@@ -21,11 +21,11 @@
 #define	GPOS                  	7	/* 0x07 Matches where last m//g left off. */
 #define	BOUND                 	8	/* 0x08 Like BOUNDA for non-utf8, otherwise match "" between any Unicode \w\W or \W\w */
 #define	BOUNDL                	9	/* 0x09 Like BOUND/BOUNDU, but \w and \W are defined by current locale */
-#define	BOUNDU                	10	/* 0x0a Match "" at any boundary of a given type using Unicode rules */
+#define	BOUNDU                	10	/* 0x0a Match "" at any boundary of a given type using /u rules. */
 #define	BOUNDA                	11	/* 0x0b Match "" at any boundary between \w\W or \W\w, where \w is [_a-zA-Z0-9] */
 #define	NBOUND                	12	/* 0x0c Like NBOUNDA for non-utf8, otherwise match "" between any Unicode \w\w or \W\W */
 #define	NBOUNDL               	13	/* 0x0d Like NBOUND/NBOUNDU, but \w and \W are defined by current locale */
-#define	NBOUNDU               	14	/* 0x0e Match "" at any non-boundary of a given type using using Unicode rules */
+#define	NBOUNDU               	14	/* 0x0e Match "" at any non-boundary of a given type using using /u rules. */
 #define	NBOUNDA               	15	/* 0x0f Match "" betweeen any \w\w or \W\W, where \w is [_a-zA-Z0-9] */
 #define	REG_ANY               	16	/* 0x10 Match any one character (except newline). */
 #define	SANY                  	17	/* 0x11 Match any one character. */
@@ -72,15 +72,15 @@
 #define	SROPEN                	58	/* 0x3a Same as OPEN, but for script run */
 #define	SRCLOSE               	59	/* 0x3b Close preceding SROPEN */
 #define	REF                   	60	/* 0x3c Match some already matched string */
-#define	REFF                  	61	/* 0x3d Match already matched string, folded using native charset rules for non-utf8 */
-#define	REFFL                 	62	/* 0x3e Match already matched string, folded in loc. */
-#define	REFFU                 	63	/* 0x3f Match already matched string, folded using unicode rules for non-utf8 */
-#define	REFFA                 	64	/* 0x40 Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII */
+#define	REFF                  	61	/* 0x3d Match already matched string, using /di rules. */
+#define	REFFL                 	62	/* 0x3e Match already matched string, using /li rules. */
+#define	REFFU                 	63	/* 0x3f Match already matched string, usng /ui. */
+#define	REFFA                 	64	/* 0x40 Match already matched string, using /aai rules. */
 #define	NREF                  	65	/* 0x41 Match some already matched string */
-#define	NREFF                 	66	/* 0x42 Match already matched string, folded using native charset rules for non-utf8 */
-#define	NREFFL                	67	/* 0x43 Match already matched string, folded in loc. */
-#define	NREFFU                	68	/* 0x44 Match already matched string, folded using unicode rules for non-utf8 */
-#define	NREFFA                	69	/* 0x45 Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII */
+#define	NREFF                 	66	/* 0x42 Match already matched string, using /di rules. */
+#define	NREFFL                	67	/* 0x43 Match already matched string, using /li rules. */
+#define	NREFFU                	68	/* 0x44 Match already matched string, using /ui rules. */
+#define	NREFFA                	69	/* 0x45 Match already matched string, using /aai rules. */
 #define	LONGJMP               	70	/* 0x46 Jump far away. */
 #define	BRANCHJ               	71	/* 0x47 BRANCH with long offset. */
 #define	IFMATCH               	72	/* 0x48 Succeeds if the following matches; non-zero flags "f" means lookbehind assertion starting "f" characters before current */

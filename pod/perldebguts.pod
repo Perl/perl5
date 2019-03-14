@@ -587,7 +587,7 @@ will be lost.
  BOUNDL           no         Like BOUND/BOUNDU, but \w and \W are
                              defined by current locale
  BOUNDU           no         Match "" at any boundary of a given type
-                             using Unicode rules
+                             using /u rules.
  BOUNDA           no         Match "" at any boundary between \w\W or
                              \W\w, where \w is [_a-zA-Z0-9]
  NBOUND           no         Like NBOUNDA for non-utf8, otherwise match
@@ -595,7 +595,7 @@ will be lost.
  NBOUNDL          no         Like NBOUND/NBOUNDU, but \w and \W are
                              defined by current locale
  NBOUNDU          no         Match "" at any non-boundary of a given
-                             type using using Unicode rules
+                             type using using /u rules.
  NBOUNDA          no         Match "" betweeen any \w\w or \W\W, where
                              \w is [_a-zA-Z0-9]
 
@@ -720,28 +720,25 @@ will be lost.
  SRCLOSE          none       Close preceding SROPEN
 
  REF              num 1      Match some already matched string
- REFF             num 1      Match already matched string, folded using
-                             native charset rules for non-utf8
- REFFL            num 1      Match already matched string, folded in
-                             loc.
- REFFU            num 1      Match already matched string, folded using
-                             unicode rules for non-utf8
- REFFA            num 1      Match already matched string, folded using
-                             unicode rules for non-utf8, no mixing
-                             ASCII, non-ASCII
+ REFF             num 1      Match already matched string, using /di
+                             rules.
+ REFFL            num 1      Match already matched string, using /li
+                             rules.
+ REFFU            num 1      Match already matched string, usng /ui.
+ REFFA            num 1      Match already matched string, using /aai
+                             rules.
 
  # Named references.  Code in regcomp.c assumes that these all are after
  # the numbered references
  NREF             no-sv 1    Match some already matched string
- NREFF            no-sv 1    Match already matched string, folded using
-                             native charset rules for non-utf8
- NREFFL           no-sv 1    Match already matched string, folded in
-                             loc.
- NREFFU           num 1      Match already matched string, folded using
-                             unicode rules for non-utf8
- NREFFA           num 1      Match already matched string, folded using
-                             unicode rules for non-utf8, no mixing
-                             ASCII, non-ASCII
+ NREFF            no-sv 1    Match already matched string, using /di
+                             rules.
+ NREFFL           no-sv 1    Match already matched string, using /li
+                             rules.
+ NREFFU           num 1      Match already matched string, using /ui
+                             rules.
+ NREFFA           num 1      Match already matched string, using /aai
+                             rules.
 
  # Support for long RE
  LONGJMP          off 1 1    Jump far away.

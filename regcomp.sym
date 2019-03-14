@@ -47,12 +47,12 @@ GPOS        GPOS,       no        ; Matches where last m//g left off.
 # BOUND, POSIX and their complements are affected, as well as EXACTF.
 BOUND       BOUND,      no        ; Like BOUNDA for non-utf8, otherwise match "" between any Unicode \w\W or \W\w
 BOUNDL      BOUND,      no        ; Like BOUND/BOUNDU, but \w and \W are defined by current locale
-BOUNDU      BOUND,      no        ; Match "" at any boundary of a given type using Unicode rules
+BOUNDU      BOUND,      no        ; Match "" at any boundary of a given type using /u rules.
 BOUNDA      BOUND,      no        ; Match "" at any boundary between \w\W or \W\w, where \w is [_a-zA-Z0-9]
 # All NBOUND nodes are required by code in regexec.c to be greater than all BOUND ones
 NBOUND      NBOUND,     no        ; Like NBOUNDA for non-utf8, otherwise match "" between any Unicode \w\w or \W\W
 NBOUNDL     NBOUND,     no        ; Like NBOUND/NBOUNDU, but \w and \W are defined by current locale
-NBOUNDU     NBOUND,     no        ; Match "" at any non-boundary of a given type using using Unicode rules
+NBOUNDU     NBOUND,     no        ; Match "" at any non-boundary of a given type using using /u rules.
 NBOUNDA     NBOUND,     no        ; Match "" betweeen any \w\w or \W\W, where \w is [_a-zA-Z0-9]
 
 #* [Special] alternatives:
@@ -156,21 +156,21 @@ SROPEN      SROPEN,     none      ; Same as OPEN, but for script run
 SRCLOSE     SRCLOSE,    none      ; Close preceding SROPEN
 
 REF         REF,        num 1 V   ; Match some already matched string
-REFF        REF,        num 1 V   ; Match already matched string, folded using native charset rules for non-utf8
-REFFL       REF,        num 1 V   ; Match already matched string, folded in loc.
+REFF        REF,        num 1 V   ; Match already matched string, using /di rules.
+REFFL       REF,        num 1 V   ; Match already matched string, using /li rules.
 # N?REFF[AU] could have been implemented using the FLAGS field of the
 # regnode, but by having a separate node type, we can use the existing switch
 # statement to avoid some tests
-REFFU       REF,        num 1 V   ; Match already matched string, folded using unicode rules for non-utf8
-REFFA       REF,        num 1 V   ; Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII
+REFFU       REF,        num 1 V   ; Match already matched string, usng /ui.
+REFFA       REF,        num 1 V   ; Match already matched string, using /aai rules.
 
 #*Named references.  Code in regcomp.c assumes that these all are after
 #*the numbered references
 NREF        REF,        no-sv 1 V ; Match some already matched string
-NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset rules for non-utf8
-NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
-NREFFU      REF,        num   1 V ; Match already matched string, folded using unicode rules for non-utf8
-NREFFA      REF,        num   1 V ; Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII
+NREFF       REF,        no-sv 1 V ; Match already matched string, using /di rules.
+NREFFL      REF,        no-sv 1 V ; Match already matched string, using /li rules.
+NREFFU      REF,        num   1 V ; Match already matched string, using /ui rules.
+NREFFA      REF,        num   1 V ; Match already matched string, using /aai rules.
 
 #*Support for long RE
 LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
