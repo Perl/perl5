@@ -2003,7 +2003,6 @@ while( "\N{U+100}bc" =~ /(..?)(?{$^N})/g ) {
 CODE
     }
     {   # [perl #133871], ASAN/valgrind out-of-bounds access
-;
         fresh_perl_like('qr/(?|(())|())|//', qr/syntax error/, {}, "[perl #133871]");
     }
 
