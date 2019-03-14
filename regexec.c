@@ -10252,11 +10252,13 @@ Additionally all decimal digits must come from the same consecutive sequence of
 
 For example, if all the characters in the sequence are Greek, or Common, or
 Inherited, this function will return TRUE, provided any decimal digits in it
-are the ASCII digits "0".."9".  For scripts (unlike Greek) that have their own
-digits defined this will accept either digits from that set or from 0..9, but
-not a combination of the two.  Some scripts, such as Arabic, have more than one
-set of digits.  All digits must come from the same set for this function to
-return TRUE.
+are from the same block of digits in Common.  (These are the ASCII digits
+"0".."9" and additionally a block for full width forms of these, and several
+others used in mathematical notation.)   For scripts (unlike Greek) that have
+their own digits defined this will accept either digits from that set or from
+one of the Common digit sets, but not a combination of the two.  Some scripts,
+such as Arabic, have more than one set of digits.  All digits must come from
+the same set for this function to return TRUE.
 
 C<*ret_script>, if C<ret_script> is not NULL, will on return of TRUE
 contain the script found, using the C<SCX_enum> typedef.  Its value will be
@@ -10359,10 +10361,9 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         UV cp;
 
         /* The code allows all scripts to use the ASCII digits.  This is
-         * because they are used in commerce even in scripts that have their
-         * own set.  Hence any ASCII ones found are ok, unless and until a
-         * digit from another set has already been encountered.  (The other
-         * digit ranges in Common are not similarly blessed) */
+         * because they are in the Common script.  Hence any ASCII ones found
+         * are ok, unless and until a digit from another set has already been
+         * encountered.  digit ranges in Common are not similarly blessed) */
         if (UNLIKELY(isDIGIT(*s))) {
             if (UNLIKELY(script_of_run == SCX_Unknown)) {
                 retval = FALSE;
@@ -10456,19 +10457,11 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         /* If the run so far is Common, and the new character isn't, change the
          * run's script to that of this character */
         if (script_of_run == SCX_Common && script_of_char != SCX_Common) {
-
-            /* But Common contains several sets of digits.  Only the '0' set
-             * can be part of another script. */
-            if (zero_of_run && zero_of_run != '0') {
-                retval = FALSE;
-                break;
-            }
-
             script_of_run = script_of_char;
         }
 
-        /* Now we can see if the script of the character is the same as that of
-         * the run */
+        /* Now we can see if the script of the new character is the same as
+         * that of the run */
         if (LIKELY(script_of_char == script_of_run)) {
             /* By far the most common case */
             goto scripts_match;
@@ -10667,14 +10660,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
                 retval = FALSE;
                 break;
             }
-        }
-        else if (script_of_char == SCX_Common && script_of_run != SCX_Common) {
-
-            /* Here, the script run isn't Common, but the current digit is in
-             * Common, and isn't '0'-'9' (those were handled earlier).   Only
-             * '0'-'9' are acceptable in non-Common scripts. */
-            retval = FALSE;
-            break;
         }
         else {  /* Otherwise we now have a zero for this run */
             zero_of_run = zero_of_char;
