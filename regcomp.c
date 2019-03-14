@@ -19673,6 +19673,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
     }
 
     if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
+        assert(val - scan <= U32_MAX);
         ARG_SET(REGNODE_p(scan), val - scan);
     }
     else {
@@ -19784,6 +19785,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         );
     });
     if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
+        assert(val - scan <= U32_MAX);
 	ARG_SET(REGNODE_p(scan), val - scan);
     }
     else {
