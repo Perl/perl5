@@ -2924,7 +2924,7 @@ EXpx	|U8 *	|utf8_to_utf16_base					\
 				|NN Size_t *newlen			\
 				|const bool high			\
 				|const bool low
-AdpR	|STRLEN |utf8_length	|NN const U8 *s 			\
+AdpR	|STRLEN |utf8_length	|NN const U8 *s0			\
 				|NN const U8 *e
 AipdR	|IV	|utf8_distance	|NN const U8 *a 			\
 				|NN const U8 *b
