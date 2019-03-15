@@ -549,8 +549,8 @@ S__variant_byte_number(PERL_UINTMAX_T word)
      *  x..xx01..1      Subtract 1, turns all the trailing zeros into 1's and
      *                  the 1 just to their left into a 0; the remainder is
      *                  untouched
-     *  0..0011..1      The xor with x..xx10..0 clears that remainder, sets
-     *                  bottom to all 1
+     *  0..0011..1      The xor with the original, x..xx10..0, clears that
+     *                  remainder, sets the bottom to all 1
      *  0..0100..0      Add 1 to clear the word except for the bit in 's'
      *
      * Another method is to do 'word &= -word'; but it generates a compiler
