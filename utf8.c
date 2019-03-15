@@ -2320,14 +2320,14 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
-    if (e < s)
+    if (UNLIKELY(e < s))
 	goto warn_and_return;
     while (s < e) {
         s += UTF8SKIP(s);
 	len++;
     }
 
-    if (e != s) {
+    if (UNLIKELY(e != s)) {
 	len--;
         warn_and_return:
 	if (PL_op)
