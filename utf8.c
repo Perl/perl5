@@ -2161,44 +2161,154 @@ If C<e E<lt> s> or if the scan would end up past C<e>, it raises a UTF8 warning
 and returns the number of valid characters.
 
 =cut
+
+    For long strings we process the input word-at-a-time, and count
+    continuations, instead of otherwise counting characters and using UTF8SKIP
+    to find the next one.  If our input were 13-byte characters, the per-word
+    would be a loser, as we would be doing things in 8 byte chunks (or 4 on a
+    32-bit platform).  But the maximum legal Unicode code point is 4 bytes, and
+    most text will have a significant number of 1 and 2 byte characters, so the
+    per-word is generally a winner.
+
+    There are start-up and finish costs with the per-word method, so we use the
+    standard method unless the input has a relatively large length.
 */
 
 STRLEN
-Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
+Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 {
+    STRLEN continuations = 0;
     STRLEN len = 0;
+    const U8 * s = s0;
 
     PERL_ARGS_ASSERT_UTF8_LENGTH;
 
-    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g.
-     * the bitops (especially ~) can create illegal UTF-8.
-     * In other words: in Perl UTF-8 is not just for Unicode. */
+    /* For EBCDCIC and short strings, we count the characters.  The boundary
+     * was determined by eyeballing the output of Porting/bench.pl and
+     * choosing a number where the continuations method gave better results (on
+     * a 64 bit system, khw not having access to a 32 bit system with
+     * cachegrind).  The number isn't critical, as at these sizes, the total
+     * time spent isn't large either way */
 
-    while (s < e) {
-        Ptrdiff_t expected_byte_count = UTF8SKIP(s);
+#ifndef EBCDIC
 
-        if (UNLIKELY(e - s  < expected_byte_count)) {
-            goto warn_and_return;
+    if (e - s0 < 96)
+
+#endif
+
+    {
+        while (s < e) { /* Count characters directly */
+
+            /* Take extra care to not exceed 'e' (which would be undefined
+             * behavior) should the input be malformed, with a partial
+             * character at the end */
+            Ptrdiff_t expected_byte_count = UTF8SKIP(s);
+            if (UNLIKELY(e - s  < expected_byte_count)) {
+                goto warn_and_return;
+            }
+
+            len++;
+            s += expected_byte_count;
         }
 
-        len++;
-        s += expected_byte_count;
+        if (LIKELY(e == s)) {
+            return len;
+        }
+
+      warn_and_return:
+        if (ckWARN_d(WARN_UTF8)) {
+            if (PL_op)
+                Perl_warner(aTHX_ packWARN(WARN_UTF8),
+                             "%s in %s", unees, OP_DESC(PL_op));
+            else
+                Perl_warner(aTHX_ packWARN(WARN_UTF8), "%s", unees);
+        }
+
+        return s - s0;
     }
+
+#ifndef EBCDIC
+
+    /* Count continuations, word-at-a-time.
+     *
+     * We need to stop before the final start character in order to
+     * preserve the limited error checking that's always been done */
+    const U8 * e_limit = e - UTF8_MAXBYTES;
+
+    /* Points to the first byte >=s which is positioned at a word boundary.  If
+     * s is on a word boundary, it is s, otherwise it is to the next word. */
+    const U8 * partial_word_end = s + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
+                                    - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK);
+
+    /* Process up to a full word boundary. */
+    while (s < partial_word_end) {
+        const Size_t skip = UTF8SKIP(s);
+
+        continuations += skip - 1;
+        s += skip;
+    }
+
+    /* Adjust back down any overshoot */
+    continuations -= s - partial_word_end;
+    s = partial_word_end;
+
+    do { /* Process per-word */
+
+        /* The idea for counting continuation bytes came from
+         * http://www.daemonology.net/blog/2008-06-05-faster-utf8-strlen.html
+         * One thing it does that this doesn't is to prefetch the buffer
+         *      __builtin_prefetch(&s[256], 0, 0);
+         *
+         * A continuation byte has the upper 2 bits be '10', and the rest
+         * dont-cares.  The VARIANTS mask zeroes out all but the upper bit of
+         * each byte in the word.  That gets shifted to the byte's lowest bit,
+         * and 'anded' with the complement of the 2nd highest bit of the byte,
+         * which has also been shifted to that position.  Hence the bit in that
+         * position will be 1 iff the upper bit is 1 and the next one is 0.  We
+         * then use the same integer multiplcation and shifting that are used
+         * in variant_under_utf8_count() to count how many of those are set in
+         * the word. */
+
+        continuations += (((((* (const PERL_UINTMAX_T *) s)
+                                            & PERL_VARIANTS_WORD_MASK) >> 7)
+                      & (((~ (* (const PERL_UINTMAX_T *) s))) >> 6))
+                  * PERL_COUNT_MULTIPLIER)
+                >> ((PERL_WORDSIZE - 1) * CHARBITS);
+        s += PERL_WORDSIZE;
+    } while (s + PERL_WORDSIZE <= e_limit);
+
+    /* Process remainder per-byte */
+    while (s < e) {
+	if (UTF8_IS_CONTINUATION(*s)) {
+            continuations++;
+            s++;
+            continue;
+        }
+
+        /* Here is a starter byte.  Use UTF8SKIP from now on */
+        do {
+            Ptrdiff_t expected_byte_count = UTF8SKIP(s);
+            if (UNLIKELY(e - s  < expected_byte_count)) {
+                break;
+            }
+
+            continuations += expected_byte_count- 1;
+            s += expected_byte_count;
+        } while (s < e);
+
+        break;
+    }
+
+#  endif
 
     if (LIKELY(e == s)) {
-        return len;
+        return s - s0 - continuations;
     }
 
-    /* Here, s > e on entry */
+    /* Convert to characters */
+    s -= continuations;
 
-  warn_and_return:
-    if (PL_op)
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
-                         "%s in %s", unees, OP_DESC(PL_op));
-    else
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "%s", unees);
-
-    return len;
+    goto warn_and_return;
 }
 
 /*
