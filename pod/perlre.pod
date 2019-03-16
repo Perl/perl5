@@ -1635,11 +1635,13 @@ multi-character match under C</i>, as that could match a single
 character, or it could match two or three, and that makes it variable
 length, which is forbidden.
 
-There is a special form of this construct, called C<\K> (available since
-Perl 5.10.0), which causes the
+However, there is a special form of this construct, called C<\K>
+(available since Perl 5.10.0), which causes the
 regex engine to "keep" everything it had matched prior to the C<\K> and
 not include it in C<$&>. This effectively provides variable-length
-lookbehind. The use of C<\K> inside of another lookaround assertion
+lookbehind.
+
+The use of C<\K> inside of another lookaround assertion
 is allowed, but the behaviour is currently not well defined.
 
 For various reasons C<\K> may be significantly more efficient than the
@@ -1672,7 +1674,9 @@ only for fixed-width lookbehind of up to 255 characters.  Note that a
 compilation error will be generated if the assertion contains a
 multi-character match under C</i>, as that could match a single
 character, or it could match two or three, and that makes it variable
-length, which is forbidden.
+length, which is forbidden.  However, there is a technique that can be
+used to handle variable length lookbehinds.  It is described in
+L<http://www.drregex.com/2019/02/variable-length-lookbehinds-actually.html>.
 
 The alphabetic forms are experimental; using them yields a warning in the
 C<experimental::alpha_assertions> category.
