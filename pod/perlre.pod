@@ -2641,8 +2641,8 @@ consecutive digits.
 
 =head2 Special Backtracking Control Verbs
 
-These special patterns are generally of the form C<(*I<VERB>:I<ARG>)>. Unless
-otherwise stated the I<ARG> argument is optional; in some cases, it is
+These special patterns are generally of the form C<(*I<VERB>:I<arg>)>. Unless
+otherwise stated the I<arg> argument is optional; in some cases, it is
 mandatory.
 
 Any pattern containing a special backtracking verb that allows an argument
@@ -2650,9 +2650,9 @@ has the special behaviour that when executed it sets the current package's
 C<$REGERROR> and C<$REGMARK> variables. When doing so the following
 rules apply:
 
-On failure, the C<$REGERROR> variable will be set to the I<ARG> value of the
+On failure, the C<$REGERROR> variable will be set to the I<arg> value of the
 verb pattern, if the verb was involved in the failure of the match. If the
-I<ARG> part of the pattern was omitted, then C<$REGERROR> will be set to the
+I<arg> part of the pattern was omitted, then C<$REGERROR> will be set to the
 name of the last C<(*MARK:I<NAME>)> pattern executed, or to TRUE if there was
 none. Also, the C<$REGMARK> variable will be set to FALSE.
 
@@ -2831,7 +2831,7 @@ is not the same as
 as after matching the I<A> but failing on the I<B> the C<(*THEN)> verb will
 backtrack and try I<C>; but the C<(*PRUNE)> verb will simply fail.
 
-=item C<(*COMMIT)> C<(*COMMIT:I<args>)>
+=item C<(*COMMIT)> C<(*COMMIT:I<arg>)>
 X<(*COMMIT)>
 
 This is the Perl 6 "commit pattern" C<< <commit> >> or C<:::>. It's a
