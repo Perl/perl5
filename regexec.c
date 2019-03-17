@@ -5465,16 +5465,18 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 
 /* push a new state then goto it */
 
-#define PUSH_STATE_GOTO(state, node, input) \
+#define PUSH_STATE_GOTO(state, node, input, eol) \
     pushinput = input; \
+    pusheol = eol; \
     scan = node; \
     st->resume_state = state; \
     goto push_state;
 
 /* push a new state with success backtracking, then goto it */
 
-#define PUSH_YES_STATE_GOTO(state, node, input) \
+#define PUSH_YES_STATE_GOTO(state, node, input, eol) \
     pushinput = input; \
+    pusheol = eol;     \
     scan = node; \
     st->resume_state = state; \
     goto push_yes_state;
@@ -5595,8 +5597,8 @@ The topmost backtrack state, pointed to by st, is usually free. If you
 want to claim it, populate any ST.foo fields in it with values you wish to
 save, then do one of
 
-	PUSH_STATE_GOTO(resume_state, node, newinput);
-	PUSH_YES_STATE_GOTO(resume_state, node, newinput);
+	PUSH_STATE_GOTO(resume_state, node, newinput, new_eol);
+	PUSH_YES_STATE_GOTO(resume_state, node, newinput, new_eol);
 
 which sets that backtrack state's resume value to 'resume_state', pushes a
 new free entry to the top of the backtrack stack, then goes to 'node'.
@@ -5647,6 +5649,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     char *locinput = startpos;
     char *loceol = reginfo->strend;
     char *pushinput; /* where to continue after a PUSH */
+    char *pusheol;   /* where to stop matching (loceol) after a PUSH */
     I32 nextchr;   /* is always set to UCHARAT(locinput), or -1 at EOS */
 
     bool result = 0;	    /* return value of S_regmatch */
@@ -5783,7 +5786,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    /* update the startpoint */
 	    st->u.keeper.val = rex->offs[0].start;
 	    rex->offs[0].start = locinput - reginfo->strbeg;
-	    PUSH_STATE_GOTO(KEEPS_next, next, locinput);
+	    PUSH_STATE_GOTO(KEEPS_next, next, locinput, loceol);
 	    NOT_REACHED; /* NOTREACHED */
 
 	case KEEPS_next_fail:
@@ -6157,7 +6160,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    });
 
 	    if ( ST.accepted > 1 || has_cutgroup || ST.jump ) {
-		PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc);
+		PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc, loceol);
 		NOT_REACHED; /* NOTREACHED */
 	    }
 	    /* only one choice left - just continue */
@@ -7393,7 +7396,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 PL_curpm = PL_reg_curpm;
 
 		if (logical != 2) {
-                    PUSH_STATE_GOTO(EVAL_B, next, locinput);
+                    PUSH_STATE_GOTO(EVAL_B, next, locinput, loceol);
 		    /* NOTREACHED */
                 }
 	    }
@@ -7493,7 +7496,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		ST.prev_eval = cur_eval;
 		cur_eval = st;
 		/* now continue from first node in postoned RE */
-		PUSH_YES_STATE_GOTO(EVAL_postponed_AB, startpoint, locinput);
+		PUSH_YES_STATE_GOTO(EVAL_postponed_AB, startpoint, locinput, loceol);
 		NOT_REACHED; /* NOTREACHED */
 	}
 
@@ -7793,7 +7796,7 @@ NULL
 	    ST.count = -1;	/* this will be updated by WHILEM */
 	    ST.lastloc = NULL;  /* this will be updated by WHILEM */
 
-	    PUSH_YES_STATE_GOTO(CURLYX_end, PREVOPER(next), locinput);
+	    PUSH_YES_STATE_GOTO(CURLYX_end, PREVOPER(next), locinput, loceol);
 	    NOT_REACHED; /* NOTREACHED */
 	}
 
@@ -7841,7 +7844,7 @@ NULL
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
 
-		PUSH_STATE_GOTO(WHILEM_A_pre, A, locinput);
+		PUSH_STATE_GOTO(WHILEM_A_pre, A, locinput, loceol);
 		NOT_REACHED; /* NOTREACHED */
 	    }
 
@@ -7949,7 +7952,7 @@ NULL
 		ST.save_curlyx = cur_curlyx;
 		cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
 		PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B,
-                                    locinput);
+                                    locinput, loceol);
 		NOT_REACHED; /* NOTREACHED */
 	    }
 
@@ -7960,7 +7963,7 @@ NULL
                             maxopenparen);
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
-		PUSH_STATE_GOTO(WHILEM_A_max, A, locinput);
+		PUSH_STATE_GOTO(WHILEM_A_max, A, locinput, loceol);
 		NOT_REACHED; /* NOTREACHED */
 	    }
 	    goto do_whilem_B_max;
@@ -8012,7 +8015,7 @@ NULL
 	    ST.save_curlyx = cur_curlyx;
 	    cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
 	    PUSH_YES_STATE_GOTO(WHILEM_B_max, ST.save_curlyx->u.curlyx.B,
-                                locinput);
+                                locinput, loceol);
 	    NOT_REACHED; /* NOTREACHED */
 
 	case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
@@ -8043,7 +8046,7 @@ NULL
 	    REGCP_SET(ST.lastcp);
 	    PUSH_STATE_GOTO(WHILEM_A_min,
 		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
-                locinput);
+                locinput, loceol);
 	    NOT_REACHED; /* NOTREACHED */
 
 #undef  ST
@@ -8065,9 +8068,9 @@ NULL
 
 	    /* Now go into the branch */
 	    if (has_cutgroup) {
-	        PUSH_YES_STATE_GOTO(BRANCH_next, scan, locinput);
+	        PUSH_YES_STATE_GOTO(BRANCH_next, scan, locinput, loceol);
 	    } else {
-	        PUSH_STATE_GOTO(BRANCH_next, scan, locinput);
+	        PUSH_STATE_GOTO(BRANCH_next, scan, locinput, loceol);
 	    }
 	    NOT_REACHED; /* NOTREACHED */
 
@@ -8075,7 +8078,7 @@ NULL
             sv_yes_mark = st->u.mark.mark_name = scan->flags
                 ? MUTABLE_SV(rexi->data->data[ ARG( scan ) ])
                 : NULL;
-            PUSH_STATE_GOTO(CUTGROUP_next, next, locinput);
+            PUSH_STATE_GOTO(CUTGROUP_next, next, locinput, loceol);
             NOT_REACHED; /* NOTREACHED */
 
         case CUTGROUP_next_fail:
@@ -8152,7 +8155,7 @@ NULL
 		goto curlym_do_B;
 
 	  curlym_do_A: /* execute the A in /A{m,n}B/  */
-	    PUSH_YES_STATE_GOTO(CURLYM_A, ST.A, locinput); /* match A */
+	    PUSH_YES_STATE_GOTO(CURLYM_A, ST.A, locinput, loceol); /* match A */
 	    NOT_REACHED; /* NOTREACHED */
 
 	case CURLYM_A: /* we've just matched an A */
@@ -8269,7 +8272,7 @@ NULL
 	        }
 	    }
 	    
-	    PUSH_STATE_GOTO(CURLYM_B, ST.B, locinput); /* match B */
+	    PUSH_STATE_GOTO(CURLYM_B, ST.B, locinput, loceol); /* match B */
 	    NOT_REACHED; /* NOTREACHED */
 
 	case CURLYM_B_fail: /* just failed to match a B */
@@ -8563,7 +8566,7 @@ NULL
 
           curly_try_B_min:
             CURLY_SETPAREN(ST.paren, ST.count);
-            PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
+            PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput, loceol);
 	    NOT_REACHED; /* NOTREACHED */
 
 
@@ -8590,7 +8593,7 @@ NULL
                 }
                 if (ST.c1 == CHRTEST_VOID || could_match) {
 		    CURLY_SETPAREN(ST.paren, ST.count);
-		    PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput);
+		    PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput, loceol);
 		    NOT_REACHED; /* NOTREACHED */
 		}
 	    }
@@ -8646,7 +8649,7 @@ NULL
                 SET_RECURSE_LOCINPUT("FAKE-END[after]", cur_eval->locinput);
 
                 PUSH_YES_STATE_GOTO(EVAL_postponed_AB, st->u.eval.prev_eval->u.eval.B,
-                                    locinput); /* match B */
+                                    locinput, loceol); /* match B */
 	    }
 
 	    if (locinput < reginfo->till) {
@@ -8711,7 +8714,7 @@ NULL
 	    logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 	    
 	    /* execute body of (?...A) */
-	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), newstart);
+	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), newstart, loceol);
 	    NOT_REACHED; /* NOTREACHED */
         }
 
@@ -8729,6 +8732,7 @@ NULL
 	    if (OP(ST.me) != SUSPEND) {
                 /* restore old position except for (?>...) */
 		locinput = st->locinput;
+                loceol = st->loceol;
 	    }
 	    scan = ST.me + ARG(ST.me);
 	    if (scan == ST.me)
@@ -8751,7 +8755,7 @@ NULL
 	case PRUNE:   /*  (*PRUNE)   */
             if (scan->flags)
 	        sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
-	    PUSH_STATE_GOTO(COMMIT_next, next, locinput);
+	    PUSH_STATE_GOTO(COMMIT_next, next, locinput, loceol);
 	    NOT_REACHED; /* NOTREACHED */
 
 	case COMMIT_next_fail:
@@ -8781,7 +8785,7 @@ NULL
                 = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
             mark_state = st;
             ST.mark_loc = locinput;
-            PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput);
+            PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput, loceol);
             NOT_REACHED; /* NOTREACHED */
 
         case MARKPOINT_next:
@@ -8814,7 +8818,7 @@ NULL
                 /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
                 ST.mark_loc = locinput;
-                PUSH_STATE_GOTO(SKIP_next,next, locinput);
+                PUSH_STATE_GOTO(SKIP_next,next, locinput, loceol);
             } else {
                 /* (*SKIP:NAME) : if there is a (*MARK:NAME) fail where it was, 
                    otherwise do nothing.  Meaning we need to scan 
@@ -8827,7 +8831,7 @@ NULL
                                 find ) ) 
                     {
                         ST.mark_name = find;
-                        PUSH_STATE_GOTO( SKIP_next, next, locinput);
+                        PUSH_STATE_GOTO( SKIP_next, next, locinput, loceol);
                     }
                     cur = cur->u.mark.prev_mark;
                 }
@@ -8923,12 +8927,14 @@ NULL
             );
 	    depth++;
 	    st->locinput = locinput;
+	    st->loceol = loceol;
 	    newst = st+1; 
 	    if (newst >  SLAB_LAST(PL_regmatch_slab))
 		newst = S_push_slab(aTHX);
 	    PL_regmatch_state = newst;
 
 	    locinput = pushinput;
+            loceol = pusheol;
 	    st = newst;
 	    continue;
             /* NOTREACHED */
@@ -8981,8 +8987,10 @@ NULL
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
         
-        if (no_final)
+        if (no_final) {
             locinput= st->locinput;
+            loceol= st->loceol;
+        }
 	state_num = st->resume_state + no_final;
 	goto reenter_switch;
     }
@@ -9032,6 +9040,7 @@ NULL
 	}
 	PL_regmatch_state = st;
 	locinput= st->locinput;
+	loceol= st->loceol;
 
 	DEBUG_STATE_pp("pop");
 	depth--;
