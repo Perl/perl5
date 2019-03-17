@@ -8662,11 +8662,11 @@ NULL
 	    newstart = locinput;
 	    goto do_ifmatch;	
 
-	case UNLESSM:	/* -ve lookaround: (?!A), or with flags, (?<!A) */
+	case UNLESSM:	/* -ve lookaround: (?!A), or with 'flags', (?<!A) */
 	    ST.wanted = 0;
 	    goto ifmatch_trivial_fail_test;
 
-	case IFMATCH:	/* +ve lookaround: (?=A), or with flags, (?<=A) */
+	case IFMATCH:	/* +ve lookaround: (?=A), or with 'flags', (?<=A) */
 	    ST.wanted = 1;
 	  ifmatch_trivial_fail_test:
 	    if (scan->flags) {
@@ -9067,7 +9067,7 @@ NULL
  * What 'simple' means is a node which can be the operand of a quantifier like
  * '+', or {1,3}
  *
- * startposp - pointer a pointer to the start position.  This is updated
+ * startposp - pointer to a pointer to the start position.  This is updated
  *             to point to the byte following the highest successful
  *             match.
  * p         - the regnode to be repeatedly matched against.
@@ -9091,8 +9091,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     PERL_ARGS_ASSERT_REGREPEAT;
 
+    /* This routine is structured so that we switch on the input OP.  Each OP
+     * case: statement contains a loop to repeatedly apply the OP, advancing
+     * the input until it fails, or reaches the end of the input, or until it
+     * reaches the upper limit of matches. */
+
     scan = *startposp;
-    if (max == REG_INFTY)
+    if (max == REG_INFTY)   /* This is a special marker to go to the platform's
+                               max */
 	max = I32_MAX;
     else if (! utf8_target && loceol - scan > max)
 	loceol = scan + max;
