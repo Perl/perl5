@@ -9578,8 +9578,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             /* LNBREAK can match one or two latin chars, which is ok, but we
              * have to use hardcount in this situation, and throw away the
              * adjustment to <loceol> done before the switch statement */
-            loceol = reginfo->strend;
-	    while (scan < loceol && (c=is_LNBREAK_latin1_safe(scan, loceol))) {
+            ;
+	    while (scan < reginfo->strend && (c=is_LNBREAK_latin1_safe(scan, reginfo->strend))) {
 		scan+=c;
 		hardcount++;
 	    }
