@@ -152,16 +152,6 @@ static const char* const non_utf8_target_but_utf8_required
     : (U8*)(pos + off))
 #define HOP4c(pos,off,llim, rlim) ((char*)HOP4(pos,off,llim, rlim))
 
-#define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
-#define NEXTCHR_IS_EOS (nextchr < 0)
-
-#define SET_nextchr __ASSERT_(locinput <= reginfo->strend)                     \
-    nextchr = ((locinput < reginfo->strend) ? UCHARAT(locinput) : NEXTCHR_EOS)
-
-#define SET_locinput(p) \
-    locinput = (p);  \
-    SET_nextchr
-
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
@@ -3936,18 +3926,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     return 0;
 }
 
-
-#define sayYES goto yes
-#define sayNO goto no
-#define sayNO_SILENT goto no_silent
-
-/* we dont use STMT_START/END here because it leads to 
-   "unreachable code" warnings, which are bogus, but distracting. */
-#define CACHEsayNO \
-    if (ST.cache_mask) \
-       reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask; \
-    sayNO
-
 /* this is used to determine how far from the left messages like
    'failed...' are printed in regexec.c. It should be set such that
    messages are inline with the regop output that created them.
@@ -3970,12 +3948,6 @@ Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...)
 }
 #endif /* DEBUGGING */
 
-
-#define CHRTEST_UNINIT -1001 /* c1/c2 haven't been calculated yet */
-#define CHRTEST_VOID   -1000 /* the c1/c2 "next char" test should be skipped */
-#define CHRTEST_NOT_A_CP_1 -999
-#define CHRTEST_NOT_A_CP_2 -998
-
 /* grab a new slab and return the first slot in it */
 
 STATIC regmatch_state *
@@ -3991,174 +3963,6 @@ S_push_slab(pTHX)
     PL_regmatch_slab = s;
     return SLAB_FIRST(s);
 }
-
-
-/* push a new state then goto it */
-
-#define PUSH_STATE_GOTO(state, node, input) \
-    pushinput = input; \
-    scan = node; \
-    st->resume_state = state; \
-    goto push_state;
-
-/* push a new state with success backtracking, then goto it */
-
-#define PUSH_YES_STATE_GOTO(state, node, input) \
-    pushinput = input; \
-    scan = node; \
-    st->resume_state = state; \
-    goto push_yes_state;
-
-
-
-
-/*
-
-regmatch() - main matching routine
-
-This is basically one big switch statement in a loop. We execute an op,
-set 'next' to point the next op, and continue. If we come to a point which
-we may need to backtrack to on failure such as (A|B|C), we push a
-backtrack state onto the backtrack stack. On failure, we pop the top
-state, and re-enter the loop at the state indicated. If there are no more
-states to pop, we return failure.
-
-Sometimes we also need to backtrack on success; for example /A+/, where
-after successfully matching one A, we need to go back and try to
-match another one; similarly for lookahead assertions: if the assertion
-completes successfully, we backtrack to the state just before the assertion
-and then carry on.  In these cases, the pushed state is marked as
-'backtrack on success too'. This marking is in fact done by a chain of
-pointers, each pointing to the previous 'yes' state. On success, we pop to
-the nearest yes state, discarding any intermediate failure-only states.
-Sometimes a yes state is pushed just to force some cleanup code to be
-called at the end of a successful match or submatch; e.g. (??{$re}) uses
-it to free the inner regex.
-
-Note that failure backtracking rewinds the cursor position, while
-success backtracking leaves it alone.
-
-A pattern is complete when the END op is executed, while a subpattern
-such as (?=foo) is complete when the SUCCESS op is executed. Both of these
-ops trigger the "pop to last yes state if any, otherwise return true"
-behaviour.
-
-A common convention in this function is to use A and B to refer to the two
-subpatterns (or to the first nodes thereof) in patterns like /A*B/: so A is
-the subpattern to be matched possibly multiple times, while B is the entire
-rest of the pattern. Variable and state names reflect this convention.
-
-The states in the main switch are the union of ops and failure/success of
-substates associated with with that op.  For example, IFMATCH is the op
-that does lookahead assertions /(?=A)B/ and so the IFMATCH state means
-'execute IFMATCH'; while IFMATCH_A is a state saying that we have just
-successfully matched A and IFMATCH_A_fail is a state saying that we have
-just failed to match A. Resume states always come in pairs. The backtrack
-state we push is marked as 'IFMATCH_A', but when that is popped, we resume
-at IFMATCH_A or IFMATCH_A_fail, depending on whether we are backtracking
-on success or failure.
-
-The struct that holds a backtracking state is actually a big union, with
-one variant for each major type of op. The variable st points to the
-top-most backtrack struct. To make the code clearer, within each
-block of code we #define ST to alias the relevant union.
-
-Here's a concrete example of a (vastly oversimplified) IFMATCH
-implementation:
-
-    switch (state) {
-    ....
-
-#define ST st->u.ifmatch
-
-    case IFMATCH: // we are executing the IFMATCH op, (?=A)B
-	ST.foo = ...; // some state we wish to save
-	...
-	// push a yes backtrack state with a resume value of
-	// IFMATCH_A/IFMATCH_A_fail, then continue execution at the
-	// first node of A:
-	PUSH_YES_STATE_GOTO(IFMATCH_A, A, newinput);
-	// NOTREACHED
-
-    case IFMATCH_A: // we have successfully executed A; now continue with B
-	next = B;
-	bar = ST.foo; // do something with the preserved value
-	break;
-
-    case IFMATCH_A_fail: // A failed, so the assertion failed
-	...;   // do some housekeeping, then ...
-	sayNO; // propagate the failure
-
-#undef ST
-
-    ...
-    }
-
-For any old-timers reading this who are familiar with the old recursive
-approach, the code above is equivalent to:
-
-    case IFMATCH: // we are executing the IFMATCH op, (?=A)B
-    {
-	int foo = ...
-	...
-	if (regmatch(A)) {
-	    next = B;
-	    bar = foo;
-	    break;
-	}
-	...;   // do some housekeeping, then ...
-	sayNO; // propagate the failure
-    }
-
-The topmost backtrack state, pointed to by st, is usually free. If you
-want to claim it, populate any ST.foo fields in it with values you wish to
-save, then do one of
-
-	PUSH_STATE_GOTO(resume_state, node, newinput);
-	PUSH_YES_STATE_GOTO(resume_state, node, newinput);
-
-which sets that backtrack state's resume value to 'resume_state', pushes a
-new free entry to the top of the backtrack stack, then goes to 'node'.
-On backtracking, the free slot is popped, and the saved state becomes the
-new free state. An ST.foo field in this new top state can be temporarily
-accessed to retrieve values, but once the main loop is re-entered, it
-becomes available for reuse.
-
-Note that the depth of the backtrack stack constantly increases during the
-left-to-right execution of the pattern, rather than going up and down with
-the pattern nesting. For example the stack is at its maximum at Z at the
-end of the pattern, rather than at X in the following:
-
-    /(((X)+)+)+....(Y)+....Z/
-
-The only exceptions to this are lookahead/behind assertions and the cut,
-(?>A), which pop all the backtrack states associated with A before
-continuing.
- 
-Backtrack state structs are allocated in slabs of about 4K in size.
-PL_regmatch_state and st always point to the currently active state,
-and PL_regmatch_slab points to the slab currently containing
-PL_regmatch_state.  The first time regmatch() is called, the first slab is
-allocated, and is never freed until interpreter destruction. When the slab
-is full, a new one is allocated and chained to the end. At exit from
-regmatch(), slabs allocated since entry are freed.
-
-*/
- 
-
-#define DEBUG_STATE_pp(pp)                                  \
-    DEBUG_STATE_r({                                         \
-        DUMP_EXEC_POS(locinput, scan, utf8_target,depth);   \
-        Perl_re_printf( aTHX_                                           \
-            "%*s" pp " %s%s%s%s%s\n",                       \
-            INDENT_CHARS(depth), "",                        \
-            PL_reg_name[st->resume_state],                  \
-            ((st==yes_state||st==mark_state) ? "[" : ""),   \
-            ((st==yes_state) ? "Y" : ""),                   \
-            ((st==mark_state) ? "M" : ""),                  \
-            ((st==yes_state||st==mark_state) ? "]" : "")    \
-        );                                                  \
-    });
 
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
@@ -4289,6 +4093,11 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
     }
     return 0;
 }
+
+#define CHRTEST_UNINIT -1001 /* c1/c2 haven't been calculated yet */
+#define CHRTEST_VOID   -1000 /* the c1/c2 "next char" test should be skipped */
+#define CHRTEST_NOT_A_CP_1 -999
+#define CHRTEST_NOT_A_CP_2 -998
 
 static bool
 S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
@@ -5613,6 +5422,28 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
     return wb;
 }
 
+/* Macros for regmatch(), using its internal variables */
+#define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
+#define NEXTCHR_IS_EOS (nextchr < 0)
+
+#define SET_nextchr \
+    nextchr = ((locinput < reginfo->strend) ? UCHARAT(locinput) : NEXTCHR_EOS)
+
+#define SET_locinput(p) \
+    locinput = (p);  \
+    SET_nextchr
+
+#define sayYES goto yes
+#define sayNO goto no
+#define sayNO_SILENT goto no_silent
+
+/* we dont use STMT_START/END here because it leads to
+   "unreachable code" warnings, which are bogus, but distracting. */
+#define CACHEsayNO \
+    if (ST.cache_mask) \
+       reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask; \
+    sayNO
+
 #define EVAL_CLOSE_PAREN_IS(st,expr)                        \
 (                                                           \
     (   ( st )                                         ) && \
@@ -5634,6 +5465,169 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 
 #define EVAL_CLOSE_PAREN_CLEAR(st) \
     (st)->u.eval.close_paren = 0
+
+/* push a new state then goto it */
+
+#define PUSH_STATE_GOTO(state, node, input) \
+    pushinput = input; \
+    scan = node; \
+    st->resume_state = state; \
+    goto push_state;
+
+/* push a new state with success backtracking, then goto it */
+
+#define PUSH_YES_STATE_GOTO(state, node, input) \
+    pushinput = input; \
+    scan = node; \
+    st->resume_state = state; \
+    goto push_yes_state;
+
+#define DEBUG_STATE_pp(pp)                                  \
+    DEBUG_STATE_r({                                         \
+        DUMP_EXEC_POS(locinput, scan, utf8_target,depth);   \
+        Perl_re_printf( aTHX_                               \
+            "%*s" pp " %s%s%s%s%s\n",                       \
+            INDENT_CHARS(depth), "",                        \
+            PL_reg_name[st->resume_state],                  \
+            ((st==yes_state||st==mark_state) ? "[" : ""),   \
+            ((st==yes_state) ? "Y" : ""),                   \
+            ((st==mark_state) ? "M" : ""),                  \
+            ((st==yes_state||st==mark_state) ? "]" : "")    \
+        );                                                  \
+    });
+
+/*
+
+regmatch() - main matching routine
+
+This is basically one big switch statement in a loop. We execute an op,
+set 'next' to point the next op, and continue. If we come to a point which
+we may need to backtrack to on failure such as (A|B|C), we push a
+backtrack state onto the backtrack stack. On failure, we pop the top
+state, and re-enter the loop at the state indicated. If there are no more
+states to pop, we return failure.
+
+Sometimes we also need to backtrack on success; for example /A+/, where
+after successfully matching one A, we need to go back and try to
+match another one; similarly for lookahead assertions: if the assertion
+completes successfully, we backtrack to the state just before the assertion
+and then carry on.  In these cases, the pushed state is marked as
+'backtrack on success too'. This marking is in fact done by a chain of
+pointers, each pointing to the previous 'yes' state. On success, we pop to
+the nearest yes state, discarding any intermediate failure-only states.
+Sometimes a yes state is pushed just to force some cleanup code to be
+called at the end of a successful match or submatch; e.g. (??{$re}) uses
+it to free the inner regex.
+
+Note that failure backtracking rewinds the cursor position, while
+success backtracking leaves it alone.
+
+A pattern is complete when the END op is executed, while a subpattern
+such as (?=foo) is complete when the SUCCESS op is executed. Both of these
+ops trigger the "pop to last yes state if any, otherwise return true"
+behaviour.
+
+A common convention in this function is to use A and B to refer to the two
+subpatterns (or to the first nodes thereof) in patterns like /A*B/: so A is
+the subpattern to be matched possibly multiple times, while B is the entire
+rest of the pattern. Variable and state names reflect this convention.
+
+The states in the main switch are the union of ops and failure/success of
+substates associated with with that op.  For example, IFMATCH is the op
+that does lookahead assertions /(?=A)B/ and so the IFMATCH state means
+'execute IFMATCH'; while IFMATCH_A is a state saying that we have just
+successfully matched A and IFMATCH_A_fail is a state saying that we have
+just failed to match A. Resume states always come in pairs. The backtrack
+state we push is marked as 'IFMATCH_A', but when that is popped, we resume
+at IFMATCH_A or IFMATCH_A_fail, depending on whether we are backtracking
+on success or failure.
+
+The struct that holds a backtracking state is actually a big union, with
+one variant for each major type of op. The variable st points to the
+top-most backtrack struct. To make the code clearer, within each
+block of code we #define ST to alias the relevant union.
+
+Here's a concrete example of a (vastly oversimplified) IFMATCH
+implementation:
+
+    switch (state) {
+    ....
+
+#define ST st->u.ifmatch
+
+    case IFMATCH: // we are executing the IFMATCH op, (?=A)B
+	ST.foo = ...; // some state we wish to save
+	...
+	// push a yes backtrack state with a resume value of
+	// IFMATCH_A/IFMATCH_A_fail, then continue execution at the
+	// first node of A:
+	PUSH_YES_STATE_GOTO(IFMATCH_A, A, newinput);
+	// NOTREACHED
+
+    case IFMATCH_A: // we have successfully executed A; now continue with B
+	next = B;
+	bar = ST.foo; // do something with the preserved value
+	break;
+
+    case IFMATCH_A_fail: // A failed, so the assertion failed
+	...;   // do some housekeeping, then ...
+	sayNO; // propagate the failure
+
+#undef ST
+
+    ...
+    }
+
+For any old-timers reading this who are familiar with the old recursive
+approach, the code above is equivalent to:
+
+    case IFMATCH: // we are executing the IFMATCH op, (?=A)B
+    {
+	int foo = ...
+	...
+	if (regmatch(A)) {
+	    next = B;
+	    bar = foo;
+	    break;
+	}
+	...;   // do some housekeeping, then ...
+	sayNO; // propagate the failure
+    }
+
+The topmost backtrack state, pointed to by st, is usually free. If you
+want to claim it, populate any ST.foo fields in it with values you wish to
+save, then do one of
+
+	PUSH_STATE_GOTO(resume_state, node, newinput);
+	PUSH_YES_STATE_GOTO(resume_state, node, newinput);
+
+which sets that backtrack state's resume value to 'resume_state', pushes a
+new free entry to the top of the backtrack stack, then goes to 'node'.
+On backtracking, the free slot is popped, and the saved state becomes the
+new free state. An ST.foo field in this new top state can be temporarily
+accessed to retrieve values, but once the main loop is re-entered, it
+becomes available for reuse.
+
+Note that the depth of the backtrack stack constantly increases during the
+left-to-right execution of the pattern, rather than going up and down with
+the pattern nesting. For example the stack is at its maximum at Z at the
+end of the pattern, rather than at X in the following:
+
+    /(((X)+)+)+....(Y)+....Z/
+
+The only exceptions to this are lookahead/behind assertions and the cut,
+(?>A), which pop all the backtrack states associated with A before
+continuing.
+
+Backtrack state structs are allocated in slabs of about 4K in size.
+PL_regmatch_state and st always point to the currently active state,
+and PL_regmatch_slab points to the slab currently containing
+PL_regmatch_state.  The first time regmatch() is called, the first slab is
+allocated, and is never freed until interpreter destruction. When the slab
+is full, a new one is allocated and chained to the end. At exit from
+regmatch(), slabs allocated since entry are freed.
+
+*/
 
 /* returns -1 on failure, $+[0] on success */
 STATIC SSize_t
