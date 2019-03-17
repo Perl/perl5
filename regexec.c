@@ -3964,9 +3964,6 @@ S_push_slab(pTHX)
     return SLAB_FIRST(s);
 }
 
-
-#define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
-
 #ifdef DEBUGGING
 
 STATIC void
