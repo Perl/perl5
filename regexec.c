@@ -5645,6 +5645,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
     SSize_t endref = 0; /* offset of end of backref when ln is start */
     char *locinput = startpos;
+    char *loceol = reginfo->strend;
     char *pushinput; /* where to continue after a PUSH */
     I32 nextchr;   /* is always set to UCHARAT(locinput), or -1 at EOS */
 
@@ -5809,13 +5810,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
 	case SANY: /*  /./s  */
-	    if (NEXTCHR_IS_EOS)
+	    if (NEXTCHR_IS_EOS || locinput >= loceol)
 		sayNO;
             goto increment_locinput;
 
 	case REG_ANY: /*  /./  */
-	    if ((NEXTCHR_IS_EOS) || nextchr == '\n')
+	    if (   NEXTCHR_IS_EOS
+                || locinput >= loceol
+                || nextchr == '\n')
+            {
 		sayNO;
+            }
             goto increment_locinput;
 
 
@@ -5825,7 +5830,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* In this case the charclass data is available inline so
                we can fail fast without a lot of extra overhead. 
              */
-            if(!NEXTCHR_IS_EOS && !ANYOF_BITMAP_TEST(scan, nextchr)) {
+            if ( !   NEXTCHR_IS_EOS
+                &&   locinput < loceol
+                && ! ANYOF_BITMAP_TEST(scan, nextchr))
+            {
                 DEBUG_EXECUTE_r(
                     Perl_re_exec_indentf( aTHX_  "%sTRIE: failed to match trie start class...%s\n",
                               depth, PL_colors[4], PL_colors[5])
@@ -5904,7 +5912,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
                 }
                 if (   trie->bitmap
-                    && (NEXTCHR_IS_EOS || !TRIE_BITMAP_TEST(trie, nextchr)))
+                    && (     NEXTCHR_IS_EOS
+                        ||   locinput >= loceol
+                        || ! TRIE_BITMAP_TEST(trie, nextchr)))
                 {
         	    if (trie->states[ state ].wordnum) {
         	         DEBUG_EXECUTE_r(
@@ -5942,7 +5952,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		   shortest accept state and the wordnum of the longest
 		   accept state */
 
-		while ( state && uc <= (U8*)(reginfo->strend) ) {
+		while ( state && uc <= (U8*)(loceol) ) {
                     U32 base = trie->states[ state ].trans.base;
                     UV uvc = 0;
                     U16 charid = 0;
@@ -5977,10 +5987,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    });
 
 		    /* read a char and goto next state */
-		    if ( base && (foldlen || uc < (U8*)(reginfo->strend))) {
+		    if ( base && (foldlen || uc < (U8*)(loceol))) {
 			I32 offset;
 			REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
-                                             (U8 *) reginfo->strend, uscan,
+                                             (U8 *) loceol, uscan,
                                              len, uvc, charid, foldlen,
                                              foldbuf, uniflags);
 			charcount++;
@@ -6214,7 +6224,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                      * is an invariant, but there are tests in the test suite
                      * dealing with (??{...}) which violate this) */
 		    while (s < e) {
-			if (l >= reginfo->strend
+			if (   l >= loceol
                             || UTF8_IS_ABOVE_LATIN1(* (U8*) l))
                         {
                             sayNO;
@@ -6238,7 +6248,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		else {
 		    /* The target is not utf8, the pattern is utf8. */
 		    while (s < e) {
-                        if (l >= reginfo->strend
+                        if (   l >= loceol
                             || UTF8_IS_ABOVE_LATIN1(* (U8*) s))
                         {
                             sayNO;
@@ -6264,7 +6274,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             else {
                 /* The target and the pattern have the same utf8ness. */
                 /* Inline the first character, for speed. */
-                if (reginfo->strend - locinput < ln
+                if (   loceol - locinput < ln
                     || UCHARAT(s) != nextchr
                     || (ln > 1 && memNE(s, locinput, ln)))
                 {
@@ -6360,7 +6370,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	      /* Either target or the pattern are utf8, or has the issue where
 	       * the fold lengths may differ. */
 		const char * const l = locinput;
-		char *e = reginfo->strend;
+		char *e = loceol;
 
 		if (! foldEQ_utf8_flags(l, &e, 0,  utf8_target,
                                         s, 0,  ln, is_utf8_pat,fold_utf8_flags))
@@ -6378,7 +6388,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    {
 		sayNO;
 	    }
-	    if (reginfo->strend - locinput < ln)
+	    if (loceol - locinput < ln)
 		sayNO;
 	    if (ln > 1 && ! folder(locinput, s, ln))
 		sayNO;
@@ -6674,7 +6684,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* FALLTHROUGH */
 	case ANYOFD:  /*   /[abc]/d       */
 	case ANYOF:  /*   /[abc]/       */
-            if (NEXTCHR_IS_EOS)
+            if (NEXTCHR_IS_EOS || locinput >= loceol)
                 sayNO;
 	    if (  (! utf8_target || UTF8_IS_INVARIANT(*locinput))
 	        && ! (ANYOF_FLAGS(scan) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP))
@@ -6685,7 +6695,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		locinput++;
             }
             else {
-	        if (!reginclass(rex, scan, (U8*)locinput, (U8*)reginfo->strend,
+	        if (!reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
                                                                    utf8_target))
                 {
 		    sayNO;
@@ -6695,14 +6705,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
         case ANYOFM:
-            if (NEXTCHR_IS_EOS || (UCHARAT(locinput) & FLAGS(scan)) != ARG(scan)) {
+            if (   NEXTCHR_IS_EOS
+                || (UCHARAT(locinput) & FLAGS(scan)) != ARG(scan)
+                || locinput >= loceol)
+            {
                 sayNO;
             }
             locinput++; /* ANYOFM is always single byte */
             break;
 
         case NANYOFM:
-            if (NEXTCHR_IS_EOS || (UCHARAT(locinput) & FLAGS(scan)) == ARG(scan)) {
+            if (   NEXTCHR_IS_EOS
+                || (UCHARAT(locinput) & FLAGS(scan)) == ARG(scan)
+                || locinput >= loceol)
+            {
                 sayNO;
             }
             goto increment_locinput;
@@ -6711,7 +6727,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFH:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
-	        || ! reginclass(rex, scan, (U8*)locinput, (U8*)reginfo->strend,
+	        || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
                                                                    utf8_target))
             {
                 sayNO;
@@ -6728,7 +6744,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case POSIXL:    /* \w or [:punct:] etc. under /l */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-            if (NEXTCHR_IS_EOS)
+            if (NEXTCHR_IS_EOS || locinput >= loceol)
                 sayNO;
 
             /* Use isFOO_lc() for characters within Latin1.  (Note that
@@ -6773,7 +6789,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case NPOSIXA:   /* \W or [:^punct:] etc. under /a */
 
-            if (NEXTCHR_IS_EOS) {
+            if (NEXTCHR_IS_EOS || locinput >= loceol) {
                 sayNO;
             }
 
@@ -6792,7 +6808,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * UTF-8, and also from NPOSIXA even in UTF-8 when the current
              * character is a single byte */
 
-            if (NEXTCHR_IS_EOS) {
+            if (NEXTCHR_IS_EOS || locinput >= loceol) {
                 sayNO;
             }
 
@@ -6815,7 +6831,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case POSIXU:    /* \w or [:punct:] etc. under /u */
           utf8_posix:
-            if (NEXTCHR_IS_EOS) {
+            if (NEXTCHR_IS_EOS || locinput >= loceol) {
                 sayNO;
             }
 
@@ -6896,7 +6912,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case CLUMP: /* Match \X: logical Unicode character.  This is defined as
 		       a Unicode extended Grapheme Cluster */
-	    if (NEXTCHR_IS_EOS)
+	    if (NEXTCHR_IS_EOS || locinput >= loceol)
 		sayNO;
 	    if  (! utf8_target) {
 
@@ -6905,7 +6921,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		locinput++;	    /* Match the . or CR */
 		if (nextchr == '\r' /* And if it was CR, and the next is LF,
 				       match the LF */
-		    && locinput < reginfo->strend
+		    && locinput <  loceol
 		    && UCHARAT(locinput) == '\n')
                 {
                     locinput++;
@@ -6922,7 +6938,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * current character.  (There is always a break at the
                  * end-of-input) */
                 locinput += UTF8SKIP(locinput);
-                while (locinput < reginfo->strend) {
+                while (locinput < loceol) {
                     GCB_enum cur_gcb = getGCB_VAL_UTF8((U8*) locinput,
                                                          (U8*) reginfo->strend);
                     if (isGCB(prev_gcb, cur_gcb,
@@ -7044,11 +7060,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (type != REF	/* REF can do byte comparison */
 		&& (utf8_target || type == REFFU || type == REFFL))
 	    {
-		char * limit = reginfo->strend;
+		char * limit = loceol;
 
 		/* This call case insensitively compares the entire buffer
 		    * at s, with the current input starting at locinput, but
-                    * not going off the end given by reginfo->strend, and
+                    * not going off the end given by loceol, and
                     * returns in <limit> upon success, how much of the
                     * current input was matched */
 		if (! foldEQ_utf8_flags(s, NULL, endref - ln, utf8_target,
@@ -7061,13 +7077,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 
 	    /* Not utf8:  Inline the first character, for speed. */
-	    if (!NEXTCHR_IS_EOS &&
-                UCHARAT(s) != nextchr &&
-		(type == REF ||
-		 UCHARAT(s) != fold_array[nextchr]))
+	    if ( ! NEXTCHR_IS_EOS
+                && locinput < loceol
+                && UCHARAT(s) != nextchr
+                && (   type == REF
+                    || UCHARAT(s) != fold_array[nextchr]))
+            {
 		sayNO;
+            }
 	    ln = endref - ln;
-	    if (locinput + ln > reginfo->strend)
+	    if (locinput + ln > loceol)
 		sayNO;
 	    if (ln > 1 && (type == REF
 			   ? memNE(s, locinput, ln)
@@ -8313,7 +8332,7 @@ NULL
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
             {
                 char *li = locinput;
-                if (!regrepeat(rex, &li, scan, reginfo->strend, reginfo, 1))
+                if (!regrepeat(rex, &li, scan, loceol, reginfo, 1))
 		    sayNO;
                 SET_locinput(li);
                 goto fake_end;
@@ -8369,7 +8388,7 @@ NULL
                 char *li = locinput;
 		minmod = 0;
 		if (ST.min &&
-                        regrepeat(rex, &li, ST.A, reginfo->strend, reginfo, ST.min)
+                        regrepeat(rex, &li, ST.A, loceol, reginfo, ST.min)
                             < ST.min)
 		    sayNO;
                 SET_locinput(li);
@@ -8383,7 +8402,7 @@ NULL
 		/* set ST.maxpos to the furthest point along the
 		 * string that could possibly match */
 		if  (ST.max == REG_INFTY) {
-		    ST.maxpos = reginfo->strend - 1;
+		    ST.maxpos = loceol - 1;
 		    if (utf8_target)
 			while (UTF8_IS_CONTINUATION(*(U8*)ST.maxpos))
 			    ST.maxpos--;
@@ -8391,13 +8410,13 @@ NULL
 		else if (utf8_target) {
 		    int m = ST.max - ST.min;
 		    for (ST.maxpos = locinput;
-			 m >0 && ST.maxpos < reginfo->strend; m--)
+			 m >0 && ST.maxpos <  loceol; m--)
 			ST.maxpos += UTF8SKIP(ST.maxpos);
 		}
 		else {
 		    ST.maxpos = locinput + ST.max - ST.min;
-		    if (ST.maxpos >= reginfo->strend)
-			ST.maxpos = reginfo->strend - 1;
+		    if (ST.maxpos >=  loceol)
+			ST.maxpos =  loceol - 1;
 		}
 		goto curly_try_B_min_known;
 
@@ -8406,7 +8425,7 @@ NULL
                 /* avoid taking address of locinput, so it can remain
                  * a register var */
                 char *li = locinput;
-                ST.count = regrepeat(rex, &li, ST.A, reginfo->strend, reginfo, ST.max);
+                ST.count = regrepeat(rex, &li, ST.A, loceol, reginfo, ST.max);
 		if (ST.count < ST.min)
 		    sayNO;
                 SET_locinput(li);
@@ -8439,7 +8458,7 @@ NULL
             if (ST.c1 == CHRTEST_VOID) {
                 /* failed -- move forward one */
                 char *li = locinput;
-                if (!regrepeat(rex, &li, ST.A, reginfo->strend, reginfo, 1)) {
+                if (!regrepeat(rex, &li, ST.A, loceol, reginfo, 1)) {
                     sayNO;
                 }
                 locinput = li;
@@ -8536,7 +8555,7 @@ NULL
                      * locinput matches */
                     char *li = ST.oldloc;
 		    ST.count += n;
-                    if (regrepeat(rex, &li, ST.A, reginfo->strend, reginfo, n) < n)
+                    if (regrepeat(rex, &li, ST.A, loceol, reginfo, n) < n)
 			sayNO;
                     assert(n == REG_INFTY || locinput == li);
 		}
@@ -8551,7 +8570,7 @@ NULL
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
 	    {
-		bool could_match = locinput < reginfo->strend;
+		bool could_match = locinput <  loceol;
 
 		/* If it could work, try it. */
                 if (ST.c1 != CHRTEST_VOID && could_match) {
@@ -8726,7 +8745,7 @@ NULL
 	    break;
 
 	case COMMIT:  /*  (*COMMIT)  */
-	    reginfo->cutpoint = reginfo->strend;
+	    reginfo->cutpoint = loceol;
 	    /* FALLTHROUGH */
 
 	case PRUNE:   /*  (*PRUNE)   */
@@ -8837,7 +8856,7 @@ NULL
 #undef ST
 
         case LNBREAK: /* \R */
-            if ((n=is_LNBREAK_safe(locinput, reginfo->strend, utf8_target))) {
+            if ((n=is_LNBREAK_safe(locinput, loceol, utf8_target))) {
                 locinput += n;
             } else
                 sayNO;
@@ -8856,7 +8875,7 @@ NULL
                 locinput += PL_utf8skip[nextchr];
                 /* locinput is allowed to go 1 char off the end (signifying
                  * EOS), but not 2+ */
-                if (locinput > reginfo->strend)
+                if (locinput >  loceol)
                     sayNO;
             }
             else
