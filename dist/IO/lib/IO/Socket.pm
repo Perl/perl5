@@ -434,9 +434,6 @@ corresponding built-in functions:
     bind
     listen
     accept
-    send
-    recv
-    peername (getpeername)
     sockname (getsockname)
     shutdown
 
@@ -516,6 +513,46 @@ depend on the peer's socket options. In particular, if the peer socket has
 SO_LINGER enabled with a zero timeout, then the peer's close() will generate
 a RST segment, upon receipt of which the local TCP transitions immediately to
 B<CLOSED>, and in that state, connected() I<will> return undef.
+
+=item send(MSG, [, FLAGS [, TO ] ])
+
+Like the built-in L<send()|perlfunc/send>, except that:
+
+=over
+
+=item *
+
+C<FLAGS> is optional and defaults to C<0>, and
+
+=item *
+
+after a successful send with C<TO>, further calls to send() without
+C<TO> will send to the same address, and C<TO> will be used as the
+result of peername().
+
+=back
+
+=item recv(BUF, LEN, [,FLAGS])
+
+Like the built-in L<recv()|perlfunc/recv>, except that:
+
+=over
+
+=item *
+
+C<FLAGS> is optional and defaults to C<0>, and
+
+=item *
+
+the cached value returned by peername() is updated with the result of
+recv().
+
+=back
+
+=item peername
+
+Returns the cached peername, possibly set by recv() or send() above.
+If not otherwise set returns (and caches) the result of getpeername().
 
 =item protocol
 
