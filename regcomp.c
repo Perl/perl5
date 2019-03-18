@@ -11009,6 +11009,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 freeze_paren = 0;
     I32 after_freeze = 0;
     I32 num; /* numeric backreferences */
+    SV * max_open;  /* Max number of unclosed parens */
 
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
@@ -11017,6 +11018,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
     PERL_ARGS_ASSERT_REG;
     DEBUG_PARSE("reg ");
+
+
+    max_open = get_sv(RE_COMPILE_RECURSION_LIMIT, GV_ADD);
+    assert(max_open);
+    if (!SvIOK(max_open)) {
+        sv_setiv(max_open, RE_COMPILE_RECURSION_INIT);
+    }
+    if (depth > 4 * SvIV(max_open)) { /* We increase depth by 4 for each open
+                                         paren */
+        vFAIL("Too many nested open parens");
+    }
 
     *flagp = 0;				/* Tentatively. */
 

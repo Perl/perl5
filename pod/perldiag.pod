@@ -6285,6 +6285,15 @@ The message attempts to include the name of the called subroutine. If the
 subroutine has been aliased, the subroutine's original name will be shown,
 regardless of what name the caller used.
 
+=item Too many nested open parens in regex; marked by <-- HERE in m/%s/
+
+(F) You have exceeded the number of open C<"("> parentheses that haven't
+been matched by corresponding closing ones.  This limit prevents eating
+up too much memory.  It is initially set to 1000, but may be changed by
+setting C<${^RE_COMPILE_RECURSION_LIMIT}> to some other value.  This may
+need to be done in a BEGIN block before the regular expression pattern
+is compiled.
+
 =item Too many )'s
 
 (A) You've accidentally run your script through B<csh> instead of Perl.

@@ -1249,6 +1249,17 @@ regular expression assertion (see L<perlre>).  May be written to.
 
 This variable was added in Perl 5.005.
 
+=item ${^RE_COMPILE_RECURSION_LIMIT}
+X<${^RE_COMPILE_RECURSION_LIMIT}>
+
+The current value giving the maximum number of open but unclosed
+parenthetical groups there may be at any point during a regular
+expression compilation.  The default is currently 1000 nested groups.
+You may adjust it depending on your needs and the amount of memory
+available.
+
+This variable was added in Perl v5.30.0.
+
 =item ${^RE_DEBUG_FLAGS}
 X<${^RE_DEBUG_FLAGS}>
 

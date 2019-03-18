@@ -946,6 +946,9 @@ typedef struct _reg_ac_data reg_ac_data;
 #define RE_TRIE_MAXBUF_NAME "\022E_TRIE_MAXBUF"
 #define RE_DEBUG_FLAGS "\022E_DEBUG_FLAGS"
 
+#define RE_COMPILE_RECURSION_INIT 1000
+#define RE_COMPILE_RECURSION_LIMIT "\022E_COMPILE_RECURSION_LIMIT"
+
 /*
 
 RE_DEBUG_FLAGS is used to control what debug output is emitted
