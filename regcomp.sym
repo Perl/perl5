@@ -177,8 +177,8 @@ LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
 BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
 
 #*Special Case Regops
-IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches; non-zero flags "f" means lookbehind assertion starting "f" characters before current
-UNLESSM     BRANCHJ,    off 1 . 1 ; Fails if the following matches; non-zero flags "f" means lookbehind assertion starting "f" characters before current
+IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current
+UNLESSM     BRANCHJ,    off 1 . 1 ; Fails if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current
 SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
 IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
 GROUPP      GROUPP,     num 1     ; Whether the group matched.

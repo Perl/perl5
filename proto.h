@@ -5888,10 +5888,10 @@ STATIC SSize_t	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode 
 #define PERL_ARGS_ASSERT_REGMATCH	\
 	assert(reginfo); assert(startpos); assert(prog)
 
-STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, regmatch_info *const reginfo, I32 max _pDEPTH)
+STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, char *loceol, regmatch_info *const reginfo, I32 max _pDEPTH)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGREPEAT	\
-	assert(prog); assert(startposp); assert(p); assert(reginfo)
+	assert(prog); assert(startposp); assert(p); assert(loceol); assert(reginfo)
 
 STATIC bool	S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 			__attribute__warn_unused_result__;

@@ -75,6 +75,18 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 Variable length lookbehind in regular expression pattern matching
+is now experimentally supported
+
+Using a lookbehind assertion (like C<(?<=foo)> or C<(?<!bar)> previously
+would generate an error and refuse to compile.  Now it compiles (if the
+maximum lookbehind is at most 255 characters), but raises a warning in
+the new C<experimental::vlb> warnings category.  This is to caution you
+that the precise behavior is subject to change based on feedback from
+use in the field.
+
+See L<perlre/(?<=pattern)> and L<perlre/(?<!pattern)>.
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:

@@ -1629,17 +1629,36 @@ X<look-behind, positive> X<lookbehind, positive> X<\K>
 
 A zero-width positive lookbehind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
-Works only for fixed-width lookbehind of up to 255 characters.  Note
-that a compilation error will be generated if the assertion contains a
-multi-character match under C</i>, as that could match a single
-character, or it could match two or three, and that makes it variable
-length, which is forbidden.
 
-However, there is a special form of this construct, called C<\K>
+Prior to Perl 5.30, it worked only for fixed-width lookbehind, but
+starting in that release, it can handle variable lengths from 1 to 255
+characters as an experimental feature.  The feature is enabled
+automatically if you use a variable length lookbehind assertion, but
+will raise a warning at pattern compilation time, unless turned off, in
+the C<experimental::vlb> category.  This is to warn you that the exact
+behavior is subject to change should feedback from actual use in the
+field indicate to do so; or even complete removal if the problems found
+are not practically surmountable.  You can achieve close to pre-5.30
+behavior by fatalizing warnings in this category.
+
+There is a special form of this construct, called C<\K>
 (available since Perl 5.10.0), which causes the
 regex engine to "keep" everything it had matched prior to the C<\K> and
-not include it in C<$&>. This effectively provides variable-length
-lookbehind.
+not include it in C<$&>. This effectively provides non-experimental
+variable-length lookbehind of any length.
+
+And, there is a technique that can be used to handle variable length
+lookbehinds on earlier releases, and longer than 255 characters.  It is
+described in
+L<http://www.drregex.com/2019/02/variable-length-lookbehinds-actually.html>.
+
+Note that under C</i>, a few single characters match two or three other
+characters.  This makes them variable length, and the 255 length applies
+to the maximum number of characters in the match.  For
+example C<qr/\N{LATIN SMALL LETTER SHARP S}/i> matches the sequence
+C<"ss">.  Your lookbehind assertion could contain 127 Sharp S
+characters under C</i>, but adding a 128th would generate a compilation
+error, as that could match 256 C<"s"> characters in a row.
 
 The use of C<\K> inside of another lookaround assertion
 is allowed, but the behaviour is currently not well defined.
@@ -1655,6 +1674,9 @@ can be rewritten as the much more efficient
 
   s/foo\Kbar//g;
 
+Use of the non-greedy modifier C<"?"> may not give you the expected
+results if it is within a capturing group within the construct.
+
 The alphabetic forms (not including C<\K> are experimental; using them
 yields a warning in the C<experimental::alpha_assertions> category.
 
@@ -1669,14 +1691,34 @@ X<(*negative_lookbehind>
 X<look-behind, negative> X<lookbehind, negative>
 
 A zero-width negative lookbehind assertion.  For example C</(?<!bar)foo/>
-matches any occurrence of "foo" that does not follow "bar".  Works
-only for fixed-width lookbehind of up to 255 characters.  Note that a
-compilation error will be generated if the assertion contains a
-multi-character match under C</i>, as that could match a single
-character, or it could match two or three, and that makes it variable
-length, which is forbidden.  However, there is a technique that can be
-used to handle variable length lookbehinds.  It is described in
+matches any occurrence of "foo" that does not follow "bar".
+
+Prior to Perl 5.30, it worked only for fixed-width lookbehind, but
+starting in that release, it can handle variable lengths from 1 to 255
+characters as an experimental feature.  The feature is enabled
+automatically if you use a variable length lookbehind assertion, but
+will raise a warning at pattern compilation time, unless turned off, in
+the C<experimental::vlb> category.  This is to warn you that the exact
+behavior is subject to change should feedback from actual use in the
+field indicate to do so; or even complete removal if the problems found
+are not practically surmountable.  You can achieve close to pre-5.30
+behavior by fatalizing warnings in this category.
+
+There is a technique that can be used to handle variable length
+lookbehinds on earlier releases, and longer than 255 characters.  It is
+described in
 L<http://www.drregex.com/2019/02/variable-length-lookbehinds-actually.html>.
+
+Note that under C</i>, a few single characters match two or three other
+characters.  This makes them variable length, and the 255 length applies
+to the maximum number of characters in the match.  For
+example C<qr/\N{LATIN SMALL LETTER SHARP S}/i> matches the sequence
+C<"ss">.  Your lookbehind assertion could contain 127 Sharp S
+characters under C</i>, but adding a 128th would generate a compilation
+error, as that could match 256 C<"s"> characters in a row.
+
+Use of the non-greedy modifier C<"?"> may not give you the expected
+results if it is within a capturing group within the construct.
 
 The alphabetic forms are experimental; using them yields a warning in the
 C<experimental::alpha_assertions> category.

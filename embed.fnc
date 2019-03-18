@@ -2580,6 +2580,7 @@ ERns	|U8 *|find_span_end_mask|NN U8 * s|NN const U8 * send	\
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 WERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN const regnode *p \
+				|NN char *loceol		\
 				|NN regmatch_info *const reginfo \
 				|I32 max
 ERs	|bool	|regtry		|NN regmatch_info *reginfo|NN char **startposp

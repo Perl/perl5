@@ -746,11 +746,13 @@ will be lost.
 
  # Special Case Regops
  IFMATCH          off 1 1    Succeeds if the following matches; non-zero
-                             flags "f" means lookbehind assertion
-                             starting "f" characters before current
+                             flags "f", next_off "o" means lookbehind
+                             assertion starting "f..(f-o)" characters
+                             before current
  UNLESSM          off 1 1    Fails if the following matches; non-zero
-                             flags "f" means lookbehind assertion
-                             starting "f" characters before current
+                             flags "f", next_off "o" means lookbehind
+                             assertion starting "f..(f-o)" characters
+                             before current
  SUSPEND          off 1 1    "Independent" sub-RE.
  IFTHEN           off 1 1    Switch, should be preceded by switcher.
  GROUPP           num 1      Whether the group matched.

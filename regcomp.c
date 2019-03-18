@@ -5986,14 +5986,27 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                                       last, &data_fake, stopparen,
                                       recursed_depth, NULL, f, depth+1);
                 if (scan->flags) {
-                    if (deltanext) {
-			FAIL("Variable length lookbehind not implemented");
-                    }
-                    else if (minnext > (I32)U8_MAX) {
+                    if (   deltanext < 0
+                        || deltanext > (I32) U8_MAX
+                        || minnext > (I32)U8_MAX
+                        || minnext + deltanext > (I32)U8_MAX)
+                    {
 			FAIL2("Lookbehind longer than %" UVuf " not implemented",
                               (UV)U8_MAX);
                     }
-                    scan->flags = (U8)minnext;
+
+                    /* The 'next_off' field has been repurposed to count the
+                     * additional starting positions to try beyond the initial
+                     * one.  (This leaves it at 0 for non-variable length
+                     * matches to avoid breakage for those not using this
+                     * extension) */
+                    if (deltanext) {
+                        scan->next_off = deltanext;
+                        ckWARNexperimental(RExC_parse,
+                            WARN_EXPERIMENTAL__VLB,
+                            "Variable length lookbehind is experimental");
+                    }
+                    scan->flags = (U8)minnext + deltanext;
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -6078,14 +6091,21 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                                         stopparen, recursed_depth, NULL,
                                         f, depth+1);
                 if (scan->flags) {
-                    if (deltanext) {
-			FAIL("Variable length lookbehind not implemented");
-                    }
-                    else if (*minnextp > (I32)U8_MAX) {
+                    assert(0);  /* This code has never been tested since this
+                                   is normally not compiled */
+                    if (   deltanext < 0
+                        || deltanext > (I32) U8_MAX
+                        || *minnextp > (I32)U8_MAX
+                        || *minnextp + deltanext > (I32)U8_MAX)
+                    {
 			FAIL2("Lookbehind longer than %" UVuf " not implemented",
                               (UV)U8_MAX);
                     }
-                    scan->flags = (U8)*minnextp;
+
+                    if (deltanext) {
+                        scan->next_off = deltanext;
+                    }
+                    scan->flags = (U8)*minnextp + deltanext;
                 }
 
                 *minnextp += min;
@@ -20432,8 +20452,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         assert(FLAGS(o) < C_ARRAY_LENGTH(bounds));
         sv_catpv(sv, bounds[FLAGS(o)]);
     }
-    else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
-	Perl_sv_catpvf(aTHX_ sv, "[%d]", -(o->flags));
+    else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH)) {
+	Perl_sv_catpvf(aTHX_ sv, "[%d", -(o->flags));
+        if (o->next_off) {
+            Perl_sv_catpvf(aTHX_ sv, "..-%d", o->flags - o->next_off);
+        }
+	Perl_sv_catpvf(aTHX_ sv, "]");
+    }
     else if (OP(o) == SBOL)
         Perl_sv_catpvf(aTHX_ sv, " /%s/", o->flags ? "\\A" : "^");
 
