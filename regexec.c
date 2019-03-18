@@ -8725,19 +8725,18 @@ NULL
 
                 /* If the lookbehind doesn't start in the actual string, is a
                  * trivial match failure */
-		    if (logical) {
-			logical = 0;
-			sw = 1 - cBOOL(ST.wanted);
-		    }
-		    else if (ST.wanted)
-			sayNO;
+                if (logical) {
+                    logical = 0;
+                    sw = 1 - cBOOL(ST.wanted);
+                }
+                else if (ST.wanted)
+                    sayNO;
 
-                    /* Here, we didn't want it to match, so is actually success
-                     * */
-		    next = scan + ARG(scan);
-		    if (next == scan)
-			next = NULL;
-		    break;
+                /* Here, we didn't want it to match, so is actually success */
+                next = scan + ARG(scan);
+                if (next == scan)
+                    next = NULL;
+                break;
 	    }
 
 	  do_ifmatch:
