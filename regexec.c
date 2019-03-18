@@ -5626,6 +5626,16 @@ allocated, and is never freed until interpreter destruction. When the slab
 is full, a new one is allocated and chained to the end. At exit from
 regmatch(), slabs allocated since entry are freed.
 
+In order to work with variable length lookbehinds, an upper limit is placed on
+lookbehinds which is set to where the match position is at the end of where the
+lookbehind would get to.  Nothing in the lookbehind should match above that,
+except we should be able to look beyond if for things like \b, which need the
+next character in the string to be able to determine if this is a boundary or
+not.  We also can't match the end of string/line unless we are also at the end
+of the entire string, so NEXTCHR_IS_EOS remains the same, and for those OPs
+that match a width, we have to add a condition that they are within the legal
+bounds of our window into the string.
+
 */
 
 /* returns -1 on failure, $+[0] on success */
@@ -8673,12 +8683,11 @@ NULL
 #undef  ST
 #define ST st->u.ifmatch
 
-        {
-            char *newstart;
-
 	case SUSPEND:	/* (?>A) */
 	    ST.wanted = 1;
-	    newstart = locinput;
+	    ST.start = locinput;
+	    ST.end = loceol;
+            ST.count = 1;
 	    goto do_ifmatch;	
 
 	case UNLESSM:	/* -ve lookaround: (?!A), or with 'flags', (?<!A) */
@@ -8688,25 +8697,48 @@ NULL
 	case IFMATCH:	/* +ve lookaround: (?=A), or with 'flags', (?<=A) */
 	    ST.wanted = 1;
 	  ifmatch_trivial_fail_test:
-	    if (scan->flags) {
-		char * const s = HOPBACKc(locinput, scan->flags);
-		if (!s) {
-		    /* trivial fail */
+            ST.count = scan->next_off + 1; /* next_off repurposed to be
+                                              lookbehind count, requires
+                                              non-zero flags */
+	    if (! scan->flags) {    /* 'flags' zero means lookahed */
+
+                /* Lookahead starts here and ends at the normal place */
+		ST.start = locinput;
+		ST.end = loceol;
+            }
+	    else {
+                PERL_UINT_FAST8_T back_count = scan->flags;
+		char * s;
+
+                /* Lookbehind ends here */
+		ST.end = locinput;
+
+                /* ... and starts at the first place in the input that is in
+                 * the range of the possible start positions */
+                for (; ST.count > 0; ST.count--, back_count--) {
+                    s = HOPBACKc(locinput, back_count);
+                    if (s) {
+                        ST.start = s;
+                        goto do_ifmatch;
+                    }
+                }
+
+                /* If the lookbehind doesn't start in the actual string, is a
+                 * trivial match failure */
 		    if (logical) {
 			logical = 0;
 			sw = 1 - cBOOL(ST.wanted);
 		    }
 		    else if (ST.wanted)
 			sayNO;
+
+                    /* Here, we didn't want it to match, so is actually success
+                     * */
 		    next = scan + ARG(scan);
 		    if (next == scan)
 			next = NULL;
 		    break;
-		}
-		newstart = s;
 	    }
-	    else
-		newstart = locinput;
 
 	  do_ifmatch:
 	    ST.me = scan;
@@ -8714,20 +8746,35 @@ NULL
 	    logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 	    
 	    /* execute body of (?...A) */
-	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), newstart, loceol);
+	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), ST.start, ST.end);
 	    NOT_REACHED; /* NOTREACHED */
-        }
+
+        {
+            bool matched;
 
 	case IFMATCH_A_fail: /* body of (?...A) failed */
-	    ST.wanted = !ST.wanted;
-	    /* FALLTHROUGH */
+	    if (! ST.logical && ST.count > 1) {
+
+                /* It isn't a real failure until we've tried all starting
+                 * positions.  Move to the next starting position and retry */
+                ST.count--;
+                ST.start = HOPc(ST.start, 1);
+                scan = ST.me;
+                logical = ST.logical;
+                goto do_ifmatch;
+            }
+
+            /* Here, all starting positions have been tried. */
+	    matched = FALSE;
+	    goto ifmatch_done;
 
 	case IFMATCH_A: /* body of (?...A) succeeded */
-	    if (ST.logical) {
-		sw = cBOOL(ST.wanted);
-	    }
-	    else if (!ST.wanted)
-		sayNO;
+	    matched = TRUE;
+          ifmatch_done:
+            sw = matched == ST.wanted;
+	    if (! ST.logical && !sw) {
+                sayNO;
+            }
 
 	    if (OP(ST.me) != SUSPEND) {
                 /* restore old position except for (?>...) */
@@ -8738,6 +8785,7 @@ NULL
 	    if (scan == ST.me)
 		scan = NULL;
 	    continue; /* execute B */
+        }
 
 #undef ST
 

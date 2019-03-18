@@ -83,8 +83,8 @@
 #define	NREFFA                	69	/* 0x45 Match already matched string, using /aai rules. */
 #define	LONGJMP               	70	/* 0x46 Jump far away. */
 #define	BRANCHJ               	71	/* 0x47 BRANCH with long offset. */
-#define	IFMATCH               	72	/* 0x48 Succeeds if the following matches; non-zero flags "f" means lookbehind assertion starting "f" characters before current */
-#define	UNLESSM               	73	/* 0x49 Fails if the following matches; non-zero flags "f" means lookbehind assertion starting "f" characters before current */
+#define	IFMATCH               	72	/* 0x48 Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
+#define	UNLESSM               	73	/* 0x49 Fails if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
 #define	SUSPEND               	74	/* 0x4a "Independent" sub-RE. */
 #define	IFTHEN                	75	/* 0x4b Switch, should be preceded by switcher. */
 #define	GROUPP                	76	/* 0x4c Whether the group matched. */

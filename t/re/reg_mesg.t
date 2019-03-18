@@ -128,7 +128,7 @@ my @death =
 (
  '/[[=foo=]]/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/[[=foo=]{#}]/',
 
- '/(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/(?<= .*)/',
+ '/(?<= .*)/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= .*)/',
 
  '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= x{1000})/',
 
@@ -415,7 +415,7 @@ my @death_only_under_strict = (
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
 my @death_utf8 = mark_as_utf8(
- '/ネ(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/ネ(?<= .*)/',
+ '/ネ(?<= .*)/' =>  'Lookbehind longer than 255 not implemented in regex m/ネ(?<= .*)/',
 
  '/(?<= ネ{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= ネ{1000})/',
 

@@ -6,6 +6,7 @@
 
 use strict;
 use warnings;
+no warnings 'experimental::vlb';
 use 5.010;
 
 sub run_tests;
@@ -1992,7 +1993,8 @@ EOP
         fresh_perl_is('m m0*0+\Rm', "",{},"Undefined behavior in address sanitizer");
     }
     {   # [perl #133642]
-        fresh_perl_is('m/((?<=(0?)))/', "Variable length lookbehind not implemented in regex m/((?<=(0?)))/ at - line 1.",{},"Was getting 'Double free'");
+        fresh_perl_is('no warnings "experimental::vlb";
+                      m/((?<=(0?)))/', "",{},"Was getting 'Double free'");
     }
     {   # [perl #133782]
         # this would panic on DEBUGGING builds

@@ -7504,7 +7504,12 @@ front of your variable.
 
 =item Variable length lookbehind not implemented in regex m/%s/
 
-(F) Lookbehind is allowed only for subexpressions whose length is fixed and
+(F) B<This message no longer should be raised as of Perl 5.30.>  It is
+retained in this document as a convenience for people using an earlier
+Perl version.
+
+In Perl 5.30 and earlier, lookbehind is allowed
+only for subexpressions whose length is fixed and
 known at compile time.  For positive lookbehind, you can use the C<\K>
 regex construct as a way to get the equivalent functionality.  See
 L<(?<=pattern) and \K in perlre|perlre/\K>.
