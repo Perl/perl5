@@ -6246,7 +6246,7 @@ PP(pp_split)
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
  		if (do_utf8)
-		    s = (char*)utf8_hop((U8*)m, len);
+		    s = (char*)utf8_hop_forward((U8*) m, len, (U8*) strend);
  		else
 		    s = m + len; /* Fake \n at the end */
 	    }
@@ -6270,7 +6270,7 @@ PP(pp_split)
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
  		if (do_utf8)
-		    s = (char*)utf8_hop((U8*)m, len);
+		    s = (char*)utf8_hop_forward((U8*)m, len, (U8 *) strend);
  		else
 		    s = m + len; /* Fake \n at the end */
 	    }
