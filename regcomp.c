@@ -5619,9 +5619,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			STRLEN l;
 			const char * const s = SvPV_const(data->last_found, l);
 			SSize_t old = b - data->last_start_min;
+                        assert(old >= 0);
 
 			if (UTF)
-			    old = utf8_hop((U8*)s, old) - (U8*)s;
+			    old = utf8_hop_forward((U8*)s, old,
+                                               (U8 *) SvEND(data->last_found))
+                                - (U8*)s;
 			l -= old;
 			/* Get the added string: */
 			last_str = newSVpvn_utf8(s  + old, l, UTF);
@@ -14528,7 +14531,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 else {
 
                     /* Point to the first byte of the final character */
-                    s = (char *) utf8_hop((U8 *) s, -1);
+                    s = (char *) utf8_hop_back((U8 *) s, -1, (U8 *) s0);
 
                     while (s >= s0) {   /* Search backwards until find
                                            a non-problematic char */
