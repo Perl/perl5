@@ -1149,7 +1149,7 @@ This variable is read-only and dynamically-scoped.
 X<@-> X<@LAST_MATCH_START>
 
 C<$-[0]> is the offset of the start of the last successful match.
-C<$-[>I<n>C<]> is the offset of the start of the substring matched by
+C<$-[I<n>]> is the offset of the start of the substring matched by
 I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus, after a match against C<$_>, C<$&> coincides with C<substr $_, $-[0],
