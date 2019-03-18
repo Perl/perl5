@@ -947,6 +947,10 @@ list context, caller returns
        # 0         1          2
     my ($package, $filename, $line) = caller;
 
+Like L<C<__FILE__>|/__FILE__> and L<C<__LINE__>|/__LINE__>, the filename and
+line number returned here may be altered by the mechanism described at
+L<perlsyn/"Plain Old Comments (Not!)">.
+
 With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
@@ -2701,6 +2705,8 @@ X<__FILE__>
 =for Pod::Functions the name of the current source file
 
 A special token that returns the name of the file in which it occurs.
+It can be altered by the mechanism described at
+L<perlsyn/"Plain Old Comments (Not!)">.
 
 =item fileno FILEHANDLE
 X<fileno>
@@ -3955,6 +3961,8 @@ X<__LINE__>
 =for Pod::Functions the current source line number
 
 A special token that compiles to the current line number.
+It can be altered by the mechanism described at
+L<perlsyn/"Plain Old Comments (Not!)">.
 
 =item link OLDFILE,NEWFILE
 X<link>
