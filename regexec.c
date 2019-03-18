@@ -3305,7 +3305,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             RXp_MATCH_UTF8_set(prog, utf8_target);
             prog->offs[0].start = s - strbeg;
             prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
+                ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
                 : s - strbeg + prog->minlenret;
             if ( !(flags & REXEC_NOT_FIRST) )
                 S_reg_set_capture_string(aTHX_ rx,
