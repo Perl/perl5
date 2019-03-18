@@ -282,9 +282,10 @@ sub send {
     croak 'send: Cannot determine peer address'
 	 unless(defined $peer);
 
-    my $r = defined(getpeername($sock))
-	? send($sock, $_[1], $flags)
-	: send($sock, $_[1], $flags, $peer);
+    my $type = $sock->socktype;
+    my $r = $type == SOCK_DGRAM || $type == SOCK_RAW
+      ? send($sock, $_[1], $flags, $peer)
+      : send($sock, $_[1], $flags);
 
     # remember who we send to, if it was successful
     ${*$sock}{'io_socket_peername'} = $peer
