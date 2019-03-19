@@ -210,7 +210,20 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
 
     assert(*(*s - 1) == '\\');
     assert(* *s      == 'x');
+
     (*s)++;
+
+    if (send <= *s) {
+        if (strict) {
+            *error_msg = "Empty \\x";
+            return FALSE;
+        }
+
+        /* Sadly, to preserve backcompat, an empty \x at the end of string is
+         * interpreted as a NUL */
+        *uv = 0;
+        return TRUE;
+    }
 
     if (strict || ! output_warning) {
         flags |= PERL_SCAN_SILENT_ILLDIGIT;

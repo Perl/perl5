@@ -411,6 +411,8 @@ my @death_only_under_strict = (
                    => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}/',
     '/\p{Latin}{/' => 'Unescaped left brace in regex is passed through {#} m/\p{Latin}{{#}/',
                    => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#}/',
+    '/\x{100}\x/'  => "",
+                   => "Empty \\x {#} m/\\x{100}\\x{#}/",
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
