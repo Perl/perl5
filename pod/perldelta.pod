@@ -306,7 +306,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Specifying C<\o{}> without anything between the braces now yields the
+fatal error message "Empty \o{}".  Previously it was  "Number with no
+digits".  This means the same wording is used for this kind of error as
+with similar constructs such as C<\p{}>.
 
 =back
 

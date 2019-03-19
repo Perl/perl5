@@ -126,7 +126,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     numbers_len = e - *s;
     if (numbers_len == 0) {
         (*s)++;    /* Move past the } */
-	*error_msg = "Number with no digits";
+	*error_msg = "Empty \\o{}";
 	return FALSE;
     }
 
