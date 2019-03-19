@@ -2163,8 +2163,11 @@ unlikely to be what you want.
 
 =item Empty \%c{} in regex; marked by S<<-- HERE> in m/%s/
 
-(F) You used something like C<\b{}>, C<\B{}>, C<\o{}>, C<\p>, C<\P>
-without specifying anything for it to operate on.
+(F) You used something like C<\b{}>, C<\B{}>, C<\o{}>, C<\p>, C<\P>, or
+C<\x> without specifying anything for it to operate on.
+
+Unfortunately, for backwards compatibility reasons, an empty C<\x> is
+legal outside S<C<use re 'strict'>> and expands to a NUL character.
 
 =item ${^ENCODING} is no longer supported
 

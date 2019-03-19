@@ -311,6 +311,16 @@ fatal error message "Empty \o{}".  Previously it was  "Number with no
 digits".  This means the same wording is used for this kind of error as
 with similar constructs such as C<\p{}>.
 
+=item *
+
+Within the scope of the experimental feature C<use re 'strict'>,
+specifying C<\x{}> without anything between the braces now yields the
+fatal error message "Empty \x{}".  Previously it was  "Number with no
+digits".  This means the same wording is used for this kind of error as
+with similar constructs such as C<\p{}>.  It is legal, though not wise
+to have an empty C<\x> outside of C<re 'strict'>; it silently generates
+a NUL character.
+
 =back
 
 =head1 Utility Changes

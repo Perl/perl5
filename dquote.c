@@ -253,7 +253,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
     if (numbers_len == 0) {
         if (strict) {
             (*s)++;    /* Move past the } */
-            *error_msg = "Number with no digits";
+            *error_msg = "Empty \\x{}";
             return FALSE;
         }
         *s = e + 1;
