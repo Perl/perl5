@@ -1736,7 +1736,7 @@ PP(pp_sysread)
     }
     else {
 	buffer = SvPV_force(bufsv, blen);
-	buffer_utf8 = !IN_BYTES && SvUTF8(bufsv);
+	buffer_utf8 = DO_UTF8(bufsv);
     }
     if (DO_UTF8(bufsv)) {
 	blen = sv_len_utf8_nomg(bufsv);

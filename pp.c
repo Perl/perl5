@@ -4012,7 +4012,7 @@ PP(pp_ucfirst)
 
 	/* In a "use bytes" we don't treat the source as UTF-8, but, still want
 	 * the destination to retain that flag */
-	if (SvUTF8(source) && ! IN_BYTES)
+	if (DO_UTF8(source))
 	    SvUTF8_on(dest);
 
 	if (!inplace) {	/* Finish the rest of the string, unchanged */
