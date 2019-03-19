@@ -706,7 +706,7 @@ static const scan_data_t zero_scan_data = {
 
 /* Used to point after bad bytes for an error message, but avoid skipping
  * past a nul byte. */
-#define SKIP_IF_CHAR(s) (!*(s) ? 0 : UTF ? UTF8SKIP(s) : 1)
+#define SKIP_IF_CHAR(s, e) (!*(s) ? 0 : UTF ? UTF8_SAFE_SKIP(s, e) : 1)
 
 /* Set up to clean up after our imminent demise */
 #define PREPARE_TO_DIE                                                      \
@@ -10929,7 +10929,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 return;
             default:
               fail_modifiers:
-                RExC_parse += SKIP_IF_CHAR(RExC_parse);
+                RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
 		/* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                 vFAIL2utf8f("Sequence (%" UTF8f "...) not recognized",
                       UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
@@ -11341,7 +11341,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
 	    } /* End of switch */
 	    if ( ! op ) {
-	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+	        RExC_parse += UTF
+                              ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                              : 1;
                 if (has_upper || verb_len == 0) {
                     vFAIL2utf8f(
                     "Unknown verb pattern '%" UTF8f "'",
@@ -11421,7 +11423,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     return handle_named_backref(pRExC_state, flagp,
                                                 parse_start, ')');
                 }
-                RExC_parse += SKIP_IF_CHAR(RExC_parse);
+                RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
 		vFAIL3("Sequence (%.*s...) not recognized",
                                 RExC_parse-seqstart, seqstart);
@@ -11696,7 +11698,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	    case '?':           /* (??...) */
 		is_logical = 1;
 		if (*RExC_parse != '{') {
-                    RExC_parse += SKIP_IF_CHAR(RExC_parse);
+                    RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
                     /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                     vFAIL2utf8f(
                         "Sequence (%" UTF8f "...) not recognized",
@@ -11894,7 +11896,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
                  insert_if_check_paren:
 		    if (UCHARAT(RExC_parse) != ')') {
-                        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                        RExC_parse += UTF
+                                      ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                                      : 1;
 			vFAIL("Switch condition not recognized");
 		    }
 		    nextchar(pRExC_state);
@@ -11956,7 +11960,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 #endif
 		    return ret;
 		}
-                RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                RExC_parse += UTF
+                              ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                              : 1;
                 vFAIL("Unknown switch condition (?(...))");
 	    }
 	    case '[':           /* (?[ ... ]) */
@@ -15870,7 +15876,9 @@ redo_curchar:
                             RExC_parse = RExC_end;
                         }
                         else if (RExC_parse != save_parse) {
-                            RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                            RExC_parse += (UTF)
+                                          ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                                          : 1;
                         }
                         vFAIL("Expecting '(?flags:(?[...'");
                     }
@@ -17057,7 +17065,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 		}   /* The \p isn't immediately followed by a '{' */
 		else if (! isALPHA(*RExC_parse)) {
-                    RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                    RExC_parse += (UTF)
+                                  ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                                  : 1;
                     vFAIL2("Character following \\%c must be '{' or a "
                            "single-character Unicode property name",
                            (U8) value);
@@ -17226,7 +17236,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    RExC_parse += numlen;
                     if (numlen != 3) {
                         if (strict) {
-                            RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                            RExC_parse += (UTF)
+                                          ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                                          : 1;
                             vFAIL("Need exactly 3 octal digits");
                         }
                         else if (   numlen < 3 /* like \08, \178 */
@@ -19435,7 +19447,9 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
                || UTF8_IS_INVARIANT(*RExC_parse)
                || UTF8_IS_START(*RExC_parse));
 
-        RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+        RExC_parse += (UTF)
+                      ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                      : 1;
 
         skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                 FALSE /* Don't force /x */ );
