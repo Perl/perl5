@@ -884,9 +884,10 @@ Perl_op_free(pTHX_ OP *o)
 
         if (o->op_flags & OPf_KIDS) {
             OP *kid, *nextkid;
+            assert(cUNOPo->op_first); /* OPf_KIDS implies op_first non-null */
             for (kid = cUNOPo->op_first; kid; kid = nextkid) {
                 nextkid = OpSIBLING(kid); /* Get before next freeing kid */
-                if (!kid || kid->op_type == OP_FREED)
+                if (kid->op_type == OP_FREED)
                     /* During the forced freeing of ops after
                        compilation failure, kidops may be freed before
                        their parents. */
