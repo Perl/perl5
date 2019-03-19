@@ -18,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 491;
+plan tests => 501;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -261,6 +261,35 @@ is(stores($y), 0);
 is(~~$y, "c");
 is(fetches($y), 1);
 is(stores($y), 0);
+
+my $g;
+# Note: if the vec() reads are part of the is() calls it's treated as
+# in lvalue context, so we save it separately
+$g = vec($x, 0, 1);
+is($g, (ord("a") & 0x01), "check vec value");
+is(fetches($x), 1, "fetches for vec read");
+is(stores($x), 0, "stores for vec read");
+# similarly here, and code like:
+#   $g = (vec($x, 0, 1) = 0)
+# results in an extra fetch, since the inner assignment returns the LV
+vec($x, 0, 1) = 0;
+# one fetch in vec() another when the LV is assigned to
+is(fetches($x), 2, "fetches for vec write");
+is(stores($x), 1, "stores for vec write");
+
+{
+    my $a = "a";
+    utf8::upgrade($a);
+    tie $x, "main", $a;
+    $g = vec($x, 0, 1);
+    is($g, (ord("a") & 0x01), "check vec value (utf8)");
+    is(fetches($x), 1, "fetches for vec read (utf8)");
+    is(stores($x), 0, "stores for vec read (utf8)");
+    vec($x, 0, 1) = 0;
+    # one fetch in vec() another when the LV is assigned to
+    is(fetches($x), 2, "fetches for vec write (utf8)");
+    is(stores($x), 1, "stores for vec write (utf8)");
+}
 
 $a = "\0\x{100}"; chop($a);
 ok(utf8::is_utf8($a)); # make sure UTF8 flag is still there
