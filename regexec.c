@@ -6127,6 +6127,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		    while (chars) {
 			if (utf8_target) {
+                            /* XXX This assumes the length is well-formed, as
+                             * does the UTF8SKIP below */
 			    uvc = utf8n_to_uvchr((U8*)uc, UTF8_MAXLEN, &len,
 						    uniflags);
 			    uc += len;
@@ -8235,6 +8237,11 @@ NULL
 		);
 	    if (! NEXTCHR_IS_EOS && ST.c1 != CHRTEST_VOID) {
                 if (! UTF8_IS_INVARIANT(nextchr) && utf8_target) {
+
+                           /* (We can use memEQ and memNE in this file without
+                            * having to worry about one being shorter than the
+                            * other, since the first byte of each gives the
+                            * length of the character) */
                     if (memNE(locinput, ST.c1_utf8, UTF8SKIP(locinput))
                         && memNE(locinput, ST.c2_utf8, UTF8SKIP(locinput)))
                     {
