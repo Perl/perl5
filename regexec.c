@@ -1720,7 +1720,7 @@ STMT_START {                                                                    
         } else {                                                                    \
             uvc = _toFOLD_utf8_flags( (const U8*) uc, uc_end, foldbuf, &foldlen,    \
                                                                             flags); \
-            len = UTF8SKIP(uc);                                                     \
+            len = UTF8_SAFE_SKIP(uc, uc_end);                                       \
             skiplen = UVCHR_SKIP( uvc );                                            \
             foldlen -= skiplen;                                                     \
             uscan = foldbuf + skiplen;                                              \
@@ -3305,7 +3305,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             RXp_MATCH_UTF8_set(prog, utf8_target);
             prog->offs[0].start = s - strbeg;
             prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
+                ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
                 : s - strbeg + prog->minlenret;
             if ( !(flags & REXEC_NOT_FIRST) )
                 S_reg_set_capture_string(aTHX_ rx,
@@ -6921,7 +6921,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         }
                         break;
                 }
-                locinput += UTF8SKIP(locinput);
+                locinput += UTF8_SAFE_SKIP(locinput, reginfo->strend);
             }
             break;
 
@@ -8242,8 +8242,10 @@ NULL
                             * having to worry about one being shorter than the
                             * other, since the first byte of each gives the
                             * length of the character) */
-                    if (memNE(locinput, ST.c1_utf8, UTF8SKIP(locinput))
-                        && memNE(locinput, ST.c2_utf8, UTF8SKIP(locinput)))
+                    if (   memNE(locinput, ST.c1_utf8, UTF8_SAFE_SKIP(locinput,
+                                                              reginfo->strend))
+                        && memNE(locinput, ST.c2_utf8, UTF8_SAFE_SKIP(locinput,
+                                                             reginfo->strend)))
                     {
                         /* simulate B failing */
                         DEBUG_OPTIMISE_r(
@@ -8505,20 +8507,26 @@ NULL
 		    n = (ST.oldloc == locinput) ? 0 : 1;
 		    if (ST.c1 == ST.c2) {
 			/* set n to utf8_distance(oldloc, locinput) */
-			while (locinput <= ST.maxpos
-                              && memNE(locinput, ST.c1_utf8, UTF8SKIP(locinput)))
+			while (    locinput <= ST.maxpos
+                               &&  locinput < loceol
+                               &&  memNE(locinput, ST.c1_utf8,
+                                    UTF8_SAFE_SKIP(locinput, reginfo->strend)))
                         {
-			    locinput += UTF8SKIP(locinput);
+			    locinput += UTF8_SAFE_SKIP(locinput,
+                                                       reginfo->strend);
 			    n++;
 			}
 		    }
 		    else {
 			/* set n to utf8_distance(oldloc, locinput) */
-			while (locinput <= ST.maxpos
-                              && memNE(locinput, ST.c1_utf8, UTF8SKIP(locinput))
-                              && memNE(locinput, ST.c2_utf8, UTF8SKIP(locinput)))
+			while (   locinput <= ST.maxpos
+                               && locinput < loceol
+                               && memNE(locinput, ST.c1_utf8,
+                                     UTF8_SAFE_SKIP(locinput, reginfo->strend))
+                               && memNE(locinput, ST.c2_utf8,
+                                    UTF8_SAFE_SKIP(locinput, reginfo->strend)))
                         {
-			    locinput += UTF8SKIP(locinput);
+			    locinput += UTF8_SAFE_SKIP(locinput, reginfo->strend);
 			    n++;
 			}
 		    }
@@ -8596,16 +8604,16 @@ NULL
                 if (ST.c1 != CHRTEST_VOID && could_match) {
                     if (! UTF8_IS_INVARIANT(UCHARAT(locinput)) && utf8_target)
                     {
-                        could_match = memEQ(locinput,
-                                            ST.c1_utf8,
-                                            UTF8SKIP(locinput))
-                                    || memEQ(locinput,
-                                             ST.c2_utf8,
-                                             UTF8SKIP(locinput));
+                        could_match =  memEQ(locinput, ST.c1_utf8,
+                                             UTF8_SAFE_SKIP(locinput,
+                                                            reginfo->strend))
+                                    || memEQ(locinput, ST.c2_utf8,
+                                             UTF8_SAFE_SKIP(locinput,
+                                                            reginfo->strend));
                     }
                     else {
-                        could_match = UCHARAT(locinput) == ST.c1
-                                      || UCHARAT(locinput) == ST.c2;
+                        could_match =   UCHARAT(locinput) == ST.c1
+                                     || UCHARAT(locinput) == ST.c2;
                     }
                 }
                 if (ST.c1 == CHRTEST_VOID || could_match) {
@@ -9377,19 +9385,22 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 if (c1 == c2) {
                     while (scan < this_eol
                            && hardcount < max
-                           && memEQ(scan, c1_utf8, UTF8SKIP(scan)))
+                           && memEQ(scan, c1_utf8, UTF8_SAFE_SKIP(scan,
+                                                                  loceol)))
                     {
-                        scan += UTF8SKIP(scan);
+                        scan += UTF8SKIP(c1_utf8);
                         hardcount++;
                     }
                 }
                 else {
                     while (scan < this_eol
                            && hardcount < max
-                           && (memEQ(scan, c1_utf8, UTF8SKIP(scan))
-                               || memEQ(scan, c2_utf8, UTF8SKIP(scan))))
+                           && (   memEQ(scan, c1_utf8, UTF8_SAFE_SKIP(scan,
+                                                                     loceol))
+                               || memEQ(scan, c2_utf8, UTF8_SAFE_SKIP(scan,
+                                                                     loceol))))
                     {
-                        scan += UTF8SKIP(scan);
+                        scan += UTF8_SAFE_SKIP(scan, loceol);
                         hardcount++;
                     }
                 }

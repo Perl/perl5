@@ -290,7 +290,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
 	if (from >= end) return FALSE;
 	val = utf8n_to_uvchr((U8 *) from, end-from, &retlen, flags);
 	if (retlen == (STRLEN) -1) {
-	    from += UTF8SKIP(from);
+	    from += UTF8_SAFE_SKIP(from, end);
 	    bad |= 1;
 	} else from += retlen;
 	if (val >= 0x100) {
