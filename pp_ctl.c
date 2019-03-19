@@ -781,7 +781,8 @@ PP(pp_formline)
 			 * for safety */
 			grow = linemax;
 			while (linemark--)
-			    s += UTF8SKIP(s);
+			    s += UTF8_SAFE_SKIP(s,
+                                            (U8 *) SvEND(PL_formtarget));
 			linemark = s - (U8*)SvPVX(PL_formtarget);
 		    }
 		    /* Easy. They agree.  */
