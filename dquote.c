@@ -106,7 +106,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     assert(* *s       == 'o');
     (*s)++;
 
-    if (**s != '{') {
+    if (send <= *s || **s != '{') {
 	*error_msg = "Missing braces on \\o{}";
 	return FALSE;
     }
