@@ -202,6 +202,10 @@ L<perl5db.pl> has been upgraded from version 1.54 to 1.55.
 Debugging threaded code no longer deadlocks in C<DB::sub> nor
 C<DB::lsub>.
 
+ =item *
+
+ L<Devel::PPPort> has been upgraded from version 3.44 to 3.45.
+
 =item *
 
 L<PerlIO::encoding> has been upgraded from version 0.26 to 0.27.

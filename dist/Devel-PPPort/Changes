@@ -1,3 +1,7 @@
+3.45 - 2019-03-19
+
+  * Restore missing unit tests from the previous release.
+
 3.44 - 2019-02-20
 
    * Fix D_PPP_FIX_UTF8_ERRSV macro to use errsv value from passed argument
