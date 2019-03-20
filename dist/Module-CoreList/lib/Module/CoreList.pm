@@ -16200,10 +16200,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         delta_from => 5.029008,
         changed => {
             'B::Op_private'         => '5.029009',
-            'Devel::PPPort'         => '3.45',
             'Config'                => '5.029009',
+            'Devel::PPPort'         => '3.45',
+            'Encode'                => '3.01',
+            'ExtUtils::Manifest'    => '1.72',
+            'JSON::PP'              => '4.02',
             'Module::CoreList'      => '5.20190320',
             'Module::CoreList::Utils'=> '5.20190320',
+            'PerlIO::encoding'      => '0.27',
+            'Unicode'               => '12.0.0',
+            'threads::shared'       => '1.60',
+            'utf8'                  => '1.22',
+            'warnings'              => '1.44',
         },
         removed => {
         }
