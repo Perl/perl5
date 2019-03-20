@@ -34,7 +34,7 @@ Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
 Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
 Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcker, Eric Herman,
-John SJ Anderson, and Karen Etheridge.
+John SJ Anderson, Karen Etheridge, and Zak B. Elep.
 
 =head2 PUMPKIN?
 
@@ -661,6 +661,7 @@ the strings?).
  Abigail   5.29.6       2018-Dec-18
  Abigail   5.29.7       2019-Jan-20
  Nicolas R 5.29.8       2019-Feb-20
+ Zak Elep  5.29.9       2019-Mar-20
 
 =head2 SELECTED RELEASE SIZES
 
