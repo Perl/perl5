@@ -4354,6 +4354,12 @@ the meantime, try using scientific notation (e.g. "1e6" instead of
 a number.  This happens, for example with C<\o{}>, with no number between
 the braces.
 
+=item Numeric format result too large
+
+(F) The length of the result of a numeric format supplied to sprintf()
+or printf() would have been too large for the underlying C function to
+report.  This limit is typically 2GB.
+
 =item Octal number > 037777777777 non-portable
 
 (W portable) The octal number you specified is larger than 2**32-1

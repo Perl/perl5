@@ -13085,6 +13085,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (float_need < width)
 		float_need = width;
 
+            if (float_need > INT_MAX) {
+                /* snprintf() returns an int, and we use that return value,
+                   so die horribly if the expected size is too large for int
+                */
+                Perl_croak(aTHX_ "Numeric format result too large");
+            }
+
 	    if (PL_efloatsize <= float_need) {
                 /* PL_efloatbuf should be at least 1 greater than
                  * float_need to allow a trailing \0 to be returned by

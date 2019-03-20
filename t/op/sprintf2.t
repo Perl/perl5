@@ -1153,4 +1153,11 @@ foreach(
     is sprintf("%.0f", $_), sprintf("%-.0f", $_), "special-case %.0f on $_";
 }
 
+# large uvsize needed so the large width is parsed properly
+# large sizesize needed so the STRLEN check doesn't
+if ($Config{intsize} == 4 && $Config{uvsize} > 4 && $Config{sizesize} > 4) {
+    eval { my $x = sprintf("%7000000000E", 0) };
+    like($@, qr/^Numeric format result too large at /,
+         "croak for very large numeric format results");
+}
 done_testing();
