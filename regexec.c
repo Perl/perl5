@@ -9744,7 +9744,7 @@ STATIC bool
 S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const p, const U8* const p_end, const bool utf8_target)
 {
     dVAR;
-    const char flags = ANYOF_FLAGS(n);
+    const char flags = (OP(n) == ANYOFH) ? 0 : ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;
 

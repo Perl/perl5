@@ -868,9 +868,17 @@ while (defined (my $test = shift @tests)) {
 
         my $display_expected = $expected
                                   =~ s/ INFTY_minus_1 /$next_highest_cp/xgr;
+        my $test_name = "Verify compilation of $test displays as"
+                      . " $display_expected";
 
         my $result = get_compiled($test);
-        is($result, $expected,
-               "Verify compilation of $test displays as $display_expected");
+        if ($expected =~ / ^ ANYOFH /x) {
+            like($result, qr/ ^ \Q$expected\E (?:\Q (First UTF-8 byte=\x\E
+                              [[:xdigit:]]{2}\) )? $ /x, $test_name);
+        }
+        else {
+            is($result, $expected,
+               "Verify compilation of $test displays as $test_name");
+        }
     }
 }

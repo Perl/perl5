@@ -33,7 +33,7 @@
 #define	ANYOFD                	19	/* 0x13 Like ANYOF, but /d is in effect */
 #define	ANYOFL                	20	/* 0x14 Like ANYOF, but /l is in effect */
 #define	ANYOFPOSIXL           	21	/* 0x15 Like ANYOFL, but matches [[:posix:]] classes */
-#define	ANYOFH                	22	/* 0x16 Like ANYOF, but only has "High" matches, none in the bitmap */
+#define	ANYOFH                	22	/* 0x16 Like ANYOF, but only has "High" matches, none in the bitmap; non-zero flags "f" means "f" is the first UTF-8 byte shared in common by all code points matched */
 #define	ANYOFM                	23	/* 0x17 Like ANYOF, but matches an invariant byte as determined by the mask and arg */
 #define	NANYOFM               	24	/* 0x18 complement of ANYOFM */
 #define	POSIXD                	25	/* 0x19 Some [[:class:]] under /d; the FLAGS field gives which one */

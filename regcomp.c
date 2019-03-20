@@ -1713,6 +1713,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
     SV* anded_cp_list;
+    U8  and_with_flags = (OP(and_with) == ANYOFH) ? 0 : ANYOF_FLAGS(and_with);
     U8  anded_flags;
 
     PERL_ARGS_ASSERT_SSC_AND;
@@ -1723,7 +1724,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * the code point inversion list and just the relevant flags */
     if (is_ANYOF_SYNTHETIC(and_with)) {
         anded_cp_list = ((regnode_ssc *)and_with)->invlist;
-        anded_flags = ANYOF_FLAGS(and_with);
+        anded_flags = and_with_flags;
 
         /* XXX This is a kludge around what appears to be deficiencies in the
          * optimizer.  If we make S_ssc_anything() add in the WARN_SUPER flag,
@@ -1747,14 +1748,14 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     else {
         anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, and_with);
         if (OP(and_with) == ANYOFD) {
-            anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
+            anded_flags = and_with_flags & ANYOF_COMMON_FLAGS;
         }
         else {
-            anded_flags = ANYOF_FLAGS(and_with)
+            anded_flags = and_with_flags
             &( ANYOF_COMMON_FLAGS
               |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
               |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
-            if (ANYOFL_UTF8_LOCALE_REQD(ANYOF_FLAGS(and_with))) {
+            if (ANYOFL_UTF8_LOCALE_REQD(and_with_flags)) {
                 anded_flags &=
                     ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
             }
@@ -1794,7 +1795,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      *                         <=  (C1 & ~C2) | (P1 & ~P2)
      * */
 
-    if ((ANYOF_FLAGS(and_with) & ANYOF_INVERT)
+    if ((and_with_flags & ANYOF_INVERT)
         && ! is_ANYOF_SYNTHETIC(and_with))
     {
         unsigned int i;
@@ -1806,7 +1807,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
         /* If either P1 or P2 is empty, the intersection will be also; can skip
          * the loop */
-        if (! (ANYOF_FLAGS(and_with) & ANYOF_MATCHES_POSIXL)) {
+        if (! (and_with_flags & ANYOF_MATCHES_POSIXL)) {
             ANYOF_POSIXL_ZERO(ssc);
         }
         else if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
@@ -1866,16 +1867,16 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             else {
                 ssc->invlist = anded_cp_list;
                 ANYOF_POSIXL_ZERO(ssc);
-                if (ANYOF_FLAGS(and_with) & ANYOF_MATCHES_POSIXL) {
+                if (and_with_flags & ANYOF_MATCHES_POSIXL) {
                     ANYOF_POSIXL_OR((regnode_charclass_posixl*) and_with, ssc);
                 }
             }
         }
         else if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)
-                 || (ANYOF_FLAGS(and_with) & ANYOF_MATCHES_POSIXL))
+                 || (and_with_flags & ANYOF_MATCHES_POSIXL))
         {
             /* One or the other of P1, P2 is non-empty. */
-            if (ANYOF_FLAGS(and_with) & ANYOF_MATCHES_POSIXL) {
+            if (and_with_flags & ANYOF_MATCHES_POSIXL) {
                 ANYOF_POSIXL_AND((regnode_charclass_posixl*) and_with, ssc);
             }
             ssc_union(ssc, anded_cp_list, FALSE);
@@ -1896,6 +1897,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     SV* ored_cp_list;
     U8 ored_flags;
+    U8  or_with_flags = (OP(or_with) == ANYOFH) ? 0 : ANYOF_FLAGS(or_with);
 
     PERL_ARGS_ASSERT_SSC_OR;
 
@@ -1905,17 +1907,17 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * the code point inversion list and just the relevant flags */
     if (is_ANYOF_SYNTHETIC(or_with)) {
         ored_cp_list = ((regnode_ssc*) or_with)->invlist;
-        ored_flags = ANYOF_FLAGS(or_with);
+        ored_flags = or_with_flags;
     }
     else {
         ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, or_with);
-        ored_flags = ANYOF_FLAGS(or_with) & ANYOF_COMMON_FLAGS;
+        ored_flags = or_with_flags & ANYOF_COMMON_FLAGS;
         if (OP(or_with) != ANYOFD) {
             ored_flags
-            |= ANYOF_FLAGS(or_with)
+            |= or_with_flags
              & ( ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
                 |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
-            if (ANYOFL_UTF8_LOCALE_REQD(ANYOF_FLAGS(or_with))) {
+            if (ANYOFL_UTF8_LOCALE_REQD(or_with_flags)) {
                 ored_flags |=
                     ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
             }
@@ -1942,12 +1944,12 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * (which results in actually simpler code than the non-inverted case)
      * */
 
-    if ((ANYOF_FLAGS(or_with) & ANYOF_INVERT)
+    if ((or_with_flags & ANYOF_INVERT)
         && ! is_ANYOF_SYNTHETIC(or_with))
     {
         /* We ignore P2, leaving P1 going forward */
     }   /* else  Not inverted */
-    else if (ANYOF_FLAGS(or_with) & ANYOF_MATCHES_POSIXL) {
+    else if (or_with_flags & ANYOF_MATCHES_POSIXL) {
         ANYOF_POSIXL_OR((regnode_charclass_posixl*)or_with, ssc);
         if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
             unsigned int i;
@@ -18972,8 +18974,34 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         * bitmap, optimize to indicate that */
         if (     start[0] >= NUM_ANYOF_CODE_POINTS
             && ! LOC
-            && ! upper_latin1_only_utf8_matches)
+            && ! upper_latin1_only_utf8_matches
+            &&   anyof_flags == 0)
         {
+            UV highest_cp = invlist_highest(cp_list);
+
+            /* If the lowest and highest code point in the class have the same
+             * UTF-8 first byte, then all do, and we can store that byte for
+             * regexec.c to use so that it can more quickly scan the target
+             * string for potential matches for this class.  We co-opt the the
+             * flags field for this.  Zero means, they don't have the same
+             * first byte.  We do accept here very large code points (for
+             * future use), but don't bother with this optimization for them,
+             * as it would cause other complications */
+            if (highest_cp > IV_MAX) {
+                anyof_flags = 0;
+            }
+            else {
+                U8 low_utf8[UTF8_MAXBYTES+1];
+                U8 high_utf8[UTF8_MAXBYTES+1];
+
+                (void) uvchr_to_utf8(low_utf8, start[0]);
+                (void) uvchr_to_utf8(high_utf8, invlist_highest(cp_list));
+
+                anyof_flags = (low_utf8[0] == high_utf8[0])
+                            ? low_utf8[0]
+                            : 0;
+            }
+
             op = ANYOFH;
         }
     }   /* End of seeing if can optimize it into a different node */
@@ -20273,7 +20301,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* 2: embedded, otherwise 1 */
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
     else if (k == ANYOF) {
-	const U8 flags = ANYOF_FLAGS(o);
+	const U8 flags = (OP(o) == ANYOFH) ? 0 : ANYOF_FLAGS(o);
         bool do_sep = FALSE;    /* Do we need to separate various components of
                                    the output? */
         /* Set if there is still an unresolved user-defined property */
@@ -20426,6 +20454,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+
+        if (OP(o) == ANYOFH && FLAGS(o) != 0) {
+            Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=\\x%02x)", FLAGS(o));
+        }
+
 
         SvREFCNT_dec(unresolved);
     }
