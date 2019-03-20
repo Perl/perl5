@@ -11071,12 +11071,6 @@ S_sprintf_arg_num_val(pTHX_ va_list *const args, int i, SV *sv, bool *neg)
     return (STRLEN)iv;
 }
 
-
-/* Returns true if c is in the range '1'..'9'
- * Written with the cast so it only needs one conditional test
- */
-#define IS_1_TO_9(c) ((U8)(c - '1') <= 8)
-
 /* Read in and return a number. Updates *pattern to point to the char
  * following the number. Expects the first char to 1..9.
  * Croaks if the number exceeds 1/4 of the maximum value of STRLEN.
@@ -11093,7 +11087,7 @@ S_expect_number(pTHX_ const char **const pattern)
 
     PERL_ARGS_ASSERT_EXPECT_NUMBER;
 
-    assert(IS_1_TO_9(**pattern));
+    assert(inRANGE(**pattern, '1', '9'));
 
     var = *(*pattern)++ - '0';
     while (isDIGIT(**pattern)) {
@@ -12042,7 +12036,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     [%bcdefginopsuxDFOUX] format (mandatory)
 */
 
-	if (IS_1_TO_9(*q)) {
+	if (inRANGE(*q, '1', '9')) {
             width = expect_number(&q);
 	    if (*q == '$') {
                 if (args)
@@ -12110,7 +12104,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (*q == '*') {
             STRLEN ix; /* explicit width/vector separator index */
 	    q++;
-	    if (IS_1_TO_9(*q)) {
+            if (inRANGE(*q, '1', '9')) {
                 ix = expect_number(&q);
 		if (*q++ == '$') {
                     if (args)
@@ -12182,7 +12176,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		fill = TRUE;
                 q++;
             }
-            if (IS_1_TO_9(*q))
+            if (inRANGE(*q, '1', '9'))
                 width = expect_number(&q);
 	}
 
@@ -12195,7 +12189,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (*q == '*') {
                 STRLEN ix; /* explicit precision index */
 		q++;
-                if (IS_1_TO_9(*q)) {
+                if (inRANGE(*q, '1', '9')) {
                     ix = expect_number(&q);
                     if (*q++ == '$') {
                         if (args)
@@ -12234,7 +12228,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  */
                 while (*q == '0')
                     q++;
-                precis = IS_1_TO_9(*q) ? expect_number(&q) : 0;
+                precis = inRANGE(*q, '1', '9') ? expect_number(&q) : 0;
 		has_precis = TRUE;
 	    }
 	}

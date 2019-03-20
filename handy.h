@@ -1094,6 +1094,12 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define FITS_IN_8_BITS(c) (1)
 #endif
 
+/* Returns true if c is in the range l..u
+ * Written with the cast so it only needs one conditional test
+ */
+#define inRANGE(c, l, u) (__ASSERT_((u) >= (l))                          \
+    ((WIDEST_UTYPE) (((c) - (l)) | 0) <= ((WIDEST_UTYPE) ((u) - (l)))))
+
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
         /* The native libc isascii() et.al. functions return the wrong results
