@@ -1007,6 +1007,28 @@ S_emulate_setlocale(const int category,
 
 #  endif
 
+    /* If we are switching to the LC_ALL C locale, it already exists.  Use
+     * it instead of trying to create a new locale */
+    if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(locale)) {
+
+#  ifdef DEBUGGING
+
+        if (DEBUG_Lv_TEST || debug_initialization) {
+            PerlIO_printf(Perl_debug_log,
+                          "%s:%d: will stay in C object\n", __FILE__, __LINE__);
+        }
+
+#  endif
+
+        new_obj = PL_C_locale_obj;
+
+        /* We already had switched to the C locale in preparation for freeing
+         * old_obj */
+        if (old_obj != LC_GLOBAL_LOCALE && old_obj != PL_C_locale_obj) {
+            freelocale(old_obj);
+        }
+    }
+    else {
     /* If we weren't in a thread safe locale, set so that newlocale() below
      which uses 'old_obj', uses an empty one.  Same for our reserved C object.
      The latter is defensive coding, so that, even if there is some bug, we
@@ -1083,6 +1105,7 @@ S_emulate_setlocale(const int category,
         freelocale(new_obj);
         RESTORE_ERRNO;
         return NULL;
+    }
     }
 
 #  ifdef DEBUGGING
