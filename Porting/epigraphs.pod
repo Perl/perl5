@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.9 - Sir Arthur Conan Doyle, The Adventure of the Dancing Men
+
+L<Announced on 2019-03-21 by Zak Elep|https://www.nntp.perl.org/group/perl.perl5.porters/2019/03/msg253978.html>
+
+  What one man can invent, another can discover.
+
 =head2 v5.29.8 -  Isaac Asimov, Foundation: “Never let your sense of morals get in the way of doing what's right.”
 
 L<Announced on 2019-02-20 by Atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2019/02/msg253750.html>
