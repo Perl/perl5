@@ -1139,11 +1139,16 @@ perl_destruct(pTHXx)
          * below */
         const locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
         if (old_locale != LC_GLOBAL_LOCALE) {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                     "%s:%d: Freeing %p\n", __FILE__, __LINE__, old_locale));
             freelocale(old_locale);
         }
     }
 #  ifdef USE_LOCALE_NUMERIC
     if (PL_underlying_numeric_obj) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                    "%s:%d: Freeing %p\n", __FILE__, __LINE__,
+                    PL_underlying_numeric_obj));
         freelocale(PL_underlying_numeric_obj);
         PL_underlying_numeric_obj = (locale_t) NULL;
     }

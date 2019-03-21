@@ -1048,7 +1048,11 @@ S_emulate_setlocale(const int category,
 #  ifdef DEBUGGING
 
     if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale created %p; should have freed %p\n", __FILE__, __LINE__, new_obj, old_obj);
+        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale created %p", __FILE__, __LINE__, new_obj);
+        if (old_obj) {
+            PerlIO_printf(Perl_debug_log, "; should have freed %p", old_obj);
+        }
+        PerlIO_printf(Perl_debug_log, "\n");
     }
 
 #  endif
