@@ -1254,17 +1254,25 @@ END_EXTERN_C
         && ((PL_charclass[(U8) (c)] & _CC_mask_A(classnum))     \
                                    == _CC_mask_A(classnum)))
 
-#   define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
+#   ifdef EBCDIC
+#     define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
+#     define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
+#     define isLOWER_A(c)  _generic_isCC_A(c, _CC_LOWER)
+#     define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
+#     define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
+#   else
+#     define isALPHA_A(c)  inRANGE((~('A' ^ 'a') & (c)), 'A', 'Z')
+#     define isGRAPH_A(c)  inRANGE((c), ' ' + 1, 0x7e)
+#     define isLOWER_A(c)  inRANGE(c, 'a', 'z')
+#     define isPRINT_A(c)  inRANGE(c, ' ', 0x7e)
+#     define isUPPER_A(c)  inRANGE(c, 'A', 'Z')
+#   endif
 #   define isALPHANUMERIC_A(c) _generic_isCC_A(c, _CC_ALPHANUMERIC)
 #   define isBLANK_A(c)  _generic_isCC_A(c, _CC_BLANK)
 #   define isCNTRL_A(c)  _generic_isCC_A(c, _CC_CNTRL)
-#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT) /* No non-ASCII digits */
-#   define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
-#   define isLOWER_A(c)  _generic_isCC_A(c, _CC_LOWER)
-#   define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
+#   define isDIGIT_A(c)  inRANGE(c, '0', '9')
 #   define isPUNCT_A(c)  _generic_isCC_A(c, _CC_PUNCT)
 #   define isSPACE_A(c)  _generic_isCC_A(c, _CC_SPACE)
-#   define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
 #   define isWORDCHAR_A(c) _generic_isCC_A(c, _CC_WORDCHAR)
 #   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT) /* No non-ASCII xdigits
                                                         */
