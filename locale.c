@@ -1002,7 +1002,9 @@ S_emulate_setlocale(const int category,
 #  ifdef DEBUGGING
 
     if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale now using %p\n", __FILE__, __LINE__, PL_C_locale_obj);
+        PerlIO_printf(Perl_debug_log,
+                      "%s:%d: emulate_setlocale now using %p\n",
+                      __FILE__, __LINE__, PL_C_locale_obj);
     }
 
 #  endif
@@ -1023,95 +1025,108 @@ S_emulate_setlocale(const int category,
         new_obj = PL_C_locale_obj;
 
         /* We already had switched to the C locale in preparation for freeing
-         * old_obj */
+         * 'old_obj' */
         if (old_obj != LC_GLOBAL_LOCALE && old_obj != PL_C_locale_obj) {
             freelocale(old_obj);
         }
     }
     else {
-    /* If we weren't in a thread safe locale, set so that newlocale() below
-     which uses 'old_obj', uses an empty one.  Same for our reserved C object.
-     The latter is defensive coding, so that, even if there is some bug, we
-     will never end up trying to modify either of these, as if passed to
-     newlocale(), they can be. */
-    if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
-        old_obj = (locale_t) 0;
-    }
-
-    /* Ready to create a new locale by modification of the exising one */
-    new_obj = newlocale(mask, locale, old_obj);
-
-    if (! new_obj) {
-        dSAVE_ERRNO;
-
-#  ifdef DEBUGGING
-
-        if (DEBUG_L_TEST || debug_initialization) {
-            PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale creating new object failed: %d\n", __FILE__, __LINE__, GET_ERRNO);
+        /* If we weren't in a thread safe locale, set so that newlocale() below
+         * which uses 'old_obj', uses an empty one.  Same for our reserved C
+         * object.  The latter is defensive coding, so that, even if there is
+         * some bug, we will never end up trying to modify either of these, as
+         * if passed to newlocale(), they can be. */
+        if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
+            old_obj = (locale_t) 0;
         }
 
-#  endif
+        /* Ready to create a new locale by modification of the exising one */
+        new_obj = newlocale(mask, locale, old_obj);
 
-        if (! uselocale(old_obj)) {
+        if (! new_obj) {
+            dSAVE_ERRNO;
 
 #  ifdef DEBUGGING
 
             if (DEBUG_L_TEST || debug_initialization) {
-                PerlIO_printf(Perl_debug_log, "%s:%d: switching back failed: %d\n", __FILE__, __LINE__, GET_ERRNO);
+                PerlIO_printf(Perl_debug_log,
+                              "%s:%d: emulate_setlocale creating new object"
+                              " failed: %d\n", __FILE__, __LINE__, GET_ERRNO);
             }
 
 #  endif
 
+            if (! uselocale(old_obj)) {
+
+#  ifdef DEBUGGING
+
+                if (DEBUG_L_TEST || debug_initialization) {
+                    PerlIO_printf(Perl_debug_log,
+                                  "%s:%d: switching back failed: %d\n",
+                                  __FILE__, __LINE__, GET_ERRNO);
+                }
+
+#  endif
+
+            }
+            RESTORE_ERRNO;
+            return NULL;
         }
-        RESTORE_ERRNO;
-        return NULL;
+
+#  ifdef DEBUGGING
+
+        if (DEBUG_Lv_TEST || debug_initialization) {
+            PerlIO_printf(Perl_debug_log,
+                          "%s:%d: emulate_setlocale created %p",
+                          __FILE__, __LINE__, new_obj);
+            if (old_obj) {
+                PerlIO_printf(Perl_debug_log,
+                              "; should have freed %p", old_obj);
+            }
+            PerlIO_printf(Perl_debug_log, "\n");
+        }
+
+#  endif
+
+        /* And switch into it */
+        if (! uselocale(new_obj)) {
+            dSAVE_ERRNO;
+
+#  ifdef DEBUGGING
+
+            if (DEBUG_L_TEST || debug_initialization) {
+                PerlIO_printf(Perl_debug_log,
+                              "%s:%d: emulate_setlocale switching to new object"
+                              " failed\n", __FILE__, __LINE__);
+            }
+
+#  endif
+
+            if (! uselocale(old_obj)) {
+
+#  ifdef DEBUGGING
+
+                if (DEBUG_L_TEST || debug_initialization) {
+                    PerlIO_printf(Perl_debug_log,
+                                  "%s:%d: switching back failed: %d\n",
+                                  __FILE__, __LINE__, GET_ERRNO);
+                }
+
+#  endif
+
+            }
+            freelocale(new_obj);
+            RESTORE_ERRNO;
+            return NULL;
+        }
     }
 
 #  ifdef DEBUGGING
 
     if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale created %p", __FILE__, __LINE__, new_obj);
-        if (old_obj) {
-            PerlIO_printf(Perl_debug_log, "; should have freed %p", old_obj);
-        }
-        PerlIO_printf(Perl_debug_log, "\n");
-    }
-
-#  endif
-
-    /* And switch into it */
-    if (! uselocale(new_obj)) {
-        dSAVE_ERRNO;
-
-#  ifdef DEBUGGING
-
-        if (DEBUG_L_TEST || debug_initialization) {
-            PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale switching to new object failed\n", __FILE__, __LINE__);
-        }
-
-#  endif
-
-        if (! uselocale(old_obj)) {
-
-#  ifdef DEBUGGING
-
-            if (DEBUG_L_TEST || debug_initialization) {
-                PerlIO_printf(Perl_debug_log, "%s:%d: switching back failed: %d\n", __FILE__, __LINE__, GET_ERRNO);
-            }
-
-#  endif
-
-        }
-        freelocale(new_obj);
-        RESTORE_ERRNO;
-        return NULL;
-    }
-    }
-
-#  ifdef DEBUGGING
-
-    if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale now using %p\n", __FILE__, __LINE__, new_obj);
+        PerlIO_printf(Perl_debug_log,
+                      "%s:%d: emulate_setlocale now using %p\n",
+                      __FILE__, __LINE__, new_obj);
     }
 
 #  endif
