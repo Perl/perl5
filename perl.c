@@ -668,6 +668,21 @@ perl_destruct(pTHXx)
     FREETMPS;
     assert(PL_scopestack_ix == 0);
 
+    /* normally when we get here, PL_parser should be null due to having
+     * its original (null) value restored by SAVEt_PARSER during leaving
+     * scope (usually before run-time starts in fact).
+     * But if a thread is created within a BEGIN block, the parser is
+     * duped, but the SAVEt_PARSER savestack entry isn't. So PL_parser
+     * never gets cleaned up.
+     * Clean it up here instead. This is a bit of a hack.
+     */
+    if (PL_parser) {
+        /* stop parser_free() stomping on PL_curcop */
+        PL_parser->saved_curcop = PL_curcop;
+        parser_free(PL_parser);
+    }
+
+
     /* Need to flush since END blocks can produce output */
     /* flush stdout separately, since we can identify it */
 #ifdef USE_PERLIO
