@@ -1188,7 +1188,7 @@
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
 #define handle_possible_posix(a,b,c,d,e)	S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
-#define handle_user_defined_property(a,b,c,d,e,f,g,h,i)	Perl_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i)
+#define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	Perl_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
 #define invlist_highest		S_invlist_highest
 #define invlist_is_iterating	S_invlist_is_iterating
@@ -1202,7 +1202,7 @@
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #define output_posix_warnings(a,b)	S_output_posix_warnings(aTHX_ a,b)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
-#define parse_uniprop_string(a,b,c,d,e,f,g,h)	Perl_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h)
+#define parse_uniprop_string(a,b,c,d,e,f,g,h,i)	Perl_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i)
 #define populate_ANYOF_from_invlist(a,b)	S_populate_ANYOF_from_invlist(aTHX_ a,b)
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reg2Lanode(a,b,c,d)	S_reg2Lanode(aTHX_ a,b,c,d)

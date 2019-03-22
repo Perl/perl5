@@ -17094,6 +17094,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SV * prop_definition = parse_uniprop_string(
                                             name, n, UTF, FOLD,
                                             FALSE, /* This is compile-time */
+
+                                            /* We can't defer this defn when
+                                             * the full result is required in
+                                             * this call */
+                                            ! cBOOL(ret_invlist),
+
                                             &user_defined,
                                             msg,
                                             0 /* Base level */
@@ -19202,6 +19208,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                                                            stored here for just
                                                            this occasion */
                             TRUE,           /* run time */
+                            FALSE,          /* This call must find the defn */
                             si,             /* The property definition  */
                             &user_defined,
                             msg,
@@ -22103,6 +22110,8 @@ Perl_handle_user_defined_property(pTHX_
     const bool is_utf8,         /* ? Is 'name' encoded in UTF-8 */
     const bool to_fold,         /* ? Is this under /i */
     const bool runtime,         /* ? Are we in compile- or run-time */
+    const bool deferrable,      /* Is it ok for this property's full definition
+                                   to be deferred until later? */
     SV* contents,               /* The property's definition */
     bool *user_defined_ptr,     /* This will be set TRUE as we wouldn't be
                                    getting called unless this is thought to be
@@ -22290,6 +22299,7 @@ Perl_handle_user_defined_property(pTHX_
 
         this_definition = parse_uniprop_string(s0, s - s0,
                                                is_utf8, to_fold, runtime,
+                                               deferrable,
                                                user_defined_ptr, msg,
                                                (name_len == 0)
                                                 ? level /* Don't increase level
@@ -22441,6 +22451,8 @@ Perl_parse_uniprop_string(pTHX_
     const bool is_utf8,         /* ? Is 'name' encoded in UTF-8 */
     const bool to_fold,         /* ? Is this under /i */
     const bool runtime,         /* TRUE if this is being called at run time */
+    const bool deferrable,      /* TRUE if it's ok for the definition to not be
+                                   known at this call */
     bool *user_defined_ptr,     /* Upon return from this function it will be
                                    set to TRUE if any component is a
                                    user-defined property */
@@ -22681,6 +22693,7 @@ Perl_parse_uniprop_string(pTHX_
                                                            is_utf8,
                                                            to_fold,
                                                            runtime,
+                                                           deferrable,
                                                            user_defined_ptr,
                                                            msg,
                                                            level + 1);
@@ -23169,6 +23182,7 @@ Perl_parse_uniprop_string(pTHX_
                  * handle it */
                 prop_definition = handle_user_defined_property(name, name_len,
                                                     is_utf8, to_fold, runtime,
+                                                    deferrable,
                                                     POPs, user_defined_ptr,
                                                     msg,
                                                     level);
@@ -23258,7 +23272,7 @@ Perl_parse_uniprop_string(pTHX_
                  * compile time, it might just be that the subroutine for that
                  * property hasn't been encountered yet, but at runtime, it's
                  * an error to try to use an undefined one */
-                if (runtime) {
+                if (! deferrable) {
                     if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
                     sv_catpvs(msg, "Unknown user-defined property name");
                     goto append_name_to_msg;
@@ -23491,6 +23505,7 @@ Perl_parse_uniprop_string(pTHX_
                                                           0, /* Not UTF-8 */
                                                           0, /* Not folded */
                                                           runtime,
+                                                          deferrable,
                                                           pu_definition,
                                                           &dummy,
                                                           msg,
