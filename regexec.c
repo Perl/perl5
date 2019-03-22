@@ -8725,8 +8725,8 @@ NULL
                 PERL_UINT_FAST8_T back_count = scan->flags;
 		char * s;
 
-                /* Lookbehind ends here */
-		ST.end = locinput;
+                /* Lookbehind can look beyond the current position */
+		ST.end = loceol;
 
                 /* ... and starts at the first place in the input that is in
                  * the range of the possible start positions */

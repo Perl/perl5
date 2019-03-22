@@ -2345,6 +2345,10 @@ EOF
     is (scalar split(/\b{sb}/, "Don't think twice.  It's all right."),
         2, '\b{wb} splits sentences correctly');
 
+    ok "my/dir/audio_07.mp3" =~
+     qr/(.*)\/(.*)\/(.*)\.(?<=(?=(?:\.(?!\d+\b)\w{1,4}$)$)\.)(.*)$()/,
+     "[perl #133948]";
+
 
     # !!! NOTE!  Keep the following tests last -- they may crash perl
 
