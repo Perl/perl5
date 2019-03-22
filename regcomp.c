@@ -20956,6 +20956,11 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	       2: something we no longer hold a reference on
 	       so we need to copy it locally.  */
     RX_WRAPPED(dstr) = SAVEPVN(RX_WRAPPED_const(sstr), SvCUR(sstr)+1);
+    /* set malloced length to a non-zero value so it will be freed
+     * (otherwise in combination with SVf_FAKE it looks like an alien
+     * buffer). It doesn't have to be the actual malloced size, since it
+     * should never be grown */
+    SvLEN_set(dstr, SvCUR(sstr)+1);
     ret->mother_re   = NULL;
 }
 #endif /* PERL_IN_XSUB_RE */
