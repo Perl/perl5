@@ -20665,7 +20665,23 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
     if (!dsv)
 	dsv = (REGEXP*) newSV_type(SVt_REGEXP);
     else {
+        assert(SvTYPE(dsv) == SVt_REGEXP || (SvTYPE(dsv) == SVt_PVLV));
+
+        /* our only valid caller, sv_setsv_flags(), should have done
+         * a SV_CHECK_THINKFIRST_COW_DROP() by now */
+        assert(!SvOOK(dsv));
+        assert(!SvIsCOW(dsv));
+        assert(!SvROK(dsv));
+
+        if (SvPVX_const(dsv)) {
+            if (SvLEN(dsv))
+                Safefree(SvPVX(dsv));
+            SvPVX(dsv) = NULL;
+        }
+        SvLEN_set(dsv, 0);
+        SvCUR_set(dsv, 0);
 	SvOK_off((SV *)dsv);
+
 	if (islv) {
 	    /* For PVLVs, the head (sv_any) points to an XPVLV, while
              * the LV's xpvlenu_rx will point to a regexp body, which
