@@ -673,7 +673,7 @@ my @warning_only_under_strict = (
     "/[$low_mixed_digit-$high_mixed_digit]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_digit-$high_mixed_digit\{#}]/",
     '/\b<GCB}/' => 'Unescaped literal \'}\' {#} m/\b<GCB}{#}/',
     '/[ ]def]/' => 'Unescaped literal \']\' {#} m/[ ]def]{#}/',
-    '/(?)/' => 'Empty (?) without any modifiers {#} m/(?){#}/', [perl #132851]
+    '/(?)/' => 'Empty (?) without any modifiers {#} m/(?){#}/', # [perl #132851]
 );
 
 my @warning_utf8_only_under_strict = mark_as_utf8(
