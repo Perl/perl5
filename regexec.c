@@ -92,7 +92,7 @@ static const char utf8_locale_required[] =
 #ifdef DEBUGGING
 /* At least one required character in the target string is expressible only in
  * UTF-8. */
-static const char* const non_utf8_target_but_utf8_required
+static const char non_utf8_target_but_utf8_required[]
                 = "Can't match, because target string needs to be in UTF-8\n";
 #endif
 
