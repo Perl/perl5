@@ -393,6 +393,15 @@ XXX
 
 =item *
 
+The perldelta for 5.29.9 listed the enhancement about regular expression
+lookbehind in the C<Security> section rather than the C<Core Enhancements>
+section.  Its title should also have indicated that it is "Limited"
+variable-length lookbehind (up to 255 characters).  (Note that a
+technique has now been published to achieve arbitrary variable length
+lookbehind with pre-existing Perl constructs and is linked to in L<perlre>.
+It is 
+L<http://www.drregex.com/2019/02/variable-length-lookbehinds-actually.html>.)
+
 XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
 
