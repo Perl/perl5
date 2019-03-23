@@ -2169,6 +2169,11 @@ C<\x> without specifying anything for it to operate on.
 Unfortunately, for backwards compatibility reasons, an empty C<\x> is
 legal outside S<C<use re 'strict'>> and expands to a NUL character.
 
+=item Empty (?) without any modifiers in regex; marked by <-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>>)
+C<(?)> does nothing, so perhaps this is a typo.
+
 =item ${^ENCODING} is no longer supported
 
 (F) The special variable C<${^ENCODING}>, formerly used to implement

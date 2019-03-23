@@ -11977,6 +11977,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
                 break;
+
+            case ')':
+                if (RExC_strict) {  /* [perl #132851] */
+                    ckWARNreg(RExC_parse, "Empty (?) without any modifiers");
+                }
+                /* FALLTHROUGH */
 	    default: /* e.g., (?i) */
 	        RExC_parse = (char *) seqstart + 1;
               parse_flags:
