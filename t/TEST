@@ -982,6 +982,11 @@ sub _cleanup_valgrind {
 	unlink _find_files('cachegrind.out.\d+$',
 		     qw ( ../t ../cpan ../ext ../dist/ ));
     }
+    elsif ($$toolnm eq 'valgrind') {
+	# Remove empty, hence non-error, output files
+	unlink grep { -z } _find_files('valgrind-current',
+		     qw ( ../t ../cpan ../ext ../dist/ ));
+    }
 }
 
 # Generate regexps of known bad filenames / skips from Porting/deparse-skips.txt
