@@ -23215,10 +23215,11 @@ Perl_parse_uniprop_string(pTHX_
                                                     level);
             }
 
-            /* Here, we have the results of the expansion.  Replace the
-             * placeholder with them.  We need exclusive access to the hash,
-             * and we can't let anyone else in, between when we delete the
-             * placeholder and add the permanent entry */
+            /* Here, we have the results of the expansion.  Delete the
+             * placeholder, and if the definition is now known, replace it with
+             * that definition.  We need exclusive access to the hash, and we
+             * can't let anyone else in, between when we delete the placeholder
+             * and add the permanent entry */
             USER_PROP_MUTEX_LOCK;
 
             S_delete_recursion_entry(aTHX_ SvPVX(fq_name));
