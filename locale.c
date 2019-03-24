@@ -5315,7 +5315,7 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 =for apidoc switch_to_global_locale
 
-On systems without locale support, or on single-threaded builds, or on
+On systems without locale support, or on typical single-threaded builds, or on
 platforms that do not support per-thread locale operations, this function does
 nothing.  On such systems that do have locale support, only a locale global to
 the whole program is available.
