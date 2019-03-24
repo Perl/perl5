@@ -266,6 +266,7 @@ $count += 4 * grep {length $_ == 1} @ILLEGAL_PROPERTIES;
 $count += 8 * @USER_CASELESS_PROPERTIES;
 $count += 1 * (@DEFERRED - @USER_ERROR_PROPERTIES) / 2;
 $count += 1 * @USER_ERROR_PROPERTIES;
+$count += 1;    # one bad apple
 $count += 1;    # No warnings generated
 
 plan(tests => $count);
@@ -533,6 +534,12 @@ sub In::foo { die }
 sub IsOverflow {
     return "0\t$overflow$utf8_comment";
 }
+
+fresh_perl_like(<<'EOP', qr/Can't find Unicode property definition "F000\\tF010" in expansion of InOneBadApple/, {}, "Just one component bad");
+# Extra backslash converts tab to backslash-t
+sub InOneBadApple { return "0100\t0110\n10000\t10010\nF000\\tF010\n0400\t0410" }
+qr/\p{InOneBadApple}/;
+EOP
 
 if (! is(@warnings, 0, "No warnings were generated")) {
     diag join "\n", @warnings, "\n";

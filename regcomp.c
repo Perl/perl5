@@ -22216,7 +22216,7 @@ Perl_handle_user_defined_property(pTHX_
                 Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
                                      UTF8fARG(is_contents_utf8, s - s0, s0));
                 sv_catpvs(msg, "\"");
-                goto return_msg;
+                goto return_failure;
             }
 
             /* Accumulate this digit into the value */
@@ -22251,7 +22251,7 @@ Perl_handle_user_defined_property(pTHX_
                     Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
                                       UTF8fARG(is_contents_utf8, s - s0, s0));
                     sv_catpvs(msg, "\"");
-                    goto return_msg;
+                    goto return_failure;
                 }
 
                 max = (max << 4) + READ_XDIGIT(s);
@@ -22279,7 +22279,7 @@ Perl_handle_user_defined_property(pTHX_
             Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
                                 UTF8fARG(is_contents_utf8, s - s0, s0));
             sv_catpvs(msg, "\"");
-            goto return_msg;
+            goto return_failure;
         }
 
 #if 0   /* See explanation at definition above of get_extended_utf8_msg() */
@@ -22334,8 +22334,8 @@ Perl_handle_user_defined_property(pTHX_
                                                 : level + 1
                                               );
         if (this_definition == NULL) {
-            goto return_msg;    /* 'msg' should have had the reason appended to
-                                   it by the above call */
+            goto return_failure;    /* 'msg' should have had the reason
+                                       appended to it by the above call */
         }
 
         if (! is_invlist(this_definition)) {    /* Unknown at this time */
@@ -22392,6 +22392,10 @@ Perl_handle_user_defined_property(pTHX_
     }
 
     /* Otherwise, add some explanatory text, but we will return success */
+    goto return_msg;
+
+  return_failure:
+    running_definition = NULL;
 
   return_msg:
 
