@@ -986,6 +986,25 @@ XS(XS_re_regexp_pattern)
     NOT_REACHED; /* NOTREACHED */
 }
 
+#ifdef HAS_GETCWD
+
+XS(XS_Internals_getcwd)
+{
+    dXSARGS;
+    SV *sv = sv_newmortal();
+
+    if (items != 0)
+        croak_xs_usage(cv, "");
+
+    (void)getcwd_sv(sv);
+
+    SvTAINTED_on(sv);
+    PUSHs(sv);
+    XSRETURN(1);
+}
+
+#endif
+
 #include "vutil.h"
 #include "vxs.inc"
 
@@ -1020,6 +1039,9 @@ static const struct xsub_details these_details[] = {
     {"re::regnames", XS_re_regnames, ";$"},
     {"re::regnames_count", XS_re_regnames_count, ""},
     {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
+#ifdef HAS_GETCWD
+    {"Internals::getcwd", XS_Internals_getcwd, ""},
+#endif
 };
 
 STATIC OP*

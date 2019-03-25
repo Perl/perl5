@@ -5425,6 +5425,7 @@ t/io/errno.t			See if $! is correctly set
 t/io/errnosig.t			Test case for restoration $! when leaving signal handlers
 t/io/fflush.t			See if auto-flush on fork/exec/system/qx works
 t/io/fs.t			See if directory manipulations work
+t/io/getcwd.t			See if Internals::getcwd is sane
 t/io/inplace.t			See if inplace editing works
 t/io/iofile.t			See if we can load IO::File on demand
 t/io/iprefix.t			See if inplace editing works with prefixes
