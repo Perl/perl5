@@ -10407,6 +10407,7 @@ S_scan_heredoc(pTHX_ char *s)
 	    /* Line doesn't begin with our indentation? Croak */
 	    }
             else {
+                Safefree(indent);
 		Perl_croak(aTHX_
 		    "Indentation on line %d of here-doc doesn't match delimiter",
 		    (int)linecount
@@ -10434,6 +10435,8 @@ S_scan_heredoc(pTHX_ char *s)
     return s;
 
   interminable:
+    if (indent)
+	Safefree(indent);
     SvREFCNT_dec(tmpstr);
     CopLINE_set(PL_curcop, origline);
     missingterm(PL_tokenbuf + 1, sizeof(PL_tokenbuf) - 1);
