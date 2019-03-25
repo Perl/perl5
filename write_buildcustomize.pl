@@ -61,6 +61,9 @@ require Cwd;
 
 my $cwd  = Cwd::getcwd();
 
+defined $cwd
+  or die "$0: Can't determine current working directory\n";
+
 # lib must be last, as the toolchain modules write themselves into it
 # as they build, and it's important that @INC order ensures that the partially
 # written files are always masked by the complete versions.
