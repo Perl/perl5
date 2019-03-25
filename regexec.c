@@ -1173,8 +1173,8 @@ Perl_re_intuit_start(pTHX_
 
     /* now look for the 'other' substring if defined */
 
-    if (utf8_target ? prog->substrs->data[other_ix].utf8_substr
-                    : prog->substrs->data[other_ix].substr)
+    if (prog->substrs->data[other_ix].utf8_substr
+        || prog->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
         char *last, *last1;
@@ -1184,6 +1184,11 @@ Perl_re_intuit_start(pTHX_
 
       do_other_substr:
         other = &prog->substrs->data[other_ix];
+        if (!utf8_target && !other->substr) {
+            if (!to_byte_substr(prog)) {
+                NON_UTF8_TARGET_BUT_UTF8_REQUIRED(fail);
+            }
+        }
 
         /* if "other" is anchored:
          * we've previously found a floating substr starting at check_at.
