@@ -2916,6 +2916,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 		if (!SvPOK(sv)) {
+                    if (!specialWARN(PL_compiling.cop_warnings))
+                        PerlMemShared_free(PL_compiling.cop_warnings);
 	            PL_compiling.cop_warnings = pWARN_STD;
 		    break;
 		}
