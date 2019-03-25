@@ -10112,7 +10112,7 @@ S_scan_heredoc(pTHX_ char *s)
 	   entered.  But we need them set here. */
 	shared->ls_bufptr  = s;
 	shared->ls_linestr = PL_linestr;
-	if (PL_lex_inwhat)
+	if (PL_lex_inwhat) {
 	  /* Look for a newline.  If the current buffer does not have one,
 	     peek into the line buffer of the parent lexing scope, going
  	     up as many levels as necessary to find one with a newline
@@ -10144,6 +10144,7 @@ S_scan_heredoc(pTHX_ char *s)
 		goto streaming;
 	    }
 	  }
+        }
 	else {	/* eval or we've already hit EOF */
 	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
 	    if (!s)
