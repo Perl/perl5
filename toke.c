@@ -10026,12 +10026,15 @@ S_scan_heredoc(pTHX_ char *s)
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
     *PL_tokenbuf = '\n';
     peek = s;
+
     if (*peek == '~') {
 	indented = TRUE;
 	peek++; s++;
     }
+
     while (SPACE_OR_TAB(*peek))
 	peek++;
+
     if (*peek == '`' || *peek == '\'' || *peek =='"') {
 	s = peek;
 	term = *s++;
@@ -10047,19 +10050,25 @@ S_scan_heredoc(pTHX_ char *s)
 	    s++, term = '\'';
 	else
 	    term = '"';
+
 	if (! isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF))
 	    Perl_croak(aTHX_ "Use of bare << to mean <<\"\" is forbidden");
+
 	peek = s;
+
         while (isWORDCHAR_lazy_if_safe(peek, PL_bufend, UTF)) {
 	    peek += UTF ? UTF8SKIP(peek) : 1;
 	}
+
 	len = (peek - s >= e - d) ? (e - d) : (peek - s);
 	Copy(s, d, len, char);
 	s += len;
 	d += len;
     }
+
     if (d >= PL_tokenbuf + sizeof PL_tokenbuf - 1)
 	Perl_croak(aTHX_ "Delimiter for here document is too long");
+
     *d++ = '\n';
     *d = '\0';
     len = d - PL_tokenbuf;
@@ -10102,6 +10111,7 @@ S_scan_heredoc(pTHX_ char *s)
 
     PL_multi_start = origline + 1 + PL_parser->herelines;
     PL_multi_open = PL_multi_close = '<';
+
     /* inside a string eval or quote-like operator */
     if (!infile || PL_lex_inwhat) {
 	SV *linestr;
@@ -10112,44 +10122,47 @@ S_scan_heredoc(pTHX_ char *s)
 	   entered.  But we need them set here. */
 	shared->ls_bufptr  = s;
 	shared->ls_linestr = PL_linestr;
-	if (PL_lex_inwhat) {
-	  /* Look for a newline.  If the current buffer does not have one,
-	     peek into the line buffer of the parent lexing scope, going
- 	     up as many levels as necessary to find one with a newline
-	     after bufptr.
-	   */
-	  while (!(s = (char *)memchr(
-		    (void *)shared->ls_bufptr, '\n',
-		    SvEND(shared->ls_linestr)-shared->ls_bufptr
-		))) {
-	    shared = shared->ls_prev;
-	    /* shared is only null if we have gone beyond the outermost
-	       lexing scope.  In a file, we will have broken out of the
-	       loop in the previous iteration.  In an eval, the string buf-
-	       fer ends with "\n;", so the while condition above will have
-	       evaluated to false.  So shared can never be null.  Or so you
-	       might think.  Odd syntax errors like s;@{<<; can gobble up
-	       the implicit semicolon at the end of a flie, causing the
-	       file handle to be closed even when we are not in a string
-	       eval.  So shared may be null in that case.
-               (Closing '}' here to balance the earlier open brace for
-               editors that look for matched pairs.) */
-	    if (UNLIKELY(!shared))
-		goto interminable;
-	    /* A LEXSHARED struct with a null ls_prev pointer is the outer-
-	       most lexing scope.  In a file, shared->ls_linestr at that
-	       level is just one line, so there is no body to steal. */
-	    if (infile && !shared->ls_prev) {
-		s = olds;
-		goto streaming;
-	    }
-	  }
+
+        if (PL_lex_inwhat) {
+            /* Look for a newline.  If the current buffer does not have one,
+             peek into the line buffer of the parent lexing scope, going
+             up as many levels as necessary to find one with a newline
+             after bufptr.
+            */
+	    while (!(s = (char *)memchr(
+                                (void *)shared->ls_bufptr, '\n',
+                                SvEND(shared->ls_linestr)-shared->ls_bufptr
+		)))
+            {
+                shared = shared->ls_prev;
+                /* shared is only null if we have gone beyond the outermost
+                   lexing scope.  In a file, we will have broken out of the
+                   loop in the previous iteration.  In an eval, the string buf-
+                   fer ends with "\n;", so the while condition above will have
+                   evaluated to false.  So shared can never be null.  Or so you
+                   might think.  Odd syntax errors like s;@{<<; can gobble up
+                   the implicit semicolon at the end of a flie, causing the
+                   file handle to be closed even when we are not in a string
+                   eval.  So shared may be null in that case.
+                   (Closing '>>}' here to balance the earlier open brace for
+                   editors that look for matched pairs.) */
+                if (UNLIKELY(!shared))
+                    goto interminable;
+                /* A LEXSHARED struct with a null ls_prev pointer is the outer-
+                   most lexing scope.  In a file, shared->ls_linestr at that
+                   level is just one line, so there is no body to steal. */
+                if (infile && !shared->ls_prev) {
+                    s = olds;
+                    goto streaming;
+                }
+            }
         }
 	else {	/* eval or we've already hit EOF */
 	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
 	    if (!s)
                 goto interminable;
 	}
+
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
@@ -10169,7 +10182,6 @@ S_scan_heredoc(pTHX_ char *s)
 			if (! SPACE_OR_TAB(*backup)) {
 			    break;
 			}
-
 			indent_len++;
 		    }
 
@@ -10184,7 +10196,8 @@ S_scan_heredoc(pTHX_ char *s)
 		    }
 		}
 	    }
-	} else {
+	}
+        else {
 	    while (s < bufend - len + 1
 	           && memNE(s,PL_tokenbuf,len) )
 	    {
@@ -10196,6 +10209,7 @@ S_scan_heredoc(pTHX_ char *s)
 	if (s >= bufend - len + 1) {
 	    goto interminable;
 	}
+
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
 	/* the preceding stmt passes a newline */
@@ -10218,6 +10232,7 @@ S_scan_heredoc(pTHX_ char *s)
 				bufend - shared->re_eval_start);
 	    shared->re_eval_start -= s-d;
 	}
+
 	if (cxstack_ix >= 0
             && CxTYPE(cx) == CXt_EVAL
             && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
@@ -10226,126 +10241,139 @@ S_scan_heredoc(pTHX_ char *s)
 	    cx->blk_eval.cur_text = newSVsv(linestr);
 	    cx->blk_u16 |= 0x40; /* indicate cur_text is ref counted */
 	}
+
 	/* Copy everything from s onwards back to d. */
 	Move(s,d,bufend-s + 1,char);
 	SvCUR_set(linestr, SvCUR(linestr) - (s-d));
 	/* Setting PL_bufend only applies when we have not dug deeper
 	   into other scopes, because sublex_done sets PL_bufend to
 	   SvEND(PL_linestr). */
-	if (shared == PL_parser->lex_shared) PL_bufend = SvEND(linestr);
+	if (shared == PL_parser->lex_shared)
+            PL_bufend = SvEND(linestr);
 	s = olds;
     }
-    else
-    {
-      SV *linestr_save;
-      char *oldbufptr_save;
-      char *oldoldbufptr_save;
-     streaming:
-      SvPVCLEAR(tmpstr);   /* avoid "uninitialized" warning */
-      term = PL_tokenbuf[1];
-      len--;
-      linestr_save = PL_linestr; /* must restore this afterwards */
-      d = s;			 /* and this */
-      oldbufptr_save = PL_oldbufptr;
-      oldoldbufptr_save = PL_oldoldbufptr;
-      PL_linestr = newSVpvs("");
-      PL_bufend = SvPVX(PL_linestr);
-      while (1) {
-	PL_bufptr = PL_bufend;
-	CopLINE_set(PL_curcop,
-		    origline + 1 + PL_parser->herelines);
-	if (!lex_next_chunk(LEX_NO_TERM)
-	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
-	    /* Simply freeing linestr_save might seem simpler here, as it
-	       does not matter what PL_linestr points to, since we are
-	       about to croak; but in a quote-like op, linestr_save
-	       will have been prospectively freed already, via
-	       SAVEFREESV(PL_linestr) in sublex_push, so it’s easier to
-	       restore PL_linestr. */
-	    SvREFCNT_dec_NN(PL_linestr);
-	    PL_linestr = linestr_save;
-            PL_oldbufptr = oldbufptr_save;
-            PL_oldoldbufptr = oldoldbufptr_save;
-	    goto interminable;
-	}
-	CopLINE_set(PL_curcop, origline);
-	if (!SvCUR(PL_linestr) || PL_bufend[-1] != '\n') {
-            s = lex_grow_linestr(SvLEN(PL_linestr) + 3);
-            /* ^That should be enough to avoid this needing to grow:  */
-	    sv_catpvs(PL_linestr, "\n\0");
-            assert(s == SvPVX(PL_linestr));
-            PL_bufend = SvEND(PL_linestr);
-	}
-	s = PL_bufptr;
-	PL_parser->herelines++;
-	PL_last_lop = PL_last_uni = NULL;
+    else {
+        SV *linestr_save;
+        char *oldbufptr_save;
+        char *oldoldbufptr_save;
+      streaming:
+        SvPVCLEAR(tmpstr);   /* avoid "uninitialized" warning */
+        term = PL_tokenbuf[1];
+        len--;
+        linestr_save = PL_linestr; /* must restore this afterwards */
+        d = s;			 /* and this */
+        oldbufptr_save = PL_oldbufptr;
+        oldoldbufptr_save = PL_oldoldbufptr;
+        PL_linestr = newSVpvs("");
+        PL_bufend = SvPVX(PL_linestr);
+
+        while (1) {
+            PL_bufptr = PL_bufend;
+            CopLINE_set(PL_curcop,
+                        origline + 1 + PL_parser->herelines);
+
+            if (   !lex_next_chunk(LEX_NO_TERM)
+                && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n'))
+            {
+                /* Simply freeing linestr_save might seem simpler here, as it
+                   does not matter what PL_linestr points to, since we are
+                   about to croak; but in a quote-like op, linestr_save
+                   will have been prospectively freed already, via
+                   SAVEFREESV(PL_linestr) in sublex_push, so it’s easier to
+                   restore PL_linestr. */
+                SvREFCNT_dec_NN(PL_linestr);
+                PL_linestr = linestr_save;
+                PL_oldbufptr = oldbufptr_save;
+                PL_oldoldbufptr = oldoldbufptr_save;
+                goto interminable;
+            }
+
+            CopLINE_set(PL_curcop, origline);
+
+            if (!SvCUR(PL_linestr) || PL_bufend[-1] != '\n') {
+                s = lex_grow_linestr(SvLEN(PL_linestr) + 3);
+                /* ^That should be enough to avoid this needing to grow:  */
+                sv_catpvs(PL_linestr, "\n\0");
+                assert(s == SvPVX(PL_linestr));
+                PL_bufend = SvEND(PL_linestr);
+            }
+
+            s = PL_bufptr;
+            PL_parser->herelines++;
+            PL_last_lop = PL_last_uni = NULL;
+
 #ifndef PERL_STRICT_CR
-	if (PL_bufend - PL_linestart >= 2) {
-	    if (   (PL_bufend[-2] == '\r' && PL_bufend[-1] == '\n')
-                || (PL_bufend[-2] == '\n' && PL_bufend[-1] == '\r'))
-	    {
-		PL_bufend[-2] = '\n';
-		PL_bufend--;
-		SvCUR_set(PL_linestr, PL_bufend - SvPVX_const(PL_linestr));
-	    }
-	    else if (PL_bufend[-1] == '\r')
-		PL_bufend[-1] = '\n';
-	}
-	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
-	    PL_bufend[-1] = '\n';
+            if (PL_bufend - PL_linestart >= 2) {
+                if (   (PL_bufend[-2] == '\r' && PL_bufend[-1] == '\n')
+                    || (PL_bufend[-2] == '\n' && PL_bufend[-1] == '\r'))
+                {
+                    PL_bufend[-2] = '\n';
+                    PL_bufend--;
+                    SvCUR_set(PL_linestr, PL_bufend - SvPVX_const(PL_linestr));
+                }
+                else if (PL_bufend[-1] == '\r')
+                    PL_bufend[-1] = '\n';
+            }
+            else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
+                PL_bufend[-1] = '\n';
 #endif
-	if (indented && (PL_bufend-s) >= len) {
-	    char * found = ninstr(s, PL_bufend, (PL_tokenbuf + 1), (PL_tokenbuf +1 + len));
 
-	    if (found) {
-		char *backup = found;
-		indent_len = 0;
+            if (indented && (PL_bufend-s) >= len) {
+                char * found = ninstr(s, PL_bufend, (PL_tokenbuf + 1), (PL_tokenbuf +1 + len));
 
-		/* Only valid if it's preceded by whitespace only */
-		while (backup != s && --backup >= s) {
-		    if (! SPACE_OR_TAB(*backup)) {
-			break;
-		    }
-		    indent_len++;
-		}
+                if (found) {
+                    char *backup = found;
+                    indent_len = 0;
 
-		/* All whitespace or none! */
-		if (backup == found || SPACE_OR_TAB(*backup)) {
-		    Newx(indent, indent_len + 1, char);
-		    memcpy(indent, backup, indent_len);
-		    indent[indent_len] = 0;
-		    SvREFCNT_dec(PL_linestr);
-		    PL_linestr = linestr_save;
-		    PL_linestart = SvPVX(linestr_save);
-		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		    PL_oldbufptr = oldbufptr_save;
-		    PL_oldoldbufptr = oldoldbufptr_save;
-		    s = d;
-		    break;
-		}
-	    }
+                    /* Only valid if it's preceded by whitespace only */
+                    while (backup != s && --backup >= s) {
+                        if (! SPACE_OR_TAB(*backup)) {
+                            break;
+                        }
+                        indent_len++;
+                    }
 
-	    /* Didn't find it */
-	    sv_catsv(tmpstr,PL_linestr);
-	} else {
-	    if (*s == term && PL_bufend-s >= len
-	        && memEQ(s,PL_tokenbuf + 1,len))
-	    {
-		SvREFCNT_dec(PL_linestr);
-		PL_linestr = linestr_save;
-		PL_linestart = SvPVX(linestr_save);
-		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		PL_oldbufptr = oldbufptr_save;
-		PL_oldoldbufptr = oldoldbufptr_save;
-		s = d;
-		break;
-	    } else {
-		sv_catsv(tmpstr,PL_linestr);
-	    }
-	}
-      }
+                    /* All whitespace or none! */
+                    if (backup == found || SPACE_OR_TAB(*backup)) {
+                        Newx(indent, indent_len + 1, char);
+                        memcpy(indent, backup, indent_len);
+                        indent[indent_len] = 0;
+                        SvREFCNT_dec(PL_linestr);
+                        PL_linestr = linestr_save;
+                        PL_linestart = SvPVX(linestr_save);
+                        PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+                        PL_oldbufptr = oldbufptr_save;
+                        PL_oldoldbufptr = oldoldbufptr_save;
+                        s = d;
+                        break;
+                    }
+                }
+
+                /* Didn't find it */
+                sv_catsv(tmpstr,PL_linestr);
+            }
+            else {
+                if (*s == term && PL_bufend-s >= len
+                    && memEQ(s,PL_tokenbuf + 1,len))
+                {
+                    SvREFCNT_dec(PL_linestr);
+                    PL_linestr = linestr_save;
+                    PL_linestart = SvPVX(linestr_save);
+                    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+                    PL_oldbufptr = oldbufptr_save;
+                    PL_oldoldbufptr = oldoldbufptr_save;
+                    s = d;
+                    break;
+                }
+                else {
+                    sv_catsv(tmpstr,PL_linestr);
+                }
+            }
+        } /* while (1) */
     }
+
     PL_multi_end = origline + PL_parser->herelines;
+
     if (indented && indent) {
 	STRLEN linecount = 1;
 	STRLEN herelen = SvCUR(tmpstr);
@@ -10363,40 +10391,44 @@ S_scan_heredoc(pTHX_ char *s)
 		linecount++;
 
 	    /* Found our indentation? Strip it */
-	    } else if (se - ss >= indent_len
+	    }
+            else if (se - ss >= indent_len
 	               && memEQ(ss, indent, indent_len))
 	    {
 		STRLEN le = 0;
-
 		ss += indent_len;
 
 		while ((ss + le) < se && *(ss + le) != '\n')
 		    le++;
 
 		sv_catpvn(newstr, ss, le);
-
 		ss += le;
 
 	    /* Line doesn't begin with our indentation? Croak */
-	    } else {
+	    }
+            else {
 		Perl_croak(aTHX_
 		    "Indentation on line %d of here-doc doesn't match delimiter",
 		    (int)linecount
 		);
 	    }
-	}
+	} /* while */
+
         /* avoid sv_setsv() as we dont wan't to COW here */
         sv_setpvn(tmpstr,SvPVX(newstr),SvCUR(newstr));
 	Safefree(indent);
 	SvREFCNT_dec_NN(newstr);
     }
+
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
 	SvPV_shrink_to_cur(tmpstr);
     }
+
     if (!IN_BYTES) {
 	if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
 	    SvUTF8_on(tmpstr);
     }
+
     PL_lex_stuff = tmpstr;
     pl_yylval.ival = op_type;
     return s;
@@ -10406,6 +10438,7 @@ S_scan_heredoc(pTHX_ char *s)
     CopLINE_set(PL_curcop, origline);
     missingterm(PL_tokenbuf + 1, sizeof(PL_tokenbuf) - 1);
 }
+
 
 /* scan_inputsymbol
    takes: position of first '<' in input buffer
