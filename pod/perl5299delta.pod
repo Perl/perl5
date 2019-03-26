@@ -53,10 +53,7 @@ multi-threaded.  To always enable them, add
 
 to your F<Configure> flags.
 
-
-=head1 Security
-
-=head2 Variable length lookbehind in regular expression pattern matching
+=head2 Limited variable length lookbehind in regular expression pattern matching
 is now experimentally supported
 
 Using a lookbehind assertion (like C<(?<=foo?)> or C<(?<!ba{1,9}r)> previously
