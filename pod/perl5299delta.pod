@@ -59,7 +59,7 @@ to your F<Configure> flags.
 =head2 Variable length lookbehind in regular expression pattern matching
 is now experimentally supported
 
-Using a lookbehind assertion (like C<(?<=foo)> or C<(?<!bar)> previously
+Using a lookbehind assertion (like C<(?<=foo?)> or C<(?<!ba{1,9}r)> previously
 would generate an error and refuse to compile.  Now it compiles (if the
 maximum lookbehind is at most 255 characters), but raises a warning in
 the new C<experimental::vlb> warnings category.  This is to caution you
