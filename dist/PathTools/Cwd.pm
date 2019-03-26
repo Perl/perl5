@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 
 
-our $VERSION = '3.77';
+our $VERSION = '3.78';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -658,6 +658,10 @@ if (exists $METHOD_MAP{$^O}) {
     *{$name} = \&{$map->{$name}};
   }
 }
+
+# built-in from 5.30
+*getcwd = \&Internals::getcwd
+  if !defined &getcwd && defined &Internals::getcwd;
 
 # In case the XS version doesn't load.
 *abs_path = \&_perl_abs_path unless defined &abs_path;
