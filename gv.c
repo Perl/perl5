@@ -1636,7 +1636,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
             if (!*stash)
                 *stash = PL_defstash;
             if (!*stash || !SvREFCNT(*stash)) /* symbol table under destruction */
-                return FALSE;
+                goto notok;
 
             *len = name_cursor - *name;
             if (name_cursor > nambeg) { /* Skip for initial :: or ' */
@@ -1666,7 +1666,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                 *gv = gvp ? *gvp : NULL;
                 if (!*gv || *gv == (const GV *)&PL_sv_undef) {
                     Safefree(tmpfullbuf); /* free our tmpfullbuf if it was used */
-                    return FALSE;
+                    goto notok;
                 }
                 /* here we know that *gv && *gv != &PL_sv_undef */
                 if (SvTYPE(*gv) != SVt_PVGV)
@@ -1707,14 +1707,19 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
 			    MUTABLE_HV(SvREFCNT_inc_simple(PL_defstash));
 		    }
 		}
-                Safefree(tmpfullbuf); /* free our tmpfullbuf if it was used */
-                return TRUE;
+                goto ok;
             }
         }
     }
     *len = name_cursor - *name;
+  ok:
+    Safefree(tmpfullbuf); /* free our tmpfullbuf if it was used */
     return TRUE;
+  notok:
+    Safefree(tmpfullbuf); /* free our tmpfullbuf if it was used */
+    return FALSE;
 }
+
 
 /* Checks if an unqualified name is in the main stash */
 PERL_STATIC_INLINE bool
