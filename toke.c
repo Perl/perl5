@@ -1885,8 +1885,8 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 #define skipspace(s) skipspace_flags(s, 0)
 #define peekspace(s) skipspace_flags(s, LEX_NO_INCLINE)
 
-STATIC char *
-S_skipspace_flags(pTHX_ char *s, U32 flags)
+char *
+Perl_skipspace_flags(pTHX_ char *s, U32 flags)
 {
     PERL_ARGS_ASSERT_SKIPSPACE_FLAGS;
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
@@ -9434,8 +9434,8 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
 /* Returns a NUL terminated string, with the length of the string written to
    *slp
    */
-STATIC char *
-S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
+char *
+Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
     char *d = dest;
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
@@ -10664,8 +10664,8 @@ S_scan_inputsymbol(pTHX_ char *start)
    SvIVX of the SV.
 */
 
-STATIC char *
-S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re_reparse,
+char *
+Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re_reparse,
 		 char **delimp
     )
 {
