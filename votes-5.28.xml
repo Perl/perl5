@@ -33,8 +33,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh tonyc" id="d81b77352f66acde60db1b056b8eb3321b7b55fe" ticket="133778" desc="(perl #133778) adjust MARK if we extend the stack in pp_repeat" />
 
-<commit votes="steveh" id="fd879d933c2a2ee22ac6e2462acc016aa033854d" ticket="131642" desc="PATCH: [perl #131642] pack returning malformed UTF-8" />
-
 </div>
 
 <div><h3>Regression Fixes</h3>
