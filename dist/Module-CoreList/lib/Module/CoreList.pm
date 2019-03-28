@@ -344,6 +344,7 @@ sub changes_between {
     5.028001 => '2018-11-29',
     5.029006 => '2018-12-18',
     5.029007 => '2019-01-20',
+    5.029008 => '2019-02-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16095,6 +16096,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Math::BigInt::CalcEmu' => 1,
         }
     },
+    5.029008 => {
+        delta_from => 5.029007,
+        changed => {
+            'B::Op_private'         => '5.029008',
+            'Config'                => '5.029008',
+            'Module::CoreList'      => '5.20190220',
+            'Module::CoreList::Utils'=> '5.20190220',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -17057,6 +17069,13 @@ sub is_core
     },
     5.029007 => {
         delta_from => 5.029006,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.029008 => {
+        delta_from => 5.029007,
         changed => {
         },
         removed => {
