@@ -3437,7 +3437,7 @@ strtol(str, base = 0)
 	long num;
 	char *unparsed;
     PPCODE:
-	if (base == 0 || (base >= 2 && base <= 36)) {
+	if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtol(str, &unparsed, base);
 #if IVSIZE < LONGSIZE
             if (num < IV_MIN || num > IV_MAX)
@@ -3471,7 +3471,7 @@ strtoul(str, base = 0)
     PPCODE:
 	PERL_UNUSED_VAR(str);
 	PERL_UNUSED_VAR(base);
-	if (base == 0 || (base >= 2 && base <= 36)) {
+	if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtoul(str, &unparsed, base);
 #if IVSIZE <= LONGSIZE
             if (num > IV_MAX)
