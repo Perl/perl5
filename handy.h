@@ -1321,7 +1321,7 @@ END_EXTERN_C
      * hard-code various macro definitions that wouldn't otherwise be available
      * to it. Most are coded based on first principles.  These are written to
      * avoid EBCDIC vs. ASCII #ifdef's as much as possible. */
-#   define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
+#   define isDIGIT_A(c)  inRANGE(c, '0', '9')
 #   define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
 #   define isSPACE_A(c)  (isBLANK_A(c)                                   \
                           || (c) == '\n'                                 \
@@ -1332,21 +1332,19 @@ END_EXTERN_C
      * uppercase.  The tests for those aren't necessary on ASCII, but hurt only
      * performance (if optimization isn't on), and allow the same code to be
      * used for both platform types */
-#   define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z'                      \
-                  && (    (c) <= 'i'                                    \
-                      || ((c) >= 'j' && (c) <= 'r')                     \
-                      ||  (c) >= 's'))
-#   define isUPPER_A(c)  ((c) >= 'A' && (c) <= 'Z'                      \
-                  && (    (c) <= 'I'                                    \
-                      || ((c) >= 'J' && (c) <= 'R')                     \
-                      ||  (c) >= 'S'))
+#   define isLOWER_A(c)  inRANGE((c), 'a', 'i')                         \
+                      || inRANGE((c), 'j', 'r')                         \
+                      || inRANGE((c), 's', 'z')
+#   define isUPPER_A(c)  inRANGE((c), 'A', 'I')                         \
+                      || inRANGE((c), 'J', 'R')                         \
+                      || inRANGE((c), 'S', 'Z')
 #   define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #   define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
 #   define isWORDCHAR_A(c)   (isALPHANUMERIC_A(c) || (c) == '_')
 #   define isIDFIRST_A(c)    (isALPHA_A(c) || (c) == '_')
-#   define isXDIGIT_A(c) (isDIGIT_A(c)                                  \
-                          || ((c) >= 'a' && (c) <= 'f')                 \
-                          || ((c) <= 'F' && (c) >= 'A'))
+#   define isXDIGIT_A(c) (   isDIGIT_A(c)                               \
+                          || inRANGE((c), 'a', 'f')                     \
+                          || inRANGE((c), 'A', 'F')
 #   define isPUNCT_A(c)  ((c) == '-' || (c) == '!' || (c) == '"'        \
                        || (c) == '#' || (c) == '$' || (c) == '%'        \
                        || (c) == '&' || (c) == '\'' || (c) == '('       \
@@ -1368,13 +1366,13 @@ END_EXTERN_C
 #       define isCNTRL_A(c)  ((c) == '\0' || (c) == '\a' || (c) == '\b'     \
                           ||  (c) == '\f' || (c) == '\n' || (c) == '\r'     \
                           ||  (c) == '\t' || (c) == '\v'                    \
-                          || ((c) <= 3 && (c) >= 1) /* SOH, STX, ETX */     \
+                          || inRANGE((c), 1, 3)     /* SOH, STX, ETX */     \
                           ||  (c) == 7    /* U+7F DEL */                    \
-                          || ((c) <= 0x13 && (c) >= 0x0E) /* SO, SI */      \
-                                                         /* DLE, DC[1-3] */ \
+                          || inRANGE((c), 0x0E, 0x13) /* SO SI DLE          \
+                                                         DC[1-3] */         \
                           ||  (c) == 0x18 /* U+18 CAN */                    \
                           ||  (c) == 0x19 /* U+19 EOM */                    \
-                          || ((c) <= 0x1F && (c) >= 0x1C) /* [FGRU]S */     \
+                          || inRANGE((c), 0x1C, 0x1F) /* [FGRU]S */         \
                           ||  (c) == 0x26 /* U+17 ETB */                    \
                           ||  (c) == 0x27 /* U+1B ESC */                    \
                           ||  (c) == 0x2D /* U+05 ENQ */                    \
@@ -1429,8 +1427,8 @@ END_EXTERN_C
                                       || NATIVE_TO_LATIN1((U8) c) == 0xA0)))
 #   define isUPPER_L1(c)     (isUPPER_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (   NATIVE_TO_LATIN1((U8) c) >= 0xC0    \
-                                      && NATIVE_TO_LATIN1((U8) c) <= 0xDE    \
+                                  && (   IN_RANGE(NATIVE_TO_LATIN1((U8) c),  \
+                                                  0xC0, 0xDE)                \
                                       && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
 #   define isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT_A(c))
 #   define isIDFIRST_L1(c)   (isALPHA_L1(c) || NATIVE_TO_LATIN1(c) == '_')
