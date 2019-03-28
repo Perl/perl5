@@ -1254,6 +1254,8 @@ END_EXTERN_C
         && ((PL_charclass[(U8) (c)] & _CC_mask_A(classnum))     \
                                    == _CC_mask_A(classnum)))
 
+/* On ASCII platforms certain classes form a single range.  It's faster to
+ * special case these.  isDIGIT is a single range on all platforms */
 #   ifdef EBCDIC
 #     define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
 #     define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
@@ -1261,8 +1263,9 @@ END_EXTERN_C
 #     define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
 #     define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
 #   else
+      /* By folding the upper and lowercase, we can use a single range */
 #     define isALPHA_A(c)  inRANGE((~('A' ^ 'a') & (c)), 'A', 'Z')
-#     define isGRAPH_A(c)  inRANGE((c), ' ' + 1, 0x7e)
+#     define isGRAPH_A(c)  inRANGE(c, ' ' + 1, 0x7e)
 #     define isLOWER_A(c)  inRANGE(c, 'a', 'z')
 #     define isPRINT_A(c)  inRANGE(c, ' ', 0x7e)
 #     define isUPPER_A(c)  inRANGE(c, 'A', 'Z')
