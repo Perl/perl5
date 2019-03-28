@@ -29,11 +29,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="tonyc steveh" id="817480137a8b1165315f21d14b8968862101c3a2" ticket="132158" desc="(perl #132158) abort compilation if we see an error compiling a form" />
 
-<commit votes="steveh" id="515c395bcca24c55c85b5aeea239e5e836c36059" ticket="131562" desc="(perl #131562) correct large line numbers copying eval lines on #line" />
+<commit votes="steveh tonyc" id="515c395bcca24c55c85b5aeea239e5e836c36059" ticket="131562" desc="(perl #131562) correct large line numbers copying eval lines on #line" />
 
-<commit votes="steveh" id="d81b77352f66acde60db1b056b8eb3321b7b55fe" ticket="133778" desc="(perl #133778) adjust MARK if we extend the stack in pp_repeat" />
-
-<commit votes="steveh hv" id="534636494a1e2160ed87b0b7531ddb162be85b6e" ticket="133882" desc="PATCH: [perl #133882] Assertion failure" />
+<commit votes="steveh tonyc" id="d81b77352f66acde60db1b056b8eb3321b7b55fe" ticket="133778" desc="(perl #133778) adjust MARK if we extend the stack in pp_repeat" />
 
 <commit votes="steveh" id="fd879d933c2a2ee22ac6e2462acc016aa033854d" ticket="131642" desc="PATCH: [perl #131642] pack returning malformed UTF-8" />
 
