@@ -16205,6 +16205,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Encode'                => '3.01',
             'ExtUtils::Manifest'    => '1.72',
             'JSON::PP'              => '4.02',
+            'JSON::PP::Boolean'     => '4.02',
             'Module::CoreList'      => '5.20190320',
             'Module::CoreList::Utils'=> '5.20190320',
             'PerlIO::encoding'      => '0.27',
