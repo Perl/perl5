@@ -85,11 +85,11 @@ Note: f8d82a1010 really needs ca152fd820 to be cherry-picked first -- which it t
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh" id="d29fa84aee8bfff9c27f68ec2d9292e1370e0924" ticket="133278" desc="perlapi: AvFILL isn't deprecated" />
+<commit votes="steveh tonyc" id="d29fa84aee8bfff9c27f68ec2d9292e1370e0924" ticket="133278" desc="perlapi: AvFILL isn't deprecated" />
 
-<commit votes="steveh" id="5962c2f672495234bec14ab5427cba5b2ccb2e33" ticket="133380" desc="Fix typo: IS_NUMBER_INFINITE -> IS_NUMBER_INFINITY" />
+<commit votes="steveh tonyc" id="5962c2f672495234bec14ab5427cba5b2ccb2e33" ticket="133380" desc="Fix typo: IS_NUMBER_INFINITE -> IS_NUMBER_INFINITY" />
 
-<commit votes="steveh" id="26b0dc0c52fbcb48a1f10935a8dd8f0b0d4c9209" ticket="" desc="there is no sv_catpvfn()" />
+<commit votes="steveh tonyc" id="26b0dc0c52fbcb48a1f10935a8dd8f0b0d4c9209" ticket="" desc="there is no sv_catpvfn()" />
 
 </div>
 
