@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20181129_28';
+our $VERSION = '5.20190419';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -346,6 +346,7 @@ sub changes_between {
     5.029007 => '2019-01-20',
     5.029008 => '2019-02-20',
     5.029009 => '2019-03-20',
+    5.028002 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16217,6 +16218,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.028002 => {
+        delta_from => 5.028001,
+        changed => {
+            'B::Op_private'         => '5.028002',
+            'Config'                => '5.028002',
+            'Module::CoreList'      => '5.20190419',
+            'Module::CoreList::Utils'=> '5.20190419',
+            'Time::HiRes'           => '1.9759',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -17198,6 +17211,13 @@ sub is_core
         removed => {
         }
     },
+    5.028002 => {
+        delta_from => 5.028001,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -17827,8 +17847,8 @@ sub is_core
     'IPC::Semaphore'        => undef,
     'IPC::SharedMem'        => undef,
     'IPC::SysV'             => undef,
-    'JSON::PP'              => undef,
-    'JSON::PP::Boolean'     => undef,
+    'JSON::PP'              => 'https://github.com/makamaka/JSON-PP/issues',
+    'JSON::PP::Boolean'     => 'https://github.com/makamaka/JSON-PP/issues',
     'List::Util'            => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'List::Util::XS'        => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Locale::Codes'         => undef,
