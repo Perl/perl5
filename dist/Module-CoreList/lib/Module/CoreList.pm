@@ -16102,6 +16102,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'B'                     => '1.76',
             'B::Op_private'         => '5.029008',
             'Config'                => '5.029008',
+            'Devel::PPPort'         => '3.44',
             'Encode'                => '3.00',
             'Encode::Unicode'       => '2.18',
             'ExtUtils::Miniperl'    => '1.09',
