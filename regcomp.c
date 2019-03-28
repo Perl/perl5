@@ -1574,6 +1574,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
+    const U8 flags = OP(node) == ANYOFH ? 0 : ANYOF_FLAGS(node);
 
     PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
 
@@ -1598,7 +1599,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         }
 
         /* Get the code points valid only under UTF-8 locales */
-        if (   (ANYOF_FLAGS(node) & ANYOFL_FOLD)
+        if (   (flags & ANYOFL_FOLD)
             &&  av_tindex_skip_len_mg(av) >= ONLY_LOCALE_MATCHES_INDEX)
         {
             only_utf8_locale_invlist = ary[ONLY_LOCALE_MATCHES_INDEX];
@@ -1619,7 +1620,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * actually does include them.  (Think about "\xe0" =~ /[^\xc0]/di;).  We
      * have to do this here before we add the unconditionally matched code
      * points */
-    if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
+    if (flags & ANYOF_INVERT) {
         _invlist_intersection_complement_2nd(invlist,
                                              PL_UpperLatin1,
                                              &invlist);
@@ -1646,21 +1647,21 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * as well.  But don't add them if inverting, as when that gets done below,
      * it would exclude all these characters, including the ones it shouldn't
      * that were added just above */
-    if (! (ANYOF_FLAGS(node) & ANYOF_INVERT) && OP(node) == ANYOFD
-        && (ANYOF_FLAGS(node) & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+    if (! (flags & ANYOF_INVERT) && OP(node) == ANYOFD
+        && (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
     {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
 
     /* Similarly for these */
-    if (ANYOF_FLAGS(node) & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
+    if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
         _invlist_union_complement_2nd(invlist, PL_InBitmap, &invlist);
     }
 
-    if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
+    if (flags & ANYOF_INVERT) {
         _invlist_invert(invlist);
     }
-    else if (ANYOF_FLAGS(node) & ANYOFL_FOLD) {
+    else if (flags & ANYOFL_FOLD) {
         if (new_node_has_latin1) {
 
             /* Under /li, any 0-255 could fold to any other 0-255, depending on
@@ -1688,7 +1689,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     if (only_utf8_locale_invlist) {
         _invlist_union_maybe_complement_2nd(invlist,
                                             only_utf8_locale_invlist,
-                                            ANYOF_FLAGS(node) & ANYOF_INVERT,
+                                            flags & ANYOF_INVERT,
                                             &invlist);
     }
 
