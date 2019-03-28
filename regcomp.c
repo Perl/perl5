@@ -11587,14 +11587,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 goto gen_recurse_regop;
                 /* NOTREACHED */
             case '+':
-                if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
+                if (! inRANGE(RExC_parse[0], '1', '9')) {
                     RExC_parse++;
                     vFAIL("Illegal pattern");
                 }
                 goto parse_recursion;
                 /* NOTREACHED*/
             case '-': /* (?-1) */
-                if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
+                if (! inRANGE(RExC_parse[0], '1', '9')) {
                     RExC_parse--; /* rewind to let it be handled later */
                     goto parse_flags;
                 }
@@ -11863,7 +11863,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         parno = 1;
                         RExC_parse++;
                     }
-                    else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
+                    else if (inRANGE(RExC_parse[0], '1', '9')) {
                         UV uv;
                         endptr = RExC_end;
                         if (grok_atoUV(RExC_parse, &uv, &endptr)
@@ -11884,7 +11884,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 		    ret = reganode(pRExC_state, INSUBP, parno);
 		    goto insert_if_check_paren;
 		}
-		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
+                else if (inRANGE(RExC_parse[0], '1', '9')) {
                     /* (?(1)...) */
 		    char c;
                     UV uv;
