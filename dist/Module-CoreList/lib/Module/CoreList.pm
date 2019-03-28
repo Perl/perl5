@@ -342,6 +342,7 @@ sub changes_between {
     5.029005 => '2018-11-20',
     5.026003 => '2018-11-29',
     5.028001 => '2018-11-29',
+    5.029006 => '2018-12-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -15865,6 +15866,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Config'                => '5.028001',
             'Module::CoreList'      => '5.20181129_28',
             'Module::CoreList::Utils'=> '5.20181129_28',
+        },
+        removed => {
+        }
+    },
+    5.029006 => {
+        delta_from => 5.029005,
+        changed => {
         },
         removed => {
         }
