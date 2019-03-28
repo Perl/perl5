@@ -16200,6 +16200,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         delta_from => 5.029008,
         changed => {
             'B::Op_private'         => '5.029009',
+            'Devel::PPPort'         => '3.45',
             'Config'                => '5.029009',
             'Module::CoreList'      => '5.20190320',
             'Module::CoreList::Utils'=> '5.20190320',
