@@ -899,41 +899,41 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
        before checking for overflow.  */
     if (++s < send) {
       int digit = *s - '0';
-      if (digit >= 0 && digit <= 9) {
+      if (inRANGE(digit, 0, 9)) {
         value = value * 10 + digit;
         if (++s < send) {
           digit = *s - '0';
-          if (digit >= 0 && digit <= 9) {
+          if (inRANGE(digit, 0, 9)) {
             value = value * 10 + digit;
             if (++s < send) {
               digit = *s - '0';
-              if (digit >= 0 && digit <= 9) {
+              if (inRANGE(digit, 0, 9)) {
                 value = value * 10 + digit;
 		if (++s < send) {
                   digit = *s - '0';
-                  if (digit >= 0 && digit <= 9) {
+                  if (inRANGE(digit, 0, 9)) {
                     value = value * 10 + digit;
                     if (++s < send) {
                       digit = *s - '0';
-                      if (digit >= 0 && digit <= 9) {
+                      if (inRANGE(digit, 0, 9)) {
                         value = value * 10 + digit;
                         if (++s < send) {
                           digit = *s - '0';
-                          if (digit >= 0 && digit <= 9) {
+                          if (inRANGE(digit, 0, 9)) {
                             value = value * 10 + digit;
                             if (++s < send) {
                               digit = *s - '0';
-                              if (digit >= 0 && digit <= 9) {
+                              if (inRANGE(digit, 0, 9)) {
                                 value = value * 10 + digit;
                                 if (++s < send) {
                                   digit = *s - '0';
-                                  if (digit >= 0 && digit <= 9) {
+                                  if (inRANGE(digit, 0, 9)) {
                                     value = value * 10 + digit;
                                     if (++s < send) {
                                       /* Now got 9 digits, so need to check
                                          each time for overflow.  */
                                       digit = *s - '0';
-                                      while (digit >= 0 && digit <= 9
+                                      while (    inRANGE(digit, 0, 9)
                                              && (value < uv_max_div_10
                                                  || (value == uv_max_div_10
                                                      && digit <= uv_max_mod_10))) {
@@ -943,7 +943,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                                         else
                                           break;
                                       }
-                                      if (digit >= 0 && digit <= 9
+                                      if (inRANGE(digit, 0, 9)
                                           && (s < send)) {
                                         /* value overflowed.
                                            skip the remaining digits, don't
