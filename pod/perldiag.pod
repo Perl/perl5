@@ -4299,13 +4299,6 @@ supplied.  See L<perlform>.
 of Perl.  Check the #! line, or manually feed your script into Perl
 yourself.
 
-=item (?[...]) not valid in locale in regex; marked by S<<-- HERE> in m/%s/
-
-(F) C<(?[...])> cannot be used within the scope of a C<S<use locale>> or with
-an C</l> regular expression modifier, as that would require deferring
-to run-time the calculation of what it should evaluate to, and it is
-regex compile-time only.
-
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
