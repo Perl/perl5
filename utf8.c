@@ -5481,6 +5481,9 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
      * handled the same way, speeding up this common case */
 
     if (UTF8_IS_INVARIANT(*s)) {  /* Assumes 's' contains at least 1 byte */
+        if (retlen) {
+            *retlen = 1;
+        }
         return (UV) *s;
     }
 
