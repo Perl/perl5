@@ -143,6 +143,10 @@ L<utf8> has been upgraded from version 1.21 to 1.22.
 
 L<warnings> has been upgraded from version 1.43 to 1.44.
 
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280230 to 0.280231.
+
 =back
 
 =head1 Diagnostics
