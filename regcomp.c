@@ -13364,7 +13364,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     char *parse_start;
     U8 op;
     int invert = 0;
-    U8 arg;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -13525,13 +13524,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
 
-	case 'W':
-            invert = 1;
-            /* FALLTHROUGH */
-	case 'w':
-            arg = ANYOF_WORDCHAR;
-            goto join_posix;
-
 	case 'B':
             invert = 1;
             /* FALLTHROUGH */
@@ -13650,85 +13642,26 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    goto finish_meta_pat;
           }
 
-	case 'D':
-            invert = 1;
-            /* FALLTHROUGH */
-	case 'd':
-            arg = ANYOF_DIGIT;
-            if (! DEPENDS_SEMANTICS) {
-                goto join_posix;
-            }
-
-            /* \d doesn't have any matches in the upper Latin1 range, hence /d
-             * is equivalent to /u.  Changing to /u saves some branches at
-             * runtime */
-            op = POSIXU;
-            goto join_posix_op_known;
-
 	case 'R':
 	    ret = reg_node(pRExC_state, LNBREAK);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 
-	case 'H':
-            invert = 1;
-            /* FALLTHROUGH */
+	case 'd':
+	case 'D':
 	case 'h':
-	    arg = ANYOF_BLANK;
-            op = POSIXU;
-            goto join_posix_op_known;
-
-	case 'V':
-            invert = 1;
-            /* FALLTHROUGH */
-	case 'v':
-	    arg = ANYOF_VERTWS;
-            op = POSIXU;
-            goto join_posix_op_known;
-
-	case 'S':
-            invert = 1;
-            /* FALLTHROUGH */
-	case 's':
-            arg = ANYOF_SPACE;
-
-          join_posix:
-
-	    op = POSIXD + get_regex_charset(RExC_flags);
-            if (op > POSIXA) {  /* /aa is same as /a */
-                op = POSIXA;
-            }
-            else if (op == POSIXL) {
-                RExC_contains_locale = 1;
-            }
-            else if (op == POSIXD) {
-                RExC_seen_d_op = TRUE;
-            }
-
-          join_posix_op_known:
-
-            if (invert) {
-                op += NPOSIXD - POSIXD;
-            }
-
-	    ret = reg_node(pRExC_state, op);
-            FLAGS(REGNODE_p(ret)) = namedclass_to_classnum(arg);
-
-	    *flagp |= HASWIDTH|SIMPLE;
-            /* FALLTHROUGH */
-
-          finish_meta_pat:
-            if (   UCHARAT(RExC_parse + 1) == '{'
-                && UNLIKELY(! new_regcurly(RExC_parse + 1, RExC_end)))
-            {
-                RExC_parse += 2;
-                vFAIL("Unescaped left brace in regex is illegal here");
-            }
-	    nextchar(pRExC_state);
-            Set_Node_Length(REGNODE_p(ret), 2); /* MJD */
-	    break;
+	case 'H':
 	case 'p':
 	case 'P':
+	case 's':
+	case 'S':
+	case 'v':
+	case 'V':
+	case 'w':
+	case 'W':
+            /* These all have the same meaning inside [brackets], and it knows
+             * how to do the best optimizations for them.  So, pretend we found
+             * these within brackets, and let it do the work */
             RExC_parse--;
 
             ret = regclass(pRExC_state, flagp, depth+1,
@@ -13747,10 +13680,21 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 FAIL2("panic: regclass returned failure to regatom, flags=%#" UVxf,
                       (UV) *flagp);
 
-            RExC_parse--;
+            RExC_parse--;   /* regclass() leaves this one too far ahead */
 
+          finish_meta_pat:
+                   /* The escapes above that don't take a parameter can't be
+                    * followed by a '{'.  But 'pX', 'p{foo}' and
+                    * correspondingly 'P' can be */
+            if (   RExC_parse - parse_start == 1
+                && UCHARAT(RExC_parse + 1) == '{'
+                && UNLIKELY(! new_regcurly(RExC_parse + 1, RExC_end)))
+            {
+                RExC_parse += 2;
+                vFAIL("Unescaped left brace in regex is illegal here");
+            }
             Set_Node_Offset(REGNODE_p(ret), parse_start);
-            Set_Node_Cur_Length(REGNODE_p(ret), parse_start - 2);
+            Set_Node_Length(REGNODE_p(ret), RExC_parse - parse_start + 1); /* MJD */
             nextchar(pRExC_state);
 	    break;
         case 'N':
