@@ -60,7 +60,7 @@ Note: This was subsequently superseded by f4e61fc03836484ea88518e8bf04cc1b32a6a1
 <commit votes="tonyc steveh" id="edf639fce3e8c8852ee4179ab902b357b1deba98" ticket="133411" desc="(perl #133411) don't try to load Storable with -Dusecrosscompile" />
 
 Fixes -Duseshrplib builds on darwin.
-<commit votes="tonyc steveh" id="191f8909fa4eca1db16a91ada42dd4a065c04890" ticket="127606" desc="(perl #127606) adjust dependency paths on installation on darwin" />
+<commit votes="tonyc steveh" id="191f8909fa4eca1db16a91ada42dd4a065c04890" ticket="126706" desc="(perl #126706) adjust dependency paths on installation on darwin" />
 
 </div>
 
