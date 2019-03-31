@@ -5603,6 +5603,13 @@ PERL_STATIC_INLINE bool	S_invlist_is_iterating(SV* const invlist)
 	assert(invlist)
 #endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE UV	S_invlist_lowest(SV* const invlist)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_INVLIST_LOWEST	\
+	assert(invlist)
+#endif
+
 STATIC bool	S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc);
 #define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT	\
 	assert(pRExC_state); assert(ssc)

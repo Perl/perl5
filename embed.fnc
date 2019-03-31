@@ -1887,6 +1887,7 @@ EiT	|void	|invlist_iterfinish|NN SV* invlist
 EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
 EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
+EixRT	|UV	|invlist_lowest|NN SV* const invlist
 #ifndef PERL_EXT_RE_BUILD
 EiRT	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiRT	|UV	|invlist_max	|NN SV* const invlist

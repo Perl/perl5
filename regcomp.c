@@ -10319,6 +10319,28 @@ Perl_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 
 #endif
 
+PERL_STATIC_INLINE UV
+S_invlist_lowest(SV* const invlist)
+{
+    /* Returns the lowest code point that matches an inversion list.  This API
+     * has an ambiguity, as it returns 0 under either the lowest is actually
+     * 0, or if the list is empty.  If this distinction matters to you, check
+     * for emptiness before calling this function */
+
+    UV len = _invlist_len(invlist);
+    UV *array;
+
+    PERL_ARGS_ASSERT_INVLIST_LOWEST;
+
+    if (len == 0) {
+        return 0;
+    }
+
+    array = invlist_array(invlist);
+
+    return array[0];
+}
+
 STATIC SV *
 S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)
 {
@@ -18465,14 +18487,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  |= ANYOFL_FOLD
                  |  ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
         }
-        else if (cp_list) { /* Look to see if a 0-255 code point is in list */
-            UV start, end;
-            invlist_iterinit(cp_list);
-            if (invlist_iternext(cp_list, &start, &end) && start < 256) {
-                anyof_flags |= ANYOFL_FOLD;
-                has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
-            }
-            invlist_iterfinish(cp_list);
+        else if (cp_list && invlist_lowest(cp_list) < 256) {
+            /* If nothing is below 256, has no locale dependency; otherwise it
+             * does */
+            anyof_flags |= ANYOFL_FOLD;
+            has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
         }
     }
     else if (   DEPENDS_SEMANTICS
