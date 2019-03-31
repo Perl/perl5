@@ -612,9 +612,10 @@ will be lost.
                   charclass_ classes
                   posixl
  ANYOFH           sv 1       Like ANYOF, but only has "High" matches,
-                             none in the bitmap; non-zero flags "f"
-                             means "f" is the first UTF-8 byte shared in
-                             common by all code points matched
+                             none in the bitmap;
+ ANYOFHb          sv 1       Like ANYOFH, but all matches share the same
+                             first byte, the repurposed flags field
+                             contains it
  ANYOFM           byte 1     Like ANYOF, but matches an invariant byte
                              as determined by the mask and arg
  NANYOFM          byte 1     complement of ANYOFM

@@ -2178,17 +2178,19 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     case ANYOFH:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
+            REXEC_FBC_CLASS_SCAN(TRUE,
+                      reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
+        }
+        break;
+
+    case ANYOFHb:
+        if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
+
+            /* We know what the first byte of any matched string should be */
             U8 first_byte = FLAGS(c);
 
-            if (first_byte) {   /* We know what the first byte of any matched
-                                   string should be */
-                REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
+            REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
-            }
-            else {
-                REXEC_FBC_CLASS_SCAN(TRUE,
-                      reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
-            }
         }
         break;
 
@@ -6803,10 +6805,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFH:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
-                ||  (   ANYOF_FLAGS(scan) != 0
-                     && ANYOF_FLAGS(scan) != (U8) *locinput)
 	        || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
                                                                    utf8_target))
+            {
+                sayNO;
+            }
+            goto increment_locinput;
+            break;
+
+        case ANYOFHb:
+            if (   ! utf8_target
+                ||   NEXTCHR_IS_EOS
+                ||   ANYOF_FLAGS(scan) != (U8) *locinput
+	        || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
+                                                                  utf8_target))
             {
                 sayNO;
             }
@@ -9578,22 +9590,25 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     case ANYOFH:
         if (utf8_target) {  /* ANYOFH only can match UTF-8 targets */
-            if (ANYOF_FLAGS(p)) {   /* If we know the first byte of what
-                                       matches, we can avoid calling reginclass
-                                     */
-                while (   hardcount < max
-                       && scan < this_eol
-                       && (U8) *scan == ANYOF_FLAGS(p)
-                       && reginclass(prog, p, (U8*)scan, (U8*) this_eol,
-                                                                  TRUE))
-                {
-                    scan += UTF8SKIP(scan);
-                    hardcount++;
-                }
+            while (  hardcount < max
+                   && scan < this_eol
+                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
             }
-            else while (  hardcount < max
-                        && scan < this_eol
-                        && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+        }
+        break;
+
+    case ANYOFHb:
+        if (utf8_target) {  /* ANYOFHb only can match UTF-8 targets */
+
+            /* we know the first byte must be the FLAGS field */
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (U8) *scan == ANYOF_FLAGS(p)
+                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol,
+                                                              TRUE))
             {
                 scan += UTF8SKIP(scan);
                 hardcount++;
@@ -9844,7 +9859,7 @@ STATIC bool
 S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const p, const U8* const p_end, const bool utf8_target)
 {
     dVAR;
-    const char flags = (OP(n) == ANYOFH) ? 0 : ANYOF_FLAGS(n);
+    const char flags = (OP(n) == ANYOFHb) ? 0 : ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;
 
@@ -9871,7 +9886,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     }
 
     /* If this character is potentially in the bitmap, check it */
-    if (c < NUM_ANYOF_CODE_POINTS && OP(n) != ANYOFH) {
+    if (c < NUM_ANYOF_CODE_POINTS && OP(n) != ANYOFH && OP(n) != ANYOFHb) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
 	else if ((flags

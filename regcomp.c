@@ -1582,7 +1582,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
-    const U8 flags = OP(node) == ANYOFH ? 0 : ANYOF_FLAGS(node);
+    const U8 flags = OP(node) == ANYOFHb ? 0 : ANYOF_FLAGS(node);
 
     PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
 
@@ -1635,7 +1635,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Add in the points from the bit map */
-    if (OP(node) != ANYOFH) {
+    if (OP(node) != ANYOFH && OP(node) != ANYOFHb) {
         for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
@@ -1722,7 +1722,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
     SV* anded_cp_list;
-    U8  and_with_flags = (OP(and_with) == ANYOFH) ? 0 : ANYOF_FLAGS(and_with);
+    U8  and_with_flags = (OP(and_with) == ANYOFHb) ? 0 : ANYOF_FLAGS(and_with);
     U8  anded_flags;
 
     PERL_ARGS_ASSERT_SSC_AND;
@@ -1906,7 +1906,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     SV* ored_cp_list;
     U8 ored_flags;
-    U8  or_with_flags = (OP(or_with) == ANYOFH) ? 0 : ANYOF_FLAGS(or_with);
+    U8  or_with_flags = (OP(or_with) == ANYOFHb) ? 0 : ANYOF_FLAGS(or_with);
 
     PERL_ARGS_ASSERT_SSC_OR;
 
@@ -5844,6 +5844,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 case ANYOFL:
                 case ANYOFPOSIXL:
                 case ANYOFH:
+                case ANYOFHb:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -14787,7 +14788,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
     assert(PL_regkind[OP(node)] == ANYOF);
 
     /* There is no bitmap for this node type */
-    if (OP(node) == ANYOFH) {
+    if (OP(node) == ANYOFH || OP(node) == ANYOFHb) {
         return;
     }
 
@@ -19028,32 +19029,30 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             /* If the lowest and highest code point in the class have the same
              * UTF-8 first byte, then all do, and we can store that byte for
              * regexec.c to use so that it can more quickly scan the target
-             * string for potential matches for this class.  We co-opt the the
-             * flags field for this.  Zero means, they don't have the same
-             * first byte.  We do accept here very large code points (for
-             * future use), but don't bother with this optimization for them,
-             * as it would cause other complications */
-            if (highest_cp > IV_MAX) {
-                anyof_flags = 0;
-            }
-            else {
+             * string for potential matches for this class.  We co-opt the
+             * flags field for this, and make the node ANYOFb.  We do accept
+             * here very large code points (for future use), but don't do
+             * this optimization for them, as it would cause other
+             * complications */
+            op = ANYOFH;
+            if (highest_cp <= IV_MAX) {
                 U8 low_utf8[UTF8_MAXBYTES+1];
                 U8 high_utf8[UTF8_MAXBYTES+1];
 
                 (void) uvchr_to_utf8(low_utf8, start[0]);
                 (void) uvchr_to_utf8(high_utf8, invlist_highest(cp_list));
 
-                anyof_flags = (low_utf8[0] == high_utf8[0])
-                            ? low_utf8[0]
-                            : 0;
+                if (low_utf8[0] == high_utf8[0]) {
+                    anyof_flags = low_utf8[0];
+                    op = ANYOFHb;
+                }
             }
 
-            op = ANYOFH;
+            goto done_finding_op;
         }
     }   /* End of seeing if can optimize it into a different node */
 
   is_anyof: /* It's going to be an ANYOF node. */
-    if (op != ANYOFH) {
         op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
              ? ANYOFD
              : ((posixl)
@@ -19061,7 +19060,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 : ((LOC)
                    ? ANYOFL
                    : ANYOF));
-    }
+
+  done_finding_op:
 
     ret = regnode_guts(pRExC_state, op, regarglen[op], "anyof");
     FILL_NODE(ret, op);        /* We set the argument later */
@@ -20348,7 +20348,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* 2: embedded, otherwise 1 */
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
     else if (k == ANYOF) {
-	const U8 flags = (OP(o) == ANYOFH) ? 0 : ANYOF_FLAGS(o);
+	const U8 flags = (OP(o) == ANYOFHb) ? 0 : ANYOF_FLAGS(o);
         bool do_sep = FALSE;    /* Do we need to separate various components of
                                    the output? */
         /* Set if there is still an unresolved user-defined property */
@@ -20404,7 +20404,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Ready to start outputting.  First, the initial left bracket */
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
-        if (OP(o) != ANYOFH) {
+        if (OP(o) != ANYOFH && OP(o) != ANYOFHb) {
             /* Then all the things that could fit in the bitmap */
             do_sep = put_charclass_bitmap_innards(sv,
                                                   ANYOF_BITMAP(o),
@@ -20502,7 +20502,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
-        if (OP(o) == ANYOFH && FLAGS(o) != 0) {
+        if (OP(o) == ANYOFHb) {
             Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=\\x%02x)", FLAGS(o));
         }
 
