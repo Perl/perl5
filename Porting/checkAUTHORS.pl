@@ -527,6 +527,7 @@ allen\100huarp.harvard.edu              nort\100bottesini.harvard.edu
 +                                       nort\100qnx.com
 allens\100cpan.org                      easmith\100beatrice.rutgers.edu
 +                                       root\100dogberry.rutgers.edu
+ambs\100cpan.org                        hashashin\100gmail.com
 andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind.de
 +                                       andreas.koenig.7os6vvqr\100franz.ak.mind.de
 +                                       a.koenig\100mind.de
