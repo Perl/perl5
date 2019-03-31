@@ -1727,7 +1727,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      *                      some subsitute value, typically the REPLACEMENT
      *                      CHARACTER.
      * s0                   points to the first byte of the character
-     * s                    points to just after were we left off processing
+     * s                    points to just after where we left off processing
      *                      the character
      * send                 points to just after where that character should
      *                      end, based on how many bytes the start byte tells
@@ -2117,7 +2117,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
         /* Since there was a possible problem, the returned length may need to
          * be changed from the one stored at the beginning of this function.
-         * Instead of trying to figure out if that's needed, just do it. */
+         * Instead of trying to figure out if it has changed, just do it. */
         if (retlen) {
             *retlen = curlen;
         }
