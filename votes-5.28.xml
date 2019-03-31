@@ -55,7 +55,7 @@ Note: This was subsequently superseded by f4e61fc03836484ea88518e8bf04cc1b32a6a1
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh tonyc" id="b79cd7dfefcc16674b83ffdeb11687ea693b7845" ticket="" desc="Fix Windows build with CCTYPE=SDK2003SP1"/>
+<commit votes="steveh tonyc khw" id="b79cd7dfefcc16674b83ffdeb11687ea693b7845" ticket="" desc="Fix Windows build with CCTYPE=SDK2003SP1"/>
 
 <commit votes="tonyc steveh arc" id="edf639fce3e8c8852ee4179ab902b357b1deba98" ticket="133411" desc="(perl #133411) don't try to load Storable with -Dusecrosscompile" />
 
