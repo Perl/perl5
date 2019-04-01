@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (126) {
+  if (128) {
     load();
-    plan(tests => 126);
+    plan(tests => 128);
   }
 }
 
@@ -280,4 +280,7 @@ ok(! Devel::PPPort::test_isPSXSPC(ord("k")));
 
 ok(  Devel::PPPort::test_isPSXSPC_A(ord("\cK")));
 ok(! Devel::PPPort::test_isPSXSPC_A(0xFC));
+
+ok(&Devel::PPPort::av_top_index([1,2,3]), 2);
+ok(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
 

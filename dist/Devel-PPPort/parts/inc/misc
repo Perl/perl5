@@ -199,6 +199,9 @@ __UNDEFINED__  DEFSV_set(sv) (DEFSV = (sv))
 /* Older perls (<=5.003) lack AvFILLp */
 __UNDEFINED__  AvFILLp      AvFILL
 
+__UNDEFINED__  av_tindex    AvFILL
+__UNDEFINED__  av_top_index AvFILL
+
 __UNDEFINED__  ERRSV        get_sv("@",FALSE)
 
 /* Hint: gv_stashpvn
@@ -1109,7 +1112,23 @@ test_isPSXSPC_A(UV ord)
     OUTPUT:
         RETVAL
 
-=tests plan => 126
+STRLEN
+av_tindex(av)
+        AV *av
+        CODE:
+                RETVAL = av_tindex(av);
+        OUTPUT:
+                RETVAL
+
+STRLEN
+av_top_index(av)
+        AV *av
+        CODE:
+                RETVAL = av_top_index(av);
+        OUTPUT:
+                RETVAL
+
+=tests plan => 128
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -1343,3 +1362,6 @@ ok(! Devel::PPPort::test_isPSXSPC(ord("k")));
 
 ok(  Devel::PPPort::test_isPSXSPC_A(ord("\cK")));
 ok(! Devel::PPPort::test_isPSXSPC_A(0xFC));
+
+ok(&Devel::PPPort::av_top_index([1,2,3]), 2);
+ok(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
