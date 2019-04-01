@@ -17,6 +17,7 @@
            platforms on all versions
          * Added isFOO_A synonyms for all character classification isFOO
            macros
+   * Provide LIKELY/UNLIKELY branch prediction
 
 3.45 - 2019-03-19
 
