@@ -1,5 +1,5 @@
-# DerivedLineBreak-12.0.0.txt
-# Date: 2019-01-22, 08:18:29 GMT
+# DerivedLineBreak-12.1.0.txt
+# Date: 2019-03-10, 10:53:09 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -24,8 +24,8 @@ E000..F8FF    ; XX # Co [6400] <private-use-E000>..<private-use-F8FF>
 F0000..FFFFD  ; XX # Co [65534] <private-use-F0000>..<private-use-FFFFD>
 100000..10FFFD; XX # Co [65534] <private-use-100000>..<private-use-10FFFD>
 
-# The above property value applies to 764430 code points not listed here.
-# Total code points: 901898
+# The above property value applies to 764429 code points not listed here.
+# Total code points: 901897
 
 # ================================================
 
@@ -1574,8 +1574,7 @@ FFED..FFEE    ; AL # So   [2] HALFWIDTH BLACK SQUARE..HALFWIDTH WHITE CIRCLE
 3280..3289    ; ID # No  [10] CIRCLED IDEOGRAPH ONE..CIRCLED IDEOGRAPH TEN
 328A..32B0    ; ID # So  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32B1..32BF    ; ID # No  [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
-32C0..32FE    ; ID # So  [63] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..CIRCLED KATAKANA WO
-3300..33FF    ; ID # So [256] SQUARE APAATO..SQUARE GAL
+32C0..33FF    ; ID # So [320] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..SQUARE GAL
 3400..4DB5    ; ID # Lo [6582] CJK UNIFIED IDEOGRAPH-3400..CJK UNIFIED IDEOGRAPH-4DB5
 4DB6..4DBF    ; ID # Cn  [10] <reserved-4DB6>..<reserved-4DBF>
 4E00..9FEF    ; ID # Lo [20976] CJK UNIFIED IDEOGRAPH-4E00..CJK UNIFIED IDEOGRAPH-9FEF
@@ -1756,7 +1755,7 @@ FFE4          ; ID # So       FULLWIDTH BROKEN BAR
 2FA1E..2FFFD  ; ID # Cn [1504] <reserved-2FA1E>..<reserved-2FFFD>
 30000..3FFFD  ; ID # Cn [65534] <reserved-30000>..<reserved-3FFFD>
 
-# Total code points: 172692
+# Total code points: 172693
 
 # ================================================
 

@@ -1,7 +1,10 @@
 ; charset=UTF-8
-@@@	The Unicode Standard 12.0.0
-@@@+	U12M190206.lst
-	Unicode 12.0.0 final names list.
+@@@	The Unicode Standard 12.1.0
+@@@+	U12M190401.lst
+	Unicode 12.1.0 names list, second delta.
+	Repertoire synched with UnicodeData-12.1.0d2.txt
+	Second delta of annotation fixes.
+	Removed temporary annotation for 32FF.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
@@ -15554,14 +15557,14 @@
 @		Character cell diagonals
 2571	BOX DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT
 	* not intended for mathematical symbol \diagup
-	x (reverse solidus - 005C)
-	x (set minus - 2216)
-	x (reverse solidus operator - 29F5)
-2572	BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT
-	* not intended for mathematical symbol \diagdown
 	x (solidus - 002F)
 	x (fraction slash - 2044)
 	x (division slash - 2215)
+2572	BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT
+	* not intended for mathematical symbol \diagdown
+	x (reverse solidus - 005C)
+	x (set minus - 2216)
+	x (reverse solidus operator - 29F5)
 2573	BOX DRAWINGS LIGHT DIAGONAL CROSS
 	x (saltire - 2613)
 	x (multiplication x - 2715)
@@ -21419,6 +21422,9 @@
 	# <circle> 30F1
 32FE	CIRCLED KATAKANA WO
 	# <circle> 30F2
+@		Japanese era name
+32FF	SQUARE ERA NAME REIWA
+	# <square> 4EE4 548C
 @@	3300	CJK Compatibility	33FF
 @		Squared Katakana words
 3300	SQUARE APAATO

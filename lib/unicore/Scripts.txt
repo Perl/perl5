@@ -1,5 +1,5 @@
-# Scripts-12.0.0.txt
-# Date: 2019-01-28, 22:16:47 GMT
+# Scripts-12.1.0.txt
+# Date: 2019-04-01, 09:10:42 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -399,6 +399,7 @@
 328A..32B0    ; Common # So  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32B1..32BF    ; Common # No  [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
 32C0..32CF    ; Common # So  [16] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..LIMITED LIABILITY SIGN
+32FF          ; Common # So       SQUARE ERA NAME REIWA
 3358..33FF    ; Common # So [168] IDEOGRAPHIC TELEGRAPH SYMBOL FOR HOUR ZERO..SQUARE GAL
 4DC0..4DFF    ; Common # So  [64] HEXAGRAM FOR THE CREATIVE HEAVEN..HEXAGRAM FOR BEFORE COMPLETION
 A700..A716    ; Common # Sk  [23] MODIFIER LETTER CHINESE TONE YIN PING..MODIFIER LETTER EXTRA-LOW LEFT-STEM TONE BAR
@@ -616,7 +617,7 @@ FFFC..FFFD    ; Common # So   [2] OBJECT REPLACEMENT CHARACTER..REPLACEMENT CHAR
 E0001         ; Common # Cf       LANGUAGE TAG
 E0020..E007F  ; Common # Cf  [96] TAG SPACE..CANCEL TAG
 
-# Total code points: 7804
+# Total code points: 7805
 
 # ================================================
 

@@ -1,5 +1,5 @@
-# VerticalOrientation-12.0.0.txt
-# Date: 2019-01-22, 08:54:18 GMT [EM, KI, LI]
+# VerticalOrientation-12.1.0.txt
+# Date: 2019-04-01, 09:27:26 GMT [EM, KI, LI]
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -1282,7 +1282,7 @@
 328A..32B0     ; U  # So    [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32B1..32BF     ; U  # No    [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
 32C0..32FE     ; U  # So    [63] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..CIRCLED KATAKANA WO
-32FF           ; U  # Cn         <reserved-32FF>
+32FF           ; Tu # So         SQUARE ERA NAME REIWA
 3300..3357     ; Tu # So    [88] SQUARE APAATO..SQUARE WATTO
 3358..337A     ; U  # So    [35] IDEOGRAPHIC TELEGRAPH SYMBOL FOR HOUR ZERO..SQUARE IU
 337B..337F     ; Tu # So     [5] SQUARE ERA NAME HEISEI..SQUARE CORPORATION

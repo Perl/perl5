@@ -1,5 +1,5 @@
-# DerivedEastAsianWidth-12.0.0.txt
-# Date: 2019-01-22, 08:18:28 GMT
+# DerivedEastAsianWidth-12.1.0.txt
+# Date: 2019-03-10, 10:53:08 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -1892,8 +1892,8 @@ FFFC          ; N # So       OBJECT REPLACEMENT CHARACTER
 E0001         ; N # Cf       LANGUAGE TAG
 E0020..E007F  ; N # Cf  [96] TAG SPACE..CANCEL TAG
 
-# The above property value applies to 768376 code points not listed here.
-# Total code points: 793253
+# The above property value applies to 768375 code points not listed here.
+# Total code points: 793252
 
 # ================================================
 
@@ -2234,8 +2234,7 @@ FFED..FFEE    ; H # So   [2] HALFWIDTH BLACK SQUARE..HALFWIDTH WHITE CIRCLE
 3280..3289    ; W # No  [10] CIRCLED IDEOGRAPH ONE..CIRCLED IDEOGRAPH TEN
 328A..32B0    ; W # So  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32B1..32BF    ; W # No  [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
-32C0..32FE    ; W # So  [63] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..CIRCLED KATAKANA WO
-3300..33FF    ; W # So [256] SQUARE APAATO..SQUARE GAL
+32C0..33FF    ; W # So [320] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..SQUARE GAL
 3400..4DB5    ; W # Lo [6582] CJK UNIFIED IDEOGRAPH-3400..CJK UNIFIED IDEOGRAPH-4DB5
 4DB6..4DBF    ; W # Cn  [10] <reserved-4DB6>..<reserved-4DBF>
 4E00..9FEF    ; W # Lo [20976] CJK UNIFIED IDEOGRAPH-4E00..CJK UNIFIED IDEOGRAPH-9FEF
@@ -2363,7 +2362,7 @@ FE6A..FE6B    ; W # Po   [2] SMALL PERCENT SIGN..SMALL COMMERCIAL AT
 2FA1E..2FFFD  ; W # Cn [1504] <reserved-2FA1E>..<reserved-2FFFD>
 30000..3FFFD  ; W # Cn [65534] <reserved-30000>..<reserved-3FFFD>
 
-# Total code points: 181782
+# Total code points: 181783
 
 # ================================================
 

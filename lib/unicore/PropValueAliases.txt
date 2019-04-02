@@ -1,5 +1,5 @@
-# PropertyValueAliases-12.0.0.txt
-# Date: 2019-02-19, 05:01:57 GMT
+# PropertyValueAliases-12.1.0.txt
+# Date: 2019-03-10, 10:53:18 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -87,6 +87,7 @@ age; 9.0                              ; V9_0
 age; 10.0                             ; V10_0
 age; 11.0                             ; V11_0
 age; 12.0                             ; V12_0
+age; 12.1                             ; V12_1
 age; NA                               ; Unassigned
 
 # Alphabetic (Alpha)

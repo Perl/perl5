@@ -19,7 +19,7 @@ use Test::More;
 
 use Unicode::UCD qw(charinfo charprop charprops_all);
 
-my $expected_version = '12.0.0';
+my $expected_version = '12.1.0';
 my $current_version = Unicode::UCD::UnicodeVersion;
 my $v_unicode_version = pack "C*", split /\./, $current_version;
 my $unknown_script = ($v_unicode_version lt v5.0.0)

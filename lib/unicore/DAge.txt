@@ -1,5 +1,5 @@
-# DerivedAge-12.0.0.txt
-# Date: 2019-01-22, 08:18:23 GMT
+# DerivedAge-12.1.0.txt
+# Date: 2019-04-01, 09:10:08 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -1783,5 +1783,15 @@ AB66..AB67    ; 12.0 #   [2] LATIN SMALL LETTER DZ DIGRAPH WITH RETROFLEX HOOK..
 1FA90..1FA95  ; 12.0 #   [6] RINGED PLANET..BANJO
 
 # Total code points: 554
+
+# ================================================
+
+# Age=V12_1
+
+# Newly assigned in Unicode 12.1.0 (May, 2019)
+
+32FF          ; 12.1 #       SQUARE ERA NAME REIWA
+
+# Total code points: 1
 
 # EOF

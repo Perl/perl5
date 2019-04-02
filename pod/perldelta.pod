@@ -25,7 +25,13 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 Perl now supports draft Unicode 12.1
+
+Unicode 12.1 differs from 12.0 only in the addition of a single
+character, that for the new Japanese era name.  The intent is to ship
+Perl 5.30 with Unicode 12.1.  The final release of 12.1 is scheduled for
+May 7, 2019.  Hopefully, there won't be any code changes to the draft
+after the release of Perl 5.29.10.
 
 =head1 Security
 

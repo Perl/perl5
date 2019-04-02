@@ -1,5 +1,5 @@
-# DerivedCombiningClass-12.0.0.txt
-# Date: 2019-01-22, 08:18:26 GMT
+# DerivedCombiningClass-12.1.0.txt
+# Date: 2019-03-10, 10:53:05 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -1037,8 +1037,7 @@
 3280..3289    ; 0 # No  [10] CIRCLED IDEOGRAPH ONE..CIRCLED IDEOGRAPH TEN
 328A..32B0    ; 0 # So  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32B1..32BF    ; 0 # No  [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
-32C0..32FE    ; 0 # So  [63] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..CIRCLED KATAKANA WO
-3300..33FF    ; 0 # So [256] SQUARE APAATO..SQUARE GAL
+32C0..33FF    ; 0 # So [320] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..SQUARE GAL
 3400..4DB5    ; 0 # Lo [6582] CJK UNIFIED IDEOGRAPH-3400..CJK UNIFIED IDEOGRAPH-4DB5
 4DC0..4DFF    ; 0 # So  [64] HEXAGRAM FOR THE CREATIVE HEAVEN..HEXAGRAM FOR BEFORE COMPLETION
 4E00..9FEF    ; 0 # Lo [20976] CJK UNIFIED IDEOGRAPH-4E00..CJK UNIFIED IDEOGRAPH-9FEF
@@ -1891,7 +1890,7 @@ E0100..E01EF  ; 0 # Mn [240] VARIATION SELECTOR-17..VARIATION SELECTOR-256
 F0000..FFFFD  ; 0 # Co [65534] <private-use-F0000>..<private-use-FFFFD>
 100000..10FFFD; 0 # Co [65534] <private-use-100000>..<private-use-10FFFD>
 
-# The above property value applies to 838651 code points not listed here.
+# The above property value applies to 838650 code points not listed here.
 # Total code points: 1113250
 
 # ================================================

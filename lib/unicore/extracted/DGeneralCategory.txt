@@ -1,5 +1,5 @@
-# DerivedGeneralCategory-12.0.0.txt
-# Date: 2019-01-22, 08:18:28 GMT
+# DerivedGeneralCategory-12.1.0.txt
+# Date: 2019-03-10, 10:53:08 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -299,7 +299,6 @@
 31BB..31BF    ; Cn #   [5] <reserved-31BB>..<reserved-31BF>
 31E4..31EF    ; Cn #  [12] <reserved-31E4>..<reserved-31EF>
 321F          ; Cn #       <reserved-321F>
-32FF          ; Cn #       <reserved-32FF>
 4DB6..4DBF    ; Cn #  [10] <reserved-4DB6>..<reserved-4DBF>
 9FF0..9FFF    ; Cn #  [16] <reserved-9FF0>..<reserved-9FFF>
 A48D..A48F    ; Cn #   [3] <reserved-A48D>..<reserved-A48F>
@@ -683,7 +682,7 @@ E01F0..EFFFF  ; Cn # [65040] <reserved-E01F0>..<noncharacter-EFFFF>
 FFFFE..FFFFF  ; Cn #   [2] <noncharacter-FFFFE>..<noncharacter-FFFFF>
 10FFFE..10FFFF; Cn #   [2] <noncharacter-10FFFE>..<noncharacter-10FFFF>
 
-# Total code points: 836603
+# Total code points: 836602
 
 # ================================================
 
@@ -3924,8 +3923,7 @@ FFE3          ; Sk #       FULLWIDTH MACRON
 3250          ; So #       PARTNERSHIP SIGN
 3260..327F    ; So #  [32] CIRCLED HANGUL KIYEOK..KOREAN STANDARD SYMBOL
 328A..32B0    ; So #  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
-32C0..32FE    ; So #  [63] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..CIRCLED KATAKANA WO
-3300..33FF    ; So # [256] SQUARE APAATO..SQUARE GAL
+32C0..33FF    ; So # [320] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..SQUARE GAL
 4DC0..4DFF    ; So #  [64] HEXAGRAM FOR THE CREATIVE HEAVEN..HEXAGRAM FOR BEFORE COMPLETION
 A490..A4C6    ; So #  [55] YI RADICAL QOT..YI RADICAL KE
 A828..A82B    ; So #   [4] SYLOTI NAGRI POETRY MARK-1..SYLOTI NAGRI POETRY MARK-4
@@ -4007,7 +4005,7 @@ FFFC..FFFD    ; So #   [2] OBJECT REPLACEMENT CHARACTER..REPLACEMENT CHARACTER
 1FA80..1FA82  ; So #   [3] YO-YO..PARACHUTE
 1FA90..1FA95  ; So #   [6] RINGED PLANET..BANJO
 
-# Total code points: 6160
+# Total code points: 6161
 
 # ================================================
 

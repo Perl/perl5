@@ -1,5 +1,5 @@
-# DerivedBidiClass-12.0.0.txt
-# Date: 2019-01-22, 08:18:26 GMT
+# DerivedBidiClass-12.1.0.txt
+# Date: 2019-03-10, 10:53:05 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -552,8 +552,7 @@
 3280..3289    ; L # No  [10] CIRCLED IDEOGRAPH ONE..CIRCLED IDEOGRAPH TEN
 328A..32B0    ; L # So  [39] CIRCLED IDEOGRAPH MOON..CIRCLED IDEOGRAPH NIGHT
 32C0..32CB    ; L # So  [12] IDEOGRAPHIC TELEGRAPH SYMBOL FOR JANUARY..IDEOGRAPHIC TELEGRAPH SYMBOL FOR DECEMBER
-32D0..32FE    ; L # So  [47] CIRCLED KATAKANA A..CIRCLED KATAKANA WO
-3300..3376    ; L # So [119] SQUARE APAATO..SQUARE PC
+32D0..3376    ; L # So [167] CIRCLED KATAKANA A..SQUARE PC
 337B..33DD    ; L # So  [99] SQUARE ERA NAME HEISEI..SQUARE WB
 33E0..33FE    ; L # So  [31] IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY ONE..IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY THIRTY-ONE
 3400..4DB5    ; L # Lo [6582] CJK UNIFIED IDEOGRAPH-3400..CJK UNIFIED IDEOGRAPH-4DB5
@@ -1027,7 +1026,7 @@ FFDA..FFDC    ; L # Lo   [3] HALFWIDTH HANGUL LETTER EU..HALFWIDTH HANGUL LETTER
 F0000..FFFFD  ; L # Co [65534] <private-use-F0000>..<private-use-FFFFD>
 100000..10FFFD; L # Co [65534] <private-use-100000>..<private-use-10FFFD>
 
-# The above property value applies to 832158 code points not listed here.
+# The above property value applies to 832157 code points not listed here.
 # Total code points: 1096767
 
 # ================================================

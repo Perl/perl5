@@ -1943,6 +1943,7 @@ EQUIVALENT TO	224D
 EQUIVALENT TO, GEOMETRICALLY	224E
 EQUIVALENT TO, STRICTLY	2263
 equivalent, tautological	29E6
+Era Name, Japanese	32FF
 Era Names, Japanese	337B
 ERASE TO THE LEFT	232B
 ERASE TO THE RIGHT	2326
@@ -2801,6 +2802,7 @@ Jamo Combining Alphabet, Korean Hangul	1100
 Jamo, Korean Hangul Compatibility	3130
 japanese bullet, tainome	25C9
 Japanese Chess Symbols	2616
+Japanese Era Name	32FF
 Japanese Era Names	337B
 Japanese Hiragana	3040
 japanese incorporated	337F

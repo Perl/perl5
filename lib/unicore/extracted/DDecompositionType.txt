@@ -1,5 +1,5 @@
-# DerivedDecompositionType-12.0.0.txt
-# Date: 2019-01-22, 08:18:28 GMT
+# DerivedDecompositionType-12.1.0.txt
+# Date: 2019-04-01, 09:10:21 GMT
 # © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -994,7 +994,7 @@ FE6A..FE6B    ; Small # Po   [2] SMALL PERCENT SIGN..SMALL COMMERCIAL AT
 
 3250          ; Square # So       PARTNERSHIP SIGN
 32CC..32CF    ; Square # So   [4] SQUARE HG..LIMITED LIABILITY SIGN
-3300..3357    ; Square # So  [88] SQUARE APAATO..SQUARE WATTO
+32FF..3357    ; Square # So  [89] SQUARE ERA NAME REIWA..SQUARE WATTO
 3371..33DF    ; Square # So [111] SQUARE HPA..SQUARE A OVER M
 33FF          ; Square # So       SQUARE GAL
 1F130..1F14F  ; Square # So  [32] SQUARED LATIN CAPITAL LETTER A..SQUARED WC
@@ -1002,7 +1002,7 @@ FE6A..FE6B    ; Small # Po   [2] SMALL PERCENT SIGN..SMALL COMMERCIAL AT
 1F200..1F202  ; Square # So   [3] SQUARE HIRAGANA HOKA..SQUARED KATAKANA SA
 1F210..1F23B  ; Square # So  [44] SQUARED CJK UNIFIED IDEOGRAPH-624B..SQUARED CJK UNIFIED IDEOGRAPH-914D
 
-# Total code points: 285
+# Total code points: 286
 
 # ================================================
 
