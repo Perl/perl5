@@ -5100,6 +5100,14 @@ Perl_yylex(pTHX)
 
 	return yylex();
     case LEX_FORMLINE:
+        if (PL_parser->sub_error_count != PL_error_count) {
+            /* There was an error parsing a formline, which tends to
+               mess up the parser.
+               Unlike interpolated sub-parsing, we can't treat any of
+               these as recoverable, so no need to check sub_no_recover.
+            */
+            yyquit();
+        }
 	assert(PL_lex_formbrack);
 	s = scan_formline(PL_bufptr);
 	if (!PL_lex_formbrack)
@@ -6519,6 +6527,7 @@ Perl_yylex(pTHX)
 		SAVEI32(PL_lex_formbrack);
 		PL_parser->form_lex_state = PL_lex_state;
 		PL_lex_formbrack = PL_lex_brackets + 1;
+                PL_parser->sub_error_count = PL_error_count;
 		goto leftbracket;
 	    }
 	}
