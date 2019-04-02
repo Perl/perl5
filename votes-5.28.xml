@@ -27,22 +27,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="tonyc steveh arc" id="817480137a8b1165315f21d14b8968862101c3a2" ticket="132158" desc="(perl #132158) abort compilation if we see an error compiling a form" />
-
-<commit votes="steveh tonyc arc" id="515c395bcca24c55c85b5aeea239e5e836c36059" ticket="131562" desc="(perl #131562) correct large line numbers copying eval lines on #line" />
-
-<commit votes="steveh tonyc arc" id="d81b77352f66acde60db1b056b8eb3321b7b55fe" ticket="133778" desc="(perl #133778) adjust MARK if we extend the stack in pp_repeat" />
-
 </div>
 
 <div><h3>Regression Fixes</h3>
-
-<commit votes="tonyc steveh arc" id="b9965e1496efe3cb6116e74d50aa83152c70e877" ticket="133422" desc="(perl #133422) handle Off_t smaller than size_t" />
-
-Note: Needs a $VERSION++ in dist/Storable/__Storable__.pm
-<commit votes="tonyc steveh arc" id="120060c86e233cb9f588314214137f3ed1b48e2a" ticket="133326" desc="(perl #133326) fix and clarify handling of recurs_sv." />
-
-<commit votes="tonyc steveh arc" id="03b94aa47e981af3c7b0118bfb11facda2b95251" ticket="133573" desc="RT#133573: $^X fallback when platform-specific technique fails" />
 
 </div>
 
@@ -55,25 +42,9 @@ Note: This was subsequently superseded by f4e61fc03836484ea88518e8bf04cc1b32a6a1
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh tonyc khw" id="b79cd7dfefcc16674b83ffdeb11687ea693b7845" ticket="" desc="Fix Windows build with CCTYPE=SDK2003SP1"/>
-
-<commit votes="tonyc steveh arc" id="edf639fce3e8c8852ee4179ab902b357b1deba98" ticket="133411" desc="(perl #133411) don't try to load Storable with -Dusecrosscompile" />
-
-Fixes -Duseshrplib builds on darwin.
-<commit votes="tonyc steveh arc" id="191f8909fa4eca1db16a91ada42dd4a065c04890" ticket="126706" desc="(perl #126706) adjust dependency paths on installation on darwin" />
-
 </div>
 
 <div><h3>Portability Fixes</h3>
-
-<commit votes="tonyc steveh arc" id="d6139ec4a9065ae249ab512398326a70dfb2fea2" ticket="133558" desc="fix 'for reverse @array' bug on AIX"/>
-
-All four of these or none.
-Note: f8d82a1010 really needs ca152fd820 to be cherry-picked first -- which it then undoes and does something different instead.
-<commit votes="tonyc steveh arc" id="63c1fa6a98bc60234a21de83dd191cd581a5d073" ticket="133760" desc="Add ability to include literal text in the prototype check."/>
-<commit votes="tonyc steveh arc" id="f8d82a1010426d0eb49c33cb903413b882c85c3e" ticket="133760" desc="Another attempt to improve Configure detection of memmem() [perl #133760]."/>
-<commit votes="tonyc steveh arc" id="ba73a4cb8f472480a2d630613d1e9e1172d518d3" ticket="133760" desc="Improve detection of memrchr, strlcat, and strlcpy"/>
-<commit votes="tonyc steveh arc" id="04db542212fdad3a62f13afe741c99028f4bf799" ticket="133760" desc="Define _GNU_SOURCE if using the musl libc on linux."/>
 
 </div>
 
@@ -82,12 +53,6 @@ Note: f8d82a1010 really needs ca152fd820 to be cherry-picked first -- which it t
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="steveh tonyc arc" id="d29fa84aee8bfff9c27f68ec2d9292e1370e0924" ticket="133278" desc="perlapi: AvFILL isn't deprecated" />
-
-<commit votes="steveh tonyc arc" id="5962c2f672495234bec14ab5427cba5b2ccb2e33" ticket="133380" desc="Fix typo: IS_NUMBER_INFINITE -> IS_NUMBER_INFINITY" />
-
-<commit votes="steveh tonyc arc" id="26b0dc0c52fbcb48a1f10935a8dd8f0b0d4c9209" ticket="" desc="there is no sv_catpvfn()" />
 
 </div>
 
