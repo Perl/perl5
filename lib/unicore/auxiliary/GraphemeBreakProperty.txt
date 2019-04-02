@@ -1,6 +1,6 @@
 # GraphemeBreakProperty-12.0.0.txt
-# Date: 2018-10-18, 06:49:03 GMT
-# © 2018 Unicode®, Inc.
+# Date: 2019-01-27, 20:10:37 GMT
+# © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -61,7 +61,6 @@
 2060..2064    ; Control # Cf   [5] WORD JOINER..INVISIBLE PLUS
 2065          ; Control # Cn       <reserved-2065>
 2066..206F    ; Control # Cf  [10] LEFT-TO-RIGHT ISOLATE..NOMINAL DIGIT SHAPES
-D800..DFFF    ; Control # Cs [2048] <surrogate-D800>..<surrogate-DFFF>
 FEFF          ; Control # Cf       ZERO WIDTH NO-BREAK SPACE
 FFF0..FFF8    ; Control # Cn   [9] <reserved-FFF0>..<reserved-FFF8>
 FFF9..FFFB    ; Control # Cf   [3] INTERLINEAR ANNOTATION ANCHOR..INTERLINEAR ANNOTATION TERMINATOR
@@ -74,7 +73,7 @@ E0002..E001F  ; Control # Cn  [30] <reserved-E0002>..<reserved-E001F>
 E0080..E00FF  ; Control # Cn [128] <reserved-E0080>..<reserved-E00FF>
 E01F0..E0FFF  ; Control # Cn [3600] <reserved-E01F0>..<reserved-E0FFF>
 
-# Total code points: 5934
+# Total code points: 3886
 
 # ================================================
 
@@ -284,7 +283,7 @@ A947..A951    ; Extend # Mn  [11] REJANG VOWEL SIGN I..REJANG CONSONANT SIGN R
 A980..A982    ; Extend # Mn   [3] JAVANESE SIGN PANYANGGA..JAVANESE SIGN LAYAR
 A9B3          ; Extend # Mn       JAVANESE SIGN CECAK TELU
 A9B6..A9B9    ; Extend # Mn   [4] JAVANESE VOWEL SIGN WULU..JAVANESE VOWEL SIGN SUKU MENDUT
-A9BC          ; Extend # Mn       JAVANESE VOWEL SIGN PEPET
+A9BC..A9BD    ; Extend # Mn   [2] JAVANESE VOWEL SIGN PEPET..JAVANESE CONSONANT SIGN KERET
 A9E5          ; Extend # Mn       MYANMAR SIGN SHAN SAW
 AA29..AA2E    ; Extend # Mn   [6] CHAM VOWEL SIGN AA..CHAM VOWEL SIGN OE
 AA31..AA32    ; Extend # Mn   [2] CHAM VOWEL SIGN AU..CHAM VOWEL SIGN UE
@@ -369,7 +368,6 @@ FF9E..FF9F    ; Extend # Lm   [2] HALFWIDTH KATAKANA VOICED SOUND MARK..HALFWIDT
 11727..1172B  ; Extend # Mn   [5] AHOM VOWEL SIGN AW..AHOM SIGN KILLER
 1182F..11837  ; Extend # Mn   [9] DOGRA VOWEL SIGN U..DOGRA SIGN ANUSVARA
 11839..1183A  ; Extend # Mn   [2] DOGRA SIGN VIRAMA..DOGRA SIGN NUKTA
-119D2         ; Extend # Mn       NANDINAGARI VOWEL SIGN I
 119D4..119D7  ; Extend # Mn   [4] NANDINAGARI VOWEL SIGN U..NANDINAGARI VOWEL SIGN VOCALIC RR
 119DA..119DB  ; Extend # Mn   [2] NANDINAGARI VOWEL SIGN E..NANDINAGARI VOWEL SIGN AI
 119E0         ; Extend # Mn       NANDINAGARI SIGN VIRAMA
@@ -520,7 +518,7 @@ A952..A953    ; SpacingMark # Mc   [2] REJANG CONSONANT SIGN H..REJANG VIRAMA
 A983          ; SpacingMark # Mc       JAVANESE SIGN WIGNYAN
 A9B4..A9B5    ; SpacingMark # Mc   [2] JAVANESE VOWEL SIGN TARUNG..JAVANESE VOWEL SIGN TOLONG
 A9BA..A9BB    ; SpacingMark # Mc   [2] JAVANESE VOWEL SIGN TALING..JAVANESE VOWEL SIGN DIRGA MURE
-A9BD..A9C0    ; SpacingMark # Mc   [4] JAVANESE CONSONANT SIGN KERET..JAVANESE PANGKON
+A9BE..A9C0    ; SpacingMark # Mc   [3] JAVANESE CONSONANT SIGN PENGKAL..JAVANESE PANGKON
 AA2F..AA30    ; SpacingMark # Mc   [2] CHAM VOWEL SIGN O..CHAM VOWEL SIGN AI
 AA33..AA34    ; SpacingMark # Mc   [2] CHAM CONSONANT SIGN YA..CHAM CONSONANT SIGN RA
 AA4D          ; SpacingMark # Mc       CHAM CONSONANT SIGN FINAL H
@@ -572,8 +570,7 @@ ABEC          ; SpacingMark # Mc       MEETEI MAYEK LUM IYEK
 11726         ; SpacingMark # Mc       AHOM VOWEL SIGN E
 1182C..1182E  ; SpacingMark # Mc   [3] DOGRA VOWEL SIGN AA..DOGRA VOWEL SIGN II
 11838         ; SpacingMark # Mc       DOGRA SIGN VISARGA
-119D1         ; SpacingMark # Mc       NANDINAGARI VOWEL SIGN AA
-119D3         ; SpacingMark # Mc       NANDINAGARI VOWEL SIGN II
+119D1..119D3  ; SpacingMark # Mc   [3] NANDINAGARI VOWEL SIGN AA..NANDINAGARI VOWEL SIGN II
 119DC..119DF  ; SpacingMark # Mc   [4] NANDINAGARI VOWEL SIGN O..NANDINAGARI SIGN VISARGA
 119E4         ; SpacingMark # Mc       NANDINAGARI VOWEL SIGN PRISHTHAMATRA E
 11A39         ; SpacingMark # Mc       ZANABAZAR SQUARE SIGN VISARGA

@@ -559,7 +559,7 @@ STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
   {    17,  7780,     0,   8,   0, UNI_BALI }   /* balinese */,
   {     4,  8225,     0,  14,   0, UNI_SC__SHRD }   /* script=sharada */,
   {     0,  9101,  8453,   5,   5, UNI_CCC__129 }   /* ccc=ccc129 */,
-  {     2,  5339,   495,  14,   7, UNI_LB__NU }   /* sentencebreak=numeric */,
+  {     2,  5339,   495,  14,   7, UNI_SB__NU }   /* sentencebreak=numeric */,
   {     3,  3671,  6602,  17,   4, UNI_NAND }   /* scriptextensions=nand */,
   {     5,  8609,  8856,   5,   5, -UNI_TERM }   /* term=false */,
   {     1,  9081,  8239,   4,   7, UNI_SHAW }   /* blk=shavian */,
@@ -4016,7 +4016,7 @@ STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
   {     0,  8946,     1,   5,   1, -UNI_XIDC }   /* xidc=n */,
   {     0,  2212,  2129,   4,  12, UNI_INHANIFIROHINGYA }   /* inhanifirohingya */,
   {     3,  8416,   690,   7,  29, UNI_CUNEIFORMNUMBERS }   /* block=cuneiformnumbersandpunctuation */,
-  {     9,  8863,   495,   3,   7, UNI_LB__NU }   /* sb=numeric */,
+  {     9,  8863,   495,   3,   7, UNI_SB__NU }   /* sb=numeric */,
   {    28,  9353,  9293,   4,   4, UNI_ORYA }   /* scx=orya */,
   {    33,  3671,  2148,  17,  21, UNI_PRTI }   /* scriptextensions=inscriptionalparthian */,
   {     0,  1084,   995,  26,   2, -UNI_CWKCF }   /* changeswhennfkccasefolded=no */,
@@ -5081,7 +5081,7 @@ STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
   {     0,  1014,     0,   6,   0, UNI_L }   /* letter */,
   {     2,  1497,  8491,   9,   2, UNI_CF }   /* category=cf */,
   {     1,  3002,  3852,  18,   3, UNI_DT__FIN }   /* decompositiontype=fin */,
-  {     1,  8863,   495,   3,   2, UNI_LB__NU }   /* sb=nu */,
+  {     1,  8863,   495,   3,   2, UNI_SB__NU }   /* sb=nu */,
   {    21,  9634,  7452,   3,   8, UNI_NV__1_SLASH_80 }   /* nv=1.25e-02 */,
   {     0,  9081,  6492,   4,  11, UNI_KATAKANAEXT }   /* blk=katakanaext */,
   {    37,   184,  8106,   2,   7, UNI_KALI }   /* iskayahli */,
@@ -6552,7 +6552,7 @@ STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
   {     0,  2493,  3391,  20,   7, UNI_VO__U }   /* verticalorientation=upright */,
   {   284,  2493,   471,  20,   2, UNI_VO__TU }   /* verticalorientation=tu */,
   {     0,  8225,  9089,   7,   4, UNI_SC__BUHD }   /* script=buhd */,
-  {     6,  5339,   495,  14,   2, UNI_LB__NU }   /* sentencebreak=nu */,
+  {     6,  5339,   495,  14,   2, UNI_SB__NU }   /* sentencebreak=nu */,
   {     2,  4849,     1,  14,   1, -UNI_CI }   /* caseignorable=n */,
   {     0,   184,  8489,   3,   4, UNI_CWKCF }   /* iscwkcf */,
   {     0,  6005,   690,   3,  29, UNI_CUNEIFORMNUMBERS }   /* incuneiformnumbersandpunctuation */,
@@ -7258,24 +7258,24 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 22b1bff498f08633f72468d46eebb65e30dc325fbb6822dde319cb605af014c2 lib/unicore/SpecialCasing.txt
  * 57913fdb1c1271fa9fd51dea08d49370f33d5bfda6bbaba348f44d90029ea11d lib/unicore/UnicodeData.txt
  * 36900e28ff01fa810d8a7e0848e1075289975188525f2c1d14487d561bbf595a lib/unicore/VerticalOrientation.txt
- * 238635e1dfcc190345ffbcab734f7017dea05d2a66f2291745c11067893689a7 lib/unicore/auxiliary/GCBTest.txt
- * b49f36b98cdd4c996fc7971b8b4d25e3c13b45f0a71f4ad0c5e70a9cebe0b956 lib/unicore/auxiliary/GraphemeBreakProperty.txt
- * d7ae54c2704f27b3a8f40ae934c2f6f3ee87bec20a865e0f9689bc1cd3f92335 lib/unicore/auxiliary/LBTest.txt
- * a9fafe0badc760379957a282bbe3d82d5a6ba113911b89501781fd6b6ad66377 lib/unicore/auxiliary/SBTest.txt
- * 5bf7faf5898403b6adad2d94f1a9ddf26de650cc7a8f2ee00590f05bbea9bd03 lib/unicore/auxiliary/SentenceBreakProperty.txt
- * 12e02e6158929ae29c9b47f76ab95d68194b1d0c295d7b4f6df31487590222a5 lib/unicore/auxiliary/WBTest.txt
- * 9be679d9772dc4842697a3a5b6e1845022f876c1f230ecea38f1be5d6d5673d8 lib/unicore/auxiliary/WordBreakProperty.txt
- * 9e6955b173a13a8a91e3c1b468c9d7e122c588aa288f707bfcef35790a828f8a lib/unicore/extracted/DBidiClass.txt
- * 80e94d5bb24639c9f322bd3b4b8159a8e9a7c33ac45076eff9cd3ecb0b9b812e lib/unicore/extracted/DBinaryProperties.txt
- * 6dc031734cd287af8b33c99435d41f6c836e8e08a7a6cb6cb07e8453cbebdb3b lib/unicore/extracted/DCombiningClass.txt
- * b143bb87f041dcb69335806cb0a1a6b2328eb25cdfa04fe6fcd4c77c6a06fe82 lib/unicore/extracted/DDecompositionType.txt
- * f63f08d36d01eb45f34ff8d2b36681252211f92db690fa1258a399a9a86df3bb lib/unicore/extracted/DEastAsianWidth.txt
- * 6fa015f11f19a9407d590827276f9884c1ee4c71fbc826a09008f7d9d7c1b255 lib/unicore/extracted/DGeneralCategory.txt
- * 1b24a2d586a8b91c0768d4da8919634463bdf126b7479a8e76b85d007cbef8a0 lib/unicore/extracted/DJoinGroup.txt
- * 8095565a527d3d0918a17e30a7bcc0c7864ac3ad748defc21027b3e1ad436368 lib/unicore/extracted/DJoinType.txt
- * 5f98a68d5aa76b06052fe16312d2fdf17547fd69c4e648532845e11beaf2002b lib/unicore/extracted/DLineBreak.txt
- * 8011b1733f6d2cc17576b2a1e20067eca51205e8e0b740d00ebd52afbec2ea39 lib/unicore/extracted/DNumType.txt
- * 8b677a4cf17a4c6949632146fa8a99aaa65689a41b9dd231f81783e81600ff36 lib/unicore/extracted/DNumValues.txt
+ * a6541b2d71764a8bf3f89a134a39b99515eefc858717862993bd15741f2bb03d lib/unicore/auxiliary/GCBTest.txt
+ * bba2b26eb46b288e5fc2243ae01de14b416a9cd129c61327e55803e1ab77c037 lib/unicore/auxiliary/GraphemeBreakProperty.txt
+ * 35ebd270ffdc8b9f03d63a3e7f82275de25cd45ab7b0c1741df6c9ee2d9aa62b lib/unicore/auxiliary/LBTest.txt
+ * 47e2bf8134f0b95e07738a036ab9aece0af2d84924270c9ec8c249bd083ce2e6 lib/unicore/auxiliary/SBTest.txt
+ * 38b7bf3e47c1c011b3f206fe58c6030bcfa8ae39353324693622c802c7df1ca1 lib/unicore/auxiliary/SentenceBreakProperty.txt
+ * 99b2cffe7d4695b7eeeffc66c1363a296f752781a5614fd3909730fe66c6b5b7 lib/unicore/auxiliary/WBTest.txt
+ * 86330d8f33bf5da9243ec01d9a2506335b09d7e916ae7f7094715f776e403bb2 lib/unicore/auxiliary/WordBreakProperty.txt
+ * a50670c09adf9a7f6e7344bdef81d5c8a2c5d116191c6f141bd772f149d8ecdc lib/unicore/extracted/DBidiClass.txt
+ * f322f50f30ab890b22d450e997bb51b972ec379ba76caf9a0b15145deddca2dc lib/unicore/extracted/DBinaryProperties.txt
+ * a857ee16245430a68577c060adbeae6e72cb25aac1dcd5f6c940eb0fdcee31f6 lib/unicore/extracted/DCombiningClass.txt
+ * e87b7feabfaad5dd17256af5845b4590908cb2ed4ca54ffd9aaaeb194305e024 lib/unicore/extracted/DDecompositionType.txt
+ * 8c368041e2509f618df29a0eefe97c4901f79b3f2e5f54e2e5b0d5e956b574dd lib/unicore/extracted/DEastAsianWidth.txt
+ * d4db33ff590a6c80d7c34d2968595586ae59bfb280978470b6e2fa2b34808405 lib/unicore/extracted/DGeneralCategory.txt
+ * b4ed74c6a72864e0df9d89024699e8ef122859a3d31515bd0c63078b7e606215 lib/unicore/extracted/DJoinGroup.txt
+ * 2a92a39d6713b8cc9a6d4eb808efaf93c52a4fcc01c149fec9892113838dae8b lib/unicore/extracted/DJoinType.txt
+ * cb0f591b443cb86b7c5a0ffcd152ec870bf4ad69f53db823510ac42cdf2797eb lib/unicore/extracted/DLineBreak.txt
+ * 509d58289bba5233a586b1ee9d21c79bee506e7b3d6f6429e688961a53353242 lib/unicore/extracted/DNumType.txt
+ * 73192b1b7662d9ea424b779bcda06ccbe57a4121bf28ed981a39a78aa5808d06 lib/unicore/extracted/DNumValues.txt
  * 56461f8238f671a5e686ca8cacd508e67d6d0b7a14ac6096938af435f76d36e0 lib/unicore/mktables
  * 93cc868487ef3345596041bcb90c302b1b056733bb95233101bc10dc2dbe36b4 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl

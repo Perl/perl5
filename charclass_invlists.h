@@ -18546,7 +18546,7 @@ static const UV _Perl_CCC_non0_non230_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
-	1781,	/* Number of elements */
+	1777,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -19128,7 +19128,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9C1,
 	0xA9E5,
 	0xA9E6,
@@ -19974,8 +19974,6 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xD7C7,
 	0xD7CB,
 	0xD7FC,
-	0xD800,
-	0xE000,
 	0xFB1E,
 	0xFB1F,
 	0xFE00,
@@ -20143,8 +20141,6 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11839,
 	0x1183B,
 	0x119D1,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -21789,8 +21785,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_T,
 	GCB_Other,
-	GCB_Control,
-	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
@@ -21957,8 +21951,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
@@ -22160,7 +22152,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 1047 */
-	1782,	/* Number of elements */
+	1778,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -22743,7 +22735,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 1047 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9C1,
 	0xA9E5,
 	0xA9E6,
@@ -23589,8 +23581,6 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 1047 */
 	0xD7C7,
 	0xD7CB,
 	0xD7FC,
-	0xD800,
-	0xE000,
 	0xFB1E,
 	0xFB1F,
 	0xFE00,
@@ -23758,8 +23748,6 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 1047 */
 	0x11839,
 	0x1183B,
 	0x119D1,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -25408,8 +25396,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 1047 */
 	GCB_Other,
 	GCB_T,
 	GCB_Other,
-	GCB_Control,
-	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
@@ -25576,8 +25562,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 1047 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
@@ -25779,7 +25763,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 037 */
-	1782,	/* Number of elements */
+	1778,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -26362,7 +26346,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 037 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9C1,
 	0xA9E5,
 	0xA9E6,
@@ -27208,8 +27192,6 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 037 */
 	0xD7C7,
 	0xD7CB,
 	0xD7FC,
-	0xD800,
-	0xE000,
 	0xFB1E,
 	0xFB1F,
 	0xFE00,
@@ -27377,8 +27359,6 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 037 */
 	0x11839,
 	0x1183B,
 	0x119D1,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -29027,8 +29007,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 037 */
 	GCB_Other,
 	GCB_T,
 	GCB_Other,
-	GCB_Control,
-	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
@@ -29195,8 +29173,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 037 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
@@ -52719,7 +52695,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for EBCDIC 037 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
-	3096,	/* Number of elements */
+	3097,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -55065,6 +55041,7 @@ static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF0C,
 	0xFF0E,
 	0xFF0F,
+	0xFF10,
 	0xFF1A,
 	0xFF1B,
 	0xFF1F,
@@ -55711,7 +55688,7 @@ static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E2F0,
@@ -58191,6 +58168,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_SContinue,
 	SB_ATerm,
 	SB_Other,
+	SB_Numeric,
 	SB_SContinue,
 	SB_Other,
 	SB_STerm,
@@ -58959,7 +58937,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 1047 */
-	3120,	/* Number of elements */
+	3121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -61329,6 +61307,7 @@ static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 1047 */
 	0xFF0C,
 	0xFF0E,
 	0xFF0F,
+	0xFF10,
 	0xFF1A,
 	0xFF1B,
 	0xFF1F,
@@ -61975,7 +61954,7 @@ static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 1047 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E2F0,
@@ -64482,6 +64461,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for EBCDIC 1047 */
 	SB_SContinue,
 	SB_ATerm,
 	SB_Other,
+	SB_Numeric,
 	SB_SContinue,
 	SB_Other,
 	SB_STerm,
@@ -65250,7 +65230,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 037 */
-	3116,	/* Number of elements */
+	3117,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -67616,6 +67596,7 @@ static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 037 */
 	0xFF0C,
 	0xFF0E,
 	0xFF0F,
+	0xFF10,
 	0xFF1A,
 	0xFF1B,
 	0xFF1F,
@@ -68262,7 +68243,7 @@ static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 037 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E2F0,
@@ -70765,6 +70746,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for EBCDIC 037 */
 	SB_SContinue,
 	SB_ATerm,
 	SB_Other,
+	SB_Numeric,
 	SB_SContinue,
 	SB_Other,
 	SB_STerm,
@@ -84316,7 +84298,7 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for EBCDIC 037 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_WB_invlist[] = {  /* for ASCII/Latin1 */
-	1847,	/* Number of elements */
+	1848,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -85463,6 +85445,7 @@ static const UV _Perl_WB_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF0D,
 	0xFF0E,
 	0xFF0F,
+	0xFF10,
 	0xFF1A,
 	0xFF1B,
 	0xFF1C,
@@ -86020,7 +86003,7 @@ static const UV _Perl_WB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E2F0,
@@ -87351,6 +87334,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_Other,
 	WB_MidNumLet,
 	WB_Other,
+	WB_Numeric,
 	WB_MidLetter,
 	WB_MidNum,
 	WB_Other,
@@ -88069,7 +88053,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 1047 */
-	1870,	/* Number of elements */
+	1871,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -89239,6 +89223,7 @@ static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 1047 */
 	0xFF0D,
 	0xFF0E,
 	0xFF0F,
+	0xFF10,
 	0xFF1A,
 	0xFF1B,
 	0xFF1C,
@@ -89796,7 +89781,7 @@ static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 1047 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E2F0,
@@ -91153,6 +91138,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for EBCDIC 1047 */
 	WB_Other,
 	WB_MidNumLet,
 	WB_Other,
+	WB_Numeric,
 	WB_MidLetter,
 	WB_MidNum,
 	WB_Other,
@@ -91871,7 +91857,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 037 */
-	1866,	/* Number of elements */
+	1867,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -93037,6 +93023,7 @@ static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 037 */
 	0xFF0D,
 	0xFF0E,
 	0xFF0F,
+	0xFF10,
 	0xFF1A,
 	0xFF1B,
 	0xFF1C,
@@ -93594,7 +93581,7 @@ static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 037 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E2F0,
@@ -94947,6 +94934,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for EBCDIC 037 */
 	WB_Other,
 	WB_MidNumLet,
 	WB_Other,
+	WB_Numeric,
 	WB_MidLetter,
 	WB_MidNum,
 	WB_Other,
@@ -239634,7 +239622,7 @@ static const UV UNI_EXT_invlist[] = {  /* for EBCDIC 037 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_GCB__CN_invlist[] = {  /* for ASCII/Latin1 */
-	40,	/* Number of elements */
+	38,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -239660,8 +239648,6 @@ static const UV UNI_GCB__CN_invlist[] = {  /* for ASCII/Latin1 */
 	0x202F,
 	0x2060,
 	0x2070,
-	0xD800,
-	0xE000,
 	0xFEFF,
 	0xFF00,
 	0xFFF0,
@@ -239688,7 +239674,7 @@ static const UV UNI_GCB__CN_invlist[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 1047 */
-	40,	/* Number of elements */
+	38,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -239714,8 +239700,6 @@ static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 1047 */
 	0x202F,
 	0x2060,
 	0x2070,
-	0xD800,
-	0xE000,
 	0xFEFF,
 	0xFF00,
 	0xFFF0,
@@ -239742,7 +239726,7 @@ static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 037 */
-	40,	/* Number of elements */
+	38,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -239768,8 +239752,6 @@ static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 037 */
 	0x202F,
 	0x2060,
 	0x2070,
-	0xD800,
-	0xE000,
 	0xFEFF,
 	0xFF00,
 	0xFFF0,
@@ -239791,7 +239773,7 @@ static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 037 */
 #  endif	/* EBCDIC 037 */
 
 static const UV UNI_GCB__EX_invlist[] = {  /* for all charsets */
-	675,	/* Number of elements */
+	673,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -240185,7 +240167,7 @@ static const UV UNI_GCB__EX_invlist[] = {  /* for all charsets */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -240354,8 +240336,6 @@ static const UV UNI_GCB__EX_invlist[] = {  /* for all charsets */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -240515,7 +240495,7 @@ static const UV UNI_GCB__PP_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_GCB__SM_invlist[] = {  /* for all charsets */
-	307,	/* Number of elements */
+	305,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -240684,7 +240664,7 @@ static const UV UNI_GCB__SM_invlist[] = {  /* for all charsets */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9C1,
 	0xAA2F,
 	0xAA31,
@@ -240789,8 +240769,6 @@ static const UV UNI_GCB__SM_invlist[] = {  /* for all charsets */
 	0x11838,
 	0x11839,
 	0x119D1,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119DC,
 	0x119E0,
@@ -240855,7 +240833,7 @@ static const UV UNI_GCB__V_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_GCB__XX_invlist[] = {  /* for ASCII/Latin1 */
-	606,	/* Number of elements */
+	604,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -241255,8 +241233,6 @@ static const UV UNI_GCB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0xD7C7,
 	0xD7CB,
 	0xD7FC,
-	0xD800,
-	0xE000,
 	0xFB1E,
 	0xFB1F,
 	0xFE00,
@@ -241475,7 +241451,7 @@ static const UV UNI_GCB__XX_invlist[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 1047 */
-	606,	/* Number of elements */
+	604,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -241875,8 +241851,6 @@ static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	0xD7C7,
 	0xD7CB,
 	0xD7FC,
-	0xD800,
-	0xE000,
 	0xFB1E,
 	0xFB1F,
 	0xFE00,
@@ -242095,7 +242069,7 @@ static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 037 */
-	606,	/* Number of elements */
+	604,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -242495,8 +242469,6 @@ static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 037 */
 	0xD7C7,
 	0xD7CB,
 	0xD7FC,
-	0xD800,
-	0xE000,
 	0xFB1E,
 	0xFB1F,
 	0xFE00,
@@ -286973,7 +286945,7 @@ static const UV UNI_JT__R_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_JT__T_invlist[] = {  /* for ASCII/Latin1 */
-	663,	/* Number of elements */
+	661,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -287363,7 +287335,7 @@ static const UV UNI_JT__T_invlist[] = {  /* for ASCII/Latin1 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -287524,8 +287496,6 @@ static const UV UNI_JT__T_invlist[] = {  /* for ASCII/Latin1 */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -287650,7 +287620,7 @@ static const UV UNI_JT__T_invlist[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 1047 */
-	663,	/* Number of elements */
+	661,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -288040,7 +288010,7 @@ static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 1047 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -288201,8 +288171,6 @@ static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 1047 */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -288327,7 +288295,7 @@ static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 037 */
-	663,	/* Number of elements */
+	661,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -288717,7 +288685,7 @@ static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 037 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -288878,8 +288846,6 @@ static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 037 */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -289001,7 +288967,7 @@ static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 037 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_JT__U_invlist[] = {  /* for ASCII/Latin1 */
-	705,	/* Number of elements */
+	703,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -289417,7 +289383,7 @@ static const UV UNI_JT__U_invlist[] = {  /* for ASCII/Latin1 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -289594,8 +289560,6 @@ static const UV UNI_JT__U_invlist[] = {  /* for ASCII/Latin1 */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -289720,7 +289684,7 @@ static const UV UNI_JT__U_invlist[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 1047 */
-	705,	/* Number of elements */
+	703,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -290136,7 +290100,7 @@ static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 1047 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -290313,8 +290277,6 @@ static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 1047 */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -290439,7 +290401,7 @@ static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 037 */
-	705,	/* Number of elements */
+	703,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -290855,7 +290817,7 @@ static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 037 */
 	0xA9B6,
 	0xA9BA,
 	0xA9BC,
-	0xA9BD,
+	0xA9BE,
 	0xA9E5,
 	0xA9E6,
 	0xAA29,
@@ -291032,8 +290994,6 @@ static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 037 */
 	0x11838,
 	0x11839,
 	0x1183B,
-	0x119D2,
-	0x119D3,
 	0x119D4,
 	0x119D8,
 	0x119DA,
@@ -345120,7 +345080,7 @@ static const UV UNI_SB__LE_invlist[] = {  /* for all charsets */
 	0x1E137,
 	0x1E13E,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E800,
@@ -349137,6 +349097,408 @@ static const UV UNI_SB__LO_invlist[] = {  /* for EBCDIC 037 */
 	0x1D7CC,
 	0x1E922,
 	0x1E944
+};
+
+#  endif	/* EBCDIC 037 */
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
+static const UV UNI_SB__NU_invlist[] = {  /* for ASCII/Latin1 */
+	121,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x30,
+	0x3A,
+	0x660,
+	0x66A,
+	0x66B,
+	0x66D,
+	0x6F0,
+	0x6FA,
+	0x7C0,
+	0x7CA,
+	0x966,
+	0x970,
+	0x9E6,
+	0x9F0,
+	0xA66,
+	0xA70,
+	0xAE6,
+	0xAF0,
+	0xB66,
+	0xB70,
+	0xBE6,
+	0xBF0,
+	0xC66,
+	0xC70,
+	0xCE6,
+	0xCF0,
+	0xD66,
+	0xD70,
+	0xDE6,
+	0xDF0,
+	0xE50,
+	0xE5A,
+	0xED0,
+	0xEDA,
+	0xF20,
+	0xF2A,
+	0x1040,
+	0x104A,
+	0x1090,
+	0x109A,
+	0x17E0,
+	0x17EA,
+	0x1810,
+	0x181A,
+	0x1946,
+	0x1950,
+	0x19D0,
+	0x19DA,
+	0x1A80,
+	0x1A8A,
+	0x1A90,
+	0x1A9A,
+	0x1B50,
+	0x1B5A,
+	0x1BB0,
+	0x1BBA,
+	0x1C40,
+	0x1C4A,
+	0x1C50,
+	0x1C5A,
+	0xA620,
+	0xA62A,
+	0xA8D0,
+	0xA8DA,
+	0xA900,
+	0xA90A,
+	0xA9D0,
+	0xA9DA,
+	0xA9F0,
+	0xA9FA,
+	0xAA50,
+	0xAA5A,
+	0xABF0,
+	0xABFA,
+	0xFF10,
+	0xFF1A,
+	0x104A0,
+	0x104AA,
+	0x10D30,
+	0x10D3A,
+	0x11066,
+	0x11070,
+	0x110F0,
+	0x110FA,
+	0x11136,
+	0x11140,
+	0x111D0,
+	0x111DA,
+	0x112F0,
+	0x112FA,
+	0x11450,
+	0x1145A,
+	0x114D0,
+	0x114DA,
+	0x11650,
+	0x1165A,
+	0x116C0,
+	0x116CA,
+	0x11730,
+	0x1173A,
+	0x118E0,
+	0x118EA,
+	0x11C50,
+	0x11C5A,
+	0x11D50,
+	0x11D5A,
+	0x11DA0,
+	0x11DAA,
+	0x16A60,
+	0x16A6A,
+	0x16B50,
+	0x16B5A,
+	0x1D7CE,
+	0x1D800,
+	0x1E140,
+	0x1E14A,
+	0x1E2F0,
+	0x1E2FA,
+	0x1E950,
+	0x1E95A
+};
+
+#  endif	/* ASCII/Latin1 */
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
+
+static const UV UNI_SB__NU_invlist[] = {  /* for EBCDIC 1047 */
+	121,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xF0,
+	0xFA,
+	0x660,
+	0x66A,
+	0x66B,
+	0x66D,
+	0x6F0,
+	0x6FA,
+	0x7C0,
+	0x7CA,
+	0x966,
+	0x970,
+	0x9E6,
+	0x9F0,
+	0xA66,
+	0xA70,
+	0xAE6,
+	0xAF0,
+	0xB66,
+	0xB70,
+	0xBE6,
+	0xBF0,
+	0xC66,
+	0xC70,
+	0xCE6,
+	0xCF0,
+	0xD66,
+	0xD70,
+	0xDE6,
+	0xDF0,
+	0xE50,
+	0xE5A,
+	0xED0,
+	0xEDA,
+	0xF20,
+	0xF2A,
+	0x1040,
+	0x104A,
+	0x1090,
+	0x109A,
+	0x17E0,
+	0x17EA,
+	0x1810,
+	0x181A,
+	0x1946,
+	0x1950,
+	0x19D0,
+	0x19DA,
+	0x1A80,
+	0x1A8A,
+	0x1A90,
+	0x1A9A,
+	0x1B50,
+	0x1B5A,
+	0x1BB0,
+	0x1BBA,
+	0x1C40,
+	0x1C4A,
+	0x1C50,
+	0x1C5A,
+	0xA620,
+	0xA62A,
+	0xA8D0,
+	0xA8DA,
+	0xA900,
+	0xA90A,
+	0xA9D0,
+	0xA9DA,
+	0xA9F0,
+	0xA9FA,
+	0xAA50,
+	0xAA5A,
+	0xABF0,
+	0xABFA,
+	0xFF10,
+	0xFF1A,
+	0x104A0,
+	0x104AA,
+	0x10D30,
+	0x10D3A,
+	0x11066,
+	0x11070,
+	0x110F0,
+	0x110FA,
+	0x11136,
+	0x11140,
+	0x111D0,
+	0x111DA,
+	0x112F0,
+	0x112FA,
+	0x11450,
+	0x1145A,
+	0x114D0,
+	0x114DA,
+	0x11650,
+	0x1165A,
+	0x116C0,
+	0x116CA,
+	0x11730,
+	0x1173A,
+	0x118E0,
+	0x118EA,
+	0x11C50,
+	0x11C5A,
+	0x11D50,
+	0x11D5A,
+	0x11DA0,
+	0x11DAA,
+	0x16A60,
+	0x16A6A,
+	0x16B50,
+	0x16B5A,
+	0x1D7CE,
+	0x1D800,
+	0x1E140,
+	0x1E14A,
+	0x1E2F0,
+	0x1E2FA,
+	0x1E950,
+	0x1E95A
+};
+
+#  endif	/* EBCDIC 1047 */
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
+
+static const UV UNI_SB__NU_invlist[] = {  /* for EBCDIC 037 */
+	121,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xF0,
+	0xFA,
+	0x660,
+	0x66A,
+	0x66B,
+	0x66D,
+	0x6F0,
+	0x6FA,
+	0x7C0,
+	0x7CA,
+	0x966,
+	0x970,
+	0x9E6,
+	0x9F0,
+	0xA66,
+	0xA70,
+	0xAE6,
+	0xAF0,
+	0xB66,
+	0xB70,
+	0xBE6,
+	0xBF0,
+	0xC66,
+	0xC70,
+	0xCE6,
+	0xCF0,
+	0xD66,
+	0xD70,
+	0xDE6,
+	0xDF0,
+	0xE50,
+	0xE5A,
+	0xED0,
+	0xEDA,
+	0xF20,
+	0xF2A,
+	0x1040,
+	0x104A,
+	0x1090,
+	0x109A,
+	0x17E0,
+	0x17EA,
+	0x1810,
+	0x181A,
+	0x1946,
+	0x1950,
+	0x19D0,
+	0x19DA,
+	0x1A80,
+	0x1A8A,
+	0x1A90,
+	0x1A9A,
+	0x1B50,
+	0x1B5A,
+	0x1BB0,
+	0x1BBA,
+	0x1C40,
+	0x1C4A,
+	0x1C50,
+	0x1C5A,
+	0xA620,
+	0xA62A,
+	0xA8D0,
+	0xA8DA,
+	0xA900,
+	0xA90A,
+	0xA9D0,
+	0xA9DA,
+	0xA9F0,
+	0xA9FA,
+	0xAA50,
+	0xAA5A,
+	0xABF0,
+	0xABFA,
+	0xFF10,
+	0xFF1A,
+	0x104A0,
+	0x104AA,
+	0x10D30,
+	0x10D3A,
+	0x11066,
+	0x11070,
+	0x110F0,
+	0x110FA,
+	0x11136,
+	0x11140,
+	0x111D0,
+	0x111DA,
+	0x112F0,
+	0x112FA,
+	0x11450,
+	0x1145A,
+	0x114D0,
+	0x114DA,
+	0x11650,
+	0x1165A,
+	0x116C0,
+	0x116CA,
+	0x11730,
+	0x1173A,
+	0x118E0,
+	0x118EA,
+	0x11C50,
+	0x11C5A,
+	0x11D50,
+	0x11D5A,
+	0x11DA0,
+	0x11DAA,
+	0x16A60,
+	0x16A6A,
+	0x16B50,
+	0x16B5A,
+	0x1D7CE,
+	0x1D800,
+	0x1E140,
+	0x1E14A,
+	0x1E2F0,
+	0x1E2FA,
+	0x1E950,
+	0x1E95A
 };
 
 #  endif	/* EBCDIC 037 */
@@ -354797,7 +355159,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF0A,
 	0xFF0C,
 	0xFF0F,
-	0xFF1A,
+	0xFF10,
 	0xFF1B,
 	0xFF1F,
 	0xFF20,
@@ -355324,7 +355686,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2FA,
 	0x1E800,
@@ -356410,7 +356772,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	0xFF0A,
 	0xFF0C,
 	0xFF0F,
-	0xFF1A,
+	0xFF10,
 	0xFF1B,
 	0xFF1F,
 	0xFF20,
@@ -356937,7 +357299,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2FA,
 	0x1E800,
@@ -358021,7 +358383,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for EBCDIC 037 */
 	0xFF0A,
 	0xFF0C,
 	0xFF0F,
-	0xFF1A,
+	0xFF10,
 	0xFF1B,
 	0xFF1F,
 	0xFF20,
@@ -358548,7 +358910,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for EBCDIC 037 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2FA,
 	0x1E800,
@@ -369020,7 +369382,7 @@ static const UV UNI_WB__LE_invlist[] = {  /* for ASCII/Latin1 */
 	0x1E137,
 	0x1E13E,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E800,
@@ -370135,7 +370497,7 @@ static const UV UNI_WB__LE_invlist[] = {  /* for EBCDIC 1047 */
 	0x1E137,
 	0x1E13E,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E800,
@@ -371246,7 +371608,7 @@ static const UV UNI_WB__LE_invlist[] = {  /* for EBCDIC 037 */
 	0x1E137,
 	0x1E13E,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2EC,
 	0x1E800,
@@ -371688,7 +372050,7 @@ static const UV UNI_WB__NL_invlist[] = {  /* for EBCDIC 037 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_WB__NU_invlist[] = {  /* for ASCII/Latin1 */
-	119,	/* Number of elements */
+	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -371767,6 +372129,8 @@ static const UV UNI_WB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0xAA5A,
 	0xABF0,
 	0xABFA,
+	0xFF10,
+	0xFF1A,
 	0x104A0,
 	0x104AA,
 	0x10D30,
@@ -371821,7 +372185,7 @@ static const UV UNI_WB__NU_invlist[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 1047 */
-	119,	/* Number of elements */
+	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -371900,6 +372264,8 @@ static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 1047 */
 	0xAA5A,
 	0xABF0,
 	0xABFA,
+	0xFF10,
+	0xFF1A,
 	0x104A0,
 	0x104AA,
 	0x10D30,
@@ -371954,7 +372320,7 @@ static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 037 */
-	119,	/* Number of elements */
+	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -372033,6 +372399,8 @@ static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 037 */
 	0xAA5A,
 	0xABF0,
 	0xABFA,
+	0xFF10,
+	0xFF1A,
 	0x104A0,
 	0x104AA,
 	0x10D30,
@@ -373093,7 +373461,7 @@ static const UV UNI_WB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF0D,
 	0xFF0E,
 	0xFF0F,
-	0xFF1A,
+	0xFF10,
 	0xFF1C,
 	0xFF21,
 	0xFF3B,
@@ -373586,7 +373954,7 @@ static const UV UNI_WB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2FA,
 	0x1E800,
@@ -374596,7 +374964,7 @@ static const UV UNI_WB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	0xFF0D,
 	0xFF0E,
 	0xFF0F,
-	0xFF1A,
+	0xFF10,
 	0xFF1C,
 	0xFF21,
 	0xFF3B,
@@ -375089,7 +375457,7 @@ static const UV UNI_WB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2FA,
 	0x1E800,
@@ -376095,7 +376463,7 @@ static const UV UNI_WB__XX_invlist[] = {  /* for EBCDIC 037 */
 	0xFF0D,
 	0xFF0E,
 	0xFF0F,
-	0xFF1A,
+	0xFF10,
 	0xFF1C,
 	0xFF21,
 	0xFF3B,
@@ -376588,7 +376956,7 @@ static const UV UNI_WB__XX_invlist[] = {  /* for EBCDIC 037 */
 	0x1E140,
 	0x1E14A,
 	0x1E14E,
-	0x1E150,
+	0x1E14F,
 	0x1E2C0,
 	0x1E2FA,
 	0x1E800,
@@ -388569,6 +388937,7 @@ typedef enum {
 	UNI_SB__FO,
 	UNI_SB__LE,
 	UNI_SB__LO,
+	UNI_SB__NU,
 	UNI_SB__SC,
 	UNI_SB__SE,
 	UNI_SB__SP,
@@ -389739,6 +390108,7 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_SB__FO_invlist,
 	UNI_SB__LE_invlist,
 	UNI_SB__LO_invlist,
+	UNI_SB__NU_invlist,
 	UNI_SB__SC_invlist,
 	UNI_SB__SE_invlist,
 	UNI_SB__SP_invlist,
@@ -393630,24 +394000,24 @@ static const U8 WB_table[23][23] = {
  * 22b1bff498f08633f72468d46eebb65e30dc325fbb6822dde319cb605af014c2 lib/unicore/SpecialCasing.txt
  * 57913fdb1c1271fa9fd51dea08d49370f33d5bfda6bbaba348f44d90029ea11d lib/unicore/UnicodeData.txt
  * 36900e28ff01fa810d8a7e0848e1075289975188525f2c1d14487d561bbf595a lib/unicore/VerticalOrientation.txt
- * 238635e1dfcc190345ffbcab734f7017dea05d2a66f2291745c11067893689a7 lib/unicore/auxiliary/GCBTest.txt
- * b49f36b98cdd4c996fc7971b8b4d25e3c13b45f0a71f4ad0c5e70a9cebe0b956 lib/unicore/auxiliary/GraphemeBreakProperty.txt
- * d7ae54c2704f27b3a8f40ae934c2f6f3ee87bec20a865e0f9689bc1cd3f92335 lib/unicore/auxiliary/LBTest.txt
- * a9fafe0badc760379957a282bbe3d82d5a6ba113911b89501781fd6b6ad66377 lib/unicore/auxiliary/SBTest.txt
- * 5bf7faf5898403b6adad2d94f1a9ddf26de650cc7a8f2ee00590f05bbea9bd03 lib/unicore/auxiliary/SentenceBreakProperty.txt
- * 12e02e6158929ae29c9b47f76ab95d68194b1d0c295d7b4f6df31487590222a5 lib/unicore/auxiliary/WBTest.txt
- * 9be679d9772dc4842697a3a5b6e1845022f876c1f230ecea38f1be5d6d5673d8 lib/unicore/auxiliary/WordBreakProperty.txt
- * 9e6955b173a13a8a91e3c1b468c9d7e122c588aa288f707bfcef35790a828f8a lib/unicore/extracted/DBidiClass.txt
- * 80e94d5bb24639c9f322bd3b4b8159a8e9a7c33ac45076eff9cd3ecb0b9b812e lib/unicore/extracted/DBinaryProperties.txt
- * 6dc031734cd287af8b33c99435d41f6c836e8e08a7a6cb6cb07e8453cbebdb3b lib/unicore/extracted/DCombiningClass.txt
- * b143bb87f041dcb69335806cb0a1a6b2328eb25cdfa04fe6fcd4c77c6a06fe82 lib/unicore/extracted/DDecompositionType.txt
- * f63f08d36d01eb45f34ff8d2b36681252211f92db690fa1258a399a9a86df3bb lib/unicore/extracted/DEastAsianWidth.txt
- * 6fa015f11f19a9407d590827276f9884c1ee4c71fbc826a09008f7d9d7c1b255 lib/unicore/extracted/DGeneralCategory.txt
- * 1b24a2d586a8b91c0768d4da8919634463bdf126b7479a8e76b85d007cbef8a0 lib/unicore/extracted/DJoinGroup.txt
- * 8095565a527d3d0918a17e30a7bcc0c7864ac3ad748defc21027b3e1ad436368 lib/unicore/extracted/DJoinType.txt
- * 5f98a68d5aa76b06052fe16312d2fdf17547fd69c4e648532845e11beaf2002b lib/unicore/extracted/DLineBreak.txt
- * 8011b1733f6d2cc17576b2a1e20067eca51205e8e0b740d00ebd52afbec2ea39 lib/unicore/extracted/DNumType.txt
- * 8b677a4cf17a4c6949632146fa8a99aaa65689a41b9dd231f81783e81600ff36 lib/unicore/extracted/DNumValues.txt
+ * a6541b2d71764a8bf3f89a134a39b99515eefc858717862993bd15741f2bb03d lib/unicore/auxiliary/GCBTest.txt
+ * bba2b26eb46b288e5fc2243ae01de14b416a9cd129c61327e55803e1ab77c037 lib/unicore/auxiliary/GraphemeBreakProperty.txt
+ * 35ebd270ffdc8b9f03d63a3e7f82275de25cd45ab7b0c1741df6c9ee2d9aa62b lib/unicore/auxiliary/LBTest.txt
+ * 47e2bf8134f0b95e07738a036ab9aece0af2d84924270c9ec8c249bd083ce2e6 lib/unicore/auxiliary/SBTest.txt
+ * 38b7bf3e47c1c011b3f206fe58c6030bcfa8ae39353324693622c802c7df1ca1 lib/unicore/auxiliary/SentenceBreakProperty.txt
+ * 99b2cffe7d4695b7eeeffc66c1363a296f752781a5614fd3909730fe66c6b5b7 lib/unicore/auxiliary/WBTest.txt
+ * 86330d8f33bf5da9243ec01d9a2506335b09d7e916ae7f7094715f776e403bb2 lib/unicore/auxiliary/WordBreakProperty.txt
+ * a50670c09adf9a7f6e7344bdef81d5c8a2c5d116191c6f141bd772f149d8ecdc lib/unicore/extracted/DBidiClass.txt
+ * f322f50f30ab890b22d450e997bb51b972ec379ba76caf9a0b15145deddca2dc lib/unicore/extracted/DBinaryProperties.txt
+ * a857ee16245430a68577c060adbeae6e72cb25aac1dcd5f6c940eb0fdcee31f6 lib/unicore/extracted/DCombiningClass.txt
+ * e87b7feabfaad5dd17256af5845b4590908cb2ed4ca54ffd9aaaeb194305e024 lib/unicore/extracted/DDecompositionType.txt
+ * 8c368041e2509f618df29a0eefe97c4901f79b3f2e5f54e2e5b0d5e956b574dd lib/unicore/extracted/DEastAsianWidth.txt
+ * d4db33ff590a6c80d7c34d2968595586ae59bfb280978470b6e2fa2b34808405 lib/unicore/extracted/DGeneralCategory.txt
+ * b4ed74c6a72864e0df9d89024699e8ef122859a3d31515bd0c63078b7e606215 lib/unicore/extracted/DJoinGroup.txt
+ * 2a92a39d6713b8cc9a6d4eb808efaf93c52a4fcc01c149fec9892113838dae8b lib/unicore/extracted/DJoinType.txt
+ * cb0f591b443cb86b7c5a0ffcd152ec870bf4ad69f53db823510ac42cdf2797eb lib/unicore/extracted/DLineBreak.txt
+ * 509d58289bba5233a586b1ee9d21c79bee506e7b3d6f6429e688961a53353242 lib/unicore/extracted/DNumType.txt
+ * 73192b1b7662d9ea424b779bcda06ccbe57a4121bf28ed981a39a78aa5808d06 lib/unicore/extracted/DNumValues.txt
  * 56461f8238f671a5e686ca8cacd508e67d6d0b7a14ac6096938af435f76d36e0 lib/unicore/mktables
  * 93cc868487ef3345596041bcb90c302b1b056733bb95233101bc10dc2dbe36b4 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
