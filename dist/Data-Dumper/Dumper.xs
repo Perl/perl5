@@ -61,9 +61,10 @@
 #endif
 
 /* This struct contains almost all the user's desired configuration, and it
- * is treated as constant by the recursive function. This arrangement has
- * the advantage of needing less memory than passing all of them on the
- * stack all the time (as was the case in an earlier implementation). */
+ * is treated as mostly constant (except for maxrecursed) by the recursive
+ * function.  This arrangement has the advantage of needing less memory
+ * than passing all of them on the stack all the time (as was the case in
+ * an earlier implementation). */
 typedef struct {
     SV *pad;
     SV *xpad;
@@ -74,6 +75,7 @@ typedef struct {
     SV *toaster;
     SV *bless;
     IV maxrecurse;
+    bool maxrecursed; /* at some point we exceeded the maximum recursion level */
     I32 indent;
     I32 purity;
     I32 deepcopy;
@@ -97,7 +99,7 @@ static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
                     HV *seenhv, AV *postav, const I32 level, SV *apad,
-                    const Style *style);
+                    Style *style);
 
 #ifndef HvNAME_get
 #define HvNAME_get HvNAME
@@ -615,7 +617,7 @@ deparsed_output(pTHX_ SV *val)
  */
 static I32
 DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
-	AV *postav, const I32 level, SV *apad, const Style *style)
+	AV *postav, const I32 level, SV *apad, Style *style)
 {
     char tmpbuf[128];
     Size_t i;
@@ -641,6 +643,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
     if (!val)
 	return 0;
+
+    if (style->maxrecursed)
+        return 0;
 
     /* If the output buffer has less than some arbitrary amount of space
        remaining, then enlarge it. For the test case (25M of output),
@@ -793,7 +798,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
         if (style->maxrecurse > 0 && level >= style->maxrecurse) {
-            croak("Recursion limit of %" IVdf " exceeded", style->maxrecurse);
+            style->maxrecursed = TRUE;
 	}
 
 	if (realpack && !no_bless) {				/* we have a blessed ref */
@@ -1528,6 +1533,7 @@ Data_Dumper_Dumpxs(href, ...)
             style.indent = 2;
             style.quotekeys = 1;
             style.maxrecurse = 1000;
+            style.maxrecursed = FALSE;
             style.purity = style.deepcopy = style.useqq = style.maxdepth
                 = style.use_sparse_seen_hash = style.trailingcomma = 0;
             style.pad = style.xpad = style.sep = style.pair = style.sortkeys
@@ -1675,7 +1681,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
                             postav, 0, newapad, &style);
 		    SPAGAIN;
-		
+
                     if (style.indent >= 2 && !terse)
 			SvREFCNT_dec(newapad);
 
@@ -1715,6 +1721,13 @@ Data_Dumper_Dumpxs(href, ...)
 		}
 		SvREFCNT_dec(postav);
 		SvREFCNT_dec(valstr);
+
+                /* we defer croaking until here so that temporary SVs and
+                 * buffers won't be leaked */
+                if (style.maxrecursed)
+                    croak("Recursion limit of %" IVdf " exceeded",
+                            style.maxrecurse);
+		
 	    }
 	    else
 		croak("Call to new() method failed to return HASH ref");
