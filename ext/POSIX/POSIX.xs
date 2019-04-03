@@ -3345,30 +3345,48 @@ write(fd, buffer, nbytes)
 void
 abort()
 
-#ifdef I_WCHAR
-#  include <wchar.h>
+#if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE) && defined(HAS_MBRTOWC)
+#  define USE_MBR
+#else
+#  undef USE_MBR /* We don't need the mbr version unless operating under unsafe threads. */
 #endif
 
 int
 mblen(s, n)
-	char *		s
+	SV *		s
 	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        mbstate_t ps;
-#endif
     CODE:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        memset(&ps, 0, sizeof(ps)); /* Initialize state */
-        RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
-#else
-        /* This might prevent some races, but locales can be switched out
-         * without locking, so this isn't a cure all */
-        LOCALE_LOCK;
-
-        RETVAL = mblen(s, n);
-        LOCALE_UNLOCK;
+        if (! SvOK(s)) {   /* Reset state */
+#ifdef USE_MBR
+            memzero(&PL_mbrlen_ps, sizeof(PL_mbrlen_ps)); /* Initialize state */
 #endif
+            /* The return value of mblen() when the first parameter is NULL
+             * indicates if the locale is stateless or stateful.  If it
+             * matters, we prefer the more thread safe function mbrlen(), but
+             * that function doesn't give this information.  Thus we have to
+             * call mblen() itself, and we use a semaphore to minizimize races.
+             * (The lock isn't fool-proof as the locale can be changed without
+             * a lock.) */
+            LOCALE_LOCK;
+            RETVAL = mblen(NULL, n);
+            LOCALE_UNLOCK;
+        }
+        else {  /* Not resetting state */
+            size_t len;
+            char * string = SvPV(s, len);
+            if (n < len) {
+                len = n;
+            }
+#ifdef USE_MBR
+            RETVAL = mbrlen(string, len, &PL_mbrlen_ps);
+#else
+            LOCALE_LOCK; /* This might prevent some races, but locales can be
+                            switched out without locking, so this isn't a cure
+                            all */
+            RETVAL = mblen(string, len);
+            LOCALE_UNLOCK;
+#endif
+        }
     OUTPUT:
         RETVAL
 

@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 The C<POSIX::mblen()> function now works on shift state locales
+
+This function is always executed under the current C language locale.
+(See L<perllocale>.)  Most locales are stateless, but a few, notably the
+very rarely encountered ISO 2022, maintain a state between calls to this
+function.  Previously the state was cleared on every call to this
+function, but now the state is not reset unless the first parameter is
+C<undef>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

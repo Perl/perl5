@@ -1069,13 +1069,29 @@ Not implemented.  C<malloc()> is C-specific.  Perl does memory management transp
 
 =item C<mblen>
 
-This is identical to the C function C<mblen()>.
+This is identical to the C function C<mblen()>, except it is generally
+thread-safe when perl is compiled on a compiler that implements the C99
+(or above) C standard.
 
-Core Perl does not have any support for the wide and multibyte
-characters of the C standards, except under UTF-8 locales, so this might
-be a rather useless function.
+Core Perl does not have any support for wide and multibyte locales,
+except Unicode UTF-8 locales.  This function, in conjunction with other
+I<mb> functions, may be used to roll your own decoding/encoding of other
+types of multi-byte locales.
 
-However, Perl supports Unicode, see L<perluniintro>.
+Use C<undef> as the first parameter to this function to get the effect
+of passing NULL as the first parameter to the C function.  The return
+value in this case is 0 if the program's current underlying locale is
+stateless; and non-zero otherwise.  This use of C<mblen> may not be
+fully thread safe.
+
+Otherwise, the return value is the number of bytes in the next character
+that starts at the position pointed to by the first parameter (based on
+the locale that currently underlies the program, regardless of whether
+or not the function is called from Perl code that is within the scope of
+S<C<use locale>>), or negative if there is an error.  This use of
+C<mblen> is fully thread-safe on C99 and above compilers, as Perl
+transparently uses L<C<mbrlen>(3)> instead in cases where there could be
+a problem.
 
 =item C<mbstowcs>
 
