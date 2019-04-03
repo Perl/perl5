@@ -1665,7 +1665,6 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                 gvp = (GV**)hv_fetch(*stash, key, is_utf8 ? -((I32)*len) : (I32)*len, add);
                 *gv = gvp ? *gvp : NULL;
                 if (!*gv || *gv == (const GV *)&PL_sv_undef) {
-                    Safefree(tmpfullbuf); /* free our tmpfullbuf if it was used */
                     goto notok;
                 }
                 /* here we know that *gv && *gv != &PL_sv_undef */
