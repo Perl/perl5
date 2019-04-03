@@ -1075,6 +1075,9 @@ be a rather useless function.
 
 However, Perl supports Unicode, see L<perluniintro>.
 
+Use C<undef> as the first parameter to this function to get the effect
+of passing NULL as the first parameter to the C function.
+
 =item C<mbstowcs>
 
 This is identical to the C function C<mbstowcs()>.

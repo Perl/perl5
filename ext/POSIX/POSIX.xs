@@ -3316,28 +3316,40 @@ write(fd, buffer, nbytes)
 void
 abort()
 
-#ifdef I_WCHAR
-#  include <wchar.h>
-#endif
-
 int
 mblen(s, n)
-	char *		s
+	SV *		s
 	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        mbstate_t ps;
-#endif
     CODE:
 #if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        memset(&ps, 0, sizeof(ps)); /* Initialize state */
-        RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
+        if (! SvPOK(s)) {
+            memzero(&PL_mbrlen_ps, sizeof(PL_mbrlen_ps)); /* Initialize state */
+
+            /* Passing NULL to mbrlen() does not tell us if this is a stateless
+             * encoding or not, as mblen() does; it supposedly always returns
+             * 0.  To emulate mblen() in this instance, we have to actually
+             * call mblen().  This actually isn't a problem because every
+             * thread is using their own state variable, even threads in the
+             * global locale */
+            LOCALE_LOCK;
+            RETVAL = mblen(NULL, n);
+            LOCALE_UNLOCK;
+        }
+        else {
+            RETVAL = mbrlen(SvPVX(s), n, &PL_mbrlen_ps); /* Prefer reentrant
+                                                            version */
+        }
 #else
         /* This might prevent some races, but locales can be switched out
          * without locking, so this isn't a cure all */
         LOCALE_LOCK;
 
-        RETVAL = mblen(s, n);
+        if (! SvPOK(s)) {
+            RETVAL = mblen(NULL, n);
+        }
+        else {
+            RETVAL = mblen(SvPVX(s), n);
+        }
         LOCALE_UNLOCK;
 #endif
     OUTPUT:
