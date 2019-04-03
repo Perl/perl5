@@ -16632,6 +16632,38 @@ function.
 =cut
 */
 
+
+/* use PERL_MAGIC_ext to call a function to free the xop structure when
+ * freeing PL_custom_ops */
+
+static int
+custom_op_register_free(pTHX_ SV *sv, MAGIC *mg)
+{
+    XOP *xop;
+
+    PERL_UNUSED_ARG(mg);
+    xop = INT2PTR(XOP *, SvIV(sv));
+    safefree((void*)xop->xop_name);
+    safefree((void*)xop->xop_desc);
+    safefree(xop);
+    return 0;
+}
+
+
+static const MGVTBL custom_op_register_vtbl = {
+    0,                          /* get */
+    0,                          /* set */
+    0,                          /* len */
+    0,                          /* clear */
+    custom_op_register_free,     /* free */
+    0,                          /* copy */
+    0,                          /* dup */
+#ifdef MGf_LOCAL
+    0,                          /* local */
+#endif
+};
+
+
 XOPRETANY
 Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 {
@@ -16655,7 +16687,12 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
     if (PL_custom_ops)
 	he = hv_fetch_ent(PL_custom_ops, keysv, 0, 0);
 
-    /* assume noone will have just registered a desc */
+    /* See if the op isn't registered, but its name *is* registered.
+     * That implies someone is using the pre-5.14 API,where only name and
+     * description could be registered. If so, fake up a real
+     * registration.
+     * We only check for an existing name, and assume no one will have
+     * just registered a desc */
     if (!he && PL_custom_op_names &&
 	(he = hv_fetch_ent(PL_custom_op_names, keysv, 0, 0))
     ) {
@@ -16673,6 +16710,13 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 	    XopENTRY_set(xop, xop_desc, savepvn(pv, l));
 	}
 	Perl_custom_op_register(aTHX_ o->op_ppaddr, xop);
+	he = hv_fetch_ent(PL_custom_ops, keysv, 0, 0);
+        /* add magic to the SV so that the xop struct (pointed to by
+         * SvIV(sv)) is freed. Normally a static xop is registered, but
+         * for this backcompat hack, we've alloced one */
+        (void)sv_magicext(HeVAL(he), NULL, PERL_MAGIC_ext,
+                &custom_op_register_vtbl, NULL, 0);
+
     }
     else {
 	if (!he)
