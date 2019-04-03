@@ -1856,9 +1856,14 @@ STMT_START {                                                                    
             break;                                          \
         }                                                   \
                                                             \
-        if (COND) FBC_CHECK_AND_TRY                         \
-        s += UTF8SKIP(s);                                   \
-        previous_occurrence_end = s;                        \
+        if (COND) {                                         \
+            FBC_CHECK_AND_TRY                               \
+            s += UTF8SKIP(s);                               \
+            previous_occurrence_end = s;                    \
+        }                                                   \
+        else {                                              \
+            s += UTF8SKIP(s);                               \
+        }                                                   \
     }
 
 /* The three macros below are slightly different versions of the same logic.
