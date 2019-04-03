@@ -41,10 +41,10 @@ SKIP: {
     fresh_perl_is(
         'use POSIX; print &POSIX::mblen("'
       . I8_to_native("\x{c3}\x{28}")
-      . '", &POSIX::MB_CUR_MAX)',
+      . '", 2)',
       -1, {}, 'mblen() recognizes invalid multibyte characters');
 
     fresh_perl_is(
-     'use POSIX; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", &POSIX::MB_CUR_MAX)',
+     'use POSIX; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", 2)',
      2, {}, 'mblen() works on UTF-8 characters');
 }
