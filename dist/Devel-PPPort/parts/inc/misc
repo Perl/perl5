@@ -418,6 +418,7 @@ OpSIBLING_tests()
 	PREINIT:
 		OP *x;
 		OP *kid;
+		OP *middlekid;
 		OP *lastkid;
 		int count = 0;
 		int failures = 0;
@@ -441,6 +442,7 @@ OpSIBLING_tests()
 			kid = OpSIBLING(kid);
 			lastkid = kid;
 		}
+                middlekid = OpSIBLING(x);
 
 		/* Should now have a sibling */
 		if (! OpHAS_SIBLING(x) || ! OpSIBLING(x) ) {
@@ -484,6 +486,9 @@ OpSIBLING_tests()
 			failures++; warn("Op should have had a sib after maybesibset");
 		}
 
+                op_free(lastkid);
+                op_free(middlekid);
+                op_free(x);
 		RETVAL = failures;
 	OUTPUT:
 		RETVAL
