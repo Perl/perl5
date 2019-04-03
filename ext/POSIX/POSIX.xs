@@ -3332,7 +3332,12 @@ mblen(s, n)
         memset(&ps, 0, sizeof(ps)); /* Initialize state */
         RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
 #else
+        /* This might prevent some races, but locales can be switched out
+         * without locking, so this isn't a cure all */
+        LOCALE_LOCK;
+
         RETVAL = mblen(s, n);
+        LOCALE_UNLOCK;
 #endif
     OUTPUT:
         RETVAL
