@@ -15,6 +15,7 @@ BEGIN {
     }
     unshift @INC, "../../t";
     require 'loc_tools.pl';
+    require 'charset_tools.pl';
     require 'test.pl';
 }
 
@@ -38,7 +39,9 @@ SKIP: {
     delete $ENV{LC_ALL};
 
     fresh_perl_is(
-      'use POSIX; print &POSIX::mblen("\x{c3}\x{28}", &POSIX::MB_CUR_MAX)',
+        'use POSIX; print &POSIX::mblen("'
+      . I8_to_native("\x{c3}\x{28}")
+      . '", &POSIX::MB_CUR_MAX)',
       -1, {}, 'mblen() recognizes invalid multibyte characters');
 
     fresh_perl_is(
