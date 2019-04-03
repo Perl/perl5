@@ -1402,7 +1402,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 }
 
 char*
-Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
+Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
 {
     const char* s = orig;
     NV result[3] = {0.0, 0.0, 0.0};
