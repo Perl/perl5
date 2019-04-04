@@ -378,6 +378,14 @@ to replace the input file, while code like:
 
 will not.  Partly resolves [perl #133659].
 
+=item *
+
+A regression in 5.28 caused the following code to fail
+
+ close(STDIN); open(CHILD, "|wc -l")'
+
+because the child's stdin would be closed on exec. This has now been fixed.
+
 =back
 
 =head1 Known Problems
