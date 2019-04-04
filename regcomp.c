@@ -11054,8 +11054,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     if (!SvIOK(max_open)) {
         sv_setiv(max_open, RE_COMPILE_RECURSION_INIT);
     }
-    if (depth > 4 * SvIV(max_open)) { /* We increase depth by 4 for each open
-                                         paren */
+    if (depth > 4 * (UV) SvIV(max_open)) { /* We increase depth by 4 for each
+                                              open paren */
         vFAIL("Too many nested open parens");
     }
 
@@ -12883,9 +12883,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         value = (U8 *) SvPV(value_sv, value_len);
 
         /* See if the result is one code point vs 0 or multiple */
-        if (value_len > 0 && value_len <= ((SvUTF8(value_sv))
-                                           ? UTF8SKIP(value)
-                                           : 1))
+        if (value_len > 0 && value_len <= (UV) ((SvUTF8(value_sv))
+                                               ? UTF8SKIP(value)
+                                               : 1))
         {
             /* Here, exactly one code point.  If that isn't what is wanted,
              * fail */
@@ -14466,18 +14466,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             has_micro_sign = TRUE;
                         }
 
-                        *(s++) = (char) (DEPENDS_SEMANTICS)
-                                        ? toFOLD(ender)
+                        *(s++) = (DEPENDS_SEMANTICS)
+                                 ? (char) toFOLD(ender)
 
-                                          /* Under /u, the fold of any
-                                           * character in the 0-255 range
-                                           * happens to be its lowercase
-                                           * equivalent, except for LATIN SMALL
-                                           * LETTER SHARP S, which was handled
-                                           * above, and the MICRO SIGN, whose
-                                           * fold requires UTF-8 to represent.
-                                           * */
-                                        : toLOWER_L1(ender);
+                                   /* Under /u, the fold of any character in
+                                    * the 0-255 range happens to be its
+                                    * lowercase equivalent, except for LATIN
+                                    * SMALL LETTER SHARP S, which was handled
+                                    * above, and the MICRO SIGN, whose fold
+                                    * requires UTF-8 to represent.  */
+                                 : (char) toLOWER_L1(ender);
                     }
 		} /* End of adding current character to the node */
 
@@ -14727,7 +14725,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_emit += STR_SZ(len);
 
                 /* If the node isn't a single character, it can't be SIMPLE */
-                if (len > ((UTF) ? UVCHR_SKIP(ender) : 1)) {
+                if (len > (Size_t) ((UTF) ? UVCHR_SKIP(ender) : 1)) {
                     maybe_SIMPLE = 0;
                 }
 
@@ -18742,7 +18740,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     RExC_emit += 1 + STR_SZ(len);
                     STR_LEN(REGNODE_p(ret)) = len;
                     if (len == 1) {
-                        *STRING(REGNODE_p(ret)) = value;
+                        *STRING(REGNODE_p(ret)) = (U8) value;
                     }
                     else {
                         uvchr_to_utf8((U8 *) STRING(REGNODE_p(ret)), value);
@@ -19780,7 +19778,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
     }
 
     if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
-        assert(val - scan <= U32_MAX);
+        assert((UV) (val - scan) <= U32_MAX);
         ARG_SET(REGNODE_p(scan), val - scan);
     }
     else {
@@ -19892,7 +19890,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         );
     });
     if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
-        assert(val - scan <= U32_MAX);
+        assert((UV) (val - scan) <= U32_MAX);
 	ARG_SET(REGNODE_p(scan), val - scan);
     }
     else {
