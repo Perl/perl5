@@ -170,7 +170,6 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     e->chk = newSVsv(get_sv("PerlIO::encoding::fallback", 0));
     if (SvROK(e->chk))
 	Perl_croak(aTHX_ "PerlIO::encoding::fallback must be an integer");
-    SvUV_set(e->chk, SvUV(e->chk) | encode_stop_at_partial);
     e->inEncodeCall = 0;
 
     FREETMPS;
@@ -331,7 +330,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
 	XPUSHs(e->dataSV);
-	XPUSHs(e->chk);
+	mXPUSHu(SvUV(e->chk) | encode_stop_at_partial);
 	PUTBACK;
 	if (call_method("decode", G_SCALAR) != 1) {
 	    Perl_die(aTHX_ "panic: decode did not return a value");
@@ -421,7 +420,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
 	    SvUTF8_on(e->bufsv);
 	    XPUSHs(e->bufsv);
-	    XPUSHs(e->chk);
+	    mXPUSHu(SvUV(e->chk) | encode_stop_at_partial);
 	    PUTBACK;
 	    e->inEncodeCall = 1;
 	    if (call_method("encode", G_SCALAR) != 1) {
@@ -488,7 +487,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		PUSHMARK(sp);
 		XPUSHs(e->enc);
 		XPUSHs(str);
-		XPUSHs(e->chk);
+		mXPUSHu(SvUV(e->chk) | encode_stop_at_partial);
 		PUTBACK;
 		e->inEncodeCall = 1;
 		if (call_method("encode", G_SCALAR) != 1) {
