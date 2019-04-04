@@ -23160,6 +23160,7 @@ Perl_parse_uniprop_string(pTHX_
              * for this property in the hash.  So we have the go ahead to
              * expand the definition ourselves. */
 
+            PUSHSTACKi(PERLSI_MAGIC);
             ENTER;
 
             /* Create a temporary placeholder in the hash to detect recursion
@@ -23247,6 +23248,7 @@ Perl_parse_uniprop_string(pTHX_
 
             FREETMPS;
             LEAVE;
+            POPSTACK;
 
             if (prop_definition) {
 
