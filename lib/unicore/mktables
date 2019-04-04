@@ -31,7 +31,7 @@ use Text::Tabs;
 use re "/aa";
 use feature 'state';
 
-sub DEBUG () { 1 }  # Set to 0 for production; 1 for development
+sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
 sub NON_ASCII_PLATFORM { ord("A") != 65 }
