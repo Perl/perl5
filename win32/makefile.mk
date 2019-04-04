@@ -154,6 +154,8 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 #CCTYPE		= MSVC140
 # Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
 #CCTYPE		= MSVC141
+# Visual C++ 2019 (aka Visual C++ 14.2) (full version or Community Edition)
+#CCTYPE		= MSVC142
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		= GCC
 
@@ -396,7 +398,7 @@ CCHOME		*= C:\MinGW
 .ELIF "$(CCTYPE)" == "MSVC60" || \
     "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
 CCHOME		*= $(MSVCDir)
-.ELIF "$(CCTYPE)" == "MSVC141"
+.ELIF "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 CCHOME		*= $(VCToolsInstallDir)
 .ELSE
 CCHOME		*= $(VCINSTALLDIR)
@@ -484,7 +486,7 @@ CCINCDIR *= $(CCHOME)\include
 CCLIBDIR *= $(CCHOME)\lib
 .ELSE
 CCINCDIR *= $(CCHOME)\include
-.IF "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 .IF "$(WIN64)" == "define"
 CCLIBDIR *= $(CCHOME)\lib\x64
 .ELSE
@@ -673,7 +675,7 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrt.lib
 .ELSE
 LIBC		= msvcrt.lib
@@ -686,7 +688,7 @@ LINK_DBG	= -debug
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
 .ELIF  "$(CFG)" == "DebugFull"
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrtd.lib
 .ELSE
 LIBC		= msvcrtd.lib
@@ -724,7 +726,7 @@ DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
 # Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 .ENDIF
 
@@ -756,7 +758,7 @@ LIBBASEFILES	= oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 	netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib version.lib \
 	odbc32.lib odbccp32.lib comctl32.lib
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 .IF "$(CFG)" == "DebugFull"
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 .ELSE
@@ -817,7 +819,7 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
 # Console vs GUI makes no difference for DLLs, so use default for cleaner
 # building cmd lines
-.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
+.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 .IF "$(WIN64)" == "define"
 LINK_FLAGS	+= -subsystem:console,"5.02"
 .ELSE
@@ -1333,7 +1335,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
