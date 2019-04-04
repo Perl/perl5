@@ -330,7 +330,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
 	XPUSHs(e->dataSV);
-	mXPUSHu(SvUV(e->chk) | encode_stop_at_partial);
+	mXPUSHu(SvUV(e->chk) | (PerlIO_eof(n) ? 0 : encode_stop_at_partial));
 	PUTBACK;
 	if (call_method("decode", G_SCALAR) != 1) {
 	    Perl_die(aTHX_ "panic: decode did not return a value");
