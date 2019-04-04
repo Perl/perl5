@@ -386,6 +386,11 @@ A regression in 5.28 caused the following code to fail
 
 because the child's stdin would be closed on exec. This has now been fixed.
 
+=item *
+
+C<pack "u", "invalid uuencoding"> now properly NUL terminates the
+zero-length SV produced.  [perl #132655]
+
 =back
 
 =head1 Known Problems
