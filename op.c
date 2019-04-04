@@ -7706,10 +7706,29 @@ void
 Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 {
     OP *veop, *imop;
-    OP * const modname = newSVOP(OP_CONST, 0, name);
+    OP * modname;
+    I32 floor;
 
     PERL_ARGS_ASSERT_VLOAD_MODULE;
 
+    /* utilize() fakes up a BEGIN { require ..; import ... }, so make sure
+     * that it has a PL_parser to play with while doing that, and also
+     * that it doesn't mess with any existing parser, by creating a tmp
+     * new parser with lex_start(). This won't actually be used for much,
+     * since pp_require() will create another parser for the real work.
+     * The ENTER/LEAVE pair protect callers from any side effects of use.
+     *
+     * start_subparse() creates a new PL_compcv. This means that any ops
+     * allocated below will be allocated from that CV's op slab, and so
+     * will be automatically freed if the utilise() fails
+     */
+
+    ENTER;
+    SAVEVPTR(PL_curcop);
+    lex_start(NULL, NULL, LEX_START_SAME_FILTER);
+    floor = start_subparse(FALSE, 0);
+
+    modname = newSVOP(OP_CONST, 0, name);
     modname->op_private |= OPpCONST_BARE;
     if (ver) {
 	veop = newSVOP(OP_CONST, 0, ver);
@@ -7732,18 +7751,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 	}
     }
 
-    /* utilize() fakes up a BEGIN { require ..; import ... }, so make sure
-     * that it has a PL_parser to play with while doing that, and also
-     * that it doesn't mess with any existing parser, by creating a tmp
-     * new parser with lex_start(). This won't actually be used for much,
-     * since pp_require() will create another parser for the real work.
-     * The ENTER/LEAVE pair protect callers from any side effects of use.  */
-
-    ENTER;
-    SAVEVPTR(PL_curcop);
-    lex_start(NULL, NULL, LEX_START_SAME_FILTER);
-    utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
-	    veop, modname, imop);
+    utilize(!(flags & PERL_LOADMOD_DENY), floor, veop, modname, imop);
     LEAVE;
 }
 
