@@ -448,6 +448,19 @@
 #define CLANG_DIAG_IGNORE_STMT(x) CLANG_DIAG_IGNORE(x) NOOP
 #define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#  define MSVC_DIAG_IGNORE(x) __pragma(warning(push)) \
+                              __pragma(warning(disable : x))
+#  define MSVC_DIAG_RESTORE   __pragma(warning(pop))
+#else
+#  define MSVC_DIAG_IGNORE(x)
+#  define MSVC_DIAG_RESTORE
+#endif
+#define MSVC_DIAG_IGNORE_DECL(x) MSVC_DIAG_IGNORE(x) dNOOP
+#define MSVC_DIAG_RESTORE_DECL MSVC_DIAG_RESTORE dNOOP
+#define MSVC_DIAG_IGNORE_STMT(x) MSVC_DIAG_IGNORE(x) NOOP
+#define MSVC_DIAG_RESTORE_STMT MSVC_DIAG_RESTORE NOOP
+
 #define NOOP /*EMPTY*/(void)0
 #define dNOOP struct Perl___notused_struct
 

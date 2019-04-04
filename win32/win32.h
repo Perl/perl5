@@ -285,8 +285,7 @@ typedef unsigned short	mode_t;
 #  pragma intrinsic(_rotl64,_rotr64)
 #endif
 
-#pragma warning(push)
-#pragma warning(disable:4756;disable:4056)
+MSVC_DIAG_IGNORE(4756 4056)
 PERL_STATIC_INLINE
 double S_Infinity() {
     /* this is a real C literal which can get further constant folded
@@ -295,7 +294,8 @@ double S_Infinity() {
        folding INF is creating -INF */
     return (DBL_MAX+DBL_MAX);
 }
-#pragma warning(pop)
+MSVC_DIAG_RESTORE
+
 #define NV_INF S_Infinity()
 
 /* selectany allows duplicate and unused data symbols to be removed by
