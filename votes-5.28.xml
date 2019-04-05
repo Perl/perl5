@@ -35,9 +35,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>New Feature Fixes</h3>
 
-Note: This was subsequently superseded by f4e61fc03836484ea88518e8bf04cc1b32a6a1a0, which khw was unsure of the suitability of.
-<commit votes="khw tonyc arc" id="393e5a4585b92e635cfc4eee34da8f86f3bfd2af" ticket="133547" desc="script run broken"/>
-
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
