@@ -1938,14 +1938,14 @@ Perl_scalarvoid(pTHX_ OP *arg)
     OP *kid;
     SV* sv;
     OP *o = arg;
-    dDEFER_OP;
 
     PERL_ARGS_ASSERT_SCALARVOID;
 
-    do {
+    while (1) {
         U8 want;
         SV *useless_sv = NULL;
         const char* useless = NULL;
+        OP * next_kid = NULL;
 
         if (o->op_type == OP_NEXTSTATE
             || o->op_type == OP_DBSTATE
@@ -1959,7 +1959,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
             || (PL_parser && PL_parser->error_count)
             || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
         {
-            continue;
+            goto get_next_op;
         }
 
         if ((o->op_private & OPpTARGET_MY)
@@ -1967,7 +1967,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         {
             /* newASSIGNOP has already applied scalar context, which we
                leave, as if this op is inside SASSIGN.  */
-            continue;
+            goto get_next_op;
         }
 
         o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
@@ -2226,11 +2226,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_COND_EXPR:
         case OP_ENTERGIVEN:
         case OP_ENTERWHEN:
-            for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
-                if (!(kid->op_flags & OPf_KIDS))
-                    scalarvoid(kid);
-                else
-                    DEFER_OP(kid);
+            next_kid = OpSIBLING(cUNOPo->op_first);
         break;
 
         case OP_NULL:
@@ -2252,11 +2248,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_LEAVEGIVEN:
         case OP_LEAVEWHEN:
         kids:
-            for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
-                if (!(kid->op_flags & OPf_KIDS))
-                    scalarvoid(kid);
-                else
-                    DEFER_OP(kid);
+            next_kid = cLISTOPo->op_first;
             break;
         case OP_LIST:
             /* If the first kid after pushmark is something that the padrange
@@ -2297,12 +2289,26 @@ Perl_scalarvoid(pTHX_ OP *arg)
                            "Useless use of %s in void context",
                            useless);
         }
-    } while ( (o = POP_DEFERRED_OP()) );
 
-    DEFER_OP_CLEANUP;
+      get_next_op:
+        /* if a kid hasn't been nominated to process, continue with the
+         * next sibling, or if no siblings left, go back to the parent's
+         * siblings and so on
+         */
+        while (!next_kid) {
+            if (o == arg)
+                return arg; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o))
+                next_kid = o->op_sibparent;
+            else
+                o = o->op_sibparent; /*try parent's next sibling */
+        }
+        o = next_kid;
+    }
 
     return arg;
 }
+
 
 static OP *
 S_listkids(pTHX_ OP *o)
