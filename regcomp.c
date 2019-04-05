@@ -16632,7 +16632,7 @@ STATIC regnode_offset
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool stop_at_1,  /* Just parse the next thing, don't
                                            look for a full character class */
-                 bool allow_multi_folds,
+                 bool allow_mutiple_chars,
                  const bool silence_non_portable,   /* Don't output warnings
                                                        about too large
                                                        characters */
@@ -16787,7 +16787,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 #if UNICODE_MAJOR_VERSION < 3 /* no multifolds in early Unicode */      \
     || (UNICODE_MAJOR_VERSION == 3 && UNICODE_DOT_VERSION == 0          \
                                    && UNICODE_DOT_DOT_VERSION == 0)
-    allow_multi_folds = FALSE;
+    allow_mutiple_chars = FALSE;
 #endif
 
     /* We include the /i status at the beginning of this so that we can
@@ -16803,7 +16803,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (UCHARAT(RExC_parse) == '^') {	/* Complement the class */
 	RExC_parse++;
         invert = TRUE;
-        allow_multi_folds = FALSE;
+        allow_mutiple_chars = FALSE;
         MARK_NAUGHTY(1);
         SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
     }
@@ -17522,7 +17522,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          *  "ss"  =~ /^[^\xDF]+$/i => N
          *
          * See [perl #89750] */
-        if (FOLD && allow_multi_folds && value == prevvalue) {
+        if (FOLD && allow_mutiple_chars && value == prevvalue) {
             if (    value == LATIN_SMALL_LETTER_SHARP_S
                 || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
                                                         value)))
