@@ -651,6 +651,7 @@ the strings?).
  Sawyer X  5.28.0       2018-Jun-22
  Steve     5.28.1-RC1   2018-Nov-08
  Steve     5.28.1       2018-Nov-29
+ Steve     5.28.2-RC1   2019-Apr-05
 
  Sawyer X  5.29.0       2018-Jun-26     The 5.29 development track
  Steve     5.29.1       2018-Jul-20
