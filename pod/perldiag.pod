@@ -4018,17 +4018,33 @@ probably not what you want.
 (F) Named Unicode character escapes (C<\N{...}>) may return a
 multi-character sequence.  Even though a character class is
 supposed to match just one character of input, perl will match the
-whole thing correctly, except when the class is inverted (C<[^...]>),
-or the escape is the beginning or final end point of a range.  The
-mathematically logical behavior for what matches when inverting
+whole thing correctly, except under certain conditions.  These currently
+are
+
+=over 4
+
+=item When the class is inverted (C<[^...]>)
+
+The mathematically logical behavior for what matches when inverting
 is very different from what people expect, so we have decided to
-forbid it.  Similarly unclear is what should be generated when the
+forbid it.
+
+=item The escape is the beginning or final end point of a range
+
+Similarly unclear is what should be generated when the
 C<\N{...}> is used as one of the end points of the range, such as in
 
  [\x{41}-\N{ARABIC SEQUENCE YEH WITH HAMZA ABOVE WITH AE}]
 
 What is meant here is unclear, as the C<\N{...}> escape is a sequence
 of code points, so this is made an error.
+
+=item In a regex set
+
+The syntax S<C<(?[   ])>> in a regular expression yields a list of
+single code points, none can be a sequence.
+
+=back
 
 =item No %s allowed while running setuid
 

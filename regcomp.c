@@ -16995,7 +16995,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         else { /* cp_count > 1 */
                             assert(cp_count > 1);
                             if (! RExC_in_multi_char_class) {
-                                if (invert || range || *RExC_parse == '-') {
+                                if ( ! allow_mutiple_chars
+                                    || invert
+                                    || range
+                                    || *RExC_parse == '-')
+                                {
                                     if (strict) {
                                         RExC_parse--;
                                         vFAIL("\\N{} in inverted character class or as a range end-point is restricted to one character");
