@@ -7192,7 +7192,7 @@ Perl_yylex(pTHX)
 	if (!anydelim && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
 	    s = d + 1;
-            pl_yylval.pval =
+            pl_yylval.opval =
                 newSVOP(OP_CONST, 0,
                     newSVpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0));
 	    CLINE;
