@@ -16,7 +16,7 @@ deemed necessary by the Pumpking.
 Code freezes (which happen in the 5.29.X series)
 
   2019-02-20  5.29.8 ✓        Contentious changes freeze
-  2019-03-20  5.29.9          User-visible changes to correctly
+  2019-03-20  5.29.9 ✓        User-visible changes to correctly
                               functioning programs freeze
   2019-04-20  5.29.10         Full code freeze
   2019-05-20  5.30.0          Stable release!
@@ -25,6 +25,7 @@ Code freezes (which happen in the 5.29.X series)
 
   2018-05-20  5.28.0 ✓        Sawyer X
   2018-11-29  5.28.1 ✓        Steve Hay
+  2019-04-??  5.28.2          Steve Hay
 
 =head2 Perl 5.26
 
