@@ -219,6 +219,20 @@ L<Announced on 2018-06-26 by Sawyer X|http://nntp.perl.org/group/perl.perl5.port
 
   Courage is the only antidote for danger.
 
+=head2 v5.28.2-RC1 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Quangle Wangle's Hat
+
+L<Announced on 2019-04-05 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/04/msg254218.html>
+
+  On the top of the Crumpetty Tree
+    The Quangle Wangle sat,
+  But his face you could not see,
+    On account of his Beaver Hat.
+  For his Hat was a hundred and two feet wide,
+  With ribbons and bibbons on every side,
+  And bells, and buttons, and loops, and lace,
+  So that nobody ever could see the face
+      Of the Quangle Wangle Quee.
+
 =head2 v5.28.1 - Humphrey Burton, "Leonard Bernstein"
 
 L<Announced on 2018-11-29 by Steve Hay|http://nntp.perl.org/group/perl.perl5.porters/2018/11/msg252975.html>
