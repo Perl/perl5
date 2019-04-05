@@ -14,19 +14,20 @@ L<perl5281delta>, which describes differences between 5.28.0 and 5.28.1.
 
 =head1 Incompatible Changes
 
-=head2 Any set of digits in the Common script are legal in a script run
-of another script
+=head2 Any set of digits in the Common script are legal in a script run of
+another script
 
-There are several sets of digits in the Common script.  C<[0-9]> is the
-most familiar.  But there are also C<[\x{FF10}-\x{FF19}]> (FULLWIDTH
-DIGIT ZERO - FULLWIDTH DIGIT NINE), and several sets for use in
-mathematical notation, such as the MATHEMATICAL DOUBLE-STRUCK DIGITs.
-Any of these sets should be able to appear in script runs of, say,
-Greek.  But the design of 5.30 overlooked all but the ASCII digits
-C<[0-9]>, so the design was flawed.  This has been fixed, so is both a
-bug fix and an incompatibility. [perl #133547]
+There are several sets of digits in the Common script.  C<[0-9]> is the most
+familiar.  But there are also C<[\x{FF10}-\x{FF19}]> (FULLWIDTH DIGIT ZERO -
+FULLWIDTH DIGIT NINE), and several sets for use in mathematical notation, such
+as the MATHEMATICAL DOUBLE-STRUCK DIGITs.  Any of these sets should be able to
+appear in script runs of, say, Greek.  But the previous design overlooked all
+but the ASCII digits C<[0-9]>, so the design was flawed.  This has been fixed,
+so is both a bug fix and an incompatibility.
 
 All digits in a run still have to come from the same set of ten digits.
+
+L<[perl #133547]|https://rt.perl.org/Ticket/Display.html?id=133547>
 
 =head1 Modules and Pragmata
 
@@ -125,8 +126,8 @@ L<[perl #132158]|https://rt.perl.org/Ticket/Display.html?id=132158>
 
 =item *
 
-See L</Any set of digits in the Common script are legal in a script run
-of another script>.
+See L</Any set of digits in the Common script are legal in a script run of
+another script>.
 
 =back
 
