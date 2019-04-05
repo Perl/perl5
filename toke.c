@@ -340,7 +340,7 @@ static struct debug_tokens {
     { GIVEN,		TOKENTYPE_IVAL,		"GIVEN" },
     { HASHBRACK,	TOKENTYPE_NONE,		"HASHBRACK" },
     { IF,		TOKENTYPE_IVAL,		"IF" },
-    { LABEL,		TOKENTYPE_PVAL,		"LABEL" },
+    { LABEL,		TOKENTYPE_OPVAL,	"LABEL" },
     { LOCAL,		TOKENTYPE_IVAL,		"LOCAL" },
     { LOOPEX,		TOKENTYPE_OPNUM,	"LOOPEX" },
     { LSTOP,		TOKENTYPE_OPNUM,	"LSTOP" },
@@ -7192,9 +7192,9 @@ Perl_yylex(pTHX)
 	if (!anydelim && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
 	    s = d + 1;
-	    pl_yylval.pval = savepvn(PL_tokenbuf, len+1);
-	    pl_yylval.pval[len] = '\0';
-	    pl_yylval.pval[len+1] = UTF ? 1 : 0;
+            pl_yylval.pval =
+                newSVOP(OP_CONST, 0,
+                    newSVpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0));
 	    CLINE;
 	    TOKEN(LABEL);
 	}
@@ -12577,10 +12577,11 @@ Perl_parse_label(pTHX_ U32 flags)
     if (PL_nexttoke) {
 	PL_parser->yychar = yylex();
 	if (PL_parser->yychar == LABEL) {
-	    char * const lpv = pl_yylval.pval;
-	    STRLEN llen = strlen(lpv);
+	    SV * const labelsv = cSVOPx(pl_yylval.opval)->op_sv;
 	    PL_parser->yychar = YYEMPTY;
-	    return newSVpvn_flags(lpv, llen, lpv[llen+1] ? SVf_UTF8 : 0);
+	    cSVOPx(pl_yylval.opval)->op_sv = NULL;
+	    op_free(pl_yylval.opval);
+	    return labelsv;
 	} else {
 	    yyunlex();
 	    goto no_label;
