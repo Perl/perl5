@@ -501,13 +501,16 @@ only) byte is pointed to by C<s>.
 /*
 
 =for apidoc Am|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
-returns the number of bytes in the UTF-8 encoded character whose first (perhaps
-only) byte is pointed to by C<s>.  But never returns beyond C<e>.
+returns 0 if S<C<s E<gt>= e>>; otherwise returns the number of bytes in the
+UTF-8 encoded character whose first  byte is pointed to by C<s>.  But it never
+returns beyond C<e>.  On DEBUGGING builds, it asserts that S<C<s E<lt>= e>>.
 
 =cut
  */
-#define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) > (s))             \
-                               MIN(((e) - (s)), UTF8_SKIP(s)))
+#define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                \
+                              ((e) - (s)) <= 0                      \
+                               ? 0                                  \
+                               : MIN(((e) - (s)), UTF8_SKIP(s)))
 
 /* Most code that says 'UNI_' really means the native value for code points up
  * through 255 */
