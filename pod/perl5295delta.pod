@@ -135,7 +135,7 @@ prevents C<DYLD_LIBRARY_PATH> from being passed to the shell, which
 prevents that variable being passed to the testing or build process,
 so running C<perl> couldn't find F<libperl.dylib>.
 
-To workaround that, the initial build of the F<perl> executable
+To work around that, the initial build of the F<perl> executable
 expects to find F<libperl.dylib> in the build directory, and the
 library path is then adjusted during installation to point to the
 installed library.
