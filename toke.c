@@ -4053,21 +4053,21 @@ S_scan_const(pTHX_ char *start)
         else if (s_is_utf8) { /* UTF8ness matters: convert output to utf8 */
             STRLEN need = send - s + 1; /* See Note on sizing above. */
 
-		SvCUR_set(sv, d - SvPVX_const(sv));
-		SvPOK_on(sv);
-		*d = '\0';
+            SvCUR_set(sv, d - SvPVX_const(sv));
+            SvPOK_on(sv);
+            *d = '\0';
 
-                if (utf8_variant_count == 0) {
-                    SvUTF8_on(sv);
-                    d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + need);
-                }
-                else {
-                    sv_utf8_upgrade_flags_grow(sv,
-                                               SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-                                               need);
-                    d = SvPVX(sv) + SvCUR(sv);
-                }
-		d_is_utf8 = TRUE;
+            if (utf8_variant_count == 0) {
+                SvUTF8_on(sv);
+                d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + need);
+            }
+            else {
+                sv_utf8_upgrade_flags_grow(sv,
+                                           SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+                                           need);
+                d = SvPVX(sv) + SvCUR(sv);
+            }
+            d_is_utf8 = TRUE;
             goto default_action; /* Redo, having upgraded so both are UTF-8 */
         }
         else {  /* UTF8ness matters: convert this non-UTF8 source char to
