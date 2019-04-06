@@ -4050,20 +4050,12 @@ S_scan_const(pTHX_ char *start)
             d += len;
             s += len;
         }
-        else { /* UTF8ness matters and doesn't match, need to convert */
-	    STRLEN len = 1;
-	    const UV nextuv   = (s_is_utf8)
-                                ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
-                                : (UV) ((U8) *s);
-	    STRLEN need = UVCHR_SKIP(nextuv);
+        else if (s_is_utf8) { /* UTF8ness matters: convert output to utf8 */
+            STRLEN need = send - s + 1; /* See Note on sizing above. */
 
-	    if (!d_is_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);
 		*d = '\0';
-
-                /* See Note on sizing above. */
-                need += (STRLEN)(send - s) + 1;
 
                 if (utf8_variant_count == 0) {
                     SvUTF8_on(sv);
@@ -4076,17 +4068,18 @@ S_scan_const(pTHX_ char *start)
                     d = SvPVX(sv) + SvCUR(sv);
                 }
 		d_is_utf8 = TRUE;
-	    } else if (need > len) {
-		/* encoded value larger than old, may need extra space (NOTE:
-		 * SvCUR() is not set correctly here).   See Note on sizing
-		 * above.  */
-                const STRLEN extra = need + (send - s) + 1;
+            goto default_action; /* Redo, having upgraded so both are UTF-8 */
+        }
+        else {  /* UTF8ness matters: convert this non-UTF8 source char to
+                   UTF-8 for output.  It will occupy 2 bytes */
+            if (d + 2 >= SvEND(sv)) {
+                const STRLEN extra = 2 + (send - s - 1) + 1;
 		const STRLEN off = d - SvPVX_const(sv);
 		d = off + SvGROW(sv, off + extra);
 	    }
-	    s += len;
-
-	    d = (char*)uvchr_to_utf8((U8*)d, nextuv);
+            *d++ = UTF8_EIGHT_BIT_HI(*s);
+            *d++ = UTF8_EIGHT_BIT_LO(*s);
+            s++;
 	}
     } /* while loop to process each character */
 
