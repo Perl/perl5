@@ -2909,8 +2909,8 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;               /* are we in a translit range? */
     bool didrange = FALSE;              /* did we just finish a range? */
     bool in_charclass = FALSE;          /* within /[...]/ */
-    bool has_utf8 = FALSE;              /* Output constant is UTF8 */
-    bool  this_utf8 = cBOOL(UTF);       /* Is the source string assumed to be
+    bool d_is_utf8 = FALSE;             /* Output constant is UTF8 */
+    bool s_is_utf8 = cBOOL(UTF);        /* Is the source string assumed to be
                                            UTF8?  But, this can show as true
                                            when the source isn't utf8, as for
                                            example when it is entirely composed
@@ -2957,8 +2957,8 @@ S_scan_const(pTHX_ char *start)
     assert(PL_lex_inwhat != OP_TRANSR);
     if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
 	/* If we are doing a trans and we know we want UTF8 set expectation */
-	has_utf8   = PL_parser->lex_sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
-	this_utf8  = PL_parser->lex_sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
+	d_is_utf8  = PL_parser->lex_sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
+	s_is_utf8  = PL_parser->lex_sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
     }
 
     /* Protect sv from errors and fatal warnings. */
@@ -3014,7 +3014,7 @@ S_scan_const(pTHX_ char *start)
                      * occurences in the constant, except those added by a
                      * backslash escape sequence, like \x{100}.  Mostly, those
                      * set 'has_above_latin1' as appropriate */
-                    if (this_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
+                    if (s_is_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
                         has_above_latin1 = TRUE;
                     }
 
@@ -3039,7 +3039,7 @@ S_scan_const(pTHX_ char *start)
                      * time through the loop */
                     offset_to_max = d - SvPVX_const(sv);
 
-                    if (this_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
+                    if (s_is_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
                         has_above_latin1 = TRUE;
                     }
 
@@ -3069,7 +3069,7 @@ S_scan_const(pTHX_ char *start)
                 IV real_range_max = 0;
 #endif
                 /* Get the code point values of the range ends. */
-                if (has_utf8) {
+                if (d_is_utf8) {
                     /* We know the utf8 is valid, because we just constructed
                      * it ourselves in previous loop iterations */
                     min_ptr = (char*) utf8_hop( (U8*) max_ptr, -1);
@@ -3100,7 +3100,7 @@ S_scan_const(pTHX_ char *start)
                  * get it out of the way now.) */
                 if (UNLIKELY(range_max == range_min)) {
                     d = max_ptr;
-                    if (! has_utf8 && ! UVCHR_IS_INVARIANT(range_max)) {
+                    if (! d_is_utf8 && ! UVCHR_IS_INVARIANT(range_max)) {
                         utf8_variant_count--;
                     }
                     goto range_done;
@@ -3174,7 +3174,7 @@ S_scan_const(pTHX_ char *start)
 
                 /* Here the range contains at least 3 code points */
 
-		if (has_utf8) {
+		if (d_is_utf8) {
 
                     /* If everything in the transliteration is below 256, we
                      * can avoid special handling later.  A translation table
@@ -3260,7 +3260,7 @@ S_scan_const(pTHX_ char *start)
                  * */
                 grow = (range_max - 1) - (range_min + 1) + 1;
 
-                if (has_utf8) {
+                if (d_is_utf8) {
 #ifdef EBCDIC
                     /* In some cases in EBCDIC, we haven't yet calculated a
                      * precise amount needed for the UTF-8 variants.  Just
@@ -3297,7 +3297,7 @@ S_scan_const(pTHX_ char *start)
                     /* Recall that the min and max are now in Unicode terms, so
                      * we have to convert each character to its native
                      * equivalent */
-                    if (has_utf8) {
+                    if (d_is_utf8) {
                         for (i = range_min; i <= range_max; i++) {
                             append_utf8_from_native_byte(
                                                     LATIN1_TO_NATIVE((U8) i),
@@ -3317,7 +3317,7 @@ S_scan_const(pTHX_ char *start)
                     /* Here, no conversions are necessary, which means that the
                      * first character in the range is already in 'd' and
                      * valid, so we can skip overwriting it */
-                    if (has_utf8) {
+                    if (d_is_utf8) {
                         SSize_t i;
                         d += UTF8SKIP(d);
                         for (i = range_min + 1; i <= range_max; i++) {
@@ -3574,7 +3574,7 @@ S_scan_const(pTHX_ char *start)
 		    *d++ = (char) uv;
 		}
 		else {
-		    if (!has_utf8 && uv > 255) {
+		    if (!d_is_utf8 && uv > 255) {
 
                         /* Here, 'uv' won't fit unless we convert to UTF-8.
                          * If we've only seen invariants so far, all we have to
@@ -3602,10 +3602,10 @@ S_scan_const(pTHX_ char *start)
                         }
 
                         has_above_latin1 = TRUE;
-                        has_utf8 = TRUE;
+                        d_is_utf8 = TRUE;
                     }
 
-                    if (! has_utf8) {
+                    if (! d_is_utf8) {
 		        *d++ = (char)uv;
                         utf8_variant_count++;
                     }
@@ -3747,7 +3747,7 @@ S_scan_const(pTHX_ char *start)
                           * tr/// doesn't care about Unicode rules, so no need
                           * there to upgrade to UTF-8 for small enough code
                           * points */
-			if (! has_utf8 && (   uv > 0xFF
+			if (! d_is_utf8 && (   uv > 0xFF
                                            || PL_lex_inwhat != OP_TRANS))
                         {
 			    /* See Note on sizing above.  */
@@ -3769,12 +3769,12 @@ S_scan_const(pTHX_ char *start)
                                 d = SvPVX(sv) + SvCUR(sv);
                             }
 
-			    has_utf8 = TRUE;
+			    d_is_utf8 = TRUE;
                             has_above_latin1 = TRUE;
 			}
 
                         /* Add the (Unicode) code point to the output. */
-			if (! has_utf8 || OFFUNI_IS_INVARIANT(uv)) {
+			if (! d_is_utf8 || OFFUNI_IS_INVARIANT(uv)) {
 			    *d++ = (char) LATIN1_TO_NATIVE(uv);
 			}
 			else {
@@ -3938,7 +3938,7 @@ S_scan_const(pTHX_ char *start)
 
                          /* Upgrade destination to be utf8 if this new
                           * component is */
-			if (! has_utf8 && SvUTF8(res)) {
+			if (! d_is_utf8 && SvUTF8(res)) {
 			    /* See Note on sizing above.  */
                             const STRLEN extra = len + (send - s) + 1;
 
@@ -3956,7 +3956,7 @@ S_scan_const(pTHX_ char *start)
 						extra);
                                 d = SvPVX(sv) + SvCUR(sv);
                             }
-			    has_utf8 = TRUE;
+			    d_is_utf8 = TRUE;
 			} else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
 
 			    /* See Note on sizing above.  (NOTE: SvCUR() is not
@@ -4032,14 +4032,14 @@ S_scan_const(pTHX_ char *start)
         if (NATIVE_BYTE_IS_INVARIANT((U8)(*s))) {
 	    *d++ = *s++;
         }
-        else if (! this_utf8 && ! has_utf8) {
+        else if (! s_is_utf8 && ! d_is_utf8) {
             /* If neither source nor output is UTF-8, is also a single byte,
              * just copy it; but this byte counts should we later have to
              * convert to UTF-8 */
 	    *d++ = *s++;
             utf8_variant_count++;
         }
-        else if (this_utf8 && has_utf8) {   /* Both UTF-8, can just copy */
+        else if (s_is_utf8 && d_is_utf8) {   /* Both UTF-8, can just copy */
 	    const STRLEN len = UTF8SKIP(s);
 
             /* We expect the source to have already been checked for
@@ -4052,12 +4052,12 @@ S_scan_const(pTHX_ char *start)
         }
         else { /* UTF8ness matters and doesn't match, need to convert */
 	    STRLEN len = 1;
-	    const UV nextuv   = (this_utf8)
+	    const UV nextuv   = (s_is_utf8)
                                 ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
                                 : (UV) ((U8) *s);
 	    STRLEN need = UVCHR_SKIP(nextuv);
 
-	    if (!has_utf8) {
+	    if (!d_is_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);
 		*d = '\0';
@@ -4075,7 +4075,7 @@ S_scan_const(pTHX_ char *start)
                                                need);
                     d = SvPVX(sv) + SvCUR(sv);
                 }
-		has_utf8 = TRUE;
+		d_is_utf8 = TRUE;
 	    } else if (need > len) {
 		/* encoded value larger than old, may need extra space (NOTE:
 		 * SvCUR() is not set correctly here).   See Note on sizing
@@ -4098,7 +4098,7 @@ S_scan_const(pTHX_ char *start)
 		   " >= %" UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
 
     SvPOK_on(sv);
-    if (has_utf8) {
+    if (d_is_utf8) {
 	SvUTF8_on(sv);
 	if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
 	    PL_parser->lex_sub_op->op_private |=
@@ -10666,7 +10666,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     char term;			/* terminating character */
     char *to;			/* current position in the sv's data */
     I32 brackets = 1;		/* bracket nesting level */
-    bool has_utf8 = FALSE;	/* is there any utf8 content? */
+    bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
     IV termcode;		/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES+1]; /* terminating string */
     STRLEN termlen;		/* length of terminating string */
@@ -10781,8 +10781,8 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 			break;
                     }
 		}
-		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF) {
-		    has_utf8 = TRUE;
+		else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF) {
+		    d_is_utf8 = TRUE;
                 }
 
 		*to = *s;
@@ -10815,8 +10815,8 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		    break;
 		else if ((UV)*s == PL_multi_open)
 		    brackets++;
-		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
-		    has_utf8 = TRUE;
+		else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
+		    d_is_utf8 = TRUE;
 		*to = *s;
 	    }
 	}
@@ -10866,7 +10866,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 	    sv_catpvn(sv, s, termlen);
     s += termlen;
 
-    if (has_utf8)
+    if (d_is_utf8)
 	SvUTF8_on(sv);
 
     PL_multi_end = CopLINE(PL_curcop);
