@@ -3399,8 +3399,19 @@ S_scan_const(pTHX_ char *start)
              * friends */
 	else if (*s == '(' && PL_lex_inpat && s[1] == '?' && !in_charclass) {
 	    if (s[2] == '#') {
-		while (s+1 < send && *s != ')')
-		    *d++ = *s++;
+                if (s_is_utf8) {
+                    PERL_UINT_FAST8_T  len = UTF8SKIP(s);
+
+                    while (s + len < send && *s != ')') {
+                        Copy(s, d, len, U8);
+                        d += len;
+                        s += len;
+                        len = UTF8_SAFE_SKIP(s, send);
+                    }
+                }
+                else while (s+1 < send && *s != ')') {
+                    *d++ = *s++;
+                }
 	    }
 	    else if (!PL_lex_casemods
                      && (    s[2] == '{' /* This should match regcomp.c */

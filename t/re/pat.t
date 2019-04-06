@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 862;  # Update this when adding/deleting tests.
+plan tests => 863;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2093,6 +2093,16 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
         fresh_perl_is('"έδωσαν ελληνικήვე" =~ m/[^0](?=0)0?/', "",
                       {wide_chars => 1},
                       '[^0] doesnt crash on UTF-8 target string');
+    }
+
+    {   # [perl #133992]  This is a tokenizer bug of parsing a pattern
+        fresh_perl_is(q:$z = do {
+                                use utf8;
+                                "q!ÑÐµÑÑ! =~ m'"
+                        };
+                        $z .= 'è(?#';
+                        $z .= "'";
+                        eval $z;:, "", {}, 'foo');
     }
 
 } # End of sub run_tests
