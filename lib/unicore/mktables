@@ -12966,9 +12966,25 @@ sub register_fraction($) {
 
     my $rational = shift;
 
-    my $float = eval $rational;
-    $float = sprintf "%.*e", $E_FLOAT_PRECISION, $float;
+    my $floating = eval $rational;
 
+    my @floats = sprintf "%.*e", $E_FLOAT_PRECISION, $floating;
+
+    # See if the denominator is a power of 2.
+    $rational =~ m!.*/(.*)!;
+    my $denominator = $1;
+    if (defined $denominator && (($denominator & ($denominator - 1)) == 0)) {
+
+        # These have an exact representation in binary, so rounding could go
+        # either way.  It turns out that Windows doesn't necessarily round
+        # towards even, so output an extra entry
+        my $extra_digit_float = sprintf "%.*e", $E_FLOAT_PRECISION + 1, $floating;
+        if ($extra_digit_float =~ / ( .* ) ( [02468] ) 5 ( e .*) /ix) {
+            push @floats, $1 . ($2 + 1) . $3;
+        }
+    }
+
+    foreach my $float (@floats) {
     # Strip off any leading zeros beyond 2 digits to make it C99 compliant.
     # (Windows has 3 digit exponents, contrary to C99)
     $float =~ s/ ( .* e [-+] ) 0* ( \d{2,}? ) /$1$2/x;
@@ -12982,6 +12998,7 @@ sub register_fraction($) {
                             . "  \$E_FLOAT_PRECISION must be increased");
     }
     $nv_floating_to_rational{$float} = $rational;
+    }
     return;
 }
 
