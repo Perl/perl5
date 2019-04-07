@@ -12985,19 +12985,19 @@ sub register_fraction($) {
     }
 
     foreach my $float (@floats) {
-    # Strip off any leading zeros beyond 2 digits to make it C99 compliant.
-    # (Windows has 3 digit exponents, contrary to C99)
-    $float =~ s/ ( .* e [-+] ) 0* ( \d{2,}? ) /$1$2/x;
+        # Strip off any leading zeros beyond 2 digits to make it C99
+        # compliant.  (Windows has 3 digit exponents, contrary to C99)
+        $float =~ s/ ( .* e [-+] ) 0* ( \d{2,}? ) /$1$2/x;
 
-    if (   defined $nv_floating_to_rational{$float}
-        && $nv_floating_to_rational{$float} ne $rational)
-    {
-        die Carp::my_carp_bug("Both '$rational' and"
+        if (   defined $nv_floating_to_rational{$float}
+            && $nv_floating_to_rational{$float} ne $rational)
+        {
+            die Carp::my_carp_bug("Both '$rational' and"
                             . " '$nv_floating_to_rational{$float}' evaluate to"
                             . " the same floating point number."
                             . "  \$E_FLOAT_PRECISION must be increased");
-    }
-    $nv_floating_to_rational{$float} = $rational;
+        }
+        $nv_floating_to_rational{$float} = $rational;
     }
     return;
 }
