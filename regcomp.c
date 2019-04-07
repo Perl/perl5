@@ -17355,33 +17355,35 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 }
                 else { /* Here, isn't the complement of any already parsed
                           class */
-                POSIXL_SET(posixl, namedclass);
-                has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
-                anyof_flags |= ANYOF_MATCHES_POSIXL;
+                    POSIXL_SET(posixl, namedclass);
+                    has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
+                    anyof_flags |= ANYOF_MATCHES_POSIXL;
 
-                /* The above-Latin1 characters are not subject to locale rules.
-                 * Just add them to the unconditionally-matched list */
+                    /* The above-Latin1 characters are not subject to locale
+                     * rules.  Just add them to the unconditionally-matched
+                     * list */
 
-                /* Get the list of the above-Latin1 code points this matches */
-                _invlist_intersection_maybe_complement_2nd(PL_AboveLatin1,
-                                        PL_XPosix_ptrs[classnum],
+                    /* Get the list of the above-Latin1 code points this
+                     * matches */
+                    _invlist_intersection_maybe_complement_2nd(PL_AboveLatin1,
+                                            PL_XPosix_ptrs[classnum],
 
-                                        /* Odd numbers are complements, like
-                                        * NDIGIT, NASCII, ... */
-                                        namedclass % 2 != 0,
-                                        &scratch_list);
-                /* Checking if 'cp_list' is NULL first saves an extra clone.
-                 * Its reference count will be decremented at the next union,
-                 * etc, or if this is the only instance, at the end of the
-                 * routine */
-                if (! cp_list) {
-                    cp_list = scratch_list;
-                }
-                else {
-                    _invlist_union(cp_list, scratch_list, &cp_list);
-                    SvREFCNT_dec_NN(scratch_list);
-                }
-                continue;   /* Go get next character */
+                                            /* Odd numbers are complements,
+                                             * like NDIGIT, NASCII, ... */
+                                            namedclass % 2 != 0,
+                                            &scratch_list);
+                    /* Checking if 'cp_list' is NULL first saves an extra
+                     * clone.  Its reference count will be decremented at the
+                     * next union, etc, or if this is the only instance, at the
+                     * end of the routine */
+                    if (! cp_list) {
+                        cp_list = scratch_list;
+                    }
+                    else {
+                        _invlist_union(cp_list, scratch_list, &cp_list);
+                        SvREFCNT_dec_NN(scratch_list);
+                    }
+                    continue;   /* Go get next character */
                 }
             }
             else {
