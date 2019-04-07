@@ -17331,13 +17331,30 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             ) {
                 SV* scratch_list = NULL;
 
-                /* What the Posix classes (like \w, [:space:]) match in locale
-                 * isn't knowable under locale until actual match time.  A
+                /* What the Posix classes (like \w, [:space:]) match isn't
+                 * generally knowable under locale until actual match time.  A
                  * special node is used for these which has extra space for a
                  * bitmap, with a bit reserved for each named class that is to
-                 * be matched against.  This isn't needed for \p{} and
+                 * be matched against.  (This isn't needed for \p{} and
                  * pseudo-classes, as they are not affected by locale, and
-                 * hence are dealt with separately */
+                 * hence are dealt with separately.)  However, if a named class
+                 * and its complement are both present, then it matches
+                 * everything, and there is no runtime dependency.  Odd numbers
+                 * are the complements of the next lower number, so xor works.
+                 * (Note that something like [\w\D] should match everything,
+                 * because \d should be a proper subset of \w.  But rather than
+                 * trust that the locale is well behaved, we leave this to
+                 * runtime to sort out) */
+                if (POSIXL_TEST(posixl, namedclass ^ 1)) {
+                    cp_list = _add_range_to_invlist(cp_list, 0, UV_MAX);
+                    POSIXL_ZERO(posixl);
+                    has_runtime_dependency &= ~HAS_L_RUNTIME_DEPENDENCY;
+                    anyof_flags &= ~ANYOF_MATCHES_POSIXL;
+                    continue;   /* We could ignore the rest of the class, but
+                                   best to parse it for any errors */
+                }
+                else { /* Here, isn't the complement of any already parsed
+                          class */
                 POSIXL_SET(posixl, namedclass);
                 has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
                 anyof_flags |= ANYOF_MATCHES_POSIXL;
@@ -17365,6 +17382,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SvREFCNT_dec_NN(scratch_list);
                 }
                 continue;   /* Go get next character */
+                }
             }
             else {
 
