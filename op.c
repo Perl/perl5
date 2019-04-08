@@ -807,8 +807,8 @@ S_op_destroy(pTHX_ OP *o)
 /*
 =for apidoc op_free
 
-Free an op.  Only use this when an op is no longer linked to from any
-optree.
+Free an op and its children. Only use this when an op is no longer linked
+to from any optree.
 
 =cut
 */
@@ -818,13 +818,68 @@ Perl_op_free(pTHX_ OP *o)
 {
     dVAR;
     OPCODE type;
-    dDEFER_OP;
+    OP *top_op = o;
+    OP *next_op = o;
+    bool went_up = FALSE; /* whether we reached the current node by
+                            following the parent pointer from a child, and
+                            so have already seen this node */
 
-    do {
+    if (!o || o->op_type == OP_FREED)
+        return;
+
+    if (o->op_private & OPpREFCOUNTED) {
+        /* if base of tree is refcounted, just decrement */
+        switch (o->op_type) {
+        case OP_LEAVESUB:
+        case OP_LEAVESUBLV:
+        case OP_LEAVEEVAL:
+        case OP_LEAVE:
+        case OP_SCOPE:
+        case OP_LEAVEWRITE:
+            {
+                PADOFFSET refcnt;
+                OP_REFCNT_LOCK;
+                refcnt = OpREFCNT_dec(o);
+                OP_REFCNT_UNLOCK;
+                if (refcnt) {
+                    /* Need to find and remove any pattern match ops from
+                     * the list we maintain for reset().  */
+                    find_and_forget_pmops(o);
+                    return;
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    while (next_op) {
+        o = next_op;
+
+        /* free child ops before ourself, (then free ourself "on the
+         * way back up") */
+
+        if (!went_up && o->op_flags & OPf_KIDS) {
+            next_op = cUNOPo->op_first;
+            continue;
+        }
+
+        /* find the next node to visit, *then* free the current node
+         * (can't rely on o->op_* fields being valid after o has been
+         * freed) */
+
+        /* The next node to visit will be either the sibling, or the
+         * parent if no siblings left, or NULL if we've worked our way
+         * back up to the top node in the tree */
+        next_op = (o == top_op) ? NULL : o->op_sibparent;
+        went_up = cBOOL(!OpHAS_SIBLING(o)); /* parents are already visited */
+
+        /* Now process the current node */
 
         /* Though ops may be freed twice, freeing the op after its slab is a
            big no-no. */
-        assert(!o || !o->op_slabbed || OpSLAB(o)->opslab_refcnt != ~(size_t)0);
+        assert(!o->op_slabbed || OpSLAB(o)->opslab_refcnt != ~(size_t)0);
         /* During the forced freeing of ops after compilation failure, kidops
            may be freed before their parents. */
         if (!o || o->op_type == OP_FREED)
@@ -843,7 +898,7 @@ Perl_op_free(pTHX_ OP *o)
          *     we can't spot faults in the main code, only
          *     evaled/required code */
 #ifdef DEBUGGING
-        if (   o->op_ppaddr == PL_ppaddr[o->op_type]
+        if (   o->op_ppaddr == PL_ppaddr[type]
             && PL_parser
             && !PL_parser->error_count)
         {
@@ -851,54 +906,12 @@ Perl_op_free(pTHX_ OP *o)
         }
 #endif
 
-        if (o->op_private & OPpREFCOUNTED) {
-            switch (type) {
-            case OP_LEAVESUB:
-            case OP_LEAVESUBLV:
-            case OP_LEAVEEVAL:
-            case OP_LEAVE:
-            case OP_SCOPE:
-            case OP_LEAVEWRITE:
-                {
-                PADOFFSET refcnt;
-                OP_REFCNT_LOCK;
-                refcnt = OpREFCNT_dec(o);
-                OP_REFCNT_UNLOCK;
-                if (refcnt) {
-                    /* Need to find and remove any pattern match ops from the list
-                       we maintain for reset().  */
-                    find_and_forget_pmops(o);
-                    continue;
-                }
-                }
-                break;
-            default:
-                break;
-            }
-        }
 
         /* Call the op_free hook if it has been set. Do it now so that it's called
          * at the right time for refcounted ops, but still before all of the kids
          * are freed. */
         CALL_OPFREEHOOK(o);
 
-        if (o->op_flags & OPf_KIDS) {
-            OP *kid, *nextkid;
-            assert(cUNOPo->op_first); /* OPf_KIDS implies op_first non-null */
-            for (kid = cUNOPo->op_first; kid; kid = nextkid) {
-                nextkid = OpSIBLING(kid); /* Get before next freeing kid */
-                if (kid->op_type == OP_FREED)
-                    /* During the forced freeing of ops after
-                       compilation failure, kidops may be freed before
-                       their parents. */
-                    continue;
-                if (!(kid->op_flags & OPf_KIDS))
-                    /* If it has no kids, just free it now */
-                    op_free(kid);
-                else
-                    DEFER_OP(kid);
-            }
-        }
         if (type == OP_NULL)
             type = (OPCODE)o->op_targ;
 
@@ -915,10 +928,9 @@ Perl_op_free(pTHX_ OP *o)
         FreeOp(o);
         if (PL_op == o)
             PL_op = NULL;
-    } while ( (o = POP_DEFERRED_OP()) );
-
-    DEFER_OP_CLEANUP;
+    }
 }
+
 
 /* S_op_clear_gv(): free a GV attached to an OP */
 
