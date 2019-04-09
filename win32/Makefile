@@ -219,12 +219,10 @@ DEFAULT_INC_EXCLUDES_DOT = define
 !IF "$(CCTYPE)" == "MSVC60" || \
     "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
 CCHOME		= $(MSVCDIR)
-!ELSE
-!  IF "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
+!ELSEIF "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 CCHOME		= $(VCTOOLSINSTALLDIR)
-!  ELSE
+!ELSE
 CCHOME		= $(VCINSTALLDIR)
-!  ENDIF
 !ENDIF
 
 #
@@ -350,16 +348,14 @@ PROCESSOR_ARCHITECTURE	= x86
 # When we are running from a 32bit cmd.exe on AMD64 then
 # PROCESSOR_ARCHITECTURE is set to x86 and PROCESSOR_ARCHITEW6432
 # is set to AMD64
-!IF "$(PROCESSOR_ARCHITEW6432)" != ""
+!  IF "$(PROCESSOR_ARCHITEW6432)" != ""
 PROCESSOR_ARCHITECTURE	= $(PROCESSOR_ARCHITEW6432)
 WIN64			= define
-!ELSE
-!IF "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITECTURE)" == "IA64"
+!  ELSEIF "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITECTURE)" == "IA64"
 WIN64			= define
-!ELSE
+!  ELSE
 WIN64			= undef
-!ENDIF
-!ENDIF
+!  ENDIF
 !ENDIF
 
 !IF "$(WIN64)" == "define"
@@ -392,8 +388,7 @@ PREMSVC80	= undef
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
 !IF "$(ARCHITECTURE)" == "AMD64"
 ARCHITECTURE	= x64
-!ENDIF
-!IF "$(ARCHITECTURE)" == "IA64"
+!ELSEIF "$(ARCHITECTURE)" == "IA64"
 ARCHITECTURE	= ia64
 !ENDIF
 
@@ -407,10 +402,8 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)-perlio
 ARCHNAME	= $(ARCHNAME)-thread
 !ENDIF
 
-!IF "$(WIN64)" != "define"
-!IF "$(USE_64_BIT_INT)" == "define"
+!IF "$(WIN64)" != "define" && "$(USE_64_BIT_INT)" == "define"
 ARCHNAME	= $(ARCHNAME)-64int
-!ENDIF
 !ENDIF
 
 # All but the free version of VC++ 7.1 can load DLLs on demand.  Makes the test
@@ -418,14 +411,14 @@ ARCHNAME	= $(ARCHNAME)-64int
 !IF "$(CCTYPE)" != "MSVC70FREE"
 # If no registry, advapi32 is only used for Perl_pp_getlogin/getlogin/GetUserNameA
 # which is rare to execute
-!IF "$(USE_NO_REGISTRY)" != "undef"
+!  IF "$(USE_NO_REGISTRY)" != "undef"
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:advapi32.dll delayimp.lib
 MINIDELAYLOAD	=
-!ELSE
+!  ELSE
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 #miniperl never does any registry lookups
 MINIDELAYLOAD	= -DELAYLOAD:advapi32.dll
-!ENDIF
+!  ENDIF
 !ENDIF
 
 # Visual C++ 2005 and 2008 (VC++ 8.0 and 9.0) create manifest files for EXEs and
@@ -482,7 +475,7 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 !IF "$(CCTYPE)" == ""
 CC		= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
 LINK32		= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
-!ELSE IF "$(__ICC)" != "define"
+!ELSEIF "$(__ICC)" != "define"
 CC		= cl
 LINK32		= link
 !ELSE
@@ -511,17 +504,15 @@ LIBC		= msvcrt.lib
 !IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 LINK_DBG	= -debug
-!ELSE
-!IF  "$(CFG)" == "DebugSymbols"
+!ELSEIF  "$(CFG)" == "DebugSymbols"
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
-!ELSE
-!IF  "$(CFG)" == "DebugFull"
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
+!ELSEIF  "$(CFG)" == "DebugFull"
+!  IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrtd.lib
-!ELSE
+!  ELSE
 LIBC		= msvcrtd.lib
-!ENDIF
+!  ENDIF
 OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug
 !ELSE
@@ -541,8 +532,6 @@ OPTIMIZE	= $(OPTIMIZE) -GL
 LINK_DBG	= $(LINK_DBG) -ltcg
 LIB_FLAGS	= -ltcg
 !  ENDIF
-!ENDIF
-!ENDIF
 !ENDIF
 
 !IF "$(WIN64)" == "define"
@@ -578,10 +567,8 @@ DEFINES		= $(DEFINES) -DNO_THREAD_SAFE_LOCALE
 # of getting it into $Config{ccflags}.  That way if someone builds
 # Perl itself with e.g. VC6 but later installs an XS module using VC8
 # the time_t types will still be compatible.
-!IF "$(WIN64)" == "undef"
-!  IF "$(PREMSVC80)" == "define"
+!IF "$(WIN64)" == "undef" && "$(PREMSVC80)" == "define"
 BUILDOPT	= $(BUILDOPT) -D_USE_32BIT_TIME_T
-!  ENDIF
 !ENDIF
 
 LIBBASEFILES	= \
