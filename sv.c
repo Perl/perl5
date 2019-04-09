@@ -11763,11 +11763,11 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     else {
         *p++ = '0';
         exponent = 0;
-        zerotail = precis;
+        zerotail = has_precis ? precis : 0;
     }
 
     /* The radix is always output if precis, or if alt. */
-    if (precis > 0 || alt) {
+    if ((has_precis && precis > 0) || alt) {
       hexradix = TRUE;
     }
 
@@ -12221,6 +12221,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     }
                     precis = S_sprintf_arg_num_val(aTHX_ args, i, sv, &neg);
                     has_precis = !neg;
+                    /* ignore negative precision */
+                    if (!has_precis)
+                        precis = 0;
                 }
 	    }
 	    else {
