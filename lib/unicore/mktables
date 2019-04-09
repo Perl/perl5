@@ -12975,11 +12975,17 @@ sub register_fraction($) {
     my $denominator = $1;
     if (defined $denominator && (($denominator & ($denominator - 1)) == 0)) {
 
-        # These have an exact representation in binary, so rounding could go
-        # either way.  It turns out that Windows doesn't necessarily round
-        # towards even, so output an extra entry
-        my $extra_digit_float = sprintf "%.*e", $E_FLOAT_PRECISION + 1, $floating;
-        if ($extra_digit_float =~ / ( .* ) ( [02468] ) 5 ( e .*) /ix) {
+        # Here the denominator is a power of 2.  This means it has an exact
+        # representation in binary, so rounding could go either way.  It turns
+        # out that Windows doesn't necessarily round towards even, so output
+        # an extra entry.  This happens when the final digit we output is even
+        # and the next digits would be 50* to the precision of the machine.
+        my $extra_digit_float = sprintf "%e", $floating;
+        my $q = $E_FLOAT_PRECISION - 1;
+        if ($extra_digit_float =~ / ( .* \. \d{$q} )
+                                    ( [02468] ) 5 0* ( e .*)
+                                  /ix)
+        {
             push @floats, $1 . ($2 + 1) . $3;
         }
     }
