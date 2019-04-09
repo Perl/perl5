@@ -13548,13 +13548,26 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	case OA_UNOP:
 	case OA_BASEOP_OR_UNOP:
 	case OA_FILESTATOP:
-	    return aop ? newUNOP(opnum,flags,aop) : newOP(opnum,flags);
+	    if (!aop)
+                return newOP(opnum,flags);       /* zero args */
+            if (aop == prev)
+                return newUNOP(opnum,flags,aop); /* one arg */
+            /* too many args */
+            /* FALLTHROUGH */
 	case OA_BASEOP:
 	    if (aop) {
-		SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
+		SV *namesv;
+                OP *nextop;
+
+		namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
 		yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
 		    SVfARG(namesv)), SvUTF8(namesv));
-		op_free(aop);
+                while (aop) {
+                    nextop = OpSIBLING(aop);
+                    op_free(aop);
+                    aop = nextop;
+                }
+
 	    }
 	    return opnum == OP_RUNCV
 		? newPVOP(OP_RUNCV,0,NULL)
