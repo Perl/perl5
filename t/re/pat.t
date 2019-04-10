@@ -2090,8 +2090,9 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
 
     {   # perl #133995]
         use utf8;
-        fresh_perl_is('"έδωσαν ελληνικήვე" =~ m/[^0](?=0)0?/', "", {},
-        '[^0] doesnt crash on UTF-8 target string');
+        fresh_perl_is('"έδωσαν ελληνικήვე" =~ m/[^0](?=0)0?/', "",
+                      {wide_chars => 1},
+                      '[^0] doesnt crash on UTF-8 target string');
     }
 
 } # End of sub run_tests
