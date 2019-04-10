@@ -2965,6 +2965,11 @@ S_scan_const(pTHX_ char *start)
     ENTER_with_name("scan_const");
     SAVEFREESV(sv);
 
+    /* A bunch of code in the loop below assumes that if s[n] exists and is not
+     * NUL, then s[n+1] exists.  This assertion makes sure that assumption is
+     * valid */
+    assert(*send == '\0');
+
     while (s < send
            || dorange   /* Handle tr/// range at right edge of input */
     ) {
