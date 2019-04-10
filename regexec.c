@@ -1972,9 +1972,12 @@ STMT_START {                                                                    
     }
 
 /* This is the macro to use when we want to see if something that looks like it
- * could match, actually does, and if so exits the loop */
-#define REXEC_FBC_TRYIT                            \
-    if ((reginfo->intuit || regtry(reginfo, &s)))  \
+ * could match, actually does, and if so exits the loop.  It needs to be used
+ * only for bounds checking macros, as it allows for matching beyond the end of
+ * string (which should be zero length without having to look at the string
+ * contents) */
+#define REXEC_FBC_TRYIT                                                     \
+    if ((reginfo->intuit || (s <= reginfo->strend && regtry(reginfo, &s)))) \
         goto got_it
 
 /* The only difference between the BOUND and NBOUND cases is that

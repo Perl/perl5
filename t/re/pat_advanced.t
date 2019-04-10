@@ -2505,6 +2505,13 @@ EOF
         ok(! $?, "User-defined pattern did not cause panic [perl 130010]");
     }
 
+    {   # [perl #133999]    Previously assertion failure
+	fresh_perl_like('0 =~ /\p{nv:(\B(*COMMIT)C+)}/',
+                        qr/No Unicode property value wildcard matches/,
+                        {},
+                        "Assertion failure with *COMMIT and wildcard property");
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
