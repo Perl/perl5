@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 861;  # Update this when adding/deleting tests.
+plan tests => 862;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2086,6 +2086,12 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
     {   # perl #133998]
         fresh_perl_is('print "\x{110000}" =~ qr/(?l)|[^\S\pC\s]/', 1, {},
         '/[\S\s]/l works');
+    }
+
+    {   # perl #133995]
+        use utf8;
+        fresh_perl_is('"έδωσαν ελληνικήვე" =~ m/[^0](?=0)0?/', "", {},
+        '[^0] doesnt crash on UTF-8 target string');
     }
 
 } # End of sub run_tests

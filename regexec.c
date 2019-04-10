@@ -2156,14 +2156,16 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
 
     case ANYOFM:    /* ARG() is the base byte; FLAGS() the mask byte */
-        /* UTF-8ness doesn't matter, so use 0 */
+        /* UTF-8ness doesn't matter because only matches UTF-8 invariants, so
+         * use 0 */
         REXEC_FBC_FIND_NEXT_SCAN(0,
          (char *) find_next_masked((U8 *) s, (U8 *) strend,
                                    (U8) ARG(c), FLAGS(c)));
         break;
 
-    case NANYOFM:
-        REXEC_FBC_FIND_NEXT_SCAN(0,
+    case NANYOFM:   /* UTF-8ness does matter because can match UTF-8 variants.
+                     */
+        REXEC_FBC_FIND_NEXT_SCAN(utf8_target,
          (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
                                    (U8) ARG(c), FLAGS(c)));
         break;
