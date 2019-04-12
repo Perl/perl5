@@ -22580,6 +22580,8 @@ Perl_parse_uniprop_string(pTHX_
                                      it is the definition.  Otherwise it is a
                                      string containing the fully qualified sub
                                      name of 'name' */
+    SV * fq_name = NULL;        /* For user-defined properties, the fully
+                                   qualified name */
     bool invert_return = FALSE; /* ? Do we need to complement the result before
                                      returning it */
 
@@ -23061,10 +23063,9 @@ Perl_parse_uniprop_string(pTHX_
             dSP;
             SV * user_sub_sv = MUTABLE_SV(user_sub);
             SV * error;     /* Any error returned by calling 'user_sub' */
-            SV * fq_name;   /* Fully qualified property name */
+            SV * key;       /* The key into the hash of user defined sub names
+                             */
             SV * placeholder;
-            char to_fold_string[] = "0:";   /* The 0 gets overwritten with the
-                                               actual value */
             SV ** saved_user_prop_ptr;      /* Hash entry for this property */
 
             /* How many times to retry when another thread is in the middle of
@@ -23094,14 +23095,13 @@ Perl_parse_uniprop_string(pTHX_
              * should the need arise, passing the /i status as a parameter.
              *
              * We start by constructing the hash key name, consisting of the
-             * fully qualified subroutine name */
-            fq_name = sv_2mortal(newSV(10));    /* 10 is just a guess */
-            (void) cv_name(user_sub, fq_name, 0);
-
-            /* But precede the sub name in the key with the /i status, so that
-             * there is a key for /i and a different key for non-/i */
-            to_fold_string[0] = to_fold + '0';
-            sv_insert(fq_name, 0, 0, to_fold_string, 2);
+             * fully qualified subroutine name, preceded by the /i status, so
+             * that there is a key for /i and a different key for non-/i */
+            key = newSVpvn(((to_fold) ? "1" : "0"), 1);
+            fq_name = S_get_fq_name(aTHX_ name, name_len, is_utf8,
+                                          non_pkg_begin != 0);
+            sv_catsv(key, fq_name);
+            sv_2mortal(key);
 
             /* We only call the sub once throughout the life of the program
              * (with the /i, non-/i exception noted above).  That means the
@@ -23151,7 +23151,7 @@ Perl_parse_uniprop_string(pTHX_
             /* If we have an entry for this key, the subroutine has already
              * been called once with this /i status. */
             saved_user_prop_ptr = hv_fetch(PL_user_def_props,
-                                           SvPVX(fq_name), SvCUR(fq_name), 0);
+                                                   SvPVX(key), SvCUR(key), 0);
             if (saved_user_prop_ptr) {
 
                 /* If the saved result is an inversion list, it is the valid
@@ -23226,7 +23226,7 @@ Perl_parse_uniprop_string(pTHX_
              * */
             SWITCH_TO_GLOBAL_CONTEXT;
             placeholder= newSVuv(PTR2IV(ORIGINAL_CONTEXT));
-            (void) hv_store_ent(PL_user_def_props, fq_name, placeholder, 0);
+            (void) hv_store_ent(PL_user_def_props, key, placeholder, 0);
             RESTORE_CONTEXT;
 
             /* Now that we have a placeholder, we can let other threads
@@ -23234,7 +23234,7 @@ Perl_parse_uniprop_string(pTHX_
             USER_PROP_MUTEX_UNLOCK;
 
             /* Make sure the placeholder always gets destroyed */
-            SAVEDESTRUCTOR_X(S_delete_recursion_entry, SvPVX(fq_name));
+            SAVEDESTRUCTOR_X(S_delete_recursion_entry, SvPVX(key));
 
             PUSHMARK(SP);
             SAVETMPS;
@@ -23285,7 +23285,7 @@ Perl_parse_uniprop_string(pTHX_
              * and add the permanent entry */
             USER_PROP_MUTEX_LOCK;
 
-            S_delete_recursion_entry(aTHX_ SvPVX(fq_name));
+            S_delete_recursion_entry(aTHX_ SvPVX(key));
 
             if (! prop_definition || is_invlist(prop_definition)) {
 
@@ -23293,7 +23293,7 @@ Perl_parse_uniprop_string(pTHX_
                  * property; otherwise use the error message */
                 SWITCH_TO_GLOBAL_CONTEXT;
                 (void) hv_store_ent(PL_user_def_props,
-                                    fq_name,
+                                    key,
                                     ((prop_definition)
                                      ? newSVsv(prop_definition)
                                      : newSVsv(msg)),
@@ -23655,11 +23655,15 @@ Perl_parse_uniprop_string(pTHX_
     /* Here it could yet to be defined, so defer evaluation of this
      * until its needed at runtime.  We need the fully qualified property name
      * to avoid ambiguity, and a trailing newline */
-    prop_definition = S_get_fq_name(aTHX_ name, name_len, is_utf8, non_pkg_begin != 0);
-    sv_catpvs(prop_definition, "\n");
+    if (! fq_name) {
+        fq_name = S_get_fq_name(aTHX_ name, name_len, is_utf8,
+                                      non_pkg_begin != 0 /* If has "::" */
+                               );
+    }
+    sv_catpvs(fq_name, "\n");
 
     *user_defined_ptr = TRUE;
-    return prop_definition;
+    return fq_name;
 }
 
 #endif
