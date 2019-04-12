@@ -22480,6 +22480,38 @@ S_delete_recursion_entry(pTHX_ void *key)
     RESTORE_CONTEXT;
 }
 
+STATIC SV *
+S_get_fq_name(pTHX_
+              const char * const name,    /* The first non-blank in the \p{}, \P{} */
+              const Size_t name_len,      /* Its length in bytes, not including any trailing space */
+              const bool is_utf8,         /* ? Is 'name' encoded in UTF-8 */
+              const bool has_colon_colon
+             )
+{
+    /* Returns a mortal SV containing the fully qualified version of the input
+     * name */
+
+    SV * fq_name;
+
+    fq_name = newSVpvs_flags("", SVs_TEMP);
+
+    /* Use the current package if it wasn't included in our input */
+    if (! has_colon_colon) {
+        const HV * pkg = (IN_PERL_COMPILETIME)
+                         ? PL_curstash
+                         : CopSTASH(PL_curcop);
+        const char* pkgname = HvNAME(pkg);
+
+        Perl_sv_catpvf(aTHX_ fq_name, "%" UTF8f,
+                      UTF8fARG(is_utf8, strlen(pkgname), pkgname));
+        sv_catpvs(fq_name, "::");
+    }
+
+    Perl_sv_catpvf(aTHX_ fq_name, "%" UTF8f,
+                         UTF8fARG(is_utf8, name_len, name));
+    return fq_name;
+}
+
 SV *
 Perl_parse_uniprop_string(pTHX_
 
@@ -23621,24 +23653,9 @@ Perl_parse_uniprop_string(pTHX_
   definition_deferred:
 
     /* Here it could yet to be defined, so defer evaluation of this
-     * until its needed at runtime. */
-    prop_definition = newSVpvs_flags("", SVs_TEMP);
-
-    /* To avoid any ambiguity, the package is always specified.
-     * Use the current one if it wasn't included in our input */
-    if (non_pkg_begin == 0) {
-        const HV * pkg = (IN_PERL_COMPILETIME)
-                         ? PL_curstash
-                         : CopSTASH(PL_curcop);
-        const char* pkgname = HvNAME(pkg);
-
-        Perl_sv_catpvf(aTHX_ prop_definition, "%" UTF8f,
-                      UTF8fARG(is_utf8, strlen(pkgname), pkgname));
-        sv_catpvs(prop_definition, "::");
-    }
-
-    Perl_sv_catpvf(aTHX_ prop_definition, "%" UTF8f,
-                         UTF8fARG(is_utf8, name_len, name));
+     * until its needed at runtime.  We need the fully qualified property name
+     * to avoid ambiguity, and a trailing newline */
+    prop_definition = S_get_fq_name(aTHX_ name, name_len, is_utf8, non_pkg_begin != 0);
     sv_catpvs(prop_definition, "\n");
 
     *user_defined_ptr = TRUE;
