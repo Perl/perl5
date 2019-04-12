@@ -8649,7 +8649,11 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	   ))
 	    /* Return the block now, so that S_new_logop does not try to
 	       fold it away. */
-	    return block;	/* do {} while 0 does once */
+        {
+            op_free(expr);
+            return block;	/* do {} while 0 does once */
+        }
+
 	if (expr->op_type == OP_READLINE
 	    || expr->op_type == OP_READDIR
 	    || expr->op_type == OP_GLOB
