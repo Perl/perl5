@@ -1316,8 +1316,9 @@ PP(pp_multiply)
 		    alow = aiv;
 		    auvok = TRUE; /* effectively it's a UV now */
 		} else {
-                    /* abs, auvok == false records sign */
-		    alow = -(UV)aiv;
+                    /* abs, auvok == false records sign; Using 0- here and
+                     * later to silence bogus warning from MS VC */
+		    alow = (UV) (0 - (UV) aiv);
 		}
 	    }
 	    if (buvok) {
@@ -1329,7 +1330,7 @@ PP(pp_multiply)
 		    buvok = TRUE; /* effectively it's a UV now */
 		} else {
                     /* abs, buvok == false records sign */
-		    blow = -(UV)biv;
+		    blow = (UV) (0 - (UV) biv);
 		}
 	    }
 
@@ -1564,7 +1565,7 @@ PP(pp_modulo)
                     right = biv;
                     right_neg = FALSE; /* effectively it's a UV now */
                 } else {
-                    right = -(UV)biv;
+		    right = (UV) (0 - (UV) biv);
                 }
             }
         }
@@ -1594,7 +1595,7 @@ PP(pp_modulo)
                         left = aiv;
                         left_neg = FALSE; /* effectively it's a UV now */
                     } else {
-                        left = -(UV)aiv;
+                        left = (UV) (0 - (UV) aiv);
                     }
                 }
         }
@@ -1893,7 +1894,7 @@ PP(pp_subtract)
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
 		    } else {
-			auv = -(UV)aiv;
+                        auv = (UV) (0 - (UV) aiv);
 		    }
 		}
 		a_valid = 1;
@@ -1913,7 +1914,7 @@ PP(pp_subtract)
 		    buv = biv;
 		    buvok = 1;
 		} else
-                    buv = -(UV)biv;
+                    buv = (UV) (0 - (UV) biv);
 	    }
 	    /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
 	       else "IV" now, independent of how it came in.

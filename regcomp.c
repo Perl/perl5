@@ -14648,8 +14648,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
           loopdone:   /* Jumped to when encounters something that shouldn't be
                          in the node */
 
-            /* Free up any over-allocated space */
-            change_engine_size(pRExC_state, - (initial_size - STR_SZ(len)));
+            /* Free up any over-allocated space; cast is to silence bogus
+             * warning in MS VC */
+            change_engine_size(pRExC_state,
+                                - (Ptrdiff_t) (initial_size - STR_SZ(len)));
 
             /* I (khw) don't know if you can get here with zero length, but the
              * old code handled this situation by creating a zero-length EXACT

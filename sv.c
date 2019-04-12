@@ -2903,7 +2903,8 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
 	uv = iv;
 	sign = 0;
     } else {
-        uv = -(UV)iv;
+        /* Using 0- here to silence bogus warning from MS VC */
+        uv = (UV) (0 - (UV) iv);
 	sign = 1;
     }
 
@@ -12651,7 +12652,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                             esignbuf[esignlen++] = plus;
                     }
                     else {
-                        uv = -(UV)iv;
+                        /* Using 0- here to silence bogus warning from MS VC */
+                        uv = (UV) (0 - (UV) iv);
                         esignbuf[esignlen++] = '-';
                     }
                 }
