@@ -19,26 +19,24 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 4;
+plan tests => 3;
 
 use POSIX qw();
 
 SKIP: {
-    skip("mblen() not present", 4) unless $Config{d_mblen};
+    skip("mblen() not present", 3) unless $Config{d_mblen};
 
     is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() basically works');
 
-    skip("LC_CTYPE locale support not available", 3)
+    skip("LC_CTYPE locale support not available", 2)
       unless locales_enabled('LC_CTYPE');
 
     my $utf8_locale = find_utf8_ctype_locale();
-    skip("no utf8 locale available", 3) unless $utf8_locale;
+    skip("no utf8 locale available", 2) unless $utf8_locale;
 
     local $ENV{LC_CTYPE} = $utf8_locale;
     local $ENV{LC_ALL};
     delete $ENV{LC_ALL};
-
-    ok &POSIX::MB_CUR_MAX >= 4, 'MB_CUR_MAX is at least 4 in a UTF-8 locale';
 
     fresh_perl_is(
         'use POSIX; print &POSIX::mblen("'
