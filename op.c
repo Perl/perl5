@@ -16941,7 +16941,8 @@ OP *
 Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
                       const int opnum)
 {
-    OP * const argop = newSVOP(OP_COREARGS,0,coreargssv);
+    OP * const argop = (opnum == OP_SELECT && code) ? NULL :
+                                        newSVOP(OP_COREARGS,0,coreargssv);
     OP *o;
 
     PERL_ARGS_ASSERT_CORESUB_OP;
