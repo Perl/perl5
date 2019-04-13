@@ -569,6 +569,8 @@ sub find_utf8_turkic_locales (;$) {
 
     my @return;
 
+    return unless locales_enabled('LC_CTYPE');
+
     my $save_locale = setlocale(&POSIX::LC_CTYPE());
     foreach my $locale (find_utf8_ctype_locales(shift)) {
         use locale;
