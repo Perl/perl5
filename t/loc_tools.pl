@@ -210,6 +210,10 @@ sub locales_enabled(;$) {
     # khw cargo-culted the '?' in the pattern on the next line.
     return 0 if $Config{ccflags} =~ /\bD?NO_LOCALE\b/;
 
+    # If we can't load the POSIX XS module, we can't have locales even if they
+    # normally would be available
+    return 0 if ! defined &DynaLoader::boot_DynaLoader;
+
     if (! $Config{d_setlocale}) {
         return 0 if $Config{ccflags} =~ /\bD?NO_POSIX_2008_LOCALE\b/;
         return 0 unless $Config{d_newlocale};
@@ -564,6 +568,8 @@ sub find_utf8_turkic_locales (;$) {
     # to try; if omitted, this tries all locales it can find on the platform
 
     my @return;
+
+    return unless locales_enabled('LC_CTYPE');
 
     my $save_locale = setlocale(&POSIX::LC_CTYPE());
     foreach my $locale (find_utf8_ctype_locales(shift)) {

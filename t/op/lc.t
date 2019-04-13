@@ -379,7 +379,7 @@ foreach my $turkic (0 .. 1) {
     }
 
     use locale;
-    setlocale(LC_CTYPE, $locale);
+    setlocale(&POSIX::LC_CTYPE, $locale);
 
     for my $i (0 .. 255) {
         is(lc(chr $i), $unicode_lc[$i], "In a $type UTF-8 locale, lc(chr $i) is the same as official Unicode");
@@ -406,7 +406,7 @@ SKIP: {
     my $filler_uc = ("SS" . uni_to_native("\x{39c}\x{c0}\x{c1}\x{b6}\x{178}")) x $filler_length;
 
     use locale;
-    setlocale(LC_CTYPE, $turkic_locale);
+    setlocale(&POSIX::LC_CTYPE, $turkic_locale);
 
     is (lc "IIIIIII$filler", "\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}$filler_lc",
         "lc non-UTF-8, in Turkic locale, beginning with a bunch of I's");

@@ -613,7 +613,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip_if_miniperl("No XS in miniperl", 3);
+    skip_if_miniperl("No XS in miniperl", 2);
 
     for ( [qw( %- Tie::Hash::NamedCapture )],
           [qw( %! Errno )] ) {
