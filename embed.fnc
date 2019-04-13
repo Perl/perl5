@@ -2744,6 +2744,7 @@ EXpR	|SV*	|get_and_check_backslash_N_name|NN const char* s	\
 				|const bool is_utf8			\
 				|NN const char** error_msg
 
+: For use ONLY in B::Hooks::Parser, by special dispensation
 EXpMR	|char*	|scan_str	|NN char *start|int keep_quoted \
 				|int keep_delims|int re_reparse \
 				|NULLOK char **delimp
