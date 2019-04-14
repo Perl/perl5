@@ -715,6 +715,7 @@ typedef struct regmatch_state {
     int resume_state;		/* where to jump to on return */
     char *locinput;		/* where to backtrack in string on failure */
     char *loceol;
+    U8 *sr0;                    /* position of start of script run, or NULL */
 
     union {
 
