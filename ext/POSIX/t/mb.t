@@ -43,7 +43,7 @@ SKIP: {
       qr/[4-6]/, {}, 'MB_CUR_MAX is at least 4 in a UTF-8 locale');
 
   SKIP: {
-    my ($major, $minor, $rest) = $Config{osvers} =~ / (\d+) \. (\d+) \. .* /x;
+    my ($major, $minor, $rest) = $Config{osvers} =~ / (\d+) \. (\d+) .* /x;
     skip("mblen() broken (at least for c.utf8) on early HP-UX", 1)
         if   $Config{osname} eq 'hpux'
           && $major < 11 || ($major == 11 && $minor < 31);
