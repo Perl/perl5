@@ -380,7 +380,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl now exposes POSIX C<getcwd> as C<Internals::getcwd()> if
+available.  This is intended for use by C<Cwd.pm> during bootstrapping
+and may be removed or changed without notice.  This fixes some
+bootstrapping issues while building perl in a directory where some
+ancestor directory isn't readable.  [perl #133951]
 
 =back
 
