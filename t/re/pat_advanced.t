@@ -2512,6 +2512,13 @@ EOF
                         "Assertion failure with *COMMIT and wildcard property");
     }
 
+    {   # [perl #134029]    Previously assertion failure
+        fresh_perl_like('qr/\p{upper:]}|\337(?|ss)|)(?0/',
+                        qr/Unicode property wildcard not terminated/,
+                        {},
+                        "Assertion failure with single character wildcard");
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like

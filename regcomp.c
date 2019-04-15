@@ -22728,7 +22728,8 @@ Perl_parse_uniprop_string(pTHX_
                 pos_in_brackets = strchr("([<)]>)]>", open);
                 close = (pos_in_brackets) ? pos_in_brackets[3] : open;
 
-                if (   name[name_len-1] != close
+                if (    i >= name_len
+                    ||  name[name_len-1] != close
                     || (escaped && name[name_len-2] != '\\'))
                 {
                     sv_catpvs(msg, "Unicode property wildcard not terminated");
