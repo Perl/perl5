@@ -2519,6 +2519,11 @@ EOF
                         "Assertion failure with single character wildcard");
     }
 
+    {   # [perl #134034]    Previously assertion failure
+        fresh_perl_is('use utf8; q!Ȧिम한글💣΢ყაოსაა!=~/(?li)\b{wb}\B(*COMMIT)0/;',
+                      "", {}, "*COMMIT caused positioning beyond EOS");
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
