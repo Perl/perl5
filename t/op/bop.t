@@ -18,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 501;
+plan tests => 502;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -668,4 +668,13 @@ foreach my $op_info ([and => "&"], [or => "|"], [xor => "^"]) {
         eval $h->{string};
         like $@, $expected, $description;
     }
+}
+
+{
+    # perl #17844 - only visible with valgrind/ASAN
+    fresh_perl_is(<<'EOS',
+formline X000n^\\0,\\0^\\0for\0,0..10
+EOS
+                  '',
+                  {}, "[perl #17844] access beyond end of block");
 }

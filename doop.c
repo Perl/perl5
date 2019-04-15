@@ -1087,7 +1087,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     lsave = lc;
     rsave = rc;
 
-    SvCUR_set(sv, len);
     (void)SvPOK_only(sv);
     if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	dc = SvPV_force_nomg_nolen(sv);
@@ -1103,6 +1102,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	sv_usepvn_flags(sv, dc, needlen, SV_HAS_TRAILING_NUL);
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }
+    SvCUR_set(sv, len);
 
     if (len >= sizeof(long)*4 &&
 	!(PTR2nat(dc) % sizeof(long)) &&
