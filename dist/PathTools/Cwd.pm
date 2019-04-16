@@ -171,7 +171,7 @@ if($^O ne 'MSWin32') {
 if ($^O =~ /android/) {
     # If targetsh is executable, then we're either a full
     # perl, or a miniperl for a native build.
-    if (-x $Config::Config{targetsh}) {
+    if ( exists($Config::Config{targetsh}) && -x $Config::Config{targetsh}) {
         $pwd_cmd = "$Config::Config{targetsh} -c pwd"
     }
     else {
