@@ -10,7 +10,7 @@ BEGIN {
     require 'loc_tools.pl';
 }
 
-use Test::More tests => 93;
+use Test::More tests => 96;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
@@ -157,7 +157,7 @@ like( getcwd(), qr/$pat/, 'getcwd' );
 # Check string conversion functions.
 
 SKIP: { 
-    skip("strtod() not present", 2) unless $Config{d_strtod};
+    skip("strtod() not present", 3) unless $Config{d_strtod};
 
     if (locales_enabled('LC_NUMERIC')) {
         $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC);
@@ -169,11 +169,25 @@ SKIP: {
     cmp_ok(abs("3.14159" - $n), '<', 1e-6, 'strtod works');
     is($x, 6, 'strtod works');
 
+    # If $Config{nvtype} is 'double' we check that strtod assigns the same value as
+    # perl for the input 8.87359152e-6.
+    # We check that value as it is known to have produced discrepancies in the past.
+    # If this check fails then perl's buggy atof has probably assigned the value,
+    # instead of the preferred Perl_strtod function.
+
+    $n = &POSIX::strtod('8.87359152e-6');
+    if($Config{nvtype} eq 'double' || ($Config{nvtype} eq 'long double' && $Config{longdblkind} == 0)) {
+      cmp_ok($n, '==', 8.87359152e-6, 'strtod and perl agree');
+    }
+    else {
+      cmp_ok($n, '!=', 8.87359152e-6, 'strtod and perl should differ');
+    }
+
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if locales_enabled('LC_NUMERIC');
 }
 
 SKIP: {
-    skip("strtold() not present", 2) unless $Config{d_strtold};
+    skip("strtold() not present", 3) unless $Config{d_strtold};
 
     if (locales_enabled('LC_NUMERIC')) {
         $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC);
@@ -185,7 +199,41 @@ SKIP: {
     cmp_ok(abs("2.718" - $n), '<', 1e-6, 'strtold works');
     is($x, 4, 'strtold works');
 
+    # If $Config{nvtype} is 'long double' we check that strtold assigns the same value as
+    # perl for the input 9.81256119e4.
+    # We check that value as it is known to have produced discrepancies in the past.
+    # If this check fails then perl's buggy atof has probably assigned the value,
+    # instead of the preferred Perl_strtod function.
+
+    $n = &POSIX::strtold('9.81256119e4820');
+    if($Config{nvtype} eq 'long double') {
+      cmp_ok($n, '==', 9.81256119e4820, 'strtold and perl agree');
+    }
+    elsif($Config{nvtype} eq '__float128') {
+      if($Config{longdblkind} == 1 || $Config{longdblkind} == 2) {
+        cmp_ok($n, '==', 9.81256119e4820, 'strtold and perl agree');
+      }
+      else {
+        cmp_ok($n, '!=', 9.81256119e4820, 'strtold and perl should differ');
+      }
+    }
+    else { # nvtype is double ... don't try and make this into a meaningful test
+      cmp_ok(1, '==', 1, 'skipping comparison between strtold amd perl');
+    }
+
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if locales_enabled('LC_NUMERIC');
+}
+
+SKIP: {
+    # We don't yet have a POSIX::strtoflt128 - but let's at least check that
+    # Perl_strtod, not perl's atof, is assigning the values on quadmath builds.
+    # Do this by checking that 3329232e296 (which is known to be assigned
+    # incorrectly by perl's atof) is assigned to its correct value.
+
+    skip("not a -Dusequadmath build", 1) unless $Config{nvtype} eq '__float128';
+    cmp_ok(scalar(reverse(unpack("h*", pack("F<", 3329232e296)))),
+           'eq','43ebf120d02ce967d48e180409b3f958',
+           '3329232e296 is assigned correctly');
 }
 
 SKIP: {
