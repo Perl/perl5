@@ -3951,6 +3951,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                  cur_min_x + COLLXFRM_HDR_LEN))
                     {
                         PL_strxfrm_NUL_replacement = j;
+                        safefree(cur_min_x);
                         cur_min_x = x;
                     }
                     else {
@@ -4106,6 +4107,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                      cur_max_x + COLLXFRM_HDR_LEN))
                         {
                             PL_strxfrm_max_cp = j;
+                            safefree(cur_max_x);
                             cur_max_x = x;
                         }
                         else {
