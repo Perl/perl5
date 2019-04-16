@@ -769,22 +769,19 @@ S_emulate_setlocale(const int category,
 
             const char * default_name;
 
-            /* To minimize other threads messing with the environment, we copy
-             * the variable, making it a temporary.  But this doesn't work upon
-             * program initialization before any scopes are created, and at
-             * this time, there's nothing else going on that would interfere.
-             * So skip the copy in that case */
-            if (PL_scopestack_ix == 0) {
-                default_name = PerlEnv_getenv("LANG");
-            }
-            else {
-                default_name = savepv(PerlEnv_getenv("LANG"));
-            }
+            default_name = PerlEnv_getenv("LANG");
 
             if (! default_name || strEQ(default_name, "")) {
                 default_name = "C";
             }
             else if (PL_scopestack_ix != 0) {
+                /* To minimize other threads messing with the environment,
+                 * we copy the variable, making it a temporary.  But this
+                 * doesn't work upon program initialization before any
+                 * scopes are created, and at this time, there's nothing
+                 * else going on that would interfere.  So skip the copy
+                 * in that case */
+                default_name = savepv(default_name);
                 SAVEFREEPV(default_name);
             }
 
