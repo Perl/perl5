@@ -8755,7 +8755,10 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 
             Note we have to deal with the char in 'i' if we are not at EOF
         */
+        bpx = bp - (STDCHAR*)SvPVX_const(sv);
+        /* signals might be called here, possibly modifying sv */
 	i   = PerlIO_getc(fp);		/* get more characters */
+        bp = (STDCHAR*)SvPVX_const(sv) + bpx;
 
 	DEBUG_Pv(PerlIO_printf(Perl_debug_log,
 	   "Screamer: post: FILE * thinks ptr=%" UVuf ", cnt=%" IVdf ", base=%" UVuf "\n",
