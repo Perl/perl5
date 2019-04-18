@@ -690,7 +690,8 @@ foreach my $test_case (@modules) {
     }
 
     is( $warnings, '', "case '$test_case->{name}': no warnings from parsing" ) or $errs++;
-    diag 'parsed module: ', explain($pm_info) if !$ENV{PERL_CORE} && $errs;
+    diag 'parsed module: ', explain($pm_info) if $errs and not $ENV{PERL_CORE}
+      and ($ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING});
   }
 }
 continue {

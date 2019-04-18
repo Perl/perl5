@@ -196,7 +196,8 @@ foreach my $script ( @scripts ) {
   is( $pm_info->version, '0.01', "correct script version ($i of $n)" ) or $errs++;
   $i++;
 
-  diag 'parsed module: ', explain($pm_info) if !$ENV{PERL_CORE} && $errs;
+  diag 'parsed module: ', explain($pm_info) if $errs and not $ENV{PERL_CORE}
+    and ($ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING});
 }
 
 {
@@ -351,7 +352,8 @@ Hello, this is pod.
   )
   or $errs++;
 
-  diag 'parsed module: ', explain($pm_info) if !$ENV{PERL_CORE} && $errs;
+  diag 'parsed module: ', explain($pm_info) if $errs and not $ENV{PERL_CORE}
+    and ($ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING});
 }
 
 {

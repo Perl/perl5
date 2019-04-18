@@ -17,18 +17,21 @@ BEGIN {
   sub _original_cwd { return $cwd }
 }
 
+my @tmpdirs;
 sub tmpdir {
   my (@args) = @_;
-  File::Temp::tempdir(
+  my $tmpdir = File::Temp::tempdir(
     'MMD-XXXXXXXX',
     CLEANUP => 0,
     DIR => ($ENV{PERL_CORE} ? _original_cwd : File::Spec->tmpdir),
     @args,
   );
+  Test::More::note "using temp dir $tmpdir";
+  push @tmpdirs, $tmpdir;
+  return $tmpdir;
 }
 
 my $tmp;
-BEGIN { $tmp = tmpdir; Test::More::note "using temp dir $tmp"; }
 
 sub generate_file {
   my ($dir, $rel_filename, $content) = @_;
@@ -48,9 +51,11 @@ sub generate_file {
 END {
   die "tests failed; leaving temp dir $tmp behind"
     if $ENV{AUTHOR_TESTING} and not Test::Builder->new->is_passing;
-  Test::More::note "removing temp dir $tmp";
   chdir _original_cwd;
-  File::Path::rmtree($tmp);
+  foreach my $tmp (@tmpdirs) {
+    Test::More::note "removing temp dir $tmp";
+    File::Path::rmtree($tmp);
+  }
 }
 
 1;
