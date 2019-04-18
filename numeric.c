@@ -29,6 +29,105 @@ values, including such things as replacements for the OS's atof() function
 #define PERL_IN_NUMERIC_C
 #include "perl.h"
 
+#ifdef Perl_strtod
+
+PERL_STATIC_INLINE NV
+S_strtod(pTHX_ const char * const s, char ** e)
+{
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+    NV result;
+
+    STORE_LC_NUMERIC_SET_TO_NEEDED();
+
+#  ifdef USE_QUADMATH
+
+    result = strtoflt128(s, e);
+
+#  elif defined(HAS_STRTOLD) && defined(HAS_LONG_DOUBLE)    \
+                             && defined(USE_LONG_DOUBLE)
+#    if defined(__MINGW64_VERSION_MAJOR)
+      /***********************************************
+       We are unable to use strtold because of
+        https://sourceforge.net/p/mingw-w64/bugs/711/
+        &
+        https://sourceforge.net/p/mingw-w64/bugs/725/
+
+       but __mingw_strtold is fine.
+      ***********************************************/
+
+    result = __mingw_strtold(s, e);
+
+#    else
+
+    result = strtold(s, e);
+
+#    endif
+#  elif defined(HAS_STRTOD)
+
+    result = strtod(s, e);
+
+#  endif
+
+    RESTORE_LC_NUMERIC();
+
+    return result;
+}
+
+#endif  /* #ifdef Perl_strtod */
+
+/*
+
+=for apidoc my_strtod
+
+This function is equivalent to the libc strtod() function, and is available
+even on platforms that lack plain strtod().  Its return value is the best
+available precision depending on platform capabilities and F<Configure>
+options.
+
+It properly handles the locale radix character, meaning it expects a dot except
+when called from within the scope of S<C<use locale>>, in which case the radix
+character should be that specified by the current locale.
+
+The synonym Strod() may be used instead.
+
+=cut
+
+*/
+
+NV
+my_strtod(const char * const s, char **e)
+{
+    dTHX;
+
+    PERL_ARGS_ASSERT_MY_STRTOD;
+
+#ifdef Perl_strtod
+
+    return S_strtod(aTHX_ s, e);
+
+#else
+
+    {
+        NV result;
+        char ** end_ptr = NULL;
+
+        *end_ptr = my_atof2(s, &result);
+        if (e) {
+            *e = *end_ptr;
+        }
+
+        if (! *end_ptr) {
+            result = 0.0;
+        }
+
+        return result;
+    }
+
+#endif
+
+}
+
+
 U32
 Perl_cast_ulong(NV f)
 {
@@ -1354,7 +1453,7 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
             }
 #endif
             assert(strNE(fake, "silence compiler warning"));
-            nv = Perl_strtod(fake, &endp);
+            nv = S_strtod(aTHX_ fake, &endp);
             if (fake != endp) {
 #ifdef NV_INF
                 if ((infnan & IS_NUMBER_INFINITY)) {
@@ -1460,7 +1559,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
             s = copy + (s - orig);
         }
 
-        result[2] = Perl_strtod(s, &endp);
+        result[2] = S_strtod(aTHX_ s, &endp);
 
         /* If we created a copy, 'endp' is in terms of that.  Convert back to
          * the original */

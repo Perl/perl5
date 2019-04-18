@@ -2295,6 +2295,11 @@ PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, i
 #define PERL_ARGS_ASSERT_MY_STRFTIME	\
 	assert(fmt)
 
+PERL_CALLCONV NV	Perl_my_strtod(const char * const s, char ** e)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_STRTOD	\
+	assert(s)
+
 PERL_CALLCONV void	Perl_my_unexec(pTHX);
 PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap);
 #define PERL_ARGS_ASSERT_MY_VSNPRINTF	\

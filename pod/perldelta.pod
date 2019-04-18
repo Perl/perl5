@@ -365,7 +365,12 @@ well.
 
 =item *
 
-XXX
+A new function L<perlapi/C<my_strtod>> or its synonym, Strtod(), is
+now availabe with the same signature as the libc strtod().  It provides
+strotod() equivalent behavior on all platforms, using the best available
+precision, depending on platform capabilities and F<Configure> options,
+while handling locale-related issues, such as if the radix character
+should be a dot or comma.
 
 =back
 

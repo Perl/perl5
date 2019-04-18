@@ -6528,37 +6528,13 @@ expression, but with an empty argument list, like this:
 #endif /* !USE_LOCALE_NUMERIC */
 
 #define Atof				my_atof
+#define Strtod                          my_strtod
 
-/* These are wrapped just below to handle locale */
-#ifdef USE_QUADMATH
-#  define _Perl_strtod(s, e) strtoflt128(s, e)
-#elif defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
-#  if defined(__MINGW64_VERSION_MAJOR) && defined(HAS_STRTOLD)
-      /***********************************************
-       We are unable to use strtold because of
-        https://sourceforge.net/p/mingw-w64/bugs/711/
-        &
-        https://sourceforge.net/p/mingw-w64/bugs/725/
-
-       but __mingw_strtold is fine.
-      ***********************************************/
-#    define _Perl_strtod(s, e) __mingw_strtold(s, e)
-#  elif defined(HAS_STRTOLD)
-#    define _Perl_strtod(s, e) strtold(s, e)
-#  elif defined(HAS_STRTOD)
-#    define _Perl_strtod(s, e) (NV)strtod(s, e) /* Unavoidable loss. */
-#  endif
-#elif defined(HAS_STRTOD)
-#  define _Perl_strtod(s, e) strtod(s, e)
+#if    defined(HAS_STRTOD) || defined(USE_QUADMATH)                 \
+    || defined(HAS_STRTOLD) && defined(HAS_LONG_DOUBLE)             \
+                            && defined(USE_LONG_DOUBLE)
+#  define Perl_strtod   Strtod
 #endif
-
-#define Perl_strotod(s, e)                                              \
-    STMT_START {                                                        \
-        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;                        \
-        STORE_LC_NUMERIC_SET_TO_NEEDED();                               \
-        _Perl_strtod(s,e)                                               \
-        RESTORE_LC_NUMERIC();                                           \
-    } STMT_END
 
 #if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && \
 	(QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
