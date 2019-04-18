@@ -623,16 +623,24 @@
 #   define TAINT_WARN_get       0
 #   define TAINT_WARN_set(s)    NOOP
 #else
+    /* Set to tainted if we are running under tainting mode */
 #   define TAINT		(PL_tainted = PL_tainting)
-#   define TAINT_NOT	(PL_tainted = FALSE)
-#   define TAINT_IF(c)	if (UNLIKELY(c)) { PL_tainted = PL_tainting; }
+
+#   define TAINT_NOT	(PL_tainted = FALSE)        /* Untaint */
+#   define TAINT_IF(c)	if (UNLIKELY(c)) { TAINT; } /* Conditionally taint */
 #   define TAINT_ENV()	if (UNLIKELY(PL_tainting)) { taint_env(); }
-#   define TAINT_PROPER(s)	if (UNLIKELY(PL_tainting)) { taint_proper(NULL, s); }
+                                /* croak or warn if tainting */
+#   define TAINT_PROPER(s)	if (UNLIKELY(PL_tainting)) {                \
+                                    taint_proper(NULL, s);                  \
+                                }
 #   define TAINT_set(s)		(PL_tainted = (s))
 #   define TAINT_get		(PL_tainted)
-#   define TAINTING_get		(PL_tainting)
+#   define TAINTING_get		(PL_tainting)   /* Is taint checking enabled? */
 #   define TAINTING_set(s)	(PL_tainting = (s))
-#   define TAINT_WARN_get       (PL_taint_warn)
+#   define TAINT_WARN_get       (PL_taint_warn) /* FALSE => tainting violations
+                                                            are fatal
+                                                   TRUE =>  they're just
+                                                            warnings */
 #   define TAINT_WARN_set(s)    (PL_taint_warn = (s))
 #endif
 
