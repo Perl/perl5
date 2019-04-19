@@ -1889,7 +1889,7 @@
  * 7d6c909af97d0ab545a132d412f6e4e65c7eb5158514a7feb9bf00bcd05875f9 lib/unicore/auxiliary/SBTest.txt
  * c47d674ef4170c46185bf56f7a4c6627f65f012295e0994f7dc4aea51f8fd8cf lib/unicore/auxiliary/SentenceBreakProperty.txt
  * 3e3320bbbe775de7f1a0b9a30021eb949116a9b05cb461c90596c5ecf1743831 lib/unicore/auxiliary/WBTest.txt
- * 40a50d1af5b4f7233b4762b11966e83ae3d873a0328dd0786796782bb9bced15 lib/unicore/auxiliary/WordBreakProperty.txt
+ * f221f89fe3bb3becc00de726d5694c4b7f464c316baff6d339b2ff3900bcb96c lib/unicore/auxiliary/WordBreakProperty.txt
  * db2c41c618bab54b00e58223ad11cec550f9b9fd1a471de236e660da92fe4870 lib/unicore/extracted/DBidiClass.txt
  * fecd8a1c49935d794c4c1012f4158aa536a13049a4c10d01aaf7b5f90f3b2cbc lib/unicore/extracted/DBinaryProperties.txt
  * db6f38fb4aa8b9181b5e6a9f320de9d5c2c9b5687116a619b3cb90138b025e0b lib/unicore/extracted/DCombiningClass.txt

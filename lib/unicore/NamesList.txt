@@ -1,10 +1,10 @@
 ; charset=UTF-8
 @@@	The Unicode Standard 12.1.0
-@@@+	U12M190401.lst
-	Unicode 12.1.0 names list, second delta.
+@@@+	U12M190408.lst
+	Unicode 12.1.0 names list, third delta.
 	Repertoire synched with UnicodeData-12.1.0d2.txt
 	Second delta of annotation fixes.
-	Removed temporary annotation for 32FF.
+	Added alias for 11FE3.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
@@ -34793,6 +34793,7 @@ FFFF	<not a character>
 11FE2	TAMIL SIGN KUZHI
 	* equals 1 square kol, where 1 kol is approximately 11 feet (3.35 m)
 11FE3	TAMIL SIGN VELI
+	= veeli
 @+	* equals 2000 kuzhi
 @		Agricultural symbols
 11FE4	TAMIL WET CULTIVATION SIGN
