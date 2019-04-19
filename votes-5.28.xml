@@ -47,6 +47,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
+Requested by Tom Hukins here: https://www.nntp.perl.org/group/perl.perl5.porters/2019/04/msg254453.html
+<commit votes="steveh" id="0d9e812de5885109532ec8bf484f165213ab97cb" ticket="" desc="ext/GDBM_File/t/fatal.t: handle non-fatality"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
