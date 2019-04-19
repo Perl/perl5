@@ -22,6 +22,7 @@
    * Provide __ASSERT_ for assertions inside macros
    * Provide UTF8_SAFE_SKIP
    * Provide my_strnlen()
+   * Provide utf8_to_uvchr_buf()
 
 3.45 - 2019-03-19
 

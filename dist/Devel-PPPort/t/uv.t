@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (13) {
+  if (17) {
     load();
-    plan(tests => 13);
+    plan(tests => 17);
   }
 }
 
@@ -61,4 +61,10 @@ ok(&Devel::PPPort::XPUSHu(), 43);
 ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
 ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
 ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);
+my $ret = &Devel::PPPort::utf8_to_uvchr_buf("A");
+ok($ret->[0], ord("A"));
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr_buf("\0");
+ok($ret->[0], 0);
+ok($ret->[1], 1);
 

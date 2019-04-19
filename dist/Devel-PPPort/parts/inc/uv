@@ -74,6 +74,18 @@ my_strnlen(const char *str, Size_t maxlen)
 
 #endif
 #endif
+#if defined(utf8n_to_uvchr)
+
+__UNDEFINED__  utf8_to_uvchr_buf(s,e,lp)  (__ASSERT_(e >= s)                \
+                       utf8n_to_uvchr((s), ((e)-(s)), (lp),                 \
+                                    (UTF8_ALLOW_ANYUV & ~UTF8_ALLOW_LONG)))
+
+#elif defined(utf8_to_uv)
+
+__UNDEFINED__  utf8_to_uvchr_buf(s,e,lp)  (__ASSERT_(e >= s)                \
+                       utf8_to_uv((s), ((e)-(s)), (lp),                     \
+                                    (UTF8_ALLOW_ANYUV & ~UTF8_ALLOW_LONG)))
+#endif
 
 =xsinit
 
@@ -158,7 +170,21 @@ my_strnlen(s, max)
         OUTPUT:
             RETVAL
 
-=tests plan => 13
+AV *
+utf8_to_uvchr_buf(s)
+        unsigned char *s
+        PREINIT:
+            AV *av;
+            STRLEN len;
+        CODE:
+            av = newAV();
+            av_push(av, newSVuv(utf8_to_uvchr_buf(s, s + UTF8SKIP(s), &len)));
+            av_push(av, newSVuv(len));
+            RETVAL = av;
+        OUTPUT:
+                RETVAL
+
+=tests plan => 17
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -173,3 +199,9 @@ ok(&Devel::PPPort::XPUSHu(), 43);
 ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
 ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
 ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);
+my $ret = &Devel::PPPort::utf8_to_uvchr_buf("A");
+ok($ret->[0], ord("A"));
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr_buf("\0");
+ok($ret->[0], 0);
+ok($ret->[1], 1);
