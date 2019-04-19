@@ -44,7 +44,7 @@ SKIP: {
 
   SKIP: {
     my ($major, $minor, $rest) = $Config{osvers} =~ / (\d+) \. (\d+) .* /x;
-    skip("mblen() broken (at least for c.utf8) on early HP-UX", 1)
+    skip("mblen() broken (at least for c.utf8) on early HP-UX", 2)
         if   $Config{osname} eq 'hpux'
           && $major < 11 || ($major == 11 && $minor < 31);
     fresh_perl_is(
@@ -52,9 +52,9 @@ SKIP: {
       . I8_to_native("\x{c3}\x{28}")
       . '", 2)',
       -1, {}, 'mblen() recognizes invalid multibyte characters');
-    }
 
     fresh_perl_is(
      'use POSIX; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", 2)',
      2, {}, 'mblen() works on UTF-8 characters');
+  }
 }
