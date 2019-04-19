@@ -346,6 +346,7 @@ sub changes_between {
     5.029007 => '2019-01-20',
     5.029008 => '2019-02-20',
     5.029009 => '2019-03-20',
+    5.028002 => '2019-04-19',
     5.029010 => '2019-04-20',
   );
 
@@ -16218,6 +16219,19 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.028002 => {
+        delta_from => 5.028001,
+        changed => {
+            'B::Op_private'         => '5.028002',
+            'Config'                => '5.028002',
+            'Module::CoreList'      => '5.20190419',
+            'Module::CoreList::Utils'=> '5.20190419',
+            'PerlIO::scalar'        => '0.30',
+            'Storable'              => '3.08_01',
+        },
+        removed => {
+        }
+    },
     5.029010 => {
         delta_from => 5.029009,
         changed => {
@@ -17205,6 +17219,13 @@ sub is_core
     },
     5.029009 => {
         delta_from => 5.029008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.028002 => {
+        delta_from => 5.028001,
         changed => {
         },
         removed => {
