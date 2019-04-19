@@ -23247,6 +23247,16 @@ Perl_parse_uniprop_string(pTHX_
             XPUSHs(boolSV(to_fold));
             PUTBACK;
 
+            /* The following block was taken from swash_init().  Presumably
+             * they apply to here as well, though we no longer use a swash --
+             * khw */
+            SAVEHINTS();
+            save_re_context();
+            /* We might get here via a subroutine signature which uses a utf8
+             * parameter name, at which point PL_subname will have been set
+             * but not yet used. */
+            save_item(PL_subname);
+
             (void) call_sv(user_sub_sv, G_EVAL|G_SCALAR);
 
             SPAGAIN;
