@@ -23058,6 +23058,7 @@ Perl_parse_uniprop_string(pTHX_
          * implemented as subs. */
         user_sub = get_cvn_flags(name, name_len, 0);
         if (user_sub) {
+            const char insecure[] = "Insecure user-defined property";
 
             /* Here, there is a sub by the correct name.  Normally we call it
              * to get the property definition */
@@ -23078,11 +23079,11 @@ Perl_parse_uniprop_string(pTHX_
             /* If we get here, we know this property is user-defined */
             *user_defined_ptr = TRUE;
 
-            /* We refuse to call a tainted subroutine; returning an error
-             * instead */
+            /* We refuse to call a potentially tainted subroutine; returning an
+             * error instead */
             if (TAINT_get) {
                 if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
-                sv_catpvs(msg, "Insecure user-defined property");
+                sv_catpvn(msg, insecure, sizeof(insecure) - 1);
                 goto append_name_to_msg;
             }
 
@@ -23251,11 +23252,18 @@ Perl_parse_uniprop_string(pTHX_
             SPAGAIN;
 
             error = ERRSV;
-            if (SvTRUE(error)) {
+            if (TAINT_get || SvTRUE(error)) {
                 if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
-                sv_catpvs(msg, "Error \"");
-                sv_catsv(msg, error);
-                sv_catpvs(msg, "\"");
+                if (SvTRUE(error)) {
+                    sv_catpvs(msg, "Error \"");
+                    sv_catsv(msg, error);
+                    sv_catpvs(msg, "\"");
+                }
+                if (TAINT_get) {
+                    if (SvTRUE(error)) sv_catpvs(msg, "; ");
+                    sv_catpvn(msg, insecure, sizeof(insecure) - 1);
+                }
+
                 if (name_len > 0) {
                     sv_catpvs(msg, " in expansion of ");
                     Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8,
