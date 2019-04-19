@@ -63,7 +63,7 @@ is $count,10,
 
 SKIP: {
     skip "unstable  or too small timing", 1 unless
-            $elapsed_match >= 0.001 && $elapsed_fail >= 0.001;
+            $elapsed_match >= 0.01 && $elapsed_fail >= 0.01;
     ok $elapsed_fail <= 10 * $elapsed_match,
         "time to fail less than 10x the time to match"
         or diag("elapsed_match=$elapsed_match elapsed_fail=$elapsed_fail");
