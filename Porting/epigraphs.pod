@@ -219,6 +219,25 @@ L<Announced on 2018-06-26 by Sawyer X|http://nntp.perl.org/group/perl.perl5.port
 
   Courage is the only antidote for danger.
 
+=head2 v5.28.2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Jumblies
+
+L<Announced on 2019-04-19 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/04/msg254456.html>
+
+  They went to sea in a Sieve, they did,
+    In a Sieve they went to sea:
+  In spite of all their friends could say,
+  On a winter's morn, on a stormy day,
+    In a Sieve they went to sea!
+  And when the Sieve turned round and round,
+  And every one cried, 'You'll all be drowned!'
+  They called aloud, 'Our Sieve ain't big,
+  But we don't care a button! we don't care a fig!
+    In a Sieve we'll go to sea!'
+      Far and few, far and few,
+        Are the lands where the Jumblies live;
+      Their heads are green, and their hands are blue,
+        And they went to sea in a Sieve.
+
 =head2 v5.28.2-RC1 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Quangle Wangle's Hat
 
 L<Announced on 2019-04-05 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/04/msg254218.html>
