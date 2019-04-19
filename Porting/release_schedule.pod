@@ -25,7 +25,7 @@ Code freezes (which happen in the 5.29.X series)
 
   2018-05-20  5.28.0 ✓        Sawyer X
   2018-11-29  5.28.1 ✓        Steve Hay
-  2019-04-??  5.28.2          Steve Hay
+  2019-04-19  5.28.2 ✓        Steve Hay
 
 =head2 Perl 5.26
 
