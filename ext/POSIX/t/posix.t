@@ -155,6 +155,7 @@ else {
 like( getcwd(), qr/$pat/, 'getcwd' );
 
 # Check string conversion functions.
+my $weasel_words = "(though differences may be beyond the diplayed digits)";
 
 SKIP: { 
     skip("strtod() not present", 3) unless $Config{d_strtod};
@@ -177,10 +178,10 @@ SKIP: {
 
     $n = &POSIX::strtod('8.87359152e-6');
     if($Config{nvtype} eq 'double' || ($Config{nvtype} eq 'long double' && $Config{longdblkind} == 0)) {
-      cmp_ok($n, '==', 8.87359152e-6, 'strtod and perl agree');
+      cmp_ok($n, '==', 8.87359152e-6, "strtod and perl agree $weasel_words");
     }
     else {
-      cmp_ok($n, '!=', 8.87359152e-6, 'strtod and perl should differ');
+      cmp_ok($n, '!=', 8.87359152e-6, "strtod and perl should differ $weasel_words");
     }
 
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if locales_enabled('LC_NUMERIC');
@@ -207,14 +208,14 @@ SKIP: {
 
     $n = &POSIX::strtold('9.81256119e4820');
     if($Config{nvtype} eq 'long double') {
-      cmp_ok($n, '==', 9.81256119e4820, 'strtold and perl agree');
+      cmp_ok($n, '==', 9.81256119e4820, "strtold and perl agree $weasel_words");
     }
     elsif($Config{nvtype} eq '__float128') {
       if($Config{longdblkind} == 1 || $Config{longdblkind} == 2) {
-        cmp_ok($n, '==', 9.81256119e4820, 'strtold and perl agree');
+        cmp_ok($n, '==', 9.81256119e4820, "strtold and perl agree $weasel_words");
       }
       else {
-        cmp_ok($n, '!=', 9.81256119e4820, 'strtold and perl should differ');
+        cmp_ok($n, '!=', 9.81256119e4820, "strtold and perl should differ $weasel_words");
       }
     }
     else { # nvtype is double ... don't try and make this into a meaningful test
