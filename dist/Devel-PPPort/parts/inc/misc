@@ -46,6 +46,12 @@ __UNDEFINED__ OpLASTSIB_set(o, parent) ((o)->op_sibling = NULL)
 __UNDEFINED__ OpMAYBESIB_set(o, sib, parent) ((o)->op_sibling = (sib))
 __UNDEFINED__ HEf_SVKEY   -2
 
+#if defined(DEBUGGING) && !defined(__COVERITY__)
+__UNDEFINED__ __ASSERT_(statement)  assert(statement),
+#else
+__UNDEFINED__ __ASSERT_(statement)
+#endif
+
 #ifndef SvRX
 #if { NEED SvRX }
 
