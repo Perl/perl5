@@ -2384,18 +2384,22 @@ end
 }
 
 {
+    SKIP: {
+        skip "Environment tainting tests skipped", 1
+          if $Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos;
 
-    local $ENV{XX} = '\p{IsB}';   # Making it an environment variable taints it
+        local $ENV{XX} = '\p{IsB}';   # Making it an environment variable taints it
 
-    fresh_perl_like(<<'EOF',
-        BEGIN { $re = qr/$ENV{XX}/; }
+        fresh_perl_like(<<'EOF',
+            BEGIN { $re = qr/$ENV{XX}/; }
 
-        sub IsB { "42" };
-        "B" =~ $re
+            sub IsB { "42" };
+            "B" =~ $re
 EOF
-     qr/Insecure user-defined property \\p\{main::IsB\}/,
-     { switches => [ "-T" ] },
-    "user-defined property; defn not known until runtime, tainted case");
+        qr/Insecure user-defined property \\p\{main::IsB\}/,
+        { switches => [ "-T" ] },
+        "user-defined property; defn not known until runtime, tainted case");
+    }
 }
 
 {
