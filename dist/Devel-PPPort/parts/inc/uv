@@ -87,6 +87,19 @@ __UNDEFINED__  utf8_to_uvchr_buf(s,e,lp)  (__ASSERT_(e >= s)                \
                                     (UTF8_ALLOW_ANYUV & ~UTF8_ALLOW_LONG)))
 #endif
 
+#undef utf8_to_uvchr
+
+/* Always redefine this unsafe function so that it refuses to read past a NUL,
+ * making it much less likely to read off the end of the buffer.  A NUL
+ * indicates the start of the next character anyway.  If the input isn't
+ * NUL-terminated, the function remains unsafe, as it always has been.
+ */
+
+__UNDEFINED__  utf8_to_uvchr(s, lp)                                             \
+    ((*(s) == '\0')                                                             \
+    ? utf8_to_uvchr_buf(s,((s)+1), lp) /* Handle single NUL specially */        \
+    : utf8_to_uvchr_buf(s, (s) + my_strnlen((char *) (s), UTF8SKIP(s)), (lp)))
+
 =xsinit
 
 #define NEED_my_strnlen
@@ -184,7 +197,21 @@ utf8_to_uvchr_buf(s)
         OUTPUT:
                 RETVAL
 
-=tests plan => 17
+AV *
+utf8_to_uvchr(s)
+        unsigned char *s
+        PREINIT:
+            AV *av;
+            STRLEN len;
+        CODE:
+            av = newAV();
+            av_push(av, newSVuv(utf8_to_uvchr(s, &len)));
+            av_push(av, newSVuv(len));
+            RETVAL = av;
+        OUTPUT:
+                RETVAL
+
+=tests plan => 21
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -203,5 +230,11 @@ my $ret = &Devel::PPPort::utf8_to_uvchr_buf("A");
 ok($ret->[0], ord("A"));
 ok($ret->[1], 1);
 $ret = &Devel::PPPort::utf8_to_uvchr_buf("\0");
+ok($ret->[0], 0);
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr("A");
+ok($ret->[0], ord("A"));
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr("\0");
 ok($ret->[0], 0);
 ok($ret->[1], 1);

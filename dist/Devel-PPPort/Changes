@@ -23,6 +23,7 @@
    * Provide UTF8_SAFE_SKIP
    * Provide my_strnlen()
    * Provide utf8_to_uvchr_buf()
+   * Replace utf8_to_uvchr() with a safer version
 
 3.45 - 2019-03-19
 

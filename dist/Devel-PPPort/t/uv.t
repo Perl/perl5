@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (17) {
+  if (21) {
     load();
-    plan(tests => 17);
+    plan(tests => 21);
   }
 }
 
@@ -65,6 +65,12 @@ my $ret = &Devel::PPPort::utf8_to_uvchr_buf("A");
 ok($ret->[0], ord("A"));
 ok($ret->[1], 1);
 $ret = &Devel::PPPort::utf8_to_uvchr_buf("\0");
+ok($ret->[0], 0);
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr("A");
+ok($ret->[0], ord("A"));
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr("\0");
 ok($ret->[0], 0);
 ok($ret->[1], 1);
 
