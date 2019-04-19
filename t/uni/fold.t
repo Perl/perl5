@@ -166,7 +166,8 @@ foreach my $test_ref (@CF) {
         $test = qq[":$c:" =~ /:$every_other_bracketed_f:/iu];
         ok eval $test, "$code - $name - $mapping - $type - $test";
 
-        my $other_every_bracketed_f = "$f_chars[0]\[$f_chars[1]]";
+        my $other_every_bracketed_f = "$f_chars[0]";
+        $other_every_bracketed_f .= "[$f_chars[1]]";
         $other_every_bracketed_f .= "$f_chars[2]" if $f_chars[2];
         $test = qq[":$c:" =~ /:$other_every_bracketed_f:/iu];
         ok eval $test, "$code - $name - $mapping - $type - $test";
