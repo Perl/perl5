@@ -20,6 +20,7 @@
    * Provide LIKELY/UNLIKELY branch prediction
    * Provide av_tindex/av_top_index
    * Provide __ASSERT_ for assertions inside macros
+   * Provide UTF8_SAFE_SKIP
 
 3.45 - 2019-03-19
 

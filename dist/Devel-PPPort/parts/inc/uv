@@ -48,6 +48,15 @@ __UNDEFINED__  XSRETURN_UV(v)  STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_E
 __UNDEFINED__  PUSHu(u)        STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG;  } STMT_END
 __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
 
+#if defined UTF8SKIP
+__UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                     \
+                                      ((e) - (s)) <= 0                          \
+                                      ? 0                                       \
+                                      : (((e) - (s)) >= UTF8SKIP(s))            \
+                                         ? ((e) - (s))                          \
+                                         : UTF8SKIP(s))
+#endif
+
 =xsubs
 
 SV *
@@ -108,7 +117,17 @@ XPUSHu()
                 XPUSHu(43);
                 XSRETURN(1);
 
-=tests plan => 10
+STRLEN
+UTF8_SAFE_SKIP(s, adjustment)
+        unsigned char * s
+        int adjustment
+        CODE:
+            /* Instead of passing in an 'e' ptr, use the real end, adjusted */
+            RETVAL = UTF8_SAFE_SKIP(s, s + UTF8SKIP(s) + adjustment);
+        OUTPUT:
+            RETVAL
+
+=tests plan => 12
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -120,3 +139,5 @@ ok(&Devel::PPPort::SvUVx(0xdeadbeef), 0xdeadbeef);
 ok(&Devel::PPPort::XSRETURN_UV(), 42);
 ok(&Devel::PPPort::PUSHu(), 42);
 ok(&Devel::PPPort::XPUSHu(), 43);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);

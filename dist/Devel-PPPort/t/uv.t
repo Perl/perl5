@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (10) {
+  if (12) {
     load();
-    plan(tests => 10);
+    plan(tests => 12);
   }
 }
 
@@ -58,4 +58,6 @@ ok(&Devel::PPPort::SvUVx(0xdeadbeef), 0xdeadbeef);
 ok(&Devel::PPPort::XSRETURN_UV(), 42);
 ok(&Devel::PPPort::PUSHu(), 42);
 ok(&Devel::PPPort::XPUSHu(), 43);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
 
