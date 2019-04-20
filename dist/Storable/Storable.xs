@@ -104,6 +104,12 @@
 #  define strEQc(s,c) memEQ(s, ("" c ""), sizeof(c))
 #endif
 
+#if defined(HAS_FLOCK) || defined(FCNTL_CAN_LOCK) && defined(HAS_LOCKF)
+#define CAN_FLOCK &PL_sv_yes
+#else
+#define CAN_FLOCK &PL_sv_no
+#endif
+
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -7793,6 +7799,8 @@ BOOT:
     newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
     newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
     newCONSTSUB(stash, "BIN_WRITE_MINOR", newSViv(STORABLE_BIN_WRITE_MINOR));
+
+    newCONSTSUB(stash, "CAN_FLOCK", CAN_FLOCK);
 
     init_perinterp(aTHX);
     gv_fetchpv("Storable::drop_utf8",   GV_ADDMULTI, SVt_PV);
