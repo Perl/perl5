@@ -17,6 +17,53 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.10 - Maya Angelou, Alone
+
+Announced on 2019-04-20 by Sawyer X
+
+  Lying, thinking
+  Last night
+  How to find my soul a home
+  Where water is not thirsty
+  And bread loaf is not stone
+  I came up with one thing
+  And I don't believe I'm wrong
+  That nobody,
+  But nobody
+  Can make it out here alone.
+
+  Alone, all alone
+  Nobody, but nobody
+  Can make it out here alone.
+
+  There are some millionaires
+  With money they can't use
+  Their wives run round like banshees
+  Their children sing the blues
+  They've got expensive doctors
+  To cure their hearts of stone.
+  But nobody
+  No, nobody
+  Can make it out here alone.
+
+  Alone, all alone
+  Nobody, but nobody
+  Can make it out here alone.
+
+  Now if you listen closely
+  I'll tell you what I know
+  Storm clouds are gathering
+  The wind is gonna blow
+  The race of man is suffering
+  And I can hear the moan,
+  'Cause nobody,
+  But nobody
+  Can make it out here alone.
+
+  Alone, all alone
+  Nobody, but nobody
+  Can make it out here alone.
+
 =head2 v5.29.9 - Sir Arthur Conan Doyle, The Adventure of the Dancing Men
 
 L<Announced on 2019-03-21 by Zak Elep|https://www.nntp.perl.org/group/perl.perl5.porters/2019/03/msg253978.html>
