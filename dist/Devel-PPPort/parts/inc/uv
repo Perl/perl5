@@ -12,6 +12,7 @@
 =provides
 
 __UNDEFINED__
+my_strnlen
 SvUOK
 
 =implementation
@@ -47,6 +48,61 @@ __UNDEFINED__  XSRETURN_UV(v)  STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_E
 
 __UNDEFINED__  PUSHu(u)        STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG;  } STMT_END
 __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
+
+#if defined UTF8SKIP
+__UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                     \
+                                      ((e) - (s)) <= 0                          \
+                                      ? 0                                       \
+                                      : (((e) - (s)) >= UTF8SKIP(s))            \
+                                         ? ((e) - (s))                          \
+                                         : UTF8SKIP(s))
+#endif
+
+#if !defined(my_strnlen)
+#if { NEED my_strnlen }
+
+STRLEN
+my_strnlen(const char *str, Size_t maxlen)
+{
+    const char *p = str;
+
+    while(maxlen-- && *p)
+        p++;
+
+    return p - str;
+}
+
+#endif
+#endif
+#if defined(utf8n_to_uvchr)
+
+__UNDEFINED__  utf8_to_uvchr_buf(s,e,lp)  (__ASSERT_(e >= s)                \
+                       utf8n_to_uvchr((s), ((e)-(s)), (lp),                 \
+                                    (UTF8_ALLOW_ANYUV & ~UTF8_ALLOW_LONG)))
+
+#elif defined(utf8_to_uv)
+
+__UNDEFINED__  utf8_to_uvchr_buf(s,e,lp)  (__ASSERT_(e >= s)                \
+                       utf8_to_uv((s), ((e)-(s)), (lp),                     \
+                                    (UTF8_ALLOW_ANYUV & ~UTF8_ALLOW_LONG)))
+#endif
+
+#undef utf8_to_uvchr
+
+/* Always redefine this unsafe function so that it refuses to read past a NUL,
+ * making it much less likely to read off the end of the buffer.  A NUL
+ * indicates the start of the next character anyway.  If the input isn't
+ * NUL-terminated, the function remains unsafe, as it always has been.
+ */
+
+__UNDEFINED__  utf8_to_uvchr(s, lp)                                             \
+    ((*(s) == '\0')                                                             \
+    ? utf8_to_uvchr_buf(s,((s)+1), lp) /* Handle single NUL specially */        \
+    : utf8_to_uvchr_buf(s, (s) + my_strnlen((char *) (s), UTF8SKIP(s)), (lp)))
+
+=xsinit
+
+#define NEED_my_strnlen
 
 =xsubs
 
@@ -108,7 +164,54 @@ XPUSHu()
                 XPUSHu(43);
                 XSRETURN(1);
 
-=tests plan => 10
+STRLEN
+UTF8_SAFE_SKIP(s, adjustment)
+        unsigned char * s
+        int adjustment
+        CODE:
+            /* Instead of passing in an 'e' ptr, use the real end, adjusted */
+            RETVAL = UTF8_SAFE_SKIP(s, s + UTF8SKIP(s) + adjustment);
+        OUTPUT:
+            RETVAL
+
+STRLEN
+my_strnlen(s, max)
+        char * s
+        STRLEN max
+        CODE:
+            RETVAL= my_strnlen(s, max);
+        OUTPUT:
+            RETVAL
+
+AV *
+utf8_to_uvchr_buf(s)
+        unsigned char *s
+        PREINIT:
+            AV *av;
+            STRLEN len;
+        CODE:
+            av = newAV();
+            av_push(av, newSVuv(utf8_to_uvchr_buf(s, s + UTF8SKIP(s), &len)));
+            av_push(av, newSVuv(len));
+            RETVAL = av;
+        OUTPUT:
+                RETVAL
+
+AV *
+utf8_to_uvchr(s)
+        unsigned char *s
+        PREINIT:
+            AV *av;
+            STRLEN len;
+        CODE:
+            av = newAV();
+            av_push(av, newSVuv(utf8_to_uvchr(s, &len)));
+            av_push(av, newSVuv(len));
+            RETVAL = av;
+        OUTPUT:
+                RETVAL
+
+=tests plan => 21
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -120,3 +223,18 @@ ok(&Devel::PPPort::SvUVx(0xdeadbeef), 0xdeadbeef);
 ok(&Devel::PPPort::XSRETURN_UV(), 42);
 ok(&Devel::PPPort::PUSHu(), 42);
 ok(&Devel::PPPort::XPUSHu(), 43);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
+ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);
+my $ret = &Devel::PPPort::utf8_to_uvchr_buf("A");
+ok($ret->[0], ord("A"));
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr_buf("\0");
+ok($ret->[0], 0);
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr("A");
+ok($ret->[0], ord("A"));
+ok($ret->[1], 1);
+$ret = &Devel::PPPort::utf8_to_uvchr("\0");
+ok($ret->[0], 0);
+ok($ret->[1], 1);

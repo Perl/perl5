@@ -1,3 +1,30 @@
+ 3.46 - 2019-04-20
+ 
+    * Fix the isFOO character type classification macros to work properly on
+       all versions, as follows:
+         * Fixed isALNUM, isALPHA, isDIGIT, isIDFIRST, isLOWER, and isUPPER on
+           very early perls to not be locale-dependent
+         * Fixed isASCII on early perls to work with signed char arguments
+         * Fixed isCNTRL on early perls to know that DEL is a control
+         * Fixed isSPACE on perls before 5.20 to know that VERTICAL TAB is a
+           space
+         * Added isALPHANUMERIC, synonym for isALNUMC
+         * Added isIDCONT, to match legal non-initial characters in an
+           identifier
+         * Added isOCTAL, to match [0-7]
+         * Added isWORDCHAR, synonym for isALNUM
+         * Make all the character classification isFOO macros work on EBCDIC
+           platforms on all versions
+         * Added isFOO_A synonyms for all character classification isFOO
+           macros
+   * Provide LIKELY/UNLIKELY branch prediction
+   * Provide av_tindex/av_top_index
+   * Provide __ASSERT_ for assertions inside macros
+   * Provide UTF8_SAFE_SKIP
+   * Provide my_strnlen()
+   * Provide utf8_to_uvchr_buf()
+   * Replace utf8_to_uvchr() with a safer version
+
 3.45 - 2019-03-19
 
   * Restore missing unit tests from the previous release.
