@@ -67,15 +67,7 @@ in the Storable documentation for instructions on how to read your data.
 EOM
 }
 
-# compute the maximum stacksize, before and after linking
 package MY;
-
-# FORCE finish of INST_DYNAMIC, avoid loading the old Storable (failed XS_VERSION check)
-sub xlinkext {
-    my $s = shift->SUPER::linkext(@_);
-    $s =~ s|( :: .*)| $1 FORCE stacksize|;
-    $s
-}
 
 sub depend {
     "
