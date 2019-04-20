@@ -50,6 +50,10 @@ __UNDEFINED__  PUSHu(u)        STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG;  
 __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
 
 #if defined UTF8SKIP
+
+/* Don't use official version because it uses MIN, which may not be available */
+#undef UTF8_SAFE_SKIP
+
 __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                     \
                                       ((e) - (s)) <= 0                          \
                                       ? 0                                       \
