@@ -664,6 +664,7 @@ the strings?).
  Abigail   5.29.7       2019-Jan-20
  Nicolas R 5.29.8       2019-Feb-20
  Zak Elep  5.29.9       2019-Mar-20
+ Sawyer X  5.29.10      2019-Apr-20
 
 =head2 SELECTED RELEASE SIZES
 
