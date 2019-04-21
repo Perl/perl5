@@ -1,10 +1,12 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 18;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
+use lib (-d 't' ? File::Spec->catdir(qw(t lib)) : 'lib');
+use PrimitiveCapture;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -175,6 +177,16 @@ unless ($ENV{PERL_NO_CLEANUP}) {
     1 while unlink $_;
   }
 }
+}
+#####################################################################
+
+{ # third block: broken typemap
+my $pxs = ExtUtils::ParseXS->new;
+tie *FH, 'Foo';
+my $stderr = PrimitiveCapture::capture_stderr(sub {
+  $pxs->process_file(filename => 'XSBroken.xs', output => \*FH);
+});
+like $stderr, '/No INPUT definition/', "Exercise typemap error";
 }
 #####################################################################
 
