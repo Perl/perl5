@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.29.10 - Maya Angelou, Alone
 
-Announced on 2019-04-20 by Sawyer X
+L<Announced on 2019-04-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/04/msg254467.html>
 
   Lying, thinking
   Last night
