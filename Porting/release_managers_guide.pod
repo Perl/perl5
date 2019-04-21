@@ -1009,9 +1009,10 @@ Check that basic configuration and tests work on each test machine:
 
 Check that the test harness and install work on each test machine:
 
- $ make distclean
- $ ./Configure -des -Dprefix=/install/path && make all test_harness install
- $ cd /install/path
+    $ make distclean
+    $ ./Configure -des -Dprefix=/install/path && \
+          make all test_harness install
+    $ cd /install/path
 
 (Remember C<-Dusedevel> above, for a development release.)
 
