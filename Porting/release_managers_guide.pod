@@ -246,7 +246,7 @@ Additionally, all files listed as "modified" but not "customized for blead"
 should have entries added under the C<CUSTOMIZED> key in
 F<Porting/Maintainers.pl>, as well as checksums updated via:
 
-    cd t; ./perl -I../lib porting/customized.t --regen
+    cd t; ../perl -I../lib porting/customized.t --regen
 
 =head4 Sync CPAN modules with the corresponding cpanE<sol> distro
 
@@ -504,7 +504,7 @@ blead release, so you may find nothing to do here.
 
 Check that the copyright years are up to date by running:
 
-    $ pushd t; ./perl -I../lib porting/copyright.t --now
+    $ pushd t; ../perl -I../lib porting/copyright.t --now
 
 Remedy any test failures by editing README or perl.c accordingly (search for
 the "Copyright"). If updating perl.c, check if the file's own copyright date in
@@ -1013,6 +1013,8 @@ Check that the test harness and install work on each test machine:
  $ ./Configure -des -Dprefix=/install/path && make all test_harness install
  $ cd /install/path
 
+(Remember C<-Dusedevel> above, for a development release.)
+
 =head4 Check C<perl -v> and C<perl -V>
 
 Check that the output of C<perl -v> and C<perl -V> are as expected,
@@ -1024,7 +1026,7 @@ which is why you should test from the tarball.
 
 =head4 Run the Installation Verification Procedure utility
 
-    $ ./perl ./perlivp
+    $ ./perl -Ilib ./perlivp
     # Or, perhaps:
     $ ./perl5.x.y ./perlivp5.x.y
     ...
@@ -1046,6 +1048,13 @@ previous is 5.10.0:
     find . -type f | sort > /tmp/f2
     diff -u /tmp/f[12]
 
+=head4 Disable C<local::lib> if it's turned on
+
+If you're using C<local::lib>, you should reset your environment before
+performing these actions:
+
+    $ unset PERL5LIB PERL_MB_OPT PERL_LOCAL_LIB_ROOT PERL_MM_OPT
+
 =head4 Bootstrap the CPAN client
 
 Bootstrap the CPAN client on the clean install:
@@ -1057,11 +1066,6 @@ Bootstrap the CPAN client on the clean install:
 
 =head4 Install the Inline module with CPAN and test it
 
-If you're using C<local::lib>, you should reset your environment before
-performing these actions:
-
-    $ unset PERL5LIB PERL_MB_OPT PERL_LOCAL_LIB_ROOT PERL_MM_OPT
-
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
 
@@ -1070,7 +1074,7 @@ has dependencies; for example:
 
 Check that your perl can run this:
 
-    $ bin/perl -lwe "use Inline C => q[int f() { return 42;}]; print f"
+    $ bin/perl -Ilib -lwe "use Inline C => q[int f() { return 42;}]; print f"
     42
     $
 
