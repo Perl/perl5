@@ -1906,7 +1906,7 @@ sub generate_init {
 
   my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
   if (not defined $inputmap) {
-    $self->blurt("Error: No INPUT definition for type '$type', typekind '" . $type->xstype . "' found");
+    $self->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
     return;
   }
 
