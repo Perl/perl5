@@ -16671,8 +16671,8 @@ custom_op_register_free(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_UNUSED_ARG(mg);
     xop = INT2PTR(XOP *, SvIV(sv));
-    Safefree((void*)xop->xop_name);
-    Safefree((void*)xop->xop_desc);
+    Safefree(xop->xop_name);
+    Safefree(xop->xop_desc);
     Safefree(xop);
     return 0;
 }
