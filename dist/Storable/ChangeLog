@@ -1,3 +1,7 @@
+2019-04-23 16:00:00 xsawyerx
+    version 3.15
+    * Fix leaking.
+
 unreleased
     version 3.14
 	* (perl #133708) don't build-time probe for stack limits at all
