@@ -6256,7 +6256,7 @@ typedef struct am_table_short AMTS;
             else {                                                          \
                 PL_lc_numeric_mutex_depth++;                                \
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,                      \
-                        "%s: %d: avoided lc_numeric_lock; depth=%d\n",      \
+                        "%s: %d: avoided lc_numeric_lock; new depth=%d\n",  \
                         __FILE__, __LINE__, PL_lc_numeric_mutex_depth));    \
                 if (cond_to_panic_if_already_locked) {                      \
                     Perl_croak_nocontext("panic: %s: %d: Trying to change"  \
@@ -6278,7 +6278,7 @@ typedef struct am_table_short AMTS;
             else {                                                          \
                 PL_lc_numeric_mutex_depth--;                                \
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,                      \
-                        "%s: %d: avoided lc_numeric_unlock; depth=%d\n",    \
+                        "%s: %d: avoided lc_numeric_unlock; new depth=%d\n",\
                         __FILE__, __LINE__, PL_lc_numeric_mutex_depth));    \
             }                                                               \
         } STMT_END                                                          \
