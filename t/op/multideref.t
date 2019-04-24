@@ -18,7 +18,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 64;
+plan 65;
 
 
 # check that strict refs hint is handled
@@ -242,3 +242,5 @@ sub defer {}
     ::pass("S_maybe_multideref() shouldn't leak on croak");
 }
 
+fresh_perl_is('0for%{scalar local$0[0]}', '', {},
+              "RT #134045 assertion on the OP_SCALAR");
