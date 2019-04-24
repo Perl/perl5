@@ -6420,8 +6420,8 @@ expression, but with an empty argument list, like this:
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED()                                  \
         STMT_START {                                                        \
             LC_NUMERIC_LOCK(                                                \
-                          (IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_UNDERLYING) \
-                      || _NOT_IN_NUMERIC_STANDARD);                         \
+                    (   (  IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_UNDERLYING) \
+                     || (! IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_STANDARD)));\
             if (IN_LC(LC_NUMERIC)) {                                        \
                 if (_NOT_IN_NUMERIC_UNDERLYING) {                           \
                     Perl_set_numeric_underlying(aTHX);                      \
