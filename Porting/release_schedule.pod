@@ -60,7 +60,7 @@ you should reset the version numbers to the next blead series.
   2019-01-20  5.29.7 ✓        Abigail
   2019-02-20  5.29.8 ✓        Nicolas R. (atoomic)
   2019-03-20  5.29.9 ✓        Zak B. Elep
-  2019-04-20  5.29.10         Sawyer X
+  2019-04-20  5.29.10 ✓       Sawyer X
 
 (RC0 for 5.30.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
