@@ -2308,7 +2308,7 @@
  *	Can we handle GCC builtin for telling that certain values are more
  *	likely
  */
-#define HAS_BUILTIN_EXPECT	/**/
+/*#define HAS_BUILTIN_EXPECT	/ **/
 /*#define HAS_BUILTIN_CHOOSE_EXPR	/ **/
 
 /* HAS_C99_VARIADIC_MACROS:
