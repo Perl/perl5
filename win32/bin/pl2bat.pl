@@ -17,9 +17,6 @@ Usage:  $0 [-h]
         -o otherargs    arguments to invoke perl with in generated file
                             other than when run from Windows NT.  Defaults
                             to '-x -S "%0" %1 %2 %3 %4 %5 %6 %7 %8 %9'.
-        -a argstring    arguments to invoke perl with in generated file
-                            ignoring operating system (for compatibility
-                            with previous pl2bat versions).
         -u              update files that may have already been processed
                             by (some version of) pl2bat.
         -w              include "-w" on the /^#!.*perl/ line (unless
@@ -39,32 +36,22 @@ $OPT{'o'} = '-x -S "%0" %1 %2 %3 %4 %5 %6 %7 %8 %9' unless exists $OPT{'o'};
 $OPT{'s'} = '/\\.plx?/' unless exists $OPT{'s'};
 $OPT{'s'} = ($OPT{'s'} =~ m#^/([^/]*[^/\$]|)\$?/?$# ? $1 : "\Q$OPT{'s'}\E");
 
-my $head;
-if(  defined( $OPT{'a'} )  ) {
-    $head = <<EOT;
-	\@rem = '--*-Perl-*--
-	\@echo off
-	perl $OPT{'a'}
-	goto endofperl
-	\@rem ';
+die '-a option has been removed' if $OPT{a};
+
+my $head = <<EOT;
+\@rem = '--*-Perl-*--
+\@echo off
+if "%OS%" == "Windows_NT" goto WinNT
+perl $OPT{'o'}
+goto endofperl
+:WinNT
+perl $OPT{'n'}
+if NOT "%COMSPEC%" == "%SystemRoot%\\system32\\cmd.exe" goto endofperl
+if %errorlevel% == 9009 echo You do not have Perl in your PATH.
+if errorlevel 1 goto script_failed_so_exit_with_non_zero_val 2>nul
+goto endofperl
+\@rem ';
 EOT
-} else {
-    $head = <<EOT;
-	\@rem = '--*-Perl-*--
-	\@echo off
-	if "%OS%" == "Windows_NT" goto WinNT
-	perl $OPT{'o'}
-	goto endofperl
-	:WinNT
-	perl $OPT{'n'}
-	if NOT "%COMSPEC%" == "%SystemRoot%\\system32\\cmd.exe" goto endofperl
-	if %errorlevel% == 9009 echo You do not have Perl in your PATH.
-	if errorlevel 1 goto script_failed_so_exit_with_non_zero_val 2>nul
-	goto endofperl
-	\@rem ';
-EOT
-}
-$head =~ s/^\t//gm;
 my $headlines = 2 + ($head =~ tr/\n/\n/);
 my $tail = "\n__END__\n:endofperl\n";
 
