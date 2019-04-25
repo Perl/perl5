@@ -17807,10 +17807,7 @@ $cat <<EOM
 Checking to see if you have setlocale() and its behavior
 EOM
 $cat >try.c <<EOCP
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
+#include <stdlib.h>
 #include <string.h>
 #$i_locale I_LOCALE
 #ifdef I_LOCALE
@@ -17869,7 +17866,7 @@ int main() {
 #if 0
 
     /* Currently unused code to determine if LC_ALL with disparate values uses
-     * category=value pairs or positional, and to determine the separator
+     * category = value pairs or positional, and to determine the separator
      * between the categories.  We could add code so that if the separator were
      * > '9', we subtract 10; similarly for 'Z' and 'z', and then just about
      * every possible ASCII separator would fit in the 5 bits available in the
@@ -17900,7 +17897,7 @@ int main() {
             exit(bad_setlocale);
         }
 
-        pos = strstr(name, "LC_CTYPE=C.UTF-8");
+        pos = strstr(name, "LC_CTYPE" "=C.UTF-8");
         if (pos != NULL) {
             uses_name_value_pair_names = 1;
             if (pos == name) {

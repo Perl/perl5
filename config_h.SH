@@ -3501,13 +3501,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_TOWLOWER:
  *	This symbol, if defined, indicates that the towlower () routine is
- *	available to do string concatenation.
+ *	available to do case conversion.
  */
 #$d_towlower HAS_TOWLOWER		/**/
 
 /* HAS_TOWUPPER:
  *	This symbol, if defined, indicates that the towupper () routine is
- *	available to do string concatenation.
+ *	available to do case conversion.
  */
 #$d_towupper HAS_TOWUPPER		/**/
 

@@ -3466,13 +3466,13 @@
 
 /* HAS_TOWLOWER:
  *	This symbol, if defined, indicates that the towlower () routine is
- *	available to do string concatenation.
+ *	available to do case conversion.
  */
 /*#define HAS_TOWLOWER		/ **/
 
 /* HAS_TOWUPPER:
  *	This symbol, if defined, indicates that the towupper () routine is
- *	available to do string concatenation.
+ *	available to do case conversion.
  */
 /*#define HAS_TOWUPPER		/ **/
 
@@ -5241,6 +5241,6 @@
 #endif
 
 /* Generated from:
- * 2cc5c49f1266887de8224d2804aae6f80c43da0a62782d74866d5e828194698d config_h.SH
+ * c352c6c51f23ce3afd9b375b5b3b094794e75aed4ee05a072b9cc9a2039a8d75 config_h.SH
  * d6d2fc8bf209b3d6db681ac0994a29a281afe35c3a96bb62079cb15b0605d035 uconfig.sh
  * ex: set ro: */
