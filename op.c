@@ -14769,6 +14769,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                         SV *ix_sv = cSVOPo->op_sv;
                         if (!SvIOK(ix_sv))
                             break;
+                        if (SvIsUV(ix_sv) && SvUV(ix_sv) > IV_MAX)
+                            break;
                         iv = SvIV(ix_sv);
 
                         if (   action_count == 0

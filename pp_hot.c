@@ -5312,12 +5312,21 @@ PP(pp_aelem)
     bool preeminent = TRUE;
     SV *sv;
 
-    if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC)))
-	Perl_warner(aTHX_ packWARN(WARN_MISC),
-		    "Use of reference \"%" SVf "\" as array index",
-		    SVfARG(elemsv));
+    if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv))) {
+        if (SvUV(elemsv) > IV_MAX)
+            elem = IV_MAX;
+        if (ckWARN(WARN_MISC))
+            Perl_warner(aTHX_ packWARN(WARN_MISC),
+                        "Use of reference \"%" SVf "\" as array index",
+                        SVfARG(elemsv));
+    }
     if (UNLIKELY(SvTYPE(av) != SVt_PVAV))
 	RETPUSHUNDEF;
+
+    if (UNLIKELY(SvUOK(elemsv) && SvUVX(elemsv) > IV_MAX))
+        elem = IV_MAX;
+    else if (UNLIKELY(SvNOK(elemsv)))
+        elem = SvUV(elemsv) > IV_MAX ? IV_MAX : (IV)SvNV(elemsv);
 
     if (UNLIKELY(localizing)) {
 	MAGIC *mg;
@@ -5334,12 +5343,6 @@ PP(pp_aelem)
     svp = av_fetch(av, elem, lval && !defer);
     if (lval) {
 #ifdef PERL_MALLOC_WRAP
-	 if (SvUOK(elemsv)) {
-	      const UV uv = SvUV(elemsv);
-	      elem = uv > IV_MAX ? IV_MAX : uv;
-	 }
-	 else if (SvNOK(elemsv))
-	      elem = (IV)SvNV(elemsv);
 	 if (elem > 0) {
 	      MEM_WRAP_CHECK_s(elem,SV*,"Out of memory during array extend");
 	 }
