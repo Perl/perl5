@@ -485,6 +485,14 @@ use File::Glob qw(:case);
         ],
     },
 
+	'ExtUtils::PL2Bat' => {
+		'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.002.tar.gz',
+		'FILES'        => q[cpan/ExtUtils-PL2Bat],
+		'EXCLUDED'     => [
+			't/00-compile.t',
+		],
+	},
+
     'ExtUtils::Manifest' => {
         'DISTRIBUTION' => 'ETHER/ExtUtils-Manifest-1.72.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Manifest],
