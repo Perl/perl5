@@ -876,6 +876,8 @@ cpan/ExtUtils-MakeMaker/t/writemakefile_args.t			See if WriteMakefile works
 cpan/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
 cpan/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 cpan/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
+cpan/ExtUtils-PL2Bat/lib/ExtUtils/PL2Bat.pm	Implement pl2bat
+cpan/ExtUtils-PL2Bat/t/make_executable.t	Tests if ExtUtils::PL2Bat makes bat files that are executable
 cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 cpan/File-Fetch/t/null_subclass.t
