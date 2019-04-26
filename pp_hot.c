@@ -1649,7 +1649,7 @@ PP(pp_aelemfast)
     sv = (svp ? *svp : &PL_sv_undef);
 
     if (UNLIKELY(!svp && lval))
-        DIE(aTHX_ PL_no_aelem, (int)key);
+        DIE(aTHX_ PL_no_aelem, (IV)key);
 
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
 	mg_get(sv);

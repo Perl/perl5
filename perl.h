@@ -4450,7 +4450,7 @@ EXTCONST char PL_no_symref_sv[]
 EXTCONST char PL_no_usym[]
   INIT("Can't use an undefined value as %s reference");
 EXTCONST char PL_no_aelem[]
-  INIT("Modification of non-creatable array value attempted, subscript %d");
+  INIT("Modification of non-creatable array value attempted, subscript %" IVdf);
 EXTCONST char PL_no_helem_sv[]
   INIT("Modification of non-creatable hash value attempted, subscript \"%" SVf "\"");
 EXTCONST char PL_no_modify[]
