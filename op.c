@@ -12732,7 +12732,7 @@ Perl_ck_sort(pTHX_ OP *o)
 	    *tmpbuf = '&';
 	    assert (len < 256);
 	    Copy(name, tmpbuf+1, len, char);
-	    off = pad_findmy_pvn(tmpbuf, len+1, SvUTF8(kSVOP_sv));
+	    off = pad_findmy_pvn(tmpbuf, len+1, 0);
 	    if (off != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS_isOUR(off)) {
 		    SV * const fq =

@@ -10,7 +10,7 @@ BEGIN {
     set_up_inc( qw(. ../lib ) );
 }
 
-plan(5);
+plan(6);
 
 # [perl #130814] can reallocate lineptr while looking ahead for
 # "Missing $ on loop variable" diagnostic.
@@ -54,6 +54,14 @@ Warning: Use of "-C-" without parentheses is ambiguous at - line 1.
 syntax error at - line 1, at EOF
 Execution of - aborted due to compilation errors.
 EXPECTED
+
+fresh_perl_is(<<'EOS', <<'EXPECT', {}, 'no panic in pad_findmy_pvn (#134061)');
+use utf8;
+eval "sort \x{100}%";
+die $@;
+EOS
+syntax error at (eval 1) line 1, at EOF
+EXPECT
 
 __END__
 # ex: set ts=8 sts=4 sw=4 et:
