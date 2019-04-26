@@ -3011,6 +3011,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the memmem routine is
  *	available to return a pointer to the start of the first occurance
  *	of a substring in a memory area (or NULL if not found).
+ *	In glibc, memmem is a GNU extension.  The function is visible in
+ *	libc, but the prototype is only visible if _GNU_SOURCE is #defined.
+ *	Thus we only define this if both the prototype and symbol are found.
  */
 #$d_memmem HAS_MEMMEM		/**/
 
