@@ -24,6 +24,7 @@
    * Provide my_strnlen()
    * Provide utf8_to_uvchr_buf()
    * Replace utf8_to_uvchr() with a safer version
+   * Provide UNICODE_REPLACEMENT
 
 3.45 - 2019-03-19
 

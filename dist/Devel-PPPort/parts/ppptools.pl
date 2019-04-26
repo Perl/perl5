@@ -380,7 +380,7 @@ sub parse_version
   if ($ver =~ /^(\d+)\.(\d+)\.(\d+)$/) {
     return ($1, $2, $3);
   }
-  elsif ($ver !~ /^\d+\.[\d_]+$/) {
+  elsif ($ver !~ /^\d+\.\d{3}(?:_\d{2})?$/) {
     die "cannot parse version '$ver'\n";
   }
 

@@ -135,6 +135,24 @@ POSTAMBLE
   return $post;
 }
 
+sub MY::dist_core
+{
+  package MY;
+  my $dist = shift->SUPER::dist_core(@_);
+
+  my $updated = '';
+  my @rules = split( m{^\s*$}m, $dist );
+  foreach my $rule ( @rules ) {
+    if ( $rule =~ m{^\s*^dist\s+:}m ) {
+        $rule .= qq[\t].q[$(NOECHO) $(ECHO) "Warning: Please check '__MAX_PERL__' value in PPPort_pm.PL"].qq[\n];
+    }
+    $updated .= $rule;
+  }
+
+  return $updated;
+}
+
+
 sub MY::c_o
 {
   package MY;
