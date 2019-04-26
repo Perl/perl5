@@ -2976,6 +2976,9 @@
  *	This symbol, if defined, indicates that the memmem routine is
  *	available to return a pointer to the start of the first occurance
  *	of a substring in a memory area (or NULL if not found).
+ *	In glibc, memmem is a GNU extension.  The function is visible in
+ *	libc, but the prototype is only visible if _GNU_SOURCE is #defined.
+ *	Thus we only define this if both the prototype and symbol are found.
  */
 /*#define HAS_MEMMEM		/ **/
 
@@ -5241,6 +5244,6 @@
 #endif
 
 /* Generated from:
- * c352c6c51f23ce3afd9b375b5b3b094794e75aed4ee05a072b9cc9a2039a8d75 config_h.SH
+ * 6608de918c3c876975f74b684da2536ab1ee23459783d691ae02ce2526a497a7 config_h.SH
  * d6d2fc8bf209b3d6db681ac0994a29a281afe35c3a96bb62079cb15b0605d035 uconfig.sh
  * ex: set ro: */
