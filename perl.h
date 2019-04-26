@@ -6530,9 +6530,10 @@ expression, but with an empty argument list, like this:
 #define Atof				my_atof
 #define Strtod                          my_strtod
 
-#if    defined(HAS_STRTOD) || defined(USE_QUADMATH)                 \
-    || defined(HAS_STRTOLD) && defined(HAS_LONG_DOUBLE)             \
-                            && defined(USE_LONG_DOUBLE)
+#if    defined(HAS_STRTOD)                                          \
+   ||  defined(USE_QUADMATH)                                        \
+   || (defined(HAS_STRTOLD) && defined(HAS_LONG_DOUBLE)             \
+                            && defined(USE_LONG_DOUBLE))
 #  define Perl_strtod   Strtod
 #endif
 
