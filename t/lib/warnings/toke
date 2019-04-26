@@ -1675,3 +1675,19 @@ Execution of - aborted due to compilation errors.
 use utf8;
 qw∘foo ∞ ♥ bar∘
 EXPECT
+########
+# NAME  [perl #134064]
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# test is ASCII-specific, but could be extended to EBCDIC";
+        exit 0;
+    }
+}
+use utf8;
+$foo="m'\302'";
+eval $foo ;
+print "The eval did not crash the program\n"
+EXPECT
+OPTION regex
+Malformed UTF-8 character: .*non-continuation.*
+The eval did not crash the program
