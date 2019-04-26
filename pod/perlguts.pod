@@ -3838,7 +3838,7 @@ hopefully be cache-friendly. In addition, this means that there's no need to
 store the size of the slab (see below on why slabs vary in size), because Perl
 can follow pointers to find the last op.
 
-It might seem possible eliminate slab reference counts altogether, by having
+It might seem possible to eliminate slab reference counts altogether, by having
 all ops implicitly attached to C<PL_compcv> when allocated and freed when the
 CV is freed. That would also allow C<op_free> to skip C<FreeOp> altogether, and
 thus free ops faster. But that doesn't work in those cases where ops need to
