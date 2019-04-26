@@ -16215,7 +16215,16 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
     }
     else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
 	*SvPVX(name) = '$';
-	Perl_sv_catpvf(aTHX_ name, "[%" IVdf "]", (IV)aindex);
+        if (keyname) {
+            if (SvUOK(keyname) || SvROK(keyname))
+                Perl_sv_catpvf(aTHX_ name, "[%" UVuf "]", SvUVX(keyname));
+            else if (SvNOK(keyname))
+                Perl_sv_catpvf(aTHX_ name, "[%" NVgf "]", SvNVX(keyname));
+            else
+                Perl_sv_catpvf(aTHX_ name, "[%" IVdf "]", SvIV(keyname));
+        }
+        else
+            Perl_sv_catpvf(aTHX_ name, "[%" IVdf "]", (IV)aindex);
     }
     else if (subscript_type == FUV_SUBSCRIPT_WITHIN) {
 	/* We know that name has no magic, so can use 0 instead of SV_GMAGIC */
@@ -16457,7 +16466,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		return varname(gv, '%', o->op_targ,
 			    kidsv, 0, FUV_SUBSCRIPT_HASH);
 	    else
-		return varname(gv, '@', o->op_targ, NULL,
+		return varname(gv, '@', o->op_targ, negate ? NULL : cSVOPx_sv(kid),
 		    negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
 		    FUV_SUBSCRIPT_ARRAY);
 	}
