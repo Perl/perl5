@@ -3194,11 +3194,21 @@ S_scan_const(pTHX_ char *start)
 		        && (range_min > 255 || ! convert_unicode)
 #endif
                     ) {
+                        const STRLEN off = d - SvPVX(sv);
+                        const STRLEN extra = 1 + (send - s) + 1;
+                        char *e;
+
                         /* Move the high character one byte to the right; then
                          * insert between it and the range begin, an illegal
                          * byte which serves to indicate this is a range (using
                          * a '-' would be ambiguous). */
-                        char *e = d++;
+
+                        if (off + extra > SvLEN(sv)) {
+                            d = off + SvGROW(sv, off + extra);
+                            max_ptr = d - off + offset_to_max;
+                        }
+
+                        e = d++;
                         while (e-- > max_ptr) {
                             *(e + 1) = *e;
                         }
