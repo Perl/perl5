@@ -4109,12 +4109,31 @@ S_scan_const(pTHX_ char *start)
 	}
     } /* while loop to process each character */
 
+    {
+        const STRLEN off = d - SvPVX(sv);
+
+        /* See if room for the terminating NUL */
+        if (UNLIKELY(off >= SvLEN(sv))) {
+
+#ifndef DEBUGGING
+
+            if (off > SvLEN(sv))
+#endif
+                Perl_croak(aTHX_ "panic: constant overflowed allocated space,"
+                        " %" UVuf " >= %" UVuf, (UV)off, (UV)SvLEN(sv));
+
+            /* Whew!  Here we don't have room for the terminating NUL, but
+             * everything else so far has fit.  It's not too late to grow
+             * to fit the NUL and continue on.  But it is a bug, as the code
+             * above was supposed to have made room for this, so under
+             * DEBUGGING builds, we panic anyway.  */
+            d = off + SvGROW(sv, off + 1);
+        }
+    }
+
     /* terminate the string and set up the sv */
     *d = '\0';
     SvCUR_set(sv, d - SvPVX_const(sv));
-    if (SvCUR(sv) >= SvLEN(sv))
-	Perl_croak(aTHX_ "panic: constant overflowed allocated space, %" UVuf
-		   " >= %" UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
 
     SvPOK_on(sv);
     if (d_is_utf8) {
