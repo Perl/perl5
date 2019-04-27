@@ -4097,10 +4097,12 @@ S_scan_const(pTHX_ char *start)
             goto default_action; /* Redo, having upgraded so both are UTF-8 */
         }
         else {  /* UTF8ness matters: convert this non-UTF8 source char to
-                   UTF-8 for output.  It will occupy 2 bytes */
-            if (d + 2 >= SvEND(sv)) {
-                const STRLEN extra = 2 + (send - s - 1) + 1;
-		const STRLEN off = d - SvPVX_const(sv);
+                   UTF-8 for output.  It will occupy 2 bytes, but don't include
+                   the input byte since we haven't incremented 's' yet. See
+                   Note on sizing above. */
+            const STRLEN off = d - SvPVX(sv);
+            const STRLEN extra = 2 + (send - s - 1) + 1;
+            if (off + extra > SvLEN(sv)) {
 		d = off + SvGROW(sv, off + extra);
 	    }
             *d++ = UTF8_EIGHT_BIT_HI(*s);
