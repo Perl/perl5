@@ -17,6 +17,7 @@
 ^parts/base-
 ^ppport\.h$
 ^PPPort\.c$
+^PPPort.pm$
 ^RealPPPort\.
 ^testing
 Devel-PPPort.*

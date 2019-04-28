@@ -55,7 +55,7 @@ WriteMakefile(%mf);
 
 sub configure
 {
-  my @clean    = qw{ $(H_FILES) RealPPPort.xs RealPPPort.c };
+  my @clean    = qw{ $(H_FILES) RealPPPort.xs RealPPPort.c PPPort.pm };
   my %depend   = ('$(OBJECT)' => '$(H_FILES)');
   my @C_FILES  = qw{ module2.c module3.c },
   my %PL_FILES = (
@@ -67,9 +67,7 @@ sub configure
 
   if (eval $ExtUtils::MakeMaker::VERSION >= 6) {
     push @moreopts, AUTHOR => 'Marcus Holland-Moritz <mhx@cpan.org>';
-    if (-f 'PPPort.pm') {
-      push @moreopts, ABSTRACT_FROM => 'PPPort.pm';
-    }
+    push @moreopts, ABSTRACT_FROM => 'PPPort_pm.PL';
   }
 
   if (eval $ExtUtils::MakeMaker::VERSION >= 6.30_01) {
@@ -77,11 +75,7 @@ sub configure
     push @moreopts, LICENSE => 'perl';
   }
 
-  if ($ENV{'PERL_CORE'}) {
-    # Pods will be built by installman.
-    push @clean, 'PPPort.pm';
-  }
-  else {
+  if (not $ENV{'PERL_CORE'}) {
     # Devel::PPPort is in the core since 5.7.3
     # 5.11.0+ has site before perl
     push @moreopts, INSTALLDIRS => (
