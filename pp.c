@@ -1999,14 +1999,15 @@ static UV S_uv_shift(UV uv, int shift, bool left)
 
 static IV S_iv_shift(IV iv, int shift, bool left)
 {
-   if (shift < 0) {
-       shift = -shift;
-       left = !left;
-   }
-   if (shift >= IV_BITS) {
-       return iv < 0 && !left ? -1 : 0;
-   }
-   return left ? iv << shift : iv >> shift;
+    if (shift < 0) {
+        shift = -shift;
+        left = !left;
+    }
+    if (shift >= IV_BITS) {
+        return iv < 0 && !left ? -1 : 0;
+    }
+
+    return left ? iv << shift : iv >> shift;
 }
 
 #define UV_LEFT_SHIFT(uv, shift) S_uv_shift(uv, shift, TRUE)
@@ -3740,6 +3741,7 @@ PP(pp_ucfirst)
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
         ulen = UTF8SKIP(s);
+
         if (op_type == OP_UCFIRST) {
 #ifdef USE_LOCALE_CTYPE
 	    _toTITLE_utf8_flags(s, s +slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
