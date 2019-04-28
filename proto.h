@@ -5224,6 +5224,13 @@ STATIC SV*	S_refto(pTHX_ SV* sv)
 
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	S_lossless_NV_to_IV(const NV nv, IV * ivp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV	\
+	assert(ivp)
+#endif
+
 PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const svtype type, SV ***spp)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SOFTREF2XV	\

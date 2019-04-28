@@ -1913,6 +1913,40 @@ S_should_warn_nl(const char *pv) {
 
 #endif
 
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
+
+PERL_STATIC_INLINE bool
+S_lossless_NV_to_IV(const NV nv, IV *ivp)
+{
+    /* This function determines if the input NV 'nv' may be converted without
+     * loss of data to an IV.  If not, it returns FALSE taking no other action.
+     * But if it is possible, it does the conversion, returning TRUE, and
+     * storing the converted result in '*ivp' */
+
+    PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV;
+
+#  if  defined(Perl_isnan)
+
+    if (UNLIKELY(Perl_isnan(nv))) {
+        return FALSE;
+    }
+
+#  endif
+
+    if (UNLIKELY(nv < IV_MIN) || UNLIKELY(nv > IV_MAX)) {
+        return FALSE;
+    }
+
+    if ((IV) nv != nv) {
+        return FALSE;
+    }
+
+    *ivp = (IV) nv;
+    return TRUE;
+}
+
+#endif
+
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
 
 #define MAX_CHARSET_NAME_LENGTH 2
