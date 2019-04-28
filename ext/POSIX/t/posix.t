@@ -155,7 +155,7 @@ else {
 like( getcwd(), qr/$pat/, 'getcwd' );
 
 # Check string conversion functions.
-my $weasel_words = "(though differences may be beyond the diplayed digits)";
+my $weasel_words = "(though differences may be beyond the displayed digits)";
 
 SKIP: { 
     skip("strtod() not present", 3) unless $Config{d_strtod};
