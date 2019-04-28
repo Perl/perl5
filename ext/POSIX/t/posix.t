@@ -206,11 +206,12 @@ SKIP: {
     # If this check fails then perl's buggy atof has probably assigned the value,
     # instead of the preferred Perl_strtod function.
 
-    $n = &POSIX::strtold('9.81256119e4820');
     if($Config{nvtype} eq 'long double') {
+      $n = &POSIX::strtold('9.81256119e4820');
       cmp_ok($n, '==', 9.81256119e4820, "strtold and perl agree $weasel_words");
     }
     elsif($Config{nvtype} eq '__float128') {
+      $n = &POSIX::strtold('9.81256119e4820');
       if($Config{longdblkind} == 1 || $Config{longdblkind} == 2) {
         cmp_ok($n, '==', 9.81256119e4820, "strtold and perl agree $weasel_words");
       }
