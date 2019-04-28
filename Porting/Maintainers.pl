@@ -65,7 +65,10 @@ use File::Glob qw(:case);
 
 # DISTRIBUTION names the tarball on CPAN which (allegedly) the files
 # included in core are derived from. Note that the file's version may not
-# necessarily match the newest version on CPAN.
+# necessarily match the newest version on CPAN.  (For dist/ distributions,
+# which are blead-first, a request should be placed with the releaser(s) to
+# upload the corresponding cpan release, and the entry in this file should
+# only be updated when that release has been done.)
 
 # EXCLUDED is a list of files to be excluded from a CPAN tarball before
 # comparing the remaining contents with core. Each item can either be a
