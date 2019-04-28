@@ -339,7 +339,7 @@ use File::Glob qw(:case);
     },
 
     'Devel::PPPort' => {
-        'DISTRIBUTION' => 'ATOOMIC/Devel-PPPort-3.46.tar.gz',
+        'DISTRIBUTION' => 'ETHER/Devel-PPPort-3.47.tar.gz',
         'FILES'        => q[dist/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead

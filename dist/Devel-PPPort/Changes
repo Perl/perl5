@@ -1,5 +1,11 @@
- 3.46 - 2019-04-20
- 
+Revision history for Devel-PPPort
+
+ 3.47 - 2019-04-27
+
+    * re-fix leaky code (used only in tests)
+
+ 3.46 - 2019-04-26
+
     * Fix the isFOO character type classification macros to work properly on
        all versions, as follows:
          * Fixed isALNUM, isALPHA, isDIGIT, isIDFIRST, isLOWER, and isUPPER on
