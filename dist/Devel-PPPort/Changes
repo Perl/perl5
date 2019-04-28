@@ -1,5 +1,9 @@
 Revision history for Devel-PPPort
 
+ 3.48 - 2019-04-28
+
+    * Order misc before uv for UNLIKELY (<=5.8.8)
+
  3.47 - 2019-04-27
 
     * re-fix leaky code (used only in tests)
