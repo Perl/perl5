@@ -9,6 +9,7 @@
 \.bak$
 \.orig$
 \.cache\.cm$
+\.DS_Store
 ^blib
 ^pm_to_blib
 ^backup
@@ -18,5 +19,6 @@
 ^PPPort\.c$
 ^RealPPPort\.
 ^testing
+Devel-PPPort.*
 Devel-PPPort.*\.tar\.gz$
 .travis.yml
