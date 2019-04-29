@@ -1229,6 +1229,9 @@ Perl_malloc(size_t nbytes)
         dVAR;
   	union overhead *p;
   	int bucket;
+#if defined(DEBUGGING) || defined(RCHECK)
+	MEM_SIZE size = nbytes;
+#endif
 
         /* A structure that has more than PTRDIFF_MAX bytes is unfortunately
          * legal in C, but in such, if two elements are far enough apart, we
@@ -1241,10 +1244,6 @@ Perl_malloc(size_t nbytes)
                                   " behavior");
             return NULL;
         }
-
-#if defined(DEBUGGING) || defined(RCHECK)
-	MEM_SIZE size = nbytes;
-#endif
 
 	BARK_64K_LIMIT("Allocation",nbytes,nbytes);
 #ifdef DEBUGGING
