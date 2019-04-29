@@ -1,4 +1,8 @@
 Revision history for Devel-PPPort
+ 
+ 3.49 - 2019-04-29
+
+    * Fix tests for 64bit int, 32bit ptr platforms
 
  3.48 - 2019-04-28
 

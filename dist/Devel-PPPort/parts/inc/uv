@@ -383,7 +383,12 @@ utf8_to_uvchr_buf(s, adjustment)
             av_push(av, newSVuv(utf8_to_uvchr_buf(s,
                                                   s + UTF8SKIP(s) + adjustment,
                                                   &len)));
-            av_push(av, newSViv((IV) len));
+            if (len == (STRLEN) -1) {
+                av_push(av, newSViv(-1));
+            }
+            else {
+                av_push(av, newSVuv(len));
+            }
             RETVAL = av;
         OUTPUT:
                 RETVAL
@@ -397,7 +402,12 @@ utf8_to_uvchr(s)
         CODE:
             av = newAV();
             av_push(av, newSVuv(utf8_to_uvchr(s, &len)));
-            av_push(av, newSViv((IV) len));
+            if (len == (STRLEN) -1) {
+                av_push(av, newSViv(-1));
+            }
+            else {
+                av_push(av, newSVuv(len));
+            }
             RETVAL = av;
         OUTPUT:
                 RETVAL
