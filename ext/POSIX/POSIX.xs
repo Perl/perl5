@@ -1086,6 +1086,7 @@ static NV my_rint(NV x)
   }
 #endif
   not_here("rint");
+  NOT_REACHED; /* NOTREACHED */
 }
 #endif
 
