@@ -131,6 +131,8 @@ struct RExC_state_t {
     char	*parse;			/* Input-scan pointer. */
     char        *copy_start;            /* start of copy of input within
                                            constructed parse string */
+    char        *save_copy_start;       /* Provides one level of saving
+                                           and restoring 'copy_start' */
     char        *copy_start_in_input;   /* Position in input string
                                            corresponding to copy_start */
     SSize_t	whilem_seen;		/* number of WHILEM in this expr */
@@ -229,6 +231,7 @@ struct RExC_state_t {
 #define RExC_precomp	(pRExC_state->precomp)
 #define RExC_copy_start_in_input (pRExC_state->copy_start_in_input)
 #define RExC_copy_start_in_constructed  (pRExC_state->copy_start)
+#define RExC_save_copy_start_in_constructed  (pRExC_state->save_copy_start)
 #define RExC_precomp_end (pRExC_state->precomp_end)
 #define RExC_rx_sv	(pRExC_state->rx_sv)
 #define RExC_rx		(pRExC_state->rx)
@@ -817,8 +820,13 @@ static const scan_data_t zero_scan_data = {
 } STMT_END
 
 /* Setting this to NULL is a signal to not output warnings */
-#define TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE RExC_copy_start_in_constructed = NULL
-#define RESTORE_WARNINGS RExC_copy_start_in_constructed = RExC_precomp
+#define TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE                               \
+    STMT_START {                                                            \
+      RExC_save_copy_start_in_constructed  = RExC_copy_start_in_constructed;\
+      RExC_copy_start_in_constructed = NULL;                                \
+    } STMT_END
+#define RESTORE_WARNINGS                                                    \
+    RExC_copy_start_in_constructed = RExC_save_copy_start_in_constructed
 
 /* Since a warning can be generated multiple times as the input is reparsed, we
  * output it the first time we come to that point in the parse, but suppress it
