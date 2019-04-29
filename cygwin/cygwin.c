@@ -112,8 +112,8 @@ do_spawn (char *cmd)
     if (strBEGINs (cmd,"exec") && isSPACE (cmd[4]))
 	goto doshell;
     for (s=cmd; *s && isALPHA (*s); s++) ;	/* catch VAR=val gizmo */
-	if (*s=='=')
-	    goto doshell;
+    if (*s=='=')
+        goto doshell;
 
     for (s=cmd; *s; s++)
 	if (strchr (metachars,*s))
