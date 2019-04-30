@@ -345,6 +345,10 @@ case "$cc" in
   ;;
 esac
 
+# This gives worse accuracy than atof() ! [perl #134031]
+d_strtod='undef'
+d_strtod_l='undef'
+
 case `uname -p` in
 arm|mips)
   ;;
