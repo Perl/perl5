@@ -443,8 +443,9 @@ if you need fixed C<stat> and C<utime> functions then have a look at the
 CPAN distribution Win32::UTCFileTime.
 
 If you build with Visual C++ 2015 or later then F<ext/XS-APItest/t/locale.t>
-may crash (after all its tests have passed). This has been reported to
-Microsoft here: L<https://developercommunity.visualstudio.com/content/problem/519486/setlocalelc-numeric-iso-latin-16-fails-then-succee.html>.
+may crash (after all its tests have passed). This is due to a regression in the
+Universal CRT introduced in the Windows 10 April 2018 Update, and will be fixed
+in the May 2019 Update, as explained here: L<https://developercommunity.visualstudio.com/content/problem/519486/setlocalelc-numeric-iso-latin-16-fails-then-succee.html>.
 
 If you build with certain versions (e.g. 4.8.1) of gcc from www.mingw.org then
 F<ext/POSIX/t/time.t> may fail test 17 due to a known bug in those gcc builds:
@@ -976,6 +977,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 19 April 2019
+Last updated: 30 April 2019
 
 =cut
