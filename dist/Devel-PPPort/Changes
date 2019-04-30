@@ -1,5 +1,9 @@
 Revision history for Devel-PPPort
 
+ 3.51 - 2019-05-01
+
+    * include the module version in metadata for proper PAUSE indexing
+
  3.50 - 2019-04-30
 
     * Order warn before uv for packWARN (shown in 5.6.1)

@@ -34,21 +34,6 @@ my %mf = (
   OBJECT        => 'RealPPPort$(OBJ_EXT) $(O_FILES)',
   XSPROTOARG    => '-noprototypes',
   CONFIGURE     => \&configure,
-  META_MERGE    => {
-    'meta-spec' => {
-      version => 2,
-    },
-    resources => {
-      bugtracker => {
-        web => 'https://rt.perl.org/rt3/',
-      },
-      repository => {
-        type => 'git',
-        url  => 'git://perl5.git.perl.org/perl.git',
-        web  => 'https://perl5.git.perl.org/perl.git',
-      },
-    },
-  },
 );
 delete $mf{META_MERGE} unless eval { ExtUtils::MakeMaker->VERSION (6.46) };
 WriteMakefile(%mf);
@@ -92,12 +77,39 @@ sub configure
     $depend{'apicheck.i'} = 'ppport.h';
   }
 
+  open my $fh, '<', 'PPPort_pm.PL' or die "cannot open PPPort_pm.PL for reading: $!";
+  my $version;
+  while (my $line = <$fh>) {
+    ($version) = $line =~ /^\$VERSION = '([\d.]+)';$/ and last;
+  };
+  die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
+  close $fh;
+
   return {
     C        => \@C_FILES,
     XS       => { 'RealPPPort.xs' => 'RealPPPort.c' },
     PL_FILES => \%PL_FILES,
     depend   => \%depend,
     clean    => { FILES => "@clean" },
+    META_MERGE    => {
+      'meta-spec' => { version => 2 },
+      provides => {
+        'Devel::PPPort' => {
+          file    => 'PPPort_pm.PL',
+          version => $version,
+        },
+      },
+      resources => {
+        bugtracker => {
+          web => 'https://rt.perl.org/rt3/',
+        },
+        repository => {
+          type => 'git',
+          url  => 'git://perl5.git.perl.org/perl.git',
+          web  => 'https://perl5.git.perl.org/perl.git',
+        },
+      },
+    },
     @moreopts,
   };
 }
