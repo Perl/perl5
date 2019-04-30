@@ -551,7 +551,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = '3.49';
+$VERSION = '3.50';
 
 sub _init_data
 {
@@ -630,6 +630,8 @@ __DATA__
 
 %include misc
 
+%include warn
+
 %include uv
 
 %include memory
@@ -669,8 +671,6 @@ __DATA__
 %include HvNAME
 
 %include gv
-
-%include warn
 
 %include pvs
 
