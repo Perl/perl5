@@ -1979,7 +1979,7 @@ static UV S_uv_shift(UV uv, int shift, bool left)
        shift = -shift;
        left = !left;
    }
-   if (shift >= IV_BITS) {
+   if (UNLIKELY(shift >= IV_BITS)) {
        return 0;
    }
    return left ? uv << shift : uv >> shift;
@@ -1991,7 +1991,7 @@ static IV S_iv_shift(IV iv, int shift, bool left)
         shift = -shift;
         left = !left;
     }
-    if (shift >= IV_BITS) {
+    if (UNLIKELY(shift >= IV_BITS)) {
         return iv < 0 && !left ? -1 : 0;
     }
 
