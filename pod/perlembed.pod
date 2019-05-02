@@ -1069,10 +1069,15 @@ Once you have this code, slap it into the second argument of I<perl_parse()>:
 
  perl_parse(my_perl, xs_init, argc, my_argv, NULL);
 
+To avoid the error C<undefined reference to `boot_Socket> you would also
+need to link your binary with the C<Socket.so> file. You can use the handy
+one-liner C<perl -MSocket -e 'print @DynaLoader::dl_shared_objects'> to get
+its location.
 
 Then compile:
 
- % cc -o interp interp.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
+ % cc -o interp interp.c `perl -MExtUtils::Embed -e ccopts -e ldopts` \
+    `perl -MSocket -e 'print @DynaLoader::dl_shared_objects'`
 
  % interp
    use Socket;
