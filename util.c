@@ -132,6 +132,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
+    dSAVEDERRNO;
 
 #ifdef USE_MDH
     if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
@@ -143,6 +144,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc, size=%" UVuf, (UV) size);
 #endif
     if (!size) size = 1;	/* malloc(0) is NASTY on our system */
+    SAVE_ERRNO;
 #ifdef PERL_DEBUG_READONLY_COW
     if ((ptr = mmap(0, size, PROT_READ|PROT_WRITE,
 		    MAP_ANON|MAP_PRIVATE, -1, 0)) == MAP_FAILED) {
@@ -182,6 +184,11 @@ Perl_safesysmalloc(MEM_SIZE size)
 	ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%" UVxf ": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
+        /* malloc() can modify errno() even on success, but since someone
+	   writing perl code doesn't have any control over when perl calls
+	   malloc() we need to hide that.
+	*/
+        RESTORE_ERRNO;
     }
     else {
 #ifdef USE_MDH
@@ -223,6 +230,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	ptr = safesysmalloc(size);
     }
     else {
+        dSAVE_ERRNO;
 #ifdef USE_MDH
 	where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
         if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
@@ -296,6 +304,12 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	    maybe_protect_ro(header->prev);
 #endif
 	    ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
+
+	    /* realloc() can modify errno() even on success, but since someone
+	       writing perl code doesn't have any control over when perl calls
+	       realloc() we need to hide that.
+	    */
+	    RESTORE_ERRNO;
 	}
 
     /* In particular, must do that fixup above before logging anything via
