@@ -1991,11 +1991,30 @@ static IV S_iv_shift(IV iv, int shift, bool left)
         shift = -shift;
         left = !left;
     }
+
     if (UNLIKELY(shift >= IV_BITS)) {
         return iv < 0 && !left ? -1 : 0;
     }
 
-    return left ? iv << shift : iv >> shift;
+    /* For left shifts, perl 5 has chosen to treat the value as unsigned for
+     * the * purposes of shifting, then cast back to signed.  This is very
+     * different from perl 6:
+     *
+     * $ perl6 -e 'say -2 +< 5'
+     * -64
+     *
+     * $ ./perl -le 'print -2 << 5'
+     * 18446744073709551552
+     * */
+    if (left) {
+        if (iv == IV_MIN) { /* Casting this to a UV is undefined behavior */
+            return 0;
+        }
+        return (IV) (((UV) iv) << shift);
+    }
+
+    /* Here is right shift */
+    return iv >> shift;
 }
 
 #define UV_LEFT_SHIFT(uv, shift) S_uv_shift(uv, shift, TRUE)
