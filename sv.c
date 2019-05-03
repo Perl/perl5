@@ -10310,7 +10310,8 @@ Perl_sv_isa(pTHX_ SV *sv, const char *const name)
 Creates a new SV for the existing RV, C<rv>, to point to.  If C<rv> is not an
 RV then it will be upgraded to one.  If C<classname> is non-null then the new
 SV will be blessed in the specified package.  The new SV is returned and its
-reference count is 1.  The reference count 1 is owned by C<rv>.
+reference count is 1.  The reference count 1 is owned by C<rv>. See also
+newRV_inc() and newRV_noinc() for creating a new RV properly.
 
 =cut
 */
