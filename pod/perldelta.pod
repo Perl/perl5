@@ -369,7 +369,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<sort SUBNAME> within an C<eval EXPR> when C<EXPR> was UTF-8 upgraded
+could panic if the C<SUBNAME> was non-ASCII.  [perl #134061]
 
 =back
 
