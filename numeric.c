@@ -66,6 +66,8 @@ S_strtod(pTHX_ const char * const s, char ** e)
 
     result = strtod(s, e);
 
+#  else
+#    error No strtod() equivalent found
 #  endif
 
     RESTORE_LC_NUMERIC();
