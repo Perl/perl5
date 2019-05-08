@@ -255,9 +255,7 @@ close \$fh;
 PROG
     print $prog;
     my $out = fresh_perl($prog, {});
-    $::TODO = "not fixed yet";
     cmp_ok($out, '!~', qr/refcnt/, "no exception from PerlIO");
-    undef $::TODO;
     # checks that that program did something rather than failing to
     # compile
     cmp_ok($out, '=~', qr/Died at/, "but we did get the exception from die");

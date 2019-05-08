@@ -1779,7 +1779,17 @@ Perl_io_close(pTHX_ IO *io, GV *gv, bool not_implicit, bool warn_on_fail)
 
     if (IoIFP(io)) {
 	if (IoTYPE(io) == IoTYPE_PIPE) {
-	    const int status = PerlProc_pclose(IoIFP(io));
+            PerlIO *fh = IoIFP(io);
+            int status;
+
+            /* my_pclose() can propagate signals which might bypass any code
+               after the call here if the signal handler throws an exception.
+               This would leave the handle in the IO object and try to close it again
+               when the SV is destroyed on unwind or global destruction.
+               So NULL it early.
+            */
+            IoOFP(io) = IoIFP(io) = NULL;
+	    status = PerlProc_pclose(fh);
 	    if (not_implicit) {
 		STATUS_NATIVE_CHILD_SET(status);
 		retval = (STATUS_UNIX == 0);
