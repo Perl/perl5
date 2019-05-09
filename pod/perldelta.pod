@@ -372,6 +372,14 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 C<sort SUBNAME> within an C<eval EXPR> when C<EXPR> was UTF-8 upgraded
 could panic if the C<SUBNAME> was non-ASCII.  [perl #134061]
 
+=item *
+
+Correctly handle realloc() modifying C<errno> on success so that the
+modification isn't visible to the perl user, since realloc() is called
+implicitly by the interpreter.  This modification is permitted by the
+C standard, but has only been observed on FreeBSD 13.0-CURRENT.  [perl
+#133958]
+
 =back
 
 =head1 Known Problems
