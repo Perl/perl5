@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.30.0-RC1 - Marcel Proust
+
+Announced on 2019-05-11 by Sawyer X
+
+  If a little dreaming is dangerous, the cure for it is not to dream
+  less but to dream more, to dream all the time.
+
+    -- Marcel Proust
+
 =head2 v5.29.10 - Maya Angelou, Alone
 
 L<Announced on 2019-04-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/04/msg254467.html>
