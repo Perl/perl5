@@ -98,6 +98,9 @@ no C<m/\A=cut/> line.
  it wouldn't be worth the confusion of having perl and pod2whatever
  actually disagree on what can constitute a Pod block.
 
+Note that a parser is not expected to distinguish between something that
+looks like pod, but is in a quoted string, such as a here document.
+
 Within a Pod block, there are B<Pod paragraphs>.  A Pod paragraph
 consists of non-blank lines of text, separated by one or more blank
 lines.
