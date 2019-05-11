@@ -50,6 +50,7 @@
 /roffitall
 
 # generated
+/perl5300delta.pod
 /perlapi.pod
 /perlintern.pod
 /perlmodlib.pod
