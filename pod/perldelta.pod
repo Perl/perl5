@@ -61,10 +61,7 @@ Because of a change in Unicode release cycles, Perl jumps from Unicode
 =head2 Perl now supports draft Unicode 12.1
 
 Unicode 12.1 differs from 12.0 only in the addition of a single
-character, that for the new Japanese era name.  The intent is to ship
-Perl 5.30 with Unicode 12.1.  The final release of 12.1 is scheduled for
-May 7, 2019.  Hopefully, there won't be any code changes to the draft
-after the release of Perl 5.29.10.
+character, that for the new Japanese era name.
 
 =head2 Wildcards in Unicode property value specifications are now
 partially supported
@@ -1210,13 +1207,6 @@ an incorrect value.
 
 =item *
 
-Fix a qr/[...]/ bug introduced in v5.29.7
-
-Using /il should not result in looking for a [:posix:] class
-that matches the code points given.
-
-=item *
-
 Reduce recursion on ops [perl #108276]
 
 This can prevent stack overflow when processing extremely deep op
@@ -1291,16 +1281,6 @@ There were some races and very long hangs should one thread be compiling
 the same property as another simultaneously.  These have now been fixed.
 
 =back
-
-=item * Assertion failure in compiling invalid regex pattern [perl #133767]
-
-This bug was introduced in the 5.29 series, so this should not be in the
-perldelta for 5.30.
-
-=item * Null pointer deref [perl #133770]
-
-This bug was introduced in the 5.29 series, so this should not be in the
-perldelta for 5.30.
 
 =item *
 
