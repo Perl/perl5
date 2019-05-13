@@ -14,7 +14,8 @@ L<perl5280delta>, which describes differences between 5.26.0 and 5.28.0.
 
 =head1 Notice
 
-sv_utf8_(downgrade|decode) are no longer marked as experimental [perl #133788]
+sv_utf8_(downgrade|decode) are no longer marked as experimental.
+L<[perl #133788]|https://rt.perl.org/Ticket/Display.html?id=133788>.
 
 =head1 Core Enhancements
 
@@ -134,7 +135,7 @@ possible regular expression debugging.
 
 =head1 Incompatible Changes
 
-=head2 Pattern delimiters now must be graphemes
+=head2 Pattern delimiters must now be graphemes
 
 This usage has been deprecated and scheduled for removal in 5.30.  See
 L<perldeprecation/Use of unassigned code point or non-standalone
@@ -158,7 +159,7 @@ Setting L<< C<$[>|perlvar/$[ >> to a non-zero value has been deprecated since
 Perl 5.12 and now throws a fatal error.
 See L<<< perldeprecation/Assigning non-zero to C<< $[ >> is fatal >>>.
 
-=head2 Previously deprecated sysread()/syswrite() on :utf8 handles now fatal
+=head2 Previously deprecated sysread()/syswrite() on :utf8 handles is now fatal
 
 Calling sysread(), syswrite(), send() or recv() on a C<:utf8> handle,
 whether applied explicitly or implicitly, is now fatal.  This was
@@ -185,39 +186,40 @@ could lead to invalidly encoded perl scalars.
 
 =back
 
-[perl #125760]
+L<[perl #125760]|https://rt.perl.org/Ticket/Display.html?id=125760>.
 
 =head2 my() in false conditional prohibited
 
 Declarations such as C<my $x if 0> are no longer permitted.
 
-[perl #133543]
+L<[perl #133543]|https://rt.perl.org/Ticket/Display.html?id=133543>.
 
 =head2 Fatalize $* and $#
 
 These special variables, long deprecated, now throw exceptions when used.
 
-[perl #133583]
+L<[perl #133583]|https://rt.perl.org/Ticket/Display.html?id=133583>.
 
 =head2 Fatalize unqualified use of dump()
 
 The C<dump()> function, long discouraged, may no longer be used unless it is
 fully qualified, I<i.e.>, C<CORE::dump()>.
 
-[perl #133584]
+L<[perl #133584]|https://rt.perl.org/Ticket/Display.html?id=133584>.
 
 =head2 Remove File::Glob::glob()
 
 The C<File::Glob::glob()> function, long deprecated, has been removed and now
 throws an exception which advises use of C<File::Glob::bsd_glob()> instead.
 
-[perl #133586]
+L<[perl #133586]|https://rt.perl.org/Ticket/Display.html?id=133586>.
 
 =head2 C<pack()> no longer can return malformed UTF-8
 
 It croaks if it would otherwise return a UTF-8 string that contains
 malformed UTF-8.  This protects agains potential security threats.  This
-is considered a bug fix as well ([perl #131642]).
+is considered a bug fix as well.
+L<[perl #131642]|https://rt.perl.org/Ticket/Display.html?id=131642>.
 
 =head2 Any set of digits in the Common script are legal in a script run
 of another script
@@ -229,11 +231,12 @@ mathematical notation, such as the MATHEMATICAL DOUBLE-STRUCK DIGITs.
 Any of these sets should be able to appear in script runs of, say,
 Greek.  But the design of 5.30 overlooked all but the ASCII digits
 C<[0-9]>, so the design was flawed.  This has been fixed, so is both a
-bug fix and an incompatibility. [perl #133547]
+bug fix and an incompatibility.
+L<[perl #133547]|https://rt.perl.org/Ticket/Display.html?id=133547>.
 
 All digits in a run still have to come from the same set of ten digits.
 
-=head2 JSON::PP enable allow_nonref by default
+=head2 JSON::PP enables allow_nonref by default
 
 As JSON::XS 4.0 changed its policy and enabled allow_nonref
 by default, JSON::PP also enabled allow_nonref by default.
@@ -259,7 +262,8 @@ C<ord("\x7fff")> now requires 12% fewer instructions than before.  The
 performance of checking that a sequence of bytes is valid UTF-8 is similarly
 improved, again by using a dfa.
 
-Eliminate recursion from finalize_op() [perl #108276]
+Eliminate recursion from finalize_op().
+L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
 =item *
 
@@ -490,7 +494,7 @@ L<IPC::Cmd> has been upgraded from version 1.00 to 1.02.
 
 L<JSON::PP> has been upgraded from version 2.97001 to 4.02.
 
-L<JSON::PP> as JSON::XS 4.0 enable C<allow_nonref> by default.
+L<JSON::PP> as JSON::XS 4.0 enables C<allow_nonref> by default.
 
 =item *
 
@@ -656,7 +660,8 @@ L<utf8> has been upgraded from version 1.21 to 1.22.
 L<vars> has been upgraded from version 1.04 to 1.05.
 
 C<vars.pm> no longer disables non-vars strict when checking if strict
-vars is enabled.  [perl #130674]
+vars is enabled.
+L<[perl #130674]|https://rt.perl.org/Ticket/Display.html?id=130674>.
 
 =item *
 
@@ -701,8 +706,9 @@ available on CPAN.
 
 =item *
 
-C<Locale::Codes> has been removed at the request of its author.  It
-continues to be available on CPAN C<L<Locale::Codes>>.  [perl #133458].
+Locale::Codes has been removed at the request of its author.  It
+continues to be available on CPAN as C<L<Locale::Codes>>.
+L<[perl #133458]|https://rt.perl.org/Ticket/Display.html?id=133458>.
 
 =back
 
@@ -768,7 +774,8 @@ Clarification of behaviour of C<reset EXPR>.
 =item *
 
 Try to clarify that C<< ref(qr/xx/) >> returns C<Regexp> rather than
-C<REGEXP> and why.  [perl #133751]
+C<REGEXP> and why.
+L<[perl #133751]|https://rt.perl.org/Ticket/Display.html?id=133751>.
 
 =back
 
@@ -810,7 +817,8 @@ Added a note for the ::xdigit:: character class.
 
 =item *
 
-More specific documentation of paragraph mode. L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
+More specific documentation of paragraph mode.
+L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
 
 =back
 
@@ -854,8 +862,8 @@ a NUL character.
 L<Type of arg %d to %s must be %s (not %s)|perldiag/"Type of arg %d to %s must be %s (not %s)">
 
 Attempts to push, pop, etc on a hash or glob now produce this message
-rather than complaining that they no longer work on scalars. [perl
-#130367]
+rather than complaining that they no longer work on scalars.
+L<[perl #130367]|https://rt.perl.org/Ticket/Display.html?id=130367>.
 
 =item *
 
@@ -905,7 +913,8 @@ Improve detection of memrchr, strlcat, and strlcpy
 
 =item *
 
-Improve Configure detection of memmem() [perl #133760].
+Improve Configure detection of memmem().
+L<[perl #133760]|https://rt.perl.org/Ticket/Display.html?id=133760>.
 
 =item *
 
@@ -923,13 +932,15 @@ Multiple improvements and fixes for -DPERL_GLOBAL_STRUCT build option.
 
 =item *
 
-F<t/lib/croak/op> [perl #130367]
+F<t/lib/croak/op>
+L<[perl #130367]|https://rt.perl.org/Ticket/Display.html?id=130367>.
 
 separate error for C<push>, etc. on hash/glob.
 
 =item *
 
-F<t/op/svleak.t> [perl #133660]
+F<t/op/svleak.t>
+L<[perl #133660]|https://rt.perl.org/Ticket/Display.html?id=133660>.
 
 Add test for C<goto &sub> in overload leaking.
 
@@ -940,12 +951,14 @@ Split F<t/re/fold_grind.t> into multiple test files.
 =item *
 
 Fix intermittent tests which failed due to race conditions which
-surface during parallel testing. L<[perl #133740]|https://rt.perl.org/Ticket/Display.html?id=133740>.
+surface during parallel testing.
+L<[perl #133740]|https://rt.perl.org/Ticket/Display.html?id=133740>.
 
 =item *
 
 Thoroughly test paragraph mode, using a new test file,
-F<t/io/paragraph_mode.t>. L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
+F<t/io/paragraph_mode.t>.
+L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
 
 =item *
 
@@ -982,7 +995,7 @@ expects to find F<libperl.dylib> in the build directory, and the
 library path is then adjusted during installation to point to the
 installed library.
 
-[perl #126706]
+L<[perl #126706]|https://rt.perl.org/Ticket/Display.html?id=126706>.
 
 =item Minix3
 
@@ -1021,7 +1034,8 @@ been added to the B<nmake> makefile.)
 =item *
 
 C<sleep()> with warnings enabled for a C<USE_IMP_SYS> build no longer
-warns about the sleep timeout being too large.  [perl #133376]
+warns about the sleep timeout being too large.
+L<[perl #133376]|https://rt.perl.org/Ticket/Display.html?id=133376>.
 
 =item *
 
@@ -1031,7 +1045,8 @@ Support for compiling perl on Windows using Microsoft Visual Studio 2019
 =item *
 
 socket() now sets C<$!> if the protocol, address family and socket
-type combination is not found.  [perl #133853]
+type combination is not found.
+L<[perl #133853]|https://rt.perl.org/Ticket/Display.html?id=133853>.
 
 =item *
 
@@ -1064,7 +1079,8 @@ should be a dot or comma.
 =item *
 
 Added C<newSVsv_nomg()> to copy a SV without processing get magic on
-the source.  [perl #132964]
+the source.
+L<[perl #132964]|https://rt.perl.org/Ticket/Display.html?id=132964>.
 
 =item *
 
@@ -1107,32 +1123,36 @@ L<[perl #133368]|https://rt.perl.org/Ticket/Display.html?id=133368>
 
 =item *
 
-The new in-place editing code no longer leaks directory handles.  [perl
-#133314]
+The new in-place editing code no longer leaks directory handles.
+L<[perl #133314]|https://rt.perl.org/Ticket/Display.html?id=133314>.
 
 =item *
 
 Warnings produced from constant folding operations on overloaded
 values no longer produce spurious "Use of uninitialized value"
-warnings.  [perl #132683]
+warnings.
+L<[perl #132683]|https://rt.perl.org/Ticket/Display.html?id=132683>.
 
 =item *
 
-Fix for "mutator not seen in (lex = ...) .= ..." [perl #133441]
+Fix for "mutator not seen in (lex = ...) .= ..."
+L<[perl #133441]|https://rt.perl.org/Ticket/Display.html?id=133441>.
 
 =item *
 
 C<pack "u", "invalid uuencoding"> now properly NUL terminates the
-zero-length SV produced.  [perl #132655]
+zero-length SV produced.
+L<[perl #132655]|https://rt.perl.org/Ticket/Display.html?id=132655>.
 
 =item *
 
-Improve the debugging output for calloc() calls with C<-Dm>.  [perl #133439]
+Improve the debugging output for calloc() calls with C<-Dm>.
+L<[perl #133439]|https://rt.perl.org/Ticket/Display.html?id=133439>.
 
 =item *
 
 Regexp script runs were failing to permit ASCII digits in some cases.
-[perl #133547]
+L<[perl #133547]|https://rt.perl.org/Ticket/Display.html?id=133547>.
 
 =item *
 
@@ -1140,19 +1160,19 @@ On Unix-like systems supporting a platform-specific technique for
 determining L<< C<$^X>|perlvar/$^X >>, Perl failed to fall back to the
 generic technique when the platform-specific one fails (for example, a Linux
 system with /proc not mounted).  This was a regression in Perl 5.28.0.
-[perl #133573]
+L<[perl #133573]|https://rt.perl.org/Ticket/Display.html?id=133573>.
 
 =item *
 
 L<SDBM_File> is now more robust with corrupt database files.  The
 improvements do not make SDBM files suitable as an interchange format.
-[perl #132147]
+L<[perl #132147]|https://rt.perl.org/Ticket/Display.html?id=132147>.
 
 =item *
 
 C<binmode($fh);> or C<binmode($fh, ':raw');> now properly removes the
-C<:utf8> flag from the default C<:crlf> I/O layer on Win32.  [perl
-#133604]
+C<:utf8> flag from the default C<:crlf> I/O layer on Win32.
+L<[perl #133604]|https://rt.perl.org/Ticket/Display.html?id=133604>.
 
 =item *
 
@@ -1165,20 +1185,21 @@ was being interpreted as:
 
     local \(@a[3,5,7]) = \(....);
 
-[perl #133538]
+L<[perl #133538]|https://rt.perl.org/Ticket/Display.html?id=133538>.
 
 =item *
 
 C<sort SUBNAME> within an C<eval EXPR> when C<EXPR> was UTF-8 upgraded
-could panic if the C<SUBNAME> was non-ASCII.  [perl #134061]
+could panic if the C<SUBNAME> was non-ASCII.
+L<[perl #134061]|https://rt.perl.org/Ticket/Display.html?id=134061>.
 
 =item *
 
 Correctly handle realloc() modifying C<errno> on success so that the
 modification isn't visible to the perl user, since realloc() is called
 implicitly by the interpreter.  This modification is permitted by the
-C standard, but has only been observed on FreeBSD 13.0-CURRENT.  [perl
-#133958]
+C standard, but has only been observed on FreeBSD 13.0-CURRENT.
+L<[perl #133958]|https://rt.perl.org/Ticket/Display.html?id=133958>.
 
 =item *
 
@@ -1186,13 +1207,15 @@ Perl now exposes POSIX C<getcwd> as C<Internals::getcwd()> if
 available.  This is intended for use by C<Cwd.pm> during bootstrapping
 and may be removed or changed without notice.  This fixes some
 bootstrapping issues while building perl in a directory where some
-ancestor directory isn't readable.  [perl #133951]
+ancestor directory isn't readable.
+L<[perl #133951]|https://rt.perl.org/Ticket/Display.html?id=133951>.
 
 =item *
 
 C<pack()> no longer can return malformed UTF-8.  It croaks if it would
 otherwise return a UTF-8 string that contains malformed UTF-8.  This
-protects agains potential security threats.  [perl #131642]
+protects agains potential security threats.
+L<[perl #131642]|https://rt.perl.org/Ticket/Display.html?id=131642>.
 
 =item *
 
@@ -1207,14 +1230,16 @@ an incorrect value.
 
 =item *
 
-Reduce recursion on ops [perl #108276]
+Reduce recursion on ops
+L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
 This can prevent stack overflow when processing extremely deep op
 trees.
 
 =item *
 
-Avoid leak in multiconcat with overloading. [perl #133789]
+Avoid leak in multiconcat with overloading.
+L<[perl #133789]|https://rt.perl.org/Ticket/Display.html?id=133789>.
 
 =item *
 
@@ -1294,7 +1319,8 @@ multi-character folds in Unicode correctly. If we want to break a
 string at a place which could potentially be in the middle of a
 multi-character fold, we back off one (or more) characters, leaving
 a shorter EXACTFish regnode. This backing off mechanism contained
-an off-by-one error. L<[perl #133756]|https://rt.perl.org/Ticket/Display.html?id=133756>.
+an off-by-one error.
+L<[perl #133756]|https://rt.perl.org/Ticket/Display.html?id=133756>.
 
 =item *
 
@@ -1305,7 +1331,8 @@ L<[perl #133721]|https://rt.perl.org/Ticket/Display.html?id=133721>
 
 Failing to compile a format now aborts compilation.  Like other errors
 in sub-parses this could leave the parser in a strange state, possibly
-crashing perl if compilation continued.  L<[perl #132158]|https://rt.perl.org/Ticket/Display.html?id=132158>
+crashing perl if compilation continued.
+L<[perl #132158]|https://rt.perl.org/Ticket/Display.html?id=132158>
 
 =item *
 
