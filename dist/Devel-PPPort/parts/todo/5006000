@@ -134,6 +134,5 @@ UTF8_SAFE_SKIP                 # U
 UTF8SKIP                       # U
 vcroak                         # U
 vform                          # U
-vmess                          # U
 vwarn                          # U
 vwarner                        # U
