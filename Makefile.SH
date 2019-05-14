@@ -1104,7 +1104,7 @@ catamount)
 $spitshell >>$Makefile <<!GROK!THIS!
 .PHONY: makeppport
 makeppport: \$(MINIPERL_EXE) \$(CONFIGPM)
-	-@for f in Makefile.PL PPPort_pm.PL PPPort_xs.PL ppport_h.PL; do \
+	-@for f in Makefile.PL PPPort_pm.PL RealPPPort_xs.PL ppport_h.PL; do \
 	(cd ext/Devel-PPPort && `pwd`/run.sh ../../$(MINIPERL_EXE) -I../../lib \$\$f); \
 	done
 

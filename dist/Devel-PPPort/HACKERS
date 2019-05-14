@@ -160,7 +160,7 @@ hints, dependency information, XS code and tests.
 The files are in a POD-like format that is parsed using the
 functions in F<parts/ppptools.pl>.
 
-The scripts F<PPPort_pm.PL>, F<PPPort_xs.PL> and F<mktests.PL> all
+The scripts F<PPPort_pm.PL>, F<RealPPPort_xs.PL> and F<mktests.PL> all
 use the information in F<parts/inc/> to generate the main module
 F<PPPort.pm>, the XS code in F<RealPPPort.xs> and various test files
 in F<t/>.
@@ -196,7 +196,7 @@ section.
 The code required to add to PPPort.xs for testing the implementation.
 This code goes into the C<=xshead>, C<=xsinit>, C<=xsmisc>, C<=xsboot>
 and C<=xsubs> section. Have a look at the template at the bottom
-of F<PPPort_xs.PL> to see where the code ends up.
+of F<RealPPPort_xs.PL> to see where the code ends up.
 
 =item *
 

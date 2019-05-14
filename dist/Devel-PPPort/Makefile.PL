@@ -46,7 +46,7 @@ sub configure
   my %PL_FILES = (
     'ppport_h.PL'  => 'ppport.h',
     'PPPort_pm.PL' => 'PPPort.pm',
-    'PPPort_xs.PL' => 'RealPPPort.xs',
+    'RealPPPort_xs.PL' => 'RealPPPort.xs',
   );
   my @moreopts;
 
@@ -127,7 +127,7 @@ regen_pm:
 	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) PPPort_pm.PL
 
 regen_xs:
-	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) PPPort_xs.PL
+	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) RealPPPort_xs.PL
 
 regen_tests:
 	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) mktests.PL
