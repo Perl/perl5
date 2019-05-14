@@ -1,5 +1,9 @@
 Revision history for Devel-PPPort
 
+ 3.52 - 2019-05-14
+
+   * fix utf8_to_uvchr_buf retval in 5.30
+
  3.51 - 2019-05-01
 
     * include the module version in metadata for proper PAUSE indexing
