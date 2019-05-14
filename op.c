@@ -3510,17 +3510,20 @@ Perl_optimize_optree(pTHX_ OP* o)
 }
 
 
-/* helper for optimize_optree() which optimises on op then recurses
+/* helper for optimize_optree() which optimises one op then recurses
  * to optimise any children.
  */
 
 STATIC void
 S_optimize_op(pTHX_ OP* o)
 {
-    dDEFER_OP;
+    OP *top_op = o;
 
     PERL_ARGS_ASSERT_OPTIMIZE_OP;
-    do {
+
+    while (1) {
+        OP * next_kid = NULL;
+
         assert(o->op_type != OP_FREED);
 
         switch (o->op_type) {
@@ -3538,26 +3541,44 @@ S_optimize_op(pTHX_ OP* o)
             break;
 
         case OP_SUBST:
-            if (cPMOPo->op_pmreplrootu.op_pmreplroot)
-                DEFER_OP(cPMOPo->op_pmreplrootu.op_pmreplroot);
+            if (cPMOPo->op_pmreplrootu.op_pmreplroot) {
+                /* we can't assume that op_pmreplroot->op_sibparent == o
+                 * and that it is thus possible to walk back up the tree
+                 * past op_pmreplroot. So, although we try to avoid
+                 * recursing through op trees, do it here. After all,
+                 * there are unlikely to be many nested s///e's within
+                 * the replacement part of a s///e.
+                 */
+                optimize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
+            }
             break;
 
         default:
             break;
         }
 
-        if (o->op_flags & OPf_KIDS) {
-            OP *kid;
-            IV child_count = 0;
-            for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
-                DEFER_OP(kid);
-                ++child_count;
-            }
-            DEFER_REVERSE(child_count);
-        }
-    } while ( ( o = POP_DEFERRED_OP() ) );
+        if (o->op_flags & OPf_KIDS)
+            next_kid = cUNOPo->op_first;
 
-    DEFER_OP_CLEANUP;
+        /* if a kid hasn't been nominated to process, continue with the
+         * next sibling, or if no siblings left, go back to the parent's
+         * siblings and so on
+         */
+        while (!next_kid) {
+            if (o == top_op)
+                return; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o))
+                next_kid = o->op_sibparent;
+            else
+                o = o->op_sibparent; /*try parent's next sibling */
+        }
+
+      /* this label not yet used. Goto here if any code above sets
+       * next-kid
+       get_next_op:
+       */
+        o = next_kid;
+    }
 }
 
 
