@@ -3324,7 +3324,7 @@ dist/Devel-PPPort/parts/todo/5024000	Devel::PPPort todo file
 dist/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
 dist/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
 dist/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
-dist/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
+dist/Devel-PPPort/RealPPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
 dist/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
 dist/Devel-PPPort/t/call.t		Devel::PPPort test file
 dist/Devel-PPPort/t/cop.t		Devel::PPPort test file
