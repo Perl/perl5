@@ -171,44 +171,6 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 
 static const char array_passed_to_stat[] = "Array passed to stat will be coerced to a scalar";
 
-/* Used to avoid recursion through the op tree in scalarvoid() and
-   op_free()
-*/
-
-#define dDEFER_OP  \
-    SSize_t defer_stack_alloc = 0; \
-    SSize_t defer_ix = -1; \
-    OP **defer_stack = NULL;
-#define DEFER_OP_CLEANUP Safefree(defer_stack)
-#define DEFERRED_OP_STEP 100
-#define DEFER_OP(o) \
-  STMT_START { \
-    if (UNLIKELY(defer_ix == (defer_stack_alloc-1))) {    \
-        defer_stack_alloc += DEFERRED_OP_STEP; \
-        assert(defer_stack_alloc > 0); \
-        Renew(defer_stack, defer_stack_alloc, OP *); \
-    } \
-    defer_stack[++defer_ix] = o; \
-  } STMT_END
-#define DEFER_REVERSE(count)                            \
-    STMT_START {                                        \
-        UV cnt = (count);                               \
-        if (cnt > 1) {                                  \
-            OP **top = defer_stack + defer_ix;          \
-            /* top - (cnt) + 1 isn't safe here */       \
-            OP **bottom = top - (cnt - 1);              \
-            OP *tmp;                                    \
-            assert(bottom >= defer_stack);              \
-            while (top > bottom) {                      \
-                tmp = *top;                             \
-                *top-- = *bottom;                       \
-                *bottom++ = tmp;                        \
-            }                                           \
-        }                                               \
-    } STMT_END;
-
-#define POP_DEFERRED_OP() (defer_ix >= 0 ? defer_stack[defer_ix--] : (OP *)NULL)
-
 /* remove any leading "empty" ops from the op_next chain whose first
  * node's address is stored in op_p. Store the updated address of the
  * first node in op_p.
