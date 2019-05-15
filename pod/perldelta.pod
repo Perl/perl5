@@ -43,7 +43,7 @@ have decided to continue to use the previous Perl tailoring with regards
 to these.
 
 As of July 2018, another aspect of Unicode 11.0 is causing problems, and
-that is the changing of the Georgian script to have both lower and
+that is the changing the Georgian script to have both lower and
 uppercase letters.  It turns out that many devices do not have fonts
 installed that can display the new uppercase letters, and people using
 Georgian are finding their text more or less illegible.  It is being
