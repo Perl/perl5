@@ -247,6 +247,8 @@ C<ord("\x7fff")> now requires 12% fewer instructions than before.  The
 performance of checking that a sequence of bytes is valid UTF-8 is similarly
 improved, again by using a dfa.
 
+=item *
+
 Eliminate recursion from finalize_op().
 L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
