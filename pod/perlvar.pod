@@ -494,12 +494,13 @@ The array C<@INC> contains the list of places that the C<do EXPR>,
 C<require>, or C<use> constructs look for their library files.  It
 initially consists of the arguments to any B<-I> command-line
 switches, followed by the default Perl library, probably
-F</usr/local/lib/perl>, followed by ".", to represent the current
-directory.  ("." will not be appended if taint checks are enabled,
-either by C<-T> or by C<-t>, or if configured not to do so by the
-C<-Ddefault_inc_excludes_dot> compile time option.)  If you need to
-modify this at runtime, you should use the C<use lib> pragma to get
-the machine-dependent library properly loaded also:
+F</usr/local/lib/perl>.
+Prior to Perl 5.26, C<.> -which represents the current directory, was included
+in C<@INC>; it has been removed. This change in behavior is documented
+in L<C<PERL_USE_UNSAFE_INC>|perlrun/PERL_USE_UNSAFE_INC> and it is
+not recommended that C<.> be re-added to C<@INC>.
+If you need to modify C<@INC> at runtime, you should use the C<use lib> pragma
+to get the machine-dependent library properly loaded as well:
 
     use lib '/mypath/libdir/';
     use SomeMod;
