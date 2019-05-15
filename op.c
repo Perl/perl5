@@ -12462,7 +12462,16 @@ Perl_ck_refassign(pTHX_ OP *o)
 	OP * const kid = cUNOPx(kidparent)->op_first;
 	o->op_private |= OPpLVREF_CV;
 	if (kid->op_type == OP_GV) {
+            SV *sv = (SV*)cGVOPx_gv(kid);
 	    varop = kidparent;
+            if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
+                /* a CVREF here confuses pp_refassign, so make sure
+                   it gets a GV */
+                CV *const cv = (CV*)SvRV(sv);
+                SV *name_sv = sv_2mortal(newSVhek(CvNAME_HEK(cv)));
+                (void)gv_init_sv((GV*)sv, CvSTASH(cv), name_sv, 0);
+                assert(SvTYPE(sv) == SVt_PVGV);
+            }
 	    goto detach_and_stack;
 	}
 	if (kid->op_type != OP_PADCV)	goto bad;
