@@ -19,19 +19,9 @@ L<[perl #133788]|https://rt.perl.org/Ticket/Display.html?id=133788>.
 
 =head1 Core Enhancements
 
-=head2 Perl now supports draft Unicode 12.1
+=head2 Unicode 11.0 is supported
 
-For details on Unicode 12.0, see
-L<https://www.unicode.org/versions/Unicode12.0.0/>.
-
-Because of a change in Unicode release cycles, Perl jumps from Unicode
-10.0 in Perl 5.28 to Unicode 12.1 in Perl 5.30.
-
-Unicode 12.1 differs from 12.0 only in the addition of a single
-character, that for the new Japanese era name.
-
-For details on Unicode 11.0, see
-L<https://www.unicode.org/versions/Unicode11.0.0/>.
+For details, see L<https://www.unicode.org/versions/Unicode11.0.0/>.
 
 The Word_Break property, as in past Perl releases, remains tailored to
 behave more in line with expectations of Perl users.  This means that
@@ -50,8 +40,10 @@ Georgian are finding their text more or less illegible.  It is being
 suggested that implementations delay their adoption of this portion of
 11.0.
 
-This has been kept in Perl for the release cycle of 5.30 to allow feedback
-from Georgian users. It is now considered permanent in 5.30.
+But since the next stable release of Perl is almost a year away, this
+aspect of 11.0 is being left in, with the option to back it out if
+things haven't improved by that time, or if we get too many complaints
+about the development release being unusable for Georgian users.
 
 =head2 The upper limit C<"n"> specifiable in a regular expression
 quantifier of the form C<"{m,n}"> has been doubled to 65534
@@ -59,6 +51,18 @@ quantifier of the form C<"{m,n}"> has been doubled to 65534
 The meaning of an unbounded upper quantifier C<"{m,}"> remains unchanged.
 It matches 2**31 - 1 times on most platforms, and more on ones where a C
 language short variable is more than 4 bytes long.
+
+=head2 Unicode 12.0 is supported
+
+For details, see L<https://www.unicode.org/versions/Unicode12.0.0/>.
+
+Because of a change in Unicode release cycles, Perl jumps from Unicode
+10.0 in Perl 5.28 to Unicode 12.0 in Perl 5.30.
+
+=head2 Perl now supports draft Unicode 12.1
+
+Unicode 12.1 differs from 12.0 only in the addition of a single
+character, that for the new Japanese era name.
 
 =head2 Wildcards in Unicode property value specifications are now
 partially supported
