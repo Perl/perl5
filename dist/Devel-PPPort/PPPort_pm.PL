@@ -628,15 +628,21 @@ __DATA__
 
 %include limits
 
+%include magic_defs
+
 %include misc
 
+%include sv_xpvf
+
+%include SvPV
+
 %include warn
+
+%include format
 
 %include uv
 
 %include memory
-
-%include magic_defs
 
 %include mess
 
@@ -652,19 +658,13 @@ __DATA__
 
 %include MY_CXT
 
-%include format
-
 %include SvREFCNT
 
 %include newSV_type
 
 %include newSVpv
 
-%include SvPV
-
 %include Sv_set
-
-%include sv_xpvf
 
 %include shared_pv
 

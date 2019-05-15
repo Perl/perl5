@@ -103,13 +103,19 @@ my_strnlen(const char *str, Size_t maxlen)
  * intended to work with modern perls, the tighter restrictions could be
  * relaxed.  khw thinks this is unlikely, but has been wrong in the past. */
 
+#if { VERSION < 5.10.0 }
+#  define D_PPP_CU8 U8
+#else
+#  define D_PPP_CU8 const U8
+#endif
+
 #ifndef utf8_to_uvchr_buf
    /* Choose which underlying implementation to use.  At least one must be
     * present or the perl is too early to handle this function */
 #  if defined(utf8n_to_uvchr) || defined(utf8_to_uv)
 #    if defined(utf8n_to_uvchr)   /* This is the preferred implementation */
 #      define _ppport_utf8_to_uvchr_buf_callee utf8n_to_uvchr
-#    else
+#    elif { VERSION >= 5.6.1 }
 #      define _ppport_utf8_to_uvchr_buf_callee utf8_to_uv
 #    endif
 
@@ -119,7 +125,7 @@ my_strnlen(const char *str, Size_t maxlen)
 #  if { NEED utf8_to_uvchr_buf }
 
 UV
-utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
 {
     UV ret;
     STRLEN curlen;
@@ -358,7 +364,11 @@ UTF8_SAFE_SKIP(s, adjustment)
         int adjustment
         CODE:
             /* Instead of passing in an 'e' ptr, use the real end, adjusted */
+#if defined(UTF8_SAFE_SKIP) && defined(UTF8SKIP)
             RETVAL = UTF8_SAFE_SKIP(s, s + UTF8SKIP(s) + adjustment);
+#else
+            RETVAL = 0;
+#endif
         OUTPUT:
             RETVAL
 
@@ -380,9 +390,14 @@ utf8_to_uvchr_buf(s, adjustment)
             STRLEN len;
         CODE:
             av = newAV();
+#ifdef utf8_to_uvchr_buf
             av_push(av, newSVuv(utf8_to_uvchr_buf(s,
                                                   s + UTF8SKIP(s) + adjustment,
                                                   &len)));
+#else
+            av_push(av, newSVuv(0));
+            len = (STRLEN) -1;
+#endif
             if (len == (STRLEN) -1) {
                 av_push(av, newSViv(-1));
             }
@@ -401,7 +416,12 @@ utf8_to_uvchr(s)
             STRLEN len;
         CODE:
             av = newAV();
+#ifdef utf8_to_uvchr
             av_push(av, newSVuv(utf8_to_uvchr(s, &len)));
+#else
+            av_push(av, newSVuv(0));
+            len = (STRLEN) -1;
+#endif
             if (len == (STRLEN) -1) {
                 av_push(av, newSViv(-1));
             }
@@ -413,6 +433,9 @@ utf8_to_uvchr(s)
                 RETVAL
 
 =tests plan => 52
+
+# skip tests on 5.6.0 and earlier
+BEGIN { if ("$]" le '5.006') { skip 'skip: broken utf8 support', 0 for 1..52; exit; } }
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -495,7 +518,7 @@ else {
         {                 # Old algorithm supposedly failed to detect this
             input      => "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
             adjustment => 0,
-            warning    => qr/overflow/,
+            warning    => ("$]" le 5.008006) ? qr/Malformed UTF-8 character/ : qr/overflow/,
             no_warnings_returned_length => 13,
         },
     );

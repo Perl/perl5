@@ -105,6 +105,7 @@ warner(U32 err, const char *pat, ...)
 =xsinit
 
 #define NEED_warner
+#define NEED_vnewSVpvf
 
 =xsubs
 

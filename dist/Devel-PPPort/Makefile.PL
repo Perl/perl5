@@ -77,13 +77,13 @@ sub configure
     $depend{'apicheck.i'} = 'ppport.h';
   }
 
-  open my $fh, '<', 'PPPort_pm.PL' or die "cannot open PPPort_pm.PL for reading: $!";
+  open FH, '<PPPort_pm.PL' or die "cannot open PPPort_pm.PL for reading: $!";
   my $version;
-  while (my $line = <$fh>) {
+  while (my $line = <FH>) {
     ($version) = $line =~ /^\$VERSION = '([\d.]+)';$/ and last;
   };
   die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
-  close $fh;
+  close FH;
 
   return {
     C        => \@C_FILES,
