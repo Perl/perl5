@@ -671,13 +671,15 @@ not usually on concerns over their design.
 
 =item *
 
-B::Debug is no longer distributed with the core distribution.  It remains
-available on CPAN.
+B::Debug is no longer distributed with the core distribution.  It
+continues to be available on CPAN as
+C<< L<B::Debug|https://metacpan.org/pod/B::Debug> >>.
 
 =item *
 
 Locale::Codes has been removed at the request of its author.  It
-continues to be available on CPAN as C<L<Locale::Codes>>.
+continues to be available on CPAN as
+C<< L<Locale::Codes|https://metacpan.org/pod/Locale::Codes> >>
 L<[perl #133458]|https://rt.perl.org/Ticket/Display.html?id=133458>.
 
 =back
