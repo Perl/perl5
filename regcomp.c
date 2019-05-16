@@ -23054,6 +23054,14 @@ Perl_parse_uniprop_string(pTHX_
     if (could_be_user_defined) {
         CV* user_sub;
 
+        /* If the user defined property returns the empty string, it could
+         * easily be because the pattern is being compiled before the data it
+         * actually needs to compile is available.  This could be argued to be
+         * a bug in the perl code, but this is a change of behavior for Perl,
+         * so we handle it.  This means that intentionally returning nothing
+         * will not be resolved until runtime */
+        bool empty_return = FALSE;
+
         /* Here, the name could be for a user defined property, which are
          * implemented as subs. */
         user_sub = get_cvn_flags(name, name_len, 0);
@@ -23285,16 +23293,28 @@ Perl_parse_uniprop_string(pTHX_
                 prop_definition = NULL;
             }
             else {  /* G_SCALAR guarantees a single return value */
+                SV * contents = POPs;
 
                 /* The contents is supposed to be the expansion of the property
-                 * definition.  Call a function to check for valid syntax and
-                 * handle it */
-                prop_definition = handle_user_defined_property(name, name_len,
+                 * definition.  If the definition is deferrable, and we got an
+                 * empty string back, set a flag to later defer it (after clean
+                 * up below). */
+                if (      deferrable
+                    && (! SvPOK(contents) || SvCUR(contents) == 0))
+                {
+                        empty_return = TRUE;
+                }
+                else { /* Otherwise, call a function to check for valid syntax,
+                          and handle it */
+
+                    prop_definition = handle_user_defined_property(
+                                                    name, name_len,
                                                     is_utf8, to_fold, runtime,
                                                     deferrable,
-                                                    POPs, user_defined_ptr,
+                                                    contents, user_defined_ptr,
                                                     msg,
                                                     level);
+                }
             }
 
             /* Here, we have the results of the expansion.  Delete the
@@ -23306,8 +23326,9 @@ Perl_parse_uniprop_string(pTHX_
 
             S_delete_recursion_entry(aTHX_ SvPVX(key));
 
-            if (! prop_definition || is_invlist(prop_definition)) {
-
+            if (    ! empty_return
+                && (! prop_definition || is_invlist(prop_definition)))
+            {
                 /* If we got success we use the inversion list defining the
                  * property; otherwise use the error message */
                 SWITCH_TO_GLOBAL_CONTEXT;
@@ -23327,6 +23348,10 @@ Perl_parse_uniprop_string(pTHX_
             FREETMPS;
             LEAVE;
             POPSTACK;
+
+            if (empty_return) {
+                goto definition_deferred;
+            }
 
             if (prop_definition) {
 
