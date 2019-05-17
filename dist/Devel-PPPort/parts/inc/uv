@@ -255,9 +255,9 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
              * what the first byte indicates the length is, nor past the
              * continuation characters */
             if (retlen && *retlen >= 0) {
+                unsigned int i = 1;
                 *retlen = _ppport_MIN(*retlen, curlen);
                 *retlen = _ppport_MIN(*retlen, UTF8SKIP(s));
-                unsigned int i = 1;
                 do {
                     if (s[i] < 0x80 || s[i] > 0xBF) {
                         *retlen = i;
