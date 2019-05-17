@@ -157,7 +157,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
 
     /* But actually, modern versions restrict the UV to being no more than what
      * an IV can hold */
-    if (ret > IV_MAX) {
+    if (UNLIKELY(ret > IV_MAX)) {
         overflows = 1;
     }
 
@@ -171,7 +171,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
      * parameters.  Therefore detect it ourselves in  releases it was
      * problematic in. */
 
-    else if (curlen > 0 && *s >= 0xFE) {
+    else if (curlen > 0 && UNLIKELY(*s >= 0xFE)) {
 
         /* First, on a 32-bit machine the first byte being at least \xFE
          * automatically is overflow, as it indicates something requiring more
