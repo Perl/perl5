@@ -164,7 +164,8 @@ else {
         ok($ret->[1], -1, "returned length $display; warnings enabled");
         my $all_warnings = join "; ", @warnings;
         my $contains = grep { $_ =~ $warning } $all_warnings;
-        ok($contains, 1, $display . "; '$all_warnings' contains '$warning'");
+        ok($contains, 1, $display
+                    . "; Got: '$all_warnings', which should contain '$warning'");
 
         undef @warnings;
         no warnings 'utf8';
