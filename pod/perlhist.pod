@@ -667,6 +667,7 @@ the strings?).
  Sawyer X  5.29.10      2019-Apr-20
 
  Sawyer X  5.30.0-RC1   2019-May-11     The 5.30 maintenance track
+ Sawyer X  5.30.0-RC2   2019-May-17
 
 =head2 SELECTED RELEASE SIZES
 
