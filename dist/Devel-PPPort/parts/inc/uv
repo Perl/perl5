@@ -96,14 +96,18 @@ my_strnlen(const char *str, Size_t maxlen)
  * utf8_to_uvchr_buf.  Some of these are security related, and clearly must
  * be done.  But its arguable that the others need not, and hence should not.
  * The reason they're here is that a module that intends to play with the
- * latest perls shoud be able to work the same in all releases.  An example is
+ * latest perls should be able to work the same in all releases.  An example is
  * that perl no longer accepts any UV for a code point, but limits them to
  * IV_MAX or below.  This is for future internal use of the larger code points.
  * If it turns out that some of these changes are breaking code that isn't
  * intended to work with modern perls, the tighter restrictions could be
  * relaxed.  khw thinks this is unlikely, but has been wrong in the past. */
 
-#if { VERSION < 5.10.0 }
+/* 5.6.0 is the first release with UTF-8, and we don't implement this function
+ * there due to its likely lack of still being in use, and the underlying
+ * implementation is very different from later ones, without the later
+ * safeguards, so would require extra work to deal with */
+#if { VERSION < 5.10.0 }  /* Was non-const before this */
 #  define D_PPP_CU8 U8
 #else
 #  define D_PPP_CU8 const U8
@@ -160,18 +164,19 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
 #    if { VERSION < 5.26.0 }
 #      ifndef EBCDIC
 
-        /* There are bugs in versions earlier than this on non-EBCDIC platforms
-         * in which it did not detect all instances of overflow, which could be
-         * a security hole.  Also, earlier versions did not allow the overflow
-         * malformation under any circumstances, and modern ones do.  So we
-         * need to check here.  */
+    /* Perl did not properly detect overflow for much of its history on
+     * non-EBCDIC platforms, often returning an overlong value which may or may
+     * not have been tolerated in the call.  Also, earlier versions, when they
+     * did detect overflow, may have disallowed it completely.  Modern ones can
+     * replace it with the REPLACEMENT CHARACTER, depending on calling
+     * parameters.  Therefore detect it ourselves in  releases it was
+     * problematic in. */
 
     else if (curlen > 0 && *s >= 0xFE) {
 
-        /* If the main routine detected overflow, great; it returned 0.  But if the
-         * input's first byte indicates it could overflow, we need to verify.
-         * First, on a 32-bit machine the first byte being at least \xFE
-         * automatically is overflow */
+        /* First, on a 32-bit machine the first byte being at least \xFE
+         * automatically is overflow, as it indicates something requiring more
+         * than 31 bits */
         if (sizeof(ret) < 8) {
             overflows = 1;
         }
@@ -186,9 +191,9 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
                 }
 
                 /* If this byte is larger than the corresponding highest UTF-8
-                * byte, the sequence overflows; otherwise the byte is less than
-                * (as we handled the equality case above), and so the sequence
-                * doesn't overflow */
+                 * byte, the sequence overflows; otherwise the byte is less
+                 * than (as we handled the equality case above), and so the
+                 * sequence doesn't overflow */
                 overflows = *cur_s > *cur_h;
                 break;
 
@@ -217,7 +222,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
              * always, 0 will be returned, but also a warning will have been
              * raised.  Don't repeat it */
             if (ret != 0) {
-                /* We use the error message in use from 5.8-5.14 */
+            /* We use the error message in use from 5.8-5.26 */
                 Perl_warner(aTHX_ packWARN(WARN_UTF8),
                     "Malformed UTF-8 character (overflow at 0x%" UVxf
                     ", byte 0x%02x, after start byte 0x%02x)",
@@ -230,14 +235,15 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
         }
     }
 
-    /* If failed and warnings are off, to emulate the behavior of the real
-     * utf8_to_uvchr(), try again, allowing anything.  (Note a return of 0 is
-     * ok if the input was '\0') */
+    /* Here, did not overflow, but if it failed for some other reason, and
+     * warnings are off, to emulate the behavior of the real utf8_to_uvchr(),
+     * try again, allowing anything.  (Note a return of 0 is ok if the input
+     * was '\0') */
     if (UNLIKELY(ret == 0 && (curlen == 0 || *s != '\0'))) {
 
         /* If curlen is 0, we already handled the case where warnings are
-         * disabled, so this 'if' will be true, and we won't look at the
-         * contents of 's' */
+         * disabled, so this 'if' will be true, and so later on, we know that
+         * 's' is dereferencible */
         if (do_warnings) {
             *retlen = (STRLEN) -1;
         }
@@ -530,7 +536,7 @@ else {
             warning    => qr/overlong|4 bytes, need 1/,
             no_warnings_returned_length => 4,
         },
-        {                 # Old algorithm supposedly failed to detect this
+        {                 # Old algorithm failed to detect this
             input      => "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
             adjustment => 0,
             warning    => ("$]" le 5.008006) ? qr/Malformed UTF-8 character/ : qr/overflow/,

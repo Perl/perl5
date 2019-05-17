@@ -144,7 +144,7 @@ else {
             warning    => qr/overlong|4 bytes, need 1/,
             no_warnings_returned_length => 4,
         },
-        {                 # Old algorithm supposedly failed to detect this
+        {                 # Old algorithm failed to detect this
             input      => "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
             adjustment => 0,
             warning    => ("$]" le 5.008006) ? qr/Malformed UTF-8 character/ : qr/overflow/,
