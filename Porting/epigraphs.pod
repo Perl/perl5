@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.30.0-RC2 - Derek Walcott
+
+Announced on 2019-05-17 by Sawyer X
+
+  The truest writers are those who see language not as linguistic process but
+  as a living element.
+
+    -- Derek Walcott
+
 =head2 v5.30.0-RC1 - Marcel Proust
 
 L<Announced on 2019-05-11 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/05/msg254750.html>
