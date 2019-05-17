@@ -48,9 +48,6 @@ bootstrap Devel::PPPort;
 
 package main;
 
-# skip tests on 5.6.0 and earlier
-BEGIN { if ("$]" le '5.006') { skip 'skip: broken utf8 support', 0 for 1..52; exit; } }
-
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
 ok(&Devel::PPPort::sv_2uv("4711"), 4711);
@@ -64,6 +61,12 @@ ok(&Devel::PPPort::XPUSHu(), 43);
 ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
 ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
 ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);
+
+# skip tests on 5.6.0 and earlier
+if ("$]" le '5.006') {
+    skip 'skip: broken utf8 support', 0 for 1..39;
+    exit;
+}
 
 my $ret = &Devel::PPPort::utf8_to_uvchr("A");
 ok($ret->[0], ord("A"));
