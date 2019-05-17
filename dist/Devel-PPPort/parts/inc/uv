@@ -136,6 +136,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
     bool overflows = 0;
     const U8 *cur_s = s;
     const bool do_warnings = ckWARN_d(WARN_UTF8);
+    STRLEN overflow_length = 0;
 
     if (send > s) {
         curlen = send - s;
@@ -149,18 +150,6 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
         }
     }
 
-    /* The modern version allows anything that evaluates to a legal UV, but not
-     * overlongs nor an empty input */
-    ret = _ppport_utf8_to_uvchr_buf_callee(
-                s, curlen, retlen,   (UTF8_ALLOW_ANYUV
-                                  & ~(UTF8_ALLOW_LONG|UTF8_ALLOW_EMPTY)));
-
-    /* But actually, modern versions restrict the UV to being no more than what
-     * an IV can hold */
-    if (UNLIKELY(ret > IV_MAX)) {
-        overflows = 1;
-    }
-
 #    if { VERSION < 5.26.0 } && ! defined(EBCDIC)
 
     /* Perl did not properly detect overflow for much of its history on
@@ -171,13 +160,14 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
      * parameters.  Therefore detect it ourselves in  releases it was
      * problematic in. */
 
-    else if (curlen > 0 && UNLIKELY(*s >= 0xFE)) {
+    if (curlen > 0 && UNLIKELY(*s >= 0xFE)) {
 
         /* First, on a 32-bit machine the first byte being at least \xFE
          * automatically is overflow, as it indicates something requiring more
          * than 31 bits */
         if (sizeof(ret) < 8) {
             overflows = 1;
+            overflow_length = 7;
         }
         else {
             const U8 highest[] =    /* 2*63-1 */
@@ -200,11 +190,43 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
 
             /* Here, either we set the bool and broke out of the loop, or got
              * to the end and all bytes are the same which indicates it doesn't
-             * overflow. */
+             * overflow.  If it did overflow, it would be this number of bytes
+             * */
+            overflow_length = 13;
         }
     }
 
+    if (UNLIKELY(overflows)) {
+        ret = 0;
+
+        if (! do_warnings && retlen) {
+            *retlen = overflow_length;
+        }
+    }
+    else
+
 #    endif  /* < 5.26 */
+
+        /* Here, we are either in a release that properly detects overflow, or
+         * we have checked for overflow and the next statement is executing as
+         * part of the above conditional where we know we don't have overflow.
+         *
+         * The modern versions allow anything that evaluates to a legal UV, but
+         * not overlongs nor an empty input */
+        ret = _ppport_utf8_to_uvchr_buf_callee(
+                s, curlen, retlen,   (UTF8_ALLOW_ANYUV
+                                  & ~(UTF8_ALLOW_LONG|UTF8_ALLOW_EMPTY)));
+
+#    if { VERSION >= 5.26.0 } && { VERSION < 5.28.0 }
+
+    /* But actually, more modern versions restrict the UV to being no more than
+     * what * an IV can hold, so it could, so it could still have gotten it
+     * wrong about overflowing. */
+    if (UNLIKELY(ret > IV_MAX)) {
+        overflows = 1;
+    }
+
+#    endif
 
     if (UNLIKELY(overflows)) {
         if (! do_warnings) {
@@ -216,16 +238,11 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
         }
         else {
 
-            /* On versions that correctly detect overflow, but forbid it
-             * always, 0 will be returned, but also a warning will have been
-             * raised.  Don't repeat it */
-            if (ret != 0) {
             /* We use the error message in use from 5.8-5.26 */
                 Perl_warner(aTHX_ packWARN(WARN_UTF8),
                     "Malformed UTF-8 character (overflow at 0x%" UVxf
                     ", byte 0x%02x, after start byte 0x%02x)",
                     ret, *cur_s, *s);
-            }
             if (retlen) {
                 *retlen = (STRLEN) -1;
             }
@@ -537,7 +554,7 @@ else {
         {                 # Old algorithm failed to detect this
             input      => "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
             adjustment => 0,
-            warning    => ("$]" le 5.008006) ? qr/Malformed UTF-8 character/ : qr/overflow/,
+            warning    => qr/overflow/,
             no_warnings_returned_length => 13,
         },
     );

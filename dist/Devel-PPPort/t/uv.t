@@ -147,7 +147,7 @@ else {
         {                 # Old algorithm failed to detect this
             input      => "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
             adjustment => 0,
-            warning    => ("$]" le 5.008006) ? qr/Malformed UTF-8 character/ : qr/overflow/,
+            warning    => qr/overflow/,
             no_warnings_returned_length => 13,
         },
     );
