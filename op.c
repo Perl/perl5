@@ -2356,7 +2356,8 @@ Perl_list(pTHX_ OP *o)
         /* possibly flatten 1..10 into a constant array */
 	if (!o->op_next && cUNOPo->op_first->op_type == OP_FLOP) {
 	    list(cBINOPo->op_first);
-	    return gen_constant_list(o);
+	    gen_constant_list(o);
+	    return o;
 	}
 	listkids(o);
 	break;
@@ -5755,7 +5756,7 @@ S_fold_constants(pTHX_ OP *const o)
  * the constant value being an AV holding the flattened range.
  */
 
-static OP *
+static void
 S_gen_constant_list(pTHX_ OP *o)
 {
     dVAR;
@@ -5774,7 +5775,7 @@ S_gen_constant_list(pTHX_ OP *o)
 
     list(o);
     if (PL_parser && PL_parser->error_count)
-	return o;		/* Don't attempt to run with errors */
+	return;		/* Don't attempt to run with errors */
 
     curop = LINKLIST(o);
     old_next = o->op_next;
@@ -5841,7 +5842,7 @@ S_gen_constant_list(pTHX_ OP *o)
         delete_eval_scope();
     }
     if (ret)
-	return o;
+	return;
 
     OpTYPE_set(o, OP_RV2AV);
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
@@ -5861,7 +5862,8 @@ S_gen_constant_list(pTHX_ OP *o)
 	    SvREADONLY_on(*svp);
 	}
     LINKLIST(o);
-    return list(o);
+    list(o);
+    return;
 }
 
 /*
