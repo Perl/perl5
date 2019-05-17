@@ -2295,6 +2295,9 @@ S_listkids(pTHX_ OP *o)
     return o;
 }
 
+
+/* apply list context to the o subtree */
+
 OP *
 Perl_list(pTHX_ OP *o)
 {
@@ -2326,6 +2329,7 @@ Perl_list(pTHX_ OP *o)
 	{
 	    list(cBINOPo->op_first);
 	    kid = cBINOPo->op_last;
+            /* optimise away (.....) x 1 */
 	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)
 	     && SvIVX(kSVOP_sv) == 1)
 	    {
@@ -2349,6 +2353,7 @@ Perl_list(pTHX_ OP *o)
     case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
+        /* possibly flatten 1..10 into a constant array */
 	if (!o->op_next && cUNOPo->op_first->op_type == OP_FLOP) {
 	    list(cBINOPo->op_first);
 	    return gen_constant_list(o);
@@ -2385,6 +2390,7 @@ Perl_list(pTHX_ OP *o)
     }
     return o;
 }
+
 
 static OP *
 S_scalarseq(pTHX_ OP *o)
@@ -5744,6 +5750,10 @@ S_fold_constants(pTHX_ OP *const o)
  nope:
     return o;
 }
+
+/* convert a constant range in list context into an OP_RV2AV, OP_CONST pair;
+ * the constant value being an AV holding the flattened range.
+ */
 
 static OP *
 S_gen_constant_list(pTHX_ OP *o)
