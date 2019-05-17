@@ -107,25 +107,24 @@ my_strnlen(const char *str, Size_t maxlen)
  * there due to its likely lack of still being in use, and the underlying
  * implementation is very different from later ones, without the later
  * safeguards, so would require extra work to deal with */
+#if { VERSION >= 5.6.1 } && ! defined(utf8_to_uvchr_buf)
 #if { VERSION < 5.10.0 }  /* Was non-const before this */
 #  define D_PPP_CU8 U8
 #else
 #  define D_PPP_CU8 const U8
 #endif
 
-#ifndef utf8_to_uvchr_buf
    /* Choose which underlying implementation to use.  At least one must be
     * present or the perl is too early to handle this function */
 #  if defined(utf8n_to_uvchr) || defined(utf8_to_uv)
 #    if defined(utf8n_to_uvchr)   /* This is the preferred implementation */
 #      define _ppport_utf8_to_uvchr_buf_callee utf8n_to_uvchr
-#    elif { VERSION >= 5.6.1 }
+#    else     /* Must be at least 5.6.1 from #if above */
 #      define _ppport_utf8_to_uvchr_buf_callee utf8_to_uv
 #    endif
 
 #  endif
 
-#ifdef _ppport_utf8_to_uvchr_buf_callee
 #  if { NEED utf8_to_uvchr_buf }
 
 UV
@@ -296,7 +295,6 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
 }
 
 #  endif
-#endif
 #endif
 
 #if defined(UTF8SKIP) && defined(utf8_to_uvchr_buf)
