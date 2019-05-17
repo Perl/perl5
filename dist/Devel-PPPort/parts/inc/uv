@@ -157,7 +157,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
 
     /* But actually, modern versions restrict the UV to being no more than what
      * an IV can hold */
-    if (ret > PERL_INT_MAX) {
+    if (ret > IV_MAX) {
         overflows = 1;
     }
 
