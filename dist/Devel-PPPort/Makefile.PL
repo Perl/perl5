@@ -150,6 +150,7 @@ sub MY::dist_core
   my @rules = split( m{^\s*$}m, $dist );
   foreach my $rule ( @rules ) {
     if ( $rule =~ m{^\s*^dist\s+:}m ) {
+        $rule =~ s{:}{: manifest}; # make sure we regenerate the manifest
         $rule .= qq[\t].q[$(NOECHO) $(ECHO) "Warning: Please check '__MAX_PERL__' value in PPPort_pm.PL"].qq[\n];
     }
     $updated .= $rule;
