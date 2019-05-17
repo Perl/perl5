@@ -161,8 +161,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
         overflows = 1;
     }
 
-#    if { VERSION < 5.26.0 }
-#      ifndef EBCDIC
+#    if { VERSION < 5.26.0 } && ! defined(EBCDIC)
 
     /* Perl did not properly detect overflow for much of its history on
      * non-EBCDIC platforms, often returning an overlong value which may or may
@@ -205,7 +204,6 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
         }
     }
 
-#      endif
 #    endif  /* < 5.26 */
 
     if (UNLIKELY(overflows)) {
