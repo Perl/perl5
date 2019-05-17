@@ -108,11 +108,11 @@ my_strnlen(const char *str, Size_t maxlen)
  * implementation is very different from later ones, without the later
  * safeguards, so would require extra work to deal with */
 #if { VERSION >= 5.6.1 } && ! defined(utf8_to_uvchr_buf)
-#if { VERSION < 5.10.0 }  /* Was non-const before this */
-#  define D_PPP_CU8 U8
-#else
-#  define D_PPP_CU8 const U8
-#endif
+#  if { VERSION < 5.10.0 }  /* Was non-const before this */
+#    define D_PPP_CU8 U8
+#  else
+#    define D_PPP_CU8 const U8
+#  endif
 
    /* Choose which underlying implementation to use.  At least one must be
     * present or the perl is too early to handle this function */
@@ -122,7 +122,6 @@ my_strnlen(const char *str, Size_t maxlen)
 #    else     /* Must be at least 5.6.1 from #if above */
 #      define _ppport_utf8_to_uvchr_buf_callee utf8_to_uv
 #    endif
-
 #  endif
 
 #  if { NEED utf8_to_uvchr_buf }
@@ -238,10 +237,10 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
         else {
 
             /* We use the error message in use from 5.8-5.26 */
-                Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                    "Malformed UTF-8 character (overflow at 0x%" UVxf
-                    ", byte 0x%02x, after start byte 0x%02x)",
-                    ret, *cur_s, *s);
+            Perl_warner(aTHX_ packWARN(WARN_UTF8),
+                "Malformed UTF-8 character (overflow at 0x%" UVxf
+                ", byte 0x%02x, after start byte 0x%02x)",
+                ret, *cur_s, *s);
             if (retlen) {
                 *retlen = (STRLEN) -1;
             }
@@ -268,7 +267,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
              * modern version of this function returns */
             ret = UNICODE_REPLACEMENT;
 
-#           if { VERSION < 5.16.0 }
+#    if { VERSION < 5.16.0 }
 
             /* Versions earlier than this don't necessarily return the proper
              * length.  It should not extend past the end of string, nor past
@@ -286,7 +285,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
                 } while (++i < *retlen);
             }
 
-#           endif
+#    endif
 
         }
     }
