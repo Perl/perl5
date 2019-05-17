@@ -1363,7 +1363,7 @@ under C<< /ui >> and C<< /di >>.
 =head1 Acknowledgements
 
 Perl 5.30.0 represents approximately 11 months of development since Perl
-5.28.0 and contains approximately 630,000 lines of changes across 1,300
+5.28.0 and contains approximately 620,000 lines of changes across 1,300
 files from 58 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
@@ -1385,6 +1385,10 @@ Clark, Nicolas R., Niko Tyni, Pali, Petr Písař, Phil Pearl (Lobbes),
 Richard Leach, Ryan Voots, Sawyer X, Shlomi Fish, Sisyphus, Slaven Rezic,
 Steve Hay, Sullivan Beck, Tina Müller, Tomasz Konojacki, Tom Wyant, Tony
 Cook, Unicode Consortium, Yves Orton, Zak B. Elep.
+
+A large number of bug fixes in this release were made possible by
+the high quality of Sergey Aleynikov's perlbug reports for issues he
+discovered through fuzzing with AFL.
 
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
