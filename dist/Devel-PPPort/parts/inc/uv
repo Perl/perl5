@@ -16,14 +16,9 @@ my_strnlen
 SvUOK
 utf8_to_uvchr_buf
 
-=dontwarn
-
-_ppport_utf8_to_uvchr_buf_callee
-_ppport_MIN
-
 =implementation
 
-#define _ppport_MIN(a,b) (((a) <= (b)) ? (a) : (b))
+#define D_PPP_MIN(a,b) (((a) <= (b)) ? (a) : (b))
 
 __UNDEFINED__  sv_setuv(sv, uv)                     \
                STMT_START {                         \
@@ -65,7 +60,7 @@ __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; 
 __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          \
                                       ((((e) - (s)) <= 0)                       \
                                       ? 0                                       \
-                                      : _ppport_MIN(((e) - (s)), UTF8SKIP(s))))
+                                      : D_PPP_MIN(((e) - (s)), UTF8SKIP(s))))
 #endif
 
 #if !defined(my_strnlen)
@@ -118,9 +113,9 @@ my_strnlen(const char *str, Size_t maxlen)
     * present or the perl is too early to handle this function */
 #  if defined(utf8n_to_uvchr) || defined(utf8_to_uv)
 #    if defined(utf8n_to_uvchr)   /* This is the preferred implementation */
-#      define _ppport_utf8_to_uvchr_buf_callee utf8n_to_uvchr
+#      define D_PPP_utf8_to_uvchr_buf_callee utf8n_to_uvchr
 #    else     /* Must be at least 5.6.1 from #if above */
-#      define _ppport_utf8_to_uvchr_buf_callee utf8_to_uv
+#      define D_PPP_utf8_to_uvchr_buf_callee utf8_to_uv
 #    endif
 #  endif
 
@@ -211,7 +206,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
          *
          * The modern versions allow anything that evaluates to a legal UV, but
          * not overlongs nor an empty input */
-        ret = _ppport_utf8_to_uvchr_buf_callee(
+        ret = D_PPP_utf8_to_uvchr_buf_callee(
                 s, curlen, retlen,   (UTF8_ALLOW_ANYUV
                                   & ~(UTF8_ALLOW_LONG|UTF8_ALLOW_EMPTY)));
 
@@ -229,8 +224,8 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
     if (UNLIKELY(overflows)) {
         if (! do_warnings) {
             if (retlen) {
-                *retlen = _ppport_MIN(*retlen, UTF8SKIP(s));
-                *retlen = _ppport_MIN(*retlen, curlen);
+                *retlen = D_PPP_MIN(*retlen, UTF8SKIP(s));
+                *retlen = D_PPP_MIN(*retlen, curlen);
             }
             return UNICODE_REPLACEMENT;
         }
@@ -261,7 +256,7 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
             *retlen = (STRLEN) -1;
         }
         else {
-            ret = _ppport_utf8_to_uvchr_buf_callee(
+            ret = D_PPP_utf8_to_uvchr_buf_callee(
                                             s, curlen, retlen, UTF8_ALLOW_ANY);
             /* Override with the REPLACEMENT character, as that is what the
              * modern version of this function returns */
@@ -275,8 +270,9 @@ utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
              * continuation characters */
             if (retlen && *retlen >= 0) {
                 unsigned int i = 1;
-                *retlen = _ppport_MIN(*retlen, curlen);
-                *retlen = _ppport_MIN(*retlen, UTF8SKIP(s));
+
+                *retlen = D_PPP_MIN(*retlen, curlen);
+                *retlen = D_PPP_MIN(*retlen, UTF8SKIP(s));
                 do {
                     if (s[i] < 0x80 || s[i] > 0xBF) {
                         *retlen = i;
