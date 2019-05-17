@@ -753,7 +753,6 @@ explained below.
  5.24.0         7922 113   1287  77  19535 2677   9994 2465   5702 177
  5.26.0         9140 121  24925 1200 40643 3017  10514 2614   7854 211
  5.28.0        13056 128  27267 1230 41745 3130  10952 2715   8185 218
- 5.30.0        13534 128  26294 1237 39642 3080  11082 2711   8249 222
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -1080,25 +1079,25 @@ the Perl source distribution for somewhat more selected releases.
 
  ======================================================================
 
-                  5.26.0           5.28.0        5.30.0
+                  5.26.0           5.28.0
 
- Configure    593      1       580      1    587      1
- Cross        122     15       125     15    126     15
- djgpp         21      7        21      7     21      7
- h2pl          24     15        24     15     24     15
- hints        376     87       364     85    372     86
- mad            -      -         -      -      -      -
- NetWare      499     61       493     61    493     61
- os2          552     70       552     70    552     70
- plan9        322     17       309     17    308     17
- Porting     1380     73      1462     75   1460     74
- qnx            5      4         5      4      5      4
- symbian      315     54       315     54    315     54
- utils        578     50       584     50    587     50
- vms          527     12       526     12    559     13
- vos           12      7        12      7     12      7
- win32       1313     65      1326     65   1520     69
- x2p            -      -         -      -      -      -
+ Configure    593      1       580      1
+ Cross        122     15       125     15
+ djgpp         21      7        21      7
+ h2pl          24     15        24     15
+ hints        376     87       364     85
+ mad            -      -         -      -
+ NetWare      499     61       493     61
+ os2          552     70       552     70
+ plan9        322     17       309     17
+ Porting     1380     73      1462     75
+ qnx            5      4         5      4
+ symbian      315     54       315     54
+ utils        578     50       584     50
+ vms          527     12       526     12
+ vos           12      7        12      7
+ win32       1313     65      1326     65
+ x2p            -      -         -      -
 
 =head2 SELECTED PATCH SIZES
 
