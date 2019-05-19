@@ -30,13 +30,15 @@ esac
 # Make sure that we look for libm
 libswanted="$libswanted m"
 
-# Down with locales!
+# Older Androids lack locale support and may need the following undefs
+# uncommenting. This isn't necessary from at least Android 8.1 (Oreo)
 # https://github.com/android/platform_bionic/blob/master/libc/CAVEATS
-d_locconv='undef'
-d_setlocale='undef'
-d_setlocale_r='undef'
-d_lc_monetary_2008='undef'
-i_locale='undef'
+#d_locconv='undef'
+#d_setlocale='undef'
+#d_setlocale_r='undef'
+#d_lc_monetary_2008='undef'
+#i_locale='undef'
+#d_newlocale='undef'
 
 # https://code.google.com/p/android-source-browsing/source/browse/libc/netbsd/net/getservent_r.c?repo=platform--bionic&r=ca6fe7bebe3cc6ed7e2db5a3ede2de0fcddf411d#95
 d_getservent_r='undef'
