@@ -421,7 +421,7 @@ sub find_locales ($;$) {
         }
 
         # The rest of the locales are in this file.
-        push @Data, <DATA>;
+        push @Data, <DATA>; close DATA;
 
         foreach my $line (@Data) {
             my ($locale_name, $language_codes, $country_codes, $encodings) =
