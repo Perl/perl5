@@ -1386,14 +1386,12 @@ Richard Leach, Ryan Voots, Sawyer X, Shlomi Fish, Sisyphus, Slaven Rezic,
 Steve Hay, Sullivan Beck, Tina Müller, Tomasz Konojacki, Tom Wyant, Tony
 Cook, Unicode Consortium, Yves Orton, Zak B. Elep.
 
-A large number of bug fixes in this release were made possible by
-the high quality of Sergey Aleynikov's perlbug reports for issues he
-discovered through fuzzing with AFL.
-
-The list above is almost certainly incomplete as it is automatically
+he list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
+the names of most of the (very much appreciated) contributors who reported
+issues to the Perl bug tracker. Noteworthy in this release were the large
+number of bug fixes made possible by Sergey Aleynikov's high quality perlbug
+reports for issues he discovered by fuzzing with AFL.
 
 Many of the changes included in this version originated in the CPAN modules
 included in Perl's core. We're grateful to the entire CPAN community for
