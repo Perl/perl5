@@ -1386,7 +1386,7 @@ Richard Leach, Ryan Voots, Sawyer X, Shlomi Fish, Sisyphus, Slaven Rezic,
 Steve Hay, Sullivan Beck, Tina Müller, Tomasz Konojacki, Tom Wyant, Tony
 Cook, Unicode Consortium, Yves Orton, Zak B. Elep.
 
-he list above is almost certainly incomplete as it is automatically
+The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
 the names of most of the (very much appreciated) contributors who reported
 issues to the Perl bug tracker. Noteworthy in this release were the large
