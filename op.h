@@ -1021,6 +1021,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define OP_TYPE_ISNT_AND_WASNT(o, type) \
     ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
 
+/* should match anything that uses ck_ftst in regen/opcodes */
+#define OP_IS_STAT(op) (OP_IS_FILETEST(op) || (op) == OP_LSTAT || (op) == OP_STAT)
 
 #  define OpHAS_SIBLING(o)	(cBOOL((o)->op_moresib))
 #  define OpSIBLING(o)		(0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
