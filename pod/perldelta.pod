@@ -186,7 +186,7 @@ L<[perl #133586]|https://rt.perl.org/Ticket/Display.html?id=133586>.
 =head2 C<pack()> no longer can return malformed UTF-8
 
 It croaks if it would otherwise return a UTF-8 string that contains
-malformed UTF-8.  This protects agains potential security threats.  This
+malformed UTF-8.  This protects against potential security threats.  This
 is considered a bug fix as well.
 L<[perl #131642]|https://rt.perl.org/Ticket/Display.html?id=131642>.
 
@@ -1187,7 +1187,7 @@ L<[perl #133951]|https://rt.perl.org/Ticket/Display.html?id=133951>.
 
 C<pack()> no longer can return malformed UTF-8.  It croaks if it would
 otherwise return a UTF-8 string that contains malformed UTF-8.  This
-protects agains potential security threats.
+protects against potential security threats.
 L<[perl #131642]|https://rt.perl.org/Ticket/Display.html?id=131642>.
 
 =item *
