@@ -321,11 +321,7 @@ L<Config::Extensions> has been upgraded from version 0.02 to 0.03.
 
 =item *
 
-L<Config::Perl::V> has been upgraded from version 0.29 to 0.32.
-
-=item *
-
-L<Config::Perl::V>. has been upgraded from version 0.30 to 0.32. This was due
+L<Config::Perl::V>. has been upgraded from version 0.29 to 0.32. This was due
 to a new configuration variable that has influence on binary compatibility:
 C<USE_THREAD_SAFE_LOCALE>.
 
