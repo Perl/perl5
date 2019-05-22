@@ -2337,6 +2337,7 @@ Perl_list(pTHX_ OP *o)
 	    }
 	}
 	break;
+
     case OP_OR:
     case OP_AND:
     case OP_COND_EXPR:
@@ -2355,6 +2356,7 @@ Perl_list(pTHX_ OP *o)
 	}
 	listkids(o);
 	break;
+
     case OP_LIST:
 	listkids(o);
 	if (cLISTOPo->op_first->op_type == OP_PUSHMARK) {
@@ -2362,6 +2364,7 @@ Perl_list(pTHX_ OP *o)
 	    op_null(o); /* NULL the list */
 	}
 	break;
+
     case OP_LEAVE:
     case OP_LEAVETRY:
 	kid = cLISTOPo->op_first;
@@ -2378,11 +2381,13 @@ Perl_list(pTHX_ OP *o)
 	}
 	PL_curcop = &PL_compiling;
 	break;
+
     case OP_SCOPE:
     case OP_LINESEQ:
 	kid = cLISTOPo->op_first;
 	goto do_kids;
     }
+
     return o;
 }
 
