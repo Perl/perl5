@@ -1239,6 +1239,7 @@ Perl_malloc(size_t nbytes)
          * malloc so that pointer subtraction in the same structure is always
          * well defined */
         if (nbytes > PTRDIFF_MAX) {
+            dTHX;
             MYMALLOC_WRITE2STDERR("Memory requests are limited to PTRDIFF_MAX"
                                   " bytes to prevent possible undefined"
                                   " behavior");
