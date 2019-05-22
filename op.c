@@ -2320,9 +2320,6 @@ Perl_list(pTHX_ OP *o)
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
 
     switch (o->op_type) {
-    case OP_FLOP:
-	list(cBINOPo->op_first);
-	break;
     case OP_REPEAT:
 	if (o->op_private & OPpREPEAT_DOLIST
 	 && !(o->op_flags & OPf_STACKED))
@@ -2346,11 +2343,8 @@ Perl_list(pTHX_ OP *o)
 	for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
 	    list(kid);
 	break;
+
     default:
-    case OP_MATCH:
-    case OP_QR:
-    case OP_SUBST:
-    case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
         /* possibly flatten 1..10 into a constant array */
