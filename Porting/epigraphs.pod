@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.30.0 - Morihei Ueshiba
+
+Announced on 2019-05-22 by Sawyer X
+
+  Life is growth. If we stop growing, technically and spiritually, we
+  are as good as dead.
+
 =head2 v5.30.0-RC2 - Derek Walcott
 
 Announced on 2019-05-17 by Sawyer X
