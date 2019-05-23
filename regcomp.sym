@@ -118,7 +118,7 @@ EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string using /iaa rules (w/len) (str
 
 EXACT_ONLY8 EXACT,      str       ; Like EXACT, but only UTF-8 encoded targets can match
 EXACTFU_ONLY8 EXACT,    str       ; Like EXACTFU, but only UTF-8 encoded targets can match
-# One could add EXACTFAA8 and and something that has the same effect for /l,
+# One could add EXACTFAA8 and something that has the same effect for /l,
 # but these would be extremely uncommon
 
 EXACTFU_S_EDGE EXACT,   str       ; /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only).
