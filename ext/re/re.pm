@@ -118,7 +118,7 @@ sub bits {
         # Pretend were called with certain parameters, which are best dealt
         # with that way.
         push @_, keys %bitmask; # taint and eval
-        push @_, 'strict';
+        push @_, 'strict', 'limit';
     }
 
     # Process each subpragma parameter
@@ -149,6 +149,8 @@ sub bits {
 	    last;
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
+        } elsif ($s eq 'limit') {
+            $^H{"re/limit"} = $on;
 	} elsif ($EXPORT_OK{$s}) {
 	    require Exporter;
 	    re->export_to_level(2, 're', $s);
