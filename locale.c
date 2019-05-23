@@ -5085,6 +5085,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             s++;
             e = strchr(s, UTF8NESS_PREFIX[0]);
             if (! e) {
+                e = PL_locale_utf8ness + strlen(PL_locale_utf8ness);
                 Perl_croak(aTHX_
                            "panic: %s: %d: Corrupt utf8ness_cache: missing"
                            " separator %.*s<-- HERE %s\n",
