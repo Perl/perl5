@@ -33,6 +33,8 @@
 
 #define PERL_NO_GET_CONTEXT
 
+extern int my_re_debug(void);
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

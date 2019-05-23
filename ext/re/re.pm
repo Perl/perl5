@@ -93,8 +93,7 @@ if (defined &DynaLoader::boot_DynaLoader) {
 # uses re 'taint'.
 
 sub _load_unload {
-    my ($on)= @_;
-    if ($on) {
+    if ($^H{"re/debug"} || $^H{"re/limit"}) {
 	# We call install() every time, as if we didn't, we wouldn't
 	# "see" any changes to the color environment var since
 	# the last time it was called.
@@ -118,7 +117,7 @@ sub bits {
         # Pretend were called with certain parameters, which are best dealt
         # with that way.
         push @_, keys %bitmask; # taint and eval
-        push @_, 'strict';
+        push @_, 'strict', 'debug', 'limit';
     }
 
     # Process each subpragma parameter
@@ -141,14 +140,19 @@ sub bits {
                                join(", ",sort keys %flags ) );
                 }
             }
-            _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
+            $^H{"re/debug"} = $on ? 1 : !!${^RE_DEBUG_FLAGS};
+            _load_unload();
             last;
         } elsif ($s eq 'debug' or $s eq 'debugcolor') {
 	    setcolor() if $s =~/color/i;
-	    _load_unload($on);
+            $^H{"re/debug"} = $on;
+	    _load_unload();
 	    last;
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
+        } elsif ($s eq 'limit') {
+            $^H{"re/limit"} = $on;
+            _load_unload();
 	} elsif ($EXPORT_OK{$s}) {
 	    require Exporter;
 	    re->export_to_level(2, 're', $s);

@@ -54,6 +54,7 @@ extern SV*      my_reg_qr_package(pTHX_ REGEXP * const rx);
 #if defined(USE_ITHREADS)
 extern void*	my_regdupe (pTHX_ REGEXP * const r, CLONE_PARAMS *param);
 #endif
+extern int my_re_debug(void);
 
 EXTERN_C const struct regexp_engine my_reg_engine;
 
@@ -76,6 +77,17 @@ const struct regexp_engine my_reg_engine = {
 #endif
         my_re_op_compile,
 };
+
+/* FIXME: this will be replaced with code to mark a regexp as debug during
+   compilation, so regcomp will use this code (or a cached version of it),
+   and regexec will check the flag in the regexp
+*/
+int
+my_re_debug(void) {
+    dTHX;
+    SV *sv = cophh_fetch_pvs(CopHINTHASH_get(PL_curcop), "re/debug", 0);
+    return SvTRUE(sv);
+}
 
 MODULE = re	PACKAGE = re
 

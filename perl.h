@@ -4123,7 +4123,7 @@ Gid_t getegid (void);
 #  ifndef PERL_EXT_RE_BUILD
 #    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  else
-#    define DEBUG_r(a) STMT_START {a;} STMT_END
+#    define DEBUG_r(a) DEBUG__(my_re_debug(), a)
 #  endif /* PERL_EXT_RE_BUILD */
 
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
