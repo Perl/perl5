@@ -2227,7 +2227,7 @@ Perl_setlocale(const int category, const char * locale)
 {
     /* This wraps POSIX::setlocale() */
 
-#ifdef NO_LOCALE
+#ifndef USE_LOCALE
 
     PERL_UNUSED_ARG(category);
     PERL_UNUSED_ARG(locale);
