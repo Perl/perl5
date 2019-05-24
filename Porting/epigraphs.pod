@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.0 - Fumiko Enchi, Masks
+
+Announced on 2019-05-22 by Sawyer X
+
+  The secrets inside her mind are like flowers in a garden at
+  nighttime, filling the darkness with perfume.
+
 =head2 v5.30.0 - Morihei Ueshiba
 
 Announced on 2019-05-22 by Sawyer X
