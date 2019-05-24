@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20190523';
+our $VERSION = '5.20190524';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -349,7 +349,7 @@ sub changes_between {
     5.028002 => '2019-04-19',
     5.029010 => '2019-04-20',
     5.030000 => '2019-05-22',
-    5.031000 => '2019-05-23',
+    5.031000 => '2019-05-24',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16290,12 +16290,41 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.031000 => {
-        delta_from => 5.030000,
+        delta_from => 5.03,
         changed => {
             'B::Op_private'         => '5.031000',
             'Config'                => '5.031',
-            'Module::CoreList'      => '5.20190523',
-            'Module::CoreList::Utils'=> '5.20190523',
+            'Module::CoreList'      => '5.20190524',
+            'Module::CoreList::Utils'=> '5.20190524',
+            'Pod::Simple'           => '3.36',
+            'Pod::Simple::BlackBox' => '3.36',
+            'Pod::Simple::Checker'  => '3.36',
+            'Pod::Simple::Debug'    => '3.36',
+            'Pod::Simple::DumpAsText'=> '3.36',
+            'Pod::Simple::DumpAsXML'=> '3.36',
+            'Pod::Simple::HTML'     => '3.36',
+            'Pod::Simple::HTMLBatch'=> '3.36',
+            'Pod::Simple::JustPod'  => undef,
+            'Pod::Simple::LinkSection'=> '3.36',
+            'Pod::Simple::Methody'  => '3.36',
+            'Pod::Simple::Progress' => '3.36',
+            'Pod::Simple::PullParser'=> '3.36',
+            'Pod::Simple::PullParserEndToken'=> '3.36',
+            'Pod::Simple::PullParserStartToken'=> '3.36',
+            'Pod::Simple::PullParserTextToken'=> '3.36',
+            'Pod::Simple::PullParserToken'=> '3.36',
+            'Pod::Simple::RTF'      => '3.36',
+            'Pod::Simple::Search'   => '3.36',
+            'Pod::Simple::SimpleTree'=> '3.36',
+            'Pod::Simple::Text'     => '3.36',
+            'Pod::Simple::TextContent'=> '3.36',
+            'Pod::Simple::TiedOutFH'=> '3.36',
+            'Pod::Simple::Transcode'=> '3.36',
+            'Pod::Simple::TranscodeDumb'=> '3.36',
+            'Pod::Simple::TranscodeSmart'=> '3.36',
+            'Pod::Simple::XHTML'    => '3.36',
+            'Pod::Simple::XMLOutStream'=> '3.36',
+            'Socket'                => '2.029',
             'feature'               => '1.55',
         },
         removed => {
@@ -17563,6 +17592,7 @@ sub is_core
     'Pod::Simple::HTML'     => 'cpan',
     'Pod::Simple::HTMLBatch'=> 'cpan',
     'Pod::Simple::HTMLLegacy'=> 'cpan',
+    'Pod::Simple::JustPod'  => 'cpan',
     'Pod::Simple::LinkSection'=> 'cpan',
     'Pod::Simple::Methody'  => 'cpan',
     'Pod::Simple::Progress' => 'cpan',
@@ -17990,6 +18020,7 @@ sub is_core
     'Pod::Simple::HTML'     => 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::HTMLBatch'=> 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::HTMLLegacy'=> 'https://github.com/perl-pod/pod-simple/issues',
+    'Pod::Simple::JustPod'  => 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::LinkSection'=> 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::Methody'  => 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::Progress' => 'https://github.com/perl-pod/pod-simple/issues',
