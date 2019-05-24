@@ -45,7 +45,7 @@ declare the output character set as UTF-8 before parsing, like so:
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.36';
+$VERSION = '3.35';
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
@@ -92,7 +92,7 @@ the call to C<parse_file>:
 
 In turning L<Foo::Bar> into http://whatever/Foo%3a%3aBar, what
 to put before the "Foo%3a%3aBar". The default value is
-"https://metacpan.org/pod/".
+"http://search.cpan.org/perldoc?".
 
 =head2 perldoc_url_postfix
 
@@ -247,7 +247,7 @@ sub new {
   my $self = shift;
   my $new = $self->SUPER::new(@_);
   $new->{'output_fh'} ||= *STDOUT{IO};
-  $new->perldoc_url_prefix('https://metacpan.org/pod/');
+  $new->perldoc_url_prefix('http://search.cpan.org/perldoc?');
   $new->man_url_prefix('http://man.he.net/man');
   $new->html_charset('ISO-8859-1');
   $new->nix_X_codes(1);
@@ -685,8 +685,8 @@ sub emit {
 Resolves a POD link target (typically a module or POD file name) and section
 name to a URL. The resulting link will be returned for the above examples as:
 
-  https://metacpan.org/pod/Net::Ping#INSTALL
-  https://metacpan.org/pod/perlpodspec
+  http://search.cpan.org/perldoc?Net::Ping#INSTALL
+  http://search.cpan.org/perldoc?perlpodspec
   #SYNOPSIS
 
 Note that when there is only a section argument the URL will simply be a link

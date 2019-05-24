@@ -98,14 +98,9 @@ nodes that represent preformatted text (from verbatim sections).
 TODO intro... mention that events are supplied for implicits, like for
 missing >'s
 
-In the following section, we use XML to represent the event structure
-associated with a particular construct.  That is, an opening tag
-represents the element start, the attributes of that opening tag are
-the attributes given to the callback, and the closing tag represents
-the end element.
 
-Three callback methods must be supplied by a class extending
-L<Pod::Simple> to receive the corresponding event:
+In the following section, we use XML to represent the event structure
+associated with a particular construct.  That is, TODO
 
 =over
 
@@ -117,9 +112,8 @@ L<Pod::Simple> to receive the corresponding event:
 
 =back
 
-Here's the comprehensive list of values you can expect as
-I<element_name> in your implementation of C<_handle_element_start>
-and C<_handle_element_end>::
+TODO describe
+
 
 =over
 
