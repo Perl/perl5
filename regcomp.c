@@ -23428,10 +23428,12 @@ Perl_parse_uniprop_string(pTHX_
                  * NV. */
 
                 NV value;
+                SSize_t value_len = lookup_len - equals_pos;
 
                 /* Get the value */
-                if (my_atof3(lookup_name + equals_pos, &value,
-                             lookup_len - equals_pos)
+                if (   value_len <= 0
+                    || my_atof3(lookup_name + equals_pos, &value,
+                                value_len)
                           != lookup_name + lookup_len)
                 {
                     goto failed;
