@@ -28,10 +28,6 @@ L<Module::CoreList> has been upgraded from version 5.20190522 to 5.20190524.
 
 =item *
 
-L<Pod::Simple> has been upgraded from version 3.35 to 3.36.
-
-=item *
-
 L<Socket> has been upgraded from version 2.027 to 2.029.
 
 =back
