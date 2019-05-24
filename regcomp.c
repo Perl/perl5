@@ -22946,7 +22946,7 @@ Perl_parse_uniprop_string(pTHX_
         /* Certain properties whose values are numeric need special handling.
          * They may optionally be prefixed by 'is'.  Ignore that prefix for the
          * purposes of checking if this is one of those properties */
-        if (memBEGINPs(lookup_name, name_len, "is")) {
+        if (memBEGINPs(lookup_name, j, "is")) {
             lookup_offset = 2;
         }
 
