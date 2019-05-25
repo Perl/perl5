@@ -28,7 +28,7 @@ define) ;;
 esac
 
 # Make sure that we look for libm
-libswanted="$libswanted m"
+libswanted="$libswanted m log"
 
 # Older Androids lack locale support and may need the following undefs
 # uncommenting. This isn't necessary from at least Android 8.1 (Oreo)
