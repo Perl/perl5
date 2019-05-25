@@ -3,7 +3,7 @@ package Pod::Simple::Search;
 use strict;
 
 use vars qw($VERSION $MAX_VERSION_WITHIN $SLEEPY);
-$VERSION = '3.35';   ## Current version of this package
+$VERSION = '3.36';   ## Current version of this package
 
 BEGIN { *DEBUG = sub () {0} unless defined &DEBUG; }   # set DEBUG level
 use Carp ();
@@ -546,7 +546,7 @@ sub _limit_glob_to_limit_re {
 sub _actual_filenames {
     my $dir = shift;
     my $fn = lc shift;
-    opendir my $dh, $dir or return;
+    opendir my ($dh), $dir or return;
     return map { File::Spec->catdir($dir, $_) }
         grep { lc $_  eq $fn } readdir $dh;
 }

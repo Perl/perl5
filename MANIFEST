@@ -1613,6 +1613,7 @@ cpan/Pod-Simple/lib/Pod/Simple/DumpAsXML.pm		turn Pod into XML
 cpan/Pod-Simple/lib/Pod/Simple/HTML.pm			convert Pod to HTML
 cpan/Pod-Simple/lib/Pod/Simple/HTMLBatch.pm		convert several Pod files to several HTML files
 cpan/Pod-Simple/lib/Pod/Simple/HTMLLegacy.pm		Pod::Simple::HTMLLegacy
+cpan/Pod-Simple/lib/Pod/Simple/JustPod.pm
 cpan/Pod-Simple/lib/Pod/Simple/LinkSection.pm		represent "section" attributes of L codes
 cpan/Pod-Simple/lib/Pod/Simple/Methody.pm		turn Pod::Simple events into method calls
 cpan/Pod-Simple/lib/Pod/Simple/Progress.pm		Pod::Simple::Progress
@@ -1731,6 +1732,7 @@ cpan/Pod-Simple/t/fcodes_l.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_s.t				Pod::Simple test file
 cpan/Pod-Simple/t/for.t					Pod::Simple test file
 cpan/Pod-Simple/t/fornot.t				Pod::Simple test file
+cpan/Pod-Simple/t/github_issue_79.t
 cpan/Pod-Simple/t/heads.t				Pod::Simple test file
 cpan/Pod-Simple/t/html01.t				Pod::Simple test file
 cpan/Pod-Simple/t/html02.t				Pod::Simple test file
@@ -1743,6 +1745,9 @@ cpan/Pod-Simple/t/junk1.pod				Pod::Simple test file
 cpan/Pod-Simple/t/junk1o.txt				Pod::Simple test file
 cpan/Pod-Simple/t/junk2.pod				Pod::Simple test file
 cpan/Pod-Simple/t/junk2o.txt				Pod::Simple test file
+cpan/Pod-Simple/t/JustPod01.t
+cpan/Pod-Simple/t/JustPod02.t
+cpan/Pod-Simple/t/JustPod_corpus.t
 cpan/Pod-Simple/t/linkclas.t				Pod::Simple test file
 cpan/Pod-Simple/t/output.t				Pod::Simple test file
 cpan/Pod-Simple/t/perlcyg.pod				Pod::Simple test file
@@ -1755,6 +1760,7 @@ cpan/Pod-Simple/t/puller.t				Pod::Simple test file
 cpan/Pod-Simple/t/pulltitl.t				Pod::Simple test file
 cpan/Pod-Simple/t/reinit.t				Pod::Simple test file
 cpan/Pod-Simple/t/render.t				Pod::Simple test file
+cpan/Pod-Simple/t/rtf_utf8.t
 cpan/Pod-Simple/t/search05.t				Pod::Simple test file
 cpan/Pod-Simple/t/search10.t				Pod::Simple test file
 cpan/Pod-Simple/t/search12.t				Pod::Simple test file
