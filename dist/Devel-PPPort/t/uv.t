@@ -48,6 +48,8 @@ bootstrap Devel::PPPort;
 
 package main;
 
+BEGIN { require warnings if "$]" gt '5.006' }
+
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
 ok(&Devel::PPPort::sv_2uv("4711"), 4711);
@@ -58,15 +60,16 @@ ok(&Devel::PPPort::SvUVx(0xdeadbeef), 0xdeadbeef);
 ok(&Devel::PPPort::XSRETURN_UV(), 42);
 ok(&Devel::PPPort::PUSHu(), 42);
 ok(&Devel::PPPort::XPUSHu(), 43);
-ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
-ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
 ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);
 
 # skip tests on 5.6.0 and earlier
 if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..49;
+    skip 'skip: broken utf8 support', 0 for 1..51;
     exit;
 }
+
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", 0), 1);
+ok(&Devel::PPPort::UTF8_SAFE_SKIP("A", -1), 0);
 
 my $ret = &Devel::PPPort::utf8_to_uvchr("A");
 ok($ret->[0], ord("A"));
@@ -96,12 +99,12 @@ else {
     local $SIG{__WARN__} = sub { push @warnings, @_; };
 
     {
-        use warnings 'utf8';
+        BEGIN { 'warnings'->import('utf8') if "$]" gt '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr("\xe0\0\x80");
         ok($ret->[0], 0);
         ok($ret->[1], -1);
 
-        no warnings;
+        BEGIN { 'warnings'->unimport() if "$]" gt '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr("\xe0\0\x80");
         ok($ret->[0], 0xFFFD);
         ok($ret->[1], 1);
@@ -173,7 +176,7 @@ else {
         my $warning = $test->{'warning'};
 
         undef @warnings;
-        use warnings 'utf8';
+        BEGIN { 'warnings'->import('utf8') if "$]" gt '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr_buf($input, $adjustment);
         ok($ret->[0], 0,  "returned value $display; warnings enabled");
         ok($ret->[1], -1, "returned length $display; warnings enabled");
@@ -183,7 +186,7 @@ else {
                     . "; Got: '$all_warnings', which should contain '$warning'");
 
         undef @warnings;
-        no warnings 'utf8';
+        BEGIN { 'warnings'->unimport('utf8') if "$]" gt '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr_buf($input, $adjustment);
         ok($ret->[0], 0xFFFD,  "returned value $display; warnings disabled");
         ok($ret->[1], $test->{'no_warnings_returned_length'},
