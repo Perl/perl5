@@ -103,26 +103,20 @@ my_strnlen(const char *str, Size_t maxlen)
  * implementation is very different from later ones, without the later
  * safeguards, so would require extra work to deal with */
 #if { VERSION >= 5.6.1 } && ! defined(utf8_to_uvchr_buf)
-#  if { VERSION < 5.10.0 }  /* Was non-const before this */
-#    define D_PPP_CU8 U8
-#  else
-#    define D_PPP_CU8 const U8
-#  endif
-
    /* Choose which underlying implementation to use.  At least one must be
     * present or the perl is too early to handle this function */
 #  if defined(utf8n_to_uvchr) || defined(utf8_to_uv)
 #    if defined(utf8n_to_uvchr)   /* This is the preferred implementation */
 #      define D_PPP_utf8_to_uvchr_buf_callee utf8n_to_uvchr
 #    else     /* Must be at least 5.6.1 from #if above */
-#      define D_PPP_utf8_to_uvchr_buf_callee utf8_to_uv
+#      define D_PPP_utf8_to_uvchr_buf_callee(s, curlen, retlen, flags) utf8_to_uv((U8 *)(s), (curlen), (retlen), (flags))
 #    endif
 #  endif
 
 #  if { NEED utf8_to_uvchr_buf }
 
 UV
-utf8_to_uvchr_buf(pTHX_ D_PPP_CU8 *s, const U8 *send, STRLEN *retlen)
+utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 {
     UV ret;
     STRLEN curlen;
@@ -372,19 +366,22 @@ XPUSHu()
                 XPUSHu(43);
                 XSRETURN(1);
 
+#if defined(UTF8_SAFE_SKIP) && defined(UTF8SKIP)
+
 STRLEN
 UTF8_SAFE_SKIP(s, adjustment)
-        unsigned char * s
+        char * s
         int adjustment
+        PREINIT:
+            const char *const_s;
         CODE:
+            const_s = s;
             /* Instead of passing in an 'e' ptr, use the real end, adjusted */
-#if defined(UTF8_SAFE_SKIP) && defined(UTF8SKIP)
-            RETVAL = UTF8_SAFE_SKIP(s, s + UTF8SKIP(s) + adjustment);
-#else
-            RETVAL = 0;
-#endif
+            RETVAL = UTF8_SAFE_SKIP(const_s, s + UTF8SKIP(s) + adjustment);
         OUTPUT:
             RETVAL
+
+#endif
 
 STRLEN
 my_strnlen(s, max)
@@ -395,6 +392,8 @@ my_strnlen(s, max)
         OUTPUT:
             RETVAL
 
+#ifdef utf8_to_uvchr_buf
+
 AV *
 utf8_to_uvchr_buf(s, adjustment)
         unsigned char *s
@@ -402,16 +401,13 @@ utf8_to_uvchr_buf(s, adjustment)
         PREINIT:
             AV *av;
             STRLEN len;
+            const char *const_s;
         CODE:
             av = newAV();
-#ifdef utf8_to_uvchr_buf
-            av_push(av, newSVuv(utf8_to_uvchr_buf(s,
+            const_s = s;
+            av_push(av, newSVuv(utf8_to_uvchr_buf(const_s,
                                                   s + UTF8SKIP(s) + adjustment,
                                                   &len)));
-#else
-            av_push(av, newSVuv(0));
-            len = (STRLEN) -1;
-#endif
             if (len == (STRLEN) -1) {
                 av_push(av, newSViv(-1));
             }
@@ -422,20 +418,21 @@ utf8_to_uvchr_buf(s, adjustment)
         OUTPUT:
                 RETVAL
 
+#endif
+
+#ifdef utf8_to_uvchr
+
 AV *
 utf8_to_uvchr(s)
         unsigned char *s
         PREINIT:
             AV *av;
             STRLEN len;
+            const char *const_s;
         CODE:
             av = newAV();
-#ifdef utf8_to_uvchr
-            av_push(av, newSVuv(utf8_to_uvchr(s, &len)));
-#else
-            av_push(av, newSVuv(0));
-            len = (STRLEN) -1;
-#endif
+            const_s = s;
+            av_push(av, newSVuv(utf8_to_uvchr(const_s, &len)));
             if (len == (STRLEN) -1) {
                 av_push(av, newSViv(-1));
             }
@@ -445,6 +442,8 @@ utf8_to_uvchr(s)
             RETVAL = av;
         OUTPUT:
                 RETVAL
+
+#endif
 
 =tests plan => 62
 
