@@ -1833,10 +1833,9 @@ The message indicates the type of reference that was expected.  This
 usually indicates a syntax error in dereferencing the constant value.
 See L<perlsub/"Constant Functions"> and L<constant>.
 
-=item Constants from lexical variables potentially modified elsewhere are
-deprecated. This will not be allowed in Perl 5.32
+=item Constants from lexical variables potentially modified elsewhere are no longer permitted
 
-(D deprecated) You wrote something like
+(F) You wrote something like
 
     my $var;
     $sub = sub () { $var };
@@ -1853,7 +1852,7 @@ breaks the behavior of closures, in which the subroutine captures
 the variable itself, rather than its value, so future changes to the
 variable are reflected in the subroutine's return value.
 
-This usage is deprecated, and will no longer be allowed in Perl 5.32,
+This usage was deprecated, and as of Perl 5.32 is no longer allowed,
 making it possible to change the behavior in the future.
 
 If you intended for the subroutine to be eligible for inlining, then
