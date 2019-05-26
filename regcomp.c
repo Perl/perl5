@@ -21520,9 +21520,14 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 
         /* As a final resort, output the range or subrange as hex. */
 
-        this_end = (end < NUM_ANYOF_CODE_POINTS)
-                    ? end
-                    : NUM_ANYOF_CODE_POINTS - 1;
+        if (start >= NUM_ANYOF_CODE_POINTS) {
+            this_end = end;
+        }
+        else {
+            this_end = (end < NUM_ANYOF_CODE_POINTS)
+                        ? end
+                        : NUM_ANYOF_CODE_POINTS - 1;
+        }
 #if NUM_ANYOF_CODE_POINTS > 256
         format = (this_end < 256)
                  ? "\\x%02" UVXf "-\\x%02" UVXf
