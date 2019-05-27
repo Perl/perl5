@@ -7338,7 +7338,7 @@ C<~>) on a string containing a code point over 0xFF.  The string bitwise
 operators treat their operands as strings of bytes, and values beyond
 0xFF are nonsensical in this context.
 
-This became fatal in Perl 5.28.
+Certain instances became fatal in Perl 5.28; others in perl 5.32.
 
 =item Use of strings with code points over 0xFF as arguments to C<vec>
 is deprecated. This will be a fatal error in Perl 5.32

@@ -1087,30 +1087,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
      * on zeros without having to do it.  In the case of '&', the result is
      * zero, and the dangling portion is simply discarded.  For '|' and '^', the
      * result is the same as the other operand, so the dangling part is just
-     * appended to the final result, unchanged.  We currently accept above-FF
-     * code points in the dangling portion, as that's how it has long worked,
-     * and code depends on it staying that way.  But it is now fatal for
-     * above-FF to appear in the portion that does get operated on.  Hence, any
-     * above-FF must come only in the longer operand, and only in its dangling
-     * portion.  That means that at least one of the operands has to be
-     * entirely non-UTF-8, and the length of that operand has to be before the
-     * first above-FF in the other */
+     * appended to the final result, unchanged.  As of perl-5.32, we no longer
+     * accept above-FF code points in the dangling portion.
+     */
     if (left_utf8 || right_utf8) {
-        if (left_utf8) {
-            if (right_utf8 || rightlen > leftlen) {
-                Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
-            }
-            len = rightlen;
-        }
-        else if (right_utf8) {
-            if (leftlen > rightlen) {
-                Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
-            }
-            len = leftlen;
-        }
-
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                               DEPRECATED_ABOVE_FF_MSG, PL_op_desc[optype]);
+        Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
     }
     else {  /* Neither is UTF-8 */
         len = MIN(leftlen, rightlen);
