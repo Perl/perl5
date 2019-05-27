@@ -217,18 +217,21 @@ elsif (IS_VMS) {
 
 { # XXX hack for dependency ordering
     # Cwd needs to be built before Encode recurses into subdirectories.
-    # Pod::Simple needs to be built before Pod::Functions
+    # Pod::Simple needs to be built before Pod::Functions, but after 'if'
     # lib needs to be built before IO-Compress
     # This seems to be the simplest way to ensure this ordering:
-    my (@first, @other);
+    my (@first, @second, @other);
     foreach (@extspec) {
-	if ($_ eq 'Cwd' || $_ eq 'Pod/Simple' || $_ eq 'lib') {
+	if ($_ eq 'Cwd' || $_ eq 'if' || $_ eq 'lib') {
 	    push @first, $_;
+        }
+	elsif ($_ eq 'Pod/Simple') {
+	    push @second, $_;
 	} else {
 	    push @other, $_;
 	}
     }
-    @extspec = (@first, @other);
+    @extspec = (@first, @second, @other);
 }
 
 if ($Config{osname} eq 'catamount' and @extspec) {

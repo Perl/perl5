@@ -197,6 +197,7 @@ done
 dynamic_list=' '
 dynamic_ext_re="lib/auto/re/re.$dlext"
 extra_dep='
+cpan/Pod-Simple/pm_to_blib: dist/if/pm_to_blib
 ext/Pod-Functions/pm_to_blib: cpan/Pod-Simple/pm_to_blib cpan/Pod-Escapes/pm_to_blib pod/perlfunc.pod
 cpan/IO-Compress/pm_to_blib: dist/lib/pm_to_blib
 '
