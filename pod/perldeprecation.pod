@@ -65,14 +65,14 @@ nonsensical. Some instances of these have been deprecated since Perl
 the wide characters did not affect the end result, no deprecation
 notice was raised, and so remain legal.  Now, all occurrences either are
 fatal or raise a deprecation warning, so that the remaining legal
-occurrences will be fatal in 5.32.
+occurrences became fatal in 5.32.
 
 An example of this is
 
  "" & "\x{100}"
 
 The wide character is not used in the C<&> operation because the left
-operand is shorter.  This now warns anyway.
+operand is shorter.  This now throws an exception.
 
 =head3 hostname() doesn't accept any arguments
 
