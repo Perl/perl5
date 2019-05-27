@@ -54,6 +54,14 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 #       '# XXX hack for dependency # ordering'
 # below.
 #
+# The basic logic is:
+#   1) if there's a Makefile.PL in git for the module, use it. and call make
+#   2) If not, auto-generate one (normally)
+#   3) unless the auto-generation code figures out that the extension is
+#      *really* simple, in which case don't.  This will be for pure perl
+#      modules, and all that is needed to be done is to copy from the source
+#      to the dest directories.
+#
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
 
