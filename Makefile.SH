@@ -192,7 +192,8 @@ for f in $dynamic_ext; do
    esac
 done
 
-: Prepare dependency lists for Makefile.
+: Prepare dependency lists for Makefile.  Non-Unix systems likely will also
+: require changes in make_ext.pl
 dynamic_list=' '
 dynamic_ext_re="lib/auto/re/re.$dlext"
 extra_dep='

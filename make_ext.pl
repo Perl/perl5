@@ -48,6 +48,12 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # by an '!ext' and are appropriate to the type of building being done.
 # An extensions follows the format of Foo/Bar, which would be extension Foo::Bar
 
+# To fix dependency ordering, on *nix systems, edit Makefile.SH to create a
+# rule.  That isn't sufficient for other systems; you also have to do
+# something in this file.  See the code at
+#       '# XXX hack for dependency # ordering'
+# below.
+#
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
 
@@ -201,7 +207,7 @@ elsif (IS_VMS) {
     push @extspec, 'DynaLoader' if $dynaloader;
 }
 
-{
+{ # XXX hack for dependency ordering
     # Cwd needs to be built before Encode recurses into subdirectories.
     # Pod::Simple needs to be built before Pod::Functions
     # lib needs to be built before IO-Compress
