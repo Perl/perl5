@@ -676,6 +676,8 @@ typedef struct {
     char *poscache;	/* S-L cache of fail positions of WHILEMs */
 } regmatch_info_aux;
 
+#define RE_CPU_LIMIT_NAME "\022E_CPU_LIMIT"
+#define RE_MEMORY_LIMIT_NAME "\022E_MEMORY_LIMIT"
 
 /* some basic information about the current match that is created by
  * Perl_regexec_flags and then passed to regtry(), regmatch() etc.
@@ -694,6 +696,9 @@ typedef struct {
     char *cutpoint;      /* (*COMMIT) position (if any) */
     regmatch_info_aux      *info_aux; /* extra fields that need cleanup */
     regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
+    UV match_memory_limit; /* limit on memory usage while matching */
+    UV match_cpu_limit;    /* limit on cpu usage while matching */
+    UV match_cpu_used;     /* accumulated cpu "usage" */
     I32  poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
     I32  poscache_iter;    /* current countdown from _maxiter to zero */
     STRLEN poscache_size;  /* size of regmatch_info_aux.poscache */
@@ -701,6 +706,7 @@ typedef struct {
     bool is_utf8_pat;    /* regex is utf8 */
     bool is_utf8_target; /* string being matched is utf8 */
     bool warned; /* we have issued a recursion warning; no need for more */
+    bool limited; /* we're applying match time resource limits */
 } regmatch_info;
  
 
