@@ -763,10 +763,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
             s = (unsigned char *) SvPV_flags(sv, srclen, svpv_flags);
         }
         else {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                                "Use of strings with code points over 0xFF as"
-                                " arguments to vec is deprecated. This will"
-                                " be a fatal error in Perl 5.32");
+	        Perl_croak(aTHX_ "Use of strings with code points over 0xFF as arguments to vec is forbidden");
         }
     }
 

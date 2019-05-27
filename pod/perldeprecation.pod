@@ -54,7 +54,7 @@ This usage has been deprecated, and will no longer be allowed in Perl 5.32.
 
 C<vec> views its string argument as a sequence of bits.  A string
 containing a code point over 0xFF is nonsensical.  This usage is
-deprecated in Perl 5.28, and will be removed in Perl 5.32.
+deprecated in Perl 5.28, and was removed in Perl 5.32.
 
 =head3 Use of code points over 0xFF in string bitwise operators
 
