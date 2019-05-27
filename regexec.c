@@ -323,6 +323,10 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     rex->lastcloseparen = lcp;
 
 
+#define MATCH_NO_LIMIT (~(UV)0)
+#define MATCH_LIMIT(x) \
+    STMT_START { if (UNLIKELY(reginfo->limited)) { x } } STMT_END
+
 STATIC void
 S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
 {
@@ -3277,6 +3281,18 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->strend = strend;
     reginfo->is_utf8_target = cBOOL(utf8_target);
 
+    {
+        SV *sv = cophh_fetch_pvs(CopHINTHASH_get(PL_curcop), "re/limit", 0);
+        reginfo->limited = SvTRUE(sv);
+        if (reginfo->limited) {
+            sv = get_sv(RE_MEMORY_LIMIT_NAME, 0);
+            reginfo->match_memory_limit = (sv && SvOK(sv)) ? SvUV(sv) : MATCH_NO_LIMIT;
+            sv = get_sv(RE_CPU_LIMIT_NAME, 0);
+            reginfo->match_cpu_limit = (sv && SvOK(sv)) ? SvUV(sv) : MATCH_NO_LIMIT;
+            reginfo->match_cpu_used = 0;
+        }
+    }
+
     if (prog->intflags & PREGf_GPOS_SEEN) {
         MAGIC *mg;
 
@@ -5821,6 +5837,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	if (next == scan)
 	    next = NULL;
 	state_num = OP(scan);
+
+        MATCH_LIMIT(
+             if (reginfo->match_cpu_limit != MATCH_NO_LIMIT
+                 && ++ reginfo->match_cpu_used >= reginfo->match_cpu_limit) {
+                 Perl_croak(aTHX_ "Exceeded CPU limit for regexp match");
+             }
+        );
 
       reenter_switch:
         DEBUG_EXECUTE_r(
@@ -9108,6 +9131,12 @@ NULL
                 DEBUG_STATE_pp("push")
             );
 	    depth++;
+            MATCH_LIMIT(
+                if (reginfo->match_memory_limit != MATCH_NO_LIMIT
+                    && depth > reginfo->match_memory_limit) {
+                    Perl_croak(aTHX_ "Memory use over limit matching regular expression");
+                }
+            );
 	    st->locinput = locinput;
 	    st->loceol = loceol;
             st->sr0 = script_run_begin;
