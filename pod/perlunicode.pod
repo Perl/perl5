@@ -1144,7 +1144,7 @@ hexadecimal code points for a range; or a single hexadecimal code point.
 For example, to define a property that covers both the Japanese
 syllabaries (hiragana and katakana), you can define
 
-    sub InKana {
+    sub InHiraganaKatakana {
         return <<END;
     3040\t309F
     30A0\t30FF
@@ -1152,11 +1152,11 @@ syllabaries (hiragana and katakana), you can define
     }
 
 Imagine that the here-doc end marker is at the beginning of the line.
-Now you can use C<\p{InKana}> and C<\P{InKana}>.
+Now you can use C<\p{InHiraganaKatakana}> and C<\P{InHiraganaKatakana}>.
 
 You could also have used the existing block property names:
 
-    sub InKana {
+    sub InHiraganaKatakana {
         return <<'END';
     +utf8::InHiragana
     +utf8::InKatakana
@@ -1167,7 +1167,7 @@ Suppose you wanted to match only the allocated characters,
 not the raw block ranges: in other words, you want to remove
 the unassigned characters:
 
-    sub InKana {
+    sub InHiraganaKatakana {
         return <<'END';
     +utf8::InHiragana
     +utf8::InKatakana
@@ -1177,7 +1177,7 @@ the unassigned characters:
 
 The negation is useful for defining (surprise!) negated classes.
 
-    sub InNotKana {
+    sub InNotHiraganaKatakana {
         return <<'END';
     !utf8::InHiragana
     -utf8::InKatakana
@@ -1186,10 +1186,10 @@ The negation is useful for defining (surprise!) negated classes.
     }
 
 This will match all non-Unicode code points, since every one of them is
-not in Kana.  You can use intersection to exclude these, if desired, as
+not in HiraganaKatakana.  You can use intersection to exclude these, if desired, as
 this modified example shows:
 
-    sub InNotKana {
+    sub InNotHiraganaKatakana {
         return <<'END';
     !utf8::InHiragana
     -utf8::InKatakana
