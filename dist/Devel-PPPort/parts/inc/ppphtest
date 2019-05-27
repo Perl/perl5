@@ -350,7 +350,6 @@ ok($o =~ /^\s*$/);
 ---------------------------- file1.xs -----------------------------------------
 
 #define NEED_newCONSTSUB
-#define NEED_sv_2pv_flags
 #define NEED_PL_parser
 #include "ppport.h"
 
@@ -522,7 +521,6 @@ call_pv();
 #define NEED_eval_pv_GLOBAL
 #define NEED_grok_hex
 #define NEED_newCONSTSUB_GLOBAL
-#define NEED_sv_2pv_flags_GLOBAL
 #include "ppport.h"
 
 newCONSTSUB();
@@ -879,8 +877,6 @@ for (qw(file.xs)) {
 
 ---------------------------- file.xs -----------------------------------------
 
-#define NEED_sv_2pv_flags
-#define NEED_vnewSVpvf
 #define NEED_warner
 #include "ppport.h"
 Perl_croak_nocontext("foo");
@@ -894,8 +890,6 @@ warner("foo");
 
 ---------------------------- file.xsr -----------------------------------------
 
-#define NEED_sv_2pv_flags
-#define NEED_vnewSVpvf
 #define NEED_warner
 #include "ppport.h"
 Perl_croak_nocontext("foo");

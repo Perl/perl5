@@ -60,26 +60,7 @@ __UNDEFINED__ __ASSERT_(statement)  assert(statement),
 __UNDEFINED__ __ASSERT_(statement)
 #endif
 
-#ifndef SvRX
-#if { NEED SvRX }
-
-void *
-SvRX(pTHX_ SV *rv)
-{
-	if (SvROK(rv)) {
-		SV *sv = SvRV(rv);
-		if (SvMAGICAL(sv)) {
-			MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
-			if (mg && mg->mg_obj) {
-				return mg->mg_obj;
-			}
-		}
-	}
-	return 0;
-}
-#endif
-#endif
-
+__UNDEFINED__ SvRX(rv) (SvROK((rv)) ? (SvMAGICAL(SvRV((rv))) ? (mg_find(SvRV((rv)), PERL_MAGIC_qr) ? mg_find(SvRV((rv)), PERL_MAGIC_qr)->mg_obj : NULL) : NULL) : NULL)
 __UNDEFINED__ SvRXOK(sv) (!!SvRX(sv))
 
 #ifndef PERL_UNUSED_DECL
@@ -579,10 +560,6 @@ XS(XS_Devel__PPPort_dAXMARK)
   mPUSHi(iv);
   XSRETURN(1);
 }
-
-=xsinit
-
-#define NEED_SvRX
 
 =xsboot
 
