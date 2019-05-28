@@ -106,7 +106,7 @@ HDR_DOC:
 	if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
 	    my $proto = $1;
 	    $proto = "||$proto" unless $proto =~ /\|/;
-	    my($flags, $ret, $name, @args) = split /\|/, $proto;
+	    my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
 	    my $docs = "";
 DOC:
 	    while (defined($doc = $get_next_line->())) {
