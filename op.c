@@ -1796,6 +1796,10 @@ S_scalar_slice_warning(pTHX_ const OP *o)
 OP *
 Perl_scalar(pTHX_ OP *o)
 {
+    OP * top_op = o;
+
+    while (1) {
+    OP *next_kid = NULL; /* what op (if any) to process next */
     OP *kid;
 
     /* assumes no premature commitment */
@@ -1803,7 +1807,7 @@ Perl_scalar(pTHX_ OP *o)
 	 || (o->op_flags & OPf_WANT)
 	 || o->op_type == OP_RETURN)
     {
-	return o;
+	goto do_next;
     }
 
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
@@ -1827,15 +1831,13 @@ Perl_scalar(pTHX_ OP *o)
     case OP_OR:
     case OP_AND:
     case OP_COND_EXPR:
-	for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
-	    scalar(kid);
+        /* impose scalar context on everything except the condition */
+        next_kid = OpSIBLING(cUNOPo->op_first);
 	break;
 
     default:
-	if (o->op_flags & OPf_KIDS) {
-	    for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
-		scalar(kid);
-	}
+	if (o->op_flags & OPf_KIDS)
+            next_kid = cUNOPo->op_first; /* do all kids */
 	break;
 
     /* the children of these ops are usually a list of statements,
@@ -1911,7 +1913,22 @@ Perl_scalar(pTHX_ OP *o)
 			SVfARG(name), lbrack, SVfARG(keysv), rbrack);
     }
     } /* switch */
-    return o;
+
+    /* If next_kid is set, someone in the code above wanted us to process
+     * that kid and all its remaining siblings.  Otherwise, work our way
+     * back up the tree */
+  do_next:
+    while (!next_kid) {
+        if (o == top_op)
+            return top_op; /* at top; no parents/siblings to try */
+        if (OpHAS_SIBLING(o))
+            next_kid = o->op_sibparent;
+        else
+            o = o->op_sibparent; /*try parent's next sibling */
+
+    }
+    o = next_kid;
+    } /* while */
 }
 
 
