@@ -126,11 +126,11 @@ DOC:
 	    my ($embed_where, $inline_where);
 	    my ($embed_may_change, $inline_may_change);
 
-	    my $docref = delete $funcflags{$name};
-	    if ($docref and %$docref) {
-		$embed_where = $docref->{flags} =~ /A/ ? 'api' : 'guts';
-		$embed_may_change = $docref->{flags} =~ /M/;
-                $flags .= 'D' if $docref->{flags} =~ /D/;
+	    my $embed_docref = delete $funcflags{$name};
+	    if ($embed_docref and %$embed_docref) {
+		$embed_where = $embed_docref->{flags} =~ /A/ ? 'api' : 'guts';
+		$embed_may_change = $embed_docref->{flags} =~ /M/;
+                $flags .= 'D' if $embed_docref->{flags} =~ /D/;
 	    } else {
 		$missing{$name} = $file;
 	    }
@@ -158,8 +158,8 @@ DOC:
 	    } else {
 		$inline_where = $embed_where;
 		$flags .= 'x' if $embed_may_change;
-		@args = @{$docref->{args}};
-		$ret = $docref->{retval};
+		@args = @{$embed_docref->{args}};
+		$ret = $embed_docref->{retval};
 	    }
 
 	    if (exists $docs{$inline_where}{$curheader}{$name}) {
