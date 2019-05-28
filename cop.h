@@ -1098,17 +1098,17 @@ typedef struct stackinfo PERL_SI;
 /*
 =head1 Multicall Functions
 
-=for apidoc Ams||dMULTICALL
+=for apidoc Amns||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Ams||PUSH_MULTICALL
+=for apidoc Amns||PUSH_MULTICALL
 Opening bracket for a lightweight callback.
 See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Ams||MULTICALL
+=for apidoc Amns||MULTICALL
 Make a lightweight callback.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Ams||POP_MULTICALL
+=for apidoc Amns||POP_MULTICALL
 Closing bracket for a lightweight callback.
 See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
