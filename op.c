@@ -2382,7 +2382,7 @@ Perl_list(pTHX_ OP *o)
             break;
 
         /* the children of these ops are usually a list of statements,
-         * except the leaves, whose first child is is corresponding enter
+         * except the leaves, whose first child is a corresponding enter
          */
         case OP_SCOPE:
         case OP_LINESEQ:
