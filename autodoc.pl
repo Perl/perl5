@@ -213,55 +213,55 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 	# nothing
     } else {
         if ($flags =~ /s/) { # semicolon ("dTHR;")
-	print $fh "\t\t$name;";
-    } elsif ($flags =~ /n/) { # no args
-	print $fh "\t$ret\t$name";
-    } else { # full usage
-	my $p            = $flags =~ /o/; # no #define foo Perl_foo
-	my $n            = "Perl_"x$p . $name;
-	my $large_ret    = length $ret > 7;
-	my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
-	                  +8+($large_ret ? 1 + length $ret : 8)
-	                  +length($n) + 1;
-	my $indent;
-	print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
-	my $long_args;
-	for (@args) {
-	    if ($indent_size + 2 + length > 79) {
-		$long_args=1;
-		$indent_size -= length($n) - 3;
-		last;
-	    }
-	}
-	my $args = '';
-	if ($p) {
-	    $args = @args ? "pTHX_ " : "pTHX";
-	    if ($long_args) { print $fh $args; $args = '' }
-	}
-	$long_args and print $fh "\n";
-	my $first = !$long_args;
-	while () {
-	    if (!@args or
-	         length $args
-	         && $indent_size + 3 + length($args[0]) + length $args > 79
-	    ) {
-		print $fh
-		  $first ? '' : (
-		    $indent //=
-		       "\t".($large_ret ? " " x (1+length $ret) : "\t")
-		      ." "x($long_args ? 4 : 1 + length $n)
-		  ),
-		  $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
-		$args = $first = '';
-	    }
-	    @args or last;
-	    $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
-	           . shift @args;
-	}
-	if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
-	print $fh ")";
-    }
-    print $fh "\n\n";
+            print $fh "\t\t$name;";
+        } elsif ($flags =~ /n/) { # no args
+            print $fh "\t$ret\t$name";
+        } else { # full usage
+            my $p            = $flags =~ /o/; # no #define foo Perl_foo
+            my $n            = "Perl_"x$p . $name;
+            my $large_ret    = length $ret > 7;
+            my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
+                            +8+($large_ret ? 1 + length $ret : 8)
+                            +length($n) + 1;
+            my $indent;
+            print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
+            my $long_args;
+            for (@args) {
+                if ($indent_size + 2 + length > 79) {
+                    $long_args=1;
+                    $indent_size -= length($n) - 3;
+                    last;
+                }
+            }
+            my $args = '';
+            if ($p) {
+                $args = @args ? "pTHX_ " : "pTHX";
+                if ($long_args) { print $fh $args; $args = '' }
+            }
+            $long_args and print $fh "\n";
+            my $first = !$long_args;
+            while () {
+                if (!@args or
+                    length $args
+                    && $indent_size + 3 + length($args[0]) + length $args > 79
+                ) {
+                    print $fh
+                    $first ? '' : (
+                        $indent //=
+                        "\t".($large_ret ? " " x (1+length $ret) : "\t")
+                        ." "x($long_args ? 4 : 1 + length $n)
+                    ),
+                    $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
+                    $args = $first = '';
+                }
+                @args or last;
+                $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
+                    . shift @args;
+            }
+            if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
+            print $fh ")";
+        }
+        print $fh "\n\n";
     }
     print $fh "=for hackers\nFound in file $file\n\n";
 }
