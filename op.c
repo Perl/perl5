@@ -2304,113 +2304,113 @@ Perl_list(pTHX_ OP *o)
     OP * top_op = o;
 
     while (1) {
-    OP *next_kid = NULL; /* what op (if any) to process next */
+        OP *next_kid = NULL; /* what op (if any) to process next */
 
-    OP *kid;
+        OP *kid;
 
-    /* assumes no premature commitment */
-    if (!o || (o->op_flags & OPf_WANT)
-	 || (PL_parser && PL_parser->error_count)
-	 || o->op_type == OP_RETURN)
-    {
-	goto do_next;
-    }
+        /* assumes no premature commitment */
+        if (!o || (o->op_flags & OPf_WANT)
+             || (PL_parser && PL_parser->error_count)
+             || o->op_type == OP_RETURN)
+        {
+            goto do_next;
+        }
 
-    if ((o->op_private & OPpTARGET_MY)
-	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
-    {
-	goto do_next;				/* As if inside SASSIGN */
-    }
+        if ((o->op_private & OPpTARGET_MY)
+            && (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
+        {
+            goto do_next;				/* As if inside SASSIGN */
+        }
 
-    o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
+        o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
 
-    switch (o->op_type) {
-    case OP_REPEAT:
-	if (o->op_private & OPpREPEAT_DOLIST
-	 && !(o->op_flags & OPf_STACKED))
-	{
-	    list(cBINOPo->op_first);
-	    kid = cBINOPo->op_last;
-            /* optimise away (.....) x 1 */
-	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)
-	     && SvIVX(kSVOP_sv) == 1)
-	    {
-		op_null(o); /* repeat */
-		op_null(cUNOPx(cBINOPo->op_first)->op_first);/* pushmark */
-		/* const (rhs): */
-		op_free(op_sibling_splice(o, cBINOPo->op_first, 1, NULL));
-	    }
-	}
-	break;
+        switch (o->op_type) {
+        case OP_REPEAT:
+            if (o->op_private & OPpREPEAT_DOLIST
+             && !(o->op_flags & OPf_STACKED))
+            {
+                list(cBINOPo->op_first);
+                kid = cBINOPo->op_last;
+                /* optimise away (.....) x 1 */
+                if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)
+                 && SvIVX(kSVOP_sv) == 1)
+                {
+                    op_null(o); /* repeat */
+                    op_null(cUNOPx(cBINOPo->op_first)->op_first);/* pushmark */
+                    /* const (rhs): */
+                    op_free(op_sibling_splice(o, cBINOPo->op_first, 1, NULL));
+                }
+            }
+            break;
 
-    case OP_OR:
-    case OP_AND:
-    case OP_COND_EXPR:
-        /* impose list context on everything except the condition */
-        next_kid = OpSIBLING(cUNOPo->op_first);
-	break;
+        case OP_OR:
+        case OP_AND:
+        case OP_COND_EXPR:
+            /* impose list context on everything except the condition */
+            next_kid = OpSIBLING(cUNOPo->op_first);
+            break;
 
-    default:
-	if (!(o->op_flags & OPf_KIDS))
-	    break;
-        /* possibly flatten 1..10 into a constant array */
-	if (!o->op_next && cUNOPo->op_first->op_type == OP_FLOP) {
-	    list(cBINOPo->op_first);
-	    gen_constant_list(o);
-	    goto do_next;
-	}
-        next_kid = cUNOPo->op_first; /* do all kids */
-	break;
-
-    case OP_LIST:
-	if (cLISTOPo->op_first->op_type == OP_PUSHMARK) {
-	    op_null(cUNOPo->op_first); /* NULL the pushmark */
-	    op_null(o); /* NULL the list */
-	}
-	if (o->op_flags & OPf_KIDS)
+        default:
+            if (!(o->op_flags & OPf_KIDS))
+                break;
+            /* possibly flatten 1..10 into a constant array */
+            if (!o->op_next && cUNOPo->op_first->op_type == OP_FLOP) {
+                list(cBINOPo->op_first);
+                gen_constant_list(o);
+                goto do_next;
+            }
             next_kid = cUNOPo->op_first; /* do all kids */
-	break;
+            break;
 
-    /* the children of these ops are usually a list of statements,
-     * except the leaves, whose first child is is corresponding enter
-     */
-    case OP_SCOPE:
-    case OP_LINESEQ:
-	kid = cLISTOPo->op_first;
-	goto do_kids;
-    case OP_LEAVE:
-    case OP_LEAVETRY:
-	kid = cLISTOPo->op_first;
-	list(kid);
-	kid = OpSIBLING(kid);
-    do_kids:
-	while (kid) {
-	    OP *sib = OpSIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHEN)
-		scalarvoid(kid);
-	    else
-		list(kid);
-	    kid = sib;
-	}
-	PL_curcop = &PL_compiling;
-	break;
+        case OP_LIST:
+            if (cLISTOPo->op_first->op_type == OP_PUSHMARK) {
+                op_null(cUNOPo->op_first); /* NULL the pushmark */
+                op_null(o); /* NULL the list */
+            }
+            if (o->op_flags & OPf_KIDS)
+                next_kid = cUNOPo->op_first; /* do all kids */
+            break;
 
-    }
+        /* the children of these ops are usually a list of statements,
+         * except the leaves, whose first child is is corresponding enter
+         */
+        case OP_SCOPE:
+        case OP_LINESEQ:
+            kid = cLISTOPo->op_first;
+            goto do_kids;
+        case OP_LEAVE:
+        case OP_LEAVETRY:
+            kid = cLISTOPo->op_first;
+            list(kid);
+            kid = OpSIBLING(kid);
+        do_kids:
+            while (kid) {
+                OP *sib = OpSIBLING(kid);
+                if (sib && kid->op_type != OP_LEAVEWHEN)
+                    scalarvoid(kid);
+                else
+                    list(kid);
+                kid = sib;
+            }
+            PL_curcop = &PL_compiling;
+            break;
 
-    /* If next_kid is set, someone in the code above wanted us to process
-     * that kid and all its remaining siblings.  Otherwise, work our way
-     * back up the tree */
-  do_next:
-    while (!next_kid) {
-        if (o == top_op)
-            return top_op; /* at top; no parents/siblings to try */
-        if (OpHAS_SIBLING(o))
-            next_kid = o->op_sibparent;
-        else
-            o = o->op_sibparent; /*try parent's next sibling */
+        }
 
-    }
-    o = next_kid;
+        /* If next_kid is set, someone in the code above wanted us to process
+         * that kid and all its remaining siblings.  Otherwise, work our way
+         * back up the tree */
+      do_next:
+        while (!next_kid) {
+            if (o == top_op)
+                return top_op; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o))
+                next_kid = o->op_sibparent;
+            else
+                o = o->op_sibparent; /*try parent's next sibling */
+
+        }
+        o = next_kid;
     } /* while */
 }
 
