@@ -7925,8 +7925,15 @@ Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 	    list(force_list(listval,   1)) );
 }
 
+#define ASSIGN_SCALAR 0
 #define ASSIGN_LIST   1
 #define ASSIGN_REF    2
+
+/* given the optree o on the LHS of an assignment, determine whether its:
+ *  ASSIGN_SCALAR   $x  = ...
+ *  ASSIGN_LIST    ($x) = ...
+ *  ASSIGN_REF     \$x  = ...
+ */
 
 STATIC I32
 S_assignment_type(pTHX_ const OP *o)
@@ -7936,7 +7943,7 @@ S_assignment_type(pTHX_ const OP *o)
     U8 ret;
 
     if (!o)
-	return TRUE;
+	return ASSIGN_LIST;
 
     if (o->op_type == OP_SREFGEN)
     {
@@ -7953,7 +7960,7 @@ S_assignment_type(pTHX_ const OP *o)
 	    o = cUNOPo->op_first;
 	flags = o->op_flags;
 	type = o->op_type;
-	ret = 0;
+	ret = ASSIGN_SCALAR;
     }
 
     if (type == OP_COND_EXPR) {
@@ -7965,7 +7972,7 @@ S_assignment_type(pTHX_ const OP *o)
 	    return ASSIGN_LIST;
 	if ((t == ASSIGN_LIST) ^ (f == ASSIGN_LIST))
 	    yyerror("Assignment to both a list and a scalar");
-	return FALSE;
+	return ASSIGN_SCALAR;
     }
 
     if (type == OP_LIST &&
@@ -7977,10 +7984,10 @@ S_assignment_type(pTHX_ const OP *o)
 	type == OP_RV2AV || type == OP_RV2HV ||
 	type == OP_ASLICE || type == OP_HSLICE ||
         type == OP_KVASLICE || type == OP_KVHSLICE || type == OP_REFGEN)
-	return TRUE;
+	return ASSIGN_LIST;
 
     if (type == OP_PADAV || type == OP_PADHV)
-	return TRUE;
+	return ASSIGN_LIST;
 
     if (type == OP_RV2SV)
 	return ret;
