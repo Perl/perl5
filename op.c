@@ -1799,135 +1799,135 @@ Perl_scalar(pTHX_ OP *o)
     OP * top_op = o;
 
     while (1) {
-    OP *next_kid = NULL; /* what op (if any) to process next */
-    OP *kid;
+        OP *next_kid = NULL; /* what op (if any) to process next */
+        OP *kid;
 
-    /* assumes no premature commitment */
-    if (!o || (PL_parser && PL_parser->error_count)
-	 || (o->op_flags & OPf_WANT)
-	 || o->op_type == OP_RETURN)
-    {
-	goto do_next;
-    }
+        /* assumes no premature commitment */
+        if (!o || (PL_parser && PL_parser->error_count)
+             || (o->op_flags & OPf_WANT)
+             || o->op_type == OP_RETURN)
+        {
+            goto do_next;
+        }
 
-    o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
+        o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
 
-    switch (o->op_type) {
-    case OP_REPEAT:
-	scalar(cBINOPo->op_first);
-        /* convert what initially looked like a list repeat into a
-         * scalar repeat, e.g. $s = (1) x $n
+        switch (o->op_type) {
+        case OP_REPEAT:
+            scalar(cBINOPo->op_first);
+            /* convert what initially looked like a list repeat into a
+             * scalar repeat, e.g. $s = (1) x $n
+             */
+            if (o->op_private & OPpREPEAT_DOLIST) {
+                kid = cLISTOPx(cUNOPo->op_first)->op_first;
+                assert(kid->op_type == OP_PUSHMARK);
+                if (OpHAS_SIBLING(kid) && !OpHAS_SIBLING(OpSIBLING(kid))) {
+                    op_null(cLISTOPx(cUNOPo->op_first)->op_first);
+                    o->op_private &=~ OPpREPEAT_DOLIST;
+                }
+            }
+            break;
+
+        case OP_OR:
+        case OP_AND:
+        case OP_COND_EXPR:
+            /* impose scalar context on everything except the condition */
+            next_kid = OpSIBLING(cUNOPo->op_first);
+            break;
+
+        default:
+            if (o->op_flags & OPf_KIDS)
+                next_kid = cUNOPo->op_first; /* do all kids */
+            break;
+
+        /* the children of these ops are usually a list of statements,
+         * except the leaves, whose first child is a corresponding enter
          */
-	if (o->op_private & OPpREPEAT_DOLIST) {
-	    kid = cLISTOPx(cUNOPo->op_first)->op_first;
-	    assert(kid->op_type == OP_PUSHMARK);
-	    if (OpHAS_SIBLING(kid) && !OpHAS_SIBLING(OpSIBLING(kid))) {
-		op_null(cLISTOPx(cUNOPo->op_first)->op_first);
-		o->op_private &=~ OPpREPEAT_DOLIST;
-	    }
-	}
-	break;
+        case OP_SCOPE:
+        case OP_LINESEQ:
+        case OP_LIST:
+            kid = cLISTOPo->op_first;
+            goto do_kids;
+        case OP_LEAVE:
+        case OP_LEAVETRY:
+            kid = cLISTOPo->op_first;
+            scalar(kid);
+            kid = OpSIBLING(kid);
+        do_kids:
+            while (kid) {
+                OP *sib = OpSIBLING(kid);
+                if (sib && kid->op_type != OP_LEAVEWHEN
+                 && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
+                    || (  sib->op_targ != OP_NEXTSTATE
+                       && sib->op_targ != OP_DBSTATE  )))
+                    scalarvoid(kid);
+                else
+                    scalar(kid);
+                kid = sib;
+            }
+            PL_curcop = &PL_compiling;
+            break;
 
-    case OP_OR:
-    case OP_AND:
-    case OP_COND_EXPR:
-        /* impose scalar context on everything except the condition */
-        next_kid = OpSIBLING(cUNOPo->op_first);
-	break;
+        case OP_SORT:
+            Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
+            break;
 
-    default:
-	if (o->op_flags & OPf_KIDS)
-            next_kid = cUNOPo->op_first; /* do all kids */
-	break;
+        case OP_KVHSLICE:
+        case OP_KVASLICE:
+        {
+            /* Warn about scalar context */
+            const char lbrack = o->op_type == OP_KVHSLICE ? '{' : '[';
+            const char rbrack = o->op_type == OP_KVHSLICE ? '}' : ']';
+            SV *name;
+            SV *keysv;
+            const char *key = NULL;
 
-    /* the children of these ops are usually a list of statements,
-     * except the leaves, whose first child is a corresponding enter
-     */
-    case OP_SCOPE:
-    case OP_LINESEQ:
-    case OP_LIST:
-	kid = cLISTOPo->op_first;
-	goto do_kids;
-    case OP_LEAVE:
-    case OP_LEAVETRY:
-	kid = cLISTOPo->op_first;
-	scalar(kid);
-	kid = OpSIBLING(kid);
-    do_kids:
-	while (kid) {
-	    OP *sib = OpSIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHEN
-	     && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
-		|| (  sib->op_targ != OP_NEXTSTATE
-		   && sib->op_targ != OP_DBSTATE  )))
-		scalarvoid(kid);
-	    else
-		scalar(kid);
-	    kid = sib;
-	}
-	PL_curcop = &PL_compiling;
-	break;
+            /* This warning can be nonsensical when there is a syntax error. */
+            if (PL_parser && PL_parser->error_count)
+                break;
 
-    case OP_SORT:
-	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
-	break;
+            if (!ckWARN(WARN_SYNTAX)) break;
 
-    case OP_KVHSLICE:
-    case OP_KVASLICE:
-    {
-	/* Warn about scalar context */
-	const char lbrack = o->op_type == OP_KVHSLICE ? '{' : '[';
-	const char rbrack = o->op_type == OP_KVHSLICE ? '}' : ']';
-	SV *name;
-	SV *keysv;
-	const char *key = NULL;
+            kid = cLISTOPo->op_first;
+            kid = OpSIBLING(kid); /* get past pushmark */
+            assert(OpSIBLING(kid));
+            name = S_op_varname(aTHX_ OpSIBLING(kid));
+            if (!name) /* XS module fiddling with the op tree */
+                break;
+            S_op_pretty(aTHX_ kid, &keysv, &key);
+            assert(SvPOK(name));
+            sv_chop(name,SvPVX(name)+1);
+            if (key)
+      /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                           "%%%" SVf "%c%s%c in scalar context better written "
+                           "as $%" SVf "%c%s%c",
+                            SVfARG(name), lbrack, key, rbrack, SVfARG(name),
+                            lbrack, key, rbrack);
+            else
+      /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                           "%%%" SVf "%c%" SVf "%c in scalar context better "
+                           "written as $%" SVf "%c%" SVf "%c",
+                            SVfARG(name), lbrack, SVfARG(keysv), rbrack,
+                            SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+        }
+        } /* switch */
 
-	/* This warning can be nonsensical when there is a syntax error. */
-	if (PL_parser && PL_parser->error_count)
-	    break;
+        /* If next_kid is set, someone in the code above wanted us to process
+         * that kid and all its remaining siblings.  Otherwise, work our way
+         * back up the tree */
+      do_next:
+        while (!next_kid) {
+            if (o == top_op)
+                return top_op; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o))
+                next_kid = o->op_sibparent;
+            else
+                o = o->op_sibparent; /*try parent's next sibling */
 
-	if (!ckWARN(WARN_SYNTAX)) break;
-
-	kid = cLISTOPo->op_first;
-	kid = OpSIBLING(kid); /* get past pushmark */
-	assert(OpSIBLING(kid));
-	name = S_op_varname(aTHX_ OpSIBLING(kid));
-	if (!name) /* XS module fiddling with the op tree */
-	    break;
-	S_op_pretty(aTHX_ kid, &keysv, &key);
-	assert(SvPOK(name));
-	sv_chop(name,SvPVX(name)+1);
-	if (key)
-  /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		       "%%%" SVf "%c%s%c in scalar context better written "
-		       "as $%" SVf "%c%s%c",
-			SVfARG(name), lbrack, key, rbrack, SVfARG(name),
-			lbrack, key, rbrack);
-	else
-  /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		       "%%%" SVf "%c%" SVf "%c in scalar context better "
-		       "written as $%" SVf "%c%" SVf "%c",
-			SVfARG(name), lbrack, SVfARG(keysv), rbrack,
-			SVfARG(name), lbrack, SVfARG(keysv), rbrack);
-    }
-    } /* switch */
-
-    /* If next_kid is set, someone in the code above wanted us to process
-     * that kid and all its remaining siblings.  Otherwise, work our way
-     * back up the tree */
-  do_next:
-    while (!next_kid) {
-        if (o == top_op)
-            return top_op; /* at top; no parents/siblings to try */
-        if (OpHAS_SIBLING(o))
-            next_kid = o->op_sibparent;
-        else
-            o = o->op_sibparent; /*try parent's next sibling */
-
-    }
-    o = next_kid;
+        }
+        o = next_kid;
     } /* while */
 }
 
