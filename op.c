@@ -2365,6 +2365,13 @@ Perl_list(pTHX_ OP *o)
 	listkids(o);
 	break;
 
+    /* the children of these ops are usually a list of statements,
+     * except the leaves, whose first child is is corresponding enter
+     */
+    case OP_SCOPE:
+    case OP_LINESEQ:
+	kid = cLISTOPo->op_first;
+	goto do_kids;
     case OP_LEAVE:
     case OP_LEAVETRY:
 	kid = cLISTOPo->op_first;
@@ -2382,10 +2389,6 @@ Perl_list(pTHX_ OP *o)
 	PL_curcop = &PL_compiling;
 	break;
 
-    case OP_SCOPE:
-    case OP_LINESEQ:
-	kid = cLISTOPo->op_first;
-	goto do_kids;
     }
 
     return o;
