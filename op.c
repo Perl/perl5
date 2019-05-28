@@ -2358,11 +2358,11 @@ Perl_list(pTHX_ OP *o)
 	break;
 
     case OP_LIST:
-	listkids(o);
 	if (cLISTOPo->op_first->op_type == OP_PUSHMARK) {
 	    op_null(cUNOPo->op_first); /* NULL the pushmark */
 	    op_null(o); /* NULL the list */
 	}
+	listkids(o);
 	break;
 
     case OP_LEAVE:
