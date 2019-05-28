@@ -8354,6 +8354,12 @@ Perl_newLOGOP(pTHX_ I32 type, I32 flags, OP *first, OP *other)
     return new_logop(type, flags, &first, &other);
 }
 
+
+/* See if the optree o contains a single OP_CONST (plus possibly
+ * surrounding enter/nextstate/null etc). If so, return it, else return
+ * NULL.
+ */
+
 STATIC OP *
 S_search_const(pTHX_ OP *o)
 {
@@ -8374,6 +8380,7 @@ S_search_const(pTHX_ OP *o)
 	    if (!(o->op_flags & OPf_KIDS))
 		return NULL;
 	    kid = cLISTOPo->op_first;
+
 	    do {
 		switch (kid->op_type) {
 		    case OP_ENTER:
@@ -8387,6 +8394,7 @@ S_search_const(pTHX_ OP *o)
 			goto last;
 		}
 	    } while (kid);
+
 	    if (!kid)
 		kid = cLISTOPo->op_last;
           last:
@@ -8396,6 +8404,7 @@ S_search_const(pTHX_ OP *o)
 
     return NULL;
 }
+
 
 STATIC OP *
 S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
