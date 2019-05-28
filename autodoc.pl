@@ -211,10 +211,11 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 
     if ($flags =~ /U/) { # no usage
 	# nothing
-    } elsif ($flags =~ /s/) { # semicolon ("dTHR;")
-	print $fh "\t\t$name;\n\n";
+    } else {
+        if ($flags =~ /s/) { # semicolon ("dTHR;")
+	print $fh "\t\t$name;";
     } elsif ($flags =~ /n/) { # no args
-	print $fh "\t$ret\t$name\n\n";
+	print $fh "\t$ret\t$name";
     } else { # full usage
 	my $p            = $flags =~ /o/; # no #define foo Perl_foo
 	my $n            = "Perl_"x$p . $name;
@@ -258,7 +259,9 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 	           . shift @args;
 	}
 	if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
-	print $fh ")\n\n";
+	print $fh ")";
+    }
+    print $fh "\n\n";
     }
     print $fh "=for hackers\nFound in file $file\n\n";
 }
