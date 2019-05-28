@@ -1789,6 +1789,10 @@ S_scalar_slice_warning(pTHX_ const OP *o)
 		    SVfARG(name), lbrack, SVfARG(keysv), rbrack);
 }
 
+
+
+/* apply scalar context to the o subtree */
+
 OP *
 Perl_scalar(pTHX_ OP *o)
 {
@@ -1807,6 +1811,9 @@ Perl_scalar(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_REPEAT:
 	scalar(cBINOPo->op_first);
+        /* convert what initially looked like a list repeat into a
+         * scalar repeat, e.g. $s = (1) x $n
+         */
 	if (o->op_private & OPpREPEAT_DOLIST) {
 	    kid = cLISTOPx(cUNOPo->op_first)->op_first;
 	    assert(kid->op_type == OP_PUSHMARK);
@@ -1816,13 +1823,14 @@ Perl_scalar(pTHX_ OP *o)
 	    }
 	}
 	break;
+
     case OP_OR:
     case OP_AND:
     case OP_COND_EXPR:
 	for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
 	    scalar(kid);
 	break;
-	/* FALLTHROUGH */
+
     case OP_SPLIT:
     case OP_MATCH:
     case OP_QR:
@@ -1834,6 +1842,7 @@ Perl_scalar(pTHX_ OP *o)
 		scalar(kid);
 	}
 	break;
+
     case OP_LEAVE:
     case OP_LEAVETRY:
 	kid = cLISTOPo->op_first;
@@ -1858,9 +1867,11 @@ Perl_scalar(pTHX_ OP *o)
     case OP_LIST:
 	kid = cLISTOPo->op_first;
 	goto do_kids;
+
     case OP_SORT:
 	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
 	break;
+
     case OP_KVHSLICE:
     case OP_KVASLICE:
     {
@@ -1901,9 +1912,10 @@ Perl_scalar(pTHX_ OP *o)
 			SVfARG(name), lbrack, SVfARG(keysv), rbrack,
 			SVfARG(name), lbrack, SVfARG(keysv), rbrack);
     }
-    }
+    } /* switch */
     return o;
 }
+
 
 OP *
 Perl_scalarvoid(pTHX_ OP *arg)
