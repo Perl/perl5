@@ -8365,12 +8365,15 @@ S_search_const(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_SEARCH_CONST;
 
+  redo:
     switch (o->op_type) {
 	case OP_CONST:
 	    return o;
 	case OP_NULL:
-	    if (o->op_flags & OPf_KIDS)
-		return search_const(cUNOPo->op_first);
+	    if (o->op_flags & OPf_KIDS) {
+		o = cUNOPo->op_first;
+                goto redo;
+            }
 	    break;
 	case OP_LEAVE:
 	case OP_SCOPE:
@@ -8398,7 +8401,8 @@ S_search_const(pTHX_ OP *o)
 	    if (!kid)
 		kid = cLISTOPo->op_last;
           last:
-	    return search_const(kid);
+	     o = kid;
+             goto redo;
 	}
     }
 
