@@ -1831,11 +1831,6 @@ Perl_scalar(pTHX_ OP *o)
 	    scalar(kid);
 	break;
 
-    case OP_SPLIT:
-    case OP_MATCH:
-    case OP_QR:
-    case OP_SUBST:
-    case OP_NULL:
     default:
 	if (o->op_flags & OPf_KIDS) {
 	    for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
