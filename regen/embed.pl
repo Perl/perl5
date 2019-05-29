@@ -81,12 +81,12 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabDdEfiMmnOoPpRrsUWXx] ) /x) {
+        if ($flags =~ / ( [^AabDdEfiMmTOoPpRrsUWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
         my $has_depth = ( $flags =~ /W/ );
-	my $has_context = ( $flags !~ /n/ );
+	my $has_context = ( $flags !~ /T/ );
 	my $never_returns = ( $flags =~ /r/ );
 	my $binarycompat = ( $flags =~ /b/ );
 	my $commented_out = ( ! $binarycompat && $flags =~ /m/ );
@@ -304,7 +304,7 @@ sub embed_h {
 	my ($flags,$retval,$func,@args) = @$_;
 	unless ($flags =~ /[om]/) {
 	    my $args = scalar @args;
-	    if ($flags =~ /n/) {
+	    if ($flags =~ /T/) {
 		my $full_name = full_name($func, $flags);
 		next if $full_name eq $func;	# Don't output a no-op.
 		$ret = hide($func, $full_name);
