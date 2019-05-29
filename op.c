@@ -1962,6 +1962,8 @@ Perl_scalar(pTHX_ OP *o)
 }
 
 
+/* apply void context to the optree arg */
+
 OP *
 Perl_scalarvoid(pTHX_ OP *arg)
 {
