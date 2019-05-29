@@ -3157,15 +3157,15 @@ XpoT	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
 				|NN const char * file| ...
 Xp	|void	|xs_boot_epilog	|const I32 ax
 #ifndef HAS_STRLCAT
-ApTod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
+ApTd	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifndef HAS_STRLCPY
-ApTod	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
+ApTd	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifndef HAS_STRNLEN
-ApTod	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
+ApTd	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
 #endif
 
 #ifndef HAS_MKOSTEMP

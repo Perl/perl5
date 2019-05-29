@@ -944,6 +944,15 @@
 #if !defined(EBCDIC)
 #define _variant_byte_number	S__variant_byte_number
 #endif
+#if !defined(HAS_STRLCAT)
+#define my_strlcat		Perl_my_strlcat
+#endif
+#if !defined(HAS_STRLCPY)
+#define my_strlcpy		Perl_my_strlcpy
+#endif
+#if !defined(HAS_STRNLEN)
+#define my_strnlen		Perl_my_strnlen
+#endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)
 #endif
