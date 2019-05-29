@@ -468,7 +468,7 @@ _EOE_
 
 # List of non-static internal functions
 my @missing_guts =
- grep $funcflags{$_}{flags} !~ /[As]/ && !$docs{guts}{$_}, keys %funcflags;
+ grep $funcflags{$_}{flags} !~ /[AS]/ && !$docs{guts}{$_}, keys %funcflags;
 
 output('perlintern', <<'END', $docs{guts}, \@missing_guts, <<'END');
 |=head1 NAME
