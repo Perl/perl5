@@ -22,7 +22,7 @@
 :
 :   A  Available fully everywhere (usually part of the public API):
 :
-:         add entry to the list of exported symbols (unless x or m);
+:         add entry to the list of exported symbols (unless e or m);
 :         any doc entry goes in perlapi.pod rather than perlintern.pod.  If no
 :	     documentation is furnished for this function, and M is also
 :	     specified, the function is not listed as part of the public API.
@@ -84,6 +84,9 @@
 :      To be usable from dynamically loaded extensions, either:
 :	  1) must be static to its containing file ("i" or "s" flag); or
 :         2) be combined with the "X" flag.
+:
+:   e  Not exported
+:         suppress entry in the list of exported symbols
 :
 :   f  Function takes a format string. If the function name =~ qr/strftime/
 :      then its assumed to take a strftime-style format string as 1st arg;
@@ -185,15 +188,13 @@
 :
 :   X  Explicitly exported:
 :
-:         add entry to the list of exported symbols, unless x or m
+:         add entry to the list of exported symbols, unless e or m
 :
 :      This is often used for private functions that are used by public
 :      macros.  In those cases the macros must use the long form of the
 :      name (Perl_blah(aTHX_ ...)).
 :
-:   x  Not exported
 :
-:         suppress entry in the list of exported symbols
 :
 : (see also L<perlguts/Internal Functions> for those flags.)
 :
@@ -286,7 +287,7 @@ ApdR	|SSize_t|av_len		|NN AV *av
 ApdR	|AV*	|av_make	|SSize_t size|NN SV **strp
 p	|SV*	|av_nonelem	|NN AV *av|SSize_t ix
 Apd	|SV*	|av_pop		|NN AV *av
-ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
+ApdoeM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NN AV *av|NN SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
@@ -295,7 +296,7 @@ Apd	|SV**	|av_store	|NN AV *av|SSize_t key|NULLOK SV *val
 AidR	|SSize_t|av_top_index	|NN AV *av
 AmpdR	|SSize_t|av_tindex	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
-ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
+ApdoeM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV *av|SSize_t num
 Apo	|SV**	|av_arylen_p	|NN AV *av
 Apo	|IV*	|av_iter_p	|NN AV *av
@@ -342,9 +343,9 @@ ATprd	|void	|croak_xs_usage	|NN const CV *const cv \
 Tpr	|void	|croak_no_mem
 TprX	|void	|croak_popstack
 fTrp	|void	|croak_caller|NULLOK const char* pat|...
-fTprx	|void	|noperl_die|NN const char* pat|...
+fTpre	|void	|noperl_die|NN const char* pat|...
 #if defined(WIN32)
-Torx	|void	|win32_croak_not_implemented|NN const char * fname
+Tore	|void	|win32_croak_not_implemented|NN const char * fname
 #endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 AfTrp	|void	|croak_nocontext|NULLOK const char* pat|...
@@ -578,7 +579,7 @@ S	|OP*	|gen_constant_list|NULLOK OP* o
 p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 #endif
 : Used in pp_ctl.c and pp_hot.c
-pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
+poe	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
 Ap	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
@@ -627,7 +628,7 @@ Abp	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
 Apmb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 : Used in scope.c
-pMox	|GP *	|newGP		|NN GV *const gv
+pMoe	|GP *	|newGP		|NN GV *const gv
 pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
 poX	|GV *	|cvgv_from_hek	|NN CV* cv
 pX	|void	|cvstash_set	|NN CV* cv|NULLOK HV* stash
@@ -639,7 +640,7 @@ Ap	|void	|gv_init_pv	|NN GV* gv|NULLOK HV* stash|NN const char* name \
 Ap	|void	|gv_init_pvn	|NN GV* gv|NULLOK HV* stash|NN const char* name \
                                 |STRLEN len|U32 flags
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
-px	|GV *	|gv_override	|NN const char * const name \
+pe	|GV *	|gv_override	|NN const char * const name \
 				|const STRLEN len
 XMpd	|void	|gv_try_downgrade|NN GV* gv
 p	|void	|gv_setref	|NN SV *const dstr|NN SV *const sstr
@@ -1122,7 +1123,7 @@ ATp	|void	|atfork_unlock
 Apmb	|I32	|my_lstat
 pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
 #if ! defined(HAS_MEMRCHR) && (defined(PERL_CORE) || defined(PERL_EXT))
-ExiT	|void *	|my_memrchr	|NN const char * s|const char c|const STRLEN len
+EeiT	|void *	|my_memrchr	|NN const char * s|const char c|const STRLEN len
 #endif
 #if !defined(PERL_IMPLICIT_SYS)
 Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
@@ -1509,7 +1510,7 @@ Ap	|char*	|scan_num	|NN const char* s|NN YYSTYPE *lvalp
 Apd	|NV	|scan_oct	|NN const char* start|STRLEN len|NN STRLEN* retlen
 AMpd	|OP*	|op_scope	|NULLOK OP* o
 : Only used by perl.c/miniperl.c, but defined in caretx.c
-px	|void	|set_caret_X
+pe	|void	|set_caret_X
 Apd	|void	|setdefout	|NN GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|SSize_t len|U32 hash
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
@@ -1986,7 +1987,7 @@ ATpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 ATpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 ATpR	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 ATp	|Free_t	|safesysfree	|Malloc_t where
-AirTx	|void	|croak_memory_wrap
+AirTe	|void	|croak_memory_wrap
 #if defined(PERL_GLOBAL_STRUCT)
 Ap	|struct perl_vars *|GetVars
 Ap	|struct perl_vars*|init_global_struct
@@ -2225,13 +2226,13 @@ XpR	|void*	|Slab_Alloc	|size_t sz
 Xp	|void	|Slab_Free	|NN void *op
 #if defined(PERL_DEBUG_READONLY_OPS)
 #    if defined(PERL_CORE)
-px	|void	|Slab_to_ro	|NN OPSLAB *slab
-px	|void	|Slab_to_rw	|NN OPSLAB *const slab
+pe	|void	|Slab_to_ro	|NN OPSLAB *slab
+pe	|void	|Slab_to_rw	|NN OPSLAB *const slab
 #    endif
 : Used in OpREFCNT_inc() in sv.c
-poxM	|OP *	|op_refcnt_inc	|NULLOK OP *o
+poeM	|OP *	|op_refcnt_inc	|NULLOK OP *o
 : FIXME - can be static.
-poxM	|PADOFFSET	|op_refcnt_dec	|NN OP *o
+poeM	|PADOFFSET	|op_refcnt_dec	|NN OP *o
 #endif
 
 #if defined(PERL_IN_PERL_C)
@@ -2272,7 +2273,7 @@ SR	|SV*	|refto		|NN SV* sv
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
 : Used in pp_hot.c
-pRxo	|GV*	|softref2xv	|NN SV *const sv|NN const char *const what \
+pReo	|GV*	|softref2xv	|NN SV *const sv|NN const char *const what \
 				|const svtype type|NN SV ***spp
 iTR	|bool	|lossless_NV_to_IV|const NV nv|NN IV * ivp
 #endif
@@ -3138,7 +3139,7 @@ ApTd	|bool|quadmath_format_needed|NN const char* format
 #endif
 
 : Used in mg.c, sv.c
-px	|void	|my_clearenv
+pe	|void	|my_clearenv
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #ifdef PERL_GLOBAL_STRUCT_PRIVATE
@@ -3218,7 +3219,7 @@ S	|void	|mro_gather_and_rename|NN HV * const stashes \
 : Used in hv.c, mg.c, pp.c, sv.c
 pd	|void   |mro_isa_changed_in|NN HV* stash
 Apd	|void	|mro_method_changed_in	|NN HV* stash
-pdx	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK HV * const oldstash|NN const GV * const gv|U32 flags
+pde	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK HV * const oldstash|NN const GV * const gv|U32 flags
 : Only used in perl.c
 p	|void   |boot_core_mro
 ApoT	|void	|sys_init	|NN int* argc|NN char*** argv
@@ -3230,7 +3231,7 @@ ApoM	|const char *|cop_fetch_label|NN COP *const cop \
 ApoM	|void|cop_store_label \
 		|NN COP *const cop|NN const char *label|STRLEN len|U32 flags
 
-xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
+epo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
 
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IN_SV_C)
