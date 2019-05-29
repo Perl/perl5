@@ -1856,13 +1856,29 @@ Perl_scalar(pTHX_ OP *o)
         do_kids:
             while (kid) {
                 OP *sib = OpSIBLING(kid);
-                if (sib && kid->op_type != OP_LEAVEWHEN
-                 && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
-                    || (  sib->op_targ != OP_NEXTSTATE
-                       && sib->op_targ != OP_DBSTATE  )))
-                    scalarvoid(kid);
-                else
+                /* Apply void context to all kids except the last, which
+                 * is scalar (ignoring a trailing ex-nextstate in determining
+                 * if it's the last kid). E.g.
+                 *      $scalar = do { void; void; scalar }
+                 * Except that 'when's are always scalar, e.g.
+                 *      $scalar = do { given(..) {
+                    *                 when (..) { scalar }
+                    *                 when (..) { scalar }
+                    *                 ...
+                    *                }}
+                    */
+                if (!sib
+                     || (  !OpHAS_SIBLING(sib)
+                         && sib->op_type == OP_NULL
+                         && (   sib->op_targ == OP_NEXTSTATE
+                             || sib->op_targ == OP_DBSTATE  )
+                        )
+                )
                     scalar(kid);
+                else if (kid->op_type == OP_LEAVEWHEN)
+                    scalar(kid);
+                else
+                    scalarvoid(kid);
                 kid = sib;
             }
             PL_curcop = &PL_compiling;
