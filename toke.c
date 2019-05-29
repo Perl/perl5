@@ -5991,7 +5991,7 @@ Perl_yylex(pTHX)
 
 	switch (PL_expect) {
 	case XOPERATOR:
-	    if (!PL_in_my || PL_lex_state != LEX_NORMAL)
+	    if (!PL_in_my || (PL_lex_state != LEX_NORMAL && !PL_lex_brackets))
 		break;
 	    PL_bufptr = s;	/* update in case we back off */
 	    if (*s == '=') {
