@@ -129,7 +129,7 @@ DOC:
 	    my $embed_docref = delete $funcflags{$name};
 	    if ($embed_docref and %$embed_docref) {
 		$embed_where = $embed_docref->{flags} =~ /A/ ? 'api' : 'guts';
-		$embed_may_change = $embed_docref->{flags} =~ /M/;
+		$embed_may_change = $embed_docref->{flags} =~ /x/;
                 $flags .= 'D' if $embed_docref->{flags} =~ /D/;
 	    } else {
 		$missing{$name} = $file;
@@ -385,7 +385,7 @@ foreach (sort keys %missing) {
 
 # List of funcs in the public API that aren't also marked as experimental nor
 # deprecated.
-my @missing_api = grep $funcflags{$_}{flags} =~ /A/ && $funcflags{$_}{flags} !~ /[MD]/ && !$docs{api}{$_}, keys %funcflags;
+my @missing_api = grep $funcflags{$_}{flags} =~ /A/ && $funcflags{$_}{flags} !~ /[xD]/ && !$docs{api}{$_}, keys %funcflags;
 output('perlapi', <<'_EOB_', $docs{api}, \@missing_api, <<'_EOE_');
 |=encoding UTF-8
 |
