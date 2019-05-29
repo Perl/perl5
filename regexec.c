@@ -852,20 +852,20 @@ Perl_re_intuit_start(pTHX_
                     const U32 flags,
                     re_scream_pos_data *data)
 {
-    struct regexp *const prog = ReANY(rx);
-    SSize_t start_shift = prog->check_offset_min;
+    struct regexp *const rex = ReANY(rx);
+    SSize_t start_shift = rex->check_offset_min;
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
     /* current lowest pos in string where the regex can start matching */
     char *rx_origin = strpos;
     SV *check;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
-    U8   other_ix = 1 - prog->substrs->check_ix;
+    U8   other_ix = 1 - rex->substrs->check_ix;
     bool ml_anch = 0;
     char *other_last = strpos;/* latest pos 'other' substr already checked to */
     char *check_at = NULL;		/* check substr found at this pos */
-    const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
-    RXi_GET_DECL(prog,progi);
+    const I32 multiline = rex->extflags & RXf_PMf_MULTILINE;
+    RXi_GET_DECL(rex,progi);
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
     regmatch_info *const reginfo = &reginfo_buf;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -883,12 +883,12 @@ Perl_re_intuit_start(pTHX_
      * which uses these offsets. See the thread beginning
      * <20140113145929.GF27210@iabyn.com>
      */
-    assert(prog->substrs->data[0].min_offset >= 0);
-    assert(prog->substrs->data[0].max_offset >= 0);
-    assert(prog->substrs->data[1].min_offset >= 0);
-    assert(prog->substrs->data[1].max_offset >= 0);
-    assert(prog->substrs->data[2].min_offset >= 0);
-    assert(prog->substrs->data[2].max_offset >= 0);
+    assert(rex->substrs->data[0].min_offset >= 0);
+    assert(rex->substrs->data[0].max_offset >= 0);
+    assert(rex->substrs->data[1].min_offset >= 0);
+    assert(rex->substrs->data[1].max_offset >= 0);
+    assert(rex->substrs->data[2].min_offset >= 0);
+    assert(rex->substrs->data[2].max_offset >= 0);
 
     /* for now, assume that if both present, that the floating substring
      * doesn't start before the anchored substring.
@@ -897,20 +897,20 @@ Perl_re_intuit_start(pTHX_
      * function carefully first
      */
     assert(
-            ! (  (prog->anchored_utf8 || prog->anchored_substr)
-              && (prog->float_utf8    || prog->float_substr))
-           || (prog->float_min_offset >= prog->anchored_offset));
+            ! (  (rex->anchored_utf8 || rex->anchored_substr)
+              && (rex->float_utf8    || rex->float_substr))
+           || (rex->float_min_offset >= rex->anchored_offset));
 
     /* byte rather than char calculation for efficiency. It fails
      * to quickly reject some cases that can't match, but will reject
      * them later after doing full char arithmetic */
-    if (prog->minlen > strend - strpos) {
+    if (rex->minlen > strend - strpos) {
         DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
 			      "  String too short...\n"));
 	goto fail;
     }
 
-    RXp_MATCH_UTF8_set(prog, utf8_target);
+    RXp_MATCH_UTF8_set(rex, utf8_target);
     reginfo->is_utf8_target = cBOOL(utf8_target);
     reginfo->info_aux = NULL;
     reginfo->strbeg = strbeg;
@@ -921,25 +921,25 @@ Perl_re_intuit_start(pTHX_
     reginfo->poscache_maxiter = 0;
 
     if (utf8_target) {
-        if ((!prog->anchored_utf8 && prog->anchored_substr)
-                || (!prog->float_utf8 && prog->float_substr))
-	    to_utf8_substr(prog);
-	check = prog->check_utf8;
+        if ((!rex->anchored_utf8 && rex->anchored_substr)
+                || (!rex->float_utf8 && rex->float_substr))
+	    to_utf8_substr(rex);
+	check = rex->check_utf8;
     } else {
-	if (!prog->check_substr && prog->check_utf8) {
-	    if (! to_byte_substr(prog)) {
+	if (!rex->check_substr && rex->check_utf8) {
+	    if (! to_byte_substr(rex)) {
                 NON_UTF8_TARGET_BUT_UTF8_REQUIRED(fail);
             }
         }
-	check = prog->check_substr;
+	check = rex->check_substr;
     }
 
     /* dump the various substring data */
     DEBUG_OPTIMISE_MORE_r({
         int i;
         for (i=0; i<=2; i++) {
-            SV *sv = (utf8_target ? prog->substrs->data[i].utf8_substr
-                                  : prog->substrs->data[i].substr);
+            SV *sv = (utf8_target ? rex->substrs->data[i].utf8_substr
+                                  : rex->substrs->data[i].substr);
             if (!sv)
                 continue;
 
@@ -947,16 +947,16 @@ Perl_re_intuit_start(pTHX_
                 "  substrs[%d]: min=%" IVdf " max=%" IVdf " end shift=%" IVdf
                 " useful=%" IVdf " utf8=%d [%s]\n",
                 i,
-                (IV)prog->substrs->data[i].min_offset,
-                (IV)prog->substrs->data[i].max_offset,
-                (IV)prog->substrs->data[i].end_shift,
+                (IV)rex->substrs->data[i].min_offset,
+                (IV)rex->substrs->data[i].max_offset,
+                (IV)rex->substrs->data[i].end_shift,
                 BmUSEFUL(sv),
                 utf8_target ? 1 : 0,
                 SvPEEK(sv));
         }
     });
 
-    if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
+    if (rex->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
 
         /* ml_anch: check after \n?
          *
@@ -966,10 +966,10 @@ Perl_re_intuit_start(pTHX_
          *   /.*abc/, /.*abc/m:  PREGf_IMPLICIT | PREGf_ANCH_MBOL
          *   /.*abc/s:           PREGf_IMPLICIT | PREGf_ANCH_SBOL
          */
-	ml_anch =      (prog->intflags & PREGf_ANCH_MBOL)
-                   && !(prog->intflags & PREGf_IMPLICIT);
+	ml_anch =      (rex->intflags & PREGf_ANCH_MBOL)
+                   && !(rex->intflags & PREGf_IMPLICIT);
 
-	if (!ml_anch && !(prog->intflags & PREGf_IMPLICIT)) {
+	if (!ml_anch && !(rex->intflags & PREGf_IMPLICIT)) {
             /* we are only allowed to match at BOS or \G */
 
             /* trivially reject if there's a BOS anchor and we're not at BOS.
@@ -981,7 +981,7 @@ Perl_re_intuit_start(pTHX_
              * be too fiddly (e.g. REXEC_IGNOREPOS).
              */
             if (   strpos != strbeg
-                && (prog->intflags & PREGf_ANCH_SBOL))
+                && (rex->intflags & PREGf_ANCH_SBOL))
             {
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                 "  Not at start...\n"));
@@ -998,14 +998,14 @@ Perl_re_intuit_start(pTHX_
              * caller will have set strpos=pos()-4; we look for the substr
              * at position pos()-4+1, which lines up with the "a" */
 
-	    if (prog->check_offset_min == prog->check_offset_max) {
+	    if (rex->check_offset_min == rex->check_offset_max) {
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
-                char *s = HOP3c(strpos, prog->check_offset_min, strend);
+                char *s = HOP3c(strpos, rex->check_offset_min, strend);
 	    
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                     "  Looking for check substr at fixed offset %" IVdf "...\n",
-                    (IV)prog->check_offset_min));
+                    (IV)rex->check_offset_min));
 
 	        if (SvTAIL(check)) {
                     /* In this case, the regex is anchored at the end too.
@@ -1039,7 +1039,7 @@ Perl_re_intuit_start(pTHX_
 	}
     }
 
-    end_shift = prog->check_end_shift;
+    end_shift = rex->check_end_shift;
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
@@ -1084,10 +1084,10 @@ Perl_re_intuit_start(pTHX_
                 " Start shift: %" IVdf " End shift %" IVdf
                 " Real end Shift: %" IVdf "\n",
                 (IV)(rx_origin - strbeg),
-                (IV)prog->check_offset_min,
+                (IV)rex->check_offset_min,
                 (IV)start_shift,
                 (IV)end_shift,
-                (IV)prog->check_end_shift);
+                (IV)rex->check_end_shift);
         });
         
         end_point = HOPBACK3(strend, end_shift, rx_origin);
@@ -1107,12 +1107,12 @@ Perl_re_intuit_start(pTHX_
          * an upper bound on the substr.
          */
         if (!ml_anch
-            && prog->intflags & PREGf_ANCH
-            && prog->check_offset_max != SSize_t_MAX)
+            && rex->intflags & PREGf_ANCH
+            && rex->check_offset_max != SSize_t_MAX)
         {
             SSize_t check_len = SvCUR(check) - !!SvTAIL(check);
             const char * const anchor =
-                        (prog->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
+                        (rex->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
             SSize_t targ_len = (char*)end_point - anchor;
 
             if (check_len > targ_len) {
@@ -1126,9 +1126,9 @@ Perl_re_intuit_start(pTHX_
              * up earlier than the old value of end_point.
              */
             assert(anchor + check_len <= (char *)end_point);
-            if (prog->check_offset_max + check_len < targ_len) {
+            if (rex->check_offset_max + check_len < targ_len) {
                 end_point = HOP3lim((U8*)anchor,
-                                prog->check_offset_max,
+                                rex->check_offset_max,
                                 end_point - check_len
                             )
                             + check_len;
@@ -1155,7 +1155,7 @@ Perl_re_intuit_start(pTHX_
                 SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
             Perl_re_printf( aTHX_  "  %s %s substr %s%s%s",
                               (check_at ? "Found" : "Did not find"),
-                (check == (utf8_target ? prog->anchored_utf8 : prog->anchored_substr)
+                (check == (utf8_target ? rex->anchored_utf8 : rex->anchored_substr)
                     ? "anchored" : "floating"),
                 quoted,
                 RE_SV_TAIL(check),
@@ -1169,8 +1169,8 @@ Perl_re_intuit_start(pTHX_
          * But don't set it lower than previously.
          */
 
-        if (check_at - rx_origin > prog->check_offset_max)
-            rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
+        if (check_at - rx_origin > rex->check_offset_max)
+            rx_origin = HOP3c(check_at, -rex->check_offset_max, rx_origin);
         /* Finish the diagnostic message */
         DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
             "%ld (rx_origin now %" IVdf ")...\n",
@@ -1182,8 +1182,8 @@ Perl_re_intuit_start(pTHX_
 
     /* now look for the 'other' substring if defined */
 
-    if (prog->substrs->data[other_ix].utf8_substr
-        || prog->substrs->data[other_ix].substr)
+    if (rex->substrs->data[other_ix].utf8_substr
+        || rex->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
         char *last, *last1;
@@ -1192,9 +1192,9 @@ Perl_re_intuit_start(pTHX_
         struct reg_substr_datum *other;
 
       do_other_substr:
-        other = &prog->substrs->data[other_ix];
+        other = &rex->substrs->data[other_ix];
         if (!utf8_target && !other->substr) {
-            if (!to_byte_substr(prog)) {
+            if (!to_byte_substr(rex)) {
                 NON_UTF8_TARGET_BUT_UTF8_REQUIRED(fail);
             }
         }
@@ -1245,12 +1245,12 @@ Perl_re_intuit_start(pTHX_
          * latest position in the string.
          *
          * Note that -minlen + float_min_offset is equivalent (AFAIKT)
-         * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
+         * to CHR_SVLEN(must) - !!SvTAIL(must) + rex->float_end_shift
          */
 
-        assert(prog->minlen >= other->min_offset);
+        assert(rex->minlen >= other->min_offset);
         last1 = HOP3c(strend,
-                        other->min_offset - prog->minlen, strbeg);
+                        other->min_offset - rex->minlen, strbeg);
 
         if (other_ix) {/* i.e. if (other-is-float) */
             /* last is the latest point where the floating substr could
@@ -1380,8 +1380,8 @@ Perl_re_intuit_start(pTHX_
                 "  Check-only match: offset min:%" IVdf " max:%" IVdf
                 " check_at:%" IVdf " rx_origin:%" IVdf " rx_origin-check_at:%" IVdf
                 " strend:%" IVdf "\n",
-                (IV)prog->check_offset_min,
-                (IV)prog->check_offset_max,
+                (IV)rex->check_offset_min,
+                (IV)rex->check_offset_max,
                 (IV)(check_at-strbeg),
                 (IV)(rx_origin-strbeg),
                 (IV)(rx_origin-check_at),
@@ -1413,7 +1413,7 @@ Perl_re_intuit_start(pTHX_
          * first
          */
 
-        s = HOP3c(strend, - prog->minlen, strpos);
+        s = HOP3c(strend, - rex->minlen, strpos);
         if (s <= rx_origin ||
             ! ( rx_origin = (char *)memchr(rx_origin, '\n', s - rx_origin)))
         {
@@ -1428,8 +1428,8 @@ Perl_re_intuit_start(pTHX_
          * HOP(rx_origin, 1)) */
         rx_origin++;
 
-        if (prog->substrs->check_ix == 0  /* check is anchored */
-            || rx_origin >= HOP3c(check_at,  - prog->check_offset_min, strpos))
+        if (rex->substrs->check_ix == 0  /* check is anchored */
+            || rx_origin >= HOP3c(check_at,  - rex->check_offset_min, strpos))
         {
             /* Position contradicts check-string; either because
              * check was anchored (and thus has no wiggle room),
@@ -1443,9 +1443,9 @@ Perl_re_intuit_start(pTHX_
         /* if we get here, the check substr must have been float,
          * is in range, and we may or may not have had an anchored
          * "other" substr which still contradicts */
-        assert(prog->substrs->check_ix); /* check is float */
+        assert(rex->substrs->check_ix); /* check is float */
 
-        if (utf8_target ? prog->anchored_utf8 : prog->anchored_substr) {
+        if (utf8_target ? rex->anchored_utf8 : rex->anchored_substr) {
             /* whoops, the anchored "other" substr exists, so we still
              * contradict. On the other hand, the float "check" substr
              * didn't contradict, so just retry the anchored "other"
@@ -1453,7 +1453,7 @@ Perl_re_intuit_start(pTHX_
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                 "  Found /%s^%s/m, rescanning for anchored from offset %" IVdf " (rx_origin now %" IVdf ")...\n",
                 PL_colors[0], PL_colors[1],
-                (IV)(rx_origin - strbeg + prog->anchored_offset),
+                (IV)(rx_origin - strbeg + rex->anchored_offset),
                 (IV)(rx_origin - strbeg)
             ));
             goto do_other_substr;
@@ -1515,9 +1515,9 @@ Perl_re_intuit_start(pTHX_
          *   find_byclass().
          */
 
-	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos = HOP3clim(rx_origin, (prog->minlen ? cl_l : 0), strend);
-        else if (prog->float_substr || prog->float_utf8) {
+	if (rex->anchored_substr || rex->anchored_utf8 || ml_anch)
+            endpos = HOP3clim(rx_origin, (rex->minlen ? cl_l : 0), strend);
+        else if (rex->float_substr || rex->float_utf8) {
 	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
 	    endpos = HOP3clim(rx_max_float, cl_l, strend);
         }
@@ -1530,7 +1530,7 @@ Perl_re_intuit_start(pTHX_
               (IV)start_shift, (IV)(check_at - strbeg),
               (IV)(rx_origin - strbeg), (IV)(endpos - strbeg)));
 
-        s = find_byclass(prog, progi->regstclass, rx_origin, endpos,
+        s = find_byclass(rex, progi->regstclass, rx_origin, endpos,
                             reginfo);
 	if (!s) {
 	    if (endpos == strend) {
@@ -1540,13 +1540,13 @@ Perl_re_intuit_start(pTHX_
 	    }
             DEBUG_EXECUTE_r( Perl_re_printf( aTHX_
                                "  This position contradicts STCLASS...\n") );
-            if ((prog->intflags & PREGf_ANCH) && !ml_anch
-                        && !(prog->intflags & PREGf_IMPLICIT))
+            if ((rex->intflags & PREGf_ANCH) && !ml_anch
+                        && !(rex->intflags & PREGf_IMPLICIT))
 		goto fail;
 
 	    /* Contradict one of substrings */
-	    if (prog->anchored_substr || prog->anchored_utf8) {
-                if (prog->substrs->check_ix == 1) { /* check is float */
+	    if (rex->anchored_substr || rex->anchored_utf8) {
+                if (rex->substrs->check_ix == 1) { /* check is float */
                     /* Have both, check_string is floating */
                     assert(rx_origin + start_shift <= check_at);
                     if (rx_origin + start_shift != check_at) {
@@ -1589,7 +1589,7 @@ Perl_re_intuit_start(pTHX_
 
                 /* strictly speaking this can never be true; but might
                  * be if we ever allow intuit without substrings */
-                if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
+                if (!(utf8_target ? rex->float_utf8 : rex->float_substr))
                     goto fail;
 
                 rx_origin = rx_max_float;
@@ -1610,7 +1610,7 @@ Perl_re_intuit_start(pTHX_
             }
             DEBUG_EXECUTE_r( Perl_re_printf( aTHX_
                 "  about to look for %s substr starting at offset %ld (rx_origin now %" IVdf ")...\n",
-                (prog->substrs->check_ix ? "floating" : "anchored"),
+                (rex->substrs->check_ix ? "floating" : "anchored"),
                 (long)(rx_origin + start_shift - strbeg),
                 (IV)(rx_origin - strbeg)
             ));
@@ -1639,36 +1639,36 @@ Perl_re_intuit_start(pTHX_
 	   cannot start at strpos. */
 
         DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "  try at offset...\n"));
-	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
+	++BmUSEFUL(utf8_target ? rex->check_utf8 : rex->check_substr);	/* hooray/5 */
     }
     else {
         /* The found rx_origin position does not prohibit matching at
          * strpos, so calling intuit didn't gain us anything. Decrement
          * the BmUSEFUL() count on the check substring, and if we reach
          * zero, free it.  */
-	if (!(prog->intflags & PREGf_NAUGHTY)
+	if (!(rex->intflags & PREGf_NAUGHTY)
 	    && (utf8_target ? (
-		prog->check_utf8		/* Could be deleted already */
-		&& --BmUSEFUL(prog->check_utf8) < 0
-		&& (prog->check_utf8 == prog->float_utf8)
+		rex->check_utf8		/* Could be deleted already */
+		&& --BmUSEFUL(rex->check_utf8) < 0
+		&& (rex->check_utf8 == rex->float_utf8)
 	    ) : (
-		prog->check_substr		/* Could be deleted already */
-		&& --BmUSEFUL(prog->check_substr) < 0
-		&& (prog->check_substr == prog->float_substr)
+		rex->check_substr		/* Could be deleted already */
+		&& --BmUSEFUL(rex->check_substr) < 0
+		&& (rex->check_substr == rex->float_substr)
 	    )))
 	{
 	    /* If flags & SOMETHING - do not do it many times on the same match */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "  ... Disabling check substring...\n"));
 	    /* XXX Does the destruction order has to change with utf8_target? */
-	    SvREFCNT_dec(utf8_target ? prog->check_utf8 : prog->check_substr);
-	    SvREFCNT_dec(utf8_target ? prog->check_substr : prog->check_utf8);
-	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
-	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
+	    SvREFCNT_dec(utf8_target ? rex->check_utf8 : rex->check_substr);
+	    SvREFCNT_dec(utf8_target ? rex->check_substr : rex->check_utf8);
+	    rex->check_substr = rex->check_utf8 = NULL;	/* disable */
+	    rex->float_substr = rex->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
 	            other heuristics. */
-	    prog->extflags &= ~RXf_USE_INTUIT;
+	    rex->extflags &= ~RXf_USE_INTUIT;
 	}
     }
 
@@ -1679,8 +1679,8 @@ Perl_re_intuit_start(pTHX_
     return rx_origin;
 
   fail_finish:				/* Substring not found */
-    if (prog->check_substr || prog->check_utf8)		/* could be removed already */
-	BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr) += 5; /* hooray */
+    if (rex->check_substr || rex->check_utf8)		/* could be removed already */
+	BmUSEFUL(utf8_target ? rex->check_utf8 : rex->check_substr) += 5; /* hooray */
   fail:
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%sMatch rejected by optimizer%s\n",
 			  PL_colors[4], PL_colors[5]));
