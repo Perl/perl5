@@ -128,49 +128,20 @@ DOC:
 	    }
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 
-	    # Check the consistency of the flags
-	    my ($embed_where, $inline_where);
-	    my ($embed_may_change, $inline_may_change);
-
+	    # If the entry is also in embed.fnc, it should be defined
+            # completely there, but not here
 	    my $embed_docref = delete $funcflags{$name};
 	    if ($embed_docref and %$embed_docref) {
-		$embed_where = $embed_docref->{flags} =~ /A/ ? 'api' : 'guts';
-		$embed_may_change = $embed_docref->{flags} =~ /x/;
-                $flags .= 'D' if $embed_docref->{flags} =~ /D/;
-                $flags .= 'O' if $embed_docref->{flags} =~ /O/;
-                $flags .= 'p' if $embed_docref->{flags} =~ /p/;
-                $flags .= 'M' if $embed_docref->{flags} =~ /M/;
-                $flags .= 'T' if $embed_docref->{flags} =~ /T/;
+                warn "embed.fnc entry overrides redundant information in"
+                   . " '$proto_in_file' in $file" if $flags || $ret || @args;
+                $flags = $embed_docref->{'flags'};
+                $ret = $embed_docref->{'retval'};
+		@args = @{$embed_docref->{args}};
 	    } else {
 		$missing{$name} = $file;
 	    }
-	    if ($flags =~ /m/) {
-		$inline_where = $flags =~ /A/ ? 'api' : 'guts';
-		$inline_may_change = $flags =~ /x/;
 
-		if (defined $embed_where && $inline_where ne $embed_where) {
-		    warn "Function '$name' inconsistency: embed.fnc says $embed_where, Pod says $inline_where";
-		}
-
-		if (defined $embed_may_change
-		    && $inline_may_change ne $embed_may_change) {
-		    my $message = "Function '$name' inconsistency: ";
-		    if ($embed_may_change) {
-			$message .= "embed.fnc says 'may change', Pod does not";
-		    } else {
-			$message .= "Pod says 'may change', embed.fnc does not";
-		    }
-		    warn $message;
-		}
-	    } elsif (!defined $embed_where) {
-		warn "Unable to place $name!\n";
-		next;
-	    } else {
-		$inline_where = $embed_where;
-		$flags .= 'x' if $embed_may_change;
-		@args = @{$embed_docref->{args}};
-		$ret = $embed_docref->{retval};
-	    }
+            my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
 
 	    if (exists $docs{$inline_where}{$curheader}{$name}) {
                 warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
