@@ -1603,17 +1603,15 @@ not be called directly.
 OP *
 Perl_op_linklist(pTHX_ OP *o)
 {
-    OP *first;
-
     PERL_ARGS_ASSERT_OP_LINKLIST;
 
     if (o->op_next)
 	return o->op_next;
 
     /* establish postfix order */
-    first = cUNOPo->op_first;
-    if (first) {
+    if (o->op_flags & OPf_KIDS) {
         OP *kid;
+        OP *first = cUNOPo->op_first;
 	o->op_next = LINKLIST(first);
 	kid = first;
 	for (;;) {
