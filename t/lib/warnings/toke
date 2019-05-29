@@ -1713,3 +1713,11 @@ $_ = "";
 s/^/ ${time} /e
 EXPECT
 Ambiguous use of ${time} resolved to $time at - line 4.
+########
+# NAME [perl #133850] another case
+use warnings;
+%x = qw(a b c d);
+$_ = "";
+s/^/ @x {a} /e
+EXPECT
+Scalar value @x{"a"} better written as $x{"a"} at - line 4.
