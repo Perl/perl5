@@ -1705,3 +1705,11 @@ my $fh = \*STDOUT;
 my $y = "";
 my $x = "${print $fh $y; \'x'}";
 EXPECT
+########
+# NAME [perl #133850] another case
+use warnings;
+my $time = 1;
+$_ = "";
+s/^/ ${time} /e
+EXPECT
+Ambiguous use of ${time} resolved to $time at - line 4.

@@ -9660,7 +9660,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 		PL_lex_state = LEX_INTERPEND;
 		PL_expect = XREF;
 	    }
-	    if (PL_lex_state == LEX_NORMAL) {
+	    if (PL_lex_state == LEX_NORMAL || PL_lex_brackets) {
 		if (ckWARN(WARN_AMBIGUOUS)
                     && (keyword(dest, d - dest, 0)
 		        || get_cvn_flags(dest, d - dest, is_utf8
