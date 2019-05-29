@@ -118,6 +118,10 @@
 :         suppress embed.h entry
 :
 :
+:   n  Has no arguments (used only in =for apidoc entries)
+:
+:      The macro (it can't be a function) is used without any parameters nor
+:      empty parentheses.
 :
 :   O  Has a perl_ compatibility macro.
 :

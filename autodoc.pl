@@ -22,6 +22,9 @@
 # indented. The next input line that is a pod directive terminates this 
 # heading-level documentation.
 
+# The meanings of the flags fields in embed.fnc and the source code is
+# documented at the top of embed.fnc.
+
 use strict;
 
 if (@ARGV) {
@@ -225,6 +228,8 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 	# nothing
     } else {
         if ($flags =~ /n/) { # no args
+            warn("n flag without m") unless $flags =~ /m/;
+            warn("n flag but apparently has args") if @args;
             print $fh "\t$ret\t$name";
         } else { # full usage
             my $n            = "Perl_"x$p . $name;
