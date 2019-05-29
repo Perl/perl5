@@ -6911,7 +6911,7 @@ Perl_yylex(pTHX)
 	if (!PL_tokenbuf[1]) {
 	    PREREF('@');
 	}
-	if (PL_lex_state == LEX_NORMAL)
+	if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
 	    s = skipspace(s);
 	if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
             && intuit_more(s, PL_bufend))
