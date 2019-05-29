@@ -1600,36 +1600,57 @@ not be called directly.
 =cut
 */
 
+
 OP *
 Perl_op_linklist(pTHX_ OP *o)
 {
+
+    OP **prevp;
+    OP *kid;
+    OP * top_op = o;
+
     PERL_ARGS_ASSERT_OP_LINKLIST;
 
-    if (o->op_next)
-	return o->op_next;
+    while (1) {
+        /* Descend down the tree looking for any unprocessed subtrees to
+         * do first */
+        if (!o->op_next) {
+            if (o->op_flags & OPf_KIDS) {
+                o = cUNOPo->op_first;
+                continue;
+            }
+            o->op_next = o; /* leaf node; link to self initially */
+        }
 
-    /* establish postfix order */
-    if (o->op_flags & OPf_KIDS) {
-        OP *kid;
-        OP *first = cUNOPo->op_first;
-	o->op_next = LINKLIST(first);
-	kid = first;
-	for (;;) {
-            OP *sibl = OpSIBLING(kid);
-            if (sibl) {
-                kid->op_next = LINKLIST(sibl);
-                kid = sibl;
-	    } else {
-		kid->op_next = o;
-		break;
-	    }
-	}
+        /* if we're at the top level, there either weren't any children
+         * to process, or we've worked our way back to the top. */
+        if (o == top_op)
+            return o->op_next;
+
+        /* o is now processed. Next, process any sibling subtrees */
+
+        if (OpHAS_SIBLING(o)) {
+            o = OpSIBLING(o);
+            continue;
+        }
+
+        /* Done all the subtrees at this level. Go back up a level and
+         * link the parent in with all its (processed) children.
+         */
+
+        o = o->op_sibparent;
+        assert(!o->op_next);
+        prevp = &(o->op_next);
+        kid   = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+        while (kid) {
+            *prevp = kid->op_next;
+            prevp = &(kid->op_next);
+            kid = OpSIBLING(kid);
+        }
+        *prevp = o;
     }
-    else
-	o->op_next = o;
-
-    return o->op_next;
 }
+
 
 static OP *
 S_scalarkids(pTHX_ OP *o)
