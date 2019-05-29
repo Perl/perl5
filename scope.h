@@ -167,12 +167,12 @@ Opening bracket on a callback.  See C<L</LEAVE>> and L<perlcall>.
 =for apidoc Amns||LEAVE
 Closing bracket on a callback.  See C<L</ENTER>> and L<perlcall>.
 
-=for apidoc Ams||ENTER_with_name(name)
+=for apidoc Ams||ENTER_with_name|const char * name
 
 Same as C<L</ENTER>>, but when debugging is enabled it also associates the
 given literal string with the new scope.
 
-=for apidoc Ams||LEAVE_with_name(name)
+=for apidoc Ams||LEAVE_with_name|const char * name
 
 Same as C<L</LEAVE>>, but when debugging is enabled it first checks that the
 scope has the given name. C<name> must be a literal string.

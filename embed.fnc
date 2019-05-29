@@ -171,6 +171,9 @@
 :                STATIC is added to declaration;
 :         embed.h: "#define foo S_foo" entries added
 :
+:   s  autodoc.pl adds a terminating semi-colon to the usage example in the
+:      documentation.
+:
 :   T  Has no implicit interpreter/thread context argument:
 :
 :         suppress the pTHX part of "foo(pTHX...)" in proto.h;
