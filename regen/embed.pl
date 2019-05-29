@@ -81,7 +81,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabDdEefimTOoPpRrSUWXx] ) /x) {
+        if ($flags =~ / ( [^AabDdEefiMmTOoPpRrSUWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
@@ -123,6 +123,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 		$retval = "PERL_CALLCONV $retval";
 	    }
 	}
+
+	die_at_end "M flag requires p flag" if $flags =~ /M/ && $flags !~ /p/;
+
 	$func = full_name($plain_func, $flags);
 	$ret = "";
 	$ret .= "#ifndef NO_MATHOMS\n" if $binarycompat;
@@ -302,7 +305,7 @@ sub embed_h {
 	}
 	my $ret = "";
 	my ($flags,$retval,$func,@args) = @$_;
-	unless ($flags =~ /[om]/) {
+	unless ($flags =~ /[omM]/) {
 	    my $args = scalar @args;
 	    if ($flags =~ /T/) {
 		my $full_name = full_name($func, $flags);

@@ -132,6 +132,8 @@ DOC:
 		$embed_may_change = $embed_docref->{flags} =~ /x/;
                 $flags .= 'D' if $embed_docref->{flags} =~ /D/;
                 $flags .= 'O' if $embed_docref->{flags} =~ /O/;
+                $flags .= 'p' if $embed_docref->{flags} =~ /p/;
+                $flags .= 'M' if $embed_docref->{flags} =~ /M/;
 	    } else {
 		$missing{$name} = $file;
 	    }
@@ -203,10 +205,17 @@ existing code.\n\n$docs";
         $docs = "\n\nNOTE: this function is experimental and may change or be
 removed without notice.\n\n$docs" if $flags =~ /x/;
     }
+
+    # Is Perl_, but no #define foo # Perl_foo
+    my $p = $flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/;
+
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
 	if $flags =~ /O/;
-    $docs .= "NOTE: this function must be explicitly called as Perl_$name with an aTHX_ parameter.\n\n"
-        if $flags =~ /o/;
+    if ($p) {
+        $docs .= "NOTE: this function must be explicitly called as Perl_$name";
+        $docs .= " with an aTHX_ parameter";
+        $docs .= ".\n\n"
+    }
 
     print $fh "=item $name\nX<$name>\n$docs";
 
@@ -218,7 +227,6 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
         } elsif ($flags =~ /n/) { # no args
             print $fh "\t$ret\t$name";
         } else { # full usage
-            my $p            = $flags =~ /o/; # no #define foo Perl_foo
             my $n            = "Perl_"x$p . $name;
             my $large_ret    = length $ret > 7;
             my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item

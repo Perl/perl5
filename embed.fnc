@@ -102,7 +102,13 @@
 :                PERL_STATIC_INLINE is added to declaration;
 :         embed.h: "#define foo S_foo" or Perl_foo entries added
 :
+:   M  There is an extra macro that bypasses this function
 :
+:      (requires 'p', and implies 'o')  The function exists so that callers who
+:      used the 'Perl_' form can continue to do so, but there is a macro
+:      available with out the 'Perl_' prefix that bypasses the function call,
+:      such as when the function has been reduced to a wrapper around another
+:      one.
 :
 :   m  Implemented as a macro:
 :
@@ -671,7 +677,7 @@ Ap	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
 Ap	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
 				|I32 klen_i32|const int action|NULLOK SV *val \
 				|const U32 hash
-Apod	|STRLEN	|hv_fill	|NN HV *const hv
+AMpod	|STRLEN	|hv_fill	|NN HV *const hv
 Ap	|void	|hv_free_ent	|NN HV *hv|NULLOK HE *entry
 Apd	|I32	|hv_iterinit	|NN HV *hv
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
@@ -1256,13 +1262,8 @@ Apd	|SV*	|vstringify	|NN SV *vs
 Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 : Used in pp_hot.c and pp_sys.c
 p	|PerlIO*|nextargv	|NN GV* gv|bool nomagicopen
-#ifdef HAS_MEMMEM
-AdTopP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
+AdMTpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
-#else
-AdTpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
-				|NN const char* little|NN const char* lend
-#endif
 Apd	|void	|op_free	|NULLOK OP* arg
 xp	|OP*	|op_unscope	|NULLOK OP* o
 #ifdef PERL_CORE
@@ -1581,10 +1582,10 @@ Apd	|void	|sv_clear	|NN SV *const orig_sv
 #if defined(PERL_IN_SV_C)
 S	|bool	|curse		|NN SV * const sv|const bool check_refcnt
 #endif
-Aopd	|I32	|sv_cmp		|NULLOK SV *const sv1|NULLOK SV *const sv2
+AMopd	|I32	|sv_cmp		|NULLOK SV *const sv1|NULLOK SV *const sv2
 Apd	|I32	|sv_cmp_flags	|NULLOK SV *const sv1|NULLOK SV *const sv2 \
 				|const U32 flags
-Aopd	|I32	|sv_cmp_locale	|NULLOK SV *const sv1|NULLOK SV *const sv2
+AMopd	|I32	|sv_cmp_locale	|NULLOK SV *const sv1|NULLOK SV *const sv2
 Apd	|I32	|sv_cmp_locale_flags	|NULLOK SV *const sv1 \
 				|NULLOK SV *const sv2|const U32 flags
 #if defined(USE_LOCALE_COLLATE)
@@ -1859,7 +1860,7 @@ AipdRT	|U8*	|utf8_hop_safe	|NN const U8 *s|SSize_t off|NN const U8 *start|NN con
 Apxd	|U8*	|utf8_to_bytes	|NN U8 *s|NN STRLEN *lenp
 Apd	|int	|bytes_cmp_utf8	|NN const U8 *b|STRLEN blen|NN const U8 *u \
 				|STRLEN ulen
-Axodp	|U8*	|bytes_from_utf8|NN const U8 *s|NN STRLEN *lenp|NN bool *is_utf8p
+AMxdp	|U8*	|bytes_from_utf8|NN const U8 *s|NN STRLEN *lenp|NN bool *is_utf8p
 AxTp	|U8*	|bytes_from_utf8_loc|NN const U8 *s			    \
 				    |NN STRLEN *lenp			    \
 				    |NN bool *is_utf8p			    \
@@ -1868,15 +1869,15 @@ Apxd	|U8*	|bytes_to_utf8	|NN const U8 *s|NN STRLEN *lenp
 ApdD	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
 AbpdD	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
 AbpxD	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
-Aopd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
+AMpd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 ApdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 px	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
 
-AdTop	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
+AdMTp	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags
-AdTop	|UV	|utf8n_to_uvchr_error|NN const U8 *s			    \
+AdMTp	|UV	|utf8n_to_uvchr_error|NN const U8 *s			    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags			    \
@@ -1901,7 +1902,7 @@ Adm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
 Ap	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
 Adm	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Admx	|U8*	|uvchr_to_utf8_flags_msgs|NN U8 *d|UV uv|UV flags|NULLOK HV ** msgs
-Apod	|U8*	|uvoffuni_to_utf8_flags	|NN U8 *d|UV uv|const UV flags
+AMpod	|U8*	|uvoffuni_to_utf8_flags	|NN U8 *d|UV uv|const UV flags
 Apx	|U8*	|uvoffuni_to_utf8_flags_msgs|NN U8 *d|UV uv|const UV flags|NULLOK HV** msgs
 Ap	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags
@@ -3131,8 +3132,8 @@ ApoP	|bool	|ckwarn_d	|U32 w
 XEopxR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
 
-ApTodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
-ApTod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
+AMpTodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
+AMpTod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
 #ifdef USE_QUADMATH
 ApTd	|const char*	|quadmath_format_single|NN const char* format
 ApTd	|bool|quadmath_format_needed|NN const char* format
@@ -3225,10 +3226,10 @@ p	|void   |boot_core_mro
 ApoT	|void	|sys_init	|NN int* argc|NN char*** argv
 ApoT	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 ApoT	|void	|sys_term
-Apox	|const char *|cop_fetch_label|NN COP *const cop \
+AMpx	|const char *|cop_fetch_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c and the perl compiler
-Apox	|void|cop_store_label \
+AMpx	|void|cop_store_label \
 		|NN COP *const cop|NN const char *label|STRLEN len|U32 flags
 
 epo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
