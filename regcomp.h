@@ -144,6 +144,9 @@
 #define PREGf_ANCH_GPOS         0x00001000
 #define PREGf_RECURSE_SEEN      0x00002000
 
+/* used only by re.pm */
+#define PREGf_DEBUG             0x80000000
+
 #define PREGf_ANCH              \
     ( PREGf_ANCH_SBOL | PREGf_ANCH_GPOS | PREGf_ANCH_MBOL )
 

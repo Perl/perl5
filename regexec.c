@@ -326,6 +326,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 #define MATCH_NO_LIMIT (~(UV)0)
 #ifdef PERL_IN_XSUB_RE
 #  define MATCH_LIMIT(x) STMT_START { if (UNLIKELY(reginfo->limited)) { x } } STMT_END
+#  undef DEBUG_r
+#  define DEBUG_r(a) DEBUG__((RXp_INTFLAGS(rex) & PREGf_DEBUG), a)
 #else
 #  define MATCH_LIMIT(x) NOOP
 #endif

@@ -7700,6 +7700,17 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_rx->intflags = 0;
 
+#ifdef PERL_IN_XSUB_RE
+    {
+        /* previously any regular expression compiled with ext/re would
+           produce debug output, we want that same behaviour
+        */
+        SV *sv = cophh_fetch_pvs(CopHINTHASH_get(PL_curcop), "re/debug", 0);
+        if (SvTRUE(sv))
+            RExC->intflags |= PREGf_DEBUG;
+    }
+#endif    
+
     RExC_flags = rx_flags;	/* don't let top level (?i) bleed */
     RExC_parse = exp;
 
