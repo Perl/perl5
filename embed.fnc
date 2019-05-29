@@ -117,6 +117,11 @@
 :         suppress entry in the list of exported symbols
 :         suppress embed.h entry
 :
+:   N  The name in the entry isn't strictly a name
+:
+:      Normally, the name of the function or macro must contain all \w
+:      characters, and a warning is raised otherwise.  This flag suppresses
+:      that warning.
 :
 :   n  Has no arguments (used only in =for apidoc entries)
 :

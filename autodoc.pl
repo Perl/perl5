@@ -107,9 +107,12 @@ HDR_DOC:
             next FUNC;
         }
 	if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
-	    my $proto = $1;
+	    my $proto_in_file = $1;
+	    my $proto = $proto_in_file;
 	    $proto = "||$proto" unless $proto =~ /\|/;
 	    my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
+            warn ("'$name' not \\w+ in '$proto_in_file' in $file")
+                        if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
 	    my $docs = "";
 DOC:
 	    while (defined($doc = $get_next_line->())) {
