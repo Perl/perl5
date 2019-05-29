@@ -2386,10 +2386,22 @@ Perl_list(pTHX_ OP *o)
         do_kids:
             while (kid) {
                 OP *sib = OpSIBLING(kid);
-                if (sib && kid->op_type != OP_LEAVEWHEN)
-                    scalarvoid(kid);
-                else
+                /* Apply void context to all kids except the last, which
+                 * is list. E.g.
+                 *      @a = do { void; void; list }
+                 * Except that 'when's are always list context, e.g.
+                 *      @a = do { given(..) {
+                    *                 when (..) { list }
+                    *                 when (..) { list }
+                    *                 ...
+                    *                }}
+                    */
+                if (!sib)
                     list(kid);
+                else if (kid->op_type == OP_LEAVEWHEN)
+                    list(kid);
+                else
+                    scalarvoid(kid);
                 kid = sib;
             }
             PL_curcop = &PL_compiling;
