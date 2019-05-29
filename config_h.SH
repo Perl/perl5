@@ -1013,6 +1013,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_value member
  */
+/* HAS_SIGINFO_SI_FD:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_fd member
+ */
 #$d_siginfo_si_errno	HAS_SIGINFO_SI_ERRNO	/**/
 #$d_siginfo_si_pid	HAS_SIGINFO_SI_PID	/**/
 #$d_siginfo_si_uid	HAS_SIGINFO_SI_UID	/**/
@@ -1020,6 +1024,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_siginfo_si_status	HAS_SIGINFO_SI_STATUS	/**/
 #$d_siginfo_si_band	HAS_SIGINFO_SI_BAND	/**/
 #$d_siginfo_si_value	HAS_SIGINFO_SI_VALUE	/**/
+#$d_siginfo_si_fd	HAS_SIGINFO_SI_FD	/**/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()

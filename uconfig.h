@@ -978,6 +978,10 @@
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_value member
  */
+/* HAS_SIGINFO_SI_FD:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_fd member
+ */
 /*#define	HAS_SIGINFO_SI_ERRNO	/ **/
 /*#define	HAS_SIGINFO_SI_PID	/ **/
 /*#define	HAS_SIGINFO_SI_UID	/ **/
@@ -985,6 +989,7 @@
 /*#define	HAS_SIGINFO_SI_STATUS	/ **/
 /*#define	HAS_SIGINFO_SI_BAND	/ **/
 /*#define	HAS_SIGINFO_SI_VALUE	/ **/
+/*#define	HAS_SIGINFO_SI_FD	/ **/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
@@ -5244,6 +5249,6 @@
 #endif
 
 /* Generated from:
- * 6608de918c3c876975f74b684da2536ab1ee23459783d691ae02ce2526a497a7 config_h.SH
- * a11d95f56af200907b9285ed0da243a4c20db34f5684af313d18195eaba2b18b uconfig.sh
+ * 8d5c424e3b6702f33316d6b54dc316ad04300cd758b4d1788acf3e2ced4a2a51 config_h.SH
+ * 89bdf5c8e2611540e25b1e7d86be85a4454220ad37f8e5a1c84b2297a1a376a9 uconfig.sh
  * ex: set ro: */
