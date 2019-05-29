@@ -134,6 +134,7 @@ DOC:
                 $flags .= 'O' if $embed_docref->{flags} =~ /O/;
                 $flags .= 'p' if $embed_docref->{flags} =~ /p/;
                 $flags .= 'M' if $embed_docref->{flags} =~ /M/;
+                $flags .= 'T' if $embed_docref->{flags} =~ /T/;
 	    } else {
 		$missing{$name} = $file;
 	    }
@@ -213,7 +214,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 	if $flags =~ /O/;
     if ($p) {
         $docs .= "NOTE: this function must be explicitly called as Perl_$name";
-        $docs .= " with an aTHX_ parameter";
+        $docs .= " with an aTHX_ parameter" if $flags !~ /T/;
         $docs .= ".\n\n"
     }
 
@@ -243,7 +244,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
                 }
             }
             my $args = '';
-            if ($p) {
+            if ($p && $flags !~ /T/) {
                 $args = @args ? "pTHX_ " : "pTHX";
                 if ($long_args) { print $fh $args; $args = '' }
             }
