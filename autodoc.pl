@@ -131,6 +131,7 @@ DOC:
 		$embed_where = $embed_docref->{flags} =~ /A/ ? 'api' : 'guts';
 		$embed_may_change = $embed_docref->{flags} =~ /x/;
                 $flags .= 'D' if $embed_docref->{flags} =~ /D/;
+                $flags .= 'O' if $embed_docref->{flags} =~ /O/;
 	    } else {
 		$missing{$name} = $file;
 	    }
@@ -203,7 +204,7 @@ existing code.\n\n$docs";
 removed without notice.\n\n$docs" if $flags =~ /x/;
     }
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
-	if $flags =~ /p/;
+	if $flags =~ /O/;
     $docs .= "NOTE: this function must be explicitly called as Perl_$name with an aTHX_ parameter.\n\n"
         if $flags =~ /o/;
 
