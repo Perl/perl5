@@ -1874,14 +1874,18 @@ Perl_scalar(pTHX_ OP *o)
                              || sib->op_targ == OP_DBSTATE  )
                         )
                 )
-                    scalar(kid);
+                {
+                    /* tail call optimise calling scalar() on the last kid */
+                    next_kid = kid;
+                    goto do_next;
+                }
                 else if (kid->op_type == OP_LEAVEWHEN)
                     scalar(kid);
                 else
                     scalarvoid(kid);
                 kid = sib;
             }
-            PL_curcop = &PL_compiling;
+            NOT_REACHED; /* NOTREACHED */
             break;
 
         case OP_SORT:
@@ -1939,9 +1943,19 @@ Perl_scalar(pTHX_ OP *o)
                 return top_op; /* at top; no parents/siblings to try */
             if (OpHAS_SIBLING(o))
                 next_kid = o->op_sibparent;
-            else
+            else {
                 o = o->op_sibparent; /*try parent's next sibling */
-
+                switch (o->op_type) {
+                case OP_SCOPE:
+                case OP_LINESEQ:
+                case OP_LIST:
+                case OP_LEAVE:
+                case OP_LEAVETRY:
+                    /* should really restore PL_curcop to its old value, but
+                     * setting it to PL_compiling is better than do nothing */
+                    PL_curcop = &PL_compiling;
+                }
+            }
         }
         o = next_kid;
     } /* while */
