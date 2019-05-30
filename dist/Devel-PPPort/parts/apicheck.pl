@@ -144,7 +144,6 @@ print OUT <<HEAD;
 #define NEED_grok_number
 #define NEED_grok_numeric_radix
 #define NEED_grok_oct
-#define NEED_gv_fetchpvn_flags
 #define NEED_load_module
 #define NEED_mg_findext
 #define NEED_my_snprintf
