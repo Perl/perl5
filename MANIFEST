@@ -4172,6 +4172,7 @@ ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re_top.h			re extension symbol hiding header
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
+ext/re/t/limits.t		test re 'limit'
 ext/re/t/qr.t			test that qr// is a Regexp
 ext/re/t/re.t			see if re pragma works
 ext/re/t/re_funcs.t		See if exportable 're' funcs in re.xs work
