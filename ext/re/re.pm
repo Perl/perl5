@@ -421,6 +421,32 @@ interpolating into another pattern, outside of C<'strict'>, it is not checked
 again for strictness.  This is because if it works under strict it must work
 under non-strict.
 
+=head2 'limit' mode
+
+Note that this is an experimental feature which may be changed or removed in a
+future Perl release.
+
+When C<use re 'limit'> is in effect runtime limits are applied to
+regular expression matching.
+
+These can be controlled with two variables:
+
+=over
+
+=item *
+
+C<${^RE_MEMORY_LIMIT}> - the maximum depth of emulated recursion.
+
+=item *
+
+C<${^RE_CPU_LIMIT}> - the maximum number of iterations of the regular
+expression execution loop.
+
+=back
+
+These will likely be modified to include other memory and CPU usage in
+their limits.
+
 =head2 '/flags' mode
 
 When C<use re '/I<flags>'> is specified, the given I<flags> are automatically
