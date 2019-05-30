@@ -14456,7 +14456,6 @@ S_aassign_padcheck(pTHX_ OP* o, bool rhs)
   'rhs' indicates whether we're scanning the LHS or RHS. If the former, we
   set PL_generation on lexical vars; if the latter, we see if
   PL_generation matches.
-  'top' indicates whether we're recursing or at the top level.
   'scalars_p' is a pointer to a counter of the number of scalar SVs seen.
   This fn will increment it by the number seen. It's not intended to
   be an accurate count (especially as many ops can push a variable
@@ -14465,10 +14464,16 @@ S_aassign_padcheck(pTHX_ OP* o, bool rhs)
 */
 
 static int
-S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
+S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
 {
+    OP *top_op           = o;
+    OP *effective_top_op = o;
+    int all_flags = 0;
+
+    while (1) {
+    bool top = o == effective_top_op;
     int flags = 0;
-    bool kid_top = FALSE;
+    OP* next_kid = NULL;
 
     /* first, look for a solitary @_ on the RHS */
     if (   rhs
@@ -14489,50 +14494,58 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
             && kid->op_type == OP_GV
             && cGVOPx_gv(kid) == PL_defgv
         )
-            flags |= AAS_DEFAV;
+            flags = AAS_DEFAV;
     }
 
     switch (o->op_type) {
     case OP_GVSV:
         (*scalars_p)++;
-        return AAS_PKG_SCALAR;
+        all_flags |= AAS_PKG_SCALAR;
+        goto do_next;
 
     case OP_PADAV:
     case OP_PADHV:
         (*scalars_p) += 2;
         /* if !top, could be e.g. @a[0,1] */
-        if (top && (o->op_flags & OPf_REF))
-            return (o->op_private & OPpLVAL_INTRO)
-                ? AAS_MY_AGG : AAS_LEX_AGG;
-        return AAS_DANGEROUS;
+        all_flags |=  (top && (o->op_flags & OPf_REF))
+                        ? ((o->op_private & OPpLVAL_INTRO)
+                            ? AAS_MY_AGG : AAS_LEX_AGG)
+                        : AAS_DANGEROUS;
+        goto do_next;
 
     case OP_PADSV:
         {
             int comm = S_aassign_padcheck(aTHX_ o, rhs)
                         ?  AAS_LEX_SCALAR_COMM : 0;
             (*scalars_p)++;
-            return (o->op_private & OPpLVAL_INTRO)
+            all_flags |= (o->op_private & OPpLVAL_INTRO)
                 ? (AAS_MY_SCALAR|comm) : (AAS_LEX_SCALAR|comm);
+            goto do_next;
+
         }
 
     case OP_RV2AV:
     case OP_RV2HV:
         (*scalars_p) += 2;
         if (cUNOPx(o)->op_first->op_type != OP_GV)
-            return AAS_DANGEROUS; /* @{expr}, %{expr} */
+            all_flags |= AAS_DANGEROUS; /* @{expr}, %{expr} */
         /* @pkg, %pkg */
         /* if !top, could be e.g. @a[0,1] */
-        if (top && (o->op_flags & OPf_REF))
-            return AAS_PKG_AGG;
-        return AAS_DANGEROUS;
+        else if (top && (o->op_flags & OPf_REF))
+            all_flags |= AAS_PKG_AGG;
+        else
+            all_flags |= AAS_DANGEROUS;
+        goto do_next;
 
     case OP_RV2SV:
         (*scalars_p)++;
         if (cUNOPx(o)->op_first->op_type != OP_GV) {
             (*scalars_p) += 2;
-            return AAS_DANGEROUS; /* ${expr} */
+            all_flags |= AAS_DANGEROUS; /* ${expr} */
         }
-        return AAS_PKG_SCALAR; /* $pkg */
+        else
+            all_flags |= AAS_PKG_SCALAR; /* $pkg */
+        goto do_next;
 
     case OP_SPLIT:
         if (o->op_private & OPpSPLIT_ASSIGN) {
@@ -14544,23 +14557,25 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
              *    ... = @a;
              */
 
-            if (o->op_flags & OPf_STACKED)
+            if (o->op_flags & OPf_STACKED) {
                 /* @{expr} = split() - the array expression is tacked
                  * on as an extra child to split - process kid */
-                return S_aassign_scan(aTHX_ cLISTOPo->op_last, rhs,
-                                        top, scalars_p);
+                next_kid = cLISTOPo->op_last;
+                goto do_next;
+            }
 
             /* ... else array is directly attached to split op */
             (*scalars_p) += 2;
-            if (PL_op->op_private & OPpSPLIT_LEX)
-                return (o->op_private & OPpLVAL_INTRO)
-                    ? AAS_MY_AGG : AAS_LEX_AGG;
-            else
-                return AAS_PKG_AGG;
+            all_flags |= (PL_op->op_private & OPpSPLIT_LEX)
+                            ? ((o->op_private & OPpLVAL_INTRO)
+                                ? AAS_MY_AGG : AAS_LEX_AGG)
+                            : AAS_PKG_AGG;
+            goto do_next;
         }
         (*scalars_p)++;
         /* other args of split can't be returned */
-        return AAS_SAFE_SCALAR;
+        all_flags |= AAS_SAFE_SCALAR;
+        goto do_next;
 
     case OP_UNDEF:
         /* undef counts as a scalar on the RHS:
@@ -14577,16 +14592,14 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
         /* these are all no-ops; they don't push a potentially common SV
          * onto the stack, so they are neither AAS_DANGEROUS nor
          * AAS_SAFE_SCALAR */
-        return 0;
+        goto do_next;
 
     case OP_PADRANGE: /* Ignore padrange; checking its siblings is enough */
         break;
 
     case OP_NULL:
     case OP_LIST:
-        /* these do nothing but may have children; but their children
-         * should also be treated as top-level */
-        kid_top = top;
+        /* these do nothing, but may have children */
         break;
 
     default:
@@ -14600,8 +14613,9 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
             && (o->op_private & OPpTARGET_MY))
         {
             (*scalars_p)++;
-            return S_aassign_padcheck(aTHX_ o, rhs)
-                ? AAS_LEX_SCALAR_COMM : AAS_LEX_SCALAR;
+            all_flags |= S_aassign_padcheck(aTHX_ o, rhs)
+                            ? AAS_LEX_SCALAR_COMM : AAS_LEX_SCALAR;
+            goto do_next;
         }
 
         /* if its an unrecognised, non-dangerous op, assume that it
@@ -14611,17 +14625,46 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
         break;
     }
 
-    /* XXX this assumes that all other ops are "transparent" - i.e. that
+    all_flags |= flags;
+
+    /* by default, process all kids next
+     * XXX this assumes that all other ops are "transparent" - i.e. that
      * they can return some of their children. While this true for e.g.
      * sort and grep, it's not true for e.g. map. We really need a
      * 'transparent' flag added to regen/opcodes
      */
     if (o->op_flags & OPf_KIDS) {
-        OP *kid;
-        for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
-            flags |= S_aassign_scan(aTHX_ kid, rhs, kid_top, scalars_p);
+        next_kid = cUNOPo->op_first;
+        /* these ops do nothing but may have children; but their
+         * children should also be treated as top-level */
+        if (   o == effective_top_op
+            && (o->op_type == OP_NULL || o->op_type == OP_LIST)
+        )
+            effective_top_op = next_kid;
     }
-    return flags;
+
+
+    /* If next_kid is set, someone in the code above wanted us to process
+     * that kid and all its remaining siblings.  Otherwise, work our way
+     * back up the tree */
+  do_next:
+    while (!next_kid) {
+        if (o == top_op)
+            return all_flags; /* at top; no parents/siblings to try */
+        if (OpHAS_SIBLING(o)) {
+            next_kid = o->op_sibparent;
+            if (o == effective_top_op)
+                effective_top_op = next_kid;
+        }
+        else
+            if (o == effective_top_op)
+                effective_top_op = o->op_sibparent;
+            o = o->op_sibparent; /* try parent's next sibling */
+
+    }
+    o = next_kid;
+    } /* while */
+
 }
 
 
@@ -16684,10 +16727,10 @@ Perl_rpeep(pTHX_ OP *o)
             PL_generation++;
             /* scan LHS */
             lscalars = 0;
-            l = S_aassign_scan(aTHX_ cLISTOPo->op_last,  FALSE, 1, &lscalars);
+            l = S_aassign_scan(aTHX_ cLISTOPo->op_last,  FALSE, &lscalars);
             /* scan RHS */
             rscalars = 0;
-            r = S_aassign_scan(aTHX_ cLISTOPo->op_first, TRUE, 1, &rscalars);
+            r = S_aassign_scan(aTHX_ cLISTOPo->op_first, TRUE, &rscalars);
             lr = (l|r);
 
 
