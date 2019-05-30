@@ -600,7 +600,7 @@ Perl_mg_free(pTHX_ SV *sv)
 }
 
 /*
-=for apidoc Am|void|mg_free_type|SV *sv|int how
+=for apidoc mg_free_type
 
 Remove any magic of type C<how> from the SV C<sv>.  See L</sv_magic>.
 
@@ -851,7 +851,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
 }
 
 /*
-=for apidoc Am|SV *|sv_string_from_errnum|int errnum|SV *tgtsv
+=for apidoc sv_string_from_errnum
 
 Generates the message string describing an OS error and returns it as
 an SV.  C<errnum> must be a value that C<errno> could take, identifying

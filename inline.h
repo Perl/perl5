@@ -1013,7 +1013,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
 /*
 
-=for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
+=for apidoc isUTF8_CHAR
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
@@ -1156,7 +1156,7 @@ S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 
 /*
 
-=for apidoc Am|STRLEN|isC9_STRICT_UTF8_CHAR|const U8 *s|const U8 *e
+=for apidoc isC9_STRICT_UTF8_CHAR
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
@@ -1847,7 +1847,7 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
+=for apidoc is_safe_syscall
 
 Test that the given C<pv> doesn't contain any internal C<NUL> characters.
 If it does, set C<errno> to C<ENOENT>, optionally warn, and return FALSE.

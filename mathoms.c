@@ -1729,7 +1729,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 }
 
 /*
-=for apidoc Am|HV *|pad_compname_type|PADOFFSET po
+=for apidoc pad_compname_type
 
 Looks up the type of the lexical variable at position C<po> in the
 currently-compiling pad.  If the variable is typed, the stash of the

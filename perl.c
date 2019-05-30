@@ -574,7 +574,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
 #endif
 
 /*
-=for apidoc Am|int|perl_destruct|PerlInterpreter *my_perl
+=for apidoc perl_destruct
 
 Shuts down a Perl interpreter.  See L<perlembed> for a tutorial.
 
@@ -1583,7 +1583,7 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 }
 
 /*
-=for apidoc Am|int|perl_parse|PerlInterpreter *my_perl|XSINIT_t xsinit|int argc|char **argv|char **env
+=for apidoc perl_parse
 
 Tells a Perl interpreter to parse a Perl script.  This performs most
 of the initialisation of a Perl interpreter.  See L<perlembed> for
@@ -2567,7 +2567,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 }
 
 /*
-=for apidoc Am|int|perl_run|PerlInterpreter *my_perl
+=for apidoc perl_run
 
 Tells a Perl interpreter to run its main program.  See L<perlembed>
 for a tutorial.
@@ -2722,7 +2722,7 @@ S_run_body(pTHX_ I32 oldscope)
 /*
 =head1 SV Manipulation Functions
 
-=for apidoc p||get_sv
+=for apidoc get_sv
 
 Returns the SV of the specified Perl scalar.  C<flags> are passed to
 C<gv_fetchpv>.  If C<GV_ADD> is set and the
@@ -2748,7 +2748,7 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 /*
 =head1 Array Manipulation Functions
 
-=for apidoc p||get_av
+=for apidoc get_av
 
 Returns the AV of the specified Perl global or package array with the given
 name (so it won't work on lexical variables).  C<flags> are passed 
@@ -2778,7 +2778,7 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 /*
 =head1 Hash Manipulation Functions
 
-=for apidoc p||get_hv
+=for apidoc get_hv
 
 Returns the HV of the specified Perl hash.  C<flags> are passed to
 C<gv_fetchpv>.  If C<GV_ADD> is set and the
@@ -2805,7 +2805,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 /*
 =head1 CV Manipulation Functions
 
-=for apidoc p||get_cvn_flags
+=for apidoc get_cvn_flags
 
 Returns the CV of the specified Perl subroutine.  C<flags> are passed to
 C<gv_fetchpvn_flags>.  If C<GV_ADD> is set and the Perl subroutine does not
@@ -2813,7 +2813,7 @@ exist then it will be declared (which has the same effect as saying
 C<sub name;>).  If C<GV_ADD> is not set and the subroutine does not exist
 then NULL is returned.
 
-=for apidoc p||get_cv
+=for apidoc get_cv
 
 Uses C<strlen> to get the length of C<name>, then calls C<get_cvn_flags>.
 
@@ -2857,7 +2857,7 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 
 =head1 Callback Functions
 
-=for apidoc p||call_argv
+=for apidoc call_argv
 
 Performs a callback to the specified named and package-scoped Perl subroutine 
 with C<argv> (a C<NULL>-terminated array of strings) as arguments.  See
@@ -2888,7 +2888,7 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
 }
 
 /*
-=for apidoc p||call_pv
+=for apidoc call_pv
 
 Performs a callback to the specified Perl sub.  See L<perlcall>.
 
@@ -2906,7 +2906,7 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
 }
 
 /*
-=for apidoc p||call_method
+=for apidoc call_method
 
 Performs a callback to the specified Perl method.  The blessed object must
 be on the stack.  See L<perlcall>.
@@ -2933,7 +2933,7 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
 
 /* May be called with any of a CV, a GV, or an SV containing the name. */
 /*
-=for apidoc p||call_sv
+=for apidoc call_sv
 
 Performs a callback to the Perl sub specified by the SV.
 
@@ -3096,7 +3096,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
 /* Eval a string. The G_EVAL flag is always assumed. */
 
 /*
-=for apidoc p||eval_sv
+=for apidoc eval_sv
 
 Tells Perl to C<eval> the string in the SV.  It supports the same flags
 as C<call_sv>, with the obvious exception of C<G_EVAL>.  See L<perlcall>.
@@ -3204,7 +3204,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 }
 
 /*
-=for apidoc p||eval_pv
+=for apidoc eval_pv
 
 Tells Perl to C<eval> the given string in scalar context and return an SV* result.
 
@@ -3243,7 +3243,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 /*
 =head1 Embedding Functions
 
-=for apidoc p||require_pv
+=for apidoc require_pv
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even

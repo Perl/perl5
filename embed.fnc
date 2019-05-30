@@ -1189,7 +1189,7 @@ pX	|CV *	|newXS_deffile	|NN const char *name|NN XSUBADDR_t subaddr
 Apx	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
 				|NULLOK const char *const proto|U32 flags
-Apd	|CV*	|newXS		|NULLOK const char *name|NN XSUBADDR_t subaddr\
+ApdU	|CV*	|newXS		|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *filename
 ApmdbR	|AV*	|newAV
 ApR	|OP*	|newAVREF	|NN OP* o
