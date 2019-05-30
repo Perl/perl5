@@ -363,7 +363,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+close() on a pipe now preemptively clears the PerlIO object from the
+IO SV.  This prevents a second attempt to close the already closed
+PerlIO object if a signal handler calls die() or exit() while close()
+is waiting for the child process to complete.  [perl #122112]
 
 =back
 
