@@ -2599,91 +2599,9 @@ that table:
 
     Apd |SV**   |av_fetch   |AV* ar|I32 key|I32 lval
 
-The second column is the return type, the third column the name.  Columns
-after that are the arguments.  The first column is a set of flags:
-
-=over 3
-
-=item A
-
-This function is a part of the public
-API.  All such functions should also
-have 'd', very few do not.
-
-=item p
-
-This function has a C<Perl_> prefix; i.e. it is defined as
-C<Perl_av_fetch>.
-
-=item d
-
-This function has documentation using the C<apidoc> feature which we'll
-look at in a second.  Some functions have 'd' but not 'A'; docs are good.
-
-=back
-
-Other available flags are:
-
-=over 3
-
-=item s
-
-This is a static function and is defined as C<STATIC S_whatever>, and
-usually called within the sources as C<whatever(...)>.
-
-=item n
-
-This does not need an interpreter context, so the definition has no
-C<pTHX>, and it follows that callers don't use C<aTHX>.  (See
-L</Background and PERL_IMPLICIT_CONTEXT>.)
-
-=item r
-
-This function never returns; C<croak>, C<exit> and friends.
-
-=item f
-
-This function takes a variable number of arguments, C<printf> style.
-The argument list should end with C<...>, like this:
-
-    Afprd   |void   |croak          |const char* pat|...
-
-=item M
-
-This function is part of the experimental development API, and may change
-or disappear without notice.
-
-=item o
-
-This function should not have a compatibility macro to define, say,
-C<Perl_parse> to C<parse>.  It must be called as C<Perl_parse>.
-
-=item x
-
-This function isn't exported out of the Perl core.
-
-=item m
-
-This is implemented as a macro.
-
-=item X
-
-This function is explicitly exported.
-
-=item E
-
-This function is visible to extensions included in the Perl core.
-
-=item b
-
-Binary backward compatibility; this function is a macro but also has
-a C<Perl_> implementation (which is exported).
-
-=item others
-
-See the comments at the top of C<embed.fnc> for others.
-
-=back
+The first column is a set of flags, the second column the return type,
+the third column the name.  Columns after that are the arguments.
+The flags are documented at the top of F<embed.fnc>.
 
 If you edit F<embed.pl> or F<embed.fnc>, you will need to run
 C<make regen_headers> to force a rebuild of F<embed.h> and other
