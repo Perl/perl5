@@ -1,16 +1,26 @@
 : BEGIN{die "You meant to run regen/embed.pl"} # Stop early if fed to perl.
 :
-: This file is processed by regen/embed.pl and autodoc.pl
-: It is used to declare the interfaces to the functions defined by perl.  All
-: non-static functions must have entries here.  Static functions need not, but
-: there is benefit to declaring them here, as it generally handles the thread
-: context parameter invisibly, as well as making sure a PERL_ARGS_ASSERT_foo
-: macro is defined, which can save you debugging time.
+: WARNING:  The meanings of some flags have been changed as of v5.31.0
+
+: This file is known to be processed by regen/embed.pl, autodoc.pl,
+: makedef.pl, Devel::PPPort, and porting/diag.t.
 :
-: Lines are of the form:
+: All non-static functions defined by perl need to be listed in this file.
+: embed.pl uses the entries here to construct proto.h to declare to the
+: compiler the function interfaces, and embed.h to create macros that present a
+: uniform interface to C code for the functions, regardless of, say, whether
+: the perl is threaded or not.
+
+: Static functions need not appear here, but there is benefit to declaring them
+: here, as it generally handles the thread context parameter invisibly, as well
+: as making sure a PERL_ARGS_ASSERT_foo macro is defined, which can save you
+: debugging time.
+:
+: Lines in this file are of the form:
 :    flags|return_type|function_name|arg1|arg2|...|argN
 :
-: A line may be continued on another by ending it with a backslash.
+: A function taking no parameters will have no 'arg' elements.
+: A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
 :
 : The default without flags is to declare a function for internal perl-core use
@@ -18,23 +28,52 @@
 : modify this.  Most non-static functions should have the 'p' flag to avoid
 : namespace clashes with programs that embed perl.
 :
-: flags are single letters with following meanings:
+: Scattered around the perl source are lines of the form:
+:
+:   =for apidoc name
+:
+: and
+:
+:   =for apidoc flags|return_type|name|arg1|arg2|...|argN
+:
+: and with the same meanings as the lines in this file.  autodoc uses these
+: lines in conjunction with this file to construct perlapi.pod.  For entries of
+: the first form, there must be a corresponding entry in this file, and the
+: purpose of the line is to associate the pod accompanying it with the
+: interface defined in this file.  The second form is used to define the
+: interface for the documentation when there is no entry in this file, hence it
+: will be for something that isn't a non-static function: a macro of some kind,
+: a constant, or some other entity that it wishes to have documented.  (If
+: there is also an entry in this file it overrides the apidoc line, and
+: autodoc.pl will warn.) 'return_type' in these lines can be empty, unlike in
+: this file.  The entries in this file that have corresponding '=for apidoc'
+: entries should have the flag 'd' set in this file.
+:
+: Devel::PPPort also looks at both this file and the '=for apidoc' lines.  In
+: part it is to construct lists of functions that are or are not backported.
+:
+: makedef.pl uses this file for constructing the export list
+:
+: porting/diag.t checks some things for consistency based on this file.
+:
+: 'flags' is a string of single letters.  Most of the flags are meaningful only
+: to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
+: comments here don't include how Devel::PPPort or diag.t use them:
 :
 :   A  Available fully everywhere (usually part of the public API):
 :
 :         add entry to the list of exported symbols (unless e or m);
-:         any doc entry goes in perlapi.pod rather than perlintern.pod.  If no
-:	     documentation is furnished for this function, and M is also
-:	     specified, the function is not listed as part of the public API.
-:	     If M isn't specified, and no documentation is furnished, the
-:	     function is listed in perlapi as existing and being undocumented
+:         any doc entry goes in perlapi.pod rather than perlintern.pod.  If
+:            none specified, autodoc.pl does not list this function/macro as
+:            part of the public API.  If x isn't specified, and no
+:            documentation is furnished, autodoc.pl lists this in perlapi as
+:            existing and being undocumented.
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
-:      If the function is only exported for use in a public
-:      macro, see X.
+:      If the function is only exported for use in a public macro, see X.
 :
 :   a  Allocates memory a la malloc/calloc.  Also implies "R".
-:      This should only be on functions which returns 'empty' memory
+:      This flag should only be on functions which return 'empty' memory
 :      which has no other pointers to it, and which does not contain
 :      any pointers to other things. So for example realloc() can't be
 :      'a'.
@@ -60,7 +99,7 @@
 :
 :      For functions, like wrappers, whose macro shortcut doesn't call the
 :      function, but which, for whatever reason, aren't considered legacy-only,
-:      use the 'o' flag
+:      use the 'o' flag, and maybe the 'M'
 :
 :      This flag effectively causes nothing to happen if the perl interpreter
 :      is compiled with -DNO_MATHOMS; otherwise these happen:
@@ -71,21 +110,24 @@
 :   D  Function is deprecated:
 :
 :         proto.h: add __attribute__deprecated__
+:         autodoc.pl adds a note to this effect in the doc entry
 :
 :   d  Function has documentation (somewhere) in the source:
 :
-:         enables 'no docs for foo" warning in autodoc.pl
+:         enables 'no docs for foo" warning in autodoc.pl in the documentation
+:         isn't found
 :
 :   E  Visible to extensions included in the Perl core:
 :
 :         in embed.h, change "#ifdef PERL_CORE"
 :         into               "#if defined(PERL_CORE) || defined(PERL_EXT)"
 :
-:      To be usable from dynamically loaded extensions, either:
-:	  1) must be static to its containing file ("i" or "s" flag); or
+:       To be usable from dynamically loaded extensions, either:
+:	  1) it must be static to its containing file ("i" or "s" flag); or
 :         2) be combined with the "X" flag.
 :
 :   e  Not exported
+
 :         suppress entry in the list of exported symbols
 :
 :   f  Function takes a format string. If the function name =~ qr/strftime/
@@ -99,14 +141,14 @@
 :
 :         proto.h: function is declared as S_foo rather than foo unless the 'p'
 :		   flag is also given in which case 'Perl_foo' is used,
-:                PERL_STATIC_INLINE is added to declaration;
+:                PERL_STATIC_INLINE is added to the declaration
 :         embed.h: "#define foo S_foo" or Perl_foo entries added
 :
 :   M  There is an extra macro that bypasses this function
 :
 :      (requires 'p', and implies 'o')  The function exists so that callers who
 :      used the 'Perl_' form can continue to do so, but there is a macro
-:      available with out the 'Perl_' prefix that bypasses the function call,
+:      available without the 'Perl_' prefix that bypasses the function call,
 :      such as when the function has been reduced to a wrapper around another
 :      one.
 :
@@ -121,7 +163,7 @@
 :
 :      Normally, the name of the function or macro must contain all \w
 :      characters, and a warning is raised otherwise.  This flag suppresses
-:      that warning.
+:      that warning, so that weird things can be documented
 :
 :   n  Has no arguments (used only in =for apidoc entries)
 :
@@ -130,7 +172,11 @@
 :
 :   O  Has a perl_ compatibility macro.
 :
-:      The really OLD name for API funcs
+:      The really OLD name for API funcs.
+
+:      autodoc.pl adds a note that the perl_ form of this function is
+:      deprecated.
+:
 :
 :   o  Has no Perl_foo or S_foo compatibility macro:
 :
@@ -138,9 +184,12 @@
 :	doesn't call the function specified by this entry.  This is typically
 :	done for a function that effectively just wraps another one, and where
 :	the macro form calls the underlying function directly.  For these, also
-:	specify the 'm' flag.  Legacy-only functions should instead use 'b'.
+:	specify the 'M' flag.  Legacy-only functions should instead use 'b'.
 :
 :         embed.h: suppress "#define foo Perl_foo"
+:
+:      autodoc.pl adds a note that this function must be explicitly called as
+:      Perl_$name with an aTHX_ parameter, unless the 'M' flag is specified.
 :
 :   P  Pure function:
 :
@@ -190,9 +239,7 @@
 :             "#define foo Perl_foo",      rather than
 :             "#define foo(a,b,c) Perl_foo(aTHX_ a,b,c)
 :
-:   U  Suppress usage example in autogenerated documentation
-:
-:         (currently no effect)
+:   U  autodoc.pl will not output a usage example
 :
 :   W  Add a _pDEPTH argument to function prototypes, and an _aDEPTH
 :      argument to the function calls. This means that under DEBUGGING
@@ -214,16 +261,15 @@
 :         any doc entry is marked that it may change.  Also used to suppress
 :	  making a doc entry if it would just be a placeholder.
 :
-: (see also L<perlguts/Internal Functions> for those flags.)
+: In this file, pointer parameters that must not be passed NULLs should be
+: prefixed with NN.
 :
-: Pointer parameters that must not be passed NULLs should be prefixed with NN.
+: And, pointer parameters that may be NULL should be prefixed with NULLOK.
+: This has no effect on output yet.  It's a notation for the maintainers to
+: know "I have defined whether NULL is OK or not" rather than having neither
+: NULL or NULLOK, which is ambiguous.
 :
-: Pointer parameters that may be NULL should be prefixed with NULLOK.  This has
-: no effect on output yet.  It's a notation for the maintainers to know "I have
-: defined whether NULL is OK or not" rather than having neither NULL or NULLOK,
-: which is ambiguous.
-:
-: Individual flags may be separated by whitespace.
+: Individual flags may be separated by non-tab whitespace.
 
 #if defined(PERL_IMPLICIT_SYS)
 ATo	|PerlInterpreter*|perl_alloc_using \
