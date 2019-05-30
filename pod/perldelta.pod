@@ -137,7 +137,9 @@ If there was something important to note about this change, include that here.
 
 =item *
 
-XXX
+Pod::Parser has been removed from the core distribution.
+It still is available for download from CPAN.  This resolves [perl
+#119439].
 
 =back
 

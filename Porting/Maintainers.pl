@@ -896,11 +896,6 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Pod-Escapes],
     },
 
-    'Pod::Parser' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.63.tar.gz',
-        'FILES'        => q[cpan/Pod-Parser],
-    },
-
     'Pod::Perldoc' => {
         'DISTRIBUTION' => 'MALLEN/Pod-Perldoc-3.28.tar.gz',
         'FILES'        => q[cpan/Pod-Perldoc],
@@ -1363,10 +1358,7 @@ use File::Glob qw(:case);
                 lib/Net/protoent.{pm,t}
                 lib/Net/servent.{pm,t}
                 lib/PerlIO.pm
-                lib/Pod/t/InputObjects.t
-                lib/Pod/t/Select.t
                 lib/Pod/t/Usage.t
-                lib/Pod/t/utils.t
                 lib/SelectSaver.{pm,t}
                 lib/Symbol.{pm,t}
                 lib/Thread.{pm,t}

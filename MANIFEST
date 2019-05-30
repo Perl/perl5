@@ -1539,48 +1539,6 @@ cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
-cpan/Pod-Parser/lib/Pod/Find.pm			find POD documents in directory trees
-cpan/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
-cpan/Pod-Parser/lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
-cpan/Pod-Parser/lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
-cpan/Pod-Parser/lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
-cpan/Pod-Parser/lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
-cpan/Pod-Parser/scripts/podselect.PL	Pod-Parser - Pod::Select::podselect() CLI
-cpan/Pod-Parser/t/pod/contains_bad_pod.xr	Pod-Parser test file
-cpan/Pod-Parser/t/pod/contains_pod.t		Pod-Parser test
-cpan/Pod-Parser/t/pod/contains_pod.xr		Pod-Parser test file
-cpan/Pod-Parser/t/pod/empty.xr
-cpan/Pod-Parser/t/pod/emptycmd.t		Test empty pod directives
-cpan/Pod-Parser/t/pod/emptycmd.xr		Expected results for emptycmd.t
-cpan/Pod-Parser/t/pod/find.t			See if Pod::Find works
-cpan/Pod-Parser/t/pod/for.t			Test =for directive
-cpan/Pod-Parser/t/pod/for.xr			Expected results for for.t
-cpan/Pod-Parser/t/pod/headings.t		Test =head directives
-cpan/Pod-Parser/t/pod/headings.xr		Expected results for headings.t
-cpan/Pod-Parser/t/pod/include.t			Test =include directive
-cpan/Pod-Parser/t/pod/include.xr		Expected results for include.t
-cpan/Pod-Parser/t/pod/included.t		Test =include directive
-cpan/Pod-Parser/t/pod/included.xr		Expected results for included.t
-cpan/Pod-Parser/t/pod/lref.t			Test L<...> sequences
-cpan/Pod-Parser/t/pod/lref.xr			Expected results for lref.t
-cpan/Pod-Parser/t/pod/multiline_items.t		Test multiline =items
-cpan/Pod-Parser/t/pod/multiline_items.xr	Expected results for multiline_items.t
-cpan/Pod-Parser/t/pod/nested_items.t		Test nested =items
-cpan/Pod-Parser/t/pod/nested_items.xr		Expected results for nested_items.t
-cpan/Pod-Parser/t/pod/nested_seqs.t		Test nested interior sequences
-cpan/Pod-Parser/t/pod/nested_seqs.xr		Expected results for nested_seqs.t
-cpan/Pod-Parser/t/pod/oneline_cmds.t		Test single paragraph ==cmds
-cpan/Pod-Parser/t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
-cpan/Pod-Parser/t/pod/podselect.t		Test Pod::Select
-cpan/Pod-Parser/t/pod/podselect.xr		Expected results for podselect.t
-cpan/Pod-Parser/t/pod/selfcheck.t
-cpan/Pod-Parser/t/pod/special_seqs.t		Test "special" interior sequences
-cpan/Pod-Parser/t/pod/special_seqs.xr		Expected results for special_seqs.t
-cpan/Pod-Parser/t/pod/testcmp.pl		Module to compare output against expected results
-cpan/Pod-Parser/t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
-cpan/Pod-Parser/t/pod/testpchk.pl		Module to test Pod::Checker for a given file
-cpan/Pod-Parser/t/pod/testpods/lib/Pod/Stuff.pm	Sample data for t/pod/find.t
-cpan/Pod-Parser/t/pod/twice.t			Test Pod::Parser
 cpan/Pod-Perldoc/corpus/no-head.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/corpus/perlfunc.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/corpus/utf8.pod		test file for Pod-Perldoc
@@ -4684,10 +4642,7 @@ lib/perl5db/t/uncalled-subroutine	Tests for the Perl debugger
 lib/perl5db/t/with-subroutine		Tests for the Perl debugger
 lib/perlbug.t			Tests for the Perl bug reporter
 lib/PerlIO.pm			PerlIO support module
-lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
-lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/Usage.t		See if Pod::Usage works
-lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
 lib/sigtrap.pm			For trapping an abort and giving traceback
