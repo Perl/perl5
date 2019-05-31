@@ -239,6 +239,8 @@ means arg not present, 1 is empty string/null byte */
 #   define ninstr(big, bigend, little, lend)                                \
             ((char *) memmem((big), (bigend) - (big),                       \
                              (little), (lend) - (little)))
+#else
+#   define ninstr(a,b,c,d) Perl_ninstr(a,b,c,d)
 #endif
 
 #ifdef __Lynx__

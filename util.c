@@ -591,7 +591,7 @@ Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc Am|char *|ninstr|char * big|char * bigend|char * little|char * little_end
+=for apidoc ninstr
 
 Find the first (leftmost) occurrence of a sequence of bytes within another
 sequence.  This is the Perl version of C<strstr()>, extended to handle
@@ -652,7 +652,7 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc Am|char *|rninstr|char * big|char * bigend|char * little|char * little_end
+=for apidoc rninstr
 
 Like C<L</ninstr>>, but instead finds the final (rightmost) occurrence of a
 sequence of bytes within another sequence, returning C<NULL> if there is no
@@ -1287,7 +1287,7 @@ Perl_vform(pTHX_ const char *pat, va_list *args)
 }
 
 /*
-=for apidoc Am|SV *|mess|const char *pat|...
+=for apidoc mess
 
 Take a sprintf-style format pattern and argument list.  These are used to
 generate a string message.  If the message does not end with a newline,
@@ -1368,7 +1368,7 @@ Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
 }
 
 /*
-=for apidoc Am|SV *|mess_sv|SV *basemsg|bool consume
+=for apidoc mess_sv
 
 Expands a message, intended for the user, to include an indication of
 the current location in the code, if the message does not already appear
@@ -1472,7 +1472,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 }
 
 /*
-=for apidoc Am|SV *|vmess|const char *pat|va_list *args
+=for apidoc vmess
 
 C<pat> and C<args> are a sprintf-style format pattern and encapsulated
 argument list, respectively.  These are used to generate a string message.  If
@@ -1584,7 +1584,7 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 }
 
 /*
-=for apidoc Am|OP *|die_sv|SV *baseex
+=for apidoc die_sv
 
 Behaves the same as L</croak_sv>, except for the return type.
 It should be used only where the C<OP *> return type is required.
@@ -1606,7 +1606,7 @@ Perl_die_sv(pTHX_ SV *baseex)
 MSVC_DIAG_RESTORE
 
 /*
-=for apidoc Am|OP *|die|const char *pat|...
+=for apidoc die
 
 Behaves the same as L</croak>, except for the return type.
 It should be used only where the C<OP *> return type is required.
@@ -1649,7 +1649,7 @@ Perl_die(pTHX_ const char* pat, ...)
 MSVC_DIAG_RESTORE
 
 /*
-=for apidoc Am|void|croak_sv|SV *baseex
+=for apidoc croak_sv
 
 This is an XS interface to Perl's C<die> function.
 
@@ -1679,7 +1679,7 @@ Perl_croak_sv(pTHX_ SV *baseex)
 }
 
 /*
-=for apidoc Am|void|vcroak|const char *pat|va_list *args
+=for apidoc vcroak
 
 This is an XS interface to Perl's C<die> function.
 
@@ -1712,7 +1712,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 }
 
 /*
-=for apidoc Am|void|croak|const char *pat|...
+=for apidoc croak
 
 This is an XS interface to Perl's C<die> function.
 
@@ -1759,7 +1759,7 @@ Perl_croak(pTHX_ const char *pat, ...)
 }
 
 /*
-=for apidoc Am|void|croak_no_modify
+=for apidoc croak_no_modify
 
 Exactly equivalent to C<Perl_croak(aTHX_ "%s", PL_no_modify)>, but generates
 terser object code than using C<Perl_croak>.  Less code used on exception code
@@ -1802,7 +1802,7 @@ Perl_croak_popstack(void)
 }
 
 /*
-=for apidoc Am|void|warn_sv|SV *baseex
+=for apidoc warn_sv
 
 This is an XS interface to Perl's C<warn> function.
 
@@ -1830,7 +1830,7 @@ Perl_warn_sv(pTHX_ SV *baseex)
 }
 
 /*
-=for apidoc Am|void|vwarn|const char *pat|va_list *args
+=for apidoc vwarn
 
 This is an XS interface to Perl's C<warn> function.
 
@@ -1858,7 +1858,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 }
 
 /*
-=for apidoc Am|void|warn|const char *pat|...
+=for apidoc warn
 
 This is an XS interface to Perl's C<warn> function.
 

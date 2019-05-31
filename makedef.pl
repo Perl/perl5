@@ -752,7 +752,7 @@ unless ($define{'USE_QUADMATH'}) {
 {
     my %seen;
     my ($embed) = setup_embed($ARGS{TARG_DIR});
-    my $excludedre = $define{'NO_MATHOMS'} ? qr/[xmib]/ : qr/[xmi]/;
+    my $excludedre = $define{'NO_MATHOMS'} ? qr/[emib]/ : qr/[emi]/;
 
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;

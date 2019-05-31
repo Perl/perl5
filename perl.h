@@ -1675,8 +1675,6 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #ifdef HAS_STRLCAT
 #  define my_strlcat    strlcat
-#else
-#  define my_strlcat    Perl_my_strlcat
 #endif
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -1689,14 +1687,10 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #ifdef HAS_STRLCPY
 #  define my_strlcpy	strlcpy
-#else
-#  define my_strlcpy	Perl_my_strlcpy
 #endif
 
 #ifdef HAS_STRNLEN
 #  define my_strnlen	strnlen
-#else
-#  define my_strnlen	Perl_my_strnlen
 #endif
 
 /*

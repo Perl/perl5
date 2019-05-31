@@ -24,7 +24,7 @@ Stack marker variable for the XSUB.  See C<L</dMARK>>.
 Opening bracket for arguments on a callback.  See C<L</PUTBACK>> and
 L<perlcall>.
 
-=for apidoc Ams||dSP
+=for apidoc Amns||dSP
 Declares a local copy of perl's stack pointer for the XSUB, available via
 the C<SP> macro.  See C<L</SP>>.
 
@@ -35,17 +35,17 @@ a local copy of perl's stack pointer, available via the C<SP> macro.
 See C<L<perlapi/SP>>.  (Available for backward source code compatibility with
 the old (Perl 5.005) thread model.)
 
-=for apidoc Ams||dMARK
+=for apidoc Amns||dMARK
 Declare a stack marker variable, C<mark>, for the XSUB.  See C<L</MARK>> and
 C<L</dORIGMARK>>.
 
-=for apidoc Ams||dORIGMARK
+=for apidoc Amns||dORIGMARK
 Saves the original stack mark for the XSUB.  See C<L</ORIGMARK>>.
 
 =for apidoc AmU||ORIGMARK
 The original stack mark for the XSUB.  See C<L</dORIGMARK>>.
 
-=for apidoc Ams||SPAGAIN
+=for apidoc Amns||SPAGAIN
 Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 =cut */
@@ -102,7 +102,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define DIE return Perl_die
 
 /*
-=for apidoc Ams||PUTBACK
+=for apidoc Amns||PUTBACK
 Closing bracket for XSUB arguments.  This is usually handled by C<xsubpp>.
 See C<L</PUSHMARK>> and L<perlcall> for other uses.
 

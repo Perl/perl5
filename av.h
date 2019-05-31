@@ -49,7 +49,7 @@ Null AV pointer.
 =for apidoc Am|int|AvFILL|AV* av
 Same as C<av_top_index()> or C<av_tindex()>.
 
-=for apidoc Am|int|av_tindex|AV* av
+=for apidoc av_tindex
 Same as C<av_top_index()>.
 
 =cut

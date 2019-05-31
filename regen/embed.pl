@@ -51,7 +51,7 @@ sub full_name ($$) { # Returns the function name with potentially the
     my ($func, $flags) = @_;
 
     return "Perl_$func" if $flags =~ /p/;
-    return "S_$func" if $flags =~ /[si]/;
+    return "S_$func" if $flags =~ /[Si]/;
     return $func;
 }
 
@@ -81,12 +81,12 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabDdEfiMmnOoPpRrsUWXx] ) /x) {
+        if ($flags =~ / ( [^AabDdEefiMmTOoPpRrSUWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
         my $has_depth = ( $flags =~ /W/ );
-	my $has_context = ( $flags !~ /n/ );
+	my $has_context = ( $flags !~ /T/ );
 	my $never_returns = ( $flags =~ /r/ );
 	my $binarycompat = ( $flags =~ /b/ );
 	my $commented_out = ( ! $binarycompat && $flags =~ /m/ );
@@ -99,17 +99,17 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
 	}
 
-	die_at_end "$plain_func: s flag is mutually exclusive from the i and p plags"
-					    if $flags =~ /s/ && $flags =~ /[ip]/;
+	die_at_end "$plain_func: S flag is mutually exclusive from the i and p plags"
+					    if $flags =~ /S/ && $flags =~ /[ip]/;
 
 	my $static_inline = 0;
-	if ($flags =~ /([si])/) {
+	if ($flags =~ /([Si])/) {
 	    my $type;
 	    if ($never_returns) {
-		$type = $1 eq 's' ? "PERL_STATIC_NO_RET" : "PERL_STATIC_INLINE_NO_RET";
+		$type = $1 eq 'S' ? "PERL_STATIC_NO_RET" : "PERL_STATIC_INLINE_NO_RET";
 	    }
 	    else {
-		$type = $1 eq 's' ? "STATIC" : "PERL_STATIC_INLINE";
+		$type = $1 eq 'S' ? "STATIC" : "PERL_STATIC_INLINE";
 	    }
 	    $retval = "$type $retval";
 	    die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
@@ -123,6 +123,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 		$retval = "PERL_CALLCONV $retval";
 	    }
 	}
+
+	die_at_end "M flag requires p flag" if $flags =~ /M/ && $flags !~ /p/;
+
 	$func = full_name($plain_func, $flags);
 	$ret = "";
 	$ret .= "#ifndef NO_MATHOMS\n" if $binarycompat;
@@ -302,9 +305,9 @@ sub embed_h {
 	}
 	my $ret = "";
 	my ($flags,$retval,$func,@args) = @$_;
-	unless ($flags =~ /[om]/) {
+	unless ($flags =~ /[omM]/) {
 	    my $args = scalar @args;
-	    if ($flags =~ /n/) {
+	    if ($flags =~ /T/) {
 		my $full_name = full_name($func, $flags);
 		next if $full_name eq $func;	# Don't output a no-op.
 		$ret = hide($func, $full_name);

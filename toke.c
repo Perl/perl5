@@ -666,7 +666,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 #endif
 
 /*
-=for apidoc Amx|void|lex_start|SV *line|PerlIO *rsfp|U32 flags
+=for apidoc lex_start
 
 Creates and initialises a new lexer/parser state object, supplying
 a context in which to lex and parse from a new source of Perl code.
@@ -831,7 +831,7 @@ Perl_parser_free_nexttoke_ops(pTHX_  yy_parser *parser, OPSLAB *slab)
 
 
 /*
-=for apidoc AmxU|SV *|PL_parser-E<gt>linestr
+=for apidoc AmxUN|SV *|PL_parser-E<gt>linestr
 
 Buffer scalar containing the chunk currently under consideration of the
 text currently being lexed.  This is always a plain string scalar (for
@@ -858,7 +858,7 @@ lexing position is pointed to by L</PL_parser-E<gt>bufptr>.  Direct use
 of these pointers is usually preferable to examination of the scalar
 through normal scalar means.
 
-=for apidoc AmxU|char *|PL_parser-E<gt>bufend
+=for apidoc AmxUN|char *|PL_parser-E<gt>bufend
 
 Direct pointer to the end of the chunk of text currently being lexed, the
 end of the lexer buffer.  This is equal to C<SvPVX(PL_parser-E<gt>linestr)
@@ -866,7 +866,7 @@ end of the lexer buffer.  This is equal to C<SvPVX(PL_parser-E<gt>linestr)
 always located at the end of the buffer, and does not count as part of
 the buffer's contents.
 
-=for apidoc AmxU|char *|PL_parser-E<gt>bufptr
+=for apidoc AmxUN|char *|PL_parser-E<gt>bufptr
 
 Points to the current position of lexing inside the lexer buffer.
 Characters around this point may be freely examined, within
@@ -884,7 +884,7 @@ Interpretation of the buffer's octets can be abstracted out by
 using the slightly higher-level functions L</lex_peek_unichar> and
 L</lex_read_unichar>.
 
-=for apidoc AmxU|char *|PL_parser-E<gt>linestart
+=for apidoc AmxUN|char *|PL_parser-E<gt>linestart
 
 Points to the start of the current line inside the lexer buffer.
 This is useful for indicating at which column an error occurred, and
@@ -895,7 +895,7 @@ a newline; the function L</lex_read_to> handles this detail.
 */
 
 /*
-=for apidoc Amx|bool|lex_bufutf8
+=for apidoc lex_bufutf8
 
 Indicates whether the octets in the lexer buffer
 (L</PL_parser-E<gt>linestr>) should be interpreted as the UTF-8 encoding
@@ -926,7 +926,7 @@ Perl_lex_bufutf8(pTHX)
 }
 
 /*
-=for apidoc Amx|char *|lex_grow_linestr|STRLEN len
+=for apidoc lex_grow_linestr
 
 Reallocates the lexer buffer (L</PL_parser-E<gt>linestr>) to accommodate
 at least C<len> octets (including terminating C<NUL>).  Returns a
@@ -989,7 +989,7 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 }
 
 /*
-=for apidoc Amx|void|lex_stuff_pvn|const char *pv|STRLEN len|U32 flags
+=for apidoc lex_stuff_pvn
 
 Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
@@ -1084,7 +1084,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 }
 
 /*
-=for apidoc Amx|void|lex_stuff_pv|const char *pv|U32 flags
+=for apidoc lex_stuff_pv
 
 Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
@@ -1113,7 +1113,7 @@ Perl_lex_stuff_pv(pTHX_ const char *pv, U32 flags)
 }
 
 /*
-=for apidoc Amx|void|lex_stuff_sv|SV *sv|U32 flags
+=for apidoc lex_stuff_sv
 
 Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
@@ -1145,7 +1145,7 @@ Perl_lex_stuff_sv(pTHX_ SV *sv, U32 flags)
 }
 
 /*
-=for apidoc Amx|void|lex_unstuff|char *ptr
+=for apidoc lex_unstuff
 
 Discards text about to be lexed, from L</PL_parser-E<gt>bufptr> up to
 C<ptr>.  Text following C<ptr> will be moved, and the buffer shortened.
@@ -1179,7 +1179,7 @@ Perl_lex_unstuff(pTHX_ char *ptr)
 }
 
 /*
-=for apidoc Amx|void|lex_read_to|char *ptr
+=for apidoc lex_read_to
 
 Consume text in the lexer buffer, from L</PL_parser-E<gt>bufptr> up
 to C<ptr>.  This advances L</PL_parser-E<gt>bufptr> to match C<ptr>,
@@ -1210,7 +1210,7 @@ Perl_lex_read_to(pTHX_ char *ptr)
 }
 
 /*
-=for apidoc Amx|void|lex_discard_to|char *ptr
+=for apidoc lex_discard_to
 
 Discards the first part of the L</PL_parser-E<gt>linestr> buffer,
 up to C<ptr>.  The remaining content of the buffer will be moved, and
@@ -1282,7 +1282,7 @@ Perl_notify_parser_that_changed_to_utf8(pTHX)
 }
 
 /*
-=for apidoc Amx|bool|lex_next_chunk|U32 flags
+=for apidoc lex_next_chunk
 
 Reads in the next chunk of text to be lexed, appending it to
 L</PL_parser-E<gt>linestr>.  This should be called when lexing code has
@@ -1422,7 +1422,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|I32|lex_peek_unichar|U32 flags
+=for apidoc lex_peek_unichar
 
 Looks ahead one (Unicode) character in the text currently being lexed.
 Returns the codepoint (unsigned integer value) of the next character,
@@ -1491,7 +1491,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|I32|lex_read_unichar|U32 flags
+=for apidoc lex_read_unichar
 
 Reads the next (Unicode) character in the text currently being lexed.
 Returns the codepoint (unsigned integer value) of the character read,
@@ -1529,7 +1529,7 @@ Perl_lex_read_unichar(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|void|lex_read_space|U32 flags
+=for apidoc lex_read_space
 
 Reads optional spaces, in Perl style, in the text currently being
 lexed.  The spaces may include ordinary whitespace characters and
@@ -1604,7 +1604,7 @@ Perl_lex_read_space(pTHX_ U32 flags)
 
 /*
 
-=for apidoc EXMp|bool|validate_proto|SV *name|SV *proto|bool warn
+=for apidoc validate_proto
 
 This function performs syntax checking on a prototype, C<proto>.
 If C<warn> is true, any illegal characters or mismatched brackets
@@ -12268,7 +12268,7 @@ Perl_keyword_plugin_standard(pTHX_
 }
 
 /*
-=for apidoc Amx|void|wrap_keyword_plugin|Perl_keyword_plugin_t new_plugin|Perl_keyword_plugin_t *old_plugin_p
+=for apidoc wrap_keyword_plugin
 
 Puts a C function into the chain of keyword plugins.  This is the
 preferred way to manipulate the L</PL_keyword_plugin> variable.
@@ -12387,7 +12387,7 @@ S_parse_expr(pTHX_ I32 fakeeof, U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_arithexpr|U32 flags
+=for apidoc parse_arithexpr
 
 Parse a Perl arithmetic expression.  This may contain operators of precedence
 down to the bit shift operators.  The expression must be followed (and thus
@@ -12419,7 +12419,7 @@ Perl_parse_arithexpr(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_termexpr|U32 flags
+=for apidoc parse_termexpr
 
 Parse a Perl term expression.  This may contain operators of precedence
 down to the assignment operators.  The expression must be followed (and thus
@@ -12451,7 +12451,7 @@ Perl_parse_termexpr(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_listexpr|U32 flags
+=for apidoc parse_listexpr
 
 Parse a Perl list expression.  This may contain operators of precedence
 down to the comma operator.  The expression must be followed (and thus
@@ -12483,7 +12483,7 @@ Perl_parse_listexpr(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_fullexpr|U32 flags
+=for apidoc parse_fullexpr
 
 Parse a single complete Perl expression.  This allows the full
 expression grammar, including the lowest-precedence operators such
@@ -12516,7 +12516,7 @@ Perl_parse_fullexpr(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_block|U32 flags
+=for apidoc parse_block
 
 Parse a single complete Perl code block.  This consists of an opening
 brace, a sequence of statements, and a closing brace.  The block
@@ -12552,7 +12552,7 @@ Perl_parse_block(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_barestmt|U32 flags
+=for apidoc parse_barestmt
 
 Parse a single unadorned Perl statement.  This may be a normal imperative
 statement or a declaration that has compile-time effect.  It does not
@@ -12590,7 +12590,7 @@ Perl_parse_barestmt(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|SV *|parse_label|U32 flags
+=for apidoc parse_label
 
 Parse a single label, possibly optional, of the type that may prefix a
 Perl statement.  It is up to the caller to ensure that the dynamic parser
@@ -12660,7 +12660,7 @@ Perl_parse_label(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_fullstmt|U32 flags
+=for apidoc parse_fullstmt
 
 Parse a single complete Perl statement.  This may be a normal imperative
 statement or a declaration that has compile-time effect, and may include
@@ -12695,7 +12695,7 @@ Perl_parse_fullstmt(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc Amx|OP *|parse_stmtseq|U32 flags
+=for apidoc parse_stmtseq
 
 Parse a sequence of zero or more Perl statements.  These may be normal
 imperative statements, including optional labels, or declarations

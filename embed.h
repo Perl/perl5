@@ -935,14 +935,20 @@
 #define whichsig_sv(a)		Perl_whichsig_sv(aTHX_ a)
 #define wrap_keyword_plugin(a,b)	Perl_wrap_keyword_plugin(aTHX_ a,b)
 #define wrap_op_checker(a,b,c)	Perl_wrap_op_checker(aTHX_ a,b,c)
-#if !(defined(HAS_MEMMEM))
-#define ninstr			Perl_ninstr
-#endif
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif
 #if !defined(EBCDIC)
 #define _variant_byte_number	S__variant_byte_number
+#endif
+#if !defined(HAS_STRLCAT)
+#define my_strlcat		Perl_my_strlcat
+#endif
+#if !defined(HAS_STRLCPY)
+#define my_strlcpy		Perl_my_strlcpy
+#endif
+#if !defined(HAS_STRNLEN)
+#define my_strnlen		Perl_my_strnlen
 #endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)

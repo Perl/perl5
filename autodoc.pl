@@ -22,6 +22,9 @@
 # indented. The next input line that is a pod directive terminates this 
 # heading-level documentation.
 
+# The meanings of the flags fields in embed.fnc and the source code is
+# documented at the top of embed.fnc.
+
 use strict;
 
 if (@ARGV) {
@@ -104,9 +107,12 @@ HDR_DOC:
             next FUNC;
         }
 	if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
-	    my $proto = $1;
+	    my $proto_in_file = $1;
+	    my $proto = $proto_in_file;
 	    $proto = "||$proto" unless $proto =~ /\|/;
-	    my($flags, $ret, $name, @args) = split /\|/, $proto;
+	    my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
+            warn ("'$name' not \\w+ in '$proto_in_file' in $file")
+                        if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
 	    my $docs = "";
 DOC:
 	    while (defined($doc = $get_next_line->())) {
@@ -122,45 +128,20 @@ DOC:
 	    }
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 
-	    # Check the consistency of the flags
-	    my ($embed_where, $inline_where);
-	    my ($embed_may_change, $inline_may_change);
-
-	    my $docref = delete $funcflags{$name};
-	    if ($docref and %$docref) {
-		$embed_where = $docref->{flags} =~ /A/ ? 'api' : 'guts';
-		$embed_may_change = $docref->{flags} =~ /M/;
-                $flags .= 'D' if $docref->{flags} =~ /D/;
+	    # If the entry is also in embed.fnc, it should be defined
+            # completely there, but not here
+	    my $embed_docref = delete $funcflags{$name};
+	    if ($embed_docref and %$embed_docref) {
+                warn "embed.fnc entry overrides redundant information in"
+                   . " '$proto_in_file' in $file" if $flags || $ret || @args;
+                $flags = $embed_docref->{'flags'};
+                $ret = $embed_docref->{'retval'};
+		@args = @{$embed_docref->{args}};
 	    } else {
 		$missing{$name} = $file;
 	    }
-	    if ($flags =~ /m/) {
-		$inline_where = $flags =~ /A/ ? 'api' : 'guts';
-		$inline_may_change = $flags =~ /x/;
 
-		if (defined $embed_where && $inline_where ne $embed_where) {
-		    warn "Function '$name' inconsistency: embed.fnc says $embed_where, Pod says $inline_where";
-		}
-
-		if (defined $embed_may_change
-		    && $inline_may_change ne $embed_may_change) {
-		    my $message = "Function '$name' inconsistency: ";
-		    if ($embed_may_change) {
-			$message .= "embed.fnc says 'may change', Pod does not";
-		    } else {
-			$message .= "Pod says 'may change', embed.fnc does not";
-		    }
-		    warn $message;
-		}
-	    } elsif (!defined $embed_where) {
-		warn "Unable to place $name!\n";
-		next;
-	    } else {
-		$inline_where = $embed_where;
-		$flags .= 'x' if $embed_may_change;
-		@args = @{$docref->{args}};
-		$ret = $docref->{retval};
-	    }
+            my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
 
 	    if (exists $docs{$inline_where}{$curheader}{$name}) {
                 warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
@@ -202,63 +183,74 @@ existing code.\n\n$docs";
         $docs = "\n\nNOTE: this function is experimental and may change or be
 removed without notice.\n\n$docs" if $flags =~ /x/;
     }
+
+    # Is Perl_, but no #define foo # Perl_foo
+    my $p = $flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/;
+
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
-	if $flags =~ /p/;
-    $docs .= "NOTE: this function must be explicitly called as Perl_$name with an aTHX_ parameter.\n\n"
-        if $flags =~ /o/;
+	if $flags =~ /O/;
+    if ($p) {
+        $docs .= "NOTE: this function must be explicitly called as Perl_$name";
+        $docs .= " with an aTHX_ parameter" if $flags !~ /T/;
+        $docs .= ".\n\n"
+    }
 
     print $fh "=item $name\nX<$name>\n$docs";
 
     if ($flags =~ /U/) { # no usage
+        warn("U and s flags are incompatible") if $flags =~ /s/;
 	# nothing
-    } elsif ($flags =~ /s/) { # semicolon ("dTHR;")
-	print $fh "\t\t$name;\n\n";
-    } elsif ($flags =~ /n/) { # no args
-	print $fh "\t$ret\t$name\n\n";
-    } else { # full usage
-	my $p            = $flags =~ /o/; # no #define foo Perl_foo
-	my $n            = "Perl_"x$p . $name;
-	my $large_ret    = length $ret > 7;
-	my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
-	                  +8+($large_ret ? 1 + length $ret : 8)
-	                  +length($n) + 1;
-	my $indent;
-	print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
-	my $long_args;
-	for (@args) {
-	    if ($indent_size + 2 + length > 79) {
-		$long_args=1;
-		$indent_size -= length($n) - 3;
-		last;
-	    }
-	}
-	my $args = '';
-	if ($p) {
-	    $args = @args ? "pTHX_ " : "pTHX";
-	    if ($long_args) { print $fh $args; $args = '' }
-	}
-	$long_args and print $fh "\n";
-	my $first = !$long_args;
-	while () {
-	    if (!@args or
-	         length $args
-	         && $indent_size + 3 + length($args[0]) + length $args > 79
-	    ) {
-		print $fh
-		  $first ? '' : (
-		    $indent //=
-		       "\t".($large_ret ? " " x (1+length $ret) : "\t")
-		      ." "x($long_args ? 4 : 1 + length $n)
-		  ),
-		  $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
-		$args = $first = '';
-	    }
-	    @args or last;
-	    $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
-	           . shift @args;
-	}
-	if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
-	print $fh ")\n\n";
+    } else {
+        if ($flags =~ /n/) { # no args
+            warn("n flag without m") unless $flags =~ /m/;
+            warn("n flag but apparently has args") if @args;
+            print $fh "\t$ret\t$name";
+        } else { # full usage
+            my $n            = "Perl_"x$p . $name;
+            my $large_ret    = length $ret > 7;
+            my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
+                            +8+($large_ret ? 1 + length $ret : 8)
+                            +length($n) + 1;
+            my $indent;
+            print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
+            my $long_args;
+            for (@args) {
+                if ($indent_size + 2 + length > 79) {
+                    $long_args=1;
+                    $indent_size -= length($n) - 3;
+                    last;
+                }
+            }
+            my $args = '';
+            if ($p && $flags !~ /T/) {
+                $args = @args ? "pTHX_ " : "pTHX";
+                if ($long_args) { print $fh $args; $args = '' }
+            }
+            $long_args and print $fh "\n";
+            my $first = !$long_args;
+            while () {
+                if (!@args or
+                    length $args
+                    && $indent_size + 3 + length($args[0]) + length $args > 79
+                ) {
+                    print $fh
+                    $first ? '' : (
+                        $indent //=
+                        "\t".($large_ret ? " " x (1+length $ret) : "\t")
+                        ." "x($long_args ? 4 : 1 + length $n)
+                    ),
+                    $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
+                    $args = $first = '';
+                }
+                @args or last;
+                $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
+                    . shift @args;
+            }
+            if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
+            print $fh ")";
+        }
+        print $fh ";" if $flags =~ /s/; # semicolon "dTHR;"
+        print $fh "\n\n";
     }
     print $fh "=for hackers\nFound in file $file\n\n";
 }
@@ -382,7 +374,7 @@ foreach (sort keys %missing) {
 
 # List of funcs in the public API that aren't also marked as experimental nor
 # deprecated.
-my @missing_api = grep $funcflags{$_}{flags} =~ /A/ && $funcflags{$_}{flags} !~ /[MD]/ && !$docs{api}{$_}, keys %funcflags;
+my @missing_api = grep $funcflags{$_}{flags} =~ /A/ && $funcflags{$_}{flags} !~ /[xD]/ && !$docs{api}{$_}, keys %funcflags;
 output('perlapi', <<'_EOB_', $docs{api}, \@missing_api, <<'_EOE_');
 |=encoding UTF-8
 |
@@ -465,7 +457,7 @@ _EOE_
 
 # List of non-static internal functions
 my @missing_guts =
- grep $funcflags{$_}{flags} !~ /[As]/ && !$docs{guts}{$_}, keys %funcflags;
+ grep $funcflags{$_}{flags} !~ /[AS]/ && !$docs{guts}{$_}, keys %funcflags;
 
 output('perlintern', <<'END', $docs{guts}, \@missing_guts, <<'END');
 |=head1 NAME

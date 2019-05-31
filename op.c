@@ -805,7 +805,7 @@ S_op_destroy(pTHX_ OP *o)
 /* Destructor */
 
 /*
-=for apidoc Am|void|op_free|OP *o
+=for apidoc op_free
 
 Free an op.  Only use this when an op is no longer linked to from any
 optree.
@@ -1323,7 +1323,7 @@ S_find_and_forget_pmops(pTHX_ OP *o)
 }
 
 /*
-=for apidoc Am|void|op_null|OP *o
+=for apidoc op_null
 
 Neutralizes an op when it is no longer needed, but is still linked to from
 other ops.
@@ -1593,7 +1593,7 @@ Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 /* Contextualizers */
 
 /*
-=for apidoc Am|OP *|op_contextualize|OP *o|I32 context
+=for apidoc op_contextualize
 
 Applies a syntactic context to an op tree representing an expression.
 C<o> is the op tree, and C<context> must be C<G_SCALAR>, C<G_ARRAY>,
@@ -1619,7 +1619,7 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
 
 /*
 
-=for apidoc Am|OP*|op_linklist|OP *o
+=for apidoc op_linklist
 This function is the implementation of the L</LINKLIST> macro.  It should
 not be called directly.
 
@@ -3587,7 +3587,7 @@ S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
 #endif
 
 /*
-=for apidoc s|OP*|traverse_op_tree|OP* top|OP* o
+=for apidoc traverse_op_tree
 
 Return the next op in a depth-first traversal of the op tree,
 returning NULL when the traversal is complete.
@@ -3800,7 +3800,7 @@ S_finalize_op(pTHX_ OP* o)
 }
 
 /*
-=for apidoc Amx|OP *|op_lvalue|OP *o|I32 type
+=for apidoc op_lvalue
 
 Propagate lvalue ("modifiable") context to an op and its children.
 C<type> represents the context type, roughly based on the type of op that
@@ -5135,7 +5135,7 @@ Perl_invert(pTHX_ OP *o)
 }
 
 /*
-=for apidoc Amx|OP *|op_scope|OP *o
+=for apidoc op_scope
 
 Wraps up an op tree with some additional ops so that at runtime a dynamic
 scope will be created.  The original ops run in the new dynamic scope,
@@ -5190,7 +5190,7 @@ Perl_op_unscope(pTHX_ OP *o)
 }
 
 /*
-=for apidoc Am|int|block_start|int full
+=for apidoc block_start
 
 Handles compile-time scope entry.
 Arranges for hints to be restored on block
@@ -5221,7 +5221,7 @@ Perl_block_start(pTHX_ int full)
 }
 
 /*
-=for apidoc Am|OP *|block_end|I32 floor|OP *seq
+=for apidoc block_end
 
 Handles compile-time scope exit.  C<floor>
 is the savestack index returned by
@@ -5320,7 +5320,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 /*
 =head1 Compile-time scope hooks
 
-=for apidoc Aox||blockhook_register
+=for apidoc blockhook_register
 
 Register a set of hooks to be called when the Perl lexical scope changes
 at compile time.  See L<perlguts/"Compile-time scope hooks">.
@@ -5860,7 +5860,7 @@ S_gen_constant_list(pTHX_ OP *o)
 /* List constructors */
 
 /*
-=for apidoc Am|OP *|op_append_elem|I32 optype|OP *first|OP *last
+=for apidoc op_append_elem
 
 Append an item to the list of ops contained directly within a list-type
 op, returning the lengthened list.  C<first> is the list-type op,
@@ -5893,7 +5893,7 @@ Perl_op_append_elem(pTHX_ I32 type, OP *first, OP *last)
 }
 
 /*
-=for apidoc Am|OP *|op_append_list|I32 optype|OP *first|OP *last
+=for apidoc op_append_list
 
 Concatenate the lists of ops contained directly within two list-type ops,
 returning the combined list.  C<first> and C<last> are the list-type ops
@@ -5931,7 +5931,7 @@ Perl_op_append_list(pTHX_ I32 type, OP *first, OP *last)
 }
 
 /*
-=for apidoc Am|OP *|op_prepend_elem|I32 optype|OP *first|OP *last
+=for apidoc op_prepend_elem
 
 Prepend an item to the list of ops contained directly within a list-type
 op, returning the lengthened list.  C<first> is the op to prepend to the
@@ -5969,7 +5969,7 @@ Perl_op_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
 }
 
 /*
-=for apidoc Am|OP *|op_convert_list|I32 type|I32 flags|OP *o
+=for apidoc op_convert_list
 
 Converts C<o> into a list op if it is not one already, and then converts it
 into the specified C<type>, calling its check function, allocating a target if
@@ -6029,7 +6029,7 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 /*
 =head1 Optree construction
 
-=for apidoc Am|OP *|newNULLLIST
+=for apidoc newNULLLIST
 
 Constructs, checks, and returns a new C<stub> op, which represents an
 empty list expression.
@@ -6076,7 +6076,7 @@ S_force_list(pTHX_ OP *o, bool nullit)
 }
 
 /*
-=for apidoc Am|OP *|newLISTOP|I32 type|I32 flags|OP *first|OP *last
+=for apidoc newLISTOP
 
 Constructs, checks, and returns an op of any list type.  C<type> is
 the opcode.  C<flags> gives the eight bits of C<op_flags>, except that
@@ -6136,7 +6136,7 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 }
 
 /*
-=for apidoc Am|OP *|newOP|I32 type|I32 flags
+=for apidoc newOP
 
 Constructs, checks, and returns an op of any base type (any type that
 has no extra fields).  C<type> is the opcode.  C<flags> gives the
@@ -6176,7 +6176,7 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
 }
 
 /*
-=for apidoc Am|OP *|newUNOP|I32 type|I32 flags|OP *first
+=for apidoc newUNOP
 
 Constructs, checks, and returns an op of any unary type.  C<type> is
 the opcode.  C<flags> gives the eight bits of C<op_flags>, except that
@@ -6265,7 +6265,7 @@ Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
 }
 
 /*
-=for apidoc Am|OP *|newMETHOP|I32 type|I32 flags|OP *first
+=for apidoc newMETHOP
 
 Constructs, checks, and returns an op of method type with a method name
 evaluated at runtime.  C<type> is the opcode.  C<flags> gives the eight
@@ -6322,7 +6322,7 @@ Perl_newMETHOP (pTHX_ I32 type, I32 flags, OP* dynamic_meth) {
 }
 
 /*
-=for apidoc Am|OP *|newMETHOP_named|I32 type|I32 flags|SV *const_meth
+=for apidoc newMETHOP_named
 
 Constructs, checks, and returns an op of method type with a constant
 method name.  C<type> is the opcode.  C<flags> gives the eight bits of
@@ -6341,7 +6341,7 @@ Perl_newMETHOP_named (pTHX_ I32 type, I32 flags, SV* const_meth) {
 }
 
 /*
-=for apidoc Am|OP *|newBINOP|I32 type|I32 flags|OP *first|OP *last
+=for apidoc newBINOP
 
 Constructs, checks, and returns an op of any binary type.  C<type>
 is the opcode.  C<flags> gives the eight bits of C<op_flags>, except
@@ -6844,7 +6844,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 
 /*
-=for apidoc Am|OP *|newPMOP|I32 type|I32 flags
+=for apidoc newPMOP
 
 Constructs, checks, and returns an op of any pattern matching type.
 C<type> is the opcode.  C<flags> gives the eight bits of C<op_flags>
@@ -7328,7 +7328,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
 }
 
 /*
-=for apidoc Am|OP *|newSVOP|I32 type|I32 flags|SV *sv
+=for apidoc newSVOP
 
 Constructs, checks, and returns an op of any type that involves an
 embedded SV.  C<type> is the opcode.  C<flags> gives the eight bits
@@ -7365,7 +7365,7 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 }
 
 /*
-=for apidoc Am|OP *|newDEFSVOP|
+=for apidoc newDEFSVOP
 
 Constructs and returns an op to access C<$_>.
 
@@ -7381,7 +7381,7 @@ Perl_newDEFSVOP(pTHX)
 #ifdef USE_ITHREADS
 
 /*
-=for apidoc Am|OP *|newPADOP|I32 type|I32 flags|SV *sv
+=for apidoc newPADOP
 
 Constructs, checks, and returns an op of any type that involves a
 reference to a pad element.  C<type> is the opcode.  C<flags> gives the
@@ -7426,7 +7426,7 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 #endif /* USE_ITHREADS */
 
 /*
-=for apidoc Am|OP *|newGVOP|I32 type|I32 flags|GV *gv
+=for apidoc newGVOP
 
 Constructs, checks, and returns an op of any type that involves an
 embedded reference to a GV.  C<type> is the opcode.  C<flags> gives the
@@ -7450,7 +7450,7 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 }
 
 /*
-=for apidoc Am|OP *|newPVOP|I32 type|I32 flags|char *pv
+=for apidoc newPVOP
 
 Constructs, checks, and returns an op of any type that involves an
 embedded C-level pointer (PV).  C<type> is the opcode.  C<flags> gives
@@ -7785,7 +7785,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 /*
 =head1 Optree construction
 
-=for apidoc Am|OP *|newSLICEOP|I32 flags|OP *subscript|OP *listval
+=for apidoc newSLICEOP
 
 Constructs, checks, and returns an C<lslice> (list slice) op.  C<flags>
 gives the eight bits of C<op_flags>, except that C<OPf_KIDS> will
@@ -7899,7 +7899,7 @@ S_newONCEOP(pTHX_ OP *initop, OP *padop)
 }
 
 /*
-=for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
+=for apidoc newASSIGNOP
 
 Constructs, checks, and returns an assignment op.  C<left> and C<right>
 supply the parameters of the assignment; they are consumed by this
@@ -8116,7 +8116,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 }
 
 /*
-=for apidoc Am|OP *|newSTATEOP|I32 flags|char *label|OP *o
+=for apidoc newSTATEOP
 
 Constructs a state op (COP).  The state op is normally a C<nextstate> op,
 but will be a C<dbstate> op if debugging is enabled for currently-compiled
@@ -8207,7 +8207,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 }
 
 /*
-=for apidoc Am|OP *|newLOGOP|I32 type|I32 flags|OP *first|OP *other
+=for apidoc newLOGOP
 
 Constructs, checks, and returns a logical (flow control) op.  C<type>
 is the opcode.  C<flags> gives the eight bits of C<op_flags>, except
@@ -8470,7 +8470,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 }
 
 /*
-=for apidoc Am|OP *|newCONDOP|I32 flags|OP *first|OP *trueop|OP *falseop
+=for apidoc newCONDOP
 
 Constructs, checks, and returns a conditional-expression (C<cond_expr>)
 op.  C<flags> gives the eight bits of C<op_flags>, except that C<OPf_KIDS>
@@ -8545,7 +8545,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 }
 
 /*
-=for apidoc Am|OP *|newRANGE|I32 flags|OP *left|OP *right
+=for apidoc newRANGE
 
 Constructs and returns a C<range> op, with subordinate C<flip> and
 C<flop> ops.  C<flags> gives the eight bits of C<op_flags> for the
@@ -8612,7 +8612,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 }
 
 /*
-=for apidoc Am|OP *|newLOOPOP|I32 flags|I32 debuggable|OP *expr|OP *block
+=for apidoc newLOOPOP
 
 Constructs, checks, and returns an op tree expressing a loop.  This is
 only a loop in the control flow through the op tree; it does not have
@@ -8713,7 +8713,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 }
 
 /*
-=for apidoc Am|OP *|newWHILEOP|I32 flags|I32 debuggable|LOOP *loop|OP *expr|OP *block|OP *cont|I32 has_my
+=for apidoc newWHILEOP
 
 Constructs, checks, and returns an op tree expressing a C<while> loop.
 This is a heavyweight loop, with structure that allows exiting the loop
@@ -8839,7 +8839,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
 }
 
 /*
-=for apidoc Am|OP *|newFOROP|I32 flags|OP *sv|OP *expr|OP *block|OP *cont
+=for apidoc newFOROP
 
 Constructs, checks, and returns an op tree expressing a C<foreach>
 loop (iteration through a list of values).  This is a heavyweight loop,
@@ -8980,7 +8980,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 }
 
 /*
-=for apidoc Am|OP *|newLOOPEX|I32 type|OP *label
+=for apidoc newLOOPEX
 
 Constructs, checks, and returns a loop-exiting op (such as C<goto>
 or C<last>).  C<type> is the opcode.  C<label> supplies the parameter
@@ -9209,7 +9209,7 @@ S_looks_like_bool(pTHX_ const OP *o)
 }
 
 /*
-=for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
+=for apidoc newGIVENOP
 
 Constructs, checks, and returns an op tree expressing a C<given> block.
 C<cond> supplies the expression to whose value C<$_> will be locally
@@ -9235,7 +9235,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 }
 
 /*
-=for apidoc Am|OP *|newWHENOP|OP *cond|OP *block
+=for apidoc newWHENOP
 
 Constructs, checks, and returns an op tree expressing a C<when> block.
 C<cond> supplies the test expression, and C<block> supplies the block
@@ -9853,7 +9853,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 }
 
 /*
-=for apidoc m|CV *|newATTRSUB_x|I32 floor|OP *o|OP *proto|OP *attrs|OP *block|bool o_is_gv
+=for apidoc newATTRSUB_x
 
 Construct a Perl subroutine, also performing some surrounding jobs.
 
@@ -10518,7 +10518,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 }
 
 /*
-=for apidoc Am|CV *|newCONSTSUB|HV *stash|const char *name|SV *sv
+=for apidoc newCONSTSUB
 
 Behaves like L</newCONSTSUB_flags>, except that C<name> is nul-terminated
 rather than of counted length, and no flags are set.  (This means that
@@ -10534,7 +10534,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 }
 
 /*
-=for apidoc Am|CV *|newCONSTSUB_flags|HV *stash|const char *name|STRLEN len|U32 flags|SV *sv
+=for apidoc newCONSTSUB_flags
 
 Construct a constant subroutine, also performing some surrounding
 jobs.  A scalar constant-valued subroutine is eligible for inlining
@@ -10656,7 +10656,7 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 }
 
 /*
-=for apidoc U||newXS
+=for apidoc newXS
 
 Used by C<xsubpp> to hook up XSUBs as Perl subs.  C<filename> needs to be
 static storage, as it is used directly as CvFILE(), without a copy being made.
@@ -10694,7 +10694,7 @@ Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
 }
 
 /*
-=for apidoc m|CV *|newXS_len_flags|const char *name|STRLEN len|XSUBADDR_t subaddr|const char *const filename|const char *const proto|SV **const_svp|U32 flags
+=for apidoc newXS_len_flags
 
 Construct an XS subroutine, also performing some surrounding jobs.
 
@@ -13013,7 +13013,7 @@ Perl_ck_join(pTHX_ OP *o)
 }
 
 /*
-=for apidoc Am|CV *|rv2cv_op_cv|OP *cvop|U32 flags
+=for apidoc rv2cv_op_cv
 
 Examines an op, which is expected to identify a subroutine at runtime,
 and attempts to determine at compile time which subroutine it identifies.
@@ -13141,7 +13141,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 }
 
 /*
-=for apidoc Am|OP *|ck_entersub_args_list|OP *entersubop
+=for apidoc ck_entersub_args_list
 
 Performs the default fixup of the arguments part of an C<entersub>
 op tree.  This consists of applying list context to each of the
@@ -13178,7 +13178,7 @@ Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
 }
 
 /*
-=for apidoc Am|OP *|ck_entersub_args_proto|OP *entersubop|GV *namegv|SV *protosv
+=for apidoc ck_entersub_args_proto
 
 Performs the fixup of the arguments part of an C<entersub> op tree
 based on a subroutine prototype.  This makes various modifications to
@@ -13426,7 +13426,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 }
 
 /*
-=for apidoc Am|OP *|ck_entersub_args_proto_or_list|OP *entersubop|GV *namegv|SV *protosv
+=for apidoc ck_entersub_args_proto_or_list
 
 Performs the fixup of the arguments part of an C<entersub> op tree either
 based on a subroutine prototype or using default list-context processing.
@@ -13578,7 +13578,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 }
 
 /*
-=for apidoc Am|void|cv_get_call_checker_flags|CV *cv|U32 gflags|Perl_call_checker *ckfun_p|SV **ckobj_p|U32 *ckflags_p
+=for apidoc cv_get_call_checker_flags
 
 Retrieves the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
@@ -13624,7 +13624,7 @@ C<gflags> is a bitset passed into C<cv_get_call_checker_flags>, in which
 only the C<CALL_CHECKER_REQUIRE_GV> bit currently has a defined meaning
 (for which see above).  All other bits should be clear.
 
-=for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
+=for apidoc cv_get_call_checker
 
 The original form of L</cv_get_call_checker_flags>, which does not return
 checker flags.  When using a checker function returned by this function,
@@ -13663,7 +13663,7 @@ Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 }
 
 /*
-=for apidoc Am|void|cv_set_call_checker_flags|CV *cv|Perl_call_checker ckfun|SV *ckobj|U32 ckflags
+=for apidoc cv_set_call_checker_flags
 
 Sets the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
@@ -13699,7 +13699,7 @@ bits should be clear.
 The current setting for a particular CV can be retrieved by
 L</cv_get_call_checker_flags>.
 
-=for apidoc Am|void|cv_set_call_checker|CV *cv|Perl_call_checker ckfun|SV *ckobj
+=for apidoc cv_set_call_checker
 
 The original form of L</cv_set_call_checker_flags>, which passes it the
 C<CALL_CHECKER_REQUIRE_GV> flag for backward-compatibility.  The effect
@@ -16647,7 +16647,7 @@ Perl_peep(pTHX_ OP *o)
 /*
 =head1 Custom Operators
 
-=for apidoc Ao||custom_op_xop
+=for apidoc custom_op_xop
 Return the XOP structure for a given custom op.  This macro should be
 considered internal to C<OP_NAME> and the other access macros: use them instead.
 This macro does call a function.  Prior
@@ -16804,7 +16804,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 }
 
 /*
-=for apidoc Ao||custom_op_register
+=for apidoc custom_op_register
 Register a custom op.  See L<perlguts/"Custom Operators">.
 
 =cut
@@ -17058,7 +17058,7 @@ hook variables.
 */
 
 /*
-=for apidoc Am|void|wrap_op_checker|Optype opcode|Perl_check_t new_checker|Perl_check_t *old_checker_p
+=for apidoc wrap_op_checker
 
 Puts a C function into the chain of check functions for a specified op
 type.  This is the preferred way to manipulate the L</PL_check> array.

@@ -1671,7 +1671,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 }
 
 /*
-=for apidoc Am|HV *|hv_copy_hints_hv|HV *ohv
+=for apidoc hv_copy_hints_hv
 
 A specialised version of L</newHVhv> for copying C<%^H>.  C<ohv> must be
 a pointer to a hash (which may have C<%^H> magic, but should be generally
@@ -3249,7 +3249,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 }
 
 /*
-=for apidoc m|HV *|refcounted_he_chain_2hv|const struct refcounted_he *c|U32 flags
+=for apidoc refcounted_he_chain_2hv
 
 Generates and returns a C<HV *> representing the content of a
 C<refcounted_he> chain.
@@ -3357,7 +3357,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 }
 
 /*
-=for apidoc m|SV *|refcounted_he_fetch_pvn|const struct refcounted_he *chain|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc refcounted_he_fetch_pvn
 
 Search along a C<refcounted_he> chain for an entry with the key specified
 by C<keypv> and C<keylen>.  If C<flags> has the C<REFCOUNTED_HE_KEY_UTF8>
@@ -3447,7 +3447,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
 }
 
 /*
-=for apidoc m|SV *|refcounted_he_fetch_pv|const struct refcounted_he *chain|const char *key|U32 hash|U32 flags
+=for apidoc refcounted_he_fetch_pv
 
 Like L</refcounted_he_fetch_pvn>, but takes a nul-terminated string
 instead of a string/length pair.
@@ -3464,7 +3464,7 @@ Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain,
 }
 
 /*
-=for apidoc m|SV *|refcounted_he_fetch_sv|const struct refcounted_he *chain|SV *key|U32 hash|U32 flags
+=for apidoc refcounted_he_fetch_sv
 
 Like L</refcounted_he_fetch_pvn>, but takes a Perl scalar instead of a
 string/length pair.
@@ -3491,7 +3491,7 @@ Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
 }
 
 /*
-=for apidoc m|struct refcounted_he *|refcounted_he_new_pvn|struct refcounted_he *parent|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
+=for apidoc refcounted_he_new_pvn
 
 Creates a new C<refcounted_he>.  This consists of a single key/value
 pair and a reference to an existing C<refcounted_he> chain (which may
@@ -3635,7 +3635,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
 }
 
 /*
-=for apidoc m|struct refcounted_he *|refcounted_he_new_pv|struct refcounted_he *parent|const char *key|U32 hash|SV *value|U32 flags
+=for apidoc refcounted_he_new_pv
 
 Like L</refcounted_he_new_pvn>, but takes a nul-terminated string instead
 of a string/length pair.
@@ -3652,7 +3652,7 @@ Perl_refcounted_he_new_pv(pTHX_ struct refcounted_he *parent,
 }
 
 /*
-=for apidoc m|struct refcounted_he *|refcounted_he_new_sv|struct refcounted_he *parent|SV *key|U32 hash|SV *value|U32 flags
+=for apidoc refcounted_he_new_sv
 
 Like L</refcounted_he_new_pvn>, but takes a Perl scalar instead of a
 string/length pair.
@@ -3679,7 +3679,7 @@ Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent,
 }
 
 /*
-=for apidoc m|void|refcounted_he_free|struct refcounted_he *he
+=for apidoc refcounted_he_free
 
 Decrements the reference count of a C<refcounted_he> by one.  If the
 reference count reaches zero the structure's memory is freed, which
@@ -3719,7 +3719,7 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
 }
 
 /*
-=for apidoc m|struct refcounted_he *|refcounted_he_inc|struct refcounted_he *he
+=for apidoc refcounted_he_inc
 
 Increment the reference count of a C<refcounted_he>.  The pointer to the
 C<refcounted_he> is also returned.  It is safe to pass a null pointer
