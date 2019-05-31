@@ -577,9 +577,6 @@ EOD
 	    $has_nanosleep++;
 	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
 	}
-    } elsif ($^O =~ /^(mpeix)$/) {
-	# MPE/iX falsely finds nanosleep from its libc equivalent.
-	print "skipping because in $^O... ";
     } else {
 	if (has_nanosleep()) {
 	    $has_nanosleep++;
