@@ -2616,7 +2616,7 @@ int
 perl_run(pTHXx)
 {
     I32 oldscope;
-    int ret = 0;
+    int ret = 0, exit_called = 0;
     dJMPENV;
 
     PERL_ARGS_ASSERT_PERL_RUN;
@@ -2637,8 +2637,10 @@ perl_run(pTHXx)
     case 0:				/* normal completion */
  redo_body:
 	run_body(oldscope);
-	/* FALLTHROUGH */
+	goto handle_exit;
     case 2:				/* my_exit() */
+	exit_called = 1;
+    handle_exit:
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
 	FREETMPS;
@@ -2652,7 +2654,12 @@ perl_run(pTHXx)
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	ret = STATUS_EXIT;
+	if (exit_called) {
+	    ret = STATUS_EXIT;
+	    if (ret == 0) ret = 0x100;
+	} else {
+	    ret = 0;
+	}
 	break;
     case 3:
 	if (PL_restartop) {
