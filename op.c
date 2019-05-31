@@ -4670,6 +4670,19 @@ S_refkids(pTHX_ OP *o, I32 type)
     return o;
 }
 
+
+/* Apply reference (autovivification) context to the subtree at o.
+ * For example in
+ *     push @{expression}, ....;
+ * o will be the head of 'expression' and type will be OP_RV2AV.
+ * It marks the op o (or a suitable child) as autovivifying, e.g. by
+ * setting  OPf_MOD.
+ * For OP_RV2AV/OP_PADAV and OP_RV2HV/OP_PADHV sets OPf_REF too if
+ * set_op_ref is true.
+ *
+ * Also calls scalar(o).
+ */
+
 OP *
 Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 {
