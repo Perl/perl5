@@ -1144,6 +1144,7 @@
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
 #define invlist_iterpeek	S_invlist_iterpeek
+#define invlist_lowest		S_invlist_lowest
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)

@@ -1930,6 +1930,7 @@ ESRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 ESxRT	|bool	|invlist_iterpeek|NN SV* invlist|NN UV* start|NN UV* end
 EiT	|void	|invlist_iterfinish|NN SV* invlist
 EiRT	|UV	|invlist_highest|NN SV* const invlist
+EiRT	|UV	|invlist_lowest|NN SV* const invlist
 ERS	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
 ESR	|SV*	|invlist_contents|NN SV* const invlist		    \
