@@ -4695,113 +4695,114 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	return o;
 
     while (1) {
+        switch (o->op_type) {
+        case OP_ENTERSUB:
+            if ((type == OP_EXISTS || type == OP_DEFINED) &&
+                !(o->op_flags & OPf_STACKED)) {
+                OpTYPE_set(o, OP_RV2CV);             /* entersub => rv2cv */
+                assert(cUNOPo->op_first->op_type == OP_NULL);
+                /* disable pushmark */
+                op_null(((LISTOP*)cUNOPo->op_first)->op_first);
+                o->op_flags |= OPf_SPECIAL;
+            }
+            else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
+                o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
+                                  : type == OP_RV2HV ? OPpDEREF_HV
+                                  : OPpDEREF_SV);
+                o->op_flags |= OPf_MOD;
+            }
 
-    switch (o->op_type) {
-    case OP_ENTERSUB:
-	if ((type == OP_EXISTS || type == OP_DEFINED) &&
-	    !(o->op_flags & OPf_STACKED)) {
-            OpTYPE_set(o, OP_RV2CV);             /* entersub => rv2cv */
-	    assert(cUNOPo->op_first->op_type == OP_NULL);
-	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);	/* disable pushmark */
-	    o->op_flags |= OPf_SPECIAL;
-	}
-	else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
-	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
-			      : type == OP_RV2HV ? OPpDEREF_HV
-			      : OPpDEREF_SV);
-	    o->op_flags |= OPf_MOD;
-	}
+            break;
 
-	break;
+        case OP_COND_EXPR:
+            o = OpSIBLING(cUNOPo->op_first);
+            continue;
 
-    case OP_COND_EXPR:
-	o = OpSIBLING(cUNOPo->op_first);
-	continue;
+        case OP_RV2SV:
+            if (type == OP_DEFINED)
+                o->op_flags |= OPf_SPECIAL;		/* don't create GV */
+            /* FALLTHROUGH */
+        case OP_PADSV:
+            if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
+                o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
+                                  : type == OP_RV2HV ? OPpDEREF_HV
+                                  : OPpDEREF_SV);
+                o->op_flags |= OPf_MOD;
+            }
+            if (o->op_flags & OPf_KIDS) {
+                type = o->op_type;
+                o = cUNOPo->op_first;
+                continue;
+            }
+            break;
 
-    case OP_RV2SV:
-	if (type == OP_DEFINED)
-	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	/* FALLTHROUGH */
-    case OP_PADSV:
-	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
-	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
-			      : type == OP_RV2HV ? OPpDEREF_HV
-			      : OPpDEREF_SV);
-	    o->op_flags |= OPf_MOD;
-	}
-	if (o->op_flags & OPf_KIDS) {
+        case OP_RV2AV:
+        case OP_RV2HV:
+            if (set_op_ref)
+                o->op_flags |= OPf_REF;
+            /* FALLTHROUGH */
+        case OP_RV2GV:
+            if (type == OP_DEFINED)
+                o->op_flags |= OPf_SPECIAL;		/* don't create GV */
             type = o->op_type;
             o = cUNOPo->op_first;
             continue;
-        }
-	break;
 
-    case OP_RV2AV:
-    case OP_RV2HV:
-	if (set_op_ref)
-	    o->op_flags |= OPf_REF;
-	/* FALLTHROUGH */
-    case OP_RV2GV:
-	if (type == OP_DEFINED)
-	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-        type = o->op_type;
-	o = cUNOPo->op_first;
-	continue;
+        case OP_PADAV:
+        case OP_PADHV:
+            if (set_op_ref)
+                o->op_flags |= OPf_REF;
+            break;
 
-    case OP_PADAV:
-    case OP_PADHV:
-	if (set_op_ref)
-	    o->op_flags |= OPf_REF;
-	break;
-
-    case OP_SCALAR:
-    case OP_NULL:
-	if (!(o->op_flags & OPf_KIDS) || type == OP_DEFINED)
-	    break;
-	 o = cBINOPo->op_first;
-	continue;
-
-    case OP_AELEM:
-    case OP_HELEM:
-	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
-	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
-			      : type == OP_RV2HV ? OPpDEREF_HV
-			      : OPpDEREF_SV);
-	    o->op_flags |= OPf_MOD;
-	}
-        type = o->op_type;
-	o = cBINOPo->op_first;
-	continue;;
-
-    case OP_SCOPE:
-    case OP_LEAVE:
-	set_op_ref = FALSE;
-	/* FALLTHROUGH */
-    case OP_ENTER:
-    case OP_LIST:
-	if (!(o->op_flags & OPf_KIDS))
-	    break;
-	o = cLISTOPo->op_last;
-	continue;
-
-    default:
-	break;
-    } /* switch */
-
-    while (1) {
-        if (o == top_op)
-            return scalar(top_op); /* at top; no parents/siblings to try */
-        if (OpHAS_SIBLING(o)) {
-            o = o->op_sibparent;
-            /* Normally skip all siblings and go straight to the parent;
-             * the only op that requires two children to be processed
-             * is OP_COND_EXPR */
-            if (!OpHAS_SIBLING(o) && o->op_sibparent->op_type == OP_COND_EXPR)
+        case OP_SCALAR:
+        case OP_NULL:
+            if (!(o->op_flags & OPf_KIDS) || type == OP_DEFINED)
                 break;
+             o = cBINOPo->op_first;
             continue;
+
+        case OP_AELEM:
+        case OP_HELEM:
+            if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
+                o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
+                                  : type == OP_RV2HV ? OPpDEREF_HV
+                                  : OPpDEREF_SV);
+                o->op_flags |= OPf_MOD;
+            }
+            type = o->op_type;
+            o = cBINOPo->op_first;
+            continue;;
+
+        case OP_SCOPE:
+        case OP_LEAVE:
+            set_op_ref = FALSE;
+            /* FALLTHROUGH */
+        case OP_ENTER:
+        case OP_LIST:
+            if (!(o->op_flags & OPf_KIDS))
+                break;
+            o = cLISTOPo->op_last;
+            continue;
+
+        default:
+            break;
+        } /* switch */
+
+        while (1) {
+            if (o == top_op)
+                return scalar(top_op); /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o)) {
+                o = o->op_sibparent;
+                /* Normally skip all siblings and go straight to the parent;
+                 * the only op that requires two children to be processed
+                 * is OP_COND_EXPR */
+                if (!OpHAS_SIBLING(o)
+                        && o->op_sibparent->op_type == OP_COND_EXPR)
+                    break;
+                continue;
+            }
+            o = o->op_sibparent; /*try parent's next sibling */
         }
-        o = o->op_sibparent; /*try parent's next sibling */
-    }
     } /* while */
 }
 
