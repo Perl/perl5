@@ -9333,7 +9333,10 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
     return o;
 }
 
-/* Does this look like a boolean operation? For these purposes
+
+/* For the purposes of 'when(implied_smartmatch)'
+ *              versus 'when(boolean_expression)',
+ * does this look like a boolean operation? For these purposes
    a boolean operation is:
      - a subroutine call [*]
      - a logical connective
@@ -9420,6 +9423,7 @@ S_looks_like_bool(pTHX_ const OP *o)
 	    return FALSE;
     }
 }
+
 
 /*
 =for apidoc newGIVENOP
