@@ -307,7 +307,11 @@ sub parse_embed
         if( @e >= 3 ) {
           my($flags, $ret, $name, @args) = @e;
           next unless $flags =~ /A/; # Skip non-public entries
-          next if $flags =~ /[Dx]/; # Skip entries marked as deprecated or unstable
+
+          # Skip entries marked as deprecated or unstable, or non-name ones, like
+          #    PL_parser-E<gt>linestr
+          # which documents a struct entry rather than a function
+          next if $flags =~ /[DxN]/;
           if ($name =~ /^[^\W\d]\w*$/) {
             for (@args) {
               $_ = [trim_arg($_)];
@@ -320,11 +324,6 @@ sub parse_embed
               args  => \@args,
               cond  => ppcond(\@pps),
             };
-          }
-          elsif ($name =~ /^[^\W\d]\w*-E<gt>[^\W\d]\w*$/) {
-            # silenty ignore entries of the form
-            #    PL_parser-E<gt>linestr
-            # which documents a struct entry rather than a function
           }
           else {
             warn "mysterious name [$name] in $file, line $.\n";
