@@ -74,7 +74,7 @@ if isperlroot $PERLROOT; then
 
 : This line needs to be in this file for things to work, even though it's been
 : removed from later embed.fnc versions
-Apnod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
+ApTod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
 
 EOF
   grep -hr '^=for apidoc' $PERLROOT | sed -e 's/=for apidoc //' | grep '|' | sort | uniq \

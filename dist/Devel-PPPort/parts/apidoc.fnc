@@ -15,7 +15,7 @@
 
 : This line needs to be in this file for things to work, even though it's been
 : removed from later embed.fnc versions
-Apnod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
+ApTod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
 
 Ama|char*|savepvs|"literal string" s
 Ama|char*|savesharedpvs|"literal string" s
@@ -129,12 +129,39 @@ Amn|NV|POPn
 Amn|peep_t|PL_peepp
 Amn|peep_t|PL_rpeepp
 Amn|Perl_ophook_t|PL_opfreehook
+Amns||dAX
+Amns||dAXMARK
+Amns||dITEMS
+Amns||dMARK
+Amns||dMULTICALL
+Amns||dORIGMARK
+Amns||dSP
+Amns||dUNDERBAR
+Amns||dXCPT
+Amns||dXSARGS
+Amns||dXSI32
+Amns||ENTER
+Amns||FREETMPS
+Amns||LEAVE
+Amns||MULTICALL
+Amns||POP_MULTICALL
+Amns||PUSH_MULTICALL
+Amns||PUTBACK
+Amns||SAVETMPS
+Amns||SPAGAIN
 Amn|STRLEN|PL_na
 Amn|SV|PL_sv_no
 Amn|SV|PL_sv_undef
 Amn|SV|PL_sv_yes
 Amn|SV|PL_sv_zero
 Amn|SV*|POPs
+Amns||XCPT_RETHROW
+Amns||XS_APIVERSION_BOOTCHECK
+Amns||XSRETURN_EMPTY
+Amns||XSRETURN_NO
+Amns||XSRETURN_UNDEF
+Amns||XSRETURN_YES
+Amns||XS_VERSION_BOOTCHECK
 Amn|U32|GIMME
 Amn|U32|GIMME_V
 Amn|UV|POPu
@@ -150,28 +177,8 @@ Am|OP*|OpSIBLING|OP *o
 Am|PADOFFSET|pad_add_name_pvs|"literal string" name|U32 flags|HV *typestash|HV *ourstash
 Am|PADOFFSET|pad_findmy_pvs|"literal string" name|U32 flags
 Am|REGEXP *|SvRX|SV *sv
-Ams||dAX
-Ams||dAXMARK
-Ams||dITEMS
-Ams||dMARK
-Ams||dMULTICALL
-Ams||dORIGMARK
-Ams||dSP
-Ams||dUNDERBAR
-Ams||dXCPT
-Ams||dXSARGS
-Ams||dXSI32
-Ams||ENTER
-Ams||ENTER_with_name(name)
-Ams||FREETMPS
-Ams||LEAVE
-Ams||LEAVE_with_name(name)
-Ams||MULTICALL
-Ams||POP_MULTICALL
-Ams||PUSH_MULTICALL
-Ams||PUTBACK
-Ams||SAVETMPS
-Ams||SPAGAIN
+Ams||ENTER_with_name|const char * name
+Ams||LEAVE_with_name|const char * name
 Am|STRLEN|HeKLEN|HE* he
 Am|STRLEN|HvENAMELEN|HV *stash
 Am|STRLEN|HvNAMELEN|HV *stash
@@ -203,13 +210,6 @@ Am|SV*|SvREFCNT_inc|SV* sv
 Am|SV*|SvRV|SV* sv
 Am|SV *|sv_setref_pvs|"literal string" s
 Am|svtype|SvTYPE|SV* sv
-Ams||XCPT_RETHROW
-Ams||XS_APIVERSION_BOOTCHECK
-Ams||XSRETURN_EMPTY
-Ams||XSRETURN_NO
-Ams||XSRETURN_UNDEF
-Ams||XSRETURN_YES
-Ams||XS_VERSION_BOOTCHECK
 Am|U32|HeHASH|HE* he
 Am|U32|HeUTF8|HE* he
 Am|U32|OP_CLASS|OP *o
@@ -458,13 +458,13 @@ Amx|SV*|newSVpadname|PADNAME *pn
 Amx|SV **|PadARRAY|PAD pad
 Amx|SV *|PadnameSV|PADNAME pn
 Amx|U32|PadlistREFCNT|PADLIST padlist
-AmxU|char *|PL_parser-E<gt>bufend
-AmxU|char *|PL_parser-E<gt>bufptr
-AmxU|char *|PL_parser-E<gt>linestart
+AmxUN|char *|PL_parser-E<gt>bufend
+AmxUN|char *|PL_parser-E<gt>bufptr
+AmxUN|char *|PL_parser-E<gt>linestart
+AmxUN|SV *|PL_parser-E<gt>linestr
 AmxU|PADNAMELIST *|PL_comppad_name
 AmxU|PAD *|PL_comppad
 AmxU|SV **|PL_curpad
-AmxU|SV *|PL_parser-E<gt>linestr
 Amx|void|BhkDISABLE|BHK *hk|which
 Amx|void|BhkENABLE|BHK *hk|which
 Amx|void|BhkENTRY_set|BHK *hk|which|void *ptr

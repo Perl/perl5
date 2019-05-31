@@ -231,7 +231,7 @@ for $f (@f) {
     }
   }
 
-  unless ($f->{flags}{n} || $f->{flags}{'m'}) {
+  unless ($f->{flags}{'T'} || $f->{flags}{'m'}) {
     $stack = "  dTHX;\n$stack";
     $aTHX = @arg ? 'aTHX_ ' : 'aTHX';
   }

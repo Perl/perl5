@@ -307,7 +307,7 @@ sub parse_embed
         if( @e >= 3 ) {
           my($flags, $ret, $name, @args) = @e;
           next unless $flags =~ /A/; # Skip non-public entries
-          next if $flags =~ /[DM]/; # Skip entries marked as deprecated or unstable
+          next if $flags =~ /[Dx]/; # Skip entries marked as deprecated or unstable
           if ($name =~ /^[^\W\d]\w*$/) {
             for (@args) {
               $_ = [trim_arg($_)];

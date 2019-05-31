@@ -94,11 +94,11 @@ for (@perl_api) {
   $line .= 'p' if exists $provides{$_};
   if (exists $embed{$_}) {
     my $e = $embed{$_};
-    if (exists $e->{flags}{p}) {
+    if (exists $e->{flags}{p}) {    # Has 'Perl_' prefix
       my $args = $e->{args};
       $line .= 'v' if @$args && $args->[-1][0] eq '...';
     }
-    $line .= 'n' if exists $e->{flags}{n};
+    $line .= 'n' if exists $e->{flags}{T};  # No thread context parameter
   }
   $_ = $line;
 }
@@ -309,7 +309,7 @@ sub make_embed
   my $a = do { my $x = 'a'; join ',', map { $x++ } 1 .. @{$f->{args}} };
   my $lastarg = ${$f->{args}}[-1];
 
-  if ($f->{flags}{n}) {
+  if ($f->{flags}{T}) {
     if ($f->{flags}{p}) {
       return "#define $n $DPPP(my_$n)\n" .
              "#define Perl_$n $DPPP(my_$n)";
