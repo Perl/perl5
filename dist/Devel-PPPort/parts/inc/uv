@@ -411,7 +411,7 @@ utf8_to_uvchr_buf(s, adjustment)
         PREINIT:
             AV *av;
             STRLEN len;
-            const char *const_s;
+            const unsigned char *const_s;
         CODE:
             av = newAV();
             const_s = s;
@@ -438,7 +438,7 @@ utf8_to_uvchr(s)
         PREINIT:
             AV *av;
             STRLEN len;
-            const char *const_s;
+            const unsigned char *const_s;
         CODE:
             av = newAV();
             const_s = s;
