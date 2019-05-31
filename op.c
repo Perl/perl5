@@ -1275,26 +1275,40 @@ S_forget_pmop(pTHX_ PMOP *const o)
 	PL_curpm = NULL;
 }
 
+
 STATIC void
 S_find_and_forget_pmops(pTHX_ OP *o)
 {
+    OP* top_op = o;
+
     PERL_ARGS_ASSERT_FIND_AND_FORGET_PMOPS;
 
-    if (o->op_flags & OPf_KIDS) {
-        OP *kid = cUNOPo->op_first;
-	while (kid) {
-	    switch (kid->op_type) {
-	    case OP_SUBST:
-	    case OP_SPLIT:
-	    case OP_MATCH:
-	    case OP_QR:
-		forget_pmop((PMOP*)kid);
-	    }
-	    find_and_forget_pmops(kid);
-	    kid = OpSIBLING(kid);
-	}
+    while (1) {
+        switch (o->op_type) {
+        case OP_SUBST:
+        case OP_SPLIT:
+        case OP_MATCH:
+        case OP_QR:
+            forget_pmop((PMOP*)o);
+        }
+
+        if (o->op_flags & OPf_KIDS) {
+            o = cUNOPo->op_first;
+            continue;
+        }
+
+        while (1) {
+            if (o == top_op)
+                return; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o)) {
+                o = o->op_sibparent; /* process next sibling */
+                break;
+            }
+            o = o->op_sibparent; /*try parent's next sibling */
+        }
     }
 }
+
 
 /*
 =for apidoc op_null
