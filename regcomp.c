@@ -19053,13 +19053,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }   /* End of seeing if can optimize it into a different node */
 
   is_anyof: /* It's going to be an ANYOF node. */
-        op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
-             ? ANYOFD
-             : ((posixl)
-                ? ANYOFPOSIXL
-                : ((LOC)
-                   ? ANYOFL
-                   : ANYOF));
+    op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
+         ? ANYOFD
+         : ((posixl)
+            ? ANYOFPOSIXL
+            : ((LOC)
+               ? ANYOFL
+               : ANYOF));
 
   done_finding_op:
 
