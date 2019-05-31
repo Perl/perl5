@@ -13,6 +13,10 @@
 : source code, but are not contained in F<embed.fnc>.
 :
 
+: This line needs to be in this file for things to work, even though it's been
+: removed from later embed.fnc versions
+Apnod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
+
 Ama|char*|savepvs|"literal string" s
 Ama|char*|savesharedpvs|"literal string" s
 Ama|SV*|newSVpvs_flags|"literal string" s|U32 flags
