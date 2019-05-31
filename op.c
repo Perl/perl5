@@ -4687,12 +4687,14 @@ OP *
 Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 {
     dVAR;
-    OP *kid;
+    OP * top_op = o;
 
     PERL_ARGS_ASSERT_DOREF;
 
     if (PL_parser && PL_parser->error_count)
 	return o;
+
+    while (1) {
 
     switch (o->op_type) {
     case OP_ENTERSUB:
@@ -4713,13 +4715,12 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	break;
 
     case OP_COND_EXPR:
-	for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
-	    doref(kid, type, set_op_ref);
-	break;
+	o = OpSIBLING(cUNOPo->op_first);
+	continue;
+
     case OP_RV2SV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	doref(cUNOPo->op_first, o->op_type, set_op_ref);
 	/* FALLTHROUGH */
     case OP_PADSV:
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
@@ -4728,6 +4729,11 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 			      : OPpDEREF_SV);
 	    o->op_flags |= OPf_MOD;
 	}
+	if (o->op_flags & OPf_KIDS) {
+            type = o->op_type;
+            o = cUNOPo->op_first;
+            continue;
+        }
 	break;
 
     case OP_RV2AV:
@@ -4738,8 +4744,9 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
     case OP_RV2GV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	doref(cUNOPo->op_first, o->op_type, set_op_ref);
-	break;
+        type = o->op_type;
+	o = cUNOPo->op_first;
+	continue;
 
     case OP_PADAV:
     case OP_PADHV:
@@ -4751,18 +4758,20 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
     case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS) || type == OP_DEFINED)
 	    break;
-	doref(cBINOPo->op_first, type, set_op_ref);
-	break;
+	 o = cBINOPo->op_first;
+	continue;
+
     case OP_AELEM:
     case OP_HELEM:
-	doref(cBINOPo->op_first, o->op_type, set_op_ref);
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
 	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
 			      : type == OP_RV2HV ? OPpDEREF_HV
 			      : OPpDEREF_SV);
 	    o->op_flags |= OPf_MOD;
 	}
-	break;
+        type = o->op_type;
+	o = cBINOPo->op_first;
+	continue;;
 
     case OP_SCOPE:
     case OP_LEAVE:
@@ -4772,14 +4781,30 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
     case OP_LIST:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
-	doref(cLISTOPo->op_last, type, set_op_ref);
-	break;
+	o = cLISTOPo->op_last;
+	continue;
+
     default:
 	break;
-    }
-    return scalar(o);
+    } /* switch */
 
+    while (1) {
+        if (o == top_op)
+            return scalar(top_op); /* at top; no parents/siblings to try */
+        if (OpHAS_SIBLING(o)) {
+            o = o->op_sibparent;
+            /* Normally skip all siblings and go straight to the parent;
+             * the only op that requires two children to be processed
+             * is OP_COND_EXPR */
+            if (!OpHAS_SIBLING(o) && o->op_sibparent->op_type == OP_COND_EXPR)
+                break;
+            continue;
+        }
+        o = o->op_sibparent; /*try parent's next sibling */
+    }
+    } /* while */
 }
+
 
 STATIC OP *
 S_dup_attrlist(pTHX_ OP *o)
