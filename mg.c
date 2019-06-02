@@ -3178,7 +3178,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    const char *p = SvPV_const(sv, len);
             Groups_t *gary = NULL;
-            const char* endptr = p + len;
+            const char* p_end = p + len;
+            const char* endptr = p_end;
             UV uv;
 #ifdef _SC_NGROUPS_MAX
            int maxgrp = sysconf(_SC_NGROUPS_MAX);
@@ -3201,6 +3202,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 if (endptr == NULL)
                     break;
                 p = endptr;
+                endptr = p_end;
                 while (isSPACE(*p))
                     ++p;
                 if (!*p)
