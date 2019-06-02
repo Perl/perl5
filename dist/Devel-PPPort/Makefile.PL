@@ -16,6 +16,8 @@
 require 5.003;
 
 use strict;
+BEGIN { $^W = 1; }
+
 use ExtUtils::MakeMaker;
 use Config;
 
