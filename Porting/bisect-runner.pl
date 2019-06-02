@@ -440,7 +440,9 @@ as exiting with a signal or a core dump.)
 
 -A I<config_arg=value>
 
-Arguments (C<-A>, C<-D>, C<-U>) to pass to F<Configure>. For example,
+Arguments (C<-A>, C<-D>, C<-U>) to pass to F<Configure>.  The C<-D>, C<-A> and
+C<-U> switches should be spelled as if you were normally giving them to
+F<./Configure>.  For example,
 
     -Dnoextensions=Encode
     -Uusedevel
