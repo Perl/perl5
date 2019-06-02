@@ -24,8 +24,8 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
+our $VERSION = '7.36';
+$VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -316,7 +316,7 @@ sub full_setup {
     PERLRUNINST PERL_CORE
     PERM_DIR PERM_RW PERM_RWX MAGICXS
     PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE
-    PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
+    PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ PUREPERL_ONLY
     SIGN SKIP TEST_REQUIRES TYPEMAPS UNINST VERSION VERSION_FROM XS
     XSBUILD XSMULTI XSOPT XSPROTOARG XS_VERSION
     clean depend dist dynamic_lib linkext macro realclean tool_autosplit
@@ -398,7 +398,7 @@ sub full_setup {
           );
 
     # 5.5.3 doesn't have any concept of vendor libs
-    push @Get_from_Config, qw( vendorarchexp vendorlibexp ) if $] >= 5.006;
+    push @Get_from_Config, qw( vendorarchexp vendorlibexp ) if "$]" >= 5.006;
 
     foreach my $item (@attrib_help){
         $Recognized_Att_Keys{$item} = 1;
@@ -534,7 +534,7 @@ sub new {
             # simulate "use warnings FATAL => 'all'" for vintage perls
             die @_;
         };
-        !$self->{MIN_PERL_VERSION} or $self->{MIN_PERL_VERSION} <= $]
+        !$self->{MIN_PERL_VERSION} or $self->{MIN_PERL_VERSION} <= "$]"
     };
     if (!$perl_version_ok) {
         if (!defined $perl_version_ok) {
@@ -693,6 +693,7 @@ END
             } else {
                 my $value = $self->{$key};
                 # not going to test in FS so only stripping start
+                $value =~ s/"// if $key =~ /PERL$/ and $self->is_make_type('dmake');
                 $value =~ s/^"// if $key =~ /PERL$/;
                 $value = $self->catdir("..", $value)
                   unless $self->file_name_is_absolute($value);
@@ -702,7 +703,8 @@ END
         }
         if ($self->{PARENT}) {
             $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-            foreach my $opt (qw(POLLUTE PERL_CORE LINKTYPE LD OPTIMIZE)) {
+            foreach my $opt (qw(POLLUTE PERL_CORE LINKTYPE AR FULL_AR CC CCFLAGS
+                                OPTIMIZE LD LDDLFLAGS LDFLAGS PERL_ARCHLIB DESTDIR)) {
                 if (exists $self->{PARENT}->{$opt}
                     and not exists $self->{$opt})
                     {
@@ -1264,7 +1266,7 @@ sub write_file_via_tmp {
     die "write_file_via_tmp: 2nd arg must be ref" unless ref $contents;
     for my $chunk (@$contents) {
         my $to_write = $chunk;
-        utf8::encode $to_write if !$CAN_DECODE && $] > 5.008;
+        utf8::encode $to_write if !$CAN_DECODE && "$]" > 5.008;
         print $fh "$to_write\n" or die "Can't write to MakeMaker.tmp: $!";
     }
     close $fh or die "Can't write to MakeMaker.tmp: $!";
@@ -2598,6 +2600,20 @@ In this case the program will be run multiple times using each target file.
 
     perl bin/foobar.PL bin/foobar1
     perl bin/foobar.PL bin/foobar2
+
+If an output file depends on extra input files beside the script itself,
+a hash ref can be used in version 7.36 and above:
+
+    PL_FILES => { 'foo.PL' => {
+        'foo.out' => 'foo.in',
+        'bar.out' => [qw(bar1.in bar2.in)],
+    }
+
+In this case the extra input files will be passed to the program after
+the target file:
+
+   perl foo.PL foo.out foo.in
+   perl foo.PL bar.out bar1.in bar2.in
 
 PL files are normally run B<after> pm_to_blib and include INST_LIB and
 INST_ARCH in their C<@INC>, so the just built modules can be

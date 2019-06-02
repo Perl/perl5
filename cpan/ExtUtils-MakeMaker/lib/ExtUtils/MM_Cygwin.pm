@@ -9,8 +9,8 @@ require ExtUtils::MM_Unix;
 require ExtUtils::MM_Win32;
 our @ISA = qw( ExtUtils::MM_Unix );
 
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;
+our $VERSION = '7.36';
+$VERSION =~ tr/_//d;
 
 
 =head1 NAME
@@ -86,7 +86,7 @@ sub init_linker {
 
     if ($Config{useshrplib} eq 'true') {
         my $libperl = '$(PERL_INC)' .'/'. "$Config{libperl}";
-        if( $] >= 5.006002 ) {
+        if( "$]" >= 5.006002 ) {
             $libperl =~ s/(dll\.)?a$/dll.a/;
         }
         $self->{PERL_ARCHIVE} = $libperl;

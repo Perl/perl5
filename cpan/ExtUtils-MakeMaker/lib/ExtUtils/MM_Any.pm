@@ -1,8 +1,8 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;
+our $VERSION = '7.36';
+$VERSION =~ tr/_//d;
 
 use Carp;
 use File::Spec;
@@ -195,7 +195,7 @@ sub can_redirect_error {
 
     my $is_dmake = $self->is_make_type('dmake');
 
-Returns true if C<<$self->make>> is the given type; possibilities are:
+Returns true if C<< $self->make >> is the given type; possibilities are:
 
   gmake    GNU make
   dmake
@@ -1090,7 +1090,7 @@ END
     my @man_cmds;
     foreach my $section (qw(1 3)) {
         my $pods = $self->{"MAN${section}PODS"};
-        my $p2m = sprintf <<'CMD', $section, $] > 5.008 ? " -u" : "";
+        my $p2m = sprintf <<'CMD', $section, "$]" > 5.008 ? " -u" : "";
 	$(NOECHO) $(POD2MAN) --section=%s --perm_rw=$(PERM_RW)%s
 CMD
         push @man_cmds, $self->split_command($p2m, map {($_,$pods->{$_})} sort keys %$pods);
@@ -2214,7 +2214,9 @@ sub init_INSTALL_from_INSTALL_BASE {
             my $key = "INSTALL".$dir.$uc_thing;
 
             $install{$key} ||=
-              $self->catdir('$(INSTALL_BASE)', @{$map{$thing}});
+                ($thing =~ /^man.dir$/ and not $Config{lc $key})
+                ? 'none'
+                : $self->catdir('$(INSTALL_BASE)', @{$map{$thing}});
         }
     }
 

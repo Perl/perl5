@@ -1,7 +1,7 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;
+our $VERSION = '7.36';
+$VERSION =~ tr/_//d;
 
 1;
 __END__
@@ -84,7 +84,8 @@ installation.
 =item How do I keep from installing man pages?
 
 Recent versions of MakeMaker will only install man pages on Unix-like
-operating systems.
+operating systems by default. To generate manpages on non-Unix operating
+systems, make the "manifypods" target.
 
 For an individual module:
 

@@ -1,8 +1,8 @@
 package ExtUtils::MM_AIX;
 
 use strict;
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;
+our $VERSION = '7.36';
+$VERSION =~ tr/_//d;
 
 use ExtUtils::MakeMaker::Config;
 require ExtUtils::MM_Unix;
@@ -50,7 +50,9 @@ sub xs_dlsyms_ext {
 
 sub xs_dlsyms_arg {
     my($self, $file) = @_;
-    return qq{-bE:${file}};
+    my $arg = qq{-bE:${file}};
+    $arg = '-Wl,'.$arg if $Config{lddlflags} =~ /-Wl,-bE:/;
+    return $arg;
 }
 
 sub init_others {
