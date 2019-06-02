@@ -43,7 +43,10 @@ WriteMakefile(%mf);
 sub configure
 {
   my @clean    = qw{ $(H_FILES) RealPPPort.xs RealPPPort.c PPPort.pm };
-  my %depend   = ('$(OBJECT)' => '$(H_FILES)');
+  my %depend   = (
+    '$(OBJECT)' => '$(H_FILES)',
+    'Makefile' => '$(VERSION_FROM)',
+  );
   my @C_FILES  = qw{ module2.c module3.c },
   my %PL_FILES = (
     'ppport_h.PL'  => 'ppport.h',
