@@ -38,7 +38,6 @@ my %mf = (
   XSPROTOARG    => '-noprototypes',
   CONFIGURE     => \&configure,
 );
-delete $mf{META_MERGE} unless eval { ExtUtils::MakeMaker->VERSION (6.46) };
 WriteMakefile(%mf);
 
 sub configure
@@ -64,44 +63,16 @@ sub configure
     push @moreopts, LICENSE => 'perl';
   }
 
-  if (not $ENV{'PERL_CORE'}) {
-    # Devel::PPPort is in the core since 5.7.3
-    # 5.11.0+ has site before perl
-    push @moreopts, INSTALLDIRS => (
-      ("$]" >= 5.007003 and "$]" < 5.011)
-        ? 'perl'
-        : 'site'
-    );
-  }
-
-  if ($opt{'apicheck'}) {
-    $PL_FILES{'apicheck_c.PL'} = 'apicheck.c';
-    push @C_FILES, qw{ apicheck.c };
-    push @clean,   qw{ apicheck.c apicheck.i };
-    $depend{'apicheck.i'} = 'ppport.h';
-  }
-
-  open FH, '<PPPort_pm.PL' or die "cannot open PPPort_pm.PL for reading: $!";
-  my $version;
-  while (my $line = <FH>) {
-    ($version) = $line =~ /^\$VERSION = '([\d.]+)';$/ and last;
-  };
-  die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
-  close FH;
-
-  if ($Config{gccversion}) {
-    my $define = '-W -Wall';
-    $define .= ' -Wdeclaration-after-statement' if $Config{gccversion} =~ /^(\d+\.\d+)\./ && $1 >= 3.4;
-    push @moreopts, DEFINE => $define;
-  }
-
-  return {
-    C        => \@C_FILES,
-    XS       => { 'RealPPPort.xs' => 'RealPPPort.c' },
-    PL_FILES => \%PL_FILES,
-    depend   => \%depend,
-    clean    => { FILES => "@clean" },
-    META_MERGE    => {
+  if (eval { ExtUtils::MakeMaker->VERSION (6.46) }) {
+    open FH, '<PPPort_pm.PL' or die "cannot open PPPort_pm.PL for reading: $!";
+    my $version;
+    while (my $line = <FH>) {
+      ($version) = $line =~ /^\$VERSION = '([\d.]+)';$/ and last;
+    };
+    die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
+    close FH;
+    print "Adding META_MERGE...\n";
+    push @moreopts, META_MERGE => {
       'meta-spec' => { version => 2 },
       provides => {
         'Devel::PPPort' => {
@@ -119,7 +90,38 @@ sub configure
           web  => 'https://perl5.git.perl.org/perl.git',
         },
       },
-    },
+    };
+  }
+
+  if (not $ENV{'PERL_CORE'}) {
+    # Devel::PPPort is in the core since 5.7.3
+    # 5.11.0+ has site before perl
+    push @moreopts, INSTALLDIRS => (
+      ("$]" >= 5.007003 and "$]" < 5.011)
+        ? 'perl'
+        : 'site'
+    );
+  }
+
+  if ($opt{'apicheck'}) {
+    $PL_FILES{'apicheck_c.PL'} = 'apicheck.c';
+    push @C_FILES, qw{ apicheck.c };
+    push @clean,   qw{ apicheck.c apicheck.i };
+    $depend{'apicheck.i'} = 'ppport.h';
+  }
+
+  if ($Config{gccversion}) {
+    my $define = '-W -Wall';
+    $define .= ' -Wdeclaration-after-statement' if $Config{gccversion} =~ /^(\d+\.\d+)\./ && $1 >= 3.4;
+    push @moreopts, DEFINE => $define;
+  }
+
+  return {
+    C        => \@C_FILES,
+    XS       => { 'RealPPPort.xs' => 'RealPPPort.c' },
+    PL_FILES => \%PL_FILES,
+    depend   => \%depend,
+    clean    => { FILES => "@clean" },
     @moreopts,
   };
 }
