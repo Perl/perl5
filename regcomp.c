@@ -22574,8 +22574,7 @@ Perl_parse_uniprop_string(pTHX_
     int slash_pos  = -1;    /* Where the '/' is found, or negative if none */
     int table_index = 0;    /* The entry number for this property in the table
                                of all Unicode property names */
-    bool starts_with_In_or_Is = FALSE;  /* ? Does the name start with 'In' or
-                                             'Is' */
+    bool starts_with_Is = FALSE;  /* ? Does the name start with 'Is' */
     Size_t lookup_offset = 0;   /* Used to ignore the first few characters of
                                    the normalized name in certain situations */
     Size_t non_pkg_begin = 0;   /* Offset of first byte in 'name' that isn't
@@ -23053,7 +23052,11 @@ Perl_parse_uniprop_string(pTHX_
         &&  name[non_pkg_begin+0] == 'I'
         && (name[non_pkg_begin+1] == 'n' || name[non_pkg_begin+1] == 's'))
     {
-        starts_with_In_or_Is = TRUE;
+        /* Names that start with In have different characterstics than those
+         * that start with Is */
+        if (name[non_pkg_begin+1] == 's') {
+            starts_with_Is = TRUE;
+        }
     }
     else {
         could_be_user_defined = FALSE;
@@ -23392,8 +23395,11 @@ Perl_parse_uniprop_string(pTHX_
     /* If it didn't find the property ... */
     if (table_index == 0) {
 
-        /* Try again stripping off any initial 'In' or 'Is' */
-        if (starts_with_In_or_Is) {
+        /* Try again stripping off any initial 'Is'.  This is because we
+         * promise that an initial Is is optional.  The same isn't true of
+         * names that start with 'In'.  Those can match only blocks, and the
+         * lookup table already has those accounted for. */
+        if (starts_with_Is) {
             lookup_name += 2;
             lookup_len -= 2;
             equals_pos -= 2;

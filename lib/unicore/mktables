@@ -19133,6 +19133,7 @@ Test_GCB("1100 $nobreak 1161");  # Bug #70940
 Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
 Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
 Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
+Error('\p{InKana}');    # 'Kana' is not a block so InKana shouldn't compile
 
 # Make sure this gets tested; it was not part of the official test suite at
 # the time this was added.  Note that this is as it would appear in the
