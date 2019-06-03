@@ -3,7 +3,7 @@
 # Test for graceful degradation to non-utf8 output without Encode module.
 #
 # Copyright 2016 Niko Tyni <ntyni@iki.fi>
-# Copyright 2016, 2018 Russ Allbery <rra@cpan.org>
+# Copyright 2016, 2018-2019 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -14,11 +14,17 @@ use 5.006;
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More;
 
-# Force the Encode module to be impossible to import.
+# Force the Encode module to be impossible to import.  Sometimes Encode is
+# already loaded before the test suite runs (this seems common for CPAN
+# Testers tests for some reason), so skip the test if that's the case.
 BEGIN {
-    ok(!$INC{'Encode.pm'}, 'Encode is not loaded yet');
+    if ($INC{'Encode.pm'}) {
+        plan skip_all => 'Encode is already loaded';
+    } else {
+        plan tests => 5;
+    }
     my $reject_encode = sub {
         if ($_[1] eq 'Encode.pm') {
             die "refusing to load Encode\n";
