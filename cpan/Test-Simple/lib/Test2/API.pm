@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302162';
+our $VERSION = '1.302164';
 
 
 my $INST;
@@ -322,6 +322,23 @@ sub context {
 
     my $stack   = $params{stack} || $STACK;
     my $hub     = $params{hub}   || (@$stack ? $stack->[-1] : $stack->top);
+
+    # Catch an edge case where we try to get context after the root hub has
+    # been garbage collected resulting in a stack that has a single undef
+    # hub
+    if (!$hub && !exists($params{hub}) && @$stack) {
+        my $msg = Carp::longmess("Attempt to get Test2 context after testing has completed (did you attempt a testing event after done_testing?)");
+
+        # The error message is usually masked by the global destruction, so we have to print to STDER
+        print STDERR $msg;
+
+        # Make sure this is a failure, we are probably already in END, so set $? to change the exit code
+        $? = 1;
+
+        # Now we actually die to interrupt the program flow and avoid undefined his warnings
+        die $msg;
+    }
+
     my $hid     = $hub->{hid};
     my $current = $CONTEXTS->{$hid};
 
