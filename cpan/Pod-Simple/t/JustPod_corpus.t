@@ -76,7 +76,7 @@ foreach my $file (@test_files) {
     my $errata = $parser->errata_seen();
     foreach my $line_number (sort { $a <=> $b } keys %$errata) {
         foreach my $err_msg (sort @{$errata->{$line_number}}) {
-            diag "$file: $line_number: $err_msg";
+            note "$file: $line_number: $err_msg";
         }
     }
     next;
