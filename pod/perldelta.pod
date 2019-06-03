@@ -380,6 +380,14 @@ to mishandling of the negative precision value.  [perl #134008]
 scalar() on a reference could cause an erroneous assertion failure
 during compilation.  [perl #134045]
 
+=item *
+
+Extraordinarily large (over 2GB) floating point format widths could
+cause an integer overflow in the underlying call to snprintf(),
+resulting in an assertion.  Formatted floating point widths are now
+limited to the range of int, the return value of snprintf().  [perl
+#133913]
+
 =back
 
 =head1 Known Problems
