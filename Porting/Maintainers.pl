@@ -211,6 +211,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},
+            qr{^t/meta},
             'bzip2-src/bzip2-const.patch',
             'bzip2-src/bzip2-cpp.patch',
             'bzip2-src/bzip2-unsigned.patch',
@@ -218,11 +219,12 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.084.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.086.tar.gz',
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
             qr{^examples/},
             qr{^t/Test/},
+            qr{^t/meta},
             qw( t/000prereq.t
                 t/99pod.t
                 ),
