@@ -5841,7 +5841,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         MATCH_LIMIT(
              if (reginfo->match_cpu_limit != MATCH_NO_LIMIT
                  && ++ reginfo->match_cpu_used >= reginfo->match_cpu_limit) {
-                 Perl_croak(aTHX_ "Exceeded CPU limit for regexp match");
+                 Perl_croak(aTHX_ "Exceeded CPU usage limit for regular expression match");
              }
         );
 
@@ -9134,7 +9134,7 @@ NULL
             MATCH_LIMIT(
                 if (reginfo->match_memory_limit != MATCH_NO_LIMIT
                     && depth > reginfo->match_memory_limit) {
-                    Perl_croak(aTHX_ "Memory use over limit matching regular expression");
+                    Perl_croak(aTHX_ "Exceeded memory limit for regular expression match");
                 }
             );
 	    st->locinput = locinput;

@@ -2226,10 +2226,15 @@ any text.  Restructure the pattern so that text is consumed.
 The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
-=item Exceeded CPU limit for regexp match
+=item Exceeded CPU usage limit for regular expression match
 
 (F) Under C<use re 'limit'> matching a regular expression exceeded the
 CPU usage limit defined in C<${^RE_CPU_LIMIT}>.
+
+=item Exceeded memory limit for regular expression match
+
+(F) Under C<use re 'limit'> matching a regular expression exceeded the
+memory usage limit defined in C<${^RE_MEMORY_LIMIT}>.
 
 =item Excessively long <> operator
 
@@ -3671,11 +3676,6 @@ See L<perlfunc/unpack>.
 
 (F) An attempt was made to specify an entry in an overloading table that
 doesn't resolve to a valid subroutine.  See L<overload>.
-
-=item Memory use over limit matching regular expression
-
-(F) Under C<use re 'limit'> matching a regular expression exceeded the
-memory usage limit defined in C<${^RE_MEMORY_LIMIT}>.
 
 =item Method %s not permitted
 
