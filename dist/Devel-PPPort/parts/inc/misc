@@ -766,7 +766,7 @@ DEFSV_modify()
 int
 ERRSV()
         CODE:
-                RETVAL = SvTRUE(ERRSV);
+                RETVAL = SvTRUEx(ERRSV);
         OUTPUT:
                 RETVAL
 

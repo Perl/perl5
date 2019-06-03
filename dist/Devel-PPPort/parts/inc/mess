@@ -50,24 +50,25 @@ NEED_vmess
 #ifndef croak_sv
 #if { VERSION >= 5.7.3 } || ( { VERSION >= 5.6.1 } && { VERSION < 5.7.0 } )
 #  if ( { VERSION >= 5.8.0 } && { VERSION < 5.8.9 } ) || ( { VERSION >= 5.9.0 } && { VERSION < 5.10.1 } )
-#    define D_PPP_FIX_UTF8_ERRSV(errsv, sv)                     \
-        STMT_START {                                            \
-            if (sv != errsv)                                    \
-                SvFLAGS(errsv) = (SvFLAGS(errsv) & ~SVf_UTF8) | \
-                                 (SvFLAGS(sv) & SVf_UTF8);      \
+#    define D_PPP_FIX_UTF8_ERRSV_FOR_SV(sv)                    \
+        STMT_START {                                           \
+            SV *_errsv = ERRSV;                                \
+            SvFLAGS(_errsv) = (SvFLAGS(_errsv) & ~SVf_UTF8) |  \
+                              (SvFLAGS(sv) & SVf_UTF8);        \
         } STMT_END
 #  else
-#    define D_PPP_FIX_UTF8_ERRSV(errsv, sv) STMT_START {} STMT_END
+#    define D_PPP_FIX_UTF8_ERRSV_FOR_SV(sv) STMT_START {} STMT_END
 #  endif
-#  define croak_sv(sv)                        \
-    STMT_START {                              \
-        if (SvROK(sv)) {                      \
-            sv_setsv(ERRSV, sv);              \
-            croak(NULL);                      \
-        } else {                              \
-            D_PPP_FIX_UTF8_ERRSV(ERRSV, sv);  \
-            croak("%" SVf, SVfARG(sv));       \
-        }                                     \
+#  define croak_sv(sv)                         \
+    STMT_START {                               \
+        SV *_sv = (sv);                        \
+        if (SvROK(_sv)) {                      \
+            sv_setsv(ERRSV, _sv);              \
+            croak(NULL);                       \
+        } else {                               \
+            D_PPP_FIX_UTF8_ERRSV_FOR_SV(_sv);  \
+            croak("%" SVf, SVfARG(_sv));       \
+        }                                      \
     } STMT_END
 #elif { VERSION >= 5.4.0 }
 #  define croak_sv(sv) croak("%" SVf, SVfARG(sv))
@@ -236,6 +237,12 @@ croak_xs_usage(const CV *const cv, const char *const params)
 #define NEED_mess_sv
 #define NEED_croak_xs_usage
 
+=xsmisc
+
+static IV counter;
+static void reset_counter(void) { counter = 0; }
+static void inc_counter(void) { counter++; }
+
 =xsubs
 
 void
@@ -243,6 +250,25 @@ croak_sv(sv)
     SV *sv
 CODE:
     croak_sv(sv);
+
+void
+croak_sv_errsv()
+CODE:
+    croak_sv(ERRSV);
+
+void
+croak_sv_with_counter(sv)
+    SV *sv
+CODE:
+    reset_counter();
+    croak_sv((inc_counter(), sv));
+
+IV
+get_counter()
+CODE:
+    RETVAL = counter;
+OUTPUT:
+    RETVAL
 
 void
 die_sv(sv)
@@ -281,7 +307,7 @@ croak_xs_usage(params)
 CODE:
     croak_xs_usage(cv, params);
 
-=tests plan => 93
+=tests plan => 102
 
 BEGIN { if ($] lt '5.006') { $^W = 0; } }
 
@@ -331,6 +357,29 @@ ok !defined eval {
 };
 ok $@, "this must be visible\n";
 ok $die, "this must be visible\n";
+
+undef $die;
+$@ = 'should not be visible';
+ok !defined eval {
+    $@ = 'this must be visible';
+    Devel::PPPort::croak_sv_errsv()
+};
+ok $@ =~ /^this must be visible at $0 line /;
+ok $die =~ /^this must be visible at $0 line /;
+
+undef $die;
+$@ = 'should not be visible';
+ok !defined eval {
+    $@ = "this must be visible\n";
+    Devel::PPPort::croak_sv_errsv()
+};
+ok $@, "this must be visible\n";
+ok $die, "this must be visible\n";
+
+undef $die;
+ok !defined eval { Devel::PPPort::croak_sv_with_counter("message\n") };
+ok $@, "message\n";
+ok Devel::PPPort::get_counter(), 1;
 
 undef $die;
 ok !defined eval { Devel::PPPort::croak_sv('') };

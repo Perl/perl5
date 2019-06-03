@@ -59,6 +59,7 @@ SV*
 eval_pv(char *p, I32 croak_on_error)
 {
     dSP;
+    SV* errsv;
     SV* sv = newSVpv(p, 0);
 
     PUSHMARK(sp);
@@ -69,8 +70,11 @@ eval_pv(char *p, I32 croak_on_error)
     sv = POPs;
     PUTBACK;
 
-    if (croak_on_error && SvTRUEx(ERRSV))
-        croak_sv(ERRSV);
+    if (croak_on_error) {
+        errsv = ERRSV;
+        if (SvTRUE(errsv))
+            croak_sv(errsv);
+    }
 
     return sv;
 }

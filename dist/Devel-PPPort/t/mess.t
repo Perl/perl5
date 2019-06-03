@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (93) {
+  if (102) {
     load();
-    plan(tests => 93);
+    plan(tests => 102);
   }
 }
 
@@ -96,6 +96,29 @@ ok !defined eval {
 };
 ok $@, "this must be visible\n";
 ok $die, "this must be visible\n";
+
+undef $die;
+$@ = 'should not be visible';
+ok !defined eval {
+    $@ = 'this must be visible';
+    Devel::PPPort::croak_sv_errsv()
+};
+ok $@ =~ /^this must be visible at $0 line /;
+ok $die =~ /^this must be visible at $0 line /;
+
+undef $die;
+$@ = 'should not be visible';
+ok !defined eval {
+    $@ = "this must be visible\n";
+    Devel::PPPort::croak_sv_errsv()
+};
+ok $@, "this must be visible\n";
+ok $die, "this must be visible\n";
+
+undef $die;
+ok !defined eval { Devel::PPPort::croak_sv_with_counter("message\n") };
+ok $@, "message\n";
+ok Devel::PPPort::get_counter(), 1;
 
 undef $die;
 ok !defined eval { Devel::PPPort::croak_sv('') };
