@@ -8,7 +8,7 @@ use CPAN::Module;
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5003";
+$VERSION = "5.5004";
 
 sub look {
     my $self = shift;
@@ -238,6 +238,7 @@ Going to $meth that.
         $self->debug("type[$type] s[$s]") if $CPAN::DEBUG;
         my $obj = $CPAN::META->instance($type,$s);
         $obj->{reqtype} = $self->{reqtype};
+        $obj->{viabundle} ||= { id => $id, reqtype => $self->{reqtype}, optional => !$self->{mandatory}};
         # $obj->$meth();
         # XXX should optional be based on whether bundle was optional? -- xdg, 2012-04-01
         # A: Sure, what could demand otherwise? --andk, 2013-11-25

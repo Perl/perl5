@@ -8,7 +8,7 @@ use CPAN::InfoObj;
 use File::Path ();
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.22";
+$VERSION = "2.24";
 
 # no prepare, because prepare is not a command on the shell command line
 # TODO: clear instance cache on reload
@@ -316,6 +316,17 @@ sub called_for {
 # and 1 means shortcut as success
 sub shortcut_get {
     my ($self) = @_;
+
+    if (exists $self->{cleanup_after_install_done}) {
+        if ($self->{force_update}) {
+            delete $self->{cleanup_after_install_done};
+        } else {
+            my $id = $self->{CALLED_FOR} || $self->pretty_id;
+            return $self->success(
+                "Has already been *installed and cleaned up in the staging area* within this session, will not work on it again; if you really want to start over, try something like `force get $id`"
+            );
+        }
+    }
 
     if (my $why = $self->check_disabled) {
         $self->{unwrapped} = CPAN::Distrostatus->new("NO $why");
@@ -1637,23 +1648,28 @@ sub force {
                            "prefs",
                            "prefs_file",
                            "prefs_file_doc",
+                           "cleanup_after_install_done",
                           ],
                    make => [
                             "writemakefile",
                             "make",
                             "modulebuild",
                             "prereq_pm",
+                            "cleanup_after_install_done",
                            ],
                    test => [
                             "badtestcnt",
                             "make_test",
-                           ],
+                            "cleanup_after_install_done",
+                          ],
                    install => [
                                "install",
+                               "cleanup_after_install_done",
                               ],
                    unknown => [
                                "reqtype",
                                "yaml_content",
+                               "cleanup_after_install_done",
                               ],
                   );
   my $methodmatch = 0;
@@ -1992,7 +2008,9 @@ sub prepare {
                 ($output, $ret) = eval { CPAN::Reporter::record_command($system) };
                 if (! defined $output or $@) {
                     my $err = $@ || "Unknown error";
-                    $CPAN::Frontend->mywarn("Error while running PL phase: $err");
+                    $CPAN::Frontend->mywarn("Error while running PL phase: $err\n");
+                    $self->{writemakefile} = CPAN::Distrostatus
+                        ->new("NO '$system' returned status $ret and no output");
                     return $self->goodbye("$system -- NOT OK");
                 }
                 CPAN::Reporter::grade_PL( $self, $system, $output, $ret );
@@ -2061,6 +2079,10 @@ sub make {
     my($self) = @_;
 
     $self->pre_make();
+
+    if (exists $self->{cleanup_after_install_done}) {
+        return $self->get;
+    }
 
     $self->debug("checking goto id[$self->{ID}]") if $CPAN::DEBUG;
     if (my $goto = $self->prefs->{goto}) {
@@ -2956,7 +2978,8 @@ sub unsat_prereq {
                     next NEED;
                 }
             } elsif (
-                $self->{reqtype} =~ /^(r|c)$/
+                $self->{reqtype} # e.g. maybe we came via goto?
+                && $self->{reqtype} =~ /^(r|c)$/
                 && (   exists $prereq_pm->{requires}{$need_module}
                     || exists $prereq_pm->{opt_requires}{$need_module} )
                 && $nmo
@@ -3531,6 +3554,10 @@ sub test {
 
     $self->pre_test();
 
+    if (exists $self->{cleanup_after_install_done}) {
+        return $self->make;
+    }
+
     $self->debug("checking goto id[$self->{ID}]") if $CPAN::DEBUG;
     if (my $goto = $self->prefs->{goto}) {
         return $self->goto($goto);
@@ -3895,7 +3922,12 @@ sub goto {
     # and run where we left off
 
     my($method) = (caller(1))[3];
-    CPAN->instance("CPAN::Distribution",$goto)->$method();
+    my $goto_do = CPAN->instance("CPAN::Distribution",$goto);
+    $goto_do->called_for($self->called_for) unless $goto_do->called_for;
+    $goto_do->{mandatory} ||= $self->{mandatory};
+    $goto_do->{reqtype}   ||= $self->{reqtype};
+    $goto_do->{coming_from} = $self->pretty_id;
+    $goto_do->$method();
     CPAN::Queue->delete_first($goto);
     # XXX delete_first returns undef; is that what this should return
     # up the call stack, eg. return $sefl->goto($goto) -- xdg, 2012-04-04
@@ -3932,11 +3964,35 @@ sub shortcut_install {
     return undef;
 }
 
+#-> sub CPAN::Distribution::is_being_sponsored ;
+
+# returns true if we find a distro object in the queue that has
+# sponsored this one
+sub is_being_sponsored {
+    my($self) = @_;
+    my $iterator = CPAN::Queue->iterator;
+ QITEM: while (my $q = $iterator->()) {
+        my $s = $q->as_string;
+        my $obj = CPAN::Shell->expandany($s) or next QITEM;
+        my $type = ref $obj;
+        if ( $type eq 'CPAN::Distribution' ){
+            for my $module (sort keys %{$obj->{sponsored_mods} || {}}) {
+                return 1 if grep { $_ eq $module } $self->containsmods;
+            }
+        }
+    }
+    return 0;
+}
+
 #-> sub CPAN::Distribution::install ;
 sub install {
     my($self) = @_;
 
     $self->pre_install();
+
+    if (exists $self->{cleanup_after_install_done}) {
+        return $self->test;
+    }
 
     $self->debug("checking goto id[$self->{ID}]") if $CPAN::DEBUG;
     if (my $goto = $self->prefs->{goto}) {
@@ -4044,6 +4100,12 @@ sub install {
     local $ENV{PERL_MM_USE_DEFAULT} = 1 if $CPAN::Config->{use_prompt_default};
     local $ENV{NONINTERACTIVE_TESTING} = 1 if $CPAN::Config->{use_prompt_default};
 
+    my $install_env;
+    if ($self->prefs->{install}) {
+        $install_env = $self->prefs->{install}{env};
+    }
+    local @ENV{keys %$install_env} = values %$install_env if $install_env;
+
     my($pipe) = FileHandle->new("$system $stderr |");
     unless ($pipe) {
         $CPAN::Frontend->mywarn("Can't execute $system: $!");
@@ -4069,7 +4131,8 @@ sub install {
         $CPAN::META->is_installed($self->{build_dir});
         $self->{install} = CPAN::Distrostatus->new("YES");
         if ($CPAN::Config->{'cleanup_after_install'}
-            && ! $self->is_dot_dist) {
+            && ! $self->is_dot_dist
+            && ! $self->is_being_sponsored) {
             my $parent = File::Spec->catdir( $self->{build_dir}, File::Spec->updir );
             chdir $parent or $CPAN::Frontend->mydie("Couldn't chdir to $parent: $!\n");
             File::Path::rmtree($self->{build_dir});
@@ -4077,6 +4140,7 @@ sub install {
             if (-e $yml) {
                 unlink $yml or $CPAN::Frontend->mydie("Couldn't unlink $yml: $!\n");
             }
+            $self->{cleanup_after_install_done}=1;
         }
     } else {
         $self->{install} = CPAN::Distrostatus->new("NO");
@@ -4360,6 +4424,8 @@ sub _should_report {
     my($self, $phase) = @_;
     die "_should_report() requires a 'phase' argument"
         if ! defined $phase;
+
+    return unless $CPAN::META->has_usable("CPAN::Reporter");
 
     # configured
     my $test_report = CPAN::HandleConfig->prefs_lookup($self,

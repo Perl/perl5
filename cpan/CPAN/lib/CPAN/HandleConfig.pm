@@ -12,7 +12,7 @@ CPAN::HandleConfig - internal configuration handling for CPAN.pm
 
 =cut 
 
-$VERSION = "5.5008"; # see also CPAN::Config::VERSION at end of file
+$VERSION = "5.5009"; # see also CPAN::Config::VERSION at end of file
 
 %can = (
         commit   => "Commit changes to disk",
@@ -751,7 +751,7 @@ sub prefs_lookup {
         return $distro->prefs->{cpanconfig}{$what};
     } else {
         $CPAN::Frontend->mywarn("Warning: $what not yet officially ".
-                                "supported for distroprefs, doing a normal lookup");
+                                "supported for distroprefs, doing a normal lookup\n");
         return $CPAN::Config->{$what};
     }
 }

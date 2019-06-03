@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.22';
+$CPAN::VERSION = '2.26';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -286,7 +286,10 @@ sub shell {
         }
         if (my $histfile = $CPAN::Config->{'histfile'}) {{
             unless ($term->can("AddHistory")) {
-                $CPAN::Frontend->mywarn("Terminal does not support AddHistory.\n\nTo fix enter>  install Term::ReadLine::Perl\n\n");
+                $CPAN::Frontend->mywarn("Terminal does not support AddHistory.\n");
+                unless ($CPAN::META->has_inst('Term::ReadLine::Perl')) {
+                    $CPAN::Frontend->mywarn("\nTo fix that, maybe try>  install Term::ReadLine::Perl\n\n");
+                }
                 last;
             }
             $META->readhist($term,$histfile);
@@ -1028,7 +1031,10 @@ sub has_usable {
     $usable = {
 
                #
-               # these subroutines die if they believe the installed version is unusable;
+               # most of these subroutines warn on the frontend, then
+               # die if the installed version is unusable for some
+               # reason; has_usable() then returns false when it caught
+               # an exception, otherwise returns true and caches that;
                #
                'CPAN::Meta' => [
                             sub {
@@ -1052,6 +1058,23 @@ sub has_usable {
                                 require CPAN::Meta::Requirements;
                                 unless (CPAN::Version->vge(CPAN::Meta::Requirements->VERSION, 2.120920)) {
                                     for ("Will not use CPAN::Meta::Requirements, need version 2.120920\n") {
+                                        $CPAN::Frontend->mywarn($_);
+                                        die $_;
+                                    }
+                                }
+                            },
+                           ],
+
+               'CPAN::Reporter' => [
+                            sub {
+                                if (defined $CPAN::Reporter::VERSION
+                                    && CPAN::Version->vlt($CPAN::Reporter::VERSION, "1.2011")
+                                   ) {
+                                    delete $INC{"CPAN/Reporter.pm"};
+                                }
+                                require CPAN::Reporter;
+                                unless (CPAN::Version->vge(CPAN::Reporter->VERSION, "1.2011")) {
+                                    for ("Will not use CPAN::Reporter, need version 1.2011\n") {
                                         $CPAN::Frontend->mywarn($_);
                                         die $_;
                                     }
@@ -2134,7 +2157,8 @@ currently defined:
   check_sigs         if signatures should be verified
   cleanup_after_install
                      remove build directory immediately after a
-                     successful install
+                     successful install and remember that for the
+                     duration of the session
   colorize_debug     Term::ANSIColor attributes for debugging output
   colorize_output    boolean if Term::ANSIColor should colorize output
   colorize_print     Term::ANSIColor attributes for normal output
@@ -2378,7 +2402,7 @@ installed. It is only built and tested, and then kept in the list of
 tested but uninstalled modules. As such, it is available during the
 build of the dependent module by integrating the path to the
 C<blib/arch> and C<blib/lib> directories in the environment variable
-PERL5LIB. If C<build_requires_install_policy> is set ti C<yes>, then
+PERL5LIB. If C<build_requires_install_policy> is set to C<yes>, then
 both modules declared as C<requires> and those declared as
 C<build_requires> are treated alike. By setting to C<ask/yes> or
 C<ask/no>, CPAN.pm asks the user and sets the default accordingly.
