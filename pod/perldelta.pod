@@ -370,6 +370,11 @@ IO SV.  This prevents a second attempt to close the already closed
 PerlIO object if a signal handler calls die() or exit() while close()
 is waiting for the child process to complete.  [perl #122112]
 
+=item *
+
+C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due
+to mishandling of the negative precision value.  [perl #134008]
+
 =back
 
 =head1 Known Problems
