@@ -7,17 +7,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.084 ;
-use Compress::Raw::Zlib 2.084 ;
-use IO::Compress::Gzip 2.084 ;
-use IO::Uncompress::Gunzip 2.084 ;
+use IO::Compress::Base::Common 2.086 ;
+use Compress::Raw::Zlib 2.086 ;
+use IO::Compress::Gzip 2.086 ;
+use IO::Uncompress::Gunzip 2.086 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.084';
+$VERSION = '2.086';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -224,7 +224,7 @@ sub Compress::Zlib::gzFile::gzseek
 
     my $gz = $self->[0] ;
     my $status ;
-    eval { $status = $gz->seek($offset, $whence) ; };
+    eval { local $SIG{__DIE__}; $status = $gz->seek($offset, $whence) ; };
     if ($@)
     {
         my $error = $@;
@@ -461,7 +461,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.084 ;
+use IO::Compress::Gzip::Constants 2.086 ;
 
 sub memGzip($)
 {

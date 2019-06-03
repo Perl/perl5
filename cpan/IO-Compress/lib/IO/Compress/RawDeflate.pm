@@ -6,15 +6,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base 2.084 ;
-use IO::Compress::Base::Common  2.084 qw(:Status );
-use IO::Compress::Adapter::Deflate 2.084 ;
+use IO::Compress::Base 2.086 ;
+use IO::Compress::Base::Common  2.086 qw(:Status );
+use IO::Compress::Adapter::Deflate 2.086 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.084';
+$VERSION = '2.086';
 $RawDeflateError = '';
 
 @ISA = qw(IO::Compress::Base Exporter);
@@ -116,8 +116,8 @@ sub getExtraParams
     return getZlibParams();
 }
 
-use IO::Compress::Base::Common  2.084 qw(:Parse);
-use Compress::Raw::Zlib  2.084 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+use IO::Compress::Base::Common  2.086 qw(:Parse);
+use Compress::Raw::Zlib  2.086 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 our %PARAMS = (
             #'method'   => [IO::Compress::Base::Common::Parse_unsigned,  Z_DEFLATED],
             'level'     => [IO::Compress::Base::Common::Parse_signed,    Z_DEFAULT_COMPRESSION],

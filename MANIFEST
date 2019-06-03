@@ -1099,6 +1099,7 @@ cpan/IO-Compress/t/107multi-deflate.t			IO::Compress
 cpan/IO-Compress/t/107multi-gzip.t			IO::Compress
 cpan/IO-Compress/t/107multi-rawdeflate.t		IO::Compress
 cpan/IO-Compress/t/107multi-zip.t			IO::Compress
+cpan/IO-Compress/t/107multi-zip-only.t
 cpan/IO-Compress/t/108anyunc-bzip2.t			IO::Compress
 cpan/IO-Compress/t/108anyunc-deflate.t			IO::Compress
 cpan/IO-Compress/t/108anyunc-gzip.t			IO::Compress
@@ -1115,6 +1116,7 @@ cpan/IO-Compress/t/110encode-gzip.t			IO::Compress
 cpan/IO-Compress/t/110encode-rawdeflate.t		IO::Compress
 cpan/IO-Compress/t/110encode-zip.t			IO::Compress
 cpan/IO-Compress/t/111const-deflate.t			IO::Compress
+cpan/IO-Compress/t/112utf8-zip.t
 cpan/IO-Compress/t/999pod.t				IO::Compress
 cpan/IO-Compress/t/compress/any.pl			Compress::Zlib
 cpan/IO-Compress/t/compress/anyunc.pl			Compress::Zlib
@@ -1135,6 +1137,7 @@ cpan/IO-Compress/t/cz-03zlib-v1.t			IO::Compress
 cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
+cpan/IO-Compress/t/files/bad-efs.zip
 cpan/IO-Compress/t/files/meta.xml
 cpan/IO-Compress/t/files/test.ods
 cpan/IO-Compress/t/globmapper.t				IO::Compress

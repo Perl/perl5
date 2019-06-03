@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.084 qw(:Status );
-use IO::Compress::RawDeflate 2.084 ();
-use IO::Compress::Adapter::Deflate 2.084 ;
-use IO::Compress::Adapter::Identity 2.084 ;
-use IO::Compress::Zlib::Extra 2.084 ;
-use IO::Compress::Zip::Constants 2.084 ;
+use IO::Compress::Base::Common  2.086 qw(:Status );
+use IO::Compress::RawDeflate 2.086 ();
+use IO::Compress::Adapter::Deflate 2.086 ;
+use IO::Compress::Adapter::Identity 2.086 ;
+use IO::Compress::Zlib::Extra 2.086 ;
+use IO::Compress::Zip::Constants 2.086 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.084 (); 
+use Compress::Raw::Zlib  2.086 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.084 ; 
+           import  IO::Compress::Adapter::Bzip2 2.086 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.084 ; 
+           import  IO::Compress::Bzip2 2.086 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.084 ; 
+           import  IO::Compress::Adapter::Lzma 2.086 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.084 ; 
+           import  IO::Compress::Lzma 2.086 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.084';
+$VERSION = '2.086';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -246,13 +246,17 @@ sub mkHeader
         &{ *$self->{ZipData}{FilterName} }() ;
     }
 
-#    if ( $param->getValue('utf8') ) {
-#        require Encode ;
-#        $filename = Encode::encode_utf8($filename)
-#            if length $filename ;
-#        $comment = Encode::encode_utf8($comment)
-#            if length $comment ;
-#    }
+   if ( $param->getValue('efs') && $] >= 5.008004) {
+        if (length $filename) {
+            utf8::downgrade($filename, 1)
+                or Carp::croak "Wide character in zip filename";
+        }
+
+        if (length $comment) {
+            utf8::downgrade($comment, 1)
+                or Carp::croak "Wide character in zip comment";
+        }
+   }   
 
     my $hdr = '';
 
@@ -325,8 +329,8 @@ sub mkHeader
     $gpFlag |= ZIP_GP_FLAG_LZMA_EOS_PRESENT
         if $method == ZIP_CM_LZMA ;
 
-#    $gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
-#        if  $param->getValue('utf8') && (length($filename) || length($comment));
+    $gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
+        if  $param->getValue('efs') && (length($filename) || length($comment));
 
     my $version = $ZIP_CM_MIN_VERSIONS{$method};
     $version = ZIP64_MIN_VERSION
@@ -682,7 +686,7 @@ our %PARAMS = (
             'name'      => [IO::Compress::Base::Common::Parse_any,       ''],
             'filtername'=> [IO::Compress::Base::Common::Parse_code,      undef],
             'canonicalname'=> [IO::Compress::Base::Common::Parse_boolean,   0],
-#            'utf8'      => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'efs'       => [IO::Compress::Base::Common::Parse_boolean,   0],
             'time'      => [IO::Compress::Base::Common::Parse_any,       undef],
             'extime'    => [IO::Compress::Base::Common::Parse_any,       undef],
             'exunix2'   => [IO::Compress::Base::Common::Parse_any,       undef], 
@@ -1291,6 +1295,9 @@ no zip filename field will be created.
 Note that both the C<CanonicalName> and C<FilterName> options
 can modify the value used for the zip filename header field.
 
+Also note that you should set the C<Efs> option to true if you are working
+with UTF8 filenames. 
+
 =item C<< CanonicalName => 0|1 >>
 
 This option controls whether the filename field in the zip header is
@@ -1342,6 +1349,19 @@ filenames before they are stored in C<$zipfile>.
         zip [ <$dir/*.txt> ] => $zipfile,
             FilterName => sub { s[^$dir/][] } ;
     }
+
+=item C<< Efs => 0|1 >>
+
+This option controls setting of the "Language Encoding Flag" (EFS) in the zip
+archive. When set, the filename and comment fields for the zip archive MUST
+be valid UTF-8. 
+
+If the string used for the filename and/or comment is not valid UTF-8 when this option
+is true, the script will die with a "wide character" error.
+
+Note that this option only works with Perl 5.8.4 or better.
+
+This option defaults to B<false>.
 
 =item C<< Time => $number >>
 
@@ -1423,6 +1443,8 @@ By default no UnixN extra field is created.
 
 Stores the contents of C<$comment> in the Central File Header of
 the zip file.
+
+Set the C<Efs> option to true if you want to store a UTF8 comment.
 
 By default, no comment field is written to the zip file.
 

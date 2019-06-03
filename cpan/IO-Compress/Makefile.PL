@@ -3,7 +3,7 @@
 use strict ;
 require 5.006 ;
 
-$::VERSION = '2.084' ;
+$::VERSION = '2.086' ;
 
 use lib '.';
 use private::MakeUtil;
@@ -50,11 +50,33 @@ WriteMakefile(
         : ()
     ),
 
-    META_MERGE => {
-        no_index => {
-            directory => [ 't', 'private' ],
-        },
-    },    
+     ( eval { ExtUtils::MakeMaker->VERSION(6.46) }  
+        ? ( META_MERGE  => {
+    
+                "meta-spec" => { version => 2 },
+
+                no_index => {
+                    directory => [ 't', 'private' ],
+                },
+
+                resources   => {
+                
+                    bugtracker  => {
+                        web     => 'https://github.com/pmqs/IO-Compress/issues'
+                    },
+
+                    homepage    => 'https://github.com/pmqs/IO-Compress',
+
+                    repository  => {
+                        type    => 'git',
+                        url     => 'git://github.com/pmqs/IO-Compress.git',
+                        web     => 'https://github.com/pmqs/IO-Compress',
+                    },        
+                },
+              } 
+            ) 
+        : ()
+    ),
 
     ((ExtUtils::MakeMaker->VERSION() gt '6.30') ?
         ('LICENSE'  => 'perl')         : ()),    
