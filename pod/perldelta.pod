@@ -384,6 +384,11 @@ Matching a non-C<SVf_UTF8> string against a regular expression
 containing unicode literals could leak a SV on each match attempt.
 [perl #134390]
 
+=item *
+
+C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due
+to mishandling of the negative precision value.  [perl #134008]
+
 =back
 
 =head1 Known Problems
