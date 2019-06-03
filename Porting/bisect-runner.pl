@@ -535,6 +535,12 @@ always exits with zero. If you require more flexibility than this, either
 specify your C<valgrind> invocation explicitly as part of the test case, or
 use a wrapper script to control the command line or massage the exit codes.
 
+In order for the test program to be seen as a perl script to valgrind
+(rather than a shell script), the first line must be one of the following
+
+  #!./perl
+  #!./miniperl
+
 =item *
 
 --test-build
