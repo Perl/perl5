@@ -1536,6 +1536,7 @@ sub extract_pod {   # Extracts just the pod from a file; returns undef if file
         use Pod::Simple::JustPod;
         my $parser = Pod::Simple::JustPod->new();
         $parser->no_errata_section(1);
+        $parser->no_whining(1);
         $parser->source_filename($filename);
         my $output;
         $parser->output_string( \$output );
