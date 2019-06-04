@@ -4004,6 +4004,15 @@ S_vivifies(const OPCODE type)
     return 0;
 }
 
+
+/* apply lvalue reference (aliasing) context to the optree o.
+ * E.g. in
+ *     \($x,$y) = (...)
+ * o would be the list ($x,$y) and type would be OP_AASSIGN.
+ * It may descend and apply this to children too, for example in
+ * \( $cond ? $x, $y) = (...)
+ */
+
 static void
 S_lvref(pTHX_ OP *o, I32 type)
 {
