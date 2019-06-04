@@ -1635,7 +1635,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Add in the points from the bit map */
-    if (OP(node) != ANYOFH && OP(node) != ANYOFHb) {
+    if (! inRANGE(OP(node), ANYOFH, ANYOFHb)) {
         for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
@@ -14788,7 +14788,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
     assert(PL_regkind[OP(node)] == ANYOF);
 
     /* There is no bitmap for this node type */
-    if (OP(node) == ANYOFH || OP(node) == ANYOFHb) {
+    if (inRANGE(OP(node), ANYOFH, ANYOFHb)) {
         return;
     }
 
@@ -20404,7 +20404,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Ready to start outputting.  First, the initial left bracket */
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
-        if (OP(o) != ANYOFH && OP(o) != ANYOFHb) {
+        if (! inRANGE(OP(o), ANYOFH, ANYOFHb)) {
             /* Then all the things that could fit in the bitmap */
             do_sep = put_charclass_bitmap_innards(sv,
                                                   ANYOF_BITMAP(o),
