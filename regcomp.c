@@ -19017,8 +19017,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             SvREFCNT_dec(intersection);
         }
 
-        /* If didn't find an optimization and there is no need for a
-        * bitmap, optimize to indicate that */
+        /* If didn't find an optimization and there is no need for a bitmap,
+         * optimize to indicate that */
         if (     start[0] >= NUM_ANYOF_CODE_POINTS
             && ! LOC
             && ! upper_latin1_only_utf8_matches
