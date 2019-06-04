@@ -3231,8 +3231,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     if (croak_on_error) {
 	SV * const errsv = ERRSV;
 	if(SvTRUE_NN(errsv))
-	    /* replace with croak_sv? */
-	    Perl_croak_nocontext("%s", SvPV_nolen_const(errsv));
+            croak_sv(errsv);
     }
 
     return sv;
