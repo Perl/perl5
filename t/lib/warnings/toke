@@ -756,7 +756,6 @@ $a = 1_; print "$a\n";
 $a = 01_; print "$a\n";
 $a = 0_; print "$a\n";
 $a = 0x1_; print "$a\n";
-$a = 0x_; print "$a\n";
 $a = 1.2_; print "$a\n";
 $a = 1._2; print "$a\n";
 $a = 1._; print "$a\n";
@@ -768,12 +767,10 @@ Misplaced _ in number at - line 6.
 Misplaced _ in number at - line 7.
 Misplaced _ in number at - line 8.
 Misplaced _ in number at - line 9.
-Misplaced _ in number at - line 10.
 1
 1
 0
 1
-0
 1.2
 1.2
 1

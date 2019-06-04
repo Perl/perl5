@@ -138,7 +138,7 @@ sub get_warn() {
 
 { # Test certain things that are not hexfloats and should stay that way.
     eval '0xp3';
-    like(get_warn(), qr/Missing operator before p3/);
+    like(get_warn(), qr/Missing operator before xp3/);
 
     eval '5p3';
     like(get_warn(), qr/Missing operator before p3/);
@@ -149,7 +149,7 @@ sub get_warn() {
 
     undef $a;
     eval '$a = eval "0x.3"';
-    is($a, '03');
+    is($a, ''); # 0 x .3
 
     undef $a;
     eval '$a = eval "0xc.3"';

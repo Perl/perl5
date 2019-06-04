@@ -11025,6 +11025,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    I32 shift;
 	    bool overflowed = FALSE;
 	    bool just_zero  = TRUE;	/* just plain 0 or binary number? */
+            bool has_digs = FALSE;
 	    static const NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
 	    static const char* const bases[5] =
 	      { "", "binary", "", "octal", "hexadecimal" };
@@ -11116,6 +11117,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 		  digit:
 		    just_zero = FALSE;
+                    has_digs = TRUE;
 		    if (!overflowed) {
 			assert(shift >= 0);
 			x = u << shift;	/* make room for the digit */
@@ -11329,6 +11331,13 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         goto decimal;
                     }
                 }
+            }
+
+            if (shift != 3 && !has_digs) {
+                /* 0x or 0b with no digits, treat it as if the x or b is part of the
+                   next token
+                */
+                s = start + 1;
             }
 
 	    if (overflowed) {

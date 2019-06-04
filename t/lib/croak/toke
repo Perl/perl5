@@ -502,3 +502,19 @@ format=
 EXPECT
 syntax error at - line 4, next token ???
 Execution of - aborted due to compilation errors.
+########
+# NAME [perl #134045] incomplete hex number
+0x x 2;
+0xx 2;
+0x_;
+EXPECT
+Number found where operator expected at - line 1, near "x 2"
+	(Do you need to predeclare x?)
+Bareword found where operator expected at - line 2, near "0xx"
+	(Missing operator before xx?)
+Number found where operator expected at - line 2, near "xx 2"
+	(Do you need to predeclare xx?)
+Bareword found where operator expected at - line 3, near "0x_"
+	(Missing operator before x_?)
+syntax error at - line 1, near "x 2"
+Execution of - aborted due to compilation errors.
