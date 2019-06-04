@@ -4092,10 +4092,13 @@ S_lvref(pTHX_ OP *o, I32 type)
 	    goto badref;
 	else if (!(o->op_flags & OPf_KIDS))
 	    return;
-	if (o->op_targ != OP_LIST) {
-	    S_lvref(aTHX_ cBINOPo->op_first, type);
-	    return;
-	}
+
+        /* the code formerly only recursed into the first child of
+         * a non ex-list OP_NULL. if we ever encounter such a null op with
+         * more than one child, need to decide whether its ok to process
+         * *all* its kids or not */
+        assert(o->op_targ == OP_LIST
+                || !(OpHAS_SIBLING(cBINOPo->op_first)));
 	/* FALLTHROUGH */
     case OP_LIST:
 	for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid)) {
