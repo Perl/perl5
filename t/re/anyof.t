@@ -874,7 +874,7 @@ while (defined (my $test = shift @tests)) {
         my $result = get_compiled($test);
         if ($expected =~ / ^ ANYOFH /x) {
             like($result, qr/ ^ \Q$expected\E (?:\Q (First UTF-8 byte=\x\E
-                              [[:xdigit:]]{2}\) )? $ /x, $test_name);
+                              [[:xdigit:]]{2} )? /x, $test_name);
         }
         else {
             is($result, $expected,

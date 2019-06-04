@@ -2179,7 +2179,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case ANYOFH:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
             REXEC_FBC_CLASS_SCAN(TRUE,
-                      reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
+                  (   (U8) NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
+                   && reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target)));
         }
         break;
 
@@ -6805,6 +6806,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFH:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
+                ||   ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8((U8) *locinput)
 	        || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
                                                                    utf8_target))
             {
@@ -9592,6 +9594,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         if (utf8_target) {  /* ANYOFH only can match UTF-8 targets */
             while (  hardcount < max
                    && scan < this_eol
+                   && NATIVE_UTF8_TO_I8((U8) *scan) >= ANYOF_FLAGS(p)
                    && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
             {
                 scan += UTF8SKIP(scan);
@@ -9859,7 +9862,9 @@ STATIC bool
 S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const p, const U8* const p_end, const bool utf8_target)
 {
     dVAR;
-    const char flags = (OP(n) == ANYOFHb) ? 0 : ANYOF_FLAGS(n);
+    const char flags = (inRANGE(OP(n), ANYOFH, ANYOFHb))
+                        ? 0
+                        : ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;
 

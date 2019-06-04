@@ -613,7 +613,9 @@ will be lost.
                   posixl
 
  ANYOFH           sv 1       Like ANYOF, but only has "High" matches,
-                             none in the bitmap;
+                             none in the bitmap; the flags field
+                             contains the lowest matchable UTF-8 start
+                             byte
  ANYOFHb          sv 1       Like ANYOFH, but all matches share the same
                              UTF-8 start byte, given in the flags field
 

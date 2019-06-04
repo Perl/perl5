@@ -1582,7 +1582,9 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
-    const U8 flags = OP(node) == ANYOFHb ? 0 : ANYOF_FLAGS(node);
+    const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFHb))
+                      ? 0
+                      : ANYOF_FLAGS(node);
 
     PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
 
@@ -1722,7 +1724,9 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
     SV* anded_cp_list;
-    U8  and_with_flags = (OP(and_with) == ANYOFHb) ? 0 : ANYOF_FLAGS(and_with);
+    U8  and_with_flags = inRANGE(OP(and_with), ANYOFH, ANYOFHb)
+                          ? 0
+                          : ANYOF_FLAGS(and_with);
     U8  anded_flags;
 
     PERL_ARGS_ASSERT_SSC_AND;
@@ -1906,7 +1910,9 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     SV* ored_cp_list;
     U8 ored_flags;
-    U8  or_with_flags = (OP(or_with) == ANYOFHb) ? 0 : ANYOF_FLAGS(or_with);
+    U8  or_with_flags = inRANGE(OP(or_with), ANYOFH, ANYOFHb)
+                         ? 0
+                         : ANYOF_FLAGS(or_with);
 
     PERL_ARGS_ASSERT_SSC_OR;
 
@@ -19024,25 +19030,37 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             && ! upper_latin1_only_utf8_matches
             &&   anyof_flags == 0)
         {
+            U8 low_utf8[UTF8_MAXBYTES+1];
             UV highest_cp = invlist_highest(cp_list);
 
-            /* If the lowest and highest code point in the class have the same
-             * UTF-8 first byte, then all do, and we can store that byte for
-             * regexec.c to use so that it can more quickly scan the target
-             * string for potential matches for this class.  We co-opt the
-             * flags field for this, and make the node ANYOFb.  We do accept
-             * here very large code points (for future use), but don't do
-             * this optimization for them, as it would cause other
-             * complications */
             op = ANYOFH;
+
+            /* Currently the maximum allowed code point by the system is
+             * IV_MAX.  Higher ones are reserved for future internal use.  This
+             * particular regnode can be used for higher ones, but we can't
+             * calculate the code point of those.  IV_MAX suffices though, as
+             * it will be a large first byte */
+            (void) uvchr_to_utf8(low_utf8, MIN(start[0], IV_MAX));
+
+            /* We store the lowest possible first byte of the UTF-8
+             * representation, using the flags field.  This allows for quick
+             * ruling out of some inputs without having to convert from UTF-8
+             * to code point.  For EBCDIC, this has to be I8. */
+            anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
+
+            /* If the lowest and highest code point in the class have the same
+             * UTF-8 first byte, then all have that byte, and we can get an
+             * exact first byte instead of a minimum.  We signal this with a
+             * different regnode */
             if (highest_cp <= IV_MAX) {
-                U8 low_utf8[UTF8_MAXBYTES+1];
                 U8 high_utf8[UTF8_MAXBYTES+1];
 
-                (void) uvchr_to_utf8(low_utf8, start[0]);
-                (void) uvchr_to_utf8(high_utf8, invlist_highest(cp_list));
+                (void) uvchr_to_utf8(high_utf8, highest_cp);
 
                 if (low_utf8[0] == high_utf8[0]) {
+
+                    /* No need to convert to I8 for EBCDIC as this is an exact
+                     * match */
                     anyof_flags = low_utf8[0];
                     op = ANYOFHb;
                 }
@@ -20348,7 +20366,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* 2: embedded, otherwise 1 */
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
     else if (k == ANYOF) {
-	const U8 flags = (OP(o) == ANYOFHb) ? 0 : ANYOF_FLAGS(o);
+	const U8 flags = inRANGE(OP(o), ANYOFH, ANYOFHb)
+                          ? 0
+                          : ANYOF_FLAGS(o);
         bool do_sep = FALSE;    /* Do we need to separate various components of
                                    the output? */
         /* Set if there is still an unresolved user-defined property */
@@ -20502,8 +20522,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
-        if (OP(o) == ANYOFHb) {
-            Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=\\x%02x)", FLAGS(o));
+        if (inRANGE(OP(o), ANYOFH, ANYOFHb)) {
+            Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=\\x%02x", FLAGS(o));
+            if (OP(o) == ANYOFH) {
+                /* Not strictly true for 32-bit or EBCDIC, but good
+                 * enough */
+                Perl_sv_catpvf(aTHX_ sv, "..\\xff");
+            }
+            Perl_sv_catpvf(aTHX_ sv, ")");
         }
 
 
