@@ -63,7 +63,7 @@ ANYOFD      ANYOF,      sv charclass S    ; Like ANYOF, but /d is in effect
 ANYOFL      ANYOF,      sv charclass S    ; Like ANYOF, but /l is in effect
 ANYOFPOSIXL ANYOF,      sv charclass_posixl S    ; Like ANYOFL, but matches [[:posix:]] classes
 ANYOFH      ANYOF,      sv 1 S    ; Like ANYOF, but only has "High" matches, none in the bitmap;
-ANYOFHb     ANYOF,      sv 1 S    ; Like ANYOFH, but all matches share the same first byte, the repurposed flags field contains it
+ANYOFHb     ANYOF,      sv 1 S    ; Like ANYOFH, but all matches share the same UTF-8 start byte, given in the flags field
 ANYOFM      ANYOFM      byte 1 S  ; Like ANYOF, but matches an invariant byte as determined by the mask and arg
 NANYOFM     ANYOFM      byte 1 S  ; complement of ANYOFM
 

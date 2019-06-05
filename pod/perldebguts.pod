@@ -614,8 +614,7 @@ will be lost.
  ANYOFH           sv 1       Like ANYOF, but only has "High" matches,
                              none in the bitmap;
  ANYOFHb          sv 1       Like ANYOFH, but all matches share the same
-                             first byte, the repurposed flags field
-                             contains it
+                             UTF-8 start byte, given in the flags field
  ANYOFM           byte 1     Like ANYOF, but matches an invariant byte
                              as determined by the mask and arg
  NANYOFM          byte 1     complement of ANYOFM
