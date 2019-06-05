@@ -1126,6 +1126,30 @@ typedef enum {
 	WB_BOUND
 } bound_type;
 
+/* This unpacks the FLAGS field of ANYOFHx nodes.  The value it contains
+ * gives the strict lower bound for the UTF-8 start byte of any code point
+ * matchable by the node, and a loose upper bound as well.
+ *
+ * The low bound is stored in the upper 6 bits, plus 0xC0.
+ * The loose upper bound is determined from the lowest 2 bits and the low bound
+ * (called x) as follows:
+ *
+ * 11  The upper limit of the range can be as much as (EF - x) / 8
+ * 10  The upper limit of the range can be as much as (EF - x) / 4
+ * 01  The upper limit of the range can be as much as (EF - x) / 2
+ * 00  The upper limit of the range can be as much as  EF
+ *
+ * For motivation of this design, see the commit message */
+#ifdef EBCDIC
+#  define MAX_ANYOF_HRx_BYTE  0xF4
+#else
+#  define MAX_ANYOF_HRx_BYTE  0xEF
+#endif
+#define LOWEST_ANYOF_HRx_BYTE(b) (((b) >> 2) + 0xC0)
+#define HIGHEST_ANYOF_HRx_BYTE(b)                                           \
+                                  (LOWEST_ANYOF_HRx_BYTE(b)                 \
+          + ((MAX_ANYOF_HRx_BYTE - LOWEST_ANYOF_HRx_BYTE(b)) >> ((b) & 3)))
+
 #endif /* PERL_REGCOMP_H_ */
 
 /*

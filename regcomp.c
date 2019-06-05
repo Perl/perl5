@@ -1582,7 +1582,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
-    const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFHb))
+    const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFHr))
                       ? 0
                       : ANYOF_FLAGS(node);
 
@@ -1637,7 +1637,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Add in the points from the bit map */
-    if (! inRANGE(OP(node), ANYOFH, ANYOFHb)) {
+    if (! inRANGE(OP(node), ANYOFH, ANYOFHr)) {
         for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
@@ -1724,7 +1724,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
     SV* anded_cp_list;
-    U8  and_with_flags = inRANGE(OP(and_with), ANYOFH, ANYOFHb)
+    U8  and_with_flags = inRANGE(OP(and_with), ANYOFH, ANYOFHr)
                           ? 0
                           : ANYOF_FLAGS(and_with);
     U8  anded_flags;
@@ -1910,7 +1910,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     SV* ored_cp_list;
     U8 ored_flags;
-    U8  or_with_flags = inRANGE(OP(or_with), ANYOFH, ANYOFHb)
+    U8  or_with_flags = inRANGE(OP(or_with), ANYOFH, ANYOFHr)
                          ? 0
                          : ANYOF_FLAGS(or_with);
 
@@ -5851,6 +5851,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 case ANYOFPOSIXL:
                 case ANYOFH:
                 case ANYOFHb:
+                case ANYOFHr:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -14794,7 +14795,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
     assert(PL_regkind[OP(node)] == ANYOF);
 
     /* There is no bitmap for this node type */
-    if (inRANGE(OP(node), ANYOFH, ANYOFHb)) {
+    if (inRANGE(OP(node), ANYOFH, ANYOFHr)) {
         return;
     }
 
@@ -19048,21 +19049,50 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * to code point.  For EBCDIC, this has to be I8. */
             anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
 
-            /* If the lowest and highest code point in the class have the same
-             * UTF-8 first byte, then all have that byte, and we can get an
-             * exact first byte instead of a minimum.  We signal this with a
-             * different regnode */
+            /* If the first UTF-8 start byte for the highest code point in the
+             * range is suitably small, we may be able to get an upper bound as
+             * well */
             if (highest_cp <= IV_MAX) {
                 U8 high_utf8[UTF8_MAXBYTES+1];
 
                 (void) uvchr_to_utf8(high_utf8, highest_cp);
 
+                /* If the lowest and highest are the same, we can get an exact
+                 * first byte instead of a just minimum.  We signal this with a
+                 * different regnode */
                 if (low_utf8[0] == high_utf8[0]) {
 
                     /* No need to convert to I8 for EBCDIC as this is an exact
                      * match */
                     anyof_flags = low_utf8[0];
                     op = ANYOFHb;
+                }
+                else if (NATIVE_UTF8_TO_I8(high_utf8[0]) <= MAX_ANYOF_HRx_BYTE)
+                {
+
+                    /* Here, the high byte is not the same as the low, but is
+                     * small enough that its reasonable to have a loose upper
+                     * bound, which is packed in with the strict lower bound.
+                     * See comments at the definition of MAX_ANYOF_HRx_BYTE.
+                     * On EBCDIC platforms, I8 is used.  On ASCII platforms I8
+                     * is the same thing as UTF-8 */
+
+                    U8 bits = 0;
+                    U8 max_range_diff = MAX_ANYOF_HRx_BYTE - anyof_flags;
+                    U8 range_diff = NATIVE_UTF8_TO_I8(high_utf8[0])
+                                  - anyof_flags;
+
+                    if (range_diff <= max_range_diff / 8) {
+                        bits = 3;
+                    }
+                    else if (range_diff <= max_range_diff / 4) {
+                        bits = 2;
+                    }
+                    else if (range_diff <= max_range_diff / 2) {
+                        bits = 1;
+                    }
+                    anyof_flags = (anyof_flags - 0xC0) << 2 | bits;
+                    op = ANYOFHr;
                 }
             }
 
@@ -20366,7 +20396,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* 2: embedded, otherwise 1 */
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
     else if (k == ANYOF) {
-	const U8 flags = inRANGE(OP(o), ANYOFH, ANYOFHb)
+	const U8 flags = inRANGE(OP(o), ANYOFH, ANYOFHr)
                           ? 0
                           : ANYOF_FLAGS(o);
         bool do_sep = FALSE;    /* Do we need to separate various components of
@@ -20424,7 +20454,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Ready to start outputting.  First, the initial left bracket */
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
-        if (! inRANGE(OP(o), ANYOFH, ANYOFHb)) {
+        if (! inRANGE(OP(o), ANYOFH, ANYOFHr)) {
             /* Then all the things that could fit in the bitmap */
             do_sep = put_charclass_bitmap_innards(sv,
                                                   ANYOF_BITMAP(o),
@@ -20522,16 +20552,21 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
-        if (inRANGE(OP(o), ANYOFH, ANYOFHb)) {
-            Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=\\x%02x", FLAGS(o));
-            if (OP(o) == ANYOFH) {
-                /* Not strictly true for 32-bit or EBCDIC, but good
-                 * enough */
-                Perl_sv_catpvf(aTHX_ sv, "..\\xff");
+        if (inRANGE(OP(o), ANYOFH, ANYOFHr)) {
+            U8 lowest = (OP(o) != ANYOFHr)
+                         ? FLAGS(o)
+                         : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
+            U8 highest = (OP(o) == ANYOFHb)
+                         ? lowest
+                         : OP(o) == ANYOFH
+                           ? 0xFF
+                           : HIGHEST_ANYOF_HRx_BYTE(FLAGS(o));
+            Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=%02X", lowest);
+            if (lowest != highest) {
+                Perl_sv_catpvf(aTHX_ sv, "-%02X", highest);
             }
             Perl_sv_catpvf(aTHX_ sv, ")");
         }
-
 
         SvREFCNT_dec(unresolved);
     }

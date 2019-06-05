@@ -618,6 +618,9 @@ will be lost.
                              byte
  ANYOFHb          sv 1       Like ANYOFH, but all matches share the same
                              UTF-8 start byte, given in the flags field
+ ANYOFHr          sv 1       Like ANYOFH, but the flags field contains
+                             packed bounds for all matchable UTF-8 start
+                             bytes.
 
  ANYOFM           byte 1     Like ANYOF, but matches an invariant byte
                              as determined by the mask and arg
