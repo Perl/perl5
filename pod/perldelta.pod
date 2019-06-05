@@ -350,7 +350,8 @@ well.
 
 =item *
 
-XXX
+L<eval_pv()|perlapi/eval_pv> no longer stringifies the exception when
+C<croak_on_error> is true.  [perl #134175]
 
 =back
 
