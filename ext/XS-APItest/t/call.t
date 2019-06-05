@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(527);
+    plan(530);
     use_ok('XS::APItest')
 };
 
@@ -223,7 +223,10 @@ is(eval_pv('d()', 0), undef, "eval_pv('d()', 0)");
 is($@, "its_dead_jim\n", "eval_pv('d()', 0) - \$@");
 is(eval { eval_pv('d()', 1) } , undef, "eval { eval_pv('d()', 1) }");
 is($@, "its_dead_jim\n", "eval { eval_pv('d()', 1) } - \$@");
-
+is(eval { eval_pv(q/die $obj/, 1) }, undef,
+   "eval_pv die of an object");
+ok(ref $@, "object thrown");
+is($@, $obj, "check object rethrown");
 
 # #3719 - check that the eval call variants handle exceptions correctly,
 # and do the right thing with $@, both with and without G_KEEPERR set.
