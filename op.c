@@ -3948,25 +3948,6 @@ S_finalize_op(pTHX_ OP* o)
     } while (( o = traverse_op_tree(top, o)) != NULL);
 }
 
-/*
-=for apidoc op_lvalue
-
-Propagate lvalue ("modifiable") context to an op and its children.
-C<type> represents the context type, roughly based on the type of op that
-would do the modifying, although C<local()> is represented by C<OP_NULL>,
-because it has no op type of its own (it is signalled by a flag on
-the lvalue op).
-
-This function detects things that can't be modified, such as C<$x+1>, and
-generates errors for them.  For example, C<$x+1 = 2> would cause it to be
-called with an op of type C<OP_ADD> and a C<type> argument of C<OP_SASSIGN>.
-
-It also flags things that need to behave specially in an lvalue context,
-such as C<$$x = 5> which might have to vivify a reference in C<$x>.
-
-=cut
-*/
-
 static void
 S_mark_padname_lvalue(pTHX_ PADNAME *pn)
 {
@@ -4165,6 +4146,31 @@ S_potential_mod_type(I32 type)
     return type == OP_GREPSTART || type == OP_ENTERSUB
 	|| type == OP_REFGEN    || type == OP_LEAVESUBLV;
 }
+
+
+/*
+=for apidoc op_lvalue
+
+Propagate lvalue ("modifiable") context to an op and its children.
+C<type> represents the context type, roughly based on the type of op that
+would do the modifying, although C<local()> is represented by C<OP_NULL>,
+because it has no op type of its own (it is signalled by a flag on
+the lvalue op).
+
+This function detects things that can't be modified, such as C<$x+1>, and
+generates errors for them.  For example, C<$x+1 = 2> would cause it to be
+called with an op of type C<OP_ADD> and a C<type> argument of C<OP_SASSIGN>.
+
+It also flags things that need to behave specially in an lvalue context,
+such as C<$$x = 5> which might have to vivify a reference in C<$x>.
+
+=cut
+
+Perl_op_lvalue_flags() is a non-API lower-level interface to
+op_lvalue().  The flags param has these bits:
+    OP_LVALUE_NO_CROAK:  return rather than croaking on error
+
+*/
 
 OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
