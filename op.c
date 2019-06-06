@@ -4018,14 +4018,15 @@ S_lvref(pTHX_ OP *o, I32 type)
 {
     dVAR;
     OP *kid;
+    OP * top_op = o;
+
+    while (1) {
     switch (o->op_type) {
     case OP_COND_EXPR:
-	for (kid = OpSIBLING(cUNOPo->op_first); kid;
-	     kid = OpSIBLING(kid))
-	    S_lvref(aTHX_ kid, type);
-	/* FALLTHROUGH */
+        o = OpSIBLING(cUNOPo->op_first);
+        continue;
     case OP_PUSHMARK:
-	return;
+	goto do_next;
     case OP_RV2AV:
 	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
 	o->op_flags |= OPf_STACKED;
@@ -4033,13 +4034,13 @@ S_lvref(pTHX_ OP *o, I32 type)
 	    if (o->op_private & OPpLVAL_INTRO) {
 		 yyerror(Perl_form(aTHX_ "Can't modify reference to "
 		      "localized parenthesized array in list assignment"));
-		return;
+		goto do_next;
 	    }
 	  slurpy:
             OpTYPE_set(o, OP_LVAVREF);
 	    o->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
 	    o->op_flags |= OPf_MOD|OPf_REF;
-	    return;
+	    goto do_next;
 	}
 	o->op_private |= OPpLVREF_AV;
 	goto checkgv;
@@ -4065,7 +4066,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 	  parenhash:
 	    yyerror(Perl_form(aTHX_ "Can't modify reference to "
 				 "parenthesized hash in list assignment"));
-		return;
+		goto do_next;
 	}
 	o->op_private |= OPpLVREF_HV;
 	/* FALLTHROUGH */
@@ -4095,12 +4096,12 @@ S_lvref(pTHX_ OP *o, I32 type)
     case OP_HSLICE:
         OpTYPE_set(o, OP_LVREFSLICE);
 	o->op_private &= OPpLVAL_INTRO;
-	return;
+	goto do_next;
     case OP_NULL:
 	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
 	    goto badref;
 	else if (!(o->op_flags & OPf_KIDS))
-	    return;
+	    goto do_next;
 
         /* the code formerly only recursed into the first child of
          * a non ex-list OP_NULL. if we ever encounter such a null op with
@@ -4110,14 +4111,11 @@ S_lvref(pTHX_ OP *o, I32 type)
                 || !(OpHAS_SIBLING(cBINOPo->op_first)));
 	/* FALLTHROUGH */
     case OP_LIST:
-	for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid)) {
-	    assert((kid->op_flags & OPf_WANT) != OPf_WANT_VOID);
-	    S_lvref(aTHX_ kid, type);
-	}
-	return;
+	o = cLISTOPo->op_first;
+        continue;
     case OP_STUB:
 	if (o->op_flags & OPf_PARENS)
-	    return;
+	    goto do_next;
 	/* FALLTHROUGH */
     default:
       badref:
@@ -4127,13 +4125,25 @@ S_lvref(pTHX_ OP *o, I32 type)
 		      ? "do block"
 		      : OP_DESC(o),
 		     PL_op_desc[type]));
-	return;
+	goto do_next;
     }
     OpTYPE_set(o, OP_LVREF);
     o->op_private &=
 	OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpPAD_STATE;
     if (type == OP_ENTERLOOP)
 	o->op_private |= OPpLVREF_ITER;
+
+  do_next:
+    while (1) {
+        if (o == top_op)
+            return; /* at top; no parents/siblings to try */
+        if (OpHAS_SIBLING(o)) {
+            o = o->op_sibparent;
+            break;
+        }
+        o = o->op_sibparent; /*try parent's next sibling */
+    }
+    } /* while */
 }
 
 PERL_STATIC_INLINE bool
