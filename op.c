@@ -4021,130 +4021,142 @@ S_lvref(pTHX_ OP *o, I32 type)
     OP * top_op = o;
 
     while (1) {
-    switch (o->op_type) {
-    case OP_COND_EXPR:
-        o = OpSIBLING(cUNOPo->op_first);
-        continue;
-    case OP_PUSHMARK:
-	goto do_next;
-    case OP_RV2AV:
-	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
-	o->op_flags |= OPf_STACKED;
-	if (o->op_flags & OPf_PARENS) {
-	    if (o->op_private & OPpLVAL_INTRO) {
-		 yyerror(Perl_form(aTHX_ "Can't modify reference to "
-		      "localized parenthesized array in list assignment"));
-		goto do_next;
-	    }
-	  slurpy:
-            OpTYPE_set(o, OP_LVAVREF);
-	    o->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
-	    o->op_flags |= OPf_MOD|OPf_REF;
-	    goto do_next;
-	}
-	o->op_private |= OPpLVREF_AV;
-	goto checkgv;
-    case OP_RV2CV:
-	kid = cUNOPo->op_first;
-	if (kid->op_type == OP_NULL)
-	    kid = cUNOPx(OpSIBLING(kUNOP->op_first))
-		->op_first;
-	o->op_private = OPpLVREF_CV;
-	if (kid->op_type == OP_GV)
-	    o->op_flags |= OPf_STACKED;
-	else if (kid->op_type == OP_PADCV) {
-	    o->op_targ = kid->op_targ;
-	    kid->op_targ = 0;
-	    op_free(cUNOPo->op_first);
-	    cUNOPo->op_first = NULL;
-	    o->op_flags &=~ OPf_KIDS;
-	}
-	else goto badref;
-	break;
-    case OP_RV2HV:
-	if (o->op_flags & OPf_PARENS) {
-	  parenhash:
-	    yyerror(Perl_form(aTHX_ "Can't modify reference to "
-				 "parenthesized hash in list assignment"));
-		goto do_next;
-	}
-	o->op_private |= OPpLVREF_HV;
-	/* FALLTHROUGH */
-    case OP_RV2SV:
-      checkgv:
-	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
-	o->op_flags |= OPf_STACKED;
-	break;
-    case OP_PADHV:
-	if (o->op_flags & OPf_PARENS) goto parenhash;
-	o->op_private |= OPpLVREF_HV;
-	/* FALLTHROUGH */
-    case OP_PADSV:
-	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
-	break;
-    case OP_PADAV:
-	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
-	if (o->op_flags & OPf_PARENS) goto slurpy;
-	o->op_private |= OPpLVREF_AV;
-	break;
-    case OP_AELEM:
-    case OP_HELEM:
-	o->op_private |= OPpLVREF_ELEM;
-	o->op_flags   |= OPf_STACKED;
-	break;
-    case OP_ASLICE:
-    case OP_HSLICE:
-        OpTYPE_set(o, OP_LVREFSLICE);
-	o->op_private &= OPpLVAL_INTRO;
-	goto do_next;
-    case OP_NULL:
-	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
-	    goto badref;
-	else if (!(o->op_flags & OPf_KIDS))
-	    goto do_next;
+        switch (o->op_type) {
+        case OP_COND_EXPR:
+            o = OpSIBLING(cUNOPo->op_first);
+            continue;
 
-        /* the code formerly only recursed into the first child of
-         * a non ex-list OP_NULL. if we ever encounter such a null op with
-         * more than one child, need to decide whether its ok to process
-         * *all* its kids or not */
-        assert(o->op_targ == OP_LIST
-                || !(OpHAS_SIBLING(cBINOPo->op_first)));
-	/* FALLTHROUGH */
-    case OP_LIST:
-	o = cLISTOPo->op_first;
-        continue;
-    case OP_STUB:
-	if (o->op_flags & OPf_PARENS)
-	    goto do_next;
-	/* FALLTHROUGH */
-    default:
-      badref:
-	/* diag_listed_as: Can't modify reference to %s in %s assignment */
-	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in %s",
-		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
-		      ? "do block"
-		      : OP_DESC(o),
-		     PL_op_desc[type]));
-	goto do_next;
-    }
-    OpTYPE_set(o, OP_LVREF);
-    o->op_private &=
-	OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpPAD_STATE;
-    if (type == OP_ENTERLOOP)
-	o->op_private |= OPpLVREF_ITER;
+        case OP_PUSHMARK:
+            goto do_next;
 
-  do_next:
-    while (1) {
-        if (o == top_op)
-            return; /* at top; no parents/siblings to try */
-        if (OpHAS_SIBLING(o)) {
-            o = o->op_sibparent;
+        case OP_RV2AV:
+            if (cUNOPo->op_first->op_type != OP_GV) goto badref;
+            o->op_flags |= OPf_STACKED;
+            if (o->op_flags & OPf_PARENS) {
+                if (o->op_private & OPpLVAL_INTRO) {
+                     yyerror(Perl_form(aTHX_ "Can't modify reference to "
+                          "localized parenthesized array in list assignment"));
+                    goto do_next;
+                }
+              slurpy:
+                OpTYPE_set(o, OP_LVAVREF);
+                o->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
+                o->op_flags |= OPf_MOD|OPf_REF;
+                goto do_next;
+            }
+            o->op_private |= OPpLVREF_AV;
+            goto checkgv;
+
+        case OP_RV2CV:
+            kid = cUNOPo->op_first;
+            if (kid->op_type == OP_NULL)
+                kid = cUNOPx(OpSIBLING(kUNOP->op_first))
+                    ->op_first;
+            o->op_private = OPpLVREF_CV;
+            if (kid->op_type == OP_GV)
+                o->op_flags |= OPf_STACKED;
+            else if (kid->op_type == OP_PADCV) {
+                o->op_targ = kid->op_targ;
+                kid->op_targ = 0;
+                op_free(cUNOPo->op_first);
+                cUNOPo->op_first = NULL;
+                o->op_flags &=~ OPf_KIDS;
+            }
+            else goto badref;
             break;
+
+        case OP_RV2HV:
+            if (o->op_flags & OPf_PARENS) {
+              parenhash:
+                yyerror(Perl_form(aTHX_ "Can't modify reference to "
+                                     "parenthesized hash in list assignment"));
+                    goto do_next;
+            }
+            o->op_private |= OPpLVREF_HV;
+            /* FALLTHROUGH */
+        case OP_RV2SV:
+          checkgv:
+            if (cUNOPo->op_first->op_type != OP_GV) goto badref;
+            o->op_flags |= OPf_STACKED;
+            break;
+
+        case OP_PADHV:
+            if (o->op_flags & OPf_PARENS) goto parenhash;
+            o->op_private |= OPpLVREF_HV;
+            /* FALLTHROUGH */
+        case OP_PADSV:
+            PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+            break;
+
+        case OP_PADAV:
+            PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+            if (o->op_flags & OPf_PARENS) goto slurpy;
+            o->op_private |= OPpLVREF_AV;
+            break;
+
+        case OP_AELEM:
+        case OP_HELEM:
+            o->op_private |= OPpLVREF_ELEM;
+            o->op_flags   |= OPf_STACKED;
+            break;
+
+        case OP_ASLICE:
+        case OP_HSLICE:
+            OpTYPE_set(o, OP_LVREFSLICE);
+            o->op_private &= OPpLVAL_INTRO;
+            goto do_next;
+
+        case OP_NULL:
+            if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
+                goto badref;
+            else if (!(o->op_flags & OPf_KIDS))
+                goto do_next;
+
+            /* the code formerly only recursed into the first child of
+             * a non ex-list OP_NULL. if we ever encounter such a null op with
+             * more than one child, need to decide whether its ok to process
+             * *all* its kids or not */
+            assert(o->op_targ == OP_LIST
+                    || !(OpHAS_SIBLING(cBINOPo->op_first)));
+            /* FALLTHROUGH */
+        case OP_LIST:
+            o = cLISTOPo->op_first;
+            continue;
+
+        case OP_STUB:
+            if (o->op_flags & OPf_PARENS)
+                goto do_next;
+            /* FALLTHROUGH */
+        default:
+          badref:
+            /* diag_listed_as: Can't modify reference to %s in %s assignment */
+            yyerror(Perl_form(aTHX_ "Can't modify reference to %s in %s",
+                         o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
+                          ? "do block"
+                          : OP_DESC(o),
+                         PL_op_desc[type]));
+            goto do_next;
         }
-        o = o->op_sibparent; /*try parent's next sibling */
-    }
+
+        OpTYPE_set(o, OP_LVREF);
+        o->op_private &=
+            OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpPAD_STATE;
+        if (type == OP_ENTERLOOP)
+            o->op_private |= OPpLVREF_ITER;
+
+      do_next:
+        while (1) {
+            if (o == top_op)
+                return; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o)) {
+                o = o->op_sibparent;
+                break;
+            }
+            o = o->op_sibparent; /*try parent's next sibling */
+        }
     } /* while */
 }
+
 
 PERL_STATIC_INLINE bool
 S_potential_mod_type(I32 type)
