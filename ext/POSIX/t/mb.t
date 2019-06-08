@@ -34,13 +34,9 @@ SKIP: {
     my $utf8_locale = find_utf8_ctype_locale();
     skip("no utf8 locale available", 3) unless $utf8_locale;
 
-    # Here we need to influence LC_CTYPE, but it's not enough to just
-    # set this because LC_ALL could override it. It's also not enough
-    # to delete LC_ALL because it could be used to override other
-    # variables such as LANG in the underlying test environment.
-    # Continue to set LC_CTYPE just in case...
     local $ENV{LC_CTYPE} = $utf8_locale;
-    local $ENV{LC_ALL} = $utf8_locale;
+    local $ENV{LC_ALL};
+    delete $ENV{LC_ALL};
 
     fresh_perl_like(
         'use POSIX; print &POSIX::MB_CUR_MAX',
