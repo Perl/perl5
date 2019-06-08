@@ -15,11 +15,11 @@ deemed necessary by the Pumpking.
 
 Code freezes (which happen in the 5.31.X series)
 
-  2019-02-20  5.31.8  ✓       Contentious changes freeze
-  2019-03-20  5.31.9  ✓       User-visible changes to correctly
+  2020-01-20  5.31.8          Contentious changes freeze
+  2020-02-20  5.31.9          User-visible changes to correctly
                               functioning programs freeze
-  2019-04-20  5.31.10 ✓       Full code freeze
-  2019-05-20  5.32.0  ✓       Stable release!
+  2020-03-20  5.31.10         Full code freeze
+  2020-04-20  5.32.0          Stable release!
 
 =head2 Perl 5.30
 
