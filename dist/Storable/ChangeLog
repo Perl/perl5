@@ -1,3 +1,8 @@
+2019-06-11 10:43:00 TonyC
+    version 3.16
+        * (perl #134179) fix self-referencing structures that include regexps
+        * bless regexps to preserve bless qr//, "Foo"
+
 2019-04-23 16:00:00 xsawyerx
     version 3.15
     * Fix leaking.
