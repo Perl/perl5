@@ -16,7 +16,7 @@ use File::Glob qw(:case);
 # complain if it can't find them)
 
 @IGNORABLE = qw(
-    .cvsignore .dualLivedDiffConfig .gitignore .perlcriticrc .perltidyrc
+    .cvsignore .dualLivedDiffConfig .gitignore .github .perlcriticrc .perltidyrc
     .travis.yml ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.md
     CONTRIBUTING.mkdn COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY

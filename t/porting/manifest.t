@@ -88,6 +88,7 @@ SKIP: {
     my %seen; # De-dup ls-files output (can appear more than once)
     chomp(my @repo= grep {
         !m{\.gitignore$} &&
+        !m{^\.github/} &&
         !$seen{$_}++
         } `git ls-files`);
     skip("git ls-files didnt work",3)
