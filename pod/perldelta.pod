@@ -391,6 +391,36 @@ resulting in an assertion.  Formatted floating point widths are now
 limited to the range of int, the return value of snprintf().  [perl
 #133913]
 
+=item *
+
+Parsing the following constructs within a sub-parse (such as with
+C<"${code here}"> or C<s/.../code here/e>) has changed to match how
+they're parsed normally:
+
+=over
+
+=item *
+
+C<print $fh ...> no longer produces a syntax error.
+
+=item *
+
+Code like C<s/.../ ${time} /e> now properly produces an "Ambiguous use
+of ${time} resolved to $time at ..." warning when warnings are enabled.
+
+=item *
+
+C<@x {"a"}> (with the space) in a sub-parse now properly produces a
+"better written as" warning when warnings are enabled.
+
+=item *
+
+attributes can now be used in a sub-parse.
+
+=back
+
+[perl #133850]
+
 =back
 
 =head1 Known Problems
