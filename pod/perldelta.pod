@@ -125,9 +125,11 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Storable> has been upgraded from version 3.15 to 3.16.
 
-If there was something important to note about this change, include that here.
+Regular expressions objects weren't properly counted for object id
+purposes on retrieve.  This would corrupt the resulting structure, or
+cause a runtime error in some cases.  [perl #134179]
 
 =back
 
