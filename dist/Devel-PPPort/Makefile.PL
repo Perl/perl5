@@ -17,6 +17,7 @@ require 5.003;
 
 use strict;
 use ExtUtils::MakeMaker;
+use Config;
 
 use vars '%opt';  # needs to be global, and we can't use 'our'
 
@@ -85,6 +86,12 @@ sub configure
   };
   die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
   close FH;
+
+  if ($Config{gccversion}) {
+    my $define = '-W -Wall';
+    $define .= ' -Wdeclaration-after-statement' if $Config{gccversion} =~ /^(\d+\.\d+)\./ && $1 >= 3.4;
+    push @moreopts, DEFINE => $define;
+  }
 
   return {
     C        => \@C_FILES,
