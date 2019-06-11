@@ -135,9 +135,11 @@ print OUT <<HEAD;
 
 #else
 
-#define NEED_PL_signals
 #define NEED_PL_parser
+#define NEED_PL_signals
 #define NEED_caller_cx
+#define NEED_croak_xs_usage
+#define NEED_die_sv
 #define NEED_eval_pv
 #define NEED_grok_bin
 #define NEED_grok_hex
@@ -145,11 +147,15 @@ print OUT <<HEAD;
 #define NEED_grok_numeric_radix
 #define NEED_grok_oct
 #define NEED_load_module
+#define NEED_mess
+#define NEED_mess_nocontext
+#define NEED_mess_sv
 #define NEED_mg_findext
 #define NEED_my_snprintf
 #define NEED_my_sprintf
 #define NEED_my_strlcat
 #define NEED_my_strlcpy
+#define NEED_my_strnlen
 #define NEED_newCONSTSUB
 #define NEED_newSVpvn_share
 #define NEED_pv_display
@@ -160,7 +166,9 @@ print OUT <<HEAD;
 #define NEED_sv_setpvf_mg
 #define NEED_sv_setpvf_mg_nocontext
 #define NEED_sv_unmagicext
+#define NEED_utf8_to_uvchr_buf
 #define NEED_vload_module
+#define NEED_vmess
 #define NEED_warner
 
 #include "ppport.h"
