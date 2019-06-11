@@ -253,7 +253,6 @@ my \$cmd = qq(\$Perl -e "sleep 3");
 my \$pid = open my \$fh, "|\$cmd" or die "\$!\n";
 close \$fh;
 PROG
-    print $prog;
     my $out = fresh_perl($prog, {});
     cmp_ok($out, '!~', qr/refcnt/, "no exception from PerlIO");
     # checks that that program did something rather than failing to
