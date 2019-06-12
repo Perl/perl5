@@ -4189,7 +4189,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	return o;
     }
 
-    assert( (o->op_flags & OPf_WANT) != OPf_WANT_VOID );
+    /* elements of a list might be in void context because the list is
+       in scalar context or because they are attribute sub calls */
+    if ((o->op_flags & OPf_WANT) == OPf_WANT_VOID)
+        return o;
 
     if (type == OP_PRTF || type == OP_SPRINTF) type = OP_ENTERSUB;
 
@@ -4524,10 +4527,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_LIST:
 	localize = 0;
 	for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
-	    /* elements might be in void context because the list is
-	       in scalar context or because they are attribute sub calls */
-	    if ( (kid->op_flags & OPf_WANT) != OPf_WANT_VOID )
-		op_lvalue(kid, type);
+            op_lvalue(kid, type);
 	break;
 
     case OP_COREARGS:
