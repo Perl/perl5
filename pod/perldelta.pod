@@ -440,6 +440,11 @@ assertion failure.
 Such constructs are now surrounded by artificial tokens that can't be
 included in the source.  [perl #130585]
 
+=item *
+
+Reference assignment of a sub, such as C<\&foo = \&bar;>, silently did
+nothing in the C<main::> package.  [perl #134072]
+
 =back
 
 =head1 Known Problems
