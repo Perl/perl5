@@ -427,6 +427,19 @@ Incomplete hex and binary literals like C<0x> and C<0b> are now
 treated as if the C<x> or C<b> is part of the next token.  [perl
 #134125]
 
+=item *
+
+A spurious C<)> in a subparse, such as in C<s/.../code here/e> or
+C<"...${code here}">, no longer confuses the parser.
+
+Previously a subparse was bracketed with generated C<(> and C<)>
+tokens, so a spurious C<)> would close the construct without doing the
+normal subparse clean up, confusing the parser and possible causing an
+assertion failure.
+
+Such constructs are now surrounded by artificial tokens that can't be
+included in the source.  [perl #130585]
+
 =back
 
 =head1 Known Problems
