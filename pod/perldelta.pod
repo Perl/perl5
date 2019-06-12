@@ -421,6 +421,12 @@ attributes can now be used in a sub-parse.
 
 [perl #133850]
 
+=item *
+
+Incomplete hex and binary literals like C<0x> and C<0b> are now
+treated as if the C<x> or C<b> is part of the next token.  [perl
+#134125]
+
 =back
 
 =head1 Known Problems
