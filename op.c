@@ -12145,6 +12145,7 @@ Perl_ck_readline(pTHX_ OP *o)
     if (o->op_flags & OPf_KIDS) {
 	 OP *kid = cLISTOPo->op_first;
 	 if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
+         scalar(kid);
     }
     else {
 	OP * const newop
