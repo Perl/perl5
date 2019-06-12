@@ -4200,10 +4200,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_UNDEF:
 	PL_modcount++;
 	return o;
+
     case OP_STUB:
 	if ((o->op_flags & OPf_PARENS))
 	    break;
 	goto nomod;
+
     case OP_ENTERSUB:
 	if ((type == OP_UNDEF || type == OP_REFGEN || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
@@ -4371,23 +4373,27 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_DBSTATE:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
+
     case OP_KVHSLICE:
     case OP_KVASLICE:
     case OP_AKEYS:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
+
     case OP_AVHVSWITCH:
 	if (type == OP_LEAVESUBLV
 	 && (o->op_private & OPpAVHVSWITCH_MASK) + OP_EACH == OP_KEYS)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
+
     case OP_AV2ARYLEN:
 	PL_hints |= HINT_BLOCK_SCOPE;
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
 	PL_modcount++;
 	break;
+
     case OP_RV2SV:
 	ref(cUNOPo->op_first, o->op_type);
 	localize = 1;
@@ -4629,6 +4635,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	o->op_flags |= OPf_REF;
     return o;
 }
+
 
 STATIC bool
 S_scalar_mod_type(const OP *o, I32 type)
