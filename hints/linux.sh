@@ -165,6 +165,9 @@ esac
 # plibpth to bypass this check.
 if [ -x /usr/bin/gcc ] ; then
     gcc=/usr/bin/gcc
+# clang also provides -print-search-dirs
+elif ${cc:-cc} --version 2>/dev/null | grep -q '^clang ' ; then
+    gcc=${cc:-cc}
 else
     gcc=gcc
 fi
