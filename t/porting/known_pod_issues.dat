@@ -361,7 +361,6 @@ install	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perl.pod	Verbatim line length including indents exceeds 79 by	8
 pod/perlandroid.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlbook.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlce.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	7

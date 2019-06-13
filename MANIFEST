@@ -5191,7 +5191,6 @@ README.aix			Perl notes for AIX
 README.amiga			Perl notes for AmigaOS
 README.android			Perl notes for Android
 README.bs2000			Perl notes for POSIX-BC BS2000
-README.ce			Perl notes for WinCE
 README.cn			Perl for Simplified Chinese (in EUC-CN)
 README.cygwin			Perl notes for Cygwin
 README.dos			Perl notes for DOS
@@ -6057,17 +6056,8 @@ win32/bin/perlglob.pl		Win32 globbing
 win32/bin/pl2bat.pl		wrap perl scripts into batch files
 win32/bin/runperl.pl		run perl script via batch file namesake
 win32/bin/search.pl		Win32 port
-win32/ce-helpers/cecopy-lib.pl	WinCE port
-win32/ce-helpers/comp.pl	WinCE port
-win32/ce-helpers/compile.bat	WinCE port
-win32/ce-helpers/compile-all.bat	WinCE port
-win32/ce-helpers/makedist.pl	WinCE port
-win32/ce-helpers/registry.bat	WinCE port
-win32/ce-helpers/sdsdkenv.bat	WinCE port
-win32/config.ce			WinCE port
 win32/config.gc			Win32 base line config.sh (MinGW build)
 win32/config.vc			Win32 base line config.sh (Visual C++ build)
-win32/config_H.ce		WinCE port
 win32/config_H.gc		Win32 config header (MinGW build)
 win32/config_h.PL		Perl code to convert Win32 config.sh to config.h
 win32/config_H.vc		Win32 config header (Visual C++ build)
@@ -6084,32 +6074,24 @@ win32/include/sys/errno2.h	Win32 port
 win32/include/sys/socket.h	Win32 port
 win32/list_static_libs.pl	prints libraries for static linking
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
-win32/Makefile.ce		WinCE port
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
-win32/perl.rc			WinCE port
 win32/perlexe.ico		perlexe.ico image file
 win32/perlexe.manifest		Assembly manifest file
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
 win32/perllib.c			Win32 port
-win32/perlmaince.c		WinCE port
 win32/pod.mak			Win32 port
 win32/runperl.c			Win32 port
-win32/vdir.h			Perl "host" virtual directory manager for CE
-win32/vmem.h			Perl "host" memory manager for CE
+win32/vdir.h			Perl "host" virtual directory manager for Win32
+win32/vmem.h			Perl "host" memory manager for Win32
 win32/win32.c			Win32 port
 win32/win32.h			Win32 port
-win32/win32ceio.c		Win32/WinCE PerlIO layer support
 win32/win32io.c			Win32 PerlIO layer support
 win32/win32iop.h		Win32 port
-win32/win32iop-o.h		WinCE port
 win32/win32sck.c		Win32 port
 win32/win32thread.c		Win32 functions for threads
 win32/win32thread.h		Win32 port mapping to threads
-win32/wince.c			WinCE port
-win32/wince.h			WinCE port
-win32/wincesck.c		WinCE port
 write_buildcustomize.pl		Generate lib/buildcustomize.pl
 XSUB.h				Include file for extension subroutines
 zaphod32_hash.h			Zaphod32 hash code (32 bit fast hash function)

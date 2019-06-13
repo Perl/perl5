@@ -3231,13 +3231,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     f->_file = -1;
     return 1;
 #  elif defined(WIN32)
-#    if defined(UNDER_CE)
-    /* WIN_CE does not have access to FILE internals, it hardly has FILE
-       structure at all
-     */
-#    else
     PERLIO_FILE_file(f) = -1;
-#    endif
     return 1;
 #  else
 #if 0

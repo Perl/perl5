@@ -704,16 +704,6 @@
 
 #include <sys/types.h>
 
-/* EVC 4 SDK headers includes a bad definition of MB_CUR_MAX in stdlib.h
-  which is included from stdarg.h. Bad definition not present in SD 2008
-  SDK headers. wince.h is not yet included, so we cant fix this from there
-  since by then MB_CUR_MAX will be defined from stdlib.h.
-  cewchar.h includes a correct definition of MB_CUR_MAX and it is copied here
-  since cewchar.h can't be included this early */
-#if defined(UNDER_CE) && (_MSC_VER < 1300)
-#  define MB_CUR_MAX 1uL
-#endif
-
 # include <stdarg.h>
 
 #ifdef I_STDINT
@@ -2290,10 +2280,6 @@ extern long double Perl_my_frexpl(long double x, int *e);
   defined(Perl_fp_class_pdenorm) && defined(Perl_fp_class_ndenorm)
 #  define Perl_fp_class_denorm(x) \
     (Perl_fp_class_pdenorm(x) || Perl_fp_class_ndenorm(x))
-#endif
-
-#ifdef UNDER_CE
-int isnan(double d);
 #endif
 
 #ifndef Perl_isnan
@@ -3900,7 +3886,7 @@ my_swap16(const U16 x) {
 #endif
 
 #ifndef __cplusplus
-#if !(defined(WIN32) || defined(UNDER_CE) || defined(SYMBIAN))
+#if !(defined(WIN32) || defined(SYMBIAN))
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
@@ -6851,10 +6837,6 @@ extern void moncontrol(int);
 #define PERL_GPROF_MONCONTROL(x) moncontrol(x)
 #else
 #define PERL_GPROF_MONCONTROL(x)
-#endif
-
-#ifdef UNDER_CE
-#include "wince.h"
 #endif
 
 /* ISO 6429 NEL - C1 control NExt Line */

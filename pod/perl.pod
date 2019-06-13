@@ -260,7 +260,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlamiga		Perl notes for AmigaOS
     perlandroid		Perl notes for Android
     perlbs2000		Perl notes for POSIX-BC BS2000
-    perlce		Perl notes for WinCE
     perlcygwin		Perl notes for Cygwin
     perldos		Perl notes for DOS
     perlfreebsd 	Perl notes for FreeBSD

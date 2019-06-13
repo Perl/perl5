@@ -85,7 +85,7 @@
 
 /* now even GCC supports __declspec() */
 /* miniperl has no reason to export anything */
-#if defined(PERL_IS_MINIPERL) && !defined(UNDER_CE)
+#if defined(PERL_IS_MINIPERL)
 #  define DllExport
 #else
 #  if defined(PERLDLL)
@@ -265,17 +265,12 @@ struct utsname {
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
 
-#ifndef UNDER_CE
 typedef long		uid_t;
 typedef long		gid_t;
 typedef unsigned short	mode_t;
-#endif
 
 #if _MSC_VER < 1800
 #define isnan		_isnan	/* Defined already in VC++ 12.0 */
-#endif
-#ifdef UNDER_CE /* revisit what function this becomes celib vs corelibc, prv warning here*/
-#  undef snprintf
 #endif
 #define snprintf	_snprintf
 #define vsnprintf	_vsnprintf
@@ -735,17 +730,10 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 DllExport void *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()
 
-#ifdef UNDER_CE
-#define Win_GetModuleHandle   XCEGetModuleHandleA
-#define Win_GetProcAddress    XCEGetProcAddressA
-#define Win_GetModuleFileName XCEGetModuleFileNameA
-#define Win_CreateSemaphore   CreateSemaphoreW
-#else
 #define Win_GetModuleHandle   GetModuleHandle
 #define Win_GetProcAddress    GetProcAddress
 #define Win_GetModuleFileName GetModuleFileName
 #define Win_CreateSemaphore   CreateSemaphore
-#endif
 
 #endif /* _INC_WIN32_PERL5 */
 

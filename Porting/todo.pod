@@ -507,12 +507,6 @@ suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
 One piece of Perl code that might make a good testbed is F<installman>.
 
-=head2 Improve win32/wince.c
-
-Currently, numerous functions look virtually, if not completely,
-identical in both F<win32/wince.c> and F<win32/win32.c> files, which can't
-be good.
-
 =head2 Use secure CRT functions when building with VC8 on Win32
 
 Visual C++ 2005 (VC++ 8.x) deprecated a number of CRT functions on the basis

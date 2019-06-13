@@ -3078,7 +3078,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #else
 #   define PERL_VMS_BANG 0
 #endif
-#if defined(WIN32) && ! defined(UNDER_CE)
+#if defined(WIN32)
 	SETERRNO(win32_get_errno(SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0),
 		 (SvIV(sv) == EVMSERR) ? 4 : PERL_VMS_BANG);
 #else

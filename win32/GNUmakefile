@@ -1733,7 +1733,6 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.amiga    ..\pod\perlamiga.pod
 	copy ..\README.android  ..\pod\perlandroid.pod
 	copy ..\README.bs2000   ..\pod\perlbs2000.pod
-	copy ..\README.ce       ..\pod\perlce.pod
 	copy ..\README.cn       ..\pod\perlcn.pod
 	copy ..\README.cygwin   ..\pod\perlcygwin.pod
 	copy ..\README.dos      ..\pod\perldos.pod
@@ -1861,7 +1860,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
 	    perl5311delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
-	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
+	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \

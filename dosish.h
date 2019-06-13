@@ -71,8 +71,6 @@
  */
 #if defined(WIN64) || defined(USE_LARGE_FILES)
 #  define Stat_t struct _stati64
-#elif defined(UNDER_CE)
-#  define Stat_t struct xcestat
 #else
 #  define Stat_t struct stat
 #endif

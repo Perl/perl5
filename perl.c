@@ -3808,12 +3808,6 @@ S_minus_v(pTHX)
 	PerlIO_printf(PIO_stdout,
 		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
-#ifdef UNDER_CE
-	PerlIO_printf(PIO_stdout,
-			"WINCE port by Rainer Keuchel, 2001-2002\n"
-			"Built on " __DATE__ " " __TIME__ "\n\n");
-	wce_hitreturn();
-#endif
 #ifdef __SYMBIAN32__
 	PerlIO_printf(PIO_stdout,
 		      "Symbian port by Nokia, 2004-2005\n");
