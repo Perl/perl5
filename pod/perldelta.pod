@@ -445,6 +445,11 @@ included in the source.  [perl #130585]
 Reference assignment of a sub, such as C<\&foo = \&bar;>, silently did
 nothing in the C<main::> package.  [perl #134072]
 
+=item *
+
+sv_gets() now recovers better if the target SV is modified by a signal
+handler.  [perl #134035]
+
 =back
 
 =head1 Known Problems
