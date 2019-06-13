@@ -12,7 +12,7 @@ CPAN::HandleConfig - internal configuration handling for CPAN.pm
 
 =cut 
 
-$VERSION = "5.5009"; # see also CPAN::Config::VERSION at end of file
+$VERSION = "5.5011"; # see also CPAN::Config::VERSION at end of file
 
 %can = (
         commit   => "Commit changes to disk",
@@ -33,6 +33,8 @@ $VERSION = "5.5009"; # see also CPAN::Config::VERSION at end of file
 
 %keys = map { $_ => undef }
     (
+     "allow_installing_module_downgrades",
+     "allow_installing_outdated_dists",
      "applypatch",
      "auto_commit",
      "build_cache",
@@ -112,6 +114,8 @@ $VERSION = "5.5009"; # see also CPAN::Config::VERSION at end of file
      "trust_test_report_history",
      "unzip",
      "urllist",
+     "urllist_ping_verbose",
+     "urllist_ping_external",
      "use_prompt_default",
      "use_sqlite",
      "username",
@@ -124,6 +128,8 @@ $VERSION = "5.5009"; # see also CPAN::Config::VERSION at end of file
 
 my %prefssupport = map { $_ => 1 }
     (
+     "allow_installing_module_downgrades",
+     "allow_installing_outdated_dists",
      "build_requires_install_policy",
      "check_sigs",
      "make",
@@ -770,7 +776,7 @@ sub prefs_lookup {
 
     use strict;
     use vars qw($AUTOLOAD $VERSION);
-    $VERSION = "5.5008";
+    $VERSION = "5.5011";
 
     # formerly CPAN::HandleConfig was known as CPAN::Config
     sub AUTOLOAD { ## no critic

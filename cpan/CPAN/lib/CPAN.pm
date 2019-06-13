@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.26';
+$CPAN::VERSION = '2.27';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -1468,11 +1468,12 @@ sub set_perl5lib {
         $ENV{PERL5LIB} = join $Config::Config{path_sep}, @dirs, @env;
     } else {
         my $cnt = keys %{$self->{is_tested}};
-        $CPAN::Frontend->optprint('perl5lib', "Prepending blib/arch and blib/lib of ".
-                                 "$cnt build dirs to PERL5LIB; ".
-                                 "for '$for'\n"
+        my $newenv = join $Config::Config{path_sep}, @dirs, @env;
+        $CPAN::Frontend->optprint('perl5lib', sprintf ("Prepending blib/arch and blib/lib of ".
+                                 "%d build dirs to PERL5LIB, reaching size %d; ".
+                                 "for '%s'\n", $cnt, length($newenv), $for)
                                 );
-        $ENV{PERL5LIB} = join $Config::Config{path_sep}, @dirs, @env;
+        $ENV{PERL5LIB} = $newenv;
     }
 }}
 
@@ -2144,6 +2145,12 @@ where WORD is any valid config variable or a regular expression.
 The following keys in the hash reference $CPAN::Config are
 currently defined:
 
+  allow_installing_module_downgrades
+                     allow or disallow installing module downgrades
+  allow_installing_outdated_dists
+                     allow or disallow installing modules that are
+                     indexed in the cpan index pointing to a distro
+                     with a higher distro-version number
   applypatch         path to external prg
   auto_commit        commit all changes to config variables to disk
   build_cache        size of cache for directories to build modules
@@ -2262,6 +2269,10 @@ currently defined:
                      CPAN::Reporter history)
   unzip              location of external program unzip
   urllist            arrayref to nearby CPAN sites (or equivalent locations)
+  urllist_ping_external
+                     use external ping command when autoselecting mirrors
+  urllist_ping_verbose
+                     increase verbosity when autoselecting mirrors
   use_prompt_default set PERL_MM_USE_DEFAULT for configure/make/test/install
   use_sqlite         use CPAN::SQLite for metadata storage (fast and lean)
   username           your username if you CPAN server wants one
@@ -2406,6 +2417,43 @@ PERL5LIB. If C<build_requires_install_policy> is set to C<yes>, then
 both modules declared as C<requires> and those declared as
 C<build_requires> are treated alike. By setting to C<ask/yes> or
 C<ask/no>, CPAN.pm asks the user and sets the default accordingly.
+
+=head2 Configuration of the allow_installing_* parameters
+
+The C<allow_installing_*> parameters are evaluated during
+the C<make> phase. If set to C<yes>, they allow the testing and the installation of
+the current distro and otherwise have no effect. If set to C<no>, they
+may abort the build (preventing testing and installing), depending on the contents of the
+C<blib/> directory. The C<blib/> directory is the directory that holds
+all the files that would usually be installed in the C<install> phase.
+
+C<allow_installing_outdated_dists> compares the C<blib/> directory with the CPAN index.
+If it finds something there that belongs, according to the index, to a different
+dist, it aborts the current build.
+
+C<allow_installing_module_downgrades> compares the C<blib/> directory
+with already installed modules, actually their version numbers, as
+determined by ExtUtils::MakeMaker or equivalent. If a to-be-installed
+module would downgrade an already installed module, the current build
+is aborted.
+
+An interesting twist occurs when a distroprefs document demands the
+installation of an outdated dist via goto while
+C<allow_installing_outdated_dists> forbids it. Without additional
+provisions, this would let the C<allow_installing_outdated_dists>
+win and the distroprefs lose. So the proper arrangement in such a case
+is to write a second distroprefs document for the distro that C<goto>
+points to and overrule the C<cpanconfig> there. E.g.:
+
+  ---
+  match:
+    distribution: "^MAUKE/Keyword-Simple-0.04.tar.gz"
+  goto: "MAUKE/Keyword-Simple-0.03.tar.gz"
+  ---
+  match:
+    distribution: "^MAUKE/Keyword-Simple-0.03.tar.gz"
+  cpanconfig:
+    allow_installing_outdated_dists: yes
 
 =head2 Configuration for individual distributions (I<Distroprefs>)
 
@@ -3945,6 +3993,25 @@ start (or more precisely, after the first extraction into the build
 directory) or exit the CPAN shell, respectively. If you never start up
 the CPAN shell, you probably also have to clean up the build directory
 yourself.
+
+=item 19)
+
+How can I switch to sudo instead of local::lib?
+
+The following 5 environment veriables need to be reset to the previous
+values: PATH, PERL5LIB, PERL_LOCAL_LIB_ROOT, PERL_MB_OPT, PERL_MM_OPT;
+and these two CPAN.pm config variables must be reconfigured:
+make_install_make_command and mbuild_install_build_command. The five
+env variables have probably been overwritten in your $HOME/.bashrc or
+some equivalent. You either find them there and delete their traces
+and logout/login or you override them temporarily, depending on your
+exact desire. The two cpanpm config variables can be set with:
+
+  o conf init /install_.*_command/
+
+probably followed by
+
+  o conf commit
 
 =back
 

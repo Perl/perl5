@@ -11,7 +11,7 @@ use File::Spec ();
 use CPAN::Mirrors ();
 use CPAN::Version ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5313";
+$VERSION = "5.5314";
 
 =head1 NAME
 
@@ -37,6 +37,34 @@ variables are collected.
 my @podpara = split /\n\n/, <<'=back';
 
 =over 2
+
+=item allow_installing_module_downgrades
+
+The CPAN shell can watch the C<blib/> directories that are built up
+before running C<make test> to determine whether the current
+distribution will end up with modules being overwritten with decreasing module version numbers. It
+can then let the build of this distro fail when it discovers a
+downgrade.
+
+Do you want to allow installing distros with decreasing module
+versions compared to what you have installed (yes, no, ask/yes,
+ask/no)?
+
+=item allow_installing_outdated_dists
+
+The CPAN shell can watch the C<blib/> directories that are built up
+before running C<make test> to determine whether the current
+distribution contains modules that are indexed with a distro with a
+higher distro-version number than the current one. It can
+then let the build of this distro fail when it would not represent the
+most up-to-date version of the distro.
+
+Note: choosing anyhing but 'yes' for this option will need
+Devel::DistnameInfo being installed for taking effect.
+
+Do you want to allow installing distros that are not indexed as the
+highest distro-version for all contained modules (yes, no, ask/yes,
+ask/no)?
 
 =item auto_commit
 
@@ -193,7 +221,8 @@ How many days shall we keep statistics about downloads?
 =item ftpstats_size
 
 Statistics about downloads are truncated by size and period
-simultaneously.
+simultaneously. Setting this to zero or negative disables download
+statistics.
 
 How many items shall we keep in the statistics about downloads?
 
@@ -567,6 +596,23 @@ because of missing dependencies.  Also, tests can be run
 regardless of the history using "force".
 
 Do you want to rely on the test report history (yes/no)?
+
+=item urllist_ping_external
+
+When automatic selection of the nearest cpan mirrors is performed,
+turn on the use of the external ping via Net::Ping::External. This is
+recommended in the case the local network has a transparent proxy.
+
+Do you want to use the external ping command when autoselecting
+mirrors?
+
+=item urllist_ping_verbose
+
+When automatic selection of the nearest cpan mirrors is performed,
+this option can be used to turn on verbosity during the selection
+process.
+
+Do you want to see verbosity turned on when autoselecting mirrors?
 
 =item use_prompt_default
 
@@ -1089,6 +1135,14 @@ sub init {
 
     my_dflt_prompt(mbuild_install_arg => "", $matcher);
 
+    for my $o (qw(
+        allow_installing_outdated_dists
+        allow_installing_module_downgrades
+        )) {
+        my_prompt_loop($o => 'ask/no', $matcher,
+                       'yes|no|ask/yes|ask/no');
+    }
+
     #
     #== use_prompt_default
     #
@@ -1264,6 +1318,12 @@ sub init {
 
     # Allow matching but don't show during manual config
     if ($matcher) {
+        if ("urllist_ping_external" =~ $matcher) {
+            my_yn_prompt(urllist_ping_external => 0, $matcher);
+        }
+        if ("urllist_ping_verbose" =~ $matcher) {
+            my_yn_prompt(urllist_ping_verbose => 0, $matcher);
+        }
         if ("randomize_urllist" =~ $matcher) {
             my_dflt_prompt(randomize_urllist => 0, $matcher);
         }
@@ -1679,7 +1739,6 @@ sub my_yn_prompt {
     my $default;
     defined($default = $CPAN::Config->{$item}) or $default = $dflt;
 
-    # $DB::single = 1;
     if (!$auto_config && (!$m || $item =~ /$m/)) {
         if (my $intro = $prompts{$item . "_intro"}) {
             $CPAN::Frontend->myprint($intro);
@@ -1917,17 +1976,25 @@ sub auto_mirrored_by {
     my $mirrors = CPAN::Mirrors->new($local);
 
     my $cnt = 0;
+    my $callback_was_active = 0;
     my @best = $mirrors->best_mirrors(
       how_many => 3,
       callback => sub {
+          $callback_was_active++;
           $CPAN::Frontend->myprint(".");
           if ($cnt++>60) { $cnt=0; $CPAN::Frontend->myprint("\n"); }
       },
+      $CPAN::Config->{urllist_ping_external} ? (external_ping => 1) : (),
+      $CPAN::Config->{urllist_ping_verbose} ? (verbose => 1) : (),
     );
 
-    my $urllist = [ map { $_->http } @best ];
+    my $urllist = [
+        map { $_->http }
+        grep { $_ && ref $_ && $_->can('http') }
+        @best
+    ];
     push @$urllist, grep { /^file:/ } @{$CPAN::Config->{urllist}};
-    $CPAN::Frontend->myprint(" done!\n\n");
+    $CPAN::Frontend->myprint(" done!\n\n") if $callback_was_active;
 
     return $urllist
 }
