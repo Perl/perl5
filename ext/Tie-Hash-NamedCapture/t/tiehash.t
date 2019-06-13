@@ -3,6 +3,9 @@ use strict;
 
 use Test::More;
 
+# this would break the hash magic setup [perl #134193]
+my ($ca, $c) = ( \@{^CAPTURE_ALL}, \@{^CAPTURE} );
+
 my %hashes = (
     '+' => \%+,
     '-' => \%-,
