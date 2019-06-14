@@ -4176,30 +4176,34 @@ OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
     dVAR;
-    OP *kid;
-    /* -1 = error on localize, 0 = ignore localize, 1 = ok to localize */
-    int localize = -1;
+    OP *top_op = o;
 
     if (!o || (PL_parser && PL_parser->error_count))
 	return o;
 
+    while (1) {
+    OP *kid;
+    /* -1 = error on localize, 0 = ignore localize, 1 = ok to localize */
+    int localize = -1;
+    OP *next_kid = NULL;
+
     if ((o->op_private & OPpTARGET_MY)
 	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
     {
-	return o;
+	goto do_next;
     }
 
     /* elements of a list might be in void context because the list is
        in scalar context or because they are attribute sub calls */
     if ((o->op_flags & OPf_WANT) == OPf_WANT_VOID)
-        return o;
+        goto do_next;
 
     if (type == OP_PRTF || type == OP_SPRINTF) type = OP_ENTERSUB;
 
     switch (o->op_type) {
     case OP_UNDEF:
 	PL_modcount++;
-	return o;
+	goto do_next;
 
     case OP_STUB:
 	if ((o->op_flags & OPf_PARENS))
@@ -4271,7 +4275,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                                      "subroutine call of &%" SVf " in %s",
                                      SVfARG(namesv), PL_op_desc[type]),
                            SvUTF8(namesv));
-                return o;
+                goto do_next;
 	    }
 	}
 	/* FALLTHROUGH */
@@ -4286,7 +4290,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		      ? "do block"
 		      : OP_DESC(o)),
 		     type ? PL_op_desc[type] : "local"));
-	return o;
+	goto do_next;
 
     case OP_PREINC:
     case OP_PREDEC:
@@ -4321,6 +4325,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    goto nomod;
 	else {
 	    const I32 mods = PL_modcount;
+            /* we recurse rather than iterate here because we need to
+             * calculate and use the delta applied to PL_modcount by the
+             * first child. So in something like
+             *     ($x, ($y) x 3) = split;
+             * split knows that 4 elements are wanted
+             */
 	    modkids(cBINOPo->op_first, type);
 	    if (type != OP_AASSIGN)
 		goto nomod;
@@ -4338,8 +4348,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     case OP_COND_EXPR:
 	localize = 1;
-	for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
-	    op_lvalue(kid, type);
+        next_kid = OpSIBLING(cUNOPo->op_first);
 	break;
 
     case OP_RV2AV:
@@ -4349,7 +4358,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
            /* Treat \(@foo) like ordinary list, but still mark it as modi-
               fiable since some contexts need to know.  */
            o->op_flags |= OPf_MOD;
-           return o;
+           goto do_next;
 	}
 	/* FALLTHROUGH */
     case OP_RV2GV:
@@ -4422,7 +4431,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
            /* Treat \(@foo) like ordinary list, but still mark it as modi-
               fiable since some contexts need to know.  */
 	    o->op_flags |= OPf_MOD;
-	    return o;
+	    goto do_next;
 	}
 	if (scalar_mod_type(o, type))
 	    goto nomod;
@@ -4459,6 +4468,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
 	if (o->op_flags & OPf_KIDS && OpHAS_SIBLING(cBINOPo->op_first)) {
+            /* we recurse rather than iterate here because the child
+             * needs to be processed with a different 'type' parameter */
+
 	    /* substr and vec */
 	    /* If this op is in merely potential (non-fatal) modifiable
 	       context, then apply OP_ENTERSUB context to
@@ -4493,7 +4505,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_LINESEQ:
 	localize = 0;
 	if (o->op_flags & OPf_KIDS)
-	    op_lvalue(cLISTOPo->op_last, type);
+	    next_kid = cLISTOPo->op_last;
 	break;
 
     case OP_NULL:
@@ -4526,27 +4538,31 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                 /* this should trigger a "Can't modify transliteration" err */
                 op_lvalue(sib, type);
             }
-            op_lvalue(cBINOPo->op_first, type);
+            next_kid = cBINOPo->op_first;
+            /* we assume OP_NULLs which aren't ex-list have no more than 2
+             * children. If this assumption is wrong, increase the scan
+             * limit below */
+            assert(   !OpHAS_SIBLING(next_kid)
+                   || !OpHAS_SIBLING(OpSIBLING(next_kid)));
             break;
 	}
 	/* FALLTHROUGH */
     case OP_LIST:
 	localize = 0;
-	for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
-            op_lvalue(kid, type);
+	next_kid = cLISTOPo->op_first;
 	break;
 
     case OP_COREARGS:
-	return o;
+	goto do_next;
 
     case OP_AND:
     case OP_OR:
 	if (type == OP_LEAVESUBLV
 	 || !S_vivifies(cLOGOPo->op_first->op_type))
-	    op_lvalue(cLOGOPo->op_first, type);
-	if (type == OP_LEAVESUBLV
+	    next_kid = cLOGOPo->op_first;
+	else if (type == OP_LEAVESUBLV
 	 || !S_vivifies(OpSIBLING(cLOGOPo->op_first)->op_type))
-	    op_lvalue(OpSIBLING(cLOGOPo->op_first), type);
+	    next_kid = OpSIBLING(cLOGOPo->op_first);
 	goto nomod;
 
     case OP_SREFGEN:
@@ -4558,8 +4574,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
 		    "Declaring references is experimental");
-	    op_lvalue(cUNOPo->op_first, OP_NULL);
-	    return o;
+	    next_kid = cUNOPo->op_first;
+	    goto do_next;
 	}
 	if (type != OP_AASSIGN && type != OP_SASSIGN
 	 && type != OP_ENTERLOOP)
@@ -4589,7 +4605,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (o->op_type == OP_REFGEN)
 	    op_null(cUNOPx(cUNOPo->op_first)->op_first); /* pushmark */
 	op_null(o);
-	return o;
+	goto do_next;
 
     case OP_SPLIT:
         if ((o->op_private & OPpSPLIT_ASSIGN)) {
@@ -4608,7 +4624,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
        their argument is a filehandle; thus \stat(".") should not set
        it. AMS 20011102 */
     if (type == OP_REFGEN && OP_IS_STAT(o->op_type))
-        return o;
+        goto do_next;
 
     if (type != OP_LEAVESUBLV)
         o->op_flags |= OPf_MOD;
@@ -4633,7 +4649,37 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     else if (type != OP_GREPSTART && type != OP_ENTERSUB
              && type != OP_LEAVESUBLV && o->op_type != OP_ENTERSUB)
 	o->op_flags |= OPf_REF;
-    return o;
+
+  do_next:
+    while (!next_kid) {
+        if (o == top_op)
+            return top_op; /* at top; no parents/siblings to try */
+        if (OpHAS_SIBLING(o)) {
+            next_kid = o->op_sibparent;
+            if (!OpHAS_SIBLING(next_kid)) {
+                /* a few node types don't recurse into their second child */
+                OP *parent = next_kid->op_sibparent;
+                I32 ptype  = parent->op_type;
+                if (   (ptype == OP_NULL && parent->op_targ != OP_LIST)
+                    || (   (ptype == OP_AND || ptype == OP_OR)
+                        && (type != OP_LEAVESUBLV 
+                            && S_vivifies(next_kid->op_type))
+                       )
+                )  {
+                    /*try parent's next sibling */
+                    o = parent;
+                    next_kid =  NULL;
+                }
+            }
+        }
+        else
+            o = o->op_sibparent; /*try parent's next sibling */
+
+    }
+    o = next_kid;
+
+    } /* while */
+
 }
 
 
