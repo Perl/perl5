@@ -133,7 +133,9 @@ utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     bool overflows = 0;
     const U8 *cur_s = s;
     const bool do_warnings = ckWARN_d(WARN_UTF8);
+#    if { VERSION < 5.26.0 } && ! defined(EBCDIC)
     STRLEN overflow_length = 0;
+#    endif
 
     if (send > s) {
         curlen = send - s;
