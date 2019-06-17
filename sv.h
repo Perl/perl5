@@ -1601,9 +1601,20 @@ false.  See C<L</SvOK>> for a defined/undefined test.  Handles 'get' magic
 unless the scalar is already C<SvPOK>, C<SvIOK> or C<SvNOK> (the public, not the
 private flags).
 
+See C<L</SvTRUEx>> for a version which guarantees to evaluate C<sv> only once.
+
 =for apidoc Am|bool|SvTRUE_nomg|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
 false.  See C<L</SvOK>> for a defined/undefined test.  Does not handle 'get' magic.
+
+=for apidoc Am|bool|SvTRUEx|SV* sv
+Returns a boolean indicating whether Perl would evaluate the SV as true or
+false.  See C<L</SvOK>> for a defined/undefined test.  Handles 'get' magic
+unless the scalar is already C<SvPOK>, C<SvIOK> or C<SvNOK> (the public, not the
+private flags).
+
+This form guarantees to evaluate C<sv> only once.  Only use this if C<sv> is an
+expression with side effects, otherwise use the more efficient C<SvTRUE>.
 
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
