@@ -2032,11 +2032,11 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     sv_magic(MUTABLE_SV(av), (SV*)n, PERL_MAGIC_regdata, NULL, 0);
                     SvREADONLY_on(av);
 
-                    require_tie_mod_s(gv, '-', "Tie::Hash::NamedCapture",0);
+                    require_tie_mod_s(gv, '+', "Tie::Hash::NamedCapture",0);
 
                 } else          /* %{^CAPTURE_ALL} */
                 if (memEQs(name, len, "\003APTURE_ALL")) {
-                    require_tie_mod_s(gv, '+', "Tie::Hash::NamedCapture",0);
+                    require_tie_mod_s(gv, '-', "Tie::Hash::NamedCapture",0);
                 }
 		break;
 	    case '\005':	/* $^ENCODING */
