@@ -244,6 +244,13 @@ the line C<__UNDEFINED__> to the C<=provides> section to get all macros
 implemented this way to be imported into this section, so they all get
 documented as being provided.
 
+If you need to define a helper macro which is not part of C<Devel::PPPort> API
+and its usage is only for definition of other C<Devel::PPPort> macros then use
+the C<D_PPP_> prefix for this macro name (e.g. C<D_PPP_SVPV_NOLEN_LP_ARG>).
+Some C<Devel::PPPort> scripts would report a warning when there is defined a
+macro which is not part of Perl public API, except those macros which start
+with the C<D_PPP_> prefix.
+
 Version checking can be tricky if you want to do it correct.
 You can use
 
