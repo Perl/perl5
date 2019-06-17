@@ -125,6 +125,13 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<IO> has been upgraded from version 1.40 to 1.41.
+
+The supplied I<TO> is now always honoured for UDP sockets for calls to
+the send() method.  [perl #133936]
+
+=item *
+
 L<Storable> has been upgraded from version 3.15 to 3.16.
 
 Regular expressions objects weren't properly counted for object id
