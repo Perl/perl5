@@ -457,6 +457,13 @@ nothing in the C<main::> package.  [perl #134072]
 sv_gets() now recovers better if the target SV is modified by a signal
 handler.  [perl #134035]
 
+=item *
+
+C<readline @foo> now evaluates C<@foo> in scalar context.  Previously
+it would be evalauted in list context, and since readline() pops only
+one argument from the stack, the stack could underflow, or be left
+with unexpected values on the stack.  [perl #133989]
+
 =back
 
 =head1 Known Problems
