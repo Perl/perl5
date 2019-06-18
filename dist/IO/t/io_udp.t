@@ -89,9 +89,14 @@ is($buf, 'FOObar');
     ok($udpa->recv($buf = "", 8), "recv it");
     is($buf, "fromctoa", "check value received");
 
-    ok($udpc->send("fromctob", 0, $udpb->sockname), "send to non-connected socket");
-    ok($udpb->recv($buf = "", 8), "recv it");
-    is($buf, "fromctob", "check value received");
+  SKIP:
+    {
+        $^O eq "linux"
+	  or skip "This is non-portable, known to 'work' on Linux", 3;
+        ok($udpc->send("fromctob", 0, $udpb->sockname), "send to non-connected socket");
+        ok($udpb->recv($buf = "", 8), "recv it");
+        is($buf, "fromctob", "check value received");
+    }
 }
 
 exit(0);
