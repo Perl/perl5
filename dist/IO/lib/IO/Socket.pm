@@ -277,13 +277,22 @@ sub send {
     @_ >= 2 && @_ <= 4 or croak 'usage: $sock->send(BUF, [FLAGS, [TO]])';
     my $sock  = $_[0];
     my $flags = $_[2] || 0;
-    my $peer  = $_[3] || $sock->peername;
+    my $peer;
 
-    croak 'send: Cannot determine peer address'
-	 unless(defined $peer);
+    if ($_[3]) {
+        # the caller explicitly requested a TO, so use it
+        # this is non-portable for "connected" UDP sockets
+        $peer = $_[3];
+    }
+    elsif (!defined getpeername($sock)) {
+        # we're not connected, so we require a peer from somewhere
+        $peer = $sock->peername;
 
-    my $type = $sock->socktype;
-    my $r = $type == SOCK_DGRAM || $type == SOCK_RAW
+	croak 'send: Cannot determine peer address'
+	    unless(defined $peer);
+    }
+
+    my $r = $peer
       ? send($sock, $_[1], $flags, $peer)
       : send($sock, $_[1], $flags);
 
@@ -526,9 +535,9 @@ C<FLAGS> is optional and defaults to C<0>, and
 
 =item *
 
-after a successful send with C<TO>, further calls to send() without
-C<TO> will send to the same address, and C<TO> will be used as the
-result of peername().
+after a successful send with C<TO>, further calls to send() on an
+unconnected socket without C<TO> will send to the same address, and
+C<TO> will be used as the result of peername().
 
 =back
 
