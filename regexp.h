@@ -658,6 +658,7 @@ typedef struct {
     STRLEN  sublen;     /* saved sublen     field from rex */
     STRLEN  suboffset;  /* saved suboffset  field from rex */
     STRLEN  subcoffset; /* saved subcoffset field from rex */
+    SV      *sv;        /* $_  during (?{}) */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
     SSize_t pos;        /* the original value of pos() in pos_magic */
     U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
