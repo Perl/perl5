@@ -127,8 +127,8 @@ XXX Remove this section if not applicable.
 
 L<IO> has been upgraded from version 1.40 to 1.41.
 
-The supplied I<TO> is now always honoured for UDP sockets for calls to
-the send() method.  [perl #133936]
+The supplied I<TO> is now always honoured on calls to the send()
+method.  [perl #133936]
 
 =item *
 
