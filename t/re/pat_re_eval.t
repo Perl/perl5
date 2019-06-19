@@ -23,7 +23,7 @@ BEGIN {
 
 our @global;
 
-plan tests => 504;  # Update this when adding/deleting tests.
+plan tests => 506;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1315,6 +1315,20 @@ sub run_tests {
         my $runtime_re = '(??{ "A"; })';
         ok "ABC" =~ /^ $runtime_re (?(?{ 1; })BC)    $/x, 'RT #133687 yes';
         ok "ABC" =~ /^ $runtime_re (?(?{ 0; })xy|BC) $/x, 'RT #133687 yes|no';
+    }
+
+    # RT #134208
+    # when the string being matched was an SvTEMP and the re_eval died,
+    # the SV's magic was being restored after the SV was freed.
+    # Give ASan something to play with.
+
+    {
+        my $a;
+        no warnings 'uninitialized';
+        eval { "$a $1" =~ /(?{ die })/ };
+        pass("SvTEMP 1");
+        eval { sub { " " }->() =~ /(?{ die })/ };
+        pass("SvTEMP 2");
     }
 
 } # End of sub run_tests

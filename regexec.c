@@ -10233,6 +10233,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     regmatch_info_aux_eval *eval_state = reginfo->info_aux_eval;
 
     eval_state->rex = rex;
+    eval_state->sv  = reginfo->sv;
 
     if (reginfo->sv) {
         /* Make $_ available to executed code. */
@@ -10240,6 +10241,8 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
             SAVE_DEFSV;
             DEFSV_set(reginfo->sv);
         }
+        /* will be dec'd by S_cleanup_regmatch_info_aux */
+        SvREFCNT_inc_NN(reginfo->sv);
 
         if (!(mg = mg_find_mglob(reginfo->sv))) {
             /* prepare for quick setting of pos */
@@ -10331,6 +10334,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
         }
 
         PL_curpm = eval_state->curpm;
+        SvREFCNT_dec(eval_state->sv);
     }
 
     PL_regmatch_state = aux->old_regmatch_state;
