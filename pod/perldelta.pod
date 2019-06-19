@@ -401,7 +401,7 @@ incorrectly an alias for C<%+>.  [perl #131867]
 =item *
 
 C<%{^CAPTURE}> didn't work if C<@{^CAPTURE}> was mentioned first.
-Similarly for C<%{^CAPTURE_A::}> and C<@{^CAPTURE_ALL}>, though
+Similarly for C<%{^CAPTURE_ALL}> and C<@{^CAPTURE_ALL}>, though
 C<@{^CAPTURE_ALL}> currently isn't used.  [perl #131193]
 
 =item *
