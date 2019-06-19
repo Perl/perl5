@@ -375,7 +375,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Setting C<$)> now properly sets supplementary group ids, if you have
+Setting C<$)> now properly sets supplementary group ids if you have
 the necessary privileges.  [perl #134169]
 
 =item *
@@ -394,6 +394,17 @@ to mishandling of the negative precision value.  [perl #134008]
 
 scalar() on a reference could cause an erroneous assertion failure
 during compilation.  [perl #134045]
+
+=item *
+
+C<%{^CAPTURE_ALL}> is now an alias to C<%-> as documented, rather than
+incorrectly an alias for C<%+>.  [perl #131867]
+
+=item *
+
+C<%{^CAPTURE}> didn't work if C<@{^CAPTURE}> was mentioned first.
+Similarly for C<%{^CAPTURE_A::}> and C<@{^CAPTURE_ALL}>, though
+C<@{^CAPTURE_ALL}> currently isn't used.  [perl #131193]
 
 =item *
 
