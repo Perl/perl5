@@ -43,6 +43,12 @@ Such strings are represented internally in UTF-8, and C<vec> is a
 bit-oriented operation that will likely give unexpected results on those
 strings.  This was deprecated in perl 5.28.0.
 
+=head2 Use of code points over 0xFF in string bitwise operators
+
+Some uses of these were already illegal after a previous deprecation
+cycle.  The remaining uses are now prohibited, having been deprecated in perl
+5.28.0.  See L<perldeprecation>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
