@@ -175,6 +175,18 @@ section.
 
 Additionally, the following selected changes have been made:
 
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Documentation about embed.fnc flags has been removed. F<embed.fnc> now has
+sufficient comments within it.  Anyone changing that file will see those
+comments first, so entries here are now redundant.
+
+=back
+
 =head3 L<perlpod>
 
 =over 4
