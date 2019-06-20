@@ -17,6 +17,52 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.1 - Kurt Vonnegut, _A Man without a Country_
+
+On Tuesday, January 20, 2004, I sent Joel Bleifuss, my editor at _In These
+Times_, this fax:
+
+    ON ORANGE ALERT HERE.
+    ECONOMIC TERRORIST ATTACK
+    EXPECTED AT 8 PM EST. KV
+
+Worried, he called, asking what was up. I said I would tell him when I had
+more complete information on the bombs George Bush was set to deliver in his
+State of the Union address.
+
+That night I got a call from my friend, the out-of-print-science-fiction
+writer Kilgore Trout. He asked me, "Did you watch the State of the Union
+address?"
+
+"Yes, and it certainly helped to remember what the great British socialist
+playwright George Bernard Shaw said about this planet."
+
+"Which was?"
+
+"He said, 'I don't know if there are men on the moon, but if there are, they
+must be using the earth as their lunatic asylum.' And he wasn't talking
+about the germs or the elephants. He meant we the people."
+
+"Okay."
+
+"You don't think this is the Lunatic Asylum of the Universe?"
+
+"Kurt, I don't think I expressed an opinion one way of the other."
+
+"We are killing this planet as a life-support system with the poisons from
+all the thermodynamic whoopee we're making with atomic energy and fossil
+fuels, and everybody knows it, and practically nobody cares. This is how
+crazy we are. I think the planet's immune system is trying to get rid of us
+with AIDS and new strains of flu and tuberculosis, and so on. I think the
+planet should get rid of us. We're really awful animals. I mean, that dumb
+Barbra Streisand song, 'People who need people are the luckiest people in
+the world' -- she's talking about cannibals. Lots to eat. Yes, the planet is
+trying to get rid of us, but I think it's too late."
+
+And I said good-bye to my friend, hung up the phone, sat down and wrote this
+epitaph: "The good Earth -- we could have saved it, but we were too damn
+cheap and lazy."
+
 =head2 v5.31.0 - Fumiko Enchi, Masks
 
 Announced on 2019-05-22 by Sawyer X
