@@ -3097,6 +3097,9 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
 Tells Perl to C<eval> the string in the SV.  It supports the same flags
 as C<call_sv>, with the obvious exception of C<G_EVAL>.  See L<perlcall>.
 
+The C<G_RETHROW> flag can be used if you only need eval_sv() to
+execute code specified by a string, but not catch any errors.
+
 =cut
 */
 
@@ -3178,6 +3181,11 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	    goto redo_body;
 	}
       fail:
+        if (flags & G_RETHROW) {
+            JMPENV_POP;
+            croak_sv(ERRSV);
+        }
+
 	PL_stack_sp = PL_stack_base + oldmark;
 	if ((flags & G_WANT) == G_ARRAY)
 	    retval = 0;
@@ -3214,20 +3222,19 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 
     PERL_ARGS_ASSERT_EVAL_PV;
 
-    eval_sv(sv, G_SCALAR);
-    SvREFCNT_dec(sv);
+    if (croak_on_error) {
+        sv_2mortal(sv);
+        eval_sv(sv, G_SCALAR | G_RETHROW);
+    }
+    else {
+        eval_sv(sv, G_SCALAR);
+        SvREFCNT_dec(sv);
+    }
 
     {
         dSP;
         sv = POPs;
         PUTBACK;
-    }
-
-    /* just check empty string or undef? */
-    if (croak_on_error) {
-	SV * const errsv = ERRSV;
-	if(SvTRUE_NN(errsv))
-            croak_sv(errsv);
     }
 
     return sv;

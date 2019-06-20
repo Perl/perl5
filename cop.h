@@ -973,6 +973,7 @@ L<perlcall>.
 				    Perl_magic_methcall().  */
 #define G_RE_REPARSING 0x800     /* compiling a run-time /(?{..})/ */
 #define G_METHOD_NAMED 4096	/* calling named method, eg without :: or ' */
+#define G_RETHROW      8192	/* eval_sv(): re-throw any error */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
