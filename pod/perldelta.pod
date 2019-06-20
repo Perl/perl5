@@ -49,6 +49,10 @@ Some uses of these were already illegal after a previous deprecation
 cycle.  The remaining uses are now prohibited, having been deprecated in perl
 5.28.0.  See L<perldeprecation>.
 
+=head2 C<Sys::Hostname::hostname()> does not accept arguments
+
+This usage was deprecated in perl 5.28.0 and is now fatal.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
