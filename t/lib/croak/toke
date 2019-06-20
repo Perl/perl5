@@ -507,16 +507,12 @@ Execution of - aborted due to compilation errors.
 0x x 2;
 0xx 2;
 0x_;
+0b;
 EXPECT
-Number found where operator expected at - line 1, near "x 2"
-	(Do you need to predeclare x?)
-Bareword found where operator expected at - line 2, near "0xx"
-	(Missing operator before xx?)
-Number found where operator expected at - line 2, near "xx 2"
-	(Do you need to predeclare xx?)
-Bareword found where operator expected at - line 3, near "0x_"
-	(Missing operator before x_?)
-syntax error at - line 1, near "x 2"
+No digits found for hexadecimal literal at - line 1, near "0x "
+No digits found for hexadecimal literal at - line 2, near "0xx"
+No digits found for hexadecimal literal at - line 3, near "0x_;"
+No digits found for binary literal at - line 4, near "0b;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME [perl #130585] close paren in subparse

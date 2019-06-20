@@ -4100,6 +4100,11 @@ for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a C<DB::sub> routine to be called at the beginning
 of each ordinary subroutine call.
 
+=item No digits found for %s literal
+
+(F) No hexadecimal digits were found following C<0x> or no binary digits
+were found following C<0b>.
+
 =item No directory specified for -I
 
 (F) The B<-I> command-line switch requires a directory name as part of the

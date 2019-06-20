@@ -11336,10 +11336,16 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             }
 
             if (shift != 3 && !has_digs) {
-                /* 0x or 0b with no digits, treat it as if the x or b is part of the
-                   next token
+                /* 0x or 0b with no digits, treat it as an error.
+                   Originally this backed up the parse before the b or
+                   x, but that has the potential for silent changes in
+                   behaviour, like for: "0x.3" and "0x+$foo".
                 */
-                s = start + 1;
+                const char *d = s;
+                if (*d) ++d; /* so the user sees the bad non-digit */
+                PL_bufptr = (char *)d; /* so yyerror reports the context */
+                yyerror(Perl_form(aTHX_ "No digits found for %s literal",
+                                  shift == 4 ? "hexadecimal" : "binary"));
             }
 
 	    if (overflowed) {
