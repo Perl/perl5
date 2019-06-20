@@ -1806,7 +1806,7 @@ to avoid the BIND.
 
 Perl can be cross-compiled.  It is just not trivial, cross-compilation
 rarely is.  Perl is routinely cross-compiled for several platforms: as of
-January 2014, these include Android, Blackberry 10,
+June 2019, these include Android, Blackberry 10,
 ARM Linux, and Solaris.  Previous versions of
 Perl also provided support for Open Zaurus, Symbian, and
 the IBM OS/400, but it's unknown if those ports are still functional.
