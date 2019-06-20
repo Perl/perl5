@@ -149,6 +149,7 @@ iconv(1)
 iconv(3)
 inetd(8)
 invoker
+IO::Compress
 IO::Socket::IP
 ioctl(2)
 IPC::Run
@@ -243,6 +244,7 @@ Pod::HTML2Pod
 Pod::LaTeX
 Pod::Plainer
 Pod::PXML
+podlators
 poll(2)
 prctl(2)
 printenv(1)

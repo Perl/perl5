@@ -81,7 +81,7 @@ method.  L<[perl #133936]|https://rt.perl.org/Ticket/Display.html?id=133936>
 
 =item *
 
-L<IO-Compress> has been upgraded from version 2.084 to 2.086.
+L<IO::Compress> has been upgraded from version 2.084 to 2.086.
 
 =item *
 
