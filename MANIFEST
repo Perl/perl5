@@ -3328,6 +3328,7 @@ dist/Devel-PPPort/t/threads.t		Devel::PPPort test file
 dist/Devel-PPPort/t/uv.t		Devel::PPPort test file
 dist/Devel-PPPort/t/variables.t		Devel::PPPort test file
 dist/Devel-PPPort/t/warn.t		Devel::PPPort test file
+dist/Devel-PPPort/TODO			Devel::PPPort developer notes
 dist/Devel-PPPort/typemap		Devel::PPPort Typemap
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
