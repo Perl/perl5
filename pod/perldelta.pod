@@ -285,7 +285,12 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<autodoc.pl>
+
+This tool that regenerates L<perlintern> and L<perlapi> has been overhauled
+significantly, restoring consistency in flags used in F<embed.fnc> and
+L<Devel::PPPort> and allowing removal of many redundant C<=for apidoc>
+entries in code.
 
 =back
 
