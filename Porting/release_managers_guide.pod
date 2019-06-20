@@ -750,6 +750,10 @@ formatting, e.g.
     $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
         ~/perldelta.html
 
+You can add pod links for RT references thusly:
+
+    $ perl -p -i -e'BEGIN{undef $/}; s{(\[perl\s+#)(\d+)\]}{L<$1$2\]|https://rt.perl.org/Ticket/Display.html?id=$2>}mg' pod/perldelta.pod
+
 If you make changes, be sure to commit them.
 
 =for checklist skip BLEAD-POINT MAINT RC
@@ -914,7 +918,7 @@ Then delete the temporary installation.
 
 Create the tag identifying this release (e.g.):
 
-    $ git tag v5.11.0 -m "First release of the v5.11 series!"
+    $ git tag v5.11.0 -m 'First release of the v5.11 series!'
 
 It is B<VERY> important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
