@@ -45,11 +45,11 @@ require './regen/embed_lib.pl';
 my %docs;
 my %funcflags;
 my %macro = (
-	     ax => 1,
-	     items => 1,
-	     ix => 1,
-	     svtype => 1,
-	    );
+             ax => 1,
+             items => 1,
+             ix => 1,
+             svtype => 1,
+            );
 my %missing;
 
 my $curheader = "Unknown section";
@@ -63,17 +63,17 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
 FUNC:
     while (defined($in = $get_next_line->())) {
-	if ($in =~ /^#\s*define\s+([A-Za-z_][A-Za-z_0-9]+)\(/ &&
-	    ($file ne 'embed.h' || $file ne 'proto.h')) {
-	    $macro{$1} = $file;
-	    next FUNC;
-	}
+        if ($in =~ /^#\s*define\s+([A-Za-z_][A-Za-z_0-9]+)\(/ &&
+            ($file ne 'embed.h' || $file ne 'proto.h')) {
+            $macro{$1} = $file;
+            next FUNC;
+        }
         if ($in=~ /^=head1 (.*)/) {
             $curheader = $1;
 
             # If the next non-space line begins with a word char, then it is
             # the start of heading-ldevel documentation.
-	    if (defined($doc = $get_next_line->())) {
+            if (defined($doc = $get_next_line->())) {
                 # Skip over empty lines
                 while ($doc =~ /^\s+$/) {
                     if (! defined($doc = $get_next_line->())) {
@@ -106,66 +106,66 @@ HDR_DOC:
             }
             next FUNC;
         }
-	if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
-	    my $proto_in_file = $1;
-	    my $proto = $proto_in_file;
-	    $proto = "||$proto" unless $proto =~ /\|/;
-	    my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
+        if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
+            my $proto_in_file = $1;
+            my $proto = $proto_in_file;
+            $proto = "||$proto" unless $proto =~ /\|/;
+            my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
             warn ("'$name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
-	    my $docs = "";
+            my $docs = "";
 DOC:
-	    while (defined($doc = $get_next_line->())) {
+            while (defined($doc = $get_next_line->())) {
 
                 # Other pod commands are considered part of the current
                 # function's docs, so can have lists, etc.
                 last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
-		if ($doc =~ m:^\*/$:) {
-		    warn "=cut missing? $file:$line:$doc";;
-		    last DOC;
+                if ($doc =~ m:^\*/$:) {
+                    warn "=cut missing? $file:$line:$doc";;
+                    last DOC;
                 }
-		$docs .= $doc;
-	    }
-	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
+                $docs .= $doc;
+            }
+            $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 
-	    # If the entry is also in embed.fnc, it should be defined
+            # If the entry is also in embed.fnc, it should be defined
             # completely there, but not here
-	    my $embed_docref = delete $funcflags{$name};
-	    if ($embed_docref and %$embed_docref) {
+            my $embed_docref = delete $funcflags{$name};
+            if ($embed_docref and %$embed_docref) {
                 warn "embed.fnc entry overrides redundant information in"
                    . " '$proto_in_file' in $file" if $flags || $ret || @args;
                 $flags = $embed_docref->{'flags'};
                 $ret = $embed_docref->{'retval'};
-		@args = @{$embed_docref->{args}};
-	    } else {
-		$missing{$name} = $file;
-	    }
+                @args = @{$embed_docref->{args}};
+            } else {
+                $missing{$name} = $file;
+            }
 
             my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
 
-	    if (exists $docs{$inline_where}{$curheader}{$name}) {
+            if (exists $docs{$inline_where}{$curheader}{$name}) {
                 warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
                 next;
             }
-	    $docs{$inline_where}{$curheader}{$name}
-		= [$flags, $docs, $ret, $file, @args];
+            $docs{$inline_where}{$curheader}{$name}
+                = [$flags, $docs, $ret, $file, @args];
 
             # Create a special entry with an empty-string name for the
             # heading-level documentation.
-	    if (defined $header_doc) {
+            if (defined $header_doc) {
                 $docs{$inline_where}{$curheader}{""} = $header_doc;
                 undef $header_doc;
             }
 
-	    if (defined $doc) {
-		if ($doc =~ /^=(?:for|head)/) {
-		    $in = $doc;
-		    redo FUNC;
-		}
-	    } else {
-		warn "$file:$line:$in";
-	    }
-	}
+            if (defined $doc) {
+                if ($doc =~ /^=(?:for|head)/) {
+                    $in = $doc;
+                    redo FUNC;
+                }
+            } else {
+                warn "$file:$line:$in";
+            }
+        }
     }
 }
 
@@ -188,7 +188,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     my $p = $flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/;
 
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
-	if $flags =~ /O/;
+         if $flags =~ /O/;
     if ($p) {
         $docs .= "NOTE: this function must be explicitly called as Perl_$name";
         $docs .= " with an aTHX_ parameter" if $flags !~ /T/;
@@ -199,7 +199,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 
     if ($flags =~ /U/) { # no usage
         warn("U and s flags are incompatible") if $flags =~ /s/;
-	# nothing
+        # nothing
     } else {
         if ($flags =~ /n/) { # no args
             warn("n flag without m") unless $flags =~ /m/;
@@ -271,15 +271,15 @@ sub output {
     s/^\|//gm for $header, $footer;
 
     my $fh = open_new("pod/$podname.pod", undef,
-		      {by => "$0 extracting documentation",
+                      {by => "$0 extracting documentation",
                        from => 'the C source files'}, 1);
 
     print $fh $header;
 
     my $key;
     for $key (sort sort_helper keys %$dochash) {
-	my $section = $dochash->{$key}; 
-	print $fh "\n=head1 $key\n\n";
+        my $section = $dochash->{$key}; 
+        print $fh "\n=head1 $key\n\n";
 
         # Output any heading-level documentation and delete so won't get in
         # the way later
@@ -287,12 +287,12 @@ sub output {
             print $fh $section->{""} . "\n";
             delete $section->{""};
         }
-	print $fh "=over 8\n\n";
+        print $fh "=over 8\n\n";
 
-	for my $key (sort sort_helper keys %$section) {
-	    docout($fh, $key, $section->{$key});
-	}
-	print $fh "\n=back\n";
+        for my $key (sort sort_helper keys %$section) {
+            docout($fh, $key, $section->{$key});
+        }
+        print $fh "\n=back\n";
     }
 
     if (@$missing) {
@@ -335,10 +335,10 @@ foreach (@{(setup_embed())[0]}) {
     s/\b(?:NN|NULLOK)\b\s+//g for @args;
 
     $funcflags{$func} = {
-			 flags => $flags,
-			 retval => $retval,
-			 args => \@args,
-			};
+                         flags => $flags,
+                         retval => $retval,
+                         args => \@args,
+                        };
 }
 
 # glob() picks up docs from extra .c or .h files that may be in unclean
@@ -463,7 +463,7 @@ output('perlintern', <<'END', $docs{guts}, \@missing_guts, <<'END');
 |=head1 NAME
 |
 |perlintern - autogenerated documentation of purely B<internal>
-|		 Perl functions
+|Perl functions
 |
 |=head1 DESCRIPTION
 |X<internal Perl functions> X<interpreter functions>
