@@ -37,13 +37,11 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code points above 0xFF is forbidden
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
+Such strings are represented internally in UTF-8, and C<vec> is a
+bit-oriented operation that will likely give unexpected results on those
+strings.  This was deprecated in perl 5.28.0.
 
 =head1 Deprecations
 
