@@ -177,13 +177,13 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlpod>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Advice has been added regarding the usage of C<< Z<> >>.
 
 =back
 
