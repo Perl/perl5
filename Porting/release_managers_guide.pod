@@ -1345,7 +1345,14 @@ in theory, only contain bug fixes but never regressions.))
 
 =head3 clean build and test
 
-Run a clean build and test to make sure nothing obvious is broken.
+Run a clean build and test to make sure nothing obvious is broken. This is
+very important, as commands run after this point must be run using the perl
+executable built with the bumped version number.
+
+ $ git clean -xdf
+ $ ./Configure -des -Dusedevel
+ $ make
+ $ make test
 
 In particular, F<Porting/perldelta_template.pod> is intentionally exempted
 from podchecker tests, to avoid false positives about placeholder text.
