@@ -1506,10 +1506,6 @@ F<dist/Module-CoreList/Changes>.
 
 =item *
 
-Update F<pod/perldelta.pod> to mention the upgrade to Module::CoreList.
-
-=item *
-
 Remake perl to get your changed .pm files propagated into F<lib/> and
 then run at least the F<dist/Module-CoreList/t/*.t> tests and the
 test_porting makefile target to check that they're ok.
