@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20190620';
+our $VERSION = '5.20190720';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -16335,7 +16335,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         delta_from => 5.031000,
         changed => {
             'App::Cpan'             => '1.675',
-            'B::Op_private'         => '5.031001',
+            'B::Op_private'         => '5.031002',
             'CPAN'                  => '2.27',
             'CPAN::Bundle'          => '5.5005',
             'CPAN::Distribution'    => '2.27',
@@ -16422,8 +16422,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'IO::Uncompress::Inflate'=> '2.086',
             'IO::Uncompress::RawInflate'=> '2.086',
             'IO::Uncompress::Unzip' => '2.086',
-            'Module::CoreList'      => '5.20190620',
-            'Module::CoreList::Utils'=> '5.20190620',
+            'Module::CoreList'      => '5.20190720',
+            'Module::CoreList::Utils'=> '5.20190720',
             'POSIX'                 => '1.89',
             'Pod::Man'              => '4.12',
             'Pod::ParseLink'        => '4.12',
