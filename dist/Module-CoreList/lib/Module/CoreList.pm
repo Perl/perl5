@@ -351,6 +351,7 @@ sub changes_between {
     5.030000 => '2019-05-22',
     5.031000 => '2019-05-24',
     5.031001 => '2019-06-20',
+    5.031002 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16544,6 +16545,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Pod::Select'           => 1,
         }
     },
+    5.031002 => {
+        delta_from => 5.031001,
+        changed => {
+            'Config'                => '5.031002',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -17555,6 +17564,13 @@ sub is_core
     },
     5.031001 => {
         delta_from => 5.031000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.031002 => {
+        delta_from => 5.031001,
         changed => {
         },
         removed => {
