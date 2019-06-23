@@ -330,9 +330,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+C<-Duse64bitint> is now the default on VMS.
 
 =back
 
