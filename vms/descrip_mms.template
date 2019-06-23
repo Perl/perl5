@@ -345,11 +345,11 @@ miniperl : $(DBG)miniperl$(E)  vmspipe.com
 	@ Continue
 
 [.lib]buildcustomize.pl :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL) write_buildcustomize.pl
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MINIPERL_EXE) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals $(CRTLOPTS)
+	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MINIPERL_EXE) miniperlmain$(O),$(DBG)libperlmini$(OLB)/Library $(CRTLOPTS)
        $(MINIPERL) "-f" write_buildcustomize.pl
 
 $(DBG)miniperl$(E) :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL)
-	Link $(LINKFLAGS)/Trace/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals  $(CRTLOPTS)
+	Link $(LINKFLAGS)/Trace/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library $(CRTLOPTS)
 
 $(DBG)libperl$(OLB) : $(obj)
 	@ If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)

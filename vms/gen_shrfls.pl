@@ -172,7 +172,7 @@ else {
 }
 close OPTATTR;
 
-my $incstr = 'PERL,GLOBALS';
+my $incstr = 'perl,globals';
 my (@symfiles, $drvrname);
 
 # Initial hack to permit building of compatible shareable images for a
