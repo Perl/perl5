@@ -62,7 +62,7 @@
 # define PVT__PERL_HASH_SEED_BYTES (PVT__PERL_HASH_WORD_SIZE * 2)
 # define PVT__PERL_HASH_STATE_BYTES (PVT__PERL_HASH_WORD_SIZE * 4)
 # define PVT__PERL_HASH_SEED_STATE(seed,state) S_perl_siphash_seed_state(seed,state)
-# define PVT__PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_1_3_with_state((state),(U8*)(str),(len))
+# define PVT__PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_1_3_with_state((state),(const U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_ZAPHOD32)
 # define PERL_HASH_FUNC_DEFINE "PERL_HASH_FUNC_ZAPHOD32"
 # define PVT__PERL_HASH_FUNC "ZAPHOD32"
@@ -119,7 +119,7 @@
 
 #define PVT_PERL_HASH_WITH_STATE(state,str,len)                                            \
     (LIKELY(len <= SBOX32_MAX_LEN)                                                      \
-        ? sbox32_hash_with_state((state + PVT__PERL_HASH_STATE_BYTES),(U8*)(str),(len))    \
+        ? sbox32_hash_with_state((state + PVT__PERL_HASH_STATE_BYTES),(const U8*)(str),(len))    \
         : PVT__PERL_HASH_WITH_STATE((state),(str),(len)))
 
 #endif
@@ -127,7 +127,7 @@
 #define PERL_HASH_WITH_SEED(seed,hash,str,len) \
     (hash) = S_perl_hash_with_seed((const U8 *) seed, (const U8 *) str,len)
 #define PERL_HASH_WITH_STATE(state,hash,str,len) \
-    (hash) = PVT_PERL_HASH_WITH_STATE((state),(U8*)(str),(len))
+    (hash) = PVT_PERL_HASH_WITH_STATE((state),(const U8*)(str),(len))
 
 #define PERL_HASH_SEED_STATE(seed,state) PVT_PERL_HASH_SEED_STATE(seed,state)
 #define PERL_HASH_SEED_BYTES PVT_PERL_HASH_SEED_roundup(PVT_PERL_HASH_SEED_BYTES)

@@ -30,7 +30,7 @@
  */
 
 #ifndef U8TO16_LE
-  #define _shifted_octet(type,ptr,idx,shift) (((type)(((U8*)(ptr))[(idx)]))<<(shift))
+  #define _shifted_octet(type,ptr,idx,shift) (((type)(((const U8*)(ptr))[(idx)]))<<(shift))
     #if defined(USE_UNALIGNED_PTR_DEREF) && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
         #define U8TO16_LE(ptr)   (*((const U16*)(ptr)))
         #define U8TO32_LE(ptr)   (*((const U32*)(ptr)))
