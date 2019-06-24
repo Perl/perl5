@@ -330,6 +330,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item Linux
+
+C<cc> will be used to populate C<plibpth> if C<cc> is C<clang>.  [perl
+#134189]
+
 =item VMS
 
 C<-Duse64bitint> is now the default on VMS.
