@@ -5050,7 +5050,7 @@ STATIC OP*	S_force_list(pTHX_ OP* arg, bool nullit);
 STATIC void	S_forget_pmop(pTHX_ PMOP *const o);
 #define PERL_ARGS_ASSERT_FORGET_PMOP	\
 	assert(o)
-STATIC OP*	S_gen_constant_list(pTHX_ OP* o);
+STATIC void	S_gen_constant_list(pTHX_ OP* o);
 STATIC void	S_inplace_aassign(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_INPLACE_AASSIGN	\
 	assert(o)
