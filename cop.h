@@ -956,24 +956,24 @@ L<perlcall>.
 #define G_WANT		3
 
 /* extra flags for Perl_call_* routines */
-#define G_DISCARD	4	/* Call FREETMPS.
+#define G_DISCARD         0x4	/* Call FREETMPS.
 				   Don't change this without consulting the
 				   hash actions codes defined in hv.h */
-#define G_EVAL		8	/* Assume eval {} around subroutine call. */
-#define G_NOARGS       16	/* Don't construct a @_ array. */
-#define G_KEEPERR      32	/* Warn for errors, don't overwrite $@ */
-#define G_NODEBUG      64	/* Disable debugging at toplevel.  */
-#define G_METHOD      128       /* Calling method. */
-#define G_FAKINGEVAL  256	/* Faking an eval context for call_sv or
+#define G_EVAL	          0x8	/* Assume eval {} around subroutine call. */
+#define G_NOARGS         0x10	/* Don't construct a @_ array. */
+#define G_KEEPERR        0x20	/* Warn for errors, don't overwrite $@ */
+#define G_NODEBUG        0x40	/* Disable debugging at toplevel.  */
+#define G_METHOD         0x80   /* Calling method. */
+#define G_FAKINGEVAL    0x100	/* Faking an eval context for call_sv or
 				   fold_constants. */
-#define G_UNDEF_FILL  512	/* Fill the stack with &PL_sv_undef
+#define G_UNDEF_FILL    0x200	/* Fill the stack with &PL_sv_undef
 				   A special case for UNSHIFT in
 				   Perl_magic_methcall().  */
-#define G_WRITING_TO_STDERR 1024 /* Perl_write_to_stderr() is calling
+#define G_WRITING_TO_STDERR 0x400 /* Perl_write_to_stderr() is calling
 				    Perl_magic_methcall().  */
-#define G_RE_REPARSING 0x800     /* compiling a run-time /(?{..})/ */
-#define G_METHOD_NAMED 4096	/* calling named method, eg without :: or ' */
-#define G_RETHROW      8192	/* eval_sv(): re-throw any error */
+#define G_RE_REPARSING  0x800   /* compiling a run-time /(?{..})/ */
+#define G_METHOD_NAMED 0x1000	/* calling named method, eg without :: or ' */
+#define G_RETHROW      0x2000	/* eval_sv(): re-throw any error */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
