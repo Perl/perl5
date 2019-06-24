@@ -627,7 +627,6 @@ perl_destruct(pTHXx)
     PERL_WAIT_FOR_CHILDREN;
 
     destruct_level = PL_perl_destruct_level;
-#if defined(DEBUGGING) || defined(PERL_TRACK_MEMPOOL)
     {
 	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
 	if (s) {
@@ -641,16 +640,13 @@ perl_destruct(pTHXx)
                 else
                     i = 0;
             }
-#ifdef DEBUGGING
 	    if (destruct_level < i) destruct_level = i;
-#endif
 #ifdef PERL_TRACK_MEMPOOL
             /* RT #114496, for perl_free */
             PL_perl_destruct_level = i;
 #endif
 	}
     }
-#endif
 
     if (PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
         dJMPENV;
