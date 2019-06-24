@@ -4196,11 +4196,11 @@
 /*#define	USE_64_BIT_ALL		/ **/
 #endif
 
-/* USE_CBACKTRACE:
+/* USE_C_BACKTRACE:
  *	This symbol, if defined, indicates that Perl should
  *	be built with support for backtrace.
  */
-/*#define USE_CBACKTRACE		/ **/
+/*#define USE_C_BACKTRACE		/ **/
 
 /* USE_DTRACE:
  *	This symbol, if defined, indicates that Perl should
@@ -5244,6 +5244,6 @@
 #endif
 
 /* Generated from:
- * 6608de918c3c876975f74b684da2536ab1ee23459783d691ae02ce2526a497a7 config_h.SH
+ * e3dbc17ac938c9df0df81930ccebf94a0425dbff9d20c3edd18a84075eff4fc2 config_h.SH
  * a11d95f56af200907b9285ed0da243a4c20db34f5684af313d18195eaba2b18b uconfig.sh
  * ex: set ro: */
