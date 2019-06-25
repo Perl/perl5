@@ -47,7 +47,7 @@ XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 =for apidoc Am|SV*|ST|int ix
 Used to access elements on the XSUB's stack.
 
-=for apidoc AmU||XS
+=for apidoc AmnU||XS
 Macro to declare an XSUB and its C parameter list.  This is handled by
 C<xsubpp>.  It is the same as using the more explicit C<XS_EXTERNAL> macro.
 
@@ -56,7 +56,7 @@ Macro to declare an XSUB and its C parameter list without exporting the symbols.
 This is handled by C<xsubpp> and generally preferable over exporting the XSUB
 symbols unnecessarily.
 
-=for apidoc AmU||XS_EXTERNAL
+=for apidoc AmnU||XS_EXTERNAL
 Macro to declare an XSUB and its C parameter list explicitly exporting the symbols.
 
 =for apidoc Amns||dAX
@@ -85,7 +85,7 @@ Sets up any variable needed by the C<UNDERBAR> macro.  It used to define
 C<padoff_du>, but it is currently a noop.  However, it is strongly advised
 to still use it for ensuring past and future compatibility.
 
-=for apidoc AmU||UNDERBAR
+=for apidoc AmnU||UNDERBAR
 The SV* corresponding to the C<$_> variable.  Works even if there
 is a lexical C<$_> in scope.
 
@@ -263,7 +263,7 @@ Return an empty list from an XSUB immediately.
 Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to
 the subs.
 
-=for apidoc AmU||XS_VERSION
+=for apidoc AmnU||XS_VERSION
 The version identifier for an XS module.  This is usually
 handled automatically by C<ExtUtils::MakeMaker>.  See
 C<L</XS_VERSION_BOOTCHECK>>.
@@ -283,13 +283,13 @@ matches the api version of the perl interpreter it's being loaded into.
 Set up necessary local variables for exception handling.
 See L<perlguts/"Exception Handling">.
 
-=for apidoc AmU||XCPT_TRY_START
+=for apidoc AmnU||XCPT_TRY_START
 Starts a try block.  See L<perlguts/"Exception Handling">.
 
-=for apidoc AmU||XCPT_TRY_END
+=for apidoc AmnU||XCPT_TRY_END
 Ends a try block.  See L<perlguts/"Exception Handling">.
 
-=for apidoc AmU||XCPT_CATCH
+=for apidoc AmnU||XCPT_CATCH
 Introduces a catch block.  See L<perlguts/"Exception Handling">.
 
 =for apidoc Amns||XCPT_RETHROW

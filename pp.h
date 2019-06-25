@@ -13,11 +13,11 @@
 /*
 =head1 Stack Manipulation Macros
 
-=for apidoc AmU||SP
+=for apidoc AmnU||SP
 Stack pointer.  This is usually handled by C<xsubpp>.  See C<L</dSP>> and
 C<SPAGAIN>.
 
-=for apidoc AmU||MARK
+=for apidoc AmnU||MARK
 Stack marker variable for the XSUB.  See C<L</dMARK>>.
 
 =for apidoc Am|void|PUSHMARK|SP
@@ -42,7 +42,7 @@ C<L</dORIGMARK>>.
 =for apidoc Amns||dORIGMARK
 Saves the original stack mark for the XSUB.  See C<L</ORIGMARK>>.
 
-=for apidoc AmU||ORIGMARK
+=for apidoc AmnU||ORIGMARK
 The original stack mark for the XSUB.  See C<L</dORIGMARK>>.
 
 =for apidoc Amns||SPAGAIN
@@ -243,7 +243,7 @@ Push an SV onto the stack and mortalizes the SV.  The stack must have room
 for this element.  Does not use C<TARG>.  See also C<L</PUSHs>> and
 C<L</mXPUSHs>>.
 
-=for apidoc Am|void|PUSHmortal
+=for apidoc Amn|void|PUSHmortal
 Push a new mortal SV onto the stack.  The stack must have room for this
 element.  Does not use C<TARG>.  See also C<L</PUSHs>>, C<L</XPUSHmortal>> and
 C<L</XPUSHs>>.
@@ -270,7 +270,7 @@ C<L</XPUSHu>>.
 Push an SV onto the stack, extending the stack if necessary and mortalizes
 the SV.  Does not use C<TARG>.  See also C<L</XPUSHs>> and C<L</mPUSHs>>.
 
-=for apidoc Am|void|XPUSHmortal
+=for apidoc Amn|void|XPUSHmortal
 Push a new mortal SV onto the stack, extending the stack if necessary.
 Does not use C<TARG>.  See also C<L</XPUSHs>>, C<L</PUSHmortal>> and
 C<L</PUSHs>>.
@@ -638,7 +638,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
 
 /*
-=for apidoc mU||LVRET
+=for apidoc mnU||LVRET
 True if this op will be the return value of an lvalue subroutine
 
 =cut */

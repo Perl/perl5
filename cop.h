@@ -922,27 +922,27 @@ struct context {
 */
 
 /*
-=for apidoc AmU||G_SCALAR
+=for apidoc AmnU||G_SCALAR
 Used to indicate scalar context.  See C<L</GIMME_V>>, C<L</GIMME>>, and
 L<perlcall>.
 
-=for apidoc AmU||G_ARRAY
+=for apidoc AmnU||G_ARRAY
 Used to indicate list context.  See C<L</GIMME_V>>, C<L</GIMME>> and
 L<perlcall>.
 
-=for apidoc AmU||G_VOID
+=for apidoc AmnU||G_VOID
 Used to indicate void context.  See C<L</GIMME_V>> and L<perlcall>.
 
-=for apidoc AmU||G_DISCARD
+=for apidoc AmnU||G_DISCARD
 Indicates that arguments returned from a callback should be discarded.  See
 L<perlcall>.
 
-=for apidoc AmU||G_EVAL
+=for apidoc AmnU||G_EVAL
 
 Used to force a Perl C<eval> wrapper around a callback.  See
 L<perlcall>.
 
-=for apidoc AmU||G_NOARGS
+=for apidoc AmnU||G_NOARGS
 
 Indicates that no arguments are being sent to a callback.  See
 L<perlcall>.
@@ -1101,7 +1101,7 @@ typedef struct stackinfo PERL_SI;
 =for apidoc Amns||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Amns||PUSH_MULTICALL
+=for apidoc Ams||PUSH_MULTICALL|CV* the_cv
 Opening bracket for a lightweight callback.
 See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 

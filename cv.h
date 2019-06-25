@@ -18,7 +18,7 @@ struct xpvcv {
 /*
 =head1 Handy Values
 
-=for apidoc AmU||Nullcv
+=for apidoc ADmnU||Nullcv
 Null CV pointer.
 
 (deprecated - use C<(CV *)NULL> instead)

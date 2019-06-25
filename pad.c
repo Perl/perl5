@@ -121,12 +121,12 @@ to be generated in evals, such as
 For state vars, C<SVs_PADSTALE> is overloaded to mean 'not yet initialised',
 but this internal state is stored in a separate pad entry.
 
-=for apidoc AmxU|PADNAMELIST *|PL_comppad_name
+=for apidoc AmnxU|PADNAMELIST *|PL_comppad_name
 
 During compilation, this points to the array containing the names part
 of the pad for the currently-compiling code.
 
-=for apidoc AmxU|PAD *|PL_comppad
+=for apidoc AmnxU|PAD *|PL_comppad
 
 During compilation, this points to the array containing the values
 part of the pad for the currently-compiling code.  (At runtime a CV may
@@ -134,7 +134,7 @@ have many such value arrays; at compile time just one is constructed.)
 At runtime, this points to the array containing the currently-relevant
 values for the pad for the currently-executing code.
 
-=for apidoc AmxU|SV **|PL_curpad
+=for apidoc AmnxU|SV **|PL_curpad
 
 Points directly to the body of the L</PL_comppad> array.
 (I.e., this is C<PadARRAY(PL_comppad)>.)

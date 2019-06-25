@@ -39,7 +39,7 @@ struct xpvav {
 /*
 =head1 Handy Values
 
-=for apidoc AmU||Nullav
+=for apidoc ADmnU||Nullav
 Null AV pointer.
 
 (deprecated - use C<(AV *)NULL> instead)

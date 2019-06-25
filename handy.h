@@ -20,11 +20,11 @@
 /*
 =head1 Handy Values
 
-=for apidoc AmU||Nullch
+=for apidoc AmnU||Nullch
 Null character pointer.  (No longer available when C<PERL_CORE> is
 defined.)
 
-=for apidoc AmU||Nullsv
+=for apidoc AmnU||Nullsv
 Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 
 =cut
@@ -317,7 +317,7 @@ string/length pair.
 Like C<sv_setpvn_mg>, but takes a literal string instead of a
 string/length pair.
 
-=for apidoc Am|SV *|sv_setref_pvs|"literal string" s
+=for apidoc Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string" s
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
 

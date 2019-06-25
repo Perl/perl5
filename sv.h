@@ -15,7 +15,7 @@
 /*
 =head1 SV Flags
 
-=for apidoc AmU||svtype
+=for apidoc AmnU||svtype
 An enum of flags for Perl types.  These are found in the file F<sv.h>
 in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
@@ -72,52 +72,52 @@ hold C<undef> or a string.  C<SVt_PVIV> is a superset of C<SVt_PV> and C<SVt_IV>
 C<SVt_PVNV> is similar.  C<SVt_PVMG> can hold anything C<SVt_PVNV> can hold, but it
 can, but does not have to, be blessed or magical.
 
-=for apidoc AmU||SVt_NULL
+=for apidoc AmnU||SVt_NULL
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_IV
+=for apidoc AmnU||SVt_IV
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_NV
+=for apidoc AmnU||SVt_NV
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_PV
+=for apidoc AmnU||SVt_PV
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVIV
+=for apidoc AmnU||SVt_PVIV
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVNV
+=for apidoc AmnU||SVt_PVNV
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVMG
+=for apidoc AmnU||SVt_PVMG
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_INVLIST
+=for apidoc AmnU||SVt_INVLIST
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_REGEXP
+=for apidoc AmnU||SVt_REGEXP
 Type flag for regular expressions.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVGV
+=for apidoc AmnU||SVt_PVGV
 Type flag for typeglobs.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVLV
+=for apidoc AmnU||SVt_PVLV
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVAV
+=for apidoc AmnU||SVt_PVAV
 Type flag for arrays.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVHV
+=for apidoc AmnU||SVt_PVHV
 Type flag for hashes.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVCV
+=for apidoc AmnU||SVt_PVCV
 Type flag for subroutines.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVFM
+=for apidoc AmnU||SVt_PVFM
 Type flag for formats.  See L</svtype>.
 
-=for apidoc AmU||SVt_PVIO
+=for apidoc AmnU||SVt_PVIO
 Type flag for I/O objects.  See L</svtype>.
 
 =cut

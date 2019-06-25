@@ -142,14 +142,14 @@ struct xpvhv {
 /*
 =head1 Hash Manipulation Functions
 
-=for apidoc AmU||HEf_SVKEY
+=for apidoc AmnU||HEf_SVKEY
 This flag, used in the length slot of hash entries and magic structures,
 specifies the structure contains an C<SV*> pointer where a C<char*> pointer
 is to be expected.  (For information only--not to be used).
 
 =head1 Handy Values
 
-=for apidoc AmU||Nullhv
+=for apidoc ADmnU||Nullhv
 Null HV pointer.
 
 (deprecated - use C<(HV *)NULL> instead)

@@ -24,7 +24,7 @@
 /*
 =head1 Unicode Support
 
-=for apidoc AmU|placeholder|BOM_UTF8
+=for apidoc AmnU|const char *|BOM_UTF8
 
 This is a macro that evaluates to a string constant of the  UTF-8 bytes that
 define the Unicode BYTE ORDER MARK (U+FEFF) for the platform that perl
@@ -33,7 +33,7 @@ works on both ASCII and EBCDIC platforms.
 S<C<sizeof(BOM_UTF8) - 1>> can be used to get its length in
 bytes.
 
-=for apidoc AmU|placeholder|REPLACEMENT_CHARACTER_UTF8
+=for apidoc AmnU|const char *|REPLACEMENT_CHARACTER_UTF8
 
 This is a macro that evaluates to a string constant of the  UTF-8 bytes that
 define the Unicode REPLACEMENT CHARACTER (U+FFFD) for the platform that perl

@@ -114,7 +114,7 @@ PERLVAR(G, C_locale_obj, locale_t)
 PERLVARI(G, watch_pvx,	char *, NULL)
 
 /*
-=for apidoc AmU|Perl_check_t *|PL_check
+=for apidoc AmnU|Perl_check_t *|PL_check
 
 Array, indexed by opcode, of functions that will be called for the "check"
 phase of optree building during compilation of Perl code.  For most (but
@@ -176,7 +176,7 @@ PERLVARI(G, my_cxt_index, int,	0)
 PERLVARI(G, veto_cleanup, int, FALSE)	/* exit without cleanup */
 
 /*
-=for apidoc AmUx|Perl_keyword_plugin_t|PL_keyword_plugin
+=for apidoc AmnUx|Perl_keyword_plugin_t|PL_keyword_plugin
 
 Function pointer, pointing at a function used to handle extended keywords.
 The function should be declared as
