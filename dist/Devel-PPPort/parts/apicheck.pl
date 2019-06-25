@@ -220,7 +220,7 @@ for $f (@f) {
     }
     my($n, $p, $d) = $a =~ /^ (\w+(?:\s+\w+)*)\s*  # type name  => $n
                               (\**)                # pointer    => $p
-                              (?:\s*const\s*)?     # const
+                              (?:\s*\bconst\b\s*)? # const
                               ((?:\[[^\]]*\])*)    # dimension  => $d
                             $/x
                      or die "$0 - cannot parse argument: [$a]\n";
@@ -229,7 +229,7 @@ for $f (@f) {
       next;
     }
     $n = $tmap{$n} || $n;
-    if ($n eq 'const char' and $p eq '*' and !$f->{flags}{f}) {
+    if ($n =~ /\bconst\s+char\b/ and $p eq '*' and !$f->{flags}{f}) {
       push @arg, '"foo"';
     }
     else {
