@@ -109,7 +109,7 @@ for my $src (glob 'parts/todo/5*') {
 print "\nBuilding todo files...\n\n";
 
 unless (runperl('devel/mktodo', @args)) {
-  print "\nSomething went wrong while building the baseline files.\n";
+  print "\nSomething went wrong while building the todo files.\n";
   quit_now();
 }
 
