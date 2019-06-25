@@ -125,6 +125,18 @@ wait;				# Collect from $pid
 pipe(READER,WRITER) || die "Can't open pipe";
 close READER;
 
+eval {
+    # one platform at least appears to block SIGPIPE by default (see #122112)
+    # so make sure it's unblocked.
+    # The eval wrapper should ensure this does nothing if these aren't
+    # implemented.
+    require POSIX;
+    my $mask = POSIX::SigSet->new(POSIX::SIGPIPE());
+    my $old = POSIX::SigSet->new();
+    POSIX::sigprocmask(POSIX::SIG_UNBLOCK(), $mask, $old);
+    note "Yes, SIGPIPE was blocked" if $old->ismember(POSIX::SIGPIPE());
+};
+
 $SIG{'PIPE'} = 'broken_pipe';
 
 sub broken_pipe {
