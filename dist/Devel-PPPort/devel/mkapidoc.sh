@@ -3,6 +3,12 @@
 #
 #  mkapidoc.sh -- generate apidoc.fnc from scanning the Perl source
 #
+# Should be called from the base directory for Devel::PPPort.
+# If that happens to be in the /dist directory of a perl build structure, and
+# you're doing the standard thing, no parameters are required.  Otherwise
+# (again with the standard things, it can be called with one parameter:
+#       sh devel/mkapidoc.sh /path/to/the/embed.fnc/you/want
+#
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
@@ -77,9 +83,23 @@ if isperlroot $PERLROOT; then
 ApTod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
 
 EOF
-  grep -hr '^=for apidoc' $PERLROOT | sed -e 's/=for apidoc //' | grep '|' | sort | uniq \
-     | perl -e'$f=pop;open(F,$f)||die"$f:$!";while(<F>){next unless /^[A-Za-z]+\t/;(split/\s*\|\s*/)[2]=~/(\w+)/;$h{$1}++}
-               while(<>){s/[ \t]+$//;(split/\s*\|\s*/)[2]=~/(\w+)/;$h{$1}||print}' $EMBED >>$OUTPUT
+    grep -hr '^=for apidoc' $PERLROOT | sed -e 's/=for apidoc //'           \
+  | grep '|'                                                                \
+  | sort                                                                    \
+  | uniq                                                                    \
+  | perl -e '$f=pop;
+             # Populate %h with the embed.fnc entry names
+             open(F,$f) || die "$f:$!";
+             while (<F>) {                      # In embed.fnc,
+                next unless /^[A-Za-z]+\t/;     # skip lines that arent defns
+                (  split /\s*\|\s*/ ) [2] =~ /(\w+)/;
+                $h{$1}++;   # Note in %h that $1 is in $EMBED
+            }
+            while (<>) {
+                s/[ \t]+$//;
+                (  split /\s*\|\s*/  ) [2] =~ /(\w+)/;
+                $h{$1} || print
+            }'  $EMBED >> $OUTPUT
 else
   usage
 fi
