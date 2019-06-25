@@ -87,6 +87,7 @@ EOF
   | grep '|'                                                                \
   | sort                                                                    \
   | uniq                                                                    \
+  | sort -f -t'|' -k3                                                       \
   | perl -e '$f=pop;
              # Populate %h with the embed.fnc entry names
              open(F,$f) || die "$f:$!";
