@@ -241,8 +241,8 @@ for $f (@f) {
     }
   }
 
-  unless ($f->{flags}{'T'} || $f->{flags}{'m'}) {
-    $stack = "  dTHX;\n$stack";
+  unless ($f->{flags}{'T'}) {
+    $stack = "  dTHX;\n$stack";     # Harmless to declare even if not needed
     $aTHX = @arg ? 'aTHX_ ' : 'aTHX';
   }
 
@@ -264,11 +264,11 @@ for $f (@f) {
     $stack .= "  $rvt rval;\n";
     $ret = $ignorerv{$f->{name}} ? '(void) ' : "rval = ";
   }
-  my $aTHX_args = "$aTHX$args";
+  my $aTHX_args = "";
 
-  if (!$f->{flags}{'m'} or $f->{flags}{'b'} or @arg > 0) {
+  unless ($f->{flags}{'n'}) {
+    $aTHX_args = "($aTHX$args)";
     $args = "($args)";
-    $aTHX_args = "($aTHX_args)";
   }
 
   print OUT <<HEAD;
