@@ -235,7 +235,9 @@ for $f (@f) {
     else {
       my $v = 'arg' . $i++;
       push @arg, $v;
-      $stack .= "  static $n $p$v$d;\n";
+      my $no_const_n = $n;
+      $no_const_n =~ s/\bconst\b// unless $p;
+      $stack .= "  static $no_const_n $p$v$d;\n";
     }
   }
 
