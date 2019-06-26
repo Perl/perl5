@@ -1325,26 +1325,13 @@ or casts
 
 /* Returns true if c is in the range l..u, where 'l' is non-negative
  * Written this way so that after optimization, only one conditional test is
- * needed.
- *
- * This isn't fully general, except for the special cased 'signed char' (which
- * should be resolved at compile time):  It won't work if 'c' is negative, and
- * 'l' is larger than the max for that signed type.  Thus if 'c' is a negative
- * int, and 'l' is larger than INT_MAX, it will fail.  To protect agains this
- * happening, there is an assert that will generate a warning if c is larger
- * than e.g.  INT_MAX if it is an 'unsigned int'.  This could be a false
- * positive, but khw couldn't figure out a way to make it better.  It's good
- * enough so far */
-
+ * needed. */
 #define inRANGE(c, l, u) (__ASSERT_((l) >= 0) __ASSERT_((u) >= (l))            \
-  ((sizeof(c) == 1)                                                            \
-   ? withinCOUNT(((U8) (c)), (l), ((u) - (l)))                             \
-   : (__ASSERT_(   (((WIDEST_UTYPE) 1) <<  (CHARBITS * sizeof(c) - 1) & (c))   \
-                     /* sign bit of c is 0 */                             == 0 \
-                || (((~ ((WIDEST_UTYPE) 1) << ((CHARBITS * sizeof(c) - 1) - 1))\
-                   /* l not larger than largest value in c's signed type */    \
-                                          & ~ ((WIDEST_UTYPE) 0)) & (l)) == 0) \
-        withinCOUNT((c), (l), ((u) - (l))))))
+   (  (sizeof(c) == sizeof(U8))  ? withinCOUNT(((U8)  (c)), (l), ((u) - (l)))  \
+    : (sizeof(c) == sizeof(U16)) ? withinCOUNT(((U16) (c)), (l), ((u) - (l)))  \
+    : (sizeof(c) == sizeof(U32)) ? withinCOUNT(((U32) (c)), (l), ((u) - (l)))  \
+    : (__ASSERT_(sizeof(c) == sizeof(WIDEST_UTYPE))                            \
+                                   withinCOUNT((      (c)), (l), ((u) - (l))))))
 
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
