@@ -9616,16 +9616,12 @@ prefixvar=sitescript
 set backtrace d_backtrace
 eval $inlibc
 
-: add flags if using c backtrace
+: Check if C backtrace is actually supported.
 case "$usecbacktrace" in
   "") usecbacktrace=$undef ;;
   [yY]*|true|$define)
     case "$d_backtrace" in
       [yY]*|true|$define)
-        case " $ccflags " in
-	  *" -DUSE_C_BACKTRACE "*) ;; # Already there.
-	  *) ccflags="$ccflags -DUSE_C_BACKTRACE -g" ;;
-	  esac
         ;;
       *)
         echo "This system does not support backtrace" >&4
