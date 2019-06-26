@@ -1317,6 +1317,12 @@ or casts
 #define FITS_IN_8_BITS(c) (1)
 #endif
 
+/* Returns true if l <= c <= l + n, where 'l' and 'n' are non-negative
+ * Written this way so that after optimization, only one conditional test is
+ * needed. */
+#define withinCOUNT(c, l, n) (__ASSERT_((l) >= 0) __ASSERT_((n) >= (0))        \
+   (((WIDEST_UTYPE) (((c) | 0) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0)))))
+
 /* Returns true if c is in the range l..u, where 'l' is non-negative
  * Written this way so that after optimization, only one conditional test is
  * needed.
@@ -1329,15 +1335,16 @@ or casts
  * than e.g.  INT_MAX if it is an 'unsigned int'.  This could be a false
  * positive, but khw couldn't figure out a way to make it better.  It's good
  * enough so far */
+
 #define inRANGE(c, l, u) (__ASSERT_((l) >= 0) __ASSERT_((u) >= (l))            \
   ((sizeof(c) == 1)                                                            \
-   ? (((WIDEST_UTYPE) ((((U8) (c))|0) - (l))) <= ((WIDEST_UTYPE) ((u) - (l)))) \
+   ? withinCOUNT(((U8) (c)), (l), ((u) - (l)))                             \
    : (__ASSERT_(   (((WIDEST_UTYPE) 1) <<  (CHARBITS * sizeof(c) - 1) & (c))   \
                      /* sign bit of c is 0 */                             == 0 \
                 || (((~ ((WIDEST_UTYPE) 1) << ((CHARBITS * sizeof(c) - 1) - 1))\
                    /* l not larger than largest value in c's signed type */    \
                                           & ~ ((WIDEST_UTYPE) 0)) & (l)) == 0) \
-      ((WIDEST_UTYPE) (((c) - (l)) | 0) <= ((WIDEST_UTYPE) ((u) - (l)))))))
+        withinCOUNT((c), (l), ((u) - (l))))))
 
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
