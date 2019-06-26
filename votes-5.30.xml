@@ -4,7 +4,7 @@
 
 <div><h2>Tickets Listed in #134127: 5.30.1 blockers</h2>
 
-<commit votes="steveh" id="9629b6dc1d6296e0d3a6a5dbfd0f672b4b2021ca" ticket="134126" desc="PATCH: [perl #134126] -Dusemymalloc, -Dusethreads"/>
+<commit votes="steveh tonyc" id="9629b6dc1d6296e0d3a6a5dbfd0f672b4b2021ca" ticket="134126" desc="PATCH: [perl #134126] -Dusemymalloc, -Dusethreads"/>
 <commit votes="" id="" ticket="131867" desc="%{^CAPTURE_ALL} is %+, not %-."/>
 
 </div>
@@ -33,6 +33,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Regression Fixes</h3>
+
+<commit votes="tonyc" id="79e302e6c3f815bf4cb72a5bacc3012595970db9" ticket="134169" desc="(perl #134169) mg.c reset endptr after use"/>
 
 </div>
 
