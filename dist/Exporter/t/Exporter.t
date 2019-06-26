@@ -18,7 +18,7 @@ sub ok ($;$) {
 
 BEGIN {
     $test = 1;
-    print "1..31\n";
+    print "1..33\n";
     require Exporter;
     ok( 1, 'Exporter compiled' );
 }
@@ -117,7 +117,6 @@ Testing->import(@imports);
             @imports),
     'import by symbols' );
 
-
 package Yar;
 my @tags = qw(:This :tray);
 Testing->import(@tags);
@@ -128,6 +127,15 @@ Testing->import(@tags);
             @{$Testing::EXPORT_TAGS{@tags}}),
     'import by tags' );
 
+package Err;
+my @missing = qw(first second);
+eval { Testing->import(@missing) };
+my $err = $@;
+
+for my $func (@missing) {
+    ::ok( $@ =~ /^"$func" is not exported by the Testing module$/m,
+          "$func is not exported error message" );
+}
 
 package Arrr;
 Testing->import(qw(!lifejacket));
