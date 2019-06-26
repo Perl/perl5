@@ -1139,7 +1139,8 @@ typedef enum {
  * 01  The upper limit of the range can be as much as (EF - x) / 2
  * 00  The upper limit of the range can be as much as  EF
  *
- * For motivation of this design, see the commit message */
+ * For motivation of this design, see commit message in
+ * 3146c00a633e9cbed741e10146662fbcedfdb8d3 */
 #ifdef EBCDIC
 #  define MAX_ANYOF_HRx_BYTE  0xF4
 #else
