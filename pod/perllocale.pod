@@ -42,9 +42,13 @@ C<ge>.  Starting in v5.26, Perl can handle these reasonably as well,
 depending on the platform's implementation.  However, for earlier
 releases or for better control, use L<Unicode::Collate>.  There are
 actually two slightly different types of UTF-8 locales: one for Turkic
-languages and one for everything else.  Starting in Perl v5.30, Perl
-seamlessly handles both types; previously only the non-Turkic one was
-supported.
+languages and one for everything else.
+
+Starting in Perl v5.30, Perl detects Turkic locales by their
+behaviour, and seamlessly handles both types; previously only the
+non-Turkic one was supported.  The name of the locale is ignored, if
+your system has a C<tr_TR.UTF-8> locale and it doesn't behave like a
+Turkic locale, perl will treat it like a non-Turkic locale.
 
 Perl continues to support the old non UTF-8 locales as well.  There are
 currently no UTF-8 locales for EBCDIC platforms.
