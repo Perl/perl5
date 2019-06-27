@@ -218,7 +218,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+C<\N{} here is restricted to one character> is now emitted in the same
+circumstances where previously C<\N{} in inverted character class or as
+a range end-point is restricted to one character> was.
+
+This is due to new circumstances having been added in perl v5.30 that
+weren't covered by the earlier wording.
 
 =back
 

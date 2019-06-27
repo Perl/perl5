@@ -260,7 +260,7 @@ my @death =
  'm/(?[[\w-x]])/' => 'False [] range "\w-" {#} m/(?[[\w-{#}x]])/',
  'm/(?[[a-\pM]])/' => 'False [] range "a-\pM" {#} m/(?[[a-\pM{#}]])/',
  'm/(?[[\pM-x]])/' => 'False [] range "\pM-" {#} m/(?[[\pM-{#}x]])/',
- 'm/(?[[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/(?[[^\N{U+100.300{#}}]])/',
+ 'm/(?[[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} here is restricted to one character {#} m/(?[[^\N{U+100.300{#}}]])/',
  'm/(?[ \p{Digit} & (?^(?[ \p{Thai} | \p{Lao} ]))])/' => 'Sequence (?^(...) not recognized {#} m/(?[ \p{Digit} & (?^({#}?[ \p{Thai} | \p{Lao} ]))])/',
  'm/(?[ \p{Digit} & (?(?[ \p{Thai} | \p{Lao} ]))])/' => 'Unexpected character {#} m/(?[ \p{Digit} & (?{#}(?[ \p{Thai} | \p{Lao} ]))])/',
  'm/\o{/' => 'Missing right brace on \o{ {#} m/\o{{#}/',
@@ -317,7 +317,7 @@ my @death =
  '/\p{Is_Other_Alphabetic=F}/ ' => 'Can\'t find Unicode property definition "Is_Other_Alphabetic=F" {#} m/\p{Is_Other_Alphabetic=F}{#}/',
  '/\p{Is_Other_Alphabetic=F}/ ' => 'Can\'t find Unicode property definition "Is_Other_Alphabetic=F" {#} m/\p{Is_Other_Alphabetic=F}{#}/',
  '/\x{100}(?(/' => 'Unknown switch condition (?(...)) {#} m/\\x{100}(?({#}/', # [perl #133896]
- '/(?[\N{KEYCAP DIGIT NINE}/' => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/(?[\\N{U+39.FE0F.20E3{#}}/', # [perl #133988]
+ '/(?[\N{KEYCAP DIGIT NINE}/' => '\N{} here is restricted to one character {#} m/(?[\\N{U+39.FE0F.20E3{#}}/', # [perl #133988]
  '/0000000000000000[\N{U+0.00}0000/' => 'Unmatched [ {#} m/0000000000000000[{#}\N{U+0.00}0000/', # [perl #134059]
 );
 
@@ -363,11 +363,11 @@ my @death_only_under_strict = (
     'm/[\pM-x]\x{100}/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
                         => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
     'm/[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[^\N{U+100.300}{#}]/',
-                                       => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[^\N{U+100.300{#}}]/',
+                                       => '\N{} here is restricted to one character {#} m/[^\N{U+100.300{#}}]/',
     'm/[\x03-\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\x03-\N{U+100.300}{#}]/',
-                                            => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[\x03-\N{U+100.300{#}}]/',
+                                            => '\N{} here is restricted to one character {#} m/[\x03-\N{U+100.300{#}}]/',
     'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}-\x{10FFFF}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100.300}{#}-\x{10FFFF}]/',
-                                                  => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[\N{U+100.300{#}}-\x{10FFFF}]/',
+                                                  => '\N{} here is restricted to one character {#} m/[\N{U+100.300{#}}-\x{10FFFF}]/',
     '/[\08]/'   => '\'\08\' resolved to \'\o{0}8\' {#} m/[\08{#}]/',
                 => 'Need exactly 3 octal digits {#} m/[\08{#}]/',
     '/[\018]/'  => '\'\018\' resolved to \'\o{1}8\' {#} m/[\018{#}]/',

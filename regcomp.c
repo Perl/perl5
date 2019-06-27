@@ -17020,7 +17020,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 {
                                     if (strict) {
                                         RExC_parse--;
-                                        vFAIL("\\N{} in inverted character class or as a range end-point is restricted to one character");
+                                        vFAIL("\\N{} here is restricted to one character");
                                     }
                                     ckWARNreg(RExC_parse, "Using just the first character returned by \\N{} in character class");
                                     break; /* <value> contains the first code
