@@ -368,7 +368,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Parsing incomplete hex or binary literals was changed in 5.31.1 to
+treat such a literal as just the 0, leaving the following C<x> or C<b>
+to be parsed as part of the next token.  This could lead to some
+silent changes in behaviour, so now incomplete hex or binary literals
+produce a fatal error.  [perl #134125]
 
 =back
 
