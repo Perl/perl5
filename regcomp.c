@@ -23092,7 +23092,9 @@ Perl_parse_uniprop_string(pTHX_
             }
 
             /* Store the first real character in the denominator */
-            lookup_name[j++] = name[i];
+            if (i < name_len) {
+                lookup_name[j++] = name[i];
+            }
         }
     }
 
