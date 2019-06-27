@@ -19765,8 +19765,8 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
                     av_store(av, INVLIST_INDEX, invlist);
                     av_fill(av, (ary[ONLY_LOCALE_MATCHES_INDEX])
-                                 ? ONLY_LOCALE_MATCHES_INDEX:
-                                 INVLIST_INDEX);
+                                 ? ONLY_LOCALE_MATCHES_INDEX
+                                 : INVLIST_INDEX);
                     si = NULL;
                 }
 	    }
