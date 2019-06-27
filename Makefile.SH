@@ -279,6 +279,7 @@ LNS = $lns
 CPS = $cp
 RMS = rm -f
 ranlib = $ranlib
+ECHO = $echo
 
 # The following are mentioned only to make metaconfig include the
 # appropriate questions in Configure.  If you want to change these,
