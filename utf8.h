@@ -69,9 +69,7 @@ the string is invariant.
 #define uvchr_to_utf8_flags_msgs(d,uv,flags,msgs)                              \
                 uvoffuni_to_utf8_flags_msgs(d,NATIVE_TO_UNI(uv),flags, msgs)
 #define utf8_to_uvchr_buf(s, e, lenp)                                          \
-                                (__ASSERT_((U8*) (e) > (U8*) (s))              \
-                                 utf8n_to_uvchr(s, (U8*)(e) - (U8*)(s), lenp,  \
-                                    ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY))
+                   _utf8_to_uvchr_buf((const U8 *) (s), (const U8 *) e, lenp)
 #define utf8n_to_uvchr(s, len, lenp, flags)                                    \
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
 #define utf8n_to_uvchr_error(s, len, lenp, flags, errors)                      \

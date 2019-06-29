@@ -1842,6 +1842,27 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
     return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags, errors, msgs);
 }
 
+PERL_STATIC_INLINE UV
+S__utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT__UTF8_TO_UVCHR_BUF;
+
+    assert(s < send);
+
+    if (! ckWARN_d(WARN_UTF8)) {
+        return utf8n_to_uvchr(s, send - s, retlen,
+                              (UTF8_ALLOW_ANY & ~UTF8_ALLOW_EMPTY));
+    }
+    else {
+        UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
+        if (retlen && ret == 0 && *s != '\0') {
+            *retlen = (STRLEN) -1;
+        }
+
+        return ret;
+    }
+}
+
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
