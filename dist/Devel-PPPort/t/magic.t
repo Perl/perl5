@@ -38,7 +38,7 @@ BEGIN {
 
 use Devel::PPPort;
 use strict;
-$^W = 1;
+BEGIN { $^W = 1; }
 
 package Devel::PPPort;
 use vars '@ISA';

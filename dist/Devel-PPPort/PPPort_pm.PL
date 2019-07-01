@@ -15,7 +15,7 @@
 ################################################################################
 
 use strict;
-$^W = 1;
+BEGIN { $^W = 1; }
 require "./parts/ppptools.pl";
 
 my $INCLUDE = 'parts/inc';
