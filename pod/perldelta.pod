@@ -259,7 +259,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule
+that was originally changed for FreeBSD, and the FreeBSD make
+apparently predefines it.  The Solaris make does not predefine C<ECHO>
+which broke this rule on Solaris.  [perl #134218]
 
 =back
 
