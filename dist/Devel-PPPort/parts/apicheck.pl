@@ -80,7 +80,10 @@ my %ignorerv = (
 );
 
 my %stack = (
+  MULTICALL      => ['dMULTICALL;'],
   ORIGMARK       => ['dORIGMARK;'],
+  POP_MULTICALL  => ['dMULTICALL;', 'U8 gimme;' ],
+  PUSH_MULTICALL => ['dMULTICALL;', 'U8 gimme;' ],
   POPpbytex      => ['STRLEN n_a;'],
   POPpx          => ['STRLEN n_a;'],
   PUSHi          => ['dTARG;'],
