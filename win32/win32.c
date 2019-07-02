@@ -2908,9 +2908,17 @@ win32_rewind(FILE *pf)
 DllExport int
 win32_tmpfd(void)
 {
+    return win32_tmpfd_mode(0);
+}
+
+DllExport int
+win32_tmpfd_mode(int mode)
+{
     char prefix[MAX_PATH+1];
     char filename[MAX_PATH+1];
     DWORD len = GetTempPath(MAX_PATH, prefix);
+    mode &= ~( O_ACCMODE | O_CREAT | O_EXCL );
+    mode |= O_RDWR;
     if (len && len < MAX_PATH) {
 	if (GetTempFileName(prefix, "plx", 0, filename)) {
 	    HANDLE fh = CreateFile(filename,
@@ -2922,7 +2930,7 @@ win32_tmpfd(void)
 				   | FILE_FLAG_DELETE_ON_CLOSE,
 				   NULL);
 	    if (fh != INVALID_HANDLE_VALUE) {
-		int fd = win32_open_osfhandle((intptr_t)fh, 0);
+		int fd = win32_open_osfhandle((intptr_t)fh, mode);
 		if (fd >= 0) {
 		    PERL_DEB(dTHX;)
 		    DEBUG_p(PerlIO_printf(Perl_debug_log,

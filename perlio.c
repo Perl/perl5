@@ -5059,7 +5059,7 @@ PerlIO_tmpfile_flags(int imode)
 #endif
      PerlIO *f = NULL;
 #ifdef WIN32
-     const int fd = win32_tmpfd();
+     const int fd = win32_tmpfd_mode(imode);
      if (fd >= 0)
 	  f = PerlIO_fdopen(fd, "w+b");
 #elif ! defined(VMS) && ! defined(OS2)

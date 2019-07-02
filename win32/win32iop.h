@@ -64,6 +64,7 @@ DllExport  int		win32_fgetpos(FILE *pf,fpos_t *p);
 DllExport  int		win32_fsetpos(FILE *pf,const fpos_t *p);
 DllExport  void		win32_rewind(FILE *pf);
 DllExport  int		win32_tmpfd(void);
+DllExport  int		win32_tmpfd_mode(int mode);
 DllExport  FILE*	win32_tmpfile(void);
 DllExport  void		win32_abort(void);
 DllExport  int  	win32_fstat(int fd,Stat_t *sbufptr);
