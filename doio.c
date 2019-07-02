@@ -265,6 +265,21 @@ Perl_my_mkstemp_cloexec(char *templte)
 #endif
 }
 
+int
+Perl_my_mkostemp_cloexec(char *templte, int flags)
+{
+    dVAR;
+    PERL_ARGS_ASSERT_MY_MKOSTEMP_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_mkstemp,
+	Perl_my_mkostemp(templte, flags | O_CLOEXEC),
+	Perl_my_mkostemp(templte, flags));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkostemp(templte, flags));
+#endif
+}
+
 #ifdef HAS_PIPE
 int
 Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
