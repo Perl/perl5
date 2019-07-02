@@ -25,15 +25,18 @@ use Time::HiRes qw( gettimeofday tv_interval );
 require './devel/devtools.pl';
 
 our %opt = (
+  blead     => 0,     # ? Is this perl blead
   debug   => 0,
   base    => 0,
   verbose => 0,
   check   => 1,
+  todo    => "",    # If no --todo, this is a blead perl, and the make should
+                    # work without error
   shlib   => 'blib/arch/auto/Devel/PPPort/PPPort.so',
 );
 
 GetOptions(\%opt, qw(
-            perl=s todo=s version=s shlib=s debug base verbose check!
+perl=s todo=s blead version=s shlib=s debug base verbose check!
           )) or die;
 
 identify();
@@ -70,7 +73,7 @@ for (`$Config{nm} $fullperl`) {
 }
 keys %sym >= 50 or die "less than 50 symbols found in $fullperl\n";
 
-my %all = %{load_todo($opt{todo}, $opt{version})};
+my %all = %{load_todo($opt{todo}, $opt{version})} if $opt{todo};
 my @recheck;
 
 my $symmap = get_apicheck_symbol_map();
@@ -85,6 +88,24 @@ retry:
 
   my $r = run(qw(make));
   $r->{didnotrun} and die "couldn't run make: $!\n";
+
+  # If there were warnings, we ask the user before continuing when creating
+  # the base files of blead.  This leads to a potential early exit when things
+  # aren't working right.
+  if ($opt{blead} && $opt{base}) {
+    undef $opt{blead};  # Only warn once.
+    if (@{$r->{stderr}}) {
+        print STDERR "Warnings and errors from compiling blead:\n";
+        print STDERR @{$r->{stderr}};
+        ask_or_quit("\nUnexpected warnings when compiling blead can lead to"
+                  . " wrong results.  Please examine the above list.\n"
+                  . "Shall I proceed?");
+    }
+    else {
+        print STDERR "blead compiled without warnings nor errors.\n"
+                   . "Proceeding with everything else\n";
+    }
+  }
 
   for my $l (@{$r->{stderr}}) {
     if ($l =~ /_DPPP_test_(\w+)/) {

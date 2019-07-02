@@ -41,16 +41,20 @@ if (exists $opt{'blead-version'}) {
   $perls[0]{version} = $opt{'blead-version'};
 }
 
+# blead's todo is its version plus 1.  Otherwise, each todo is the previous
+# one's version
+$perls[0]{todo} = $perls[0]{version} + 1;
 for (1 .. $#perls) {
   $perls[$_]{todo} = $perls[$_-1]{version};
 }
 
-shift @perls;
-
 for (@perls) {
   my $todo = do { my $v = $_->{todo}; $v =~ s/\D+//g; $v };
   -e "$outdir/$todo" and next;
-  my @args = ('--perl', $_->{path}, '--todo', "$outdir/$todo", '--version', "$_->{todo}");
+  my @args = ('--perl', $_->{path}, '--version', "$_->{todo}");
+
+  push @args, '--blead' if $_ == $perls[0]; # First one is blead
+  push @args, '--todo', $_->{'todo'};
   push @args, '--base' if $opt{base};
   push @args, '--verbose' if $opt{verbose};
   push @args, '--nocheck' unless $opt{check};
