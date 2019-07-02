@@ -543,6 +543,7 @@ p	|int	|PerlLIO_dup2_cloexec|int oldfd|int newfd
 pR	|int	|PerlLIO_open_cloexec|NN const char *file|int flag
 pR	|int	|PerlLIO_open3_cloexec|NN const char *file|int flag|int perm
 pToR	|int	|my_mkstemp_cloexec|NN char *templte
+pToR	|int	|my_mkostemp_cloexec|NN char *templte|int flags
 #ifdef HAS_PIPE
 pR	|int	|PerlProc_pipe_cloexec|NN int *pipefd
 #endif
