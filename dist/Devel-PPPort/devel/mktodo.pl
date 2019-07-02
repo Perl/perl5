@@ -213,6 +213,9 @@ if ($opt{check}) {
 
     my $r = run(qw(make test));
 
+    # This regenerated apicheck.c
+    dump_apicheck() if $opt{debug};
+
     $r->{didnotrun} and die "couldn't run make test: $!\n" .
         join('', @{$r->{stdout}})."\n---\n".join('', @{$r->{stderr}});
 
@@ -265,6 +268,23 @@ sub regen_apicheck
   unlink qw(apicheck.c apicheck.o);
   runtool({ out => '/dev/null' }, $fullperl, 'apicheck_c.PL', map { "--api=$_" } @_)
       or die "cannot regenerate apicheck.c\n";
+  dump_apicheck() if $opt{debug};
+}
+
+sub dump_apicheck
+{
+    my $apicheck = "apicheck.c";
+    my $f = new IO::File $apicheck or die "cannot open $apicheck: $!\n";
+    my @lines = <$f>;
+    print STDERR __FILE__, ": ", __LINE__, ": $apicheck (",
+                                           scalar @lines,
+                                           " lines) for $fullperl";
+    print STDERR " and '" if @_;
+    print STDERR join "', '", @_;
+    print STDERR "'" if @_;
+    print STDERR ":\n";
+    my $n = 1;
+    print STDERR $n++, " ", $_ for @lines;
 }
 
 sub load_todo
