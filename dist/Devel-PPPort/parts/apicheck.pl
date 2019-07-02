@@ -47,28 +47,28 @@ my %void = (
 
 my %castvoid = (
   map { ($_ => 1) } qw(
-    Nullav
-    Nullcv
-    Nullhv
-    Nullch
-    Nullsv
-    HEf_SVKEY
-    SP
-    MARK
-    SVt_PV
-    SVt_IV
-    SVt_NV
-    SVt_PVMG
-    SVt_PVAV
-    SVt_PVHV
-    SVt_PVCV
-    SvUOK
-    G_SCALAR
     G_ARRAY
-    G_VOID
     G_DISCARD
     G_EVAL
     G_NOARGS
+    G_SCALAR
+    G_VOID
+    HEf_SVKEY
+    MARK
+    Nullav
+    Nullch
+    Nullcv
+    Nullhv
+    Nullsv
+    SP
+    SVt_IV
+    SVt_NV
+    SVt_PV
+    SVt_PVAV
+    SVt_PVCV
+    SVt_PVHV
+    SVt_PVMG
+    SvUOK
     XS_VERSION
   ),
 );
@@ -81,38 +81,38 @@ my %ignorerv = (
 
 my %stack = (
   ORIGMARK       => ['dORIGMARK;'],
-  POPpx          => ['STRLEN n_a;'],
   POPpbytex      => ['STRLEN n_a;'],
-  PUSHp          => ['dTARG;'],
-  PUSHn          => ['dTARG;'],
+  POPpx          => ['STRLEN n_a;'],
   PUSHi          => ['dTARG;'],
+  PUSHn          => ['dTARG;'],
+  PUSHp          => ['dTARG;'],
   PUSHu          => ['dTARG;'],
-  XPUSHp         => ['dTARG;'],
-  XPUSHn         => ['dTARG;'],
-  XPUSHi         => ['dTARG;'],
-  XPUSHu         => ['dTARG;'],
-  UNDERBAR       => ['dUNDERBAR;'],
-  XCPT_TRY_START => ['dXCPT;'],
-  XCPT_TRY_END   => ['dXCPT;'],
-  XCPT_CATCH     => ['dXCPT;'],
-  XCPT_RETHROW   => ['dXCPT;'],
   RESTORE_LC_NUMERIC => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
   STORE_LC_NUMERIC_FORCE_TO_UNDERLYING => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
   STORE_LC_NUMERIC_SET_TO_NEEDED => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
   STORE_LC_NUMERIC_SET_TO_NEEDED_IN => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
+  UNDERBAR       => ['dUNDERBAR;'],
+  XCPT_CATCH     => ['dXCPT;'],
+  XCPT_RETHROW   => ['dXCPT;'],
+  XCPT_TRY_END   => ['dXCPT;'],
+  XCPT_TRY_START => ['dXCPT;'],
+  XPUSHi         => ['dTARG;'],
+  XPUSHn         => ['dTARG;'],
+  XPUSHp         => ['dTARG;'],
+  XPUSHu         => ['dTARG;'],
 );
 
 my %ignore = (
   map { ($_ => 1) } qw(
-    svtype
+    CLASS
+    dXSI32
     items
     ix
-    dXSI32
-    XS
-    CLASS
-    THIS
     RETVAL
     StructCopy
+    svtype
+    THIS
+    XS
   ),
 );
 
