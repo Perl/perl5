@@ -2275,6 +2275,11 @@ PERL_CALLCONV Pid_t	Perl_my_fork(void);
 PERL_CALLCONV I32	Perl_my_lstat(pTHX);
 #endif
 PERL_CALLCONV I32	Perl_my_lstat_flags(pTHX_ const U32 flags);
+PERL_CALLCONV int	Perl_my_mkostemp_cloexec(char *templte, int flags)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_MKOSTEMP_CLOEXEC	\
+	assert(templte)
+
 PERL_CALLCONV int	Perl_my_mkstemp_cloexec(char *templte)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC	\
