@@ -77,11 +77,6 @@ if isperlroot $PERLROOT; then
 : This file lists all API functions/macros that are documented in the Perl
 : source code, but are not contained in F<embed.fnc>.
 :
-
-: This line needs to be in this file for things to work, even though it's been
-: removed from later embed.fnc versions
-ApTod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
-
 EOF
     grep -hr '^=for apidoc' $PERLROOT | sed -e 's/=for apidoc //'           \
   | grep '|'                                                                \
