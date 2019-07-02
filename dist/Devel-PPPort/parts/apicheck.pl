@@ -117,7 +117,14 @@ my %ignore = (
     StructCopy
     svtype
     THIS
+    XopDISABLE
+    XopENABLE
+    XopENTRY
+    XopENTRYCUSTOM
+    XopENTRY_set
     XS
+    XS_EXTERNAL
+    XS_INTERNAL
   ),
 );
 
