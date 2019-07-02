@@ -103,6 +103,8 @@ my %stack = (
   XPUSHn         => ['dTARG;'],
   XPUSHp         => ['dTARG;'],
   XPUSHu         => ['dTARG;'],
+  XS_APIVERSION_BOOTCHECK => ['CV * cv;'],
+  XS_VERSION_BOOTCHECK => ['CV * cv;'],
 );
 
 my %ignore = (
