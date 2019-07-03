@@ -63,7 +63,7 @@ foreach my $file (@test_files) {
   $parser->complain_stderr(0);
 
   my $input;
-  open( IN , '<' , $file ) or die "$file: $!";
+  open( IN , '<:raw' , $file ) or die "$file: $!";
   $input .= $_ while (<IN>);
   close( IN );
 

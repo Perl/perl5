@@ -22,7 +22,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.38';
+$VERSION = '3.39';
 #use constant DEBUG => 7;
 
 sub my_qr ($$) {
@@ -99,6 +99,11 @@ if (($] ge 5.007_003)) {
 } else {
   $utf8_bom = "\xEF\xBB\xBF";   # No EBCDIC BOM detection for early Perls.
 }
+
+# This is used so that the 'content_seen' method doesn't return true on a
+# file that just happens to have a line that matches /^=[a-zA-z]/.  Only if
+# there is a valid =foo line will we return that content was seen.
+my $seen_legal_directive = 0;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -859,6 +864,10 @@ sub _ponder_paragraph_buffer {
 
   my($para, $para_type);
   while(@$paras) {
+
+    # If a directive, assume it's legal; subtract below if found not to be
+    $seen_legal_directive++ if $paras->[0][0] =~ /^=/;
+
     last if      @$paras == 1
             and (    $paras->[0][0] eq '=over'
                  or  $paras->[0][0] eq '=item'
@@ -1148,6 +1157,7 @@ sub _ponder_paragraph_buffer {
         DEBUG > 1 and print STDERR " Pondering known directive ${$para}[0] as $para_type\n";
       } else {
         # An unknown directive!
+        $seen_legal_directive--;
         DEBUG > 1 and printf STDERR "Unhandled directive %s (Handled: %s)\n",
          $para->[0], join(' ', sort keys %{$self->{'accept_directives'}} )
         ;
@@ -1208,7 +1218,8 @@ sub _ponder_paragraph_buffer {
       DEBUG and print STDERR "\n", pretty($para), "\n";
 
       # traverse the treelet (which might well be just one string scalar)
-      $self->{'content_seen'} ||= 1;
+      $self->{'content_seen'} ||= 1 if   $seen_legal_directive
+                                    && ! $self->{'~tried_gen_errata'};
       $self->_traverse_treelet_bit(@$para);
     }
   }
@@ -1336,7 +1347,7 @@ sub _ponder_begin {
   if(!$dont_ignore or scalar grep $_->[1]{'~ignore'}, @$curr_open) {
     DEBUG > 1 and print STDERR "Ignoring ignorable =begin\n";
   } else {
-    $self->{'content_seen'} ||= 1;
+    $self->{'content_seen'} ||= 1 unless $self->{'~tried_gen_errata'};
     $self->_handle_element_start((my $scratch='for'), $para->[1]);
   }
 
@@ -1404,7 +1415,7 @@ sub _ponder_end {
     $curr_open->[-1][1]{'start_line'} = $para->[1]{'start_line'};
       # what's that for?
 
-    $self->{'content_seen'} ||= 1;
+    $self->{'content_seen'} ||= 1 unless $self->{'~tried_gen_errata'};
     $self->_handle_element_end( my $scratch = 'for', $para->[1]);
   }
   DEBUG > 1 and print STDERR "Popping $curr_open->[-1][0] $curr_open->[-1][1]{'target'} because of =end $content\n";
@@ -1468,7 +1479,7 @@ sub _ponder_pod {
 
   # The surrounding methods set content_seen, so let us remain consistent.
   # I do not know why it was not here before -- should it not be here?
-  # $self->{'content_seen'} ||= 1;
+  # $self->{'content_seen'} ||= 1 unless $self->{'~tried_gen_errata'};
 
   return;
 }
@@ -1526,7 +1537,7 @@ sub _ponder_over {
   }
   DEBUG > 1 and print STDERR "=over found of type $list_type\n";
 
-  $self->{'content_seen'} ||= 1;
+  $self->{'content_seen'} ||= 1 unless $self->{'~tried_gen_errata'};
   $self->_handle_element_start((my $scratch = 'over-' . $list_type), $para->[1]);
 
   return;
@@ -1548,7 +1559,7 @@ sub _ponder_back {
     DEBUG > 1 and print STDERR "=back happily closes matching =over\n";
     # Expected case: we're closing the most recently opened thing
     #my $over = pop @$curr_open;
-    $self->{'content_seen'} ||= 1;
+    $self->{'content_seen'} ||= 1 unless $self->{'~tried_gen_errata'};
     $self->_handle_element_end( my $scratch =
       'over-' . ( (pop @$curr_open)->[1]{'~type'} ), $para->[1]
     );
