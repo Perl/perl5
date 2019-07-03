@@ -5049,7 +5049,7 @@ PerlIO_tmpfile(void)
 }
 
 #define MKOSTEMP_MODES ( O_RDWR | O_CREAT | O_EXCL )
-#define MKOSTEMP_MODE_MASK ( O_ACCMODE | O_CREAT | O_EXCL )
+#define MKOSTEMP_MODE_MASK ( O_ACCMODE | O_CREAT | O_EXCL | O_TRUNC )
 
 PerlIO *
 PerlIO_tmpfile_flags(int imode)
