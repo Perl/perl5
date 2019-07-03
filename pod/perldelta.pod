@@ -361,7 +361,11 @@ well.
 
 =item *
 
-XXX
+The PERL_DESTRUCT_LEVEL environment variable was formerly only honored on
+perl binaries built with DEBUGGING support. It it now checked on all perl
+builds. It's normal use is to force perl to individually free every block
+of memory which it has allocated before exiting, which is useful when
+using automated leak detection tools such as valgrind.
 
 =back
 
