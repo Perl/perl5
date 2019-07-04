@@ -1264,6 +1264,38 @@ EXTERN_C char *crypt(const char *, const char *);
 EXTERN_C char *crypt(const char *, const char *);
 #endif
 
+/*
+=head1 Errno
+
+=for apidoc m|void|SETERRNO|int errcode|int vmserrcode
+
+Set C<errno>, and on VMS set C<vaxc$errno>.
+
+=for apidoc mn|void|dSAVEDERRNO
+
+Declare variables needed to save C<errno> and any operating system
+specific error number.
+
+=for apidoc mn|void|dSAVE_ERRNO
+
+Declare variables needed to save C<errno> and any operating system
+specific error number, and save them for optional later restoration
+by C<RESTORE_ERRNO>.
+
+=for apidoc mn|void|SAVE_ERRNO
+
+Save C<errno> and any operating system specific error number for
+optional later restoration by C<RESTORE_ERRNO>.  Requires
+C<dSAVEDERRNO> or C<dSAVE_ERRNO> in scope.
+
+=for apidoc mn|void|RESTORE_ERRNO
+
+Restore C<errno> and any operating system specific error number that
+was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
+
+=cut
+*/
+
 #ifdef SETERRNO
 # undef SETERRNO  /* SOCKS might have defined this */
 #endif
