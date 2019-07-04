@@ -44,6 +44,12 @@ __UNDEFINED__ newSVsv_flags(sv, flags) ((PL_Sv = newSV(0)), sv_setsv_flags(PL_Sv
 __UNDEFINED__ newSVsv_nomg(sv) newSVsv_flags((sv), SV_NOSTEAL)
 #endif
 
+#if { VERSION >= 5.17.5 }
+__UNDEFINED__ sv_mortalcopy_flags(sv, flags) Perl_sv_mortalcopy_flags(aTHX_ (sv), (flags))
+#else
+__UNDEFINED__ sv_mortalcopy_flags(sv, flags) sv_2mortal(newSVsv_flags((sv), (flags)))
+#endif
+
 __UNDEFINED__ SvMAGIC_set(sv, val) \
                 STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
                 (((XPVMG*) SvANY(sv))->xmg_magic = (val)); } STMT_END
