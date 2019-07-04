@@ -42,6 +42,19 @@ __UNDEFINED__ isUTF8_CHAR(s0, e)    (                                           
     : UTF8SKIP(s0))
 #endif
 
+#if 'A' == 65
+__UNDEFINED__ BOM_UTF8                    "\xEF\xBB\xBF"
+__UNDEFINED__ REPLACEMENT_CHARACTER_UTF8  "\xEF\xBF\xBD"
+#elif '^' == 95
+__UNDEFINED__ BOM_UTF8                    "\xDD\x73\x66\x73"
+__UNDEFINED__ REPLACEMENT_CHARACTER_UTF8  "\xDD\x73\x73\x71"
+#elif '^' == 176
+__UNDEFINED__ BOM_UTF8                    "\xDD\x72\x65\x72"
+__UNDEFINED__ REPLACEMENT_CHARACTER_UTF8  "\xDD\x72\x72\x70"
+#else
+#  error Unknown character set
+#endif
+
 #if { VERSION < 5.31.3 }
         /* Versions prior to this accepted things that are now considered
          * malformations, and didn't return -1 on error with warnings enabled
