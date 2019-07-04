@@ -191,6 +191,25 @@ A list of the provided API in the C<=provides> section.
 The implementation to add to F<ppport.h> in the C<=implementation>
 section.
 
+Here you can add additional information for a given item that will be displayed
+when F<ppport.h> is run.  If your item is named C<foo>, you add a
+comment like so:
+
+ /* Hint: foo
+    paragraphs of stuff about foo you want to have
+    shown when ppport.h outputs something about foo
+ */
+
+This will cause S<C<perl ppport.h>> to display this hint when it outputs
+something about C<foo>.
+
+A more serious caution about C<foo> can be displayed by instead saying
+
+ /* Warning: foo
+    paragraphs of stuff about foo you want to have
+    shown when ppport.h outputs something about foo
+ */
+
 =item *
 
 The code required to add to PPPort.xs for testing the implementation.
