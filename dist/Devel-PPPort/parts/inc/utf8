@@ -44,6 +44,11 @@ __UNDEFINED__ is_utf8_invariant_string(s,l) is_ascii_string(s,l)
 */
 #endif
 
+#ifdef ibcmp_utf8
+__UNDEFINED__ foldEQ_utf8(s1,pe1,l1,u1,s2,pe2,l2,u2)                            \
+                                cBOOL(! ibcmp_utf8(s1,pe1,l1,u1,s2,pe2,l2,u2))
+#endif
+
 #if defined(is_utf8_string) && defined(UTF8SKIP)
 __UNDEFINED__ isUTF8_CHAR(s0, e)    (                                           \
     (e) <= (s0) || ! is_utf8_string(s0, D_PPP_MIN(UTF8SKIP(s0), (e) - (s0)))    \
@@ -329,6 +334,29 @@ isUTF8_CHAR(s, adjustment)
 
 #endif
 
+
+#ifdef foldEQ_utf8
+
+STRLEN
+foldEQ_utf8(s1, l1, u1, s2, l2, u2)
+        char *s1
+        UV l1
+        bool u1
+        char *s2
+        UV l2
+        bool u2
+        PREINIT:
+            const char *const_s1;
+            const char *const_s2;
+        CODE:
+            const_s1 = s1;
+            const_s2 = s2;
+            RETVAL = foldEQ_utf8(const_s1, NULL, l1, u1, const_s2, NULL, l2, u2);
+        OUTPUT:
+            RETVAL
+
+#endif
+
 #ifdef utf8_to_uvchr_buf
 
 AV *
@@ -382,13 +410,13 @@ utf8_to_uvchr(s)
 
 #endif
 
-=tests plan => 55
+=tests plan => 58
 
 BEGIN { require warnings if "$]" gt '5.006' }
 
 # skip tests on 5.6.0 and earlier
 if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..55;
+    skip 'skip: broken utf8 support', 0 for 1..58;
     exit;
 }
 
@@ -399,6 +427,15 @@ ok(&Devel::PPPort::isUTF8_CHAR("A", -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("A",  0), 1);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  0), 2);
+
+if ("$]" lt '5.008') {
+    ok(1, 1) for 1 ..3
+}
+else {
+    ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "a\x{101}", 3, 1), 1);
+    ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "a\x{102}", 3, 1), 0);
+    ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "b\x{101}", 3, 1), 0);
+}
 
 my $ret = &Devel::PPPort::utf8_to_uvchr("A");
 ok($ret->[0], ord("A"));

@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (55) {
+  if (58) {
     load();
-    plan(tests => 55);
+    plan(tests => 58);
   }
 }
 
@@ -52,7 +52,7 @@ BEGIN { require warnings if "$]" gt '5.006' }
 
 # skip tests on 5.6.0 and earlier
 if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..55;
+    skip 'skip: broken utf8 support', 0 for 1..58;
     exit;
 }
 
@@ -63,6 +63,15 @@ ok(&Devel::PPPort::isUTF8_CHAR("A", -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("A",  0), 1);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  0), 2);
+
+if ("$]" lt '5.008') {
+    ok(1, 1) for 1 ..3
+}
+else {
+    ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "a\x{101}", 3, 1), 1);
+    ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "a\x{102}", 3, 1), 0);
+    ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "b\x{101}", 3, 1), 0);
+}
 
 my $ret = &Devel::PPPort::utf8_to_uvchr("A");
 ok($ret->[0], ord("A"));
