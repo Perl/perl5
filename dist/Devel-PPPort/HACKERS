@@ -294,6 +294,25 @@ which are described further below).
 
 =over 4
 
+Here you can add additional information for a given item that will be displayed
+when F<ppport.h> is run.  If your item is named C<foo>, you add a
+comment like so:
+
+ /* Hint: foo
+    paragraphs of stuff about foo you want to have
+    shown when ppport.h outputs something about foo
+ */
+
+This will cause S<C<perl ppport.h>> to display this hint when it outputs
+something about C<foo>.
+
+A more serious caution about C<foo> can be displayed by instead saying
+
+ /* Warning: foo
+    paragraphs of stuff about foo you want to have
+    shown when ppport.h outputs something about foo
+ */
+
 =item *
 
 You will first need a whole bunch of different Perls, the more, the better, but
