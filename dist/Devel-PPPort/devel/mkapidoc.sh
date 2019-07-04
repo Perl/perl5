@@ -91,6 +91,11 @@ EOF
                 $h{$1}++;   # Note in %h that $1 is in $EMBED
             }
             while (<>) {
+                s/\|/d|/ unless /^[^|]*d/; # Many of the entries omit the "d"
+                                           # flag to indicate they are
+                                           # documented, but  we wouldnt have
+                                           # found this unless it was
+                                           # documented in the source
                 s/[ \t]+$//;
                 (  split /\s*\|\s*/  ) [2] =~ /(\w+)/;
                 $h{$1} || print
