@@ -34,12 +34,14 @@ newSVsv_nomg
   } STMT_END
 #endif
 
-#if !defined(newSVsv_nomg) && defined(SV_NOSTEAL)
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define newSVsv_nomg(sv) ({ SV *_sv = newSV(0); sv_setsv_flags(_sv, (sv), SV_NOSTEAL); _sv; })
+__UNDEFINED__ newSVsv_flags(sv, flags) ({ SV *_sv = newSV(0); sv_setsv_flags(_sv, (sv), (flags)); _sv; })
 #else
-#  define newSVsv_nomg(sv) ((PL_Sv = newSV(0)), sv_setsv_flags(PL_Sv, (sv), SV_NOSTEAL), PL_Sv)
+__UNDEFINED__ newSVsv_flags(sv, flags) ((PL_Sv = newSV(0)), sv_setsv_flags(PL_Sv, (sv), (flags)), PL_Sv)
 #endif
+
+#ifdef SV_NOSTEAL
+__UNDEFINED__ newSVsv_nomg(sv) newSVsv_flags((sv), SV_NOSTEAL)
 #endif
 
 __UNDEFINED__ SvMAGIC_set(sv, val) \
