@@ -1335,6 +1335,22 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define RESTORE_ERRNO  (errno = saved_errno)
 #endif
 
+/*
+=head1 Warning and Dieing
+
+=for apidoc Amn|SV *|ERRSV
+
+Returns the SV for C<$@>, creating it if needed.
+
+=for apidoc Am|void|CLEAR_ERRSV
+
+Clear the contents of C<$@>, setting it to the empty string.
+
+This replaces any read-only SV with a fresh SV and removes any magic.
+
+=cut
+*/
+
 #define ERRSV GvSVn(PL_errgv)
 
 /* contains inlined gv_add_by_type */
