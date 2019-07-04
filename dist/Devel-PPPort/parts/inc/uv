@@ -14,11 +14,8 @@
 __UNDEFINED__
 my_strnlen
 SvUOK
-utf8_to_uvchr_buf
 
 =implementation
-
-#define D_PPP_MIN(a,b) (((a) <= (b)) ? (a) : (b))
 
 __UNDEFINED__  sv_setuv(sv, uv)                     \
                STMT_START {                         \
@@ -61,17 +58,6 @@ __UNDEFINED__  XSRETURN_UV(v)  STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_E
 
 __UNDEFINED__  PUSHu(u)        STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG;  } STMT_END
 __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
-
-#if defined UTF8SKIP
-
-/* Don't use official version because it uses MIN, which may not be available */
-#undef UTF8_SAFE_SKIP
-
-__UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          \
-                                      ((((e) - (s)) <= 0)                       \
-                                      ? 0                                       \
-                                      : D_PPP_MIN(((e) - (s)), UTF8SKIP(s))))
-#endif
 
 #if !defined(my_strnlen)
 #if { NEED my_strnlen }
@@ -378,23 +364,6 @@ XPUSHu()
                 XPUSHu(43);
                 XSRETURN(1);
 
-#if defined(UTF8_SAFE_SKIP) && defined(UTF8SKIP)
-
-STRLEN
-UTF8_SAFE_SKIP(s, adjustment)
-        char * s
-        int adjustment
-        PREINIT:
-            const char *const_s;
-        CODE:
-            const_s = s;
-            /* Instead of passing in an 'e' ptr, use the real end, adjusted */
-            RETVAL = UTF8_SAFE_SKIP(const_s, s + UTF8SKIP(s) + adjustment);
-        OUTPUT:
-            RETVAL
-
-#endif
-
 STRLEN
 my_strnlen(s, max)
         char * s
@@ -404,60 +373,7 @@ my_strnlen(s, max)
         OUTPUT:
             RETVAL
 
-#ifdef utf8_to_uvchr_buf
-
-AV *
-utf8_to_uvchr_buf(s, adjustment)
-        unsigned char *s
-        int adjustment
-        PREINIT:
-            AV *av;
-            STRLEN len;
-            const unsigned char *const_s;
-        CODE:
-            av = newAV();
-            const_s = s;
-            av_push(av, newSVuv(utf8_to_uvchr_buf(const_s,
-                                                  s + UTF8SKIP(s) + adjustment,
-                                                  &len)));
-            if (len == (STRLEN) -1) {
-                av_push(av, newSViv(-1));
-            }
-            else {
-                av_push(av, newSVuv(len));
-            }
-            RETVAL = av;
-        OUTPUT:
-                RETVAL
-
-#endif
-
-#ifdef utf8_to_uvchr
-
-AV *
-utf8_to_uvchr(s)
-        unsigned char *s
-        PREINIT:
-            AV *av;
-            STRLEN len;
-            const unsigned char *const_s;
-        CODE:
-            av = newAV();
-            const_s = s;
-            av_push(av, newSVuv(utf8_to_uvchr(const_s, &len)));
-            if (len == (STRLEN) -1) {
-                av_push(av, newSViv(-1));
-            }
-            else {
-                av_push(av, newSVuv(len));
-            }
-            RETVAL = av;
-        OUTPUT:
-                RETVAL
-
-#endif
-
-=tests plan => 62
+=tests plan => 11
 
 BEGIN { require warnings if "$]" gt '5.006' }
 

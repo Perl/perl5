@@ -688,6 +688,8 @@ __DATA__
 
 %include strlfuncs
 
+%include utf8
+
 %include pv_tools
 
 #endif /* _P_P_PORTABILITY_H_ */
