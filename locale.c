@@ -1238,7 +1238,7 @@ S_locking_setlocale(pTHX_
      * ones.  This is because as described earlier.  If we know on input the
      * index corresponding to the category into the array where we store the
      * current locales, we don't have to calculate it.  If the caller knows at
-     * compile time what the index is, it it can pass it, setting
+     * compile time what the index is, it can pass it, setting
      * 'is_index_valid' to TRUE; otherwise the index parameter is ignored.
      *
      */

@@ -16594,7 +16594,7 @@ sub make_re_pod_entries($) {
                     my $standard_short = standardize($proposed_short);
 
                     # If the short name is shorter than the standard one, or
-                    # even it it's not, but the combination of it and its
+                    # even if it's not, but the combination of it and its
                     # short property name (as in \p{prop=short} ($perl doesn't
                     # have this form)) saves at least two characters, then,
                     # cause it to be listed as a shorter synonym.

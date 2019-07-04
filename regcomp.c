@@ -13800,7 +13800,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         && num >= RExC_npar
                         /* cannot be an octal escape if it starts with 8 */
                         && *RExC_parse != '8'
-                        /* cannot be an octal escape it it starts with 9 */
+                        /* cannot be an octal escape if it starts with 9 */
                         && *RExC_parse != '9'
                     ) {
                         /* Probably not meant to be a backref, instead likely
