@@ -5279,8 +5279,8 @@ PP(pp_shostent)
 	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 	break;
-#ifdef HAS_SETNETENT
     case OP_SNETENT:
+#ifdef HAS_SETNETENT
 	PerlSock_setnetent(stayopen);
 #else
 	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
