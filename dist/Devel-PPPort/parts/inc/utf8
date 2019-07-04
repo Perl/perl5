@@ -35,6 +35,15 @@ __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          
                                       : D_PPP_MIN(((e) - (s)), UTF8SKIP(s))))
 #endif
 
+#ifdef is_ascii_string
+__UNDEFINED__ is_invariant_string(s,l) is_ascii_string(s,l)
+__UNDEFINED__ is_utf8_invariant_string(s,l) is_ascii_string(s,l)
+
+/* Hint: is_utf8_invariant_string
+   Please use this instead of is_ascii_string or is_invariant_string
+*/
+#endif
+
 #if defined(is_utf8_string) && defined(UTF8SKIP)
 __UNDEFINED__ isUTF8_CHAR(s0, e)    (                                           \
     (e) <= (s0) || ! is_utf8_string(s0, D_PPP_MIN(UTF8SKIP(s0), (e) - (s0)))    \
