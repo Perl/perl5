@@ -142,7 +142,7 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 /* Warning: PL_parser
  * For perl versions earlier than 5.9.5, this is an always
  * non-NULL dummy. Also, it cannot be dereferenced. Don't
- * use it if you can avoid is and unless you absolutely know
+ * use it if you can avoid it, and unless you absolutely know
  * what you're doing.
  * If you always check that PL_parser is non-NULL, you can
  * define DPPP_PL_parser_NO_DUMMY to avoid the creation of
