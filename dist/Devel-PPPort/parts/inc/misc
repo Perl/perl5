@@ -387,34 +387,25 @@ __UNDEFINED__ isUPPER(c)    (        (c) >= 'A' && (c) <= 'Z'                   
 #  undef isUPPER_A
 # endif
 
-# if { VERSION < 5.8.0 }
-/* Hint: isCNTRL
- * Earlier perls omitted DEL */
+# if { VERSION < 5.8.0 } /* earlier perls omitted DEL */
 #  undef isCNTRL
 # endif
 
 # if { VERSION < 5.10.0 }
-/* Hint: isPRINT
- * The implementation in older perl versions includes all of the
- * isSPACE() characters, which is wrong. The version provided by
- * Devel::PPPort always overrides a present buggy version.
- */
+/* earlier perls included all of the isSPACE() characters, which is wrong. The
+ * version provided by Devel::PPPort always overrides an existing buggy
+ * version. */
 #  undef isPRINT
 #  undef isPRINT_A
 # endif
 
 # if { VERSION < 5.14.0 }
-/* Hint: isASCII
- * The implementation in older perl versions always returned true if the
- * parameter was a signed char
- */
+/* earlier perls always returned true if the parameter was a signed char */
 #  undef isASCII
 #  undef isASCII_A
 # endif
 
-# if { VERSION < 5.20.0 }
-/* Hint: isSPACE
- * The implementation in older perl versions didn't include \v */
+# if { VERSION < 5.20.0 } /* earlier perls didn't include \v */
 #  undef isSPACE
 #  undef isSPACE_A
 # endif
