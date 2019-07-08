@@ -367,6 +367,13 @@ builds. Its normal use is to force perl to individually free every block
 of memory which it has allocated before exiting, which is useful when
 using automated leak detection tools such as valgrind.
 
+=item *
+
+The API eval_sv() now accepts a C<G_RETHROW> flag.  If this flag is
+set and an exception is thrown while compiling or executing the
+supplied code, it will be rethrown, and eval_sv() will not return.
+[perl #134177]
+
 =back
 
 =head1 Selected Bug Fixes
@@ -385,6 +392,11 @@ treat such a literal as just the 0, leaving the following C<x> or C<b>
 to be parsed as part of the next token.  This could lead to some
 silent changes in behaviour, so now incomplete hex or binary literals
 produce a fatal error.  [perl #134125]
+
+=item *
+
+eval_pv()'s I<croak_on_error> flag will now throw even if the
+exception is a false overloaded value.  [perl #134177]
 
 =back
 
