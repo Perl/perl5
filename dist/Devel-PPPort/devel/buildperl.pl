@@ -548,6 +548,9 @@ buildperl.pl - build/install perl distributions
                               /tmp/perl/install/<config>/<perl>]
 
   --config=configuration      build this configuration [MULTI]
+                              The possibilities for this parameter are:
+                                'thread', 'thread5005', 'debug'; and
+                                'default', which means none of the others.
                               [default: all possible configurations]
 
   --perl=version              build this version of perl [MULTI]
