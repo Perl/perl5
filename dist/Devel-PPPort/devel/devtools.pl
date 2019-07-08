@@ -93,8 +93,10 @@ sub ask($)
   my $q = shift;
   my $a;
   local $| = 1;
-  print "\n$q [y/n] ";
-  do { $a = <>; } while ($a !~ /^\s*([yn])\s*$/i);
+  do {
+    print "\a\n$q [y/n] ";
+    $a = <>; }
+  while ($a !~ /^\s*([yn])\s*$/i);
   return lc $1 eq 'y';
 }
 
