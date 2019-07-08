@@ -32,8 +32,9 @@ our %opt = (
 
 # The way this works, is it expects to find perl binaries for a bunch of
 # different versions in a given directory.  This defaults to the 'install' one
-# listed above, but is overriddable by the --install parameter.  It also uses
-# blead, again with an overridable default.
+# listed above, but is overriddable by the --install parameter.  Comma
+# separating --install allows multiple source directories.
+# It also uses blead, again with an overridable default.
 #
 # It first verifies that the test file works properly for blead.
 #
@@ -53,24 +54,49 @@ identify();
 
 my $outdir = 'parts/todo';
 
-my @perls = sort { $b->{version} <=> $a->{version} }
-            map { { version => `$_ -e 'printf "%.6f", \$]'`, path => $_ } }
-            ($opt{blead}, grep !/-RC\d+/, glob "$opt{install}/bin/perl5.*");
 
+# Get blead and all other perls
+my @perls = $opt{blead};
+for my $dir (split ",", $opt{install}) {
+    push @perls, grep !/-RC\d+/, glob "$dir/bin/perl5.*";
+}
+
+# Sort in descending version order.  Each element is a hash describing a perl,
+# with keys 'version' and 'path'
+@perls = sort { $b->{version} <=> $a->{version} }
+
+                               # Call the perl to get it to print out it's $]
+                               # version
+            map { { version => `$_ -e 'printf "%.6f", \$]'`,
+                    path => $_ }
+                }
+            @perls;
+
+# Override blead's version if specified.
 if (exists $opt{'blead-version'}) {
   $perls[0]{version} = $opt{'blead-version'};
 }
 
+my %seen;
+
 # blead's todo is its version plus 1.  Otherwise, each todo is the previous
-# one's version
+# one's version.  Also get rid of duplicate versions.
 $perls[0]{todo} = $perls[0]{version} + 1;
-for (1 .. $#perls) {
-  $perls[$_]{todo} = $perls[$_-1]{version};
+$seen{$perls[0]{version}} = 1;
+for my $i (1 .. $#perls) {
+    last unless defined $perls[$i];
+  if (    exists $seen{$perls[$i]{version}}
+  ) {
+    splice @perls, $i, 1;
+    redo;
+  }
+  $seen{$perls[$i]{version}} = 1;
+  $perls[$i]{todo} = $perls[$i-1]{version};
 }
 
+# Go through all the perls, creating a todo file for it.
 for (@perls) {
   my $todo = do { my $v = $_->{todo}; $v =~ s/\D+//g; $v };
-  -e "$outdir/$todo" and next;
   my @args = ('--perl', $_->{path}, '--version', "$_->{todo}");
 
   push @args, '--blead' if $_ == $perls[0]; # First one is blead
