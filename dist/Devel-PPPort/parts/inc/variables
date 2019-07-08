@@ -58,6 +58,7 @@ PL_tainted
 PL_tainting
 PL_tokenbuf
 PL_signals
+PL_mess_sv
 PERL_SIGNALS_UNSAFE_FLAG
 
 =implementation
@@ -134,6 +135,7 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_tainted                tainted
 #  define PL_tainting               tainting
 #  define PL_tokenbuf               tokenbuf
+#  define PL_mess_sv                mess_sv
 /* Replace: 0 */
 #endif
 
