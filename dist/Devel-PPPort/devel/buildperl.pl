@@ -44,20 +44,23 @@ my %opt = (
   'test-archives' => 0,
 );
 
+my $Configure_extra = '-Dman1dir="none" -Dman3dir="none"';
+
+
 my %config = (
   default     => {
-                   config_args => '-des',
+                   config_args => "-des $Configure_extra" ,
                  },
   thread      => {
-                   config_args     => '-des -Dusethreads',
+                   config_args     => "-des -Dusethreads $Configure_extra",
                    masked_versions => [ qr/^5\.00[01234]/ ],
                  },
   thread5005  => {
-                   config_args     => '-des -Duse5005threads',
+                   config_args     => "-des -Duse5005threads $Configure_extra",
                    masked_versions => [ qr/^5\.00[012345]|^5\.(9|\d\d)|^5\.8\.9/ ],
                  },
   debug       => {
-                   config_args => '-des -Doptimize=-g',
+                   config_args => "-des -Doptimize=-g $Configure_extra",
                  },
 );
 
