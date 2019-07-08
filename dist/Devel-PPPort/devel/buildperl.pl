@@ -367,7 +367,7 @@ sub build_and_install
   run_or_die("make $job_string all");
   run("TEST_JOBS=$opt{jobs} make $job_string test") if $opt{test};
   if ($opt{install}) {
-    run_or_die("make $job_string install");
+    run("make $job_string install");
   }
   else {
     print "\n*** NOT INSTALLING PERL ***\n\n";
