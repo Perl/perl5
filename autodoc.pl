@@ -111,6 +111,14 @@ HDR_DOC:
             my $proto = $proto_in_file;
             $proto = "||$proto" unless $proto =~ /\|/;
             my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
+            $name or die <<EOS;
+Bad apidoc at $file line $.:
+  $in
+Expected:
+  =for apidoc flags|returntype|name|arg|arg|...
+  =for apidoc flags|returntype|name
+  =for apidoc name
+EOS
             warn ("'$name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
             my $docs = "";
