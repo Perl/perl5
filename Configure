@@ -8110,6 +8110,10 @@ while $test 1 ; do
 	$define|true|[yY]*)
 		dflt='y'
 		;;
+	$undef|false|[nN]*)
+		dflt='n'
+		dflt_dtrace=""
+		;;
 	?*)
 		dflt='y'
 		dflt_dtrace=$usedtrace
