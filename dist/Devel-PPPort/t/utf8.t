@@ -50,9 +50,11 @@ package main;
 
 BEGIN { require warnings if "$]" gt '5.006' }
 
-# skip tests on 5.6.0 and earlier
-if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..81;
+# skip tests on 5.6.0 and earlier, plus 7.0
+if ("$]" <= '5.006' || "$]" == '5.007' ) {
+    for (1..81) {
+        skip 'skip: broken utf8 support', 0;
+    }
     exit;
 }
 

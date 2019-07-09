@@ -98,11 +98,19 @@ __UNDEFINED__ REPLACEMENT_CHARACTER_UTF8  "\xDD\x72\x72\x70"
 #if { VERSION >= 5.6.1 } && ! defined(utf8_to_uvchr_buf)
    /* Choose which underlying implementation to use.  At least one must be
     * present or the perl is too early to handle this function */
-#  if defined(utf8n_to_uvchr) || defined(utf8_to_uv)
+#  if defined(utf8n_to_uvchr) || defined(utf8_to_uvchr) || defined(utf8_to_uv)
 #    if defined(utf8n_to_uvchr)   /* This is the preferred implementation */
 #      define D_PPP_utf8_to_uvchr_buf_callee utf8n_to_uvchr
-#    else     /* Must be at least 5.6.1 from #if above */
-#      define D_PPP_utf8_to_uvchr_buf_callee(s, curlen, retlen, flags) utf8_to_uv((U8 *)(s), (curlen), (retlen), (flags))
+#    elif /* Must be at least 5.6.1 from #if above;                             \
+             If have both regular and _simple, regular has all args */          \
+          defined(utf8_to_uv) && defined(utf8_to_uv_simple)
+#      define D_PPP_utf8_to_uvchr_buf_callee utf8_to_uv
+#    elif defined(utf8_to_uvchr)  /* The below won't work well on error input */
+#      define D_PPP_utf8_to_uvchr_buf_callee(s, curlen, retlen, flags)          \
+                                            utf8_to_uvchr((U8 *)(s), (retlen))
+#    else
+#      define D_PPP_utf8_to_uvchr_buf_callee(s, curlen, retlen, flags)          \
+                                            utf8_to_uv((U8 *)(s), (retlen))
 #    endif
 #  endif
 
@@ -458,9 +466,11 @@ sv_len_utf8_nomg(sv)
 
 BEGIN { require warnings if "$]" gt '5.006' }
 
-# skip tests on 5.6.0 and earlier
-if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..81;
+# skip tests on 5.6.0 and earlier, plus 7.0
+if ("$]" <= '5.006' || "$]" == '5.007' ) {
+    for (1..81) {
+        skip 'skip: broken utf8 support', 0;
+    }
     exit;
 }
 
