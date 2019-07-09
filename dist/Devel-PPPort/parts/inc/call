@@ -50,6 +50,18 @@ __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS   0x4
 # endif
 #endif
 
+/* Older Perl versions have broken croak_on_error=1 */
+#if { VERSION < 5.31.2 }
+# ifdef eval_pv
+#  undef eval_pv
+#  if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#   define eval_pv(p, croak_on_error) ({ SV *_sv = Perl_eval_pv(aTHX_ p, 0); SV *_errsv = ERRSV; (croak_on_error && (SvROK(_errsv) || SvTRUE(_errsv)) && (croak_sv(_errsv), 1)); _sv; })
+#  else
+#   define eval_pv(p, croak_on_error) ((PL_Sv = Perl_eval_pv(aTHX_ p, 0)), (croak_on_error && (SvROK(ERRSV) || SvTRUE(ERRSV)) && (croak_sv(ERRSV), 1)), PL_Sv)
+#  endif
+# endif
+#endif
+
 /* Replace perl_eval_pv with eval_pv */
 
 #ifndef eval_pv
@@ -72,7 +84,7 @@ eval_pv(char *p, I32 croak_on_error)
 
     if (croak_on_error) {
         errsv = ERRSV;
-        if (SvTRUE(errsv))
+        if (SvROK(errsv) || SvTRUE(errsv))
             croak_sv(errsv);
     }
 
@@ -308,7 +320,7 @@ load_module(flags, name, version, ...)
                 Perl_load_module(aTHX_ flags, SvREFCNT_inc_simple(name),
                                  SvREFCNT_inc_simple(version), NULL);
 
-=tests plan => 52
+=tests plan => 69
 
 sub eq_array
 {
@@ -366,3 +378,35 @@ ok(&Devel::PPPort::eval_pv('f(qw(a b c))', 0), 'y');
 ok(!defined $::{'less::'}, 1, "Hadn't loaded less yet");
 Devel::PPPort::load_module(0, "less", undef);
 ok(defined $::{'less::'}, 1, "Have now loaded less");
+
+ok(eval { Devel::PPPort::eval_pv('die', 0); 1 });
+ok(!eval { Devel::PPPort::eval_pv('die', 1); 1 });
+ok($@ =~ /^Died at \(eval [0-9]+\) line 1\.\n$/);
+ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('', 0); 1 });
+ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('', 1); 1 });
+ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"', 0); 1 });
+ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"', 1); 1 });
+ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 0); 1 });
+ok(!eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 1); 1 });
+ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
+
+if ($] ge '5.007003' or ($] ge '5.006001' and $] lt '5.007')) {
+    my $hashref = { key => 'value' };
+    ok(eval { Devel::PPPort::eval_pv('die $hashref', 1); 1 }, undef, 'check plain hashref is rethrown');
+    ok(ref($@), 'HASH', 'check $@ is hashref') and
+        ok($@->{key}, 'value', 'check $@ hashref has correct value');
+
+    my $false = False->new;
+    ok(!$false);
+    ok(eval { Devel::PPPort::eval_pv('die $false', 1); 1 }, undef, 'check false objects are rethrown');
+    ok(ref($@), 'False', 'check that $@ contains False object');
+    ok("$@", "$false", 'check we got the expected object');
+} else {
+    skip 'skip: no support for references in $@', 0 for 1..7;
+}
+
+{
+    package False;
+    use overload bool => sub { 0 }, '""' => sub { 'Foo' };
+    sub new { bless {}, shift }
+}
