@@ -374,6 +374,11 @@ set and an exception is thrown while compiling or executing the
 supplied code, it will be rethrown, and eval_sv() will not return.
 [perl #134177]
 
+=item *
+
+As part of the fix for [perl #2754] perl_parse() now returns non-zero
+if exit(0) is called in a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -397,6 +402,12 @@ produce a fatal error.  [perl #134125]
 
 eval_pv()'s I<croak_on_error> flag will now throw even if the
 exception is a false overloaded value.  [perl #134177]
+
+=item *
+
+C<INIT> blocks and the program itself are no longer run if exit(0) is
+called within a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.  [perl
+#2754]
 
 =back
 
