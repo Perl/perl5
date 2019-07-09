@@ -306,12 +306,13 @@ sub parse_embed
         my @e = split /\s*\|\s*/, $line;
         if( @e >= 3 ) {
           my($flags, $ret, $name, @args) = @e;
-          next unless $flags =~ /A/; # Skip non-public entries
 
-          # Skip entries marked as deprecated or unstable, or non-name ones, like
+          # Skip non-name entries, like
           #    PL_parser-E<gt>linestr
-          # which documents a struct entry rather than a function
-          next if $flags =~ /[DxN]/;
+          # which documents a struct entry rather than a function.  We retain
+          # all other entries, so that our caller has full information, and
+          # may skip things like non-public functions.
+          next if $flags =~ /N/;
           if ($name =~ /^[^\W\d]\w*$/) {
             for (@args) {
               $_ = [trim_arg($_)];

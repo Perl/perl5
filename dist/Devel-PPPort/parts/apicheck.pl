@@ -200,8 +200,6 @@ for $f (@f) {
   $ignore{$f->{name}} and next;
   $f->{flags}{A} or next;  # only public API members
 
-  $ignore{$f->{name}} = 1; # ignore duplicates
-
   my $Perl_ = $f->{flags}{p} ? 'Perl_' : '';
 
   my $stack = '';
