@@ -69,7 +69,8 @@ sub configure
   if (eval { ExtUtils::MakeMaker->VERSION (6.46) }) {
     open FH, '<PPPort_pm.PL' or die "cannot open PPPort_pm.PL for reading: $!";
     my $version;
-    while (my $line = <FH>) {
+    my $line;
+    while ($line = <FH>) {
       ($version) = $line =~ /^\$VERSION = '([\d.]+)';$/ and last;
     };
     die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
@@ -166,7 +167,8 @@ sub MY::processPL
 
   my $updated = '';
   my @rules = split( m{^\s*$}m, $original );
-  foreach my $rule ( @rules ) {
+  my $rule;
+  foreach $rule ( @rules ) {
     if ( $rule =~ m{^\s*^PPPort\.pm\s+:}m ) {
       $rule =~ s{^(\s*^PPPort\.pm\s+:.*)}{$1 $includes}m; # PPPort.pm depends on all files from parts/inc
       $rule =~ s{pm_to_blib}{}m; # PPPort.pm must not depend on built PPPort.pm in blib/
@@ -193,7 +195,8 @@ sub MY::dist_core
 
   my $updated = '';
   my @rules = split( m{^\s*$}m, $dist );
-  foreach my $rule ( @rules ) {
+  my $rule;
+  foreach $rule ( @rules ) {
     if ( $rule =~ m{^\s*^dist\s+:}m ) {
         $rule =~ s{:}{: manifest}; # make sure we regenerate the manifest
         $rule .= qq[\t].q[$(NOECHO) $(ECHO) "Warning: Please check '__MAX_PERL__' value in PPPort_pm.PL"].qq[\n];
