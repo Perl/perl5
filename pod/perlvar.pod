@@ -437,12 +437,11 @@ is the subversion / 1e6.  For example, Perl v5.10.1 would be "5.010001".
 This variable can be used to determine whether the Perl interpreter
 executing a script is in the right range of versions:
 
-    warn "No PerlIO!\n" if $] lt '5.008';
+    warn "No PerlIO!\n" if "$]" < 5.008;
 
-When comparing C<$]>, string comparison operators are B<highly
-recommended>.  The inherent limitations of binary floating point
-representation can sometimes lead to incorrect comparisons for some
-numbers on some architectures.
+When comparing C<$]>, numeric comparison operators should be used, but the
+variable should be stringified first to avoid issues where its original
+numeric value is inaccurate.
 
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
@@ -453,9 +452,10 @@ object, which allows more flexible string comparisons.
 The main advantage of C<$]> over C<$^V> is that it works the same on any
 version of Perl.  The disadvantages are that it can't easily be compared
 to versions in other formats (e.g. literal v-strings, "v1.2.3" or
-version objects) and numeric comparisons can occasionally fail; it's good
-for string literal version checks and bad for comparing to a variable
-that hasn't been sanity-checked.
+version objects) and numeric comparisons are subject to the binary
+floating point representation; it's good for numeric literal version
+checks and bad for comparing to a variable that hasn't been
+sanity-checked.
 
 The C<$OLD_PERL_VERSION> form was added in Perl v5.20.0 for historical
 reasons but its use is discouraged. (If your reason to use C<$]> is to
