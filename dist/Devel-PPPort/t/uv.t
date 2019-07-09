@@ -48,7 +48,7 @@ bootstrap Devel::PPPort;
 
 package main;
 
-BEGIN { require warnings if "$]" gt '5.006' }
+BEGIN { require warnings if "$]" > '5.006' }
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
