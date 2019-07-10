@@ -659,7 +659,7 @@ my %found = map {($_ => 1)} $o =~ /^===\s+(\w+)\s+===/mg;
 ok(scalar keys %found, 1);
 ok(exists $found{INT2PTR});
 ok(matches($o, '^Supported at least starting from perl-5\.6\.0\.', 'm'), 1);
-ok(matches($o, '^Support by .*ppport.* provided back to perl-5\.003\.', 'm'), 1);
+ok(matches($o, '^Support by .*ppport.* provided back to perl-5\.003', 'm'), 1);
 
 $o = ppport(qw(--api-info=Zero));
 %found = map {($_ => 1)} $o =~ /^===\s+(\w+)\s+===/mg;

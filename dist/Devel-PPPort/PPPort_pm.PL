@@ -131,7 +131,7 @@ for (reverse sort keys %todo) {
 $data =~ s{^__UNSUPPORTED_API__(\s*?)^}
           {join "\n", @todo}gem;
 
-$data =~ s{__MIN_PERL__}{5.003}g;
+$data =~ s{__MIN_PERL__}{5.003_07}g;
 $data =~ s{__MAX_PERL__}{5.30}g;
 
 open FH, ">PPPort.pm" or die "PPPort.pm: $!\n";
