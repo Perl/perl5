@@ -67,7 +67,9 @@ ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  0), 2);
 
 if ("$]" lt '5.008') {
-    ok(1, 1) for 1 ..3
+    for (1 ..3) {
+        ok(1, 1)
+    }
 }
 else {
     ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "a\x{101}", 3, 1), 1);
@@ -92,7 +94,9 @@ ok($ret->[0], 0);
 ok($ret->[1], 1);
 
 if (ord("A") != 65) {   # tests not valid for EBCDIC
-    ok(1, 1) for 1 .. (2 + 4 + (7 * 5));
+    for (1 .. (2 + 4 + (7 * 5))) {
+        ok(1, 1);
+    }
 }
 else {
     $ret = &Devel::PPPort::utf8_to_uvchr_buf("\xc4\x80", 0);
@@ -165,14 +169,18 @@ else {
     use vars '%Config';
     if ($Config{ccflags} =~ /-DDEBUGGING/) {
         shift @buf_tests;
-        ok(1, 1) for 1..5;
+        for (1..5) {
+            ok(1, 1);
+        }
     }
 
-    for my $test (@buf_tests) {
+    my $test;
+    for $test (@buf_tests) {
         my $input = $test->{'input'};
         my $adjustment = $test->{'adjustment'};
         my $display = 'utf8_to_uvchr_buf("';
-        for (my $i = 0; $i < length($input) + $adjustment; $i++) {
+        my $i;
+        for ($i = 0; $i < length($input) + $adjustment; $i++) {
             $display .= sprintf "\\x%02x", ord substr($input, $i, 1);
         }
 
