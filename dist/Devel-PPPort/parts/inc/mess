@@ -441,8 +441,12 @@ if ($] ge '5.006') {
 
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv("\x{100}\n") };
-    ok $@, "\x{100}\n";
-    if ($] ne '5.008') {
+    if ("$]" < '5.007001' || "$]" > '5.007003') {
+        ok $@, "\x{100}\n";
+    } else {
+        skip 'skip: broken utf8 support in die hook', 0;
+    }
+    if ("$]" < '5.007001' || "$]" > '5.008') {
         ok $die, "\x{100}\n";
     } else {
         skip 'skip: broken utf8 support in die hook', 0;
@@ -450,14 +454,18 @@ if ($] ge '5.006') {
 
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv("\x{100}") };
-    ok $@ =~ /^\x{100} at $0 line /;
-    if ($] ne '5.008') {
+    if ("$]" < '5.007001' || "$]" > '5.007003') {
+        ok $@ =~ /^\x{100} at $0 line /;
+    } else {
+        skip 'skip: broken utf8 support in die hook', 0;
+    }
+    if ("$]" < '5.007001' || "$]" > '5.008') {
         ok $die =~ /^\x{100} at $0 line /;
     } else {
         skip 'skip: broken utf8 support in die hook', 0;
     }
 
-    if ($] ne '5.008') {
+    if ("$]" < '5.007001' || "$]" > '5.008') {
         undef $warn;
         Devel::PPPort::warn_sv("\x{100}\n");
         ok $warn, "\x{100}\n";
