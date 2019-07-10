@@ -208,7 +208,9 @@ if ($] ge '5.006') {
         Devel::PPPort::warn_sv("\x{100}");
         ok (my $tmp = $warn) =~ /^\x{100} at $0 line /;
     } else {
-        skip 'skip: broken utf8 support in warn hook', 0 for 1..2;
+        for (1..2) {
+            skip 'skip: broken utf8 support in warn hook', 0;
+        }
     }
 
     ok Devel::PPPort::mess_sv("\x{100}\n", 0), "\x{100}\n";
@@ -217,11 +219,15 @@ if ($] ge '5.006') {
     ok Devel::PPPort::mess_sv("\x{100}", 0) =~ /^\x{100} at $0 line /;
     ok Devel::PPPort::mess_sv(do {my $tmp = "\x{100}"}, 1) =~ /^\x{100} at $0 line /;
 } else {
-    skip 'skip: no utf8 support', 0 for 1..12;
+    for (1..12) {
+        skip 'skip: no utf8 support', 0;
+    }
 }
 
 if (ord('A') != 65) {
-    skip 'skip: no ASCII support', 0 for 1..24;
+    for (1..24) {
+        skip 'skip: no ASCII support', 0;
+    }
 } elsif (      $] ge '5.008'
          &&    $] ne '5.013000'     # Broken in these ranges
          && ! ($] ge '5.011005' && $] le '5.012000'))
@@ -287,7 +293,9 @@ if (ord('A') != 65) {
       ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1"}, 1) =~ eval 'qr/^\N{U+C3}\N{U+A1} at $0 line /';
     }
 } else {
-    skip 'skip: no support for \N{U+..} syntax', 0 for 1..24;
+    for (1..24) {
+        skip 'skip: no support for \N{U+..} syntax', 0;
+    }
 }
 
 if ($] ge '5.007003' or ($] ge '5.006001' and $] lt '5.007')) {
@@ -311,7 +319,9 @@ if ($] ge '5.007003' or ($] ge '5.006001' and $] lt '5.007')) {
     ok $@ == $obj;
     ok $die == $obj;
 } else {
-    skip 'skip: no support for exceptions', 0 for 1..12;
+    for (1..12) {
+        skip 'skip: no support for exceptions', 0;
+    }
 }
 
 ok !defined eval { Devel::PPPort::croak_no_modify() };
