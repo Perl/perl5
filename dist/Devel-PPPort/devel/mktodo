@@ -28,6 +28,7 @@ our %opt = (
   verbose => 0,
   install => '/tmp/perl/install/default',
   blead   => 'bleadperl-debug',
+  debug   => 0,
  'debug-start' => "",   # build an incomplete output, starting with the
                         # specified perl of the form perl5.xxxyyy
 );
@@ -51,7 +52,7 @@ our %opt = (
 # ppport.h, so we get, as patched by ppport.h, what gets added when
 
 GetOptions(\%opt, qw( base check! verbose install=s blead=s blead-version=s
-                      debug-start=s)) or die;
+                      debug debug-start=s)) or die;
 
 identify();
 
@@ -67,6 +68,7 @@ for (@${perls_ref}) {
   push @args, '--blead' if $_ == $perls_ref->[0];   # First one is blead
   push @args, '--todo', $_->{'todo'};
   push @args, '--base' if $opt{base};
+  push @args, '--debug' if $opt{debug};
   push @args, '--verbose' if $opt{verbose};
   push @args, '--nocheck' unless $opt{check};
   runperl('devel/mktodo.pl', @args) or die "error running mktodo.pl [$!] [$?]\n";

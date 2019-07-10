@@ -24,11 +24,12 @@ require './devel/devtools.pl';
 
 our %opt = (
   check   => 1,
+  debug   => 0,
   verbose => 0,
 );
 
 GetOptions(\%opt, qw( check! verbose install=s blead=s blead-version=s
-                      debug-start=s)) or die pod2usage();
+                      debug debug-start=s)) or die pod2usage();
 
 identify();
 
@@ -79,6 +80,7 @@ for my $dir (qw( base todo )) {
 }
 
 my @perlargs;
+push @perlargs, "--debug" if $opt{debug};
 push @perlargs, "--install=$opt{install}" if exists $opt{install};
 push @perlargs, "--blead=$opt{blead}" if exists $opt{blead};
 push @perlargs, "--debug-start=$opt{'debug-start'}" if $opt{'debug-start'};
