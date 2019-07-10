@@ -464,7 +464,7 @@ sv_len_utf8_nomg(sv)
 
 =tests plan => 81
 
-BEGIN { require warnings if "$]" gt '5.006' }
+BEGIN { require warnings if "$]" > '5.006' }
 
 # skip tests on 5.6.0 and earlier, plus 7.0
 if ("$]" <= '5.006' || "$]" == '5.007' ) {
@@ -482,7 +482,7 @@ ok(&Devel::PPPort::isUTF8_CHAR("A",  0), 1);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  0), 2);
 
-if ("$]" lt '5.008') {
+if ("$]" < '5.008') {
     for (1 ..3) {
         ok(1, 1)
     }
@@ -523,12 +523,12 @@ else {
     local $SIG{__WARN__} = sub { push @warnings, @_; };
 
     {
-        BEGIN { 'warnings'->import('utf8') if "$]" gt '5.006' }
+        BEGIN { 'warnings'->import('utf8') if "$]" > '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr("\xe0\0\x80");
         ok($ret->[0], 0);
         ok($ret->[1], -1);
 
-        BEGIN { 'warnings'->unimport() if "$]" gt '5.006' }
+        BEGIN { 'warnings'->unimport() if "$]" > '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr("\xe0\0\x80");
         ok($ret->[0], 0xFFFD);
         ok($ret->[1], 1);
@@ -604,7 +604,7 @@ else {
         my $warning = $test->{'warning'};
 
         undef @warnings;
-        BEGIN { 'warnings'->import('utf8') if "$]" gt '5.006' }
+        BEGIN { 'warnings'->import('utf8') if "$]" > '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr_buf($input, $adjustment);
         ok($ret->[0], 0,  "returned value $display; warnings enabled");
         ok($ret->[1], -1, "returned length $display; warnings enabled");
@@ -614,7 +614,7 @@ else {
                     . "; Got: '$all_warnings', which should contain '$warning'");
 
         undef @warnings;
-        BEGIN { 'warnings'->unimport('utf8') if "$]" gt '5.006' }
+        BEGIN { 'warnings'->unimport('utf8') if "$]" > '5.006' }
         $ret = &Devel::PPPort::utf8_to_uvchr_buf($input, $adjustment);
         ok($ret->[0], 0xFFFD,  "returned value $display; warnings disabled");
         ok($ret->[1], $test->{'no_warnings_returned_length'},
