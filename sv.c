@@ -16662,8 +16662,11 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
         if (agg_targ)
 	    sv = PAD_SV(agg_targ);
-        else if (agg_gv)
+        else if (agg_gv) {
             sv = is_hv ? MUTABLE_SV(GvHV(agg_gv)) : MUTABLE_SV(GvAV(agg_gv));
+            if (!sv)
+                break;
+            }
         else
             break;
 
