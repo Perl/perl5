@@ -15,6 +15,8 @@
 #
 ################################################################################
 
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
 use IO::File;
 require "./parts/inc/inctools";
 
@@ -209,6 +211,10 @@ sub get_and_sort_perls($)
 
         $seen{$perls[$i]{file}} = 1;
         $perls[$i]{todo} = $perls[$i-1]{file};
+    }
+
+    if ($opt{debug}) {
+        print STDERR "The perls returned are: ", Dumper \@perls;
     }
 
     return \@perls;
