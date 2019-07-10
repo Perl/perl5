@@ -148,7 +148,7 @@ __UNDEFINED__  PTR2NV(p)       NUM2PTR(NV,p)
 #  define EXTERN_C extern
 #endif
 
-#if defined(PERL_GCC_PEDANTIC)
+#if { VERSION < 5.004 } || defined(PERL_GCC_PEDANTIC)
 #  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #  endif
