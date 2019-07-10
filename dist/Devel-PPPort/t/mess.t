@@ -260,17 +260,24 @@ if (ord('A') != 65) {
     Devel::PPPort::warn_sv("\xC3\xA1");
     ok $warn =~ eval 'qr/^\N{U+C3}\N{U+A1} at $0 line /';
 
-    ok Devel::PPPort::mess_sv(eval('"\N{U+E1}\n"'), 0), eval '"\N{U+E1}\n"';
-    ok Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}\n"'}, 1), eval '"\N{U+E1}\n"';
+    if ("$]" < '5.004') {
+        for (1..8) {
+            skip 'skip: no support for mess_sv', 0;
+        }
+    }
+    else {
+      ok Devel::PPPort::mess_sv(eval('"\N{U+E1}\n"'), 0), eval '"\N{U+E1}\n"';
+      ok Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}\n"'}, 1), eval '"\N{U+E1}\n"';
 
-    ok Devel::PPPort::mess_sv(eval('"\N{U+E1}"'), 0) =~ eval 'qr/^\N{U+E1} at $0 line /';
-    ok Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}"'}, 1) =~ eval 'qr/^\N{U+E1} at $0 line /';
+      ok Devel::PPPort::mess_sv(eval('"\N{U+E1}"'), 0) =~ eval 'qr/^\N{U+E1} at $0 line /';
+      ok Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}"'}, 1) =~ eval 'qr/^\N{U+E1} at $0 line /';
 
-    ok Devel::PPPort::mess_sv("\xC3\xA1\n", 0), eval '"\N{U+C3}\N{U+A1}\n"';
-    ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1\n"}, 1), eval '"\N{U+C3}\N{U+A1}\n"';
+      ok Devel::PPPort::mess_sv("\xC3\xA1\n", 0), eval '"\N{U+C3}\N{U+A1}\n"';
+      ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1\n"}, 1), eval '"\N{U+C3}\N{U+A1}\n"';
 
-    ok Devel::PPPort::mess_sv("\xC3\xA1", 0) =~ eval 'qr/^\N{U+C3}\N{U+A1} at $0 line /';
-    ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1"}, 1) =~ eval 'qr/^\N{U+C3}\N{U+A1} at $0 line /';
+      ok Devel::PPPort::mess_sv("\xC3\xA1", 0) =~ eval 'qr/^\N{U+C3}\N{U+A1} at $0 line /';
+      ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1"}, 1) =~ eval 'qr/^\N{U+C3}\N{U+A1} at $0 line /';
+    }
 } else {
     skip 'skip: no support for \N{U+..} syntax', 0 for 1..24;
 }
