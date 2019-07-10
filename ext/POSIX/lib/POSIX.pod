@@ -468,7 +468,7 @@ integer value less than or equal to the numerical argument.
 
 Returns the current floating point rounding mode, one of
 
-  FE_TONEAREST FE_TOWARDZERO FE_UPWARD FE_UPWARD
+  FE_TONEAREST FE_TOWARDZERO FE_UPWARD FE_DOWNWARD
 
 C<FE_TONEAREST> is like L</round>, C<FE_TOWARDZERO> is like L</trunc> [C99].
 
