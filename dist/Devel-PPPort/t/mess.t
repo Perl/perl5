@@ -48,7 +48,7 @@ bootstrap Devel::PPPort;
 
 package main;
 
-BEGIN { if ($] lt '5.006') { $^W = 0; } }
+BEGIN { if ("$]" < '5.006') { $^W = 0; } }
 
 my $warn;
 my $die;
@@ -170,8 +170,8 @@ ok Devel::PPPort::mess_sv(do {my $tmp = "\xE1"}, 1) =~ /^\xE1 at $0 line /;
 ok Devel::PPPort::mess_sv("\xC3\xA1", 0) =~ /^\xC3\xA1 at $0 line /;
 ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1"}, 1) =~ /^\xC3\xA1 at $0 line /;
 
-if ($] ge '5.006') {
-    BEGIN { if ($] ge '5.006' && $] lt '5.008') { require utf8; utf8->import(); } }
+if ("$]" >= '5.006') {
+    BEGIN { if ("$]" >= '5.006' && "$]" < '5.008') { require utf8; utf8->import(); } }
 
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv("\x{100}\n") };
@@ -228,9 +228,9 @@ if (ord('A') != 65) {
     for (1..24) {
         skip 'skip: no ASCII support', 0;
     }
-} elsif (      $] ge '5.008'
-         &&    $] ne '5.013000'     # Broken in these ranges
-         && ! ($] ge '5.011005' && $] le '5.012000'))
+} elsif (      "$]" >= '5.008'
+         &&    "$]" != '5.013000'     # Broken in these ranges
+         && ! ("$]" >= '5.011005' && "$]" <= '5.012000'))
 {
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv(eval '"\N{U+E1}\n"') };
@@ -298,7 +298,7 @@ if (ord('A') != 65) {
     }
 }
 
-if ($] ge '5.007003' or ($] ge '5.006001' and $] lt '5.007')) {
+if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv($scalar_ref) };
     ok $@ == $scalar_ref;
