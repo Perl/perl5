@@ -32,6 +32,8 @@ It can currently build the following Perl releases:
     5.8.x
     5.9.x
     5.1x.x
+    5.2x.x
+    5.3x.x
 
 =head2 Fully automatic API checks
 
@@ -165,6 +167,9 @@ use the information in F<parts/inc/> to generate the main module
 F<PPPort.pm>, the XS code in F<RealPPPort.xs> and various test files
 in F<t/>.
 
+You can get extra information from F<PPPort_pm.PL> by setting the environment
+variable C<DPPP_CHECK_LEVEL> to 1 or 2.
+
 All of these files could be generated on the fly while building
 C<Devel::PPPort>, but not having the tests in F<t/> will confuse
 TEST/harness in the core. Not having F<PPPort.pm> will be bad for
@@ -220,19 +225,39 @@ of F<RealPPPort_xs.PL> to see where the code ends up.
 =item *
 
 The tests in the C<=tests> section. Remember not to use any fancy
-modules or syntax elements, as the test code should be able to run
-with Perl 5.003, which, for example, doesn't support C<my> in
-C<for>-loops:
+modules or syntax elements, as the test code needs to be able to run
+with Perl 5.003.  (This is because Devel::PPPort itself will run all test files
+in the process of generating the information about when a feature came into
+existence.)  This means, for example
+
+=over
+
+=item C<my> isn't supported in C<for>-loops
 
     for my $x (1, 2, 3) { }    # won't work with 5.003
 
+Instead declare C<$x> just before the statement
+
+=item The postfix for statement modifier isn't supported
+
+    foo for 1..2
+
+won't compile.  Instead enclose C<foo> in a loop.
+
+=item You can't use plain C<qr//>
+
+Instead, wrap it in a string eval C<eval "qr//">, and be sure it's skipped at
+execution time on perls earlier than 5.005
+
+=back
+
 You can use C<ok()> to report success or failure:
 
-    ok($got == 42);
-    ok($got, $expected);
+ ok($got, $expected, 'name');
+ ok($got == 42);     # Doesn't give good runtime diagnostics
 
-Regular expressions are not supported as the second argument to C<ok>,
-because older perls do not support the C<qr> operator.
+ ok($got, eval "qr/foo/", 'name') # But don't execute this statement
+                                  # on perls earlier than 5.005
 
 =back
 
@@ -270,7 +295,7 @@ Some C<Devel::PPPort> scripts would report a warning when there is defined a
 macro which is not part of Perl public API, except those macros which start
 with the C<D_PPP_> prefix.
 
-Version checking can be tricky if you want to do it correct.
+Version checking can be tricky to get correct.
 You can use
 
   #if { VERSION < 5.9.3 }
