@@ -264,6 +264,10 @@ that was originally changed for FreeBSD, and the FreeBSD make
 apparently predefines it.  The Solaris make does not predefine C<ECHO>
 which broke this rule on Solaris.  [perl #134218]
 
+=item *
+
+Bison versions 3.1 through 3.4 are now supported.
+
 =back
 
 =head1 Testing
