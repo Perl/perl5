@@ -759,6 +759,7 @@ static SV *hintkey_swaplabel_sv, *hintkey_labelconst_sv;
 static SV *hintkey_arrayfullexpr_sv, *hintkey_arraylistexpr_sv;
 static SV *hintkey_arraytermexpr_sv, *hintkey_arrayarithexpr_sv;
 static SV *hintkey_arrayexprflags_sv;
+static SV *hintkey_subsignature_sv;
 static SV *hintkey_DEFSV_sv;
 static SV *hintkey_with_vars_sv;
 static SV *hintkey_join_with_space_sv;
@@ -1051,6 +1052,58 @@ static OP *THX_parse_keyword_arrayexprflags(pTHX)
     return o ? newANONLIST(o) : newANONHASH(newOP(OP_STUB, 0));
 }
 
+#define parse_keyword_subsignature() THX_parse_keyword_subsignature(aTHX)
+static OP *THX_parse_keyword_subsignature(pTHX)
+{
+    OP *retop = NULL, *sigop = parse_subsignature(0);
+    OP *kid;
+    int seen_nextstate = 0;
+
+    /* We can't yield the optree as is to the caller because it won't be
+     * executable outside of a called sub. We'll have to convert it into
+     * something safe for them to invoke
+     * sigop should be a OP_LINESEQ containing OP_NEXTSTATE-separated
+     * OP_ARGCHECK and OP_ARGELEMs
+     */
+    if(sigop->op_type != OP_LINESEQ)
+	croak("Expected parse_subsignature() to yield an OP_LINESEQ");
+
+    for(kid = cLISTOPx(sigop)->op_first; kid; kid = OpSIBLING(kid)) {
+	switch(kid->op_type) {
+	    case OP_NEXTSTATE:
+		/* Only emit the first one otherwise they get boring */
+		if(seen_nextstate)
+		    break;
+		seen_nextstate++;
+		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
+		    /* newSVpvf("nextstate:%s:%d", CopFILE(cCOPx(kid)), cCOPx(kid)->cop_line))); */
+		    newSVpvf("nextstate:%d", cCOPx(kid)->cop_line)));
+		break;
+	    case OP_ARGCHECK: {
+		UNOP_AUX_item *aux = cUNOP_AUXx(kid)->op_aux;
+		char slurpy = (char)(aux[2].iv);
+		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
+		    newSVpvf("argcheck:%d:%d:%c", (int)(aux[0].iv), (int)(aux[1].iv), slurpy ? slurpy : '-')));
+		break;
+	    }
+	    case OP_ARGELEM: {
+		PADOFFSET padix = kid->op_targ;
+		PADNAMELIST *names = PadlistNAMES(CvPADLIST(find_runcv(0)));
+		char *namepv = PadnamePV(padnamelist_fetch(names, padix));
+		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
+		    newSVpvf(kid->op_flags & OPf_KIDS ? "argelem:%s:d" : "argelem:%s", namepv)));
+		break;
+	    }
+	    default:
+		fprintf(stderr, "TODO: examine kid %p (optype=%s)\n", kid, PL_op_name[kid->op_type]);
+		break;
+	}
+    }
+
+    op_free(sigop);
+    return newANONLIST(retop);
+}
+
 #define parse_keyword_DEFSV() THX_parse_keyword_DEFSV(aTHX)
 static OP *THX_parse_keyword_DEFSV(pTHX)
 {
@@ -1245,6 +1298,10 @@ static int my_keyword_plugin(pTHX_
     } else if (memEQs(keyword_ptr, keyword_len, "join_with_space") &&
 		    keyword_active(hintkey_join_with_space_sv)) {
 	*op_ptr = parse_join_with_space();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if (memEQs(keyword_ptr, keyword_len, "subsignature") &&
+		    keyword_active(hintkey_subsignature_sv)) {
+	*op_ptr = parse_keyword_subsignature();
 	return KEYWORD_PLUGIN_EXPR;
     } else {
         assert(next_keyword_plugin != my_keyword_plugin);
@@ -3995,6 +4052,7 @@ BOOT:
     hintkey_arraytermexpr_sv = newSVpvs_share("XS::APItest/arraytermexpr");
     hintkey_arrayarithexpr_sv = newSVpvs_share("XS::APItest/arrayarithexpr");
     hintkey_arrayexprflags_sv = newSVpvs_share("XS::APItest/arrayexprflags");
+    hintkey_subsignature_sv = newSVpvs_share("XS::APItest/subsignature");
     hintkey_DEFSV_sv = newSVpvs_share("XS::APItest/DEFSV");
     hintkey_with_vars_sv = newSVpvs_share("XS::APItest/with_vars");
     hintkey_join_with_space_sv = newSVpvs_share("XS::APItest/join_with_space");

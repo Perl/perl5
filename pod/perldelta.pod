@@ -366,7 +366,11 @@ well.
 
 =item *
 
-XXX
+A new parser function L<parse_subsignature()|perlapi/parse_subsignature>
+allows a keyword plugin to parse a subroutine signature while C<use feature
+'signatures'> is in effect.  This allows custom keywords to implement
+semantics similar to regular C<sub> declarations that include signatures.
+[perl #132474]
 
 =back
 

@@ -12756,5 +12756,37 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
 }
 
 /*
+=for apidoc parse_subsignature
+
+Parse a subroutine signature declaration. This is the contents of the
+parentheses following a named or anonymous subroutine declaration when the
+C<signatures> feature is enabled. Note that this function neither expects
+nor consumes the opening and closing parentheses around the signature; it
+is the caller's job to handle these.
+
+This function must only be called during parsing of a subroutine; after
+L</start_subparse> has been called. It might allocate lexical variables on
+the pad for the current subroutine.
+
+The op tree to unpack the arguments from the stack at runtime is returned.
+This op tree should appear at the beginning of the compiled function. The
+caller may wish to use L</op_append_list> to build their function body
+after it, or splice it together with the body before calling L</newATTRSUB>.
+
+The C<flags> parameter is reserved for future use, and must always
+be zero.
+
+=cut
+*/
+
+OP *
+Perl_parse_subsignature(pTHX_ U32 flags)
+{
+    if (flags)
+        Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_subsignature");
+    return parse_recdescent_for_op(GRAMSUBSIGNATURE, LEX_FAKEEOF_NONEXPR);
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -43,7 +43,7 @@
     GV *gvval;
 }
 
-%token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
+%token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
 %token <ival> '{' '}' '[' ']' '-' '+' '@' '%' '&' '=' '.'
 
@@ -78,7 +78,7 @@
 %type <opval> termbinop termunop anonymous termdo
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
-%type <opval> sigelem siglist siglistornull subsignature optsubsignature
+%type <opval> sigelem siglist siglistornull subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
 
@@ -182,6 +182,16 @@ grammar	:	GRAMPROG
                           $<ival>$ = 0;
 			}
 		stmtseq
+			{
+			  PL_eval_root = $3;
+			  $$ = 0;
+			}
+	|	GRAMSUBSIGNATURE
+			{
+			  parser->expect = XSTATE;
+			  $<ival>$ = 0;
+			}
+		subsigguts
 			{
 			  PL_eval_root = $3;
 			  $$ = 0;
@@ -763,7 +773,10 @@ optsubsignature:	/* NULL */
 			{ $$ = $1; }
 
 /* Subroutine signature */
-subsignature:	'('
+subsignature:	'(' subsigguts ')'
+			{ $$ = $2; }
+
+subsigguts:
                         {
                             ENTER;
                             SAVEIV(parser->sig_elems);
@@ -775,9 +788,8 @@ subsignature:	'('
                             parser->in_my        = KEY_sigvar;
                         }
                 siglistornull
-                ')'
 			{
-                            OP            *sigops = $3;
+                            OP            *sigops = $2;
                             UNOP_AUX_item *aux;
                             OP            *check;
 

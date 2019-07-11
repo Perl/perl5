@@ -1013,6 +1013,7 @@ Axpd	|OP*	|parse_barestmt	|U32 flags
 Axpd	|SV*	|parse_label	|U32 flags
 Axpd	|OP*	|parse_fullstmt	|U32 flags
 Axpd	|OP*	|parse_stmtseq	|U32 flags
+Axpd	|OP*	|parse_subsignature|U32 flags
 : Used in various files
 Apd	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias
