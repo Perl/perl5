@@ -203,7 +203,7 @@ C<I18N::LangTags::implicate_supers(...)>, like so:
 
 =head1 ENVIRONMENT
 
-This module looks for several environment variables, including
+This module looks at several environment variables:
 REQUEST_METHOD, HTTP_ACCEPT_LANGUAGE,
 LANGUAGE, LC_ALL, LC_MESSAGES, and LANG.
 
