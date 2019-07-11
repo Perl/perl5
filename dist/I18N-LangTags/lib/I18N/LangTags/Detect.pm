@@ -11,7 +11,7 @@ our ( $MATCH_SUPERS, $USING_LANGUAGE_TAGS,
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-our $VERSION = "1.07";
+our $VERSION = "1.08";
 our @ISA = ();
 use I18N::LangTags qw(alternate_language_tags locale2language_tag);
 
