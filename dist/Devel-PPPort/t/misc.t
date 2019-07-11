@@ -155,131 +155,131 @@ if ("$]" < 5.005) {
         ok(Devel::PPPort::SvRXOK(bless $qr, "Surprise"));
 }
 
-ok(  Devel::PPPort::test_isBLANK(ord(" ")));
-ok(! Devel::PPPort::test_isBLANK(ord("\n")));
+ok(  Devel::PPPort::isBLANK(ord(" ")));
+ok(! Devel::PPPort::isBLANK(ord("\n")));
 
-ok(  Devel::PPPort::test_isBLANK_A(ord("\t")));
-ok(! Devel::PPPort::test_isBLANK_A(ord("\r")));
+ok(  Devel::PPPort::isBLANK_A(ord("\t")));
+ok(! Devel::PPPort::isBLANK_A(ord("\r")));
 
-ok(  Devel::PPPort::test_isUPPER(ord("A")));
-ok(! Devel::PPPort::test_isUPPER(ord("a")));
+ok(  Devel::PPPort::isUPPER(ord("A")));
+ok(! Devel::PPPort::isUPPER(ord("a")));
 
-ok(  Devel::PPPort::test_isUPPER_A(ord("Z")));
+ok(  Devel::PPPort::isUPPER_A(ord("Z")));
 
 # One of these two is uppercase in EBCDIC; the other in Latin1, but neither are
 # ASCII uppercase.
-ok(! Devel::PPPort::test_isUPPER_A(ord(0xDC)));
-ok(! Devel::PPPort::test_isUPPER_A(ord(0xFC)));
+ok(! Devel::PPPort::isUPPER_A(ord(0xDC)));
+ok(! Devel::PPPort::isUPPER_A(ord(0xFC)));
 
-ok(  Devel::PPPort::test_isLOWER(ord("b")));
-ok(! Devel::PPPort::test_isLOWER(ord("B")));
+ok(  Devel::PPPort::isLOWER(ord("b")));
+ok(! Devel::PPPort::isLOWER(ord("B")));
 
-ok(  Devel::PPPort::test_isLOWER_A(ord("y")));
+ok(  Devel::PPPort::isLOWER_A(ord("y")));
 
 # One of these two is lowercase in EBCDIC; the other in Latin1, but neither are
 # ASCII lowercase.
-ok(! Devel::PPPort::test_isLOWER_A(ord(0xDC)));
-ok(! Devel::PPPort::test_isLOWER_A(ord(0xFC)));
+ok(! Devel::PPPort::isLOWER_A(ord(0xDC)));
+ok(! Devel::PPPort::isLOWER_A(ord(0xFC)));
 
-ok(  Devel::PPPort::test_isALPHA(ord("C")));
-ok(! Devel::PPPort::test_isALPHA(ord("1")));
+ok(  Devel::PPPort::isALPHA(ord("C")));
+ok(! Devel::PPPort::isALPHA(ord("1")));
 
-ok(  Devel::PPPort::test_isALPHA_A(ord("x")));
-ok(! Devel::PPPort::test_isALPHA_A(0xDC));
+ok(  Devel::PPPort::isALPHA_A(ord("x")));
+ok(! Devel::PPPort::isALPHA_A(0xDC));
 
-ok(  Devel::PPPort::test_isWORDCHAR(ord("_")));
-ok(! Devel::PPPort::test_isWORDCHAR(ord("@")));
+ok(  Devel::PPPort::isWORDCHAR(ord("_")));
+ok(! Devel::PPPort::isWORDCHAR(ord("@")));
 
-ok(  Devel::PPPort::test_isWORDCHAR_A(ord("2")));
-ok(! Devel::PPPort::test_isWORDCHAR_A(0xFC));
+ok(  Devel::PPPort::isWORDCHAR_A(ord("2")));
+ok(! Devel::PPPort::isWORDCHAR_A(0xFC));
 
-ok(  Devel::PPPort::test_isALPHANUMERIC(ord("4")));
-ok(! Devel::PPPort::test_isALPHANUMERIC(ord("_")));
+ok(  Devel::PPPort::isALPHANUMERIC(ord("4")));
+ok(! Devel::PPPort::isALPHANUMERIC(ord("_")));
 
-ok(  Devel::PPPort::test_isALPHANUMERIC_A(ord("l")));
-ok(! Devel::PPPort::test_isALPHANUMERIC_A(0xDC));
+ok(  Devel::PPPort::isALPHANUMERIC_A(ord("l")));
+ok(! Devel::PPPort::isALPHANUMERIC_A(0xDC));
 
-ok(  Devel::PPPort::test_isALNUM(ord("c")));
-ok(! Devel::PPPort::test_isALNUM(ord("}")));
+ok(  Devel::PPPort::isALNUM(ord("c")));
+ok(! Devel::PPPort::isALNUM(ord("}")));
 
-ok(  Devel::PPPort::test_isALNUM_A(ord("5")));
-ok(! Devel::PPPort::test_isALNUM_A(0xFC));
+ok(  Devel::PPPort::isALNUM_A(ord("5")));
+ok(! Devel::PPPort::isALNUM_A(0xFC));
 
-ok(  Devel::PPPort::test_isDIGIT(ord("6")));
-ok(! Devel::PPPort::test_isDIGIT(ord("_")));
+ok(  Devel::PPPort::isDIGIT(ord("6")));
+ok(! Devel::PPPort::isDIGIT(ord("_")));
 
-ok(  Devel::PPPort::test_isDIGIT_A(ord("7")));
-ok(! Devel::PPPort::test_isDIGIT_A(0xDC));
+ok(  Devel::PPPort::isDIGIT_A(ord("7")));
+ok(! Devel::PPPort::isDIGIT_A(0xDC));
 
-ok(  Devel::PPPort::test_isOCTAL(ord("7")));
-ok(! Devel::PPPort::test_isOCTAL(ord("8")));
+ok(  Devel::PPPort::isOCTAL(ord("7")));
+ok(! Devel::PPPort::isOCTAL(ord("8")));
 
-ok(  Devel::PPPort::test_isOCTAL_A(ord("0")));
-ok(! Devel::PPPort::test_isOCTAL_A(ord("9")));
+ok(  Devel::PPPort::isOCTAL_A(ord("0")));
+ok(! Devel::PPPort::isOCTAL_A(ord("9")));
 
-ok(  Devel::PPPort::test_isIDFIRST(ord("D")));
-ok(! Devel::PPPort::test_isIDFIRST(ord("1")));
+ok(  Devel::PPPort::isIDFIRST(ord("D")));
+ok(! Devel::PPPort::isIDFIRST(ord("1")));
 
-ok(  Devel::PPPort::test_isIDFIRST_A(ord("_")));
-ok(! Devel::PPPort::test_isIDFIRST_A(0xFC));
+ok(  Devel::PPPort::isIDFIRST_A(ord("_")));
+ok(! Devel::PPPort::isIDFIRST_A(0xFC));
 
-ok(  Devel::PPPort::test_isIDCONT(ord("e")));
-ok(! Devel::PPPort::test_isIDCONT(ord("@")));
+ok(  Devel::PPPort::isIDCONT(ord("e")));
+ok(! Devel::PPPort::isIDCONT(ord("@")));
 
-ok(  Devel::PPPort::test_isIDCONT_A(ord("2")));
-ok(! Devel::PPPort::test_isIDCONT_A(0xDC));
+ok(  Devel::PPPort::isIDCONT_A(ord("2")));
+ok(! Devel::PPPort::isIDCONT_A(0xDC));
 
-ok(  Devel::PPPort::test_isSPACE(ord(" ")));
-ok(! Devel::PPPort::test_isSPACE(ord("_")));
+ok(  Devel::PPPort::isSPACE(ord(" ")));
+ok(! Devel::PPPort::isSPACE(ord("_")));
 
-ok(  Devel::PPPort::test_isSPACE_A(ord("\cK")));
-ok(! Devel::PPPort::test_isSPACE_A(ord("F")));
+ok(  Devel::PPPort::isSPACE_A(ord("\cK")));
+ok(! Devel::PPPort::isSPACE_A(ord("F")));
 
 # This stresses the edge for ASCII machines, but happens to work on EBCDIC as
 # well
-ok(  Devel::PPPort::test_isASCII(0x7F));
-ok(! Devel::PPPort::test_isASCII(0x80));
+ok(  Devel::PPPort::isASCII(0x7F));
+ok(! Devel::PPPort::isASCII(0x80));
 
-ok(  Devel::PPPort::test_isASCII_A(ord("9")));
+ok(  Devel::PPPort::isASCII_A(ord("9")));
 
 # B6 is the PARAGRAPH SIGN in ASCII and EBCDIC
-ok(! Devel::PPPort::test_isASCII_A(0xB6));
+ok(! Devel::PPPort::isASCII_A(0xB6));
 
-ok(  Devel::PPPort::test_isCNTRL(ord("\e")));
-ok(! Devel::PPPort::test_isCNTRL(ord(" ")));
+ok(  Devel::PPPort::isCNTRL(ord("\e")));
+ok(! Devel::PPPort::isCNTRL(ord(" ")));
 
-ok(  Devel::PPPort::test_isCNTRL_A(ord("\a")));
-ok(! Devel::PPPort::test_isCNTRL_A(0xB6));
+ok(  Devel::PPPort::isCNTRL_A(ord("\a")));
+ok(! Devel::PPPort::isCNTRL_A(0xB6));
 
-ok(  Devel::PPPort::test_isPRINT(ord(" ")));
-ok(! Devel::PPPort::test_isPRINT(ord("\n")));
+ok(  Devel::PPPort::isPRINT(ord(" ")));
+ok(! Devel::PPPort::isPRINT(ord("\n")));
 
-ok(  Devel::PPPort::test_isPRINT_A(ord("G")));
-ok(! Devel::PPPort::test_isPRINT_A(0xB6));
+ok(  Devel::PPPort::isPRINT_A(ord("G")));
+ok(! Devel::PPPort::isPRINT_A(0xB6));
 
-ok(  Devel::PPPort::test_isGRAPH(ord("h")));
-ok(! Devel::PPPort::test_isGRAPH(ord(" ")));
+ok(  Devel::PPPort::isGRAPH(ord("h")));
+ok(! Devel::PPPort::isGRAPH(ord(" ")));
 
-ok(  Devel::PPPort::test_isGRAPH_A(ord("i")));
-ok(! Devel::PPPort::test_isGRAPH_A(0xB6));
+ok(  Devel::PPPort::isGRAPH_A(ord("i")));
+ok(! Devel::PPPort::isGRAPH_A(0xB6));
 
-ok(  Devel::PPPort::test_isPUNCT(ord("#")));
-ok(! Devel::PPPort::test_isPUNCT(ord(" ")));
+ok(  Devel::PPPort::isPUNCT(ord("#")));
+ok(! Devel::PPPort::isPUNCT(ord(" ")));
 
-ok(  Devel::PPPort::test_isPUNCT_A(ord("*")));
-ok(! Devel::PPPort::test_isPUNCT_A(0xB6));
+ok(  Devel::PPPort::isPUNCT_A(ord("*")));
+ok(! Devel::PPPort::isPUNCT_A(0xB6));
 
-ok(  Devel::PPPort::test_isXDIGIT(ord("A")));
-ok(! Devel::PPPort::test_isXDIGIT(ord("_")));
+ok(  Devel::PPPort::isXDIGIT(ord("A")));
+ok(! Devel::PPPort::isXDIGIT(ord("_")));
 
-ok(  Devel::PPPort::test_isXDIGIT_A(ord("9")));
-ok(! Devel::PPPort::test_isXDIGIT_A(0xDC));
+ok(  Devel::PPPort::isXDIGIT_A(ord("9")));
+ok(! Devel::PPPort::isXDIGIT_A(0xDC));
 
-ok(  Devel::PPPort::test_isPSXSPC(ord(" ")));
-ok(! Devel::PPPort::test_isPSXSPC(ord("k")));
+ok(  Devel::PPPort::isPSXSPC(ord(" ")));
+ok(! Devel::PPPort::isPSXSPC(ord("k")));
 
-ok(  Devel::PPPort::test_isPSXSPC_A(ord("\cK")));
-ok(! Devel::PPPort::test_isPSXSPC_A(0xFC));
+ok(  Devel::PPPort::isPSXSPC_A(ord("\cK")));
+ok(! Devel::PPPort::isPSXSPC_A(0xFC));
 
 ok(&Devel::PPPort::av_top_index([1,2,3]), 2);
 ok(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
