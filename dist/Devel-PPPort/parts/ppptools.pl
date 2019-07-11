@@ -344,7 +344,7 @@ sub make_prototype
   my $f = shift;
   my @args = map { "@$_" } @{$f->{args}};
   my $proto;
-  my $pTHX_ = exists $f->{flags}{n} ? "" : "pTHX_ ";
+  my $pTHX_ = exists $f->{flags}{T} ? "" : "pTHX_ ";
   $proto = "$f->{ret} $f->{name}" . "($pTHX_" . join(', ', @args) . ')';
   return $proto;
 }
