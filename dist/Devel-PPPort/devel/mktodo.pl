@@ -338,10 +338,9 @@ sub find_undefined_symbols
   my @undefined;
 
   for my $sym (keys %$ls) {
+    next if $sym =~ /\@/ or $sym =~ /^_/ or exists $stdsym{$sym};
     unless (exists $ps->{$sym}) {
-      if ($sym !~ /\@/ and $sym !~ /^_/) {
-        push @undefined, $sym unless $stdsym{$sym};
-      }
+        push @undefined, $sym;
     }
   }
 
