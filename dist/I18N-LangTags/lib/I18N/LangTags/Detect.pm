@@ -207,7 +207,9 @@ This module looks for several environment variables, including
 REQUEST_METHOD, HTTP_ACCEPT_LANGUAGE,
 LANGUAGE, LC_ALL, LC_MESSAGES, and LANG.
 
-It will also use the L<Win32::Locale> module, if it's installed.
+It will also use the L<Win32::Locale> module, if it's installed
+and IGNORE_WIN32_LOCALE is not set to a true value in the
+environment.
 
 
 =head1 SEE ALSO
