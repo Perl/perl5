@@ -177,7 +177,7 @@ __UNDEFINED__  SvVSTRING_mg(sv)  (SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_vstring
 #if { NEED mg_findext }
 
 MAGIC *
-mg_findext(SV * sv, int type, const MGVTBL *vtbl) {
+mg_findext(const SV * sv, int type, const MGVTBL *vtbl) {
     if (sv) {
         MAGIC *mg;
 
