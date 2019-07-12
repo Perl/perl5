@@ -39,6 +39,14 @@ __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          
                                       : D_PPP_MIN(((e) - (s)), UTF8SKIP(s))))
 #endif
 
+#if 'A' == 65
+__UNDEFINED__ UTF8_IS_INVARIANT(c)   isASCII(c)
+#else
+__UNDEFINED__ UTF8_IS_INVARIANT(c)  (isASCII(c) || isCNTRL_L1(c))
+#endif
+
+__UNDEFINED__ UVCHR_IS_INVARIANT(c)  UTF8_IS_INVARIANT(c)
+
 #ifdef is_ascii_string
 __UNDEFINED__ is_invariant_string(s,l) is_ascii_string(s,l)
 __UNDEFINED__ is_utf8_invariant_string(s,l) is_ascii_string(s,l)
@@ -470,13 +478,26 @@ sv_len_utf8_nomg(sv)
 
 #endif
 
-=tests plan => 81
+#ifdef UVCHR_IS_INVARIANT
+
+bool
+UVCHR_IS_INVARIANT(c)
+        unsigned c
+        PREINIT:
+        CODE:
+            RETVAL = UVCHR_IS_INVARIANT(c);
+        OUTPUT:
+            RETVAL
+
+#endif
+
+=tests plan => 84
 
 BEGIN { require warnings if "$]" > '5.006' }
 
 # skip tests on 5.6.0 and earlier, plus 7.0
 if ("$]" <= '5.006' || "$]" == '5.007' ) {
-    for (1..81) {
+    for (1..84) {
         skip 'skip: broken utf8 support', 0;
     }
     exit;
@@ -489,6 +510,10 @@ ok(&Devel::PPPort::isUTF8_CHAR("A", -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("A",  0), 1);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  -1), 0);
 ok(&Devel::PPPort::isUTF8_CHAR("\x{100}",  0), 2);
+
+ok(&Devel::PPPort::UVCHR_IS_INVARIANT(ord("A")), 1);
+ok(! &Devel::PPPort::UVCHR_IS_INVARIANT(0xb6));
+ok(! &Devel::PPPort::UVCHR_IS_INVARIANT(0x100));
 
 if ("$]" < '5.008') {
     for (1 ..3) {
