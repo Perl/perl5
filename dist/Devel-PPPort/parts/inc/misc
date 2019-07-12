@@ -1259,8 +1259,8 @@ ok(  Devel::PPPort::isUPPER_A(ord("Z")));
 
 # One of these two is uppercase in EBCDIC; the other in Latin1, but neither are
 # ASCII uppercase.
-ok(! Devel::PPPort::isUPPER_A(ord(0xDC)));
-ok(! Devel::PPPort::isUPPER_A(ord(0xFC)));
+ok(! Devel::PPPort::isUPPER_A(0xDC));
+ok(! Devel::PPPort::isUPPER_A(0xFC));
 
 ok(  Devel::PPPort::isLOWER(ord("b")));
 ok(! Devel::PPPort::isLOWER(ord("B")));
@@ -1269,8 +1269,8 @@ ok(  Devel::PPPort::isLOWER_A(ord("y")));
 
 # One of these two is lowercase in EBCDIC; the other in Latin1, but neither are
 # ASCII lowercase.
-ok(! Devel::PPPort::isLOWER_A(ord(0xDC)));
-ok(! Devel::PPPort::isLOWER_A(ord(0xFC)));
+ok(! Devel::PPPort::isLOWER_A(0xDC));
+ok(! Devel::PPPort::isLOWER_A(0xFC));
 
 ok(  Devel::PPPort::isALPHA(ord("C")));
 ok(! Devel::PPPort::isALPHA(ord("1")));
