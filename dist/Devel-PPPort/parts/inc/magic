@@ -18,6 +18,11 @@ __UNDEFINED__
 /sv_\w+_mg/
 sv_magic_portable
 
+SvIV_nomg
+SvUV_nomg
+SvNV_nomg
+SvTRUE_nomg
+
 =implementation
 
 __UNDEFINED__  SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
@@ -27,8 +32,13 @@ __UNDEFINED__  sv_catpvn_nomg     sv_catpvn
 __UNDEFINED__  sv_catsv_nomg      sv_catsv
 __UNDEFINED__  sv_setsv_nomg      sv_setsv
 __UNDEFINED__  sv_pvn_nomg        sv_pvn
-__UNDEFINED__  SvIV_nomg          SvIV
-__UNDEFINED__  SvUV_nomg          SvUV
+
+#ifdef SV_NOSTEAL
+__UNDEFINED__ SvIV_nomg(sv) (!SvGMAGICAL((sv)) ? SvIV((sv)) : SvIVx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
+__UNDEFINED__ SvUV_nomg(sv) (!SvGMAGICAL((sv)) ? SvUV((sv)) : SvUVx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
+__UNDEFINED__ SvNV_nomg(sv) (!SvGMAGICAL((sv)) ? SvNV((sv)) : SvNVx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
+__UNDEFINED__ SvTRUE_nomg(sv) (!SvGMAGICAL((sv)) ? SvTRUE((sv)) : SvTRUEx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
+#endif
 
 #ifndef sv_catpv_mg
 #  define sv_catpv_mg(sv, ptr)          \
@@ -481,7 +491,67 @@ sv_magic_portable(sv)
         OUTPUT:
                 RETVAL
 
-=tests plan => 23
+#ifdef SvIV_nomg
+
+IV
+magic_SvIV_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = SvIV_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+#ifdef SvUV_nomg
+
+UV
+magic_SvUV_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = SvUV_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+#ifdef SvNV_nomg
+
+NV
+magic_SvNV_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = SvNV_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+#ifdef SvTRUE_nomg
+
+bool
+magic_SvTRUE_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = SvTRUE_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+#ifdef SvPV_nomg_nolen
+
+char *
+magic_SvPV_nomg_nolen(sv)
+        SV *sv
+        CODE:
+                RETVAL = SvPV_nomg_nolen(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+=tests plan => 45
 
 # Find proper magic
 ok(my $obj1 = Devel::PPPort->new_with_mg());
@@ -552,3 +622,68 @@ ok(!Devel::PPPort::SvVSTRING_mg(4711));
 my $foo = 'bar';
 ok(Devel::PPPort::sv_magic_portable($foo));
 ok($foo eq 'bar');
+
+if ( "$]" lt '5.007003' ) {
+    skip 'skip: no SV_NOSTEAL support', 0 for 1..22;
+} else {
+    tie my $scalar, 'TieScalarCounter', 10;
+    my $fetch = $scalar;
+
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvIV_nomg($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvUV_nomg($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvNV_nomg($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvPV_nomg_nolen($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvTRUE_nomg($scalar);
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+
+    my $object = OverloadedObject->new('string', 5.5, 0);
+
+    ok Devel::PPPort::magic_SvIV_nomg($object), 5;
+    ok Devel::PPPort::magic_SvUV_nomg($object), 5;
+    ok Devel::PPPort::magic_SvNV_nomg($object), 5.5;
+    ok Devel::PPPort::magic_SvPV_nomg_nolen($object), 'string';
+    ok !Devel::PPPort::magic_SvTRUE_nomg($object);
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value};
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
+}
+
+package OverloadedObject;
+
+sub new {
+    my ($class, $str, $num, $bool) = @_;
+    return bless { str => $str, num => $num, bool => $bool }, $class;
+}
+
+use overload
+    '""' => sub { $_[0]->{str} },
+    '0+' => sub { $_[0]->{num} },
+    'bool' => sub { $_[0]->{bool} },
+    ;

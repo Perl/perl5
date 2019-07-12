@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (23) {
+  if (45) {
     load();
-    plan(tests => 23);
+    plan(tests => 45);
   }
 }
 
@@ -117,4 +117,69 @@ ok(!Devel::PPPort::SvVSTRING_mg(4711));
 my $foo = 'bar';
 ok(Devel::PPPort::sv_magic_portable($foo));
 ok($foo eq 'bar');
+
+if ( "$]" lt '5.007003' ) {
+    skip 'skip: no SV_NOSTEAL support', 0 for 1..22;
+} else {
+    tie my $scalar, 'TieScalarCounter', 10;
+    my $fetch = $scalar;
+
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvIV_nomg($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvUV_nomg($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvNV_nomg($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvPV_nomg_nolen($scalar), 10;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok Devel::PPPort::magic_SvTRUE_nomg($scalar);
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+
+    my $object = OverloadedObject->new('string', 5.5, 0);
+
+    ok Devel::PPPort::magic_SvIV_nomg($object), 5;
+    ok Devel::PPPort::magic_SvUV_nomg($object), 5;
+    ok Devel::PPPort::magic_SvNV_nomg($object), 5.5;
+    ok Devel::PPPort::magic_SvPV_nomg_nolen($object), 'string';
+    ok !Devel::PPPort::magic_SvTRUE_nomg($object);
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value};
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
+}
+
+package OverloadedObject;
+
+sub new {
+    my ($class, $str, $num, $bool) = @_;
+    return bless { str => $str, num => $num, bool => $bool }, $class;
+}
+
+use overload
+    '""' => sub { $_[0]->{str} },
+    '0+' => sub { $_[0]->{num} },
+    'bool' => sub { $_[0]->{bool} },
+    ;
 
