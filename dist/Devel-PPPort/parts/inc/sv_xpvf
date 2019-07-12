@@ -45,7 +45,7 @@ sv_vsetpvf_mg
 #if { NEED sv_catpvf_mg }
 
 void
-sv_catpvf_mg(pTHX_ SV *sv, const char *pat, ...)
+sv_catpvf_mg(pTHX_ SV * const sv, const char * const pat, ...)
 {
   va_list args;
   va_start(args, pat);
@@ -62,7 +62,7 @@ sv_catpvf_mg(pTHX_ SV *sv, const char *pat, ...)
 #if { NEED sv_catpvf_mg_nocontext }
 
 void
-sv_catpvf_mg_nocontext(SV *sv, const char *pat, ...)
+sv_catpvf_mg_nocontext(SV * const sv, const char * const pat, ...)
 {
   dTHX;
   va_list args;
@@ -97,7 +97,7 @@ sv_catpvf_mg_nocontext(SV *sv, const char *pat, ...)
 #if { NEED sv_setpvf_mg }
 
 void
-sv_setpvf_mg(pTHX_ SV *sv, const char *pat, ...)
+sv_setpvf_mg(pTHX_ SV * const sv, const char * const pat, ...)
 {
   va_list args;
   va_start(args, pat);
@@ -114,7 +114,7 @@ sv_setpvf_mg(pTHX_ SV *sv, const char *pat, ...)
 #if { NEED sv_setpvf_mg_nocontext }
 
 void
-sv_setpvf_mg_nocontext(SV *sv, const char *pat, ...)
+sv_setpvf_mg_nocontext(SV * const sv, const char * const pat, ...)
 {
   dTHX;
   va_list args;
