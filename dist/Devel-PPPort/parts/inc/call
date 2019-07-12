@@ -68,7 +68,7 @@ __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS   0x4
 #if { NEED eval_pv }
 
 SV*
-eval_pv(char *p, I32 croak_on_error)
+eval_pv(const char *p, I32 croak_on_error)
 {
     dSP;
     SV* errsv;
