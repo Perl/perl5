@@ -634,6 +634,10 @@ __DATA__
 
 %include limits
 
+%include variables
+
+%include newCONSTSUB
+
 %include magic_defs
 
 %include misc
@@ -652,15 +656,11 @@ __DATA__
 
 %include mess
 
-%include variables
-
 %include mPUSH
 
 %include call
 
 %include newRV
-
-%include newCONSTSUB
 
 %include MY_CXT
 
