@@ -112,12 +112,18 @@ $data =~ s/^([\t ]*)__PERL_API__(\s*?)$/
            join "\n", map "$1$_", sort @perl_api
           /gem;
 
+my $undocumented = "(undocumented)";
+
 my @todo;
 for (reverse sort keys %todo) {
   my $ver = format_version($_);
   my $todo = "=item perl $ver\n\n";
   for (sort @{$todo{$_}}) {
-    $todo .= "  $_\n";
+    $todo .= "  $_";
+    $todo .= "  (DEPRECATED)" if  $embed{$_}->{flags}{D};
+    $todo .= "  (marked experimental)" if $embed{$_}->{flags}{x};
+    $todo .= "  $undocumented" unless $embed{$_}->{flags}{d};
+    $todo .= "\n";
   }
   push @todo, $todo;
 }
@@ -486,18 +492,33 @@ in threaded and non-threaded configurations.
 
 The header file written by this module, typically F<ppport.h>, provides
 access to the following elements of the Perl API that are not otherwise
-available in older Perl releases:
+available in Perl releases older than when the elements were first introduced.
+(Many of these are not supported all the way back to __MIN_PERL__;
+see L</Perl API not supported by ppport.h back to __MIN_PERL__> for details.)
 
     __PROVIDED_API__
 
-=head2 Perl API not supported by ppport.h
+=head2 Perl API not supported by ppport.h back to __MIN_PERL__
 
-There is still a big part of the API not supported by F<ppport.h>.
-Either because it doesn't make sense to back-port that part of the API,
-or simply because it hasn't been implemented yet. Patches welcome!
+There is still a big part of the API not fully supported by F<ppport.h>.
+This can be because it doesn't make sense to back-port that part of the API,
+or simply because it hasn't been implemented yet. Patches welcome!  Some
+elements are ported backward for some releases, but not all the way to
+__MIN_PERL__.
 
-Here's a list of the currently unsupported API, and also the version of
-Perl below which it is unsupported:
+Below is a list of the API that isn't currently supported back to
+__MIN_PERL__, sorted by the version of Perl below which it is unsupported.
+Only things you should be using are included in the list, so not listed are
+deprecated and experimental functions.
+
+Some of the entries are marked as "undocumented".  This means that they
+aren't necessarily considered stable, and could be changed or removed in some
+future release without warning.  It is therefore a bad idea to use them
+without further checking.  It could be that these are considered to be for
+perl core use only; or it could be, though, that C<Devel::PPPort> doesn't know
+where to find their documentation, or that it's just an oversight that they
+haven't been documented.  If you want to use one, and potentially have it
+backported, first send mail to L<mailto:perl5-porters@perl.org>.
 
 =over 4
 
