@@ -286,7 +286,14 @@ sub expand_pp_expr
     my $proto = make_prototype($e);
     if (exists $prototypes{$func}) {
       if (compare_prototypes($proto, $prototypes{$func})) {
-        check(1, "differing prototypes for $func:\n  API: $proto\n  PPP: $prototypes{$func}");
+        my $proto_no_pTHX = $proto;
+        $proto_no_pTHX =~ s/pTHX_\s*//;
+        if (compare_prototypes($proto_no_pTHX, $prototypes{$func})) {
+            check(1, "differing prototypes for $func:\n  API: $proto\n  PPP: $prototypes{$func}");
+        }
+        else {
+            check(1, "prototypes differ in pTHX_ for $func:\n  API: $proto\n  PPP: $prototypes{$func}");
+        }
         $proto = $prototypes{$func};
       }
     }
