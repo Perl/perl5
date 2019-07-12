@@ -339,6 +339,13 @@ sub parse_embed
   return @func;
 }
 
+sub normalize_prototype  # So that they can be compared more easily
+{
+    my $proto = shift;
+    $proto =~ s/\s* \* \s* / * /xg;
+    return $proto;
+}
+
 sub make_prototype
 {
   my $f = shift;
@@ -346,7 +353,7 @@ sub make_prototype
   my $proto;
   my $pTHX_ = exists $f->{flags}{T} ? "" : "pTHX_ ";
   $proto = "$f->{ret} $f->{name}" . "($pTHX_" . join(', ', @args) . ')';
-  return $proto;
+  return normalize_prototype($proto);
 }
 
 sub format_version

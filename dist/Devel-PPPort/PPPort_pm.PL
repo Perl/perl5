@@ -150,6 +150,7 @@ sub include
 
   for (keys %{$data->{prototypes}}) {
     $prototypes{$_} = $data->{prototypes}{$_};
+    $prototypes{$_} = normalize_prototype($data->{prototypes}{$_});
     $data->{implementation} =~ s/^$_(?=\s*\()/$DPPP(my_$_)/mg;
   }
 
