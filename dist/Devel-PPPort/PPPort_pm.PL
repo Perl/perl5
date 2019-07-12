@@ -854,6 +854,8 @@ __DATA__
 
 %include pv_tools
 
+%include locale
+
 #endif /* _P_P_PORTABILITY_H_ */
 
 /* End of File ppport.h */
