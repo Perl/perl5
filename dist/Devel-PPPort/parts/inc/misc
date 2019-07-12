@@ -310,44 +310,64 @@ __UNDEFINED__ LATIN1_TO_NATIVE(c) (c)
 # if { VERSION < 5.22.0 }
 #  undef isALNUM
 #  undef isALNUM_A
+#  undef isALNUM_L1
 #  undef isALNUMC
 #  undef isALNUMC_A
+#  undef isALNUMC_L1
 #  undef isALPHA
 #  undef isALPHA_A
+#  undef isALPHA_L1
 #  undef isALPHANUMERIC
 #  undef isALPHANUMERIC_A
+#  undef isALPHANUMERIC_L1
 #  undef isASCII
 #  undef isASCII_A
+#  undef isASCII_L1
 #  undef isBLANK
 #  undef isBLANK_A
+#  undef isBLANK_L1
 #  undef isCNTRL
 #  undef isCNTRL_A
+#  undef isCNTRL_L1
 #  undef isDIGIT
 #  undef isDIGIT_A
+#  undef isDIGIT_L1
 #  undef isGRAPH
 #  undef isGRAPH_A
+#  undef isGRAPH_L1
 #  undef isIDCONT
 #  undef isIDCONT_A
+#  undef isIDCONT_L1
 #  undef isIDFIRST
 #  undef isIDFIRST_A
+#  undef isIDFIRST_L1
 #  undef isLOWER
 #  undef isLOWER_A
+#  undef isLOWER_L1
 #  undef isOCTAL
 #  undef isOCTAL_A
+#  undef isOCTAL_L1
 #  undef isPRINT
 #  undef isPRINT_A
+#  undef isPRINT_L1
 #  undef isPSXSPC
 #  undef isPSXSPC_A
+#  undef isPSXSPC_L1
 #  undef isPUNCT
 #  undef isPUNCT_A
+#  undef isPUNCT_L1
 #  undef isSPACE
 #  undef isSPACE_A
+#  undef isSPACE_L1
 #  undef isUPPER
 #  undef isUPPER_A
+#  undef isUPPER_L1
 #  undef isWORDCHAR
 #  undef isWORDCHAR_A
+#  undef isWORDCHAR_L1
 #  undef isXDIGIT
 #  undef isXDIGIT_A
+#  undef isXDIGIT_L1
 # endif
 
 __UNDEFINED__ isASCII(c)    (isCNTRL(c) || isPRINT(c))
@@ -373,6 +393,17 @@ __UNDEFINED__ isCNTRL(c)    (    (c) == '\0' || (c) == '\a' || (c) == '\b'      
                              ||  (c) == 0x3C /* U+14 DC4 */                     \
                              ||  (c) == 0x3D /* U+15 NAK */                     \
                              ||  (c) == 0x3F /* U+1A SUB */                     \
+                            )
+
+#if '^' == 106    /* EBCDIC POSIX-BC */
+#  define D_PPP_OUTLIER_CONTROL 0x5F
+#else   /* EBCDIC 1047 037 */
+#  define D_PPP_OUTLIER_CONTROL 0xFF
+#endif
+
+/* The controls are everything below blank, plus one outlier */
+__UNDEFINED__ isCNTRL_L1(c) ((WIDEST_UTYPE) (c) < ' '                           \
+                          || (WIDEST_UTYPE) (c) == D_PPP_OUTLIER_CONTROL)
                             )
 /* The ordering of the tests in this and isUPPER are to exclude most characters
  * early */
@@ -422,29 +453,61 @@ __UNDEFINED__ isUPPER(c)    (        (c) >= 'A' && (c) <= 'Z'                   
 #  undef isASCII_A
 # endif
 
+# if { VERSION < 5.17.8 } /* earlier perls didn't include PILCROW, SECTION SIGN */
+#  undef isPUNCT_L1
+# endif
+
+# if { VERSION < 5.13.7 } /* khw didn't investigate why this failed */
+#  undef isALNUMC_L1
+#endif
+
 # if { VERSION < 5.20.0 } /* earlier perls didn't include \v */
 #  undef isSPACE
 #  undef isSPACE_A
+#  undef isSPACE_L1
 # endif
 
 __UNDEFINED__ isASCII(c)        ((WIDEST_UTYPE) (c) <= 127)
 __UNDEFINED__ isCNTRL(c)        ((WIDEST_UTYPE) (c) < ' ' || (c) == 127)
+__UNDEFINED__ isCNTRL_L1(c)     (isCNTRL(c) || (   (WIDEST_UTYPE) (c) <= 0x9F  \
+                                                && (WIDEST_UTYPE) (c) >= 0x80))
 __UNDEFINED__ isLOWER(c)        ((c) >= 'a' && (c) <= 'z')
 __UNDEFINED__ isUPPER(c)        ((c) <= 'Z' && (c) >= 'A')
 #endif /* Below are definitions common to EBCDIC and ASCII */
 
+__UNDEFINED__ isASCII_L1(c)     isASCII(c)
 __UNDEFINED__ isALNUM(c)        isWORDCHAR(c)
 __UNDEFINED__ isALNUMC(c)       isALPHANUMERIC(c)
+__UNDEFINED__ isALNUMC_L1(c)    isALPHANUMERIC_L1(c)
 __UNDEFINED__ isALPHA(c)        (isUPPER(c) || isLOWER(c))
+__UNDEFINED__ isALPHA_L1(c)     (isUPPER_L1(c) || isLOWER_L1(c))
 __UNDEFINED__ isALPHANUMERIC(c) (isALPHA(c) || isDIGIT(c))
+__UNDEFINED__ isALPHANUMERIC_L1(c) (isALPHA_L1(c) || isDIGIT(c))
 __UNDEFINED__ isBLANK(c)        ((c) == ' ' || (c) == '\t')
+__UNDEFINED__ isBLANK_L1(c) (    isBLANK(c)                                    \
+                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                                 && NATIVE_TO_LATIN1((U8) c) == 0xA0))
 __UNDEFINED__ isDIGIT(c)        ((c) <= '9' && (c) >= '0')
+__UNDEFINED__ isDIGIT_L1(c)     isDIGIT(c)
 __UNDEFINED__ isGRAPH(c)        (isWORDCHAR(c) || isPUNCT(c))
+__UNDEFINED__ isGRAPH_L1(c)     (isPRINT_L1(c) && (c) != ' ')
 __UNDEFINED__ isIDCONT(c)       isWORDCHAR(c)
+__UNDEFINED__ isIDCONT_L1(c)	isWORDCHAR_L1(c)
 __UNDEFINED__ isIDFIRST(c)      (isALPHA(c) || (c) == '_')
+__UNDEFINED__ isIDFIRST_L1(c)   (isALPHA_L1(c) || NATIVE_TO_LATIN1(c) == '_')
+__UNDEFINED__ isLOWER_L1(c) (    isLOWER(c)                                    \
+                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                                 && (  (   NATIVE_TO_LATIN1((U8) c) >= 0xDF    \
+                                        && NATIVE_TO_LATIN1((U8) c) != 0xF7)   \
+                                     || NATIVE_TO_LATIN1((U8) c) == 0xAA       \
+                                     || NATIVE_TO_LATIN1((U8) c) == 0xBA       \
+                                     || NATIVE_TO_LATIN1((U8) c) == 0xB5)))
 __UNDEFINED__ isOCTAL(c)        (((WIDEST_UTYPE)((c)) & ~7) == '0')
+__UNDEFINED__ isOCTAL_L1(c)     isOCTAL(c)
 __UNDEFINED__ isPRINT(c)        (isGRAPH(c) || (c) == ' ')
+__UNDEFINED__ isPRINT_L1(c)     ((WIDEST_UTYPE) (c) < 256 && ! isCNTRL_L1(c))
 __UNDEFINED__ isPSXSPC(c)       isSPACE(c)
+__UNDEFINED__ isPSXSPC_L1(c)    isSPACE_L1(c)
 __UNDEFINED__ isPUNCT(c)    (   (c) == '-' || (c) == '!' || (c) == '"'          \
                              || (c) == '#' || (c) == '$' || (c) == '%'          \
                              || (c) == '&' || (c) == '\'' || (c) == '('         \
@@ -456,12 +519,32 @@ __UNDEFINED__ isPUNCT(c)    (   (c) == '-' || (c) == '!' || (c) == '"'          
                              || (c) == ']' || (c) == '^' || (c) == '_'          \
                              || (c) == '`' || (c) == '{' || (c) == '|'          \
                              || (c) == '}' || (c) == '~')
+__UNDEFINED__ isPUNCT_L1(c)  (    isPUNCT(c)                                   \
+                              || (   (WIDEST_UTYPE) (c) < 256                  \
+                                  && (   NATIVE_TO_LATIN1((U8) c) == 0xA1      \
+                                      || NATIVE_TO_LATIN1((U8) c) == 0xA7      \
+                                      || NATIVE_TO_LATIN1((U8) c) == 0xAB      \
+                                      || NATIVE_TO_LATIN1((U8) c) == 0xB6      \
+                                      || NATIVE_TO_LATIN1((U8) c) == 0xB7      \
+                                      || NATIVE_TO_LATIN1((U8) c) == 0xBB      \
+                                      || NATIVE_TO_LATIN1((U8) c) == 0xBF)))
 __UNDEFINED__ isSPACE(c)        (   isBLANK(c) || (c) == '\n' || (c) == '\r'    \
                                  || (c) == '\v' || (c) == '\f')
+__UNDEFINED__ isSPACE_L1(c) (    isSPACE(c)                                    \
+                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                                 && (   NATIVE_TO_LATIN1((U8) c) == 0x85       \
+                                     || NATIVE_TO_LATIN1((U8) c) == 0xA0)))
+__UNDEFINED__ isUPPER_L1(c) (   isUPPER(c)                                     \
+                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                                 && (   NATIVE_TO_LATIN1((U8) c) >= 0xC0       \
+                                     && NATIVE_TO_LATIN1((U8) c) <= 0xDE       \
+                                     && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
 __UNDEFINED__ isWORDCHAR(c)     (isALPHANUMERIC(c) || (c) == '_')
+__UNDEFINED__ isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT(c))
 __UNDEFINED__ isXDIGIT(c)       (   isDIGIT(c)                                  \
                                  || ((c) >= 'a' && (c) <= 'f')                  \
                                  || ((c) >= 'A' && (c) <= 'F'))
+__UNDEFINED__ isXDIGIT_L1(c)    isXDIGIT(c)
 
 __UNDEFINED__ isALNUM_A         isALNUM
 __UNDEFINED__ isALNUMC_A        isALNUMC
@@ -851,6 +934,14 @@ isBLANK_A(ord)
         RETVAL
 
 bool
+isBLANK_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isBLANK_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
 isUPPER(ord)
     UV ord
     CODE:
@@ -863,6 +954,14 @@ isUPPER_A(ord)
     UV ord
     CODE:
         RETVAL = isUPPER_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isUPPER_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isUPPER_L1(ord);
     OUTPUT:
         RETVAL
 
@@ -883,6 +982,14 @@ isLOWER_A(ord)
         RETVAL
 
 bool
+isLOWER_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isLOWER_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
 isALPHA(ord)
     UV ord
     CODE:
@@ -899,6 +1006,14 @@ isALPHA_A(ord)
         RETVAL
 
 bool
+isALPHA_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isALPHA_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
 isWORDCHAR(ord)
     UV ord
     CODE:
@@ -911,6 +1026,14 @@ isWORDCHAR_A(ord)
     UV ord
     CODE:
         RETVAL = isWORDCHAR_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isWORDCHAR_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isWORDCHAR_L1(ord);
     OUTPUT:
         RETVAL
 
@@ -1138,6 +1261,118 @@ isPSXSPC_A(ord)
     OUTPUT:
         RETVAL
 
+bool
+isALPHANUMERIC_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isALPHANUMERIC_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isALNUMC_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isALNUMC_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isDIGIT_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isDIGIT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isOCTAL_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isOCTAL_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isIDFIRST_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isIDFIRST_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isIDCONT_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isIDCONT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isSPACE_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isSPACE_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isASCII_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isASCII_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isCNTRL_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isCNTRL_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isPRINT_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isPRINT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isGRAPH_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isGRAPH_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isPUNCT_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isPUNCT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isXDIGIT_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isXDIGIT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isPSXSPC_L1(ord)
+    UV ord
+    CODE:
+        RETVAL = isPSXSPC_L1(ord);
+    OUTPUT:
+        RETVAL
+
 STRLEN
 av_tindex(av)
         SV *av
@@ -1154,7 +1389,7 @@ av_top_index(av)
         OUTPUT:
                 RETVAL
 
-=tests plan => 128
+=tests plan => 176
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -1269,6 +1504,9 @@ ok(! Devel::PPPort::isBLANK(ord("\n")));
 ok(  Devel::PPPort::isBLANK_A(ord("\t")));
 ok(! Devel::PPPort::isBLANK_A(ord("\r")));
 
+ok(  Devel::PPPort::isBLANK_L1(ord("\t")));
+ok(! Devel::PPPort::isBLANK_L1(ord("\r")));
+
 ok(  Devel::PPPort::isUPPER(ord("A")));
 ok(! Devel::PPPort::isUPPER(ord("a")));
 
@@ -1278,6 +1516,9 @@ ok(  Devel::PPPort::isUPPER_A(ord("Z")));
 # ASCII uppercase.
 ok(! Devel::PPPort::isUPPER_A(0xDC));
 ok(! Devel::PPPort::isUPPER_A(0xFC));
+
+ok(Devel::PPPort::isUPPER_L1(0xDC) || Devel::PPPort::isUPPER_L1(0xFC));
+ok(! (Devel::PPPort::isUPPER_L1(0xDC) && Devel::PPPort::isUPPER_L1(0xFC)));
 
 ok(  Devel::PPPort::isLOWER(ord("b")));
 ok(! Devel::PPPort::isLOWER(ord("B")));
@@ -1289,11 +1530,18 @@ ok(  Devel::PPPort::isLOWER_A(ord("y")));
 ok(! Devel::PPPort::isLOWER_A(0xDC));
 ok(! Devel::PPPort::isLOWER_A(0xFC));
 
+ok(Devel::PPPort::isLOWER_L1(0xDC) || Devel::PPPort::isLOWER_L1(0xFC));
+ok(! Devel::PPPort::isLOWER_L1(0xDC) && Devel::PPPort::isLOWER_L1(0xFC));
+
 ok(  Devel::PPPort::isALPHA(ord("C")));
 ok(! Devel::PPPort::isALPHA(ord("1")));
 
 ok(  Devel::PPPort::isALPHA_A(ord("x")));
 ok(! Devel::PPPort::isALPHA_A(0xDC));
+
+ok(  Devel::PPPort::isALPHA_L1(ord("y")));
+ok(  Devel::PPPort::isALPHA_L1(0xDC));
+ok(! Devel::PPPort::isALPHA_L1(0xB6));
 
 ok(  Devel::PPPort::isWORDCHAR(ord("_")));
 ok(! Devel::PPPort::isWORDCHAR(ord("@")));
@@ -1301,11 +1549,19 @@ ok(! Devel::PPPort::isWORDCHAR(ord("@")));
 ok(  Devel::PPPort::isWORDCHAR_A(ord("2")));
 ok(! Devel::PPPort::isWORDCHAR_A(0xFC));
 
+ok(  Devel::PPPort::isWORDCHAR_L1(ord("2")));
+ok(  Devel::PPPort::isWORDCHAR_L1(0xFC));
+ok(! Devel::PPPort::isWORDCHAR_L1(0xB6));
+
 ok(  Devel::PPPort::isALPHANUMERIC(ord("4")));
 ok(! Devel::PPPort::isALPHANUMERIC(ord("_")));
 
 ok(  Devel::PPPort::isALPHANUMERIC_A(ord("l")));
 ok(! Devel::PPPort::isALPHANUMERIC_A(0xDC));
+
+ok(  Devel::PPPort::isALPHANUMERIC_L1(ord("l")));
+ok(  Devel::PPPort::isALPHANUMERIC_L1(0xDC));
+ok(! Devel::PPPort::isALPHANUMERIC_L1(0xB6));
 
 ok(  Devel::PPPort::isALNUM(ord("c")));
 ok(! Devel::PPPort::isALNUM(ord("}")));
@@ -1313,11 +1569,18 @@ ok(! Devel::PPPort::isALNUM(ord("}")));
 ok(  Devel::PPPort::isALNUM_A(ord("5")));
 ok(! Devel::PPPort::isALNUM_A(0xFC));
 
+ok(  Devel::PPPort::isALNUMC_L1(ord("5")));
+ok(  Devel::PPPort::isALNUMC_L1(0xFC));
+ok(! Devel::PPPort::isALNUMC_L1(0xB6));
+
 ok(  Devel::PPPort::isDIGIT(ord("6")));
 ok(! Devel::PPPort::isDIGIT(ord("_")));
 
 ok(  Devel::PPPort::isDIGIT_A(ord("7")));
 ok(! Devel::PPPort::isDIGIT_A(0xDC));
+
+ok(  Devel::PPPort::isDIGIT_L1(ord("5")));
+ok(! Devel::PPPort::isDIGIT_L1(0xDC));
 
 ok(  Devel::PPPort::isOCTAL(ord("7")));
 ok(! Devel::PPPort::isOCTAL(ord("8")));
@@ -1325,11 +1588,18 @@ ok(! Devel::PPPort::isOCTAL(ord("8")));
 ok(  Devel::PPPort::isOCTAL_A(ord("0")));
 ok(! Devel::PPPort::isOCTAL_A(ord("9")));
 
+ok(  Devel::PPPort::isOCTAL_L1(ord("2")));
+ok(! Devel::PPPort::isOCTAL_L1(ord("8")));
+
 ok(  Devel::PPPort::isIDFIRST(ord("D")));
 ok(! Devel::PPPort::isIDFIRST(ord("1")));
 
 ok(  Devel::PPPort::isIDFIRST_A(ord("_")));
 ok(! Devel::PPPort::isIDFIRST_A(0xFC));
+
+ok(  Devel::PPPort::isIDFIRST_L1(ord("_")));
+ok(  Devel::PPPort::isIDFIRST_L1(0xFC));
+ok(! Devel::PPPort::isIDFIRST_L1(0xB6));
 
 ok(  Devel::PPPort::isIDCONT(ord("e")));
 ok(! Devel::PPPort::isIDCONT(ord("@")));
@@ -1337,11 +1607,18 @@ ok(! Devel::PPPort::isIDCONT(ord("@")));
 ok(  Devel::PPPort::isIDCONT_A(ord("2")));
 ok(! Devel::PPPort::isIDCONT_A(0xDC));
 
+ok(  Devel::PPPort::isIDCONT_L1(ord("4")));
+ok(  Devel::PPPort::isIDCONT_L1(0xDC));
+ok(! Devel::PPPort::isIDCONT_L1(0xB6));
+
 ok(  Devel::PPPort::isSPACE(ord(" ")));
 ok(! Devel::PPPort::isSPACE(ord("_")));
 
 ok(  Devel::PPPort::isSPACE_A(ord("\cK")));
 ok(! Devel::PPPort::isSPACE_A(ord("F")));
+
+ok(  Devel::PPPort::isSPACE_L1(ord("\cK")));
+ok(! Devel::PPPort::isSPACE_L1(ord("g")));
 
 # This stresses the edge for ASCII machines, but happens to work on EBCDIC as
 # well
@@ -1349,9 +1626,11 @@ ok(  Devel::PPPort::isASCII(0x7F));
 ok(! Devel::PPPort::isASCII(0x80));
 
 ok(  Devel::PPPort::isASCII_A(ord("9")));
+ok(  Devel::PPPort::isASCII_L1(ord("9")));
 
 # B6 is the PARAGRAPH SIGN in ASCII and EBCDIC
 ok(! Devel::PPPort::isASCII_A(0xB6));
+ok(! Devel::PPPort::isASCII_L1(0xB6));
 
 ok(  Devel::PPPort::isCNTRL(ord("\e")));
 ok(! Devel::PPPort::isCNTRL(ord(" ")));
@@ -1359,11 +1638,28 @@ ok(! Devel::PPPort::isCNTRL(ord(" ")));
 ok(  Devel::PPPort::isCNTRL_A(ord("\a")));
 ok(! Devel::PPPort::isCNTRL_A(0xB6));
 
+ok(  Devel::PPPort::isCNTRL_L1(ord("\a")));
+ok(  Devel::PPPort::isCNTRL_L1(ord(" ") - 1));
+ok(! Devel::PPPort::isCNTRL_L1(0xB6));
+if (ord('A') == 65) {
+    ok(Devel::PPPort::isCNTRL_L1(0x80));
+}
+elsif (ord('^') == 106) {
+    ok(Devel::PPPort::isCNTRL_L1(0x5F));
+}
+else {
+    ok(Devel::PPPort::isCNTRL_L1(0xFF));
+}
+
 ok(  Devel::PPPort::isPRINT(ord(" ")));
 ok(! Devel::PPPort::isPRINT(ord("\n")));
 
 ok(  Devel::PPPort::isPRINT_A(ord("G")));
 ok(! Devel::PPPort::isPRINT_A(0xB6));
+
+ok(  Devel::PPPort::isPRINT_L1(ord("~")));
+ok(  Devel::PPPort::isPRINT_L1(0xB6));
+ok(! Devel::PPPort::isPRINT_L1(ord("\r")));
 
 ok(  Devel::PPPort::isGRAPH(ord("h")));
 ok(! Devel::PPPort::isGRAPH(ord(" ")));
@@ -1371,11 +1667,18 @@ ok(! Devel::PPPort::isGRAPH(ord(" ")));
 ok(  Devel::PPPort::isGRAPH_A(ord("i")));
 ok(! Devel::PPPort::isGRAPH_A(0xB6));
 
+ok(  Devel::PPPort::isGRAPH_L1(ord("j")));
+ok(  Devel::PPPort::isGRAPH_L1(0xB6));
+ok(! Devel::PPPort::isGRAPH_L1(4));
+
 ok(  Devel::PPPort::isPUNCT(ord("#")));
 ok(! Devel::PPPort::isPUNCT(ord(" ")));
 
 ok(  Devel::PPPort::isPUNCT_A(ord("*")));
 ok(! Devel::PPPort::isPUNCT_A(0xB6));
+
+ok(  Devel::PPPort::isPUNCT_L1(ord("+")));
+ok(  Devel::PPPort::isPUNCT_L1(0xB6));
 
 ok(  Devel::PPPort::isXDIGIT(ord("A")));
 ok(! Devel::PPPort::isXDIGIT(ord("_")));
@@ -1383,11 +1686,17 @@ ok(! Devel::PPPort::isXDIGIT(ord("_")));
 ok(  Devel::PPPort::isXDIGIT_A(ord("9")));
 ok(! Devel::PPPort::isXDIGIT_A(0xDC));
 
+ok(  Devel::PPPort::isXDIGIT_L1(ord("9")));
+ok(! Devel::PPPort::isXDIGIT_L1(0xFF));
+
 ok(  Devel::PPPort::isPSXSPC(ord(" ")));
 ok(! Devel::PPPort::isPSXSPC(ord("k")));
 
 ok(  Devel::PPPort::isPSXSPC_A(ord("\cK")));
 ok(! Devel::PPPort::isPSXSPC_A(0xFC));
+
+ok(  Devel::PPPort::isPSXSPC_L1(ord("\cK")));
+ok(! Devel::PPPort::isPSXSPC_L1(0xFC));
 
 ok(&Devel::PPPort::av_top_index([1,2,3]), 2);
 ok(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
