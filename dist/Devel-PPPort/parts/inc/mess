@@ -80,9 +80,9 @@ NEED_vmess
 #ifndef die_sv
 #if { NEED die_sv }
 OP *
-die_sv(pTHX_ SV *sv)
+die_sv(pTHX_ SV *baseex)
 {
-    croak_sv(sv);
+    croak_sv(baseex);
     return (OP *)NULL;
 }
 #endif
