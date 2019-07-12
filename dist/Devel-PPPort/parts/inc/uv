@@ -63,7 +63,7 @@ __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; 
 #if !defined(my_strnlen)
 #if { NEED my_strnlen }
 
-STRLEN
+Size_t
 my_strnlen(const char *str, Size_t maxlen)
 {
     const char *p = str;
