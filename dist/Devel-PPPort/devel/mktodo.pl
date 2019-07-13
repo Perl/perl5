@@ -48,7 +48,7 @@ chomp $fullperl;
 
 $ENV{SKIP_SLOW_TESTS} = 1;
 
-regen_all();
+regen_Makefile();
 
 my %stdsym = map { ($_ => 1) } qw (
   strlen
@@ -73,7 +73,7 @@ for (`$Config{nm} $fullperl`) {
 }
 keys %sym >= 50 or die "less than 50 symbols found in $fullperl\n";
 
-my %all = %{load_todo($opt{todo}, $opt{version})} if $opt{todo};
+my %todo = %{load_todo($opt{todo}, $opt{version})} if $opt{todo};
 my @recheck;
 
 my $symmap = get_apicheck_symbol_map();
@@ -84,7 +84,7 @@ for (;;) {
   regen_apicheck();
 
 retry:
-  my(@new, @tmp, %seen);
+  my(@new, @already_in_sym, %seen);
 
   my $r = run(qw(make));
   $r->{didnotrun} and die "couldn't run make: $!\n";
@@ -112,7 +112,7 @@ retry:
       if (!$seen{$1}++) {
         my @s = grep { exists $sym{$_} } $1, "Perl_$1", "perl_$1";
         if (@s) {
-          push @tmp, [$1, "E (@s)"];
+          push @already_in_sym, [$1, "E (@s)"];
         }
         else {
           push @new, [$1, "E"];
@@ -155,16 +155,16 @@ retry:
     }
   }
 
-  @new = grep !$all{$_->[0]}, @new;
+  @new = grep !$todo{$_->[0]}, @new;
 
   unless (@new) {
-    @new = grep !$all{$_->[0]}, @tmp;
+    @new = grep !$todo{$_->[0]}, @already_in_sym;
   }
 
   unless (@new) {
     if ($retry > 0) {
       $retry--;
-      regen_all();
+      regen_Makefile();
       goto retry;
     }
     print Dumper($r);
@@ -175,11 +175,11 @@ retry:
   push @recheck, map { $_->[0] } grep { $_->[1] !~ /^U/ } @new;
 
   for (@new) {
-    sym('new', @$_);
-    $all{$_->[0]} = $_->[1];
+    display_sym('new', @$_);
+    $todo{$_->[0]} = $_->[1];
   }
 
-  write_todo($opt{todo}, $opt{version}, \%all);
+  write_todo($opt{todo}, $opt{version}, \%todo);
 }
 
 if ($opt{check}) {
@@ -188,12 +188,12 @@ if ($opt{check}) {
 
   RECHECK: for my $i (0 .. $#recheck) {
     my $sym = $recheck[$i];
-    my $cur = delete $all{$sym};
+    my $cur = delete $todo{$sym};
 
-    sym('chk', $sym, $cur, sprintf(" [$ifmt/$ifmt, ETA %s]",
+    display_sym('chk', $sym, $cur, sprintf(" [$ifmt/$ifmt, ETA %s]",
                $i + 1, scalar @recheck, eta($t0, $i, scalar @recheck)));
 
-    write_todo($opt{todo}, $opt{version}, \%all);
+    write_todo($opt{todo}, $opt{version}, \%todo);
 
     if ($cur eq "E (Perl_$sym)") {
       # we can try a shortcut here
@@ -202,34 +202,34 @@ if ($opt{check}) {
       my $r = run(qw(make test));
 
       if (!$r->{didnotrun} && $r->{status} == 0) {
-        sym('del', $sym, $cur);
+        display_sym('del', $sym, $cur);
         next RECHECK;
       }
     }
 
     # run the full test
-    regen_all();
+    regen_Makefile();
 
     my $r = run(qw(make test));
 
     $r->{didnotrun} and die "couldn't run make test: $!\n";
 
     if ($r->{status} == 0) {
-      sym('del', $sym, $cur);
+      display_sym('del', $sym, $cur);
     }
     else {
-      $all{$sym} = $cur;
+      $todo{$sym} = $cur;
     }
   }
 }
 
-write_todo($opt{todo}, $opt{version}, \%all);
+write_todo($opt{todo}, $opt{version}, \%todo);
 
 run(qw(make realclean));
 
 exit 0;
 
-sub sym
+sub display_sym
 {
   my($what, $sym, $reason, $extra) = @_;
   $extra ||= '';
@@ -244,7 +244,7 @@ sub sym
          $opt{version}, $what, $sym, $reason, $extra;
 }
 
-sub regen_all
+sub regen_Makefile
 {
   my @mf_arg = ('--with-apicheck', 'OPTIMIZE=-O0 -w');
   push @mf_arg, qw( DEFINE=-DDPPP_APICHECK_NO_PPPORT_H ) if $opt{base};
@@ -360,10 +360,10 @@ sub get_apicheck_symbol_map
 
     if (keys %sym) {
       for my $s (sort dictionary_order keys %sym) {
-        sym('new', $s, $sym{$s});
-        $all{$s} = $sym{$s};
+        display_sym('new', $s, $sym{$s});
+        $todo{$s} = $sym{$s};
       }
-      write_todo($opt{todo}, $opt{version}, \%all);
+      write_todo($opt{todo}, $opt{version}, \%todo);
       regen_apicheck();
     }
     else {
