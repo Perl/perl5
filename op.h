@@ -701,8 +701,9 @@ struct opslab {
     OPSLAB *	opslab_head;		/* first slab in chain */
     OP *	opslab_freed;		/* chain of freed ops */
     size_t	opslab_refcnt;		/* number of ops (head slab only) */
+    U16		opslab_size;		/* size of slab in pointers,
+                                           including header */
 # ifdef PERL_DEBUG_READONLY_OPS
-    U16		opslab_size;		/* size of slab in pointers */
     bool	opslab_readonly;
 # endif
     OPSLOT	opslab_slots;		/* slots begin here */

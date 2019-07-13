@@ -236,10 +236,11 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 	perror("mmap failed");
 	abort();
     }
-    slab->opslab_size = (U16)sz;
 #else
     slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
 #endif
+    slab->opslab_size = (U16)sz;
+
 #ifndef WIN32
     /* The context is unused in non-Windows */
     PERL_UNUSED_CONTEXT;
