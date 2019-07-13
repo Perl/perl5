@@ -208,13 +208,26 @@ S_prune_chain_head(OP** op_p)
 #define SIZE_TO_PSIZE(x)	(((x) + sizeof(I32 *) - 1)/sizeof(I32 *))
 #define DIFF(o,p)		((size_t)((I32 **)(p) - (I32**)(o)))
 
-/* malloc a new op slab (suitable for attaching to PL_compcv) */
+/* requires double parens and aTHX_ */
+#define DEBUG_S_warn(args)					       \
+    DEBUG_S( 								\
+	PerlIO_printf(Perl_debug_log, "%s", SvPVx_nolen(Perl_mess args)) \
+    )
+
+
+/* malloc a new op slab (suitable for attaching to PL_compcv).
+ * sz is in units of pointers */
 
 static OPSLAB *
-S_new_slab(pTHX_ size_t sz)
+S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 {
+    OPSLAB *slab;
+
+    /* opslot_offset is only U16 */
+    assert(sz  < U16_MAX);
+
 #ifdef PERL_DEBUG_READONLY_OPS
-    OPSLAB *slab = (OPSLAB *) mmap(0, sz * sizeof(I32 *),
+    slab = (OPSLAB *) mmap(0, sz * sizeof(I32 *),
 				   PROT_READ|PROT_WRITE,
 				   MAP_ANON|MAP_PRIVATE, -1, 0);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "mapped %lu at %p\n",
@@ -225,21 +238,19 @@ S_new_slab(pTHX_ size_t sz)
     }
     slab->opslab_size = (U16)sz;
 #else
-    OPSLAB *slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
+    slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
 #endif
 #ifndef WIN32
     /* The context is unused in non-Windows */
     PERL_UNUSED_CONTEXT;
 #endif
     slab->opslab_first = (OPSLOT *)((I32 **)slab + sz - 1);
+    slab->opslab_head = head ? head : slab;
+    DEBUG_S_warn((aTHX_ "allocated new op slab  %p, head slab %p",
+        (void*)slab, (void*)(slab->opslab_head)));
     return slab;
 }
 
-/* requires double parens and aTHX_ */
-#define DEBUG_S_warn(args)					       \
-    DEBUG_S( 								\
-	PerlIO_printf(Perl_debug_log, "%s", SvPVx_nolen(Perl_mess args)) \
-    )
 
 /* Returns a sz-sized block of memory (suitable for holding an op) from
  * a free slot in the chain of op slabs attached to PL_compcv.
@@ -277,7 +288,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
        details.  */
     if (!CvSTART(PL_compcv)) {
 	CvSTART(PL_compcv) =
-	    (OP *)(head_slab = S_new_slab(aTHX_ PERL_SLAB_SIZE));
+	    (OP *)(head_slab = S_new_slab(aTHX_ NULL, PERL_SLAB_SIZE));
 	CvSLABBED_on(PL_compcv);
 	head_slab->opslab_refcnt = 2; /* one for the CV; one for the new OP */
     }
@@ -308,7 +319,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     }
 
 #define INIT_OPSLOT \
-	    slot->opslot_slab = head_slab;		\
+	    slot->opslot_offset = DIFF(slab2, slot) ;	\
 	    slot->opslot_next = slab2->opslab_first;	\
 	    slab2->opslab_first = slot;			\
 	    o = &slot->opslot_op;			\
@@ -332,7 +343,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	/* Create a new slab.  Make this one twice as big. */
 	slot = slab2->opslab_first;
 	while (slot->opslot_next) slot = slot->opslot_next;
-	slab2 = S_new_slab(aTHX_
+	slab2 = S_new_slab(aTHX_ head_slab,
 			    (DIFF(slab2, slot)+1)*2 > PERL_MAX_SLAB_SIZE
 					? PERL_MAX_SLAB_SIZE
 					: (DIFF(slab2, slot)+1)*2);
@@ -348,8 +359,8 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	 < SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P)
 	slot = &slab2->opslab_slots;
     INIT_OPSLOT;
-    DEBUG_S_warn((aTHX_ "allocating op at %p, head slab %p", (void*)o,
-        (void*)head_slab));
+    DEBUG_S_warn((aTHX_ "allocating op at %p, slab %p, head slab %p",
+        (void*)o, (void*)slab2, (void*)head_slab));
 
   gotit:
     /* moresib == 0, op_sibling == 0 implies a solitary unattached op */
@@ -448,7 +459,7 @@ Perl_Slab_Free(pTHX_ void *op)
     o->op_type = OP_FREED;
     o->op_next = slab->opslab_freed;
     slab->opslab_freed = o;
-    DEBUG_S_warn((aTHX_ "free op at %p, recorded in slab %p", (void*)o, (void*)slab));
+    DEBUG_S_warn((aTHX_ "free op at %p, recorded in head slab %p", (void*)o, (void*)slab));
     OpslabREFCNT_dec_padok(slab);
 }
 
