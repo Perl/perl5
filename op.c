@@ -250,7 +250,7 @@ S_new_slab(pTHX_ size_t sz)
 void *
 Perl_Slab_Alloc(pTHX_ size_t sz)
 {
-    OPSLAB *slab;
+    OPSLAB *head_slab; /* first slab in the chain */
     OPSLAB *slab2;
     OPSLOT *slot;
     OP *o;
@@ -277,11 +277,11 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
        details.  */
     if (!CvSTART(PL_compcv)) {
 	CvSTART(PL_compcv) =
-	    (OP *)(slab = S_new_slab(aTHX_ PERL_SLAB_SIZE));
+	    (OP *)(head_slab = S_new_slab(aTHX_ PERL_SLAB_SIZE));
 	CvSLABBED_on(PL_compcv);
-	slab->opslab_refcnt = 2; /* one for the CV; one for the new OP */
+	head_slab->opslab_refcnt = 2; /* one for the CV; one for the new OP */
     }
-    else ++(slab = (OPSLAB *)CvSTART(PL_compcv))->opslab_refcnt;
+    else ++(head_slab = (OPSLAB *)CvSTART(PL_compcv))->opslab_refcnt;
 
     opsz = SIZE_TO_PSIZE(sz);
     sz = opsz + OPSLOT_HEADER_P;
@@ -289,10 +289,11 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     /* The slabs maintain a free list of OPs. In particular, constant folding
        will free up OPs, so it makes sense to re-use them where possible. A
        freed up slot is used in preference to a new allocation.  */
-    if (slab->opslab_freed) {
-	OP **too = &slab->opslab_freed;
+    if (head_slab->opslab_freed) {
+	OP **too = &head_slab->opslab_freed;
 	o = *too;
-	DEBUG_S_warn((aTHX_ "found free op at %p, slab %p", (void*)o, (void*)slab));
+	DEBUG_S_warn((aTHX_ "found free op at %p, head slab %p", (void*)o,
+            (void*)head_slab));
 	while (o && DIFF(OpSLOT(o), OpSLOT(o)->opslot_next) < sz) {
 	    DEBUG_S_warn((aTHX_ "Alas! too small"));
 	    o = *(too = &o->op_next);
@@ -307,14 +308,14 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     }
 
 #define INIT_OPSLOT \
-	    slot->opslot_slab = slab;			\
+	    slot->opslot_slab = head_slab;		\
 	    slot->opslot_next = slab2->opslab_first;	\
 	    slab2->opslab_first = slot;			\
 	    o = &slot->opslot_op;			\
 	    o->op_slabbed = 1
 
     /* The partially-filled slab is next in the chain. */
-    slab2 = slab->opslab_next ? slab->opslab_next : slab;
+    slab2 = head_slab->opslab_next ? head_slab->opslab_next : head_slab;
     if ((space = DIFF(&slab2->opslab_slots, slab2->opslab_first)) < sz) {
 	/* Remaining space is too small. */
 
@@ -324,8 +325,8 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	    slot = &slab2->opslab_slots;
 	    INIT_OPSLOT;
 	    o->op_type = OP_FREED;
-	    o->op_next = slab->opslab_freed;
-	    slab->opslab_freed = o;
+	    o->op_next = head_slab->opslab_freed;
+	    head_slab->opslab_freed = o;
 	}
 
 	/* Create a new slab.  Make this one twice as big. */
@@ -335,8 +336,8 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 			    (DIFF(slab2, slot)+1)*2 > PERL_MAX_SLAB_SIZE
 					? PERL_MAX_SLAB_SIZE
 					: (DIFF(slab2, slot)+1)*2);
-	slab2->opslab_next = slab->opslab_next;
-	slab->opslab_next = slab2;
+	slab2->opslab_next = head_slab->opslab_next;
+	head_slab->opslab_next = slab2;
     }
     assert(DIFF(&slab2->opslab_slots, slab2->opslab_first) >= sz);
 
@@ -347,7 +348,8 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	 < SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P)
 	slot = &slab2->opslab_slots;
     INIT_OPSLOT;
-    DEBUG_S_warn((aTHX_ "allocating op at %p, slab %p", (void*)o, (void*)slab));
+    DEBUG_S_warn((aTHX_ "allocating op at %p, head slab %p", (void*)o,
+        (void*)head_slab));
 
   gotit:
     /* moresib == 0, op_sibling == 0 implies a solitary unattached op */
