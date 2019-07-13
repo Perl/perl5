@@ -91,6 +91,7 @@ push @args, '--nocheck' unless $opt{check};
 push @args, "--blead-version=$opt{'blead-version'}" if exists $opt{'blead-version'};
 push @args, @perlargs;
 
+# Find out what symbols were in what releases
 print "\nBuilding baseline files...\n\n";
 
 unless (runperl('devel/mktodo', '--base', @args)) {
@@ -98,6 +99,7 @@ unless (runperl('devel/mktodo', '--base', @args)) {
   quit_now();
 }
 
+# Move them to parts/base
 print "\nMoving baseline files...\n\n";
 
 for my $src (glob 'parts/todo/5*') {
@@ -106,6 +108,8 @@ for my $src (glob 'parts/todo/5*') {
   move($src, $dst) or die "Moving $src to $dst failed: $!\n";
 }
 
+# Then find out what ppport.h buys us by repeating the process above, but
+# using ppport.h
 print "\nBuilding todo files...\n\n";
 
 unless (runperl('devel/mktodo', @args)) {
