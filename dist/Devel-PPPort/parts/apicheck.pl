@@ -3,6 +3,9 @@
 #
 #  apicheck.pl -- generate apicheck.c: C source for automated API check
 #
+#  WARNING:  This script will be run on very old perls.  You need to not use
+#            modern constructs.  See HACKERS file for examples.
+#
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
@@ -223,8 +226,8 @@ HEAD
 # Caller can restrict what functions tests are generated for
 if (@ARGV) {
   my %want = map { ($_ => 0) } @ARGV;
-  @f = grep { exists $want{$_->{name}} } @f;
-  for (@f) { $want{$_->{name}}++ }
+  @f = grep { exists $want{$_->{'name'}} } @f;
+  for (@f) { $want{$_->{'name'}}++ }
   for (keys %want) {
     die "nothing found for '$_'\n" unless $want{$_};
   }
@@ -232,12 +235,12 @@ if (@ARGV) {
 
 my $f;
 for $f (@f) {   # Loop through all the tests to add
-  $ignore{$f->{name}} and next;
-  $f->{flags}{A} or next;  # only public API members
+  $ignore{$f->{'name'}} and next;
+  $f->{'flags'}{'A'} or next;  # only public API members
 
-  $ignore{$f->{name}} = 1; # ignore duplicates
+  $ignore{$f->{'name'}} = 1; # ignore duplicates
 
-  my $Perl_ = $f->{flags}{p} ? 'Perl_' : '';
+  my $Perl_ = $f->{'flags'}{'p'} ? 'Perl_' : '';
 
   my $stack = '';
   my @arg;
@@ -247,7 +250,7 @@ for $f (@f) {   # Loop through all the tests to add
   my $ca;
   my $varargs = 0;
 
-  for $ca (@{$f->{args}}) {   # Loop through the function's args
+  for $ca (@{$f->{'args'}}) {   # Loop through the function's args
     my $a = $ca->[0];           # 1th is the name, 0th is its type
     if ($a eq '...') {
       $varargs = 1;
@@ -273,7 +276,7 @@ for $f (@f) {   # Loop through all the tests to add
     $n = $tmap{$n} || $n;
 
     # Use a literal of our choosing for non-format functions
-    if ($n =~ /\bconst\s+char\b/ and $p eq '*' and !$f->{flags}{f}) {
+    if ($n =~ /\bconst\s+char\b/ and $p eq '*' and !$f->{'flags'}{'f'}) {
       push @arg, '"foo"';
     }
     else {
@@ -289,16 +292,16 @@ for $f (@f) {   # Loop through all the tests to add
 
   # Declare thread context for functions and macros that might need it.
   # (Macros often fail to say they don't need it.)
-  unless ($f->{flags}{'T'}) {
+  unless ($f->{'flags'}{'T'}) {
     $stack = "  dTHX;\n$stack";     # Harmless to declare even if not needed
     $aTHX = @arg ? 'aTHX_ ' : 'aTHX';
   }
 
   # If this function is on the list of things that need declarations, add
   # them.
-  if ($stack{$f->{name}}) {
+  if ($stack{$f->{'name'}}) {
     my $s = '';
-    for (@{$stack{$f->{name}}}) {
+    for (@{$stack{$f->{'name'}}}) {
       $s .= "  $_\n";
     }
     $stack = "$s$stack";
@@ -307,21 +310,21 @@ for $f (@f) {   # Loop through all the tests to add
   my $args = join ', ', @arg;
 
   # Failure to specify a return type in the apidoc line means void
-  my $rvt = $f->{ret} || 'void';
+  my $rvt = $f->{'ret'} || 'void';
 
   my $ret;
   if ($void{$rvt}) {    # Certain return types are instead considered void
-    $ret = $castvoid{$f->{name}} ? '(void) ' : '';
+    $ret = $castvoid{$f->{'name'}} ? '(void) ' : '';
   }
   else {
     $stack .= "  $rvt rval;\n";
-    $ret = $ignorerv{$f->{name}} ? '(void) ' : "rval = ";
+    $ret = $ignorerv{$f->{'name'}} ? '(void) ' : "rval = ";
   }
 
   my $aTHX_args = "";
 
   # Add parens to functions that take an argument list, even if empty
-  unless ($f->{flags}{'n'}) {
+  unless ($f->{'flags'}{'n'}) {
     $aTHX_args = "($aTHX$args)";
     $args = "($args)";
   }
@@ -329,54 +332,54 @@ for $f (@f) {   # Loop through all the tests to add
   print OUT <<HEAD;
 /******************************************************************************
 *
-*  $f->{name}
+*  $f->{'name'}
 *
 ******************************************************************************/
 
 HEAD
 
   # #ifdef out if marked as todo (not known in) this version
-  if ($todo{$f->{name}}) {
-    my($ver,$sub) = $todo{$f->{name}} =~ /^5\.(\d{3})(\d{3})$/ or die;
+  if ($todo{$f->{'name'}}) {
+    my($ver,$sub) = $todo{$f->{'name'}} =~ /^5\.(\d{3})(\d{2,3})$/ or die;
     for ($ver, $sub) {
       s/^0+(\d)/$1/
     }
     if ($ver < 6 && $sub > 0) {
-      $sub =~ s/0$// or die;
+      #$sub =~ s/0$// or die;
     }
     print OUT "#if PERL_VERSION > $ver || (PERL_VERSION == $ver && PERL_SUBVERSION >= $sub) /* TODO */\n";
   }
 
   my $final = $varargs
-              ? "$Perl_$f->{name}$aTHX_args"
-              : "$f->{name}$args";
+              ? "$Perl_$f->{'name'}$aTHX_args"
+              : "$f->{'name'}$args";
 
   # If there is a '#if' associated with this, add that
-  $f->{cond} and print OUT "#if $f->{cond}\n";
+  $f->{'cond'} and print OUT "#if $f->{'cond'}\n";
 
   print OUT <<END;
-void _DPPP_test_$f->{name} (void)
+void _DPPP_test_$f->{'name'} (void)
 {
   dXSARGS;
 $stack
   {
-#ifdef $f->{name}
-    $ret$f->{name}$args;
+#ifdef $f->{'name'}
+    $ret$f->{'name'}$args;
 #endif
   }
 
   {
-#ifdef $f->{name}
+#ifdef $f->{'name'}
     $ret$final;
 #else
-    $ret$Perl_$f->{name}$aTHX_args;
+    $ret$Perl_$f->{'name'}$aTHX_args;
 #endif
   }
 }
 END
 
-  $f->{cond} and print OUT "#endif\n";
-  $todo{$f->{name}} and print OUT "#endif\n";
+  $f->{'cond'} and print OUT "#endif\n";
+  $todo{$f->{'name'}} and print OUT "#endif\n";
 
   print OUT "\n";
 }
