@@ -116,7 +116,7 @@ ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"'
 ok(!eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 1); 1 });
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
 
-if ($] ge '5.007003' or ($] ge '5.006001' and $] lt '5.007')) {
+if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };
     ok(eval { Devel::PPPort::eval_pv('die $hashref', 1); 1 }, undef, 'check plain hashref is rethrown');
     ok(ref($@), 'HASH', 'check $@ is hashref') and
@@ -128,7 +128,9 @@ if ($] ge '5.007003' or ($] ge '5.006001' and $] lt '5.007')) {
     ok(ref($@), 'False', 'check that $@ contains False object');
     ok("$@", "$false", 'check we got the expected object');
 } else {
-    skip 'skip: no support for references in $@', 0 for 1..7;
+    for (1..7) {
+        skip 'skip: no support for references in $@', 0;
+    }
 }
 
 {
