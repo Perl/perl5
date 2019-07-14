@@ -193,10 +193,17 @@ if (exists $opt{'api-info'}) {
       $info++;
     }
     if ($API{$f}{provided}) {
-      my $todo = $API{$f}{todo} ? format_version($API{$f}{todo}) : "__MIN_PERL__";
-      print "Support by $ppport provided back to perl-$todo.\n";
-      print "Support needs to be explicitly requested by NEED_$f.\n" if exists $need{$f};
-      print "Depends on: ", join(', ', @{$depends{$f}}), ".\n" if exists $depends{$f};
+      my $todo = $API{$f}{todo} ? $API{$f}{todo} : __MIN_PERL__;
+      my $at_least = (int_parse_version($todo) == int_parse_version(__MIN_PERL__))
+                     ? " at least"
+                     : "";
+      print "Support by $ppport provided$at_least back to perl-",
+            format_version($todo),
+            ".\n";
+      print "Support needs to be explicitly requested by #define NEED_$f\n",
+            "(or #define NEED_${f}_GLOBAL).\n"              if exists $need{$f};
+      print "Depends on: ", join(', ', @{$depends{$f}}), ".\n"
+                                                         if exists $depends{$f};
       print "\n$hints{$f}" if exists $hints{$f};
       print "\nWARNING:\n$warnings{$f}" if exists $warnings{$f};
       $info++;
