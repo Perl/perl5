@@ -248,6 +248,17 @@ means arg not present, 1 is empty string/null byte */
 int mkstemp(char*);
 #endif
 
+#ifdef PERL_CORE
+#   if defined(VMS)
+/* only useful for calls to our mkostemp() emulation */
+#       define O_VMS_DELETEONCLOSE 0x40000000
+#       ifdef HAS_MKOSTEMP
+#           error 134221 will need a new solution for VMS
+#       endif
+#   else
+#       define O_VMS_DELETEONCLOSE 0
+#   endif
+#endif
 #if defined(HAS_MKOSTEMP) && defined(PERL_CORE)
 #   define Perl_my_mkostemp(templte, flags) mkostemp(templte, flags)
 #endif

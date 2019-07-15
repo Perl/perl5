@@ -5712,6 +5712,11 @@ S_my_mkostemp(char *templte, int flags) {
     STRLEN len = strlen(templte);
     int fd;
     int attempts = 0;
+#ifdef VMS
+    int delete_on_close = flags & O_VMS_DELETEONCLOSE;
+
+    flags &= ~O_VMS_DELETEONCLOSE;
+#endif
 
     if (len < 6 ||
         templte[len-1] != 'X' || templte[len-2] != 'X' || templte[len-3] != 'X' ||
@@ -5725,7 +5730,15 @@ S_my_mkostemp(char *templte, int flags) {
         for (i = 1; i <= 6; ++i) {
             templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
         }
-        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
+#ifdef VMS
+        if (delete_on_close) {
+            fd = open(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600, "fop=dlt");
+        }
+        else
+#endif
+        {
+            fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
+        }
     } while (fd == -1 && errno == EEXIST && ++attempts <= 100);
 
     return fd;

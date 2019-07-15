@@ -5062,7 +5062,7 @@ PerlIO_tmpfile_flags(int imode)
      const int fd = win32_tmpfd_mode(imode);
      if (fd >= 0)
 	  f = PerlIO_fdopen(fd, "w+b");
-#elif ! defined(VMS) && ! defined(OS2)
+#elif ! defined(OS2)
      int fd = -1;
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = TAINTING_get ? NULL : PerlEnv_getenv("TMPDIR");
@@ -5073,19 +5073,19 @@ PerlIO_tmpfile_flags(int imode)
 	 /* if TMPDIR is set and not empty, we try that first */
 	 sv = newSVpv(tmpdir, 0);
 	 sv_catpv(sv, tempname + 4);
-	 fd = Perl_my_mkostemp_cloexec(SvPVX(sv), imode);
+	 fd = Perl_my_mkostemp_cloexec(SvPVX(sv), imode | O_VMS_DELETEONCLOSE);
      }
      if (fd < 0) {
 	 SvREFCNT_dec(sv);
 	 sv = NULL;
 	 /* else we try /tmp */
-	 fd = Perl_my_mkostemp_cloexec(tempname, imode);
+	 fd = Perl_my_mkostemp_cloexec(tempname, imode | O_VMS_DELETEONCLOSE);
      }
      if (fd < 0) {
          /* Try cwd */
          sv = newSVpvs(".");
          sv_catpv(sv, tempname + 4);
-         fd = Perl_my_mkostemp_cloexec(SvPVX(sv), imode);
+         fd = Perl_my_mkostemp_cloexec(SvPVX(sv), imode | O_VMS_DELETEONCLOSE);
      }
      umask(old_umask);
      if (fd >= 0) {
@@ -5096,7 +5096,9 @@ PerlIO_tmpfile_flags(int imode)
          f = PerlIO_fdopen(fd, mode);
 	  if (f)
 	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
+#   ifndef VMS
 	  PerlLIO_unlink(sv ? SvPVX_const(sv) : tempname);
+#   endif
      }
      SvREFCNT_dec(sv);
 #else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
