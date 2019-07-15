@@ -229,15 +229,6 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
 }
 #endif /* #if defined(WIN32) || defined(CYGWIN_WITH_W32API) */
 
-#if defined(WIN32) && !defined(ATLEASTFIVEOHOHFIVE)
-static unsigned int
-sleep(unsigned int t)
-{
-    Sleep(t*1000);
-    return 0;
-}
-#endif
-
 #if !defined(HAS_GETTIMEOFDAY) && defined(VMS)
 #  define HAS_GETTIMEOFDAY
 
@@ -1023,15 +1014,13 @@ BOOT:
 #ifdef MY_CXT_KEY
         MY_CXT_INIT;
 #endif
-#ifdef ATLEASTFIVEOHOHFIVE
-#  ifdef HAS_GETTIMEOFDAY
+#ifdef HAS_GETTIMEOFDAY
         {
             (void) hv_store(PL_modglobal, "Time::NVtime", 12,
                             newSViv(PTR2IV(myNVtime)), 0);
             (void) hv_store(PL_modglobal, "Time::U2time", 12,
                             newSViv(PTR2IV(myU2time)), 0);
         }
-#  endif
 #endif
 #if defined(PERL_DARWIN)
 #  if defined(USE_ITHREADS) && defined(PERL_DARWIN_MUTEX)

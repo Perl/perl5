@@ -11,6 +11,8 @@ use Config;
 use ExtUtils::MakeMaker;
 use strict;
 
+use File::Spec;
+
 my $VERBOSE = $ENV{VERBOSE};
 my $DEFINE;
 my $LIBS = [];
@@ -28,55 +30,6 @@ my $ld_exeext = ($^O eq 'cygwin' ||
 unless($ENV{PERL_CORE}) {
     $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
-
-# Perls 5.002 and 5.003 did not have File::Spec, fake what we need.
-
-sub my_dirsep {
-    $^O eq 'VMS' ? '.' :
-        $^O =~ /mswin32|netware|djgpp/i ? '\\' :
-            $^O eq 'MacOS' ? ':'
-                : '/';
-}
-
-sub my_catdir {
-    shift;
-    my $catdir = join(my_dirsep, @_);
-    $^O eq 'VMS' ? "[$catdir]" : $catdir;
-}
-
-sub my_catfile {
-    shift;
-    return join(my_dirsep, @_) unless $^O eq 'VMS';
-    my $file = pop;
-    return my_catdir (undef, @_) . $file;
-}
-
-sub my_updir {
-    shift;
-    $^O eq 'VMS' ? "-" : "..";
-}
-
-BEGIN {
-    eval { require File::Spec };
-    if ($@) {
-        *File::Spec::catdir  = \&my_catdir;
-        *File::Spec::updir   = \&my_updir;
-        *File::Spec::catfile = \&my_catfile;
-    }
-}
-
-# Avoid 'used only once' warnings.
-my $nop1 = *File::Spec::catdir;
-my $nop2 = *File::Spec::updir;
-my $nop3 = *File::Spec::catfile;
-
-# if you have 5.004_03 (and some slightly older versions?), xsubpp
-# tries to generate line numbers in the C code generated from the .xs.
-# unfortunately, it is a little buggy around #ifdef'd code.
-# my choice is leave it in and have people with old perls complain
-# about the "Usage" bug, or leave it out and be unable to compile myself
-# without changing it, and then I'd always forget to change it before a
-# release. Sorry, Edward :)
 
 sub try_compile_and_link {
     my ($c, %args) = @_;
@@ -889,17 +842,12 @@ EOM
 sub doMakefile {
     my @makefileopts = ();
 
-    if ($] >= 5.005) {
-        push (@makefileopts,
-            'AUTHOR'    => 'Jarkko Hietaniemi <jhi@iki.fi>',
-            'ABSTRACT_FROM' => 'HiRes.pm',
-        );
-        DEFINE('ATLEASTFIVEOHOHFIVE');
-    }
     DEFINE('USE_PPPORT_H') unless $ENV{PERL_CORE};
 
     push (@makefileopts,
         'NAME'  => 'Time::HiRes',
+        'AUTHOR'    => 'Jarkko Hietaniemi <jhi@iki.fi>',
+        'ABSTRACT_FROM' => 'HiRes.pm',
         'VERSION_FROM' => 'HiRes.pm', # finds $VERSION
         'LIBS'  => $LIBS,   # e.g., '-lm'
         'DEFINE'        => $DEFINE,     # e.g., '-DHAS_SOMETHING'
@@ -916,6 +864,7 @@ sub doMakefile {
             'Test::More' => 0,
             'XSLoader' => 0,
             'strict' => 0,
+            'File::Spec' => 0,
         },
         'dist'      => {
             'CI'       => 'ci -l',
