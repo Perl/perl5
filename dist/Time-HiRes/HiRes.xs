@@ -57,13 +57,6 @@ extern "C" {
 #  define GCC_DIAG_RESTORE_STMT GCC_DIAG_RESTORE NOOP
 #endif
 
-/* At least ppport.h 3.13 gets this wrong: one really cannot
- * have NVgf as anything else than "g" under Perl 5.6.x. */
-#if PERL_REVISION == 5 && PERL_VERSION == 6
-#  undef NVgf
-#  define NVgf "g"
-#endif
-
 #if PERL_VERSION_GE(5,7,3) && !PERL_VERSION_GE(5,10,1)
 #  undef SAVEOP
 #  define SAVEOP() SAVEVPTR(PL_op)
