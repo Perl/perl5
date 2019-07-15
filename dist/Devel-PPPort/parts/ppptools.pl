@@ -2,6 +2,9 @@
 #
 #  ppptools.pl -- various utility functions
 #
+#  WARNING: This will be called by old perls.  You can't use modern constructs
+#  in it.
+#
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
@@ -33,6 +36,10 @@ sub all_files_in_dir
 
 sub parse_todo
 {
+  # Creates a hash with the keys being all symbols found in all the files in
+  # the input directory (default 'parts/todo'), and the values being the perl
+  # versions of each symbol.
+
   my $dir = shift || 'parts/todo';
   local *TODO;
   my %todo;
@@ -70,6 +77,7 @@ sub parse_partspec
 {
   my $file = shift;
   my $section = 'implementation';
+
   my $vsec = join '|', qw( provides dontwarn implementation
                            xsubs xsinit xsmisc xshead xsboot tests );
   my(%data, %options);
@@ -82,7 +90,9 @@ sub parse_partspec
       m!//! && !m!(?:=~|s/).*//! && !m!(?:ht|f)tp(?:s)://!
           and warn "$file:$.: warning: potential C++ comment\n";
     }
+
     /^##/ and next;
+
     if (/^=($vsec)(?:\s+(.*))?/) {
       $section = $1;
       if (defined $2) {
@@ -224,7 +234,8 @@ sub ppcond
   join " && ", @c;
 }
 
-sub trim_arg
+sub trim_arg        # Splits the argument into type and name, returning the
+                    # pair: (type, name)
 {
   my $in = shift;
   my $remove = join '|', qw( NN NULLOK VOL );
@@ -232,38 +243,40 @@ sub trim_arg
   $in eq '...' and return ($in);
 
   local $_ = $in;
-  my $name;
+  my $name;                 # Work on the name
 
-  s/[*()]/ /g;
-  s/\[[^\]]*\]/ /g;
+  s/[*()]/ /g;              # Get rid of this punctuation
+  s/ \[ [^\]]* \] / /xg;    # Get rid of dimensions
   s/\b(?:auto|const|extern|inline|register|static|volatile|restrict)\b//g;
   s/\b(?:$remove)\b//;
-  s/^\s*//; s/\s*$//;
+  s/^\s+//; s/\s+$//;       # No leading, trailing space
 
-  if( /^\b(?:struct|union|enum)\s+\w+(?:\s+(\w+))?$/ ) {
-    defined $1 and $name = $1;
+  if( /^\b (?:struct|union|enum) \s+ \w+ (?: \s+ ( \w+ ) )? $/x ) {
+    defined $1 and $name = $1;    # Extract the name for one of these declarations
   }
   else {
     if( s/\b(?:char|double|float|int|long|short|signed|unsigned|void)\b//g ) {
-      /^\s*(\w+)\s*$/ and $name = $1;
+      /^ \s* (\w+) \s* $/x and $name = $1;    # Similarly for these
     }
     else {
-      /^\s*\w+\s+(\w+)\s*$/ and $name = $1;
+      /^ \s* \w+ \s+ (\w+) \s* $/x and $name = $1; # Everything else.
     }
   }
 
-  $_ = $in;
+  $_ = $in;     # Now work on the type.
 
+  # Get rid of the name if we found one
   defined $name and s/\b$name\b//;
 
-  # these don't matter at all
+  # these don't matter at all; note that const does matter
   s/\b(?:auto|extern|inline|register|static|volatile|restrict)\b//g;
   s/\b(?:$remove)\b//;
 
-  s/(?=<\*)\s+(?=\*)//g;
-  s/\s*(\*+)\s*/ $1 /g;
-  s/^\s*//; s/\s*$//;
-  s/\s+/ /g;
+  s/ (?=<\*) \s+ (?=\*) //xg;   # No spaces in pointer sequences
+  s/ \s* ( \*+ ) \s* / $1 /xg;  # Normalize pointer sequences to be surrounded
+                                # by a single space
+  s/^\s+//; s/\s+$//;           # No leading, trailing spacd
+  s/\s+/ /g;                    # Collapse multiple space into one
 
   return ($_, $name);
 }
@@ -335,6 +348,42 @@ sub parse_embed
 
     close FILE;
   }
+
+  # Here's what two elements of the array look like:
+  # {
+  #              'args' => [
+  #                          [
+  #                            'const nl_item',
+  #                            'item'
+  #                          ]
+  #                        ],
+  #              'cond' => '(defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H))',
+  #              'flags' => {
+  #                           'A' => 1,
+  #                           'T' => 1,
+  #                           'd' => 1,
+  #                           'o' => 1
+  #                         },
+  #              'name' => 'Perl_langinfo',
+  #              'ret' => 'const char *'
+  #            },
+  #            {
+  #              'args' => [
+  #                          [
+  #                            'const int',
+  #                            'item'
+  #                          ]
+  #                        ],
+  #              'cond' => '!(defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H))',
+  #              'flags' => {
+  #                           'A' => 1,
+  #                           'T' => 1,
+  #                           'd' => 1,
+  #                           'o' => 1
+  #                         },
+  #              'name' => 'Perl_langinfo',
+  #              'ret' => 'const char *'
+  #            },
 
   return @func;
 }
