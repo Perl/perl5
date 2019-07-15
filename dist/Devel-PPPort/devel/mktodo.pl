@@ -428,6 +428,8 @@ sub write_todo  # Write out the todo file.  The keys of %sym are known to not
   for (sort dictionary_order keys %$sym) {
     $f->print(sprintf "%-30s # %s\n", $_, $sym->{$_});
   }
+
+  $f->close;
 }
 
 sub find_undefined_symbols
