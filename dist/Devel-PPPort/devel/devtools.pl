@@ -2,6 +2,8 @@
 #
 #  devtools.pl -- various utility functions
 #
+#  NOTE: This will only be called by the overarching (modern) perl
+#
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
@@ -68,7 +70,8 @@ sub run
     status    => $? >> 8,
     stdout    => [<$out>],
     stderr    => [<$err>],
-    didnotrun => 0,
+    didnotrun => 0,         # Note that currently this will always be 0
+                            # This must have been used in earlier versions
   );
 
   unlink "tmp.out", "tmp.err";
@@ -131,6 +134,15 @@ sub get_and_sort_perls($)
     $starting = int_parse_version($opt->{'debug-start'})
                                                        if $opt->{'debug-start'};
 
+    # Uses the opt structure parameter to find the perl versions to use this
+    # run, and returns an array with a hash representing blead in the 0th
+    # element and the oldest in the final one.  Each entry looks like
+    #     {
+    #       'version' => '5.031002',
+    #       'file' => '5031002',
+    #       'path' => '/home/khw/devel/bin/perl5.31.2'
+    #     },
+    #
     # Get blead and all other perls
     my @perls = $opt->{blead};
     for my $dir (split ",", $opt->{install}) {
