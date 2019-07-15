@@ -13,6 +13,10 @@
 
 newCONSTSUB
 
+=dontwarn
+
+NEED_newCONSTSUB    /* Because we define this weirdly */
+
 =implementation
 
 /* Hint: newCONSTSUB
@@ -22,6 +26,11 @@ newCONSTSUB
 
 /* newCONSTSUB from IO.xs is in the core starting with 5.004_63 */
 #if { VERSION < 5.004_63 } && { VERSION != 5.004_05 }
+
+/* And before that, we need to make sure this gets compiled for the functions
+ * that rely on it */
+#define NEED_newCONSTSUB
+
 #if { NEED newCONSTSUB }
 
 /* This is just a trick to avoid a dependency of newCONSTSUB on PL_parser */
