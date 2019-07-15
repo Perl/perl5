@@ -410,14 +410,15 @@ sub get_apicheck_symbol_map
 
   while (<$fh>) {
     next if /^#/;
-    if (defined $cur) {
+
+    if (! defined $cur) {
+      /_DPPP_test_(\w+)/ and $cur = $1;
+    }
+    else {
       for my $sym (/\b([A-Za-z_]\w+)\b/g) {
         $symmap{$sym}{$cur}++;
       }
       undef $cur if /^}$/;
-    }
-    else {
-      /_DPPP_test_(\w+)/ and $cur = $1;
     }
   }
 
