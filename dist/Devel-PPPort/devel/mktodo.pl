@@ -334,6 +334,7 @@ if ($opt{check}) {
 write_todo($todo_file, $todo_version, \%todo);
 
 # Clean up after ourselves
+$opt{debug} = 0;    # Don't care about failures
 run(qw(make realclean));
 
 exit 0;
@@ -362,7 +363,10 @@ sub regen_Makefile
   push @mf_arg, qw( DEFINE=-DDPPP_APICHECK_NO_PPPORT_H ) if $opt{base};
 
   # just to be sure
+  my $debug = $opt{debug};
+  $opt{debug} = 0;    # Don't care about failures
   run(qw(make realclean));
+  $opt{debug} = $debug;
 
   my $r = run($fullperl, "Makefile.PL", @mf_arg);
   unless ($r->{status} == 0) {

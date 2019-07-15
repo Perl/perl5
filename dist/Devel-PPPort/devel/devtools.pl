@@ -79,6 +79,26 @@ sub run
   $? & 128 and $rval{core}   = 1;
   $? & 127 and $rval{signal} = $? & 127;
 
+  # This is expected and isn't an error.
+  @{$rval{stderr}} = grep { $_ !~ /make.*No rule .*realclean/ } @{$rval{stderr}};
+
+  if (    exists $rval{core}
+      ||  exists $rval{signal}
+      || ($rval{status} && @{$rval{stderr}})
+      || ($opt{debug} && @{$rval{stderr}})
+
+          # verbose increases likelihood of output
+      || ($opt{debug} && $opt{verbose} && @{$rval{stdout}}))
+  {
+    print STDERR "Returning\n", Dumper \%rval;
+
+    # Under verbose, runtool already output the call string
+    unless ($opt{verbose}) {
+        print STDERR "from $prog ", join ", ", @args;
+        print STDERR "\n";
+    }
+  }
+
   return \%rval;
 }
 
