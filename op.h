@@ -698,7 +698,7 @@ struct opslot {
 struct opslab {
     OPSLAB *	opslab_next;		/* next slab */
     OPSLAB *	opslab_head;		/* first slab in chain */
-    OP *	opslab_freed;		/* chain of freed ops */
+    OP *	opslab_freed;		/* chain of freed ops (head only)*/
     size_t	opslab_refcnt;		/* number of ops (head slab only) */
     U16		opslab_size;		/* size of slab in pointers,
                                            including header */
