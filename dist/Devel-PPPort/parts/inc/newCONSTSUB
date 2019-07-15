@@ -52,13 +52,7 @@ newCONSTSUB(HV *stash, const char *name, SV *sv)
 
         newSUB(
 
-#if   { VERSION <  5.003_22 }
-                start_subparse(),
-#elif { VERSION == 5.003_22 }
-                start_subparse(0),
-#else  /* 5.003_23  onwards */
                 start_subparse(FALSE, 0),
-#endif
 
                 newSVOP(OP_CONST, 0, newSVpv((char *) name, 0)),
                 newSVOP(OP_CONST, 0, &PL_sv_no),   /* SvPV(&PL_sv_no) == "" -- GMB */

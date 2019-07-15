@@ -94,7 +94,7 @@ eval_pv(const char *p, I32 croak_on_error)
 #endif
 #endif
 
-#ifndef vload_module
+#if ! defined(vload_module) && defined(start_subparse)
 #if { NEED vload_module }
 
 void
@@ -137,16 +137,11 @@ vload_module(U32 flags, SV *name, SV *ver, va_list *args)
         COP * const ocurcop = PL_curcop;
         const int oexpect = PL_expect;
 
-#if { VERSION >= 5.004 }
         utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
-                veop, modname, imop);
-#elif { VERSION > 5.003 }
-        utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(),
-                veop, modname, imop);
-#else
-        utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(),
-                modname, imop);
+#if { VERSION > 5.003 }
+                veop,
 #endif
+                modname, imop);
         PL_expect = oexpect;
         PL_copline = ocopline;
         PL_curcop = ocurcop;

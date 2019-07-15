@@ -792,6 +792,8 @@ __DATA__
 
 %include variables
 
+%include subparse
+
 %include newCONSTSUB
 
 %include magic_defs
