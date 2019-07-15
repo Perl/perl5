@@ -304,9 +304,9 @@ __UNDEFINED__ LATIN1_TO_NATIVE(c) (c)
 
 #ifdef EBCDIC
 
-/* This is the first version where these macros are fully correct.  Relying on
- * the C library functions, as earlier releases did, causes problems with
- * locales */
+/* This is the first version where these macros are fully correct on EBCDIC
+ * platforms.  Relying on * the C library functions, as earlier releases did,
+ * causes problems with * locales */
 # if { VERSION < 5.22.0 }
 #  undef isALNUM
 #  undef isALNUM_A
@@ -465,6 +465,7 @@ __UNDEFINED__ isUPPER(c)    (        (c) >= 'A' && (c) <= 'Z'                   
 #  undef isSPACE
 #  undef isSPACE_A
 #  undef isSPACE_L1
+
 # endif
 
 __UNDEFINED__ isASCII(c)        ((WIDEST_UTYPE) (c) <= 127)
@@ -473,6 +474,7 @@ __UNDEFINED__ isCNTRL_L1(c)     (isCNTRL(c) || (   (WIDEST_UTYPE) (c) <= 0x9F  \
                                                 && (WIDEST_UTYPE) (c) >= 0x80))
 __UNDEFINED__ isLOWER(c)        ((c) >= 'a' && (c) <= 'z')
 __UNDEFINED__ isUPPER(c)        ((c) <= 'Z' && (c) >= 'A')
+
 #endif /* Below are definitions common to EBCDIC and ASCII */
 
 __UNDEFINED__ isASCII_L1(c)     isASCII(c)
@@ -508,16 +510,16 @@ __UNDEFINED__ isPRINT(c)        (isGRAPH(c) || (c) == ' ')
 __UNDEFINED__ isPRINT_L1(c)     ((WIDEST_UTYPE) (c) < 256 && ! isCNTRL_L1(c))
 __UNDEFINED__ isPSXSPC(c)       isSPACE(c)
 __UNDEFINED__ isPSXSPC_L1(c)    isSPACE_L1(c)
-__UNDEFINED__ isPUNCT(c)    (   (c) == '-' || (c) == '!' || (c) == '"'          \
-                             || (c) == '#' || (c) == '$' || (c) == '%'          \
-                             || (c) == '&' || (c) == '\'' || (c) == '('         \
-                             || (c) == ')' || (c) == '*' || (c) == '+'          \
-                             || (c) == ',' || (c) == '.' || (c) == '/'          \
-                             || (c) == ':' || (c) == ';' || (c) == '<'          \
-                             || (c) == '=' || (c) == '>' || (c) == '?'          \
-                             || (c) == '@' || (c) == '[' || (c) == '\\'         \
-                             || (c) == ']' || (c) == '^' || (c) == '_'          \
-                             || (c) == '`' || (c) == '{' || (c) == '|'          \
+__UNDEFINED__ isPUNCT(c)    (   (c) == '-' || (c) == '!' || (c) == '"'         \
+                             || (c) == '#' || (c) == '$' || (c) == '%'         \
+                             || (c) == '&' || (c) == '\'' || (c) == '('        \
+                             || (c) == ')' || (c) == '*' || (c) == '+'         \
+                             || (c) == ',' || (c) == '.' || (c) == '/'         \
+                             || (c) == ':' || (c) == ';' || (c) == '<'         \
+                             || (c) == '=' || (c) == '>' || (c) == '?'         \
+                             || (c) == '@' || (c) == '[' || (c) == '\\'        \
+                             || (c) == ']' || (c) == '^' || (c) == '_'         \
+                             || (c) == '`' || (c) == '{' || (c) == '|'         \
                              || (c) == '}' || (c) == '~')
 __UNDEFINED__ isPUNCT_L1(c)  (    isPUNCT(c)                                   \
                               || (   (WIDEST_UTYPE) (c) < 256                  \
@@ -528,7 +530,7 @@ __UNDEFINED__ isPUNCT_L1(c)  (    isPUNCT(c)                                   \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xB7      \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xBB      \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xBF)))
-__UNDEFINED__ isSPACE(c)        (   isBLANK(c) || (c) == '\n' || (c) == '\r'    \
+__UNDEFINED__ isSPACE(c)        (   isBLANK(c) || (c) == '\n' || (c) == '\r'   \
                                  || (c) == '\v' || (c) == '\f')
 __UNDEFINED__ isSPACE_L1(c) (    isSPACE(c)                                    \
                              || (   (WIDEST_UTYPE) (c) < 256                   \
@@ -541,8 +543,8 @@ __UNDEFINED__ isUPPER_L1(c) (   isUPPER(c)                                     \
                                      && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
 __UNDEFINED__ isWORDCHAR(c)     (isALPHANUMERIC(c) || (c) == '_')
 __UNDEFINED__ isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT(c))
-__UNDEFINED__ isXDIGIT(c)       (   isDIGIT(c)                                  \
-                                 || ((c) >= 'a' && (c) <= 'f')                  \
+__UNDEFINED__ isXDIGIT(c)       (   isDIGIT(c)                                 \
+                                 || ((c) >= 'a' && (c) <= 'f')                 \
                                  || ((c) >= 'A' && (c) <= 'F'))
 __UNDEFINED__ isXDIGIT_L1(c)    isXDIGIT(c)
 
