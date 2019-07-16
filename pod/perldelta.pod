@@ -413,6 +413,12 @@ C<INIT> blocks and the program itself are no longer run if exit(0) is
 called within a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.  [perl
 #2754]
 
+=item *
+
+C<<< open my $fh, ">>+", undef >>> now opens the temporary file in
+append mode - writes will seek to the end of file before writing.
+[perl #134221]
+
 =back
 
 =head1 Known Problems
