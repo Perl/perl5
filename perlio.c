@@ -4946,17 +4946,22 @@ typedef struct {
     STRLEN cbuf_size;
 } PerlIOUnicode;
 
-#define UTF8_QUIET_ON_ERROR 0x0
-#define UTF8_FAIL_ON_ERROR 0x40000000
-#define UTF8_WARN_ON_ERROR 0x80000000
-#define UTF8_CROAK_ON_ERROR 0xC0000000
+#define UTF8_FAIL_FLAG 0x40000000
+#define UTF8_WARN_FLAG 0x20000000
+#define UTF8_CROAK_FLAG 0x80000000
 #define UTF8_ONERROR_MASK 0xC0000000
+
+#define UTF8_QUIET_ON_ERROR 0x0
+#define UTF8_FAIL_ON_ERROR (UTF8_FAIL_FLAG | UTF8_WARN_FLAG)
+#define UTF8_FAILQUIET_ON_ERROR UTF8_FAIL_FLAG
+#define UTF8_WARN_ON_ERROR UTF8_WARN_FLAG
+#define UTF8_CROAK_ON_ERROR UTF8_CROAK_FLAG
 
 /* The following two macros depend on the values of the masks above */
 /* test whether we want messages */
-#define UTF8_ONERROR_MESSAGES(f) ((f) & UTF8_WARN_ON_ERROR)
+#define UTF8_ONERROR_MESSAGES(f) ((f) & (UTF8_WARN_FLAG | UTF8_CROAK_FLAG))
 /* test whether an error does replacement */
-#define UTF8_ONERROR_REPLACEMENT(f) (((f) & UTF8_FAIL_ON_ERROR) == 0)
+#define UTF8_ONERROR_REPLACEMENT(f) (((f) & (UTF8_CROAK_FLAG | UTF8_FAIL_FLAG)) == 0)
 
 /* test whether we do no replacement:
    Which is the case if we fail or die for all errors,
@@ -4986,6 +4991,7 @@ static struct {
     { STR_WITH_LEN("error=warn"), UTF8_WARN_ON_ERROR, UTF8_ONERROR_MASK },
     { STR_WITH_LEN("error=die"), UTF8_CROAK_ON_ERROR, UTF8_ONERROR_MASK },
     { STR_WITH_LEN("error=fail"), UTF8_FAIL_ON_ERROR, UTF8_ONERROR_MASK },
+    { STR_WITH_LEN("error=failquiet"), UTF8_FAILQUIET_ON_ERROR, UTF8_ONERROR_MASK },
 };
 
 static int lookup_parameter(pTHX_ const char* ptr, size_t len) {
@@ -5016,8 +5022,7 @@ static U32 parse_parameters(pTHX_ SV* param) {
         }
     }
 
-    if ((flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR
-        || (flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR) {
+    if (UTF8_ONERROR_MESSAGES(flags)) {
         /* each of these flags has a warning mask bit one to the left */
         flags |= (flags & (UTF8_DISALLOW_SUPER | UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_PERL_EXTENDED)) << 1;
     }
