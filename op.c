@@ -535,7 +535,7 @@ Perl_opslab_force_free(pTHX_ OPSLAB *slab)
                     ((I32**)&slab2->opslab_slots + slab2->opslab_free_space);
         OPSLOT *end  = (OPSLOT*)
                         ((I32**)slab2 + slab2->opslab_size);
-	for (; slot <= end -1;
+	for (; slot < end;
                 slot = (OPSLOT*) ((I32**)slot + slot->opslot_size) )
         {
 	    if (slot->opslot_op.op_type != OP_FREED
