@@ -310,7 +310,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
             (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
             (void*)head_slab));
 
-	while (o && DIFF(OpSLOT(o), OpSLOT(o)->opslot_next) < sz) {
+	while (o && OpSLOT(o)->opslot_size < sz) {
 	    DEBUG_S_warn((aTHX_ "Alas! too small"));
 	    o = *(too = &o->op_next);
 	    if (o) { DEBUG_S_warn((aTHX_ "found another free op at %p", (void*)o)); }
@@ -325,7 +325,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 
 #define INIT_OPSLOT(s) \
 	    slot->opslot_offset = DIFF(slab2, slot) ;	\
-	    slot->opslot_next = ((OPSLOT*)( (I32**)slot + s )); \
+	    slot->opslot_size = s;                      \
 	    slab2->opslab_free_space -= s;		\
 	    o = &slot->opslot_op;			\
 	    o->op_slabbed = 1
@@ -535,7 +535,9 @@ Perl_opslab_force_free(pTHX_ OPSLAB *slab)
                     ((I32**)&slab2->opslab_slots + slab2->opslab_free_space);
         OPSLOT *end  = (OPSLOT*)
                         ((I32**)slab2 + slab2->opslab_size);
-	for (; slot <= end -1; slot = slot->opslot_next) {
+	for (; slot <= end -1;
+                slot = (OPSLOT*) ((I32**)slot + slot->opslot_size) )
+        {
 	    if (slot->opslot_op.op_type != OP_FREED
 	     && !(slot->opslot_op.op_savefree
 #ifdef DEBUGGING
@@ -9281,10 +9283,13 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     /* for my  $x () sets OPpLVAL_INTRO;
      * for our $x () sets OPpOUR_INTRO */
     loop->op_private = (U8)iterpflags;
+
+    /* upgrade loop from a LISTOP to a LOOPOP;
+     * keep it in-place if there's space */
     if (loop->op_slabbed
-     && DIFF(loop, OpSLOT(loop)->opslot_next)
-	 < SIZE_TO_PSIZE(sizeof(LOOP)))
+        && OpSLOT(loop)->opslot_size < SIZE_TO_PSIZE(sizeof(LOOP)))
     {
+        /* no space; allocate new op */
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LISTOP);
@@ -9295,6 +9300,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     }
     else if (!loop->op_slabbed)
     {
+        /* loop was malloc()ed */
 	loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
         OpLASTSIB_set(loop->op_last, (OP*)loop);
     }

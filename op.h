@@ -689,8 +689,7 @@ least an C<UNOP>.
 
 #ifdef PERL_CORE
 struct opslot {
-    /* keep opslot_next first */
-    OPSLOT *	opslot_next;		/* next slot */
+    U16         opslot_size;        /* size of this slot (in pointers) */
     U16         opslot_offset;      /* offset from start of slab (in ptr units) */
     OP		opslot_op;		/* the op itself */
 };
