@@ -498,7 +498,7 @@ PP(pp_die)
 		}
 	    }
 	}
-	else if (SvPOK(errsv) && SvCUR(errsv)) {
+	else if (SvOK(errsv) && (SvPV_nomg(errsv,len), len)) {
 	    exsv = sv_mortalcopy(errsv);
 	    sv_catpvs(exsv, "\t...propagated");
 	}
