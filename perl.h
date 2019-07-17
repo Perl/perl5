@@ -6455,10 +6455,11 @@ expression, but with an empty argument list, like this:
 
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED()                                  \
         STMT_START {                                                        \
+            bool in_lc_numeric = IN_LC(LC_NUMERIC);			    \
             LC_NUMERIC_LOCK(                                                \
-                    (   (  IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_UNDERLYING) \
-                     || (! IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_STANDARD)));\
-            if (IN_LC(LC_NUMERIC)) {                                        \
+                    (   (  in_lc_numeric && _NOT_IN_NUMERIC_UNDERLYING) \
+                     || (! in_lc_numeric && _NOT_IN_NUMERIC_STANDARD)));\
+            if (in_lc_numeric) {                                        \
                 if (_NOT_IN_NUMERIC_UNDERLYING) {                           \
                     Perl_set_numeric_underlying(aTHX);                      \
                     _restore_LC_NUMERIC_function                            \
