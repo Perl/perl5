@@ -16,6 +16,8 @@
 #
 ################################################################################
 
+require './parts/inc/inctools';
+
 sub cat_file
 {
   eval { require File::Spec };
@@ -113,8 +115,14 @@ sub parse_partspec
     $data{$_} = join '', @v;
   }
 
-  unless (exists $data{provides}) {
-    $data{provides} = ($file =~ /(\w+)\.?$/)[0];
+  if (! exists $data{provides}) {
+    if ($file =~ /inctools$/) { # This file is special, it doesn't 'provide'
+                                # any API, but has subs to use internally
+      $data{provides} = "";
+    }
+    else {
+      $data{provides} = ($file =~ /(\w+)\.?$/)[0];
+    }
   }
   $data{provides} = [$data{provides} =~ /(\S+)/g];
 
@@ -407,59 +415,4 @@ sub make_prototype
   $proto = "$f->{ret} $f->{name}" . "($pTHX_" . join(', ', @args) . ')';
   return normalize_prototype($proto);
 }
-
-sub format_version
-{
-  my $ver = shift;
-
-  $ver =~ s/$/000000/;
-  my($r,$v,$s) = $ver =~ /(\d+)\.(\d{3})(\d{3})/;
-
-  $v = int $v;
-  $s = int $s;
-
-  if ($r < 5 || ($r == 5 && $v < 6)) {
-    if ($s % 10) {
-      die "invalid version '$ver'\n";
-    }
-    $s /= 10;
-
-    $ver = sprintf "%d.%03d", $r, $v;
-    $s > 0 and $ver .= sprintf "_%02d", $s;
-
-    return $ver;
-  }
-
-  return sprintf "%d.%d.%d", $r, $v, $s;
-}
-
-sub parse_version
-{
-  my $ver = shift;
-
-  if ($ver =~ /^(\d+)\.(\d+)\.(\d+)$/) {
-    return ($1, $2, $3);
-  }
-  elsif ($ver !~ /^\d+\.\d{3}(?:_\d{2})?$/) {
-    die "cannot parse version '$ver'\n";
-  }
-
-  $ver =~ s/_//g;
-  $ver =~ s/$/000000/;
-
-  my($r,$v,$s) = $ver =~ /(\d+)\.(\d{3})(\d{3})/;
-
-  $v = int $v;
-  $s = int $s;
-
-  if ($r < 5 || ($r == 5 && $v < 6)) {
-    if ($s % 10) {
-      die "cannot parse version '$ver'\n";
-    }
-    $s /= 10;
-  }
-
-  return ($r, $v, $s);
-}
-
 1;

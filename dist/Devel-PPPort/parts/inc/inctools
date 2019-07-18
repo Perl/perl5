@@ -1,0 +1,58 @@
+# These are tools that must be included in ppport.h.  It doesn't work if given
+# a .pl suffix
+
+sub format_version
+{
+  my $ver = shift;
+
+  $ver =~ s/$/000000/;
+  my($r,$v,$s) = $ver =~ /(\d+)\.(\d{3})(\d{3})/;
+
+  $v = int $v;
+  $s = int $s;
+
+  if ($r < 5 || ($r == 5 && $v < 6)) {
+    if ($s % 10) {
+      die "invalid version '$ver'\n";
+    }
+    $s /= 10;
+
+    $ver = sprintf "%d.%03d", $r, $v;
+    $s > 0 and $ver .= sprintf "_%02d", $s;
+
+    return $ver;
+  }
+
+  return sprintf "%d.%d.%d", $r, $v, $s;
+}
+
+sub parse_version
+{
+  my $ver = shift;
+
+  if ($ver =~ /^(\d+)\.(\d+)\.(\d+)$/) {
+    return ($1, $2, $3);
+  }
+  elsif ($ver !~ /^\d+\.\d{3}(?:_\d{2})?$/) {
+    die "cannot parse version '$ver'\n";
+  }
+
+  $ver =~ s/_//g;
+  $ver =~ s/$/000000/;
+
+  my($r,$v,$s) = $ver =~ /(\d+)\.(\d{3})(\d{3})/;
+
+  $v = int $v;
+  $s = int $s;
+
+  if ($r < 5 || ($r == 5 && $v < 6)) {
+    if ($s % 10) {
+      die "cannot parse version '$ver'\n";
+    }
+    $s /= 10;
+  }
+
+  return ($r, $v, $s);
+}
+
+1;
