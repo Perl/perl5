@@ -40,16 +40,16 @@ sub parse_todo
 
   for $todo (all_files_in_dir($dir)) {
     open TODO, $todo or die "cannot open $todo: $!\n";
-    my $perl = <TODO>;
-    chomp $perl;
+    my $version = <TODO>;
+    chomp $version;
     while (<TODO>) {
       chomp;
       s/#.*//;
       s/^\s+//; s/\s+$//;
       /^\s*$/ and next;
       /^\w+$/ or die "invalid identifier: $_\n";
-      exists $todo{$_} and die "duplicate identifier: $_ ($todo{$_} <=> $perl)\n";
-      $todo{$_} = $perl;
+      exists $todo{$_} and die "duplicate identifier: $_ ($todo{$_} <=> $version)\n";
+      $todo{$_} = $version;
     }
     close TODO;
   }
@@ -232,7 +232,7 @@ sub trim_arg
   $in eq '...' and return ($in);
 
   local $_ = $in;
-  my $id;
+  my $name;
 
   s/[*()]/ /g;
   s/\[[^\]]*\]/ /g;
@@ -241,20 +241,20 @@ sub trim_arg
   s/^\s*//; s/\s*$//;
 
   if( /^\b(?:struct|union|enum)\s+\w+(?:\s+(\w+))?$/ ) {
-    defined $1 and $id = $1;
+    defined $1 and $name = $1;
   }
   else {
     if( s/\b(?:char|double|float|int|long|short|signed|unsigned|void)\b//g ) {
-      /^\s*(\w+)\s*$/ and $id = $1;
+      /^\s*(\w+)\s*$/ and $name = $1;
     }
     else {
-      /^\s*\w+\s+(\w+)\s*$/ and $id = $1;
+      /^\s*\w+\s+(\w+)\s*$/ and $name = $1;
     }
   }
 
   $_ = $in;
 
-  defined $id and s/\b$id\b//;
+  defined $name and s/\b$name\b//;
 
   # these don't matter at all
   s/\b(?:auto|extern|inline|register|static|volatile|restrict)\b//g;
@@ -265,7 +265,7 @@ sub trim_arg
   s/^\s*//; s/\s*$//;
   s/\s+/ /g;
 
-  return ($_, $id);
+  return ($_, $name);
 }
 
 sub parse_embed
