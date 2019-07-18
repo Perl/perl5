@@ -3,21 +3,13 @@
 
 sub format_version
 {
-  my $ver = shift;
+  # Given an input version that is acceptable to parse_version(), return a
+  # string of the standard representation of it.
 
-  $ver =~ s/$/000000/;
-  my($r,$v,$s) = $ver =~ /(\d+)\.(\d{3})(\d{3})/;
-
-  $v = int $v;
-  $s = int $s;
+  my($r,$v,$s) = parse_version(shift);
 
   if ($r < 5 || ($r == 5 && $v < 6)) {
-    if ($s % 10) {
-      die "invalid version '$ver'\n";
-    }
-    $s /= 10;
-
-    $ver = sprintf "%d.%03d", $r, $v;
+    my $ver = sprintf "%d.%03d", $r, $v;
     $s > 0 and $ver .= sprintf "_%02d", $s;
 
     return $ver;
