@@ -11895,7 +11895,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
 #ifdef USE_LOCALE_NUMERIC
     DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-    bool lc_numeric_set = FALSE; /* called STORE_LC_NUMERIC_SET_TO_NEEDED? */
+    bool know_lc_numeric = FALSE;
+    bool is_lc_numeric;
 #endif
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
@@ -12967,16 +12968,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * below, or implicitly, via an snprintf() variant.
              * Note also things like ps_AF.utf8 which has
              * "\N{ARABIC DECIMAL SEPARATOR} as a radix point */
-            if (!lc_numeric_set) {
+            if (!know_lc_numeric) {
                 /* only set once and reuse in-locale value on subsequent
                  * iterations.
                  * XXX what happens if we die in an eval?
                  */
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
-                lc_numeric_set = TRUE;
+                is_lc_numeric = IN_LC(LC_NUMERIC);
+                know_lc_numeric = TRUE;
             }
 
-            if (IN_LC(LC_NUMERIC)) {
+            STORE_LC_NUMERIC_SET_TO_NEEDED_IN(is_lc_numeric);
+            if (is_lc_numeric) {
                 /* this can't wrap unless PL_numeric_radix_sv is a string
                  * consuming virtually all the 32-bit or 64-bit address
                  * space
@@ -13089,6 +13091,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		float_need = width;
 
             if (float_need > INT_MAX) {
+#ifdef USE_LOCALE_NUMERIC
+                RESTORE_LC_NUMERIC();
+#endif
                 /* snprintf() returns an int, and we use that return value,
                    so die horribly if the expected size is too large for int
                 */
@@ -13167,13 +13172,20 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifdef USE_QUADMATH
                 {
                     const char* qfmt = quadmath_format_single(ptr);
-                    if (!qfmt)
+                    if (!qfmt) {
+#ifdef USE_LOCALE_NUMERIC
+                        RESTORE_LC_NUMERIC();
+#endif
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
+                    }
                     elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
                                              qfmt, nv);
                     if ((IV)elen == -1) {
                         if (qfmt != ptr)
                             SAVEFREEPV(qfmt);
+#ifdef USE_LOCALE_NUMERIC
+                        RESTORE_LC_NUMERIC();
+#endif
                         Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
                     }
                     if (qfmt != ptr)
@@ -13188,6 +13200,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
                 GCC_DIAG_RESTORE_STMT;
 	    }
+#ifdef USE_LOCALE_NUMERIC
+            RESTORE_LC_NUMERIC();
+#endif
 
 	    eptr = PL_efloatbuf;
 
@@ -13406,16 +13421,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
 
     SvTAINT(sv);
-
-#ifdef USE_LOCALE_NUMERIC
-
-    if (lc_numeric_set) {
-        RESTORE_LC_NUMERIC();   /* Done outside loop, so don't have to
-                                   save/restore each iteration. */
-    }
-
-#endif
-
 }
 
 /* =========================================================================

@@ -6453,13 +6453,13 @@ expression, but with an empty argument list, like this:
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION                           \
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL
 
-#  define STORE_LC_NUMERIC_SET_TO_NEEDED()                                  \
+#  define STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in)                             \
         STMT_START {                                                        \
-            bool in_lc_numeric = IN_LC(LC_NUMERIC);			    \
+            bool in_lc_numeric = (in);                                      \
             LC_NUMERIC_LOCK(                                                \
-                    (   (  in_lc_numeric && _NOT_IN_NUMERIC_UNDERLYING) \
-                     || (! in_lc_numeric && _NOT_IN_NUMERIC_STANDARD)));\
-            if (in_lc_numeric) {                                        \
+                    (   (  in_lc_numeric && _NOT_IN_NUMERIC_UNDERLYING)     \
+                     || (! in_lc_numeric && _NOT_IN_NUMERIC_STANDARD)));    \
+            if (in_lc_numeric) {                                            \
                 if (_NOT_IN_NUMERIC_UNDERLYING) {                           \
                     Perl_set_numeric_underlying(aTHX);                      \
                     _restore_LC_NUMERIC_function                            \
@@ -6474,6 +6474,9 @@ expression, but with an empty argument list, like this:
                 }                                                           \
             }                                                               \
         } STMT_END
+
+#  define STORE_LC_NUMERIC_SET_TO_NEEDED() \
+    STORE_LC_NUMERIC_SET_TO_NEEDED_IN(IN_LC(LC_NUMERIC))
 
 #  define RESTORE_LC_NUMERIC()                                              \
         STMT_START {                                                        \
