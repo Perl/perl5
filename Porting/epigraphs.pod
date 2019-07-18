@@ -19,6 +19,8 @@ Consult your favorite dictionary for details.
 
 =head2 v5.31.1 - Kurt Vonnegut, _A Man without a Country_
 
+L<Announced on 2019-06-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2019/06/msg255243.html>
+
 On Tuesday, January 20, 2004, I sent Joel Bleifuss, my editor at _In These
 Times_, this fax:
 
@@ -65,21 +67,21 @@ cheap and lazy."
 
 =head2 v5.31.0 - Fumiko Enchi, Masks
 
-Announced on 2019-05-22 by Sawyer X
+L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/05/msg254886.html>
 
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
 
 =head2 v5.30.0 - Morihei Ueshiba
 
-Announced on 2019-05-22 by Sawyer X
+L<Announced on 2019-05-22 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/05/msg254844.html>
 
   Life is growth. If we stop growing, technically and spiritually, we
   are as good as dead.
 
 =head2 v5.30.0-RC2 - Derek Walcott
 
-Announced on 2019-05-17 by Sawyer X
+L<Announced on 2019-05-17 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/05/msg254824.html>
 
   The truest writers are those who see language not as linguistic process but
   as a living element.
