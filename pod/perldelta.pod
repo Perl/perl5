@@ -433,7 +433,12 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+The VC++ 6.0 build on Windows is currently broken.
+
+=item *
+
+Tests 9-11 in F<t/op/blocks.t> currently fail on Windows.
+[perl #134295]
 
 =back
 
