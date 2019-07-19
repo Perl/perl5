@@ -237,6 +237,7 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [qw(
 		examples/show-v.pl
 		)],
+        'CUSTOMIZED'   => [ qw(V.pm) ],
     },
 
     'constant' => {
