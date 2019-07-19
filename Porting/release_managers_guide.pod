@@ -436,8 +436,8 @@ When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
 you're releasing, unless you're absolutely sure the release you're about to
 make is 100% binary compatible to an earlier release. Note: for BLEAD-POINT
-releases the bump should have already occured at the end of the previous release
-and this is somethig you would have to do at the very end.
+releases the bump should have already occurred at the end of the previous
+release and this is something you would have to do at the very end.
 When releasing a MAINT perl version, the C<PERL_API_*> constants C<MUST NOT>
 be changed as we aim to guarantee binary compatibility in maint branches.
 
