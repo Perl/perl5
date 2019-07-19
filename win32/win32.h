@@ -735,5 +735,9 @@ DllExport void *win32_signal_context(void);
 #define Win_GetModuleFileName GetModuleFileName
 #define Win_CreateSemaphore   CreateSemaphore
 
+#if defined(PERL_CORE) && !defined(O_ACCMODE)
+#  define O_ACCMODE (O_RDWR | O_WRONLY | O_RDONLY)
+#endif
+
 #endif /* _INC_WIN32_PERL5 */
 
