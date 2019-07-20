@@ -6789,8 +6789,8 @@ X<say>
 =for Pod::Functions +say output a list to a filehandle, appending a newline
 
 Just like L<C<print>|/print FILEHANDLE LIST>, but implicitly appends a
-newline.  C<say LIST> is simply an abbreviation for
-C<{ local $\ = "\n"; print LIST }>.  To use FILEHANDLE without a LIST to
+newline at the end of the LIST instead of any value L<C<$\>|perlvar/$\>
+might have.  To use FILEHANDLE without a LIST to
 print the contents of L<C<$_>|perlvar/$_> to it, you must use a bareword
 filehandle like C<FH>, not an indirect one like C<$fh>.
 
