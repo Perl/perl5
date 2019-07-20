@@ -672,6 +672,7 @@ the strings?).
 
  Sawyer X  5.31.0       2018-May-24     The 5.31 development track
  Ether     5.31.1       2019-Jun-20
+ Steve     5.31.2       2019-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
