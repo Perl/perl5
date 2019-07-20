@@ -364,13 +364,7 @@ HEAD
 
   # #ifdef out if marked as todo (not known in) this version
   if ($todo{$f->{'name'}}) {
-    my($ver,$sub) = $todo{$f->{'name'}} =~ /^5\.(\d{3})(\d{2,3})$/ or die;
-    for ($ver, $sub) {
-      s/^0+(\d)/$1/
-    }
-    if ($ver < 6 && $sub > 0) {
-      #$sub =~ s/0$// or die;
-    }
+    my($five, $ver,$sub) = parse_version($todo{$f->{'name'}});
     print OUT "#if PERL_VERSION > $ver || (PERL_VERSION == $ver && PERL_SUBVERSION >= $sub) /* TODO */\n";
   }
 
