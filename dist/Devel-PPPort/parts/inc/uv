@@ -90,7 +90,7 @@ my_strnlen(const char *str, Size_t maxlen)
 #endif
 #endif
 
-#if { VERSION < 5.31.3 }
+#if { VERSION < 5.31.4 }
         /* Versions prior to this accepted things that are now considered
          * malformations, and didn't return -1 on error with warnings enabled
          * */
