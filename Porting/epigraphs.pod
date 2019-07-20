@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Duck and the Kangaroo
+
+L<Announced on 2019-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2019/07/msg255639.html>
+
+  Said the Duck to the Kangaroo,
+    'Good gracious! how you hop!
+  Over the fields and the water too,
+    As if you never would stop!
+  My life is a bore in this nasty pond,
+  And I long to go out in the world beyond!
+    I wish I could hop like you!'
+    Said the Duck to the Kangaroo.
+
 =head2 v5.31.1 - Kurt Vonnegut, _A Man without a Country_
 
 L<Announced on 2019-06-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2019/06/msg255243.html>
