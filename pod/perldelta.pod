@@ -201,7 +201,8 @@ an op whose subtree includes an OP_MULTIDEREF.
 
 =item *
 
-The VC++ 6.0 build on Windows is currently broken.
+The VC++ 6.0 build on Windows is currently broken.  Support for this compiler
+is likely to be removed in the near future.
 
 =item *
 
