@@ -65,11 +65,7 @@ strip() if $opt{strip};
 
 if (exists $opt{'compat-version'}) {
   my($r,$v,$s) = eval { parse_version($opt{'compat-version'}) };
-  if ($@) {
-    die "Invalid version number format: '$opt{'compat-version'}'\n";
-  }
-  die "Only Perl 5 is supported\n" if $r != 5;
-  die "Invalid version number: $opt{'compat-version'}\n" if $v >= 1000 || $s >= 1000;
+  die $@ if $@;
   $opt{'compat-version'} = sprintf "%d.%03d%03d", $r, $v, $s;
 }
 else {
