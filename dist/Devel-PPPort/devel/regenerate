@@ -27,7 +27,8 @@ our %opt = (
   verbose => 0,
 );
 
-GetOptions(\%opt, qw( check! verbose install=s blead=s blead-version=s )) or die pod2usage();
+GetOptions(\%opt, qw( check! verbose install=s blead=s blead-version=s
+                      debug-start=s)) or die pod2usage();
 
 identify();
 
@@ -80,6 +81,7 @@ for my $dir (qw( base todo )) {
 my @perlargs;
 push @perlargs, "--install=$opt{install}" if exists $opt{install};
 push @perlargs, "--blead=$opt{blead}" if exists $opt{blead};
+push @perlargs, "--debug-start=$opt{'debug-start'}" if $opt{'debug-start'};
 
 my $T0 = time;
 my @args = ddverbose();

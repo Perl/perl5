@@ -28,6 +28,8 @@ our %opt = (
   verbose => 0,
   install => '/tmp/perl/install/default',
   blead   => 'bleadperl-debug',
+ 'debug-start' => "",   # build an incomplete output, starting with the
+                        # specified perl of the form perl5.xxxyyy
 );
 
 # The way this works, is it expects to find perl binaries for a bunch of
@@ -48,7 +50,8 @@ our %opt = (
 # what the official perls added when.  Without this parameter, we do use
 # ppport.h, so we get, as patched by ppport.h, what gets added when
 
-GetOptions(\%opt, qw( base check! verbose install=s blead=s blead-version=s )) or die;
+GetOptions(\%opt, qw( base check! verbose install=s blead=s blead-version=s
+                      debug-start=s)) or die;
 
 identify();
 

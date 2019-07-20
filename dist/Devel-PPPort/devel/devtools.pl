@@ -127,6 +127,10 @@ sub get_and_sort_perls($)
 {
     my $opt = shift;
 
+    my $starting;
+    $starting = int_parse_version($opt->{'debug-start'})
+                                                       if $opt->{'debug-start'};
+
     # Get blead and all other perls
     my @perls = $opt->{blead};
     for my $dir (split ",", $opt->{install}) {
@@ -164,7 +168,9 @@ sub get_and_sort_perls($)
     $seen{$perls[0]{file}} = 1;
     for my $i (1 .. $#perls) {
         last unless defined $perls[$i];
-        if (    exists $seen{$perls[$i]{file}}) {
+        if (    exists $seen{$perls[$i]{file}}
+            || ($starting && $perls[$i]{file} gt $starting)
+        ) {
             splice @perls, $i, 1;
             redo;
         }
