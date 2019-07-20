@@ -122,4 +122,50 @@ sub eta
   return sprintf "%02d:%02d:%02d", $h, $m, $s;
 }
 
+sub get_and_sort_perls($)
+{
+    my $opt = shift;
+
+    # Get blead and all other perls
+    my @perls = $opt->{blead};
+    for my $dir (split ",", $opt->{install}) {
+        push @perls, grep !/-RC\d+/, glob "$dir/bin/perl5.*";
+    }
+
+    # Sort in descending version order.  Each element is a hash describing a perl,
+    # with keys 'version' and 'path'
+    @perls = sort { $b->{version} <=> $a->{version} }
+
+                                # Call the perl to get it to print out it's $]
+                                # version
+                map { { version => `$_ -e 'printf "%.6f", \$]'`,
+                        path => $_ }
+                    }
+                @perls;
+
+    # Override blead's version if specified.
+    if (exists $opt->{'blead-version'}) {
+        $perls[0]{version} = $opt->{'blead-version'};
+    }
+
+    my %seen;
+
+    # blead's todo is its version plus 1.  Otherwise, each todo is the
+    # previous one's.  Also get rid of duplicate versions.
+    $perls[0]{todo} = $perls[0]{version} + 1;
+    $seen{$perls[0]{version}} = 1;
+    for my $i (1 .. $#perls) {
+        last unless defined $perls[$i];
+        if (    exists $seen{$perls[$i]{version}}) {
+            splice @perls, $i, 1;
+            redo;
+        }
+
+        $seen{$perls[$i]{version}} = 1;
+        $perls[$i]{todo} = $perls[$i-1]{version};
+    }
+
+    return \@perls;
+}
+
 1;
