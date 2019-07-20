@@ -80,11 +80,11 @@ found following C<0b>.
 =item *
 
 C<\N{} here is restricted to one character> is now emitted in the same
-circumstances where previously C<\N{} in inverted character class or as
-a range end-point is restricted to one character> was.
+circumstances where previously C<\N{} in inverted character class or as a range
+end-point is restricted to one character> was.
 
-This is due to new circumstances having been added in perl v5.30 that
-weren't covered by the earlier wording.
+This is due to new circumstances having been added in Perl 5.30 that weren't
+covered by the earlier wording.
 
 =back
 
@@ -94,10 +94,10 @@ weren't covered by the earlier wording.
 
 =item *
 
-The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule
-that was originally changed for FreeBSD, and the FreeBSD make
-apparently predefines it.  The Solaris make does not predefine C<ECHO>
-which broke this rule on Solaris.  [perl #134218]
+The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule that was
+originally changed for FreeBSD, and the FreeBSD make apparently predefines it.
+The Solaris make does not predefine C<ECHO> which broke this rule on Solaris.
+L<[perl #134218]|https://rt.perl.org/Ticket/Display.html?id=134218>
 
 =item *
 
@@ -113,8 +113,8 @@ Bison versions 3.1 through 3.4 are now supported.
 
 =item Linux
 
-C<cc> will be used to populate C<plibpth> if C<cc> is C<clang>.  [perl
-#134189]
+C<cc> will be used to populate C<plibpth> if C<cc> is C<clang>.
+L<[perl #134189]|https://rt.perl.org/Ticket/Display.html?id=134189>
 
 =item VMS
 
@@ -128,23 +128,25 @@ C<-Duse64bitint> is now the default on VMS.
 
 =item *
 
-The PERL_DESTRUCT_LEVEL environment variable was formerly only honored on
-perl binaries built with DEBUGGING support. It is now checked on all perl
-builds. Its normal use is to force perl to individually free every block
-of memory which it has allocated before exiting, which is useful when
-using automated leak detection tools such as valgrind.
+The PERL_DESTRUCT_LEVEL environment variable was formerly only honoured on perl
+binaries built with DEBUGGING support.  It is now checked on all perl builds.
+Its normal use is to force perl to individually free every block of memory
+which it has allocated before exiting, which is useful when using automated
+leak detection tools such as valgrind.
 
 =item *
 
-The API eval_sv() now accepts a C<G_RETHROW> flag.  If this flag is
-set and an exception is thrown while compiling or executing the
-supplied code, it will be rethrown, and eval_sv() will not return.
-[perl #134177]
+The API eval_sv() now accepts a C<G_RETHROW> flag.  If this flag is set and an
+exception is thrown while compiling or executing the supplied code, it will be
+rethrown, and eval_sv() will not return.
+L<[perl #134177]|https://rt.perl.org/Ticket/Display.html?id=134177>
 
 =item *
 
-As part of the fix for [perl #2754] perl_parse() now returns non-zero
-if exit(0) is called in a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.
+As part of the fix for
+L<[perl #2754]|https://rt.perl.org/Ticket/Display.html?id=2754> perl_parse()
+now returns non-zero if exit(0) is called in a C<BEGIN>, C<UNITCHECK> or
+C<CHECK> block.
 
 =item *
 
@@ -164,34 +166,35 @@ thread, as threads tend to have small stacks by default.
 
 =item *
 
-Parsing incomplete hex or binary literals was changed in 5.31.1 to
-treat such a literal as just the 0, leaving the following C<x> or C<b>
-to be parsed as part of the next token.  This could lead to some
-silent changes in behaviour, so now incomplete hex or binary literals
-produce a fatal error.  [perl #134125]
+Parsing incomplete hex or binary literals was changed in 5.31.1 to treat such a
+literal as just the 0, leaving the following C<x> or C<b> to be parsed as part
+of the next token.  This could lead to some silent changes in behaviour, so now
+incomplete hex or binary literals produce a fatal error.
+L<[perl #134125]|https://rt.perl.org/Ticket/Display.html?id=134125>
 
 =item *
 
-eval_pv()'s I<croak_on_error> flag will now throw even if the
-exception is a false overloaded value.  [perl #134177]
+eval_pv()'s I<croak_on_error> flag will now throw even if the exception is a
+false overloaded value.
+L<[perl #134177]|https://rt.perl.org/Ticket/Display.html?id=134177>
 
 =item *
 
-C<INIT> blocks and the program itself are no longer run if exit(0) is
-called within a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.  [perl
-#2754]
+C<INIT> blocks and the program itself are no longer run if exit(0) is called
+within a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.
+L<[perl #2754]|https://rt.perl.org/Ticket/Display.html?id=2754>
 
 =item *
 
-C<<< open my $fh, ">>+", undef >>> now opens the temporary file in
-append mode - writes will seek to the end of file before writing.
-[perl #134221]
+C<<< open my $fh, ">>+", undef >>> now opens the temporary file in append mode
+- writes will seek to the end of file before writing.
+L<[perl #134221]|https://rt.perl.org/Ticket/Display.html?id=134221>
 
 =item *
 
 Fixed a SEGV when searching for the source of an uninitialized value warning on
 an op whose subtree includes an OP_MULTIDEREF.
-[perl #134275]
+L<[perl #134275]|https://rt.perl.org/Ticket/Display.html?id=134275>
 
 =back
 
@@ -207,7 +210,7 @@ is likely to be removed in the near future.
 =item *
 
 Tests 9-11 in F<t/op/blocks.t> currently fail on Windows.
-[perl #134295]
+L<[perl #134295]|https://rt.perl.org/Ticket/Display.html?id=134295>
 
 =back
 
@@ -219,8 +222,8 @@ XXX Generate this with:
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the perl bug database
-at L<https://rt.perl.org/>.  There may also be information at
+If you find what you think is a bug, you might check the perl bug database at
+L<https://rt.perl.org/>.  There may also be information at
 L<http://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
@@ -230,13 +233,13 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
