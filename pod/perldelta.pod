@@ -146,6 +146,16 @@ supplied code, it will be rethrown, and eval_sv() will not return.
 As part of the fix for [perl #2754] perl_parse() now returns non-zero
 if exit(0) is called in a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.
 
+=item *
+
+Most functions which recursively walked an op tree during compilation have been
+made non-recursive.  This avoids SEGVs from stack overflow when the op tree is
+deeply nested, such as C<$n == 1 ? "one" : $n == 2 ? "two" : ....> (especially
+in code which is auto-generated).
+
+This is particularly noticeable where the code is compiled within a separate
+thread, as threads tend to have small stacks by default.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -176,6 +186,12 @@ called within a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.  [perl
 C<<< open my $fh, ">>+", undef >>> now opens the temporary file in
 append mode - writes will seek to the end of file before writing.
 [perl #134221]
+
+=item *
+
+Fixed a SEGV when searching for the source of an uninitialized value warning on
+an op whose subtree includes an OP_MULTIDEREF.
+[perl #134275]
 
 =back
 
