@@ -43,9 +43,9 @@ __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          
 __UNDEFINED__ is_invariant_string(s,l) is_ascii_string(s,l)
 __UNDEFINED__ is_utf8_invariant_string(s,l) is_ascii_string(s,l)
 
-/* Hint: is_utf8_invariant_string
-   Please use this instead of is_ascii_string or is_invariant_string
-*/
+/* Hint: is_ascii_string, is_invariant_string
+   is_utf8_invariant_string() does the same thing and is preferred because its
+   name is more accurate as to what it does */
 #endif
 
 #ifdef ibcmp_utf8
