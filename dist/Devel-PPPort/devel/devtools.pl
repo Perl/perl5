@@ -14,6 +14,7 @@
 ################################################################################
 
 use IO::File;
+require "./parts/inc/inctools";
 
 eval "use Term::ANSIColor";
 $@ and eval "sub colored { pop; @_ }";
@@ -132,16 +133,23 @@ sub get_and_sort_perls($)
         push @perls, grep !/-RC\d+/, glob "$dir/bin/perl5.*";
     }
 
-    # Sort in descending version order.  Each element is a hash describing a perl,
-    # with keys 'version' and 'path'
-    @perls = sort { $b->{version} <=> $a->{version} }
+    # Normalize version numbers into 5.xxxyyy, and convert each element
+    # describing the perl to be a hash with keys 'version' and 'path'
+    for (my $i = 0; $i < @perls; $i++) {
+        my $version = `$perls[$i] -e 'print \$]'`;
+        my $file = int_parse_version($version);
+        $version = format_version($version);
 
-                                # Call the perl to get it to print out it's $]
-                                # version
-                map { { version => `$_ -e 'printf "%.6f", \$]'`,
-                        path => $_ }
-                    }
-                @perls;
+        # Make this entry a hash with its version, file name, and path
+        $perls[$i] = { version =>  $version,
+                       file    =>  $file,
+                       path    =>  $perls[$i],
+                     };
+    }
+
+    # Sort in descending order.  We start processing the most recent perl
+    # first.
+    @perls = sort { $b->{file} <=> $a->{file} } @perls;
 
     # Override blead's version if specified.
     if (exists $opt->{'blead-version'}) {
@@ -152,17 +160,17 @@ sub get_and_sort_perls($)
 
     # blead's todo is its version plus 1.  Otherwise, each todo is the
     # previous one's.  Also get rid of duplicate versions.
-    $perls[0]{todo} = $perls[0]{version} + 1;
-    $seen{$perls[0]{version}} = 1;
+    $perls[0]{todo} = $perls[0]{file} + 1;
+    $seen{$perls[0]{file}} = 1;
     for my $i (1 .. $#perls) {
         last unless defined $perls[$i];
-        if (    exists $seen{$perls[$i]{version}}) {
+        if (    exists $seen{$perls[$i]{file}}) {
             splice @perls, $i, 1;
             redo;
         }
 
-        $seen{$perls[$i]{version}} = 1;
-        $perls[$i]{todo} = $perls[$i-1]{version};
+        $seen{$perls[$i]{file}} = 1;
+        $perls[$i]{todo} = $perls[$i-1]{file};
     }
 
     return \@perls;
