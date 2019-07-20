@@ -58,7 +58,7 @@ you should reset the version numbers to the next blead series.
 
   2019-05-23  5.31.0 ✓       Sawyer X
   2019-06-20  5.31.1 ✓       Karen Etheridge
-  2019-07-20  5.31.2
+  2019-07-20  5.31.2 ✓       Steve Hay
   2019-08-20  5.31.3
   2019-09-20  5.31.4
   2019-10-20  5.31.5
