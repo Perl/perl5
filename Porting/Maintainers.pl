@@ -828,15 +828,6 @@ use File::Glob qw(:case);
             qw(t/600_pod.t),
             qw(t/601_pod-coverage.t),
         ],
-        'CUSTOMIZED'   => [
-            qw(
-                lib/Net/Ping.pm
-                t/000_load.t
-                t/500_ping_icmp.t
-                t/501_ping_icmpv6.t
-                ),
-        ],
-
     },
 
     'NEXT' => {
