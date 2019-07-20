@@ -145,7 +145,7 @@ sub get_and_sort_perls($)
 
     # Override blead's version if specified.
     if (exists $opt->{'blead-version'}) {
-        $perls[0]{version} = $opt->{'blead-version'};
+        $perls[0]{version} = format_version($opt->{'blead-version'});
     }
 
     my %seen;
