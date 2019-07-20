@@ -276,7 +276,8 @@ sub write_todo
   $f = new IO::File ">$file" or die "cannot open $file: $!\n";
   $f->print("$ver\n");
 
-  for (sort keys %$sym) {
+  # Dictionary ordering, with only alphanumerics
+  for (sort dictionary_order keys %$sym) {
     $f->print(sprintf "%-30s # %s\n", $_, $sym->{$_});
   }
 }
@@ -337,7 +338,7 @@ sub get_apicheck_symbol_map
               @{$r->{stderr}};
 
     if (keys %sym) {
-      for my $s (sort keys %sym) {
+      for my $s (sort dictionary_order keys %sym) {
         sym('new', $s, $sym{$s});
         $all{$s} = $sym{$s};
       }

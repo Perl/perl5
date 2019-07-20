@@ -18,6 +18,7 @@ use strict;
 use Getopt::Long;
 
 require './parts/ppptools.pl';
+require './parts/inc/inctools';
 
 our %opt = (
   mode    => 'check',
@@ -62,7 +63,7 @@ my $out = 'parts/base';
 my $todo = parse_todo($out);
 
 for my $v (keys %v) {
-  my @new = sort grep { !exists $todo->{$_} } keys %{$v{$v}};
+  my @new = sort dictionary_order grep { !exists $todo->{$_} } keys %{$v{$v}};
   @new or next;
   my $file = $v;
   $file =~ s/\.//g;

@@ -90,7 +90,7 @@ __PERL_API__
 
 if (exists $opt{'list-unsupported'}) {
   my $f;
-  for $f (sort { lc $a cmp lc $b } keys %API) {
+  for $f (sort dictionary_order keys %API) {
     next unless $API{$f}{todo};
     print "$f ", '.'x(40-length($f)), " ", format_version($API{$f}{todo}), "\n";
   }
@@ -176,14 +176,14 @@ while (<DATA>) {
 
 for (values %depends) {
   my %s;
-  $_ = [sort grep !$s{$_}++, @$_];
+  $_ = [sort dictionary_order grep !$s{$_}++, @$_];
 }
 
 if (exists $opt{'api-info'}) {
   my $f;
   my $count = 0;
   my $match = $opt{'api-info'} =~ m!^/(.*)/$! ? $1 : "^\Q$opt{'api-info'}\E\$";
-  for $f (sort { lc $a cmp lc $b } keys %API) {
+  for $f (sort dictionary_order keys %API) {
     next unless $f =~ /$match/;
     print "\n=== $f ===\n\n";
     my $info = 0;
@@ -211,7 +211,7 @@ if (exists $opt{'api-info'}) {
 
 if (exists $opt{'list-provided'}) {
   my $f;
-  for $f (sort { lc $a cmp lc $b } keys %API) {
+  for $f (sort dictionary_order keys %API) {
     next unless $API{$f}{provided};
     my @flags;
     push @flags, 'explicit' if exists $need{$f};
@@ -382,7 +382,7 @@ for $filename (@files) {
   my $c = $file{code};
   my $warnings = 0;
 
-  for $func (sort keys %{$file{uses_Perl}}) {
+  for $func (sort dictionary_order keys %{$file{uses_Perl}}) {
     if ($API{$func}{varargs}) {
       unless ($API{$func}{nothxarg}) {
         my $changes = ($c =~ s{\b(Perl_$func\s*\(\s*)(?!aTHX_?)(\)|[^\s)]*\))}
@@ -400,12 +400,12 @@ for $filename (@files) {
     }
   }
 
-  for $func (sort keys %{$file{uses_replace}}) {
+  for $func (sort dictionary_order keys %{$file{uses_replace}}) {
     warning("Uses $func instead of $replace{$func}");
     $file{changes} += ($c =~ s/\b$func\b/$replace{$func}/g);
   }
 
-  for $func (sort keys %{$file{uses_provided}}) {
+  for $func (sort dictionary_order keys %{$file{uses_provided}}) {
     if ($file{uses}{$func}) {
       if (exists $file{uses_deps}{$func}) {
         diag("Uses $func, which depends on ", join(', ', @{$file{uses_deps}{$func}}));
@@ -418,14 +418,14 @@ for $filename (@files) {
   }
 
   unless ($opt{quiet}) {
-    for $func (sort keys %{$file{uses_todo}}) {
+    for $func (sort dictionary_order keys %{$file{uses_todo}}) {
       print "*** WARNING: Uses $func, which may not be portable below perl ",
             format_version($API{$func}{todo}), ", even with '$ppport'\n";
       $warnings++;
     }
   }
 
-  for $func (sort keys %{$file{needed_static}}) {
+  for $func (sort dictionary_order keys %{$file{needed_static}}) {
     my $message = '';
     if (not exists $file{uses}{$func}) {
       $message = "No need to define NEED_$func if $func is never used";
@@ -439,7 +439,7 @@ for $filename (@files) {
     }
   }
 
-  for $func (sort keys %{$file{needed_global}}) {
+  for $func (sort dictionary_order keys %{$file{needed_global}}) {
     my $message = '';
     if (not exists $global{uses}{$func}) {
       $message = "No need to define NEED_${func}_GLOBAL if $func is never used";
@@ -463,7 +463,7 @@ for $filename (@files) {
   if ($file{needs_inc_ppport}) {
     my $pp = '';
 
-    for $func (sort keys %{$file{needs}}) {
+    for $func (sort dictionary_order keys %{$file{needs}}) {
       my $type = $file{needs}{$func};
       next if $type eq 'extern';
       my $suffix = $type eq 'global' ? '_GLOBAL' : '';

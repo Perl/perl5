@@ -20,6 +20,7 @@
 use strict;
 BEGIN { $^W = 1; }
 require "./parts/ppptools.pl";
+require "./parts/inc/inctools";
 
 my $INCLUDE = 'parts/inc';
 my $DPPP = 'DPPP_';
@@ -37,7 +38,7 @@ $data =~ s{^\%(include)\s+(\w+)((?:[^\S\r\n]+.*?)?)\s*$}
 
 $data = expand($data);
 
-my @api = sort { lc $a cmp lc $b or $a cmp $b } keys %provides;
+my @api = sort dictionary_order keys %provides;
 
 $data =~ s{^(.*)__PROVIDED_API__(\s*?)^}
           {join '', map "$1$_\n", @api}gem;
@@ -54,7 +55,7 @@ $data =~ s!^(.*)__EXPLICIT_API__(\s*?)^!
            sprintf("$1$format\n", 'Function / Variable', 'Static Request', 'Global Request') .
            $1 . '-'x$len . "\n" .
            join('', map { sprintf "$1$format\n", $explicit{$_} eq 'var' ? $_ : "$_()", "NEED_$_", "NEED_${_}_GLOBAL" }
-                    sort keys %explicit)
+                    sort dictionary_order keys %explicit)
           !gem;
 }
 
@@ -89,6 +90,7 @@ for (keys %provides) {
 }
 
 push @perl_api, keys %embed;
+@perl_api = sort dictionary_order @perl_api;
 
 for (@perl_api) {
   if (exists $provides{$_} && !exists $raw_base{$_}) {
@@ -109,7 +111,7 @@ for (@perl_api) {
 }
 
 $data =~ s/^([\t ]*)__PERL_API__(\s*?)$/
-           join "\n", map "$1$_", sort @perl_api
+           join "\n", map "$1$_", sort dictionary_order @perl_api
           /gem;
 
 my $undocumented = "(undocumented)";
@@ -118,7 +120,7 @@ my @todo;
 for (reverse sort keys %todo) {
   my $ver = format_version($_);
   my $todo = "=item perl $ver\n\n";
-  for (sort @{$todo{$_}}) {
+  for (sort dictionary_order @{$todo{$_}}) {
     $todo .= "  $_";
     $todo .= "  (DEPRECATED)" if  $embed{$_}->{flags}{D};
     $todo .= "  (marked experimental)" if $embed{$_}->{flags}{x};
@@ -640,6 +642,8 @@ __DATA__
 SKIP
 
 %include ppphdoc { indent => '|>' }
+
+%include inctools
 
 %include ppphbin
 
