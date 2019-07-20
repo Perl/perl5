@@ -403,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.31.2..HEAD
+  perl Porting/acknowledgements.pl v5.31.3..HEAD
 
 =head1 Reporting Bugs
 
