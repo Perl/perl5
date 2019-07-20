@@ -210,8 +210,8 @@ utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 #    if { VERSION >= 5.26.0 } && { VERSION < 5.28.0 }
 
     /* But actually, more modern versions restrict the UV to being no more than
-     * what * an IV can hold, so it could, so it could still have gotten it
-     * wrong about overflowing. */
+     * what an IV can hold, so it could still have gotten it wrong about
+     * overflowing. */
     if (UNLIKELY(ret > IV_MAX)) {
         overflows = 1;
     }
