@@ -51,7 +51,12 @@ sub parse_version
   die "Invalid version number format: '$ver'$mesg\n";
 }
 
+sub int_parse_version
+{
+    # Returns integer 7 digit human-readable version, suitable for use in file
+    # names in parts/todo parts/base.
 
+    return 0 + join "", map { sprintf("%03d", $_) } parse_version(shift);
 
 }
 
