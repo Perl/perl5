@@ -28,12 +28,12 @@ require './devel/devtools.pl';
 
 our %opt = (
   blead     => 0,     # ? Is this perl blead
-  debug   => 0,
-  base    => 0,     # Don't use ppport.h when generating
-  verbose => 0,
-  check   => 1,
-  todo    => "",  # If no --todo, this is a blead perl
-  shlib   => 'blib/arch/auto/Devel/PPPort/PPPort.so',
+  debug     => 0,
+  base      => 0,     # Don't use ppport.h when generating
+  verbose   => 0,
+  check     => 1,
+  todo      => "",    # If no --todo, this is a blead perl
+  shlib     => 'blib/arch/auto/Devel/PPPort/PPPort.so',
 );
 
 GetOptions(\%opt, qw(
