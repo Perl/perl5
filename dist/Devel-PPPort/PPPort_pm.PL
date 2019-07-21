@@ -67,6 +67,17 @@ for (keys %raw_todo) {
   push @{$todo{$raw_todo{$_}}}, $_;
 }
 
+# Most recent first
+my @todo_list = reverse sort keys %todo;
+
+# The first and final elements give the extremes of the supported versions.
+# (Use defaults that were reasonable at the time of this commit if the
+# directories are empty (which should only happen during regeneration of the
+# base and todo files).)
+my $MAX_PERL = format_version((@todo_list) ? $todo_list[0] : '5.30.0');
+my $INT_MIN_PERL = (@todo_list) ? $todo_list[-1] : 5003007;
+my $MIN_PERL = format_version($INT_MIN_PERL);
+
 # check consistency
 for (@api) {
   if (exists $raw_todo{$_} and exists $raw_base{$_}) {
@@ -117,7 +128,7 @@ $data =~ s/^([\t ]*)__PERL_API__(\s*?)$/
 my $undocumented = "(undocumented)";
 
 my @todo;
-for (reverse sort keys %todo) {
+for (@todo_list) {
   my $ver = format_version($_);
   my $todo = "=item perl $ver\n\n";
   for (sort dictionary_order @{$todo{$_}}) {
@@ -133,8 +144,8 @@ for (reverse sort keys %todo) {
 $data =~ s{^__UNSUPPORTED_API__(\s*?)^}
           {join "\n", @todo}gem;
 
-$data =~ s{__MIN_PERL__}{5.003_07}g;
-$data =~ s{__MAX_PERL__}{5.30}g;
+$data =~ s{__MIN_PERL__}{$MIN_PERL}g;
+$data =~ s{__MAX_PERL__}{$MAX_PERL}g;
 
 open FH, ">PPPort.pm" or die "PPPort.pm: $!\n";
 print FH $data;
