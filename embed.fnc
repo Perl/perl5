@@ -60,7 +60,7 @@
 : to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
 : comments here don't include how Devel::PPPort or diag.t use them:
 :
-:   A  Available fully everywhere (usually part of the public API):
+:   A  Accessible fully everywhere (usually part of the public API):
 :
 :         add entry to the list of exported symbols (unless e or m);
 :         any doc entry goes in perlapi.pod rather than perlintern.pod.  If
