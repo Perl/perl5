@@ -32,12 +32,13 @@ our %opt = (
   base      => 0,     # Don't use ppport.h when generating
   verbose   => 0,
   check     => 1,
+ 'todo-dir' => "",
   todo      => "",    # If no --todo, this is a blead perl
   shlib     => 'blib/arch/auto/Devel/PPPort/PPPort.so',
 );
 
 GetOptions(\%opt, qw(
-perl=s todo=s blead version=s shlib=s debug=i base verbose check!
+perl=s todo=i blead todo-dir=s version=s shlib=s debug=i base verbose check!
           )) or die;
 
 identify();
@@ -45,8 +46,8 @@ identify();
 my $todo_file;
 my $todo_version;
 if ($opt{todo}) {
-    $todo_file = $opt{todo};
-    $todo_version = $opt{version};
+    $todo_file = "$opt{'todo-dir'}/$opt{todo}";
+    $todo_version = format_version_line($opt{todo});
 }
 
 print "\n", ident_str(), "\n\n";

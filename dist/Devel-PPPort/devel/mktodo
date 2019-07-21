@@ -21,6 +21,7 @@ use strict;
 use Getopt::Long;
 
 require './devel/devtools.pl';
+require './parts/ppptools.pl';
 
 our %opt = (
   base    => 0,     # If specified, this will generate base files, not todo ones
@@ -61,12 +62,15 @@ my $outdir = 'parts/todo';
 my $perls_ref = get_and_sort_perls(\%opt);
 
 # Go through all the perls, creating a todo file for it.
-for (@${perls_ref}) {
-  my $todo = do { my $v = $_->{todo}; $v =~ s/\D+//g; $v };
-  my @args = ('--perl', $_->{path}, '--version', "$_->{todo}");
+for (my $i = 0; $i < @$perls_ref; $i++) {
+  my $this_perl = @{$perls_ref}[$i];
+  my @args = ('--perl',     $this_perl->{path},
+              '--version',  $this_perl->{version},
+              '--todo-dir', $outdir
+             );
 
-  push @args, '--blead' if $_ == $perls_ref->[0];   # First one is blead
-  push @args, '--todo', $_->{'todo'};
+  push @args, '--blead' if $i == 0; # First one is blead
+  push @args, '--todo', $this_perl->{'todo'};
   push @args, '--base' if $opt{base};
   push @args, "--debug=$opt{debug}" if $opt{debug};
   push @args, '--verbose' if $opt{verbose};
