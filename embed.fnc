@@ -119,7 +119,7 @@
 :
 :   A  Both long and short names are accessible fully everywhere (usually part
 :      of the public API).  If the function is not part of the public API,
-:      instead use E, or X.
+:      instead use C, E, or X.
 :
 :         add entry to the list of symbols available on all platforms
 :	    unless e or m are also specified;
@@ -168,6 +168,20 @@
 :         add entry to the list of symbols available on all platforms;
 :         create PERL_ARGS_ASSERT_foo;
 :	  add embed.h entry (unless overridden by the 'M' or 'o' flags)
+:
+:   C  Intended for core use only.  This indicates to XS writers that they
+:      shouldn't be using this function.  Devel::PPPort informs them of this,
+:      for example.  Some functions have to be accessible everywhere even if
+:      they are not intended for public use.  An example is helper functions
+:      that are called from inline ones that are publicly available.
+:
+:         add entry to the list of symbols available on all platforms
+:	    unless e or m are also specified;
+:         any doc entry goes in perlintern.pod rather than perlapi.pod.  If
+:	    there isn't a doc entry, autodoc.pl lists this in perlintern as
+:	    existing and being undocumented
+:         makes the short name defined for everywhere, not just for
+:	    PERL_CORE/PERL_EXT
 :
 :   D  Function is deprecated:
 :
