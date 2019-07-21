@@ -64,10 +64,9 @@
 :
 :         add entry to the list of exported symbols (unless e or m);
 :         any doc entry goes in perlapi.pod rather than perlintern.pod.  If
-:            none specified, autodoc.pl does not list this function/macro as
-:            part of the public API.  If x isn't specified, and no
-:            documentation is furnished, autodoc.pl lists this in perlapi as
-:            existing and being undocumented.
+:            no documentation is furnished, x controls what happens: If x
+:            isn't specified, autodoc.pl lists this in perlapi as existing and
+:	     being undocumented; otherwise it simply isn't listed.
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
 :      If the function is only exported for use in a public macro, see X.
