@@ -72,7 +72,7 @@ my %API = map { /^(\w+)\|([^|]*)\|([^|]*)\|(\w*)$/
                       ($3                  ? ( todo     => $3 ) : ()),
                       (index($4, 'v') >= 0 ? ( varargs  => 1  ) : ()),
                       (index($4, 'p') >= 0 ? ( provided => 1  ) : ()),
-                      (index($4, 'n') >= 0 ? ( nothxarg => 1  ) : ()),
+                      (index($4, 'n') >= 0 ? ( noTHXarg => 1  ) : ()),
                     } )
                 : die "invalid spec: $_" } qw(
 __PERL_API__
@@ -378,7 +378,7 @@ for $filename (@files) {
 
   for $func (sort dictionary_order keys %{$file{uses_Perl}}) {
     if ($API{$func}{varargs}) {
-      unless ($API{$func}{nothxarg}) {
+      unless ($API{$func}{noTHXarg}) {
         my $changes = ($c =~ s{\b(Perl_$func\s*\(\s*)(?!aTHX_?)(\)|[^\s)]*\))}
                               { $1 . ($2 eq ')' ? 'aTHX' : 'aTHX_ ') . $2 }ge);
         if ($changes) {
