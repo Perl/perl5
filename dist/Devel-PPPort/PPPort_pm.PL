@@ -131,6 +131,17 @@ for (@perl_api) {
       $line .= 'v' if @$args && $args->[-1][0] eq '...';
     }
     $line .= 'n' if exists $e->{flags}{T};  # No thread context parameter
+    $line .= 'd' if exists $e->{flags}{D};  # deprecated
+    $line .= 'x' if exists $e->{flags}{x};  # experimental
+    $line .= 'c' if        exists $e->{flags}{C}      # core-only
+                   || (    exists $e->{flags}{X}
+                       && (exists $e->{flags}{E} || ! exists $e->{flags}{m}));
+    $line .= 'i' if exists $e->{flags}{A}
+                       || exists $e->{flags}{C}
+                       || (     exists $e->{flags}{X}
+                           && ! exists $e->{flags}{E}
+                           &&   exists $e->{flags}{m});
+    $line .= 'u' unless exists $e->{flags}{d};  # undocumented
   }
   $_ = $line;
 }

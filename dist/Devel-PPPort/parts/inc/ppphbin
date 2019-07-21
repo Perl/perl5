@@ -73,6 +73,11 @@ my %API = map { /^(\w+)\|([^|]*)\|([^|]*)\|(\w*)$/
                       (index($4, 'v') >= 0 ? ( varargs  => 1  ) : ()),
                       (index($4, 'p') >= 0 ? ( provided => 1  ) : ()),
                       (index($4, 'n') >= 0 ? ( noTHXarg => 1  ) : ()),
+                      (index($4, 'c') >= 0 ? ( core_only    => 1  ) : ()),
+                      (index($4, 'd') >= 0 ? ( deprecated   => 1  ) : ()),
+                      (index($4, 'i') >= 0 ? ( inaccessible => 1  ) : ()),
+                      (index($4, 'x') >= 0 ? ( experimental => 1  ) : ()),
+                      (index($4, 'u') >= 0 ? ( undocumented => 1  ) : ()),
                     } )
                 : die "invalid spec: $_" } qw(
 __PERL_API__
@@ -191,10 +196,43 @@ if (exists $opt{'api-info'}) {
       print "\nWARNING:\n$warnings{$f}" if exists $warnings{$f};
       $info++;
     }
-    print "No portability information available.\n" unless $info;
+
+      my $email = "Send email to perl5-porters\@perl.org if you need to have this functionality.\n";
+      if ($API{$f}{inaccessible}) {
+        print "\nThis is not part of the public API, and may not even be accessible to XS code.\n";
+        $info++;
+      }
+      elsif ($API{$f}{core_only}) {
+        print "\nThis is not part of the public API, and should not be used by XS code.\n";
+        $info++;
+      }
+      elsif ($API{$f}{deprecated}) {
+        print "\nThis is deprecated and should not be used.  Convert existing uses.\n";
+        $info++;
+      }
+      elsif ($API{$f}{experimental}) {
+        print "\nThe API for this is unstable and should not be used by XS code.\n", $email;
+        $info++;
+      }
+      elsif ($API{$f}{undocumented}) {
+        print "\nSince this is undocumented, the API should be considered unstable.\n";
+        if ($API{$f}{provided}) {
+            print "Consider bringing this up on the list: perl5-porters\@perl.org.\n";
+        }
+        else {
+            print "It may be that this is not intended for XS use, or it may just be\n",
+                  "that no one has gotten around to documenting it.\n", $email;
+        }
+        $info++;
+      }
+      unless ($info) {
+        print "No portability information available.  Check your spelling; or",
+              " this could be\na bug in Devel::PPPort.  To report an issue:\n",
+              "https://github.com/Dual-Life/Devel-PPPort/issues/new\n";
+      }
     $count++;
   }
-  $count or print "Found no API matching '$opt{'api-info'}'.";
+  $count or print "\nFound no API matching '$opt{'api-info'}'.";
   print "\n";
   exit 0;
 }
