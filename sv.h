@@ -93,8 +93,8 @@ Type flag for scalars.  See L</svtype>.
 =for apidoc AmnU||SVt_PVMG
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmnU||SVt_INVLIST
-Type flag for scalars.  See L</svtype>.
+=for apidoc CmnU||SVt_INVLIST
+Type flag for scalars.  See L<perlapi/svtype>.
 
 =for apidoc AmnU||SVt_REGEXP
 Type flag for regular expressions.  See L</svtype>.
