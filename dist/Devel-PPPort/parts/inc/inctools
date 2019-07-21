@@ -57,7 +57,15 @@ sub int_parse_version
     # names in parts/todo parts/base.
 
     return 0 + join "", map { sprintf("%03d", $_) } parse_version(shift);
+}
 
+sub format_version_line
+{
+    # Returns a floating point representation of the input version
+
+    my $version = int_parse_version(shift);
+    $version =~ s/^5\B/5./;
+    return $version;
 }
 
 sub dictionary_order($$)    # Sort caselessly, ignoring punct
