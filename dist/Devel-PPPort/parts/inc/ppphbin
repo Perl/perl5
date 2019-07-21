@@ -91,6 +91,7 @@ if (exists $opt{'list-unsupported'}) {
     next if $API{$f}{inaccessible};
     next if $API{$f}{experimental};
     next unless $API{$f}{todo};
+    next if int_parse_version($API{$f}{todo}) <=  int_parse_version(__MIN_PERL__);
     print "$f ", '.'x(40-length($f)), " ", format_version($API{$f}{todo}), "\n";
   }
   exit 0;
