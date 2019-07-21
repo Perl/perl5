@@ -1240,6 +1240,11 @@ header in your message after receiving it back via perl5-porters.
 If you have a blog, please consider writing an entry in your blog explaining
 why you chose that particular quote for your epigraph.
 
+=head3 update the link to the latest perl on perlweb
+
+Submit a pull request to L<https://github.com/perlorg/perlweb> to update the
+link in F<docs/dev/perl5/index.html> to point to your release.
+
 =for checklist skip RC
 
 =head3 Release schedule
