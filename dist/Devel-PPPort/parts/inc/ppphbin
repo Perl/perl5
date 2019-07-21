@@ -86,6 +86,10 @@ __PERL_API__
 if (exists $opt{'list-unsupported'}) {
   my $f;
   for $f (sort dictionary_order keys %API) {
+    next if $API{$f}{core_only};
+    next if $API{$f}{beyond_depr};
+    next if $API{$f}{inaccessible};
+    next if $API{$f}{experimental};
     next unless $API{$f}{todo};
     print "$f ", '.'x(40-length($f)), " ", format_version($API{$f}{todo}), "\n";
   }
