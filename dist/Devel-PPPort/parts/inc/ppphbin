@@ -115,18 +115,56 @@ sub find_api
 
 while (<DATA>) {
   if ($hint) {
-    my $h = $hint->[0] eq 'Hint' ? \%hints : \%warnings;
-    if (m{^\s*\*\s(.*?)\s*$}) {
-      for (@{$hint->[1]}) {
-        $h->{$_} ||= '';  # suppress warning with older perls
-        $h->{$_} .= "$1\n";
-      }
+
+    # Here, we are in the middle of accumulating a hint or warning.
+    my $end_of_hint = 0;
+
+    # A line containing a comment end marker closes the hint.  Remove that
+    # marker for processing below.
+    if (s/\s*$rcce(.*?)\s*$//) {
+        die "Nothing can follow the end of comment in '$_'\n" if length $1 > 0;
+        $end_of_hint = 1;
     }
-    else { undef $hint }
+
+    # Set $h to the hash of which type.
+    my $h = $hint->[0] eq 'Hint' ? \%hints : \%warnings;
+
+    # Ignore any leading and trailing white space, and an optional star comment
+    # continuation marker, then place the meat of the line into $1
+    m/^\s*(?:\*\s*)?(.*?)\s*$/;
+
+    # Add the meat of this line to the hash value of each API element it
+    # applies to
+    for (@{$hint->[1]}) {
+      $h->{$_} ||= '';  # avoid the warning older perls generate
+      $h->{$_} .= "$1\n";
+    }
+
+    # If the line had a comment close, we are through with this hint
+    undef $hint if $end_of_hint;
+
+    next;
   }
 
-  $hint = [$1, [split /,?\s+/, $2]]
-      if m{^\s*$rccs\s+(Hint|Warning):\s+(\w+(?:,?\s+\w+)*)\s*$};
+  # Set up $hint if this is the beginning of a Hint: or Warning:
+  # These are from a multi-line C comment in the file, with the first line
+  # looking like (a space has been inserted because this file can't have C
+  # comment markers in it):
+  #   / * Warning: PL_expect, PL_copline, PL_rsfp
+  #
+  # $hint becomes
+  #     [
+  #      'Warning',
+  #                [
+  #                  'PL_expect',
+  #                  'PL_copline',
+  #                  'PL_rsfp',
+  #                ],
+  #     ]
+  if (m{^\s*$rccs\s+(Hint|Warning):\s+(\w+(?:,?\s+\w+)*)\s*$}) {
+      $hint = [$1, [split /,?\s+/, $2]];
+      next;
+  }
 
   if ($define) {
     if ($define->[1] =~ /\\$/) {
