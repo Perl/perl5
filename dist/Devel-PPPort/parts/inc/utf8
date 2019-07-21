@@ -304,6 +304,14 @@ __UNDEFINED__  utf8_to_uvchr(s, lp)                                             
 
 #endif
 
+/* Hint: utf8_to_uvchr
+    Use utf8_to_uvchr_buf() instead.  But ONLY if you KNOW the upper bound
+    of the input string (not resorting to using UTF8SKIP, etc., to infer it).
+    The backported utf8_to_uvchr() will do a better job to prevent most cases
+    of trying to read beyond the end of the buffer */
+
+/* Replace utf8_to_uvchr with utf8_to_uvchr_buf */
+
 #ifdef SV_NOSTEAL
    /* Older Perl versions have broken sv_len_utf8() when passed sv does not have SVf_UTF8 flag set */
    /* Also note that SvGETMAGIC() may change presence of SVf_UTF8 flag */
