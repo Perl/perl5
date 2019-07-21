@@ -32,13 +32,14 @@ our %opt = (
   base      => 0,     # Don't use ppport.h when generating
   verbose   => 0,
   check     => 1,
+  final     => "",
  'todo-dir' => "",
   todo      => "",    # If no --todo, this is a blead perl
   shlib     => 'blib/arch/auto/Devel/PPPort/PPPort.so',
 );
 
 GetOptions(\%opt, qw(
-perl=s todo=i blead todo-dir=s version=s shlib=s debug=i base verbose check!
+perl=s todo=i blead todo-dir=s version=s shlib=s debug=i base final=s verbose check!
           )) or die;
 
 identify();
@@ -346,6 +347,29 @@ if ($opt{check}) {
 
 print STDERR __LINE__, ": %todo at end ", Dumper \%todo  if $opt{debug} > 6;
 write_todo($todo_file, $todo_version, \%todo);
+
+# If this is the earliest perl being tested, we can extend down our values to
+# include it.  (Remember, that we create files for the next higher version,
+# but this allows us to create a file for the lowest as well.)  This
+# effectively writes out all the known symbols of this earliest version as if
+# they came into existence during it.
+if ($opt{final}) {
+    my $file = "$opt{'todo-dir'}/$opt{final}";
+    my $version = format_version_line($opt{final});
+
+    regen_Makefile();
+    my $r = run(qw(make));
+    $r->{didnotrun} and die "couldn't run make: $!\n" .
+        join('', @{$r->{stdout}})."\n---\n".join('', @{$r->{stderr}});
+
+    my $symbols = read_sym(file => $opt{shlib}, options => [qw( --defined-only )]);
+    my @stuff = map { /_DPPP_test_(.*)/ } keys %$symbols;
+    %todo = map { $_ => 'T' } @stuff;
+
+    print STDERR __LINE__, ": write at ", Dumper $file, $version, \%todo
+                                                            if $opt{debug} > 5;
+    write_todo($file, $version, \%todo);
+}
 
 # Clean up after ourselves
 $opt{debug} = 0;    # Don't care about failures

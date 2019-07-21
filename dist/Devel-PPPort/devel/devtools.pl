@@ -212,6 +212,10 @@ sub get_and_sort_perls($)
         $perls[$i]{todo} = $perls[$i-1]{file};
     }
 
+    # The earliest perl gets a special marker key, consisting of the proper
+    # file name
+    $perls[$#perls]{final} = $perls[$#perls]{file};
+
     if ($opt{debug}) {
         print STDERR "The perls returned are: ", Dumper \@perls;
     }

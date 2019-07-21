@@ -62,9 +62,16 @@ $data =~ s!^(.*)__EXPLICIT_API__(\s*?)^!
 my %raw_base = %{&parse_todo('parts/base')};
 my %raw_todo = %{&parse_todo('parts/todo')};
 
+# Invert so each key is the 7 digit version number, and it's value is an array
+# of all symbols within it, like:
+#          '5005003' => [
+#                         'POPpx',
+#                         'get_vtbl',
+#                         'save_generic_svref'
+#                       ],
 my %todo;
 for (keys %raw_todo) {
-  push @{$todo{$raw_todo{$_}}}, $_;
+  push @{$todo{int_parse_version($raw_todo{$_})}}, $_;
 }
 
 # Most recent first
@@ -73,15 +80,22 @@ my @todo_list = reverse sort keys %todo;
 # The first and final elements give the extremes of the supported versions.
 # (Use defaults that were reasonable at the time of this commit if the
 # directories are empty (which should only happen during regeneration of the
-# base and todo files).)
-my $MAX_PERL = format_version((@todo_list) ? $todo_list[0] : '5.30.0');
+# base and todo files).).  Actually the final element is for blead (at the
+# time things were regenerated), which is 1 beyond the max version supported.
+my $INT_MAX_PERL = (@todo_list) ? $todo_list[0] - 1 : '5030000';
+my $MAX_PERL = format_version($INT_MAX_PERL);
 my $INT_MIN_PERL = (@todo_list) ? $todo_list[-1] : 5003007;
 my $MIN_PERL = format_version($INT_MIN_PERL);
 
+
 # check consistency
 for (@api) {
-  if (exists $raw_todo{$_} and exists $raw_base{$_}) {
-    if ($raw_base{$_} eq $raw_todo{$_}) {
+  if (   exists $raw_todo{$_}
+      && $raw_todo{$_} > $INT_MIN_PERL      # INT_MIN_PERL contents are real
+                                            # symbols, not something to do
+      && exists $raw_base{$_})
+  {
+    if ($raw_base{$_} == $raw_todo{$_}) {
       warn "$INCLUDE/$provides{$_} provides $_, which is still marked "
            . "todo for " . format_version($raw_todo{$_}) . "\n";
     }
@@ -130,6 +144,7 @@ my $undocumented = "(undocumented)";
 my @todo;
 for (@todo_list) {
   my $ver = format_version($_);
+  $ver .= " (at least)" if $_ == $todo_list[-1];
   my $todo = "=item perl $ver\n\n";
   for (sort dictionary_order @{$todo{$_}}) {
     $todo .= "  $_";

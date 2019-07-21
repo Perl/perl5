@@ -75,5 +75,6 @@ for (my $i = 0; $i < @$perls_ref; $i++) {
   push @args, "--debug=$opt{debug}" if $opt{debug};
   push @args, '--verbose' if $opt{verbose};
   push @args, '--nocheck' unless $opt{check};
+  push @args, '--final', $this_perl->{'final'} if $this_perl->{'final'};
   runperl('devel/mktodo.pl', @args) or die "error running mktodo.pl [$!] [$?]\n";
 }
