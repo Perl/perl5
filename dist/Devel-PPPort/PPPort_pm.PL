@@ -25,6 +25,8 @@ require "./parts/inc/inctools";
 my $INCLUDE = 'parts/inc';
 my $DPPP = 'DPPP_';
 
+# The keys of %embed are the names of the items found in all the .fnc files,
+# and each value is all the information parse_embed returns for that item.
 my %embed = map { ( $_->{name} => $_ ) }
             parse_embed(qw(parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc));
 
@@ -33,13 +35,23 @@ my(%provides, %prototypes, %explicit);
 my $data = do { local $/; <DATA> };
 
 # Call include(file, params) for every line that begins with %include
+# These fill in %provides and %prototypes.
+# The keys of %provides are the items provided by Devel::PPPort, and each
+# value is the name of the file (in parts/inc/) that has the code to provide
+# it.
+# An entry in %prototypes looks like:
+#   'grok_bin' => 'UV grok_bin(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result)',
+
 $data =~ s{^\%(include)\s+(\w+)((?:[^\S\r\n]+.*?)?)\s*$}
           {eval "$1('$2', $3)" or die $@}gem;
 
+# And expand it.
 $data = expand($data);
 
+# Just the list of provided items.
 my @api = sort dictionary_order keys %provides;
 
+# which further expands $data.
 $data =~ s{^(.*)__PROVIDED_API__(\s*?)^}
           {join '', map "$1$_\n", @api}gem;
 
@@ -59,7 +71,18 @@ $data =~ s!^(.*)__EXPLICIT_API__(\s*?)^!
           !gem;
 }
 
+# These hashes look like:
+#   { ...  'gv_check' => '5.003007',
+#          'gv_const_sv' => '5.009003',
+#          'gv_dump' => '5.006000',
+#     ... },
+
+# What's provided when without ppport.h, as far as we've been able to
+# determine
 my %raw_base = %{&parse_todo('parts/base')};
+
+# What's provided when using ppport.h, as far as we've been able to
+# determine
 my %raw_todo = %{&parse_todo('parts/todo')};
 
 # Invert so each key is the 7 digit version number, and it's value is an array
@@ -77,6 +100,7 @@ for (keys %raw_todo) {
 # Most recent first
 my @todo_list = reverse sort keys %todo;
 
+# Here, @todo_list contains the integer version numbers that have support.
 # The first and final elements give the extremes of the supported versions.
 # (Use defaults that were reasonable at the time of this commit if the
 # directories are empty (which should only happen during regeneration of the
@@ -87,8 +111,8 @@ my $MAX_PERL = format_version($INT_MAX_PERL);
 my $INT_MIN_PERL = (@todo_list) ? $todo_list[-1] : 5003007;
 my $MIN_PERL = format_version($INT_MIN_PERL);
 
-
-# check consistency
+# check consistency between our list of everything provided, and our lists of
+# what got provided when
 for (@api) {
   if (   exists $raw_todo{$_}
       && $raw_todo{$_} > $INT_MIN_PERL      # INT_MIN_PERL contents are real
@@ -101,7 +125,7 @@ for (@api) {
     }
     else {
       check(2, "$_ was ported back to " . format_version($raw_todo{$_}) .
-               " (baseline revision: " . format_version($raw_base{$_}) . ").");
+               " (baseline revision: "  . format_version($raw_base{$_}) . ").");
     }
   }
 }
@@ -114,13 +138,19 @@ for (keys %provides) {
   check(2, "No API definition for provided element $_ found.");
 }
 
+# At this point @perl_api is the list of things we provide that weren't found
+# in the .fnc files.
+# Add in the .fnc file definitions.
 push @perl_api, keys %embed;
 @perl_api = sort dictionary_order @perl_api;
 
-for (@perl_api) {
+for (@perl_api) {   # $_ is the item name
   if (exists $provides{$_} && !exists $raw_base{$_}) {
     check(2, "Mmmh, $_ doesn't seem to need backporting.");
   }
+
+  # Create the lines that ppport.h reads.  These look like
+  #     CopyD|5.009002|5.003007|p
   my $line = "$_|" . (exists $provides{$_} && exists $raw_base{$_} ? $raw_base{$_} : '') . '|';
   $line .= ($raw_todo{$_} || '') . '|';
   $line .= 'p' if exists $provides{$_};
@@ -594,7 +624,7 @@ Version 2.x was ported to the Perl core by Paul Marquess.
 
 Version 3.x was ported back to CPAN by Marcus Holland-Moritz.
 
-=item * 
+=item *
 
 Versions >= 3.22 are maintained by perl5 porters
 
