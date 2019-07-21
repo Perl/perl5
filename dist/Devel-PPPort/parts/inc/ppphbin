@@ -63,14 +63,8 @@ if ($opt{version}) {
 usage() if $opt{help};
 strip() if $opt{strip};
 
-if (exists $opt{'compat-version'}) {
-  my($r,$v,$s) = eval { parse_version($opt{'compat-version'}) };
-  die $@ if $@;
-  $opt{'compat-version'} = sprintf "%d.%03d%03d", $r, $v, $s;
-}
-else {
-  $opt{'compat-version'} = 5;
-}
+$opt{'compat-version'} = __MIN_PERL__ unless exists $opt{'compat-version'};
+$opt{'compat-version'} = int_parse_version($opt{'compat-version'});
 
 my %API = map { /^(\w+)\|([^|]*)\|([^|]*)\|(\w*)$/
                 ? ( $1 => {
@@ -313,7 +307,9 @@ for $filename (@files) {
       $file{uses_Perl}{$func}++ if $c =~ /\bPerl_$func\b/;
       if (exists $API{$func}{provided}) {
         $file{uses_provided}{$func}++;
-        if (!exists $API{$func}{base} || $API{$func}{base} > $opt{'compat-version'}) {
+        if ( ! exists $API{$func}{base}
+            || int_parse_version($API{$func}{base}) > $opt{'compat-version'})
+        {
           $file{uses}{$func}++;
           my @deps = rec_depend($func);
           if (@deps) {
@@ -327,7 +323,9 @@ for $filename (@files) {
           }
         }
       }
-      if (exists $API{$func}{todo} && $API{$func}{todo} > $opt{'compat-version'}) {
+      if (   exists $API{$func}{todo}
+          && int_parse_version($API{$func}{todo}) > $opt{'compat-version'})
+      {
         if ($c =~ /\b$func\b/) {
           $file{uses_todo}{$func}++;
         }
