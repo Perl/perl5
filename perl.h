@@ -6411,7 +6411,15 @@ argument list, like this:
 
 On threaded perls not operating with thread-safe functionality, this macro uses
 a mutex to force a critical section.  Therefore the matching RESTORE should be
-close by, and guaranteed to be called.
+close by, and guaranteed to be called; see L</WITH_LC_NUMERIC_SET_TO_NEEDED>
+for a more contained way to ensure that.
+
+=for apidoc Am|void|STORE_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric
+
+Same as L</STORE_LC_NUMERIC_SET_TO_NEEDED_IN> with in_lc_numeric provided
+as the precalculated value of C<IN_LC(LC_NUMERIC)>. It is the caller's
+responsibility to ensure that the status of C<PL_compiling> and C<PL_hints>
+cannot have changed since the precalculation.
 
 =for apidoc Am|void|RESTORE_LC_NUMERIC
 
@@ -6455,6 +6463,13 @@ is equivalent to:
 #endif
   }
 
+=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric
+
+Same as L</WITH_LC_NUMERIC_SET_TO_NEEDED> with in_lc_numeric provided
+as the precalculated value of C<IN_LC(LC_NUMERIC)>. It is the caller's
+responsibility to ensure that the status of C<PL_compiling> and C<PL_hints>
+cannot have changed since the precalculation.
+
 =cut
 
 */
@@ -6482,12 +6497,13 @@ is equivalent to:
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION                           \
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL
 
-#  define STORE_LC_NUMERIC_SET_TO_NEEDED()                                  \
+#  define STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in)                             \
         STMT_START {                                                        \
+            bool _in_lc_numeric = (in);                                     \
             LC_NUMERIC_LOCK(                                                \
-                    (   (  IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_UNDERLYING) \
-                     || (! IN_LC(LC_NUMERIC) && _NOT_IN_NUMERIC_STANDARD)));\
-            if (IN_LC(LC_NUMERIC)) {                                        \
+                    (   (  _in_lc_numeric && _NOT_IN_NUMERIC_UNDERLYING)    \
+                     || (! _in_lc_numeric && _NOT_IN_NUMERIC_STANDARD)));   \
+            if (_in_lc_numeric) {                                           \
                 if (_NOT_IN_NUMERIC_UNDERLYING) {                           \
                     Perl_set_numeric_underlying(aTHX);                      \
                     _restore_LC_NUMERIC_function                            \
@@ -6502,6 +6518,9 @@ is equivalent to:
                 }                                                           \
             }                                                               \
         } STMT_END
+
+#  define STORE_LC_NUMERIC_SET_TO_NEEDED() \
+        STORE_LC_NUMERIC_SET_TO_NEEDED_IN(IN_LC(LC_NUMERIC))
 
 #  define RESTORE_LC_NUMERIC()                                              \
         STMT_START {                                                        \
@@ -6577,13 +6596,16 @@ is equivalent to:
             __FILE__, __LINE__, PL_numeric_standard));                      \
         } STMT_END
 
-#  define WITH_LC_NUMERIC_SET_TO_NEEDED(block)                              \
+#  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block)            \
         STMT_START {                                                        \
             DECLARATION_FOR_LC_NUMERIC_MANIPULATION;                        \
-            STORE_LC_NUMERIC_SET_TO_NEEDED();                               \
+            STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric);               \
             block;                                                          \
             RESTORE_LC_NUMERIC();                                           \
         } STMT_END;
+
+#  define WITH_LC_NUMERIC_SET_TO_NEEDED(block) \
+        WITH_LC_NUMERIC_SET_TO_NEEDED_IN(IN_LC(LC_NUMERIC), block)
 
 #else /* !USE_LOCALE_NUMERIC */
 
@@ -6593,10 +6615,13 @@ is equivalent to:
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 #  define STORE_LC_NUMERIC_SET_STANDARD()
 #  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
+#  define STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric)
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED()
 #  define RESTORE_LC_NUMERIC()
 #  define LOCK_LC_NUMERIC_STANDARD()
 #  define UNLOCK_LC_NUMERIC_STANDARD()
+#  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block) \
+    STMT_START { block; } STMT_END
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED(block) \
     STMT_START { block; } STMT_END
 

@@ -11784,7 +11784,7 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 #else
         if (in_lc_numeric) {
             STRLEN n;
-            WITH_LC_NUMERIC_SET_TO_NEEDED({
+            WITH_LC_NUMERIC_SET_TO_NEEDED_IN(TRUE, {
                 const char* r = SvPV(PL_numeric_radix_sv, n);
                 Copy(r, p, n, char);
             });
@@ -12978,7 +12978,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
 
             if (in_lc_numeric) {
-                WITH_LC_NUMERIC_SET_TO_NEEDED({
+                WITH_LC_NUMERIC_SET_TO_NEEDED_IN(TRUE, {
                     /* this can't wrap unless PL_numeric_radix_sv is a string
                      * consuming virtually all the 32-bit or 64-bit address
                      * space
@@ -13071,7 +13071,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && !fill
                 && intsize != 'q'
             ) {
-                WITH_LC_NUMERIC_SET_TO_NEEDED(
+                WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
                     SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis)
                 );
                 elen = strlen(ebuf);
@@ -13174,7 +13174,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     const char* qfmt = quadmath_format_single(ptr);
                     if (!qfmt)
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
-                    WITH_LC_NUMERIC_SET_TO_NEEDED(
+                    WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
                         elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
                                                  qfmt, nv);
                     );
@@ -13187,13 +13187,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         Safefree(qfmt);
                 }
 #elif defined(HAS_LONG_DOUBLE)
-                WITH_LC_NUMERIC_SET_TO_NEEDED(
+                WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
                     elen = ((intsize == 'q')
                             ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
                             : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv))
                 );
 #else
-                WITH_LC_NUMERIC_SET_TO_NEEDED(
+                WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
                     elen = my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
                 );
 #endif
