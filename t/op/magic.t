@@ -104,7 +104,7 @@ END {
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
-if ($Is_MSWin32)  { like `set FOO`, qr/^(?:FOO=)?hi there$/; }
+if ($Is_MSWin32)  { like `set FOO`, qr/^(?:FOO=)?hi there$/m; }
 elsif ($Is_VMS)   { is `write sys\$output f\$trnlnm("FOO")`, "hi there\n"; }
 else              { is `echo \$FOO`, "hi there\n"; }
 
