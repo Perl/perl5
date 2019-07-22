@@ -9013,7 +9013,7 @@ Perl_yylex(pTHX)
 
   Looks up an identifier in the pad or in a package
 
-  is_sig indicates that this is a subroutine signature variable
+  PL_in_my == KEY_sigvar indicates that this is a subroutine signature variable
   rather than a plain pad var.
 
   Returns:
