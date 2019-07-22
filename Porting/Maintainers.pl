@@ -1265,6 +1265,12 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^ex/},
         ],
+        # https://rt.cpan.org/Ticket/Display.html?id=127837
+        'CUSTOMIZED'   => [
+            qw( File.pm
+                File.xs
+                ),
+        ],
     },
 
     'XSLoader' => {
