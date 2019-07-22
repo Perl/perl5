@@ -6432,6 +6432,29 @@ expression, but with an empty argument list, like this:
      ...
  }
 
+=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED
+
+This macro invokes the supplied statement or block within the context
+of a L</STORE_LC_NUMERIC_SET_TO_NEEDED> .. L</RESTORE_LC_NUMERIC> pair
+if required, so eg:
+
+  WITH_LC_NUMERIC_SET_TO_NEEDED(
+    SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis)
+  );
+
+is equivalent to:
+
+  {
+#ifdef USE_LOCALE_NUMERIC
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+    STORE_LC_NUMERIC_SET_TO_NEEDED();
+#endif
+    SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis);
+#ifdef USE_LOCALE_NUMERIC
+    RESTORE_LC_NUMERIC();
+#endif
+  }
+
 =cut
 
 */
@@ -6554,6 +6577,14 @@ expression, but with an empty argument list, like this:
             __FILE__, __LINE__, PL_numeric_standard));                      \
         } STMT_END
 
+#  define WITH_LC_NUMERIC_SET_TO_NEEDED(block)                              \
+        STMT_START {                                                        \
+            DECLARATION_FOR_LC_NUMERIC_MANIPULATION;                        \
+            STORE_LC_NUMERIC_SET_TO_NEEDED();                               \
+            block;                                                          \
+            RESTORE_LC_NUMERIC();                                           \
+        } STMT_END;
+
 #else /* !USE_LOCALE_NUMERIC */
 
 #  define SET_NUMERIC_STANDARD()
@@ -6566,6 +6597,8 @@ expression, but with an empty argument list, like this:
 #  define RESTORE_LC_NUMERIC()
 #  define LOCK_LC_NUMERIC_STANDARD()
 #  define UNLOCK_LC_NUMERIC_STANDARD()
+#  define WITH_LC_NUMERIC_SET_TO_NEEDED(block) \
+    STMT_START { block; } STMT_END
 
 #endif /* !USE_LOCALE_NUMERIC */
 

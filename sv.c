@@ -11562,7 +11562,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
  * The rest of the args have the same meaning as the local vars of the
  * same name within Perl_sv_vcatpvfn_flags().
  *
- * It assumes the caller has already done STORE_LC_NUMERIC_SET_TO_NEEDED();
+ * The caller's determination of IN_LC(LC_NUMERIC), passed as in_lc_numeric,
+ * is used to ensure we do the right thing when we need to access the locale's
+ * numeric radix.
  *
  * It requires the caller to make buf large enough.
  */
@@ -11571,7 +11573,7 @@ static STRLEN
 S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
                     const NV nv, const vcatpvfn_long_double_t fv,
                     bool has_precis, STRLEN precis, STRLEN width,
-                    bool alt, char plus, bool left, bool fill)
+                    bool alt, char plus, bool left, bool fill, bool in_lc_numeric)
 {
     /* Hexadecimal floating point. */
     char* p = buf;
@@ -11778,17 +11780,19 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 
     if (hexradix) {
 #ifndef USE_LOCALE_NUMERIC
-            *p++ = '.';
+        *p++ = '.';
 #else
-            if (IN_LC(LC_NUMERIC)) {
-                STRLEN n;
+        if (in_lc_numeric) {
+            STRLEN n;
+            WITH_LC_NUMERIC_SET_TO_NEEDED({
                 const char* r = SvPV(PL_numeric_radix_sv, n);
                 Copy(r, p, n, char);
-                p += n;
-            }
-            else {
-                *p++ = '.';
-            }
+            });
+            p += n;
+        }
+        else {
+            *p++ = '.';
+        }
 #endif
     }
 
@@ -11894,9 +11898,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
 #ifdef USE_LOCALE_NUMERIC
-    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-    bool lc_numeric_set = FALSE; /* called STORE_LC_NUMERIC_SET_TO_NEEDED? */
+    bool have_in_lc_numeric = FALSE;
 #endif
+    /* we never change this unless USE_LOCALE_NUMERIC */
+    bool in_lc_numeric = FALSE;
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
     PERL_UNUSED_ARG(maybe_tainted);
@@ -12967,33 +12972,31 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * below, or implicitly, via an snprintf() variant.
              * Note also things like ps_AF.utf8 which has
              * "\N{ARABIC DECIMAL SEPARATOR} as a radix point */
-            if (!lc_numeric_set) {
-                /* only set once and reuse in-locale value on subsequent
-                 * iterations.
-                 * XXX what happens if we die in an eval?
-                 */
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
-                lc_numeric_set = TRUE;
+            if (! have_in_lc_numeric) {
+                in_lc_numeric = IN_LC(LC_NUMERIC);
+                have_in_lc_numeric = TRUE;
             }
 
-            if (IN_LC(LC_NUMERIC)) {
-                /* this can't wrap unless PL_numeric_radix_sv is a string
-                 * consuming virtually all the 32-bit or 64-bit address
-                 * space
-                 */
-                float_need += (SvCUR(PL_numeric_radix_sv) - 1);
+            if (in_lc_numeric) {
+                WITH_LC_NUMERIC_SET_TO_NEEDED({
+                    /* this can't wrap unless PL_numeric_radix_sv is a string
+                     * consuming virtually all the 32-bit or 64-bit address
+                     * space
+                     */
+                    float_need += (SvCUR(PL_numeric_radix_sv) - 1);
 
-                /* floating-point formats only get utf8 if the radix point
-                 * is utf8. All other characters in the string are < 128
-                 * and so can be safely appended to both a non-utf8 and utf8
-                 * string as-is.
-                 * Note that this will convert the output to utf8 even if
-                 * the radix point didn't get output.
-                 */
-                if (SvUTF8(PL_numeric_radix_sv) && !has_utf8) {
-                    sv_utf8_upgrade(sv);
-                    has_utf8 = TRUE;
-                }
+                    /* floating-point formats only get utf8 if the radix point
+                     * is utf8. All other characters in the string are < 128
+                     * and so can be safely appended to both a non-utf8 and utf8
+                     * string as-is.
+                     * Note that this will convert the output to utf8 even if
+                     * the radix point didn't get output.
+                     */
+                    if (SvUTF8(PL_numeric_radix_sv) && !has_utf8) {
+                        sv_utf8_upgrade(sv);
+                        has_utf8 = TRUE;
+                    }
+                });
             }
 #endif
 
@@ -13068,7 +13071,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && !fill
                 && intsize != 'q'
             ) {
-                SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis);
+                WITH_LC_NUMERIC_SET_TO_NEEDED(
+                    SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis)
+                );
                 elen = strlen(ebuf);
                 eptr = ebuf;
                 goto float_concat;
@@ -13113,7 +13118,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             if (UNLIKELY(hexfp)) {
                 elen = S_format_hexfp(aTHX_ PL_efloatbuf, PL_efloatsize, c,
                                 nv, fv, has_precis, precis, width,
-                                alt, plus, left, fill);
+                                alt, plus, left, fill, in_lc_numeric);
             }
             else {
                 char *ptr = ebuf + sizeof ebuf;
@@ -13169,8 +13174,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     const char* qfmt = quadmath_format_single(ptr);
                     if (!qfmt)
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
-                    elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
-                                             qfmt, nv);
+                    WITH_LC_NUMERIC_SET_TO_NEEDED(
+                        elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
+                                                 qfmt, nv);
+                    );
                     if ((IV)elen == -1) {
                         if (qfmt != ptr)
                             SAVEFREEPV(qfmt);
@@ -13180,11 +13187,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         Safefree(qfmt);
                 }
 #elif defined(HAS_LONG_DOUBLE)
-                elen = ((intsize == 'q')
-                        ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
-                        : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv));
+                WITH_LC_NUMERIC_SET_TO_NEEDED(
+                    elen = ((intsize == 'q')
+                            ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
+                            : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv))
+                );
 #else
-                elen = my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv);
+                WITH_LC_NUMERIC_SET_TO_NEEDED(
+                    elen = my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
+                );
 #endif
                 GCC_DIAG_RESTORE_STMT;
 	    }
@@ -13406,16 +13417,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
 
     SvTAINT(sv);
-
-#ifdef USE_LOCALE_NUMERIC
-
-    if (lc_numeric_set) {
-        RESTORE_LC_NUMERIC();   /* Done outside loop, so don't have to
-                                   save/restore each iteration. */
-    }
-
-#endif
-
 }
 
 /* =========================================================================
