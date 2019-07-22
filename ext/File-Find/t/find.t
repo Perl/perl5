@@ -1026,11 +1026,13 @@ if ($^O eq 'MSWin32') {
         }
     }
     closedir $ROOT_DIR;
+  SKIP:
+    {
     my $created_file;
     unless (defined $expected_first_file) {
         $expected_first_file = '__perl_File_Find_test.tmp';
         open(F, ">", "/$expected_first_file") && close(F)
-            or die "cannot create file in root directory: $!\n";
+            or skip "cannot create file in root directory: $!", 8;
         $created_file = 1;
     }
 
@@ -1066,6 +1068,7 @@ if ($^O eq 'MSWin32') {
     if ($created_file) {
         unlink("/$expected_first_file")
             or warn "can't unlink /$expected_first_file: $!\n";
+    }
     }
 }
 
