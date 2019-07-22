@@ -64,6 +64,7 @@
 #include <float.h>
 #include <time.h>
 #include <sys/utime.h>
+#include <wchar.h>
 
 #ifdef __GNUC__
 /* Mingw32 defaults to globing command line
