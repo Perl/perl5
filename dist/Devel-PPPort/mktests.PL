@@ -41,11 +41,14 @@ sub generate_tests
       print "generating $testfile\n";
 
       my $tmpl = $template;
-      $tmpl =~ s/__SOURCE__/$file/mg;
+      # ensure we get the same result on Win32
+      (my $source = $file) =~ s(\\)(/)g;
+      $tmpl =~ s/__SOURCE__/$source/mg;
       $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
       $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
 
       open FH, ">$testfile" or die "$testfile: $!\n";
+      binmode FH;
       print FH $tmpl;
       close FH;
 
