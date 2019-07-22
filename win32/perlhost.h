@@ -13,6 +13,7 @@
 #define ___PerlHost_H___
 
 #include <signal.h>
+#include <wchar.h>
 #include "iperlsys.h"
 #include "vmem.h"
 #include "vdir.h"
