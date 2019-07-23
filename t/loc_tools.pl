@@ -424,6 +424,7 @@ sub find_locales ($;$) {
         push @Data, <DATA>; close DATA;
 
         foreach my $line (@Data) {
+            chomp $line;
             my ($locale_name, $language_codes, $country_codes, $encodings) =
                 split /:/, $line;
             _my_diag(__FILE__ . ":" . __LINE__ . ": Unexpected syntax in '$line'")
