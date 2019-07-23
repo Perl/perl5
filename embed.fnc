@@ -357,7 +357,7 @@ EXp	|void	|av_reify	|NN AV *av
 ApdR	|SV*	|av_shift	|NN AV *av
 Apd	|SV**	|av_store	|NN AV *av|SSize_t key|NULLOK SV *val
 AidR	|SSize_t|av_top_index	|NN AV *av
-AmpdR	|SSize_t|av_tindex	|NN AV *av
+AmdR	|SSize_t|av_tindex	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
 Apdoex	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV *av|SSize_t num
@@ -884,8 +884,8 @@ ATiR	|unsigned int|_variant_byte_number|PERL_UINTMAX_T word
 EiTR	|Size_t	|variant_under_utf8_count|NN const U8* const s		    \
 		|NN const U8* const e
 #endif
-AmTpdRP	|bool	|is_ascii_string|NN const U8* const s|STRLEN len
-AmTpdRP	|bool	|is_invariant_string|NN const U8* const s|STRLEN len
+AmTdRP	|bool	|is_ascii_string|NN const U8* const s|STRLEN len
+AmTdRP	|bool	|is_invariant_string|NN const U8* const s|STRLEN len
 #if defined(PERL_CORE) || defined (PERL_EXT)
 EXTidR	|bool	|is_utf8_non_invariant_string|NN const U8* const s	    \
 		|STRLEN len
@@ -898,11 +898,11 @@ ATidR	|Size_t	|isSTRICT_UTF8_CHAR |NN const U8 * const s0		    \
 				    |NN const U8 * const e
 ATidR	|Size_t	|isC9_STRICT_UTF8_CHAR |NN const U8 * const s0		    \
 				       |NN const U8 * const e
-ATmdpR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
+ATmdR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 ATidR	|bool	|is_utf8_string_flags					    \
 		|NN const U8 *s|STRLEN len|const U32 flags
-ATmdpR	|bool	|is_strict_utf8_string|NN const U8 *s|STRLEN len
-ATmdpR	|bool	|is_c9strict_utf8_string|NN const U8 *s|STRLEN len
+ATmdR	|bool	|is_strict_utf8_string|NN const U8 *s|STRLEN len
+ATmdR	|bool	|is_c9strict_utf8_string|NN const U8 *s|STRLEN len
 ATpdmb	|bool	|is_utf8_string_loc					    \
 		|NN const U8 *s|const STRLEN len|NN const U8 **ep
 ATdm	|bool	|is_utf8_string_loc_flags				    \
@@ -1279,7 +1279,7 @@ AfpdR	|SV*	|newSVpvf	|NN const char *const pat|...
 ApR	|SV*	|vnewSVpvf	|NN const char *const pat|NULLOK va_list *const args
 Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
 ApmbdR	|SV*	|newSVsv	|NULLOK SV *const old
-ApmdR	|SV*	|newSVsv_nomg	|NULLOK SV *const old
+AmdR	|SV*	|newSVsv_nomg	|NULLOK SV *const old
 ApR	|SV*	|newSVsv_flags	|NULLOK SV *const old|I32 flags
 ApdR	|SV*	|newSV_type	|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
@@ -2990,7 +2990,7 @@ Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN le
 Apd	|void	|sv_catpv_flags	|NN SV *dstr|NN const char *sstr \
 				|const I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
-Apmd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
+Amd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Ap	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 Apmb	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv

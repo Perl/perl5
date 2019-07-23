@@ -248,7 +248,7 @@ PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV *av)
 PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val);
 #define PERL_ARGS_ASSERT_AV_STORE	\
 	assert(av)
-/* PERL_CALLCONV SSize_t	Perl_av_tindex(pTHX_ AV *av)
+/* PERL_CALLCONV SSize_t	av_tindex(pTHX_ AV *av)
 			__attribute__warn_unused_result__; */
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -1454,11 +1454,11 @@ PERL_STATIC_INLINE Size_t	S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 	assert(s0); assert(e)
 #endif
 
-/* PERL_CALLCONV bool	Perl_is_ascii_string(const U8* const s, STRLEN len)
+/* PERL_CALLCONV bool	is_ascii_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */
 
-/* PERL_CALLCONV bool	Perl_is_c9strict_utf8_string(const U8 *s, STRLEN len)
+/* PERL_CALLCONV bool	is_c9strict_utf8_string(const U8 *s, STRLEN len)
 			__attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool	is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
@@ -1467,7 +1467,7 @@ PERL_STATIC_INLINE bool	S_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len
 #define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOCLEN	\
 	assert(s)
 #endif
-/* PERL_CALLCONV bool	Perl_is_invariant_string(const U8* const s, STRLEN len)
+/* PERL_CALLCONV bool	is_invariant_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */
 
@@ -1481,7 +1481,7 @@ PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, cons
 	assert(pv); assert(what); assert(op_name)
 #endif
 
-/* PERL_CALLCONV bool	Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
+/* PERL_CALLCONV bool	is_strict_utf8_string(const U8 *s, STRLEN len)
 			__attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool	is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
@@ -1853,7 +1853,7 @@ PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
 	assert(p)
 #endif
 
-/* PERL_CALLCONV bool	Perl_is_utf8_string(const U8 *s, STRLEN len)
+/* PERL_CALLCONV bool	is_utf8_string(const U8 *s, STRLEN len)
 			__attribute__warn_unused_result__; */
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -2545,7 +2545,7 @@ PERL_CALLCONV SV*	Perl_newSVsv(pTHX_ SV *const old)
 PERL_CALLCONV SV*	Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
 			__attribute__warn_unused_result__;
 
-/* PERL_CALLCONV SV*	Perl_newSVsv_nomg(pTHX_ SV *const old)
+/* PERL_CALLCONV SV*	newSVsv_nomg(pTHX_ SV *const old)
 			__attribute__warn_unused_result__; */
 
 PERL_CALLCONV SV*	Perl_newSVuv(pTHX_ const UV u)
@@ -3712,7 +3712,7 @@ PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE	\
 	assert(sv)
 #endif
-/* PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *const sv, const I32 flags); */
+/* PERL_CALLCONV STRLEN	sv_utf8_upgrade_flags(pTHX_ SV *const sv, const I32 flags); */
 PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extra);
 #define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_FLAGS_GROW	\
 	assert(sv)
