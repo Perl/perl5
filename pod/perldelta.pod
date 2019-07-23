@@ -348,9 +348,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+F<t/op/magic.t> could fail if environment varables starting with
+C<FOO> already existed.
 
 =back
 
