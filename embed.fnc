@@ -779,7 +779,7 @@ Apbmx	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 Amd	|void	|hv_undef	|NULLOK HV *hv
 poX	|void	|hv_undef_flags	|NULLOK HV *hv|U32 flags
 AmP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
-AiTp	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
+AdiTp	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
 AmP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
 AiTp	|I32	|foldEQ_locale	|NN const char* a|NN const char* b|I32 len
 Am	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
