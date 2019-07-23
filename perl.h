@@ -1628,9 +1628,15 @@ This replaces any read-only SV with a fresh SV and removes any magic.
 /* This used to be conditionally defined based on whether we had a sprintf()
  * that correctly returns the string length (as required by C89), but we no
  * longer need that. XS modules can (and do) use this name, so it must remain
- * a part of the API that's visible to modules. But we no longer document it
- * either (because using sprintf() rather than snprintf() is almost always
- * a bad idea). */
+ * a part of the API that's visible to modules.
+
+=for apidoc ATmD|int|my_sprintf|NN char *buffer|NN const char *pat|...
+
+Do NOT use this due to the possibility of overflowing C<buffer>.  Instead use
+my_snprintf()
+
+=cut
+*/
 #define my_sprintf sprintf
 
 /*
@@ -6564,6 +6570,7 @@ expression, but with an empty argument list, like this:
 #endif /* !USE_LOCALE_NUMERIC */
 
 #define Atof				my_atof
+/* XXX document this , maybe other similar ones*/
 #define Strtod                          my_strtod
 
 #if    defined(HAS_STRTOD)                                          \
