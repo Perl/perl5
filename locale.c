@@ -2084,6 +2084,57 @@ S_new_collate(pTHX_ const char *newcoll)
 
 #ifdef WIN32
 
+#define USE_WSETLOCALE
+
+#ifdef USE_WSETLOCALE
+
+STATIC char *
+S_wrap_wsetlocale(pTHX_ int category, const char *locale) {
+    wchar_t *wlocale;
+    wchar_t *wresult;
+    char *result;
+
+    if (locale) {
+        int req_size =
+            MultiByteToWideChar(CP_UTF8, 0, locale, -1, NULL, 0);
+
+        if (!req_size) {
+            errno = EINVAL;
+            return NULL;
+        }
+
+        Newx(wlocale, req_size, wchar_t);
+        if (!MultiByteToWideChar(CP_UTF8, 0, locale, -1, wlocale, req_size)) {
+            Safefree(wlocale);
+            errno = EINVAL;
+            return NULL;
+        }
+    }
+    else {
+        wlocale = NULL;
+    }
+    wresult = _wsetlocale(category, wlocale);
+    Safefree(wlocale);
+    if (wresult) {
+        int req_size =
+            WideCharToMultiByte(CP_UTF8, 0, wresult, -1, NULL, 0, NULL, NULL);
+        Newx(result, req_size, char);
+        SAVEFREEPV(result); /* is there something better we can do here? */
+        if (!WideCharToMultiByte(CP_UTF8, 0, wresult, -1,
+                                 result, req_size, NULL, NULL)) {
+            errno = EINVAL;
+            return NULL;
+        }
+    }
+    else {
+        result = NULL;
+    }
+
+    return result;
+}
+
+#endif
+
 STATIC char *
 S_win32_setlocale(pTHX_ int category, const char* locale)
 {
@@ -2141,7 +2192,11 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
     }
 
+#ifdef USE_WSETLOCALE
+    result = S_wrap_wsetlocale(aTHX_ category, locale);
+#else
     result = setlocale(category, locale);
+#endif
     DEBUG_L(STMT_START {
                 dSAVE_ERRNO;
                 PerlIO_printf(Perl_debug_log, "%s:%d: %s\n", __FILE__, __LINE__,
@@ -2162,7 +2217,11 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     for (i = 0; i < LC_ALL_INDEX; i++) {
         result = PerlEnv_getenv(category_names[i]);
         if (result && strNE(result, "")) {
-            setlocale(categories[i], result);
+#ifdef USE_WSETLOCALE
+            S_wrap_wsetlocale(aTHX_ categories[i], locale);
+#else
+            setlocale(categories[i], locale);
+#endif
             DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
                 __FILE__, __LINE__,
                 setlocale_debug_string(categories[i], result, "not captured")));
