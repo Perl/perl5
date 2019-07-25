@@ -7260,7 +7260,7 @@ prefixit='case "$3" in
 		none)
 			eval "tp=\"\$$2\"";
 			case "$tp" in
-			""|" ") eval "$1=\"\$$2\"";;
+			""|" "|none) eval "$1=\"\$$2\"";;
 			*) eval "$1=";;
 			esac;;
 		esac;;
