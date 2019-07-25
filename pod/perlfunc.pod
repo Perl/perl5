@@ -1228,9 +1228,10 @@ change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a L<C<chroot>|/chroot FILENAME> to L<C<$_>|perlvar/$_>.
 
-B<NOTE:>  It is good security practice to do C<chdir("/")>
+B<NOTE:>  It is mandatory for security to C<chdir("/")>
 (L<C<chdir>|/chdir EXPR> to the root directory) immediately after a
-L<C<chroot>|/chroot FILENAME>.
+L<C<chroot>|/chroot FILENAME>, otherwise the current working directory
+may be outside of the new root.
 
 Portability issues: L<perlport/chroot>.
 
