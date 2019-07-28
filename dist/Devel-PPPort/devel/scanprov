@@ -60,19 +60,20 @@ for my $p (@$perls_ref) {
   local @ARGV = glob "$archlib/CORE/*.h";
   my %sym;
 
-  # %sym's keys are every single \w+ that occurs in all the headers,
-  # regardless of if they are in a comment, or what.
-  while (<>) { $sym{$_}++ for /(\w+)/g; }
+  # %sym's keys are every single thing that looks like an identifier
+  # (beginning with a non-digit \w, followed by \w*) that occurs in all the
+  # headers, regardless of if they are in a comment, or what.
+  while (<>) { $sym{$_}++ for /(\b[^\W\d]\w*)/g; }
 
-  # @provided is narrowed to include only those \w+ things that are mentioned
-  # in some hdr in this release.  (If it isn't even mentioned, it won't exist in
-  # the release.)  For those not mentioned, a key is added of the \w+ in %v.
-  # It is a subkey of this release's "todo" release, which is the next higher
-  # one.  If we are at version n, we have already done version n+1 and the
-  # provided element was mentioned there, and now it no longer is.  We take
-  # that to mean that to mean that the element became provided for in n+1.
-  # (khw notes that it could have just been in a comment for a bunch of
-  # releases above this, like
+  # @provided is narrowed to include only those identifier-like things that
+  # are mentioned in some hdr in this release.  (If it isn't even mentioned,
+  # it won't exist in the release.)  For those not mentioned, a key is added
+  # of the identifier-like thing in %v.  It is a subkey of this release's
+  # "todo" release, which is the next higher one.  If we are at version n, we
+  # have already done version n+1 and the provided element was mentioned
+  # there, and now it no longer is.  We take that to mean that to mean that
+  # the element became provided for in n+1.  (khw notes that it could have
+  # just been in a comment for a bunch of releases above this, like
   #         /* Oh how I wish we had FOO */
   # and at some point FOO got added.  The method here is, hence, just a
   # heuristic.
