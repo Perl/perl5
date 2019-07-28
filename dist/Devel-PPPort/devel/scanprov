@@ -19,14 +19,17 @@ use Getopt::Long;
 
 require './parts/ppptools.pl';
 require './parts/inc/inctools';
+require './devel/devtools.pl';
 
 our %opt = (
   mode    => 'check',
   install => '/tmp/perl/install/default',
   blead   => 'bleadperl',
+  debug   => 0,
+ 'debug-start' => "",
 );
 
-GetOptions(\%opt, qw( install=s mode=s blead=s )) or die;
+GetOptions(\%opt, qw( install=s mode=s blead=s debug debug-start=s)) or die;
 
 my $write = $opt{mode} eq 'write';
 
@@ -39,22 +42,18 @@ my @provided = grep { !exists $embed{$_} }
                map { /^(\w+)/ ? $1 : () }
                `$^X ppport.h --list-provided`;
 
-my @perls = sort { $b->{version} <=> $a->{version} }
-            map { { version => `$_ -e 'printf "%.6f", \$]'`, path => $_ } }
-            ($opt{blead}, glob "$opt{install}/*/bin/perl5.*");
-
-for (1 .. $#perls) {
-  $perls[$_]{todo} = $perls[$_-1]{version};
-}
+my $perls_ref = get_and_sort_perls(\%opt);
 
 # Get rid of blead
-shift @perls;
+shift @$perls_ref;
+
+die "Couldn't find any perls" unless @$perls_ref > 1;
 
 my %v;
 
 # We look in descending order of perl versions.  Each time through the loop
 # @provided is narrowed.
-for my $p (@perls) {
+for my $p (@$perls_ref) {
   print "checking perl $p->{version}...\n";
 
   # Get the hdr files associated with this version
