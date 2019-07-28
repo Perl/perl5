@@ -47,6 +47,7 @@ __UNDEFINED__  SvUVx(sv)       ((PL_Sv = (sv)), SvUV(PL_Sv))
 /* Hint: sv_uv
  * Always use the SvUVx() macro instead of sv_uv().
  */
+/* Replace sv_uv with SvUVx */
 __UNDEFINED__  sv_uv(sv)       SvUVx(sv)
 
 #if !defined(SvUOK) && defined(SvIOK_UV)
