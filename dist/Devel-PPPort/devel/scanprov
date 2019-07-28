@@ -44,8 +44,6 @@ my @provided = grep { !exists $embed{$_} }
 
 my $perls_ref = get_and_sort_perls(\%opt);
 
-# Get rid of blead
-shift @$perls_ref;
 
 die "Couldn't find any perls" unless @$perls_ref > 1;
 
@@ -99,6 +97,11 @@ my $base_ref = parse_todo($out);
 #                },
 
 for my $v (keys %v) {
+
+  # Things listed in blead (the most recent file) are special.  They are there
+  # by default because we haven't found them anywhere, so they don't really
+  # exist as far as we can determine, so shouldn't be listed as existing.
+  next if $v > $perls_ref->[0]->{file};
 
   # @new becomes the symbols for version $v not already in the file for $v
   my @new = sort dictionary_order grep { !exists $base_ref->{$_} }
