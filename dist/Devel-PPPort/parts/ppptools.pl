@@ -399,6 +399,41 @@ sub parse_embed
   return @func;
 }
 
+sub known_but_hard_to_test_for
+{
+    # This returns a list of functions/symbols that are in Perl, but the tests
+    # for their existence don't work, usually as a result of them being XS,
+    # and using XS to test.  Effectively, any XS code that compiles and works
+    # is exercising most of these XS-related ones.
+    #
+    # The values for the keys are each the version that ppport.h makes them
+    # work on, and were gleaned by manually looking at the code parts/inc/*.
+    # For non-ppport.h, scanprov will automatically figure out the version
+    # they were introduced in.
+
+    my %return;
+
+    for (qw(CLASS dXSI32 items ix pTHX_ RETVAL StructCopy svtype
+            STMT_START STMT_END STR_WITH_LEN THIS XS))
+    {
+        # __MIN_PERL__ is this at the time of this commit.  This is the
+        # earliest these have been tested to at the time of the commit, but
+        # likely go back further.
+        $return{$_} = '5.003_07';
+    }
+    for (qw(_pMY_CXT pMY_CXT_)) {
+        $return{$_} = '5.9.0';
+    }
+    for (qw(XopDISABLE XopENABLE XopENTRY XopENTRYCUSTOM XopENTRY_set)) {
+        $return{$_} = '5.13.7';
+    }
+    for (qw(XS_EXTERNAL XS_INTERNAL)) {
+        $return{$_} = '5.15.2';
+    }
+
+    return \%return;
+}
+
 sub normalize_prototype  # So that they can be compared more easily
 {
     my $proto = shift;
