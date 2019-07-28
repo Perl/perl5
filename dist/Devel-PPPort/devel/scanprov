@@ -33,6 +33,8 @@ my $write = $opt{mode} eq 'write';
 my %embed = map { ( $_->{name} => 1 ) }
             parse_embed(qw(parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc ));
 
+# @provided is set to the elements that are provided, but not functions in the
+# .fnc files
 my @provided = grep { !exists $embed{$_} }
                map { /^(\w+)/ ? $1 : () }
                `$^X ppport.h --list-provided`;
@@ -45,26 +47,65 @@ for (1 .. $#perls) {
   $perls[$_]{todo} = $perls[$_-1]{version};
 }
 
+# Get rid of blead
 shift @perls;
 
 my %v;
 
+# We look in descending order of perl versions.  Each time through the loop
+# @provided is narrowed.
 for my $p (@perls) {
   print "checking perl $p->{version}...\n";
+
+  # Get the hdr files associated with this version
   my $archlib = `$p->{path} -MConfig -l -e 'print \$Config{archlib}'`;
   chomp $archlib;
   local @ARGV = glob "$archlib/CORE/*.h";
   my %sym;
+
+  # %sym's keys are every single \w+ that occurs in all the headers,
+  # regardless of if they are in a comment, or what.
   while (<>) { $sym{$_}++ for /(\w+)/g; }
-  @provided = map { $sym{$_} or $v{$p->{todo}}{$_}++; $sym{$_} ? $_ : () } @provided;
+
+  # @provided is narrowed to include only those \w+ things that are mentioned
+  # in some hdr in this release.  (If it isn't even mentioned, it won't exist in
+  # the release.)  For those not mentioned, a key is added of the \w+ in %v.
+  # It is a subkey of this release's "todo" release, which is the next higher
+  # one.  If we are at version n, we have already done version n+1 and the
+  # provided element was mentioned there, and now it no longer is.  We take
+  # that to mean that to mean that the element became provided for in n+1.
+  # (khw notes that it could have just been in a comment for a bunch of
+  # releases above this, like
+  #         /* Oh how I wish we had FOO */
+  # and at some point FOO got added.  The method here is, hence, just a
+  # heuristic.
+  @provided = map { $sym{$_} or $v{$p->{todo}}{$_}++;
+                    $sym{$_} ? $_ : ()
+                  } @provided;
 }
 
+# Read in the parts/base files.  The hash ref has keys being all symbols found
+# in all the files in base/, and the values being the perl versions each symbol
+# became defined in.
 my $out = 'parts/base';
 my $todo = parse_todo($out);
 
+# Now add the results from above.  At this point, The keys of %v are the 7
+# digit BCD version numbers, and their subkeys are the symbols provided by
+# D:P that are first mentioned in this version, like this:
+#   '5009002' => {
+#                  'MY_CXT_CLONE' => 1,
+#                  'SV_NOSTEAL' => 1,
+#                  'UTF8_MAXBYTES' => 1
+#                },
+
 for my $v (keys %v) {
-  my @new = sort dictionary_order grep { !exists $todo->{$_} } keys %{$v{$v}};
-  @new or next;
+
+  # @new becomes the symbols for version $v not already in the file for $v
+  my @new = sort dictionary_order grep { !exists $todo->{$_} }
+                                                                keys %{$v{$v}};
+  @new or next; # Nothing new, skip writing
+
   my $file = $v;
   $file =~ s/\.//g;
   $file = "$out/$file";
