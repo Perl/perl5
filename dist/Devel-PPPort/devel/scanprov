@@ -62,8 +62,15 @@ for my $p (@$perls_ref) {
 
   # %sym's keys are every single thing that looks like an identifier
   # (beginning with a non-digit \w, followed by \w*) that occurs in all the
-  # headers, regardless of if they are in a comment, or what.
-  while (<>) { $sym{$_}++ for /(\b[^\W\d]\w*)/g; }
+  # headers, regardless of where (outside of comments).
+  local $/ = undef;
+  while (<>) {  # Read in the next file
+
+    # Strip comments, from perl faq
+    s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#defined $2 ? $2 : ""#gse;
+
+    $sym{$_}++ for /(\b[^\W\d]\w*)/g;
+  }
 
   # @provided is narrowed to include only those identifier-like things that
   # are mentioned in some hdr in this release.  (If it isn't even mentioned,
@@ -72,11 +79,7 @@ for my $p (@$perls_ref) {
   # "todo" release, which is the next higher one.  If we are at version n, we
   # have already done version n+1 and the provided element was mentioned
   # there, and now it no longer is.  We take that to mean that to mean that
-  # the element became provided for in n+1.  (khw notes that it could have
-  # just been in a comment for a bunch of releases above this, like
-  #         /* Oh how I wish we had FOO */
-  # and at some point FOO got added.  The method here is, hence, just a
-  # heuristic.
+  # the element became provided for in n+1.
   @provided = map { $sym{$_} or $v{$p->{todo}}{$_}++;
                     $sym{$_} ? $_ : ()
                   } @provided;
