@@ -160,6 +160,7 @@ for (@perl_api) {   # $_ is the item name
       my $args = $e->{args};
       $line .= 'v' if @$args && $args->[-1][0] eq '...';
     }
+    $line .= 'o' if exists $e->{ppport_fnc};
     $line .= 'n' if exists $e->{flags}{T};  # No thread context parameter
     $line .= 'd' if exists $e->{flags}{D};  # deprecated
     $line .= 'x' if exists $e->{flags}{x};  # experimental

@@ -84,6 +84,7 @@ my %API = map { /^(\w+)\|([^|]*)\|([^|]*)\|(\w*)$/
                       (index($4, 'i') >= 0 ? ( inaccessible => 1  ) : ()),
                       (index($4, 'x') >= 0 ? ( experimental => 1  ) : ()),
                       (index($4, 'u') >= 0 ? ( undocumented => 1  ) : ()),
+                      (index($4, 'o') >= 0 ? ( ppport_fnc => 1  ) : ()),
                     } )
                 : die "invalid spec: $_" } qw(
 __PERL_API__
@@ -255,8 +256,13 @@ if (exists $opt{'api-info'}) {
     print "\n=== $f ===\n\n";
     my $info = 0;
     if ($API{$f}{base} || $API{$f}{todo}) {
-      my $base = format_version($API{$f}{base} || $API{$f}{todo});
-      print "Supported at least starting from perl-$base.\n";
+      if ($API{$f}{ppport_fnc}) {
+        print "This is only supported by ppport.h, and NOT by ANY perl version.\n";
+      }
+      else {
+        my $base = format_version($API{$f}{base} || $API{$f}{todo});
+        print "Supported at least starting from perl-$base.\n";
+      }
       $info++;
     }
     if ($API{$f}{provided}) {
@@ -280,6 +286,7 @@ if (exists $opt{'api-info'}) {
       $info++;
     }
 
+    if (! $API{$f}{ppport_fnc}) {
       my $email = "Send email to perl5-porters\@perl.org if you need to have this functionality.\n";
       if ($API{$f}{inaccessible}) {
         print "\nThis is not part of the public API, and may not even be accessible to XS code.\n";
@@ -313,8 +320,10 @@ if (exists $opt{'api-info'}) {
               " this could be\na bug in Devel::PPPort.  To report an issue:\n",
               "https://github.com/Dual-Life/Devel-PPPort/issues/new\n";
       }
+    }
     $count++;
   }
+
   $count or print "\nFound no API matching '$opt{'api-info'}'.";
   print "\n";
   exit 0;

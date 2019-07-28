@@ -349,6 +349,7 @@ sub parse_embed
               args  => \@args,
               cond  => ppcond(\@pps),
             };
+            $func[-1]{'ppport_fnc'} = 1 if $file =~ /ppport\.fnc/;
           }
           else {
             warn "mysterious name [$name] in $file, line $.\n";
