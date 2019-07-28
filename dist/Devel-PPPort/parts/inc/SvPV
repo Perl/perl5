@@ -40,6 +40,8 @@ __UNDEFINED__ sv_2pvbyte(sv, lp) (sv_utf8_downgrade((sv), 0), SvPV((sv), *(lp)))
  * Use the SvPVbyte() macro instead of sv_2pvbyte().
  */
 
+/* Replace sv_2pvbyte with SvPVbyte */
+
 #undef SvPVbyte
 
 #define SvPVbyte(sv, lp)                                                \
@@ -61,9 +63,13 @@ __UNDEFINED__  sv_2pvbyte_nolen(sv)  sv_2pv_nolen(sv)
  * Always use the SvPV() macro instead of sv_pvn().
  */
 
+/* Replace sv_pvn with SvPV */
+
 /* Hint: sv_pvn_force
  * Always use the SvPV_force() macro instead of sv_pvn_force().
  */
+
+/* Replace sv_pvn_force with SvPV_force */
 
 /* If these are undefined, they're not handled by the core anyway */
 __UNDEFINED__  SV_IMMEDIATE_UNREF       0
