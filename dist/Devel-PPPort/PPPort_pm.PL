@@ -566,28 +566,44 @@ in threaded and non-threaded configurations.
 
 =head2 Provided Perl compatibility API
 
-The header file written by this module, typically F<ppport.h>, provides
-access to the following elements of the Perl API that are not otherwise
-available in Perl releases older than when the elements were first introduced.
-(Many of these are not supported all the way back to __MIN_PERL__;
-see L</Perl API not supported by ppport.h back to __MIN_PERL__> for details.)
+The header file written by this module, typically F<ppport.h>, provides access
+to the following elements of the Perl API that are not otherwise available in
+Perl releases older than when the elements were first introduced.  (Note that
+many of these are not supported all the way back to __MIN_PERL__, but it may
+be that they are supported back as far as you need; see L</Supported Perl API,
+sorted by version> for that information.)
 
     __PROVIDED_API__
 
-=head2 Perl API not supported by ppport.h back to __MIN_PERL__
+=head2 Supported Perl API, sorted by version
 
-There is still a big part of the API not fully supported by F<ppport.h>.
-This can be because it doesn't make sense to back-port that part of the API,
-or simply because it hasn't been implemented yet. Patches welcome!  Some
-elements are ported backward for some releases, but not all the way to
-__MIN_PERL__.
+The table in this section lists all the Perl API elements available, sorted by
+the version in which support starts.  This includes all the elements that
+F<ppport.h> helps out with, as well as those elements that it doesn't.
 
-Below is a list of the API that isn't currently supported back to
-__MIN_PERL__, sorted by the version of Perl below which it is unsupported.
-Only things you should be using are included in the list, so not listed are
-deprecated and experimental functions.
+In some cases, it doesn't make practical sense for elements to be supported
+earlier than they already are.  For example, UTF-8 functionality isn't
+provided prior to the release where it was first introduced.
 
-Some of the entries are marked as "undocumented".  This means that they
+But in other cases, it just is that no one has implemented support yet.
+Patches welcome!  Some elements are ported backward for some releases, but not
+all the way to __MIN_PERL__.
+
+If an element, call it ELEMENT, is not on this list, try using this command to
+find out why:
+
+ perl ppport.h --api-info=ELEMENT
+
+A few of the entries in the list below are marked as DEPRECATED.  You should
+not use these for new code, and should be converting existing uses to use
+something better.
+
+Some of the entries in the list are marked as "experimental".  This means
+these should not generally be used.  They may be removed or changed without
+notice.  You can ask why they are experimental by sending email to
+L<mailto:perl5-porters@perl.org>.
+
+And some of the entries are marked as "undocumented".  This means that they
 aren't necessarily considered stable, and could be changed or removed in some
 future release without warning.  It is therefore a bad idea to use them
 without further checking.  It could be that these are considered to be for
@@ -606,7 +622,7 @@ __UNSUPPORTED_API__
 
 If you find any bugs, C<Devel::PPPort> doesn't seem to build on your
 system, or any of its tests fail, please send a bug report to
-L<perlbug@perl.org|mailto:perlbug@perl.org>.
+L<https://github.com/Dual-Life/Devel-PPPort/issues/new>.
 
 =head1 AUTHORS
 
