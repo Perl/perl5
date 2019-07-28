@@ -88,7 +88,7 @@ for my $p (@perls) {
 # in all the files in base/, and the values being the perl versions each symbol
 # became defined in.
 my $out = 'parts/base';
-my $todo = parse_todo($out);
+my $base_ref = parse_todo($out);
 
 # Now add the results from above.  At this point, The keys of %v are the 7
 # digit BCD version numbers, and their subkeys are the symbols provided by
@@ -102,7 +102,7 @@ my $todo = parse_todo($out);
 for my $v (keys %v) {
 
   # @new becomes the symbols for version $v not already in the file for $v
-  my @new = sort dictionary_order grep { !exists $todo->{$_} }
+  my @new = sort dictionary_order grep { !exists $base_ref->{$_} }
                                                                 keys %{$v{$v}};
   @new or next; # Nothing new, skip writing
 
