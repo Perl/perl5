@@ -94,7 +94,7 @@ my %raw_todo = %{&parse_todo('parts/todo')};
 #                       ],
 my %todo;
 for (keys %raw_todo) {
-  push @{$todo{int_parse_version($raw_todo{$_})}}, $_;
+  push @{$todo{int_parse_version($raw_todo{$_}{version})}}, $_;
 }
 
 # Most recent first
@@ -111,21 +111,29 @@ my $MAX_PERL = format_version($INT_MAX_PERL);
 my $INT_MIN_PERL = (@todo_list) ? $todo_list[-1] : 5003007;
 my $MIN_PERL = format_version($INT_MIN_PERL);
 
+# Get rid of blead.  It contains the things marked as todo, meaning they
+# don't compile at all, and not getting rid of it would mean they would be
+# listed as working but introduced in blead.
+shift @todo_list if @todo_list && $todo_list[0] > $INT_MAX_PERL;
+
 # check consistency between our list of everything provided, and our lists of
 # what got provided when
 for (@provided) {
   if (   exists $raw_todo{$_}
-      && $raw_todo{$_} > $INT_MIN_PERL      # INT_MIN_PERL contents are real
-                                            # symbols, not something to do
+      && $raw_todo{$_}{version} > $INT_MIN_PERL # INT_MIN_PERL contents are real
+                                                # symbols, not something to do
+      && $raw_todo{$_}{version} <= $INT_MAX_PERL # Above this would be things that
+                                                 # don't compile in blead
       && exists $raw_base{$_})
   {
-    if ($raw_base{$_} == $raw_todo{$_}) {
+    if ($raw_base{$_}{version} == $raw_todo{$_}{version}) {
       warn "$INCLUDE/$provides{$_} provides $_, which is still marked "
            . "todo for " . format_version($raw_todo{$_}) . "\n";
     }
     else {
-      check(2, "$_ was ported back to " . format_version($raw_todo{$_}) .
-               " (baseline revision: "  . format_version($raw_base{$_}) . ").");
+      check(2, "$_ was ported back to " . format_version($raw_todo{$_}{version})
+            .  " (baseline revision: "  . format_version($raw_base{$_}{version})
+            . ").");
     }
   }
 }
@@ -151,13 +159,21 @@ for (@perl_api) {   # $_ is the item name
 
   # Create the lines that ppport.h reads.  These look like
   #     CopyD|5.009002|5.003007|p
-  my $line = "$_|" . (exists $provides{$_} && exists $raw_base{$_} ? $raw_base{$_} : '') . '|';
-  $line .= ($raw_todo{$_} || '') . '|';
+  my $line = "$_|";
+  $line .= $raw_base{$_}{version} if exists $raw_base{$_}
+                # If is above the max, it means it never actually got defined
+            && int_parse_version($raw_base{$_}{version}) <= $INT_MAX_PERL;
+  $line .= '|';
+  $line .= $raw_todo{$_}{version}
+                if exists $raw_todo{$_}
+                && int_parse_version($raw_todo{$_}{version}) <= $INT_MAX_PERL;
+  $line .= '|';
   $line .= 'p' if exists $provides{$_};
+  my $e;
+  $e = $embed{$_} if exists $embed{$_};
   my $is_documented = 0;
   my $is_accessible = 0;
-  if (exists $embed{$_}) {
-    my $e = $embed{$_};
+  if (defined $e) {
     if (exists $e->{flags}{p}) {    # Has 'Perl_' prefix
       my $args = $e->{args};
       $line .= 'v' if @$args && $args->[-1][0] eq '...';

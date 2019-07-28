@@ -39,8 +39,16 @@ sub all_files_in_dir
 sub parse_todo
 {
   # Creates a hash with the keys being all symbols found in all the files in
-  # the input directory (default 'parts/todo'), and the values being the perl
-  # versions of each symbol.
+  # the input directory (default 'parts/todo'), and the values being each a
+  # subhash like so:
+  #     'utf8_hop_forward' => {
+  #                               'code' => 'U',
+  #                               'version' => '5.025007'
+  #                           },
+  #
+  # The input line that generated that was this:
+  #
+  #     utf8_hop_forward               # U
 
   my $dir = shift || 'parts/todo';
   local *TODO;
@@ -53,12 +61,14 @@ sub parse_todo
     chomp $version;
     while (<TODO>) {
       chomp;
-      s/#.*//;
+      s/#(?: (\w)\b)?.*//;  # 'code' is optional
+      my $code = $1;
       s/^\s+//; s/\s+$//;
       /^\s*$/ and next;
       /^\w+$/ or die "invalid identifier: $_\n";
       exists $todo{$_} and die "duplicate identifier: $_ ($todo{$_} <=> $version)\n";
-      $todo{$_} = $version;
+      $todo{$_}{'version'} = $version;
+      $todo{$_}{'code'} = $code if $code;
     }
     close TODO;
   }

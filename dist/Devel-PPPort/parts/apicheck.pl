@@ -350,8 +350,8 @@ for $f (@f) {   # Loop through all the tests to add
 HEAD
 
   # #ifdef out if marked as todo (not known in) this version
-  if ($todo{$f->{'name'}}) {
-    my($five, $ver,$sub) = parse_version($todo{$f->{'name'}});
+  if (exists $todo{$f->{'name'}}) {
+    my($five, $ver,$sub) = parse_version($todo{$f->{'name'}}{'version'});
     print OUT "#if PERL_VERSION > $ver || (PERL_VERSION == $ver && PERL_SUBVERSION >= $sub) /* TODO */\n";
   }
 
@@ -384,7 +384,7 @@ $stack
 END
 
   $f->{'cond'} and print OUT "#endif\n";
-  $todo{$f->{'name'}} and print OUT "#endif\n";
+  exists $todo{$f->{'name'}} and print OUT "#endif\n";
 
   print OUT "\n";
 }
