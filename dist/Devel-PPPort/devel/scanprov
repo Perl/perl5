@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
 ################################################################################
 #
-#  scanprov -- scan Perl headers for provided macros
+#  scanprov -- scan Perl headers for provided macros, and add known exceptions
 #
-#  The lines added have an 'M' code to signify they are macros added by us.
+#  The lines added have a code to signify they are added by us:
+#   M means it is a macro
+#   X means it is a known exceptional item
 #
 ################################################################################
 #
@@ -44,8 +46,82 @@ my @provided = grep { !exists $embed{$_} }
                map { /^(\w+)/ ? $1 : () }
                `$^X ppport.h --list-provided`;
 
-my $perls_ref = get_and_sort_perls(\%opt);
+# There are a few exceptions that have to be dealt with specially.  Add these
+# to the list of things to scan for.
+my $hard_to_test_ref = known_but_hard_to_test_for();
+push @provided, keys %$hard_to_test_ref;
 
+my $base_dir = 'parts/base';
+my $todo_dir = 'parts/todo';
+
+if ($write) {
+
+    # Get the list of files, which are returned sorted, and so the min version
+    # is in the 0th element
+    my @files = all_files_in_dir($base_dir);
+    my $file =  $files[0];
+    my $min_perl = $file;
+    $min_perl =~ s,.*/,,;    # The name is the integer of __MIN_PERL__
+
+    # There are a very few special cases that we may not find in scanning, but
+    # exist all the way back.  Add them now to avoid throwing later things
+    # off.
+    print "-- $file --\n";
+    open F, ">>$file" or die "$file: $!\n";
+    for (qw(RETVAL CALL THIS)) { # These are also in hard_to_test_for(),
+                                 # so can't be in blead, as they are skipped
+                                 # in testing, so no real need to check that
+                                 # they aren't dups.
+        print "Adding $_ to $file\n";
+        print F format_output_line($_, 'X');
+    }
+    close F;
+
+    # Now we're going to add the hard to test symbols.  The hash has been
+    # manually populated and commited, with the version number ppport supports
+    # them to.
+    #
+    # This is a hash ref with the keys being all symbols found in all the
+    # files in the directory, and the values being the perl versions of each
+    # symbol.
+    my $todo = parse_todo($todo_dir);
+
+    # The keys of $hard_to_test_ref are the symbols, and the values are
+    # subhashes, with each 'version' key being its proper perl version.
+    # Below, we invert %hard_to_test, so that the keys are the version, and
+    # the values are the symbols that go in that version
+    my %add_by_version;
+    for my $hard (keys %$hard_to_test_ref) {
+
+        # But if someone ups the min version we support, we don't want to add
+        # something less than that.
+        my $version = int_parse_version($hard_to_test_ref->{$hard});
+        $version = $min_perl if $version < $min_perl;
+        $version = format_version_line($version);
+
+        push @{$add_by_version{$version}}, $hard
+                unless grep { $todo->{$_}->{version} eq $hard } keys %$todo;
+    }
+
+    # Only a few files will have exceptions that apply to them.  Rewrite each
+    foreach my $version (keys %add_by_version) {
+        my $file = "$todo_dir/" . int_parse_version($version);
+        print "-- Adding known exceptions to $file --\n";
+        my $need_version_line = ! -e $file;
+        open F, ">>$file" or die "$file: $!\n";
+        print F format_version_line($version) . "\n" if $need_version_line;
+        foreach my $symbol (sort dictionary_order @{$add_by_version{$version}})
+        {
+            print "adding $symbol\n";
+            print F format_output_line($symbol, 'X');
+        }
+        close F;
+    }
+}
+
+# Now that we've added the exceptions to a few files, we can parse
+# and deal with all of them.
+my $perls_ref = get_and_sort_perls(\%opt);
 
 die "Couldn't find any perls" unless @$perls_ref > 1;
 
