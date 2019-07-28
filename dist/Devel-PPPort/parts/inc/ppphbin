@@ -204,6 +204,10 @@ if (exists $opt{'api-info'}) {
             "(or #define NEED_${f}_GLOBAL).\n"              if exists $need{$f};
       print "Depends on: ", join(', ', @{$depends{$f}}), ".\n"
                                                          if exists $depends{$f};
+      $info++;
+    }
+
+    if (exists $hints{$f} || exists $warnings{$f}) {
       print "\n$hints{$f}" if exists $hints{$f};
       print "\nWARNING:\n$warnings{$f}" if exists $warnings{$f};
       $info++;
