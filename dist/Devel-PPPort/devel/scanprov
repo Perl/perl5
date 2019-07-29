@@ -120,7 +120,14 @@ for my $v (keys %v) {
   $write and (open F, ">>$file" or die "$file: $!\n");
   for (@new) {
     print "adding $_\n";
-    $write and printf F "%-30s # added by $0\n", $_;
+    $write and print F format_output_line($_);
   }
   $write and close F;
+}
+
+sub format_output_line
+{
+    my $sym = shift;
+
+    return sprintf "%-30s # added by $0\n", $sym;
 }
