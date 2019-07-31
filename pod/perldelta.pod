@@ -389,6 +389,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 C<< $@ = 100; die; >> now correctly propagates the 100 as an exception
 instead of ignoring it.  [perl #134291]
 
+=item *
+
+C<< 0 0x@ >> no longer asserts in S_no_op().  [perl #134310]
+
 =back
 
 =head1 Known Problems
