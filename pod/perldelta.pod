@@ -373,6 +373,14 @@ allows a keyword plugin to parse a subroutine signature while C<use feature
 semantics similar to regular C<sub> declarations that include signatures.
 [perl #132474]
 
+=item *
+
+Since on some platforms we need to hold a mutex when temporarily
+switching locales, new macros (C<STORE_LC_NUMERIC_SET_TO_NEEDED_IN>,
+C<WITH_LC_NUMERIC_SET_TO_NEEDED> and C<WITH_LC_NUMERIC_SET_TO_NEEDED_IN>)
+have been added to make it easier to do this safely and efficiently
+as part of [perl #134172].
+
 =back
 
 =head1 Selected Bug Fixes
