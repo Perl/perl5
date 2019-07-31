@@ -90,7 +90,7 @@ It properly handles the locale radix character, meaning it expects a dot except
 when called from within the scope of S<C<use locale>>, in which case the radix
 character should be that specified by the current locale.
 
-The synonym Strod() may be used instead.
+The synonym Strtod() may be used instead.
 
 =cut
 
