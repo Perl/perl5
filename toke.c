@@ -11342,10 +11342,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                    behaviour, like for: "0x.3" and "0x+$foo".
                 */
                 const char *d = s;
+                char *oldbp = PL_bufptr;
                 if (*d) ++d; /* so the user sees the bad non-digit */
                 PL_bufptr = (char *)d; /* so yyerror reports the context */
                 yyerror(Perl_form(aTHX_ "No digits found for %s literal",
                                   shift == 4 ? "hexadecimal" : "binary"));
+                PL_bufptr = oldbp;
             }
 
 	    if (overflowed) {

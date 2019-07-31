@@ -528,3 +528,15 @@ qq!$x\U@{s{0})(?{!;
 EXPECT
 syntax error at - line 3, near ")("
 Execution of - aborted due to compilation errors.
+########
+# NAME [perl #134310] don't confuse S_no_op() with PL_bufptr after s
+0 0x@
+EXPECT
+Number found where operator expected at - line 1, near "0 0x"
+	(Missing operator before  0x?)
+Array found where operator expected at - line 1, near "0x@
+;"
+	(Missing operator before ;?)
+No digits found for hexadecimal literal at - line 1, near "0 0x@"
+syntax error at - line 1, near "0 0x"
+Execution of - aborted due to compilation errors.
