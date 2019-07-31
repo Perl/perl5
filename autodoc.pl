@@ -44,12 +44,6 @@ require './regen/embed_lib.pl';
 
 my %docs;
 my %funcflags;
-my %macro = (
-             ax => 1,
-             items => 1,
-             ix => 1,
-             svtype => 1,
-            );
 my %missing;
 
 my $curheader = "Unknown section";
@@ -63,11 +57,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
 FUNC:
     while (defined($in = $get_next_line->())) {
-        if ($in =~ /^#\s*define\s+([A-Za-z_][A-Za-z_0-9]+)\(/ &&
-            ($file ne 'embed.h' || $file ne 'proto.h')) {
-            $macro{$1} = $file;
-            next FUNC;
-        }
         if ($in=~ /^=head1 (.*)/) {
             $curheader = $1;
 
@@ -372,11 +361,6 @@ for (sort keys %funcflags) {
 }
 
 foreach (sort keys %missing) {
-    next if $macro{$_};
-    # Heuristics for known not-a-function macros:
-    next if /^[A-Z]/;
-    next if /^dj?[A-Z]/;
-
     warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc";
 }
 
