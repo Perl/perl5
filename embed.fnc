@@ -113,8 +113,8 @@
 :
 :   d  Function has documentation (somewhere) in the source:
 :
-:         enables 'no docs for foo" warning in autodoc.pl in the documentation
-:         isn't found
+:         enables 'no docs for foo" warning in autodoc.pl if the documentation
+:         isn't found.
 :
 :   E  Visible to extensions included in the Perl core:
 :
