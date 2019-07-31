@@ -72,7 +72,7 @@ FUNC:
             $curheader = $1;
 
             # If the next non-space line begins with a word char, then it is
-            # the start of heading-ldevel documentation.
+            # the start of heading-level documentation.
             if (defined($doc = $get_next_line->())) {
                 # Skip over empty lines
                 while ($doc =~ /^\s+$/) {
