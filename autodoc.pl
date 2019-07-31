@@ -143,9 +143,12 @@ DOC:
                 warn "embed.fnc entry overrides redundant information in"
                    . " '$proto_in_file' in $file" if $flags || $ret || @args;
                 $flags = $embed_docref->{'flags'};
+                warn "embed.fnc entry '$name' missing 'd' flag"
+                                                            unless $flags =~ /d/;
                 $ret = $embed_docref->{'retval'};
                 @args = @{$embed_docref->{args}};
-            } else {
+            } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
+                                       # macro
                 $missing{$name} = $file;
             }
 
