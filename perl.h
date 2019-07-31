@@ -6416,7 +6416,7 @@ for a more contained way to ensure that.
 
 =for apidoc Am|void|STORE_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric
 
-Same as L</STORE_LC_NUMERIC_SET_TO_NEEDED_IN> with in_lc_numeric provided
+Same as L</STORE_LC_NUMERIC_SET_TO_NEEDED> with in_lc_numeric provided
 as the precalculated value of C<IN_LC(LC_NUMERIC)>. It is the caller's
 responsibility to ensure that the status of C<PL_compiling> and C<PL_hints>
 cannot have changed since the precalculation.
