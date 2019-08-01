@@ -242,8 +242,8 @@ while (<DATA>) {
 }
 
 for (values %depends) {
-  my %s;
-  $_ = [sort dictionary_order grep !$s{$_}++, @$_];
+  my %seen;
+  $_ = [sort dictionary_order grep !$seen{$_}++, @$_];
 }
 
 if (exists $opt{'api-info'}) {
