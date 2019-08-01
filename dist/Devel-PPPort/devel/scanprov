@@ -125,83 +125,12 @@ my $perls_ref = get_and_sort_perls(\%opt);
 
 die "Couldn't find any perls" unless @$perls_ref > 1;
 
-my %v;
-
-# We look in descending order of perl versions.  Each time through the loop
-# @provided is narrowed.
-for my $p (@$perls_ref) {
-  print "checking perl $p->{version}...\n";
-
-  # Get the hdr files associated with this version
-  my $archlib = `$p->{path} -MConfig -l -e 'print \$Config{archlib}'`;
-  chomp $archlib;
-  local @ARGV = glob "$archlib/CORE/*.h";
-  my %sym;
-
-  # %sym's keys are every single thing that looks like an identifier
-  # (beginning with a non-digit \w, followed by \w*) that occurs in all the
-  # headers, regardless of where (outside of comments).
-  local $/ = undef;
-  while (<>) {  # Read in the next file
-
-    # Strip comments, from perl faq
-    s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#defined $2 ? $2 : ""#gse;
-
-    $sym{$_}++ for /(\b[^\W\d]\w*)/g;
-  }
-
-  # @provided is narrowed to include only those identifier-like things that
-  # are mentioned in some hdr in this release.  (If it isn't even mentioned,
-  # it won't exist in the release.)  For those not mentioned, a key is added
-  # of the identifier-like thing in %v.  It is a subkey of this release's
-  # "todo" release, which is the next higher one.  If we are at version n, we
-  # have already done version n+1 and the provided element was mentioned
-  # there, and now it no longer is.  We take that to mean that to mean that
-  # the element became provided for in n+1.
-  @provided = map { $sym{$_} or $v{$p->{todo}}{$_}++;
-                    $sym{$_} ? $_ : ()
-                  } @provided;
-}
-
-# Read in the parts/base files.  The hash ref has keys being all symbols found
-# in all the files in base/, and the values being the perl versions each symbol
-# became defined in.
-my $out = 'parts/base';
-my $base_ref = parse_todo($out);
-
-# Now add the results from above.  At this point, The keys of %v are the 7
-# digit BCD version numbers, and their subkeys are the symbols provided by
-# D:P that are first mentioned in this version, like this:
-#   '5009002' => {
-#                  'MY_CXT_CLONE' => 1,
-#                  'SV_NOSTEAL' => 1,
-#                  'UTF8_MAXBYTES' => 1
-#                },
-
-for my $v (keys %v) {
-
-  # Things listed in blead (the most recent file) are special.  They are there
-  # by default because we haven't found them anywhere, so they don't really
-  # exist as far as we can determine, so shouldn't be listed as existing.
-  next if $v > $perls_ref->[0]->{file};
-
-  # @new becomes the symbols for version $v not already in the file for $v
-  my @new = sort dictionary_order grep { !exists $base_ref->{$_} }
-                                                                keys %{$v{$v}};
-  @new or next; # Nothing new, skip writing
-
-  my $file = $v;
-  $file =~ s/\.//g;
-  $file = "$out/$file";
-  -e $file or die "non-existent: $file\n";
-  print "-- $file --\n";
-  $write and (open F, ">>$file" or die "$file: $!\n");
-  for (@new) {
-    print "adding $_\n";
-    $write and print F format_output_line($_, 'M');
-  }
-  $write and close F;
-}
+find_first_mentions($perls_ref,   # perls to look in
+                    \@provided,   # List of symbol names to look for
+                    '*.h',        # Look in all hdrs.
+                    1,            # Strip comments
+                   'M'
+                   );
 
 sub format_output_line
 {
@@ -209,4 +138,105 @@ sub format_output_line
     my $code = shift;
 
     return sprintf "%-30s # $code added by $0\n", $sym;
+}
+
+sub find_first_mentions
+{
+    my $perls_ref =    shift;   # List of perls to look in
+    my $look_for_ref = shift;   # List of symbol names to look for
+    my $hdrs =         shift;   # Glob of hdrs to look in
+    my $strip_comments = shift;
+    my $code           = shift; # Mark entries as having this type
+
+    $hdrs = [ $hdrs ] unless ref $hdrs;
+
+    my @remaining = @$look_for_ref;
+
+    my %v;
+
+    # We look in descending order of perl versions.  Each time through the
+    # loop @remaining is narrowed.
+    for my $p (@$perls_ref) {
+        print "checking perl $p->{version}...\n";
+
+        # Get the hdr files associated with this version
+        my $archlib = `$p->{path} -MConfig -l -e 'print \$Config{archlib}'`;
+        chomp $archlib;
+        local @ARGV;
+        push @ARGV, glob "$archlib/CORE/$_" for @$hdrs;
+
+        my %sym;
+
+        # %sym's keys are every single thing that looks like an identifier
+        # (beginning with a non-digit \w, followed by \w*) that occurs in all
+        # the headers, regardless of where (outside of comments).
+        local $/ = undef;
+        while (<>) {  # Read in the next file
+
+            # Strip comments, from perl faq
+            if ($strip_comments) {
+                s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#defined $2 ? $2 : ""#gse;
+            }
+
+            $sym{$_}++ for /(\b[^\W\d]\w*)/g;
+        }
+
+        # @remaining is narrowed to include only those identifier-like things
+        # that are mentioned in some hdr in this release.  (If it isn't even
+        # mentioned, it won't exist in the release.)  For those not mentioned,
+        # a key is added of the identifier-like thing in %v.  It is a subkey
+        # of this release's "todo" release, which is the next higher one.  If
+        # we are at version n, we have already done version n+1 and the
+        # provided element was mentioned there, and now it no longer is.  We
+        # take that to mean that to mean that the element became provided for
+        # in n+1.
+        @remaining = map { $sym{$_} or $v{$p->{todo}}{$_}++;
+                            $sym{$_} ? $_ : ()
+                        } @remaining;
+
+    }
+
+    $v{$perls_ref->[-1]{file}}{$_}++ for @remaining;
+
+    # Read in the parts/base files.  The hash ref has keys being all symbols
+    # found in all the files in base/, which are all we are concerned with
+    # became defined in.
+    my $base_ref = parse_todo($base_dir);
+
+
+    # Now add the results from above.  At this point, The keys of %v are the 7
+    # digit BCD version numbers, and their subkeys are the symbols provided by
+    # D:P that are first mentioned in this version, like this:
+    #   '5009002' => {
+    #                  'MY_CXT_CLONE' => 1,
+    #                  'SV_NOSTEAL' => 1,
+    #                  'UTF8_MAXBYTES' => 1
+    #                },
+
+    for my $v (keys %v) {
+
+        # Things listed in blead (the most recent file) are special.  They are
+        # there by default because we haven't found them anywhere, so they
+        # don't really exist as far as we can determine, so shouldn't be
+        # listed as existing.
+        next if $v > $perls_ref->[0]->{file};
+
+        # @new becomes the symbols for version $v not already in the file for
+        # $v
+        my @new = sort dictionary_order grep { !exists $base_ref->{$_} }
+                                                                keys %{$v{$v}};
+        @new or next; # Nothing new, skip writing
+
+        my $file = $v;
+        $file =~ s/\.//g;
+        $file = "$base_dir/$file";
+        -e $file or die "non-existent: $file\n";
+        print "-- $file --\n";
+        $write and (open F, ">>$file" or die "$file: $!\n");
+        for (@new) {
+            print "adding $_\n";
+            $write and print F format_output_line($_, $code);
+        }
+        $write and close F;
+    }
 }
