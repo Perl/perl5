@@ -206,6 +206,12 @@ retry:
       # keys, being all the symbols referred to within it (with their values
       # btw being the count of occurrences in the element).
       for my $m (keys %{$symmap->{$u}}) {
+
+        # pthread_getspecific() is undefined.  khw doesn't know why.  But we
+        # have a bunch of things depending on it, so it doesn't work unless we
+        # ignore this apparently spurious issue.
+        next if $u eq 'pthread_getspecific';
+
         if (!$seen{$m}++) {
           my $pl = $m;
           $pl =~ s/^[Pp]erl_//;
