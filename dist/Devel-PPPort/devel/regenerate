@@ -81,14 +81,14 @@ for my $dir (qw( base todo )) {
 
 my @perlargs;
 push @perlargs, "--debug" if $opt{debug};
-push @perlargs, "--install=$opt{install}" if exists $opt{install};
-push @perlargs, "--blead=$opt{blead}" if exists $opt{blead};
+push @perlargs, "--install=$opt{install}" if $opt{install};
+push @perlargs, "--blead=$opt{blead}" if $opt{blead};
 push @perlargs, "--debug-start=$opt{'debug-start'}" if $opt{'debug-start'};
 
 my $T0 = time;
 my @args = ddverbose();
 push @args, '--nocheck' unless $opt{check};
-push @args, "--blead-version=$opt{'blead-version'}" if exists $opt{'blead-version'};
+push @args, "--blead-version=$opt{'blead-version'}" if $opt{'blead-version'};
 push @args, @perlargs;
 
 # Find out what symbols were in what releases
