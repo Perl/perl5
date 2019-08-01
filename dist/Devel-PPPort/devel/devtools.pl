@@ -18,6 +18,7 @@
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
 use IO::File;
+use warnings;   # Can't use strict because of %opt passed from caller
 require "./parts/inc/inctools";
 
 eval "use Term::ANSIColor";
