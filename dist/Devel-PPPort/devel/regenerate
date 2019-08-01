@@ -117,7 +117,7 @@ unless (runperl('devel/mktodo', @args)) {
   quit_now();
 }
 
-print "\nAdding remaining baseline info...\n\n";
+print "\nAdding remaining info...\n\n";
 
 unless (runperl('Makefile.PL') and
         runtool('make') and
