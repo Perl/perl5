@@ -154,6 +154,8 @@ for (@perl_api) {   # $_ is the item name
   my $line = "$_|" . (exists $provides{$_} && exists $raw_base{$_} ? $raw_base{$_} : '') . '|';
   $line .= ($raw_todo{$_} || '') . '|';
   $line .= 'p' if exists $provides{$_};
+  my $is_documented = 0;
+  my $is_accessible = 0;
   if (exists $embed{$_}) {
     my $e = $embed{$_};
     if (exists $e->{flags}{p}) {    # Has 'Perl_' prefix
@@ -167,13 +169,25 @@ for (@perl_api) {   # $_ is the item name
     $line .= 'c' if        exists $e->{flags}{C}      # core-only
                    || (    exists $e->{flags}{X}
                        && (exists $e->{flags}{E} || ! exists $e->{flags}{m}));
-    $line .= 'i' if exists $e->{flags}{A}
+    $is_accessible = 1 if exists $e->{flags}{A}
                        || exists $e->{flags}{C}
                        || (     exists $e->{flags}{X}
                            && ! exists $e->{flags}{E}
                            &&   exists $e->{flags}{m});
-    $line .= 'u' unless exists $e->{flags}{d};  # undocumented
+    $is_documented = 1 if exists $e->{flags}{d};
   }
+
+  # scanprov adds the M and F flags.  The M is for provided macros; F for
+  # functions we didn't find in testing (usually because they are hidden
+  # behind ifdefs, like PERL_GLOBAL_STRUCT_PRIVATE).  None of them were
+  # verified
+  if (exists $raw_base{$_}{code}) {
+    $line .= 'V' if $raw_base{$_}{code} =~ /[MFX]/;
+    $is_accessible = 1 if $raw_base{$_}{code} =~ /M/;
+  }
+  $line .= 'i' unless $is_accessible;
+  $line .= 'u' unless $is_documented;
+
   $_ = $line;
 }
 
