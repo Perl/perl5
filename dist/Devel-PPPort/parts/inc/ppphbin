@@ -546,6 +546,7 @@ for $filename (@files) {
 
   unless ($opt{quiet}) {
     for $func (sort dictionary_order keys %{$file{uses_todo}}) {
+      next if int_parse_version($API{$func}{todo}) <= $int_min_perl;
       print "*** WARNING: Uses $func, which may not be portable below perl ",
             format_version($API{$func}{todo}), ", even with '$ppport'\n";
       $warnings++;
