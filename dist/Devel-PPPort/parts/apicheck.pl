@@ -235,7 +235,9 @@ for $f (@f) {   # Loop through all the tests to add
   my $unique = "$f->{'name'}$sep$f->{'cond'}";
   $ignore{$unique} and next;
 
-  $f->{'flags'}{'A'} or next;  # only public API members
+  # only public API members, except those in ppport.fnc are there because we
+  # want them to be tested even if non-public.
+  $f->{'flags'}{'A'} or $f->{'ppport_fnc'} or next;
 
   $ignore{$unique} = 1; # ignore duplicates
 
