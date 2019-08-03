@@ -609,13 +609,13 @@ future releases.
 Variant C<isI<FOO>_utf8> is like C<isI<FOO>_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
 in C<isI<FOO>_utf8_safe>.  The function therefore can't check if it is reading
-beyond the end of the string.  Starting in Perl v5.30, it will take a second
+beyond the end of the string.  Starting in Perl v5.32, it will take a second
 parameter, becoming a synonym for C<isI<FOO>_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
 meantime, the first runtime call to C<isI<FOO>_utf8> from each call point in the
 program will raise a deprecation warning, enabled by default.  You can convert
 your program now to use C<isI<FOO>_utf8_safe>, and avoid the warnings, and get an
-extra measure of protection, or you can wait until v5.30, when you'll be forced
+extra measure of protection, or you can wait until v5.32, when you'll be forced
 to add the C<e> parameter.
 
 Variant C<isI<FOO>_LC> is like the C<isI<FOO>_A> and C<isI<FOO>_L1> variants, but the
@@ -649,13 +649,13 @@ future releases.
 Variant C<isI<FOO>_LC_utf8> is like C<isI<FOO>_LC_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
 in C<isI<FOO>_LC_utf8_safe>.  The function therefore can't check if it is reading
-beyond the end of the string.  Starting in Perl v5.30, it will take a second
+beyond the end of the string.  Starting in Perl v5.32, it will take a second
 parameter, becoming a synonym for C<isI<FOO>_LC_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
 meantime, the first runtime call to C<isI<FOO>_LC_utf8> from each call point in
 the program will raise a deprecation warning, enabled by default.  You can
 convert your program now to use C<isI<FOO>_LC_utf8_safe>, and avoid the warnings,
-and get an extra measure of protection, or you can wait until v5.30, when
+and get an extra measure of protection, or you can wait until v5.32, when
 you'll be forced to add the C<e> parameter.
 
 =for apidoc Am|bool|isALPHA|char ch
@@ -897,13 +897,13 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toUPPER_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+beyond the end of the string.  Starting in Perl v5.32, it will take the C<e>
 parameter, becoming a synonym for C<toUPPER_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
 meantime, the first runtime call to C<toUPPER_utf8> from each call point in the
 program will raise a deprecation warning, enabled by default.  You can convert
 your program now to use C<toUPPER_utf8_safe>, and avoid the warnings, and get an
-extra measure of protection, or you can wait until v5.30, when you'll be forced
+extra measure of protection, or you can wait until v5.32, when you'll be forced
 to add the C<e> parameter.
 
 =for apidoc Am|U8|toFOLD|U8 ch
@@ -944,13 +944,13 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toFOLD_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+beyond the end of the string.  Starting in Perl v5.32, it will take the C<e>
 parameter, becoming a synonym for C<toFOLD_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
 meantime, the first runtime call to C<toFOLD_utf8> from each call point in the
 program will raise a deprecation warning, enabled by default.  You can convert
 your program now to use C<toFOLD_utf8_safe>, and avoid the warnings, and get an
-extra measure of protection, or you can wait until v5.30, when you'll be forced
+extra measure of protection, or you can wait until v5.32, when you'll be forced
 to add the C<e> parameter.
 
 =for apidoc Am|U8|toLOWER|U8 ch
@@ -999,13 +999,13 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toLOWER_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+beyond the end of the string.  Starting in Perl v5.32, it will take the C<e>
 parameter, becoming a synonym for C<toLOWER_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
 meantime, the first runtime call to C<toLOWER_utf8> from each call point in the
 program will raise a deprecation warning, enabled by default.  You can convert
 your program now to use C<toLOWER_utf8_safe>, and avoid the warnings, and get an
-extra measure of protection, or you can wait until v5.30, when you'll be forced
+extra measure of protection, or you can wait until v5.32, when you'll be forced
 to add the C<e> parameter.
 
 =for apidoc Am|U8|toTITLE|U8 ch
@@ -1047,13 +1047,13 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toLOWER_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+beyond the end of the string.  Starting in Perl v5.32, it will take the C<e>
 parameter, becoming a synonym for C<toTITLE_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
 meantime, the first runtime call to C<toTITLE_utf8> from each call point in the
 program will raise a deprecation warning, enabled by default.  You can convert
 your program now to use C<toTITLE_utf8_safe>, and avoid the warnings, and get an
-extra measure of protection, or you can wait until v5.30, when you'll be forced
+extra measure of protection, or you can wait until v5.32, when you'll be forced
 to add the C<e> parameter.
 
 =cut
