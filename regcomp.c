@@ -5820,9 +5820,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #if 0
 Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
                               " OPTIMIZE_INFTY=%" UVuf " minnext=%" UVuf
-                              " maxcount=%" UVuf " mincount=%" UVuf "\n",
+                              " maxcount=%" UVuf " mincount=%" UVuf
+                              " data->pos_delta=%" UVuf "\n",
     (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext, (UV)maxcount,
-    (UV)mincount);
+    (UV)mincount, (UV)data->pos_delta);
 if (deltanext != OPTIMIZE_INFTY)
 Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
