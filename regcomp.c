@@ -5386,13 +5386,25 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    min += charlen - min_subtract;
             assert (min >= 0);
-            delta += min_subtract;
+            if ((SSize_t)min_subtract < OPTIMIZE_INFTY
+                && delta < OPTIMIZE_INFTY - (SSize_t)min_subtract
+            ) {
+                delta += min_subtract;
+            } else {
+                delta = OPTIMIZE_INFTY;
+            }
 	    if (flags & SCF_DO_SUBSTR) {
 		data->pos_min += charlen - min_subtract;
 		if (data->pos_min < 0) {
                     data->pos_min = 0;
                 }
-                data->pos_delta += min_subtract;
+                if ((SSize_t)min_subtract < OPTIMIZE_INFTY
+                    && data->pos_delta < OPTIMIZE_INFTY - (SSize_t)min_subtract
+                ) {
+                    data->pos_delta += min_subtract;
+                } else {
+                    data->pos_delta = OPTIMIZE_INFTY;
+                }
 		if (min_subtract) {
 		    data->cur_is_floating = 1; /* float */
 		}
