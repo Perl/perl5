@@ -3514,8 +3514,25 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #else
 #  define EXPECT(expr,val)                  (expr)
 #endif
+
+/*
+=head1 Miscellaneous Functions
+
+=for apidoc AmU|bool|LIKELY|const bool expr
+
+Returns the input unchanged, but at the same time it gives a branch prediction
+hint to the compiler that this condition is likely to be true.
+
+=for apidoc AmU|bool|UNLIKELY|const bool expr
+
+Returns the input unchanged, but at the same time it gives a branch prediction
+hint to the compiler that this condition is likely to be false.
+
+=cut
+*/
 #define LIKELY(cond)                        EXPECT(cBOOL(cond),TRUE)
 #define UNLIKELY(cond)                      EXPECT(cBOOL(cond),FALSE)
+
 #ifdef HAS_BUILTIN_CHOOSE_EXPR
 /* placeholder */
 #endif
