@@ -313,6 +313,9 @@ Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
 }
 
 /*
+
+=head1 GV Functions
+
 =for apidoc save_gp
 
 Saves the current GP of gv on the save stack to be restored on scope exit.
