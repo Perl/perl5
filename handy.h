@@ -569,9 +569,9 @@ each class.  (Not all macros have all variants; each item below lists the
 ones valid for it.)  None are affected by C<use bytes>, and only the ones
 with C<LC> in the name are affected by the current locale.
 
-The base function, e.g., C<isALPHA()>, takes an octet (either a C<char> or a
-C<U8>) as input and returns a boolean as to whether or not the character
-represented by that octet is (or on non-ASCII platforms, corresponds to) an
+The base function, e.g., C<isALPHA()>, takes any signed or unsigned value,
+treating it as a code point, and returns a boolean as to whether or not the
+character represented by it is (or on non-ASCII platforms, corresponds to) an
 ASCII character in the named class based on platform, Unicode, and Perl rules.
 If the input is a number that doesn't fit in an octet, FALSE is returned.
 
@@ -585,16 +585,19 @@ since ASCII is a subset of Latin-1.  But the non-ASCII code points are treated
 as if they are Latin-1 characters.  For example, C<isWORDCHAR_L1()> will return
 true when called with the code point 0xDF, which is a word character in both
 ASCII and EBCDIC (though it represents different characters in each).
+If the input is a number that doesn't fit in an octet, FALSE is returned.
+(Perl's documentation uses a colloquial definition of Latin-1, to include all
+code points below 256.)
 
-Variant C<isI<FOO>_uvchr> is like the C<isI<FOO>_L1> variant, but accepts any UV code
-point as input.  If the code point is larger than 255, Unicode rules are used
-to determine if it is in the character class.  For example,
+Variant C<isI<FOO>_uvchr> is exactly like the C<isI<FOO>_L1> variant, for
+inputs below 256, but if the code point is larger than 255, Unicode rules are
+used to determine if it is in the character class.  For example,
 C<isWORDCHAR_uvchr(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A
 WITH MACRON in Unicode, and is a word character.
 
 Variant C<isI<FOO>_utf8_safe> is like C<isI<FOO>_uvchr>, but is used for UTF-8
-encoded strings.  Each call classifies one character, even if the string
-contains many.  This variant takes two parameters.  The first, C<p>, is a
+encoded strings.  Each call classifies the first character of the string.  This
+variant takes two parameters.  The first, C<p>, is a
 pointer to the first byte of the character to be classified.  (Recall that it
 may take more than one byte to represent a character in UTF-8 strings.)  The
 second parameter, C<e>, points to anywhere in the string beyond the first
@@ -618,33 +621,32 @@ your program now to use C<isI<FOO>_utf8_safe>, and avoid the warnings, and get a
 extra measure of protection, or you can wait until v5.32, when you'll be forced
 to add the C<e> parameter.
 
-Variant C<isI<FOO>_LC> is like the C<isI<FOO>_A> and C<isI<FOO>_L1> variants, but the
-result is based on the current locale, which is what C<LC> in the name stands
-for.  If Perl can determine that the current locale is a UTF-8 locale, it uses
-the published Unicode rules; otherwise, it uses the C library function that
-gives the named classification.  For example, C<isDIGIT_LC()> when not in a
-UTF-8 locale returns the result of calling C<isdigit()>.  FALSE is always
+Variant C<isI<FOO>_LC> is like the C<isI<FOO>_A> and C<isI<FOO>_L1> variants,
+but the result is based on the current locale, which is what C<LC> in the name
+stands for.  If Perl can determine that the current locale is a UTF-8 locale,
+it uses the published Unicode rules; otherwise, it uses the C library function
+that gives the named classification.  For example, C<isDIGIT_LC()> when not in
+a UTF-8 locale returns the result of calling C<isdigit()>.  FALSE is always
 returned if the input won't fit into an octet.  On some platforms where the C
 library function is known to be defective, Perl changes its result to follow
 the POSIX standard's rules.
 
-Variant C<isI<FOO>_LC_uvchr> is like C<isI<FOO>_LC>, but is defined on any UV.  It
-returns the same as C<isI<FOO>_LC> for input code points less than 256, and
-returns the hard-coded, not-affected-by-locale, Unicode results for larger ones.
+Variant C<isI<FOO>_LC_uvchr> acts exactly like C<isI<FOO>_LC> for inputs less
+than 256, but for larger ones it returns the Unicode classification of the code
+point.
 
 Variant C<isI<FOO>_LC_utf8_safe> is like C<isI<FOO>_LC_uvchr>, but is used for UTF-8
-encoded strings.  Each call classifies one character, even if the string
-contains many.  This variant takes two parameters.  The first, C<p>, is a
-pointer to the first byte of the character to be classified.  (Recall that it
-may take more than one byte to represent a character in UTF-8 strings.) The
-second parameter, C<e>, points to anywhere in the string beyond the first
-character, up to one byte past the end of the entire string.  The suffix
-C<_safe> in the function's name indicates that it will not attempt to read
-beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is true (this
-is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the input
-character is malformed in some way, the program may croak, or the function may
-return FALSE, at the discretion of the implementation, and subject to change in
-future releases.
+encoded strings.  Each call classifies the first character of the string.  This
+variant takes two parameters.  The first, C<p>, is a pointer to the first byte
+of the character to be classified.  (Recall that it may take more than one byte
+to represent a character in UTF-8 strings.) The second parameter, C<e>,
+points to anywhere in the string beyond the first character, up to one byte
+past the end of the entire string.  The suffix C<_safe> in the function's name
+indicates that it will not attempt to read beyond S<C<e - 1>>, provided that
+the constraint S<C<s E<lt> e>> is true (this is asserted for in C<-DDEBUGGING>
+builds).  If the UTF-8 for the input character is malformed in some way, the
+program may croak, or the function may return FALSE, at the discretion of the
+implementation, and subject to change in future releases.
 
 Variant C<isI<FOO>_LC_utf8> is like C<isI<FOO>_LC_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
@@ -658,24 +660,24 @@ convert your program now to use C<isI<FOO>_LC_utf8_safe>, and avoid the warnings
 and get an extra measure of protection, or you can wait until v5.32, when
 you'll be forced to add the C<e> parameter.
 
-=for apidoc Am|bool|isALPHA|char ch
-Returns a boolean indicating whether the specified character is an
-alphabetic character, analogous to C<m/[[:alpha:]]/>.
+=for apidoc Am|bool|isALPHA|int ch
+Returns a boolean indicating whether the specified input is one of C<[A-Za-z]>,
+analogous to C<m/[[:alpha:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
 C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uvchr>, C<isALPHA_utf8_safe>,
 C<isALPHA_LC>, C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8_safe>.
 
-=for apidoc Am|bool|isALPHANUMERIC|char ch
-Returns a boolean indicating whether the specified character is a either an
-alphabetic character or decimal digit, analogous to C<m/[[:alnum:]]/>.
+=for apidoc Am|bool|isALPHANUMERIC|int ch
+Returns a boolean indicating whether the specified character is one of
+C<[A-Za-z0-9]>, analogous to C<m/[[:alnum:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
 C<isALPHANUMERIC_A>, C<isALPHANUMERIC_L1>, C<isALPHANUMERIC_uvchr>,
 C<isALPHANUMERIC_utf8_safe>, C<isALPHANUMERIC_LC>, C<isALPHANUMERIC_LC_uvchr>,
 and C<isALPHANUMERIC_LC_utf8_safe>.
 
-=for apidoc Am|bool|isASCII|char ch
+=for apidoc Am|bool|isASCII|int ch
 Returns a boolean indicating whether the specified character is one of the 128
 characters in the ASCII character set, analogous to C<m/[[:ascii:]]/>.
 On non-ASCII platforms, it returns TRUE iff this
@@ -860,7 +862,7 @@ an API that does allow every possible legal result to be returned.)  Likewise
 no other function that is crippled by not being able to give the correct
 results for the full range of possible inputs has been implemented here.
 
-=for apidoc Am|U8|toUPPER|U8 ch
+=for apidoc Am|U8|toUPPER|int ch
 Converts the specified character to uppercase.  If the input is anything but an
 ASCII lowercase character, that input character itself is returned.  Variant
 C<toUPPER_A> is equivalent.
