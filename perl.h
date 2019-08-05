@@ -6692,7 +6692,33 @@ cannot have changed since the precalculation.
 #endif /* !USE_LOCALE_NUMERIC */
 
 #define Atof				my_atof
-/* XXX document this , maybe other similar ones*/
+
+/*
+
+=head1 Numeric functions
+
+=for apidoc AmTR|NV|Strtod|NN const char * const s|NULLOK char ** e
+
+This is a synonym for L</my_strtod>.
+
+=for apidoc AmTR|NV|Strtol|NN const char * const s|NULLOK char ** e|int base
+
+Platform and configuration independent C<strtol>.  This expands to the
+appropriate C<strotol>-like function based on the platform and F<Configure>
+options>.  For example it could expand to C<strtoll> or C<strtoq> instead of
+C<strtol>.
+
+=for apidoc AmTR|NV|Strtoul|NN const char * const s|NULLOK char ** e|int base
+
+Platform and configuration independent C<strtoul>.  This expands to the
+appropriate C<strotoul>-like function based on the platform and F<Configure>
+options>.  For example it could expand to C<strtoull> or C<strtouq> instead of
+C<strtoul>.
+
+=cut
+
+*/
+
 #define Strtod                          my_strtod
 
 #if    defined(HAS_STRTOD)                                          \
