@@ -689,19 +689,22 @@ least an C<UNOP>.
 
 #ifdef PERL_CORE
 struct opslot {
-    /* keep opslot_next first */
-    OPSLOT *	opslot_next;		/* next slot */
-    OPSLAB *	opslot_slab;		/* owner */
+    U16         opslot_size;        /* size of this slot (in pointers) */
+    U16         opslot_offset;      /* offset from start of slab (in ptr units) */
     OP		opslot_op;		/* the op itself */
 };
 
 struct opslab {
-    OPSLOT *	opslab_first;		/* first op in this slab */
     OPSLAB *	opslab_next;		/* next slab */
-    OP *	opslab_freed;		/* chain of freed ops */
-    size_t	opslab_refcnt;		/* number of ops */
+    OPSLAB *	opslab_head;		/* first slab in chain */
+    OP *	opslab_freed;		/* chain of freed ops (head only)*/
+    size_t	opslab_refcnt;		/* number of ops (head slab only) */
+    U16		opslab_size;		/* size of slab in pointers,
+                                           including header */
+    U16         opslab_free_space;	/* space available in this slab
+                                           for allocating new ops (in ptr
+                                           units) */
 # ifdef PERL_DEBUG_READONLY_OPS
-    U16		opslab_size;		/* size of slab in pointers */
     bool	opslab_readonly;
 # endif
     OPSLOT	opslab_slots;		/* slots begin here */
@@ -711,7 +714,11 @@ struct opslab {
 # define OPSLOT_HEADER_P	(OPSLOT_HEADER/sizeof(I32 *))
 # define OpSLOT(o)		(assert_(o->op_slabbed) \
 				 (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
-# define OpSLAB(o)		OpSLOT(o)->opslot_slab
+
+/* the first (head) opslab of the chain in which this op is allocated */
+# define OpSLAB(o) \
+    (((OPSLAB*)( (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset))->opslab_head)
+
 # define OpslabREFCNT_dec(slab)      \
 	(((slab)->opslab_refcnt == 1) \
 	 ? opslab_free_nopad(slab)     \
