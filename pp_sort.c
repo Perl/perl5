@@ -346,6 +346,8 @@ cmp_desc(pTHX_ gptr const a, gptr const b)
 }
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc sortsv_flags
 
 In-place sort an array of SV pointers with the given comparison routine,
