@@ -1654,6 +1654,8 @@ any magic.
  * longer need that. XS modules can (and do) use this name, so it must remain
  * a part of the API that's visible to modules.
 
+=head1 Miscellaneous Functions
+
 =for apidoc ATmD|int|my_sprintf|NN char *buffer|NN const char *pat|...
 
 Do NOT use this due to the possibility of overflowing C<buffer>.  Instead use
