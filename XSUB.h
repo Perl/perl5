@@ -217,6 +217,10 @@ is stored in a new mortal SV.
 Place a copy of a string into the specified position C<pos> on the stack. 
 The value is stored in a new mortal SV.
 
+=for apidoc Am|void|XST_mUV|int pos|UV uv
+Place an unsigned integer into the specified position C<pos> on the stack.  The
+value is stored in a new mortal SV.
+
 =for apidoc Am|void|XST_mNO|int pos
 Place C<&PL_sv_no> into the specified position C<pos> on the
 stack.
