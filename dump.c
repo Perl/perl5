@@ -1004,6 +1004,26 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         S_opdump_indent(aTHX_ o, level, bar, file, "PARENT");
         S_opdump_link(aTHX_ o, op_parent((OP*)o), file);
     }
+    else if (!OpHAS_SIBLING(o)) {
+        bool ok = TRUE;
+        OP *p = o->op_sibparent;
+        if (!p || !(p->op_flags & OPf_KIDS))
+            ok = FALSE;
+        else {
+            OP *kid = cUNOPx(p)->op_first;
+            while (kid != o) {
+                kid = OpSIBLING(kid);
+                if (!kid) {
+                    ok = FALSE;
+                    break;
+                }
+            }
+        }
+        if (!ok) {
+            S_opdump_indent(aTHX_ o, level, bar, file,
+                            "*** WILD PARENT 0x%p\n", p);
+        }
+    }
 
     if (o->op_targ && optype != OP_NULL)
 	    S_opdump_indent(aTHX_ o, level, bar, file, "TARG = %ld\n",
