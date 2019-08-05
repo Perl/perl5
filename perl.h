@@ -1380,6 +1380,13 @@ Clear the contents of C<$@>, setting it to the empty string.
 
 This replaces any read-only SV with a fresh SV and removes any magic.
 
+=for apidoc Am|void|SANE_ERRSV
+
+Clean up ERRSV so we can safely set it.
+
+This replaces any read-only SV with a fresh writable copy and removes
+any magic.
+
 =cut
 */
 
@@ -1397,6 +1404,23 @@ This replaces any read-only SV with a fresh SV and removes any magic.
 	SV *const errsv = *svp;						\
         SvPVCLEAR(errsv);                                               \
 	SvPOK_only(errsv);						\
+	if (SvMAGICAL(errsv)) {						\
+	    mg_free(errsv);						\
+	}								\
+    }									\
+    } STMT_END
+
+/* contains inlined gv_add_by_type */
+#define SANE_ERRSV() STMT_START {					\
+    SV ** const svp = &GvSV(PL_errgv);					\
+    if (!*svp) {							\
+        *svp = newSVpvs("");                                            \
+    } else if (SvREADONLY(*svp)) {					\
+        SV *dupsv = newSVsv(*svp);					\
+	SvREFCNT_dec_NN(*svp);						\
+	*svp = dupsv;							\
+    } else {								\
+	SV *const errsv = *svp;						\
 	if (SvMAGICAL(errsv)) {						\
 	    mg_free(errsv);						\
 	}								\

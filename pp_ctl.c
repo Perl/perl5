@@ -1724,9 +1724,13 @@ Perl_die_unwind(pTHX_ SV *msv)
 	 * perls 5.13.{1..7} which had late setting of $@ without this
 	 * early-setting hack.
 	 */
-	if (!(in_eval & EVAL_KEEPERR))
+	if (!(in_eval & EVAL_KEEPERR)) {
+            /* remove any read-only/magic from the SV, so we don't
+               get infinite recursion when setting ERRSV */
+            SANE_ERRSV();
 	    sv_setsv_flags(ERRSV, exceptsv,
                         (SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+        }
 
 	if (in_eval & EVAL_KEEPERR) {
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
@@ -1788,8 +1792,10 @@ Perl_die_unwind(pTHX_ SV *msv)
              */
             S_pop_eval_context_maybe_croak(aTHX_ cx, exceptsv, 2);
 
-	    if (!(in_eval & EVAL_KEEPERR))
+	    if (!(in_eval & EVAL_KEEPERR)) {
+                SANE_ERRSV();
 		sv_setsv(ERRSV, exceptsv);
+            }
 	    PL_restartjmpenv = restartjmpenv;
 	    PL_restartop = restartop;
 	    JMPENV_JUMP(3);
