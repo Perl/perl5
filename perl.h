@@ -6133,6 +6133,27 @@ typedef struct am_table_short AMTS;
 #  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
                         cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
+/*
+=head1 Locale-related functions and macros
+
+=for apidoc Amn|bool|IN_LOCALE
+
+Evaluates to TRUE if the plain locale pragma without a parameter (S<C<use
+locale>>) is in effect.
+
+=for apidoc Amn|bool|IN_LOCALE_COMPILETIME
+
+Evaluates to TRUE if, when compiling a perl program (including an C<eval>) if
+the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
+
+=for apidoc Amn|bool|IN_LOCALE_RUNTIME
+
+Evaluates to TRUE if, when executing a perl program (including an C<eval>) if
+the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
+
+=cut
+*/
+
 #  define IN_LOCALE                                                         \
         (IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
 #  define IN_SOME_LOCALE_FORM                                               \
