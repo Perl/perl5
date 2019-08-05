@@ -275,6 +275,7 @@ platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
 are in the character.
 
+=cut
 */
 
 /* Is the representation of the Unicode code point 'cp' the same regardless of
@@ -865,6 +866,10 @@ looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
 of the Unicode non-character code points; otherwise it evaluates to 0.  If
 non-zero, the value gives how many bytes starting at C<s> comprise the code
 point's representation.
+
+=for apidoc AmnU|UV|UNICODE_REPLACEMENT
+
+Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 
 =cut
  */
