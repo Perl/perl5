@@ -7020,6 +7020,15 @@ int flock(int fd, int op);
 #define IS_NUMBER_NAN                 0x20 /* this is not */
 #define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
+/*
+=head1 Numeric functions
+
+=for apidoc AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
+
+A synonym for L</grok_numeric_radix>
+
+=cut
+*/
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
 /* Input flags: */
@@ -7100,8 +7109,20 @@ extern void moncontrol(int);
 
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
-/* Use instead of abs() since abs() forces its argument to be an int,
- * but also beware since this evaluates its argument twice, so no x++. */
+/*
+=head1 Numeric functions
+
+=for apidoc Am|int|PERL_ABS|int
+
+Typeless C<abs> or C<fabs>, I<etc>.  (The usage below indicates it is for
+integers, but it works for any type.)  Use instead of these, since the C
+library ones force their argument to be what it is expecting, potentially
+leading to disaster.  But also beware that this evaluates its argument twice,
+so no C<x++>.
+
+=cut
+*/
+
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
 #if defined(__DECC) && defined(__osf__)
