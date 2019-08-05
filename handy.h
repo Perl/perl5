@@ -690,6 +690,20 @@ variants
 C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uvchr>, C<isALPHA_utf8_safe>,
 C<isALPHA_LC>, C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8_safe>.
 
+=cut
+
+Here and below, we add the protoypes of these macros for downstream programs
+that would be interested in them, such as Devel::PPPort
+
+=for apidoc Amh|bool|isALPHA_A|int ch
+=for apidoc Amh|bool|isALPHA_L1|int ch
+=for apidoc Amh|bool|isALPHA_uvchr|int ch
+=for apidoc Amh|bool|isALPHA_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isALPHA_utf8|U8 * s
+=for apidoc Amh|bool|isALPHA_LC|int ch
+=for apidoc Amh|bool|isALPHA_LC_uvchr|int ch
+=for apidoc Amh|bool|isALPHA_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isALPHANUMERIC|int ch
 Returns a boolean indicating whether the specified character is one of
 C<[A-Za-z0-9]>, analogous to C<m/[[:alnum:]]/>.
@@ -705,6 +719,20 @@ there are the variants
 C<isALNUMC_A>, C<isALNUMC_L1>
 C<isALNUMC_LC>, and C<isALNUMC_LC_uvchr>.
 
+=for apidoc Amh|bool|isALPHANUMERIC_A|int ch
+=for apidoc Amh|bool|isALPHANUMERIC_L1|int ch
+=for apidoc Amh|bool|isALPHANUMERIC_uvchr|int ch
+=for apidoc Amh|bool|isALPHANUMERIC_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isALPHANUMERIC_utf8|U8 * s
+=for apidoc Amh|bool|isALPHANUMERIC_LC|int ch
+=for apidoc Amh|bool|isALPHANUMERIC_LC_uvchr|int ch
+=for apidoc Amh|bool|isALPHANUMERIC_LC_utf8_safe|U8 * s| U8 *end
+=for apidoc Amh|bool|isALNUMC|int ch
+=for apidoc Amh|bool|isALNUMC_A|int ch
+=for apidoc Amh|bool|isALNUMC_L1|int ch
+=for apidoc Amh|bool|isALNUMC_LC|int ch
+=for apidoc Amh|bool|isALNUMC_LC_uvchr|int ch
+
 =for apidoc Am|bool|isASCII|int ch
 Returns a boolean indicating whether the specified character is one of the 128
 characters in the ASCII character set, analogous to C<m/[[:ascii:]]/>.
@@ -717,6 +745,15 @@ C<isASCII_uvchr>, C<isASCII_utf8_safe>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
 C<isASCII_LC_utf8_safe>.  Note, however, that some platforms do not have the C
 library routine C<isascii()>.  In these cases, the variants whose names contain
 C<LC> are the same as the corresponding ones without.
+
+=for apidoc Amh|bool|isASCII_A|int ch
+=for apidoc Amh|bool|isASCII_L1|int ch
+=for apidoc Amh|bool|isASCII_uvchr|int ch
+=for apidoc Amh|bool|isASCII_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isASCII_utf8|U8 * s
+=for apidoc Amh|bool|isASCII_LC|int ch
+=for apidoc Amh|bool|isASCII_LC_uvchr|int ch
+=for apidoc Amh|bool|isASCII_LC_utf8_safe|U8 * s| U8 *end
 
 Also note, that because all ASCII characters are UTF-8 invariant (meaning they
 have the exact same representation (always a single byte) whether encoded in
@@ -735,6 +772,15 @@ however, that some platforms do not have the C library routine
 C<isblank()>.  In these cases, the variants whose names contain C<LC> are
 the same as the corresponding ones without.
 
+=for apidoc Amh|bool|isBLANK_A|int ch
+=for apidoc Amh|bool|isBLANK_L1|int ch
+=for apidoc Amh|bool|isBLANK_uvchr|int ch
+=for apidoc Amh|bool|isBLANK_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isBLANK_utf8|U8 * s
+=for apidoc Amh|bool|isBLANK_LC|int ch
+=for apidoc Amh|bool|isBLANK_LC_uvchr|int ch
+=for apidoc Amh|bool|isBLANK_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isCNTRL|char ch
 Returns a boolean indicating whether the specified character is a
 control character, analogous to C<m/[[:cntrl:]]/>.
@@ -743,6 +789,15 @@ variants
 C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uvchr>, C<isCNTRL_utf8_safe>,
 C<isCNTRL_LC>, C<isCNTRL_LC_uvchr>, and C<isCNTRL_LC_utf8_safe> On EBCDIC
 platforms, you almost always want to use the C<isCNTRL_L1> variant.
+
+=for apidoc Amh|bool|isCNTRL_A|int ch
+=for apidoc Amh|bool|isCNTRL_L1|int ch
+=for apidoc Amh|bool|isCNTRL_uvchr|int ch
+=for apidoc Amh|bool|isCNTRL_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isCNTRL_utf8|U8 * s
+=for apidoc Amh|bool|isCNTRL_LC|int ch
+=for apidoc Amh|bool|isCNTRL_LC_uvchr|int ch
+=for apidoc Amh|bool|isCNTRL_LC_utf8_safe|U8 * s| U8 *end
 
 =for apidoc Am|bool|isDIGIT|char ch
 Returns a boolean indicating whether the specified character is a
@@ -753,12 +808,30 @@ variants
 C<isDIGIT_uvchr>, C<isDIGIT_utf8_safe>, C<isDIGIT_LC>, C<isDIGIT_LC_uvchr>, and
 C<isDIGIT_LC_utf8_safe>.
 
+=for apidoc Amh|bool|isDIGIT_A|int ch
+=for apidoc Amh|bool|isDIGIT_L1|int ch
+=for apidoc Amh|bool|isDIGIT_uvchr|int ch
+=for apidoc Amh|bool|isDIGIT_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isDIGIT_utf8|U8 * s
+=for apidoc Amh|bool|isDIGIT_LC|int ch
+=for apidoc Amh|bool|isDIGIT_LC_uvchr|int ch
+=for apidoc Amh|bool|isDIGIT_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isGRAPH|char ch
 Returns a boolean indicating whether the specified character is a
 graphic character, analogous to C<m/[[:graph:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uvchr>, C<isGRAPH_utf8_safe>,
 C<isGRAPH_LC>, C<isGRAPH_LC_uvchr>, and C<isGRAPH_LC_utf8_safe>.
+
+=for apidoc Amh|bool|isGRAPH_A|int ch
+=for apidoc Amh|bool|isGRAPH_L1|int ch
+=for apidoc Amh|bool|isGRAPH_uvchr|int ch
+=for apidoc Amh|bool|isGRAPH_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isGRAPH_utf8|U8 * s
+=for apidoc Amh|bool|isGRAPH_LC|int ch
+=for apidoc Amh|bool|isGRAPH_LC_uvchr|int ch
+=for apidoc Amh|bool|isGRAPH_LC_utf8_safe|U8 * s| U8 *end
 
 =for apidoc Am|bool|isLOWER|char ch
 Returns a boolean indicating whether the specified character is a
@@ -768,11 +841,23 @@ variants
 C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uvchr>, C<isLOWER_utf8_safe>,
 C<isLOWER_LC>, C<isLOWER_LC_uvchr>, and C<isLOWER_LC_utf8_safe>.
 
+=for apidoc Amh|bool|isLOWER_A|int ch
+=for apidoc Amh|bool|isLOWER_L1|int ch
+=for apidoc Amh|bool|isLOWER_uvchr|int ch
+=for apidoc Amh|bool|isLOWER_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isLOWER_utf8|U8 * s
+=for apidoc Amh|bool|isLOWER_LC|int ch
+=for apidoc Amh|bool|isLOWER_LC_uvchr|int ch
+=for apidoc Amh|bool|isLOWER_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isOCTAL|char ch
 Returns a boolean indicating whether the specified character is an
 octal digit, [0-7].
 The only two variants are C<isOCTAL_A> and C<isOCTAL_L1>; each is identical to
 C<isOCTAL>.
+
+=for apidoc Amh|bool|isOCTAL_A|int ch
+=for apidoc Amh|bool|isOCTAL_L1|int ch
 
 =for apidoc Am|bool|isPUNCT|char ch
 Returns a boolean indicating whether the specified character is a
@@ -783,6 +868,15 @@ Classes> for details.
 See the L<top of this section|/Character classification> for an explanation of
 variants C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uvchr>, C<isPUNCT_utf8_safe>,
 C<isPUNCT_LC>, C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8_safe>.
+
+=for apidoc Amh|bool|isPUNCT_A|int ch
+=for apidoc Amh|bool|isPUNCT_L1|int ch
+=for apidoc Amh|bool|isPUNCT_uvchr|int ch
+=for apidoc Amh|bool|isPUNCT_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isPUNCT_utf8|U8 * s
+=for apidoc Amh|bool|isPUNCT_LC|int ch
+=for apidoc Amh|bool|isPUNCT_LC_uvchr|int ch
+=for apidoc Amh|bool|isPUNCT_LC_utf8_safe|U8 * s| U8 *end
 
 =for apidoc Am|bool|isSPACE|char ch
 Returns a boolean indicating whether the specified character is a
@@ -798,6 +892,15 @@ variants
 C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uvchr>, C<isSPACE_utf8_safe>,
 C<isSPACE_LC>, C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8_safe>.
 
+=for apidoc Amh|bool|isSPACE_A|int ch
+=for apidoc Amh|bool|isSPACE_L1|int ch
+=for apidoc Amh|bool|isSPACE_uvchr|int ch
+=for apidoc Amh|bool|isSPACE_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isSPACE_utf8|U8 * s
+=for apidoc Amh|bool|isSPACE_LC|int ch
+=for apidoc Amh|bool|isSPACE_LC_uvchr|int ch
+=for apidoc Amh|bool|isSPACE_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isPSXSPC|char ch
 (short for Posix Space)
 Starting in 5.18, this is identical in all its forms to the
@@ -812,12 +915,30 @@ See the L<top of this section|/Character classification> for an explanation of
 variants C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uvchr>, C<isPSXSPC_utf8_safe>,
 C<isPSXSPC_LC>, C<isPSXSPC_LC_uvchr>, and C<isPSXSPC_LC_utf8_safe>.
 
+=for apidoc Amh|bool|isPSXSPC_A|int ch
+=for apidoc Amh|bool|isPSXSPC_L1|int ch
+=for apidoc Amh|bool|isPSXSPC_uvchr|int ch
+=for apidoc Amh|bool|isPSXSPC_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isPSXSPC_utf8|U8 * s
+=for apidoc Amh|bool|isPSXSPC_LC|int ch
+=for apidoc Amh|bool|isPSXSPC_LC_uvchr|int ch
+=for apidoc Amh|bool|isPSXSPC_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the specified character is an
 uppercase character, analogous to C<m/[[:upper:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uvchr>, C<isUPPER_utf8_safe>,
 C<isUPPER_LC>, C<isUPPER_LC_uvchr>, and C<isUPPER_LC_utf8_safe>.
+
+=for apidoc Amh|bool|isUPPER_A|int ch
+=for apidoc Amh|bool|isUPPER_L1|int ch
+=for apidoc Amh|bool|isUPPER_uvchr|int ch
+=for apidoc Amh|bool|isUPPER_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isUPPER_utf8|U8 * s
+=for apidoc Amh|bool|isUPPER_LC|int ch
+=for apidoc Amh|bool|isUPPER_LC_uvchr|int ch
+=for apidoc Amh|bool|isUPPER_LC_utf8_safe|U8 * s| U8 *end
 
 =for apidoc Am|bool|isPRINT|char ch
 Returns a boolean indicating whether the specified character is a
@@ -826,6 +947,15 @@ See the L<top of this section|/Character classification> for an explanation of
 variants
 C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uvchr>, C<isPRINT_utf8_safe>,
 C<isPRINT_LC>, C<isPRINT_LC_uvchr>, and C<isPRINT_LC_utf8_safe>.
+
+=for apidoc Amh|bool|isPRINT_A|int ch
+=for apidoc Amh|bool|isPRINT_L1|int ch
+=for apidoc Amh|bool|isPRINT_uvchr|int ch
+=for apidoc Amh|bool|isPRINT_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isPRINT_utf8|U8 * s
+=for apidoc Amh|bool|isPRINT_LC|int ch
+=for apidoc Amh|bool|isPRINT_LC_uvchr|int ch
+=for apidoc Amh|bool|isPRINT_LC_utf8_safe|U8 * s| U8 *end
 
 =for apidoc Am|bool|isWORDCHAR|char ch
 Returns a boolean indicating whether the specified character is a character
@@ -842,6 +972,19 @@ C<isWORDCHAR_utf8_safe>.  C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and
 C<isWORDCHAR_LC_utf8_safe> are also as described there, but additionally
 include the platform's native underscore.
 
+=for apidoc Amh|bool|isWORDCHAR_A|int ch
+=for apidoc Amh|bool|isWORDCHAR_L1|int ch
+=for apidoc Amh|bool|isWORDCHAR_uvchr|int ch
+=for apidoc Amh|bool|isWORDCHAR_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isWORDCHAR_utf8|U8 * s
+=for apidoc Amh|bool|isWORDCHAR_LC|int ch
+=for apidoc Amh|bool|isWORDCHAR_LC_uvchr|int ch
+=for apidoc Amh|bool|isWORDCHAR_LC_utf8_safe|U8 * s| U8 *end
+=for apidoc Amh|bool|isALNUM|int ch
+=for apidoc Amh|bool|isALNUM_A|int ch
+=for apidoc Amh|bool|isALNUM_LC|int ch
+=for apidoc Amh|bool|isALNUM_LC_uvchr|int ch
+
 =for apidoc Am|bool|isXDIGIT|char ch
 Returns a boolean indicating whether the specified character is a hexadecimal
 digit.  In the ASCII range these are C<[0-9A-Fa-f]>.  Variants C<isXDIGIT_A()>
@@ -850,6 +993,15 @@ See the L<top of this section|/Character classification> for an explanation of
 variants
 C<isXDIGIT_uvchr>, C<isXDIGIT_utf8_safe>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>,
 and C<isXDIGIT_LC_utf8_safe>.
+
+=for apidoc Amh|bool|isXDIGIT_A|int ch
+=for apidoc Amh|bool|isXDIGIT_L1|int ch
+=for apidoc Amh|bool|isXDIGIT_uvchr|int ch
+=for apidoc Amh|bool|isXDIGIT_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isXDIGIT_utf8|U8 * s
+=for apidoc Amh|bool|isXDIGIT_LC|int ch
+=for apidoc Amh|bool|isXDIGIT_LC_uvchr|int ch
+=for apidoc Amh|bool|isXDIGIT_LC_utf8_safe|U8 * s| U8 *end
 
 =for apidoc Am|bool|isIDFIRST|char ch
 Returns a boolean indicating whether the specified character can be the first
@@ -861,6 +1013,15 @@ variants
 C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uvchr>, C<isIDFIRST_utf8_safe>,
 C<isIDFIRST_LC>, C<isIDFIRST_LC_uvchr>, and C<isIDFIRST_LC_utf8_safe>.
 
+=for apidoc Amh|bool|isIDFIRST_A|int ch
+=for apidoc Amh|bool|isIDFIRST_L1|int ch
+=for apidoc Amh|bool|isIDFIRST_uvchr|int ch
+=for apidoc Amh|bool|isIDFIRST_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isIDFIRST_utf8|U8 * s
+=for apidoc Amh|bool|isIDFIRST_LC|int ch
+=for apidoc Amh|bool|isIDFIRST_LC_uvchr|int ch
+=for apidoc Amh|bool|isIDFIRST_LC_utf8_safe|U8 * s| U8 *end
+
 =for apidoc Am|bool|isIDCONT|char ch
 Returns a boolean indicating whether the specified character can be the
 second or succeeding character of an identifier.  This is very close to, but
@@ -871,6 +1032,15 @@ an
 explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uvchr>,
 C<isIDCONT_utf8_safe>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
 C<isIDCONT_LC_utf8_safe>.
+
+=for apidoc Amh|bool|isIDCONT_A|int ch
+=for apidoc Amh|bool|isIDCONT_L1|int ch
+=for apidoc Amh|bool|isIDCONT_uvchr|int ch
+=for apidoc Amh|bool|isIDCONT_utf8_safe|U8 * s|U8 * end
+=for apidoc Amh|bool|isIDCONT_utf8|U8 * s
+=for apidoc Amh|bool|isIDCONT_LC|int ch
+=for apidoc Amh|bool|isIDCONT_LC_uvchr|int ch
+=for apidoc Amh|bool|isIDCONT_LC_utf8_safe|U8 * s| U8 *end
 
 =head1 Miscellaneous Functions
 
