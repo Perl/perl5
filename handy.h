@@ -2485,11 +2485,23 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
 
-/* C_ARRAY_LENGTH is the number of elements in the C array (so you
- * want your zero-based indices to be less than but not equal to).
- *
- * C_ARRAY_END is one past the last: half-open/half-closed range,
- * not last-inclusive range. */
+/*
+=head1 Handy Values
+
+=for apidoc Am|STRLEN|C_ARRAY_LENGTH|void *a
+
+Returns the number of elements in the input C array (so you want your
+zero-based indices to be less than but not equal to).
+
+=for apidoc Am|void *|C_ARRAY_END|void *a
+
+Returns a pointer to one element past the final element of the input C array.
+
+=cut
+
+C_ARRAY_END is one past the last: half-open/half-closed range, not
+last-inclusive range.
+*/
 #define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
 #define C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
 
