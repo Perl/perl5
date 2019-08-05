@@ -455,10 +455,20 @@ Test two buffers (which may contain embedded C<NUL> characters, to see if they
 are equal.  The C<len> parameter indicates the number of bytes to compare.
 Returns zero if equal, or non-zero if non-equal.
 
+=for apidoc Am|bool|memEQs|char* s1|STRLEN l1|"literal string" s2
+Like L</memEQ>, but the second string is a literal enclosed in double quotes,
+C<l1> gives the number of bytes in C<s1>.
+Returns zero if equal, or non-zero if non-equal.
+
 =for apidoc Am|bool|memNE|char* s1|char* s2|STRLEN len
 Test two buffers (which may contain embedded C<NUL> characters, to see if they
 are not equal.  The C<len> parameter indicates the number of bytes to compare.
 Returns zero if non-equal, or non-zero if equal.
+
+=for apidoc Am|bool|memNEs|char* s1|STRLEN l1|"literal string" s2
+Like L</memNE>, but the second string is a literal enclosed in double quotes,
+C<l1> gives the number of bytes in C<s1>.
+Returns zero if non-equal, or zero if non-equal.
 
 =cut
 
