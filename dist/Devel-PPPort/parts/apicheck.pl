@@ -333,6 +333,12 @@ for $f (@f) {   # Loop through all the tests to add
     $args = "($args)";
   }
 
+  # Single trailing underscore in name means is a comma operator
+  if ($f->{'name'} =~ /[^_]_$/) {
+    $aTHX_args .= ' 1';
+    $args .= ' 1';
+  }
+
   print OUT <<HEAD;
 /******************************************************************************
 *
