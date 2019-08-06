@@ -266,10 +266,12 @@ for $f (@f) {   # Loop through all the tests to add
                               (?: \s* \b const \b \s* )? # opt. const
                               ( (?: \[ [^\]]* \] )* )    # opt. dimension(s)=> $d
                             $/x
-                     or die "$0 - cannot parse argument: [$a]\n";
+                     or die "$0 - cannot parse argument: [$a] in $f->{'name'}\n";
 
     # Replace a special argument name by something that will compile.
     if (exists $amap{$n}) {
+      die "$f->{'name'} had type $n, which should have been the whole type"
+                                                                    if $p or $d;
       push @arg, $amap{$n};
       next;
     }
