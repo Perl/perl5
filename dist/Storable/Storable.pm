@@ -986,6 +986,9 @@ modifying C<$Storable::recursion_limit> and
 C<$Storable::recursion_limit_hash> respectively.  Either can be set to
 C<-1> to prevent any depth checks, though this isn't recommended.
 
+If you want to test what the limits are, the F<stacksize> tool is
+included in the C<Storable> distribution.
+
 =item *
 
 You can create endless loops if the things you serialize via freeze()
