@@ -163,6 +163,7 @@ retry:
       }
     }
   }
+  print STDERR __LINE__, ": \@new after make", Dumper \@new if $opt{debug} > 6;
 
   if ($r->{status} == 0) {
     my @u;
@@ -215,14 +216,20 @@ retry:
       }
     }
   }
+  print STDERR __LINE__, ": \@new after getting undefs", Dumper \@new
+                                                            if $opt{debug} > 6;
 
   # Remove from @new all the current todo symbols
   @new = grep !$todo{$_->[0]}, @new;
+  print STDERR __LINE__, ": \@new after removing current", Dumper \@new
+                                                            if $opt{debug} > 6;
 
   # If none remain, start over with those we know about, minus the todo
   # symbols.  khw doesn't understand why this is necessary
   unless (@new) {
     @new = grep !$todo{$_->[0]}, @already_in_sym;
+    print STDERR __LINE__, ": \@new after starting over", Dumper \@new
+                                                            if $opt{debug} > 6;
   }
 
   # This retries once if nothing new was found (khw guesses that is just to
@@ -246,6 +253,9 @@ retry:
     display_sym('new', @$_);
     $todo{$_->[0]} = $_->[1];
   }
+
+  print STDERR __LINE__, ": %todo at end of iteration ", Dumper \%todo
+                                                            if $opt{debug} > 6;
 
   # Write the revised todo, so that apicheck.c when generated in the next
   # iteration will have these #ifdef'd out
@@ -315,7 +325,7 @@ if ($opt{check}) {
     my $r = run(qw(make test));
 
     # This regenerated apicheck.c
-    dump_apicheck() if $opt{debug};
+    dump_apicheck() if $opt{debug} > 3;
 
     $r->{didnotrun} and die "couldn't run make test: $!\n" .
         join('', @{$r->{stdout}})."\n---\n".join('', @{$r->{stderr}});
@@ -325,12 +335,15 @@ if ($opt{check}) {
       display_sym('del', $sym, $cur);
     }
     else { # Revert to this symbol is bad in this version
+      print STDERR __LINE__, ": symbol '$sym' not in this version\n"
+                                                            if $opt{debug} > 6;
       $todo{$sym} = $cur;
       write_todo($todo_file, $todo_version, \%todo);
     }
   }
 } # End of checking our work
 
+print STDERR __LINE__, ": %todo at end ", Dumper \%todo  if $opt{debug} > 6;
 write_todo($todo_file, $todo_version, \%todo);
 
 # Clean up after ourselves
@@ -380,7 +393,7 @@ sub regen_apicheck      # Regeneration can also occur by calling 'make'
   unlink qw(apicheck.c apicheck.o);
   runtool({ out => '/dev/null' }, $fullperl, 'apicheck_c.PL', map { "--api=$_" } @_)
       or die "cannot regenerate apicheck.c\n";
-  dump_apicheck() if $opt{debug};
+  dump_apicheck() if $opt{debug} > 3;
 }
 
 sub dump_apicheck
@@ -461,10 +474,14 @@ sub find_undefined_symbols
   for my $sym (keys %$ls) {
     next if $sym =~ /\@/ or $sym =~ /^_/ or exists $stdsym{$sym};
     unless (exists $ps->{$sym}) {
+        print STDERR __LINE__, ": , Couldn't find '$sym' in $perl\n"
+                                                            if $opt{debug} > 4;
         push @undefined, $sym;
     }
   }
 
+  print STDERR __LINE__, ": find_undef returning ", Dumper \@undefined
+                                                            if $opt{debug} > 4;
   return @undefined;
 }
 
@@ -537,6 +554,7 @@ sub get_apicheck_symbol_map
   my $cur;
 
   while (<$fh>) {
+    print STDERR __LINE__, ": apicheck.i ", $_ if $opt{debug} > 5;
     next if /^#/;
 
     # We only care about lines within one of our _DPPP_test_ functions.  If
@@ -566,5 +584,7 @@ sub get_apicheck_symbol_map
     }
   }
 
+  print STDERR __LINE__, ": load_todo returning ", Dumper \%symmap
+                                                            if $opt{debug} > 5;
   return \%symmap;
 }

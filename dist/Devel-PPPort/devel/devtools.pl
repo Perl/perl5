@@ -87,9 +87,9 @@ sub run
 
   if (    exists $rval{core}
       ||  exists $rval{signal}
-      || ($rval{status} && @{$rval{stderr}})
-      || ($opt{debug} && @{$rval{stderr}})
-      || ($opt{debug} > 2 && @{$rval{stdout}}))
+      || ($opt{debug} > 2 && @{$rval{stderr}} && $rval{status})
+      || ($opt{debug} > 3 && @{$rval{stderr}})
+      || ($opt{debug} > 4 && @{$rval{stdout}}))
   {
     print STDERR "Returning\n", Dumper \%rval;
 
