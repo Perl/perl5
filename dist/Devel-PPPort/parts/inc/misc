@@ -548,26 +548,26 @@ __UNDEFINED__ isXDIGIT(c)       (   isDIGIT(c)                                 \
                                  || ((c) >= 'A' && (c) <= 'F'))
 __UNDEFINED__ isXDIGIT_L1(c)    isXDIGIT(c)
 
-__UNDEFINED__ isALNUM_A         isALNUM
-__UNDEFINED__ isALNUMC_A        isALNUMC
-__UNDEFINED__ isALPHA_A         isALPHA
-__UNDEFINED__ isALPHANUMERIC_A  isALPHANUMERIC
-__UNDEFINED__ isASCII_A         isASCII
-__UNDEFINED__ isBLANK_A         isBLANK
-__UNDEFINED__ isCNTRL_A         isCNTRL
-__UNDEFINED__ isDIGIT_A         isDIGIT
-__UNDEFINED__ isGRAPH_A         isGRAPH
-__UNDEFINED__ isIDCONT_A        isIDCONT
-__UNDEFINED__ isIDFIRST_A       isIDFIRST
-__UNDEFINED__ isLOWER_A         isLOWER
-__UNDEFINED__ isOCTAL_A         isOCTAL
-__UNDEFINED__ isPRINT_A         isPRINT
-__UNDEFINED__ isPSXSPC_A        isPSXSPC
-__UNDEFINED__ isPUNCT_A         isPUNCT
-__UNDEFINED__ isSPACE_A         isSPACE
-__UNDEFINED__ isUPPER_A         isUPPER
-__UNDEFINED__ isWORDCHAR_A	isWORDCHAR
-__UNDEFINED__ isXDIGIT_A	isXDIGIT
+__UNDEFINED__ isALNUM_A(c)         isALNUM(c)
+__UNDEFINED__ isALNUMC_A(c)        isALNUMC(c)
+__UNDEFINED__ isALPHA_A(c)         isALPHA(c)
+__UNDEFINED__ isALPHANUMERIC_A(c)  isALPHANUMERIC(c)
+__UNDEFINED__ isASCII_A(c)         isASCII(c)
+__UNDEFINED__ isBLANK_A(c)         isBLANK(c)
+__UNDEFINED__ isCNTRL_A(c)         isCNTRL(c)
+__UNDEFINED__ isDIGIT_A(c)         isDIGIT(c)
+__UNDEFINED__ isGRAPH_A(c)         isGRAPH(c)
+__UNDEFINED__ isIDCONT_A(c)        isIDCONT(c)
+__UNDEFINED__ isIDFIRST_A(c)       isIDFIRST(c)
+__UNDEFINED__ isLOWER_A(c)         isLOWER(c)
+__UNDEFINED__ isOCTAL_A(c)         isOCTAL(c)
+__UNDEFINED__ isPRINT_A(c)         isPRINT(c)
+__UNDEFINED__ isPSXSPC_A(c)        isPSXSPC(c)
+__UNDEFINED__ isPUNCT_A(c)         isPUNCT(c)
+__UNDEFINED__ isSPACE_A(c)         isSPACE(c)
+__UNDEFINED__ isUPPER_A(c)         isUPPER(c)
+__UNDEFINED__ isWORDCHAR_A(c)	   isWORDCHAR(c)
+__UNDEFINED__ isXDIGIT_A(c)	   isXDIGIT(c)
 
 /* Until we figure out how to support this in older perls... */
 #if { VERSION >= 5.8.0 }
