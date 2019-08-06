@@ -49,6 +49,7 @@ my %amap = (
   SP   => 'SP',
   type => 'int',
   cast => 'int',
+  block => '{1;}',
 );
 
 # Certain return types are instead considered void
