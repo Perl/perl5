@@ -2526,7 +2526,8 @@ is the recommended Unicode-aware way of saying
 	if (UTF) {							   \
             SV *zlopp = newSV(UTF8_MAXBYTES);				   \
 	    unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);	   \
-            unsigned const char *const kapow = uvchr_to_utf8(flrbbbbb, val); \
+            unsigned char *const kapow = uvchr_to_utf8(flrbbbbb, val);     \
+            *kapow = '\0';                                                 \
 	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \
 	    SvPOK_on(zlopp);						   \
 	    SvUTF8_on(zlopp);						   \
