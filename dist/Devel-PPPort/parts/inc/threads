@@ -21,12 +21,26 @@ dTHXR
 __UNDEFINED__  dTHR       dNOOP
 
 __UNDEFINED__  dTHX       dNOOP
+/* Hint: dTHX
+
+  For pre-5.6.0 thread compatibility, instead use dTHXR, available only through
+  ppport.h */
+
 __UNDEFINED__  dTHXa(x)   dNOOP
 
 __UNDEFINED__  pTHX       void
 __UNDEFINED__  pTHX_
 __UNDEFINED__  aTHX
+/* Hint: aTHX
+
+  For pre-5.6.0 thread compatibility, instead use aTHXR, available only through
+  ppport.h */
+
 __UNDEFINED__  aTHX_
+/* Hint: aTHX_
+
+  For pre-5.6.0 thread compatibility, instead use aTHXR_, available only
+  through ppport.h */
 
 #if { VERSION < 5.6.0 }
 #  ifdef USE_THREADS
