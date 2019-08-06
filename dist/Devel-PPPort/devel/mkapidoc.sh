@@ -27,15 +27,13 @@ function isperlroot
 
 function usage
 {
-  echo "USAGE: $0 [perlroot] [output-file] [embed.fnc]"
+  echo "USAGE: $0 [perlroot] [output-file] [input embed.fnc]"
   exit 0
 }
 
 if [ -z "$1" ]; then
   if isperlroot "../../.."; then
     PERLROOT=../../..
-  else
-    PERLROOT=.
   fi
 else
   PERLROOT=$1
@@ -52,11 +50,7 @@ else
 fi
 
 if [ -z "$3" ]; then
-  if [ -f "parts/embed.fnc" ]; then
-    EMBED="parts/embed.fnc"
-  else
-    usage
-  fi
+  EMBED="$PERLROOT/embed.fnc"
 else
   EMBED=$3
 fi
@@ -102,5 +96,6 @@ EOF
                 $h{$1} || print
             }'  $EMBED >> $OUTPUT
 else
+  echo "$0: First parameter must be a directory containing embed.fnc and perl.h"
   usage
 fi
