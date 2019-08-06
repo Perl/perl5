@@ -89,9 +89,7 @@ sub run
       ||  exists $rval{signal}
       || ($rval{status} && @{$rval{stderr}})
       || ($opt{debug} && @{$rval{stderr}})
-
-          # verbose increases likelihood of output
-      || ($opt{debug} && $opt{verbose} && @{$rval{stdout}}))
+      || ($opt{debug} > 2 && @{$rval{stdout}}))
   {
     print STDERR "Returning\n", Dumper \%rval;
 

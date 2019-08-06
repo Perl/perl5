@@ -28,7 +28,7 @@ require './devel/devtools.pl';
 
 our %opt = (
   blead     => 0,     # ? Is this perl blead
-  debug   => 0,     # Adding --verbose increases the detail
+  debug   => 0,
   base    => 0,     # Don't use ppport.h when generating
   verbose => 0,
   check   => 1,
@@ -37,7 +37,7 @@ our %opt = (
 );
 
 GetOptions(\%opt, qw(
-perl=s todo=s blead version=s shlib=s debug base verbose check!
+perl=s todo=s blead version=s shlib=s debug=i base verbose check!
           )) or die;
 
 identify();

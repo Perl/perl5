@@ -29,7 +29,7 @@ our %opt = (
  'debug-start' => "",
 );
 
-GetOptions(\%opt, qw( install=s mode=s blead=s debug debug-start=s)) or die;
+GetOptions(\%opt, qw( install=s mode=s blead=s debug=i debug-start=s)) or die;
 
 my $write = $opt{mode} eq 'write';
 
