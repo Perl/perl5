@@ -256,32 +256,63 @@ if (exists $opt{'api-info'}) {
   my $match = $opt{'api-info'} =~ m!^/(.*)/$! ? $1 : "^\Q$opt{'api-info'}\E\$";
   for $f (sort dictionary_order keys %API) {
     next unless $f =~ /$match/;
-    print "\n=== $f ===\n\n";
+    print "\n=== $f ===\n";
     my $info = 0;
-    if ($API{$f}{base} || $API{$f}{todo}) {
-      if ($API{$f}{ppport_fnc}) {
-        print "This is only supported by ppport.h, and NOT by ANY perl version.\n";
-      }
-      else {
-        my $base = format_version($API{$f}{base} || $API{$f}{todo});
-        print "Supported at least starting from perl-$base.\n";
-      }
-      $info++;
+    my $base;
+    $base = int_parse_version($API{$f}{base}) if $API{$f}{base};
+    my $todo;
+    $todo = int_parse_version($API{$f}{todo}) if $API{$f}{todo};
+
+    # Output information if it is generally publicly usable
+    if ($base && ! $API{$f}{inaccessible} && ! $API{$f}{core_only}) {
+        my $with_or= "";
+        if (    $base <= $int_min_perl
+            || (   (! $API{$f}{provided} && ! $todo)
+                || ($todo && $todo >= $base)))
+        {
+            $with_or= " with or";
+        }
+        print "\nSupported at least since perl-",
+              format_version($base), ",$with_or without $ppport.";
+        if ($API{$f}{unverified}) {
+            print "\nThis information is based on inspection of the source code",
+                  " and has not been\n",
+                  "verified by successful compilation.";
+        }
+        print "\n";
+        $info++;
+     }
+     if ($API{$f}{provided} || $todo) {
+        print "\nThis is only supported by $ppport, and NOT by perl versions going forward.\n" unless $base;
+        if ($todo) {
+            if (! $base || $todo < $base) {
+                my $additionally = "";
+                $additionally .= " additionally" if $base;
+                print "$ppport$additionally provides support at least back to perl-",
+                    format_version($todo),
+                    ".\n";
+            }
+        }
+        elsif (! $base || $base > $int_min_perl) {
+            print "\n$ppport provides support for this, but ironically, does not",
+                  " currently know,\n",
+                  "for this report, the minimum version it supports for this";
+            if ($API{$f}{undocumented}) {
+                print " and many things\n",
+                      "it provides that are implemented as macros and aren't",
+                      " documented.  You can\n",
+                      "help by submitting a documentation patch";
+            }
+            print ".\n";
+        }
     }
     if ($API{$f}{provided}) {
-      my $todo = $API{$f}{todo} ? $API{$f}{todo} : __MIN_PERL__;
-      my $at_least = (int_parse_version($todo) == int_parse_version(__MIN_PERL__))
-                     ? " at least"
-                     : "";
-      print "Support by $ppport provided$at_least back to perl-",
-            format_version($todo),
-            ".\n";
       print "Support needs to be explicitly requested by #define NEED_$f\n",
             "(or #define NEED_${f}_GLOBAL).\n"              if exists $need{$f};
       $info++;
     }
 
-    if (! $API{$f}{ppport_fnc}) {
+    if ($base || ! $API{$f}{ppport_fnc}) {
       my $email = "Send email to perl5-porters\@perl.org if you need to have this functionality.\n";
       if ($API{$f}{inaccessible}) {
         print "\nThis is not part of the public API, and may not even be accessible to XS code.\n";
