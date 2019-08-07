@@ -278,14 +278,6 @@ if (exists $opt{'api-info'}) {
             ".\n";
       print "Support needs to be explicitly requested by #define NEED_$f\n",
             "(or #define NEED_${f}_GLOBAL).\n"              if exists $need{$f};
-      print "Depends on: ", join(', ', @{$depends{$f}}), ".\n"
-                                                         if exists $depends{$f};
-      $info++;
-    }
-
-    if (exists $hints{$f} || exists $warnings{$f}) {
-      print "\n$hints{$f}" if exists $hints{$f};
-      print "\nWARNING:\n$warnings{$f}" if exists $warnings{$f};
       $info++;
     }
 
@@ -323,6 +315,14 @@ if (exists $opt{'api-info'}) {
               " this could be\na bug in Devel::PPPort.  To report an issue:\n",
               "https://github.com/Dual-Life/Devel-PPPort/issues/new\n";
       }
+    }
+
+    print "\nDepends on: ", join(', ', @{$depends{$f}}), ".\n"
+                                                         if exists $depends{$f};
+    if (exists $hints{$f} || exists $warnings{$f}) {
+      print "\n$hints{$f}" if exists $hints{$f};
+      print "\nWARNING:\n$warnings{$f}" if exists $warnings{$f};
+      $info++;
     }
     $count++;
   }
