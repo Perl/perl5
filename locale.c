@@ -4349,11 +4349,6 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     return xbuf;
 
   bad:
-    Safefree(xbuf);
-    if (s != input_string) {
-        Safefree(s);
-    }
-    *xlen = 0;
 
 #  ifdef DEBUGGING
 
@@ -4362,6 +4357,12 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     }
 
 #  endif
+
+    Safefree(xbuf);
+    if (s != input_string) {
+        Safefree(s);
+    }
+    *xlen = 0;
 
     return NULL;
 }
