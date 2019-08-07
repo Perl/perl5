@@ -66,6 +66,8 @@ strip() if $opt{strip};
 $opt{'compat-version'} = __MIN_PERL__ unless exists $opt{'compat-version'};
 $opt{'compat-version'} = int_parse_version($opt{'compat-version'});
 
+my $int_min_perl = int_parse_version(__MIN_PERL__);
+
 # Each element of this hash looks something like:
 # 'Poison' => {
 #                         'base' => '5.008000',
@@ -98,7 +100,7 @@ if (exists $opt{'list-unsupported'}) {
     next if $API{$f}{inaccessible};
     next if $API{$f}{experimental};
     next unless $API{$f}{todo};
-    next if int_parse_version($API{$f}{todo}) <=  int_parse_version(__MIN_PERL__);
+    next if int_parse_version($API{$f}{todo}) <= $int_min_perl;
     print "$f ", '.'x(40-length($f)), " ", format_version($API{$f}{todo}), "\n";
   }
   exit 0;
