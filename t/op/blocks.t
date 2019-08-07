@@ -167,23 +167,23 @@ SKIP: {
     skip "VMS doesn't have the perl #2754 bug", 3 if $^O eq 'VMS';
     fresh_perl_is(
         "$testblocks BEGIN { exit 0; }",
-        "begin\nunitcheck\ncheck\nend",
+        "begin\nunitcheck\ncheck\ninit\nend",
         {},
-        "BEGIN{exit 0} should exit"
+        "BEGIN{exit 0} doesn't exit yet"
     );
 
     fresh_perl_is(
         "$testblocks UNITCHECK { exit 0; }",
-        "begin\nunitcheck\ncheck\nend",
+        "begin\nunitcheck\ncheck\ninit\nmain\nend",
         {},
-        "UNITCHECK{exit 0} should exit"
+        "UNITCHECK{exit 0} doesn't exit yet"
     );
 
     fresh_perl_is(
         "$testblocks CHECK { exit 0; }",
-        "begin\nunitcheck\ncheck\nend",
+        "begin\nunitcheck\ncheck\ninit\nmain\nend",
         {},
-        "CHECK{exit 0} should exit"
+        "CHECK{exit 0} doesn't exit yet"
     );
 }
 
