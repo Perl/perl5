@@ -413,6 +413,13 @@ instead of ignoring it.  [perl #134291]
 
 C<< 0 0x@ >> no longer asserts in S_no_op().  [perl #134310]
 
+=item *
+
+Exceptions thrown while C<$@> is read-only could result in infinite
+recursion as perl tried to update C<$@>, which throws another
+exception, resulting in a stack overflow.  Perl now replaces C<$@>
+with a copy if it's not a simple writable SV.  [perl #134266]
+
 =back
 
 =head1 Known Problems
