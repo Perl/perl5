@@ -289,7 +289,7 @@ sub expand
   my $code = shift;
   $code =~ s{^(\s*#\s*(?:el)?if\s+)(.*)$}{$1.expand_pp_expressions($2)}gem;
   $code =~ s{^\s*
-              __UNDEFINED__
+              __(?:UNDEFINED|UNDEF_NOT_PROVIDED)__
               \s+
               (
                 ( \w+ )
