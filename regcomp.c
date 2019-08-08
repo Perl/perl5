@@ -5841,6 +5841,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
           - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
 #endif
 		    if (deltanext == OPTIMIZE_INFTY
+                        || data->pos_delta == OPTIMIZE_INFTY
                         || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= OPTIMIZE_INFTY - data->pos_delta)
 		        data->pos_delta = OPTIMIZE_INFTY;
 		    else
