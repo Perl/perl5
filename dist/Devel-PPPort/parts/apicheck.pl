@@ -367,6 +367,9 @@ HEAD
   # If there is a '#if' associated with this, add that
   $f->{'cond'} and print OUT "#if $f->{'cond'}\n";
 
+  # If only to be tested when ppport.h is enabled
+  $f->{'ppport_fnc'} and print OUT "#ifndef DPPP_APICHECK_NO_PPPORT_H\n";
+
   print OUT <<END;
 void _DPPP_test_$f->{'name'} (void)
 {
@@ -388,6 +391,7 @@ $stack
 }
 END
 
+  $f->{'ppport_fnc'} and print OUT "#endif\n";
   $f->{'cond'} and print OUT "#endif\n";
   exists $todo{$f->{'name'}} and print OUT "#endif\n";
 

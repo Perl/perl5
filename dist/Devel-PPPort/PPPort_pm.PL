@@ -148,6 +148,8 @@ for (@provided) {
 
 # At this point @perl_api is the list of things we provide that weren't found
 # in the .fnc files.
+my @prototype_unknown = @perl_api;
+
 # Add in the .fnc file definitions.
 push @perl_api, keys %embed;
 @perl_api = sort dictionary_order @perl_api;
@@ -226,6 +228,14 @@ for (@todo_list) {
     $todo .= "\n";
   }
   push @todo, $todo;
+}
+
+if (@prototype_unknown) {
+    my $todo = "=item Backported version unknown\n\n";
+    for (sort dictionary_order @prototype_unknown) {
+        $todo .= " $_  $undocumented\n";
+    }
+    push @todo, $todo;
 }
 
 $data =~ s{^__UNSUPPORTED_API__(\s*?)^}
