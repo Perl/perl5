@@ -93,6 +93,14 @@ PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
  */
 PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
 
+/*
+=for apidoc Amn|GV *|PL_defgv
+
+The GV representing C<*_>.  Useful for access to C<$_>.
+
+=cut
+*/
+
 PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
 PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(I, defgv,	GV *)           /* the *_ glob */
@@ -117,10 +125,26 @@ PERLVAR(I, dowarn,	U8)
 PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 #undef PERL___I
 
+/*
+=for apidoc Amn|HV*|PL_curstash
+
+The stash for the package code will be compiled into.
+
+=cut
+*/
 
 /* Stashes */
 PERLVAR(I, defstash,	HV *)		/* main symbol table */
 PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
+
+/*
+=for apidoc Amn|COP*|PL_curcop
+
+The currently active COP (control op) roughly representing the current
+statement in the source.
+
+=cut
+*/
 
 PERLVAR(I, curcop,	COP *)
 PERLVAR(I, curstack,	AV *)		/* THE STACK */
@@ -181,6 +205,14 @@ PERLVARA(I, sv_immortals, 4, SV)
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
 PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */
+
+/*
+=for apidoc Amn|yy_parser*|PL_parser
+
+The parser state when compiling code.
+
+=cut
+*/
 
 PERLVAR(I, parser,	yy_parser *)	/* current parser state */
 
@@ -256,6 +288,37 @@ PERLVAR(I, efloatsize,	STRLEN)
 
 PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
+
+/*
+=for apidoc Amn|U8|PL_exit_flags
+
+Contains flags controlling perl's behaviour on exit():
+
+=over
+
+=item * C<PERL_EXIT_DESTRUCT_END>
+
+If set, END blocks are executed when the interpreter is destroyed.
+This is normally set by perl itself after the interpreter is
+constructed.
+
+=item * C<PERL_EXIT_ABORT>
+
+Call C<abort()> on exit.  This is used internally by perl itself to
+abort if exit is called while processing exit.
+
+=item * C<PERL_EXIT_WARN>
+
+Warn on exit.
+
+=item * C<PERL_EXIT_EXPECTED>
+
+Set by the L<perlfunc/exit> operator.
+
+=back
+
+=cut
+*/
 
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
@@ -565,6 +628,14 @@ PERLVAR(I, debug,	volatile U32)	/* flags given to -D switch */
 
 PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
+/*
+=for apidoc Amn|runops_proc_t|PL_runops
+
+See L<perlguts/Pluggable runops>.
+
+=cut
+*/
+
 PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
 
 PERLVAR(I, subname,	SV *)		/* name of current subroutine */
@@ -619,8 +690,28 @@ PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
 
 PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
 
-/* This value may be set when embedding for full cleanup  */
-/* 0=none, 1=full, 2=full with checks */
+/*
+=for apidoc Amn|signed char|PL_perl_destruct_level
+
+This value may be set when embedding for full cleanup.
+
+Possible values:
+
+=over
+
+=item * 0 - none
+
+=item * 1 - full
+
+=item * 2 or greater - full with checks.
+
+=back
+
+If C<$ENV{PERL_DESTRUCT_LEVEL}> is set to an integer greater than the
+value of C<PL_perl_destruct_level> its value is used instead.
+
+=cut
+*/
 /* mod_perl is special, and also assigns a meaning -1 */
 PERLVARI(I, perl_destruct_level, signed char,	0)
 
