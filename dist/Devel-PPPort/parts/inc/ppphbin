@@ -87,6 +87,7 @@ my %API = map { /^(\w+)\|([^|]*)\|([^|]*)\|(\w*)$/
                       (index($4, 'x') >= 0 ? ( experimental => 1  ) : ()),
                       (index($4, 'u') >= 0 ? ( undocumented => 1  ) : ()),
                       (index($4, 'o') >= 0 ? ( ppport_fnc => 1  ) : ()),
+                      (index($4, 'V') >= 0 ? ( unverified => 1  ) : ()),
                     } )
                 : die "invalid spec: $_" } qw(
 __PERL_API__
