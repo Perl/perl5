@@ -239,6 +239,9 @@ for $f (@f) {   # Loop through all the tests to add
   # want them to be tested even if non-public.
   $f->{'flags'}{'A'} or $f->{'ppport_fnc'} or next;
 
+  # Don't test unorthodox things that we aren't set up to do
+  $f->{'flags'}{'u'} and next;
+
   $ignore{$unique} = 1; # ignore duplicates
 
   my $Perl_ = $f->{'flags'}{'p'} ? 'Perl_' : '';
