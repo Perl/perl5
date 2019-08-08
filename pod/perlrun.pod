@@ -1257,8 +1257,7 @@ after compilation.
 =item PERL_DESTRUCT_LEVEL
 X<PERL_DESTRUCT_LEVEL>
 
-Relevant only if your Perl executable was built with B<-DDEBUGGING>,
-this controls the behaviour of global destruction of objects and other
+Controls the behaviour of global destruction of objects and other
 references.  See L<perlhacktips/PERL_DESTRUCT_LEVEL> for more information.
 
 =item PERL_DL_NONLAZY
