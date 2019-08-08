@@ -26,6 +26,8 @@ Ama|char*|savesharedpvs|"literal string"
 Ama|char*|savesharedpvs|"literal string" s
 Ama|SV*|newSVpvs_flags|"literal string" s|U32 flags
 Ama|SV*|newSVpvs_flags|"literal string"|U32 flags
+Ama|SV*|newSVpvs|"literal string"
+Ama|SV*|newSVpvs|"literal string" s
 Ama|SV*|newSVpvs_share|"literal string"
 Ama|SV*|newSVpvs_share|"literal string" s
 Am|AV*|GvAV|GV* gv
@@ -734,6 +736,7 @@ Am|void|mXPUSHn|NV nv
 Am|void|mXPUSHp|char* str|STRLEN len
 Am|void|mXPUSHs|SV* sv
 Am|void|mXPUSHu|UV uv
+Am|void|Newxc|void* ptr|int nitems|type|cast
 Am|void|Newx|void* ptr|int nitems|type
 Am|void|Newxz|void* ptr|int nitems|type
 Am|void|OpLASTSIB_set|OP *o|OP *parent

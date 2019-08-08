@@ -78,7 +78,7 @@ ApTod   |int    |my_sprintf     |NN char *buffer|NN const char *pat|...
 
 EOF
   grep -hr '^=for apidoc' $PERLROOT | sed -e 's/=for apidoc //' | grep '|' | sort | uniq \
-     | perl -e'$f=pop;open(F,$f)||die"$f:$!";while(<F>){(split/\s*\|\s*/)[2]=~/(\w+)/;$h{$1}++}
+     | perl -e'$f=pop;open(F,$f)||die"$f:$!";while(<F>){next unless /^[A-Za-z]+\t/;(split/\s*\|\s*/)[2]=~/(\w+)/;$h{$1}++}
                while(<>){s/[ \t]+$//;(split/\s*\|\s*/)[2]=~/(\w+)/;$h{$1}||print}' $EMBED >>$OUTPUT
 else
   usage
