@@ -2,6 +2,9 @@
 #
 #  PPPort_pm.PL -- generate PPPort.pm
 #
+# Set the environment variable DPPP_CHECK_LEVEL to more than zero for some
+# extra checking. 1 or 2 currently
+
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
@@ -27,6 +30,8 @@ my %embed = map { ( $_->{name} => $_ ) }
 my(%provides, %prototypes, %explicit);
 
 my $data = do { local $/; <DATA> };
+
+# Call include(file, params) for every line that begins with %include
 $data =~ s{^\%(include)\s+(\w+)((?:[^\S\r\n]+.*?)?)\s*$}
           {eval "$1('$2', $3)" or die $@}gem;
 
@@ -425,7 +430,7 @@ You should use F<ppport.h> in modern code so that your code will work
 with the widest range of Perl interpreters possible, without significant
 additional work.
 
-You should attempt older code to fully use F<ppport.h>, because the
+You should attempt to get older code to fully use F<ppport.h>, because the
 reduced pollution of newer Perl versions is an important thing. It's so
 important that the old polluting ways of original Perl modules will not be
 supported very far into the future, and your module will almost certainly
@@ -435,7 +440,7 @@ having done the electronic ecology some good.
 =head2 How to use ppport.h
 
 Don't direct the users of your module to download C<Devel::PPPort>.
-They are most probably no XS writers. Also, don't make F<ppport.h>
+They are most probably not XS writers. Also, don't make F<ppport.h>
 optional. Rather, just take the most recent copy of F<ppport.h> that
 you can find (e.g. by generating it with the latest C<Devel::PPPort>
 release from CPAN), copy it into your project, adjust your project to
@@ -480,8 +485,8 @@ in threaded and non-threaded configurations.
 =head2 Provided Perl compatibility API
 
 The header file written by this module, typically F<ppport.h>, provides
-access to the following elements of the Perl API that is not available
-in older Perl releases:
+access to the following elements of the Perl API that are not otherwise
+available in older Perl releases:
 
     __PROVIDED_API__
 
@@ -524,7 +529,7 @@ Version 3.x was ported back to CPAN by Marcus Holland-Moritz.
 
 =item * 
 
-Versions >= 3.22 are maintained with support from Matthew Horsfall (alh).
+Versions >= 3.22 are maintained by perl5 porters
 
 =back
 
