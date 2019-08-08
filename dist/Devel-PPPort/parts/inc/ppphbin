@@ -295,6 +295,14 @@ if (exists $opt{'api-info'}) {
             }
         }
         elsif (! $base || $base > $int_min_perl) {
+            if (exists $depends{$f}) {
+                my $max = 0;
+                for (@{$depends{$f}}) {
+                    $max = int_parse_version($API{$_}{todo}) if $API{$_}{todo} && $API{$_}{todo} > $max;
+                    # XXX What to assume unspecified values are?  This effectively makes them MIN_PERL
+                }
+                $todo = $max if $max;
+            }
             print "\n$ppport provides support for this, but ironically, does not",
                   " currently know,\n",
                   "for this report, the minimum version it supports for this";
@@ -305,6 +313,17 @@ if (exists $opt{'api-info'}) {
                       "help by submitting a documentation patch";
             }
             print ".\n";
+            if ($todo) {
+                if ($todo <= $int_min_perl) {
+                    print "It may very well be supported all the way back to ",
+                          format_version(__MIN_PERL__), ".\n";
+                }
+                else {
+                    print "But given the things $f depends on, it's a good",
+                          " guess that it isn't\n",
+                          "supported prior to ", format_version($todo), ".\n";
+                }
+            }
         }
     }
     if ($API{$f}{provided}) {
