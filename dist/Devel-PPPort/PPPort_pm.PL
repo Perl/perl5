@@ -49,11 +49,11 @@ $data =~ s{^\%(include)\s+(\w+)((?:[^\S\r\n]+.*?)?)\s*$}
 $data = expand($data);
 
 # Just the list of provided items.
-my @api = sort dictionary_order keys %provides;
+my @provided = sort dictionary_order keys %provides;
 
 # which further expands $data.
 $data =~ s{^(.*)__PROVIDED_API__(\s*?)^}
-          {join '', map "$1$_\n", @api}gem;
+          {join '', map "$1$_\n", @provided}gem;
 
 {
   my $len = 0;
@@ -113,7 +113,7 @@ my $MIN_PERL = format_version($INT_MIN_PERL);
 
 # check consistency between our list of everything provided, and our lists of
 # what got provided when
-for (@api) {
+for (@provided) {
   if (   exists $raw_todo{$_}
       && $raw_todo{$_} > $INT_MIN_PERL      # INT_MIN_PERL contents are real
                                             # symbols, not something to do
@@ -131,7 +131,7 @@ for (@api) {
 }
 
 my @perl_api;
-for (keys %provides) {
+for (@provided) {
   next if /^Perl_(.*)/ && exists $embed{$1};
   next if exists $embed{$_};
   push @perl_api, $_;
