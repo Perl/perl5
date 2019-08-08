@@ -347,6 +347,20 @@ sub parse_embed
           # all other entries, so that our caller has full information, and
           # may skip things like non-public functions.
           next if $flags =~ /N/;
+
+          # M implies m for the purposes of this module.
+          $flags .= 'm' if $flags =~ /M/;
+
+          # An entry marked 'b' is in mathoms, so is effectively deprecated,
+          # as it can be removed at anytime.  But if it also has a macro to
+          # implement it, that macro stays when mathoms is removed, so the
+          # non-'Perl_' form isn't deprecated.  embed.fnc is supposed to have
+          # already set this up, but make sure.
+          if ($flags =~ /b/ && $flags !~ /m/ && $flags !~ /D/) {
+            warn "Expecting D flag for '$name', since it is b without [Mm]";
+            $flags .= 'D';
+          }
+
           if ($name =~ /^[^\W\d]\w*$/) {
             for (@args) {
               $_ = [trim_arg($_)];
