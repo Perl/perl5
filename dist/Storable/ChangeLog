@@ -1,3 +1,10 @@
+2019-08-08 11:48:00 TonyC
+    version 3.17
+        * correct a data type to ensure the check for too large results from
+	  STORABLE_freeze() are detected correctly (detected by Coverity)
+	* removed remains of stack size detection from the build process.
+	* moved CAN_FLOCK detection into XS to simplify the build process.
+
 2019-06-11 10:43:00 TonyC
     version 3.16
         * (perl #134179) fix self-referencing structures that include regexps
