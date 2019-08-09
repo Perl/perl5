@@ -9287,7 +9287,8 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     /* upgrade loop from a LISTOP to a LOOPOP;
      * keep it in-place if there's space */
     if (loop->op_slabbed
-        && OpSLOT(loop)->opslot_size < SIZE_TO_PSIZE(sizeof(LOOP)))
+        &&    OpSLOT(loop)->opslot_size
+            < SIZE_TO_PSIZE(sizeof(LOOP)) + OPSLOT_HEADER_P)
     {
         /* no space; allocate new op */
 	LOOP *tmp;
