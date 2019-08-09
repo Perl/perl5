@@ -899,7 +899,7 @@ Am	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 Amd	|I32	|foldEQ_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2
-Axp	|I32	|foldEQ_utf8_flags |NN const char *s1|NULLOK char **pe1|UV l1 \
+Cp	|I32	|foldEQ_utf8_flags |NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2|U32 flags
 AiTp	|I32	|foldEQ_latin1	|NN const char* a|NN const char* b|I32 len
@@ -924,29 +924,29 @@ pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
-ApxRTP	|STRLEN	|_is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
-AbDxpR	|U32	|to_uni_upper_lc|U32 c
-AbDxpR	|U32	|to_uni_title_lc|U32 c
-AbDxpR	|U32	|to_uni_lower_lc|U32 c
-AbDxpR	|bool	|is_uni_alnum	|UV c
-AbDxpR	|bool	|is_uni_alnumc	|UV c
-AbDxpR	|bool	|is_uni_idfirst	|UV c
-AbDxpR	|bool	|is_uni_alpha	|UV c
-AbDxpPR	|bool	|is_uni_ascii	|UV c
-AbDxpPR	|bool	|is_uni_blank	|UV c
-AbDxpPR	|bool	|is_uni_space	|UV c
-AbDxpPR	|bool	|is_uni_cntrl	|UV c
-AbDxpR	|bool	|is_uni_graph	|UV c
-AbDxpR	|bool	|is_uni_digit	|UV c
-AbDxpR	|bool	|is_uni_upper	|UV c
-AbDxpR	|bool	|is_uni_lower	|UV c
-AbDxpR	|bool	|is_uni_print	|UV c
-AbDxpR	|bool	|is_uni_punct	|UV c
-AbDxpPR	|bool	|is_uni_xdigit	|UV c
-Axp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
-Axp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
-AbDxpR	|bool	|isIDFIRST_lazy	|NN const char* p
-AbDxpR	|bool	|isALNUM_lazy	|NN const char* p
+CpRTP	|STRLEN	|_is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
+CbDpR	|U32	|to_uni_upper_lc|U32 c
+CbDpR	|U32	|to_uni_title_lc|U32 c
+CbDpR	|U32	|to_uni_lower_lc|U32 c
+CbDpR	|bool	|is_uni_alnum	|UV c
+CbDpR	|bool	|is_uni_alnumc	|UV c
+CbDpR	|bool	|is_uni_idfirst	|UV c
+CbDpR	|bool	|is_uni_alpha	|UV c
+CbDpPR	|bool	|is_uni_ascii	|UV c
+CbDpPR	|bool	|is_uni_blank	|UV c
+CbDpPR	|bool	|is_uni_space	|UV c
+CbDpPR	|bool	|is_uni_cntrl	|UV c
+CbDpR	|bool	|is_uni_graph	|UV c
+CbDpR	|bool	|is_uni_digit	|UV c
+CbDpR	|bool	|is_uni_upper	|UV c
+CbDpR	|bool	|is_uni_lower	|UV c
+CbDpR	|bool	|is_uni_print	|UV c
+CbDpR	|bool	|is_uni_punct	|UV c
+CbDpPR	|bool	|is_uni_xdigit	|UV c
+Cp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
+Cp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
+CbDpR	|bool	|isIDFIRST_lazy	|NN const char* p
+CbDpR	|bool	|isALNUM_lazy	|NN const char* p
 p	|void	|init_uniprops
 #ifdef PERL_IN_UTF8_C
 STR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp  \
@@ -963,33 +963,33 @@ EXTp	|UV        |_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const unsig
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_or_s
 #endif
-Axp	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
-Axmp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
-Axp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|U8 flags
-AbDxpR	|bool	|is_uni_alnum_lc|UV c
-AbDxpR	|bool	|is_uni_alnumc_lc|UV c
-AbDxpR	|bool	|is_uni_idfirst_lc|UV c
-AxpR	|bool	|_is_uni_perl_idcont|UV c
-AxpR	|bool	|_is_uni_perl_idstart|UV c
-AbDxpR	|bool	|is_uni_alpha_lc|UV c
-AbDxpPR	|bool	|is_uni_ascii_lc|UV c
-AbDxpPR	|bool	|is_uni_space_lc|UV c
-AbDxpPR	|bool	|is_uni_blank_lc|UV c
-AbDxpPR	|bool	|is_uni_cntrl_lc|UV c
-AbDxpR	|bool	|is_uni_graph_lc|UV c
-AbDxpR	|bool	|is_uni_digit_lc|UV c
-AbDxpR	|bool	|is_uni_upper_lc|UV c
-AbDxpR	|bool	|is_uni_lower_lc|UV c
-AbDxpR	|bool	|is_uni_print_lc|UV c
-AbDxpR	|bool	|is_uni_punct_lc|UV c
-AbDxpPR	|bool	|is_uni_xdigit_lc|UV c
+Cp	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
+Cmp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
+Cp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|U8 flags
+CbDpR	|bool	|is_uni_alnum_lc|UV c
+CbDpR	|bool	|is_uni_alnumc_lc|UV c
+CbDpR	|bool	|is_uni_idfirst_lc|UV c
+CpR	|bool	|_is_uni_perl_idcont|UV c
+CpR	|bool	|_is_uni_perl_idstart|UV c
+CbDpR	|bool	|is_uni_alpha_lc|UV c
+CbDpPR	|bool	|is_uni_ascii_lc|UV c
+CbDpPR	|bool	|is_uni_space_lc|UV c
+CbDpPR	|bool	|is_uni_blank_lc|UV c
+CbDpPR	|bool	|is_uni_cntrl_lc|UV c
+CbDpR	|bool	|is_uni_graph_lc|UV c
+CbDpR	|bool	|is_uni_digit_lc|UV c
+CbDpR	|bool	|is_uni_upper_lc|UV c
+CbDpR	|bool	|is_uni_lower_lc|UV c
+CbDpR	|bool	|is_uni_print_lc|UV c
+CbDpR	|bool	|is_uni_punct_lc|UV c
+CbDpPR	|bool	|is_uni_xdigit_lc|UV c
 ATdmoR	|bool	|is_utf8_invariant_string|NN const U8* const s		    \
 		|STRLEN len
 ATidR	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
 		|STRLEN len						    \
 		|NULLOK const U8 ** ep
 #ifndef EBCDIC
-ATiR	|unsigned int|_variant_byte_number|PERL_UINTMAX_T word
+CTiR	|unsigned int|_variant_byte_number|PERL_UINTMAX_T word
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 EiTRd	|Size_t	|variant_under_utf8_count|NN const U8* const s		    \
@@ -1047,44 +1047,44 @@ AmTdP	|bool	|is_utf8_valid_partial_char				    \
 		|NN const U8 * const s|NN const U8 * const e
 ATidR	|bool	|is_utf8_valid_partial_char_flags			    \
 		|NN const U8 * const s|NN const U8 * const e|const U32 flags
-AxpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
-AxpR	|bool	|_is_utf8_FOO|U8 classnum|NN const U8 * const p		    \
+CpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
+CpR	|bool	|_is_utf8_FOO|U8 classnum|NN const U8 * const p		    \
 		|NN const char * const name				    \
 		|NN const char * const alternative			    \
 		|const bool use_utf8|const bool use_locale		    \
 		|NN const char * const file|const unsigned line
-AxpR	|bool	|_is_utf8_FOO_with_len|const U8 classnum|NN const U8 *p	    \
+CpR	|bool	|_is_utf8_FOO_with_len|const U8 classnum|NN const U8 *p	    \
 		|NN const U8 * const e
-AbDxpR	|bool	|is_utf8_alnum	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_alnumc	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_idfirst|NN const U8 *p
-AbDxpR	|bool	|is_utf8_xidfirst|NN const U8 *p
-AxpR	|bool	|_is_utf8_idcont|NN const U8 *p
-AxpR	|bool	|_is_utf8_idstart|NN const U8 *p
-AxpR	|bool	|_is_utf8_xidcont|NN const U8 *p
-AxpR	|bool	|_is_utf8_xidstart|NN const U8 *p
-AxpR	|bool	|_is_utf8_perl_idcont_with_len|NN const U8 *p		    \
+CbDpR	|bool	|is_utf8_alnum	|NN const U8 *p
+CbDpR	|bool	|is_utf8_alnumc	|NN const U8 *p
+CbDpR	|bool	|is_utf8_idfirst|NN const U8 *p
+CbDpR	|bool	|is_utf8_xidfirst|NN const U8 *p
+CpR	|bool	|_is_utf8_idcont|NN const U8 *p
+CpR	|bool	|_is_utf8_idstart|NN const U8 *p
+CpR	|bool	|_is_utf8_xidcont|NN const U8 *p
+CpR	|bool	|_is_utf8_xidstart|NN const U8 *p
+CpR	|bool	|_is_utf8_perl_idcont_with_len|NN const U8 *p		    \
 		|NN const U8 * const e
-AxpR	|bool	|_is_utf8_perl_idstart_with_len|NN const U8 *p		    \
+CpR	|bool	|_is_utf8_perl_idstart_with_len|NN const U8 *p		    \
 		|NN const U8 * const e
-AbDxpR	|bool	|is_utf8_idcont	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_xidcont	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_alpha	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_ascii	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_blank	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_space	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_perl_space	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_perl_word	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_cntrl	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_digit	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_posix_digit	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_graph	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_upper	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_lower	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_print	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_punct	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_xdigit	|NN const U8 *p
-AxpR	|bool	|_is_utf8_mark	|NN const U8 *p
+CbDpR	|bool	|is_utf8_idcont	|NN const U8 *p
+CbDpR	|bool	|is_utf8_xidcont	|NN const U8 *p
+CbDpR	|bool	|is_utf8_alpha	|NN const U8 *p
+CbDpR	|bool	|is_utf8_ascii	|NN const U8 *p
+CbDpR	|bool	|is_utf8_blank	|NN const U8 *p
+CbDpR	|bool	|is_utf8_space	|NN const U8 *p
+CbDpR	|bool	|is_utf8_perl_space	|NN const U8 *p
+CbDpR	|bool	|is_utf8_perl_word	|NN const U8 *p
+CbDpR	|bool	|is_utf8_cntrl	|NN const U8 *p
+CbDpR	|bool	|is_utf8_digit	|NN const U8 *p
+CbDpR	|bool	|is_utf8_posix_digit	|NN const U8 *p
+CbDpR	|bool	|is_utf8_graph	|NN const U8 *p
+CbDpR	|bool	|is_utf8_upper	|NN const U8 *p
+CbDpR	|bool	|is_utf8_lower	|NN const U8 *p
+CbDpR	|bool	|is_utf8_print	|NN const U8 *p
+CbDpR	|bool	|is_utf8_punct	|NN const U8 *p
+CbDpR	|bool	|is_utf8_xdigit	|NN const U8 *p
+CpR	|bool	|_is_utf8_mark	|NN const U8 *p
 AbDxpR	|bool	|is_utf8_mark	|NN const U8 *p
 #if defined(PERL_CORE) || defined(PERL_EXT)
 EXdpR	|bool	|isSCRIPT_RUN	|NN const U8 *s|NN const U8 *send   \
@@ -1242,7 +1242,7 @@ p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
 pbD	|char*	|mem_collxfrm	|NN const char* input_string|STRLEN len|NN STRLEN* xlen
 : Defined in locale.c, used only in sv.c
 #   if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
-px	|char*	|_mem_collxfrm	|NN const char* input_string	\
+p	|char*	|_mem_collxfrm	|NN const char* input_string	\
 				|STRLEN len			\
 				|NN STRLEN* xlen		\
 				|bool utf8
@@ -1312,8 +1312,8 @@ pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Afp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 : Used in pp_ctl.c
 p	|void	|my_unexec
-AbDxTPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
-AbDxTPR	|UV	|ASCII_TO_NEED	|const UV enc|const UV ch
+CbDTPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
+CbDTPR	|UV	|ASCII_TO_NEED	|const UV enc|const UV ch
 ApR	|OP*	|newANONLIST	|NULLOK OP* o
 ApR	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
@@ -1489,8 +1489,8 @@ ATdo	|const char*|Perl_langinfo|const nl_item item
 #else
 ATdo	|const char*|Perl_langinfo|const int item
 #endif
-ApOx	|int	|init_i18nl10n	|int printwarn
-AbpOxD	|int	|init_i18nl14n	|int printwarn
+CpO	|int	|init_i18nl10n	|int printwarn
+CbpOD	|int	|init_i18nl14n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
 XpT	|void	|_warn_problematic_locale
 Xp	|void	|set_numeric_underlying
@@ -1546,14 +1546,14 @@ p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|NULLOK bool *is_bare_re \
 				|const U32 rx_flags|const U32 pm_flags
 Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 orig_rx_flags
-Ap	|char*	|re_intuit_start|NN REGEXP * const rx \
+Cp	|char*	|re_intuit_start|NN REGEXP * const rx \
 				|NULLOK SV* sv \
 				|NN const char* const strbeg \
 				|NN char* strpos \
 				|NN char* strend \
 				|const U32 flags \
 				|NULLOK re_scream_pos_data *data
-Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
+Cp	|SV*	|re_intuit_string|NN REGEXP  *const r
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg \
 				|SSize_t minend|NN SV *sv \
@@ -1943,7 +1943,7 @@ EXp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
-Epx	|char *	|_byte_dump_string					\
+Ep	|char *	|_byte_dump_string					\
 				|NN const U8 * const start		\
 				|const STRLEN len			\
 				|const bool format
@@ -1954,7 +1954,7 @@ iTR	|int	|does_utf8_overflow|NN const U8 * const s		\
 iTR	|int	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s \
 						     |const STRLEN len
 iTR	|int	|isFF_OVERLONG	|NN const U8 * const s|const STRLEN len
-SxR	|char *	|unexpected_non_continuation_text			\
+SR	|char *	|unexpected_non_continuation_text			\
 		|NN const U8 * const s					\
 		|STRLEN print_len					\
 		|const STRLEN non_cont_byte_pos				\
@@ -1986,19 +1986,19 @@ S	|UV	|turkic_lc	|NN const U8 * const p0|NN const U8 * const e|NN U8* ustrp|NN S
 S	|UV	|turkic_uc	|NN const U8 * const p |NN const U8 * const e|NN U8* ustrp|NN STRLEN *lenp
 #endif
 ApbMdD	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-Axp	|UV	|_to_utf8_lower_flags|NN const U8 *p|NULLOK const U8* e		\
+Cp	|UV	|_to_utf8_lower_flags|NN const U8 *p|NULLOK const U8* e		\
 				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags	\
 				|NN const char * const file|const int line
 ApbMdD	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-Axp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NULLOK const U8 *e	\
+Cp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NULLOK const U8 *e	\
 				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags	\
 				|NN const char * const file|const int line
 ApbMdD	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-Axp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NULLOK const U8* e	\
+Cp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NULLOK const U8* e	\
 				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags	\
 				|NN const char * const file|const int line
 ApbMdD	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-Axp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NULLOK const U8 *e		\
+Cp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NULLOK const U8 *e		\
 				|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags  \
 				|NN const char * const file|const int line
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
@@ -2020,7 +2020,7 @@ Ap	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|NULLOK HEK* hek
 : Used in perly.y
 p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* arg
-Apx	|void	|_force_out_malformed_utf8_message			    \
+Cp	|void	|_force_out_malformed_utf8_message			    \
 		|NN const U8 *const p|NN const U8 * const e|const U32 flags \
 		|const bool die_here
 EXp	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
@@ -2041,11 +2041,11 @@ AxTp	|U8*	|bytes_from_utf8_loc|NN const U8 *s			    \
 				    |NULLOK const U8 ** first_unconverted
 Apxd	|U8*	|bytes_to_utf8	|NN const U8 *s|NN STRLEN *lenp
 ApdD	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
-AbpdD	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
-AbpxD	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
+CbpdD	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
+CbpD	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
 AMpd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
-Ai	|UV	|_utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
-ApdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
+Ci	|UV	|_utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
+CpdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 p	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
 
 AdMTp	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
@@ -2063,23 +2063,23 @@ AxTdi	|UV	|utf8n_to_uvchr_msgs|NN const U8 *s			    \
 				|const U32 flags			    \
 				|NULLOK U32 * errors			    \
 				|NULLOK AV ** msgs
-AxTp	|UV	|_utf8n_to_uvchr_msgs_helper				    \
+CTp	|UV	|_utf8n_to_uvchr_msgs_helper				    \
 				|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags			    \
 				|NULLOK U32 * errors			    \
 				|NULLOK AV ** msgs
-AipTRd	|UV	|valid_utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
-Adp	|UV	|utf8n_to_uvuni|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+CipTRd	|UV	|valid_utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
+Cdp	|UV	|utf8n_to_uvuni|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
 
 Adm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
-Ap	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
+Cp	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
 Adm	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Admx	|U8*	|uvchr_to_utf8_flags_msgs|NN U8 *d|UV uv|UV flags|NULLOK HV ** msgs
-AMpod	|U8*	|uvoffuni_to_utf8_flags	|NN U8 *d|UV uv|const UV flags
-Apx	|U8*	|uvoffuni_to_utf8_flags_msgs|NN U8 *d|UV uv|const UV flags|NULLOK HV** msgs
-Adp	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
+CMpod	|U8*	|uvoffuni_to_utf8_flags	|NN U8 *d|UV uv|const UV flags
+Cp	|U8*	|uvoffuni_to_utf8_flags_msgs|NN U8 *d|UV uv|const UV flags|NULLOK HV** msgs
+Cdp	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
 EXpR	|Size_t	|_inverse_folds	|const UV cp				    \
@@ -2747,7 +2747,7 @@ ESR	|bool	|regtail_study	|NN RExC_state_t *pRExC_state \
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-EXRpx	|bool	|isFOO_lc	|const U8 classnum|const U8 character
+EXRp	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
@@ -3055,7 +3055,7 @@ STR	|char *	|setlocale_debug_string	|const int category		    \
         || defined(PERL_IN_MG_C)	\
 	|| defined (PERL_EXT_POSIX)	\
 	|| defined (PERL_EXT_LANGINFO))
-Apx	|bool	|_is_cur_LC_category_utf8|int category
+Cp	|bool	|_is_cur_LC_category_utf8|int category
 #endif
 
 

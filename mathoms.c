@@ -1676,7 +1676,7 @@ Perl_is_utf8_char(const U8 *s)
 /*
 =for apidoc is_utf8_char_buf
 
-This is identical to the macro L</isUTF8_CHAR>.
+This is identical to the macro L<perlapi/isUTF8_CHAR>.
 
 =cut */
 
@@ -1722,7 +1722,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
+See L<perlapi/utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */

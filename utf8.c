@@ -145,14 +145,14 @@ S_new_msg_hv(pTHX_ const char * const message, /* The message text */
 =for apidoc uvoffuni_to_utf8_flags
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Instead, B<Almost all code should use L</uvchr_to_utf8> or
-L</uvchr_to_utf8_flags>>.
+Instead, B<Almost all code should use L<perlapi/uvchr_to_utf8> or
+L<perlapi/uvchr_to_utf8_flags>>.
 
 This function is like them, but the input is a strict Unicode
 (as opposed to native) code point.  Only in very rare circumstances should code
 not be using the native code point.
 
-For details, see the description for L</uvchr_to_utf8_flags>.
+For details, see the description for L<perlapi/uvchr_to_utf8_flags>.
 
 =cut
 */
@@ -1189,7 +1189,8 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 =for apidoc utf8n_to_uvchr
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
+Most code should use L</utf8_to_uvchr_buf>() rather than call this
+directly.
 
 Bottom level UTF-8 decode routine.
 Returns the native code point value of the first character in the string C<s>,
@@ -1304,7 +1305,8 @@ Perl_utf8n_to_uvchr(const U8 *s,
 =for apidoc utf8n_to_uvchr_error
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
+Most code should use L</utf8_to_uvchr_buf>() rather than call this
+directly.
 
 This function is for code that needs to know what the precise malformation(s)
 are when an error is found.  If you also need to know the generated warning
@@ -1463,7 +1465,8 @@ Perl_utf8n_to_uvchr_error(const U8 *s,
 =for apidoc utf8n_to_uvchr_msgs
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
+Most code should use L</utf8_to_uvchr_buf>() rather than call this
+directly.
 
 This function is for code that needs to know what the precise malformation(s)
 are when an error is found, and wants the corresponding warning and/or error
@@ -2280,9 +2283,9 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
 Only in very rare circumstances should code need to be dealing in Unicode
 (as opposed to native) code points.  In those few cases, use
-C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|/utf8_to_uvchr_buf>> instead.  If you
-are not absolutely sure this is one of those cases, then assume it isn't and
-use plain C<utf8_to_uvchr_buf> instead.
+C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|perlapi/utf8_to_uvchr_buf>> instead.
+If you are not absolutely sure this is one of those cases, then assume it isn't
+and use plain C<utf8_to_uvchr_buf> instead.
 
 Returns the Unicode (not-native) code point of the first character in the
 string C<s> which
@@ -2295,7 +2298,8 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
+See L<perlapi/utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is
+returned.
 
 =cut
 */
@@ -5409,15 +5413,15 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 /*
 =for apidoc utf8n_to_uvuni
 
-Instead use L</utf8_to_uvchr_buf>, or rarely, L</utf8n_to_uvchr>.
+Instead use L<perlapi/utf8_to_uvchr_buf>, or rarely, L<perlapi/utf8n_to_uvchr>.
 
 This function was useful for code that wanted to handle both EBCDIC and
 ASCII platforms with Unicode properties, but starting in Perl v5.20, the
 distinctions between the platforms have mostly been made invisible to most
 code, so this function is quite unlikely to be what you want.  If you do need
 this precise functionality, use instead
-C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|/utf8_to_uvchr_buf>>
-or C<L<NATIVE_TO_UNI(utf8n_to_uvchr(...))|/utf8n_to_uvchr>>.
+C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|perlapi/utf8_to_uvchr_buf>>
+or C<L<NATIVE_TO_UNI(utf8n_to_uvchr(...))|perlapi/utf8n_to_uvchr>>.
 
 =cut
 */
@@ -5433,8 +5437,8 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 /*
 =for apidoc uvuni_to_utf8_flags
 
-Instead you almost certainly want to use L</uvchr_to_utf8> or
-L</uvchr_to_utf8_flags>.
+Instead you almost certainly want to use L<perlapi/uvchr_to_utf8> or
+L<perlapi/uvchr_to_utf8_flags>.
 
 This function is a deprecated synonym for L</uvoffuni_to_utf8_flags>,
 which itself, while not deprecated, should be used only in isolated

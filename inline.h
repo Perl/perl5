@@ -301,10 +301,10 @@ S_append_utf8_from_native_byte(const U8 byte, U8** dest)
 
 /*
 =for apidoc valid_utf8_to_uvchr
-Like C<L</utf8_to_uvchr_buf>>, but should only be called when it is known that
-the next character in the input UTF-8 string C<s> is well-formed (I<e.g.>,
-it passes C<L</isUTF8_CHAR>>.  Surrogates, non-character code points, and
-non-Unicode code points are allowed.
+Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
+known that the next character in the input UTF-8 string C<s> is well-formed
+(I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
+points, and non-Unicode code points are allowed.
 
 =cut
 
