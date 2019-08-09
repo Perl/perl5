@@ -693,20 +693,20 @@ call_pv();
 
 my $o = ppport(qw(--api-info=INT2PTR));
 my %found = map {($_ => 1)} $o =~ /^===\s+(\w+)\s+===/mg;
-ok(scalar keys %found, 1);
+ok(scalar keys %found, 1, "found 1 key");
 ok(exists $found{INT2PTR});
-ok(matches($o, '^Supported at least starting from perl-5\.6\.0\.', 'm'), 1);
-ok(matches($o, '^Support by .*ppport.* provided at least back to perl-5\.003', 'm'), 1, "Supported with ppport.h to 5.003");
+ok(matches($o, '^Supported at least since perl-5\.6\.0', 'm'), 1, "INT2PTR supported without ppport.h to 5.6.0");
+ok(matches($o, '^ppport.h additionally provides support at least back to perl-5\.003', 'm'), 1, "INT2PTR supported with ppport.h to 5.003");
 
 $o = ppport(qw(--api-info=Zero));
 %found = map {($_ => 1)} $o =~ /^===\s+(\w+)\s+===/mg;
-ok(scalar keys %found, 1);
+ok(scalar keys %found, 1, "found 1 key");
 ok(exists $found{Zero});
-ok(matches($o, '^Supported at least starting from perl-5.003', 'm'), 1, __LINE__);
+ok(matches($o, '^Supported at least since perl-5.003', 'm'), 1, "Zero supported to 5.003");
 
 $o = ppport(qw(--api-info=/Zero/));
 %found = map {($_ => 1)} $o =~ /^===\s+(\w+)\s+===/mg;
-ok(scalar keys %found, 2);
+ok(scalar keys %found, 2, "found 2 keys");
 ok(exists $found{Zero});
 ok(exists $found{ZeroD});
 
