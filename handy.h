@@ -677,6 +677,12 @@ C<isALPHANUMERIC_A>, C<isALPHANUMERIC_L1>, C<isALPHANUMERIC_uvchr>,
 C<isALPHANUMERIC_utf8_safe>, C<isALPHANUMERIC_LC>, C<isALPHANUMERIC_LC_uvchr>,
 and C<isALPHANUMERIC_LC_utf8_safe>.
 
+A (discouraged from use) synonym is C<isALNUMC> (where the C<C> suffix means
+this corresponds to the C language alphanumeric definition).  Also
+there are the variants
+C<isALNUMC_A>, C<isALNUMC_L1>
+C<isALNUMC_LC>, and C<isALNUMC_LC_uvchr>.
+
 =for apidoc Am|bool|isASCII|int ch
 Returns a boolean indicating whether the specified character is one of the 128
 characters in the ASCII character set, analogous to C<m/[[:ascii:]]/>.
