@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 33;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -75,6 +75,18 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
            'uniqnum distinguishes floats' );
 
+{
+    my @nums = map $_+0.1, 1e7..1e7+5;
+    is_deeply( [ uniqnum @nums ],
+               [ @nums ],
+               'uniqnum distinguishes large floats' );
+
+    my @strings = map "$_", @nums;
+    is_deeply( [ uniqnum @strings ],
+               [ @strings ],
+               'uniqnum distinguishes large floats (stringified)' );
+}
+
 # Hard to know for sure what an Inf is going to be. Lets make one
 my $Inf = 0 + 1E1000;
 my $NaN;
@@ -84,7 +96,7 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
            [ 0, 1, 12345, $Inf, -$Inf, $NaN ],
            'uniqnum preserves the special values of +-Inf and Nan' );
 
-{
+SKIP: {
     my $maxuint = ~0;
     my $maxint = ~0 >> 1;
     my $minint = -(~0 >> 1) - 1;
@@ -94,6 +106,15 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
     is_deeply( [ uniqnum @nums, 1.0 ],
                [ @nums ],
                'uniqnum preserves uniqness of full integer range' );
+
+    my @strs = map "$_", @nums;
+
+    skip( "Perl $] doesn't stringify UV_MAX right ($maxuint)", 1 )
+        if $maxuint !~ /\A[0-9]+\z/;
+
+    is_deeply( [ uniqnum @strs, "1.0" ],
+               [ @strs ],
+               'uniqnum preserves uniqness of full integer range (stringified)' );
 }
 
 {
