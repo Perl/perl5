@@ -88,4 +88,14 @@ sub dictionary_order($$)    # Sort caselessly, ignoring punct
          or    $valid_a cmp $valid_b);
 }
 
+sub sort_api_lines  # Sort lines of the form flags|return|name|args...
+                    # by 'name'
+{
+    $a =~ / ^ [^|]* \| [^|]* \| (\w+) /x; # 3rd field '|' is sep
+    my $a_name = $1;
+    $b =~ / ^ [^|]* \| [^|]* \| (\w+) /x;
+    my $b_name = $1;
+    return dictionary_order($a_name, $b_name);
+}
+
 1;
