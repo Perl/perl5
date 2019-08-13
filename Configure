@@ -8554,7 +8554,7 @@ EOM
 	if $test "X$sysroot" != X; then
 	    case "$gccversion" in
 		'') ;;
-		*)  dflt="$dflt --sysroot $sysroot" ;;
+		*)  dflt="$dflt --sysroot=$sysroot" ;;
 	    esac
 	fi
 
