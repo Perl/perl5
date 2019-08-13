@@ -28,6 +28,11 @@ else {
   *OUT = \*STDOUT;
 }
 
+# Arguments passed to us in this variable are of the form
+# '--a=foo --b=bar', so split first on space, then the =, and then the hash is
+# of the form { a => foo, b => bar }
+my %script_args = map { split /=/ } split(/\s+/, $ENV{'DPPP_ARGUMENTS'});
+
 # Get list of functions/macros to test
 my @f = parse_embed(qw( parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc ));
 
@@ -345,10 +350,18 @@ for $f (@f) {   # Loop through all the tests to add
     $args .= ' 1';
   }
 
+  # Single leading underscore in a few names means is a comma operator
+  if ($f->{'name'} =~ /^ _[ adp] (?: THX | MY_CXT ) /x) {
+    $aTHX_prefix = '1 ';
+    $prefix = '1 ';
+  }
+
+
   print OUT <<HEAD;
 /******************************************************************************
 *
-*  $f->{'name'}
+
+*  $f->{'name'}     $script_args{'--todo'}
 *
 ******************************************************************************/
 

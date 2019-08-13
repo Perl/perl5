@@ -51,6 +51,8 @@ if ($opt{todo}) {
     $todo_version = format_version_line($opt{todo});
 }
 
+$ENV{'DPPP_ARGUMENTS'} = "--todo=$todo_version";
+
 print "\n", ident_str(), "\n\n";
 
 my $fullperl = `which $opt{perl}`;
