@@ -2991,7 +2991,7 @@ Apd	|void	|sv_catpv_flags	|NN SV *dstr|NN const char *sstr \
 				|const I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Amd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
-Ap	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
+Adp	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 Adpmb	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
 Apmd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
