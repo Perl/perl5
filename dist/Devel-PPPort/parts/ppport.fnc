@@ -24,7 +24,7 @@
 
 Amn|void|aTHXR
 Amn|void|aTHXR_
-dCm|int|AvFILLp|AV* av
+md|int|AvFILLp|AV* av
 Amn|void|DEFSV
 Amn|void|dMY_CXT_SV
 Amn|void|dNOOP
@@ -56,13 +56,13 @@ Amn|void|PL_bufptr
 Amn|void|PL_compiling
 Amn|void|PL_copline
 Amn|void|PL_DBsignal
-dmn|SV *|PL_DBsingle
-dmn|GV *|PL_DBsub
-dmn|SV *|PL_DBtrace
+mnd|SV *|PL_DBsingle
+mnd|GV *|PL_DBsub
+mnd|SV *|PL_DBtrace
 Amn|void|PL_debstash
 Amn|void|PL_diehook
 Amn|void|PL_dirty
-dmn|U8|PL_dowarn
+mnd|U8|PL_dowarn
 Amn|void|PL_error_count
 Amn|void|PL_expect
 Amn|void|PL_hexdigit
