@@ -82,7 +82,11 @@ EOF
   | sort                                                                    \
   | uniq                                                                    \
   | sort -f -t'|' -k3                                                       \
-  | perl -e '$f=pop;
+  | perl -e 'use warnings;
+             use strict;
+             my $f=pop;
+             my %h;
+
              # Populate %h with the embed.fnc entry names
              open(F,$f) || die "$f:$!";
              while (<F>) {                      # In embed.fnc,
