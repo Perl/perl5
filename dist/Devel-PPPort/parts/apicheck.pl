@@ -241,8 +241,12 @@ for $f (@f) {   # Loop through all the tests to add
   $ignore{$unique} and next;
 
   # only public API members, except those in ppport.fnc are there because we
-  # want them to be tested even if non-public.
-  $f->{'flags'}{'A'} or $f->{'ppport_fnc'} or next;
+  # want them to be tested even if non-public.  X,M functions are supposed to
+  # be considered to have just the macro form public.
+      $f->{'flags'}{'A'}
+  or  $f->{'ppport_fnc'}
+  or ($f->{'flags'}{'X'} and $f->{'flags'}{'M'})
+  or next;
 
   # Don't test unorthodox things that we aren't set up to do
   $f->{'flags'}{'u'} and next;
@@ -389,6 +393,22 @@ void _DPPP_test_$f->{'name'} (void)
   dXSARGS;
 $stack
   {
+END
+
+  # If M is a flag here, it means the 'Perl_' form is not for general use, but
+  # the macro (tested above) is.
+  if ($f->{'flags'}{'M'}) {
+      print OUT <<END;
+
+    $ret$prefix$f->{'name'}$args;
+  }
+}
+END
+
+  }
+  else {
+    print OUT <<END;
+
 #ifdef $f->{'name'}
     $ret$prefix$f->{'name'}$args;
 #endif
@@ -403,6 +423,8 @@ $stack
   }
 }
 END
+
+  }
 
   $f->{'ppport_fnc'} and print OUT "#endif\n";
   $f->{'cond'} and print OUT "#endif\n";
