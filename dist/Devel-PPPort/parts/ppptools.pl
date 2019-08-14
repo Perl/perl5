@@ -272,11 +272,11 @@ sub trim_arg        # Splits the argument into type and name, returning the
   s/\b(?:auto|extern|inline|register|static|volatile|restrict)\b//g;
   s/\b(?:$remove)\b//;
 
-  s/ (?=<\*) \s+ (?=\*) //xg;   # No spaces in pointer sequences
-  s/ \s* ( \*+ ) \s* / $1 /xg;  # Normalize pointer sequences to be surrounded
-                                # by a single space
-  s/^\s+//; s/\s+$//;           # No leading, trailing spacd
-  s/\s+/ /g;                    # Collapse multiple space into one
+  while (s/ \* \s+ \* /**/xg) {}  # No spaces within pointer sequences
+  s/ \s* ( \*+ ) \s* / $1 /xg;    # Normalize pointer sequences to be surrounded
+                                  # by a single space
+  s/^\s+//; s/\s+$//;             # No leading, trailing spacd
+  s/\s+/ /g;                      # Collapse multiple space into one
 
   return ($_, $name);
 }
