@@ -51,7 +51,8 @@ if ($opt{todo}) {
     $todo_version = format_version_line($opt{todo});
 }
 
-$ENV{'DPPP_ARGUMENTS'} = "--todo=$todo_version";
+# Pass this through the Make, to apicheck.pl
+$ENV{'DPPP_ARGUMENTS'} = "--todo-dir=$opt{'todo-dir'} --todo=$todo_version";
 
 print "\n", ident_str(), "\n\n";
 

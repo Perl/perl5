@@ -42,7 +42,7 @@ my @f = parse_embed(qw( parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc ));
 #                               'version' => '5.025007'
 #                           },
 # We don't care here about other subkeys
-my %todo = %{&parse_todo};
+my %todo = %{&parse_todo($script_args{'--todo-dir'})};
 
 # We convert these types into these other types
 my %tmap = (
@@ -361,7 +361,7 @@ for $f (@f) {   # Loop through all the tests to add
 /******************************************************************************
 *
 
-*  $f->{'name'}     $script_args{'--todo'}
+*  $f->{'name'}  $script_args{'--todo-dir'}  $script_args{'--todo'}
 *
 ******************************************************************************/
 

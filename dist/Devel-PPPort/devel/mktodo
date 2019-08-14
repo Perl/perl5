@@ -57,8 +57,6 @@ GetOptions(\%opt, qw( base check! verbose install=s blead=s blead-version=s
 
 identify();
 
-my $outdir = 'parts/todo';
-
 my $perls_ref = get_and_sort_perls(\%opt);
 
 # Go through all the perls, creating a todo file for it.
@@ -66,7 +64,7 @@ for (my $i = 0; $i < @$perls_ref; $i++) {
   my $this_perl = @{$perls_ref}[$i];
   my @args = ('--perl',     $this_perl->{path},
               '--version',  $this_perl->{version},
-              '--todo-dir', $outdir
+              '--todo-dir', (($opt{base}) ? 'parts/base' : 'parts/todo')
              );
 
   push @args, '--blead' if $i == 0; # First one is blead
