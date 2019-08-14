@@ -96,6 +96,9 @@ my %ignorerv = (
   ),
 );
 
+my @simple_my_cxt_prereqs = ( 'typedef struct { int count; } my_cxt_t;', 'START_MY_CXT;' );
+my @my_cxt_prereqs = ( @simple_my_cxt_prereqs, 'MY_CXT_INIT;' );
+
 # The value of each key is a list of things that need to be declared in order
 # for the key to compile.
 my %stack = (
@@ -124,6 +127,14 @@ my %stack = (
   XPUSHu         => ['dTARG;'],
   XS_APIVERSION_BOOTCHECK => ['CV * cv;'],
   XS_VERSION_BOOTCHECK => ['CV * cv;'],
+  MY_CXT_INIT  => [ @simple_my_cxt_prereqs ],
+  MY_CXT_CLONE => [ @simple_my_cxt_prereqs ],
+  dMY_CXT      => [ @simple_my_cxt_prereqs ],
+  MY_CXT       => [ @my_cxt_prereqs ],
+  _aMY_CXT     => [ @my_cxt_prereqs ],
+   aMY_CXT     => [ @my_cxt_prereqs ],
+   aMY_CXT_    => [ @my_cxt_prereqs ],
+   pMY_CXT     => [ @my_cxt_prereqs ],
 );
 
 # Things to not try to check.  Either not applicable, or too hard to get to
