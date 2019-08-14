@@ -259,10 +259,11 @@ for $f (@f) {   # Loop through all the tests to add
     }
 
     # Split this type into its components
-    my($n, $p, $d) = $a =~ /^ (\w+(?:\s+\w+)*)\s*  # type name  => $n
-                              (\**)                # pointer    => $p
-                              (?:\s*\bconst\b\s*)? # const
-                              ((?:\[[^\]]*\])*)    # dimension  => $d
+    my($n, $p, $d) = $a =~ /^ ( \w+ (?: \s+ \w+ )* )     # type name  => $n
+                              \s*
+                              ( \** )                 # optional pointer(s) => $p
+                              (?: \s* \b const \b \s* )? # opt. const
+                              ( (?: \[ [^\]]* \] )* )    # opt. dimension(s)=> $d
                             $/x
                      or die "$0 - cannot parse argument: [$a]\n";
 
