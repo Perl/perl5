@@ -323,6 +323,7 @@ for $f (@f) {   # Loop through all the tests to add
   }
 
   my $args = join ', ', @arg;
+  my $prefix = "";
 
   # Failure to specify a return type in the apidoc line means void
   my $rvt = $f->{'ret'} || 'void';
@@ -336,7 +337,8 @@ for $f (@f) {   # Loop through all the tests to add
     $ret = $ignorerv{$f->{'name'}} ? '(void) ' : "rval = ";
   }
 
-  my $aTHX_args = "";
+  my $aTHX_args   = "";
+  my $aTHX_prefix = "";
 
   # Add parens to functions that take an argument list, even if empty
   unless ($f->{'flags'}{'n'}) {
@@ -372,8 +374,8 @@ HEAD
   }
 
   my $final = $varargs
-              ? "$Perl_$f->{'name'}$aTHX_args"
-              : "$f->{'name'}$args";
+              ? "$aTHX_prefix$Perl_$f->{'name'}$aTHX_args"
+              : "$prefix$f->{'name'}$args";
 
   # If there is a '#if' associated with this, add that
   $f->{'cond'} and print OUT "#if $f->{'cond'}\n";
@@ -385,7 +387,7 @@ void _DPPP_test_$f->{'name'} (void)
 $stack
   {
 #ifdef $f->{'name'}
-    $ret$f->{'name'}$args;
+    $ret$prefix$f->{'name'}$args;
 #endif
   }
 
@@ -393,7 +395,7 @@ $stack
 #ifdef $f->{'name'}
     $ret$final;
 #else
-    $ret$Perl_$f->{'name'}$aTHX_args;
+    $ret$aTHX_prefix$Perl_$f->{'name'}$aTHX_args;
 #endif
   }
 }
