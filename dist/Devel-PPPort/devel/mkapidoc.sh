@@ -27,7 +27,7 @@ function isperlroot
 
 function usage
 {
-  echo "USAGE: $0 [perlroot] [output-file] [input embed.fnc]"
+  echo "USAGE: $0 [perlroot] [output-file] [input embed.fnc] [input config_h.SH]"
   exit 0
 }
 
@@ -53,6 +53,12 @@ if [ -z "$3" ]; then
   EMBED="$PERLROOT/embed.fnc"
 else
   EMBED=$3
+fi
+
+if [ -z "$4" ]; then
+  CONFIG="$PERLROOT/config_h.SH"
+else
+  CONFIG=$4
 fi
 
 if isperlroot $PERLROOT; then
@@ -84,6 +90,7 @@ EOF
   | sort -f -t'|' -k3                                                       \
   | perl -e 'use warnings;
              use strict;
+             my $c=pop;
              my $f=pop;
              my %h;
 
@@ -94,6 +101,12 @@ EOF
                 (  split /\s*\|\s*/ ) [2] =~ /(\w+)/;
                 $h{$1}++;   # Note in %h that $1 is in $EMBED
             }
+            close F;
+
+            # STDIN consists of the =for apidoc lines.  Those in embed.fnc
+            # already give us their prototypes, so skip.  Otherwise massage the
+            # input somewhat and save them
+            my @entries;
             while (<>) {
                 s/\|/d|/ unless /^[^|]*d/; # Many of the entries omit the "d"
                                            # flag to indicate they are
@@ -102,8 +115,37 @@ EOF
                                            # documented in the source
                 s/[ \t]+$//;
                 (  split /\s*\|\s*/  ) [2] =~ /(\w+)/;
-                $h{$1} || print
-            }'  $EMBED >> $OUTPUT
+                push @entries, $_ unless $h{$1}
+            }
+
+            # The entries in config_h.SH are also (documented) macros that are
+            # accessible to XS code, and ppport.h backports some of them.  We
+            # use only the unconditionally compiled parameterless ones (as
+            # that"s all that"s backported so far, and we don"t have to know
+            # the types of the parameters.
+            open(C, "<", $c) or die "$c: $!";
+            my $if_depth = 0;   # We don"t use the ones within #if statements
+                                # The #ifndef that guards the whole file is not
+                                # noticed by the code below
+            while (<C>) {
+                $if_depth ++ if / ^ \# [[:blank:]]* (ifdef | if\ defined ) /x;
+                $if_depth -- if $if_depth > 0 && / ^ \# [[:blank:]]* endif /x;
+                next unless $if_depth <= 0;
+
+                # We are only interested in #defines with no parameters
+                next unless /^ \# [[:blank:]]* define [[:blank:]]+
+                                 ( [A-Za-z][A-Za-z0-9]* )
+                                 [[:blank:]]
+                            /x;
+                next if $h{$1}; # Ignore duplicates
+                push @entries, "Amnd||$1\n";
+                $h{$1}++;
+            }
+            close C;
+
+            require "./parts/inc/inctools";
+            print sort sort_api_lines @entries;
+           '  $EMBED $CONFIG >> $OUTPUT
 else
   echo "$0: First parameter must be a directory containing embed.fnc and perl.h"
   usage
