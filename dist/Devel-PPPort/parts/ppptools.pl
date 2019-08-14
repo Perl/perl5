@@ -258,6 +258,9 @@ sub trim_arg        # Splits the argument into type and name, returning the
     if( s/\b(?:char|double|float|int|long|short|signed|unsigned|void)\b//g ) {
       /^ \s* (\w+) \s* $/x and $name = $1;    # Similarly for these
     }
+    elsif (/^ \s* " [^"]+ " \s+ (\w+) \s* $/x) { # A literal string (is special)
+        $name = $1;
+    }
     else {
       /^ \s* \w+ \s+ (\w+) \s* $/x and $name = $1; # Everything else.
     }

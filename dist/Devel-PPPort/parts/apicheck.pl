@@ -271,7 +271,9 @@ for $f (@f) {   # Loop through all the tests to add
     }
 
     # Split this type into its components
-    my($n, $p, $d) = $a =~ /^ ( \w+ (?: \s+ \w+ )* )     # type name  => $n
+    my($n, $p, $d) = $a =~ /^ (  (?: " [^"]* " )      # literal string type => $n
+                               | (?: \w+ (?: \s+ \w+ )* )    # name of type => $n
+                              )
                               \s*
                               ( \** )                 # optional pointer(s) => $p
                               (?: \s* \b const \b \s* )? # opt. const
@@ -290,9 +292,8 @@ for $f (@f) {   # Loop through all the tests to add
     # Certain types, like 'void', get remapped.
     $n = $tmap{$n} || $n;
 
-    # Use a literal of our choosing for non-format functions
-    if ($n =~ /\bconst\s+char\b/ and $p eq '*' and !$f->{'flags'}{'f'}) {
-      push @arg, '"foo"';
+    if ($n =~ / ^ " [^"]* " $/x) {  # Use the literal string, literally
+      push @arg, $n;
     }
     else {
       my $v = 'arg' . $i++;     # Argument number
