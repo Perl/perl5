@@ -21,6 +21,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 require './devel/devtools.pl';
+require './parts/ppptools.pl';
 
 our %opt = (
   check   => 1,
@@ -61,6 +62,35 @@ if (@notwr) {
       quit_now();
     }
   }
+}
+
+
+if (-e 'ppport.h') {
+    my $blead = $opt{blead};
+    $blead = get_and_sort_perls(\%opt)->[0]->{path} unless $blead;
+
+    # Get list of things we provide
+    my %provided = map { /^(\w+)/ ? ( $1 => 1 ) : () }
+                                            `$blead ppport.h --list-provided`;
+
+    # Get the list of macros that are hard to test.
+    my @unorthodox = map { exists $_->{flags}{u} ? $_->{name} : () }
+            parse_embed(qw(parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc));
+
+    # Keep on that list only the things we provide
+    @unorthodox = grep { exists $provided{$_} } @unorthodox;
+
+    # And get the list of known hard things.
+    my $hard_ref = &known_but_hard_to_test_for;
+
+    # If we provide something, it better be on the known things list
+    my @bad = grep { ! exists $hard_ref->{$_} } @unorthodox;
+    if (@bad) {
+        print "The following items need to be manually added to the list in",
+            " part/inc/ppptools: known_but_hard_to_test_for(): ",
+            join ", ", @bad, "\n";
+        quit_now();
+    }
 }
 
 for my $dir (qw( base todo )) {
