@@ -145,7 +145,12 @@ find_first_mentions($perls_ref,   # perls to look in
 # these were hidden behind #ifdef's.
 my $base_ref = parse_todo($base_dir);
 my @functions = parse_embed(qw(parts/embed.fnc));
-@functions = grep { exists $_->{flags}{A} } @functions;
+
+# We could just gather data for the publicly available ones, but having this
+# information available for everything is useful (for those who know where to
+# look)
+#@functions = grep { exists $_->{flags}{A} } @functions;
+
 # The ones we don't have info on are the ones in embed.fnc that aren't in the
 # base files.  Certain of these will only be in the Perl_foo form.
 my @missing = map { exists $base_ref->{$_->{name}}
