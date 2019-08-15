@@ -121,6 +121,19 @@ push @args, '--nocheck' unless $opt{check};
 push @args, "--blead-version=$opt{'blead-version'}" if $opt{'blead-version'};
 push @args, @perlargs;
 
+# Look for all the NEED_foo macros
+my @NEED;
+for my $file (all_files_in_dir('parts/inc')) {
+  my $spec = parse_partspec($file);
+  next unless $spec->{'xsinit'};
+  while ($spec->{'xsinit'} =~ / ^ ( \# \s* define \s+  NEED_ \w+ ) \s /xmg) {
+    push @NEED, "$1";
+  }
+}
+
+# Make the list available to parts/apicheck.pl
+$ENV{'DPPP_NEED'} = join "\n", sort @NEED;
+
 # Find out what symbols were in what releases
 print "\nBuilding baseline files...\n\n";
 
