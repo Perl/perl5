@@ -1177,15 +1177,12 @@ CODE:
                 /* clone the value so we don't invoke magic again */
                 arg = sv_mortalcopy(arg);
 
-            if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg)))
-                SvNV(arg); /* sets SVf_IOK/SVf_UOK if it's an integer */
-
-            if(!SvOK(arg) || SvUOK(arg))
+            if(SvUOK(arg))
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             else if(SvIOK(arg))
                 sv_setpvf(keysv, "%" IVdf, SvIV(arg));
             else
-                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
+                sv_setpvf(keysv, "%" NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
@@ -1604,18 +1601,15 @@ PPCODE:
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
         HV* DBsub = GvHV(PL_DBsub);
-        HE* old_data = NULL;
+        HE* old_data;
 
         GV* oldgv = CvGV(cv);
         HV* oldhv = GvSTASH(oldgv);
+        SV* old_full_name = sv_2mortal(newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0));
+        sv_catpvn(old_full_name, "::", 2);
+        sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
 
-        if (oldhv) {
-            SV* old_full_name = sv_2mortal(newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0));
-            sv_catpvn(old_full_name, "::", 2);
-            sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
-
-            old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
-        }
+        old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
 
         if (old_data && HeVAL(old_data)) {
             SV* new_full_name = sv_2mortal(newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
@@ -1666,7 +1660,6 @@ subname(code)
 PREINIT:
     CV *cv;
     GV *gv;
-    const char *stashname;
 PPCODE:
     if (!SvROK(code) && SvGMAGICAL(code))
         mg_get(code);
@@ -1677,12 +1670,7 @@ PPCODE:
     if(!(gv = CvGV(cv)))
         XSRETURN(0);
 
-    if(GvSTASH(gv))
-        stashname = HvNAME(GvSTASH(gv));
-    else
-        stashname = "__ANON__";
-
-    mPUSHs(newSVpvf("%s::%s", stashname, GvNAME(gv)));
+    mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
     XSRETURN(1);
 
 BOOT:
