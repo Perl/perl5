@@ -176,23 +176,23 @@ for (@perl_api) {   # $_ is the item name
   my $is_documented = 0;
   my $is_accessible = 0;
   if (defined $e) {
-    if (exists $e->{flags}{p}) {    # Has 'Perl_' prefix
+    if (exists $e->{flags}{'p'}) {    # Has 'Perl_' prefix
       my $args = $e->{args};
       $line .= 'v' if @$args && $args->[-1][0] eq '...';
     }
     $line .= 'o' if exists $e->{ppport_fnc};
-    $line .= 'n' if exists $e->{flags}{T};  # No thread context parameter
-    $line .= 'd' if exists $e->{flags}{D};  # deprecated
-    $line .= 'x' if exists $e->{flags}{x};  # experimental
-    $line .= 'c' if        exists $e->{flags}{C}      # core-only
-                   || (    exists $e->{flags}{X}
-                       && (exists $e->{flags}{E} || ! exists $e->{flags}{m}));
-    $is_accessible = 1 if exists $e->{flags}{A}
-                       || exists $e->{flags}{C}
-                       || (     exists $e->{flags}{X}
-                           && ! exists $e->{flags}{E}
-                           &&   exists $e->{flags}{m});
-    $is_documented = 1 if exists $e->{flags}{d};
+    $line .= 'n' if exists $e->{flags}{'T'};  # No thread context parameter
+    $line .= 'd' if exists $e->{flags}{'D'};  # deprecated
+    $line .= 'x' if exists $e->{flags}{'x'};  # experimental
+    $line .= 'c' if        exists $e->{flags}{'C'}      # core-only
+                   || (    exists $e->{flags}{'X'}
+                       && (exists $e->{flags}{'E'} || ! exists $e->{flags}{'m'}));
+    $is_accessible = 1 if exists $e->{flags}{'A'}
+                       || exists $e->{flags}{'C'}
+                       || (     exists $e->{flags}{'X'}
+                           && ! exists $e->{flags}{'E'}
+                           &&   exists $e->{flags}{'m'});
+    $is_documented = 1 if exists $e->{flags}{'d'};
   }
 
   # scanprov adds the M and F flags.  The M is for provided macros; F for
@@ -222,9 +222,9 @@ for (@todo_list) {
   my $todo = "=item perl $ver\n\n";
   for (sort dictionary_order @{$todo{$_}}) {
     $todo .= "  $_";
-    $todo .= "  (DEPRECATED)" if  $embed{$_}->{flags}{D};
-    $todo .= "  (marked experimental)" if $embed{$_}->{flags}{x};
-    $todo .= "  $undocumented" unless $embed{$_}->{flags}{d};
+    $todo .= "  (DEPRECATED)" if  $embed{$_}->{flags}{'D'};
+    $todo .= "  (marked experimental)" if $embed{$_}->{flags}{'x'};
+    $todo .= "  $undocumented" unless $embed{$_}->{flags}{'d'};
     $todo .= "\n";
   }
   push @todo, $todo;
@@ -438,8 +438,8 @@ sub make_embed
   my $a = do { my $x = 'a'; join ',', map { $x++ } 1 .. @{$f->{args}} };
   my $lastarg = ${$f->{args}}[-1];
 
-  if ($f->{flags}{T}) {
-    if ($f->{flags}{p}) {
+  if ($f->{flags}{'T'}) {
+    if ($f->{flags}{'p'}) {
       return "#define $n $DPPP(my_$n)\n" .
              "#define Perl_$n $DPPP(my_$n)";
     }
@@ -453,8 +453,8 @@ sub make_embed
 #  undef $n
 #endif
 UNDEF
-    if ($f->{flags}{p}) {
-      if ($f->{flags}{f}) {
+    if ($f->{flags}{'p'}) {
+      if ($f->{flags}{'f'}) {
         return "#define Perl_$n $DPPP(my_$n)";
       }
       elsif (@$lastarg && $lastarg->[0] =~ /\.\.\./) {
