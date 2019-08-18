@@ -77,3 +77,5 @@ EOCBU
 case "$usemallocwrap" in
 '') usemallocwrap='define' ;;
 esac
+
+test "$optimize" || optimize='-O2'
