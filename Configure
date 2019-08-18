@@ -10386,15 +10386,15 @@ esac
 $cat >>try.c <<EOP
 #ifdef TRY_gconvert
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
-char *myname = "gconvert";
+const char *myname = "gconvert";
 #endif
 #ifdef TRY_gcvt
 #define Gconvert(x,n,t,b) gcvt((x),(n),(b))
-char *myname = "gcvt";
+const char *myname = "gcvt";
 #endif
 #ifdef TRY_qgcvt
 #define Gconvert(x,n,t,b) qgcvt((x),(n),(b))
-char *myname = "qgcvt";
+const char *myname = "qgcvt";
 #define DOUBLETYPE long double
 #endif
 #ifdef TRY_sprintf
@@ -10407,7 +10407,7 @@ char *myname = "qgcvt";
 #else
 #define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
 #endif
-char *myname = "sprintf";
+const char *myname = "sprintf";
 #endif
 
 #ifndef DOUBLETYPE
@@ -10426,7 +10426,7 @@ char *myname = "sprintf";
 #endif
 #include <string.h>
 
-int checkit(char *expect, char *got)
+void checkit(const char *expect, char *got)
 {
     if (strcmp(expect, got)) {
 		printf("%s oddity:  Expected %s, got %s\n",
@@ -10575,6 +10575,7 @@ for xxx_convert in $xxx_list; do
 		fi
 	else
 		echo "$xxx_convert NOT found." >&4
+		xxx_convert=''
 	fi
 done
 
