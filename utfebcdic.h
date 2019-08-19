@@ -121,21 +121,7 @@
 
 START_EXTERN_C
 
-#ifdef DOINIT
-
 #include "ebcdic_tables.h"
-
-#else
-EXTCONST U8 PL_utf8skip[];
-EXTCONST U8 PL_e2utf[];
-EXTCONST U8 PL_utf2e[];
-EXTCONST U8 PL_e2a[];
-EXTCONST U8 PL_a2e[];
-EXTCONST U8 PL_fold[];
-EXTCONST U8 PL_fold_latin1[];
-EXTCONST U8 PL_latin1_lc[];
-EXTCONST U8 PL_mod_latin1_uc[];
-#endif
 
 END_EXTERN_C
 
