@@ -2960,7 +2960,6 @@ dist/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
 dist/Devel-PPPort/Changes			Devel::PPPort Changes file
 dist/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
 dist/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
-dist/Devel-PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
 dist/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
 dist/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
 dist/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator

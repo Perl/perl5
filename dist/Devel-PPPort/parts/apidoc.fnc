@@ -127,7 +127,6 @@ Amd|AV*|GvAV|GV* gv
 Amd|CV*|GvCV|GV* gv
 Amd|HV*|GvHV|GV* gv
 AmnUd||G_VOID
-Amd|HV*|gv_stashpvs|"literal string" name|I32 create
 Amd|HV*|gv_stashpvs|"name"|I32 create
 Amnhd||GV_SUPER
 Amd|SV*|GvSV|GV* gv
@@ -145,13 +144,11 @@ Amd|char*|HvENAME|HV* stash
 Amd|STRLEN|HvENAMELEN|HV *stash
 Amd|unsigned char|HvENAMEUTF8|HV *stash
 Amd|SV**|hv_fetchs|HV* tb|"key"|I32 lval
-Amd|SV**|hv_fetchs|HV* tb|"literal string" key|I32 lval
 Amd|STRLEN|HvFILL|HV *const hv
 Amd|char*|HvNAME|HV* stash
 Amd|STRLEN|HvNAMELEN|HV *stash
 Amd|unsigned char|HvNAMEUTF8|HV *stash
 Amd|SV**|hv_stores|HV* tb|"key"|SV* val
-Amd|SV**|hv_stores|HV* tb|"literal string" key|SV* val
 Amnd||I16SIZE
 Amnd||I16TYPE
 Amnd||I32SIZE
@@ -338,14 +335,12 @@ Amhd|bool|isXDIGIT_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isXDIGIT_uvchr|int ch
 Amnd|I32|items
 Amnhd||IVdf
-Amnd||IVdf
 Amnd||IVSIZE
 Amnd||IVTYPE
 Amnd|I32|ix
 Amd|U8|LATIN1_TO_NATIVE|U8 ch
 Amnsd||LEAVE
 Amsd||LEAVE_with_name|"name"
-Amxd|void|lex_stuff_pvs|"literal string" pv|U32 flags
 Amxd|void|lex_stuff_pvs|"pv"|U32 flags
 AmUd|bool|LIKELY|const bool expr
 Amd|OP*|LINKLIST|OP *o
@@ -357,10 +352,8 @@ Amnd||LSEEKSIZE
 mnUd||LVRET
 AmnUd||MARK
 Amd|bool|memEQ|char* s1|char* s2|STRLEN len
-Amd|bool|memEQs|char* s1|STRLEN l1|"literal string" s2
 Amd|bool|memEQs|char* s1|STRLEN l1|"s2"
 Amd|bool|memNE|char* s1|char* s2|STRLEN len
-Amd|bool|memNEs|char* s1|STRLEN l1|"literal string" s2
 Amd|bool|memNEs|char* s1|STRLEN l1|"s2"
 Amd|void|Move|void* src|void* dest|int nitems|type
 Amd|void *|MoveD|void* src|void* dest|int nitems|type
@@ -385,11 +378,8 @@ Amd|SV*|newRV_inc|SV* sv
 Amxd|SV*|newSVpadname|PADNAME *pn
 Amd|SV*|newSVpvn_utf8|const char* s|STRLEN len|U32 utf8
 Amad|SV*|newSVpvs|"literal string"
-Amad|SV*|newSVpvs|"literal string" s
-Amad|SV*|newSVpvs_flags|"literal string" s|U32 flags
 Amad|SV*|newSVpvs_flags|"literal string"|U32 flags
 Amad|SV*|newSVpvs_share|"literal string"
-Amad|SV*|newSVpvs_share|"literal string" s
 Amd|void|Newx|void* ptr|int nitems|type
 Amd|void|Newxc|void* ptr|int nitems|type|cast
 AmUd||newXSproto|char* name|XSUBADDR_t f|char* filename|const char *proto
@@ -400,11 +390,8 @@ ADmnUd||Nullcv
 ADmnUd||Nullhv
 AmnUd||Nullsv
 Amnhd||NVef
-Amnd||NVef
 Amnhd||NVff
-Amnd||NVff
 Amnhd||NVgf
-Amnd||NVgf
 Amnd||NVMANTBITS
 Amnd||NVSIZE
 Amnd||NVTYPE
@@ -592,10 +579,10 @@ Amnd|STRLEN|PL_na
 mnd|GV*|PL_ofsgv
 Amnd|Perl_ophook_t|PL_opfreehook
 AmnUd|yy_parser *|PL_parser
+AmnxUNd|SV *|PL_parser-E<gt>linestr
 AmnxUNd|char *|PL_parser-E<gt>bufend
 AmnxUNd|char *|PL_parser-E<gt>bufptr
 AmnxUNd|char *|PL_parser-E<gt>linestart
-AmnxUNd|SV *|PL_parser-E<gt>linestr
 Amnd|peep_t|PL_peepp
 Amnd|signed char|PL_perl_destruct_level
 Amnd|peep_t|PL_rpeepp
@@ -655,9 +642,7 @@ md|void|SAVECOMPPAD
 mnd|void|SAVE_ERRNO
 md|void|SAVEPADSV	|PADOFFSET po
 Amad|char*|savepvs|"literal string"
-Amad|char*|savepvs|"literal string" s
 Amad|char*|savesharedpvs|"literal string"
-Amad|char*|savesharedpvs|"literal string" s
 Amnsd||SAVETMPS
 md|void|SETERRNO|int errcode|int vmserrcode
 Amnd||SHORTSIZE
@@ -689,13 +674,9 @@ Amud|pair|STR_WITH_LEN|"literal string"
 Amd|void|sv_catpvn_nomg|SV* sv|const char* ptr|STRLEN len
 Amd|void|sv_catpv_nomg|SV* sv|const char* ptr
 Amd|void|sv_catpvs|SV* sv|"literal string"
-Amd|void|sv_catpvs|SV* sv|"literal string" s
 Amd|void|sv_catpvs_flags|SV* sv|"literal string"|I32 flags
-Amd|void|sv_catpvs_flags|SV* sv|"literal string" s|I32 flags
 Amd|void|sv_catpvs_mg|SV* sv|"literal string"
-Amd|void|sv_catpvs_mg|SV* sv|"literal string" s
 Amd|void|sv_catpvs_nomg|SV* sv|"literal string"
-Amd|void|sv_catpvs_nomg|SV* sv|"literal string" s
 Amd|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Amnhd||SV_COW_DROP_PV
 Amd|STRLEN|SvCUR|SV* sv
@@ -796,11 +777,8 @@ Amd|void|SvSETMAGIC|SV* sv
 Amd|void|SvSetMagicSV|SV* dsv|SV* ssv
 Amd|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
 Amd|void|sv_setpvs|SV* sv|"literal string"
-Amd|void|sv_setpvs|SV* sv|"literal string" s
 Amd|void|sv_setpvs_mg|SV* sv|"literal string"
-Amd|void|sv_setpvs_mg|SV* sv|"literal string" s
 Amd|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
-Amd|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string" s
 Amd|void|SvSetSV|SV* dsv|SV* ssv
 Amd|void|sv_setsv_nomg|SV* dsv|SV* ssv
 Amd|void|SvSetSV_nosteal|SV* dsv|SV* ssv
@@ -887,14 +865,11 @@ Amd|STRLEN|UTF8SKIP|char* s
 Amd|bool|UVCHR_IS_INVARIANT|UV cp
 Amd|STRLEN|UVCHR_SKIP|UV cp
 Amnhd||UVof
-Amnd||UVof
 Amnd||UVSIZE
 Amnd||UVTYPE
 Amnhd||UVuf
-Amnd||UVuf
 Amnd||UVXf
 Amnhd||UVxf
-Amnd||UVxf
 Amnhd||WARN_ALL
 Amnhd||WARN_AMBIGUOUS
 Amnhd||WARN_BAREWORD
