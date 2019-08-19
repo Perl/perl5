@@ -166,7 +166,7 @@ L<Getopt::Long> has been upgraded from version 2.50 to 2.51.
 
 =item *
 
-L<Time::HiRes> has been upgradded from version 1.9761 to 1.9762.
+L<Time::HiRes> has been upgraded from version 1.9761 to 1.9762.
 
 Removed obsolete code such as support for pre-5.6 perl and classic
 MacOS.  [perl #134288]
