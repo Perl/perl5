@@ -9,13 +9,41 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302164';
+our $VERSION = '1.302166';
 
 
 my $INST;
 my $ENDING = 0;
-sub test2_set_is_end { ($ENDING) = @_ ? @_ : (1) }
+sub test2_unset_is_end { $ENDING = 0 }
 sub test2_get_is_end { $ENDING }
+
+sub test2_set_is_end {
+    my $before = $ENDING;
+    ($ENDING) = @_ ? @_ : (1);
+
+    # Only send the event in a transition from false to true
+    return if $before;
+    return unless $ENDING;
+
+    return unless $INST;
+    my $stack = $INST->stack or return;
+    my $root = $stack->root or return;
+
+    return unless $$ == $INST->pid;
+    return unless get_tid() == $INST->tid;
+
+    my $trace = Test2::EventFacet::Trace->new(
+        frame  => [__PACKAGE__, __FILE__, __LINE__, __PACKAGE__ . '::test2_set_is_end'],
+    );
+    my $ctx = Test2::API::Context->new(
+        trace => $trace,
+        hub   => $root,
+    );
+
+    $ctx->send_ev2(control => { phase => 'END', details => 'Transition to END phase' });
+
+    1;
+}
 
 use Test2::API::Instance(\$INST);
 
@@ -87,6 +115,7 @@ our @EXPORT_OK = qw{
     test2_in_preload
 
     test2_set_is_end
+    test2_unset_is_end
     test2_get_is_end
 
     test2_pid
