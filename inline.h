@@ -1850,8 +1850,12 @@ S__utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     assert(s < send);
 
     if (! ckWARN_d(WARN_UTF8)) {
+
+        /* EMPTY is not really allowed, and asserts on debugging builds.  But
+         * on non-debugging we have to deal with it, and this causes it to
+         * return the REPLACEMENT CHARACTER, as the documentation indicates */
         return utf8n_to_uvchr(s, send - s, retlen,
-                              (UTF8_ALLOW_ANY & ~UTF8_ALLOW_EMPTY));
+                              (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY));
     }
     else {
         UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
