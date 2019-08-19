@@ -57,6 +57,13 @@ as strings so ranges like C< "00" .. "03" > produced C< "00", "01",
 
 [perl #133695]
 
+=head2 C<\K> now disallowed in look-ahead and look-behind assertions
+
+This was disallowed because it causes unexpected behaviour, and no-one
+could define what the desired behaviour was.
+
+[perl #124256]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
