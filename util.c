@@ -4931,7 +4931,7 @@ Perl_quadmath_format_single(const char* format)
         return NULL;
     if (format[len - 2] != 'Q') {
         char* fixed;
-        Newx(fixed, len + 1, char);
+        Newx(fixed, len + 2, char);
         memcpy(fixed, format, len - 1);
         fixed[len - 1] = 'Q';
         fixed[len    ] = format[len - 1];
