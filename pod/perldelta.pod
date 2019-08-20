@@ -41,6 +41,14 @@ could define what the desired behaviour was.
 
 =item *
 
+L<Compress::Raw::Bzip2> has been upgraded from version 2.086 to 2.087.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.086 to 2.087.
+
+=item *
+
 L<Devel::PPPort> has been upgraded from version 3.54 to 3.55.
 
 The test files generated on Win32 are now identical to when they are
@@ -55,11 +63,37 @@ directory, or a writable root directory.
 
 =item *
 
-L<Thread> has been upgraded from version 3.04 to 3.05.
+L<Getopt::Long> has been upgraded from version 2.50 to 2.51.
 
 =item *
 
-L<Getopt::Long> has been upgraded from version 2.50 to 2.51.
+L<I18N::LangTags> has been upgraded from version 1.07 to 1.08.
+
+Document the C<IGNORE_WIN32_LOCALE> environment variable.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.086 to 2.087.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20190720 to 5.20190820.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.17 to 0.18.
+
+=item *
+
+L<Storable> has been upgraded from version 3.16 to 3.17.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302164 to 1.302166.
+
+=item *
+
+L<Thread> has been upgraded from version 3.04 to 3.05.
 
 =item *
 
@@ -70,13 +104,11 @@ MacOS.  [perl #134288]
 
 =item *
 
-L<I18N::LangTags> has been upgraded from version 1.07 to 1.08.
-
-Document the C<IGNORE_WIN32_LOCALE> environment variable.
+L<Win32> has been upgraded from version 0.52 to 0.53.
 
 =item *
 
-L<Test::Simple> has been upgraded from version 1.302164 to 1.302166.
+L<XS::APItest> has been upgraded from version 1.01 to 1.02.
 
 =back
 
