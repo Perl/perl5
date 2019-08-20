@@ -1551,6 +1551,15 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
         if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return endp;
 
+        /* strtold() accepts 0x-prefixed hex and in POSIX implementations,
+           0b-prefixed binary numbers, which is backward incompatible
+        */
+        if ((len == 0 || len >= 2) && *s == '0' &&
+            (isALPHA_FOLD_EQ(s[1], 'x') || isALPHA_FOLD_EQ(s[1], 'b'))) {
+            *value = 0;
+            return (char *)s+1;
+        }
+
         /* If the length is passed in, the input string isn't NUL-terminated,
          * and in it turns out the function below assumes it is; therefore we
          * create a copy and NUL-terminate that */
