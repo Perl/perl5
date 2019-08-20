@@ -71,7 +71,7 @@ __UNDEFINED__ REPLACEMENT_CHARACTER_UTF8  "\xDD\x72\x72\x70"
 #  error Unknown character set
 #endif
 
-#if { VERSION < 5.31.3 }
+#if { VERSION < 5.31.4 }
         /* Versions prior to this accepted things that are now considered
          * malformations, and didn't return -1 on error with warnings enabled
          * */
