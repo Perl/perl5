@@ -421,6 +421,11 @@ C<WITH_LC_NUMERIC_SET_TO_NEEDED> and C<WITH_LC_NUMERIC_SET_TO_NEEDED_IN>)
 have been added to make it easier to do this safely and efficiently
 as part of [perl #134172].
 
+=item *
+
+The memory bookkeeping overhead for allocating an OP structure has been
+reduced by 8 bytes per OP on 64-bit systems.
+
 =back
 
 =head1 Selected Bug Fixes
