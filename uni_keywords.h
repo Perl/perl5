@@ -7217,7 +7217,7 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
     U32 s;
     U32 n;
     do {
-        h ^= *ptr;
+        h ^= NATIVE_TO_LATIN1(*ptr);    /* table collated in Latin1 */
         h *= MPH_FNV_CONST;
     } while ( ++ptr < ptr_end );
     n= h % MPH_BUCKETS;
@@ -7289,5 +7289,5 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
  * 61ea8132bb9ea5c637609e2d026b0b85ce17d6bec544c2f08ce411e6f65e8386 regen/mk_invlists.pl
- * c56b78df81e0f96632246052d71580b212546ca02ba4075158965e11d892f21e regen/mph.pl
+ * e80fb4dd6c15dc1b543793552ab5c7255a0f7b50d6ca9cce3a30a4dadf187b53 regen/mph.pl
  * ex: set ro: */
