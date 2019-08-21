@@ -1835,7 +1835,7 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
             *msgs = NULL;
         }
 
-        return uv;
+        return UNI_TO_NATIVE(uv);
     }
 
     /* Here is potentially problematic.  Use the full mechanism */
