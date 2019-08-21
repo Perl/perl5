@@ -2628,6 +2628,12 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             /* The macro passes this by address, not value, and a lot of
                called code assumes that it's 32 bits without checking.  */
             const SSize_t len = mg->mg_len;
+            /* we no longer accept vstrings over I32_SIZE-1, so don't emit
+               them, also, older Storables handle them badly.
+            */
+            if (len >= I32_MAX) {
+                CROAK(("vstring too large to freeze"));
+            }
             STORE_PV_LEN((const char *)mg->mg_ptr,
                          len, SX_VSTRING, SX_LVSTRING);
         }
@@ -5937,12 +5943,19 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
 {
 #ifdef SvVOK
     char *s;
-    I32 len;
+    U32 len;
     SV *sv;
 
     RLEN(len);
-    TRACEME(("retrieve_lvstring (#%d), len = %" IVdf,
-             (int)cxt->tagnum, (IV)len));
+    TRACEME(("retrieve_lvstring (#%d), len = %" UVuf,
+             (int)cxt->tagnum, (UV)len));
+
+    /* Since we'll no longer produce such large vstrings, reject them
+       here too.
+    */
+    if (len >= I32_MAX) {
+        CROAK(("vstring too large to fetch"));
+    }
 
     New(10003, s, len+1, char);
     SAFEPVREAD(s, len, s);
