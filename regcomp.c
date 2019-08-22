@@ -23132,7 +23132,7 @@ Perl_parse_uniprop_string(pTHX_
 
     /* If the original input began with 'In' or 'Is', it could be a subroutine
      * call to a user-defined property instead of a Unicode property name. */
-    if (    non_pkg_begin + name_len > 2
+    if (    name_len - non_pkg_begin > 2
         &&  name[non_pkg_begin+0] == 'I'
         && (name[non_pkg_begin+1] == 'n' || name[non_pkg_begin+1] == 's'))
     {
