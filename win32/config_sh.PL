@@ -227,6 +227,7 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{nveformat} = '"Le"';
     $opt{nvfformat} = '"Lf"';
     $opt{nvgformat} = '"Lg"';
+    $opt{nvmantbits} = 64;
     $opt{longdblkind} = 3;
     $opt{longdblmantbits} = 64;
 }
