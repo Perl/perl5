@@ -216,6 +216,10 @@
 :
 :   R  Return value must not be ignored (also implied by 'a' and 'P' flags):
 :
+:	gcc has a bug (which they claim is a feature) in which casting the
+:       result of one of these to (void) doesn't silence the warning that the
+:	result is ignored.
+:
 :        proto.h: add __attribute__warn_unused_result__
 :
 :   r  Function never returns:
