@@ -326,6 +326,7 @@ if ($opt{check}) {
     }
     else { # Revert to this symbol is bad in this version
       $todo{$sym} = $cur;
+      write_todo($todo_file, $todo_version, \%todo);
     }
   }
 } # End of checking our work
