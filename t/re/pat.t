@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 863;  # Update this when adding/deleting tests.
+plan tests => 864;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -33,7 +33,6 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
-
     my $sharp_s = uni_to_native("\xdf");
 
     {
@@ -2104,6 +2103,17 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
                         $z .= "'";
                         eval $z;:, "", {}, 'foo');
     }
+
+    {   # [perl #134325]
+        my $quote="\\Q";
+        my $back="\\\\";
+        my $ff="\xff";
+        my $s = sprintf "/\\1|(|%s)%s%s   /i",
+                        $quote x 8 . $back x 69,
+                        $quote x 5 . $back x 4,
+                        $ff x 48;
+        like(runperl(prog => "$s", stderr => 1), qr/Unmatched \(/);
+   }
 
 } # End of sub run_tests
 
