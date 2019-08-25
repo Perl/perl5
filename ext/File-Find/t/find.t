@@ -281,7 +281,9 @@ my %tb = map { $_ => 1 } @testing_basenames;
     {
         find(
             {
-                wanted => sub { ++$::count_tb if $tb{$_}; },
+                wanted => sub { s#\.$## if ($^O eq 'VMS' && $_ ne '.');
+                                ++$::count_tb if $tb{$_};
+                              },
                 $bad_option => undef,
             },
             File::Spec->curdir
@@ -296,7 +298,9 @@ my %tb = map { $_ => 1 } @testing_basenames;
     {
         finddepth(
             {
-                wanted => sub { ++$::count_tb if $tb{$_}; },
+                wanted => sub { s#\.$## if ($^O eq 'VMS' && $_ ne '.');
+                                ++$::count_tb if $tb{$_};
+                              },
                 $bad_option => undef,
                 $second_bad_option => undef,
             },
