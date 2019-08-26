@@ -20271,11 +20271,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     SvPVCLEAR(sv);
 
-    if (OP(o) > REGNODE_MAX)		/* regnode.type is unsigned */
-	/* It would be nice to FAIL() here, but this may be called from
-	   regexec.c, and it would be hard to supply pRExC_state. */
-        Perl_croak(aTHX_ "panic: corrupted regexp opcode %d > %d",
-                                              (int)OP(o), (int)REGNODE_MAX);
+    if (OP(o) > REGNODE_MAX) {          /* regnode.type is unsigned */
+        if (pRExC_state) {  /* This gives more info, if we have it */
+            FAIL3("panic: corrupted regexp opcode %d > %d",
+                  (int)OP(o), (int)REGNODE_MAX);
+        }
+        else {
+            Perl_croak(aTHX_ "panic: corrupted regexp opcode %d > %d",
+                             (int)OP(o), (int)REGNODE_MAX);
+        }
+    }
     sv_catpv(sv, PL_reg_name[OP(o)]); /* Take off const! */
 
     k = PL_regkind[OP(o)];
