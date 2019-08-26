@@ -833,7 +833,8 @@ static const scan_data_t zero_scan_data = {
 #define UPDATE_WARNINGS_LOC(loc)                                        \
     STMT_START {                                                        \
         if (TO_OUTPUT_WARNINGS(loc)) {                                  \
-            RExC_latest_warn_offset = (xI(loc)) - RExC_precomp;         \
+            RExC_latest_warn_offset = MAX(sI, MIN(eI, xI(loc)))         \
+                                                       - RExC_precomp;  \
         }                                                               \
     } STMT_END
 
