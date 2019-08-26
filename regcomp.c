@@ -14176,13 +14176,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             UPDATE_WARNINGS_LOC(p - 1);
                             ender = result;
 
-                            if (ender < 0x100) {
 #ifdef EBCDIC
+                            if (ender < 0x100) {
                                 if (RExC_recode_x_to_native) {
                                     ender = LATIN1_TO_NATIVE(ender);
                                 }
-#endif
 			    }
+#endif
 			    break;
 			}
 		    case 'c':
