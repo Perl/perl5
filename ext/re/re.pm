@@ -511,7 +511,7 @@ purposes. The options are as follows:
 
 =item COMPILE
 
-Turns on all compile related debug options.
+Turns on all non-extra compile related debug options.
 
 =item PARSE
 
@@ -545,7 +545,7 @@ Print output intended for testing the internals of the compile process
 
 =item EXECUTE
 
-Turns on all execute related debug options.
+Turns on all non-extra execute related debug options.
 
 =item MATCH
 
