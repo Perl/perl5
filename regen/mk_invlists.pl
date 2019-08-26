@@ -2715,8 +2715,8 @@ foreach my $prop (@props) {
                         # Do convert to native for maps to single code points.
                         # There are some properties that have a few outlier
                         # maps that aren't code points, so the above test
-                        # skips those.
-                        $bucket = a2n($invmap[0]);
+                        # skips those.  0 is never remapped.
+                        $bucket = $invmap[0] == 0 ? 0 : a2n($invmap[0]);
                     } else {
                         $bucket = $invmap[0];
                     }
