@@ -2557,10 +2557,10 @@ foreach my $prop (@props) {
 
         my @invlist;
         my @invmap;
-        my $map_format;
+        my $map_format = 0;;
         my $map_default;
-        my $maps_to_code_point;
-        my $to_adjust;
+        my $maps_to_code_point = 0;
+        my $to_adjust = 0;
         my $same_in_all_code_pages;
         if ($is_local_sub) {
             my @return = eval $lookup_prop;
@@ -2601,10 +2601,13 @@ foreach my $prop (@props) {
                     @invmap = @$map_ref;
                     $map_format = $format;
                     $map_default = $default;
-                    $maps_to_code_point = $map_format =~ / a ($ | [^r] ) /x;
-                    $to_adjust = $map_format =~ /a/;
                 }
             }
+        }
+
+        if ($map_format) {
+            $maps_to_code_point = $map_format =~ / a ($ | [^r] ) /x;
+            $to_adjust = $map_format =~ /a/;
         }
 
         # Re-order the Unicode code points to native ones for this platform.

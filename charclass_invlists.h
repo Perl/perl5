@@ -32260,7 +32260,7 @@ static const int _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 1047 */
-	1324,	/* Number of elements */
+	1325,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -32278,6 +32278,7 @@ static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 1047 */
 	0x8A,
 	0x8C,
 	0x8D,
+	0x8E,
 	0x8F,
 	0x91,
 	0x92,
@@ -33701,7 +33702,7 @@ static const unsigned int IVCF_AUX_TABLE_12[] = {
 };
 
 static const unsigned int IVCF_AUX_TABLE_13[] = {
-	0xB5,
+	0xA0,
 	0x39C
 };
 
@@ -33843,32 +33844,33 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 
 static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
 	0,
-	0xC0,
+	0x62,
 	IVCF_use_AUX_TABLE_1,
-	0xC6,
+	0x68,
 	0,
-	0xC6,
+	0x71,
 	0x1E9E,
 	0,
-	0xD8,
+	0x80,
 	0,
-	0x41,
+	0xC1,
 	0,
-	0xC6,
-	0xD8,
+	0xAC,
+	0xBA,
+	0xAE,
 	0,
-	0x41,
+	0xD1,
 	IVCF_use_AUX_TABLE_2,
-	0x4C,
+	0xD3,
 	0,
-	0xC6,
+	0x9E,
 	0,
 	IVCF_use_AUX_TABLE_3,
-	0x54,
+	0xE3,
 	0,
-	0xC6,
+	0xEB,
 	0,
-	0xD8,
+	0xFB,
 	0x178,
 	0,
 	0x100,
@@ -34651,7 +34653,7 @@ static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x1E94,
 	0,
-	0xDF,
+	0x59,
 	0,
 	0x1EA0,
 	0,
@@ -35180,7 +35182,7 @@ static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 037 */
-	1324,	/* Number of elements */
+	1323,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -35197,7 +35199,6 @@ static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 037 */
 	0x81,
 	0x8A,
 	0x8C,
-	0x8D,
 	0x8F,
 	0x91,
 	0x92,
@@ -36621,7 +36622,7 @@ static const unsigned int IVCF_AUX_TABLE_12[] = {
 };
 
 static const unsigned int IVCF_AUX_TABLE_13[] = {
-	0xB5,
+	0xA0,
 	0x39C
 };
 
@@ -36763,32 +36764,31 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 
 static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 037 */
 	0,
-	0xC0,
+	0x62,
 	IVCF_use_AUX_TABLE_1,
-	0xC6,
+	0x68,
 	0,
-	0xC6,
+	0x71,
 	0x1E9E,
 	0,
-	0xD8,
+	0x80,
 	0,
-	0x41,
+	0xC1,
 	0,
-	0xC6,
-	0xD8,
+	0xAC,
 	0,
-	0x41,
+	0xD1,
 	IVCF_use_AUX_TABLE_2,
-	0x4C,
+	0xD3,
 	0,
-	0xC6,
+	0x9E,
 	0,
 	IVCF_use_AUX_TABLE_3,
-	0x54,
+	0xE3,
 	0,
-	0xC6,
+	0xEB,
 	0,
-	0xD8,
+	0xFB,
 	0x178,
 	0,
 	0x100,
@@ -37571,7 +37571,7 @@ static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x1E94,
 	0,
-	0xDF,
+	0x59,
 	0,
 	0x1EA0,
 	0,
@@ -395311,5 +395311,5 @@ static const U8 WB_table[23][23] = {
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * f51864f8e2be210bcc569e93da4e89acb0a727a383f813cecc718732fb292652 regen/mk_invlists.pl
+ * 44a3e3e2047a58e56ed8e3338ad85bedabae470dd119bf0862ca8129545ebf8a regen/mk_invlists.pl
  * ex: set ro: */
