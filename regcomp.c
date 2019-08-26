@@ -185,9 +185,7 @@ struct RExC_state_t {
     I32		in_lookahead;
     I32		contains_locale;
     I32		override_recoding;
-#ifdef EBCDIC
-    I32		recode_x_to_native;
-#endif
+    I32         recode_x_to_native;
     I32		in_multi_char_class;
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
 					    within pattern */
@@ -245,7 +243,6 @@ struct RExC_state_t {
 #define RExC_seen_d_op (pRExC_state->seen_d_op) /* Seen something that differs
                                                    under /d from /u ? */
 
-
 #ifdef RE_TRACK_PATTERN_OFFSETS
 #  define RExC_offsets	(RExC_rxi->u.offsets) /* I am not like the
                                                          others */
@@ -276,9 +273,15 @@ struct RExC_state_t {
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 #define RExC_in_lookahead	(pRExC_state->in_lookahead)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
+#define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
+
 #ifdef EBCDIC
-#   define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
+#  define SET_recode_x_to_native(x)                                         \
+                    STMT_START { RExC_recode_x_to_native = (x); } STMT_END
+#else
+#  define SET_recode_x_to_native(x) NOOP
 #endif
+
 #define RExC_in_multi_char_class (pRExC_state->in_multi_char_class)
 #define RExC_frame_head (pRExC_state->frame_head)
 #define RExC_frame_last (pRExC_state->frame_last)
@@ -7626,9 +7629,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_in_lookbehind = 0;
     RExC_in_lookahead = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
-#ifdef EBCDIC
     RExC_recode_x_to_native = 0;
-#endif
     RExC_in_multi_char_class = 0;
 
     RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = RExC_precomp = exp;
@@ -12967,11 +12968,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         sv_catsv(substitute_parse, value_sv);
         sv_catpv(substitute_parse, ")");
 
-#ifdef EBCDIC
         /* The value should already be native, so no need to convert on EBCDIC
          * platforms.*/
         assert(! RExC_recode_x_to_native);
-#endif
 
     }
     else {   /* \N{U+...} */
@@ -13104,12 +13103,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
         sv_catpvs(substitute_parse, ")");
 
-#ifdef EBCDIC
         /* The values are Unicode, and therefore have to be converted to native
          * on a non-Unicode (meaning non-ASCII) platform. */
-        RExC_recode_x_to_native = 1;
-#endif
-
+        SET_recode_x_to_native(1);
     }
 
     /* Here, we have the string the name evaluates to, ready to be parsed,
@@ -13134,9 +13130,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     RExC_start = save_start;
     RExC_parse = endbrace;
     RExC_end = orig_end;
-#ifdef EBCDIC
-    RExC_recode_x_to_native = 0;
-#endif
+    SET_recode_x_to_native(0);
 
     SvREFCNT_dec_NN(substitute_parse);
 
