@@ -27,7 +27,7 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
-=head2 Now can dump compiled pattern before optimization
+=head2 Now can dump compiled patterns before optimization
 
 This is primarily useful for tracking down bugs in the regular
 expression compiler.  This dump happens on C<-DDEBUGGING> perls, if you
