@@ -6425,8 +6425,8 @@ Perl_get_c_backtrace(pTHX_ int depth, int skip)
     Safefree(raw_frames);
     return bt;
 #else
-    PERL_UNUSED_ARGV(depth);
-    PERL_UNUSED_ARGV(skip);
+    PERL_UNUSED_ARG(depth);
+    PERL_UNUSED_ARG(skip);
     return NULL;
 #endif
 }
