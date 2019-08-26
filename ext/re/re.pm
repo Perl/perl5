@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.37";
+our $VERSION     = "0.38";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -54,33 +54,34 @@ sub setcolor {
 }
 
 my %flags = (
-    COMPILE         => 0x0000FF,
-    PARSE           => 0x000001,
-    OPTIMISE        => 0x000002,
-    TRIEC           => 0x000004,
-    DUMP            => 0x000008,
-    FLAGS           => 0x000010,
-    TEST            => 0x000020,
+    COMPILE           => 0x0000FF,
+    PARSE             => 0x000001,
+    OPTIMISE          => 0x000002,
+    TRIEC             => 0x000004,
+    DUMP              => 0x000008,
+    FLAGS             => 0x000010,
+    TEST              => 0x000020,
 
-    EXECUTE         => 0x00FF00,
-    INTUIT          => 0x000100,
-    MATCH           => 0x000200,
-    TRIEE           => 0x000400,
+    EXECUTE           => 0x00FF00,
+    INTUIT            => 0x000100,
+    MATCH             => 0x000200,
+    TRIEE             => 0x000400,
 
-    EXTRA           => 0xFF0000,
-    TRIEM           => 0x010000,
-    OFFSETS         => 0x020000,
-    OFFSETSDBG      => 0x040000,
-    STATE           => 0x080000,
-    OPTIMISEM       => 0x100000,
-    STACK           => 0x280000,
-    BUFFERS         => 0x400000,
-    GPOS            => 0x800000,
+    EXTRA             => 0xFF0000,
+    TRIEM             => 0x010000,
+    OFFSETS           => 0x020000,
+    OFFSETSDBG        => 0x040000,
+    STATE             => 0x080000,
+    OPTIMISEM         => 0x100000,
+    STACK             => 0x280000,
+    BUFFERS           => 0x400000,
+    GPOS              => 0x800000,
 );
 $flags{ALL} = -1 & ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS});
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{Extra} = $flags{EXECUTE} | $flags{COMPILE} | $flags{GPOS};
-$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
+$flags{More} = $flags{MORE} =
+                    $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
