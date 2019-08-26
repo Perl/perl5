@@ -7844,6 +7844,16 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     SetProgLen(RExC_rxi,RExC_size);
 #endif
 
+    DEBUG_DUMP_PRE_OPTIMIZE_r({
+        SV * const sv = sv_newmortal();
+        RXi_GET_DECL(RExC_rx, ri);
+        DEBUG_RExC_seen();
+        Perl_re_printf( aTHX_ "Program before optimization:\n");
+
+        (void)dumpuntil(RExC_rx, ri->program, ri->program + 1, NULL, NULL,
+                        sv, 0, 0);
+    });
+
     DEBUG_OPTIMISE_r(
         Perl_re_printf( aTHX_  "Starting post parse optimization\n");
     );

@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Now can dump compiled pattern before optimization
+
+This is primarily useful for tracking down bugs in the regular
+expression compiler.  This dump happens on C<-DDEBUGGING> perls, if you
+specify C<-Drv> on the command line; or on any perl if the pattern is
+compiled within the scope of S<C<use re qw(Debug DUMP_PRE_OPTIMIZE)>> or
+S<C<use re qw(Debug COMPILE EXTRA)>>.  (All but the 2nd case display
+other information as well.)
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

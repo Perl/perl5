@@ -67,17 +67,19 @@ my %flags = (
     MATCH             => 0x000200,
     TRIEE             => 0x000400,
 
-    EXTRA             => 0xFF0000,
-    TRIEM             => 0x010000,
-    OFFSETS           => 0x020000,
-    OFFSETSDBG        => 0x040000,
-    STATE             => 0x080000,
-    OPTIMISEM         => 0x100000,
-    STACK             => 0x280000,
-    BUFFERS           => 0x400000,
-    GPOS              => 0x800000,
+    EXTRA             => 0x1FF0000,
+    TRIEM             => 0x0010000,
+    OFFSETS           => 0x0020000,
+    OFFSETSDBG        => 0x0040000,
+    STATE             => 0x0080000,
+    OPTIMISEM         => 0x0100000,
+    STACK             => 0x0280000,
+    BUFFERS           => 0x0400000,
+    GPOS              => 0x0800000,
+    DUMP_PRE_OPTIMIZE => 0x1000000,
 );
-$flags{ALL} = -1 & ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS});
+$flags{ALL} = -1 &
+ ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS}|$flags{DUMP_PRE_OPTIMIZE});
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{Extra} = $flags{EXECUTE} | $flags{COMPILE} | $flags{GPOS};
 $flags{More} = $flags{MORE} =
@@ -618,6 +620,9 @@ debug options.
 Almost definitely only useful to people hacking
 on the offsets part of the debug engine.
 
+=item DUMP_PRE_OPTIMIZE
+
+Enable the dumping of the compiled pattern before the optimization phase.
 
 =back
 
@@ -629,7 +634,8 @@ These are useful shortcuts to save on the typing.
 
 =item ALL
 
-Enable all options at once except OFFSETS, OFFSETSDBG and BUFFERS.
+Enable all options at once except OFFSETS, OFFSETSDBG and BUFFERS and
+DUMP_PRE_OPTIMIZE.
 (To get every single option without exception, use both ALL and EXTRA, or
 starting in 5.30 on a C<-DDEBUGGING>-enabled perl interpreter, use
 the B<-Drv> command-line switches.)

@@ -997,16 +997,17 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXECUTE_TRIE      0x000400
 
 /* Extra */
-#define RE_DEBUG_EXTRA_MASK        0xFF0000
-#define RE_DEBUG_EXTRA_TRIE        0x010000
-#define RE_DEBUG_EXTRA_OFFSETS     0x020000
-#define RE_DEBUG_EXTRA_OFFDEBUG    0x040000
-#define RE_DEBUG_EXTRA_STATE       0x080000
-#define RE_DEBUG_EXTRA_OPTIMISE    0x100000
-#define RE_DEBUG_EXTRA_BUFFERS     0x400000
-#define RE_DEBUG_EXTRA_GPOS        0x800000
+#define RE_DEBUG_EXTRA_MASK              0x1FF0000
+#define RE_DEBUG_EXTRA_TRIE              0x0010000
+#define RE_DEBUG_EXTRA_OFFSETS           0x0020000
+#define RE_DEBUG_EXTRA_OFFDEBUG          0x0040000
+#define RE_DEBUG_EXTRA_STATE             0x0080000
+#define RE_DEBUG_EXTRA_OPTIMISE          0x0100000
+#define RE_DEBUG_EXTRA_BUFFERS           0x0400000
+#define RE_DEBUG_EXTRA_GPOS              0x0800000
+#define RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE 0x1000000
 /* combined */
-#define RE_DEBUG_EXTRA_STACK       0x280000
+#define RE_DEBUG_EXTRA_STACK             0x0280000
 
 #define RE_DEBUG_FLAG(x) (re_debug_flags & x)
 /* Compile */
@@ -1062,6 +1063,9 @@ re.pm, especially to the documentation.
         | RE_DEBUG_EXECUTE_TRIE ))) x )
 #define DEBUG_GPOS_r(x) DEBUG_r( \
     if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_GPOS)) x )
+
+#define DEBUG_DUMP_PRE_OPTIMIZE_r(x) DEBUG_r( \
+    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
 /* get_sv() can return NULL during global destruction. */
