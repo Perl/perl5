@@ -1075,6 +1075,9 @@ sub _Perl_IVCF {
     push @invlist, $sorted_folds[-1] + 1;
     push @invmap, 0;
 
+    push @invlist, 0x110000;
+    push @invmap, 0;
+
     # All Unicode versions have some places where multiple code points map to
     # the same one, so the format always has an 'l'
     return \@invlist, \@invmap, 'al', $default;

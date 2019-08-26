@@ -29371,7 +29371,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 037 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_IVCF_invlist[] = {  /* for ASCII/Latin1 */
-	1309,	/* Number of elements */
+	1310,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -30683,7 +30683,8 @@ static const UV _Perl_IVCF_invlist[] = {  /* for ASCII/Latin1 */
 	0x118E0,
 	0x16E60,
 	0x16E80,
-	0x1E922
+	0x1E922,
+	0x1E944
 };
 
 #  endif	/* ASCII/Latin1 */
@@ -32243,7 +32244,8 @@ static const int _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x16E40,
 	0,
-	0x1E900
+	0x1E900,
+	0
 };
 
 #  endif	/* ASCII/Latin1 */
@@ -32258,7 +32260,7 @@ static const int _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
 static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 1047 */
-	1323,	/* Number of elements */
+	1324,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -33584,7 +33586,8 @@ static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 1047 */
 	0x118E0,
 	0x16E60,
 	0x16E80,
-	0x1E922
+	0x1E922,
+	0x1E944
 };
 
 #  endif	/* EBCDIC 1047 */
@@ -35161,7 +35164,8 @@ static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x16E40,
 	0,
-	0x1E900
+	0x1E900,
+	0
 };
 
 #  endif	/* EBCDIC 1047 */
@@ -35176,7 +35180,7 @@ static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
 static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 037 */
-	1323,	/* Number of elements */
+	1324,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -36502,7 +36506,8 @@ static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 037 */
 	0x118E0,
 	0x16E60,
 	0x16E80,
-	0x1E922
+	0x1E922,
+	0x1E944
 };
 
 #  endif	/* EBCDIC 037 */
@@ -38079,7 +38084,8 @@ static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x16E40,
 	0,
-	0x1E900
+	0x1E900,
+	0
 };
 
 #  endif	/* EBCDIC 037 */
@@ -395305,5 +395311,5 @@ static const U8 WB_table[23][23] = {
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 61ea8132bb9ea5c637609e2d026b0b85ce17d6bec544c2f08ce411e6f65e8386 regen/mk_invlists.pl
+ * b1280c65a1d7854433c185fe16ec778a8a4a65c696e8f119aee1b3fc2c740938 regen/mk_invlists.pl
  * ex: set ro: */
