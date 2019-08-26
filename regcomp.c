@@ -753,6 +753,10 @@ static const scan_data_t zero_scan_data = {
     Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",	    \
 	    arg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
+#define	FAIL3(msg,arg1,arg2) _FAIL(			    \
+    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",	    \
+     arg1, arg2, UTF8fARG(UTF, len, RExC_precomp), ellipses))
+
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
