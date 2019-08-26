@@ -18890,7 +18890,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     full_cp_count += this_end - this_start + 1;
                 }
-                invlist_iterfinish(cp_list);
 
                 /* At the end of the loop, we count how many bits differ from
                  * the bits in lowest code point, call the count 'd'.  If the
@@ -18919,8 +18918,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     ret = reganode(pRExC_state, op, lowest_cp);
                     FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
                 }
+
+              done_anyofm:
+                invlist_iterfinish(cp_list);
             }
-          done_anyofm:
 
             if (inverted) {
                 _invlist_invert(cp_list);
