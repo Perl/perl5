@@ -22,6 +22,14 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
+<commit votes="tonyc" id="c0ad3f089909eceaf6d442a6805e5b46d1fee0e0" ticket="134218" desc="(perl #134218) make sure ECHO is defined"/>
+
+<commit votes="tonyc" id="a8e0c1fd5ade7c30aa0782f1aea274ef89190f6d" ticket="133989" desc="(perl #133989) scalar() the argument to readline, if any"/>
+
+<commit votes="tonyc" id="40258daf9899686d934c460ba3630431312d7694" ticket="134072" desc="(perl #134072) allow \&amp;foo = \&amp;bar to work in main::"/>
+
+<commit votes="tonyc" id="368ac47cccd4ffca6e83a26289c152a32c2ea385" ticket="134035" desc="(perl #134035) ensure sv_gets() handles a signal handler modifying sv"/>
+
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -35,6 +43,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Regression Fixes</h3>
 
 <commit votes="tonyc" id="79e302e6c3f815bf4cb72a5bacc3012595970db9" ticket="134169" desc="(perl #134169) mg.c reset endptr after use"/>
+
+This could potentially break code written on 5.30.0 that expects "0x10" to numify to 16, but
+the bug fixed has the potential of silently(!) breaking code written with older perls that
+expect it to be 0.
+<commit votes="tonyc" id="14d26b44a1d7eee67837ec0ea8fb0368ac6fe33e" ticket="134230" desc="(perl #134230) don't interpret 0x, 0b when numifying strings"/>
 
 </div>
 
