@@ -2,6 +2,8 @@
 
 __UNDEFINED__
 utf8_to_uvchr_buf
+sv_len_utf8
+sv_len_utf8_nomg
 
 =implementation
 
@@ -292,6 +294,26 @@ __UNDEFINED__  utf8_to_uvchr(s, lp)                                             
 
 #endif
 
+#ifdef SV_NOSTEAL
+   /* Older Perl versions have broken sv_len_utf8() when passed sv does not have SVf_UTF8 flag set */
+   /* Also note that SvGETMAGIC() may change presence of SVf_UTF8 flag */
+#  if { VERSION < 5.17.5 }
+#    undef sv_len_utf8
+#    if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#      define sv_len_utf8_nomg(sv) ({ SV *_sv2 = (sv); (SvUTF8(_sv2) ? Perl_sv_len_utf8(aTHX_ (!SvGMAGICAL(_sv2) ? _sv2 : sv_mortalcopy_flags(_sv2, SV_NOSTEAL))) : ({ STRLEN _len; SvPV_nomg(_sv2, _len); _len; })); })
+#      define sv_len_utf8(sv) ({ SV *_sv1 = (sv); SvGETMAGIC(_sv1); sv_len_utf8_nomg(_sv1); })
+#    else
+#      define sv_len_utf8_nomg(sv) (PL_Sv = (sv), (SvUTF8(PL_Sv) ? Perl_sv_len_utf8(aTHX_ (!SvGMAGICAL(PL_Sv) ? PL_Sv : sv_mortalcopy_flags(PL_Sv, SV_NOSTEAL))) : (SvPV_nomg(PL_Sv, PL_na), PL_na)))
+#      define sv_len_utf8(sv) (PL_Sv = (sv), SvGETMAGIC(PL_Sv), sv_len_utf8_nomg(PL_Sv))
+#    endif
+#  endif
+#  if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+     __UNDEFINED__ sv_len_utf8_nomg(sv) ({ SV *_sv = (sv); sv_len_utf8(!SvGMAGICAL(_sv) ? _sv : sv_mortalcopy_flags(_sv, SV_NOSTEAL)); })
+#  else
+     __UNDEFINED__ sv_len_utf8_nomg(sv) ((PL_Sv = (sv)), sv_len_utf8(!SvGMAGICAL(PL_Sv) ? PL_Sv : sv_mortalcopy_flags(PL_Sv, SV_NOSTEAL)))
+#  endif
+#endif
+
 =xsinit
 
 #define NEED_utf8_to_uvchr_buf
@@ -410,13 +432,33 @@ utf8_to_uvchr(s)
 
 #endif
 
-=tests plan => 58
+#ifdef SV_NOSTEAL
+
+STRLEN
+sv_len_utf8(sv)
+        SV *sv
+        CODE:
+                RETVAL = sv_len_utf8(sv);
+        OUTPUT:
+                RETVAL
+
+STRLEN
+sv_len_utf8_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = sv_len_utf8_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+=tests plan => 81
 
 BEGIN { require warnings if "$]" gt '5.006' }
 
 # skip tests on 5.6.0 and earlier
 if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..58;
+    skip 'skip: broken utf8 support', 0 for 1..81;
     exit;
 }
 
@@ -558,4 +600,63 @@ else {
         ok($ret->[1], $test->{'no_warnings_returned_length'},
                       "returned length $display; warnings disabled");
     }
+}
+
+if ("$]" ge '5.008') {
+    BEGIN { if ("$]" ge '5.008') { require utf8; "utf8"->import() } }
+
+    ok(Devel::PPPort::sv_len_utf8("aščť"), 4);
+    ok(Devel::PPPort::sv_len_utf8_nomg("aščť"), 4);
+
+    my $str = "áíé";
+    utf8::downgrade($str);
+    ok(Devel::PPPort::sv_len_utf8($str), 3);
+    utf8::downgrade($str);
+    ok(Devel::PPPort::sv_len_utf8_nomg($str), 3);
+    utf8::upgrade($str);
+    ok(Devel::PPPort::sv_len_utf8($str), 3);
+    utf8::upgrade($str);
+    ok(Devel::PPPort::sv_len_utf8_nomg($str), 3);
+
+    tie my $scalar, 'TieScalarCounter', "é";
+
+    ok(tied($scalar)->{fetch}, 0);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8($scalar), 2);
+    ok(tied($scalar)->{fetch}, 1);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8($scalar), 3);
+    ok(tied($scalar)->{fetch}, 2);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8($scalar), 4);
+    ok(tied($scalar)->{fetch}, 3);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8_nomg($scalar), 4);
+    ok(tied($scalar)->{fetch}, 3);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8_nomg($scalar), 4);
+    ok(tied($scalar)->{fetch}, 3);
+    ok(tied($scalar)->{store}, 0);
+} else {
+    skip 'skip: no SV_NOSTEAL support', 0 for 1..23;
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    BEGIN { if ("$]" ge '5.008') { require utf8; "utf8"->import() } }
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value} .= "é";
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
 }

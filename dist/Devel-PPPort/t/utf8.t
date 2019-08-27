@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (58) {
+  if (81) {
     load();
-    plan(tests => 58);
+    plan(tests => 81);
   }
 }
 
@@ -52,7 +52,7 @@ BEGIN { require warnings if "$]" gt '5.006' }
 
 # skip tests on 5.6.0 and earlier
 if ("$]" le '5.006') {
-    skip 'skip: broken utf8 support', 0 for 1..58;
+    skip 'skip: broken utf8 support', 0 for 1..81;
     exit;
 }
 
@@ -194,5 +194,64 @@ else {
         ok($ret->[1], $test->{'no_warnings_returned_length'},
                       "returned length $display; warnings disabled");
     }
+}
+
+if ("$]" ge '5.008') {
+    BEGIN { if ("$]" ge '5.008') { require utf8; "utf8"->import() } }
+
+    ok(Devel::PPPort::sv_len_utf8("aščť"), 4);
+    ok(Devel::PPPort::sv_len_utf8_nomg("aščť"), 4);
+
+    my $str = "áíé";
+    utf8::downgrade($str);
+    ok(Devel::PPPort::sv_len_utf8($str), 3);
+    utf8::downgrade($str);
+    ok(Devel::PPPort::sv_len_utf8_nomg($str), 3);
+    utf8::upgrade($str);
+    ok(Devel::PPPort::sv_len_utf8($str), 3);
+    utf8::upgrade($str);
+    ok(Devel::PPPort::sv_len_utf8_nomg($str), 3);
+
+    tie my $scalar, 'TieScalarCounter', "é";
+
+    ok(tied($scalar)->{fetch}, 0);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8($scalar), 2);
+    ok(tied($scalar)->{fetch}, 1);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8($scalar), 3);
+    ok(tied($scalar)->{fetch}, 2);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8($scalar), 4);
+    ok(tied($scalar)->{fetch}, 3);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8_nomg($scalar), 4);
+    ok(tied($scalar)->{fetch}, 3);
+    ok(tied($scalar)->{store}, 0);
+    ok(Devel::PPPort::sv_len_utf8_nomg($scalar), 4);
+    ok(tied($scalar)->{fetch}, 3);
+    ok(tied($scalar)->{store}, 0);
+} else {
+    skip 'skip: no SV_NOSTEAL support', 0 for 1..23;
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    BEGIN { if ("$]" ge '5.008') { require utf8; "utf8"->import() } }
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value} .= "é";
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
 }
 
