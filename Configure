@@ -19105,9 +19105,9 @@ EOM
 #define strtoll _strtoll
 #endif
 #include <stdio.h>
-extern long long int strtoll(char *s, char **, int);
+#include <stdlib.h>
 static int bad = 0;
-int check(char *s, long long ell, int een) {
+void check(const char *s, long long ell, int een) {
 	long long gll;
 	errno = 0;
 	gll = strtoll(s, 0, 10);
@@ -19160,11 +19160,11 @@ case "$d_strtoul" in
 Checking whether your strtoul() works okay...
 EOM
 	$cat >try.c <<'EOCP'
+#include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
-extern unsigned long int strtoul(char *s, char **, int);
 static int bad = 0;
-void check(char *s, unsigned long eul, int een) {
+void check(const char *s, unsigned long eul, int een) {
 	unsigned long gul;
 	errno = 0;
 	gul = strtoul(s, 0, 10);
@@ -19297,11 +19297,11 @@ case "$d_strtouq" in
 Checking whether your strtouq() works okay...
 EOM
 	$cat >try.c <<'EOCP'
+#include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
-extern unsigned long long int strtouq(char *s, char **, int);
 static int bad = 0;
-void check(char *s, unsigned long long eull, int een) {
+void check(const char *s, unsigned long long eull, int een) {
 	unsigned long long gull;
 	errno = 0;
 	gull = strtouq(s, 0, 10);
