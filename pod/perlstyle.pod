@@ -8,12 +8,13 @@ Each programmer will, of course, have his or her own preferences in
 regards to formatting, but there are some general guidelines that will
 make your programs easier to read, understand, and maintain.
 
-The most important thing is to run your programs under the B<-w>
-flag at all times.  You may turn it off explicitly for particular
-portions of code via the C<no warnings> pragma or the C<$^W> variable
-if you must.  You should also always run under C<use strict> or know the
-reason why not.  The C<use sigtrap> and even C<use diagnostics> pragmas
-may also prove useful.
+The most important thing is to use L<strict> and L<warnings> in all your
+code or know the reason why not to.  You may turn them off explicitly for
+particular portions of code via C<no warnings> or C<no strict>, and this
+can be limited to the specific warnings or strict features you wish to
+disable.  The B<-w> flag and C<$^W> variable should not be used for this
+purpose since they can affect code you use but did not write, such as
+modules from core or CPAN.
 
 Regarding aesthetics of code lay out, about the only thing Larry
 cares strongly about is that the closing curly bracket of
@@ -262,7 +263,7 @@ Line up your transliterations when it makes sense:
 Think about reusability.  Why waste brainpower on a one-shot when you
 might want to do something like it again?  Consider generalizing your
 code.  Consider writing a module or object class.  Consider making your
-code run cleanly with C<use strict> and C<use warnings> (or B<-w>) in
+code run cleanly with C<use strict> and C<use warnings> in
 effect.  Consider giving away your code.  Consider changing your whole
 world view.  Consider... oh, never mind.
 
