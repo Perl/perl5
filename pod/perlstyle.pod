@@ -103,11 +103,11 @@ you I<SHOULD> do it that way.  Perl is designed to give you several
 ways to do anything, so consider picking the most readable one.  For
 instance
 
-    open(FOO,$foo) || die "Can't open $foo: $!";
+    open(my $fh, '<', $foo) || die "Can't open $foo: $!";
 
 is better than
 
-    die "Can't open $foo: $!" unless open(FOO,$foo);
+    die "Can't open $foo: $!" unless open(my $fh, '<', $foo);
 
 because the second way hides the main point of the statement in a
 modifier.  On the other hand
@@ -249,7 +249,7 @@ system call and arguments were, and (VERY IMPORTANT) should contain the
 standard system error message for what went wrong.  Here's a simple but
 sufficient example:
 
-    opendir(D, $dir)	 or die "can't opendir $dir: $!";
+    opendir(my $dh, $dir)	 or die "can't opendir $dir: $!";
 
 =item *
 
