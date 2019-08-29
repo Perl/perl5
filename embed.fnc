@@ -136,6 +136,15 @@
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
+:   h  Hide any documentation.  This is used typically when the documentation
+:      is atypical of the rest of perlapi and perlintern.  In other words the
+:      item is documented, but just not the standard way.  One reason would be
+:      if there are a bunch of macros which follow a common paradigm in their
+:      naming, so rather than having an entry for each slight variation, there
+:      is an overarchinge one.  It is also used when the documentation is in
+:      another pod, such as perlguts or warnings.h.  This flag is useful for
+:      downstream programs, such as Devel::PPPort.
+:
 :   i  Static inline: function in source code has a S_ prefix:
 :
 :         proto.h: function is declared as S_foo rather than foo unless the 'p'

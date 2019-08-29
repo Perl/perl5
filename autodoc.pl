@@ -120,6 +120,8 @@ Expected:
   =for apidoc flags|returntype|name
   =for apidoc name
 EOS
+            next FUNC if $flags =~ /h/;
+
             warn ("'$name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
             my $docs = "";
@@ -146,6 +148,7 @@ DOC:
                 $flags = $embed_docref->{'flags'};
                 warn "embed.fnc entry '$name' missing 'd' flag"
                                                             unless $flags =~ /d/;
+                next FUNC if $flags =~ /h/;
                 $ret = $embed_docref->{'retval'};
                 @args = @{$embed_docref->{args}};
             } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
@@ -369,6 +372,7 @@ close $fh or die "Error whilst reading MANIFEST: $!";
 
 for (sort keys %funcflags) {
     next unless $funcflags{$_}{flags} =~ /d/;
+    next if $funcflags{$_}{flags} =~ /h/;
     warn "no docs for $_\n"
 }
 
