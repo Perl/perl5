@@ -388,6 +388,13 @@ EOM
 
 =head1 Warning and Dieing
 
+In all these calls, the C<U32 wI<n>> parameters are warning category
+constants.  You can see the ones currently available in
+L<warnings/Category Hierarchy>, just capitalize all letters in the names
+and prefix them by C<WARN_>.  So, for example, the category C<void> used in a
+perl program becomes C<WARN_VOID> when used in XS code and passed to one of
+the calls below.
+
 =for apidoc Am|bool|ckWARN|U32 w
 
 Returns a boolean as to whether or not warnings are enabled for the warning
