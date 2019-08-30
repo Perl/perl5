@@ -2692,6 +2692,15 @@ dup2(int oldfd, int newfd)
 #ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
 
+/*
+=for apidoc rsignal
+
+A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
+
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {

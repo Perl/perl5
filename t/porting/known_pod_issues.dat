@@ -285,6 +285,7 @@ sha1sum(1)
 shadow(3)
 Shell
 Shell::Command
+signal(2)
 sleep(3)
 sock_init(3)
 Socket

@@ -1483,7 +1483,7 @@ EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 ATp	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|IV count
 AdTpP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
-Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
+Apd	|Sighandler_t|rsignal	|int i|Sighandler_t t
 : Used in pp_sys.c
 p	|int	|rsignal_restore|int i|NULLOK Sigsave_t* t
 : Used in pp_sys.c
