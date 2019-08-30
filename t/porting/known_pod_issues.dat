@@ -296,6 +296,7 @@ strftime(3)
 strictures
 String::Base
 String::Scanf
+strstr(3)
 strtol(3)
 Switch
 tar(1)
