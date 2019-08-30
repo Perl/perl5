@@ -5126,6 +5126,15 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     }
 }
 
+/*
+=for apidoc my_exit
+
+A wrapper for the C library L<exit(3)>, honoring what L<perlapi/PL_exit_flags>
+say to do.
+
+=cut
+*/
+
 void
 Perl_my_exit(pTHX_ U32 status)
 {

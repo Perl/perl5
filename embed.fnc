@@ -1192,7 +1192,7 @@ p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
 Ap	|NV	|my_atof	|NN const char *s
 ATdpR	|NV	|my_strtod	|NN const char * const s|NULLOK char ** e
-Apr	|void	|my_exit	|U32 status
+Aprd	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Ap	|I32	|my_fflush_all
 ATp	|Pid_t	|my_fork

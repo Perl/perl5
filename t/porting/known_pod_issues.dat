@@ -105,6 +105,7 @@ Encode::Detect
 Encode::Locale
 Eval::WithLexicals
 execvp(3)
+exit(3)
 Exporter::Easy
 ExtUtils::Constant::ProxySubs
 fchdir(2)
