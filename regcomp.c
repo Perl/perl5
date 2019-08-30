@@ -445,6 +445,9 @@ struct RExC_state_t {
 #define DEFERRED_COULD_BE_OFFICIAL_MARKERs  "~"
 #define DEFERRED_COULD_BE_OFFICIAL_MARKERc  '~'
 
+/* What is infinity for optimization purposes */
+#define OPTIMIZE_INFTY  SSize_t_MAX
+
 /* About scan_data_t.
 
   During optimisation we recurse through the regexp program performing
@@ -479,7 +482,7 @@ struct RExC_state_t {
 
   - max_offset
     Only used for floating strings. This is the rightmost point that
-    the string can appear at. If set to SSize_t_MAX it indicates that the
+    the string can appear at. If set to OPTIMIZE_INFTY it indicates that the
     string can occur infinitely far to the right.
     For fixed strings, it is equal to min_offset.
 
@@ -1433,12 +1436,12 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	else { /* float */
 	    data->substrs[1].max_offset = (l
                           ? data->last_start_max
-                          : (data->pos_delta > SSize_t_MAX - data->pos_min
-					 ? SSize_t_MAX
+                          : (data->pos_delta > OPTIMIZE_INFTY - data->pos_min
+					 ? OPTIMIZE_INFTY
 					 : data->pos_min + data->pos_delta));
 	    if (is_inf
-		 || (STRLEN)data->substrs[1].max_offset > (STRLEN)SSize_t_MAX)
-		data->substrs[1].max_offset = SSize_t_MAX;
+		 || (STRLEN)data->substrs[1].max_offset > (STRLEN)OPTIMIZE_INFTY)
+		data->substrs[1].max_offset = OPTIMIZE_INFTY;
         }
 
         if (data->flags & SF_BEFORE_EOL)
@@ -4497,7 +4500,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     scan_data_t data_fake;
     SV *re_trie_maxbuff = NULL;
     regnode *first_non_open = scan;
-    SSize_t stopmin = SSize_t_MAX;
+    SSize_t stopmin = OPTIMIZE_INFTY;
     scan_frame *frame = NULL;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -4631,7 +4634,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 /* NOTE - There is similar code to this block below for
                  * handling TRIE nodes on a re-study.  If you change stuff here
                  * check there too. */
-		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
+		SSize_t max1 = 0, min1 = OPTIMIZE_INFTY, num = 0;
 		regnode_ssc accum;
 		regnode * const startbranch=scan;
 
@@ -4682,9 +4685,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		    if (min1 > minnext)
 			min1 = minnext;
-		    if (deltanext == SSize_t_MAX) {
+		    if (deltanext == OPTIMIZE_INFTY) {
 			is_inf = is_inf_internal = 1;
-			max1 = SSize_t_MAX;
+			max1 = OPTIMIZE_INFTY;
 		    } else if (max1 < minnext + deltanext)
 			max1 = minnext + deltanext;
 		    scan = next;
@@ -4709,17 +4712,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    min1 = 0;
 		if (flags & SCF_DO_SUBSTR) {
 		    data->pos_min += min1;
-		    if (data->pos_delta >= SSize_t_MAX - (max1 - min1))
-		        data->pos_delta = SSize_t_MAX;
+		    if (data->pos_delta >= OPTIMIZE_INFTY - (max1 - min1))
+		        data->pos_delta = OPTIMIZE_INFTY;
 		    else
 		        data->pos_delta += max1 - min1;
 		    if (max1 != min1 || is_inf)
 			data->cur_is_floating = 1;
 		}
 		min += min1;
-		if (delta == SSize_t_MAX
-		 || SSize_t_MAX - delta - (max1 - min1) < 0)
-		    delta = SSize_t_MAX;
+		if (delta == OPTIMIZE_INFTY
+		 || OPTIMIZE_INFTY - delta - (max1 - min1) < 0)
+		    delta = OPTIMIZE_INFTY;
 		else
 		    delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
@@ -5238,7 +5241,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (data->last_end == -1) { /* Update the start info. */
 		    data->last_start_min = data->pos_min;
  		    data->last_start_max = is_inf
- 			? SSize_t_MAX : data->pos_min + data->pos_delta;
+                        ? OPTIMIZE_INFTY : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), bytelen);
 		if (UTF)
@@ -5521,11 +5524,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 }
 
 		min += minnext * mincount;
-		is_inf_internal |= deltanext == SSize_t_MAX
+		is_inf_internal |= deltanext == OPTIMIZE_INFTY
                          || (maxcount == REG_INFTY && minnext + deltanext > 0);
 		is_inf |= is_inf_internal;
                 if (is_inf) {
-		    delta = SSize_t_MAX;
+		    delta = OPTIMIZE_INFTY;
                 } else {
 		    delta += (minnext + deltanext) * maxcount
                              - minnext * mincount;
@@ -5721,7 +5724,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			    data->last_start_min += minnext * (mincount - 1);
 			    data->last_start_max =
                               is_inf
-                               ? SSize_t_MAX
+                               ? OPTIMIZE_INFTY
 			       : data->last_start_max +
                                  (maxcount - 1) * (minnext + data->pos_delta);
 			}
@@ -5730,18 +5733,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->pos_min += minnext * (mincount - counted);
 #if 0
 Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
-                              " SSize_t_MAX=%" UVuf " minnext=%" UVuf
+                              " OPTIMIZE_INFTY=%" UVuf " minnext=%" UVuf
                               " maxcount=%" UVuf " mincount=%" UVuf "\n",
-    (UV)counted, (UV)deltanext, (UV)SSize_t_MAX, (UV)minnext, (UV)maxcount,
+    (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext, (UV)maxcount,
     (UV)mincount);
-if (deltanext != SSize_t_MAX)
+if (deltanext != OPTIMIZE_INFTY)
 Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
-          - minnext * mincount), (UV)(SSize_t_MAX - data->pos_delta));
+          - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
 #endif
-		    if (deltanext == SSize_t_MAX
-                        || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= SSize_t_MAX - data->pos_delta)
-		        data->pos_delta = SSize_t_MAX;
+		    if (deltanext == OPTIMIZE_INFTY
+                        || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= OPTIMIZE_INFTY - data->pos_delta)
+		        data->pos_delta = OPTIMIZE_INFTY;
 		    else
 		        data->pos_delta += - counted * deltanext +
 			(minnext + deltanext) * maxcount - minnext * mincount;
@@ -5760,7 +5763,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 			    data->last_end = data->pos_min;
 			    data->last_start_min = data->pos_min - last_chrs;
 			    data->last_start_max = is_inf
-				? SSize_t_MAX
+				? OPTIMIZE_INFTY
 				: data->pos_min + data->pos_delta - last_chrs;
 			}
 			data->cur_is_floating = 1; /* float */
@@ -5825,13 +5828,13 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 		flags &= ~SCF_DO_STCLASS;
             }
 	    min++;
-            if (delta != SSize_t_MAX)
+            if (delta != OPTIMIZE_INFTY)
                 delta++;    /* Because of the 2 char string cr-lf */
             if (flags & SCF_DO_SUBSTR) {
                 /* Cannot expect anything... */
                 scan_commit(pRExC_state, data, minlenp, is_inf);
     	        data->pos_min += 1;
-                if (data->pos_delta != SSize_t_MAX) {
+                if (data->pos_delta != OPTIMIZE_INFTY) {
                     data->pos_delta += 1;
                 }
 		data->cur_is_floating = 1; /* float */
@@ -6294,7 +6297,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
             regnode *trie_node= scan;
             regnode *tail= regnext(scan);
             reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
-            SSize_t max1 = 0, min1 = SSize_t_MAX;
+            SSize_t max1 = 0, min1 = OPTIMIZE_INFTY;
             regnode_ssc accum;
 
             if (flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
@@ -6349,9 +6352,9 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 
                     if (min1 > (SSize_t)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
-                    if (deltanext == SSize_t_MAX) {
+                    if (deltanext == OPTIMIZE_INFTY) {
                         is_inf = is_inf_internal = 1;
-                        max1 = SSize_t_MAX;
+                        max1 = OPTIMIZE_INFTY;
                     } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
                         max1 = minnext + deltanext + trie->maxlen;
 
@@ -6380,11 +6383,11 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     data->cur_is_floating = 1; /* float */
             }
             min += min1;
-            if (delta != SSize_t_MAX) {
-                if (SSize_t_MAX - (max1 - min1) >= delta)
+            if (delta != OPTIMIZE_INFTY) {
+                if (OPTIMIZE_INFTY - (max1 - min1) >= delta)
                     delta += max1 - min1;
                 else
-                    delta = SSize_t_MAX;
+                    delta = OPTIMIZE_INFTY;
             }
             if (flags & SCF_DO_STCLASS_OR) {
                 ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &accum);
@@ -6465,10 +6468,10 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     DEBUG_STUDYDATA("pre-fin", data, depth, is_inf);
 
     *scanp = scan;
-    *deltap = is_inf_internal ? SSize_t_MAX : delta;
+    *deltap = is_inf_internal ? OPTIMIZE_INFTY : delta;
 
     if (flags & SCF_DO_SUBSTR && is_inf)
-	data->pos_delta = SSize_t_MAX - data->pos_min;
+	data->pos_delta = OPTIMIZE_INFTY - data->pos_min;
     if (is_par > (I32)U8_MAX)
 	is_par = 0;
     if (is_par && pars==1 && data) {
@@ -6488,9 +6491,10 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 
     final_minlen = min < stopmin
             ? min : stopmin;
+
     if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
-        if (final_minlen > SSize_t_MAX - delta)
-            RExC_maxlen = SSize_t_MAX;
+        if (final_minlen > OPTIMIZE_INFTY - delta)
+            RExC_maxlen = OPTIMIZE_INFTY;
         else if (RExC_maxlen < final_minlen + delta)
             RExC_maxlen = final_minlen + delta;
     }
@@ -8177,7 +8181,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
                 RExC_rx->substrs->data[i].max_offset = data.substrs[i].max_offset;
                 /* Don't offset infinity */
-                if (data.substrs[i].max_offset < SSize_t_MAX)
+                if (data.substrs[i].max_offset < OPTIMIZE_INFTY)
                     RExC_rx->substrs->data[i].max_offset -= data.substrs[i].lookbehind;
                 SvREFCNT_inc_simple_void_NN(data.substrs[i].str);
             }
