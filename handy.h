@@ -1267,7 +1267,22 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 */
 
-/* Specify the widest unsigned type on the platform. */
+/*
+   void below because that's the best fit, and works for Devel::PPPort
+=for apidoc AmnU|void|WIDEST_UTYPE
+
+Yields the widest unsigned integer type on the platform, currently either
+C<U32> or C<64>.  This can be used in declarations such as
+
+ WIDEST_UTYPE my_uv;
+
+or casts
+
+ my_uv = (WIDEST_UTYPE) val;
+
+=cut
+
+*/
 #ifdef QUADKIND
 #   define WIDEST_UTYPE U64
 #else
