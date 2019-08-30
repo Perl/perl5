@@ -742,7 +742,7 @@ sub run_tests {
         is($#+, 2, $message);
         is($#-, 1, $message);
 
-        # Check that values don’t stick
+        # Check that values don't stick
         "     "=~/()()()(.)(..)/;
         my($m,$p,$q) = (\$-[5], \$+[5], \${^CAPTURE}[4]);
         () = "$$_" for $m, $p, $q; # FETCH (or eqv.)
