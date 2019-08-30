@@ -1223,6 +1223,15 @@ S_adjust_size_and_find_bucket(size_t *nbytes_p)
 	return bucket;
 }
 
+/*
+These have the same interfaces as the C lib ones, so are considered documented
+
+=for apidoc malloc
+=for apidoc calloc
+=for apidoc realloc
+=cut
+*/
+
 Malloc_t
 Perl_malloc(size_t nbytes)
 {

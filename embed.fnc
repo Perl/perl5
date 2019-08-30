@@ -321,9 +321,9 @@ ATo	|PerlInterpreter*|perl_clone_using \
 #  endif
 #endif
 
-AaTop	|Malloc_t|malloc	|MEM_SIZE nbytes
-AaTop	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
-ARTop	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
+AaTophd	|Malloc_t|malloc	|MEM_SIZE nbytes
+AaTophd	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
+ARTophd	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
 ATop	|Free_t	|mfree		|Malloc_t where
 #if defined(MYMALLOC)
 TpR	|MEM_SIZE|malloced_size	|NN void *p
