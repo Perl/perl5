@@ -132,6 +132,16 @@ sequences, whereas C<"%"> is not a particularly common character in patterns.
 
 Returns a pointer to the escaped text as held by C<dsv>.
 
+=for apidoc Amnh||PERL_PV_ESCAPE_ALL
+=for apidoc Amnh||PERL_PV_ESCAPE_FIRSTCHAR
+=for apidoc Amnh||PERL_PV_ESCAPE_NOBACKSLASH
+=for apidoc Amnh||PERL_PV_ESCAPE_NOCLEAR
+=for apidoc Amnh||PERL_PV_ESCAPE_NONASCII
+=for apidoc Amnh||PERL_PV_ESCAPE_QUOTE
+=for apidoc Amnh||PERL_PV_ESCAPE_RE
+=for apidoc Amnh||PERL_PV_ESCAPE_UNI
+=for apidoc Amnh||PERL_PV_ESCAPE_UNI_DETECT
+
 =cut
 */
 #define PV_ESCAPE_OCTBUFSIZE 32
@@ -266,6 +276,10 @@ is non-null then it will be inserted after the escaped text but before
 any quotes or ellipses.
 
 Returns a pointer to the prettified text as held by C<dsv>.
+
+=for apidoc Amnh||PERL_PV_PRETTY_QUOTE
+=for apidoc Amnh||PERL_PV_PRETTY_LTGT
+=for apidoc Amnh||PERL_PV_PRETTY_ELLIPSES
 
 =cut           
 */
