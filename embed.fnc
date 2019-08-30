@@ -1208,7 +1208,7 @@ Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
 Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
 #endif
 Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
-Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
+Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 ApMb	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Afp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
