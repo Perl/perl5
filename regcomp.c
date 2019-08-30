@@ -10369,6 +10369,40 @@ S_invlist_iterfinish(SV* invlist)
 }
 
 STATIC bool
+S_invlist_iterpeek(SV* invlist, UV* start, UV* end)
+{
+    /* An C<invlist_iterinit> call on <invlist> must be used to set this up.
+     * This call sets in <*start> and <*end>, the next range in <invlist>.
+     * Returns <TRUE> if successful and the next call will return the next
+     * range; <FALSE> if was already at the end of the list.  If the latter,
+     * <*start> and <*end> are unchanged, and the next call to this function
+     * will start over at the beginning of the list */
+
+    STRLEN pos = *get_invlist_iter_addr(invlist);
+    const UV len = _invlist_len(invlist);
+    const UV *array;
+
+    PERL_ARGS_ASSERT_INVLIST_ITERPEEK;
+
+    if (pos >= len) {
+	return FALSE;
+    }
+
+    array = invlist_array(invlist);
+
+    *start = array[pos++];
+
+    if (pos >= len) {
+	*end = UV_MAX;
+    }
+    else {
+	*end = array[pos] - 1;
+    }
+
+    return TRUE;
+}
+
+STATIC bool
 S_invlist_iternext(SV* invlist, UV* start, UV* end)
 {
     /* An C<invlist_iterinit> call on <invlist> must be used to set this up.
@@ -10379,27 +10413,15 @@ S_invlist_iternext(SV* invlist, UV* start, UV* end)
      * will start over at the beginning of the list */
 
     STRLEN* pos = get_invlist_iter_addr(invlist);
-    UV len = _invlist_len(invlist);
-    UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
 
-    if (*pos >= len) {
+    if (! invlist_iterpeek(invlist, start, end)) {
 	*pos = (STRLEN) UV_MAX;	/* Force iterinit() to be required next time */
-	return FALSE;
+        return FALSE;
     }
 
-    array = invlist_array(invlist);
-
-    *start = array[(*pos)++];
-
-    if (*pos >= len) {
-	*end = UV_MAX;
-    }
-    else {
-	*end = array[(*pos)++] - 1;
-    }
-
+    *pos += (*end == UV_MAX) ? 1 : 2;
     return TRUE;
 }
 
@@ -21776,9 +21798,67 @@ S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
     /* Here we have figured things out.  Output each range */
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
+
+#ifdef EBCDIC
+        UV peek_start, peek_end;
+#endif
+
         if (start >= NUM_ANYOF_CODE_POINTS) {
             break;
         }
+
+#ifdef EBCDIC
+
+        /* There are discontinuities between 'i' and 'j' and 'r' and 's' in
+         * EBCDIC (same with the uppercase).  To hide those from the output, we
+         * handle them here by bridging them.  We don't do so if there aren't
+         * enough to make a decent range */
+        if (    allow_literals
+            && (isALPHA_FOLD_EQ(end, 'i') || isALPHA_FOLD_EQ(end, 'r'))
+            &&  invlist_iterpeek(invlist, &peek_start, &peek_end)
+            &&  NATIVE_TO_LATIN1(peek_start) - 1 == NATIVE_TO_LATIN1(end)
+            &&  NATIVE_TO_LATIN1(end) + 1
+              - NATIVE_TO_LATIN1(start)
+              + NATIVE_TO_LATIN1(peek_end) + 1
+              - NATIVE_TO_LATIN1(peek_start) > 3)
+        {
+            /* If there are non-alphas before the 'A' or 'a', output them
+             * separately */
+            if (isALPHA_FOLD_EQ(end, 'i')) {
+                SSize_t non_alpha_count = end - start - ('i' - 'a');
+
+                if (non_alpha_count > 0) {
+                    put_range(sv, start, start + non_alpha_count - 1, allow_literals);
+                    start += non_alpha_count;
+                }
+            }
+
+            /* We peeked ahead and decided we wanted the range.  Move the
+             * pointer now */
+            (void) invlist_iternext(invlist, &peek_start, &end);
+
+            /* Bridge again if can */
+            if (   isALPHA_FOLD_EQ(end, 'r')
+                && invlist_iterpeek(invlist, &peek_start, &peek_end)
+                && NATIVE_TO_LATIN1(peek_start) - 1 == NATIVE_TO_LATIN1(end))
+            {
+                (void) invlist_iternext(invlist, &peek_start, &end);
+            }
+
+            put_code_point(sv, start);
+            sv_catpvs(sv, "-");
+            if (isALPHA_A(end)) {
+                put_code_point(sv, end);
+            }
+            else {
+                put_code_point(sv, peek_start += ('z' - 's'));
+                put_range(sv, peek_start + 1, end, allow_literals);
+            }
+        }
+        else
+
+#endif
+
         put_range(sv, start, end, allow_literals);
     }
     invlist_iterfinish(invlist);

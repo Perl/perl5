@@ -1927,6 +1927,7 @@ S	|void	|initialize_invlist_guts|NN SV* invlist|const Size_t initial_size
 EiRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
 EiT	|void	|invlist_iterinit|NN SV* invlist
 ESRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
+ESxRT	|bool	|invlist_iterpeek|NN SV* invlist|NN UV* start|NN UV* end
 EiT	|void	|invlist_iterfinish|NN SV* invlist
 EiRT	|UV	|invlist_highest|NN SV* const invlist
 ERS	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \

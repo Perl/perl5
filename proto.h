@@ -5927,6 +5927,11 @@ STATIC bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
 #define PERL_ARGS_ASSERT_INVLIST_ITERNEXT	\
 	assert(invlist); assert(start); assert(end)
 
+STATIC bool	S_invlist_iterpeek(SV* invlist, UV* start, UV* end)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_INVLIST_ITERPEEK	\
+	assert(invlist); assert(start); assert(end)
+
 STATIC bool	S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc);
 #define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT	\
 	assert(pRExC_state); assert(ssc)
