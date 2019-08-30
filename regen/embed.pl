@@ -81,7 +81,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabDdEefiMmTOoPpRrSUWXx] ) /x) {
+        if ($flags =~ / ( [^AabDdEefiMmNnOoPpRrSsTUWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
