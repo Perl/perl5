@@ -263,6 +263,16 @@ C<SV*>.
 #  define Nullhv Null(HV*)
 #endif
 #define HvARRAY(hv)	((hv)->sv_u.svu_hash)
+
+/*
+
+=for apidoc Am|STRLEN|HvFILL|HV *const hv
+
+See L</hv_fill>.
+
+=cut
+
+*/
 #define HvFILL(hv)	Perl_hv_fill(aTHX_ MUTABLE_HV(hv))
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 /* This quite intentionally does no flag checking first. That's your
