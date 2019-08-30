@@ -2482,6 +2482,58 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
 #endif
 
+/*
+=head1 Numeric functions
+
+=for apidoc AmnUh||PERL_INT_MIN
+=for apidoc AmnUh||PERL_LONG_MAX
+=for apidoc AmnUh||PERL_LONG_MIN
+=for apidoc AmnUh||PERL_QUAD_MAX
+=for apidoc AmnUh||PERL_SHORT_MAX
+=for apidoc AmnUh||PERL_SHORT_MIN
+=for apidoc AmnUh||PERL_UCHAR_MAX
+=for apidoc AmnUh||PERL_UCHAR_MIN
+=for apidoc AmnUh||PERL_UINT_MAX
+=for apidoc AmnUh||PERL_ULONG_MAX
+=for apidoc AmnUh||PERL_ULONG_MIN
+=for apidoc AmnUh||PERL_UQUAD_MAX
+=for apidoc AmnUh||PERL_UQUAD_MIN
+=for apidoc AmnUh||PERL_USHORT_MAX
+=for apidoc AmnUh||PERL_USHORT_MIN
+=for apidoc AmnUh||PERL_QUAD_MIN
+=for apidoc AmnU||PERL_INT_MAX
+This and
+C<PERL_INT_MIN>,
+C<PERL_LONG_MAX>,
+C<PERL_LONG_MIN>,
+C<PERL_QUAD_MAX>,
+C<PERL_SHORT_MAX>,
+C<PERL_SHORT_MIN>,
+C<PERL_UCHAR_MAX>,
+C<PERL_UCHAR_MIN>,
+C<PERL_UINT_MAX>,
+C<PERL_ULONG_MAX>,
+C<PERL_ULONG_MIN>,
+C<PERL_UQUAD_MAX>,
+C<PERL_UQUAD_MIN>,
+C<PERL_USHORT_MAX>,
+C<PERL_USHORT_MIN>,
+C<PERL_QUAD_MIN>
+give the largest and smallest number representable in the current
+platform in variables of the corresponding types.
+
+For signed types, the smallest representable number is the most negative
+number, the one furthest away from zero.
+
+For C99 and later compilers, these correspond to things like C<INT_MAX>, which
+are available to the C code.  But these constants, furnished by Perl,
+allow code compiled on earlier compilers to portably have access to the same
+constants.
+
+=cut
+
+*/
+
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
