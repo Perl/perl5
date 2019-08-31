@@ -2948,6 +2948,9 @@ not be depended on.
 
 See L<perlcall>.
 
+=for apidoc Amnh||G_METHOD
+=for apidoc Amnh||G_METHOD_NAMED
+
 =cut
 */
 
