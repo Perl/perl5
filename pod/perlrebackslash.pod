@@ -446,7 +446,7 @@ Mnemonic: I<g>roup.
 =head3 Relative referencing
 
 C<\g-I<N>> (starting in Perl 5.10.0) is used for relative addressing.  (It can
-be written as C<\g{-I<N>>.)  It refers to the I<N>th group before the
+be written as C<\g{-I<N>}>.)  It refers to the I<N>th group before the
 C<\g{-I<N>}>.
 
 The big advantage of this form is that it makes it much easier to write
