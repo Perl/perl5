@@ -56,10 +56,6 @@
 :
 : porting/diag.t checks some things for consistency based on this file.
 :
-: 'flags' is a string of single letters.  Most of the flags are meaningful only
-: to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
-: comments here don't include how Devel::PPPort or diag.t use them:
-:
 :   A  Accessible fully everywhere (usually part of the public API):
 :
 :         add entry to the list of exported symbols (unless e or m);
@@ -250,6 +246,15 @@
 :         In the PERL_IMPLICIT_SYS branch of embed.h, generates
 :             "#define foo Perl_foo",      rather than
 :             "#define foo(a,b,c) Perl_foo(aTHX_ a,b,c)
+:
+:   u  The macro's (it has to be a macro) parameters are unorthodox.  For
+:      example, they aren't C parameters, or the macro expands to something
+:      that isn't a symbol.
+:
+:      For example, the expansion of aTHX_ includes a comma, so would have this
+:      flag; or some macros take preprocessor tokens, so would have this flag.
+:      This flag is an indication to downstream tools, such as Devel::PPPort,
+:      that this requires special handling.
 :
 :   U  autodoc.pl will not output a usage example
 :

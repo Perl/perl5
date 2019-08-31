@@ -125,8 +125,11 @@ Expected:
   =for apidoc flags|returntype|name
   =for apidoc name
 EOS
+            die "flag $1 is not legal (for function $name (from $file))"
+                        if $flags =~ / ( [^AabCDdEefhiMmNnTOoPpRrSsUuWXx] ) /x;
             next FUNC if $flags =~ /h/;
 
+            die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
             warn ("'$name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
             my $docs = "";

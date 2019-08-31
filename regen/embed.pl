@@ -81,7 +81,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabDdEefhiMmNnOoPpRrSsTUWXx] ) /x) {
+        if ($flags =~ / ( [^AabDdEefhiMmNnOoPpRrSsTUuWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
@@ -101,6 +101,8 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	die_at_end "$plain_func: S flag is mutually exclusive from the i and p plags"
 					    if $flags =~ /S/ && $flags =~ /[ip]/;
+
+	die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/ && $flags !~ /m/;
 
 	my $static_inline = 0;
 	if ($flags =~ /([Si])/) {
