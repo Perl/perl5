@@ -5,36 +5,66 @@
 : This file is known to be processed by regen/embed.pl, autodoc.pl,
 : makedef.pl, Devel::PPPort, and porting/diag.t.
 :
-: All non-static functions defined by perl need to be listed in this file.
-: embed.pl uses the entries here to construct proto.h to declare to the
-: compiler the function interfaces, and embed.h to create macros that present a
-: uniform interface to C code for the functions, regardless of, say, whether
-: the perl is threaded or not.
+: This file contains entries for various functions and macros defined by perl.
+: Each entry includes the name, parameters, and various attributes about it.
+: In most functions listed here, the name is a short name, and the function's
+: real name is the short one, prefixed by either 'Perl_' (for publicly visible
+: functions) or 'S_' (for internal-to-a-file static ones).  In many instances a
+: macro is defined that is the name in this file, and which expands to call the
+: real (full) name, with any appropriate thread context paramaters, thus hiding
+: that detail from the typical code.
 :
-: Static functions need not appear here, but there is benefit to declaring them
-: here, as it generally handles the thread context parameter invisibly, as well
-: as making sure a PERL_ARGS_ASSERT_foo macro is defined, which can save you
-: debugging time.
+: Most macros listed here are the complete full name.
+:
+: All non-static functions defined by perl need to be listed in this file.
+: embed.pl uses the entries here to construct:
+:   1) proto.h to declare to the compiler the function interfaces; and
+:   2) embed.h to create short name macros
+:
+: Static functions internal to a file need not appear here, but there is
+: benefit to declaring them here, as it generally handles the thread context
+: parameter invisibly, as well as making sure a PERL_ARGS_ASSERT_foo macro is
+: defined, which can save you debugging time.
 :
 : Lines in this file are of the form:
-:    flags|return_type|function_name|arg1|arg2|...|argN
+:    flags|return_type|name|arg1|arg2|...|argN
 :
 : 'flags' is a string of single letters.  Most of the flags are meaningful only
 : to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
-: comments here don't include how Devel::PPPort or diag.t use them:
+: comments here mostly don't include how Devel::PPPort or diag.t use them:
 :
 : A function taking no parameters will have no 'arg' elements.
 : A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
 :
+: Most entries here have a macro created with the entry name.  This presents
+: name space collision potentials which haven't been well thought out, but are
+: now documented here.  In practice this has rarely been an issue.  At least,
+: with a macro, the XS author can #undef it, unlike a function.
+:
 : The default without flags is to declare a function for internal perl-core use
-: only.  On some platforms, such as Linux and Darwin, all non-static functions
+: only.  The short name is visible only when the PERL_CORE symbol is defined.
+: On some platforms, such as Linux and Darwin, all non-static functions
 : are currently externally visible.  Because of this, and also for programs
 : that embed perl, most non-static functions should have the 'p' flag to avoid
 : namespace clashes.
 :
-: Most entries here have a macro created to wrap them, and whose name doesn't
-: include the 'Perl_', or other prefix.
+: There are several advantages to using a macro instead of the full Perl_foo or
+: S_foo form: it hides the need to know if the called function requires a
+: thread context parameter or not, and the code using it is more readable
+: because of fewer parameters being visible.  And if there is some bug in it
+: that gets fixed in a later release, ppport.h can be changed to automatically
+: backport the fixed version to modules.  The only disadvantage khw can think
+: of is the namespace pollution one.
+:
+: Since we don't require a C compiler to support variadic macros (C99), the
+: macros can't be generated in such situations.
+:
+: WARNING: Any macro created in a header file is visible to XS code, unless
+: care is taken to wrap it within something like #ifdef PERL_CORE..#endif.
+: This has had to be done with things like MAX and MIN, but nearly everything
+: else has been created without regard to the namespace pollution problem.
+:
 :
 : Scattered around the perl source are lines of the form:
 :
@@ -44,19 +74,20 @@
 : autodoc.pl where the documentation is for a function listed in this file.  It
 : uses the prototype from here and the pod from there in generating the
 : documentation in perlapi or perlintern.  The entries in this file that have
-: corresponding '=for apidoc' entries should have the flag 'd' set in this
+: corresponding '=for apidoc' entries should have the 'd' flag set in this
 : file.
 :
 : There are also lines of this form scattered around:
 :
 :   =for apidoc flags|return_type|name|arg1|arg2|...|argN
 :
-: and with the same meanings as the lines in this file.  The 'name' in any such
-: line must not be the same as any in this file (i.e., no redundant
-: definitions), and one of the flags must be 'm', indicating this is a macro.
-: The lines following these are pod for the respective macro.  Since these are
-: macros, the arguments need not be legal C parameters.  To indicate this to
-: downstream software that inspects these lines, there are a few conventions:
+: and with the same meanings as the lines in this file.  These are for
+: documenting macros.  The 'name' in any such line must not be the same as any
+: in this file (i.e., no redundant definitions), and one of the flags must be
+: 'm', indicating it is a macro.  The lines following these are pod for the
+: respective macro.  Since these are macros, the arguments need not be legal C
+: parameters.  To indicate this to downstream software that inspects these
+: lines, there are a few conventions:
 :  type    should be the entire argument name if it names a type
 :  cast    should be the entire argument name if it is a cast
 :  SP      should be the entire argument name if it is the stack pointer SP
@@ -70,32 +101,39 @@
 : indicate that it has to be a string, instead of a const char * const, like this
 :   =for apidoc Ama|SV*|newSVpvs|"string"
 :
+: If any argument or return value is not one of the above, and isn't a legal C
+: language one, the 'u' flag should be specified.
+:
 : Again, autodoc uses these lines to construct perlapi. 'return_type' in these
 : lines can be empty, unlike in this file.
 :
 : Devel::PPPort also looks at both this file and the '=for apidoc' lines.  In
 : part it is to construct lists of functions that are or are not backported.
 :
-: makedef.pl uses this file for constructing the export list
+: makedef.pl uses this file for constructing the export list which lists the
+: symbols that should be available on all platforms.
 :
 : porting/diag.t checks some things for consistency based on this file.
 :
-:   A  Accessible fully everywhere (usually part of the public API):
+: The remainder of these introductory comments detail all the possible flags:
 :
-:         add entry to the list of exported symbols (unless e or m);
+:   A  Both long and short names are accessible fully everywhere (usually part
+:      of the public API).  If the function is not part of the public API,
+:      instead use E, or X.
+:
+:         add entry to the list of symbols available on all platforms
+:	    unless e or m are also specified;
 :         any doc entry goes in perlapi.pod rather than perlintern.pod.  If
-:            no documentation is furnished, x controls what happens: If x
-:            isn't specified, autodoc.pl lists this in perlapi as existing and
-:	     being undocumented; otherwise it simply isn't listed.
-:         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
+:	    there isn't a doc entry, autodoc.pl lists this in perlapi as
+:	    existing and being undocumented; unless x is also specified, in
+:	    which case it simply isn't listed.
+:         makes the short name defined for everywhere, not just for
+:	    PERL_CORE/PERL_EXT
 :
-:      If the function is only exported for use in a public macro, see X.
-:
-:   a  Allocates memory a la malloc/calloc.  Also implies "R".
-:      This flag should only be on a function which returns 'empty' memory
-:      which has no other pointers to it, and which does not contain
-:      any pointers to other things. So for example realloc() can't be
-:      'a'.
+:   a  Allocates memory a la malloc/calloc.  Also implies "R".  This flag
+:      should only be on a function which returns 'empty' memory which has no
+:      other pointers to it, and which does not contain any pointers to other
+:      things. So for example realloc() can't be 'a'.
 :
 :         proto.h: add __attribute__malloc__
 :
@@ -106,10 +144,15 @@
 :      -Accflags='-DNO_MATHOMS' parameter to not even compile them.
 :
 :      Sometimes the function has been subsumed by a more general one (say, by
-:      adding a flags parameter), and a macro exists with the original API, and
-:      it calls the new function, bypassing this one, and the original 'Perl_'
-:      form is being deprecated.  In this case also specify the 'M' flag.  The
-:      'b' functions are normally moved to mathoms.c, but if circumstances
+:      adding a flags parameter), and a macro exists with the original short
+:      name API, and it calls the new function, bypassing this one, and the
+:      original 'Perl_' form is being deprecated.  In this case also specify
+:      the 'M' flag.
+:
+:      Without the M flag, these functions should be deprecated, and it is an
+:      error to not also specify the 'D' flag.
+:
+:      The 'b' functions are normally moved to mathoms.c, but if circumstances
 :      dictate otherwise, they can be anywhere, provided the whole function is
 :      wrapped with
 :	    #ifndef NO_MATHOMS
@@ -119,15 +162,12 @@
 :      Note that this flag no longer automatically adds a 'Perl_' prefix to the
 :      name.  Additionally specify 'p' to do that.
 :
-:      For functions, like wrappers, whose macro shortcut doesn't call the
-:      function, but which, for whatever reason, aren't considered legacy-only,
-:      use the 'o' flag, and maybe the 'M'
-:
 :      This flag effectively causes nothing to happen if the perl interpreter
-:      is compiled with -DNO_MATHOMS; otherwise these happen:
-:         add entry to the list of exported symbols;
+:      is compiled with -DNO_MATHOMS (which causes any functions with this flag
+:      to not be compiled); otherwise these happen:
+:         add entry to the list of symbols available on all platforms;
 :         create PERL_ARGS_ASSERT_foo;
-:	  add embed.h entry (unless overridden by the 'o' flag)
+:	  add embed.h entry (unless overridden by the 'M' or 'o' flags)
 :
 :   D  Function is deprecated:
 :
@@ -150,45 +190,56 @@
 :
 :   e  Not exported
 :
-:         suppress entry in the list of exported symbols
+:         suppress entry in the list of symbols available on all platforms
 :
 :   f  Function takes a format string. If the function name =~ qr/strftime/
-:      then its assumed to take a strftime-style format string as 1st arg;
-:      otherwise it's assumed to be a printf style format string, varargs
+:      then it is assumed to take a strftime-style format string as the 1st
+:      arg; otherwise it's assumed to be a printf style format string, varargs
 :      (hence any entry that would otherwise go in embed.h is suppressed):
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
-:   h  Hide any documentation.  This is used typically when the documentation
-:      is atypical of the rest of perlapi and perlintern.  In other words the
-:      item is documented, but just not the standard way.  One reason would be
-:      if there are a bunch of macros which follow a common paradigm in their
-:      naming, so rather than having an entry for each slight variation, there
-:      is an overarchinge one.  It is also used when the documentation is in
-:      another pod, such as perlguts or warnings.h.  This flag is useful for
-:      downstream programs, such as Devel::PPPort.
+:   h  Hide any documentation.  This is used when the documentation is atypical
+:      of the rest of perlapi and perlintern.  In other words the item is
+:      documented, but just not the standard way.  One reason would be if there
+:      are a bunch of macros which follow a common paradigm in their naming, so
+:      rather than having an entry for each slight variation, there is an
+:      overarchinge one.  It is also used when the documentation is in another
+:      pod, such as perlguts or warnings.h.  This flag is useful for downstream
+:      programs, such as Devel::PPPort.
 :
-:   i  Static inline: function in source code has a S_ prefix:
+:   i  inline static.  This is used for functions that the compiler is being
+:      requested to inline.  If the function is in a header file its
+:      definition will be visible (unless guarded by #if..#endif) to all
+:      XS code.  (A typical guard will be that it is being included in a
+:      particular C file(s) or in the perl core.)  Therefore, all
+:      non-guarded function should also have the 'p' flag specified to avoid
+:      polluting the XS code name space.  Otherwise an error is generated if
+:      the 'S' flag is not also specified.
 :
-:         proto.h: function is declared as S_foo rather than foo unless the 'p'
-:		   flag is also given in which case 'Perl_foo' is used,
-:                PERL_STATIC_INLINE is added to the declaration
-:         embed.h: "#define foo S_foo" or Perl_foo entries added
+:         proto.h: function is declared as PERL_STATIC_INLINE
 :
-:   M  There is an extra macro that bypasses this function
+:   m  Implemented as a macro; there is no function associated with this name,
+:      and hence no long Perl_ or S_ name.
 :
-:      (requires 'p', and implies 'o')  The function exists so that callers who
-:      used the 'Perl_' form can continue to do so, but there is a macro
-:      available without the 'Perl_' prefix that bypasses the function call,
-:      such as when the function has been reduced to a wrapper around another
-:      one.
+:         suppress proto.h entry (actually, not suppressed, but commented out)
+:         suppress entry in the list of exported symbols available on all platforms
+:         suppress embed.h entry, as the implementation should furnish the macro
 :
-:   m  Implemented as a macro:
+:   M  The implementation is furnishing its own macro instead of relying on the
+:      default short name macro that simply expands to call the real name
+:      function.  This is used if the parameters need to be cast from what the
+:      caller has, or if there is a macro that bypasses this function (whose
+:      long name is being retained for backward compatibility for those who
+:      call it with that name).  An example is when a new function is created
+:      with an extra parameter and a wrapper macro is added that has the old
+:      API, but calls the new one with the exta parameter set to a default.
 :
-:         suppress proto.h entry unless 'b' also specified (actually, not
-:		suppressed, but commented out)
-:         suppress entry in the list of exported symbols
-:         suppress embed.h entry
+:      This flag requires the 'p' flag to be specified, as there would be no
+:      need to do this if the function weren't publicly accessible before.
+:
+:      The entry is processed based on the other flags, but the:
+:         embed.h entry is suppressed
 :
 :   N  The name in the entry isn't strictly a name
 :
@@ -208,19 +259,17 @@
 :      autodoc.pl adds a note that the perl_ form of this function is
 :      deprecated.
 :
-:
 :   o  Has no Perl_foo or S_foo compatibility macro:
 :
-:	This can be used when you define a macro with this entry's name that
-:	doesn't call the function specified by this entry.  This is typically
-:	done for a function that effectively just wraps another one, and where
-:	the macro form calls the underlying function directly.  For these, also
-:	specify the 'M' flag.  Legacy-only functions should instead use 'b'.
+:	This is used for whatever reason to force the function to be called
+:	with the long name.  Perhaps there is a varargs issue.  Use the 'M'
+:	flag instead for wrapper macros, and legacy-only functions should
+:	also use 'b'.
 :
 :         embed.h: suppress "#define foo Perl_foo"
 :
 :      autodoc.pl adds a note that this function must be explicitly called as
-:      Perl_$name with an aTHX_ parameter, unless the 'M' flag is specified.
+:      Perl_$name with an aTHX_ parameter.
 :
 :   P  Pure function:
 :
@@ -296,7 +345,8 @@
 :
 :   X  Explicitly exported:
 :
-:         add entry to the list of exported symbols, unless e or m
+:         add entry to the list of symbols available on all platforms, unless e
+:	    or m
 :
 :      This is often used for private functions that are used by public
 :      macros.  In those cases the macros must use the long form of the
@@ -305,7 +355,7 @@
 :   x  Experimental, may change:
 :
 :         any doc entry is marked that it may change.  Also used to suppress
-:	  making a doc entry if it would just be a placeholder.
+:	  making a perlapi doc entry if it would just be a placeholder.
 :
 : In this file, pointer parameters that must not be passed NULLs should be
 : prefixed with NN.
