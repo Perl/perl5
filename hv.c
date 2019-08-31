@@ -3794,7 +3794,7 @@ Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags) {
 
 Save a label into a C<cop_hints_hash>.
 You need to set flags to C<SVf_UTF8>
-for a UTF-8 label.
+for a UTF-8 label.  Any other flag is ignored.
 
 =cut
 */
