@@ -541,6 +541,24 @@ be zero.
 #define cop_hints_2hv(cop, flags) \
     cophh_2hv(CopHINTHASH_get(cop), flags)
 
+/*
+=for apidoc Am|const char *|CopLABEL|COP *const cop
+
+Returns the label attached to a cop.
+
+=for apidoc Am|const char *|CopLABEL_len|COP *const cop|STRLEN *len
+
+Returns the label attached to a cop, and stores its length in bytes into
+C<*len>.
+
+=for apidoc Am|const char *|CopLABEL_len_flags|COP *const cop|STRLEN *len|U32 *flags
+
+Returns the label attached to a cop, and stores its length in bytes into
+C<*len>.  Upon return, C<*flags> will be set to either C<SVf_UTF8> or 0.
+
+=cut
+*/
+
 #define CopLABEL(c)  Perl_cop_fetch_label(aTHX_ (c), NULL, NULL)
 #define CopLABEL_len(c,len)  Perl_cop_fetch_label(aTHX_ (c), len, NULL)
 #define CopLABEL_len_flags(c,len,flags)  Perl_cop_fetch_label(aTHX_ (c), len, flags)
