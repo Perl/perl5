@@ -370,14 +370,22 @@ a string/length pair.
 =cut
 */
 
-/* concatenating with "" ensures that only literal strings are accepted as
- * argument */
-#define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
+/*
+=head1 Handy Values
 
-/* note that STR_WITH_LEN() can't be used as argument to macros or functions
- * that under some configurations might be macros, which means that it requires
- * the full Perl_xxx(aTHX_ ...) form for any API calls where it's used.
- */
+=for apidoc Amu|pair|STR_WITH_LEN|"literal string"
+
+Returns two comma separated tokens of the input literal string, and its length.
+This is convenience macro which helps out in some API calls.
+Note that it can't be used as an argument to macros or functions that under
+some configurations might be macros, which means that it requires the full
+Perl_xxx(aTHX_ ...) form for any API calls where it's used.
+
+=cut
+*/
+
+
+#define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
 
 /* STR_WITH_LEN() shortcuts */
 #define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
