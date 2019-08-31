@@ -1077,7 +1077,7 @@ p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-ExpRX	|bool	|grok_bslash_x	|NN char** s		 \
+EpRX	|bool	|grok_bslash_x	|NN char** s		 \
 				|NN const char* const send	 \
 				|NN UV* uv			 \
 				|NN const char** error_msg       \
@@ -1085,8 +1085,8 @@ ExpRX	|bool	|grok_bslash_x	|NN char** s		 \
 				|const bool strict               \
 				|const bool silence_non_portable \
 				|const bool utf8
-ExpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
-ExpRX	|bool	|grok_bslash_o	|NN char** s		 \
+EpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
+EpRX	|bool	|grok_bslash_o	|NN char** s		 \
 				|NN const char* const send	 \
 				|NN UV* uv			 \
 				|NN const char** error_msg       \
@@ -1094,7 +1094,7 @@ ExpRX	|bool	|grok_bslash_o	|NN char** s		 \
 				|const bool strict               \
 				|const bool silence_non_portable \
 				|const bool utf8
-ExiR	|char*|form_short_octal_warning|NN const char * const s  \
+EiR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
 EiRT	|I32	|regcurly	|NN const char *s
 #endif
@@ -1457,7 +1457,7 @@ S	|OP*	|refkids	|NULLOK OP* o|I32 type
 Ap	|void	|regdump	|NN const regexp* r
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 EXpR	|SV*	|_new_invlist_C_array|NN const UV* const list
-EXxp	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
+EXp	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \
@@ -1804,64 +1804,64 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
 				|const Size_t sv_count|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
-EXpRx	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
-EXpx	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
+EXpR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
+EXp	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 #ifdef PERL_IN_REGCOMP_C
-EixR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
-EixRT	|bool	|invlist_is_iterating|NN SV* const invlist
+EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
+EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
 #ifndef PERL_EXT_RE_BUILD
-EixRT	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
-EixRT	|UV	|invlist_max	|NN SV* const invlist
-ESx	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
-ESx	|void	|invlist_extend    |NN SV* const invlist|const UV len
-ESx	|void	|invlist_replace_list_destroys_src|NN SV *dest|NN SV *src
-EixRT	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
-Eix	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
-EixT	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
-EixRT	|IV	|invlist_previous_index|NN SV* const invlist
-EixT	|void	|invlist_trim	|NN SV* invlist
-Eix	|void	|invlist_clear	|NN SV* invlist
-Sx	|void	|initialize_invlist_guts|NN SV* invlist|const Size_t initial_size
+EiRT	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
+EiRT	|UV	|invlist_max	|NN SV* const invlist
+ES	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
+ES	|void	|invlist_extend    |NN SV* const invlist|const UV len
+ES	|void	|invlist_replace_list_destroys_src|NN SV *dest|NN SV *src
+EiRT	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
+Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
+EiT	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
+EiRT	|IV	|invlist_previous_index|NN SV* const invlist
+EiT	|void	|invlist_trim	|NN SV* invlist
+Ei	|void	|invlist_clear	|NN SV* invlist
+S	|void	|initialize_invlist_guts|NN SV* invlist|const Size_t initial_size
 #endif
-EixRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
-EixT	|void	|invlist_iterinit|NN SV* invlist
-ESxRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
-EixT	|void	|invlist_iterfinish|NN SV* invlist
-EixRT	|UV	|invlist_highest|NN SV* const invlist
-ExRS	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
+EiRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
+EiT	|void	|invlist_iterinit|NN SV* invlist
+ESRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
+EiT	|void	|invlist_iterfinish|NN SV* invlist
+EiRT	|UV	|invlist_highest|NN SV* const invlist
+ERS	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
-ESxR	|SV*	|invlist_contents|NN SV* const invlist		    \
+ESR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
 ESRT	|bool	|new_regcurly	|NN const char *s|NN const char *e
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
-EXmx	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
-EXpx	|void	|_invlist_intersection_maybe_complement_2nd \
+EXm	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
+EXp	|void	|_invlist_intersection_maybe_complement_2nd \
 		|NULLOK SV* const a|NN SV* const b          \
 		|const bool complement_b|NN SV** i
-EXmx	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
-EXpx	|void	|_invlist_union_maybe_complement_2nd        \
+EXm	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
+EXp	|void	|_invlist_union_maybe_complement_2nd        \
 		|NULLOK SV* const a|NN SV* const b          \
 		|const bool complement_b|NN SV** output
-EXmx	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
-EXpx	|void	|_invlist_invert|NN SV* const invlist
-EXxpR	|SV*	|_new_invlist	|IV initial_size
-EXxpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|UV start|UV end
-EXxpR	|SV*	|_setup_canned_invlist|const STRLEN size|const UV element0|NN UV** other_elements_ptr
+EXm	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
+EXp	|void	|_invlist_invert|NN SV* const invlist
+EXpR	|SV*	|_new_invlist	|IV initial_size
+EXpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|UV start|UV end
+EXpR	|SV*	|_setup_canned_invlist|const STRLEN size|const UV element0|NN UV** other_elements_ptr
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
-ExpX	|SV*	|invlist_clone	|NN SV* const invlist|NULLOK SV* newlist
+EpX	|SV*	|invlist_clone	|NN SV* const invlist|NULLOK SV* newlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
-EixRT	|UV*	|invlist_array	|NN SV* const invlist
-EixRT	|bool	|is_invlist	|NULLOK SV* const invlist
-EixRT	|bool*	|get_invlist_offset_addr|NN SV* invlist
-EixRT	|UV	|_invlist_len	|NN SV* const invlist
-ExiRT	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
-EXpxRT	|SSize_t|_invlist_search	|NN SV* const invlist|const UV cp
+EiRT	|UV*	|invlist_array	|NN SV* const invlist
+EiRT	|bool	|is_invlist	|NULLOK SV* const invlist
+EiRT	|bool*	|get_invlist_offset_addr|NN SV* invlist
+EiRT	|UV	|_invlist_len	|NN SV* const invlist
+EiRT	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
+EXpRT	|SSize_t|_invlist_search	|NN SV* const invlist|const UV cp
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-EXpx	|SV*	|_get_regclass_nonbitmap_data				   \
+EXp	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK const regexp *prog		   \
 				|NN const struct regnode *node		   \
 				|bool doinit				   \
@@ -1870,7 +1870,7 @@ EXpx	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK SV **output_invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
-EXxp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
+EXp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 				|NN const char* const indent \
 				|NN SV* const invlist
 #endif
@@ -1979,7 +1979,7 @@ AbpxD	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
 AMpd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 Ai	|UV	|_utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 ApdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
-px	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
+p	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
 
 AdMTp	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
 				|STRLEN curlen				    \
@@ -3015,7 +3015,7 @@ pT	|Malloc_t	|mem_log_free	|Malloc_t oldalloc|NN const char *filename|const int 
 SR	|HV *	|new_msg_hv |NN const char * const message		    \
 			    |U32 categories				    \
 			    |U32 flag
-SRx	|UV	|check_locale_boundary_crossing				    \
+SR	|UV	|check_locale_boundary_crossing				    \
 		|NN const U8* const p					    \
 		|const UV result					    \
 		|NN U8* const ustrp					    \
@@ -3026,12 +3026,12 @@ iR	|bool	|is_utf8_common_with_len|NN const U8 *const p		    \
 					|NN const U8 *const e		    \
 					|NULLOK SV* const invlist
 SR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
-SRx	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
+SR	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
 		|NN UV* max|NN UV* val|const bool wants_value		    \
 		|NN const U8* const typestr
 #endif
 
-EXixT	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
+EXiT	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
 
 Apd	|void	|sv_set_undef	|NN SV *sv
 Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
