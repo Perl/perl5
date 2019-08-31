@@ -52,6 +52,8 @@ Same as C<av_top_index()> or C<av_tindex()>.
 =for apidoc av_tindex
 Same as C<av_top_index()>.
 
+=for apidoc m|int|AvFILLp|AV* av
+
 =cut
 */
 
