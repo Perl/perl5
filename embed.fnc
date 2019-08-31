@@ -19,35 +19,59 @@
 : Lines in this file are of the form:
 :    flags|return_type|function_name|arg1|arg2|...|argN
 :
+: 'flags' is a string of single letters.  Most of the flags are meaningful only
+: to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
+: comments here don't include how Devel::PPPort or diag.t use them:
+:
 : A function taking no parameters will have no 'arg' elements.
 : A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
 :
 : The default without flags is to declare a function for internal perl-core use
-: only, not visible to XS code nor to Perl extensions.  Use the A and E flags to
-: modify this.  Most non-static functions should have the 'p' flag to avoid
-: namespace clashes with programs that embed perl.
+: only.  On some platforms, such as Linux and Darwin, all non-static functions
+: are currently externally visible.  Because of this, and also for programs
+: that embed perl, most non-static functions should have the 'p' flag to avoid
+: namespace clashes.
+:
+: Most entries here have a macro created to wrap them, and whose name doesn't
+: include the 'Perl_', or other prefix.
 :
 : Scattered around the perl source are lines of the form:
 :
 :   =for apidoc name
 :
-: and
+: followed by pod for that function.  The purpose of these is to tell
+: autodoc.pl where the documentation is for a function listed in this file.  It
+: uses the prototype from here and the pod from there in generating the
+: documentation in perlapi or perlintern.  The entries in this file that have
+: corresponding '=for apidoc' entries should have the flag 'd' set in this
+: file.
+:
+: There are also lines of this form scattered around:
 :
 :   =for apidoc flags|return_type|name|arg1|arg2|...|argN
 :
-: and with the same meanings as the lines in this file.  autodoc uses these
-: lines in conjunction with this file to construct perlapi.pod.  For entries of
-: the first form, there must be a corresponding entry in this file, and the
-: purpose of the line is to associate the pod accompanying it with the
-: interface defined in this file.  The second form is used to define the
-: interface for the documentation when there is no entry in this file, hence it
-: will be for something that isn't a non-static function: a macro of some kind,
-: a constant, or some other entity that it wishes to have documented.  (If
-: there is also an entry in this file it overrides the apidoc line, and
-: autodoc.pl will warn.) 'return_type' in these lines can be empty, unlike in
-: this file.  The entries in this file that have corresponding '=for apidoc'
-: entries should have the flag 'd' set in this file.
+: and with the same meanings as the lines in this file.  The 'name' in any such
+: line must not be the same as any in this file (i.e., no redundant
+: definitions), and one of the flags must be 'm', indicating this is a macro.
+: The lines following these are pod for the respective macro.  Since these are
+: macros, the arguments need not be legal C parameters.  To indicate this to
+: downstream software that inspects these lines, there are a few conventions:
+:  type    should be the entire argument name if it names a type
+:  cast    should be the entire argument name if it is a cast
+:  SP      should be the entire argument name if it is the stack pointer SP
+:  block   should be the entire argument name if it is a C brace-enclosed block
+:
+: The letters above are exact.  For example, you have to have 't', 'y', 'p',
+: and 'e' literally.  Here is an example:
+:   =for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
+:
+: Additionally, an argument can be some word(s) enclosed in double quotes to
+: indicate that it has to be a string, instead of a const char * const, like this
+:   =for apidoc Ama|SV*|newSVpvs|"string"
+:
+: Again, autodoc uses these lines to construct perlapi. 'return_type' in these
+: lines can be empty, unlike in this file.
 :
 : Devel::PPPort also looks at both this file and the '=for apidoc' lines.  In
 : part it is to construct lists of functions that are or are not backported.
@@ -247,14 +271,16 @@
 :             "#define foo Perl_foo",      rather than
 :             "#define foo(a,b,c) Perl_foo(aTHX_ a,b,c)
 :
-:   u  The macro's (it has to be a macro) parameters are unorthodox.  For
+:   u  The macro's (it has to be a macro) return value or parameters are
+:      unorthodox, and aren't in the list above of recognized weird ones.   For
 :      example, they aren't C parameters, or the macro expands to something
 :      that isn't a symbol.
 :
-:      For example, the expansion of aTHX_ includes a comma, so would have this
-:      flag; or some macros take preprocessor tokens, so would have this flag.
-:      This flag is an indication to downstream tools, such as Devel::PPPort,
-:      that this requires special handling.
+:      For example, the expansion of STR_WITH_LEN is a comma separated pair of
+:      values, so would have this flag; or some macros take preprocessor
+:      tokens, so would have this flag.  This flag is an indication to
+:      downstream tools, such as Devel::PPPort, that this requires special
+:      handling.
 :
 :   U  autodoc.pl will not output a usage example
 :
