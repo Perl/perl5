@@ -205,15 +205,6 @@ PERLVARA(I, sv_immortals, 4, SV)
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
 PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */
-
-/*
-=for apidoc Amn|yy_parser*|PL_parser
-
-The parser state when compiling code.
-
-=cut
-*/
-
 PERLVAR(I, parser,	yy_parser *)	/* current parser state */
 
 PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
