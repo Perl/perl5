@@ -779,7 +779,7 @@ Ap	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
 Ap	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
 				|I32 klen_i32|const int action|NULLOK SV *val \
 				|const U32 hash
-AMpod	|STRLEN	|hv_fill	|NN HV *const hv
+Apod	|STRLEN	|hv_fill	|NN HV *const hv
 Ap	|void	|hv_free_ent	|NN HV *hv|NULLOK HE *entry
 Apd	|I32	|hv_iterinit	|NN HV *hv
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
@@ -3336,10 +3336,10 @@ p	|void   |boot_core_mro
 ApoT	|void	|sys_init	|NN int* argc|NN char*** argv
 ApoT	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 ApoT	|void	|sys_term
-AMpxd	|const char *|cop_fetch_label|NN COP *const cop \
+Apxd	|const char *|cop_fetch_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c and the perl compiler
-AMpxd	|void|cop_store_label \
+Apxd	|void|cop_store_label \
 		|NN COP *const cop|NN const char *label|STRLEN len|U32 flags
 
 epo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr

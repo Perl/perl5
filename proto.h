@@ -2847,9 +2847,6 @@ PERL_CALLCONV void*	Perl_reentrant_retry(const char *f, ...);
 #define PERL_ARGS_ASSERT_REENTRANT_RETRY	\
 	assert(f)
 PERL_CALLCONV void	Perl_reentrant_size(pTHX);
-#ifndef NO_MATHOMS
-PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type);
-#endif
 PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *c, U32 flags);
 PERL_CALLCONV SV *	Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain, const char *key, U32 hash, U32 flags);
 #define PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PV	\
@@ -5236,6 +5233,11 @@ STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 fla
 #define PERL_ARGS_ASSERT_PAD_FINDLEX	\
 	assert(namepv); assert(cv); assert(out_name); assert(out_flags)
 STATIC void	S_pad_reset(pTHX);
+#endif
+#if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
+#ifndef NO_MATHOMS
+PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type);
+#endif
 #endif
 #if defined(PERL_IN_PERL_C)
 STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp);
