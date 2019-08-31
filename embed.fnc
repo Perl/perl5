@@ -459,9 +459,9 @@ Apd	|void	|cv_undef	|NN CV* cv
 p	|void	|cv_undef_flags	|NN CV* cv|U32 flags
 pd	|void	|cv_forget_slab	|NULLOK CV *cv
 Ap	|void	|cx_dump	|NN PERL_CONTEXT* cx
-Ap	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
+Aphd	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Ap	|void	|filter_del	|NN filter_t funcp
-ApR	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
+ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
 ApPR	|char**	|get_op_descs
 ApPR	|char**	|get_op_names
 : FIXME discussion on p5p
