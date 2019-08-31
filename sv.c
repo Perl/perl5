@@ -15071,16 +15071,15 @@ C<CLONEf_KEEP_PTR_TABLE> -
 C<perl_clone> keeps a ptr_table with the pointer of the old
 variable as a key and the new variable as a value,
 this allows it to check if something has been cloned and not
-clone it again but rather just use the value and increase the
-refcount.  If C<KEEP_PTR_TABLE> is not set then C<perl_clone> will kill
-the ptr_table using the function
-C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>,
-reason to keep it around is if you want to dup some of your own
-variable who are outside the graph perl scans, an example of this
-code is in F<threads.xs> create.
+clone it again, but rather just use the value and increase the
+refcount.
+If C<KEEP_PTR_TABLE> is not set then C<perl_clone> will kill the ptr_table
+using the function S<C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>>.
+A reason to keep it around is if you want to dup some of your own
+variables which are outside the graph that perl scans.
 
 C<CLONEf_CLONE_HOST> -
-This is a win32 thing, it is ignored on unix, it tells perls
+This is a win32 thing, it is ignored on unix, it tells perl's
 win32host code (which is c++) to clone itself, this is needed on
 win32 if you want to run two threads at the same time,
 if you just want to do some stuff in a separate perl interpreter
