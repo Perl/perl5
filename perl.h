@@ -6569,7 +6569,7 @@ expression, but with an empty argument list, like this:
      ...
  }
 
-=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED
+=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED|block
 
 This macro invokes the supplied statement or block within the context
 of a L</STORE_LC_NUMERIC_SET_TO_NEEDED> .. L</RESTORE_LC_NUMERIC> pair
@@ -6592,7 +6592,7 @@ is equivalent to:
 #endif
   }
 
-=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric
+=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric|block
 
 Same as L</WITH_LC_NUMERIC_SET_TO_NEEDED> with in_lc_numeric provided
 as the precalculated value of C<IN_LC(LC_NUMERIC)>. It is the caller's
