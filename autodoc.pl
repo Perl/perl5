@@ -40,6 +40,7 @@ my @specialized_docs = sort qw( perlguts
                                 perlxstut
                                 perlclib
                                 warnings
+                                perlapio
                               );
 my $other_places_api = join " ",    map { "L<$_>" } sort @specialized_docs, 'perlintern';
 my $other_places_intern = join " ", map { "L<$_>" } sort @specialized_docs, 'perlapi';

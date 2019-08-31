@@ -3025,36 +3025,36 @@ pxXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
 Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode
 
 #if defined(USE_PERLIO)
-Ap	|int	|PerlIO_close		|NULLOK PerlIO *f
+Apdh	|int	|PerlIO_close		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_fill		|NULLOK PerlIO *f
-Ap	|int	|PerlIO_fileno		|NULLOK PerlIO *f
-Ap	|int	|PerlIO_eof		|NULLOK PerlIO *f
-Ap	|int	|PerlIO_error		|NULLOK PerlIO *f
-Ap	|int	|PerlIO_flush		|NULLOK PerlIO *f
-Ap	|void	|PerlIO_clearerr	|NULLOK PerlIO *f
-Ap	|void	|PerlIO_set_cnt		|NULLOK PerlIO *f|SSize_t cnt
-Ap	|void	|PerlIO_set_ptrcnt	|NULLOK PerlIO *f|NULLOK STDCHAR *ptr \
+Apdh	|int	|PerlIO_fileno		|NULLOK PerlIO *f
+Apdh	|int	|PerlIO_eof		|NULLOK PerlIO *f
+Apdh	|int	|PerlIO_error		|NULLOK PerlIO *f
+Apdh	|int	|PerlIO_flush		|NULLOK PerlIO *f
+Apdh	|void	|PerlIO_clearerr	|NULLOK PerlIO *f
+Apdh	|void	|PerlIO_set_cnt		|NULLOK PerlIO *f|SSize_t cnt
+Apdh	|void	|PerlIO_set_ptrcnt	|NULLOK PerlIO *f|NULLOK STDCHAR *ptr \
 					|SSize_t cnt
-Ap	|void	|PerlIO_setlinebuf	|NULLOK PerlIO *f
-Ap	|SSize_t|PerlIO_read		|NULLOK PerlIO *f|NN void *vbuf \
+Apdh	|void	|PerlIO_setlinebuf	|NULLOK PerlIO *f
+Apdh	|SSize_t|PerlIO_read		|NULLOK PerlIO *f|NN void *vbuf \
 					|Size_t count
-Ap	|SSize_t|PerlIO_write		|NULLOK PerlIO *f|NN const void *vbuf \
+Apdh	|SSize_t|PerlIO_write		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
 Ap	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
-Ap	|Off_t	|PerlIO_tell		|NULLOK PerlIO *f
-Ap	|int	|PerlIO_seek		|NULLOK PerlIO *f|Off_t offset|int whence
+Apdh	|Off_t	|PerlIO_tell		|NULLOK PerlIO *f
+Apdh	|int	|PerlIO_seek		|NULLOK PerlIO *f|Off_t offset|int whence
 Xp	|void	|PerlIO_save_errno	|NULLOK PerlIO *f
 Xp	|void	|PerlIO_restore_errno	|NULLOK PerlIO *f
 
-Ap	|STDCHAR *|PerlIO_get_base	|NULLOK PerlIO *f
-Ap	|STDCHAR *|PerlIO_get_ptr	|NULLOK PerlIO *f
-ApR	|SSize_t	  |PerlIO_get_bufsiz	|NULLOK PerlIO *f
-ApR	|SSize_t	  |PerlIO_get_cnt	|NULLOK PerlIO *f
+Apdh	|STDCHAR *|PerlIO_get_base	|NULLOK PerlIO *f
+Apdh	|STDCHAR *|PerlIO_get_ptr	|NULLOK PerlIO *f
+ApRdh	|SSize_t	  |PerlIO_get_bufsiz	|NULLOK PerlIO *f
+ApRdh	|SSize_t	  |PerlIO_get_cnt	|NULLOK PerlIO *f
 
-ApR	|PerlIO *|PerlIO_stdin
-ApR	|PerlIO *|PerlIO_stdout
-ApR	|PerlIO *|PerlIO_stderr
+ApRdh	|PerlIO *|PerlIO_stdin
+ApRdh	|PerlIO *|PerlIO_stdout
+ApRdh	|PerlIO *|PerlIO_stderr
 #endif /* USE_PERLIO */
 
 : Only used in dump.c
