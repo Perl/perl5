@@ -2519,6 +2519,8 @@ Return the unsigned integer value of an SV, doing any necessary string
 conversion.  If C<flags> has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.
 Normally used via the C<SvUV(sv)> and C<SvUVx(sv)> macros.
 
+=for apidoc Amnh||SV_GMAGIC
+
 =cut
 */
 
@@ -3827,6 +3829,8 @@ C<SvSetMagicSV_nosteal>.
 This is the primary function for copying scalars, and most other
 copy-ish functions and macros use this underneath.
 
+=for apidoc Amnh||SV_NOSTEAL
+
 =cut
 */
 
@@ -5116,6 +5120,9 @@ and the realloc
 will be skipped (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>).
 
+=for apidoc Amnh||SV_SMAGIC
+=for apidoc Amnh||SV_HAS_TRAILING_NUL
+
 =cut
 */
 
@@ -5281,6 +5288,8 @@ with flags set to 0.
 This function is expected to be used to signal to perl that this SV is
 about to be written to, and any extra book-keeping needs to be taken care
 of.  Hence, it croaks on read-only values.
+
+=for apidoc Amnh||SV_COW_DROP_PV
 
 =cut
 */
@@ -9311,6 +9320,9 @@ C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
     #define newSVpvn_utf8(s, len, u)			\
 	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
 
+=for apidoc Amnh||SVf_UTF8
+=for apidoc Amnh||SVs_TEMP
+
 =cut
 */
 
@@ -10619,6 +10631,8 @@ C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
 (otherwise the decrementing is conditional on the reference count being
 different from one or the reference being a readonly SV).
 See C<L</SvROK_off>>.
+
+=for apidoc Amnh||SV_IMMEDIATE_UNREF
 
 =cut
 */
