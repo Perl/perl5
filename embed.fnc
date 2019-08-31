@@ -1540,7 +1540,7 @@ Ap	|void	|save_I16	|NN I16* intp
 Ap	|void	|save_I32	|NN I32* intp
 Ap	|void	|save_I8	|NN I8* bytep
 Ap	|void	|save_int	|NN int* intp
-Ap	|void	|save_item	|NN SV* item
+Apdh	|void	|save_item	|NN SV* item
 Ap	|void	|save_iv	|NN IV *ivp
 AbpD	|void	|save_list	|NN SV** sarg|I32 maxsarg
 AbpD	|void	|save_long	|NN long* longp

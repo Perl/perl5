@@ -1662,8 +1662,10 @@ Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
 
 =item C<void save_item(SV *item)>
 
-Duplicates the current value of C<SV>, on the exit from the current
-C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
+=for apidoc save_item
+
+Duplicates the current value of C<SV>. On the exit from the current
+C<ENTER>/C<LEAVE> I<pseudo-block> the value of C<SV> will be restored
 using the stored value.  It doesn't handle magic.  Use C<save_scalar> if
 magic is affected.
 
