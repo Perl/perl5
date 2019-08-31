@@ -2196,7 +2196,7 @@ Adop	|void	|custom_op_register	|NN Perl_ppaddr_t ppaddr \
 			|NN const XOP *xop
 
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
-Adpbm	|void	|sv_nolocking	|NULLOK SV *sv
+Adpb	|void	|sv_nolocking	|NULLOK SV *sv
 Adp	|bool	|sv_destroyable	|NULLOK SV *sv
 Adpb	|void	|sv_nounlocking	|NULLOK SV *sv
 Adp	|int	|nothreadhook

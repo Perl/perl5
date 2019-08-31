@@ -779,6 +779,9 @@
 #define sv_mortalcopy_flags(a,b)	Perl_sv_mortalcopy_flags(aTHX_ a,b)
 #define sv_newmortal()		Perl_sv_newmortal(aTHX)
 #define sv_newref(a)		Perl_sv_newref(aTHX_ a)
+#ifndef NO_MATHOMS
+#define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
+#endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #ifndef NO_MATHOMS
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
