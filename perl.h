@@ -533,12 +533,25 @@
 #endif
 
 /*
- * STMT_START { statements; } STMT_END;
- * can be used as a single statement, as in
- * if (x) STMT_START { ... } STMT_END; else ...
- *
- * Trying to select a version that gives no warnings...
- */
+=head1 Miscellaneous Functions
+
+=for apidoc AmnUu|void|STMT_START
+
+ STMT_START { statements; } STMT_END;
+
+can be used as a single statement, as in
+
+ if (x) STMT_START { ... } STMT_END; else ...
+
+These are often used in macro definitions.  Note that you can't return a value
+out of them.
+
+=for apidoc AmnUhu|void|STMT_END
+
+=cut
+
+ Trying to select a version that gives no warnings...
+*/
 #if !(defined(STMT_START) && defined(STMT_END))
 # ifdef PERL_USE_GCC_BRACE_GROUPS
 #   define STMT_START	(void)(	/* gcc supports "({ STATEMENTS; })" */
