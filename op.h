@@ -744,29 +744,29 @@ struct block_hooks {
 =for apidoc mx|U32|BhkFLAGS|BHK *hk
 Return the BHK's flags.
 
-=for apidoc mx|void *|BhkENTRY|BHK *hk|which
+=for apidoc mxu|void *|BhkENTRY|BHK *hk|which
 Return an entry from the BHK structure.  C<which> is a preprocessor token
 indicating which entry to return.  If the appropriate flag is not set
 this will return C<NULL>.  The type of the return value depends on which
 entry you ask for.
 
-=for apidoc Amx|void|BhkENTRY_set|BHK *hk|which|void *ptr
+=for apidoc Amxu|void|BhkENTRY_set|BHK *hk|which|void *ptr
 Set an entry in the BHK structure, and set the flags to indicate it is
 valid.  C<which> is a preprocessing token indicating which entry to set.
 The type of C<ptr> depends on the entry.
 
-=for apidoc Amx|void|BhkDISABLE|BHK *hk|which
+=for apidoc Amxu|void|BhkDISABLE|BHK *hk|which
 Temporarily disable an entry in this BHK structure, by clearing the
 appropriate flag.  C<which> is a preprocessor token indicating which
 entry to disable.
 
-=for apidoc Amx|void|BhkENABLE|BHK *hk|which
+=for apidoc Amxu|void|BhkENABLE|BHK *hk|which
 Re-enable an entry in this BHK structure, by setting the appropriate
 flag.  C<which> is a preprocessor token indicating which entry to enable.
 This will assert (under -DDEBUGGING) if the entry doesn't contain a valid
 pointer.
 
-=for apidoc mx|void|CALL_BLOCK_HOOKS|which|arg
+=for apidoc mxu|void|CALL_BLOCK_HOOKS|which|arg
 Call all the registered block hooks for type C<which>.  C<which> is a
 preprocessing token; the type of C<arg> depends on C<which>.
 
