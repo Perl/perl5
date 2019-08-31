@@ -44,11 +44,17 @@ my @specialized_docs = sort qw( perlguts
                                 perlcall
                                 perlfilter
                                 perlmroapi
+                                config.h
                               );
-my $other_places_api = join " ",    map { "L<$_>" } sort @specialized_docs, 'perlintern';
-my $other_places_intern = join " ", map { "L<$_>" } sort @specialized_docs, 'perlapi';
+sub name_in_pod($) {
+    my $name = shift;
+    return "F<$name>" if $name =~ /\./;
+    return "L<$name>";
+}
+my $other_places_api = join " ",    map { name_in_pod($_) } sort @specialized_docs, 'perlintern';
+my $other_places_intern = join " ", map { name_in_pod($_) } sort @specialized_docs, 'perlapi';
 
-@specialized_docs = map { "L<$_>" } sort @specialized_docs;
+@specialized_docs = map { name_in_pod($_) } sort @specialized_docs;
 $specialized_docs[-1] =~ s/^/and /;
 my $specialized_docs = join ", ", @specialized_docs;
 
