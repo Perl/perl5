@@ -1514,8 +1514,8 @@ Amp	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
 Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 				 |const U32 flags
 Ap	|I32	|save_alloc	|I32 size|I32 pad
-Ap	|void	|save_aptr	|NN AV** aptr
-Ap	|AV*	|save_ary	|NN GV* gv
+Apdh	|void	|save_aptr	|NN AV** aptr
+Apdh	|AV*	|save_ary	|NN GV* gv
 Ap	|void	|save_bool	|NN bool* boolp
 Ap	|void	|save_clearsv	|NN SV** svp
 Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
@@ -1531,31 +1531,31 @@ Ap	|void	|save_generic_svref|NN SV** sptr
 Ap	|void	|save_generic_pvref|NN char** str
 Ap	|void	|save_shared_pvref|NN char** str
 Adp	|void	|save_gp	|NN GV* gv|I32 empty
-Ap	|HV*	|save_hash	|NN GV* gv
+Apdh	|HV*	|save_hash	|NN GV* gv
 Ap	|void	|save_hints
 Amp	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
 Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
-Ap	|void	|save_hptr	|NN HV** hptr
+Apdh	|void	|save_hptr	|NN HV** hptr
 Ap	|void	|save_I16	|NN I16* intp
 Ap	|void	|save_I32	|NN I32* intp
 Ap	|void	|save_I8	|NN I8* bytep
 Ap	|void	|save_int	|NN int* intp
 Apdh	|void	|save_item	|NN SV* item
 Ap	|void	|save_iv	|NN IV *ivp
-AbpD	|void	|save_list	|NN SV** sarg|I32 maxsarg
+AbpDdh	|void	|save_list	|NN SV** sarg|I32 maxsarg
 AbpD	|void	|save_long	|NN long* longp
 ApMb	|void	|save_mortalizesv|NN SV* sv
 AbpD	|void	|save_nogv	|NN GV* gv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
 ApMb	|void	|save_op
-Ap	|SV*	|save_scalar	|NN GV* gv
+Apdh	|SV*	|save_scalar	|NN GV* gv
 Ap	|void	|save_pptr	|NN char** pptr
 Ap	|void	|save_vptr	|NN void *ptr
 Ap	|void	|save_re_context
 Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Xp	|void	|save_strlen	|NN STRLEN* ptr
-Ap	|SV*	|save_svref	|NN SV** sptr
+Apdh	|SV*	|save_svref	|NN SV** sptr
 Axpo	|void	|savetmps
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 Ap	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
