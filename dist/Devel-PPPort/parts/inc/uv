@@ -570,7 +570,8 @@ else {
     # deliberately the first test.
     require Config; import Config;
     use vars '%Config';
-    if ($Config{ccflags} =~ /-DDEBUGGING/) {
+    if ($Config{ccflags} =~ /-DDEBUGGING/
+        || $^O eq 'VMS' && $Config{usedebugging_perl} eq 'Y') {
         shift @buf_tests;
         ok(1, 1) for 1..5;
     }
