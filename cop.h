@@ -190,7 +190,7 @@ associated with the key.
     Perl_refcounted_he_fetch_pvn(aTHX_ cophh, keypv, keylen, hash, flags)
 
 /*
-=for apidoc Amx|SV *|cophh_fetch_pvs|const COPHH *cophh|"literal string" key|U32 flags
+=for apidoc Amx|SV *|cophh_fetch_pvs|const COPHH *cophh|"key"|U32 flags
 
 Like L</cophh_fetch_pvn>, but takes a literal string instead
 of a string/length pair, and no precomputed hash.
@@ -296,7 +296,7 @@ be stored with referential integrity, but will be coerced to strings.
     Perl_refcounted_he_new_pvn(aTHX_ cophh, keypv, keylen, hash, value, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_store_pvs|const COPHH *cophh|"literal string" key|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pvs|const COPHH *cophh|"key"|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a literal string instead
 of a string/length pair, and no precomputed hash.
@@ -353,7 +353,7 @@ hash of the key string, or zero if it has not been precomputed.
 	(SV *)NULL, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_delete_pvs|const COPHH *cophh|"literal string" key|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pvs|const COPHH *cophh|"key"|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a literal string instead
 of a string/length pair, and no precomputed hash.
@@ -493,7 +493,7 @@ associated with the key.
     cophh_fetch_pvn(CopHINTHASH_get(cop), keypv, keylen, hash, flags)
 
 /*
-=for apidoc Am|SV *|cop_hints_fetch_pvs|const COP *cop|"literal string" key|U32 flags
+=for apidoc Am|SV *|cop_hints_fetch_pvs|const COP *cop|"key"|U32 flags
 
 Like L</cop_hints_fetch_pvn>, but takes a literal string
 instead of a string/length pair, and no precomputed hash.
