@@ -128,6 +128,8 @@ my ($embed, $core, $ext, $api) = setup_embed();
 					    if $flags =~ /M/ && $flags !~ /p/;
 	die_at_end "For '$plain_func', b and m flags are mutually exclusive"
 	         . " (try M flag)" if $flags =~ /b/ && $flags =~ /m/;
+	die_at_end "For '$plain_func', b flag without M flag requires D flag"
+			    if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
 
 	$func = full_name($plain_func, $flags);
 	$ret = "";
