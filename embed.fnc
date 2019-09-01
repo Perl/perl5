@@ -103,15 +103,18 @@
 :      kept only to not have to change legacy applications that call them.  If
 :      there are no such legacy applications in a Perl installation for all
 :      functions flagged with this, the installation can run Configure with the
-:      -Accflags='-DNO_MATHOMS' parameter to not even compile them.  If there
-:      is a macro form of this function that provides equivalent functionality
-:      (using a different implementation), also specify the 'm' flag.  The 'b'
-:      functions are normally moved to mathoms.c, but if circumstances dictate
-:      otherwise, they can be anywhere, provided the whole function is wrapped
-:      with
-:       #ifndef NO_MATHOMS
-:       ...
-:       #endif
+:      -Accflags='-DNO_MATHOMS' parameter to not even compile them.
+:
+:      Sometimes the function has been subsumed by a more general one (say, by
+:      adding a flags parameter), and a macro exists with the original API, and
+:      it calls the new function, bypassing this one, and the original 'Perl_'
+:      form is being deprecated.  In this case also specify the 'M' flag.  The
+:      'b' functions are normally moved to mathoms.c, but if circumstances
+:      dictate otherwise, they can be anywhere, provided the whole function is
+:      wrapped with
+:	    #ifndef NO_MATHOMS
+:	    ...
+:	    #endif
 :
 :      Note that this flag no longer automatically adds a 'Perl_' prefix to the
 :      name.  Additionally specify 'p' to do that.
