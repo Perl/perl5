@@ -92,7 +92,7 @@
 :      If the function is only exported for use in a public macro, see X.
 :
 :   a  Allocates memory a la malloc/calloc.  Also implies "R".
-:      This flag should only be on functions which return 'empty' memory
+:      This flag should only be on a function which returns 'empty' memory
 :      which has no other pointers to it, and which does not contain
 :      any pointers to other things. So for example realloc() can't be
 :      'a'.
