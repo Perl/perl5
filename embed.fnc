@@ -124,7 +124,7 @@
 :      is compiled with -DNO_MATHOMS; otherwise these happen:
 :         add entry to the list of exported symbols;
 :         create PERL_ARGS_ASSERT_foo;
-:	  add embed.h entry (unless overridden by the 'm' flag)
+:	  add embed.h entry (unless overridden by the 'o' flag)
 :
 :   D  Function is deprecated:
 :
