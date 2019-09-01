@@ -79,9 +79,13 @@ Perl 的知識, 以及 Unicode 的使用方式. 不過, 外部的資源相當豐
 
 =over 4
 
+=item L<https://www.perl.org/>
+
+Perl 的首頁
+
 =item L<https://www.perl.com/>
 
-Perl 的首頁 (由歐萊禮公司維護)
+由 Perl 基金會所營運的文章輯錄
 
 =item L<https://www.cpan.org/>
 
