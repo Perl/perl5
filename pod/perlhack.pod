@@ -145,7 +145,7 @@ L<http://archive.develooper.com/perl5-porters@perl.org/>.
 
 The perl5-changes mailing list receives a copy of each patch that gets
 submitted to the maintenance and development branches of the perl
-repository.  See L<http://lists.perl.org/list/perl5-changes.html> for
+repository.  See L<https://lists.perl.org/list/perl5-changes.html> for
 subscription and archive information.
 
 =head2 #p5p on IRC

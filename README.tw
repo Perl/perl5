@@ -50,7 +50,7 @@ Perl 也內附了 "piconv", 一支完全以 Perl 寫成的字符轉換工具程�
 
 =head2 額外的中文編碼
 
-如果需要更多的中文編碼, 可以從 CPAN (L<http://www.cpan.org/>) 下載
+如果需要更多的中文編碼, 可以從 CPAN (L<https://www.cpan.org/>) 下載
 Encode::HanExtra 模組. 它目前提供下列編碼方式:
 
     cccii	1980 年文建會的中文資訊交換碼
