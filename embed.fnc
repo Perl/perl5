@@ -1,7 +1,7 @@
 : BEGIN{die "You meant to run regen/embed.pl"} # Stop early if fed to perl.
 :
 : WARNING:  The meanings of some flags have been changed as of v5.31.0
-
+:
 : This file is known to be processed by regen/embed.pl, autodoc.pl,
 : makedef.pl, Devel::PPPort, and porting/diag.t.
 :
@@ -10,7 +10,7 @@
 : compiler the function interfaces, and embed.h to create macros that present a
 : uniform interface to C code for the functions, regardless of, say, whether
 : the perl is threaded or not.
-
+:
 : Static functions need not appear here, but there is benefit to declaring them
 : here, as it generally handles the thread context parameter invisibly, as well
 : as making sure a PERL_ARGS_ASSERT_foo macro is defined, which can save you
@@ -146,7 +146,7 @@
 :         2) be combined with the "X" flag.
 :
 :   e  Not exported
-
+:
 :         suppress entry in the list of exported symbols
 :
 :   f  Function takes a format string. If the function name =~ qr/strftime/
@@ -201,7 +201,7 @@
 :   O  Has a perl_ compatibility macro.
 :
 :      The really OLD name for API funcs.
-
+:
 :      autodoc.pl adds a note that the perl_ form of this function is
 :      deprecated.
 :
