@@ -30,6 +30,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="tonyc" id="368ac47cccd4ffca6e83a26289c152a32c2ea385" ticket="134035" desc="(perl #134035) ensure sv_gets() handles a signal handler modifying sv"/>
 
+<commit votes="tonyc" id="05a03c0da6f3694904885fa1629a6e35e75d2875" ticket="134390" desc="(perl #134390) don't leak the SV we just created on an early return"/>
+
 </div>
 
 <div><h3>Security Fixes</h3>

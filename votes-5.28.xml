@@ -19,6 +19,8 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
+<commit votes="tonyc" id="05a03c0da6f3694904885fa1629a6e35e75d2875" ticket="134390" desc="(perl #134390) don't leak the SV we just created on an early return"/>
+
 </div>
 
 <div><h3>Security Fixes</h3>
