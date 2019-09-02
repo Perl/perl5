@@ -170,6 +170,20 @@ START_MY_CXT
 #  undef gettimeofday
 #  define gettimeofday(tp, not_used) _gettimeofday(aTHX_ tp, not_used)
 
+#  undef GetSystemTimePreciseAsFileTime
+#  define GetSystemTimePreciseAsFileTime(out) _GetSystemTimePreciseAsFileTime(aTHX_ out)
+
+#  undef clock_gettime
+#  define clock_gettime(clock_id, tp) _clock_gettime(aTHX_ clock_id, tp)
+
+#  undef clock_getres
+#  define clock_getres(clock_id, tp) _clock_getres(clock_id, tp)
+
+#  ifndef CLOCK_REALTIME
+#    define CLOCK_REALTIME  1
+#    define CLOCK_MONOTONIC 2
+#  endif
+
 /* If the performance counter delta drifts more than 0.5 seconds from the
  * system time then we recalibrate to the system time.  This means we may
  * move *backwards* in time! */
@@ -179,15 +193,17 @@ START_MY_CXT
  * Many PC clocks just seem to be so bad. */
 #  define MAX_PERF_COUNTER_TICKS Const64(300000000) /* 300 seconds */
 
-static int
-_gettimeofday(pTHX_ struct timeval *tp, void *not_used)
+/*
+ * Windows 8 introduced GetSystemTimePreciseAsFileTime(), but currently we have
+ * to support older systems, so for now we provide our own implementation.
+ * In the future we will switch to the real deal.
+ */
+static void
+_GetSystemTimePreciseAsFileTime(pTHX_ FILETIME *out)
 {
     dMY_CXT;
-
-    unsigned __int64 ticks;
     FT_t ft;
 
-    PERL_UNUSED_ARG(not_used);
     if (MY_CXT.run_count++ == 0 ||
         MY_CXT.base_systime_as_filetime.ft_i64 > MY_CXT.reset_time) {
 
@@ -199,6 +215,7 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
     }
     else {
         __int64 diff;
+        unsigned __int64 ticks;
         QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
         ticks -= MY_CXT.base_ticks;
         ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
@@ -212,6 +229,20 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
         }
     }
 
+    *out = ft.ft_val;
+
+    return;
+}
+
+static int
+_gettimeofday(pTHX_ struct timeval *tp, void *not_used)
+{
+    FT_t ft;
+
+    PERL_UNUSED_ARG(not_used);
+
+    GetSystemTimePreciseAsFileTime(&ft.ft_val);
+
     /* seconds since epoch */
     tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(IV_1E7));
 
@@ -220,6 +251,68 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
 
     return 0;
 }
+
+static int
+_clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
+{
+    FT_t ft;
+
+    switch (clock_id) {
+    case CLOCK_REALTIME: {
+        FT_t ft;
+
+        GetSystemTimePreciseAsFileTime(&ft.ft_val);
+        tp->tv_sec = (time_t)((ft.ft_i64 - EPOCH_BIAS) / IV_1E7);
+        tp->tv_nsec = (long)((ft.ft_i64 % IV_1E7) * 100);
+        break;
+    }
+    case CLOCK_MONOTONIC: {
+        unsigned __int64 freq, ticks;
+
+        QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+        QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
+
+        tp->tv_sec = (time_t)(ticks / freq);
+        tp->tv_nsec = (long)((IV_1E9 * (ticks % freq)) / freq);
+        break;
+    }
+    default:
+        errno = EINVAL;
+        return 1;
+    }
+
+    return 0;
+}
+
+static int
+_clock_getres(clockid_t clock_id, struct timespec *tp)
+{
+    unsigned __int64 freq, qpc_res_ns;
+
+    QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+    qpc_res_ns = IV_1E9 > freq ? IV_1E9 / freq : 1;
+
+    switch (clock_id) {
+    case CLOCK_REALTIME:
+        tp->tv_sec = 0;
+        /* the resolution can't be smaller than 100ns because our implementation
+         * of CLOCK_REALTIME is using FILETIME internally */
+        tp->tv_nsec = (long)(qpc_res_ns > 100 ? qpc_res_ns : 100);
+        break;
+
+    case CLOCK_MONOTONIC:
+        tp->tv_sec = 0;
+        tp->tv_nsec = (long)qpc_res_ns;
+        break;
+
+    default:
+        errno = EINVAL;
+        return 1;
+    }
+
+    return 0;
+}
+
 #endif /* #if defined(WIN32) || defined(CYGWIN_WITH_W32API) */
 
 #if !defined(HAS_GETTIMEOFDAY) && defined(VMS)

@@ -1020,6 +1020,9 @@ sub main {
         1 while unlink("define");
         if ($^O =~ /Win32/i) {
             DEFINE('SELECT_IS_BROKEN');
+            # we provide our own implementations of those functions on win32
+            DEFINE('TIME_HIRES_CLOCK_GETTIME');
+            DEFINE('TIME_HIRES_CLOCK_GETRES');
             $LIBS = [];
             print "System is $^O, skipping full configure...\n";
             open(XDEFINE, '>', 'xdefine') or die "$0: Cannot create xdefine: $!\n";
