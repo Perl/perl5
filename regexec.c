@@ -10341,6 +10341,7 @@ S_to_byte_substr(pTHX_ regexp *prog)
 	    && !prog->substrs->data[i].substr) {
 	    SV* sv = newSVsv(prog->substrs->data[i].utf8_substr);
 	    if (! sv_utf8_downgrade(sv, TRUE)) {
+                SvREFCNT_dec_NN(sv);
                 return FALSE;
             }
             if (SvVALID(prog->substrs->data[i].utf8_substr)) {
