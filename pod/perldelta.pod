@@ -378,6 +378,12 @@ This reverts a change in behaviour inadvertently introduced in perl
 5.30.0 intended to improve precision when converting a string to a
 floating point number. [perl #134230]
 
+=item *
+
+Matching a non-C<SVf_UTF8> string against a regular expression
+containing unicode literals could leak a SV on each match attempt.
+[perl #134390]
+
 =back
 
 =head1 Known Problems
