@@ -4219,9 +4219,23 @@ OUTPUT:
     RETVAL
 
 char *
+SvPVbyte_nomg(SV *sv)
+CODE:
+    RETVAL = SvPVbyte_nomg(sv, PL_na);
+OUTPUT:
+    RETVAL
+
+char *
 SvPVutf8(SV *sv)
 CODE:
     RETVAL = SvPVutf8_nolen(sv);
+OUTPUT:
+    RETVAL
+
+char *
+SvPVutf8_nomg(SV *sv)
+CODE:
+    RETVAL = SvPVutf8_nomg(sv, PL_na);
 OUTPUT:
     RETVAL
 

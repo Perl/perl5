@@ -1606,8 +1606,10 @@ Apd	|NV	|sv_2nv_flags	|NN SV *const sv|const I32 flags
 pxd	|SV*	|sv_2num	|NN SV *const sv
 Apmb	|char*	|sv_2pv		|NN SV *sv|NULLOK STRLEN *lp
 Apd	|char*	|sv_2pv_flags	|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
-Apd	|char*	|sv_2pvutf8	|NN SV *sv|NULLOK STRLEN *const lp
-Apd	|char*	|sv_2pvbyte	|NN SV *sv|NULLOK STRLEN *const lp
+Apdmb	|char*	|sv_2pvutf8	|NN SV *sv|NULLOK STRLEN *const lp
+Ap	|char*	|sv_2pvutf8_flags	|NN SV *sv|NULLOK STRLEN *const lp|const U32 flags
+Apdmb	|char*	|sv_2pvbyte	|NN SV *sv|NULLOK STRLEN *const lp
+Ap	|char*	|sv_2pvbyte_flags	|NN SV *sv|NULLOK STRLEN *const lp|const U32 flags
 Abp	|char*	|sv_pvn_nomg	|NN SV* sv|NULLOK STRLEN* lp
 Apmb	|UV	|sv_2uv		|NN SV *sv
 Apd	|UV	|sv_2uv_flags	|NN SV *const sv|const I32 flags
@@ -2114,7 +2116,9 @@ ApmdbR	|char*	|sv_pvutf8	|NN SV *sv
 ApmdbR	|char*	|sv_pvbyte	|NN SV *sv
 Apmdb	|STRLEN	|sv_utf8_upgrade|NN SV *sv
 Amd	|STRLEN	|sv_utf8_upgrade_nomg|NN SV *sv
-Apd	|bool	|sv_utf8_downgrade|NN SV *const sv|const bool fail_ok
+Apdmb	|bool	|sv_utf8_downgrade|NN SV *const sv|const bool fail_ok
+Amd	|bool	|sv_utf8_downgrade_nomg|NN SV *const sv|const bool fail_ok
+Apd	|bool	|sv_utf8_downgrade_flags|NN SV *const sv|const bool fail_ok|const U32 flags
 Apd	|void	|sv_utf8_encode |NN SV *const sv
 Apd	|bool	|sv_utf8_decode |NN SV *const sv
 Apdmb	|void	|sv_force_normal|NN SV *sv
