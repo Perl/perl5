@@ -378,6 +378,12 @@ with unexpected values on the stack.  [perl #133989]
 sv_gets() now recovers better if the target SV is modified by a signal
 handler.  [perl #134035]
 
+=item *
+
+Matching a non-C<SVf_UTF8> string against a regular expression
+containing unicode literals could leak a SV on each match attempt.
+[perl #134390]
+
 =back
 
 =head1 Known Problems
