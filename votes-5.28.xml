@@ -40,8 +40,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Build and Installation Fixes</h3>
 
 These two requested off-list by Andreas K. Huettel for Gentoo releases:
-<commit votes="steveh tonyc" id="fb5f378b17e3b41db03064c19b9205db64a3354c" ticket="133706" desc="(perl #133706) remove exploit code from Storable"/>
-<commit votes="steveh tonyc" id="2a0bbd31bbcc94c7c511f9575df619c5fdf3164c" ticket="133708" desc="(perl #133708) remove build-time probing for stack limits for Storable"/>
+<commit votes="steveh tonyc bingos" id="fb5f378b17e3b41db03064c19b9205db64a3354c" ticket="133706" desc="(perl #133706) remove exploit code from Storable"/>
+<commit votes="steveh tonyc bingos" id="2a0bbd31bbcc94c7c511f9575df619c5fdf3164c" ticket="133708" desc="(perl #133708) remove build-time probing for stack limits for Storable"/>
 
 </div>
 
