@@ -3360,7 +3360,7 @@ Perl_get_context(void)
     dVAR;
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
-    int error = pthread_getspecific(PL_thr_key, &t)
+    int error = pthread_getspecific(PL_thr_key, &t);
     if (error)
 	Perl_croak_nocontext("panic: pthread_getspecific, error=%d", error);
     return (void*)t;
