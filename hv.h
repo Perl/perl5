@@ -263,6 +263,16 @@ C<SV*>.
 #  define Nullhv Null(HV*)
 #endif
 #define HvARRAY(hv)	((hv)->sv_u.svu_hash)
+
+/*
+
+=for apidoc Am|STRLEN|HvFILL|HV *const hv
+
+See L</hv_fill>.
+
+=cut
+
+*/
 #define HvFILL(hv)	Perl_hv_fill(aTHX_ MUTABLE_HV(hv))
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 /* This quite intentionally does no flag checking first. That's your
@@ -565,7 +575,7 @@ struct refcounted_he {
 };
 
 /*
-=for apidoc m|SV *|refcounted_he_fetch_pvs|const struct refcounted_he *chain|"literal string" key|U32 flags
+=for apidoc m|SV *|refcounted_he_fetch_pvs|const struct refcounted_he *chain|"key"|U32 flags
 
 Like L</refcounted_he_fetch_pvn>, but takes a literal string
 instead of a string/length pair, and no precomputed hash.
@@ -577,7 +587,7 @@ instead of a string/length pair, and no precomputed hash.
     Perl_refcounted_he_fetch_pvn(aTHX_ chain, STR_WITH_LEN(key), 0, flags)
 
 /*
-=for apidoc m|struct refcounted_he *|refcounted_he_new_pvs|struct refcounted_he *parent|"literal string" key|SV *value|U32 flags
+=for apidoc m|struct refcounted_he *|refcounted_he_new_pvs|struct refcounted_he *parent|"key"|SV *value|U32 flags
 
 Like L</refcounted_he_new_pvn>, but takes a literal string
 instead of a string/length pair, and no precomputed hash.

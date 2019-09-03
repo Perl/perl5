@@ -227,6 +227,12 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the binary
 number may use C<"_"> characters to separate digits.
 
+=for apidoc Amnh||PERL_SCAN_ALLOW_UNDERSCORES
+=for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
+=for apidoc Amnh||PERL_SCAN_GREATER_THAN_UV_MAX
+=for apidoc Amnh||PERL_SCAN_SILENT_ILLDIGIT
+=for apidoc Amnh||PERL_SCAN_TRAILING
+
 =cut
 
 Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
@@ -677,6 +683,13 @@ possibly |-ed with C<IS_NUMBER_TRAILING>.
 If an infinity or a not-a-number is recognized, C<*sp> will point to
 one byte past the end of the recognized string.  If the recognition fails,
 zero is returned, and C<*sp> will not move.
+
+=for apidoc Amn|bool|IS_NUMBER_GREATER_THAN_UV_MAX
+=for apidoc Amn|bool|IS_NUMBER_INFINITY
+=for apidoc Amn|bool|IS_NUMBER_IN_UV
+=for apidoc Amn|bool|IS_NUMBER_NAN
+=for apidoc Amn|bool|IS_NUMBER_NEG
+=for apidoc Amn|bool|IS_NUMBER_NOT_INT
 
 =cut
 */

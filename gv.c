@@ -693,6 +693,8 @@ visible to Perl code.  So when calling C<call_sv>, you should not use
 the GV directly; instead, you should use the method's CV, which can be
 obtained from the GV with the C<GvCV> macro.
 
+=for apidoc Amnh||GV_SUPER
+
 =cut
 */
 
@@ -1435,6 +1437,8 @@ The most important of which are probably C<GV_ADD> and C<SVf_UTF8>.
 
 Note, use of C<gv_stashsv> instead of C<gv_stashpvn> where possible is strongly
 recommended for performance reasons.
+
+=for apidoc Amnh||GV_ADD
 
 =cut
 */

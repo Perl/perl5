@@ -533,12 +533,25 @@
 #endif
 
 /*
- * STMT_START { statements; } STMT_END;
- * can be used as a single statement, as in
- * if (x) STMT_START { ... } STMT_END; else ...
- *
- * Trying to select a version that gives no warnings...
- */
+=head1 Miscellaneous Functions
+
+=for apidoc AmnUu|void|STMT_START
+
+ STMT_START { statements; } STMT_END;
+
+can be used as a single statement, as in
+
+ if (x) STMT_START { ... } STMT_END; else ...
+
+These are often used in macro definitions.  Note that you can't return a value
+out of them.
+
+=for apidoc AmnUhu|void|STMT_END
+
+=cut
+
+ Trying to select a version that gives no warnings...
+*/
 #if !(defined(STMT_START) && defined(STMT_END))
 # ifdef PERL_USE_GCC_BRACE_GROUPS
 #   define STMT_START	(void)(	/* gcc supports "({ STATEMENTS; })" */
@@ -2482,6 +2495,58 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
 #endif
 
+/*
+=head1 Numeric functions
+
+=for apidoc AmnUh||PERL_INT_MIN
+=for apidoc AmnUh||PERL_LONG_MAX
+=for apidoc AmnUh||PERL_LONG_MIN
+=for apidoc AmnUh||PERL_QUAD_MAX
+=for apidoc AmnUh||PERL_SHORT_MAX
+=for apidoc AmnUh||PERL_SHORT_MIN
+=for apidoc AmnUh||PERL_UCHAR_MAX
+=for apidoc AmnUh||PERL_UCHAR_MIN
+=for apidoc AmnUh||PERL_UINT_MAX
+=for apidoc AmnUh||PERL_ULONG_MAX
+=for apidoc AmnUh||PERL_ULONG_MIN
+=for apidoc AmnUh||PERL_UQUAD_MAX
+=for apidoc AmnUh||PERL_UQUAD_MIN
+=for apidoc AmnUh||PERL_USHORT_MAX
+=for apidoc AmnUh||PERL_USHORT_MIN
+=for apidoc AmnUh||PERL_QUAD_MIN
+=for apidoc AmnU||PERL_INT_MAX
+This and
+C<PERL_INT_MIN>,
+C<PERL_LONG_MAX>,
+C<PERL_LONG_MIN>,
+C<PERL_QUAD_MAX>,
+C<PERL_SHORT_MAX>,
+C<PERL_SHORT_MIN>,
+C<PERL_UCHAR_MAX>,
+C<PERL_UCHAR_MIN>,
+C<PERL_UINT_MAX>,
+C<PERL_ULONG_MAX>,
+C<PERL_ULONG_MIN>,
+C<PERL_UQUAD_MAX>,
+C<PERL_UQUAD_MIN>,
+C<PERL_USHORT_MAX>,
+C<PERL_USHORT_MIN>,
+C<PERL_QUAD_MIN>
+give the largest and smallest number representable in the current
+platform in variables of the corresponding types.
+
+For signed types, the smallest representable number is the most negative
+number, the one furthest away from zero.
+
+For C99 and later compilers, these correspond to things like C<INT_MAX>, which
+are available to the C code.  But these constants, furnished by Perl,
+allow code compiled on earlier compilers to portably have access to the same
+constants.
+
+=cut
+
+*/
+
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
@@ -3514,8 +3579,25 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #else
 #  define EXPECT(expr,val)                  (expr)
 #endif
+
+/*
+=head1 Miscellaneous Functions
+
+=for apidoc AmU|bool|LIKELY|const bool expr
+
+Returns the input unchanged, but at the same time it gives a branch prediction
+hint to the compiler that this condition is likely to be true.
+
+=for apidoc AmU|bool|UNLIKELY|const bool expr
+
+Returns the input unchanged, but at the same time it gives a branch prediction
+hint to the compiler that this condition is likely to be false.
+
+=cut
+*/
 #define LIKELY(cond)                        EXPECT(cBOOL(cond),TRUE)
 #define UNLIKELY(cond)                      EXPECT(cBOOL(cond),FALSE)
+
 #ifdef HAS_BUILTIN_CHOOSE_EXPR
 /* placeholder */
 #endif
@@ -6116,6 +6198,27 @@ typedef struct am_table_short AMTS;
 #  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
                         cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
+/*
+=head1 Locale-related functions and macros
+
+=for apidoc Amn|bool|IN_LOCALE
+
+Evaluates to TRUE if the plain locale pragma without a parameter (S<C<use
+locale>>) is in effect.
+
+=for apidoc Amn|bool|IN_LOCALE_COMPILETIME
+
+Evaluates to TRUE if, when compiling a perl program (including an C<eval>) if
+the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
+
+=for apidoc Amn|bool|IN_LOCALE_RUNTIME
+
+Evaluates to TRUE if, when executing a perl program (including an C<eval>) if
+the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
+
+=cut
+*/
+
 #  define IN_LOCALE                                                         \
         (IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
 #  define IN_SOME_LOCALE_FORM                                               \
@@ -6466,7 +6569,7 @@ expression, but with an empty argument list, like this:
      ...
  }
 
-=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED
+=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED|block
 
 This macro invokes the supplied statement or block within the context
 of a L</STORE_LC_NUMERIC_SET_TO_NEEDED> .. L</RESTORE_LC_NUMERIC> pair
@@ -6489,7 +6592,7 @@ is equivalent to:
 #endif
   }
 
-=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric
+=for apidoc Am|void|WITH_LC_NUMERIC_SET_TO_NEEDED_IN|bool in_lc_numeric|block
 
 Same as L</WITH_LC_NUMERIC_SET_TO_NEEDED> with in_lc_numeric provided
 as the precalculated value of C<IN_LC(LC_NUMERIC)>. It is the caller's
@@ -6654,7 +6757,33 @@ cannot have changed since the precalculation.
 #endif /* !USE_LOCALE_NUMERIC */
 
 #define Atof				my_atof
-/* XXX document this , maybe other similar ones*/
+
+/*
+
+=head1 Numeric functions
+
+=for apidoc AmTR|NV|Strtod|NN const char * const s|NULLOK char ** e
+
+This is a synonym for L</my_strtod>.
+
+=for apidoc AmTR|NV|Strtol|NN const char * const s|NULLOK char ** e|int base
+
+Platform and configuration independent C<strtol>.  This expands to the
+appropriate C<strotol>-like function based on the platform and F<Configure>
+options>.  For example it could expand to C<strtoll> or C<strtoq> instead of
+C<strtol>.
+
+=for apidoc AmTR|NV|Strtoul|NN const char * const s|NULLOK char ** e|int base
+
+Platform and configuration independent C<strtoul>.  This expands to the
+appropriate C<strotoul>-like function based on the platform and F<Configure>
+options>.  For example it could expand to C<strtoull> or C<strtouq> instead of
+C<strtoul>.
+
+=cut
+
+*/
+
 #define Strtod                          my_strtod
 
 #if    defined(HAS_STRTOD)                                          \
@@ -6956,6 +7085,15 @@ int flock(int fd, int op);
 #define IS_NUMBER_NAN                 0x20 /* this is not */
 #define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
+/*
+=head1 Numeric functions
+
+=for apidoc AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
+
+A synonym for L</grok_numeric_radix>
+
+=cut
+*/
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
 /* Input flags: */
@@ -7036,8 +7174,20 @@ extern void moncontrol(int);
 
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
-/* Use instead of abs() since abs() forces its argument to be an int,
- * but also beware since this evaluates its argument twice, so no x++. */
+/*
+=head1 Numeric functions
+
+=for apidoc Am|int|PERL_ABS|int
+
+Typeless C<abs> or C<fabs>, I<etc>.  (The usage below indicates it is for
+integers, but it works for any type.)  Use instead of these, since the C
+library ones force their argument to be what it is expecting, potentially
+leading to disaster.  But also beware that this evaluates its argument twice,
+so no C<x++>.
+
+=cut
+*/
+
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
 #if defined(__DECC) && defined(__osf__)

@@ -548,6 +548,8 @@ is only valid for the duration of a single perl process.
 See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the hash access functions on tied hashes.
 
+=for apidoc Amh|void|PERL_HASH|U32 hash|char *key|STRLEN klen
+
 =head2 Hash API Extensions
 
 Beginning with version 5.004, the following functions are also supported:
@@ -1285,6 +1287,52 @@ will be lost.
  ~  PERL_MAGIC_ext            (none)         Available for use by
                                              extensions
 
+
+=for apidoc Amnh||PERL_MAGIC_sv
+=for apidoc Amnh||PERL_MAGIC_arylen
+=for apidoc Amnh||PERL_MAGIC_rhash
+=for apidoc Amnh||PERL_MAGIC_debugvar
+=for apidoc Amnh||PERL_MAGIC_pos
+=for apidoc Amnh||PERL_MAGIC_symtab
+=for apidoc Amnh||PERL_MAGIC_backref
+=for apidoc Amnh||PERL_MAGIC_arylen_p
+=for apidoc Amnh||PERL_MAGIC_bm
+=for apidoc Amnh||PERL_MAGIC_overload_table
+=for apidoc Amnh||PERL_MAGIC_regdata
+=for apidoc Amnh||PERL_MAGIC_regdatum
+=for apidoc Amnh||PERL_MAGIC_env
+=for apidoc Amnh||PERL_MAGIC_envelem
+=for apidoc Amnh||PERL_MAGIC_fm
+=for apidoc Amnh||PERL_MAGIC_regex_global
+=for apidoc Amnh||PERL_MAGIC_hints
+=for apidoc Amnh||PERL_MAGIC_hintselem
+=for apidoc Amnh||PERL_MAGIC_isa
+=for apidoc Amnh||PERL_MAGIC_isaelem
+=for apidoc Amnh||PERL_MAGIC_nkeys
+=for apidoc Amnh||PERL_MAGIC_dbfile
+=for apidoc Amnh||PERL_MAGIC_dbline
+=for apidoc Amnh||PERL_MAGIC_shared
+=for apidoc Amnh||PERL_MAGIC_shared_scalar
+=for apidoc Amnh||PERL_MAGIC_collxfrm
+=for apidoc Amnh||PERL_MAGIC_tied
+=for apidoc Amnh||PERL_MAGIC_tiedelem
+=for apidoc Amnh||PERL_MAGIC_tiedscalar
+=for apidoc Amnh||PERL_MAGIC_qr
+=for apidoc Amnh||PERL_MAGIC_sig
+=for apidoc Amnh||PERL_MAGIC_sigelem
+=for apidoc Amnh||PERL_MAGIC_taint
+=for apidoc Amnh||PERL_MAGIC_uvar
+=for apidoc Amnh||PERL_MAGIC_uvar_elem
+=for apidoc Amnh||PERL_MAGIC_vstring
+=for apidoc Amnh||PERL_MAGIC_vec
+=for apidoc Amnh||PERL_MAGIC_utf8
+=for apidoc Amnh||PERL_MAGIC_substr
+=for apidoc Amnh||PERL_MAGIC_nonelem
+=for apidoc Amnh||PERL_MAGIC_defelem
+=for apidoc Amnh||PERL_MAGIC_lvref
+=for apidoc Amnh||PERL_MAGIC_checkcall
+=for apidoc Amnh||PERL_MAGIC_ext
+
 =for mg_vtable.pl end
 
 When an uppercase and lowercase letter both exist in the table, then the
@@ -1606,33 +1654,48 @@ function takes C<int *>.
 
 =item C<SV* save_scalar(GV *gv)>
 
+=for apidoc save_scalar
+
 Equivalent to Perl code C<local $gv>.
 
 =item C<AV* save_ary(GV *gv)>
 
+=for apidoc save_ary
+
 =item C<HV* save_hash(GV *gv)>
+
+=for apidoc save_hash
 
 Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
 
 =item C<void save_item(SV *item)>
 
-Duplicates the current value of C<SV>, on the exit from the current
-C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
+=for apidoc save_item
+
+Duplicates the current value of C<SV>. On the exit from the current
+C<ENTER>/C<LEAVE> I<pseudo-block> the value of C<SV> will be restored
 using the stored value.  It doesn't handle magic.  Use C<save_scalar> if
 magic is affected.
 
 =item C<void save_list(SV **sarg, I32 maxsarg)>
+
+=for apidoc save_list
 
 A variant of C<save_item> which takes multiple arguments via an array
 C<sarg> of C<SV*> of length C<maxsarg>.
 
 =item C<SV* save_svref(SV **sptr)>
 
+=for apidoc save_svref
+
 Similar to C<save_scalar>, but will reinstate an C<SV *>.
 
 =item C<void save_aptr(AV **aptr)>
 
 =item C<void save_hptr(HV **hptr)>
+
+=for apidoc save_aptr
+=for apidoc save_hptr
 
 Similar to C<save_svref>, but localize C<AV *> and C<HV *>.
 
@@ -2306,6 +2369,8 @@ please see F<miniperlmain.c> for usage details.  You may also need
 to use C<dVAR> in your coding to "declare the global variables"
 when you are using them.  dTHX does this for you automatically.
 
+=for apidoc Amnh||dVAR
+
 To see whether you have non-const data you can use a BSD (or GNU)
 compatible C<nm>:
 
@@ -2367,6 +2432,12 @@ The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
 or 'd' for B<d>eclaration, so we have C<pTHX>, C<aTHX> and C<dTHX>, and
 their variants.
 
+=for apidoc Amnh||aTHX
+=for apidoc Amnh||aTHX_
+=for apidoc Amnh||dTHX
+=for apidoc Amnh||pTHX
+=for apidoc Amnh||pTHX_
+
 When Perl is built without options that set PERL_IMPLICIT_CONTEXT, there is no
 first argument containing the interpreter's context.  The trailing underscore
 in the pTHX_ macro indicates that the macro expansion needs a comma
@@ -2412,6 +2483,8 @@ Those are strictly for use within the core.  Extensions and embedders
 need only be aware of [pad]THX.
 
 =head2 So what happened to dTHR?
+
+=for apidoc Amnh||dTHR
 
 C<dTHR> was introduced in perl 5.005 to support the older thread model.
 The older thread model now uses the C<THX> mechanism to pass context
@@ -2621,6 +2694,14 @@ following macros for portability
         NVff            NV %f-like
         NVgf            NV %g-like
 
+=for apidoc Amnh||IVdf
+=for apidoc Amnh||UVuf
+=for apidoc Amnh||UVof
+=for apidoc Amnh||UVxf
+=for apidoc Amnh||NVef
+=for apidoc Amnh||NVff
+=for apidoc Amnh||NVgf
+
 These will take care of 64-bit integers and long doubles.
 For example:
 
@@ -2657,6 +2738,11 @@ use the follow macros to do it right.
         PTR2IV(pointer)
         PTR2NV(pointer)
         INT2PTR(pointertotype, integer)
+
+=for apidoc Amh|void *|INT2PTR|type|int value
+=for apidoc Amh|UV|PTR2UV|void *
+=for apidoc Amh|IV|PTR2IV|void *
+=for apidoc Amh|NV|PTR2NV|void *
 
 For example:
 

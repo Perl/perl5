@@ -93,6 +93,8 @@
 #define ck_warner_d		Perl_ck_warner_d
 #endif
 #define clear_defarray(a,b)	Perl_clear_defarray(aTHX_ a,b)
+#define cop_fetch_label(a,b,c)	Perl_cop_fetch_label(aTHX_ a,b,c)
+#define cop_store_label(a,b,c,d)	Perl_cop_store_label(aTHX_ a,b,c,d)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define croak			Perl_croak
 #endif
@@ -574,18 +576,12 @@
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #define op_scope(a)		Perl_op_scope(aTHX_ a)
 #define op_sibling_splice	Perl_op_sibling_splice
-#ifndef NO_MATHOMS
-#define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
-#endif
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
 #define pad_add_name_pv(a,b,c,d)	Perl_pad_add_name_pv(aTHX_ a,b,c,d)
 #define pad_add_name_pvn(a,b,c,d,e)	Perl_pad_add_name_pvn(aTHX_ a,b,c,d,e)
 #define pad_add_name_sv(a,b,c,d)	Perl_pad_add_name_sv(aTHX_ a,b,c,d)
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
-#ifndef NO_MATHOMS
-#define pad_compname_type(a)	Perl_pad_compname_type(aTHX_ a)
-#endif
 #define pad_findmy_pv(a,b)	Perl_pad_findmy_pv(aTHX_ a,b)
 #define pad_findmy_pvn(a,b,c)	Perl_pad_findmy_pvn(aTHX_ a,b,c)
 #define pad_findmy_sv(a,b)	Perl_pad_findmy_sv(aTHX_ a,b)
@@ -779,6 +775,9 @@
 #define sv_mortalcopy_flags(a,b)	Perl_sv_mortalcopy_flags(aTHX_ a,b)
 #define sv_newmortal()		Perl_sv_newmortal(aTHX)
 #define sv_newref(a)		Perl_sv_newref(aTHX_ a)
+#ifndef NO_MATHOMS
+#define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
+#endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #ifndef NO_MATHOMS
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)

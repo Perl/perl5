@@ -294,6 +294,9 @@ becomes M.)
 
    1;
 
+=for apidoc filter_add
+=for apidoc filter_read
+
 All Perl source filters are implemented as Perl classes and have the
 same basic structure as the example above.
 

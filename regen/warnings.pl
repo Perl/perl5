@@ -358,15 +358,21 @@ EOM
 
   my $k ;
   my $last_ver = 0;
+  my @names;
   foreach $k (sort { $a <=> $b } keys %ValueToName) {
       my ($name, $version) = @{ $ValueToName{$k} };
       print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
           if $last_ver != $version ;
       $name =~ y/:/_/;
-      print $warn tab(6, "#define WARN_$name"), " $k\n" ;
+      $name = "WARN_$name";
+      print $warn tab(6, "#define $name"), " $k\n" ;
+      push @names, $name;
       $last_ver = $version ;
   }
-  print $warn "\n" ;
+  print $warn "\n\n/*\n" ;
+
+  print $warn map { "=for apidoc Amnh||$_\n" } @names;
+  print $warn "\n=cut\n*/\n\n" ;
 
   print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
   print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
@@ -387,6 +393,13 @@ EOM
 /*
 
 =head1 Warning and Dieing
+
+In all these calls, the C<U32 wI<n>> parameters are warning category
+constants.  You can see the ones currently available in
+L<warnings/Category Hierarchy>, just capitalize all letters in the names
+and prefix them by C<WARN_>.  So, for example, the category C<void> used in a
+perl program becomes C<WARN_VOID> when used in XS code and passed to one of
+the calls below.
 
 =for apidoc Am|bool|ckWARN|U32 w
 

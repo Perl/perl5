@@ -105,6 +105,7 @@ Encode::Detect
 Encode::Locale
 Eval::WithLexicals
 execvp(3)
+exit(3)
 Exporter::Easy
 ExtUtils::Constant::ProxySubs
 fchdir(2)
@@ -275,6 +276,7 @@ sendmail(1)
 sendmsg(2)
 sendmsg(3)
 sendto(2)
+setenv(3)
 setitimer(2)
 setlocale(3)
 setpgid(2)
@@ -284,6 +286,7 @@ sha1sum(1)
 shadow(3)
 Shell
 Shell::Command
+signal(2)
 sleep(3)
 sock_init(3)
 Socket
@@ -296,6 +299,7 @@ strftime(3)
 strictures
 String::Base
 String::Scanf
+strstr(3)
 strtol(3)
 Switch
 tar(1)

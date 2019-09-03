@@ -233,6 +233,16 @@ means arg not present, 1 is empty string/null byte */
 #  define HS_CXT cv
 #endif
 
+/*
+=for apidoc instr
+Same as L<strstr(3)>, which finds and returns a pointer to the first occurrence
+of the NUL-terminated substring C<little> in the NUL-terminated string C<big>,
+returning NULL if not found.  The terminating NUL bytes are not compared.
+
+=cut
+*/
+
+
 #define instr(haystack, needle) strstr(haystack, needle)
 
 #ifdef HAS_MEMMEM

@@ -108,11 +108,19 @@ the string is invariant.
 #else	/* ! EBCDIC */
 START_EXTERN_C
 
-/* How wide can a single UTF-8 encoded character become in bytes. */
-/* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
- * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
- * expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
- * non-negative integers in a binary format, even those above Unicode */
+/*
+
+=for apidoc AmnU|STRLEN|UTF8_MAXBYTES
+
+The maximum width of a single UTF-8 encoded character, in bytes.
+
+NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
+is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
+expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
+non-negative integers in a binary format, even those above Unicode.
+
+=cut
+ */
 #define UTF8_MAXBYTES 13
 
 #ifdef DOINIT
@@ -150,8 +158,51 @@ END_EXTERN_C
 #define PERL_SMALL_MACRO_BUFFER
 #endif
 
-/* Native character to/from iso-8859-1.  Are the identity functions on ASCII
- * platforms */
+/*
+
+=for apidoc Am|U8|NATIVE_TO_LATIN1|U8 ch
+
+Returns the Latin-1 (including ASCII and control characters) equivalent of the
+input native code point given by C<ch>.  Thus, C<NATIVE_TO_LATIN1(193)> on
+EBCDIC platforms returns 65.  These each represent the character C<"A"> on
+their respective platforms.  On ASCII platforms no conversion is needed, so
+this macro expands to just its input, adding no time nor space requirements to
+the implementation.
+
+For conversion of code points potentially larger than will fit in a character,
+use L</NATIVE_TO_UNI>.
+
+=for apidoc Am|U8|LATIN1_TO_NATIVE|U8 ch
+
+Returns the native  equivalent of the input Latin-1 code point (including ASCII
+and control characters) given by C<ch>.  Thus, C<LATIN1_TO_NATIVE(66)> on
+EBCDIC platforms returns 194.  These each represent the character C<"B"> on
+their respective platforms.  On ASCII platforms no conversion is needed, so
+this macro expands to just its input, adding no time nor space requirements to
+the implementation.
+
+For conversion of code points potentially larger than will fit in a character,
+use L</UNI_TO_NATIVE>.
+
+=for apidoc Am|UV|NATIVE_TO_UNI|UV ch
+
+Returns the Unicode  equivalent of the input native code point given by C<ch>.
+Thus, C<NATIVE_TO_UNI(195)> on EBCDIC platforms returns 67.  These each
+represent the character C<"C"> on their respective platforms.  On ASCII
+platforms no conversion is needed, so this macro expands to just its input,
+adding no time nor space requirements to the implementation.
+
+=for apidoc Am|UV|UNI_TO_NATIVE|UV ch
+
+Returns the native  equivalent of the input Unicode code point  given by C<ch>.
+Thus, C<UNI_TO_NATIVE(68)> on EBCDIC platforms returns 196.  These each
+represent the character C<"D"> on their respective platforms.  On ASCII
+platforms no conversion is needed, so this macro expands to just its input,
+adding no time nor space requirements to the implementation.
+
+=cut
+*/
+
 #ifdef PERL_SMALL_MACRO_BUFFER
 #define NATIVE_TO_LATIN1(ch)     ((U8)(ch))
 #define LATIN1_TO_NATIVE(ch)     ((U8)(ch))
@@ -174,7 +225,6 @@ END_EXTERN_C
 #define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 #endif
 
-/* Transforms in wide UV chars */
 #define UNI_TO_NATIVE(ch)        ((UV) (ch))
 #define NATIVE_TO_UNI(ch)        ((UV) (ch))
 
@@ -233,6 +283,7 @@ platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
 are in the character.
 
+=cut
 */
 
 /* Is the representation of the Unicode code point 'cp' the same regardless of
@@ -823,6 +874,10 @@ looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
 of the Unicode non-character code points; otherwise it evaluates to 0.  If
 non-zero, the value gives how many bytes starting at C<s> comprise the code
 point's representation.
+
+=for apidoc AmnU|UV|UNICODE_REPLACEMENT
+
+Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 
 =cut
  */

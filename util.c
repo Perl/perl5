@@ -2103,6 +2103,15 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 
 #  if !defined(WIN32) && !defined(NETWARE)
 
+/*
+=for apidoc my_setenv
+
+A wrapper for the C library L<setenv(3)>.  Don't use the latter, as the perl
+version has desirable safeguards
+
+=cut
+*/
+
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
@@ -2682,6 +2691,15 @@ dup2(int oldfd, int newfd)
 
 #ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
+
+/*
+=for apidoc rsignal
+
+A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
 
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
