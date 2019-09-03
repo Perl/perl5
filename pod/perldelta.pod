@@ -67,9 +67,14 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+The locale tests could crash on Win32 due to a Windows bug, and
+separately due to the CRT throwing an exception if the locale name
+wasn't validly encoded in the current code page.
+
+For the second we now decode the locale name ourselves, and always
+decode it as UTF-8.  [perl #133981]
 
 =back
 
