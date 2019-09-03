@@ -2231,7 +2231,7 @@ pRX	|XOPRETANY	|custom_op_get_field	|NN const OP *o|const xop_flags_enum field
 Adop	|void	|custom_op_register	|NN Perl_ppaddr_t ppaddr \
 			|NN const XOP *xop
 
-AdpD	|void	|sv_nosharing	|NULLOK SV *sv
+Adp	|void	|sv_nosharing	|NULLOK SV *sv
 AdpbD	|void	|sv_nolocking	|NULLOK SV *sv
 Adp	|bool	|sv_destroyable	|NULLOK SV *sv
 AdpbD	|void	|sv_nounlocking	|NULLOK SV *sv

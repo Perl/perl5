@@ -3485,9 +3485,7 @@ PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *sv)
 			__attribute__deprecated__;
 #endif
 
-PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv)
-			__attribute__deprecated__;
-
+PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv);
 #ifndef NO_MATHOMS
 PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv)
 			__attribute__deprecated__;
