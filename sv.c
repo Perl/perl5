@@ -3664,8 +3664,7 @@ Like C<sv_utf8_downgrade>, but does not process get magic on C<sv>.
 =for apidoc sv_utf8_downgrade_flags
 
 Like C<sv_utf8_downgrade>, but with additional C<flags>.
-If C<flags> has C<SV_GMAGIC> bit set, then this function process
-get magic on C<sv>.
+If C<flags> has C<SV_GMAGIC> bit set, processes get magic on C<sv>.
 
 =cut
 */

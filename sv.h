@@ -1629,7 +1629,7 @@ Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
 Like C<SvPVutf8>, but does not process get magic.
 
 =for apidoc Am|char*|SvPVutf8_or_null|SV* sv|STRLEN len
-Like C<SvPVutf8>, but when C<sv> is undef then returns C<NULL>.
+Like C<SvPVutf8>, but when C<sv> is undef, returns C<NULL>.
 
 =for apidoc Am|char*|SvPVutf8_or_null_nomg|SV* sv|STRLEN len
 Like C<SvPVutf8_or_null>, but does not process get magic.
@@ -1647,7 +1647,7 @@ Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
 Like C<SvPVbyte>, but does not process get magic.
 
 =for apidoc Am|char*|SvPVbyte_or_null|SV* sv|STRLEN len
-Like C<SvPVbyte>, but when C<sv> is undef then returns C<NULL>.
+Like C<SvPVbyte>, but when C<sv> is undef, returns C<NULL>.
 
 =for apidoc Am|char*|SvPVbyte_or_null_nomg|SV* sv|STRLEN len
 Like C<SvPVbyte_or_null>, but does not process get magic.
