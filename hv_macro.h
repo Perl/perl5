@@ -6,7 +6,7 @@
 #endif
 
 /*-----------------------------------------------------------------------------
- * Endianess, misalignment capabilities and util macros
+ * Endianess and util macros
  *
  * The following 3 macros are defined in this section. The other macros defined
  * are only needed to help derive these 3.
@@ -20,27 +20,20 @@
  * ROTR64(x,r)      Rotate x right by r bits
  */
 
-#ifndef U32_ALIGNMENT_REQUIRED
-  #if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
-    #define U8TO16_LE(ptr)   (*((const U16*)(ptr)))
-    #define U8TO32_LE(ptr)   (*((const U32*)(ptr)))
-    #define U8TO64_LE(ptr)   (*((const U64*)(ptr)))
-  #elif (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
-    #if defined(__GNUC__) && (__GNUC__>4 || (__GNUC__==4 && __GNUC_MINOR__>=3))
-      #define U8TO16_LE(ptr)   (__builtin_bswap16(*((U16*)(ptr))))
-      #define U8TO32_LE(ptr)   (__builtin_bswap32(*((U32*)(ptr))))
-      #define U8TO64_LE(ptr)   (__builtin_bswap64(*((U64*)(ptr))))
-    #endif
-  #endif
-#endif
-
 #ifndef U8TO16_LE
-    /* Without a known fast bswap32 we're just as well off doing this */
-  #define U8TO16_LE(ptr)   ((U32)(ptr)[0]|(U32)(ptr)[1]<<8)
-  #define U8TO32_LE(ptr)   ((U32)(ptr)[0]|(U32)(ptr)[1]<<8|(U32)(ptr)[2]<<16|(U32)(ptr)[3]<<24)
-  #define U8TO64_LE(ptr)   ((U64)(ptr)[0]|(U64)(ptr)[1]<<8|(U64)(ptr)[2]<<16|(U64)(ptr)[3]<<24|\
-                            (U64)(ptr)[4]<<32|(U64)(ptr)[5]<<40|\
-                            (U64)(ptr)[6]<<48|(U64)(ptr)[7]<<56)
+  #if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+    #define U8TO16_LE(ptr)   ((U32)(ptr)[1]|(U32)(ptr)[0]<<8)
+    #define U8TO32_LE(ptr)   ((U32)(ptr)[3]|(U32)(ptr)[2]<<8|(U32)(ptr)[1]<<16|(U32)(ptr)[0]<<24)
+    #define U8TO64_LE(ptr)   ((U64)(ptr)[7]|(U64)(ptr)[6]<<8|(U64)(ptr)[5]<<16|(U64)(ptr)[4]<<24|\
+                              (U64)(ptr)[3]<<32|(U64)(ptr)[4]<<40|\
+                              (U64)(ptr)[1]<<48|(U64)(ptr)[0]<<56)
+  #elif (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
+    #define U8TO16_LE(ptr)   ((U32)(ptr)[0]|(U32)(ptr)[1]<<8)
+    #define U8TO32_LE(ptr)   ((U32)(ptr)[0]|(U32)(ptr)[1]<<8|(U32)(ptr)[2]<<16|(U32)(ptr)[3]<<24)
+    #define U8TO64_LE(ptr)   ((U64)(ptr)[0]|(U64)(ptr)[1]<<8|(U64)(ptr)[2]<<16|(U64)(ptr)[3]<<24|\
+                              (U64)(ptr)[4]<<32|(U64)(ptr)[5]<<40|\
+                              (U64)(ptr)[6]<<48|(U64)(ptr)[7]<<56)
+  #endif
 #endif
 
 #ifdef CAN64BITHASH
