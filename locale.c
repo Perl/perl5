@@ -2215,9 +2215,9 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
         result = PerlEnv_getenv(category_names[i]);
         if (result && strNE(result, "")) {
 #ifdef USE_WSETLOCALE
-            S_wrap_wsetlocale(aTHX_ categories[i], locale);
+            S_wrap_wsetlocale(aTHX_ categories[i], result);
 #else
-            setlocale(categories[i], locale);
+            setlocale(categories[i], result);
 #endif
             DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
                 __FILE__, __LINE__,
