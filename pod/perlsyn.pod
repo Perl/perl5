@@ -527,8 +527,8 @@ is therefore visible only within the loop.  Otherwise, the variable is
 implicitly local to the loop and regains its former value upon exiting
 the loop.  If the variable was previously declared with C<my>, it uses
 that variable instead of the global one, but it's still localized to
-the loop.  This implicit localization occurs I<only> in a C<foreach>
-loop.
+the loop.  This implicit localization occurs I<only> for non C-style
+loops.
 X<my> X<local>
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
