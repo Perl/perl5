@@ -127,15 +127,15 @@ my $OP = $qr ? 'qr' : 'm';
 
 $| = 1;
 
-my $test;
+my $test_num = 0;
 TEST:
 foreach (@tests) {
-    $test++;
+    $test_num++;
     if (!/\S/ || /^\s*#/ || /^__END__$/) {
         chomp;
         my ($not,$comment)= split /\s*#\s*/, $_, 2;
         $comment ||= "(blank line)";
-        print "ok $test # $comment\n";
+        print "ok $test_num # $comment\n";
         next;
     }
     chomp;
@@ -143,7 +143,7 @@ foreach (@tests) {
     my ($pat, $subject, $result, $repl, $expect, $reason, $comment) = split(/\t/,$_,7);
     $comment = "" unless defined $comment;
     if (!defined $subject) {
-        die "Bad test definition on line $test: $_\n";
+        die "Bad test definition on line $test_num: $_\n";
     }
     $reason = '' unless defined $reason;
     my $input = join(':',$pat,$subject,$result,$repl,$expect);
@@ -186,7 +186,7 @@ foreach (@tests) {
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
     my $todo= $result =~ s/T// ? " # TODO" : "";
-    my $testname= $test;
+    my $testname= $test_num;
     if ($comment) {
         $comment=~s/^\s*(?:#\s*)?//;
         $testname .= " - $comment" if $comment;
@@ -215,7 +215,7 @@ foreach (@tests) {
                 $expanded_pat =~ s//(*negative_lookbehind:/g;
             }
             if ($expanded_pat ne $pat) {
-                $comment .= " $expanded_text $test";
+                $comment .= " $expanded_text $test_num";
                 push @tests, join "\t", $expanded_pat,
                                         $subject // "",
                                         $result // "",
