@@ -384,7 +384,7 @@ S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp,
 	else {
             const int old_fd = PerlIO_fileno(IoIFP(io));
 
-            if (old_fd >= 0 && old_fd <= PL_maxsysfd) {
+            if (inRANGE(old_fd, 0, PL_maxsysfd)) {
                 /* This is one of the original STD* handles */
                 *saveifp  = IoIFP(io);
                 *saveofp  = IoOFP(io);
