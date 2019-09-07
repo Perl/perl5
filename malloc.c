@@ -1688,7 +1688,7 @@ morecore(int bucket)
 		    IV val = 0;
 
 		    t += 2;
-		    while (*t <= '9' && *t >= '0')
+		    while (isDIGIT(*t))
 			val = 10*val + *t++ - '0';
 		    if (!*t || *t == ';') {
 			if (MallocCfg[off - opts] != val)
