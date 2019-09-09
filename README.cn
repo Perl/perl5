@@ -81,7 +81,11 @@ Perl 的知识, 以及 Unicode 的使用方式. 不过, 外部的资源相当丰
 
 =head2 提供 Perl 资源的网址
 
+=over 4
+
 =item L<https://www.perl.org/>
+
+=back
 
 Perl 的首页
 
