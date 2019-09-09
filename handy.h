@@ -1317,7 +1317,7 @@ or casts
 #define FITS_IN_8_BITS(c) (1)
 #endif
 
-/* Returns true if l <= c <= l + n, where 'l' and 'n' are non-negative
+/* Returns true if l <= c <= (l + n), where 'l' and 'n' are non-negative
  * Written this way so that after optimization, only one conditional test is
  * needed. */
 #define withinCOUNT(c, l, n) (__ASSERT_((l) >= 0) __ASSERT_((n) >= (0))        \
@@ -1331,7 +1331,7 @@ or casts
     : (sizeof(c) == sizeof(U16)) ? withinCOUNT(((U16) (c)), (l), ((u) - (l)))  \
     : (sizeof(c) == sizeof(U32)) ? withinCOUNT(((U32) (c)), (l), ((u) - (l)))  \
     : (__ASSERT_(sizeof(c) == sizeof(WIDEST_UTYPE))                            \
-                                   withinCOUNT((      (c)), (l), ((u) - (l))))))
+                          withinCOUNT(((WIDEST_UTYPE) (c)), (l), ((u) - (l))))))
 
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
