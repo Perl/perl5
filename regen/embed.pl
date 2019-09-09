@@ -135,8 +135,6 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	$func = full_name($plain_func, $flags);
 	$ret = "";
-	$ret .= "#ifndef NO_MATHOMS\n" if $binarycompat;
-	$ret .= "#ifndef PERL_NO_INLINE_FUNCTIONS\n" if $static_inline;
 	$ret .= "$retval\t$func(";
 	if ( $has_context ) {
 	    $ret .= @args ? "pTHX_ " : "pTHX";
@@ -229,8 +227,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    $ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E\t\\\n\t"
 		. join '; ', map "assert($_)", @names_of_nn;
 	}
-	$ret .= "\n#endif" if $static_inline;
-	$ret .= "\n#endif" if $binarycompat;
+
+	$ret = "#ifndef PERL_NO_INLINE_FUNCTIONS\n$ret\n#endif" if $static_inline;
+	$ret = "#ifndef NO_MATHOMS\n$ret\n#endif" if $binarycompat;
 	$ret .= @attrs ? "\n\n" : "\n";
 
 	print $pr $ret;
