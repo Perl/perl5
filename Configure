@@ -14091,6 +14091,7 @@ $cat >try.c <<EOCP
 #include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 int main ()
 {
