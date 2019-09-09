@@ -120,15 +120,19 @@ Perlには膨大な資料が付属しており、Perlの新機能やUnicodeサ�
 
 =over 4
 
-=item L<http://www.perl.com/>
+=item L<https://www.perl.org/>
 
-Perl ホームページ (O'Reilly and Associates)
+Perl ホームページ
 
-=item L<http://www.cpan.org/>
+=item L<https://www.perl.com/>
+
+Perl 財団が営業する文章作品集
+
+=item L<https://www.cpan.org/>
 
 CPAN (Comprehensive Perl Archive Network)
 
-=item L<http://lists.perl.org/>
+=item L<https://lists.perl.org/>
 
 Perl メーリングリスト集
 
@@ -146,7 +150,7 @@ O'Reilly 社のPerl関連書籍(繁体字中国語)
 
 O'Reilly 社のPerl関連書籍(簡体字中国語)
 
-=item L<http://www.oreilly.co.jp/catalog/>
+=item L<https://www.oreilly.co.jp/catalog/>
 
 オライリー社のPerl関連書籍(日本語)
 
@@ -156,7 +160,7 @@ O'Reilly 社のPerl関連書籍(簡体字中国語)
 
 =over 4
 
-=item L<http://www.pm.org/groups/asia.html>
+=item L<https://www.pm.org/groups/asia.html>
 
 =back
 
@@ -164,15 +168,15 @@ O'Reilly 社のPerl関連書籍(簡体字中国語)
 
 =over 4
 
-=item L<http://www.unicode.org/>
+=item L<https://www.unicode.org/>
 
 Unicode コンソーシアム (Unicode規格の選定団体)
 
-=item L<http://www.cl.cam.ac.uk/%7Emgk25/unicode.html>
+=item L<https://www.cl.cam.ac.uk/%7Emgk25/unicode.html>
 
 UTF-8 and Unicode FAQ for Unix/Linux
 
-=item L<http://wiki.kldp.org/Translations/html/UTF8-Unicode-KLDP/UTF8-Unicode-KLDP.html>
+=item L<https://wiki.kldp.org/Translations/html/UTF8-Unicode-KLDP/UTF8-Unicode-KLDP.html>
 
 UTF-8 and Unicode FAQ for Unix/Linux (ハングル訳)
 

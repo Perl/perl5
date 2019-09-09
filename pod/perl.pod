@@ -374,10 +374,10 @@ see L<perlvar> for more information.
 
 =head1 SEE ALSO
 
- http://www.perl.org/       the Perl homepage
- http://www.perl.com/       Perl articles (O'Reilly)
- http://www.cpan.org/       the Comprehensive Perl Archive
- http://www.pm.org/         the Perl Mongers
+ https://www.perl.org/       the Perl homepage
+ https://www.perl.com/       Perl articles
+ https://www.cpan.org/       the Comprehensive Perl Archive
+ https://www.pm.org/         the Perl Mongers
 
 =head1 DIAGNOSTICS
 
