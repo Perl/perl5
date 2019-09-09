@@ -213,6 +213,21 @@
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
+:   G  Suppress empty PERL_ARGS_ASSERT_foo macro.  Normally such a macro is
+:      generated for all entries for functions 'foo' in this file.  If there is
+:      a pointer argument to 'foo', it needs to be declared in this file as
+:      either NN or NULLOK, and the function definition must call its
+:      corresponding PERL_ARGS_ASSERT_foo macro (a porting test ensures this)
+:      which asserts at runtime (under DEBUGGING builds) that NN arguments are
+:      not NULL.  If there aren't NN arguments, use of this macro is optional.
+:      Rarely, a function will define its own PERL_ARGS_ASSERT_foo macro, and
+:      in those cases, adding this flag to its entry in this file will suppress
+:      the normal one.  It is not possible to suppress the generated macro if
+:      it isn't optional, that is, if there is at least one NN argument.
+:
+:         proto.h: PERL_ARGS_ASSERT macro is not defined unless the function
+:		   has NN arguments
+:
 :   h  Hide any documentation.  This is used when the documentation is atypical
 :      of the rest of perlapi and perlintern.  In other words the item is
 :      documented, but just not the standard way.  One reason would be if there
@@ -823,7 +838,7 @@ Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 #if defined(PERL_IN_GV_C)
 i	|HV*	|gv_stashpvn_internal	|NN const char* name|U32 namelen|I32 flags
-i	|HV*	|gv_stashsvpvn_cached	|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
+iG	|HV*	|gv_stashsvpvn_cached	|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
 i	|GV*	|gv_fetchmeth_internal	|NULLOK HV* stash|NULLOK SV* meth|NULLOK const char* name \
 					|STRLEN len|I32 level|U32 flags
 #endif

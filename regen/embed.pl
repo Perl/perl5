@@ -81,10 +81,11 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabCDdEefhiMmNnOoPpRrSsTUuWXx] ) /x) {
+        if ($flags =~ / ( [^AabCDdEefGhiMmNnOoPpRrSsTUuWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
+	my $args_assert_line = ( $flags !~ /G/ );
         my $has_depth = ( $flags =~ /W/ );
 	my $has_context = ( $flags !~ /T/ );
 	my $never_returns = ( $flags =~ /r/ );
@@ -223,10 +224,11 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 	$ret .= ";";
 	$ret = "/* $ret */" if $commented_out;
-	if (@names_of_nn) {
-	    $ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E\t\\\n\t"
-		. join '; ', map "assert($_)", @names_of_nn;
-	}
+
+	$ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E"
+					    if $args_assert_line || @names_of_nn;
+	$ret .= "\t\\\n\t" . join '; ', map "assert($_)", @names_of_nn
+								if @names_of_nn;
 
 	$ret = "#ifndef PERL_NO_INLINE_FUNCTIONS\n$ret\n#endif" if $static_inline;
 	$ret = "#ifndef NO_MATHOMS\n$ret\n#endif" if $binarycompat;
