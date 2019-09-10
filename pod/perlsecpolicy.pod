@@ -390,7 +390,8 @@ There may be some back and forth here, and some iteration on the
 fixes, e.g. if they find a bug with the fixes.
 
 A distributor may also ask for support with applying the patches to
-older releases.
+older releases, which we may or may not provide, as perl may have
+changed too much since an older release for a patch to be backported.
 
 Requires: Allocate a CVE ID, Work up fixes.
 
