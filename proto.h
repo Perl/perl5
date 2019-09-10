@@ -98,12 +98,6 @@ PERL_CALLCONV bool	Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 
 #define PERL_ARGS_ASSERT__IS_UTF8_FOO_WITH_LEN	\
 	assert(p); assert(e)
 
-PERL_CALLCONV STRLEN	Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-#define PERL_ARGS_ASSERT__IS_UTF8_CHAR_HELPER	\
-	assert(s); assert(e)
-
 PERL_CALLCONV bool	Perl__is_utf8_idcont(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UTF8_IDCONT	\
@@ -1892,6 +1886,12 @@ PERL_CALLCONV STRLEN	Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF	\
 	assert(buf); assert(buf_end)
 #endif
+PERL_CALLCONV STRLEN	Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER	\
+	assert(s); assert(e)
+
 #ifndef NO_MATHOMS
 PERL_CALLCONV bool	Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 			__attribute__deprecated__

@@ -1078,7 +1078,7 @@ Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 #if defined(UV_IS_QUAD) || defined(EBCDIC)
 
     if (NATIVE_UTF8_TO_I8(*s0) == 0xFF && e - s0 >= UTF8_MAXBYTES) {
-       return _is_utf8_char_helper(s0, e, 0);
+       return is_utf8_char_helper(s0, e, 0);
     }
 
 #endif
@@ -1702,7 +1702,7 @@ Perl_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, co
         return FALSE;
     }
 
-    return cBOOL(_is_utf8_char_helper(s, e, flags));
+    return cBOOL(is_utf8_char_helper(s, e, flags));
 }
 
 /*

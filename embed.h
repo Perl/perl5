@@ -33,7 +33,6 @@
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
 #define _is_utf8_FOO(a,b,c,d,e,f,g,h)	Perl__is_utf8_FOO(aTHX_ a,b,c,d,e,f,g,h)
 #define _is_utf8_FOO_with_len(a,b,c)	Perl__is_utf8_FOO_with_len(aTHX_ a,b,c)
-#define _is_utf8_char_helper	Perl__is_utf8_char_helper
 #define _is_utf8_idcont(a)	Perl__is_utf8_idcont(aTHX_ a)
 #define _is_utf8_idstart(a)	Perl__is_utf8_idstart(aTHX_ a)
 #define _is_utf8_mark(a)	Perl__is_utf8_mark(aTHX_ a)
@@ -383,6 +382,7 @@
 #ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif
+#define is_utf8_char_helper	Perl_is_utf8_char_helper
 #ifndef NO_MATHOMS
 #define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
 #endif

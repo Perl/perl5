@@ -921,7 +921,7 @@ S_does_utf8_overflow(const U8 * const s,
 #undef FF_OVERLONG_PREFIX
 
 STRLEN
-Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
+Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 {
     STRLEN len;
     const U8 *x;
@@ -958,7 +958,7 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
      *
      */
 
-    PERL_ARGS_ASSERT__IS_UTF8_CHAR_HELPER;
+    PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER;
 
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
                           |UTF8_DISALLOW_PERL_EXTENDED)));

@@ -939,7 +939,7 @@ pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
-CpRTP	|STRLEN	|_is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
+CpRTP	|STRLEN	|is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
 CbDpR	|U32	|to_uni_upper_lc|U32 c
 CbDpR	|U32	|to_uni_title_lc|U32 c
 CbDpR	|U32	|to_uni_lower_lc|U32 c
