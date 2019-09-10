@@ -81,8 +81,8 @@ directory before calling C<require>.
 
 =item *
 
-Allows an attacker to modify, delete or read resources such as files
-they otherwise don't have access to.
+Allows an attacker to create, modify, delete or read resources such as
+files they otherwise don't have access to.
 
 =item *
 
