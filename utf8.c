@@ -2274,7 +2274,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
 
-    return _utf8_to_uvchr_buf(s, send, retlen);
+    return utf8_to_uvchr_buf_helper(s, send, retlen);
 }
 
 /* This is marked as deprecated
