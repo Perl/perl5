@@ -272,18 +272,18 @@ struct p5rx {
 Returns the value of the object's reference count. Exposed
 to perl code via Internals::SvREFCNT().
 
-=for apidoc Am|SV*|SvREFCNT_inc|SV* sv
+=for apidoc SvREFCNT_inc
 Increments the reference count of the given SV, returning the SV.
 
-All of the following C<SvREFCNT_inc>* macros are optimized versions of
+All of the following C<SvREFCNT_inc>* are optimized versions of
 C<SvREFCNT_inc>, and can be replaced with C<SvREFCNT_inc>.
 
-=for apidoc Am|SV*|SvREFCNT_inc_NN|SV* sv
+=for apidoc SvREFCNT_inc_NN
 Same as C<SvREFCNT_inc>, but can only be used if you know C<sv>
 is not C<NULL>.  Since we don't have to check the NULLness, it's faster
 and smaller.
 
-=for apidoc Am|void|SvREFCNT_inc_void|SV* sv
+=for apidoc SvREFCNT_inc_void
 Same as C<SvREFCNT_inc>, but can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
@@ -312,10 +312,10 @@ value, and you know that C<sv> is not C<NULL>.  The macro doesn't need
 to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
-=for apidoc Am|void|SvREFCNT_dec|SV* sv
+=for apidoc SvREFCNT_dec
 Decrements the reference count of the given SV.  C<sv> may be C<NULL>.
 
-=for apidoc Am|void|SvREFCNT_dec_NN|SV* sv
+=for apidoc SvREFCNT_dec_NN
 Same as C<SvREFCNT_dec>, but can only be used if you know C<sv>
 is not C<NULL>.  Since we don't have to check the NULLness, it's faster
 and smaller.

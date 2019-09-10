@@ -2251,6 +2251,11 @@ pX	|SSize_t|tmps_grow_p	|SSize_t ix
 Apd	|SV*	|sv_rvweaken	|NN SV *const sv
 Apd	|SV*	|sv_rvunweaken	|NN SV *const sv
 ATpxd	|SV*	|sv_get_backrefs|NN SV *const sv
+AiTMdp	|SV *	|SvREFCNT_inc	|NULLOK SV *sv
+AiTMdp	|SV *	|SvREFCNT_inc_NN|NN SV *sv
+AiTMdp	|void	|SvREFCNT_inc_void|NULLOK SV *sv
+AiMdp	|void	|SvREFCNT_dec	|NULLOK SV *sv
+AiMdp	|void	|SvREFCNT_dec_NN|NN SV *sv
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block

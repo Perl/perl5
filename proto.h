@@ -63,6 +63,28 @@ PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
 PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #define PERL_ARGS_ASSERT_SLAB_FREE	\
 	assert(op)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_SvREFCNT_dec(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVREFCNT_DEC
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_SvREFCNT_dec_NN(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVREFCNT_DEC_NN	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV *	Perl_SvREFCNT_inc(SV *sv);
+#define PERL_ARGS_ASSERT_SVREFCNT_INC
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV *	Perl_SvREFCNT_inc_NN(SV *sv);
+#define PERL_ARGS_ASSERT_SVREFCNT_INC_NN	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_SvREFCNT_inc_void(SV *sv);
+#define PERL_ARGS_ASSERT_SVREFCNT_INC_VOID
+#endif
 PERL_CALLCONV char *	Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
 #define PERL_ARGS_ASSERT__BYTE_DUMP_STRING	\
 	assert(start)

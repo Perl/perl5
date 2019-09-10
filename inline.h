@@ -196,6 +196,8 @@ Perl_SvREFCNT_inc(SV *sv)
 PERL_STATIC_INLINE SV *
 Perl_SvREFCNT_inc_NN(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVREFCNT_INC_NN;
+
     SvREFCNT(sv)++;
     return sv;
 }
@@ -221,6 +223,9 @@ PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
 {
     U32 rc = SvREFCNT(sv);
+
+    PERL_ARGS_ASSERT_SVREFCNT_DEC_NN;
+
     if (LIKELY(rc > 1))
 	SvREFCNT(sv) = rc - 1;
     else
