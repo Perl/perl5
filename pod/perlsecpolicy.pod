@@ -371,6 +371,8 @@ branch.
 
 Note: These should be patches produced by C<git format-patch>.
 
+It may take some time to work up fixes.
+
 Rationale: Because otherwise we get patches that have to be manually
 applied (#132063 I'm looking at you) and the patches should be easy
 for everyone who gets them to apply and test.
