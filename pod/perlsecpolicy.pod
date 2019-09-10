@@ -220,7 +220,7 @@ sysread() on any layer that returns UTF-8 marked data.
 
 Other ways to receive badly encoded SVs usually involve bugs in XS
 modules, functions like Encode::_utf8_on() that document loudly
-its preconditions, and some C<pack> formats.
+its preconditions, and some C<pack> formats pre-5.32.
 
 =item *
 
@@ -272,8 +272,8 @@ Rationale: The C<use re 'eval';> mechanism exists specifically to
 prevent an attacker executing code via regexps.
 
 Note: Compiling a regular expression may still overflow the stack due
-to excessive recursion, and matching may allocate large amounts of
-memory, neither of these is a security issue.
+to excessive recursion pre-5.30, and matching may allocate large
+amounts of memory, neither of these is a security issue.
 
 =item *
 
