@@ -940,7 +940,7 @@
 #define csighandler		Perl_csighandler
 #endif
 #if !defined(EBCDIC)
-#define _variant_byte_number	Perl__variant_byte_number
+#define variant_byte_number	Perl_variant_byte_number
 #endif
 #if !defined(HAS_STRLCAT)
 #define my_strlcat		Perl_my_strlcat

@@ -1004,7 +1004,7 @@ ATidRp	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
 		|STRLEN len						    \
 		|NULLOK const U8 ** ep
 #ifndef EBCDIC
-CTiRp	|unsigned int|_variant_byte_number|PERL_UINTMAX_T word
+CTiRp	|unsigned int|variant_byte_number|PERL_UINTMAX_T word
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 EiTRd	|Size_t	|variant_under_utf8_count|NN const U8* const s		    \

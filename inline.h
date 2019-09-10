@@ -466,7 +466,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
      || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
-                *ep = x + _variant_byte_number(* (PERL_UINTMAX_T *) x);
+                *ep = x + variant_byte_number(* (PERL_UINTMAX_T *) x);
                 assert(*ep >= s && *ep < send);
 
                 return FALSE;
@@ -504,7 +504,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int
-Perl__variant_byte_number(PERL_UINTMAX_T word)
+Perl_variant_byte_number(PERL_UINTMAX_T word)
 {
 
     /* This returns the position in a word (0..7) of the first variant byte in

@@ -579,7 +579,7 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
             span_word |= span_word << 4;
 
             /* That reduces the problem to what this function solves */
-            return s + _variant_byte_number(span_word);
+            return s + variant_byte_number(span_word);
 
 #endif
 
@@ -657,7 +657,7 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
             masked &= PERL_VARIANTS_WORD_MASK;
 
             /* This reduces the problem to that solved by this function */
-            s += _variant_byte_number(masked);
+            s += variant_byte_number(masked);
             return s;
 
         } while (s + PERL_WORDSIZE <= send);
@@ -723,7 +723,7 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
             masked |= masked << 1;
             masked |= masked << 2;
             masked |= masked << 4;
-            return s + _variant_byte_number(masked);
+            return s + variant_byte_number(masked);
 
 #endif
 

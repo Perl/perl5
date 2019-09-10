@@ -4565,9 +4565,9 @@ PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 #endif
 #if !defined(EBCDIC)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE unsigned int	Perl__variant_byte_number(PERL_UINTMAX_T word)
+PERL_STATIC_INLINE unsigned int	Perl_variant_byte_number(PERL_UINTMAX_T word)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__VARIANT_BYTE_NUMBER
+#define PERL_ARGS_ASSERT_VARIANT_BYTE_NUMBER
 #endif
 
 #endif
