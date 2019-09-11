@@ -5799,6 +5799,13 @@ PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, co
 	assert(sv); assert(what); assert(spp)
 
 #endif
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE const char *	S_get_regex_charset_name(const U32 flags, STRLEN* const lenp);
+#define PERL_ARGS_ASSERT_GET_REGEX_CHARSET_NAME	\
+	assert(lenp)
+#endif
+#endif
 #if defined(PERL_IN_PP_CTL_C)
 STATIC PerlIO *	S_check_type_and_open(pTHX_ SV *name)
 			__attribute__warn_unused_result__;

@@ -1983,11 +1983,15 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
 
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+
 #define MAX_CHARSET_NAME_LENGTH 2
 
 PERL_STATIC_INLINE const char *
-get_regex_charset_name(const U32 flags, STRLEN* const lenp)
+S_get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 {
+    PERL_ARGS_ASSERT_GET_REGEX_CHARSET_NAME;
+
     /* Returns a string that corresponds to the name of the regex character set
      * given by 'flags', and *lenp is set the length of that string, which
      * cannot exceed MAX_CHARSET_NAME_LENGTH characters */
@@ -2007,6 +2011,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     NOT_REACHED; /* NOTREACHED */
     return "?";	    /* Unknown */
 }
+
+#endif
 
 /*
 

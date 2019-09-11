@@ -1182,6 +1182,9 @@
 #define isSCRIPT_RUN(a,b,c)	Perl_isSCRIPT_RUN(aTHX_ a,b,c)
 #define variant_under_utf8_count	S_variant_under_utf8_count
 #  endif
+#  if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#define get_regex_charset_name	S_get_regex_charset_name
+#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _make_exactf_invlist(a,b)	S__make_exactf_invlist(aTHX_ a,b)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)

@@ -1942,6 +1942,9 @@ EiRT	|UV	|_invlist_len	|NN SV* const invlist
 EiRT	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpRT	|SSize_t|_invlist_search	|NN SV* const invlist|const UV cp
 #endif
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+EiT	|const char *|get_regex_charset_name|const U32 flags|NN STRLEN* const lenp
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 EXp	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK const regexp *prog		   \
