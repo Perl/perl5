@@ -1892,7 +1892,8 @@ Used by the C<IS_SAFE_SYSCALL()> macro.
 */
 
 PERL_STATIC_INLINE bool
-Perl_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name) {
+Perl_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
+{
     /* While the Windows CE API provides only UCS-16 (or UTF-16) APIs
      * perl itself uses xce*() functions which accept 8-bit strings.
      */
@@ -1933,7 +1934,8 @@ then calling:
 #ifdef PERL_CORE
 
 PERL_STATIC_INLINE bool
-S_should_warn_nl(const char *pv) {
+S_should_warn_nl(const char *pv)
+{
     STRLEN len;
 
     PERL_ARGS_ASSERT_SHOULD_WARN_NL;
@@ -2013,7 +2015,8 @@ Return false if any get magic is on the SV other than taint magic.
 */
 
 PERL_STATIC_INLINE bool
-Perl_sv_only_taint_gmagic(SV *sv) {
+Perl_sv_only_taint_gmagic(SV *sv)
+{
     MAGIC *mg = SvMAGIC(sv);
 
     PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC;
