@@ -1906,6 +1906,9 @@
 #define pad_findlex(a,b,c,d,e,f,g,h,i)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g,h,i)
 #define pad_reset()		S_pad_reset(aTHX)
 #  endif
+#  if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
+#define PadnameIN_SCOPE		S_PadnameIN_SCOPE
+#  endif
 #  if defined(PERL_IN_PERL_C)
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)

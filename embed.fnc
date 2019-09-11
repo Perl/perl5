@@ -3239,6 +3239,9 @@ pd	|void	|do_dump_pad	|I32 level|NN PerlIO *file|NULLOK PADLIST *padlist|int ful
 Sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 #endif
+#if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
+iT	|bool	|PadnameIN_SCOPE|NN const PADNAME * const pn|const U32 seq
+#endif
 Apd	|CV*	|cv_clone	|NN CV* proto
 p	|CV*	|cv_clone_into	|NN CV* proto|NN CV *target
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv

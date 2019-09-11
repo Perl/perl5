@@ -119,8 +119,10 @@ S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, STRLEN len)
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 PERL_STATIC_INLINE bool
-PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
+S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 {
+    PERL_ARGS_ASSERT_PADNAMEIN_SCOPE;
+
     /* is seq within the range _LOW to _HIGH ?
      * This is complicated by the fact that PL_cop_seqmax
      * may have wrapped around at some point */

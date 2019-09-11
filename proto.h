@@ -5708,6 +5708,13 @@ STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 fla
 STATIC void	S_pad_reset(pTHX);
 #define PERL_ARGS_ASSERT_PAD_RESET
 #endif
+#if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq);
+#define PERL_ARGS_ASSERT_PADNAMEIN_SCOPE	\
+	assert(pn)
+#endif
+#endif
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #ifndef NO_MATHOMS
 PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type);
