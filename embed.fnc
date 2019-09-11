@@ -2261,6 +2261,8 @@ AiTMdp	|SV *	|SvREFCNT_inc_NN|NN SV *sv
 AiTMdp	|void	|SvREFCNT_inc_void|NULLOK SV *sv
 AiMdp	|void	|SvREFCNT_dec	|NULLOK SV *sv
 AiMdp	|void	|SvREFCNT_dec_NN|NN SV *sv
+AiTp	|void	|SvAMAGIC_on	|NN SV *sv
+AiTp	|void	|SvAMAGIC_off	|NN SV *sv
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block

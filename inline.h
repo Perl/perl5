@@ -239,14 +239,18 @@ Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
 }
 
 PERL_STATIC_INLINE void
-SvAMAGIC_on(SV *sv)
+Perl_SvAMAGIC_on(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVAMAGIC_ON;
     assert(SvROK(sv));
+
     if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
 }
 PERL_STATIC_INLINE void
-SvAMAGIC_off(SV *sv)
+Perl_SvAMAGIC_off(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVAMAGIC_OFF;
+
     if (SvROK(sv) && SvOBJECT(SvRV(sv)))
 	HvAMAGIC_off(SvSTASH(SvRV(sv)));
 }

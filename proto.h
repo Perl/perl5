@@ -74,6 +74,16 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #define PERL_ARGS_ASSERT_SLAB_FREE	\
 	assert(op)
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_SvAMAGIC_off(SV *sv);
+#define PERL_ARGS_ASSERT_SVAMAGIC_OFF	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_SvAMAGIC_on(SV *sv);
+#define PERL_ARGS_ASSERT_SVAMAGIC_ON	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	Perl_SvREFCNT_dec(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SVREFCNT_DEC
 #endif
