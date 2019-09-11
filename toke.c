@@ -10968,6 +10968,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     const char *lastub = NULL;		/* position of last underbar */
     static const char* const number_too_long = "Number too long";
     bool warned_about_underscore = 0;
+    I32 shift; /* shift per digit for hex/oct/bin, hoisted here for fp */
 #define WARN_ABOUT_UNDERSCORE() \
 	do { \
 	    if (!warned_about_underscore) { \
@@ -11014,8 +11015,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	{
 	  /* variables:
 	     u		holds the "number so far"
-	     shift	the power of 2 of the base
-			(hex == 4, octal == 3, binary == 1)
 	     overflowed	was the number more than we can hold?
 
 	     Shift is used when we add a digit.  It also serves as an "are
@@ -11024,7 +11023,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	   */
 	    NV n = 0.0;
 	    UV u = 0;
-	    I32 shift;
 	    bool overflowed = FALSE;
 	    bool just_zero  = TRUE;	/* just plain 0 or binary number? */
             bool has_digs = FALSE;
@@ -11388,8 +11386,21 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         if (hexfp) {
             floatit = TRUE;
             *d++ = '0';
-            *d++ = 'x';
-            s = start + 2;
+            switch (shift) {
+            case 4:
+                *d++ = 'x';
+                s = start + 2;
+                break;
+            case 3:
+                s = start + 1;
+                break;
+            case 1:
+                *d++ = 'b';
+                s = start + 2;
+                break;
+            default:
+                NOT_REACHED; /* NOTREACHED */
+            }
         }
 
 	/* read next group of digits and _ and copy into d */
