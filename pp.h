@@ -67,8 +67,8 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \
     } STMT_END
 
-#define TOPMARK S_TOPMARK(aTHX)
-#define POPMARK S_POPMARK(aTHX)
+#define TOPMARK Perl_TOPMARK(aTHX)
+#define POPMARK Perl_POPMARK(aTHX)
 
 #define INCMARK \
     STMT_START {                                                      \

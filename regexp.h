@@ -629,7 +629,7 @@ and check for NULL.
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
 #  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
 #endif
-#define ReANY(re)		S_ReANY((const REGEXP *)(re))
+#define ReANY(re)		Perl_ReANY((const REGEXP *)(re))
 
 /* FIXME for plugins. */
 

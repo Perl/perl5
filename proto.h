@@ -155,7 +155,7 @@ PERL_CALLCONV UV	Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8* u
 #define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS	\
 	assert(p); assert(ustrp); assert(file)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE UV	S__utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
+PERL_STATIC_INLINE UV	Perl__utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
 #define PERL_ARGS_ASSERT__UTF8_TO_UVCHR_BUF	\
 	assert(s); assert(send)
 #endif
@@ -183,7 +183,7 @@ PERL_CALLCONV SV *	Perl_amagic_deref_call(pTHX_ SV *ref, int method);
 PERL_CALLCONV bool	Perl_amagic_is_enabled(pTHX_ int method);
 #define PERL_ARGS_ASSERT_AMAGIC_IS_ENABLED
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_append_utf8_from_native_byte(const U8 byte, U8** dest);
+PERL_STATIC_INLINE void	Perl_append_utf8_from_native_byte(const U8 byte, U8** dest);
 #define PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE	\
 	assert(dest)
 #endif
@@ -269,7 +269,7 @@ PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val);
 #define PERL_ARGS_ASSERT_AV_TINDEX
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE SSize_t	S_av_top_index(pTHX_ AV *av)
+PERL_STATIC_INLINE SSize_t	Perl_av_top_index(pTHX_ AV *av)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
 	assert(av)
@@ -659,7 +659,7 @@ PERL_CALLCONV_NO_RET void	Perl_croak_caller(const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,1,2);
 #define PERL_ARGS_ASSERT_CROAK_CALLER
 
-PERL_STATIC_INLINE_NO_RET void	S_croak_memory_wrap(void)
+PERL_STATIC_INLINE_NO_RET void	Perl_croak_memory_wrap(void)
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_CROAK_MEMORY_WRAP
 
@@ -1549,7 +1549,7 @@ PERL_CALLCONV bool	Perl_isALNUM_lazy(pTHX_ const char* p)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE Size_t	S_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+PERL_STATIC_INLINE Size_t	Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISC9_STRICT_UTF8_CHAR	\
 	assert(s0); assert(e)
@@ -1564,14 +1564,14 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE Size_t	S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+PERL_STATIC_INLINE Size_t	Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR	\
 	assert(s0); assert(e)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE Size_t	S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
+PERL_STATIC_INLINE Size_t	Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISUTF8_CHAR	\
 	assert(s0); assert(e)
@@ -1589,7 +1589,7 @@ PERL_STATIC_INLINE Size_t	S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 /* PERL_CALLCONV bool	is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
 #define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOC
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
+PERL_STATIC_INLINE bool	Perl_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
 #define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOCLEN	\
 	assert(s)
 #endif
@@ -1603,7 +1603,7 @@ PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 #define PERL_ARGS_ASSERT_IS_LVALUE_SUB
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
+PERL_STATIC_INLINE bool	Perl_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_SAFE_SYSCALL	\
 	assert(pv); assert(what); assert(op_name)
@@ -1616,7 +1616,7 @@ PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, cons
 /* PERL_CALLCONV bool	is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
 #define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOC
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
+PERL_STATIC_INLINE bool	Perl_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
 #define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOCLEN	\
 	assert(s)
 #endif
@@ -1913,7 +1913,7 @@ PERL_CALLCONV bool	Perl_is_utf8_digit(pTHX_ const U8 *p)
 /* PERL_CALLCONV bool	is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
 #define PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOC_FLAGS
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags);
+PERL_STATIC_INLINE bool	Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags);
 #define PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOCLEN_FLAGS	\
 	assert(s)
 #endif
@@ -1946,7 +1946,7 @@ PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+PERL_STATIC_INLINE bool	Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING_LOC	\
 	assert(s)
@@ -2021,7 +2021,7 @@ PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
+PERL_STATIC_INLINE bool	Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_FLAGS	\
 	assert(s)
@@ -2040,7 +2040,7 @@ PERL_STATIC_INLINE bool	Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, cons
 	assert(s)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags);
+PERL_STATIC_INLINE bool	Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS	\
 	assert(s)
 #endif
@@ -2058,7 +2058,7 @@ PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
+PERL_STATIC_INLINE bool	Perl_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS	\
 	assert(s); assert(e)
@@ -3857,7 +3857,7 @@ PERL_CALLCONV NV	Perl_sv_nv(pTHX_ SV* sv)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_sv_only_taint_gmagic(SV *sv);
+PERL_STATIC_INLINE bool	Perl_sv_only_taint_gmagic(SV *sv);
 #define PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC	\
 	assert(sv)
 #endif
@@ -4353,7 +4353,7 @@ PERL_CALLCONV UV	Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *r
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR	\
 	assert(s)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE UV	S_utf8n_to_uvchr_msgs(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 * errors, AV ** msgs);
+PERL_STATIC_INLINE UV	Perl_utf8n_to_uvchr_msgs(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 * errors, AV ** msgs);
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS	\
 	assert(s)
 #endif
@@ -4565,7 +4565,7 @@ PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 #endif
 #if !defined(EBCDIC)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE unsigned int	S__variant_byte_number(PERL_UINTMAX_T word)
+PERL_STATIC_INLINE unsigned int	Perl__variant_byte_number(PERL_UINTMAX_T word)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__VARIANT_BYTE_NUMBER
 #endif
@@ -4724,92 +4724,92 @@ STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem);
 #endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popblock(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popblock(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPBLOCK	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popeval(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popeval(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPEVAL	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popformat(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPFORMAT	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popgiven(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPGIVEN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_poploop(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPLOOP	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popsub(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popsub(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPSUB	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popsub_args(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPSUB_ARGS	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPSUB_COMMON	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popwhen(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_popwhen(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPWHEN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE PERL_CONTEXT *	S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix);
+PERL_STATIC_INLINE PERL_CONTEXT *	Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix);
 #define PERL_ARGS_ASSERT_CX_PUSHBLOCK	\
 	assert(sp)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv);
+PERL_STATIC_INLINE void	Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv);
 #define PERL_ARGS_ASSERT_CX_PUSHEVAL	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv);
+PERL_STATIC_INLINE void	Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv);
 #define PERL_ARGS_ASSERT_CX_PUSHFORMAT	\
 	assert(cx); assert(cv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
+PERL_STATIC_INLINE void	Perl_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
 #define PERL_ARGS_ASSERT_CX_PUSHGIVEN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV *itersave);
+PERL_STATIC_INLINE void	Perl_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV *itersave);
 #define PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR	\
 	assert(cx); assert(itervarp)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_PUSHLOOP_PLAIN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs);
+PERL_STATIC_INLINE void	Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs);
 #define PERL_ARGS_ASSERT_CX_PUSHSUB	\
 	assert(cx); assert(cv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_pushwhen(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_PUSHWHEN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_topblock(pTHX_ PERL_CONTEXT *cx);
+PERL_STATIC_INLINE void	Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_TOPBLOCK	\
 	assert(cx)
 #endif

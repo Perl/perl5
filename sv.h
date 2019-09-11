@@ -334,10 +334,10 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#define SvREFCNT_inc(sv)		S_SvREFCNT_inc(MUTABLE_SV(sv))
+#define SvREFCNT_inc(sv)		Perl_SvREFCNT_inc(MUTABLE_SV(sv))
 #define SvREFCNT_inc_simple(sv)		SvREFCNT_inc(sv)
-#define SvREFCNT_inc_NN(sv)		S_SvREFCNT_inc_NN(MUTABLE_SV(sv))
-#define SvREFCNT_inc_void(sv)		S_SvREFCNT_inc_void(MUTABLE_SV(sv))
+#define SvREFCNT_inc_NN(sv)		Perl_SvREFCNT_inc_NN(MUTABLE_SV(sv))
+#define SvREFCNT_inc_void(sv)		Perl_SvREFCNT_inc_void(MUTABLE_SV(sv))
 
 /* These guys don't need the curly blocks */
 #define SvREFCNT_inc_simple_void(sv)	STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END
@@ -345,8 +345,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 
-#define SvREFCNT_dec(sv)	S_SvREFCNT_dec(aTHX_ MUTABLE_SV(sv))
-#define SvREFCNT_dec_NN(sv)	S_SvREFCNT_dec_NN(aTHX_ MUTABLE_SV(sv))
+#define SvREFCNT_dec(sv)	Perl_SvREFCNT_dec(aTHX_ MUTABLE_SV(sv))
+#define SvREFCNT_dec_NN(sv)	Perl_SvREFCNT_dec_NN(aTHX_ MUTABLE_SV(sv))
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((svtype)((sv)->sv_flags & SVTYPEMASK))
@@ -1081,8 +1081,8 @@ C<sv_force_normal> does nothing.
 
 #define SvPADTMP_on(sv)		(SvFLAGS(sv) |= SVs_PADTMP)
 #define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
-#define SvPADSTALE_on(sv)	S_SvPADSTALE_on(MUTABLE_SV(sv))
-#define SvPADSTALE_off(sv)	S_SvPADSTALE_off(MUTABLE_SV(sv))
+#define SvPADSTALE_on(sv)	Perl_SvPADSTALE_on(MUTABLE_SV(sv))
+#define SvPADSTALE_off(sv)	Perl_SvPADSTALE_off(MUTABLE_SV(sv))
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVs_TEMP)
 #define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVs_TEMP)

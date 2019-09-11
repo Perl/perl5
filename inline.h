@@ -40,7 +40,7 @@ SOFTWARE.
 /* ------------------------------- av.h ------------------------------- */
 
 PERL_STATIC_INLINE SSize_t
-S_av_top_index(pTHX_ AV *av)
+Perl_av_top_index(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_TOP_INDEX;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -51,7 +51,7 @@ S_av_top_index(pTHX_ AV *av)
 /* ------------------------------- cv.h ------------------------------- */
 
 PERL_STATIC_INLINE GV *
-S_CvGV(pTHX_ CV *sv)
+Perl_CvGV(pTHX_ CV *sv)
 {
     return CvNAMED(sv)
 	? Perl_cvgv_from_hek(aTHX_ sv)
@@ -59,7 +59,7 @@ S_CvGV(pTHX_ CV *sv)
 }
 
 PERL_STATIC_INLINE I32 *
-S_CvDEPTHp(const CV * const sv)
+Perl_CvDEPTHp(const CV * const sv)
 {
     assert(SvTYPE(sv) == SVt_PVCV || SvTYPE(sv) == SVt_PVFM);
     return &((XPVCV*)SvANY(sv))->xcv_depth;
@@ -153,7 +153,7 @@ PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 /* ------------------------------- pp.h ------------------------------- */
 
 PERL_STATIC_INLINE I32
-S_TOPMARK(pTHX)
+Perl_TOPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
 				 "MARK top  %p %" IVdf "\n",
@@ -163,7 +163,7 @@ S_TOPMARK(pTHX)
 }
 
 PERL_STATIC_INLINE I32
-S_POPMARK(pTHX)
+Perl_POPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
 				 "MARK pop  %p %" IVdf "\n",
@@ -176,7 +176,7 @@ S_POPMARK(pTHX)
 /* ----------------------------- regexp.h ----------------------------- */
 
 PERL_STATIC_INLINE struct regexp *
-S_ReANY(const REGEXP * const re)
+Perl_ReANY(const REGEXP * const re)
 {
     XPV* const p = (XPV*)SvANY(re);
     assert(isREGEXP(re));
@@ -187,26 +187,26 @@ S_ReANY(const REGEXP * const re)
 /* ------------------------------- sv.h ------------------------------- */
 
 PERL_STATIC_INLINE SV *
-S_SvREFCNT_inc(SV *sv)
+Perl_SvREFCNT_inc(SV *sv)
 {
     if (LIKELY(sv != NULL))
 	SvREFCNT(sv)++;
     return sv;
 }
 PERL_STATIC_INLINE SV *
-S_SvREFCNT_inc_NN(SV *sv)
+Perl_SvREFCNT_inc_NN(SV *sv)
 {
     SvREFCNT(sv)++;
     return sv;
 }
 PERL_STATIC_INLINE void
-S_SvREFCNT_inc_void(SV *sv)
+Perl_SvREFCNT_inc_void(SV *sv)
 {
     if (LIKELY(sv != NULL))
 	SvREFCNT(sv)++;
 }
 PERL_STATIC_INLINE void
-S_SvREFCNT_dec(pTHX_ SV *sv)
+Perl_SvREFCNT_dec(pTHX_ SV *sv)
 {
     if (LIKELY(sv != NULL)) {
 	U32 rc = SvREFCNT(sv);
@@ -218,7 +218,7 @@ S_SvREFCNT_dec(pTHX_ SV *sv)
 }
 
 PERL_STATIC_INLINE void
-S_SvREFCNT_dec_NN(pTHX_ SV *sv)
+Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
 {
     U32 rc = SvREFCNT(sv);
     if (LIKELY(rc > 1))
@@ -241,13 +241,13 @@ SvAMAGIC_off(SV *sv)
 }
 
 PERL_STATIC_INLINE U32
-S_SvPADSTALE_on(SV *sv)
+Perl_SvPADSTALE_on(SV *sv)
 {
     assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) |= SVs_PADSTALE;
 }
 PERL_STATIC_INLINE U32
-S_SvPADSTALE_off(SV *sv)
+Perl_SvPADSTALE_off(SV *sv)
 {
     assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
@@ -271,7 +271,7 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 /* saves machine code for a common noreturn idiom typically used in Newx*() */
 GCC_DIAG_IGNORE_DECL(-Wunused-function);
 static void
-S_croak_memory_wrap(void)
+Perl_croak_memory_wrap(void)
 {
     Perl_croak_nocontext("%s",PL_memory_wrap);
 }
@@ -284,7 +284,7 @@ GCC_DIAG_RESTORE_DECL;
 */
 
 PERL_STATIC_INLINE void
-S_append_utf8_from_native_byte(const U8 byte, U8** dest)
+Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
 {
     /* Takes an input 'byte' (Latin1 or EBCDIC) and appends it to the UTF-8
      * encoded string at '*dest', updating '*dest' to include it */
@@ -394,7 +394,7 @@ UTF-8 invariant, this function does not change the contents of C<*ep>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 {
     const U8* send;
     const U8* x = s;
@@ -504,7 +504,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int
-S__variant_byte_number(PERL_UINTMAX_T word)
+Perl__variant_byte_number(PERL_UINTMAX_T word)
 {
 
     /* This returns the position in a word (0..7) of the first variant byte in
@@ -891,7 +891,7 @@ C<L</is_c9strict_utf8_string_loclen>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
+Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
 {
     const U8 * first_variant;
 
@@ -1050,7 +1050,7 @@ documented at the definition of PL_extended_utf8_dfa_tab[].
 */
 
 PERL_STATIC_INLINE Size_t
-S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
+Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
     const U8 * s = s0;
     UV state = 0;
@@ -1124,7 +1124,7 @@ documented at the definition of strict_extended_utf8_dfa_tab[].
 */
 
 PERL_STATIC_INLINE Size_t
-S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
     const U8 * s = s0;
     UV state = 0;
@@ -1190,7 +1190,7 @@ documented at the definition of PL_c9_utf8_dfa_tab[].
 */
 
 PERL_STATIC_INLINE Size_t
-S_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
     const U8 * s = s0;
     UV state = 0;
@@ -1242,7 +1242,7 @@ See also C<L</is_strict_utf8_string_loc>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8 * first_variant;
 
@@ -1319,7 +1319,7 @@ See also C<L</is_c9strict_utf8_string_loc>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8 * first_variant;
 
@@ -1401,7 +1401,7 @@ See also C<L</is_utf8_string_loc_flags>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags)
+Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags)
 {
     const U8 * first_variant;
 
@@ -1691,7 +1691,7 @@ determined from just the first one or two bytes.
  */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
+Perl_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
 {
     PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS;
 
@@ -1759,7 +1759,7 @@ complete, valid characters found in the C<el> pointer.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
+Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
                                        STRLEN len,
                                        const U8 **ep,
                                        STRLEN *el,
@@ -1780,7 +1780,7 @@ S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
 }
 
 PERL_STATIC_INLINE UV
-S_utf8n_to_uvchr_msgs(const U8 *s,
+Perl_utf8n_to_uvchr_msgs(const U8 *s,
                       STRLEN curlen,
                       STRLEN *retlen,
                       const U32 flags,
@@ -1843,7 +1843,7 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
 }
 
 PERL_STATIC_INLINE UV
-S__utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+Perl__utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT__UTF8_TO_UVCHR_BUF;
 
@@ -1885,7 +1885,7 @@ Used by the C<IS_SAFE_SYSCALL()> macro.
 */
 
 PERL_STATIC_INLINE bool
-S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name) {
+Perl_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name) {
     /* While the Windows CE API provides only UCS-16 (or UTF-16) APIs
      * perl itself uses xce*() functions which accept 8-bit strings.
      */
@@ -2006,7 +2006,7 @@ Return false if any get magic is on the SV other than taint magic.
 */
 
 PERL_STATIC_INLINE bool
-S_sv_only_taint_gmagic(SV *sv) {
+Perl_sv_only_taint_gmagic(SV *sv) {
     MAGIC *mg = SvMAGIC(sv);
 
     PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC;
@@ -2029,7 +2029,7 @@ S_sv_only_taint_gmagic(SV *sv) {
 /* Enter a block. Push a new base context and return its address. */
 
 PERL_STATIC_INLINE PERL_CONTEXT *
-S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
+Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
 {
     PERL_CONTEXT * cx;
 
@@ -2056,7 +2056,7 @@ S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
 /* Exit a block (RETURN and LAST). */
 
 PERL_STATIC_INLINE void
-S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popblock(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPBLOCK;
 
@@ -2081,7 +2081,7 @@ S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
  * *after* cx_pushblock() was called. */
 
 PERL_STATIC_INLINE void
-S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_TOPBLOCK;
 
@@ -2096,7 +2096,7 @@ S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
+Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 {
     U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
 
@@ -2116,7 +2116,7 @@ S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 /* subsets of cx_popsub() */
 
 PERL_STATIC_INLINE void
-S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
 {
     CV *cv;
 
@@ -2135,7 +2135,7 @@ S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
 /* handle the @_ part of leaving a sub */
 
 PERL_STATIC_INLINE void
-S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 {
     AV *av;
 
@@ -2157,7 +2157,7 @@ S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popsub(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPSUB;
     assert(CxTYPE(cx) == CXt_SUB);
@@ -2171,7 +2171,7 @@ S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
+Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
 {
     PERL_ARGS_ASSERT_CX_PUSHFORMAT;
 
@@ -2189,7 +2189,7 @@ S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
 
 
 PERL_STATIC_INLINE void
-S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
 {
     CV *cv;
     GV *dfout;
@@ -2212,7 +2212,7 @@ S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
+Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
 {
     PERL_ARGS_ASSERT_CX_PUSHEVAL;
 
@@ -2230,7 +2230,7 @@ S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
 
 
 PERL_STATIC_INLINE void
-S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popeval(pTHX_ PERL_CONTEXT *cx)
 {
     SV *sv;
 
@@ -2262,7 +2262,7 @@ S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
  */
 
 PERL_STATIC_INLINE void
-S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_PUSHLOOP_PLAIN;
     cx->blk_loop.my_op = cLOOP;
@@ -2274,7 +2274,7 @@ S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
  */
 
 PERL_STATIC_INLINE void
-S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
+Perl_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
 {
     PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR;
 
@@ -2292,7 +2292,7 @@ S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
 /* pop all loop types, including plain */
 
 PERL_STATIC_INLINE void
-S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPLOOP;
 
@@ -2325,7 +2325,7 @@ S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_PUSHWHEN;
 
@@ -2334,7 +2334,7 @@ S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPWHEN;
     assert(CxTYPE(cx) == CXt_WHEN);
@@ -2346,7 +2346,7 @@ S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
+Perl_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 {
     PERL_ARGS_ASSERT_CX_PUSHGIVEN;
 
@@ -2356,7 +2356,7 @@ S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 
 
 PERL_STATIC_INLINE void
-S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
 {
     SV *sv;
 
