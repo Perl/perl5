@@ -53,15 +53,19 @@ Perl_av_top_index(pTHX_ AV *av)
 PERL_STATIC_INLINE GV *
 Perl_CvGV(pTHX_ CV *sv)
 {
+    PERL_ARGS_ASSERT_CVGV;
+
     return CvNAMED(sv)
 	? Perl_cvgv_from_hek(aTHX_ sv)
 	: ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
 }
 
 PERL_STATIC_INLINE I32 *
-Perl_CvDEPTHp(const CV * const sv)
+Perl_CvDEPTH(const CV * const sv)
 {
+    PERL_ARGS_ASSERT_CVDEPTH;
     assert(SvTYPE(sv) == SVt_PVCV || SvTYPE(sv) == SVt_PVFM);
+
     return &((XPVCV*)SvANY(sv))->xcv_depth;
 }
 

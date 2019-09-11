@@ -25,6 +25,16 @@ PERL_CALLCONV UV	ASCII_TO_NEED(const UV enc, const UV ch)
 #define PERL_ARGS_ASSERT_ASCII_TO_NEED
 #endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE I32 *	Perl_CvDEPTH(const CV * const sv);
+#define PERL_ARGS_ASSERT_CVDEPTH	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE GV *	Perl_CvGV(pTHX_ CV *sv);
+#define PERL_ARGS_ASSERT_CVGV	\
+	assert(sv)
+#endif
 PERL_CALLCONV int	Perl_Gv_AMupdate(pTHX_ HV* stash, bool destructing);
 #define PERL_ARGS_ASSERT_GV_AMUPDATE	\
 	assert(stash)
