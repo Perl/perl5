@@ -731,6 +731,10 @@ potentially warn under some level of strict-ness.
 "Superseded" by C<sv_nosharing()>.
 
 =cut
+
+PERL_UNLOCK_HOOK in intrpvar.h is the macro that refers to this, and guarantees
+that mathoms gets loaded.
+
 */
 
 void
