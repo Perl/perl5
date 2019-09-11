@@ -71,6 +71,10 @@ C<-Accflags='-DNO_MATHOMS'>
  */
 #else
 
+/* The functions in this file should be able to call other deprecated functions
+ * without a compiler warning */
+GCC_DIAG_IGNORE(-Wdeprecated-declarations)
+
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */
@@ -1784,6 +1788,8 @@ Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
 
     return sv_2pvbyte(sv, lp);
 }
+
+GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */
 

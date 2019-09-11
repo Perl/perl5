@@ -10744,7 +10744,12 @@ Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
 {
     PERL_ARGS_ASSERT_SV_SETPVIV_MG;
 
+    GCC_DIAG_IGNORE_STMT(-Wdeprecated-declarations);
+
     sv_setpviv(sv, iv);
+
+    GCC_DIAG_RESTORE_STMT;
+
     SvSETMAGIC(sv);
 }
 
