@@ -1683,6 +1683,8 @@ Ap	|void	|save_pushptrptr|NULLOK void *const ptr1 \
 S	|void	|save_pushptri32ptr|NULLOK void *const ptr1|const I32 i \
 				|NULLOK void *const ptr2|const int type
 #endif
+Xiop	|I32	|TOPMARK
+Xiop	|I32	|POPMARK
 : Used in perly.y
 p	|OP*	|sawparens	|NULLOK OP* o
 Apd	|OP*	|op_contextualize|NN OP* o|I32 context

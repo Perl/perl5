@@ -46,6 +46,10 @@ PERL_CALLCONV UV	NATIVE_TO_NEED(const UV enc, const UV ch)
 #define PERL_ARGS_ASSERT_NATIVE_TO_NEED
 #endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE I32	Perl_POPMARK(pTHX);
+#define PERL_ARGS_ASSERT_POPMARK
+#endif
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
 #define PERL_ARGS_ASSERT_PERLIO_CONTEXT_LAYERS
 PERL_CALLCONV int	Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd);
@@ -104,6 +108,10 @@ PERL_STATIC_INLINE SV *	Perl_SvREFCNT_inc_NN(SV *sv);
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	Perl_SvREFCNT_inc_void(SV *sv);
 #define PERL_ARGS_ASSERT_SVREFCNT_INC_VOID
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE I32	Perl_TOPMARK(pTHX);
+#define PERL_ARGS_ASSERT_TOPMARK
 #endif
 PERL_CALLCONV char *	Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
 #define PERL_ARGS_ASSERT__BYTE_DUMP_STRING	\
