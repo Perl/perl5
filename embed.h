@@ -1177,7 +1177,7 @@
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
 #  if defined(PERL_CORE) || defined (PERL_EXT)
-#define is_utf8_non_invariant_string	S_is_utf8_non_invariant_string
+#define is_utf8_non_invariant_string	Perl_is_utf8_non_invariant_string
 #define sv_or_pv_pos_u2b(a,b,c,d)	S_sv_or_pv_pos_u2b(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_CORE) || defined(PERL_EXT)

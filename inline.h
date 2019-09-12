@@ -775,7 +775,7 @@ at this low a level.  A valid use case could change that.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
+Perl_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
 {
     const U8 * first_variant;
 

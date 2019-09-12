@@ -5140,7 +5140,7 @@ PERL_CALLCONV void	Perl_Slab_to_rw(pTHX_ OPSLAB *const slab);
 #endif
 #if defined(PERL_CORE) || defined (PERL_EXT)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
+PERL_STATIC_INLINE bool	Perl_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_NON_INVARIANT_STRING	\
 	assert(s)

@@ -1015,7 +1015,7 @@ EiTRd	|Size_t	|variant_under_utf8_count|NN const U8* const s		    \
 AmTdRP	|bool	|is_ascii_string|NN const U8* const s|STRLEN len
 AmTdRP	|bool	|is_invariant_string|NN const U8* const s|STRLEN len
 #if defined(PERL_CORE) || defined (PERL_EXT)
-EXTidR	|bool	|is_utf8_non_invariant_string|NN const U8* const s	    \
+EXTidRp	|bool	|is_utf8_non_invariant_string|NN const U8* const s	    \
 		|STRLEN len
 #endif
 AbTpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
