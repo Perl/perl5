@@ -1892,10 +1892,14 @@ Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
 =for apidoc is_safe_syscall
 
-Test that the given C<pv> doesn't contain any internal C<NUL> characters.
-If it does, set C<errno> to C<ENOENT>, optionally warn, and return FALSE.
+Test that the given C<pv> (with length C<len>) doesn't contain any internal
+C<NUL> characters.
+If it does, set C<errno> to C<ENOENT>, optionally warn using the C<syscalls>
+category, and return FALSE.
 
 Return TRUE if the name is safe.
+
+C<what> and C<op_name> are used in any warning.
 
 Used by the C<IS_SAFE_SYSCALL()> macro.
 
