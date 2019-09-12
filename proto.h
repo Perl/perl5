@@ -70,6 +70,11 @@ PERL_CALLCONV int	Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 
 PERL_CALLCONV const char*	Perl_setlocale(const int category, const char* locale);
 #define PERL_ARGS_ASSERT_PERL_SETLOCALE
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE struct regexp *	Perl_ReANY(const REGEXP * const re);
+#define PERL_ARGS_ASSERT_REANY	\
+	assert(re)
+#endif
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SLAB_ALLOC

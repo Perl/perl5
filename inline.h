@@ -185,7 +185,10 @@ PERL_STATIC_INLINE struct regexp *
 Perl_ReANY(const REGEXP * const re)
 {
     XPV* const p = (XPV*)SvANY(re);
+
+    PERL_ARGS_ASSERT_REANY;
     assert(isREGEXP(re));
+
     return SvTYPE(re) == SVt_PVLV ? p->xpv_len_u.xpvlenu_rx
                                    : (struct regexp *)p;
 }

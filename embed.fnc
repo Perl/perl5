@@ -1539,6 +1539,7 @@ ApMb	|OP*	|ref		|NULLOK OP* o|I32 type
 S	|OP*	|refkids	|NULLOK OP* o|I32 type
 #endif
 Ap	|void	|regdump	|NN const regexp* r
+CiTop	|struct regexp *|ReANY	|NN const REGEXP * const re
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 EXpR	|SV*	|_new_invlist_C_array|NN const UV* const list
 EXp	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
