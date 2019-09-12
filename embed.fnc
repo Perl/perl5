@@ -1922,15 +1922,15 @@ ESR	|SV*	|invlist_contents|NN SV* const invlist		    \
 ESRT	|bool	|new_regcurly	|NN const char *s|NN const char *e
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
-EXm	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
+m	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EXp	|void	|_invlist_intersection_maybe_complement_2nd \
 		|NULLOK SV* const a|NN SV* const b          \
 		|const bool complement_b|NN SV** i
-EXm	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
+Cm	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
 EXp	|void	|_invlist_union_maybe_complement_2nd        \
 		|NULLOK SV* const a|NN SV* const b          \
 		|const bool complement_b|NN SV** output
-EXm	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
+m	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
 EXp	|void	|_invlist_invert|NN SV* const invlist
 EXpR	|SV*	|_new_invlist	|IV initial_size
 EXpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|UV start|UV end
