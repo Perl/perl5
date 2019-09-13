@@ -877,8 +877,7 @@ while (defined (my $test = shift @tests)) {
                               [[:xdigit:]]{2} )? /x, $test_name);
         }
         else {
-            is($result, $expected,
-               "Verify compilation of $test displays as $test_name");
+            is($result, $expected, $test_name);
         }
     }
 }
