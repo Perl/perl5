@@ -15,9 +15,9 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.50";
+our $VERSION    = "1.52";
 our $XS_VERSION = $VERSION;
-$VERSION    = eval $VERSION;
+$VERSION =~ tr/_//d;
 
 require XSLoader;
 XSLoader::load('List::Util', $XS_VERSION);
@@ -38,6 +38,7 @@ sub import
 # For objects returned by pairs()
 sub List::Util::_Pair::key   { shift->[0] }
 sub List::Util::_Pair::value { shift->[1] }
+sub List::Util::_Pair::TO_JSON { [ @{+shift} ] }
 
 =head1 NAME
 
@@ -341,6 +342,9 @@ equivalent:
        ...
     }
 
+Since version C<1.51> they also have a C<TO_JSON> method to ease
+serialisation.
+
 =head2 unpairs
 
     my @kvlist = unpairs @pairs
@@ -557,6 +561,8 @@ entire list of values returned by C<uniqstr> are well-behaved as strings.
 
     my @values = head $size, @list;
 
+I<Since version 1.50.>
+
 Returns the first C<$size> elements from C<@list>. If C<$size> is negative, returns
 all but the last C<$size> elements from C<@list>.
 
@@ -569,6 +575,8 @@ all but the last C<$size> elements from C<@list>.
 =head2 tail
 
     my @values = tail $size, @list;
+
+I<Since version 1.50.>
 
 Returns the last C<$size> elements from C<@list>. If C<$size> is negative, returns
 all but the first C<$size> elements from C<@list>.
