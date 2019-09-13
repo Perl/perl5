@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.36';
+$VERSION = '7.38';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -419,6 +419,7 @@ sub constants {
               INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB
               INST_MAN1DIR INST_MAN3DIR
               MAN1EXT      MAN3EXT
+              MAN1SECTION  MAN3SECTION
               INSTALLDIRS INSTALL_BASE DESTDIR PREFIX
               PERLPREFIX      SITEPREFIX      VENDORPREFIX
                    ),
@@ -968,6 +969,7 @@ sub dynamic_lib {
             my ($v, $d, $f) = File::Spec->splitpath($ext);
             my @d = File::Spec->splitdir($d);
             shift @d if $d[0] eq 'lib';
+            pop @d if $d[$#d] eq '';
             my $instdir = $self->catdir('$(INST_ARCHLIB)', 'auto', @d, $f);
 
             # Dynamic library names may need special handling.
@@ -1498,6 +1500,24 @@ sub init_MANPODS {
             my $init_method = "init_${man}PODS";
             $self->$init_method();
         }
+    }
+
+    # logic similar to picking man${num}ext in perl's Configure script
+    foreach my $num (1,3) {
+        my $installdirs = uc $self->{INSTALLDIRS};
+        $installdirs = '' if $installdirs eq 'PERL';
+        my $mandir = $self->_expand_macros(
+            $self->{ "INSTALL${installdirs}MAN${num}DIR" } );
+        my $section = $num;
+
+        foreach ($num, "${num}p", "${num}pm", qw< l n o C L >, "L$num") {
+            if ( $mandir =~ /\b(?:man|cat)$_$/ ) {
+                $section = $_;
+                last;
+            }
+        }
+
+        $self->{"MAN${num}SECTION"} = $section;
     }
 }
 
@@ -2227,6 +2247,7 @@ sub init_xs {
 		my ($v, $d, $f) = File::Spec->splitpath($ext);
 		my @d = File::Spec->splitdir($d);
 		shift @d if defined $d[0] and $d[0] eq 'lib';
+		pop @d if $d[$#d] eq '';
 		my $instdir = $self->catdir('$(INST_ARCHLIB)', 'auto', @d, $f);
 		my $instfile = $self->catfile($instdir, $f);
 		push @statics, "$instfile\$(LIB_EXT)";
@@ -2797,14 +2818,14 @@ sub _find_static_libs {
 
 Called by a utility method of makeaperl. Checks whether a given file
 is an XS library by seeing whether it defines any symbols starting
-with C<boot_>.
+with C<boot_> (with an optional leading underscore - needed on MacOS).
 
 =cut
 
 sub xs_static_lib_is_xs {
     my ($self, $libfile) = @_;
     my $devnull = File::Spec->devnull;
-    return `nm $libfile 2>$devnull` =~ /\bboot_/;
+    return `nm $libfile 2>$devnull` =~ /\b_?boot_/;
 }
 
 =item makefile (o)
