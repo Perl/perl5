@@ -16136,8 +16136,11 @@ redo_curchar:
 
                     /* Recurse, with the meat of the embedded expression */
                     RExC_parse++;
-                    (void) handle_regex_sets(pRExC_state, &current, flagp,
-                                                    depth+1, oregcomp_parse);
+                    if (! handle_regex_sets(pRExC_state, &current, flagp,
+                                                    depth+1, oregcomp_parse))
+                    {
+                        RETURN_FAIL_ON_RESTART(*flagp, flagp);
+                    }
 
                     /* Here, 'current' contains the embedded expression's
                      * inversion list, and RExC_parse points to the trailing
@@ -16191,6 +16194,7 @@ redo_curchar:
                               FALSE, /* Require return to be an ANYOF */
                               &current))
                 {
+                    RETURN_FAIL_ON_RESTART(*flagp, flagp);
                     goto regclass_failed;
                 }
 
@@ -16227,6 +16231,7 @@ redo_curchar:
                                 FALSE, /* Require return to be an ANYOF */
                                 &current))
                 {
+                    RETURN_FAIL_ON_RESTART(*flagp, flagp);
                     goto regclass_failed;
                 }
 
@@ -16587,8 +16592,10 @@ redo_curchar:
         RExC_flags |= RXf_PMf_FOLD;
     }
 
-    if (!node)
+    if (!node) {
+        RETURN_FAIL_ON_RESTART(*flagp, flagp);
         goto regclass_failed;
+    }
 
     /* Fix up the node type if we are in locale.  (We have pretended we are
      * under /u for the purposes of regclass(), as this construct will only
