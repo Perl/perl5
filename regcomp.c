@@ -16392,7 +16392,11 @@ redo_curchar:
                              well have generated non-portable code points, but
                              they're valid on this machine */
                     FALSE, /* similarly, no need for strict */
-                    FALSE, /* Require return to be an ANYOF */
+
+                    /* We can optimize into something besides an ANYOF, except
+                     * under /l, which needs to be ANYOF because of runtime
+                     * checks for locale sanity, etc */
+                  ! in_locale,
                     NULL
                 );
 
