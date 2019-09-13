@@ -1046,7 +1046,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302166.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302168.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},

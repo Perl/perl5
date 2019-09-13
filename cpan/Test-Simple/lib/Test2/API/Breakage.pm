@@ -2,7 +2,7 @@ package Test2::API::Breakage;
 use strict;
 use warnings;
 
-our $VERSION = '1.302166';
+our $VERSION = '1.302168';
 
 
 use Test2::Util qw/pkg_to_file/;
@@ -73,7 +73,7 @@ sub report {
         next unless $INC{$file} || ($require && eval { require $file; 1 });
         my $want = $suggest{$mod};
         next if eval { $mod->VERSION($want); 1 };
-        push @warn => " * Module '$mod' is outdated, we recommed updating above $want.";
+        push @warn => " * Module '$mod' is outdated, we recommend updating above $want.";
     }
 
     for my $mod (keys %required) {

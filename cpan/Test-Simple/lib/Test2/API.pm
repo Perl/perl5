@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302166';
+our $VERSION = '1.302168';
 
 
 my $INST;
@@ -113,6 +113,7 @@ our @EXPORT_OK = qw{
     test2_start_preload
     test2_stop_preload
     test2_in_preload
+    test2_is_testing_done
 
     test2_set_is_end
     test2_unset_is_end
@@ -204,6 +205,27 @@ sub test2_stack            { $INST->stack }
 sub test2_ipc_wait_enable  { $INST->set_no_wait(0) }
 sub test2_ipc_wait_disable { $INST->set_no_wait(1) }
 sub test2_ipc_wait_enabled { !$INST->no_wait }
+
+sub test2_is_testing_done {
+    # No instance? VERY DONE!
+    return 1 unless $INST;
+
+    # No stack? tests must be done, it is created pretty early
+    my $stack = $INST->stack or return 1;
+
+    # Nothing on the stack, no root hub yet, likely have not started testing
+    return 0 unless @$stack;
+
+    # Stack has a slot for the root hub (see above) but it is undefined, likely
+    # garbage collected, test is done
+    my $root_hub = $stack->[0] or return 1;
+
+    # If the root hub is ended than testing is done.
+    return 1 if $root_hub->ended;
+
+    # Looks like we are still testing!
+    return 0;
+}
 
 sub test2_no_wait {
     $INST->set_no_wait(@_) if @_;
@@ -860,6 +882,7 @@ C<intercept { ... }> which only lets you see events as the main hub sees them.
         test2_ipc
         test2_formatter_set
         test2_formatter
+        test2_is_testing_done
     };
 
     my $init  = test2_init_done();
@@ -1302,6 +1325,26 @@ Check if Test2 believes it is the END phase.
 
 This will return the global L<Test2::API::Stack> instance. If this has not
 yet been initialized it will be initialized now.
+
+=item $bool = test2_is_testing_done()
+
+This will return true if testing is complete and no other events should be
+sent. This is useful in things like warning handlers where you might want to
+turn warnings into events, but need them to start acting like normal warnings
+when testing is done.
+
+    $SIG{__WARN__} = sub {
+        my ($warning) = @_;
+
+        if (test2_is_testing_done()) {
+            warn @_;
+        }
+        else {
+            my $ctx = context();
+            ...
+            $ctx->release
+        }
+    }
 
 =item test2_ipc_disable
 
