@@ -267,6 +267,11 @@ L</Platform Support> section, instead.
 
 =item *
 
+Improvements in F<Configure> to detection in C++ and clang++.  Work ongoing by
+Andy Dougherty. [perl #134171]
+
+=item *
+
 XXX
 
 =back
