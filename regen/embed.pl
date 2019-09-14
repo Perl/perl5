@@ -100,12 +100,13 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
 	}
 
-	die_at_end "$plain_func: S flag is mutually exclusive from the i and p plags"
-					if $flags =~ /S/ && $flags =~ /([ip])/;
+	die_at_end "$plain_func: S and p flags are mutually exclusive"
+					    if $flags =~ /S/ && $flags =~ /p/;
 	die_at_end "$plain_func: m and $1 flags are mutually exclusive"
 					if $flags =~ /m/ && $flags =~ /([pS])/;
 
-	die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/ && $flags !~ /m/;
+	die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/
+							    && $flags !~ /m/;
 
 	my $static_inline = 0;
 	if ($flags =~ /([Si])/) {
@@ -131,6 +132,14 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	die_at_end "For '$plain_func', M flag requires p flag"
 					    if $flags =~ /M/ && $flags !~ /p/;
+	die_at_end "For '$plain_func', C flag requires one of [pim] flag"
+					    if $flags =~ /C/ && $flags !~ /[ibmp]/;
+	die_at_end "For '$plain_func', X flag requires p or i flag"
+					    if $flags =~ /X/ && $flags !~ /[ip]/;
+	die_at_end "For '$plain_func', X and m flags are mutually exclusive"
+					    if $flags =~ /X/ && $flags =~ /m/;
+	die_at_end "For '$plain_func', i with [ACX] requires p flag"
+			if $flags =~ /i/ && $flags =~ /[ACX]/ && $flags !~ /p/;
 	die_at_end "For '$plain_func', b and m flags are mutually exclusive"
 	         . " (try M flag)" if $flags =~ /b/ && $flags =~ /m/;
 	die_at_end "For '$plain_func', b flag without M flag requires D flag"
@@ -143,6 +152,8 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    $ret .= @args ? "pTHX_ " : "pTHX";
 	}
 	if (@args) {
+	    die_at_end "n flag is contradicted by having arguments"
+								if $flags =~ /n/;
 	    my $n;
 	    for my $arg ( @args ) {
 		++$n;
