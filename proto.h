@@ -68,6 +68,8 @@ PERL_CALLCONV int	Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 #define PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC	\
 	assert(file)
 
+/* PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o); */
+#define PERL_ARGS_ASSERT_PERL_CUSTOM_OP_XOP
 PERL_CALLCONV const char*	Perl_setlocale(const int category, const char* locale);
 #define PERL_ARGS_ASSERT_PERL_SETLOCALE
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -755,8 +757,6 @@ PERL_CALLCONV const char *	Perl_custom_op_name(pTHX_ const OP *o)
 PERL_CALLCONV void	Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop);
 #define PERL_ARGS_ASSERT_CUSTOM_OP_REGISTER	\
 	assert(ppaddr); assert(xop)
-/* PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o); */
-#define PERL_ARGS_ASSERT_CUSTOM_OP_XOP
 PERL_CALLCONV void	Perl_cv_ckproto_len_flags(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len, const U32 flags);
 #define PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS	\
 	assert(cv)

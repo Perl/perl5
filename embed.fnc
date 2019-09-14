@@ -2360,7 +2360,9 @@ Ap	|void	|sys_intern_dup	|NN struct interp_intern* src|NN struct interp_intern* 
 #  endif
 #endif
 
-Admop	|const XOP *	|custom_op_xop	|NN const OP *o
+: The reason for the 'u' flag is that this passes "aTHX_ x" to its callee: not
+: a legal C parameter
+Admu	|const XOP *	|Perl_custom_op_xop	|NN const OP *o
 AbpRdD	|const char *	|custom_op_name	|NN const OP *o
 AbpRdD	|const char *	|custom_op_desc	|NN const OP *o
 pRX	|XOPRETANY	|custom_op_get_field	|NN const OP *o|const xop_flags_enum field
