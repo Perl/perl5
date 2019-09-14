@@ -661,7 +661,7 @@ Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
-pm	|bool|do_exec	|NN const char* cmd
+pM	|bool|do_exec	|NN const char* cmd
 #else
 p	|bool|do_exec	|NN const char* cmd
 #endif
@@ -1023,7 +1023,7 @@ EXTp	|UV        |_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const unsig
 p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_or_s
 #endif
 Cp	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
-Cmp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
+Cm	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
 Cp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|U8 flags
 CbDpR	|bool	|is_uni_alnum_lc|UV c
 CbDpR	|bool	|is_uni_alnumc_lc|UV c
@@ -1670,7 +1670,7 @@ Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
-Amp	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
+Am	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
 Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 				 |const U32 flags
 Ap	|I32	|save_alloc	|I32 size|I32 pad
@@ -1693,7 +1693,7 @@ Ap	|void	|save_shared_pvref|NN char** str
 Adp	|void	|save_gp	|NN GV* gv|I32 empty
 Apdh	|HV*	|save_hash	|NN GV* gv
 Ap	|void	|save_hints
-Amp	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
+Am	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
 Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
 Apdh	|void	|save_hptr	|NN HV** hptr
 Ap	|void	|save_I16	|NN I16* intp
@@ -3185,7 +3185,7 @@ Amd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Adp	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 AdpMb	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
-Apmd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
+Amd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
 Apd	|void	|sv_copypv_flags	|NN SV *const dsv|NN SV *const ssv|const I32 flags
 Cpo	|char*	|my_atof2	|NN const char *orig|NN NV* value
 Cp	|char*	|my_atof3	|NN const char *orig|NN NV* value|const STRLEN len

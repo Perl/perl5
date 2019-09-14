@@ -3321,7 +3321,7 @@ PERL_CALLCONV void	Perl_save_I8(pTHX_ I8* bytep);
 PERL_CALLCONV void	Perl_save_adelete(pTHX_ AV *av, SSize_t key);
 #define PERL_ARGS_ASSERT_SAVE_ADELETE	\
 	assert(av)
-/* PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, SSize_t idx, SV **sptr); */
+/* PERL_CALLCONV void	save_aelem(pTHX_ AV* av, SSize_t idx, SV **sptr); */
 #define PERL_ARGS_ASSERT_SAVE_AELEM
 PERL_CALLCONV void	Perl_save_aelem_flags(pTHX_ AV* av, SSize_t idx, SV **sptr, const U32 flags);
 #define PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS	\
@@ -3375,7 +3375,7 @@ PERL_CALLCONV HV*	Perl_save_hash(pTHX_ GV* gv);
 PERL_CALLCONV void	Perl_save_hdelete(pTHX_ HV *hv, SV *keysv);
 #define PERL_ARGS_ASSERT_SAVE_HDELETE	\
 	assert(hv); assert(keysv)
-/* PERL_CALLCONV void	Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr); */
+/* PERL_CALLCONV void	save_helem(pTHX_ HV *hv, SV *key, SV **sptr); */
 #define PERL_ARGS_ASSERT_SAVE_HELEM
 PERL_CALLCONV void	Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags);
 #define PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS	\
@@ -3746,7 +3746,7 @@ PERL_CALLCONV void	Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv);
 PERL_CALLCONV void	Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags);
 #define PERL_ARGS_ASSERT_SV_COPYPV_FLAGS	\
 	assert(dsv); assert(ssv)
-/* PERL_CALLCONV void	Perl_sv_copypv_nomg(pTHX_ SV *const dsv, SV *const ssv); */
+/* PERL_CALLCONV void	sv_copypv_nomg(pTHX_ SV *const dsv, SV *const ssv); */
 #define PERL_ARGS_ASSERT_SV_COPYPV_NOMG
 PERL_CALLCONV void	Perl_sv_dec(pTHX_ SV *const sv);
 #define PERL_ARGS_ASSERT_SV_DEC
@@ -4246,7 +4246,7 @@ PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, c
 	assert(methname); assert(sp); assert(sv); assert(mg)
 PERL_CALLCONV SSize_t	Perl_tmps_grow_p(pTHX_ SSize_t ix);
 #define PERL_ARGS_ASSERT_TMPS_GROW_P
-/* PERL_CALLCONV UV	Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp); */
+/* PERL_CALLCONV UV	to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp); */
 #define PERL_ARGS_ASSERT_TO_UNI_FOLD
 PERL_CALLCONV UV	Perl_to_uni_lower(pTHX_ UV c, U8 *p, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_TO_UNI_LOWER	\
@@ -5193,8 +5193,9 @@ PERL_CALLCONV OP *	Perl_op_refcnt_inc(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_OP_REFCNT_INC
 #endif
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
-/* PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd); */
-#define PERL_ARGS_ASSERT_DO_EXEC
+PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
+#define PERL_ARGS_ASSERT_DO_EXEC	\
+	assert(cmd)
 #endif
 #if defined(PERL_DONT_CREATE_GVSV)
 #ifndef NO_MATHOMS

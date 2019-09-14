@@ -101,7 +101,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	die_at_end "$plain_func: S flag is mutually exclusive from the i and p plags"
-					    if $flags =~ /S/ && $flags =~ /[ip]/;
+					if $flags =~ /S/ && $flags =~ /([ip])/;
+	die_at_end "$plain_func: m and $1 flags are mutually exclusive"
+					if $flags =~ /m/ && $flags =~ /([pS])/;
 
 	die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/ && $flags !~ /m/;
 
