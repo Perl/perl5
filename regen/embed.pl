@@ -90,7 +90,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	my $has_context = ( $flags !~ /T/ );
 	my $never_returns = ( $flags =~ /r/ );
 	my $binarycompat = ( $flags =~ /b/ );
-	my $commented_out = ( ! $binarycompat && $flags =~ /m/ );
+	my $commented_out = ( $flags =~ /m/ );
 	my $is_malloc = ( $flags =~ /a/ );
 	my $can_ignore = ( $flags !~ /R/ ) && ( $flags !~ /P/ ) && !$is_malloc;
 	my @names_of_nn;
