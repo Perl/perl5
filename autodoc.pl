@@ -251,7 +251,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
                 }
             }
             my $args = '';
-            if ($p && $flags !~ /T/) {
+            if ($flags !~ /T/ && ($p || ($flags =~ /m/ && $name =~ /^Perl_/))) {
                 $args = @args ? "pTHX_ " : "pTHX";
                 if ($long_args) { print $fh $args; $args = '' }
             }

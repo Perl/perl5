@@ -289,7 +289,9 @@
 :         proto.h: function is declared as PERL_STATIC_INLINE
 :
 :   m  Implemented as a macro; there is no function associated with this name,
-:      and hence no long Perl_ or S_ name.
+:      and hence no long Perl_ or S_ name.  However, if the macro name itself
+:      begins with 'Perl_', autodoc.pl will show a thread context parameter
+:      unless the 'T' flag is specified.
 :
 :         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols available on all platforms
