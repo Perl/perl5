@@ -65,6 +65,46 @@
 : This has had to be done with things like MAX and MIN, but nearly everything
 : else has been created without regard to the namespace pollution problem.
 :
+: Here's what else you need to know about using this file with regards to name
+: space pollution:
+:
+: The A flag is used to make a function and its short name visible everywhere
+:	     on all platforms.  This should be used to make it part of Perl's
+:	     API contract with XS developers.  The documentation for these is
+:	     usually placed in perlapi.  If no documentation exists, that fact
+:	     is also noted in perlapi.
+:
+: The C flag is used instead for functions and their short names that need to
+:            be accessible everywhere, typically because they are called from a
+:            publicly available macro or inline function, but they are not for
+:            public use by themselves.  The documentation for these is placed
+:            in perlintern.  If no documentation exists, that fact is also
+:            noted in perlintern.
+:
+:            These really need the 'p' flag to avoid name space collisions.
+:
+:	     Some of these have been constructed so that the wrapper macro
+:	     names begin with an underscore to lessen the chances of a name
+:	     collision.  However, this is contrary to the C standard, and those
+:	     should be changed.
+:
+: The E flag is used instead for a function and its short name that is supposed
+:            to be used only in the core, and in extensions compiled with the
+:            PERL_EXT symbol defined.  Again, on some platforms, the function
+:            will be visible everywhere, so the 'p' flag is gnerally needed.
+:            Also note that an XS writer can always cheat and pretend to be an
+:            extension by #defining PERL_EXT.
+:
+: The X flag is similar to the C flag in that the function (whose entry better
+:	     have the 'p' flag) is accessible everywhere on all platforms.
+:	     However the short name macro that normally gets generated is
+:	     suppressed outside the core.  (Except it is also visible in
+:	     PERL_EXT extensions if the E flag is also specified.)  This flag
+:	     is used for functions that are called from a public macro, the
+:	     name of which isn't derived from the function name.  You'll have
+:	     to write the macro yourself, and from within it, refer to the
+:	     function in its full 'Perl_' form with any necessary thread
+:	     context parameter.
 :
 : Scattered around the perl source are lines of the form:
 :
