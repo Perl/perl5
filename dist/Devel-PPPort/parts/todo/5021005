@@ -2,3 +2,6 @@
 cv_name                        # A
 newMETHOP                      # U
 newMETHOP_named                # U
+PERL_MAGIC_debugvar            # E
+PERL_MAGIC_lvref               # E
+WARN_EXPERIMENTAL__REFALIASING # E

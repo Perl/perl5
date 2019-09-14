@@ -6,3 +6,4 @@ to_utf8_fold                   # U
 to_utf8_lower                  # U
 to_utf8_title                  # U
 to_utf8_upper                  # U
+swatch_get                     # F added by devel/scanprov

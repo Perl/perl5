@@ -1,4 +1,5 @@
-5.005030
-POPpx                          # E
+5.005003
 get_vtbl                       # E
+POPpx                          # E
 save_generic_svref             # E
+dofile                         # F added by devel/scanprov

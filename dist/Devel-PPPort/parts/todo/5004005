@@ -1,7 +1,4 @@
-5.004050
-CopyD                          # E
-MoveD                          # E
+5.004005
 do_binmode                     # U
-my_bcopy                       # U
 save_aelem                     # U
 save_helem                     # U
