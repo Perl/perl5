@@ -6245,7 +6245,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
 
      /* This internal macro should be called from places that operate under
-      * locale rules.  It there is a problem with the current locale that
+      * locale rules.  If there is a problem with the current locale that
       * hasn't been raised yet, it will output a warning this time.  Because
       * this will so rarely  be true, there is no point to optimize for time;
       * instead it makes sense to minimize space used and do all the work in
