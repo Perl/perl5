@@ -93,8 +93,8 @@ Type flag for scalars.  See L</svtype>.
 =for apidoc AmnU||SVt_PVMG
 Type flag for scalars.  See L</svtype>.
 
-=for apidoc AmnU||SVt_INVLIST
-Type flag for scalars.  See L</svtype>.
+=for apidoc CmnU||SVt_INVLIST
+Type flag for scalars.  See L<perlapi/svtype>.
 
 =for apidoc AmnU||SVt_REGEXP
 Type flag for regular expressions.  See L</svtype>.
@@ -272,18 +272,18 @@ struct p5rx {
 Returns the value of the object's reference count. Exposed
 to perl code via Internals::SvREFCNT().
 
-=for apidoc Am|SV*|SvREFCNT_inc|SV* sv
+=for apidoc SvREFCNT_inc
 Increments the reference count of the given SV, returning the SV.
 
-All of the following C<SvREFCNT_inc>* macros are optimized versions of
+All of the following C<SvREFCNT_inc>* are optimized versions of
 C<SvREFCNT_inc>, and can be replaced with C<SvREFCNT_inc>.
 
-=for apidoc Am|SV*|SvREFCNT_inc_NN|SV* sv
+=for apidoc SvREFCNT_inc_NN
 Same as C<SvREFCNT_inc>, but can only be used if you know C<sv>
 is not C<NULL>.  Since we don't have to check the NULLness, it's faster
 and smaller.
 
-=for apidoc Am|void|SvREFCNT_inc_void|SV* sv
+=for apidoc SvREFCNT_inc_void
 Same as C<SvREFCNT_inc>, but can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
@@ -312,10 +312,10 @@ value, and you know that C<sv> is not C<NULL>.  The macro doesn't need
 to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
-=for apidoc Am|void|SvREFCNT_dec|SV* sv
+=for apidoc SvREFCNT_dec
 Decrements the reference count of the given SV.  C<sv> may be C<NULL>.
 
-=for apidoc Am|void|SvREFCNT_dec_NN|SV* sv
+=for apidoc SvREFCNT_dec_NN
 Same as C<SvREFCNT_dec>, but can only be used if you know C<sv>
 is not C<NULL>.  Since we don't have to check the NULLness, it's faster
 and smaller.
@@ -334,10 +334,10 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#define SvREFCNT_inc(sv)		S_SvREFCNT_inc(MUTABLE_SV(sv))
+#define SvREFCNT_inc(sv)		Perl_SvREFCNT_inc(MUTABLE_SV(sv))
 #define SvREFCNT_inc_simple(sv)		SvREFCNT_inc(sv)
-#define SvREFCNT_inc_NN(sv)		S_SvREFCNT_inc_NN(MUTABLE_SV(sv))
-#define SvREFCNT_inc_void(sv)		S_SvREFCNT_inc_void(MUTABLE_SV(sv))
+#define SvREFCNT_inc_NN(sv)		Perl_SvREFCNT_inc_NN(MUTABLE_SV(sv))
+#define SvREFCNT_inc_void(sv)		Perl_SvREFCNT_inc_void(MUTABLE_SV(sv))
 
 /* These guys don't need the curly blocks */
 #define SvREFCNT_inc_simple_void(sv)	STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END
@@ -345,8 +345,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 
-#define SvREFCNT_dec(sv)	S_SvREFCNT_dec(aTHX_ MUTABLE_SV(sv))
-#define SvREFCNT_dec_NN(sv)	S_SvREFCNT_dec_NN(aTHX_ MUTABLE_SV(sv))
+#define SvREFCNT_dec(sv)	Perl_SvREFCNT_dec(aTHX_ MUTABLE_SV(sv))
+#define SvREFCNT_dec_NN(sv)	Perl_SvREFCNT_dec_NN(aTHX_ MUTABLE_SV(sv))
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((svtype)((sv)->sv_flags & SVTYPEMASK))
@@ -1081,8 +1081,8 @@ C<sv_force_normal> does nothing.
 
 #define SvPADTMP_on(sv)		(SvFLAGS(sv) |= SVs_PADTMP)
 #define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
-#define SvPADSTALE_on(sv)	S_SvPADSTALE_on(MUTABLE_SV(sv))
-#define SvPADSTALE_off(sv)	S_SvPADSTALE_off(MUTABLE_SV(sv))
+#define SvPADSTALE_on(sv)	Perl_SvPADSTALE_on(MUTABLE_SV(sv))
+#define SvPADSTALE_off(sv)	Perl_SvPADSTALE_off(MUTABLE_SV(sv))
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVs_TEMP)
 #define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVs_TEMP)

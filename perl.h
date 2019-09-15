@@ -7205,9 +7205,19 @@ so no C<x++>.
 #  define do_aexec(really, mark,sp)	do_aexec5(really, mark, sp, 0, 0)
 #endif
 
-/* check embedded \0 characters in pathnames passed to syscalls,
-   but allow one ending \0 */
-#define IS_SAFE_SYSCALL(p, len, what, op_name) (S_is_safe_syscall(aTHX_ (p), (len), (what), (op_name)))
+
+/*
+=head1 Miscellaneous Functions
+
+=for apidoc Am|bool|IS_SAFE_SYSCALL|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
+
+Same as L</is_safe_syscall>.
+
+=cut
+
+Allows one ending \0
+*/
+#define IS_SAFE_SYSCALL(p, len, what, op_name) (Perl_is_safe_syscall(aTHX_ (p), (len), (what), (op_name)))
 
 #define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
 

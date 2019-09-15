@@ -251,7 +251,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
                 }
             }
             my $args = '';
-            if ($p && $flags !~ /T/) {
+            if ($flags !~ /T/ && ($p || ($flags =~ /m/ && $name =~ /^Perl_/))) {
                 $args = @args ? "pTHX_ " : "pTHX";
                 if ($long_args) { print $fh $args; $args = '' }
             }
@@ -397,8 +397,8 @@ foreach (sort keys %missing) {
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 
-# List of funcs in the public API that aren't also marked as experimental nor
-# deprecated.
+# List of funcs in the public API that aren't also marked as core-only,
+# experimental nor deprecated.
 my @missing_api = grep $funcflags{$_}{flags} =~ /A/
                     && $funcflags{$_}{flags} !~ /[xD]/
                     && !$docs{api}{$_}, keys %funcflags;

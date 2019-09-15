@@ -17036,7 +17036,7 @@ Perl_peep(pTHX_ OP *o)
 /*
 =head1 Custom Operators
 
-=for apidoc custom_op_xop
+=for apidoc Perl_custom_op_xop
 Return the XOP structure for a given custom op.  This macro should be
 considered internal to C<OP_NAME> and the other access macros: use them instead.
 This macro does call a function.  Prior

@@ -27,13 +27,14 @@
 /* Hide global symbols */
 
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
+#define SvAMAGIC_off		Perl_SvAMAGIC_off
+#define SvAMAGIC_on		Perl_SvAMAGIC_on
 #define _force_out_malformed_utf8_message(a,b,c,d)	Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idcont(a)	Perl__is_uni_perl_idcont(aTHX_ a)
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
 #define _is_utf8_FOO(a,b,c,d,e,f,g,h)	Perl__is_utf8_FOO(aTHX_ a,b,c,d,e,f,g,h)
 #define _is_utf8_FOO_with_len(a,b,c)	Perl__is_utf8_FOO_with_len(aTHX_ a,b,c)
-#define _is_utf8_char_helper	Perl__is_utf8_char_helper
 #define _is_utf8_idcont(a)	Perl__is_utf8_idcont(aTHX_ a)
 #define _is_utf8_idstart(a)	Perl__is_utf8_idstart(aTHX_ a)
 #define _is_utf8_mark(a)	Perl__is_utf8_mark(aTHX_ a)
@@ -46,7 +47,6 @@
 #define _to_utf8_lower_flags(a,b,c,d,e,f,g)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e,f,g)
 #define _to_utf8_title_flags(a,b,c,d,e,f,g)	Perl__to_utf8_title_flags(aTHX_ a,b,c,d,e,f,g)
 #define _to_utf8_upper_flags(a,b,c,d,e,f,g)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e,f,g)
-#define _utf8_to_uvchr_buf(a,b,c)	S__utf8_to_uvchr_buf(aTHX_ a,b,c)
 #define _utf8n_to_uvchr_msgs_helper	Perl__utf8n_to_uvchr_msgs_helper
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
@@ -65,7 +65,7 @@
 #define av_push(a,b)		Perl_av_push(aTHX_ a,b)
 #define av_shift(a)		Perl_av_shift(aTHX_ a)
 #define av_store(a,b,c)		Perl_av_store(aTHX_ a,b,c)
-#define av_top_index(a)		S_av_top_index(aTHX_ a)
+#define av_top_index(a)		Perl_av_top_index(aTHX_ a)
 #define av_undef(a)		Perl_av_undef(aTHX_ a)
 #define av_unshift(a,b)		Perl_av_unshift(aTHX_ a,b)
 #define block_end(a,b)		Perl_block_end(aTHX_ a,b)
@@ -98,7 +98,7 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define croak			Perl_croak
 #endif
-#define croak_memory_wrap	S_croak_memory_wrap
+#define croak_memory_wrap	Perl_croak_memory_wrap
 #define croak_no_modify		Perl_croak_no_modify
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
 #define croak_xs_usage		Perl_croak_xs_usage
@@ -265,16 +265,16 @@
 #ifndef NO_MATHOMS
 #define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
 #endif
-#define isC9_STRICT_UTF8_CHAR	S_isC9_STRICT_UTF8_CHAR
+#define isC9_STRICT_UTF8_CHAR	Perl_isC9_STRICT_UTF8_CHAR
 #ifndef NO_MATHOMS
 #define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
 #endif
-#define isSTRICT_UTF8_CHAR	S_isSTRICT_UTF8_CHAR
-#define isUTF8_CHAR		S_isUTF8_CHAR
-#define is_c9strict_utf8_string_loclen	S_is_c9strict_utf8_string_loclen
+#define isSTRICT_UTF8_CHAR	Perl_isSTRICT_UTF8_CHAR
+#define isUTF8_CHAR		Perl_isUTF8_CHAR
+#define is_c9strict_utf8_string_loclen	Perl_is_c9strict_utf8_string_loclen
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
-#define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)
-#define is_strict_utf8_string_loclen	S_is_strict_utf8_string_loclen
+#define is_safe_syscall(a,b,c,d)	Perl_is_safe_syscall(aTHX_ a,b,c,d)
+#define is_strict_utf8_string_loclen	Perl_is_strict_utf8_string_loclen
 #ifndef NO_MATHOMS
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #endif
@@ -383,13 +383,14 @@
 #ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif
+#define is_utf8_char_helper	Perl_is_utf8_char_helper
 #ifndef NO_MATHOMS
 #define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
 #endif
 #ifndef NO_MATHOMS
 #define is_utf8_digit(a)	Perl_is_utf8_digit(aTHX_ a)
 #endif
-#define is_utf8_fixed_width_buf_loclen_flags	S_is_utf8_fixed_width_buf_loclen_flags
+#define is_utf8_fixed_width_buf_loclen_flags	Perl_is_utf8_fixed_width_buf_loclen_flags
 #ifndef NO_MATHOMS
 #define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
 #endif
@@ -399,7 +400,7 @@
 #ifndef NO_MATHOMS
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
 #endif
-#define is_utf8_invariant_string_loc	S_is_utf8_invariant_string_loc
+#define is_utf8_invariant_string_loc	Perl_is_utf8_invariant_string_loc
 #ifndef NO_MATHOMS
 #define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
 #endif
@@ -424,13 +425,13 @@
 #ifndef NO_MATHOMS
 #define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
 #endif
-#define is_utf8_string_flags	S_is_utf8_string_flags
+#define is_utf8_string_flags	Perl_is_utf8_string_flags
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
-#define is_utf8_string_loclen_flags	S_is_utf8_string_loclen_flags
+#define is_utf8_string_loclen_flags	Perl_is_utf8_string_loclen_flags
 #ifndef NO_MATHOMS
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
 #endif
-#define is_utf8_valid_partial_char_flags	S_is_utf8_valid_partial_char_flags
+#define is_utf8_valid_partial_char_flags	Perl_is_utf8_valid_partial_char_flags
 #ifndef NO_MATHOMS
 #define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
 #endif
@@ -898,11 +899,12 @@
 #define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
+#define utf8_to_uvchr_buf_helper(a,b,c)	Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 #ifndef NO_MATHOMS
 #define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
 #endif
 #define utf8_to_uvuni_buf(a,b,c)	Perl_utf8_to_uvuni_buf(aTHX_ a,b,c)
-#define utf8n_to_uvchr_msgs	S_utf8n_to_uvchr_msgs
+#define utf8n_to_uvchr_msgs	Perl_utf8n_to_uvchr_msgs
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
 #define uvoffuni_to_utf8_flags_msgs(a,b,c,d)	Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
@@ -940,7 +942,7 @@
 #define csighandler		Perl_csighandler
 #endif
 #if !defined(EBCDIC)
-#define _variant_byte_number	S__variant_byte_number
+#define variant_byte_number	Perl_variant_byte_number
 #endif
 #if !defined(HAS_STRLCAT)
 #define my_strlcat		Perl_my_strlcat
@@ -959,24 +961,24 @@
 #define my_popen(a,b)		Perl_my_popen(aTHX_ a,b)
 #endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
-#define cx_popblock(a)		S_cx_popblock(aTHX_ a)
-#define cx_popeval(a)		S_cx_popeval(aTHX_ a)
-#define cx_popformat(a)		S_cx_popformat(aTHX_ a)
-#define cx_popgiven(a)		S_cx_popgiven(aTHX_ a)
-#define cx_poploop(a)		S_cx_poploop(aTHX_ a)
-#define cx_popsub(a)		S_cx_popsub(aTHX_ a)
-#define cx_popsub_args(a)	S_cx_popsub_args(aTHX_ a)
-#define cx_popsub_common(a)	S_cx_popsub_common(aTHX_ a)
-#define cx_popwhen(a)		S_cx_popwhen(aTHX_ a)
-#define cx_pushblock(a,b,c,d)	S_cx_pushblock(aTHX_ a,b,c,d)
-#define cx_pusheval(a,b,c)	S_cx_pusheval(aTHX_ a,b,c)
-#define cx_pushformat(a,b,c,d)	S_cx_pushformat(aTHX_ a,b,c,d)
-#define cx_pushgiven(a,b)	S_cx_pushgiven(aTHX_ a,b)
-#define cx_pushloop_for(a,b,c)	S_cx_pushloop_for(aTHX_ a,b,c)
-#define cx_pushloop_plain(a)	S_cx_pushloop_plain(aTHX_ a)
-#define cx_pushsub(a,b,c,d)	S_cx_pushsub(aTHX_ a,b,c,d)
-#define cx_pushwhen(a)		S_cx_pushwhen(aTHX_ a)
-#define cx_topblock(a)		S_cx_topblock(aTHX_ a)
+#define cx_popblock(a)		Perl_cx_popblock(aTHX_ a)
+#define cx_popeval(a)		Perl_cx_popeval(aTHX_ a)
+#define cx_popformat(a)		Perl_cx_popformat(aTHX_ a)
+#define cx_popgiven(a)		Perl_cx_popgiven(aTHX_ a)
+#define cx_poploop(a)		Perl_cx_poploop(aTHX_ a)
+#define cx_popsub(a)		Perl_cx_popsub(aTHX_ a)
+#define cx_popsub_args(a)	Perl_cx_popsub_args(aTHX_ a)
+#define cx_popsub_common(a)	Perl_cx_popsub_common(aTHX_ a)
+#define cx_popwhen(a)		Perl_cx_popwhen(aTHX_ a)
+#define cx_pushblock(a,b,c,d)	Perl_cx_pushblock(aTHX_ a,b,c,d)
+#define cx_pusheval(a,b,c)	Perl_cx_pusheval(aTHX_ a,b,c)
+#define cx_pushformat(a,b,c,d)	Perl_cx_pushformat(aTHX_ a,b,c,d)
+#define cx_pushgiven(a,b)	Perl_cx_pushgiven(aTHX_ a,b)
+#define cx_pushloop_for(a,b,c)	Perl_cx_pushloop_for(aTHX_ a,b,c)
+#define cx_pushloop_plain(a)	Perl_cx_pushloop_plain(aTHX_ a)
+#define cx_pushsub(a,b,c,d)	Perl_cx_pushsub(aTHX_ a,b,c,d)
+#define cx_pushwhen(a)		Perl_cx_pushwhen(aTHX_ a)
+#define cx_topblock(a)		Perl_cx_topblock(aTHX_ a)
 #endif
 #if defined(DEBUGGING)
 #define pad_setsv(a,b)		Perl_pad_setsv(aTHX_ a,b)
@@ -1091,7 +1093,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define _byte_dump_string(a,b,c)	Perl__byte_dump_string(aTHX_ a,b,c)
 #define _inverse_folds(a,b,c)	Perl__inverse_folds(aTHX_ a,b,c)
-#define append_utf8_from_native_byte	S_append_utf8_from_native_byte
+#define append_utf8_from_native_byte	Perl_append_utf8_from_native_byte
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
@@ -1114,7 +1116,7 @@
 #define scan_word(a,b,c,d,e)	Perl_scan_word(aTHX_ a,b,c,d,e)
 #define skipspace_flags(a,b)	Perl_skipspace_flags(aTHX_ a,b)
 #define sv_magicext_mglob(a)	Perl_sv_magicext_mglob(aTHX_ a)
-#define sv_only_taint_gmagic	S_sv_only_taint_gmagic
+#define sv_only_taint_gmagic	Perl_sv_only_taint_gmagic
 #define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
 #define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
@@ -1175,12 +1177,15 @@
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
 #  if defined(PERL_CORE) || defined (PERL_EXT)
-#define is_utf8_non_invariant_string	S_is_utf8_non_invariant_string
+#define is_utf8_non_invariant_string	Perl_is_utf8_non_invariant_string
 #define sv_or_pv_pos_u2b(a,b,c,d)	S_sv_or_pv_pos_u2b(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_CORE) || defined(PERL_EXT)
 #define isSCRIPT_RUN(a,b,c)	Perl_isSCRIPT_RUN(aTHX_ a,b,c)
 #define variant_under_utf8_count	S_variant_under_utf8_count
+#  endif
+#  if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#define get_regex_charset_name	S_get_regex_charset_name
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _make_exactf_invlist(a,b)	S__make_exactf_invlist(aTHX_ a,b)
@@ -1905,6 +1910,9 @@
 #define pad_check_dup(a,b,c)	S_pad_check_dup(aTHX_ a,b,c)
 #define pad_findlex(a,b,c,d,e,f,g,h,i)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g,h,i)
 #define pad_reset()		S_pad_reset(aTHX)
+#  endif
+#  if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
+#define PadnameIN_SCOPE		S_PadnameIN_SCOPE
 #  endif
 #  if defined(PERL_IN_PERL_C)
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)

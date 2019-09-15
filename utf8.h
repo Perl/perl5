@@ -69,7 +69,7 @@ the string is invariant.
 #define uvchr_to_utf8_flags_msgs(d,uv,flags,msgs)                              \
                 uvoffuni_to_utf8_flags_msgs(d,NATIVE_TO_UNI(uv),flags, msgs)
 #define utf8_to_uvchr_buf(s, e, lenp)                                          \
-                   _utf8_to_uvchr_buf((const U8 *) (s), (const U8 *) e, lenp)
+            utf8_to_uvchr_buf_helper((const U8 *) (s), (const U8 *) e, lenp)
 #define utf8n_to_uvchr(s, len, lenp, flags)                                    \
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
 #define utf8n_to_uvchr_error(s, len, lenp, flags, errors)                      \
@@ -851,14 +851,14 @@ fit in an IV on the current machine.
                     && (    NATIVE_UTF8_TO_I8(*(s)) >  0xF9                 \
                         || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2))         \
                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                   \
-                    ? _is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
+                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #else
 #   define UTF8_IS_SUPER(s, e)                                              \
                    ((    LIKELY((e) > (s) + 3)                              \
                      &&  (*(U8*) (s)) >= 0xF4                               \
                      && ((*(U8*) (s)) >  0xF4 || (*((U8*) (s) + 1) >= 0x90))\
                      &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
-                    ? _is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
+                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #endif
 
 /* These are now machine generated, and the 'given' clause is no longer
@@ -1029,7 +1029,7 @@ L</is_utf8_string_loclen_flags> to check entire strings.
       ? 1                                                                   \
       : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
         ? 0                                                                 \
-        : _is_utf8_char_helper(s, e, flags))
+        : is_utf8_char_helper(s, e, flags))
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
