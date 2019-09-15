@@ -638,7 +638,9 @@ if ("$]" ge '5.008') {
     ok(tied($scalar)->{fetch}, 3);
     ok(tied($scalar)->{store}, 0);
 } else {
-    skip 'skip: no SV_NOSTEAL support', 0 for 1..23;
+    for (1..23) {
+        skip 'skip: no SV_NOSTEAL support', 0;
+    }
 }
 
 package TieScalarCounter;
