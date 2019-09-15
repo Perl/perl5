@@ -48,7 +48,7 @@
 #define	NPOSIXA               	34	/* 0x22 complement of POSIXA, [[:^class:]] */
 #define	CLUMP                 	35	/* 0x23 Match any extended grapheme cluster sequence */
 #define	BRANCH                	36	/* 0x24 Match this alternative, or the next... */
-#define	EXACT                 	37	/* 0x25 Match this string (preceded by length). */
+#define	EXACT                 	37	/* 0x25 Match this string (flags field is the length). */
 #define	EXACTL                	38	/* 0x26 Like EXACT, but /l is in effect (used so locale-related warnings can be checked for). */
 #define	EXACTF                	39	/* 0x27 Match this string using /id rules (w/len); (string not UTF-8, not guaranteed to be folded). */
 #define	EXACTFL               	40	/* 0x28 Match this string using /il rules (w/len); (string not guaranteed to be folded). */

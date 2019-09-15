@@ -658,7 +658,8 @@ will be lost.
 
  # Literals
 
- EXACT            str        Match this string (preceded by length).
+ EXACT            str        Match this string (flags field is the
+                             length).
  EXACTL           str        Like EXACT, but /l is in effect (used so
                              locale-related warnings can be checked
                              for).
