@@ -398,6 +398,12 @@ Matching a non-C<SVf_UTF8> string against a regular expression
 containing unicode literals could leak a SV on each match attempt.
 [perl #134390]
 
+=item *
+
+Overloads for octal and binary floating point literals were always
+passed a string with a C<0x> prefix instead of the appropriate C<0> or
+C<0b> prefix.  [perl #125557]
+
 =back
 
 =head1 Known Problems
