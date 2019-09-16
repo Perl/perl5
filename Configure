@@ -657,6 +657,7 @@ d_lstat=''
 d_madvise=''
 d_malloc_good_size=''
 d_malloc_size=''
+d_malloc_usable_size=''
 d_mblen=''
 d_mbrlen=''
 d_mbrtowc=''
@@ -16150,6 +16151,10 @@ eval $inlibc
 set malloc_good_size d_malloc_good_size
 eval $inlibc
 
+: see if malloc_usable_size exists
+set malloc_usable_size d_malloc_usable_size
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -24300,6 +24305,7 @@ d_lstat='$d_lstat'
 d_madvise='$d_madvise'
 d_malloc_good_size='$d_malloc_good_size'
 d_malloc_size='$d_malloc_size'
+d_malloc_usable_size='$d_malloc_usable_size'
 d_mblen='$d_mblen'
 d_mbrlen='$d_mbrlen'
 d_mbrtowc='$d_mbrtowc'
