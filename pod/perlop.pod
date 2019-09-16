@@ -2276,6 +2276,9 @@ to occur that you might want.  Here are two common cases:
     # expand tabs to 8-column spacing
     1 while s/\t+/' ' x (length($&)*8 - length($`)%8)/e;
 
+X</c>While C<s///> accepts the C</c> flag, it has no effect beyond
+producing a warning if warnings are enabled.
+
 =back
 
 =head2 Quote-Like Operators
