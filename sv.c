@@ -14690,6 +14690,7 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 
     nsi->si_stack	= av_dup_inc(si->si_stack, param);
     nsi->si_cxix	= si->si_cxix;
+    nsi->si_cxsubix	= si->si_cxsubix;
     nsi->si_cxmax	= si->si_cxmax;
     nsi->si_cxstack	= cx_dup(si->si_cxstack, si->si_cxix, si->si_cxmax, param);
     nsi->si_type	= si->si_type;

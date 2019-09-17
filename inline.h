@@ -2134,6 +2134,8 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
     PERL_ARGS_ASSERT_CX_PUSHSUB;
 
     PERL_DTRACE_PROBE_ENTRY(cv);
+    cx->blk_sub.old_cxsubix     = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
     cx->blk_sub.cv = cv;
     cx->blk_sub.olddepth = CvDEPTH(cv);
     cx->blk_sub.prevcomppad = PL_comppad;
@@ -2160,6 +2162,7 @@ Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
     CvDEPTH(cv) = cx->blk_sub.olddepth;
     cx->blk_sub.cv = NULL;
     SvREFCNT_dec(cv);
+    PL_curstackinfo->si_cxsubix = cx->blk_sub.old_cxsubix;
 }
 
 
@@ -2206,6 +2209,8 @@ Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
 {
     PERL_ARGS_ASSERT_CX_PUSHFORMAT;
 
+    cx->blk_format.old_cxsubix = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
     cx->blk_format.cv          = cv;
     cx->blk_format.retop       = retop;
     cx->blk_format.gv          = gv;
@@ -2239,6 +2244,7 @@ Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
     cx->blk_format.cv = NULL;
     --CvDEPTH(cv);
     SvREFCNT_dec_NN(cv);
+    PL_curstackinfo->si_cxsubix = cx->blk_format.old_cxsubix;
 }
 
 
@@ -2247,6 +2253,8 @@ Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
 {
     PERL_ARGS_ASSERT_CX_PUSHEVAL;
 
+    cx->blk_eval.old_cxsubix   = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
     cx->blk_eval.retop         = retop;
     cx->blk_eval.old_namesv    = namesv;
     cx->blk_eval.old_eval_root = PL_eval_root;
@@ -2282,6 +2290,7 @@ Perl_cx_popeval(pTHX_ PERL_CONTEXT *cx)
         cx->blk_eval.old_namesv = NULL;
         SvREFCNT_dec_NN(sv);
     }
+    PL_curstackinfo->si_cxsubix = cx->blk_eval.old_cxsubix;
 }
 
 

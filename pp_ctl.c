@@ -37,7 +37,11 @@
 #define RUN_PP_CATCHABLY(thispp) \
     STMT_START { if (CATCH_GET) return docatch(thispp); } STMT_END
 
-#define dopopto_cursub()	dopoptosub_at(cxstack, cxstack_ix)
+#define dopopto_cursub() \
+    (PL_curstackinfo->si_cxsubix >= 0        \
+        ? PL_curstackinfo->si_cxsubix        \
+        : dopoptosub_at(cxstack, cxstack_ix))
+
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
 PP(pp_wantarray)
