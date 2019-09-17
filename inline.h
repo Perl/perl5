@@ -2056,6 +2056,26 @@ Perl_sv_only_taint_gmagic(SV *sv)
 
 /* ------------------ cop.h ------------------------------------------- */
 
+/* implement GIMME_V() macro */
+
+PERL_STATIC_INLINE U8
+Perl_gimme_V(pTHX)
+{
+    I32 cxix;
+    U8  gimme = (PL_op->op_flags & OPf_WANT);
+
+    if (gimme)
+        return gimme;
+    cxix = PL_curstackinfo->si_cxsubix;
+    if (cxix < 0)
+        return G_VOID;
+    gimme = (cxstack[cxix].blk_gimme & G_WANT);
+    if (gimme)
+        return gimme;
+    /* use the full sub to report the error */
+    return block_gimme();
+}
+
 
 /* Enter a block. Push a new base context and return its address. */
 

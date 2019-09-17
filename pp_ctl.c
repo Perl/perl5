@@ -1389,6 +1389,8 @@ Perl_dowantarray(pTHX)
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
+/* note that this function has mostly been superseded by Perl_gimme_V */
+
 U8
 Perl_block_gimme(pTHX)
 {
