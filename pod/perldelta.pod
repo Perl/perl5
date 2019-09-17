@@ -179,13 +179,14 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>, L<perlintern>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Documentation has been added for a dozen or two functions that were
+lacking it before.
 
 =back
 
