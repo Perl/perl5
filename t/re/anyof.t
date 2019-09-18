@@ -478,7 +478,6 @@ my @tests = (
 
     '[\x{00}-{INFTY_minus_1}]' => 'ANYOF[\x00-\xFF][0100-INFTY_minus_1]',
     '[\x{00}-{INFTY}]' => 'SANY',
-    '(?i)[\x{100}]' => 'ANYOFHb[0100-0101]',
     '[\x{101}-{INFTY}]' => 'ANYOFH[0101-INFTY]',
     '[\x{101}-{INFTY_minus_1}]' => 'ANYOFH[0101-INFTY_minus_1]',
     '[\x{102}\x{104}]' => 'ANYOFHb[0102 0104]',
