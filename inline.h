@@ -2069,11 +2069,8 @@ Perl_gimme_V(pTHX)
     cxix = PL_curstackinfo->si_cxsubix;
     if (cxix < 0)
         return G_VOID;
-    gimme = (cxstack[cxix].blk_gimme & G_WANT);
-    if (gimme)
-        return gimme;
-    /* use the full sub to report the error */
-    return block_gimme();
+    assert(cxstack[cxix].blk_gimme & G_WANT);
+    return (cxstack[cxix].blk_gimme & G_WANT);
 }
 
 
