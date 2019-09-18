@@ -478,7 +478,6 @@ my @tests = (
 
     '[\x{00}-{INFTY_minus_1}]' => 'ANYOF[\x00-\xFF][0100-INFTY_minus_1]',
     '[\x{00}-{INFTY}]' => 'SANY',
-    '(?i)[\x{100}]' => 'ANYOFHb[0100-0101]',
     '[\x{101}-{INFTY}]' => 'ANYOFH[0101-INFTY]',
     '[\x{101}-{INFTY_minus_1}]' => 'ANYOFH[0101-INFTY_minus_1]',
     '[\x{102}\x{104}]' => 'ANYOFHb[0102 0104]',
@@ -709,7 +708,6 @@ my @tests = (
     '[\x{10C}-{INFTY}\x{104}\x{102}\x{103}]' => 'ANYOFH[0102-0104 010C-INFTY]',
     '[{INFTY_minus_1}]' => 'ANYOFH[INFTY_minus_1]',
 
-    '(?8)(?i)[\x{100}]' => 'EXACTFU_ONLY8 <\x{101}>',
     '(?8)(?i)[\x{399}]' => 'EXACTFU_ONLY8 <\x{3b9}>',
     '(?8)(?i)[\x{345}\x{399}\x{3B9}\x{1FBE}]' => 'EXACTFU_ONLY8 <\x{3b9}>',
     '(?i)[\x{2b9}]' => 'ANYOFHb[02B9]',           # Doesn't participate in a fold
