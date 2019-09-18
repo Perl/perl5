@@ -60,7 +60,7 @@ sub  get_compiled ($) {
 
     my $result = fresh_perl($actual_pattern);
     if ($? != 0) {  # Re-run so as to display STDERR.
-        fail($pattern);
+        fail($pattern, "Until this is fixed, the planned number of tests will be wrong");
         fresh_perl($actual_pattern, { stderr => 0, verbose => 1 });
         return;
     }
