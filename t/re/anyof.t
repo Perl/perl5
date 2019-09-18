@@ -708,7 +708,6 @@ my @tests = (
     '[\x{10C}-{INFTY}\x{104}\x{102}]' => 'ANYOFH[0102 0104 010C-INFTY]',
     '[\x{10C}-{INFTY}\x{104}\x{102}\x{103}]' => 'ANYOFH[0102-0104 010C-INFTY]',
     '[{INFTY_minus_1}]' => 'ANYOFH[INFTY_minus_1]',
-    '[{INFTY}]' => 'ANYOFH[INFTY-INFTY]',
 
     '(?8)(?i)[\x{100}]' => 'EXACTFU_ONLY8 <\x{101}>',
     '(?8)(?i)[\x{399}]' => 'EXACTFU_ONLY8 <\x{3b9}>',
