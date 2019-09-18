@@ -18655,21 +18655,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * participates in no fold whatsoever, and having it EXACT tells the
          * optimizer the target string cannot match unless it has a colon in
          * it.
-         *
-         * We don't typically generate an EXACTish node if doing so would
-         * require changing the pattern to UTF-8, as that affects /d and
-         * otherwise is slower.  However, under /i, not changing to UTF-8 can
-         * miss some potential multi-character folds.  We calculate the
-         * EXACTish node, and then decide if something would be missed if we
-         * don't upgrade */
+         */
         if (   ! posixl
             && ! invert
 
                 /* Only try if there are no more code points in the class than
                  * in the max possible fold */
-            &&   partial_cp_count > 0 && partial_cp_count <= MAX_FOLD_FROMS + 1
-
-            && (start[0] < 256 || UTF || FOLD))
+            &&   partial_cp_count > 0 && partial_cp_count <= MAX_FOLD_FROMS + 1)
         {
             if (partial_cp_count == 1 && ! upper_latin1_only_utf8_matches)
             {
@@ -18678,10 +18670,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 if (LOC) {
 
-                    /* Here is /l:  Use EXACTL, except /li indicates EXACTFL,
-                     * as that means there is a fold not known until runtime so
-                     * shows as only a single code point here. */
-                    op = (FOLD) ? EXACTFL : EXACTL;
+                    /* Here is /l:  Use EXACTL, except if there is a fold not
+                     * known until runtime so shows as only a single code point
+                     * here.  For code points above 255, we know which can
+                     * cause problems by having a potential fold to the Latin1
+                     * range. */
+                    if (  ! FOLD
+                        || (     start[0] > 255
+                            && ! is_PROBLEMATIC_LOCALE_FOLD_cp(start[0])))
+                    {
+                        op = EXACTL;
+                    }
+                    else {
+                        op = EXACTFL;
+                    }
                 }
                 else if (! FOLD) { /* Not /l and not /i */
                     op = (start[0] < 256) ? EXACT : EXACT_REQ8;
@@ -18931,32 +18933,32 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
 
             if (op != END) {
+                U8 len;
 
-                /* Here, we have calculated what EXACTish node we would use.
-                 * But we don't use it if it would require converting the
-                 * pattern to UTF-8, unless not using it could cause us to miss
-                 * some folds (hence be buggy) */
+                /* Here, we have calculated what EXACTish node to use.  Have to
+                 * convert to UTF-8 if not already there */
+                if (value > 255) {
+                    if (! UTF) {
 
-                if (! UTF && value > 255) {
-                    SV * in_multis = NULL;
-
-                    assert(FOLD);
-
-                    /* If there is no code point that is part of a multi-char
-                     * fold, then there aren't any matches, so we don't do this
-                     * optimization.  Otherwise, it could match depending on
-                     * the context around us, so we do upgrade */
-                    _invlist_intersection(PL_InMultiCharFold, cp_list, &in_multis);
-                    if (UNLIKELY(_invlist_len(in_multis) != 0)) {
+                        SvREFCNT_dec(cp_list);;
                         REQUIRE_UTF8(flagp);
                     }
-                    else {
-                        op = END;
+
+                    /* This is a kludge to the special casing issues with this
+                     * ligature under /aa.  FB05 should fold to FB06, but the
+                     * call above to _to_uni_fold_flags() didn't find this, as
+                     * it didn't use the /aa restriction in order to not miss
+                     * other folds that would be affected.  This is the only
+                     * instance likely to ever be a problem in all of Unicode.
+                     * So special case it. */
+                    if (   value == LATIN_SMALL_LIGATURE_LONG_S_T
+                        && ASCII_FOLD_RESTRICTED)
+                    {
+                        value = LATIN_SMALL_LIGATURE_ST;
                     }
                 }
 
-                if (op != END) {
-                    U8 len = (UTF) ? UVCHR_SKIP(value) : 1;
+                len = (UTF) ? UVCHR_SKIP(value) : 1;
 
                     ret = regnode_guts(pRExC_state, op, len, "exact");
                     FILL_NODE(ret, op);
@@ -18969,7 +18971,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         uvchr_to_utf8((U8 *) STRING(REGNODE_p(ret)), value);
                     }
                     goto not_anyof;
-                }
             }
         }
 

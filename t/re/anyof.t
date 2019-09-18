@@ -140,7 +140,9 @@ my @tests = (
     '[\xA0[:^blank:]]' => 'ANYOF[^\t ][0100-167F 1681-1FFF 200B-202E 2030-205E 2060-2FFF 3001-INFTY]',
     '(?d:[_[:^blank:]])' => 'NPOSIXD[:blank:]',
     '[\x{07}-\x{0B}]' => 'ANYOF[\a\b\t\n\x0B]',
-    '(?il)[\x{212A}]' => 'ANYOFL{i}[{utf8 locale}Kk][212A]',
+    '(?l)[\x{2029}]' => 'EXACTL <\x{2029}>',
+    '(?l)(?[\x{2029}])' => 'ANYOFL{utf8-locale-reqd}[2029]', # regex sets requires utf8 locale for /l
+    '(?il)[\x{212A}]' => 'EXACTFL <\\x{212a}>',
     '(?il)(?[\x{212A}])' => 'ANYOFL{utf8-locale-reqd}[Kk][212A]',
 
     '(?i)b[s]\xe0' => 'ANYOFM[Bb]',    # The s goes into a 2nd node
@@ -461,7 +463,7 @@ my @tests = (
     '(?i)(?u)[\D\w]' => 'SANY',
     '(?i)(?a)[\d\w]' => 'POSIXA[\w]',
     '(?i)(?a)[\D\w]' => 'SANY',
-    '(?l:[\x{212A}])' => 'ANYOFL[212A]',
+    '(?l:[\x{212A}])' => 'EXACTL <\x{212a}>',
     '(?l:[\s\x{212A}])' => 'ANYOFPOSIXL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
     '(?l:[^\S\x{202F}])' => 'ANYOFPOSIXL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
     '(?li:[a-z])' => 'ANYOFL{i}[a-z{utf8 locale}\x{017F}\x{212A}]',
@@ -579,7 +581,7 @@ my @tests = (
     '[\x{102}-\x{104}\x{108}-\x{10A}\x{109}]' => 'ANYOFHb[0102-0104 0108-010A]',
     '[\x{102}-\x{104}\x{108}-\x{10A}\x{10A}]' => 'ANYOFHb[0102-0104 0108-010A]',
     '[\x{102}-\x{104}\x{108}-\x{10A}\x{10B}]' => 'ANYOFHb[0102-0104 0108-010B]',
-    '[\x{103}\x{102}]' => 'ANYOFHb[0102-0103]',
+    '[\x{103}\x{102}]' => 'EXACTFU_REQ8 <\x{103}>',
     '[\x{104}\x{102}]' => 'ANYOFHb[0102 0104]',
     '[\x{104}\x{102}\x{103}]' => 'ANYOFHb[0102-0104]',
     '[\x{106}-{INFTY}\x{104}]' => 'ANYOFH[0104 0106-INFTY]',
@@ -708,12 +710,12 @@ my @tests = (
     '[\x{10C}-{INFTY}\x{103}\x{102}]' => 'ANYOFH[0102-0103 010C-INFTY]',
     '[\x{10C}-{INFTY}\x{104}\x{102}]' => 'ANYOFH[0102 0104 010C-INFTY]',
     '[\x{10C}-{INFTY}\x{104}\x{102}\x{103}]' => 'ANYOFH[0102-0104 010C-INFTY]',
-    '[{HIGHEST_CP}]' => 'ANYOFHb[HIGHEST_CP]',
+    '[{HIGHEST_CP}]' => 'EXACT_REQ8 <\x{HIGHEST_CP}>',
 
-    '(?8)(?i)[\x{100}]' => 'EXACTFU_REQ8 <\x{101}>',
+    '(?8)(?i)[\x{410}]' => 'EXACTFU_REQ8 <\x{430}>',
     '(?8)(?i)[\x{399}]' => 'EXACTFU_REQ8 <\x{3b9}>',
     '(?8)(?i)[\x{345}\x{399}\x{3B9}\x{1FBE}]' => 'EXACTFU_REQ8 <\x{3b9}>',
-    '(?i)[\x{2b9}]' => 'ANYOFHb[02B9]',           # Doesn't participate in a fold
+    '(?i)[\x{2b9}]' => 'EXACT_REQ8 <\x{2b9}>',           # Doesn't participate in a fold
     '(?8)(?i)[\x{2b9}]' => 'EXACT_REQ8 <\x{2b9}>',
     '(?i)[\x{2bc}]' => 'EXACTFU_REQ8 <\x{2bc}>', # Part of a multi-char fold, ASCII component
     '(?i)[\x{390}]' => 'EXACTFU_REQ8 <\x{3b9}\x{308}\x{301}>', # Part of a multi-char fold, no ASCII component
@@ -721,7 +723,7 @@ my @tests = (
     '(?i)[\x{1E9E}]' => 'EXACTFU <ss>',
     '(?iaa)[\x{1E9E}]' => 'EXACTFAA <\x{17f}\x{17f}>',
     '(?i)[\x{FB00}]' => 'EXACTFU <ff>',
-    '(?iaa)[\x{FB00}]' => 'ANYOFHb[FB00]',
+    '(?iaa)[\x{FB00}]' => 'EXACT_REQ8 <\x{fb00}>',
     '(?i)[\x{FB00}]' => 'EXACTFU <ff>',
     '(?i)[\x{FB01}]' => 'EXACTFU <fi>',
     '(?i)[\x{FB02}]' => 'EXACTFU <fl>',
@@ -820,29 +822,40 @@ for my $char (@single_chars_to_test) {
                     push @single_tests, get_compiled("$upgrade$modifiers\\x{$hex}");
                 }
                 else {
-                    my $interior = "";
-                    my @list = $cp;
+                    use feature 'fc';
+
+                    my %list = ( sprintf("%X", $cp) => 1 );
                     if ($fold) {
-                        if (lc $char ne $char) {
-                            push @list, ord lc $char;
-                        }
-                        elsif (uc $char ne $char) {
-                            push @list, ord uc $char;
+                        for my $op (qw(fc lc uc)) {
+                            my $result = eval "$op(\"$char\")";
+                            $list{sprintf "%X", ord $result} = 1;
                         }
                     }
-                    @list = sort { $a <=> $b } @list;
-                    if (@list == 1) {
-                        $interior = sprintf "%04X", $list[0];
-                    }
-                    elsif (@list == 2) {
-                        my $separator = ($list[1] == $list[0] + 1) ? '-' : ', ';
-                        $interior = sprintf "%04X$separator%04X", $list[0], $list[1];
+
+                    my $mod_cp = $cp;
+                    my $op;
+
+                    if (! $fold || scalar keys %list == 1) {
+                        $op = ($charset eq 'l')
+                                ? 'EXACTL'
+                                : ($cp < 256)
+                                ? 'EXACT'
+                                : 'EXACT_REQ8';
                     }
                     else {
-                        die join ", ", @list;
+                        $op = ($charset eq 'aa')
+                        ? 'EXACTFAA'
+                        : ($charset eq 'l')
+                            ? (($cp < 256)
+                            ? 'EXACTFL'
+                            : 'EXACTFLU8')
+                            : ($cp < 256)
+                            ? 'EXACTFU'
+                            : 'EXACTFU_REQ8';
+                        $mod_cp = ord fc $char;
                     }
-                    my $anyof = ($charset eq "l") ? "ANYOFL" : "ANYOFHb";
-                    push @single_tests, "$anyof\[$interior\]";
+
+                    push @single_tests, sprintf "$op <\\x{%X}>", $mod_cp;
                 }
             }
         }

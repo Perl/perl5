@@ -2424,7 +2424,7 @@ EOF
             like(chr(0x7FFF_FFFF_FFFF_FFFF), qr/^\p{Is_Portable_Super}$/,
                     "chr(0x7FFF_FFFF_FFFF_FFFF) can match a Unicode property");
 
-            my $p = qr/^[\x{7FFF_FFFF_FFFF_FFFF}]$/;
+            my $p = eval 'qr/^\x{7FFF_FFFF_FFFF_FFFF}$/';
             like(chr(0x7FFF_FFFF_FFFF_FFFF), qr/$p/,
                     "chr(0x7FFF_FFFF_FFFF_FFFF) can match itself in a [class]");
             like(chr(0x7FFF_FFFF_FFFF_FFFF), qr/$p/, # Tests any caching
