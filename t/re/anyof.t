@@ -787,6 +787,7 @@ my @single_chars_to_test =
     "\x{106}",
     "\x{107}",
     "\x{108}",
+    "\x{2029}",
 );
 
 my @single_tests;
