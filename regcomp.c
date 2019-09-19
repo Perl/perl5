@@ -5883,6 +5883,25 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     break;
                   }
 
+                case ANYOFR:
+                  {
+                    SV* cp_list = NULL;
+
+                    cp_list = _add_range_to_invlist(cp_list,
+                                        ANYOFRbase(scan),
+                                        ANYOFRbase(scan) + ANYOFRdelta(scan));
+
+                    if (flags & SCF_DO_STCLASS_OR) {
+                        ssc_union(data->start_class, cp_list, invert);
+                    }
+                    else if (flags & SCF_DO_STCLASS_AND) {
+                        ssc_intersection(data->start_class, cp_list, invert);
+                    }
+
+                    SvREFCNT_dec_NN(cp_list);
+                    break;
+                  }
+
 		case NPOSIXL:
                     invert = 1;
                     /* FALLTHROUGH */
@@ -18348,6 +18367,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         Size_t partial_cp_count = 0;
         UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
         UV   end[MAX_FOLD_FROMS+1] = { 0 };
+        bool single_range = FALSE;
 
         if (cp_list) { /* Count the code points in enough ranges that we would
                           see all the ones possible in any fold in this version
@@ -18361,6 +18381,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 partial_cp_count += end[i] - start[i] + 1;
             }
 
+            if (i == 1) {
+                single_range = TRUE;
+            }
             invlist_iterfinish(cp_list);
         }
 
@@ -19069,6 +19092,36 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             SvREFCNT_dec(d_invlist);
             SvREFCNT_dec(intersection);
+        }
+
+        /* If it is a single contiguous range, ANYOFR is an efficient regnode,
+         * both in size and speed.  Currently, a 20 bit range base (smallest
+         * code point in it), and a 12 bit maximum delta are packed into a 32
+         * bit word.  This allows for using it on all of the Unicode code
+         * points except for the highest plane, which is only for private use
+         * code points.  khw doubts that a bigger delta is likely in real world
+         * applications */
+        if (     single_range
+            && ! has_runtime_dependency
+            &&   anyof_flags == 0
+            &&   start[0] < (1 << ANYOFR_BASE_BITS)
+            &&   end[0] - start[0]
+                    < ((1U << (sizeof(((struct regnode_1 *)NULL)->arg1)
+                                   * CHARBITS - ANYOFR_BASE_BITS))))
+
+        {
+            U8 low_utf8[UTF8_MAXBYTES+1];
+
+            ret = reganode(pRExC_state, ANYOFR,
+                        (start[0] | (end[0] - start[0]) << ANYOFR_BASE_BITS));
+
+            /* Place the lowest UTF-8 start byte in the flags field, so as to
+             * allow efficient ruling out at run time of many possible inputs.
+             * */
+            (void) uvchr_to_utf8(low_utf8, start[0]);
+            ANYOF_FLAGS(REGNODE_p(ret)) = NATIVE_UTF8_TO_I8(low_utf8[0]);
+
+            goto not_anyof;
         }
 
         /* If didn't find an optimization and there is no need for a bitmap,
@@ -20452,10 +20505,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
-    else if (k == ANYOF) {
-	const U8 flags = inRANGE(OP(o), ANYOFH, ANYOFHr)
-                          ? 0
-                          : ANYOF_FLAGS(o);
+    else if (k == ANYOF || k == ANYOFR) {
+        U8 flags;
         char * bitmap;
         U32 arg;
         bool do_sep = FALSE;    /* Do we need to separate various components of
@@ -20474,11 +20525,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         bool inverted;
 
-        if (inRANGE(OP(o), ANYOFH, ANYOFHb)) {
+        if (inRANGE(OP(o), ANYOFH, ANYOFR)) {
+            flags = 0;
             bitmap = NULL;
             arg = 0;
         }
         else {
+            flags = ANYOF_FLAGS(o);
             bitmap = ANYOF_BITMAP(o);
             arg = ARG(o);
         }
@@ -20496,15 +20549,23 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         /* If there is stuff outside the bitmap, get it */
         if (arg != ANYOF_ONLY_HAS_BITMAP) {
-            (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
+            if (inRANGE(OP(o), ANYOFR, ANYOFR)) {
+                nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
+                                            ANYOFRbase(o),
+                                            ANYOFRbase(o) + ANYOFRdelta(o));
+            }
+            else {
+                (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
+            }
+
             /* The non-bitmap data may contain stuff that could fit in the
              * bitmap.  This could come from a user-defined property being
              * finally resolved when this call was done; or much more likely
              * because there are matches that require UTF-8 to be valid, and so
-             * aren't in the bitmap.  This is teased apart later */
+             * aren't in the bitmap (or ANYOFR).  This is teased apart later */
             _invlist_intersection(nonbitmap_invlist,
                                   PL_InBitmap,
                                   &bitmap_range_not_in_bitmap);
@@ -20524,7 +20585,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Ready to start outputting.  First, the initial left bracket */
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
-        if (! inRANGE(OP(o), ANYOFH, ANYOFHr)) {
+        /* ANYOFH by definition doesn't have anything that will fit inside the
+         * bitmap;  ANYOFR may or may not. */
+        if (  ! inRANGE(OP(o), ANYOFH, ANYOFHr)
+            && (   ! inRANGE(OP(o), ANYOFR, ANYOFR)
+                ||   ANYOFRbase(o) < NUM_ANYOF_CODE_POINTS))
+        {
             /* Then all the things that could fit in the bitmap */
             do_sep = put_charclass_bitmap_innards(sv,
                                                   bitmap,
@@ -20537,7 +20603,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                    * better display if there
                                                    * are things that haven't
                                                    * been resolved */
-                                                  unresolved != NULL);
+                                                  unresolved != NULL
+                                            || inRANGE(OP(o), ANYOFR, ANYOFR));
             SvREFCNT_dec(bitmap_range_not_in_bitmap);
 
             /* If there are user-defined properties which haven't been defined
@@ -20623,15 +20690,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
-        if (inRANGE(OP(o), ANYOFH, ANYOFHr)) {
+        if (inRANGE(OP(o), ANYOFH, ANYOFR)) {
             U8 lowest = (OP(o) != ANYOFHr)
                          ? FLAGS(o)
                          : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
-            U8 highest = (OP(o) == ANYOFHb)
-                         ? lowest
-                         : OP(o) == ANYOFH
+            U8 highest = (OP(o) == ANYOFHr)
+                         ? HIGHEST_ANYOF_HRx_BYTE(FLAGS(o))
+                         : (OP(o) == ANYOFH || OP(o) == ANYOFR)
                            ? 0xFF
-                           : HIGHEST_ANYOF_HRx_BYTE(FLAGS(o));
+                           : lowest;
             Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=%02X", lowest);
             if (lowest != highest) {
                 Perl_sv_catpvf(aTHX_ sv, "-%02X", highest);

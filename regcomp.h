@@ -338,6 +338,10 @@ struct regnode_ssc {
 #define STR_SZ(l)	((l + sizeof(regnode) - 1) / sizeof(regnode))
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
 
+#define ANYOFR_BASE_BITS    20
+#define ANYOFRbase(p)   (ARG(p) & ((1 << ANYOFR_BASE_BITS) - 1))
+#define ANYOFRdelta(p)  (ARG(p) >> ANYOFR_BASE_BITS)
+
 #undef NODE_ALIGN
 #undef ARG_LOC
 #undef NEXTOPER
@@ -1130,7 +1134,7 @@ typedef enum {
 	WB_BOUND
 } bound_type;
 
-/* This unpacks the FLAGS field of ANYOFHx nodes.  The value it contains
+/* This unpacks the FLAGS field of ANYOF[HR]x nodes.  The value it contains
  * gives the strict lower bound for the UTF-8 start byte of any code point
  * matchable by the node, and a loose upper bound as well.
  *
