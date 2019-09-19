@@ -20456,6 +20456,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	const U8 flags = inRANGE(OP(o), ANYOFH, ANYOFHr)
                           ? 0
                           : ANYOF_FLAGS(o);
+        char * bitmap;
+        U32 arg;
         bool do_sep = FALSE;    /* Do we need to separate various components of
                                    the output? */
         /* Set if there is still an unresolved user-defined property */
@@ -20470,7 +20472,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And things that aren't in the bitmap, but are small enough to be */
         SV* bitmap_range_not_in_bitmap = NULL;
 
-        const bool inverted = flags & ANYOF_INVERT;
+        bool inverted;
+
+        if (inRANGE(OP(o), ANYOFH, ANYOFHb)) {
+            bitmap = NULL;
+            arg = 0;
+        }
+        else {
+            bitmap = ANYOF_BITMAP(o);
+            arg = ARG(o);
+        }
 
 	if (OP(o) == ANYOFL || OP(o) == ANYOFPOSIXL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
@@ -20481,8 +20492,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
         }
 
+        inverted = flags & ANYOF_INVERT;
+
         /* If there is stuff outside the bitmap, get it */
-        if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
+        if (arg != ANYOF_ONLY_HAS_BITMAP) {
             (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
@@ -20514,7 +20527,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (! inRANGE(OP(o), ANYOFH, ANYOFHr)) {
             /* Then all the things that could fit in the bitmap */
             do_sep = put_charclass_bitmap_innards(sv,
-                                                  ANYOF_BITMAP(o),
+                                                  bitmap,
                                                   bitmap_range_not_in_bitmap,
                                                   only_utf8_locale_invlist,
                                                   o,
