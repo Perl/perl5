@@ -35,15 +35,13 @@ interested in all the latest developments, you should definitely
 subscribe.  The list is high volume, but generally has a
 fairly low noise level.
 
-Subscribe by sending the message (in the body of your letter)
+To subscribe to perl5-porters, send an email to
 
-	subscribe perl5-porters
-
-to perl5-porters-request@perl.org .
+	perl5-porters-subscribe@perl.org
 
 Archives of the list are held at:
 
-    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
+	https://lists.perl.org/list/perl5-porters.html
 
 =head1 How are Perl Releases Numbered?
 
