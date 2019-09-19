@@ -11138,7 +11138,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     PERL_ARGS_ASSERT_REG;
     DEBUG_PARSE("reg ");
 
-
     max_open = get_sv(RE_COMPILE_RECURSION_LIMIT, GV_ADD);
     assert(max_open);
     if (!SvIOK(max_open)) {
@@ -18605,6 +18604,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     goto not_anyof;
                 }
             }
+
             /* For well-behaved locales, some classes are subsets of others,
              * so complementing the subset and including the non-complemented
              * superset should match everything, like [\D[:alnum:]], and
@@ -18709,7 +18709,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
         /* Next see if can optimize classes that contain just a few code points
          * into an EXACTish node.  The reason to do this is to let the
-         * optimizer join this node with adjacent EXACTish ones.
+         * optimizer join this node with adjacent EXACTish ones, and ANYOF
+         * nodes require conversion to code point from UTF-8.
          *
          * An EXACTFish node can be generated even if not under /i, and vice
          * versa.  But care must be taken.  An EXACTFish node has to be such
@@ -19014,7 +19015,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * convert to UTF-8 if not already there */
                 if (value > 255) {
                     if (! UTF) {
-
                         SvREFCNT_dec(cp_list);;
                         REQUIRE_UTF8(flagp);
                     }
@@ -19035,17 +19035,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 len = (UTF) ? UVCHR_SKIP(value) : 1;
 
-                    ret = regnode_guts(pRExC_state, op, len, "exact");
-                    FILL_NODE(ret, op);
-                    RExC_emit += 1 + STR_SZ(len);
-                    setSTR_LEN(REGNODE_p(ret), len);
-                    if (len == 1) {
-                        *STRING(REGNODE_p(ret)) = (U8) value;
-                    }
-                    else {
-                        uvchr_to_utf8((U8 *) STRING(REGNODE_p(ret)), value);
-                    }
-                    goto not_anyof;
+                ret = regnode_guts(pRExC_state, op, len, "exact");
+                FILL_NODE(ret, op);
+                RExC_emit += 1 + STR_SZ(len);
+                setSTR_LEN(REGNODE_p(ret), len);
+                if (len == 1) {
+                    *STRINGs(REGNODE_p(ret)) = (U8) value;
+                }
+                else {
+                    uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(ret)), value);
+                }
+                goto not_anyof;
             }
         }
 
@@ -19088,7 +19088,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             if (invlist_highest(cp_list) <= max_permissible) {
                 UV this_start, this_end;
-                UV lowest_cp = UV_MAX;  /* inited to suppress compiler warn */
+                UV lowest_cp = UV_MAX;  /* init'ed to suppress compiler warn */
                 U8 bits_differing = 0;
                 Size_t full_cp_count = 0;
                 bool first_time = TRUE;
@@ -19303,7 +19303,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             /* We store the lowest possible first byte of the UTF-8
              * representation, using the flags field.  This allows for quick
              * ruling out of some inputs without having to convert from UTF-8
-             * to code point.  For EBCDIC, this has to be I8. */
+             * to code point.  For EBCDIC, we use I8, as not doing that
+             * transformation would not rule out nearly so many things */
             anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
 
             /* If the first UTF-8 start byte for the highest code point in the
@@ -21767,7 +21768,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         if (start >= NUM_ANYOF_CODE_POINTS) {
             this_end = end;
         }
-        else {
+        else {  /* Have to split range at the bitmap boundary */
             this_end = (end < NUM_ANYOF_CODE_POINTS)
                         ? end
                         : NUM_ANYOF_CODE_POINTS - 1;
