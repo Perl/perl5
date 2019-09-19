@@ -20514,6 +20514,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                 NULL,
                                                 NULL,
                                                 NULL,
+                                                0,
                                                 FALSE
                                                );
             sv_catpvs(sv, "]");
@@ -20662,6 +20663,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                   bitmap_range_not_in_bitmap,
                                                   only_utf8_locale_invlist,
                                                   o,
+                                                  flags,
 
                                                   /* Can't try inverting for a
                                                    * better display if there
@@ -20779,7 +20781,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             _invlist_invert(cp_list);
         }
 
-        put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, TRUE);
+        put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, 0, TRUE);
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
         SvREFCNT_dec(cp_list);
@@ -21860,6 +21862,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                      SV *nonbitmap_invlist,
                                      SV *only_utf8_locale_invlist,
                                      const regnode * const node,
+                                     const U8 flags,
                                      const bool force_as_is_display)
 {
     /* Appends to 'sv' a displayable version of the innards of the bracketed
@@ -21876,6 +21879,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      *  'node' is the regex pattern ANYOF node.  It is needed only when the
      *      above two parameters are not null, and is passed so that this
      *      routine can tease apart the various reasons for them.
+     *  'flags' is the flags field of 'node'
      *  'force_as_is_display' is TRUE if this routine should definitely NOT try
      *      to invert things to see if that leads to a cleaner display.  If
      *      FALSE, this routine is free to use its judgment about doing this.
@@ -21913,8 +21917,6 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
     SV* as_is_display;      /* The output string when we take the inputs
                                literally */
     SV* inverted_display;   /* The output string when we invert the inputs */
-
-    U8 flags = (node) ? ANYOF_FLAGS(node) : 0;
 
     bool invert = cBOOL(flags & ANYOF_INVERT);  /* Is the input to be inverted
                                                    to match? */

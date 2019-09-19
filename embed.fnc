@@ -2719,6 +2719,7 @@ ES	|bool	|put_charclass_bitmap_innards|NN SV* sv		    \
 				|NULLOK SV* nonbitmap_invlist	    \
 				|NULLOK SV* only_utf8_locale_invlist\
 				|NULLOK const regnode * const node  \
+				|const U8 flags			    \
 				|const bool force_as_is_display
 ES	|SV*	|put_charclass_bitmap_innards_common		    \
 				|NN SV* invlist			    \
