@@ -1553,6 +1553,29 @@ while(<$kh>) {
         "RT 132760 err 0";
 }
 
+# check that warnings come from the correct line
+
+{
+    my @warn;
+    local $SIG{__WARN__} = sub { push @warn, @_};
+    eval q{
+        sub multiline1 (
+            $a,
+            $b = $a + 1,
+            $c = $a + 1)
+        {
+            my $d = $a + 1;
+            my $e = $a + 1;
+        }
+    };
+    multiline1(undef);
+    like $warn[0], qr/line 4,/, 'multiline1: $b';
+    like $warn[1], qr/line 5,/, 'multiline1: $c';
+    like $warn[2], qr/line 7,/, 'multiline1: $d';
+    like $warn[3], qr/line 8,/, 'multiline1: $e';
+}
+
+
 done_testing;
 
 1;
