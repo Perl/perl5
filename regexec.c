@@ -2198,7 +2198,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case ANYOFHr:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
             REXEC_FBC_CLASS_SCAN(TRUE,
-                  (   inRANGE((U8) NATIVE_UTF8_TO_I8(*s),
+                  (   inRANGE(NATIVE_UTF8_TO_I8(*s),
                               LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)),
                               HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)))
                    && reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target)));
@@ -6839,7 +6839,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFH:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
-                ||   ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8((U8) *locinput)
+                ||   ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8(*locinput)
 	        || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
                                                                    utf8_target))
             {
@@ -9662,7 +9662,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         if (utf8_target) {  /* ANYOFH only can match UTF-8 targets */
             while (  hardcount < max
                    && scan < this_eol
-                   && NATIVE_UTF8_TO_I8((U8) *scan) >= ANYOF_FLAGS(p)
+                   && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
                    && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
             {
                 scan += UTF8SKIP(scan);
@@ -9691,10 +9691,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         if (utf8_target) {  /* ANYOFH only can match UTF-8 targets */
             while (  hardcount < max
                    && scan < this_eol
-                   && inRANGE((U8) NATIVE_UTF8_TO_I8(*scan),
+                   && inRANGE(NATIVE_UTF8_TO_I8(*scan),
                               LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)),
                               HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)))
-                   && NATIVE_UTF8_TO_I8((U8) *scan) >= ANYOF_FLAGS(p)
+                   && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
                    && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
             {
                 scan += UTF8SKIP(scan);
