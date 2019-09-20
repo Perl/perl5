@@ -384,21 +384,15 @@ sub print_reg_off_by_arg {
     my ($out)= @_;
     print $out <<EOP;
 
-/* reg_off_by_arg[] - Which argument holds the offset to the next node */
+#if defined(PERL_CORE) || defined(PERL_EXT)
+/* reg_off_by_arg[] - Which argument holds the offset to the next node: 0 for
+ * next_off; 1 for arg1*/
 
-static const char reg_off_by_arg[] = {
+#define reg_off_by_arg(n) cBOOL(OP(n) >= LONGJMP)
+
+#endif
 EOP
 
-    foreach my $node (@ops) {
-        my $size= $node->{longj} || 0;
-
-        printf $out "\t%d,\t/* %*s */\n", $size, -$rwidth, $node->{name};
-    }
-
-    print $out <<EOP;
-};
-
-EOP
 }
 
 sub print_reg_name {
@@ -670,9 +664,8 @@ print_regkind($out);
 wrap_ifdef_print(
     $out,
     "REG_COMP_C",
-    \&print_regarglen,
-    \&print_reg_off_by_arg
-);
+    \&print_regarglen);
+print_reg_off_by_arg($out);
 print_reg_name($out);
 print_reg_extflags_name($out);
 print_reg_intflags_name($out);
