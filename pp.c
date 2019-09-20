@@ -7110,7 +7110,7 @@ S_find_runcv_name(void)
     return sv;
 }
 
-/* Check a  a subs arguments - i.e. that it has the correct number of args
+/* Check a sub's arguments - i.e. that it has the correct number of args
  * (and anything else we might think of in future). Typically used with
  * signatured subs.
  */
@@ -7118,10 +7118,10 @@ S_find_runcv_name(void)
 PP(pp_argcheck)
 {
     OP * const o       = PL_op;
-    UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
-    IV   params        = aux[0].iv;
-    IV   opt_params    = aux[1].iv;
-    char slurpy        = (char)(aux[2].iv);
+    struct op_argcheck_aux *aux = (struct op_argcheck_aux *)cUNOP_AUXo->op_aux;
+    IV   params        = aux->params;
+    IV   opt_params    = aux->opt_params;
+    char slurpy        = aux->slurpy;
     AV  *defav         = GvAV(PL_defgv); /* @_ */
     IV   argc;
     bool too_few;
