@@ -17,6 +17,34 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.4 - Ann Leckie, "The Raven Tower"
+
+L<Announced on 2019-09-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2019/09/msg256254.html>
+
+  Stories can be risky for someone like me. What I say must be true, or it
+will be made true, and if it cannot be made true - if I don't have the
+power, or if what I have said is an impossibility - then I will pay the
+price. I might more or less safely say, "Once there was a man who rode
+home to attend his father's funeral and claim his inheritance, but
+matters were not as he expected them to be." I do not doubt that such a
+thing has happened more than once in all the time there have been
+fathers to die and sons to succeed them. But to go any further, I must
+supply more details - the specific actions of specific people, and their
+specific consequences - and there I might blunder, all unknowing, into
+untruth. It's safer for me to speak of what I know. Or to speak only in
+the safest of generalities. Or else to say plainly at the beginning,
+"Here is a story I have heard," placing the burden of truth or not on
+the teller whose words I am merely accurately reporting.
+
+  But what is the story that I am telling? Here is another story I have
+heard:
+Once there were two brothers, and one of them wanted what the other had.
+Bent all his will to obtain what the other had, no matter the cost.
+  Here is another story: Once there was a prisoner in a tower.
+  And another:
+Once someone risked their life out of duty and loyalty to a friend.
+  Ah, there's a story that I might tell, and truthfully.
+
 =head2 v5.31.2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Duck and the Kangaroo
 
 L<Announced on 2019-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2019/07/msg255639.html>
