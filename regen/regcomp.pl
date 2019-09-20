@@ -93,10 +93,17 @@ sub register_node {
     push @all, $node;
     $all{ $node->{name} }= $node;
 
-    if ($node->{longj} && $node->{longj} != 1) {
-        die "longj field must be in [01] if present in ", Dumper($node);
+    if ($node->{longj}) {
+        if ($node->{longj} != 1) {
+            die "longj field must be in [01] if present in ", Dumper($node);
+        }
+        elsif (! exists $all{LONGJMP} && $node->{optype} eq 'op') {
+            die "$node->{name}: All nodes with longj field set must come after LONGJMP one";
+        }
     }
-
+    elsif (exists $all{LONGJMP} && $node->{optype} eq 'op') {
+        die "$node->{name}: All nodes without longj field set must come before LONGJMP one";
+    }
 }
 
 # Parse and add an opcode definition to the global state.
