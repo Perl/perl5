@@ -250,6 +250,8 @@ OPTIMIZED   NOTHING,    off       ; Placeholder for dump.
 PSEUDO      PSEUDO,     off       ; Pseudo opcode for internal use.
 
 #*Support for long RE
+# ABOVE this all nodes don't have longj set; BELOW, all do.  LONGJMP is the
+# predetermined separator, so must be the first with longj.
 LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
 BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
 
