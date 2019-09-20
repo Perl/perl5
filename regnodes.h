@@ -427,120 +427,16 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* IFTHEN       */
 	EXTRA_SIZE(struct regnode_1),        	/* RENUM        */
 };
-
-/* reg_off_by_arg[] - Which argument holds the offset to the next node */
-
-static const char reg_off_by_arg[] = {
-	0,	/* END          */
-	0,	/* SUCCEED      */
-	0,	/* SBOL         */
-	0,	/* MBOL         */
-	0,	/* SEOL         */
-	0,	/* MEOL         */
-	0,	/* EOS          */
-	0,	/* GPOS         */
-	0,	/* BOUND        */
-	0,	/* BOUNDL       */
-	0,	/* BOUNDU       */
-	0,	/* BOUNDA       */
-	0,	/* NBOUND       */
-	0,	/* NBOUNDL      */
-	0,	/* NBOUNDU      */
-	0,	/* NBOUNDA      */
-	0,	/* REG_ANY      */
-	0,	/* SANY         */
-	0,	/* ANYOF        */
-	0,	/* ANYOFD       */
-	0,	/* ANYOFL       */
-	0,	/* ANYOFPOSIXL  */
-	0,	/* ANYOFH       */
-	0,	/* ANYOFHb      */
-	0,	/* ANYOFHr      */
-	0,	/* ANYOFR       */
-	0,	/* ANYOFRb      */
-	0,	/* ANYOFM       */
-	0,	/* NANYOFM      */
-	0,	/* POSIXD       */
-	0,	/* POSIXL       */
-	0,	/* POSIXU       */
-	0,	/* POSIXA       */
-	0,	/* NPOSIXD      */
-	0,	/* NPOSIXL      */
-	0,	/* NPOSIXU      */
-	0,	/* NPOSIXA      */
-	0,	/* CLUMP        */
-	0,	/* BRANCH       */
-	0,	/* EXACT        */
-	0,	/* EXACTL       */
-	0,	/* EXACTF       */
-	0,	/* EXACTFL      */
-	0,	/* EXACTFU      */
-	0,	/* EXACTFAA     */
-	0,	/* EXACTFUP     */
-	0,	/* EXACTFLU8    */
-	0,	/* EXACTFAA_NO_TRIE */
-	0,	/* EXACT_ONLY8  */
-	0,	/* EXACTFU_ONLY8 */
-	0,	/* EXACTFU_S_EDGE */
-	0,	/* NOTHING      */
-	0,	/* TAIL         */
-	0,	/* STAR         */
-	0,	/* PLUS         */
-	0,	/* CURLY        */
-	0,	/* CURLYN       */
-	0,	/* CURLYM       */
-	0,	/* CURLYX       */
-	0,	/* WHILEM       */
-	0,	/* OPEN         */
-	0,	/* CLOSE        */
-	0,	/* SROPEN       */
-	0,	/* SRCLOSE      */
-	0,	/* REF          */
-	0,	/* REFF         */
-	0,	/* REFFL        */
-	0,	/* REFFU        */
-	0,	/* REFFA        */
-	0,	/* REFN         */
-	0,	/* REFFN        */
-	0,	/* REFFLN       */
-	0,	/* REFFUN       */
-	0,	/* REFFAN       */
-	0,	/* EVAL         */
-	0,	/* MINMOD       */
-	0,	/* LOGICAL      */
-	0,	/* TRIE         */
-	0,	/* TRIEC        */
-	0,	/* AHOCORASICK  */
-	0,	/* AHOCORASICKC */
-	0,	/* GOSUB        */
-	0,	/* GROUPPN      */
-	0,	/* INSUBP       */
-	0,	/* DEFINEP      */
-	0,	/* ENDLIKE      */
-	0,	/* OPFAIL       */
-	0,	/* ACCEPT       */
-	0,	/* VERB         */
-	0,	/* PRUNE        */
-	0,	/* MARKPOINT    */
-	0,	/* SKIP         */
-	0,	/* COMMIT       */
-	0,	/* CUTGROUP     */
-	0,	/* KEEPS        */
-	0,	/* LNBREAK      */
-	0,	/* GROUPP       */
-	0,	/* OPTIMIZED    */
-	0,	/* PSEUDO       */
-	1,	/* LONGJMP      */
-	1,	/* BRANCHJ      */
-	1,	/* IFMATCH      */
-	1,	/* UNLESSM      */
-	1,	/* SUSPEND      */
-	1,	/* IFTHEN       */
-	1,	/* RENUM        */
-};
-
 #endif /* REG_COMP_C */
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
+/* reg_off_by_arg[] - Which argument holds the offset to the next node: 0 for
+ * next_off; 1 for arg1*/
+
+#define reg_off_by_arg(n) cBOOL(OP(n) >= LONGJMP)
+
+#endif
 
 /* reg_name[] - Opcode/state names in string form, for debugging */
 

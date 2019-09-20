@@ -4174,7 +4174,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 #ifdef EXPERIMENTAL_INPLACESCAN
 	if (flags && !NEXT_OFF(n)) {
 	    DEBUG_PEEP("atch", val, depth, 0);
-	    if (reg_off_by_arg[OP(n)]) {
+	    if (reg_off_by_arg(n)) {
 		ARG_SET(n, val - n);
 	    }
 	    else {
@@ -4545,11 +4545,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	/* Follow the next-chain of the current node and optimize
 	   away all the NOTHINGs from it.  */
 	if (OP(scan) != CURLYX) {
-	    const int max = (reg_off_by_arg[OP(scan)]
+	    const int max = (reg_off_by_arg(scan)
 		       ? I32_MAX
 		       /* I32 may be smaller than U16 on CRAYs! */
 		       : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-	    int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
+	    int off = (reg_off_by_arg(scan) ? ARG(scan) : NEXT_OFF(scan));
 	    int noff;
 	    regnode *n = scan;
 
@@ -4559,7 +4559,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		       || ((OP(n) == LONGJMP) && (noff = ARG(n))))
 		   && off + noff < max)
 		off += noff;
-	    if (reg_off_by_arg[OP(scan)])
+	    if (reg_off_by_arg(scan))
 		ARG(scan) = off;
 	    else
 		NEXT_OFF(scan) = off;
@@ -5587,7 +5587,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			while ( nxt1 && (OP(nxt1) != WHILEM)) {
 			    regnode *nnxt = regnext(nxt1);
 			    if (nnxt == nxt) {
-				if (reg_off_by_arg[OP(nxt1)])
+				if (reg_off_by_arg(nxt1))
 				    ARG_SET(nxt1, nxt2 - nxt1);
 				else if (nxt2 - nxt1 < U16_MAX)
 				    NEXT_OFF(nxt1) = nxt2 - nxt1;
@@ -19978,7 +19978,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         scan = REGNODE_OFFSET(temp);
     }
 
-    if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
+    if (reg_off_by_arg(REGNODE_p(scan))) {
         assert((UV) (val - scan) <= U32_MAX);
         ARG_SET(REGNODE_p(scan), val - scan);
     }
@@ -20090,7 +20090,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 		      (IV)(val - scan)
         );
     });
-    if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
+    if (reg_off_by_arg(REGNODE_p(scan))) {
         assert((UV) (val - scan) <= U32_MAX);
 	ARG_SET(REGNODE_p(scan), val - scan);
     }
@@ -21383,7 +21383,7 @@ Perl_regnext(pTHX_ regnode *p)
                                                 (int)OP(p), (int)REGNODE_MAX);
     }
 
-    offset = (reg_off_by_arg[OP(p)] ? ARG(p) : NEXT_OFF(p));
+    offset = (reg_off_by_arg(p)) ? ARG(p) : NEXT_OFF(p);
     if (offset == 0)
 	return(NULL);
 
