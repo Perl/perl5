@@ -753,7 +753,7 @@ unless ($define{'USE_QUADMATH'}) {
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;
 	next unless $func;
-	if (($flags =~ /[AX]/ && $flags !~ $excludedre)
+	if (($flags =~ /[AXC]/ && $flags !~ $excludedre)
             || (!$define{'NO_MATHOMS'} && $flags =~ /b/))
         {
 	    # public API, so export
