@@ -764,7 +764,7 @@ run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 =item default_inc_excludes_dot
 
 Since version 5.26.0, default perl builds no longer includes C<'.'> as the
-last element of @INC. The old behaviour can restored using 
+last element of @INC. The old behaviour can restored using
 
 	sh Configure -Udefault_inc_excludes_dot
 
@@ -2440,7 +2440,7 @@ Perl 5.31.4 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl
-(e.g.  5.X.Y) to another similar minor version (e.g. 5.X.(Y+1))) without
+(e.g.  5.31.3) to another similar minor version (e.g. 5.31.4))) without
 re-compiling all of your extensions.  You can also safely leave the old
 version around in case the new version causes you problems for some
 reason.
