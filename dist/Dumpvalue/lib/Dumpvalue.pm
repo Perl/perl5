@@ -1,7 +1,7 @@
 use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 our(%address, $stab, @stab, %stab, %subs);
 
 sub ASCII { return ord('A') == 65; }
@@ -79,7 +79,7 @@ sub dumpValues {
   my $self = shift;
   local %address;
   local $^W=0;
-  (print "undef\n"), return unless defined $_[0];
+  (print "undef\n"), return if (@_ == 1 and not defined $_[0]);
   $self->unwrap(\@_,0);
 }
 
