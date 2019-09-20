@@ -757,23 +757,6 @@ will be lost.
  REFFAN           num 1      Match already matched string, using /aai
                              rules.
 
- # Support for long RE
- LONGJMP          off 1 1    Jump far away.
- BRANCHJ          off 1 1    BRANCH with long offset.
-
- # Special Case Regops
- IFMATCH          off 1 1    Succeeds if the following matches; non-zero
-                             flags "f", next_off "o" means lookbehind
-                             assertion starting "f..(f-o)" characters
-                             before current
- UNLESSM          off 1 1    Fails if the following matches; non-zero
-                             flags "f", next_off "o" means lookbehind
-                             assertion starting "f..(f-o)" characters
-                             before current
- SUSPEND          off 1 1    "Independent" sub-RE.
- IFTHEN           off 1 1    Switch, should be preceded by switcher.
- GROUPP           num 1      Whether the group matched.
-
  # The heavy worker
 
  EVAL             evl/flags  Execute some Perl code.
@@ -783,9 +766,6 @@ will be lost.
 
  MINMOD           no         Next operator is not greedy.
  LOGICAL          no         Next opcode should set the flag only.
-
- # This is not used yet
- RENUM            off 1 1    Group with independently numbered parens.
 
  # Trie Related
 
@@ -835,6 +815,8 @@ will be lost.
  # New charclass like patterns
  LNBREAK          none       generic newline pattern
 
+ GROUPP           num 1      Whether the group matched.
+
  # SPECIAL  REGOPS
 
  # This is not really a node, but an optimized away piece of a "long"
@@ -847,6 +829,25 @@ will be lost.
  # node cant be optimized. So END implies "unoptimizable" and PSEUDO
  # mean "not seen anything to optimize yet".
  PSEUDO           off        Pseudo opcode for internal use.
+
+ # Support for long RE
+ LONGJMP          off 1 1    Jump far away.
+ BRANCHJ          off 1 1    BRANCH with long offset.
+
+ # Special Case Regops
+ IFMATCH          off 1 1    Succeeds if the following matches; non-zero
+                             flags "f", next_off "o" means lookbehind
+                             assertion starting "f..(f-o)" characters
+                             before current
+ UNLESSM          off 1 1    Fails if the following matches; non-zero
+                             flags "f", next_off "o" means lookbehind
+                             assertion starting "f..(f-o)" characters
+                             before current
+ SUSPEND          off 1 1    "Independent" sub-RE.
+ IFTHEN           off 1 1    Switch, should be preceded by switcher.
+
+ # This is not used yet
+ RENUM            off 1 1    Group with independently numbered parens.
 
 =for regcomp.pl end
 

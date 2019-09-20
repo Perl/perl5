@@ -85,38 +85,38 @@
 #define	REFFLN                	71	/* 0x47 Match already matched string, using /li rules. */
 #define	REFFUN                	72	/* 0x48 Match already matched string, using /ui rules. */
 #define	REFFAN                	73	/* 0x49 Match already matched string, using /aai rules. */
-#define	LONGJMP               	74	/* 0x4a Jump far away. */
-#define	BRANCHJ               	75	/* 0x4b BRANCH with long offset. */
-#define	IFMATCH               	76	/* 0x4c Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
-#define	UNLESSM               	77	/* 0x4d Fails if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
-#define	SUSPEND               	78	/* 0x4e "Independent" sub-RE. */
-#define	IFTHEN                	79	/* 0x4f Switch, should be preceded by switcher. */
-#define	GROUPP                	80	/* 0x50 Whether the group matched. */
-#define	EVAL                  	81	/* 0x51 Execute some Perl code. */
-#define	MINMOD                	82	/* 0x52 Next operator is not greedy. */
-#define	LOGICAL               	83	/* 0x53 Next opcode should set the flag only. */
-#define	RENUM                 	84	/* 0x54 Group with independently numbered parens. */
-#define	TRIE                  	85	/* 0x55 Match many EXACT(F[ALU]?)? at once. flags==type */
-#define	TRIEC                 	86	/* 0x56 Same as TRIE, but with embedded charclass data */
-#define	AHOCORASICK           	87	/* 0x57 Aho Corasick stclass. flags==type */
-#define	AHOCORASICKC          	88	/* 0x58 Same as AHOCORASICK, but with embedded charclass data */
-#define	GOSUB                 	89	/* 0x59 recurse to paren arg1 at (signed) ofs arg2 */
-#define	GROUPPN               	90	/* 0x5a Whether the group matched. */
-#define	INSUBP                	91	/* 0x5b Whether we are in a specific recurse. */
-#define	DEFINEP               	92	/* 0x5c Never execute directly. */
-#define	ENDLIKE               	93	/* 0x5d Used only for the type field of verbs */
-#define	OPFAIL                	94	/* 0x5e Same as (?!), but with verb arg */
-#define	ACCEPT                	95	/* 0x5f Accepts the current matched string, with verbar */
-#define	VERB                  	96	/* 0x60 Used only for the type field of verbs */
-#define	PRUNE                 	97	/* 0x61 Pattern fails at this startpoint if no-backtracking through this */
-#define	MARKPOINT             	98	/* 0x62 Push the current location for rollback by cut. */
-#define	SKIP                  	99	/* 0x63 On failure skip forward (to the mark) before retrying */
-#define	COMMIT                	100	/* 0x64 Pattern fails outright if backtracking through this */
-#define	CUTGROUP              	101	/* 0x65 On failure go to the next alternation in the group */
-#define	KEEPS                 	102	/* 0x66 $& begins here. */
-#define	LNBREAK               	103	/* 0x67 generic newline pattern */
-#define	OPTIMIZED             	104	/* 0x68 Placeholder for dump. */
-#define	PSEUDO                	105	/* 0x69 Pseudo opcode for internal use. */
+#define	EVAL                  	74	/* 0x4a Execute some Perl code. */
+#define	MINMOD                	75	/* 0x4b Next operator is not greedy. */
+#define	LOGICAL               	76	/* 0x4c Next opcode should set the flag only. */
+#define	TRIE                  	77	/* 0x4d Match many EXACT(F[ALU]?)? at once. flags==type */
+#define	TRIEC                 	78	/* 0x4e Same as TRIE, but with embedded charclass data */
+#define	AHOCORASICK           	79	/* 0x4f Aho Corasick stclass. flags==type */
+#define	AHOCORASICKC          	80	/* 0x50 Same as AHOCORASICK, but with embedded charclass data */
+#define	GOSUB                 	81	/* 0x51 recurse to paren arg1 at (signed) ofs arg2 */
+#define	GROUPPN               	82	/* 0x52 Whether the group matched. */
+#define	INSUBP                	83	/* 0x53 Whether we are in a specific recurse. */
+#define	DEFINEP               	84	/* 0x54 Never execute directly. */
+#define	ENDLIKE               	85	/* 0x55 Used only for the type field of verbs */
+#define	OPFAIL                	86	/* 0x56 Same as (?!), but with verb arg */
+#define	ACCEPT                	87	/* 0x57 Accepts the current matched string, with verbar */
+#define	VERB                  	88	/* 0x58 Used only for the type field of verbs */
+#define	PRUNE                 	89	/* 0x59 Pattern fails at this startpoint if no-backtracking through this */
+#define	MARKPOINT             	90	/* 0x5a Push the current location for rollback by cut. */
+#define	SKIP                  	91	/* 0x5b On failure skip forward (to the mark) before retrying */
+#define	COMMIT                	92	/* 0x5c Pattern fails outright if backtracking through this */
+#define	CUTGROUP              	93	/* 0x5d On failure go to the next alternation in the group */
+#define	KEEPS                 	94	/* 0x5e $& begins here. */
+#define	LNBREAK               	95	/* 0x5f generic newline pattern */
+#define	GROUPP                	96	/* 0x60 Whether the group matched. */
+#define	OPTIMIZED             	97	/* 0x61 Placeholder for dump. */
+#define	PSEUDO                	98	/* 0x62 Pseudo opcode for internal use. */
+#define	LONGJMP               	99	/* 0x63 Jump far away. */
+#define	BRANCHJ               	100	/* 0x64 BRANCH with long offset. */
+#define	IFMATCH               	101	/* 0x65 Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
+#define	UNLESSM               	102	/* 0x66 Fails if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
+#define	SUSPEND               	103	/* 0x67 "Independent" sub-RE. */
+#define	IFTHEN                	104	/* 0x68 Switch, should be preceded by switcher. */
+#define	RENUM                 	105	/* 0x69 Group with independently numbered parens. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -239,17 +239,9 @@ EXTCONST U8 PL_regkind[] = {
 	REF,      	/* REFFLN                 */
 	REF,      	/* REFFUN                 */
 	REF,      	/* REFFAN                 */
-	LONGJMP,  	/* LONGJMP                */
-	BRANCHJ,  	/* BRANCHJ                */
-	BRANCHJ,  	/* IFMATCH                */
-	BRANCHJ,  	/* UNLESSM                */
-	BRANCHJ,  	/* SUSPEND                */
-	BRANCHJ,  	/* IFTHEN                 */
-	GROUPP,   	/* GROUPP                 */
 	EVAL,     	/* EVAL                   */
 	MINMOD,   	/* MINMOD                 */
 	LOGICAL,  	/* LOGICAL                */
-	BRANCHJ,  	/* RENUM                  */
 	TRIE,     	/* TRIE                   */
 	TRIE,     	/* TRIEC                  */
 	TRIE,     	/* AHOCORASICK            */
@@ -269,8 +261,16 @@ EXTCONST U8 PL_regkind[] = {
 	VERB,     	/* CUTGROUP               */
 	KEEPS,    	/* KEEPS                  */
 	LNBREAK,  	/* LNBREAK                */
+	GROUPP,   	/* GROUPP                 */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
+	LONGJMP,  	/* LONGJMP                */
+	BRANCHJ,  	/* BRANCHJ                */
+	BRANCHJ,  	/* IFMATCH                */
+	BRANCHJ,  	/* UNLESSM                */
+	BRANCHJ,  	/* SUSPEND                */
+	BRANCHJ,  	/* IFTHEN                 */
+	BRANCHJ,  	/* RENUM                  */
 	/* ------------ States ------------- */
 	TRIE,     	/* TRIE_next              */
 	TRIE,     	/* TRIE_next_fail         */
@@ -394,17 +394,9 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* REFFLN       */
 	EXTRA_SIZE(struct regnode_1),        	/* REFFUN       */
 	EXTRA_SIZE(struct regnode_1),        	/* REFFAN       */
-	EXTRA_SIZE(struct regnode_1),        	/* LONGJMP      */
-	EXTRA_SIZE(struct regnode_1),        	/* BRANCHJ      */
-	EXTRA_SIZE(struct regnode_1),        	/* IFMATCH      */
-	EXTRA_SIZE(struct regnode_1),        	/* UNLESSM      */
-	EXTRA_SIZE(struct regnode_1),        	/* SUSPEND      */
-	EXTRA_SIZE(struct regnode_1),        	/* IFTHEN       */
-	EXTRA_SIZE(struct regnode_1),        	/* GROUPP       */
 	EXTRA_SIZE(struct regnode_2L),       	/* EVAL         */
 	0,                                   	/* MINMOD       */
 	0,                                   	/* LOGICAL      */
-	EXTRA_SIZE(struct regnode_1),        	/* RENUM        */
 	EXTRA_SIZE(struct regnode_1),        	/* TRIE         */
 	EXTRA_SIZE(struct regnode_charclass),	/* TRIEC        */
 	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
@@ -424,8 +416,16 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
 	0,                                   	/* KEEPS        */
 	0,                                   	/* LNBREAK      */
+	EXTRA_SIZE(struct regnode_1),        	/* GROUPP       */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
+	EXTRA_SIZE(struct regnode_1),        	/* LONGJMP      */
+	EXTRA_SIZE(struct regnode_1),        	/* BRANCHJ      */
+	EXTRA_SIZE(struct regnode_1),        	/* IFMATCH      */
+	EXTRA_SIZE(struct regnode_1),        	/* UNLESSM      */
+	EXTRA_SIZE(struct regnode_1),        	/* SUSPEND      */
+	EXTRA_SIZE(struct regnode_1),        	/* IFTHEN       */
+	EXTRA_SIZE(struct regnode_1),        	/* RENUM        */
 };
 
 /* reg_off_by_arg[] - Which argument holds the offset to the next node */
@@ -505,17 +505,9 @@ static const char reg_off_by_arg[] = {
 	0,	/* REFFLN       */
 	0,	/* REFFUN       */
 	0,	/* REFFAN       */
-	1,	/* LONGJMP      */
-	1,	/* BRANCHJ      */
-	1,	/* IFMATCH      */
-	1,	/* UNLESSM      */
-	1,	/* SUSPEND      */
-	1,	/* IFTHEN       */
-	0,	/* GROUPP       */
 	0,	/* EVAL         */
 	0,	/* MINMOD       */
 	0,	/* LOGICAL      */
-	1,	/* RENUM        */
 	0,	/* TRIE         */
 	0,	/* TRIEC        */
 	0,	/* AHOCORASICK  */
@@ -535,8 +527,16 @@ static const char reg_off_by_arg[] = {
 	0,	/* CUTGROUP     */
 	0,	/* KEEPS        */
 	0,	/* LNBREAK      */
+	0,	/* GROUPP       */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
+	1,	/* LONGJMP      */
+	1,	/* BRANCHJ      */
+	1,	/* IFMATCH      */
+	1,	/* UNLESSM      */
+	1,	/* SUSPEND      */
+	1,	/* IFTHEN       */
+	1,	/* RENUM        */
 };
 
 #endif /* REG_COMP_C */
@@ -622,38 +622,38 @@ EXTCONST char * const PL_reg_name[] = {
 	"REFFLN",                	/* 0x47 */
 	"REFFUN",                	/* 0x48 */
 	"REFFAN",                	/* 0x49 */
-	"LONGJMP",               	/* 0x4a */
-	"BRANCHJ",               	/* 0x4b */
-	"IFMATCH",               	/* 0x4c */
-	"UNLESSM",               	/* 0x4d */
-	"SUSPEND",               	/* 0x4e */
-	"IFTHEN",                	/* 0x4f */
-	"GROUPP",                	/* 0x50 */
-	"EVAL",                  	/* 0x51 */
-	"MINMOD",                	/* 0x52 */
-	"LOGICAL",               	/* 0x53 */
-	"RENUM",                 	/* 0x54 */
-	"TRIE",                  	/* 0x55 */
-	"TRIEC",                 	/* 0x56 */
-	"AHOCORASICK",           	/* 0x57 */
-	"AHOCORASICKC",          	/* 0x58 */
-	"GOSUB",                 	/* 0x59 */
-	"GROUPPN",               	/* 0x5a */
-	"INSUBP",                	/* 0x5b */
-	"DEFINEP",               	/* 0x5c */
-	"ENDLIKE",               	/* 0x5d */
-	"OPFAIL",                	/* 0x5e */
-	"ACCEPT",                	/* 0x5f */
-	"VERB",                  	/* 0x60 */
-	"PRUNE",                 	/* 0x61 */
-	"MARKPOINT",             	/* 0x62 */
-	"SKIP",                  	/* 0x63 */
-	"COMMIT",                	/* 0x64 */
-	"CUTGROUP",              	/* 0x65 */
-	"KEEPS",                 	/* 0x66 */
-	"LNBREAK",               	/* 0x67 */
-	"OPTIMIZED",             	/* 0x68 */
-	"PSEUDO",                	/* 0x69 */
+	"EVAL",                  	/* 0x4a */
+	"MINMOD",                	/* 0x4b */
+	"LOGICAL",               	/* 0x4c */
+	"TRIE",                  	/* 0x4d */
+	"TRIEC",                 	/* 0x4e */
+	"AHOCORASICK",           	/* 0x4f */
+	"AHOCORASICKC",          	/* 0x50 */
+	"GOSUB",                 	/* 0x51 */
+	"GROUPPN",               	/* 0x52 */
+	"INSUBP",                	/* 0x53 */
+	"DEFINEP",               	/* 0x54 */
+	"ENDLIKE",               	/* 0x55 */
+	"OPFAIL",                	/* 0x56 */
+	"ACCEPT",                	/* 0x57 */
+	"VERB",                  	/* 0x58 */
+	"PRUNE",                 	/* 0x59 */
+	"MARKPOINT",             	/* 0x5a */
+	"SKIP",                  	/* 0x5b */
+	"COMMIT",                	/* 0x5c */
+	"CUTGROUP",              	/* 0x5d */
+	"KEEPS",                 	/* 0x5e */
+	"LNBREAK",               	/* 0x5f */
+	"GROUPP",                	/* 0x60 */
+	"OPTIMIZED",             	/* 0x61 */
+	"PSEUDO",                	/* 0x62 */
+	"LONGJMP",               	/* 0x63 */
+	"BRANCHJ",               	/* 0x64 */
+	"IFMATCH",               	/* 0x65 */
+	"UNLESSM",               	/* 0x66 */
+	"SUSPEND",               	/* 0x67 */
+	"IFTHEN",                	/* 0x68 */
+	"RENUM",                 	/* 0x69 */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -788,7 +788,7 @@ EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
 EXTCONST U8 PL_varies_bitmask[];
 #else
 EXTCONST U8 PL_varies_bitmask[] = {
-    0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0xE0, 0x0F, 0xFF, 0xCB, 0x00, 0x00, 0x00, 0x00
+    0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0xE0, 0x0F, 0xFF, 0x03, 0x00, 0x00, 0x90, 0x01
 };
 #endif /* DOINIT */
 
