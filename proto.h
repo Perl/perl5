@@ -4868,10 +4868,6 @@ PERL_STATIC_INLINE void	Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_TOPBLOCK	\
 	assert(cx)
 #endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE U8	Perl_gimme_V(pTHX);
-#define PERL_ARGS_ASSERT_GIMME_V
-#endif
 #endif
 #if !defined(PERL_NO_UTF16_FILTER)
 #  if defined(PERL_IN_TOKE_C)

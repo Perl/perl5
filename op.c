@@ -5455,8 +5455,7 @@ Perl_op_scope(pTHX_ OP *o)
     dVAR;
     if (o) {
 	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
-	    o = op_prepend_elem(OP_LINESEQ,
-                    newOP(OP_ENTER, (o->op_flags & OPf_WANT)), o);
+	    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
             OpTYPE_set(o, OP_LEAVE);
 	}
 	else if (o->op_type == OP_LINESEQ) {

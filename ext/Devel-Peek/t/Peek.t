@@ -1465,7 +1465,7 @@ dumpindent is 4 at -e line 1.
      REFCNT = 1
      |   
 2    +--enter OP(0xNNN) ===> 3 [nextstate 0xNNN]
-     |   FLAGS = (VOID,SLABBED,MORESIB)
+     |   FLAGS = (UNKNOWN,SLABBED,MORESIB)
      |   
 3    +--nextstate COP(0xNNN) ===> 4 [pushmark 0xNNN]
      |   FLAGS = (VOID,SLABBED,MORESIB)

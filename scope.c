@@ -82,7 +82,6 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     si->si_next = 0;
     si->si_cxmax = cxitems - 1;
     si->si_cxix = -1;
-    si->si_cxsubix = -1;
     si->si_type = PERLSI_UNDEF;
     Newx(si->si_cxstack, cxitems, PERL_CONTEXT);
     /* Without any kind of initialising CX_PUSHSUBST()

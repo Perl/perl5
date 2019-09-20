@@ -979,7 +979,6 @@
 #define cx_pushsub(a,b,c,d)	Perl_cx_pushsub(aTHX_ a,b,c,d)
 #define cx_pushwhen(a)		Perl_cx_pushwhen(aTHX_ a)
 #define cx_topblock(a)		Perl_cx_topblock(aTHX_ a)
-#define gimme_V()		Perl_gimme_V(aTHX)
 #endif
 #if defined(DEBUGGING)
 #define pad_setsv(a,b)		Perl_pad_setsv(aTHX_ a,b)

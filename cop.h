@@ -585,7 +585,6 @@ C<*len>.  Upon return, C<*flags> will be set to either C<SVf_UTF8> or 0.
 /* subroutine context */
 struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
-    I32         old_cxsubix;  /* previous value of si_cxsubix */
     /* Above here is the same for sub, format and eval.  */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
@@ -598,7 +597,6 @@ struct block_sub {
 /* format context */
 struct block_format {
     OP *	retop;	/* op to execute on exit from sub */
-    I32         old_cxsubix;  /* previous value of si_cxsubix */
     /* Above here is the same for sub, format and eval.  */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
@@ -665,7 +663,6 @@ struct block_format {
 /* eval context */
 struct block_eval {
     OP *	retop;	/* op to execute on exit from eval */
-    I32         old_cxsubix;  /* previous value of si_cxsubix */
     /* Above here is the same for sub, format and eval.  */
     SV *	old_namesv;
     OP *	old_eval_root;
@@ -1029,7 +1026,6 @@ struct stackinfo {
     struct stackinfo *	si_next;
     I32			si_cxix;	/* current context index */
     I32			si_cxmax;	/* maximum allocated index */
-    I32			si_cxsubix;	/* topmost sub/eval/format */
     I32			si_type;	/* type of runlevel */
     I32			si_markoff;	/* offset where markstack begins for us.
 					 * currently used only with DEBUGGING,
@@ -1076,7 +1072,6 @@ typedef struct stackinfo PERL_SI;
 	}								\
 	next->si_type = type;						\
 	next->si_cxix = -1;						\
-	next->si_cxsubix = -1;						\
         PUSHSTACK_INIT_HWM(next);                                       \
 	AvFILLp(next->si_stack) = 0;					\
 	SWITCHSTACK(PL_curstack,next->si_stack);			\

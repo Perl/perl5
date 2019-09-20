@@ -37,11 +37,6 @@
 #define RUN_PP_CATCHABLY(thispp) \
     STMT_START { if (CATCH_GET) return docatch(thispp); } STMT_END
 
-#define dopopto_cursub() \
-    (PL_curstackinfo->si_cxsubix >= 0        \
-        ? PL_curstackinfo->si_cxsubix        \
-        : dopoptosub_at(cxstack, cxstack_ix))
-
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
 PP(pp_wantarray)
@@ -55,7 +50,7 @@ PP(pp_wantarray)
 	if (!(cx = caller_cx(1,NULL))) RETPUSHUNDEF;
     }
     else {
-      cxix = dopopto_cursub();
+      cxix = dopoptosub(cxstack_ix);
       if (cxix < 0)
 	RETPUSHUNDEF;
       cx = &cxstack[cxix];
@@ -1389,12 +1384,10 @@ Perl_dowantarray(pTHX)
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
-/* note that this function has mostly been superseded by Perl_gimme_V */
-
 U8
 Perl_block_gimme(pTHX)
 {
-    const I32 cxix = dopopto_cursub();
+    const I32 cxix = dopoptosub(cxstack_ix);
     U8 gimme;
     if (cxix < 0)
 	return G_VOID;
@@ -1409,7 +1402,7 @@ Perl_block_gimme(pTHX)
 I32
 Perl_is_lvalue_sub(pTHX)
 {
-    const I32 cxix = dopopto_cursub();
+    const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
     if (CxLVAL(cxstack + cxix) && CvLVALUE(cxstack[cxix].blk_sub.cv))
@@ -1867,7 +1860,7 @@ frame for the sub call itself.
 const PERL_CONTEXT *
 Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
 {
-    I32 cxix = dopopto_cursub();
+    I32 cxix = dopoptosub(cxstack_ix);
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *ccstack = cxstack;
     const PERL_SI *top_si = PL_curstackinfo;
@@ -2469,7 +2462,7 @@ PP(pp_return)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    const I32 cxix = dopopto_cursub();
+    const I32 cxix = dopoptosub(cxstack_ix);
 
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
@@ -2840,7 +2833,7 @@ PP(pp_goto)
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
 
-	    cxix = dopopto_cursub();
+	    cxix = dopoptosub(cxstack_ix);
             if (cxix < 0) {
                 DIE(aTHX_ "Can't goto subroutine outside a subroutine");
             }
