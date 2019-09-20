@@ -740,6 +740,33 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
     return s;
 }
 
+#ifndef PERL_IN_XSUB_RE
+
+/*
+ - regnext - dig the "next" pointer out of a node
+ */
+regnode *
+Perl_regnext(pTHX_ regnode *p)
+{
+    I32 offset;
+
+    if (UNLIKELY(!p))
+	return(NULL);
+
+    if (UNLIKELY(OP(p) > REGNODE_MAX)) {    /* regnode.type is unsigned */
+	Perl_croak(aTHX_ "Corrupted regexp opcode %d > %d",
+                                                (int)OP(p), (int)REGNODE_MAX);
+    }
+
+    offset = (reg_off_by_arg(p)) ? ARG(p) : NEXT_OFF(p);
+    if (UNLIKELY(offset == 0))
+	return(NULL);
+
+    return(p+offset);
+}
+
+#endif
+
 /*
  * pregexec and friends
  */
