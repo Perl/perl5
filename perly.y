@@ -816,9 +816,18 @@ subsigguts:
                                                 sigops);
                             /* a nextstate at the end handles context
                              * correctly for an empty sub body */
-                            $$ = op_append_elem(OP_LINESEQ,
+                            sigops = op_append_elem(OP_LINESEQ,
                                                 sigops,
                                                 newSTATEOP(0, NULL, NULL));
+                            /* wrap the list of arg ops in a NULL aux op.
+                              This serves two purposes. First, it makes
+                              the arg list a separate subtree from the
+                              body of the sub, and secondly the null op
+                              may in future be upgraded to an OP_SIGNATURE
+                              when implemented. For now leave it as
+                              ex-argcheck */
+                            $$ = newUNOP_AUX(OP_ARGCHECK, 0, sigops, NULL);
+                            op_null($$);
 
                             parser->in_my = 0;
                             /* tell the toker that attrributes can follow
