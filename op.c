@@ -16087,8 +16087,17 @@ Perl_rpeep(pTHX_ OP *o)
 	       this optimisation if the first NEXTSTATE has a label.  */
 	    if (!CopLABEL((COP*)o) && !PERLDB_NOOPT) {
 		OP *nextop = o->op_next;
-		while (nextop && nextop->op_type == OP_NULL)
-		    nextop = nextop->op_next;
+		while (nextop) {
+                    switch (nextop->op_type) {
+                        case OP_NULL:
+                        case OP_SCALAR:
+                        case OP_LINESEQ:
+                        case OP_SCOPE:
+                            nextop = nextop->op_next;
+                            continue;
+                    }
+                    break;
+                }
 
 		if (nextop && (nextop->op_type == OP_NEXTSTATE)) {
 		    op_null(o);
