@@ -1326,7 +1326,7 @@ or casts
 /* Returns true if c is in the range l..u, where 'l' is non-negative
  * Written this way so that after optimization, only one conditional test is
  * needed. */
-#define inRANGE(c, l, u) (__ASSERT_((l) >= 0) __ASSERT_((u) >= (l))            \
+#define inRANGE(c, l, u) (__ASSERT_((u) >= (l))                                \
    (  (sizeof(c) == sizeof(U8))  ? withinCOUNT(((U8)  (c)), (l), ((u) - (l)))  \
     : (sizeof(c) == sizeof(U16)) ? withinCOUNT(((U16) (c)), (l), ((u) - (l)))  \
     : (sizeof(c) == sizeof(U32)) ? withinCOUNT(((U32) (c)), (l), ((u) - (l)))  \
