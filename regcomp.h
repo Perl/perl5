@@ -331,7 +331,8 @@ struct regnode_ssc {
 #define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all      \
 					   regnode types.  For some, it's the \
 					   character set of the regnode */
-#define	OPERAND(p)	(((struct regnode_string *)p)->string)
+#define	OPERAND(p)	STRING(p)
+
 #define MASK(p)		((char*)OPERAND(p))
 #define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
 #define	STRING(p)	(((struct regnode_string *)p)->string)
