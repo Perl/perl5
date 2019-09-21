@@ -13925,10 +13925,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 /* This allows us to fill a node with just enough spare so that if the final
  * character folds, its expansion is guaranteed to fit */
-#define MAX_NODE_STRING_SIZE (255-UTF8_MAXBYTES_CASE)
+#define MAX_FOLDED_NODE_STRING_SIZE (255-UTF8_MAXBYTES_CASE)
 
 	    char *s0;
-	    U8 upper_parse = MAX_NODE_STRING_SIZE;
+	    U8 upper_fill = MAX_FOLDED_NODE_STRING_SIZE;
 
             /* We start out as an EXACT node, even if under /i, until we find a
              * character which is in a fold.  The algorithm now segregates into
@@ -13944,7 +13944,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* Assume the node will be fully used; the excess is given back at
              * the end.  We can't make any other length assumptions, as a byte
              * input sequence could shrink down. */
-            Ptrdiff_t initial_size = STR_SZ(256);
+            Ptrdiff_t current_string_nodes = STR_SZ(256);
 
             bool next_is_quantifier;
             char * oldp = NULL;
@@ -13978,7 +13978,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* Allocate an EXACT node.  The node_type may change below to
              * another EXACTish node, but since the size of the node doesn't
              * change, it works */
-            ret = regnode_guts(pRExC_state, node_type, initial_size, "exact");
+            ret = regnode_guts(pRExC_state, node_type, current_string_nodes,
+                                                                    "exact");
             FILL_NODE(ret, node_type);
             RExC_emit++;
 
@@ -14007,7 +14008,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * We quit at the first non-literal or when the node gets full, or
              * under /i the categorization of folding/non-folding character
              * changes */
-            for (p = RExC_parse; len < upper_parse && p < RExC_end; ) {
+            for (p = RExC_parse; len < upper_fill && p < RExC_end; ) {
 
                 /* In most cases each iteration adds one byte to the output.
                  * The exceptions override this */
@@ -14544,17 +14545,17 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * positives, and that would fill the nodes more completely, would
              * be to actually have available all the multi-character folds to
              * test against, and to back-off only far enough to be sure that
-             * this node isn't ending with a partial one.  <upper_parse> is set
+             * this node isn't ending with a partial one.  <upper_fill> is set
              * further below (if we need to reparse the node) to include just
              * up through that final non-problematic character that this code
              * identifies, so when it is set to less than the full node, we can
              * skip the rest of this */
-            if (FOLD && p < RExC_end && upper_parse == MAX_NODE_STRING_SIZE) {
+            if (FOLD && p < RExC_end && upper_fill == MAX_FOLDED_NODE_STRING_SIZE) {
                 PERL_UINT_FAST8_T backup_count = 0;
 
                 const STRLEN full_len = len;
 
-		assert(len >= MAX_NODE_STRING_SIZE);
+		assert(len >= MAX_FOLDED_NODE_STRING_SIZE);
 
                 /* Here, <s> points to just beyond where we have output the
                  * final character of the node.  Look backwards through the
@@ -14675,7 +14676,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * (khw) decided to try this method which doesn't have that
                      * pitfall; if performance issues are found, we can do a
                      * combination of the current approach plus that one */
-                    upper_parse = len;
+                    upper_fill = len;
                     len = 0;
                     s = s0;
                     goto reparse;
@@ -14688,7 +14689,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* Free up any over-allocated space; cast is to silence bogus
              * warning in MS VC */
             change_engine_size(pRExC_state,
-                                - (Ptrdiff_t) (initial_size - STR_SZ(len)));
+                        - (Ptrdiff_t) (current_string_nodes - STR_SZ(len)));
 
             /* I (khw) don't know if you can get here with zero length, but the
              * old code handled this situation by creating a zero-length EXACT
