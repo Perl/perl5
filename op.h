@@ -85,7 +85,7 @@ Deprecated.  Use C<GIMME_V> instead.
 =cut
 */
 
-#define GIMME_V		OP_GIMME(PL_op, block_gimme())
+#define GIMME_V		Perl_gimme_V(aTHX)
 
 /* Public flags */
 
