@@ -626,6 +626,8 @@ will be lost.
                              delta from the base lower 20; the flags
                              field contains the lowest matchable UTF-8
                              start byte
+ ANYOFRb          packed 1   Like ANYOFR, but all matches share the same
+                             UTF-8 start byte, given in the flags field
 
  ANYOFM           byte 1     Like ANYOF, but matches an invariant byte
                              as determined by the mask and arg

@@ -2220,6 +2220,24 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
+    case ANYOFRb:
+        if (utf8_target) {
+
+            /* We know what the first byte of any matched string should be */
+            U8 first_byte = FLAGS(c);
+
+            REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
+                      withinCOUNT(utf8_to_uvchr_buf((U8 *) s,
+                                                    (U8 *) strend,
+                                                    NULL),
+                                  ANYOFRbase(c), ANYOFRdelta(c)));
+        }
+        else {
+            REXEC_FBC_CLASS_SCAN(0, withinCOUNT((U8) *s,
+                                               ANYOFRbase(c), ANYOFRdelta(c)));
+        }
+        break;
+
     case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
 	/* FALLTHROUGH */
@@ -6914,6 +6932,31 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto increment_locinput;
             break;
 
+        case ANYOFRb:
+            if (NEXTCHR_IS_EOS) {
+                sayNO;
+            }
+
+            if (utf8_target) {
+                if (     ANYOF_FLAGS(scan) != (U8) *locinput
+                    || ! withinCOUNT(utf8_to_uvchr_buf((U8 *) locinput,
+                                                (U8 *) reginfo->strend,
+                                                NULL),
+                                     ANYOFRbase(scan), ANYOFRdelta(scan)))
+                {
+                    sayNO;
+                }
+            }
+            else {
+                if (! withinCOUNT((U8) *locinput,
+                                  ANYOFRbase(scan), ANYOFRdelta(scan)))
+                {
+                    sayNO;
+                }
+            }
+            goto increment_locinput;
+            break;
+
         /* The argument (FLAGS) to all the POSIX node types is the class number
          * */
 
@@ -9748,6 +9791,31 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             while (   hardcount < max
                    && scan < this_eol
                    && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
+                   && withinCOUNT(utf8_to_uvchr_buf((U8 *) scan,
+                                                (U8 *) this_eol,
+                                                NULL),
+                                  ANYOFRbase(p), ANYOFRdelta(p)))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+        }
+        else {
+            while (   hardcount < max
+                   && scan < this_eol
+                   && withinCOUNT((U8) *scan, ANYOFRbase(p), ANYOFRdelta(p)))
+            {
+                scan++;
+                hardcount++;
+            }
+        }
+        break;
+
+    case ANYOFRb:
+        if (utf8_target) {
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (U8) *scan == ANYOF_FLAGS(p)
                    && withinCOUNT(utf8_to_uvchr_buf((U8 *) scan,
                                                 (U8 *) this_eol,
                                                 NULL),
