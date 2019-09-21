@@ -1319,8 +1319,11 @@ or casts
 
 /* Returns true if l <= c <= l + n, where 'l' and 'n' are non-negative
  * Written this way so that after optimization, only one conditional test is
- * needed. */
-#define withinCOUNT(c, l, n) (__ASSERT_((l) >= 0) __ASSERT_((n) >= (0))        \
+ * needed.  (The NV casts stop any warnings about comparison always being true
+ * if called with an unsigned.  The cast preserves the sign, which is all we
+ * care about.) */
+#define withinCOUNT(c, l, n) (__ASSERT_((NV) (l) >= 0)                         \
+                              __ASSERT_((NV) (n) >= (0))                       \
    (((WIDEST_UTYPE) (((c) | 0) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0)))))
 
 /* Returns true if c is in the range l..u, where 'l' is non-negative
