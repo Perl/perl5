@@ -14007,7 +14007,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * We quit at the first non-literal or when the node gets full, or
              * under /i the categorization of folding/non-folding character
              * changes */
-	    for (p = RExC_parse; len < upper_parse && p < RExC_end; ) {
+            for (p = RExC_parse; len < upper_parse && p < RExC_end; ) {
 
                 /* In most cases each iteration adds one byte to the output.
                  * The exceptions override this */
@@ -14346,19 +14346,19 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 if (! FOLD) {  /* The simple case, just append the literal */
 
-                      not_fold_common:
-                        if (UVCHR_IS_INVARIANT(ender) || ! UTF) {
-                            *(s++) = (char) ender;
-                        }
-                        else {
-                            U8 * new_s = uvchr_to_utf8((U8*)s, ender);
-                            added_len = (char *) new_s - s;
-                            s = (char *) new_s;
+                  not_fold_common:
+                    if (UVCHR_IS_INVARIANT(ender) || ! UTF) {
+                        *(s++) = (char) ender;
+                    }
+                    else {
+                        U8 * new_s = uvchr_to_utf8((U8*)s, ender);
+                        added_len = (char *) new_s - s;
+                        s = (char *) new_s;
 
-                            if (ender > 255)  {
-                                requires_utf8_target = TRUE;
-                            }
+                        if (ender > 255)  {
+                            requires_utf8_target = TRUE;
                         }
+                    }
                 }
                 else if (LOC && is_PROBLEMATIC_LOCALE_FOLD_cp(ender)) {
 
@@ -14527,7 +14527,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	    } /* End of loop through literal characters */
 
-            /* Here we have either exhausted the input or ran out of room in
+            /* Here we have either exhausted the input or run out of room in
              * the node.  (If we encountered a character that can't be in the
              * node, transfer is made directly to <loopdone>, and so we
              * wouldn't have fallen off the end of the loop.)  In the latter
