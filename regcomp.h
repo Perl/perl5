@@ -338,6 +338,8 @@ struct regnode_ssc {
 #define	STRING(p)	(((struct regnode_string *)p)->string)
 #define STR_SZ(l)	(((l) + sizeof(regnode) - 1) / sizeof(regnode))
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
+#define setSTR_LEN(p,v)                                                     \
+            ((struct regnode_string *)(p))->str_len = (v);
 
 #undef NODE_ALIGN
 #undef ARG_LOC

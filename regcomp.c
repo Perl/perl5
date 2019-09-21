@@ -3551,9 +3551,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     if ( state==1 ) {
                         OP( convert ) = nodetype;
                         str=STRING(convert);
-                        STR_LEN(convert)=0;
+                        setSTR_LEN(convert, 0);
                     }
-                    STR_LEN(convert) += len;
+                    setSTR_LEN(convert, STR_LEN(convert) + len);
                     while (len--)
                         *str++ = *ch++;
 		} else {
@@ -4160,7 +4160,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             merged++;
 
             NEXT_OFF(scan) += NEXT_OFF(n);
-            STR_LEN(scan) += STR_LEN(n);
+            setSTR_LEN(scan, STR_LEN(scan) + STR_LEN(n));
             next = n + NODE_SZ_STR(n);
             /* Now we can overwrite *n : */
             Move(STRING(n), STRING(scan) + oldl, STR_LEN(n), char);
@@ -14760,7 +14760,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
 
                 OP(REGNODE_p(ret)) = node_type;
-                STR_LEN(REGNODE_p(ret)) = len;
+                setSTR_LEN(REGNODE_p(ret), len);
                 RExC_emit += STR_SZ(len);
 
                 /* If the node isn't a single character, it can't be SIMPLE */
@@ -18802,7 +18802,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     ret = regnode_guts(pRExC_state, op, len, "exact");
                     FILL_NODE(ret, op);
                     RExC_emit += 1 + STR_SZ(len);
-                    STR_LEN(REGNODE_p(ret)) = len;
+                    setSTR_LEN(REGNODE_p(ret), len);
                     if (len == 1) {
                         *STRING(REGNODE_p(ret)) = (U8) value;
                     }
