@@ -334,8 +334,15 @@ struct regnode_ssc {
 
 #define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
 #define	STRING(p)	(((struct regnode_string *)p)->string)
+
+/* The number of (smallest) regnode equivalents that a string of length l bytes
+ * occupies */
 #define STR_SZ(l)	(((l) + sizeof(regnode) - 1) / sizeof(regnode))
+
+/* The number of (smallest) regnode equivalents that the EXACTISH node 'p'
+ * occupies */
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
+
 #define setSTR_LEN(p,v)                                                     \
             ((struct regnode_string *)(p))->str_len = (v);
 
@@ -716,6 +723,8 @@ struct regnode_ssc {
 #  define UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
 
+/* Number of regnode equivalents that 'guy' occupies beyond the size of the
+ * smallest regnode. */
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 
 #define REG_ZERO_LEN_SEEN                   0x00000001
