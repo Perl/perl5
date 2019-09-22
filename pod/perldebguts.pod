@@ -663,25 +663,25 @@ will be lost.
  EXACTL           str        Like EXACT, but /l is in effect (used so
                              locale-related warnings can be checked
                              for).
- EXACTF           str        Match this string using /id rules (w/len);
+ EXACTF           str        Like EXACT, but match using /id rules;
                              (string not UTF-8, not guaranteed to be
                              folded).
- EXACTFL          str        Match this string using /il rules (w/len);
-                             (string not guaranteed to be folded).
- EXACTFU          str        Match this string using /iu rules (w/len);
-                             (string folded iff in UTF-8; non-UTF8
-                             folded length <= unfolded).
- EXACTFAA         str        Match this string using /iaa rules (w/len)
-                             (string folded iff in UTF-8; non-UTF8
-                             folded length <= unfolded).
+ EXACTFL          str        Like EXACT, but match using /il rules;
+                             (string not likely to be folded).
+ EXACTFU          str        Like EXACT, but match using /iu rules;
+                             (string folded).
+ EXACTFAA         str        Like EXACT, but match using /iaa rules;
+                             (string folded iff pattern is UTF8; folded
+                             length <= unfolded).
 
- EXACTFUP         str        Match this string using /iu rules (w/len);
+ EXACTFUP         str        Like EXACT, but match using /iu rules;
                              (string not UTF-8, not guaranteed to be
-                             folded; and its Problematic).
+                             folded; and it is Problematic).
 
- EXACTFLU8        str        Like EXACTFU, but use /il, UTF-8, folded,
-                             and everything in it is above 255.
- EXACTFAA_NO_TRIE str        Match this string using /iaa rules (w/len)
+ EXACTFLU8        str        Like EXACTFU, but use /il, UTF-8, (string
+                             is folded, and everything in it is above
+                             255.
+ EXACTFAA_NO_TRIE str        Like EXACT, but match using /iaa rules
                              (string not UTF-8, not guaranteed to be
                              folded, not currently trie-able).
 
