@@ -324,7 +324,6 @@ struct regnode_ssc {
 
 #undef OP
 #undef OPERAND
-#undef MASK
 #undef STRING
 
 #define	OP(p)		((p)->type)
@@ -333,7 +332,6 @@ struct regnode_ssc {
 					   character set of the regnode */
 #define	OPERAND(p)	STRING(p)
 
-#define MASK(p)		((char*)OPERAND(p))
 #define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
 #define	STRING(p)	(((struct regnode_string *)p)->string)
 #define STR_SZ(l)	(((l) + sizeof(regnode) - 1) / sizeof(regnode))
