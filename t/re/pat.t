@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 864;  # Update this when adding/deleting tests.
+plan tests => 960;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1419,6 +1419,55 @@ EOP
     {   # Various flags weren't being set when a [] is optimized into an
         # EXACTish node
         ok("\x{017F}\x{017F}" =~ qr/^[$sharp_s]?$/i, "[] to EXACTish optimization");
+    }
+
+    {   # Test that it avoids spllitting a multi-char fold across nodes
+        my $utf8_locale = find_utf8_ctype_locale();
+        for my $char('F', $sharp_s, "\x{FB00}") {
+            my $length = 260;    # Long enough to overflow an EXACTFish regnode
+            my $p = $char x $length;
+            my $s = ($char eq $sharp_s) ? 'ss' : 'ff';
+            $s = $s x $length;
+            for my $charset (qw(u d l aa)) {
+                for my $utf8 (0..1) {
+                  SKIP:
+                    for my $locale ('C', $utf8_locale) {
+                        skip "test skipped for non-C locales", 2
+                                    if $charset ne 'l'
+                                    && (! defined $locale || $locale ne 'C');
+                        if ($charset eq 'l') {
+                            if (! defined $locale) {
+                                skip "No UTF-8 locale", 2;
+                            }
+
+                            use POSIX;
+                            POSIX::setlocale(&LC_CTYPE, $locale);
+                        }
+
+                        my $pat = $p;
+                        utf8::upgrade($pat) if $utf8;
+                        my $should_pass =
+                            (    $charset eq 'u'
+                             || ($charset eq 'd' && $utf8)
+                             || ($charset eq 'd' && (   $char =~ /[[:ascii:]]/
+                                                     || ord $char > 255))
+                             || ($charset eq 'aa' && $char =~ /[[:ascii:]]/)
+                             || ($charset eq 'l' && $locale ne 'C')
+                             || ($charset eq 'l' && $char =~ /[[:ascii:]]/)
+                            );
+                        my $name = "(?i$charset), utf8=$utf8, locale=$locale,"
+                                 . " char=" . sprintf "%x", ord $char;
+                        no warnings 'locale';
+                        is (eval " '$s' =~ qr/(?i$charset)$pat/;",
+                            $should_pass, $name);
+                        fail "$name: $@" if $@;
+                        is (eval " 'a$s' =~ qr/(?i$charset)a$pat/;",
+                            $should_pass, "extra a, $name");
+                        fail "$name: $@" if $@;
+                    }
+                }
+            }
+        }
     }
 
     {
