@@ -2962,6 +2962,9 @@ PP(pp_goto)
                  * this is a cx_popblock(), less all the stuff we already did
                  * for cx_topblock() earlier */
                 PL_curcop = cx->blk_oldcop;
+                /* this is cx_popsub, less all the stuff we already did */
+                PL_curstackinfo->si_cxsubix = cx->blk_sub.old_cxsubix;
+
                 CX_POP(cx);
 
 		/* Push a mark for the start of arglist */
