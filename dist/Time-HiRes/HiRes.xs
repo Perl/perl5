@@ -139,6 +139,14 @@ typedef struct {
     unsigned __int64 reset_time;
 } my_cxt_t;
 
+/* Visual C++ 2013 and older don't have the timespec structure */
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+struct timespec {
+    time_t tv_sec;
+    long   tv_nsec;
+};
+#  endif
+
 START_MY_CXT
 
 /* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
