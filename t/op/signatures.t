@@ -1126,10 +1126,10 @@ syntax error at foo line 8, near "\$\$) "
 EOF
 
 eval "#line 8 foo\nsub t101 (\@_) { }";
-like $@, qr/\ACan't use global \@_ in "my" at foo line 8/;
+like $@, qr/\ACan't use global \@_ in subroutine signature at foo line 8/;
 
 eval "#line 8 foo\nsub t102 (\%_) { }";
-like $@, qr/\ACan't use global \%_ in "my" at foo line 8/;
+like $@, qr/\ACan't use global \%_ in subroutine signature at foo line 8/;
 
 my $t103 = sub ($a) { $a || "z" };
 is prototype($t103), undef;
@@ -1575,6 +1575,19 @@ while(<$kh>) {
     like $warn[3], qr/line 8,/, 'multiline1: $e';
 }
 
+# check errors for using global vars as params
+
+{
+    eval q{ sub ($_) {} };
+    like $@, qr/Can't use global \$_ in subroutine signature/, 'f($_)';
+    eval q{ sub (@_) {} };
+    like $@, qr/Can't use global \@_ in subroutine signature/, 'f(@_)';
+    eval q{ sub (%_) {} };
+    like $@, qr/Can't use global \%_ in subroutine signature/, 'f(%_)';
+    eval q{ sub ($1) {} };
+    like $@, qr/Illegal operator following parameter in a subroutine signature/,
+            'f($1)';
+}
 
 done_testing;
 

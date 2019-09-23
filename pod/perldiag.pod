@@ -1499,7 +1499,7 @@ it's loaded, etc.
 
 (P) The parser got confused when trying to parse a C<foreach> loop.
 
-=item Can't use global %s in "%s"
+=item Can't use global %s in %s
 
 (F) You tried to declare a magical variable as a lexical variable.  This
 is not allowed, because the magic can be tied to only one location
