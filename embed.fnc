@@ -3517,6 +3517,7 @@ Apx	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
                 |U8 gimme|int filter
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
+Aixp	|U8	|gimme_V         |
 Aixp	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
 Aixp	|void	|cx_popblock|NN PERL_CONTEXT *cx
 Aixp	|void	|cx_topblock|NN PERL_CONTEXT *cx
