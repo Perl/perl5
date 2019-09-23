@@ -1061,10 +1061,17 @@ static OP *THX_parse_keyword_subsignature(pTHX)
 
     /* We can't yield the optree as is to the caller because it won't be
      * executable outside of a called sub. We'll have to convert it into
-     * something safe for them to invoke
-     * sigop should be a OP_LINESEQ containing OP_NEXTSTATE-separated
-     * OP_ARGCHECK and OP_ARGELEMs
+     * something safe for them to invoke.
+     * sigop should be an OP_NULL above a OP_LINESEQ containing
+     * OP_NEXTSTATE-separated OP_ARGCHECK and OP_ARGELEMs
      */
+    if(sigop->op_type != OP_NULL)
+	croak("Expected parse_subsignature() to yield an OP_NULL");
+    
+    if(!(sigop->op_flags & OPf_KIDS))
+	croak("Expected parse_subsignature() to yield an OP_NULL with kids");
+    sigop = cUNOPx(sigop)->op_first;
+
     if(sigop->op_type != OP_LINESEQ)
 	croak("Expected parse_subsignature() to yield an OP_LINESEQ");
 

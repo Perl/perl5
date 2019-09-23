@@ -700,16 +700,22 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
                 && isIDFIRST_utf8_safe((U8 *)name+1, name + len))
             || (name[1] == '_' && len > 2)))
     {
+        const char * const type =
+              PL_parser->in_my == KEY_sigvar ? "subroutine signature" :
+              PL_parser->in_my == KEY_state  ? "\"state\""     : "\"my\"";
+
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
 	 && isASCII(name[1])
 	 && (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1]))) {
-	    /* diag_listed_as: Can't use global %s in "%s" */
-	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in \"%s\"",
-			      name[0], toCTRL(name[1]), (int)(len - 2), name + 2,
-			      PL_parser->in_my == KEY_state ? "state" : "my"));
+	    /* diag_listed_as: Can't use global %s in %s */
+	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in %s",
+			      name[0], toCTRL(name[1]),
+                              (int)(len - 2), name + 2,
+			      type));
 	} else {
-	    yyerror_pv(Perl_form(aTHX_ "Can't use global %.*s in \"%s\"", (int) len, name,
-			      PL_parser->in_my == KEY_state ? "state" : "my"), flags & SVf_UTF8);
+	    yyerror_pv(Perl_form(aTHX_ "Can't use global %.*s in %s",
+                              (int) len, name,
+			      type), flags & SVf_UTF8);
 	}
     }
 
@@ -16087,8 +16093,17 @@ Perl_rpeep(pTHX_ OP *o)
 	       this optimisation if the first NEXTSTATE has a label.  */
 	    if (!CopLABEL((COP*)o) && !PERLDB_NOOPT) {
 		OP *nextop = o->op_next;
-		while (nextop && nextop->op_type == OP_NULL)
-		    nextop = nextop->op_next;
+		while (nextop) {
+                    switch (nextop->op_type) {
+                        case OP_NULL:
+                        case OP_SCALAR:
+                        case OP_LINESEQ:
+                        case OP_SCOPE:
+                            nextop = nextop->op_next;
+                            continue;
+                    }
+                    break;
+                }
 
 		if (nextop && (nextop->op_type == OP_NEXTSTATE)) {
 		    op_null(o);

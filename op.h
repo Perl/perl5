@@ -1113,6 +1113,14 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
       "Perl 5.32"
 #endif
 
+/* stuff for OP_ARGCHECK */
+
+struct  op_argcheck_aux {
+    UV   params;     /* number of positional parameters */
+    UV   opt_params; /* number of optional positional parameters */
+    char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
+};
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

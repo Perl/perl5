@@ -790,7 +790,7 @@ subsigguts:
                 siglistornull
 			{
                             OP            *sigops = $2;
-                            UNOP_AUX_item *aux;
+                            struct op_argcheck_aux *aux;
                             OP            *check;
 
 			    if (!FEATURE_SIGNATURES_IS_ENABLED)
@@ -802,21 +802,32 @@ subsigguts:
                                 packWARN(WARN_EXPERIMENTAL__SIGNATURES),
                                 "The signatures feature is experimental");
 
-                            aux = (UNOP_AUX_item*)PerlMemShared_malloc(
-                                sizeof(UNOP_AUX_item) * 3);
-                            aux[0].iv = parser->sig_elems;
-                            aux[1].iv = parser->sig_optelems;
-                            aux[2].iv = parser->sig_slurpy;
-                            check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
+                            aux = (struct op_argcheck_aux*)
+                                    PerlMemShared_malloc(
+                                        sizeof(struct op_argcheck_aux));
+                            aux->params     = parser->sig_elems;
+                            aux->opt_params = parser->sig_optelems;
+                            aux->slurpy     = parser->sig_slurpy;
+                            check = newUNOP_AUX(OP_ARGCHECK, 0, NULL,
+                                            (UNOP_AUX_item *)aux);
                             sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
                             sigops = op_prepend_elem(OP_LINESEQ,
                                                 newSTATEOP(0, NULL, NULL),
                                                 sigops);
                             /* a nextstate at the end handles context
                              * correctly for an empty sub body */
-                            $$ = op_append_elem(OP_LINESEQ,
+                            sigops = op_append_elem(OP_LINESEQ,
                                                 sigops,
                                                 newSTATEOP(0, NULL, NULL));
+                            /* wrap the list of arg ops in a NULL aux op.
+                              This serves two purposes. First, it makes
+                              the arg list a separate subtree from the
+                              body of the sub, and secondly the null op
+                              may in future be upgraded to an OP_SIGNATURE
+                              when implemented. For now leave it as
+                              ex-argcheck */
+                            $$ = newUNOP_AUX(OP_ARGCHECK, 0, sigops, NULL);
+                            op_null($$);
 
                             parser->in_my = 0;
                             /* tell the toker that attrributes can follow
