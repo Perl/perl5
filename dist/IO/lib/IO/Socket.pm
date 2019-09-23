@@ -82,7 +82,12 @@ sub socket {
 
     ${*$sock}{'io_socket_domain'} = $domain;
     ${*$sock}{'io_socket_type'}   = $type;
-    ${*$sock}{'io_socket_proto'}  = $protocol;
+
+    # "A value of 0 for protocol will let the system select an
+    # appropriate protocol"
+    # so we need to look up what the system selected,
+    # not cache PF_UNSPEC.
+    ${*$sock}{'io_socket_proto'} = $protocol if $protocol;
 
     $sock;
 }
