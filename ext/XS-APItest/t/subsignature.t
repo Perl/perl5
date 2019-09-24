@@ -18,7 +18,6 @@ eval q{
 	push @t, (subsignature $one = 1);
 };
 is $@, "";
-use Data::Dumper; print Dumper \@t;
 is_deeply \@t, [
 	['nextstate:4', 'argcheck:2:0:-', 'argelem:$x', 'argelem:$y'],
 	['nextstate:5', 'argcheck:2:0:-', 'argelem:$z',],
