@@ -660,6 +660,11 @@ will be lost.
 
  EXACT            str        Match this string (flags field is the
                              length).
+
+ # In a long string node, the U32 argument is the length, and is
+ # immediately followed by the string.
+ LEXACT           len:str 1  Match this long string (preceded by length;
+                             flags unused).
  EXACTL           str        Like EXACT, but /l is in effect (used so
                              locale-related warnings can be checked
                              for).

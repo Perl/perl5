@@ -117,6 +117,10 @@ BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 # NOTE: the relative ordering of these types is important do not change it
 
 EXACT       EXACT,      str       ; Match this string (flags field is the length).
+
+#* In a long string node, the U32 argument is the length, and is
+#* immediately followed by the string.
+LEXACT      EXACT,  len:str 1; Match this long string (preceded by length; flags unused).
 EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect (used so locale-related warnings can be checked for).
 EXACTF      EXACT,      str       ; Like EXACT, but match using /id rules; (string not UTF-8, not guaranteed to be folded).
 EXACTFL     EXACT,      str       ; Like EXACT, but match using /il rules; (string not likely to be folded).

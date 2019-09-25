@@ -2298,8 +2298,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * first character.  c2 is its fold.  This logic will not work for
          * Unicode semantics and the german sharp ss, which hence should
          * not be compiled into a node that gets here. */
-        pat_string = STRING(c);
-        ln  = STR_LEN(c);	/* length to match in octets/bytes */
+        pat_string = STRINGs(c);
+        ln  = STR_LENs(c);	/* length to match in octets/bytes */
 
         /* We know that we have to match at least 'ln' bytes (which is the
          * same as characters, since not utf8).  If we have to match 3
@@ -2374,8 +2374,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* If one of the operands is in utf8, we can't use the simpler folding
          * above, due to the fact that many different characters can have the
          * same fold, or portion of a fold, or different- length fold */
-        pat_string = STRING(c);
-        ln  = STR_LEN(c);	/* length to match in octets/bytes */
+        pat_string = STRINGs(c);
+        ln  = STR_LENs(c);	/* length to match in octets/bytes */
         pat_end = pat_string + ln;
         lnc = is_utf8_pat       /* length to match in characters */
                 ? utf8_length((U8 *) pat_string, (U8 *) pat_end)
@@ -4262,7 +4262,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         }
     }
     else { /* an EXACTFish node */
-        U8 *pat_end = pat + STR_LEN(text_node);
+        U8 *pat_end = pat + STR_LENs(text_node);
 
         /* An EXACTFL node has at least some characters unfolded, because what
          * they match is not known until now.  So, now is the time to fold
@@ -6274,6 +6274,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         }
 #undef  ST
 
+        {
+	    char *s;
+
 	case EXACTL:             /*  /abc/l       */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
@@ -6292,11 +6295,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sayNO;
             }
             /* FALLTHROUGH */
-	case EXACT: {            /*  /abc/        */
-	    char *s;
+
+	case EXACT:             /*  /abc/        */
           do_exact:
-	    s = STRING(scan);
-	    ln = STR_LEN(scan);
+	    s = STRINGs(scan);
+	    ln = STR_LENs(scan);
 	    if (utf8_target != is_utf8_pat) {
 		/* The target and the pattern have differing utf8ness. */
 		char *l = locinput;
@@ -6448,8 +6451,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_utf8_flags = 0;
 
 	  do_exactf:
-	    s = STRING(scan);
-	    ln = STR_LEN(scan);
+	    s = STRINGs(scan);
+	    ln = STR_LENs(scan);
 
 	    if (   utf8_target
                 || is_utf8_pat
@@ -9363,6 +9366,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	else
 	    scan = this_eol;
 	break;
+
+      {
+        U8 * string;
+        Size_t str_len;
+
     case EXACTL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (utf8_target && UTF8_IS_ABOVE_LATIN1(*scan)) {
@@ -9377,9 +9385,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
     case EXACT:
       do_exact:
-        assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
+	string = (U8 *) STRINGs(p);
+        str_len = STR_LENs(p);
+        assert(str_len == reginfo->is_utf8_pat ? UTF8SKIP(string) : 1);
 
-	c = (U8)*STRING(p);
+	c = *string;
 
         /* Can use a simple find if the pattern char to match on is invariant
          * under UTF-8, or both target and pattern aren't UTF-8.  Note that we
@@ -9401,8 +9411,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                  * string EQ */
                 while (hardcount < max
                        && scan < this_eol
-                       && (scan_char_len = UTF8SKIP(scan)) <= STR_LEN(p)
-                       && memEQ(scan, STRING(p), scan_char_len))
+                       && (scan_char_len = UTF8SKIP(scan)) <= str_len
+                       && memEQ(scan, string, scan_char_len))
                 {
                     scan += scan_char_len;
                     hardcount++;
@@ -9412,7 +9422,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
                 /* Target isn't utf8; convert the character in the UTF-8
                  * pattern to non-UTF8, and do a simple find */
-                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *(STRING(p) + 1));
+                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *(string + 1));
                 scan = (char *) find_span_end((U8 *) scan, (U8 *) this_eol, (U8) c);
             } /* else pattern char is above Latin1, can't possibly match the
                  non-UTF-8 target */
@@ -9436,6 +9446,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	    }
 	}
 	break;
+      }
 
     case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
         assert(! reginfo->is_utf8_pat);
@@ -9486,7 +9497,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         int c1, c2;
         U8 c1_utf8[UTF8_MAXBYTES+1], c2_utf8[UTF8_MAXBYTES+1];
 
-        assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
+        assert(STR_LENs(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRINGs(p)) : 1);
 
         if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8,
                                         reginfo))
@@ -9494,10 +9505,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             if (c1 == CHRTEST_VOID) {
                 /* Use full Unicode fold matching */
                 char *tmpeol = loceol;
-                STRLEN pat_len = reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1;
+                STRLEN pat_len = reginfo->is_utf8_pat ? UTF8SKIP(STRINGs(p)) : 1;
                 while (hardcount < max
                         && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
-                                             STRING(p), NULL, pat_len,
+                                             STRINGs(p), NULL, pat_len,
                                              reginfo->is_utf8_pat, utf8_flags))
                 {
                     scan = tmpeol;
