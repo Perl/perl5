@@ -124,12 +124,12 @@ SKIP: {
 }
 
 # try to open a syslog using all the available connection methods
-# handle inet and udp in a separate test file
+# handle other connections in t/syslog.t
 
 my @passed = ();
 
-BEGIN { $tests += 22 * 6 }
-for my $sock_type (qw(native eventlog unix pipe stream tcp )) {
+BEGIN { $tests += 22 * 2 }
+for my $sock_type (qw(inet udp)) {
     SKIP: {
         skip "the 'stream' mechanism because a previous mechanism with similar interface succeeded", 22 
             if $sock_type eq 'stream' and grep {/pipe|unix/} @passed;
@@ -201,125 +201,5 @@ for my $sock_type (qw(native eventlog unix pipe stream tcp )) {
     }
 }
 
-BEGIN { $tests += 10 }
-SKIP: {
-    skip "not testing setlogsock('stream') on Win32", 10 if $is_Win32;
-    skip "the 'unix' mechanism works, so the tests will likely fail with the 'stream' mechanism", 10 
-        if grep {/unix/} @passed;
 
-    skip "not testing setlogsock('stream'): _PATH_LOG unavailable", 10
-        unless -e Sys::Syslog::_PATH_LOG();
-
-    # setlogsock() with "stream" and an undef path
-    $r = eval { setlogsock("stream", undef ) } || '';
-    is( $@, '', "setlogsock() called, with 'stream' and an undef path" );
-    if ($is_Cygwin) {
-        if (-x "/usr/sbin/syslog-ng") {
-            ok( $r, "setlogsock() on Cygwin with syslog-ng should return true: '$r'" );
-        }
-        else {
-            ok( !$r, "setlogsock() on Cygwin without syslog-ng should return false: '$r'" );
-        }
-    }
-    else  {
-        ok( $r, "setlogsock() should return true: '$r'" );
-    }
-
-    # setlogsock() with "stream" and an empty path
-    $r = eval { setlogsock("stream", '' ) } || '';
-    is( $@, '', "setlogsock() called, with 'stream' and an empty path" );
-    ok( !$r, "setlogsock() should return false: '$r'" );
-
-    # setlogsock() with "stream" and /dev/null
-    $r = eval { setlogsock("stream", '/dev/null' ) } || '';
-    is( $@, '', "setlogsock() called, with 'stream' and '/dev/null'" );
-    ok( $r, "setlogsock() should return true: '$r'" );
-
-    # setlogsock() with "stream" and a non-existing file
-    $r = eval { setlogsock("stream", 'test.log' ) } || '';
-    is( $@, '', "setlogsock() called, with 'stream' and 'test.log' (file does not exist)" );
-    ok( !$r, "setlogsock() should return false: '$r'" );
-
-    # setlogsock() with "stream" and a local file
-    SKIP: {
-        my $logfile = "test.log";
-        my $fh = FileHandle->new;
-        open $fh, ">$logfile" or skip "can't create file '$logfile': $!", 2;
-        close $fh;
-        $r = eval { setlogsock("stream", $logfile ) } || '';
-        is( $@, '', "setlogsock() called, with 'stream' and '$logfile' (file exists)" );
-        ok( $r, "setlogsock() should return true: '$r'" );
-        unlink($logfile);
-    }
-}
-
-
-BEGIN { $tests += 3 + 4 * 3 }
-# setlogmask()
-{
-    my $oldmask = 0;
-
-    $oldmask = eval { setlogmask(0) } || 0;
-    is( $@, '', "setlogmask() called with a null mask" );
-    $r = eval { setlogmask(0) } || 0;
-    is( $@, '', "setlogmask() called with a null mask (second time)" );
-    is( $r, $oldmask, "setlogmask() must return the same mask as previous call");
-
-    my @masks = (
-        LOG_MASK(LOG_ERR()), 
-        ~LOG_MASK(LOG_INFO()), 
-        LOG_MASK(LOG_CRIT()) | LOG_MASK(LOG_ERR()) | LOG_MASK(LOG_WARNING()), 
-    );
-
-    for my $newmask (@masks) {
-        $r = eval { setlogmask($newmask) } || 0;
-        is( $@, '', "setlogmask() called with a new mask" );
-        is( $r, $oldmask, "setlogmask() must return the same mask as previous call");
-        $r = eval { setlogmask(0) } || 0;
-        is( $@, '', "setlogmask() called with a null mask" );
-        is( $r, $newmask, "setlogmask() must return the new mask");
-        setlogmask($oldmask);
-    }
-}
-
-BEGIN { $tests += 4 }
-SKIP: {
-    # case: test the return value of setlogsock()
-
-    # setlogsock("stream") on a non-existent file must fail
-    eval { $r = setlogsock("stream", "plonk/log") };
-    is( $@, '', "setlogsock() didn't croak");
-    ok( !$r, "setlogsock() correctly failed with a non-existent stream path");
-
-    # setlogsock("tcp") must fail if the service is not declared
-    my $service = getservbyname("syslog", "tcp") || getservbyname("syslogng", "tcp");
-    skip "can't test setlogsock() tcp failure", 2 if $service;
-    eval { $r = setlogsock("tcp") };
-    is( $@, '', "setlogsock() didn't croak");
-    ok( !$r, "setlogsock() correctly failed when tcp services can't be resolved");
-}
-
-BEGIN { $tests += 3 }
-SKIP: {
-    # case: configure Sys::Syslog to use the stream mechanism on a
-    #       given file, but remove the file before openlog() is called,
-    #       so it fails.
-
-    # create the log file
-    my $log = "t/stream";
-    my $fh = FileHandle->new;
-    open $fh, ">$log" or skip "can't write file '$log': $!", 3;
-    close $fh;
-
-    # configure Sys::Syslog to use it
-    $r = eval { setlogsock("stream", $log) };
-    is( $@, "", "setlogsock('stream', '$log') -> $r" );
-    skip "can't test openlog() failure with a missing stream", 2 if !$r;
-
-    # remove the log and check that openlog() fails
-    unlink $log;
-    $r = eval { openlog('perl', 'ndelay', 'local0') };
-    ok( !$r, "openlog() correctly failed with a non-existent stream" );
-    like( $@, '/not writable/', "openlog() correctly croaked with a non-existent stream" );
-}
 
