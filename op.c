@@ -316,6 +316,10 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	    if (o) { DEBUG_S_warn((aTHX_ "found another free op at %p", (void*)o)); }
 	}
 	if (o) {
+            DEBUG_S_warn((aTHX_ "realloced  op at %p, slab %p, head slab %p",
+                (void*)o,
+                (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
+                (void*)head_slab));
 	    *too = o->op_next;
 	    Zero(o, opsz, I32 *);
 	    o->op_slabbed = 1;
