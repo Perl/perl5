@@ -1055,7 +1055,7 @@ static OP *THX_parse_keyword_arrayexprflags(pTHX)
 #define parse_keyword_subsignature() THX_parse_keyword_subsignature(aTHX)
 static OP *THX_parse_keyword_subsignature(pTHX)
 {
-    OP *retop = NULL, *sigop = parse_subsignature(0);
+    OP *retop = NULL, *listop, *sigop = parse_subsignature(0);
     OP *kid;
     int seen_nextstate = 0;
 
@@ -1070,12 +1070,12 @@ static OP *THX_parse_keyword_subsignature(pTHX)
     
     if(!(sigop->op_flags & OPf_KIDS))
 	croak("Expected parse_subsignature() to yield an OP_NULL with kids");
-    sigop = cUNOPx(sigop)->op_first;
+    listop = cUNOPx(sigop)->op_first;
 
-    if(sigop->op_type != OP_LINESEQ)
+    if(listop->op_type != OP_LINESEQ)
 	croak("Expected parse_subsignature() to yield an OP_LINESEQ");
 
-    for(kid = cLISTOPx(sigop)->op_first; kid; kid = OpSIBLING(kid)) {
+    for(kid = cLISTOPx(listop)->op_first; kid; kid = OpSIBLING(kid)) {
 	switch(kid->op_type) {
 	    case OP_NEXTSTATE:
 		/* Only emit the first one otherwise they get boring */
