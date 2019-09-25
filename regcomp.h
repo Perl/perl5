@@ -156,6 +156,14 @@ struct regnode_string {
     char string[1];
 };
 
+struct regnode_lstring { /* Constructed this way to keep the string aligned. */
+    U8	flags;
+    U8  type;
+    U16 next_off;
+    U32 str_len;    /* Only 16 bits allowed before would overflow 'next_off' */
+    char string[1];
+};
+
 /* Argument bearing node - workhorse, 
    arg1 is often for the data field */
 struct regnode_1 {
@@ -330,10 +338,29 @@ struct regnode_ssc {
 #define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all      \
 					   regnode types.  For some, it's the \
 					   character set of the regnode */
-#define	OPERAND(p)	STRING(p)
+#define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT) ((struct regnode_string *)p)->str_len)
+#define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT) ((struct regnode_string *)p)->string)
+#define	OPERANDs(p)	STRINGs(p)
 
-#define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
-#define	STRING(p)	(((struct regnode_string *)p)->string)
+/* Long strings.  Currently limited to length 18 bits, which handles a 262000
+ * byte string.  The limiting factor is the 16 bit 'next_off' field, which
+ * points to the next regnode, so the furthest away it can be is 2**16.  On
+ * most architectures, regnodes are 2**2 bytes long, so that yields 2**18
+ * bytes.  Should a longer string be desired, we could increase it to 26 bits
+ * fairly easily, by changing this node to have longj type which causes the ARG
+ * field to be used for the link to the next regnode (although code would have
+ * to be changed to account for this), and then use a combination of the flags
+ * and next_off fields for the length.  To get 34 bit length, also change the
+ * node to be an ARG2L, using the second 32 bit field for the length, and not
+ * using the flags nor next_off fields at all.  One could have an llstring node
+ * and even an lllstring type. */
+#define	STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT) (((struct regnode_lstring *)p)->str_len))
+#define	STRINGl(p)	(__ASSERT_(OP(p) == LEXACT) (((struct regnode_lstring *)p)->string))
+#define	OPERANDl(p)	STRINGl(p)
+
+#define	STR_LEN(p)	((OP(p) == LEXACT) ? STR_LENl(p) : STR_LENs(p))
+#define	STRING(p)	((OP(p) == LEXACT) ? STRINGl(p)  : STRINGs(p))
+#define	OPERAND(p)	STRING(p)
 
 /* The number of (smallest) regnode equivalents that a string of length l bytes
  * occupies */
@@ -341,10 +368,15 @@ struct regnode_ssc {
 
 /* The number of (smallest) regnode equivalents that the EXACTISH node 'p'
  * occupies */
-#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
+#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + regarglen[(p)->type])
 
 #define setSTR_LEN(p,v)                                                     \
-            ((struct regnode_string *)(p))->str_len = (v);
+    STMT_START{                                                             \
+        if (OP(p) == LEXACT)                                                \
+            ((struct regnode_lstring *)(p))->str_len = (v);                 \
+        else                                                                \
+            ((struct regnode_string *)(p))->str_len = (v);                  \
+    } STMT_END
 
 #undef NODE_ALIGN
 #undef ARG_LOC
