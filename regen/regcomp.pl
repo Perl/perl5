@@ -124,10 +124,10 @@ sub parse_opcode_def {
         or die "Failed to match $_";
 
     # the content of the "desc" field from the first step is extracted here:
-    @{$node}{qw(type code args flags longj)}= split /[,\s]\s*/, $node->{desc};
+    @{$node}{qw(type code suffix flags longj)}= split /[,\s]\s*/, $node->{desc};
 
     defined $node->{$_} or $node->{$_} = ""
-        for qw(type code args flags longj);
+        for qw(type code suffix flags longj);
 
     register_node($node); # has to be before the type_alias code below
 
@@ -363,7 +363,7 @@ EOP
 
     foreach my $node (@ops) {
         my $size= 0;
-        $size= "EXTRA_SIZE(struct regnode_$node->{args})" if $node->{args};
+        $size= "EXTRA_SIZE(struct regnode_$node->{suffix})" if $node->{suffix};
 
         printf $out "\t%*s\t/* %*s */\n", -37, "$size,", -$rwidth, $node->{name};
     }
@@ -634,7 +634,7 @@ EOD
 END_OF_DESCR
     for my $n (@ops) {
         $node= $n;
-        $code= "$node->{code} " . ( $node->{args} || "" );
+        $code= "$node->{code} " . ( $node->{suffix} || "" );
         $code .= " $node->{longj}" if $node->{longj};
         if ( $node->{pod_comment} ||= "" ) {
 
