@@ -49,14 +49,17 @@ use strict;
 # name          Both    Name of op/state
 # id            Both    integer value for this opcode/state
 # optype        Both    Either 'op' or 'state'
-# line_num          Both    line_num number of the input file for this item.
+# line_num      Both    line_num number of the input file for this item.
 # type          Op      Type of node (aka regkind)
-# code          Op      what code is associated with this node (???)
-# args          Op      what type of args the node has (which regnode struct)
-# flags         Op      (???)
+# code          Op      Apparently not used
+# suffix        Op      which regnode struct this uses, so if this is '1', it
+#                       uses 'struct regnode_1'
+# flags         Op      S for simple; V for varies
 # longj         Op      Boolean as to if this node is a longjump
-# comment       Both    Comment about node, if any
+# comment       Both    Comment about node, if any.  Placed in perlredebguts
+#                       as its description
 # pod_comment   Both    Special comments for pod output (preceding lines in def)
+#                       Such lines begin with '#*'
 
 # Global State
 my @all;    # all opcodes/state
@@ -97,22 +100,14 @@ sub register_node {
 }
 
 # Parse and add an opcode definition to the global state.
-# An opcode definition looks like this:
+# What an opcode definition looks like is given in regcomp.sym.
 #
-#                             +- args
-#                             | +- flags
-#                             | | +- longjmp
-# Name        Type       code | | | ; comment
-# --------------------------------------------------------------------------
-# IFMATCH     BRANCHJ,    off 1 . 2 ; Succeeds if the following matches.
-# UNLESSM     BRANCHJ,    off 1 . 2 ; Fails if the following matches.
-# SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
-# IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
-# GROUPP      GROUPP,     num 1     ; Whether the group matched.
-#
-# Not every opcode definition has all of these. We should maybe make this
-# nicer/easier to read in the future. Also note that the above is tab
+# Not every opcode definition has all of the components. We should maybe make
+# this nicer/easier to read in the future. Also note that the above is tab
 # sensitive.
+
+# Special comments for an entry precede it, and begin with '#*' and are placed
+# in the generated pod file just before the entry.
 
 sub parse_opcode_def {
     my ( $text, $line_num, $pod_comment )= @_;
@@ -635,7 +630,7 @@ EOD
 
     print <<'END_OF_DESCR';
 
- # TYPE arg-description [num-args] [longjump-len] DESCRIPTION
+ # TYPE arg-description [regnode-struct-suffix] [longjump-len] DESCRIPTION
 END_OF_DESCR
     for my $n (@ops) {
         $node= $n;

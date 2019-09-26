@@ -562,7 +562,7 @@ will be lost.
 
 =for regcomp.pl begin
 
- # TYPE arg-description [num-args] [longjump-len] DESCRIPTION
+ # TYPE arg-description [regnode-struct-suffix] [longjump-len] DESCRIPTION
 
  # Exit points
 

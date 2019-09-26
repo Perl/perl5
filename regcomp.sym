@@ -11,14 +11,29 @@
 # Note that the order in this file is important.
 #
 # Format for first section: 
-# NAME \s+ TYPE, arg-description [num-args] [flags] [longjump] ; DESCRIPTION
+# NAME \s+ TYPE, arg-description [struct regnode suffix] [flags] [longjump] ; DESCRIPTION
+#   arg-description is currently unused
+#   suffix is appended to 'struct_regnode_' giving which one to use.  If empty,
+#       it means plain 'struct regnode'.  If the regnode is a string one, this
+#       should instead refer to the base regnode, without the char[1] element
+#       of the structure
 #   flag <S> means is REGNODE_SIMPLE; flag <V> means is REGNODE_VARIES; <.> is
-#   a placeholder
-#   longjump is 1 if the (first) argument holds the next offset.
-#
+#       a placeholder
+#   longjump is 1 if the (first) argument holds the next offset (instead of the
+#       usual 'next_offset' field
 #
 # run perl regen.pl after editing this file
 
+#                             +- suffix of which struct regnode to use e.g.,
+#                             | +- flags  (S or V)               struct regnode_1
+#                         un- | | +- longjmp (0, blank, or 1)  blank means 0
+# Name        Type       used | | | ; comment
+# --------------------------------------------------------------------------
+# IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches.
+# UNLESSM     BRANCHJ,    off 1 . 1 ; Fails if the following matches.
+# SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
+# IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
+# GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
 
 #* Exit points
