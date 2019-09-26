@@ -7584,6 +7584,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         && memEQ(RX_PRECOMP(old_re), exp, plen)
 	&& !runtime_code /* with runtime code, always recompile */ )
     {
+        DEBUG_COMPILE_r({
+            SV *dsv= sv_newmortal();
+            RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, PL_dump_re_max_len);
+            Perl_re_printf( aTHX_  "%sSkipping recompilation of unchanged REx%s %s\n",
+                          PL_colors[4], PL_colors[5], s);
+        });
         return old_re;
     }
 
