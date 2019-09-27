@@ -41,9 +41,9 @@ sub generate_tests
       print "generating $testfile\n";
 
       my $tmpl = $template;
-      # ensure we get the same result on Win32
-      (my $source = $file) =~ s(\\)(/)g;
-      $tmpl =~ s/__SOURCE__/$source/mg;
+      my $canonfile = $file;
+      $canonfile =~ tr!\\!/!; # MSWin32 use backslashes
+      $tmpl =~ s/__SOURCE__/$canonfile/mg;
       $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
       $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
 
