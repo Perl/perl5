@@ -4237,6 +4237,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
 
     if (   OP(text_node) == EXACT
+        || OP(text_node) == LEXACT
         || OP(text_node) == EXACT_ONLY8
         || OP(text_node) == EXACTL)
     {
@@ -6274,8 +6275,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         }
 #undef  ST
 
+	case LEXACT:
         {
 	    char *s;
+
+	    s = STRINGl(scan);
+	    ln = STR_LENl(scan);
+            goto join_short_long_exact;
 
 	case EXACTL:             /*  /abc/l       */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
@@ -6300,6 +6306,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
           do_exact:
 	    s = STRINGs(scan);
 	    ln = STR_LENs(scan);
+
+          join_short_long_exact:
 	    if (utf8_target != is_utf8_pat) {
 		/* The target and the pattern have differing utf8ness. */
 		char *l = locinput;
@@ -9367,9 +9375,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	    scan = this_eol;
 	break;
 
+    case LEXACT:
       {
         U8 * string;
         Size_t str_len;
+
+	string = (U8 *) STRINGl(p);
+        str_len = STR_LENl(p);
+        goto join_short_long_exact;
 
     case EXACTL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
@@ -9387,6 +9400,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       do_exact:
 	string = (U8 *) STRINGs(p);
         str_len = STR_LENs(p);
+
+      join_short_long_exact:
         assert(str_len == reginfo->is_utf8_pat ? UTF8SKIP(string) : 1);
 
 	c = *string;

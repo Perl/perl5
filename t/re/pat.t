@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 960;  # Update this when adding/deleting tests.
+plan tests => 965;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1421,7 +1421,10 @@ EOP
         ok("\x{017F}\x{017F}" =~ qr/^[$sharp_s]?$/i, "[] to EXACTish optimization");
     }
 
-    {   # Test that it avoids spllitting a multi-char fold across nodes
+    {   # Test that it avoids spllitting a multi-char fold across nodes.
+        # These all fold to things that are like 'ss', which, if split across
+        # nodes could fail to match a single character that folds to the
+        # combination.
         my $utf8_locale = find_utf8_ctype_locale();
         for my $char('F', $sharp_s, "\x{FB00}") {
             my $length = 260;    # Long enough to overflow an EXACTFish regnode
@@ -1468,6 +1471,32 @@ EOP
                 }
             }
         }
+    }
+
+    {
+        my $s = ("0123456789" x 26214) x 2; # Should fill 2 LEXACTS, plus
+                                            # small change
+        my $pattern_prefix = "use utf8; use re qw(Debug COMPILE)";
+        my $pattern = "$pattern_prefix; qr/$s/;";
+        my $result = fresh_perl($pattern);
+        if ($? != 0) {  # Re-run so as to display STDERR.
+            fail($pattern);
+            fresh_perl($pattern, { stderr => 0, verbose => 1 });
+        }
+        like($result, qr/Final program[^X]*\bLEXACT\b[^X]*\bLEXACT\b[^X]*\bEXACT\b[^X]*\bEND\b/s,
+             "Check that LEXACT nodes are generated");
+        like($s, qr/$s/, "Check that LEXACT nodes match");
+        like("a$s", qr/a$s/, "Previous test preceded by an 'a'");
+        substr($s, 260000, 1) = "\x{100}";
+        $pattern = "$pattern_prefix; qr/$s/;";
+        $result = fresh_perl($pattern, { 'wide_chars' => 1 } );
+        if ($? != 0) {  # Re-run so as to display STDERR.
+            fail($pattern);
+            fresh_perl($pattern, { stderr => 0, verbose => 1 });
+        }
+        like($result, qr/Final program[^X]*\bLEXACT\b[^X]*\bLEXACT\b[^X]*\bEXACT\b[^X]*\bEND\b/s,
+             "Check that LEXACT nodes are generated with a \\x{100}");
+        like($s, qr/$s/, "Check that these LEXACT nodes match");
     }
 
     {
