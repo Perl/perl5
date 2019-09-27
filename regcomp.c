@@ -19607,8 +19607,9 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 STATIC void
 S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size)
 {
-    /* 'size' is the delta to add or subtract from the current memory allocated
-     * to the regex engine being constructed */
+    /* 'size' is the delta number of smallest regnode equivalents to add or
+     * subtract from the current memory allocated to the regex engine being
+     * constructed. */
 
     PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE;
 
@@ -19640,8 +19641,8 @@ S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size)
 STATIC regnode_offset
 S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size, const char* const name)
 {
-    /* Allocate a regnode for 'op', with 'extra_size' extra space.  It aligns
-     * and increments RExC_size and RExC_emit
+    /* Allocate a regnode for 'op', with 'extra_size' extra (smallest) regnode
+     * equivalents space.  It aligns and increments RExC_size and RExC_emit
      *
      * It returns the regnode's offset into the regex engine program */
 
