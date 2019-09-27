@@ -3994,7 +3994,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      strings, so this should rarely be encountered in practice */
 
 #define JOIN_EXACT(scan,min_subtract,unfolded_multi_char, flags) \
-    if (PL_regkind[OP(scan)] == EXACT) \
+    if (PL_regkind[OP(scan)] == EXACT && OP(scan) != LEXACT) \
         join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags), NULL, depth+1)
 
 STATIC U32
@@ -5197,6 +5197,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	}
 	else if (   OP(scan) == EXACT
+                 || OP(scan) == LEXACT
                  || OP(scan) == EXACT_ONLY8
                  || OP(scan) == EXACTL)
         {
@@ -5319,6 +5320,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
 		    next = NEXTOPER(scan);
 		    if (   OP(next) == EXACT
+                        || OP(next) == LEXACT
                         || OP(next) == EXACT_ONLY8
                         || OP(next) == EXACTL
                         || (flags & SCF_DO_STCLASS))
@@ -7978,6 +7980,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* Ignore EXACT as we deal with it later. */
 	if (PL_regkind[OP(first)] == EXACT) {
 	    if (   OP(first) == EXACT
+	        || OP(first) == LEXACT
                 || OP(first) == EXACT_ONLY8
                 || OP(first) == EXACTL)
             {
@@ -8324,7 +8327,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                  && nop == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
-                  && (fop == EXACT || fop == EXACT_ONLY8 || fop == EXACTL)
+                  && (fop == EXACT || fop == LEXACT || fop == EXACT_ONLY8 || fop == EXACTL)
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
                   && nop == END )
@@ -13998,6 +14001,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             len = 0;
             s = s0;
 
+          continue_parse:
+
             /* This breaks under rare circumstances.  If folding, we do not
              * want to split a node at a character that is a non-final in a
              * multi-char fold, as an input string could just happen to want to
@@ -14582,13 +14587,79 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 goto loopdone;
             }
 
-            /* Here we have run out of room.  We artificially have to split the
-             * node into two, because we just don't have enough space to hold
-             * everything. */
+            /* Here we have run out of room.  We can grow plain EXACT and
+             * LEXACT nodes.  If the pattern is gigantic enough, though,
+             * eventually we'll have to artificially chunk the pattern into
+             * multiple nodes. */
+            if (! LOC && (node_type == EXACT || node_type == LEXACT)) {
+                Size_t overhead = 1 + regarglen[OP(REGNODE_p(ret))];
+                Size_t overhead_expansion = 0;
+                char temp[256];
 
-            if (FOLD) {
+                /* Here we couldn't fit the final character in the current
+                 * node, so it will have to be reparsed, no matter what else we
+                 * do */
+                p = oldp;
 
-                /* Running out of room creates a problem if we are
+
+                /* If would have overflowed a regular EXACT node, switch
+                 * instead to an LEXACT.  The code below is structured so that
+                 * the actual growing code is common to changing from an EXACT
+                 * or just increasing the LEXACT size.  This means that we have
+                 * save the string in the EXACT case before growing, and then
+                 * copy it afterwards to its new location */
+                if (node_type == EXACT) {
+                    overhead_expansion = regarglen[LEXACT] - regarglen[EXACT];
+                    RExC_emit += overhead_expansion;
+                    Copy(s0, temp, len, char);
+                }
+                else if (node_type != LEXACT) { /* Can't grow other node types;
+                                                   go finish up this chunk of
+                                                   the pattern */
+                    goto loopdone;
+                }
+                {   /* Ready to grow.  If it was a plain EXACT, the string was
+                       saved, and the first few bytes of it overwritten by
+                       adding an argument field */
+
+                    const Size_t max_nodes_for_string = U16_MAX
+                                                      - overhead
+                                                      - overhead_expansion;
+                    Size_t achievable = MIN(max_nodes_for_string,
+                                current_string_nodes + STR_SZ(RExC_end - p));
+                    SSize_t delta = achievable - current_string_nodes;
+
+                    /* If there is just no more room, go finish up this chunk
+                     * of the pattern. */
+                    if (delta <= 0) {
+                        goto loopdone;
+                    }
+
+                    change_engine_size(pRExC_state, delta + overhead_expansion);
+                    current_string_nodes += delta;
+                    max_string_len
+                               = sizeof(struct regnode) * current_string_nodes;
+                    upper_fill = max_string_len + 1;
+
+                    /* If the length was small, we know this was originally an
+                     * EXACT node now converted to LEXACT, and the string has
+                     * to be restored.  Otherwise the string was untouched.
+                     * 260 is just a number safely above 255 so don't have to
+                     * worry about getting it precise */
+                    if (len < 260) {
+                        node_type = LEXACT;
+                        FILL_NODE(ret, node_type);
+                        s0 = STRING(REGNODE_p(ret));
+                        Copy(temp, s0, len, char);
+                        s = s0 + len;
+                    }
+
+                    goto continue_parse;
+                }
+            }
+            else {
+
+                /* Here is /i.  Running out of room creates a problem if we are
                  * folding, and the split happens in the middle of a
                  * multi-character fold, as a match that should have occurred,
                  * won't, due to the way nodes are matched, and our artificial
@@ -14622,6 +14693,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 STRLEN fold_len;
                 UV folded;
 
+                assert(FOLD);
 
                 /* The Unicode standard says that multi character folds consist
                  * of either two or three characters.  So we create a buffer
@@ -20043,6 +20115,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 #endif
         if ( exact ) {
             switch (OP(REGNODE_p(scan))) {
+                case LEXACT:
                 case EXACT:
                 case EXACT_ONLY8:
                 case EXACTL:
