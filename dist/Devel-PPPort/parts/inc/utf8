@@ -306,7 +306,12 @@ utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
                 *retlen = D_PPP_MIN(*retlen, curlen);
                 *retlen = D_PPP_MIN(*retlen, UTF8SKIP(s));
                 do {
-                    if (s[i] < 0x80 || s[i] > 0xBF) {
+#      ifdef UTF8_IS_CONTINUATION
+                    if (! UTF8_IS_CONTINUATION(s[i]))
+#      else       /* Versions without the above don't support EBCDIC anyway */
+                    if (s[i] < 0x80 || s[i] > 0xBF)
+#      endif
+                    {
                         *retlen = i;
                         break;
                     }
