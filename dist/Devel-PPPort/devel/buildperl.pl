@@ -549,8 +549,9 @@ buildperl.pl - build/install perl distributions
 
   --config=configuration      build this configuration [MULTI]
                               The possibilities for this parameter are:
-                                'thread', 'thread5005', 'debug'; and
-                                'default', which means none of the others.
+                                'thread', 'thread5005', 'debug';
+                                 and 'default',
+                                 which means none of the others.
                               [default: all possible configurations]
 
   --perl=version              build this version of perl [MULTI]
@@ -570,7 +571,8 @@ buildperl.pl - build/install perl distributions
                               directory (extra arguments are passed to
                               Configure)
 
-  -j N                        Build and test with N parallel jobs, default 1.
+  -j N                        Build and test with N parallel jobs
+                              [default: 1]
 
   options tagged with [MULTI] can be given multiple times
 

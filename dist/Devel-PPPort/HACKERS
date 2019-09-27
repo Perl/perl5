@@ -121,7 +121,8 @@ in
 
   __UNDEFINED__ SvMAGIC_set(sv, val) \
                 STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
-                (((XPVMG*) SvANY(sv))->xmg_magic = (val)); } STMT_END
+                (((XPVMG*) SvANY(sv))->xmg_magic = (val)); } \
+                STMT_END
 
 This usually makes the code more compact and readable.
 
@@ -151,7 +152,8 @@ You can use
 
 instead of
 
-  #if ((PERL_VERSION < 9) || (PERL_VERSION == 9 && PERL_SUBVERSION < 3))
+  #if ((PERL_VERSION < 9) \
+    || (PERL_VERSION == 9 && PERL_SUBVERSION < 3))
 
 The version number can be either of the new form C<5.x.x> or the older
 form C<5.00x_yy>. Both are translated into the correct preprocessor
@@ -525,6 +527,8 @@ module in the core:
   PPPort.pm
 
 =head1 BUGS
+
+No known bugs.
 
 =head1 COPYRIGHT
 
