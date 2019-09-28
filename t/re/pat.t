@@ -1494,9 +1494,9 @@ EOP
             fail($pattern);
             fresh_perl($pattern, { stderr => 0, verbose => 1 });
         }
-        like($result, qr/Final program[^X]*\bLEXACT\b[^X]*\bLEXACT\b[^X]*\bEXACT\b[^X]*\bEND\b/s,
-             "Check that LEXACT nodes are generated with a \\x{100}");
-        like($s, qr/$s/, "Check that these LEXACT nodes match");
+        like($result, qr/Final program[^X]*\bLEXACT_ONLY8\b[^X]*\bLEXACT\b[^X]*\bEXACT\b[^X]*\bEND\b/s,
+             "Check that an LEXACT_ONLY node is generated with a \\x{100}");
+        like($s, qr/$s/, "Check that LEXACT_ONLY8 nodes match");
     }
 
     {

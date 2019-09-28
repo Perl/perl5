@@ -3993,8 +3993,9 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      using /iaa matching will be doing so almost entirely with ASCII
  *      strings, so this should rarely be encountered in practice */
 
-#define JOIN_EXACT(scan,min_subtract,unfolded_multi_char, flags) \
-    if (PL_regkind[OP(scan)] == EXACT && OP(scan) != LEXACT) \
+#define JOIN_EXACT(scan,min_subtract,unfolded_multi_char, flags)    \
+    if (PL_regkind[OP(scan)] == EXACT && OP(scan) != LEXACT         \
+                                      && OP(scan) != LEXACT_ONLY8)  \
         join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags), NULL, depth+1)
 
 STATIC U32
@@ -5199,6 +5200,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	else if (   OP(scan) == EXACT
                  || OP(scan) == LEXACT
                  || OP(scan) == EXACT_ONLY8
+                 || OP(scan) == LEXACT_ONLY8
                  || OP(scan) == EXACTL)
         {
 	    SSize_t l = STR_LEN(scan);
@@ -5322,6 +5324,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (   OP(next) == EXACT
                         || OP(next) == LEXACT
                         || OP(next) == EXACT_ONLY8
+                        || OP(next) == LEXACT_ONLY8
                         || OP(next) == EXACTL
                         || (flags & SCF_DO_STCLASS))
                     {
@@ -7982,6 +7985,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    if (   OP(first) == EXACT
 	        || OP(first) == LEXACT
                 || OP(first) == EXACT_ONLY8
+                || OP(first) == LEXACT_ONLY8
                 || OP(first) == EXACTL)
             {
 		NOOP;	/* Empty, get anchored substr later. */
@@ -8327,7 +8331,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                  && nop == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
-                  && (fop == EXACT || fop == LEXACT || fop == EXACT_ONLY8 || fop == EXACTL)
+                  && (   fop == EXACT || fop == LEXACT
+                      || fop == EXACT_ONLY8 || fop == LEXACT_ONLY8
+                      || fop == EXACTL)
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
                   && nop == END )
@@ -14870,7 +14876,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     else if (requires_utf8_target) {
                         node_type = EXACT_ONLY8;
                     }
-                } else if (FOLD) {
+                }
+                else if (node_type == LEXACT) {
+                    if (requires_utf8_target) {
+                        node_type = LEXACT_ONLY8;
+                    }
+                }
+                else if (FOLD) {
                     if (    UNLIKELY(has_micro_sign || has_ss)
                         && (node_type == EXACTFU || (   node_type == EXACTF
                                                      && maybe_exactfu)))
@@ -20116,6 +20128,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
             switch (OP(REGNODE_p(scan))) {
                 case LEXACT:
                 case EXACT:
+                case LEXACT_ONLY8:
                 case EXACT_ONLY8:
                 case EXACTL:
                 case EXACTF:

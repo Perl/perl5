@@ -692,6 +692,8 @@ will be lost.
 
  EXACT_ONLY8      str        Like EXACT, but only UTF-8 encoded targets
                              can match
+ LEXACT_ONLY8     len:str 1  Like LEXACT, but only UTF-8 encoded targets
+                             can match
  EXACTFU_ONLY8    str        Like EXACTFU, but only UTF-8 encoded
                              targets can match
 
