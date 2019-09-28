@@ -1,5 +1,11 @@
 Revision history for Devel-PPPort
 
+ 3.53 - 2019-09-27
+
+  * Rename PPPort_xs.PL to RealPPPort_xs.PL
+  * Fix compilation issues with version older than 5.010
+  * Fix compilation issues with version older than 5.010
+
  3.52 - 2019-05-14
 
    * fix utf8_to_uvchr_buf retval in 5.30
