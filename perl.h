@@ -7483,6 +7483,7 @@ START_EXTERN_C
  */
 
 /* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
+GCC_DIAG_IGNORE_DECL(-Wpragmas);
 GCC_DIAG_IGNORE_DECL(-Wc++-compat);
 
 #  ifdef USE_QUADMATH
@@ -7553,6 +7554,7 @@ INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
 #    endif
 #  endif
 
+GCC_DIAG_RESTORE_DECL;
 GCC_DIAG_RESTORE_DECL;
 
 #else
