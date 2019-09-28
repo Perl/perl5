@@ -4239,6 +4239,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     if (   OP(text_node) == EXACT
         || OP(text_node) == LEXACT
         || OP(text_node) == EXACT_ONLY8
+        || OP(text_node) == LEXACT_ONLY8
         || OP(text_node) == EXACTL)
     {
 
@@ -4247,7 +4248,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
          * copy the input to the output, avoiding finding the code point of
          * that character */
         if (!is_utf8_pat) {
-            assert(OP(text_node) != EXACT_ONLY8);
+            assert(   OP(text_node) != EXACT_ONLY8
+                   && OP(text_node) != LEXACT_ONLY8);
             c2 = c1 = *pat;
         }
         else if (utf8_target) {
@@ -4255,7 +4257,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             Copy(pat, c2_utf8, UTF8SKIP(pat), U8);
             utf8_has_been_setup = TRUE;
         }
-        else if (OP(text_node) == EXACT_ONLY8) {
+        else if (   OP(text_node) == EXACT_ONLY8
+                 || OP(text_node) == LEXACT_ONLY8)
+        {
             return FALSE;   /* Can only match UTF-8 target */
         }
         else {
@@ -6274,6 +6278,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* NOTREACHED */
         }
 #undef  ST
+
+	case LEXACT_ONLY8:
+            if (! utf8_target) {
+                sayNO;
+            }
+            /* FALLTHROUGH */
 
 	case LEXACT:
         {
@@ -9374,6 +9384,12 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	else
 	    scan = this_eol;
 	break;
+
+    case LEXACT_ONLY8:
+        if (! utf8_target) {
+            break;
+        }
+        /* FALLTHROUGH */
 
     case LEXACT:
       {
