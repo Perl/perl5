@@ -403,7 +403,6 @@ __UNDEFINED__ isCNTRL(c)    (    (c) == '\0' || (c) == '\a' || (c) == '\b'      
 /* The controls are everything below blank, plus one outlier */
 __UNDEFINED__ isCNTRL_L1(c) ((WIDEST_UTYPE) (c) < ' '                           \
                           || (WIDEST_UTYPE) (c) == D_PPP_OUTLIER_CONTROL)
-                            )
 /* The ordering of the tests in this and isUPPER are to exclude most characters
  * early */
 __UNDEFINED__ isLOWER(c)    (        (c) >= 'a' && (c) <= 'z'                   \
