@@ -354,6 +354,14 @@ restored automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would
 need to be manually managed if you do any unusual manipulation of the
 context stack.
 
+=item *
+
+Various macros dealing with character type classification and changing
+case where the input is encoded in UTF-8 now require an extra parameter
+to prevent potential reads beyond the end of the buffer.  Use of these
+has generated a deprecation warning since 5.26.  Details are in
+L<perldeprecation/In XS code, use of various macros dealing with UTF-8.>
+
 =back
 
 =head1 Selected Bug Fixes

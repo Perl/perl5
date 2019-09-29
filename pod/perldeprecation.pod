@@ -113,7 +113,10 @@ and will be made fatal in 5.32.
 
 =head3 In XS code, use of various macros dealing with UTF-8.
 
-These macros will require an extra parameter in Perl 5.32:
+The macros below now require an extra parameter than in versions prior
+to Perl 5.32.  The final parameter in each one is a pointer into the
+string supplied by the first parameter beyond which the input will not
+be read.  This prevents potential reading beyond the end of the buffer.
 C<isALPHANUMERIC_utf8>,
 C<isASCII_utf8>,
 C<isBLANK_utf8>,
@@ -148,16 +151,13 @@ C<toTITLE_utf8>,
 and
 C<toUPPER_utf8>.
 
-There is now a macro that corresponds to each one of these, simply by
-appending C<_safe> to the name.  It takes the extra parameter.
-For example, C<isDIGIT_utf8_safe> corresponds to C<isDIGIT_utf8>, but
-takes the extra parameter, and its use doesn't generate a deprecation
-warning.  All are documented in L<perlapi/Character case changing> and
+Since Perl 5.26, this functionality with the extra parameter has been
+available by using a corresponding macro to each one of these, and whose
+name is formed by appending C<_safe> to the base name.  There is no
+change to the functionality of those.  For example, C<isDIGIT_utf8_safe>
+corresponds to C<isDIGIT_utf8>, and both now behave identically.  All
+are documented in L<perlapi/Character case changing> and
 L<perlapi/Character classification>.
-
-You can change to use these versions at any time, or, if you can live
-with the deprecation messages, wait until 5.32 and add the parameter to
-the existing calls, without changing the names.
 
 This change was originally scheduled for 5.30, but was delayed.
 
@@ -297,7 +297,6 @@ Because Unicode is never going to assign L<non-character code
 points|perlunicode/Noncharacter code points>, nor L<code points that are
 above the legal Unicode maximum|perlunicode/Beyond Unicode code
 points>, those can be delimiters.
-
 
 =head2 Perl 5.28
 

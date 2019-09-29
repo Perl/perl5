@@ -33,7 +33,6 @@
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idcont(a)	Perl__is_uni_perl_idcont(aTHX_ a)
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
-#define _is_utf8_FOO(a,b,c,d,e,f,g,h)	Perl__is_utf8_FOO(aTHX_ a,b,c,d,e,f,g,h)
 #define _is_utf8_FOO_with_len(a,b,c)	Perl__is_utf8_FOO_with_len(aTHX_ a,b,c)
 #define _is_utf8_idcont(a)	Perl__is_utf8_idcont(aTHX_ a)
 #define _is_utf8_idstart(a)	Perl__is_utf8_idstart(aTHX_ a)
@@ -43,10 +42,10 @@
 #define _is_utf8_xidcont(a)	Perl__is_utf8_xidcont(aTHX_ a)
 #define _is_utf8_xidstart(a)	Perl__is_utf8_xidstart(aTHX_ a)
 #define _to_uni_fold_flags(a,b,c,d)	Perl__to_uni_fold_flags(aTHX_ a,b,c,d)
-#define _to_utf8_fold_flags(a,b,c,d,e,f,g)	Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e,f,g)
-#define _to_utf8_lower_flags(a,b,c,d,e,f,g)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e,f,g)
-#define _to_utf8_title_flags(a,b,c,d,e,f,g)	Perl__to_utf8_title_flags(aTHX_ a,b,c,d,e,f,g)
-#define _to_utf8_upper_flags(a,b,c,d,e,f,g)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e,f,g)
+#define _to_utf8_fold_flags(a,b,c,d,e)	Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e)
+#define _to_utf8_lower_flags(a,b,c,d,e)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e)
+#define _to_utf8_title_flags(a,b,c,d,e)	Perl__to_utf8_title_flags(aTHX_ a,b,c,d,e)
+#define _to_utf8_upper_flags(a,b,c,d,e)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e)
 #define _utf8n_to_uvchr_msgs_helper	Perl__utf8n_to_uvchr_msgs_helper
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
@@ -262,13 +261,7 @@
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define init_tm(a)		Perl_init_tm(aTHX_ a)
 #define intro_my()		Perl_intro_my(aTHX)
-#ifndef NO_MATHOMS
-#define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
-#endif
 #define isC9_STRICT_UTF8_CHAR	Perl_isC9_STRICT_UTF8_CHAR
-#ifndef NO_MATHOMS
-#define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
-#endif
 #define isSTRICT_UTF8_CHAR	Perl_isSTRICT_UTF8_CHAR
 #define isUTF8_CHAR		Perl_isUTF8_CHAR
 #define is_c9strict_utf8_string_loclen	Perl_is_c9strict_utf8_string_loclen
@@ -366,81 +359,18 @@
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
 #endif
 #ifndef NO_MATHOMS
-#define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_alpha(a)	Perl_is_utf8_alpha(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_ascii(a)	Perl_is_utf8_ascii(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_blank(a)	Perl_is_utf8_blank(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif
 #define is_utf8_char_helper	Perl_is_utf8_char_helper
-#ifndef NO_MATHOMS
-#define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_digit(a)	Perl_is_utf8_digit(aTHX_ a)
-#endif
 #define is_utf8_fixed_width_buf_loclen_flags	Perl_is_utf8_fixed_width_buf_loclen_flags
-#ifndef NO_MATHOMS
-#define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_idcont(a)	Perl_is_utf8_idcont(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
-#endif
 #define is_utf8_invariant_string_loc	Perl_is_utf8_invariant_string_loc
 #ifndef NO_MATHOMS
-#define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_perl_space(a)	Perl_is_utf8_perl_space(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_perl_word(a)	Perl_is_utf8_perl_word(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_posix_digit(a)	Perl_is_utf8_posix_digit(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_print(a)	Perl_is_utf8_print(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_punct(a)	Perl_is_utf8_punct(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
 #endif
 #define is_utf8_string_flags	Perl_is_utf8_string_flags
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_string_loclen_flags	Perl_is_utf8_string_loclen_flags
-#ifndef NO_MATHOMS
-#define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
-#endif
 #define is_utf8_valid_partial_char_flags	Perl_is_utf8_valid_partial_char_flags
-#ifndef NO_MATHOMS
-#define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_xidcont(a)	Perl_is_utf8_xidcont(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_utf8_xidfirst(a)	Perl_is_utf8_xidfirst(aTHX_ a)
-#endif
 #define isinfnan		Perl_isinfnan
 #define leave_adjust_stacks(a,b,c,d)	Perl_leave_adjust_stacks(aTHX_ a,b,c,d)
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
@@ -1679,6 +1609,11 @@
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
+#  if 0	/* Not currently used, but may be needed in the future */
+#    if defined(PERL_IN_UTF8_C)
+#define warn_on_first_deprecated_use(a,b,c,d,e)	S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
+#    endif
+#  endif
 #  if defined (HAS_SOCKETPAIR) ||     (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && 	defined(AF_INET) && defined(PF_INET))
 #define PerlSock_socketpair_cloexec(a,b,c,d)	Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
 #  endif
@@ -2085,7 +2020,6 @@
 #  endif
 #  if defined(PERL_IN_UTF8_C)
 #define _to_utf8_case(a,b,c,d,e,f,g,h,i)	S__to_utf8_case(aTHX_ a,b,c,d,e,f,g,h,i)
-#define check_and_deprecate(a,b,c,d,e,f)	S_check_and_deprecate(aTHX_ a,b,c,d,e,f)
 #define check_locale_boundary_crossing(a,b,c,d)	S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #define does_utf8_overflow	S_does_utf8_overflow
 #define isFF_OVERLONG		S_isFF_OVERLONG
@@ -2100,7 +2034,6 @@
 #define turkic_lc(a,b,c,d)	S_turkic_lc(aTHX_ a,b,c,d)
 #define turkic_uc(a,b,c,d)	S_turkic_uc(aTHX_ a,b,c,d)
 #define unexpected_non_continuation_text(a,b,c,d)	S_unexpected_non_continuation_text(aTHX_ a,b,c,d)
-#define warn_on_first_deprecated_use(a,b,c,d,e)	S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
 #  endif
 #  if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 #define _to_upper_title_latin1(a,b,c,d)	Perl__to_upper_title_latin1(aTHX_ a,b,c,d)
