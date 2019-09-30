@@ -14613,7 +14613,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * do */
                 p = oldp;
 
-
                 /* If would have overflowed a regular EXACT node, switch
                  * instead to an LEXACT.  The code below is structured so that
                  * the actual growing code is common to changing from an EXACT
@@ -14851,7 +14850,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     oldp = old_oldp;
                     old_oldp = NULL;
 
-                }
+                } /* End of loop backing up through the node */
 
                 /* Here the node consists entirely of non-final multi-char
                  * folds.  (Likely it is all 'f's or all 's's.)  There's no
@@ -19143,6 +19142,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             if (op != END) {
                 goto not_anyof;
             }
+
+            /* XXX We could create an ANYOFR_LOW node here if we saved above if
+             * all were invariants, it wasn't inverted, and there is a single
+             * range.  This would be faster than some of the posix nodes we
+             * create below like /\d/a, but would be twice the size.  Without
+             * having actually measured the gain, khw doesn't think the
+             * tradeoff is really worth it */
         }
 
         if (! (anyof_flags & ANYOF_LOCALE_FLAGS)) {
