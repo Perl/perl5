@@ -13959,6 +13959,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
             bool next_is_quantifier;
             char * oldp = NULL;
+            char * old_oldp = NULL;
 
             /* We can convert EXACTF nodes to EXACTFU if they contain only
              * characters that match identically regardless of the target
@@ -14037,6 +14038,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * The exceptions override this */
                 Size_t added_len = 1;
 
+                old_oldp = oldp;
 		oldp = p;
 
                 /* White space has already been ignored */
@@ -14677,9 +14679,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * multi-character folds.
                  *
                  * At this point:
-                 *  oldp        points to the beginning in the input of the
+                 *  old_oldp  points to the beginning in the input of the
+                 *              penultimate character in the node.
+                 *  oldp      points to the beginning in the input of the
                  *              final character in the node.
-                 *  p           points to the beginning in the input of the
+                 *  p         points to the beginning in the input of the
                  *              next character in the input, the one that won't
                  *              fit in the node.
                  *
@@ -14698,6 +14702,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 U8 foldbuf[UTF8_MAXBYTES_CASE * 5 + 1];
                 STRLEN fold_len;
                 UV folded;
+                char * const sav_oldp = oldp;
 
                 assert(FOLD);
 
@@ -14768,6 +14773,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                         /* There's no safe place in the node to split.  Quit so
                          * will take the whole node */
+                        oldp = sav_oldp;
                         break;
                     }
 
@@ -14826,7 +14832,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                                 foldbuf + UTF8_MAXBYTES_CASE))
                         {
                             upper_fill = s + UTF8SKIP(s) - s0;
-                            if (LIKELY(upper_fill == 255)) {
+                            if (LIKELY(oldp)) {
                                 break;
                             }
                             goto reparse;
@@ -14836,11 +14842,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                                 foldbuf + UTF8_MAXBYTES_CASE))
                     {
                         upper_fill = s + 1 - s0;
-                        if (LIKELY(upper_fill == 255)) {
+                        if (LIKELY(oldp)) {
                             break;
                         }
                         goto reparse;
                     }
+
+                    oldp = old_oldp;
+                    old_oldp = NULL;
+
                 }
 
                 /* Here the node consists entirely of non-final multi-char
