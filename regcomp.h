@@ -338,9 +338,9 @@ struct regnode_ssc {
 #define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all      \
 					   regnode types.  For some, it's the \
 					   character set of the regnode */
-#define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_ONLY8)  \
+#define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->str_len)
-#define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_ONLY8)  \
+#define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->string)
 #define	OPERANDs(p)	STRINGs(p)
 
@@ -356,15 +356,15 @@ struct regnode_ssc {
  * node to be an ARG2L, using the second 32 bit field for the length, and not
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
-#define	STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_ONLY8)  \
+#define	STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->str_len))
-#define	STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_ONLY8)  \
+#define	STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->string))
 #define	OPERANDl(p)	STRINGl(p)
 
-#define	STR_LEN(p)	((OP(p) == LEXACT || OP(p) == LEXACT_ONLY8)           \
+#define	STR_LEN(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
                                                ? STR_LENl(p) : STR_LENs(p))
-#define	STRING(p)	((OP(p) == LEXACT || OP(p) == LEXACT_ONLY8)           \
+#define	STRING(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
                                                ? STRINGl(p)  : STRINGs(p))
 #define	OPERAND(p)	STRING(p)
 
@@ -378,7 +378,7 @@ struct regnode_ssc {
 
 #define setSTR_LEN(p,v)                                                     \
     STMT_START{                                                             \
-        if (OP(p) == LEXACT || OP(p) == LEXACT_ONLY8)                       \
+        if (OP(p) == LEXACT || OP(p) == LEXACT_REQ8)                        \
             ((struct regnode_lstring *)(p))->str_len = (v);                 \
         else                                                                \
             ((struct regnode_string *)(p))->str_len = (v);                  \

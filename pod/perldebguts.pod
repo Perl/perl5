@@ -690,11 +690,11 @@ will be lost.
                              (string not UTF-8, not guaranteed to be
                              folded, not currently trie-able).
 
- EXACT_ONLY8      str        Like EXACT, but only UTF-8 encoded targets
+ EXACT_REQ8       str        Like EXACT, but only UTF-8 encoded targets
                              can match
- LEXACT_ONLY8     len:str 1  Like LEXACT, but only UTF-8 encoded targets
+ LEXACT_REQ8      len:str 1  Like LEXACT, but only UTF-8 encoded targets
                              can match
- EXACTFU_ONLY8    str        Like EXACTFU, but only UTF-8 encoded
+ EXACTFU_REQ8     str        Like EXACTFU, but only UTF-8 encoded
                              targets can match
 
  EXACTFU_S_EDGE   str        /di rules, but nothing in it precludes /ui,

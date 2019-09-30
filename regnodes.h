@@ -58,9 +58,9 @@
 #define	EXACTFUP              	44	/* 0x2c Like EXACT, but match using /iu rules; (string not UTF-8, not guaranteed to be folded; and it is Problematic). */
 #define	EXACTFLU8             	45	/* 0x2d Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255. */
 #define	EXACTFAA_NO_TRIE      	46	/* 0x2e Like EXACT, but match using /iaa rules (string not UTF-8, not guaranteed to be folded, not currently trie-able). */
-#define	EXACT_ONLY8           	47	/* 0x2f Like EXACT, but only UTF-8 encoded targets can match */
-#define	LEXACT_ONLY8          	48	/* 0x30 Like LEXACT, but only UTF-8 encoded targets can match */
-#define	EXACTFU_ONLY8         	49	/* 0x31 Like EXACTFU, but only UTF-8 encoded targets can match */
+#define	EXACT_REQ8            	47	/* 0x2f Like EXACT, but only UTF-8 encoded targets can match */
+#define	LEXACT_REQ8           	48	/* 0x30 Like LEXACT, but only UTF-8 encoded targets can match */
+#define	EXACTFU_REQ8          	49	/* 0x31 Like EXACTFU, but only UTF-8 encoded targets can match */
 #define	EXACTFU_S_EDGE        	50	/* 0x32 /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only). */
 #define	NOTHING               	51	/* 0x33 Match empty string. */
 #define	TAIL                  	52	/* 0x34 Match empty string. Can jump here from outside. */
@@ -212,9 +212,9 @@ EXTCONST U8 PL_regkind[] = {
 	EXACT,    	/* EXACTFUP               */
 	EXACT,    	/* EXACTFLU8              */
 	EXACT,    	/* EXACTFAA_NO_TRIE       */
-	EXACT,    	/* EXACT_ONLY8            */
-	EXACT,    	/* LEXACT_ONLY8           */
-	EXACT,    	/* EXACTFU_ONLY8          */
+	EXACT,    	/* EXACT_REQ8             */
+	EXACT,    	/* LEXACT_REQ8            */
+	EXACT,    	/* EXACTFU_REQ8           */
 	EXACT,    	/* EXACTFU_S_EDGE         */
 	NOTHING,  	/* NOTHING                */
 	NOTHING,  	/* TAIL                   */
@@ -367,9 +367,9 @@ static const U8 regarglen[] = {
 	0,                                   	/* EXACTFUP     */
 	0,                                   	/* EXACTFLU8    */
 	0,                                   	/* EXACTFAA_NO_TRIE */
-	0,                                   	/* EXACT_ONLY8  */
-	EXTRA_SIZE(struct regnode_1),        	/* LEXACT_ONLY8 */
-	0,                                   	/* EXACTFU_ONLY8 */
+	0,                                   	/* EXACT_REQ8   */
+	EXTRA_SIZE(struct regnode_1),        	/* LEXACT_REQ8  */
+	0,                                   	/* EXACTFU_REQ8 */
 	0,                                   	/* EXACTFU_S_EDGE */
 	0,                                   	/* NOTHING      */
 	0,                                   	/* TAIL         */
@@ -478,9 +478,9 @@ static const char reg_off_by_arg[] = {
 	0,	/* EXACTFUP     */
 	0,	/* EXACTFLU8    */
 	0,	/* EXACTFAA_NO_TRIE */
-	0,	/* EXACT_ONLY8  */
-	0,	/* LEXACT_ONLY8 */
-	0,	/* EXACTFU_ONLY8 */
+	0,	/* EXACT_REQ8   */
+	0,	/* LEXACT_REQ8  */
+	0,	/* EXACTFU_REQ8 */
 	0,	/* EXACTFU_S_EDGE */
 	0,	/* NOTHING      */
 	0,	/* TAIL         */
@@ -595,9 +595,9 @@ EXTCONST char * const PL_reg_name[] = {
 	"EXACTFUP",              	/* 0x2c */
 	"EXACTFLU8",             	/* 0x2d */
 	"EXACTFAA_NO_TRIE",      	/* 0x2e */
-	"EXACT_ONLY8",           	/* 0x2f */
-	"LEXACT_ONLY8",          	/* 0x30 */
-	"EXACTFU_ONLY8",         	/* 0x31 */
+	"EXACT_REQ8",            	/* 0x2f */
+	"LEXACT_REQ8",           	/* 0x30 */
+	"EXACTFU_REQ8",          	/* 0x31 */
 	"EXACTFU_S_EDGE",        	/* 0x32 */
 	"NOTHING",               	/* 0x33 */
 	"TAIL",                  	/* 0x34 */

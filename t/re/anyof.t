@@ -710,13 +710,13 @@ my @tests = (
     '[{INFTY_minus_1}]' => 'ANYOFH[INFTY_minus_1]',
     '[{INFTY}]' => 'ANYOFH[INFTY-INFTY]',
 
-    '(?8)(?i)[\x{100}]' => 'EXACTFU_ONLY8 <\x{101}>',
-    '(?8)(?i)[\x{399}]' => 'EXACTFU_ONLY8 <\x{3b9}>',
-    '(?8)(?i)[\x{345}\x{399}\x{3B9}\x{1FBE}]' => 'EXACTFU_ONLY8 <\x{3b9}>',
+    '(?8)(?i)[\x{100}]' => 'EXACTFU_REQ8 <\x{101}>',
+    '(?8)(?i)[\x{399}]' => 'EXACTFU_REQ8 <\x{3b9}>',
+    '(?8)(?i)[\x{345}\x{399}\x{3B9}\x{1FBE}]' => 'EXACTFU_REQ8 <\x{3b9}>',
     '(?i)[\x{2b9}]' => 'ANYOFHb[02B9]',           # Doesn't participate in a fold
-    '(?8)(?i)[\x{2b9}]' => 'EXACT_ONLY8 <\x{2b9}>',
-    '(?i)[\x{2bc}]' => 'EXACTFU_ONLY8 <\x{2bc}>', # Part of a multi-char fold, ASCII component
-    '(?i)[\x{390}]' => 'EXACTFU_ONLY8 <\x{3b9}\x{308}\x{301}>', # Part of a multi-char fold, no ASCII component
+    '(?8)(?i)[\x{2b9}]' => 'EXACT_REQ8 <\x{2b9}>',
+    '(?i)[\x{2bc}]' => 'EXACTFU_REQ8 <\x{2bc}>', # Part of a multi-char fold, ASCII component
+    '(?i)[\x{390}]' => 'EXACTFU_REQ8 <\x{3b9}\x{308}\x{301}>', # Part of a multi-char fold, no ASCII component
 
     '(?i)[\x{1E9E}]' => 'EXACTFU <ss>',
     '(?iaa)[\x{1E9E}]' => 'EXACTFAA <\x{17f}\x{17f}>',
@@ -731,11 +731,11 @@ my @tests = (
     '(?i)[\x{FB06}]' => 'EXACTFU <st>',
 
     '[a][b]' => 'EXACT <ab>',
-    '[a]\x{100}' => 'EXACT_ONLY8 <a\x{100}>',
-    '(?8)[\x{100}]a' => 'EXACT_ONLY8 <\x{100}a>',
+    '[a]\x{100}' => 'EXACT_REQ8 <a\x{100}>',
+    '(?8)[\x{100}]a' => 'EXACT_REQ8 <\x{100}a>',
     '(?i)[b][c]' => 'EXACTFU <bc>',
-    '(?i)[b]\x{100}' => 'EXACTFU_ONLY8 <b\x{101}>',
-    '(?8)(?i)[\x{100}]b' => 'EXACTFU_ONLY8 <\x{101}b>',
+    '(?i)[b]\x{100}' => 'EXACTFU_REQ8 <b\x{101}>',
+    '(?8)(?i)[\x{100}]b' => 'EXACTFU_REQ8 <\x{101}b>',
     '(?i)b[s]' => 'EXACTFU <bs>',
     '(?i)b[s]c' => 'EXACTFU <bsc>',
     '(?i)bs[s]c' => 'EXACTF <bss>',  # The c goes into a 2nd node

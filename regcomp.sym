@@ -140,9 +140,9 @@ EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, (string is fol
 EXACTFAA_NO_TRIE  EXACT, str	  ; Like EXACT, but match using /iaa rules (string not UTF-8, not guaranteed to be folded, not currently trie-able).
 
 
-EXACT_ONLY8 EXACT,      str       ; Like EXACT, but only UTF-8 encoded targets can match
-LEXACT_ONLY8 EXACT,  len:str 1    ; Like LEXACT, but only UTF-8 encoded targets can match
-EXACTFU_ONLY8 EXACT,    str       ; Like EXACTFU, but only UTF-8 encoded targets can match
+EXACT_REQ8   EXACT,      str      ; Like EXACT, but only UTF-8 encoded targets can match
+LEXACT_REQ8  EXACT,  len:str 1    ; Like LEXACT, but only UTF-8 encoded targets can match
+EXACTFU_REQ8 EXACT,    str        ; Like EXACTFU, but only UTF-8 encoded targets can match
 # One could add EXACTFAA8 and something that has the same effect for /l,
 # but these would be extremely uncommon
 

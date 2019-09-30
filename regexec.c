@@ -2266,7 +2266,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                              | FOLDEQ_S2_FOLDS_SANE;
             goto do_exactf_utf8;
 
-    case EXACTFU_ONLY8:
+    case EXACTFU_REQ8:
         if (! utf8_target) {
             break;
         }
@@ -4238,8 +4238,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
     if (   OP(text_node) == EXACT
         || OP(text_node) == LEXACT
-        || OP(text_node) == EXACT_ONLY8
-        || OP(text_node) == LEXACT_ONLY8
+        || OP(text_node) == EXACT_REQ8
+        || OP(text_node) == LEXACT_REQ8
         || OP(text_node) == EXACTL)
     {
 
@@ -4248,8 +4248,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
          * copy the input to the output, avoiding finding the code point of
          * that character */
         if (!is_utf8_pat) {
-            assert(   OP(text_node) != EXACT_ONLY8
-                   && OP(text_node) != LEXACT_ONLY8);
+            assert(   OP(text_node) != EXACT_REQ8
+                   && OP(text_node) != LEXACT_REQ8);
             c2 = c1 = *pat;
         }
         else if (utf8_target) {
@@ -4257,8 +4257,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             Copy(pat, c2_utf8, UTF8SKIP(pat), U8);
             utf8_has_been_setup = TRUE;
         }
-        else if (   OP(text_node) == EXACT_ONLY8
-                 || OP(text_node) == LEXACT_ONLY8)
+        else if (   OP(text_node) == EXACT_REQ8
+                 || OP(text_node) == LEXACT_REQ8)
         {
             return FALSE;   /* Can only match UTF-8 target */
         }
@@ -4432,7 +4432,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     case EXACTFU:
                         c2 = PL_fold_latin1[c1];
                         break;
-                    case EXACTFU_ONLY8:
+                    case EXACTFU_REQ8:
                         return FALSE;
                         NOT_REACHED; /* NOTREACHED */
 
@@ -6279,7 +6279,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         }
 #undef  ST
 
-	case LEXACT_ONLY8:
+	case LEXACT_REQ8:
             if (! utf8_target) {
                 sayNO;
             }
@@ -6306,7 +6306,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
             }
             goto do_exact;
-	case EXACT_ONLY8:
+	case EXACT_REQ8:
             if (! utf8_target) {
                 sayNO;
             }
@@ -6420,7 +6420,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_array = PL_fold_latin1;
 	    goto do_exactf;
 
-        case EXACTFU_ONLY8:      /* /abc/iu with something in /abc/ > 255 */
+        case EXACTFU_REQ8:      /* /abc/iu with something in /abc/ > 255 */
             if (! utf8_target) {
                 sayNO;
             }
@@ -9387,7 +9387,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	    scan = this_eol;
 	break;
 
-    case LEXACT_ONLY8:
+    case LEXACT_REQ8:
         if (! utf8_target) {
             break;
         }
@@ -9409,7 +9409,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         }
         goto do_exact;
 
-    case EXACT_ONLY8:
+    case EXACT_REQ8:
         if (! utf8_target) {
             break;
         }
@@ -9512,7 +9512,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                                     | FOLDEQ_S2_FOLDS_SANE;
         goto do_exactf;
 
-    case EXACTFU_ONLY8:
+    case EXACTFU_REQ8:
         if (! utf8_target) {
             break;
         }

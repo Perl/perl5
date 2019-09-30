@@ -2702,7 +2702,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 #endif
 
     switch (flags) {
-        case EXACT: case EXACT_ONLY8: case EXACTL: break;
+        case EXACT: case EXACT_REQ8: case EXACTL: break;
 	case EXACTFAA:
         case EXACTFUP:
 	case EXACTFU:
@@ -2717,7 +2717,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     trie->wordcount = word_count;
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
     trie->charmap = (U16 *) PerlMemShared_calloc( 256, sizeof(U16) );
-    if (flags == EXACT || flags == EXACT_ONLY8 || flags == EXACTL)
+    if (flags == EXACT || flags == EXACT_REQ8 || flags == EXACTL)
 	trie->bitmap = (char *) PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     trie->wordinfo = (reg_trie_wordinfo *) PerlMemShared_calloc(
                        trie->wordcount+1, sizeof(reg_trie_wordinfo));
@@ -2793,8 +2793,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
         if (    noper < tail
             && (    OP(noper) == flags
-                || (flags == EXACT && OP(noper) == EXACT_ONLY8)
-                || (flags == EXACTFU && (   OP(noper) == EXACTFU_ONLY8
+                || (flags == EXACT && OP(noper) == EXACT_REQ8)
+                || (flags == EXACTFU && (   OP(noper) == EXACTFU_REQ8
                                          || OP(noper) == EXACTFUP))))
         {
             uc= (U8*)STRING(noper);
@@ -3011,8 +3011,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
             if (    noper < tail
                 && (    OP(noper) == flags
-                    || (flags == EXACT && OP(noper) == EXACT_ONLY8)
-                    || (flags == EXACTFU && (   OP(noper) == EXACTFU_ONLY8
+                    || (flags == EXACT && OP(noper) == EXACT_REQ8)
+                    || (flags == EXACTFU && (   OP(noper) == EXACTFU_REQ8
                                              || OP(noper) == EXACTFUP))))
             {
                 const U8 *uc= (U8*)STRING(noper);
@@ -3236,8 +3236,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
             if (    noper < tail
                 && (    OP(noper) == flags
-                    || (flags == EXACT && OP(noper) == EXACT_ONLY8)
-                    || (flags == EXACTFU && (   OP(noper) == EXACTFU_ONLY8
+                    || (flags == EXACT && OP(noper) == EXACT_REQ8)
+                    || (flags == EXACTFU && (   OP(noper) == EXACTFU_REQ8
                                              || OP(noper) == EXACTFUP))))
             {
                 const U8 *uc= (U8*)STRING(noper);
@@ -3996,7 +3996,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
 
 #define JOIN_EXACT(scan,min_subtract,unfolded_multi_char, flags)    \
     if (PL_regkind[OP(scan)] == EXACT && OP(scan) != LEXACT         \
-                                      && OP(scan) != LEXACT_ONLY8)  \
+                                      && OP(scan) != LEXACT_REQ8)  \
         join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags), NULL, depth+1)
 
 STATIC U32
@@ -4061,16 +4061,16 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 
             /* Joining something that requires UTF-8 with something that
              * doesn't, means the result requires UTF-8. */
-            if (OP(scan) == EXACT && (OP(n) == EXACT_ONLY8)) {
-                OP(scan) = EXACT_ONLY8;
+            if (OP(scan) == EXACT && (OP(n) == EXACT_REQ8)) {
+                OP(scan) = EXACT_REQ8;
             }
-            else if (OP(scan) == EXACT_ONLY8 && (OP(n) == EXACT)) {
+            else if (OP(scan) == EXACT_REQ8 && (OP(n) == EXACT)) {
                 ;   /* join is compatible, no need to change OP */
             }
-            else if ((OP(scan) == EXACTFU) && (OP(n) == EXACTFU_ONLY8)) {
-                OP(scan) = EXACTFU_ONLY8;
+            else if ((OP(scan) == EXACTFU) && (OP(n) == EXACTFU_REQ8)) {
+                OP(scan) = EXACTFU_REQ8;
             }
-            else if ((OP(scan) == EXACTFU_ONLY8) && (OP(n) == EXACTFU)) {
+            else if ((OP(scan) == EXACTFU_REQ8) && (OP(n) == EXACTFU)) {
                 ;   /* join is compatible, no need to change OP */
             }
             else if (OP(scan) == EXACTFU && OP(n) == EXACTFU) {
@@ -4093,7 +4093,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                   * node.  And if the only adjacent node is EXACTF, they get
                   * absorbed into that, under the theory that a longer node is
                   * better than two shorter ones, even if one is EXACTFU.  Note
-                  * that EXACTFU_ONLY8 is generated only for UTF-8 patterns,
+                  * that EXACTFU_REQ8 is generated only for UTF-8 patterns,
                   * and the EXACTFU_S_EDGE ones only for non-UTF-8.  */
 
                 if (STRING(n)[STR_LEN(n)-1] == 's') {
@@ -4201,7 +4201,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
      * this final joining, sequences could have been split over boundaries, and
      * hence missed).  The sequences only happen in folding, hence for any
      * non-EXACT EXACTish node */
-    if (OP(scan) != EXACT && OP(scan) != EXACT_ONLY8 && OP(scan) != EXACTL) {
+    if (OP(scan) != EXACT && OP(scan) != EXACT_REQ8 && OP(scan) != EXACTL) {
         U8* s0 = (U8*) STRING(scan);
         U8* s = s0;
         U8* s_end = s0 + STR_LEN(scan);
@@ -4860,9 +4860,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 ----------------+-----------
                                 NOTHING         | NOTHING
                                 EXACT           | EXACT
-                                EXACT_ONLY8     | EXACT
+                                EXACT_REQ8     | EXACT
                                 EXACTFU         | EXACTFU
-                                EXACTFU_ONLY8   | EXACTFU
+                                EXACTFU_REQ8   | EXACTFU
                                 EXACTFUP        | EXACTFU
                                 EXACTFAA        | EXACTFAA
                                 EXACTL          | EXACTL
@@ -4872,10 +4872,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         */
 #define TRIE_TYPE(X) ( ( NOTHING == (X) )                                   \
                        ? NOTHING                                            \
-                       : ( EXACT == (X) || EXACT_ONLY8 == (X) )             \
+                       : ( EXACT == (X) || EXACT_REQ8 == (X) )             \
                          ? EXACT                                            \
                          : (     EXACTFU == (X)                             \
-                              || EXACTFU_ONLY8 == (X)                       \
+                              || EXACTFU_REQ8 == (X)                       \
                               || EXACTFUP == (X) )                          \
                            ? EXACTFU                                        \
                            : ( EXACTFAA == (X) )                            \
@@ -5200,8 +5200,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	}
 	else if (   OP(scan) == EXACT
                  || OP(scan) == LEXACT
-                 || OP(scan) == EXACT_ONLY8
-                 || OP(scan) == LEXACT_ONLY8
+                 || OP(scan) == EXACT_REQ8
+                 || OP(scan) == LEXACT_REQ8
                  || OP(scan) == EXACTL)
         {
 	    SSize_t l = STR_LEN(scan);
@@ -5324,8 +5324,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    next = NEXTOPER(scan);
 		    if (   OP(next) == EXACT
                         || OP(next) == LEXACT
-                        || OP(next) == EXACT_ONLY8
-                        || OP(next) == LEXACT_ONLY8
+                        || OP(next) == EXACT_REQ8
+                        || OP(next) == LEXACT_REQ8
                         || OP(next) == EXACTL
                         || (flags & SCF_DO_STCLASS))
                     {
@@ -7985,8 +7985,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	if (PL_regkind[OP(first)] == EXACT) {
 	    if (   OP(first) == EXACT
 	        || OP(first) == LEXACT
-                || OP(first) == EXACT_ONLY8
-                || OP(first) == LEXACT_ONLY8
+                || OP(first) == EXACT_REQ8
+                || OP(first) == LEXACT_REQ8
                 || OP(first) == EXACTL)
             {
 		NOOP;	/* Empty, get anchored substr later. */
@@ -8333,7 +8333,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
                   && (   fop == EXACT || fop == LEXACT
-                      || fop == EXACT_ONLY8 || fop == LEXACT_ONLY8
+                      || fop == EXACT_REQ8 || fop == LEXACT_REQ8
                       || fop == EXACTL)
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
@@ -14878,18 +14878,18 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             else {
 
                 /* If the node type is EXACT here, check to see if it
-                 * should be EXACTL, or EXACT_ONLY8. */
+                 * should be EXACTL, or EXACT_REQ8. */
                 if (node_type == EXACT) {
                     if (LOC) {
                         node_type = EXACTL;
                     }
                     else if (requires_utf8_target) {
-                        node_type = EXACT_ONLY8;
+                        node_type = EXACT_REQ8;
                     }
                 }
                 else if (node_type == LEXACT) {
                     if (requires_utf8_target) {
-                        node_type = LEXACT_ONLY8;
+                        node_type = LEXACT_REQ8;
                     }
                 }
                 else if (FOLD) {
@@ -14960,7 +14960,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
 
                     if (requires_utf8_target && node_type == EXACTFU) {
-                        node_type = EXACTFU_ONLY8;
+                        node_type = EXACTFU_REQ8;
                     }
                 }
 
@@ -18737,7 +18737,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     op = (FOLD) ? EXACTFL : EXACTL;
                 }
                 else if (! FOLD) { /* Not /l and not /i */
-                    op = (start[0] < 256) ? EXACT : EXACT_ONLY8;
+                    op = (start[0] < 256) ? EXACT : EXACT_REQ8;
                 }
                 else if (start[0] < 256) { /* /i, not /l, and the code point is
                                               small */
@@ -18767,8 +18767,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                            applies to it */
                     op = _invlist_contains_cp(PL_InMultiCharFold,
                                               start[0])
-                         ? EXACTFU_ONLY8
-                         : EXACT_ONLY8;
+                         ? EXACTFU_REQ8
+                         : EXACT_REQ8;
                 }
 
                 value = start[0];
@@ -18932,7 +18932,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                      ? EXACTFLU8
                                      : (ASCII_FOLD_RESTRICTED)
                                        ? EXACTFAA
-                                       : EXACTFU_ONLY8;
+                                       : EXACTFU_REQ8;
                                 value = folded;
                             }
                         }   /* Below, the lowest code point < 256 */
@@ -20172,15 +20172,15 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
             switch (OP(REGNODE_p(scan))) {
                 case LEXACT:
                 case EXACT:
-                case LEXACT_ONLY8:
-                case EXACT_ONLY8:
+                case LEXACT_REQ8:
+                case EXACT_REQ8:
                 case EXACTL:
                 case EXACTF:
                 case EXACTFU_S_EDGE:
                 case EXACTFAA_NO_TRIE:
                 case EXACTFAA:
                 case EXACTFU:
-                case EXACTFU_ONLY8:
+                case EXACTFU_REQ8:
                 case EXACTFLU8:
                 case EXACTFUP:
                 case EXACTFL:
