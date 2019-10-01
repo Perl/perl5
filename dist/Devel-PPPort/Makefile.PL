@@ -71,7 +71,7 @@ sub configure
     my $version;
     my $line;
     while ($line = <FH>) {
-      ($version) = $line =~ /^\$VERSION = '([\d.]+)';$/ and last;
+      ($version) = $line =~ /^\$VERSION = '([\d.]+(_\d+)?)';$/ and last;
     };
     die 'failed to extract $VERSION from PPPort_pm.PL' if not $version;
     close FH;
