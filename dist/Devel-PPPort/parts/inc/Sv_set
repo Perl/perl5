@@ -25,15 +25,15 @@ sv_setsv_flags
 #if ( { VERSION >= 5.7.3 } && { VERSION < 5.8.7 } ) || ( { VERSION >= 5.9.0 } && { VERSION < 5.9.2 } )
 #undef sv_setsv_flags
 #define SV_NOSTEAL 16
-#define sv_setsv_flags(dstr, sstr, flags)                                \
-  STMT_START {                                                           \
-    if (((flags) & SV_NOSTEAL) && (SvFLAGS((sstr)) & SVs_TEMP)) {        \
-      SvTEMP_off((sstr));                                                \
-      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);  \
-      SvTEMP_on((sstr));                                                 \
-    } else {                                                             \
-      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);  \
-    }                                                                    \
+#define sv_setsv_flags(dstr, sstr, flags)                                          \
+  STMT_START {                                                                     \
+    if (((flags) & SV_NOSTEAL) && (sstr) && (SvFLAGS((SV *)(sstr)) & SVs_TEMP)) {  \
+      SvTEMP_off((SV *)(sstr));                                                    \
+      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);            \
+      SvTEMP_on((SV *)(sstr));                                                     \
+    } else {                                                                       \
+      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);            \
+    }                                                                              \
   } STMT_END
 #endif
 
@@ -158,6 +158,18 @@ newSVsv_nomg(sv)
         OUTPUT:
                 RETVAL
 
+#endif
+
+void
+sv_setsv_compile_test(sv)
+        SV *sv
+        CODE:
+                sv_setsv(sv, NULL);
+#ifdef sv_setsv_flags
+                sv_setsv_flags(sv, NULL, 0);
+#ifdef SV_NOSTEAL
+                sv_setsv_flags(sv, NULL, SV_NOSTEAL);
+#endif
 #endif
 
 =tests plan => 15
