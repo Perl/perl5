@@ -14902,6 +14902,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
                     else if (node_type == EXACTF) {  /* Means is /di */
 
+                        /* This intermediate variable is needed solely because
+                         * the asserts in the macro where used exceed Win32's
+                         * literal string capacity */
+                        char first_char = * STRING(REGNODE_p(ret));
+
                         /* If 'maybe_exactfu' is clear, then we need to stay
                          * /di.  If it is set, it means there are no code
                          * points that match differently depending on UTF8ness
@@ -14910,7 +14915,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (! maybe_exactfu) {
                             RExC_seen_d_op = TRUE;
                         }
-                        else if (   isALPHA_FOLD_EQ(* STRING(REGNODE_p(ret)), 's')
+                        else if (   isALPHA_FOLD_EQ(first_char, 's')
                                  || isALPHA_FOLD_EQ(ender, 's'))
                         {
                             /* But, if the node begins or ends in an 's' we
