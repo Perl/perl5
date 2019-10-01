@@ -86,12 +86,12 @@ sub configure
       },
       resources => {
         bugtracker => {
-          web => 'https://rt.perl.org/rt3/',
+          web => 'https://github.com/Dual-Life/Devel-PPPort/issues',
         },
         repository => {
           type => 'git',
-          url  => 'git://perl5.git.perl.org/perl.git',
-          web  => 'https://perl5.git.perl.org/perl.git',
+          url  => 'git://github.com/Dual-Life/Devel-PPPort.git',
+          web  => 'https://github.com/Dual-Life/Devel-PPPort',
         },
       },
     };
