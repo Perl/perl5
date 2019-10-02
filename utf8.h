@@ -475,7 +475,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * code point in process of being generated */
 #define UTF8_ACCUMULATE(old, new) (__ASSERT_(FITS_IN_8_BITS(new))              \
                                    ((old) << UTF_ACCUMULATION_SHIFT)           \
-                                   | ((NATIVE_UTF8_TO_I8((U8)new))             \
+                                   | ((NATIVE_UTF8_TO_I8(new))                 \
                                        & UTF_CONTINUATION_MASK))
 
 /* This works in the face of malformed UTF-8. */
