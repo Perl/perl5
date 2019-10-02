@@ -1259,6 +1259,9 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
             s/^\s*#.*//;
             next unless $_;
             my ($name, $codes) = split ";";
+            $codes =~ s/\b 00 ( [0-9A-F]{2} ) \b/
+                       sprintf("%04X", utf8::unicode_to_native(hex $1))/gxe
+                                                            if ord "A" != 65;
             my $utf8 = pack("W*", map { hex } split " ", $codes);
             is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
             my $loose_name = get_loose_name($name);
