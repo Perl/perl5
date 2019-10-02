@@ -324,7 +324,9 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
      * performance hit on these high EBCDIC code points. */
 
     if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-        if (UNLIKELY(uv > MAX_LEGAL_CP)) {
+        if (UNLIKELY(      uv > MAX_LEGAL_CP
+                     && ! (flags & UNICODE_ALLOW_ABOVE_IV_MAX)))
+        {
             Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_LEGAL_CP);
         }
         if (       (flags & UNICODE_WARN_SUPER)
