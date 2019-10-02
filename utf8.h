@@ -355,7 +355,9 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 
 #endif /* EBCDIC vs ASCII */
 
-/* 2**UTF_ACCUMULATION_SHIFT - 1 */
+/* 2**UTF_ACCUMULATION_SHIFT - 1.  This masks out all but the bits that carry
+ * real information in a continuation byte.  This turns out to be 0x3F in
+ * UTF-8, 0x1F in UTF-EBCDIC. */
 #define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
 
 /* Internal macro to be used only in this file to aid in constructing other
