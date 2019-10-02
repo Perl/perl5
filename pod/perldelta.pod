@@ -45,6 +45,24 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Modifiable variables are no longer permitted in constants
+
+Code like:
+
+    my $var;
+    $sub = sub () { $var };
+
+where C<$var> is referenced elsewhere in some sort of modiable context
+now produces an exception when the sub is defined.
+
+This error can be avoided by adding a return to the sub definition:
+
+    $sub = sub () { return $var };
+
+This has been deprecated since perl 5.22.
+
+[perl #131138]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
