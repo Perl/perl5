@@ -245,9 +245,7 @@ explicitly forbidden, and the shortest possible encoding should always be used
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
 
-#define UTF_CONTINUATION_MARK		0xA0
 #define UTF_ACCUMULATION_SHIFT		5
-
 /* ^? is defined to be APC on EBCDIC systems.  See the definition of toCTRL()
  * for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)

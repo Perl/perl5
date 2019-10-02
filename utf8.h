@@ -294,10 +294,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 
 #define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
 
-/* This defines the bits that are to be in the continuation bytes of a multi-byte
- * UTF-8 encoded character that mark it is a continuation byte. */
-#define UTF_CONTINUATION_MARK		0x80
-
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT.  The |0 makes sure this
  * isn't mistakenly called with a ptr argument */
@@ -360,6 +356,12 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 /* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
  * E0 in UTF-EBCDIC */
 #define UTF_IS_CONTINUATION_MASK    ((U8) (0xFF << UTF_ACCUMULATION_SHIFT))
+
+/* This defines the bits that are to be in the continuation bytes of a
+ * multi-byte UTF-8 encoded character that mark it is a continuation byte.
+ * This turns out to be 0x80 in UTF-8, 0xA0 in UTF-EBCDIC.  (khw doesn't know
+ * the underlying reason that B0 works here) */
+#define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
