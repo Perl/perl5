@@ -220,8 +220,6 @@ explicitly forbidden, and the shortest possible encoding should always be used
 
 #define UTF8_IS_START(c)		_generic_isCC(c, _CC_UTF8_IS_START)
 
-#define UTF_IS_CONTINUATION_MASK    0xE0
-
 #define UTF8_IS_CONTINUATION(c)		_generic_isCC(c, _CC_UTF8_IS_CONTINUATION)
 
 /* The above instead could be written as this:

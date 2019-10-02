@@ -311,9 +311,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define UTF8_IS_START(c)      (__ASSERT_(FITS_IN_8_BITS(c))                 \
                                ((U8)((c) | 0)) >= 0xc2)
 
-/* For use in UTF8_IS_CONTINUATION() below */
-#define UTF_IS_CONTINUATION_MASK    0xC0
-
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof?  The |0 makes sure this isn't mistakenly called with a
  * ptr argument */
@@ -359,6 +356,10 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * real information in a continuation byte.  This turns out to be 0x3F in
  * UTF-8, 0x1F in UTF-EBCDIC. */
 #define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+
+/* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
+ * E0 in UTF-EBCDIC */
+#define UTF_IS_CONTINUATION_MASK    ((U8) (0xFF << UTF_ACCUMULATION_SHIFT))
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
