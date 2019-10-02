@@ -36,18 +36,14 @@
  */
 
 STATIC Size_t
-S_do_trans_simple(pTHX_ SV * const sv)
+S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
     Size_t matches = 0;
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv,len);
     U8 * const send = s+len;
-    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_SIMPLE;
-
-    if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans_simple line %d",__LINE__);
 
     /* First, take care of non-UTF-8 input strings, because they're easy */
     if (!SvUTF8(sv)) {
@@ -115,18 +111,14 @@ S_do_trans_simple(pTHX_ SV * const sv)
  */
 
 STATIC Size_t
-S_do_trans_count(pTHX_ SV * const sv)
+S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
     STRLEN len;
     const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
     Size_t matches = 0;
-    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT;
-
-    if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans_count line %d",__LINE__);
 
     if (!SvUTF8(sv)) {
 	while (s < send) {
@@ -160,18 +152,14 @@ S_do_trans_count(pTHX_ SV * const sv)
  */
 
 STATIC Size_t
-S_do_trans_complex(pTHX_ SV * const sv)
+S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
     Size_t matches = 0;
-    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
-
-    if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans_complex line %d",__LINE__);
 
     if (!SvUTF8(sv)) {
 	U8 *d = s;
@@ -636,11 +624,11 @@ Perl_do_trans(pTHX_ SV *sv)
      * we must also rely on it to choose the readonly strategy.
      */
     if (flags & OPpTRANS_IDENTICAL) {
-        return hasutf ? do_trans_count_utf8(sv) : do_trans_count(sv);
+        return hasutf ? do_trans_count_utf8(sv) : do_trans_count(sv, (OPtrans_map*)cPVOP->op_pv);
     } else if (flags & (OPpTRANS_SQUASH|OPpTRANS_DELETE|OPpTRANS_COMPLEMENT)) {
-        return hasutf ? do_trans_complex_utf8(sv) : do_trans_complex(sv);
+        return hasutf ? do_trans_complex_utf8(sv) : do_trans_complex(sv, (OPtrans_map*)cPVOP->op_pv);
     } else {
-        return hasutf ? do_trans_simple_utf8(sv) : do_trans_simple(sv);
+        return hasutf ? do_trans_simple_utf8(sv) : do_trans_simple(sv, (OPtrans_map*)cPVOP->op_pv);
     }
 }
 

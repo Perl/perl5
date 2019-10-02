@@ -1601,11 +1601,11 @@
 #define openn_setup(a,b,c,d,e,f)	S_openn_setup(aTHX_ a,b,c,d,e,f)
 #  endif
 #  if defined(PERL_IN_DOOP_C)
-#define do_trans_complex(a)	S_do_trans_complex(aTHX_ a)
+#define do_trans_complex(a,b)	S_do_trans_complex(aTHX_ a,b)
 #define do_trans_complex_utf8(a)	S_do_trans_complex_utf8(aTHX_ a)
-#define do_trans_count(a)	S_do_trans_count(aTHX_ a)
+#define do_trans_count(a,b)	S_do_trans_count(aTHX_ a,b)
 #define do_trans_count_utf8(a)	S_do_trans_count_utf8(aTHX_ a)
-#define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)
+#define do_trans_simple(a,b)	S_do_trans_simple(aTHX_ a,b)
 #define do_trans_simple_utf8(a)	S_do_trans_simple_utf8(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_DUMP_C)

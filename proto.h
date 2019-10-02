@@ -4851,30 +4851,30 @@ STATIC IO *	S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **s
 	assert(gv); assert(mode); assert(saveifp); assert(saveofp); assert(savefd); assert(savetype)
 #endif
 #if defined(PERL_IN_DOOP_C)
-STATIC Size_t	S_do_trans_complex(pTHX_ SV * const sv)
+STATIC Size_t	S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_COMPLEX	\
-	assert(sv)
+	assert(sv); assert(tbl)
 
 STATIC Size_t	S_do_trans_complex_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_COMPLEX_UTF8	\
 	assert(sv)
 
-STATIC Size_t	S_do_trans_count(pTHX_ SV * const sv)
+STATIC Size_t	S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_COUNT	\
-	assert(sv)
+	assert(sv); assert(tbl)
 
 STATIC Size_t	S_do_trans_count_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_COUNT_UTF8	\
 	assert(sv)
 
-STATIC Size_t	S_do_trans_simple(pTHX_ SV * const sv)
+STATIC Size_t	S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_SIMPLE	\
-	assert(sv)
+	assert(sv); assert(tbl)
 
 STATIC Size_t	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
