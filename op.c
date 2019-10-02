@@ -7031,8 +7031,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     }
 
         /* Non-utf8 case: set o->op_pv to point to a simple 256+ entry lookup
-        * table. Entries with the value -1 indicate chars not to be
-        * translated, while -2 indicates a search char without a
+        * table. Entries with the value TR_UNMAPPED indicate chars not to be
+        * translated, while TR_DELETE indicates a search char without a
         * corresponding replacement char under /d.
         *
         * Normally, the table has 256 slots. However, in the presence of
@@ -7042,16 +7042,17 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         * is allocated.
         *
         * In addition, regardless of whether under /c, an extra slot at the
-        * end is used to store the final repeating char, or -3 under an empty
-        * replacement list, or -2 under /d; which makes the runtime code
-        * easier.
+        * end is used to store the final repeating char, or TR_R_EMPTY under an
+        * empty replacement list, or TR_DELETE under /d; which makes the
+        * runtime code easier.
         *
         * The toker will have already expanded char ranges in t and r.
         */
 
         /* Initially allocate 257-slot table: 256 for basic (non /c) usage,
-        * plus final slot for repeat/-2/-3. Later we realloc if excess > * 0.
-        * The OPtrans_map struct already contains one slot; hence the -1.
+        * plus final slot for repeat/TR_DELETE/TR_R_EMPTY. Later we realloc if
+        * excess > * 0.  The OPtrans_map struct already contains one slot;
+        * hence the -1.
         */
         struct_size = sizeof(OPtrans_map) + (256 - 1 + 1)*sizeof(short);
         tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
@@ -7065,13 +7066,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             * with a search char) replacement chars (so j <= rlen always)
             */
             for (i = 0; i < tlen; i++)
-                tbl->map[t[i]] = -1;
+                tbl->map[t[i]] = (short) TR_UNMAPPED;
 
             for (i = 0, j = 0; i < 256; i++) {
                 if (!tbl->map[i]) {
                     if (j == rlen) {
                         if (del)
-                            tbl->map[i] = -2;
+                            tbl->map[i] = (short) TR_DELETE;
                         else if (rlen)
                             tbl->map[i] = r[j-1];
                         else
@@ -7111,7 +7112,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     o->op_private |= OPpTRANS_IDENTICAL;
             }
 
-            tbl->map[tbl->size] = del ? -2 : rlen ? r[rlen - 1] : -3;
+            tbl->map[tbl->size] = del
+                                  ? (short) TR_DELETE
+                                  : rlen
+                                    ? r[rlen - 1]
+                                    : (short) TR_R_EMPTY;
         }
         else {
             if (!rlen && !del) {
@@ -7124,24 +7129,28 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             }
 
             for (i = 0; i < 256; i++)
-                tbl->map[i] = -1;
+                tbl->map[i] = (short) TR_UNMAPPED;
             for (i = 0, j = 0; i < tlen; i++,j++) {
                 if (j >= rlen) {
                     if (del) {
-                        if (tbl->map[t[i]] == -1)
-                            tbl->map[t[i]] = -2;
+                        if (tbl->map[t[i]] == (short) TR_UNMAPPED)
+                            tbl->map[t[i]] = (short) TR_DELETE;
                         continue;
                     }
                     --j;
                 }
-                if (tbl->map[t[i]] == -1) {
+                if (tbl->map[t[i]] == (short) TR_UNMAPPED) {
                     if (     UVCHR_IS_INVARIANT(t[i])
                         && ! UVCHR_IS_INVARIANT(r[j]))
                         grows = TRUE;
                     tbl->map[t[i]] = r[j];
                 }
             }
-            tbl->map[tbl->size] = del ? -1 : rlen ? -1 : -3;
+            tbl->map[tbl->size] = del
+                                  ? (short) TR_UNMAPPED
+                                  : rlen
+                                    ? (short) TR_UNMAPPED
+                                    : (short) TR_R_EMPTY;
         }
 
     /* both non-utf8 and utf8 code paths end up here */
