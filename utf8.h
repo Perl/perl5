@@ -307,12 +307,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define UTF8_IS_START(c)      (__ASSERT_(FITS_IN_8_BITS(c))                 \
                                ((U8)((c) | 0)) >= 0xc2)
 
-/* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
- * first byte thereof?  The |0 makes sure this isn't mistakenly called with a
- * ptr argument */
-#define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
-     (((U8)((c) | 0)) & UTF_IS_CONTINUATION_MASK) == UTF_CONTINUATION_MARK)
-
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
@@ -362,6 +356,12 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * This turns out to be 0x80 in UTF-8, 0xA0 in UTF-EBCDIC.  (khw doesn't know
  * the underlying reason that B0 works here) */
 #define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
+
+/* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
+ * first byte thereof? */
+#define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+            (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)             \
+                                                == UTF_CONTINUATION_MARK)))
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
