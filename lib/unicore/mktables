@@ -12524,6 +12524,11 @@ sub process_NamedSequences {
             next;
         }
 
+        # Code points below 0x0100 need to be converted to native
+        $sequence =~ s/\b 00 ( [0-9A-F]{2} ) \b/
+                      sprintf("%04X", utf8::unicode_to_native(hex $1))/gxe
+                                                        if NON_ASCII_PLATFORM;
+
         # Note single \t in keeping with special output format of
         # Perl_charnames.  But it turns out that the code points don't have to
         # be 5 digits long, like the rest, based on the internal workings of
