@@ -195,11 +195,11 @@ adding no time nor space requirements to the implementation.
 */
 
 #ifdef PERL_SMALL_MACRO_BUFFER
-#define NATIVE_TO_LATIN1(ch)     ((U8)(ch))
-#define LATIN1_TO_NATIVE(ch)     ((U8)(ch))
+#  define NATIVE_TO_LATIN1(ch)     ((U8)(ch))
+#  define LATIN1_TO_NATIVE(ch)     ((U8)(ch))
 #else
-#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
-#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#  define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#  define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
 #endif
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
@@ -212,12 +212,12 @@ adding no time nor space requirements to the implementation.
 #define NATIVE_UTF8_TO_I8(ch) ((U8) (ch))
 #define I8_TO_NATIVE_UTF8(ch) ((U8) (ch))
 #else
-#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
-#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
 #endif
 
-#define UNI_TO_NATIVE(ch)        ((UV) (ch))
-#define NATIVE_TO_UNI(ch)        ((UV) (ch))
+#define UNI_TO_NATIVE(ch)        ((UV) ((ch) | 0))
+#define NATIVE_TO_UNI(ch)        ((UV) ((ch) | 0))
 
 /*
 
