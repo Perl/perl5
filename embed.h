@@ -1015,7 +1015,6 @@
 #define get_regex_charset_name	S_get_regex_charset_name
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
-#define _make_exactf_invlist(a,b)	S__make_exactf_invlist(aTHX_ a,b)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
@@ -1041,6 +1040,7 @@
 #define invlist_iternext	S_invlist_iternext
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
+#define make_exactf_invlist(a,b)	S_make_exactf_invlist(aTHX_ a,b)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define new_regcurly		S_new_regcurly
 #define nextchar(a)		S_nextchar(aTHX_ a)

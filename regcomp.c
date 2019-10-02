@@ -5286,7 +5286,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 
             if (flags & SCF_DO_STCLASS) {
-                SV* EXACTF_invlist = _make_exactf_invlist(pRExC_state, scan);
+                SV* EXACTF_invlist = make_exactf_invlist(pRExC_state, scan);
 
                 assert(EXACTF_invlist);
                 if (flags & SCF_DO_STCLASS_AND) {
@@ -10614,7 +10614,7 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
  * call SvREFCNT_dec() when done with it.
  */
 STATIC SV*
-S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
+S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 {
     dVAR;
     const U8 * s = (U8*)STRING(node);
@@ -10623,7 +10623,7 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
     /* Start out big enough for 2 separate code points */
     SV* invlist = _new_invlist(4);
 
-    PERL_ARGS_ASSERT__MAKE_EXACTF_INVLIST;
+    PERL_ARGS_ASSERT_MAKE_EXACTF_INVLIST;
 
     if (! UTF) {
         uc = *s;

@@ -5542,11 +5542,6 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array);
 #define PERL_ARGS_ASSERT_SPACE_JOIN_NAMES_MORTAL
 #endif
 #if defined(PERL_IN_REGCOMP_C)
-STATIC SV*	S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__MAKE_EXACTF_INVLIST	\
-	assert(pRExC_state); assert(node)
-
 STATIC void	S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist);
 #define PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS	\
 	assert(pRExC_state); assert(invlist)
@@ -5656,6 +5651,11 @@ STATIC bool	S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ss
 STATIC U32	S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *unfolded_multi_char, U32 flags, regnode *val, U32 depth);
 #define PERL_ARGS_ASSERT_JOIN_EXACT	\
 	assert(pRExC_state); assert(scan); assert(min_subtract); assert(unfolded_multi_char)
+STATIC SV*	S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MAKE_EXACTF_INVLIST	\
+	assert(pRExC_state); assert(node)
+
 STATIC I32	S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth);
 #define PERL_ARGS_ASSERT_MAKE_TRIE	\
 	assert(pRExC_state); assert(startbranch); assert(first); assert(last); assert(tail)

@@ -1891,11 +1891,11 @@ EiT	|void	|invlist_iterinit|NN SV* invlist
 ESRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 EiT	|void	|invlist_iterfinish|NN SV* invlist
 EiRT	|UV	|invlist_highest|NN SV* const invlist
-ERS	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
-					|NN regnode *node
 ESR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
 ESRT	|bool	|new_regcurly	|NN const char *s|NN const char *e
+ERS	|SV*	|make_exactf_invlist	|NN RExC_state_t *pRExC_state \
+					|NN regnode *node
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 m	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
