@@ -300,13 +300,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
                                ((U8)((c) | 0)) &  UTF_CONTINUATION_MARK)
 
-/* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
- * This doesn't catch invariants (they are single-byte).  It also excludes the
- * illegal overlong sequences that begin with C0 and C1.  The |0 makes sure
- * this isn't mistakenly called with a ptr argument */
-#define UTF8_IS_START(c)      (__ASSERT_(FITS_IN_8_BITS(c))                 \
-                               ((U8)((c) | 0)) >= 0xc2)
-
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
@@ -420,6 +413,15 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 =cut
  */
 #define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
+
+#define UTF_MIN_START_BYTE                                                  \
+     ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+
+/* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
+ * This doesn't catch invariants (they are single-byte).  It also excludes the
+ * illegal overlong sequences that begin with C0 and C1. */
+#define UTF8_IS_START(c)    (__ASSERT_(FITS_IN_8_BITS(c))                   \
+                             (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE))
 
 /* The largest code point representable by two UTF-8 bytes on this platform.
  * As explained in the comments for __COMMON_UNI_SKIP, 32 start bytes with
