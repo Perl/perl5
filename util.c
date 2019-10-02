@@ -3874,7 +3874,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
   ** If there is a better way to make it portable, go ahead by
   ** all means.
   */
-  if ((len > 0 && len < buflen) || (len == 0 && *fmt == '\0'))
+  if (inRANGE(len, 1, buflen - 1) || (len == 0 && *fmt == '\0'))
     return buf;
   else {
     /* Possibly buf overflowed - try again with a bigger buf */
@@ -3888,7 +3888,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
       buflen = strftime(buf, bufsize, fmt, &mytm);
       GCC_DIAG_RESTORE_STMT;
 
-      if (buflen > 0 && buflen < bufsize)
+      if (inRANGE(buflen, 1, bufsize - 1))
 	break;
       /* heuristic to prevent out-of-memory errors */
       if (bufsize > 100*fmtlen) {
