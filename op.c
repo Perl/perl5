@@ -6846,8 +6846,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    while (t < tend) {
 		cp[2*i] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
 		t += ulen;
-                /* the toker converts X-Y into (X, ILLEGAL_UTF8_BYTE, Y) */
-		if (t < tend && *t == ILLEGAL_UTF8_BYTE) {
+                /* the toker converts X-Y into (X, RANGE_INDICATOR, Y) */
+		if (t < tend && *t == RANGE_INDICATOR) {
 		    t++;
 		    cp[2*i+1] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
 		    t += ulen;
@@ -6864,10 +6864,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             /* Create a utf8 string containing the complement of the
              * codepoint ranges. For example if cp[] contains [A,B], [C,D],
              * then transv will contain the equivalent of:
-             * join '', map chr, 0,     ILLEGAL_UTF8_BYTE, A - 1,
-             *                   B + 1, ILLEGAL_UTF8_BYTE, C - 1,
-             *                   D + 1, ILLEGAL_UTF8_BYTE, 0x7fffffff;
-             * A range of a single char skips the ILLEGAL_UTF8_BYTE and
+             * join '', map chr, 0,     RANGE_INDICATOR, A - 1,
+             *                   B + 1, RANGE_INDICATOR, C - 1,
+             *                   D + 1, RANGE_INDICATOR, 0x7fffffff;
+             * A range of a single char skips the RANGE_INDICATOR and
              * end cp.
              */
 	    for (j = 0; j < i; j++) {
@@ -6877,7 +6877,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    t = uvchr_to_utf8(tmpbuf,nextmin);
 		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    if (diff > 1) {
-			U8  range_mark = ILLEGAL_UTF8_BYTE;
+			U8  range_mark = RANGE_INDICATOR;
 			t = uvchr_to_utf8(tmpbuf, val - 1);
 			sv_catpvn(transv, (char *)&range_mark, 1);
 			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
@@ -6891,7 +6891,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    t = uvchr_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    {
-		U8 range_mark = ILLEGAL_UTF8_BYTE;
+		U8 range_mark = RANGE_INDICATOR;
 		sv_catpvn(transv, (char *)&range_mark, 1);
 	    }
 	    t = uvchr_to_utf8(tmpbuf, 0x7fffffff);
@@ -6920,7 +6920,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (tfirst > tlast) {
 		tfirst = (I32)utf8n_to_uvchr(t, tend - t, &ulen, flags);
 		t += ulen;
-		if (t < tend && *t == ILLEGAL_UTF8_BYTE) {	/* illegal utf8 val indicates range */
+		if (t < tend && *t == RANGE_INDICATOR) {	/* illegal utf8 val indicates range */
 		    t++;
 		    tlast = (I32)utf8n_to_uvchr(t, tend - t, &ulen, flags);
 		    t += ulen;
@@ -6934,7 +6934,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (r < rend) {
 		    rfirst = (I32)utf8n_to_uvchr(r, rend - r, &ulen, flags);
 		    r += ulen;
-		    if (r < rend && *r == ILLEGAL_UTF8_BYTE) {	/* illegal utf8 val indicates range */
+		    if (r < rend && *r == RANGE_INDICATOR) {	/* illegal utf8 val indicates range */
 			r++;
 			rlast = (I32)utf8n_to_uvchr(r, rend - r, &ulen, flags);
 			r += ulen;

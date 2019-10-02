@@ -2987,12 +2987,13 @@ S_scan_const(pTHX_ char *start)
              * order to make the transliteration a simple table look-up.
              * Ranges that extend above Latin1 have to be done differently, so
              * there is no advantage to expanding them here, so they are
-             * stored here as Min, ILLEGAL_UTF8_BYTE, Max.  The illegal byte
-             * signifies a hyphen without any possible ambiguity.  On EBCDIC
-             * machines, if the range is expressed as Unicode, the Latin1
-             * portion is expanded out even if the range extends above
-             * Latin1.  This is because each code point in it has to be
-             * processed here individually to get its native translation */
+             * stored here as Min, RANGE_INDICATOR, Max.  'RANGE_INDICATOR' is
+             * a byte that can't occur in legal UTF-8, and hence can signify a
+             * hyphen without any possible ambiguity.  On EBCDIC machines, if
+             * the range is expressed as Unicode, the Latin1 portion is
+             * expanded out even if the range extends above Latin1.  This is
+             * because each code point in it has to be processed here
+             * individually to get its native translation */
 
 	    if (! dorange) {
 
@@ -3204,7 +3205,7 @@ S_scan_const(pTHX_ char *start)
                         while (e-- > max_ptr) {
                             *(e + 1) = *e;
                         }
-                        *(e + 1) = (char) ILLEGAL_UTF8_BYTE;
+                        *(e + 1) = (char) RANGE_INDICATOR;
                         goto range_done;
                     }
 
@@ -3362,7 +3363,7 @@ S_scan_const(pTHX_ char *start)
                     *d++ = (char) UTF8_TWO_BYTE_LO(0x100);
                     if (real_range_max > 0x100) {
                         if (real_range_max > 0x101) {
-                            *d++ = (char) ILLEGAL_UTF8_BYTE;
+                            *d++ = (char) RANGE_INDICATOR;
                         }
                         d = (char*)uvchr_to_utf8((U8*)d, real_range_max);
                     }
