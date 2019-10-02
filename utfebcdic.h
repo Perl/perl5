@@ -224,12 +224,6 @@ explicitly forbidden, and the shortest possible encoding should always be used
 #define UTF8_IS_DOWNGRADEABLE_START(c)   _generic_isCC(c,                       \
                                               _CC_UTF8_IS_DOWNGRADEABLE_START)
 
-/* Equivalent to (UTF8_IS_START(c) && ! UTF8_IS_DOWNGRADEABLE_START(c))
- * Makes sure that the START bit is set and the DOWNGRADEABLE bit isn't */
-#define UTF8_IS_ABOVE_LATIN1(c) cBOOL(FITS_IN_8_BITS(c)                         \
-  && ((PL_charclass[(U8) (c)] & ( _CC_mask(_CC_UTF8_IS_START)                   \
-                                 |_CC_mask(_CC_UTF8_IS_DOWNGRADEABLE_START)))   \
-                        == _CC_mask(_CC_UTF8_IS_START)))
 
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
