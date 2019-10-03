@@ -300,14 +300,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
                                ((U8)((c) | 0)) &  UTF_CONTINUATION_MARK)
 
-/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
- * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
- * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
- * this matches 0xc[23].  The |0 makes sure this isn't mistakenly called with a
- * ptr argument */
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(__ASSERT_(FITS_IN_8_BITS(c))       \
-                                         (((U8)((c) | 0)) & 0xfe) == 0xc2)
-
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
@@ -425,6 +417,13 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * represent a code point > 255? */
 #define UTF8_IS_ABOVE_LATIN1(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
                         (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE))
+
+/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
+ * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
+ * be well-formed. */
+#define UTF8_IS_DOWNGRADEABLE_START(c)	(__ASSERT_(FITS_IN_8_BITS(c))       \
+                inRANGE(NATIVE_UTF8_TO_I8(c),                               \
+                        UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
 
 /* The largest code point representable by two UTF-8 bytes on this platform.
  * As explained in the comments for __COMMON_UNI_SKIP, 32 start bytes with

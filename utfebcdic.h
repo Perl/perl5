@@ -221,9 +221,6 @@ explicitly forbidden, and the shortest possible encoding should always be used
 #define UTF8_IS_CONTINUED(c) 		cBOOL(FITS_IN_8_BITS(c)                 \
    && ! (PL_charclass[(U8) (c)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
 
-#define UTF8_IS_DOWNGRADEABLE_START(c)   _generic_isCC(c,                       \
-                                              _CC_UTF8_IS_DOWNGRADEABLE_START)
-
 
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
