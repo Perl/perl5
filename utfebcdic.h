@@ -202,10 +202,23 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
-/* Comments as to the meaning of each are given at their corresponding utf8.h
- * definitions. */
+/* It turns out that just this one number is sufficient to derive all the basic
+ * macros for UTF-8 and UTF-EBCDIC.  Everything follows from the fact that
+ * there are 6 bits of real information in a UTF-8 continuation byte vs. 5 bits
+ * in a UTF-EBCDIC one. */
 
 #define UTF_ACCUMULATION_SHIFT		5
+
+/* Also needed is how perl handles a start byte of 8 one bits.  The decision
+ * was made to just append the minimal number of bytes after that so that code
+ * points up to 64 bits wide could be represented.  In UTF-8, that was an extra
+ * 5 bytes, and in UTF-EBCDIC it's 6.  The result is in UTF8_MAXBYTES defined
+ * above.  This implementation has the advantage that you have everything you
+ * need in the first byte.  Other ways of extending UTF-8 have been devised,
+ * some to arbitrarily high code points.  But they require looking at the next
+ * byte(s) when the first one is 8 one bits. */
+
+/* These others are for efficiency or for other decisions we've made */
 
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
