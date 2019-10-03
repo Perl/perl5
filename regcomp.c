@@ -8676,8 +8676,8 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
 	i = rx->sublen + rx->suboffset - rx->offs[0].end;
     }
     else
-    if ( 0 <= n && n <= (I32)rx->nparens &&
-        (s1 = rx->offs[n].start) != -1 &&
+    if (inRANGE(n, 0, (I32)rx->nparens) &&
+        (s1 = rx->offs[n].start) != -1  &&
         (t1 = rx->offs[n].end) != -1)
     {
         /* $&, ${^MATCH},  $1 ... */
@@ -12851,9 +12851,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         value = (U8 *) SvPV(value_sv, value_len);
 
         /* See if the result is one code point vs 0 or multiple */
-        if (value_len > 0 && value_len <= (UV) ((SvUTF8(value_sv))
-                                               ? UTF8SKIP(value)
-                                               : 1))
+        if (inRANGE(value_len, 1, ((UV) SvUTF8(value_sv)
+                                  ? UTF8SKIP(value)
+                                  : 1)))
         {
             /* Here, exactly one code point.  If that isn't what is wanted,
              * fail */
@@ -18839,7 +18839,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 /* Only try if there are no more code points in the class than
                  * in the max possible fold */
-            &&   partial_cp_count > 0 && partial_cp_count <= MAX_FOLD_FROMS + 1)
+            &&   inRANGE(partial_cp_count, 1, MAX_FOLD_FROMS + 1))
         {
             if (partial_cp_count == 1 && ! upper_latin1_only_utf8_matches)
             {
