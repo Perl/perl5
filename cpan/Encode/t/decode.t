@@ -13,7 +13,15 @@ sub croak_ok(&) {
     like $@, qr/does not map/;
 }
 
-my $bytes = "L\x{e9}on";
+sub uni_to_native($) {
+    my $ord = shift;
+
+    return chr $ord if ord("A") == 65 || "$]" < 5.008;
+
+    return chr utf8::unicode_to_native($ord);
+}
+
+my $bytes = "L" . uni_to_native(0xe9) . "on";
 my $pad = "\x{30C9}";
 
 my $orig = $bytes;
@@ -35,57 +43,65 @@ SKIP: {
     is($latin1->decode(*a), '*main::'.$orig, '[cpan #115168] passing typeglobs to decode');
 }
 
-$orig = "\x80";
+$orig = uni_to_native(0x80);
 $orig =~ /(.)/;
 is($latin1->decode($1), "\N{U+0080}", 'passing magic regex to latin1 decode');
 
-$orig = "\x80";
+$orig = uni_to_native(0x80);
 *a = $orig;
 is($latin1->decode(*a), "*main::\N{U+0080}", 'passing typeglob to latin1 decode');
 
 $orig = "\N{U+0080}";
 $orig =~ /(.)/;
-is($latin1->encode($1), "\x80", 'passing magic regex to latin1 encode');
+is($latin1->encode($1), $orig, 'passing magic regex to latin1 encode');
 
-$orig = "\xC3\x80";
+my $A_grave = uni_to_native(0xC0);
+my $A_grave_bytes = (ord("A") == 65)
+                    ? "\xC3\x80"
+                    : (ord("^") == 95)      # 1047
+                      ? "\x8A\x41"
+                      : (ord("^") == 106)   # 037
+                        ? "\x80\x41"
+                        : "\x8B\x41";       # Assume POSIX-BC
+$orig = $A_grave_bytes;
 $orig =~ /(..)/;
 is(Encode::decode_utf8($1), "\N{U+C0}", 'passing magic regex to Encode::decode_utf8');
 
 SKIP: {
     skip "Perl Version ($]) is older than v5.27.1", 1 if $] < 5.027001;
-    $orig = "\xC3\x80";
+    $orig = $A_grave_bytes;
     *a = $orig;
     is(Encode::decode_utf8(*a), "*main::\N{U+C0}", 'passing typeglob to Encode::decode_utf8');
 }
 
 $orig = "\N{U+C0}";
 $orig =~ /(.)/;
-is(Encode::encode_utf8($1), "\xC3\x80", 'passing magic regex to Encode::encode_utf8');
+is(Encode::encode_utf8($1), $A_grave_bytes, 'passing magic regex to Encode::encode_utf8');
 
-$orig = "\xC3\x80";
+$orig = $A_grave_bytes;
 $orig =~ /(..)/;
 is(Encode::decode('utf-8', $1), "\N{U+C0}", 'passing magic regex to UTF-8 decode');
 
-$orig = "\xC3\x80";
+$orig = $A_grave_bytes;
 *a = $orig;
 is(Encode::decode('utf-8', *a), "*main::\N{U+C0}", 'passing typeglob to UTF-8 decode');
 
 $orig = "\N{U+C0}";
 $orig =~ /(.)/;
-is(Encode::encode('utf-8', $1), "\xC3\x80", 'passing magic regex to UTF-8 encode');
+is(Encode::encode('utf-8', $1), $A_grave_bytes, 'passing magic regex to UTF-8 encode');
 
 SKIP: {
     skip "Perl Version ($]) is older than v5.16", 3 if $] < 5.016;
 
     $orig = "\N{U+0080}";
     *a = $orig;
-    is($latin1->encode(*a), "*main::\x80", 'passing typeglob to latin1 encode');
+    is($latin1->encode(*a), "*main::$orig", 'passing typeglob to latin1 encode');
 
     $orig = "\N{U+C0}";
     *a = $orig;
-    is(Encode::encode_utf8(*a), "*main::\xC3\x80", 'passing typeglob to Encode::encode_utf8');
+    is(Encode::encode_utf8(*a), "*main::$A_grave_bytes", 'passing typeglob to Encode::encode_utf8');
 
     $orig = "\N{U+C0}";
     *a = $orig;
-    is(Encode::encode('utf-8', *a), "*main::\xC3\x80", 'passing typeglob to UTF-8 encode');
+    is(Encode::encode('utf-8', *a), "*main::$A_grave_bytes", 'passing typeglob to UTF-8 encode');
 }

@@ -3,8 +3,14 @@
 #
 use strict;
 use Encode ();
-use Test::More tests => 4;
+use Test::More;
 
+if (ord("A") != 65) {
+    plan skip_all => 'Tests are ASCII centric';
+}
+else {
+    plan tests => 4;
+}
 
 my %a = ( "L\x{c3}\x{a9}on" => "acme" );
 my ($k) = ( keys %a );

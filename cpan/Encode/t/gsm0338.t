@@ -13,7 +13,15 @@ BEGIN {
 
 use strict;
 use utf8;
-use Test::More tests => 780;
+use Test::More;
+
+if (ord("A") != 65) {
+    plan skip_all => 'Tests are ASCII centric';
+}
+else {
+    plan tests => 780;
+}
+
 use Encode;
 use Encode::GSM0338;
 
