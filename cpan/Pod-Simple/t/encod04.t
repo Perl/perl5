@@ -9,6 +9,7 @@ BEGIN {
     }
 }
 
+no utf8;        # Tell EBCDIC translator not to convert this to UTF-8
 use strict;
 use Test;
 BEGIN {
