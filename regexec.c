@@ -1472,10 +1472,10 @@ Perl_re_intuit_start(pTHX_
         const U8* const str = (U8*)STRING(progi->regstclass);
 
         /* XXX this value could be pre-computed */
-        const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
+        const SSize_t cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
 		    ?  (reginfo->is_utf8_pat
-                        ? utf8_distance(str + STR_LEN(progi->regstclass), str)
-                        : STR_LEN(progi->regstclass))
+                        ? (SSize_t)utf8_distance(str + STR_LEN(progi->regstclass), str)
+                        : (SSize_t)STR_LEN(progi->regstclass))
 		    : 1);
 	char * endpos;
         char *s;

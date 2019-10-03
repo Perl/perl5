@@ -7123,11 +7123,11 @@ PP(pp_argcheck)
     UV   opt_params    = aux->opt_params;
     char slurpy        = aux->slurpy;
     AV  *defav         = GvAV(PL_defgv); /* @_ */
-    IV   argc;
+    UV   argc;
     bool too_few;
 
     assert(!SvMAGICAL(defav));
-    argc = (AvFILLp(defav) + 1);
+    argc = (UV)(AvFILLp(defav) + 1);
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))
