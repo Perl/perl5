@@ -202,17 +202,7 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
-/* It turns out that on EBCDIC platforms, the invariants are the characters
- * that have ASCII equivalents, plus the C1 controls.  Since the C0 controls
- * and DELETE are ASCII, this is the same as: (isASCII(uv) || isCNTRL_L1(uv))
- * */
-#define UVCHR_IS_INVARIANT(uv) cBOOL(FITS_IN_8_BITS(uv)                        \
-   && (PL_charclass[(U8) (uv)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
-
-/* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
- * compare, but now only have to do a single lookup by using a bit in
- * l1_char_class_tab.h.
- * Comments as to the meaning of each are given at their corresponding utf8.h
+/* Comments as to the meaning of each are given at their corresponding utf8.h
  * definitions. */
 /* Equivalent to ! UVCHR_IS_INVARIANT(c) */
 #define UTF8_IS_CONTINUED(c) 		cBOOL(FITS_IN_8_BITS(c)                 \
