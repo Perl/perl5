@@ -58,6 +58,7 @@
 #define PL_Sock			(vTHX->ISock)
 #define PL_StdIO		(vTHX->IStdIO)
 #define PL_Sv			(vTHX->ISv)
+#define PL_TR_SPECIAL_HANDLING_UTF8	(vTHX->ITR_SPECIAL_HANDLING_UTF8)
 #define PL_Xpv			(vTHX->IXpv)
 #define PL_an			(vTHX->Ian)
 #define PL_argvgv		(vTHX->Iargvgv)
