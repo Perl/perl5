@@ -354,8 +354,11 @@ sub run_tests {
         ok $@ =~ /^\QLookbehind longer than 255 not/, "Lookbehind limit";
     }
 
-    {
-        # Long Monsters
+  SKIP:
+    {   # Long Monsters
+
+        skip('limited memory', 20) if $ENV{'PERL_SKIP_BIG_MEM_TESTS'};
+
         for my $l (125, 140, 250, 270, 300000, 30) { # Ordered to free memory
             my $a = 'a' x $l;
 	    my $message = "Long monster, length = $l";
@@ -367,8 +370,11 @@ sub run_tests {
         }
     }
 
-    {
-        # 20000 nodes, each taking 3 words per string, and 1 per branch
+  SKIP:
+    {   # 20000 nodes, each taking 3 words per string, and 1 per branch
+
+        skip('limited memory', 20) if $ENV{'PERL_SKIP_BIG_MEM_TESTS'};
+
         my $long_constant_len = join '|', 12120 .. 32645;
         my $long_var_len = join '|', 8120 .. 28645;
         my %ans = ( 'ax13876y25677lbc' => 1,
