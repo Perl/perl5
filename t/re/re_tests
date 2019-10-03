@@ -2011,7 +2011,8 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 (?il)\x{100}|\x{100}|\x{FE}	\xFE	y	$&	\xFE
 \A([\x00-\x7F]+)(.*)\z	\007\011\012	y	$&	\007\011\012	# [perl #133311]
 (?:(?^:(?{1}))[^0-9])	:	y	$&	:	# [perl #133348]
-/[\xdf-/i	-	c	-	Invalid [] range	# [perl #133620] likely only fails under valgrind
+/[\xdf-/i	-	ca	-	Invalid [] range	# [perl #133620] likely only fails under valgrind
+/[\x59-/i	-	ce	-	Unmatched [	# [perl #133620] likely only fails under valgrind
 /\1a(b)/	bab	n	-	-		# This compiles but fails to match as \1 is not set when parsed.
 /(?iu)(?<=\xdf)hbase/	sshbase	y	$&	hbase
 /\x{30c3}?[\x{30a2}\x{30a4}\x{30a6}\x{30a8}\x{30aa}-\x{30e2}\x{30e4}\x{30e6}\x{30e8}-\x{30f4}](?:[\x{30e3}\x{30e5}\x{30e7}\x{30a1}\x{30a3}\x{30a5}\x{30a7}\x{30a9}])?\x{30fc}?\x{30f3}?/	\x{30de}\x{30fc}\x{30af}\x{30b5}\x{30fc}\x{30d3}\x{30b9}	y	$&	\x{30de}\x{30fc}	# part of [perl #133942
