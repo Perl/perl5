@@ -1361,11 +1361,8 @@ or casts
 
 /* This next group is only used on EBCDIC platforms, so theoretically could be
  * shared with something entirely different that's only on ASCII platforms */
-#  define _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE 28
-#  define _CC_UTF8_IS_START                             29
-#  define _CC_UTF8_IS_DOWNGRADEABLE_START               30
-#  define _CC_UTF8_IS_CONTINUATION                      31
-/* Unused: 24-27
+#  define _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE 31
+/* Unused: 24-30
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
