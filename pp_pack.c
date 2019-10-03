@@ -212,8 +212,9 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 /* Explosives and implosives. */
 
-#define ISUUCHAR(ch)    (NATIVE_TO_LATIN1(ch) >= NATIVE_TO_LATIN1(' ')  \
-                      && NATIVE_TO_LATIN1(ch) <  NATIVE_TO_LATIN1('a'))
+#define ISUUCHAR(ch)    inRANGE(NATIVE_TO_LATIN1(ch),               \
+                                NATIVE_TO_LATIN1(' '),              \
+                                NATIVE_TO_LATIN1('a') - 1)
 
 /* type modifiers */
 #define TYPE_IS_SHRIEKING	0x100
