@@ -299,6 +299,7 @@ perl_construct(pTHXx)
     STATUS_ALL_SUCCESS;
 
     init_uniprops();
+#define TR_SPECIAL_HANDLING ((~0 - 1))
     (void) uvchr_to_utf8_flags((U8 *) PL_TR_SPECIAL_HANDLING_UTF8, TR_SPECIAL_HANDLING, UNICODE_ALLOW_ABOVE_IV_MAX);
 
 #if defined(LOCAL_PATCH_COUNT)
