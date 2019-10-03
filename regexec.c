@@ -6302,6 +6302,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * language routine, and I (khw) don't think slowing things down
              * just to check for this warning is worth it.  So this just checks
              * the first character */
+#if 0
+            PerlIO_printf( Perl_debug_log, "%s: %d: %x\n", __FILE__, __LINE__, UTF8_MIN_START_BYTE);
+            PerlIO_printf( Perl_debug_log, "%s: %d: %x\n", __FILE__, __LINE__, UTF8_MIN_ABOVE_LATIN1_BYTE);
+            PerlIO_printf( Perl_debug_log, "%s: %d: %x\n", __FILE__, __LINE__, (__ASSERT_(FITS_IN_8_BITS(*locinput)) 1));
+            PerlIO_printf( Perl_debug_log, "%s: %d: %d\n", __FILE__, __LINE__, *locinput);
+            PerlIO_printf( Perl_debug_log, "%s: %d: %d\n", __FILE__, __LINE__, sizeof(*locinput));
+            PerlIO_printf( Perl_debug_log, "%s: %d: %x\n", __FILE__, __LINE__, *locinput);
+            PerlIO_printf( Perl_debug_log, "%s: %d: %x\n", __FILE__, __LINE__, (WIDEST_UTYPE)(*locinput));
+            PerlIO_printf( Perl_debug_log, "%s: %d: %x\n", __FILE__, __LINE__, UTF8_IS_ABOVE_LATIN1(*locinput));
+#endif
             if (utf8_target && UTF8_IS_ABOVE_LATIN1(*locinput)) {
                 _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
             }
