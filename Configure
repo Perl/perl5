@@ -5400,8 +5400,9 @@ EOH
 rp="What optimizer/debugger flag should be used?"
 . ./myread
 optimize="$ans"
+optimize=	# Kludge
 case "$optimize" in
-'none') optimize=" ";;
+'*none*') optimize=" ";;
 esac
 
 : Check what DEBUGGING is required from the command line
