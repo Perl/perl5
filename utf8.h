@@ -272,19 +272,7 @@ Perl's extended UTF-8 means we can have start bytes up through FF, though any
 beginning with FF yields a code point that is too large for 32-bit ASCII
 platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
-are in the character.
-
-=for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
-
-Evaluates to 1 if the representation of code point C<cp> is the same whether or
-not it is encoded in UTF-8; otherwise evaluates to 0.  UTF-8 invariant
-characters can be copied as-is when converting to/from UTF-8, saving time.
-C<cp> is Unicode if above 255; otherwise is platform-native.
-
-=cut
- */
-
-#define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
+are in the character. */
 
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT.  The |0 makes sure this
@@ -338,6 +326,18 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * being encoded in UTF-8 or not? This is a fundamental property of
  * UTF-8,EBCDIC */
 #define OFFUNI_IS_INVARIANT(c) (((WIDEST_UTYPE)(c)) < UTF_CONTINUATION_MARK)
+
+/*
+=for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
+
+Evaluates to 1 if the representation of code point C<cp> is the same whether or
+not it is encoded in UTF-8; otherwise evaluates to 0.  UTF-8 invariant
+characters can be copied as-is when converting to/from UTF-8, saving time.
+C<cp> is Unicode if above 255; otherwise is platform-native.
+
+=cut
+ */
+#define UVCHR_IS_INVARIANT(cp)  (OFFUNI_IS_INVARIANT(NATIVE_TO_UNI(cp)))
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
