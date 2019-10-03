@@ -8,6 +8,8 @@ BEGIN {
 
 plan tests => 21;
 
+use utf8;   # Tell EBCDIC translator to make this UTF-8,
+
 eval {
     eval {
 	die "Horribly\n";
