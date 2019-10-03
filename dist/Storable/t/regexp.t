@@ -123,7 +123,7 @@ __DATA__
 A-; qr(\x2E) ; ".", !"a" ; \x2E - hex meta
 -; qr/\./ ; "." , !"a" ; \. - backslash meta
 8- ; qr/\x{100}/ ; "\x{100}" ; simple unicode
-12- ; qr/fss/i ; "f\xDF\x{101}" ; case insensive unicode promoted
-22-; qr/fss/ui ; "f\xDF" ; case insensitive unicode SS /iu
-22-; qr/fss/aai ; !"f\xDF" ; case insensitive unicode SS /iaa
-22-; qr/f\w/a ; "fo", !"f\xff" ; simple /a flag
+A12- ; qr/fss/i ; "f\xDF\x{101}" ; case insensive unicode promoted
+A22-; qr/fss/ui ; "f\xDF" ; case insensitive unicode SS /iu
+A22-; qr/fss/aai ; !"f\xDF" ; case insensitive unicode SS /iaa
+A22-; qr/f\w/a ; "fo", !"f\xff" ; simple /a flag
