@@ -593,8 +593,9 @@ LIBFILES	= $(LIBC) -lmoldname -lkernel32 -luser32 -lgdi32 -lwinspool \
 	-luuid -lws2_32 -lmpr -lwinmm -lversion -lodbc32 -lodbccp32 -lcomctl32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g -O2 -DDEBUGGING
+OPTIMIZE	= -g -O2
 LINK_DBG	= -g
+DEFINES		+= -DDEBUGGING
 .ELIF  "$(CFG)" == "DebugSymbols"
 OPTIMIZE	= -g -O2
 LINK_DBG	= -g
@@ -674,6 +675,7 @@ INCLUDES	= -I.\include -I. -I..
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
+EXTRACFLAGS	= -nologo -GF -W3
 
 .IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrt.lib
@@ -682,22 +684,27 @@ LIBC		= msvcrt.lib
 .ENDIF
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
+OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
+DEFINES		+= -DDEBUGGING
+EXTRACFLAGS	+= -MD
 .ELIF  "$(CFG)" == "DebugSymbols"
-OPTIMIZE	= -Od -MD -Zi
+OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
+EXTRACFLAGS	+= -MD
 .ELIF  "$(CFG)" == "DebugFull"
 .IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrtd.lib
 .ELSE
 LIBC		= msvcrtd.lib
 .ENDIF
-OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
+DEFINES		+= -D_DEBUG -DDEBUGGING
+EXTRACFLAGS	+= -MDd
 .ELSE
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
-OPTIMIZE	= -O1 -MD -Zi -DNDEBUG
+OPTIMIZE	= -O1 -Zi
 # we enable debug symbols in release builds also
 LINK_DBG	= -debug -opt:ref,icf
 # you may want to enable this if you want COFF symbols in the executables
@@ -706,6 +713,7 @@ LINK_DBG	= -debug -opt:ref,icf
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
 #LINK_DBG	= $(LINK_DBG) -debugtype:both
+EXTRACFLAGS	+= -MD
 .IF "$(CCTYPE)" != "MSVC60"
 # enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
 OPTIMIZE	+= -GL
@@ -784,7 +792,6 @@ LIBBASEFILES    += bufferoverflowU.lib
 
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-EXTRACFLAGS	= -nologo -GF -W3
 .IF "$(__ICC)" == "define"
 EXTRACFLAGS	+= -Qstd=c99
 .ENDIF
@@ -1151,7 +1158,7 @@ CFG_VARS	=					\
 		archname=$(ARCHNAME)		~	\
 		cc=$(CC)			~	\
 		ld=$(LINK32)			~	\
-		ccflags=$(EXTRACFLAGS) $(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
+		ccflags=$(EXTRACFLAGS) $(DEFINES) $(BUILDOPT)	~	\
 		usecplusplus=$(USE_CPLUSPLUS)	~	\
 		cf_email=$(EMAIL)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
