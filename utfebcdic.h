@@ -202,9 +202,6 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
-/* This is a fundamental property of UTF-EBCDIC */
-#define OFFUNI_IS_INVARIANT(c) (((UV)(c)) <  0xA0)
-
 /* It turns out that on EBCDIC platforms, the invariants are the characters
  * that have ASCII equivalents, plus the C1 controls.  Since the C0 controls
  * and DELETE are ASCII, this is the same as: (isASCII(uv) || isCNTRL_L1(uv))
