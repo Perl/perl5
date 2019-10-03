@@ -274,14 +274,6 @@ platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
 are in the character.
 
-=cut
-*/
-
-/* Is the representation of the Unicode code point 'cp' the same regardless of
- * being encoded in UTF-8 or not? */
-#define OFFUNI_IS_INVARIANT(cp)     isASCII(cp)
-
-/*
 =for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
 
 Evaluates to 1 if the representation of code point C<cp> is the same whether or
@@ -300,11 +292,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
                                ((U8)((c) | 0)) &  UTF_CONTINUATION_MARK)
 
-/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
- * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
- * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
- * this matches 0xc[23].  The |0 makes sure this isn't mistakenly called with a
- * ptr argument */
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
@@ -346,6 +333,11 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
             (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)             \
                                                 == UTF_CONTINUATION_MARK)))
+
+/* Is the representation of the Unicode code point 'cp' the same regardless of
+ * being encoded in UTF-8 or not? This is a fundamental property of
+ * UTF-8,EBCDIC */
+#define OFFUNI_IS_INVARIANT(c) (((WIDEST_UTYPE)(c)) < UTF_CONTINUATION_MARK)
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
