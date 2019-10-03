@@ -2654,7 +2654,7 @@ win32_strerror(int e)
 	 * additionally map them to corresponding Windows (sockets) error codes
 	 * first to avoid getting the wrong system message.
 	 */
-	else if (e >= EADDRINUSE && e <= EWOULDBLOCK) {
+	else if (inRANGE(e, EADDRINUSE, EWOULDBLOCK)) {
 	    e = convert_errno_to_wsa_error(e);
 	}
 #endif
