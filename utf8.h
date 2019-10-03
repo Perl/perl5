@@ -274,12 +274,6 @@ platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
 are in the character. */
 
-/* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
- * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT.  The |0 makes sure this
- * isn't mistakenly called with a ptr argument */
-#define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
-                               ((U8)((c) | 0)) &  UTF_CONTINUATION_MARK)
-
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
@@ -588,6 +582,11 @@ with a ptr argument.
 /* Like the above, but its name implies a non-UTF8 input, which as the comments
  * above show, doesn't matter as to its implementation */
 #define NATIVE_BYTE_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
+
+/* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
+ * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT. */
+#define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
+                               (! UTF8_IS_INVARIANT(c)))
 
 /* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
  * bytes from an ordinal that is known to fit into exactly two (not one) bytes;
