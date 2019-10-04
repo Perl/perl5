@@ -364,7 +364,7 @@ The problem can be further examined in a roughly equivalent C program:
 
 =head2 Modules and Extensions for Perl on OS/390
 
-Pure pure (that is non XS) modules may be installed via the usual:
+Pure Perl (that is non XS) modules may be installed via the usual:
 
     perl Makefile.PL
     make
