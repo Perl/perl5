@@ -455,7 +455,7 @@ uppercase/lowercase/titlecase/fold into.
  * UTF-8 encoded character that mark it as a start byte and give the number of
  * bytes that comprise the character. 'len' is the number of bytes in the
  * multi-byte sequence. */
-#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
+#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : ((U8) (0xFE << (7-(len)))))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
  * Doesn't work on an invariant byte.  'len' is the number of bytes in the
