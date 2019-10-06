@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (183) {
+  if (17678) {
     load();
-    plan(tests => 183);
+    plan(tests => 17678);
   }
 }
 
@@ -155,81 +155,10 @@ if ("$]" < 5.005) {
         ok(Devel::PPPort::SvRXOK(bless $qr, "Surprise"));
 }
 
-ok(  Devel::PPPort::isBLANK(ord(" ")));
-ok(! Devel::PPPort::isBLANK(ord("\n")));
-
-ok(  Devel::PPPort::isBLANK_A(ord("\t")));
-ok(! Devel::PPPort::isBLANK_A(ord("\r")));
-
-ok(  Devel::PPPort::isBLANK_L1(ord("\t")));
-ok(! Devel::PPPort::isBLANK_L1(ord("\r")));
-
-ok(  Devel::PPPort::isUPPER(ord("A")));
-ok(! Devel::PPPort::isUPPER(ord("a")));
-
-ok(  Devel::PPPort::isUPPER_A(ord("Z")));
-
-# One of these two is uppercase in EBCDIC; the other in Latin1, but neither are
-# ASCII uppercase.
-ok(! Devel::PPPort::isUPPER_A(0xDC));
-ok(! Devel::PPPort::isUPPER_A(0xFC));
-
-ok(Devel::PPPort::isUPPER_L1(0xDC) || Devel::PPPort::isUPPER_L1(0xFC));
-ok(! (Devel::PPPort::isUPPER_L1(0xDC) && Devel::PPPort::isUPPER_L1(0xFC)));
-
-ok(  Devel::PPPort::isLOWER(ord("b")));
-ok(! Devel::PPPort::isLOWER(ord("B")));
-
-ok(  Devel::PPPort::isLOWER_A(ord("y")));
-
-# One of these two is lowercase in EBCDIC; the other in Latin1, but neither are
-# ASCII lowercase.
-ok(! Devel::PPPort::isLOWER_A(0xDC));
-ok(! Devel::PPPort::isLOWER_A(0xFC));
-
-ok(Devel::PPPort::isLOWER_L1(0xDC) || Devel::PPPort::isLOWER_L1(0xFC));
-ok(! Devel::PPPort::isLOWER_L1(0xDC) && Devel::PPPort::isLOWER_L1(0xFC));
-
-ok(  Devel::PPPort::isALPHA(ord("C")));
-ok(! Devel::PPPort::isALPHA(ord("1")));
-
-ok(  Devel::PPPort::isALPHA_A(ord("x")));
-ok(! Devel::PPPort::isALPHA_A(0xDC));
-
-ok(  Devel::PPPort::isALPHA_L1(ord("y")));
-ok(  Devel::PPPort::isALPHA_L1(0xDC));
-ok(! Devel::PPPort::isALPHA_L1(0xB6));
-
-ok(  Devel::PPPort::isWORDCHAR(ord("_")));
-ok(! Devel::PPPort::isWORDCHAR(ord("@")));
-
-ok(  Devel::PPPort::isWORDCHAR_A(ord("2")));
-ok(! Devel::PPPort::isWORDCHAR_A(0xFC));
-
-ok(  Devel::PPPort::isWORDCHAR_L1(ord("2")));
-ok(  Devel::PPPort::isWORDCHAR_L1(0xFC));
-ok(! Devel::PPPort::isWORDCHAR_L1(0xB6));
-
-ok(  Devel::PPPort::isALPHANUMERIC(ord("4")));
-ok(! Devel::PPPort::isALPHANUMERIC(ord("_")));
-
 ok( Devel::PPPort::NATIVE_TO_LATIN1(0xB6) == 0xB6);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(0x1) == 0x1);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("A")) == 0x41);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("0")) == 0x30);
-
-ok(  Devel::PPPort::isALPHANUMERIC_A(ord("l")));
-ok(! Devel::PPPort::isALPHANUMERIC_A(0xDC));
-
-ok(  Devel::PPPort::isALPHANUMERIC_L1(ord("l")));
-ok(  Devel::PPPort::isALPHANUMERIC_L1(0xDC));
-ok(! Devel::PPPort::isALPHANUMERIC_L1(0xB6));
-
-ok(  Devel::PPPort::isALNUM(ord("c")));
-ok(! Devel::PPPort::isALNUM(ord("}")));
-
-ok(  Devel::PPPort::isALNUM_A(ord("5")));
-ok(! Devel::PPPort::isALNUM_A(0xFC));
 
 ok( Devel::PPPort::LATIN1_TO_NATIVE(0xB6) == 0xB6);
 if (ord("A") == 65) {
@@ -245,15 +174,6 @@ ok(  Devel::PPPort::isALNUMC_L1(ord("5")));
 ok(  Devel::PPPort::isALNUMC_L1(0xFC));
 ok(! Devel::PPPort::isALNUMC_L1(0xB6));
 
-ok(  Devel::PPPort::isDIGIT(ord("6")));
-ok(! Devel::PPPort::isDIGIT(ord("_")));
-
-ok(  Devel::PPPort::isDIGIT_A(ord("7")));
-ok(! Devel::PPPort::isDIGIT_A(0xDC));
-
-ok(  Devel::PPPort::isDIGIT_L1(ord("5")));
-ok(! Devel::PPPort::isDIGIT_L1(0xDC));
-
 ok(  Devel::PPPort::isOCTAL(ord("7")));
 ok(! Devel::PPPort::isOCTAL(ord("8")));
 
@@ -263,112 +183,155 @@ ok(! Devel::PPPort::isOCTAL_A(ord("9")));
 ok(  Devel::PPPort::isOCTAL_L1(ord("2")));
 ok(! Devel::PPPort::isOCTAL_L1(ord("8")));
 
-ok(  Devel::PPPort::isIDFIRST(ord("D")));
-ok(! Devel::PPPort::isIDFIRST(ord("1")));
-
-ok(  Devel::PPPort::isIDFIRST_A(ord("_")));
-ok(! Devel::PPPort::isIDFIRST_A(0xFC));
-
-ok(  Devel::PPPort::isIDFIRST_L1(ord("_")));
-ok(  Devel::PPPort::isIDFIRST_L1(0xFC));
-ok(! Devel::PPPort::isIDFIRST_L1(0xB6));
-
-ok(  Devel::PPPort::isIDCONT(ord("e")));
-ok(! Devel::PPPort::isIDCONT(ord("@")));
-
-ok(  Devel::PPPort::isIDCONT_A(ord("2")));
-ok(! Devel::PPPort::isIDCONT_A(0xDC));
-
-ok(  Devel::PPPort::isIDCONT_L1(ord("4")));
-ok(  Devel::PPPort::isIDCONT_L1(0xDC));
-ok(! Devel::PPPort::isIDCONT_L1(0xB6));
-
-ok(  Devel::PPPort::isSPACE(ord(" ")));
-ok(! Devel::PPPort::isSPACE(ord("_")));
-
-ok(  Devel::PPPort::isSPACE_A(ord("\cK")));
-ok(! Devel::PPPort::isSPACE_A(ord("F")));
-
-ok(  Devel::PPPort::isSPACE_L1(ord("\cK")));
-ok(! Devel::PPPort::isSPACE_L1(ord("g")));
-
-# This stresses the edge for ASCII machines, but happens to work on EBCDIC as
-# well
-ok(  Devel::PPPort::isASCII(0x7F));
-ok(! Devel::PPPort::isASCII(0x80));
-
-ok(  Devel::PPPort::isASCII_A(ord("9")));
-ok(  Devel::PPPort::isASCII_L1(ord("9")));
-
-# B6 is the PARAGRAPH SIGN in ASCII and EBCDIC
-ok(! Devel::PPPort::isASCII_A(0xB6));
-ok(! Devel::PPPort::isASCII_L1(0xB6));
-
-ok(  Devel::PPPort::isCNTRL(ord("\e")));
-ok(! Devel::PPPort::isCNTRL(ord(" ")));
-
-ok(  Devel::PPPort::isCNTRL_A(ord("\a")));
-ok(! Devel::PPPort::isCNTRL_A(0xB6));
-
-ok(  Devel::PPPort::isCNTRL_L1(ord("\a")));
-ok(  Devel::PPPort::isCNTRL_L1(ord(" ") - 1));
-ok(! Devel::PPPort::isCNTRL_L1(0xB6));
-if (ord('A') == 65) {
-    ok(Devel::PPPort::isCNTRL_L1(0x80));
+# For the other properties, we test every code point from 0.255, and a
+# smattering of higher ones.  First populate a hash with keys like '65:ALPHA'
+# to indicate that the code point there is alphabetic
+my $i;
+my %types;
+for $i (0x41..0x5A, 0x61..0x7A, 0xAA, 0xB5, 0xBA, 0xC0..0xD6, 0xD8..0xF6,
+        0xF8..0x101)
+{
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:ALPHA"} = 1;
+    $types{"$native:ALPHANUMERIC"} = 1;
+    $types{"$native:IDFIRST"} = 1;
+    $types{"$native:IDCONT"} = 1;
+    $types{"$native:PRINT"} = 1;
+    $types{"$native:WORDCHAR"} = 1;
 }
-elsif (ord('^') == 106) {
-    ok(Devel::PPPort::isCNTRL_L1(0x5F));
-}
-else {
-    ok(Devel::PPPort::isCNTRL_L1(0xFF));
+for $i (0x30..0x39, 0x660, 0xFF19) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:ALPHANUMERIC"} = 1;
+    $types{"$native:DIGIT"} = 1;
+    $types{"$native:IDCONT"} = 1;
+    $types{"$native:WORDCHAR"} = 1;
+    $types{"$native:GRAPH"} = 1;
+    $types{"$native:PRINT"} = 1;
+    $types{"$native:XDIGIT"} = 1 if $i < 255 || ($i >= 0xFF10 && $i <= 0xFF19);
 }
 
-ok(  Devel::PPPort::isPRINT(ord(" ")));
-ok(! Devel::PPPort::isPRINT(ord("\n")));
+for $i (0..0x7F) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:ASCII"} = 1;
+}
+for $i (0..0x1f, 0x7F..0x9F) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:CNTRL"} = 1;
+}
+for $i (0x21..0x7E, 0xA1..0x101, 0x660) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:GRAPH"} = 1;
+    $types{"$native:PRINT"} = 1;
+}
+for $i (0x09, 0x20, 0xA0) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:BLANK"} = 1;
+    $types{"$native:SPACE"} = 1;
+    $types{"$native:PSXSPC"} = 1;
+    $types{"$native:PRINT"} = 1 if $i > 0x09;
+}
+for $i (0x09..0x0D, 0x85, 0x2029) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:SPACE"} = 1;
+    $types{"$native:PSXSPC"} = 1;
+}
+for $i (0x41..0x5A, 0xC0..0xD6, 0xD8..0xDE, 0x100) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:UPPER"} = 1;
+    $types{"$native:XDIGIT"} = 1 if $i < 0x47;
+}
+for $i (0x61..0x7A, 0xAA, 0xB5, 0xBA, 0xDF..0xF6, 0xF8..0xFF, 0x101) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:LOWER"} = 1;
+    $types{"$native:XDIGIT"} = 1 if $i < 0x67;
+}
+for $i (0x21..0x2F, 0x3A..0x40, 0x5B..0x60, 0x7B..0x7E, 0xB6, 0xA1, 0xA7, 0xAB,
+        0xB7, 0xBB, 0xBF, 0x5BE)
+{
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    $types{"$native:PUNCT"} = 1;
+    $types{"$native:GRAPH"} = 1;
+    $types{"$native:PRINT"} = 1;
+}
 
-ok(  Devel::PPPort::isPRINT_A(ord("G")));
-ok(! Devel::PPPort::isPRINT_A(0xB6));
+$i = ord('_');
+$types{"$i:WORDCHAR"} = 1;
+$types{"$i:IDFIRST"} = 1;
+$types{"$i:IDCONT"} = 1;
 
-ok(  Devel::PPPort::isPRINT_L1(ord("~")));
-ok(  Devel::PPPort::isPRINT_L1(0xB6));
-ok(! Devel::PPPort::isPRINT_L1(ord("\r")));
+# Now find all the unique code points included above.
+my %code_points_to_test;
+my $key;
+for $key (keys %types) {
+    $key =~ s/:.*//;
+    $code_points_to_test{$key} = 1;
+}
 
-ok(  Devel::PPPort::isGRAPH(ord("h")));
-ok(! Devel::PPPort::isGRAPH(ord(" ")));
+# And test each one
+for $i (sort { $a <=> $b } keys %code_points_to_test) {
+    my $native = Devel::PPPort::LATIN1_TO_NATIVE($i);
+    my $hex = sprintf("0x%02X", $native);
 
-ok(  Devel::PPPort::isGRAPH_A(ord("i")));
-ok(! Devel::PPPort::isGRAPH_A(0xB6));
+    # And for each code point test each of the classes
+    my $class;
+    for $class (qw(ALPHA ALPHANUMERIC ASCII BLANK CNTRL DIGIT GRAPH IDCONT
+                   IDFIRST LOWER PRINT PSXSPC PUNCT SPACE UPPER WORDCHAR
+                   XDIGIT))
+    {
+        if ($i < 256) {  # For the ones that can fit in a byte, test each of
+                         #three macros.
+            my $suffix;
+            for $suffix ("", "_A", "_L1") {
+                my $should_be = ($i > 0x7F && $suffix ne "_L1")
+                                ? 0     # Fail on non-ASCII unless L1
+                                : ($types{"$native:$class"} || 0);
+                my $eval_string = "Devel::PPPort::is${class}$suffix($hex)";
+                my $is = eval $eval_string || 0;
+                die "eval 'For $i: $eval_string' gave $@" if $@;
+                ok($is, $should_be, "'$eval_string'");
+            }
+        }
 
-ok(  Devel::PPPort::isGRAPH_L1(ord("j")));
-ok(  Devel::PPPort::isGRAPH_L1(0xB6));
-ok(! Devel::PPPort::isGRAPH_L1(4));
+        # For all code points, test the '_utf8' macros
+        if ("$]" < 5.006) {
+            skip("No UTF-8 on this perl", 0);
+            if ($i > 255) {
+                skip("No UTF-8 on this perl", 0);
+            }
+        }
+        else {
+            my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
+            if ("$]" < 5.007 && $native > 255) {
+                skip("Perls earlier than 5.7 give wrong answers for above Latin1 code points", 0);
+            }
+            elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
+                skip("Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH", 0);
+            }
+            else {
 
-ok(  Devel::PPPort::isPUNCT(ord("#")));
-ok(! Devel::PPPort::isPUNCT(ord(" ")));
+                my $should_be = $types{"$native:$class"} || 0;
+                my $eval_string = "Devel::PPPort::is${class}_utf8_safe(\"$utf8\", 0)";
+                my $is = eval $eval_string || 0;
+                die "eval 'For $i, $eval_string' gave $@" if $@;
+                ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
+            }
 
-ok(  Devel::PPPort::isPUNCT_A(ord("*")));
-ok(! Devel::PPPort::isPUNCT_A(0xB6));
-
-ok(  Devel::PPPort::isPUNCT_L1(ord("+")));
-ok(  Devel::PPPort::isPUNCT_L1(0xB6));
-
-ok(  Devel::PPPort::isXDIGIT(ord("A")));
-ok(! Devel::PPPort::isXDIGIT(ord("_")));
-
-ok(  Devel::PPPort::isXDIGIT_A(ord("9")));
-ok(! Devel::PPPort::isXDIGIT_A(0xDC));
-
-ok(  Devel::PPPort::isXDIGIT_L1(ord("9")));
-ok(! Devel::PPPort::isXDIGIT_L1(0xFF));
-
-ok(  Devel::PPPort::isPSXSPC(ord(" ")));
-ok(! Devel::PPPort::isPSXSPC(ord("k")));
-
-ok(  Devel::PPPort::isPSXSPC_A(ord("\cK")));
-ok(! Devel::PPPort::isPSXSPC_A(0xFC));
-
-ok(  Devel::PPPort::isPSXSPC_L1(ord("\cK")));
-ok(! Devel::PPPort::isPSXSPC_L1(0xFC));
+            # And for the high code points, test that a too short malformation (the
+            # -1) causes it to fail
+            if ($i > 255) {
+                if ("$]" >= 5.025009) {
+                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
+                }
+                else {
+                    my $eval_string = "Devel::PPPort::is${class}_utf8_safe(\"$utf8\", -1)";
+                    my $is = eval "no warnings; $eval_string" || 0;
+                    die "eval '$eval_string' gave $@" if $@;
+                    ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
+                }
+            }
+        }
+    }
+}
 
 ok(&Devel::PPPort::av_top_index([1,2,3]), 2);
 ok(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
