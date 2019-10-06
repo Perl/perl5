@@ -329,6 +329,23 @@ __UNDEFINED__ UNI_TO_NATIVE(c) (c)
    EBCDIC is not supported on versions earlier than 5.7.1
  */
 
+/* The meaning of this changed; use the modern version */
+#undef isPSXSPC
+#undef isPSXSPC_A
+#undef isPSXSPC_L1
+
+/* Hint: isPSXSPC, isPSXSPC_A, isPSXSPC_L1, isPSXSPC_utf8_safe
+    This is equivalent to the corresponding isSPACE-type macro.  On perls
+    before 5.18, this matched a vertical tab and SPACE didn't.  But the
+    ppport.h SPACE version does match VT in all perl releases.  Since VT's are
+    extremely rarely found in real-life files, this difference effectively
+    doesn't matter */
+
+/* Hint: isSPACE, isSPACE_A, isSPACE_L1, isSPACE_utf8_safe
+    Until Perl 5.18, this did not match the vertical tab (VT).  The ppport.h
+    version does match it in all perl releases. Since VT's are extremely rarely
+    found in real-life files, this difference effectively doesn't matter */
+
 #ifdef EBCDIC
 
 /* This is the first version where these macros are fully correct on EBCDIC
@@ -377,9 +394,6 @@ __UNDEFINED__ UNI_TO_NATIVE(c) (c)
 #  undef isPRINT
 #  undef isPRINT_A
 #  undef isPRINT_L1
-#  undef isPSXSPC
-#  undef isPSXSPC_A
-#  undef isPSXSPC_L1
 #  undef isPUNCT
 #  undef isPUNCT_A
 #  undef isPUNCT_L1
@@ -686,7 +700,7 @@ __UNDEFINED__ isIDFIRST_utf8_safe(s,e)  D_PPP_IS_GENERIC_UTF8_SAFE(s, e, IDFIRST
 __UNDEFINED__ isLOWER_utf8_safe(s,e)    D_PPP_IS_GENERIC_UTF8_SAFE(s, e, LOWER)
 __UNDEFINED__ isPRINT_utf8_safe(s,e)    D_PPP_IS_GENERIC_UTF8_SAFE(s, e, PRINT)
 
-#undef isPSXSPC_utf8_safe   /* Use the modern definition */
+#  undef isPSXSPC_utf8_safe   /* Use the modern definition */
 __UNDEFINED__ isPSXSPC_utf8_safe(s,e)   isSPACE_utf8_safe(s,e)
 
 __UNDEFINED__ isPUNCT_utf8_safe(s,e)    D_PPP_IS_GENERIC_UTF8_SAFE(s, e, PUNCT)
