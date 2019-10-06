@@ -272,67 +272,7 @@ Perl's extended UTF-8 means we can have start bytes up through FF, though any
 beginning with FF yields a code point that is too large for 32-bit ASCII
 platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
-are in the character.
-
-=cut
-*/
-
-/* Is the representation of the Unicode code point 'cp' the same regardless of
- * being encoded in UTF-8 or not? */
-#define OFFUNI_IS_INVARIANT(cp)     isASCII(cp)
-
-/*
-=for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
-
-Evaluates to 1 if the representation of code point C<cp> is the same whether or
-not it is encoded in UTF-8; otherwise evaluates to 0.  UTF-8 invariant
-characters can be copied as-is when converting to/from UTF-8, saving time.
-C<cp> is Unicode if above 255; otherwise is platform-native.
-
-=cut
- */
-
-#define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
-
-/* This defines the bits that are to be in the continuation bytes of a multi-byte
- * UTF-8 encoded character that mark it is a continuation byte. */
-#define UTF_CONTINUATION_MARK		0x80
-
-/* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
- * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT.  The |0 makes sure this
- * isn't mistakenly called with a ptr argument */
-#define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
-                               ((U8)((c) | 0)) &  UTF_CONTINUATION_MARK)
-
-/* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
- * This doesn't catch invariants (they are single-byte).  It also excludes the
- * illegal overlong sequences that begin with C0 and C1.  The |0 makes sure
- * this isn't mistakenly called with a ptr argument */
-#define UTF8_IS_START(c)      (__ASSERT_(FITS_IN_8_BITS(c))                 \
-                               ((U8)((c) | 0)) >= 0xc2)
-
-/* For use in UTF8_IS_CONTINUATION() below */
-#define UTF_IS_CONTINUATION_MASK    0xC0
-
-/* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
- * first byte thereof?  The |0 makes sure this isn't mistakenly called with a
- * ptr argument */
-#define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
-     (((U8)((c) | 0)) & UTF_IS_CONTINUATION_MASK) == UTF_CONTINUATION_MARK)
-
-/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
- * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
- * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
- * this matches 0xc[23].  The |0 makes sure this isn't mistakenly called with a
- * ptr argument */
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(__ASSERT_(FITS_IN_8_BITS(c))       \
-                                         (((U8)((c) | 0)) & 0xfe) == 0xc2)
-
-/* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
- * represent a code point > 255?  The |0 makes sure this isn't mistakenly
- * called with a ptr argument */
-#define UTF8_IS_ABOVE_LATIN1(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
-                                     ((U8)((c) | 0)) >= 0xc4)
+are in the character. */
 
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
@@ -359,6 +299,39 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * real information in a continuation byte.  This turns out to be 0x3F in
  * UTF-8, 0x1F in UTF-EBCDIC. */
 #define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+
+/* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
+ * E0 in UTF-EBCDIC */
+#define UTF_IS_CONTINUATION_MASK    ((U8) (0xFF << UTF_ACCUMULATION_SHIFT))
+
+/* This defines the bits that are to be in the continuation bytes of a
+ * multi-byte UTF-8 encoded character that mark it is a continuation byte.
+ * This turns out to be 0x80 in UTF-8, 0xA0 in UTF-EBCDIC.  (khw doesn't know
+ * the underlying reason that B0 works here) */
+#define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
+
+/* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
+ * first byte thereof? */
+#define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+            (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)             \
+                                                == UTF_CONTINUATION_MARK)))
+
+/* Is the representation of the Unicode code point 'cp' the same regardless of
+ * being encoded in UTF-8 or not? This is a fundamental property of
+ * UTF-8,EBCDIC */
+#define OFFUNI_IS_INVARIANT(c) (((WIDEST_UTYPE)(c)) < UTF_CONTINUATION_MARK)
+
+/*
+=for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
+
+Evaluates to 1 if the representation of code point C<cp> is the same whether or
+not it is encoded in UTF-8; otherwise evaluates to 0.  UTF-8 invariant
+characters can be copied as-is when converting to/from UTF-8, saving time.
+C<cp> is Unicode if above 255; otherwise is platform-native.
+
+=cut
+ */
+#define UVCHR_IS_INVARIANT(cp)  (OFFUNI_IS_INVARIANT(NATIVE_TO_UNI(cp)))
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
@@ -417,6 +390,31 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 =cut
  */
 #define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
+
+#define UTF_MIN_START_BYTE                                                  \
+     ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+
+/* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
+ * This doesn't catch invariants (they are single-byte).  It also excludes the
+ * illegal overlong sequences that begin with C0 and C1 on ASCII platforms, and
+ * C0-C4 I8 start bytes on EBCDIC ones */
+#define UTF8_IS_START(c)    (__ASSERT_(FITS_IN_8_BITS(c))                   \
+                             (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE))
+
+#define UTF_MIN_ABOVE_LATIN1_BYTE                                           \
+                    ((0x100 >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+
+/* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
+ * represent a code point > 255? */
+#define UTF8_IS_ABOVE_LATIN1(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+                        (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE))
+
+/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
+ * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
+ * be well-formed. */
+#define UTF8_IS_DOWNGRADEABLE_START(c)	(__ASSERT_(FITS_IN_8_BITS(c))       \
+                inRANGE(NATIVE_UTF8_TO_I8(c),                               \
+                        UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
 
 /* The largest code point representable by two UTF-8 bytes on this platform.
  * As explained in the comments for __COMMON_UNI_SKIP, 32 start bytes with
@@ -584,6 +582,11 @@ with a ptr argument.
 /* Like the above, but its name implies a non-UTF8 input, which as the comments
  * above show, doesn't matter as to its implementation */
 #define NATIVE_BYTE_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
+
+/* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
+ * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT. */
+#define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
+                               (! UTF8_IS_INVARIANT(c)))
 
 /* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
  * bytes from an ordinal that is known to fit into exactly two (not one) bytes;

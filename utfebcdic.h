@@ -202,54 +202,13 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
-/* This is a fundamental property of UTF-EBCDIC */
-#define OFFUNI_IS_INVARIANT(c) (((UV)(c)) <  0xA0)
-
-/* It turns out that on EBCDIC platforms, the invariants are the characters
- * that have ASCII equivalents, plus the C1 controls.  Since the C0 controls
- * and DELETE are ASCII, this is the same as: (isASCII(uv) || isCNTRL_L1(uv))
- * */
-#define UVCHR_IS_INVARIANT(uv) cBOOL(FITS_IN_8_BITS(uv)                        \
-   && (PL_charclass[(U8) (uv)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
-
-/* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
- * compare, but now only have to do a single lookup by using a bit in
- * l1_char_class_tab.h.
- * Comments as to the meaning of each are given at their corresponding utf8.h
+/* Comments as to the meaning of each are given at their corresponding utf8.h
  * definitions. */
-
-#define UTF8_IS_START(c)		_generic_isCC(c, _CC_UTF8_IS_START)
-
-#define UTF_IS_CONTINUATION_MASK    0xE0
-
-#define UTF8_IS_CONTINUATION(c)		_generic_isCC(c, _CC_UTF8_IS_CONTINUATION)
-
-/* The above instead could be written as this:
-#define UTF8_IS_CONTINUATION(c)                                                 \
-            (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)                 \
-                                                == UTF_CONTINUATION_MARK)
- */
-
-/* Equivalent to ! UVCHR_IS_INVARIANT(c) */
-#define UTF8_IS_CONTINUED(c) 		cBOOL(FITS_IN_8_BITS(c)                 \
-   && ! (PL_charclass[(U8) (c)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
-
-#define UTF8_IS_DOWNGRADEABLE_START(c)   _generic_isCC(c,                       \
-                                              _CC_UTF8_IS_DOWNGRADEABLE_START)
-
-/* Equivalent to (UTF8_IS_START(c) && ! UTF8_IS_DOWNGRADEABLE_START(c))
- * Makes sure that the START bit is set and the DOWNGRADEABLE bit isn't */
-#define UTF8_IS_ABOVE_LATIN1(c) cBOOL(FITS_IN_8_BITS(c)                         \
-  && ((PL_charclass[(U8) (c)] & ( _CC_mask(_CC_UTF8_IS_START)                   \
-                                 |_CC_mask(_CC_UTF8_IS_DOWNGRADEABLE_START)))   \
-                        == _CC_mask(_CC_UTF8_IS_START)))
 
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
 
-#define UTF_CONTINUATION_MARK		0xA0
 #define UTF_ACCUMULATION_SHIFT		5
-
 /* ^? is defined to be APC on EBCDIC systems.  See the definition of toCTRL()
  * for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
