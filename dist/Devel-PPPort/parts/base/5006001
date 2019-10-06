@@ -6,10 +6,8 @@ gv_efullname4                  # U
 gv_fullname4                   # U
 isBLANK                        # U
 isBLANK_LC                     # U
-isBLANK_utf8                   # U
 isPSXSPC                       # U
 isPSXSPC_LC                    # U
-isPSXSPC_utf8                  # U
 is_utf8_string                 # U
 NVef                           # E
 NVff                           # E

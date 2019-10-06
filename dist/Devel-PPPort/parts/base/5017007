@@ -14,4 +14,3 @@ is_uni_alnumc                  # F added by devel/scanprov
 is_uni_alnumc_lc               # F added by devel/scanprov
 is_uni_blank_lc                # F added by devel/scanprov
 _is_uni_perl_idstart           # F added by devel/scanprov
-is_utf8_alnumc                 # F added by devel/scanprov

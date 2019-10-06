@@ -1,7 +1,6 @@
 5.017008
 isALPHANUMERIC_LC              # U
 isALPHANUMERIC_LC_uvchr        # U
-isALPHANUMERIC_utf8            # U
 isIDCONT_LC                    # U
 isIDCONT_LC_uvchr              # U
 WARN_EXPERIMENTAL__REGEX_SETS  # E

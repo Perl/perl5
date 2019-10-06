@@ -1,0 +1,23 @@
+5.031006
+isALPHANUMERIC_utf8            # A
+isALPHA_utf8                   # A
+isASCII_utf8                   # A
+isBLANK_utf8                   # A
+isCNTRL_utf8                   # A
+isDIGIT_utf8                   # A
+isGRAPH_utf8                   # A
+isIDCONT_utf8                  # A
+isIDFIRST_utf8                 # A
+isLOWER_utf8                   # A
+isPRINT_utf8                   # A
+isPSXSPC_utf8                  # A
+isPUNCT_utf8                   # A
+isSPACE_utf8                   # A
+isUPPER_utf8                   # A
+isWORDCHAR_utf8                # A
+isXDIGIT_utf8                  # A
+my_lstat                       # U (Perl_my_lstat)
+my_stat                        # U (Perl_my_stat)
+pack_cat                       # U (Perl_pack_cat)
+pad_compname_type              # U (Perl_pad_compname_type)
+UTF8_CHK_SKIP                  # U

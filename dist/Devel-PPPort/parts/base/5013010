@@ -1,5 +1,4 @@
 5.013010
-isIDCONT_utf8                  # U
 WARN_NONCHAR                   # E
 WARN_NON_UNICODE               # E
 WARN_SURROGATE                 # E
@@ -10,8 +9,6 @@ invlist_extend                 # F added by devel/scanprov
 invlist_max                    # F added by devel/scanprov
 invlist_set_len                # F added by devel/scanprov
 invlist_trim                   # F added by devel/scanprov
-is_utf8_xidcont                # F added by devel/scanprov
-is_utf8_xidfirst               # F added by devel/scanprov
 _new_invlist                   # F added by devel/scanprov
 Perl_feature_is_enabled        # F added by devel/scanprov
 regcurly                       # F added by devel/scanprov

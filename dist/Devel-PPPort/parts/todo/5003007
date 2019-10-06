@@ -180,6 +180,7 @@ isALPHANUMERIC_L1              # T
 isASCII                        # T
 isASCII_A                      # T
 isASCII_L1                     # T
+isASCII_utf8_safe              # T
 isBLANK                        # T
 isBLANK_A                      # T
 isBLANK_L1                     # T
@@ -277,6 +278,7 @@ my_strlcat                     # T
 my_strlcpy                     # T
 my_strnlen                     # T
 NATIVE_TO_LATIN1               # T
+NATIVE_TO_UNI                  # T
 newANONHASH                    # T
 newANONLIST                    # T
 newANONSUB                     # T
@@ -775,6 +777,7 @@ toLOWER                        # T
 toUPPER                        # T
 UNDERBAR                       # T
 UNICODE_REPLACEMENT            # T
+UNI_TO_NATIVE                  # T
 UNLIKELY                       # T
 unsharepvn                     # T
 UTF8_IS_INVARIANT              # T

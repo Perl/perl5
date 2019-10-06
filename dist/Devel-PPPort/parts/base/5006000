@@ -55,28 +55,16 @@ I8TYPE                         # E
 INT2PTR                        # E
 isALNUMC                       # E
 isALNUMC_LC                    # E
-isALPHA_utf8                   # E
 isASCII                        # E
-isASCII_utf8                   # E
 isCNTRL                        # E
 isCNTRL_LC                     # E
-isCNTRL_utf8                   # E
-isDIGIT_utf8                   # E
 isGRAPH                        # E
 isGRAPH_LC                     # E
-isGRAPH_utf8                   # E
-isIDFIRST_utf8                 # E
-isLOWER_utf8                   # E
-isPRINT_utf8                   # E
 isPUNCT                        # E
 isPUNCT_LC                     # E
-isPUNCT_utf8                   # E
-isSPACE_utf8                   # E
-isUPPER_utf8                   # E
 is_utf8_char                   # U
 is_utf8_mark                   # E
 isXDIGIT                       # E
-isXDIGIT_utf8                  # E
 IVdf                           # E
 IVSIZE                         # E
 IVTYPE                         # E
@@ -331,19 +319,6 @@ is_uni_upper                   # F added by devel/scanprov
 is_uni_upper_lc                # F added by devel/scanprov
 is_uni_xdigit                  # F added by devel/scanprov
 is_uni_xdigit_lc               # F added by devel/scanprov
-is_utf8_alnum                  # F added by devel/scanprov
-is_utf8_alpha                  # F added by devel/scanprov
-is_utf8_ascii                  # F added by devel/scanprov
-is_utf8_cntrl                  # F added by devel/scanprov
-is_utf8_digit                  # F added by devel/scanprov
-is_utf8_graph                  # F added by devel/scanprov
-is_utf8_idfirst                # F added by devel/scanprov
-is_utf8_lower                  # F added by devel/scanprov
-is_utf8_print                  # F added by devel/scanprov
-is_utf8_punct                  # F added by devel/scanprov
-is_utf8_space                  # F added by devel/scanprov
-is_utf8_upper                  # F added by devel/scanprov
-is_utf8_xdigit                 # F added by devel/scanprov
 load_module_nocontext          # F added by devel/scanprov
 magic_killbackrefs             # F added by devel/scanprov
 magic_regdata_cnt              # F added by devel/scanprov

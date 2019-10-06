@@ -4,7 +4,6 @@ isALPHANUMERIC_A               # U
 isALPHANUMERIC_L1              # U
 isALPHANUMERIC_LC              # U
 isALPHANUMERIC_LC_uvchr        # U
-isALPHANUMERIC_utf8            # U
 isIDCONT                       # U
 isIDCONT_A                     # U
 isIDCONT_L1                    # U
@@ -15,10 +14,7 @@ croak_popstack                 # F added by devel/scanprov
 form_short_octal_warning       # F added by devel/scanprov
 invlist_is_iterating           # F added by devel/scanprov
 invlist_iterfinish             # F added by devel/scanprov
-isALNUM_lazy                   # F added by devel/scanprov
 isFOO_utf8_lc                  # F added by devel/scanprov
-isIDFIRST_lazy                 # F added by devel/scanprov
 _is_uni_FOO                    # F added by devel/scanprov
 _is_uni_perl_idcont            # F added by devel/scanprov
-_is_utf8_FOO                   # F added by devel/scanprov
 _is_utf8_mark                  # F added by devel/scanprov

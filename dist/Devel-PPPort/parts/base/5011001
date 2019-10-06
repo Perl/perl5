@@ -3,8 +3,5 @@ ck_warner                      # U
 ck_warner_d                    # U
 add_utf16_textfilter           # F added by devel/scanprov
 ckwarn_common                  # F added by devel/scanprov
-is_utf8_perl_space             # F added by devel/scanprov
-is_utf8_perl_word              # F added by devel/scanprov
-is_utf8_posix_digit            # F added by devel/scanprov
 package_version                # F added by devel/scanprov
 utf16_textfilter               # F added by devel/scanprov

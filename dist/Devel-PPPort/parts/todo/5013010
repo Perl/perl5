@@ -1,5 +1,4 @@
 5.013010
-isIDCONT_utf8                  # U
 WARN_NONCHAR                   # E
 WARN_NON_UNICODE               # E
 WARN_SURROGATE                 # E

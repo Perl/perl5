@@ -16,7 +16,6 @@ isPUNCT_LC_uvchr               # U
 isSPACE_LC_uvchr               # U
 isUPPER_LC_uvchr               # U
 my_popen_list                  # U
-NATIVE_TO_UNI                  # U
 PerlIO_apply_layers            # U
 PerlIO_binmode                 # U
 PerlIO_debug                   # U
@@ -28,7 +27,6 @@ sv_force_normal_flags          # U
 sv_setref_uv                   # U
 sv_unref_flags                 # U
 sv_utf8_upgrade                # E (Perl_sv_utf8_upgrade)
-UNI_TO_NATIVE                  # U
 utf8_length                    # U
 utf8n_to_uvchr                 # U
 uvchr_to_utf8                  # U

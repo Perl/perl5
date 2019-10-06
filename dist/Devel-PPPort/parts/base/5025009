@@ -37,7 +37,6 @@ toFOLD_utf8_safe               # U
 toLOWER_utf8_safe              # U
 toTITLE_utf8_safe              # U
 toUPPER_utf8_safe              # U
-check_and_deprecate            # F added by devel/scanprov
 _force_out_malformed_utf8_message # F added by devel/scanprov
 _is_grapheme                   # F added by devel/scanprov
 is_utf8_common_with_len        # F added by devel/scanprov

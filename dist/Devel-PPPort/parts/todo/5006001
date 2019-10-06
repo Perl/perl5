@@ -4,9 +4,7 @@ bytes_to_utf8                  # U
 gv_efullname4                  # U
 gv_fullname4                   # U
 isBLANK_LC                     # U
-isBLANK_utf8                   # U
 isPSXSPC_LC                    # U
-isPSXSPC_utf8                  # U
 isUTF8_CHAR                    # U
 is_utf8_string                 # U
 NVSIZE                         # E

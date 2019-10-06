@@ -1,6 +1,5 @@
 5.019001
 toFOLD                         # U
-toFOLD_utf8                    # U
 toLOWER_L1                     # U
 toTITLE                        # U
 find_lexical_cv                # F added by devel/scanprov

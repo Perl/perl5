@@ -18,6 +18,7 @@ PadnameSV                      # E
 PadnameUTF8                    # E
 PL_comppad_name                # E
 WARN_EXPERIMENTAL              # E
+sv_len_utf8_nomg               # M added by devel/scanprov
 av_extend_guts                 # F added by devel/scanprov
 cv_clone_into                  # F added by devel/scanprov
 force_ident_maybe_lex          # F added by devel/scanprov
@@ -27,4 +28,3 @@ invlist_previous_index         # F added by devel/scanprov
 invlist_set_previous_index     # F added by devel/scanprov
 padlist_store                  # F added by devel/scanprov
 pending_ident                  # F added by devel/scanprov
-sv_len_utf8_nomg               # F added by devel/scanprov

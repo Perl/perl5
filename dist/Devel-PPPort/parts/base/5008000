@@ -9,7 +9,6 @@ do_aspawn                      # F added by devel/scanprov
 do_spawn                       # F added by devel/scanprov
 do_spawn_nowait                # F added by devel/scanprov
 hv_notallowed                  # F added by devel/scanprov
-is_utf8_idcont                 # F added by devel/scanprov
 save_hek_flags                 # F added by devel/scanprov
 share_hek_flags                # F added by devel/scanprov
 to_byte_substr                 # F added by devel/scanprov

@@ -1,6 +1,6 @@
 5.031005
-dMY_CXT_SV                     # E
-my_lstat                       # U (Perl_my_lstat)
-my_stat                        # U (Perl_my_stat)
-pack_cat                       # U (Perl_pack_cat)
-pad_compname_type              # U (Perl_pad_compname_type)
+gimme_V                        # U
+toFOLD_utf8                    # A
+toLOWER_utf8                   # A
+toTITLE_utf8                   # A
+toUPPER_utf8                   # A
