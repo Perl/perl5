@@ -748,6 +748,18 @@ __UNDEFINED__  isXDIGIT_utf8_safe(s,e)                                       \
 #  else
 #    error Unknown character set
 #  endif
+
+/* Warning: isALPHANUMERIC_utf8_safe, isALPHA_utf8_safe, isASCII_utf8_safe,
+ * isBLANK_utf8_safe, isCNTRL_utf8_safe, isDIGIT_utf8_safe, isGRAPH_utf8_safe,
+ * isIDCONT_utf8_safe, isIDFIRST_utf8_safe, isLOWER_utf8_safe,
+ * isPRINT_utf8_safe, isPSXSPC_utf8_safe, isPUNCT_utf8_safe, isSPACE_utf8_safe,
+ * isUPPER_utf8_safe, isWORDCHAR_utf8_safe, isWORDCHAR_utf8_safe,
+ * isXDIGIT_utf8_safe
+ *
+ * The UTF-8 handling is buggy in early Perls, and this can give inaccurate
+ * results for code points above 0xFF, until the implementation started
+ * settling down in 5.12 and 5.14 */
+
 #endif
 
 
