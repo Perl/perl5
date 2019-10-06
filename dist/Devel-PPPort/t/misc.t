@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (176) {
+  if (183) {
     load();
-    plan(tests => 176);
+    plan(tests => 183);
   }
 }
 
@@ -213,6 +213,11 @@ ok(! Devel::PPPort::isWORDCHAR_L1(0xB6));
 ok(  Devel::PPPort::isALPHANUMERIC(ord("4")));
 ok(! Devel::PPPort::isALPHANUMERIC(ord("_")));
 
+ok( Devel::PPPort::NATIVE_TO_LATIN1(0xB6) == 0xB6);
+ok( Devel::PPPort::NATIVE_TO_LATIN1(0x1) == 0x1);
+ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("A")) == 0x41);
+ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("0")) == 0x30);
+
 ok(  Devel::PPPort::isALPHANUMERIC_A(ord("l")));
 ok(! Devel::PPPort::isALPHANUMERIC_A(0xDC));
 
@@ -225,6 +230,16 @@ ok(! Devel::PPPort::isALNUM(ord("}")));
 
 ok(  Devel::PPPort::isALNUM_A(ord("5")));
 ok(! Devel::PPPort::isALNUM_A(0xFC));
+
+ok( Devel::PPPort::LATIN1_TO_NATIVE(0xB6) == 0xB6);
+if (ord("A") == 65) {
+    ok( Devel::PPPort::LATIN1_TO_NATIVE(0x41) == 0x41);
+    ok( Devel::PPPort::LATIN1_TO_NATIVE(0x30) == 0x30);
+}
+else {
+    ok( Devel::PPPort::LATIN1_TO_NATIVE(0x41) == 0xC1);
+    ok( Devel::PPPort::LATIN1_TO_NATIVE(0x30) == 0xF0);
+}
 
 ok(  Devel::PPPort::isALNUMC_L1(ord("5")));
 ok(  Devel::PPPort::isALNUMC_L1(0xFC));
