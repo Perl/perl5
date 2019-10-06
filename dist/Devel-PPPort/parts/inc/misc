@@ -50,6 +50,15 @@ __UNDEFINED__ __ASSERT_(statement)  assert(statement),
 __UNDEFINED__ __ASSERT_(statement)
 #endif
 
+/* These could become provided when they become part of the public API */
+__UNDEF_NOT_PROVIDED__ withinCOUNT(c, l, n)                                 \
+   (((WIDEST_UTYPE) (((c)) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0))))
+__UNDEF_NOT_PROVIDED__ inRANGE(c, l, u)                                    \
+   (  (sizeof(c) == sizeof(U8))  ? withinCOUNT(((U8)  (c)), (l), ((u) - (l)))  \
+    : (sizeof(c) == sizeof(U16)) ? withinCOUNT(((U16) (c)), (l), ((u) - (l)))  \
+    : (sizeof(c) == sizeof(U32)) ? withinCOUNT(((U32) (c)), (l), ((u) - (l)))  \
+    : (withinCOUNT(((WIDEST_UTYPE) (c)), (l), ((u) - (l)))))
+
 __UNDEFINED__ SvRX(rv) (SvROK((rv)) ? (SvMAGICAL(SvRV((rv))) ? (mg_find(SvRV((rv)), PERL_MAGIC_qr) ? mg_find(SvRV((rv)), PERL_MAGIC_qr)->mg_obj : NULL) : NULL) : NULL)
 __UNDEFINED__ SvRXOK(sv) (!!SvRX(sv))
 
