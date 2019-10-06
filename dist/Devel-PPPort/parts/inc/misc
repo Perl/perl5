@@ -499,7 +499,9 @@ __UNDEFINED__ isBLANK_L1(c) (    isBLANK(c)                                    \
 __UNDEFINED__ isDIGIT(c)        ((c) <= '9' && (c) >= '0')
 __UNDEFINED__ isDIGIT_L1(c)     isDIGIT(c)
 __UNDEFINED__ isGRAPH(c)        (isWORDCHAR(c) || isPUNCT(c))
-__UNDEFINED__ isGRAPH_L1(c)     (isPRINT_L1(c) && (c) != ' ')
+__UNDEFINED__ isGRAPH_L1(c)     (   isPRINT_L1(c)                              \
+                                 && (c) != ' '                                 \
+                                 && NATIVE_TO_LATIN1((U8) c) != 0xA0)
 __UNDEFINED__ isIDCONT(c)       isWORDCHAR(c)
 __UNDEFINED__ isIDCONT_L1(c)	isWORDCHAR_L1(c)
 __UNDEFINED__ isIDFIRST(c)      (isALPHA(c) || (c) == '_')
