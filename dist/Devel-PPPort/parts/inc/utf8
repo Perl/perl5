@@ -15,6 +15,53 @@ __UNDEFINED__ UNICODE_REPLACEMENT  0xFFFD
 __UNDEFINED__  UTF8_MAXBYTES   UTF8_MAXLEN
 #endif
 
+__UNDEF_NOT_PROVIDED__ UTF_START_MARK(len)                                   \
+                    (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
+
+#if 'A' == 65
+__UNDEF_NOT_PROVIDED__ UTF_ACCUMULATION_SHIFT 6
+#else
+__UNDEF_NOT_PROVIDED__ UTF_ACCUMULATION_SHIFT 5
+#endif
+
+#ifdef NATIVE_TO_UTF
+__UNDEF_NOT_PROVIDED__ NATIVE_UTF8_TO_I8(c)  NATIVE_TO_UTF(c)
+#else   /* System doesn't support EBCDIC */
+__UNDEF_NOT_PROVIDED__ NATIVE_UTF8_TO_I8(c)  (c)
+#endif
+
+#ifdef UTF_TO_NATIVE
+__UNDEF_NOT_PROVIDED__ I8_TO_NATIVE_UTF8(c)  UTF_TO_NATIVE(c)
+#else   /* System doesn't support EBCDIC */
+__UNDEF_NOT_PROVIDED__ I8_TO_NATIVE_UTF8(c)  (c)
+#endif
+
+__UNDEF_NOT_PROVIDED__ UTF_START_MASK(len)                                 \
+                                (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
+__UNDEF_NOT_PROVIDED__ UTF_IS_CONTINUATION_MASK                            \
+                                    ((U8) (0xFF << UTF_ACCUMULATION_SHIFT))
+__UNDEF_NOT_PROVIDED__ UTF_CONTINUATION_MARK                               \
+                                          (UTF_IS_CONTINUATION_MASK & 0xB0)
+__UNDEF_NOT_PROVIDED__ UTF_MIN_START_BYTE                                  \
+    ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+
+__UNDEF_NOT_PROVIDED__ UTF_MIN_ABOVE_LATIN1_BYTE                           \
+                    ((0x100 >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+
+#if { VERSION < 5.007 }     /* Was the complement of what should have been */
+#  undef UTF8_IS_DOWNGRADEABLE_START
+#endif
+__UNDEF_NOT_PROVIDED__ UTF8_IS_DOWNGRADEABLE_START(c)                       \
+                inRANGE(NATIVE_UTF8_TO_I8(c),                               \
+                        UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1)
+__UNDEF_NOT_PROVIDED__ UTF_CONTINUATION_MASK                                \
+                                ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+
+__UNDEF_NOT_PROVIDED__ UTF8_ACCUMULATE(base, added)                         \
+                                  (((base) << UTF_ACCUMULATION_SHIFT)       \
+                                   | ((NATIVE_UTF8_TO_I8(added))            \
+                                       & UTF_CONTINUATION_MASK))
+
 __UNDEF_NOT_PROVIDED__ UTF8_ALLOW_ANYUV                 0
 __UNDEF_NOT_PROVIDED__ UTF8_ALLOW_EMPTY            0x0001
 __UNDEF_NOT_PROVIDED__ UTF8_ALLOW_CONTINUATION     0x0002
@@ -383,6 +430,46 @@ __UNDEFINED__  utf8_to_uvchr(s, lp)                                             
 
 =xsubs
 
+#if { VERSION >= 5.006 } /* This is just a helper fcn, not publicized */  \
+                         /* as being available and params not what the  */  \
+                         /* API function has; works on EBCDIC too */
+
+SV *
+uvoffuni_to_utf8(uni)
+
+    UV uni
+    PREINIT:
+        int len;
+        U8 string[UTF8_MAXBYTES+1];
+        int i;
+        UV native;
+    CODE:
+        native = UNI_TO_NATIVE(uni);
+
+	len = UVCHR_SKIP(native);
+
+        for (i = 0; i < len; i++) {
+            string[i] = '\0';
+        }
+
+        if (len <= 1) {
+            string[0] = native;
+        }
+        else {
+            i = len;
+            while (i-- > 1) {
+                string[i] = I8_TO_NATIVE_UTF8((uni & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK);
+                uni >>= UTF_ACCUMULATION_SHIFT;
+            }
+            string[0] = I8_TO_NATIVE_UTF8((uni & UTF_START_MASK(len)) | UTF_START_MARK(len));
+        }
+
+        RETVAL = newSVpvn((char *) string, len);
+        SvUTF8_on(RETVAL);
+    OUTPUT:
+        RETVAL
+
+#endif
 #if defined(UTF8_SAFE_SKIP) && defined(UTF8SKIP)
 
 STRLEN
