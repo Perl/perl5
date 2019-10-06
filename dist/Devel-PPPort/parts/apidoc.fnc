@@ -828,21 +828,21 @@ AmDd|UV|SvUVXx|SV* sv
 Amd|bool|SvVOK|SV* sv
 Amnd|(whatever)|THIS
 Amd|U8|toFOLD|U8 ch
-Amd|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
+Amd|UV|toFOLD_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toFOLD_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toFOLD_uvchr|UV cp|U8* s|STRLEN* lenp
 Amd|U8|toLOWER|U8 ch
 Amd|U8|toLOWER_L1|U8 ch
 Amd|U8|toLOWER_LC|U8 ch
-Amd|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
+Amd|UV|toLOWER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toLOWER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toLOWER_uvchr|UV cp|U8* s|STRLEN* lenp
 Amd|U8|toTITLE|U8 ch
-Amd|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
+Amd|UV|toTITLE_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toTITLE_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toTITLE_uvchr|UV cp|U8* s|STRLEN* lenp
 Amd|U8|toUPPER|int ch
-Amd|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
+Amd|UV|toUPPER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toUPPER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
 Amd|UV|toUPPER_uvchr|UV cp|U8* s|STRLEN* lenp
 Amnd||U16SIZE
@@ -855,12 +855,14 @@ AmnUd||UNDERBAR
 AmnUd|UV|UNICODE_REPLACEMENT
 Amd|UV|UNI_TO_NATIVE|UV ch
 AmUd|bool|UNLIKELY|const bool expr
+Amd|STRLEN|UTF8_CHK_SKIP|char* s
 Amd|bool|UTF8_IS_INVARIANT|char c
 Amd|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
 Amd|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
 Amd|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
 AmnUd|STRLEN|UTF8_MAXBYTES
 Amd|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
+Amd|STRLEN|UTF8_SKIP|char* s
 Amd|STRLEN|UTF8SKIP|char* s
 Amd|bool|UVCHR_IS_INVARIANT|UV cp
 Amd|STRLEN|UVCHR_SKIP|UV cp
