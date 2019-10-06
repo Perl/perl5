@@ -99,6 +99,12 @@ In all sections, lines that begin with C<##> are completely ignored.
 
 =head2 Implementation Section Details
 
+You can implement API elements via C functions or macros, or simple variables.
+For a function, just place its body in this C<=implementation> section.  But it
+is preferable to use a macro if feasible.  Otherwise, the user must explicitly
+request that it get loaded, by defining a C<NEED_I<function>> (or I<variable>)
+as described in F<ppport.h>.
+
 =over
 
 =item __UNDEFINED__
@@ -128,7 +134,7 @@ This usually makes the code more compact and readable.
 
 But you should only use this on things that you plan to publicly provide.  If
 something, such as a mnemonic for a constant needs to be defined but isn't
-really needed for the public at larget to know about, you should use
+really needed for the public at large to know about, you should use
 
  __UNDEF_NOT_PROVIDED__ macro   some definition
 
@@ -333,8 +339,8 @@ collect the remaining information in F<parts/apidoc.fnc>.
 
 =item *
 
-The final step before regenerating everything is to run F</devel/mkppport.fnc>
-to update the F</parts/ppport.fnc> file.
+The final step before regenerating everything is to run
+F</devel/mkppport_fnc.pl> to update the F</parts/ppport.fnc> file.
 
 =back
 
@@ -444,7 +450,8 @@ successfully compiles, the dynamic linker is happy, and C<make test> runs on
 this version.  Then we repeat the process for I<n-1>, and so on.  (Actually,
 this process may generate false positives, so by default each failing API call
 is checked again.  If possible, this is done by generating an F<apicheck.c> for
-just the one failing API.)
+just the one failing API.)  Note that the make test is run using F<ppport.h>
+during both passes.
 
 Running F<devel/mktodo> currently takes a couple hours on dromedary.
 
