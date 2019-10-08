@@ -373,6 +373,10 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'GAAS/Digest-MD5-2.55.tar.gz',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => ['rfc1321.txt'],
+        'CUSTOMIZED'   => [
+            # RT #133495
+            qw(MD5.xs MD5.pm)
+         ],
     },
 
     'Digest::SHA' => {
