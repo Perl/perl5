@@ -3180,6 +3180,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             Groups_t *gary = NULL;
             const char* p_end = p + len;
             const char* endptr = p_end;
+            const char* backup_endptr = endptr;
             UV uv;
 #ifdef _SC_NGROUPS_MAX
            int maxgrp = sysconf(_SC_NGROUPS_MAX);
@@ -3211,6 +3212,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                     Newx(gary, i + 1, Groups_t);
                 else
                     Renew(gary, i + 1, Groups_t);
+                endptr = backup_endptr; /* we know where the end is */
                 if (grok_atoUV(p, &uv, &endptr))
                     gary[i] = (Groups_t)uv;
                 else {
