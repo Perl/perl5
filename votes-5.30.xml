@@ -44,7 +44,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="tonyc" id="79e302e6c3f815bf4cb72a5bacc3012595970db9" ticket="134169" desc="(perl #134169) mg.c reset endptr after use"/>
+<commit votes="tonyc ilmari" id="79e302e6c3f815bf4cb72a5bacc3012595970db9" ticket="134169" desc="(perl #134169) mg.c reset endptr after use"/>
 
 This could potentially break code written on 5.30.0 that expects "0x10" to numify to 16, but
 the bug fixed has the potential of silently(!) breaking code written with older perls that
