@@ -23,6 +23,14 @@ use Config;
 
 use vars '%opt';  # needs to be global, and we can't use 'our'
 
+sub cat_file
+{
+  eval { require File::Spec };
+  return $@ ? join('/', @_) : File::Spec->catfile(@_);
+}
+
+my $t_01_test = cat_file('t', '01_test.t');
+
 unless ($ENV{'PERL_CORE'}) {
   $ENV{'PERL_CORE'} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
@@ -52,7 +60,7 @@ sub configure
     'ppport_h.PL'  => 'ppport.h',
     'PPPort_pm.PL' => 'PPPort.pm',
     'RealPPPort_xs.PL' => 'RealPPPort.xs',
-    'mktests.PL' => 't/01_test.t',
+    'mktests.PL' => $t_01_test,
   );
   my @moreopts;
 
