@@ -19705,108 +19705,16 @@ EOM
 	;;
 esac
 
-: Checking 32bit alignedness
 $cat <<EOM
 
 Checking to see whether you can access character data unalignedly...
+
+We assume only aligned access is permitted.
 EOM
+: Checking 32bit alignedness
+: We no longer check and assume it is required.
 case "$d_u32align" in
-'')   $cat >try.c <<EOCP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#define U32 $u32type
-#define BYTEORDER 0x$byteorder
-#define U8 $u8type
-#include <signal.h>
-#ifdef SIGBUS
-$signal_t bletch(int s) { exit(4); }
-#endif
-int main() {
-#if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
-    volatile U8 buf[8];
-    volatile U32 *up;
-    int i;
-
-    if (sizeof(U32) != 4) {
-	printf("sizeof(U32) is not 4, but %d\n", sizeof(U32));
-	exit(1);
-    }
-
-    fflush(stdout);
-
-#ifdef SIGBUS
-    signal(SIGBUS, bletch);
-#endif
-
-    buf[0] = 0;
-    buf[1] = 0;
-    buf[2] = 0;
-    buf[3] = 1;
-    buf[4] = 0;
-    buf[5] = 0;
-    buf[6] = 0;
-    buf[7] = 1;
-
-    for (i = 0; i < 4; i++) {
-	up = (U32*)(buf + i);
-	if (! ((*up == 1 << (8*i)) ||   /* big-endian */
-	       (*up == 1 << (8*(3-i)))  /* little-endian */
-	      )
-	   )
-	{
-	    printf("read failed (%x)\n", *up);
-	    exit(2);
-	}
-    }
-
-    /* write test */
-    for (i = 0; i < 4; i++) {
-	up = (U32*)(buf + i);
-	*up = 0xBeef;
-	if (*up != 0xBeef) {
-	    printf("write failed (%x)\n", *up);
-	    exit(3);
-	}
-    }
-
-    exit(0);
-#else
-    printf("1\n");
-    exit(1);
-#endif
-    return 0;
-}
-EOCP
-set try
-if eval $compile_ok; then
-	echo "(Testing for character data alignment may crash the test.  That's okay.)" >&4
-	$run ./try 2>&1 >/dev/null
-	case "$?" in
-	0)	cat >&4 <<EOM
-You can access character data pretty unalignedly.
-EOM
-		d_u32align="$undef"
-		;;
-	*)	cat >&4 <<EOM
-It seems that you must access character data in an aligned manner.
-EOM
-		d_u32align="$define"
-		;;
-	esac
-else
-	rp='Can you access character data at unaligned addresses?'
-	dflt='n'
-	. ./myread
-	case "$ans" in
-	[yY]*)	d_u32align="$undef"  ;;
-	*)	d_u32align="$define" ;;
-	esac
-fi
-$rm_try
-;;
+'') d_u32align="$define" ;;
 esac
 
 : see if ualarm exists
