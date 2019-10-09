@@ -425,7 +425,7 @@ e.g. stopping the MS Internet Explorer might help.
 
 Use the perlrebase or rebase utilities to resolve the conflicting dll addresses.
 The rebase package is included in the Cygwin setup. Use F<setup.exe>
-from L<http://www.cygwin.com/setup.exe> to install it.
+from L<https://cygwin.com/install.html> to install it.
 
 1. kill all perl processes and run C<perlrebase> or
 
