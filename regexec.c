@@ -6527,9 +6527,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		if (locinput == reginfo->strbeg)
 		    b1 = isWORDCHAR_LC('\n');
 		else {
-                    b1 = isWORDCHAR_LC_utf8_safe(reghop3((U8*)locinput, -1,
-                                                        (U8*)(reginfo->strbeg)),
-                                                 (U8*)(reginfo->strend));
+                    U8 *p = reghop3((U8*)locinput, -1,
+                                    (U8*)(reginfo->strbeg));
+                    b1 = isWORDCHAR_LC_utf8_safe(p, (U8*)(reginfo->strend));
 		}
                 b2 = (NEXTCHR_IS_EOS)
                     ? isWORDCHAR_LC('\n')
@@ -6606,13 +6606,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     case TRADITIONAL_BOUND:
                     {
                         bool b1, b2;
-                        b1 = (locinput == reginfo->strbeg)
-                             ? 0 /* isWORDCHAR_L1('\n') */
-                             : isWORDCHAR_utf8_safe(
-                                               reghop3((U8*)locinput,
-                                                       -1,
-                                                       (U8*)(reginfo->strbeg)),
-                                                    (U8*) reginfo->strend);
+                        if (locinput == reginfo->strbeg) {
+                            b1 = 0 /* isWORDCHAR_L1('\n') */;
+                        }
+                        else {
+                            U8 *p = reghop3((U8*)locinput, -1,
+                                            (U8*)(reginfo->strbeg));
+
+                            b1 = isWORDCHAR_utf8_safe(p, (U8*) reginfo->strend);
+                        }
                         b2 = (NEXTCHR_IS_EOS)
                             ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_utf8_safe((U8*)locinput,
