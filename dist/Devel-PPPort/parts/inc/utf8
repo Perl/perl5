@@ -38,6 +38,9 @@ __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          
                                       ? 0                                       \
                                       : D_PPP_MIN(((e) - (s)), UTF8SKIP(s))))
 
+__UNDEFINED__ UTF8_CHK_SKIP(s)                                                  \
+    (s[0] == '\0' ? 1 : ((U8) D_PPP_MIN(my_strnlen((char *) (s), UTF8SKIP(s)),  \
+                                      UTF8SKIP(s))))
 __UNDEFINED__ UTF8_SKIP(s)  UTF8SKIP(s)
 #endif
 
@@ -342,7 +345,7 @@ utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 __UNDEFINED__  utf8_to_uvchr(s, lp)                                             \
     ((*(s) == '\0')                                                             \
     ? utf8_to_uvchr_buf(s,((s)+1), lp) /* Handle single NUL specially */        \
-    : utf8_to_uvchr_buf(s, (s) + my_strnlen((char *) (s), UTF8SKIP(s)), (lp)))
+    : utf8_to_uvchr_buf(s, (s) + UTF8_CHK_SKIP(s), (lp)))
 
 #endif
 
