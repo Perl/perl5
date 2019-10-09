@@ -536,6 +536,14 @@ only) byte is pointed to by C<s>.
 =cut
  */
 #define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(s)]
+
+/*
+=for apidoc Am|STRLEN|UTF8_SKIP|char* s
+This is a synonym for L</C<UTF8SKIP>>
+
+=cut
+*/
+
 #define UTF8_SKIP(s) UTF8SKIP(s)
 
 /*
