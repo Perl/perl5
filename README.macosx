@@ -141,8 +141,8 @@ modules (C<Mac::*>), as the required Apple frameworks do not provide PPC64
 support. Similarly, downloads from Fink or Darwinports are unlikely to provide
 64-bit support; the libraries must be rebuilt from source with the appropriate
 compiler and linker flags. For further information, see Apple's
-I<64-Bit Transition Guide> at 
-L<http://developer.apple.com/documentation/Darwin/Conceptual/64bitPorting/index.html>.
+I<64-Bit Transition Guide> at
+L<https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/64bitPorting/transition/transition.html>.
 
 =head2 libperl and Prebinding
 
