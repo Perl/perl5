@@ -1153,7 +1153,7 @@ The first code point of the lowercased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-=for apidoc Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
+=for apidoc Am|UV|toLOWER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
 Converts the first UTF-8 encoded character in the sequence starting at C<p> and
 extending no further than S<C<e - 1>> to its lowercase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
