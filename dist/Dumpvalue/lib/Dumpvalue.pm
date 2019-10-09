@@ -1,7 +1,8 @@
 use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
-our $VERSION = '1.19';
+use warnings;
+our $VERSION = '1.20';
 our(%address, $stab, @stab, %stab, %subs);
 
 sub ASCII { return ord('A') == 65; }
@@ -101,6 +102,7 @@ sub stringify {
   my $tick = $self->{tick};
 
   return 'undef' unless defined $_ or not $self->{printUndef};
+  $_ = '' if not defined $_;
   return $_ . "" if ref \$_ eq 'GLOB';
   { no strict 'refs';
     $_ = &{'overload::StrVal'}($_)
@@ -176,7 +178,7 @@ sub unwrap {
   my $self = shift;
   return if $DB::signal and $self->{stopDbSignal};
   my ($v) = shift ;
-  my ($s) = shift ;		# extra no of spaces
+  my ($s) = shift || 0;		# extra no of spaces
   my $sp;
   my (%v,@v,$address,$short,$fileno);
 
@@ -390,6 +392,7 @@ sub CvGV_name {
 sub dumpsub {
   my $self = shift;
   my ($off,$sub) = @_;
+  $off ||= 0;
   my $ini = $sub;
   my $s;
   $sub = $1 if $sub =~ /^\{\*(.*)\}$/;
@@ -424,7 +427,7 @@ sub dumpvars {
   *stab = *main::;
 
   while ($package =~ /(\w+?::)/g) {
-    *stab = $ {stab}{$1};
+    *stab = defined ${stab}{$1} ? ${stab}{$1} : '';
   }
   $self->{TotalStrings} = 0;
   $self->{Strings} = 0;
