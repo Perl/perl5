@@ -27,9 +27,10 @@ our %opt = (
   check   => 1,
   debug   => 0,
   verbose => 0,
+  yes     => 0,
 );
 
-GetOptions(\%opt, qw( check! verbose install=s blead=s blead-version=s
+GetOptions(\%opt, qw( check! verbose yes install=s blead=s blead-version=s
                       debug=i debug-start=s)) or die pod2usage();
 
 identify();
@@ -39,7 +40,9 @@ unless (-e 'parts/embed.fnc' and -e 'parts/apidoc.fnc') {
   quit_now();
 }
 
-ask_or_quit("Are you SURE you have:\n1) updated parts/embed.fnc to latest blead?\n2) run devel/mkapidoc.sh to update parts/apidoc.fnc?\n3) run devel/mkppport_fnc.pl to update parts/ppport.fnc?\n");
+if (! $opt{'yes'}) {
+    ask_or_quit("Are you SURE you have:\n1) updated parts/embed.fnc to latest blead?\n2) run devel/mkapidoc.sh to update parts/apidoc.fnc?\n3) run devel/mkppport_fnc.pl to update parts/ppport.fnc?\n");
+}
 
 my %files = map { ($_ => [glob "parts/$_/5*"]) } qw( base todo );
 
@@ -109,7 +112,9 @@ for my $dir (qw( base todo )) {
   my $cur = "parts/$dir";
   my $old = "$cur-old";
   if (-e $old) {
-    ask_or_quit("Do you want me to remove the old $old directory?");
+    if (! $opt{'yes'}) {
+        ask_or_quit("Do you want me to remove the old $old directory?");
+    }
     rmtree($old);
   }
   mkdir $old;
@@ -199,6 +204,8 @@ regenerate - Automatically regenerate Devel::PPPort's API information
 
   --nocheck      don't recheck symbols that caused an error
   --verbose      show verbose output
+  --yes          the answer to all the standard questions is 'yes',
+                 can be used to nohup this.
 
 =head1 COPYRIGHT
 
