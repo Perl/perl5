@@ -29,7 +29,7 @@ This uses the git protocol (port 9418).
 If you cannot use the git protocol for firewall reasons, you can also
 clone via http, though this is much slower:
 
-  % git clone http://perl5.git.perl.org/perl.git perl
+  % git clone https://perl5.git.perl.org/perl.git perl
 
 =head1 WORKING WITH THE REPOSITORY
 
@@ -341,12 +341,12 @@ patch will be destroyed.
 Someone may download your patch from RT, which will result in the
 subject (the first line of the commit message) being omitted.  See
 L<RT #74192|https://rt.perl.org/Ticket/Display.html?id=74192> and
-L<commit a4583001|http://perl5.git.perl.org/perl.git/commitdiff/a4583001>
+L<commit a4583001|https://perl5.git.perl.org/perl.git/commitdiff/a4583001>
 for an example. Alternatively someone may
 apply your patch from RT after it arrived in their mailbox, by which
 time RT will have modified the inline content of the message.  See
 L<RT #74532|https://rt.perl.org/Ticket/Display.html?id=74532> and
-L<commit f9bcfeac|http://perl5.git.perl.org/perl.git/commitdiff/f9bcfeac>
+L<commit f9bcfeac|https://perl5.git.perl.org/perl.git/commitdiff/f9bcfeac>
 for a bad example of this failure mode.
 
 =head2 A note on derived files
@@ -928,7 +928,7 @@ general testing and development. Dromedary syncs the git tree from
 camel every few minutes, you should not push there. Both machines also
 have a full CPAN mirror in F</srv/CPAN>, please use this. To share files
 with the general public, dromedary serves your F<~/public_html/> as
-C<L<http://users.perl5.git.perl.org/~yourlogin/>>
+C<L<https://users.perl5.git.perl.org/~yourlogin/>>
 
 These hosts have fairly strict firewalls to the outside. Outgoing, only
 rsync, ssh and git are allowed. For http and ftp, you can use

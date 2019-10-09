@@ -5664,7 +5664,7 @@ variables (like PATH) from the user it isn't running under, and isn't
 in a location where the CGI server can't find it, basically, more or
 less.  Please see the following for more information:
 
-	http://www.perl.org/CGI_MetaFAQ.html
+	https://www.perl.org/CGI_MetaFAQ.html
 	http://www.htmlhelp.org/faq/cgifaq.html
 	http://www.w3.org/Security/Faq/
 

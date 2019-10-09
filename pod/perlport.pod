@@ -827,7 +827,7 @@ Mailing list: cpan-testers-discuss@perl.org
 
 =item *
 
-Testing results: L<http://www.cpantesters.org/>
+Testing results: L<https://www.cpantesters.org/>
 
 =back
 
@@ -1032,12 +1032,12 @@ The C<Win32::*> modules in L<Win32>.
 
 =item *
 
-The ActiveState Pages, L<http://www.activestate.com/>
+The ActiveState Pages, L<https://www.activestate.com/>
 
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed
-as L<perlcygwin>), L<http://www.cygwin.com/>
+as L<perlcygwin>), L<https://www.cygwin.com/>
 
 =item *
 

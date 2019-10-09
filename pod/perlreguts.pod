@@ -897,8 +897,8 @@ Same terms as Perl.
 
 =head1 REFERENCES
 
-[1] L<http://perl.plover.com/Rx/paper/>
+[1] L<https://perl.plover.com/Rx/paper/>
 
-[2] L<http://www.unicode.org>
+[2] L<https://www.unicode.org/>
 
 =cut

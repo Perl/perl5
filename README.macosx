@@ -10,7 +10,7 @@ perlmacosx - Perl under Mac OS X
 
 This document briefly describes Perl under Mac OS X.
 
-  curl -O http://www.cpan.org/src/perl-5.31.5.tar.gz
+  curl -O https://www.cpan.org/src/perl-5.31.5.tar.gz
   tar -xzf perl-5.31.5.tar.gz
   cd perl-5.31.5
   ./Configure -des -Dprefix=/usr/local/
@@ -223,7 +223,7 @@ access Foundation (i.e. non-GUI) classes and objects.
 An alternative is CamelBones, a framework that allows access to both
 Foundation and AppKit classes and objects, so that full GUI applications
 can be built in Perl. CamelBones can be found on SourceForge, at
-L<http://www.sourceforge.net/projects/camelbones/>.
+L<https://www.sourceforge.net/projects/camelbones/>.
 
 
 =head1 Starting From Scratch
@@ -258,7 +258,7 @@ or rebuild Perl from the source code with C<Configure -Dprefix=/usr
 works much better with Perl 5.8.1 and later, in Perl 5.8.0 the
 settings were not quite right.
 
-"Pacifist" from CharlesSoft (L<http://www.charlessoft.com/>) is a nice
+"Pacifist" from CharlesSoft (L<https://www.charlessoft.com/>) is a nice
 way to extract the Perl binaries from the OS media, without having to
 reinstall the entire OS.
 

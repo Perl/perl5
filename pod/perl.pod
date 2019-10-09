@@ -21,7 +21,7 @@ For more information on these options, you can run C<perldoc perlrun>.
 
 The F<perldoc> program gives you access to all the documentation that comes
 with Perl.  You can get more documentation, tutorials and community support
-online at L<http://www.perl.org/>.
+online at L<https://www.perl.org/>.
 
 If you're new to Perl, you should start by running C<perldoc perlintro>,
 which is a general intro for beginners and provides some background to help

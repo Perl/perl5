@@ -24,7 +24,7 @@ everyone uses Unicode.
 Unicode is a comprehensive standard.  It specifies many things outside
 the scope of Perl, such as how to display sequences of characters.  For
 a full discussion of all aspects of Unicode, see
-L<http://www.unicode.org>.
+L<https://www.unicode.org>.
 
 =head2 Important Caveats
 
@@ -499,7 +499,7 @@ matching Unicode properties against non-Unicode code points.
 
 Every Unicode character is assigned a general category, which is the "most
 usual categorization of a character" (from
-L<http://www.unicode.org/reports/tr44>).
+L<https://www.unicode.org/reports/tr44>).
 
 The compound way of writing these is like C<\p{General_Category=Number}>
 (short: C<\p{gc:n}>).  But Perl furnishes shortcuts in which everything up
@@ -598,7 +598,7 @@ property can have more values added in a future Unicode release.  Those
 listed above comprised the complete set for many Unicode releases, but
 others were added in Unicode 6.3; you can always find what the
 current ones are in L<perluniprops>.  And
-L<http://www.unicode.org/reports/tr9/> describes how to use them.
+L<https://www.unicode.org/reports/tr9/> describes how to use them.
 
 =head3 B<Scripts>
 
@@ -675,7 +675,7 @@ used in more than one script, they will be in C<sc=Common>, but only
 if they are used in many scripts should they be in C<scx=Common>.
 
 The explanation above has omitted some detail; refer to UAX#24 "Unicode
-Script Property": L<http://www.unicode.org/reports/tr24>.
+Script Property": L<https://www.unicode.org/reports/tr24>.
 
 A complete list of scripts and their shortcuts is in L<perluniprops>.
 
@@ -703,7 +703,7 @@ those digits are shared across many scripts, and hence are in the
 C<Common> script.
 
 For more about scripts versus blocks, see UAX#24 "Unicode Script Property":
-L<http://www.unicode.org/reports/tr24>
+L<https://www.unicode.org/reports/tr24>
 
 The C<Script_Extensions> or C<Script> properties are likely to be the
 ones you want to use when processing
@@ -751,12 +751,12 @@ Unicode defines all its properties in the compound form, so all single-form
 properties are Perl extensions.  Most of these are just synonyms for the
 Unicode ones, but some are genuine extensions, including several that are in
 the compound form.  And quite a few of these are actually recommended by Unicode
-(in L<http://www.unicode.org/reports/tr18>).
+(in L<https://www.unicode.org/reports/tr18>).
 
 This section gives some details on all extensions that aren't just
 synonyms for compound-form Unicode properties
 (for those properties, you'll have to refer to the
-L<Unicode Standard|http://www.unicode.org/reports/tr44>.
+L<Unicode Standard|https://www.unicode.org/reports/tr44>.
 
 =over
 
@@ -804,7 +804,7 @@ pre-composed character.  An example is the C<"SUPERSCRIPT ONE">.  It is
 somewhat like a regular digit 1, but not exactly; its decomposition into
 the digit 1 is called a "compatible" decomposition, specifically a
 "super" decomposition.  There are several such compatibility
-decompositions (see L<http://www.unicode.org/reports/tr44>), including
+decompositions (see L<https://www.unicode.org/reports/tr44>), including
 one called "compat", which means some miscellaneous type of
 decomposition that doesn't fit into the other decomposition categories
 that Unicode has chosen.
@@ -1227,7 +1227,7 @@ See L<Encode>.
 The following list of Unicode supported features for regular expressions describes
 all features currently directly supported by core Perl.  The references
 to "Level I<N>" and the section numbers refer to
-L<UTS#18 "Unicode Regular Expressions"|http://www.unicode.org/reports/tr18>,
+L<UTS#18 "Unicode Regular Expressions"|https://www.unicode.org/reports/tr18>,
 version 18, October 2016.
 
 =head3 Level 1 - Basic Unicode Support
@@ -1253,7 +1253,7 @@ properties, as R2.7 asks (see L</"Unicode Character Properties"> above).
 =item [3]
 Perl has C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]>
 C<[:^I<prop>:]>, plus all the properties specified by
-L<http://www.unicode.org/reports/tr18/#Compatibility_Properties>.  These
+L<https://www.unicode.org/reports/tr18/#Compatibility_Properties>.  These
 are described above in L</Other Properties>
 
 =item [4]
@@ -1319,7 +1319,7 @@ character.
 The reason this is considered to be only partially implemented is that
 Perl has L<C<qrE<sol>\b{lb}E<sol>>|perlrebackslash/\b{lb}> and
 C<L<Unicode::LineBreak>> that are conformant with
-L<UAX#14 "Unicode Line Breaking Algorithm"|http://www.unicode.org/reports/tr14>.
+L<UAX#14 "Unicode Line Breaking Algorithm"|https://www.unicode.org/reports/tr14>.
 The regular expression construct provides default behavior, while the
 heavier-weight module provides customizable line breaking.
 
@@ -1367,7 +1367,7 @@ C<U+10FFFF> but also beyond C<U+10FFFF>
 =item [9]
 Unicode has rewritten this portion of UTS#18 to say that getting
 canonical equivalence (see UAX#15
-L<"Unicode Normalization Forms"|http://www.unicode.org/reports/tr15>)
+L<"Unicode Normalization Forms"|https://www.unicode.org/reports/tr15>)
 is basically to be done at the programmer level.  Use NFD to write
 both your regular expressions and text to match them against (you
 can use L<Unicode::Normalize>).
@@ -1376,7 +1376,7 @@ can use L<Unicode::Normalize>).
 Perl has C<\X> and C<\b{gcb}> but we don't have a "Grapheme Cluster Mode".
 
 =item [11] see
-L<UAX#29 "Unicode Text Segmentation"|http://www.unicode.org/reports/tr29>,
+L<UAX#29 "Unicode Text Segmentation"|https://www.unicode.org/reports/tr29>,
 
 =item [12] see
 L</Wildcards in Property Values> above.
@@ -1402,7 +1402,7 @@ L</Wildcards in Property Values> above.
 =item [13]
 Perl has L<Unicode::Collate>, but it isn't integrated with regular
 expressions.  See
-L<UTS#10 "Unicode Collation Algorithms"|http://www.unicode.org/reports/tr10>.
+L<UTS#10 "Unicode Collation Algorithms"|https://www.unicode.org/reports/tr10>.
 
 =item [14]
 Perl has C<(?<=x)> and C<(?=x)>, but this requirement says that it
@@ -1625,7 +1625,7 @@ noncharacter code points from such text, because of the potential
 security issues caused by deleting uninterpreted characters.  (See
 conformance clause C7 in Section 3.2, Conformance Requirements, and
 L<Unicode Technical Report #36, "Unicode Security
-Considerations"|http://www.unicode.org/reports/tr36/#Substituting_for_Ill_Formed_Subsequences>)."
+Considerations"|https://www.unicode.org/reports/tr36/#Substituting_for_Ill_Formed_Subsequences>)."
 
 =back
 
@@ -1776,7 +1776,7 @@ through C<0x10FFFF>.)
 =head2 Security Implications of Unicode
 
 First, read
-L<Unicode Security Considerations|http://www.unicode.org/reports/tr36>.
+L<Unicode Security Considerations|https://www.unicode.org/reports/tr36>.
 
 Also, note the following:
 
@@ -2042,7 +2042,7 @@ v5.20 and v5.22, however, the earliest usable version is Unicode 5.1.
 Perl v5.18 and v5.24 are able to handle all earlier versions.
 
 Download the files in the desired version of Unicode from the Unicode web
-site L<http://www.unicode.org>).  These should replace the existing files in
+site L<https://www.unicode.org>).  These should replace the existing files in
 F<lib/unicore> in the Perl source tree.  Follow the instructions in
 F<README.perl> in that directory to change some of their names, and then build
 perl (see L<INSTALL>).
@@ -2246,6 +2246,6 @@ C<Nd> compared with the 10 ASCII characters matching C<[0-9]>).
 
 L<perlunitut>, L<perluniintro>, L<perluniprops>, L<Encode>, L<open>, L<utf8>, L<bytes>,
 L<perlretut>, L<perlvar/"${^UNICODE}">,
-L<http://www.unicode.org/reports/tr44>).
+L<https://www.unicode.org/reports/tr44>).
 
 =cut
