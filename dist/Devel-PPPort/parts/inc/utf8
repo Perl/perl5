@@ -37,6 +37,8 @@ __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          
                                       ((((e) - (s)) <= 0)                       \
                                       ? 0                                       \
                                       : D_PPP_MIN(((e) - (s)), UTF8SKIP(s))))
+
+__UNDEFINED__ UTF8_SKIP(s)  UTF8SKIP(s)
 #endif
 
 #if 'A' == 65
