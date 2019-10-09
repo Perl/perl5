@@ -284,20 +284,20 @@ typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
 # endif
 #endif
 
-/* On versions without this, only ASCII is supported */
-#ifdef NATIVE_TO_ASCII
+/* On versions without NATIVE_TO_ASCII, only ASCII is supported */
+#if defined(EBCDIC) && defined(NATIVE_TO_ASCI)
 __UNDEFINED__ NATIVE_TO_LATIN1(c) NATIVE_TO_ASCII(c)
+__UNDEFINED__ LATIN1_TO_NATIVE(c) ASCII_TO_NATIVE(c)
+__UNDEFINED__ NATIVE_TO_UNI(c) ((c) > 255 ? (c) : NATIVE_TO_LATIN1(c))
+__UNDEFINED__ UNI_TO_NATIVE(c) ((c) > 255 ? (c) : LATIN1_TO_NATIVE(c))
 #else
 __UNDEFINED__ NATIVE_TO_LATIN1(c) (c)
-#endif
-
-#ifdef ASCII_TO_NATIVE
-__UNDEFINED__ LATIN1_TO_NATIVE(c) ASCII_TO_NATIVE(c)
-#else
 __UNDEFINED__ LATIN1_TO_NATIVE(c) (c)
+__UNDEFINED__ NATIVE_TO_UNI(c) (c)
+__UNDEFINED__ UNI_TO_NATIVE(c) (c)
 #endif
 
-/* Warning: LATIN1_TO_NATIVE, NATIVE_TO_LATIN1
+/* Warning: LATIN1_TO_NATIVE, NATIVE_TO_LATIN1 NATIVE_TO_UNI UNI_TO_NATIVE
    EBCDIC is not supported on versions earlier than 5.7.1
  */
 
