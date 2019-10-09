@@ -141,10 +141,10 @@ __UNDEFINED__ foldEQ_utf8(s1,pe1,l1,u1,s2,pe2,l2,u2)                            
 #endif
 
 #if defined(is_utf8_string) && defined(UTF8SKIP)
-__UNDEFINED__ isUTF8_CHAR(s0, e)    (                                           \
-    (e) <= (s0) || ! is_utf8_string(s0, D_PPP_MIN(UTF8SKIP(s0), (e) - (s0)))    \
+__UNDEFINED__ isUTF8_CHAR(s, e)    (                                            \
+    (e) <= (s) || ! is_utf8_string(s, UTF8_SAFE_SKIP(s, e))                     \
     ? 0                                                                         \
-    : UTF8SKIP(s0))
+    : UTF8SKIP(s))
 #endif
 
 #if 'A' == 65
