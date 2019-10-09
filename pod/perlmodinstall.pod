@@ -128,7 +128,9 @@ steps below.
 
    A. DECOMPRESS
 
-You can use the shareware Winzip ( L<http://www.winzip.com> ) to
+You can use the
+open source 7-zip ( L<https://www.7-zip.org/> )
+or the shareware Winzip ( L<https://www.winzip.com> ) to
 decompress and unpack modules.
 
    B. UNPACK
