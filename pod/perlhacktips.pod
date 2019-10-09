@@ -1276,7 +1276,7 @@ contains C<-shared> (at least on Linux).
 =back
 
 See also
-L<http://code.google.com/p/address-sanitizer/wiki/AddressSanitizer>.
+L<https://github.com/google/sanitizers/wiki/AddressSanitizer>.
 
 
 =head1 PROFILING
