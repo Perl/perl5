@@ -68,7 +68,7 @@ directory) and use this approach.
 B<If you're on a Unix or Unix-like system,>
 
 You can use Andreas Koenig's CPAN module
-( L<http://www.cpan.org/modules/by-module/CPAN> )
+( L<https://metacpan.org/release/CPAN> )
 to automate the following steps, from DECOMPRESS through INSTALL.
 
 A. DECOMPRESS
