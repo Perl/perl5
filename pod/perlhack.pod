@@ -537,7 +537,7 @@ consideration.
 Modules in the F<cpan/> directory of the source tree are maintained
 outside of the Perl core.  When the author updates the module, the
 updates are simply copied into the core.  See that module's
-documentation or its listing on L<http://search.cpan.org/> for more
+documentation or its listing on L<https://metacpan.org/> for more
 information on reporting bugs and submitting patches.
 
 In most cases, patches to modules in F<cpan/> should be sent upstream
