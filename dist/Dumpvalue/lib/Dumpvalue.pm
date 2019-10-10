@@ -2,7 +2,7 @@ use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
 use warnings;
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 our(%address, $stab, @stab, %stab, %subs);
 
 sub ASCII { return ord('A') == 65; }
@@ -256,7 +256,7 @@ sub unwrap {
       if ($#$v >= 0) {
 	$short = $sp . "0..$#{$v}  " .
 	  join(" ", 
-	       map {exists $v->[$_] ? $self->stringify($v->[$_]) : "empty"} (0..$tArrayDepth)
+	       map {defined $v->[$_] ? $self->stringify($v->[$_]) : "empty"} (0..$tArrayDepth)
 	      ) . "$shortmore";
       } else {
 	$short = $sp . "empty array";
@@ -266,7 +266,7 @@ sub unwrap {
     for my $num (0 .. $tArrayDepth) {
       return if $DB::signal and $self->{stopDbSignal};
       print "$sp$num  ";
-      if (exists $v->[$num]) {
+      if (defined $v->[$num]) {
         $self->DumpElem($v->[$num], $s);
       } else {
 	print "empty slot\n";

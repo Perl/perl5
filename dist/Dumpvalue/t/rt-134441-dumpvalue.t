@@ -39,11 +39,11 @@ is( $y, $x,
 @foobar = (undef, 'bar');
 $d->dumpValue([@foobar]);
 $x = $out->read;
-is( $x, "0  undef\n1  'bar'\n",
+is( $x, "0  empty slot\n1  'bar'\n",
     'dumpValue worked on array ref, first element undefined' );
 $d->dumpValues(@foobar);
 $y = $out->read;
-is( $y, "0  undef\n1  'bar'\n",
+is( $y, "0  empty slot\n1  'bar'\n",
     'dumpValues worked on array, first element undefined' );
 is( $y, $x,
     "dumpValues called on array returns same as dumpValue on array ref, first element undefined");
@@ -51,11 +51,11 @@ is( $y, $x,
 @foobar = ('bar', undef);
 $d->dumpValue([@foobar]);
 $x = $out->read;
-is( $x, "0  'bar'\n1  undef\n",
+is( $x, "0  'bar'\n1  empty slot\n",
     'dumpValue worked on array ref, last element undefined' );
 $d->dumpValues(@foobar);
 $y = $out->read;
-is( $y, "0  'bar'\n1  undef\n",
+is( $y, "0  'bar'\n1  empty slot\n",
     'dumpValues worked on array, last element undefined' );
 is( $y, $x,
     "dumpValues called on array returns same as dumpValue on array ref, last element undefined");
