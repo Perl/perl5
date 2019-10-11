@@ -475,6 +475,10 @@ __UNDEFINED__ isUPPER(c)    (        (c) >= 'A' && (c) <= 'Z'                   
 #  undef isUPPER_A
 # endif
 
+#  if { VERSION == 5.7.0 } /* this perl made space GRAPH */
+#    undef isGRAPH
+#  endif
+
 # if { VERSION < 5.8.0 } /* earlier perls omitted DEL */
 #  undef isCNTRL
 # endif
