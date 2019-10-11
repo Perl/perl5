@@ -66,7 +66,7 @@ sub configure
 
   if (eval { ExtUtils::MakeMaker->VERSION(6) }) {
     push @moreopts, AUTHOR => 'Marcus Holland-Moritz <mhx@cpan.org>';
-    push @moreopts, ABSTRACT_FROM => 'PPPort_pm.PL';
+    push @moreopts, ABSTRACT => 'Perl/Pollution/Portability';
   }
 
   if (eval { ExtUtils::MakeMaker->VERSION(6.30_01) }) {
@@ -88,7 +88,7 @@ sub configure
       'meta-spec' => { version => 2 },
       provides => {
         'Devel::PPPort' => {
-          file    => 'PPPort_pm.PL',
+          file    => 'PPPort.pm',
           version => $version,
         },
       },
@@ -206,7 +206,7 @@ sub MY::dist_core
   my $rule;
   foreach $rule ( @rules ) {
     if ( $rule =~ m{^\s*^dist\s+:}m ) {
-        $rule =~ s{:}{: manifest}; # make sure we regenerate the manifest
+        $rule =~ s{:}{: PPPort.pm manifest}; # make sure we update PPPort.pm
         $rule .= qq[\t].q[$(NOECHO) $(ECHO) "Warning: Please check '__MAX_PERL__' value in PPPort_pm.PL"].qq[\n];
     }
     $updated .= $rule;
