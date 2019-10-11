@@ -1081,13 +1081,13 @@ on your way to becoming a threaded Perl expert.
 =head1 SEE ALSO
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/?mode=search&field=Module&name=threads>
+L<https://web.archive.org/web/20171028020148/http://annocpan.org/?mode=search&field=Module&name=threads>
 
 Latest version of L<threads> on CPAN:
 L<https://search.cpan.org/search?module=threads>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/?mode=search&field=Module&name=threads%3A%3Ashared>
+L<https://web.archive.org/web/20171028020148/http://annocpan.org/?mode=search&field=Module&name=threads%3A%3Ashared>
 
 Latest version of L<threads::shared> on CPAN:
 L<https://search.cpan.org/search?module=threads%3A%3Ashared>
