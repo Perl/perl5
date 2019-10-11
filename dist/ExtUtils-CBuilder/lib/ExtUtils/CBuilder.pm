@@ -274,7 +274,7 @@ submit any bug reports via the F<perlbug> tool included with Perl 5.
 Bug reports will be included in the Perl 5 ticket system at
 L<http://rt.perl.org>.
 
-The Perl 5 source code is available at L<http://perl5.git.perl.org/perl.git>
+The Perl 5 source code is available at L<https://perl5.git.perl.org/perl.git>
 and ExtUtils-CBuilder may be found in the F<dist/ExtUtils-CBuilder> directory
 of the repository.
 

@@ -99,12 +99,12 @@ typedef struct jmpenv JMPENV;
  * that they moved some code that could potentially die() out of the
  * region protected by the setjmp()s.  This caused exceptions within
  * END blocks and such to not be handled by the correct setjmp().
- * 
+ *
  * The original patches that introduces flexible exceptions were:
  *
- * http://perl5.git.perl.org/perl.git/commit/312caa8e97f1c7ee342a9895c2f0e749625b4929
- * http://perl5.git.perl.org/perl.git/commit/14dd3ad8c9bf82cf09798a22cc89a9862dfd6d1a                                        
- *  
+ * https://perl5.git.perl.org/perl.git/commit/312caa8e97f1c7ee342a9895c2f0e749625b4929
+ * https://perl5.git.perl.org/perl.git/commit/14dd3ad8c9bf82cf09798a22cc89a9862dfd6d1a
+ *
  */
 
 #define dJMPENV		JMPENV cur_env
