@@ -197,7 +197,7 @@ You will need the packages mentioned in F<README.dos> in the Perl distribution.
 
 B<If you're on OS/2,>
 
-Get the EMX development suite and gzip/tar, from either Hobbes (
+Get the EMX development suite and gzip/tar from Hobbes (
 L<http://hobbes.nmsu.edu/h-browse.php?dir=/pub/os2/dev/emx/v0.9d> ), and then follow
 the instructions for Unix.
 
