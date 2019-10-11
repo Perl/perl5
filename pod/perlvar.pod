@@ -607,7 +607,8 @@ The hash C<%SIG> contains signal handlers for signals.  For example:
 
 Using a value of C<'IGNORE'> usually has the effect of ignoring the
 signal, except for the C<CHLD> signal.  See L<perlipc> for more about
-this special case.
+this special case.  Using an empty string or C<undef> as the value has
+the same effect as C<'DEFAULT'>.
 
 Here are some other examples:
 
@@ -621,6 +622,11 @@ Here are some other examples:
 
 Be sure not to use a bareword as the name of a signal handler,
 lest you inadvertently call it.
+
+Using a string that doesn't correspond to any existing function or a
+glob that doesn't contain a code slot is equivalent to C<'IGNORE'>,
+but a warning is emitted when the handler is being called (the warning
+is not emitted for the internal hooks described below).
 
 If your system has the C<sigaction()> function then signal handlers
 are installed using it.  This means you get reliable signal handling.
@@ -640,8 +646,9 @@ errors, like this:
     local $SIG{__WARN__} = sub { die $_[0] };
     eval $proggie;
 
-As the C<'IGNORE'> hook is not supported by C<__WARN__>, you can
-disable warnings using the empty subroutine:
+As the C<'IGNORE'> hook is not supported by C<__WARN__>, its effect is
+the same as using C<'DEFAULT'>.  You can disable warnings using the
+empty subroutine:
 
     local $SIG{__WARN__} = sub {};
 
@@ -660,6 +667,9 @@ this possible. This used to be deprecated, as it allowed strange action
 at a distance like rewriting a pending exception in C<$@>. Plans to
 rectify this have been scrapped, as users found that rewriting a 
 pending exception is actually a useful feature, and not a bug.
+
+The C<$SIG{__DIE__}> doesn't support C<'IGNORE'>, it has the same
+effect as C<'DEFAULT'>.
 
 C<__DIE__>/C<__WARN__> handlers are very special in one respect: they
 may be called to report (probable) errors found by the parser.  In such
