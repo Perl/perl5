@@ -486,7 +486,7 @@ Similarly, C<UNICODE_WARN_ILLEGAL_C9_INTERCHANGE> and
 C<UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE> are shortcuts to select the
 above-Unicode and surrogate flags, but not the non-character ones, as
 defined in
-L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
+L<Unicode Corrigendum #9|https://www.unicode.org/versions/corrigendum9.html>.
 See L<perlunicode/Noncharacter code points>.
 
 Extremely high code points were never specified in any standard, and require an
@@ -1242,7 +1242,7 @@ disallow these categories individually.  C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
 restricts the allowed inputs to the strict UTF-8 traditionally defined by
 Unicode.  Use C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE> to use the strictness
 definition given by
-L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
+L<Unicode Corrigendum #9|https://www.unicode.org/versions/corrigendum9.html>.
 The difference between traditional strictness and C9 strictness is that the
 latter does not forbid non-character code points.  (They are still discouraged,
 however.)  For more discussion see L<perlunicode/Noncharacter code points>.
@@ -1598,7 +1598,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     /* The order of malformation tests here is important.  We should consume as
      * few bytes as possible in order to not skip any valid character.  This is
      * required by the Unicode Standard (section 3.9 of Unicode 6.0); see also
-     * http://unicode.org/reports/tr36 for more discussion as to why.  For
+     * https://unicode.org/reports/tr36 for more discussion as to why.  For
      * example, once we've done a UTF8SKIP, we can tell the expected number of
      * bytes, and could fail right off the bat if the input parameters indicate
      * that there are too few available.  But it could be that just that first
@@ -4941,7 +4941,7 @@ beyond what was matched.  Correspondingly for C<pe2> and C<s2>.
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
-L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
+L<https://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
 
 =cut */
 

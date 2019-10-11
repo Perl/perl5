@@ -667,7 +667,7 @@ characters.  The C<KELVIN SIGN>, for example matches the letters "k" and
 "K"; and C<LATIN SMALL LIGATURE FF> matches the sequence "ff", which,
 if you're not prepared, might make it look like a hexadecimal constant,
 presenting another potential security issue.  See
-L<http://unicode.org/reports/tr36> for a detailed discussion of Unicode
+L<https://unicode.org/reports/tr36> for a detailed discussion of Unicode
 security issues.
 
 This modifier may be specified to be the default by C<use feature
@@ -2594,7 +2594,7 @@ you can write either of these:
 
 In Taiwan, Japan, and Korea, it is common for text to have a mixture of
 characters from their native scripts and base Chinese.  Perl follows
-Unicode's UTS 39 (L<http://unicode.org/reports/tr39/>) Unicode Security
+Unicode's UTS 39 (L<https://unicode.org/reports/tr39/>) Unicode Security
 Mechanisms in allowing such mixtures.  For example, the Japanese scripts
 Katakana and Hiragana are commonly mixed together in practice, along
 with some Chinese characters, and hence are treated as being in a single
@@ -2642,7 +2642,7 @@ operation are subject to change; using it yields a warning in the
 C<experimental::script_run> category.
 
 The C<Script_Extensions> property as modified by UTS 39
-(L<http://unicode.org/reports/tr39/>) is used as the basis for this
+(L<https://unicode.org/reports/tr39/>) is used as the basis for this
 feature.
 
 To summarize,
@@ -2677,7 +2677,7 @@ All characters in the sequence come from the Common script and/or the
 Inherited script and/or a single other script.
 
 The script of a character is determined by the C<Script_Extensions>
-property as modified by UTS 39 (L<http://unicode.org/reports/tr39/>), as
+property as modified by UTS 39 (L<https://unicode.org/reports/tr39/>), as
 described above.
 
 =item 3

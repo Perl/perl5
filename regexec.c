@@ -4484,7 +4484,7 @@ STATIC bool
 S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strbeg, const U8 * const curpos, const bool utf8_target)
 {
     /* returns a boolean indicating if there is a Grapheme Cluster Boundary
-     * between the inputs.  See http://www.unicode.org/reports/tr29/. */
+     * between the inputs.  See https://www.unicode.org/reports/tr29/. */
 
     PERL_ARGS_ASSERT_ISGCB;
 
@@ -4921,7 +4921,7 @@ S_isSB(pTHX_ SB_enum before,
              const bool utf8_target)
 {
     /* returns a boolean indicating if there is a Sentence Boundary Break
-     * between the inputs.  See http://www.unicode.org/reports/tr29/ */
+     * between the inputs.  See https://www.unicode.org/reports/tr29/ */
 
     U8 * lpos = (U8 *) curpos;
     bool has_para_sep = FALSE;
