@@ -1234,16 +1234,16 @@ For example:
 
   L<https://www.perl.org/>
     =>  undef,                         # link text
-        "https://www.perl.org/",        # possibly inferred link text
-        "https://www.perl.org/",        # name
+        "https://www.perl.org/",       # possibly inferred link text
+        "https://www.perl.org/",       # name
         undef,                         # section
         'url',                         # what sort of link
         "https://www.perl.org/"         # original content
 
   L<Perl.org|https://www.perl.org/>
     =>  "Perl.org",                    # link text
-        "https://www.perl.org/",        # possibly inferred link text
-        "https://www.perl.org/",        # name
+        "https://www.perl.org/",       # possibly inferred link text
+        "https://www.perl.org/",       # name
         undef,                         # section
         'url',                         # what sort of link
         "Perl.org|https://www.perl.org/" # original content
