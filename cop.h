@@ -76,25 +76,26 @@ typedef struct jmpenv JMPENV;
 
 /*
  *   PERL_FLEXIBLE_EXCEPTIONS
- * 
+ *
  * All the flexible exceptions code has been removed.
  * See the following threads for details:
  *
- *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2004-07/msg00378.html
- * 
+ *   Message-Id: 20040713143217.GB1424@plum.flirble.org
+ *   https://www.nntp.perl.org/group/perl.perl5.porters/2004/07/msg93041.html
+ *
  * Joshua's original patches (which weren't applied) and discussion:
- * 
+ *
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01396.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01489.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01491.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01608.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg02144.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg02998.html
- * 
+ *
  * Chip's reworked patch and discussion:
- * 
+ *
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1999-03/msg00520.html
- * 
+ *
  * The flaw in these patches (which went unnoticed at the time) was
  * that they moved some code that could potentially die() out of the
  * region protected by the setjmp()s.  This caused exceptions within
@@ -418,7 +419,7 @@ struct cop {
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
 				 ? gv_fetchfile(CopFILE(c)) : NULL)
-				 
+
 #  ifdef NETWARE
 #    define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
 #    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savepvn((pv),(l)))
@@ -938,7 +939,7 @@ struct context {
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-/* 
+/*
 =head1 "Gimme" Values
 */
 
