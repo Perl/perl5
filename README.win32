@@ -74,7 +74,7 @@ This port can also be built on IA64/AMD64 using:
       Microsoft Platform SDK	Nov 2001 (64-bit compiler and tools)
       MinGW64 compiler (gcc version 4.4.3 or later)
 
-The Windows SDK can be downloaded from L<http://www.microsoft.com/>.
+The Windows SDK can be downloaded from L<https://developer.microsoft.com/windows/downloads/sdk-archive>.
 The MinGW64 compiler is available at L<http://mingw-w64.org>.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
@@ -566,7 +566,7 @@ character is the double quote (").  It can be used to protect spaces
 and other special characters in arguments.
 
 The Windows documentation describes the shell parsing rules here:
-L<http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/cmd.mspx?mfr=true>
+L<https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd>
 and the C runtime parsing rules here:
 L<https://msdn.microsoft.com/en-us/library/17w5ykft%28v=VS.100%29.aspx>.
 
