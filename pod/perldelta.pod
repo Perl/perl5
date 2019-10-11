@@ -184,6 +184,28 @@ section.
 
 Additionally, the following selected changes have been made:
 
+=head3 URLs have been changed to https://, stale links updated
+
+=over 4
+
+=item *
+
+Where applicable, the URLs in the documentation have been moved from
+using the http:// protocol to https:// . This also affects the location
+of the bug tracker at L<https://rt.perl.org>.
+
+=item *
+
+Some links to OS/2 libraries, Address Sanitizer and other system tools
+had gone stale. These have been updated with working links.
+
+=item *
+
+Some links to old mails on perl5-porters had gone stale. These have been
+updated with working links.
+
+=back
+
 =head3 L<XXX>
 
 =over 4
