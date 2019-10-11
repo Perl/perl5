@@ -1448,7 +1448,7 @@ offers of frosty beverages.  (Please do be kind to the maintainers.
 Harassing or flaming them is likely to have the opposite effect of the
 one you want.)
 
-Feel free to update the ticket about your bug on http://rt.perl.org
+Feel free to update the ticket about your bug on https://rt.perl.org
 if a new version of Perl is released and your bug is still present.
 
 =head1 OPTIONS

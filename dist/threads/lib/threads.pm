@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '2.22';      # remember to update version in POD!
+our $VERSION = '2.23';      # remember to update version in POD!
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 2.21
+This document describes threads version 2.23
 
 =head1 WARNING
 
@@ -914,7 +914,7 @@ C<-E<gt>import()>) after any threads are started, and in such a way that no
 other threads are started afterwards.
 
 If the above does not work, or is not adequate for your application, then file
-a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
+a bug report on L<https://rt.cpan.org/Public/> against the problematic module.
 
 =item Memory consumption
 
@@ -1090,7 +1090,7 @@ determine whether your system supports it.
 
 In prior perl versions, spawning threads with open directory handles would
 crash the interpreter.
-L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>
+L<[perl #75154]|https://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>
 
 =item Detached threads and global destruction
 
@@ -1118,8 +1118,8 @@ unreferenced scalars.  However, such warnings are harmless, and may safely be
 ignored.
 
 You can search for L<threads> related bug reports at
-L<http://rt.cpan.org/Public/>.  If needed submit any new bugs, problems,
-patches, etc. to: L<http://rt.cpan.org/Public/Dist/Display.html?Name=threads>
+L<https://rt.cpan.org/Public/>.  If needed submit any new bugs, problems,
+patches, etc. to: L<https://rt.cpan.org/Public/Dist/Display.html?Name=threads>
 
 =back
 
@@ -1137,14 +1137,14 @@ L<https://github.com/Dual-Life/threads>
 
 L<threads::shared>, L<perlthrtut>
 
-L<http://www.perl.com/pub/a/2002/06/11/threads.html> and
-L<http://www.perl.com/pub/a/2002/09/04/threads.html>
+L<https://www.perl.com/pub/a/2002/06/11/threads.html> and
+L<https://www.perl.com/pub/a/2002/09/04/threads.html>
 
 Perl threads mailing list:
-L<http://lists.perl.org/list/ithreads.html>
+L<https://lists.perl.org/list/ithreads.html>
 
 Stack size discussion:
-L<http://www.perlmonks.org/?node_id=532956>
+L<https://www.perlmonks.org/?node_id=532956>
 
 Sample code in the I<examples> directory of this distribution on CPAN.
 

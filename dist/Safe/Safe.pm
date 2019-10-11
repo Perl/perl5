@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.40";
+$Safe::VERSION = "2.41";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -753,7 +753,7 @@ any I<further> compilation that the already compiled code may try to perform.
 This is particularly useful when applied to code references returned from reval().
 
 (It also provides a kind of workaround for RT#60374: "Safe.pm sort {} bug with
--Dusethreads". See L<http://rt.perl.org/rt3//Public/Bug/Display.html?id=60374>
+-Dusethreads". See L<https://rt.perl.org/rt3//Public/Bug/Display.html?id=60374>
 for I<much> more detail.)
 
 =head2 wrap_code_refs_within (...)

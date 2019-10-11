@@ -25,7 +25,7 @@ the number or list of keys from an empty hash is about the same
 
 This test tests against RT ticket #26188
 
-L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=26188>
+L<https://rt.perl.org/rt3/Public/Bug/Display.html?id=26188>
 
 =cut
 
