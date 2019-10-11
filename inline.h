@@ -6,7 +6,7 @@
  *    License or the Artistic License, as specified in the README file.
  *
  *    This file contains tables and code adapted from
- *    http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this
+ *    https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this
  *    copyright notice:
 
 Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
@@ -1060,7 +1060,7 @@ machines) is a valid UTF-8 character.
 =cut
 
 This uses an adaptation of the table and algorithm given in
-http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of PL_extended_utf8_dfa_tab[].
@@ -1134,7 +1134,7 @@ C<L</is_strict_utf8_string_loclen>> to check entire strings.
 =cut
 
 This uses an adaptation of the tables and algorithm given in
-http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of strict_extended_utf8_dfa_tab[].
@@ -1200,7 +1200,7 @@ C<L</is_c9strict_utf8_string_loclen>> to check entire strings.
 =cut
 
 This uses an adaptation of the tables and algorithm given in
-http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of PL_c9_utf8_dfa_tab[].
@@ -1619,7 +1619,7 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
             s--;
         } while (UTF8_IS_CONTINUATION(*s) && s > start);
     }
-    
+
     GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
     GCC_DIAG_RESTORE
@@ -1812,7 +1812,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
      * will need to be called.
      *
      * This is an adaptation of the tables and algorithm given in
-     * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
+     * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
      * comprehensive documentation of the original version.  A copyright notice
      * for the original version is given at the beginning of this file.  The
      * Perl adapation is documented at the definition of PL_strict_utf8_dfa_tab[].

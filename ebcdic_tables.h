@@ -12,7 +12,7 @@
  * More info is in utfebcdic.h
  *
  * Some of the tables are adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * which requires this copyright notice:
 
 Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
@@ -288,7 +288,7 @@ SOFTWARE.
 
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 
@@ -329,7 +329,7 @@ SOFTWARE.
 
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 
@@ -375,7 +375,7 @@ SOFTWARE.
 
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 
@@ -665,7 +665,7 @@ SOFTWARE.
 
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 
@@ -706,7 +706,7 @@ SOFTWARE.
 
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 
@@ -752,7 +752,7 @@ SOFTWARE.
 
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 

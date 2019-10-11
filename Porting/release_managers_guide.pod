@@ -366,9 +366,9 @@ This comes down to:
 =head3 monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
-L<https://tux.nl/perl5/smoke/index.html>, L<http://perl5.test-smoke.org/>
+L<https://tux.nl/perl5/smoke/index.html>, L<https://perl5.test-smoke.org/>
 and L<http://perl.develop-help.com> for a summary. See also
-L<http://www.nntp.perl.org/group/perl.daily-build.reports/> which has
+L<https://www.nntp.perl.org/group/perl.daily-build.reports/> which has
 the raw reports.
 
 Similarly, monitor the smoking of perl for compiler warnings, and try to
@@ -652,7 +652,7 @@ modules on CPAN. It can use a full, local CPAN mirror and/or fall back
 on HTTP::Tiny to fetch package metadata remotely.
 
 (If you'd prefer to have a full CPAN mirror, see
-L<http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN>)
+L<https://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN>)
 
 Change to your perl checkout, and if necessary,
 
@@ -941,7 +941,7 @@ up.
 In order to produce the C<xz> tarball, XZ Utils are required. The C<xz>
 utility is included with most modern UNIX-type operating systems and
 is available for Cygwin. A Windows port is available from
-L<http://tukaani.org/xz/>.
+L<https://tukaani.org/xz/>.
 
 B<IMPORTANT>: if you are on OS X, you must export C<COPYFILE_DISABLE=1>
 to prevent OS X resource files from being included in your tarball. After
@@ -1540,7 +1540,7 @@ and is properly indexed:
 
 =item *
 
-Check your author directory under L<http://www.cpan.org/authors/id/>
+Check your author directory under L<https://www.cpan.org/authors/id/>
 to ensure that the tarballs are available on the website.
 
 =item *
@@ -1557,14 +1557,14 @@ ask Ask <ask@perl.org>.
 
 =item *
 
-Check L<http://www.cpan.org/src/> to ensure that the F</src> updates
+Check L<https://www.cpan.org/src/> to ensure that the F</src> updates
 have been correctly mirrored to the website.
 If they haven't, ask Ask <ask@perl.org>.
 
 =item *
 
-Check L<http://search.cpan.org> to see if it has indexed the distribution.
-It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
+Check L<https://search.cpan.org> to see if it has indexed the distribution.
+It should be visible at a URL like C<https://search.cpan.org/dist/perl-5.10.1/>.
 
 =back
 

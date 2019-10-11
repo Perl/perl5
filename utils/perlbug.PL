@@ -372,7 +372,7 @@ Please do not use $0 to send test messages, test whether perl
 works, or to report bugs in perl modules from CPAN.
 
 Suggestions for how to find help using Perl can be found at
-http://perldoc.perl.org/perlcommunity.html
+https://perldoc.perl.org/perlcommunity.html
 EOF
 	}
     }
@@ -553,7 +553,7 @@ EOF
 		paraprint <<EOF;
 $entry is not a "core" Perl module. Please check that you entered
 its name correctly. If it is correct, quit this program, try searching
-for $entry on http://rt.cpan.org, and report your issue there.
+for $entry on https://rt.cpan.org, and report your issue there.
 EOF
 
             $entry = '';

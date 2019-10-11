@@ -5631,7 +5631,7 @@ EXTCONST bool PL_valid_types_NV_set[];
 #ifndef EBCDIC
 
 /* The tables below are adapted from
- * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this copyright
+ * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this copyright
  * notice:
 
 Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
@@ -5658,7 +5658,7 @@ SOFTWARE.
 
 #  ifdef DOINIT
 #    if 0       /* This is the original table given in
-                   http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ */
+                   https://bjoern.hoehrmann.de/utf-8/decoder/dfa/ */
 static U8 utf8d_C9[] = {
   /* The first part of the table maps bytes to character classes that
    * to reduce the size of the transition table and create bitmasks. */
@@ -5800,7 +5800,7 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  * that can be returned immediately.
  *
  * The "Implementation details" portion of
- * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ shows how
+ * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/ shows how
  * the first portion of the table maps each possible byte into a character
  * class.  And that the classes for those bytes which are start bytes have been
  * carefully chosen so they serve as well to be used as a shift value to mask
@@ -5949,7 +5949,7 @@ EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
 /* And below is yet another version of the above tables that accepts only UTF-8
  * as defined by Corregidum #9.  Hence no surrogates nor non-Unicode, but
  * it allows non-characters.  This is isomorphic to the original table
- * in http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ * in https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  *
  * The classes are
  *      00-7F           0

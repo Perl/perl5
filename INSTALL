@@ -10,7 +10,7 @@ INSTALL - Build and Installation guide for perl 5.
 
 First, make sure you have an up-to-date version of Perl.  If you
 didn't get your Perl source from CPAN, check the latest version at
-L<http://www.cpan.org/src/>.  Perl uses a version scheme where even-numbered
+L<https://www.cpan.org/src/>.  Perl uses a version scheme where even-numbered
 subreleases (like 5.8.x and 5.10.x) are stable maintenance releases and
 odd-numbered subreleases (like 5.7.x and 5.9.x) are unstable
 development releases.  Development releases should not be used in
@@ -458,7 +458,7 @@ TCP/IP proxy protocol library.  SOCKS is used to give applications
 access to transport layer network proxies.  Perl supports only SOCKS
 Version 5.  The corresponding Configure option is -Dusesocks.
 You can find more about SOCKS from wikipedia at
-L<http://en.wikipedia.org/wiki/SOCKS>.
+L<https://en.wikipedia.org/wiki/SOCKS>.
 
 =head3 Dynamic Loading
 
@@ -1415,7 +1415,7 @@ including a glossary of all those config.sh variables, is in the Porting
 subdirectory.  Porting/Glossary should especially come in handy.
 
 Ports for other systems may also be available.  You should check out
-L<http://www.cpan.org/ports> for current information on ports to
+L<https://www.cpan.org/ports> for current information on ports to
 various other operating systems.
 
 If you plan to port Perl to a new architecture, study carefully the
@@ -2432,7 +2432,7 @@ for details of how to report the issue.
 
 If you are unsure what makes a good bug report please read "How to
 report Bugs Effectively" by Simon Tatham:
-L<http://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
+L<https://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
 
 =head1 Coexistence with earlier versions of perl 5
 
