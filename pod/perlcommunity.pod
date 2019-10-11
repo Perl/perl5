@@ -145,7 +145,7 @@ put on by O'Reilly, and Yet Another Perl Conference or YAPC (pronounced
 yap-see), which is localized into several regional YAPCs (North America,
 Europe, Asia) in a stunning grassroots display by the Perl community. For more
 information about either conference, check out their respective web pages:
-OSCON L<http://conferences.oreillynet.com/>; YAPC L<http://www.yapc.org>.
+OSCON L<https://www.oreilly.com/conferences/>; YAPC L<https://www.yapc.org>.
 
 A relatively new conference franchise with a large Perl portion is the
 Open Source Developers Conference or OSDC. First held in Australia it has
