@@ -2621,8 +2621,8 @@ L<Unicode::UCD/B<prop_invmap()>>.
 For further information on casefolding, refer to
 the Unicode Standard, specifically sections 3.13 C<Default Case Operations>,
 4.2 C<Case-Normative>, and 5.18 C<Case Mappings>,
-available at L<http://www.unicode.org/versions/latest/>, as well as the
-Case Charts available at L<http://www.unicode.org/charts/case/>.
+available at L<https://www.unicode.org/versions/latest/>, as well as the
+Case Charts available at L<https://www.unicode.org/charts/case/>.
 
 If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
 
@@ -6037,7 +6037,7 @@ This protects against those locales where characters such as C<"|"> are
 considered to be word characters.
 
 Otherwise, Perl quotes non-ASCII characters using an adaptation from
-Unicode (see L<http://www.unicode.org/reports/tr31/>).
+Unicode (see L<https://www.unicode.org/reports/tr31/>).
 The only code points that are quoted are those that have any of the
 Unicode properties:  Pattern_Syntax, Pattern_White_Space, White_Space,
 Default_Ignorable_Code_Point, or General_Category=Control.

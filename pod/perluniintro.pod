@@ -599,8 +599,8 @@ CAPITAL LETTER A's should be considered equal, or even A's of any case.
 
 The long answer is that you need to consider character normalization
 and casing issues: see L<Unicode::Normalize>, Unicode Technical Report #15,
-L<Unicode Normalization Forms|http://www.unicode.org/unicode/reports/tr15> and
-sections on case mapping in the L<Unicode Standard|http://www.unicode.org>.
+L<Unicode Normalization Forms|https://www.unicode.org/unicode/reports/tr15> and
+sections on case mapping in the L<Unicode Standard|https://www.unicode.org>.
 
 As of Perl 5.8.0, the "Full" case-folding of I<Case
 Mappings/SpecialCasing> is implemented, but bugs remain in C<qr//i> with them,
@@ -624,7 +624,7 @@ C<0x00C1> > C<0x00C0>.
 The long answer is that "it depends", and a good answer cannot be
 given without knowing (at the very least) the language context.
 See L<Unicode::Collate>, and I<Unicode Collation Algorithm>
-L<http://www.unicode.org/unicode/reports/tr10/>
+L<https://www.unicode.org/unicode/reports/tr10/>
 
 =back
 
@@ -911,19 +911,19 @@ show a decimal number in hexadecimal.  If you have just the
 
 Unicode Consortium
 
-L<http://www.unicode.org/>
+L<https://www.unicode.org/>
 
 =item *
 
 Unicode FAQ
 
-L<http://www.unicode.org/unicode/faq/>
+L<https://www.unicode.org/unicode/faq/>
 
 =item *
 
 Unicode Glossary
 
-L<http://www.unicode.org/glossary/>
+L<https://www.unicode.org/glossary/>
 
 =item *
 
@@ -937,7 +937,7 @@ L<http://unicode.org/resources/readinglist.html>
 
 Unicode Useful Resources
 
-L<http://www.unicode.org/unicode/onlinedat/resources.html>
+L<https://www.unicode.org/unicode/onlinedat/resources.html>
 
 =item *
 
