@@ -55,9 +55,8 @@ This is a synonym for S<C<(! foldEQ_locale())>>
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of
    perl_drand48_t below, and that is visible outside of the core.  */
-#if defined(U64TYPE) && !defined(USING_MSVC6)
-/* use a faster implementation when quads are available,
- * but not with VC6 on Windows */
+#if defined(U64TYPE)
+/* use a faster implementation when quads are available */
 #    define PERL_DRAND48_QUAD
 #endif
 

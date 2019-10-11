@@ -533,24 +533,7 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* Get just the msb bits of each byte */
     word &= PERL_VARIANTS_WORD_MASK;
 
-#  ifdef USING_MSVC6    /* VC6 has some issues with the normal code, and the
-                           easiest thing is to hide that from the callers */
-    {
-        unsigned int i;
-        const U8 * s = (U8 *) &word;
-        dTHX;
-
-        for (i = 0; i < sizeof(word); i++ ) {
-            if (s[i]) {
-                return i;
-            }
-        }
-
-        Perl_croak(aTHX_ "panic: %s: %d: unexpected zero word\n",
-                                 __FILE__, __LINE__);
-    }
-
-#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1

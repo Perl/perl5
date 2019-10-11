@@ -538,7 +538,7 @@ read-only attribute).
 
 Furthermore, POSIX::access() behaves differently for directories having the
 read-only attribute set depending on what CRT library is being used. For
-example, the _access() function in the VC6 and VC7 CRTs (wrongly) claim that
+example, the _access() function in the VC7 CRT (wrongly) claims that
 such directories are not writable, whereas in fact all directories are writable
 unless access is denied by DACLs. (In the case of directories, the read-only
 attribute actually only means that the directory cannot be deleted.) This CRT

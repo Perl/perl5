@@ -1,7 +1,7 @@
 #
 # Makefile to build perl on Windows using GMAKE.
 # Supported compilers:
-#	Microsoft Visual C++ 6.0 or later
+#	Microsoft Visual C++ 7.0 or later
 #	MinGW with gcc-3.4.5 or later with runtime < 3.21
 #	MinGW64 with gcc-4.4.3 or later
 #	Windows SDK 64-bit compiler and tools
@@ -126,7 +126,6 @@ USE_LARGE_FILES	:= define
 # Uncomment this if you're building a 32-bit perl and want 64-bit integers.
 # (If you're building a 64-bit perl then you will have 64-bit integers whether
 # or not this is uncommented.)
-# Note: This option is not supported in 32-bit MSVC60 builds.
 #
 #USE_64_BIT_INT	:= define
 
@@ -160,8 +159,6 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 6.0 (aka Visual C++ 98)
-#CCTYPE		:= MSVC60
 # Visual C++ .NET 2002/2003 (aka Visual C++ 7.0/7.1) (full version)
 #CCTYPE		:= MSVC70
 # Visual C++ Toolkit 2003 (aka Visual C++ 7.1) (free command-line tools)
@@ -394,8 +391,6 @@ endif
 ifeq ($(CCHOME),)
 ifeq ($(CCTYPE),GCC)
 CCHOME		:= C:\MinGW
-else ifeq ($(CCTYPE),MSVC60)
-CCHOME		:= $(MSVCDir)
 else ifeq ($(CCTYPE),MSVC70)
 CCHOME		:= $(MSVCDir)
 else ifeq ($(CCTYPE),MSVC70FREE)
@@ -444,19 +439,6 @@ endif
 
 ifeq ($(WIN64),define)
 USE_64_BIT_INT	= define
-endif
-
-# Treat 64-bit MSVC60 (doesn't really exist) as SDK2003SP1 because
-# both link against MSVCRT.dll (which is part of Windows itself) and
-# not against a compiler specific versioned runtime.
-ifeq ("$(WIN64) $(CCTYPE)","define MSVC60")
-CCTYPE		= SDK2003SP1
-endif
-
-# Disable the 64-bit-int option for (32-bit) MSVC60 builds since that compiler
-# does not support it.
-ifeq ($(CCTYPE),MSVC60)
-USE_64_BIT_INT	= undef
 endif
 
 # Disable the long double option for MSVC builds since that compiler
@@ -672,9 +654,7 @@ EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputre
 
 # Most relevant compiler-specific options fall into two groups:
 # either pre-MSVC80 or MSVC80 onwards, so define a macro for this.
-ifeq ($(CCTYPE),MSVC60)
-PREMSVC80	= define
-else ifeq ($(CCTYPE),MSVC70)
+ifeq ($(CCTYPE),MSVC70)
 PREMSVC80	= define
 else ifeq ($(CCTYPE),MSVC70FREE)
 PREMSVC80	= define
@@ -731,22 +711,18 @@ endif
 OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug
 else
+# Enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG).
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
-OPTIMIZE	= -O1 -MD -Zi -DNDEBUG
+OPTIMIZE	= -O1 -MD -Zi -DNDEBUG -GL
 # we enable debug symbols in release builds also
-LINK_DBG	= -debug -opt:ref,icf
+LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
 # in addition to the PDB symbols.  The default Dr. Watson that ships with
 # Windows can use the the former but not latter.  The free WinDbg can be
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
-#LINK_DBG	= $(LINK_DBG) -debugtype:both
-ifneq ($(CCTYPE),MSVC60)
-# enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
-OPTIMIZE	+= -GL
-LINK_DBG	+= -ltcg
+#LINK_DBG	+= -debugtype:both
 LIB_FLAGS	= -ltcg
-endif
 endif
 
 ifeq ($(WIN64),define)
@@ -784,7 +760,7 @@ endif
 # backward compatibility.  We define this symbol here for older 32-bit
 # compilers only (which aren't using it at all) for the sole purpose
 # of getting it into $Config{ccflags}.  That way if someone builds
-# Perl itself with e.g. VC6 but later installs an XS module using VC8
+# Perl itself with e.g. VC7 but later installs an XS module using VC8
 # the time_t types will still be compatible.
 ifeq ($(WIN64),undef)
 ifeq ($(PREMSVC80),define)

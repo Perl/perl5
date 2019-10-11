@@ -125,15 +125,16 @@ build usually works in this circumstance, but some tests will fail.
 
 =item Microsoft Visual C++
 
-The nmake that comes with Visual C++ will suffice for building. Visual C
-requires that certain things be set up in the console before Visual C will
+The nmake that comes with Visual C++ will suffice for building. Visual C++
+requires that certain things be set up in the console before Visual C++ will
 sucessfully run. To make a console box be able to run the C compiler, you will
-need to beforehand, run the C<vcvars32.bat> file to compile for x86-32 and for
-x86-64 C<vcvarsall.bat x64> or C<vcvarsamd64.bat>. On a typical install of a
-Microsoft C compiler product, these batch files will already be in your C<PATH>
+need to beforehand, run C<vcvarsall.bat x86> to compile for x86-32 and for
+x86-64 C<vcvarsall.bat amd64>. On a typical install of a Microsoft C++
+compiler product, these batch files will already be in your C<PATH>
 environment variable so you may just type them without an absolute path into
 your console. If you need to find the absolute path to the batch file, it is
-usually found somewhere like C:\Program Files\Microsoft Visual Studio\VC98\Bin.
+usually found somewhere like
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC.
 With some newer Micrsoft C products (released after ~2004), the installer will
 put a shortcut in the start menu to launch a new console window with the
 console already set up for your target architecture (x86-32 or x86-64 or IA64).
@@ -388,15 +389,8 @@ The default value for CCHOME in the makefiles for Visual C++
 may not be correct for some versions.  Make sure the default exists
 and is valid.
 
-You may also need to comment out the C<DELAYLOAD = ...> line in the
-Makefile if you're using VC++ 6.0 without the latest service pack and
-the linker reports an internal error.
-
 If you want build some core extensions statically into perl's dll, specify
 them in the STATIC_EXT macro.
-
-NOTE: The USE_64_BIT_INT build option is not supported with the 32-bit
-Visual C++ 6.0 compiler.
 
 Be sure to read the instructions near the top of the makefiles carefully.
 

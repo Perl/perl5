@@ -116,11 +116,6 @@
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
-/* Microsoft Visual C++ 6.0 needs special treatment in numerous places */
-#if defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1300
-#  define USING_MSVC6
-#endif
-
 #undef START_EXTERN_C
 #undef END_EXTERN_C
 #undef EXTERN_C
@@ -1830,11 +1825,10 @@ typedef UVTYPE UV;
 #  else
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
-#if !defined(PERL_CORE) || defined(USING_MSVC6)
+#if !defined(PERL_CORE)
 /* We think that removing this decade-old undef this will cause too much
    breakage on CPAN for too little gain. (See RT #119753)
-   However, we do need HAS_QUAD in the core for use by the drand48 code,
-   but not for Win32 VC6 because it has poor __int64 support. */
+   However, we do need HAS_QUAD in the core for use by the drand48 code. */
 #    undef HAS_QUAD
 #endif
 #  endif
@@ -1926,11 +1920,6 @@ typedef NVTYPE NV;
 #   include <ieeefp.h>
 #endif
 
-#ifdef USING_MSVC6
-/* VC6 has broken NaN semantics: NaN == NaN returns true instead of false,
- * and for example NaN < IV_MIN. */
-#  define NAN_COMPARE_BROKEN
-#endif
 #if defined(__DECC) && defined(__osf__)
 /* Also Tru64 cc has broken NaN comparisons. */
 #  define NAN_COMPARE_BROKEN

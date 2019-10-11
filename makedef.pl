@@ -1306,7 +1306,7 @@ if ($ARGS{PLATFORM} eq 'win32') {
     print "LIBRARY $dll\n";
     # The DESCRIPTION module definition file statement is not supported
     # by VC7 onwards.
-    if ($ARGS{CCTYPE} =~ /^(?:MSVC60|GCC)$/) {
+    if ($ARGS{CCTYPE} eq 'GCC') {
 	print "DESCRIPTION 'Perl interpreter'\n";
     }
     print "EXPORTS\n";
