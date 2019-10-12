@@ -422,7 +422,6 @@ sub dumpvars {
   my $self = shift;
   my ($package,@vars) = @_;
   local(%address,$^W);
-  my ($key,$val);
   $package .= "::" unless $package =~ /::$/;
   *stab = *main::;
 
@@ -432,7 +431,8 @@ sub dumpvars {
   $self->{TotalStrings} = 0;
   $self->{Strings} = 0;
   $self->{CompleteTotal} = 0;
-  while (($key,$val) = each(%stab)) {
+  for my $k (keys %stab) {
+    my ($key,$val) = ($k, $stab{$k});
     return if $DB::signal and $self->{stopDbSignal};
     next if @vars && !grep( matchvar($key, $_), @vars );
     if ($self->{usageOnly}) {
