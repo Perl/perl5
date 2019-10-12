@@ -1468,7 +1468,7 @@ any magic.
 
 #define UNKNOWN_ERRNO_MSG "(unknown)"
 
-#if VMS
+#ifdef VMS
 #define Strerror(e) strerror((e), vaxc$errno)
 #else
 #define Strerror(e) strerror(e)
