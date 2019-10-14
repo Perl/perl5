@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20190522';
+our $VERSION = '5.20191027';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -354,6 +354,7 @@ sub changes_between {
     5.031002 => '2019-07-20',
     5.031003 => '2019-08-20',
     5.031004 => '2019-09-20',
+    5.030001 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16823,6 +16824,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.030001 => {
+        delta_from => 5.030000,
+        changed => {
+            'B::Op_private'         => '5.030001',
+            'Config'                => '5.030001',
+            'Module::CoreList'      => '5.20191027',
+            'Module::CoreList::Utils'=> '5.20191027',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -17860,6 +17872,13 @@ sub is_core
         removed => {
         }
     },
+    5.030001 => {
+        delta_from => 5.030000,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -18697,7 +18716,7 @@ sub is_core
     'Unicode::Collate::CJK::Stroke'=> undef,
     'Unicode::Collate::CJK::Zhuyin'=> undef,
     'Unicode::Collate::Locale'=> undef,
-    'Win32'                 => undef,
+    'Win32'                 => 'https://github.com/perl-libwin32/win32/issues',
     'Win32API::File'        => undef,
     'Win32API::File::inc::ExtUtils::Myconst2perl'=> undef,
     'autodie'               => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
