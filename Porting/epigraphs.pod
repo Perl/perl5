@@ -45,6 +45,26 @@ Bent all his will to obtain what the other had, no matter the cost.
 Once someone risked their life out of duty and loyalty to a friend.
   Ah, there's a story that I might tell, and truthfully.
 
+=head2 v5.31.3 - Samantha Harvey, "All Is Song"
+
+L<Announced on 2019-08-20 by Tom Hukins|https://www.nntp.perl.org/group/perl.perl5.porters/2019/08/msg256012.html>
+
+We are born from unity, we divide into isolation.  We winnow ourselves
+out from the thing that first made sense of us and then expect to find
+meaning, yet a fraction makes no sense without the number of which
+it's a fractional part.  We see loss, feel grief, give ourselves
+illness, we're cells that have over-divided and we call the division
+growth; the only real growth is in the return to unity, God, the
+unifying principle.
+
+Tired to his core, he turned the video off.  The rain still poured as
+he went upstairs, and in bed as he tripped down into the deep open
+shaft of sleep he kept thinking that to divide by zero was to end up
+with infinity, as was to divide by God.  To divide by God, to divide
+by God, over and over he thought it without sense; to divide by God; I
+must tell my students that the way to pass their exams is to divide by
+God.  Then he must have slept, for it was morning.
+
 =head2 v5.31.2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Duck and the Kangaroo
 
 L<Announced on 2019-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2019/07/msg255639.html>
