@@ -69,6 +69,9 @@ stable throughout 5.30 and not revert back until 5.32?
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
+<commit votes="steveh" id="6c3320363f6cd734c66a25852aac87e4f2538215" ticket="133981" desc="(perl #133981) fix for Win32 setlocale() abort"/>
+<commit votes="steveh" id="17a1e9ac2917a0f8cdb3bf899724e07190e3d8ec" ticket="133981" desc="(perl #133981) fix my stupid mistake"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
