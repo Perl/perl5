@@ -4,7 +4,7 @@
 
 <div><h2>Tickets Listed in #134127: 5.30.1 blockers</h2>
 
-<commit votes="" id="" ticket="131867" desc="%{^CAPTURE_ALL} is %+, not %-."/>
+<commit votes="steveh" id="1a1d29aaa2e0c668f9a8c960d52b516415f28983" ticket="131867" desc="%{^CAPTURE_ALL} is %+, not %-."/>
 
 </div>
 
@@ -21,15 +21,15 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-<commit votes="tonyc" id="c0ad3f089909eceaf6d442a6805e5b46d1fee0e0" ticket="134218" desc="(perl #134218) make sure ECHO is defined"/>
+<commit votes="tonyc steveh" id="c0ad3f089909eceaf6d442a6805e5b46d1fee0e0" ticket="134218" desc="(perl #134218) make sure ECHO is defined"/>
 
-<commit votes="tonyc" id="a8e0c1fd5ade7c30aa0782f1aea274ef89190f6d" ticket="133989" desc="(perl #133989) scalar() the argument to readline, if any"/>
+<commit votes="tonyc steveh" id="a8e0c1fd5ade7c30aa0782f1aea274ef89190f6d" ticket="133989" desc="(perl #133989) scalar() the argument to readline, if any"/>
 
-<commit votes="tonyc" id="40258daf9899686d934c460ba3630431312d7694" ticket="134072" desc="(perl #134072) allow \&amp;foo = \&amp;bar to work in main::"/>
+<commit votes="tonyc steveh" id="40258daf9899686d934c460ba3630431312d7694" ticket="134072" desc="(perl #134072) allow \&amp;foo = \&amp;bar to work in main::"/>
 
-<commit votes="tonyc" id="368ac47cccd4ffca6e83a26289c152a32c2ea385" ticket="134035" desc="(perl #134035) ensure sv_gets() handles a signal handler modifying sv"/>
+<commit votes="tonyc steveh" id="368ac47cccd4ffca6e83a26289c152a32c2ea385" ticket="134035" desc="(perl #134035) ensure sv_gets() handles a signal handler modifying sv"/>
 
-<commit votes="tonyc" id="05a03c0da6f3694904885fa1629a6e35e75d2875" ticket="134390" desc="(perl #134390) don't leak the SV we just created on an early return"/>
+<commit votes="tonyc steveh" id="05a03c0da6f3694904885fa1629a6e35e75d2875" ticket="134390" desc="(perl #134390) don't leak the SV we just created on an early return"/>
 
 </div>
 
@@ -46,6 +46,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 This could potentially break code written on 5.30.0 that expects "0x10" to numify to 16, but
 the bug fixed has the potential of silently(!) breaking code written with older perls that
 expect it to be 0.
+steveh - The potential breakage here makes me wonder if this is better left for 5.32 rather
+than being backported to a maint release? H.Merijn's data on the ticket shows a change in
+behaviour between 5.29.1 and 5.29.2, i.e. between 5.28 and 5.30. There was also an earlier
+change between 5.6.2 and 5.8.0 - again between major versions.  Users might expect it to be
+stable throughout 5.30 and not revert back until 5.32?
 <commit votes="tonyc" id="14d26b44a1d7eee67837ec0ea8fb0368ac6fe33e" ticket="134230" desc="(perl #134230) don't interpret 0x, 0b when numifying strings"/>
 
 </div>
