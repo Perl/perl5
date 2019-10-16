@@ -1294,9 +1294,11 @@ cpan/Math-BigInt/lib/Math/BigInt/Calc.pm	Pure Perl module to support Math::BigIn
 cpan/Math-BigInt/lib/Math/BigInt/Lib.pm
 cpan/Math-BigInt/t/_e_math.t		Helper routine in BigFloat for _e math
 cpan/Math-BigInt/t/alias.inc		Support for BigInt tests
+cpan/Math-BigInt/t/backermann-mbi.t	Test Math::BigInt
 cpan/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mbi.t		Test MBI under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mif.t		Rounding tests under BareCalc
+cpan/Math-BigInt/t/bdigitsum-mbi.t	Test Math::BigInt
 cpan/Math-BigInt/t/bdstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bdstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/bestr-mbf.t		Test Math::BigInt
@@ -1318,6 +1320,7 @@ cpan/Math-BigInt/t/bnstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bnstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/bsstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bsstr-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/buparrow-mbi.t	Test Math::BigInt
 cpan/Math-BigInt/t/calling.t		Test calling conventions
 cpan/Math-BigInt/t/calling-class-methods.t	Test Math::BigInt
 cpan/Math-BigInt/t/calling-instance-methods.t	Test Math::BigInt
@@ -1334,6 +1337,7 @@ cpan/Math-BigInt/t/from_bin-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_bin-mbi.t
 cpan/Math-BigInt/t/from_hex-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_hex-mbi.t
+cpan/Math-BigInt/t/from_ieee754-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_oct-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_oct-mbi.t
 cpan/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
@@ -1373,6 +1377,7 @@ cpan/Math-BigInt/t/sub_mbf.t		Empty subclass test of BigFloat
 cpan/Math-BigInt/t/sub_mbi.t		Empty subclass test of BigInt
 cpan/Math-BigInt/t/sub_mif.t		Test A & P with subclasses using mbimbf.inc
 cpan/Math-BigInt/t/to_base-mbi.t
+cpan/Math-BigInt/t/to_ieee754-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/trap.t		Test whether trap_nan and trap_inf work
 cpan/Math-BigInt/t/upgrade.inc		Actual tests for upgrade.t
 cpan/Math-BigInt/t/upgrade.t		Test if use Math::BigInt(); under upgrade works
