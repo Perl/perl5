@@ -426,14 +426,24 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * continuation byte */
 #define MAX_PORTABLE_UTF8_TWO_BYTE (32 * (1U << 5) - 1)
 
-/* The maximum number of UTF-8 bytes a single Unicode character can
- * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
- * expansion is UTF8_MAX_FOLD_CHAR_EXPAND characters, but any above-Unicode
- * code point will fold to itself, so we only have to look at the expansion of
- * the maximum Unicode code point.  But this number may be less than the space
- * occupied by a very large code point under Perl's extended UTF-8.  We have to
- * make it large enough to fit any single character.  (It turns out that ASCII
- * and EBCDIC differ in which is larger) */
+/*
+
+=for apidoc AmnU|STRLEN|UTF8_MAXBYTES_CASE
+
+The maximum number of UTF-8 bytes a single Unicode character can
+uppercase/lowercase/titlecase/fold into.
+
+=cut
+
+ * Unicode guarantees that the maximum expansion is UTF8_MAX_FOLD_CHAR_EXPAND
+ * characters, but any above-Unicode code point will fold to itself, so we only
+ * have to look at the expansion of the maximum Unicode code point.  But this
+ * number may be less than the space occupied by a very large code point under
+ * Perl's extended UTF-8.  We have to make it large enough to fit any single
+ * character.  (It turns out that ASCII and EBCDIC differ in which is larger)
+ *
+=cut
+*/
 #define UTF8_MAXBYTES_CASE	                                                \
         (UTF8_MAXBYTES >= (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF))    \
                            ? UTF8_MAXBYTES                                      \
