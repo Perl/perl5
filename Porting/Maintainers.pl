@@ -375,7 +375,8 @@ use File::Glob qw(:case);
         'EXCLUDED'     => ['rfc1321.txt'],
         'CUSTOMIZED'   => [
             # RT #133495
-            qw(MD5.xs MD5.pm)
+            qw(MD5.xs MD5.pm),
+            qw(Makefile.PL t/files.t)
          ],
     },
 
@@ -572,6 +573,9 @@ use File::Glob qw(:case);
             'perlfilter.pod'   => 'pod/perlfilter.pod',
             ''                 => 'cpan/Filter-Util-Call/',
         },
+        'CUSTOMIZED'   => [
+            qw(pod/perlfilter.pod)
+        ],
     },
 
     'Getopt::Long' => {
