@@ -380,9 +380,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Support for building perl with Visual C++ 6.0 has now been removed.
 
 =back
 
