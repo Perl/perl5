@@ -306,6 +306,15 @@ Perl now no longer probes for C<d_u32align>, defaulting to C<define>
 on all platforms.  This check was error prone when it was done, which
 was on 32-bit platforms only.  [perl #133495]
 
+=item *
+
+Documentation and hints for building perl on Z/OS (native EBCDIC) have
+been updated. Still work in progress.
+
+=item *
+
+New probe for malloc_usable_size
+
 =back
 
 =head1 Testing
