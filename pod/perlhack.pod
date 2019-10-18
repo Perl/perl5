@@ -27,7 +27,7 @@ for a bug, comment fixes, etc., it's easy! Here's how:
 The perl source is in a git repository.  You can clone the repository
 with the following command:
 
-  % git clone git://perl5.git.perl.org/perl.git perl
+  % git clone https://github.com/Perl/perl5.git perl
 
 =item * Ensure you're following the latest advice
 
@@ -157,7 +157,7 @@ Perl core.
 =head1 GETTING THE PERL SOURCE
 
 All of Perl's source code is kept centrally in a Git repository at
-I<perl5.git.perl.org>.  The repository contains many Perl revisions
+I<github.com>.  The repository contains many Perl revisions
 from Perl 1 onwards and all the revisions from Perforce, the previous
 version control system.
 
@@ -169,23 +169,22 @@ L<perlgit>.
 You will need a copy of Git for your computer.  You can fetch a copy of
 the repository using the git protocol:
 
-  % git clone git://perl5.git.perl.org/perl.git perl
+  % git clone git://github.com/Perl/perl5.git perl
 
 This clones the repository and makes a local copy in the F<perl>
 directory.
 
 If you cannot use the git protocol for firewall reasons, you can also
-clone via http, though this is much slower:
+clone via http:
 
-  % git clone https://perl5.git.perl.org/perl.git perl
+  % git clone https://github.com/Perl/perl5.git perl
 
 =head2 Read access via the web
 
 You may access the repository over the web.  This allows you to browse
-the tree, see recent commits, subscribe to RSS feeds for the changes,
+the tree, see recent commits, subscribe to repository notifications,
 search for particular commits and more.  You may access it at
-L<https://perl5.git.perl.org/perl.git>.  A mirror of the repository is
-found at L<https://github.com/Perl/perl5>.
+L<https://github.com/Perl/perl5>.
 
 =head2 Read access via rsync
 

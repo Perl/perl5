@@ -18,18 +18,18 @@ Perl, including those with write access to the git repository.
 =head1 CLONING THE REPOSITORY
 
 All of Perl's source code is kept centrally in a Git repository at
-I<perl5.git.perl.org>.
+I<github.com>.
 
 You can make a read-only clone of the repository by running:
 
-  % git clone git://perl5.git.perl.org/perl.git perl
+  % git clone git://github.com/Perl/perl5.git perl
 
 This uses the git protocol (port 9418).
 
 If you cannot use the git protocol for firewall reasons, you can also
-clone via http, though this is much slower:
+clone via http:
 
-  % git clone https://perl5.git.perl.org/perl.git perl
+  % git clone https://github.com/Perl/perl5.git perl
 
 =head1 WORKING WITH THE REPOSITORY
 
@@ -341,12 +341,12 @@ patch will be destroyed.
 Someone may download your patch from RT, which will result in the
 subject (the first line of the commit message) being omitted.  See
 L<RT #74192|https://rt.perl.org/Ticket/Display.html?id=74192> and
-L<commit a4583001|https://perl5.git.perl.org/perl.git/commitdiff/a4583001>
+L<commit a4583001|https://github.com/Perl/perl5/commit/a4583001>
 for an example. Alternatively someone may
 apply your patch from RT after it arrived in their mailbox, by which
 time RT will have modified the inline content of the message.  See
 L<RT #74532|https://rt.perl.org/Ticket/Display.html?id=74532> and
-L<commit f9bcfeac|https://perl5.git.perl.org/perl.git/commitdiff/f9bcfeac>
+L<commit f9bcfeac|https://github.com/Perl/perl5/commit/f9bcfeac>
 for a bad example of this failure mode.
 
 =head2 A note on derived files
@@ -586,7 +586,7 @@ Once you have write access, you will need to modify the URL for the
 origin remote to enable pushing. Edit F<.git/config> with the
 git-config(1) command:
 
-  % git config remote.origin.url ssh://perl5.git.perl.org/perl.git
+  % git config remote.origin.url git@github.com:Perl/perl5.git
 
 You can also set up your user name and e-mail address. Most people do
 this once globally in their F<~/.gitconfig> by doing something like:
@@ -602,7 +602,7 @@ execute something like the following in F<perl>:
 It is also possible to keep C<origin> as a git remote, and add a new
 remote for ssh access:
 
-  % git remote add camel perl5.git.perl.org:/perl.git
+  % git remote add camel git@github.com:Perl/perl5.git
 
 This allows you to update your local repository by pulling from
 C<origin>, which is faster and doesn't require you to authenticate, and
@@ -814,35 +814,6 @@ original commit in the new commit message.
 Before pushing any change to a maint version, make sure you've
 satisfied the steps in L</Committing to blead> above.
 
-=head2 Merging from a branch via GitHub
-
-While we don't encourage the submission of patches via GitHub, that
-will still happen. Here is a guide to merging patches from a GitHub
-repository.
-
-  % git remote add avar git://github.com/avar/perl.git
-  % git fetch avar
-
-Now you can see the differences between the branch and blead:
-
-  % git diff avar/orange
-
-And you can see the commits:
-
-  % git log avar/orange
-
-If you approve of a specific commit, you can cherry pick it:
-
-  % git cherry-pick 0c24b290ae02b2ab3304f51d5e11e85eb3659eae
-
-Or you could just merge the whole branch if you like it all:
-
-  % git merge avar/orange
-
-And then push back to the repository:
-
-  % git push origin blead
-
 =head2 Using a smoke-me branch to test changes
 
 Sometimes a change affects code paths which you cannot test on the OSes
@@ -853,7 +824,7 @@ Fortunately, there is a way to get your change smoke-tested on various
 OSes: push it to a "smoke-me" branch and wait for certain automated
 smoke-testers to report the results from their OSes.
 A "smoke-me" branch is identified by the branch name: specifically, as
-seen on perl5.git.perl.org it must be a local branch whose first name
+seen on github.com it must be a local branch whose first name
 component is precisely C<smoke-me>.
 
 The procedure for doing this is roughly as follows (using the example of
