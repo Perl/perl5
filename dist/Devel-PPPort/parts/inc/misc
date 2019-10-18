@@ -615,7 +615,7 @@ __UNDEFINED__ isUPPER_A(c)         isUPPER(c)
 __UNDEFINED__ isWORDCHAR_A(c)	   isWORDCHAR(c)
 __UNDEFINED__ isXDIGIT_A(c)	   isXDIGIT(c)
 
-__UNDEFINED__ isASCII_utf8_safe(s,e)  isASCII(*(s))
+__UNDEFINED__ isASCII_utf8_safe(s,e)  (((e) - (s)) <= 0 ? 0 : isASCII(*(s)))
 
 #if { VERSION >= 5.006 }
 
@@ -1690,6 +1690,15 @@ isPSXSPC_L1(ord)
     OUTPUT:
         RETVAL
 
+bool
+isASCII_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isASCII_utf8_safe(s, s + 1 + offset);
+    OUTPUT:
+        RETVAL
+
 #if { VERSION >= 5.006 }
 
 bool
@@ -1707,15 +1716,6 @@ isALPHANUMERIC_utf8_safe(s, offset)
     int offset
     CODE:
         RETVAL = isALPHANUMERIC_utf8_safe(s, s + UTF8SKIP(s) + offset);
-    OUTPUT:
-        RETVAL
-
-bool
-isASCII_utf8_safe(s, offset)
-    unsigned char * s
-    int offset
-    CODE:
-        RETVAL = isASCII_utf8_safe(s, s + UTF8SKIP(s) + offset);
     OUTPUT:
         RETVAL
 
@@ -1844,10 +1844,6 @@ isXDIGIT_utf8_safe(s, offset)
         RETVAL = isXDIGIT_utf8_safe(s, s + UTF8SKIP(s) + offset);
     OUTPUT:
         RETVAL
-
-#endif
-
-#ifdef UTF8SKIP
 
 AV *
 toLOWER_utf8_safe(s, offset)
