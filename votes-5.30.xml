@@ -28,22 +28,22 @@ steveh: I'm not sure whether this one fits any of the categories allowed by perl
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="steveh" id="2d26cf4aed90a77ac5e93ddec29770756027b788" ticket="134134" desc="PATCH: [perl #134134] read beyond end of buffer"/>
+<commit votes="steveh bingos" id="2d26cf4aed90a77ac5e93ddec29770756027b788" ticket="134134" desc="PATCH: [perl #134134] read beyond end of buffer"/>
 
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="tonyc steveh" id="a8e0c1fd5ade7c30aa0782f1aea274ef89190f6d" ticket="133989" desc="(perl #133989) scalar() the argument to readline, if any"/>
+<commit votes="tonyc steveh bingos" id="a8e0c1fd5ade7c30aa0782f1aea274ef89190f6d" ticket="133989" desc="(perl #133989) scalar() the argument to readline, if any"/>
 
-<commit votes="tonyc steveh" id="368ac47cccd4ffca6e83a26289c152a32c2ea385" ticket="134035" desc="(perl #134035) ensure sv_gets() handles a signal handler modifying sv"/>
+<commit votes="tonyc steveh bingos" id="368ac47cccd4ffca6e83a26289c152a32c2ea385" ticket="134035" desc="(perl #134035) ensure sv_gets() handles a signal handler modifying sv"/>
 
-<commit votes="tonyc steveh" id="05a03c0da6f3694904885fa1629a6e35e75d2875" ticket="134390" desc="(perl #134390) don't leak the SV we just created on an early return"/>
+<commit votes="tonyc steveh bingos" id="05a03c0da6f3694904885fa1629a6e35e75d2875" ticket="134390" desc="(perl #134390) don't leak the SV we just created on an early return"/>
 
 steveh: This adds a new member to struct RExC_state_t. Is that a problem for binary compatibility?
 <commit votes="steveh" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="134059" desc="PATCH: [perl #134059] panic outputting a warning"/>
 
-<commit votes="steveh" id="b0f5b1daacb21ab7e46a772a6ff0f70ca627cb58" ticket="134008" desc="[#134008] More carefully ignore negative precision in sprintf"/>
+<commit votes="steveh bingos" id="b0f5b1daacb21ab7e46a772a6ff0f70ca627cb58" ticket="134008" desc="[#134008] More carefully ignore negative precision in sprintf"/>
 
 steveh: The ticket number is #134045. The commit message gave the wrong number.
 <commit votes="steveh" id="94a2f6a3c87a0795b9b1aabd49616f90c922b835" ticket="134045" desc="(perl #134048) prevent an erroneous assertion on OP_SCALAR"/>
@@ -51,13 +51,13 @@ steveh: The ticket number is #134045. The commit message gave the wrong number.
 steveh: This is quite a large change, which makes me nervous for a maint release. Maybe it's better off left out?
 <commit votes="steveh" id="69afcc21edd23e38a4aff806a14e666d77f2bd0c" ticket="130585" desc="(perl #130585) prevent a spurious ) in a subparse confusing the parser"/>
 
-<commit votes="steveh" id="1d48e83dd8863e78e8422ed502d9b2f3199193f5" ticket="134208" desc="avoid use-after free in /(?{...})/"/>
+<commit votes="steveh bingos" id="1d48e83dd8863e78e8422ed502d9b2f3199193f5" ticket="134208" desc="avoid use-after free in /(?{...})/"/>
 
-<commit votes="steveh" id="c6f37d61adb39a6d7764b1bcb6bb67accb22a0a0" ticket="134133" desc="PATCH: [perl #134133] read beyond end of buffer"/>
+<commit votes="steveh bingos" id="c6f37d61adb39a6d7764b1bcb6bb67accb22a0a0" ticket="134133" desc="PATCH: [perl #134133] read beyond end of buffer"/>
 
-<commit votes="steveh" id="439a3bfe85749ea9eca31372daec5705acaa3db1" ticket="134325" desc="PATCH: [perl #134325] Heap buffer overflow"/>
+<commit votes="steveh bingos" id="439a3bfe85749ea9eca31372daec5705acaa3db1" ticket="134325" desc="PATCH: [perl #134325] Heap buffer overflow"/>
 
-<commit votes="steveh" id="4a69216a74159df74779841fa79d731bcc5c6a9d" ticket="134409" desc="Avoid panic when last s///g is tainted and utf8"/>
+<commit votes="steveh bingos" id="4a69216a74159df74779841fa79d731bcc5c6a9d" ticket="134409" desc="Avoid panic when last s///g is tainted and utf8"/>
 
 </div>
 
@@ -81,9 +81,9 @@ stable throughout 5.30 and not revert back until 5.32?
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="tonyc steveh" id="c0ad3f089909eceaf6d442a6805e5b46d1fee0e0" ticket="134218" desc="(perl #134218) make sure ECHO is defined"/>
+<commit votes="tonyc steveh bingos" id="c0ad3f089909eceaf6d442a6805e5b46d1fee0e0" ticket="134218" desc="(perl #134218) make sure ECHO is defined"/>
 
-<commit votes="steveh" id="52129632e392fa9969a1a481f0175777a4329973" ticket="134098" desc="PATCH: [perl #134098] no locales + debugging = no compile"/>
+<commit votes="steveh bingos" id="52129632e392fa9969a1a481f0175777a4329973" ticket="134098" desc="PATCH: [perl #134098] no locales + debugging = no compile"/>
 
 </div>
 
@@ -93,8 +93,8 @@ stable throughout 5.30 and not revert back until 5.32?
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh" id="6c3320363f6cd734c66a25852aac87e4f2538215" ticket="133981" desc="(perl #133981) fix for Win32 setlocale() abort"/>
-<commit votes="steveh" id="17a1e9ac2917a0f8cdb3bf899724e07190e3d8ec" ticket="133981" desc="(perl #133981) fix my stupid mistake"/>
+<commit votes="steveh bingos" id="6c3320363f6cd734c66a25852aac87e4f2538215" ticket="133981" desc="(perl #133981) fix for Win32 setlocale() abort"/>
+<commit votes="steveh bingos" id="17a1e9ac2917a0f8cdb3bf899724e07190e3d8ec" ticket="133981" desc="(perl #133981) fix my stupid mistake"/>
 
 </div>
 
