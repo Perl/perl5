@@ -18,10 +18,17 @@ __UNDEFINED__  UTF8_MAXBYTES   UTF8_MAXLEN
 __UNDEF_NOT_PROVIDED__ UTF_START_MARK(len)                                   \
                     (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
 
+#if { VERSION < 5.018 }     /* On non-EBCDIC was valid before this, */
+                            /* but easier to just do one check */
+#  undef UTF8_MAXBYTES_CASE
+#endif
+
 #if 'A' == 65
 #  define D_PPP_BYTE_INFO_BITS 6  /* 6 bits meaningful in continuation bytes */
+__UNDEFINED__          UTF8_MAXBYTES_CASE 13
 #else
 #  define D_PPP_BYTE_INFO_BITS 5  /* 5 bits meaningful in continuation bytes */
+__UNDEFINED__          UTF8_MAXBYTES_CASE 15
 #endif
 
 __UNDEF_NOT_PROVIDED__ UTF_ACCUMULATION_SHIFT D_PPP_BYTE_INFO_BITS

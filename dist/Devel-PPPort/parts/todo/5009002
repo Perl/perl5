@@ -4,4 +4,5 @@ op_refcnt_lock                 # U
 op_refcnt_unlock               # U
 savesvpv                       # U
 SvPVbyte_force                 # U
+UTF8_MAXBYTES_CASE             # E
 vnormal                        # U

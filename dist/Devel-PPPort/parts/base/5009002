@@ -23,6 +23,7 @@ SV_NOSTEAL                     # E
 SvPVbyte_force                 # U
 UNDERBAR                       # E
 UTF8_MAXBYTES                  # E
+UTF8_MAXBYTES_CASE             # E
 vnormal                        # U
 XCPT_CATCH                     # E
 XCPT_RETHROW                   # E
