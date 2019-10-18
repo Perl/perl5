@@ -19,10 +19,12 @@ __UNDEF_NOT_PROVIDED__ UTF_START_MARK(len)                                   \
                     (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
 
 #if 'A' == 65
-__UNDEF_NOT_PROVIDED__ UTF_ACCUMULATION_SHIFT 6
+#  define D_PPP_BYTE_INFO_BITS 6  /* 6 bits meaningful in continuation bytes */
 #else
-__UNDEF_NOT_PROVIDED__ UTF_ACCUMULATION_SHIFT 5
+#  define D_PPP_BYTE_INFO_BITS 5  /* 5 bits meaningful in continuation bytes */
 #endif
+
+__UNDEF_NOT_PROVIDED__ UTF_ACCUMULATION_SHIFT D_PPP_BYTE_INFO_BITS
 
 #ifdef NATIVE_TO_UTF
 __UNDEF_NOT_PROVIDED__ NATIVE_UTF8_TO_I8(c)  NATIVE_TO_UTF(c)
@@ -101,7 +103,6 @@ __UNDEFINED__ UVCHR_IS_INVARIANT(c)  UTF8_IS_INVARIANT(c)
 
 #ifdef UVCHR_IS_INVARIANT
 #  if 'A' == 65
-#    define D_PPP_BYTE_INFO_BITS 6  /* 6 bits meaningful in continuation bytes */
 #    ifdef QUADKIND
 #      define D_PPP_UVCHR_SKIP_UPPER(c)                                         \
           (WIDEST_UTYPE) (c) <                                                  \
@@ -110,8 +111,6 @@ __UNDEFINED__ UVCHR_IS_INVARIANT(c)  UTF8_IS_INVARIANT(c)
 #      define D_PPP_UVCHR_SKIP_UPPER(c) 7  /* 32 bit platform */
 #    endif
 #  else
-#    define D_PPP_BYTE_INFO_BITS 5      /* EBCDIC has only 5 meaningful bits */
-
      /* In the releases this is backported to, UTF-EBCDIC had a max of 2**31-1 */
 #    define D_PPP_UVCHR_SKIP_UPPER(c) 7
 #  endif
