@@ -4892,6 +4892,124 @@ yyl_sigvar(pTHX_ char *s)
     TOKEN(sigil);
 }
 
+static int
+yyl_sub(pTHX_ char *s, const int key)
+{
+    char * const tmpbuf = PL_tokenbuf + 1;
+    bool have_name, have_proto;
+    STRLEN len;
+    SV *format_name = NULL;
+    bool is_sigsub = FEATURE_SIGNATURES_IS_ENABLED;
+
+    SSize_t off = s-SvPVX(PL_linestr);
+    char *d = SvPVX(PL_linestr)+off;
+    s = skipspace(s);
+
+    SAVEBOOL(PL_parser->sig_seen);
+    PL_parser->sig_seen = FALSE;
+
+    if (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
+        || *s == '\''
+        || (*s == ':' && s[1] == ':'))
+    {
+
+        PL_expect = XATTRBLOCK;
+        d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
+                      &len);
+        if (key == KEY_format)
+            format_name = S_newSV_maybe_utf8(aTHX_ s, d - s);
+        *PL_tokenbuf = '&';
+        if (memchr(tmpbuf, ':', len) || key != KEY_sub
+         || pad_findmy_pvn(
+                PL_tokenbuf, len + 1, 0
+            ) != NOT_IN_PAD)
+            sv_setpvn(PL_subname, tmpbuf, len);
+        else {
+            sv_setsv(PL_subname,PL_curstname);
+            sv_catpvs(PL_subname,"::");
+            sv_catpvn(PL_subname,tmpbuf,len);
+        }
+        if (SvUTF8(PL_linestr))
+            SvUTF8_on(PL_subname);
+        have_name = TRUE;
+
+        s = skipspace(d);
+    }
+    else {
+        if (key == KEY_my || key == KEY_our || key==KEY_state) {
+            *d = '\0';
+            /* diag_listed_as: Missing name in "%s sub" */
+            Perl_croak(aTHX_
+                      "Missing name in \"%s\"", PL_bufptr);
+        }
+        PL_expect = XATTRTERM;
+        sv_setpvs(PL_subname,"?");
+        have_name = FALSE;
+    }
+
+    if (key == KEY_format) {
+        if (format_name) {
+            NEXTVAL_NEXTTOKE.opval
+                = newSVOP(OP_CONST,0, format_name);
+            NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
+            force_next(BAREWORD);
+        }
+        PREBLOCK(FORMAT);
+    }
+
+    /* Look for a prototype */
+    if (*s == '(' && !is_sigsub) {
+        s = scan_str(s,FALSE,FALSE,FALSE,NULL);
+        if (!s)
+            Perl_croak(aTHX_ "Prototype not terminated");
+        COPLINE_SET_FROM_MULTI_END;
+        (void)validate_proto(PL_subname, PL_lex_stuff,
+                             ckWARN(WARN_ILLEGALPROTO), 0);
+        have_proto = TRUE;
+
+        s = skipspace(s);
+    }
+    else
+        have_proto = FALSE;
+
+    if (  !(*s == ':' && s[1] != ':')
+        && (*s != '{' && *s != '(') && key != KEY_format)
+    {
+        assert(key == KEY_sub || key == KEY_AUTOLOAD ||
+               key == KEY_DESTROY || key == KEY_BEGIN ||
+               key == KEY_UNITCHECK || key == KEY_CHECK ||
+               key == KEY_INIT || key == KEY_END ||
+               key == KEY_my || key == KEY_state ||
+               key == KEY_our);
+        if (!have_name)
+            Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
+        else if (*s != ';' && *s != '}')
+            Perl_croak(aTHX_ "Illegal declaration of subroutine %" SVf, SVfARG(PL_subname));
+    }
+
+    if (have_proto) {
+        NEXTVAL_NEXTTOKE.opval =
+            newSVOP(OP_CONST, 0, PL_lex_stuff);
+        PL_lex_stuff = NULL;
+        force_next(THING);
+    }
+    if (!have_name) {
+        if (PL_curstash)
+            sv_setpvs(PL_subname, "__ANON__");
+        else
+            sv_setpvs(PL_subname, "__ANON__::__ANON__");
+        if (is_sigsub)
+            TOKEN(ANON_SIGSUB);
+        else
+            TOKEN(ANONSUB);
+    }
+    force_ident_maybe_lex('&');
+    if (is_sigsub)
+        TOKEN(SIGSUB);
+    else
+        TOKEN(SUB);
+}
+
 /*
   yylex
 
@@ -8752,123 +8870,7 @@ Perl_yylex(pTHX)
 	case KEY_format:
 	case KEY_sub:
 	  really_sub:
-	    {
-		char * const tmpbuf = PL_tokenbuf + 1;
-		bool have_name, have_proto;
-		const int key = tmp;
-                SV *format_name = NULL;
-                bool is_sigsub = FEATURE_SIGNATURES_IS_ENABLED;
-
-                SSize_t off = s-SvPVX(PL_linestr);
-		s = skipspace(s);
-                d = SvPVX(PL_linestr)+off;
-
-                SAVEBOOL(PL_parser->sig_seen);
-                PL_parser->sig_seen = FALSE;
-
-                if (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
-                    || *s == '\''
-                    || (*s == ':' && s[1] == ':'))
-		{
-
-		    PL_expect = XATTRBLOCK;
-		    d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
-				  &len);
-                    if (key == KEY_format)
-			format_name = S_newSV_maybe_utf8(aTHX_ s, d - s);
-		    *PL_tokenbuf = '&';
-		    if (memchr(tmpbuf, ':', len) || key != KEY_sub
-		     || pad_findmy_pvn(
-			    PL_tokenbuf, len + 1, 0
-			) != NOT_IN_PAD)
-			sv_setpvn(PL_subname, tmpbuf, len);
-		    else {
-			sv_setsv(PL_subname,PL_curstname);
-			sv_catpvs(PL_subname,"::");
-			sv_catpvn(PL_subname,tmpbuf,len);
-		    }
-                    if (SvUTF8(PL_linestr))
-                        SvUTF8_on(PL_subname);
-		    have_name = TRUE;
-
-
-		    s = skipspace(d);
-		}
-		else {
-		    if (key == KEY_my || key == KEY_our || key==KEY_state)
-		    {
-			*d = '\0';
-			/* diag_listed_as: Missing name in "%s sub" */
-			Perl_croak(aTHX_
-				  "Missing name in \"%s\"", PL_bufptr);
-		    }
-		    PL_expect = XATTRTERM;
-		    sv_setpvs(PL_subname,"?");
-		    have_name = FALSE;
-		}
-
-		if (key == KEY_format) {
-		    if (format_name) {
-                        NEXTVAL_NEXTTOKE.opval
-                            = newSVOP(OP_CONST,0, format_name);
-                        NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
-                        force_next(BAREWORD);
-                    }
-		    PREBLOCK(FORMAT);
-		}
-
-		/* Look for a prototype */
-		if (*s == '(' && !is_sigsub) {
-		    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-		    if (!s)
-			Perl_croak(aTHX_ "Prototype not terminated");
-		    COPLINE_SET_FROM_MULTI_END;
-		    (void)validate_proto(PL_subname, PL_lex_stuff,
-					 ckWARN(WARN_ILLEGALPROTO), 0);
-		    have_proto = TRUE;
-
-		    s = skipspace(s);
-		}
-		else
-		    have_proto = FALSE;
-
-		if (  !(*s == ':' && s[1] != ':')
-                    && (*s != '{' && *s != '(') && key != KEY_format)
-                {
-                    assert(key == KEY_sub || key == KEY_AUTOLOAD ||
-                           key == KEY_DESTROY || key == KEY_BEGIN ||
-                           key == KEY_UNITCHECK || key == KEY_CHECK ||
-                           key == KEY_INIT || key == KEY_END ||
-                           key == KEY_my || key == KEY_state ||
-                           key == KEY_our);
-		    if (!have_name)
-			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
-		    else if (*s != ';' && *s != '}')
-			Perl_croak(aTHX_ "Illegal declaration of subroutine %" SVf, SVfARG(PL_subname));
-		}
-
-		if (have_proto) {
-		    NEXTVAL_NEXTTOKE.opval =
-                        newSVOP(OP_CONST, 0, PL_lex_stuff);
-		    PL_lex_stuff = NULL;
-		    force_next(THING);
-		}
-		if (!have_name) {
-		    if (PL_curstash)
-			sv_setpvs(PL_subname, "__ANON__");
-		    else
-			sv_setpvs(PL_subname, "__ANON__::__ANON__");
-                    if (is_sigsub)
-                        TOKEN(ANON_SIGSUB);
-                    else
-                        TOKEN(ANONSUB);
-		}
-		force_ident_maybe_lex('&');
-                if (is_sigsub)
-                    TOKEN(SIGSUB);
-                else
-                    TOKEN(SUB);
-	    }
+            return yyl_sub(aTHX_ s, tmp);
 
 	case KEY_system:
 	    LOP(OP_SYSTEM,XREF);
