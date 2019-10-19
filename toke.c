@@ -5277,6 +5277,67 @@ yyl_interpcasemod(pTHX_ char *s)
     }
 }
 
+static int
+yyl_secondclass_keyword(pTHX_ char *s, STRLEN len, int key, int *orig_keyword,
+                        GV **pgv, GV ***pgvp)
+{
+    GV *ogv = NULL;	/* override (winner) */
+    GV *hgv = NULL;	/* hidden (loser) */
+    GV *gv = *pgv;
+
+    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
+        CV *cv;
+        if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len,
+                                    (UTF ? SVf_UTF8 : 0)|GV_NOTQUAL,
+                                    SVt_PVCV))
+            && (cv = GvCVu(gv)))
+        {
+            if (GvIMPORTED_CV(gv))
+                ogv = gv;
+            else if (! CvMETHOD(cv))
+                hgv = gv;
+        }
+        if (!ogv
+            && (*pgvp = (GV**)hv_fetch(PL_globalstash, PL_tokenbuf, len, FALSE))
+            && (gv = **pgvp)
+            && (isGV_with_GP(gv)
+                ? GvCVu(gv) && GvIMPORTED_CV(gv)
+                :   SvPCS_IMPORTED(gv)
+                && (gv_init(gv, PL_globalstash, PL_tokenbuf,
+                                                         len, 0), 1)))
+        {
+            ogv = gv;
+        }
+    }
+
+    *pgv = gv;
+
+    if (ogv) {
+        *orig_keyword = key;
+        return 0;		/* overridden by import or by GLOBAL */
+    }
+    else if (gv && !*pgvp
+             && -key==KEY_lock	/* XXX generalizable kludge */
+             && GvCVu(gv))
+    {
+        return 0;		/* any sub overrides "weak" keyword */
+    }
+    else {			/* no override */
+        key = -key;
+        if (key == KEY_dump) {
+            Perl_croak(aTHX_ "dump() must be written as CORE::dump() as of Perl 5.30");
+        }
+        *pgv = NULL;
+        *pgvp = 0;
+        if (hgv && key != KEY_x)	/* never ambiguous */
+            Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
+                           "Ambiguous call resolved as CORE::%s(), "
+                           "qualify as such or use &",
+                           GvENAME(hgv));
+        return key;
+    }
+}
+
 /*
   yylex
 
@@ -7424,58 +7485,8 @@ Perl_yylex(pTHX)
 	    off = 0;
 	}
 
-	if (tmp < 0) {			/* second-class keyword? */
-	    GV *ogv = NULL;	/* override (winner) */
-	    GV *hgv = NULL;	/* hidden (loser) */
-	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
-		CV *cv;
-		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len,
-					    (UTF ? SVf_UTF8 : 0)|GV_NOTQUAL,
-					    SVt_PVCV))
-                    && (cv = GvCVu(gv)))
-		{
-		    if (GvIMPORTED_CV(gv))
-			ogv = gv;
-		    else if (! CvMETHOD(cv))
-			hgv = gv;
-		}
-		if (!ogv
-                    && (gvp = (GV**)hv_fetch(PL_globalstash, PL_tokenbuf,
-                                                              len, FALSE))
-                    && (gv = *gvp)
-                    && (isGV_with_GP(gv)
-			? GvCVu(gv) && GvIMPORTED_CV(gv)
-			:   SvPCS_IMPORTED(gv)
-			&& (gv_init(gv, PL_globalstash, PL_tokenbuf,
-                                                                 len, 0), 1)))
-		{
-		    ogv = gv;
-		}
-	    }
-	    if (ogv) {
-		orig_keyword = tmp;
-		tmp = 0;		/* overridden by import or by GLOBAL */
-	    }
-	    else if (gv && !gvp
-		     && -tmp==KEY_lock	/* XXX generalizable kludge */
-		     && GvCVu(gv))
-	    {
-		tmp = 0;		/* any sub overrides "weak" keyword */
-	    }
-	    else {			/* no override */
-		tmp = -tmp;
-		if (tmp == KEY_dump) {
-		    Perl_croak(aTHX_ "dump() must be written as CORE::dump() as of Perl 5.30");
-		}
-		gv = NULL;
-		gvp = 0;
-		if (hgv && tmp != KEY_x)	/* never ambiguous */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-				   "Ambiguous call resolved as CORE::%s(), "
-				   "qualify as such or use &",
-				   GvENAME(hgv));
-	    }
-	}
+        if (tmp < 0)
+            tmp = yyl_secondclass_keyword(aTHX_ s, len, tmp, &orig_keyword, &gv, &gvp);
 
 	if (tmp && tmp != KEY___DATA__ && tmp != KEY___END__
 	 && (!anydelim || *s != '#')) {
