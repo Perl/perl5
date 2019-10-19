@@ -5180,6 +5180,103 @@ yyl_sub(pTHX_ char *s, const int key)
         TOKEN(SUB);
 }
 
+static int
+yyl_interpcasemod(pTHX_ char *s)
+{
+#ifdef DEBUGGING
+    if (PL_bufptr != PL_bufend && *PL_bufptr != '\\')
+        Perl_croak(aTHX_
+                   "panic: INTERPCASEMOD bufptr=%p, bufend=%p, *bufptr=%u",
+                   PL_bufptr, PL_bufend, *PL_bufptr);
+#endif
+
+    if (PL_bufptr == PL_bufend || PL_bufptr[1] == 'E') {
+        /* if at a \E */
+        if (PL_lex_casemods) {
+            const char oldmod = PL_lex_casestack[--PL_lex_casemods];
+            PL_lex_casestack[PL_lex_casemods] = '\0';
+
+            if (PL_bufptr != PL_bufend
+                && (oldmod == 'L' || oldmod == 'U' || oldmod == 'Q'
+                    || oldmod == 'F')) {
+                PL_bufptr += 2;
+                PL_lex_state = LEX_INTERPCONCAT;
+            }
+            PL_lex_allbrackets--;
+            return REPORT(')');
+        }
+        else if ( PL_bufptr != PL_bufend && PL_bufptr[1] == 'E' ) {
+           /* Got an unpaired \E */
+           Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+                    "Useless use of \\E");
+        }
+        if (PL_bufptr != PL_bufend)
+            PL_bufptr += 2;
+        PL_lex_state = LEX_INTERPCONCAT;
+        return yylex();
+    }
+    else {
+        DEBUG_T({
+            PerlIO_printf(Perl_debug_log, "### Saw case modifier\n");
+        });
+        s = PL_bufptr + 1;
+        if (s[1] == '\\' && s[2] == 'E') {
+            PL_bufptr = s + 3;
+            PL_lex_state = LEX_INTERPCONCAT;
+            return yylex();
+        }
+        else {
+            I32 tmp;
+            if (   memBEGINs(s, (STRLEN) (PL_bufend - s), "L\\u")
+                || memBEGINs(s, (STRLEN) (PL_bufend - s), "U\\l"))
+            {
+                tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
+            }
+            if ((*s == 'L' || *s == 'U' || *s == 'F')
+                && (strpbrk(PL_lex_casestack, "LUF")))
+            {
+                PL_lex_casestack[--PL_lex_casemods] = '\0';
+                PL_lex_allbrackets--;
+                return REPORT(')');
+            }
+            if (PL_lex_casemods > 10)
+                Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
+            PL_lex_casestack[PL_lex_casemods++] = *s;
+            PL_lex_casestack[PL_lex_casemods] = '\0';
+            PL_lex_state = LEX_INTERPCONCAT;
+            NEXTVAL_NEXTTOKE.ival = 0;
+            force_next((2<<24)|'(');
+            if (*s == 'l')
+                NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
+            else if (*s == 'u')
+                NEXTVAL_NEXTTOKE.ival = OP_UCFIRST;
+            else if (*s == 'L')
+                NEXTVAL_NEXTTOKE.ival = OP_LC;
+            else if (*s == 'U')
+                NEXTVAL_NEXTTOKE.ival = OP_UC;
+            else if (*s == 'Q')
+                NEXTVAL_NEXTTOKE.ival = OP_QUOTEMETA;
+            else if (*s == 'F')
+                NEXTVAL_NEXTTOKE.ival = OP_FC;
+            else
+                Perl_croak(aTHX_ "panic: yylex, *s=%u", *s);
+            PL_bufptr = s + 1;
+        }
+        force_next(FUNC);
+        if (PL_lex_starts) {
+            s = PL_bufptr;
+            PL_lex_starts = 0;
+            /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
+            if (PL_lex_casemods == 1 && PL_lex_inpat)
+                TOKEN(',');
+            else
+                AopNOASSIGN(OP_CONCAT);
+        }
+        else
+            return yylex();
+    }
+}
+
 /*
   yylex
 
@@ -5307,98 +5404,8 @@ Perl_yylex(pTHX)
        when we get here, PL_bufptr is at the \
     */
     case LEX_INTERPCASEMOD:
-#ifdef DEBUGGING
-	if (PL_bufptr != PL_bufend && *PL_bufptr != '\\')
-	    Perl_croak(aTHX_
-		       "panic: INTERPCASEMOD bufptr=%p, bufend=%p, *bufptr=%u",
-		       PL_bufptr, PL_bufend, *PL_bufptr);
-#endif
 	/* handle \E or end of string */
-       	if (PL_bufptr == PL_bufend || PL_bufptr[1] == 'E') {
-	    /* if at a \E */
-	    if (PL_lex_casemods) {
-		const char oldmod = PL_lex_casestack[--PL_lex_casemods];
-		PL_lex_casestack[PL_lex_casemods] = '\0';
-
-		if (PL_bufptr != PL_bufend
-		    && (oldmod == 'L' || oldmod == 'U' || oldmod == 'Q'
-                        || oldmod == 'F')) {
-		    PL_bufptr += 2;
-		    PL_lex_state = LEX_INTERPCONCAT;
-		}
-		PL_lex_allbrackets--;
-		return REPORT(')');
-	    }
-            else if ( PL_bufptr != PL_bufend && PL_bufptr[1] == 'E' ) {
-               /* Got an unpaired \E */
-               Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                        "Useless use of \\E");
-            }
-	    if (PL_bufptr != PL_bufend)
-		PL_bufptr += 2;
-	    PL_lex_state = LEX_INTERPCONCAT;
-	    return yylex();
-	}
-	else {
-	    DEBUG_T({
-                PerlIO_printf(Perl_debug_log, "### Saw case modifier\n");
-            });
-	    s = PL_bufptr + 1;
-	    if (s[1] == '\\' && s[2] == 'E') {
-	        PL_bufptr = s + 3;
-		PL_lex_state = LEX_INTERPCONCAT;
-		return yylex();
-	    }
-	    else {
-		I32 tmp;
-                if (   memBEGINs(s, (STRLEN) (PL_bufend - s), "L\\u")
-                    || memBEGINs(s, (STRLEN) (PL_bufend - s), "U\\l"))
-                {
-                    tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
-                }
-		if ((*s == 'L' || *s == 'U' || *s == 'F')
-                    && (strpbrk(PL_lex_casestack, "LUF")))
-                {
-		    PL_lex_casestack[--PL_lex_casemods] = '\0';
-		    PL_lex_allbrackets--;
-		    return REPORT(')');
-		}
-		if (PL_lex_casemods > 10)
-		    Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
-		PL_lex_casestack[PL_lex_casemods++] = *s;
-		PL_lex_casestack[PL_lex_casemods] = '\0';
-		PL_lex_state = LEX_INTERPCONCAT;
-		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next((2<<24)|'(');
-		if (*s == 'l')
-		    NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
-		else if (*s == 'u')
-		    NEXTVAL_NEXTTOKE.ival = OP_UCFIRST;
-		else if (*s == 'L')
-		    NEXTVAL_NEXTTOKE.ival = OP_LC;
-		else if (*s == 'U')
-		    NEXTVAL_NEXTTOKE.ival = OP_UC;
-		else if (*s == 'Q')
-		    NEXTVAL_NEXTTOKE.ival = OP_QUOTEMETA;
-                else if (*s == 'F')
-		    NEXTVAL_NEXTTOKE.ival = OP_FC;
-		else
-		    Perl_croak(aTHX_ "panic: yylex, *s=%u", *s);
-		PL_bufptr = s + 1;
-	    }
-	    force_next(FUNC);
-	    if (PL_lex_starts) {
-		s = PL_bufptr;
-		PL_lex_starts = 0;
-		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
-		if (PL_lex_casemods == 1 && PL_lex_inpat)
-		    TOKEN(',');
-		else
-		    AopNOASSIGN(OP_CONCAT);
-	    }
-	    else
-		return yylex();
-	}
+        return yyl_interpcasemod(aTHX_ s);
 
     case LEX_INTERPPUSH:
         return REPORT(sublex_push());
