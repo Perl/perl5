@@ -4893,6 +4893,176 @@ yyl_sigvar(pTHX_ char *s)
 }
 
 static int
+yyl_dollar(pTHX_ char *s)
+{
+    CLINE;
+
+    if (PL_expect == XPOSTDEREF) {
+        if (s[1] == '#') {
+            s++;
+            POSTDEREF(DOLSHARP);
+        }
+        POSTDEREF('$');
+    }
+
+    if (   s[1] == '#'
+        && (   isIDFIRST_lazy_if_safe(s+2, PL_bufend, UTF)
+            || strchr("{$:+-@", s[2])))
+    {
+        PL_tokenbuf[0] = '@';
+        s = scan_ident(s + 1, PL_tokenbuf + 1,
+                       sizeof PL_tokenbuf - 1, FALSE);
+        if (PL_expect == XOPERATOR) {
+            char *d = s;
+            if (PL_bufptr > s) {
+                d = PL_bufptr-1;
+                PL_bufptr = PL_oldbufptr;
+            }
+            no_op("Array length", d);
+        }
+        if (!PL_tokenbuf[1])
+            PREREF(DOLSHARP);
+        PL_expect = XOPERATOR;
+        force_ident_maybe_lex('#');
+        TOKEN(DOLSHARP);
+    }
+
+    PL_tokenbuf[0] = '$';
+    s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+    if (PL_expect == XOPERATOR) {
+        char *d = s;
+        if (PL_bufptr > s) {
+            d = PL_bufptr-1;
+            PL_bufptr = PL_oldbufptr;
+        }
+        no_op("Scalar", d);
+    }
+    if (!PL_tokenbuf[1]) {
+        if (s == PL_bufend)
+            yyerror("Final $ should be \\$ or $name");
+        PREREF('$');
+    }
+
+    {
+        const char tmp = *s;
+        if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
+            s = skipspace(s);
+
+        if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
+            && intuit_more(s, PL_bufend)) {
+            if (*s == '[') {
+                PL_tokenbuf[0] = '@';
+                if (ckWARN(WARN_SYNTAX)) {
+                    char *t = s+1;
+
+                    while (   isSPACE(*t)
+                           || isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF)
+                           || *t == '$')
+                    {
+                        t += UTF ? UTF8SKIP(t) : 1;
+                    }
+                    if (*t++ == ',') {
+                        PL_bufptr = skipspace(PL_bufptr); /* XXX can realloc */
+                        while (t < PL_bufend && *t != ']')
+                            t++;
+                        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                                    "Multidimensional syntax %" UTF8f " not supported",
+                                    UTF8fARG(UTF,(int)((t - PL_bufptr) + 1), PL_bufptr));
+                    }
+                }
+            }
+            else if (*s == '{') {
+                char *t;
+                PL_tokenbuf[0] = '%';
+                if (    strEQ(PL_tokenbuf+1, "SIG")
+                    && ckWARN(WARN_SYNTAX)
+                    && (t = (char *) memchr(s, '}', PL_bufend - s))
+                    && (t = (char *) memchr(t, '=', PL_bufend - t)))
+                {
+                    char tmpbuf[sizeof PL_tokenbuf];
+                    do {
+                        t++;
+                    } while (isSPACE(*t));
+                    if (isIDFIRST_lazy_if_safe(t, PL_bufend, UTF)) {
+                        STRLEN len;
+                        t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
+                                        &len);
+                        while (isSPACE(*t))
+                            t++;
+                        if (  *t == ';'
+                            && get_cvn_flags(tmpbuf, len, UTF
+                                                            ? SVf_UTF8
+                                                            : 0))
+                        {
+                            Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                                "You need to quote \"%" UTF8f "\"",
+                                    UTF8fARG(UTF, len, tmpbuf));
+                        }
+                    }
+                }
+            }
+        }
+
+        PL_expect = XOPERATOR;
+        if ((PL_lex_state == LEX_NORMAL || PL_lex_brackets) && isSPACE((char)tmp)) {
+            const bool islop = (PL_last_lop == PL_oldoldbufptr);
+            if (!islop || PL_last_lop_op == OP_GREPSTART)
+                PL_expect = XOPERATOR;
+            else if (strchr("$@\"'`q", *s))
+                PL_expect = XTERM;		/* e.g. print $fh "foo" */
+            else if (   strchr("&*<%", *s)
+                     && isIDFIRST_lazy_if_safe(s+1, PL_bufend, UTF))
+            {
+                PL_expect = XTERM;		/* e.g. print $fh &sub */
+            }
+            else if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+                char tmpbuf[sizeof PL_tokenbuf];
+                int t2;
+                STRLEN len;
+                scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
+                if ((t2 = keyword(tmpbuf, len, 0))) {
+                    /* binary operators exclude handle interpretations */
+                    switch (t2) {
+                    case -KEY_x:
+                    case -KEY_eq:
+                    case -KEY_ne:
+                    case -KEY_gt:
+                    case -KEY_lt:
+                    case -KEY_ge:
+                    case -KEY_le:
+                    case -KEY_cmp:
+                        break;
+                    default:
+                        PL_expect = XTERM;	/* e.g. print $fh length() */
+                        break;
+                    }
+                }
+                else {
+                    PL_expect = XTERM;	/* e.g. print $fh subr() */
+                }
+            }
+            else if (isDIGIT(*s))
+                PL_expect = XTERM;		/* e.g. print $fh 3 */
+            else if (*s == '.' && isDIGIT(s[1]))
+                PL_expect = XTERM;		/* e.g. print $fh .3 */
+            else if ((*s == '?' || *s == '-' || *s == '+')
+                     && !isSPACE(s[1]) && s[1] != '=')
+                PL_expect = XTERM;		/* e.g. print $fh -1 */
+            else if (*s == '/' && !isSPACE(s[1]) && s[1] != '='
+                     && s[1] != '/')
+                PL_expect = XTERM;		/* e.g. print $fh /.../
+                                               XXX except DORDOR operator
+                                            */
+            else if (*s == '<' && s[1] == '<' && !isSPACE(s[2])
+                     && s[2] != '=')
+                PL_expect = XTERM;		/* print $fh <<"EOF" */
+        }
+    }
+    force_ident_maybe_lex('$');
+    TOKEN('$');
+}
+
+static int
 yyl_sub(pTHX_ char *s, const int key)
 {
     char * const tmpbuf = PL_tokenbuf + 1;
@@ -6865,170 +7035,7 @@ Perl_yylex(pTHX)
 	Rop(OP_GT);
 
     case '$':
-	CLINE;
-
-        if (PL_expect == XPOSTDEREF) {
-	    if (s[1] == '#') {
-		s++;
-		POSTDEREF(DOLSHARP);
-	    }
-	    POSTDEREF('$');
-	}
-
-	if (   s[1] == '#'
-            && (   isIDFIRST_lazy_if_safe(s+2, PL_bufend, UTF)
-                || strchr("{$:+-@", s[2])))
-        {
-	    PL_tokenbuf[0] = '@';
-	    s = scan_ident(s + 1, PL_tokenbuf + 1,
-			   sizeof PL_tokenbuf - 1, FALSE);
-            if (PL_expect == XOPERATOR) {
-                d = s;
-                if (PL_bufptr > s) {
-                    d = PL_bufptr-1;
-                    PL_bufptr = PL_oldbufptr;
-                }
-		no_op("Array length", d);
-            }
-	    if (!PL_tokenbuf[1])
-		PREREF(DOLSHARP);
-	    PL_expect = XOPERATOR;
-	    force_ident_maybe_lex('#');
-	    TOKEN(DOLSHARP);
-	}
-
-	PL_tokenbuf[0] = '$';
-	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
-	if (PL_expect == XOPERATOR) {
-	    d = s;
-	    if (PL_bufptr > s) {
-		d = PL_bufptr-1;
-		PL_bufptr = PL_oldbufptr;
-	    }
-	    no_op("Scalar", d);
-	}
-	if (!PL_tokenbuf[1]) {
-	    if (s == PL_bufend)
-		yyerror("Final $ should be \\$ or $name");
-	    PREREF('$');
-	}
-
-	{
-	    const char tmp = *s;
-	    if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
-		s = skipspace(s);
-
-	    if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
-		&& intuit_more(s, PL_bufend)) {
-		if (*s == '[') {
-		    PL_tokenbuf[0] = '@';
-		    if (ckWARN(WARN_SYNTAX)) {
-			char *t = s+1;
-
-                        while (   isSPACE(*t)
-                               || isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF)
-                               || *t == '$')
-                        {
-			    t += UTF ? UTF8SKIP(t) : 1;
-                        }
-			if (*t++ == ',') {
-			    PL_bufptr = skipspace(PL_bufptr); /* XXX can realloc */
-			    while (t < PL_bufend && *t != ']')
-				t++;
-			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-					"Multidimensional syntax %" UTF8f " not supported",
-                                        UTF8fARG(UTF,(int)((t - PL_bufptr) + 1), PL_bufptr));
-			}
-		    }
-		}
-		else if (*s == '{') {
-		    char *t;
-		    PL_tokenbuf[0] = '%';
-                    if (    strEQ(PL_tokenbuf+1, "SIG")
-                        && ckWARN(WARN_SYNTAX)
-                        && (t = (char *) memchr(s, '}', PL_bufend - s))
-                        && (t = (char *) memchr(t, '=', PL_bufend - t)))
-                    {
-                        char tmpbuf[sizeof PL_tokenbuf];
-                        do {
-                            t++;
-                        } while (isSPACE(*t));
-                        if (isIDFIRST_lazy_if_safe(t, PL_bufend, UTF)) {
-                            STRLEN len;
-                            t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
-                                            &len);
-                            while (isSPACE(*t))
-                                t++;
-                            if (  *t == ';'
-                                && get_cvn_flags(tmpbuf, len, UTF
-                                                                ? SVf_UTF8
-                                                                : 0))
-                            {
-                                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                                    "You need to quote \"%" UTF8f "\"",
-                                        UTF8fARG(UTF, len, tmpbuf));
-                            }
-                        }
-                    }
-		}
-	    }
-
-	    PL_expect = XOPERATOR;
-	    if ((PL_lex_state == LEX_NORMAL || PL_lex_brackets) && isSPACE((char)tmp)) {
-		const bool islop = (PL_last_lop == PL_oldoldbufptr);
-		if (!islop || PL_last_lop_op == OP_GREPSTART)
-		    PL_expect = XOPERATOR;
-		else if (strchr("$@\"'`q", *s))
-		    PL_expect = XTERM;		/* e.g. print $fh "foo" */
-		else if (   strchr("&*<%", *s)
-                         && isIDFIRST_lazy_if_safe(s+1, PL_bufend, UTF))
-                {
-		    PL_expect = XTERM;		/* e.g. print $fh &sub */
-                }
-	        else if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-		    char tmpbuf[sizeof PL_tokenbuf];
-		    int t2;
-		    scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		    if ((t2 = keyword(tmpbuf, len, 0))) {
-			/* binary operators exclude handle interpretations */
-			switch (t2) {
-			case -KEY_x:
-			case -KEY_eq:
-			case -KEY_ne:
-			case -KEY_gt:
-			case -KEY_lt:
-			case -KEY_ge:
-			case -KEY_le:
-			case -KEY_cmp:
-			    break;
-			default:
-			    PL_expect = XTERM;	/* e.g. print $fh length() */
-			    break;
-			}
-		    }
-		    else {
-			PL_expect = XTERM;	/* e.g. print $fh subr() */
-		    }
-		}
-		else if (isDIGIT(*s))
-		    PL_expect = XTERM;		/* e.g. print $fh 3 */
-		else if (*s == '.' && isDIGIT(s[1]))
-		    PL_expect = XTERM;		/* e.g. print $fh .3 */
-		else if ((*s == '?' || *s == '-' || *s == '+')
-			 && !isSPACE(s[1]) && s[1] != '=')
-		    PL_expect = XTERM;		/* e.g. print $fh -1 */
-		else if (*s == '/' && !isSPACE(s[1]) && s[1] != '='
-			 && s[1] != '/')
-		    PL_expect = XTERM;		/* e.g. print $fh /.../
-						   XXX except DORDOR operator
-						*/
-		else if (*s == '<' && s[1] == '<' && !isSPACE(s[2])
-			 && s[2] != '=')
-		    PL_expect = XTERM;		/* print $fh <<"EOF" */
-	    }
-	}
-	force_ident_maybe_lex('$');
-	TOKEN('$');
+        return yyl_dollar(aTHX_ s);
 
     case '@':
         if (PL_expect == XPOSTDEREF)
