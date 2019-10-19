@@ -5544,6 +5544,45 @@ yyl_plus(pTHX_ char *s)
 }
 
 static int
+yyl_star(pTHX_ char *s)
+{
+    if (PL_expect == XPOSTDEREF)
+        POSTDEREF('*');
+
+    if (PL_expect != XOPERATOR) {
+        s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+        PL_expect = XOPERATOR;
+        force_ident(PL_tokenbuf, '*');
+        if (!*PL_tokenbuf)
+            PREREF('*');
+        TERM('*');
+    }
+
+    s++;
+    if (*s == '*') {
+        s++;
+        if (*s == '=' && !PL_lex_allbrackets
+            && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+        {
+            s -= 2;
+            TOKEN(0);
+        }
+        PWop(OP_POW);
+    }
+
+    if (*s == '='
+        && !PL_lex_allbrackets
+        && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+    {
+        s--;
+        TOKEN(0);
+    }
+
+    PL_parser->saw_infix_sigil = 1;
+    Mop(OP_MULTIPLY);
+}
+
+static int
 yyl_subproto(pTHX_ char *s, CV *cv)
 {
     STRLEN protolen = CvPROTOLEN(cv);
@@ -6365,35 +6404,7 @@ Perl_yylex(pTHX)
         return yyl_plus(aTHX_ s);
 
     case '*':
-	if (PL_expect == XPOSTDEREF) POSTDEREF('*');
-	if (PL_expect != XOPERATOR) {
-	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
-	    PL_expect = XOPERATOR;
-	    force_ident(PL_tokenbuf, '*');
-	    if (!*PL_tokenbuf)
-		PREREF('*');
-	    TERM('*');
-	}
-	s++;
-	if (*s == '*') {
-	    s++;
-	    if (*s == '=' && !PL_lex_allbrackets
-                && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-            {
-		s -= 2;
-		TOKEN(0);
-	    }
-	    PWop(OP_POW);
-	}
-	if (*s == '='
-            && !PL_lex_allbrackets
-            && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-        {
-	    s--;
-	    TOKEN(0);
-	}
-	PL_parser->saw_infix_sigil = 1;
-	Mop(OP_MULTIPLY);
+        return yyl_star(aTHX_ s);
 
     case '%':
     {
