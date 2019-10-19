@@ -4936,6 +4936,12 @@ yyl_sigvar(pTHX_ char *s)
 		  - cases for built-in keywords
 */
 
+#ifdef NETWARE
+#define RSFP_FILENO (PL_rsfp)
+#else
+#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
+#endif
+
 
 int
 Perl_yylex(pTHX)
@@ -7794,11 +7800,7 @@ Perl_yylex(pTHX)
 			loc = PerlIO_tell(PL_rsfp);
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }
-#ifdef NETWARE
-			if (PerlLIO_setmode(PL_rsfp, O_TEXT) != -1) {
-#else
-		    if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
-#endif	/* NETWARE */
+                    if (PerlLIO_setmode(RSFP_FILENO, O_TEXT) != -1) {
 			if (loc > 0)
 			    PerlIO_seek(PL_rsfp, loc, 0);
 		    }
