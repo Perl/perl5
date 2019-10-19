@@ -5052,8 +5052,9 @@ Perl_yylex(pTHX)
 	    return yylex();
 	}
 	else {
-	    DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Saw case modifier\n"); });
+	    DEBUG_T({
+                PerlIO_printf(Perl_debug_log, "### Saw case modifier\n");
+            });
 	    s = PL_bufptr + 1;
 	    if (s[1] == '\\' && s[2] == 'E') {
 	        PL_bufptr = s + 3;
@@ -5117,8 +5118,10 @@ Perl_yylex(pTHX)
     case LEX_INTERPSTART:
 	if (PL_bufptr == PL_bufend)
 	    return REPORT(sublex_done());
-	DEBUG_T({ if(*PL_bufptr != '(') PerlIO_printf(Perl_debug_log,
-              "### Interpolated variable\n"); });
+	DEBUG_T({
+            if(*PL_bufptr != '(')
+                PerlIO_printf(Perl_debug_log, "### Interpolated variable\n");
+        });
 	PL_expect = XTERM;
         /* for /@a/, we leave the joining for the regex engine to do
          * (unless we're within \Q etc) */
@@ -5353,9 +5356,9 @@ Perl_yylex(pTHX)
 			 ? "Format not terminated"
 			 : "Missing right curly or square bracket"));
 	    }
-            DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Tokener got EOF\n");
-            } );
+            DEBUG_T({
+                PerlIO_printf(Perl_debug_log, "### Tokener got EOF\n");
+            });
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
@@ -5801,15 +5804,16 @@ Perl_yylex(pTHX)
 	    if (ftst) {
                 PL_last_uni = PL_oldbufptr;
 		PL_last_lop_op = (OPCODE)ftst;
-		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", (int)tmp);
+		DEBUG_T( {
+                    PerlIO_printf(Perl_debug_log, "### Saw file test %c\n", (int)tmp);
 		} );
 		FTST(ftst);
 	    }
 	    else {
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
-		DEBUG_T( { PerlIO_printf(Perl_debug_log,
+		DEBUG_T( {
+                    PerlIO_printf(Perl_debug_log,
 			"### '-%c' looked like a file test but was not\n",
 			(int) tmp);
 		} );
