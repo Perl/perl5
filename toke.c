@@ -4796,6 +4796,102 @@ S_vcs_conflict_marker(pTHX_ char *s)
     return s;
 }
 
+static int
+yyl_sigvar(pTHX_ char *s)
+{
+    /* we expect the sigil and optional var name part of a
+     * signature element here. Since a '$' is not necessarily
+     * followed by a var name, handle it specially here; the general
+     * yylex code would otherwise try to interpret whatever follows
+     * as a var; e.g. ($, ...) would be seen as the var '$,'
+     */
+
+    U8 sigil;
+
+    s = skipspace(s);
+    sigil = *s++;
+    PL_bufptr = s; /* for error reporting */
+    switch (sigil) {
+    case '$':
+    case '@':
+    case '%':
+        /* spot stuff that looks like an prototype */
+        if (strchr("$:@%&*;\\[]", *s)) {
+            yyerror("Illegal character following sigil in a subroutine signature");
+            break;
+        }
+        /* '$#' is banned, while '$ # comment' isn't */
+        if (*s == '#') {
+            yyerror("'#' not allowed immediately following a sigil in a subroutine signature");
+            break;
+        }
+        s = skipspace(s);
+        if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+            char *dest = PL_tokenbuf + 1;
+            /* read var name, including sigil, into PL_tokenbuf */
+            PL_tokenbuf[0] = sigil;
+            parse_ident(&s, &dest, dest + sizeof(PL_tokenbuf) - 1,
+                0, cBOOL(UTF), FALSE, FALSE);
+            *dest = '\0';
+            assert(PL_tokenbuf[1]); /* we have a variable name */
+        }
+        else {
+            *PL_tokenbuf = 0;
+            PL_in_my = 0;
+        }
+
+        s = skipspace(s);
+        /* parse the = for the default ourselves to avoid '+=' etc being accepted here
+         * as the ASSIGNOP, and exclude other tokens that start with =
+         */
+        if (*s == '=' && (!s[1] || strchr("=~>", s[1]) == 0)) {
+            /* save now to report with the same context as we did when
+             * all ASSIGNOPS were accepted */
+            PL_oldbufptr = s;
+
+            ++s;
+            NEXTVAL_NEXTTOKE.ival = 0;
+            force_next(ASSIGNOP);
+            PL_expect = XTERM;
+        }
+        else if (*s == ',' || *s == ')') {
+            PL_expect = XOPERATOR;
+        }
+        else {
+            /* make sure the context shows the unexpected character and
+             * hopefully a bit more */
+            if (*s) ++s;
+            while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
+                s++;
+            PL_bufptr = s; /* for error reporting */
+            yyerror("Illegal operator following parameter in a subroutine signature");
+            PL_in_my = 0;
+        }
+        if (*PL_tokenbuf) {
+            NEXTVAL_NEXTTOKE.ival = sigil;
+            force_next('p'); /* force a signature pending identifier */
+        }
+        break;
+
+    case ')':
+        PL_expect = XBLOCK;
+        break;
+    case ',': /* handle ($a,,$b) */
+        break;
+
+    default:
+        PL_in_my = 0;
+        yyerror("A signature parameter must start with '$', '@' or '%'");
+        /* very crude error recovery: skip to likely next signature
+         * element */
+        while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
+            s++;
+        break;
+    }
+
+    TOKEN(sigil);
+}
+
 /*
   yylex
 
@@ -5186,96 +5282,7 @@ Perl_yylex(pTHX)
     PL_parser->saw_infix_sigil = 0;
 
     if (PL_in_my == KEY_sigvar) {
-        /* we expect the sigil and optional var name part of a
-         * signature element here. Since a '$' is not necessarily
-         * followed by a var name, handle it specially here; the general
-         * yylex code would otherwise try to interpret whatever follows
-         * as a var; e.g. ($, ...) would be seen as the var '$,'
-         */
-
-        U8 sigil;
-
-        s = skipspace(s);
-        sigil = *s++;
-        PL_bufptr = s; /* for error reporting */
-        switch (sigil) {
-        case '$':
-        case '@':
-        case '%':
-            /* spot stuff that looks like an prototype */
-            if (strchr("$:@%&*;\\[]", *s)) {
-                yyerror("Illegal character following sigil in a subroutine signature");
-                break;
-            }
-            /* '$#' is banned, while '$ # comment' isn't */
-            if (*s == '#') {
-                yyerror("'#' not allowed immediately following a sigil in a subroutine signature");
-                break;
-            }
-            s = skipspace(s);
-            if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-                char *dest = PL_tokenbuf + 1;
-                /* read var name, including sigil, into PL_tokenbuf */
-                PL_tokenbuf[0] = sigil;
-                parse_ident(&s, &dest, dest + sizeof(PL_tokenbuf) - 1,
-                    0, cBOOL(UTF), FALSE, FALSE);
-                *dest = '\0';
-                assert(PL_tokenbuf[1]); /* we have a variable name */
-            }
-            else {
-                *PL_tokenbuf = 0;
-                PL_in_my = 0;
-            }
-
-            s = skipspace(s);
-            /* parse the = for the default ourselves to avoid '+=' etc being accepted here
-             * as the ASSIGNOP, and exclude other tokens that start with =
-             */
-            if (*s == '=' && (!s[1] || strchr("=~>", s[1]) == 0)) {
-                /* save now to report with the same context as we did when
-                 * all ASSIGNOPS were accepted */
-                PL_oldbufptr = s;
-
-                ++s;
-                NEXTVAL_NEXTTOKE.ival = 0;
-                force_next(ASSIGNOP);
-                PL_expect = XTERM;
-            }
-            else if (*s == ',' || *s == ')') {
-                PL_expect = XOPERATOR;
-            }
-            else {
-                /* make sure the context shows the unexpected character and
-                 * hopefully a bit more */
-                if (*s) ++s;
-                while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
-                    s++;
-                PL_bufptr = s; /* for error reporting */
-                yyerror("Illegal operator following parameter in a subroutine signature");
-                PL_in_my = 0;
-            }
-            if (*PL_tokenbuf) {
-                NEXTVAL_NEXTTOKE.ival = sigil;
-                force_next('p'); /* force a signature pending identifier */
-            }
-            break;
-
-        case ')':
-            PL_expect = XBLOCK;
-            break;
-        case ',': /* handle ($a,,$b) */
-            break;
-
-        default:
-            PL_in_my = 0;
-            yyerror("A signature parameter must start with '$', '@' or '%'");
-            /* very crude error recovery: skip to likely next signature
-             * element */
-            while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
-                s++;
-            break;
-        }
-        TOKEN(sigil);
+        return yyl_sigvar(aTHX_ s);
     }
 
   retry:
