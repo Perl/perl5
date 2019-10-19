@@ -5616,6 +5616,23 @@ yyl_percent(pTHX_ char *s)
 }
 
 static int
+yyl_caret(pTHX_ char *s)
+{
+    char *d = s;
+    const bool bof = cBOOL(FEATURE_BITWISE_IS_ENABLED);
+    if (bof && s[1] == '.')
+        s++;
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+            (s[1] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE))
+    {
+        s = d;
+        TOKEN(0);
+    }
+    s++;
+    BOop(bof ? d == s-2 ? OP_SBIT_XOR : OP_NBIT_XOR : OP_BIT_XOR);
+}
+
+static int
 yyl_subproto(pTHX_ char *s, CV *cv)
 {
     STRLEN protolen = CvPROTOLEN(cv);
@@ -6443,18 +6460,8 @@ Perl_yylex(pTHX)
         return yyl_percent(aTHX_ s);
 
     case '^':
-	d = s;
-	bof = FEATURE_BITWISE_IS_ENABLED;
-	if (bof && s[1] == '.')
-	    s++;
-	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-		(s[1] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE))
-	{
-	    s = d;
-	    TOKEN(0);
-	}
-	s++;
-	BOop(bof ? d == s-2 ? OP_SBIT_XOR : OP_NBIT_XOR : OP_BIT_XOR);
+        return yyl_caret(aTHX_ s);
+
     case '[':
 	if (PL_lex_brackets > 100)
 	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
