@@ -888,26 +888,3 @@ Finally, you should then delete the remote smoke-me branch:
 ) and then delete your local branch:
 
   % git branch -d win32stat
-
-=head2 A note on camel and dromedary
-
-The committers have SSH access to the two servers that serve
-C<perl5.git.perl.org>. One is C<perl5.git.perl.org> itself (I<camel>),
-which is the 'master' repository. The second one is
-C<users.perl5.git.perl.org> (I<dromedary>), which can be used for
-general testing and development. Dromedary syncs the git tree from
-camel every few minutes, you should not push there. Both machines also
-have a full CPAN mirror in F</srv/CPAN>, please use this. To share files
-with the general public, dromedary serves your F<~/public_html/> as
-C<L<https://users.perl5.git.perl.org/~yourlogin/>>
-
-These hosts have fairly strict firewalls to the outside. Outgoing, only
-rsync, ssh and git are allowed. For http and ftp, you can use
-L<http://webproxy:3128> as proxy. Incoming, the firewall tries to detect
-attacks and blocks IP addresses with suspicious activity. This
-sometimes (but very rarely) has false positives and you might get
-blocked. The quickest way to get unblocked is to notify the admins.
-
-These two boxes are owned, hosted, and operated by booking.com. You can
-reach the sysadmins in #p5p on irc.perl.org or via mail to
-L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
