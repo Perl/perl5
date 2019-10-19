@@ -5885,14 +5885,9 @@ Perl_yylex(pTHX)
   retry:
     switch (*s) {
     default:
-	if (UTF) {
-            if (isIDFIRST_utf8_safe(s, PL_bufend)) {
-                goto keylookup;
-            }
+        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s)) {
+            goto keylookup;
         }
-        else if (isALNUMC(*s)) {
-	    goto keylookup;
-	}
     {
         SV *dsv = newSVpvs_flags("", SVs_TEMP);
         const char *c;
