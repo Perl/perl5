@@ -5516,6 +5516,34 @@ yyl_hyphen(pTHX_ char *s)
 }
 
 static int
+yyl_plus(pTHX_ char *s)
+{
+    const char tmp = *s++;
+    if (*s == tmp) {
+        s++;
+        if (PL_expect == XOPERATOR)
+            TERM(POSTINC);
+        else
+            OPERATOR(PREINC);
+    }
+    if (PL_expect == XOPERATOR) {
+        if (*s == '='
+            && !PL_lex_allbrackets
+            && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+        {
+            s--;
+            TOKEN(0);
+        }
+        Aop(OP_ADD);
+    }
+    else {
+        if (isSPACE(*s) || !isSPACE(*PL_bufptr))
+            check_uni();
+        OPERATOR('+');
+    }
+}
+
+static int
 yyl_subproto(pTHX_ char *s, CV *cv)
 {
     STRLEN protolen = CvPROTOLEN(cv);
@@ -6334,31 +6362,7 @@ Perl_yylex(pTHX)
         return yyl_hyphen(aTHX_ s);
 
     case '+':
-	{
-	    const char tmp = *s++;
-	    if (*s == tmp) {
-		s++;
-		if (PL_expect == XOPERATOR)
-		    TERM(POSTINC);
-		else
-		    OPERATOR(PREINC);
-	    }
-	    if (PL_expect == XOPERATOR) {
-		if (*s == '='
-                    && !PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-                {
-		    s--;
-		    TOKEN(0);
-		}
-		Aop(OP_ADD);
-	    }
-	    else {
-		if (isSPACE(*s) || !isSPACE(*PL_bufptr))
-		    check_uni();
-		OPERATOR('+');
-	    }
-	}
+        return yyl_plus(aTHX_ s);
 
     case '*':
 	if (PL_expect == XPOSTDEREF) POSTDEREF('*');
