@@ -5392,6 +5392,129 @@ yyl_qw(pTHX_ char *s, STRLEN len)
     TOKEN(QWLIST);
 }
 
+static int
+yyl_hyphen(pTHX_ char *s)
+{
+    if (s[1] && isALPHA(s[1]) && !isWORDCHAR(s[2])) {
+        I32 ftst = 0;
+        char tmp;
+
+        s++;
+        PL_bufptr = s;
+        tmp = *s++;
+
+        while (s < PL_bufend && SPACE_OR_TAB(*s))
+            s++;
+
+        if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=>")) {
+            s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
+            DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
+            OPERATOR('-');              /* unary minus */
+        }
+        switch (tmp) {
+        case 'r': ftst = OP_FTEREAD;    break;
+        case 'w': ftst = OP_FTEWRITE;   break;
+        case 'x': ftst = OP_FTEEXEC;    break;
+        case 'o': ftst = OP_FTEOWNED;   break;
+        case 'R': ftst = OP_FTRREAD;    break;
+        case 'W': ftst = OP_FTRWRITE;   break;
+        case 'X': ftst = OP_FTREXEC;    break;
+        case 'O': ftst = OP_FTROWNED;   break;
+        case 'e': ftst = OP_FTIS;       break;
+        case 'z': ftst = OP_FTZERO;     break;
+        case 's': ftst = OP_FTSIZE;     break;
+        case 'f': ftst = OP_FTFILE;     break;
+        case 'd': ftst = OP_FTDIR;      break;
+        case 'l': ftst = OP_FTLINK;     break;
+        case 'p': ftst = OP_FTPIPE;     break;
+        case 'S': ftst = OP_FTSOCK;     break;
+        case 'u': ftst = OP_FTSUID;     break;
+        case 'g': ftst = OP_FTSGID;     break;
+        case 'k': ftst = OP_FTSVTX;     break;
+        case 'b': ftst = OP_FTBLK;      break;
+        case 'c': ftst = OP_FTCHR;      break;
+        case 't': ftst = OP_FTTTY;      break;
+        case 'T': ftst = OP_FTTEXT;     break;
+        case 'B': ftst = OP_FTBINARY;   break;
+        case 'M': case 'A': case 'C':
+            gv_fetchpvs("\024", GV_ADD|GV_NOTQUAL, SVt_PV);
+            switch (tmp) {
+            case 'M': ftst = OP_FTMTIME; break;
+            case 'A': ftst = OP_FTATIME; break;
+            case 'C': ftst = OP_FTCTIME; break;
+            default:                     break;
+            }
+            break;
+        default:
+            break;
+        }
+        if (ftst) {
+            PL_last_uni = PL_oldbufptr;
+            PL_last_lop_op = (OPCODE)ftst;
+            DEBUG_T( {
+                PerlIO_printf(Perl_debug_log, "### Saw file test %c\n", (int)tmp);
+            } );
+            FTST(ftst);
+        }
+        else {
+            /* Assume it was a minus followed by a one-letter named
+             * subroutine call (or a -bareword), then. */
+            DEBUG_T( {
+                PerlIO_printf(Perl_debug_log,
+                    "### '-%c' looked like a file test but was not\n",
+                    (int) tmp);
+            } );
+            s = --PL_bufptr;
+        }
+    }
+    {
+        const char tmp = *s++;
+        if (*s == tmp) {
+            s++;
+            if (PL_expect == XOPERATOR)
+                TERM(POSTDEC);
+            else
+                OPERATOR(PREDEC);
+        }
+        else if (*s == '>') {
+            s++;
+            s = skipspace(s);
+            if (((*s == '$' || *s == '&') && s[1] == '*')
+              ||(*s == '$' && s[1] == '#' && s[2] == '*')
+              ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
+              ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
+             )
+            {
+                PL_expect = XPOSTDEREF;
+                TOKEN(ARROW);
+            }
+            if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+                s = force_word(s,METHOD,FALSE,TRUE);
+                TOKEN(ARROW);
+            }
+            else if (*s == '$')
+                OPERATOR(ARROW);
+            else
+                TERM(ARROW);
+        }
+        if (PL_expect == XOPERATOR) {
+            if (*s == '='
+                && !PL_lex_allbrackets
+                && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+            {
+                s--;
+                TOKEN(0);
+            }
+            Aop(OP_SUBTRACT);
+        }
+        else {
+            if (isSPACE(*s) || !isSPACE(*PL_bufptr))
+                check_uni();
+            OPERATOR('-');              /* unary minus */
+        }
+    }
+}
+
 /*
   yylex
 
@@ -6158,124 +6281,7 @@ Perl_yylex(pTHX)
 	}
 	goto retry;
     case '-':
-	if (s[1] && isALPHA(s[1]) && !isWORDCHAR(s[2])) {
-	    I32 ftst = 0;
-	    char tmp;
-
-	    s++;
-	    PL_bufptr = s;
-	    tmp = *s++;
-
-	    while (s < PL_bufend && SPACE_OR_TAB(*s))
-		s++;
-
-	    if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=>")) {
-		s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
-		DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
-		OPERATOR('-');		/* unary minus */
-	    }
-	    switch (tmp) {
-	    case 'r': ftst = OP_FTEREAD;	break;
-	    case 'w': ftst = OP_FTEWRITE;	break;
-	    case 'x': ftst = OP_FTEEXEC;	break;
-	    case 'o': ftst = OP_FTEOWNED;	break;
-	    case 'R': ftst = OP_FTRREAD;	break;
-	    case 'W': ftst = OP_FTRWRITE;	break;
-	    case 'X': ftst = OP_FTREXEC;	break;
-	    case 'O': ftst = OP_FTROWNED;	break;
-	    case 'e': ftst = OP_FTIS;		break;
-	    case 'z': ftst = OP_FTZERO;		break;
-	    case 's': ftst = OP_FTSIZE;		break;
-	    case 'f': ftst = OP_FTFILE;		break;
-	    case 'd': ftst = OP_FTDIR;		break;
-	    case 'l': ftst = OP_FTLINK;		break;
-	    case 'p': ftst = OP_FTPIPE;		break;
-	    case 'S': ftst = OP_FTSOCK;		break;
-	    case 'u': ftst = OP_FTSUID;		break;
-	    case 'g': ftst = OP_FTSGID;		break;
-	    case 'k': ftst = OP_FTSVTX;		break;
-	    case 'b': ftst = OP_FTBLK;		break;
-	    case 'c': ftst = OP_FTCHR;		break;
-	    case 't': ftst = OP_FTTTY;		break;
-	    case 'T': ftst = OP_FTTEXT;		break;
-	    case 'B': ftst = OP_FTBINARY;	break;
-	    case 'M': case 'A': case 'C':
-		gv_fetchpvs("\024", GV_ADD|GV_NOTQUAL, SVt_PV);
-		switch (tmp) {
-		case 'M': ftst = OP_FTMTIME;	break;
-		case 'A': ftst = OP_FTATIME;	break;
-		case 'C': ftst = OP_FTCTIME;	break;
-		default:			break;
-		}
-		break;
-	    default:
-		break;
-	    }
-	    if (ftst) {
-                PL_last_uni = PL_oldbufptr;
-		PL_last_lop_op = (OPCODE)ftst;
-		DEBUG_T( {
-                    PerlIO_printf(Perl_debug_log, "### Saw file test %c\n", (int)tmp);
-		} );
-		FTST(ftst);
-	    }
-	    else {
-		/* Assume it was a minus followed by a one-letter named
-		 * subroutine call (or a -bareword), then. */
-		DEBUG_T( {
-                    PerlIO_printf(Perl_debug_log,
-			"### '-%c' looked like a file test but was not\n",
-			(int) tmp);
-		} );
-		s = --PL_bufptr;
-	    }
-	}
-	{
-	    const char tmp = *s++;
-	    if (*s == tmp) {
-		s++;
-		if (PL_expect == XOPERATOR)
-		    TERM(POSTDEC);
-		else
-		    OPERATOR(PREDEC);
-	    }
-	    else if (*s == '>') {
-		s++;
-		s = skipspace(s);
-		if (((*s == '$' || *s == '&') && s[1] == '*')
-		  ||(*s == '$' && s[1] == '#' && s[2] == '*')
-		  ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
-		  ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
-		 )
-		{
-		    PL_expect = XPOSTDEREF;
-		    TOKEN(ARROW);
-		}
-	        if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-		    s = force_word(s,METHOD,FALSE,TRUE);
-		    TOKEN(ARROW);
-		}
-		else if (*s == '$')
-		    OPERATOR(ARROW);
-		else
-		    TERM(ARROW);
-	    }
-	    if (PL_expect == XOPERATOR) {
-		if (*s == '='
-                    && !PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-                {
-		    s--;
-		    TOKEN(0);
-		}
-		Aop(OP_SUBTRACT);
-	    }
-	    else {
-		if (isSPACE(*s) || !isSPACE(*PL_bufptr))
-		    check_uni();
-		OPERATOR('-');		/* unary minus */
-	    }
-	}
+        return yyl_hyphen(aTHX_ s);
 
     case '+':
 	{
