@@ -6913,7 +6913,6 @@ Perl_yylex(pTHX)
 	    PREREF('$');
 	}
 
-	d = s;
 	{
 	    const char tmp = *s;
 	    if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
