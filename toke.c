@@ -5515,6 +5515,61 @@ yyl_hyphen(pTHX_ char *s)
     }
 }
 
+static int
+yyl_subproto(pTHX_ char *s, CV *cv)
+{
+    STRLEN protolen = CvPROTOLEN(cv);
+    const char *proto = CvPROTO(cv);
+    bool optional;
+
+    proto = S_strip_spaces(aTHX_ proto, &protolen);
+    if (!protolen)
+        TERM(FUNC0SUB);
+    if ((optional = *proto == ';')) {
+        do {
+            proto++;
+        } while (*proto == ';');
+    }
+
+    if (
+        (
+            (
+                *proto == '$' || *proto == '_'
+             || *proto == '*' || *proto == '+'
+            )
+         && proto[1] == '\0'
+        )
+     || (
+         *proto == '\\' && proto[1] && proto[2] == '\0'
+        )
+    ) {
+        UNIPROTO(UNIOPSUB,optional);
+    }
+
+    if (*proto == '\\' && proto[1] == '[') {
+        const char *p = proto + 2;
+        while(*p && *p != ']')
+            ++p;
+        if(*p == ']' && !p[1])
+            UNIPROTO(UNIOPSUB,optional);
+    }
+
+    if (*proto == '&' && *s == '{') {
+        if (PL_curstash)
+            sv_setpvs(PL_subname, "__ANON__");
+        else
+            sv_setpvs(PL_subname, "__ANON__::__ANON__");
+        if (!PL_lex_allbrackets
+            && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+        {
+            PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
+        }
+        PREBLOCK(LSTOPSUB);
+    }
+
+    return KEY_NULL;
+}
+
 /*
   yylex
 
@@ -7846,53 +7901,14 @@ Perl_yylex(pTHX)
 		    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
+
 		    /* Is there a prototype? */
-		    if (
-			SvPOK(cv))
-		    {
-			STRLEN protolen = CvPROTOLEN(cv);
-			const char *proto = CvPROTO(cv);
-			bool optional;
-			proto = S_strip_spaces(aTHX_ proto, &protolen);
-			if (!protolen)
-			    TERM(FUNC0SUB);
-			if ((optional = *proto == ';'))
-			  do
-			    proto++;
-			  while (*proto == ';');
-			if (
-			    (
-			        (
-			            *proto == '$' || *proto == '_'
-			         || *proto == '*' || *proto == '+'
-			        )
-			     && proto[1] == '\0'
-			    )
-			 || (
-			     *proto == '\\' && proto[1] && proto[2] == '\0'
-			    )
-			)
-			    UNIPROTO(UNIOPSUB,optional);
-			if (*proto == '\\' && proto[1] == '[') {
-			    const char *p = proto + 2;
-			    while(*p && *p != ']')
-				++p;
-			    if(*p == ']' && !p[1])
-				UNIPROTO(UNIOPSUB,optional);
-			}
-			if (*proto == '&' && *s == '{') {
-			    if (PL_curstash)
-				sv_setpvs(PL_subname, "__ANON__");
-			    else
-				sv_setpvs(PL_subname, "__ANON__::__ANON__");
-			    if (!PL_lex_allbrackets
-                                && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
-                            {
-				PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-                            }
-			    PREBLOCK(LSTOPSUB);
-			}
-		    }
+                    if (SvPOK(cv)) {
+                        int k = yyl_subproto(aTHX_ s, cv);
+                        if (k != KEY_NULL)
+                            return k;
+                    }
+
 		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(off ? PRIVATEREF : BAREWORD);
