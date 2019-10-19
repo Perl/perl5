@@ -5338,6 +5338,60 @@ yyl_secondclass_keyword(pTHX_ char *s, STRLEN len, int key, int *orig_keyword,
     }
 }
 
+static int
+yyl_qw(pTHX_ char *s, STRLEN len)
+{
+    OP *words = NULL;
+
+    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
+    if (!s)
+        missingterm(NULL, 0);
+
+    COPLINE_SET_FROM_MULTI_END;
+    PL_expect = XOPERATOR;
+    if (SvCUR(PL_lex_stuff)) {
+        int warned_comma = !ckWARN(WARN_QW);
+        int warned_comment = warned_comma;
+        char *d = SvPV_force(PL_lex_stuff, len);
+        while (len) {
+            for (; isSPACE(*d) && len; --len, ++d)
+                /**/;
+            if (len) {
+                SV *sv;
+                const char *b = d;
+                if (!warned_comma || !warned_comment) {
+                    for (; !isSPACE(*d) && len; --len, ++d) {
+                        if (!warned_comma && *d == ',') {
+                            Perl_warner(aTHX_ packWARN(WARN_QW),
+                                "Possible attempt to separate words with commas");
+                            ++warned_comma;
+                        }
+                        else if (!warned_comment && *d == '#') {
+                            Perl_warner(aTHX_ packWARN(WARN_QW),
+                                "Possible attempt to put comments in qw() list");
+                            ++warned_comment;
+                        }
+                    }
+                }
+                else {
+                    for (; !isSPACE(*d) && len; --len, ++d)
+                        /**/;
+                }
+                sv = newSVpvn_utf8(b, d-b, DO_UTF8(PL_lex_stuff));
+                words = op_append_elem(OP_LIST, words,
+                                       newSVOP(OP_CONST, 0, tokeq(sv)));
+            }
+        }
+    }
+    if (!words)
+        words = newNULLLIST();
+    SvREFCNT_dec_NN(PL_lex_stuff);
+    PL_lex_stuff = NULL;
+    PL_expect = XOPERATOR;
+    pl_yylval.opval = sawparens(words);
+    TOKEN(QWLIST);
+}
+
 /*
   yylex
 
@@ -8614,55 +8668,8 @@ Perl_yylex(pTHX)
 	case KEY_quotemeta:
 	    UNI(OP_QUOTEMETA);
 
-	case KEY_qw: {
-	    OP *words = NULL;
-	    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-	    if (!s)
-		missingterm(NULL, 0);
-	    COPLINE_SET_FROM_MULTI_END;
-	    PL_expect = XOPERATOR;
-	    if (SvCUR(PL_lex_stuff)) {
-		int warned_comma = !ckWARN(WARN_QW);
-		int warned_comment = warned_comma;
-		d = SvPV_force(PL_lex_stuff, len);
-		while (len) {
-		    for (; isSPACE(*d) && len; --len, ++d)
-			/**/;
-		    if (len) {
-			SV *sv;
-			const char *b = d;
-			if (!warned_comma || !warned_comment) {
-			    for (; !isSPACE(*d) && len; --len, ++d) {
-				if (!warned_comma && *d == ',') {
-				    Perl_warner(aTHX_ packWARN(WARN_QW),
-					"Possible attempt to separate words with commas");
-				    ++warned_comma;
-				}
-				else if (!warned_comment && *d == '#') {
-				    Perl_warner(aTHX_ packWARN(WARN_QW),
-					"Possible attempt to put comments in qw() list");
-				    ++warned_comment;
-				}
-			    }
-			}
-			else {
-			    for (; !isSPACE(*d) && len; --len, ++d)
-				/**/;
-			}
-			sv = newSVpvn_utf8(b, d-b, DO_UTF8(PL_lex_stuff));
-			words = op_append_elem(OP_LIST, words,
-					    newSVOP(OP_CONST, 0, tokeq(sv)));
-		    }
-		}
-	    }
-	    if (!words)
-		words = newNULLLIST();
-	    SvREFCNT_dec_NN(PL_lex_stuff);
-	    PL_lex_stuff = NULL;
-	    PL_expect = XOPERATOR;
-	    pl_yylval.opval = sawparens(words);
-	    TOKEN(QWLIST);
-	}
+	case KEY_qw:
+            return yyl_qw(aTHX_ s, len);
 
 	case KEY_qq:
 	    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
