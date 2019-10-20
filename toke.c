@@ -6359,6 +6359,18 @@ yyl_tilde(pTHX_ char *s)
     BCop(bof ? OP_NCOMPLEMENT : OP_COMPLEMENT);
 }
 
+static int
+yyl_leftparen(pTHX_ char *s)
+{
+    if (PL_last_lop == PL_oldoldbufptr || PL_last_uni == PL_oldoldbufptr)
+        PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
+    else
+        PL_expect = XTERM;
+    s = skipspace(s);
+    PL_lex_allbrackets++;
+    TOKEN('(');
+}
+
 /*
   yylex
 
@@ -7153,14 +7165,8 @@ Perl_yylex(pTHX)
         return yyl_colon(aTHX_ s + 1);
 
     case '(':
-	s++;
-	if (PL_last_lop == PL_oldoldbufptr || PL_last_uni == PL_oldoldbufptr)
-	    PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
-	else
-	    PL_expect = XTERM;
-	s = skipspace(s);
-	PL_lex_allbrackets++;
-	TOKEN('(');
+        return yyl_leftparen(aTHX_ s + 1);
+
     case ';':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 	    TOKEN(0);
