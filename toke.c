@@ -6466,6 +6466,21 @@ yyl_rightpointy(pTHX_ char *s)
 }
 
 static int
+yyl_sglquote(pTHX_ char *s)
+{
+    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
+    if (!s)
+        missingterm(NULL, 0);
+    COPLINE_SET_FROM_MULTI_END;
+    DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
+    if (PL_expect == XOPERATOR) {
+        no_op("String",s);
+    }
+    pl_yylval.ival = OP_CONST;
+    TERM(sublex_start());
+}
+
+static int
 yyl_dblquote(pTHX_ char *s, STRLEN len)
 {
     char *d;
@@ -7510,16 +7525,7 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-	if (!s)
-	    missingterm(NULL, 0);
-	COPLINE_SET_FROM_MULTI_END;
-	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
-	if (PL_expect == XOPERATOR) {
-            no_op("String",s);
-	}
-	pl_yylval.ival = OP_CONST;
-	TERM(sublex_start());
+        return yyl_sglquote(aTHX_ s);
 
     case '"':
         return yyl_dblquote(aTHX_ s, len);
