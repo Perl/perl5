@@ -5633,6 +5633,176 @@ yyl_caret(pTHX_ char *s)
 }
 
 static int
+yyl_colon(pTHX_ char *s)
+{
+    OP *attrs;
+
+    switch (PL_expect) {
+    case XOPERATOR:
+        if (!PL_in_my || (PL_lex_state != LEX_NORMAL && !PL_lex_brackets))
+            break;
+        PL_bufptr = s;	/* update in case we back off */
+        if (*s == '=') {
+            Perl_croak(aTHX_
+                       "Use of := for an empty attribute list is not allowed");
+        }
+        goto grabattrs;
+    case XATTRBLOCK:
+        PL_expect = XBLOCK;
+        goto grabattrs;
+    case XATTRTERM:
+        PL_expect = XTERMBLOCK;
+     grabattrs:
+        /* NB: as well as parsing normal attributes, we also end up
+         * here if there is something looking like attributes
+         * following a signature (which is illegal, but used to be
+         * legal in 5.20..5.26). If the latter, we still parse the
+         * attributes so that error messages(s) are less confusing,
+         * but ignore them (parser->sig_seen).
+         */
+        s = skipspace(s);
+        attrs = NULL;
+        while (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+            bool sig = PL_parser->sig_seen;
+            I32 tmp;
+            SV *sv;
+            STRLEN len;
+            char *d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
+            if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len, 0))) {
+                if (tmp < 0) tmp = -tmp;
+                switch (tmp) {
+                case KEY_or:
+                case KEY_and:
+                case KEY_for:
+                case KEY_foreach:
+                case KEY_unless:
+                case KEY_if:
+                case KEY_while:
+                case KEY_until:
+                    goto got_attrs;
+                default:
+                    break;
+                }
+            }
+            sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
+            if (*d == '(') {
+                d = scan_str(d,TRUE,TRUE,FALSE,NULL);
+                if (!d) {
+                    if (attrs)
+                        op_free(attrs);
+                    sv_free(sv);
+                    Perl_croak(aTHX_ "Unterminated attribute parameter in attribute list");
+                }
+                COPLINE_SET_FROM_MULTI_END;
+            }
+            if (PL_lex_stuff) {
+                sv_catsv(sv, PL_lex_stuff);
+                attrs = op_append_elem(OP_LIST, attrs,
+                                    newSVOP(OP_CONST, 0, sv));
+                SvREFCNT_dec_NN(PL_lex_stuff);
+                PL_lex_stuff = NULL;
+            }
+            else {
+                /* NOTE: any CV attrs applied here need to be part of
+                   the CVf_BUILTIN_ATTRS define in cv.h! */
+                if (!PL_in_my && memEQs(SvPVX(sv), len, "lvalue")) {
+                    sv_free(sv);
+                    if (!sig)
+                        CvLVALUE_on(PL_compcv);
+                }
+                else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
+                    sv_free(sv);
+                    if (!sig)
+                        CvMETHOD_on(PL_compcv);
+                }
+                else if (!PL_in_my && memEQs(SvPVX(sv), len, "const")) {
+                    sv_free(sv);
+                    if (!sig) {
+                        Perl_ck_warner_d(aTHX_
+                            packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
+                           ":const is experimental"
+                        );
+                        CvANONCONST_on(PL_compcv);
+                        if (!CvANON(PL_compcv))
+                            yyerror(":const is not permitted on named "
+                                    "subroutines");
+                    }
+                }
+                /* After we've set the flags, it could be argued that
+                   we don't need to do the attributes.pm-based setting
+                   process, and shouldn't bother appending recognized
+                   flags.  To experiment with that, uncomment the
+                   following "else".  (Note that's already been
+                   uncommented.  That keeps the above-applied built-in
+                   attributes from being intercepted (and possibly
+                   rejected) by a package's attribute routines, but is
+                   justified by the performance win for the common case
+                   of applying only built-in attributes.) */
+                else
+                    attrs = op_append_elem(OP_LIST, attrs,
+                                        newSVOP(OP_CONST, 0,
+                                                sv));
+            }
+            s = skipspace(d);
+            if (*s == ':' && s[1] != ':')
+                s = skipspace(s+1);
+            else if (s == d)
+                break;	/* require real whitespace or :'s */
+            /* XXX losing whitespace on sequential attributes here */
+        }
+
+        if (*s != ';'
+            && *s != '}'
+            && !(PL_expect == XOPERATOR
+                 ? (*s == '=' ||  *s == ')')
+                 : (*s == '{' ||  *s == '(')))
+        {
+            const char q = ((*s == '\'') ? '"' : '\'');
+            /* If here for an expression, and parsed no attrs, back off. */
+            if (PL_expect == XOPERATOR && !attrs) {
+                s = PL_bufptr;
+                break;
+            }
+            /* MUST advance bufptr here to avoid bogus "at end of line"
+               context messages from yyerror().
+            */
+            PL_bufptr = s;
+            yyerror( (const char *)
+                     (*s
+                      ? Perl_form(aTHX_ "Invalid separator character "
+                                  "%c%c%c in attribute list", q, *s, q)
+                      : "Unterminated attribute list" ) );
+            if (attrs)
+                op_free(attrs);
+            OPERATOR(':');
+        }
+
+    got_attrs:
+        if (PL_parser->sig_seen) {
+            /* see comment about about sig_seen and parser error
+             * handling */
+            if (attrs)
+                op_free(attrs);
+            Perl_croak(aTHX_ "Subroutine attributes must come "
+                             "before the signature");
+        }
+        if (attrs) {
+            NEXTVAL_NEXTTOKE.opval = attrs;
+            force_next(THING);
+        }
+        TOKEN(COLONATTR);
+    }
+
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING) {
+        s--;
+        TOKEN(0);
+    }
+
+    PL_lex_allbrackets--;
+    OPERATOR(':');
+}
+
+static int
 yyl_subproto(pTHX_ char *s, CV *cv)
 {
     STRLEN protolen = CvPROTOLEN(cv);
@@ -6499,173 +6669,8 @@ Perl_yylex(pTHX)
 	    len = 0;
 	    goto just_a_word_zero_gv;
 	}
-	s++;
-        {
-        OP *attrs;
+        return yyl_colon(aTHX_ s + 1);
 
-	switch (PL_expect) {
-	case XOPERATOR:
-	    if (!PL_in_my || (PL_lex_state != LEX_NORMAL && !PL_lex_brackets))
-		break;
-	    PL_bufptr = s;	/* update in case we back off */
-	    if (*s == '=') {
-		Perl_croak(aTHX_
-			   "Use of := for an empty attribute list is not allowed");
-	    }
-	    goto grabattrs;
-	case XATTRBLOCK:
-	    PL_expect = XBLOCK;
-	    goto grabattrs;
-	case XATTRTERM:
-	    PL_expect = XTERMBLOCK;
-	 grabattrs:
-            /* NB: as well as parsing normal attributes, we also end up
-             * here if there is something looking like attributes
-             * following a signature (which is illegal, but used to be
-             * legal in 5.20..5.26). If the latter, we still parse the
-             * attributes so that error messages(s) are less confusing,
-             * but ignore them (parser->sig_seen).
-             */
-	    s = skipspace(s);
-	    attrs = NULL;
-            while (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-                bool sig = PL_parser->sig_seen;
-		I32 tmp;
-		SV *sv;
-		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len, 0))) {
-		    if (tmp < 0) tmp = -tmp;
-		    switch (tmp) {
-		    case KEY_or:
-		    case KEY_and:
-		    case KEY_for:
-		    case KEY_foreach:
-		    case KEY_unless:
-		    case KEY_if:
-		    case KEY_while:
-		    case KEY_until:
-			goto got_attrs;
-		    default:
-			break;
-		    }
-		}
-		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
-		if (*d == '(') {
-		    d = scan_str(d,TRUE,TRUE,FALSE,NULL);
-		    if (!d) {
-			if (attrs)
-			    op_free(attrs);
-			sv_free(sv);
-                        Perl_croak(aTHX_ "Unterminated attribute parameter in attribute list");
-		    }
-		    COPLINE_SET_FROM_MULTI_END;
-		}
-		if (PL_lex_stuff) {
-		    sv_catsv(sv, PL_lex_stuff);
-		    attrs = op_append_elem(OP_LIST, attrs,
-					newSVOP(OP_CONST, 0, sv));
-		    SvREFCNT_dec_NN(PL_lex_stuff);
-		    PL_lex_stuff = NULL;
-		}
-		else {
-		    /* NOTE: any CV attrs applied here need to be part of
-		       the CVf_BUILTIN_ATTRS define in cv.h! */
-		    if (!PL_in_my && memEQs(SvPVX(sv), len, "lvalue")) {
-			sv_free(sv);
-			if (!sig)
-                            CvLVALUE_on(PL_compcv);
-		    }
-		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
-			sv_free(sv);
-			if (!sig)
-                            CvMETHOD_on(PL_compcv);
-		    }
-		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "const"))
-		    {
-			sv_free(sv);
-                        if (!sig) {
-                            Perl_ck_warner_d(aTHX_
-                                packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
-                               ":const is experimental"
-                            );
-                            CvANONCONST_on(PL_compcv);
-                            if (!CvANON(PL_compcv))
-                                yyerror(":const is not permitted on named "
-                                        "subroutines");
-                        }
-		    }
-		    /* After we've set the flags, it could be argued that
-		       we don't need to do the attributes.pm-based setting
-		       process, and shouldn't bother appending recognized
-		       flags.  To experiment with that, uncomment the
-		       following "else".  (Note that's already been
-		       uncommented.  That keeps the above-applied built-in
-		       attributes from being intercepted (and possibly
-		       rejected) by a package's attribute routines, but is
-		       justified by the performance win for the common case
-		       of applying only built-in attributes.) */
-		    else
-		        attrs = op_append_elem(OP_LIST, attrs,
-					    newSVOP(OP_CONST, 0,
-					      	    sv));
-		}
-		s = skipspace(d);
-		if (*s == ':' && s[1] != ':')
-		    s = skipspace(s+1);
-		else if (s == d)
-		    break;	/* require real whitespace or :'s */
-		/* XXX losing whitespace on sequential attributes here */
-	    }
-	    {
-		if (*s != ';'
-                    && *s != '}'
-                    && !(PL_expect == XOPERATOR
-			 ? (*s == '=' ||  *s == ')')
-			 : (*s == '{' ||  *s == '(')))
-                {
-		    const char q = ((*s == '\'') ? '"' : '\'');
-		    /* If here for an expression, and parsed no attrs, back
-		       off. */
-		    if (PL_expect == XOPERATOR && !attrs) {
-			s = PL_bufptr;
-			break;
-		    }
-		    /* MUST advance bufptr here to avoid bogus "at end of line"
-		       context messages from yyerror().
-		    */
-		    PL_bufptr = s;
-		    yyerror( (const char *)
-			     (*s
-			      ? Perl_form(aTHX_ "Invalid separator character "
-					  "%c%c%c in attribute list", q, *s, q)
-			      : "Unterminated attribute list" ) );
-		    if (attrs)
-			op_free(attrs);
-		    OPERATOR(':');
-		}
-	    }
-	got_attrs:
-            if (PL_parser->sig_seen) {
-                /* see comment about about sig_seen and parser error
-                 * handling */
-                if (attrs)
-                    op_free(attrs);
-                Perl_croak(aTHX_ "Subroutine attributes must come "
-                                 "before the signature");
-                }
-	    if (attrs) {
-		NEXTVAL_NEXTTOKE.opval = attrs;
-		force_next(THING);
-	    }
-	    TOKEN(COLONATTR);
-	}
-	}
-	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING) {
-	    s--;
-	    TOKEN(0);
-	}
-	PL_lex_allbrackets--;
-	OPERATOR(':');
     case '(':
 	s++;
 	if (PL_last_lop == PL_oldoldbufptr || PL_last_uni == PL_oldoldbufptr)
