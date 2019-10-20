@@ -1,0 +1,311 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5315delta - what is new for perl v5.31.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.31.4 release and the 5.31.5
+release.
+
+If you are upgrading from an earlier release such as 5.31.3, first read
+L<perl5314delta>, which describes differences between 5.31.3 and 5.31.4.
+
+=head1 Incompatible Changes
+
+=head2 Modifiable variables are no longer permitted in constants
+
+Code like:
+
+    my $var;
+    $sub = sub () { $var };
+
+where C<$var> is referenced elsewhere in some sort of modifiable context now
+produces an exception when the sub is defined.
+
+This error can be avoided by adding a return to the sub definition:
+
+    $sub = sub () { return $var };
+
+This has been deprecated since Perl 5.22.
+
+L<[perl #131138]|https://rt.perl.org/Ticket/Display.html?id=131138>.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.76 to 1.77.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.55 to 3.54.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.55 to 2.55_01.
+
+=item *
+
+L<Dumpvalue> has been upgraded from version 1.18 to 1.21.
+
+Previously, when dumping elements of an array and encountering an undefined
+value, the string printed would have been C<empty array>.  This has been
+changed to what was apparently originally intended:  C<empty slot>.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280232 to 0.280233.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999816 to 1.999817_01.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5008 to 0.5009.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20190920 to 5.20191020.
+
+=item *
+
+L<Safe> has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+L<threads> has been upgraded from version 2.22 to 2.23.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9763 to 1.9764.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.03 to 1.04.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, send email to
+L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Details of the various stacks within the perl interpreter are now explained
+here.
+
+=back
+
+Additionally, the following selected changes have been made:
+
+=head3 URLs have been changed to https:// and stale links have been updated
+
+=over 4
+
+=item *
+
+Where applicable, the URLs in the documentation have been moved from using the
+http:// protocol to https:// .  This also affects the location of the bug
+tracker at L<https://rt.perl.org>.
+
+=item *
+
+Some links to OS/2 libraries, Address Sanitizer and other system tools had gone
+stale.  These have been updated with working links.
+
+=item *
+
+Some links to old mails on perl5-porters had gone stale.  These have been
+updated with working links.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Can't use global %s in %s|perldiag/"Can't use global %s in %s">
+
+This error message has been slightly reformatted from the original C<Can't use
+global %s in "%s">, and in particular misleading error messages like C<Can't
+use global $_ in "my"> are now rendered as C<Can't use global $_ in subroutine
+signature>.
+
+=item *
+
+L<Constants from lexical variables potentially modified elsewhere are no longer permitted|perldiag/"Constants from lexical variables potentially modified elsewhere are no longer permitted">
+
+This error message replaces the former C<Constants from lexical variables
+potentially modified elsewhere are deprecated.  This will not be allowed in Perl
+5.32> to reflect the fact that this previously deprecated usage has now been
+transformed into an exception.  The message's classification has also been
+updated from D (deprecated) to F (fatal).
+
+See also L</Incompatible Changes>.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Perl now no longer probes for C<d_u32align>, defaulting to C<define> on all
+platforms.  This check was error prone when it was done, which was on 32-bit
+platforms only.
+L<[perl #133495]|https://rt.perl.org/Ticket/Display.html?id=133495>.
+
+=item *
+
+Documentation and hints for building perl on Z/OS (native EBCDIC) have been
+updated.  Still work in progress.
+
+=item *
+
+A new probe for C<malloc_usable_size> has been added.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes in this
+release.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+=over 4
+
+=item *
+
+Support for building perl with Visual C++ 6.0 has now been removed.
+
+=item *
+
+Building perl with Visual C++ 2013 and earlier was broken in the previous
+release but has now been fixed.
+
+=back
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Added the C<<PL_curstackinfo->si_cxsubix>> field.  This records the stack index
+of the most recently pushed sub/format/eval context.  It is set and restored
+automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would need to be
+manually managed if you do any unusual manipulation of the context stack.
+
+=item *
+
+Various macros dealing with character type classification and changing case
+where the input is encoded in UTF-8 now require an extra parameter to prevent
+potential reads beyond the end of the buffer.  Use of these has generated a
+deprecation warning since Perl 5.26.  Details are in
+L<perldeprecation/In XS code, use of various macros dealing with UTF-8.>
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.31.5 represents approximately 4 weeks of development since Perl 5.31.4
+and contains approximately 27,000 lines of changes across 610 files from 15
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 9,500 lines of changes to 150 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.31.5:
+
+Dagfinn Ilmari Mannsåker, David Mitchell, H.Merijn Brand, James E Keenan, Karl
+Williamson, Matt Turner, Max Maischein, Nicolas R., Pali, Paul Evans, Paul
+Marquess, Peter Eisentraut, Steve Hay, Tomasz Konojacki, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database at
+L<https://rt.perl.org/>.  There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
