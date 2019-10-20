@@ -25,6 +25,7 @@ env:
         - CONFIGURE_ARGS='-DPERL_GLOBAL_STRUCT_PRIVATE'
         - CONFIGURE_ARGS='-Duseshrplib -Dusesitecustomize'
         - CONFIGURE_ARGS='-Duserelocatableinc'
+        - CONFIGURE_ARGS='-DDEBUGGING -Duse64bitall -Duselongdouble'
 
 # only use gcc on linux, and only use clang on osx for now
 matrix:
