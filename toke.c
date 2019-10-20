@@ -6465,6 +6465,37 @@ yyl_rightpointy(pTHX_ char *s)
     Rop(OP_GT);
 }
 
+static int
+yyl_dblquote(pTHX_ char *s, STRLEN len)
+{
+    char *d;
+    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
+    DEBUG_T( {
+        if (s)
+            printbuf("### Saw string before %s\n", s);
+        else
+            PerlIO_printf(Perl_debug_log,
+                         "### Saw unterminated string\n");
+    } );
+    if (PL_expect == XOPERATOR) {
+            no_op("String",s);
+    }
+    if (!s)
+        missingterm(NULL, 0);
+    pl_yylval.ival = OP_CONST;
+    /* FIXME. I think that this can be const if char *d is replaced by
+       more localised variables.  */
+    for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
+        if (*d == '$' || *d == '@' || *d == '\\' || !UTF8_IS_INVARIANT((U8)*d)) {
+            pl_yylval.ival = OP_STRINGIFY;
+            break;
+        }
+    }
+    if (pl_yylval.ival == OP_CONST)
+        COPLINE_SET_FROM_MULTI_END;
+    TERM(sublex_start());
+}
+
 /*
   yylex
 
@@ -7491,31 +7522,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-	DEBUG_T( {
-	    if (s)
-		printbuf("### Saw string before %s\n", s);
-	    else
-		PerlIO_printf(Perl_debug_log,
-			     "### Saw unterminated string\n");
-	} );
-	if (PL_expect == XOPERATOR) {
-		no_op("String",s);
-	}
-	if (!s)
-	    missingterm(NULL, 0);
-	pl_yylval.ival = OP_CONST;
-	/* FIXME. I think that this can be const if char *d is replaced by
-	   more localised variables.  */
-	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
-	    if (*d == '$' || *d == '@' || *d == '\\' || !UTF8_IS_INVARIANT((U8)*d)) {
-		pl_yylval.ival = OP_STRINGIFY;
-		break;
-	    }
-	}
-	if (pl_yylval.ival == OP_CONST)
-	    COPLINE_SET_FROM_MULTI_END;
-	TERM(sublex_start());
+        return yyl_dblquote(aTHX_ s, len);
 
     case '`':
 	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
