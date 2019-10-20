@@ -372,7 +372,18 @@ L</Modules and Pragmata> section.
 
 =item Windows
 
+=over 4
+
+=item *
+
 Support for building perl with Visual C++ 6.0 has now been removed.
+
+=item *
+
+Building perl with Visual C++ 2013 and earlier was broken in the previous
+release but has now been fixed.
+
+=back
 
 =back
 
