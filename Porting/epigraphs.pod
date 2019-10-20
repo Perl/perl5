@@ -17,6 +17,23 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.5 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Daddy Long-legs and the Fly
+
+L<Announced on 2019-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2019/10/msg256478.html>
+
+  'O Mr Daddy Long-legs,'
+    Said Mr Floppy Fly,
+  'It's true I never go to court,
+    And I will tell you why.
+  If I had six long legs like yours,
+    At once I'd go to court!
+  But oh! I can't, because my legs
+    Are so extremely short.
+  And I'm afraid the King and Queen
+  (One in red, and one in green)
+  Would say aloud, "You are not fit,
+  You Fly, to come to court a bit!"'
+
 =head2 v5.31.4 - Ann Leckie, "The Raven Tower"
 
 L<Announced on 2019-09-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2019/09/msg256254.html>
