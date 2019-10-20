@@ -7213,16 +7213,17 @@ Perl_yylex(pTHX)
         return yyl_verticalbar(aTHX_ s);
 
     case '=':
+        if (s[1] == '=' && (s == PL_linestart || s[-1] == '\n')
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), "====="))
+        {
+            s = vcs_conflict_marker(s + 7);
+            goto retry;
+        }
+
 	s++;
 	{
 	    const char tmp = *s++;
 	    if (tmp == '=') {
-                if (   (s == PL_linestart+2 || s[-3] == '\n')
-                    && memBEGINs(s, (STRLEN) (PL_bufend - s), "====="))
-                {
-	            s = vcs_conflict_marker(s + 5);
-	            goto retry;
-	        }
 		if (!PL_lex_allbrackets
                     && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
                 {
@@ -7307,18 +7308,18 @@ Perl_yylex(pTHX)
         return yyl_bang(aTHX_ s + 1);
 
     case '<':
+        if (s[1] == '<' && (s == PL_linestart || s[-1] == '\n')
+            && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
+        {
+            s = vcs_conflict_marker(s + 7);
+            goto retry;
+        }
+
 	if (PL_expect != XOPERATOR) {
 	    if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
 		check_uni();
-	    if (s[1] == '<' && s[2] != '>') {
-                if (   (s == PL_linestart || s[-1] == '\n')
-                    && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
-                {
-	            s = vcs_conflict_marker(s + 7);
-	            goto retry;
-	        }
+	    if (s[1] == '<' && s[2] != '>')
 		s = scan_heredoc(s);
-	    }
 	    else
 		s = scan_inputsymbol(s);
 	    PL_expect = XOPERATOR;
@@ -7328,12 +7329,6 @@ Perl_yylex(pTHX)
 	{
 	    char tmp = *s++;
 	    if (tmp == '<') {
-                if (   (s == PL_linestart+2 || s[-3] == '\n')
-                    && memBEGINs(s, (STRLEN) (PL_bufend - s), "<<<<<"))
-                {
-                    s = vcs_conflict_marker(s + 5);
-	            goto retry;
-	        }
 		if (*s == '=' && !PL_lex_allbrackets
                     && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
                 {
@@ -7369,17 +7364,19 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	}
 	Rop(OP_LT);
+
     case '>':
+        if (s[1] == '>' && (s == PL_linestart || s[-1] == '\n')
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), ">>>>>"))
+        {
+            s = vcs_conflict_marker(s + 7);
+            goto retry;
+        }
+
 	s++;
 	{
 	    const char tmp = *s++;
 	    if (tmp == '>') {
-	        if (   (s == PL_linestart+2 || s[-3] == '\n')
-                    && memBEGINs(s, (STRLEN) (PL_bufend - s), ">>>>>"))
-                {
-	            s = vcs_conflict_marker(s + 5);
-	            goto retry;
-	        }
 		if (*s == '=' && !PL_lex_allbrackets
                     && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
                 {
