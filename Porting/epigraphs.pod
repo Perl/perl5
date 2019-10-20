@@ -2504,7 +2504,7 @@ shed tears, struck my head and was filled with regret when it was no
 longer of any use, for to me the whole world was worth no more than
 a bean.
 
-=head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://www.weebls-stuff.com/other-toons/video/magical-trevor.html>
+=head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://weebls-stuff.com/toons/magical-trevor-episode-01-animated-music-video-mrweebl/>
 
 L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225777.html>
 
@@ -2528,7 +2528,7 @@ L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   Oh, beans, lots of beans, lots of beans, lots of beans,
   Yeah, yeah!
 
-=head2 v5.20.2-RC1 - Jonathan "Jonti" Picking, L<"Scampi"|http://www.weebls-stuff.com/other-toons/video/scampi.html>
+=head2 v5.20.2-RC1 - Jonathan "Jonti" Picking, L<"Scampi"|http://weebls-stuff.com/toons/ive-seen-things-scampi-animated-music-video-mrweebl/>
 
 L<Announced on 2015-02-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225273.html>
 
