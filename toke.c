@@ -6316,6 +6316,29 @@ yyl_leftsquare(pTHX_ char *s)
 }
 
 static int
+yyl_rightsquare(pTHX_ char *s)
+{
+    if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
+        TOKEN(0);
+    s++;
+    if (PL_lex_brackets <= 0)
+        /* diag_listed_as: Unmatched right %s bracket */
+        yyerror("Unmatched right square bracket");
+    else
+        --PL_lex_brackets;
+    PL_lex_allbrackets--;
+    if (PL_lex_state == LEX_INTERPNORMAL) {
+        if (PL_lex_brackets == 0) {
+            if (*s == '-' && s[1] == '>')
+                PL_lex_state = LEX_INTERPENDMAYBE;
+            else if (*s != '[' && *s != '{')
+                PL_lex_state = LEX_INTERPEND;
+        }
+    }
+    TERM(']');
+}
+
+static int
 yyl_tilde(pTHX_ char *s)
 {
     bool bof;
@@ -7154,25 +7177,10 @@ Perl_yylex(pTHX)
 	if (*s == '{')
 	    PREBLOCK(')');
 	TERM(')');
+
     case ']':
-	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
-	    TOKEN(0);
-	s++;
-	if (PL_lex_brackets <= 0)
-	    /* diag_listed_as: Unmatched right %s bracket */
-	    yyerror("Unmatched right square bracket");
-	else
-	    --PL_lex_brackets;
-	PL_lex_allbrackets--;
-	if (PL_lex_state == LEX_INTERPNORMAL) {
-	    if (PL_lex_brackets == 0) {
-		if (*s == '-' && s[1] == '>')
-		    PL_lex_state = LEX_INTERPENDMAYBE;
-		else if (*s != '[' && *s != '{')
-		    PL_lex_state = LEX_INTERPEND;
-	    }
-	}
-	TERM(']');
+        return yyl_rightsquare(aTHX_ s);
+
     case '{':
 	s++;
       leftbracket:
