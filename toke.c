@@ -6436,6 +6436,35 @@ yyl_leftpointy(pTHX_ char *s)
     Rop(OP_LT);
 }
 
+static int
+yyl_rightpointy(pTHX_ char *s)
+{
+    const char tmp = *s++;
+
+    if (tmp == '>') {
+        if (*s == '=' && !PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+            s -= 2;
+            TOKEN(0);
+        }
+        SHop(OP_RIGHT_SHIFT);
+    }
+    else if (tmp == '=') {
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+            s -= 2;
+            TOKEN(0);
+        }
+        Rop(OP_GE);
+    }
+
+    s--;
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+        s--;
+        TOKEN(0);
+    }
+
+    Rop(OP_GT);
+}
+
 /*
   yylex
 
@@ -7375,35 +7404,7 @@ Perl_yylex(pTHX)
             s = vcs_conflict_marker(s + 7);
             goto retry;
         }
-
-	s++;
-	{
-	    const char tmp = *s++;
-	    if (tmp == '>') {
-		if (*s == '=' && !PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-                {
-		    s -= 2;
-		    TOKEN(0);
-		}
-		SHop(OP_RIGHT_SHIFT);
-	    }
-	    else if (tmp == '=') {
-		if (!PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
-                {
-		    s -= 2;
-		    TOKEN(0);
-		}
-		Rop(OP_GE);
-	    }
-	}
-	s--;
-	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
-	    s--;
-	    TOKEN(0);
-	}
-	Rop(OP_GT);
+        return yyl_rightpointy(aTHX_ s + 1);
 
     case '$':
         return yyl_dollar(aTHX_ s);
