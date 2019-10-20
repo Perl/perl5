@@ -113,39 +113,25 @@ XXX
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<B> has been upgraded from version 1.76 to 1.77.
 
-If there was something important to note about this change, include that here.
+=item *
+
+L<B::Deparse> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.55 to 3.54.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.55 to 2.55_01.
 
 =item *
 
@@ -155,15 +141,39 @@ Previously, when dumping elements of an array and encountering an undefined
 value, the string printed would have been C<empty array>.  This has been
 changed to what was apparently originally intended:  C<empty slot>.
 
-=back
+=item *
 
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<ExtUtils::CBuilder> has been upgraded from version 0.280232 to 0.280233.
 
 =item *
 
-XXX
+L<Math::BigInt> has been upgraded from version 1.999816 to 1.999817_01.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5008 to 0.5009.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20190920 to 5.20191020.
+
+=item *
+
+L<Safe> has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+L<threads> has been upgraded from version 2.22 to 2.23.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9763 to 1.9764.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.03 to 1.04.
+
+If there was something important to note about this change, include that here.
 
 =back
 
