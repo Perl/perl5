@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.57';
+our $VERSION = '1.58';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -15,6 +15,7 @@ our %feature = (
     switch          => 'feature_switch',
     bitwise         => 'feature_bitwise',
     evalbytes       => 'feature_evalbytes',
+    noindirect      => 'feature_noindirect',
     signatures      => 'feature_signatures',
     current_sub     => 'feature___SUB__',
     refaliasing     => 'feature_refaliasing',
@@ -30,7 +31,7 @@ our %feature_bundle = (
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc isa noindirect postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw()],
 );
 
@@ -356,6 +357,20 @@ This feature is available from Perl 5.26 onwards.
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
 right operand. See L<perlop/Class Instance Operator> for more details.
+
+This feature is available from Perl 5.32 onwards.
+
+=head2 The 'noindirect' feature
+
+This feature removes the indirect notation for method invocation, so
+that bareword sequences like:
+
+  new Foo;
+
+will only be accepted if a function new() is defined.
+
+Perl operators that have a similar syntax such as C<print> and C<exec>
+continue to work.
 
 This feature is available from Perl 5.32 onwards.
 

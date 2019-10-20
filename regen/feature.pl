@@ -36,6 +36,7 @@ my %feature = (
     fc              => 'fc',
     signatures      => 'signatures',
     isa             => 'isa',
+    noindirect      => 'noindirect',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -468,7 +469,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.57';
+our $VERSION = '1.58';
 
 FEATURES
 
@@ -758,6 +759,20 @@ This feature is available from Perl 5.26 onwards.
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
 right operand. See L<perlop/Class Instance Operator> for more details.
+
+This feature is available from Perl 5.32 onwards.
+
+=head2 The 'noindirect' feature
+
+This feature removes the indirect notation for method invocation, so
+that bareword sequences like:
+
+  new Foo;
+
+will only be accepted if a function new() is defined.
+
+Perl operators that have a similar syntax such as C<print> and C<exec>
+continue to work.
 
 This feature is available from Perl 5.32 onwards.
 
