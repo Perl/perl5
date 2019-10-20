@@ -6384,6 +6384,58 @@ yyl_rightparen(pTHX_ char *s)
     TERM(')');
 }
 
+static int
+yyl_leftpointy(pTHX_ char *s)
+{
+    char tmp;
+
+    if (PL_expect != XOPERATOR) {
+        if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
+            check_uni();
+        if (s[1] == '<' && s[2] != '>')
+            s = scan_heredoc(s);
+        else
+            s = scan_inputsymbol(s);
+        PL_expect = XOPERATOR;
+        TOKEN(sublex_start());
+    }
+
+    s++;
+
+    tmp = *s++;
+    if (tmp == '<') {
+        if (*s == '=' && !PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+            s -= 2;
+            TOKEN(0);
+        }
+        SHop(OP_LEFT_SHIFT);
+    }
+    if (tmp == '=') {
+        tmp = *s++;
+        if (tmp == '>') {
+            if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+                s -= 3;
+                TOKEN(0);
+            }
+            Eop(OP_NCMP);
+        }
+        s--;
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+            s -= 2;
+            TOKEN(0);
+        }
+        Rop(OP_LE);
+    }
+
+    s--;
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+        s--;
+        TOKEN(0);
+    }
+
+    Rop(OP_LT);
+}
+
 /*
   yylex
 
@@ -7314,56 +7366,7 @@ Perl_yylex(pTHX)
             s = vcs_conflict_marker(s + 7);
             goto retry;
         }
-
-	if (PL_expect != XOPERATOR) {
-	    if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
-		check_uni();
-	    if (s[1] == '<' && s[2] != '>')
-		s = scan_heredoc(s);
-	    else
-		s = scan_inputsymbol(s);
-	    PL_expect = XOPERATOR;
-	    TOKEN(sublex_start());
-	}
-	s++;
-	{
-	    char tmp = *s++;
-	    if (tmp == '<') {
-		if (*s == '=' && !PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-                {
-		    s -= 2;
-		    TOKEN(0);
-		}
-		SHop(OP_LEFT_SHIFT);
-	    }
-	    if (tmp == '=') {
-		tmp = *s++;
-		if (tmp == '>') {
-		    if (!PL_lex_allbrackets
-                        && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
-                    {
-			s -= 3;
-			TOKEN(0);
-		    }
-		    Eop(OP_NCMP);
-		}
-		s--;
-		if (!PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
-                {
-		    s -= 2;
-		    TOKEN(0);
-		}
-		Rop(OP_LE);
-	    }
-	}
-	s--;
-	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
-	    s--;
-	    TOKEN(0);
-	}
-	Rop(OP_LT);
+        return yyl_leftpointy(aTHX_ s);
 
     case '>':
         if (s[1] == '>' && (s == PL_linestart || s[-1] == '\n')
