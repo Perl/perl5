@@ -6193,6 +6193,43 @@ yyl_verticalbar(pTHX_ char *s)
     BOop(bof ? s == d ? OP_NBIT_OR : OP_SBIT_OR : OP_BIT_OR);
 }
 
+static int
+yyl_bang(pTHX_ char *s)
+{
+    const char tmp = *s++;
+    if (tmp == '=') {
+        /* was this !=~ where !~ was meant?
+         * warn on m:!=~\s+([/?]|[msy]\W|tr\W): */
+
+        if (*s == '~' && ckWARN(WARN_SYNTAX)) {
+            const char *t = s+1;
+
+            while (t < PL_bufend && isSPACE(*t))
+                ++t;
+
+            if (*t == '/' || *t == '?'
+                || ((*t == 'm' || *t == 's' || *t == 'y')
+                    && !isWORDCHAR(t[1]))
+                || (*t == 't' && t[1] == 'r' && !isWORDCHAR(t[2])))
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                            "!=~ should be !~");
+        }
+
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+            s -= 2;
+            TOKEN(0);
+        }
+
+        Eop(OP_NE);
+    }
+
+    if (tmp == '~')
+        PMop(OP_NOT);
+
+    s--;
+    OPERATOR('!');
+}
+
 /*
   yylex
 
@@ -7159,40 +7196,10 @@ Perl_yylex(pTHX)
 	}
 	pl_yylval.ival = 0;
 	OPERATOR(ASSIGNOP);
+
     case '!':
-	s++;
-	{
-	    const char tmp = *s++;
-	    if (tmp == '=') {
-		/* was this !=~ where !~ was meant?
-		 * warn on m:!=~\s+([/?]|[msy]\W|tr\W): */
+        return yyl_bang(aTHX_ s + 1);
 
-		if (*s == '~' && ckWARN(WARN_SYNTAX)) {
-		    const char *t = s+1;
-
-		    while (t < PL_bufend && isSPACE(*t))
-			++t;
-
-		    if (*t == '/' || *t == '?'
-                        || ((*t == 'm' || *t == 's' || *t == 'y')
-			    && !isWORDCHAR(t[1]))
-                        || (*t == 't' && t[1] == 'r' && !isWORDCHAR(t[2])))
-			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				    "!=~ should be !~");
-		}
-		if (!PL_lex_allbrackets
-                    && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
-                {
-		    s -= 2;
-		    TOKEN(0);
-		}
-		Eop(OP_NE);
-	    }
-	    if (tmp == '~')
-		PMop(OP_NOT);
-	}
-	s--;
-	OPERATOR('!');
     case '<':
 	if (PL_expect != XOPERATOR) {
 	    if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
