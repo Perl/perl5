@@ -16827,10 +16827,25 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.031005 => {
         delta_from => 5.031004,
         changed => {
+            'B'                     => '1.77',
+            'B::Deparse'            => '1.50',
             'B::Op_private'         => '5.031005',
             'Config'                => '5.031005',
+            'Devel::PPPort'         => '3.54',
+            'Digest::MD5'           => '2.55_01',
+            'Dumpvalue'             => '1.21',
+            'ExtUtils::CBuilder'    => '0.280233',
+            'Math::BigFloat'        => '1.999817_01',
+            'Math::BigInt'          => '1.999817_01',
+            'Math::BigInt::Calc'    => '1.999817_01',
+            'Math::BigInt::FastCalc'=> '0.5009',
+            'Math::BigInt::Lib'     => '1.999817_01',
             'Module::CoreList'      => '5.20191020',
             'Module::CoreList::Utils'=> '5.20191020',
+            'Safe'                  => '2.41',
+            'Time::HiRes'           => '1.9764',
+            'XS::APItest'           => '1.04',
+            'threads'               => '2.23',
         },
         removed => {
         }
