@@ -214,7 +214,7 @@ platform-specific Configure-like scripts, as well as F<Configure>
 itself.
 
 The metaconfig system has its own git repository. Please see its README
-file in L<https://perl5.git.perl.org/metaconfig.git/> for more details.
+file in L<https://github.com/Perl/metaconfig> for more details.
 
 The F<Cross> directory contains various files related to
 cross-compiling Perl. See F<Cross/README> for more details.
