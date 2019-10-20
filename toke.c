@@ -6371,6 +6371,19 @@ yyl_leftparen(pTHX_ char *s)
     TOKEN('(');
 }
 
+static int
+yyl_rightparen(pTHX_ char *s)
+{
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
+        TOKEN(0);
+    s++;
+    PL_lex_allbrackets--;
+    s = skipspace(s);
+    if (*s == '{')
+        PREBLOCK(')');
+    TERM(')');
+}
+
 /*
   yylex
 
@@ -7174,15 +7187,9 @@ Perl_yylex(pTHX)
 	s++;
 	PL_expect = XSTATE;
 	TOKEN(';');
+
     case ')':
-	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
-	    TOKEN(0);
-	s++;
-	PL_lex_allbrackets--;
-	s = skipspace(s);
-	if (*s == '{')
-	    PREBLOCK(')');
-	TERM(')');
+        return yyl_rightparen(aTHX_ s);
 
     case ']':
         return yyl_rightsquare(aTHX_ s);
