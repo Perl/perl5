@@ -6269,6 +6269,39 @@ yyl_snail(pTHX_ char *s)
     TERM('@');
 }
 
+static int
+yyl_slash(pTHX_ char *s)
+{
+    if ((PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR) && s[1] == '/') {
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+                (s[2] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC))
+            TOKEN(0);
+        s += 2;
+        AOPERATOR(DORDOR);
+    }
+    else if (PL_expect == XOPERATOR) {
+        s++;
+        if (*s == '=' && !PL_lex_allbrackets
+            && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+        {
+            s--;
+            TOKEN(0);
+        }
+        Mop(OP_DIVIDE);
+    }
+    else {
+        /* Disable warning on "study /blah/" */
+        if (    PL_oldoldbufptr == PL_last_uni
+            && (   *PL_last_uni != 's' || s - PL_last_uni < 5
+                || memNE(PL_last_uni, "study", 5)
+                || isWORDCHAR_lazy_if_safe(PL_last_uni+5, PL_bufend, UTF)
+         ))
+            check_uni();
+        s = scan_pat(s,OP_MATCH);
+        TERM(sublex_start());
+    }
+}
+
 /*
   yylex
 
@@ -7344,35 +7377,8 @@ Perl_yylex(pTHX)
     case '@':
         return yyl_snail(aTHX_ s);
 
-     case '/':			/* may be division, defined-or, or pattern */
-	if ((PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR) && s[1] == '/') {
-	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-		    (s[2] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC))
-		TOKEN(0);
-	    s += 2;
-	    AOPERATOR(DORDOR);
-	}
-	else if (PL_expect == XOPERATOR) {
-	    s++;
-	    if (*s == '=' && !PL_lex_allbrackets
-                && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
-            {
-		s--;
-		TOKEN(0);
-	    }
-	    Mop(OP_DIVIDE);
-        }
-	else {
-	    /* Disable warning on "study /blah/" */
-	    if (    PL_oldoldbufptr == PL_last_uni
-                && (   *PL_last_uni != 's' || s - PL_last_uni < 5
-                    || memNE(PL_last_uni, "study", 5)
-                    || isWORDCHAR_lazy_if_safe(PL_last_uni+5, PL_bufend, UTF)
-	     ))
-	        check_uni();
-	    s = scan_pat(s,OP_MATCH);
-	    TERM(sublex_start());
-	}
+    case '/':			/* may be division, defined-or, or pattern */
+        return yyl_slash(aTHX_ s);
 
      case '?':			/* conditional */
 	s++;
