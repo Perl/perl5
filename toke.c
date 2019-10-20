@@ -6302,6 +6302,19 @@ yyl_slash(pTHX_ char *s)
     }
 }
 
+static int
+yyl_leftsquare(pTHX_ char *s)
+{
+    char tmp;
+
+    if (PL_lex_brackets > 100)
+        Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+    PL_lex_brackstack[PL_lex_brackets++] = 0;
+    PL_lex_allbrackets++;
+    tmp = *s++;
+    OPERATOR(tmp);
+}
+
 /*
   yylex
 
@@ -7078,14 +7091,8 @@ Perl_yylex(pTHX)
         return yyl_caret(aTHX_ s);
 
     case '[':
-	if (PL_lex_brackets > 100)
-	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
-	PL_lex_brackstack[PL_lex_brackets++] = 0;
-	PL_lex_allbrackets++;
-	{
-	    const char tmp = *s++;
-	    OPERATOR(tmp);
-	}
+        return yyl_leftsquare(aTHX_ s);
+
     case '~':
 	if (s[1] == '~'
 	    && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR))
