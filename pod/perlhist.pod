@@ -675,6 +675,7 @@ the strings?).
  Steve     5.31.2       2019-Jul-20
  Tom H     5.31.3       2019-Aug-20
  Max M     5.31.4       2019-Sep-20
+ Steve     5.31.5       2019-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
