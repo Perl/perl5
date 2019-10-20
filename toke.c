@@ -6530,6 +6530,17 @@ yyl_backtick(pTHX_ char *s)
     TERM(sublex_start());
 }
 
+static int
+yyl_backslash(pTHX_ char *s)
+{
+    if (PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr && isDIGIT(*s))
+        Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),"Can't use \\%c to mean $%c in expression",
+                       *s, *s);
+    if (PL_expect == XOPERATOR)
+        no_op("Backslash",s);
+    OPERATOR(REFGEN);
+}
+
 /*
   yylex
 
@@ -7553,14 +7564,7 @@ Perl_yylex(pTHX)
         return yyl_backtick(aTHX_ s);
 
     case '\\':
-	s++;
-	if (PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
-	 && isDIGIT(*s))
-	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),"Can't use \\%c to mean $%c in expression",
-			   *s, *s);
-	if (PL_expect == XOPERATOR)
-	    no_op("Backslash",s);
-	OPERATOR(REFGEN);
+        return yyl_backslash(aTHX_ s + 1);
 
     case 'v':
 	if (isDIGIT(s[1]) && PL_expect != XOPERATOR) {
