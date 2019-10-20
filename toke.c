@@ -6739,8 +6739,56 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
     OPERATOR(DO);
 }
 
+static int yyl_try(pTHX_ char, char*, STRLEN, I32, GV*, GV**, U8, U32, const bool);
+
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
+
+static int
+yyl_eol(pTHX_ char *s, STRLEN len,
+        I32 orig_keyword, GV *gv, GV **gvp,
+        U8 formbrack, U32 fake_eof, const bool saw_infix_sigil)
+{
+    if (PL_lex_state != LEX_NORMAL
+        || (PL_in_eval && !PL_rsfp && !PL_parser->filtered))
+    {
+        const bool in_comment = *s == '#';
+        char *d;
+        if (*s == '#' && s == PL_linestart && PL_in_eval
+         && !PL_rsfp && !PL_parser->filtered) {
+            /* handle eval qq[#line 1 "foo"\n ...] */
+            CopLINE_dec(PL_curcop);
+            incline(s, PL_bufend);
+        }
+        d = s;
+        while (d < PL_bufend && *d != '\n')
+            d++;
+        if (d < PL_bufend)
+            d++;
+        s = d;
+        if (in_comment && d == PL_bufend
+            && PL_lex_state == LEX_INTERPNORMAL
+            && PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
+            && SvEVALED(PL_lex_repl) && d[-1] == '}') s--;
+        else
+            incline(s, PL_bufend);
+        if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
+            PL_lex_state = LEX_FORMLINE;
+            force_next(FORMRBRACK);
+            TOKEN(';');
+        }
+    }
+    else {
+        while (s < PL_bufend && *s != '\n')
+            s++;
+        if (s < PL_bufend) {
+            s++;
+            if (s < PL_bufend)
+                incline(s, PL_bufend);
+        }
+    }
+    return RETRY();
+}
 
 static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
@@ -7125,47 +7173,12 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
     case ' ': case '\t': case '\f': case '\v':
 	s++;
 	return RETRY();
+
     case '#':
     case '\n':
-	if (PL_lex_state != LEX_NORMAL
-            || (PL_in_eval && !PL_rsfp && !PL_parser->filtered))
-        {
-            const bool in_comment = *s == '#';
-	    if (*s == '#' && s == PL_linestart && PL_in_eval
-	     && !PL_rsfp && !PL_parser->filtered) {
-		/* handle eval qq[#line 1 "foo"\n ...] */
-		CopLINE_dec(PL_curcop);
-		incline(s, PL_bufend);
-	    }
-            d = s;
-            while (d < PL_bufend && *d != '\n')
-                d++;
-            if (d < PL_bufend)
-                d++;
-            s = d;
-            if (in_comment && d == PL_bufend
-                && PL_lex_state == LEX_INTERPNORMAL
-                && PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
-                && SvEVALED(PL_lex_repl) && d[-1] == '}') s--;
-            else
-                incline(s, PL_bufend);
-	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-		PL_lex_state = LEX_FORMLINE;
-		force_next(FORMRBRACK);
-		TOKEN(';');
-	    }
-	}
-	else {
-            while (s < PL_bufend && *s != '\n')
-                s++;
-            if (s < PL_bufend)
-                {
-                    s++;
-                    if (s < PL_bufend)
-                        incline(s, PL_bufend);
-                }
-	}
-	return RETRY();
+        return yyl_eol(aTHX_ s, len, orig_keyword, gv, gvp,
+                       formbrack, fake_eof, saw_infix_sigil);
+
     case '-':
         return yyl_hyphen(aTHX_ s);
 
