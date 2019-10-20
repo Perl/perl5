@@ -6639,6 +6639,42 @@ yyl_croak_unrecognised(pTHX_ char *s)
     NORETURN_FUNCTION_END;
 }
 
+static int
+yyl_require(pTHX_ char *s, I32 orig_keyword)
+{
+    s = skipspace(s);
+    if (isDIGIT(*s)) {
+        s = force_version(s, FALSE);
+    }
+    else if (*s != 'v' || !isDIGIT(s[1])
+            || (s = force_version(s, TRUE), *s == 'v'))
+    {
+        *PL_tokenbuf = '\0';
+        s = force_word(s,BAREWORD,TRUE,TRUE);
+        if (isIDFIRST_lazy_if_safe(PL_tokenbuf,
+                                   PL_tokenbuf + sizeof(PL_tokenbuf),
+                                   UTF))
+        {
+            gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
+                        GV_ADD | (UTF ? SVf_UTF8 : 0));
+        }
+        else if (*s == '<')
+            yyerror("<> at require-statement should be quotes");
+    }
+
+    if (orig_keyword == KEY_require)
+        pl_yylval.ival = 1;
+    else
+        pl_yylval.ival = 0;
+
+    PL_expect = PL_nexttoke ? XOPERATOR : XTERM;
+    PL_bufptr = s;
+    PL_last_uni = PL_oldbufptr;
+    PL_last_lop_op = OP_REQUIRE;
+    s = skipspace(s);
+    return REPORT( (int)REQUIRE );
+}
+
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
 
@@ -8592,37 +8628,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    OLDLOP(OP_RETURN);
 
 	case KEY_require:
-	    s = skipspace(s);
-	    if (isDIGIT(*s)) {
-		s = force_version(s, FALSE);
-	    }
-	    else if (*s != 'v' || !isDIGIT(s[1])
-		    || (s = force_version(s, TRUE), *s == 'v'))
-	    {
-		*PL_tokenbuf = '\0';
-		s = force_word(s,BAREWORD,TRUE,TRUE);
-                if (isIDFIRST_lazy_if_safe(PL_tokenbuf,
-                                           PL_tokenbuf + sizeof(PL_tokenbuf),
-                                           UTF))
-                {
-		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
-                                GV_ADD | (UTF ? SVf_UTF8 : 0));
-                }
-		else if (*s == '<')
-		    yyerror("<> at require-statement should be quotes");
-	    }
-	    if (orig_keyword == KEY_require) {
-		orig_keyword = 0;
-		pl_yylval.ival = 1;
-	    }
-	    else
-		pl_yylval.ival = 0;
-	    PL_expect = PL_nexttoke ? XOPERATOR : XTERM;
-	    PL_bufptr = s;
-	    PL_last_uni = PL_oldbufptr;
-	    PL_last_lop_op = OP_REQUIRE;
-	    s = skipspace(s);
-	    return REPORT( (int)REQUIRE );
+            return yyl_require(aTHX_ s, orig_keyword);
 
 	case KEY_reset:
 	    UNI(OP_RESET);
