@@ -6106,6 +6106,63 @@ yyl_rightcurly(pTHX_ char *s, U8 formbrack)
     TOKEN(';');
 }
 
+static int
+yyl_ampersand(pTHX_ char *s)
+{
+    if (PL_expect == XPOSTDEREF)
+        POSTDEREF('&');
+
+    s++;
+    if (*s++ == '&') {
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+                (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
+            s -= 2;
+            TOKEN(0);
+        }
+        AOPERATOR(ANDAND);
+    }
+    s--;
+
+    if (PL_expect == XOPERATOR) {
+        char *d;
+        bool bof;
+        if (   PL_bufptr == PL_linestart
+            && ckWARN(WARN_SEMICOLON)
+            && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))
+        {
+            CopLINE_dec(PL_curcop);
+            Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
+            CopLINE_inc(PL_curcop);
+        }
+        d = s;
+        if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.')
+            s++;
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+                (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
+            s = d;
+            s--;
+            TOKEN(0);
+        }
+        if (d == s) {
+            PL_parser->saw_infix_sigil = 1;
+            BAop(bof ? OP_NBIT_AND : OP_BIT_AND);
+        }
+        else
+            BAop(OP_SBIT_AND);
+    }
+
+    PL_tokenbuf[0] = '&';
+    s = scan_ident(s - 1, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, TRUE);
+    pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
+
+    if (PL_tokenbuf[1])
+        force_ident_maybe_lex('&');
+    else
+        PREREF('&');
+
+    TERM('&');
+}
+
 /*
   yylex
 
@@ -6977,52 +7034,7 @@ Perl_yylex(pTHX)
         return yyl_rightcurly(aTHX_ s + 1, formbrack);
 
     case '&':
-	if (PL_expect == XPOSTDEREF) POSTDEREF('&');
-	s++;
-	if (*s++ == '&') {
-	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
-		s -= 2;
-		TOKEN(0);
-	    }
-	    AOPERATOR(ANDAND);
-	}
-	s--;
-	if (PL_expect == XOPERATOR) {
-	    if (   PL_bufptr == PL_linestart
-                && ckWARN(WARN_SEMICOLON)
-	        && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))
-	    {
-		CopLINE_dec(PL_curcop);
-		Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
-		CopLINE_inc(PL_curcop);
-	    }
-	    d = s;
-	    if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.')
-		s++;
-	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
-		s = d;
-		s--;
-		TOKEN(0);
-	    }
-	    if (d == s) {
-		PL_parser->saw_infix_sigil = 1;
-		BAop(bof ? OP_NBIT_AND : OP_BIT_AND);
-	    }
-	    else
-		BAop(OP_SBIT_AND);
-	}
-
-	PL_tokenbuf[0] = '&';
-	s = scan_ident(s - 1, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, TRUE);
-	pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
-	if (PL_tokenbuf[1]) {
-	    force_ident_maybe_lex('&');
-	}
-	else
-	    PREREF('&');
-	TERM('&');
+        return yyl_ampersand(aTHX_ s);
 
     case '|':
 	s++;
