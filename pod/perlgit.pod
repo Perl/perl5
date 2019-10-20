@@ -220,7 +220,8 @@ git will open a text editor for you to compose the message
 interactively. This is useful when the changes are more complex than
 the sample given here, and, depending on the editor, to know that the
 first line of the commit message doesn't exceed the 50 character legal
-maximum.
+maximum. See L<perlhack/Commit message> for more information about what
+makes a good commit message.
 
 Once you've finished writing your commit message and exited your
 editor, git will write your change to disk and tell you something like
@@ -283,47 +284,6 @@ If you want to delete your temporary branch, you may do so with:
  If you are sure you want to delete it, run 'git branch -D orange'.
  % git branch -D orange
  Deleted branch orange.
-
-=head2 Committing your changes
-
-Assuming that you'd like to commit all the changes you've made as a
-single atomic unit, run this command:
-
-  % git commit -a
-
-(That C<-a> tells git to add every file you've changed to this commit.
-New files aren't automatically added to your commit when you use
-C<commit -a> If you want to add files or to commit some, but not all of
-your changes, have a look at the documentation for C<git add>.)
-
-Git will start up your favorite text editor, so that you can craft a
-commit message for your change. See L<perlhack/Commit message> for more
-information about what makes a good commit message.
-
-Once you've finished writing your commit message and exited your
-editor, git will write your change to disk and tell you something like
-this:
-
- Created commit daf8e63: explain git status and stuff about remotes
-  1 files changed, 83 insertions(+), 3 deletions(-)
-
-If you re-run C<git status>, you should see something like this:
-
- % git status
- On branch blead
- Your branch is ahead of 'origin/blead' by 2 commits.
-   (use "git push" to publish your local commits)
- Untracked files:
-   (use "git add <file>..." to include in what will be committed)
-
-       deliberate.untracked
-
- nothing added to commit but untracked files present (use "git add" to
-                                                                  track)
-
-When in doubt, before you do anything else, check your status and read
-it carefully, many questions are answered directly by the git status
-output.
 
 =head2 Sending patch emails
 
