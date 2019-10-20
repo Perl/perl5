@@ -126,9 +126,24 @@ my $unpushed_commits = '    ';
 my ($read, $branch, $snapshot_created, $commit_id, $describe)= ("") x 5;
 my ($changed, $extra_info, $commit_title)= ("") x 3;
 
+my $git_patch_file;
 if (my $patch_file= read_file(".patch")) {
     ($branch, $snapshot_created, $commit_id, $describe) = split /\s+/, $patch_file;
     $extra_info = "git_snapshot_date='$snapshot_created'";
+    $commit_title = "Snapshot of:";
+}
+elsif ($git_patch_file = read_file(".git_patch") and $git_patch_file !~ /\A\$Format:%H/) {
+    my ($git_info) = $git_patch_file =~ /\A\$Format:(.*)\$/;
+    ($commit_id, my $commit_date, my $names)
+        = split /\|/, $git_info;
+
+    my @names = split /,\s*/, $names;
+
+    ($branch) = grep m{^(blead|maint/.*)}, @names;
+
+    $describe = $branch ||= $commit_id;
+    $extra_info = "git_commit_date='$commit_date'\n";
+    $extra_info .= "git_snapshot_date='$commit_date'\n";
     $commit_title = "Snapshot of:";
 }
 elsif (-d "$srcdir/.git") {
