@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.174'; # Don't forget to set version and release
+    $VERSION = '2.175'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -499,7 +499,7 @@ sub _dump {
     }
 
     if ($realpack and !$no_bless) { # we have a blessed ref
-      $out .= ', ' . _quote($realpack) . ' )';
+      $out .= ', ' . quote_str($realpack,$s->{useqq}) . ' )';
       $out .= '->' . $s->{toaster} . '()'
         if $s->{toaster} ne '';
       $s->{apad} = $blesspad;
@@ -575,13 +575,7 @@ sub _dump {
       $out .= $val;
     }
     else {                 # string
-      if ($s->{useqq} or $val =~ tr/\0-\377//c) {
-        # Fall back to qq if there's Unicode
-        $out .= qquote($val, $s->{useqq});
-      }
-      else {
-        $out .= _quote($val);
-      }
+      $out .= quote_str($val, $s->{useqq});
     }
   }
   if ($id) {
@@ -805,6 +799,15 @@ sub qquote {
     }
 
   return qq("$_");
+}
+
+sub quote_str {
+    if ($_[1] or $_[0] =~ tr/\0-\377//c) {
+        return qquote($_[0], $_[1]);
+    }
+    else {
+        return _quote($_[0])
+    }
 }
 
 # helper sub to sort hash keys in Perl < 5.8.0 where we don't have
@@ -1467,7 +1470,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.174
+Version 2.175
 
 =head1 SEE ALSO
 

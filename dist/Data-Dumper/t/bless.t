@@ -5,7 +5,7 @@ use Test::More 0.60;
 # Test::More 0.60 required because:
 # - is_deeply(undef, $not_undef); now works. [rt.cpan.org 9441]
 
-BEGIN { plan tests => 1+2*5; }
+BEGIN { plan tests => 1+2*7; }
 
 BEGIN { use_ok('Data::Dumper') };
 
@@ -21,6 +21,18 @@ SKIP: {
 
 sub run_tests_for_bless {
 note("\$Data::Dumper::Useperl = $Data::Dumper::Useperl");
+
+{
+my $t = bless( {}, q{a'b} );
+local $Data::Dumper::Useqq=1;
+my $dt = Dumper($t);
+my $o = <<'PERL';
+$VAR1 = bless( {}, "a'b" );
+PERL
+
+is($dt, $o, "package name in bless with useqq handles embedded single quote");
+is_deeply(scalar eval($dt), $t, "eval reverts dump");
+}
 
 {
 my $t = bless( {}, q{a'b} );

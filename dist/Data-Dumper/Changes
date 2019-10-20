@@ -6,6 +6,16 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.175
+
+perl #134483: All strings output under useqq=1 should be double quoted.
+(Class names should not be single quoted when useqq=1).
+
+=item 2.174
+
+Fix memory leak associated with max_recursion level.
+(Noticed and fixed by Dave Mitchell.)
+
 =item 2.173
 
 perl #133624: Reinstate support for 5.8.8 and older.

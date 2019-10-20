@@ -634,6 +634,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     AV *seenentry = NULL;
     char *iname;
     STRLEN inamelen, idlen = 0;
+    STRLEN realpack_len;
+    char realpack_utf8;
     U32 realtype;
     bool no_bless = 0; /* when a qr// is blessed into Regexp we dont want to bless it.
                           in later perls we should actually check the classname of the 
@@ -685,9 +687,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	id_buffer = PTR2UV(ival);
 	idlen = sizeof(id_buffer);
 #endif
-	if (SvOBJECT(ival))
-	    realpack = HvNAME_get(SvSTASH(ival));
-	else
+	if (SvOBJECT(ival)) {
+            HV *stash= SvSTASH(ival);
+	    realpack = HvNAME_get(stash);
+            realpack_len= HvNAMELEN(stash);
+            realpack_utf8= HvNAMEUTF8(stash);
+	}
+        else
 	    realpack = NULL;
 
 	/* if it has a name, we need to either look it up, or keep a tab
@@ -1244,32 +1250,37 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
 	if (realpack && !no_bless) {  /* free blessed allocs */
-            STRLEN plen, pticks;
+            STRLEN pticks;
 
             if (style->indent >= 2) {
 		SvREFCNT_dec(apad);
 		apad = blesspad;
 	    }
-	    sv_catpvs(retval, ", '");
+            if (style->useqq || realpack_utf8) {
+                sv_catpvs(retval, ", ");
+                esc_q_utf8(aTHX_ retval, realpack, realpack_len, realpack_utf8, style->useqq);
+                sv_catpvs(retval, " )");
+            } else {
+                sv_catpvs(retval, ", '");
 
-	    plen = strlen(realpack);
-	    pticks = num_q(realpack, plen);
-	    if (pticks) { /* needs escaping */
-	        char *npack;
-	        char *npack_buffer = NULL;
+                pticks = num_q(realpack, realpack_len);
+                if (pticks) { /* needs escaping */
+                    char *npack;
+                    char *npack_buffer = NULL;
 
-	        New(0, npack_buffer, plen+pticks+1, char);
-	        npack = npack_buffer;
-	        plen += esc_q(npack, realpack, plen);
-	        npack[plen] = '\0';
+                    New(0, npack_buffer, realpack_len+pticks+1, char);
+                    npack = npack_buffer;
+                    realpack_len += esc_q(npack, realpack, realpack_len);
+                    npack[realpack_len] = '\0';
 
-	        sv_catpvn(retval, npack, plen);
-	        Safefree(npack_buffer);
-	    }
-	    else {
-	        sv_catpvn(retval, realpack, strlen(realpack));
-	    }
-	    sv_catpvs(retval, "' )");
+                    sv_catpvn(retval, npack, realpack_len);
+                    Safefree(npack_buffer);
+                }
+                else {
+                    sv_catpvn(retval, realpack, realpack_len);
+                }
+	        sv_catpvs(retval, "' )");
+            }
             if (style->toaster && SvPOK(style->toaster) && SvCUR(style->toaster)) {
 		sv_catpvs(retval, "->");
                 sv_catsv(retval, style->toaster);
