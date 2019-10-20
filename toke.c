@@ -6591,6 +6591,10 @@ yyl_backslash(pTHX_ char *s)
 #define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
 #endif
 
+#define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
+                        formbrack, fake_eof, saw_infix_sigil)
+
+
 static int yyl_try(pTHX_ char, char*, STRLEN, I32, GV*, GV**, U8, U32, const bool);
 
 int
@@ -6855,7 +6859,6 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
     case '}': goto rightbracket;
     }
 
-  retry:
     switch (*s) {
     default:
         if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s)) {
@@ -6918,7 +6921,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
-	    goto retry;			/* ignore stray nulls */
+	    return RETRY();			/* ignore stray nulls */
 	PL_last_uni = 0;
 	PL_last_lop = 0;
 	if (!PL_in_eval && !PL_preambled) {
@@ -6996,7 +6999,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    PL_last_lop = PL_last_uni = NULL;
 	    if (PERLDB_LINE_OR_SAVESRC && PL_curstash != PL_debstash)
 		update_debugger_info(PL_linestr, NULL, 0);
-	    goto retry;
+	    return RETRY();
 	}
 	do {
 	    fake_eof = 0;
@@ -7241,7 +7244,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 			    PL_preambled = FALSE;
 			    if (PERLDB_LINE_OR_SAVESRC)
 				(void)gv_fetchfile(PL_origfilename);
-			    goto retry;
+			    return RETRY();
 			}
 		    }
 		}
@@ -7252,7 +7255,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    force_next(FORMRBRACK);
 	    TOKEN(';');
 	}
-	goto retry;
+	return RETRY();
     case '\r':
 #ifdef PERL_STRICT_CR
 	Perl_warn(aTHX_ "Illegal character \\%03o (carriage return)", '\r');
@@ -7261,7 +7264,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 #endif
     case ' ': case '\t': case '\f': case '\v':
 	s++;
-	goto retry;
+	return RETRY();
     case '#':
     case '\n':
 	if (PL_lex_state != LEX_NORMAL
@@ -7302,7 +7305,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
                         incline(s, PL_bufend);
                 }
 	}
-	goto retry;
+	return RETRY();
     case '-':
         return yyl_hyphen(aTHX_ s);
 
@@ -7376,7 +7379,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
             && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), "====="))
         {
             s = vcs_conflict_marker(s + 7);
-            goto retry;
+            return RETRY();
         }
 
 	s++;
@@ -7426,15 +7429,15 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
                                 else
                                     s = d;
                                 incline(s, PL_bufend);
-                                goto retry;
+                                return RETRY();
                             }
                         }
                     }
-                    goto retry;
+                    return RETRY();
                 }
                 s = PL_bufend;
                 PL_parser->in_pod = 1;
-                goto retry;
+                return RETRY();
             }
 	}
 	if (PL_expect == XBLOCK) {
@@ -7471,7 +7474,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
             && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
         {
             s = vcs_conflict_marker(s + 7);
-            goto retry;
+            return RETRY();
         }
         return yyl_leftpointy(aTHX_ s);
 
@@ -7480,7 +7483,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
             && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), ">>>>>"))
         {
             s = vcs_conflict_marker(s + 7);
-            goto retry;
+            return RETRY();
         }
         return yyl_rightpointy(aTHX_ s + 1);
 
