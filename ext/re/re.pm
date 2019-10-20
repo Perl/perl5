@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.36";
+our $VERSION     = "0.38";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -54,33 +54,36 @@ sub setcolor {
 }
 
 my %flags = (
-    COMPILE         => 0x0000FF,
-    PARSE           => 0x000001,
-    OPTIMISE        => 0x000002,
-    TRIEC           => 0x000004,
-    DUMP            => 0x000008,
-    FLAGS           => 0x000010,
-    TEST            => 0x000020,
+    COMPILE           => 0x0000FF,
+    PARSE             => 0x000001,
+    OPTIMISE          => 0x000002,
+    TRIEC             => 0x000004,
+    DUMP              => 0x000008,
+    FLAGS             => 0x000010,
+    TEST              => 0x000020,
 
-    EXECUTE         => 0x00FF00,
-    INTUIT          => 0x000100,
-    MATCH           => 0x000200,
-    TRIEE           => 0x000400,
+    EXECUTE           => 0x00FF00,
+    INTUIT            => 0x000100,
+    MATCH             => 0x000200,
+    TRIEE             => 0x000400,
 
-    EXTRA           => 0xFF0000,
-    TRIEM           => 0x010000,
-    OFFSETS         => 0x020000,
-    OFFSETSDBG      => 0x040000,
-    STATE           => 0x080000,
-    OPTIMISEM       => 0x100000,
-    STACK           => 0x280000,
-    BUFFERS         => 0x400000,
-    GPOS            => 0x800000,
+    EXTRA             => 0x1FF0000,
+    TRIEM             => 0x0010000,
+    OFFSETS           => 0x0020000,
+    OFFSETSDBG        => 0x0040000,
+    STATE             => 0x0080000,
+    OPTIMISEM         => 0x0100000,
+    STACK             => 0x0280000,
+    BUFFERS           => 0x0400000,
+    GPOS              => 0x0800000,
+    DUMP_PRE_OPTIMIZE => 0x1000000,
 );
-$flags{ALL} = -1 & ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS});
+$flags{ALL} = -1 &
+ ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS}|$flags{DUMP_PRE_OPTIMIZE});
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{Extra} = $flags{EXECUTE} | $flags{COMPILE} | $flags{GPOS};
-$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
+$flags{More} = $flags{MORE} =
+                    $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
@@ -510,7 +513,7 @@ purposes. The options are as follows:
 
 =item COMPILE
 
-Turns on all compile related debug options.
+Turns on all non-extra compile related debug options.
 
 =item PARSE
 
@@ -544,7 +547,7 @@ Print output intended for testing the internals of the compile process
 
 =item EXECUTE
 
-Turns on all execute related debug options.
+Turns on all non-extra execute related debug options.
 
 =item MATCH
 
@@ -617,6 +620,9 @@ debug options.
 Almost definitely only useful to people hacking
 on the offsets part of the debug engine.
 
+=item DUMP_PRE_OPTIMIZE
+
+Enable the dumping of the compiled pattern before the optimization phase.
 
 =back
 
@@ -628,8 +634,11 @@ These are useful shortcuts to save on the typing.
 
 =item ALL
 
-Enable all options at once except OFFSETS, OFFSETSDBG and BUFFERS.
-(To get every single option without exception, use both ALL and EXTRA.)
+Enable all options at once except OFFSETS, OFFSETSDBG and BUFFERS and
+DUMP_PRE_OPTIMIZE.
+(To get every single option without exception, use both ALL and EXTRA, or
+starting in 5.30 on a C<-DDEBUGGING>-enabled perl interpreter, use
+the B<-Drv> command-line switches.)
 
 =item All
 

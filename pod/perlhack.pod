@@ -120,7 +120,7 @@ command line tool.  This tool will ensure that your bug report includes
 all the relevant system and configuration information.
 
 To browse existing Perl bugs and patches, you can use the web interface
-at L<http://rt.perl.org/>.
+at L<https://rt.perl.org/>.
 
 Please check the archive of the perl5-porters list (see below) and/or
 the bug tracking system before submitting a bug report.  Often, you'll
@@ -138,14 +138,14 @@ are also referred to as the "Perl 5 Porters", "p5p" or just the
 "porters".
 
 A searchable archive of the list is available at
-L<http://markmail.org/search/?q=perl5-porters>.  There is also an archive at
-L<http://archive.develooper.com/perl5-porters@perl.org/>.
+L<https://markmail.org/search/?q=perl5-porters>.  There is also an archive at
+L<https://archive.develooper.com/perl5-porters@perl.org/>.
 
 =head2 perl-changes mailing list
 
 The perl5-changes mailing list receives a copy of each patch that gets
 submitted to the maintenance and development branches of the perl
-repository.  See L<http://lists.perl.org/list/perl5-changes.html> for
+repository.  See L<https://lists.perl.org/list/perl5-changes.html> for
 subscription and archive information.
 
 =head2 #p5p on IRC
@@ -177,14 +177,14 @@ directory.
 If you cannot use the git protocol for firewall reasons, you can also
 clone via http, though this is much slower:
 
-  % git clone http://perl5.git.perl.org/perl.git perl
+  % git clone https://perl5.git.perl.org/perl.git perl
 
 =head2 Read access via the web
 
 You may access the repository over the web.  This allows you to browse
 the tree, see recent commits, subscribe to RSS feeds for the changes,
 search for particular commits and more.  You may access it at
-L<http://perl5.git.perl.org/perl.git>.  A mirror of the repository is
+L<https://perl5.git.perl.org/perl.git>.  A mirror of the repository is
 found at L<https://github.com/Perl/perl5>.
 
 =head2 Read access via rsync
@@ -537,7 +537,7 @@ consideration.
 Modules in the F<cpan/> directory of the source tree are maintained
 outside of the Perl core.  When the author updates the module, the
 updates are simply copied into the core.  See that module's
-documentation or its listing on L<http://search.cpan.org/> for more
+documentation or its listing on L<https://metacpan.org/> for more
 information on reporting bugs and submitting patches.
 
 In most cases, patches to modules in F<cpan/> should be sent upstream
@@ -761,7 +761,7 @@ L<Test::More>, but avoids loading most modules and uses as few core
 features as possible.
 
 If you write your own test, use the L<Test Anything
-Protocol|http://testanything.org>.
+Protocol|https://testanything.org>.
 
 =over 4
 
@@ -1144,7 +1144,7 @@ source, and we'll do that later on.
 Gisle Aas's "illustrated perlguts", also known as I<illguts>, has very
 helpful pictures:
 
-L<http://search.cpan.org/dist/illguts/>
+L<https://search.cpan.org/dist/illguts/>
 
 =item * L<perlxstut> and L<perlxs>
 
@@ -1169,21 +1169,21 @@ wanting to go about Perl development.
 
 =head1 CPAN TESTERS AND PERL SMOKERS
 
-The CPAN testers ( L<http://testers.cpan.org/> ) are a group of volunteers
+The CPAN testers ( L<http://cpantesters.org/> ) are a group of volunteers
 who test CPAN modules on a variety of platforms.
 
-Perl Smokers ( L<http://www.nntp.perl.org/group/perl.daily-build/> and
-L<http://www.nntp.perl.org/group/perl.daily-build.reports/> )
+Perl Smokers ( L<https://www.nntp.perl.org/group/perl.daily-build/> and
+L<https://www.nntp.perl.org/group/perl.daily-build.reports/> )
 automatically test Perl source releases on platforms with various
 configurations.
 
 Both efforts welcome volunteers.  In order to get involved in smoke
 testing of the perl itself visit
-L<http://search.cpan.org/dist/Test-Smoke/>.  In order to start smoke
+L<https://search.cpan.org/dist/Test-Smoke/>.  In order to start smoke
 testing CPAN modules visit
-L<http://search.cpan.org/dist/CPANPLUS-YACSmoke/> or
-L<http://search.cpan.org/dist/minismokebox/> or
-L<http://search.cpan.org/dist/CPAN-Reporter/>.
+L<https://search.cpan.org/dist/CPANPLUS-YACSmoke/> or
+L<https://search.cpan.org/dist/minismokebox/> or
+L<https://search.cpan.org/dist/CPAN-Reporter/>.
 
 =head1 WHAT NEXT?
 

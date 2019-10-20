@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.54';
+our $VERSION = '1.55';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -49,6 +49,8 @@ $feature_bundle{"5.26"} = $feature_bundle{"5.23"};
 $feature_bundle{"5.28"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.29"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.30"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.31"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.32"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -393,6 +395,10 @@ The following feature bundles are available:
             postderef_qq bitwise
 
   :5.30     say state switch unicode_strings
+            unicode_eval evalbytes current_sub fc
+            postderef_qq bitwise
+
+  :5.32     say state switch unicode_strings
             unicode_eval evalbytes current_sub fc
             postderef_qq bitwise
 

@@ -6,7 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  */
 
-#if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
+#ifndef PERL_INVLIST_INLINE_H_
+#define PERL_INVLIST_INLINE_H_
+
+#if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_PP_C)
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
  * etc */
@@ -20,9 +23,7 @@
 PERL_STATIC_INLINE bool
 S_is_invlist(SV* const invlist)
 {
-    PERL_ARGS_ASSERT_IS_INVLIST;
-
-    return SvTYPE(invlist) == SVt_INVLIST;
+    return invlist != NULL && SvTYPE(invlist) == SVt_INVLIST;
 }
 
 PERL_STATIC_INLINE bool*
@@ -93,3 +94,5 @@ S_invlist_array(SV* const invlist)
 #   endif
 
 #endif
+
+#endif /* PERL_INVLIST_INLINE_H_ */

@@ -556,12 +556,18 @@ S_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
     const MGVTBL* const vtbl = mg->mg_virtual;
     if (vtbl && vtbl->svt_free)
 	vtbl->svt_free(aTHX_ sv, mg);
-    if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
+
+    if (mg->mg_type == PERL_MAGIC_collxfrm && mg->mg_len >= 0)
+        /* collate magic uses string len not buffer len, so
+         * free even with mg_len == 0 */
+        Safefree(mg->mg_ptr);
+    else if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
 	if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
 	    Safefree(mg->mg_ptr);
 	else if (mg->mg_len == HEf_SVKEY)
 	    SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
     }
+
     if (mg->mg_flags & MGf_REFCOUNTED)
 	SvREFCNT_dec(mg->mg_obj);
     Safefree(mg);
@@ -594,7 +600,7 @@ Perl_mg_free(pTHX_ SV *sv)
 }
 
 /*
-=for apidoc Am|void|mg_free_type|SV *sv|int how
+=for apidoc mg_free_type
 
 Remove any magic of type C<how> from the SV C<sv>.  See L</sv_magic>.
 
@@ -845,7 +851,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
 }
 
 /*
-=for apidoc Am|SV *|sv_string_from_errnum|int errnum|SV *tgtsv
+=for apidoc sv_string_from_errnum
 
 Generates the message string describing an OS error and returns it as
 an SV.  C<errnum> must be a value that C<errno> could take, identifying
@@ -2916,6 +2922,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 		if (!SvPOK(sv)) {
+                    if (!specialWARN(PL_compiling.cop_warnings))
+                        PerlMemShared_free(PL_compiling.cop_warnings);
 	            PL_compiling.cop_warnings = pWARN_STD;
 		    break;
 		}
@@ -3070,7 +3078,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #else
 #   define PERL_VMS_BANG 0
 #endif
-#if defined(WIN32) && ! defined(UNDER_CE)
+#if defined(WIN32)
 	SETERRNO(win32_get_errno(SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0),
 		 (SvIV(sv) == EVMSERR) ? 4 : PERL_VMS_BANG);
 #else
@@ -3170,7 +3178,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    const char *p = SvPV_const(sv, len);
             Groups_t *gary = NULL;
-            const char* endptr = p + len;
+            const char* p_end = p + len;
+            const char* endptr = p_end;
             UV uv;
 #ifdef _SC_NGROUPS_MAX
            int maxgrp = sysconf(_SC_NGROUPS_MAX);
@@ -3193,6 +3202,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 if (endptr == NULL)
                     break;
                 p = endptr;
+                endptr = p_end;
                 while (isSPACE(*p))
                     ++p;
                 if (!*p)

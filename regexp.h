@@ -20,6 +20,8 @@
 
 #include "utf8.h"
 
+typedef SSize_t regnode_offset;
+
 struct regnode {
     U8	flags;
     U8  type;
@@ -627,7 +629,7 @@ and check for NULL.
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
 #  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
 #endif
-#define ReANY(re)		S_ReANY((const REGEXP *)(re))
+#define ReANY(re)		Perl_ReANY((const REGEXP *)(re))
 
 /* FIXME for plugins. */
 
@@ -656,6 +658,7 @@ typedef struct {
     STRLEN  sublen;     /* saved sublen     field from rex */
     STRLEN  suboffset;  /* saved suboffset  field from rex */
     STRLEN  subcoffset; /* saved subcoffset field from rex */
+    SV      *sv;        /* $_  during (?{}) */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
     SSize_t pos;        /* the original value of pos() in pos_magic */
     U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
@@ -712,6 +715,8 @@ typedef I32 CHECKPOINT;
 typedef struct regmatch_state {
     int resume_state;		/* where to jump to on return */
     char *locinput;		/* where to backtrack in string on failure */
+    char *loceol;
+    U8 *sr0;                    /* position of start of script run, or NULL */
 
     union {
 
@@ -804,6 +809,9 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_yes_state;
 	    I32 wanted;
 	    I32 logical;	/* saved copy of 'logical' var */
+            U8  count;          /* number of beginning positions */
+            char *start;
+            char *end;
 	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
 	} ifmatch; /* and SUSPEND/UNLESSM */
 	

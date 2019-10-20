@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 1041;
+plan tests => 1052;
 
 $| = 1;
 
@@ -2378,8 +2378,28 @@ end
     ok("A" =~ /\p{$prop}/, "user-defined property: non-tainted case");
     $prop = "IsA$TAINT";
     eval { "A" =~ /\p{$prop}/};
-    like($@, qr/Insecure user-defined property \\p\{main::IsA\}/,
+    like($@, qr/Insecure user-defined property "IsA" in regex/,
 	    "user-defined property: tainted case");
+
+}
+
+{
+    SKIP: {
+        skip "Environment tainting tests skipped", 1
+          if $Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos;
+
+        local $ENV{XX} = '\p{IsB}';   # Making it an environment variable taints it
+
+        fresh_perl_like(<<'EOF',
+            BEGIN { $re = qr/$ENV{XX}/; }
+
+            sub IsB { "42" };
+            "B" =~ $re
+EOF
+        qr/Insecure user-defined property \\p\{main::IsB\}/,
+        { switches => [ "-T" ] },
+        "user-defined property; defn not known until runtime, tainted case");
+    }
 }
 
 {
@@ -2872,6 +2892,55 @@ is_tainted("$ovtaint", "overload preserves taint");
     my $s = "abcd" . $TAINT;
     ok(!!($s =~ s/a/x/g), "RT #132385");
 }
+
+# RT #134409
+# When the last substitution added both taint and utf8, adding taint
+# magic to the result also triggered a byte-to-utf8 recalulation of the
+# existing pos() magic, which had not yet been reset, resulting in a panic
+# about pos() being off the end of the string.
+{
+    my $utf8_taint = substr($^X,0,0);
+    utf8::upgrade($utf8_taint);
+
+    my %map = (
+        'UTF8'    => "$utf8_taint",
+        'PLAIN' => '',
+    );
+
+
+    my $v = "PLAIN UTF8";
+    my $c = eval { $v =~ s/(\w+)/$map{$1}/g; };
+    is($c, 2, "RT #134409")
+        or diag("\$@ = [$@]");
+}
+
+{
+    # check that each param is independent taint-wise.
+    use feature 'signatures';
+    use experimental 'signatures';
+
+    sub taint_sig1($a, $b, $c) {
+        isnt_tainted($a, 'taint_sig1: $a');
+        is_tainted  ($b, 'taint_sig1: $b');
+        isnt_tainted($c, 'taint_sig1: $c');
+    }
+    taint_sig1(1, $TAINT, 3);
+
+    sub taint_sig2($a, $b = $TAINT, $c = 3) {
+        isnt_tainted($a, 'taint_sig2: $a');
+        is_tainted  ($b, 'taint_sig2: $b');
+        isnt_tainted($c, 'taint_sig2: $c');
+    }
+    taint_sig2(1);
+
+    sub taint_sig3($a, $b = 2, $c = $TAINT) {
+        is_tainted  ($a, 'taint_sig3: $a');
+        isnt_tainted($b, 'taint_sig3: $b');
+        is_tainted  ($c, 'taint_sig3: $c');
+    }
+    taint_sig3($TAINT);
+}
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {

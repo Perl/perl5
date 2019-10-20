@@ -410,7 +410,6 @@ d_clearenv=''
 d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
-d_const=''
 d_copysign=''
 d_copysignl=''
 d_cplusplus=''
@@ -658,6 +657,7 @@ d_lstat=''
 d_madvise=''
 d_malloc_good_size=''
 d_malloc_size=''
+d_malloc_usable_size=''
 d_mblen=''
 d_mbrlen=''
 d_mbrtowc=''
@@ -763,7 +763,9 @@ d_sethostent_r=''
 sethostent_r_proto=''
 d_setitimer=''
 d_setlinebuf=''
+d_has_C_UTF8=''
 d_setlocale=''
+d_setlocale_accepts_any_locale_name=''
 d_setlocale_r=''
 setlocale_r_proto=''
 d_setnent=''
@@ -905,6 +907,8 @@ clocktype=''
 d_times=''
 d_tmpnam_r=''
 tmpnam_r_proto=''
+d_towlower=''
+d_towupper=''
 d_trunc=''
 d_truncate=''
 d_truncl=''
@@ -1073,6 +1077,7 @@ i_ustat=''
 i_utime=''
 i_vfork=''
 i_wchar=''
+i_wctype=''
 d_inc_version_list=''
 inc_version_list=''
 inc_version_list_init=''
@@ -3499,6 +3504,9 @@ EOM
 			;;
 		MiNT)	osname=mint
 			;;
+		minix)	osname=minix
+			osvers=`$uname -r`
+			;;
 		netbsd*) osname=netbsd
 			osvers="$3"
 			;;
@@ -4162,14 +4170,9 @@ EOSC
 
 : determine root of directory hierarchy where package will be installed.
 case "$prefix" in
-'')
-	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
+'')	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
 	;;
-*?/)
-	dflt=`echo "$prefix" | sed 's/.$//'`
-	;;
-*)
-	dflt="$prefix"
+*)	dflt="$prefix"
 	;;
 esac
 $cat <<EOM
@@ -4188,16 +4191,25 @@ rp='Installation prefix to use?'
 . ./getfile
 oldprefix=''
 case "$prefix" in
-'') ;;
-*)
-	case "$ans" in
+'')	;;
+*)	case "$ans" in
 	"$prefix") ;;
 	*) oldprefix="$prefix";;
 	esac
 	;;
 esac
-prefix="$ans"
-prefixexp="$ansexp"
+
+case "$ans" in
+*?/)	prefix=`echo "$ans" | sed 's/.$//'`
+	;;
+*)	prefix="$ans"
+esac
+
+case "$ansexp" in
+*?/)	prefixexp=`echo "$ansexp" | sed 's/.$//'`
+	;;
+*)	prefixexp="$ansexp"
+esac
 
 : allow them to override the AFS root
 case "$afsroot" in
@@ -7249,7 +7261,7 @@ prefixit='case "$3" in
 		none)
 			eval "tp=\"\$$2\"";
 			case "$tp" in
-			""|" ") eval "$1=\"\$$2\"";;
+			""|" "|none) eval "$1=\"\$$2\"";;
 			*) eval "$1=";;
 			esac;;
 		esac;;
@@ -8103,6 +8115,10 @@ while $test 1 ; do
 	$define|true|[yY]*)
 		dflt='y'
 		;;
+	$undef|false|[nN]*)
+		dflt='n'
+		dflt_dtrace=""
+		;;
 	?*)
 		dflt='y'
 		dflt_dtrace=$usedtrace
@@ -8539,7 +8555,7 @@ EOM
 	if $test "X$sysroot" != X; then
 	    case "$gccversion" in
 		'') ;;
-		*)  dflt="$dflt --sysroot $sysroot" ;;
+		*)  dflt="$dflt --sysroot=$sysroot" ;;
 	    esac
 	fi
 
@@ -8803,7 +8819,7 @@ if "$useshrplib"; then
 	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd|mirbsd|netbsd|openbsd|interix|dragonfly|bitrig)
+	freebsd|minix|mirbsd|netbsd|openbsd|interix|dragonfly|bitrig)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	bsdos|linux|irix*|dec_osf|gnu*|haiku)
@@ -10371,15 +10387,15 @@ esac
 $cat >>try.c <<EOP
 #ifdef TRY_gconvert
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
-char *myname = "gconvert";
+const char *myname = "gconvert";
 #endif
 #ifdef TRY_gcvt
 #define Gconvert(x,n,t,b) gcvt((x),(n),(b))
-char *myname = "gcvt";
+const char *myname = "gcvt";
 #endif
 #ifdef TRY_qgcvt
 #define Gconvert(x,n,t,b) qgcvt((x),(n),(b))
-char *myname = "qgcvt";
+const char *myname = "qgcvt";
 #define DOUBLETYPE long double
 #endif
 #ifdef TRY_sprintf
@@ -10392,7 +10408,7 @@ char *myname = "qgcvt";
 #else
 #define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
 #endif
-char *myname = "sprintf";
+const char *myname = "sprintf";
 #endif
 
 #ifndef DOUBLETYPE
@@ -10411,7 +10427,7 @@ char *myname = "sprintf";
 #endif
 #include <string.h>
 
-int checkit(char *expect, char *got)
+void checkit(const char *expect, char *got)
 {
     if (strcmp(expect, got)) {
 		printf("%s oddity:  Expected %s, got %s\n",
@@ -10560,6 +10576,7 @@ for xxx_convert in $xxx_list; do
 		fi
 	else
 		echo "$xxx_convert NOT found." >&4
+		xxx_convert=''
 	fi
 done
 
@@ -10737,6 +10754,7 @@ hasproto='varname=$1; func=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
 	$define) echo "#include <$2>";;
+	literal) echo "$2" ;;
 	esac ;
     shift 2;
 done > try.c;
@@ -12050,27 +12068,6 @@ case "$d_cmsghdr_s" in
 "$define")      echo "Yes, it does."   ;;
 *)              echo "No, it doesn't." ;;
 esac
-
-: check for const keyword
-echo " "
-echo 'Checking to see if your C compiler knows about "const"...' >&4
-$cat >const.c <<'EOCP'
-typedef struct spug { int drokk; } spug;
-int main()
-{
-	const char *foo;
-	const spug y = { 0 };
-}
-EOCP
-if $cc -c $ccflags const.c >/dev/null 2>&1 ; then
-	val="$define"
-	echo "Yup, it does."
-else
-	val="$undef"
-	echo "Nope, it doesn't."
-fi
-set d_const
-eval $setvar
 
 : see if copysign exists
 set copysign d_copysign
@@ -14095,6 +14092,7 @@ $cat >try.c <<EOCP
 #include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 int main ()
 {
@@ -16153,6 +16151,10 @@ eval $inlibc
 set malloc_good_size d_malloc_good_size
 eval $inlibc
 
+: see if malloc_usable_size exists
+set malloc_usable_size d_malloc_usable_size
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -16174,12 +16176,46 @@ set mbtowc d_mbtowc
 eval $inlibc
 
 : see if memmem exists
-set memmem d_memmem
-eval $inlibc
+: We need both a prototype in string.h and the symbol in libc.
+echo " "
+d_memmem_proto=''
+xx1="#$d_gnulibc HAS_GNULIBC"
+xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
+xx3='#   define _GNU_SOURCE'
+xx4='#endif'
+set d_memmem_proto memmem literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
+eval $hasproto
+case "$d_memmem_proto" in
+    define) # see if memmem exists
+	set memmem d_memmem
+	eval $inlibc
+	;;
+    *)  val=$undef
+	set d_memmem
+	eval $setvar
+	;;
+esac
 
 : see if memrchr exists
-set memrchr d_memrchr
-eval $inlibc
+: We need both a prototype in string.h and the symbol in libc.
+echo " "
+d_memrchr_proto=''
+xx1="#$d_gnulibc HAS_GNULIBC"
+xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
+xx3='#   define _GNU_SOURCE'
+xx4='#endif'
+set d_memrchr_proto memrchr literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
+eval $hasproto
+case "$d_memrchr_proto" in
+    define) # see if memrchr exists
+	set memrchr d_memrchr
+	eval $inlibc
+	;;
+    *)  val=$undef
+	set d_memrchr
+	eval $setvar
+	;;
+esac
 
 : see if mkdir exists
 set mkdir d_mkdir
@@ -17768,13 +17804,187 @@ eval $inlibc
 set setlinebuf d_setlinebuf
 eval $inlibc
 
-: see if setlocale exists
-set setlocale d_setlocale
-eval $inlibc
-
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
+
+: see if this system has wctype.h
+set wctype.h i_wctype
+eval $inhdr
+
+: see if towupper exists
+set towupper d_towupper
+eval $inlibc
+
+: check for setlocale function and behavior
+$cat <<EOM
+
+Checking to see if you have setlocale() and its behavior
+EOM
+$cat >try.c <<EOCP
+#include <stdlib.h>
+#include <string.h>
+#$i_locale I_LOCALE
+#ifdef I_LOCALE
+#  include <locale.h>
+#endif
+#$i_wctype I_WCTYPE
+#ifdef I_WCTYPE
+#  include <wctype.h>
+#endif
+
+int main() {
+    const char * invalid_name = "\a";   /* This is really invalid! */
+    int accepts_any_locale_name = 0;
+    int has_C_UTF8 = 0;
+    unsigned char bad_setlocale = 255;
+
+    /* If LC_CTYPE isn't defined the compilation will fail, and locales will be
+     * disabled.  It's hard to imagine an instance where meaningful locale
+     * handling could be done without LC_CTYPE */
+    const char *  name = setlocale(LC_CTYPE, "C");
+
+    if (name == NULL || strcmp(name, "C") != 0) {
+        exit(bad_setlocale);
+    }
+
+    name = setlocale(LC_CTYPE, invalid_name);
+    if (name != NULL) {
+
+        /* Let it pass if it accepts the name but gives back one of the C
+         * locales */
+        if (strcmp(name, "C") != 0 && strcmp(name, "C.UTF-8") != 0) {
+            accepts_any_locale_name = 1;
+        }
+    }
+
+    name = setlocale(LC_CTYPE, "C.UTF-8");
+    if (name != NULL) {
+        unsigned char y_with_diaeresis = ('A' == 193) ? 0xDF : 0xFF;
+
+#$d_towupper HAS_TOWUPPER
+#ifdef HAS_TOWUPPER
+
+        /* We assume that if the machine doesn't have the C99 towupper, it
+         * doesn't have C.UTF-8, even if we successfully changed locales to
+         * include it.  This seems safer even on platforms that didn't accept
+         * the really invalid name */
+
+        if (towupper(y_with_diaeresis) == 0x178) {
+            has_C_UTF8 = 1;
+        }
+
+#endif
+
+    }
+
+#if 0
+
+    /* Currently unused code to determine if LC_ALL with disparate values uses
+     * category = value pairs or positional, and to determine the separator
+     * between the categories.  We could add code so that if the separator were
+     * > '9', we subtract 10; similarly for 'Z' and 'z', and then just about
+     * every possible ASCII separator would fit in the 5 bits available in the
+     * exit code.  This would not be true in EBCDIC.  And then if LC_ALL is
+     * positional, we probably would want to know the order of the categories.
+     * Using a file between the C program and the shell script would really be
+     * require to do that */
+#ifdef LC_ALL
+
+    unsigned char min_separator = ' ' - 1;
+    unsigned char separator = min_separator;
+    int uses_name_value_pair_names = 0;
+
+    name = setlocale(LC_ALL, "C");
+    if (name == NULL || strcmp(name, "C") != 0) {
+        exit(bad_setlocale);
+    }
+
+    if (has_C_UTF8) {
+        char * pos;
+
+        name = setlocale(LC_CTYPE, "C.UTF-8");
+        if (name == NULL) {
+            exit(bad_setlocale);
+        }
+        name = setlocale(LC_ALL, NULL);
+        if (name == NULL) {
+            exit(bad_setlocale);
+        }
+
+        pos = strstr(name, "LC_CTYPE" "=C.UTF-8");
+        if (pos != NULL) {
+            uses_name_value_pair_names = 1;
+            if (pos == name) {
+                separator = name[sizeof("LC_CTYPE=C.UTF-8") - 1];
+            }
+            else {
+                separator = *(pos - 1);
+            }
+        }
+        else {
+            pos = strstr(name, "C.UTF-8");
+            if (pos == NULL) {
+                /* bad */
+            }
+            else if (pos == name) {
+                separator = name[sizeof("C.UTF-8") - 1];
+            }
+            else {
+                separator = *(pos - 1);
+            }
+        }
+    }
+
+#endif
+#endif
+
+    exit( 0 /* (separator - min_separator) << 3
+        | uses_name_value_pair_names      << 2
+          */
+        | has_C_UTF8                      << 1
+        | accepts_any_locale_name);
+
+}
+EOCP
+set try
+if eval $compile; then
+    echo "Your system has setlocale()..." >&4
+    $run ./try
+    case $? in
+        0) echo "and it seems sane" >&4
+           d_setlocale="$define"
+           d_setlocale_accepts_any_locale_name="$undef"
+           d_has_C_UTF8="false"
+           ;;
+        1) echo "and it seems sane, but accepts any locale name as valid" >&4
+           d_setlocale="$define"
+           d_setlocale_accepts_any_locale_name="$define"
+           d_has_C_UTF8="false"
+           ;;
+        2) echo "and it seems sane" >&4
+           d_setlocale="$define"
+           d_setlocale_accepts_any_locale_name="$undef"
+           d_has_C_UTF8="true"
+           ;;
+        3) echo "and it seems sane, but accepts any locale name as valid" >&4
+           d_setlocale="$define"
+           d_setlocale_accepts_any_locale_name="$define"
+           d_has_C_UTF8="true"
+           ;;
+        *) echo "but it doesn't seem to work, so we won't use it." >&4
+           d_setlocale="$undef"
+           d_setlocale_accepts_any_locale_name="$undef"
+           d_has_C_UTF8="false"
+           ;;
+    esac
+else
+    echo "your system does not have setlocale()" >&4
+    d_setlocale="$undef"
+    d_setlocale_accepts_any_locale_name="$undef"
+    d_has_C_UTF8="false"
+fi
+$rm_try
 
 : see if setlocale_r exists
 set setlocale_r d_setlocale_r
@@ -18788,12 +18998,46 @@ set strftime d_strftime
 eval $inlibc
 
 : see if strlcat exists
-set strlcat d_strlcat
-eval $inlibc
+: We need both a prototype in string.h and the symbol in libc.
+echo " "
+d_strlcat_proto=''
+xx1="#$d_gnulibc HAS_GNULIBC"
+xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
+xx3='#   define _GNU_SOURCE'
+xx4='#endif'
+set d_strlcat_proto strlcat literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
+eval $hasproto
+case "$d_strlcat_proto" in
+    define) # see if strlcat exists
+	set strlcat d_strlcat
+	eval $inlibc
+	;;
+    *)  val=$undef
+	set d_strlcat
+	eval $setvar
+	;;
+esac
 
 : see if strlcpy exists
-set strlcpy d_strlcpy
-eval $inlibc
+: We need both a prototype in string.h and the symbol in libc.
+echo " "
+d_strlcpy_proto=''
+xx1="#$d_gnulibc HAS_GNULIBC"
+xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
+xx3='#   define _GNU_SOURCE'
+xx4='#endif'
+set d_strlcpy_proto strlcpy literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
+eval $hasproto
+case "$d_strlcpy_proto" in
+    define) # see if strlcpy exists
+	set strlcpy d_strlcpy
+	eval $inlibc
+	;;
+    *)  val=$undef
+	set d_strlcpy
+	eval $setvar
+	;;
+esac
 
 : see if strnlen exists
 set strnlen d_strnlen
@@ -19297,6 +19541,10 @@ case "$d_tmpnam_r" in
 	;;
 esac
 
+: see if towlower exists
+set towlower d_towlower
+eval $inlibc
+
 : see if trunc exists
 set trunc d_trunc
 eval $inlibc
@@ -19457,108 +19705,16 @@ EOM
 	;;
 esac
 
-: Checking 32bit alignedness
 $cat <<EOM
 
 Checking to see whether you can access character data unalignedly...
+
+We assume only aligned access is permitted.
 EOM
+: Checking 32bit alignedness
+: We no longer check and assume it is required.
 case "$d_u32align" in
-'')   $cat >try.c <<EOCP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#define U32 $u32type
-#define BYTEORDER 0x$byteorder
-#define U8 $u8type
-#include <signal.h>
-#ifdef SIGBUS
-$signal_t bletch(int s) { exit(4); }
-#endif
-int main() {
-#if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
-    volatile U8 buf[8];
-    volatile U32 *up;
-    int i;
-
-    if (sizeof(U32) != 4) {
-	printf("sizeof(U32) is not 4, but %d\n", sizeof(U32));
-	exit(1);
-    }
-
-    fflush(stdout);
-
-#ifdef SIGBUS
-    signal(SIGBUS, bletch);
-#endif
-
-    buf[0] = 0;
-    buf[1] = 0;
-    buf[2] = 0;
-    buf[3] = 1;
-    buf[4] = 0;
-    buf[5] = 0;
-    buf[6] = 0;
-    buf[7] = 1;
-
-    for (i = 0; i < 4; i++) {
-	up = (U32*)(buf + i);
-	if (! ((*up == 1 << (8*i)) ||   /* big-endian */
-	       (*up == 1 << (8*(3-i)))  /* little-endian */
-	      )
-	   )
-	{
-	    printf("read failed (%x)\n", *up);
-	    exit(2);
-	}
-    }
-
-    /* write test */
-    for (i = 0; i < 4; i++) {
-	up = (U32*)(buf + i);
-	*up = 0xBeef;
-	if (*up != 0xBeef) {
-	    printf("write failed (%x)\n", *up);
-	    exit(3);
-	}
-    }
-
-    exit(0);
-#else
-    printf("1\n");
-    exit(1);
-#endif
-    return 0;
-}
-EOCP
-set try
-if eval $compile_ok; then
-	echo "(Testing for character data alignment may crash the test.  That's okay.)" >&4
-	$run ./try 2>&1 >/dev/null
-	case "$?" in
-	0)	cat >&4 <<EOM
-You can access character data pretty unalignedly.
-EOM
-		d_u32align="$undef"
-		;;
-	*)	cat >&4 <<EOM
-It seems that you must access character data in an aligned manner.
-EOM
-		d_u32align="$define"
-		;;
-	esac
-else
-	rp='Can you access character data at unaligned addresses?'
-	dflt='n'
-	. ./myread
-	case "$ans" in
-	[yY]*)	d_u32align="$undef"  ;;
-	*)	d_u32align="$define" ;;
-	esac
-fi
-$rm_try
-;;
+'') d_u32align="$define" ;;
 esac
 
 : see if ualarm exists
@@ -19853,10 +20009,6 @@ $define)
 	echo " "
 	echo "Checking Berkeley DB version ..." >&4
 	$cat >try.c <<EOCP
-#$d_const HASCONST
-#ifndef HASCONST
-#define const
-#endif
 #include <sys/types.h>
 #include <stdio.h>
 #$i_stdlib I_STDLIB
@@ -19947,10 +20099,6 @@ define)
 	echo " "
 	echo "Checking return type needed for hash for Berkeley DB ..." >&4
 	$cat >try.c <<EOCP
-#$d_const HASCONST
-#ifndef HASCONST
-#define const
-#endif
 #include <sys/types.h>
 #include <db.h>
 
@@ -19991,10 +20139,6 @@ define)
 	echo " "
 	echo "Checking return type needed for prefix for Berkeley DB ..." >&4
 	cat >try.c <<EOCP
-#$d_const HASCONST
-#ifndef HASCONST
-#define const
-#endif
 #include <sys/types.h>
 #include <db.h>
 
@@ -22768,7 +22912,7 @@ M68000 m68k m88100 m88k M88KBCS_TARGET MACH machine MachTen
 MATH_HAS_NO_SIDE_EFFECTS mc300 mc500 mc68000 mc68010 mc68020
 mc68030 mc68040 mc68060 mc68k mc68k32 mc700 mc88000 mc88100
 merlin mert MiNT mips MIPSEB MIPSEL MIPS_FPSET MIPS_ISA MIPS_SIM
-MIPS_SZINT MIPS_SZLONG MIPS_SZPTR MODERN_C motorola mpeix MSDOS
+MIPS_SZINT MIPS_SZLONG MIPS_SZPTR MODERN_C motorola MSDOS
 MTXINU MULTIMAX MVS mvs M_AMD64 M_ARM M_ARMT M_COFF M_I186 M_I286
 M_I386 M_I8086 M_I86 M_I86SM M_IA64 M_IX86 M_PPC M_SYS3 M_SYS5
 M_SYSIII M_SYSV M_UNIX M_X86 M_XENIX
@@ -23840,7 +23984,6 @@ d_class='$d_class'
 d_clearenv='$d_clearenv'
 d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
-d_const='$d_const'
 d_copysign='$d_copysign'
 d_copysignl='$d_copysignl'
 d_cplusplus='$d_cplusplus'
@@ -24003,6 +24146,7 @@ d_gmtime64='$d_gmtime64'
 d_gmtime_r='$d_gmtime_r'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
+d_has_C_UTF8='$d_has_C_UTF8'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_hypot='$d_hypot'
@@ -24069,6 +24213,7 @@ d_lstat='$d_lstat'
 d_madvise='$d_madvise'
 d_malloc_good_size='$d_malloc_good_size'
 d_malloc_size='$d_malloc_size'
+d_malloc_usable_size='$d_malloc_usable_size'
 d_mblen='$d_mblen'
 d_mbrlen='$d_mbrlen'
 d_mbrtowc='$d_mbrtowc'
@@ -24190,6 +24335,7 @@ d_sethostent_r='$d_sethostent_r'
 d_setitimer='$d_setitimer'
 d_setlinebuf='$d_setlinebuf'
 d_setlocale='$d_setlocale'
+d_setlocale_accepts_any_locale_name='$d_setlocale_accepts_any_locale_name'
 d_setlocale_r='$d_setlocale_r'
 d_setnent='$d_setnent'
 d_setnetent_r='$d_setnetent_r'
@@ -24297,6 +24443,8 @@ d_times='$d_times'
 d_tm_tm_gmtoff='$d_tm_tm_gmtoff'
 d_tm_tm_zone='$d_tm_tm_zone'
 d_tmpnam_r='$d_tmpnam_r'
+d_towlower='$d_towlower'
+d_towupper='$d_towupper'
 d_trunc='$d_trunc'
 d_truncate='$d_truncate'
 d_truncl='$d_truncl'
@@ -24516,6 +24664,7 @@ i_ustat='$i_ustat'
 i_utime='$i_utime'
 i_vfork='$i_vfork'
 i_wchar='$i_wchar'
+i_wctype='$i_wctype'
 i_xlocale='$i_xlocale'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'

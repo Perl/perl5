@@ -759,6 +759,7 @@ static SV *hintkey_swaplabel_sv, *hintkey_labelconst_sv;
 static SV *hintkey_arrayfullexpr_sv, *hintkey_arraylistexpr_sv;
 static SV *hintkey_arraytermexpr_sv, *hintkey_arrayarithexpr_sv;
 static SV *hintkey_arrayexprflags_sv;
+static SV *hintkey_subsignature_sv;
 static SV *hintkey_DEFSV_sv;
 static SV *hintkey_with_vars_sv;
 static SV *hintkey_join_with_space_sv;
@@ -1051,6 +1052,65 @@ static OP *THX_parse_keyword_arrayexprflags(pTHX)
     return o ? newANONLIST(o) : newANONHASH(newOP(OP_STUB, 0));
 }
 
+#define parse_keyword_subsignature() THX_parse_keyword_subsignature(aTHX)
+static OP *THX_parse_keyword_subsignature(pTHX)
+{
+    OP *retop = NULL, *listop, *sigop = parse_subsignature(0);
+    OP *kid;
+    int seen_nextstate = 0;
+
+    /* We can't yield the optree as is to the caller because it won't be
+     * executable outside of a called sub. We'll have to convert it into
+     * something safe for them to invoke.
+     * sigop should be an OP_NULL above a OP_LINESEQ containing
+     * OP_NEXTSTATE-separated OP_ARGCHECK and OP_ARGELEMs
+     */
+    if(sigop->op_type != OP_NULL)
+	croak("Expected parse_subsignature() to yield an OP_NULL");
+    
+    if(!(sigop->op_flags & OPf_KIDS))
+	croak("Expected parse_subsignature() to yield an OP_NULL with kids");
+    listop = cUNOPx(sigop)->op_first;
+
+    if(listop->op_type != OP_LINESEQ)
+	croak("Expected parse_subsignature() to yield an OP_LINESEQ");
+
+    for(kid = cLISTOPx(listop)->op_first; kid; kid = OpSIBLING(kid)) {
+	switch(kid->op_type) {
+	    case OP_NEXTSTATE:
+		/* Only emit the first one otherwise they get boring */
+		if(seen_nextstate)
+		    break;
+		seen_nextstate++;
+		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
+		    /* newSVpvf("nextstate:%s:%d", CopFILE(cCOPx(kid)), cCOPx(kid)->cop_line))); */
+		    newSVpvf("nextstate:%d", cCOPx(kid)->cop_line)));
+		break;
+	    case OP_ARGCHECK: {
+		UNOP_AUX_item *aux = cUNOP_AUXx(kid)->op_aux;
+		char slurpy = (char)(aux[2].iv);
+		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
+		    newSVpvf("argcheck:%d:%d:%c", (int)(aux[0].iv), (int)(aux[1].iv), slurpy ? slurpy : '-')));
+		break;
+	    }
+	    case OP_ARGELEM: {
+		PADOFFSET padix = kid->op_targ;
+		PADNAMELIST *names = PadlistNAMES(CvPADLIST(find_runcv(0)));
+		char *namepv = PadnamePV(padnamelist_fetch(names, padix));
+		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
+		    newSVpvf(kid->op_flags & OPf_KIDS ? "argelem:%s:d" : "argelem:%s", namepv)));
+		break;
+	    }
+	    default:
+		fprintf(stderr, "TODO: examine kid %p (optype=%s)\n", kid, PL_op_name[kid->op_type]);
+		break;
+	}
+    }
+
+    op_free(sigop);
+    return newANONLIST(retop);
+}
+
 #define parse_keyword_DEFSV() THX_parse_keyword_DEFSV(aTHX)
 static OP *THX_parse_keyword_DEFSV(pTHX)
 {
@@ -1246,6 +1306,10 @@ static int my_keyword_plugin(pTHX_
 		    keyword_active(hintkey_join_with_space_sv)) {
 	*op_ptr = parse_join_with_space();
 	return KEYWORD_PLUGIN_EXPR;
+    } else if (memEQs(keyword_ptr, keyword_len, "subsignature") &&
+		    keyword_active(hintkey_subsignature_sv)) {
+	*op_ptr = parse_keyword_subsignature();
+	return KEYWORD_PLUGIN_EXPR;
     } else {
         assert(next_keyword_plugin != my_keyword_plugin);
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
@@ -1339,7 +1403,7 @@ my_ck_rv2cv(pTHX_ OP *o)
     {
 	SvGROW(ref, SvCUR(ref)+2);
 	*SvEND(ref) = '_';
-	SvCUR(ref)++;
+	SvCUR(ref)++; /* Not _set, so we don't accidentally break non-PERL_CORE */
 	*SvEND(ref) = '\0';
     }
     return old_ck_rv2cv(aTHX_ o);
@@ -3995,6 +4059,7 @@ BOOT:
     hintkey_arraytermexpr_sv = newSVpvs_share("XS::APItest/arraytermexpr");
     hintkey_arrayarithexpr_sv = newSVpvs_share("XS::APItest/arrayarithexpr");
     hintkey_arrayexprflags_sv = newSVpvs_share("XS::APItest/arrayexprflags");
+    hintkey_subsignature_sv = newSVpvs_share("XS::APItest/subsignature");
     hintkey_DEFSV_sv = newSVpvs_share("XS::APItest/DEFSV");
     hintkey_with_vars_sv = newSVpvs_share("XS::APItest/with_vars");
     hintkey_join_with_space_sv = newSVpvs_share("XS::APItest/join_with_space");
@@ -4161,9 +4226,23 @@ OUTPUT:
     RETVAL
 
 char *
+SvPVbyte_nomg(SV *sv)
+CODE:
+    RETVAL = SvPVbyte_nomg(sv, PL_na);
+OUTPUT:
+    RETVAL
+
+char *
 SvPVutf8(SV *sv)
 CODE:
     RETVAL = SvPVutf8_nolen(sv);
+OUTPUT:
+    RETVAL
+
+char *
+SvPVutf8_nomg(SV *sv)
+CODE:
+    RETVAL = SvPVutf8_nomg(sv, PL_na);
 OUTPUT:
     RETVAL
 
@@ -4197,7 +4276,6 @@ CODE:
 	/* The slab allocator does not like CvROOT being set. */
 	CvROOT(PL_compcv) = (OP *)1;
 	o = newFOROP(0, 0, newOP(OP_PUSHMARK, 0), 0, 0);
-#ifdef PERL_OP_PARENT
 	if (cLOOPx(cUNOPo->op_first)->op_last->op_sibparent
 		!= cUNOPo->op_first)
 	{
@@ -4205,7 +4283,6 @@ CODE:
 	    RETVAL = FALSE;
 	}
 	else
-#endif
 	    /* If we do not crash before returning, the test passes. */
 	    RETVAL = TRUE;
 	op_free(o);
@@ -4597,7 +4674,7 @@ test_isBLANK_utf8(U8 * p, int type)
             RETVAL = isBLANK_utf8_safe(p, e);
         }
         else {
-            RETVAL = isBLANK_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4612,7 +4689,7 @@ test_isBLANK_LC_utf8(U8 * p, int type)
             RETVAL = isBLANK_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isBLANK_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4641,7 +4718,7 @@ test_isVERTWS_utf8(U8 * p, int type)
             RETVAL = isVERTWS_utf8_safe(p, e);
         }
         else {
-            RETVAL = isVERTWS_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4705,7 +4782,7 @@ test_isUPPER_utf8(U8 * p, int type)
             RETVAL = isUPPER_utf8_safe(p, e);
         }
         else {
-            RETVAL = isUPPER_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4720,7 +4797,7 @@ test_isUPPER_LC_utf8(U8 * p, int type)
             RETVAL = isUPPER_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isUPPER_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4784,7 +4861,7 @@ test_isLOWER_utf8(U8 * p, int type)
             RETVAL = isLOWER_utf8_safe(p, e);
         }
         else {
-            RETVAL = isLOWER_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4799,7 +4876,7 @@ test_isLOWER_LC_utf8(U8 * p, int type)
             RETVAL = isLOWER_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isLOWER_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4863,7 +4940,7 @@ test_isALPHA_utf8(U8 * p, int type)
             RETVAL = isALPHA_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHA_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4878,7 +4955,7 @@ test_isALPHA_LC_utf8(U8 * p, int type)
             RETVAL = isALPHA_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHA_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4942,7 +5019,7 @@ test_isWORDCHAR_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4957,7 +5034,7 @@ test_isWORDCHAR_LC_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5021,7 +5098,7 @@ test_isALPHANUMERIC_utf8(U8 * p, int type)
             RETVAL = isALPHANUMERIC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHANUMERIC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5036,7 +5113,7 @@ test_isALPHANUMERIC_LC_utf8(U8 * p, int type)
             RETVAL = isALPHANUMERIC_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHANUMERIC_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5079,7 +5156,7 @@ test_isALNUM_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5094,7 +5171,7 @@ test_isALNUM_LC_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5130,7 +5207,7 @@ test_isDIGIT_utf8(U8 * p, int type)
             RETVAL = isDIGIT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isDIGIT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5145,7 +5222,7 @@ test_isDIGIT_LC_utf8(U8 * p, int type)
             RETVAL = isDIGIT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isDIGIT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5258,7 +5335,7 @@ test_isIDFIRST_utf8(U8 * p, int type)
             RETVAL = isIDFIRST_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDFIRST_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5273,7 +5350,7 @@ test_isIDFIRST_LC_utf8(U8 * p, int type)
             RETVAL = isIDFIRST_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDFIRST_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5337,7 +5414,7 @@ test_isIDCONT_utf8(U8 * p, int type)
             RETVAL = isIDCONT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDCONT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5352,7 +5429,7 @@ test_isIDCONT_LC_utf8(U8 * p, int type)
             RETVAL = isIDCONT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDCONT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5416,7 +5493,7 @@ test_isSPACE_utf8(U8 * p, int type)
             RETVAL = isSPACE_utf8_safe(p, e);
         }
         else {
-            RETVAL = isSPACE_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5431,7 +5508,7 @@ test_isSPACE_LC_utf8(U8 * p, int type)
             RETVAL = isSPACE_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isSPACE_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5498,7 +5575,7 @@ test_isASCII_utf8(U8 * p, int type)
             RETVAL = isASCII_utf8_safe(p, e);
         }
         else {
-            RETVAL = isASCII_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5516,7 +5593,7 @@ test_isASCII_LC_utf8(U8 * p, int type)
             RETVAL = isASCII_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isASCII_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5580,7 +5657,7 @@ test_isCNTRL_utf8(U8 * p, int type)
             RETVAL = isCNTRL_utf8_safe(p, e);
         }
         else {
-            RETVAL = isCNTRL_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5595,7 +5672,7 @@ test_isCNTRL_LC_utf8(U8 * p, int type)
             RETVAL = isCNTRL_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isCNTRL_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5659,7 +5736,7 @@ test_isPRINT_utf8(U8 * p, int type)
             RETVAL = isPRINT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPRINT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5674,7 +5751,7 @@ test_isPRINT_LC_utf8(U8 * p, int type)
             RETVAL = isPRINT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPRINT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5738,7 +5815,7 @@ test_isGRAPH_utf8(U8 * p, int type)
             RETVAL = isGRAPH_utf8_safe(p, e);
         }
         else {
-            RETVAL = isGRAPH_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5753,7 +5830,7 @@ test_isGRAPH_LC_utf8(U8 * p, int type)
             RETVAL = isGRAPH_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isGRAPH_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5817,7 +5894,7 @@ test_isPUNCT_utf8(U8 * p, int type)
             RETVAL = isPUNCT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPUNCT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5832,7 +5909,7 @@ test_isPUNCT_LC_utf8(U8 * p, int type)
             RETVAL = isPUNCT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPUNCT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5896,7 +5973,7 @@ test_isXDIGIT_utf8(U8 * p, int type)
             RETVAL = isXDIGIT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isXDIGIT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5911,7 +5988,7 @@ test_isXDIGIT_LC_utf8(U8 * p, int type)
             RETVAL = isXDIGIT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isXDIGIT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5975,7 +6052,7 @@ test_isPSXSPC_utf8(U8 * p, int type)
             RETVAL = isPSXSPC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPSXSPC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5990,7 +6067,7 @@ test_isPSXSPC_LC_utf8(U8 * p, int type)
             RETVAL = isPSXSPC_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPSXSPC_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -6430,23 +6507,18 @@ test_toLOWER_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toLOWER_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toLOWER_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_lower(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 
@@ -6520,23 +6592,18 @@ test_toFOLD_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toFOLD_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toFOLD_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_fold(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 
@@ -6610,23 +6677,18 @@ test_toUPPER_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toUPPER_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toUPPER_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_upper(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 
@@ -6693,23 +6755,18 @@ test_toTITLE_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toTITLE_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toTITLE_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_title(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 

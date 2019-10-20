@@ -104,6 +104,12 @@
 #  define strEQc(s,c) memEQ(s, ("" c ""), sizeof(c))
 #endif
 
+#if defined(HAS_FLOCK) || defined(FCNTL_CAN_LOCK) && defined(HAS_LOCKF)
+#define CAN_FLOCK &PL_sv_yes
+#else
+#define CAN_FLOCK &PL_sv_no
+#endif
+
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -3662,7 +3668,7 @@ static int store_hook(
     SV *ref;
     AV *av;
     SV **ary;
-    int count;			/* really len3 + 1 */
+    IV count;			/* really len3 + 1 */
     unsigned char flags;
     char *pv;
     int i;
@@ -3752,7 +3758,7 @@ static int store_hook(
     SvREFCNT_dec(ref);			/* Reclaim temporary reference */
 
     count = AvFILLp(av) + 1;
-    TRACEME(("store_hook, array holds %d items", count));
+    TRACEME(("store_hook, array holds %" IVdf " items", count));
 
     /*
      * If they return an empty list, it means they wish to ignore the
@@ -3986,7 +3992,7 @@ static int store_hook(
      */
 
     TRACEME(("SX_HOOK (recursed=%d) flags=0x%x "
-             "class=%" IVdf " len=%" IVdf " len2=%" IVdf " len3=%d",
+             "class=%" IVdf " len=%" IVdf " len2=%" IVdf " len3=%" IVdf,
              recursed, flags, (IV)classnum, (IV)len, (IV)len2, count-1));
 
     /* SX_HOOK <flags> [<extra>] */
@@ -6808,8 +6814,7 @@ static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname) {
     SV *sv;
     dSP;
     I32 count;
-
-    PERL_UNUSED_ARG(cname);
+    HV *stash;
 
     ENTER;
     SAVETMPS;
@@ -6857,6 +6862,8 @@ static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname) {
 
     sv = SvRV(re_ref);
     SvREFCNT_inc(sv);
+    stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+    SEEN_NN(sv, stash, 0);
     
     FREETMPS;
     LEAVE;
@@ -7769,6 +7776,10 @@ storable_free(pTHX_ SV *sv, MAGIC* mg) {
     stcxt_t *cxt = (stcxt_t *)SvPVX(sv);
 
     PERL_UNUSED_ARG(mg);
+#ifdef USE_PTR_TABLE
+    if (cxt->pseen)
+        ptr_table_free(cxt->pseen);
+#endif
     if (kbuf)
         Safefree(kbuf);
     if (!cxt->membuf_ro && mbase)
@@ -7788,6 +7799,8 @@ BOOT:
     newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
     newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
     newCONSTSUB(stash, "BIN_WRITE_MINOR", newSViv(STORABLE_BIN_WRITE_MINOR));
+
+    newCONSTSUB(stash, "CAN_FLOCK", CAN_FLOCK);
 
     init_perinterp(aTHX);
     gv_fetchpv("Storable::drop_utf8",   GV_ADDMULTI, SVt_PV);

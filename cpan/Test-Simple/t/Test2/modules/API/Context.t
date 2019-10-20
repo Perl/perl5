@@ -447,4 +447,60 @@ sub {
     is($?,     33,    "Destroy does not restore \$?");
 }->();
 
+sub {
+    require Test2::EventFacet::Info::Table;
+
+    my $events = intercept {
+        my $ctx = context();
+
+        $ctx->fail('foo', 'bar', Test2::EventFacet::Info::Table->new(rows => [['a', 'b']]));
+        $ctx->fail_and_release('foo', 'bar', Test2::EventFacet::Info::Table->new(rows => [['a', 'b']], as_string => 'a, b'));
+    };
+
+    is(@$events, 2, "got 2 events");
+
+    is($events->[0]->{info}->[0]->{details}, 'bar', "got first diag");
+    is($events->[0]->{info}->[1]->{details}, '<TABLE NOT DISPLAYED>', "second diag has default details");
+    is_deeply(
+        $events->[0]->{info}->[1]->{table},
+        {rows => [['a', 'b']]},
+        "Got the table rows"
+    );
+
+    is($events->[1]->{info}->[0]->{details}, 'bar', "got first diag");
+    is($events->[1]->{info}->[1]->{details}, 'a, b', "second diag has custom details");
+    is_deeply(
+        $events->[1]->{info}->[1]->{table},
+        {rows => [['a', 'b']]},
+        "Got the table rows"
+    );
+
+}->();
+
+sub ctx_destroy_test {
+    my (undef, undef, $line1) = caller();
+    my (@warn, $line2);
+    local $SIG{__WARN__} = sub { push @warn => $_[0] };
+
+    { my $ctx = context(); $ctx = undef } $line2 = __LINE__;
+
+    use Data::Dumper;
+#    print Dumper(@warn);
+
+    like($warn[0], qr/context appears to have been destroyed without first calling release/, "Is normal context warning");
+    like($warn[0], qr{\QContext destroyed at ${ \__FILE__ } line $line2\E}, "Reported context destruction trace");
+
+    my $created = <<"    EOT";
+Here are the context creation details, just in case a tool forgot to call
+release():
+  File: ${ \__FILE__ }
+  Line: $line1
+  Tool: main::ctx_destroy_test
+    EOT
+
+    like($warn[0], qr{\Q$created\E}, "Reported context creation details");
+};
+
+ctx_destroy_test();
+
 done_testing;

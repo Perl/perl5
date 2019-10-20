@@ -1,4 +1,3 @@
-__Storable__.pm
 ChangeLog
 hints/gnukfreebsd.pl
 hints/gnuknetbsd.pl
@@ -11,7 +10,7 @@ META.yml			Module meta-data (added by MakeMaker)
 ppport.h
 README
 stacksize
-Storable.pm.PL
+Storable.pm
 Storable.xs
 t/attach.t
 t/attach_errors.t
@@ -23,7 +22,6 @@ t/code.t
 t/compat01.t
 t/compat06.t
 t/croak.t
-t/CVE-2015-1592.inc
 t/CVE-2015-1592.t
 t/dclone.t
 t/destroy.t

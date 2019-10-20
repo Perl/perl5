@@ -21,7 +21,7 @@ For more information on these options, you can run C<perldoc perlrun>.
 
 The F<perldoc> program gives you access to all the documentation that comes
 with Perl.  You can get more documentation, tutorials and community support
-online at L<http://www.perl.org/>.
+online at L<https://www.perl.org/>.
 
 If you're new to Perl, you should start by running C<perldoc perlintro>,
 which is a general intro for beginners and provides some background to help
@@ -181,11 +181,16 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
-    perl5293delta	Perl changes in version 5.29.3
-    perl5292delta	Perl changes in version 5.29.2
-    perl5291delta	Perl changes in version 5.29.1
-    perl5290delta	Perl changes in version 5.29.0
+    perl5314delta	Perl changes in version 5.31.4
+    perl5313delta	Perl changes in version 5.31.3
+    perl5312delta	Perl changes in version 5.31.2
+    perl5311delta	Perl changes in version 5.31.1
+    perl5310delta	Perl changes in version 5.31.0
+    perl5300delta	Perl changes in version 5.30.0
+    perl5282delta	Perl changes in version 5.28.2
+    perl5281delta	Perl changes in version 5.28.1
     perl5280delta	Perl changes in version 5.28.0
+    perl5263delta	Perl changes in version 5.26.3
     perl5262delta	Perl changes in version 5.26.2
     perl5261delta	Perl changes in version 5.26.1
     perl5260delta	Perl changes in version 5.26.0
@@ -259,7 +264,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlamiga		Perl notes for AmigaOS
     perlandroid		Perl notes for Android
     perlbs2000		Perl notes for POSIX-BC BS2000
-    perlce		Perl notes for WinCE
     perlcygwin		Perl notes for Cygwin
     perldos		Perl notes for DOS
     perlfreebsd 	Perl notes for FreeBSD
@@ -371,10 +375,10 @@ see L<perlvar> for more information.
 
 =head1 SEE ALSO
 
- http://www.perl.org/       the Perl homepage
- http://www.perl.com/       Perl articles (O'Reilly)
- http://www.cpan.org/       the Comprehensive Perl Archive
- http://www.pm.org/         the Perl Mongers
+ https://www.perl.org/       the Perl homepage
+ https://www.perl.com/       Perl articles
+ https://www.cpan.org/       the Comprehensive Perl Archive
+ https://www.pm.org/         the Perl Mongers
 
 =head1 DIAGNOSTICS
 

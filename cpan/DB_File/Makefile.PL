@@ -48,7 +48,7 @@ my $CORE = $ENV{PERL_CORE} ? '' : '-D_NOT_CORE';
 WriteMakefile(
 	NAME 		=> 'DB_File',
 	LIBS 		=> ["-L${LIB_DIR} $LIBS"],
-	INC		=> "-I$INC_DIR",
+	INC		    => "-I$INC_DIR",
     VERSION_FROM	=> 'DB_File.pm',
 	XS_VERSION      => eval MM->parse_version('DB_File.pm'),
 	XSPROTOARG	=> '-noprototypes',
@@ -74,8 +74,34 @@ WriteMakefile(
                              'version$(OBJ_EXT)' => 'version.c'},
 	'clean'		=> { FILES => 'constants.h constants.xs DB_File.pm.bak t/db-btree.t.bak t/db-hash.t.bak t/db-recno.t.bak t/pod.t.bak' },
 	'macro'		=> { my_files => "@files" },
-        'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz',
-			     DIST_DEFAULT => 'MyDoubleCheck tardist'},    
+    'dist'      => { COMPRESS => 'gzip', SUFFIX => 'gz',
+			         DIST_DEFAULT => 'MyDoubleCheck tardist'},
+
+     ( eval { ExtUtils::MakeMaker->VERSION(6.46) }  
+        ? ( META_MERGE  => {
+    
+                "meta-spec" => { version => 2 },
+                
+                resources   => {
+                
+                    bugtracker  => {
+                        web     => 'https://github.com/pmqs/DB_File/issues'
+                    },
+
+                    homepage    => 'https://github.com/pmqs/DB_File',
+
+                    repository  => {
+                        type    => 'git',
+                        url     => 'git://github.com/pmqs/DB_File.git',
+                        web     => 'https://github.com/pmqs/DB_File',
+                    },        
+                },
+            } 
+            ) 
+        : ()
+    ),
+
+
 	);
 
 

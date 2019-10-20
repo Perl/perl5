@@ -14,10 +14,13 @@ hv_placeholders_set            # U
 hv_riter_p                     # U
 hv_riter_set                   # U
 is_utf8_string_loclen          # U
+MULTICALL                      # E
 newGIVENOP                     # U
 newSVhek                       # U
-newWHENOP                      # U
-pad_compname_type              # U
+PERL_MAGIC_arylen_p            # E
+PERL_MAGIC_rhash               # E
+PERL_MAGIC_symtab              # E
+POP_MULTICALL                  # E
 savepvs                        # U
 sortsv_flags                   # U
 vverify                        # U

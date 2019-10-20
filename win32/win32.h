@@ -85,7 +85,7 @@
 
 /* now even GCC supports __declspec() */
 /* miniperl has no reason to export anything */
-#if defined(PERL_IS_MINIPERL) && !defined(UNDER_CE)
+#if defined(PERL_IS_MINIPERL)
 #  define DllExport
 #else
 #  if defined(PERLDLL)
@@ -265,17 +265,12 @@ struct utsname {
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
 
-#ifndef UNDER_CE
 typedef long		uid_t;
 typedef long		gid_t;
 typedef unsigned short	mode_t;
-#endif
 
 #if _MSC_VER < 1800
 #define isnan		_isnan	/* Defined already in VC++ 12.0 */
-#endif
-#ifdef UNDER_CE /* revisit what function this becomes celib vs corelibc, prv warning here*/
-#  undef snprintf
 #endif
 #define snprintf	_snprintf
 #define vsnprintf	_vsnprintf
@@ -285,8 +280,7 @@ typedef unsigned short	mode_t;
 #  pragma intrinsic(_rotl64,_rotr64)
 #endif
 
-#pragma warning(push)
-#pragma warning(disable:4756;disable:4056)
+MSVC_DIAG_IGNORE(4756 4056)
 PERL_STATIC_INLINE
 double S_Infinity() {
     /* this is a real C literal which can get further constant folded
@@ -295,7 +289,8 @@ double S_Infinity() {
        folding INF is creating -INF */
     return (DBL_MAX+DBL_MAX);
 }
-#pragma warning(pop)
+MSVC_DIAG_RESTORE
+
 #define NV_INF S_Infinity()
 
 /* selectany allows duplicate and unused data symbols to be removed by
@@ -735,16 +730,13 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 DllExport void *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()
 
-#ifdef UNDER_CE
-#define Win_GetModuleHandle   XCEGetModuleHandleA
-#define Win_GetProcAddress    XCEGetProcAddressA
-#define Win_GetModuleFileName XCEGetModuleFileNameA
-#define Win_CreateSemaphore   CreateSemaphoreW
-#else
 #define Win_GetModuleHandle   GetModuleHandle
 #define Win_GetProcAddress    GetProcAddress
 #define Win_GetModuleFileName GetModuleFileName
 #define Win_CreateSemaphore   CreateSemaphore
+
+#if defined(PERL_CORE) && !defined(O_ACCMODE)
+#  define O_ACCMODE (O_RDWR | O_WRONLY | O_RDONLY)
 #endif
 
 #endif /* _INC_WIN32_PERL5 */

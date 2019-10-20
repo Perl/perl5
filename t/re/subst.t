@@ -11,7 +11,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-plan(tests => 276);
+plan(tests => 278);
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1174,5 +1174,12 @@ __EOF__
     is $lines, 4, "RT #131930";
 }
 
+{   # [perl #133899], would panic
 
+    fresh_perl_is('my $a = "ha"; $a =~ s!|0?h\x{300}(?{})!!gi', "", {},
+                  "[perl #133899] s!|0?h\\x{300}(?{})!!gi panics");
+}
 
+{
+    fresh_perl_is("s//00000000000format            \0          '0000000\\x{800}/;eval", "", {}, "RT #133882");
+}

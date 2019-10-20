@@ -1,4 +1,4 @@
-package ExtUtils::Manifest; # git description: 1.70-20-gd0a8273
+package ExtUtils::Manifest; # git description: 1.71-18-g17b7919
 
 require Exporter;
 use Config;
@@ -10,7 +10,7 @@ use Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.71';
+our $VERSION = '1.72';
 our @ISA = ('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -65,7 +65,7 @@ ExtUtils::Manifest - Utilities to write and check a MANIFEST file
 
 =head1 VERSION
 
-version 1.71
+version 1.72
 
 =head1 SYNOPSIS
 
@@ -694,7 +694,7 @@ sub maniadd {
     _fix_manifest($MANIFEST);
 
     my $manifest = maniread();
-    my @needed = grep { !exists $manifest->{$_} } keys %$additions;
+    my @needed = grep !exists $manifest->{$_}, keys %$additions;
     return 1 unless @needed;
 
     open(MANIFEST, ">>$MANIFEST") or

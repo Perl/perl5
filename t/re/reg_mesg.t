@@ -122,11 +122,13 @@ my $tab_hex = sprintf "%02X", ord("\t");
 #
 # The first set are those that should be fatal errors.
 
+my $bug133423 = "(?[(?^:(?[\\\x00]))\\]\x00|2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670";
+
 my @death =
 (
  '/[[=foo=]]/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/[[=foo=]{#}]/',
 
- '/(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/(?<= .*)/',
+ '/(?<= .*)/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= .*)/',
 
  '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= x{1000})/',
 
@@ -236,10 +238,10 @@ my @death =
  '/(?[ \0004 ])/' => 'Need exactly 3 octal digits {#} m/(?[ \0004 {#}])/',
  '/(?[ \05 ])/' => 'Need exactly 3 octal digits {#} m/(?[ \05 {#}])/',
  '/(?[ \o{1038} ])/' => 'Non-octal character {#} m/(?[ \o{1038{#}} ])/',
- '/(?[ \o{} ])/' => 'Number with no digits {#} m/(?[ \o{}{#} ])/',
+ '/(?[ \o{} ])/' => 'Empty \o{} {#} m/(?[ \o{}{#} ])/',
  '/(?[ \x{defg} ])/' => 'Non-hex character {#} m/(?[ \x{defg{#}} ])/',
  '/(?[ \xabcdef ])/' => 'Use \\x{...} for more than two hex characters {#} m/(?[ \xabc{#}def ])/',
- '/(?[ \x{} ])/' => 'Number with no digits {#} m/(?[ \x{}{#} ])/',
+ '/(?[ \x{} ])/' => 'Empty \x{} {#} m/(?[ \x{}{#} ])/',
  '/(?[ \cK + ) ])/' => 'Unexpected \')\' {#} m/(?[ \cK + ){#} ])/',
  '/(?[ \cK + ])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ \cK + {#}])/',
  '/(?[ ( ) ])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ ( ){#} ])/',
@@ -258,15 +260,15 @@ my @death =
  'm/(?[[\w-x]])/' => 'False [] range "\w-" {#} m/(?[[\w-{#}x]])/',
  'm/(?[[a-\pM]])/' => 'False [] range "a-\pM" {#} m/(?[[a-\pM{#}]])/',
  'm/(?[[\pM-x]])/' => 'False [] range "\pM-" {#} m/(?[[\pM-{#}x]])/',
- 'm/(?[[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/(?[[^\N{U+100.300{#}}]])/',
- 'm/(?[ \p{Digit} & (?(?[ \p{Thai} | \p{Lao} ]))])/' => 'Sequence (?(...) not recognized {#} m/(?[ \p{Digit} & (?({#}?[ \p{Thai} | \p{Lao} ]))])/',
- 'm/(?[ \p{Digit} & (?:(?[ \p{Thai} | \p{Lao} ]))])/' => 'Expecting \'(?flags:(?[...\' {#} m/(?[ \p{Digit} & (?{#}:(?[ \p{Thai} | \p{Lao} ]))])/',
+ 'm/(?[[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} here is restricted to one character {#} m/(?[[^\N{U+100.300{#}}]])/',
+ 'm/(?[ \p{Digit} & (?^(?[ \p{Thai} | \p{Lao} ]))])/' => 'Sequence (?^(...) not recognized {#} m/(?[ \p{Digit} & (?^({#}?[ \p{Thai} | \p{Lao} ]))])/',
+ 'm/(?[ \p{Digit} & (?(?[ \p{Thai} | \p{Lao} ]))])/' => 'Unexpected character {#} m/(?[ \p{Digit} & (?{#}(?[ \p{Thai} | \p{Lao} ]))])/',
  'm/\o{/' => 'Missing right brace on \o{ {#} m/\o{{#}/',
  'm/\o/' => 'Missing braces on \o{} {#} m/\o{#}/',
- 'm/\o{}/' => 'Number with no digits {#} m/\o{}{#}/',
+ 'm/\o{}/' => 'Empty \o{} {#} m/\o{}{#}/',
  'm/[\o{]/' => 'Missing right brace on \o{ {#} m/[\o{{#}]/',
  'm/[\o]/' => 'Missing braces on \o{} {#} m/[\o{#}]/',
- 'm/[\o{}]/' => 'Number with no digits {#} m/[\o{}{#}]/',
+ 'm/[\o{}]/' => 'Empty \o{} {#} m/[\o{}{#}]/',
  'm/(?^-i:foo)/' => 'Sequence (?^-...) not recognized {#} m/(?^-{#}i:foo)/',
  'm/\87/' => 'Reference to nonexistent group {#} m/\87{#}/',
  'm/a\87/' => 'Reference to nonexistent group {#} m/a\87{#}/',
@@ -310,7 +312,13 @@ my @death =
  '/\p{Latin}{,4 }/' => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#},4 }/',
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
-
+ "/$bug133423/" => "Operand with no preceding operator {#} m/(?[(?^:(?[\\ ]))\\{#}] |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
+ '/[^/' => 'Unmatched [ {#} m/[{#}^/', # [perl #133767]
+ '/\p{Is_Other_Alphabetic=F}/ ' => 'Can\'t find Unicode property definition "Is_Other_Alphabetic=F" {#} m/\p{Is_Other_Alphabetic=F}{#}/',
+ '/\p{Is_Other_Alphabetic=F}/ ' => 'Can\'t find Unicode property definition "Is_Other_Alphabetic=F" {#} m/\p{Is_Other_Alphabetic=F}{#}/',
+ '/\x{100}(?(/' => 'Unknown switch condition (?(...)) {#} m/\\x{100}(?({#}/', # [perl #133896]
+ '/(?[\N{KEYCAP DIGIT NINE}/' => '\N{} here is restricted to one character {#} m/(?[\\N{U+39.FE0F.20E3{#}}/', # [perl #133988]
+ '/0000000000000000[\N{U+0.00}0000/' => 'Unmatched [ {#} m/0000000000000000[{#}\N{U+0.00}0000/', # [perl #134059]
 );
 
 # These are messages that are death under 'use re "strict"', and may or may
@@ -337,9 +345,9 @@ my @death_only_under_strict = (
     'm/[\o{789}]/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
                    => 'Non-octal character {#} m/[\o{78{#}9}]/',
     'm/\x{}/' => "",
-              => 'Number with no digits {#} m/\x{}{#}/',
+              => 'Empty \x{} {#} m/\x{}{#}/',
     'm/[\x{}]/' => "",
-                => 'Number with no digits {#} m/[\x{}{#}]/',
+                => 'Empty \x{} {#} m/[\x{}{#}]/',
     'm/\x{ABCDEFG}/' => 'Illegal hexadecimal digit \'G\' ignored',
                      => 'Non-hex character {#} m/\x{ABCDEFG{#}}/',
     'm/[\x{ABCDEFG}]/' => 'Illegal hexadecimal digit \'G\' ignored',
@@ -355,11 +363,11 @@ my @death_only_under_strict = (
     'm/[\pM-x]\x{100}/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
                         => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
     'm/[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[^\N{U+100.300}{#}]/',
-                                       => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[^\N{U+100.300{#}}]/',
+                                       => '\N{} here is restricted to one character {#} m/[^\N{U+100.300{#}}]/',
     'm/[\x03-\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\x03-\N{U+100.300}{#}]/',
-                                            => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[\x03-\N{U+100.300{#}}]/',
+                                            => '\N{} here is restricted to one character {#} m/[\x03-\N{U+100.300{#}}]/',
     'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}-\x{10FFFF}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100.300}{#}-\x{10FFFF}]/',
-                                                  => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[\N{U+100.300{#}}-\x{10FFFF}]/',
+                                                  => '\N{} here is restricted to one character {#} m/[\N{U+100.300{#}}-\x{10FFFF}]/',
     '/[\08]/'   => '\'\08\' resolved to \'\o{0}8\' {#} m/[\08{#}]/',
                 => 'Need exactly 3 octal digits {#} m/[\08{#}]/',
     '/[\018]/'  => '\'\018\' resolved to \'\o{1}8\' {#} m/[\018{#}]/',
@@ -406,11 +414,13 @@ my @death_only_under_strict = (
                    => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}/',
     '/\p{Latin}{/' => 'Unescaped left brace in regex is passed through {#} m/\p{Latin}{{#}/',
                    => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#}/',
+    '/\x{100}\x/'  => "",
+                   => "Empty \\x {#} m/\\x{100}\\x{#}/",
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
 my @death_utf8 = mark_as_utf8(
- '/ネ(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/ネ(?<= .*)/',
+ '/ネ(?<= .*)/' =>  'Lookbehind longer than 255 not implemented in regex m/ネ(?<= .*)/',
 
  '/(?<= ネ{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= ネ{1000})/',
 
@@ -472,7 +482,7 @@ my @death_utf8 = mark_as_utf8(
  '/ネ(?[ \cK [ネ] ])ネ/' => 'Operand with no preceding operator {#} m/ネ(?[ \cK [ネ{#}] ])ネ/',
  '/ネ(?[ \0004 ])ネ/' => 'Need exactly 3 octal digits {#} m/ネ(?[ \0004 {#}])ネ/',
  '/(?[ \o{ネ} ])ネ/' => 'Non-octal character {#} m/(?[ \o{ネ{#}} ])ネ/',
- '/ネ(?[ \o{} ])ネ/' => 'Number with no digits {#} m/ネ(?[ \o{}{#} ])ネ/',
+ '/ネ(?[ \o{} ])ネ/' => 'Empty \o{} {#} m/ネ(?[ \o{}{#} ])ネ/',
  '/(?[ \x{ネ} ])ネ/' => 'Non-hex character {#} m/(?[ \x{ネ{#}} ])ネ/',
  '/(?[ \p{ネ} ])/' => 'Can\'t find Unicode property definition "ネ" {#} m/(?[ \p{ネ}{#} ])/',
  '/(?[ \p{ ネ = bar } ])/' => 'Can\'t find Unicode property definition "ネ = bar" {#} m/(?[ \p{ ネ = bar }{#} ])/',
@@ -529,6 +539,7 @@ my @warning = (
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
+    '/\q\p{Any}/' => 'Unrecognized escape \q passed through {#} m/\q{#}\p{Any}/',
 
     # These two tests do not include the marker, because regcomp.c no
     # longer knows where it goes by the time this warning is emitted.
@@ -665,6 +676,7 @@ my @warning_only_under_strict = (
     "/[$low_mixed_digit-$high_mixed_digit]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_digit-$high_mixed_digit\{#}]/",
     '/\b<GCB}/' => 'Unescaped literal \'}\' {#} m/\b<GCB}{#}/',
     '/[ ]def]/' => 'Unescaped literal \']\' {#} m/[ ]def]{#}/',
+    '/(?)/' => 'Empty (?) without any modifiers {#} m/(?){#}/', # [perl #132851]
 );
 
 my @warning_utf8_only_under_strict = mark_as_utf8(
@@ -728,6 +740,7 @@ for my $strict ("", "use re 'strict';") {
             no warnings 'experimental::regex_sets';
             no warnings 'experimental::script_run';
             no warnings 'experimental::re_strict';
+            no warnings 'experimental::alpha_assertions';
 
             warning_is(sub {
                     my $meaning_of_life;

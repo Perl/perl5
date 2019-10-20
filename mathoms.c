@@ -71,6 +71,10 @@ C<-Accflags='-DNO_MATHOMS'>
  */
 #else
 
+/* The functions in this file should be able to call other deprecated functions
+ * without a compiler warning */
+GCC_DIAG_IGNORE(-Wdeprecated-declarations)
+
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */
@@ -727,6 +731,10 @@ potentially warn under some level of strict-ness.
 "Superseded" by C<sv_nosharing()>.
 
 =cut
+
+PERL_UNLOCK_HOOK in intrpvar.h is the macro that refers to this, and guarantees
+that mathoms gets loaded.
+
 */
 
 void
@@ -1140,38 +1148,6 @@ Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
     return newATTRSUB(floor, o, proto, NULL, block);
 }
 
-UV
-Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
-{
-    PERL_ARGS_ASSERT_TO_UTF8_FOLD;
-
-    return toFOLD_utf8(p, ustrp, lenp);
-}
-
-UV
-Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
-{
-    PERL_ARGS_ASSERT_TO_UTF8_LOWER;
-
-    return toLOWER_utf8(p, ustrp, lenp);
-}
-
-UV
-Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
-{
-    PERL_ARGS_ASSERT_TO_UTF8_TITLE;
-
-    return toTITLE_utf8(p, ustrp, lenp);
-}
-
-UV
-Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
-{
-    PERL_ARGS_ASSERT_TO_UTF8_UPPER;
-
-    return toUPPER_utf8(p, ustrp, lenp);
-}
-
 SV *
 Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
 {
@@ -1198,22 +1174,6 @@ ASCII_TO_NEED(const UV enc, const UV ch)
 {
     PERL_UNUSED_ARG(enc);
     return ch;
-}
-
-bool      /* Made into a function, so can be deprecated */
-Perl_isIDFIRST_lazy(pTHX_ const char* p)
-{
-    PERL_ARGS_ASSERT_ISIDFIRST_LAZY;
-
-    return isIDFIRST_lazy_if(p,1);
-}
-
-bool      /* Made into a function, so can be deprecated */
-Perl_isALNUM_lazy(pTHX_ const char* p)
-{
-    PERL_ARGS_ASSERT_ISALNUM_LAZY;
-
-    return isALNUM_lazy_if(p,1);
 }
 
 bool
@@ -1377,38 +1337,6 @@ Perl_is_uni_idfirst(pTHX_ UV c)
 }
 
 bool
-Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
-{
-    PERL_ARGS_ASSERT_IS_UTF8_IDFIRST;
-
-    return _is_utf8_idstart(p);
-}
-
-bool
-Perl_is_utf8_xidfirst(pTHX_ const U8 *p) /* The naming is historical. */
-{
-    PERL_ARGS_ASSERT_IS_UTF8_XIDFIRST;
-
-    return _is_utf8_xidstart(p);
-}
-
-bool
-Perl_is_utf8_idcont(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_IDCONT;
-
-    return _is_utf8_idcont(p);
-}
-
-bool
-Perl_is_utf8_xidcont(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_XIDCONT;
-
-    return _is_utf8_xidcont(p);
-}
-
-bool
 Perl_is_uni_upper_lc(pTHX_ UV c)
 {
     return isUPPER_LC_uvchr(c);
@@ -1481,159 +1409,6 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
 }
 
 bool
-Perl_is_utf8_alnum(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_ALNUM;
-
-    /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
-     * descendant of isalnum(3), in other words, it doesn't
-     * contain the '_'. --jhi */
-    return isWORDCHAR_utf8(p);
-}
-
-bool
-Perl_is_utf8_alnumc(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_ALNUMC;
-
-    return isALPHANUMERIC_utf8(p);
-}
-
-bool
-Perl_is_utf8_alpha(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_ALPHA;
-
-    return isALPHA_utf8(p);
-}
-
-bool
-Perl_is_utf8_ascii(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_ASCII;
-    PERL_UNUSED_CONTEXT;
-
-    return isASCII_utf8(p);
-}
-
-bool
-Perl_is_utf8_blank(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_BLANK;
-    PERL_UNUSED_CONTEXT;
-
-    return isBLANK_utf8(p);
-}
-
-bool
-Perl_is_utf8_space(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_SPACE;
-    PERL_UNUSED_CONTEXT;
-
-    return isSPACE_utf8(p);
-}
-
-bool
-Perl_is_utf8_perl_space(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE;
-    PERL_UNUSED_CONTEXT;
-
-    /* Only true if is an ASCII space-like character, and ASCII is invariant
-     * under utf8, so can just use the macro */
-    return isSPACE_A(*p);
-}
-
-bool
-Perl_is_utf8_perl_word(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD;
-    PERL_UNUSED_CONTEXT;
-
-    /* Only true if is an ASCII word character, and ASCII is invariant
-     * under utf8, so can just use the macro */
-    return isWORDCHAR_A(*p);
-}
-
-bool
-Perl_is_utf8_digit(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_DIGIT;
-
-    return isDIGIT_utf8(p);
-}
-
-bool
-Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT;
-    PERL_UNUSED_CONTEXT;
-
-    /* Only true if is an ASCII digit character, and ASCII is invariant
-     * under utf8, so can just use the macro */
-    return isDIGIT_A(*p);
-}
-
-bool
-Perl_is_utf8_upper(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_UPPER;
-
-    return isUPPER_utf8(p);
-}
-
-bool
-Perl_is_utf8_lower(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_LOWER;
-
-    return isLOWER_utf8(p);
-}
-
-bool
-Perl_is_utf8_cntrl(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_CNTRL;
-    PERL_UNUSED_CONTEXT;
-
-    return isCNTRL_utf8(p);
-}
-
-bool
-Perl_is_utf8_graph(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_GRAPH;
-
-    return isGRAPH_utf8(p);
-}
-
-bool
-Perl_is_utf8_print(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_PRINT;
-
-    return isPRINT_utf8(p);
-}
-
-bool
-Perl_is_utf8_punct(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_PUNCT;
-
-    return isPUNCT_utf8(p);
-}
-
-bool
-Perl_is_utf8_xdigit(pTHX_ const U8 *p)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_XDIGIT;
-    PERL_UNUSED_CONTEXT;
-
-    return isXDIGIT_utf8(p);
-}
-
-bool
 Perl_is_utf8_mark(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT_IS_UTF8_MARK;
@@ -1668,7 +1443,7 @@ Perl_is_utf8_char(const U8 *s)
 /*
 =for apidoc is_utf8_char_buf
 
-This is identical to the macro L</isUTF8_CHAR>.
+This is identical to the macro L<perlapi/isUTF8_CHAR>.
 
 =cut */
 
@@ -1714,7 +1489,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
+See L<perlapi/utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -1729,7 +1504,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 }
 
 /*
-=for apidoc Am|HV *|pad_compname_type|PADOFFSET po
+=for apidoc pad_compname_type
 
 Looks up the type of the lexical variable at position C<po> in the
 currently-compiling pad.  If the variable is typed, the stash of the
@@ -1754,6 +1529,38 @@ Perl_instr(const char *big, const char *little)
 
     return instr((char *) big, (char *) little);
 }
+
+SV *
+Perl_newSVsv(pTHX_ SV *const old)
+{
+    return newSVsv(old);
+}
+
+bool
+Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
+{
+    PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE;
+
+    return sv_utf8_downgrade(sv, fail_ok);
+}
+
+char *
+Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp)
+{
+    PERL_ARGS_ASSERT_SV_2PVUTF8;
+
+    return sv_2pvutf8(sv, lp);
+}
+
+char *
+Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
+{
+    PERL_ARGS_ASSERT_SV_2PVBYTE;
+
+    return sv_2pvbyte(sv, lp);
+}
+
+GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */
 

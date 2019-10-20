@@ -734,9 +734,9 @@ keep a reference count on its arguments and cannot be made to
 do so.  Such arrays are not even supposed to be accessible to
 Perl code, but are only used internally.
 
-=item Cannot yet reorder sv_catpvfn() arguments from va_list
+=item Cannot yet reorder sv_vcatpvfn() arguments from va_list
 
-(F) Some XS code tried to use C<sv_catpvfn()> or a related function with a
+(F) Some XS code tried to use C<sv_vcatpvfn()> or a related function with a
 format string that specifies explicit indexes for some of the elements, and
 using a C-style variable-argument list (a C<va_list>).  This is not currently
 supported.  XS authors wanting to do this must instead construct a C array
@@ -863,12 +863,6 @@ a file in /dev, a FIFO or an uneditable directory.  The file was ignored.
 
 (S inplace) The creation of the new file failed for the indicated
 reason.
-
-=item Can't do inplace edit without backup
-
-(F) You're on a system such as MS-DOS that gets confused if you try
-reading from a deleted (but still opened) file.  You have to say
-C<-i.bak>, or some such.
 
 =item Can't do inplace edit: %s would not be unique
 
@@ -1505,7 +1499,7 @@ it's loaded, etc.
 
 (P) The parser got confused when trying to parse a C<foreach> loop.
 
-=item Can't use global %s in "%s"
+=item Can't use global %s in %s
 
 (F) You tried to declare a magical variable as a lexical variable.  This
 is not allowed, because the magic can be tied to only one location
@@ -1839,10 +1833,9 @@ The message indicates the type of reference that was expected.  This
 usually indicates a syntax error in dereferencing the constant value.
 See L<perlsub/"Constant Functions"> and L<constant>.
 
-=item Constants from lexical variables potentially modified elsewhere are
-deprecated. This will not be allowed in Perl 5.32
+=item Constants from lexical variables potentially modified elsewhere are no longer permitted
 
-(D deprecated) You wrote something like
+(F) You wrote something like
 
     my $var;
     $sub = sub () { $var };
@@ -1859,7 +1852,7 @@ breaks the behavior of closures, in which the subroutine captures
 the variable itself, rather than its value, so future changes to the
 variable are reflected in the subroutine's return value.
 
-This usage is deprecated, and will no longer be allowed in Perl 5.32,
+This usage was deprecated, and as of Perl 5.32 is no longer allowed,
 making it possible to change the behavior in the future.
 
 If you intended for the subroutine to be eligible for inlining, then
@@ -2128,13 +2121,11 @@ something that isn't defined yet, you don't actually have to define the
 subroutine or package before the current location.  You can use an empty
 "sub foo;" or "package FOO;" to enter a "forward" declaration.
 
-=item dump() better written as CORE::dump(). dump() will no longer be available in Perl 5.30
+=item dump() must be written as CORE::dump() as of Perl 5.30
 
-(D deprecated, misc) You used the obsolescent C<dump()> built-in function,
-without fully qualifying it as C<CORE::dump()>. Maybe it's a typo.
-
-Use of a unqualified C<dump()> was deprecated in Perl 5.8.0, and this
-will not be available in Perl 5.30.
+(F) You used the obsolete C<dump()> built-in function.  That was deprecated in
+Perl 5.8.0.  As of Perl 5.30 it must be written in fully qualified format:
+C<CORE::dump()>.
 
 See L<perlfunc/dump>.
 
@@ -2161,11 +2152,20 @@ unlikely to be what you want.
 
 =item Empty \%c in regex; marked by S<<-- HERE> in m/%s/
 
+=item Empty \%c{}
+
 =item Empty \%c{} in regex; marked by S<<-- HERE> in m/%s/
 
-(F) C<\p> and C<\P> are used to introduce a named Unicode property, as
-described in L<perlunicode> and L<perlre>.  You used C<\p> or C<\P> in
-a regular expression without specifying the property name.
+(F) You used something like C<\b{}>, C<\B{}>, C<\o{}>, C<\p>, C<\P>, or
+C<\x> without specifying anything for it to operate on.
+
+Unfortunately, for backwards compatibility reasons, an empty C<\x> is
+legal outside S<C<use re 'strict'>> and expands to a NUL character.
+
+=item Empty (?) without any modifiers in regex; marked by <-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>>)
+C<(?)> does nothing, so perhaps this is a typo.
 
 =item ${^ENCODING} is no longer supported
 
@@ -3231,10 +3231,10 @@ code.
 You specified a character that has the given plainer way of writing it, and
 which is also portable to platforms running with different character sets.
 
-=item $* is no longer supported. Its use will be fatal in Perl 5.30
+=item $* is no longer supported as of Perl 5.30
 
-(D deprecated, syntax) The special variable C<$*>, deprecated in older
-perls, has been removed as of 5.10.0 and is no longer supported.  In
+(F) The special variable C<$*>, deprecated in older perls, was removed in
+5.10.0, is no longer supported and is a fatal error as of Perl 5.30.  In
 previous versions of perl the use of C<$*> enabled or disabled multi-line
 matching within a string.
 
@@ -3245,13 +3245,11 @@ then all regular expressions behaved as if they were written using C</m>.)
 
 Use of this variable will be a fatal error in Perl 5.30.
 
-=item $# is no longer supported. Its use will be fatal in Perl 5.30
+=item $# is no longer supported as of Perl 5.30
 
-(D deprecated, syntax) The special variable C<$#>, deprecated in older
-perls, has been removed as of 5.10.0 and is no longer supported.  You
+(F) The special variable C<$#>, deprecated in older perls, was removed as of
+5.10.0, is no longer supported and is a fatal error as of Perl 5.30.  You
 should use the printf/sprintf functions instead.
-
-Use of this variable will be a fatal error in Perl 5.30.
 
 =item '%s' is not a code reference
 
@@ -3277,6 +3275,11 @@ line.  See L<perlrun> for more details.
 =item Junk on end of regexp in regex m/%s/
 
 (P) The regular expression parser is confused.
+
+=item \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/
+
+(F) Your regular expression used C<\K> in a lookhead or lookbehind
+assertion, which isn't permitted.
 
 =item Label not found for "last %s"
 
@@ -4008,16 +4011,25 @@ bracketed character class, for the same reason that C<.> in a character
 class loses its specialness: it matches almost everything, which is
 probably not what you want.
 
-=item \N{} in inverted character class or as a range end-point is restricted to one character in regex; marked by <-- HERE in m/%s/
+=item \N{} here is restricted to one character in regex; marked by <-- HERE in m/%s/
 
 (F) Named Unicode character escapes (C<\N{...}>) may return a
 multi-character sequence.  Even though a character class is
 supposed to match just one character of input, perl will match the
-whole thing correctly, except when the class is inverted (C<[^...]>),
-or the escape is the beginning or final end point of a range.  The
-mathematically logical behavior for what matches when inverting
+whole thing correctly, except under certain conditions.  These currently
+are
+
+=over 4
+
+=item When the class is inverted (C<[^...]>)
+
+The mathematically logical behavior for what matches when inverting
 is very different from what people expect, so we have decided to
-forbid it.  Similarly unclear is what should be generated when the
+forbid it.
+
+=item The escape is the beginning or final end point of a range
+
+Similarly unclear is what should be generated when the
 C<\N{...}> is used as one of the end points of the range, such as in
 
  [\x{41}-\N{ARABIC SEQUENCE YEH WITH HAMZA ABOVE WITH AE}]
@@ -4025,37 +4037,12 @@ C<\N{...}> is used as one of the end points of the range, such as in
 What is meant here is unclear, as the C<\N{...}> escape is a sequence
 of code points, so this is made an error.
 
-=item \N{NAME} must be resolved by the lexer in regex; marked by
-S<<-- HERE> in m/%s/
+=item In a regex set
 
-(F) When compiling a regex pattern, an unresolved named character or
-sequence was encountered.  This can happen in any of several ways that
-bypass the lexer, such as using single-quotish context, or an extra
-backslash in double-quotish:
+The syntax S<C<(?[   ])>> in a regular expression yields a list of
+single code points, none can be a sequence.
 
-    $re = '\N{SPACE}';	# Wrong!
-    $re = "\\N{SPACE}";	# Wrong!
-    /$re/;
-
-Instead, use double-quotes with a single backslash:
-
-    $re = "\N{SPACE}";	# ok
-    /$re/;
-
-The lexer can be bypassed as well by creating the pattern from smaller
-components:
-
-    $re = '\N';
-    /${re}{SPACE}/;	# Wrong!
-
-It's not a good idea to split a construct in the middle like this, and
-it doesn't work here.  Instead use the solution above.
-
-Finally, the message also can happen under the C</x> regex modifier when the
-C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
-
-    /\N {SPACE}/x;	# Wrong!
-    /\N{SPACE}/x;	# ok
+=back
 
 =item No %s allowed while running setuid
 
@@ -4116,6 +4103,11 @@ supply dbm nowadays, because Perl comes with SDBM.  See L<SDBM_File>.
 for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a C<DB::sub> routine to be called at the beginning
 of each ordinary subroutine call.
+
+=item No digits found for %s literal
+
+(F) No hexadecimal digits were found following C<0x> or no binary digits
+were found following C<0b>.
 
 =item No directory specified for -I
 
@@ -4248,6 +4240,12 @@ earlier as an attempt to close an unopened filehandle.
 not recognized.  Say C<kill -l> in your shell to see the valid signal
 names on your system.
 
+=item No Unicode property value wildcard matches:
+
+(W regexp) You specified a wildcard for a Unicode property value, but
+there is no property value in the current Unicode release that matches
+it.  Check your spelling.
+
 =item Not a CODE reference
 
 (F) Perl was trying to evaluate a reference to a code value (that is, a
@@ -4320,13 +4318,6 @@ supplied.  See L<perlform>.
 of Perl.  Check the #! line, or manually feed your script into Perl
 yourself.
 
-=item (?[...]) not valid in locale in regex; marked by S<<-- HERE> in m/%s/
-
-(F) C<(?[...])> cannot be used within the scope of a C<S<use locale>> or with
-an C</l> regular expression modifier, as that would require deferring
-to run-time the calculation of what it should evaluate to, and it is
-regex compile-time only.
-
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
@@ -4371,6 +4362,12 @@ the meantime, try using scientific notation (e.g. "1e6" instead of
 (F) Perl was looking for a number but found nothing that looked like
 a number.  This happens, for example with C<\o{}>, with no number between
 the braces.
+
+=item Numeric format result too large
+
+(F) The length of the result of a numeric format supplied to sprintf()
+or printf() would have been too large for the underlying C function to
+report.  This limit is typically 2GB.
 
 =item Octal number > 037777777777 non-portable
 
@@ -5667,7 +5664,7 @@ variables (like PATH) from the user it isn't running under, and isn't
 in a location where the CGI server can't find it, basically, more or
 less.  Please see the following for more information:
 
-	http://www.perl.org/CGI_MetaFAQ.html
+	https://www.perl.org/CGI_MetaFAQ.html
 	http://www.htmlhelp.org/faq/cgifaq.html
 	http://www.w3.org/Security/Faq/
 
@@ -6134,6 +6131,11 @@ the feature:
 (F) The function indicated isn't implemented on this architecture,
 according to the probings of Configure.
 
+=item The private_use feature is experimental
+
+(S experimental::private_use) This feature is actually a hook for future
+use.
+
 =item The regex_sets feature is experimental
 
 (S experimental::regex_sets) This warning is emitted if you
@@ -6170,6 +6172,12 @@ in a future Perl version:
 linkhood if the last stat that wrote to the stat buffer already went
 past the symlink to get to the real file.  Use an actual filename
 instead.
+
+=item The Unicode property wildcards feature is experimental
+
+(S experimental::uniprop_wildcards) This feature is experimental
+and its behavior may in any future release of perl.  See
+L<perlunicode/Wildcards in Property Values>.
 
 =item The 'unique' attribute may only be applied to 'our' variables
 
@@ -6303,6 +6311,15 @@ by the signature.  The caller of the subroutine is presumably at fault.
 The message attempts to include the name of the called subroutine. If the
 subroutine has been aliased, the subroutine's original name will be shown,
 regardless of what name the caller used.
+
+=item Too many nested open parens in regex; marked by <-- HERE in m/%s/
+
+(F) You have exceeded the number of open C<"("> parentheses that haven't
+been matched by corresponding closing ones.  This limit prevents eating
+up too much memory.  It is initially set to 1000, but may be changed by
+setting C<${^RE_COMPILE_RECURSION_LIMIT}> to some other value.  This may
+need to be done in a BEGIN block before the regular expression pattern
+is compiled.
 
 =item Too many )'s
 
@@ -6709,6 +6726,14 @@ turn off this warning by C<no warnings 'nonchar';>.
 This is not really a "severe" error, but it is supposed to be
 raised by default even if warnings are not enabled, and currently
 the only way to do that in Perl is to mark it as serious.
+
+=item Unicode property wildcard not terminated
+
+(F) A Unicode property wildcard looks like a delimited regular
+expression pattern (all within the braces of the enclosing C<\p{...}>.
+The closing delimtter to match the opening one was not found.  If the
+opening one is escaped by preceding it with a backslash, the closing one
+must also be so escaped.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
@@ -7328,15 +7353,14 @@ C<~>) on a string containing a code point over 0xFF.  The string bitwise
 operators treat their operands as strings of bytes, and values beyond
 0xFF are nonsensical in this context.
 
-This became fatal in Perl 5.28.
+Certain instances became fatal in Perl 5.28; others in perl 5.32.
 
-=item Use of strings with code points over 0xFF as arguments to C<vec>
-is deprecated. This will be a fatal error in Perl 5.32
+=item Use of strings with code points over 0xFF as arguments to vec is forbidden
 
-(D deprecated) You tried to use L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS>
+(F) You tried to use L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS>
 on a string containing a code point over 0xFF, which is nonsensical here.
 
-Such usage will be a fatal error in Perl 5.32.
+This became fatal in Perl 5.32.
 
 =item Use of tainted arguments in %s is deprecated
 
@@ -7346,9 +7370,9 @@ but will become a fatal error in a future version of perl.  Untaint your
 arguments.  See L<perlsec>.
 
 =item Use of unassigned code point or non-standalone grapheme for a
-delimiter will be a fatal error starting in Perl 5.30
+delimiter is not allowed
 
-(D deprecated)
+(F)
 A grapheme is what appears to a native-speaker of a language to be a
 character.  In Unicode (and hence Perl) a grapheme may actually be
 several adjacent characters that together form a complete grapheme.  For
@@ -7358,7 +7382,7 @@ the circumflex hovering over the "R".  Perl currently allows things like
 that circumflex to be delimiters of strings, patterns, I<etc>.  When
 displayed, the circumflex would look like it belongs to the character
 just to the left of it.  In order to move the language to be able to
-accept graphemes as delimiters, we have to deprecate the use of
+accept graphemes as delimiters, we cannot allow the use of
 delimiters which aren't graphemes by themselves.  Also, a delimiter must
 already be assigned (or known to be never going to be assigned) to try
 to future-proof code, for otherwise code that works today would fail to
@@ -7368,7 +7392,7 @@ assign
 L<non-character code points|perlunicode/Noncharacter code points>, nor
 L<code points that are above the legal Unicode maximum|
 perlunicode/Beyond Unicode code points>, those can be delimiters, and
-their use won't raise this warning.
+their use is legal.
 
 =item Use of uninitialized value%s
 
@@ -7506,7 +7530,12 @@ front of your variable.
 
 =item Variable length lookbehind not implemented in regex m/%s/
 
-(F) Lookbehind is allowed only for subexpressions whose length is fixed and
+(F) B<This message no longer should be raised as of Perl 5.30.>  It is
+retained in this document as a convenience for people using an earlier
+Perl version.
+
+In Perl 5.30 and earlier, lookbehind is allowed
+only for subexpressions whose length is fixed and
 known at compile time.  For positive lookbehind, you can use the C<\K>
 regex construct as a way to get the equivalent functionality.  See
 L<(?<=pattern) and \K in perlre|perlre/\K>.

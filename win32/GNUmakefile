@@ -1,13 +1,13 @@
 #
 # Makefile to build perl on Windows using GMAKE.
 # Supported compilers:
-#	Microsoft Visual C++ 6.0 or later
+#	Microsoft Visual C++ 7.0 or later
 #	MinGW with gcc-3.4.5 or later with runtime < 3.21
 #	MinGW64 with gcc-4.4.3 or later
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl529.dll).  Also makes individual DLLs for the XS extensions.
+# (perl531.dll).  Also makes individual DLLs for the XS extensions.
 #
 # The easiest way to customize the build process is to use parameters like this:
 #
@@ -64,7 +64,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \5.29.4
+#INST_VER	:= \5.31.5
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -126,7 +126,6 @@ USE_LARGE_FILES	:= define
 # Uncomment this if you're building a 32-bit perl and want 64-bit integers.
 # (If you're building a 64-bit perl then you will have 64-bit integers whether
 # or not this is uncommented.)
-# Note: This option is not supported in 32-bit MSVC60 builds.
 #
 #USE_64_BIT_INT	:= define
 
@@ -160,8 +159,6 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 6.0 (aka Visual C++ 98)
-#CCTYPE		:= MSVC60
 # Visual C++ .NET 2002/2003 (aka Visual C++ 7.0/7.1) (full version)
 #CCTYPE		:= MSVC70
 # Visual C++ Toolkit 2003 (aka Visual C++ 7.1) (free command-line tools)
@@ -182,6 +179,8 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #CCTYPE		:= MSVC140
 # Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
 #CCTYPE		:= MSVC141
+# Visual C++ 2019 (aka Visual C++ 14.2) (full version or Community Edition)
+#CCTYPE		:= MSVC142
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		:= GCC
 
@@ -231,7 +230,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl529s.lib will also be created.
+# variables below. A static library perl531s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	:= define
@@ -392,13 +391,13 @@ endif
 ifeq ($(CCHOME),)
 ifeq ($(CCTYPE),GCC)
 CCHOME		:= C:\MinGW
-else ifeq ($(CCTYPE),MSVC60)
-CCHOME		:= $(MSVCDir)
 else ifeq ($(CCTYPE),MSVC70)
 CCHOME		:= $(MSVCDir)
 else ifeq ($(CCTYPE),MSVC70FREE)
 CCHOME		:= $(MSVCDir)
 else ifeq ($(CCTYPE),MSVC141)
+CCHOME		:= $(VCToolsInstallDir)
+else ifeq ($(CCTYPE),MSVC142)
 CCHOME		:= $(VCToolsInstallDir)
 else
 CCHOME		:= $(VCINSTALLDIR)
@@ -440,19 +439,6 @@ endif
 
 ifeq ($(WIN64),define)
 USE_64_BIT_INT	= define
-endif
-
-# Treat 64-bit MSVC60 (doesn't really exist) as SDK2003SP1 because
-# both link against MSVCRT.dll (which is part of Windows itself) and
-# not against a compiler specific versioned runtime.
-ifeq ("$(WIN64) $(CCTYPE)","define MSVC60")
-CCTYPE		= SDK2003SP1
-endif
-
-# Disable the 64-bit-int option for (32-bit) MSVC60 builds since that compiler
-# does not support it.
-ifeq ($(CCTYPE),MSVC60)
-USE_64_BIT_INT	= undef
 endif
 
 # Disable the long double option for MSVC builds since that compiler
@@ -510,6 +496,12 @@ ARCHPREFIX :=
 else
 CCINCDIR := $(CCHOME)\include
 ifeq ($(CCTYPE),MSVC141)
+ifeq ($(WIN64),define)
+CCLIBDIR := $(CCHOME)\lib\x64
+else
+CCLIBDIR := $(CCHOME)\lib\x86
+endif
+else ifeq ($(CCTYPE),MSVC142)
 ifeq ($(WIN64),define)
 CCLIBDIR := $(CCHOME)\lib\x64
 else
@@ -662,9 +654,7 @@ EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputre
 
 # Most relevant compiler-specific options fall into two groups:
 # either pre-MSVC80 or MSVC80 onwards, so define a macro for this.
-ifeq ($(CCTYPE),MSVC60)
-PREMSVC80	= define
-else ifeq ($(CCTYPE),MSVC70)
+ifeq ($(CCTYPE),MSVC70)
 PREMSVC80	= define
 else ifeq ($(CCTYPE),MSVC70FREE)
 PREMSVC80	= define
@@ -696,6 +686,8 @@ ifeq ($(CCTYPE),MSVC140)
 LIBC		= ucrt.lib
 else ifeq ($(CCTYPE),MSVC141)
 LIBC		= ucrt.lib
+else ifeq ($(CCTYPE),MSVC142)
+LIBC		= ucrt.lib
 else
 LIBC		= msvcrt.lib
 endif
@@ -711,28 +703,26 @@ ifeq ($(CCTYPE),MSVC140)
 LIBC		= ucrtd.lib
 else ifeq ($(CCTYPE),MSVC141)
 LIBC		= ucrtd.lib
+else ifeq ($(CCTYPE),MSVC142)
+LIBC		= ucrtd.lib
 else
 LIBC		= msvcrtd.lib
 endif
 OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug
 else
+# Enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG).
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
-OPTIMIZE	= -O1 -MD -Zi -DNDEBUG
+OPTIMIZE	= -O1 -MD -Zi -DNDEBUG -GL
 # we enable debug symbols in release builds also
-LINK_DBG	= -debug -opt:ref,icf
+LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
 # in addition to the PDB symbols.  The default Dr. Watson that ships with
 # Windows can use the the former but not latter.  The free WinDbg can be
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
-#LINK_DBG	= $(LINK_DBG) -debugtype:both
-ifneq ($(CCTYPE),MSVC60)
-# enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
-OPTIMIZE	+= -GL
-LINK_DBG	+= -ltcg
+#LINK_DBG	+= -debugtype:both
 LIB_FLAGS	= -ltcg
-endif
 endif
 
 ifeq ($(WIN64),define)
@@ -751,6 +741,8 @@ ifeq ($(CCTYPE),MSVC140)
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 else ifeq ($(CCTYPE),MSVC141)
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
+else ifeq ($(CCTYPE),MSVC142)
+DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 endif
 
 # The Windows Server 2003 SP1 SDK compiler only defines _configthreadlocale() if
@@ -768,7 +760,7 @@ endif
 # backward compatibility.  We define this symbol here for older 32-bit
 # compilers only (which aren't using it at all) for the sole purpose
 # of getting it into $Config{ccflags}.  That way if someone builds
-# Perl itself with e.g. VC6 but later installs an XS module using VC8
+# Perl itself with e.g. VC7 but later installs an XS module using VC8
 # the time_t types will still be compatible.
 ifeq ($(WIN64),undef)
 ifeq ($(PREMSVC80),define)
@@ -788,6 +780,12 @@ else
 LIBBASEFILES	+= msvcrt.lib vcruntime.lib
 endif
 else ifeq ($(CCTYPE),MSVC141)
+ifeq ($(CFG),DebugFull)
+LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
+else
+LIBBASEFILES	+= msvcrt.lib vcruntime.lib
+endif
+else ifeq ($(CCTYPE),MSVC142)
 ifeq ($(CFG),DebugFull)
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 else
@@ -857,6 +855,20 @@ LINK_FLAGS	+= -subsystem:console,"5.01"
 endif
 
 else ifeq ($(CCTYPE),MSVC140)
+ifeq ($(WIN64),define)
+LINK_FLAGS	+= -subsystem:console,"5.02"
+else
+LINK_FLAGS	+= -subsystem:console,"5.01"
+endif
+
+else ifeq ($(CCTYPE),MSVC141)
+ifeq ($(WIN64),define)
+LINK_FLAGS	+= -subsystem:console,"5.02"
+else
+LINK_FLAGS	+= -subsystem:console,"5.01"
+endif
+
+else ifeq ($(CCTYPE),MSVC142)
 ifeq ($(WIN64),define)
 LINK_FLAGS	+= -subsystem:console,"5.02"
 else
@@ -984,9 +996,9 @@ ifeq ($(CCTYPE),GCC)
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl529$(a)
-PERLIMPLIBBASE	= libperl529$(a)
-PERLSTATICLIB	= ..\libperl529s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl531$(a)
+PERLIMPLIBBASE	= libperl531$(a)
+PERLSTATICLIB	= ..\libperl531s$(a)
 INT64		= long long
 
 else
@@ -999,12 +1011,12 @@ endif
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	?= $(COREDIR)\perl529$(a)
-PERLIMPLIBBASE	?= perl529$(a)
-PERLEXPLIB	?= $(COREDIR)\perl529.exp
-PERLSTATICLIB	?= ..\perl529s$(a)
-PERLDLL		= ..\perl529.dll
-PERLDLLBASE	= perl529.dll
+PERLIMPLIB	?= $(COREDIR)\perl531$(a)
+PERLIMPLIBBASE	?= perl531$(a)
+PERLEXPLIB	?= $(COREDIR)\perl531.exp
+PERLSTATICLIB	?= ..\perl531s$(a)
+PERLDLL		= ..\perl531.dll
+PERLDLLBASE	= perl531.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake
@@ -1208,7 +1220,7 @@ CFG_VARS	=					\
 
 .PHONY: all info
 
-all : info rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
+all : info rebasePE Extensions_nonxs $(PERLSTATIC)
 
 info :
 ifeq ($(CCTYPE),GCC)
@@ -1364,6 +1376,16 @@ ifeq ($(CCTYPE),MSVC140)
 	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
 	echo #define I_STDBOOL)>> config.h
 else ifeq ($(CCTYPE),MSVC141)
+	@(echo #undef FILE_ptr&& \
+	echo #undef FILE_cnt&& \
+	echo #undef FILE_base&& \
+	echo #undef FILE_bufsiz&& \
+	echo #define FILE_ptr^(fp^) PERLIO_FILE_ptr^(fp^)&& \
+	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
+	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
+	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
+	echo #define I_STDBOOL)>> config.h
+else ifeq ($(CCTYPE),MSVC142)
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
@@ -1659,16 +1681,6 @@ Extensions_clean :
 Extensions_realclean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
 
-PostExt : ..\lib\Storable\Limit.pm
-
-# we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
-# rebasePE most of that, including adjustment for static builds, so we
-# just need non-xs extensions
-..\lib\Storable\Limit.pm : rebasePE Extensions_nonxs
-	$(PLMAKE) -C ..\dist\Storable lib\Storable\Limit.pm
-	if not exist ..\lib\Storable mkdir ..\lib\Storable
-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
-
 # all PE files need to be built by the time this target runs, PP files can still
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
@@ -1697,7 +1709,6 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.amiga    ..\pod\perlamiga.pod
 	copy ..\README.android  ..\pod\perlandroid.pod
 	copy ..\README.bs2000   ..\pod\perlbs2000.pod
-	copy ..\README.ce       ..\pod\perlce.pod
 	copy ..\README.cn       ..\pod\perlcn.pod
 	copy ..\README.cygwin   ..\pod\perlcygwin.pod
 	copy ..\README.dos      ..\pod\perldos.pod
@@ -1726,7 +1737,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5294delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5315delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1824,8 +1835,8 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5294delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
-	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
+	    perl5315delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \

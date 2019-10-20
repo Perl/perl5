@@ -12,8 +12,46 @@
 =provides
 
 __UNDEFINED__
+SV_NOSTEAL
+sv_setsv_flags
+newSVsv_nomg
+
+=dontwarn
+
+sv_setsv_flags
 
 =implementation
+
+#if ( { VERSION >= 5.7.3 } && { VERSION < 5.8.7 } ) || ( { VERSION >= 5.9.0 } && { VERSION < 5.9.2 } )
+#undef sv_setsv_flags
+#define SV_NOSTEAL 16
+#define sv_setsv_flags(dstr, sstr, flags)                                          \
+  STMT_START {                                                                     \
+    if (((flags) & SV_NOSTEAL) && (sstr) && (SvFLAGS((SV *)(sstr)) & SVs_TEMP)) {  \
+      SvTEMP_off((SV *)(sstr));                                                    \
+      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);            \
+      SvTEMP_on((SV *)(sstr));                                                     \
+    } else {                                                                       \
+      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);            \
+    }                                                                              \
+  } STMT_END
+#endif
+
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+__UNDEFINED__ newSVsv_flags(sv, flags) ({ SV *_sv = newSV(0); sv_setsv_flags(_sv, (sv), (flags)); _sv; })
+#else
+__UNDEFINED__ newSVsv_flags(sv, flags) ((PL_Sv = newSV(0)), sv_setsv_flags(PL_Sv, (sv), (flags)), PL_Sv)
+#endif
+
+#ifdef SV_NOSTEAL
+__UNDEFINED__ newSVsv_nomg(sv) newSVsv_flags((sv), SV_NOSTEAL)
+#endif
+
+#if { VERSION >= 5.17.5 }
+__UNDEFINED__ sv_mortalcopy_flags(sv, flags) Perl_sv_mortalcopy_flags(aTHX_ (sv), (flags))
+#else
+__UNDEFINED__ sv_mortalcopy_flags(sv, flags) sv_2mortal(newSVsv_flags((sv), (flags)))
+#endif
 
 __UNDEFINED__ SvMAGIC_set(sv, val) \
                 STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
@@ -94,7 +132,47 @@ TestSvSTASH_set(sv, name)
                 SvREFCNT_dec(SvSTASH(sv));
                 SvSTASH_set(sv, (HV*) SvREFCNT_inc(gv_stashpv(name, 0)));
 
-=tests plan => 5
+#ifdef SV_NOSTEAL
+
+IV
+Test_sv_setsv_SV_NOSTEAL()
+        PREINIT:
+                SV *sv1, *sv2;
+        CODE:
+                sv1 = sv_2mortal(newSVpv("test1", 0));
+                sv2 = sv_2mortal(newSVpv("test2", 0));
+                sv_setsv_flags(sv2, sv1, SV_NOSTEAL);
+                RETVAL = (strEQ(SvPV_nolen(sv1), "test1") && strEQ(SvPV_nolen(sv2), "test1"));
+        OUTPUT:
+                RETVAL
+
+#endif
+
+#ifdef newSVsv_nomg
+
+SV *
+newSVsv_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = newSVsv_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+void
+sv_setsv_compile_test(sv)
+        SV *sv
+        CODE:
+                sv_setsv(sv, NULL);
+#ifdef sv_setsv_flags
+                sv_setsv_flags(sv, NULL, 0);
+#ifdef SV_NOSTEAL
+                sv_setsv_flags(sv, NULL, SV_NOSTEAL);
+#endif
+#endif
+
+=tests plan => 15
 
 my $foo = 5;
 ok(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
@@ -108,6 +186,49 @@ ok($bar->x(), 'foobar');
 
 Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 ok($bar->x(), 'hacker');
+
+if ( "$]" < '5.007003' ) {
+    for (1..10) {
+        skip 'skip: no SV_NOSTEAL support', 0;
+    }
+} else {
+    ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+
+    tie my $scalar, 'TieScalarCounter', 'string';
+
+    ok tied($scalar)->{fetch}, 0;
+    ok tied($scalar)->{store}, 0;
+    my $copy = Devel::PPPort::newSVsv_nomg($scalar);
+    ok tied($scalar)->{fetch}, 0;
+    ok tied($scalar)->{store}, 0;
+
+    my $fetch = $scalar;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    my $copy2 = Devel::PPPort::newSVsv_nomg($scalar);
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok $copy2, 'string';
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value};
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
+}
 
 package foo;
 

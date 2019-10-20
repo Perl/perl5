@@ -1467,17 +1467,6 @@
  */
 /*#define HAS_BACKTRACE	/ **/
 
-/* HASCONST:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the const type. There is no need to actually test for that symbol
- *	within your programs. The mere use of the "const" keyword will
- *	trigger the necessary tests.
- */
-#define HASCONST	/**/
-#ifndef HASCONST
-#define const
-#endif
-
 /* HAS_CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
  */
@@ -4118,11 +4107,11 @@
 /*#define	USE_64_BIT_ALL		/ **/
 #endif
 
-/* USE_CBACKTRACE:
+/* USE_C_BACKTRACE:
  *	This symbol, if defined, indicates that Perl should
  *	be built with support for backtrace.
  */
-/*#define USE_CBACKTRACE		/ **/
+/*#define USE_C_BACKTRACE		/ **/
 
 /* USE_DTRACE:
  *	This symbol, if defined, indicates that Perl should

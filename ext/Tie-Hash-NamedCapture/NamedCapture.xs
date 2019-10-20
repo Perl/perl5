@@ -25,8 +25,11 @@ _tie_it(SV *sv)
     GV * const gv = (GV *)sv;
     HV * const hv = GvHVn(gv);
     SV *rv = newSV_type(SVt_RV);
+    const char *gv_name = GvNAME(gv);
   CODE:
-    SvRV_set(rv, newSVuv(*GvNAME(gv) == '-' ? RXapif_ALL : RXapif_ONE));
+    SvRV_set(rv, newSVuv(
+        strEQ(gv_name, "-") || strEQ(gv_name, "\003APTURE_ALL")
+            ? RXapif_ALL : RXapif_ONE));
     SvROK_on(rv);
     sv_bless(rv, GvSTASH(CvGV(cv)));
 

@@ -1,1 +1,6 @@
 5.013009
+PERL_PV_ESCAPE_NONASCII        # E
+check_utf8_print               # F added by devel/scanprov
+curse                          # F added by devel/scanprov
+report_wrongway_fh             # F added by devel/scanprov
+tied_method                    # F added by devel/scanprov

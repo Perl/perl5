@@ -14,7 +14,7 @@
 ################################################################################
 
 use strict;
-$^W = 1;
+BEGIN { $^W = 1; }
 require "./parts/ppptools.pl";
 
 my $template = do { local $/; <DATA> };
@@ -41,11 +41,14 @@ sub generate_tests
       print "generating $testfile\n";
 
       my $tmpl = $template;
-      $tmpl =~ s/__SOURCE__/$file/mg;
+      my $canonfile = $file;
+      $canonfile =~ tr!\\!/!; # MSWin32 use backslashes
+      $tmpl =~ s/__SOURCE__/$canonfile/mg;
       $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
       $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
 
       open FH, ">$testfile" or die "$testfile: $!\n";
+      binmode FH;
       print FH $tmpl;
       close FH;
 
@@ -97,7 +100,7 @@ BEGIN {
 
 use Devel::PPPort;
 use strict;
-$^W = 1;
+BEGIN { $^W = 1; }
 
 package Devel::PPPort;
 use vars '@ISA';

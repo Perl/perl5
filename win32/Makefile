@@ -1,11 +1,11 @@
 #
 # Makefile to build perl on Windows using Microsoft NMAKE.
 # Supported compilers:
-#	Microsoft Visual C++ 6.0 or later
+#	Microsoft Visual C++ 7.0 or later
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl529.dll).  Also makes individual DLLs for the XS extensions.
+# (perl531.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -38,7 +38,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	= \5.29.4
+#INST_VER	= \5.31.5
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -91,7 +91,6 @@ USE_LARGE_FILES	= define
 # Uncomment this if you're building a 32-bit perl and want 64-bit integers.
 # (If you're building a 64-bit perl then you will have 64-bit integers whether
 # or not this is uncommented.)
-# Note: This option is not supported in 32-bit MSVC60 builds.
 #
 #USE_64_BIT_INT	= define
 
@@ -111,8 +110,6 @@ DEFAULT_INC_EXCLUDES_DOT = define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 6.0 (aka Visual C++ 98)
-#CCTYPE		= MSVC60
 # Visual C++ .NET 2002/2003 (aka Visual C++ 7.0/7.1) (full version)
 #CCTYPE		= MSVC70
 # Visual C++ Toolkit 2003 (aka Visual C++ 7.1) (free command-line tools)
@@ -133,6 +130,8 @@ DEFAULT_INC_EXCLUDES_DOT = define
 #CCTYPE		= MSVC140
 # Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
 #CCTYPE		= MSVC141
+# Visual C++ 2019 (aka Visual C++ 14.2) (full version or Community Edition)
+#CCTYPE		= MSVC142
 
 #
 # If you are using Intel C++ Compiler uncomment this
@@ -192,7 +191,7 @@ DEFAULT_INC_EXCLUDES_DOT = define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl529s.lib will also be created.
+# variables below. A static library perl531s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	= define
@@ -211,18 +210,15 @@ DEFAULT_INC_EXCLUDES_DOT = define
 # Running VCVARS32.BAT, VCVARSALL.BAT or similar is *required* when using
 # Visual C++.
 # Versions of Visual C++ up to VC++ 7.1 define $(MSVCDir); versions since then
-# define $(VCINSTALLDIR) instead, but for VC++ 14.1 we need the subfolder given
+# define $(VCINSTALLDIR) instead, but from VC++ 14.1 we need the subfolder given
 # by $(VCToolsInstallDir).
 #
-!IF "$(CCTYPE)" == "MSVC60" || \
-    "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+!IF "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
 CCHOME		= $(MSVCDIR)
-!ELSE
-!  IF "$(CCTYPE)" == "MSVC141"
+!ELSEIF "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 CCHOME		= $(VCTOOLSINSTALLDIR)
-!  ELSE
+!ELSE
 CCHOME		= $(VCINSTALLDIR)
-!  ENDIF
 !ENDIF
 
 #
@@ -348,40 +344,23 @@ PROCESSOR_ARCHITECTURE	= x86
 # When we are running from a 32bit cmd.exe on AMD64 then
 # PROCESSOR_ARCHITECTURE is set to x86 and PROCESSOR_ARCHITEW6432
 # is set to AMD64
-!IF "$(PROCESSOR_ARCHITEW6432)" != ""
+!  IF "$(PROCESSOR_ARCHITEW6432)" != ""
 PROCESSOR_ARCHITECTURE	= $(PROCESSOR_ARCHITEW6432)
 WIN64			= define
-!ELSE
-!IF "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITECTURE)" == "IA64"
+!  ELSEIF "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITECTURE)" == "IA64"
 WIN64			= define
-!ELSE
+!  ELSE
 WIN64			= undef
-!ENDIF
-!ENDIF
+!  ENDIF
 !ENDIF
 
 !IF "$(WIN64)" == "define"
 USE_64_BIT_INT	= define
 !ENDIF
 
-# Treat 64-bit MSVC60 (doesn't really exist) as SDK2003SP1 because
-# both link against MSVCRT.dll (which is part of Windows itself) and
-# not against a compiler specific versioned runtime.
-!IF "$(WIN64)" == "define" && "$(CCTYPE)" == "MSVC60"
-CCTYPE		= SDK2003SP1
-!ENDIF
-
-# Disable the 64-bit-int option for (32-bit) MSVC60 builds since that compiler
-# does not support it.
-!IF "$(CCTYPE)" == "MSVC60"
-!UNDEF USE_64_BIT_INT
-USE_64_BIT_INT	= undef
-!ENDIF
-
 # Most relevant compiler-specific options fall into two groups:
 # either pre-MSVC80 or MSVC80 onwards, so define a macro for this.
-!IF "$(CCTYPE)" == "MSVC60" || \
-    "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+!IF "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
 PREMSVC80	= define
 !ELSE
 PREMSVC80	= undef
@@ -390,8 +369,7 @@ PREMSVC80	= undef
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
 !IF "$(ARCHITECTURE)" == "AMD64"
 ARCHITECTURE	= x64
-!ENDIF
-!IF "$(ARCHITECTURE)" == "IA64"
+!ELSEIF "$(ARCHITECTURE)" == "IA64"
 ARCHITECTURE	= ia64
 !ENDIF
 
@@ -405,10 +383,8 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)-perlio
 ARCHNAME	= $(ARCHNAME)-thread
 !ENDIF
 
-!IF "$(WIN64)" != "define"
-!IF "$(USE_64_BIT_INT)" == "define"
+!IF "$(WIN64)" != "define" && "$(USE_64_BIT_INT)" == "define"
 ARCHNAME	= $(ARCHNAME)-64int
-!ENDIF
 !ENDIF
 
 # All but the free version of VC++ 7.1 can load DLLs on demand.  Makes the test
@@ -416,14 +392,14 @@ ARCHNAME	= $(ARCHNAME)-64int
 !IF "$(CCTYPE)" != "MSVC70FREE"
 # If no registry, advapi32 is only used for Perl_pp_getlogin/getlogin/GetUserNameA
 # which is rare to execute
-!IF "$(USE_NO_REGISTRY)" != "undef"
+!  IF "$(USE_NO_REGISTRY)" != "undef"
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:advapi32.dll delayimp.lib
 MINIDELAYLOAD	=
-!ELSE
+!  ELSE
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 #miniperl never does any registry lookups
 MINIDELAYLOAD	= -DELAYLOAD:advapi32.dll
-!ENDIF
+!  ENDIF
 !ENDIF
 
 # Visual C++ 2005 and 2008 (VC++ 8.0 and 9.0) create manifest files for EXEs and
@@ -439,7 +415,7 @@ EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputre
 # Set the install location of the compiler headers/libraries.
 # These are saved into $Config{incpath} and $Config{libpth}.
 CCINCDIR	= $(CCHOME)\include
-!IF "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 !  IF "$(WIN64)" == "define"
 CCLIBDIR	= $(CCHOME)\lib\x64
 !  ELSE
@@ -480,7 +456,7 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 !IF "$(CCTYPE)" == ""
 CC		= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
 LINK32		= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
-!ELSE IF "$(__ICC)" != "define"
+!ELSEIF "$(__ICC)" != "define"
 CC		= cl
 LINK32		= link
 !ELSE
@@ -500,7 +476,7 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrt.lib
 !ELSE
 LIBC		= msvcrt.lib
@@ -509,38 +485,30 @@ LIBC		= msvcrt.lib
 !IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 LINK_DBG	= -debug
-!ELSE
-!IF  "$(CFG)" == "DebugSymbols"
+!ELSEIF  "$(CFG)" == "DebugSymbols"
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
-!ELSE
-!IF  "$(CFG)" == "DebugFull"
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!ELSEIF  "$(CFG)" == "DebugFull"
+!  IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrtd.lib
-!ELSE
+!  ELSE
 LIBC		= msvcrtd.lib
-!ENDIF
+!  ENDIF
 OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug
 !ELSE
+# Enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG).
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
-OPTIMIZE	= -O1 -MD -Zi -DNDEBUG
+OPTIMIZE	= -O1 -MD -Zi -DNDEBUG -GL
 # we enable debug symbols in release builds also
-LINK_DBG	= -debug -opt:ref,icf
+LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
 # in addition to the PDB symbols.  The default Dr. Watson that ships with
 # Windows can use the the former but not latter.  The free WinDbg can be
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
 #LINK_DBG	= $(LINK_DBG) -debugtype:both
-!  IF "$(CCTYPE)" != "MSVC60"
-# enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
-OPTIMIZE	= $(OPTIMIZE) -GL
-LINK_DBG	= $(LINK_DBG) -ltcg
 LIB_FLAGS	= -ltcg
-!  ENDIF
-!ENDIF
-!ENDIF
 !ENDIF
 
 !IF "$(WIN64)" == "define"
@@ -555,7 +523,7 @@ DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 !ENDIF
 
 # Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 !ENDIF
 
@@ -574,12 +542,10 @@ DEFINES		= $(DEFINES) -DNO_THREAD_SAFE_LOCALE
 # backward compatibility.  We define this symbol here for older 32-bit
 # compilers only (which aren't using it at all) for the sole purpose
 # of getting it into $Config{ccflags}.  That way if someone builds
-# Perl itself with e.g. VC6 but later installs an XS module using VC8
+# Perl itself with e.g. VC7 but later installs an XS module using VC8
 # the time_t types will still be compatible.
-!IF "$(WIN64)" == "undef"
-!  IF "$(PREMSVC80)" == "define"
+!IF "$(WIN64)" == "undef" && "$(PREMSVC80)" == "define"
 BUILDOPT	= $(BUILDOPT) -D_USE_32BIT_TIME_T
-!  ENDIF
 !ENDIF
 
 LIBBASEFILES	= \
@@ -588,7 +554,7 @@ LIBBASEFILES	= \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib comctl32.lib
 
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 !  IF  "$(CFG)" == "DebugFull"
 LIBBASEFILES	= $(LIBBASEFILES) msvcrtd.lib vcruntimed.lib
 !  ELSE
@@ -645,7 +611,7 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
 # Console vs GUI makes no difference for DLLs, so use default for cleaner
 # building cmd lines
-!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
+!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 !  IF "$(WIN64)" == "define"
 LINK_FLAGS	= $(LINK_FLAGS) -subsystem:console,"5.02"
 !  ELSE
@@ -694,9 +660,9 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	= ..\perl529.lib
-PERLSTATICLIB	= ..\perl529s.lib
-PERLDLL		= ..\perl529.dll
+PERLIMPLIB	= ..\perl531.lib
+PERLSTATICLIB	= ..\perl531s.lib
+PERLDLL		= ..\perl531.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
@@ -955,7 +921,7 @@ CFG_VARS	=					\
 #
 
 all : ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
-	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions PostExt \
+	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions \
 	$(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
@@ -1058,7 +1024,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef USE_64_BIT_INT&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
@@ -1244,13 +1210,6 @@ Extensions_clean:
 Extensions_realclean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
 
-PostExt: ..\lib\Storable\Limit.pm
-
-..\lib\Storable\Limit.pm: $(PERLEXE) Extensions
-	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
-	if not exist ..\lib\Storable mkdir ..\lib\Storable
-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
-
 #-------------------------------------------------------------------------------
 
 doc: $(PERLEXE) ..\pod\perltoc.pod
@@ -1272,7 +1231,6 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\README.amiga    ..\pod\perlamiga.pod
 	copy ..\README.android  ..\pod\perlandroid.pod
 	copy ..\README.bs2000   ..\pod\perlbs2000.pod
-	copy ..\README.ce       ..\pod\perlce.pod
 	copy ..\README.cn       ..\pod\perlcn.pod
 	copy ..\README.cygwin   ..\pod\perlcygwin.pod
 	copy ..\README.dos      ..\pod\perldos.pod
@@ -1301,7 +1259,7 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5294delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5315delta.pod
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
@@ -1329,7 +1287,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
-	-del /f $(LIBDIR)\Storable.pm $(LIBDIR)\Storable\Limit.pm
 	-del /f $(LIBDIR)\Win32.pm
 	-del /f $(LIBDIR)\Win32CORE.pm
 	-del /f $(LIBDIR)\Win32API\File.pm
@@ -1401,8 +1358,8 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5294delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
-	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
+	    perl5315delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \

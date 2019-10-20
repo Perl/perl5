@@ -453,6 +453,8 @@ jesse                                   jesse\100bestpractical.com
 +                                       jesse\100fsck.com
 +                                       jesse\100perl.org
 merijn                                  h.m.brand\100xs4all.nl
++                                       h.m.brand\100procura.nl
++                                       merijn.brand\100procura.nl
 +                                       h.m.brand\100hccnet.nl
 +                                       merijn\100l1.procura.nl
 +                                       merijn\100a5.(none)
@@ -527,6 +529,7 @@ allen\100huarp.harvard.edu              nort\100bottesini.harvard.edu
 +                                       nort\100qnx.com
 allens\100cpan.org                      easmith\100beatrice.rutgers.edu
 +                                       root\100dogberry.rutgers.edu
+ambs\100cpan.org                        hashashin\100gmail.com
 andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind.de
 +                                       andreas.koenig.7os6vvqr\100franz.ak.mind.de
 +                                       a.koenig\100mind.de
@@ -610,6 +613,7 @@ dev-perl\100pimb.org                    knew-p5p\100pimb.org
 +                                       lists-p5p\100pimb.org
 djberg86\100attbi.com                   djberg96\100attbi.com
 dk\100tetsuo.karasik.eu.org             dmitry\100karasik.eu.org
+dom\100earth.li                         dom\100semmle.com
 domo\100computer.org                    shouldbedomo\100mac.com
 +                                       domo\100slipper.ip.lu
 +                                       domo\100tcp.ip.lu

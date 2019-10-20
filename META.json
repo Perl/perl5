@@ -119,14 +119,14 @@
       "bugtracker" : {
          "web" : "https://rt.perl.org/"
       },
-      "homepage" : "http://www.perl.org/",
+      "homepage" : "https://www.perl.org/",
       "license" : [
-         "http://dev.perl.org/licenses/"
+         "https://dev.perl.org/licenses/"
       ],
       "repository" : {
-         "url" : "http://perl5.git.perl.org/"
+         "url" : "https://perl5.git.perl.org/"
       }
    },
-   "version" : "5.029004",
-   "x_serialization_backend" : "JSON::PP version 2.97001"
+   "version" : "5.031005",
+   "x_serialization_backend" : "JSON::PP version 4.04"
 }

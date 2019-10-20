@@ -7,11 +7,11 @@
 #define PERL_BISON_VERSION  30000
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -58,82 +58,85 @@ extern int yydebug;
     GRAMBARESTMT = 261,
     GRAMFULLSTMT = 262,
     GRAMSTMTSEQ = 263,
-    BAREWORD = 264,
-    METHOD = 265,
-    FUNCMETH = 266,
-    THING = 267,
-    PMFUNC = 268,
-    PRIVATEREF = 269,
-    QWLIST = 270,
-    FUNC0OP = 271,
-    FUNC0SUB = 272,
-    UNIOPSUB = 273,
-    LSTOPSUB = 274,
-    PLUGEXPR = 275,
-    PLUGSTMT = 276,
-    LABEL = 277,
-    FORMAT = 278,
-    SUB = 279,
-    SIGSUB = 280,
-    ANONSUB = 281,
-    ANON_SIGSUB = 282,
-    PACKAGE = 283,
-    USE = 284,
-    WHILE = 285,
-    UNTIL = 286,
-    IF = 287,
-    UNLESS = 288,
-    ELSE = 289,
-    ELSIF = 290,
-    CONTINUE = 291,
-    FOR = 292,
-    GIVEN = 293,
-    WHEN = 294,
-    DEFAULT = 295,
-    LOOPEX = 296,
-    DOTDOT = 297,
-    YADAYADA = 298,
-    FUNC0 = 299,
-    FUNC1 = 300,
-    FUNC = 301,
-    UNIOP = 302,
-    LSTOP = 303,
-    RELOP = 304,
-    EQOP = 305,
-    MULOP = 306,
-    ADDOP = 307,
-    DOLSHARP = 308,
-    DO = 309,
-    HASHBRACK = 310,
-    NOAMP = 311,
-    LOCAL = 312,
-    MY = 313,
-    REQUIRE = 314,
-    COLONATTR = 315,
-    FORMLBRACK = 316,
-    FORMRBRACK = 317,
-    PREC_LOW = 318,
-    OROP = 319,
-    DOROP = 320,
-    ANDOP = 321,
-    NOTOP = 322,
-    ASSIGNOP = 323,
-    OROR = 324,
-    DORDOR = 325,
-    ANDAND = 326,
-    BITOROP = 327,
-    BITANDOP = 328,
-    SHIFTOP = 329,
-    MATCHOP = 330,
-    UMINUS = 331,
-    REFGEN = 332,
-    POWOP = 333,
-    PREINC = 334,
-    PREDEC = 335,
-    POSTINC = 336,
-    POSTDEC = 337,
-    POSTJOIN = 338,
-    ARROW = 339
+    GRAMSUBSIGNATURE = 264,
+    BAREWORD = 265,
+    METHOD = 266,
+    FUNCMETH = 267,
+    THING = 268,
+    PMFUNC = 269,
+    PRIVATEREF = 270,
+    QWLIST = 271,
+    FUNC0OP = 272,
+    FUNC0SUB = 273,
+    UNIOPSUB = 274,
+    LSTOPSUB = 275,
+    PLUGEXPR = 276,
+    PLUGSTMT = 277,
+    LABEL = 278,
+    FORMAT = 279,
+    SUB = 280,
+    SIGSUB = 281,
+    ANONSUB = 282,
+    ANON_SIGSUB = 283,
+    PACKAGE = 284,
+    USE = 285,
+    WHILE = 286,
+    UNTIL = 287,
+    IF = 288,
+    UNLESS = 289,
+    ELSE = 290,
+    ELSIF = 291,
+    CONTINUE = 292,
+    FOR = 293,
+    GIVEN = 294,
+    WHEN = 295,
+    DEFAULT = 296,
+    LOOPEX = 297,
+    DOTDOT = 298,
+    YADAYADA = 299,
+    FUNC0 = 300,
+    FUNC1 = 301,
+    FUNC = 302,
+    UNIOP = 303,
+    LSTOP = 304,
+    RELOP = 305,
+    EQOP = 306,
+    MULOP = 307,
+    ADDOP = 308,
+    DOLSHARP = 309,
+    DO = 310,
+    HASHBRACK = 311,
+    NOAMP = 312,
+    LOCAL = 313,
+    MY = 314,
+    REQUIRE = 315,
+    COLONATTR = 316,
+    FORMLBRACK = 317,
+    FORMRBRACK = 318,
+    SUBLEXSTART = 319,
+    SUBLEXEND = 320,
+    PREC_LOW = 321,
+    OROP = 322,
+    DOROP = 323,
+    ANDOP = 324,
+    NOTOP = 325,
+    ASSIGNOP = 326,
+    OROR = 327,
+    DORDOR = 328,
+    ANDAND = 329,
+    BITOROP = 330,
+    BITANDOP = 331,
+    SHIFTOP = 332,
+    MATCHOP = 333,
+    UMINUS = 334,
+    REFGEN = 335,
+    POWOP = 336,
+    PREINC = 337,
+    PREDEC = 338,
+    POSTINC = 339,
+    POSTDEC = 340,
+    POSTJOIN = 341,
+    ARROW = 342
   };
 #endif
 
@@ -146,6 +149,7 @@ S_is_opval_token(int type) {
     case FUNC0OP:
     case FUNC0SUB:
     case FUNCMETH:
+    case LABEL:
     case LSTOPSUB:
     case METHOD:
     case PLUGEXPR:
@@ -162,7 +166,7 @@ S_is_opval_token(int type) {
 #endif /* PERL_IN_TOKE_C */
 #endif /* PERL_CORE */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 
@@ -173,6 +177,8 @@ union YYSTYPE
     GV *gvval;
 
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -183,6 +189,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * ac323bb6f3cacf4eb8eda6403a58c41f30954d07a4a6d6f7f00de81577b2c79a perly.y
- * b6fae5748f9bef6db4740aa5e122b84ac5181852d42474d0ecad621fa4253306 regen_perly.pl
+ * c522864236e07231c0a218cecf8cdcd82b74ce082b72f10199de4deeff580100 perly.y
+ * 0947213b55d0ed11693554bea04987e886cf285f5c14cf9075fa1e7acc3f4061 regen_perly.pl
  * ex: set ro: */

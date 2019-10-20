@@ -23,6 +23,10 @@ env:
         - CONFIGURE_ARGS='-Dusethreads'
         - CONFIGURE_ARGS='-Uusethreads' OUT_OF_SOURCE='true'
         - CONFIGURE_ARGS='-Dusethreads' OUT_OF_SOURCE='true'
+        - CONFIGURE_ARGS='-DPERL_GLOBAL_STRUCT'
+        - CONFIGURE_ARGS='-DPERL_GLOBAL_STRUCT_PRIVATE'
+        - CONFIGURE_ARGS='-Duseshrplib -Dusesitecustomize'
+        - CONFIGURE_ARGS='-Duserelocatableinc'
 
 # only use gcc on linux, and only use clang on osx for now
 matrix:

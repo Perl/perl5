@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302140';
+our $VERSION = '1.302168';
 
 
 use Carp qw/confess croak/;
@@ -71,6 +71,8 @@ sub DESTROY {
         # show the warning about using eq.
         no warnings 'uninitialized';
         if($self->{+EVAL_ERROR} eq $@ && $hub->is_local) {
+            require Carp;
+            my $mess = Carp::longmess("Context destroyed");
             my $frame = $self->{+_IS_SPAWN} || $self->{+TRACE}->frame;
             warn <<"            EOT";
 A context appears to have been destroyed without first calling release().
@@ -86,6 +88,10 @@ release():
   File: $frame->[1]
   Line: $frame->[2]
   Tool: $frame->[3]
+
+Here is a trace to the code that caused the context to be destroyed, this could
+be an exit(), a goto, or simply the end of a scope:
+$mess
 
 Cleaning up the CONTEXT stack...
             EOT
@@ -325,7 +331,15 @@ sub fail {
         "Test2::Event::Fail"
     );
 
-    $e->add_info({tag => 'DIAG', debug => 1, details => $_}) for @diag;
+    for my $msg (@diag) {
+        if (ref($msg) eq 'Test2::EventFacet::Info::Table') {
+            $e->add_info({tag => 'DIAG', debug => 1, $msg->info_args});
+        }
+        else {
+            $e->add_info({tag => 'DIAG', debug => 1, details => $msg});
+        }
+    }
+
     $self->{+HUB}->send($e);
     return $e;
 }
@@ -342,7 +356,15 @@ sub fail_and_release {
         "Test2::Event::Fail"
     );
 
-    $e->add_info({tag => 'DIAG', debug => 1, details => $_}) for @diag;
+    for my $msg (@diag) {
+        if (ref($msg) eq 'Test2::EventFacet::Info::Table') {
+            $e->add_info({tag => 'DIAG', debug => 1, $msg->info_args});
+        }
+        else {
+            $e->add_info({tag => 'DIAG', debug => 1, details => $msg});
+        }
+    }
+
     $self->{+HUB}->send($e);
     $self->release;
     return 0;
@@ -490,7 +512,14 @@ should always use C<context()> which is exported by the L<Test2::API> module.
     sub my_ok {
         my ($bool, $name) = @_;
         my $ctx = context();
-        $ctx->ok($bool, $name);
+
+        if ($bool) {
+            $ctx->pass($name);
+        }
+        else {
+            $ctx->fail($name);
+        }
+
         $ctx->release; # You MUST do this!
         return $bool;
     }
@@ -715,6 +744,10 @@ write more clear and compact code.
 This lets you send an L<Test2::Event::Fail> event. You may optionally provide a
 C<$name> and C<@diagnostics> messages.
 
+Diagnostics messages can be simple strings, data structures, or instances of
+L<Test2::EventFacet::Info::Table> (which are converted inline into the
+L<Test2::EventFacet::Info> structure).
+
 =item my $false = $ctx->fail_and_release()
 
 =item my $false = $ctx->fail_and_release($name)
@@ -760,7 +793,8 @@ failure. If you do not want automatic diagnostics you should use the
 C<send_event()> method directly.
 
 The third argument C<\@on_fail>) is an optional set of diagnostics to be sent in
-the event of a test failure.
+the event of a test failure. Unlike with C<fail()> these diagnostics must be
+plain strings, data structures are not supported.
 
 =item $event = $ctx->note($message)
 
@@ -975,7 +1009,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2019 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

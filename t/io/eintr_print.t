@@ -20,7 +20,7 @@ use IO::Handle;
 
 skip_all("only for dev versions for now") if ((int($]*1000) & 1) == 0);
 skip_all("does not match platform whitelist")
-    unless ($^O =~ /^(linux|.*bsd|darwin|solaris)$/);
+    unless ($^O =~ /^(linux|android|.*bsd|darwin|solaris)$/);
 skip_all("ualarm() not implemented on this platform")
     unless Time::HiRes::d_ualarm();
 skip_all("usleep() not implemented on this platform")

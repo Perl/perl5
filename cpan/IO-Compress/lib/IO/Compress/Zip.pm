@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.081 qw(:Status );
-use IO::Compress::RawDeflate 2.081 ();
-use IO::Compress::Adapter::Deflate 2.081 ;
-use IO::Compress::Adapter::Identity 2.081 ;
-use IO::Compress::Zlib::Extra 2.081 ;
-use IO::Compress::Zip::Constants 2.081 ;
+use IO::Compress::Base::Common  2.087 qw(:Status );
+use IO::Compress::RawDeflate 2.087 ();
+use IO::Compress::Adapter::Deflate 2.087 ;
+use IO::Compress::Adapter::Identity 2.087 ;
+use IO::Compress::Zlib::Extra 2.087 ;
+use IO::Compress::Zip::Constants 2.087 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.081 (); 
+use Compress::Raw::Zlib  2.087 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.081 ; 
+           import  IO::Compress::Adapter::Bzip2 2.087 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.081 ; 
+           import  IO::Compress::Bzip2 2.087 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.081 ; 
+           import  IO::Compress::Adapter::Lzma 2.087 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.081 ; 
+           import  IO::Compress::Lzma 2.087 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.081';
+$VERSION = '2.087';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -246,13 +246,17 @@ sub mkHeader
         &{ *$self->{ZipData}{FilterName} }() ;
     }
 
-#    if ( $param->getValue('utf8') ) {
-#        require Encode ;
-#        $filename = Encode::encode_utf8($filename)
-#            if length $filename ;
-#        $comment = Encode::encode_utf8($comment)
-#            if length $comment ;
-#    }
+   if ( $param->getValue('efs') && $] >= 5.008004) {
+        if (length $filename) {
+            utf8::downgrade($filename, 1)
+                or Carp::croak "Wide character in zip filename";
+        }
+
+        if (length $comment) {
+            utf8::downgrade($comment, 1)
+                or Carp::croak "Wide character in zip comment";
+        }
+   }   
 
     my $hdr = '';
 
@@ -325,8 +329,8 @@ sub mkHeader
     $gpFlag |= ZIP_GP_FLAG_LZMA_EOS_PRESENT
         if $method == ZIP_CM_LZMA ;
 
-#    $gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
-#        if  $param->getValue('utf8') && (length($filename) || length($comment));
+    $gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
+        if  $param->getValue('efs') && (length($filename) || length($comment));
 
     my $version = $ZIP_CM_MIN_VERSIONS{$method};
     $version = ZIP64_MIN_VERSION
@@ -682,7 +686,7 @@ our %PARAMS = (
             'name'      => [IO::Compress::Base::Common::Parse_any,       ''],
             'filtername'=> [IO::Compress::Base::Common::Parse_code,      undef],
             'canonicalname'=> [IO::Compress::Base::Common::Parse_boolean,   0],
-#            'utf8'      => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'efs'       => [IO::Compress::Base::Common::Parse_boolean,   0],
             'time'      => [IO::Compress::Base::Common::Parse_any,       undef],
             'extime'    => [IO::Compress::Base::Common::Parse_any,       undef],
             'exunix2'   => [IO::Compress::Base::Common::Parse_any,       undef], 
@@ -914,7 +918,7 @@ compressed data to files or buffer.
 
 The primary purpose of this module is to provide streaming write access to
 zip files and buffers. It is not a general-purpose file archiver. If that
-is what you want, check out C<Archive::Zip>.
+is what you want, check out C<Archive::Zip> or C<Archive::Zip::SimpleZip>.
 
 At present three compression methods are supported by IO::Compress::Zip,
 namely Store (no compression at all), Deflate, Bzip2 and LZMA.
@@ -1081,9 +1085,7 @@ This parameter defaults to 0.
 
 =item C<< BinModeIn => 0|1 >>
 
-When reading from a file or filehandle, set C<binmode> before reading.
-
-Defaults to 0.
+This option is now a no-op. All files will be read in binmode.
 
 =item C<< Append => 0|1 >>
 
@@ -1293,6 +1295,9 @@ no zip filename field will be created.
 Note that both the C<CanonicalName> and C<FilterName> options
 can modify the value used for the zip filename header field.
 
+Also note that you should set the C<Efs> option to true if you are working
+with UTF8 filenames. 
+
 =item C<< CanonicalName => 0|1 >>
 
 This option controls whether the filename field in the zip header is
@@ -1344,6 +1349,19 @@ filenames before they are stored in C<$zipfile>.
         zip [ <$dir/*.txt> ] => $zipfile,
             FilterName => sub { s[^$dir/][] } ;
     }
+
+=item C<< Efs => 0|1 >>
+
+This option controls setting of the "Language Encoding Flag" (EFS) in the zip
+archive. When set, the filename and comment fields for the zip archive MUST
+be valid UTF-8. 
+
+If the string used for the filename and/or comment is not valid UTF-8 when this option
+is true, the script will die with a "wide character" error.
+
+Note that this option only works with Perl 5.8.4 or better.
+
+This option defaults to B<false>.
 
 =item C<< Time => $number >>
 
@@ -1425,6 +1443,8 @@ By default no UnixN extra field is created.
 
 Stores the contents of C<$comment> in the Central File Header of
 the zip file.
+
+Set the C<Efs> option to true if you want to store a UTF8 comment.
 
 By default, no comment field is written to the zip file.
 
@@ -1922,7 +1942,7 @@ See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzip>, L<IO::Uncompress::UnLzip>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Compress::Zstd>, L<IO::Uncompress::UnZstd>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<IO::Compress::FAQ|IO::Compress::FAQ>
 
@@ -1953,7 +1973,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2018 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2019 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

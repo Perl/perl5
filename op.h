@@ -38,21 +38,12 @@
 
 typedef PERL_BITFIELD16 Optype;
 
-/* this field now either points to the next sibling or to the parent,
- * depending on op_moresib. So rename it from op_sibling to op_sibparent.
- */
-#ifdef PERL_OP_PARENT
-#  define _OP_SIBPARENT_FIELDNAME op_sibparent
-#else
-#  define _OP_SIBPARENT_FIELDNAME op_sibling
-#endif
-
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
 #define BASEOP				\
     OP*		op_next;		\
-    OP*		_OP_SIBPARENT_FIELDNAME;\
+    OP*		op_sibparent;		\
     OP*		(*op_ppaddr)(pTHX);	\
     PADOFFSET	op_targ;		\
     PERL_BITFIELD16 op_type:9;		\
@@ -94,7 +85,7 @@ Deprecated.  Use C<GIMME_V> instead.
 =cut
 */
 
-#define GIMME_V		OP_GIMME(PL_op, block_gimme())
+#define GIMME_V		Perl_gimme_V(aTHX)
 
 /* Public flags */
 
@@ -108,7 +99,12 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_REF		16	/* Certified reference. */
 				/*  (Return container, not containee). */
 #define OPf_MOD		32	/* Will modify (lvalue). */
+
 #define OPf_STACKED	64	/* Some arg is arriving on the stack. */
+                                /*   Indicates mutator-variant of op for those
+                                 *     ops which support them, e.g. $x += 1
+                                 */
+
 #define OPf_SPECIAL	128	/* Do something weird for this op: */
 				/*  On local LVAL, don't init local value. */
 				/*  On OP_SORT, subroutine is inlined. */
@@ -693,19 +689,22 @@ least an C<UNOP>.
 
 #ifdef PERL_CORE
 struct opslot {
-    /* keep opslot_next first */
-    OPSLOT *	opslot_next;		/* next slot */
-    OPSLAB *	opslot_slab;		/* owner */
+    U16         opslot_size;        /* size of this slot (in pointers) */
+    U16         opslot_offset;      /* offset from start of slab (in ptr units) */
     OP		opslot_op;		/* the op itself */
 };
 
 struct opslab {
-    OPSLOT *	opslab_first;		/* first op in this slab */
     OPSLAB *	opslab_next;		/* next slab */
-    OP *	opslab_freed;		/* chain of freed ops */
-    size_t	opslab_refcnt;		/* number of ops */
+    OPSLAB *	opslab_head;		/* first slab in chain */
+    OP *	opslab_freed;		/* chain of freed ops (head only)*/
+    size_t	opslab_refcnt;		/* number of ops (head slab only) */
+    U16		opslab_size;		/* size of slab in pointers,
+                                           including header */
+    U16         opslab_free_space;	/* space available in this slab
+                                           for allocating new ops (in ptr
+                                           units) */
 # ifdef PERL_DEBUG_READONLY_OPS
-    U16		opslab_size;		/* size of slab in pointers */
     bool	opslab_readonly;
 # endif
     OPSLOT	opslab_slots;		/* slots begin here */
@@ -715,7 +714,11 @@ struct opslab {
 # define OPSLOT_HEADER_P	(OPSLOT_HEADER/sizeof(I32 *))
 # define OpSLOT(o)		(assert_(o->op_slabbed) \
 				 (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
-# define OpSLAB(o)		OpSLOT(o)->opslot_slab
+
+/* the first (head) opslab of the chain in which this op is allocated */
+# define OpSLAB(o) \
+    (((OPSLAB*)( (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset))->opslab_head)
+
 # define OpslabREFCNT_dec(slab)      \
 	(((slab)->opslab_refcnt == 1) \
 	 ? opslab_free_nopad(slab)     \
@@ -741,29 +744,29 @@ struct block_hooks {
 =for apidoc mx|U32|BhkFLAGS|BHK *hk
 Return the BHK's flags.
 
-=for apidoc mx|void *|BhkENTRY|BHK *hk|which
+=for apidoc mxu|void *|BhkENTRY|BHK *hk|which
 Return an entry from the BHK structure.  C<which> is a preprocessor token
 indicating which entry to return.  If the appropriate flag is not set
 this will return C<NULL>.  The type of the return value depends on which
 entry you ask for.
 
-=for apidoc Amx|void|BhkENTRY_set|BHK *hk|which|void *ptr
+=for apidoc Amxu|void|BhkENTRY_set|BHK *hk|which|void *ptr
 Set an entry in the BHK structure, and set the flags to indicate it is
 valid.  C<which> is a preprocessing token indicating which entry to set.
 The type of C<ptr> depends on the entry.
 
-=for apidoc Amx|void|BhkDISABLE|BHK *hk|which
+=for apidoc Amxu|void|BhkDISABLE|BHK *hk|which
 Temporarily disable an entry in this BHK structure, by clearing the
 appropriate flag.  C<which> is a preprocessor token indicating which
 entry to disable.
 
-=for apidoc Amx|void|BhkENABLE|BHK *hk|which
+=for apidoc Amxu|void|BhkENABLE|BHK *hk|which
 Re-enable an entry in this BHK structure, by setting the appropriate
 flag.  C<which> is a preprocessor token indicating which entry to enable.
 This will assert (under -DDEBUGGING) if the entry doesn't contain a valid
 pointer.
 
-=for apidoc mx|void|CALL_BLOCK_HOOKS|which|arg
+=for apidoc mxu|void|CALL_BLOCK_HOOKS|which|arg
 Call all the registered block hooks for type C<which>.  C<which> is a
 preprocessing token; the type of C<arg> depends on C<which>.
 
@@ -980,7 +983,7 @@ and C<L</OpMAYBESIB_set>>. For a higher-level interface, see
 C<L</op_sibling_splice>>.
 
 =for apidoc Am|void|OpLASTSIB_set|OP *o|OP *parent
-Marks C<o> as having no further siblings. On C<PERL_OP_PARENT> builds, marks
+Marks C<o> as having no further siblings and marks
 o as having the specified parent. See also C<L</OpMORESIB_set>> and
 C<OpMAYBESIB_set>. For a higher-level interface, see
 C<L</op_sibling_splice>>.
@@ -1025,24 +1028,16 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define OP_TYPE_ISNT_AND_WASNT(o, type) \
     ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
 
+/* should match anything that uses ck_ftst in regen/opcodes */
+#define OP_IS_STAT(op) (OP_IS_FILETEST(op) || (op) == OP_LSTAT || (op) == OP_STAT)
 
-#ifdef PERL_OP_PARENT
-#  define OpHAS_SIBLING(o)	(cBOOL((o)->op_moresib))
-#  define OpSIBLING(o)		(0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
-#  define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
-#  define OpLASTSIB_set(o, parent) \
-       ((o)->op_moresib = 0, (o)->op_sibparent = (parent))
-#  define OpMAYBESIB_set(o, sib, parent) \
-       ((o)->op_sibparent = ((o)->op_moresib = cBOOL(sib)) ? (sib) : (parent))
-#else
-#  define OpHAS_SIBLING(o)	(cBOOL((o)->op_sibling))
-#  define OpSIBLING(o)		(0 + (o)->op_sibling)
-#  define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibling = (sib))
-#  define OpLASTSIB_set(o, parent) \
-       ((o)->op_moresib = 0, (o)->op_sibling = NULL)
-#  define OpMAYBESIB_set(o, sib, parent) \
-       ((o)->op_moresib = cBOOL(sib), (o)->op_sibling = (sib))
-#endif
+#define OpHAS_SIBLING(o)	(cBOOL((o)->op_moresib))
+#define OpSIBLING(o)		(0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
+#define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
+#define OpLASTSIB_set(o, parent) \
+    ((o)->op_moresib = 0, (o)->op_sibparent = (parent))
+#define OpMAYBESIB_set(o, sib, parent) \
+    ((o)->op_sibparent = ((o)->op_moresib = cBOOL(sib)) ? (sib) : (parent))
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
 /* for backwards compatibility only */
@@ -1117,6 +1112,14 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
       "%s operator is deprecated. This will be a fatal error in "   \
       "Perl 5.32"
 #endif
+
+/* stuff for OP_ARGCHECK */
+
+struct  op_argcheck_aux {
+    UV   params;     /* number of positional parameters */
+    UV   opt_params; /* number of optional positional parameters */
+    char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
+};
 
 
 /*

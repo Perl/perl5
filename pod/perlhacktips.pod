@@ -915,7 +915,7 @@ Lots of junk will go past as gdb reads in the relevant source files and
 libraries, and then:
 
     Breakpoint 1, Perl_pp_add () at pp_hot.c:309
-    309         dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+    1396    dSP; dATARGET; bool useleft; SV *svl, *svr;
     (gdb) step
     311           dPOPTOPnnrl_ul;
     (gdb)
@@ -1276,7 +1276,7 @@ contains C<-shared> (at least on Linux).
 =back
 
 See also
-L<http://code.google.com/p/address-sanitizer/wiki/AddressSanitizer>.
+L<https://github.com/google/sanitizers/wiki/AddressSanitizer>.
 
 
 =head1 PROFILING

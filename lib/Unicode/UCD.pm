@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.72';
+our $VERSION = '0.73';
 
 require Exporter;
 
@@ -4025,7 +4025,7 @@ sub search_invlist {
 C<search_invlist> is used to search an inversion list returned by
 C<prop_invlist> or C<prop_invmap> for a particular L</code point argument>.
 C<undef> is returned if the code point is not found in the inversion list
-(this happens only when it is not a legal L<code point argument>, or is less
+(this happens only when it is not a legal L</code point argument>, or is less
 than the list's first element).  A warning is raised in the first instance.
 
 Otherwise, it returns the index into the list of the range that contains the

@@ -4,7 +4,7 @@ perlfaq4 - Data Manipulation
 
 =head1 VERSION
 
-version 5.20180915
+version 5.20190126
 
 =head1 DESCRIPTION
 
@@ -1243,6 +1243,10 @@ indentation correctly preserved:
       And whither then? I cannot say.
         --Bilbo in /usr/src/perl/pp_ctl.c
     EVER_ON_AND_ON
+
+Beginning with Perl version 5.26, a much simpler and cleaner way to
+write indented here documents has been added to the language: the
+tilde (~) modifier. See L<perlop/"Indented Here-docs"> for details.
 
 =head1 Data: Arrays
 

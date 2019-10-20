@@ -65,6 +65,8 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq bitwise)],
     "5.29"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq bitwise)],
+    "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
+		    evalbytes current_sub fc postderef_qq bitwise)],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -242,6 +244,9 @@ read_only_bottom_close_and_rename($pm);
 
 print $h <<EOH;
 
+#ifndef PERL_FEATURE_H_
+#define PERL_FEATURE_H_
+
 #if defined(PERL_CORE) || defined (PERL_EXT)
 
 #define HINT_FEATURE_SHIFT	$HintShift
@@ -364,6 +369,8 @@ print $h <<EOJ;
     else			    PL_hints &= ~HINT_UNI_8_BIT;
 }
 #endif /* PERL_IN_OP_C */
+
+#endif /* PERL_FEATURE_H_ */
 EOJ
 
 read_only_bottom_close_and_rename($h);
@@ -375,7 +382,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.54';
+our $VERSION = '1.55';
 
 FEATURES
 

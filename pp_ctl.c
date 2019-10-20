@@ -37,6 +37,11 @@
 #define RUN_PP_CATCHABLY(thispp) \
     STMT_START { if (CATCH_GET) return docatch(thispp); } STMT_END
 
+#define dopopto_cursub() \
+    (PL_curstackinfo->si_cxsubix >= 0        \
+        ? PL_curstackinfo->si_cxsubix        \
+        : dopoptosub_at(cxstack, cxstack_ix))
+
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
 PP(pp_wantarray)
@@ -50,7 +55,7 @@ PP(pp_wantarray)
 	if (!(cx = caller_cx(1,NULL))) RETPUSHUNDEF;
     }
     else {
-      cxix = dopoptosub(cxstack_ix);
+      cxix = dopopto_cursub();
       if (cxix < 0)
 	RETPUSHUNDEF;
       cx = &cxstack[cxix];
@@ -275,6 +280,24 @@ PP(pp_substcont)
                     cBOOL(cx->sb_rxtainted &
 			  (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL))
                 );
+
+                /* sv_magic(), when adding magic (e.g.taint magic), also
+                 * recalculates any pos() magic, converting any byte offset
+                 * to utf8 offset. Make sure pos() is reset before this
+                 * happens rather than using the now invalid value (since
+                 * we've just replaced targ's pvx buffer with the
+                 * potentially shorter dstr buffer). Normally (i.e. in
+                 * non-taint cases), pos() gets removed a few lines later
+                 * with the SvSETMAGIC().
+                 */
+                {
+                    MAGIC *mg;
+                    mg = mg_find_mglob(targ);
+                    if (mg) {
+                        MgBYTEPOS_set(mg, targ, SvPVX(targ), -1);
+                    }
+                }
+
 		SvTAINT(TARG);
 	    }
 	    /* PL_tainted must be correctly set for this mg_set */
@@ -781,7 +804,8 @@ PP(pp_formline)
 			 * for safety */
 			grow = linemax;
 			while (linemark--)
-			    s += UTF8SKIP(s);
+			    s += UTF8_SAFE_SKIP(s,
+                                            (U8 *) SvEND(PL_formtarget));
 			linemark = s - (U8*)SvPVX(PL_formtarget);
 		    }
 		    /* Easy. They agree.  */
@@ -1177,14 +1201,18 @@ PP(pp_flip)
 }
 
 /* This code tries to decide if "$left .. $right" should use the
-   magical string increment, or if the range is numeric (we make
-   an exception for .."0" [#18165]). AMS 20021031. */
+   magical string increment, or if the range is numeric. Initially,
+   an exception was made for *any* string beginning with "0" (see
+   [#18165], AMS 20021031), but now that is only applied when the
+   string's length is also >1 - see the rules now documented in
+   perlop [#133695] */
 
 #define RANGE_IS_NUMERIC(left,right) ( \
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
 	(((!SvOK(left) && SvOK(right)) || ((!SvOK(left) || \
-          looks_like_number(left)) && SvPOKp(left) && *SvPVX_const(left) != '0')) \
+          looks_like_number(left)) && SvPOKp(left) \
+          && !(*SvPVX_const(left) == '0' && SvCUR(left)>1 ) )) \
          && (!SvOK(right) || looks_like_number(right))))
 
 PP(pp_flop)
@@ -1361,10 +1389,12 @@ Perl_dowantarray(pTHX)
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
+/* note that this function has mostly been superseded by Perl_gimme_V */
+
 U8
 Perl_block_gimme(pTHX)
 {
-    const I32 cxix = dopoptosub(cxstack_ix);
+    const I32 cxix = dopopto_cursub();
     U8 gimme;
     if (cxix < 0)
 	return G_VOID;
@@ -1379,7 +1409,7 @@ Perl_block_gimme(pTHX)
 I32
 Perl_is_lvalue_sub(pTHX)
 {
-    const I32 cxix = dopoptosub(cxstack_ix);
+    const I32 cxix = dopopto_cursub();
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
     if (CxLVAL(cxstack + cxix) && CvLVALUE(cxstack[cxix].blk_sub.cv))
@@ -1719,9 +1749,13 @@ Perl_die_unwind(pTHX_ SV *msv)
 	 * perls 5.13.{1..7} which had late setting of $@ without this
 	 * early-setting hack.
 	 */
-	if (!(in_eval & EVAL_KEEPERR))
+	if (!(in_eval & EVAL_KEEPERR)) {
+            /* remove any read-only/magic from the SV, so we don't
+               get infinite recursion when setting ERRSV */
+            SANE_ERRSV();
 	    sv_setsv_flags(ERRSV, exceptsv,
                         (SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+        }
 
 	if (in_eval & EVAL_KEEPERR) {
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
@@ -1783,8 +1817,10 @@ Perl_die_unwind(pTHX_ SV *msv)
              */
             S_pop_eval_context_maybe_croak(aTHX_ cx, exceptsv, 2);
 
-	    if (!(in_eval & EVAL_KEEPERR))
+	    if (!(in_eval & EVAL_KEEPERR)) {
+                SANE_ERRSV();
 		sv_setsv(ERRSV, exceptsv);
+            }
 	    PL_restartjmpenv = restartjmpenv;
 	    PL_restartop = restartop;
 	    JMPENV_JUMP(3);
@@ -1831,7 +1867,7 @@ frame for the sub call itself.
 const PERL_CONTEXT *
 Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
 {
-    I32 cxix = dopoptosub(cxstack_ix);
+    I32 cxix = dopopto_cursub();
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *ccstack = cxstack;
     const PERL_SI *top_si = PL_curstackinfo;
@@ -2433,7 +2469,7 @@ PP(pp_return)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    const I32 cxix = dopoptosub(cxstack_ix);
+    const I32 cxix = dopopto_cursub();
 
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
@@ -2804,7 +2840,7 @@ PP(pp_goto)
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
 
-	    cxix = dopoptosub(cxstack_ix);
+	    cxix = dopopto_cursub();
             if (cxix < 0) {
                 DIE(aTHX_ "Can't goto subroutine outside a subroutine");
             }
@@ -2926,6 +2962,9 @@ PP(pp_goto)
                  * this is a cx_popblock(), less all the stuff we already did
                  * for cx_topblock() earlier */
                 PL_curcop = cx->blk_oldcop;
+                /* this is cx_popsub, less all the stuff we already did */
+                PL_curstackinfo->si_cxsubix = cx->blk_sub.old_cxsubix;
+
                 CX_POP(cx);
 
 		/* Push a mark for the start of arglist */

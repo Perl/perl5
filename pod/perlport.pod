@@ -827,7 +827,7 @@ Mailing list: cpan-testers-discuss@perl.org
 
 =item *
 
-Testing results: L<http://www.cpantesters.org/>
+Testing results: L<https://www.cpantesters.org/>
 
 =back
 
@@ -1032,12 +1032,12 @@ The C<Win32::*> modules in L<Win32>.
 
 =item *
 
-The ActiveState Pages, L<http://www.activestate.com/>
+The ActiveState Pages, L<https://www.activestate.com/>
 
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed
-as L<perlcygwin>), L<http://www.cygwin.com/>
+as L<perlcygwin>), L<https://www.cygwin.com/>
 
 =item *
 
@@ -1647,6 +1647,11 @@ Invokes VMS debugger.
 C<exec LIST> without the use of indirect object syntax (C<exec PROGRAM LIST>)
 may fall back to trying the shell if the first C<spawn()> fails.
 
+Note that the list form of exec() is emulated since the Win32 API
+CreateProcess() accepts a simple string rather than an array of
+command-line arguments.  This may have security implications for your
+code.
+
 (SunOS, Solaris, HP-UX)
 Does not automatically flush output handles on some platforms.
 
@@ -1959,12 +1964,18 @@ Not implemented.
 
 =item open
 
-(Win32, S<RISC OS>)
+(S<RISC OS>)
 Open modes C<|-> and C<-|> are unsupported.
 
 (SunOS, Solaris, HP-UX)
 Opening a process does not automatically flush output handles on some
 platforms.
+
+(Win32)
+Both of modes C<|-> and C<-|> are supported, but the list form is
+emulated since the Win32 API CreateProcess() accepts a simple string
+rather than an array of arguments.  This may have security
+implications for your code.
 
 =item readlink
 
@@ -2123,6 +2134,11 @@ Failure to C<spawn()> a subprocess is indicated by setting
 L<C<$?>|perlvar/$?> to C<<< 255 << 8 >>>.  L<C<$?>|perlvar/$?> is set in a
 way compatible with Unix (i.e. the exit status of the subprocess is
 obtained by C<<< $? >> 8 >>>, as described in the documentation).
+
+Note that the list form of system() is emulated since the Win32 API
+CreateProcess() accepts a simple string rather than an array of
+command-line arguments.  This may have security implications for your
+code.
 
 (S<RISC OS>)
 There is no shell to process metacharacters, and the native standard is
@@ -2517,7 +2533,7 @@ L<http://www.cpan.org/ports/index.html> for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlamiga>, L<perlbs2000>,
-L<perlce>, L<perlcygwin>, L<perldos>,
+L<perlcygwin>, L<perldos>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
 L<perlmacos>, L<perlmacosx>,
 L<perlnetware>, L<perlos2>, L<perlos390>, L<perlos400>,

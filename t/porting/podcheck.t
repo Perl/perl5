@@ -105,7 +105,7 @@ encoding (declared or auto-detected) with C<\N{REPLACEMENT CHARACTER}>.
 =back
 
 If the C<PERL_POD_PEDANTIC> environment variable is set or the C<--pedantic>
-command line argument is provided then a few more checks are made.
+command line argument is provided, then a few more checks are made.
 The pedantic checks are:
 
 =over
@@ -467,7 +467,7 @@ my $C_path_re = qr{ ^
 
 # '.PL' files should be excluded, as they aren't final pods, but often contain
 # material used in generating pods, and so can look like a pod.  We can't use
-# the regexp above because case sensisitivity is important for these, as some
+# the regexp above because case sensitivity is important for these, as some
 # '.pl' files should be examined for pods.  Instead look through the MANIFEST
 # for .PL files and get their full path names, so we can exclude each such
 # file explicitly.  This works because other porting tests prohibit having two
@@ -671,7 +671,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
     my %linkable_item;      # Bool: if the latest =item is linkable.  It isn't
                             # for bullet and number lists
     my %linkable_nodes;     # Pod::Checker adds all =items to its node list,
-                            # but not all =items are linkable to
+                            # but not all =items are linkable-to
     my %running_CFL_text;   # The current text that is being accumulated until
                             # an end_FOO is found, and this includes any C<>,
                             # F<>, or L<> directives.
@@ -1359,28 +1359,6 @@ package My::Pod::Checker {      # Extend Pod::Checker
     }
 }
 
-package Tie_Array_to_FH {  # So printing actually goes to an array
-
-    my %array;
-
-    sub TIEHANDLE {
-        my $class = shift;
-        my $array_ref = shift;
-
-        my $self = bless \do{ my $anonymous_scalar }, $class;
-        $array{Scalar::Util::refaddr $self} = $array_ref;
-
-        return $self;
-    }
-
-    sub PRINT {
-        my $self = shift;
-        push @{$array{Scalar::Util::refaddr $self}}, @_;
-        return 1;
-    }
-}
-
-
 my %filename_to_checker; # Map a filename to its pod checker object
 my %id_to_checker;       # Map a checksum to its pod checker object
 my %nodes;               # key is filename, values are nodes in that file.
@@ -1475,7 +1453,7 @@ if ($show_counts) {
     note("-----\n" . Text::Tabs::expand("$total\tknown potential issues"));
     if (%suppressed_files) {
         note("\nFiles that have all messages of at least one type suppressed:");
-        note(join ",", keys %suppressed_files);
+        note(join ",", sort keys %suppressed_files);
     }
     exit 0;
 }
@@ -1553,19 +1531,19 @@ sub my_safer_print {    # print, with error checking for outputting to db
 sub extract_pod {   # Extracts just the pod from a file; returns undef if file
                     # doesn't exist
     my $filename = shift;
-    use Pod::Parser;
 
-    my @pod;
-
-    # Arrange for the output of Pod::Parser to be collected in an array we can
-    # look at instead of being printed
-    tie *ALREADY_FH, 'Tie_Array_to_FH', \@pod;
     if (open my $in_fh, '<:bytes', $filename) {
-        my $parser = Pod::Parser->new();
-        $parser->parse_from_filehandle($in_fh, *ALREADY_FH);
+        use Pod::Simple::JustPod;
+        my $parser = Pod::Simple::JustPod->new();
+        $parser->no_errata_section(1);
+        $parser->no_whining(1);
+        $parser->source_filename($filename);
+        my $output;
+        $parser->output_string( \$output );
+        $parser->parse_lines( <$in_fh>, undef );
         close $in_fh;
 
-        return join "", @pod
+        return $output;
     }
 
     # The file should already have been opened once to get here, so if that
@@ -1655,7 +1633,8 @@ sub is_pod_file {
 
     if ($filename =~ / (?: ^(cpan|lib|ext|dist)\/ )
                         | $only_for_interior_links_re
-                    /x) {
+                    /x)
+    {
         $digest->add($contents);
         $digests{$filename} = $digest->digest;
 
@@ -1803,7 +1782,6 @@ foreach my $filename (@files) {
             next FILE;
         }
         $parsed = 1;
-
     }
 
     if ($checker->num_errors() < 0) {   # Returns negative if not a pod
@@ -2106,6 +2084,10 @@ foreach my $filename (@files) {
             my $problem_count = scalar @{$problems{$filename}{$message}};
             $total_known += $problem_count;
             next if $known_problems{$canonical}{$message} < 0;
+
+            # If we have new problems not previously known, we output all of
+            # such problems, as we can't know which are really new and which
+            # not
             if ($problem_count > $known_problems{$canonical}{$message}) {
 
                 # Here we are about to output all the messages for this type,
@@ -2172,7 +2154,7 @@ if (! $regen
     && ! ok (keys %known_problems == 0, "The known problems database ($data_dir/known_pod_issues.dat) includes no references to non-existent files"))
 {
     note("The following files were not found: "
-         . join ", ", keys %known_problems);
+         . join ", ", sort keys %known_problems);
     note("They will automatically be removed from the db the next time");
     note("  cd t; ./perl -I../lib porting/podcheck.t --regen");
     note("is run");

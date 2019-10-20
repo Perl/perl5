@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66892);
+plan (tests => 66880);
 
 # ${single:colon} should not be treated as a simple variable, but as a
 # block with a label inside.
@@ -134,6 +134,7 @@ for ( 0x0 .. 0xff ) {
             $tests++;
         }
         elsif ($chr =~ /[[:punct:][:digit:]]/a) {
+            next if ($chr eq '#' or $chr eq '*'); # RT 133583
 
             # Unlike other variables, we dare not try setting the length-1
             # variables that are ASCII punctuation and digits.  This is

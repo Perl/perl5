@@ -1,3 +1,5 @@
+# -*- coding: utf-8-unix -*-
+
 package Math::BigInt;
 
 #
@@ -20,13 +22,11 @@ use warnings;
 
 use Carp qw< carp croak >;
 
-our $VERSION = '1.999813';
+our $VERSION = '1.999817';
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(objectify bgcd blcm);
-
-my $class = "Math::BigInt";
 
 # Inside overload, the first arg is always an object. If the original code had
 # it reversed (like $x = 2 * $y), then the third parameter is true.
@@ -232,10 +232,7 @@ my $LIB = 'Math::BigInt::Calc';        # module to do the low level math
                                         # default is Calc.pm
 my $IMPORT = 0;                         # was import() called yet?
                                         # used to make require work
-my %WARN;                               # warn only once for low-level libs
-my %CAN;                                # cache for $LIB->can(...)
 my %CALLBACKS;                          # callbacks to notify on lib loads
-my $EMU_LIB = 'Math/BigInt/CalcEmu.pm'; # emulate low-level math
 
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
@@ -904,6 +901,50 @@ sub from_bytes {
     return $self;
 }
 
+sub from_base {
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_base');
+
+    my $str = shift;
+
+    my $base = shift;
+    $base = $class->new($base) unless ref($base);
+
+    croak("the base must be a finite integer >= 2")
+      if $base < 2 || ! $base -> is_int();
+
+    # If called as a class method, initialize a new object.
+
+    $self = $class -> bzero() unless $selfref;
+
+    # If no collating sequence is given, pass some of the conversions to
+    # methods optimized for those cases.
+
+    if (! @_) {
+        return $self -> from_bin($str) if $base == 2;
+        return $self -> from_oct($str) if $base == 8;
+        return $self -> from_hex($str) if $base == 16;
+        if ($base == 10) {
+            my $tmp = $class -> new($str);
+            $self -> {value} = $tmp -> {value};
+            $self -> {sign}  = '+';
+        }
+    }
+
+    croak("from_base() requires a newer version of the $LIB library.")
+      unless $LIB->can('_from_base');
+
+    $self -> {sign}  = '+';
+    $self -> {value}
+      = $LIB->_from_base($str, $base -> {value}, @_ ? shift() : ());
+    return $self
+}
+
 sub bzero {
     # create/assign '+0'
 
@@ -1092,7 +1133,7 @@ sub bpi {
     if (@_ == 1) {
         # called like Math::BigInt::bpi(10);
         $n = $self;
-        $self = $class;
+        $self = __PACKAGE__;
     }
     $self = ref($self) if ref($self);
 
@@ -1189,6 +1230,24 @@ sub is_negative {
     my ($class, $x) = ref($_[0]) ? (undef, $_[0]) : objectify(1, @_);
 
     $x->{sign} =~ /^-/ ? 1 : 0; # -inf is negative, but NaN is not
+}
+
+sub is_non_negative {
+    # Return true if argument is non-negative (>= 0).
+    my ($class, $x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
+
+    return 1 if $x->{sign} =~ /^\+/;
+    return 1 if $x -> is_zero();
+    return 0;
+}
+
+sub is_non_positive {
+    # Return true if argument is non-positive (<= 0).
+    my ($class, $x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
+
+    return 1 if $x->{sign} =~ /^\-/;
+    return 1 if $x -> is_zero();
+    return 0;
 }
 
 sub is_odd {
@@ -2311,7 +2370,7 @@ sub bmodpow {
     $num->{value} = $value;
     $num->{sign}  = $sign;
 
-    return $num;
+    return $num -> round(@r);
 }
 
 sub bpow {
@@ -2358,21 +2417,14 @@ sub bpow {
 
     $r[3] = $y;                 # no push!
 
-    # cases 0 ** Y, X ** 0, X ** 1, 1 ** Y are handled by Calc or Emu
+    # 0 ** -y => ( 1 / (0 ** y)) => 1 / 0 => +inf
+    return $x->binf() if $y->is_negative() && $x->is_zero();
 
-    my $new_sign = '+';
-    $new_sign = $y->is_odd() ? '-' : '+' if ($x->{sign} ne '+');
-
-    # 0 ** -7 => ( 1 / (0 ** 7)) => 1 / 0 => +inf
-    return $x->binf()
-      if $y->{sign} eq '-' && $x->{sign} eq '+' && $LIB->_is_zero($x->{value});
     # 1 ** -y => 1 / (1 ** |y|)
-    # so do test for negative $y after above's clause
-    return $x->bnan() if $y->{sign} eq '-' && !$LIB->_is_one($x->{value});
+    return $x->bzero() if $y->is_negative() && !$LIB->_is_one($x->{value});
 
     $x->{value} = $LIB->_pow($x->{value}, $y->{value});
-    $x->{sign} = $new_sign;
-    $x->{sign} = '+' if $LIB->_is_zero($y->{value});
+    $x->{sign}  = $x->is_negative() && $y->is_odd() ? '-' : '+';
     $x->round(@r);
 }
 
@@ -2440,7 +2492,7 @@ sub blog {
         return $x;
     }
 
-    my ($rc, $exact) = $LIB->_log_int($x->{value}, $base->{value});
+    my ($rc) = $LIB->_log_int($x->{value}, $base->{value});
     return $x->bnan() unless defined $rc; # not possible to take log?
     $x->{value} = $rc;
     $x->round(@r);
@@ -2478,74 +2530,205 @@ sub bexp {
 }
 
 sub bnok {
-    # Calculate n over k (binomial coefficient or "choose" function) as integer.
-    # set up parameters
-    my ($class, $x, $y, @r) = (ref($_[0]), @_);
+    # Calculate n over k (binomial coefficient or "choose" function) as
+    # integer.
 
-    # objectify is costly, so avoid it
+    # Set up parameters.
+    my ($self, $n, $k, @r) = (ref($_[0]), @_);
+
+    # Objectify is costly, so avoid it.
     if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
-        ($class, $x, $y, @r) = objectify(2, @_);
+        ($self, $n, $k, @r) = objectify(2, @_);
     }
 
-    return $x if $x->modify('bnok');
-    return $x->bnan() if $x->{sign} eq 'NaN' || $y->{sign} eq 'NaN';
-    return $x->binf() if $x->{sign} eq '+inf';
+    return $n if $n->modify('bnok');
 
-    # k > n or k < 0 => 0
-    my $cmp = $x->bacmp($y);
-    return $x->bzero() if $cmp < 0 || substr($y->{sign}, 0, 1) eq "-";
+    # All cases where at least one argument is NaN.
 
-    if ($LIB->can('_nok')) {
-        $x->{value} = $LIB->_nok($x->{value}, $y->{value});
-    } else {
-        # ( 7 )       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
-        # ( - ) = --------- =  --------------- = --------- = 5 * - * -
-        # ( 3 )   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
+    return $n->bnan() if $n->{sign} eq 'NaN' || $k->{sign} eq 'NaN';
 
-        my $n = $x -> {value};
-        my $k = $y -> {value};
+    # All cases where at least one argument is +/-inf.
 
-        # If k > n/2, or, equivalently, 2*k > n, compute nok(n, k) as
-        # nok(n, n-k) to minimize the number if iterations in the loop.
-
-        {
-            my $twok = $LIB->_mul($LIB->_two(), $LIB->_copy($k));
-            if ($LIB->_acmp($twok, $n) > 0) {
-                $k = $LIB->_sub($LIB->_copy($n), $k);
+    if ($n -> is_inf()) {
+        if ($k -> is_inf()) {                   # bnok(+/-inf,+/-inf)
+            return $n -> bnan();
+        } elsif ($k -> is_neg()) {              # bnok(+/-inf,k), k < 0
+            return $n -> bzero();
+        } elsif ($k -> is_zero()) {             # bnok(+/-inf,k), k = 0
+            return $n -> bone();
+        } else {
+            if ($n -> is_inf("+")) {            # bnok(+inf,k), 0 < k < +inf
+                return $n -> binf("+");
+            } else {                            # bnok(-inf,k), k > 0
+                my $sign = $k -> is_even() ? "+" : "-";
+                return $n -> binf($sign);
             }
         }
+    }
 
-        if ($LIB->_is_zero($k)) {
-            $n = $LIB->_one();
+    elsif ($k -> is_inf()) {            # bnok(n,+/-inf), -inf <= n <= inf
+        return $n -> bnan();
+    }
+
+    # At this point, both n and k are real numbers.
+
+    my $sign = 1;
+
+    if ($n >= 0) {
+        if ($k < 0 || $k > $n) {
+            return $n -> bzero();
+        }
+    } else {
+
+        if ($k >= 0) {
+
+            # n < 0 and k >= 0: bnok(n,k) = (-1)^k * bnok(-n+k-1,k)
+
+            $sign = (-1) ** $k;
+            $n -> bneg() -> badd($k) -> bdec();
+
+        } elsif ($k <= $n) {
+
+            # n < 0 and k <= n: bnok(n,k) = (-1)^(n-k) * bnok(-k-1,n-k)
+
+            $sign = (-1) ** ($n - $k);
+            my $x0 = $n -> copy();
+            $n -> bone() -> badd($k) -> bneg();
+            $k = $k -> copy();
+            $k -> bneg() -> badd($x0);
+
         } else {
 
-            # Make a copy of the original n, since we'll be modifying n
-            # in-place.
+            # n < 0 and n < k < 0:
 
-            my $n_orig = $LIB->_copy($n);
-
-            $LIB->_sub($n, $k);
-            $LIB->_inc($n);
-
-            my $f = $LIB->_copy($n);
-            $LIB->_inc($f);
-
-            my $d = $LIB->_two();
-
-            # while f <= n (the original n, that is) ...
-
-            while ($LIB->_acmp($f, $n_orig) <= 0) {
-                $LIB->_mul($n, $f);
-                $LIB->_div($n, $d);
-                $LIB->_inc($f);
-                $LIB->_inc($d);
-            }
+            return $n -> bzero();
         }
-
-        $x -> {value} = $n;
     }
 
-    $x->round(@r);
+    $n->{value} = $LIB->_nok($n->{value}, $k->{value});
+    $n -> bneg() if $sign == -1;
+
+    $n->round(@r);
+}
+
+sub buparrow {
+    my $a = shift;
+    my $y = $a -> uparrow(@_);
+    $a -> {value} = $y -> {value};
+    return $a;
+}
+
+sub uparrow {
+    # Knuth's up-arrow notation buparrow(a, n, b)
+    #
+    # The following is a simple, recursive implementation of the up-arrow
+    # notation, just to show the idea. Such implementations cause "Deep
+    # recursion on subroutine ..." warnings, so we use a faster, non-recursive
+    # algorithm below with @_ as a stack.
+    #
+    #   sub buparrow {
+    #       my ($a, $n, $b) = @_;
+    #       return $a ** $b if $n == 1;
+    #       return $a * $b  if $n == 0;
+    #       return 1        if $b == 0;
+    #       return buparrow($a, $n - 1, buparrow($a, $n, $b - 1));
+    #   }
+
+    my ($a, $b, $n) = @_;
+    my $class = ref $a;
+    croak("a must be non-negative") if $a < 0;
+    croak("n must be non-negative") if $n < 0;
+    croak("b must be non-negative") if $b < 0;
+
+    while (@_ >= 3) {
+
+        # return $a ** $b if $n == 1;
+
+        if ($_[-2] == 1) {
+            my ($a, $n, $b) = splice @_, -3;
+            push @_, $a ** $b;
+            next;
+        }
+
+        # return $a * $b if $n == 0;
+
+        if ($_[-2] == 0) {
+            my ($a, $n, $b) = splice @_, -3;
+            push @_, $a * $b;
+            next;
+        }
+
+        # return 1 if $b == 0;
+
+        if ($_[-1] == 0) {
+            splice @_, -3;
+            push @_, $class -> bone();
+            next;
+        }
+
+        # return buparrow($a, $n - 1, buparrow($a, $n, $b - 1));
+
+        my ($a, $n, $b) = splice @_, -3;
+        push @_, ($a, $n - 1,
+                      $a, $n, $b - 1);
+
+    }
+
+    pop @_;
+}
+
+sub backermann {
+    my $m = shift;
+    my $y = $m -> ackermann(@_);
+    $m -> {value} = $y -> {value};
+    return $m;
+}
+
+sub ackermann {
+    # Ackermann's function ackermann(m, n)
+    #
+    # The following is a simple, recursive implementation of the ackermann
+    # function, just to show the idea. Such implementations cause "Deep
+    # recursion on subroutine ..." warnings, so we use a faster, non-recursive
+    # algorithm below with @_ as a stack.
+    #
+    # sub ackermann {
+    #     my ($m, $n) = @_;
+    #     return $n + 1                                  if $m == 0;
+    #     return ackermann($m - 1, 1)                    if $m > 0 && $n == 0;
+    #     return ackermann($m - 1, ackermann($m, $n - 1) if $m > 0 && $n > 0;
+    # }
+
+    my ($m, $n) = @_;
+    my $class = ref $m;
+    croak("m must be non-negative") if $m < 0;
+    croak("n must be non-negative") if $n < 0;
+
+    my $two      = $class -> new("2");
+    my $three    = $class -> new("3");
+    my $thirteen = $class -> new("13");
+
+    $n = pop;
+    $n = $class -> new($n) unless ref($n);
+    while (@_) {
+        my $m = pop;
+        if ($m > $three) {
+            push @_, (--$m) x $n;
+            while (--$m >= $three) {
+                push @_, $m;
+            }
+            $n = $thirteen;
+        } elsif ($m == $three) {
+            $n = $class -> bone() -> blsft($n + $three) -> bsub($three);
+        } elsif ($m == $two) {
+            $n -> bmul($two) -> badd($three);
+        } elsif ($m >= 0) {
+            $n -> badd($m) -> binc();
+        } else {
+            die "negative m!";
+        }
+    }
+    $n;
 }
 
 sub bsin {
@@ -2600,9 +2783,9 @@ sub batan {
     return $upgrade->new($x)->batan(@r) if defined $upgrade;
 
     # calculate the result and truncate it to integer
-    my $t = Math::BigFloat->new($x)->batan(@r);
+    my $tmp = Math::BigFloat->new($x)->batan(@r);
 
-    $x->{value} = $LIB->_new($x->as_int()->bstr());
+    $x->{value} = $LIB->_new($tmp->as_int()->bstr());
     $x->round(@r);
 }
 
@@ -2848,12 +3031,19 @@ sub blsft {
     # (BINT or num_str, BINT or num_str) return BINT
     # compute x << y, base n, y >= 0
 
-    # set up parameters
-    my ($class, $x, $y, $b, @r) = (ref($_[0]), @_);
+    my ($class, $x, $y, $b, @r);
 
-    # objectify is costly, so avoid it
-    if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
-        ($class, $x, $y, $b, @r) = objectify(2, @_);
+    # Objectify the base only when it is defined, since an undefined base, as
+    # in $x->blsft(3) or $x->blog(3, undef) means use the default base 2.
+
+    if (!ref($_[0]) && $_[0] =~ /^[A-Za-z]|::/) {
+        # E.g., Math::BigInt->blog(256, 5, 2)
+        ($class, $x, $y, $b, @r) =
+          defined $_[3] ? objectify(3, @_) : objectify(2, @_);
+    } else {
+        # E.g., Math::BigInt::blog(256, 5, 2) or $x->blog(5, 2)
+        ($class, $x, $y, $b, @r) =
+          defined $_[2] ? objectify(3, @_) : objectify(2, @_);
     }
 
     return $x if $x -> modify('blsft');
@@ -2861,7 +3051,15 @@ sub blsft {
                             $y -> {sign} !~ /^[+-]$/);
     return $x -> round(@r) if $y -> is_zero();
 
-    $b = 2 if !defined $b;
+    $b = defined($b) ? $b -> numify() : 2;
+
+    # While some of the libraries support an arbitrarily large base, not all of
+    # them do, so rather than returning an incorrect result in those cases,
+    # disallow bases that don't work with all libraries.
+
+    my $uintmax = ~0;
+    croak("Base is too large.") if $b > $uintmax;
+
     return $x -> bnan() if $b <= 0 || $y -> {sign} eq '-';
 
     $x -> {value} = $LIB -> _lsft($x -> {value}, $y -> {value}, $b);
@@ -2947,21 +3145,13 @@ sub band {
 
     return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
 
-    my $sx = $x->{sign} eq '+' ? 1 : -1;
-    my $sy = $y->{sign} eq '+' ? 1 : -1;
-
-    if ($sx == 1 && $sy == 1) {
+    if ($x->{sign} eq '+' && $y->{sign} eq '+') {
         $x->{value} = $LIB->_and($x->{value}, $y->{value});
-        return $x->round(@r);
+    } else {
+        ($x->{value}, $x->{sign}) = $LIB->_sand($x->{value}, $x->{sign},
+                                                $y->{value}, $y->{sign});
     }
-
-    if ($CAN{signed_and}) {
-        $x->{value} = $LIB->_signed_and($x->{value}, $y->{value}, $sx, $sy);
-        return $x->round(@r);
-    }
-
-    require $EMU_LIB;
-    __emu_band($class, $x, $y, $sx, $sy, @r);
+    return $x->round(@r);
 }
 
 sub bior {
@@ -2976,29 +3166,18 @@ sub bior {
     }
 
     return $x if $x->modify('bior');
+
     $r[3] = $y;                 # no push!
 
     return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
 
-    my $sx = $x->{sign} eq '+' ? 1 : -1;
-    my $sy = $y->{sign} eq '+' ? 1 : -1;
-
-    # the sign of X follows the sign of X, e.g. sign of Y irrelevant for bior()
-
-    # don't use lib for negative values
-    if ($sx == 1 && $sy == 1) {
+    if ($x->{sign} eq '+' && $y->{sign} eq '+') {
         $x->{value} = $LIB->_or($x->{value}, $y->{value});
-        return $x->round(@r);
+    } else {
+        ($x->{value}, $x->{sign}) = $LIB->_sor($x->{value}, $x->{sign},
+                                               $y->{value}, $y->{sign});
     }
-
-    # if lib can do negative values, let it handle this
-    if ($CAN{signed_or}) {
-        $x->{value} = $LIB->_signed_or($x->{value}, $y->{value}, $sx, $sy);
-        return $x->round(@r);
-    }
-
-    require $EMU_LIB;
-    __emu_bior($class, $x, $y, $sx, $sy, @r);
+    return $x->round(@r);
 }
 
 sub bxor {
@@ -3013,27 +3192,18 @@ sub bxor {
     }
 
     return $x if $x->modify('bxor');
+
     $r[3] = $y;                 # no push!
 
     return $x->bnan() if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/);
 
-    my $sx = $x->{sign} eq '+' ? 1 : -1;
-    my $sy = $y->{sign} eq '+' ? 1 : -1;
-
-    # don't use lib for negative values
-    if ($sx == 1 && $sy == 1) {
+    if ($x->{sign} eq '+' && $y->{sign} eq '+') {
         $x->{value} = $LIB->_xor($x->{value}, $y->{value});
-        return $x->round(@r);
+    } else {
+        ($x->{value}, $x->{sign}) = $LIB->_sxor($x->{value}, $x->{sign},
+                                               $y->{value}, $y->{sign});
     }
-
-    # if lib can do negative values, let it handle this
-    if ($CAN{signed_xor}) {
-        $x->{value} = $LIB->_signed_xor($x->{value}, $y->{value}, $sx, $sy);
-        return $x->round(@r);
-    }
-
-    require $EMU_LIB;
-    __emu_bxor($class, $x, $y, $sx, $sy, @r);
+    return $x->round(@r);
 }
 
 sub bnot {
@@ -3120,7 +3290,7 @@ sub bround {
     # do not return $x->bnorm(), but $x
 
     my $x = shift;
-    $x = $class->new($x) unless ref $x;
+    $x = __PACKAGE__->new($x) unless ref $x;
     my ($scale, $mode) = $x->_scale_a(@_);
     return $x if !defined $scale || $x->modify('bround'); # no-op
 
@@ -3238,7 +3408,7 @@ sub fround {
     # Exists to make life easier for switch between MBF and MBI (should we
     # autoload fxxx() like MBF does for bxxx()?)
     my $x = shift;
-    $x = $class->new($x) unless ref $x;
+    $x = __PACKAGE__->new($x) unless ref $x;
     $x->bround(@_);
 }
 
@@ -3328,6 +3498,31 @@ sub digit {
 
     $n = $n->numify() if ref($n);
     $LIB->_digit($x->{value}, $n || 0);
+}
+
+sub bdigitsum {
+    # like digitsum(), but assigns the result to the invocand
+    my $x = shift;
+
+    return $x           if $x -> is_nan();
+    return $x -> bnan() if $x -> is_inf();
+
+    $x -> {value} = $LIB -> _digitsum($x -> {value});
+    $x -> {sign}  = '+';
+    return $x;
+}
+
+sub digitsum {
+    # compute sum of decimal digits and return it
+    my $x = shift;
+    my $class = ref $x;
+
+    return $class -> bnan() if $x -> is_nan();
+    return $class -> bnan() if $x -> is_inf();
+
+    my $y = $class -> bzero();
+    $y -> {value} = $LIB -> _digitsum($x -> {value});
+    return $y;
 }
 
 sub length {
@@ -3626,7 +3821,7 @@ sub bdstr {
 sub to_hex {
     # return as hex string, with prefixed 0x
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
 
@@ -3637,7 +3832,7 @@ sub to_hex {
 sub to_oct {
     # return as octal string, with prefixed 0
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
 
@@ -3648,7 +3843,7 @@ sub to_oct {
 sub to_bin {
     # return as binary string, with prefixed 0b
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
 
@@ -3659,7 +3854,7 @@ sub to_bin {
 sub to_bytes {
     # return a byte string
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     croak("to_bytes() requires a finite, non-negative integer")
         if $x -> is_neg() || ! $x -> is_int();
@@ -3670,10 +3865,40 @@ sub to_bytes {
     return $LIB->_to_bytes($x->{value});
 }
 
+sub to_base {
+    # return a base anything string
+    my $x = shift;
+    $x = __PACKAGE__->new($x) if !ref($x);
+
+    croak("the value to convert must be a finite, non-negative integer")
+      if $x -> is_neg() || !$x -> is_int();
+
+    my $base = shift;
+    $base = __PACKAGE__->new($base) unless ref($base);
+
+    croak("the base must be a finite integer >= 2")
+      if $base < 2 || ! $base -> is_int();
+
+    # If no collating sequence is given, pass some of the conversions to
+    # methods optimized for those cases.
+
+    if (! @_) {
+        return    $x -> to_bin() if $base == 2;
+        return    $x -> to_oct() if $base == 8;
+        return uc $x -> to_hex() if $base == 16;
+        return    $x -> bstr()   if $base == 10;
+    }
+
+    croak("to_base() requires a newer version of the $LIB library.")
+      unless $LIB->can('_to_base');
+
+    return $LIB->_to_base($x->{value}, $base -> {value}, @_ ? shift() : ());
+}
+
 sub as_hex {
     # return as hex string, with prefixed 0x
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
 
@@ -3684,7 +3909,7 @@ sub as_hex {
 sub as_oct {
     # return as octal string, with prefixed 0
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
 
@@ -3695,7 +3920,7 @@ sub as_oct {
 sub as_bin {
     # return as binary string, with prefixed 0b
     my $x = shift;
-    $x = $class->new($x) if !ref($x);
+    $x = __PACKAGE__->new($x) if !ref($x);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
 
@@ -3712,7 +3937,7 @@ sub as_bin {
 sub numify {
     # Make a Perl scalar number from a Math::BigInt object.
     my $x = shift;
-    $x = $class->new($x) unless ref $x;
+    $x = __PACKAGE__->new($x) unless ref $x;
 
     if ($x -> is_nan()) {
         require Math::Complex;
@@ -3761,7 +3986,7 @@ sub objectify {
     # Check the context.
 
     unless (wantarray) {
-        croak("${class}::objectify() needs list context");
+        croak(__PACKAGE__ . "::objectify() needs list context");
     }
 
     # Get the number of arguments to objectify.
@@ -3879,10 +4104,9 @@ sub objectify {
 sub import {
     my $class = shift;
     $IMPORT++;                  # remember we did import()
-    my @a;
-    my $l = scalar @_;
+    my @a;                      # unrecognized arguments
     my $warn_or_die = 0;        # 0 - no warn, 1 - warn, 2 - die
-    for (my $i = 0; $i < $l ; $i++) {
+    for (my $i = 0; $i <= $#_ ; $i++) {
         if ($_[$i] eq ':constant') {
             # this causes overlord er load to step in
             overload::constant
@@ -3895,7 +4119,9 @@ sub import {
         } elsif ($_[$i] =~ /^(lib|try|only)\z/) {
             # this causes a different low lib to take care...
             $LIB = $_[$i+1] || '';
-            # lib => 1 (warn on fallback), try => 0 (no warn), only => 2 (die on fallback)
+            # try  => 0 (no warn)
+            # lib  => 1 (warn on fallback)
+            # only => 2 (die on fallback)
             $warn_or_die = 1 if $_[$i] eq 'lib';
             $warn_or_die = 2 if $_[$i] eq 'only';
             $i++;
@@ -3912,77 +4138,34 @@ sub import {
     # try to load core math lib
     my @c = split /\s*,\s*/, $LIB;
     foreach (@c) {
-        $_ =~ tr/a-zA-Z0-9://cd; # limit to sane characters
+        tr/a-zA-Z0-9://cd;      # limit to sane characters
     }
     push @c, \'Calc'            # if all fail, try these
       if $warn_or_die < 2;      # but not for "only"
-    $LIB = '';                 # signal error
+    $LIB = '';                  # signal error
     foreach my $l (@c) {
         # fallback libraries are "marked" as \'string', extract string if nec.
         my $lib = $l;
         $lib = $$l if ref($l);
 
-        next if ($lib || '') eq '';
+        next unless defined($lib) && CORE::length($lib);
         $lib = 'Math::BigInt::'.$lib if $lib !~ /^Math::BigInt/i;
         $lib =~ s/\.pm$//;
-        if ($] < 5.006) {
-            # Perl < 5.6.0 dies with "out of memory!" when eval("") and ':constant' is
-            # used in the same script, or eval("") inside import().
-            my @parts = split /::/, $lib; # Math::BigInt => Math BigInt
-            my $file = pop @parts;
-            $file .= '.pm';     # BigInt => BigInt.pm
-            require File::Spec;
-            $file = File::Spec->catfile (@parts, $file);
-            eval {
-                require "$file";
-                $lib->import(@c);
-            }
-        } else {
-            eval "use $lib qw/@c/;";
-        }
+        my @parts = split /::/, $lib;   # Math::BigInt => Math BigInt
+        $parts[-1] .= '.pm';            # BigInt => BigInt.pm
+        require File::Spec;
+        my $file = File::Spec->catfile(@parts);
+        eval { require $file; };
         if ($@ eq '') {
-            my $ok = 1;
-            # loaded it ok, see if the api_version() is high enough
-            if ($lib->can('api_version') && $lib->api_version() >= 1.0) {
-                $ok = 0;
-                # api_version matches, check if it really provides anything we need
-                for my $method (qw/
-                                      one two ten
-                                      str num
-                                      add mul div sub dec inc
-                                      acmp len digit is_one is_zero is_even is_odd
-                                      is_two is_ten
-                                      zeros new copy check
-                                      from_hex from_oct from_bin as_hex as_bin as_oct
-                                      rsft lsft xor and or
-                                      mod sqrt root fac pow modinv modpow log_int gcd
-                                  /) {
-                    if (!$lib->can("_$method")) {
-                        if (($WARN{$lib} || 0) < 2) {
-                            carp("$lib is missing method '_$method'");
-                            $WARN{$lib} = 1; # still warn about the lib
-                        }
-                        $ok++;
-                        last;
-                    }
-                }
+            $lib->import();
+            $LIB = $lib;
+            if ($warn_or_die > 0 && ref($l)) {
+                my $msg = "Math::BigInt: couldn't load specified"
+                        . " math lib(s), fallback to $lib";
+                carp($msg)  if $warn_or_die == 1;
+                croak($msg) if $warn_or_die == 2;
             }
-            if ($ok == 0) {
-                $LIB = $lib;
-                if ($warn_or_die > 0 && ref($l)) {
-                    my $msg = "Math::BigInt: couldn't load specified"
-                            . " math lib(s), fallback to $lib";
-                    carp($msg)  if $warn_or_die == 1;
-                    croak($msg) if $warn_or_die == 2;
-                }
-                last;           # found a usable one, break
-            } else {
-                if (($WARN{$lib} || 0) < 2) {
-                    my $ver = eval "\$$lib\::VERSION" || 'unknown';
-                    carp("Cannot load outdated $lib v$ver, please upgrade");
-                    $WARN{$lib} = 2; # never warn again
-                }
-            }
+            last;               # found a usable one, break
         }
     }
     if ($LIB eq '') {
@@ -3997,14 +4180,6 @@ sub import {
     # notify callbacks
     foreach my $class (keys %CALLBACKS) {
         &{$CALLBACKS{$class}}($LIB);
-    }
-
-    # Fill $CAN with the results of $LIB->can(...) for emulating lower math lib
-    # functions
-
-    %CAN = ();
-    for my $method (qw/ signed_and signed_or signed_xor /) {
-        $CAN{$method} = $LIB->can("_$method") ? 1 : 0;
     }
 
     # import done
@@ -4162,7 +4337,7 @@ sub _split {
 sub _trailing_zeros {
     # return the amount of trailing zeros in $x (as scalar)
     my $x = shift;
-    $x = $class->new($x) unless ref $x;
+    $x = __PACKAGE__->new($x) unless ref $x;
 
     return 0 if $x->{sign} !~ /^[+-]$/; # NaN, inf, -inf etc
 
@@ -4301,19 +4476,20 @@ Math::BigInt - Arbitrary size integer/float math package
   # Constructor methods (when the class methods below are used as instance
   # methods, the value is assigned the invocand)
 
-  $x = Math::BigInt->new($str);         # defaults to 0
-  $x = Math::BigInt->new('0x123');      # from hexadecimal
-  $x = Math::BigInt->new('0b101');      # from binary
-  $x = Math::BigInt->from_hex('cafe');  # from hexadecimal
-  $x = Math::BigInt->from_oct('377');   # from octal
-  $x = Math::BigInt->from_bin('1101');  # from binary
-  $x = Math::BigInt->bzero();           # create a +0
-  $x = Math::BigInt->bone();            # create a +1
-  $x = Math::BigInt->bone('-');         # create a -1
-  $x = Math::BigInt->binf();            # create a +inf
-  $x = Math::BigInt->binf('-');         # create a -inf
-  $x = Math::BigInt->bnan();            # create a Not-A-Number
-  $x = Math::BigInt->bpi();             # returns pi
+  $x = Math::BigInt->new($str);             # defaults to 0
+  $x = Math::BigInt->new('0x123');          # from hexadecimal
+  $x = Math::BigInt->new('0b101');          # from binary
+  $x = Math::BigInt->from_hex('cafe');      # from hexadecimal
+  $x = Math::BigInt->from_oct('377');       # from octal
+  $x = Math::BigInt->from_bin('1101');      # from binary
+  $x = Math::BigInt->from_base('why', 36);  # from any base
+  $x = Math::BigInt->bzero();               # create a +0
+  $x = Math::BigInt->bone();                # create a +1
+  $x = Math::BigInt->bone('-');             # create a -1
+  $x = Math::BigInt->binf();                # create a +inf
+  $x = Math::BigInt->binf('-');             # create a -inf
+  $x = Math::BigInt->bnan();                # create a Not-A-Number
+  $x = Math::BigInt->bpi();                 # returns pi
 
   $y = $x->copy();         # make a copy (unlike $y = $x)
   $y = $x->as_int();       # return as a Math::BigInt
@@ -4374,6 +4550,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->blog($base);        # logarithm of $x to base $base (e.g., base 2)
   $x->bexp();             # calculate e ** $x where e is Euler's number
   $x->bnok($y);           # x over y (binomial coefficient n over k)
+  $x->buparrow($n, $y);   # Knuth's up-arrow notation
+  $x->backermann($y);     # the Ackermann function
   $x->bsin();             # sine
   $x->bcos();             # cosine
   $x->batan();            # inverse tangent
@@ -4440,6 +4618,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->to_bin();       # as signed binary string
   $x->to_oct();       # as signed octal string
   $x->to_bytes();     # as byte string
+  $x->to_base($b);    # as string in any base
 
   $x->as_hex();       # as signed hexadecimal string with prefixed 0x
   $x->as_bin();       # as signed binary string with prefixed 0b
@@ -4747,6 +4926,49 @@ In some special cases, from_bytes() matches the conversion done by unpack():
     $x = Math::BigInt->from_bytes($b);       # = 3305723134637787565
     $y = unpack "Q>", $b;                    # ditto, but scalar
 
+=item from_base()
+
+Given a string, a base, and an optional collation sequence, interpret the
+string as a number in the given base. The collation sequence describes the
+value of each character in the string.
+
+If a collation sequence is not given, a default collation sequence is used. If
+the base is less than or equal to 36, the collation sequence is the string
+consisting of the 36 characters "0" to "9" and "A" to "Z". In this case, the
+letter case in the input is ignored. If the base is greater than 36, and
+smaller than or equal to 62, the collation sequence is the string consisting of
+the 62 characters "0" to "9", "A" to "Z", and "a" to "z". A base larger than 62
+requires the collation sequence to be specified explicitly.
+
+These examples show standard binary, octal, and hexadecimal conversion. All
+cases return 250.
+
+    $x = Math::BigInt->from_base("11111010", 2);
+    $x = Math::BigInt->from_base("372", 8);
+    $x = Math::BigInt->from_base("fa", 16);
+
+When the base is less than or equal to 36, and no collation sequence is given,
+the letter case is ignored, so both of these also return 250:
+
+    $x = Math::BigInt->from_base("6Y", 16);
+    $x = Math::BigInt->from_base("6y", 16);
+
+When the base greater than 36, and no collation sequence is given, the default
+collation sequence contains both uppercase and lowercase letters, so
+the letter case in the input is not ignored:
+
+    $x = Math::BigInt->from_base("6S", 37);         # $x is 250
+    $x = Math::BigInt->from_base("6s", 37);         # $x is 276
+    $x = Math::BigInt->from_base("121", 3);         # $x is 16
+    $x = Math::BigInt->from_base("XYZ", 36);        # $x is 44027
+    $x = Math::BigInt->from_base("Why", 42);        # $x is 58314
+
+The collation sequence can be any set of unique characters. These two cases
+are equivalent
+
+    $x = Math::BigInt->from_base("100", 2, "01");   # $x is 4
+    $x = Math::BigInt->from_base("|--", 2, "-|");   # $x is 4
+
 =item bzero()
 
     $x = Math::BigInt->bzero();
@@ -4893,6 +5115,18 @@ neither positive nor negative.
 
 Returns true if the invocand is negative and false otherwise. A C<NaN> is
 neither positive nor negative.
+
+=item is_non_positive()
+
+    $x->is_non_positive();      # true if <= 0
+
+Returns true if the invocand is negative or zero.
+
+=item is_non_negative()
+
+    $x->is_non_negative();      # true if >= 0
+
+Returns true if the invocand is positive or zero.
 
 =item is_odd()
 
@@ -5176,13 +5410,60 @@ See also L</blog()>.
     $x->bnok($y);               # x over y (binomial coefficient n over k)
 
 Calculates the binomial coefficient n over k, also called the "choose"
-function. The result is equivalent to:
+function, which is
 
-    ( n )      n!
-    | - |  = -------
+    ( n )       n!
+    |   |  = --------
     ( k )    k!(n-k)!
 
-This method was added in v1.84 of Math::BigInt (April 2007).
+when n and k are non-negative. This method implements the full Kronenburg
+extension (Kronenburg, M.J. "The Binomial Coefficient for Negative Arguments."
+18 May 2011. http://arxiv.org/abs/1105.3689/) illustrated by the following
+pseudo-code:
+
+    if n >= 0 and k >= 0:
+        return binomial(n, k)
+    if k >= 0:
+        return (-1)^k*binomial(-n+k-1, k)
+    if k <= n:
+        return (-1)^(n-k)*binomial(-k-1, n-k)
+    else
+        return 0
+
+The behaviour is identical to the behaviour of the Maple and Mathematica
+function for negative integers n, k.
+
+=item buparrow()
+
+=item uparrow()
+
+    $a -> buparrow($n, $b);         # modifies $a
+    $x = $a -> uparrow($n, $b);     # does not modify $a
+
+This method implements Knuth's up-arrow notation, where $n is a non-negative
+integer representing the number of up-arrows. $n = 0 gives multiplication, $n =
+1 gives exponentiation, $n = 2 gives tetration, $n = 3 gives hexation etc. The
+following illustrates the relation between the first values of $n.
+
+See L<https://en.wikipedia.org/wiki/Knuth%27s_up-arrow_notation>.
+
+=item backermann()
+
+=item ackermann()
+
+    $m -> backermann($n);           # modifies $a
+    $x = $m -> ackermann($n);       # does not modify $a
+
+This method implements the Ackermann function:
+
+             / n + 1              if m = 0
+   A(m, n) = | A(m-1, 1)          if m > 0 and n = 0
+             \ A(m-1, A(m, n-1))  if m > 0 and n > 0
+
+Its value grows rapidly, even for small inputs. For example, A(4, 2) is an
+integer of 19729 decimal digits.
+
+See https://en.wikipedia.org/wiki/Ackermann_function
 
 =item bsin()
 
@@ -5482,6 +5763,18 @@ If you want $x to have a certain sign, use one of the following methods:
 
 If C<$n> is negative, returns the digit counting from left.
 
+=item digitsum()
+
+    $x->digitsum();
+
+Computes the sum of the base 10 digits and returns it.
+
+=item bdigitsum()
+
+    $x->bdigitsum();
+
+Computes the sum of the base 10 digits and assigns the result to the invocand.
+
 =item length()
 
     $x->length();
@@ -5619,19 +5912,19 @@ corresponds to the output from C<dparts()>.
 
     $x->to_hex();
 
-Returns a hexadecimal string representation of the number.
+Returns a hexadecimal string representation of the number. See also from_hex().
 
 =item to_bin()
 
     $x->to_bin();
 
-Returns a binary string representation of the number.
+Returns a binary string representation of the number. See also from_bin().
 
 =item to_oct()
 
     $x->to_oct();
 
-Returns an octal string representation of the number.
+Returns an octal string representation of the number. See also from_oct().
 
 =item to_bytes()
 
@@ -5639,7 +5932,27 @@ Returns an octal string representation of the number.
     $s = $x->to_bytes();                    # $s = "cafe"
 
 Returns a byte string representation of the number using big endian byte
-order. The invocand must be a non-negative, finite integer.
+order. The invocand must be a non-negative, finite integer. See also from_bytes().
+
+=item to_base()
+
+    $x = Math::BigInt->new("250");
+    $x->to_base(2);     # returns "11111010"
+    $x->to_base(8);     # returns "372"
+    $x->to_base(16);    # returns "fa"
+
+Returns a string representation of the number in the given base. If a collation
+sequence is given, the collation sequence determines which characters are used
+in the output.
+
+Here are some more examples
+
+    $x = Math::BigInt->new("16")->to_base(3);       # returns "121"
+    $x = Math::BigInt->new("44027")->to_base(36);   # returns "XYZ"
+    $x = Math::BigInt->new("58314")->to_base(42);   # returns "Why"
+    $x = Math::BigInt->new("4")->to_base(2, "-|");  # returns "|--"
+
+See from_base() for information and examples.
 
 =item as_hex()
 
@@ -6568,11 +6881,11 @@ L<http://annocpan.org/dist/Math-BigInt>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/dist/Math-BigInt>
+L<https://cpanratings.perl.org/dist/Math-BigInt>
 
-=item * Search CPAN
+=item * MetaCPAN
 
-L<http://search.cpan.org/dist/Math-BigInt/>
+L<https://metacpan.org/release/Math-BigInt>
 
 =item * CPAN Testers Matrix
 

@@ -1060,9 +1060,9 @@ PP(pp_multiconcat)
                     SV * const tmpsv = amagic_call(left, right, concat_amg,
                                                 (nextappend ? AMGf_assign: 0));
                     if (tmpsv) {
-                        /* NB: tryAMAGICbin_MG() includes an SvPADMY test
-                         * here, which isn;t needed as any implicit
-                         * assign does under OPpTARGET_MY is done after
+                        /* NB: tryAMAGICbin_MG() includes an OPpTARGET_MY test
+                         * here, which isn't needed as any implicit
+                         * assign done under OPpTARGET_MY is done after
                          * this loop */
                         if (nextappend) {
                             sv_setsv(left, tmpsv);
@@ -1097,15 +1097,20 @@ PP(pp_multiconcat)
 
         SP = toparg - stack_adj + 1;
 
-        /* Assign result of all RHS concats (left) to LHS (targ).
+        /* Return the result of all RHS concats, unless this op includes
+         * an assign ($lex = x.y.z or expr = x.y.z), in which case copy
+         * to target (which will be $lex or expr).
          * If we are appending, targ will already have been appended to in
          * the loop */
-        if (is_append)
-            SvTAINT(targ);
-        else {
+        if (  !is_append
+            && (   (PL_op->op_flags   & OPf_STACKED)
+                || (PL_op->op_private & OPpTARGET_MY))
+        ) {
             sv_setsv(targ, left);
             SvSETMAGIC(targ);
         }
+        else
+            targ = left;
         SETs(targ);
         RETURN;
     }
@@ -1257,7 +1262,7 @@ PP(pp_eq)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(eq_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(eq_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -1430,16 +1435,10 @@ PP(pp_add)
             NV nl = SvNVX(svl);
             NV nr = SvNVX(svr);
 
-            if (
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-                !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
-                && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
-#else
-                nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
-#endif
-                )
+            if (lossless_NV_to_IV(nl, &il) && lossless_NV_to_IV(nr, &ir)) {
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
+            }
             SP--;
             TARGn(nl + nr, 0); /* args not GMG, so can't be tainted */
             SETs(TARG);
@@ -1521,7 +1520,9 @@ PP(pp_add)
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
 		    } else {
-			auv = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
+                        /* Using 0- here and later to silence bogus warning
+                         * from MS VC */
+                        auv = (UV) (0 - (UV) aiv);
 		    }
 		}
 		a_valid = 1;
@@ -1541,7 +1542,7 @@ PP(pp_add)
 		    buv = biv;
 		    buvok = 1;
 		} else
-                    buv = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
+                    buv = (UV) (0 - (UV) biv);
 	    }
 	    /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
 	       else "IV" now, independent of how it came in.
@@ -1822,7 +1823,6 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
                 PUSHi(i);
             }
             else
-#ifdef PERL_OP_PARENT
             if (is_keys) {
                 /* parent op should be an unused OP_KEYS whose targ we can
                  * use */
@@ -1836,7 +1836,6 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
                 PUSHi(i);
             }
             else
-#endif
                 mPUSHi(i);
         }
     }
@@ -3932,7 +3931,7 @@ PP(pp_iter)
     case CXt_LOOP_LIST: /* for (1,2,3) */
 
         assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
-        inc = 1 - (PL_op->op_private & OPpITER_REVERSED);
+        inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
         ix = (cx->blk_loop.state_u.stack.ix += inc);
         if (UNLIKELY(inc > 0
                         ? ix > cx->blk_oldsp
@@ -3947,7 +3946,7 @@ PP(pp_iter)
     case CXt_LOOP_ARY: /* for (@ary) */
 
         av = cx->blk_loop.state_u.ary.ary;
-        inc = 1 - (PL_op->op_private & OPpITER_REVERSED);
+        inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
         ix = (cx->blk_loop.state_u.ary.ix += inc);
         if (UNLIKELY(inc > 0
                         ? ix > AvFILL(av)

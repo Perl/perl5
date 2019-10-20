@@ -171,7 +171,7 @@ X<UNTIE>
 
 This method will be triggered when the C<untie> occurs. This can be useful
 if the class needs to know when no further calls will be made. (Except DESTROY
-of course.) See L<The C<untie> Gotcha> below for more details.
+of course.) See L</The C<untie> Gotcha> below for more details.
 
 =item DESTROY this
 X<DESTROY>
@@ -482,7 +482,7 @@ In our example, we'll use a little shortcut if there is a I<LIST>:
 =item UNTIE this
 X<UNTIE>
 
-Will be called when C<untie> happens. (See L<The C<untie> Gotcha> below.)
+Will be called when C<untie> happens. (See L</The C<untie> Gotcha> below.)
 
 =item DESTROY this
 X<DESTROY>
@@ -838,7 +838,7 @@ L<Hash::Util/bucket_ratio> for a backwards compatibility path.
 =item UNTIE this
 X<UNTIE>
 
-This is called when C<untie> occurs.  See L<The C<untie> Gotcha> below.
+This is called when C<untie> occurs.  See L</The C<untie> Gotcha> below.
 
 =item DESTROY this
 X<DESTROY>
@@ -1017,7 +1017,7 @@ X<UNTIE>
 
 As with the other types of ties, this method will be called when C<untie> happens.
 It may be appropriate to "auto CLOSE" when this occurs.  See
-L<The C<untie> Gotcha> below.
+L</The C<untie> Gotcha> below.
 
 =item DESTROY this
 X<DESTROY>
@@ -1042,7 +1042,7 @@ Here's how to use our little example:
 X<UNTIE>
 
 You can define for all tie types an UNTIE method that will be called
-at untie().  See L<The C<untie> Gotcha> below.
+at untie().  See L</The C<untie> Gotcha> below.
 
 =head2 The C<untie> Gotcha
 X<untie>

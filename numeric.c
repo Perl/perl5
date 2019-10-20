@@ -29,6 +29,107 @@ values, including such things as replacements for the OS's atof() function
 #define PERL_IN_NUMERIC_C
 #include "perl.h"
 
+#ifdef Perl_strtod
+
+PERL_STATIC_INLINE NV
+S_strtod(pTHX_ const char * const s, char ** e)
+{
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+    NV result;
+
+    STORE_LC_NUMERIC_SET_TO_NEEDED();
+
+#  ifdef USE_QUADMATH
+
+    result = strtoflt128(s, e);
+
+#  elif defined(HAS_STRTOLD) && defined(HAS_LONG_DOUBLE)    \
+                             && defined(USE_LONG_DOUBLE)
+#    if defined(__MINGW64_VERSION_MAJOR)
+      /***********************************************
+       We are unable to use strtold because of
+        https://sourceforge.net/p/mingw-w64/bugs/711/
+        &
+        https://sourceforge.net/p/mingw-w64/bugs/725/
+
+       but __mingw_strtold is fine.
+      ***********************************************/
+
+    result = __mingw_strtold(s, e);
+
+#    else
+
+    result = strtold(s, e);
+
+#    endif
+#  elif defined(HAS_STRTOD)
+
+    result = strtod(s, e);
+
+#  else
+#    error No strtod() equivalent found
+#  endif
+
+    RESTORE_LC_NUMERIC();
+
+    return result;
+}
+
+#endif  /* #ifdef Perl_strtod */
+
+/*
+
+=for apidoc my_strtod
+
+This function is equivalent to the libc strtod() function, and is available
+even on platforms that lack plain strtod().  Its return value is the best
+available precision depending on platform capabilities and F<Configure>
+options.
+
+It properly handles the locale radix character, meaning it expects a dot except
+when called from within the scope of S<C<use locale>>, in which case the radix
+character should be that specified by the current locale.
+
+The synonym Strtod() may be used instead.
+
+=cut
+
+*/
+
+NV
+Perl_my_strtod(const char * const s, char **e)
+{
+    dTHX;
+
+    PERL_ARGS_ASSERT_MY_STRTOD;
+
+#ifdef Perl_strtod
+
+    return S_strtod(aTHX_ s, e);
+
+#else
+
+    {
+        NV result;
+        char ** end_ptr = NULL;
+
+        *end_ptr = my_atof2(s, &result);
+        if (e) {
+            *e = *end_ptr;
+        }
+
+        if (! *end_ptr) {
+            result = 0.0;
+        }
+
+        return result;
+    }
+
+#endif
+
+}
+
+
 U32
 Perl_cast_ulong(NV f)
 {
@@ -125,6 +226,12 @@ The binary number may optionally be prefixed with C<"0b"> or C<"b"> unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the binary
 number may use C<"_"> characters to separate digits.
+
+=for apidoc Amnh||PERL_SCAN_ALLOW_UNDERSCORES
+=for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
+=for apidoc Amnh||PERL_SCAN_GREATER_THAN_UV_MAX
+=for apidoc Amnh||PERL_SCAN_SILENT_ILLDIGIT
+=for apidoc Amnh||PERL_SCAN_TRAILING
 
 =cut
 
@@ -577,6 +684,13 @@ If an infinity or a not-a-number is recognized, C<*sp> will point to
 one byte past the end of the recognized string.  If the recognition fails,
 zero is returned, and C<*sp> will not move.
 
+=for apidoc Amn|bool|IS_NUMBER_GREATER_THAN_UV_MAX
+=for apidoc Amn|bool|IS_NUMBER_INFINITY
+=for apidoc Amn|bool|IS_NUMBER_IN_UV
+=for apidoc Amn|bool|IS_NUMBER_NAN
+=for apidoc Amn|bool|IS_NUMBER_NEG
+=for apidoc Amn|bool|IS_NUMBER_NOT_INT
+
 =cut
 */
 
@@ -899,41 +1013,41 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
        before checking for overflow.  */
     if (++s < send) {
       int digit = *s - '0';
-      if (digit >= 0 && digit <= 9) {
+      if (inRANGE(digit, 0, 9)) {
         value = value * 10 + digit;
         if (++s < send) {
           digit = *s - '0';
-          if (digit >= 0 && digit <= 9) {
+          if (inRANGE(digit, 0, 9)) {
             value = value * 10 + digit;
             if (++s < send) {
               digit = *s - '0';
-              if (digit >= 0 && digit <= 9) {
+              if (inRANGE(digit, 0, 9)) {
                 value = value * 10 + digit;
 		if (++s < send) {
                   digit = *s - '0';
-                  if (digit >= 0 && digit <= 9) {
+                  if (inRANGE(digit, 0, 9)) {
                     value = value * 10 + digit;
                     if (++s < send) {
                       digit = *s - '0';
-                      if (digit >= 0 && digit <= 9) {
+                      if (inRANGE(digit, 0, 9)) {
                         value = value * 10 + digit;
                         if (++s < send) {
                           digit = *s - '0';
-                          if (digit >= 0 && digit <= 9) {
+                          if (inRANGE(digit, 0, 9)) {
                             value = value * 10 + digit;
                             if (++s < send) {
                               digit = *s - '0';
-                              if (digit >= 0 && digit <= 9) {
+                              if (inRANGE(digit, 0, 9)) {
                                 value = value * 10 + digit;
                                 if (++s < send) {
                                   digit = *s - '0';
-                                  if (digit >= 0 && digit <= 9) {
+                                  if (inRANGE(digit, 0, 9)) {
                                     value = value * 10 + digit;
                                     if (++s < send) {
                                       /* Now got 9 digits, so need to check
                                          each time for overflow.  */
                                       digit = *s - '0';
-                                      while (digit >= 0 && digit <= 9
+                                      while (    inRANGE(digit, 0, 9)
                                              && (value < uv_max_div_10
                                                  || (value == uv_max_div_10
                                                      && digit <= uv_max_mod_10))) {
@@ -943,7 +1057,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                                         else
                                           break;
                                       }
-                                      if (digit >= 0 && digit <= 9
+                                      if (inRANGE(digit, 0, 9)
                                           && (s < send)) {
                                         /* value overflowed.
                                            skip the remaining digits, don't
@@ -1307,10 +1421,6 @@ Perl_my_atof(pTHX_ const char* s)
 
 #if defined(NV_INF) || defined(NV_NAN)
 
-#ifdef USING_MSVC6
-#  pragma warning(push)
-#  pragma warning(disable:4756;disable:4056)
-#endif
 static char*
 S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value)
 {
@@ -1354,7 +1464,7 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
             }
 #endif
             assert(strNE(fake, "silence compiler warning"));
-            nv = Perl_strtod(fake, &endp);
+            nv = S_strtod(aTHX_ fake, &endp);
             if (fake != endp) {
 #ifdef NV_INF
                 if ((infnan & IS_NUMBER_INFINITY)) {
@@ -1388,9 +1498,6 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
     }
     return NULL;
 }
-#ifdef USING_MSVC6
-#  pragma warning(pop)
-#endif
 
 #endif /* if defined(NV_INF) || defined(NV_NAN) */
 
@@ -1402,7 +1509,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 }
 
 char*
-Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
+Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
 {
     const char* s = orig;
     NV result[3] = {0.0, 0.0, 0.0};
@@ -1450,6 +1557,15 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
         if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return endp;
 
+        /* strtold() accepts 0x-prefixed hex and in POSIX implementations,
+           0b-prefixed binary numbers, which is backward incompatible
+        */
+        if ((len == 0 || len >= 2) && *s == '0' &&
+            (isALPHA_FOLD_EQ(s[1], 'x') || isALPHA_FOLD_EQ(s[1], 'b'))) {
+            *value = 0;
+            return (char *)s+1;
+        }
+
         /* If the length is passed in, the input string isn't NUL-terminated,
          * and in it turns out the function below assumes it is; therefore we
          * create a copy and NUL-terminate that */
@@ -1460,11 +1576,12 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
             s = copy + (s - orig);
         }
 
-        result[2] = Perl_strtod(s, &endp);
+        result[2] = S_strtod(aTHX_ s, &endp);
 
         /* If we created a copy, 'endp' is in terms of that.  Convert back to
          * the original */
         if (copy) {
+            s = (s - copy) + (char *) orig;
             endp = (endp - copy) + (char *) orig;
             Safefree(copy);
         }

@@ -335,7 +335,7 @@ conditional is about to be evaluated again.  Thus it can be used to
 increment a loop variable, even when the loop has been continued via
 the C<next> statement.
 
-When a block is preceding by a compilation phase keyword such as C<BEGIN>,
+When a block is preceded by a compilation phase keyword such as C<BEGIN>,
 C<END>, C<INIT>, C<CHECK>, or C<UNITCHECK>, then the block will run only
 during the corresponding phase of execution.  See L<perlmod> for more details.
 

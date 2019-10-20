@@ -30,15 +30,15 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (10) {
+  if (11) {
     load();
-    plan(tests => 10);
+    plan(tests => 11);
   }
 }
 
 use Devel::PPPort;
 use strict;
-$^W = 1;
+BEGIN { $^W = 1; }
 
 package Devel::PPPort;
 use vars '@ISA';
@@ -47,6 +47,8 @@ require DynaLoader;
 bootstrap Devel::PPPort;
 
 package main;
+
+BEGIN { require warnings if "$]" > '5.006' }
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -58,4 +60,5 @@ ok(&Devel::PPPort::SvUVx(0xdeadbeef), 0xdeadbeef);
 ok(&Devel::PPPort::XSRETURN_UV(), 42);
 ok(&Devel::PPPort::PUSHu(), 42);
 ok(&Devel::PPPort::XPUSHu(), 43);
+ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);
 

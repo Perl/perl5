@@ -1223,16 +1223,37 @@ S_adjust_size_and_find_bucket(size_t *nbytes_p)
 	return bucket;
 }
 
+/*
+These have the same interfaces as the C lib ones, so are considered documented
+
+=for apidoc malloc
+=for apidoc calloc
+=for apidoc realloc
+=cut
+*/
+
 Malloc_t
 Perl_malloc(size_t nbytes)
 {
         dVAR;
   	union overhead *p;
   	int bucket;
-
 #if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;
 #endif
+
+        /* A structure that has more than PTRDIFF_MAX bytes is unfortunately
+         * legal in C, but in such, if two elements are far enough apart, we
+         * can't legally find out how far apart they are.  Limit the size of a
+         * malloc so that pointer subtraction in the same structure is always
+         * well defined */
+        if (nbytes > PTRDIFF_MAX) {
+            dTHX;
+            MYMALLOC_WRITE2STDERR("Memory requests are limited to PTRDIFF_MAX"
+                                  " bytes to prevent possible undefined"
+                                  " behavior");
+            return NULL;
+        }
 
 	BARK_64K_LIMIT("Allocation",nbytes,nbytes);
 #ifdef DEBUGGING

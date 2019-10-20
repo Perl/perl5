@@ -9,6 +9,7 @@ use Unicode::UCD qw(prop_aliases
                     prop_invmap search_invlist
                     charprop
                     num
+                    charblock
                    );
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
@@ -31,8 +32,17 @@ my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 # charclass_invlists.h now also contains inversion maps and enum definitions
 # for those maps that have a finite number of possible values
 
-# integer or float
-my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
+# integer or float (no exponent)
+my $integer_or_float_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
+
+# Also includes rationals
+my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
+
+# More than one code point may have the same code point as their fold.  This
+# gives the maximum number in the current Unicode release.  (The folded-to
+# code point is not included in this count.)  Most folds are pairs of code
+# points, like 'B' and 'b', so this number is at least one.
+my $max_fold_froms = 1;
 
 my %keywords;
 my $table_name_prefix = "UNI_";
@@ -131,6 +141,8 @@ my %keep_together = (
                         posixxdigit => 1,
                         _perl_any_folds => 1,
                         _perl_folds_to_multi_char => 1,
+                        _perl_is_in_multi_char_fold => 1,
+                        _perl_non_final_folds => 1,
                         _perl_idstart => 1,
                         _perl_idcont => 1,
                         _perl_charname_begin => 1,
@@ -156,7 +168,7 @@ sub a2n($) {
 
     # Returns the input Unicode code point translated to native.
 
-    return $cp if $cp !~ $numeric_re || $cp > 255;
+    return $cp if $cp !~ $integer_or_float_re || $cp > 255;
     return $a2n[$cp];
 }
 
@@ -881,27 +893,6 @@ die "Could not find inversion map for Case_Folding" unless defined $format;
 die "Incorrect format '$format' for Case_Folding inversion map"
                                                     unless $format eq 'al'
                                                            || $format eq 'a';
-my @has_multi_char_fold;
-my @is_non_final_fold;
-
-for my $i (0 .. @$folds_ref - 1) {
-    next unless ref $folds_ref->[$i];   # Skip single-char folds
-    push @has_multi_char_fold, $cp_ref->[$i];
-
-    # Add to the non-finals list each code point that is in a non-final
-    # position
-    for my $j (0 .. @{$folds_ref->[$i]} - 2) {
-        push @is_non_final_fold, $folds_ref->[$i][$j];
-    }
-    @is_non_final_fold = uniques @is_non_final_fold;
-}
-
-sub _Perl_Non_Final_Folds {
-    @is_non_final_fold = sort { $a <=> $b } @is_non_final_fold;
-    my @return = mk_invlist_from_sorted_cp_list(\@is_non_final_fold);
-    return \@return;
-}
-
 sub _Perl_IVCF {
 
     # This creates a map of the inversion of case folding. i.e., given a
@@ -1028,8 +1019,15 @@ sub _Perl_IVCF {
 
 
     # Now we have a hash that is the inversion of the case fold property.
-    # Convert it to an inversion map.
+    # First find the maximum number of code points that fold to the same one.
+    foreach my $fold_to (keys %new) {
+        if (ref $new{$fold_to}) {
+            my $folders_count = scalar @{$new{$fold_to}};
+            $max_fold_froms = $folders_count if $folders_count > $max_fold_froms;
+        }
+    }
 
+    # Then convert the hash to an inversion map.
     my @sorted_folds = sort { $a <=> $b } keys %new;
     my (@invlist, @invmap);
 
@@ -1077,6 +1075,9 @@ sub _Perl_IVCF {
     push @invlist, $sorted_folds[-1] + 1;
     push @invmap, 0;
 
+    push @invlist, 0x110000;
+    push @invmap, 0;
+
     # All Unicode versions have some places where multiple code points map to
     # the same one, so the format always has an 'l'
     return \@invlist, \@invmap, 'al', $default;
@@ -1095,6 +1096,35 @@ sub prop_name_for_cmp ($) { # Sort helper
 
 sub UpperLatin1 {
     my @return = mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
+    return \@return;
+}
+
+sub _Perl_CCC_non0_non230 {
+
+    # Create an inversion list of code points with non-zero canonical
+    # combining class that also don't have 230 as the class number.  This is
+    # part of a Unicode Standard rule
+
+    my @nonzeros = prop_invlist("ccc=0");
+    shift @nonzeros;    # Invert so is "ccc != 0"
+
+    my @return;
+
+    # Expand into list of code points, while excluding those with ccc == 230
+    for (my $i = 0; $i < @nonzeros; $i += 2) {
+        my $upper = ($i + 1) < @nonzeros
+                    ? $nonzeros[$i+1] - 1      # In range
+                    : $Unicode::UCD::MAX_CP;  # To infinity.
+        for my $j ($nonzeros[$i] .. $upper) {
+            my @ccc_names = prop_value_aliases("ccc", charprop($j, "ccc"));
+
+            # Final element in @ccc_names will be all numeric
+            push @return, $j if $ccc_names[-1] != 230;
+        }
+    }
+
+    @return = sort { $a <=> $b } @return;
+    @return = mk_invlist_from_sorted_cp_list(\@return);
     return \@return;
 }
 
@@ -1137,21 +1167,8 @@ sub output_table_common {
 
     my $column_width = 2;   # We currently allow 2 digits for the number
 
-    # If the maximum value in the table is 1, it can be a bool.  (Being above
-    # a U8 is not currently handled
-    my $max_element = 0;
-    for my $i (0 .. $size - 1) {
-        for my $j (0 .. $size - 1) {
-            next if $max_element >= $table_ref->[$i][$j];
-            $max_element = $table_ref->[$i][$j];
-        }
-    }
-    die "Need wider table column width given '$max_element"
-                                    if length $max_element > $column_width;
-
-    my $table_type = ($max_element == 1)
-                     ? 'bool'
-                     : 'U8';
+    # Being above a U8 is not currently handled
+    my $table_type = 'U8';
 
     # If a name is longer than the width set aside for a column, its column
     # needs to have increased spacing so that the name doesn't get truncated
@@ -2326,7 +2343,6 @@ no warnings 'qw';
                         # Ignore non-alpha in sort
 my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
-                    &NonL1_Perl_Non_Final_Folds
                     &UpperLatin1
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,XPG_XX
                     _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner
@@ -2339,6 +2355,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     Simple_Case_Folding
                     Case_Folding
                     &_Perl_IVCF
+                    &_Perl_CCC_non0_non230
                 );
                 # NOTE that the convention is that extra enum values come
                 # after the property name, separated by commas, with the enums
@@ -2372,6 +2389,9 @@ foreach my $key (keys %utf8::nv_floating_to_rational) {
     my $value = $utf8::nv_floating_to_rational{$key};
     $floating_to_file_of{$key} = $utf8::stricter_to_file_of{"nv=$value"};
 }
+
+# Properties that are specified with a prop=value syntax
+my @equals_properties;
 
 # Collect all the binary properties from data in lib/unicore
 # Sort so that complements come after the main table, and the shortest
@@ -2412,8 +2432,12 @@ foreach my $property (sort
     # thing if there is no '='
     my ($lhs, $rhs) = $property =~ / ( [^=]* ) ( =? .*) /x;
 
-    # $lhs then becomes the property name.  See if there are any synonyms
-    # for this property.
+    # $lhs then becomes the property name.
+    my $prop_value = $rhs =~ s/ ^ = //rx;
+
+    push @equals_properties, $lhs if $prop_value ne "";
+
+    # See if there are any synonyms for this property.
     if (exists $prop_name_aliases{$lhs}) {
 
         # If so, do the combinatorics so that a new entry is added for
@@ -2439,6 +2463,7 @@ foreach my $property (sort
     # processing.  But we haven't dealt with it yet.  If we already have a
     # property with the identical characteristics, this becomes just a
     # synonym for it.
+
     if (exists $enums{$tag}) {
         push @this_entries, $property;
     }
@@ -2532,10 +2557,10 @@ foreach my $prop (@props) {
 
         my @invlist;
         my @invmap;
-        my $map_format;
+        my $map_format = 0;;
         my $map_default;
-        my $maps_to_code_point;
-        my $to_adjust;
+        my $maps_to_code_point = 0;
+        my $to_adjust = 0;
         my $same_in_all_code_pages;
         if ($is_local_sub) {
             my @return = eval $lookup_prop;
@@ -2576,10 +2601,13 @@ foreach my $prop (@props) {
                     @invmap = @$map_ref;
                     $map_format = $format;
                     $map_default = $default;
-                    $maps_to_code_point = $map_format =~ / a ($ | [^r] ) /x;
-                    $to_adjust = $map_format =~ /a/;
                 }
             }
+        }
+
+        if ($map_format) {
+            $maps_to_code_point = $map_format =~ / a ($ | [^r] ) /x;
+            $to_adjust = $map_format =~ /a/;
         }
 
         # Re-order the Unicode code points to native ones for this platform.
@@ -2683,13 +2711,15 @@ foreach my $prop (@props) {
                     if (ref $invmap[0]) {
                         $bucket = join "\cK", map { a2n($_) }  @{$invmap[0]};
                     }
-                    elsif ($maps_to_code_point && $invmap[0] =~ $numeric_re) {
+                    elsif (   $maps_to_code_point
+                           && $invmap[0] =~ $integer_or_float_re)
+                    {
 
                         # Do convert to native for maps to single code points.
                         # There are some properties that have a few outlier
                         # maps that aren't code points, so the above test
-                        # skips those.
-                        $bucket = a2n($invmap[0]);
+                        # skips those.  0 is never remapped.
+                        $bucket = $invmap[0] == 0 ? 0 : a2n($invmap[0]);
                     } else {
                         $bucket = $invmap[0];
                     }
@@ -2706,7 +2736,7 @@ foreach my $prop (@props) {
 
                                # Skip any non-numeric maps: these are outliers
                                # that aren't code points.
-                            && $base_map =~ $numeric_re
+                            && $base_map =~ $integer_or_float_re
 
                                #  'ne' because the default can be a string
                             && $base_map ne $map_default)
@@ -2794,9 +2824,12 @@ foreach my $prop (@props) {
                     for my $i (0 .. @new_invlist - 1) {
                         next if $i > 0
                                 && $new_invlist[$i-1] + 1 == $new_invlist[$i]
-                                && $xlated{$new_invlist[$i-1]} =~ $numeric_re
-                                && $xlated{$new_invlist[$i]} =~ $numeric_re
-                                && $xlated{$new_invlist[$i-1]} + 1 == $xlated{$new_invlist[$i]};
+                                && $xlated{$new_invlist[$i-1]}
+                                                        =~ $integer_or_float_re
+                                && $xlated{$new_invlist[$i]}
+                                                        =~ $integer_or_float_re
+                                && $xlated{$new_invlist[$i-1]} + 1
+                                                 == $xlated{$new_invlist[$i]};
                         push @temp, $new_invlist[$i];
                     }
                     @new_invlist = @temp;
@@ -2901,7 +2934,7 @@ foreach my $prop (@props) {
 
 switch_pound_if ('binary_property_tables', 'PERL_IN_REGCOMP_C');
 
-print $out_fh "\nconst char * deprecated_property_msgs[] = {\n\t";
+print $out_fh "\nconst char * const deprecated_property_msgs[] = {\n\t";
 print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
 print $out_fh "\n};\n";
 
@@ -2935,14 +2968,14 @@ if (scalar keys %deprecated_tags) {
     }
 }
 
-print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,\n\t";
+print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,  /* So no real value is zero */\n\t";
 print $out_fh join ",\n\t", @enums;
 print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 
 output_table_header($out_fh, "UV *", "uni_prop_ptrs");
-print $out_fh "\tNULL,\t/* Placeholder */\n\t";
+print $out_fh "\tNULL,\t/* Placeholder */\n";
 print $out_fh "\t";
 print $out_fh join ",\n\t", @invlist_names;
 print $out_fh "\n";
@@ -2958,6 +2991,131 @@ print $out_fh join "\n", "\n",
                          #"#    endif  /* DOINIT */",
                          "\n";
 
+switch_pound_if ('Valid property_values', 'PERL_IN_REGCOMP_C');
+
+# Each entry is a pointer to a table of property values for some property.
+# (Other properties may share this table.  The next two data structures allow
+# this sharing to be implemented.)
+my @values_tables = "NULL /* Placeholder so zero index is an error */";
+
+# Keys are all the values of a property, strung together.  The value of each
+# key is its index in @values_tables.  This is because many properties have
+# the same values, and this allows the data to appear just once.
+my %joined_values;
+
+# #defines for indices into @values_tables, so can have synonyms resolved by
+# the C compiler.
+my @values_indices;
+
+# Go through each property which is specifiable by \p{prop=value}, and create
+# a hash with the keys being the canonicalized short property names, and the
+# values for each property being all possible values that it can take on.
+# Both the full value and its short, canonicalized into lc, sans punctuation
+# version are included.
+my %all_values;
+for my $property (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) }
+                 uniques @equals_properties)
+{
+    # Get and canonicalize the short name for this property.
+    my ($short_name) = prop_aliases($property);
+    $short_name = lc $short_name;
+    $short_name =~ s/[ _-]//g;
+
+    # Now look at each value this property can take on
+    foreach my $value (prop_values($short_name)) {
+
+        # And for each value, look at each synonym for it
+        foreach my $alias (prop_value_aliases($short_name, $value)) {
+
+            # Add each synonym
+            push @{$all_values{$short_name}}, $alias;
+
+            # As well as its canonicalized name.  khw made the decision to not
+            # support the grandfathered L_ Gc property value
+            $alias = lc $alias;
+            $alias =~ s/[ _-]//g unless $alias =~ $numeric_re;
+            push @{$all_values{$short_name}}, $alias;
+        }
+    }
+}
+
+# Also include the old style block names, using the recipe given in
+# Unicode::UCD
+foreach my $block (prop_values('block')) {
+    push @{$all_values{'blk'}}, charblock((prop_invlist("block=$block"))[0]);
+}
+
+# Now create output tables for each property in @equals_properties (the keys
+# in %all_values) each containing that property's possible values as computed
+# just above.
+PROPERTY:
+for my $property (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b)
+                         or $a cmp $b } keys %all_values)
+{
+    @{$all_values{$property}} = uniques(@{$all_values{$property}});
+
+    # String together the values for this property, sorted.  This string forms
+    # a list definition, with each value as an entry in it, indented on a new
+    # line.  The sorting is used to find properties that take on the exact
+    # same values to share this string.
+    my $joined = "\t\"";
+    $joined .= join "\",\n\t\"",
+                sort { ($a =~ $numeric_re && $b =~ $numeric_re)
+                        ? eval $a <=> eval $b
+                        :    prop_name_for_cmp($a) cmp prop_name_for_cmp($b)
+                          or $a cmp $b
+                        } @{$all_values{$property}};
+    # And add a trailing marker
+    $joined .= "\",\n\tNULL\n";
+
+    my $table_name = $table_name_prefix . $property . "_values";
+    my $index_name = "${table_name}_index";
+
+    # Add a rule for the parser that is just an empty value.  It will need to
+    # know to look up empty things in the prop_value_ptrs[] table.
+
+    $keywords{"$property="} = $index_name;
+    if (exists $prop_name_aliases{$property}) {
+        foreach my $alias (@{$prop_name_aliases{$property}}) {
+            $keywords{"$alias="} = $index_name;
+        }
+    }
+
+    # Also create rules for the synonyms of this property to point to the same
+    # thing
+
+    # If this property's values are the same as one we've already computed,
+    # use that instead of creating a duplicate.  But we add a #define to point
+    # to the proper one.
+    if (exists $joined_values{$joined}) {
+        push @values_indices, "#define $index_name  $joined_values{$joined}\n";
+        next PROPERTY;
+    }
+
+    # And this property, now known to have unique values from any other seen
+    # so far is about to be pushed onto @values_tables.  Its index is the
+    # current count.
+    push @values_indices, "#define $index_name  "
+                         . scalar @values_tables . "\n";
+    $joined_values{$joined} = $index_name;
+    push @values_tables, $table_name;
+
+    # Create the table for this set of values.
+    output_table_header($out_fh, "char *", $table_name);
+    print $out_fh $joined;
+    output_table_trailer();
+} # End of loop through the properties, and their values
+
+# We have completely determined the table of the unique property values
+output_table_header($out_fh, "char * const *",
+                             "${table_name_prefix}prop_value_ptrs");
+print $out_fh join ",\n", @values_tables;
+print $out_fh "\n";
+output_table_trailer();
+
+# And the #defines for the indices in it
+print $out_fh "\n\n", join "", @values_indices;
+
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
 
 output_GCB_table();
@@ -2965,6 +3123,16 @@ output_LB_table();
 output_WB_table();
 
 end_file_pound_if;
+
+print $out_fh <<"EOF";
+
+/* More than one code point may have the same code point as their fold.  This
+ * gives the maximum number in the current Unicode release.  (The folded-to
+ * code point is not included in this count.)  For example, both 'S' and
+ * \\x{17F} fold to 's', so the number for that fold is 2.  Another way to
+ * look at it is the maximum length of all the IVCF_AUX_TABLE's */
+#define MAX_FOLD_FROMS $max_fold_froms
+EOF
 
 my $sources_list = "lib/unicore/mktables.lst";
 my @sources = qw(regen/mk_invlists.pl
@@ -2991,6 +3159,40 @@ my @sources = qw(regen/mk_invlists.pl
 }
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
+
+my %name_to_index;
+for my $i (0 .. @enums - 1) {
+    my $loose_name = $enums[$i] =~ s/^$table_name_prefix//r;
+    $loose_name = lc $loose_name;
+    $loose_name =~ s/__/=/;
+    $loose_name =~ s/_dot_/./;
+    $loose_name =~ s/_slash_/\//g;
+    $name_to_index{$loose_name} = $i + 1;
+}
+# unsanitize, exclude &, maybe add these before sanitize
+for my $i (0 .. @perl_prop_synonyms - 1) {
+    my $loose_name_pair = $perl_prop_synonyms[$i] =~ s/#\s*define\s*//r;
+    $loose_name_pair =~ s/\b$table_name_prefix//g;
+    $loose_name_pair = lc $loose_name_pair;
+    $loose_name_pair =~ s/__/=/g;
+    $loose_name_pair =~ s/_dot_/./g;
+    $loose_name_pair =~ s/_slash_/\//g;
+    my ($synonym, $primary) = split / +/, $loose_name_pair;
+    $name_to_index{$synonym} = $name_to_index{$primary};
+}
+
+my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
+		      {style => '*', by => 'regen/mk_invlists.pl',
+                      from => "Unicode::UCD"});
+{
+    print $uni_pl "\%utf8::uni_prop_ptrs_indices = (\n";
+    for my $name (sort keys %name_to_index) {
+        print $uni_pl "    '$name' => $name_to_index{$name},\n";
+    }
+    print $uni_pl ");\n\n1;\n";
+}
+
+read_only_bottom_close_and_rename($uni_pl, \@sources);
 
 require './regen/mph.pl';
 

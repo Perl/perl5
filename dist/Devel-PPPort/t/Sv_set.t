@@ -30,15 +30,15 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (5) {
+  if (15) {
     load();
-    plan(tests => 5);
+    plan(tests => 15);
   }
 }
 
 use Devel::PPPort;
 use strict;
-$^W = 1;
+BEGIN { $^W = 1; }
 
 package Devel::PPPort;
 use vars '@ISA';
@@ -60,6 +60,49 @@ ok($bar->x(), 'foobar');
 
 Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 ok($bar->x(), 'hacker');
+
+if ( "$]" < '5.007003' ) {
+    for (1..10) {
+        skip 'skip: no SV_NOSTEAL support', 0;
+    }
+} else {
+    ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+
+    tie my $scalar, 'TieScalarCounter', 'string';
+
+    ok tied($scalar)->{fetch}, 0;
+    ok tied($scalar)->{store}, 0;
+    my $copy = Devel::PPPort::newSVsv_nomg($scalar);
+    ok tied($scalar)->{fetch}, 0;
+    ok tied($scalar)->{store}, 0;
+
+    my $fetch = $scalar;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    my $copy2 = Devel::PPPort::newSVsv_nomg($scalar);
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok $copy2, 'string';
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value};
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
+}
 
 package foo;
 

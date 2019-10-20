@@ -414,7 +414,9 @@ B<-D14> is equivalent to B<-Dtls>):
                (eg when using -Ds)
     524288  J  show s,t,P-debug (don't Jump over) on opcodes within
                package DB
-   1048576  v  Verbose: use in conjunction with other flags
+   1048576  v  Verbose: use in conjunction with other flags to
+               increase the verbosity of the output.  Is a no-op on
+               many of the other flags
    2097152  C  Copy On Write
    4194304  A  Consistency checks on internal structures
    8388608  q  quiet - currently only suppresses the "EXECUTING"
@@ -852,8 +854,8 @@ into an executable file by using the I<undump> program (not supplied).
 This speeds startup at the expense of some disk space (which you
 can minimize by stripping the executable).  (Still, a "hello world"
 executable comes out to about 200K on my machine.)  If you want to
-execute a portion of your program before dumping, use the dump()
-operator instead.  Note: availability of I<undump> is platform
+execute a portion of your program before dumping, use the C<CORE::dump()>
+function instead.  Note: availability of I<undump> is platform
 specific and may not be available for a specific port of Perl.
 
 =item B<-U>
@@ -946,6 +948,8 @@ X<-X>
 
 Disables all warnings regardless of C<use warnings> or C<$^W>.
 See L<warnings>.
+
+Forbidden in L</C<PERL5OPT>>.
 
 =item B<-x>
 X<-x>
@@ -1255,8 +1259,7 @@ after compilation.
 =item PERL_DESTRUCT_LEVEL
 X<PERL_DESTRUCT_LEVEL>
 
-Relevant only if your Perl executable was built with B<-DDEBUGGING>,
-this controls the behaviour of global destruction of objects and other
+Controls the behaviour of global destruction of objects and other
 references.  See L<perlhacktips/PERL_DESTRUCT_LEVEL> for more information.
 
 =item PERL_DL_NONLAZY
@@ -1335,8 +1338,8 @@ B<Note> that any information about the hash function, especially the hash
 seed is B<sensitive information>: by knowing it, one can craft a denial-of-service
 attack against Perl code, even remotely; see L<perlsec/"Algorithmic Complexity Attacks">
 for more information. B<Do not disclose the hash seed> to people who
-don't need to know it. See also C<hash_seed()> and
-C<key_traversal_mask()> in L<Hash::Util>.
+don't need to know it. See also L<C<hash_seed()>|Hash::Util/hash_seed> and
+L<C<hash_traversal_mask()>|Hash::Util/hash_traversal_mask>.
 
 An example output might be:
 

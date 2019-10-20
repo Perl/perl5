@@ -213,8 +213,8 @@ void endservent(void);
 #endif
 
 #if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESSX) && defined(ACC_SELF)
-    /* AIX */
-#   define PERL_EFF_ACCESS(p,f) (accessx((p), (f), ACC_SELF))
+    /* AIX's accessx() doesn't declare its argument const, unlike every other platform */
+#   define PERL_EFF_ACCESS(p,f) (accessx((char*)(p), (f), ACC_SELF))
 #endif
 
 
@@ -498,7 +498,7 @@ PP(pp_die)
 		}
 	    }
 	}
-	else if (SvPOK(errsv) && SvCUR(errsv)) {
+	else if (SvOK(errsv) && (SvPV_nomg(errsv,len), len)) {
 	    exsv = sv_mortalcopy(errsv);
 	    sv_catpvs(exsv, "\t...propagated");
 	}
@@ -1736,7 +1736,7 @@ PP(pp_sysread)
     }
     else {
 	buffer = SvPV_force(bufsv, blen);
-	buffer_utf8 = !IN_BYTES && SvUTF8(bufsv);
+	buffer_utf8 = DO_UTF8(bufsv);
     }
     if (DO_UTF8(bufsv)) {
 	blen = sv_len_utf8_nomg(bufsv);
@@ -2121,7 +2121,7 @@ PP(pp_eof)
     }
 
     if (!gv)
-	RETPUSHNO;
+	RETPUSHYES;
 
     if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
 	return tied_method1(SV_CONST(EOF), SP, MUTABLE_SV(io), mg, newSVuv(which));
@@ -3824,8 +3824,7 @@ PP(pp_readlink)
     len = readlink(tmps, buf, sizeof(buf) - 1);
     if (len < 0)
 	RETPUSHUNDEF;
-    if (len != -1)
-        buf[len] = '\0';
+    buf[len] = '\0';
     PUSHp(buf, len);
     RETURN;
 #else
@@ -5280,8 +5279,8 @@ PP(pp_shostent)
 	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 	break;
-#ifdef HAS_SETNETENT
     case OP_SNETENT:
+#ifdef HAS_SETNETENT
 	PerlSock_setnetent(stayopen);
 #else
 	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);

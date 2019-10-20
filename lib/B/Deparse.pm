@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.49';
+$VERSION = '1.50';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -271,7 +271,7 @@ BEGIN {
 
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
-		 kvaslice kvhslice padsv
+		 kvaslice kvhslice padsv argcheck
                  nextstate dbstate rv2av rv2hv helem custom ]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
@@ -1176,42 +1176,68 @@ sub pad_subs {
 # or altered. In this case we return "()" and fall back to general
 # deparsing of the individual sigelems as 'my $x = $_[N]' etc.
 #
-# We're only called if the first two ops are nextstate and argcheck.
+# We're only called if the top is an ex-argcheck, which is a placeholder
+# indicating a signature subtree.
+#
+# Return a signature string, or an empty list if no deparseable as a
+# signature
 
 sub deparse_argops {
-    my ($self, $firstop, $cv) = @_;
+    my ($self, $topop, $cv) = @_;
 
     my @sig;
-    my $o = $firstop;
-    return if $o->label; #first nextstate;
+
+
+    $topop = $topop->first;
+    return unless $$topop and $topop->name eq 'lineseq';
+
+
+    # last op should be nextstate
+    my $last = $topop->last;
+    return unless $$last
+                    and (   _op_is_or_was($last, OP_NEXTSTATE)
+                         or _op_is_or_was($last, OP_DBSTATE));
+
+    # first OP_NEXTSTATE
+
+    my $o = $topop->first;
+    return unless $$o;
+    return if $o->label;
 
     # OP_ARGCHECK
 
     $o = $o->sibling;
+    return unless $$o and $o->name eq 'argcheck';
+
     my ($params, $opt_params, $slurpy) = $o->aux_list($cv);
     my $mandatory = $params - $opt_params;
     my $seen_slurpy = 0;
     my $last_ix = -1;
 
-    # keep looking for valid nextstate + argelem pairs
+    # keep looking for valid nextstate + argelem pairs, terminated
+    # by a final nextstate
 
     while (1) {
-        # OP_NEXTSTATE
         $o = $o->sibling;
-        last unless $$o;
-        last unless $o->name =~ /^(next|db)state$/;
-        last if $o->label;
+        return unless $$o;
+
+        # skip trailing nextstate
+        last if $$o == $$last;
+
+        # OP_NEXTSTATE
+        return unless $o->name =~ /^(next|db)state$/;
+        return if $o->label;
 
         # OP_ARGELEM
-        my $o2 = $o->sibling;
-        last unless $$o2;
+        $o = $o->sibling;
+        last unless $$o;
 
-        if ($o2->name eq 'argelem') {
-            my $ix  = $o2->string($cv);
+        if ($o->name eq 'argelem') {
+            my $ix  = $o->string($cv);
             while (++$last_ix < $ix) {
                 push @sig, $last_ix <  $mandatory ? '$' : '$=';
             }
-            my $var = $self->padname($o2->targ);
+            my $var = $self->padname($o->targ);
             if ($var =~ /^[@%]/) {
                 return if $seen_slurpy;
                 $seen_slurpy = 1;
@@ -1221,8 +1247,8 @@ sub deparse_argops {
             else {
                 return if $ix >= $params;
             }
-            if ($o2->flags & OPf_KIDS) {
-                my $kid = $o2->first;
+            if ($o->flags & OPf_KIDS) {
+                my $kid = $o->first;
                 return unless $$kid and $kid->name eq 'argdefelem';
                 my $def = $self->deparse($kid->first, 7);
                 $def = "($def)" if $kid->first->flags & OPf_PARENS;
@@ -1230,13 +1256,13 @@ sub deparse_argops {
             }
             push @sig, $var;
         }
-        elsif ($o2->name eq 'null'
-               and ($o2->flags & OPf_KIDS)
-               and $o2->first->name eq 'argdefelem')
+        elsif ($o->name eq 'null'
+               and ($o->flags & OPf_KIDS)
+               and $o->first->name eq 'argdefelem')
         {
             # special case - a void context default expression: $ = expr
 
-            my $defop = $o2->first;
+            my $defop = $o->first;
             my $ix = $defop->targ;
             while (++$last_ix < $ix) {
                 push @sig, $last_ix <  $mandatory ? '$' : '$=';
@@ -1248,10 +1274,9 @@ sub deparse_argops {
             push @sig, '$ = ' . $def;
         }
         else {
-            last;
+            return;
         }
 
-        $o = $o2;
     }
 
     while (++$last_ix < $params) {
@@ -1259,8 +1284,9 @@ sub deparse_argops {
     }
     push @sig, $slurpy if $slurpy and !$seen_slurpy;
 
-    return ($o, join(', ', @sig));
+    return (join(', ', @sig));
 }
+
 
 # Deparse a sub. Returns everything except the 'sub foo',
 # e.g.  ($$) : method { ...; }
@@ -1304,27 +1330,26 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	$self->pad_subs($cv);
 	$self->pessimise($root, $cv->START);
 	my $lineseq = $root->first;
-	if ($lineseq->name eq "lineseq") {
-	    my $firstop = $lineseq->first;
 
-            if ($has_sig) {
-                my $o2;
-                # try to deparse first few ops as a signature if possible
-                if (     $$firstop
-                     and $firstop->name =~  /^(next|db)state$/
-                     and (($o2 = $firstop->sibling))
-                     and $$o2)
-                {
-                    if ($o2->name eq 'argcheck') {
-                        my ($nexto, $mysig) = $self->deparse_argops($firstop, $cv);
-                        if (defined $nexto) {
-                            $firstop = $nexto;
-                            $sig = $mysig;
-                        }
-                    }
-                }
+        # stub sub may have single op rather than list of ops
+        my $is_list = ($lineseq->name eq "lineseq");
+        my $firstop = $is_list ? $lineseq->first : $lineseq;
+
+        # Try to deparse first subtree as a signature if possible.
+        # Top of signature subtree has an ex-argcheck as a placeholder
+        if (    $has_sig
+            and $$firstop
+            and $firstop->name eq 'null'
+            and $firstop->targ == OP_ARGCHECK
+        ) {
+            my ($mysig) = $self->deparse_argops($firstop, $cv);
+            if (defined $mysig) {
+                $sig = $mysig;
+                $firstop = $is_list ? $firstop->sibling : undef;
             }
+        }
 
+        if ($is_list && $firstop) {
             my @ops;
 	    for (my $o = $firstop; $$o; $o=$o->sibling) {
 		push @ops, $o;
@@ -1341,9 +1366,12 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 		$body .= ";\n$subs" if length($subs);
 	    }
 	}
-	else {
+	elsif ($firstop) {
 	    $body = $self->deparse($root->first, 0);
 	}
+        else {
+            $body = ';'; # stub sub
+        }
 
         my $l = '';
         if ($self->{'linenums'}) {

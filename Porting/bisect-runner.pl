@@ -440,7 +440,9 @@ as exiting with a signal or a core dump.)
 
 -A I<config_arg=value>
 
-Arguments (C<-A>, C<-D>, C<-U>) to pass to F<Configure>. For example,
+Arguments (C<-A>, C<-D>, C<-U>) to pass to F<Configure>.  The C<-D>, C<-A> and
+C<-U> switches should be spelled as if you were normally giving them to
+F<./Configure>.  For example,
 
     -Dnoextensions=Encode
     -Uusedevel
@@ -534,6 +536,12 @@ if it detects errors, with the assumption that the test program itself
 always exits with zero. If you require more flexibility than this, either
 specify your C<valgrind> invocation explicitly as part of the test case, or
 use a wrapper script to control the command line or massage the exit codes.
+
+In order for the test program to be seen as a perl script to valgrind
+(rather than a shell script), the first line must be one of the following
+
+  #!./perl
+  #!./miniperl
 
 =item *
 

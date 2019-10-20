@@ -246,6 +246,7 @@ Christian Millour		<cm.perl@abtela.com>
 Christian Winter		<bitpoet@linux-config.de>
 Christoph Lamprecht		<ch.l.ngre@online.de>
 Christophe Grosjean		<christophe.grosjean@gmail.com>
+Christopher Chavez		<chrischavez@gmx.us>
 Christopher Chan-Nui		<channui@austin.ibm.com>
 Christopher Davis		<ckd@loiosh.kei.com>
 Christopher J. Madsen		<perl@cjmweb.net>
@@ -274,10 +275,12 @@ Dagfinn Ilmari Mannsåker	<ilmari@ilmari.org>
 Dale Amon			<amon@vnl.com>
 Damian Conway			<damian@conway.org>
 Damon Atkins			<Damon.Atkins@nabaus.com.au>
+Dan Book			<grinnz@grinnz.com>
 Dan Boorstein			<dan_boo@bellsouth.net>
 Dan Brook			<dbrook@easyspace.com>
 Dan Collins			<dcollinsn@gmail.com>
 Dan Dascalescu			<bigbang7@gmail.com>
+Dan Dedrick			<ddedrick@lexmark.com>
 Dan Hale			<danhale@us.ibm.com>
 Dan Jacobson			<jidanni@jidanni.org>
 Dan Kogai			<dankogai@dan.co.jp>
@@ -415,6 +418,7 @@ Fergal Daly			<fergal@esatclear.ie>
 Fingle Nark			<finglenark@gmail.com>
 Florent Guillaume
 Florian Ragwitz			<rafl@debian.org>
+Florian Weimer			<fweimer@redhat.com>
 François Désarménien		<desar@club-internet.fr>
 François Perrad			<francois.perrad@gadz.org>
 Frank Crawford
@@ -539,8 +543,10 @@ Jack Shirazi			<JackS@GemStone.com>
 Jacques Germishuys		<jacquesg@striata.com>
 Jacqui Caren			<Jacqui.Caren@ig.co.uk>
 Jake Hamby			<jehamby@lightside.com>
+Jakub Wilk			<jwilk@jwilk.net>
 James				<james@rf.net>
 James A. Duncan			<jduncan@fotango.com>
+James Clarke			<jrtc27@jrtc27.com>
 James E Keenan			<jkeenan@cpan.org>
 James FitzGibbon		<james@ican.net>
 James Jurach			<muaddib@erf.net>
@@ -584,6 +590,7 @@ Jeremy D. Zawodny		<jeremy@zawodny.com>
 Jeremy H. Brown			<jhbrown@ai.mit.edu>
 Jeremy Madea			<jmadea@inktomi.com>
 Jerome Abela			<abela@hsc.fr>
+Jerome Duval			<jerome.duval@gmail.com>
 Jerrad Pierce			<belg4mit@MIT.EDU>
 Jerry D. Hedden			<jdhedden@cpan.org>
 Jess Robinson			<castaway@desert-island.me.uk>
@@ -766,6 +773,7 @@ Maik Hentsche			<maik@mm-double.de>
 Major Sébastien			<sebastien.major@crdp.ac-caen.fr>
 Makoto MATSUSHITA		<matusita@ics.es.osaka-u.ac.jp>
 Malcolm Beattie			<mbeattie@sable.ox.ac.uk>
+Manuel Mausz			<manuel@mausz.at>
 Manuel Valente			<mvalente@idealx.com>
 Marc Green			<marcgreen@cpan.org>
 Marc Lehmann			<pcg@goof.com>
@@ -835,6 +843,7 @@ Matt Kraai			<kraai@ftbfs.org>
 Matt S Trout			<mst@shadowcat.co.uk>
 Matt Sergeant			<matt@sergeant.org>
 Matt Taggart			<taggart@debian.org>
+Matt Turner			<mattst88@gmail.com>
 Matthew Black			<black@csulb.edu>
 Matthew Green			<mrg@splode.eterna.com.au>
 Matthew Horsfall		<wolfsage@gmail.com>
@@ -860,6 +869,7 @@ Michael Engel			<engel@nms1.cc.huji.ac.il>
 Michael Fig			<michael@liveblockauctions.com>
 Michael G Schwern		<schwern@pobox.com>
 Michael H. Moran		<mhm@austin.ibm.com>
+Michael Haardt			<michael@moria.de>
 Michael King			<mike808@users.sourceforge.net>
 Michael Lemke			<lemkemch@t-online.de>
 Michael Mahan			<mahanm@nextwork.rose-hulman.edu>
@@ -963,7 +973,7 @@ Paul Hoffman			<phoffman@proper.com>
 Paul Holser			<Paul.Holser.pholser@nortelnetworks.com>
 Paul Johnson			<paul@pjcj.net>
 Paul Lindner			<lindner@inuus.com>
-Paul Marquess			<paul.marquess@btinternet.com>
+Paul Marquess			<pmqs@cpan.org>
 Paul Moore			<Paul.Moore@uk.origin-it.com>
 Paul Rogers			<Paul.Rogers@Central.Sun.COM>
 Paul Saab			<ps@yahoo-inc.com>
@@ -980,6 +990,7 @@ Peter BARABAS
 Peter Chines			<pchines@nhgri.nih.gov>
 Peter Dintelmann		<Peter.Dintelmann@Dresdner-Bank.com>
 Peter E. Yee			<yee@trident.arc.nasa.gov>
+Peter Eisentraut			<peter@eisentraut.org>
 Peter Gessner			<peter.gessner@post.rwth-aachen.de>
 Peter Gordon			<peter@valor.com>
 Peter Haworth			<pmh@edison.ioppublishing.com>
@@ -999,6 +1010,7 @@ Petr Písař			<ppisar@redhat.com>
 Petter Reinholdtsen		<pere@hungry.com>
 Phil Lobbes			<phil@perkpartners.com>
 Phil Monsen			<philip.monsen@pobox.com>
+Phil Pearl (Lobbes)			<plobbes@gmail.com>
 Philip Boulain			<philip.boulain@smoothwall.net>
 Philip Guenther			<guenther@openbsd.org>
 Philip Hazel			<ph10@cus.cam.ac.uk>
@@ -1051,6 +1063,7 @@ Richard Hitt			<rbh00@utsglobal.com>
 Richard Kandarian		<richard.kandarian@lanl.gov>
 Richard L. England		<richard_england@mentorg.com>
 Richard L. Maus, Jr.		<rmaus@monmouth.com>
+Richard Leach			<rich+perl@hyphen-dash-hyphen.info>
 Richard Levitte			<levitte@openssl.org>
 Richard Möhn			<richard.moehn@fu-berlin.de>
 Richard Ohnemus			<richard_ohnemus@dallas.csd.sterling.com>
@@ -1090,6 +1103,7 @@ Russel O'Connor			<roconnor@world.std.com>
 Russell Fulton			<russell@ccu1.auckland.ac.nz>
 Russell Mosemann		<mose@ccsn.edu>
 Ryan Herbert			<rherbert@sycamorehq.com>
+Ryan Voots			<simcop2387@simcop2387.info>
 Salvador Fandiño		<sfandino@yahoo.com>
 Salvador Ortiz Garcia		<sog@msg.com.mx>
 Sam Kimbrel			<kimbrel@me.com>
@@ -1179,6 +1193,7 @@ Steven Parkes			<parkes@sierravista.com>
 Steven Schubiger		<schubiger@cpan.org>
 Stian Seeberg			<sseeberg@nimsoft.no>
 Sullivan Beck			<sbeck@cpan.org>
+Svyatoslav			<razmyslov@viva64.com>
 Sven Strickroth			<sven.strickroth@tu-clausthal.de>
 Sven Verdoolaege		<skimo@breughel.ufsia.ac.be>
 syber				<syber@crazypanda.ru>
@@ -1253,7 +1268,9 @@ Ulrich Pfeifer			<pfeifer@wait.de>
 Unicode Consortium		<unicode.org>
 Vadim Konovalov			<vkonovalov@lucent.com>
 Valeriy E. Ushakov		<uwe@ptc.spbu.ru>
+VanL				<van@scratch.space>
 Vernon Lyon			<vlyon@cpan.org>
+Vickenty Fesunov			<kent@setattr.net>
 Victor Adam			<victor@drawall.cc>
 Victor Efimov			<victor@vsespb.ru>
 Viktor Turskyi			<koorchik@gmail.com>
@@ -1300,6 +1317,7 @@ Yuval Kogman			<nothingmuch@woobling.org>
 Yves Orton			<demerphq@gmail.com>
 Zachary Miller			<zcmiller@simon.er.usgs.gov>
 Zachary Storer			<zacts.3.14159@gmail.com>
+Zak B. Elep			<zakame@zakame.net>
 Zbynek Vyskovsky		<kvr@centrum.cz>
 Zefram				<zefram@fysh.org>
 Zsbán Ambrus			<ambrus@math.bme.hu>

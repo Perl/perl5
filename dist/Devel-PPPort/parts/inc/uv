@@ -12,6 +12,7 @@
 =provides
 
 __UNDEFINED__
+my_strnlen
 SvUOK
 
 =implementation
@@ -27,15 +28,26 @@ __UNDEFINED__  sv_setuv(sv, uv)                     \
 
 __UNDEFINED__  newSVuv(uv)     ((uv) <= IV_MAX ? newSViv((IV)uv) : newSVnv((NV)uv))
 
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+__UNDEFINED__  sv_2uv(sv)      ({ SV *_sv = (sv); (UV) (SvNOK(_sv) ? SvNV(_sv) : sv_2nv(_sv)); })
+#else
 __UNDEFINED__  sv_2uv(sv)      ((PL_Sv = (sv)), (UV) (SvNOK(PL_Sv) ? SvNV(PL_Sv) : sv_2nv(PL_Sv)))
+#endif
+
 __UNDEFINED__  SvUVX(sv)       ((UV)SvIVX(sv))
 __UNDEFINED__  SvUVXx(sv)      SvUVX(sv)
 __UNDEFINED__  SvUV(sv)        (SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv))
+
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+__UNDEFINED__  SvUVx(sv)       ({ SV *_sv = (sv)); SvUV(_sv); })
+#else
 __UNDEFINED__  SvUVx(sv)       ((PL_Sv = (sv)), SvUV(PL_Sv))
+#endif
 
 /* Hint: sv_uv
  * Always use the SvUVx() macro instead of sv_uv().
  */
+/* Replace sv_uv with SvUVx */
 __UNDEFINED__  sv_uv(sv)       SvUVx(sv)
 
 #if !defined(SvUOK) && defined(SvIOK_UV)
@@ -47,6 +59,27 @@ __UNDEFINED__  XSRETURN_UV(v)  STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_E
 
 __UNDEFINED__  PUSHu(u)        STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG;  } STMT_END
 __UNDEFINED__  XPUSHu(u)       STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
+
+#if !defined(my_strnlen)
+#if { NEED my_strnlen }
+
+Size_t
+my_strnlen(const char *str, Size_t maxlen)
+{
+    const char *p = str;
+
+    while(maxlen-- && *p)
+        p++;
+
+    return p - str;
+}
+
+#endif
+#endif
+
+=xsinit
+
+#define NEED_my_strnlen
 
 =xsubs
 
@@ -108,7 +141,18 @@ XPUSHu()
                 XPUSHu(43);
                 XSRETURN(1);
 
-=tests plan => 10
+STRLEN
+my_strnlen(s, max)
+        char * s
+        STRLEN max
+        CODE:
+            RETVAL= my_strnlen(s, max);
+        OUTPUT:
+            RETVAL
+
+=tests plan => 11
+
+BEGIN { require warnings if "$]" > '5.006' }
 
 ok(&Devel::PPPort::sv_setuv(42), 42);
 ok(&Devel::PPPort::newSVuv(123), 123);
@@ -120,3 +164,4 @@ ok(&Devel::PPPort::SvUVx(0xdeadbeef), 0xdeadbeef);
 ok(&Devel::PPPort::XSRETURN_UV(), 42);
 ok(&Devel::PPPort::PUSHu(), 42);
 ok(&Devel::PPPort::XPUSHu(), 43);
+ok(&Devel::PPPort::my_strnlen("abc\0def", 7), 3);

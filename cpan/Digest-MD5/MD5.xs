@@ -106,20 +106,6 @@ static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
  * values.  The following macros (and functions) allow us to convert
  * between native integers and such values.
  */
-#undef BYTESWAP
-#ifndef U32_ALIGNMENT_REQUIRED
- #if BYTEORDER == 0x1234      /* 32-bit little endian */
-  #define BYTESWAP(x) (x)     /* no-op */
-
- #elif BYTEORDER == 0x4321    /* 32-bit big endian */
-  #define BYTESWAP(x) 	((((x)&0xFF)<<24)	\
-			|(((x)>>24)&0xFF)	\
-			|(((x)&0x0000FF00)<<8)	\
-			|(((x)&0x00FF0000)>>8)	)
- #endif
-#endif
-
-#ifndef BYTESWAP
 static void u2s(U32 u, U8* s)
 {
     *s++ = (U8)(u         & 0xFF);
@@ -132,7 +118,6 @@ static void u2s(U32 u, U8* s)
                         ((U32)(*(s+1)) << 8)  |  \
                         ((U32)(*(s+2)) << 16) |  \
                         ((U32)(*(s+3)) << 24))
-#endif
 
 /* This structure keeps the current state of algorithm.
  */
@@ -279,29 +264,16 @@ MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
     U32 C = ctx->C;
     U32 D = ctx->D;
 
-#ifndef U32_ALIGNMENT_REQUIRED
-    const U32 *x = (U32*)buf;  /* really just type casting */
-#endif
-
     do {
 	U32 a = A;
 	U32 b = B;
 	U32 c = C;
 	U32 d = D;
 
-#if BYTEORDER == 0x1234 && !defined(U32_ALIGNMENT_REQUIRED)
-	const U32 *X = x;
-        #define NEXTx  (*x++)
-#else
-	U32 X[16];      /* converted values, used in round 2-4 */
+	U32 X[16];      /* little-endian values, used in round 2-4 */
 	U32 *uptr = X;
 	U32 tmp;
- #ifdef BYTESWAP
-        #define NEXTx  (tmp=*x++, *uptr++ = BYTESWAP(tmp))
- #else
         #define NEXTx  (s2u(buf,tmp), buf += 4, *uptr++ = tmp)
- #endif
-#endif
 
 #ifdef MD5_DEBUG
 	if (buf == ctx->buffer)
@@ -313,7 +285,7 @@ MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
 	    int i;
 	    fprintf(stderr,"[");
 	    for (i = 0; i < 16; i++) {
-		fprintf(stderr,"%x,", x[i]);
+		fprintf(stderr,"%x,", x[i]); /* FIXME */
 	    }
 	    fprintf(stderr,"]\n");
 	}
@@ -468,30 +440,18 @@ MD5Final(U8* digest, MD5_CTX *ctx)
 
     bits_low = ctx->bytes_low << 3;
     bits_high = (ctx->bytes_high << 3) | (ctx->bytes_low  >> 29);
-#ifdef BYTESWAP
-    *(U32*)(ctx->buffer + fill) = BYTESWAP(bits_low);    fill += 4;
-    *(U32*)(ctx->buffer + fill) = BYTESWAP(bits_high);   fill += 4;
-#else
     u2s(bits_low,  ctx->buffer + fill);   fill += 4;
     u2s(bits_high, ctx->buffer + fill);   fill += 4;
-#endif
 
     MD5Transform(ctx, ctx->buffer, fill >> 6);
 #ifdef MD5_DEBUG
     fprintf(stderr,"       Result: %s\n", ctx_dump(ctx));
 #endif
 
-#ifdef BYTESWAP
-    *(U32*)digest = BYTESWAP(ctx->A);  digest += 4;
-    *(U32*)digest = BYTESWAP(ctx->B);  digest += 4;
-    *(U32*)digest = BYTESWAP(ctx->C);  digest += 4;
-    *(U32*)digest = BYTESWAP(ctx->D);
-#else
     u2s(ctx->A, digest);
     u2s(ctx->B, digest+4);
     u2s(ctx->C, digest+8);
     u2s(ctx->D, digest+12);
-#endif
 }
 
 #ifndef INT2PTR

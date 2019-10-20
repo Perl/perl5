@@ -338,7 +338,7 @@ ${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len )
     U32 s;
     U32 n;
     do {
-        h ^= *ptr;
+        h ^= NATIVE_TO_LATIN1(*ptr);    /* table collated in Latin1 */
         h *= ${prefix}_FNV_CONST;
     } while ( ++ptr < ptr_end );
     n= h % ${prefix}_BUCKETS;
@@ -436,8 +436,6 @@ sub make_mph_from_hash {
     my $hash= shift;
 
     # we do this twice because often we can find longer prefixes on the second pass.
-    my @keys= sort {length($b) <=> length($a) || $a cmp $b } keys %$hash;
-
     my ($smart_blob, $res_to_split)= build_split_words($hash,0);
     {
         my ($smart_blob2, $res_to_split2)= build_split_words($hash,1);

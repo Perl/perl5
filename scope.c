@@ -82,6 +82,7 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     si->si_next = 0;
     si->si_cxmax = cxitems - 1;
     si->si_cxix = -1;
+    si->si_cxsubix = -1;
     si->si_type = PERLSI_UNDEF;
     Newx(si->si_cxstack, cxitems, PERL_CONTEXT);
     /* Without any kind of initialising CX_PUSHSUBST()
@@ -313,6 +314,9 @@ Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
 }
 
 /*
+
+=head1 GV Functions
+
 =for apidoc save_gp
 
 Saves the current GP of gv on the save stack to be restored on scope exit.
@@ -1253,15 +1257,26 @@ Perl_leave_scope(pTHX_ I32 base)
 
 	case SAVEt_DELETE:
             a0 = ap[0]; a1 = ap[1]; a2 = ap[2];
+            /* hv_delete could die, so free the key and SvREFCNT_dec the
+             * hv by pushing new save actions
+             */
+            /* ap[0] is the key */
+            ap[1].any_uv = SAVEt_FREEPV; /* was len */
+            /* ap[2] is the hv */
+            ap[3].any_uv = SAVEt_FREESV; /* was SAVEt_DELETE */
+            PL_savestack_ix += 4;
 	    (void)hv_delete(a2.any_hv, a0.any_pv, a1.any_i32, G_DISCARD);
-	    SvREFCNT_dec(a2.any_hv);
-	    Safefree(a0.any_ptr);
 	    break;
 
 	case SAVEt_ADELETE:
             a0 = ap[0]; a1 = ap[1];
+            /* av_delete could die, so SvREFCNT_dec the av by pushing a
+             * new save action
+             */
+            ap[0].any_av = a1.any_av;
+            ap[1].any_uv = SAVEt_FREESV;
+            PL_savestack_ix += 2;
 	    (void)av_delete(a1.any_av, a0.any_iv, G_DISCARD);
-	    SvREFCNT_dec(a1.any_av);
 	    break;
 
 	case SAVEt_DESTRUCTOR_X:

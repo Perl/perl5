@@ -3,6 +3,7 @@
 BEGIN { pop @INC if $INC[-1] eq '.' }
 use strict;
 use Getopt::Long;
+use Encode ();
 
 use JSON::PP ();
 
@@ -10,7 +11,7 @@ use JSON::PP ();
 
 my %allow_json_opt = map { $_ => 1 } qw(
     ascii latin1 utf8 pretty indent space_before space_after relaxed canonical allow_nonref
-    allow_singlequote allow_barekey allow_bignum loose escape_slash
+    allow_singlequote allow_barekey allow_bignum loose escape_slash indent_length
 );
 
 
@@ -31,13 +32,28 @@ if ( $version ) {
 
 $json_opt = '' if $json_opt eq '-';
 
-my @json_opt = grep { $allow_json_opt{ $_ } or die "'$_' is not a valid json option" } split/,/, $json_opt;
+my %json_opt;
+for my $opt (split /,/, $json_opt) {
+    my ($key, $value) = split /=/, $opt, 2;
+    $value = 1 unless defined $value;
+    die "'$_' is not a valid json option" unless $allow_json_opt{$key};
+    $json_opt{$key} = $value;
+}
 
 my %F = (
    'json' => sub {
       my $json = JSON::PP->new;
-      $json->$_() for @json_opt;
-      $json->decode( $_ );
+      my $enc =
+         /^\x00\x00\x00/s  ? "utf-32be"
+       : /^\x00.\x00/s     ? "utf-16be"
+       : /^.\x00\x00\x00/s ? "utf-32le"
+       : /^.\x00.\x00/s    ? "utf-16le"
+       :                     "utf-8";
+      for my $key (keys %json_opt) {
+        next if $key eq 'utf8';
+        $json->$key($json_opt{$key});
+      }
+      $json->decode( Encode::decode($enc, $_) );
    },
    'eval' => sub {
         my $v = eval "no strict;\n#line 1 \"input\"\n$_";
@@ -51,7 +67,10 @@ my %T = (
    'null' => sub { "" },
    'json' => sub {
       my $json = JSON::PP->new->utf8;
-      $json->$_() for @json_opt;
+      for my $key (keys %json_opt) {
+        $json->$key($json_opt{$key});
+      }
+      $json->canonical if $json_opt{pretty};
       $json->encode( $_ );
    },
    'dumper' => sub {
@@ -73,8 +92,11 @@ $F{$opt_from}
 $T{$opt_to}
    or die "$opt_from: not a valid toformat\n";
 
-local $/;
-$_ = <STDIN>;
+{
+  local $/;
+  binmode STDIN;
+  $_ = <STDIN>;
+}
 
 $_ = $F{$opt_from}->();
 $_ = $T{$opt_to}->();
@@ -152,7 +174,7 @@ options to JSON::PP
 Acceptable options are:
 
     ascii latin1 utf8 pretty indent space_before space_after relaxed canonical allow_nonref
-    allow_singlequote allow_barekey allow_bignum loose escape_slash
+    allow_singlequote allow_barekey allow_bignum loose escape_slash indent_length
 
 Multiple options must be separated by commas:
 

@@ -30,11 +30,6 @@
 #define PERL_IN_PP_SORT_C
 #include "perl.h"
 
-#if defined(UNDER_CE)
-/* looks like 'small' is reserved word for WINCE (or somesuch)*/
-#define	small xsmall
-#endif
-
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
 
@@ -351,6 +346,8 @@ cmp_desc(pTHX_ gptr const a, gptr const b)
 }
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc sortsv_flags
 
 In-place sort an array of SV pointers with the given comparison routine,

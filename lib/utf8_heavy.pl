@@ -35,6 +35,13 @@ sub _loose_name ($) {
     # out blanks, underscores and dashes.  The complication stems from the
     # grandfathered-in 'L_', which retains a single trailing underscore.
 
+# integer or float (no exponent)
+my $integer_or_float_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
+
+# Also includes rationals
+my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
+    return $_[0] if $_[0] =~ $numeric_re;
+
     (my $loose = $_[0]) =~ s/[-_ \t]//g;
 
     return $loose if $loose !~ / ^ (?: is | to )? l $/x;
@@ -75,9 +82,6 @@ sub _loose_name ($) {
         ##
         ## Callers of swash_init:
         ##     op.c:pmtrans             -- for tr/// and y///
-        ##     regexec.c:regclass_swash -- for /[]/, \p, and \P
-        ##     utf8.c:is_utf8_common    -- for common Unicode properties
-        ##     utf8.c:S__to_utf8_case   -- for lc, uc, ucfirst, etc. and //i
         ##     Unicode::UCD::prop_invlist
         ##     Unicode::UCD::prop_invmap
         ##

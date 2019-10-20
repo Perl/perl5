@@ -2001,9 +2001,9 @@ L<charnames> pragma:
     print "\N{sigma} is Greek sigma\n";
 
 An index of character names is available on-line from the Unicode
-Consortium, L<http://www.unicode.org/charts/charindex.html>; explanatory
+Consortium, L<https://www.unicode.org/charts/charindex.html>; explanatory
 material with links to other resources at
-L<http://www.unicode.org/standard/where>.
+L<https://www.unicode.org/standard/where>.
 
 The answer to requirement 2) is that a regexp (mostly)
 uses Unicode characters.  The "mostly" is for messy backward
@@ -2070,7 +2070,7 @@ RING>" is a grapheme cluster with base character "A" and combining character
 as in the word E<Aring>ngstrom.
 
 For the full and latest information about Unicode see the latest
-Unicode standard, or the Unicode Consortium's website L<http://www.unicode.org>
+Unicode standard, or the Unicode Consortium's website L<https://www.unicode.org>
 
 As if all those classes weren't enough, Perl also defines POSIX-style
 character classes.  These have the form C<[:I<name>:]>, with I<name> the

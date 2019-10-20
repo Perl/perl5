@@ -758,15 +758,12 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
 
     if (SvUTF8(sv)) {
-	if (Perl_sv_utf8_downgrade(aTHX_ sv, TRUE)) {
+	if (Perl_sv_utf8_downgrade_flags(aTHX_ sv, TRUE, 0)) {
             /* PVX may have changed */
             s = (unsigned char *) SvPV_flags(sv, srclen, svpv_flags);
         }
         else {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                                "Use of strings with code points over 0xFF as"
-                                " arguments to vec is deprecated. This will"
-                                " be a fatal error in Perl 5.32");
+	        Perl_croak(aTHX_ "Use of strings with code points over 0xFF as arguments to vec is forbidden");
         }
     }
 
@@ -934,10 +931,10 @@ Perl_do_vecset(pTHX_ SV *sv)
                                          SV_GMAGIC | SV_UNDEF_RETURNS_NULL);
     if (SvUTF8(targ)) {
 	/* This is handled by the SvPOK_only below...
-	if (!Perl_sv_utf8_downgrade(aTHX_ targ, TRUE))
+	if (!Perl_sv_utf8_downgrade_flags(aTHX_ targ, TRUE, 0))
 	    SvUTF8_off(targ);
 	 */
-	(void) Perl_sv_utf8_downgrade(aTHX_ targ, TRUE);
+	(void) Perl_sv_utf8_downgrade_flags(aTHX_ targ, TRUE, 0);
     }
 
     (void)SvPOK_only(targ);
@@ -1087,30 +1084,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
      * on zeros without having to do it.  In the case of '&', the result is
      * zero, and the dangling portion is simply discarded.  For '|' and '^', the
      * result is the same as the other operand, so the dangling part is just
-     * appended to the final result, unchanged.  We currently accept above-FF
-     * code points in the dangling portion, as that's how it has long worked,
-     * and code depends on it staying that way.  But it is now fatal for
-     * above-FF to appear in the portion that does get operated on.  Hence, any
-     * above-FF must come only in the longer operand, and only in its dangling
-     * portion.  That means that at least one of the operands has to be
-     * entirely non-UTF-8, and the length of that operand has to be before the
-     * first above-FF in the other */
+     * appended to the final result, unchanged.  As of perl-5.32, we no longer
+     * accept above-FF code points in the dangling portion.
+     */
     if (left_utf8 || right_utf8) {
-        if (left_utf8) {
-            if (right_utf8 || rightlen > leftlen) {
-                Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
-            }
-            len = rightlen;
-        }
-        else if (right_utf8) {
-            if (leftlen > rightlen) {
-                Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
-            }
-            len = leftlen;
-        }
-
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                               DEPRECATED_ABOVE_FF_MSG, PL_op_desc[optype]);
+        Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
     }
     else {  /* Neither is UTF-8 */
         len = MIN(leftlen, rightlen);
@@ -1200,13 +1178,13 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
         len = lensave;
         if (rightlen > len) {
             if (dc == rc)
-                SvCUR(sv) = rightlen;
+                SvCUR_set(sv, rightlen);
             else
                 sv_catpvn_nomg(sv, rsave + len, rightlen - len);
         }
         else if (leftlen > len) {
             if (dc == lc)
-                SvCUR(sv) = leftlen;
+                SvCUR_set(sv, leftlen);
             else
                 sv_catpvn_nomg(sv, lsave + len, leftlen - len);
         }

@@ -64,17 +64,17 @@ that are also supported by perl's makefile.
 =back
 
 The Microsoft Visual C++ compilers are also now being given away free. They are
-available as "Visual C++ Toolkit 2003" or "Visual C++ 2005-2017 Express [or
+available as "Visual C++ Toolkit 2003" or "Visual C++ 2005-2019 Express [or
 Community, from 2017] Edition" (and also as part of the ".NET Framework SDK")
 and are the same compilers that ship with "Visual C++ .NET 2003 Professional"
-or "Visual C++ 2005-2017 Professional" respectively.
+or "Visual C++ 2005-2019 Professional" respectively.
 
 This port can also be built on IA64/AMD64 using:
 
       Microsoft Platform SDK	Nov 2001 (64-bit compiler and tools)
       MinGW64 compiler (gcc version 4.4.3 or later)
 
-The Windows SDK can be downloaded from L<http://www.microsoft.com/>.
+The Windows SDK can be downloaded from L<https://developer.microsoft.com/windows/downloads/sdk-archive>.
 The MinGW64 compiler is available at L<http://mingw-w64.org>.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
@@ -109,7 +109,7 @@ polling loop.
 
 A port of dmake for Windows is available from:
 
-L<http://search.cpan.org/dist/dmake/>
+L<https://search.cpan.org/dist/dmake/>
 
 Fetch and install dmake somewhere on your path.
 
@@ -125,34 +125,35 @@ build usually works in this circumstance, but some tests will fail.
 
 =item Microsoft Visual C++
 
-The nmake that comes with Visual C++ will suffice for building. Visual C
-requires that certain things be set up in the console before Visual C will
+The nmake that comes with Visual C++ will suffice for building. Visual C++
+requires that certain things be set up in the console before Visual C++ will
 sucessfully run. To make a console box be able to run the C compiler, you will
-need to beforehand, run the C<vcvars32.bat> file to compile for x86-32 and for
-x86-64 C<vcvarsall.bat x64> or C<vcvarsamd64.bat>. On a typical install of a
-Microsoft C compiler product, these batch files will already be in your C<PATH>
+need to beforehand, run C<vcvarsall.bat x86> to compile for x86-32 and for
+x86-64 C<vcvarsall.bat amd64>. On a typical install of a Microsoft C++
+compiler product, these batch files will already be in your C<PATH>
 environment variable so you may just type them without an absolute path into
 your console. If you need to find the absolute path to the batch file, it is
-usually found somewhere like C:\Program Files\Microsoft Visual Studio\VC98\Bin.
+usually found somewhere like
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC.
 With some newer Micrsoft C products (released after ~2004), the installer will
 put a shortcut in the start menu to launch a new console window with the
 console already set up for your target architecture (x86-32 or x86-64 or IA64).
 With the newer compilers, you may also use the older batch files if you choose
 so.
 
-=item Microsoft Visual C++ 2008-2017 Express/Community Edition
+=item Microsoft Visual C++ 2008-2019 Express/Community Edition
 
-These free versions of Visual C++ 2008-2017 Professional contain the same
+These free versions of Visual C++ 2008-2019 Professional contain the same
 compilers and linkers that ship with the full versions, and also contain
 everything necessary to build Perl, rather than requiring a separate download
 of the Windows SDK like previous versions did.
 
 These packages can be downloaded by searching in the Download Center at
-L<http://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
+L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Install Visual C++ 2008-2017 Express/Community, then setup your environment
+Install Visual C++ 2008-2019 Express/Community, then setup your environment
 using, e.g.
 
  C:\Program Files\Microsoft Visual Studio 12.0\Common7\Tools\vsvars32.bat
@@ -160,7 +161,7 @@ using, e.g.
 (assuming the default installation location was chosen).
 
 Perl should now build using the win32/Makefile.  You will need to edit that
-file to set CCTYPE to one of MSVC90-MSVC141 first.
+file to set CCTYPE to one of MSVC90-MSVC142 first.
 
 =item Microsoft Visual C++ 2005 Express Edition
 
@@ -220,7 +221,7 @@ Framework Redistributable" to be installed first.  This can be downloaded and
 installed separately, but is included in the "Visual C++ Toolkit 2003" anyway.
 
 These packages can all be downloaded by searching in the Download Center at
-L<http://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
+L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
@@ -388,15 +389,8 @@ The default value for CCHOME in the makefiles for Visual C++
 may not be correct for some versions.  Make sure the default exists
 and is valid.
 
-You may also need to comment out the C<DELAYLOAD = ...> line in the
-Makefile if you're using VC++ 6.0 without the latest service pack and
-the linker reports an internal error.
-
 If you want build some core extensions statically into perl's dll, specify
 them in the STATIC_EXT macro.
-
-NOTE: The USE_64_BIT_INT build option is not supported with the 32-bit
-Visual C++ 6.0 compiler.
 
 Be sure to read the instructions near the top of the makefiles carefully.
 
@@ -405,7 +399,7 @@ Be sure to read the instructions near the top of the makefiles carefully.
 Type "dmake" ("gmake" for GNU make, or "nmake" if you are using that make).
 
 This should build everything.  Specifically, it will create perl.exe,
-perl529.dll at the perl toplevel, and various other extension dll's
+perl531.dll at the perl toplevel, and various other extension dll's
 under the lib\auto directory.  If the build fails for any reason, make
 sure you have done the previous steps correctly.
 
@@ -442,9 +436,14 @@ L<https://connect.microsoft.com/VisualStudio/feedback/details/811534/utime-somet
 if you need fixed C<stat> and C<utime> functions then have a look at the
 CPAN distribution Win32::UTCFileTime.
 
+If you build with Visual C++ 2015 or later then F<ext/XS-APItest/t/locale.t>
+may crash (after all its tests have passed). This is due to a regression in the
+Universal CRT introduced in the Windows 10 April 2018 Update, and will be fixed
+in the May 2019 Update, as explained here: L<https://developercommunity.visualstudio.com/content/problem/519486/setlocalelc-numeric-iso-latin-16-fails-then-succee.html>.
+
 If you build with certain versions (e.g. 4.8.1) of gcc from www.mingw.org then
 F<ext/POSIX/t/time.t> may fail test 17 due to a known bug in those gcc builds:
-see L<http://sourceforge.net/p/mingw/bugs/2152/>.
+see L<https://sourceforge.net/p/mingw/bugs/2152/>.
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
@@ -458,6 +457,13 @@ have any GNU tool packages in your path: some toolkits like Unixutils
 include some tools (C<type> for instance) which override the Windows
 ones and makes tests fail. Remove them from your path while testing to
 avoid these errors.
+
+To see the output of specific failing tests run the harness from the t
+directory:
+
+  # assuming you're starting from the win32 directory
+  cd ..\win32
+  .\perl harness <list of tests>
 
 Please report any other failures as described under L</BUGS AND CAVEATS>.
 
@@ -554,9 +560,9 @@ character is the double quote (").  It can be used to protect spaces
 and other special characters in arguments.
 
 The Windows documentation describes the shell parsing rules here:
-L<http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/cmd.mspx?mfr=true>
+L<https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd>
 and the C runtime parsing rules here:
-L<http://msdn.microsoft.com/en-us/library/17w5ykft%28v=VS.100%29.aspx>.
+L<https://msdn.microsoft.com/en-us/library/17w5ykft%28v=VS.100%29.aspx>.
 
 Here are some further observations based on experiments: The C runtime
 breaks arguments at spaces and passes them to programs in argc/argv.
@@ -625,11 +631,11 @@ quoted.
 
 The Comprehensive Perl Archive Network (CPAN) offers a wealth
 of extensions, some of which require a C compiler to build.
-Look in L<http://www.cpan.org/> for more information on CPAN.
+Look in L<https://www.cpan.org/> for more information on CPAN.
 
 Note that not all of the extensions available from CPAN may work
 in the Windows environment; you should check the information at
-L<http://www.cpantesters.org/> before investing too much effort into
+L<https://www.cpantesters.org/> before investing too much effort into
 porting modules that don't readily build.
 
 Most extensions (whether they require a C compiler or not) can
@@ -655,7 +661,7 @@ L<http://download.microsoft.com/download/vc15/Patch/1.52/W95/EN-US/nmake15.exe>
 Another option is to use the make written in Perl, available from
 CPAN.
 
-L<http://www.cpan.org/modules/by-module/Make/>
+L<https://www.cpan.org/modules/by-module/Make/>
 
 You may also use dmake or gmake.  See L</"Make"> above on how to get it.
 
@@ -965,6 +971,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 23 May 2018
+Last updated: 30 April 2019
 
 =cut

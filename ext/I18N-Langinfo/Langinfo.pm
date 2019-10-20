@@ -72,7 +72,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.17';
+our $VERSION = '0.19';
 
 XSLoader::load();
 
@@ -92,7 +92,7 @@ I18N::Langinfo - query locale information
 The langinfo() function queries various locale information that can be
 used to localize output and user interfaces.  It uses the current underlying
 locale, regardless of whether or not it was called from within the scope of
-S<C<use locale>>.  The langinfo() requires
+S<C<use locale>>.  The langinfo() function requires
 one numeric argument that identifies the locale constant to query:
 if no argument is supplied, C<$_> is used.  The numeric constants
 appropriate to be used as arguments are exportable from I18N::Langinfo.
@@ -179,6 +179,8 @@ For the eras based on typically some ruler, such as the Japanese Emperor
     ERA ERA_D_FMT ERA_D_T_FMT ERA_T_FMT
 
 =back
+
+=head2 For systems without C<nl_langinfo>
 
 Starting in Perl 5.28, this module is available even on systems that lack a
 native C<nl_langinfo>.  On such systems, it uses various methods to construct
@@ -273,7 +275,7 @@ workaround for this; patches welcome: see L<perlapi/switch_to_global_locale>.
 
 L<perllocale>, L<POSIX/localeconv>, L<POSIX/setlocale>, L<nl_langinfo(3)>.
 
-The langinfo() is just a wrapper for the C nl_langinfo() interface.
+The langinfo() function is just a wrapper for the C nl_langinfo() interface.
 
 =head1 AUTHOR
 

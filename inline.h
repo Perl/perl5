@@ -6,7 +6,7 @@
  *    License or the Artistic License, as specified in the README file.
  *
  *    This file contains tables and code adapted from
- *    http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this
+ *    https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this
  *    copyright notice:
 
 Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
@@ -40,7 +40,7 @@ SOFTWARE.
 /* ------------------------------- av.h ------------------------------- */
 
 PERL_STATIC_INLINE SSize_t
-S_av_top_index(pTHX_ AV *av)
+Perl_av_top_index(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_TOP_INDEX;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -51,17 +51,21 @@ S_av_top_index(pTHX_ AV *av)
 /* ------------------------------- cv.h ------------------------------- */
 
 PERL_STATIC_INLINE GV *
-S_CvGV(pTHX_ CV *sv)
+Perl_CvGV(pTHX_ CV *sv)
 {
+    PERL_ARGS_ASSERT_CVGV;
+
     return CvNAMED(sv)
 	? Perl_cvgv_from_hek(aTHX_ sv)
 	: ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
 }
 
 PERL_STATIC_INLINE I32 *
-S_CvDEPTHp(const CV * const sv)
+Perl_CvDEPTH(const CV * const sv)
 {
+    PERL_ARGS_ASSERT_CVDEPTH;
     assert(SvTYPE(sv) == SVt_PVCV || SvTYPE(sv) == SVt_PVFM);
+
     return &((XPVCV*)SvANY(sv))->xcv_depth;
 }
 
@@ -119,8 +123,10 @@ S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, STRLEN len)
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 PERL_STATIC_INLINE bool
-PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
+S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 {
+    PERL_ARGS_ASSERT_PADNAMEIN_SCOPE;
+
     /* is seq within the range _LOW to _HIGH ?
      * This is complicated by the fact that PL_cop_seqmax
      * may have wrapped around at some point */
@@ -153,7 +159,7 @@ PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 /* ------------------------------- pp.h ------------------------------- */
 
 PERL_STATIC_INLINE I32
-S_TOPMARK(pTHX)
+Perl_TOPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
 				 "MARK top  %p %" IVdf "\n",
@@ -163,7 +169,7 @@ S_TOPMARK(pTHX)
 }
 
 PERL_STATIC_INLINE I32
-S_POPMARK(pTHX)
+Perl_POPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
 				 "MARK pop  %p %" IVdf "\n",
@@ -176,10 +182,13 @@ S_POPMARK(pTHX)
 /* ----------------------------- regexp.h ----------------------------- */
 
 PERL_STATIC_INLINE struct regexp *
-S_ReANY(const REGEXP * const re)
+Perl_ReANY(const REGEXP * const re)
 {
     XPV* const p = (XPV*)SvANY(re);
+
+    PERL_ARGS_ASSERT_REANY;
     assert(isREGEXP(re));
+
     return SvTYPE(re) == SVt_PVLV ? p->xpv_len_u.xpvlenu_rx
                                    : (struct regexp *)p;
 }
@@ -187,26 +196,28 @@ S_ReANY(const REGEXP * const re)
 /* ------------------------------- sv.h ------------------------------- */
 
 PERL_STATIC_INLINE SV *
-S_SvREFCNT_inc(SV *sv)
+Perl_SvREFCNT_inc(SV *sv)
 {
     if (LIKELY(sv != NULL))
 	SvREFCNT(sv)++;
     return sv;
 }
 PERL_STATIC_INLINE SV *
-S_SvREFCNT_inc_NN(SV *sv)
+Perl_SvREFCNT_inc_NN(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVREFCNT_INC_NN;
+
     SvREFCNT(sv)++;
     return sv;
 }
 PERL_STATIC_INLINE void
-S_SvREFCNT_inc_void(SV *sv)
+Perl_SvREFCNT_inc_void(SV *sv)
 {
     if (LIKELY(sv != NULL))
 	SvREFCNT(sv)++;
 }
 PERL_STATIC_INLINE void
-S_SvREFCNT_dec(pTHX_ SV *sv)
+Perl_SvREFCNT_dec(pTHX_ SV *sv)
 {
     if (LIKELY(sv != NULL)) {
 	U32 rc = SvREFCNT(sv);
@@ -218,9 +229,12 @@ S_SvREFCNT_dec(pTHX_ SV *sv)
 }
 
 PERL_STATIC_INLINE void
-S_SvREFCNT_dec_NN(pTHX_ SV *sv)
+Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
 {
     U32 rc = SvREFCNT(sv);
+
+    PERL_ARGS_ASSERT_SVREFCNT_DEC_NN;
+
     if (LIKELY(rc > 1))
 	SvREFCNT(sv) = rc - 1;
     else
@@ -228,26 +242,30 @@ S_SvREFCNT_dec_NN(pTHX_ SV *sv)
 }
 
 PERL_STATIC_INLINE void
-SvAMAGIC_on(SV *sv)
+Perl_SvAMAGIC_on(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVAMAGIC_ON;
     assert(SvROK(sv));
+
     if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
 }
 PERL_STATIC_INLINE void
-SvAMAGIC_off(SV *sv)
+Perl_SvAMAGIC_off(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVAMAGIC_OFF;
+
     if (SvROK(sv) && SvOBJECT(SvRV(sv)))
 	HvAMAGIC_off(SvSTASH(SvRV(sv)));
 }
 
 PERL_STATIC_INLINE U32
-S_SvPADSTALE_on(SV *sv)
+Perl_SvPADSTALE_on(SV *sv)
 {
     assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) |= SVs_PADSTALE;
 }
 PERL_STATIC_INLINE U32
-S_SvPADSTALE_off(SV *sv)
+Perl_SvPADSTALE_off(SV *sv)
 {
     assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
@@ -271,7 +289,7 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 /* saves machine code for a common noreturn idiom typically used in Newx*() */
 GCC_DIAG_IGNORE_DECL(-Wunused-function);
 static void
-S_croak_memory_wrap(void)
+Perl_croak_memory_wrap(void)
 {
     Perl_croak_nocontext("%s",PL_memory_wrap);
 }
@@ -284,7 +302,7 @@ GCC_DIAG_RESTORE_DECL;
 */
 
 PERL_STATIC_INLINE void
-S_append_utf8_from_native_byte(const U8 byte, U8** dest)
+Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
 {
     /* Takes an input 'byte' (Latin1 or EBCDIC) and appends it to the UTF-8
      * encoded string at '*dest', updating '*dest' to include it */
@@ -301,10 +319,10 @@ S_append_utf8_from_native_byte(const U8 byte, U8** dest)
 
 /*
 =for apidoc valid_utf8_to_uvchr
-Like C<L</utf8_to_uvchr_buf>>, but should only be called when it is known that
-the next character in the input UTF-8 string C<s> is well-formed (I<e.g.>,
-it passes C<L</isUTF8_CHAR>>.  Surrogates, non-character code points, and
-non-Unicode code points are allowed.
+Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
+known that the next character in the input UTF-8 string C<s> is well-formed
+(I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
+points, and non-Unicode code points are allowed.
 
 =cut
 
@@ -394,7 +412,7 @@ UTF-8 invariant, this function does not change the contents of C<*ep>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 {
     const U8* send;
     const U8* x = s;
@@ -466,7 +484,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
      || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
-                *ep = x + _variant_byte_number(* (PERL_UINTMAX_T *) x);
+                *ep = x + variant_byte_number(* (PERL_UINTMAX_T *) x);
                 assert(*ep >= s && *ep < send);
 
                 return FALSE;
@@ -504,7 +522,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int
-S__variant_byte_number(PERL_UINTMAX_T word)
+Perl_variant_byte_number(PERL_UINTMAX_T word)
 {
 
     /* This returns the position in a word (0..7) of the first variant byte in
@@ -515,24 +533,7 @@ S__variant_byte_number(PERL_UINTMAX_T word)
     /* Get just the msb bits of each byte */
     word &= PERL_VARIANTS_WORD_MASK;
 
-#  ifdef USING_MSVC6    /* VC6 has some issues with the normal code, and the
-                           easiest thing is to hide that from the callers */
-    {
-        unsigned int i;
-        const U8 * s = (U8 *) &word;
-        dTHX;
-
-        for (i = 0; i < sizeof(word); i++ ) {
-            if (s[i]) {
-                return i;
-            }
-        }
-
-        Perl_croak(aTHX_ "panic: %s: %d: unexpected zero word\n",
-                                 __FILE__, __LINE__);
-    }
-
-#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1
@@ -549,8 +550,8 @@ S__variant_byte_number(PERL_UINTMAX_T word)
      *  x..xx01..1      Subtract 1, turns all the trailing zeros into 1's and
      *                  the 1 just to their left into a 0; the remainder is
      *                  untouched
-     *  0..0011..1      The xor with x..xx10..0 clears that remainder, sets
-     *                  bottom to all 1
+     *  0..0011..1      The xor with the original, x..xx10..0, clears that
+     *                  remainder, sets the bottom to all 1
      *  0..0100..0      Add 1 to clear the word except for the bit in 's'
      *
      * Another method is to do 'word &= -word'; but it generates a compiler
@@ -757,7 +758,7 @@ at this low a level.  A valid use case could change that.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
+Perl_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
 {
     const U8 * first_variant;
 
@@ -891,7 +892,7 @@ C<L</is_c9strict_utf8_string_loclen>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
+Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
 {
     const U8 * first_variant;
 
@@ -1013,7 +1014,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
 /*
 
-=for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
+=for apidoc isUTF8_CHAR
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
@@ -1042,7 +1043,7 @@ machines) is a valid UTF-8 character.
 =cut
 
 This uses an adaptation of the table and algorithm given in
-http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of PL_extended_utf8_dfa_tab[].
@@ -1050,7 +1051,7 @@ documented at the definition of PL_extended_utf8_dfa_tab[].
 */
 
 PERL_STATIC_INLINE Size_t
-S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
+Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
     const U8 * s = s0;
     UV state = 0;
@@ -1078,7 +1079,7 @@ S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 #if defined(UV_IS_QUAD) || defined(EBCDIC)
 
     if (NATIVE_UTF8_TO_I8(*s0) == 0xFF && e - s0 >= UTF8_MAXBYTES) {
-       return _is_utf8_char_helper(s0, e, 0);
+       return is_utf8_char_helper(s0, e, 0);
     }
 
 #endif
@@ -1116,7 +1117,7 @@ C<L</is_strict_utf8_string_loclen>> to check entire strings.
 =cut
 
 This uses an adaptation of the tables and algorithm given in
-http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of strict_extended_utf8_dfa_tab[].
@@ -1124,7 +1125,7 @@ documented at the definition of strict_extended_utf8_dfa_tab[].
 */
 
 PERL_STATIC_INLINE Size_t
-S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
     const U8 * s = s0;
     UV state = 0;
@@ -1156,7 +1157,7 @@ S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 
 /*
 
-=for apidoc Am|STRLEN|isC9_STRICT_UTF8_CHAR|const U8 *s|const U8 *e
+=for apidoc isC9_STRICT_UTF8_CHAR
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
@@ -1182,7 +1183,7 @@ C<L</is_c9strict_utf8_string_loclen>> to check entire strings.
 =cut
 
 This uses an adaptation of the tables and algorithm given in
-http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of PL_c9_utf8_dfa_tab[].
@@ -1190,7 +1191,7 @@ documented at the definition of PL_c9_utf8_dfa_tab[].
 */
 
 PERL_STATIC_INLINE Size_t
-S_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
     const U8 * s = s0;
     UV state = 0;
@@ -1242,7 +1243,7 @@ See also C<L</is_strict_utf8_string_loc>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8 * first_variant;
 
@@ -1319,7 +1320,7 @@ See also C<L</is_c9strict_utf8_string_loc>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8 * first_variant;
 
@@ -1401,7 +1402,7 @@ See also C<L</is_utf8_string_loc_flags>>.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags)
+Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags)
 {
     const U8 * first_variant;
 
@@ -1601,7 +1602,7 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
             s--;
         } while (UTF8_IS_CONTINUATION(*s) && s > start);
     }
-    
+
     GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
     GCC_DIAG_RESTORE
@@ -1691,7 +1692,7 @@ determined from just the first one or two bytes.
  */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
+Perl_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
 {
     PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS;
 
@@ -1702,7 +1703,7 @@ S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const
         return FALSE;
     }
 
-    return cBOOL(_is_utf8_char_helper(s, e, flags));
+    return cBOOL(is_utf8_char_helper(s, e, flags));
 }
 
 /*
@@ -1759,7 +1760,7 @@ complete, valid characters found in the C<el> pointer.
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
+Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
                                        STRLEN len,
                                        const U8 **ep,
                                        STRLEN *el,
@@ -1780,7 +1781,7 @@ S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
 }
 
 PERL_STATIC_INLINE UV
-S_utf8n_to_uvchr_msgs(const U8 *s,
+Perl_utf8n_to_uvchr_msgs(const U8 *s,
                       STRLEN curlen,
                       STRLEN *retlen,
                       const U32 flags,
@@ -1794,7 +1795,7 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
      * will need to be called.
      *
      * This is an adaptation of the tables and algorithm given in
-     * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
+     * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
      * comprehensive documentation of the original version.  A copyright notice
      * for the original version is given at the beginning of this file.  The
      * Perl adapation is documented at the definition of PL_strict_utf8_dfa_tab[].
@@ -1835,11 +1836,36 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
             *msgs = NULL;
         }
 
-        return uv;
+        return UNI_TO_NATIVE(uv);
     }
 
     /* Here is potentially problematic.  Use the full mechanism */
     return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags, errors, msgs);
+}
+
+PERL_STATIC_INLINE UV
+Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF_HELPER;
+
+    assert(s < send);
+
+    if (! ckWARN_d(WARN_UTF8)) {
+
+        /* EMPTY is not really allowed, and asserts on debugging builds.  But
+         * on non-debugging we have to deal with it, and this causes it to
+         * return the REPLACEMENT CHARACTER, as the documentation indicates */
+        return utf8n_to_uvchr(s, send - s, retlen,
+                              (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY));
+    }
+    else {
+        UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
+        if (retlen && ret == 0 && *s != '\0') {
+            *retlen = (STRLEN) -1;
+        }
+
+        return ret;
+    }
 }
 
 /* ------------------------------- perl.h ----------------------------- */
@@ -1847,12 +1873,16 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
+=for apidoc is_safe_syscall
 
-Test that the given C<pv> doesn't contain any internal C<NUL> characters.
-If it does, set C<errno> to C<ENOENT>, optionally warn, and return FALSE.
+Test that the given C<pv> (with length C<len>) doesn't contain any internal
+C<NUL> characters.
+If it does, set C<errno> to C<ENOENT>, optionally warn using the C<syscalls>
+category, and return FALSE.
 
 Return TRUE if the name is safe.
+
+C<what> and C<op_name> are used in any warning.
 
 Used by the C<IS_SAFE_SYSCALL()> macro.
 
@@ -1860,7 +1890,8 @@ Used by the C<IS_SAFE_SYSCALL()> macro.
 */
 
 PERL_STATIC_INLINE bool
-S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name) {
+Perl_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
+{
     /* While the Windows CE API provides only UCS-16 (or UTF-16) APIs
      * perl itself uses xce*() functions which accept 8-bit strings.
      */
@@ -1901,7 +1932,8 @@ then calling:
 #ifdef PERL_CORE
 
 PERL_STATIC_INLINE bool
-S_should_warn_nl(const char *pv) {
+S_should_warn_nl(const char *pv)
+{
     STRLEN len;
 
     PERL_ARGS_ASSERT_SHOULD_WARN_NL;
@@ -1913,13 +1945,51 @@ S_should_warn_nl(const char *pv) {
 
 #endif
 
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
+
+PERL_STATIC_INLINE bool
+S_lossless_NV_to_IV(const NV nv, IV *ivp)
+{
+    /* This function determines if the input NV 'nv' may be converted without
+     * loss of data to an IV.  If not, it returns FALSE taking no other action.
+     * But if it is possible, it does the conversion, returning TRUE, and
+     * storing the converted result in '*ivp' */
+
+    PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV;
+
+#  if  defined(Perl_isnan)
+
+    if (UNLIKELY(Perl_isnan(nv))) {
+        return FALSE;
+    }
+
+#  endif
+
+    if (UNLIKELY(nv < IV_MIN) || UNLIKELY(nv > IV_MAX)) {
+        return FALSE;
+    }
+
+    if ((IV) nv != nv) {
+        return FALSE;
+    }
+
+    *ivp = (IV) nv;
+    return TRUE;
+}
+
+#endif
+
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
+
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
 
 #define MAX_CHARSET_NAME_LENGTH 2
 
 PERL_STATIC_INLINE const char *
-get_regex_charset_name(const U32 flags, STRLEN* const lenp)
+S_get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 {
+    PERL_ARGS_ASSERT_GET_REGEX_CHARSET_NAME;
+
     /* Returns a string that corresponds to the name of the regex character set
      * given by 'flags', and *lenp is set the length of that string, which
      * cannot exceed MAX_CHARSET_NAME_LENGTH characters */
@@ -1940,6 +2010,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     return "?";	    /* Unknown */
 }
 
+#endif
+
 /*
 
 Return false if any get magic is on the SV other than taint magic.
@@ -1947,7 +2019,8 @@ Return false if any get magic is on the SV other than taint magic.
 */
 
 PERL_STATIC_INLINE bool
-S_sv_only_taint_gmagic(SV *sv) {
+Perl_sv_only_taint_gmagic(SV *sv)
+{
     MAGIC *mg = SvMAGIC(sv);
 
     PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC;
@@ -1966,11 +2039,28 @@ S_sv_only_taint_gmagic(SV *sv) {
 
 /* ------------------ cop.h ------------------------------------------- */
 
+/* implement GIMME_V() macro */
+
+PERL_STATIC_INLINE U8
+Perl_gimme_V(pTHX)
+{
+    I32 cxix;
+    U8  gimme = (PL_op->op_flags & OPf_WANT);
+
+    if (gimme)
+        return gimme;
+    cxix = PL_curstackinfo->si_cxsubix;
+    if (cxix < 0)
+        return G_VOID;
+    assert(cxstack[cxix].blk_gimme & G_WANT);
+    return (cxstack[cxix].blk_gimme & G_WANT);
+}
+
 
 /* Enter a block. Push a new base context and return its address. */
 
 PERL_STATIC_INLINE PERL_CONTEXT *
-S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
+Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
 {
     PERL_CONTEXT * cx;
 
@@ -1997,7 +2087,7 @@ S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
 /* Exit a block (RETURN and LAST). */
 
 PERL_STATIC_INLINE void
-S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popblock(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPBLOCK;
 
@@ -2022,7 +2112,7 @@ S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
  * *after* cx_pushblock() was called. */
 
 PERL_STATIC_INLINE void
-S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_TOPBLOCK;
 
@@ -2037,13 +2127,15 @@ S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
+Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 {
     U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
 
     PERL_ARGS_ASSERT_CX_PUSHSUB;
 
     PERL_DTRACE_PROBE_ENTRY(cv);
+    cx->blk_sub.old_cxsubix     = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
     cx->blk_sub.cv = cv;
     cx->blk_sub.olddepth = CvDEPTH(cv);
     cx->blk_sub.prevcomppad = PL_comppad;
@@ -2057,7 +2149,7 @@ S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 /* subsets of cx_popsub() */
 
 PERL_STATIC_INLINE void
-S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
 {
     CV *cv;
 
@@ -2070,13 +2162,14 @@ S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
     CvDEPTH(cv) = cx->blk_sub.olddepth;
     cx->blk_sub.cv = NULL;
     SvREFCNT_dec(cv);
+    PL_curstackinfo->si_cxsubix = cx->blk_sub.old_cxsubix;
 }
 
 
 /* handle the @_ part of leaving a sub */
 
 PERL_STATIC_INLINE void
-S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 {
     AV *av;
 
@@ -2098,7 +2191,7 @@ S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popsub(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPSUB;
     assert(CxTYPE(cx) == CXt_SUB);
@@ -2112,10 +2205,12 @@ S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
+Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
 {
     PERL_ARGS_ASSERT_CX_PUSHFORMAT;
 
+    cx->blk_format.old_cxsubix = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
     cx->blk_format.cv          = cv;
     cx->blk_format.retop       = retop;
     cx->blk_format.gv          = gv;
@@ -2130,7 +2225,7 @@ S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
 
 
 PERL_STATIC_INLINE void
-S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
 {
     CV *cv;
     GV *dfout;
@@ -2149,14 +2244,17 @@ S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
     cx->blk_format.cv = NULL;
     --CvDEPTH(cv);
     SvREFCNT_dec_NN(cv);
+    PL_curstackinfo->si_cxsubix = cx->blk_format.old_cxsubix;
 }
 
 
 PERL_STATIC_INLINE void
-S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
+Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
 {
     PERL_ARGS_ASSERT_CX_PUSHEVAL;
 
+    cx->blk_eval.old_cxsubix   = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
     cx->blk_eval.retop         = retop;
     cx->blk_eval.old_namesv    = namesv;
     cx->blk_eval.old_eval_root = PL_eval_root;
@@ -2171,7 +2269,7 @@ S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
 
 
 PERL_STATIC_INLINE void
-S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popeval(pTHX_ PERL_CONTEXT *cx)
 {
     SV *sv;
 
@@ -2192,6 +2290,7 @@ S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
         cx->blk_eval.old_namesv = NULL;
         SvREFCNT_dec_NN(sv);
     }
+    PL_curstackinfo->si_cxsubix = cx->blk_eval.old_cxsubix;
 }
 
 
@@ -2203,7 +2302,7 @@ S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
  */
 
 PERL_STATIC_INLINE void
-S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_PUSHLOOP_PLAIN;
     cx->blk_loop.my_op = cLOOP;
@@ -2215,7 +2314,7 @@ S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
  */
 
 PERL_STATIC_INLINE void
-S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
+Perl_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
 {
     PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR;
 
@@ -2233,7 +2332,7 @@ S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
 /* pop all loop types, including plain */
 
 PERL_STATIC_INLINE void
-S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPLOOP;
 
@@ -2266,7 +2365,7 @@ S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_PUSHWHEN;
 
@@ -2275,7 +2374,7 @@ S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPWHEN;
     assert(CxTYPE(cx) == CXt_WHEN);
@@ -2287,7 +2386,7 @@ S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
+Perl_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 {
     PERL_ARGS_ASSERT_CX_PUSHGIVEN;
 
@@ -2297,7 +2396,7 @@ S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 
 
 PERL_STATIC_INLINE void
-S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
+Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
 {
     SV *sv;
 
@@ -2347,10 +2446,10 @@ Perl_foldEQ(const char *s1, const char *s2, I32 len)
 PERL_STATIC_INLINE I32
 Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
 {
-    /* Compare non-utf8 using Unicode (Latin1) semantics.  Does not work on
-     * MICRO_SIGN, LATIN_SMALL_LETTER_SHARP_S, nor
-     * LATIN_SMALL_LETTER_Y_WITH_DIAERESIS, and does not check for these.  Nor
-     * does it check that the strings each have at least 'len' characters */
+    /* Compare non-UTF-8 using Unicode (Latin1) semantics.  Works on all folds
+     * representable without UTF-8, except for LATIN_SMALL_LETTER_SHARP_S, and
+     * does not check for this.  Nor does it check that the strings each have
+     * at least 'len' characters. */
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;

@@ -5,7 +5,7 @@ use strict;
 use Cwd ();
 require File::Spec::Unix;
 
-our $VERSION = '3.75';
+our $VERSION = '3.79';
 $VERSION =~ tr/_//d;
 
 our @ISA = qw(File::Spec::Unix);
@@ -84,7 +84,7 @@ sub tmpdir {
 MSWin32 case-tolerance depends on GetVolumeInformation() $ouFsFlags == FS_CASE_SENSITIVE,
 indicating the case significance when comparing file specifications.
 Since XP FS_CASE_SENSITIVE is effectively disabled for the NT subsubsystem.
-See http://cygwin.com/ml/cygwin/2007-07/msg00891.html
+See L<http://cygwin.com/ml/cygwin/2007-07/msg00891.html>
 Default: 1
 
 =cut
@@ -137,7 +137,7 @@ sub catfile {
     # Legacy / compatibility support
     #
     shift, return _canon_cat( "/", @_ )
-	if $_[0] eq "";
+	if !@_ || $_[0] eq "";
 
     # Compatibility with File::Spec <= 3.26:
     #     catfile('A:', 'foo') should return 'A:\foo'.
@@ -407,16 +407,6 @@ sub _canon_cat				# @path -> path
 	       )+			# performance boost -- I do not know why
 	     }{\\}gx;
 
-    # XXX I do not know whether more dots are supported by the OS supporting
-    #     this ... annotation (NetWare or symbian but not MSWin32).
-    #     Then .... could easily become ../../.. etc:
-    # Replace \.\.\. by (\.\.\.+)  and substitute with
-    # { $1 . ".." . "\\.." x (length($2)-2) }gex
-	     				# ... --> ../..
-    $path =~ s{ (\A|\\)			# at begin or after a slash
-    		\.\.\.
-		(?=\\|\z) 		# at end or followed by slash
-	     }{$1..\\..}gx;
     					# xx\yy\..\zz --> xx\zz
     while ( $path =~ s{(?:
 		(?:\A|\\)		# at begin or after a slash

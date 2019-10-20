@@ -112,11 +112,10 @@ Perl_setfd_cloexec_or_inhexec_by_sysfdness(pTHX_ int fd)
 	} while(0)
 #if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC) && \
 			defined(F_GETFD)
-enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
-#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
+enum { CLOEXEC_EXPERIMENT = 0, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
+#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(strategy, TESTFD, GENOPEN_CLOEXEC, \
 			GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
 	do { \
-	    static int strategy = CLOEXEC_EXPERIMENT; \
 	    switch (strategy) { \
 		case CLOEXEC_EXPERIMENT: default: { \
 		    int res = (GENOPEN_CLOEXEC), eno; \
@@ -149,7 +148,7 @@ enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
 	    } \
 	} while(0)
 #else
-#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
+#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(strategy, TESTFD, GENOPEN_CLOEXEC, \
 			GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
 	DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC)
 #endif
@@ -160,10 +159,13 @@ enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
 	    DO_GENOPEN_THEN_CLOEXEC(fd = (ONEOPEN_NORMAL), \
 		setfd_cloexec(fd)); \
 	} while(0)
-#define DO_ONEOPEN_EXPERIMENTING_CLOEXEC(ONEOPEN_CLOEXEC, ONEOPEN_NORMAL) \
+#define DO_ONEOPEN_EXPERIMENTING_CLOEXEC(strategy, \
+                ONEOPEN_CLOEXEC, ONEOPEN_NORMAL) \
 	do { \
 	    int fd; \
-	    DO_GENOPEN_EXPERIMENTING_CLOEXEC(fd, fd = (ONEOPEN_CLOEXEC), \
+	    DO_GENOPEN_EXPERIMENTING_CLOEXEC(strategy, \
+                fd, \
+                fd = (ONEOPEN_CLOEXEC), \
 		fd = (ONEOPEN_NORMAL), setfd_cloexec(fd)); \
 	} while(0)
 
@@ -174,9 +176,10 @@ enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
 	} while(0)
 #define DO_PIPEOPEN_THEN_CLOEXEC(PIPEFD, PIPEOPEN_NORMAL) \
 	DO_GENOPEN_THEN_CLOEXEC(PIPEOPEN_NORMAL, DO_PIPESETFD_CLOEXEC(PIPEFD))
-#define DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PIPEFD, PIPEOPEN_CLOEXEC, \
+#define DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(strategy, PIPEFD, PIPEOPEN_CLOEXEC, \
 			PIPEOPEN_NORMAL) \
-	DO_GENOPEN_EXPERIMENTING_CLOEXEC((PIPEFD)[0], PIPEOPEN_CLOEXEC, \
+	DO_GENOPEN_EXPERIMENTING_CLOEXEC(strategy, \
+                (PIPEFD)[0], PIPEOPEN_CLOEXEC, \
 	    PIPEOPEN_NORMAL, DO_PIPESETFD_CLOEXEC(PIPEFD))
 
 int
@@ -188,7 +191,9 @@ Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
      * to extend it, so for the time being this just isn't available on
      * PERL_IMPLICIT_SYS builds.
      */
+    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_dup,
 	fcntl(oldfd, F_DUPFD_CLOEXEC, 0),
 	PerlLIO_dup(oldfd));
 #else
@@ -205,7 +210,9 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
      * to extend it, so for the time being this just isn't available on
      * PERL_IMPLICIT_SYS builds.
      */
+    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_dup2,
 	dup3(oldfd, newfd, O_CLOEXEC),
 	PerlLIO_dup2(oldfd, newfd));
 #else
@@ -216,9 +223,11 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
 int
 Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 {
+    dVAR;
     PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_open,
 	PerlLIO_open(file, flag | O_CLOEXEC),
 	PerlLIO_open(file, flag));
 #else
@@ -229,9 +238,11 @@ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 int
 Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 {
+    dVAR;
     PERL_ARGS_ASSERT_PERLLIO_OPEN3_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_open3,
 	PerlLIO_open3(file, flag | O_CLOEXEC, perm),
 	PerlLIO_open3(file, flag, perm));
 #else
@@ -242,9 +253,11 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 int
 Perl_my_mkstemp_cloexec(char *templte)
 {
+    dVAR;
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_mkstemp,
 	Perl_my_mkostemp(templte, O_CLOEXEC),
 	Perl_my_mkstemp(templte));
 #else
@@ -252,10 +265,26 @@ Perl_my_mkstemp_cloexec(char *templte)
 #endif
 }
 
+int
+Perl_my_mkostemp_cloexec(char *templte, int flags)
+{
+    dVAR;
+    PERL_ARGS_ASSERT_MY_MKOSTEMP_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_mkstemp,
+	Perl_my_mkostemp(templte, flags | O_CLOEXEC),
+	Perl_my_mkostemp(templte, flags));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkostemp(templte, flags));
+#endif
+}
+
 #ifdef HAS_PIPE
 int
 Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
 {
+    dVAR;
     PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC;
     /*
      * struct IPerlProc doesn't cover pipe2(), and there's no clear way
@@ -263,7 +292,7 @@ Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
      * PERL_IMPLICIT_SYS builds.
      */
 #  if !defined(PERL_IMPLICIT_SYS) && defined(HAS_PIPE2) && defined(O_CLOEXEC)
-    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(pipefd,
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy_pipe, pipefd,
 	pipe2(pipefd, O_CLOEXEC),
 	PerlProc_pipe(pipefd));
 #  else
@@ -278,7 +307,9 @@ int
 Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 {
 #  if defined(SOCK_CLOEXEC)
+    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_socket,
 	PerlSock_socket(domain, type | SOCK_CLOEXEC, protocol),
 	PerlSock_socket(domain, type, protocol));
 #  else
@@ -297,7 +328,9 @@ Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr,
      * way to extend it, so for the time being this just isn't available
      * on PERL_IMPLICIT_SYS builds.
      */
+    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+        PL_strategy_accept,
 	accept4(listenfd, addr, addrlen, SOCK_CLOEXEC),
 	PerlSock_accept(listenfd, addr, addrlen));
 #  else
@@ -314,9 +347,10 @@ int
 Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol,
     int *pairfd)
 {
+    dVAR;
     PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC;
 #  ifdef SOCK_CLOEXEC
-    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(pairfd,
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy_socketpair, pairfd,
 	PerlSock_socketpair(domain, type | SOCK_CLOEXEC, protocol, pairfd),
 	PerlSock_socketpair(domain, type, protocol, pairfd));
 #  else
@@ -1173,34 +1207,39 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
         dir = INT2PTR(DIR *, SvIV(*dir_psv));
 #endif
         if (IoIFP(io)) {
-            SV **pid_psv;
-            PerlIO *iop = IoIFP(io);
+            if (PL_phase == PERL_PHASE_DESTRUCT && PL_statusvalue == 0) {
+                (void)argvout_final(mg, (IO*)io, FALSE);
+            }
+            else {
+                SV **pid_psv;
+                PerlIO *iop = IoIFP(io);
 
-            assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
+                assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
 
-            pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
+                pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
 
-            assert(pid_psv && *pid_psv);
+                assert(pid_psv && *pid_psv);
 
-            if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
-                /* if we get here the file hasn't been closed explicitly by the
-                   user and hadn't been closed implicitly by nextargv(), so
-                   abandon the edit */
-                SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
-                const char *temp_pv = SvPVX(*temp_psv);
+                if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
+                    /* if we get here the file hasn't been closed explicitly by the
+                       user and hadn't been closed implicitly by nextargv(), so
+                       abandon the edit */
+                    SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+                    const char *temp_pv = SvPVX(*temp_psv);
 
-                assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
-                (void)PerlIO_close(iop);
-                IoIFP(io) = IoOFP(io) = NULL;
+                    assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
+                    (void)PerlIO_close(iop);
+                    IoIFP(io) = IoOFP(io) = NULL;
 #ifdef ARGV_USE_ATFUNCTIONS
-                if (dir) {
-                    if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
-                        NotSupported(errno))
-                        (void)UNLINK(temp_pv);
-                }
+                    if (dir) {
+                        if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
+                            NotSupported(errno))
+                            (void)UNLINK(temp_pv);
+                    }
 #else
-                (void)UNLINK(temp_pv);
+                    (void)UNLINK(temp_pv);
 #endif
+                }
             }
         }
 #ifdef ARGV_USE_ATFUNCTIONS
@@ -1461,7 +1500,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 }
 
 #ifdef ARGV_USE_ATFUNCTIONS
-#  if defined(__FreeBSD__)
+#  if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 
 /* FreeBSD 11 renameat() mis-behaves strangely with absolute paths in cases where the
  * equivalent rename() succeeds
@@ -1481,7 +1520,7 @@ S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath) 
 
 #  else
 #    define S_my_renameat(dh1, pv1, dh2, pv2) renameat((dh1), (pv1), (dh2), (pv2))
-#  endif /* if defined(__FreeBSD__) */
+#  endif /* if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) */
 #endif
 
 static bool
@@ -1526,31 +1565,14 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
 #define dir_unchanged(orig_psv, mg) \
     S_dir_unchanged(aTHX_ (orig_psv), (mg))
 
-/* explicit renamed to avoid C++ conflict    -- kja */
-bool
-Perl_do_close(pTHX_ GV *gv, bool not_implicit)
-{
+STATIC bool
+S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool not_implicit) {
     bool retval;
-    IO *io;
-    MAGIC *mg;
 
-    if (!gv)
-	gv = PL_argvgv;
-    if (!gv || !isGV_with_GP(gv)) {
-	if (not_implicit)
-	    SETERRNO(EBADF,SS_IVCHAN);
-	return FALSE;
-    }
-    io = GvIO(gv);
-    if (!io) {		/* never opened */
-	if (not_implicit) {
-	    report_evil_fh(gv);
-	    SETERRNO(EBADF,SS_IVCHAN);
-	}
-	return FALSE;
-    }
-    if ((mg = mg_findext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl))
-        && mg->mg_obj) {
+    /* ensure args are checked before we start using them */
+    PERL_ARGS_ASSERT_ARGVOUT_FINAL;
+
+    {
         /* handle to an in-place edit work file */
         SV **back_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_BACKUP_NAME, FALSE);
         SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
@@ -1717,7 +1739,38 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
                            SvPVX(*temp_psv), Strerror(errno));
             }
         }
-    freext:
+ freext:
+        ;
+    }
+    return retval;
+}
+
+/* explicit renamed to avoid C++ conflict    -- kja */
+bool
+Perl_do_close(pTHX_ GV *gv, bool not_implicit)
+{
+    bool retval;
+    IO *io;
+    MAGIC *mg;
+
+    if (!gv)
+	gv = PL_argvgv;
+    if (!gv || !isGV_with_GP(gv)) {
+	if (not_implicit)
+	    SETERRNO(EBADF,SS_IVCHAN);
+	return FALSE;
+    }
+    io = GvIO(gv);
+    if (!io) {		/* never opened */
+	if (not_implicit) {
+	    report_evil_fh(gv);
+	    SETERRNO(EBADF,SS_IVCHAN);
+	}
+	return FALSE;
+    }
+    if ((mg = mg_findext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl))
+        && mg->mg_obj) {
+        retval = argvout_final(mg, io, not_implicit);
         mg_freeext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl);
     }
     else {
@@ -1741,7 +1794,17 @@ Perl_io_close(pTHX_ IO *io, GV *gv, bool not_implicit, bool warn_on_fail)
 
     if (IoIFP(io)) {
 	if (IoTYPE(io) == IoTYPE_PIPE) {
-	    const int status = PerlProc_pclose(IoIFP(io));
+            PerlIO *fh = IoIFP(io);
+            int status;
+
+            /* my_pclose() can propagate signals which might bypass any code
+               after the call here if the signal handler throws an exception.
+               This would leave the handle in the IO object and try to close it again
+               when the SV is destroyed on unwind or global destruction.
+               So NULL it early.
+            */
+            IoOFP(io) = IoIFP(io) = NULL;
+	    status = PerlProc_pclose(fh);
 	    if (not_implicit) {
 		STATUS_NATIVE_CHILD_SET(status);
 		retval = (STATUS_UNIX == 0);

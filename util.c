@@ -132,6 +132,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
+    dSAVEDERRNO;
 
 #ifdef USE_MDH
     if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
@@ -143,6 +144,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc, size=%" UVuf, (UV) size);
 #endif
     if (!size) size = 1;	/* malloc(0) is NASTY on our system */
+    SAVE_ERRNO;
 #ifdef PERL_DEBUG_READONLY_COW
     if ((ptr = mmap(0, size, PROT_READ|PROT_WRITE,
 		    MAP_ANON|MAP_PRIVATE, -1, 0)) == MAP_FAILED) {
@@ -182,6 +184,11 @@ Perl_safesysmalloc(MEM_SIZE size)
 	ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%" UVxf ": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
+        /* malloc() can modify errno() even on success, but since someone
+	   writing perl code doesn't have any control over when perl calls
+	   malloc() we need to hide that.
+	*/
+        RESTORE_ERRNO;
     }
     else {
 #ifdef USE_MDH
@@ -223,6 +230,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	ptr = safesysmalloc(size);
     }
     else {
+        dSAVE_ERRNO;
 #ifdef USE_MDH
 	where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
         if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
@@ -296,6 +304,12 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	    maybe_protect_ro(header->prev);
 #endif
 	    ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
+
+	    /* realloc() can modify errno() even on success, but since someone
+	       writing perl code doesn't have any control over when perl calls
+	       realloc() we need to hide that.
+	    */
+	    RESTORE_ERRNO;
 	}
 
     /* In particular, must do that fixup above before logging anything via
@@ -577,7 +591,7 @@ Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc Am|char *|ninstr|char * big|char * bigend|char * little|char * little_end
+=for apidoc ninstr
 
 Find the first (leftmost) occurrence of a sequence of bytes within another
 sequence.  This is the Perl version of C<strstr()>, extended to handle
@@ -638,7 +652,7 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc Am|char *|rninstr|char * big|char * bigend|char * little|char * little_end
+=for apidoc rninstr
 
 Like C<L</ninstr>>, but instead finds the final (rightmost) occurrence of a
 sequence of bytes within another sequence, returning C<NULL> if there is no
@@ -1273,7 +1287,7 @@ Perl_vform(pTHX_ const char *pat, va_list *args)
 }
 
 /*
-=for apidoc Am|SV *|mess|const char *pat|...
+=for apidoc mess
 
 Take a sprintf-style format pattern and argument list.  These are used to
 generate a string message.  If the message does not end with a newline,
@@ -1354,7 +1368,7 @@ Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
 }
 
 /*
-=for apidoc Am|SV *|mess_sv|SV *basemsg|bool consume
+=for apidoc mess_sv
 
 Expands a message, intended for the user, to include an indication of
 the current location in the code, if the message does not already appear
@@ -1458,7 +1472,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 }
 
 /*
-=for apidoc Am|SV *|vmess|const char *pat|va_list *args
+=for apidoc vmess
 
 C<pat> and C<args> are a sprintf-style format pattern and encapsulated
 argument list, respectively.  These are used to generate a string message.  If
@@ -1527,6 +1541,7 @@ S_with_queued_errors(pTHX_ SV *ex)
 STATIC bool
 S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 {
+    dVAR;
     HV *stash;
     GV *gv;
     CV *cv;
@@ -1569,7 +1584,7 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 }
 
 /*
-=for apidoc Am|OP *|die_sv|SV *baseex
+=for apidoc die_sv
 
 Behaves the same as L</croak_sv>, except for the return type.
 It should be used only where the C<OP *> return type is required.
@@ -1578,13 +1593,8 @@ The function never actually returns.
 =cut
 */
 
-#ifdef _MSC_VER
-#  pragma warning( push )
-#  pragma warning( disable : 4646 ) /* warning C4646: function declared with
-    __declspec(noreturn) has non-void return type */
-#  pragma warning( disable : 4645 ) /* warning C4645: function declared with
-__declspec(noreturn) has a return statement */
-#endif
+/* silence __declspec(noreturn) warnings */
+MSVC_DIAG_IGNORE(4646 4645)
 OP *
 Perl_die_sv(pTHX_ SV *baseex)
 {
@@ -1593,12 +1603,10 @@ Perl_die_sv(pTHX_ SV *baseex)
     /* NOTREACHED */
     NORETURN_FUNCTION_END;
 }
-#ifdef _MSC_VER
-#  pragma warning( pop )
-#endif
+MSVC_DIAG_RESTORE
 
 /*
-=for apidoc Am|OP *|die|const char *pat|...
+=for apidoc die
 
 Behaves the same as L</croak>, except for the return type.
 It should be used only where the C<OP *> return type is required.
@@ -1608,13 +1616,9 @@ The function never actually returns.
 */
 
 #if defined(PERL_IMPLICIT_CONTEXT)
-#ifdef _MSC_VER
-#  pragma warning( push )
-#  pragma warning( disable : 4646 ) /* warning C4646: function declared with
-    __declspec(noreturn) has non-void return type */
-#  pragma warning( disable : 4645 ) /* warning C4645: function declared with
-__declspec(noreturn) has a return statement */
-#endif
+
+/* silence __declspec(noreturn) warnings */
+MSVC_DIAG_IGNORE(4646 4645)
 OP *
 Perl_die_nocontext(const char* pat, ...)
 {
@@ -1626,18 +1630,12 @@ Perl_die_nocontext(const char* pat, ...)
     va_end(args);
     NORETURN_FUNCTION_END;
 }
-#ifdef _MSC_VER
-#  pragma warning( pop )
-#endif
+MSVC_DIAG_RESTORE
+
 #endif /* PERL_IMPLICIT_CONTEXT */
 
-#ifdef _MSC_VER
-#  pragma warning( push )
-#  pragma warning( disable : 4646 ) /* warning C4646: function declared with
-    __declspec(noreturn) has non-void return type */
-#  pragma warning( disable : 4645 ) /* warning C4645: function declared with
-__declspec(noreturn) has a return statement */
-#endif
+/* silence __declspec(noreturn) warnings */
+MSVC_DIAG_IGNORE(4646 4645)
 OP *
 Perl_die(pTHX_ const char* pat, ...)
 {
@@ -1648,12 +1646,10 @@ Perl_die(pTHX_ const char* pat, ...)
     va_end(args);
     NORETURN_FUNCTION_END;
 }
-#ifdef _MSC_VER
-#  pragma warning( pop )
-#endif
+MSVC_DIAG_RESTORE
 
 /*
-=for apidoc Am|void|croak_sv|SV *baseex
+=for apidoc croak_sv
 
 This is an XS interface to Perl's C<die> function.
 
@@ -1683,7 +1679,7 @@ Perl_croak_sv(pTHX_ SV *baseex)
 }
 
 /*
-=for apidoc Am|void|vcroak|const char *pat|va_list *args
+=for apidoc vcroak
 
 This is an XS interface to Perl's C<die> function.
 
@@ -1716,7 +1712,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 }
 
 /*
-=for apidoc Am|void|croak|const char *pat|...
+=for apidoc croak
 
 This is an XS interface to Perl's C<die> function.
 
@@ -1763,7 +1759,7 @@ Perl_croak(pTHX_ const char *pat, ...)
 }
 
 /*
-=for apidoc Am|void|croak_no_modify
+=for apidoc croak_no_modify
 
 Exactly equivalent to C<Perl_croak(aTHX_ "%s", PL_no_modify)>, but generates
 terser object code than using C<Perl_croak>.  Less code used on exception code
@@ -1806,7 +1802,7 @@ Perl_croak_popstack(void)
 }
 
 /*
-=for apidoc Am|void|warn_sv|SV *baseex
+=for apidoc warn_sv
 
 This is an XS interface to Perl's C<warn> function.
 
@@ -1834,7 +1830,7 @@ Perl_warn_sv(pTHX_ SV *baseex)
 }
 
 /*
-=for apidoc Am|void|vwarn|const char *pat|va_list *args
+=for apidoc vwarn
 
 This is an XS interface to Perl's C<warn> function.
 
@@ -1862,7 +1858,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 }
 
 /*
-=for apidoc Am|void|warn|const char *pat|...
+=for apidoc warn
 
 This is an XS interface to Perl's C<warn> function.
 
@@ -2107,6 +2103,15 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 
 #  if !defined(WIN32) && !defined(NETWARE)
 
+/*
+=for apidoc my_setenv
+
+A wrapper for the C library L<setenv(3)>.  Don't use the latter, as the perl
+version has desirable safeguards
+
+=cut
+*/
+
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
@@ -2330,8 +2335,10 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	    if (p[THAT] != (*mode == 'r'))	/* if dup2() didn't close it */
 		PerlLIO_close(p[THAT]);	/* close parent's end of _the_ pipe */
 	}
-	else
+	else {
+	    setfd_cloexec_or_inhexec_by_sysfdness(p[THIS]);
 	    PerlLIO_close(p[THAT]);	/* close parent's end of _the_ pipe */
+        }
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
 	/* No automatic close - do it by hand */
 #  ifndef NOFILE
@@ -2469,8 +2476,10 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	    if (p[THAT] != (*mode == 'r'))	/* if dup2() didn't close it */
 		PerlLIO_close(p[THAT]);
 	}
-	else
+	else {
+	    setfd_cloexec_or_inhexec_by_sysfdness(p[THIS]);
 	    PerlLIO_close(p[THAT]);
+	}
 #ifndef OS2
 	if (doexec) {
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
@@ -2682,6 +2691,15 @@ dup2(int oldfd, int newfd)
 
 #ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
+
+/*
+=for apidoc rsignal
+
+A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
 
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
@@ -3342,7 +3360,7 @@ Perl_get_context(void)
     dVAR;
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
-    int error = pthread_getspecific(PL_thr_key, &t)
+    int error = pthread_getspecific(PL_thr_key, &t);
     if (error)
 	Perl_croak_nocontext("panic: pthread_getspecific, error=%d", error);
     return (void*)t;
@@ -4931,7 +4949,7 @@ Perl_quadmath_format_single(const char* format)
         return NULL;
     if (format[len - 2] != 'Q') {
         char* fixed;
-        Newx(fixed, len + 1, char);
+        Newx(fixed, len + 2, char);
         memcpy(fixed, format, len - 1);
         fixed[len - 1] = 'Q';
         fixed[len    ] = format[len - 1];
@@ -5199,50 +5217,12 @@ Perl_my_clearenv(pTHX)
 
 #ifdef PERL_IMPLICIT_CONTEXT
 
-/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
-the global PL_my_cxt_index is incremented, and that value is assigned to
-that module's static my_cxt_index (who's address is passed as an arg).
-Then, for each interpreter this function is called for, it makes sure a
-void* slot is available to hang the static data off, by allocating or
-extending the interpreter's PL_my_cxt_list array */
 
-#ifndef PERL_GLOBAL_STRUCT_PRIVATE
-void *
-Perl_my_cxt_init(pTHX_ int *index, size_t size)
-{
-    dVAR;
-    void *p;
-    PERL_ARGS_ASSERT_MY_CXT_INIT;
-    if (*index == -1) {
-	/* this module hasn't been allocated an index yet */
-	MUTEX_LOCK(&PL_my_ctx_mutex);
-	*index = PL_my_cxt_index++;
-	MUTEX_UNLOCK(&PL_my_ctx_mutex);
-    }
-    
-    /* make sure the array is big enough */
-    if (PL_my_cxt_size <= *index) {
-	if (PL_my_cxt_size) {
-            IV new_size = PL_my_cxt_size;
-	    while (new_size <= *index)
-		new_size *= 2;
-	    Renew(PL_my_cxt_list, new_size, void *);
-            PL_my_cxt_size = new_size;
-	}
-	else {
-	    PL_my_cxt_size = 16;
-	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
-	}
-    }
-    /* newSV() allocates one more than needed */
-    p = (void*)SvPVX(newSV(size-1));
-    PL_my_cxt_list[*index] = p;
-    Zero(p, size, char);
-    return p;
-}
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
 
-#else /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
-
+/* rather than each module having a static var holding its index,
+ * use a global array of name to index mappings
+ */
 int
 Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
 {
@@ -5261,9 +5241,22 @@ Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
     }
     return -1;
 }
+#  endif
+
+
+/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
+the global PL_my_cxt_index is incremented, and that value is assigned to
+that module's static my_cxt_index (who's address is passed as an arg).
+Then, for each interpreter this function is called for, it makes sure a
+void* slot is available to hang the static data off, by allocating or
+extending the interpreter's PL_my_cxt_list array */
 
 void *
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
 Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
+#  else
+Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
+#  endif
 {
     dVAR;
     void *p;
@@ -5271,44 +5264,81 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 
     PERL_ARGS_ASSERT_MY_CXT_INIT;
 
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+#  else
+    index = *indexp;
+#  endif
+    /* do initial check without locking.
+     * -1:    not allocated or another thread currently allocating
+     *  other: already allocated by another thread
+     */
     if (index == -1) {
-	/* this module hasn't been allocated an index yet */
 	MUTEX_LOCK(&PL_my_ctx_mutex);
-	index = PL_my_cxt_index++;
+        /*now a stricter check with locking */
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+        index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+#  else
+        index = *indexp;
+#  endif
+        if (index == -1)
+            /* this module hasn't been allocated an index yet */
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+            index = PL_my_cxt_index++;
+
+        /* Store the index in a global MY_CXT_KEY string to index mapping
+         * table. This emulates the perl-module static my_cxt_index var on
+         * builds which don't allow static vars */
+        if (PL_my_cxt_keys_size <= index) {
+            int old_size = PL_my_cxt_keys_size;
+            int i;
+            if (PL_my_cxt_keys_size) {
+                IV new_size = PL_my_cxt_keys_size;
+                while (new_size <= index)
+                    new_size *= 2;
+                PL_my_cxt_keys = (const char **)PerlMemShared_realloc(
+                                        PL_my_cxt_keys,
+                                        new_size * sizeof(const char *));
+                PL_my_cxt_keys_size = new_size;
+            }
+            else {
+                PL_my_cxt_keys_size = 16;
+                PL_my_cxt_keys = (const char **)PerlMemShared_malloc(
+                            PL_my_cxt_keys_size * sizeof(const char *));
+            }
+            for (i = old_size; i < PL_my_cxt_keys_size; i++) {
+                PL_my_cxt_keys[i] = 0;
+            }
+        }
+        PL_my_cxt_keys[index] = my_cxt_key;
+#  else
+            *indexp = PL_my_cxt_index++;
+        index = *indexp;
+#  endif
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
 
     /* make sure the array is big enough */
     if (PL_my_cxt_size <= index) {
-	int old_size = PL_my_cxt_size;
-	int i;
 	if (PL_my_cxt_size) {
             IV new_size = PL_my_cxt_size;
 	    while (new_size <= index)
 		new_size *= 2;
 	    Renew(PL_my_cxt_list, new_size, void *);
-	    Renew(PL_my_cxt_keys, new_size, const char *);
             PL_my_cxt_size = new_size;
 	}
 	else {
 	    PL_my_cxt_size = 16;
 	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
-	    Newx(PL_my_cxt_keys, PL_my_cxt_size, const char *);
-	}
-	for (i = old_size; i < PL_my_cxt_size; i++) {
-	    PL_my_cxt_keys[i] = 0;
-	    PL_my_cxt_list[i] = 0;
 	}
     }
-    PL_my_cxt_keys[index] = my_cxt_key;
     /* newSV() allocates one more than needed */
     p = (void*)SvPVX(newSV(size-1));
     PL_my_cxt_list[index] = p;
     Zero(p, size, char);
     return p;
 }
-#endif /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
+
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 
@@ -5700,6 +5730,11 @@ S_my_mkostemp(char *templte, int flags) {
     STRLEN len = strlen(templte);
     int fd;
     int attempts = 0;
+#ifdef VMS
+    int delete_on_close = flags & O_VMS_DELETEONCLOSE;
+
+    flags &= ~O_VMS_DELETEONCLOSE;
+#endif
 
     if (len < 6 ||
         templte[len-1] != 'X' || templte[len-2] != 'X' || templte[len-3] != 'X' ||
@@ -5713,7 +5748,15 @@ S_my_mkostemp(char *templte, int flags) {
         for (i = 1; i <= 6; ++i) {
             templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
         }
-        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
+#ifdef VMS
+        if (delete_on_close) {
+            fd = open(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600, "fop=dlt");
+        }
+        else
+#endif
+        {
+            fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
+        }
     } while (fd == -1 && errno == EEXIST && ++attempts <= 100);
 
     return fd;
@@ -6400,8 +6443,8 @@ Perl_get_c_backtrace(pTHX_ int depth, int skip)
     Safefree(raw_frames);
     return bt;
 #else
-    PERL_UNUSED_ARGV(depth);
-    PERL_UNUSED_ARGV(skip);
+    PERL_UNUSED_ARG(depth);
+    PERL_UNUSED_ARG(skip);
     return NULL;
 #endif
 }

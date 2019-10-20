@@ -17,20 +17,7 @@ sv_2pvbyte
 sv_2pv_flags
 sv_pvn_force_flags
 
-=dontwarn
-
-NEED_sv_2pv_flags
-NEED_sv_2pv_flags_GLOBAL
-
 =implementation
-
-/* Backwards compatibility stuff... :-( */
-#if !defined(NEED_sv_2pv_flags) && defined(NEED_sv_2pv_nolen)
-#  define NEED_sv_2pv_flags
-#endif
-#if !defined(NEED_sv_2pv_flags_GLOBAL) && defined(NEED_sv_2pv_nolen_GLOBAL)
-#  define NEED_sv_2pv_flags_GLOBAL
-#endif
 
 /* Hint: sv_2pv_nolen
  * Use the SvPV_nolen() or SvPV_nolen_const() macros instead of sv_2pv_nolen().
@@ -47,20 +34,13 @@ __UNDEFINED__  sv_2pv_nolen(sv)   SvPV_nolen(sv)
 
 #if { VERSION < 5.7.0 }
 
-#if { NEED sv_2pvbyte }
-
-char *
-sv_2pvbyte(pTHX_ SV *sv, STRLEN *lp)
-{
-  sv_utf8_downgrade(sv,0);
-  return SvPV(sv,*lp);
-}
-
-#endif
+__UNDEFINED__ sv_2pvbyte(sv, lp) (sv_utf8_downgrade((sv), 0), SvPV((sv), *(lp)))
 
 /* Hint: sv_2pvbyte
  * Use the SvPVbyte() macro instead of sv_2pvbyte().
  */
+
+/* Replace sv_2pvbyte with SvPVbyte */
 
 #undef SvPVbyte
 
@@ -83,16 +63,19 @@ __UNDEFINED__  sv_2pvbyte_nolen(sv)  sv_2pv_nolen(sv)
  * Always use the SvPV() macro instead of sv_pvn().
  */
 
+/* Replace sv_pvn with SvPV */
+
 /* Hint: sv_pvn_force
  * Always use the SvPV_force() macro instead of sv_pvn_force().
  */
+
+/* Replace sv_pvn_force with SvPV_force */
 
 /* If these are undefined, they're not handled by the core anyway */
 __UNDEFINED__  SV_IMMEDIATE_UNREF       0
 __UNDEFINED__  SV_GMAGIC                0
 __UNDEFINED__  SV_COW_DROP_PV           0
 __UNDEFINED__  SV_UTF8_NO_ENCODING      0
-__UNDEFINED__  SV_NOSTEAL               0
 __UNDEFINED__  SV_CONST_RETURN          0
 __UNDEFINED__  SV_MUTABLE_RETURN        0
 __UNDEFINED__  SV_SMAGIC                0
@@ -101,27 +84,8 @@ __UNDEFINED__  SV_COW_SHARED_HASH_KEYS  0
 
 #if { VERSION < 5.7.2 }
 
-#if { NEED sv_2pv_flags }
-
-char *
-sv_2pv_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
-{
-  STRLEN n_a = (STRLEN) flags;
-  return sv_2pv(sv, lp ? lp : &n_a);
-}
-
-#endif
-
-#if { NEED sv_pvn_force_flags }
-
-char *
-sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
-{
-  STRLEN n_a = (STRLEN) flags;
-  return sv_pvn_force(sv, lp ? lp : &n_a);
-}
-
-#endif
+__UNDEFINED__ sv_2pv_flags(sv, lp, flags) sv_2pv((sv), (lp) ? (lp) : &PL_na)
+__UNDEFINED__ sv_pvn_force_flags(sv, lp, flags) sv_pvn_force((sv), (lp) ? (lp) : &PL_na)
 
 #endif
 
@@ -190,12 +154,6 @@ __UNDEFINED__  SvPV_renew(sv,n) STMT_START { SvLEN_set(sv, n); \
                  SvPV_set((sv), (char *) saferealloc(          \
                        (Malloc_t)SvPVX(sv), (MEM_SIZE)((n)))); \
                } STMT_END
-
-=xsinit
-
-#define NEED_sv_2pv_flags
-#define NEED_sv_pvn_force_flags
-#define NEED_sv_2pvbyte
 
 =xsubs
 

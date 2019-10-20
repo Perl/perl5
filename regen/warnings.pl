@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.43';
+$VERSION = '1.45';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -111,6 +111,12 @@ my $tree = {
                                     [ 5.027, DEFAULT_ON ],
                                 'experimental::alpha_assertions' =>
                                     [ 5.027, DEFAULT_ON ],
+                                'experimental::private_use' =>
+                                    [ 5.029, DEFAULT_ON ],
+                                'experimental::uniprop_wildcards' =>
+                                    [ 5.029, DEFAULT_ON ],
+                                'experimental::vlb' =>
+                                    [ 5.029, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
@@ -322,8 +328,8 @@ my ($index, $warn_size);
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
 #define pWARN_STD		NULL
-#define pWARN_ALL		(((STRLEN*)0)+1)    /* use warnings 'all' */
-#define pWARN_NONE		(((STRLEN*)0)+2)    /* no  warnings 'all' */
+#define pWARN_ALL		(STRLEN *) &PL_WARN_ALL    /* use warnings 'all' */
+#define pWARN_NONE		(STRLEN *) &PL_WARN_NONE   /* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)
@@ -352,15 +358,21 @@ EOM
 
   my $k ;
   my $last_ver = 0;
+  my @names;
   foreach $k (sort { $a <=> $b } keys %ValueToName) {
       my ($name, $version) = @{ $ValueToName{$k} };
       print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
           if $last_ver != $version ;
       $name =~ y/:/_/;
-      print $warn tab(6, "#define WARN_$name"), " $k\n" ;
+      $name = "WARN_$name";
+      print $warn tab(6, "#define $name"), " $k\n" ;
+      push @names, $name;
       $last_ver = $version ;
   }
-  print $warn "\n" ;
+  print $warn "\n\n/*\n" ;
+
+  print $warn map { "=for apidoc Amnh||$_\n" } @names;
+  print $warn "\n=cut\n*/\n\n" ;
 
   print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
   print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
@@ -376,14 +388,18 @@ EOM
 #define isWARN_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)))
 #define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
 
-#define DUP_WARNINGS(p)		\
-    (specialWARN(p) ? (STRLEN*)(p)	\
-    : (STRLEN*)CopyD(p, PerlMemShared_malloc(sizeof(*p)+*p), sizeof(*p)+*p, \
-		     			     char))
+#define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
 
 /*
 
 =head1 Warning and Dieing
+
+In all these calls, the C<U32 wI<n>> parameters are warning category
+constants.  You can see the ones currently available in
+L<warnings/Category Hierarchy>, just capitalize all letters in the names
+and prefix them by C<WARN_>.  So, for example, the category C<void> used in a
+perl program becomes C<WARN_VOID> when used in XS code and passed to one of
+the calls below.
 
 =for apidoc Am|bool|ckWARN|U32 w
 
@@ -1024,7 +1040,7 @@ X<-w>
 
 This is  the existing flag.  If the lexical warnings pragma is B<not>
 used in any of you code, or any of the modules that you use, this flag
-will enable warnings everywhere.  See L<Backward Compatibility> for
+will enable warnings everywhere.  See L</Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
 =item B<-W>

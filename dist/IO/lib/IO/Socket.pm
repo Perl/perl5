@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 our @ISA = qw(IO::Handle);
 
-our $VERSION = "1.39";
+our $VERSION = "1.41";
 
 our @EXPORT_OK = qw(sockatmark);
 
@@ -277,14 +277,24 @@ sub send {
     @_ >= 2 && @_ <= 4 or croak 'usage: $sock->send(BUF, [FLAGS, [TO]])';
     my $sock  = $_[0];
     my $flags = $_[2] || 0;
-    my $peer  = $_[3] || $sock->peername;
+    my $peer;
 
-    croak 'send: Cannot determine peer address'
-	 unless(defined $peer);
+    if ($_[3]) {
+        # the caller explicitly requested a TO, so use it
+        # this is non-portable for "connected" UDP sockets
+        $peer = $_[3];
+    }
+    elsif (!defined getpeername($sock)) {
+        # we're not connected, so we require a peer from somewhere
+        $peer = $sock->peername;
 
-    my $r = defined(getpeername($sock))
-	? send($sock, $_[1], $flags)
-	: send($sock, $_[1], $flags, $peer);
+	croak 'send: Cannot determine peer address'
+	    unless(defined $peer);
+    }
+
+    my $r = $peer
+      ? send($sock, $_[1], $flags, $peer)
+      : send($sock, $_[1], $flags);
 
     # remember who we send to, if it was successful
     ${*$sock}{'io_socket_peername'} = $peer
@@ -413,12 +423,12 @@ C<new> only looks for one key C<Domain> which tells new which domain
 the socket will be in. All other arguments will be passed to the
 configuration method of the package for that domain, See below.
 
- NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+B<NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE>
 
 As of VERSION 1.18 all IO::Socket objects have autoflush turned on
 by default. This was not the case with earlier releases.
 
- NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+B<NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE>
 
 =back
 
@@ -433,9 +443,6 @@ corresponding built-in functions:
     bind
     listen
     accept
-    send
-    recv
-    peername (getpeername)
     sockname (getsockname)
     shutdown
 
@@ -515,6 +522,46 @@ depend on the peer's socket options. In particular, if the peer socket has
 SO_LINGER enabled with a zero timeout, then the peer's close() will generate
 a RST segment, upon receipt of which the local TCP transitions immediately to
 B<CLOSED>, and in that state, connected() I<will> return undef.
+
+=item send(MSG, [, FLAGS [, TO ] ])
+
+Like the built-in L<send()|perlfunc/send>, except that:
+
+=over
+
+=item *
+
+C<FLAGS> is optional and defaults to C<0>, and
+
+=item *
+
+after a successful send with C<TO>, further calls to send() on an
+unconnected socket without C<TO> will send to the same address, and
+C<TO> will be used as the result of peername().
+
+=back
+
+=item recv(BUF, LEN, [,FLAGS])
+
+Like the built-in L<recv()|perlfunc/recv>, except that:
+
+=over
+
+=item *
+
+C<FLAGS> is optional and defaults to C<0>, and
+
+=item *
+
+the cached value returned by peername() is updated with the result of
+recv().
+
+=back
+
+=item peername
+
+Returns the cached peername, possibly set by recv() or send() above.
+If not otherwise set returns (and caches) the result of getpeername().
 
 =item protocol
 

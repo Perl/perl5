@@ -522,6 +522,10 @@ argument is omitted, tests L<C<$_>|perlvar/$_>, except for C<-t>, which
 tests STDIN.  Unless otherwise documented, it returns C<1> for true and
 C<''> for false.  If the file doesn't exist or can't be examined, it
 returns L<C<undef>|/undef EXPR> and sets L<C<$!>|perlvar/$!> (errno).
+With the exception of the C<-l> test they all follow symbolic links
+because they use C<stat()> and not C<lstat()> (so dangling symlinks can't
+be examined and will therefore report failure).
+
 Despite the funny names, precedence is the same as any other named unary
 operator.  The operator may be any of:
 
@@ -1224,9 +1228,10 @@ change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a L<C<chroot>|/chroot FILENAME> to L<C<$_>|perlvar/$_>.
 
-B<NOTE:>  It is good security practice to do C<chdir("/")>
+B<NOTE:>  It is mandatory for security to C<chdir("/")>
 (L<C<chdir>|/chdir EXPR> to the root directory) immediately after a
-L<C<chroot>|/chroot FILENAME>.
+L<C<chroot>|/chroot FILENAME>, otherwise the current working directory
+may be outside of the new root.
 
 Portability issues: L<perlport/chroot>.
 
@@ -1921,9 +1926,8 @@ be open any more when the program is reincarnated, with possible
 resulting confusion by Perl.
 
 This function is now largely obsolete, mostly because it's very hard to
-convert a core file into an executable.  That's why you should now invoke
-it as C<CORE::dump()> if you don't want to be warned against a possible
-typo.
+convert a core file into an executable.  As of Perl 5.30, it must be invoked
+as C<CORE::dump()>.
 
 Unlike most named operators, this has the same precedence as assignment.
 It is also exempt from the looks-like-a-function rule, so
@@ -2617,8 +2621,8 @@ L<Unicode::UCD/B<prop_invmap()>>.
 For further information on casefolding, refer to
 the Unicode Standard, specifically sections 3.13 C<Default Case Operations>,
 4.2 C<Case-Normative>, and 5.18 C<Case Mappings>,
-available at L<http://www.unicode.org/versions/latest/>, as well as the
-Case Charts available at L<http://www.unicode.org/charts/case/>.
+available at L<https://www.unicode.org/versions/latest/>, as well as the
+Case Charts available at L<https://www.unicode.org/charts/case/>.
 
 If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
 
@@ -6033,7 +6037,7 @@ This protects against those locales where characters such as C<"|"> are
 considered to be word characters.
 
 Otherwise, Perl quotes non-ASCII characters using an adaptation from
-Unicode (see L<http://www.unicode.org/reports/tr31/>).
+Unicode (see L<https://www.unicode.org/reports/tr31/>).
 The only code points that are quoted are those that have any of the
 Unicode properties:  Pattern_Syntax, Pattern_White_Space, White_Space,
 Default_Ignorable_Code_Point, or General_Category=Control.
@@ -6376,7 +6380,9 @@ C<HASH>, C<CODE>, C<FORMAT>, or C<IO>, indicating only which kind of
 object it is.  If the unblessed referent is a scalar, then the return
 value will be one of the strings C<SCALAR>, C<VSTRING>, C<REF>, C<GLOB>,
 C<LVALUE>, or C<REGEXP>, depending on the kind of value the scalar
-currently has.  Beware that these built-in type names can also be used as
+currently has.   But note that C<qr//> scalars are created already
+blessed, so C<ref qr/.../> will likely return C<Regexp>.  Beware that
+these built-in type names can also be used as
 class names, so C<ref> returning one of these names doesn't unambiguously
 indicate that the referent is of the kind to which the name refers.
 
@@ -6649,7 +6655,8 @@ Generally used in a L<C<continue>|/continue BLOCK> block at the end of a
 loop to clear variables and reset C<m?pattern?> searches so that they
 work again.  The
 expression is interpreted as a list of single characters (hyphens
-allowed for ranges).  All variables and arrays beginning with one of
+allowed for ranges).  All variables (scalars, arrays, and hashes)
+in the current package beginning with one of
 those letters are reset to their pristine state.  If the expression is
 omitted, one-match searches (C<m?pattern?>) are reset to match again.
 Only resets variables or searches in the current package.  Always returns
@@ -6662,6 +6669,7 @@ Only resets variables or searches in the current package.  Always returns
 Resetting C<"A-Z"> is not recommended because you'll wipe out your
 L<C<@ARGV>|perlvar/@ARGV> and L<C<@INC>|perlvar/@INC> arrays and your
 L<C<%ENV>|perlvar/%ENV> hash.
+
 Resets only package variables; lexical variables are unaffected, but
 they clean themselves up on scope exit anyway, so you'll probably want
 to use them instead.  See L<C<my>|/my VARLIST>.
@@ -6782,8 +6790,8 @@ X<say>
 =for Pod::Functions +say output a list to a filehandle, appending a newline
 
 Just like L<C<print>|/print FILEHANDLE LIST>, but implicitly appends a
-newline.  C<say LIST> is simply an abbreviation for
-C<{ local $\ = "\n"; print LIST }>.  To use FILEHANDLE without a LIST to
+newline at the end of the LIST instead of any value L<C<$\>|perlvar/$\>
+might have.  To use FILEHANDLE without a LIST to
 print the contents of L<C<$_>|perlvar/$_> to it, you must use a bareword
 filehandle like C<FH>, not an indirect one like C<$fh>.
 
@@ -8058,8 +8066,8 @@ as supported by the compiler used to build Perl:
    h           interpret integer as C type "short" or
                "unsigned short"
    j           interpret integer as C type "intmax_t" on Perl
-               5.14 or later; and only with a C99 compiler
-               prior to Perl 5.30 (unportable)
+               5.14 or later; and prior to Perl 5.30, only with
+               a C99 compiler (unportable)
    l           interpret integer as C type "long" or
                "unsigned long"
    q, L, or ll interpret integer as C type "long long",
@@ -8726,7 +8734,7 @@ X<sysseek> X<lseek>
 
 Sets FILEHANDLE's system position I<in bytes> using L<lseek(2)>.  FILEHANDLE may
 be an expression whose value gives the name of the filehandle.  The values
-for WHENCE are C<0> to set the new position to POSITION; C<1> to set the it
+for WHENCE are C<0> to set the new position to POSITION; C<1> to set it
 to the current position plus POSITION; and C<2> to set it to EOF plus
 POSITION, typically negative.
 
@@ -9662,10 +9670,8 @@ to try to write off the beginning of the string (i.e., negative OFFSET).
 If the string happens to be encoded as UTF-8 internally (and thus has
 the UTF8 flag set), L<C<vec>|/vec EXPR,OFFSET,BITS> tries to convert it
 to use a one-byte-per-character internal representation. However, if the
-string contains characters with values of 256 or higher, that conversion
-will fail, and a deprecation message will be raised.  In that situation,
-C<vec> will operate on the underlying buffer regardless, in its internal
-UTF-8 representation.  In Perl 5.32, this will be a fatal error.
+string contains characters with values of 256 or higher, a fatal error
+will occur.
 
 Strings created with L<C<vec>|/vec EXPR,OFFSET,BITS> can also be
 manipulated with the logical

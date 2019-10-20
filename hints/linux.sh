@@ -165,6 +165,9 @@ esac
 # plibpth to bypass this check.
 if [ -x /usr/bin/gcc ] ; then
     gcc=/usr/bin/gcc
+# clang also provides -print-search-dirs
+elif ${cc:-cc} --version 2>/dev/null | grep -q '^clang ' ; then
+    gcc=${cc:-cc}
 else
     gcc=gcc
 fi
@@ -176,6 +179,16 @@ case "$plibpth" in
     shift
     plibpth="$*"
     ;;
+esac
+
+# For the musl libc, perl should #define _GNU_SOURCE.  Otherwise, some
+# available functions, like memem, won't be used.  See the discussion in
+# [perl #133760].  musl doesn't offer an easy way to identify it, but,
+# at least on alpine linux, the ldd --version output contains the
+# string 'musl.'
+case `ldd --version 2>&1` in
+    musl*)  ccflags="$ccflags -D_GNU_SOURCE" ;;
+        *) ;;
 esac
 
 # libquadmath is sometimes installed as gcc internal library,

@@ -635,11 +635,7 @@ BOOT:
     cv = newXS("B::diehook", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, diehook);
     sv = get_sv("B::OP::does_parent", GV_ADDMULTI);
-#ifdef PERL_OP_PARENT
     sv_setsv(sv, &PL_sv_yes);
-#else
-    sv_setsv(sv, &PL_sv_no);
-#endif
 }
 
 void
@@ -1181,11 +1177,15 @@ string(o, cv)
             break;
 
         case OP_ARGCHECK:
-            ret = Perl_newSVpvf(aTHX_ "%" IVdf ",%" IVdf, aux[0].iv, aux[1].iv);
-            if (aux[2].iv)
-                Perl_sv_catpvf(aTHX_ ret, ",%c", (char)aux[2].iv);
-            ret = sv_2mortal(ret);
-            break;
+            {
+                struct op_argcheck_aux *p = (struct op_argcheck_aux*)aux;
+                ret = Perl_newSVpvf(aTHX_ "%" IVdf ",%" IVdf,
+                                    p->params, p->opt_params);
+                if (p->slurpy)
+                    Perl_sv_catpvf(aTHX_ ret, ",%c", p->slurpy);
+                ret = sv_2mortal(ret);
+                break;
+            }
 
         default:
             ret = sv_2mortal(newSVpvn("", 0));
@@ -1219,12 +1219,16 @@ aux_list(o, cv)
             break;
 
         case OP_ARGCHECK:
-            EXTEND(SP, 3);
-            PUSHs(sv_2mortal(newSViv(aux[0].iv)));
-            PUSHs(sv_2mortal(newSViv(aux[1].iv)));
-            PUSHs(sv_2mortal(aux[2].iv ? Perl_newSVpvf(aTHX_ "%c",
-                                (char)aux[2].iv) : &PL_sv_no));
-            break;
+            {
+                struct op_argcheck_aux *p = (struct op_argcheck_aux*)aux;
+                EXTEND(SP, 3);
+                PUSHs(sv_2mortal(newSViv(p->params)));
+                PUSHs(sv_2mortal(newSViv(p->opt_params)));
+                PUSHs(sv_2mortal(p->slurpy
+                                ? Perl_newSVpvf(aTHX_ "%c", p->slurpy)
+                                : &PL_sv_no));
+                break;
+            }
 
         case OP_MULTICONCAT:
             {

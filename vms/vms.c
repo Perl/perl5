@@ -11800,7 +11800,7 @@ encode_dev (pTHX_ const char *dev)
   enc = 0;
   f = 1;
   i = 0;
-  for (q = dev + strlen(dev); q--; q >= dev) {
+  for (q = dev + strlen(dev); q >= dev; q--) {
     if (*q == ':')
 	break;
     if (isdigit (*q))

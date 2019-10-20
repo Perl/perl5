@@ -9,17 +9,20 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.081 ;
-use IO::Compress::Base::Common  2.081 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.081 ;
-use IO::Uncompress::Adapter::Identity 2.081 ;
-use IO::Compress::Zlib::Extra 2.081 ;
-use IO::Compress::Zip::Constants 2.081 ;
+use IO::Uncompress::RawInflate  2.087 ;
+use IO::Compress::Base::Common  2.087 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.087 ;
+use IO::Uncompress::Adapter::Identity 2.087 ;
+use IO::Compress::Zlib::Extra 2.087 ;
+use IO::Compress::Zip::Constants 2.087 ;
 
-use Compress::Raw::Zlib  2.081 () ;
+use Compress::Raw::Zlib  2.087 () ;
 
 BEGIN
 {
+   # Don't trigger any __DIE__ Hooks.
+   local $SIG{__DIE__};
+       
     eval{ require IO::Uncompress::Adapter::Bunzip2 ;
           import  IO::Uncompress::Adapter::Bunzip2 } ;
     eval{ require IO::Uncompress::Adapter::UnLzma ;
@@ -31,7 +34,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.081';
+$VERSION = '2.087';
 $UnzipError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);
@@ -70,6 +73,7 @@ sub getExtraParams
             'name'    => [IO::Compress::Base::Common::Parse_any,       undef],
 
             'stream'  => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'efs'     => [IO::Compress::Base::Common::Parse_boolean,   0],
             
             # TODO - This means reading the central directory to get
             # 1. the local header offsets
@@ -86,6 +90,7 @@ sub ckParams
     $got->setValue('crc32' => 1);
 
     *$self->{UnzipData}{Name} = $got->getValue('name');
+    *$self->{UnzipData}{efs} = $got->getValue('efs');
 
     return 1;
 }
@@ -171,25 +176,27 @@ sub readHeader
         # TODO - when Stream is off, use seek
         my $buffer;
         if (*$self->{ZipData}{Streaming}) {
-
             while (1) {
 
                 my $b;
                 my $status = $self->smartRead(\$b, 1024 * 16);
-                return undef
+
+                return $self->saveErrorString(undef, "Truncated file")
                     if $status <= 0 ;
 
-                my $temp_buf;
+                my $temp_buf ;
                 my $out;
+
                 $status = *$self->{Uncomp}->uncompr(\$b, \$temp_buf, 0, $out);
 
                 return $self->saveErrorString(undef, *$self->{Uncomp}{Error}, 
                                                      *$self->{Uncomp}{ErrorNo})
                     if $self->saveStatus($status) == STATUS_ERROR;                
 
+                $self->pushBack($b)  ;
+
                 if ($status == STATUS_ENDSTREAM) {
                     *$self->{Uncomp}->reset();
-                    $self->pushBack($b)  ;
                     last;
                 }
             }
@@ -461,6 +468,7 @@ sub skipEndCentralDirectory
     my $self = shift;
     my $magic = shift ;
 
+
     my $buffer;
     $self->smartReadExact(\$buffer, 22 - 4)
         or return $self->TrailerError("Minimum header size is " . 
@@ -548,6 +556,7 @@ sub _readZipHeader($)
     my $extraField;
     my @EXTRA = ();
     my $streamingMode = ($gpFlag & ZIP_GP_FLAG_STREAMING_MASK) ? 1 : 0 ;
+    my $efs_flag = ($gpFlag & ZIP_GP_FLAG_LANGUAGE_ENCODING) ? 1 : 0;
 
     return $self->HeaderError("Encrypted content not supported")
         if $gpFlag & (ZIP_GP_FLAG_ENCRYPTED_MASK|ZIP_GP_FLAG_STRONG_ENCRYPTED_MASK);
@@ -562,6 +571,14 @@ sub _readZipHeader($)
     {
         $self->smartReadExact(\$filename, $filename_length)
             or return $self->TruncatedHeader("Filename");
+
+        if (*$self->{UnzipData}{efs} && $efs_flag && $] >= 5.008004)
+        {
+            require Encode;
+            eval { $filename = Encode::decode_utf8($filename, 1) }
+                or Carp::croak "Zip Filename not UTF-8" ;
+        }     
+
         $keep .= $filename ;
     }
 
@@ -702,6 +719,7 @@ sub _readZipHeader($)
         'UncompressedLength' => $uncompressedLength ,
         'CRC32'              => $crc32 ,
         'Name'               => $filename,
+        'efs'                => $efs_flag, # language encoding flag
         'Time'               => _dosToUnixTime($lastModTime),
         'Stream'             => $streamingMode,
 
@@ -1233,10 +1251,7 @@ This parameter defaults to 0.
 
 =item C<< BinModeOut => 0|1 >>
 
-When writing to a file or filehandle, set C<binmode> before writing to the
-file.
-
-Defaults to 0.
+This option is now a no-op. All files will be written  in binmode.
 
 =item C<< Append => 0|1 >>
 
@@ -1430,6 +1445,18 @@ OPTS is a combination of the following options:
 =item C<< Name => "membername" >>
 
 Open "membername" from the zip file for reading.
+
+=item C<< Efs => 0| 1 >>
+
+When this option is set to true AND the zip archive being read has 
+the "Language Encoding Flag" (EFS) set, the member name is assumed to be encoded in UTF-8.
+
+If the member name in the zip archive is not valid UTF-8 when this optionn is true,
+the script will die with an error message.
+
+Note that this option only works with Perl 5.8.4 or better.
+
+This option defaults to B<false>.
 
 =item C<< AutoClose => 0|1 >>
 
@@ -1731,6 +1758,10 @@ Skips to the next compressed data stream in the input file/buffer. If a new
 compressed data stream is found, the eof marker will be cleared and C<$.>
 will be reset to 0.
 
+If trailing data is present immediately after the zip archive and the
+C<Transparent> option is enabled, this method will consider that trailing
+data to be another member of the zip archive.
+
 Returns 1 if a new stream was found, 0 if none was found, and -1 if an
 error was encountered.
 
@@ -1830,7 +1861,7 @@ The script is available from L<https://gist.github.com/eqhmcow/5389877>
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzip>, L<IO::Uncompress::UnLzip>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Compress::Zstd>, L<IO::Uncompress::UnZstd>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<IO::Compress::FAQ|IO::Compress::FAQ>
 
@@ -1861,7 +1892,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2018 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2019 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

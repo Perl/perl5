@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.081';
+$VERSION = '2.087';
 
 @EXPORT = qw( isaFilehandle isaFilename isaScalar
               whatIsInput whatIsOutput
@@ -975,6 +975,14 @@ sub equal
 
     return $self->[LOW]  == $other->[LOW] &&
            $self->[HIGH] == $other->[HIGH] ;
+}
+
+sub isZero
+{
+    my $self = shift;
+
+    return $self->[LOW]  == 0 &&
+           $self->[HIGH] == 0 ;
 }
 
 sub gt

@@ -139,7 +139,7 @@ my %Extras = (
 
       # The Header ID mappings defined by Info-ZIP and third parties are:
 
-      0x0065,  ['IBM S/390 attributes - uncompressed', undef],
+      0x0065,  ['IBM S/390 attributes - uncompressed', \&decodeMVS],
       0x0066,  ['IBM S/390 attributes - compressed', undef],
       0x07c8,  ['Info-ZIP Macintosh (old, J. Lee)', undef],
       0x2605,  ['ZipIt Macintosh (first version)', undef],
@@ -173,13 +173,14 @@ my %Extras = (
       0x7855,  ['Unix Extra type 2', \&decode_Ux],
       0x7875,  ['Unix Extra Type 3', \&decode_ux],
       0x9901,  ['AES Encryption', \&decode_AES],
+      0xa11e,  ['Data Stream Alignment', undef],
       0xA220,  ['Open Packaging Growth Hint', undef ],
       0xCAFE,  ['Java Executable', \&decode_Java_exe],
       0xfb4a,  ['SMS/QDOS', undef],
 
        );
 
-my $VERSION = "1.08" ;
+my $VERSION = "1.10" ;
 
 my $FH;
 
@@ -1462,6 +1463,24 @@ sub decode_NT_security
     }
 }
 
+sub decodeMVS
+{
+    my $len = shift;
+    my $context = shift;
+
+    # data in Big-Endian
+    myRead(my $data, $len);
+    my $ID = unpack("N", $data);
+
+    if ($ID == 0xE9F3F9F0)
+    {
+        out($data, "  ID", "'Z390'");
+        substr($data, 0, 4) = '';
+    }
+
+    out($data, "  Extra Payload", hexDump($data));
+}
+
 sub printAes
 {
     my $context = shift ;
@@ -2061,7 +2080,7 @@ OPTIONS
      -h     display help
      -v     Verbose - output more stuff
     
-Copyright (c) 2011-2018 Paul Marquess. All rights reserved.
+Copyright (c) 2011-2019 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -2181,7 +2200,7 @@ Paul Marquess F<pmqs@cpan.org>.
 
 =head1 COPYRIGHT 
 
-Copyright (c) 2011-2018 Paul Marquess. All rights reserved.
+Copyright (c) 2011-2019 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. 

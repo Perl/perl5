@@ -533,7 +533,7 @@ Perl_new_version(pTHX_ SV *ver)
 	    under = ninstr(raw, raw+len, underscore, underscore + 1);
 	    if (under) {
 		Move(under + 1, under, raw + len - under - 1, char);
-		SvCUR(rv)--;
+		SvCUR_set(rv, SvCUR(rv) - 1);
 		*SvEND(rv) = '\0';
 	    }
 	    /* this is for consistency with the pure Perl class */
@@ -571,6 +571,11 @@ Perl_upg_version2(pTHX_ SV *ver, bool qv)
 Perl_upg_version(pTHX_ SV *ver, bool qv)
 #endif
 {
+
+#ifdef dVAR
+    dVAR;
+#endif
+
     const char *version, *s;
 #ifdef SvVOK
     const MAGIC *mg;

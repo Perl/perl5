@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.43";
+$VERSION = "1.44";
 
 use Carp;
 use Exporter ();
@@ -493,7 +493,7 @@ A handy tag name for a I<reasonable> default set of ops beyond the
 :default optag.  Like :default (and indeed all the other optags) its
 current definition is unstable while development continues. It will change.
 
-The :browse tag represents the next step beyond :default. It it a
+The :browse tag represents the next step beyond :default. It is a
 superset of the :default ops and adds :filesys_read the :sys_db.
 The intent being that scripts can access more (possibly sensitive)
 information about your system but not be able to change it.

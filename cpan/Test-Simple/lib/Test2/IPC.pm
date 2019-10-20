@@ -2,12 +2,13 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302140';
+our $VERSION = '1.302168';
 
 
 use Test2::API::Instance;
 use Test2::Util qw/get_tid/;
 use Test2::API qw{
+    test2_in_preload
     test2_init_done
     test2_ipc
     test2_has_ipc
@@ -24,7 +25,7 @@ use Test2::API qw{
     no warnings 'void';
     INIT {
         use warnings 'void';
-        context()->release();
+        context()->release() unless test2_in_preload();
     }
 }
 
@@ -149,7 +150,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2019 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

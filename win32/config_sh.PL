@@ -212,11 +212,7 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{d_PRIEUldbl} = 'define';
     $opt{d_PRIFUldbl} = 'define';
     $opt{d_PRIGUldbl} = 'define';
-    $opt{d_frexpl} = 'define';
-    $opt{d_isnanl} = 'define';
-    $opt{d_modfl} = 'define';
     $opt{d_modflproto} = 'define';
-    $opt{d_sqrtl} = 'define';
     $opt{d_strtold} = 'define';
     $opt{d_PRIeldbl} = 'define';
     $opt{d_PRIfldbl} = 'define';
@@ -231,6 +227,7 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{nveformat} = '"Le"';
     $opt{nvfformat} = '"Lf"';
     $opt{nvgformat} = '"Lg"';
+    $opt{nvmantbits} = 64;
     $opt{longdblkind} = 3;
     $opt{longdblmantbits} = 64;
 }
@@ -239,11 +236,14 @@ else {
     $opt{d_PRIEUldbl} = 'undef';
     $opt{d_PRIFUldbl} = 'undef';
     $opt{d_PRIGUldbl} = 'undef';
-    $opt{d_frexpl} = 'undef';
-    $opt{d_isnanl} = 'undef';
-    $opt{d_modfl} = 'undef';
-    $opt{d_modflproto} = 'undef';
-    $opt{d_sqrtl} = 'undef';
+
+    if($opt{cc} =~ /\b(?:cl|icl)/) {
+        $opt{d_modflproto} = 'undef';
+    }
+    else {
+        $opt{d_modflproto} = 'define';
+    }
+
     $opt{d_strtold} = 'undef';
     $opt{d_PRIeldbl} = 'undef';
     $opt{d_PRIfldbl} = 'undef';
@@ -263,9 +263,6 @@ else {
 # change some configuration variables based on compiler version
 if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
     my $ccversion = $1;
-    if ($ccversion < 13) { # VC6
-	$opt{ar} ='lib';
-    }
     if ($ccversion >= 14) { # VC8+
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;

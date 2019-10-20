@@ -200,7 +200,9 @@ sub find_git_or_skip {
 	    $source_dir = '.'
 	}
     }
-    if ($source_dir) {
+    if ($ENV{'PERL_BUILD_PACKAGING'}) {
+	$reason = 'PERL_BUILD_PACKAGING is set';
+    } elsif ($source_dir) {
 	my $version_string = `git --version`;
 	if (defined $version_string
 	      && $version_string =~ /\Agit version (\d+\.\d+\.\d+)(.*)/) {
@@ -212,9 +214,6 @@ sub find_git_or_skip {
 	}
     } else {
 	$reason = 'not being run from a git checkout';
-    }
-    if ($ENV{'PERL_BUILD_PACKAGING'}) {
-	$reason = 'PERL_BUILD_PACKAGING is set';
     }
     skip_all($reason) if $_[0] && $_[0] eq 'all';
     skip($reason, @_);

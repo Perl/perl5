@@ -15,8 +15,8 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;
+our $VERSION = '7.38';
+$VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -587,9 +587,10 @@ sub constants {
     # Cleanup paths for directories in MMS macros.
     foreach my $macro ( qw [
             INST_BIN INST_SCRIPT INST_LIB INST_ARCHLIB
-            PERL_LIB PERL_ARCHLIB
+            PERL_LIB PERL_ARCHLIB PERL_ARCHLIBDEP
             PERL_INC PERL_SRC ],
-                        (map { 'INSTALL'.$_ } $self->installvars)
+                        (map { 'INSTALL'.$_ } $self->installvars),
+                        (map { 'DESTINSTALL'.$_ } $self->installvars)
                       )
     {
         next unless defined $self->{$macro};

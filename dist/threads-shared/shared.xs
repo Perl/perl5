@@ -115,6 +115,17 @@
  * without the prefix (e.g., sv, tmp or obj).
  */
 
+/* this is lower overhead than warn() and less likely to interfere
+   with other parts of perl (like with the debugger.)
+*/
+#ifdef SHARED_TRACE_LOCKS
+#  define TRACE_LOCK(x) DEBUG_U(x)
+#  define TRACE_LOCKv(x) DEBUG_Uv(x)
+#else
+#  define TRACE_LOCK(x)
+#  define TRACE_LOCKv(x)
+#endif
+
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
@@ -211,7 +222,23 @@ recursive_lock_release(pTHX_ recursive_lock_t *lock)
         if (--lock->locks == 0) {
             lock->owner = NULL;
             COND_SIGNAL(&lock->cond);
+            TRACE_LOCK(
+                    PerlIO_printf(Perl_debug_log, "shared lock released %p for %p at %s:%d\n",
+                                  lock, aTHX, CopFILE(PL_curcop), CopLINE(PL_curcop))
+                    );
         }
+        else {
+            TRACE_LOCKv(
+                    PerlIO_printf(Perl_debug_log, "shared lock unbump %p for %p at %s:%d\n",
+                                  lock, aTHX, CopFILE(PL_curcop), CopLINE(PL_curcop))
+                    );
+        }
+    }
+    else {
+        TRACE_LOCK(
+                PerlIO_printf(Perl_debug_log, "bad shared lock release %p for %p (owned by %p) at %s:%d\n",
+                               lock, aTHX, lock->owner, CopFILE(PL_curcop), CopLINE(PL_curcop))
+                 );
     }
     MUTEX_UNLOCK(&lock->mutex);
 }
@@ -224,8 +251,16 @@ recursive_lock_acquire(pTHX_ recursive_lock_t *lock, const char *file, int line)
     assert(aTHX);
     MUTEX_LOCK(&lock->mutex);
     if (lock->owner == aTHX) {
+        TRACE_LOCKv(
+                 PerlIO_printf(Perl_debug_log, "shared lock bump %p (%p) at %s:%d\n",
+                               lock, lock->owner, CopFILE(PL_curcop), CopLINE(PL_curcop))
+                 );
         lock->locks++;
     } else {
+        TRACE_LOCK(
+                 PerlIO_printf(Perl_debug_log, "shared lock try %p for %p (owned by %p) at %s:%d\n",
+                               lock, aTHX, lock->owner, CopFILE(PL_curcop), CopLINE(PL_curcop))
+                 );
         while (lock->owner) {
 #ifdef DEBUG_LOCKS
             Perl_warn(aTHX_ " %p waiting - owned by %p %s:%d\n",
@@ -233,6 +268,10 @@ recursive_lock_acquire(pTHX_ recursive_lock_t *lock, const char *file, int line)
 #endif
             COND_WAIT(&lock->cond,&lock->mutex);
         }
+        TRACE_LOCK(
+                 PerlIO_printf(Perl_debug_log, "shared lock got %p at %s:%d\n",
+                               lock, CopFILE(PL_curcop), CopLINE(PL_curcop))
+                 );
         lock->locks = 1;
         lock->owner = aTHX;
 #ifdef DEBUG_LOCKS
@@ -779,12 +818,19 @@ sharedsv_scalar_store(pTHX_ SV *sv, SV *ssv)
         SV *obj = SvRV(sv);
         SV *sobj = Perl_sharedsv_find(aTHX_ obj);
         if (sobj) {
+            SV* tmpref;
             SHARED_CONTEXT;
-            (void)SvUPGRADE(ssv, SVt_RV);
-            sv_setsv_nomg(ssv, &PL_sv_undef);
+            /* Creating a tmp ref to sobj then assigning it to ssv ensures
+             * that any previous contents of ssv are correctly freed
+             * by sv_setsv(). Not sure if there is a better, API-legal way
+             * to achieve this */
+            tmpref = newSV_type(SVt_RV);
+            SvRV_set(tmpref, sobj);
+            SvROK_on(tmpref);
+            SvREFCNT_inc_simple_NN(sobj);
+            sv_setsv_nomg(ssv, tmpref);
+            SvREFCNT_dec_NN(tmpref);
 
-            SvRV_set(ssv, SvREFCNT_inc(sobj));
-            SvROK_on(ssv);
             if (SvOBJECT(sobj)) {
                 /* Remove any old blessing */
                 SvREFCNT_dec(SvSTASH(sobj));

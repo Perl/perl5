@@ -372,7 +372,7 @@ Please do not use $0 to send test messages, test whether perl
 works, or to report bugs in perl modules from CPAN.
 
 Suggestions for how to find help using Perl can be found at
-http://perldoc.perl.org/perlcommunity.html
+https://perldoc.perl.org/perlcommunity.html
 EOF
 	}
     }
@@ -553,7 +553,7 @@ EOF
 		paraprint <<EOF;
 $entry is not a "core" Perl module. Please check that you entered
 its name correctly. If it is correct, quit this program, try searching
-for $entry on http://rt.cpan.org, and report your issue there.
+for $entry on https://rt.cpan.org, and report your issue there.
 EOF
 
             $entry = '';
@@ -1313,7 +1313,7 @@ Type C<perl -v> at the command line to find out.
 
 =item Are you running the latest released version of perl?
 
-Look at http://www.perl.org/ to find out.  If you are not using the
+Look at L<http://www.perl.org/> to find out.  If you are not using the
 latest released version, please try to replicate your bug on the
 latest stable release.
 
@@ -1448,7 +1448,7 @@ offers of frosty beverages.  (Please do be kind to the maintainers.
 Harassing or flaming them is likely to have the opposite effect of the
 one you want.)
 
-Feel free to update the ticket about your bug on http://rt.perl.org
+Feel free to update the ticket about your bug on https://rt.perl.org
 if a new version of Perl is released and your bug is still present.
 
 =head1 OPTIONS

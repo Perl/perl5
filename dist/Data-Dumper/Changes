@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.173
+
+perl #133624: Reinstate support for 5.8.8 and older.
+
 =item 2.172
 
 Prepare recent changes for CPAN release

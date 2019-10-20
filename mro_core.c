@@ -21,6 +21,7 @@
 /*
 =head1 MRO Functions
 These functions are related to the method resolution order of perl classes
+Also see L<perlmroapi>.
 
 =cut
 */
@@ -118,7 +119,8 @@ Perl_mro_get_from_name(pTHX_ SV *name) {
 
 /*
 =for apidoc mro_register
-Registers a custom mro plugin.  See L<perlmroapi> for details.
+Registers a custom mro plugin.  See L<perlmroapi> for details on this and other
+mro functions.
 
 =cut
 */

@@ -111,8 +111,8 @@ no_index:
     - vxs.inc
 resources:
   bugtracker: https://rt.perl.org/
-  homepage: http://www.perl.org/
-  license: http://dev.perl.org/licenses/
-  repository: http://perl5.git.perl.org/
-version: '5.029004'
+  homepage: https://www.perl.org/
+  license: https://dev.perl.org/licenses/
+  repository: https://perl5.git.perl.org/
+version: '5.031005'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

@@ -54,7 +54,7 @@ This usage has been deprecated, and will no longer be allowed in Perl 5.32.
 
 C<vec> views its string argument as a sequence of bits.  A string
 containing a code point over 0xFF is nonsensical.  This usage is
-deprecated in Perl 5.28, and will be removed in Perl 5.32.
+deprecated in Perl 5.28, and was removed in Perl 5.32.
 
 =head3 Use of code points over 0xFF in string bitwise operators
 
@@ -65,14 +65,14 @@ nonsensical. Some instances of these have been deprecated since Perl
 the wide characters did not affect the end result, no deprecation
 notice was raised, and so remain legal.  Now, all occurrences either are
 fatal or raise a deprecation warning, so that the remaining legal
-occurrences will be fatal in 5.32.
+occurrences became fatal in 5.32.
 
 An example of this is
 
  "" & "\x{100}"
 
 The wide character is not used in the C<&> operation because the left
-operand is shorter.  This now warns anyway.
+operand is shorter.  This now throws an exception.
 
 =head3 hostname() doesn't accept any arguments
 
@@ -110,6 +110,56 @@ in Perl 5.26. Due to an oversight, not all cases of a use of a literal
 C<{> got a deprecation warning.  Some cases started warning in Perl 5.26,
 and were made fatal in Perl 5.30.  Other cases started in Perl 5.28,
 and will be made fatal in 5.32.
+
+=head3 In XS code, use of various macros dealing with UTF-8.
+
+The macros below now require an extra parameter than in versions prior
+to Perl 5.32.  The final parameter in each one is a pointer into the
+string supplied by the first parameter beyond which the input will not
+be read.  This prevents potential reading beyond the end of the buffer.
+C<isALPHANUMERIC_utf8>,
+C<isASCII_utf8>,
+C<isBLANK_utf8>,
+C<isCNTRL_utf8>,
+C<isDIGIT_utf8>,
+C<isIDFIRST_utf8>,
+C<isPSXSPC_utf8>,
+C<isSPACE_utf8>,
+C<isVERTWS_utf8>,
+C<isWORDCHAR_utf8>,
+C<isXDIGIT_utf8>,
+C<isALPHANUMERIC_LC_utf8>,
+C<isALPHA_LC_utf8>,
+C<isASCII_LC_utf8>,
+C<isBLANK_LC_utf8>,
+C<isCNTRL_LC_utf8>,
+C<isDIGIT_LC_utf8>,
+C<isGRAPH_LC_utf8>,
+C<isIDCONT_LC_utf8>,
+C<isIDFIRST_LC_utf8>,
+C<isLOWER_LC_utf8>,
+C<isPRINT_LC_utf8>,
+C<isPSXSPC_LC_utf8>,
+C<isPUNCT_LC_utf8>,
+C<isSPACE_LC_utf8>,
+C<isUPPER_LC_utf8>,
+C<isWORDCHAR_LC_utf8>,
+C<isXDIGIT_LC_utf8>,
+C<toFOLD_utf8>,
+C<toLOWER_utf8>,
+C<toTITLE_utf8>,
+and
+C<toUPPER_utf8>.
+
+Since Perl 5.26, this functionality with the extra parameter has been
+available by using a corresponding macro to each one of these, and whose
+name is formed by appending C<_safe> to the base name.  There is no
+change to the functionality of those.  For example, C<isDIGIT_utf8_safe>
+corresponds to C<isDIGIT_utf8>, and both now behave identically.  All
+are documented in L<perlapi/Character case changing> and
+L<perlapi/Character classification>.
+
+This change was originally scheduled for 5.30, but was delayed.
 
 =head2 Perl 5.30
 
@@ -247,54 +297,6 @@ Because Unicode is never going to assign L<non-character code
 points|perlunicode/Noncharacter code points>, nor L<code points that are
 above the legal Unicode maximum|perlunicode/Beyond Unicode code
 points>, those can be delimiters.
-
-=head3 In XS code, use of various macros dealing with UTF-8.
-
-These macros will require an extra parameter in Perl 5.30:
-C<isALPHANUMERIC_utf8>,
-C<isASCII_utf8>,
-C<isBLANK_utf8>,
-C<isCNTRL_utf8>,
-C<isDIGIT_utf8>,
-C<isIDFIRST_utf8>,
-C<isPSXSPC_utf8>,
-C<isSPACE_utf8>,
-C<isVERTWS_utf8>,
-C<isWORDCHAR_utf8>,
-C<isXDIGIT_utf8>,
-C<isALPHANUMERIC_LC_utf8>,
-C<isALPHA_LC_utf8>,
-C<isASCII_LC_utf8>,
-C<isBLANK_LC_utf8>,
-C<isCNTRL_LC_utf8>,
-C<isDIGIT_LC_utf8>,
-C<isGRAPH_LC_utf8>,
-C<isIDCONT_LC_utf8>,
-C<isIDFIRST_LC_utf8>,
-C<isLOWER_LC_utf8>,
-C<isPRINT_LC_utf8>,
-C<isPSXSPC_LC_utf8>,
-C<isPUNCT_LC_utf8>,
-C<isSPACE_LC_utf8>,
-C<isUPPER_LC_utf8>,
-C<isWORDCHAR_LC_utf8>,
-C<isXDIGIT_LC_utf8>,
-C<toFOLD_utf8>,
-C<toLOWER_utf8>,
-C<toTITLE_utf8>,
-and
-C<toUPPER_utf8>.
-
-There is now a macro that corresponds to each one of these, simply by
-appending C<_safe> to the name.  It takes the extra parameter.
-For example, C<isDIGIT_utf8_safe> corresponds to C<isDIGIT_utf8>, but
-takes the extra parameter, and its use doesn't generate a deprecation
-warning.  All are documented in L<perlapi/Character case changing> and
-L<perlapi/Character classification>.
-
-You can change to use these versions at any time, or, if you can live
-with the deprecation messages, wait until 5.30 and add the parameter to
-the existing calls, without changing the names.
 
 =head2 Perl 5.28
 

@@ -1,0 +1,5 @@
+5.027002
+Perl_setlocale                 # U
+hv_free_entries                # F added by devel/scanprov
+print_bytes_for_locale         # F added by devel/scanprov
+setlocale_debug_string         # F added by devel/scanprov

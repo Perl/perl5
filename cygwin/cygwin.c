@@ -112,8 +112,8 @@ do_spawn (char *cmd)
     if (strBEGINs (cmd,"exec") && isSPACE (cmd[4]))
 	goto doshell;
     for (s=cmd; *s && isALPHA (*s); s++) ;	/* catch VAR=val gizmo */
-	if (*s=='=')
-	    goto doshell;
+    if (*s=='=')
+        goto doshell;
 
     for (s=cmd; *s; s++)
 	if (strchr (metachars,*s))
@@ -219,7 +219,7 @@ XS(Cygwin_cwd)
     dXSARGS;
     char *cwd;
 
-    /* See http://rt.perl.org/rt3/Ticket/Display.html?id=38628 
+    /* See https://rt.perl.org/rt3/Ticket/Display.html?id=38628
        There is Cwd->cwd() usage in the wild, and previous versions didn't die.
      */
     if(items > 1)

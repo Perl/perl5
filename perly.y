@@ -43,14 +43,14 @@
     GV *gvval;
 }
 
-%token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
+%token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
 %token <ival> '{' '}' '[' ']' '-' '+' '@' '%' '&' '=' '.'
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
-%token <pval> LABEL
+%token <opval> LABEL
 %token <ival> FORMAT SUB SIGSUB ANONSUB ANON_SIGSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> GIVEN WHEN DEFAULT
@@ -60,6 +60,7 @@
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
 %token <ival> LOCAL MY REQUIRE
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
+%token <ival> SUBLEXSTART SUBLEXEND
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
@@ -77,7 +78,7 @@
 %type <opval> termbinop termunop anonymous termdo
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
-%type <opval> sigelem siglist siglistornull subsignature optsubsignature
+%type <opval> sigelem siglist siglistornull subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
 
@@ -185,6 +186,16 @@ grammar	:	GRAMPROG
 			  PL_eval_root = $3;
 			  $$ = 0;
 			}
+	|	GRAMSUBSIGNATURE
+			{
+			  parser->expect = XSTATE;
+			  $<ival>$ = 0;
+			}
+		subsigguts
+			{
+			  PL_eval_root = $3;
+			  $$ = 0;
+			}
 	;
 
 /* An ordinary block */
@@ -253,11 +264,17 @@ fullstmt:	barestmt
 
 labfullstmt:	LABEL barestmt
 			{
-			  $$ = newSTATEOP(SVf_UTF8 * $1[strlen($1)+1], $1, $2);
+                          SV *label = cSVOPx_sv($1);
+			  $$ = newSTATEOP(SvFLAGS(label) & SVf_UTF8,
+                                            savepv(SvPVX_const(label)), $2);
+                          op_free($1);
 			}
 	|	LABEL labfullstmt
 			{
-			  $$ = newSTATEOP(SVf_UTF8 * $1[strlen($1)+1], $1, $2);
+                          SV *label = cSVOPx_sv($1);
+			  $$ = newSTATEOP(SvFLAGS(label) & SVf_UTF8,
+                                            savepv(SvPVX_const(label)), $2);
+                          op_free($1);
 			}
 	;
 
@@ -756,7 +773,10 @@ optsubsignature:	/* NULL */
 			{ $$ = $1; }
 
 /* Subroutine signature */
-subsignature:	'('
+subsignature:	'(' subsigguts ')'
+			{ $$ = $2; }
+
+subsigguts:
                         {
                             ENTER;
                             SAVEIV(parser->sig_elems);
@@ -768,10 +788,9 @@ subsignature:	'('
                             parser->in_my        = KEY_sigvar;
                         }
                 siglistornull
-                ')'
 			{
-                            OP            *sigops = $3;
-                            UNOP_AUX_item *aux;
+                            OP            *sigops = $2;
+                            struct op_argcheck_aux *aux;
                             OP            *check;
 
 			    if (!FEATURE_SIGNATURES_IS_ENABLED)
@@ -783,21 +802,32 @@ subsignature:	'('
                                 packWARN(WARN_EXPERIMENTAL__SIGNATURES),
                                 "The signatures feature is experimental");
 
-                            aux = (UNOP_AUX_item*)PerlMemShared_malloc(
-                                sizeof(UNOP_AUX_item) * 3);
-                            aux[0].iv = parser->sig_elems;
-                            aux[1].iv = parser->sig_optelems;
-                            aux[2].iv = parser->sig_slurpy;
-                            check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
+                            aux = (struct op_argcheck_aux*)
+                                    PerlMemShared_malloc(
+                                        sizeof(struct op_argcheck_aux));
+                            aux->params     = parser->sig_elems;
+                            aux->opt_params = parser->sig_optelems;
+                            aux->slurpy     = parser->sig_slurpy;
+                            check = newUNOP_AUX(OP_ARGCHECK, 0, NULL,
+                                            (UNOP_AUX_item *)aux);
                             sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
                             sigops = op_prepend_elem(OP_LINESEQ,
                                                 newSTATEOP(0, NULL, NULL),
                                                 sigops);
                             /* a nextstate at the end handles context
                              * correctly for an empty sub body */
-                            $$ = op_append_elem(OP_LINESEQ,
+                            sigops = op_append_elem(OP_LINESEQ,
                                                 sigops,
                                                 newSTATEOP(0, NULL, NULL));
+                            /* wrap the list of arg ops in a NULL aux op.
+                              This serves two purposes. First, it makes
+                              the arg list a separate subtree from the
+                              body of the sub, and secondly the null op
+                              may in future be upgraded to an OP_SIGNATURE
+                              when implemented. For now leave it as
+                              ex-argcheck */
+                            $$ = newUNOP_AUX(OP_ARGCHECK, 0, sigops, NULL);
+                            op_null($$);
 
                             parser->in_my = 0;
                             /* tell the toker that attrributes can follow
@@ -902,6 +932,8 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = op_convert_list($1, 0, $2); }
 	|	FUNC '(' optexpr ')'                 /* print (@args) */
+			{ $$ = op_convert_list($1, 0, $3); }
+	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($1, 0, $3); }
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
 			{ SvREFCNT_inc_simple_void(PL_compcv);
@@ -1224,7 +1256,7 @@ term	:	termbinop
 			    } else
 				$<ival>$ = 0;
 			}
-		    '(' listexpr optrepl ')'
+		    SUBLEXSTART listexpr optrepl SUBLEXEND
 			{ $$ = pmruntime($1, $4, $5, 1, $<ival>2); }
 	|	BAREWORD
 	|	listop

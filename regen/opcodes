@@ -397,6 +397,7 @@ getsockname	getsockname		ck_fun		is%	Fs
 getpeername	getpeername		ck_fun		is%	Fs
 
 # Stat calls.  OP_IS_FILETEST wants them consecutive.
+# Also needs to match OP_IS_STAT() in op.h
 
 lstat		lstat			ck_ftst		u-	F?
 stat		stat			ck_ftst		u-	F?

@@ -74,7 +74,7 @@ DPPP_dopoptosub_at(const PERL_CONTEXT *cxstk, I32 startingblock)
 # if { NEED caller_cx }
 
 const PERL_CONTEXT *
-caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
+caller_cx(pTHX_ I32 level, const PERL_CONTEXT **dbcxp)
 {
     register I32 cxix = DPPP_dopoptosub_at(cxstack, cxstack_ix);
     register const PERL_CONTEXT *cx;
@@ -93,8 +93,8 @@ caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
 	/* caller() should not report the automatic calls to &DB::sub */
 	if (PL_DBsub && GvCV(PL_DBsub) && cxix >= 0 &&
 		ccstack[cxix].blk_sub.cv == GvCV(PL_DBsub))
-	    count++;
-	if (!count--)
+	    level++;
+	if (!level--)
 	    break;
 	cxix = DPPP_dopoptosub_at(ccstack, cxix - 1);
     }

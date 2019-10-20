@@ -224,7 +224,12 @@ X<recursion>
     &foo();		# the same
 
     &foo;		# foo() get current args, like foo(@_) !!
-    foo;		# like foo() IFF sub foo predeclared, else "foo"
+    use strict 'subs';
+    foo;                # like foo() iff sub foo predeclared, else
+                        # a compile-time error
+    no strict 'subs';
+    foo;                # like foo() iff sub foo predeclared, else
+                        # a literal string "foo"
 
 Not only does the C<&> form make the argument list optional, it also
 disables any prototype checking on arguments you do provide.  This
@@ -973,7 +978,9 @@ Perl will print
     The array has 6 elements: 0, 1, 2, undef, undef, 5
 
 The behavior of local() on non-existent members of composite
-types is subject to change in future.
+types is subject to change in future. The behavior of local()
+on array elements specified using negative indexes is particularly
+surprising, and is very likely to change.
 
 =head3 Localized deletion of elements of composite types
 X<delete> X<local, composite type element> X<local, array element> X<local, hash element>

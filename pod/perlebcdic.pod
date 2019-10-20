@@ -143,6 +143,9 @@ accordingly to that platform.  If the platform uses a character set that is not
 one of the three Perl knows about, Perl will either fail to compile, or
 mistakenly and silently choose one of the three.
 
+The Line Feed (LF) character is actually a 14th variant character, and
+Perl checks for that as well.
+
 =head3 EBCDIC code sets recognized by Perl
 
 =over
@@ -251,7 +254,7 @@ extensions are constructed to allow encoding of any code point that fits
 in a 64-bit word.
 
 UTF-EBCDIC is defined by
-L<Unicode Technical Report #16|http://www.unicode.org/reports/tr16>
+L<Unicode Technical Report #16|https://www.unicode.org/reports/tr16>
 (often referred to as just TR16).
 It is defined based on CCSID 1047, not allowing for the differences for
 other code pages.  This allows for easy interchange of text between
@@ -1874,9 +1877,9 @@ L<perllocale>, L<perlfunc>, L<perlunicode>, L<utf8>.
 
 L<http://anubis.dkuug.dk/i18n/charmaps>
 
-L<http://www.unicode.org/>
+L<https://www.unicode.org/>
 
-L<http://www.unicode.org/unicode/reports/tr16/>
+L<https://www.unicode.org/unicode/reports/tr16/>
 
 L<http://www.wps.com/projects/codes/>
 B<ASCII: American Standard Code for Information Infiltration> Tom Jennings,

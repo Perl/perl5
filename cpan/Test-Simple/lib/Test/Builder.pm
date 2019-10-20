@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302140';
+our $VERSION = '1.302168';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -27,7 +27,6 @@ BEGIN {
         Test2::IPC::Driver::Files->import;
         Test2::API::test2_ipc_enable_polling();
         Test2::API::test2_no_wait(1);
-        Test2::API::test2_ipc_enable_shm();
     }
 }
 
@@ -64,18 +63,14 @@ sub _add_ts_hooks {
         $todo = ${"$cpkg\::TODO"} if $cpkg;
         $todo = ${"$epkg\::TODO"} if $epkg && !$todo;
 
-        return $e unless $todo;
+        return $e unless defined($todo);
+        return $e unless length($todo);
 
         # Turn a diag into a todo diag
         return Test::Builder::TodoDiag->new(%$e) if ref($e) eq 'Test2::Event::Diag';
 
-        if ($active_hub == $hub) {
-            $e->set_todo($todo) if $e->can('set_todo');
-            $e->add_amnesty({tag => 'TODO', details => $todo});
-        }
-        else {
-            $e->add_amnesty({tag => 'TODO', details => $todo, inherited => 1});
-        }
+        $e->set_todo($todo) if $e->can('set_todo');
+        $e->add_amnesty({tag => 'TODO', details => $todo});
 
         # Set todo on ok's
         if ($e->isa('Test2::Event::Ok')) {
@@ -396,7 +391,7 @@ sub name {
 sub reset {    ## no critic (Subroutines::ProhibitBuiltinHomonyms)
     my ($self, %params) = @_;
 
-    Test2::API::test2_set_is_end(0);
+    Test2::API::test2_unset_is_end();
 
     # We leave this a global because it has to be localized and localizing
     # hash keys is just asking for pain.  Also, it was documented.
@@ -701,7 +696,7 @@ sub _ok_debug {
     my $self = shift;
     my ($trace, $orig_name) = @_;
 
-    my $is_todo = defined($self->todo);
+    my $is_todo = $self->in_todo;
 
     my $msg = $is_todo ? "Failed (TODO)" : "Failed";
 
@@ -1765,7 +1760,6 @@ sub coordinate_forks {
     my $ipc = Test2::IPC::apply_ipc($self->{Stack});
     $ipc->set_no_fatal(1);
     Test2::API::test2_no_wait(1);
-    Test2::API::test2_ipc_enable_shm();
 }
 
 sub no_log_results { $_[0]->{no_log_results} = 1 }
@@ -2578,7 +2572,17 @@ L<Test::Exception> and L<Test::Differences> all use Test::Builder.
 
 =head1 SEE ALSO
 
-L<Test::Simple>, L<Test::More>, L<Test::Harness>
+=head2 INTERNALS
+
+L<Test2>, L<Test2::API>
+
+=head2 LEGACY
+
+L<Test::Simple>, L<Test::More>
+
+=head2 EXTERNAL
+
+L<Test::Harness>
 
 =head1 AUTHORS
 

@@ -303,7 +303,7 @@ like "How do I get to the marketplace?" that don't have any blanks to
 fill in, and ones like "How much do these ___ cost?", where there's
 one or more blanks to fill in (and these are usually linked to a
 list of words that you can put in that blank: "fish", "potatoes",
-"tomatoes", etc.)  The ones with no blanks are no problem, but the
+"tomatoes", etc.).  The ones with no blanks are no problem, but the
 fill-in-the-blank ones may not be really straightforward. If it's a
 Swahili phrasebook, for example, the authors probably didn't bother to
 tell you the complicated ways that the verb "cost" changes its
@@ -750,16 +750,16 @@ morphology and pedagogy of North American native languages.
 
 Alvestrand, Harald Tveit.  1995.  I<RFC 1766: Tags for the
 Identification of Languages.>
-C<http://www.ietf.org/rfc/rfc1766.txt>
+C<L<http://www.ietf.org/rfc/rfc1766.txt>>
 [Now see RFC 3066.]
 
 Callon, Ross, editor.  1996.  I<RFC 1925: The Twelve
 Networking Truths.>
-C<http://www.ietf.org/rfc/rfc1925.txt>
+C<L<http://www.ietf.org/rfc/rfc1925.txt>>
 
 Drepper, Ulrich, Peter Miller,
 and FranE<ccedil>ois Pinard.  1995-2001.  GNU
-C<gettext>.  Available in C<ftp://prep.ai.mit.edu/pub/gnu/>, with
+C<gettext>.  Available in C<L<ftp://prep.ai.mit.edu/pub/gnu/>>, with
 extensive docs in the distribution tarball.  [Since
 I wrote this article in 1998, I now see that the
 gettext docs are now trying more to come to terms with

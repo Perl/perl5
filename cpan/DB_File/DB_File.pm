@@ -2,7 +2,7 @@
 #
 # Written by Paul Marquess (pmqs@cpan.org)
 #
-#     Copyright (c) 1995-2018 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-2019 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -165,7 +165,7 @@ use Carp;
 # Module not thread safe, so don't clone
 sub CLONE_SKIP { 1 } 
 
-$VERSION = "1.842" ;
+$VERSION = "1.852" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {

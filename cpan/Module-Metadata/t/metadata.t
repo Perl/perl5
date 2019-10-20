@@ -3,6 +3,7 @@
 
 use strict;
 use warnings;
+use Encode 'decode';
 use Test::More 0.82;
 use IO::File;
 use File::Spec;
@@ -11,7 +12,12 @@ use File::Basename;
 use Cwd ();
 use File::Path;
 
-plan tests => 70;
+use lib 't/lib';
+use GeneratePackage;
+
+my $tmpdir = GeneratePackage::tmpdir();
+
+plan tests => 72;
 
 require_ok('Module::Metadata');
 
@@ -24,29 +30,6 @@ require_ok('Module::Metadata');
 
 #########################
 
-BEGIN {
-  my $cwd = File::Spec->rel2abs(Cwd::cwd);
-  sub original_cwd { return $cwd }
-}
-
-# Set up a temp directory
-sub tmpdir {
-  my (@args) = @_;
-  my $dir = $ENV{PERL_CORE} ? original_cwd : File::Spec->tmpdir;
-  return File::Temp::tempdir('MMD-XXXXXXXX', CLEANUP => 0, DIR => $dir, @args);
-}
-
-my $tmp;
-BEGIN { $tmp = tmpdir; note "using temp dir $tmp"; }
-
-END {
-  die "tests failed; leaving temp dir $tmp behind"
-    if $ENV{AUTHOR_TESTING} and not Test::Builder->new->is_passing;
-  note "removing temp dir $tmp";
-  chdir original_cwd;
-  File::Path::rmtree($tmp);
-}
-
 # generates a new distribution:
 # files => { relative filename => $content ... }
 # returns the name of the distribution (not including version),
@@ -57,7 +40,7 @@ END {
     my %opts = @_;
 
     my $distname = 'Simple' . $test_num++;
-    my $distdir = File::Spec->catdir($tmp, $distname);
+    my $distdir = File::Spec->catdir($tmpdir, $distname);
     note "using dist $distname in $distdir";
 
     File::Path::mkpath($distdir) or die "failed to create '$distdir'";
@@ -214,7 +197,8 @@ foreach my $script ( @scripts ) {
   is( $pm_info->version, '0.01', "correct script version ($i of $n)" ) or $errs++;
   $i++;
 
-  diag 'parsed module: ', explain($pm_info) if !$ENV{PERL_CORE} && $errs;
+  diag 'parsed module: ', explain($pm_info) if $errs and not $ENV{PERL_CORE}
+    and ($ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING});
 }
 
 {
@@ -226,13 +210,15 @@ $VERSION = '0.01';
 package Simple::Ex;
 $VERSION = '0.02';
 
+=encoding UTF-8
+
 =head1 NAME
 
 Simple - It's easy.
 
 =head1 AUTHOR
 
-Simple Simon
+Símple Simon
 
 You can find me on the IRC channel
 #simon on irc.perl.org.
@@ -287,7 +273,7 @@ You can find me on the IRC channel
   my %expected = (
     NAME   => q|Simple - It's easy.|,
     AUTHOR => <<'EXPECTED'
-Simple Simon
+Símple Simon
 
 You can find me on the IRC channel
 #simon on irc.perl.org.
@@ -299,6 +285,13 @@ EXPECTED
   }
   is( $pod{NAME},   $expected{NAME},   'collected NAME pod section' );
   is( $pod{AUTHOR}, $expected{AUTHOR}, 'collected AUTHOR pod section' );
+
+  my $pm_info2 = Module::Metadata->new_from_module(
+               'Simple', inc => [ 'lib', @INC ], collect_pod => 1, decode_pod => 1 );
+  my $author = $pm_info2->pod( 'AUTHOR' );
+  $author =~ s/^\s+//;
+  $author =~ s/\s+$//;
+  is( $author, decode('UTF-8', $expected{AUTHOR} ), 'collected AUTHOR pod section in UTF-8' );
 }
 
 {
@@ -328,11 +321,8 @@ our $VERSION = '1.23';
   is( $pm_info->version, '1.23', 'version for default package' );
 }
 
-my $tmpdir = GeneratePackage::tmpdir();
 my $undef;
 my $test_num = 0;
-use lib 't/lib';
-use GeneratePackage;
 
 {
   # and now a real pod file
@@ -372,7 +362,8 @@ Hello, this is pod.
   )
   or $errs++;
 
-  diag 'parsed module: ', explain($pm_info) if !$ENV{PERL_CORE} && $errs;
+  diag 'parsed module: ', explain($pm_info) if $errs and not $ENV{PERL_CORE}
+    and ($ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING});
 }
 
 {
@@ -453,9 +444,16 @@ Simple Simon
     }
   };
 
-  my $got_pvfd = Module::Metadata->package_versions_from_directory('lib');
+  my $dir = "lib";
+  my $got_pvfd = Module::Metadata->package_versions_from_directory($dir);
 
   is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
+    or diag explain $got_pvfd;
+
+  my $absolute_file = File::Spec->rel2abs($exp_pvfd->{Simple}{file}, $dir);
+  my $got_pvfd2 = Module::Metadata->package_versions_from_directory($dir, [$absolute_file]);
+
+  is_deeply( $got_pvfd2, $exp_pvfd, "package_version_from_directory() with provided absolute file path" )
     or diag explain $got_pvfd;
 
 {

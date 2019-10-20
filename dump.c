@@ -132,6 +132,16 @@ sequences, whereas C<"%"> is not a particularly common character in patterns.
 
 Returns a pointer to the escaped text as held by C<dsv>.
 
+=for apidoc Amnh||PERL_PV_ESCAPE_ALL
+=for apidoc Amnh||PERL_PV_ESCAPE_FIRSTCHAR
+=for apidoc Amnh||PERL_PV_ESCAPE_NOBACKSLASH
+=for apidoc Amnh||PERL_PV_ESCAPE_NOCLEAR
+=for apidoc Amnh||PERL_PV_ESCAPE_NONASCII
+=for apidoc Amnh||PERL_PV_ESCAPE_QUOTE
+=for apidoc Amnh||PERL_PV_ESCAPE_RE
+=for apidoc Amnh||PERL_PV_ESCAPE_UNI
+=for apidoc Amnh||PERL_PV_ESCAPE_UNI_DETECT
+
 =cut
 */
 #define PV_ESCAPE_OCTBUFSIZE 32
@@ -266,6 +276,10 @@ is non-null then it will be inserted after the escaped text but before
 any quotes or ellipses.
 
 Returns a pointer to the prettified text as held by C<dsv>.
+
+=for apidoc Amnh||PERL_PV_PRETTY_QUOTE
+=for apidoc Amnh||PERL_PV_PRETTY_LTGT
+=for apidoc Amnh||PERL_PV_PRETTY_ELLIPSES
 
 =cut           
 */
@@ -1004,6 +1018,26 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         S_opdump_indent(aTHX_ o, level, bar, file, "PARENT");
         S_opdump_link(aTHX_ o, op_parent((OP*)o), file);
     }
+    else if (!OpHAS_SIBLING(o)) {
+        bool ok = TRUE;
+        OP *p = o->op_sibparent;
+        if (!p || !(p->op_flags & OPf_KIDS))
+            ok = FALSE;
+        else {
+            OP *kid = cUNOPx(p)->op_first;
+            while (kid != o) {
+                kid = OpSIBLING(kid);
+                if (!kid) {
+                    ok = FALSE;
+                    break;
+                }
+            }
+        }
+        if (!ok) {
+            S_opdump_indent(aTHX_ o, level, bar, file,
+                            "*** WILD PARENT 0x%p\n", p);
+        }
+    }
 
     if (o->op_targ && optype != OP_NULL)
 	    S_opdump_indent(aTHX_ o, level, bar, file, "TARG = %ld\n",
@@ -1699,6 +1733,7 @@ const struct flag_to_name regexp_core_intflags_names[] = {
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
+    dVAR;
     SV *d;
     const char *s;
     U32 flags;

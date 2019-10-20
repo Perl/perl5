@@ -143,7 +143,7 @@ Andreas' email address at:
 
 =head3 rt.perl.org update access
 
-Make sure you have permission to close tickets on L<http://rt.perl.org/>
+Make sure you have permission to close tickets on L<https://rt.perl.org/>
 so you can respond to bug reports as necessary during your stint.  If you
 don't, make an account (if you don't have one) and contact the pumpking
 with your username to get ticket-closing permission.
@@ -206,7 +206,7 @@ You can also run an actual diff of the contents of the modules, comparing core
 to CPAN, to ensure that there were no erroneous/extraneous changes that need to
 be dealt with. You do this by not passing the C<-x> option:
 
-    $ ./perl -Ilib Porting/core-cpan-diff -a -o /tmp/corediffs
+    $ ./perl -Ilib Porting/core-cpan-diff -a -o ~/corediffs
 
 Passing C<-u cpan> will probably be helpful, since it limits the search to
 distributions with 'cpan' upstream source.  (It's OK for blead upstream to
@@ -237,6 +237,16 @@ maint, then diff the two outputs. Compare this with what you expect, and if
 necessary, fix things up. For example, you might think that both blead
 and maint are synchronised with a particular CPAN module, but one might
 have some extra changes.
+
+In any case, any cpan-first distribution that is listed as having files
+"Customized for blead" in the output of cpan-core-diff should have requests
+submitted to the maintainer(s) to make a cpan release to catch up with blead.
+
+Additionally, all files listed as "modified" but not "customized for blead"
+should have entries added under the C<CUSTOMIZED> key in
+F<Porting/Maintainers.pl>, as well as checksums updated via:
+
+    cd t; ../perl -I../lib porting/customized.t --regen
 
 =head4 Sync CPAN modules with the corresponding cpanE<sol> distro
 
@@ -356,9 +366,9 @@ This comes down to:
 =head3 monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
-L<https://tux.nl/perl5/smoke/index.html>, L<http://perl5.test-smoke.org/>
+L<https://tux.nl/perl5/smoke/index.html>, L<https://perl5.test-smoke.org/>
 and L<http://perl.develop-help.com> for a summary. See also
-L<http://www.nntp.perl.org/group/perl.daily-build.reports/> which has
+L<https://www.nntp.perl.org/group/perl.daily-build.reports/> which has
 the raw reports.
 
 Similarly, monitor the smoking of perl for compiler warnings, and try to
@@ -393,7 +403,7 @@ L<"update Module::CoreList">).
 =head3 Bump the version number
 
 Do not do this yet for a BLEAD-POINT release! You will do this at the end of
-the release process.
+the release process (after building the final tarball, tagging etc).
 
 Increase the version number (e.g. from 5.12.0 to 5.12.1).
 
@@ -425,9 +435,11 @@ F<pod/perlpolicy.pod>.
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
 you're releasing, unless you're absolutely sure the release you're about to
-make is 100% binary compatible to an earlier release. When releasing a MAINT
-perl version, the C<PERL_API_*> constants C<MUST NOT> be changed as we aim
-to guarantee binary compatibility in maint branches.
+make is 100% binary compatible to an earlier release. Note: for BLEAD-POINT
+releases the bump should have already occurred at the end of the previous
+release and this is something you would have to do at the very end.
+When releasing a MAINT perl version, the C<PERL_API_*> constants C<MUST NOT>
+be changed as we aim to guarantee binary compatibility in maint branches.
 
 After editing, regenerate uconfig.h (this must be run on a system with a
 /bin/sh available):
@@ -469,6 +481,7 @@ version number.
 =head3 update INSTALL
 
 Review and update INSTALL to account for the change in version number.
+INSTALL for a BLEAD-POINT release should already contain the expected version.
 The lines in F<INSTALL> about "is not binary compatible with" may require a
 correct choice of earlier version to declare incompatibility with. These are
 in the "Changes and Incompatibilities" and "Coexistence with earlier versions
@@ -491,7 +504,7 @@ blead release, so you may find nothing to do here.
 
 Check that the copyright years are up to date by running:
 
-    $ pushd t; ./perl -I../lib porting/copyright.t --now
+    $ pushd t; ../perl -I../lib porting/copyright.t --now
 
 Remedy any test failures by editing README or perl.c accordingly (search for
 the "Copyright"). If updating perl.c, check if the file's own copyright date in
@@ -521,6 +534,9 @@ C<-Dusethreads>
 If you have multiple compilers on your machine, you might also consider
 compiling with C<-Dcc=$other_compiler>.
 
+You can also consider pushing the repo to GitHub where Travis CI is enabled
+which would smoke different flavors of Perl for you.
+
 =head3 update perlport
 
 L<perlport> has a section currently named I<Supported Platforms> that
@@ -529,7 +545,7 @@ If necessary update the list and the indicated version number.
 
 =head3 check a readonly build
 
-Even before other prep work, follow the steps in L<build the tarball> and test
+Even before other prep work, follow the steps in L</build the tarball> and test
 it locally.  Because a perl source tarballs sets many files read-only, it could
 test differently than tests run from the repository.  After you're sure
 permissions aren't a problem, delete the generated directory and tarballs.
@@ -636,7 +652,7 @@ modules on CPAN. It can use a full, local CPAN mirror and/or fall back
 on HTTP::Tiny to fetch package metadata remotely.
 
 (If you'd prefer to have a full CPAN mirror, see
-L<http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN>)
+L<https://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN>)
 
 Change to your perl checkout, and if necessary,
 
@@ -673,7 +689,7 @@ action from the last commit.)
 Add a perldelta entry for the new Module::CoreList version. You only
 need to do this if you want to add notes about the changes included
 with this version of Module::CoreList. Otherwise, its version bump
-will be automatically filled in below in L<finalize perldelta>.
+will be automatically filled in below in L</finalize perldelta>.
 
 =for checklist skip RC
 
@@ -732,7 +748,11 @@ Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
     $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
-        /tmp/perldelta.html
+        ~/perldelta.html
+
+You can add pod links for RT references thusly:
+
+    $ perl -p -i -e'BEGIN{undef $/}; s{(\[perl\s+#)(\d+)\]}{L<$1$2\]|https://rt.perl.org/Ticket/Display.html?id=$2>}mg' pod/perldelta.pod
 
 If you make changes, be sure to commit them.
 
@@ -782,6 +802,13 @@ Then build a clean perl and do a full test
     $ make test
 
 Once all tests pass, commit your changes.
+
+=head3 final check of perldelta placeholders
+
+Check for any 'XXX' leftover section in the perldelta.
+Either fill them or remove these sections appropriately.
+
+    $ git grep XX pod/perldelta.pod
 
 =head3 build a clean perl
 
@@ -891,7 +918,7 @@ Then delete the temporary installation.
 
 Create the tag identifying this release (e.g.):
 
-    $ git tag v5.11.0 -m "First release of the v5.11 series!"
+    $ git tag v5.11.0 -m 'First release of the v5.11 series!'
 
 It is B<VERY> important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
@@ -914,7 +941,7 @@ up.
 In order to produce the C<xz> tarball, XZ Utils are required. The C<xz>
 utility is included with most modern UNIX-type operating systems and
 is available for Cygwin. A Windows port is available from
-L<http://tukaani.org/xz/>.
+L<https://tukaani.org/xz/>.
 
 B<IMPORTANT>: if you are on OS X, you must export C<COPYFILE_DISABLE=1>
 to prevent OS X resource files from being included in your tarball. After
@@ -986,9 +1013,12 @@ Check that basic configuration and tests work on each test machine:
 
 Check that the test harness and install work on each test machine:
 
- $ make distclean
- $ ./Configure -des -Dprefix=/install/path && make all test_harness install
- $ cd /install/path
+    $ make distclean
+    $ ./Configure -des -Dprefix=/install/path && \
+          make all test_harness install
+    $ cd /install/path
+
+(Remember C<-Dusedevel> above, for a development release.)
 
 =head4 Check C<perl -v> and C<perl -V>
 
@@ -1001,7 +1031,9 @@ which is why you should test from the tarball.
 
 =head4 Run the Installation Verification Procedure utility
 
-    $ ./perl utils/perlivp
+    $ ./perl -Ilib ./perlivp
+    # Or, perhaps:
+    $ ./perl5.x.y ./perlivp5.x.y
     ...
     All tests successful.
     $
@@ -1021,6 +1053,13 @@ previous is 5.10.0:
     find . -type f | sort > /tmp/f2
     diff -u /tmp/f[12]
 
+=head4 Disable C<local::lib> if it's turned on
+
+If you're using C<local::lib>, you should reset your environment before
+performing these actions:
+
+    $ unset PERL5LIB PERL_MB_OPT PERL_LOCAL_LIB_ROOT PERL_MM_OPT
+
 =head4 Bootstrap the CPAN client
 
 Bootstrap the CPAN client on the clean install:
@@ -1032,11 +1071,6 @@ Bootstrap the CPAN client on the clean install:
 
 =head4 Install the Inline module with CPAN and test it
 
-If you're using C<local::lib>, you should reset your environment before
-performing these actions:
-
-    $ unset PERL5LIB PERL_MB_OPT PERL_LOCAL_LIB_ROOT PERL_MM_OPT
-
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
 
@@ -1045,7 +1079,7 @@ has dependencies; for example:
 
 Check that your perl can run this:
 
-    $ bin/perl -lwe "use Inline C => q[int f() { return 42;}]; print f"
+    $ bin/perl -Ilib -lwe "use Inline C => q[int f() { return 42;}]; print f"
     42
     $
 
@@ -1064,7 +1098,7 @@ Test L<perlbug> with the following:
     (edit report)
     Action (Send/Display/Edit/Subject/Save to File): f
     Name of file to save message in [perlbug.rep]:
-    Action (Send/Display/Edit/Subject/Save to File): q
+    Action (Send/Display/Edit/Subject/Save to File): Q
 
 and carefully examine the output (in F<perlbug.rep]>), especially
 the "Locally applied patches" section. If everything appears okay, then
@@ -1126,8 +1160,10 @@ you have it configured:
     cpan-upload perl-5.X.Y.tar.xz
 
 Do not proceed any further until you are sure that your tarballs are on CPAN.
-Check your authors directory www.cpan.org (the globally balanced "fast"
-mirror) to confirm that your uploads have been successful.
+Check your authors directory metacpan.org to confirm that your uploads have
+been successful.
+
+    https://metacpan.org/author/YOUR_PAUSE_ID
 
 =for checklist skip RC BLEAD-POINT
 
@@ -1203,6 +1239,11 @@ header in your message after receiving it back via perl5-porters.
 
 If you have a blog, please consider writing an entry in your blog explaining
 why you chose that particular quote for your epigraph.
+
+=head3 update the link to the latest perl on perlweb
+
+Submit a pull request to L<https://github.com/perlorg/perlweb> to update the
+link in F<docs/dev/perl5/index.html> to point to your release.
 
 =for checklist skip RC
 
@@ -1309,7 +1350,14 @@ in theory, only contain bug fixes but never regressions.))
 
 =head3 clean build and test
 
-Run a clean build and test to make sure nothing obvious is broken.
+Run a clean build and test to make sure nothing obvious is broken. This is
+very important, as commands run after this point must be run using the perl
+executable built with the bumped version number.
+
+ $ git clean -xdf
+ $ ./Configure -des -Dusedevel
+ $ make
+ $ make test
 
 In particular, F<Porting/perldelta_template.pod> is intentionally exempted
 from podchecker tests, to avoid false positives about placeholder text.
@@ -1463,10 +1511,6 @@ F<dist/Module-CoreList/Changes>.
 
 =item *
 
-Update F<pod/perldelta.pod> to mention the upgrade to Module::CoreList.
-
-=item *
-
 Remake perl to get your changed .pm files propagated into F<lib/> and
 then run at least the F<dist/Module-CoreList/t/*.t> tests and the
 test_porting makefile target to check that they're ok.
@@ -1496,7 +1540,7 @@ and is properly indexed:
 
 =item *
 
-Check your author directory under L<http://www.cpan.org/authors/id/>
+Check your author directory under L<https://www.cpan.org/authors/id/>
 to ensure that the tarballs are available on the website.
 
 =item *
@@ -1513,14 +1557,14 @@ ask Ask <ask@perl.org>.
 
 =item *
 
-Check L<http://www.cpan.org/src/> to ensure that the F</src> updates
+Check L<https://www.cpan.org/src/> to ensure that the F</src> updates
 have been correctly mirrored to the website.
 If they haven't, ask Ask <ask@perl.org>.
 
 =item *
 
-Check L<http://search.cpan.org> to see if it has indexed the distribution.
-It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
+Check L<https://search.cpan.org> to see if it has indexed the distribution.
+It should be visible at a URL like C<https://search.cpan.org/dist/perl-5.10.1/>.
 
 =back
 

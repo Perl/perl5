@@ -51,13 +51,29 @@ sub get_column_headers ($$;$) {
     return $header . "*/\n";
 }
 
+sub output_table_start($$$) {
+    my ($out_fh, $TYPE, $name) = @_;
+
+    my $declaration = "EXTCONST $TYPE $name\[\]";
+    print $out_fh <<EOF;
+#  ifndef DOINIT
+    $declaration;
+#  else
+    $declaration = {
+EOF
+}
+
+sub output_table_end($) {
+    print $out_fh "};\n#  endif\n\n";
+}
+
 sub output_table ($$;$) {
     my $table_ref = shift;
     my $name = shift;
 
     # 0 => print in decimal
     # 1 => print in hex (translates code point to code point)
-    # >= 2 => is a dfa table, like http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+    # >= 2 => is a dfa table, like https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
     #      The number is how many columns in the part after the code point
     #      portion.
     #
@@ -81,7 +97,7 @@ sub output_table ($$;$) {
         print $out_fh <<'EOF';
 
 /* The table below is adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * See copyright notice at the beginning of this file.
  */
 
@@ -124,13 +140,7 @@ EOF
     my $TYPE = 'U8';
     $TYPE = 'U16' if grep { $_ > 255 } @$table_ref;
 
-    my $declaration = "EXTCONST $TYPE $name\[\]";
-    print $out_fh <<EOF;
-#  ifndef DOINIT
-#    $declaration;
-#  else
-#    $declaration = {
-EOF
+    output_table_start $out_fh, $TYPE, $name;
 
     # First the headers for the columns
     print $out_fh get_column_headers($row_hdr_length, $field_width);
@@ -192,7 +202,7 @@ EOF
     print $out_fh get_column_headers($row_hdr_length, $field_width,
                                      ($is_dfa) ? $columns_after_256 : undef);
 
-    print $out_fh "};\n#  endif\n\n";
+    output_table_end($out_fh);
 }
 
 print $out_fh <<'END';
@@ -204,7 +214,7 @@ print $out_fh <<'END';
  * More info is in utfebcdic.h
  *
  * Some of the tables are adapted from
- *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *      https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  * which requires this copyright notice:
 
 Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>

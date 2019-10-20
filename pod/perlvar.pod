@@ -494,12 +494,13 @@ The array C<@INC> contains the list of places that the C<do EXPR>,
 C<require>, or C<use> constructs look for their library files.  It
 initially consists of the arguments to any B<-I> command-line
 switches, followed by the default Perl library, probably
-F</usr/local/lib/perl>, followed by ".", to represent the current
-directory.  ("." will not be appended if taint checks are enabled,
-either by C<-T> or by C<-t>, or if configured not to do so by the
-C<-Ddefault_inc_excludes_dot> compile time option.)  If you need to
-modify this at runtime, you should use the C<use lib> pragma to get
-the machine-dependent library properly loaded also:
+F</usr/local/lib/perl>.
+Prior to Perl 5.26, C<.> -which represents the current directory, was included
+in C<@INC>; it has been removed. This change in behavior is documented
+in L<C<PERL_USE_UNSAFE_INC>|perlrun/PERL_USE_UNSAFE_INC> and it is
+not recommended that C<.> be re-added to C<@INC>.
+If you need to modify C<@INC> at runtime, you should use the C<use lib> pragma
+to get the machine-dependent library properly loaded as well:
 
     use lib '/mypath/libdir/';
     use SomeMod;
@@ -699,6 +700,14 @@ and B<-C> filetests are based on this value.
 
 =item $^V
 X<$^V> X<$PERL_VERSION>
+
+=for comment
+These are documented in the generated file lib/Config.pod.  This looks
+like as good a place as any to give notice that they are documented.
+
+=for apidoc hAmn|int|PERL_VERSION
+=for apidoc hAmn|int|PERL_REVISION
+=for apidoc hAmn|int|PERL_SUBVERSION
 
 The revision, version, and subversion of the Perl interpreter,
 represented as a L<version> object.
@@ -931,7 +940,8 @@ is equivalent to $2, etc.
 
 should output "f-o-a-l".
 
-See also L</$I<digits>>, L</%{^CAPTURE}> and L</%{^CAPTURE_ALL}>.
+See also L<<< /$<I<digits>> ($1, $2, ...) >>>, L</%{^CAPTURE}> and
+L</%{^CAPTURE_ALL}>.
 
 Note that unlike most other regex magic variables there is no single
 letter equivalent to C<@{^CAPTURE}>.
@@ -1148,7 +1158,7 @@ This variable is read-only and dynamically-scoped.
 X<@-> X<@LAST_MATCH_START>
 
 C<$-[0]> is the offset of the start of the last successful match.
-C<$-[>I<n>C<]> is the offset of the start of the substring matched by
+C<$-[I<n>]> is the offset of the start of the substring matched by
 I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus, after a match against C<$_>, C<$&> coincides with C<substr $_, $-[0],
@@ -1247,6 +1257,17 @@ The result of evaluation of the last successful C<(?{ code })>
 regular expression assertion (see L<perlre>).  May be written to.
 
 This variable was added in Perl 5.005.
+
+=item ${^RE_COMPILE_RECURSION_LIMIT}
+X<${^RE_COMPILE_RECURSION_LIMIT}>
+
+The current value giving the maximum number of open but unclosed
+parenthetical groups there may be at any point during a regular
+expression compilation.  The default is currently 1000 nested groups.
+You may adjust it depending on your needs and the amount of memory
+available.
+
+This variable was added in Perl v5.30.0.
 
 =item ${^RE_DEBUG_FLAGS}
 X<${^RE_DEBUG_FLAGS}>
@@ -1486,6 +1507,44 @@ the next paragraph, even if it's a newline.
 
 Remember: the value of C<$/> is a string, not a regex.  B<awk> has to
 be better for something. :-)
+
+Setting C<$/> to an empty string -- the so-called I<paragraph mode> -- merits
+special attention.  When C<$/> is set to C<""> and the entire file is read in
+with that setting, any sequence of consecutive newlines C<"\n\n"> at the
+beginning of the file is discarded.  With the exception of the final record in
+the file, each sequence of characters ending in two or more newlines is
+treated as one record and is read in to end in exactly two newlines.  If the
+last record in the file ends in zero or one consecutive newlines, that record
+is read in with that number of newlines.  If the last record ends in two or
+more consecutive newlines, it is read in with two newlines like all preceding
+records.
+
+Suppose we wrote the following string to a file:
+
+    my $string = "\n\n\n";
+    $string .= "alpha beta\ngamma delta\n\n\n";
+    $string .= "epsilon zeta eta\n\n";
+    $string .= "theta\n";
+
+    my $file = 'simple_file.txt'; 
+    open my $OUT, '>', $file or die;
+    print $OUT $string;
+    close $OUT or die;
+
+Now we read that file in paragraph mode:
+
+    local $/ = ""; # paragraph mode
+    open my $IN, '<', $file or die;
+    my @records = <$IN>;
+    close $IN or die;
+
+C<@records> will consist of these 3 strings:
+
+    (
+      "alpha beta\ngamma delta\n\n",
+      "epsilon zeta eta\n\n",
+      "theta\n",
+    )
 
 Setting C<$/> to a reference to an integer, scalar containing an
 integer, or scalar that's convertible to an integer will attempt to

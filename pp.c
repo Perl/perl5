@@ -28,11 +28,9 @@
 #include "perl.h"
 #include "keywords.h"
 
+#include "invlist_inline.h"
 #include "reentr.h"
 #include "regcharclass.h"
-
-static const STRLEN small_mu_len = sizeof(GREEK_SMALL_LETTER_MU_UTF8) - 1;
-static const STRLEN capital_iota_len = sizeof(GREEK_CAPITAL_LETTER_IOTA_UTF8) - 1;
 
 /* variations on pp_null */
 
@@ -364,7 +362,7 @@ PP(pp_rv2cv)
 	cv = SvTYPE(SvRV(gv)) == SVt_PVCV
 	    ? MUTABLE_CV(SvRV(gv))
 	    : MUTABLE_CV(gv);
-    }    
+    }
     else
 	cv = MUTABLE_CV(&PL_sv_undef);
     SETs(MUTABLE_SV(cv));
@@ -670,7 +668,7 @@ PP(pp_study)
 
 PP(pp_trans)
 {
-    dSP; 
+    dSP;
     SV *sv;
 
     if (PL_op->op_flags & OPf_STACKED)
@@ -1161,18 +1159,18 @@ PP(pp_pow)
 			else if (result <= (UV)IV_MAX)
 			    /* answer negative, fits in IV */
 			    SETi( -(IV)result );
-			else if (result == (UV)IV_MIN) 
+			else if (result == (UV)IV_MIN)
 			    /* 2's complement assumption: special case IV_MIN */
 			    SETi( IV_MIN );
 			else
 			    /* answer negative, doesn't fit */
 			    SETn( -(NV)result );
 			RETURN;
-		    } 
+		    }
 		}
     }
   float_it:
-#endif    
+#endif
     {
 	NV right = SvNV_nomg(svr);
 	NV left  = SvNV_nomg(svl);
@@ -1270,16 +1268,10 @@ PP(pp_multiply)
             NV nr = SvNVX(svr);
             NV result;
 
-            if (
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-                !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
-                && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
-#else
-                nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
-#endif
-                )
+            if (lossless_NV_to_IV(nl, &il) && lossless_NV_to_IV(nr, &ir)) {
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
+            }
             SP--;
             result = nl * nr;
 #  if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE && NVSIZE == 16
@@ -1318,8 +1310,9 @@ PP(pp_multiply)
 		    alow = aiv;
 		    auvok = TRUE; /* effectively it's a UV now */
 		} else {
-                    /* abs, auvok == false records sign */
-		    alow = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
+                    /* abs, auvok == false records sign; Using 0- here and
+                     * later to silence bogus warning from MS VC */
+		    alow = (UV) (0 - (UV) aiv);
 		}
 	    }
 	    if (buvok) {
@@ -1331,7 +1324,7 @@ PP(pp_multiply)
 		    buvok = TRUE; /* effectively it's a UV now */
 		} else {
                     /* abs, buvok == false records sign */
-		    blow = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
+		    blow = (UV) (0 - (UV) biv);
 		}
 	    }
 
@@ -1462,7 +1455,7 @@ PP(pp_divide)
                     right_non_neg = TRUE; /* effectively it's a UV now */
                 }
 		else {
-                    right = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
+                    right = -(UV)biv;
                 }
             }
             /* historically undef()/0 gives a "Use of uninitialized value"
@@ -1483,7 +1476,7 @@ PP(pp_divide)
                     left_non_neg = TRUE; /* effectively it's a UV now */
                 }
 		else {
-                    left = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
+                    left = -(UV)aiv;
                 }
             }
 
@@ -1503,8 +1496,11 @@ PP(pp_divide)
 #endif
                 ) {
                 /* Integer division can't overflow, but it can be imprecise.  */
+
+                /* Modern compilers optimize division followed by
+                 * modulo into a single div instruction */
 		const UV result = left / right;
-                if (result * right == left) {
+                if (left % right == 0) {
                     SP--; /* result is valid */
                     if (left_non_neg == right_non_neg) {
                         /* signs identical, result is positive.  */
@@ -1563,7 +1559,7 @@ PP(pp_modulo)
                     right = biv;
                     right_neg = FALSE; /* effectively it's a UV now */
                 } else {
-                    right = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
+		    right = (UV) (0 - (UV) biv);
                 }
             }
         }
@@ -1593,7 +1589,7 @@ PP(pp_modulo)
                         left = aiv;
                         left_neg = FALSE; /* effectively it's a UV now */
                     } else {
-                        left = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
+                        left = (UV) (0 - (UV) aiv);
                     }
                 }
         }
@@ -1693,7 +1689,8 @@ PP(pp_repeat)
 	    else {
 		dTOPss;
 		ASSUME(MARK + 1 == SP);
-		XPUSHs(sv);
+                MEXTEND(SP, 1);
+                PUSHs(sv);
 		MARK[1] = &PL_sv_undef;
 	    }
 	    SP = MARK + 2;
@@ -1846,16 +1843,10 @@ PP(pp_subtract)
             NV nl = SvNVX(svl);
             NV nr = SvNVX(svr);
 
-            if (
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-                !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
-                && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
-#else
-                nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
-#endif
-                )
+            if (lossless_NV_to_IV(nl, &il) && lossless_NV_to_IV(nr, &ir)) {
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
+            }
             SP--;
             TARGn(nl - nr, 0); /* args not GMG, so can't be tainted */
             SETs(TARG);
@@ -1890,8 +1881,8 @@ PP(pp_subtract)
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
-		    } else { /* 2s complement assumption for IV_MIN */
-			auv = (aiv == IV_MIN) ? (UV)aiv : (UV)-aiv;
+		    } else {
+                        auv = (UV) (0 - (UV) aiv);
 		    }
 		}
 		a_valid = 1;
@@ -1902,7 +1893,7 @@ PP(pp_subtract)
 	    UV result;
 	    UV buv;
 	    bool buvok = SvUOK(svr);
-	
+
 	    if (buvok)
 		buv = SvUVX(svr);
 	    else {
@@ -1911,7 +1902,7 @@ PP(pp_subtract)
 		    buv = biv;
 		    buvok = 1;
 		} else
-                    buv = (biv == IV_MIN) ? (UV)biv : (UV)-biv;
+                    buv = (UV) (0 - (UV) biv);
 	    }
 	    /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
 	       else "IV" now, independent of how it came in.
@@ -1988,7 +1979,7 @@ static UV S_uv_shift(UV uv, int shift, bool left)
        shift = -shift;
        left = !left;
    }
-   if (shift >= IV_BITS) {
+   if (UNLIKELY(shift >= IV_BITS)) {
        return 0;
    }
    return left ? uv << shift : uv >> shift;
@@ -1996,14 +1987,34 @@ static UV S_uv_shift(UV uv, int shift, bool left)
 
 static IV S_iv_shift(IV iv, int shift, bool left)
 {
-   if (shift < 0) {
-       shift = -shift;
-       left = !left;
-   }
-   if (shift >= IV_BITS) {
-       return iv < 0 && !left ? -1 : 0;
-   }
-   return left ? iv << shift : iv >> shift;
+    if (shift < 0) {
+        shift = -shift;
+        left = !left;
+    }
+
+    if (UNLIKELY(shift >= IV_BITS)) {
+        return iv < 0 && !left ? -1 : 0;
+    }
+
+    /* For left shifts, perl 5 has chosen to treat the value as unsigned for
+     * the * purposes of shifting, then cast back to signed.  This is very
+     * different from perl 6:
+     *
+     * $ perl6 -e 'say -2 +< 5'
+     * -64
+     *
+     * $ ./perl -le 'print -2 << 5'
+     * 18446744073709551552
+     * */
+    if (left) {
+        if (iv == IV_MIN) { /* Casting this to a UV is undefined behavior */
+            return 0;
+        }
+        return (IV) (((UV) iv) << shift);
+    }
+
+    /* Here is right shift */
+    return iv >> shift;
 }
 
 #define UV_LEFT_SHIFT(uv, shift) S_uv_shift(uv, shift, TRUE)
@@ -2052,7 +2063,7 @@ PP(pp_lt)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(lt_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(lt_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2068,7 +2079,7 @@ PP(pp_gt)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(gt_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(gt_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2084,7 +2095,7 @@ PP(pp_le)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(le_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(le_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2100,7 +2111,7 @@ PP(pp_ge)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(ge_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(ge_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2116,7 +2127,7 @@ PP(pp_ne)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(ne_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(ne_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2248,7 +2259,7 @@ PP(pp_sle)
 	break;
     }
 
-    tryAMAGICbin_MG(amg_type, AMGf_set);
+    tryAMAGICbin_MG(amg_type, 0);
     {
       dPOPTOPssrl;
       const int cmp =
@@ -2266,7 +2277,7 @@ PP(pp_sle)
 PP(pp_seq)
 {
     dSP;
-    tryAMAGICbin_MG(seq_amg, AMGf_set);
+    tryAMAGICbin_MG(seq_amg, 0);
     {
       dPOPTOPssrl;
       SETs(boolSV(sv_eq_flags(left, right, 0)));
@@ -2277,7 +2288,7 @@ PP(pp_seq)
 PP(pp_sne)
 {
     dSP;
-    tryAMAGICbin_MG(sne_amg, AMGf_set);
+    tryAMAGICbin_MG(sne_amg, 0);
     {
       dPOPTOPssrl;
       SETs(boolSV(!sv_eq_flags(left, right, 0)));
@@ -2512,7 +2523,7 @@ PP(pp_not)
     dSP;
     SV *sv;
 
-    tryAMAGICun_MG(not_amg, AMGf_set);
+    tryAMAGICun_MG(not_amg, 0);
     sv = *PL_stack_sp;
     *PL_stack_sp = boolSV(!SvTRUE_nomg_NN(sv));
     return NORMAL;
@@ -2532,7 +2543,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
             if (len && ! utf8_to_bytes(tmps, &len)) {
                 Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[PL_op->op_type]);
             }
-            SvCUR(TARG) = len;
+            SvCUR_set(TARG, len);
             SvUTF8_off(TARG);
         }
 
@@ -2709,7 +2720,7 @@ PP(pp_i_subtract)
 PP(pp_i_lt)
 {
     dSP;
-    tryAMAGICbin_MG(lt_amg, AMGf_set);
+    tryAMAGICbin_MG(lt_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left < right));
@@ -2720,7 +2731,7 @@ PP(pp_i_lt)
 PP(pp_i_gt)
 {
     dSP;
-    tryAMAGICbin_MG(gt_amg, AMGf_set);
+    tryAMAGICbin_MG(gt_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left > right));
@@ -2731,7 +2742,7 @@ PP(pp_i_gt)
 PP(pp_i_le)
 {
     dSP;
-    tryAMAGICbin_MG(le_amg, AMGf_set);
+    tryAMAGICbin_MG(le_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left <= right));
@@ -2742,7 +2753,7 @@ PP(pp_i_le)
 PP(pp_i_ge)
 {
     dSP;
-    tryAMAGICbin_MG(ge_amg, AMGf_set);
+    tryAMAGICbin_MG(ge_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left >= right));
@@ -2753,7 +2764,7 @@ PP(pp_i_ge)
 PP(pp_i_eq)
 {
     dSP;
-    tryAMAGICbin_MG(eq_amg, AMGf_set);
+    tryAMAGICbin_MG(eq_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left == right));
@@ -2764,7 +2775,7 @@ PP(pp_i_eq)
 PP(pp_i_ne)
 {
     dSP;
-    tryAMAGICbin_MG(ne_amg, AMGf_set);
+    tryAMAGICbin_MG(ne_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left != right));
@@ -2890,7 +2901,7 @@ PP(pp_rand)
     {
 	dSP;
 	NV value;
-    
+
 	if (MAXARG < 1)
 	{
 	    EXTEND(SP, 1);
@@ -3061,7 +3072,7 @@ PP(pp_oct)
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
 	 SV* const tsv = sv_2mortal(newSVsv(sv));
-	
+
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
@@ -3536,7 +3547,7 @@ PP(pp_index)
             /* $lex = (index() == -1) */
             sv_setsv(TARG, TOPs);
     }
-    else 
+    else
         PUSHi(retval);
     RETURN;
 }
@@ -3678,7 +3689,7 @@ PP(pp_crypt)
 #endif
 }
 
-/* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
+/* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
 
 
@@ -3708,6 +3719,7 @@ PP(pp_ucfirst)
     STRLEN tculen;  /* tculen is the byte length of the freshly titlecased (or
 		     * lowercased) character stored in tmpbuf.  May be either
 		     * UTF-8 or not, but in either case is the number of bytes */
+    bool remove_dot_above = FALSE;
 
     s = (const U8*)SvPV_const(source, slen);
 
@@ -3736,6 +3748,7 @@ PP(pp_ucfirst)
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
         ulen = UTF8SKIP(s);
+
         if (op_type == OP_UCFIRST) {
 #ifdef USE_LOCALE_CTYPE
 	    _toTITLE_utf8_flags(s, s +slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
@@ -3744,12 +3757,45 @@ PP(pp_ucfirst)
 #endif
 	}
         else {
+
 #ifdef USE_LOCALE_CTYPE
+
 	    _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+
+            /* In turkic locales, lower casing an 'I' normally yields U+0131,
+             * LATIN SMALL LETTER DOTLESS I, but not if the grapheme also
+             * contains a COMBINING DOT ABOVE.  Instead it is treated like
+             * LATIN CAPITAL LETTER I WITH DOT ABOVE lowercased to 'i'.  The
+             * call to lowercase above has handled this.  But SpecialCasing.txt
+             * says we are supposed to remove the COMBINING DOT ABOVE.  We can
+             * tell if we have this situation if I ==> i in a turkic locale. */
+            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                && IN_LC_RUNTIME(LC_CTYPE)
+                && (UNLIKELY(*s == 'I' && tmpbuf[0] == 'i')))
+            {
+                /* Here, we know there was a COMBINING DOT ABOVE.  We won't be
+                 * able to handle this in-place. */
+                inplace = FALSE;
+
+                /* It seems likely that the DOT will immediately follow the
+                 * 'I'.  If so, we can remove it simply by indicating to the
+                 * code below to start copying the source just beyond the DOT.
+                 * We know its length is 2 */
+                if (LIKELY(memBEGINs(s + 1, s + slen, COMBINING_DOT_ABOVE_UTF8))) {
+                    ulen += 2;
+                }
+                else {  /* But if it doesn't follow immediately, set a flag for
+                           the code below */
+                    remove_dot_above = TRUE;
+                }
+            }
 #else
+            PERL_UNUSED_VAR(remove_dot_above);
+
 	    _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, 0);
 #endif
-	}
+
+        }
 
         /* we can't do in-place if the length changes.  */
         if (ulen != tculen) inplace = FALSE;
@@ -3757,47 +3803,69 @@ PP(pp_ucfirst)
     }
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
-	    * precedence */ 
+	    * precedence */
 	ulen = 1;	/* Original character is 1 byte */
 	tculen = 1;	/* Most characters will require one byte, but this will
 			 * need to be overridden for the tricky ones */
 	need = slen + 1;
 
-	if (op_type == OP_LCFIRST) {
 
-	    /* lower case the first letter: no trickiness for any character */
 #ifdef USE_LOCALE_CTYPE
-            if (IN_LC_RUNTIME(LC_CTYPE)) {
+
+        if (IN_LC_RUNTIME(LC_CTYPE)) {
+            if (    UNLIKELY(PL_in_utf8_turkic_locale)
+                && (   (op_type == OP_LCFIRST && UNLIKELY(*s == 'I'))
+                    || (op_type == OP_UCFIRST && UNLIKELY(*s == 'i'))))
+            {
+                if (*s == 'I') { /* lcfirst('I') */
+                    tmpbuf[0] = UTF8_TWO_BYTE_HI(LATIN_SMALL_LETTER_DOTLESS_I);
+                    tmpbuf[1] = UTF8_TWO_BYTE_LO(LATIN_SMALL_LETTER_DOTLESS_I);
+                }
+                else {  /* ucfirst('i') */
+                    tmpbuf[0] = UTF8_TWO_BYTE_HI(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                    tmpbuf[1] = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                }
+                tculen = 2;
+                inplace = FALSE;
+                doing_utf8 = TRUE;
+                convert_source_to_utf8 = TRUE;
+                need += variant_under_utf8_count(s, s + slen);
+            }
+            else if (op_type == OP_LCFIRST) {
+
+                /* For lc, there are no gotchas for UTF-8 locales (other than
+                 * the turkish ones already handled above) */
                 *tmpbuf = toLOWER_LC(*s);
             }
-            else
-#endif
-            {
-                *tmpbuf = (IN_UNI_8_BIT)
-                          ? toLOWER_LATIN1(*s)
-                          : toLOWER(*s);
-            }
-	}
-#ifdef USE_LOCALE_CTYPE
-	/* is ucfirst() */
-	else if (IN_LC_RUNTIME(LC_CTYPE)) {
-            if (IN_UTF8_CTYPE_LOCALE) {
-                goto do_uni_rules;
-            }
+            else { /* ucfirst */
 
-            *tmpbuf = (U8) toUPPER_LC(*s); /* This would be a bug if any
-                                              locales have upper and title case
-                                              different */
-	}
+                /* But for uc, some characters require special handling */
+                if (IN_UTF8_CTYPE_LOCALE) {
+                    goto do_uni_rules;
+                }
+
+                /* This would be a bug if any locales have upper and title case
+                 * different */
+                *tmpbuf = (U8) toUPPER_LC(*s);
+            }
+        }
+        else
 #endif
-	else if (! IN_UNI_8_BIT) {
-	    *tmpbuf = toUPPER(*s);	/* Returns caseless for non-ascii, or
-					 * on EBCDIC machines whatever the
-					 * native function does */
-	}
+        /* Here, not in locale.  If not using Unicode rules, is a simple
+         * lower/upper, depending */
+        if (! IN_UNI_8_BIT) {
+            *tmpbuf = (op_type == OP_LCFIRST)
+                      ? toLOWER(*s)
+                      : toUPPER(*s);
+        }
+        else if (op_type == OP_LCFIRST) {
+            /* lower case the first letter: no trickiness for any character */
+            *tmpbuf = toLOWER_LATIN1(*s);
+        }
         else {
             /* Here, is ucfirst non-UTF-8, not in locale (unless that locale is
-             * UTF-8, which we treat as not in locale), and cased latin1 */
+             * non-turkic UTF-8, which we treat as not in locale), and cased
+             * latin1 */
 	    UV title_ord;
 #ifdef USE_LOCALE_CTYPE
       do_uni_rules:
@@ -3821,16 +3889,19 @@ PP(pp_ucfirst)
 		    inplace = FALSE;
 
                     /* If the result won't fit in a byte, the entire result
-                     * will have to be in UTF-8.  Assume worst case sizing in
-                     * conversion. (all latin1 characters occupy at most two
-                     * bytes in utf8) */
+                     * will have to be in UTF-8.  Allocate enough space for the
+                     * expanded first byte, and if UTF-8, the rest of the input
+                     * string, some or all of which may also expand to two
+                     * bytes, plus the terminating NUL. */
 		    if (title_ord > 255) {
 			doing_utf8 = TRUE;
 			convert_source_to_utf8 = TRUE;
-			need = slen * 2 + 1;
+			need = slen
+                            + variant_under_utf8_count(s, s + slen)
+                            + 1;
 
                         /* The (converted) UTF-8 and UTF-EBCDIC lengths of all
-                         * (both) characters whose title case is above 255 is
+                         * characters whose title case is above 255 is
                          * 2. */
 			ulen = 2;
 		    }
@@ -3874,6 +3945,29 @@ PP(pp_ucfirst)
 		 * of the string. */
 		sv_setpvn(dest, (char*)tmpbuf, tculen);
 		if (slen > ulen) {
+
+                    /* But this boolean being set means we are in a turkic
+                     * locale, and there is a DOT character that needs to be
+                     * removed, and it isn't immediately after the current
+                     * character.  Keep concatenating characters to the output
+                     * one at a time, until we find the DOT, which we simply
+                     * skip */
+                    if (UNLIKELY(remove_dot_above)) {
+                        do {
+                            Size_t this_len = UTF8SKIP(s + ulen);
+
+                            sv_catpvn(dest, (char*)(s + ulen), this_len);
+
+                            ulen += this_len;
+                            if (memBEGINs(s + ulen, s + slen, COMBINING_DOT_ABOVE_UTF8)) {
+                                ulen += 2;
+                                break;
+                            }
+                        } while (s + ulen < s + slen);
+                    }
+
+                    /* The rest of the string can be concatenated unchanged,
+                     * all at once */
 		    sv_catpvn(dest, (char*)(s + ulen), slen - ulen);
 		}
 	    }
@@ -3885,15 +3979,18 @@ PP(pp_ucfirst)
 		 * into tmpbuf.  First put that into dest, and then append the
 		 * rest of the source, converting it to UTF-8 as we go. */
 
-		/* Assert tculen is 2 here because the only two characters that
+		/* Assert tculen is 2 here because the only characters that
 		 * get to this part of the code have 2-byte UTF-8 equivalents */
+                assert(tculen == 2);
 		*d++ = *tmpbuf;
 		*d++ = *(tmpbuf + 1);
 		s++;	/* We have just processed the 1st char */
 
-		for (; s < send; s++) {
-		    d = uvchr_to_utf8(d, *s);
-		}
+                while (s < send) {
+                    append_utf8_from_native_byte(*s, &d);
+                    s++;
+                }
+
 		*d = '\0';
 		SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	    }
@@ -3905,7 +4002,7 @@ PP(pp_ucfirst)
 	}
 
     }
-    else {  /* Neither source nor dest are in or need to be UTF-8 */
+    else {  /* Neither source nor dest are, nor need to be UTF-8 */
 	if (slen) {
 	    if (inplace) {  /* in-place, only need to change the 1st char */
 		*d = *tmpbuf;
@@ -3925,7 +4022,7 @@ PP(pp_ucfirst)
 
 	/* In a "use bytes" we don't treat the source as UTF-8, but, still want
 	 * the destination to retain that flag */
-	if (SvUTF8(source) && ! IN_BYTES)
+	if (DO_UTF8(source))
 	    SvUTF8_on(dest);
 
 	if (!inplace) {	/* Finish the rest of the string, unchanged */
@@ -3946,11 +4043,9 @@ PP(pp_ucfirst)
     return NORMAL;
 }
 
-/* There's so much setup/teardown code common between uc and lc, I wonder if
-   it would be worth merging the two, and just having a switch outside each
-   of the three tight loops.  There is less and less commonality though */
 PP(pp_uc)
 {
+    dVAR;
     dSP;
     SV *source = TOPs;
     STRLEN len;
@@ -4015,6 +4110,8 @@ PP(pp_uc)
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
+#define GREEK_CAPITAL_LETTER_IOTA 0x0399
+#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
 	/* All occurrences of these are to be moved to follow any other marks.
 	 * This is context-dependent.  We may not be passed enough context to
 	 * move the iota subscript beyond all of them, but we do the best we can
@@ -4031,12 +4128,16 @@ PP(pp_uc)
 	    STRLEN u;
 	    STRLEN ulen;
 	    UV uv;
-	    if (in_iota_subscript && ! _is_utf8_mark(s)) {
+	    if (UNLIKELY(in_iota_subscript)) {
+                UV cp = utf8_to_uvchr_buf(s, send, NULL);
 
-		/* A non-mark.  Time to output the iota subscript */
-		Copy(GREEK_CAPITAL_LETTER_IOTA_UTF8, d, capital_iota_len, U8);
-                d += capital_iota_len;
-		in_iota_subscript = FALSE;
+                if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
+
+                    /* A non-mark.  Time to output the iota subscript */
+                    *d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
+                    *d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
+                    in_iota_subscript = FALSE;
+                }
             }
 
             /* Then handle the current character.  Get the changed case value
@@ -4048,8 +4149,6 @@ PP(pp_uc)
 #else
             uv = _toUPPER_utf8_flags(s, send, tmpbuf, &ulen, 0);
 #endif
-#define GREEK_CAPITAL_LETTER_IOTA 0x0399
-#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
                 && utf8_to_uvchr_buf(s, send, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
             {
@@ -4063,9 +4162,10 @@ PP(pp_uc)
 
                     /* If someone uppercases one million U+03B0s we SvGROW()
                      * one million times.  Or we could try guessing how much to
-                     * allocate without allocating too much.  Such is life.
-                     * See corresponding comment in lc code for another option
-                     * */
+                     * allocate without allocating too much.  But we can't
+                     * really guess without examining the rest of the string.
+                     * Such is life.  See corresponding comment in lc code for
+                     * another option */
                     d = o + (U8*) SvGROW(dest, min);
                 }
                 Copy(tmpbuf, d, ulen, U8);
@@ -4074,8 +4174,8 @@ PP(pp_uc)
             s += u;
 	}
 	if (in_iota_subscript) {
-            Copy(GREEK_CAPITAL_LETTER_IOTA_UTF8, d, capital_iota_len, U8);
-            d += capital_iota_len;
+            *d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
+            *d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
 	}
 	SvUTF8_on(dest);
 	*d = '\0';
@@ -4109,16 +4209,27 @@ PP(pp_uc)
           do_uni_rules:
 #endif
 		for (; s < send; d++, s++) {
+                    Size_t extra;
+
 		    *d = toUPPER_LATIN1_MOD(*s);
-		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
+		    if (   LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)
+
+#ifdef USE_LOCALE_CTYPE
+
+                        && (LIKELY(   ! PL_in_utf8_turkic_locale
+                                   || ! IN_LC_RUNTIME(LC_CTYPE))
+                                   || *s != 'i')
+#endif
+
+                    ) {
                         continue;
                     }
 
 		    /* The mainstream case is the tight loop above.  To avoid
-		     * extra tests in that, all three characters that require
-		     * special handling are mapped by the MOD to the one tested
-		     * just above.  
-		     * Use the source to distinguish between the three cases */
+                     * extra tests in that, all three characters that always
+                     * require special handling are mapped by the MOD to the
+                     * one tested just above.  Use the source to distinguish
+                     * between those cases */
 
 #if    UNICODE_MAJOR_VERSION > 2                                        \
    || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1		\
@@ -4127,7 +4238,7 @@ PP(pp_uc)
 
 			/* uc() of this requires 2 characters, but they are
 			 * ASCII.  If not enough room, grow the string */
-			if (SvLEN(dest) < ++min) {	
+			if (SvLEN(dest) < ++min) {
 			    const UV o = d - (U8*)SvPVX_const(dest);
 			    d = o + (U8*) SvGROW(dest, min);
 			}
@@ -4136,59 +4247,105 @@ PP(pp_uc)
 		    }
 #endif
 
-		    /* The other two special handling characters have their
+		    /* The other special handling characters have their
 		     * upper cases outside the latin1 range, hence need to be
-		     * in UTF-8, so the whole result needs to be in UTF-8.  So,
-		     * here we are somewhere in the middle of processing a
-		     * non-UTF-8 string, and realize that we will have to convert
-		     * the whole thing to UTF-8.  What to do?  There are
-		     * several possibilities.  The simplest to code is to
-		     * convert what we have so far, set a flag, and continue on
-		     * in the loop.  The flag would be tested each time through
-		     * the loop, and if set, the next character would be
-		     * converted to UTF-8 and stored.  But, I (khw) didn't want
-		     * to slow down the mainstream case at all for this fairly
-		     * rare case, so I didn't want to add a test that didn't
-		     * absolutely have to be there in the loop, besides the
-		     * possibility that it would get too complicated for
-		     * optimizers to deal with.  Another possibility is to just
-		     * give up, convert the source to UTF-8, and restart the
-		     * function that way.  Another possibility is to convert
-		     * both what has already been processed and what is yet to
-		     * come separately to UTF-8, then jump into the loop that
-		     * handles UTF-8.  But the most efficient time-wise of the
-		     * ones I could think of is what follows, and turned out to
-		     * not require much extra code.  */
+		     * in UTF-8, so the whole result needs to be in UTF-8.
+                     *
+                     * So, here we are somewhere in the middle of processing a
+                     * non-UTF-8 string, and realize that we will have to
+                     * convert the whole thing to UTF-8.  What to do?  There
+                     * are several possibilities.  The simplest to code is to
+                     * convert what we have so far, set a flag, and continue on
+                     * in the loop.  The flag would be tested each time through
+                     * the loop, and if set, the next character would be
+                     * converted to UTF-8 and stored.  But, I (khw) didn't want
+                     * to slow down the mainstream case at all for this fairly
+                     * rare case, so I didn't want to add a test that didn't
+                     * absolutely have to be there in the loop, besides the
+                     * possibility that it would get too complicated for
+                     * optimizers to deal with.  Another possibility is to just
+                     * give up, convert the source to UTF-8, and restart the
+                     * function that way.  Another possibility is to convert
+                     * both what has already been processed and what is yet to
+                     * come separately to UTF-8, then jump into the loop that
+                     * handles UTF-8.  But the most efficient time-wise of the
+                     * ones I could think of is what follows, and turned out to
+                     * not require much extra code.
+                     *
+                     * First, calculate the extra space needed for the
+                     * remainder of the source needing to be in UTF-8.  Except
+                     * for the 'i' in Turkic locales, in UTF-8 strings, the
+                     * uppercase of a character below 256 occupies the same
+                     * number of bytes as the original.  Therefore, the space
+                     * needed is the that number plus the number of characters
+                     * that become two bytes when converted to UTF-8, plus, in
+                     * turkish locales, the number of 'i's. */
 
-		    /* Convert what we have so far into UTF-8, telling the
+                    extra = send - s + variant_under_utf8_count(s, send);
+
+#ifdef USE_LOCALE_CTYPE
+
+                    if (UNLIKELY(*s == 'i')) {  /* We wouldn't get an 'i' here
+                                                   unless are in a Turkic
+                                                   locale */
+                        const U8 * s_peek = s;
+
+                        do {
+                            extra++;
+
+                            s_peek = (U8 *) memchr(s_peek + 1, 'i',
+                                                   send - (s_peek + 1));
+                        } while (s_peek != NULL);
+                    }
+#endif
+
+                    /* Convert what we have so far into UTF-8, telling the
 		     * function that we know it should be converted, and to
 		     * allow extra space for what we haven't processed yet.
-		     * Assume the worst case space requirements for converting
-		     * what we haven't processed so far: that it will require
-		     * two bytes for each remaining source character, plus the
-		     * NUL at the end.  This may cause the string pointer to
-		     * move, so re-find it. */
+                     *
+                     * This may cause the string pointer to move, so need to
+                     * save and re-find it. */
 
 		    len = d - (U8*)SvPVX_const(dest);
 		    SvCUR_set(dest, len);
 		    len = sv_utf8_upgrade_flags_grow(dest,
 						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						(send -s) * 2 + 1);
+                                                extra
+                                              + 1 /* trailing NUL */ );
 		    d = (U8*)SvPVX(dest) + len;
 
-		    /* Now process the remainder of the source, converting to
-		     * upper and UTF-8.  If a resulting byte is invariant in
-		     * UTF-8, output it as-is, otherwise convert to UTF-8 and
-		     * append it to the output. */
-		    for (; s < send; s++) {
-			(void) _to_upper_title_latin1(*s, d, &len, 'S');
-			d += len;
-		    }
+                    /* Now process the remainder of the source, simultaneously
+                     * converting to upper and UTF-8.
+                     *
+                     * To avoid extra tests in the loop body, and since the
+                     * loop is so simple, split out the rare Turkic case into
+                     * its own loop */
 
-		    /* Here have processed the whole source; no need to continue
-		     * with the outer loop.  Each character has been converted
-		     * to upper case and converted to UTF-8 */
+#ifdef USE_LOCALE_CTYPE
+                    if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                        && UNLIKELY(IN_LC_RUNTIME(LC_CTYPE)))
+                    {
+                        for (; s < send; s++) {
+                            if (*s == 'i') {
+                                *d++ = UTF8_TWO_BYTE_HI(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                                *d++ = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                            }
+                            else {
+                                (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                                d += len;
+                            }
+                        }
+                    }
+                    else
+#endif
+                        for (; s < send; s++) {
+                            (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                            d += len;
+                        }
 
+                    /* Here have processed the whole source; no need to
+                     * continue with the outer loop.  Each character has been
+                     * converted to upper case and converted to UTF-8. */
 		    break;
 		} /* End of processing all latin1-style chars */
 	    } /* End of processing all chars */
@@ -4220,15 +4377,26 @@ PP(pp_lc)
     SV *dest;
     const U8 *s;
     U8 *d;
+    bool has_turkic_I = FALSE;
 
     SvGETMAGIC(source);
 
     if (   SvPADTMP(source)
 	&& !SvREADONLY(source) && SvPOK(source)
-	&& !DO_UTF8(source)) {
+	&& !DO_UTF8(source)
 
-	/* We can convert in place, as lowercasing anything in the latin1 range
-	 * (or else DO_UTF8 would have been on) doesn't lengthen it */
+#ifdef USE_LOCALE_CTYPE
+
+        && (   LIKELY(! IN_LC_RUNTIME(LC_CTYPE))
+            || LIKELY(! PL_in_utf8_turkic_locale))
+
+#endif
+
+    ) {
+
+        /* We can convert in place, as, outside of Turkic UTF-8 locales,
+         * lowercasing anything in the latin1 range (or else DO_UTF8 would have
+         * been on) doesn't lengthen it. */
 	dest = source;
 	s = d = (U8*)SvPV_force_nomg(source, len);
 	min = len + 1;
@@ -4250,7 +4418,38 @@ PP(pp_lc)
 #ifdef USE_LOCALE_CTYPE
 
     if (IN_LC_RUNTIME(LC_CTYPE)) {
+        const U8 * next_I;
+
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+
+        /* Lowercasing in a Turkic locale can cause non-UTF-8 to need to become
+         * UTF-8 for the single case of the character 'I' */
+        if (     UNLIKELY(PL_in_utf8_turkic_locale)
+            && ! DO_UTF8(source)
+            &&   (next_I = (U8 *) memchr(s, 'I', len)))
+        {
+            Size_t I_count = 0;
+            const U8 *const send = s + len;
+
+            do {
+                I_count++;
+
+                next_I = (U8 *) memchr(next_I + 1, 'I',
+                                        send - (next_I + 1));
+            } while (next_I != NULL);
+
+            /* Except for the 'I', in UTF-8 strings, the lower case of a
+             * character below 256 occupies the same number of bytes as the
+             * original.  Therefore, the space needed is the original length
+             * plus I_count plus the number of characters that become two bytes
+             * when converted to UTF-8 */
+            sv_utf8_upgrade_flags_grow(dest, 0, len
+                                              + I_count
+                                              + variant_under_utf8_count(s, send)
+                                              + 1 /* Trailing NUL */ );
+            d = (U8*)SvPVX(dest);
+            has_turkic_I = TRUE;
+        }
     }
 
 #endif
@@ -4261,19 +4460,48 @@ PP(pp_lc)
     if (DO_UTF8(source)) {
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+        bool remove_dot_above = FALSE;
 
 	while (s < send) {
 	    const STRLEN u = UTF8SKIP(s);
 	    STRLEN ulen;
 
 #ifdef USE_LOCALE_CTYPE
+
 	    _toLOWER_utf8_flags(s, send, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+
+            /* If we are in a Turkic locale, we have to do more work.  As noted
+             * in the comments for lcfirst, there is a special case if a 'I'
+             * is in a grapheme with COMBINING DOT ABOVE UTF8.  It turns into a
+             * 'i', and the DOT must be removed.  We check for that situation,
+             * and set a flag if the DOT is there.  Then each time through the
+             * loop, we have to see if we need to remove the next DOT above,
+             * and if so, do it.  We know that there is a DOT because
+             * _toLOWER_utf8_flags() wouldn't have returned 'i' unless there
+             * was one in a proper position. */
+            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                && IN_LC_RUNTIME(LC_CTYPE))
+            {
+                if (   UNLIKELY(remove_dot_above)
+                    && memBEGINs(tmpbuf, sizeof(tmpbuf), COMBINING_DOT_ABOVE_UTF8))
+                {
+                    s += u;
+                    remove_dot_above = FALSE;
+                    continue;
+                }
+                else if (UNLIKELY(*s == 'I' && tmpbuf[0] == 'i')) {
+                    remove_dot_above = TRUE;
+                }
+            }
 #else
+            PERL_UNUSED_VAR(remove_dot_above);
+
 	    _toLOWER_utf8_flags(s, send, tmpbuf, &ulen, 0);
 #endif
 
-	    /* Here is where we would do context-sensitive actions.  See the
-	     * commit message for 86510fb15 for why there isn't any */
+            /* Here is where we would do context-sensitive actions for the
+             * Greek final sigma.  See the commit message for 86510fb15 for why
+             * there isn't any */
 
 	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
 
@@ -4299,7 +4527,7 @@ PP(pp_lc)
 	SvUTF8_on(dest);
 	*d = '\0';
 	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
-    } else {	/* Not utf8 */
+    } else {	/* 'source' not utf8 */
 	if (len) {
 	    const U8 *const send = s + len;
 
@@ -4308,8 +4536,22 @@ PP(pp_lc)
 	     * whole thing in a tight loop, for speed, */
 #ifdef USE_LOCALE_CTYPE
             if (IN_LC_RUNTIME(LC_CTYPE)) {
-		for (; s < send; d++, s++)
-		    *d = toLOWER_LC(*s);
+                if (LIKELY( ! has_turkic_I)) {
+                    for (; s < send; d++, s++)
+                        *d = toLOWER_LC(*s);
+                }
+                else {  /* This is the only case where lc() converts 'dest'
+                           into UTF-8 from a non-UTF-8 'source' */
+                    for (; s < send; s++) {
+                        if (*s == 'I') {
+                            *d++ = UTF8_TWO_BYTE_HI(LATIN_SMALL_LETTER_DOTLESS_I);
+                            *d++ = UTF8_TWO_BYTE_LO(LATIN_SMALL_LETTER_DOTLESS_I);
+                        }
+                        else {
+                            append_utf8_from_native_byte(toLOWER_LATIN1(*s), &d);
+                        }
+                    }
+                }
             }
 	    else
 #endif
@@ -4369,7 +4611,7 @@ PP(pp_quotemeta)
 #ifdef USE_LOCALE_CTYPE
 		    /* In locale, we quote all non-ASCII Latin1 chars.
 		     * Otherwise use the quoting rules */
-		    
+
 		    IN_LC_RUNTIME(LC_CTYPE)
 			||
 #endif
@@ -4517,52 +4759,80 @@ PP(pp_fc)
 #ifdef USE_LOCALE_CTYPE
       do_uni_folding:
 #endif
-            /* For ASCII and the Latin-1 range, there's only two troublesome
-             * folds, \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
-             * casefolding becomes 'ss'; and \x{B5} (\N{MICRO SIGN}), which
-             * under any fold becomes \x{3BC} (\N{GREEK SMALL LETTER MU}) --
+            /* For ASCII and the Latin-1 range, there's potentially three
+             * troublesome folds:
+             *      \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
+             *             casefolding becomes 'ss';
+             *      \x{B5} (\N{MICRO SIGN}), which under any fold becomes
+             *             \x{3BC} (\N{GREEK SMALL LETTER MU})
+             *      I      only in Turkic locales, this folds to \x{131}
+             *             \N{LATIN SMALL LETTER DOTLESS I}
              * For the rest, the casefold is their lowercase.  */
             for (; s < send; d++, s++) {
-                if (*s == MICRO_SIGN) {
+                if (    UNLIKELY(*s == MICRO_SIGN)
+#ifdef USE_LOCALE_CTYPE
+                    || (   UNLIKELY(PL_in_utf8_turkic_locale)
+                        && UNLIKELY(IN_LC_RUNTIME(LC_CTYPE))
+                        && UNLIKELY(*s == 'I'))
+#endif
+                ) {
+                    Size_t extra = send - s
+                                 + variant_under_utf8_count(s, send);
+
                     /* \N{MICRO SIGN}'s casefold is \N{GREEK SMALL LETTER MU},
-                     * which is outside of the latin-1 range. There's a couple
-                     * of ways to deal with this -- khw discusses them in
-                     * pp_lc/uc, so go there :) What we do here is upgrade what
-                     * we had already casefolded, then enter an inner loop that
-                     * appends the rest of the characters as UTF-8. */
+                     * and 'I' in Turkic locales is \N{LATIN SMALL LETTER
+                     * DOTLESS I} both of which are outside of the latin-1
+                     * range. There's a couple of ways to deal with this -- khw
+                     * discusses them in pp_lc/uc, so go there :) What we do
+                     * here is upgrade what we had already casefolded, then
+                     * enter an inner loop that appends the rest of the
+                     * characters as UTF-8.
+                     *
+                     * First we calculate the needed size of the upgraded dest
+                     * beyond what's been processed already (the upgrade
+                     * function figures that out).  Except for the 'I' in
+                     * Turkic locales, in UTF-8 strings, the fold case of a
+                     * character below 256 occupies the same number of bytes as
+                     * the original (even the Sharp S).  Therefore, the space
+                     * needed is the number of bytes remaining plus the number
+                     * of characters that become two bytes when converted to
+                     * UTF-8 plus, in turkish locales, the number of 'I's */
+
+                    if (UNLIKELY(*s == 'I')) {
+                        const U8 * s_peek = s;
+
+                        do {
+                            extra++;
+
+                            s_peek = (U8 *) memchr(s_peek + 1, 'i',
+                                                   send - (s_peek + 1));
+                        } while (s_peek != NULL);
+                    }
+
+                    /* Growing may move things, so have to save and recalculate
+                     * 'd' */
                     len = d - (U8*)SvPVX_const(dest);
                     SvCUR_set(dest, len);
                     len = sv_utf8_upgrade_flags_grow(dest,
                                                 SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						/* The max expansion for latin1
-						 * chars is 1 byte becomes 2 */
-                                                (send -s) * 2 + 1);
+                                                extra
+                                              + 1 /* Trailing NUL */ );
                     d = (U8*)SvPVX(dest) + len;
 
-                    Copy(GREEK_SMALL_LETTER_MU_UTF8, d, small_mu_len, U8);
-                    d += small_mu_len;
+                    *d++ = UTF8_TWO_BYTE_HI(GREEK_SMALL_LETTER_MU);
+                    *d++ = UTF8_TWO_BYTE_LO(GREEK_SMALL_LETTER_MU);
                     s++;
+
                     for (; s < send; s++) {
                         STRLEN ulen;
-                        UV fc = _to_uni_fold_flags(*s, tmpbuf, &ulen, flags);
-                        if UVCHR_IS_INVARIANT(fc) {
-                            if (full_folding
-                                && *s == LATIN_SMALL_LETTER_SHARP_S)
-                            {
-                                *d++ = 's';
-                                *d++ = 's';
-                            }
-                            else
-                                *d++ = (U8)fc;
-                        }
-                        else {
-                            Copy(tmpbuf, d, ulen, U8);
-                            d += ulen;
-                        }
+                        _to_uni_fold_flags(*s, d, &ulen, flags);
+                        d += ulen;
                     }
                     break;
                 }
-                else if (full_folding && *s == LATIN_SMALL_LETTER_SHARP_S) {
+                else if (   UNLIKELY(*s == LATIN_SMALL_LETTER_SHARP_S)
+                         && full_folding)
+                {
                     /* Under full casefolding, LATIN SMALL LETTER SHARP S
                      * becomes "ss", which may require growing the SV. */
                     if (SvLEN(dest) < ++min) {
@@ -4572,8 +4842,7 @@ PP(pp_fc)
                     *(d)++ = 's';
                     *d = 's';
                 }
-                else { /* If it's not one of those two, the fold is their lower
-                          case */
+                else { /* Else, the fold is the lower case */
                     *d = toLOWER_LATIN1(*s);
                 }
              }
@@ -5384,7 +5653,7 @@ PP(pp_splice)
 	i = -diff;
 	while (i)
 	    dst[--i] = NULL;
-	
+
 	if (newlen) {
  	    Copy( tmparyval, AvARRAY(ary) + offset, newlen, SV* );
 	    Safefree(tmparyval);
@@ -5835,7 +6104,7 @@ PP(pp_split)
             } else {
                 while (m < strend && !isSPACE(*m))
                     ++m;
-            }  
+            }
 	    if (m >= strend)
 		break;
 
@@ -5873,7 +6142,7 @@ PP(pp_split)
             } else {
                 while (s < strend && isSPACE(*s))
                     ++s;
-            } 	    
+            }
 	}
     }
     else if (RX_EXTFLAGS(rx) & RXf_START_ONLY) {
@@ -5987,7 +6256,7 @@ PP(pp_split)
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
  		if (do_utf8)
-		    s = (char*)utf8_hop((U8*)m, len);
+		    s = (char*)utf8_hop_forward((U8*) m, len, (U8*) strend);
  		else
 		    s = m + len; /* Fake \n at the end */
 	    }
@@ -6011,7 +6280,7 @@ PP(pp_split)
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
  		if (do_utf8)
-		    s = (char*)utf8_hop((U8*)m, len);
+		    s = (char*)utf8_hop_forward((U8*)m, len, (U8 *) strend);
  		else
 		    s = m + len; /* Fake \n at the end */
 	    }
@@ -6557,7 +6826,7 @@ PP(pp_lvref)
         }
       }
       else if (arg) {
-	S_localise_gv_slot(aTHX_ (GV *)arg, 
+	S_localise_gv_slot(aTHX_ (GV *)arg,
 				 PL_op->op_private & OPpLVREF_TYPE);
       }
       else if (!(PL_op->op_private & OPpPAD_STATE))
@@ -6596,10 +6865,12 @@ PP(pp_lvrefslice)
 
     while (++MARK <= SP) {
 	SV * const elemsv = *MARK;
-	if (SvTYPE(av) == SVt_PVAV)
-	    S_localise_aelem_lval(aTHX_ av, elemsv, can_preserve);
-	else
-	    S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
+        if (UNLIKELY(localizing)) {
+            if (SvTYPE(av) == SVt_PVAV)
+                S_localise_aelem_lval(aTHX_ av, elemsv, can_preserve);
+            else
+                S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
+        }
 	*MARK = sv_2mortal(newSV_type(SVt_PVMG));
 	sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
     }
@@ -6638,7 +6909,7 @@ PP(pp_anonconst)
  *  for $:   (OPf_STACKED ? *sp : $_[N])
  *  for @/%: @_[N..$#_]
  *
- * It's equivalent to 
+ * It's equivalent to
  *    my $foo = $_[N];
  * or
  *    my $foo = (value-on-stack)
@@ -6839,7 +7110,7 @@ S_find_runcv_name(void)
     return sv;
 }
 
-/* Check a  a subs arguments - i.e. that it has the correct number of args
+/* Check a sub's arguments - i.e. that it has the correct number of args
  * (and anything else we might think of in future). Typically used with
  * signatured subs.
  */
@@ -6847,16 +7118,16 @@ S_find_runcv_name(void)
 PP(pp_argcheck)
 {
     OP * const o       = PL_op;
-    UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
-    IV   params        = aux[0].iv;
-    IV   opt_params    = aux[1].iv;
-    char slurpy        = (char)(aux[2].iv);
+    struct op_argcheck_aux *aux = (struct op_argcheck_aux *)cUNOP_AUXo->op_aux;
+    UV   params        = aux->params;
+    UV   opt_params    = aux->opt_params;
+    char slurpy        = aux->slurpy;
     AV  *defav         = GvAV(PL_defgv); /* @_ */
-    IV   argc;
+    UV   argc;
     bool too_few;
 
     assert(!SvMAGICAL(defav));
-    argc = (AvFILLp(defav) + 1);
+    argc = (UV)(AvFILLp(defav) + 1);
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))

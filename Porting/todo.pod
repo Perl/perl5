@@ -5,7 +5,7 @@ todo - Perl TO-DO list
 =head1 DESCRIPTION
 
 This is a list of wishes for Perl. The most up to date version of this file
-is at L<http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/Porting/todo.pod>
+is at L<https://perl5.git.perl.org/perl.git/blob_plain/HEAD:/Porting/todo.pod>
 
 The tasks we think are smaller or easier are listed first. Anyone is welcome
 to work on any of these, but it's a good idea to first contact
@@ -485,7 +485,7 @@ Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
 On these systems, it might be the default compilation mode, and there
 is currently no guarantee that passing no use64bitall option to the
 Configure process will build a 32bit perl. Implementing -Duse32bit*
-options would be nice for perl 5.26.0.
+options would be nice for perl 5.32.0.
 
 =head2 Profile Perl - am I hot or not?
 
@@ -506,12 +506,6 @@ want to determine what ops I<really> are the most commonly used. And in turn
 suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
 One piece of Perl code that might make a good testbed is F<installman>.
-
-=head2 Improve win32/wince.c
-
-Currently, numerous functions look virtually, if not completely,
-identical in both F<win32/wince.c> and F<win32/win32.c> files, which can't
-be good.
 
 =head2 Use secure CRT functions when building with VC8 on Win32
 
@@ -544,7 +538,7 @@ read-only attribute).
 
 Furthermore, POSIX::access() behaves differently for directories having the
 read-only attribute set depending on what CRT library is being used. For
-example, the _access() function in the VC6 and VC7 CRTs (wrongly) claim that
+example, the _access() function in the VC7 CRT (wrongly) claims that
 such directories are not writable, whereas in fact all directories are writable
 unless access is denied by DACLs. (In the case of directories, the read-only
 attribute actually only means that the directory cannot be deleted.) This CRT
@@ -1050,7 +1044,7 @@ The old perltodo notes "Look at the "reification" code in C<av.c>".
 Implement a set of "vtables" that virtualizes operating system access
 (chdir(), chmod(), dbmopen(), getenv(), glob(), link(), mkdir(), open(),
 opendir(), readdir(), rename(), rmdir(), stat(), sysopen(), uname(),
-unlink(), etc.)  At the very least these interfaces should take SVs as
+unlink(), etc.).  At the very least these interfaces should take SVs as
 "name" arguments instead of bare char pointers; probably the most
 flexible and extensible way would be for the Perl-facing interfaces to
 accept HVs.  The system needs to be per-operating-system and
@@ -1205,7 +1199,7 @@ L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-01/msg00339.html>
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.26.0"
+of 5.32.0"
 
 =head2 make ithreads more robust
 

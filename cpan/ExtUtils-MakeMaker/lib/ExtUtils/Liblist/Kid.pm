@@ -11,8 +11,8 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '7.34';
-$VERSION = eval $VERSION;
+our $VERSION = '7.38';
+$VERSION =~ tr/_//d;
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -49,8 +49,10 @@ sub _unix_os2_ext {
     # $potential_libs
     # this is a rewrite of Andy Dougherty's extliblist in perl
 
+    require Text::ParseWords;
+
     my ( @searchpath );    # from "-L/path" entries in $potential_libs
-    my ( @libpath ) = split " ", $Config{'libpth'} || '';
+    my ( @libpath ) = Text::ParseWords::quotewords( '\s+', 0, $Config{'libpth'} || '' );
     my ( @ldloadlibs, @bsloadlibs, @extralibs, @ld_run_path, %ld_run_path_seen );
     my ( @libs,       %libs_seen );
     my ( $fullname,   @fullname );
@@ -63,7 +65,7 @@ sub _unix_os2_ext {
         $potential_libs =~ s/(^|\s)(-F)\s*(\S+)/$1-Wl,$2 -Wl,$3/g;
     }
 
-    foreach my $thislib ( split ' ', $potential_libs ) {
+    foreach my $thislib ( Text::ParseWords::quotewords( '\s+', 0, $potential_libs) ) {
         my ( $custom_name ) = '';
 
         # Handle possible linker path arguments.
@@ -88,6 +90,7 @@ sub _unix_os2_ext {
                 $thislib = $self->catdir( $pwd, $thislib );
             }
             push( @searchpath, $thislib );
+            $thislib = qq{"$thislib"} if $thislib =~ / /; # protect spaces if there
             push( @extralibs,  "$ptype$thislib" );
             push( @ldloadlibs, "$rtype$thislib" );
             next;

@@ -14,7 +14,7 @@
 
 =head1 NAME
 
-B::Op_private -  OP op_private flag definitions
+B::Op_private - OP op_private flag definitions
 
 =head1 SYNOPSIS
 
@@ -118,7 +118,7 @@ package B::Op_private;
 our %bits;
 
 
-our $VERSION = "5.029004";
+our $VERSION = "5.031005";
 
 $bits{$_}{3} = 'OPpENTERSUB_AMPER' for qw(entersub rv2cv);
 $bits{$_}{6} = 'OPpENTERSUB_DB' for qw(entersub rv2cv);

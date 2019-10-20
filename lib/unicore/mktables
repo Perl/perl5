@@ -45,7 +45,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v11.0.0;
+my $version_of_mk_invlist_bounds = v12.1.0;
 
 ##########################################################################
 #
@@ -660,7 +660,7 @@ sub stack_trace() {
 # common to both releases, and you can see the changes caused just by the
 # underlying release semantic changes.  For versions earlier than 3.2, you
 # must copy a version of DAge.txt into the directory.
-my $string_compare_versions = DEBUG && ""; #  e.g., "2.1";
+my $string_compare_versions = DEBUG && "";
 my $compare_versions = DEBUG
                        && $string_compare_versions
                        && pack "C*", split /\./, $string_compare_versions;
@@ -12524,6 +12524,11 @@ sub process_NamedSequences {
             next;
         }
 
+        # Code points below 0x0100 need to be converted to native
+        $sequence =~ s{ \b 00 ( [0-9A-F]{2} ) \b }
+                      { sprintf("%04X", utf8::unicode_to_native(hex $1)) }gxe
+                                                        if NON_ASCII_PLATFORM;
+
         # Note single \t in keeping with special output format of
         # Perl_charnames.  But it turns out that the code points don't have to
         # be 5 digits long, like the rest, based on the internal workings of
@@ -12966,22 +12971,45 @@ sub register_fraction($) {
 
     my $rational = shift;
 
-    my $float = eval $rational;
-    $float = sprintf "%.*e", $E_FLOAT_PRECISION, $float;
+    my $floating = eval $rational;
 
-    # Strip off any leading zeros beyond 2 digits to make it C99 compliant.
-    # (Windows has 3 digit exponents, contrary to C99)
-    $float =~ s/ ( .* e [-+] ) 0* ( \d{2,}? ) /$1$2/x;
+    my @floats = sprintf "%.*e", $E_FLOAT_PRECISION, $floating;
 
-    if (   defined $nv_floating_to_rational{$float}
-        && $nv_floating_to_rational{$float} ne $rational)
-    {
-        die Carp::my_carp_bug("Both '$rational' and"
+    # See if the denominator is a power of 2.
+    $rational =~ m!.*/(.*)!;
+    my $denominator = $1;
+    if (defined $denominator && (($denominator & ($denominator - 1)) == 0)) {
+
+        # Here the denominator is a power of 2.  This means it has an exact
+        # representation in binary, so rounding could go either way.  It turns
+        # out that Windows doesn't necessarily round towards even, so output
+        # an extra entry.  This happens when the final digit we output is even
+        # and the next digits would be 50* to the precision of the machine.
+        my $extra_digit_float = sprintf "%e", $floating;
+        my $q = $E_FLOAT_PRECISION - 1;
+        if ($extra_digit_float =~ / ( .* \. \d{$q} )
+                                    ( [02468] ) 5 0* ( e .*)
+                                  /ix)
+        {
+            push @floats, $1 . ($2 + 1) . $3;
+        }
+    }
+
+    foreach my $float (@floats) {
+        # Strip off any leading zeros beyond 2 digits to make it C99
+        # compliant.  (Windows has 3 digit exponents, contrary to C99)
+        $float =~ s/ ( .* e [-+] ) 0* ( \d{2,}? ) /$1$2/x;
+
+        if (   defined $nv_floating_to_rational{$float}
+            && $nv_floating_to_rational{$float} ne $rational)
+        {
+            die Carp::my_carp_bug("Both '$rational' and"
                             . " '$nv_floating_to_rational{$float}' evaluate to"
                             . " the same floating point number."
                             . "  \$E_FLOAT_PRECISION must be increased");
+        }
+        $nv_floating_to_rational{$float} = $rational;
     }
-    $nv_floating_to_rational{$float} = $rational;
     return;
 }
 
@@ -14941,6 +14969,8 @@ sub compile_perl() {
     # Every character 0-255 is problematic because what each folds to depends
     # on the current locale
     $loc_problem_folds->add_range(0, 255);
+    $loc_problem_folds->add_range(0x130, 0x131);    # These are problematic in
+                                                    # Turkic locales
     $loc_problem_folds_start += $loc_problem_folds;
 
     # Also problematic are anything these fold to outside the range.  Likely
@@ -14980,8 +15010,19 @@ sub compile_perl() {
          Description =>
               "Code points whose fold is a string of more than one character",
     );
+    my $in_multi_fold = $perl->add_match_table(
+               "_Perl_Is_In_Multi_Char_Fold",
+               Description =>
+                   "Code points that are in some multiple character fold",
+    );
+    my $non_final_fold = $perl->add_match_table(
+               "_Perl_Non_Final_Folds",
+               Description => "Code points that are in some multiple character fold, but not in the final position",
+    );
     if ($v_version lt v3.0.1) {
-        push @tables_that_may_be_empty, '_Perl_Folds_To_Multi_Char';
+        push @tables_that_may_be_empty, '_Perl_Folds_To_Multi_Char',
+                                        '_Perl_Is_In_Multi_Char_Fold',
+                                        '_Perl_Non_Final_Folds';
     }
 
     # Look through all the known folds to populate these tables.
@@ -15008,6 +15049,12 @@ sub compile_perl() {
             if ($loc_problem_folds->contains($cp)) {
                 $loc_problem_folds->add_range($start, $end);
                 $found_locale_problematic = 1;
+            }
+
+            if (@hex_folds > 1) {
+                $in_multi_fold->add_range($cp, $cp);
+                next if $i < @hex_folds - 1;
+                $non_final_fold->add_range($cp, $cp);
             }
         }
 
@@ -16552,7 +16599,7 @@ sub make_re_pod_entries($) {
                     my $standard_short = standardize($proposed_short);
 
                     # If the short name is shorter than the standard one, or
-                    # even it it's not, but the combination of it and its
+                    # even if it's not, but the combination of it and its
                     # short property name (as in \p{prop=short} ($perl doesn't
                     # have this form)) saves at least two characters, then,
                     # cause it to be listed as a shorter synonym.
@@ -18070,7 +18117,7 @@ sub make_UCD () {
             next unless $alias->ucd;
             next unless $alias->ok_as_filename;
             push @{$perlprop_to_aliases{standardize($alias->name)}},
-                 @aliases_list;
+                 uniques @aliases_list;
         }
     }
 
@@ -18853,6 +18900,34 @@ EOC
     return @output;
 }
 
+sub generate_wildcard_tests($$$$$) {
+    # This used only for making the test script.  It generates wildcardl
+    # matching test cases that are expected to compile successfully in perl.
+
+    my $lhs = shift;           # The property: what's to the left of the
+                               # or equals separator
+    my $rhs = shift;           # The property value; what's to the right
+    my $valid_code = shift;    # A code point that's known to be in the
+                               # table given by LHS=RHS; undef if table is
+                               # empty
+    my $invalid_code = shift;  # A code point known to not be in the table;
+                               # undef if the table is all code points
+    my $warning = shift;
+
+    return if $lhs eq "";
+    return if $lhs =~ / ^ Is_ /x;   # These are not currently supported
+
+    # Generate a standardized pattern, with colon being the delimitter
+    my $wildcard = "$lhs=:\\A$rhs\\z:";
+
+    my @output;
+    push @output, "Expect(1, $valid_code, '\\p{$wildcard}', $warning);"
+                                                        if defined $valid_code;
+    push @output, "Expect(0, $invalid_code, '\\p{$wildcard}', $warning);"
+                                                      if defined $invalid_code;
+    return @output;
+}
+
 sub generate_error($$$) {
     # This used only for making the test script.  It generates test cases that
     # are expected to not only not match, but to be syntax or similar errors
@@ -19063,6 +19138,7 @@ Test_GCB("1100 $nobreak 1161");  # Bug #70940
 Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
 Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
 Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
+Error('\p{InKana}');    # 'Kana' is not a block so InKana shouldn't compile
 
 # Make sure this gets tested; it was not part of the official test suite at
 # the time this was added.  Note that this is as it would appear in the
@@ -19160,7 +19236,16 @@ EOF_CODE
                 # quit now without generating success cases.
                 next if $already_error;
 
-                # Now for the success cases.
+                # Now for the success cases.  First, wildcard matching, as it
+                # shouldn't have any randomization.
+                if ($table_alias->status eq $NORMAL) {
+                    push @output, generate_wildcard_tests($property_name,
+                                                          $table_name,
+                                                          $valid,
+                                                          $invalid,
+                                                          $warning,
+                                                         );
+                }
                 my $random;
                 if ($loose_match) {
 
@@ -19181,6 +19266,15 @@ EOF_CODE
                                                      $invalid,
                                                      $warning,
                                                  );
+                        if ($table_alias->status eq $NORMAL) {
+                            push @output, generate_wildcard_tests(
+                                                     $property_name,
+                                                     $standard,
+                                                     $valid,
+                                                     $invalid,
+                                                     $warning,
+                                                 );
+                        }
                     }
                     $random = randomize_loose_name($table_name)
                 }
@@ -19209,8 +19303,8 @@ EOF_CODE
                                             );
                     }
                     else {
-                    # If the name is a rational number, add tests for a
-                    # non-reduced form, and for a floating point equivalent.
+                        # If the name is a rational number, add tests for a
+                        # non-reduced form, and for a floating point equivalent.
 
                         # 60 is a number divisible by a bunch of things
                         my ($numerator, $denominator) = $table_name
@@ -19290,7 +19384,8 @@ EOF_CODE
                                           # case, the representation at this
                                           # precision could actually be a
                                           # valid one for some other rational
-                                       || ! grep { $_ eq $this_table }
+                                       || ! grep { $this_table
+                                                            =~ / ^ $_ 0* $ /x }
                                                             @valid_base_floats)
                                 {
                                     push @output,
@@ -20347,6 +20442,7 @@ __DATA__
 
 use strict;
 use warnings;
+no warnings 'experimental::uniprop_wildcards';
 
 # Test qr/\X/ and the \p{} regular expression constructs.  This file is
 # constructed by mktables from the tables it generates, so if mktables is

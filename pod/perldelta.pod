@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.29.4
+perldelta - what is new for perl v5.31.5
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.29.3 release and the 5.29.4
+This document describes differences between the 5.31.4 release and the 5.31.5
 release.
 
-If you are upgrading from an earlier release such as 5.29.2, first read
-L<perl5293delta>, which describes differences between 5.29.2 and 5.29.3.
+If you are upgrading from an earlier release such as 5.31.3, first read
+L<perl5314delta>, which describes differences between 5.31.3 and 5.31.4.
 
 =head1 Notice
 
@@ -26,12 +26,6 @@ enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
-
-=head2 The maximum number of times a pattern can match has been doubled
-to 65535
-
-This means if you specify C<qr/a+/> that there can be anywhere from 1
-through 65535 C<"a">'s in a row, instead of 32267 as previously.
 
 =head1 Security
 
@@ -51,40 +45,23 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
-=head2 Assigning non-zero to C<$[> is fatal
+=head2 Modifiable variables are no longer permitted in constants
 
-Setting L<< C<$[>|perlvar/$[ >> to a non-zero value has been deprecated since
-Perl 5.12 and now throws a fatal error.
-See L<<< perldeprecation/Assigning non-zero to C<< $[ >> is fatal >>>.
+Code like:
 
-=head2 Previously deprecated sysread()/syswrite() on :utf8 handles now fatal
+    my $var;
+    $sub = sub () { $var };
 
-Calling sysread(), syswrite(), send() or recv() on a C<:utf8> handle,
-whether applied explicitly or implicitly, is now fatal.  This was
-deprecated in perl 5.24.
+where C<$var> is referenced elsewhere in some sort of modiable context
+now produces an exception when the sub is defined.
 
-There were two problems with calling these functions on C<:utf8>
-handles:
+This error can be avoided by adding a return to the sub definition:
 
-=over
+    $sub = sub () { return $var };
 
-=item *
+This has been deprecated since perl 5.22.
 
-all four functions only paid attention to the C<:utf8> flag, other
-layers were completely ignored, so a handle with
-C<:encoding(UTF-16LE)> layer would be treated as UTF-8.  Other layers,
-such as compression are completely ignored with or without the
-C<:utf8> flag.
-
-=item *
-
-sysread() and recv() would read from the handle, skipping any
-validation by the layers, and do no validation of their own.  This
-could lead to invalidly encoded perl scalars.
-
-=back
-
-[perl #125760]
+[perl #131138]
 
 =head1 Deprecations
 
@@ -166,21 +143,23 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<vars> has been upgraded from version 1.04 to 1.05.
+L<XXX> has been upgraded from version A.xx to B.yy.
 
-C<vars.pm> no longer disables non-vars strict when checking if strict
-vars is enabled.  [perl #130674]
+If there was something important to note about this change, include that here.
+
+=item *
+
+L<Dumpvalue> has been upgraded from version 1.18 to 1.21.
+
+Previously, when dumping elements of an array and encountering an undefined
+value, the string printed would have been C<empty array>.  This has been
+changed to what was apparently originally intended:  C<empty slot>.
 
 =back
 
 =head2 Removed Modules and Pragmata
 
 =over 4
-
-=item *
-
-B::Debug is no longer distributed with the core distribution.  It remains
-available on CPAN.
 
 =item *
 
@@ -212,6 +191,28 @@ However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
 Additionally, the following selected changes have been made:
+
+=head3 URLs have been changed to https://, stale links updated
+
+=over 4
+
+=item *
+
+Where applicable, the URLs in the documentation have been moved from
+using the http:// protocol to https:// . This also affects the location
+of the bug tracker at L<https://rt.perl.org>.
+
+=item *
+
+Some links to OS/2 libraries, Address Sanitizer and other system tools
+had gone stale. These have been updated with working links.
+
+=item *
+
+Some links to old mails on perl5-porters had gone stale. These have been
+updated with working links.
+
+=back
 
 =head3 L<XXX>
 
@@ -301,7 +302,18 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Perl now no longer probes for C<d_u32align>, defaulting to C<define>
+on all platforms.  This check was error prone when it was done, which
+was on 32-bit platforms only.  [perl #133495]
+
+=item *
+
+Documentation and hints for building perl on Z/OS (native EBCDIC) have
+been updated. Still work in progress.
+
+=item *
+
+New probe for malloc_usable_size
 
 =back
 
@@ -377,9 +389,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Support for building perl with Visual C++ 6.0 has now been removed.
 
 =back
 
@@ -395,7 +407,19 @@ well.
 
 =item *
 
-XXX
+Added the C<<PL_curstackinfo->si_cxsubix>> field. This records the stack
+index of the most recently pushed sub/format/eval context.  It is set and
+restored automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would
+need to be manually managed if you do any unusual manipulation of the
+context stack.
+
+=item *
+
+Various macros dealing with character type classification and changing
+case where the input is encoded in UTF-8 now require an extra parameter
+to prevent potential reads beyond the end of the buffer.  Use of these
+has generated a deprecation warning since 5.26.  Details are in
+L<perldeprecation/In XS code, use of various macros dealing with UTF-8.>
 
 =back
 
@@ -410,12 +434,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-C<pack "u", "invalid uuencoding"> now properly NUL terminates the
-zero-length SV produced.  [perl #132655]
-
-=item *
-
-Improve the debugging output for calloc() calls with C<-Dm>.  [perl #133439]
+XXX
 
 =back
 
@@ -455,13 +474,13 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.29.3..HEAD
+  perl Porting/acknowledgements.pl v5.31.4..HEAD
 
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the perl bug database
-at L<https://rt.perl.org/> .  There may also be information at
-L<http://www.perl.org/> , the Perl Home Page.
+at L<https://rt.perl.org/>.  There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but

@@ -1,0 +1,244 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5313delta - what is new for perl v5.31.3
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.31.2 release and the 5.31.3
+release.
+
+If you are upgrading from an earlier release such as 5.31.1, first read
+L<perl5312delta>, which describes differences between 5.31.1 and 5.31.2.
+
+=head1 Incompatible Changes
+
+=head2 Plain "0" string now treated as a number for range operator
+
+Previously a range C< "0" .. "-1" > would produce a range of numeric
+strings from "0" through "99", this now produces an empty list, just
+as C< 0 .. -1 > does.
+
+This was due to a special case that treated strings starting with "0"
+as strings so ranges like C< "00" .. "03" > produced C< "00", "01",
+"02", "03" >, but didn't specially handle the string C<"0">.
+
+[perl #133695]
+
+=head2 C<\K> now disallowed in look-ahead and look-behind assertions
+
+This was disallowed because it causes unexpected behaviour, and no-one
+could define what the desired behaviour was.
+
+[perl #124256]
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.086 to 2.087.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.086 to 2.087.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.54 to 3.55.
+
+The test files generated on Win32 are now identical to when they are
+generated on POSIX-like systems.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.36 to 1.37.
+
+On Win32, the tests no longer require either a file in the drive root
+directory, or a writable root directory.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.50 to 2.51.
+
+=item *
+
+L<I18N::LangTags> has been upgraded from version 1.07 to 1.08.
+
+Document the C<IGNORE_WIN32_LOCALE> environment variable.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.086 to 2.087.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20190720 to 5.20190820.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.17 to 0.18.
+
+=item *
+
+L<Storable> has been upgraded from version 3.16 to 3.17.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302164 to 1.302166.
+
+=item *
+
+L<Thread> has been upgraded from version 3.04 to 3.05.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9761 to 1.9762.
+
+Removed obsolete code such as support for pre-5.6 perl and classic
+MacOS.  [perl #134288]
+
+=item *
+
+L<Win32> has been upgraded from version 0.52 to 0.53.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.01 to 1.02.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+F<t/op/magic.t> could fail if environment varables starting with
+C<FOO> already existed.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+A new parser function L<parse_subsignature()|perlapi/parse_subsignature>
+allows a keyword plugin to parse a subroutine signature while C<use feature
+'signatures'> is in effect.  This allows custom keywords to implement
+semantics similar to regular C<sub> declarations that include signatures.
+[perl #132474]
+
+=item *
+
+Since on some platforms we need to hold a mutex when temporarily
+switching locales, new macros (C<STORE_LC_NUMERIC_SET_TO_NEEDED_IN>,
+C<WITH_LC_NUMERIC_SET_TO_NEEDED> and C<WITH_LC_NUMERIC_SET_TO_NEEDED_IN>)
+have been added to make it easier to do this safely and efficiently
+as part of [perl #134172].
+
+=item *
+
+The memory bookkeeping overhead for allocating an OP structure has been
+reduced by 8 bytes per OP on 64-bit systems.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<< $@ = 100; die; >> now correctly propagates the 100 as an exception
+instead of ignoring it.  [perl #134291]
+
+=item *
+
+C<< 0 0x@ >> no longer asserts in S_no_op().  [perl #134310]
+
+=item *
+
+Exceptions thrown while C<$@> is read-only could result in infinite
+recursion as perl tried to update C<$@>, which throws another
+exception, resulting in a stack overflow.  Perl now replaces C<$@>
+with a copy if it's not a simple writable SV.  [perl #134266]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.31.3 represents approximately 4 weeks of development since Perl
+5.31.2 and contains approximately 9,900 lines of changes across 230 files
+from 23 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 2,800 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.31.3:
+
+Alexandr Savca, Andrew Fresh, Chad Granum, Chris 'BinGOs' Williams, Dagfinn
+Ilmari Mannsåker, Dan Book, David Cantrell, David Mitchell, E. Choroba,
+Graham Knop, Hauke D, H.Merijn Brand, Hugo van der Sanden, James E Keenan,
+Johan Vromans, Karen Etheridge, Karl Williamson, Paul Evans, Sawyer X, Steve
+Hay, Tomasz Konojacki, Tom Hukins, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
