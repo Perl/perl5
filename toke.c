@@ -6315,6 +6315,27 @@ yyl_leftsquare(pTHX_ char *s)
     OPERATOR(tmp);
 }
 
+static int
+yyl_tilde(pTHX_ char *s)
+{
+    bool bof;
+    if (s[1] == '~' && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR)) {
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+            TOKEN(0);
+        s += 2;
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
+            "Smartmatch is experimental");
+        Eop(OP_SMARTMATCH);
+    }
+    s++;
+    if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.') {
+        s++;
+        BCop(OP_SCOMPLEMENT);
+    }
+    BCop(bof ? OP_NCOMPLEMENT : OP_COMPLEMENT);
+}
+
 /*
   yylex
 
@@ -7094,23 +7115,8 @@ Perl_yylex(pTHX)
         return yyl_leftsquare(aTHX_ s);
 
     case '~':
-	if (s[1] == '~'
-	    && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR))
-	{
-	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
-		TOKEN(0);
-	    s += 2;
-            Perl_ck_warner_d(aTHX_
-                packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
-                "Smartmatch is experimental");
-	    Eop(OP_SMARTMATCH);
-	}
-	s++;
-	if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.') {
-	    s++;
-	    BCop(OP_SCOMPLEMENT);
-	}
-	BCop(bof ? OP_NCOMPLEMENT : OP_COMPLEMENT);
+        return yyl_tilde(aTHX_ s);
+
     case ',':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMMA)
 	    TOKEN(0);
