@@ -6739,6 +6739,49 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
     OPERATOR(DO);
 }
 
+static int
+yyl_my(pTHX_ char **sp, I32 my)
+{
+    char *s = *sp;
+    if (PL_in_my) {
+        PL_bufptr = s;
+        yyerror(Perl_form(aTHX_
+                          "Can't redeclare \"%s\" in \"%s\"",
+                           my       == KEY_my    ? "my" :
+                           my       == KEY_state ? "state" : "our",
+                           PL_in_my == KEY_my    ? "my" :
+                           PL_in_my == KEY_state ? "state" : "our"));
+    }
+    PL_in_my = (U16)my;
+    s = skipspace(s);
+    if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+        STRLEN len;
+        s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
+        if (memEQs(PL_tokenbuf, len, "sub")) {
+            *sp = s;
+            return SUB;
+        }
+        PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
+        if (!PL_in_my_stash) {
+            char tmpbuf[1024];
+            int i;
+            PL_bufptr = s;
+            i = my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
+            PERL_MY_SNPRINTF_POST_GUARD(i, sizeof(tmpbuf));
+            yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
+        }
+    }
+    else if (*s == '\\') {
+        if (!FEATURE_MYREF_IS_ENABLED)
+            Perl_croak(aTHX_ "The experimental declared_refs "
+                             "feature is not enabled");
+        Perl_ck_warner_d(aTHX_
+             packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+            "Declaring references is experimental");
+    }
+    OPERATOR(MY);
+}
+
 static int yyl_try(pTHX_ char, char*, STRLEN, I32, GV*, GV**, U8, U32, const bool);
 
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
@@ -8482,41 +8525,13 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 	case KEY_our:
 	case KEY_my:
-	case KEY_state:
-	    if (PL_in_my) {
-	        PL_bufptr = s;
-	        yyerror(Perl_form(aTHX_
-	                          "Can't redeclare \"%s\" in \"%s\"",
-	                           tmp      == KEY_my    ? "my" :
-	                           tmp      == KEY_state ? "state" : "our",
-	                           PL_in_my == KEY_my    ? "my" :
-	                           PL_in_my == KEY_state ? "state" : "our"));
-	    }
-	    PL_in_my = (U16)tmp;
-	    s = skipspace(s);
-            if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-		if (memEQs(PL_tokenbuf, len, "sub"))
-		    goto really_sub;
-		PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
-		if (!PL_in_my_stash) {
-		    char tmpbuf[1024];
-                    int len;
-		    PL_bufptr = s;
-		    len = my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
-                    PERL_MY_SNPRINTF_POST_GUARD(len, sizeof(tmpbuf));
-		    yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
-		}
-	    }
-	    else if (*s == '\\') {
-		if (!FEATURE_MYREF_IS_ENABLED)
-		    Perl_croak(aTHX_ "The experimental declared_refs "
-				     "feature is not enabled");
-		Perl_ck_warner_d(aTHX_
-		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-		    "Declaring references is experimental");
-	    }
-	    OPERATOR(MY);
+	case KEY_state: {
+            int tok = yyl_my(aTHX_ &s, tmp);
+            if (tok == SUB)
+                goto really_sub;
+            else
+                return tok;
+        }
 
 	case KEY_next:
 	    LOOPX(OP_NEXT);
