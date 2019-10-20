@@ -6596,9 +6596,12 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
                           UTF8fARG(UTF, (s - d), d),
                          (int) len + 1);
     }
+
     case 4:
     case 26:
+        fake_eof = LEX_FAKE_EOF;
 	goto fake_eof;			/* emulate EOF on ^D or ^Z */
+
     case 0:
 	if ((!PL_rsfp || PL_lex_inwhat)
 	 && (!PL_parser->filtered || s+1 < PL_bufend)) {
@@ -6701,10 +6704,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	do {
 	    fake_eof = 0;
 	    bof = cBOOL(PL_rsfp);
-	    if (0) {
-	      fake_eof:
-		fake_eof = LEX_FAKE_EOF;
-	    }
+          fake_eof:
 	    PL_bufptr = PL_bufend;
 	    COPLINE_INC_WITH_HERELINES;
 	    if (!lex_next_chunk(fake_eof)) {
@@ -7890,6 +7890,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 #endif
 		PL_rsfp = NULL;
 	    }
+            fake_eof = LEX_FAKE_EOF;
 	    goto fake_eof;
 	}
 
