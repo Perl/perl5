@@ -6061,6 +6061,51 @@ yyl_leftcurly(pTHX_ char *s, U8 formbrack)
     TOKEN(formbrack ? '=' : '{');
 }
 
+static int
+yyl_rightcurly(pTHX_ char *s, U8 formbrack)
+{
+    if (PL_lex_brackets <= 0)
+        /* diag_listed_as: Unmatched right %s bracket */
+        yyerror("Unmatched right curly bracket");
+    else
+        PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
+
+    PL_lex_allbrackets--;
+
+    if (PL_lex_state == LEX_INTERPNORMAL) {
+        if (PL_lex_brackets == 0) {
+            if (PL_expect & XFAKEBRACK) {
+                PL_expect &= XENUMMASK;
+                PL_lex_state = LEX_INTERPEND;
+                PL_bufptr = s;
+                return yylex();	/* ignore fake brackets */
+            }
+            if (PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
+             && SvEVALED(PL_lex_repl))
+                PL_lex_state = LEX_INTERPEND;
+            else if (*s == '-' && s[1] == '>')
+                PL_lex_state = LEX_INTERPENDMAYBE;
+            else if (*s != '[' && *s != '{')
+                PL_lex_state = LEX_INTERPEND;
+        }
+    }
+
+    if (PL_expect & XFAKEBRACK) {
+        PL_expect &= XENUMMASK;
+        PL_bufptr = s;
+        return yylex();		/* ignore fake brackets */
+    }
+
+    force_next(formbrack ? '.' : '}');
+    if (formbrack) LEAVE_with_name("lex_format");
+    if (formbrack == 2) { /* means . where arguments were expected */
+        force_next(';');
+        TOKEN(FORMRBRACK);
+    }
+
+    TOKEN(';');
+}
+
 /*
   yylex
 
@@ -6929,42 +6974,8 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
       rightbracket:
 	assert(s != PL_bufend);
-	s++;
-	if (PL_lex_brackets <= 0)
-	    /* diag_listed_as: Unmatched right %s bracket */
-	    yyerror("Unmatched right curly bracket");
-	else
-	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
-	PL_lex_allbrackets--;
-	if (PL_lex_state == LEX_INTERPNORMAL) {
-	    if (PL_lex_brackets == 0) {
-		if (PL_expect & XFAKEBRACK) {
-		    PL_expect &= XENUMMASK;
-		    PL_lex_state = LEX_INTERPEND;
-		    PL_bufptr = s;
-		    return yylex();	/* ignore fake brackets */
-		}
-		if (PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
-		 && SvEVALED(PL_lex_repl))
-		    PL_lex_state = LEX_INTERPEND;
-		else if (*s == '-' && s[1] == '>')
-		    PL_lex_state = LEX_INTERPENDMAYBE;
-		else if (*s != '[' && *s != '{')
-		    PL_lex_state = LEX_INTERPEND;
-	    }
-	}
-	if (PL_expect & XFAKEBRACK) {
-	    PL_expect &= XENUMMASK;
-	    PL_bufptr = s;
-	    return yylex();		/* ignore fake brackets */
-	}
-	force_next(formbrack ? '.' : '}');
-	if (formbrack) LEAVE_with_name("lex_format");
-	if (formbrack == 2) { /* means . where arguments were expected */
-	    force_next(';');
-	    TOKEN(FORMRBRACK);
-	}
-	TOKEN(';');
+        return yyl_rightcurly(aTHX_ s + 1, formbrack);
+
     case '&':
 	if (PL_expect == XPOSTDEREF) POSTDEREF('&');
 	s++;
