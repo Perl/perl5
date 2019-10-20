@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Scalar::Util qw(blessed);
 
 my $t;
@@ -46,3 +46,8 @@ cmp_ok(blessed($x), "eq", "0",	'blessed HASH-ref');
   ::is( ::blessed($obj), __PACKAGE__, "blessed on broken isa() and can()" );
 }
 
+{
+  my $utf8_pack= "X\x{100}";
+  my $obj= bless {}, $utf8_pack;
+  ::is( ::blessed($obj), $utf8_pack, "blessed preserves utf8ness for utf8 class names" );
+}

@@ -347,6 +347,7 @@ CODE:
             /* fallthrough to NV now */
             retnv = retiv;
             accum = ACC_NV;
+            /* FALLTHROUGH */
         case ACC_NV:
             is_product ? (retnv *= slu_sv_value(sv))
                        : (retnv += slu_sv_value(sv));
@@ -1310,18 +1311,25 @@ CODE:
     ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
     XSRETURN(1);
 
-char *
+SV *
 blessed(sv)
     SV *sv
 PROTOTYPE: $
 CODE:
 {
     SvGETMAGIC(sv);
-
-    if(!(SvROK(sv) && SvOBJECT(SvRV(sv))))
-        XSRETURN_UNDEF;
-
-    RETVAL = (char*)sv_reftype(SvRV(sv),TRUE);
+    RETVAL = newSV(0);
+    if(SvROK(sv)) {
+        sv= SvRV(sv);
+        if (SvOBJECT(sv)) {
+            HV *st= SvSTASH(sv);
+            if (HvNAME_get(st)) {
+                sv_sethek(RETVAL, HvNAME_HEK(st));
+            } else {
+                sv_setpvs(RETVAL, "__ANON__");
+            }
+        }
+    }
 }
 OUTPUT:
     RETVAL

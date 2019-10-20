@@ -5,7 +5,7 @@ use Test::More 0.60;
 # Test::More 0.60 required because:
 # - is_deeply(undef, $not_undef); now works. [rt.cpan.org 9441]
 
-BEGIN { plan tests => 1+2*7; }
+BEGIN { plan tests => 1+2*9; }
 
 BEGIN { use_ok('Data::Dumper') };
 
@@ -44,6 +44,17 @@ PERL
 is($dt, $o, "package name in bless is escaped if needed");
 is_deeply(scalar eval($dt), $t, "eval reverts dump");
 }
+{
+my $t = bless( {}, qq{X\x{100}::\x{df}} );
+my $dt = Dumper($t);
+my $o = <<'PERL';
+$VAR1 = bless( {}, "X\x{100}::\x{df}" );
+PERL
+
+is($dt, $o, "package name in bless is escaped with double quotes if unicode");
+is_deeply(scalar eval($dt), $t, "eval reverts dump");
+}
+
 
 {
 my $t = bless( {}, q{a\\} );

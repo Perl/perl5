@@ -1882,7 +1882,7 @@ Apd	|SV*	|sv_setref_pvn	|NN SV *const rv|NULLOK const char *const classname \
 Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Apd	|char  *|sv_setpv_bufsize|NN SV *const sv|const STRLEN cur|const STRLEN len
-Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
+XEp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
 ApMdb	|void	|sv_setsv	|NN SV *dstr|NULLOK SV *sstr
 ApMdb	|void	|sv_taint	|NN SV* sv
 ApdR	|bool	|sv_tainted	|NN SV *const sv
