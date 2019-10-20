@@ -6163,6 +6163,36 @@ yyl_ampersand(pTHX_ char *s)
     TERM('&');
 }
 
+static int
+yyl_verticalbar(pTHX_ char *s)
+{
+    char *d;
+    bool bof;
+
+    s++;
+    if (*s++ == '|') {
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+                (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
+            s -= 2;
+            TOKEN(0);
+        }
+        AOPERATOR(OROR);
+    }
+
+    s--;
+    d = s;
+    if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.')
+        s++;
+
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+            (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
+        s = d - 1;
+        TOKEN(0);
+    }
+
+    BOop(bof ? s == d ? OP_NBIT_OR : OP_SBIT_OR : OP_BIT_OR);
+}
+
 /*
   yylex
 
@@ -7037,25 +7067,8 @@ Perl_yylex(pTHX)
         return yyl_ampersand(aTHX_ s);
 
     case '|':
-	s++;
-	if (*s++ == '|') {
-	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
-		s -= 2;
-		TOKEN(0);
-	    }
-	    AOPERATOR(OROR);
-	}
-	s--;
-	d = s;
-	if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.')
-	    s++;
-	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-		(*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
-	    s = d - 1;
-	    TOKEN(0);
-	}
-	BOop(bof ? s == d ? OP_NBIT_OR : OP_SBIT_OR : OP_BIT_OR);
+        return yyl_verticalbar(aTHX_ s);
+
     case '=':
 	s++;
 	{
