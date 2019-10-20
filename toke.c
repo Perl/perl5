@@ -6511,6 +6511,25 @@ yyl_dblquote(pTHX_ char *s, STRLEN len)
     TERM(sublex_start());
 }
 
+static int
+yyl_backtick(pTHX_ char *s)
+{
+    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
+    DEBUG_T( {
+        if (s)
+            printbuf("### Saw backtick string before %s\n", s);
+        else
+            PerlIO_printf(Perl_debug_log,
+                         "### Saw unterminated backtick string\n");
+    } );
+    if (PL_expect == XOPERATOR)
+        no_op("Backticks",s);
+    if (!s)
+        missingterm(NULL, 0);
+    pl_yylval.ival = OP_BACKTICK;
+    TERM(sublex_start());
+}
+
 /*
   yylex
 
@@ -7531,20 +7550,7 @@ Perl_yylex(pTHX)
         return yyl_dblquote(aTHX_ s, len);
 
     case '`':
-	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-	DEBUG_T( {
-            if (s)
-                printbuf("### Saw backtick string before %s\n", s);
-            else
-		PerlIO_printf(Perl_debug_log,
-			     "### Saw unterminated backtick string\n");
-        } );
-	if (PL_expect == XOPERATOR)
-	    no_op("Backticks",s);
-	if (!s)
-	    missingterm(NULL, 0);
-	pl_yylval.ival = OP_BACKTICK;
-	TERM(sublex_start());
+        return yyl_backtick(aTHX_ s);
 
     case '\\':
 	s++;
