@@ -21,16 +21,16 @@ Code like:
     my $var;
     $sub = sub () { $var };
 
-where C<$var> is referenced elsewhere in some sort of modiable context
-now produces an exception when the sub is defined.
+where C<$var> is referenced elsewhere in some sort of modifiable context now
+produces an exception when the sub is defined.
 
 This error can be avoided by adding a return to the sub definition:
 
     $sub = sub () { return $var };
 
-This has been deprecated since perl 5.22.
+This has been deprecated since Perl 5.22.
 
-[perl #131138]
+L<[perl #131138]|https://rt.perl.org/Ticket/Display.html?id=131138>.
 
 =head1 Modules and Pragmata
 
@@ -94,17 +94,15 @@ L<Time::HiRes> has been upgraded from version 1.9763 to 1.9764.
 
 L<XS::APItest> has been upgraded from version 1.03 to 1.04.
 
-If there was something important to note about this change, include that here.
-
 =back
 
 =head1 Documentation
 
 =head2 Changes to Existing Documentation
 
-We have attempted to update the documentation to reflect the changes
-listed in this document.  If you find any we have missed, send email
-to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, send email to
+L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
 =head3 L<perlguts>
 
@@ -119,24 +117,24 @@ here.
 
 Additionally, the following selected changes have been made:
 
-=head3 URLs have been changed to https://, stale links updated
+=head3 URLs have been changed to https:// and stale links have been updated
 
 =over 4
 
 =item *
 
-Where applicable, the URLs in the documentation have been moved from
-using the http:// protocol to https:// . This also affects the location
-of the bug tracker at L<https://rt.perl.org>.
+Where applicable, the URLs in the documentation have been moved from using the
+http:// protocol to https:// .  This also affects the location of the bug
+tracker at L<https://rt.perl.org>.
 
 =item *
 
-Some links to OS/2 libraries, Address Sanitizer and other system tools
-had gone stale. These have been updated with working links.
+Some links to OS/2 libraries, Address Sanitizer and other system tools had gone
+stale.  These have been updated with working links.
 
 =item *
 
-Some links to old mails on perl5-porters had gone stale. These have been
+Some links to old mails on perl5-porters had gone stale.  These have been
 updated with working links.
 
 =back
@@ -165,10 +163,12 @@ signature>.
 L<Constants from lexical variables potentially modified elsewhere are no longer permitted|perldiag/"Constants from lexical variables potentially modified elsewhere are no longer permitted">
 
 This error message replaces the former C<Constants from lexical variables
-potentially modified elsewhere are deprecated. This will not be allowed in Perl
+potentially modified elsewhere are deprecated.  This will not be allowed in Perl
 5.32> to reflect the fact that this previously deprecated usage has now been
 transformed into an exception.  The message's classification has also been
 updated from D (deprecated) to F (fatal).
+
+See also L</Incompatible Changes>.
 
 =back
 
@@ -178,25 +178,26 @@ updated from D (deprecated) to F (fatal).
 
 =item *
 
-Perl now no longer probes for C<d_u32align>, defaulting to C<define>
-on all platforms.  This check was error prone when it was done, which
-was on 32-bit platforms only.  [perl #133495]
+Perl now no longer probes for C<d_u32align>, defaulting to C<define> on all
+platforms.  This check was error prone when it was done, which was on 32-bit
+platforms only.
+L<[perl #133495]|https://rt.perl.org/Ticket/Display.html?id=133495>.
 
 =item *
 
-Documentation and hints for building perl on Z/OS (native EBCDIC) have
-been updated. Still work in progress.
+Documentation and hints for building perl on Z/OS (native EBCDIC) have been
+updated.  Still work in progress.
 
 =item *
 
-New probe for malloc_usable_size
+A new probe for C<malloc_usable_size> has been added.
 
 =back
 
 =head1 Testing
 
-Tests were added and changed to reflect the other additions and changes
-in this release.
+Tests were added and changed to reflect the other additions and changes in this
+release.
 
 =head1 Platform Support
 
@@ -227,18 +228,17 @@ release but has now been fixed.
 
 =item *
 
-Added the C<<PL_curstackinfo->si_cxsubix>> field. This records the stack
-index of the most recently pushed sub/format/eval context.  It is set and
-restored automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would
-need to be manually managed if you do any unusual manipulation of the
-context stack.
+Added the C<<PL_curstackinfo->si_cxsubix>> field.  This records the stack index
+of the most recently pushed sub/format/eval context.  It is set and restored
+automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would need to be
+manually managed if you do any unusual manipulation of the context stack.
 
 =item *
 
-Various macros dealing with character type classification and changing
-case where the input is encoded in UTF-8 now require an extra parameter
-to prevent potential reads beyond the end of the buffer.  Use of these
-has generated a deprecation warning since 5.26.  Details are in
+Various macros dealing with character type classification and changing case
+where the input is encoded in UTF-8 now require an extra parameter to prevent
+potential reads beyond the end of the buffer.  Use of these has generated a
+deprecation warning since Perl 5.26.  Details are in
 L<perldeprecation/In XS code, use of various macros dealing with UTF-8.>
 
 =back
@@ -251,8 +251,8 @@ XXX Generate this with:
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the perl bug database
-at L<https://rt.perl.org/>.  There may also be information at
+If you find what you think is a bug, you might check the perl bug database at
+L<https://rt.perl.org/>.  There may also be information at
 L<https://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
@@ -262,13 +262,13 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
