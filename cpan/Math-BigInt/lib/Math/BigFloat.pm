@@ -19,7 +19,7 @@ use warnings;
 use Carp qw< carp croak >;
 use Math::BigInt ();
 
-our $VERSION = '1.999817';
+our $VERSION = '1.999817_01';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
@@ -4597,7 +4597,7 @@ sub numify {
     }
 
     # Create a string and let Perl's atoi()/atof() handle the rest.
-    return 0 + $x -> bsstr();
+    return 0 + $x -> bnstr();
 }
 
 ###############################################################################

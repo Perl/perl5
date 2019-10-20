@@ -728,6 +728,14 @@ use File::Glob qw(:case);
                 t/01load.t
                 ),
         ],
+        # CPAN RT 130736
+        'CUSTOMIZED'   => [
+            'lib/Math/BigFloat.pm',
+            'lib/Math/BigInt.pm',
+            'lib/Math/BigInt/Calc.pm',
+            'lib/Math/BigInt/Lib.pm',
+            'lib/Math-BigInt/t/calling.t'
+        ],
     },
 
     'Math::BigInt::FastCalc' => {
