@@ -6709,6 +6709,36 @@ yyl_foreach(pTHX_ char *s)
     OPERATOR(FOR);
 }
 
+static int
+yyl_do(pTHX_ char *s, I32 orig_keyword)
+{
+    s = skipspace(s);
+    if (*s == '{')
+        PRETERMBLOCK(DO);
+    if (*s != '\'') {
+        char *d;
+        STRLEN len;
+        *PL_tokenbuf = '&';
+        d = scan_word(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
+                      1, &len);
+        if (len && memNEs(PL_tokenbuf+1, len, "CORE")
+         && !keyword(PL_tokenbuf + 1, len, 0)) {
+            SSize_t off = s-SvPVX(PL_linestr);
+            d = skipspace(d);
+            s = SvPVX(PL_linestr)+off;
+            if (*d == '(') {
+                force_ident_maybe_lex('&');
+                s = d;
+            }
+        }
+    }
+    if (orig_keyword == KEY_do)
+        pl_yylval.ival = 1;
+    else
+        pl_yylval.ival = 0;
+    OPERATOR(DO);
+}
+
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
 
@@ -8122,31 +8152,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    PREBLOCK(DEFAULT);
 
 	case KEY_do:
-	    s = skipspace(s);
-	    if (*s == '{')
-		PRETERMBLOCK(DO);
-	    if (*s != '\'') {
-		*PL_tokenbuf = '&';
-		d = scan_word(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
-			      1, &len);
-		if (len && memNEs(PL_tokenbuf+1, len, "CORE")
-		 && !keyword(PL_tokenbuf + 1, len, 0)) {
-                    SSize_t off = s-SvPVX(PL_linestr);
-		    d = skipspace(d);
-                    s = SvPVX(PL_linestr)+off;
-		    if (*d == '(') {
-			force_ident_maybe_lex('&');
-			s = d;
-		    }
-		}
-	    }
-	    if (orig_keyword == KEY_do) {
-		orig_keyword = 0;
-		pl_yylval.ival = 1;
-	    }
-	    else
-		pl_yylval.ival = 0;
-	    OPERATOR(DO);
+            return yyl_do(aTHX_ s, orig_keyword);
 
 	case KEY_die:
 	    PL_hints |= HINT_BLOCK_SCOPE;
