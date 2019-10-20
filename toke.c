@@ -6541,6 +6541,58 @@ yyl_backslash(pTHX_ char *s)
     OPERATOR(REFGEN);
 }
 
+static void
+yyl_data_handle(pTHX)
+{
+    HV * const stash = PL_tokenbuf[2] == 'D' && PL_curstash
+                            ? PL_curstash
+                            : PL_defstash;
+    GV *gv = (GV *)*hv_fetchs(stash, "DATA", 1);
+
+    if (!isGV(gv))
+        gv_init(gv,stash,"DATA",4,0);
+
+    GvMULTI_on(gv);
+    if (!GvIO(gv))
+        GvIOp(gv) = newIO();
+    IoIFP(GvIOp(gv)) = PL_rsfp;
+
+    /* Mark this internal pseudo-handle as clean */
+    IoFLAGS(GvIOp(gv)) |= IOf_UNTAINT;
+    if ((PerlIO*)PL_rsfp == PerlIO_stdin())
+        IoTYPE(GvIOp(gv)) = IoTYPE_STD;
+    else
+        IoTYPE(GvIOp(gv)) = IoTYPE_RDONLY;
+
+#if defined(WIN32) && !defined(PERL_TEXTMODE_SCRIPTS)
+    /* if the script was opened in binmode, we need to revert
+     * it to text mode for compatibility; but only iff it has CRs
+     * XXX this is a questionable hack at best. */
+    if (PL_bufend-PL_bufptr > 2
+        && PL_bufend[-1] == '\n' && PL_bufend[-2] == '\r')
+    {
+        Off_t loc = 0;
+        if (IoTYPE(GvIOp(gv)) == IoTYPE_RDONLY) {
+            loc = PerlIO_tell(PL_rsfp);
+            (void)PerlIO_seek(PL_rsfp, 0L, 0);
+        }
+        if (PerlLIO_setmode(RSFP_FILENO, O_TEXT) != -1) {
+            if (loc > 0)
+                PerlIO_seek(PL_rsfp, loc, 0);
+        }
+    }
+#endif
+
+#ifdef PERLIO_LAYERS
+    if (!IN_BYTES) {
+        if (UTF)
+            PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
+    }
+#endif
+
+    PL_rsfp = NULL;
+}
+
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
 
@@ -7845,54 +7897,11 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    );
 
 	case KEY___DATA__:
-	case KEY___END__: {
-	    GV *gv;
-	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
-		HV * const stash = PL_tokenbuf[2] == 'D' && PL_curstash
-					? PL_curstash
-					: PL_defstash;
-		gv = (GV *)*hv_fetchs(stash, "DATA", 1);
-		if (!isGV(gv))
-		    gv_init(gv,stash,"DATA",4,0);
-		GvMULTI_on(gv);
-		if (!GvIO(gv))
-		    GvIOp(gv) = newIO();
-		IoIFP(GvIOp(gv)) = PL_rsfp;
-		/* Mark this internal pseudo-handle as clean */
-		IoFLAGS(GvIOp(gv)) |= IOf_UNTAINT;
-		if ((PerlIO*)PL_rsfp == PerlIO_stdin())
-		    IoTYPE(GvIOp(gv)) = IoTYPE_STD;
-		else
-		    IoTYPE(GvIOp(gv)) = IoTYPE_RDONLY;
-#if defined(WIN32) && !defined(PERL_TEXTMODE_SCRIPTS)
-		/* if the script was opened in binmode, we need to revert
-		 * it to text mode for compatibility; but only iff it has CRs
-		 * XXX this is a questionable hack at best. */
-		if (PL_bufend-PL_bufptr > 2
-		    && PL_bufend[-1] == '\n' && PL_bufend[-2] == '\r')
-		{
-		    Off_t loc = 0;
-		    if (IoTYPE(GvIOp(gv)) == IoTYPE_RDONLY) {
-			loc = PerlIO_tell(PL_rsfp);
-			(void)PerlIO_seek(PL_rsfp, 0L, 0);
-		    }
-                    if (PerlLIO_setmode(RSFP_FILENO, O_TEXT) != -1) {
-			if (loc > 0)
-			    PerlIO_seek(PL_rsfp, loc, 0);
-		    }
-		}
-#endif
-#ifdef PERLIO_LAYERS
-		if (!IN_BYTES) {
-		    if (UTF)
-			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
-		}
-#endif
-		PL_rsfp = NULL;
-	    }
+	case KEY___END__:
+            if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D'))
+                yyl_data_handle(aTHX);
             fake_eof = LEX_FAKE_EOF;
 	    goto fake_eof;
-	}
 
 	case KEY___SUB__:
 	    FUN0OP(CvCLONE(PL_compcv)
