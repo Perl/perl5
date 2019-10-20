@@ -6230,6 +6230,45 @@ yyl_bang(pTHX_ char *s)
     OPERATOR('!');
 }
 
+static int
+yyl_snail(pTHX_ char *s)
+{
+    if (PL_expect == XPOSTDEREF)
+        POSTDEREF('@');
+    PL_tokenbuf[0] = '@';
+    s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+    if (PL_expect == XOPERATOR) {
+        char *d = s;
+        if (PL_bufptr > s) {
+            d = PL_bufptr-1;
+            PL_bufptr = PL_oldbufptr;
+        }
+        no_op("Array", d);
+    }
+    pl_yylval.ival = 0;
+    if (!PL_tokenbuf[1]) {
+        PREREF('@');
+    }
+    if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
+        s = skipspace(s);
+    if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
+        && intuit_more(s, PL_bufend))
+    {
+        if (*s == '{')
+            PL_tokenbuf[0] = '%';
+
+        /* Warn about @ where they meant $. */
+        if (*s == '[' || *s == '{') {
+            if (ckWARN(WARN_SYNTAX)) {
+                S_check_scalar_slice(aTHX_ s);
+            }
+        }
+    }
+    PL_expect = XOPERATOR;
+    force_ident_maybe_lex('@');
+    TERM('@');
+}
+
 /*
   yylex
 
@@ -7303,40 +7342,7 @@ Perl_yylex(pTHX)
         return yyl_dollar(aTHX_ s);
 
     case '@':
-        if (PL_expect == XPOSTDEREF)
-            POSTDEREF('@');
-	PL_tokenbuf[0] = '@';
-	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
-	if (PL_expect == XOPERATOR) {
-            d = s;
-            if (PL_bufptr > s) {
-                d = PL_bufptr-1;
-                PL_bufptr = PL_oldbufptr;
-            }
-	    no_op("Array", d);
-        }
-	pl_yylval.ival = 0;
-	if (!PL_tokenbuf[1]) {
-	    PREREF('@');
-	}
-	if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
-	    s = skipspace(s);
-	if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
-            && intuit_more(s, PL_bufend))
-        {
-	    if (*s == '{')
-		PL_tokenbuf[0] = '%';
-
-	    /* Warn about @ where they meant $. */
-	    if (*s == '[' || *s == '{') {
-		if (ckWARN(WARN_SYNTAX)) {
-		    S_check_scalar_slice(aTHX_ s);
-		}
-	    }
-	}
-	PL_expect = XOPERATOR;
-	force_ident_maybe_lex('@');
-	TERM('@');
+        return yyl_snail(aTHX_ s);
 
      case '/':			/* may be division, defined-or, or pattern */
 	if ((PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR) && s[1] == '/') {
