@@ -179,26 +179,22 @@ If there was something important to note about this change, include that here.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, send email
 to L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Details of the various stacks within the perl interpreter are now explained
+here.
+
+=back
 
 Additionally, the following selected changes have been made:
 
@@ -224,59 +220,34 @@ updated with working links.
 
 =back
 
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
-
-=back
-
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+L<Can't use global %s in %s|perldiag/"Can't use global %s in %s">
+
+This error message has been slightly reformatted from the original C<Can't use
+global %s in "%s">, and in particular misleading error messages like C<Can't
+use global $_ in "my"> are now rendered as C<Can't use global $_ in subroutine
+signature>.
+
+=item *
+
+L<Constants from lexical variables potentially modified elsewhere are no longer permitted|perldiag/"Constants from lexical variables potentially modified elsewhere are no longer permitted">
+
+This error message replaces the former C<Constants from lexical variables
+potentially modified elsewhere are deprecated. This will not be allowed in Perl
+5.32> to reflect the fact that this previously deprecated usage has now been
+transformed into an exception.  The message's classification has also been
+updated from D (deprecated) to F (fatal).
 
 =back
 
