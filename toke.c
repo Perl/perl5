@@ -6541,311 +6541,8 @@ yyl_backslash(pTHX_ char *s)
     OPERATOR(REFGEN);
 }
 
-/*
-  yylex
-
-  Works out what to call the token just pulled out of the input
-  stream.  The yacc parser takes care of taking the ops we return and
-  stitching them into a tree.
-
-  Returns:
-    The type of the next token
-
-  Structure:
-      Check if we have already built the token; if so, use it.
-      Switch based on the current state:
-	  - if we have a case modifier in a string, deal with that
-	  - handle other cases of interpolation inside a string
-	  - scan the next line if we are inside a format
-      In the normal state, switch on the next character:
-	  - default:
-	    if alphabetic, go to key lookup
-	    unrecognized character - croak
-	  - 0/4/26: handle end-of-line or EOF
-	  - cases for whitespace
-	  - \n and #: handle comments and line numbers
-	  - various operators, brackets and sigils
-	  - numbers
-	  - quotes
-	  - 'v': vstrings (or go to key lookup)
-	  - 'x' repetition operator (or go to key lookup)
-	  - other ASCII alphanumerics (key lookup begins here):
-	      word before => ?
-	      keyword plugin
-	      scan built-in keyword (but do nothing with it yet)
-	      check for statement label
-	      check for lexical subs
-		  goto just_a_word if there is one
-	      see whether built-in keyword is overridden
-	      switch on keyword number:
-		  - default: just_a_word:
-		      not a built-in keyword; handle bareword lookup
-		      disambiguate between method and sub call
-		      fall back to bareword
-		  - cases for built-in keywords
-*/
-
-#ifdef NETWARE
-#define RSFP_FILENO (PL_rsfp)
-#else
-#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
-#endif
-
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
-
-
-static int yyl_try(pTHX_ char, char*, STRLEN, I32, GV*, GV**, U8, U32, const bool);
-
-int
-Perl_yylex(pTHX)
-{
-    dVAR;
-    char *s = PL_bufptr;
-    const bool saw_infix_sigil = cBOOL(PL_parser->saw_infix_sigil);
-
-    if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
-        const U8* first_bad_char_loc;
-        if (UTF && UNLIKELY(! is_utf8_string_loc((U8 *) PL_bufptr,
-                                                        PL_bufend - PL_bufptr,
-                                                        &first_bad_char_loc)))
-        {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
-                                              (U8 *) PL_bufend,
-                                              0,
-                                              1 /* 1 means die */ );
-            NOT_REACHED; /* NOTREACHED */
-        }
-        PL_parser->recheck_utf8_validity = FALSE;
-    }
-    DEBUG_T( {
-	SV* tmp = newSVpvs("");
-	PerlIO_printf(Perl_debug_log, "### %" IVdf ":LEX_%s/X%s %s\n",
-	    (IV)CopLINE(PL_curcop),
-	    lex_state_names[PL_lex_state],
-	    exp_name[PL_expect],
-	    pv_display(tmp, s, strlen(s), 0, 60));
-	SvREFCNT_dec(tmp);
-    } );
-
-    /* when we've already built the next token, just pull it out of the queue */
-    if (PL_nexttoke) {
-	PL_nexttoke--;
-	pl_yylval = PL_nextval[PL_nexttoke];
-	{
-	    I32 next_type;
-	    next_type = PL_nexttype[PL_nexttoke];
-	    if (next_type & (7<<24)) {
-		if (next_type & (1<<24)) {
-		    if (PL_lex_brackets > 100)
-			Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
-		    PL_lex_brackstack[PL_lex_brackets++] =
-			(char) ((next_type >> 16) & 0xff);
-		}
-		if (next_type & (2<<24))
-		    PL_lex_allbrackets++;
-		if (next_type & (4<<24))
-		    PL_lex_allbrackets--;
-		next_type &= 0xffff;
-	    }
-	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
-	}
-    }
-
-    switch (PL_lex_state) {
-    case LEX_NORMAL:
-    case LEX_INTERPNORMAL:
-	break;
-
-    /* interpolated case modifiers like \L \U, including \Q and \E.
-       when we get here, PL_bufptr is at the \
-    */
-    case LEX_INTERPCASEMOD:
-	/* handle \E or end of string */
-        return yyl_interpcasemod(aTHX_ s);
-
-    case LEX_INTERPPUSH:
-        return REPORT(sublex_push());
-
-    case LEX_INTERPSTART:
-	if (PL_bufptr == PL_bufend)
-	    return REPORT(sublex_done());
-	DEBUG_T({
-            if(*PL_bufptr != '(')
-                PerlIO_printf(Perl_debug_log, "### Interpolated variable\n");
-        });
-	PL_expect = XTERM;
-        /* for /@a/, we leave the joining for the regex engine to do
-         * (unless we're within \Q etc) */
-	PL_lex_dojoin = (*PL_bufptr == '@'
-                            && (!PL_lex_inpat || PL_lex_casemods));
-	PL_lex_state = LEX_INTERPNORMAL;
-	if (PL_lex_dojoin) {
-	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(',');
-	    force_ident("\"", '$');
-	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next('$');
-	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next((2<<24)|'(');
-	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
-	    force_next(FUNC);
-	}
-	/* Convert (?{...}) and friends to 'do {...}' */
-	if (PL_lex_inpat && *PL_bufptr == '(') {
-	    PL_parser->lex_shared->re_eval_start = PL_bufptr;
-	    PL_bufptr += 2;
-	    if (*PL_bufptr != '{')
-		PL_bufptr++;
-	    PL_expect = XTERMBLOCK;
-	    force_next(DO);
-	}
-
-	if (PL_lex_starts++) {
-	    s = PL_bufptr;
-	    /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
-	    if (!PL_lex_casemods && PL_lex_inpat)
-		TOKEN(',');
-	    else
-		AopNOASSIGN(OP_CONCAT);
-	}
-	return yylex();
-
-    case LEX_INTERPENDMAYBE:
-	if (intuit_more(PL_bufptr, PL_bufend)) {
-	    PL_lex_state = LEX_INTERPNORMAL;	/* false alarm, more expr */
-	    break;
-	}
-	/* FALLTHROUGH */
-
-    case LEX_INTERPEND:
-	if (PL_lex_dojoin) {
-	    const U8 dojoin_was = PL_lex_dojoin;
-	    PL_lex_dojoin = FALSE;
-	    PL_lex_state = LEX_INTERPCONCAT;
-	    PL_lex_allbrackets--;
-	    return REPORT(dojoin_was == 1 ? (int)')' : (int)POSTJOIN);
-	}
-	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
-	    && SvEVALED(PL_lex_repl))
-	{
-	    if (PL_bufptr != PL_bufend)
-		Perl_croak(aTHX_ "Bad evalled substitution pattern");
-	    PL_lex_repl = NULL;
-	}
-	/* Paranoia.  re_eval_start is adjusted when S_scan_heredoc sets
-	   re_eval_str.  If the here-doc body’s length equals the previous
-	   value of re_eval_start, re_eval_start will now be null.  So
-	   check re_eval_str as well. */
-	if (PL_parser->lex_shared->re_eval_start
-	 || PL_parser->lex_shared->re_eval_str) {
-	    SV *sv;
-	    if (*PL_bufptr != ')')
-		Perl_croak(aTHX_ "Sequence (?{...}) not terminated with ')'");
-	    PL_bufptr++;
-	    /* having compiled a (?{..}) expression, return the original
-	     * text too, as a const */
-	    if (PL_parser->lex_shared->re_eval_str) {
-		sv = PL_parser->lex_shared->re_eval_str;
-		PL_parser->lex_shared->re_eval_str = NULL;
-		SvCUR_set(sv,
-			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
-		SvPV_shrink_to_cur(sv);
-	    }
-	    else sv = newSVpvn(PL_parser->lex_shared->re_eval_start,
-			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
-	    NEXTVAL_NEXTTOKE.opval =
-                    newSVOP(OP_CONST, 0,
-				 sv);
-	    force_next(THING);
-	    PL_parser->lex_shared->re_eval_start = NULL;
-	    PL_expect = XTERM;
-	    return REPORT(',');
-	}
-
-	/* FALLTHROUGH */
-    case LEX_INTERPCONCAT:
-#ifdef DEBUGGING
-	if (PL_lex_brackets)
-	    Perl_croak(aTHX_ "panic: INTERPCONCAT, lex_brackets=%ld",
-		       (long) PL_lex_brackets);
-#endif
-	if (PL_bufptr == PL_bufend)
-	    return REPORT(sublex_done());
-
-	/* m'foo' still needs to be parsed for possible (?{...}) */
-	if (SvIVX(PL_linestr) == '\'' && !PL_lex_inpat) {
-	    SV *sv = newSVsv(PL_linestr);
-	    sv = tokeq(sv);
-            pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
-	    s = PL_bufend;
-	}
-	else {
-            int save_error_count = PL_error_count;
-
-	    s = scan_const(PL_bufptr);
-
-            /* Set flag if this was a pattern and there were errors.  op.c will
-             * refuse to compile a pattern with this flag set.  Otherwise, we
-             * could get segfaults, etc. */
-            if (PL_lex_inpat && PL_error_count > save_error_count) {
-                ((PMOP*)PL_lex_inpat)->op_pmflags |= PMf_HAS_ERROR;
-            }
-	    if (*s == '\\')
-		PL_lex_state = LEX_INTERPCASEMOD;
-	    else
-		PL_lex_state = LEX_INTERPSTART;
-	}
-
-	if (s != PL_bufptr) {
-	    NEXTVAL_NEXTTOKE = pl_yylval;
-	    PL_expect = XTERM;
-	    force_next(THING);
-	    if (PL_lex_starts++) {
-		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
-		if (!PL_lex_casemods && PL_lex_inpat)
-		    TOKEN(',');
-		else
-		    AopNOASSIGN(OP_CONCAT);
-	    }
-	    else {
-		PL_bufptr = s;
-		return yylex();
-	    }
-	}
-
-	return yylex();
-    case LEX_FORMLINE:
-        if (PL_parser->sub_error_count != PL_error_count) {
-            /* There was an error parsing a formline, which tends to
-               mess up the parser.
-               Unlike interpolated sub-parsing, we can't treat any of
-               these as recoverable, so no need to check sub_no_recover.
-            */
-            yyquit();
-        }
-	assert(PL_lex_formbrack);
-	s = scan_formline(PL_bufptr);
-	if (!PL_lex_formbrack) {
-            return yyl_try(aTHX_ '}', s, 0, 0, NULL, NULL, 1, 0, saw_infix_sigil);
-	}
-	PL_bufptr = s;
-	return yylex();
-    }
-
-    /* We really do *not* want PL_linestr ever becoming a COW. */
-    assert (!SvIsCOW(PL_linestr));
-    s = PL_bufptr;
-    PL_oldoldbufptr = PL_oldbufptr;
-    PL_oldbufptr = s;
-    PL_parser->saw_infix_sigil = 0;
-
-    if (PL_in_my == KEY_sigvar) {
-        return yyl_sigvar(aTHX_ s);
-    }
-
-    return yyl_try(aTHX_ 0, s, 0, 0, NULL, NULL, 0, 0, saw_infix_sigil);
-}
 
 static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
@@ -9232,6 +8929,309 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	}
     }}
 }
+
+
+/*
+  yylex
+
+  Works out what to call the token just pulled out of the input
+  stream.  The yacc parser takes care of taking the ops we return and
+  stitching them into a tree.
+
+  Returns:
+    The type of the next token
+
+  Structure:
+      Check if we have already built the token; if so, use it.
+      Switch based on the current state:
+	  - if we have a case modifier in a string, deal with that
+	  - handle other cases of interpolation inside a string
+	  - scan the next line if we are inside a format
+      In the normal state, switch on the next character:
+	  - default:
+	    if alphabetic, go to key lookup
+	    unrecognized character - croak
+	  - 0/4/26: handle end-of-line or EOF
+	  - cases for whitespace
+	  - \n and #: handle comments and line numbers
+	  - various operators, brackets and sigils
+	  - numbers
+	  - quotes
+	  - 'v': vstrings (or go to key lookup)
+	  - 'x' repetition operator (or go to key lookup)
+	  - other ASCII alphanumerics (key lookup begins here):
+	      word before => ?
+	      keyword plugin
+	      scan built-in keyword (but do nothing with it yet)
+	      check for statement label
+	      check for lexical subs
+		  goto just_a_word if there is one
+	      see whether built-in keyword is overridden
+	      switch on keyword number:
+		  - default: just_a_word:
+		      not a built-in keyword; handle bareword lookup
+		      disambiguate between method and sub call
+		      fall back to bareword
+		  - cases for built-in keywords
+*/
+
+#ifdef NETWARE
+#define RSFP_FILENO (PL_rsfp)
+#else
+#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
+#endif
+
+
+int
+Perl_yylex(pTHX)
+{
+    dVAR;
+    char *s = PL_bufptr;
+    const bool saw_infix_sigil = cBOOL(PL_parser->saw_infix_sigil);
+
+    if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
+        const U8* first_bad_char_loc;
+        if (UTF && UNLIKELY(! is_utf8_string_loc((U8 *) PL_bufptr,
+                                                        PL_bufend - PL_bufptr,
+                                                        &first_bad_char_loc)))
+        {
+            _force_out_malformed_utf8_message(first_bad_char_loc,
+                                              (U8 *) PL_bufend,
+                                              0,
+                                              1 /* 1 means die */ );
+            NOT_REACHED; /* NOTREACHED */
+        }
+        PL_parser->recheck_utf8_validity = FALSE;
+    }
+    DEBUG_T( {
+	SV* tmp = newSVpvs("");
+	PerlIO_printf(Perl_debug_log, "### %" IVdf ":LEX_%s/X%s %s\n",
+	    (IV)CopLINE(PL_curcop),
+	    lex_state_names[PL_lex_state],
+	    exp_name[PL_expect],
+	    pv_display(tmp, s, strlen(s), 0, 60));
+	SvREFCNT_dec(tmp);
+    } );
+
+    /* when we've already built the next token, just pull it out of the queue */
+    if (PL_nexttoke) {
+	PL_nexttoke--;
+	pl_yylval = PL_nextval[PL_nexttoke];
+	{
+	    I32 next_type;
+	    next_type = PL_nexttype[PL_nexttoke];
+	    if (next_type & (7<<24)) {
+		if (next_type & (1<<24)) {
+		    if (PL_lex_brackets > 100)
+			Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+		    PL_lex_brackstack[PL_lex_brackets++] =
+			(char) ((next_type >> 16) & 0xff);
+		}
+		if (next_type & (2<<24))
+		    PL_lex_allbrackets++;
+		if (next_type & (4<<24))
+		    PL_lex_allbrackets--;
+		next_type &= 0xffff;
+	    }
+	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
+	}
+    }
+
+    switch (PL_lex_state) {
+    case LEX_NORMAL:
+    case LEX_INTERPNORMAL:
+	break;
+
+    /* interpolated case modifiers like \L \U, including \Q and \E.
+       when we get here, PL_bufptr is at the \
+    */
+    case LEX_INTERPCASEMOD:
+	/* handle \E or end of string */
+        return yyl_interpcasemod(aTHX_ s);
+
+    case LEX_INTERPPUSH:
+        return REPORT(sublex_push());
+
+    case LEX_INTERPSTART:
+	if (PL_bufptr == PL_bufend)
+	    return REPORT(sublex_done());
+	DEBUG_T({
+            if(*PL_bufptr != '(')
+                PerlIO_printf(Perl_debug_log, "### Interpolated variable\n");
+        });
+	PL_expect = XTERM;
+        /* for /@a/, we leave the joining for the regex engine to do
+         * (unless we're within \Q etc) */
+	PL_lex_dojoin = (*PL_bufptr == '@'
+                            && (!PL_lex_inpat || PL_lex_casemods));
+	PL_lex_state = LEX_INTERPNORMAL;
+	if (PL_lex_dojoin) {
+	    NEXTVAL_NEXTTOKE.ival = 0;
+	    force_next(',');
+	    force_ident("\"", '$');
+	    NEXTVAL_NEXTTOKE.ival = 0;
+	    force_next('$');
+	    NEXTVAL_NEXTTOKE.ival = 0;
+	    force_next((2<<24)|'(');
+	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
+	    force_next(FUNC);
+	}
+	/* Convert (?{...}) and friends to 'do {...}' */
+	if (PL_lex_inpat && *PL_bufptr == '(') {
+	    PL_parser->lex_shared->re_eval_start = PL_bufptr;
+	    PL_bufptr += 2;
+	    if (*PL_bufptr != '{')
+		PL_bufptr++;
+	    PL_expect = XTERMBLOCK;
+	    force_next(DO);
+	}
+
+	if (PL_lex_starts++) {
+	    s = PL_bufptr;
+	    /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
+	    if (!PL_lex_casemods && PL_lex_inpat)
+		TOKEN(',');
+	    else
+		AopNOASSIGN(OP_CONCAT);
+	}
+	return yylex();
+
+    case LEX_INTERPENDMAYBE:
+	if (intuit_more(PL_bufptr, PL_bufend)) {
+	    PL_lex_state = LEX_INTERPNORMAL;	/* false alarm, more expr */
+	    break;
+	}
+	/* FALLTHROUGH */
+
+    case LEX_INTERPEND:
+	if (PL_lex_dojoin) {
+	    const U8 dojoin_was = PL_lex_dojoin;
+	    PL_lex_dojoin = FALSE;
+	    PL_lex_state = LEX_INTERPCONCAT;
+	    PL_lex_allbrackets--;
+	    return REPORT(dojoin_was == 1 ? (int)')' : (int)POSTJOIN);
+	}
+	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
+	    && SvEVALED(PL_lex_repl))
+	{
+	    if (PL_bufptr != PL_bufend)
+		Perl_croak(aTHX_ "Bad evalled substitution pattern");
+	    PL_lex_repl = NULL;
+	}
+	/* Paranoia.  re_eval_start is adjusted when S_scan_heredoc sets
+	   re_eval_str.  If the here-doc body’s length equals the previous
+	   value of re_eval_start, re_eval_start will now be null.  So
+	   check re_eval_str as well. */
+	if (PL_parser->lex_shared->re_eval_start
+	 || PL_parser->lex_shared->re_eval_str) {
+	    SV *sv;
+	    if (*PL_bufptr != ')')
+		Perl_croak(aTHX_ "Sequence (?{...}) not terminated with ')'");
+	    PL_bufptr++;
+	    /* having compiled a (?{..}) expression, return the original
+	     * text too, as a const */
+	    if (PL_parser->lex_shared->re_eval_str) {
+		sv = PL_parser->lex_shared->re_eval_str;
+		PL_parser->lex_shared->re_eval_str = NULL;
+		SvCUR_set(sv,
+			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
+		SvPV_shrink_to_cur(sv);
+	    }
+	    else sv = newSVpvn(PL_parser->lex_shared->re_eval_start,
+			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
+	    NEXTVAL_NEXTTOKE.opval =
+                    newSVOP(OP_CONST, 0,
+				 sv);
+	    force_next(THING);
+	    PL_parser->lex_shared->re_eval_start = NULL;
+	    PL_expect = XTERM;
+	    return REPORT(',');
+	}
+
+	/* FALLTHROUGH */
+    case LEX_INTERPCONCAT:
+#ifdef DEBUGGING
+	if (PL_lex_brackets)
+	    Perl_croak(aTHX_ "panic: INTERPCONCAT, lex_brackets=%ld",
+		       (long) PL_lex_brackets);
+#endif
+	if (PL_bufptr == PL_bufend)
+	    return REPORT(sublex_done());
+
+	/* m'foo' still needs to be parsed for possible (?{...}) */
+	if (SvIVX(PL_linestr) == '\'' && !PL_lex_inpat) {
+	    SV *sv = newSVsv(PL_linestr);
+	    sv = tokeq(sv);
+            pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
+	    s = PL_bufend;
+	}
+	else {
+            int save_error_count = PL_error_count;
+
+	    s = scan_const(PL_bufptr);
+
+            /* Set flag if this was a pattern and there were errors.  op.c will
+             * refuse to compile a pattern with this flag set.  Otherwise, we
+             * could get segfaults, etc. */
+            if (PL_lex_inpat && PL_error_count > save_error_count) {
+                ((PMOP*)PL_lex_inpat)->op_pmflags |= PMf_HAS_ERROR;
+            }
+	    if (*s == '\\')
+		PL_lex_state = LEX_INTERPCASEMOD;
+	    else
+		PL_lex_state = LEX_INTERPSTART;
+	}
+
+	if (s != PL_bufptr) {
+	    NEXTVAL_NEXTTOKE = pl_yylval;
+	    PL_expect = XTERM;
+	    force_next(THING);
+	    if (PL_lex_starts++) {
+		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
+		if (!PL_lex_casemods && PL_lex_inpat)
+		    TOKEN(',');
+		else
+		    AopNOASSIGN(OP_CONCAT);
+	    }
+	    else {
+		PL_bufptr = s;
+		return yylex();
+	    }
+	}
+
+	return yylex();
+    case LEX_FORMLINE:
+        if (PL_parser->sub_error_count != PL_error_count) {
+            /* There was an error parsing a formline, which tends to
+               mess up the parser.
+               Unlike interpolated sub-parsing, we can't treat any of
+               these as recoverable, so no need to check sub_no_recover.
+            */
+            yyquit();
+        }
+	assert(PL_lex_formbrack);
+	s = scan_formline(PL_bufptr);
+	if (!PL_lex_formbrack) {
+            return yyl_try(aTHX_ '}', s, 0, 0, NULL, NULL, 1, 0, saw_infix_sigil);
+	}
+	PL_bufptr = s;
+	return yylex();
+    }
+
+    /* We really do *not* want PL_linestr ever becoming a COW. */
+    assert (!SvIsCOW(PL_linestr));
+    s = PL_bufptr;
+    PL_oldoldbufptr = PL_oldbufptr;
+    PL_oldbufptr = s;
+    PL_parser->saw_infix_sigil = 0;
+
+    if (PL_in_my == KEY_sigvar) {
+        return yyl_sigvar(aTHX_ s);
+    }
+
+    return yyl_try(aTHX_ 0, s, 0, 0, NULL, NULL, 0, 0, saw_infix_sigil);
+}
+
 
 /*
   S_pending_ident
