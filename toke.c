@@ -5857,6 +5857,210 @@ yyl_subproto(pTHX_ char *s, CV *cv)
     return KEY_NULL;
 }
 
+static int
+yyl_leftcurly(pTHX_ char *s, U8 formbrack)
+{
+    char *d;
+    if (PL_lex_brackets > 100) {
+        Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+    }
+
+    switch (PL_expect) {
+    case XTERM:
+    case XTERMORDORDOR:
+        PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+        PL_lex_allbrackets++;
+        OPERATOR(HASHBRACK);
+    case XOPERATOR:
+        while (s < PL_bufend && SPACE_OR_TAB(*s))
+            s++;
+        d = s;
+        PL_tokenbuf[0] = '\0';
+        if (d < PL_bufend && *d == '-') {
+            PL_tokenbuf[0] = '-';
+            d++;
+            while (d < PL_bufend && SPACE_OR_TAB(*d))
+                d++;
+        }
+        if (d < PL_bufend && isIDFIRST_lazy_if_safe(d, PL_bufend, UTF)) {
+            STRLEN len;
+            d = scan_word(d, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
+                          FALSE, &len);
+            while (d < PL_bufend && SPACE_OR_TAB(*d))
+                d++;
+            if (*d == '}') {
+                const char minus = (PL_tokenbuf[0] == '-');
+                s = force_word(s + minus, BAREWORD, FALSE, TRUE);
+                if (minus)
+                    force_next('-');
+            }
+        }
+        /* FALLTHROUGH */
+    case XATTRTERM:
+    case XTERMBLOCK:
+        PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+        PL_lex_allbrackets++;
+        PL_expect = XSTATE;
+        break;
+    case XATTRBLOCK:
+    case XBLOCK:
+        PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
+        PL_lex_allbrackets++;
+        PL_expect = XSTATE;
+        break;
+    case XBLOCKTERM:
+        PL_lex_brackstack[PL_lex_brackets++] = XTERM;
+        PL_lex_allbrackets++;
+        PL_expect = XSTATE;
+        break;
+    default: {
+            const char *t;
+            if (PL_oldoldbufptr == PL_last_lop)
+                PL_lex_brackstack[PL_lex_brackets++] = XTERM;
+            else
+                PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+            PL_lex_allbrackets++;
+            s = skipspace(s);
+            if (*s == '}') {
+                if (PL_expect == XREF && PL_lex_state == LEX_INTERPNORMAL) {
+                    PL_expect = XTERM;
+                    /* This hack is to get the ${} in the message. */
+                    PL_bufptr = s+1;
+                    yyerror("syntax error");
+                    break;
+                }
+                OPERATOR(HASHBRACK);
+            }
+            if (PL_expect == XREF && PL_oldoldbufptr != PL_last_lop) {
+                /* ${...} or @{...} etc., but not print {...}
+                 * Skip the disambiguation and treat this as a block.
+                 */
+                goto block_expectation;
+            }
+            /* This hack serves to disambiguate a pair of curlies
+             * as being a block or an anon hash.  Normally, expectation
+             * determines that, but in cases where we're not in a
+             * position to expect anything in particular (like inside
+             * eval"") we have to resolve the ambiguity.  This code
+             * covers the case where the first term in the curlies is a
+             * quoted string.  Most other cases need to be explicitly
+             * disambiguated by prepending a "+" before the opening
+             * curly in order to force resolution as an anon hash.
+             *
+             * XXX should probably propagate the outer expectation
+             * into eval"" to rely less on this hack, but that could
+             * potentially break current behavior of eval"".
+             * GSAR 97-07-21
+             */
+            t = s;
+            if (*s == '\'' || *s == '"' || *s == '`') {
+                /* common case: get past first string, handling escapes */
+                for (t++; t < PL_bufend && *t != *s;)
+                    if (*t++ == '\\')
+                        t++;
+                t++;
+            }
+            else if (*s == 'q') {
+                if (++t < PL_bufend
+                    && (!isWORDCHAR(*t)
+                        || ((*t == 'q' || *t == 'x') && ++t < PL_bufend
+                            && !isWORDCHAR(*t))))
+                {
+                    /* skip q//-like construct */
+                    const char *tmps;
+                    char open, close, term;
+                    I32 brackets = 1;
+
+                    while (t < PL_bufend && isSPACE(*t))
+                        t++;
+                    /* check for q => */
+                    if (t+1 < PL_bufend && t[0] == '=' && t[1] == '>') {
+                        OPERATOR(HASHBRACK);
+                    }
+                    term = *t;
+                    open = term;
+                    if (term && (tmps = strchr("([{< )]}> )]}>",term)))
+                        term = tmps[5];
+                    close = term;
+                    if (open == close)
+                        for (t++; t < PL_bufend; t++) {
+                            if (*t == '\\' && t+1 < PL_bufend && open != '\\')
+                                t++;
+                            else if (*t == open)
+                                break;
+                        }
+                    else {
+                        for (t++; t < PL_bufend; t++) {
+                            if (*t == '\\' && t+1 < PL_bufend)
+                                t++;
+                            else if (*t == close && --brackets <= 0)
+                                break;
+                            else if (*t == open)
+                                brackets++;
+                        }
+                    }
+                    t++;
+                }
+                else
+                    /* skip plain q word */
+                    while (   t < PL_bufend
+                           && isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
+                    {
+                        t += UTF ? UTF8SKIP(t) : 1;
+                    }
+            }
+            else if (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF)) {
+                t += UTF ? UTF8SKIP(t) : 1;
+                while (   t < PL_bufend
+                       && isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
+                {
+                    t += UTF ? UTF8SKIP(t) : 1;
+                }
+            }
+            while (t < PL_bufend && isSPACE(*t))
+                t++;
+            /* if comma follows first term, call it an anon hash */
+            /* XXX it could be a comma expression with loop modifiers */
+            if (t < PL_bufend && ((*t == ',' && (*s == 'q' || !isLOWER(*s)))
+                               || (*t == '=' && t[1] == '>')))
+                OPERATOR(HASHBRACK);
+            if (PL_expect == XREF) {
+              block_expectation:
+                /* If there is an opening brace or 'sub:', treat it
+                   as a term to make ${{...}}{k} and &{sub:attr...}
+                   dwim.  Otherwise, treat it as a statement, so
+                   map {no strict; ...} works.
+                 */
+                s = skipspace(s);
+                if (*s == '{') {
+                    PL_expect = XTERM;
+                    break;
+                }
+                if (memBEGINs(s, (STRLEN) (PL_bufend - s), "sub")) {
+                    PL_bufptr = s;
+                    d = s + 3;
+                    d = skipspace(d);
+                    s = PL_bufptr;
+                    if (*d == ':') {
+                        PL_expect = XTERM;
+                        break;
+                    }
+                }
+                PL_expect = XSTATE;
+            }
+            else {
+                PL_lex_brackstack[PL_lex_brackets-1] = XSTATE;
+                PL_expect = XSTATE;
+            }
+        }
+        break;
+    }
+
+    pl_yylval.ival = CopLINE(PL_curcop);
+    PL_copline = NOLINE;   /* invalidate current command line number */
+    TOKEN(formbrack ? '=' : '{');
+}
+
 /*
   yylex
 
@@ -6718,202 +6922,8 @@ Perl_yylex(pTHX)
     case '{':
 	s++;
       leftbracket:
-	if (PL_lex_brackets > 100) {
-	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
-	}
-	switch (PL_expect) {
-	case XTERM:
-	case XTERMORDORDOR:
-	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
-	    PL_lex_allbrackets++;
-	    OPERATOR(HASHBRACK);
-	case XOPERATOR:
-	    while (s < PL_bufend && SPACE_OR_TAB(*s))
-		s++;
-	    d = s;
-	    PL_tokenbuf[0] = '\0';
-	    if (d < PL_bufend && *d == '-') {
-		PL_tokenbuf[0] = '-';
-		d++;
-		while (d < PL_bufend && SPACE_OR_TAB(*d))
-		    d++;
-	    }
-            if (d < PL_bufend && isIDFIRST_lazy_if_safe(d, PL_bufend, UTF)) {
-		d = scan_word(d, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
-			      FALSE, &len);
-		while (d < PL_bufend && SPACE_OR_TAB(*d))
-		    d++;
-		if (*d == '}') {
-		    const char minus = (PL_tokenbuf[0] == '-');
-		    s = force_word(s + minus, BAREWORD, FALSE, TRUE);
-		    if (minus)
-			force_next('-');
-		}
-	    }
-	    /* FALLTHROUGH */
-	case XATTRTERM:
-	case XTERMBLOCK:
-	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
-	case XATTRBLOCK:
-	case XBLOCK:
-	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
-	case XBLOCKTERM:
-	    PL_lex_brackstack[PL_lex_brackets++] = XTERM;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
-	default: {
-		const char *t;
-		if (PL_oldoldbufptr == PL_last_lop)
-		    PL_lex_brackstack[PL_lex_brackets++] = XTERM;
-		else
-		    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
-		PL_lex_allbrackets++;
-		s = skipspace(s);
-		if (*s == '}') {
-		    if (PL_expect == XREF && PL_lex_state == LEX_INTERPNORMAL) {
-			PL_expect = XTERM;
-			/* This hack is to get the ${} in the message. */
-			PL_bufptr = s+1;
-			yyerror("syntax error");
-			break;
-		    }
-		    OPERATOR(HASHBRACK);
-		}
-		if (PL_expect == XREF && PL_oldoldbufptr != PL_last_lop) {
-		    /* ${...} or @{...} etc., but not print {...}
-		     * Skip the disambiguation and treat this as a block.
-		     */
-		    goto block_expectation;
-		}
-		/* This hack serves to disambiguate a pair of curlies
-		 * as being a block or an anon hash.  Normally, expectation
-		 * determines that, but in cases where we're not in a
-		 * position to expect anything in particular (like inside
-		 * eval"") we have to resolve the ambiguity.  This code
-		 * covers the case where the first term in the curlies is a
-		 * quoted string.  Most other cases need to be explicitly
-		 * disambiguated by prepending a "+" before the opening
-		 * curly in order to force resolution as an anon hash.
-		 *
-		 * XXX should probably propagate the outer expectation
-		 * into eval"" to rely less on this hack, but that could
-		 * potentially break current behavior of eval"".
-		 * GSAR 97-07-21
-		 */
-		t = s;
-		if (*s == '\'' || *s == '"' || *s == '`') {
-		    /* common case: get past first string, handling escapes */
-		    for (t++; t < PL_bufend && *t != *s;)
-			if (*t++ == '\\')
-			    t++;
-		    t++;
-		}
-		else if (*s == 'q') {
-		    if (++t < PL_bufend
-			&& (!isWORDCHAR(*t)
-			    || ((*t == 'q' || *t == 'x') && ++t < PL_bufend
-				&& !isWORDCHAR(*t))))
-		    {
-			/* skip q//-like construct */
-			const char *tmps;
-			char open, close, term;
-			I32 brackets = 1;
+        return yyl_leftcurly(aTHX_ s, formbrack);
 
-			while (t < PL_bufend && isSPACE(*t))
-			    t++;
-			/* check for q => */
-			if (t+1 < PL_bufend && t[0] == '=' && t[1] == '>') {
-			    OPERATOR(HASHBRACK);
-			}
-			term = *t;
-			open = term;
-			if (term && (tmps = strchr("([{< )]}> )]}>",term)))
-			    term = tmps[5];
-			close = term;
-			if (open == close)
-			    for (t++; t < PL_bufend; t++) {
-				if (*t == '\\' && t+1 < PL_bufend && open != '\\')
-				    t++;
-				else if (*t == open)
-				    break;
-			    }
-			else {
-			    for (t++; t < PL_bufend; t++) {
-				if (*t == '\\' && t+1 < PL_bufend)
-				    t++;
-				else if (*t == close && --brackets <= 0)
-				    break;
-				else if (*t == open)
-				    brackets++;
-			    }
-			}
-			t++;
-		    }
-		    else
-			/* skip plain q word */
-			while (   t < PL_bufend
-                               && isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
-                        {
-			    t += UTF ? UTF8SKIP(t) : 1;
-                        }
-		}
-	        else if (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF)) {
-		    t += UTF ? UTF8SKIP(t) : 1;
-		    while (   t < PL_bufend
-                           && isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
-                    {
-			t += UTF ? UTF8SKIP(t) : 1;
-                    }
-		}
-		while (t < PL_bufend && isSPACE(*t))
-		    t++;
-		/* if comma follows first term, call it an anon hash */
-		/* XXX it could be a comma expression with loop modifiers */
-		if (t < PL_bufend && ((*t == ',' && (*s == 'q' || !isLOWER(*s)))
-				   || (*t == '=' && t[1] == '>')))
-		    OPERATOR(HASHBRACK);
-		if (PL_expect == XREF)
-		{
-		  block_expectation:
-		    /* If there is an opening brace or 'sub:', treat it
-		       as a term to make ${{...}}{k} and &{sub:attr...}
-		       dwim.  Otherwise, treat it as a statement, so
-		       map {no strict; ...} works.
-		     */
-		    s = skipspace(s);
-		    if (*s == '{') {
-			PL_expect = XTERM;
-			break;
-		    }
-		    if (memBEGINs(s, (STRLEN) (PL_bufend - s), "sub")) {
-                        PL_bufptr = s;
-			d = s + 3;
-			d = skipspace(d);
-                        s = PL_bufptr;
-			if (*d == ':') {
-			    PL_expect = XTERM;
-			    break;
-			}
-		    }
-		    PL_expect = XSTATE;
-		}
-		else {
-		    PL_lex_brackstack[PL_lex_brackets-1] = XSTATE;
-		    PL_expect = XSTATE;
-		}
-	    }
-	    break;
-	}
-	pl_yylval.ival = CopLINE(PL_curcop);
-	PL_copline = NOLINE;   /* invalidate current command line number */
-	TOKEN(formbrack ? '=' : '{');
     case '}':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
 	    TOKEN(0);
