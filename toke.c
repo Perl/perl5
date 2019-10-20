@@ -6591,25 +6591,14 @@ yyl_backslash(pTHX_ char *s)
 #define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
 #endif
 
+static int yyl_try(pTHX_ char, char*, STRLEN, I32, GV*, GV**, U8, U32, const bool);
 
 int
 Perl_yylex(pTHX)
 {
     dVAR;
     char *s = PL_bufptr;
-    char *d;
-    STRLEN len;
-    bool bof = FALSE;
     const bool saw_infix_sigil = cBOOL(PL_parser->saw_infix_sigil);
-    U8 formbrack = 0;
-    U32 fake_eof = 0;
-
-    /* orig_keyword, gvp, and gv are initialized here because
-     * jump to the label just_a_word_zero can bypass their
-     * initialization later. */
-    I32 orig_keyword = 0;
-    GV *gv = NULL;
-    GV **gvp = NULL;
 
     if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
         const U8* first_bad_char_loc;
@@ -6833,10 +6822,8 @@ Perl_yylex(pTHX)
         }
 	assert(PL_lex_formbrack);
 	s = scan_formline(PL_bufptr);
-	if (!PL_lex_formbrack)
-	{
-	    formbrack = 1;
-	    goto rightbracket;
+	if (!PL_lex_formbrack) {
+            return yyl_try(aTHX_ '}', s, 0, 0, NULL, NULL, 1, 0, saw_infix_sigil);
 	}
 	PL_bufptr = s;
 	return yylex();
@@ -6851,6 +6838,21 @@ Perl_yylex(pTHX)
 
     if (PL_in_my == KEY_sigvar) {
         return yyl_sigvar(aTHX_ s);
+    }
+
+    return yyl_try(aTHX_ 0, s, 0, 0, NULL, NULL, 0, 0, saw_infix_sigil);
+}
+
+static int
+yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
+        I32 orig_keyword, GV *gv, GV **gvp,
+        U8 formbrack, U32 fake_eof, const bool saw_infix_sigil)
+{
+    char *d;
+    bool bof = FALSE;
+
+    switch (initial_state) {
+    case '}': goto rightbracket;
     }
 
   retry:
