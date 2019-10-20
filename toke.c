@@ -6675,6 +6675,40 @@ yyl_require(pTHX_ char *s, I32 orig_keyword)
     return REPORT( (int)REQUIRE );
 }
 
+static int
+yyl_foreach(pTHX_ char *s)
+{
+    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+        return REPORT(0);
+    pl_yylval.ival = CopLINE(PL_curcop);
+    s = skipspace(s);
+    if (PL_expect == XSTATE && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+        char *p = s;
+        SSize_t s_off = s - SvPVX(PL_linestr);
+        STRLEN len;
+
+        if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "my") && isSPACE(p[2])) {
+            p += 2;
+        }
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our") && isSPACE(p[3])) {
+            p += 3;
+        }
+
+        p = skipspace(p);
+        /* skip optional package name, as in "for my abc $x (..)" */
+        if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
+            p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
+            p = skipspace(p);
+        }
+        if (*p != '$' && *p != '\\')
+            Perl_croak(aTHX_ "Missing $ on loop variable");
+
+        /* The buffer may have been reallocated, update s */
+        s = SvPVX(PL_linestr) + s_off;
+    }
+    OPERATOR(FOR);
+}
+
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
 
@@ -8205,40 +8239,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 	case KEY_for:
 	case KEY_foreach:
-	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
-		return REPORT(0);
-	    pl_yylval.ival = CopLINE(PL_curcop);
-	    s = skipspace(s);
-            if (   PL_expect == XSTATE
-                && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))
-            {
-		char *p = s;
-                SSize_t s_off = s - SvPVX(PL_linestr);
-
-                if (   memBEGINPs(p, (STRLEN) (PL_bufend - p), "my")
-                    && isSPACE(*(p + 2)))
-                {
-                    p += 2;
-                }
-                else if (   memBEGINPs(p, (STRLEN) (PL_bufend - p), "our")
-                         && isSPACE(*(p + 3)))
-                {
-                    p += 3;
-                }
-
-		p = skipspace(p);
-                /* skip optional package name, as in "for my abc $x (..)" */
-	        if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
-		    p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-		    p = skipspace(p);
-		}
-		if (*p != '$' && *p != '\\')
-		    Perl_croak(aTHX_ "Missing $ on loop variable");
-
-                /* The buffer may have been reallocated, update s */
-                s = SvPVX(PL_linestr) + s_off;
-	    }
-	    OPERATOR(FOR);
+            return yyl_foreach(aTHX_ s);
 
 	case KEY_formline:
 	    LOP(OP_FORMLINE,XTERM);
