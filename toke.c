@@ -7084,6 +7084,17 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len,
 }
 
 static int
+yyl_fatcomma(pTHX_ char *s, STRLEN len)
+{
+    CLINE;
+    pl_yylval.opval
+        = newSVOP(OP_CONST, 0,
+                       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
+    pl_yylval.opval->op_private = OPpCONST_BARE;
+    TERM(BAREWORD);
+}
+
+static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         I32 orig_keyword, GV *gv, GV **gvp,
         U8 formbrack, U32 fake_eof, const bool saw_infix_sigil)
@@ -7590,13 +7601,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
-	  fat_arrow:
-	    CLINE;
-	    pl_yylval.opval
-                = newSVOP(OP_CONST, 0,
-			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
-	    pl_yylval.opval->op_private = OPpCONST_BARE;
-	    TERM(BAREWORD);
+            return yyl_fatcomma(aTHX_ s, len);
 	}
 
 	/* Check for plugged-in keyword */
@@ -7690,7 +7695,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    PL_bufptr = SvPVX(PL_linestr) + bufoff;
 	    s         = SvPVX(PL_linestr) +   soff;
 	    if (arrow)
-		goto fat_arrow;
+                return yyl_fatcomma(aTHX_ s, len);
 	}
 
       reserved_word:
