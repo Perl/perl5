@@ -7113,6 +7113,50 @@ yyl_safe_bareword(pTHX_ char *s, const char lastchar, const bool saw_infix_sigil
 }
 
 static int
+yyl_constant_op(pTHX_ char *s, SV *sv, CV *cv, OP *rv2cv_op, PADOFFSET off)
+{
+    if (sv) {
+        op_free(rv2cv_op);
+        SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
+        ((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
+        if (SvTYPE(sv) == SVt_PVAV)
+            pl_yylval.opval = newUNOP(OP_RV2AV, OPf_PARENS,
+                                      pl_yylval.opval);
+        else {
+            pl_yylval.opval->op_private = 0;
+            pl_yylval.opval->op_folded = 1;
+            pl_yylval.opval->op_flags |= OPf_SPECIAL;
+        }
+        TOKEN(BAREWORD);
+    }
+
+    op_free(pl_yylval.opval);
+    pl_yylval.opval =
+        off ? newCVREF(0, rv2cv_op) : rv2cv_op;
+    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
+    PL_last_lop = PL_oldbufptr;
+    PL_last_lop_op = OP_ENTERSUB;
+
+    /* Is there a prototype? */
+    if (SvPOK(cv)) {
+        int k = yyl_subproto(aTHX_ s, cv);
+        if (k != KEY_NULL)
+            return k;
+    }
+
+    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
+    PL_expect = XTERM;
+    force_next(off ? PRIVATEREF : BAREWORD);
+    if (!PL_lex_allbrackets
+        && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+    {
+        PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
+    }
+
+    TOKEN(NOAMP);
+}
+
+static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         I32 orig_keyword, GV *gv, GV **gvp,
         U8 formbrack, U32 fake_eof, const bool saw_infix_sigil)
@@ -7912,10 +7956,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 			d = s + 1;
 			while (SPACE_OR_TAB(*d))
 			    d++;
-			if (*d == ')' && (sv = cv_const_sv_or_av(cv))) {
-			    s = d + 1;
-			    goto its_constant;
-			}
+			if (*d == ')' && (sv = cv_const_sv_or_av(cv)))
+                            return yyl_constant_op(aTHX_ d + 1, sv, cv, rv2cv_op, off);
 		    }
 		    NEXTVAL_NEXTTOKE.opval =
 			off ? rv2cv_op : pl_yylval.opval;
@@ -7972,45 +8014,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 		if (cv) {
 		    /* Check for a constant sub */
-		    if ((sv = cv_const_sv_or_av(cv))) {
-		  its_constant:
-			op_free(rv2cv_op);
-			SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
-			((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
-			if (SvTYPE(sv) == SVt_PVAV)
-			    pl_yylval.opval = newUNOP(OP_RV2AV, OPf_PARENS,
-						      pl_yylval.opval);
-			else {
-			    pl_yylval.opval->op_private = 0;
-			    pl_yylval.opval->op_folded = 1;
-			    pl_yylval.opval->op_flags |= OPf_SPECIAL;
-			}
-			TOKEN(BAREWORD);
-		    }
-
-		    op_free(pl_yylval.opval);
-		    pl_yylval.opval =
-                        off ? newCVREF(0, rv2cv_op) : rv2cv_op;
-		    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
-		    PL_last_lop = PL_oldbufptr;
-		    PL_last_lop_op = OP_ENTERSUB;
-
-		    /* Is there a prototype? */
-                    if (SvPOK(cv)) {
-                        int k = yyl_subproto(aTHX_ s, cv);
-                        if (k != KEY_NULL)
-                            return k;
-                    }
-
-		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
-		    PL_expect = XTERM;
-		    force_next(off ? PRIVATEREF : BAREWORD);
-		    if (!PL_lex_allbrackets
-                        && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
-                    {
-			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-                    }
-		    TOKEN(NOAMP);
+                    sv = cv_const_sv_or_av(cv);
+                    return yyl_constant_op(aTHX_ s, sv, cv, rv2cv_op, off);
 		}
 
 		/* Call it a bare word */
