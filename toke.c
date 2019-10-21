@@ -7095,6 +7095,24 @@ yyl_fatcomma(pTHX_ char *s, STRLEN len)
 }
 
 static int
+yyl_safe_bareword(pTHX_ char *s, const char lastchar, const bool saw_infix_sigil)
+{
+    if ((lastchar == '*' || lastchar == '%' || lastchar == '&')
+        && saw_infix_sigil)
+    {
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
+                         "Operator or semicolon missing before %c%" UTF8f,
+                         lastchar,
+                         UTF8fARG(UTF, strlen(PL_tokenbuf),
+                                  PL_tokenbuf));
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
+                         "Ambiguous use of %c resolved as operator %c",
+                         lastchar, lastchar);
+    }
+    TOKEN(BAREWORD);
+}
+
+static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         I32 orig_keyword, GV *gv, GV **gvp,
         U8 formbrack, U32 fake_eof, const bool saw_infix_sigil)
@@ -7795,7 +7813,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 		/* And if "Foo::", then that's what it certainly is. */
 		if (safebw)
-		    goto safe_bareword;
+                    return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
 
 		if (!off)
 		{
@@ -8031,19 +8049,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		}
 		op_free(rv2cv_op);
 
-	    safe_bareword:
-		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')
-		 && saw_infix_sigil) {
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-				     "Operator or semicolon missing before %c%" UTF8f,
-				     lastchar,
-				     UTF8fARG(UTF, strlen(PL_tokenbuf),
-					      PL_tokenbuf));
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-				     "Ambiguous use of %c resolved as operator %c",
-				     lastchar, lastchar);
-		}
-		TOKEN(BAREWORD);
+                return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
 	    }
 
 	case KEY___FILE__:
