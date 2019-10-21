@@ -6817,6 +6817,273 @@ yyl_eol(pTHX_ char *s, STRLEN len,
 }
 
 static int
+yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len,
+             I32 orig_keyword, GV *gv, GV **gvp,
+             U8 formbrack, const bool saw_infix_sigil)
+{
+    char *d;
+
+    goto start;
+
+    do {
+        fake_eof = 0;
+        bof = cBOOL(PL_rsfp);
+      start:
+
+        PL_bufptr = PL_bufend;
+        COPLINE_INC_WITH_HERELINES;
+        if (!lex_next_chunk(fake_eof)) {
+            CopLINE_dec(PL_curcop);
+            s = PL_bufptr;
+            TOKEN(';');	/* not infinite loop because rsfp is NULL now */
+        }
+        CopLINE_dec(PL_curcop);
+        s = PL_bufptr;
+        /* If it looks like the start of a BOM or raw UTF-16,
+         * check if it in fact is. */
+        if (bof && PL_rsfp
+            && (   *s == 0
+                || *(U8*)s == BOM_UTF8_FIRST_BYTE
+                || *(U8*)s >= 0xFE
+                || s[1] == 0))
+        {
+            Off_t offset = (IV)PerlIO_tell(PL_rsfp);
+            bof = (offset == (Off_t)SvCUR(PL_linestr));
+#if defined(PERLIO_USING_CRLF) && defined(PERL_TEXTMODE_SCRIPTS)
+            /* offset may include swallowed CR */
+            if (!bof)
+                bof = (offset == (Off_t)SvCUR(PL_linestr)+1);
+#endif
+            if (bof) {
+                PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+                s = swallow_bom((U8*)s);
+            }
+        }
+        if (PL_parser->in_pod) {
+            /* Incest with pod. */
+            if (    memBEGINPs(s, (STRLEN) (PL_bufend - s), "=cut")
+                && !isALPHA(s[4]))
+            {
+                SvPVCLEAR(PL_linestr);
+                PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
+                PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+                PL_last_lop = PL_last_uni = NULL;
+                PL_parser->in_pod = 0;
+            }
+        }
+        if (PL_rsfp || PL_parser->filtered)
+            incline(s, PL_bufend);
+    } while (PL_parser->in_pod);
+
+    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
+    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+    PL_last_lop = PL_last_uni = NULL;
+    if (CopLINE(PL_curcop) == 1) {
+        while (s < PL_bufend && isSPACE(*s))
+            s++;
+        if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
+            s++;
+        d = NULL;
+        if (!PL_in_eval) {
+            if (*s == '#' && *(s+1) == '!')
+                d = s + 2;
+#ifdef ALTERNATE_SHEBANG
+            else {
+                static char const as[] = ALTERNATE_SHEBANG;
+                if (*s == as[0] && strnEQ(s, as, sizeof(as) - 1))
+                    d = s + (sizeof(as) - 1);
+            }
+#endif /* ALTERNATE_SHEBANG */
+        }
+        if (d) {
+            char *ipath;
+            char *ipathend;
+
+            while (isSPACE(*d))
+                d++;
+            ipath = d;
+            while (*d && !isSPACE(*d))
+                d++;
+            ipathend = d;
+
+#ifdef ARG_ZERO_IS_SCRIPT
+            if (ipathend > ipath) {
+                /*
+                 * HP-UX (at least) sets argv[0] to the script name,
+                 * which makes $^X incorrect.  And Digital UNIX and Linux,
+                 * at least, set argv[0] to the basename of the Perl
+                 * interpreter. So, having found "#!", we'll set it right.
+                 */
+                SV* copfilesv = CopFILESV(PL_curcop);
+                if (copfilesv) {
+                    SV * const x =
+                        GvSV(gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL,
+                                         SVt_PV)); /* $^X */
+                    assert(SvPOK(x) || SvGMAGICAL(x));
+                    if (sv_eq(x, copfilesv)) {
+                        sv_setpvn(x, ipath, ipathend - ipath);
+                        SvSETMAGIC(x);
+                    }
+                    else {
+                        STRLEN blen;
+                        STRLEN llen;
+                        const char *bstart = SvPV_const(copfilesv, blen);
+                        const char * const lstart = SvPV_const(x, llen);
+                        if (llen < blen) {
+                            bstart += blen - llen;
+                            if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
+                                sv_setpvn(x, ipath, ipathend - ipath);
+                                SvSETMAGIC(x);
+                            }
+                        }
+                    }
+                }
+                else {
+                    /* Anything to do if no copfilesv? */
+                }
+                TAINT_NOT;	/* $^X is always tainted, but that's OK */
+            }
+#endif /* ARG_ZERO_IS_SCRIPT */
+
+            /*
+             * Look for options.
+             */
+            d = instr(s,"perl -");
+            if (!d) {
+                d = instr(s,"perl");
+#if defined(DOSISH)
+                /* avoid getting into infinite loops when shebang
+                 * line contains "Perl" rather than "perl" */
+                if (!d) {
+                    for (d = ipathend-4; d >= ipath; --d) {
+                        if (isALPHA_FOLD_EQ(*d, 'p')
+                            && !ibcmp(d, "perl", 4))
+                        {
+                            break;
+                        }
+                    }
+                    if (d < ipath)
+                        d = NULL;
+                }
+#endif
+            }
+#ifdef ALTERNATE_SHEBANG
+            /*
+             * If the ALTERNATE_SHEBANG on this system starts with a
+             * character that can be part of a Perl expression, then if
+             * we see it but not "perl", we're probably looking at the
+             * start of Perl code, not a request to hand off to some
+             * other interpreter.  Similarly, if "perl" is there, but
+             * not in the first 'word' of the line, we assume the line
+             * contains the start of the Perl program.
+             */
+            if (d && *s != '#') {
+                const char *c = ipath;
+                while (*c && !strchr("; \t\r\n\f\v#", *c))
+                    c++;
+                if (c < d)
+                    d = NULL;	/* "perl" not in first word; ignore */
+                else
+                    *s = '#';	/* Don't try to parse shebang line */
+            }
+#endif /* ALTERNATE_SHEBANG */
+            if (!d
+                && *s == '#'
+                && ipathend > ipath
+                && !PL_minus_c
+                && !instr(s,"indir")
+                && instr(PL_origargv[0],"perl"))
+            {
+                dVAR;
+                char **newargv;
+
+                *ipathend = '\0';
+                s = ipathend + 1;
+                while (s < PL_bufend && isSPACE(*s))
+                    s++;
+                if (s < PL_bufend) {
+                    Newx(newargv,PL_origargc+3,char*);
+                    newargv[1] = s;
+                    while (s < PL_bufend && !isSPACE(*s))
+                        s++;
+                    *s = '\0';
+                    Copy(PL_origargv+1, newargv+2, PL_origargc+1, char*);
+                }
+                else
+                    newargv = PL_origargv;
+                newargv[0] = ipath;
+                PERL_FPU_PRE_EXEC
+                PerlProc_execv(ipath, EXEC_ARGV_CAST(newargv));
+                PERL_FPU_POST_EXEC
+                Perl_croak(aTHX_ "Can't exec %s", ipath);
+            }
+            if (d) {
+                while (*d && !isSPACE(*d))
+                    d++;
+                while (SPACE_OR_TAB(*d))
+                    d++;
+
+                if (*d++ == '-') {
+                    const bool switches_done = PL_doswitches;
+                    const U32 oldpdb = PL_perldb;
+                    const bool oldn = PL_minus_n;
+                    const bool oldp = PL_minus_p;
+                    const char *d1 = d;
+
+                    do {
+                        bool baduni = FALSE;
+                        if (*d1 == 'C') {
+                            const char *d2 = d1 + 1;
+                            if (parse_unicode_opts((const char **)&d2)
+                                != PL_unicode)
+                                baduni = TRUE;
+                        }
+                        if (baduni || isALPHA_FOLD_EQ(*d1, 'M')) {
+                            const char * const m = d1;
+                            while (*d1 && !isSPACE(*d1))
+                                d1++;
+                            Perl_croak(aTHX_ "Too late for \"-%.*s\" option",
+                                  (int)(d1 - m), m);
+                        }
+                        d1 = moreswitches(d1);
+                    } while (d1);
+                    if (PL_doswitches && !switches_done) {
+                        int argc = PL_origargc;
+                        char **argv = PL_origargv;
+                        do {
+                            argc--,argv++;
+                        } while (argc && argv[0][0] == '-' && argv[0][1]);
+                        init_argv_symbols(argc,argv);
+                    }
+                    if (   (PERLDB_LINE_OR_SAVESRC && !oldpdb)
+                        || ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
+                          /* if we have already added "LINE: while (<>) {",
+                             we must not do it again */
+                    {
+                        SvPVCLEAR(PL_linestr);
+                        PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
+                        PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+                        PL_last_lop = PL_last_uni = NULL;
+                        PL_preambled = FALSE;
+                        if (PERLDB_LINE_OR_SAVESRC)
+                            (void)gv_fetchfile(PL_origfilename);
+                        return RETRY();
+                    }
+                }
+            }
+        }
+    }
+
+    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
+        PL_lex_state = LEX_FORMLINE;
+        force_next(FORMRBRACK);
+        TOKEN(';');
+    }
+
+    return RETRY();
+}
+
+static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         I32 orig_keyword, GV *gv, GV **gvp,
         U8 formbrack, U32 fake_eof, const bool saw_infix_sigil)
@@ -6836,8 +7103,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
     case 4:
     case 26:
-        fake_eof = LEX_FAKE_EOF;
-	goto fake_eof;			/* emulate EOF on ^D or ^Z */
+        /* emulate EOF on ^D or ^Z */
+        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s, len,
+                            orig_keyword, gv, gvp, formbrack, saw_infix_sigil);
 
     case 0:
 	if ((!PL_rsfp || PL_lex_inwhat)
@@ -6938,258 +7206,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		update_debugger_info(PL_linestr, NULL, 0);
 	    return RETRY();
 	}
-	do {
-	    fake_eof = 0;
-	    bof = cBOOL(PL_rsfp);
-          fake_eof:
-	    PL_bufptr = PL_bufend;
-	    COPLINE_INC_WITH_HERELINES;
-	    if (!lex_next_chunk(fake_eof)) {
-		CopLINE_dec(PL_curcop);
-		s = PL_bufptr;
-		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
-	    }
-	    CopLINE_dec(PL_curcop);
-	    s = PL_bufptr;
-	    /* If it looks like the start of a BOM or raw UTF-16,
-	     * check if it in fact is. */
-	    if (bof && PL_rsfp
-                && (   *s == 0
-                    || *(U8*)s == BOM_UTF8_FIRST_BYTE
-                    || *(U8*)s >= 0xFE
-                    || s[1] == 0))
-            {
-		Off_t offset = (IV)PerlIO_tell(PL_rsfp);
-		bof = (offset == (Off_t)SvCUR(PL_linestr));
-#if defined(PERLIO_USING_CRLF) && defined(PERL_TEXTMODE_SCRIPTS)
-		/* offset may include swallowed CR */
-		if (!bof)
-		    bof = (offset == (Off_t)SvCUR(PL_linestr)+1);
-#endif
-		if (bof) {
-		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		    s = swallow_bom((U8*)s);
-		}
-	    }
-	    if (PL_parser->in_pod) {
-		/* Incest with pod. */
-                if (    memBEGINPs(s, (STRLEN) (PL_bufend - s), "=cut")
-                    && !isALPHA(s[4]))
-                {
-                    SvPVCLEAR(PL_linestr);
-		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
-		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		    PL_last_lop = PL_last_uni = NULL;
-		    PL_parser->in_pod = 0;
-		}
-	    }
-	    if (PL_rsfp || PL_parser->filtered)
-		incline(s, PL_bufend);
-	} while (PL_parser->in_pod);
-	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
-	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = NULL;
-	if (CopLINE(PL_curcop) == 1) {
-	    while (s < PL_bufend && isSPACE(*s))
-		s++;
-	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
-		s++;
-	    d = NULL;
-	    if (!PL_in_eval) {
-		if (*s == '#' && *(s+1) == '!')
-		    d = s + 2;
-#ifdef ALTERNATE_SHEBANG
-		else {
-		    static char const as[] = ALTERNATE_SHEBANG;
-		    if (*s == as[0] && strnEQ(s, as, sizeof(as) - 1))
-			d = s + (sizeof(as) - 1);
-		}
-#endif /* ALTERNATE_SHEBANG */
-	    }
-	    if (d) {
-		char *ipath;
-		char *ipathend;
+        return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s, len,
+                            orig_keyword, gv, gvp, formbrack, saw_infix_sigil);
 
-		while (isSPACE(*d))
-		    d++;
-		ipath = d;
-		while (*d && !isSPACE(*d))
-		    d++;
-		ipathend = d;
-
-#ifdef ARG_ZERO_IS_SCRIPT
-		if (ipathend > ipath) {
-		    /*
-		     * HP-UX (at least) sets argv[0] to the script name,
-		     * which makes $^X incorrect.  And Digital UNIX and Linux,
-		     * at least, set argv[0] to the basename of the Perl
-		     * interpreter. So, having found "#!", we'll set it right.
-		     */
-                    SV* copfilesv = CopFILESV(PL_curcop);
-                    if (copfilesv) {
-                        SV * const x =
-                            GvSV(gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL,
-                                             SVt_PV)); /* $^X */
-                        assert(SvPOK(x) || SvGMAGICAL(x));
-                        if (sv_eq(x, copfilesv)) {
-                            sv_setpvn(x, ipath, ipathend - ipath);
-                            SvSETMAGIC(x);
-                        }
-                        else {
-                            STRLEN blen;
-                            STRLEN llen;
-                            const char *bstart = SvPV_const(copfilesv, blen);
-                            const char * const lstart = SvPV_const(x, llen);
-                            if (llen < blen) {
-                                bstart += blen - llen;
-                                if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
-                                    sv_setpvn(x, ipath, ipathend - ipath);
-                                    SvSETMAGIC(x);
-                                }
-                            }
-			}
-                    }
-                    else {
-                        /* Anything to do if no copfilesv? */
-		    }
-		    TAINT_NOT;	/* $^X is always tainted, but that's OK */
-		}
-#endif /* ARG_ZERO_IS_SCRIPT */
-
-		/*
-		 * Look for options.
-		 */
-		d = instr(s,"perl -");
-		if (!d) {
-		    d = instr(s,"perl");
-#if defined(DOSISH)
-		    /* avoid getting into infinite loops when shebang
-		     * line contains "Perl" rather than "perl" */
-		    if (!d) {
-			for (d = ipathend-4; d >= ipath; --d) {
-			    if (isALPHA_FOLD_EQ(*d, 'p')
-				&& !ibcmp(d, "perl", 4))
-			    {
-				break;
-			    }
-			}
-			if (d < ipath)
-			    d = NULL;
-		    }
-#endif
-		}
-#ifdef ALTERNATE_SHEBANG
-		/*
-		 * If the ALTERNATE_SHEBANG on this system starts with a
-		 * character that can be part of a Perl expression, then if
-		 * we see it but not "perl", we're probably looking at the
-		 * start of Perl code, not a request to hand off to some
-		 * other interpreter.  Similarly, if "perl" is there, but
-		 * not in the first 'word' of the line, we assume the line
-		 * contains the start of the Perl program.
-		 */
-		if (d && *s != '#') {
-		    const char *c = ipath;
-		    while (*c && !strchr("; \t\r\n\f\v#", *c))
-			c++;
-		    if (c < d)
-			d = NULL;	/* "perl" not in first word; ignore */
-		    else
-			*s = '#';	/* Don't try to parse shebang line */
-		}
-#endif /* ALTERNATE_SHEBANG */
-		if (!d
-                    && *s == '#'
-                    && ipathend > ipath
-                    && !PL_minus_c
-                    && !instr(s,"indir")
-                    && instr(PL_origargv[0],"perl"))
-		{
-		    dVAR;
-		    char **newargv;
-
-		    *ipathend = '\0';
-		    s = ipathend + 1;
-		    while (s < PL_bufend && isSPACE(*s))
-			s++;
-		    if (s < PL_bufend) {
-			Newx(newargv,PL_origargc+3,char*);
-			newargv[1] = s;
-			while (s < PL_bufend && !isSPACE(*s))
-			    s++;
-			*s = '\0';
-			Copy(PL_origargv+1, newargv+2, PL_origargc+1, char*);
-		    }
-		    else
-			newargv = PL_origargv;
-		    newargv[0] = ipath;
-		    PERL_FPU_PRE_EXEC
-		    PerlProc_execv(ipath, EXEC_ARGV_CAST(newargv));
-		    PERL_FPU_POST_EXEC
-		    Perl_croak(aTHX_ "Can't exec %s", ipath);
-		}
-		if (d) {
-		    while (*d && !isSPACE(*d))
-			d++;
-		    while (SPACE_OR_TAB(*d))
-			d++;
-
-		    if (*d++ == '-') {
-			const bool switches_done = PL_doswitches;
-			const U32 oldpdb = PL_perldb;
-			const bool oldn = PL_minus_n;
-			const bool oldp = PL_minus_p;
-			const char *d1 = d;
-
-			do {
-			    bool baduni = FALSE;
-			    if (*d1 == 'C') {
-				const char *d2 = d1 + 1;
-				if (parse_unicode_opts((const char **)&d2)
-				    != PL_unicode)
-				    baduni = TRUE;
-			    }
-			    if (baduni || isALPHA_FOLD_EQ(*d1, 'M')) {
-				const char * const m = d1;
-				while (*d1 && !isSPACE(*d1))
-				    d1++;
-				Perl_croak(aTHX_ "Too late for \"-%.*s\" option",
-				      (int)(d1 - m), m);
-			    }
-			    d1 = moreswitches(d1);
-			} while (d1);
-			if (PL_doswitches && !switches_done) {
-			    int argc = PL_origargc;
-			    char **argv = PL_origargv;
-			    do {
-				argc--,argv++;
-			    } while (argc && argv[0][0] == '-' && argv[0][1]);
-			    init_argv_symbols(argc,argv);
-			}
-			if (   (PERLDB_LINE_OR_SAVESRC && !oldpdb)
-                            || ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
-			      /* if we have already added "LINE: while (<>) {",
-			         we must not do it again */
-			{
-                            SvPVCLEAR(PL_linestr);
-			    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
-			    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-			    PL_last_lop = PL_last_uni = NULL;
-			    PL_preambled = FALSE;
-			    if (PERLDB_LINE_OR_SAVESRC)
-				(void)gv_fetchfile(PL_origfilename);
-			    return RETRY();
-			}
-		    }
-		}
-	    }
-	}
-	if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-	    PL_lex_state = LEX_FORMLINE;
-	    force_next(FORMRBRACK);
-	    TOKEN(';');
-	}
-	return RETRY();
     case '\r':
 #ifdef PERL_STRICT_CR
 	Perl_warn(aTHX_ "Illegal character \\%03o (carriage return)", '\r');
@@ -8050,8 +8069,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	case KEY___END__:
             if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D'))
                 yyl_data_handle(aTHX);
-            fake_eof = LEX_FAKE_EOF;
-	    goto fake_eof;
+            return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, bof, s, len,
+                                orig_keyword, gv, gvp, formbrack, saw_infix_sigil);
 
 	case KEY___SUB__:
 	    FUN0OP(CvCLONE(PL_compcv)
