@@ -7567,21 +7567,16 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
       keylookup: {
 	bool anydelim;
-	bool lex;
+	bool lex = FALSE;
 	I32 tmp;
-	SV *sv;
-	CV *cv;
-	PADOFFSET off;
-	OP *rv2cv_op;
+	SV *sv = NULL;
+	CV *cv = NULL;
+	PADOFFSET off = 0;
+	OP *rv2cv_op = NULL;
 
-	lex = FALSE;
 	orig_keyword = 0;
-	off = 0;
-	sv = NULL;
-	cv = NULL;
 	gv = NULL;
 	gvp = NULL;
-	rv2cv_op = NULL;
 
 	PL_bufptr = s;
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
