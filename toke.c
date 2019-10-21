@@ -6723,9 +6723,8 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
 }
 
 static int
-yyl_my(pTHX_ char **sp, I32 my)
+yyl_my(pTHX_ char *s, I32 my)
 {
-    char *s = *sp;
     if (PL_in_my) {
         PL_bufptr = s;
         yyerror(Perl_form(aTHX_
@@ -6740,10 +6739,8 @@ yyl_my(pTHX_ char **sp, I32 my)
     if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
         STRLEN len;
         s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-        if (memEQs(PL_tokenbuf, len, "sub")) {
-            *sp = s;
-            return SUB;
-        }
+        if (memEQs(PL_tokenbuf, len, "sub"))
+            return yyl_sub(aTHX_ s, my);
         PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
         if (!PL_in_my_stash) {
             char tmpbuf[1024];
@@ -8095,10 +8092,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	case KEY_CHECK:
 	case KEY_INIT:
 	case KEY_END:
-	    if (PL_expect == XSTATE) {
-		s = PL_bufptr;
-		goto really_sub;
-	    }
+	    if (PL_expect == XSTATE)
+		return yyl_sub(aTHX_ PL_bufptr, tmp);
 	    goto just_a_word;
 
 	case_KEY_CORE:
@@ -8538,13 +8533,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 	case KEY_our:
 	case KEY_my:
-	case KEY_state: {
-            int tok = yyl_my(aTHX_ &s, tmp);
-            if (tok == SUB)
-                goto really_sub;
-            else
-                return tok;
-        }
+	case KEY_state:
+            return yyl_my(aTHX_ s, tmp);
 
 	case KEY_next:
 	    LOOPX(OP_NEXT);
@@ -8851,7 +8841,6 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 	case KEY_format:
 	case KEY_sub:
-	  really_sub:
             return yyl_sub(aTHX_ s, tmp);
 
 	case KEY_system:
