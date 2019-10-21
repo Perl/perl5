@@ -7153,6 +7153,39 @@ yyl_constant_op(pTHX_ char *s, SV *sv, CV *cv, OP *rv2cv_op, PADOFFSET off)
     TOKEN(NOAMP);
 }
 
+/* Honour "reserved word" warnings, and enforce strict subs */
+static void
+yyl_strictwarn_bareword(pTHX_ const char lastchar)
+{
+    /* after "print" and similar functions (corresponding to
+     * "F? L" in opcode.pl), whatever wasn't already parsed as
+     * a filehandle should be subject to "strict subs".
+     * Likewise for the optional indirect-object argument to system
+     * or exec, which can't be a bareword */
+    if ((PL_last_lop_op == OP_PRINT
+            || PL_last_lop_op == OP_PRTF
+            || PL_last_lop_op == OP_SAY
+            || PL_last_lop_op == OP_SYSTEM
+            || PL_last_lop_op == OP_EXEC)
+        && (PL_hints & HINT_STRICT_SUBS))
+    {
+        pl_yylval.opval->op_private |= OPpCONST_STRICT;
+    }
+
+    if (lastchar != '-' && ckWARN(WARN_RESERVED)) {
+        char *d = PL_tokenbuf;
+        while (isLOWER(*d))
+            d++;
+        if (!*d && !gv_stashpv(PL_tokenbuf, UTF ? SVf_UTF8 : 0)) {
+            /* PL_warn_reserved is constant */
+            GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
+            Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
+                        PL_tokenbuf);
+            GCC_DIAG_RESTORE_STMT;
+        }
+    }
+}
+
 static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         I32 orig_keyword, GV *gv, GV **gvp,
@@ -7921,7 +7954,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		       )
 		    {
 			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
-			goto bareword;
+                        yyl_strictwarn_bareword(aTHX_ lastchar);
+                        op_free(rv2cv_op);
+                        return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
 		    }
 		}
 
@@ -8019,36 +8054,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
 		if (PL_hints & HINT_STRICT_SUBS)
 		    pl_yylval.opval->op_private |= OPpCONST_STRICT;
-		else {
-		bareword:
-		    /* after "print" and similar functions (corresponding to
-		     * "F? L" in opcode.pl), whatever wasn't already parsed as
-		     * a filehandle should be subject to "strict subs".
-		     * Likewise for the optional indirect-object argument to system
-		     * or exec, which can't be a bareword */
-		    if ((PL_last_lop_op == OP_PRINT
-			    || PL_last_lop_op == OP_PRTF
-			    || PL_last_lop_op == OP_SAY
-			    || PL_last_lop_op == OP_SYSTEM
-			    || PL_last_lop_op == OP_EXEC)
-			    && (PL_hints & HINT_STRICT_SUBS))
-			pl_yylval.opval->op_private |= OPpCONST_STRICT;
-		    if (lastchar != '-') {
-			if (ckWARN(WARN_RESERVED)) {
-			    d = PL_tokenbuf;
-			    while (isLOWER(*d))
-				d++;
-			    if (!*d && !gv_stashpv(PL_tokenbuf, UTF ? SVf_UTF8 : 0))
-                            {
-                                /* PL_warn_reserved is constant */
-                                GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
-				       PL_tokenbuf);
-                                GCC_DIAG_RESTORE_STMT;
-                            }
-			}
-		    }
-		}
+		else
+                    yyl_strictwarn_bareword(aTHX_ lastchar);
+
 		op_free(rv2cv_op);
 
                 return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
