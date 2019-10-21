@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (17736) {
+  if (17858) {
     load();
-    plan(tests => 17736);
+    plan(tests => 17858);
   }
 }
 
@@ -333,183 +333,104 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
     }
 }
 
-if ("$]" < 5.006000) {
-    my $i;
-    for $i (1..58) {    # Should be 44, don't know why not
-        skip 'UTF-8 not implemented on this perl', 0;
-    }
-}
-else {
-    my $ret = Devel::PPPort::toLOWER_utf8_safe('A', 0);
-    ok($ret->[0], ord 'a', "ord of lowercase of A is 97");
-    ok($ret->[1], 'a', "Lowercase of A is a");
-    ok($ret->[2], 1, "Length of lowercase of A is 1");
+my %case_changing = ( 'LOWER' => [ [ ord('A'), ord('a') ],
+                                   [ 0xC0, 0xE0 ],
+                                   [ 0x100, 0x101 ],
+                                 ],
+                      'FOLD'  => [ [ ord('C'), ord('c') ],
+                                   [ 0xC0, 0xE0 ],
+                                   [ 0x104, 0x105 ],
+                                   [ 0xDF, 'ss' ],
+                                 ],
+                      'UPPER' => [ [ ord('a'),ord('A'),  ],
+                                   [ 0xE0, 0xC0 ],
+                                   [ 0x101, 0x100 ],
+                                   [ 0xDF, 'SS' ],
+                                 ],
+                      'TITLE' => [ [ ord('c'),ord('C'),  ],
+                                   [ 0xE2, 0xC2 ],
+                                   [ 0x103, 0x102 ],
+                                   [ 0xDF, 'Ss' ],
+                                 ],
+                    );
 
-    my $utf8 = Devel::PPPort::uvoffuni_to_utf8(0xC0);
-    my $lc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0xE0);
-    $ret = Devel::PPPort::toLOWER_utf8_safe($utf8, 0);
-    ok($ret->[0], Devel::PPPort::LATIN1_TO_NATIVE(0xE0), "ord of lowercase of 0xC0 is 0xE0");
-    ok($ret->[1], $lc_utf8, "Lowercase of UTF-8 of 0xC0 is 0xE0");
-    ok($ret->[2], 2, "Length of lowercase of UTF-8 of 0xC0 is 2");
+my $way_too_early_msg = 'UTF-8 not implemented on this perl';
 
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0x100);
-    $lc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0x101);
-    $ret = Devel::PPPort::toLOWER_utf8_safe($utf8, 0);
-    ok($ret->[0], 0x101, "ord of lowercase of 0x100 is 0x101");
-    ok($ret->[1], $lc_utf8, "Lowercase of UTF-8 of 0x100 is 0x101");
-    ok($ret->[2], 2, "Length of lowercase of UTF-8 of 0x100 is 2");
-
-    my $eval_string = "Devel::PPPort::toLOWER_utf8_safe(\"$utf8\", -1);";
-    $ret = eval $eval_string;
-    my $fail = $@;  # Have to save $@, as it gets destroyed
-    ok($ret, undef, "Returns undef for illegal short char");
-    ok($fail, eval 'qr/Malformed UTF-8 character/', 'Gave appropriate error for short char');
-
-    if ("$]" > 5.025008) {
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-    }
-    else {
-        $eval_string = "Devel::PPPort::toLOWER_utf8_safe(\"$utf8\", -3);";
-        $ret = eval $eval_string;
-        $fail = $@;
-        ok($ret, undef, "Returns undef for zero length string");
-        ok($fail, eval 'qr/Attempting case change on zero length string/',
-           'Gave appropriate error for short char');
-    }
-
-    $ret = Devel::PPPort::toUPPER_utf8_safe('b', 0);
-    ok($ret->[0], ord 'B', "ord of uppercase of b is 66");
-    ok($ret->[1], 'B', "Uppercase of b is B");
-    ok($ret->[2], 1, "Length of uppercase of b is 1");
-
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0xE1);
-    my $uc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0xC1);
-    $ret = Devel::PPPort::toUPPER_utf8_safe($utf8, 0);
-    ok($ret->[0], Devel::PPPort::LATIN1_TO_NATIVE(0xC1), "ord of uppercase of 0xC0 is 0xE0");
-    ok($ret->[1], $uc_utf8, "Uppercase of UTF-8 of 0xE1 is 0xC1");
-    ok($ret->[2], 2, "Length of uppercase of UTF-8 of 0xE1 is 2");
-
-    $eval_string = "Devel::PPPort::toUPPER_utf8_safe(\"$utf8\", -1);";
-    $ret = eval $eval_string;
-    $fail = $@;
-    ok($ret, undef, "Returns undef for illegal short char");
-    ok($fail, eval 'qr/Malformed UTF-8 character/', 'Gave appropriate error for short char');
-
-    if ("$]" > 5.025008) {
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-    }
-    else {
-        $eval_string = "Devel::PPPort::toUPPER_utf8_safe(\"$utf8\", -3);";
-        $ret = eval $eval_string;
-        $fail = $@;
-        ok($ret, undef, "Returns undef for zero length string");
-        ok($fail, eval 'qr/Attempting case change on zero length string/',
-           'Gave appropriate error for short char');
-    }
-
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0x103);
-    $uc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0x102);
-    $ret = Devel::PPPort::toUPPER_utf8_safe($utf8, 0);
-    ok($ret->[0], 0x102, "ord of uppercase of 0x103 is 0x102");
-    ok($ret->[1], $uc_utf8, "Uppercase of UTF-8 of 0x103 is 0x102");
-    ok($ret->[2], 2, "Length of uppercase of UTF-8 of 0x102 is 2");
-
-    $ret = Devel::PPPort::toTITLE_utf8_safe('b', 0);
-    ok($ret->[0], ord 'B', "ord of titlecase of b is 66");
-    ok($ret->[1], 'B', "Titlecase of b is B");
-    ok($ret->[2], 1, "Length of titlecase of b is 1");
-
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0xE1);
-    my $tc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0xC1);
-    $ret = Devel::PPPort::toTITLE_utf8_safe($utf8, 0);
-    ok($ret->[0], Devel::PPPort::LATIN1_TO_NATIVE(0xC1), "ord of titlecase of 0xC0 is 0xE0");
-    ok($ret->[1], $tc_utf8, "Titlecase of UTF-8 of 0xE1 is 0xC1");
-    ok($ret->[2], 2, "Length of titlecase of UTF-8 of 0xE1 is 2");
-
-    $eval_string = "Devel::PPPort::toTITLE_utf8_safe(\"$utf8\", -1);";
-    $ret = eval $eval_string;
-    $fail = $@;
-    ok($ret, undef, "Returns undef for illegal short char");
-    ok($fail, eval 'qr/Malformed UTF-8 character/', 'Gave appropriate error for short char');
-
-    if ("$]" > 5.025008) {
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-    }
-    else {
-        $eval_string = "Devel::PPPort::toTITLE_utf8_safe(\"$utf8\", -3);";
-        $ret = eval $eval_string;
-        $fail = $@;
-        ok($ret, undef, "Returns undef for zero length string");
-        ok($fail, eval 'qr/Attempting case change on zero length string/',
-           'Gave appropriate error for short char');
-    }
-
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0x103);
-    $tc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0x102);
-    $ret = Devel::PPPort::toTITLE_utf8_safe($utf8, 0);
-    ok($ret->[0], 0x102, "ord of titlecase of 0x103 is 0x102");
-    ok($ret->[1], $tc_utf8, "Titlecase of UTF-8 of 0x103 is 0x102");
-    ok($ret->[2], 2, "Length of titlecase of UTF-8 of 0x102 is 2");
-
-    $ret = Devel::PPPort::toFOLD_utf8_safe('C', 0);
-    ok($ret->[0], ord 'c', "ord of foldcase of C is 100");
-    ok($ret->[1], 'c', "Foldcase of C is c");
-    ok($ret->[2], 1, "Length of foldcase of C is 1");
-
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0xC2);
-    my $fc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0xE2);
-    $ret = Devel::PPPort::toFOLD_utf8_safe($utf8, 0);
-    ok($ret->[0], Devel::PPPort::LATIN1_TO_NATIVE(0xE2), "ord of foldcase of 0xC2 is 0xE2");
-    ok($ret->[1], $fc_utf8, "Foldcase of UTF-8 of 0xC2 is 0xE2");
-    ok($ret->[2], 2, "Length of foldcase of UTF-8 of 0xC2 is 2");
-
-    $utf8 = Devel::PPPort::uvoffuni_to_utf8(0x104);
-    $fc_utf8 = Devel::PPPort::uvoffuni_to_utf8(0x105);
-    $ret = Devel::PPPort::toFOLD_utf8_safe($utf8, 0);
-    ok($ret->[0], 0x105, "ord of foldcase of 0x104 is 0x105");
-    ok($ret->[1], $fc_utf8, "Foldcase of UTF-8 of 0x104 is 0x105");
-    ok($ret->[2], 2, "Length of foldcase of UTF-8 of 0x104 is 2");
-
-    $eval_string = "Devel::PPPort::toFOLD_utf8_safe(\"$utf8\", -1);";
-    $ret = eval $eval_string;
-    $fail = $@;
-    ok($ret, undef, "Returns undef for illegal short char");
-    ok($fail, eval 'qr/Malformed UTF-8 character/', 'Gave appropriate error for short char');
-
-    if ("$]" > 5.025008) {
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-        skip "Zero length inputs cause assertion failure; test dies in modern perls", 0;
-    }
-    else {
-        $eval_string = "Devel::PPPort::toFOLD_utf8_safe(\"$utf8\", -3);";
-        $ret = eval $eval_string;
-        $fail = $@;
-        ok($ret, undef, "Returns undef for zero length string");
-        ok($fail, eval 'qr/Attempting case change on zero length string/',
-           'Gave appropriate error for short char');
-    }
-
-    if ("$]" < 5.007003) {
-        my $i;
-        for $i (1..6) {
-            skip 'Multi-char case changing not implemented in this perl', 0;
+my $name;
+for $name (keys %case_changing) {
+    my @code_points_to_test = @{$case_changing{$name}};
+    my $unchanged;
+    for $unchanged (@code_points_to_test) {
+        my @pair = @$unchanged;
+        my $original = $pair[0];
+        my $changed = $pair[1];
+        my $utf8_changed = $changed;
+        my $is_cp = $utf8_changed =~ /^\d+$/;
+        my $should_be_bytes;
+        if ("$]" >= 5.006000) {
+            if ($is_cp) {
+                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
+            }
+            else {
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                $should_be_bytes = length $utf8_changed;
+            }
         }
-    }
-    else {
-        $utf8 = Devel::PPPort::uvoffuni_to_utf8(0xDF);
 
-        $ret = Devel::PPPort::toUPPER_utf8_safe($utf8, 0);
-        ok($ret->[0], ord 'S', "ord of uppercase of 0xDF is ord S");
-        ok($ret->[1], 'SS', "Uppercase of UTF-8 of 0xDF is SS");
-        ok($ret->[2], 2, "Length of uppercase of UTF-8 of 0xDF is 2");
-
-        $ret = Devel::PPPort::toFOLD_utf8_safe($utf8, 0);
-        ok($ret->[0], ord 's', "ord of foldcase of 0xDF is ord s");
-        ok($ret->[1], 'ss', "Foldcase of UTF-8 of 0xDF is ss");
-        ok($ret->[2], 2, "Length of foldcase of UTF-8 of 0xDF is 2");
+        my $truncate;
+        for $truncate (0..2) {
+            my $skip;
+            if ("$]" < 5.006000) {
+                $skip = 'UTF-8 not implemented on this perl';
+            }
+            elsif (! $is_cp && "$]" < 5.007003) {
+                $skip = "Multi-character case change not implemented until 5.7.3";
+            }
+            elsif ($truncate == 2 && "$]" > 5.025008) {
+                $skip = "Zero length inputs cause assertion failure; test dies in modern perls";
+            }
+            elsif ($truncate > 0 && length $changed > 1) {
+                $skip = "Don't test shortened multi-char case changes";
+            }
+            elsif ($truncate > 0 && Devel::PPPort::UVCHR_IS_INVARIANT($original)) {
+                $skip = "Don't try to test shortened single bytes";
+            }
+            if ($skip) {
+                for (1..4) {
+                    skip $skip, 0;
+                }
+            }
+            else {
+                my $fcn = "to${name}_utf8_safe";
+                my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($original);
+                my $real_truncate = ($truncate < 2)
+                                    ? $truncate : $should_be_bytes;
+                my $eval_string = "Devel::PPPort::$fcn(\"$utf8\", $real_truncate)";
+                my $ret = eval "no warnings; $eval_string" || 0;
+                my $fail = $@;  # Have to save $@, as it gets destroyed
+                if ($truncate == 0) {
+                    ok ($fail, "", "Didn't fail on full length input");
+                    my $first = ("$]" != 5.006000)
+                                ? substr($utf8_changed, 0, 1)
+                                : $utf8_changed, 0, 1;
+                    ok($ret->[0], ord $first,
+                       "ord of $fcn($original) is $changed");
+                    ok($ret->[1], $utf8_changed,
+                       "UTF-8 of of $fcn($original) is correct");
+                    ok($ret->[2], $should_be_bytes,
+                    "Length of $fcn($original) is $should_be_bytes");
+                }
+                else {
+                    ok ($fail, eval 'qr/Malformed UTF-8 character/',
+                        "Gave appropriate error for short char: $original");
+                    for (1..3) {
+                        skip("Expected failure means remaining tests for"
+                           . " this aren't relevant", 0);
+                    }
+                }
+            }
+        }
     }
 }
 
