@@ -6593,6 +6593,52 @@ yyl_data_handle(pTHX)
     PL_rsfp = NULL;
 }
 
+PERL_STATIC_NO_RET void yyl_croak_unrecognised(pTHX_ char*)
+    __attribute__noreturn__;
+
+PERL_STATIC_NO_RET void
+yyl_croak_unrecognised(pTHX_ char *s)
+{
+    SV *dsv = newSVpvs_flags("", SVs_TEMP);
+    const char *c;
+    char *d;
+    STRLEN len;
+
+    if (UTF) {
+        STRLEN skiplen = UTF8SKIP(s);
+        STRLEN stravail = PL_bufend - s;
+        c = sv_uni_display(dsv, newSVpvn_flags(s,
+                                               skiplen > stravail ? stravail : skiplen,
+                                               SVs_TEMP | SVf_UTF8),
+                           10, UNI_DISPLAY_ISPRINT);
+    }
+    else {
+        c = Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
+    }
+
+    if (s >= PL_linestart) {
+        d = PL_linestart;
+    }
+    else {
+        /* somehow (probably due to a parse failure), PL_linestart has advanced
+         * pass PL_bufptr, get a reasonable beginning of line
+         */
+        d = s;
+        while (d > SvPVX(PL_linestr) && d[-1] && d[-1] != '\n')
+            --d;
+    }
+    len = UTF ? Perl_utf8_length(aTHX_ (U8 *) d, (U8 *) s) : (STRLEN) (s - d);
+    if (len > UNRECOGNIZED_PRECEDE_COUNT) {
+        d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)d) : s - UNRECOGNIZED_PRECEDE_COUNT;
+    }
+
+    Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %" UTF8f "<-- HERE near column %d", c,
+                      UTF8fARG(UTF, (s - d), d),
+                     (int) len + 1);
+
+    NORETURN_FUNCTION_END;
+}
+
 #define RETRY() yyl_try(aTHX_ 0, s, len, orig_keyword, gv, gvp, \
                         formbrack, fake_eof, saw_infix_sigil)
 
@@ -6610,44 +6656,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
     switch (*s) {
     default:
-        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s)) {
+        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s))
             goto keylookup;
-        }
-    {
-        SV *dsv = newSVpvs_flags("", SVs_TEMP);
-        const char *c;
-        if (UTF) {
-            STRLEN skiplen = UTF8SKIP(s);
-            STRLEN stravail = PL_bufend - s;
-            c = sv_uni_display(dsv, newSVpvn_flags(s,
-                                                   skiplen > stravail ? stravail : skiplen,
-                                                   SVs_TEMP | SVf_UTF8),
-                               10, UNI_DISPLAY_ISPRINT);
-        }
-        else {
-            c = Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
-        }
-
-        if (s >= PL_linestart) {
-            d = PL_linestart;
-        }
-        else {
-            /* somehow (probably due to a parse failure), PL_linestart has advanced
-             * pass PL_bufptr, get a reasonable beginning of line
-             */
-            d = s;
-            while (d > SvPVX(PL_linestr) && d[-1] && d[-1] != '\n')
-                --d;
-        }
-        len = UTF ? Perl_utf8_length(aTHX_ (U8 *) d, (U8 *) s) : (STRLEN) (s - d);
-        if (len > UNRECOGNIZED_PRECEDE_COUNT) {
-            d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)d) : s - UNRECOGNIZED_PRECEDE_COUNT;
-        }
-
-        Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %" UTF8f "<-- HERE near column %d", c,
-                          UTF8fARG(UTF, (s - d), d),
-                         (int) len + 1);
-    }
+        yyl_croak_unrecognised(aTHX_ s);
 
     case 4:
     case 26:
