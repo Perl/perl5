@@ -981,7 +981,7 @@ __UNDEFINED__  toTITLE_utf8_safe(s,e,r,l)                                   \
 __UNDEFINED__  toFOLD_utf8_safe(s,e,r,l)                                    \
                         D_PPP_GENERIC_MULTI_ARG_TO(FOLD,s,e,r,l)
 
-#elif defined(UTF8SKIP)
+#elif { VERSION >= 5.006 }
 
 /* Here we have UTF-8 support, but using the original API where the case
  * changing functions merely returned the changed code point; hence they
