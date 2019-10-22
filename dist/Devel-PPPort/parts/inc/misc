@@ -879,8 +879,7 @@ __UNDEFINED__  toTITLE_utf8_safe(s,e,r,l)                                   \
     lowercasing.  This gives the correct result in most, but not all, instances
     */
 
-__UNDEFINED__  toFOLD_utf8_safe(s,e,r,l)                                    \
-                            D_PPP_GENERIC_SINGLE_ARG_TO(lower, s, e, r, l)
+__UNDEFINED__  toFOLD_utf8_safe(s,e,r,l)  toLOWER_utf8_safe(s,e,r,l)
 
 #endif
 
