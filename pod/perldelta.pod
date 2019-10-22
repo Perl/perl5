@@ -363,7 +363,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Setting C<$)> now properly sets supplementary group ids, if you have
+the necessary privileges.  [perl #134169]
 
 =back
 
