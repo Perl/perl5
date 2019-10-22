@@ -14662,7 +14662,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 goto continue_parse;
             }
-            else {
+            else if (! LOC) {
 
                 /* Here is /i.  Running out of room creates a problem if we are
                  * folding, and the split happens in the middle of a

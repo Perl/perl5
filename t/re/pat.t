@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 965;  # Update this when adding/deleting tests.
+plan tests => 966;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2198,6 +2198,13 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
                         $ff x 48;
         like(runperl(prog => "$s", stderr => 1), qr/Unmatched \(/);
    }
+
+   {    # GitHub #17196, caused assertion failure
+        fresh_perl_like('("0" x 258) =~ /(?l)0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/',
+                        qr/^$/,
+                        {},
+                        "Assertion failure with /l exact string longer than a single node");
+    }
 
 } # End of sub run_tests
 
