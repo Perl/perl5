@@ -1609,7 +1609,7 @@ C<'m'> delimiters act like quotes.  If the regexp evaluates to the empty string,
 the regexp in the I<last successful match> is used instead.  So we have
 
     "dog" =~ /d/;  # 'd' matches
-    "dogbert =~ //;  # this matches the 'd' regexp used before
+    "dogbert" =~ //;  # this matches the 'd' regexp used before
 
 
 =head3 Global matching
