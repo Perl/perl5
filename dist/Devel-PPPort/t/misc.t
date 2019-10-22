@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (22270) {
+  if (26826) {
     load();
-    plan(tests => 22270);
+    plan(tests => 26826);
   }
 }
 
@@ -183,6 +183,8 @@ ok(! Devel::PPPort::isOCTAL_A(ord("9")));
 ok(  Devel::PPPort::isOCTAL_L1(ord("2")));
 ok(! Devel::PPPort::isOCTAL_L1(ord("8")));
 
+my $way_too_early_msg = 'UTF-8 not implemented on this perl';
+
 # For the other properties, we test every code point from 0.255, and a
 # smattering of higher ones.  First populate a hash with keys like '65:ALPHA'
 # to indicate that the code point there is alphabetic
@@ -298,43 +300,50 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
         }
 
         # For all code points, test the '_utf8' macros
-        if ("$]" < 5.006) {
-            skip("No UTF-8 on this perl", 0);
-            if ($i > 255) {
-                skip("No UTF-8 on this perl", 0);
+        my $sub_fcn;
+        for $sub_fcn ("", "_LC") {
+            my $skip = "";
+            if ("$]" < 5.006) {
+                $skip = $way_too_early_msg;
             }
-        }
-        else {
-            my $sub_fcn;
-            for $sub_fcn ("") {
-                my $fcn = "Devel::PPPort::is${class}${sub_fcn}_utf8_safe";
-                my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
-                if ("$]" < 5.007 && $native > 255) {
-                    skip("Perls earlier than 5.7 give wrong answers for above Latin1 code points", 0);
+            elsif ("$]" < 5.007 && $native > 255) {
+                $skip = "Perls earlier than 5.7 give wrong answers for above Latin1 code points";
+            }
+            elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
+                $skip = "Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH";
+            }
+            elsif ($sub_fcn eq '_LC' && $i < 256) {
+                $skip = "Testing of code points whose results depend on locale is skipped ";
+            }
+            my $fcn = "Devel::PPPort::is${class}${sub_fcn}_utf8_safe";
+            my $utf8;
+
+            if ($skip) {
+                skip $skip, 0;
+            }
+            else {
+                $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
+                my $should_be = $types{"$native:$class"} || 0;
+                my $eval_string = "$fcn(\"$utf8\", 0)";
+                my $is = eval $eval_string || 0;
+                die "eval 'For $i, $eval_string' gave $@" if $@;
+                ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
+            }
+
+            # And for the high code points, test that a too short malformation (the
+            # -1) causes it to fail
+            if ($i > 255) {
+                if ($skip) {
+                    skip $skip, 0;
                 }
-                elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
-                    skip("Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH", 0);
+                elsif ("$]" >= 5.025009) {
+                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
                 }
                 else {
-                    my $should_be = $types{"$native:$class"} || 0;
-                    my $eval_string = "$fcn(\"$utf8\", 0)";
-                    my $is = eval $eval_string || 0;
-                    die "eval 'For $i, $eval_string' gave $@" if $@;
-                    ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
-                }
-
-                # And for the high code points, test that a too short malformation (the
-                # -1) causes it to fail
-                if ($i > 255) {
-                    if ("$]" >= 5.025009) {
-                        skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
-                    }
-                    else {
-                        my $eval_string = "$fcn(\"$utf8\", -1)";
-                        my $is = eval "no warnings; $eval_string" || 0;
-                        die "eval '$eval_string' gave $@" if $@;
-                        ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
-                    }
+                    my $eval_string = "$fcn(\"$utf8\", -1)";
+                    my $is = eval "no warnings; $eval_string" || 0;
+                    die "eval '$eval_string' gave $@" if $@;
+                    ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
                 }
             }
         }
@@ -361,8 +370,6 @@ my %case_changing = ( 'LOWER' => [ [ ord('A'), ord('a') ],
                                    [ 0xDF, 'Ss' ],
                                  ],
                     );
-
-my $way_too_early_msg = 'UTF-8 not implemented on this perl';
 
 my $name;
 for $name (keys %case_changing) {
@@ -428,7 +435,7 @@ for $name (keys %case_changing) {
         for $truncate (0..2) {
             my $skip;
             if ("$]" < 5.006000) {
-                $skip = 'UTF-8 not implemented on this perl';
+                $skip = $way_too_early_msg;
             }
             elsif (! $is_cp && "$]" < 5.007003) {
                 $skip = "Multi-character case change not implemented until 5.7.3";

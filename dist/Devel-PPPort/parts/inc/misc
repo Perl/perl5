@@ -78,6 +78,48 @@ __UNDEF_NOT_PROVIDED__ inRANGE(c, l, u)                                        \
                                                   (s)[1])))                 \
             : is ## macro ## _utf8(s))
 
+/* Create the macro for "is'macro'_LC_utf8_safe(s, e)".  For code points below
+ * 256, it calls the equivalent _L1 macro by converting the UTF-8 to code
+ * point.  That is so that it can automatically get the bug fixes done in this
+ * file. */
+#define D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, macro)                          \
+   (((e) - (s)) <= 0                                                        \
+     ? 0                                                                    \
+     : UTF8_IS_INVARIANT((s)[0])                                            \
+       ? is ## macro ## _LC((s)[0])                                         \
+       : (((e) - (s)) < UTF8SKIP(s))                                        \
+          ? 0                                                               \
+          : UTF8_IS_DOWNGRADEABLE_START((s)[0])                             \
+              /* The cast in the line below is only to silence warnings */  \
+            ? is ## macro ## _LC((WIDEST_UTYPE) LATIN1_TO_NATIVE(           \
+                                  UTF8_ACCUMULATE(NATIVE_UTF8_TO_I8((s)[0]) \
+                                                     & UTF_START_MASK(2),   \
+                                                  (s)[1])))                 \
+            : is ## macro ## _utf8(s))
+
+/* A few of the early functions are broken.  For these and the non-LC case,
+ * machine generated code is substituted.  But that code doesn't work for
+ * locales.  This is just like the above macro, but at the end, we call the
+ * macro we've generated for the above 255 case, which is correct since locale
+ * isn't involved.  This will generate extra code to handle the 0-255 inputs,
+ * but hopefully it will be optimized out by the C compiler.  But just in case
+ * it isn't, this macro is only used on the few versions that are broken */
+
+#define D_PPP_IS_GENERIC_LC_UTF8_SAFE_BROKEN(s, e, macro)                   \
+   (((e) - (s)) <= 0                                                        \
+     ? 0                                                                    \
+     : UTF8_IS_INVARIANT((s)[0])                                            \
+       ? is ## macro ## _LC((s)[0])                                         \
+       : (((e) - (s)) < UTF8SKIP(s))                                        \
+          ? 0                                                               \
+          : UTF8_IS_DOWNGRADEABLE_START((s)[0])                             \
+              /* The cast in the line below is only to silence warnings */  \
+            ? is ## macro ## _LC((WIDEST_UTYPE) LATIN1_TO_NATIVE(           \
+                                  UTF8_ACCUMULATE(NATIVE_UTF8_TO_I8((s)[0]) \
+                                                     & UTF_START_MASK(2),   \
+                                                  (s)[1])))                 \
+            : is ## macro ## _utf8_safe(s, e))
+
 __UNDEFINED__ SvRX(rv) (SvROK((rv)) ? (SvMAGICAL(SvRV((rv))) ? (mg_find(SvRV((rv)), PERL_MAGIC_qr) ? mg_find(SvRV((rv)), PERL_MAGIC_qr)->mg_obj : NULL) : NULL) : NULL)
 __UNDEFINED__ SvRXOK(sv) (!!SvRX(sv))
 
@@ -803,12 +845,59 @@ __UNDEFINED__  isXDIGIT_utf8_safe(s,e)                                       \
 #    error Unknown character set
 #  endif
 
+__UNDEFINED__ isALPHA_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, ALPHA)
+#  ifdef isALPHANUMERIC_utf8
+__UNDEFINED__ isALPHANUMERIC_LC_utf8_safe(s,e)                                 \
+                                D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, ALPHANUMERIC)
+#  else
+__UNDEFINED__ isALPHANUMERIC_LC_utf8_safe(s,e)				    \
+                        (isALPHA_LC_utf8_safe(s,e) || isDIGIT_LC_utf8_safe(s,e))
+#  endif
+
+__UNDEFINED__  isBLANK_LC_utf8_safe(s,e)                                       \
+                            D_PPP_IS_GENERIC_LC_UTF8_SAFE_BROKEN(s, e, BLANK)
+__UNDEFINED__ isCNTRL_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, CNTRL)
+__UNDEFINED__ isDIGIT_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, DIGIT)
+__UNDEFINED__ isGRAPH_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, GRAPH)
+#  ifdef isIDCONT_utf8
+__UNDEFINED__ isIDCONT_LC_utf8_safe(s,e)   D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, IDCONT)
+#  else
+__UNDEFINED__ isIDCONT_LC_utf8_safe(s,e)   isWORDCHAR_LC_utf8_safe(s,e)
+#  endif
+
+__UNDEFINED__ isIDFIRST_LC_utf8_safe(s,e)  D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, IDFIRST)
+__UNDEFINED__ isLOWER_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, LOWER)
+__UNDEFINED__ isPRINT_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, PRINT)
+
+#  undef isPSXSPC_LC_utf8_safe   /* Use the modern definition */
+__UNDEFINED__ isPSXSPC_LC_utf8_safe(s,e)   isSPACE_LC_utf8_safe(s,e)
+
+__UNDEFINED__ isPUNCT_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, PUNCT)
+__UNDEFINED__ isSPACE_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, SPACE)
+__UNDEFINED__ isUPPER_LC_utf8_safe(s,e)    D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, UPPER)
+
+#  ifdef isWORDCHAR_utf8
+__UNDEFINED__ isWORDCHAR_LC_utf8_safe(s,e) D_PPP_IS_GENERIC_LC_UTF8_SAFE(s, e, WORDCHAR)
+#  else
+__UNDEFINED__ isWORDCHAR_LC_utf8_safe(s,e)				               \
+                               (isALPHANUMERIC_LC_utf8_safe(s,e) || (*(s)) == '_')
+#  endif
+
+__UNDEFINED__  isXDIGIT_LC_utf8_safe(s,e)                                       \
+                            D_PPP_IS_GENERIC_LC_UTF8_SAFE_BROKEN(s, e, XDIGIT)
+
 /* Warning: isALPHANUMERIC_utf8_safe, isALPHA_utf8_safe, isASCII_utf8_safe,
  * isBLANK_utf8_safe, isCNTRL_utf8_safe, isDIGIT_utf8_safe, isGRAPH_utf8_safe,
  * isIDCONT_utf8_safe, isIDFIRST_utf8_safe, isLOWER_utf8_safe,
  * isPRINT_utf8_safe, isPSXSPC_utf8_safe, isPUNCT_utf8_safe, isSPACE_utf8_safe,
  * isUPPER_utf8_safe, isWORDCHAR_utf8_safe, isWORDCHAR_utf8_safe,
  * isXDIGIT_utf8_safe,
+ * isALPHANUMERIC_LC_utf8_safe, isALPHA_LC_utf8_safe, isASCII_LC_utf8_safe,
+ * isBLANK_LC_utf8_safe, isCNTRL_LC_utf8_safe, isDIGIT_LC_utf8_safe,
+ * isGRAPH_LC_utf8_safe, isIDCONT_LC_utf8_safe, isIDFIRST_LC_utf8_safe,
+ * isLOWER_LC_utf8_safe, isPRINT_LC_utf8_safe, isPSXSPC_LC_utf8_safe,
+ * isPUNCT_LC_utf8_safe, isSPACE_LC_utf8_safe, isUPPER_LC_utf8_safe,
+ * isWORDCHAR_LC_utf8_safe, isWORDCHAR_LC_utf8_safe, isXDIGIT_LC_utf8_safe,
  * isALPHANUMERIC_uvchr, isALPHA_uvchr, isASCII_uvchr, isBLANK_uvchr,
  * isCNTRL_uvchr, isDIGIT_uvchr, isGRAPH_uvchr, isIDCONT_uvchr,
  * isIDFIRST_uvchr, isLOWER_uvchr, isPRINT_uvchr, isPSXSPC_uvchr,
@@ -2057,6 +2146,159 @@ isXDIGIT_utf8_safe(s, offset)
     OUTPUT:
         RETVAL
 
+bool
+isALPHA_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isALPHA_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isALPHANUMERIC_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isALPHANUMERIC_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isASCII_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isASCII_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isBLANK_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isBLANK_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isCNTRL_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isCNTRL_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isDIGIT_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isDIGIT_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isGRAPH_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isGRAPH_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isIDCONT_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isIDCONT_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isIDFIRST_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isIDFIRST_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isLOWER_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isLOWER_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isPRINT_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isPRINT_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isPSXSPC_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isPSXSPC_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isPUNCT_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isPUNCT_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isSPACE_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isSPACE_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isUPPER_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isUPPER_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isWORDCHAR_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isWORDCHAR_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
+bool
+isXDIGIT_LC_utf8_safe(s, offset)
+    unsigned char * s
+    int offset
+    CODE:
+        RETVAL = isXDIGIT_LC_utf8_safe(s, s + UTF8SKIP(s) + offset);
+    OUTPUT:
+        RETVAL
+
 AV *
 toLOWER_utf8_safe(s, offset)
     unsigned char * s
@@ -2280,7 +2522,7 @@ av_top_index(av)
         OUTPUT:
                 RETVAL
 
-=tests plan => 22270
+=tests plan => 26826
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -2417,6 +2659,8 @@ ok(! Devel::PPPort::isOCTAL_A(ord("9")));
 ok(  Devel::PPPort::isOCTAL_L1(ord("2")));
 ok(! Devel::PPPort::isOCTAL_L1(ord("8")));
 
+my $way_too_early_msg = 'UTF-8 not implemented on this perl';
+
 # For the other properties, we test every code point from 0.255, and a
 # smattering of higher ones.  First populate a hash with keys like '65:ALPHA'
 # to indicate that the code point there is alphabetic
@@ -2532,43 +2776,50 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
         }
 
         # For all code points, test the '_utf8' macros
-        if ("$]" < 5.006) {
-            skip("No UTF-8 on this perl", 0);
-            if ($i > 255) {
-                skip("No UTF-8 on this perl", 0);
+        my $sub_fcn;
+        for $sub_fcn ("", "_LC") {
+            my $skip = "";
+            if ("$]" < 5.006) {
+                $skip = $way_too_early_msg;
             }
-        }
-        else {
-            my $sub_fcn;
-            for $sub_fcn ("") {
-                my $fcn = "Devel::PPPort::is${class}${sub_fcn}_utf8_safe";
-                my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
-                if ("$]" < 5.007 && $native > 255) {
-                    skip("Perls earlier than 5.7 give wrong answers for above Latin1 code points", 0);
+            elsif ("$]" < 5.007 && $native > 255) {
+                $skip = "Perls earlier than 5.7 give wrong answers for above Latin1 code points";
+            }
+            elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
+                $skip = "Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH";
+            }
+            elsif ($sub_fcn eq '_LC' && $i < 256) {
+                $skip = "Testing of code points whose results depend on locale is skipped ";
+            }
+            my $fcn = "Devel::PPPort::is${class}${sub_fcn}_utf8_safe";
+            my $utf8;
+
+            if ($skip) {
+                skip $skip, 0;
+            }
+            else {
+                $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
+                my $should_be = $types{"$native:$class"} || 0;
+                my $eval_string = "$fcn(\"$utf8\", 0)";
+                my $is = eval $eval_string || 0;
+                die "eval 'For $i, $eval_string' gave $@" if $@;
+                ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
+            }
+
+            # And for the high code points, test that a too short malformation (the
+            # -1) causes it to fail
+            if ($i > 255) {
+                if ($skip) {
+                    skip $skip, 0;
                 }
-                elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
-                    skip("Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH", 0);
+                elsif ("$]" >= 5.025009) {
+                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
                 }
                 else {
-                    my $should_be = $types{"$native:$class"} || 0;
-                    my $eval_string = "$fcn(\"$utf8\", 0)";
-                    my $is = eval $eval_string || 0;
-                    die "eval 'For $i, $eval_string' gave $@" if $@;
-                    ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
-                }
-
-                # And for the high code points, test that a too short malformation (the
-                # -1) causes it to fail
-                if ($i > 255) {
-                    if ("$]" >= 5.025009) {
-                        skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
-                    }
-                    else {
-                        my $eval_string = "$fcn(\"$utf8\", -1)";
-                        my $is = eval "no warnings; $eval_string" || 0;
-                        die "eval '$eval_string' gave $@" if $@;
-                        ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
-                    }
+                    my $eval_string = "$fcn(\"$utf8\", -1)";
+                    my $is = eval "no warnings; $eval_string" || 0;
+                    die "eval '$eval_string' gave $@" if $@;
+                    ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
                 }
             }
         }
@@ -2595,8 +2846,6 @@ my %case_changing = ( 'LOWER' => [ [ ord('A'), ord('a') ],
                                    [ 0xDF, 'Ss' ],
                                  ],
                     );
-
-my $way_too_early_msg = 'UTF-8 not implemented on this perl';
 
 my $name;
 for $name (keys %case_changing) {
@@ -2662,7 +2911,7 @@ for $name (keys %case_changing) {
         for $truncate (0..2) {
             my $skip;
             if ("$]" < 5.006000) {
-                $skip = 'UTF-8 not implemented on this perl';
+                $skip = $way_too_early_msg;
             }
             elsif (! $is_cp && "$]" < 5.007003) {
                 $skip = "Multi-character case change not implemented until 5.7.3";
