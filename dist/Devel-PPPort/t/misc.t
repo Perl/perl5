@@ -308,34 +308,34 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
             my $sub_fcn;
             for $sub_fcn ("") {
                 my $fcn = "Devel::PPPort::is${class}${sub_fcn}_utf8_safe";
-            my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
-            if ("$]" < 5.007 && $native > 255) {
-                skip("Perls earlier than 5.7 give wrong answers for above Latin1 code points", 0);
-            }
-            elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
-                skip("Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH", 0);
-            }
-            else {
-                my $should_be = $types{"$native:$class"} || 0;
-                my $eval_string = "$fcn(\"$utf8\", 0)";
-                my $is = eval $eval_string || 0;
-                die "eval 'For $i, $eval_string' gave $@" if $@;
-                ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
-            }
-
-            # And for the high code points, test that a too short malformation (the
-            # -1) causes it to fail
-            if ($i > 255) {
-                if ("$]" >= 5.025009) {
-                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
+                my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
+                if ("$]" < 5.007 && $native > 255) {
+                    skip("Perls earlier than 5.7 give wrong answers for above Latin1 code points", 0);
+                }
+                elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
+                    skip("Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH", 0);
                 }
                 else {
-                    my $eval_string = "$fcn(\"$utf8\", -1)";
-                    my $is = eval "no warnings; $eval_string" || 0;
-                    die "eval '$eval_string' gave $@" if $@;
-                    ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
+                    my $should_be = $types{"$native:$class"} || 0;
+                    my $eval_string = "$fcn(\"$utf8\", 0)";
+                    my $is = eval $eval_string || 0;
+                    die "eval 'For $i, $eval_string' gave $@" if $@;
+                    ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
                 }
-            }
+
+                # And for the high code points, test that a too short malformation (the
+                # -1) causes it to fail
+                if ($i > 255) {
+                    if ("$]" >= 5.025009) {
+                        skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
+                    }
+                    else {
+                        my $eval_string = "$fcn(\"$utf8\", -1)";
+                        my $is = eval "no warnings; $eval_string" || 0;
+                        die "eval '$eval_string' gave $@" if $@;
+                        ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
+                    }
+                }
             }
         }
     }
