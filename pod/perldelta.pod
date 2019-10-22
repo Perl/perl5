@@ -47,7 +47,8 @@ L<Module::CoreList> has been upgraded from version 5.20190522 to 5.20191027.
 The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule
 that was originally changed for FreeBSD, and the FreeBSD make
 apparently predefines it.  The Solaris make does not predefine C<ECHO>
-which broke this rule on Solaris.  [perl #134218]
+which broke this rule on Solaris.
+L<[perl #17057]|https://github.com/perl/perl5/issues/17057>
 
 =back
 
@@ -80,30 +81,34 @@ XXX
 =item *
 
 Setting C<$)> now properly sets supplementary group ids, if you have
-the necessary privileges.  [perl #134169]
+the necessary privileges.
+L<[perl #17031]|https://github.com/perl/perl5/issues/17031>
 
 =item *
 
 C<readline @foo> now evaluates C<@foo> in scalar context.  Previously
 it would be evalauted in list context, and since readline() pops only
 one argument from the stack, the stack could underflow, or be left
-with unexpected values on the stack.  [perl #133989]
+with unexpected values on the stack.
+L<[perl #16929]|https://github.com/perl/perl5/issues/16929>
 
 =item *
 
 sv_gets() now recovers better if the target SV is modified by a signal
-handler.  [perl #134035]
+handler.
+L<[perl #16960]|https://github.com/perl/perl5/issues/16960>
 
 =item *
 
 Matching a non-C<SVf_UTF8> string against a regular expression
 containing unicode literals could leak a SV on each match attempt.
-[perl #134390]
+L<[perl #17140]|https://github.com/perl/perl5/issues/17140>
 
 =item *
 
 C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due
-to mishandling of the negative precision value.  [perl #134008]
+to mishandling of the negative precision value.
+L<[perl #16942]|https://github.com/perl/perl5/issues/16942>
 
 =back
 
