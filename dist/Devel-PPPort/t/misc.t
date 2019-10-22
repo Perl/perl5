@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (17858) {
+  if (22210) {
     load();
-    plan(tests => 17858);
+    plan(tests => 22210);
   }
 }
 
@@ -281,10 +281,15 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
         if ($i < 256) {  # For the ones that can fit in a byte, test each of
                          #three macros.
             my $suffix;
-            for $suffix ("", "_A", "_L1") {
-                my $should_be = ($i > 0x7F && $suffix ne "_L1")
-                                ? 0     # Fail on non-ASCII unless L1
+            for $suffix ("", "_A", "_L1", "_uvchr") {
+                my $should_be = ($i > 0x7F && $suffix !~ /_(uvchr|L1)/)
+                                ? 0     # Fail on non-ASCII unless unicode
                                 : ($types{"$native:$class"} || 0);
+                if ("$]" < 5.006 && $suffix eq '_uvchr') {
+                    skip("No UTF-8 on this perl", 0);
+                    next;
+                }
+
                 my $eval_string = "Devel::PPPort::is${class}$suffix($hex)";
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i: $eval_string' gave $@" if $@;

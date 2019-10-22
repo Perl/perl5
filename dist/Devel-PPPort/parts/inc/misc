@@ -616,8 +616,51 @@ __UNDEFINED__ isWORDCHAR_A(c)	   isWORDCHAR(c)
 __UNDEFINED__ isXDIGIT_A(c)	   isXDIGIT(c)
 
 __UNDEFINED__ isASCII_utf8_safe(s,e)  (((e) - (s)) <= 0 ? 0 : isASCII(*(s)))
+__UNDEFINED__ isASCII_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isASCII_L1(c) : 0)
 
 #if { VERSION >= 5.006 }
+
+__UNDEFINED__ isALPHA_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isALPHA_L1(c) : is_uni_alpha((UV) (c)))
+__UNDEFINED__ isALPHANUMERIC_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                 \
+    ? isALPHANUMERIC_L1(c) : (is_uni_alpha((UV) (c)) || is_uni_digit((UV) (c))))
+#  ifdef is_uni_blank
+__UNDEFINED__ isBLANK_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isBLANK_L1(c) : is_uni_blank((UV) (c)))
+#  else
+__UNDEFINED__ isBLANK_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                   \
+                                 ? isBLANK_L1(c)                            \
+                                 : (   (UV) (c) == 0x1680 /* Unicode 3.0 */ \
+                                    || inRANGE((UV) (c), 0x2000, 0x200A)    \
+                                    || (UV) (c) == 0x202F  /* Unicode 3.0 */\
+                                    || (UV) (c) == 0x205F  /* Unicode 3.2 */\
+                                    || (UV) (c) == 0x3000))
+#  endif
+__UNDEFINED__ isCNTRL_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isCNTRL_L1(c) : is_uni_cntrl((UV) (c)))
+__UNDEFINED__ isDIGIT_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isDIGIT_L1(c) : is_uni_digit((UV) (c)))
+__UNDEFINED__ isGRAPH_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isGRAPH_L1(c) : is_uni_graph((UV) (c)))
+__UNDEFINED__ isIDCONT_uvchr(c)    isWORDCHAR_uvchr(c)
+__UNDEFINED__ isIDFIRST_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isIDFIRST_L1(c) : is_uni_idfirst((UV) (c)))
+__UNDEFINED__ isLOWER_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isLOWER_L1(c) : is_uni_lower((UV) (c)))
+__UNDEFINED__ isPRINT_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isPRINT_L1(c) : is_uni_print((UV) (c)))
+__UNDEFINED__ isPSXSPC_uvchr(c)   isSPACE_uvchr(c)
+__UNDEFINED__ isPUNCT_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isPUNCT_L1(c) : is_uni_punct((UV) (c)))
+__UNDEFINED__ isSPACE_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isSPACE_L1(c) : is_uni_space((UV) (c)))
+__UNDEFINED__ isUPPER_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isUPPER_L1(c) : is_uni_upper((UV) (c)))
+__UNDEFINED__ isXDIGIT_uvchr(c)   ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isXDIGIT_L1(c) : is_uni_xdigit((UV) (c)))
+__UNDEFINED__ isWORDCHAR_uvchr(c) ((WIDEST_UTYPE) (c) < 256                 \
+                                   ? isWORDCHAR_L1(c) : is_uni_alnum((UV) (c)))
 
 __UNDEFINED__ isALPHA_utf8_safe(s,e)    D_PPP_IS_GENERIC_UTF8_SAFE(s, e, ALPHA)
 #  ifdef isALPHANUMERIC_utf8
@@ -758,7 +801,12 @@ __UNDEFINED__  isXDIGIT_utf8_safe(s,e)                                       \
  * isIDCONT_utf8_safe, isIDFIRST_utf8_safe, isLOWER_utf8_safe,
  * isPRINT_utf8_safe, isPSXSPC_utf8_safe, isPUNCT_utf8_safe, isSPACE_utf8_safe,
  * isUPPER_utf8_safe, isWORDCHAR_utf8_safe, isWORDCHAR_utf8_safe,
- * isXDIGIT_utf8_safe
+ * isXDIGIT_utf8_safe,
+ * isALPHANUMERIC_uvchr, isALPHA_uvchr, isASCII_uvchr, isBLANK_uvchr,
+ * isCNTRL_uvchr, isDIGIT_uvchr, isGRAPH_uvchr, isIDCONT_uvchr,
+ * isIDFIRST_uvchr, isLOWER_uvchr, isPRINT_uvchr, isPSXSPC_uvchr,
+ * isPUNCT_uvchr, isSPACE_uvchr, isUPPER_uvchr, isWORDCHAR_uvchr,
+ * isWORDCHAR_uvchr, isXDIGIT_uvchr
  *
  * The UTF-8 handling is buggy in early Perls, and this can give inaccurate
  * results for code points above 0xFF, until the implementation started
@@ -1690,6 +1738,14 @@ isPSXSPC_L1(ord)
         RETVAL
 
 bool
+isASCII_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isASCII_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
 isASCII_utf8_safe(s, offset)
     unsigned char * s
     int offset
@@ -1699,6 +1755,134 @@ isASCII_utf8_safe(s, offset)
         RETVAL
 
 #if { VERSION >= 5.006 }
+
+bool
+isBLANK_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isBLANK_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isALPHA_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isALPHA_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isALPHANUMERIC_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isALPHANUMERIC_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isCNTRL_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isCNTRL_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isDIGIT_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isDIGIT_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isIDFIRST_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isIDFIRST_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isIDCONT_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isIDCONT_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isGRAPH_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isGRAPH_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isLOWER_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isLOWER_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isPRINT_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isPRINT_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isPSXSPC_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isPSXSPC_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isPUNCT_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isPUNCT_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isSPACE_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isSPACE_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isUPPER_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isUPPER_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isWORDCHAR_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isWORDCHAR_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+isXDIGIT_uvchr(ord)
+    UV ord
+    CODE:
+        RETVAL = isXDIGIT_uvchr(ord);
+    OUTPUT:
+        RETVAL
 
 bool
 isALPHA_utf8_safe(s, offset)
@@ -1975,7 +2159,7 @@ av_top_index(av)
         OUTPUT:
                 RETVAL
 
-=tests plan => 17858
+=tests plan => 22210
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -2210,10 +2394,15 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
         if ($i < 256) {  # For the ones that can fit in a byte, test each of
                          #three macros.
             my $suffix;
-            for $suffix ("", "_A", "_L1") {
-                my $should_be = ($i > 0x7F && $suffix ne "_L1")
-                                ? 0     # Fail on non-ASCII unless L1
+            for $suffix ("", "_A", "_L1", "_uvchr") {
+                my $should_be = ($i > 0x7F && $suffix !~ /_(uvchr|L1)/)
+                                ? 0     # Fail on non-ASCII unless unicode
                                 : ($types{"$native:$class"} || 0);
+                if ("$]" < 5.006 && $suffix eq '_uvchr') {
+                    skip("No UTF-8 on this perl", 0);
+                    next;
+                }
+
                 my $eval_string = "Devel::PPPort::is${class}$suffix($hex)";
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i: $eval_string' gave $@" if $@;
