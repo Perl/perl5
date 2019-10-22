@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (22210) {
+  if (22270) {
     load();
-    plan(tests => 22210);
+    plan(tests => 22270);
   }
 }
 
@@ -381,6 +381,44 @@ for $name (keys %case_changing) {
                 die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
                 $should_be_bytes = length $utf8_changed;
             }
+        }
+
+        my $fcn = "to${name}_uvchr";
+        my $skip = "";
+
+        if ("$]" < 5.006000) {
+            $skip = $way_too_early_msg;
+        }
+        elsif (! $is_cp) {
+            $skip = "Can't do uvchr on a multi-char string";
+        }
+        if ($skip) {
+            for (1..4) {
+                skip $skip, 0;
+            }
+        }
+        else {
+            if ($is_cp) {
+                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
+            }
+            else {
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                $should_be_bytes = length $utf8_changed;
+            }
+
+            my $ret = eval "Devel::PPPort::$fcn($original)";
+            my $fail = $@;  # Have to save $@, as it gets destroyed
+            ok ($fail, "", "$fcn($original) didn't fail");
+            my $first = ("$]" != 5.006000)
+                        ? substr($utf8_changed, 0, 1)
+                        : $utf8_changed, 0, 1;
+            ok($ret->[0], ord $first,
+               "ord of $fcn($original) is $changed");
+            ok($ret->[1], $utf8_changed,
+               "UTF-8 of of $fcn($original) is correct");
+            ok($ret->[2], $should_be_bytes,
+               "Length of $fcn($original) is $should_be_bytes");
         }
 
         my $truncate;

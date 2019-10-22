@@ -819,6 +819,12 @@ __UNDEFINED__  isXDIGIT_utf8_safe(s,e)                                       \
                              " %d)\n"
 /* Perls starting here had a new API which handled multi-character results */
 #if { VERSION >= 5.7.3 }
+
+__UNDEFINED__ toLOWER_uvchr(c, s, l)  UNI_TO_NATIVE(to_uni_lower(NATIVE_TO_UNI(c), s, l))
+__UNDEFINED__ toUPPER_uvchr(c, s, l)  UNI_TO_NATIVE(to_uni_upper(NATIVE_TO_UNI(c), s, l))
+__UNDEFINED__ toTITLE_uvchr(c, s, l)  UNI_TO_NATIVE(to_uni_title(NATIVE_TO_UNI(c), s, l))
+__UNDEFINED__ toFOLD_uvchr(c, s, l)   UNI_TO_NATIVE(to_uni_fold( NATIVE_TO_UNI(c), s, l))
+
 #  if { VERSION != 5.15.6 }     /* Just this version is broken */
 
       /* Prefer the macro to the function */
@@ -891,6 +897,21 @@ __UNDEFINED__  toFOLD_utf8_safe(s,e,r,l)                                    \
 #    define D_PPP_UV_TO_UTF8 uv_to_utf8
 #  endif
 
+   /* Get the utf8 of the case changed value, and store its length; then have
+    * to re-calculate the changed case value in order to return it */
+#  define D_PPP_GENERIC_SINGLE_ARG_TO_UVCHR(name, c, s, l)                  \
+        (*(l) = (D_PPP_UV_TO_UTF8(s,                                        \
+                 UNI_TO_NATIVE(to_uni_ ## name(NATIVE_TO_UNI(c)))) - (s)),  \
+        UNI_TO_NATIVE(to_uni_ ## name(NATIVE_TO_UNI(c))))
+
+__UNDEFINED__ toLOWER_uvchr(c, s, l)                                        \
+                        D_PPP_GENERIC_SINGLE_ARG_TO_UVCHR(lower, c, s, l)
+__UNDEFINED__ toUPPER_uvchr(c, s, l)                                        \
+                        D_PPP_GENERIC_SINGLE_ARG_TO_UVCHR(upper, c, s, l)
+__UNDEFINED__ toTITLE_uvchr(c, s, l)                                        \
+                        D_PPP_GENERIC_SINGLE_ARG_TO_UVCHR(title, c, s, l)
+__UNDEFINED__ toFOLD_uvchr(c, s, l)   toLOWER_uvchr(c, s, l)
+
 #  define D_PPP_GENERIC_SINGLE_ARG_TO_UTF8(name, s, e, r, l)                \
     (((((e) - (s)) <= 0)                                                    \
       ? (croak("Attempting case change on zero length string"),             \
@@ -904,7 +925,8 @@ __UNDEFINED__  toFOLD_utf8_safe(s,e,r,l)                                    \
             /* Then store its length, and re-get code point for return */   \
             *(l) = UTF8SKIP(r), to_utf8_ ## name(r))
 
-/* Warning: toUPPER_utf8_safe, toLOWER_utf8_safe, toTITLE_utf8_safe
+/* Warning: toUPPER_utf8_safe, toLOWER_utf8_safe, toTITLE_utf8_safe,
+ * toUPPER_uvchr, toLOWER_uvchr, toTITLE_uvchr
     The UTF-8 case changing operations had bugs before around 5.12 or 5.14;
     this backport does not correct them.
 
@@ -918,7 +940,7 @@ __UNDEFINED__  toLOWER_utf8_safe(s,e,r,l)                                   \
 __UNDEFINED__  toTITLE_utf8_safe(s,e,r,l)                                   \
                         D_PPP_GENERIC_SINGLE_ARG_TO_UTF8(title, s, e, r, l)
 
- /* Warning: toFOLD_utf8_safe
+ /* Warning: toFOLD_utf8_safe, toFOLD_uvchr
     The UTF-8 case changing operations had bugs before around 5.12 or 5.14;
     this backport does not correct them.
 
@@ -2124,6 +2146,98 @@ toFOLD_utf8_safe(s, offset)
     OUTPUT:
         RETVAL
 
+AV *
+toLOWER_uvchr(c)
+    UV c
+    PREINIT:
+        U8 u[UTF8_MAXBYTES+1];
+        Size_t len;
+        UV ret;
+        SV* utf8;
+        AV * av;
+    CODE:
+        av = newAV();
+        ret = toLOWER_uvchr(c, u, &len);
+        av_push(av, newSVuv(ret));
+
+        utf8 = newSVpvn((char *) u, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+toTITLE_uvchr(c)
+    UV c
+    PREINIT:
+        U8 u[UTF8_MAXBYTES+1];
+        Size_t len;
+        UV ret;
+        SV* utf8;
+        AV * av;
+    CODE:
+        av = newAV();
+        ret = toTITLE_uvchr(c, u, &len);
+        av_push(av, newSVuv(ret));
+
+        utf8 = newSVpvn((char *) u, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+toUPPER_uvchr(c)
+    UV c
+    PREINIT:
+        U8 u[UTF8_MAXBYTES+1];
+        Size_t len;
+        UV ret;
+        SV* utf8;
+        AV * av;
+    CODE:
+        av = newAV();
+        ret = toUPPER_uvchr(c, u, &len);
+        av_push(av, newSVuv(ret));
+
+        utf8 = newSVpvn((char *) u, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+toFOLD_uvchr(c)
+    UV c
+    PREINIT:
+        U8 u[UTF8_MAXBYTES+1];
+        Size_t len;
+        UV ret;
+        SV* utf8;
+        AV * av;
+    CODE:
+        av = newAV();
+        ret = toFOLD_uvchr(c, u, &len);
+        av_push(av, newSVuv(ret));
+
+        utf8 = newSVpvn((char *) u, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
 #endif
 
 UV
@@ -2159,7 +2273,7 @@ av_top_index(av)
         OUTPUT:
                 RETVAL
 
-=tests plan => 22210
+=tests plan => 22270
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -2494,6 +2608,44 @@ for $name (keys %case_changing) {
                 die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
                 $should_be_bytes = length $utf8_changed;
             }
+        }
+
+        my $fcn = "to${name}_uvchr";
+        my $skip = "";
+
+        if ("$]" < 5.006000) {
+            $skip = $way_too_early_msg;
+        }
+        elsif (! $is_cp) {
+            $skip = "Can't do uvchr on a multi-char string";
+        }
+        if ($skip) {
+            for (1..4) {
+                skip $skip, 0;
+            }
+        }
+        else {
+            if ($is_cp) {
+                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
+            }
+            else {
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                $should_be_bytes = length $utf8_changed;
+            }
+
+            my $ret = eval "Devel::PPPort::$fcn($original)";
+            my $fail = $@;  # Have to save $@, as it gets destroyed
+            ok ($fail, "", "$fcn($original) didn't fail");
+            my $first = ("$]" != 5.006000)
+                        ? substr($utf8_changed, 0, 1)
+                        : $utf8_changed, 0, 1;
+            ok($ret->[0], ord $first,
+               "ord of $fcn($original) is $changed");
+            ok($ret->[1], $utf8_changed,
+               "UTF-8 of of $fcn($original) is correct");
+            ok($ret->[2], $should_be_bytes,
+               "Length of $fcn($original) is $should_be_bytes");
         }
 
         my $truncate;
