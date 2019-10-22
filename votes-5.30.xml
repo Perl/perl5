@@ -79,6 +79,8 @@ stable throughout 5.30 and not revert back until 5.32?
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="steveh" id="47ef154c59e75e9351d27b3bd06d6ac57494193c" ticket="" desc="Update documentation, comments, metadata to reference GitHub as canonical repository (#1186)"/>
+
 </div>
 
 </data>
