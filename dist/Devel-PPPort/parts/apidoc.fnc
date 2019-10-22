@@ -181,10 +181,10 @@ Amhd|bool|isALPHANUMERIC_L1|int ch
 Amhd|bool|isALPHANUMERIC_LC|int ch
 Amhd|bool|isALPHANUMERIC_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isALPHANUMERIC_LC_uvchr|int ch
-Amhd|bool|isALPHANUMERIC_utf8|U8 * s
+Amhd|bool|isALPHANUMERIC_utf8|U8 * s|U8 * end
 Amhd|bool|isALPHANUMERIC_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isALPHANUMERIC_uvchr|int ch
-Amhd|bool|isALPHA_utf8|U8 * s
+Amhd|bool|isALPHA_utf8|U8 * s|U8 * end
 Amhd|bool|isALPHA_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isALPHA_uvchr|int ch
 Amd|bool|isASCII|int ch
@@ -193,7 +193,7 @@ Amhd|bool|isASCII_L1|int ch
 Amhd|bool|isASCII_LC|int ch
 Amhd|bool|isASCII_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isASCII_LC_uvchr|int ch
-Amhd|bool|isASCII_utf8|U8 * s
+Amhd|bool|isASCII_utf8|U8 * s|U8 * end
 Amhd|bool|isASCII_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isASCII_uvchr|int ch
 Amd|bool|isBLANK|char ch
@@ -202,7 +202,7 @@ Amhd|bool|isBLANK_L1|int ch
 Amhd|bool|isBLANK_LC|int ch
 Amhd|bool|isBLANK_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isBLANK_LC_uvchr|int ch
-Amhd|bool|isBLANK_utf8|U8 * s
+Amhd|bool|isBLANK_utf8|U8 * s|U8 * end
 Amhd|bool|isBLANK_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isBLANK_uvchr|int ch
 Amd|bool|isCNTRL|char ch
@@ -211,7 +211,7 @@ Amhd|bool|isCNTRL_L1|int ch
 Amhd|bool|isCNTRL_LC|int ch
 Amhd|bool|isCNTRL_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isCNTRL_LC_uvchr|int ch
-Amhd|bool|isCNTRL_utf8|U8 * s
+Amhd|bool|isCNTRL_utf8|U8 * s|U8 * end
 Amhd|bool|isCNTRL_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isCNTRL_uvchr|int ch
 Amd|bool|isDIGIT|char ch
@@ -220,7 +220,7 @@ Amhd|bool|isDIGIT_L1|int ch
 Amhd|bool|isDIGIT_LC|int ch
 Amhd|bool|isDIGIT_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isDIGIT_LC_uvchr|int ch
-Amhd|bool|isDIGIT_utf8|U8 * s
+Amhd|bool|isDIGIT_utf8|U8 * s|U8 * end
 Amhd|bool|isDIGIT_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isDIGIT_uvchr|int ch
 Amd|bool|isGRAPH|char ch
@@ -229,7 +229,7 @@ Amhd|bool|isGRAPH_L1|int ch
 Amhd|bool|isGRAPH_LC|int ch
 Amhd|bool|isGRAPH_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isGRAPH_LC_uvchr|int ch
-Amhd|bool|isGRAPH_utf8|U8 * s
+Amhd|bool|isGRAPH_utf8|U8 * s|U8 * end
 Amhd|bool|isGRAPH_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isGRAPH_uvchr|int ch
 Amd|bool|isIDCONT|char ch
@@ -238,7 +238,7 @@ Amhd|bool|isIDCONT_L1|int ch
 Amhd|bool|isIDCONT_LC|int ch
 Amhd|bool|isIDCONT_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isIDCONT_LC_uvchr|int ch
-Amhd|bool|isIDCONT_utf8|U8 * s
+Amhd|bool|isIDCONT_utf8|U8 * s|U8 * end
 Amhd|bool|isIDCONT_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isIDCONT_uvchr|int ch
 Amd|bool|isIDFIRST|char ch
@@ -247,7 +247,7 @@ Amhd|bool|isIDFIRST_L1|int ch
 Amhd|bool|isIDFIRST_LC|int ch
 Amhd|bool|isIDFIRST_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isIDFIRST_LC_uvchr|int ch
-Amhd|bool|isIDFIRST_utf8|U8 * s
+Amhd|bool|isIDFIRST_utf8|U8 * s|U8 * end
 Amhd|bool|isIDFIRST_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isIDFIRST_uvchr|int ch
 Amd|bool|isLOWER|char ch
@@ -256,7 +256,7 @@ Amhd|bool|isLOWER_L1|int ch
 Amhd|bool|isLOWER_LC|int ch
 Amhd|bool|isLOWER_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isLOWER_LC_uvchr|int ch
-Amhd|bool|isLOWER_utf8|U8 * s
+Amhd|bool|isLOWER_utf8|U8 * s|U8 * end
 Amhd|bool|isLOWER_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isLOWER_uvchr|int ch
 Amnd|bool|IS_NUMBER_GREATER_THAN_UV_MAX
@@ -274,7 +274,7 @@ Amhd|bool|isPRINT_L1|int ch
 Amhd|bool|isPRINT_LC|int ch
 Amhd|bool|isPRINT_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isPRINT_LC_uvchr|int ch
-Amhd|bool|isPRINT_utf8|U8 * s
+Amhd|bool|isPRINT_utf8|U8 * s|U8 * end
 Amhd|bool|isPRINT_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isPRINT_uvchr|int ch
 Amd|bool|isPSXSPC|char ch
@@ -283,7 +283,7 @@ Amhd|bool|isPSXSPC_L1|int ch
 Amhd|bool|isPSXSPC_LC|int ch
 Amhd|bool|isPSXSPC_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isPSXSPC_LC_uvchr|int ch
-Amhd|bool|isPSXSPC_utf8|U8 * s
+Amhd|bool|isPSXSPC_utf8|U8 * s|U8 * end
 Amhd|bool|isPSXSPC_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isPSXSPC_uvchr|int ch
 Amd|bool|isPUNCT|char ch
@@ -292,7 +292,7 @@ Amhd|bool|isPUNCT_L1|int ch
 Amhd|bool|isPUNCT_LC|int ch
 Amhd|bool|isPUNCT_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isPUNCT_LC_uvchr|int ch
-Amhd|bool|isPUNCT_utf8|U8 * s
+Amhd|bool|isPUNCT_utf8|U8 * s|U8 * end
 Amhd|bool|isPUNCT_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isPUNCT_uvchr|int ch
 Amd|bool|IS_SAFE_SYSCALL|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
@@ -302,7 +302,7 @@ Amhd|bool|isSPACE_L1|int ch
 Amhd|bool|isSPACE_LC|int ch
 Amhd|bool|isSPACE_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isSPACE_LC_uvchr|int ch
-Amhd|bool|isSPACE_utf8|U8 * s
+Amhd|bool|isSPACE_utf8|U8 * s|U8 * end
 Amhd|bool|isSPACE_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isSPACE_uvchr|int ch
 Amd|bool|isUPPER|char ch
@@ -311,7 +311,7 @@ Amhd|bool|isUPPER_L1|int ch
 Amhd|bool|isUPPER_LC|int ch
 Amhd|bool|isUPPER_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isUPPER_LC_uvchr|int ch
-Amhd|bool|isUPPER_utf8|U8 * s
+Amhd|bool|isUPPER_utf8|U8 * s|U8 * end
 Amhd|bool|isUPPER_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isUPPER_uvchr|int ch
 Amd|STRLEN|isUTF8_CHAR_flags|const U8 *s|const U8 *e| const U32 flags
@@ -321,7 +321,7 @@ Amhd|bool|isWORDCHAR_L1|int ch
 Amhd|bool|isWORDCHAR_LC|int ch
 Amhd|bool|isWORDCHAR_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isWORDCHAR_LC_uvchr|int ch
-Amhd|bool|isWORDCHAR_utf8|U8 * s
+Amhd|bool|isWORDCHAR_utf8|U8 * s|U8 * end
 Amhd|bool|isWORDCHAR_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isWORDCHAR_uvchr|int ch
 Amd|bool|isXDIGIT|char ch
@@ -330,7 +330,7 @@ Amhd|bool|isXDIGIT_L1|int ch
 Amhd|bool|isXDIGIT_LC|int ch
 Amhd|bool|isXDIGIT_LC_utf8_safe|U8 * s| U8 *end
 Amhd|bool|isXDIGIT_LC_uvchr|int ch
-Amhd|bool|isXDIGIT_utf8|U8 * s
+Amhd|bool|isXDIGIT_utf8|U8 * s|U8 * end
 Amhd|bool|isXDIGIT_utf8_safe|U8 * s|U8 * end
 Amhd|bool|isXDIGIT_uvchr|int ch
 Amnd|I32|items
@@ -856,11 +856,14 @@ AmnUd|UV|UNICODE_REPLACEMENT
 Amd|UV|UNI_TO_NATIVE|UV ch
 AmUd|bool|UNLIKELY|const bool expr
 Amd|STRLEN|UTF8_CHK_SKIP|char* s
+Amnhd||UTF8f
+Amhd||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
 Amd|bool|UTF8_IS_INVARIANT|char c
 Amd|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
 Amd|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
 Amd|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
 AmnUd|STRLEN|UTF8_MAXBYTES
+AmnUd|STRLEN|UTF8_MAXBYTES_CASE
 Amd|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
 Amd|STRLEN|UTF8_SKIP|char* s
 Amd|STRLEN|UTF8SKIP|char* s
