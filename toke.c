@@ -303,23 +303,6 @@ struct code {
 
 static const struct code no_code = { NULL, NULL, NULL, NULL, NULL, 0, FALSE };
 
-PERL_STATIC_INLINE struct code
-make_code(SV *sv, CV *cv, GV *gv, GV **gvp, OP *rv2cv_op, PADOFFSET off, bool lex)
-{
-    struct code c;
-    c.sv = sv;
-    c.sv = sv;
-    c.cv = cv;
-    c.gv = gv;
-    c.gvp = gvp;
-    c.rv2cv_op = rv2cv_op;
-    c.off = off;
-    c.lex = lex;
-    return c;
-}
-
-#define MAKE_CODE(lEx) make_code(sv, cv, gv, gvp, rv2cv_op, off, lEx)
-
 
 #ifdef DEBUGGING
 
@@ -8406,12 +8389,145 @@ yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
 }
 
 static int
+yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
+{
+    STRLEN len;
+    bool anydelim;
+    I32 tmp = 0;
+    struct code c = no_code;
+    I32 orig_keyword = 0;
+    char *d;
+
+    c.gv = gv;
+
+    PL_bufptr = s;
+    s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
+
+    /* Some keywords can be followed by any delimiter, including ':' */
+    anydelim = word_takes_any_delimiter(PL_tokenbuf, len);
+
+    /* x::* is just a word, unless x is "CORE" */
+    if (!anydelim && *s == ':' && s[1] == ':') {
+        if (memEQs(PL_tokenbuf, len, "CORE"))
+            return yyl_key_core(aTHX_ s, len, tmp, orig_keyword, c, bof, saw_infix_sigil);
+        return yyl_just_a_word(aTHX_ s, len, 0, orig_keyword, c, saw_infix_sigil);
+    }
+
+    d = s;
+    while (d < PL_bufend && isSPACE(*d))
+            d++;	/* no comments skipped here, or s### is misparsed */
+
+    /* Is this a word before a => operator? */
+    if (*d == '=' && d[1] == '>') {
+        return yyl_fatcomma(aTHX_ s, len);
+    }
+
+    /* Check for plugged-in keyword */
+    {
+        OP *o;
+        int result;
+        char *saved_bufptr = PL_bufptr;
+        PL_bufptr = s;
+        result = PL_keyword_plugin(aTHX_ PL_tokenbuf, len, &o);
+        s = PL_bufptr;
+        if (result == KEYWORD_PLUGIN_DECLINE) {
+            /* not a plugged-in keyword */
+            PL_bufptr = saved_bufptr;
+        } else if (result == KEYWORD_PLUGIN_STMT) {
+            pl_yylval.opval = o;
+            CLINE;
+            if (!PL_nexttoke) PL_expect = XSTATE;
+            return REPORT(PLUGSTMT);
+        } else if (result == KEYWORD_PLUGIN_EXPR) {
+            pl_yylval.opval = o;
+            CLINE;
+            if (!PL_nexttoke) PL_expect = XOPERATOR;
+            return REPORT(PLUGEXPR);
+        } else {
+            Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'", PL_tokenbuf);
+        }
+    }
+
+    /* Check for built-in keyword */
+    tmp = keyword(PL_tokenbuf, len, 0);
+
+    /* Is this a label? */
+    if (!anydelim && PL_expect == XSTATE
+          && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
+        s = d + 1;
+        pl_yylval.opval =
+            newSVOP(OP_CONST, 0,
+                newSVpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0));
+        CLINE;
+        TOKEN(LABEL);
+    }
+
+    /* Check for lexical sub */
+    if (PL_expect != XOPERATOR) {
+        char tmpbuf[sizeof PL_tokenbuf + 1];
+        *tmpbuf = '&';
+        Copy(PL_tokenbuf, tmpbuf+1, len, char);
+        c.off = pad_findmy_pvn(tmpbuf, len+1, 0);
+        if (c.off != NOT_IN_PAD) {
+            assert(c.off); /* we assume this is boolean-true below */
+            if (PAD_COMPNAME_FLAGS_isOUR(c.off)) {
+                HV *  const stash = PAD_COMPNAME_OURSTASH(c.off);
+                HEK * const stashname = HvNAME_HEK(stash);
+                c.sv = newSVhek(stashname);
+                sv_catpvs(c.sv, "::");
+                sv_catpvn_flags(c.sv, PL_tokenbuf, len,
+                                (UTF ? SV_CATUTF8 : SV_CATBYTES));
+                c.gv = gv_fetchsv(c.sv, GV_NOADD_NOINIT | SvUTF8(c.sv),
+                                  SVt_PVCV);
+                c.off = 0;
+                if (!c.gv) {
+                    sv_free(c.sv);
+                    c.sv = NULL;
+                    return yyl_just_a_word(aTHX_ s, len, tmp, orig_keyword,
+                                           c, saw_infix_sigil);
+                }
+            }
+            else {
+                c.rv2cv_op = newOP(OP_PADANY, 0);
+                c.rv2cv_op->op_targ = c.off;
+                c.cv = find_lexical_cv(c.off);
+            }
+            c.lex = TRUE;
+            return yyl_just_a_word(aTHX_ s, len, tmp, orig_keyword,
+                                   c, saw_infix_sigil);
+        }
+        c.off = 0;
+    }
+
+    if (tmp < 0)
+        tmp = yyl_secondclass_keyword(aTHX_ s, len, tmp, &orig_keyword, &c.gv, &c.gvp);
+
+    if (tmp && tmp != KEY___DATA__ && tmp != KEY___END__
+     && (!anydelim || *s != '#')) {
+        /* no override, and not s### either; skipspace is safe here
+         * check for => on following line */
+        bool arrow;
+        STRLEN bufoff = PL_bufptr - SvPVX(PL_linestr);
+        STRLEN   soff = s         - SvPVX(PL_linestr);
+        s = peekspace(s);
+        arrow = *s == '=' && s[1] == '>';
+        PL_bufptr = SvPVX(PL_linestr) + bufoff;
+        s         = SvPVX(PL_linestr) +   soff;
+        if (arrow)
+            return yyl_fatcomma(aTHX_ s, len);
+    }
+
+    return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword,
+                               c, bof, saw_infix_sigil);
+}
+
+static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         U8 formbrack, const bool saw_infix_sigil)
 {
     char *d;
     bool bof = FALSE;
-    GV *gv = NULL, **gvp = NULL;
+    GV *gv = NULL;
 
     switch (initial_state) {
     case '}': goto rightbracket;
@@ -8420,7 +8536,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
     switch (*s) {
     default:
         if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s))
-            goto keylookup;
+            return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
         yyl_croak_unrecognised(aTHX_ s);
 
     case 4:
@@ -8817,11 +8933,12 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	    }
 	    else if ((*start == ':' && start[1] == ':')
 		  || (PL_expect == XSTATE && *start == ':'))
-		goto keylookup;
+                return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
 	    else if (PL_expect == XSTATE) {
 		d = start;
 		while (d < PL_bufend && isSPACE(*d)) d++;
-		if (*d == ':') goto keylookup;
+		if (*d == ':')
+                    return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    if (!isALPHA(*start) && (PL_expect == XTERM
@@ -8835,13 +8952,14 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		}
 	    }
 	}
-	goto keylookup;
+        return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+
     case 'x':
 	if (isDIGIT(s[1]) && PL_expect == XOPERATOR) {
 	    s++;
 	    Mop(OP_REPEAT);
 	}
-	goto keylookup;
+        return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
 
     case '_':
     case 'a': case 'A':
@@ -8870,140 +8988,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	      case 'X':
     case 'y': case 'Y':
     case 'z': case 'Z':
-
-      keylookup: {
-	bool anydelim;
-	I32 tmp = 0;
-	SV *sv = NULL;
-	CV *cv = NULL;
-	PADOFFSET off = 0;
-	OP *rv2cv_op = NULL;
-	I32 orig_keyword = 0;
-
-	gv = NULL;
-	gvp = NULL;
-
-	PL_bufptr = s;
-	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-
-	/* Some keywords can be followed by any delimiter, including ':' */
-	anydelim = word_takes_any_delimiter(PL_tokenbuf, len);
-
-	/* x::* is just a word, unless x is "CORE" */
-	if (!anydelim && *s == ':' && s[1] == ':') {
-            struct code c = MAKE_CODE(FALSE);
-            if (memEQs(PL_tokenbuf, len, "CORE"))
-                return yyl_key_core(aTHX_ s, len, tmp, orig_keyword, c, bof, saw_infix_sigil);
-            return yyl_just_a_word(aTHX_ s, len, 0, orig_keyword, c, saw_infix_sigil);
-	}
-
-	d = s;
-	while (d < PL_bufend && isSPACE(*d))
-		d++;	/* no comments skipped here, or s### is misparsed */
-
-	/* Is this a word before a => operator? */
-	if (*d == '=' && d[1] == '>') {
-            return yyl_fatcomma(aTHX_ s, len);
-	}
-
-	/* Check for plugged-in keyword */
-	{
-	    OP *o;
-	    int result;
-	    char *saved_bufptr = PL_bufptr;
-	    PL_bufptr = s;
-	    result = PL_keyword_plugin(aTHX_ PL_tokenbuf, len, &o);
-	    s = PL_bufptr;
-	    if (result == KEYWORD_PLUGIN_DECLINE) {
-		/* not a plugged-in keyword */
-		PL_bufptr = saved_bufptr;
-	    } else if (result == KEYWORD_PLUGIN_STMT) {
-		pl_yylval.opval = o;
-		CLINE;
-		if (!PL_nexttoke) PL_expect = XSTATE;
-		return REPORT(PLUGSTMT);
-	    } else if (result == KEYWORD_PLUGIN_EXPR) {
-		pl_yylval.opval = o;
-		CLINE;
-		if (!PL_nexttoke) PL_expect = XOPERATOR;
-		return REPORT(PLUGEXPR);
-	    } else {
-		Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'",
-					PL_tokenbuf);
-	    }
-	}
-
-	/* Check for built-in keyword */
-	tmp = keyword(PL_tokenbuf, len, 0);
-
-	/* Is this a label? */
-	if (!anydelim && PL_expect == XSTATE
-	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
-	    s = d + 1;
-            pl_yylval.opval =
-                newSVOP(OP_CONST, 0,
-                    newSVpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0));
-	    CLINE;
-	    TOKEN(LABEL);
-	}
-
-	/* Check for lexical sub */
-	if (PL_expect != XOPERATOR) {
-	    char tmpbuf[sizeof PL_tokenbuf + 1];
-	    *tmpbuf = '&';
-	    Copy(PL_tokenbuf, tmpbuf+1, len, char);
-	    off = pad_findmy_pvn(tmpbuf, len+1, 0);
-	    if (off != NOT_IN_PAD) {
-		assert(off); /* we assume this is boolean-true below */
-		if (PAD_COMPNAME_FLAGS_isOUR(off)) {
-		    HV *  const stash = PAD_COMPNAME_OURSTASH(off);
-		    HEK * const stashname = HvNAME_HEK(stash);
-		    sv = newSVhek(stashname);
-                    sv_catpvs(sv, "::");
-                    sv_catpvn_flags(sv, PL_tokenbuf, len,
-				    (UTF ? SV_CATUTF8 : SV_CATBYTES));
-		    gv = gv_fetchsv(sv, GV_NOADD_NOINIT | SvUTF8(sv),
-				    SVt_PVCV);
-		    off = 0;
-		    if (!gv) {
-			sv_free(sv);
-                        sv = NULL;
-                        return yyl_just_a_word(aTHX_ s, len, tmp, orig_keyword,
-                                               MAKE_CODE(FALSE), saw_infix_sigil);
-		    }
-		}
-		else {
-		    rv2cv_op = newOP(OP_PADANY, 0);
-		    rv2cv_op->op_targ = off;
-		    cv = find_lexical_cv(off);
-		}
-                return yyl_just_a_word(aTHX_ s, len, tmp, orig_keyword,
-                                       MAKE_CODE(TRUE), saw_infix_sigil);
-	    }
-	    off = 0;
-	}
-
-        if (tmp < 0)
-            tmp = yyl_secondclass_keyword(aTHX_ s, len, tmp, &orig_keyword, &gv, &gvp);
-
-	if (tmp && tmp != KEY___DATA__ && tmp != KEY___END__
-	 && (!anydelim || *s != '#')) {
-	    /* no override, and not s### either; skipspace is safe here
-	     * check for => on following line */
-	    bool arrow;
-	    STRLEN bufoff = PL_bufptr - SvPVX(PL_linestr);
-	    STRLEN   soff = s         - SvPVX(PL_linestr);
-	    s = peekspace(s);
-	    arrow = *s == '=' && s[1] == '>';
-	    PL_bufptr = SvPVX(PL_linestr) + bufoff;
-	    s         = SvPVX(PL_linestr) +   soff;
-	    if (arrow)
-                return yyl_fatcomma(aTHX_ s, len);
-	}
-
-        return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword,
-                                   MAKE_CODE(FALSE), bof, saw_infix_sigil);
-    }}
+        return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+    }
 }
 
 
