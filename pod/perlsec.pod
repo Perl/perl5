@@ -269,8 +269,9 @@ problem will be reported:
   Insecure dependency in require while running with -T switch
 
 On versions of Perl before 5.26, activating taint mode will also remove
-the current directory (".") from C<@INC>. Since version 5.26, the
-current directory isn't included in C<@INC>.
+the current directory (".") from the default value of C<@INC>. Since
+version 5.26, the current directory isn't included in C<@INC> by
+default.
 
 =head2 Cleaning Up Your Path
 
