@@ -1162,9 +1162,9 @@ like $@, qr'^Undefined format "STDOUT" called',
     AUTOLOAD BEGIN CHECK CORE DESTROY END INIT UNITCHECK
     __DATA__ __END__
     and cmp default do dump else elsif eq eval for foreach format ge given goto
-    grep gt if last le local lt m map my ne next no or our package print printf
-    q qq qr qw qx redo require return s say sort state sub tr unless until use
-    when while x xor y
+    grep gt if isa last le local lt m map my ne next no or our package print
+    printf q qq qr qw qx redo require return s say sort state sub tr unless
+    until use when while x xor y
   );
   open my $kh, $keywords_file
     or die "$0 cannot open $keywords_file: $!";

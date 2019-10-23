@@ -7143,6 +7143,18 @@ PP(pp_argcheck)
     return NORMAL;
 }
 
+PP(pp_isa)
+{
+    dSP;
+    SV *left, *right;
+
+    right = POPs;
+    left  = TOPs;
+
+    SETs(boolSV(sv_isa_sv(left, right)));
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

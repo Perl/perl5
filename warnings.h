@@ -127,6 +127,10 @@
 #define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 71
 #define WARN_EXPERIMENTAL__VLB		 72
 
+/* Warnings Categories added in Perl 5.031 */
+
+#define WARN_EXPERIMENTAL__ISA		 73
+
 
 /*
 =for apidoc Amnh||WARN_ALL
@@ -202,6 +206,7 @@
 =for apidoc Amnh||WARN_EXPERIMENTAL__PRIVATE_USE
 =for apidoc Amnh||WARN_EXPERIMENTAL__UNIPROP_WILDCARDS
 =for apidoc Amnh||WARN_EXPERIMENTAL__VLB
+=for apidoc Amnh||WARN_EXPERIMENTAL__ISA
 
 =cut
 */

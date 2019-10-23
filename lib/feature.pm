@@ -9,6 +9,7 @@ our $VERSION = '1.57';
 
 our %feature = (
     fc              => 'feature_fc',
+    isa             => 'feature_isa',
     say             => 'feature_say',
     state           => 'feature_state',
     switch          => 'feature_switch',
@@ -29,7 +30,7 @@ our %feature_bundle = (
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw()],
 );
 
@@ -349,6 +350,14 @@ conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
 Reference to a Variable> for examples.
 
 This feature is available from Perl 5.26 onwards.
+
+=head2 The 'isa' feature
+
+This allows the use of the C<isa> infix operator, which tests whether the
+scalar given by the left operand is an object of the class given by the
+right operand. See L<perlop/Class Instance Operator> for more details.
+
+This feature is available from Perl 5.32 onwards.
 
 =head1 FEATURE BUNDLES
 

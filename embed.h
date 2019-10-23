@@ -600,6 +600,7 @@
 #define sv_inc_nomg(a)		Perl_sv_inc_nomg(aTHX_ a)
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
 #define sv_isa(a,b)		Perl_sv_isa(aTHX_ a,b)
+#define sv_isa_sv(a,b)		Perl_sv_isa_sv(aTHX_ a,b)
 #define sv_isobject(a)		Perl_sv_isobject(aTHX_ a)
 #ifndef NO_MATHOMS
 #define sv_iv(a)		Perl_sv_iv(aTHX_ a)
@@ -1204,6 +1205,7 @@
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)
 #define ck_grep(a)		Perl_ck_grep(aTHX_ a)
 #define ck_index(a)		Perl_ck_index(aTHX_ a)
+#define ck_isa(a)		Perl_ck_isa(aTHX_ a)
 #define ck_join(a)		Perl_ck_join(aTHX_ a)
 #define ck_length(a)		Perl_ck_length(aTHX_ a)
 #define ck_lfun(a)		Perl_ck_lfun(aTHX_ a)

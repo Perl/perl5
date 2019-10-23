@@ -5815,6 +5815,7 @@ t/op/index.t			See if index works
 t/op/index_thr.t		See if index works in another thread
 t/op/infnan.t			See if inf/nan work
 t/op/int.t			See if int works
+t/op/isa.t			See if isa works
 t/op/join.t			See if join works
 t/op/kill0.t			See if kill works
 t/op/kill0_child		Process tree script that is kill()ed

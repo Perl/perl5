@@ -3262,6 +3262,12 @@ an anonymous subroutine, or a reference to a subroutine.
 (W overload) You tried to overload a constant type the overload package is
 unaware of.
 
+=item isa is experimental
+
+(S experimental::isa) This warning is emitted if you use the (C<isa>)
+operator. This operator is currently experimental and its behaviour may
+change in future releases of Perl.
+
 =item -i used with no filenames on the command line, reading from STDIN
 
 (S inplace) The C<-i> option was passed on the command line, indicating
