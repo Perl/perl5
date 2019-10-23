@@ -42,6 +42,9 @@ steveh: The ticket number is #134045. The commit message gave the wrong number.
 steveh: This is quite a large change, which makes me nervous for a maint release. Maybe it's better off left out?
 <commit votes="steveh arc" id="69afcc21edd23e38a4aff806a14e666d77f2bd0c" ticket="130585" desc="(perl #130585) prevent a spurious ) in a subparse confusing the parser"/>
 
+steveh: Only just added to blead, so I will wait a few days before cherry-picking, but in principle I am in favour of back-porting this.
+<commit votes="steveh" id="5d894ca5213a852cb764a9c7d17b0cd7295597ea" ticket="134281" desc="regcomp.c: Create fail-safe for reading out of bounds"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
