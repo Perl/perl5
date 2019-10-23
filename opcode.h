@@ -1781,7 +1781,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lvrefslice */
 	Perl_ck_null,		/* lvavref */
 	Perl_ck_null,		/* anonconst */
-	Perl_ck_null,		/* isa */
+	Perl_ck_isa,		/* isa */
 }
 #endif
 #ifdef PERL_CHECK_INITED

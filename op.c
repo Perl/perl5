@@ -15090,6 +15090,22 @@ Perl_ck_length(pTHX_ OP *o)
 }
 
 
+OP *
+Perl_ck_isa(pTHX_ OP *o)
+{
+    OP *classop = cBINOPo->op_last;
+
+    PERL_ARGS_ASSERT_CK_ISA;
+
+    /* Convert barename into PV */
+    if(classop->op_type == OP_CONST && classop->op_private & OPpCONST_BARE) {
+        /* TODO: Optionally convert package to raw HV here */
+        classop->op_private &= ~(OPpCONST_BARE|OPpCONST_STRICT);
+    }
+
+    return o;
+}
+
 
 /*
    ---------------------------------------------------------

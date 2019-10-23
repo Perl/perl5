@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature 'isa';
 
-plan 7;
+plan 9;
 
 package BaseClass {}
 package DerivedClass { our @ISA = qw(BaseClass) }
@@ -18,12 +18,18 @@ package DerivedClass { our @ISA = qw(BaseClass) }
 my $baseobj = bless {}, "BaseClass";
 my $derivedobj = bless {}, "DerivedClass";
 
+# Bareword package name
+ok($baseobj isa BaseClass, '$baseobj isa BaseClass');
+ok(not($baseobj isa Another::Class), '$baseobj is not Another::Class');
+
+# String package name
 ok($baseobj isa "BaseClass",         '$baseobj isa BaseClass');
 ok(not($baseobj isa "DerivedClass"), '$baseobj is not DerivedClass');
 
 ok($derivedobj isa "DerivedClass", '$derivedobj isa DerivedClass');
 ok($derivedobj isa "BaseClass",    '$derivedobj isa BaseClass');
 
+# Expression giving a package name
 my $classname = "DerivedClass";
 ok($derivedobj isa $classname, '$derivedobj isa DerivedClass via SV');
 
@@ -32,4 +38,3 @@ ok(not([] isa "BaseClass"),    'ARRAYref is not BaseClass');
 
 # TODO: Consider 
 #    LHS = other class
-#    RHS = bareword PackageName

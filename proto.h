@@ -480,6 +480,11 @@ PERL_CALLCONV OP *	Perl_ck_index(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_INDEX	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_isa(pTHX_ OP *o)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CK_ISA	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_join(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CK_JOIN	\
