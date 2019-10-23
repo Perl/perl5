@@ -44,18 +44,17 @@ L<Module::CoreList> has been upgraded from version 5.20190522 to 5.20191027.
 
 =item *
 
-The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule
-that was originally changed for FreeBSD, and the FreeBSD make
-apparently predefines it.  The Solaris make does not predefine C<ECHO>
-which broke this rule on Solaris.
+The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule that was
+originally changed for FreeBSD, and the FreeBSD make apparently predefines it.
+The Solaris make does not predefine C<ECHO> which broke this rule on Solaris.
 L<[perl #17057]|https://github.com/perl/perl5/issues/17057>
 
 =back
 
 =head1 Testing
 
-Tests were added and changed to reflect the other additions and changes
-in this release.
+Tests were added and changed to reflect the other additions and changes in this
+release.
 
 =head1 Platform Support
 
@@ -80,34 +79,32 @@ XXX
 
 =item *
 
-Setting C<$)> now properly sets supplementary group ids, if you have
-the necessary privileges.
+Setting C<$)> now properly sets supplementary group ids, if you have the
+necessary privileges.
 L<[perl #17031]|https://github.com/perl/perl5/issues/17031>
 
 =item *
 
-C<readline @foo> now evaluates C<@foo> in scalar context.  Previously
-it would be evalauted in list context, and since readline() pops only
-one argument from the stack, the stack could underflow, or be left
-with unexpected values on the stack.
+C<readline @foo> now evaluates C<@foo> in scalar context.  Previously, it would
+be evaluated in list context, and since readline() pops only one argument from
+the stack, the stack could underflow, or be left with unexpected values on it.
 L<[perl #16929]|https://github.com/perl/perl5/issues/16929>
 
 =item *
 
-sv_gets() now recovers better if the target SV is modified by a signal
-handler.
+sv_gets() now recovers better if the target SV is modified by a signal handler.
 L<[perl #16960]|https://github.com/perl/perl5/issues/16960>
 
 =item *
 
-Matching a non-C<SVf_UTF8> string against a regular expression
-containing unicode literals could leak a SV on each match attempt.
+Matching a non-C<SVf_UTF8> string against a regular expression containing
+Unicode literals could leak an SV on each match attempt.
 L<[perl #17140]|https://github.com/perl/perl5/issues/17140>
 
 =item *
 
-C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due
-to mishandling of the negative precision value.
+C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due to
+mishandling of the negative precision value.
 L<[perl #16942]|https://github.com/perl/perl5/issues/16942>
 
 =back
@@ -120,8 +117,8 @@ XXX Generate this with:
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the perl bug database
-at L<https://rt.perl.org/>.  There may also be information at
+If you find what you think is a bug, you might check the perl bug database at
+L<https://rt.perl.org/>.  There may also be information at
 L<http://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
@@ -131,13 +128,13 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
