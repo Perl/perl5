@@ -542,7 +542,7 @@ __UNDEFINED__ isGRAPH_L1(c)     (   isPRINT_L1(c)                              \
 __UNDEFINED__ isIDCONT(c)       isWORDCHAR(c)
 __UNDEFINED__ isIDCONT_L1(c)	isWORDCHAR_L1(c)
 __UNDEFINED__ isIDFIRST(c)      (isALPHA(c) || (c) == '_')
-__UNDEFINED__ isIDFIRST_L1(c)   (isALPHA_L1(c) || NATIVE_TO_LATIN1(c) == '_')
+__UNDEFINED__ isIDFIRST_L1(c)   (isALPHA_L1(c) || (U8) (c) == '_')
 __UNDEFINED__ isLOWER_L1(c) (    isLOWER(c)                                    \
                              || (   (WIDEST_UTYPE) (c) < 256                   \
                                  && (  (   NATIVE_TO_LATIN1((U8) c) >= 0xDF    \
