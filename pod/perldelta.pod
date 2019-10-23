@@ -25,6 +25,15 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 The isa Operator
+
+A new infix operator called C<isa> tests whether a given object is an instance
+of a given class or a class derived from it:
+
+    if( $obj isa Package::Name ) { ... }
+
+For more detail see L<perlop/Class Instance Operator>.
+
 [ List each enhancement as a =head2 entry ]
 
 =head1 Security
