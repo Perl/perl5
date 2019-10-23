@@ -35,6 +35,7 @@ my %feature = (
     unicode_strings => 'unicode',
     fc              => 'fc',
     signatures      => 'signatures',
+    isa             => 'isa',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -751,6 +752,14 @@ conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
 Reference to a Variable> for examples.
 
 This feature is available from Perl 5.26 onwards.
+
+=head2 The 'isa' feature
+
+This allows the use of the C<isa> infix operator, which tests whether the
+scalar given by the left operand is an object of the class given by the
+right operand. See L<perlop/isa operator> for more details.
+
+This feature is available from Perl 5.31.6.
 
 =head1 FEATURE BUNDLES
 

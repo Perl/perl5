@@ -543,6 +543,7 @@ EXTCONST char* const PL_op_name[] = {
 	"lvrefslice",
 	"lvavref",
 	"anonconst",
+	"isa",
 	"freed",
 };
 #endif
@@ -948,6 +949,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"lvalue ref assignment",
 	"lvalue array reference",
 	"anonymous constant",
+	"derived class test",
 	"freed op",
 };
 #endif
@@ -1365,6 +1367,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_lvrefslice,
 	Perl_pp_lvavref,
 	Perl_pp_anonconst,
+	Perl_pp_isa,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1778,6 +1781,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lvrefslice */
 	Perl_ck_null,		/* lvavref */
 	Perl_ck_null,		/* anonconst */
+	Perl_ck_null,		/* isa */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2187,6 +2191,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000440,	/* lvrefslice */
 	0x00000b40,	/* lvavref */
 	0x00000144,	/* anonconst */
+	0x00000204,	/* isa */
 };
 #endif
 
@@ -2855,6 +2860,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      233, /* lvrefslice */
      234, /* lvavref */
        0, /* anonconst */
+      12, /* isa */
 
 };
 
@@ -2879,7 +2885,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x0438, 0x1a50, 0x426c, 0x3d28, 0x3505, /* const */
     0x2fdc, 0x3659, /* gvsv */
     0x18b5, /* gv */
-    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, bit_and, bit_xor, bit_or, sbit_and, sbit_xor, sbit_or, smartmatch, lslice, xor */
+    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, bit_and, bit_xor, bit_or, sbit_and, sbit_xor, sbit_or, smartmatch, lslice, xor, isa */
     0x2fdc, 0x41b8, 0x03d7, /* padsv */
     0x2fdc, 0x41b8, 0x05b4, 0x30cc, 0x3ea9, /* padav */
     0x2fdc, 0x41b8, 0x05b4, 0x0650, 0x30cc, 0x3ea8, 0x2b41, /* padhv */
@@ -3348,6 +3354,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* LVREFSLICE */ (OPpLVAL_INTRO),
     /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
     /* ANONCONST  */ (OPpARG1_MASK),
+    /* ISA        */ (OPpARG2_MASK),
 
 };
 

@@ -399,6 +399,7 @@ $bits{i_preinc}{0} = $bf[0];
 @{$bits{index}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{int}{0} = $bf[0];
 @{$bits{ioctl}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
+@{$bits{isa}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{join}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{keys}{0} = $bf[0];
 @{$bits{kill}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);

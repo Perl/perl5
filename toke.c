@@ -7800,6 +7800,9 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_ioctl:
         LOP(OP_IOCTL,XTERM);
 
+    case KEY_isa:
+        Rop(OP_ISA);
+
     case KEY_join:
         LOP(OP_JOIN,XTERM);
 

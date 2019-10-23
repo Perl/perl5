@@ -17,14 +17,15 @@
 #define FEATURE_MYREF_BIT           0x0004
 #define FEATURE_EVALBYTES_BIT       0x0008
 #define FEATURE_FC_BIT              0x0010
-#define FEATURE_POSTDEREF_QQ_BIT    0x0020
-#define FEATURE_REFALIASING_BIT     0x0040
-#define FEATURE_SAY_BIT             0x0080
-#define FEATURE_SIGNATURES_BIT      0x0100
-#define FEATURE_STATE_BIT           0x0200
-#define FEATURE_SWITCH_BIT          0x0400
-#define FEATURE_UNIEVAL_BIT         0x0800
-#define FEATURE_UNICODE_BIT         0x1000
+#define FEATURE_ISA_BIT             0x0020
+#define FEATURE_POSTDEREF_QQ_BIT    0x0040
+#define FEATURE_REFALIASING_BIT     0x0080
+#define FEATURE_SAY_BIT             0x0100
+#define FEATURE_SIGNATURES_BIT      0x0200
+#define FEATURE_STATE_BIT           0x0400
+#define FEATURE_SWITCH_BIT          0x0800
+#define FEATURE_UNIEVAL_BIT         0x1000
+#define FEATURE_UNICODE_BIT         0x2000
 
 #define FEATURE_BUNDLE_DEFAULT	0
 #define FEATURE_BUNDLE_510	1
@@ -52,6 +53,12 @@
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_527) \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_FC_BIT)) \
+    )
+
+#define FEATURE_ISA_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_ISA_BIT) \
     )
 
 #define FEATURE_SAY_IS_ENABLED \
@@ -232,6 +239,14 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
             if (keylen == sizeof("feature_fc")-1
                  && memcmp(subf+1, "c", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_FC_BIT;
+                break;
+            }
+            return;
+
+        case 'i':
+            if (keylen == sizeof("feature_isa")-1
+                 && memcmp(subf+1, "sa", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_ISA_BIT;
                 break;
             }
             return;

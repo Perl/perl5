@@ -7143,6 +7143,25 @@ PP(pp_argcheck)
     return NORMAL;
 }
 
+PP(pp_isa)
+{
+    dSP;
+    SV *left, *right;
+
+    right = POPs;
+    left  = TOPs;
+
+    if(!SvROK(left) || !SvOBJECT(SvRV(left))) {
+        SETs(boolSV(FALSE));
+        RETURN;
+    }
+
+    /* TODO: Support right being an HV ref to the stash directly */
+
+    SETs(boolSV(sv_derived_from_sv(left, right, 0)));
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
