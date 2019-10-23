@@ -36,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 3886;
+plan tests => 3904;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -79,7 +79,6 @@ sub testit {
 	my $desc = "$keyword: lex=$lex $expr => $expected_expr";
 	$desc .= " (lex sub)" if $lexsub;
 
-
         my $code;
 	my $code_ref;
 	if ($lexsub) {
@@ -88,6 +87,7 @@ sub testit {
 	    use feature 'lexical_subs';
 	    no strict 'vars';
             $code = "sub { state sub $keyword; ${vars}() = $expr }";
+	    $code = "use feature 'isa';\n$code" if $keyword eq "isa";
 	    $code_ref = eval $code
 			    or die "$@ in $expr";
 	}
@@ -96,6 +96,7 @@ sub testit {
 	    use subs ();
 	    import subs $keyword;
 	    $code = "no strict 'vars'; sub { ${vars}() = $expr }";
+	    $code = "use feature 'isa';\n$code" if $keyword eq "isa";
 	    $code_ref = eval $code
 			    or die "$@ in $expr";
 	}
@@ -545,6 +546,7 @@ hex              01    $
 index            23    p
 int              01    $
 ioctl            3     p
+isa              B     -
 join             13    p
 # keys handled specially
 kill             123   p
