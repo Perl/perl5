@@ -9516,9 +9516,10 @@ I<only> meant to be used to assert that the running Perl is of a earlier
 version than its argument and I<not> to undo the feature-enabling side effects
 of C<use VERSION>.
 
-See L<perlmodlib> for a list of standard modules and pragmas.  See L<perlrun>
-for the C<-M> and C<-m> command-line options to Perl that give
-L<C<use>|/use Module VERSION LIST> functionality from the command-line.
+See L<perlmodlib> for a list of standard modules and pragmas.  See
+L<perlrun|perlrun/-m[-]module> for the C<-M> and C<-m> command-line
+options to Perl that give L<C<use>|/use Module VERSION LIST>
+functionality from the command-line.
 
 =item utime LIST
 X<utime>
