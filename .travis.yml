@@ -3,11 +3,9 @@ cache: ccache
 
 os:
   - linux
-  - osx
 
 compiler:
   - gcc
-  - clang
 
 install:
   - git fetch --unshallow --tags # t/porting/cmp_version.t
@@ -24,10 +22,10 @@ env:
         - CONFIGURE_ARGS='-DPERL_GLOBAL_STRUCT'
         - CONFIGURE_ARGS='-DPERL_GLOBAL_STRUCT_PRIVATE'
         - CONFIGURE_ARGS='-Duseshrplib -Dusesitecustomize'
-        - CONFIGURE_ARGS='-Duserelocatableinc'
 
 # only use gcc on linux, and only use clang on osx for now
 matrix:
+  fast_finish: true
   exclude:
   - compiler: clang
     os: linux
