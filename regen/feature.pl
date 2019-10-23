@@ -757,7 +757,7 @@ This feature is available from Perl 5.26 onwards.
 
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
-right operand. See L<perlop/isa operator> for more details.
+right operand. See L<perlop/Class Instance Operator> for more details.
 
 This feature is available from Perl 5.31.6.
 
