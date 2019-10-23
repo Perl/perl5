@@ -6779,9 +6779,7 @@ yyl_my(pTHX_ char *s, I32 my)
     OPERATOR(MY);
 }
 
-static int yyl_try(pTHX_ char*, STRLEN, U8, const bool);
-
-#define RETRY() yyl_try(aTHX_ s, len, 0, 0)
+static int yyl_try(pTHX_ char*, STRLEN, const bool);
 
 static int
 yyl_eol(pTHX_ char *s, STRLEN len)
@@ -6824,7 +6822,7 @@ yyl_eol(pTHX_ char *s, STRLEN len)
                 incline(s, PL_bufend);
         }
     }
-    return RETRY();
+    return yyl_try(aTHX_ s, len, 0);
 }
 
 static int
@@ -7076,7 +7074,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
                         PL_preambled = FALSE;
                         if (PERLDB_LINE_OR_SAVESRC)
                             (void)gv_fetchfile(PL_origfilename);
-                        return RETRY();
+                        return yyl_try(aTHX_ s, len, 0);
                     }
                 }
             }
@@ -7089,7 +7087,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
         TOKEN(';');
     }
 
-    return RETRY();
+    return yyl_try(aTHX_ s, len, 0);
 }
 
 static int
@@ -8525,7 +8523,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
 }
 
 static int
-yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
+yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 {
     char *d;
     bool bof = FALSE;
@@ -8561,7 +8559,7 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
-	    return RETRY();			/* ignore stray nulls */
+	    return yyl_try(aTHX_ s, len, 0);  /* ignore stray nulls */
 	PL_last_uni = 0;
 	PL_last_lop = 0;
 	if (!PL_in_eval && !PL_preambled) {
@@ -8639,7 +8637,7 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
 	    PL_last_lop = PL_last_uni = NULL;
 	    if (PERLDB_LINE_OR_SAVESRC && PL_curstash != PL_debstash)
 		update_debugger_info(PL_linestr, NULL, 0);
-	    return RETRY();
+	    return yyl_try(aTHX_ s, len, 0);
 	}
         return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s, len);
 
@@ -8651,7 +8649,7 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
 #endif
     case ' ': case '\t': case '\f': case '\v':
 	s++;
-	return RETRY();
+	return yyl_try(aTHX_ s, len, 0);
 
     case '#':
     case '\n':
@@ -8706,12 +8704,12 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
         return yyl_rightsquare(aTHX_ s);
 
     case '{':
-        return yyl_leftcurly(aTHX_ s + 1, formbrack);
+        return yyl_leftcurly(aTHX_ s + 1, 0);
 
     case '}':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
 	    TOKEN(0);
-        return yyl_rightcurly(aTHX_ s, formbrack);
+        return yyl_rightcurly(aTHX_ s, 0);
 
     case '&':
         return yyl_ampersand(aTHX_ s);
@@ -8724,7 +8722,7 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
             && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), "====="))
         {
             s = vcs_conflict_marker(s + 7);
-            return RETRY();
+            return yyl_try(aTHX_ s, len, 0);
         }
 
 	s++;
@@ -8774,15 +8772,15 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
                                 else
                                     s = d;
                                 incline(s, PL_bufend);
-                                return RETRY();
+                                return yyl_try(aTHX_ s, len, 0);
                             }
                         }
                     }
-                    return RETRY();
+                    return yyl_try(aTHX_ s, len, 0);
                 }
                 s = PL_bufend;
                 PL_parser->in_pod = 1;
-                return RETRY();
+                return yyl_try(aTHX_ s, len, 0);
             }
 	}
 	if (PL_expect == XBLOCK) {
@@ -8794,14 +8792,13 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
 #endif
 		t++;
 	    if (*t == '\n' || *t == '#') {
-		formbrack = 1;
 		ENTER_with_name("lex_format");
 		SAVEI8(PL_parser->form_lex_state);
 		SAVEI32(PL_lex_formbrack);
 		PL_parser->form_lex_state = PL_lex_state;
 		PL_lex_formbrack = PL_lex_brackets + 1;
                 PL_parser->sub_error_count = PL_error_count;
-                return yyl_leftcurly(aTHX_ s, formbrack);
+                return yyl_leftcurly(aTHX_ s, 1);
 	    }
 	}
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
@@ -8819,7 +8816,7 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
             && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
         {
             s = vcs_conflict_marker(s + 7);
-            return RETRY();
+            return yyl_try(aTHX_ s, len, 0);
         }
         return yyl_leftpointy(aTHX_ s);
 
@@ -8828,7 +8825,7 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
             && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), ">>>>>"))
         {
             s = vcs_conflict_marker(s + 7);
-            return RETRY();
+            return yyl_try(aTHX_ s, len, 0);
         }
         return yyl_rightpointy(aTHX_ s + 1);
 
@@ -8862,8 +8859,8 @@ yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
 	    && (s == PL_linestart || s[-1] == '\n') )
 	{
 	    PL_expect = XSTATE;
-	    formbrack = 2; /* dot seen where arguments expected */
-            return yyl_rightcurly(aTHX_ s, formbrack);
+            /* formbrack==2 means dot seen where arguments expected */
+            return yyl_rightcurly(aTHX_ s, 2);
 	}
 	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
 	    s += 3;
@@ -9284,7 +9281,7 @@ Perl_yylex(pTHX)
         return yyl_sigvar(aTHX_ s);
     }
 
-    return yyl_try(aTHX_ s, 0, 0, saw_infix_sigil);
+    return yyl_try(aTHX_ s, 0, saw_infix_sigil);
 }
 
 
