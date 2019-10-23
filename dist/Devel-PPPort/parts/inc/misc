@@ -522,6 +522,7 @@ __UNDEFINED__ isUPPER(c)        ((c) <= 'Z' && (c) >= 'A')
 #endif /* Below are definitions common to EBCDIC and ASCII */
 
 __UNDEFINED__ isASCII_L1(c)     isASCII(c)
+__UNDEFINED__ isASCII_LC(c)     isASCII(c)
 __UNDEFINED__ isALNUM(c)        isWORDCHAR(c)
 __UNDEFINED__ isALNUMC(c)       isALPHANUMERIC(c)
 __UNDEFINED__ isALNUMC_L1(c)    isALPHANUMERIC_L1(c)
@@ -529,10 +530,12 @@ __UNDEFINED__ isALPHA(c)        (isUPPER(c) || isLOWER(c))
 __UNDEFINED__ isALPHA_L1(c)     (isUPPER_L1(c) || isLOWER_L1(c))
 __UNDEFINED__ isALPHANUMERIC(c) (isALPHA(c) || isDIGIT(c))
 __UNDEFINED__ isALPHANUMERIC_L1(c) (isALPHA_L1(c) || isDIGIT(c))
+__UNDEFINED__ isALPHANUMERIC_LC(c) (isALPHA_LC(c) || isDIGIT_LC(c))
 __UNDEFINED__ isBLANK(c)        ((c) == ' ' || (c) == '\t')
 __UNDEFINED__ isBLANK_L1(c) (    isBLANK(c)                                    \
                              || (   (WIDEST_UTYPE) (c) < 256                   \
                                  && NATIVE_TO_LATIN1((U8) c) == 0xA0))
+__UNDEFINED__ isBLANK_LC(c)     isBLANK(c)
 __UNDEFINED__ isDIGIT(c)        ((c) <= '9' && (c) >= '0')
 __UNDEFINED__ isDIGIT_L1(c)     isDIGIT(c)
 __UNDEFINED__ isGRAPH(c)        (isWORDCHAR(c) || isPUNCT(c))
@@ -541,8 +544,10 @@ __UNDEFINED__ isGRAPH_L1(c)     (   isPRINT_L1(c)                              \
                                  && NATIVE_TO_LATIN1((U8) c) != 0xA0)
 __UNDEFINED__ isIDCONT(c)       isWORDCHAR(c)
 __UNDEFINED__ isIDCONT_L1(c)	isWORDCHAR_L1(c)
+__UNDEFINED__ isIDCONT_LC(c)    isWORDCHAR_LC(c)
 __UNDEFINED__ isIDFIRST(c)      (isALPHA(c) || (c) == '_')
 __UNDEFINED__ isIDFIRST_L1(c)   (isALPHA_L1(c) || (U8) (c) == '_')
+__UNDEFINED__ isIDFIRST_LC(c)   (isALPHA_LC(c) || (U8) (c) == '_')
 __UNDEFINED__ isLOWER_L1(c) (    isLOWER(c)                                    \
                              || (   (WIDEST_UTYPE) (c) < 256                   \
                                  && (  (   NATIVE_TO_LATIN1((U8) c) >= 0xDF    \
@@ -589,10 +594,12 @@ __UNDEFINED__ isUPPER_L1(c) (   isUPPER(c)                                     \
                                      && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
 __UNDEFINED__ isWORDCHAR(c)     (isALPHANUMERIC(c) || (c) == '_')
 __UNDEFINED__ isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT(c))
+__UNDEFINED__ isWORDCHAR_LC(c)  (isIDFIRST_LC(c) || isDIGIT_LC(c))
 __UNDEFINED__ isXDIGIT(c)       (   isDIGIT(c)                                 \
                                  || ((c) >= 'a' && (c) <= 'f')                 \
                                  || ((c) >= 'A' && (c) <= 'F'))
 __UNDEFINED__ isXDIGIT_L1(c)    isXDIGIT(c)
+__UNDEFINED__ isXDIGIT_LC(c)    isxdigit(c)
 
 __UNDEFINED__ isALNUM_A(c)         isALNUM(c)
 __UNDEFINED__ isALNUMC_A(c)        isALNUMC(c)
