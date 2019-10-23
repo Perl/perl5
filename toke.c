@@ -6063,6 +6063,9 @@ yyl_leftcurly(pTHX_ char *s, U8 formbrack)
 static int
 yyl_rightcurly(pTHX_ char *s, U8 formbrack)
 {
+    assert(s != PL_bufend);
+    s++;
+
     if (PL_lex_brackets <= 0)
         /* diag_listed_as: Unmatched right %s bracket */
         yyerror("Unmatched right curly bracket");
@@ -6776,9 +6779,9 @@ yyl_my(pTHX_ char *s, I32 my)
     OPERATOR(MY);
 }
 
-static int yyl_try(pTHX_ char, char*, STRLEN, U8, const bool);
+static int yyl_try(pTHX_ char*, STRLEN, U8, const bool);
 
-#define RETRY() yyl_try(aTHX_ 0, s, len, 0, 0)
+#define RETRY() yyl_try(aTHX_ s, len, 0, 0)
 
 static int
 yyl_eol(pTHX_ char *s, STRLEN len)
@@ -8522,16 +8525,11 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
 }
 
 static int
-yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
-        U8 formbrack, const bool saw_infix_sigil)
+yyl_try(pTHX_ char *s, STRLEN len, U8 formbrack, const bool saw_infix_sigil)
 {
     char *d;
     bool bof = FALSE;
     GV *gv = NULL;
-
-    switch (initial_state) {
-    case '}': goto rightbracket;
-    }
 
     switch (*s) {
     default:
@@ -8708,16 +8706,12 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         return yyl_rightsquare(aTHX_ s);
 
     case '{':
-	s++;
-      leftbracket:
-        return yyl_leftcurly(aTHX_ s, formbrack);
+        return yyl_leftcurly(aTHX_ s + 1, formbrack);
 
     case '}':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
 	    TOKEN(0);
-      rightbracket:
-	assert(s != PL_bufend);
-        return yyl_rightcurly(aTHX_ s + 1, formbrack);
+        return yyl_rightcurly(aTHX_ s, formbrack);
 
     case '&':
         return yyl_ampersand(aTHX_ s);
@@ -8807,7 +8801,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		PL_parser->form_lex_state = PL_lex_state;
 		PL_lex_formbrack = PL_lex_brackets + 1;
                 PL_parser->sub_error_count = PL_error_count;
-		goto leftbracket;
+                return yyl_leftcurly(aTHX_ s, formbrack);
 	    }
 	}
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
@@ -8869,7 +8863,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	{
 	    PL_expect = XSTATE;
 	    formbrack = 2; /* dot seen where arguments expected */
-	    goto rightbracket;
+            return yyl_rightcurly(aTHX_ s, formbrack);
 	}
 	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
 	    s += 3;
@@ -9273,9 +9267,8 @@ Perl_yylex(pTHX)
         }
 	assert(PL_lex_formbrack);
 	s = scan_formline(PL_bufptr);
-	if (!PL_lex_formbrack) {
-            return yyl_try(aTHX_ '}', s, 0, 1, saw_infix_sigil);
-	}
+	if (!PL_lex_formbrack)
+            return yyl_rightcurly(aTHX_ s, 1);
 	PL_bufptr = s;
 	return yylex();
     }
@@ -9291,7 +9284,7 @@ Perl_yylex(pTHX)
         return yyl_sigvar(aTHX_ s);
     }
 
-    return yyl_try(aTHX_ 0, s, 0, 0, saw_infix_sigil);
+    return yyl_try(aTHX_ s, 0, 0, saw_infix_sigil);
 }
 
 
