@@ -7182,6 +7182,259 @@ yyl_strictwarn_bareword(pTHX_ const char lastchar)
 }
 
 static int
+yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, PADOFFSET off,
+                I32 orig_keyword, SV *sv, CV *cv, GV *gv, GV **gvp,
+                OP *rv2cv_op, const bool lex, const bool saw_infix_sigil)
+{
+    int pkgname = 0;
+    const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
+    bool safebw;
+    bool no_op_error = FALSE;
+
+    if (PL_expect == XOPERATOR) {
+        if (PL_bufptr == PL_linestart) {
+            CopLINE_dec(PL_curcop);
+            Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
+            CopLINE_inc(PL_curcop);
+        }
+        else
+            /* We want to call no_op with s pointing after the
+               bareword, so defer it.  But we want it to come
+               before the Bad name croak.  */
+            no_op_error = TRUE;
+    }
+
+    /* Get the rest if it looks like a package qualifier */
+
+    if (*s == '\'' || (*s == ':' && s[1] == ':')) {
+        STRLEN morelen;
+        s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
+                      TRUE, &morelen);
+        if (no_op_error) {
+            no_op("Bareword",s);
+            no_op_error = FALSE;
+        }
+        if (!morelen)
+            Perl_croak(aTHX_ "Bad name after %" UTF8f "%s",
+                    UTF8fARG(UTF, len, PL_tokenbuf),
+                    *s == '\'' ? "'" : "::");
+        len += morelen;
+        pkgname = 1;
+    }
+
+    if (no_op_error)
+        no_op("Bareword",s);
+
+    /* See if the name is "Foo::",
+       in which case Foo is a bareword
+       (and a package name). */
+
+    if (len > 2 && PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':') {
+        if (ckWARN(WARN_BAREWORD)
+            && ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
+            Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
+                        "Bareword \"%" UTF8f
+                        "\" refers to nonexistent package",
+                        UTF8fARG(UTF, len, PL_tokenbuf));
+        len -= 2;
+        PL_tokenbuf[len] = '\0';
+        gv = NULL;
+        gvp = 0;
+        safebw = TRUE;
+    }
+    else {
+        safebw = FALSE;
+    }
+
+    /* if we saw a global override before, get the right name */
+
+    if (!sv)
+        sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len);
+    if (gvp) {
+        SV * const tmp_sv = sv;
+        sv = newSVpvs("CORE::GLOBAL::");
+        sv_catsv(sv, tmp_sv);
+        SvREFCNT_dec(tmp_sv);
+    }
+
+    /* Presume this is going to be a bareword of some sort. */
+    CLINE;
+    pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
+    pl_yylval.opval->op_private = OPpCONST_BARE;
+
+    /* And if "Foo::", then that's what it certainly is. */
+    if (safebw)
+        return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
+
+    if (!off) {
+        OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(sv));
+        const_op->op_private = OPpCONST_BARE;
+        rv2cv_op = newCVREF(OPpMAY_RETURN_CONSTANT<<8, const_op);
+        cv = lex
+            ? isGV(gv)
+                ? GvCV(gv)
+                : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
+                    ? (CV *)SvRV(gv)
+                    : ((CV *)gv)
+            : rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
+    }
+
+    /* Use this var to track whether intuit_method has been
+       called.  intuit_method returns 0 or > 255.  */
+    key = 1;
+
+    /* See if it's the indirect object for a list operator. */
+
+    if (PL_oldoldbufptr
+        && PL_oldoldbufptr < PL_bufptr
+        && (PL_oldoldbufptr == PL_last_lop
+            || PL_oldoldbufptr == PL_last_uni)
+        && /* NO SKIPSPACE BEFORE HERE! */
+           (PL_expect == XREF
+            || ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7)
+                                                   == OA_FILEREF))
+    {
+        bool immediate_paren = *s == '(';
+        SSize_t s_off;
+
+        /* (Now we can afford to cross potential line boundary.) */
+        s = skipspace(s);
+
+        /* intuit_method() can indirectly call lex_next_chunk(),
+         * invalidating s
+         */
+        s_off = s - SvPVX(PL_linestr);
+        /* Two barewords in a row may indicate method call. */
+        if (   (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
+                || *s == '$')
+            && (key = intuit_method(s, lex ? NULL : sv, cv)))
+        {
+            /* the code at method: doesn't use s */
+            goto method;
+        }
+        s = SvPVX(PL_linestr) + s_off;
+
+        /* If not a declared subroutine, it's an indirect object. */
+        /* (But it's an indir obj regardless for sort.) */
+        /* Also, if "_" follows a filetest operator, it's a bareword */
+
+        if (
+            ( !immediate_paren && (PL_last_lop_op == OP_SORT
+             || (!cv
+                 && (PL_last_lop_op != OP_MAPSTART
+                     && PL_last_lop_op != OP_GREPSTART))))
+           || (PL_tokenbuf[0] == '_' && PL_tokenbuf[1] == '\0'
+                && ((PL_opargs[PL_last_lop_op] & OA_CLASS_MASK)
+                                                == OA_FILESTATOP))
+           )
+        {
+            PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
+            yyl_strictwarn_bareword(aTHX_ lastchar);
+            op_free(rv2cv_op);
+            return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
+        }
+    }
+
+    PL_expect = XOPERATOR;
+    s = skipspace(s);
+
+    /* Is this a word before a => operator? */
+    if (*s == '=' && s[1] == '>' && !pkgname) {
+        op_free(rv2cv_op);
+        CLINE;
+        if (gvp || (lex && !off)) {
+            assert (cSVOPx(pl_yylval.opval)->op_sv == sv);
+            /* This is our own scalar, created a few lines
+               above, so this is safe. */
+            SvREADONLY_off(sv);
+            sv_setpv(sv, PL_tokenbuf);
+            if (UTF && !IN_BYTES
+             && is_utf8_string((U8*)PL_tokenbuf, len))
+                  SvUTF8_on(sv);
+            SvREADONLY_on(sv);
+        }
+        TERM(BAREWORD);
+    }
+
+    /* If followed by a paren, it's certainly a subroutine. */
+    if (*s == '(') {
+        CLINE;
+        if (cv) {
+            char *d = s + 1;
+            while (SPACE_OR_TAB(*d))
+                d++;
+            if (*d == ')' && (sv = cv_const_sv_or_av(cv)))
+                return yyl_constant_op(aTHX_ d + 1, sv, cv, rv2cv_op, off);
+        }
+        NEXTVAL_NEXTTOKE.opval =
+            off ? rv2cv_op : pl_yylval.opval;
+        if (off)
+             op_free(pl_yylval.opval), force_next(PRIVATEREF);
+        else op_free(rv2cv_op),	   force_next(BAREWORD);
+        pl_yylval.ival = 0;
+        TOKEN('&');
+    }
+
+    /* If followed by var or block, call it a method (unless sub) */
+
+    if ((*s == '$' || *s == '{') && !cv) {
+        op_free(rv2cv_op);
+        PL_last_lop = PL_oldbufptr;
+        PL_last_lop_op = OP_METHOD;
+        if (!PL_lex_allbrackets && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+            PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
+        PL_expect = XBLOCKTERM;
+        PL_bufptr = s;
+        return REPORT(METHOD);
+    }
+
+    /* If followed by a bareword, see if it looks like indir obj. */
+
+    if (   key == 1
+        && !orig_keyword
+        && (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF) || *s == '$')
+        && (key = intuit_method(s, lex ? NULL : sv, cv)))
+    {
+      method:
+        if (lex && !off) {
+            assert(cSVOPx(pl_yylval.opval)->op_sv == sv);
+            SvREADONLY_off(sv);
+            sv_setpvn(sv, PL_tokenbuf, len);
+            if (UTF && !IN_BYTES
+             && is_utf8_string((U8*)PL_tokenbuf, len))
+                SvUTF8_on (sv);
+            else SvUTF8_off(sv);
+        }
+        op_free(rv2cv_op);
+        if (key == METHOD && !PL_lex_allbrackets
+            && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+        {
+            PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
+        }
+        return REPORT(key);
+    }
+
+    /* Not a method, so call it a subroutine (if defined) */
+
+    if (cv) {
+        /* Check for a constant sub */
+        sv = cv_const_sv_or_av(cv);
+        return yyl_constant_op(aTHX_ s, sv, cv, rv2cv_op, off);
+    }
+
+    /* Call it a bare word */
+
+    if (PL_hints & HINT_STRICT_SUBS)
+        pl_yylval.opval->op_private |= OPpCONST_STRICT;
+    else
+        yyl_strictwarn_bareword(aTHX_ lastchar);
+
+    op_free(rv2cv_op);
+
+    return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
+}
+
+static int
 yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
         U8 formbrack, const bool saw_infix_sigil)
 {
@@ -7346,10 +7599,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	s++;
 	OPERATOR(',');
     case ':':
-	if (s[1] == ':') {
-	    len = 0;
-	    goto just_a_word_zero_gv;
-	}
+	if (s[1] == ':')
+            return yyl_just_a_word(aTHX_ s, 0, 0, 0, 0, 0, NULL, NULL, NULL,
+                                   NULL, NULL, saw_infix_sigil);
         return yyl_colon(aTHX_ s + 1);
 
     case '(':
@@ -7651,8 +7903,7 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
       keylookup: {
 	bool anydelim;
-	bool lex = FALSE;
-	I32 tmp;
+	I32 tmp = 0;
 	SV *sv = NULL;
 	CV *cv = NULL;
 	PADOFFSET off = 0;
@@ -7671,7 +7922,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	/* x::* is just a word, unless x is "CORE" */
 	if (!anydelim && *s == ':' && s[1] == ':') {
 	    if (memEQs(PL_tokenbuf, len, "CORE")) goto case_KEY_CORE;
-	    goto just_a_word;
+            return yyl_just_a_word(aTHX_ s, len, 0, off, orig_keyword, sv, cv,
+                                   gv, gvp, rv2cv_op, FALSE, saw_infix_sigil);
 	}
 
 	d = s;
@@ -7744,8 +7996,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		    off = 0;
 		    if (!gv) {
 			sv_free(sv);
-			sv = NULL;
-			goto just_a_word;
+                        return yyl_just_a_word(aTHX_ s, len, tmp, off,
+                                               orig_keyword, NULL, cv, gv, gvp,
+                                               rv2cv_op, FALSE, saw_infix_sigil);
 		    }
 		}
 		else {
@@ -7753,8 +8006,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		    rv2cv_op->op_targ = off;
 		    cv = find_lexical_cv(off);
 		}
-		lex = TRUE;
-		goto just_a_word;
+                return yyl_just_a_word(aTHX_ s, len, tmp, off, orig_keyword, sv,
+                                       cv, gv, gvp, rv2cv_op, TRUE, saw_infix_sigil);
 	    }
 	    off = 0;
 	}
@@ -7779,280 +8032,9 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 
       reserved_word:
 	switch (tmp) {
-
-	    /* Trade off - by using this evil construction we can pull the
-	       variable gv into the block labelled keylookup. If not, then
-	       we have to give it function scope so that the goto from the
-	       earlier ':' case doesn't bypass the initialisation.  */
-	    just_a_word_zero_gv:
-		sv = NULL;
-		cv = NULL;
-		gv = NULL;
-		gvp = NULL;
-		rv2cv_op = NULL;
-		orig_keyword = 0;
-		lex = 0;
-		off = 0;
-            /* FALLTHROUGH */
 	default:			/* not a keyword */
-	  just_a_word: {
-		int pkgname = 0;
-		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
-		bool safebw;
-		bool no_op_error = FALSE;
-
-		if (PL_expect == XOPERATOR) {
-		    if (PL_bufptr == PL_linestart) {
-			CopLINE_dec(PL_curcop);
-			Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
-			CopLINE_inc(PL_curcop);
-		    }
-		    else
-			/* We want to call no_op with s pointing after the
-			   bareword, so defer it.  But we want it to come
-			   before the Bad name croak.  */
-			no_op_error = TRUE;
-		}
-
-		/* Get the rest if it looks like a package qualifier */
-
-		if (*s == '\'' || (*s == ':' && s[1] == ':')) {
-		    STRLEN morelen;
-		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
-				  TRUE, &morelen);
-		    if (no_op_error) {
-			no_op("Bareword",s);
-			no_op_error = FALSE;
-		    }
-		    if (!morelen)
-			Perl_croak(aTHX_ "Bad name after %" UTF8f "%s",
-				UTF8fARG(UTF, len, PL_tokenbuf),
-				*s == '\'' ? "'" : "::");
-		    len += morelen;
-		    pkgname = 1;
-		}
-
-		if (no_op_error)
-			no_op("Bareword",s);
-
-		/* See if the name is "Foo::",
-		   in which case Foo is a bareword
-		   (and a package name). */
-
-		if (len > 2
-                    && PL_tokenbuf[len - 2] == ':'
-                    && PL_tokenbuf[len - 1] == ':')
-		{
-		    if (ckWARN(WARN_BAREWORD)
-			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
-			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
-                                    "Bareword \"%" UTF8f
-                                    "\" refers to nonexistent package",
-                                    UTF8fARG(UTF, len, PL_tokenbuf));
-		    len -= 2;
-		    PL_tokenbuf[len] = '\0';
-		    gv = NULL;
-		    gvp = 0;
-		    safebw = TRUE;
-		}
-		else {
-		    safebw = FALSE;
-		}
-
-		/* if we saw a global override before, get the right name */
-
-		if (!sv)
-		  sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf,
-						len);
-		if (gvp) {
-		    SV * const tmp_sv = sv;
-		    sv = newSVpvs("CORE::GLOBAL::");
-		    sv_catsv(sv, tmp_sv);
-		    SvREFCNT_dec(tmp_sv);
-		}
-
-
-		/* Presume this is going to be a bareword of some sort. */
-		CLINE;
-                pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
-		pl_yylval.opval->op_private = OPpCONST_BARE;
-
-		/* And if "Foo::", then that's what it certainly is. */
-		if (safebw)
-                    return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
-
-		if (!off)
-		{
-		    OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(sv));
-		    const_op->op_private = OPpCONST_BARE;
-		    rv2cv_op =
-			newCVREF(OPpMAY_RETURN_CONSTANT<<8, const_op);
-		    cv = lex
-			? isGV(gv)
-			    ? GvCV(gv)
-			    : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
-				? (CV *)SvRV(gv)
-				: ((CV *)gv)
-			: rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
-		}
-
-		/* Use this var to track whether intuit_method has been
-		   called.  intuit_method returns 0 or > 255.  */
-		tmp = 1;
-
-		/* See if it's the indirect object for a list operator. */
-
-		if (PL_oldoldbufptr
-                    && PL_oldoldbufptr < PL_bufptr
-                    && (PL_oldoldbufptr == PL_last_lop
-		        || PL_oldoldbufptr == PL_last_uni)
-                    && /* NO SKIPSPACE BEFORE HERE! */
-		       (PL_expect == XREF
-                        || ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7)
-                                                               == OA_FILEREF))
-		{
-		    bool immediate_paren = *s == '(';
-                    SSize_t s_off;
-
-		    /* (Now we can afford to cross potential line boundary.) */
-		    s = skipspace(s);
-
-                    /* intuit_method() can indirectly call lex_next_chunk(),
-                     * invalidating s
-                     */
-                    s_off = s - SvPVX(PL_linestr);
-		    /* Two barewords in a row may indicate method call. */
-	            if (   (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
-                            || *s == '$')
-                        && (tmp = intuit_method(s, lex ? NULL : sv, cv)))
-                    {
-                        /* the code at method: doesn't use s */
-			goto method;
-		    }
-                    s = SvPVX(PL_linestr) + s_off;
-
-		    /* If not a declared subroutine, it's an indirect object. */
-		    /* (But it's an indir obj regardless for sort.) */
-		    /* Also, if "_" follows a filetest operator, it's a bareword */
-
-		    if (
-			( !immediate_paren && (PL_last_lop_op == OP_SORT
-                         || (!cv
-                             && (PL_last_lop_op != OP_MAPSTART
-                                 && PL_last_lop_op != OP_GREPSTART))))
-		       || (PL_tokenbuf[0] == '_' && PL_tokenbuf[1] == '\0'
-			    && ((PL_opargs[PL_last_lop_op] & OA_CLASS_MASK)
-                                                            == OA_FILESTATOP))
-		       )
-		    {
-			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
-                        yyl_strictwarn_bareword(aTHX_ lastchar);
-                        op_free(rv2cv_op);
-                        return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
-		    }
-		}
-
-		PL_expect = XOPERATOR;
-		s = skipspace(s);
-
-		/* Is this a word before a => operator? */
-		if (*s == '=' && s[1] == '>' && !pkgname) {
-		    op_free(rv2cv_op);
-		    CLINE;
-		    if (gvp || (lex && !off)) {
-			assert (cSVOPx(pl_yylval.opval)->op_sv == sv);
-			/* This is our own scalar, created a few lines
-			   above, so this is safe. */
-			SvREADONLY_off(sv);
-			sv_setpv(sv, PL_tokenbuf);
-			if (UTF && !IN_BYTES
-			 && is_utf8_string((U8*)PL_tokenbuf, len))
-			      SvUTF8_on(sv);
-			SvREADONLY_on(sv);
-		    }
-		    TERM(BAREWORD);
-		}
-
-		/* If followed by a paren, it's certainly a subroutine. */
-		if (*s == '(') {
-		    CLINE;
-		    if (cv) {
-			d = s + 1;
-			while (SPACE_OR_TAB(*d))
-			    d++;
-			if (*d == ')' && (sv = cv_const_sv_or_av(cv)))
-                            return yyl_constant_op(aTHX_ d + 1, sv, cv, rv2cv_op, off);
-		    }
-		    NEXTVAL_NEXTTOKE.opval =
-			off ? rv2cv_op : pl_yylval.opval;
-		    if (off)
-			 op_free(pl_yylval.opval), force_next(PRIVATEREF);
-		    else op_free(rv2cv_op),	   force_next(BAREWORD);
-		    pl_yylval.ival = 0;
-		    TOKEN('&');
-		}
-
-		/* If followed by var or block, call it a method (unless sub) */
-
-		if ((*s == '$' || *s == '{') && !cv) {
-		    op_free(rv2cv_op);
-		    PL_last_lop = PL_oldbufptr;
-		    PL_last_lop_op = OP_METHOD;
-		    if (!PL_lex_allbrackets
-                        && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
-                    {
-			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-                    }
-		    PL_expect = XBLOCKTERM;
-		    PL_bufptr = s;
-		    return REPORT(METHOD);
-		}
-
-		/* If followed by a bareword, see if it looks like indir obj. */
-
-		if (   tmp == 1
-                    && !orig_keyword
-                    && (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF) || *s == '$')
-                    && (tmp = intuit_method(s, lex ? NULL : sv, cv)))
-                {
-		  method:
-		    if (lex && !off) {
-			assert(cSVOPx(pl_yylval.opval)->op_sv == sv);
-			SvREADONLY_off(sv);
-			sv_setpvn(sv, PL_tokenbuf, len);
-			if (UTF && !IN_BYTES
-			 && is_utf8_string((U8*)PL_tokenbuf, len))
-			    SvUTF8_on (sv);
-			else SvUTF8_off(sv);
-		    }
-		    op_free(rv2cv_op);
-		    if (tmp == METHOD && !PL_lex_allbrackets
-                        && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
-                    {
-			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-                    }
-		    return REPORT(tmp);
-		}
-
-		/* Not a method, so call it a subroutine (if defined) */
-
-		if (cv) {
-		    /* Check for a constant sub */
-                    sv = cv_const_sv_or_av(cv);
-                    return yyl_constant_op(aTHX_ s, sv, cv, rv2cv_op, off);
-		}
-
-		/* Call it a bare word */
-
-		if (PL_hints & HINT_STRICT_SUBS)
-		    pl_yylval.opval->op_private |= OPpCONST_STRICT;
-		else
-                    yyl_strictwarn_bareword(aTHX_ lastchar);
-
-		op_free(rv2cv_op);
-
-                return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
-	    }
+            return yyl_just_a_word(aTHX_ s, len, tmp, off, orig_keyword, sv, cv,
+                                   gv, gvp, rv2cv_op, FALSE, saw_infix_sigil);
 
 	case KEY___FILE__:
 	    FUN0OP(
@@ -8093,7 +8075,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	case KEY_END:
 	    if (PL_expect == XSTATE)
 		return yyl_sub(aTHX_ PL_bufptr, tmp);
-	    goto just_a_word;
+            return yyl_just_a_word(aTHX_ s, len, tmp, off, orig_keyword, sv, cv,
+                                   gv, gvp, rv2cv_op, FALSE, saw_infix_sigil);
 
 	case_KEY_CORE:
 	    {
@@ -8104,10 +8087,10 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		if ((*s == ':' && s[1] == ':')
 		 || (!(tmp = keyword(PL_tokenbuf, len, 1)) && *s == '\''))
 		{
-		    s = d;
-		    len = olen;
 		    Copy(PL_bufptr, PL_tokenbuf, olen, char);
-		    goto just_a_word;
+                    return yyl_just_a_word(aTHX_ d, olen, tmp, off, orig_keyword,
+                                           sv, cv, gv, gvp, rv2cv_op, FALSE,
+                                           saw_infix_sigil);
 		}
 		if (!tmp)
 		    Perl_croak(aTHX_ "CORE::%" UTF8f " is not a keyword",
@@ -8982,7 +8965,8 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 		Mop(OP_REPEAT);
 	    }
 	    check_uni();
-	    goto just_a_word;
+            return yyl_just_a_word(aTHX_ s, len, tmp, off, orig_keyword, sv, cv,
+                                   gv, gvp, rv2cv_op, FALSE, saw_infix_sigil);
 
 	case KEY_xor:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
@@ -9028,10 +9012,10 @@ yyl_try(pTHX_ char initial_state, char *s, STRLEN len,
 	      scan built-in keyword (but do nothing with it yet)
 	      check for statement label
 	      check for lexical subs
-		  goto just_a_word if there is one
+		  return yyl_just_a_word if there is one
 	      see whether built-in keyword is overridden
 	      switch on keyword number:
-		  - default: just_a_word:
+		  - default: return yyl_just_a_word:
 		      not a built-in keyword; handle bareword lookup
 		      disambiguate between method and sub call
 		      fall back to bareword
