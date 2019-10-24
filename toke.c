@@ -7801,6 +7801,8 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         LOP(OP_IOCTL,XTERM);
 
     case KEY_isa:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__ISA), "isa is experimental");
         Rop(OP_ISA);
 
     case KEY_join:

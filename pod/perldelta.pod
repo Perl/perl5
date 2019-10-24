@@ -27,8 +27,8 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 The isa Operator
 
-A new infix operator called C<isa> tests whether a given object is an instance
-of a given class or a class derived from it:
+A new experimental infix operator called C<isa> tests whether a given object
+is an instance of a given class or a class derived from it:
 
     if( $obj isa Package::Name ) { ... }
 
