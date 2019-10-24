@@ -11851,8 +11851,10 @@ Perl_ck_eval(pTHX_ OP *o)
     if ((PL_hints & HINT_LOCALIZE_HH) != 0
      && !(o->op_private & OPpEVAL_COPHH) && GvHV(PL_hintgv)) {
 	/* Store a copy of %^H that pp_entereval can pick up. */
-	OP *hhop = newSVOP(OP_HINTSEVAL, 0,
-			   MUTABLE_SV(hv_copy_hints_hv(GvHV(PL_hintgv))));
+        HV *hh = hv_copy_hints_hv(GvHV(PL_hintgv));
+	OP *hhop;
+        STOREFEATUREBITSHH(hh);
+        hhop = newSVOP(OP_HINTSEVAL, 0, MUTABLE_SV(hh));
         /* append hhop to only child  */
         op_sibling_splice(o, cUNOPo->op_first, 0, hhop);
 

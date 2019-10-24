@@ -25,6 +25,7 @@
 #include "EXTERN.h"
 #define PERL_IN_SCOPE_C
 #include "perl.h"
+#include "feature.h"
 
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
@@ -688,6 +689,7 @@ Perl_save_hints(pTHX)
 	save_pushptri32ptr(oldhh, PL_hints, save_cophh, SAVEt_HINTS);
 	GvHV(PL_hintgv) = NULL; /* in case copying dies */
 	GvHV(PL_hintgv) = hv_copy_hints_hv(oldhh);
+        SAVEFEATUREBITS();
     } else {
 	save_pushi32ptr(PL_hints, save_cophh, SAVEt_HINTS);
     }
