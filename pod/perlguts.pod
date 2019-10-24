@@ -2717,6 +2717,26 @@ whatever the compiler has.
 If you are printing addresses of pointers, use UVxf combined
 with PTR2UV(), do not use %lx or %p.
 
+=head2 Formatted Printing of SvPVs
+
+If you just want the bytes printed in a NUL-terminated string, you can
+just use C<%s> (assuming they are all printables).  But if there is a
+possibility the value will be encoded as UTF-8, you should instead use
+the C<UTF8f> format.  And as its parameter, use the C<UTF8fARG()> macro.
+Below is a general example using the SV C<err_msg> which is known to
+contain a string and not need magic handling:
+
+ Perl_croak(aTHX_ "This croaked because: " UTF8f "\n",
+                  UTF8fARG(SvUTF8(err_msg),
+                           SvCUR(err_msg),
+                           SvPVX(err_msg)));
+
+The first parameter to C<UTF8fARG> is a boolean: 1 if the string is in
+UTF-8; 0 if bytes.
+The second parameter is the number of bytes in the string to print.
+And the third and final parameter is a pointer to the first byte in the
+string.
+
 =head2 Formatted Printing of C<Size_t> and C<SSize_t>
 
 The most general way to do this is to cast them to a UV or IV, and
