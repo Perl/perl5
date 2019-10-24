@@ -3,7 +3,6 @@ apply_attrs_string             # U
 bytes_to_utf8                  # U
 gv_efullname4                  # U
 gv_fullname4                   # U
-isBLANK_LC                     # U
 isPSXSPC_LC                    # U
 isUTF8_CHAR                    # U
 is_utf8_string                 # U

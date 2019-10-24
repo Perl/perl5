@@ -21,12 +21,15 @@ IN_LOCALE_RUNTIME              # E
 intro_my                       # U
 isALNUM_LC                     # U
 isALPHA_LC                     # U
+isALPHANUMERIC_LC              # U
 isDIGIT_LC                     # U
+isIDCONT_LC                    # U
 isIDFIRST_LC                   # U
 isLOWER_LC                     # U
 isPRINT_LC                     # U
 isSPACE_LC                     # U
 isUPPER_LC                     # U
+isWORDCHAR_LC                  # U
 mess                           # E (Perl_mess)
 mess_sv                        # U
 my_failure_exit                # U

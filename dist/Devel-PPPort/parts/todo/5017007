@@ -3,8 +3,6 @@ isALNUMC_LC_uvchr              # U
 isASCII_LC_uvchr               # U
 isBLANK_LC_uvchr               # U
 isPSXSPC_LC_uvchr              # U
-isWORDCHAR_LC                  # U
 isWORDCHAR_LC_uvchr            # U
-isXDIGIT_LC                    # U
 isXDIGIT_LC_uvchr              # U
 SvREFCNT_dec_NN                # U

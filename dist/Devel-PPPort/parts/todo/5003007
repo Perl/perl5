@@ -180,10 +180,13 @@ isALPHANUMERIC_L1              # T
 isASCII                        # T
 isASCII_A                      # T
 isASCII_L1                     # T
+isASCII_LC                     # T
 isASCII_utf8_safe              # T
+isASCII_uvchr                  # T
 isBLANK                        # T
 isBLANK_A                      # T
 isBLANK_L1                     # T
+isBLANK_LC                     # T
 isCNTRL                        # T
 isCNTRL_A                      # T
 isCNTRL_L1                     # T
@@ -232,6 +235,7 @@ isWORDCHAR_L1                  # T
 isXDIGIT                       # T
 isXDIGIT_A                     # T
 isXDIGIT_L1                    # T
+isXDIGIT_LC                    # T
 IVdf                           # T
 IVSIZE                         # T
 IVTYPE                         # T
@@ -781,6 +785,7 @@ UNI_TO_NATIVE                  # T
 UNLIKELY                       # T
 unsharepvn                     # T
 UTF8_IS_INVARIANT              # T
+UTF8_MAXBYTES_CASE             # T
 UVCHR_IS_INVARIANT             # T
 UVCHR_SKIP                     # T
 UVof                           # T
