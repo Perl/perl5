@@ -1927,7 +1927,7 @@ terminated by C<\E> or thrown over by another C<\U> or C<\L>:
 
     $x = "This word is in lower case:\L SHOUT\E";
     $x =~ /shout/;       # matches
-    $x = "I STILL KEYPUNCH CARDS FOR MY 360"
+    $x = "I STILL KEYPUNCH CARDS FOR MY 360";
     $x =~ /\Ukeypunch/;  # matches punch card string
 
 If there is no C<\E>, case is converted until the end of the
