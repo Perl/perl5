@@ -59,6 +59,11 @@ sub int_parse_version
     return 0 + join "", map { sprintf("%03d", $_) } parse_version(shift);
 }
 
+sub ivers    # Shorter name for int_parse_version
+{
+    return int_parse_version(shift);
+}
+
 sub format_version_line
 {
     # Returns a floating point representation of the input version
