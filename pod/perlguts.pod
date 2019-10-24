@@ -2705,9 +2705,11 @@ following macros for portability
 These will take care of 64-bit integers and long doubles.
 For example:
 
-        printf("IV is %"IVdf"\n", iv);
+        printf("IV is %" IVdf "\n", iv);
 
-The IVdf will expand to whatever is the correct format for the IVs.
+The C<IVdf> will expand to whatever is the correct format for the IVs.
+Note that the spaces are required around the format in case the code is
+compiled with C++, to maintain compliance with its standard.
 
 Note that there are different "long doubles": Perl will use
 whatever the compiler has.
