@@ -250,7 +250,7 @@ utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
          * than 31 bits */
         if (sizeof(ret) < 8) {
             overflows = 1;
-            overflow_length = 7;
+            overflow_length = (*s == 0xFE) ? 7 : 13;
         }
         else {
             const U8 highest[] =    /* 2*63-1 */
