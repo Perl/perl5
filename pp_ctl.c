@@ -33,6 +33,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_CTL_C
 #include "perl.h"
+#include "feature.h"
 
 #define RUN_PP_CATCHABLY(thispp) \
     STMT_START { if (CATCH_GET) return docatch(thispp); } STMT_END
@@ -3485,6 +3486,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     if (clear_hints) {
 	PL_hints = 0;
 	hv_clear(GvHV(PL_hintgv));
+        CLEARFEATUREBITS();
     }
     else {
 	PL_hints = saveop->op_private & OPpEVAL_COPHH
@@ -3502,6 +3504,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 	    /* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
 	    SvREFCNT_dec(GvHV(PL_hintgv));
 	    GvHV(PL_hintgv) = hh;
+            FETCHFEATUREBITSHH(hh);
 	}
     }
     SAVECOMPILEWARNINGS();

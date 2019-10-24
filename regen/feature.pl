@@ -76,6 +76,17 @@ my @removed = qw( array_base );
 ###########################################################################
 # More data generated from the above
 
+if (keys %feature > 32) {
+    die "cop_features only has room for 32 features";
+}
+
+my %feature_bits;
+my $mask = 1;
+for my $feature (sort keys %feature) {
+    $feature_bits{$feature} = $mask;
+    $mask <<= 1;
+}
+
 for (keys %feature_bundle) {
     next unless /^5\.(\d*[13579])\z/;
     $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
@@ -178,12 +189,18 @@ for(sort { length $a <=> length $b || $a cmp $b } keys %feature) {
 }
 print $pm ");\n\n";
 
+print $pm "\nmy %feature_bits = (\n";
+for (sort keys %feature_bits) {
+    printf $pm "    %-*s => %#06x,\n", $width, $_, $feature_bits{$_};
+}
+print $pm ");\n\n";
+
 print $pm "our %feature_bundle = (\n";
-$width = length longest values %UniqueBundles;
+my $bund_width = length longest values %UniqueBundles;
 for( sort { $UniqueBundles{$a} cmp $UniqueBundles{$b} }
           keys %UniqueBundles ) {
     my $bund = $UniqueBundles{$_};
-    print $pm qq'    "$bund"' . " "x($width-length $bund)
+    print $pm qq'    "$bund"' . " "x($bund_width-length $bund)
 	    . qq' => [qw($_)],\n';
 }
 print $pm ");\n\n";
@@ -253,6 +270,12 @@ print $h <<EOH;
 
 EOH
 
+for (sort keys %feature_bits) {
+    printf $h "#define FEATURE_%s_BIT%*s %#06x\n", uc($feature{$_}),
+      $width-length($feature{$_}), "", $feature_bits{$_};
+}
+print $h "\n";
+
 my $count;
 for (@HintedBundles) {
     (my $key = uc) =~ y/.//d;
@@ -273,6 +296,11 @@ print $h <<'EOH';
 	((CURRENT_HINTS							 \
 	   & HINT_LOCALIZE_HH)						  \
 	    ? Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)) : FALSE)
+
+#define FEATURE_IS_ENABLED_MASK(mask)                   \
+  ((CURRENT_HINTS & HINT_LOCALIZE_HH)                \
+    ? (PL_curcop->cop_features & (mask)) : FALSE)
+
 /* The longest string we pass in.  */
 EOH
 
@@ -295,7 +323,7 @@ for (
     ( \\
 	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED("$name")) \\
+	 FEATURE_ENABLED_MASK(FEATURE_\L$name\E_BIT)) \\
     )
 
 EOI
@@ -307,7 +335,7 @@ EOI
 	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED("$name")) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_\U$name\E_BIT)) \\
     )
 
 EOH3
@@ -318,7 +346,7 @@ EOH3
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED("$name")) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_\U$name\E_BIT)) \\
     )
 
 EOH4
@@ -328,7 +356,7 @@ EOH4
 #define FEATURE_$NAME\_IS_ENABLED \\
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED("$name") \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_\U$name\E_BIT) \\
     )
 
 EOH5
@@ -336,6 +364,19 @@ EOH5
 }
 
 print $h <<EOH;
+
+#define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
+
+#define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)
+
+#define STOREFEATUREBITSHH(hh) \\
+  (hv_stores((hh), "feature/bits", newSVuv(PL_compiling.cop_features)))
+
+#define FETCHFEATUREBITSHH(hh)                              \\
+  STMT_START {                                              \\
+      SV **fbsv = hv_fetchs((hh), "feature/bits", FALSE);   \\
+      PL_compiling.cop_features = fbsv ? SvUV(*fbsv) : 0;   \\
+  } STMT_END
 
 #endif /* PERL_CORE or PERL_EXT */
 
@@ -382,7 +423,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.55';
+our $VERSION = '1.56';
 
 FEATURES
 
@@ -763,14 +804,17 @@ sub __common {
     my $import = shift;
     my $bundle_number = $^H & $hint_mask;
     my $features = $bundle_number != $hint_mask
-	&& $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
+      && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
+    my $bits = ${^FEATURE_BITS};
     if ($features) {
 	# Features are enabled implicitly via bundle hints.
 	# Delete any keys that may be left over from last time.
 	delete @^H{ values(%feature) };
+        $bits = 0;
 	$^H |= $hint_mask;
 	for (@$features) {
 	    $^H{$feature{$_}} = 1;
+            $bits |= $feature_bits{$_};
 	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
 	}
     }
@@ -798,12 +842,15 @@ sub __common {
         }
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
+            $bits |= $feature_bits{$name};
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
 	} else {
             delete $^H{$feature{$name}};
+            $bits &= ~$feature_bits{$name};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }
     }
+    ${^FEATURE_BITS} = $bits;
 }
 
 sub unknown_feature {

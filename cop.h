@@ -413,6 +413,12 @@ struct cop {
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
     COPHH *	cop_hints_hash;
+    /* for now just a bitmask stored here.
+       If we get sufficient features this may become a pointer.
+       How these flags are stored is subject to change without
+       notice.  Use the macros to test for features.
+    */
+    U32		cop_features;
 };
 
 #ifdef USE_ITHREADS

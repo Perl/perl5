@@ -1032,7 +1032,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
 
     case '\006':		/* ^F */
-	sv_setiv(sv, (IV)PL_maxsysfd);
+        if (nextchar == '\0') {
+            sv_setiv(sv, (IV)PL_maxsysfd);
+        }
+        else if (strEQ(remaining, "EATURE_BITS")) {
+            sv_setuv(sv, PL_compiling.cop_features);
+        }
 	break;
     case '\007':		/* ^GLOBAL_PHASE */
 	if (strEQ(remaining, "LOBAL_PHASE")) {
@@ -2840,7 +2845,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             Perl_croak(aTHX_ "${^ENCODING} is no longer supported");
 	break;
     case '\006':	/* ^F */
-	PL_maxsysfd = SvIV(sv);
+        if (mg->mg_ptr[1] == '\0') {
+            PL_maxsysfd = SvIV(sv);
+        }
+        else if (strEQ(mg->mg_ptr + 1, "EATURE_BITS")) {
+            PL_compiling.cop_features = SvUV(sv);
+        }
 	break;
     case '\010':	/* ^H */
         {
