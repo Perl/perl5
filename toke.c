@@ -7444,7 +7444,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct cod
 }
 
 static int
-yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c, bool bof)
+yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c)
 {
     switch (key) {
     default:			/* not a keyword */
@@ -7470,7 +7470,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY___END__:
         if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D'))
             yyl_data_handle(aTHX);
-        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, bof, s, len);
+        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s, len);
 
     case KEY___SUB__:
         FUN0OP(CvCLONE(PL_compcv)
@@ -8352,7 +8352,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 }
 
 static int
-yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c, bool bof)
+yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c)
 {
     STRLEN olen = len;
     char *d = s;
@@ -8375,11 +8375,11 @@ yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c
         orig_keyword = key;
 
     /* Known to be a reserved word at this point */
-    return yyl_word_or_keyword(aTHX_ s, len, key, orig_keyword, c, bof);
+    return yyl_word_or_keyword(aTHX_ s, len, key, orig_keyword, c);
 }
 
 static int
-yyl_keylookup(pTHX_ char *s, GV *gv, bool bof)
+yyl_keylookup(pTHX_ char *s, GV *gv)
 {
     STRLEN len;
     bool anydelim;
@@ -8399,7 +8399,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof)
     /* x::* is just a word, unless x is "CORE" */
     if (!anydelim && *s == ':' && s[1] == ':') {
         if (memEQs(PL_tokenbuf, len, "CORE"))
-            return yyl_key_core(aTHX_ s, len, tmp, 0, c, bof);
+            return yyl_key_core(aTHX_ s, len, tmp, 0, c);
         return yyl_just_a_word(aTHX_ s, len, 0, 0, c);
     }
 
@@ -8505,20 +8505,19 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof)
             return yyl_fatcomma(aTHX_ s, len);
     }
 
-    return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword, c, bof);
+    return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword, c);
 }
 
 static int
 yyl_try(pTHX_ char *s, STRLEN len)
 {
     char *d;
-    bool bof = FALSE;
     GV *gv = NULL;
 
     switch (*s) {
     default:
         if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s))
-            return yyl_keylookup(aTHX_ s, gv, bof);
+            return yyl_keylookup(aTHX_ s, gv);
         yyl_croak_unrecognised(aTHX_ s);
 
     case 4:
@@ -8910,12 +8909,12 @@ yyl_try(pTHX_ char *s, STRLEN len)
 	    }
 	    else if ((*start == ':' && start[1] == ':')
 		  || (PL_expect == XSTATE && *start == ':'))
-                return yyl_keylookup(aTHX_ s, gv, bof);
+                return yyl_keylookup(aTHX_ s, gv);
 	    else if (PL_expect == XSTATE) {
 		d = start;
 		while (d < PL_bufend && isSPACE(*d)) d++;
 		if (*d == ':')
-                    return yyl_keylookup(aTHX_ s, gv, bof);
+                    return yyl_keylookup(aTHX_ s, gv);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    if (!isALPHA(*start) && (PL_expect == XTERM
@@ -8929,14 +8928,14 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		}
 	    }
 	}
-        return yyl_keylookup(aTHX_ s, gv, bof);
+        return yyl_keylookup(aTHX_ s, gv);
 
     case 'x':
 	if (isDIGIT(s[1]) && PL_expect == XOPERATOR) {
 	    s++;
 	    Mop(OP_REPEAT);
 	}
-        return yyl_keylookup(aTHX_ s, gv, bof);
+        return yyl_keylookup(aTHX_ s, gv);
 
     case '_':
     case 'a': case 'A':
@@ -8965,7 +8964,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 	      case 'X':
     case 'y': case 'Y':
     case 'z': case 'Z':
-        return yyl_keylookup(aTHX_ s, gv, bof);
+        return yyl_keylookup(aTHX_ s, gv);
     }
 }
 
