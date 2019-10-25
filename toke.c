@@ -6635,8 +6635,6 @@ yyl_croak_unrecognised(pTHX_ char *s)
     Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %" UTF8f "<-- HERE near column %d", c,
                       UTF8fARG(UTF, (s - d), d),
                      (int) len + 1);
-
-    NORETURN_FUNCTION_END;
 }
 
 static int
