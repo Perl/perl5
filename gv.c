@@ -713,6 +713,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
     CV* cand_cv = NULL;
     GV* topgv = NULL;
     const char *hvname;
+    STRLEN hvnamelen;
     I32 create = (level >= 0) ? HV_FETCH_LVALUE : 0;
     I32 items;
     U32 topgen_cmp;
@@ -728,6 +729,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
     assert(stash);
 
     hvname = HvNAME_get(stash);
+    hvnamelen = HvNAMELEN_get(stash);
     if (!hvname)
       Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
 
@@ -797,10 +799,30 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
         cstash = gv_stashsv(linear_sv, 0);
 
         if (!cstash) {
-	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "Can't locate package %" SVf " for @%" HEKf "::ISA",
-			   SVfARG(linear_sv),
-                           HEKfARG(HvNAME_HEK(stash)));
+            if ( ckWARN(WARN_SYNTAX)) {
+                if(     /* these are loaded from Perl_Gv_AMupdate() one way or another */
+                           ( len    && name[0] == '(' )  /* overload.pm related, in particular "()" */
+                        || ( memEQs( name, len, "DESTROY") )
+                ) {
+                     Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+                            "Can't locate package %" SVf " for @%" HEKf "::ISA",
+                            SVfARG(linear_sv),
+                            HEKfARG(HvNAME_HEK(stash)));
+
+                } else if( memEQs( name, len, "AUTOLOAD") ) {
+                    /* gobble this warning */
+                } else {
+                    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+                        "While trying to resolve method call %.*s->%.*s()"
+                        " can not locate package \"%"SVf"\" yet it is mentioned in @%.*s::ISA"
+                         " (perhaps you forgot to load \"%"SVf"\"?)",
+                         hvnamelen, hvname,
+                         len, name,
+                        SVfARG(linear_sv),
+                         hvnamelen, hvname,
+                         SVfARG(linear_sv));
+                }
+            }
             continue;
         }
 
