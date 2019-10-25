@@ -7729,6 +7729,18 @@ can be determined from the template alone.  This is not possible if
 it contains any of the codes @, /, U, u, w or a *-length.  Redesign
 the template.
 
+=item While trying to resolve method call %s->%s() can not locate package "%s" yet it is mentioned in @%s::ISA (perhaps you forgot to load "%s"?)
+
+(W syntax) It is possible that the @ISA contains a misspelled or never loaded
+package name, which can result in perl choosing an unexpected parent
+classes method to resolve the method call. If this is deliberate you
+can do something like
+
+  @Missing::Package::ISA = ();
+
+to silence the warnings, otherwise you should correct the package name, or
+ensure that the package is loaded prior to the method call.
+
 =item %s() with negative argument
 
 (S misc) Certain operations make no sense with negative arguments.
