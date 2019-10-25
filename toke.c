@@ -5577,7 +5577,6 @@ yyl_star(pTHX_ char *s)
         TOKEN(0);
     }
 
-    PL_parser->saw_infix_sigil = 1;
     Mop(OP_MULTIPLY);
 }
 
@@ -5592,7 +5591,6 @@ yyl_percent(pTHX_ char *s)
             TOKEN(0);
         }
         ++s;
-        PL_parser->saw_infix_sigil = 1;
         Mop(OP_MODULO);
     }
     else if (PL_expect == XPOSTDEREF)
@@ -6145,10 +6143,8 @@ yyl_ampersand(pTHX_ char *s)
             s--;
             TOKEN(0);
         }
-        if (d == s) {
-            PL_parser->saw_infix_sigil = 1;
+        if (d == s)
             BAop(bof ? OP_NBIT_AND : OP_BIT_AND);
-        }
         else
             BAop(OP_SBIT_AND);
     }
@@ -6779,7 +6775,7 @@ yyl_my(pTHX_ char *s, I32 my)
     OPERATOR(MY);
 }
 
-static int yyl_try(pTHX_ char*, STRLEN, const bool);
+static int yyl_try(pTHX_ char*, STRLEN);
 
 static int
 yyl_eol(pTHX_ char *s, STRLEN len)
@@ -6822,7 +6818,7 @@ yyl_eol(pTHX_ char *s, STRLEN len)
                 incline(s, PL_bufend);
         }
     }
-    return yyl_try(aTHX_ s, len, 0);
+    return yyl_try(aTHX_ s, len);
 }
 
 static int
@@ -7074,7 +7070,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
                         PL_preambled = FALSE;
                         if (PERLDB_LINE_OR_SAVESRC)
                             (void)gv_fetchfile(PL_origfilename);
-                        return yyl_try(aTHX_ s, len, 0);
+                        return yyl_try(aTHX_ s, len);
                     }
                 }
             }
@@ -7087,7 +7083,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
         TOKEN(';');
     }
 
-    return yyl_try(aTHX_ s, len, 0);
+    return yyl_try(aTHX_ s, len);
 }
 
 static int
@@ -7102,10 +7098,10 @@ yyl_fatcomma(pTHX_ char *s, STRLEN len)
 }
 
 static int
-yyl_safe_bareword(pTHX_ char *s, const char lastchar, const bool saw_infix_sigil)
+yyl_safe_bareword(pTHX_ char *s, const char lastchar)
 {
     if ((lastchar == '*' || lastchar == '%' || lastchar == '&')
-        && saw_infix_sigil)
+        && PL_parser->saw_infix_sigil)
     {
         Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
                          "Operator or semicolon missing before %c%" UTF8f,
@@ -7197,8 +7193,7 @@ yyl_strictwarn_bareword(pTHX_ const char lastchar)
 }
 
 static int
-yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
-                struct code c, const bool saw_infix_sigil)
+yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c)
 {
     int pkgname = 0;
     const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
@@ -7278,7 +7273,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
 
     /* And if "Foo::", then that's what it certainly is. */
     if (safebw)
-        return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
+        return yyl_safe_bareword(aTHX_ s, lastchar);
 
     if (!c.off) {
         OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(c.sv));
@@ -7345,7 +7340,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
             PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
             yyl_strictwarn_bareword(aTHX_ lastchar);
             op_free(c.rv2cv_op);
-            return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
+            return yyl_safe_bareword(aTHX_ s, lastchar);
         }
     }
 
@@ -7445,17 +7440,15 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
 
     op_free(c.rv2cv_op);
 
-    return yyl_safe_bareword(aTHX_ s, lastchar, saw_infix_sigil);
+    return yyl_safe_bareword(aTHX_ s, lastchar);
 }
 
 static int
-yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
-                    struct code c, bool bof, const bool saw_infix_sigil)
+yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c, bool bof)
 {
     switch (key) {
     default:			/* not a keyword */
-        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword,
-                               c, saw_infix_sigil);
+        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword, c);
 
     case KEY___FILE__:
         FUN0OP( newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0)) );
@@ -7493,8 +7486,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
     case KEY_END:
         if (PL_expect == XSTATE)
             return yyl_sub(aTHX_ PL_bufptr, key);
-        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword,
-                               c, saw_infix_sigil);
+        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword, c);
 
     case KEY_abs:
         UNI(OP_ABS);
@@ -8349,8 +8341,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
             Mop(OP_REPEAT);
         }
         check_uni();
-        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword,
-                               c, saw_infix_sigil);
+        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword, c);
 
     case KEY_xor:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
@@ -8361,8 +8352,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
 }
 
 static int
-yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
-             struct code c, bool bof, const bool saw_infix_sigil)
+yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c, bool bof)
 {
     STRLEN olen = len;
     char *d = s;
@@ -8372,7 +8362,7 @@ yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
         || (!(key = keyword(PL_tokenbuf, len, 1)) && *s == '\''))
     {
         Copy(PL_bufptr, PL_tokenbuf, olen, char);
-        return yyl_just_a_word(aTHX_ d, olen, key, orig_keyword, c, saw_infix_sigil);
+        return yyl_just_a_word(aTHX_ d, olen, key, orig_keyword, c);
     }
     if (!key)
         Perl_croak(aTHX_ "CORE::%" UTF8f " is not a keyword",
@@ -8385,12 +8375,11 @@ yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword,
         orig_keyword = key;
 
     /* Known to be a reserved word at this point */
-    return yyl_word_or_keyword(aTHX_ s, len, key, orig_keyword, c,
-                               bof, saw_infix_sigil);
+    return yyl_word_or_keyword(aTHX_ s, len, key, orig_keyword, c, bof);
 }
 
 static int
-yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
+yyl_keylookup(pTHX_ char *s, GV *gv, bool bof)
 {
     STRLEN len;
     bool anydelim;
@@ -8410,8 +8399,8 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
     /* x::* is just a word, unless x is "CORE" */
     if (!anydelim && *s == ':' && s[1] == ':') {
         if (memEQs(PL_tokenbuf, len, "CORE"))
-            return yyl_key_core(aTHX_ s, len, tmp, 0, c, bof, saw_infix_sigil);
-        return yyl_just_a_word(aTHX_ s, len, 0, 0, c, saw_infix_sigil);
+            return yyl_key_core(aTHX_ s, len, tmp, 0, c, bof);
+        return yyl_just_a_word(aTHX_ s, len, 0, 0, c);
     }
 
     d = s;
@@ -8484,7 +8473,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
                 if (!c.gv) {
                     sv_free(c.sv);
                     c.sv = NULL;
-                    return yyl_just_a_word(aTHX_ s, len, tmp, 0, c, saw_infix_sigil);
+                    return yyl_just_a_word(aTHX_ s, len, tmp, 0, c);
                 }
             }
             else {
@@ -8493,7 +8482,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
                 c.cv = find_lexical_cv(c.off);
             }
             c.lex = TRUE;
-            return yyl_just_a_word(aTHX_ s, len, tmp, 0, c, saw_infix_sigil);
+            return yyl_just_a_word(aTHX_ s, len, tmp, 0, c);
         }
         c.off = 0;
     }
@@ -8516,12 +8505,11 @@ yyl_keylookup(pTHX_ char *s, GV *gv, bool bof, bool saw_infix_sigil)
             return yyl_fatcomma(aTHX_ s, len);
     }
 
-    return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword,
-                               c, bof, saw_infix_sigil);
+    return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword, c, bof);
 }
 
 static int
-yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
+yyl_try(pTHX_ char *s, STRLEN len)
 {
     char *d;
     bool bof = FALSE;
@@ -8530,7 +8518,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
     switch (*s) {
     default:
         if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s))
-            return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+            return yyl_keylookup(aTHX_ s, gv, bof);
         yyl_croak_unrecognised(aTHX_ s);
 
     case 4:
@@ -8557,7 +8545,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
-	    return yyl_try(aTHX_ s, len, 0);  /* ignore stray nulls */
+	    return yyl_try(aTHX_ s, len);  /* ignore stray nulls */
 	PL_last_uni = 0;
 	PL_last_lop = 0;
 	if (!PL_in_eval && !PL_preambled) {
@@ -8635,7 +8623,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 	    PL_last_lop = PL_last_uni = NULL;
 	    if (PERLDB_LINE_OR_SAVESRC && PL_curstash != PL_debstash)
 		update_debugger_info(PL_linestr, NULL, 0);
-	    return yyl_try(aTHX_ s, len, 0);
+	    return yyl_try(aTHX_ s, len);
 	}
         return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s, len);
 
@@ -8647,7 +8635,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 #endif
     case ' ': case '\t': case '\f': case '\v':
 	s++;
-	return yyl_try(aTHX_ s, len, 0);
+	return yyl_try(aTHX_ s, len);
 
     case '#':
     case '\n':
@@ -8681,7 +8669,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 	OPERATOR(',');
     case ':':
 	if (s[1] == ':')
-            return yyl_just_a_word(aTHX_ s, 0, 0, 0, no_code, saw_infix_sigil);
+            return yyl_just_a_word(aTHX_ s, 0, 0, 0, no_code);
         return yyl_colon(aTHX_ s + 1);
 
     case '(':
@@ -8720,7 +8708,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
             && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), "====="))
         {
             s = vcs_conflict_marker(s + 7);
-            return yyl_try(aTHX_ s, len, 0);
+            return yyl_try(aTHX_ s, len);
         }
 
 	s++;
@@ -8770,15 +8758,15 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
                                 else
                                     s = d;
                                 incline(s, PL_bufend);
-                                return yyl_try(aTHX_ s, len, 0);
+                                return yyl_try(aTHX_ s, len);
                             }
                         }
                     }
-                    return yyl_try(aTHX_ s, len, 0);
+                    return yyl_try(aTHX_ s, len);
                 }
                 s = PL_bufend;
                 PL_parser->in_pod = 1;
-                return yyl_try(aTHX_ s, len, 0);
+                return yyl_try(aTHX_ s, len);
             }
 	}
 	if (PL_expect == XBLOCK) {
@@ -8814,7 +8802,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
             && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
         {
             s = vcs_conflict_marker(s + 7);
-            return yyl_try(aTHX_ s, len, 0);
+            return yyl_try(aTHX_ s, len);
         }
         return yyl_leftpointy(aTHX_ s);
 
@@ -8823,7 +8811,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
             && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), ">>>>>"))
         {
             s = vcs_conflict_marker(s + 7);
-            return yyl_try(aTHX_ s, len, 0);
+            return yyl_try(aTHX_ s, len);
         }
         return yyl_rightpointy(aTHX_ s + 1);
 
@@ -8922,12 +8910,12 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 	    }
 	    else if ((*start == ':' && start[1] == ':')
 		  || (PL_expect == XSTATE && *start == ':'))
-                return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+                return yyl_keylookup(aTHX_ s, gv, bof);
 	    else if (PL_expect == XSTATE) {
 		d = start;
 		while (d < PL_bufend && isSPACE(*d)) d++;
 		if (*d == ':')
-                    return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+                    return yyl_keylookup(aTHX_ s, gv, bof);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    if (!isALPHA(*start) && (PL_expect == XTERM
@@ -8941,14 +8929,14 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 		}
 	    }
 	}
-        return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+        return yyl_keylookup(aTHX_ s, gv, bof);
 
     case 'x':
 	if (isDIGIT(s[1]) && PL_expect == XOPERATOR) {
 	    s++;
 	    Mop(OP_REPEAT);
 	}
-        return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+        return yyl_keylookup(aTHX_ s, gv, bof);
 
     case '_':
     case 'a': case 'A':
@@ -8977,7 +8965,7 @@ yyl_try(pTHX_ char *s, STRLEN len, const bool saw_infix_sigil)
 	      case 'X':
     case 'y': case 'Y':
     case 'z': case 'Z':
-        return yyl_keylookup(aTHX_ s, gv, bof, saw_infix_sigil);
+        return yyl_keylookup(aTHX_ s, gv, bof);
     }
 }
 
@@ -9038,7 +9026,6 @@ Perl_yylex(pTHX)
 {
     dVAR;
     char *s = PL_bufptr;
-    const bool saw_infix_sigil = cBOOL(PL_parser->saw_infix_sigil);
 
     if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
         const U8* first_bad_char_loc;
@@ -9273,13 +9260,35 @@ Perl_yylex(pTHX)
     s = PL_bufptr;
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
-    PL_parser->saw_infix_sigil = 0;
 
     if (PL_in_my == KEY_sigvar) {
+        PL_parser->saw_infix_sigil = 0;
         return yyl_sigvar(aTHX_ s);
     }
 
-    return yyl_try(aTHX_ s, 0, saw_infix_sigil);
+    {
+        /* yyl_try() and its callees might consult PL_parser->saw_infix_sigil.
+           On its return, we then need to set it to indicate whether the token
+           we just encountered was an infix operator that (if we hadn't been
+           expecting an operator) have been a sigil.
+        */
+        bool expected_operator = (PL_expect == XOPERATOR);
+        int ret = yyl_try(aTHX_ s, 0);
+        switch (pl_yylval.ival) {
+        case OP_BIT_AND:
+        case OP_MODULO:
+        case OP_MULTIPLY:
+        case OP_NBIT_AND:
+            if (expected_operator) {
+                PL_parser->saw_infix_sigil = 1;
+                break;
+            }
+            /* FALLTHROUGH */
+        default:
+            PL_parser->saw_infix_sigil = 0;
+        }
+        return ret;
+    }
 }
 
 
