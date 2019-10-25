@@ -357,17 +357,17 @@ XXX
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The lexer (C<Perl_yylex()> in F<toke.c>) was previously a single 4100-line
+function, relying heavily on C<goto> and a lot of widely-scoped local variables
+to do its work. It has now been pulled apart into a few dozen smaller static
+functions; the largest remaining chunk (C<yyl_word_or_keyword()>) is a little
+over 900 lines, and consists of a single C<switch> statement, all of whose
+C<case> groups are independent. This should be much easier to understand and
+maintain.
 
 =back
 
