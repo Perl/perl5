@@ -475,6 +475,7 @@ INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
+EXTRACFLAGS	= -nologo -GF -W3
 
 !IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrt.lib
@@ -483,23 +484,28 @@ LIBC		= msvcrt.lib
 !ENDIF
 
 !IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
+OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
+DEFINES		= $(DEFINES) -DDEBUGGING
+EXTRACFLAGS	= $(EXTRACFLAGS) -MD
 !ELSEIF  "$(CFG)" == "DebugSymbols"
-OPTIMIZE	= -Od -MD -Zi
+OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
+EXTRACFLAGS	= $(EXTRACFLAGS) -MD
 !ELSEIF  "$(CFG)" == "DebugFull"
 !  IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141" || "$(CCTYPE)" == "MSVC142"
 LIBC		= ucrtd.lib
 !  ELSE
 LIBC		= msvcrtd.lib
 !  ENDIF
-OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
+DEFINES		= $(DEFINES) -D_DEBUG -DDEBUGGING
+EXTRACFLAGS	= $(EXTRACFLAGS) -MDd
 !ELSE
 # Enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG).
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
-OPTIMIZE	= -O1 -MD -Zi -DNDEBUG -GL
+OPTIMIZE	= -O1 -Zi -GL
 # we enable debug symbols in release builds also
 LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
@@ -509,6 +515,7 @@ LINK_DBG	= -debug -opt:ref,icf -ltcg
 # avoid the bloat of COFF symbols by default.
 #LINK_DBG	= $(LINK_DBG) -debugtype:both
 LIB_FLAGS	= -ltcg
+EXTRACFLAGS	= $(EXTRACFLAGS) -MD
 !ENDIF
 
 !IF "$(WIN64)" == "define"
@@ -580,8 +587,6 @@ LIBBASEFILES    = $(LIBBASEFILES) bufferoverflowU.lib
 
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-#EXTRACFLAGS	= -nologo -GF -W4 -wd4127 -wd4706
-EXTRACFLAGS	= -nologo -GF -W3
 !IF "$(__ICC)" == "define"
 EXTRACFLAGS	= $(EXTRACFLAGS) -Qstd=c99
 !ENDIF
@@ -893,7 +898,7 @@ CFG_VARS	=					\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ld=$(LINK32)"				\
-		"ccflags=$(EXTRACFLAGS) $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
+		"ccflags=$(EXTRACFLAGS) $(DEFINES) $(BUILDOPT)"	\
 		"usecplusplus=$(USE_CPLUSPLUS)"		\
 		"cf_email=$(EMAIL)"	 		\
 		"d_mymalloc=$(PERL_MALLOC)"		\
