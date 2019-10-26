@@ -7147,12 +7147,47 @@ PP(pp_isa)
 {
     dSP;
     SV *left, *right;
+    GV *isagv;
 
     right = POPs;
     left  = TOPs;
 
     if(!SvROK(left) || !SvOBJECT(SvRV(left))) {
         SETs(boolSV(FALSE));
+        RETURN;
+    }
+
+    /* This abuse of gv_fetchmeth_pv() with level = 1 skips the UNIVERSAL
+     * lookup
+     * TODO: Consider if we want a NOUNIVERSAL flag for requesting this in a
+     * more obvious way
+     */
+    isagv = gv_fetchmeth_pv(SvSTASH(SvRV(left)), "isa", 1, 0);
+    if(isagv) {
+        CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
+        bool ret;
+
+        PUTBACK;
+
+        ENTER;
+        SAVETMPS;
+
+        EXTEND(SP, 2);
+        PUSHMARK(SP);
+        PUSHs(left);
+        PUSHs(right);
+        PUTBACK;
+
+        call_sv((SV *)isacv, G_SCALAR);
+
+        SPAGAIN;
+        ret = SvTRUEx(POPs);
+        PUTBACK;
+
+        FREETMPS;
+        LEAVE;
+
+        SETs(boolSV(ret));
         RETURN;
     }
 
