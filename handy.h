@@ -681,7 +681,7 @@ that would be interested in them, such as Devel::PPPort
 =for apidoc Amh|bool|isALPHA_L1|int ch
 =for apidoc Amh|bool|isALPHA_uvchr|int ch
 =for apidoc Amh|bool|isALPHA_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isALPHA_utf8|U8 * s
+=for apidoc Amh|bool|isALPHA_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isALPHA_LC|int ch
 =for apidoc Amh|bool|isALPHA_LC_uvchr|int ch
 =for apidoc Amh|bool|isALPHA_LC_utf8_safe|U8 * s| U8 *end
@@ -706,7 +706,7 @@ C<isALNUMC_LC>, and C<isALNUMC_LC_uvchr>.
 =for apidoc Amh|bool|isALPHANUMERIC_L1|int ch
 =for apidoc Amh|bool|isALPHANUMERIC_uvchr|int ch
 =for apidoc Amh|bool|isALPHANUMERIC_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isALPHANUMERIC_utf8|U8 * s
+=for apidoc Amh|bool|isALPHANUMERIC_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isALPHANUMERIC_LC|int ch
 =for apidoc Amh|bool|isALPHANUMERIC_LC_uvchr|int ch
 =for apidoc Amh|bool|isALPHANUMERIC_LC_utf8_safe|U8 * s| U8 *end
@@ -734,7 +734,7 @@ same as the corresponding ones without.
 =for apidoc Amh|bool|isASCII_L1|int ch
 =for apidoc Amh|bool|isASCII_uvchr|int ch
 =for apidoc Amh|bool|isASCII_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isASCII_utf8|U8 * s
+=for apidoc Amh|bool|isASCII_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isASCII_LC|int ch
 =for apidoc Amh|bool|isASCII_LC_uvchr|int ch
 =for apidoc Amh|bool|isASCII_LC_utf8_safe|U8 * s| U8 *end
@@ -761,7 +761,7 @@ the same as the corresponding ones without.
 =for apidoc Amh|bool|isBLANK_L1|int ch
 =for apidoc Amh|bool|isBLANK_uvchr|int ch
 =for apidoc Amh|bool|isBLANK_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isBLANK_utf8|U8 * s
+=for apidoc Amh|bool|isBLANK_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isBLANK_LC|int ch
 =for apidoc Amh|bool|isBLANK_LC_uvchr|int ch
 =for apidoc Amh|bool|isBLANK_LC_utf8_safe|U8 * s| U8 *end
@@ -780,7 +780,7 @@ platforms, you almost always want to use the C<isCNTRL_L1> variant.
 =for apidoc Amh|bool|isCNTRL_L1|int ch
 =for apidoc Amh|bool|isCNTRL_uvchr|int ch
 =for apidoc Amh|bool|isCNTRL_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isCNTRL_utf8|U8 * s
+=for apidoc Amh|bool|isCNTRL_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isCNTRL_LC|int ch
 =for apidoc Amh|bool|isCNTRL_LC_uvchr|int ch
 =for apidoc Amh|bool|isCNTRL_LC_utf8_safe|U8 * s| U8 *end
@@ -798,7 +798,7 @@ C<isDIGIT_LC_uvchr>, C<isDIGIT_LC_utf8>, and C<isDIGIT_LC_utf8_safe>.
 =for apidoc Amh|bool|isDIGIT_L1|int ch
 =for apidoc Amh|bool|isDIGIT_uvchr|int ch
 =for apidoc Amh|bool|isDIGIT_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isDIGIT_utf8|U8 * s
+=for apidoc Amh|bool|isDIGIT_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isDIGIT_LC|int ch
 =for apidoc Amh|bool|isDIGIT_LC_uvchr|int ch
 =for apidoc Amh|bool|isDIGIT_LC_utf8_safe|U8 * s| U8 *end
@@ -815,7 +815,7 @@ C<isGRAPH_LC_utf8_safe>, and C<isGRAPH_LC_utf8_safe>.
 =for apidoc Amh|bool|isGRAPH_L1|int ch
 =for apidoc Amh|bool|isGRAPH_uvchr|int ch
 =for apidoc Amh|bool|isGRAPH_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isGRAPH_utf8|U8 * s
+=for apidoc Amh|bool|isGRAPH_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isGRAPH_LC|int ch
 =for apidoc Amh|bool|isGRAPH_LC_uvchr|int ch
 =for apidoc Amh|bool|isGRAPH_LC_utf8_safe|U8 * s| U8 *end
@@ -833,7 +833,7 @@ and C<isLOWER_LC_utf8_safe>.
 =for apidoc Amh|bool|isLOWER_L1|int ch
 =for apidoc Amh|bool|isLOWER_uvchr|int ch
 =for apidoc Amh|bool|isLOWER_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isLOWER_utf8|U8 * s
+=for apidoc Amh|bool|isLOWER_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isLOWER_LC|int ch
 =for apidoc Amh|bool|isLOWER_LC_uvchr|int ch
 =for apidoc Amh|bool|isLOWER_LC_utf8_safe|U8 * s| U8 *end
@@ -862,7 +862,7 @@ and C<isPUNCT_LC_utf8_safe>.
 =for apidoc Amh|bool|isPUNCT_L1|int ch
 =for apidoc Amh|bool|isPUNCT_uvchr|int ch
 =for apidoc Amh|bool|isPUNCT_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isPUNCT_utf8|U8 * s
+=for apidoc Amh|bool|isPUNCT_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isPUNCT_LC|int ch
 =for apidoc Amh|bool|isPUNCT_LC_uvchr|int ch
 =for apidoc Amh|bool|isPUNCT_LC_utf8_safe|U8 * s| U8 *end
@@ -886,7 +886,7 @@ and C<isSPACE_LC_utf8_safe>.
 =for apidoc Amh|bool|isSPACE_L1|int ch
 =for apidoc Amh|bool|isSPACE_uvchr|int ch
 =for apidoc Amh|bool|isSPACE_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isSPACE_utf8|U8 * s
+=for apidoc Amh|bool|isSPACE_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isSPACE_LC|int ch
 =for apidoc Amh|bool|isSPACE_LC_uvchr|int ch
 =for apidoc Amh|bool|isSPACE_LC_utf8_safe|U8 * s| U8 *end
@@ -910,7 +910,7 @@ C<isPSXSPC_LC_utf8>, and C<isPSXSPC_LC_utf8_safe>.
 =for apidoc Amh|bool|isPSXSPC_L1|int ch
 =for apidoc Amh|bool|isPSXSPC_uvchr|int ch
 =for apidoc Amh|bool|isPSXSPC_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isPSXSPC_utf8|U8 * s
+=for apidoc Amh|bool|isPSXSPC_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isPSXSPC_LC|int ch
 =for apidoc Amh|bool|isPSXSPC_LC_uvchr|int ch
 =for apidoc Amh|bool|isPSXSPC_LC_utf8_safe|U8 * s| U8 *end
@@ -927,7 +927,7 @@ and C<isUPPER_LC_utf8_safe>.
 =for apidoc Amh|bool|isUPPER_L1|int ch
 =for apidoc Amh|bool|isUPPER_uvchr|int ch
 =for apidoc Amh|bool|isUPPER_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isUPPER_utf8|U8 * s
+=for apidoc Amh|bool|isUPPER_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isUPPER_LC|int ch
 =for apidoc Amh|bool|isUPPER_LC_uvchr|int ch
 =for apidoc Amh|bool|isUPPER_LC_utf8_safe|U8 * s| U8 *end
@@ -945,7 +945,7 @@ and C<isPRINT_LC_utf8_safe>.
 =for apidoc Amh|bool|isPRINT_L1|int ch
 =for apidoc Amh|bool|isPRINT_uvchr|int ch
 =for apidoc Amh|bool|isPRINT_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isPRINT_utf8|U8 * s
+=for apidoc Amh|bool|isPRINT_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isPRINT_LC|int ch
 =for apidoc Amh|bool|isPRINT_LC_uvchr|int ch
 =for apidoc Amh|bool|isPRINT_LC_utf8_safe|U8 * s| U8 *end
@@ -970,7 +970,7 @@ underscore.
 =for apidoc Amh|bool|isWORDCHAR_L1|int ch
 =for apidoc Amh|bool|isWORDCHAR_uvchr|int ch
 =for apidoc Amh|bool|isWORDCHAR_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isWORDCHAR_utf8|U8 * s
+=for apidoc Amh|bool|isWORDCHAR_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isWORDCHAR_LC|int ch
 =for apidoc Amh|bool|isWORDCHAR_LC_uvchr|int ch
 =for apidoc Amh|bool|isWORDCHAR_LC_utf8_safe|U8 * s| U8 *end
@@ -992,7 +992,7 @@ C<isXDIGIT_LC_uvchr>, C<isXDIGIT_LC_utf8>, and C<isXDIGIT_LC_utf8_safe>.
 =for apidoc Amh|bool|isXDIGIT_L1|int ch
 =for apidoc Amh|bool|isXDIGIT_uvchr|int ch
 =for apidoc Amh|bool|isXDIGIT_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isXDIGIT_utf8|U8 * s
+=for apidoc Amh|bool|isXDIGIT_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isXDIGIT_LC|int ch
 =for apidoc Amh|bool|isXDIGIT_LC_uvchr|int ch
 =for apidoc Amh|bool|isXDIGIT_LC_utf8_safe|U8 * s| U8 *end
@@ -1012,7 +1012,7 @@ C<isIDFIRST_LC_utf8>, and C<isIDFIRST_LC_utf8_safe>.
 =for apidoc Amh|bool|isIDFIRST_L1|int ch
 =for apidoc Amh|bool|isIDFIRST_uvchr|int ch
 =for apidoc Amh|bool|isIDFIRST_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isIDFIRST_utf8|U8 * s
+=for apidoc Amh|bool|isIDFIRST_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isIDFIRST_LC|int ch
 =for apidoc Amh|bool|isIDFIRST_LC_uvchr|int ch
 =for apidoc Amh|bool|isIDFIRST_LC_utf8_safe|U8 * s| U8 *end
@@ -1031,7 +1031,7 @@ C<isIDCONT_LC_utf8>, and C<isIDCONT_LC_utf8_safe>.
 =for apidoc Amh|bool|isIDCONT_L1|int ch
 =for apidoc Amh|bool|isIDCONT_uvchr|int ch
 =for apidoc Amh|bool|isIDCONT_utf8_safe|U8 * s|U8 * end
-=for apidoc Amh|bool|isIDCONT_utf8|U8 * s
+=for apidoc Amh|bool|isIDCONT_utf8|U8 * s|U8 * end
 =for apidoc Amh|bool|isIDCONT_LC|int ch
 =for apidoc Amh|bool|isIDCONT_LC_uvchr|int ch
 =for apidoc Amh|bool|isIDCONT_LC_utf8_safe|U8 * s| U8 *end
