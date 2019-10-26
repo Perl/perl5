@@ -23,7 +23,7 @@ Adding new warnings, errors or deprecations
 The same criteria apply to code in dual-life modules as to core code.)
 
 steveh: I'm not sure whether this one fits any of the categories allowed by perlpolicy for backporting, unless it's a regression bug?
-<commit votes="tonyc arc" id="40258daf9899686d934c460ba3630431312d7694" ticket="134072" desc="(perl #134072) allow \&amp;foo = \&amp;bar to work in main::"/>
+<commit votes="tonyc arc khw" id="40258daf9899686d934c460ba3630431312d7694" ticket="134072" desc="(perl #134072) allow \&amp;foo = \&amp;bar to work in main::"/>
 
 </div>
 
@@ -34,10 +34,11 @@ steveh: I'm not sure whether this one fits any of the categories allowed by perl
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 steveh: This adds a new member to struct RExC_state_t. Is that a problem for binary compatibility?
-<commit votes="steveh arc" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="134059" desc="PATCH: [perl #134059] panic outputting a warning"/>
+khw vote contingent on bin compat being acceptable
+<commit votes="steveh arc khw" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="134059" desc="PATCH: [perl #134059] panic outputting a warning"/>
 
 steveh: The ticket number is #134045. The commit message gave the wrong number.
-<commit votes="steveh arc" id="94a2f6a3c87a0795b9b1aabd49616f90c922b835" ticket="134045" desc="(perl #134048) prevent an erroneous assertion on OP_SCALAR"/>
+<commit votes="steveh arc khw" id="94a2f6a3c87a0795b9b1aabd49616f90c922b835" ticket="134045" desc="(perl #134048) prevent an erroneous assertion on OP_SCALAR"/>
 
 steveh: This is quite a large change, which makes me nervous for a maint release. Maybe it's better off left out?
 <commit votes="steveh arc" id="69afcc21edd23e38a4aff806a14e666d77f2bd0c" ticket="130585" desc="(perl #130585) prevent a spurious ) in a subparse confusing the parser"/>
@@ -76,14 +77,14 @@ stable throughout 5.30 and not revert back until 5.32?
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh bingos" id="6c3320363f6cd734c66a25852aac87e4f2538215" ticket="133981" desc="(perl #133981) fix for Win32 setlocale() abort"/>
-<commit votes="steveh bingos" id="17a1e9ac2917a0f8cdb3bf899724e07190e3d8ec" ticket="133981" desc="(perl #133981) fix my stupid mistake"/>
+<commit votes="steveh bingos khw" id="6c3320363f6cd734c66a25852aac87e4f2538215" ticket="133981" desc="(perl #133981) fix for Win32 setlocale() abort"/>
+<commit votes="steveh bingos khw" id="17a1e9ac2917a0f8cdb3bf899724e07190e3d8ec" ticket="133981" desc="(perl #133981) fix my stupid mistake"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh craigb" id="47ef154c59e75e9351d27b3bd06d6ac57494193c" ticket="" desc="Update documentation, comments, metadata to reference GitHub as canonical repository (#1186)"/>
+<commit votes="steveh craigb khw" id="47ef154c59e75e9351d27b3bd06d6ac57494193c" ticket="" desc="Update documentation, comments, metadata to reference GitHub as canonical repository (#1186)"/>
 
 </div>
 
