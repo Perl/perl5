@@ -7165,6 +7165,7 @@ PP(pp_isa)
     isagv = gv_fetchmeth_pv(SvSTASH(SvRV(left)), "isa", 1, 0);
     if(isagv) {
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
+        SV *retsv;
         bool ret;
 
         PUTBACK;
@@ -7181,7 +7182,8 @@ PP(pp_isa)
         call_sv((SV *)isacv, G_SCALAR);
 
         SPAGAIN;
-        ret = SvTRUEx(POPs);
+        retsv = POPs;
+        ret = SvTRUE(retsv);
         PUTBACK;
 
         FREETMPS;
