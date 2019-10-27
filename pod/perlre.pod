@@ -2622,10 +2622,6 @@ to capture, if desired.  You will have to do this if you plan to use
 L</(*ACCEPT) (*ACCEPT:arg)> and not have it bypass the script run
 checking.
 
-This feature is experimental, and the exact syntax and details of
-operation are subject to change; using it yields a warning in the
-C<experimental::script_run> category.
-
 The C<Script_Extensions> property as modified by UTS 39
 (L<https://unicode.org/reports/tr39/>) is used as the basis for this
 feature.

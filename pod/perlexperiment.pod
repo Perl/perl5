@@ -116,15 +116,6 @@ See also: L<perlref/Declaring a Reference to a Variable>
 The ticket for this feature is
 L<[perl #116487]|https://rt.perl.org/rt3/Ticket/Display.html?id=116487>.
 
-=item Script runs
-
-Introduced in Perl 5.28.0
-
-Using this feature triggers warnings in the category
-C<experimental::script_run>.
-
-See also: L<perlre/Script Runs>
-
 =item (Limited) Variable-length look-behind
 
 Introduced in Perl 5.30.0.  Variability of up to 255 characters is
@@ -259,6 +250,12 @@ Introduced in Perl 5.22.0
 Accepted in Perl 5.28.0
 
 =item Alphabetic assertions
+
+Introduced in Perl 5.28.0
+
+Accepted in Perl 5.32.0
+
+=item Script runs
 
 Introduced in Perl 5.28.0
 

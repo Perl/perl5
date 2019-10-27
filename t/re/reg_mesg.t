@@ -697,12 +697,6 @@ my @experimental_regex_sets = (
     '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
-my @experimental_script_run = (
-    '/(*script_run:paypal.com)/' => 'The script_run feature is experimental {#} m/(*script_run:{#}paypal.com)/',
-    'use utf8; /utf8 ネ (*script_run:ネ)/' => do { use utf8; 'The script_run feature is experimental {#} m/utf8 ネ (*script_run:{#}ネ)/' },
-    '/noutf8 ネ (*script_run:ネ)/' => 'The script_run feature is experimental {#} m/noutf8 ネ (*script_run:{#}ネ)/',
-);
-
 my @deprecated = (
  '/^{/'          => "",
  '/foo|{/'       => "",
@@ -738,7 +732,6 @@ for my $strict ("", "use re 'strict';") {
         }
         else {
             no warnings 'experimental::regex_sets';
-            no warnings 'experimental::script_run';
             no warnings 'experimental::re_strict';
 
             warning_is(sub {
@@ -793,7 +786,6 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
 
     foreach my $ref (\@warning_tests,
                      \@experimental_regex_sets,
-                     \@experimental_script_run,
                      \@deprecated)
     {
         my $warning_type;
@@ -801,8 +793,7 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         my $default_on;
         if ($ref == \@warning_tests) {
             $warning_type = 'regexp, digit';
-            $turn_off_warnings = "no warnings 'experimental::regex_sets';"
-                               . "no warnings 'experimental::script_run';";
+            $turn_off_warnings = "no warnings 'experimental::regex_sets';";
             $default_on = $strict;
         }
         elsif ($ref == \@deprecated) {
@@ -811,10 +802,6 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
         elsif ($ref == \@experimental_regex_sets) {
             $warning_type = 'experimental::regex_sets';
-            $default_on = 1;
-        }
-        elsif ($ref == \@experimental_script_run) {
-            $warning_type = 'experimental::script_run';
             $default_on = 1;
         }
         else {

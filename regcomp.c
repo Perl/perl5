@@ -11328,12 +11328,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         goto parse_rest;
                     }
 
-                    /* By doing this here, we avoid extra warnings for nested
-                     * script runs */
-                    ckWARNexperimental(RExC_parse,
-                        WARN_EXPERIMENTAL__SCRIPT_RUN,
-                        "The script_run feature is experimental");
-
                     if (paren == 's') {
                         /* Here, we're starting a new regular script run */
                         ret = reg_node(pRExC_state, SROPEN);

@@ -6142,12 +6142,6 @@ warning:
 
     no warnings "experimental::regex_sets";
 
-=item The script_run feature is experimental
-
-(S experimental::script_run) This feature is experimental
-and its behavior may in any future release of perl.  See
-L<perlre/Script Runs>.
-
 =item The signatures feature is experimental
 
 (S experimental::signatures) This warning is emitted if you unwrap a
