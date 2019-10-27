@@ -7097,9 +7097,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                 * store excess replacement chars at end of main table.
                 */
 
-                struct_size += excess;
-                tbl = (OPtrans_map*)PerlMemShared_realloc(tbl,
-                            struct_size + excess * sizeof(short));
+                struct_size += excess * sizeof(short);
+                tbl = (OPtrans_map*)PerlMemShared_realloc(tbl, struct_size);
                 tbl->size += excess;
                 cPVOPo->op_pv = (char*)tbl;
 
