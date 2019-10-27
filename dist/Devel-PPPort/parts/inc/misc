@@ -2533,7 +2533,7 @@ $_ = "Fred";
 ok(&Devel::PPPort::DEFSV(), "Fred");
 ok(&Devel::PPPort::UNDERBAR(), "Fred");
 
-if ("$]" >= 5.009002 && "$]" < 5.023 && "$]" < 5.023004) {
+if (ivers($]) >= ivers(5.9.2) && ivers($]) < ivers(5.23)) {
   eval q{
     no warnings "deprecated";
     no if $^V > v5.17.9, warnings => "experimental::lexical_topic";
@@ -2596,8 +2596,8 @@ ok(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
 ok(Devel::PPPort::PERL_ABS(42), 42);
 ok(Devel::PPPort::PERL_ABS(-13), 13);
 
-ok(Devel::PPPort::SVf(42), "$]" >= 5.004 ? '[42]' : '42');
-ok(Devel::PPPort::SVf('abc'), "$]" >= 5.004 ? '[abc]' : 'abc');
+ok(Devel::PPPort::SVf(42), ivers($]) >= ivers(5.4) ? '[42]' : '42');
+ok(Devel::PPPort::SVf('abc'), ivers($]) >= ivers(5.4) ? '[abc]' : 'abc');
 
 ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
 
@@ -2605,7 +2605,7 @@ ok(&Devel::PPPort::ptrtests(), 63);
 
 ok(&Devel::PPPort::OpSIBLING_tests(), 0);
 
-if ("$]" >= 5.009000) {
+if (ivers($]) >= ivers(5.9)) {
   eval q{
     ok(&Devel::PPPort::check_HeUTF8("hello"), "norm");
     ok(&Devel::PPPort::check_HeUTF8("\N{U+263a}"), "utf8");
@@ -2622,7 +2622,7 @@ ok($r[1], "13");
 ok(!Devel::PPPort::SvRXOK(""));
 ok(!Devel::PPPort::SvRXOK(bless [], "Regexp"));
 
-if ("$]" < 5.005) {
+if (ivers($]) < ivers(5.5)) {
         skip 'no qr// objects in this perl', 0;
         skip 'no qr// objects in this perl', 0;
 } else {
@@ -2763,7 +2763,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 my $should_be = ($i > 0x7F && $suffix !~ /_(uvchr|L1)/)
                                 ? 0     # Fail on non-ASCII unless unicode
                                 : ($types{"$native:$class"} || 0);
-                if ("$]" < 5.006 && $suffix eq '_uvchr') {
+                if (ivers($]) < ivers(5.6) && $suffix eq '_uvchr') {
                     skip("No UTF-8 on this perl", 0);
                     next;
                 }
@@ -2779,13 +2779,13 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
         my $sub_fcn;
         for $sub_fcn ("", "_LC") {
             my $skip = "";
-            if ("$]" < 5.006) {
+            if (ivers($]) < ivers(5.6)) {
                 $skip = $way_too_early_msg;
             }
-            elsif ("$]" < 5.007 && $native > 255) {
+            elsif (ivers($]) < ivers(5.7) && $native > 255) {
                 $skip = "Perls earlier than 5.7 give wrong answers for above Latin1 code points";
             }
-            elsif ("$]" <= 5.011003 && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
+            elsif (ivers($]) <= ivers(5.11.3) && $native == 0x2029 && ($class eq 'PRINT' || $class eq 'GRAPH')) {
                 $skip = "Perls earlier than 5.11.3 considered high space characters as isPRINT and isGRAPH";
             }
             elsif ($sub_fcn eq '_LC' && $i < 256) {
@@ -2812,7 +2812,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 if ($skip) {
                     skip $skip, 0;
                 }
-                elsif ("$]" >= 5.025009) {
+                elsif (ivers($]) >= ivers(5.25.9)) {
                     skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
                 }
                 else {
@@ -2858,7 +2858,7 @@ for $name (keys %case_changing) {
         my $utf8_changed = $changed;
         my $is_cp = $utf8_changed =~ /^\d+$/;
         my $should_be_bytes;
-        if ("$]" >= 5.006000) {
+        if (ivers($]) >= ivers(5.6)) {
             if ($is_cp) {
                 $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
                 $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
@@ -2872,7 +2872,7 @@ for $name (keys %case_changing) {
         my $fcn = "to${name}_uvchr";
         my $skip = "";
 
-        if ("$]" < 5.006000) {
+        if (ivers($]) < ivers(5.6)) {
             $skip = $way_too_early_msg;
         }
         elsif (! $is_cp) {
@@ -2896,7 +2896,7 @@ for $name (keys %case_changing) {
             my $ret = eval "Devel::PPPort::$fcn($original)";
             my $fail = $@;  # Have to save $@, as it gets destroyed
             ok ($fail, "", "$fcn($original) didn't fail");
-            my $first = ("$]" != 5.006000)
+            my $first = (ivers($]) != ivers(5.6))
                         ? substr($utf8_changed, 0, 1)
                         : $utf8_changed, 0, 1;
             ok($ret->[0], ord $first,
@@ -2910,13 +2910,13 @@ for $name (keys %case_changing) {
         my $truncate;
         for $truncate (0..2) {
             my $skip;
-            if ("$]" < 5.006000) {
+            if (ivers($]) < ivers(5.6)) {
                 $skip = $way_too_early_msg;
             }
-            elsif (! $is_cp && "$]" < 5.007003) {
+            elsif (! $is_cp && ivers($]) < ivers(5.7.3)) {
                 $skip = "Multi-character case change not implemented until 5.7.3";
             }
-            elsif ($truncate == 2 && "$]" > 5.025008) {
+            elsif ($truncate == 2 && ivers($]) > ivers(5.25.8)) {
                 $skip = "Zero length inputs cause assertion failure; test dies in modern perls";
             }
             elsif ($truncate > 0 && length $changed > 1) {
@@ -2940,7 +2940,7 @@ for $name (keys %case_changing) {
                 my $fail = $@;  # Have to save $@, as it gets destroyed
                 if ($truncate == 0) {
                     ok ($fail, "", "Didn't fail on full length input");
-                    my $first = ("$]" != 5.006000)
+                    my $first = (ivers($]) != ivers(5.6))
                                 ? substr($utf8_changed, 0, 1)
                                 : $utf8_changed, 0, 1;
                     ok($ret->[0], ord $first,
