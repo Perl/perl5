@@ -134,6 +134,17 @@ C<experimental::alpha_assertions>.
 
 See also: L<perlre/Extended Patterns>.
 
+=item (Limited) Variable-length look-behind
+
+Introduced in Perl 5.30.0.  Variability of up to 255 characters is
+handled.
+
+Using this feature triggers warnings in the category
+C<experimental::vlb>.
+
+See also: L<perlre/(*positive_lookbehind:I<pattern>)> and
+L<perlre/(*negative_lookbehind:I<pattern>)>
+
 =back
 
 =head2 Accepted features
