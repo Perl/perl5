@@ -12,14 +12,6 @@ release.
 If you are upgrading from an earlier release such as 5.29.0, first read
 L<perl5300delta>, which describes differences between 5.29.0 and 5.30.0.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
 
 There are no changes intentionally incompatible with 5.30.1.  If any exist,
@@ -59,11 +51,6 @@ release.
 =head1 Platform Support
 
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
