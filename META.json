@@ -117,14 +117,14 @@
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://rt.perl.org/"
+         "web" : "https://github.com/Perl/perl5/issues"
       },
       "homepage" : "http://www.perl.org/",
       "license" : [
          "http://dev.perl.org/licenses/"
       ],
       "repository" : {
-         "url" : "http://perl5.git.perl.org/"
+         "url" : "https://github.com/Perl/perl5"
       }
    },
    "version" : "5.030001",
