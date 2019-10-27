@@ -150,6 +150,22 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
 
+=head2 v5.30.1-RC1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act I: Brindisi
+
+L<Announced on 2019-10-27 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/10/msg256542.html>
+
+  ALFREDO:
+  Let's drink from the joyous chalice
+  where beauty flowers...
+  Let the fleeting hour
+  to pleasure's intoxication yield.
+  Let's drink
+  to love's sweet tremors --
+  to those eyes
+  that pierce the heart.
+  Let's drink to love -- to wine
+  that warms our kisses.
+
 =head2 v5.30.0 - Morihei Ueshiba
 
 L<Announced on 2019-05-22 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2019/05/msg254844.html>
