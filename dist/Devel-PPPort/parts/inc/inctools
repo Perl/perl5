@@ -20,8 +20,8 @@ sub format_version
 
 sub parse_version
 {
-  # Returns a triplet, (5, major, minor) from the input, which can be in any
-  # of several typical formats
+  # Returns a triplet, (5, major, minor) from the input, treated as a string,
+  # which can be in any of several typical formats.
 
   my $ver = shift;
   $ver = "" unless defined $ver;
@@ -44,6 +44,19 @@ sub parse_version
     die "Only Perl 5 is supported '$ver'\n" if $r != 5;
     die "Invalid version number: $ver\n" if $v >= 1000 || $s >= 1000;
     return (5, 0 + $v, 0 + $s);
+  }
+
+  # For some safety, don't assume something is a version number if it has a
+  # literal dot as one of the three characters.  This will have to be fixed
+  # when we reach 5.46
+  if ($ver !~ /\./ && (($r, $v, $s) = $ver =~ /^(.)(.)(.)$/))  # vstring 5.25.7
+  {
+    $r = ord $r;
+    $v = ord $v;
+    $s = ord $s;
+
+    die "Only Perl 5 is supported '$ver'\n" if $r != 5;
+    return (5, $v, $s);
   }
 
   my $mesg = "";
