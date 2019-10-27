@@ -199,7 +199,8 @@ PERL_STATIC_INLINE bool
 Perl_SvTRUE(pTHX_ SV *sv) {
     if (!LIKELY(sv))
         return FALSE;
-    return SvTRUE_NN(sv);
+    SvGETMAGIC(sv);
+    return SvTRUE_nomg_NN(sv);
 }
 
 PERL_STATIC_INLINE SV *
