@@ -11378,9 +11378,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 /*FALLTHROUGH*/
 
             alpha_assertions:
-                ckWARNexperimental(RExC_parse,
-                        WARN_EXPERIMENTAL__ALPHA_ASSERTIONS,
-                        "The alpha_assertions feature is experimental");
 
                 RExC_seen_zerolen++;
 

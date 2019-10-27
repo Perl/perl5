@@ -458,7 +458,6 @@ EOFCODE
 EOFCODE
         }
         $code = "no warnings 'experimental::regex_sets';$code" if $regex_sets;
-        $code = "no warnings 'experimental::alpha_assertions';$code" if $alpha_assertions;
         #$code.=qq[\n\$expect="$expect";\n];
         #use Devel::Peek;
         #die Dump($code) if $pat=~/\\h/ and $subject=~/\x{A0}/;

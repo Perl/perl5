@@ -1593,9 +1593,6 @@ X<look-ahead, positive> X<lookahead, positive>
 A zero-width positive lookahead assertion.  For example, C</\w+(?=\t)/>
 matches a word followed by a tab, without including the tab in C<$&>.
 
-The alphabetic forms are experimental; using them yields a warning in the
-C<experimental::alpha_assertions> category.
-
 =item C<(?!I<pattern>)>
 
 =item C<(*nla:I<pattern>)>
@@ -1615,9 +1612,6 @@ If you are looking for a "bar" that isn't preceded by a "foo", C</(?!foo)bar/>
 will not do what you want.  That's because the C<(?!foo)> is just saying that
 the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
 match.  Use lookbehind instead (see below).
-
-The alphabetic forms are experimental; using them yields a warning in the
-C<experimental::alpha_assertions> category.
 
 =item C<(?<=I<pattern>)>
 
@@ -1681,9 +1675,6 @@ can be rewritten as the much more efficient
 Use of the non-greedy modifier C<"?"> may not give you the expected
 results if it is within a capturing group within the construct.
 
-The alphabetic forms (not including C<\K> are experimental; using them
-yields a warning in the C<experimental::alpha_assertions> category.
-
 =item C<(?<!I<pattern>)>
 
 =item C<(*nlb:I<pattern>)>
@@ -1723,9 +1714,6 @@ error, as that could match 256 C<"s"> characters in a row.
 
 Use of the non-greedy modifier C<"?"> may not give you the expected
 results if it is within a capturing group within the construct.
-
-The alphabetic forms are experimental; using them yields a warning in the
-C<experimental::alpha_assertions> category.
 
 =back
 
@@ -2326,9 +2314,6 @@ matches, but
  "abc" =~ /(?>a(?>[bc]*)c)/
 
 does not.
-
-The alphabetic form (C<(*atomic:...)>) is experimental; using it
-yields a warning in the C<experimental::alpha_assertions> category.
 
 =item C<(?[ ])>
 

@@ -125,15 +125,6 @@ C<experimental::script_run>.
 
 See also: L<perlre/Script Runs>
 
-=item Alphabetic assertions
-
-Introduced in Perl 5.28.0
-
-Using this feature triggers warnings in the category
-C<experimental::alpha_assertions>.
-
-See also: L<perlre/Extended Patterns>.
-
 =item (Limited) Variable-length look-behind
 
 Introduced in Perl 5.30.0.  Variability of up to 255 characters is
@@ -266,6 +257,12 @@ Accepted in Perl 5.26.0
 Introduced in Perl 5.22.0
 
 Accepted in Perl 5.28.0
+
+=item Alphabetic assertions
+
+Introduced in Perl 5.28.0
+
+Accepted in Perl 5.32.0
 
 =back
 

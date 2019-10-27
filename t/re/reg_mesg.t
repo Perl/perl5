@@ -740,7 +740,6 @@ for my $strict ("", "use re 'strict';") {
             no warnings 'experimental::regex_sets';
             no warnings 'experimental::script_run';
             no warnings 'experimental::re_strict';
-            no warnings 'experimental::alpha_assertions';
 
             warning_is(sub {
                     my $meaning_of_life;

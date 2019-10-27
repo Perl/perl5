@@ -6104,12 +6104,6 @@ a dirhandle.  Check your control flow.
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
 
-=item The alpha_assertions feature is experimental
-
-(S experimental::alpha_assertions) This feature is experimental
-and its behavior may change in any future release of perl.  See
-L<perlre/Extended Patterns>.
-
 =item The crypt() function is unimplemented due to excessive paranoia.
 
 (F) Configure couldn't find the crypt() function on your machine,
