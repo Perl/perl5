@@ -196,8 +196,10 @@ Perl_ReANY(const REGEXP * const re)
 /* ------------------------------- sv.h ------------------------------- */
 
 PERL_STATIC_INLINE bool
-Perl_SvTRUE(SV *sv) {
-    return LIKELY(sv) && SvTRUE_NN(sv);
+Perl_SvTRUE(pTHX_ SV *sv) {
+    if (!LIKELY(sv))
+        return FALSE;
+    return SvTRUE_NN(sv);
 }
 
 PERL_STATIC_INLINE SV *
