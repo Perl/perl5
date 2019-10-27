@@ -30,6 +30,17 @@ L<Module::CoreList> has been upgraded from version 5.20190522 to 5.20191027.
 
 =back
 
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, send email to
+L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, documentation has been updated to reference GitHub as the new
+canonical repository and to describe the new GitHub pull request workflow.
+
 =head1 Configuration and Compilation
 
 =over 4
@@ -56,12 +67,14 @@ release.
 
 =item Win32
 
-The locale tests could crash on Win32 due to a Windows bug, and
-separately due to the CRT throwing an exception if the locale name
-wasn't validly encoded in the current code page.
+The locale tests could crash on Win32 due to a Windows bug, and separately due
+to the CRT throwing an exception if the locale name wasn't validly encoded in
+the current code page.
 
-For the second we now decode the locale name ourselves, and always
-decode it as UTF-8.  [perl #133981]
+For the second we now decode the locale name ourselves, and always decode it as
+UTF-8.
+
+L<[perl #16922]|https://github.com/perl/perl5/issues/16922>
 
 =back
 
@@ -101,8 +114,9 @@ L<[perl #16942]|https://github.com/perl/perl5/issues/16942>
 
 =item *
 
-scalar() on a reference could cause an erroneous assertion failure
-during compilation.  [perl #134045]
+C<scalar()> on a reference could cause an erroneous assertion failure during
+compilation.
+L<[perl #16969]|https://github.com/perl/perl5/issues/16969>
 
 =back
 
