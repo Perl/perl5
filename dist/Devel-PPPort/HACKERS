@@ -98,6 +98,32 @@ awkward finding which of many tests executed at the same point in a loop is the
 one failing.  Even though C<'name'> is optional, you will end up regretting not
 specifying it.
 
+It's fine to backport an element only as far as convenient and necessary.  But
+remember that your test file will end up being called on all perl versions
+available, likely including ones earlier than your backport.  That may mean
+that elements in the C<=xs> sections will have to be C<#idef>'d out so that the
+object will not get missing symbols when loaded.
+
+It also means you have to check for and skip tests that aren't relevant to this
+version.  The recommended way to do this is like:
+
+ if (ivers($]) < ivers(5.6.2)) {
+    skip "reason", 0;
+ }
+ elsif (if (ivers($]) > ivers(5.5) {
+    skip "other reason", 0;
+ }
+
+C<skip> doesn't work quite like the modern C<skip()> in, say, C<Test::More>.
+But you can pretend it pretty much does, by using it like the above.  (And you
+really don't want to know the now-discarded API elements in it.)  The C<"0">
+parameter is just to make it look like you know what you're doing.
+
+C<ivers()> is a function automatically made available to all F<.t> files.  It
+converts any reasonble expression of a version number into an integer, which
+can reliably be compared using numeric comparison operators, with the output of
+a second C<ivers()> call on a different version number, like in the result above.
+
 =back
 
 In all sections, lines that begin with C<##> are completely ignored.
@@ -158,7 +184,8 @@ Perl public API.
 
 Version checking can be tricky to get correct (besides being buggy in some perl
 versions).
-You can use
+C<ivers()> is used in the C<=tests> section to overcome this, and constructs
+like the following in the C language sections.
 
   #if { VERSION < 5.9.3 }
 
