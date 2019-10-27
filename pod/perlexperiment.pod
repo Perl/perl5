@@ -116,8 +116,6 @@ See also: L<perlref/Declaring a Reference to a Variable>
 The ticket for this feature is
 L<[perl #116487]|https://rt.perl.org/rt3/Ticket/Display.html?id=116487>.
 
-=item Unicode in Perl on EBCDIC
-
 =item Script runs
 
 Introduced in Perl 5.28.0
