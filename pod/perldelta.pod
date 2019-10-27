@@ -107,6 +107,11 @@ C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due to
 mishandling of the negative precision value.
 L<[perl #16942]|https://github.com/perl/perl5/issues/16942>
 
+=item *
+
+scalar() on a reference could cause an erroneous assertion failure
+during compilation.  [perl #134045]
+
 =back
 
 =head1 Acknowledgements
