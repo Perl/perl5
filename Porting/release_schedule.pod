@@ -24,8 +24,8 @@ Code freezes (which happen in the 5.31.X series)
 =head2 Perl 5.30
 
   2019-05-22  5.30.0 ✓        Sawyer X
-  2019-??-??  5.30.1          Steve Hay
-  2019-??-??  5.30.2          Steve Hay
+  2019-11-10  5.30.1          Steve Hay
+  2020-03-??  5.30.2          Steve Hay
 
 =head2 Perl 5.28
 
