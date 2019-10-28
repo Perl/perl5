@@ -73,10 +73,11 @@ foreach my $file (@test_files) {
 
   if ($parser->any_errata_seen()) {
     pass("Skip '$file' because of pod errors");
+    next if "$]" lt '5.010.001';     # note() not found in earlier versions
     my $errata = $parser->errata_seen();
     foreach my $line_number (sort { $a <=> $b } keys %$errata) {
         foreach my $err_msg (sort @{$errata->{$line_number}}) {
-            note "$file: $line_number: $err_msg";
+            note("$file: $line_number: $err_msg");
         }
     }
     next;

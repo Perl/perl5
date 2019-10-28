@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.39';
+$VERSION = '3.40';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -106,6 +106,8 @@ __PACKAGE__->_accessorize(
 
   'preserve_whitespace', # whether to try to keep whitespace as-is
   'strip_verbatim_indent', # What indent to strip from verbatim
+  'expand_verbatim_tabs',  # 0: preserve tabs in verbatim blocks
+                           # n: expand tabs to stops every n columns
 
   'parse_characters',  # Whether parser should expect chars rather than octets
 
@@ -223,11 +225,14 @@ sub new {
   my $class = ref($_[0]) || $_[0];
   #Carp::croak(__PACKAGE__ . " is a virtual base class -- see perldoc "
   #  . __PACKAGE__ );
-  return bless {
+  my $obj = bless {
     'accept_codes'      => { map( ($_=>$_), @Known_formatting_codes ) },
     'accept_directives' => { %Known_directives },
     'accept_targets'    => {},
   }, $class;
+
+  $obj->expand_verbatim_tabs(8);
+  return $obj;
 }
 
 

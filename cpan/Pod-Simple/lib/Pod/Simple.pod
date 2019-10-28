@@ -223,6 +223,21 @@ that you don't want I<any> lines indented. You can do something like this:
       return undef;
   });
 
+=item C<< $parser->expand_verbatim_tabs( I<n> ) >>
+
+Default: 8
+
+If after any stripping of indentation in verbatim blocks, there remain
+tabs, this method call indicates what to do with them.  C<0>
+means leave them as tabs, any other number indicates that each tab is to
+be translated so as to have tab stops every C<n> columns.
+
+This is independent of other methods (except that it operates after any
+verbatim input stripping is done).
+
+Like the other methods, the input parameter is not checked for validity.
+C<undef> or containing non-digits has the same effect as 8.
+
 =back
 
 =head1 TERTIARY METHODS

@@ -1611,6 +1611,7 @@ cpan/Pod-Simple/t/begin.t				Pod::Simple test file
 cpan/Pod-Simple/t/cbacks.t				Pod::Simple test file
 cpan/Pod-Simple/t/chunking.t				Pod::Simple test file
 cpan/Pod-Simple/t/closeys.t				Pod::Simple test file
+cpan/Pod-Simple/t/content_seen.t			Pod::Simple test file
 cpan/Pod-Simple/t/corpus.t				Pod::Simple test file
 cpan/Pod-Simple/t/corpus/2202jp.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/2202jp.xml			Pod::Simple test file
@@ -1738,6 +1739,9 @@ cpan/Pod-Simple/t/search27.t				Pod::Simple test file
 cpan/Pod-Simple/t/search28.t				Pod::Simple test file
 cpan/Pod-Simple/t/search29.t				Pod::Simple test file
 cpan/Pod-Simple/t/search50.t				Pod::Simple test file
+cpan/Pod-Simple/t/search60.t				Pod::Simple test file
+cpan/Pod-Simple/t/search60/A/x.pod			Pod::Simple test file
+cpan/Pod-Simple/t/search60/B/X.pod			Pod::Simple test file
 cpan/Pod-Simple/t/stree.t				Pod::Simple test file
 cpan/Pod-Simple/t/strpvbtm.t				Pod::Simple test file
 cpan/Pod-Simple/t/testlib1/Blorm.pm			Pod::Simple test file
@@ -1758,6 +1762,7 @@ cpan/Pod-Simple/t/testlib2/hinkhonk/readme.txt		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/hinkhonk/Vliff.pm		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/pod/perlthng.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/pod/perlzuk.pod		Pod::Simple test file
+cpan/Pod-Simple/t/testlib2/pods/perlzoned.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/squaa/Vliff.pm		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/squaa/Wowo.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/Suzzle.pm			Pod::Simple test file
