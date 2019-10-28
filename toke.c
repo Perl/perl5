@@ -5281,7 +5281,7 @@ yyl_interpcasemod(pTHX_ char *s)
 }
 
 static int
-yyl_secondclass_keyword(pTHX_ char *s, STRLEN len, int key, int *orig_keyword,
+yyl_secondclass_keyword(pTHX_ char *s, STRLEN len, int key, I32 *orig_keyword,
                         GV **pgv, GV ***pgvp)
 {
     GV *ogv = NULL;	/* override (winner) */
