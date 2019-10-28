@@ -3459,10 +3459,6 @@ ATop	|void	|clone_params_del|NN CLONE_PARAMS *param
 : Used in perl.c and toke.c
 op	|void	|populate_isa	|NN const char *name|STRLEN len|...
 
-: Used in keywords.c and toke.c
-Xop	|bool	|feature_is_enabled|NN const char *const name \
-		|STRLEN namelen
-
 : Some static inline functions need predeclaration because they are used
 : inside other static inline functions.
 #if defined(PERL_CORE) || defined (PERL_EXT)

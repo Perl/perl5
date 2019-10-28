@@ -1029,9 +1029,6 @@ PERL_CALLCONV char*	Perl_fbm_instr(pTHX_ unsigned char* big, unsigned char* bige
 #define PERL_ARGS_ASSERT_FBM_INSTR	\
 	assert(big); assert(bigend); assert(littlestr)
 
-PERL_CALLCONV bool	Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen);
-#define PERL_ARGS_ASSERT_FEATURE_IS_ENABLED	\
-	assert(name)
 PERL_CALLCONV SV*	Perl_filter_add(pTHX_ filter_t funcp, SV* datasv);
 #define PERL_ARGS_ASSERT_FILTER_ADD
 PERL_CALLCONV void	Perl_filter_del(pTHX_ filter_t funcp);
