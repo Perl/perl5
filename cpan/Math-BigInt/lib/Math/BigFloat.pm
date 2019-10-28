@@ -19,7 +19,7 @@ use warnings;
 use Carp qw< carp croak >;
 use Math::BigInt ();
 
-our $VERSION = '1.999817_01';
+our $VERSION = '1.999818';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
@@ -4448,13 +4448,17 @@ sub to_ieee754 {
 
             $sign = 1 if $x -> is_neg();
 
-            # Get the mantissa and exponent in base $b.
+            # Now we need to compute the mantissa and exponent in base $b.
 
             my $binv = $class -> new("0.5");
             my $b    = $class -> new(2);
             my $one  = $class -> bone();
 
-            $expo = $class -> bzero();
+            # We start off by initializing the exponent to zero and the
+            # mantissa to the input value. Then we increase the mantissa and
+            # decrease the exponent, or vice versa, until the mantissa is in
+            # the desired range or we hit one of the limits for the exponent.
+
             $mant = $x -> copy() -> babs();
 
             # We need to find the base 2 exponent. First make an estimate of
@@ -4471,15 +4475,30 @@ sub to_ieee754 {
             my ($m, $e) = $x -> nparts();
             my $ms = $m -> numify();
             my $es = $e -> numify();
-            $expo = (log(abs($ms))/log(10) + $es) * log(10)/log(2);
-            $expo = int($expo);
-            if ($expo > $emax) {
-                $expo = $emax;
-            } elsif ($expo < $emin) {
-                $expo = $emin;
+
+            my $expo_est = (log(abs($ms))/log(10) + $es) * log(10)/log(2);
+            $expo_est = int($expo_est);
+
+            # Limit the exponent.
+
+            if ($expo_est > $emax) {
+                $expo_est = $emax;
+            } elsif ($expo_est < $emin) {
+                $expo_est = $emin;
             }
-            $expo = $class -> new($expo);
-            $mant -> bmul($binv -> copy() -> bpow($expo));
+
+            # Don't multiply by a number raised to a negative exponent. This
+            # will cause a division, whose result is truncated to some fixed
+            # number of digits. Instead, multiply by the inverse number raised
+            # to a positive exponent.
+
+            $expo = $class -> new($expo_est);
+            if ($expo_est > 0) {
+                $mant -> bmul($binv -> copy() -> bpow($expo));
+            } elsif ($expo_est < 0) {
+                my $expo_abs = $expo -> copy() -> bneg();
+                $mant -> bmul($b -> copy() -> bpow($expo_abs));
+            }
 
             # Final adjustment.
 

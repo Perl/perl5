@@ -718,7 +718,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999817.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999818.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -727,14 +727,6 @@ use File::Glob qw(:case);
             qw( t/00sig.t
                 t/01load.t
                 ),
-        ],
-        # CPAN RT 130736
-        'CUSTOMIZED'   => [
-            'lib/Math/BigFloat.pm',
-            'lib/Math/BigInt.pm',
-            'lib/Math/BigInt/Calc.pm',
-            'lib/Math/BigInt/Lib.pm',
-            'lib/Math-BigInt/t/calling.t'
         ],
     },
 

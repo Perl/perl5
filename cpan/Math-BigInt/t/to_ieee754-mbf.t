@@ -187,7 +187,7 @@ for my $k (@k) {
         my $bytes = pack "B*", $bin;
         my $hex   = unpack "H*", $bytes;
 
-        note("\n", $entry -> {dsc}, " (k = $k)\n\n");
+        note("\n", $entry -> {dsc}, " (k = $k): ", $entry -> {asc}, "\n\n");
 
         my $x = Math::BigFloat -> new($entry -> {mbf});
 
