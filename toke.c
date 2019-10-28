@@ -5072,8 +5072,11 @@ yyl_sub(pTHX_ char *s, const int key)
     bool is_sigsub = FEATURE_SIGNATURES_IS_ENABLED;
 
     SSize_t off = s-SvPVX(PL_linestr);
-    char *d = SvPVX(PL_linestr)+off;
-    s = skipspace(s);
+    char *d;
+
+    s = skipspace(s); /* can move PL_linestr */
+
+    d = SvPVX(PL_linestr)+off;
 
     SAVEBOOL(PL_parser->sig_seen);
     PL_parser->sig_seen = FALSE;
