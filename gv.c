@@ -1506,8 +1506,8 @@ Note the sv interface is strongly preferred for performance reasons.
 #define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED \
     assert(namesv || name)
 
-PERL_STATIC_INLINE HV*
-S_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
+HV*
+Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
 {
     HV* stash;
     HE* he;

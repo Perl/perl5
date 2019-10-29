@@ -5209,9 +5209,6 @@ PERL_STATIC_INLINE HV*	S_gv_stashpvn_internal(pTHX_ const char* name, U32 namele
 #define PERL_ARGS_ASSERT_GV_STASHPVN_INTERNAL	\
 	assert(name)
 #endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE HV*	S_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char* name, U32 namelen, I32 flags);
-#endif
 STATIC void	S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type);
 #define PERL_ARGS_ASSERT_MAYBE_MULTIMAGIC_GV	\
 	assert(gv); assert(name)
@@ -5226,6 +5223,9 @@ STATIC void	S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * nam
 PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv);
 #define PERL_ARGS_ASSERT_SV_ADD_BACKREF	\
 	assert(tsv); assert(sv)
+#endif
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
+PERL_CALLCONV HV*	Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char* name, U32 namelen, I32 flags);
 #endif
 #if defined(PERL_IN_HV_C)
 STATIC void	S_clear_placeholders(pTHX_ HV *hv, U32 items);
@@ -6612,9 +6612,8 @@ STATIC int	S_yywarn(pTHX_ const char *const s, U32 flags);
 	assert(s)
 #endif
 #if defined(PERL_IN_UNIVERSAL_C)
-STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags);
-#define PERL_ARGS_ASSERT_ISA_LOOKUP	\
-	assert(stash); assert(name)
+STATIC bool	S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 flags);
+STATIC bool	S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, STRLEN len, U32 flags);
 #endif
 #if defined(PERL_IN_UTF8_C)
 STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const int * const invmap, const unsigned int * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);

@@ -880,9 +880,11 @@ Xxpd	|void	|gv_try_downgrade|NN GV* gv
 p	|void	|gv_setref	|NN SV *const dstr|NN SV *const sstr
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
+EpG	|HV*	|gv_stashsvpvn_cached	|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
+#endif
 #if defined(PERL_IN_GV_C)
 i	|HV*	|gv_stashpvn_internal	|NN const char* name|U32 namelen|I32 flags
-iG	|HV*	|gv_stashsvpvn_cached	|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
 i	|GV*	|gv_fetchmeth_internal	|NULLOK HV* stash|NULLOK SV* meth|NULLOK const char* name \
 					|STRLEN len|I32 level|U32 flags
 #endif
@@ -3033,8 +3035,9 @@ EdXxp	|bool	|validate_proto	|NN SV *name|NULLOK SV *proto|bool warn \
 		|bool curstash
 
 #if defined(PERL_IN_UNIVERSAL_C)
-S	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
+SG	|bool	|isa_lookup	|NULLOK HV *stash|NULLOK SV *namesv|NULLOK const char * name \
                                         |STRLEN len|U32 flags
+SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv|NULLOK SV *namesv|NULLOK const char * name|STRLEN len|U32 flags
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
