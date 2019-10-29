@@ -17,7 +17,7 @@ L<perl5315delta>, which describes differences between 5.31.4 and 5.31.5.
 
 =head1 Notice
 
-XXX Any important notices here
+XXX Any important notices here.
 
 =head1 Core Enhancements
 
