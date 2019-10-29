@@ -1005,11 +1005,9 @@ Perl_do_vecset(pTHX_ SV *sv)
 void
 Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
-#ifdef LIBERAL
     long *dl;
     long *ll;
     long *rl;
-#endif
     char *dc;
     STRLEN leftlen;
     STRLEN rightlen;
@@ -1115,7 +1113,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }
 
-#ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
 	!(PTR2nat(dc) % sizeof(long)) &&
 	!(PTR2nat(lc) % sizeof(long)) &&
@@ -1160,7 +1157,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
 	len = remainder;
     }
-#endif
+
     switch (optype) {
     case OP_BIT_AND:
         while (len--)

@@ -561,11 +561,6 @@ out of them.
 #   define BYTEORDER 0x1234
 #endif
 
-/* Overall memory policy? */
-#ifndef CONSERVATIVE
-#   define LIBERAL 1
-#endif
-
 #if 'A' == 65 && 'I' == 73 && 'J' == 74 && 'Z' == 90
 #define ASCIIish
 #else
