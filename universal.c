@@ -38,8 +38,13 @@
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
  */
 
+#define PERL_ARGS_ASSERT_ISA_LOOKUP \
+    assert(stash); \
+    assert(namesv || name)
+
+
 STATIC bool
-S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
+S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 flags)
 {
     const struct mro_meta *const meta = HvMROMETA(stash);
     HV *isa = meta->isa;
@@ -52,7 +57,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
 	isa = meta->isa;
     }
 
-    if (hv_common(isa, NULL, name, len, ( flags & SVf_UTF8 ? HVhek_UTF8 : 0),
+    if (hv_common(isa, namesv, name, len, ( flags & SVf_UTF8 ? HVhek_UTF8 : 0),
 		  HV_FETCH_ISEXISTS, NULL, 0)) {
 	/* Direct name lookup worked.  */
 	return TRUE;
@@ -61,7 +66,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
     /* A stash/class can go by many names (ie. User == main::User), so 
        we use the HvENAME in the stash itself, which is canonical, falling
        back to HvNAME if necessary.  */
-    our_stash = gv_stashpvn(name, len, flags);
+    our_stash = gv_stashsvpvn_cached(namesv, name, len, flags);
 
     if (our_stash) {
 	HEK *canon_name = HvENAME_HEK(our_stash);
@@ -75,6 +80,43 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
     }
 
     return FALSE;
+}
+
+#define PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN \
+    assert(sv); \
+    assert(namesv || name)
+
+STATIC bool
+S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags)
+{
+    HV* stash;
+
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN;
+    SvGETMAGIC(sv);
+
+    if (SvROK(sv)) {
+        const char *type;
+        sv = SvRV(sv);
+        type = sv_reftype(sv,0);
+        if (type) {
+            if (namesv)
+                name = SvPV_nolen(namesv);
+            if (strEQ(name, type))
+                return TRUE;
+        }
+        if (!SvOBJECT(sv))
+            return FALSE;
+        stash = SvSTASH(sv);
+    }
+    else {
+        stash = gv_stashsv(sv, 0);
+    }
+
+    if (stash && isa_lookup(stash, namesv, name, len, flags))
+        return TRUE;
+
+    stash = gv_stashpvs("UNIVERSAL", 0);
+    return stash && isa_lookup(stash, namesv, name, len, flags);
 }
 
 /*
@@ -93,7 +135,7 @@ Currently, the only significant value for C<flags> is SVf_UTF8.
 =for apidoc sv_derived_from_sv
 
 Exactly like L</sv_derived_from_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
+of an SV instead of a string/length pair. This is the advised form.
 
 =cut
 
@@ -102,13 +144,8 @@ of an SV instead of a string/length pair.
 bool
 Perl_sv_derived_from_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 {
-    char *namepv;
-    STRLEN namelen;
     PERL_ARGS_ASSERT_SV_DERIVED_FROM_SV;
-    namepv = SvPV(namesv, namelen);
-    if (SvUTF8(namesv))
-       flags |= SVf_UTF8;
-    return sv_derived_from_pvn(sv, namepv, namelen, flags);
+    return sv_derived_from_svpvn(sv, namesv, NULL, 0, flags);
 }
 
 /*
@@ -123,7 +160,7 @@ bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
 {
     PERL_ARGS_ASSERT_SV_DERIVED_FROM;
-    return sv_derived_from_pvn(sv, name, strlen(name), 0);
+    return sv_derived_from_svpvn(sv, NULL, name, strlen(name), 0);
 }
 
 /*
@@ -140,37 +177,14 @@ bool
 Perl_sv_derived_from_pv(pTHX_ SV *sv, const char *const name, U32 flags)
 {
     PERL_ARGS_ASSERT_SV_DERIVED_FROM_PV;
-    return sv_derived_from_pvn(sv, name, strlen(name), flags);
+    return sv_derived_from_svpvn(sv, NULL, name, strlen(name), flags);
 }
 
 bool
 Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
 {
-    HV *stash;
-
     PERL_ARGS_ASSERT_SV_DERIVED_FROM_PVN;
-
-    SvGETMAGIC(sv);
-
-    if (SvROK(sv)) {
-	const char *type;
-        sv = SvRV(sv);
-        type = sv_reftype(sv,0);
-	if (type && strEQ(type,name))
-	    return TRUE;
-        if (!SvOBJECT(sv))
-            return FALSE;
-	stash = SvSTASH(sv);
-    }
-    else {
-        stash = gv_stashsv(sv, 0);
-    }
-
-    if (stash && isa_lookup(stash, name, len, flags))
-        return TRUE;
-
-    stash = gv_stashpvs("UNIVERSAL", 0);
-    return stash && isa_lookup(stash, name, len, flags);
+    return sv_derived_from_svpvn(sv, NULL, name, len, flags);
 }
 
 /*

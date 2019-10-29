@@ -1008,6 +1008,9 @@
 #define isSCRIPT_RUN(a,b,c)	Perl_isSCRIPT_RUN(aTHX_ a,b,c)
 #define variant_under_utf8_count	S_variant_under_utf8_count
 #  endif
+#  if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
+#define gv_stashsvpvn_cached(a,b,c,d)	Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
+#  endif
 #  if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
 #define get_regex_charset_name	S_get_regex_charset_name
 #  endif
@@ -1619,7 +1622,6 @@
 #define gv_magicalize(a,b,c,d,e)	S_gv_magicalize(aTHX_ a,b,c,d,e)
 #define gv_magicalize_isa(a)	S_gv_magicalize_isa(aTHX_ a)
 #define gv_stashpvn_internal(a,b,c)	S_gv_stashpvn_internal(aTHX_ a,b,c)
-#define gv_stashsvpvn_cached(a,b,c,d)	S_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
 #define maybe_multimagic_gv(a,b,c)	S_maybe_multimagic_gv(aTHX_ a,b,c)
 #define parse_gv_stash_name(a,b,c,d,e,f,g,h)	S_parse_gv_stash_name(aTHX_ a,b,c,d,e,f,g,h)
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
@@ -1909,7 +1911,8 @@
 #define yywarn(a,b)		S_yywarn(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_UNIVERSAL_C)
-#define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
+#define isa_lookup(a,b,c,d,e)	S_isa_lookup(aTHX_ a,b,c,d,e)
+#define sv_derived_from_svpvn(a,b,c,d,e)	S_sv_derived_from_svpvn(aTHX_ a,b,c,d,e)
 #  endif
 #  if defined(PERL_IN_UTF8_C)
 #define _to_utf8_case(a,b,c,d,e,f,g,h,i)	S__to_utf8_case(aTHX_ a,b,c,d,e,f,g,h,i)
