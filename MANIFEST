@@ -1611,6 +1611,7 @@ cpan/Pod-Simple/t/begin.t				Pod::Simple test file
 cpan/Pod-Simple/t/cbacks.t				Pod::Simple test file
 cpan/Pod-Simple/t/chunking.t				Pod::Simple test file
 cpan/Pod-Simple/t/closeys.t				Pod::Simple test file
+cpan/Pod-Simple/t/content_seen.t			Pod::Simple test file
 cpan/Pod-Simple/t/corpus.t				Pod::Simple test file
 cpan/Pod-Simple/t/corpus/2202jp.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/2202jp.xml			Pod::Simple test file
@@ -1738,6 +1739,9 @@ cpan/Pod-Simple/t/search27.t				Pod::Simple test file
 cpan/Pod-Simple/t/search28.t				Pod::Simple test file
 cpan/Pod-Simple/t/search29.t				Pod::Simple test file
 cpan/Pod-Simple/t/search50.t				Pod::Simple test file
+cpan/Pod-Simple/t/search60.t				Pod::Simple test file
+cpan/Pod-Simple/t/search60/A/x.pod			Pod::Simple test file
+cpan/Pod-Simple/t/search60/B/X.pod			Pod::Simple test file
 cpan/Pod-Simple/t/stree.t				Pod::Simple test file
 cpan/Pod-Simple/t/strpvbtm.t				Pod::Simple test file
 cpan/Pod-Simple/t/testlib1/Blorm.pm			Pod::Simple test file
@@ -1758,6 +1762,7 @@ cpan/Pod-Simple/t/testlib2/hinkhonk/readme.txt		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/hinkhonk/Vliff.pm		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/pod/perlthng.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/pod/perlzuk.pod		Pod::Simple test file
+cpan/Pod-Simple/t/testlib2/pods/perlzoned.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/squaa/Vliff.pm		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/squaa/Wowo.pod		Pod::Simple test file
 cpan/Pod-Simple/t/testlib2/Suzzle.pm			Pod::Simple test file
@@ -1961,8 +1966,15 @@ cpan/Sys-Syslog/Syslog.pm		Sys::Syslog extension Perl module
 cpan/Sys-Syslog/Syslog.xs		Sys::Syslog extension external subroutines
 cpan/Sys-Syslog/t/00-load.t		test for Sys::Syslog
 cpan/Sys-Syslog/t/constants.t		test for Sys::Syslog
+cpan/Sys-Syslog/t/cpan-rt-21516.t
+cpan/Sys-Syslog/t/cpan-rt-21866.t
+cpan/Sys-Syslog/t/cpan-rt-25488.t
+cpan/Sys-Syslog/t/cpan-rt-49877.pl
+cpan/Sys-Syslog/t/cpan-rt-55151.t
+cpan/Sys-Syslog/t/cpan-rt-64287.t
 cpan/Sys-Syslog/t/facilities-routing.t	test for Sys::Syslog
 cpan/Sys-Syslog/t/syslog.t		See if Sys::Syslog works
+cpan/Sys-Syslog/t/syslog-inet-udp.t
 cpan/Sys-Syslog/win32/compile.pl	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog.mc	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog_dll.uu	Sys::Syslog extension Win32 related file
@@ -5129,6 +5141,7 @@ pod/perl5311delta.pod		Perl changes in version 5.31.1
 pod/perl5312delta.pod		Perl changes in version 5.31.2
 pod/perl5313delta.pod		Perl changes in version 5.31.3
 pod/perl5314delta.pod		Perl changes in version 5.31.4
+pod/perl5315delta.pod		Perl changes in version 5.31.5
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5396,6 +5409,7 @@ runtests.SH			A script that generates runtests
 sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
+SECURITY.md			Add Security Policy for GitHub
 stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header

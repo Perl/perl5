@@ -22,7 +22,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.39';
+$VERSION = '3.40';
 #use constant DEBUG => 7;
 
 sub my_qr ($$) {
@@ -1769,6 +1769,13 @@ sub _ponder_Verbatim {
   $para->[1]{'xml:space'} = 'preserve';
 
   unless ($self->{'_output_is_for_JustPod'}) {
+    # Fix illegal settings for expand_verbatim_tabs()
+    # This is because this module doesn't do input error checking, but khw
+    # doesn't want to add yet another instance of that.
+    $self->expand_verbatim_tabs(8)
+                            if ! defined $self->expand_verbatim_tabs()
+                            ||   $self->expand_verbatim_tabs() =~ /\D/;
+
     my $indent = $self->strip_verbatim_indent;
     if ($indent && ref $indent eq 'CODE') {
         my @shifted = (shift @{$para}, shift @{$para});
@@ -1780,16 +1787,17 @@ sub _ponder_Verbatim {
       foreach my $line ($para->[$i]) { # just for aliasing
         # Strip indentation.
         $line =~ s/^\Q$indent// if $indent;
+        next unless $self->expand_verbatim_tabs;
 
             # This is commented out because of github issue #85, and the
             # current maintainers don't know why it was there in the first
             # place.
             #&& !($self->{accept_codes} && $self->{accept_codes}{VerbatimFormatted});
         while( $line =~
-          # Sort of adapted from Text::Tabs -- yes, it's hardwired in that
-          # tabs are at every EIGHTH column.  For portability, it has to be
-          # one setting everywhere, and 8th wins.
-          s/^([^\t]*)(\t+)/$1.(" " x ((length($2)<<3)-(length($1)&7)))/e
+          # Sort of adapted from Text::Tabs.
+          s/^([^\t]*)(\t+)/$1.(" " x ((length($2)
+                                       * $self->expand_verbatim_tabs)
+                                       -(length($1)&7)))/e
         ) {}
 
         # TODO: whinge about (or otherwise treat) unindented or overlong lines

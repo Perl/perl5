@@ -317,7 +317,7 @@ and that every file is listed.
 The y2038 implementation for perl. This is an implementation of POSIX time.h
 which solves the year 2038 bug on systems where time_t is only 32 bits.  It is
 implemented in bog-standard ANSI C. The latest version can be found at
-L<http://y2038.googlecode.com/>.
+L<https://github.com/evalEmpire/y2038>.
 
 =head2 F<release_announcement_template.txt>
 
@@ -361,7 +361,7 @@ A helper tool for perl's 2038 support See F<Porting/README.y2038> for details.
 =head2 F<todo.pod>
 
 This is a list of wishes for Perl. The most up-to-date version of this file is
-at L<https://perl5.git.perl.org/perl.git/blob_plain/HEAD:/Porting/todo.pod>.
+at L<https://github.com/Perl/perl5/blob/blead/Porting/todo.pod>.
 The tasks we think are smaller or easier are listed first.  Anyone is welcome
 to work on any of these, but it's a good idea to first contact
 I<perl5-porters@perl.org> to avoid duplication of effort, and to learn from

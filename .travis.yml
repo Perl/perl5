@@ -3,11 +3,9 @@ cache: ccache
 
 os:
   - linux
-  - osx
 
 compiler:
   - gcc
-  - clang
 
 install:
   - git fetch --unshallow --tags # t/porting/cmp_version.t
@@ -29,6 +27,7 @@ env:
 
 # only use gcc on linux, and only use clang on osx for now
 matrix:
+  fast_finish: true
   exclude:
   - compiler: clang
     os: linux

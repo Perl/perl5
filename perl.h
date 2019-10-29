@@ -3475,7 +3475,13 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 
 #define HEKfARG(p) ((void*)(p))
 
-/* Takes three arguments: is_utf8, length, str */
+/*
+=for apidoc Amnh||UTF8f
+=for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
+
+=cut
+ * %4p is a custom format
+ */
 #ifndef UTF8f
 #  define UTF8f "d%" UVuf "%4p"
 #endif
@@ -4605,7 +4611,7 @@ EXTCONST char PL_no_dir_func[]
 EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char PL_no_myglob[]
-  INIT("\"%s\" %se %s can't be in a package");
+  INIT("\"%s\" %s %s can't be in a package");
 EXTCONST char PL_no_localize_ref[]
   INIT("Can't localize through a reference");
 EXTCONST char PL_memory_wrap[]

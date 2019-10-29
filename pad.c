@@ -1086,10 +1086,10 @@ S_unavailable(pTHX_ PADNAME *name)
 {
     /* diag_listed_as: Variable "%s" is not available */
     Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-			"%se \"%" PNf "\" is not available",
+			"%s \"%" PNf "\" is not available",
 			 *PadnamePV(name) == '&'
-					 ? "Subroutin"
-					 : "Variabl",
+					 ? "Subroutine"
+					 : "Variable",
 			 PNfARG(name));
 }
 
@@ -1205,8 +1205,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			/* diag_listed_as: Variable "%s" will not stay
 					   shared */
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "%se \"%" UTF8f "\" will not stay shared",
-			     *namepv == '&' ? "Subroutin" : "Variabl",
+			    "%s \"%" UTF8f "\" will not stay shared",
+			     *namepv == '&' ? "Subroutine" : "Variable",
 			     UTF8fARG(1, namelen, namepv));
 		    }
 

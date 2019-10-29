@@ -818,8 +818,8 @@ translation and marking it as bytes (as opposed to Unicode characters).
 Note that, despite what may be implied in I<"Programming Perl"> (the
 Camel, 3rd edition) or elsewhere, C<:raw> is I<not> simply the inverse of C<:crlf>.
 Other layers that would affect the binary nature of the stream are
-I<also> disabled.  See L<PerlIO>, L<perlrun>, and the discussion about the
-PERLIO environment variable.
+I<also> disabled.  See L<PerlIO>, and the discussion about the PERLIO
+environment variable in L<perlrun|perlrun/PERLIO>.
 
 The C<:bytes>, C<:crlf>, C<:utf8>, and any other directives of the
 form C<:...>, are called I/O I<layers>.  The L<open> pragma can be used to
@@ -1909,7 +1909,7 @@ X<dump> X<core> X<undump>
 =for Pod::Functions create an immediate core dump
 
 This function causes an immediate core dump.  See also the B<-u>
-command-line switch in L<perlrun>, which does the same thing.
+command-line switch in L<perlrun|perlrun/-u>, which does the same thing.
 Primarily this is so that you can use the B<undump> program (not
 supplied) to turn your core dump into an executable binary after
 having initialized all your variables at the beginning of the
@@ -2307,7 +2307,7 @@ Examples:
 If you want to trap errors when loading an XS module, some problems with
 the binary interface (such as Perl version skew) may be fatal even with
 C<eval> unless C<$ENV{PERL_DL_NONLAZY}> is set.  See
-L<perlrun>.
+L<perlrun|perlrun/PERL_DL_NONLAZY>.
 
 Using the C<eval {}> form as an exception trap in libraries does have some
 issues.  Due to the current arguably broken state of C<__DIE__> hooks, you
@@ -4486,9 +4486,10 @@ indicate that you want both read and write access to the file; thus
 C<< +< >> is almost always preferred for read/write updates--the
 C<< +> >> mode would clobber the file first.  You can't usually use
 either read-write mode for updating textfiles, since they have
-variable-length records.  See the B<-i> switch in L<perlrun> for a
-better approach.  The file is created with permissions of C<0666>
-modified by the process's L<C<umask>|/umask EXPR> value.
+variable-length records.  See the B<-i> switch in
+L<perlrun|perlrun/-i[extension]> for a better approach.  The file is
+created with permissions of C<0666> modified by the process's
+L<C<umask>|/umask EXPR> value.
 
 These various prefixes correspond to the L<fopen(3)> modes of C<r>,
 C<r+>, C<w>, C<w+>, C<a>, and C<a+>.
@@ -9516,9 +9517,10 @@ I<only> meant to be used to assert that the running Perl is of a earlier
 version than its argument and I<not> to undo the feature-enabling side effects
 of C<use VERSION>.
 
-See L<perlmodlib> for a list of standard modules and pragmas.  See L<perlrun>
-for the C<-M> and C<-m> command-line options to Perl that give
-L<C<use>|/use Module VERSION LIST> functionality from the command-line.
+See L<perlmodlib> for a list of standard modules and pragmas.  See
+L<perlrun|perlrun/-m[-]module> for the C<-M> and C<-m> command-line
+options to Perl that give L<C<use>|/use Module VERSION LIST>
+functionality from the command-line.
 
 =item utime LIST
 X<utime>

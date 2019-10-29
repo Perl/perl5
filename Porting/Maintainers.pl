@@ -718,7 +718,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999817.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999818.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -727,14 +727,6 @@ use File::Glob qw(:case);
             qw( t/00sig.t
                 t/01load.t
                 ),
-        ],
-        # CPAN RT 130736
-        'CUSTOMIZED'   => [
-            'lib/Math/BigFloat.pm',
-            'lib/Math/BigInt.pm',
-            'lib/Math/BigInt/Calc.pm',
-            'lib/Math/BigInt/Lib.pm',
-            'lib/Math-BigInt/t/calling.t'
         ],
     },
 
@@ -805,7 +797,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20190920.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20191020.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -933,7 +925,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Simple' => {
-        'DISTRIBUTION' => 'KHW/Pod-Simple-3.39.tar.gz',
+        'DISTRIBUTION' => 'KHW/Pod-Simple-3.40.tar.gz',
         'FILES'        => q[cpan/Pod-Simple],
     },
 
@@ -965,7 +957,7 @@ use File::Glob qw(:case);
     },
 
     'Scalar::Util' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.52.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.53.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 
@@ -994,7 +986,7 @@ use File::Glob qw(:case);
     },
 
     'Sys::Syslog' => {
-        'DISTRIBUTION' => 'SAPER/Sys-Syslog-0.35.tar.gz',
+        'DISTRIBUTION' => 'SAPER/Sys-Syslog-0.36.tar.gz',
         'FILES'        => q[cpan/Sys-Syslog],
         'EXCLUDED'     => [
             qr{^eg/},

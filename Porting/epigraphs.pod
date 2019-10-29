@@ -17,6 +17,23 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.5 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Daddy Long-legs and the Fly
+
+L<Announced on 2019-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2019/10/msg256478.html>
+
+  'O Mr Daddy Long-legs,'
+    Said Mr Floppy Fly,
+  'It's true I never go to court,
+    And I will tell you why.
+  If I had six long legs like yours,
+    At once I'd go to court!
+  But oh! I can't, because my legs
+    Are so extremely short.
+  And I'm afraid the King and Queen
+  (One in red, and one in green)
+  Would say aloud, "You are not fit,
+  You Fly, to come to court a bit!"'
+
 =head2 v5.31.4 - Ann Leckie, "The Raven Tower"
 
 L<Announced on 2019-09-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2019/09/msg256254.html>
@@ -132,6 +149,22 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
 
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
+
+=head2 v5.30.1-RC1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act I: Brindisi
+
+L<Announced on 2019-10-27 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/10/msg256542.html>
+
+  ALFREDO:
+  Let's drink from the joyous chalice
+  where beauty flowers...
+  Let the fleeting hour
+  to pleasure's intoxication yield.
+  Let's drink
+  to love's sweet tremors --
+  to those eyes
+  that pierce the heart.
+  Let's drink to love -- to wine
+  that warms our kisses.
 
 =head2 v5.30.0 - Morihei Ueshiba
 
@@ -2487,7 +2520,7 @@ shed tears, struck my head and was filled with regret when it was no
 longer of any use, for to me the whole world was worth no more than
 a bean.
 
-=head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://www.weebls-stuff.com/other-toons/video/magical-trevor.html>
+=head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://weebls-stuff.com/toons/magical-trevor-episode-01-animated-music-video-mrweebl/>
 
 L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225777.html>
 
@@ -2511,7 +2544,7 @@ L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   Oh, beans, lots of beans, lots of beans, lots of beans,
   Yeah, yeah!
 
-=head2 v5.20.2-RC1 - Jonathan "Jonti" Picking, L<"Scampi"|http://www.weebls-stuff.com/other-toons/video/scampi.html>
+=head2 v5.20.2-RC1 - Jonathan "Jonti" Picking, L<"Scampi"|http://weebls-stuff.com/toons/ive-seen-things-scampi-animated-music-video-mrweebl/>
 
 L<Announced on 2015-02-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225273.html>
 

@@ -124,6 +124,38 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define SvNV_nomg SvNV
 #endif
 
+#if PERL_VERSION_GE(5,16,0)
+#  define HAVE_UNICODE_PACKAGE_NAMES
+
+#  ifndef sv_sethek
+#    define sv_sethek(a, b)  Perl_sv_sethek(aTHX_ a, b)
+#  endif
+
+#  ifndef sv_ref
+#  define sv_ref(dst, sv, ob) my_sv_ref(aTHX_ dst, sv, ob)
+static SV *
+my_sv_ref(pTHX_ SV *dst, const SV *sv, int ob)
+{
+  /* cargoculted from perl 5.22's sv.c */
+  if(!dst)
+    dst = sv_newmortal();
+
+  if(ob && SvOBJECT(sv)) {
+    if(HvNAME_get(SvSTASH(sv)))
+      sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)));
+    else
+      sv_setpvs(dst, "__ANON__");
+  }
+  else {
+    const char *reftype = sv_reftype(sv, 0);
+    sv_setpv(dst, reftype);
+  }
+
+  return dst;
+}
+#  endif
+#endif /* HAVE_UNICODE_PACKAGE_NAMES */
+
 enum slu_accum {
     ACC_IV,
     ACC_NV,
@@ -344,9 +376,9 @@ CODE:
                 /* else fallthrough */
             }
 
-            /* fallthrough to NV now */
             retnv = retiv;
             accum = ACC_NV;
+            /* FALLTHROUGH */
         case ACC_NV:
             is_product ? (retnv *= slu_sv_value(sv))
                        : (retnv += slu_sv_value(sv));
@@ -1310,7 +1342,7 @@ CODE:
     ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
     XSRETURN(1);
 
-char *
+SV *
 blessed(sv)
     SV *sv
 PROTOTYPE: $
@@ -1320,8 +1352,12 @@ CODE:
 
     if(!(SvROK(sv) && SvOBJECT(SvRV(sv))))
         XSRETURN_UNDEF;
-
-    RETVAL = (char*)sv_reftype(SvRV(sv),TRUE);
+#ifdef HAVE_UNICODE_PACKAGE_NAMES
+    RETVAL = newSVsv(sv_ref(NULL, SvRV(sv), TRUE));
+#else
+    RETVAL = newSV(0);
+    sv_setpv(RETVAL, sv_reftype(SvRV(sv), TRUE));
+#endif
 }
 OUTPUT:
     RETVAL

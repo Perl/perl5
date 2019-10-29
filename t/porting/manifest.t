@@ -87,6 +87,8 @@ SKIP: {
     find_git_or_skip(6);
     my %seen; # De-dup ls-files output (can appear more than once)
     chomp(my @repo= grep {
+        !m{\.git_patch$} &&
+        !m{\.gitattributes$} &&
         !m{\.gitignore$} &&
         !m{^\.github/} &&
         !$seen{$_}++
