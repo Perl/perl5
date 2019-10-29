@@ -590,7 +590,7 @@ a = .a
 INCLUDES	= -I.\include -I. -I..
 DEFINES		= -DWIN32
 ifeq ($(WIN64),define)
-DEFINES		+= -DWIN64 -DCONSERVATIVE
+DEFINES		+= -DWIN64
 endif
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -xc++
@@ -735,7 +735,7 @@ EXTRACFLAGS	+= -MD
 endif
 
 ifeq ($(WIN64),define)
-DEFINES		+= -DWIN64 -DCONSERVATIVE
+DEFINES		+= -DWIN64
 OPTIMIZE	+= -fp:precise
 endif
 
