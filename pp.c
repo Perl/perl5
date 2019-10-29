@@ -2552,7 +2552,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 #ifdef LIBERAL
 	{
 	    long *tmpl;
-	    for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
+	    for ( ; anum && PTR2nat(tmps) % sizeof(long); anum--, tmps++)
 		*tmps = ~*tmps;
 	    tmpl = (long*)tmps;
 	    for ( ; anum >= (I32)sizeof(long); anum -= (I32)sizeof(long), tmpl++)
