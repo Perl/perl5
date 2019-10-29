@@ -1117,9 +1117,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
-	!((unsigned long)dc % sizeof(long)) &&
-	!((unsigned long)lc % sizeof(long)) &&
-	!((unsigned long)rc % sizeof(long)))	/* It's almost always aligned... */
+	!(PTR2nat(dc) % sizeof(long)) &&
+	!(PTR2nat(lc) % sizeof(long)) &&
+	!(PTR2nat(rc) % sizeof(long)))	/* It's almost always aligned... */
     {
 	const STRLEN remainder = len % (sizeof(long)*4);
 	len /= (sizeof(long)*4);
