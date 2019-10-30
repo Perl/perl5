@@ -103,8 +103,6 @@ END_EXTERN_C
 #define PL_C_locale_obj		(*Perl_GC_locale_obj_ptr(NULL))
 #undef  PL_appctx
 #define PL_appctx		(*Perl_Gappctx_ptr(NULL))
-#undef  PL_check
-#define PL_check		(*Perl_Gcheck_ptr(NULL))
 #undef  PL_check_mutex
 #define PL_check_mutex		(*Perl_Gcheck_mutex_ptr(NULL))
 #undef  PL_csighandler1p

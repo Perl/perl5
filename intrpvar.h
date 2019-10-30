@@ -496,6 +496,7 @@ PERLVAR(I, endav,	AV *)		/* names of END subroutines */
 PERLVAR(I, unitcheckav,	AV *)		/* names of UNITCHECK subroutines */
 PERLVAR(I, checkav,	AV *)		/* names of CHECK subroutines */
 PERLVAR(I, initav,	AV *)		/* names of INIT subroutines */
+PERLVARA(I, check, MAXO, Perl_check_t)  /* functions to call during CHECK phase */
 
 /* subprocess state */
 PERLVAR(I, fdpid,	AV *)		/* keep fd-to-pid mappings for my_popen */

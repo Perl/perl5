@@ -10,7 +10,6 @@ PL_bitcount
 PL_block_type
 PL_c9_utf8_dfa_tab
 PL_charclass
-PL_check
 PL_core_reg_engine
 PL_extended_utf8_dfa_tab
 PL_fold
