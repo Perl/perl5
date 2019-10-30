@@ -7162,7 +7162,7 @@ PP(pp_isa)
      * TODO: Consider if we want a NOUNIVERSAL flag for requesting this in a
      * more obvious way
      */
-    isagv = gv_fetchmeth_pv(SvSTASH(SvRV(left)), "isa", 1, 0);
+    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(left)), "isa", 3, 1, 0);
     if(isagv) {
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
         SV *retsv;
