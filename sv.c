@@ -15574,6 +15574,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_globalstash	= hv_dup(proto_perl->Iglobalstash, param);
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname, param);
 
+    /* Add PL_check here */
+    Copy(proto_perl->Icheck,  PL_check,  PL_maxo,  Perl_check_t);
+
     PL_beginav		= av_dup_inc(proto_perl->Ibeginav, param);
     PL_beginav_save	= av_dup_inc(proto_perl->Ibeginav_save, param);
     PL_checkav_save	= av_dup_inc(proto_perl->Icheckav_save, param);

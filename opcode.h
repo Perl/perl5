@@ -1374,15 +1374,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 ;
 #endif
 
-#ifdef PERL_GLOBAL_STRUCT_INIT
-#  define PERL_CHECK_INITED
+#ifdef PERL_IN_PERL_C
 static const Perl_check_t Gcheck[]
-#elif !defined(PERL_GLOBAL_STRUCT)
-#  define PERL_CHECK_INITED
-EXT Perl_check_t PL_check[] /* or perlvars.h */
-#endif
-#if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
-#  define PERL_CHECK_INITED
 = {
 	Perl_ck_null,		/* null */
 	Perl_ck_null,		/* stub */
@@ -1782,11 +1775,8 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lvavref */
 	Perl_ck_null,		/* anonconst */
 	Perl_ck_isa,		/* isa */
-}
+};
 #endif
-#ifdef PERL_CHECK_INITED
-;
-#endif /* #ifdef PERL_CHECK_INITED */
 
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
