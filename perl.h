@@ -3429,6 +3429,10 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #endif
 
 /*
+=for apidoc Amnh||SVf
+=for apidoc Amh||SVfARG|SV *sv
+
+=cut
     This replaces the previous %_ "hack" by the "%p" hacks.
     All that is required is that the perl source does not
     use "%-p" or "%-<number>p" or "%<number>p" formats.

@@ -2717,6 +2717,24 @@ whatever the compiler has.
 If you are printing addresses of pointers, use UVxf combined
 with PTR2UV(), do not use %lx or %p.
 
+=head2 Formatted Printing of SVs
+
+If you want to print perl scalar which you get as C<SV*>, you can use
+C<SVf> format and pass scalar via C<SVfARG()> macro.  See example:
+
+ SV *sv = ERRSV;
+ croak("This croaked because: %" SVf "\n", SVfARG(sv));
+
+or:
+
+ SV *var1 = get_sv("var1", GV_ADD);
+ SV *var2 = get_sv("var2", GV_ADD);
+ SV *var3 = newSVpvf("var1=%" SVf " and var2=%" SVf,
+                     SVfARG(var1), SVfARG(var2));
+
+Note that C<SVf> format correctly handles C<SVfUTF8> flag and therefore
+it is safe to use it for Unicode strings.
+
 =head2 Formatted Printing of SvPVs
 
 If you just want the bytes printed in a NUL-terminated string, you can
