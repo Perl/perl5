@@ -283,7 +283,8 @@ We also use empty definition under Coverity since the __ASSERT__
 checks often check for things that Really Cannot Happen, and Coverity
 detects that and gets all excited. */
 
-#if defined(DEBUGGING) && !defined(__COVERITY__)
+#if   defined(DEBUGGING) && !defined(__COVERITY__)                        \
+ && ! defined(PERL_SMALL_MACRO_BUFFER)
 #   define __ASSERT_(statement)  assert(statement),
 #else
 #   define __ASSERT_(statement)

@@ -390,6 +390,11 @@
 #  endif
 #endif
 
+#if defined(_MSC_VER)
+/* XXX older MSVC versions have a smallish macro buffer */
+#define PERL_SMALL_MACRO_BUFFER
+#endif
+
 /* on gcc (and clang), specify that a warning should be temporarily
  * ignored; e.g.
  *
