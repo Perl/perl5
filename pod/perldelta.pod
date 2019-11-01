@@ -27,6 +27,21 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Alpha assertions are no longer experimental
+
+See L<perlre/(*pla:pattern)>, L<perlre/(*plb:pattern)>,
+L<perlre/(*nla:pattern)>>, and L<perlre/(*nlb:pattern)>.
+Use of these no longer generates a warning; existing code that disables
+the warning category C<experimental::script_run> will continue to work
+without any changes needed.  Enabling the category has no effect.
+
+=head2 Script runs are no longer experimental
+
+See L<perlre/Script Runs>.  Use of these no longer generates a warning;
+existing code that disables the warning category
+C<experimental::alpha_assertions> will continue to work without any
+changes needed.  Enabling the category has no effect.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
