@@ -1186,7 +1186,6 @@ perl_destruct(pTHXx)
         PL_langinfo_buf = NULL;
     }
 
-    /* clear character classes  */
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
     PL_warn_locale       = NULL;
