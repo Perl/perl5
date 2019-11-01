@@ -5855,7 +5855,7 @@ yyl_subproto(pTHX_ char *s, CV *cv)
 }
 
 static int
-yyl_leftcurly(pTHX_ char *s, U8 formbrack)
+yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
 {
     char *d;
     if (PL_lex_brackets > 100) {
@@ -6059,7 +6059,7 @@ yyl_leftcurly(pTHX_ char *s, U8 formbrack)
 }
 
 static int
-yyl_rightcurly(pTHX_ char *s, U8 formbrack)
+yyl_rightcurly(pTHX_ char *s, const U8 formbrack)
 {
     assert(s != PL_bufend);
     s++;
