@@ -338,12 +338,6 @@ load_module(flags, name, version, ...)
 
 =tests plan => 86
 
-sub eq_array
-{
-  my($a, $b) = @_;
-  join(':', @$a) eq join(':', @$b);
-}
-
 sub f
 {
   shift;

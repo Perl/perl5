@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -66,11 +65,19 @@ ok($r[0], "foobarbaz");
 ok($r[2], $r[3]);
 ok($r[2], '<leftpv_p\retty\nright>');
 ok($r[4], $r[5]);
-skip(ord("A") != 65 ? "Skip for non-ASCII platform" : 0,
-     $r[4], $uni ? 'N\375 Batter\355' : 'N\303\275 Batter\303');
+if(ord("A") == 65) {
+    is($r[4], $uni ? 'N\375 Batter\355' : 'N\303\275 Batter\303');
+}
+else {
+    skip("Skip for non-ASCII platform");
+}
 ok($r[6], $r[7]);
-skip(ord("A") != 65 ? "Skip for non-ASCII platform" : 0,
-     $r[6], $uni ? '\301g\346tis Byrju...' : '\303\201g\303\246t...');
+if(ord("A") == 65) {
+    is($r[6], $uni ? '\301g\346tis Byrju...' : '\303\201g\303\246t...');
+}
+else {
+    skip("Skip for non-ASCII platform");
+}
 
 @r = &Devel::PPPort::pv_display();
 ok($r[0], $r[1]);

@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -52,12 +51,6 @@ require DynaLoader;
 bootstrap Devel::PPPort;
 
 package main;
-
-sub eq_array
-{
-  my($a, $b) = @_;
-  join(':', @$a) eq join(':', @$b);
-}
 
 sub f
 {

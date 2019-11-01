@@ -30,14 +30,13 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
-  if (28) {
+  if (8) {
     load();
-    plan(tests => 28);
+    plan(tests => 8);
   }
 }
 
@@ -68,7 +67,7 @@ ok($file =~ /cop/i);
 BEGIN {
   if ("$]" < 5.006000) {
     # Skip
-    for (1..28) {
+    for (1..8) {
       ok(1, 1);
     }
     exit;
@@ -107,9 +106,6 @@ for (
 ) {
     my ($sub, $arg, @want) = @$_;
     my @got = $sub->($arg);
-    ok(@got, @want);
-    for (0..$#want) {
-        ok($got[$_], $want[$_]);
-    }
+    ok(eq_array(\@got, \@want));
 }
 

@@ -167,7 +167,7 @@ caller_cx(level)
 
 #endif /* 5.6.0 */
 
-=tests plan => 28
+=tests plan => 8
 
 my $package;
 {
@@ -184,7 +184,7 @@ ok($file =~ /cop/i);
 BEGIN {
   if ("$]" < 5.006000) {
     # Skip
-    for (1..28) {
+    for (1..8) {
       ok(1, 1);
     }
     exit;
@@ -223,9 +223,6 @@ for (
 ) {
     my ($sub, $arg, @want) = @$_;
     my @got = $sub->($arg);
-    ok(@got, @want);
-    for (0..$#want) {
-        ok($got[$_], $want[$_]);
-    }
+    ok(eq_array(\@got, \@want));
 }
 
