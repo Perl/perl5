@@ -15038,9 +15038,14 @@ sub compile_perl() {
 
         my $found_locale_problematic = 0;
 
+        my $folded_count = @hex_folds;
+        if ($folded_count > 3) {
+            die Carp::my_carp("Maximum number of characters in a fold should be 3: Instead, it's  $folded_count for U+" . sprintf "%04X", $range->start);
+        }
+
         # Look at each of the folded-to characters...
-        foreach my $i (0 .. @hex_folds - 1) {
-            my $cp = hex $hex_folds[$i];
+        foreach my $i (1 .. $folded_count) {
+            my $cp = hex $hex_folds[$i-1];
             $any_folds->add_range($cp, $cp);
 
             # The fold is problematic if any of the folded-to characters is
@@ -15050,9 +15055,9 @@ sub compile_perl() {
                 $found_locale_problematic = 1;
             }
 
-            if (@hex_folds > 1) {
+            if ($folded_count > 1) {
                 $in_multi_fold->add_range($cp, $cp);
-                next if $i < @hex_folds - 1;
+                next if $i == $folded_count;    # In final position
                 $non_final_fold->add_range($cp, $cp);
             }
         }
