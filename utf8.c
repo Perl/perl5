@@ -2800,21 +2800,6 @@ Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
     return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
 }
 
-/* Internal function so we can deprecate the external one, and call
-   this one from other deprecated functions in this file */
-
-bool
-Perl__is_utf8_idstart(pTHX_ const U8 *p)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT__IS_UTF8_IDSTART;
-
-    if (*p == '_')
-	return TRUE;
-    return is_utf8_common(p, PL_utf8_idstart);
-}
-
 bool
 Perl__is_uni_perl_idcont(pTHX_ UV c)
 {
@@ -3136,37 +3121,8 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 }
 
 PERL_STATIC_INLINE bool
-S_is_utf8_common(pTHX_ const U8 *const p, SV* const invlist)
-{
-    /* returns a boolean giving whether or not the UTF8-encoded character that
-     * starts at <p> is in the inversion list indicated by <invlist>.
-     *
-     * Note that it is assumed that the buffer length of <p> is enough to
-     * contain all the bytes that comprise the character.  Thus, <*p> should
-     * have been checked before this call for mal-formedness enough to assure
-     * that.  This function, does make sure to not look past any NUL, so it is
-     * safe to use on C, NUL-terminated, strings */
-    STRLEN len = my_strnlen((char *) p, UTF8SKIP(p));
-
-    PERL_ARGS_ASSERT_IS_UTF8_COMMON;
-
-    /* The API should have included a length for the UTF-8 character in <p>,
-     * but it doesn't.  We therefore assume that p has been validated at least
-     * as far as there being enough bytes available in it to accommodate the
-     * character without reading beyond the end, and pass that number on to the
-     * validating routine */
-    if (! isUTF8_CHAR(p, p + len)) {
-        _force_out_malformed_utf8_message(p, p + len, _UTF8_NO_CONFIDENCE_IN_CURLEN,
-                                          1 /* Die */ );
-        NOT_REACHED; /* NOTREACHED */
-    }
-
-    return is_utf8_common_with_len(p, p + len, invlist);
-}
-
-PERL_STATIC_INLINE bool
-S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
-                          SV* const invlist)
+S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
+                       SV* const invlist)
 {
     /* returns a boolean giving whether or not the UTF8-encoded character that
      * starts at <p>, and extending no further than <e - 1> is in the inversion
@@ -3174,7 +3130,7 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
 
     UV cp = utf8n_to_uvchr(p, e - p, NULL, 0);
 
-    PERL_ARGS_ASSERT_IS_UTF8_COMMON_WITH_LEN;
+    PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     if (cp == 0 && (p >= e || *p != '\0')) {
         _force_out_malformed_utf8_message(p, e, 0, 1);
@@ -3186,6 +3142,8 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
 }
 
 #if 0	/* Not currently used, but may be needed in the future */
+PERLVAR(I, seen_deprecated_macro, HV *)
+
 STATIC void
 S_warn_on_first_deprecated_use(pTHX_ const char * const name,
                                      const char * const alternative,
@@ -3230,69 +3188,27 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 #endif
 
 bool
-Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
-                                                            const U8 * const e)
+Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_FOO_WITH_LEN;
+    PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
-    return is_utf8_common_with_len(p, e, PL_XPosix_ptrs[classnum]);
+    return is_utf8_common(p, e, PL_XPosix_ptrs[classnum]);
 }
 
 bool
-Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
+Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 {
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN;
+    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
 
-    return is_utf8_common_with_len(p, e, PL_utf8_perl_idstart);
+    return is_utf8_common(p, e, PL_utf8_perl_idstart);
 }
 
 bool
-Perl__is_utf8_xidstart(pTHX_ const U8 *p)
+Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 {
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_XIDSTART;
+    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
 
-    if (*p == '_')
-	return TRUE;
-    return is_utf8_common(p, PL_utf8_xidstart);
-}
-
-bool
-Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
-{
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN;
-
-    return is_utf8_common_with_len(p, e, PL_utf8_perl_idcont);
-}
-
-bool
-Perl__is_utf8_idcont(pTHX_ const U8 *p)
-{
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_IDCONT;
-
-    return is_utf8_common(p, PL_utf8_idcont);
-}
-
-bool
-Perl__is_utf8_xidcont(pTHX_ const U8 *p)
-{
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_XIDCONT;
-
-    return is_utf8_common(p, PL_utf8_xidcont);
-}
-
-bool
-Perl__is_utf8_mark(pTHX_ const U8 *p)
-{
-    dVAR;
-    PERL_ARGS_ASSERT__IS_UTF8_MARK;
-
-    return is_utf8_common(p, PL_utf8_mark);
+    return is_utf8_common(p, e, PL_utf8_perl_idcont);
 }
 
 STATIC UV

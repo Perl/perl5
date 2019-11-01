@@ -2024,10 +2024,10 @@ END_EXTERN_C
                               ? (_force_out_malformed_utf8_message(         \
                                       (U8 *) (p), (U8 *) (e), 0, 1), 0)     \
                               : above_latin1(p)))
-/* Like the above, but passes classnum to _isFOO_utf8_with_len(), instead of
+/* Like the above, but passes classnum to _isFOO_utf8(), instead of
  * having an 'above_latin1' parameter */
 #define _generic_swash_utf8_safe(classnum, p, e)                            \
-_generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
+_generic_utf8_safe(classnum, p, e, _is_utf8_FOO(classnum, p, e))
 
 /* Like the above, but should be used only when it is known that there are no
  * characters in the upper-Latin1 range (128-255 on ASCII platforms) which the
@@ -2082,10 +2082,10 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 
 #define isDIGIT_utf8_safe(p, e)                                             \
             _generic_utf8_safe_no_upper_latin1(_CC_DIGIT, p, e,             \
-                                    _is_utf8_FOO_with_len(_CC_DIGIT, p, e))
+                                    _is_utf8_FOO(_CC_DIGIT, p, e))
 #define isGRAPH_utf8_safe(p, e)    _generic_swash_utf8_safe(_CC_GRAPH, p, e)
 #define isIDCONT_utf8_safe(p, e)   _generic_func_utf8_safe(_CC_WORDCHAR,    \
-                                     _is_utf8_perl_idcont_with_len, p, e)
+                                                 _is_utf8_perl_idcont, p, e)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -2095,7 +2095,7 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
  * modern Unicode definition */
 #define isIDFIRST_utf8_safe(p, e)                                           \
     _generic_func_utf8_safe(_CC_IDFIRST,                                    \
-                    _is_utf8_perl_idstart_with_len, (U8 *) (p), (U8 *) (e))
+                            _is_utf8_perl_idstart, (U8 *) (p), (U8 *) (e))
 
 #define isLOWER_utf8_safe(p, e)     _generic_swash_utf8_safe(_CC_LOWER, p, e)
 #define isPRINT_utf8_safe(p, e)     _generic_swash_utf8_safe(_CC_PRINT, p, e)
@@ -2165,8 +2165,7 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
               : above_latin1))
 
 #define _generic_LC_swash_utf8_safe(macro, classnum, p, e)                  \
-            _generic_LC_utf8_safe(macro, p, e,                              \
-                               _is_utf8_FOO_with_len(classnum, p, e))
+            _generic_LC_utf8_safe(macro, p, e, _is_utf8_FOO(classnum, p, e))
 
 #define _generic_LC_func_utf8_safe(macro, above_latin1, p, e)               \
             _generic_LC_utf8_safe(macro, p, e, above_latin1(p, e))
@@ -2195,10 +2194,10 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
             _generic_LC_swash_utf8_safe(isGRAPH_LC, _CC_GRAPH, p, e)
 #define isIDCONT_LC_utf8_safe(p, e)                                         \
             _generic_LC_func_utf8_safe(isIDCONT_LC,                         \
-                                _is_utf8_perl_idcont_with_len, p, e)
+                                                _is_utf8_perl_idcont, p, e)
 #define isIDFIRST_LC_utf8_safe(p, e)                                        \
             _generic_LC_func_utf8_safe(isIDFIRST_LC,                        \
-                                _is_utf8_perl_idstart_with_len, p, e)
+                                               _is_utf8_perl_idstart, p, e)
 #define isLOWER_LC_utf8_safe(p, e)                                          \
             _generic_LC_swash_utf8_safe(isLOWER_LC, _CC_LOWER, p, e)
 #define isPRINT_LC_utf8_safe(p, e)                                          \

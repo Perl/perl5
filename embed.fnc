@@ -1104,19 +1104,12 @@ AmTdP	|bool	|is_utf8_valid_partial_char				    \
 		|NN const U8 * const s|NN const U8 * const e
 ATidRp	|bool	|is_utf8_valid_partial_char_flags			    \
 		|NN const U8 * const s|NN const U8 * const e|const U32 flags
-CpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
-CpR	|bool	|_is_utf8_FOO_with_len|const U8 classnum|NN const U8 *p	    \
+CpR     |bool   |_is_uni_FOO|const U8 classnum|const UV c
+CpR     |bool   |_is_utf8_FOO|const U8 classnum|NN const U8 *p     \
 		|NN const U8 * const e
-CpR	|bool	|_is_utf8_idcont|NN const U8 *p
-CpR	|bool	|_is_utf8_idstart|NN const U8 *p
-CpR	|bool	|_is_utf8_xidcont|NN const U8 *p
-CpR	|bool	|_is_utf8_xidstart|NN const U8 *p
-CpR	|bool	|_is_utf8_perl_idcont_with_len|NN const U8 *p		    \
-		|NN const U8 * const e
-CpR	|bool	|_is_utf8_perl_idstart_with_len|NN const U8 *p		    \
-		|NN const U8 * const e
-CpR	|bool	|_is_utf8_mark	|NN const U8 *p
-AbDxpR	|bool	|is_utf8_mark	|NN const U8 *p
+CpR     |bool   |_is_utf8_perl_idcont|NN const U8 *p|NN const U8 * const e
+CpR     |bool   |_is_utf8_perl_idstart|NN const U8 *p|NN const U8 * const e
+
 #if defined(PERL_CORE) || defined(PERL_EXT)
 EXdpR	|bool	|isSCRIPT_RUN	|NN const U8 *s|NN const U8 *send   \
 				|const bool utf8_target
@@ -3121,10 +3114,8 @@ SR	|UV	|check_locale_boundary_crossing				    \
 		|NN U8* const ustrp					    \
 		|NN STRLEN *lenp
 iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
+				|NN const U8 *const e			    \
 				|NULLOK SV* const invlist
-iR	|bool	|is_utf8_common_with_len|NN const U8 *const p		    \
-					|NN const U8 *const e		    \
-					|NULLOK SV* const invlist
 SR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
 SR	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
 		|NN UV* max|NN UV* val|const bool wants_value		    \

@@ -33,14 +33,9 @@
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idcont(a)	Perl__is_uni_perl_idcont(aTHX_ a)
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
-#define _is_utf8_FOO_with_len(a,b,c)	Perl__is_utf8_FOO_with_len(aTHX_ a,b,c)
-#define _is_utf8_idcont(a)	Perl__is_utf8_idcont(aTHX_ a)
-#define _is_utf8_idstart(a)	Perl__is_utf8_idstart(aTHX_ a)
-#define _is_utf8_mark(a)	Perl__is_utf8_mark(aTHX_ a)
-#define _is_utf8_perl_idcont_with_len(a,b)	Perl__is_utf8_perl_idcont_with_len(aTHX_ a,b)
-#define _is_utf8_perl_idstart_with_len(a,b)	Perl__is_utf8_perl_idstart_with_len(aTHX_ a,b)
-#define _is_utf8_xidcont(a)	Perl__is_utf8_xidcont(aTHX_ a)
-#define _is_utf8_xidstart(a)	Perl__is_utf8_xidstart(aTHX_ a)
+#define _is_utf8_FOO(a,b,c)	Perl__is_utf8_FOO(aTHX_ a,b,c)
+#define _is_utf8_perl_idcont(a,b)	Perl__is_utf8_perl_idcont(aTHX_ a,b)
+#define _is_utf8_perl_idstart(a,b)	Perl__is_utf8_perl_idstart(aTHX_ a,b)
 #define _to_uni_fold_flags(a,b,c,d)	Perl__to_uni_fold_flags(aTHX_ a,b,c,d)
 #define _to_utf8_fold_flags(a,b,c,d,e)	Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e)
 #define _to_utf8_lower_flags(a,b,c,d,e)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e)
@@ -364,9 +359,6 @@
 #define is_utf8_char_helper	Perl_is_utf8_char_helper
 #define is_utf8_fixed_width_buf_loclen_flags	Perl_is_utf8_fixed_width_buf_loclen_flags
 #define is_utf8_invariant_string_loc	Perl_is_utf8_invariant_string_loc
-#ifndef NO_MATHOMS
-#define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
-#endif
 #define is_utf8_string_flags	Perl_is_utf8_string_flags
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_string_loclen_flags	Perl_is_utf8_string_loclen_flags
@@ -2023,8 +2015,7 @@
 #define check_locale_boundary_crossing(a,b,c,d)	S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #define does_utf8_overflow	S_does_utf8_overflow
 #define isFF_OVERLONG		S_isFF_OVERLONG
-#define is_utf8_common(a,b)	S_is_utf8_common(aTHX_ a,b)
-#define is_utf8_common_with_len(a,b,c)	S_is_utf8_common_with_len(aTHX_ a,b,c)
+#define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define is_utf8_overlong_given_start_byte_ok	S_is_utf8_overlong_given_start_byte_ok
 #define new_msg_hv(a,b,c)	S_new_msg_hv(aTHX_ a,b,c)
 #define swash_scan_list_line(a,b,c,d,e,f,g)	S_swash_scan_list_line(aTHX_ a,b,c,d,e,f,g)

@@ -145,45 +145,20 @@ PERL_CALLCONV bool	Perl__is_uni_perl_idstart(pTHX_ UV c)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UNI_PERL_IDSTART
 
-PERL_CALLCONV bool	Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
+PERL_CALLCONV bool	Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_FOO_WITH_LEN	\
+#define PERL_ARGS_ASSERT__IS_UTF8_FOO	\
 	assert(p); assert(e)
 
-PERL_CALLCONV bool	Perl__is_utf8_idcont(pTHX_ const U8 *p)
+PERL_CALLCONV bool	Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_IDCONT	\
-	assert(p)
-
-PERL_CALLCONV bool	Perl__is_utf8_idstart(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_IDSTART	\
-	assert(p)
-
-PERL_CALLCONV bool	Perl__is_utf8_mark(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_MARK	\
-	assert(p)
-
-PERL_CALLCONV bool	Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN	\
+#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT	\
 	assert(p); assert(e)
 
-PERL_CALLCONV bool	Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
+PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN	\
+#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART	\
 	assert(p); assert(e)
-
-PERL_CALLCONV bool	Perl__is_utf8_xidcont(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_XIDCONT	\
-	assert(p)
-
-PERL_CALLCONV bool	Perl__is_utf8_xidstart(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_XIDSTART	\
-	assert(p)
 
 PERL_CALLCONV UV	Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, U8 flags);
 #define PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS	\
@@ -1896,14 +1871,6 @@ PERL_STATIC_INLINE bool	Perl_is_utf8_invariant_string_loc(const U8* const s, STR
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING_LOC	\
 	assert(s)
-#endif
-
-#ifndef NO_MATHOMS
-PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
-			__attribute__deprecated__
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_MARK	\
-	assert(p)
 #endif
 
 /* PERL_CALLCONV bool	is_utf8_string(const U8 *s, STRLEN len)
@@ -6637,16 +6604,9 @@ PERL_STATIC_INLINE int	S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_common(pTHX_ const U8 *const p, SV* const invlist)
+PERL_STATIC_INLINE bool	S_is_utf8_common(pTHX_ const U8 *const p, const U8 *const e, SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_COMMON	\
-	assert(p)
-#endif
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 *const e, SV* const invlist)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_COMMON_WITH_LEN	\
 	assert(p); assert(e)
 #endif
 
