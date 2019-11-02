@@ -1503,7 +1503,7 @@ X<\o{}>
     \b                  backspace         (BS)
     \a                  alarm (bell)      (BEL)
     \e                  escape            (ESC)
-    \x{263A}     [1,8]  hex char          (example: SMILEY)
+    \x{263A}     [1,8]  hex char          (example shown: SMILEY)
     \x1b         [2,8]  restricted range hex char (example: ESC)
     \N{name}     [3]    named Unicode character or character sequence
     \N{U+263D}   [4,8]  Unicode character (example: FIRST QUARTER MOON)
