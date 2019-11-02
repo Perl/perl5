@@ -13,7 +13,7 @@ BEGIN {
 
 use utf8;
 
-plan tests => 301;
+plan tests => 304;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -1143,6 +1143,16 @@ for ("", nullrocow) {
 {
     fresh_perl_like('y/\x{a00}0-\N{}//', qr/Unknown charname/, { },
                     'RT #133880 illegal \N{}');
+}
+
+{
+    my $c = "\xff";
+    my $d = "\x{104}";
+    eval '$c =~ tr/\x{ff}-\x{104}/\x{100}-\x{105}/';
+    is($@, "", 'tr/\x{ff}-\x{104}/\x{100}-\x{105}/ compiled');
+    is($c, "\x{100}", 'ff -> 100');
+    eval '$d =~ tr/\x{ff}-\x{104}/\x{100}-\x{105}/';
+    is($d, "\x{105}", '104 -> 105');
 }
 
 1;

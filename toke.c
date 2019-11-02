@@ -3044,7 +3044,7 @@ S_scan_const(pTHX_ char *start)
                  * 'offset_to_max' is the offset in 'sv' at which the character
                  *      (the range's maximum end point) before 'd'  begins.
                  */
-                char * max_ptr = SvPVX(sv) + offset_to_max;
+                char * max_ptr;
                 char * min_ptr;
                 IV range_min;
 		IV range_max;	/* last character in range */
@@ -3056,6 +3056,8 @@ S_scan_const(pTHX_ char *start)
                 IV real_range_max = 0;
 #endif
                 /* Get the code point values of the range ends. */
+                max_ptr = (d_is_utf8) ? (char *) utf8_hop( (U8*) d, -1) : d - 1;
+                offset_to_max = max_ptr - SvPVX_const(sv);
                 if (d_is_utf8) {
                     /* We know the utf8 is valid, because we just constructed
                      * it ourselves in previous loop iterations */
