@@ -4,7 +4,7 @@ perlfaq4 - Data Manipulation
 
 =head1 VERSION
 
-version 5.20190126
+version 5.20191102
 
 =head1 DESCRIPTION
 
