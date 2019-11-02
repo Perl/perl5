@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.50';
+$VERSION = '1.51';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -2212,6 +2212,7 @@ my %ignored_hints = (
     'strict/refs' => 1,
     'strict/subs' => 1,
     'strict/vars' => 1,
+    'feature/bits' => 1,
 );
 
 my %rev_feature;
