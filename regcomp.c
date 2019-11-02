@@ -9199,6 +9199,7 @@ S_initialize_invlist_guts(pTHX_ SV* invlist, const Size_t initial_size)
     invlist_iterfinish(invlist);
 
     *get_invlist_previous_index_addr(invlist) = 0;
+    SvPOK_on(invlist);  /* This allows B to extract the PV */
 }
 
 SV*
@@ -9273,6 +9274,7 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
     invlist_iterfinish(invlist);
 
     SvREADONLY_on(invlist);
+    SvPOK_on(invlist);
 
     return invlist;
 }
