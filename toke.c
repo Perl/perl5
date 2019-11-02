@@ -2952,7 +2952,7 @@ S_scan_const(pTHX_ char *start)
 
     assert(PL_lex_inwhat != OP_TRANSR);
     if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
-	/* If we are doing a trans and we know we want UTF8 set expectation */
+	/* If we are doing a trans and we know we want UTF8, set expectation */
 	d_is_utf8  = PL_parser->lex_sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
 	s_is_utf8  = PL_parser->lex_sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
     }
@@ -3000,7 +3000,8 @@ S_scan_const(pTHX_ char *start)
                  * is not a hyphen; or if it is a hyphen, but it's too close to
                  * either edge to indicate a range, or if we haven't output any
                  * characters yet then it's a regular character. */
-                if (*s != '-' || s >= send - 1 || s == start || d == SvPVX(sv)) {
+                if (*s != '-' || s >= send - 1 || s == start || d == SvPVX(sv))
+                {
 
                     /* A regular character.  Process like any other, but first
                      * clear any flags */
