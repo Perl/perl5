@@ -1108,10 +1108,6 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #   define FATAL_ABOVE_FF_MSG                                       \
       "Use of strings with code points over 0xFF as arguments to "  \
       "%s operator is not allowed"
-#  define DEPRECATED_ABOVE_FF_MSG                                   \
-      "Use of strings with code points over 0xFF as arguments to "  \
-      "%s operator is deprecated. This will be a fatal error in "   \
-      "Perl 5.32"
 #endif
 
 /* stuff for OP_ARGCHECK */
