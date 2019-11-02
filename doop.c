@@ -29,10 +29,11 @@
 
 
 /* Helper function for do_trans().
- * Handles non-utf8 cases(*) not involving the /c, /d, /s flags,
- * and where search and replacement charlists aren't identical.
- * (*) i.e. where the search and replacement charlists are non-utf8. sv may
- * or may not be utf8.
+ * Handles cases where the search and replacement charlists aren't UTF-8,
+ * aren't identical, and neither the /d nor /s flag is present.
+ *
+ * sv may or may not be utf8.  Note that no code point above 255 can possibly
+ * be in the to-translate set
  */
 
 STATIC Size_t
@@ -62,7 +63,10 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	U8 *d;
 	U8 *dstart;
 
-	/* Allow for expansion: $_="a".chr(400); tr/a/\xFE/, FE needs encoding */
+        /* Allow for worst-case expansion: Each input byte can become 2.  For a
+         * given input character, this happens when it occupies a single byte
+         * under UTF-8, but is to be translated to something that occupies two:
+         * $_="a".chr(400); tr/a/\xFE/, FE needs encoding. */
 	if (grows)
 	    Newx(d, len*2+1, U8);
 	else
@@ -101,13 +105,15 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 
 
 /* Helper function for do_trans().
- * Handles non-utf8 cases(*) where search and replacement charlists are
- * identical: so the string isn't modified, and only a count of modifiable
+ * Handles cases where the search and replacement charlists are identical and
+ * non-utf8: so the string isn't modified, and only a count of modifiable
  * chars is needed.
- * Note that it doesn't handle /d or /s, since these modify the string
- * even if the replacement list is empty.
- * (*) i.e. where the search and replacement charlists are non-utf8. sv may
- * or may not be utf8.
+ *
+ * Note that it doesn't handle /d or /s, since these modify the string even if
+ * the replacement list is empty.
+ *
+ * sv may or may not be utf8.  Note that no code point above 255 can possibly
+ * be in the to-translate set
  */
 
 STATIC Size_t
@@ -145,10 +151,11 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 
 
 /* Helper function for do_trans().
- * Handles non-utf8 cases(*) involving the /c, /d, /s flags,
- * and where search and replacement charlists aren't identical.
- * (*) i.e. where the search and replacement charlists are non-utf8. sv may
- * or may not be utf8.
+ * Handles cases where the search and replacement charlists aren't identical
+ * and both are non-utf8, and one or both of /d, /s is specified.
+ *
+ * sv may or may not be utf8.  Note that no code point above 255 can possibly
+ * be in the to-translate set
  */
 
 STATIC Size_t
@@ -182,7 +189,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 		s++;
 	    }
 	}
-	else {
+	else {  /* Not to squash */
 	    while (s < send) {
 		const short ch = tbl->map[*s];
 		if (ch >= 0) {
@@ -205,9 +212,17 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	U8 *d;
 	U8 *dstart;
 	Size_t size = tbl->size;
+
+        /* What the mapping of the previous character was to.  If the new
+         * character has the same mapping, it is squashed from the output (but
+         * still is included in the count) */
         UV pch = 0xfeedface;
 
 	if (grows)
+            /* Allow for worst-case expansion: Each input byte can become 2.
+             * For a given input character, this happens when it occupies a
+             * single byte under UTF-8, but is to be translated to something
+             * that occupies two: */
 	    Newx(d, len*2+1, U8);
 	else
 	    d = s;
