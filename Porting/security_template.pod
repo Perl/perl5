@@ -48,8 +48,16 @@ FIXME with a list of versions that are affected, and which were updated.
 
 FIXME or use the following:
 
-If you are vulnerable, upgrade to the latest maintenance release for
-the version of perl you are using.
+If you are vulnerable, upgrade to the latest maintenance release for the
+version of perl you are using.
+
+If your release of perl is no longer supported by the perl 5 committers you
+may need to upgrade to a new major release of perl. The versions currently
+supported by the perl 5 committers are
+FIXME 5.28.2 (until 2020-05-31)
+and
+FIXME 5.30.1 (until 2021-05-31).
+The current version of perl is available from https://www.perl.org/get.html .
 
 =head2 Who was given access to the information about the vulnerability?
 
