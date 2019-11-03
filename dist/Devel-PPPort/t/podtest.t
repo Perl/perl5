@@ -78,7 +78,7 @@ if ($reason) {
 for (@pods) {
   print "# checking $_\n";
   if ($reason) {
-    skip("skip: $reason", 0);
+    skip("skip: $reason", 1);
   }
   else {
     pod_file_ok($_);

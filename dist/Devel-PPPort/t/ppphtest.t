@@ -54,9 +54,7 @@ package main;
 
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
-    for (1 .. 238) {
-      skip("skip: SKIP_SLOW_TESTS", 0);
-    }
+    skip("skip: SKIP_SLOW_TESTS", 238);
     exit 0;
   }
 }

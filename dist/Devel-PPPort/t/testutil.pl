@@ -385,7 +385,6 @@ sub skip {
     my $n   = @_ ? shift : 1;
     my $bad_swap;
     my $both_zero;
-    $n = 1 if $n == 0;  # XXX Temporary
     {
       local $^W = 0;
       $bad_swap = $why > 0 && $n == 0;

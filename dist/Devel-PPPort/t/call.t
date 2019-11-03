@@ -126,9 +126,7 @@ if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     ok(ref($@), 'False', 'check that $@ contains False object');
     ok("$@", "$false", 'check we got the expected object');
 } else {
-    for (1..7) {
-        skip 'skip: no support for references in $@', 0;
-    }
+    skip 'skip: no support for references in $@', 7;
 }
 
 ok(eval { Devel::PPPort::eval_sv('die', 0); 1 });
@@ -154,9 +152,7 @@ if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     ok(ref($@), 'False', 'check that $@ contains False object');
     ok("$@", "$false", 'check we got the expected object');
 } else {
-    for (1..7) {
-        skip 'skip: no support for references in $@', 0;
-    }
+    skip 'skip: no support for references in $@', 7;
 }
 
 {

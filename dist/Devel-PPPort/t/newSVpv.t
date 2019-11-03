@@ -77,6 +77,6 @@ if ("$]" >= 5.008001) {
   ok(utf8::is_utf8($s[0]));
 }
 else {
-  skip("skip: no is_utf8()", 0);
+  skip("skip: no is_utf8()", 1);
 }
 

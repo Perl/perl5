@@ -55,9 +55,7 @@ package main;
 use Config;
 
 if ("$]" < '5.004') {
-    for (1..5) {
-        skip 'skip: No newSVpvf support', 0;
-    }
+    skip 'skip: No newSVpvf support', 5;
     exit;
 }
 
@@ -73,9 +71,7 @@ my $ivsize = $Config::Config{ivsize};
 my $ivmax = ($ivsize == 4) ? '2147483647' : ($ivsize == 8) ? '9223372036854775807' : 0;
 my $uvmax = ($ivsize == 4) ? '4294967295' : ($ivsize == 8) ? '18446744073709551615' : 0;
 if ($ivmax == 0) {
-    for (1..2) {
-        skip 'skip: unknown ivsize', 0;
-    }
+    skip 'skip: unknown ivsize', 2;
 } else {
     ok(Devel::PPPort::sprintf_ivmax(), $ivmax);
     ok(Devel::PPPort::sprintf_uvmax(), $uvmax);

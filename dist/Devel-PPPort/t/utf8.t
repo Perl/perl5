@@ -56,9 +56,7 @@ BEGIN { require warnings if "$]" > '5.006' }
 
 # skip tests on 5.6.0 and earlier, plus 7.0
 if ("$]" <= '5.006' || "$]" == '5.007' ) {
-    for (1..93) {
-        skip 'skip: broken utf8 support', 0;
-    }
+    skip 'skip: broken utf8 support', 93;
     exit;
 }
 
@@ -75,9 +73,7 @@ ok(! &Devel::PPPort::UVCHR_IS_INVARIANT(0xb6));
 ok(! &Devel::PPPort::UVCHR_IS_INVARIANT(0x100));
 
 if ("$]" < '5.006') {
-    for (1 ..9) {
-        ok(1, 1)
-    }
+    skip("Perl version too early", 9);
 }
 else {
     ok(&Devel::PPPort::UVCHR_SKIP(ord("A")), 1);
@@ -89,7 +85,7 @@ else {
     ok(&Devel::PPPort::UVCHR_SKIP(0x3FFFFFF), ord("A") == 65 ? 5 : 6);
     ok(&Devel::PPPort::UVCHR_SKIP(0x4000000), ord("A") == 65 ? 6 : 7);
     if (ord("A") != 65) {
-        ok(1, 1)
+        skip("Test not valid on EBCDIC", 1)
     }
     else {
         ok(&Devel::PPPort::UVCHR_SKIP(0xFFFFFFFF), 7);
@@ -97,9 +93,7 @@ else {
 }
 
 if ("$]" < '5.008') {
-    for (1 ..3) {
-        ok(1, 1)
-    }
+    skip("Perl version too early", 3);
 }
 else {
     ok(&Devel::PPPort::foldEQ_utf8("A\x{100}", 3, 1, "a\x{101}", 3, 1), 1);
@@ -124,9 +118,7 @@ ok($ret->[0], 0);
 ok($ret->[1], 1);
 
 if (ord("A") != 65) {   # tests not valid for EBCDIC
-    for (1 .. (2 + 4 + (7 * 5))) {
-        ok(1, 1);
-    }
+    skip("Perl version too early",  1 .. (2 + 4 + (7 * 5)));
 }
 else {
     $ret = &Devel::PPPort::utf8_to_uvchr_buf("\xc4\x80", 0);
@@ -199,9 +191,7 @@ else {
     use vars '%Config';
     if ($Config{ccflags} =~ /-DDEBUGGING/) {
         shift @buf_tests;
-        for (1..5) {
-            ok(1, 1);
-        }
+        skip("Test not valid on DEBUGGING builds", 5);
     }
 
     my $test;
@@ -272,9 +262,7 @@ if ("$]" ge '5.008') {
     ok(tied($scalar)->{fetch}, 3);
     ok(tied($scalar)->{store}, 0);
 } else {
-    for (1..23) {
-        skip 'skip: no SV_NOSTEAL support', 0;
-    }
+    skip 'skip: no SV_NOSTEAL support', 23;
 }
 
 package TieScalarCounter;

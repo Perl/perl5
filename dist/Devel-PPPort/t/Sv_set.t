@@ -66,9 +66,7 @@ Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 ok($bar->x(), 'hacker');
 
 if ( "$]" < '5.007003' ) {
-    for (1..10) {
-        skip 'skip: no SV_NOSTEAL support', 0;
-    }
+    skip 'skip: no SV_NOSTEAL support', 10;
 } else {
     ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
 

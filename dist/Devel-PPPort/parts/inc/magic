@@ -624,9 +624,7 @@ ok(Devel::PPPort::sv_magic_portable($foo));
 ok($foo eq 'bar');
 
 if ( "$]" < '5.007003' ) {
-    for (1..22) {
-        skip 'skip: no SV_NOSTEAL support', 0;
-    }
+    skip 'skip: no SV_NOSTEAL support', 22;
 } else {
     tie my $scalar, 'TieScalarCounter', 10;
     my $fetch = $scalar;

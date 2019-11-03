@@ -183,10 +183,7 @@ ok($file =~ /cop/i);
 
 BEGIN {
   if ("$]" < 5.006000) {
-    # Skip
-    for (1..8) {
-      ok(1, 1);
-    }
+    skip("Perl version too early", 8);
     exit;
   }
 }

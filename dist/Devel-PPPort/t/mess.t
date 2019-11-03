@@ -182,12 +182,12 @@ if ("$]" >= '5.006') {
     if ("$]" < '5.007001' || "$]" > '5.007003') {
         ok $@, "\x{100}\n";
     } else {
-        skip 'skip: broken utf8 support in die hook', 0;
+        skip 'skip: broken utf8 support in die hook', 1;
     }
     if ("$]" < '5.007001' || "$]" > '5.008') {
         ok $die, "\x{100}\n";
     } else {
-        skip 'skip: broken utf8 support in die hook', 0;
+        skip 'skip: broken utf8 support in die hook', 1;
     }
 
     undef $die;
@@ -195,12 +195,12 @@ if ("$]" >= '5.006') {
     if ("$]" < '5.007001' || "$]" > '5.007003') {
         ok $@ =~ /^\x{100} at \Q$0\E line /;
     } else {
-        skip 'skip: broken utf8 support in die hook', 0;
+        skip 'skip: broken utf8 support in die hook', 1;
     }
     if ("$]" < '5.007001' || "$]" > '5.008') {
         ok $die =~ /^\x{100} at \Q$0\E line /;
     } else {
-        skip 'skip: broken utf8 support in die hook', 0;
+        skip 'skip: broken utf8 support in die hook', 1;
     }
 
     if ("$]" < '5.007001' || "$]" > '5.008') {
@@ -212,9 +212,7 @@ if ("$]" >= '5.006') {
         Devel::PPPort::warn_sv("\x{100}");
         ok (my $tmp = $warn) =~ /^\x{100} at \Q$0\E line /;
     } else {
-        for (1..2) {
-            skip 'skip: broken utf8 support in warn hook', 0;
-        }
+        skip 'skip: broken utf8 support in warn hook', 2;
     }
 
     ok Devel::PPPort::mess_sv("\x{100}\n", 0), "\x{100}\n";
@@ -223,15 +221,11 @@ if ("$]" >= '5.006') {
     ok Devel::PPPort::mess_sv("\x{100}", 0) =~ /^\x{100} at \Q$0\E line /;
     ok Devel::PPPort::mess_sv(do {my $tmp = "\x{100}"}, 1) =~ /^\x{100} at \Q$0\E line /;
 } else {
-    for (1..12) {
-        skip 'skip: no utf8 support', 0;
-    }
+    skip 'skip: no utf8 support', 12;
 }
 
 if (ord('A') != 65) {
-    for (1..24) {
-        skip 'skip: no ASCII support', 0;
-    }
+    skip 'skip: no ASCII support', 24;
 } elsif (      "$]" >= '5.008'
          &&    "$]" != '5.013000'     # Broken in these ranges
          && ! ("$]" >= '5.011005' && "$]" <= '5.012000'))
@@ -279,9 +273,7 @@ if (ord('A') != 65) {
     ok $warn =~ eval 'qr/^\N{U+C3}\N{U+A1} at \Q$0\E line /';
 
     if ("$]" < '5.004') {
-        for (1..8) {
-            skip 'skip: no support for mess_sv', 0;
-        }
+        skip 'skip: no support for mess_sv', 8;
     }
     else {
       ok Devel::PPPort::mess_sv(eval('"\N{U+E1}\n"'), 0), eval '"\N{U+E1}\n"';
@@ -297,9 +289,7 @@ if (ord('A') != 65) {
       ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1"}, 1) =~ eval 'qr/^\N{U+C3}\N{U+A1} at \Q$0\E line /';
     }
 } else {
-    for (1..24) {
-        skip 'skip: no support for \N{U+..} syntax', 0;
-    }
+    skip 'skip: no support for \N{U+..} syntax', 24;
 }
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
@@ -323,9 +313,7 @@ if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     ok $@ == $obj;
     ok $die == $obj;
 } else {
-    for (1..12) {
-        skip 'skip: no support for exceptions', 0;
-    }
+    skip 'skip: no support for exceptions', 12;
 }
 
 ok !defined eval { Devel::PPPort::croak_no_modify() };

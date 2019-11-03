@@ -139,8 +139,7 @@ if (ivers($]) >= ivers(5.9)) {
     ok(&Devel::PPPort::check_HeUTF8("\N{U+263a}"), "utf8");
   };
 } else {
-  ok(1, 1);
-  ok(1, 1);
+  skip("Too early perl version", 2);
 }
 
 @r = &Devel::PPPort::check_c_array();
@@ -151,8 +150,7 @@ ok(!Devel::PPPort::SvRXOK(""));
 ok(!Devel::PPPort::SvRXOK(bless [], "Regexp"));
 
 if (ivers($]) < ivers(5.5)) {
-        skip 'no qr// objects in this perl', 0;
-        skip 'no qr// objects in this perl', 0;
+        skip 'no qr// objects in this perl', 2;
 } else {
         my $qr = eval 'qr/./';
         ok(Devel::PPPort::SvRXOK($qr));
@@ -292,7 +290,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                                 ? 0     # Fail on non-ASCII unless unicode
                                 : ($types{"$native:$class"} || 0);
                 if (ivers($]) < ivers(5.6) && $suffix eq '_uvchr') {
-                    skip("No UTF-8 on this perl", 0);
+                    skip("No UTF-8 on this perl", 1);
                     next;
                 }
 
@@ -323,7 +321,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
             my $utf8;
 
             if ($skip) {
-                skip $skip, 0;
+                skip $skip, 1;
             }
             else {
                 $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
@@ -338,10 +336,10 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
             # -1) causes it to fail
             if ($i > 255) {
                 if ($skip) {
-                    skip $skip, 0;
+                    skip $skip, 1;
                 }
                 elsif (ivers($]) >= ivers(5.25.9)) {
-                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
+                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 1);
                 }
                 else {
                     my $eval_string = "$fcn(\"$utf8\", -1)";
@@ -407,9 +405,7 @@ for $name (keys %case_changing) {
             $skip = "Can't do uvchr on a multi-char string";
         }
         if ($skip) {
-            for (1..4) {
-                skip $skip, 0;
-            }
+            skip $skip, 4;
         }
         else {
             if ($is_cp) {
@@ -454,9 +450,7 @@ for $name (keys %case_changing) {
                 $skip = "Don't try to test shortened single bytes";
             }
             if ($skip) {
-                for (1..4) {
-                    skip $skip, 0;
-                }
+                skip $skip, 4;
             }
             else {
                 my $fcn = "to${name}_utf8_safe";
@@ -481,10 +475,8 @@ for $name (keys %case_changing) {
                 else {
                     ok ($fail, eval 'qr/Malformed UTF-8 character/',
                         "Gave appropriate error for short char: $original");
-                    for (1..3) {
-                        skip("Expected failure means remaining tests for"
-                           . " this aren't relevant", 0);
-                    }
+                    skip("Expected failure means remaining tests for"
+                       . " this aren't relevant", 3);
                 }
             }
         }
