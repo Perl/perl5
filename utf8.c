@@ -5204,23 +5204,11 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
      * the character than there are in the input buffer, it can read past the
      * end.  But we can make it safe if the input string happens to be
      * NUL-terminated, as many strings in Perl are, by refusing to read past a
-     * NUL.  A NUL indicates the start of the next character anyway.  If the
-     * input isn't NUL-terminated, the function remains unsafe, as it always
-     * has been.
-     *
-     * An initial NUL has to be handled separately, but all ASCIIs can be
-     * handled the same way, speeding up this common case */
+     * NUL, which is what UTF8_CHK_SKIP() does.  A NUL indicates the start of
+     * the next character anyway.  If the input isn't NUL-terminated, the
+     * function remains unsafe, as it always has been. */
 
-    if (UTF8_IS_INVARIANT(*s)) {  /* Assumes 's' contains at least 1 byte */
-        if (retlen) {
-            *retlen = 1;
-        }
-        return (UV) *s;
-    }
-
-    return utf8_to_uvchr_buf(s,
-                             s + my_strnlen((char *) s, UTF8SKIP(s)),
-                             retlen);
+    return utf8_to_uvchr_buf(s, s + UTF8_CHK_SKIP(s), retlen);
 }
 
 /*
