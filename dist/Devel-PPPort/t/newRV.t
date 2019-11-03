@@ -52,6 +52,6 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(&Devel::PPPort::newRV_inc_REFCNT, 1);
-ok(&Devel::PPPort::newRV_noinc_REFCNT, 1);
+is(&Devel::PPPort::newRV_inc_REFCNT, 1);
+is(&Devel::PPPort::newRV_noinc_REFCNT, 1);
 

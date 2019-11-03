@@ -53,11 +53,11 @@ bootstrap Devel::PPPort;
 package main;
 
 &Devel::PPPort::call_newCONSTSUB_1();
-ok(&Devel::PPPort::test_value_1(), 1);
+is(&Devel::PPPort::test_value_1(), 1);
 
 &Devel::PPPort::call_newCONSTSUB_2();
-ok(&Devel::PPPort::test_value_2(), 2);
+is(&Devel::PPPort::test_value_2(), 2);
 
 &Devel::PPPort::call_newCONSTSUB_3();
-ok(&Devel::PPPort::test_value_3(), 3);
+is(&Devel::PPPort::test_value_3(), 3);
 

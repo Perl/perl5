@@ -175,10 +175,6 @@ sub _where {
 }
 
 sub ok ($@) {
-    if (@_ > 1) {   # ok() really was modern 'is', though limited
-        local $Level = $Level + 1;
-        return is(@_);
-    }
     my ($pass, $name, @mess) = @_;
     _ok($pass, _where(), $name, @mess);
 }

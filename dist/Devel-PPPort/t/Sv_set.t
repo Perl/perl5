@@ -53,17 +53,17 @@ bootstrap Devel::PPPort;
 package main;
 
 my $foo = 5;
-ok(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
-ok(&Devel::PPPort::TestSvPVX_const("mhx"), 43);
-ok(&Devel::PPPort::TestSvPVX_mutable("mhx"), 44);
+is(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
+is(&Devel::PPPort::TestSvPVX_const("mhx"), 43);
+is(&Devel::PPPort::TestSvPVX_mutable("mhx"), 44);
 
 my $bar = [];
 
 bless $bar, 'foo';
-ok($bar->x(), 'foobar');
+is($bar->x(), 'foobar');
 
 Devel::PPPort::TestSvSTASH_set($bar, 'bar');
-ok($bar->x(), 'hacker');
+is($bar->x(), 'hacker');
 
 if ( "$]" < '5.007003' ) {
     skip 'skip: no SV_NOSTEAL support', 10;
@@ -72,19 +72,19 @@ if ( "$]" < '5.007003' ) {
 
     tie my $scalar, 'TieScalarCounter', 'string';
 
-    ok tied($scalar)->{fetch}, 0;
-    ok tied($scalar)->{store}, 0;
+    is tied($scalar)->{fetch}, 0;
+    is tied($scalar)->{store}, 0;
     my $copy = Devel::PPPort::newSVsv_nomg($scalar);
-    ok tied($scalar)->{fetch}, 0;
-    ok tied($scalar)->{store}, 0;
+    is tied($scalar)->{fetch}, 0;
+    is tied($scalar)->{store}, 0;
 
     my $fetch = $scalar;
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
     my $copy2 = Devel::PPPort::newSVsv_nomg($scalar);
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
-    ok $copy2, 'string';
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
+    is $copy2, 'string';
 }
 
 package TieScalarCounter;

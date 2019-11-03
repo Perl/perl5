@@ -57,13 +57,13 @@ ok(Devel::PPPort::compare_PL_signals());
 ok(!defined(&Devel::PPPort::PL_sv_undef()));
 ok(&Devel::PPPort::PL_sv_yes());
 ok(!&Devel::PPPort::PL_sv_no());
-ok(&Devel::PPPort::PL_na("abcd"), 4);
-ok(&Devel::PPPort::PL_Sv(), "mhx");
+is(&Devel::PPPort::PL_na("abcd"), 4);
+is(&Devel::PPPort::PL_Sv(), "mhx");
 ok(defined &Devel::PPPort::PL_tokenbuf());
 ok("$]" >= 5.009005 || &Devel::PPPort::PL_parser());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
 ok(defined &Devel::PPPort::PL_hints());
-ok(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
+is(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
 
 for (&Devel::PPPort::other_variables()) {
   ok($_ != 0);
@@ -89,7 +89,7 @@ for (&Devel::PPPort::other_variables()) {
   else {
     ok(@w == 0);
   }
-  ok($fail, 0);
+  is($fail, 0);
 }
 
 ok(&Devel::PPPort::no_dummy_parser_vars(1) >= ("$]" < 5.009005 ? 1 : 0));
@@ -97,7 +97,7 @@ ok(&Devel::PPPort::no_dummy_parser_vars(1) >= ("$]" < 5.009005 ? 1 : 0));
 eval { &Devel::PPPort::no_dummy_parser_vars(0) };
 
 if ("$]" < 5.009005) {
-  ok($@, '');
+  is($@, '');
 }
 else {
   if ($@) {

@@ -64,6 +64,6 @@ my @r = Devel::PPPort::my_strlfunc();
 ok(@e == @r);
 
 for (0 .. $#e) {
-  ok($r[$_], $e[$_]);
+  is($r[$_], $e[$_]);
 }
 

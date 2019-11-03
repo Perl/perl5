@@ -66,8 +66,8 @@ my $obj = bless {}, 'Package';
 
 undef $die;
 ok !defined eval { Devel::PPPort::croak_sv("\xE1\n") };
-ok $@, "\xE1\n";
-ok $die, "\xE1\n";
+is $@, "\xE1\n";
+is $die, "\xE1\n";
 
 undef $die;
 ok !defined eval { Devel::PPPort::croak_sv(10) };
@@ -98,8 +98,8 @@ ok !defined eval {
     $@ = "this must be visible\n";
     Devel::PPPort::croak_sv($@)
 };
-ok $@, "this must be visible\n";
-ok $die, "this must be visible\n";
+is $@, "this must be visible\n";
+is $die, "this must be visible\n";
 
 undef $die;
 $@ = 'should not be visible';
@@ -116,13 +116,13 @@ ok !defined eval {
     $@ = "this must be visible\n";
     Devel::PPPort::croak_sv_errsv()
 };
-ok $@, "this must be visible\n";
-ok $die, "this must be visible\n";
+is $@, "this must be visible\n";
+is $die, "this must be visible\n";
 
 undef $die;
 ok !defined eval { Devel::PPPort::croak_sv_with_counter("message\n") };
-ok $@, "message\n";
-ok Devel::PPPort::get_counter(), 1;
+is $@, "message\n";
+is Devel::PPPort::get_counter(), 1;
 
 undef $die;
 ok !defined eval { Devel::PPPort::croak_sv('') };
@@ -141,7 +141,7 @@ ok $die =~ /^\xC3\xA1 at \Q$0\E line /;
 
 undef $warn;
 Devel::PPPort::warn_sv("\xE1\n");
-ok $warn, "\xE1\n";
+is $warn, "\xE1\n";
 
 undef $warn;
 Devel::PPPort::warn_sv(10);
@@ -159,8 +159,8 @@ undef $warn;
 Devel::PPPort::warn_sv("\xC3\xA1");
 ok $warn =~ /^\xC3\xA1 at \Q$0\E line /;
 
-ok Devel::PPPort::mess_sv("\xE1\n", 0), "\xE1\n";
-ok Devel::PPPort::mess_sv(do {my $tmp = "\xE1\n"}, 1), "\xE1\n";
+is Devel::PPPort::mess_sv("\xE1\n", 0), "\xE1\n";
+is Devel::PPPort::mess_sv(do {my $tmp = "\xE1\n"}, 1), "\xE1\n";
 
 ok Devel::PPPort::mess_sv(10, 0) =~ /^10 at \Q$0\E line /;
 ok Devel::PPPort::mess_sv(do {my $tmp = 10}, 1) =~ /^10 at \Q$0\E line /;
@@ -180,12 +180,12 @@ if ("$]" >= '5.006') {
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv("\x{100}\n") };
     if ("$]" < '5.007001' || "$]" > '5.007003') {
-        ok $@, "\x{100}\n";
+        is $@, "\x{100}\n";
     } else {
         skip 'skip: broken utf8 support in die hook', 1;
     }
     if ("$]" < '5.007001' || "$]" > '5.008') {
-        ok $die, "\x{100}\n";
+        is $die, "\x{100}\n";
     } else {
         skip 'skip: broken utf8 support in die hook', 1;
     }
@@ -206,7 +206,7 @@ if ("$]" >= '5.006') {
     if ("$]" < '5.007001' || "$]" > '5.008') {
         undef $warn;
         Devel::PPPort::warn_sv("\x{100}\n");
-        ok $warn, "\x{100}\n";
+        is $warn, "\x{100}\n";
 
         undef $warn;
         Devel::PPPort::warn_sv("\x{100}");
@@ -215,8 +215,8 @@ if ("$]" >= '5.006') {
         skip 'skip: broken utf8 support in warn hook', 2;
     }
 
-    ok Devel::PPPort::mess_sv("\x{100}\n", 0), "\x{100}\n";
-    ok Devel::PPPort::mess_sv(do {my $tmp = "\x{100}\n"}, 1), "\x{100}\n";
+    is Devel::PPPort::mess_sv("\x{100}\n", 0), "\x{100}\n";
+    is Devel::PPPort::mess_sv(do {my $tmp = "\x{100}\n"}, 1), "\x{100}\n";
 
     ok Devel::PPPort::mess_sv("\x{100}", 0) =~ /^\x{100} at \Q$0\E line /;
     ok Devel::PPPort::mess_sv(do {my $tmp = "\x{100}"}, 1) =~ /^\x{100} at \Q$0\E line /;
@@ -232,8 +232,8 @@ if (ord('A') != 65) {
 {
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv(eval '"\N{U+E1}\n"') };
-    ok $@, "\xE1\n";
-    ok $die, "\xE1\n";
+    is $@, "\xE1\n";
+    is $die, "\xE1\n";
 
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv(eval '"\N{U+E1}"') };
@@ -244,8 +244,8 @@ if (ord('A') != 65) {
         undef $die;
         my $expect = eval '"\N{U+C3}\N{U+A1}\n"';
         ok !defined eval { Devel::PPPort::croak_sv("\xC3\xA1\n") };
-        ok $@, $expect;
-        ok $die, $expect;
+        is $@, $expect;
+        is $die, $expect;
     }
 
     {
@@ -258,7 +258,7 @@ if (ord('A') != 65) {
 
     undef $warn;
     Devel::PPPort::warn_sv(eval '"\N{U+E1}\n"');
-    ok $warn, "\xE1\n";
+    is $warn, "\xE1\n";
 
     undef $warn;
     Devel::PPPort::warn_sv(eval '"\N{U+E1}"');
@@ -266,7 +266,7 @@ if (ord('A') != 65) {
 
     undef $warn;
     Devel::PPPort::warn_sv("\xC3\xA1\n");
-    ok $warn, eval '"\N{U+C3}\N{U+A1}\n"';
+    is $warn, eval '"\N{U+C3}\N{U+A1}\n"';
 
     undef $warn;
     Devel::PPPort::warn_sv("\xC3\xA1");
@@ -276,14 +276,14 @@ if (ord('A') != 65) {
         skip 'skip: no support for mess_sv', 8;
     }
     else {
-      ok Devel::PPPort::mess_sv(eval('"\N{U+E1}\n"'), 0), eval '"\N{U+E1}\n"';
-      ok Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}\n"'}, 1), eval '"\N{U+E1}\n"';
+      is Devel::PPPort::mess_sv(eval('"\N{U+E1}\n"'), 0), eval '"\N{U+E1}\n"';
+      is Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}\n"'}, 1), eval '"\N{U+E1}\n"';
 
       ok Devel::PPPort::mess_sv(eval('"\N{U+E1}"'), 0) =~ eval 'qr/^\N{U+E1} at \Q$0\E line /';
       ok Devel::PPPort::mess_sv(do {my $tmp = eval '"\N{U+E1}"'}, 1) =~ eval 'qr/^\N{U+E1} at \Q$0\E line /';
 
-      ok Devel::PPPort::mess_sv("\xC3\xA1\n", 0), eval '"\N{U+C3}\N{U+A1}\n"';
-      ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1\n"}, 1), eval '"\N{U+C3}\N{U+A1}\n"';
+      is Devel::PPPort::mess_sv("\xC3\xA1\n", 0), eval '"\N{U+C3}\N{U+A1}\n"';
+      is Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1\n"}, 1), eval '"\N{U+C3}\N{U+A1}\n"';
 
       ok Devel::PPPort::mess_sv("\xC3\xA1", 0) =~ eval 'qr/^\N{U+C3}\N{U+A1} at \Q$0\E line /';
       ok Devel::PPPort::mess_sv(do {my $tmp = "\xC3\xA1"}, 1) =~ eval 'qr/^\N{U+C3}\N{U+A1} at \Q$0\E line /';

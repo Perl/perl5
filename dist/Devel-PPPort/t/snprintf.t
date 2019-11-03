@@ -53,6 +53,6 @@ bootstrap Devel::PPPort;
 package main;
 
 my($l, $s) = Devel::PPPort::my_snprintf();
-ok($l, 8);
-ok($s, "foobar42");
+is($l, 8);
+is($s, "foobar42");
 

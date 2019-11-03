@@ -72,7 +72,7 @@ ok("$]" >= 5.004 ? $warning =~ /^Perl_warner_nocontext bar:42/ : $warning eq '')
 
 $warning = '';
 Devel::PPPort::ckWARN();
-ok($warning, '');
+is($warning, '');
 
 $^W = 1;
 

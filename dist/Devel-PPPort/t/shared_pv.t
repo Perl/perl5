@@ -52,5 +52,5 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(&Devel::PPPort::newSVpvn_share(), 6);
+is(&Devel::PPPort::newSVpvn_share(), 6);
 

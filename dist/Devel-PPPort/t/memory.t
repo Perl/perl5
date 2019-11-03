@@ -52,5 +52,5 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(Devel::PPPort::checkmem(), 6);
+is(Devel::PPPort::checkmem(), 6);
 

@@ -96,12 +96,12 @@ for $test (
     ok(eq_array( [ &Devel::PPPort::call_sv_G_METHOD('meth', $flags, $obj, @$args) ], $expected));
 };
 
-ok(&Devel::PPPort::eval_pv('f()', 0), 'y');
-ok(&Devel::PPPort::eval_pv('f(qw(a b c))', 0), 'y');
+is(&Devel::PPPort::eval_pv('f()', 0), 'y');
+is(&Devel::PPPort::eval_pv('f(qw(a b c))', 0), 'y');
 
-ok(!defined $::{'less::'}, 1, "Hadn't loaded less yet");
+is(!defined $::{'less::'}, 1, "Hadn't loaded less yet");
 Devel::PPPort::load_module(0, "less", undef);
-ok(defined $::{'less::'}, 1, "Have now loaded less");
+is(defined $::{'less::'}, 1, "Have now loaded less");
 
 ok(eval { Devel::PPPort::eval_pv('die', 0); 1 });
 ok(!eval { Devel::PPPort::eval_pv('die', 1); 1 });
@@ -116,15 +116,15 @@ ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };
-    ok(eval { Devel::PPPort::eval_pv('die $hashref', 1); 1 }, undef, 'check plain hashref is rethrown');
-    ok(ref($@), 'HASH', 'check $@ is hashref') and
-        ok($@->{key}, 'value', 'check $@ hashref has correct value');
+    is(eval { Devel::PPPort::eval_pv('die $hashref', 1); 1 }, undef, 'check plain hashref is rethrown');
+    is(ref($@), 'HASH', 'check $@ is hashref') and
+        is($@->{key}, 'value', 'check $@ hashref has correct value');
 
     my $false = False->new;
     ok(!$false);
-    ok(eval { Devel::PPPort::eval_pv('die $false', 1); 1 }, undef, 'check false objects are rethrown');
-    ok(ref($@), 'False', 'check that $@ contains False object');
-    ok("$@", "$false", 'check we got the expected object');
+    is(eval { Devel::PPPort::eval_pv('die $false', 1); 1 }, undef, 'check false objects are rethrown');
+    is(ref($@), 'False', 'check that $@ contains False object');
+    is("$@", "$false", 'check we got the expected object');
 } else {
     skip 'skip: no support for references in $@', 7;
 }
@@ -142,15 +142,15 @@ ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };
-    ok(eval { Devel::PPPort::eval_sv('die $hashref', &Devel::PPPort::G_RETHROW); 1 }, undef, 'check plain hashref is rethrown');
-    ok(ref($@), 'HASH', 'check $@ is hashref') and
-        ok($@->{key}, 'value', 'check $@ hashref has correct value');
+    is(eval { Devel::PPPort::eval_sv('die $hashref', &Devel::PPPort::G_RETHROW); 1 }, undef, 'check plain hashref is rethrown');
+    is(ref($@), 'HASH', 'check $@ is hashref') and
+        is($@->{key}, 'value', 'check $@ hashref has correct value');
 
     my $false = False->new;
     ok(!$false);
-    ok(eval { Devel::PPPort::eval_sv('die $false', &Devel::PPPort::G_RETHROW); 1 }, undef, 'check false objects are rethrown');
-    ok(ref($@), 'False', 'check that $@ contains False object');
-    ok("$@", "$false", 'check we got the expected object');
+    is(eval { Devel::PPPort::eval_sv('die $false', &Devel::PPPort::G_RETHROW); 1 }, undef, 'check false objects are rethrown');
+    is(ref($@), 'False', 'check that $@ contains False object');
+    is("$@", "$false", 'check we got the expected object');
 } else {
     skip 'skip: no support for references in $@', 7;
 }

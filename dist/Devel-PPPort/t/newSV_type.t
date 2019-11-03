@@ -52,5 +52,5 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(Devel::PPPort::newSV_type(), 4);
+is(Devel::PPPort::newSV_type(), 4);
 

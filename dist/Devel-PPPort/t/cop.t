@@ -58,7 +58,7 @@ my $package;
   $package = &Devel::PPPort::CopSTASHPV();
 }
 print "# $package\n";
-ok($package, "MyPackage");
+is($package, "MyPackage");
 
 my $file = &Devel::PPPort::CopFILE();
 print "# $file\n";

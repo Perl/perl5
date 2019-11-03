@@ -52,7 +52,7 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(&Devel::PPPort::no_THX_arg("42"), 43);
+is(&Devel::PPPort::no_THX_arg("42"), 43);
 eval { &Devel::PPPort::with_THX_arg("yes\n"); };
 ok($@ =~ /^yes/);
 

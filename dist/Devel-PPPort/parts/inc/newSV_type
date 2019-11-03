@@ -64,4 +64,4 @@ newSV_type()
 
 =tests plan => 1
 
-ok(Devel::PPPort::newSV_type(), 4);
+is(Devel::PPPort::newSV_type(), 4);

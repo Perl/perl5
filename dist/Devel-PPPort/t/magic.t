@@ -54,27 +54,27 @@ package main;
 
 # Find proper magic
 ok(my $obj1 = Devel::PPPort->new_with_mg());
-ok(Devel::PPPort::as_string($obj1), 'hello');
+is(Devel::PPPort::as_string($obj1), 'hello');
 
 # Find with no magic
 my $obj = bless {}, 'Fake::Class';
-ok(Devel::PPPort::as_string($obj), "Sorry, your princess is in another castle.");
+is(Devel::PPPort::as_string($obj), "Sorry, your princess is in another castle.");
 
 # Find with other magic (not the magic we are looking for)
 ok($obj = Devel::PPPort->new_with_other_mg());
-ok(Devel::PPPort::as_string($obj), "Sorry, your princess is in another castle.");
+is(Devel::PPPort::as_string($obj), "Sorry, your princess is in another castle.");
 
 # Okay, attempt to remove magic that isn't there
 Devel::PPPort::remove_other_magic($obj1);
-ok(Devel::PPPort::as_string($obj1), 'hello');
+is(Devel::PPPort::as_string($obj1), 'hello');
 
 # Remove magic that IS there
 Devel::PPPort::remove_null_magic($obj1);
-ok(Devel::PPPort::as_string($obj1), "Sorry, your princess is in another castle.");
+is(Devel::PPPort::as_string($obj1), "Sorry, your princess is in another castle.");
 
 # Removing when no magic present
 Devel::PPPort::remove_null_magic($obj1);
-ok(Devel::PPPort::as_string($obj1), "Sorry, your princess is in another castle.");
+is(Devel::PPPort::as_string($obj1), "Sorry, your princess is in another castle.");
 
 use Tie::Hash;
 my %h;
@@ -83,34 +83,34 @@ $h{foo} = 'foo';
 $h{bar} = '';
 
 &Devel::PPPort::sv_catpv_mg($h{foo}, 'bar');
-ok($h{foo}, 'foobar');
+is($h{foo}, 'foobar');
 
 &Devel::PPPort::sv_catpvn_mg($h{bar}, 'baz');
-ok($h{bar}, 'baz');
+is($h{bar}, 'baz');
 
 &Devel::PPPort::sv_catsv_mg($h{foo}, '42');
-ok($h{foo}, 'foobar42');
+is($h{foo}, 'foobar42');
 
 &Devel::PPPort::sv_setiv_mg($h{bar}, 42);
-ok($h{bar}, 42);
+is($h{bar}, 42);
 
 &Devel::PPPort::sv_setnv_mg($h{PI}, 3.14159);
 ok(abs($h{PI} - 3.14159) < 0.01);
 
 &Devel::PPPort::sv_setpv_mg($h{mhx}, 'mhx');
-ok($h{mhx}, 'mhx');
+is($h{mhx}, 'mhx');
 
 &Devel::PPPort::sv_setpvn_mg($h{mhx}, 'Marcus');
-ok($h{mhx}, 'Marcus');
+is($h{mhx}, 'Marcus');
 
 &Devel::PPPort::sv_setsv_mg($h{sv}, 'SV');
-ok($h{sv}, 'SV');
+is($h{sv}, 'SV');
 
 &Devel::PPPort::sv_setuv_mg($h{sv}, 4711);
-ok($h{sv}, 4711);
+is($h{sv}, 4711);
 
 &Devel::PPPort::sv_usepvn_mg($h{sv}, 'Perl');
-ok($h{sv}, 'Perl');
+is($h{sv}, 'Perl');
 
 # v1 is treated as a bareword in older perls...
 my $ver = do { local $SIG{'__WARN__'} = sub {}; eval qq[v1.2.0] };
@@ -128,30 +128,30 @@ if ( "$]" < '5.007003' ) {
     tie my $scalar, 'TieScalarCounter', 10;
     my $fetch = $scalar;
 
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
-    ok Devel::PPPort::magic_SvIV_nomg($scalar), 10;
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
-    ok Devel::PPPort::magic_SvUV_nomg($scalar), 10;
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
-    ok Devel::PPPort::magic_SvNV_nomg($scalar), 10;
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
-    ok Devel::PPPort::magic_SvPV_nomg_nolen($scalar), 10;
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
+    is Devel::PPPort::magic_SvIV_nomg($scalar), 10;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
+    is Devel::PPPort::magic_SvUV_nomg($scalar), 10;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
+    is Devel::PPPort::magic_SvNV_nomg($scalar), 10;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
+    is Devel::PPPort::magic_SvPV_nomg_nolen($scalar), 10;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
     ok Devel::PPPort::magic_SvTRUE_nomg($scalar);
-    ok tied($scalar)->{fetch}, 1;
-    ok tied($scalar)->{store}, 0;
+    is tied($scalar)->{fetch}, 1;
+    is tied($scalar)->{store}, 0;
 
     my $object = OverloadedObject->new('string', 5.5, 0);
 
-    ok Devel::PPPort::magic_SvIV_nomg($object), 5;
-    ok Devel::PPPort::magic_SvUV_nomg($object), 5;
-    ok Devel::PPPort::magic_SvNV_nomg($object), 5.5;
-    ok Devel::PPPort::magic_SvPV_nomg_nolen($object), 'string';
+    is Devel::PPPort::magic_SvIV_nomg($object), 5;
+    is Devel::PPPort::magic_SvUV_nomg($object), 5;
+    is Devel::PPPort::magic_SvNV_nomg($object), 5.5;
+    is Devel::PPPort::magic_SvPV_nomg_nolen($object), 'string';
     ok !Devel::PPPort::magic_SvTRUE_nomg($object);
 }
 
