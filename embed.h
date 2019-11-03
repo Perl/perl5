@@ -264,96 +264,6 @@
 #define is_safe_syscall(a,b,c,d)	Perl_is_safe_syscall(aTHX_ a,b,c,d)
 #define is_strict_utf8_string_loclen	Perl_is_strict_utf8_string_loclen
 #ifndef NO_MATHOMS
-#define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_alnumc_lc(a)	Perl_is_uni_alnumc_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_alpha(a)		Perl_is_uni_alpha(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_alpha_lc(a)	Perl_is_uni_alpha_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_ascii(a)		Perl_is_uni_ascii(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_ascii_lc(a)	Perl_is_uni_ascii_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_blank(a)		Perl_is_uni_blank(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_blank_lc(a)	Perl_is_uni_blank_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_cntrl(a)		Perl_is_uni_cntrl(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_cntrl_lc(a)	Perl_is_uni_cntrl_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_digit(a)		Perl_is_uni_digit(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_digit_lc(a)	Perl_is_uni_digit_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_graph(a)		Perl_is_uni_graph(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_graph_lc(a)	Perl_is_uni_graph_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_idfirst_lc(a)	Perl_is_uni_idfirst_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_lower(a)		Perl_is_uni_lower(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_lower_lc(a)	Perl_is_uni_lower_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_print(a)		Perl_is_uni_print(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_print_lc(a)	Perl_is_uni_print_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_punct(a)		Perl_is_uni_punct(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_space(a)		Perl_is_uni_space(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_space_lc(a)	Perl_is_uni_space_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_upper(a)		Perl_is_uni_upper(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_upper_lc(a)	Perl_is_uni_upper_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_xdigit(a)	Perl_is_uni_xdigit(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
-#define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
-#endif
-#ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif
 #define is_utf8_char_helper	Perl_is_utf8_char_helper
@@ -796,17 +706,8 @@
 #define thread_locale_init	Perl_thread_locale_init
 #define thread_locale_term	Perl_thread_locale_term
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
-#ifndef NO_MATHOMS
-#define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
-#endif
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
-#ifndef NO_MATHOMS
-#define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
-#endif
 #define to_uni_upper(a,b,c)	Perl_to_uni_upper(aTHX_ a,b,c)
-#ifndef NO_MATHOMS
-#define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
-#endif
 #ifndef NO_MATHOMS
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
 #endif

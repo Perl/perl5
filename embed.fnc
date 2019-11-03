@@ -984,24 +984,6 @@ ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
 CpRTP	|STRLEN	|is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
-CbDpR	|U32	|to_uni_upper_lc|U32 c
-CbDpR	|U32	|to_uni_title_lc|U32 c
-CbDpR	|U32	|to_uni_lower_lc|U32 c
-CbDpR	|bool	|is_uni_alnum	|UV c
-CbDpR	|bool	|is_uni_alnumc	|UV c
-CbDpR	|bool	|is_uni_idfirst	|UV c
-CbDpR	|bool	|is_uni_alpha	|UV c
-CbDpPR	|bool	|is_uni_ascii	|UV c
-CbDpPR	|bool	|is_uni_blank	|UV c
-CbDpPR	|bool	|is_uni_space	|UV c
-CbDpPR	|bool	|is_uni_cntrl	|UV c
-CbDpR	|bool	|is_uni_graph	|UV c
-CbDpR	|bool	|is_uni_digit	|UV c
-CbDpR	|bool	|is_uni_upper	|UV c
-CbDpR	|bool	|is_uni_lower	|UV c
-CbDpR	|bool	|is_uni_print	|UV c
-CbDpR	|bool	|is_uni_punct	|UV c
-CbDpPR	|bool	|is_uni_xdigit	|UV c
 Cp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
 Cp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
 p	|void	|init_uniprops
@@ -1023,23 +1005,8 @@ p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_o
 Cp	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
 Cm	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
 Cp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|U8 flags
-CbDpR	|bool	|is_uni_alnum_lc|UV c
-CbDpR	|bool	|is_uni_alnumc_lc|UV c
-CbDpR	|bool	|is_uni_idfirst_lc|UV c
 CpR	|bool	|_is_uni_perl_idcont|UV c
 CpR	|bool	|_is_uni_perl_idstart|UV c
-CbDpR	|bool	|is_uni_alpha_lc|UV c
-CbDpPR	|bool	|is_uni_ascii_lc|UV c
-CbDpPR	|bool	|is_uni_space_lc|UV c
-CbDpPR	|bool	|is_uni_blank_lc|UV c
-CbDpPR	|bool	|is_uni_cntrl_lc|UV c
-CbDpR	|bool	|is_uni_graph_lc|UV c
-CbDpR	|bool	|is_uni_digit_lc|UV c
-CbDpR	|bool	|is_uni_upper_lc|UV c
-CbDpR	|bool	|is_uni_lower_lc|UV c
-CbDpR	|bool	|is_uni_print_lc|UV c
-CbDpR	|bool	|is_uni_punct_lc|UV c
-CbDpPR	|bool	|is_uni_xdigit_lc|UV c
 ATdmoR	|bool	|is_utf8_invariant_string|NN const U8* const s		    \
 		|STRLEN len
 ATidRp	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
