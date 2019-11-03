@@ -3649,6 +3649,7 @@ dist/IO/t/io_dir.t		See if directory-related methods from IO work
 dist/IO/t/io_dup.t		See if dup()-related methods from IO work
 dist/IO/t/io_file.t		See if binmode()-related methods on IO::File work
 dist/IO/t/io_file_export.t	Test IO::File exports
+dist/IO/t/io_getline.t		Test getline and getlines
 dist/IO/t/io_leak.t		See if IO leaks SVs (only run in core)
 dist/IO/t/io_linenum.t		See if I/O line numbers are tracked correctly
 dist/IO/t/io_multihomed.t	See if INET sockets work with multi-homed hosts
