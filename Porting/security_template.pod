@@ -2,7 +2,7 @@
 
 Delete this begin/end block before publication.
 
-Note every heading below is appropriate for every security issue, so
+Not every heading below is appropriate for every security issue, so
 some may be deleted.
 
 Look for FIXME to see what needs to be filled in.
