@@ -1115,6 +1115,9 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #  define TR_DELETE             (UV)-2
 #  define TR_R_EMPTY            (UV)-3  /* rhs (replacement) is empty */
 #  define TR_OOB                (UV)-4  /* Something that isn't one of the others */
+#  define TR_SPECIAL_HANDLING   TR_DELETE /* Can occupy same value */
+#  define TR_UNLISTED           TR_UNMAPPED /* A synonym whose name is clearer
+                                               at times */
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #define RANGE_INDICATOR  ILLEGAL_UTF8_BYTE
