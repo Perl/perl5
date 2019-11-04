@@ -513,8 +513,12 @@ addbits('sassign',
 
 for (qw(trans transr)) {
     addbits($_,
-        0 => qw(OPpTRANS_FROM_UTF   <UTF),    # search chars are utf8
-        1 => qw(OPpTRANS_TO_UTF     >UTF),    # replacement chars are utf8
+        # There is a character in the lhs representable not using UTF-8 whose
+        # replacement requires UTF-8.
+        0 => qw(OPpTRANS_CAN_FORCE_UTF8 CAN_FORCE_UTF8),
+
+        1 => qw(OPpTRANS_USE_SVOP   USE_SVOP),# This is implemented an an svop
+                                              # vs pvop
         2 => qw(OPpTRANS_IDENTICAL  IDENT),   # right side is same as left
         3 => qw(OPpTRANS_SQUASH     SQUASH),  # /s
         # 4 is used for OPpTARGET_MY
