@@ -3112,7 +3112,7 @@ Cp	|char*	|my_atof3	|NN const char *orig|NN NV* value|const STRLEN len
 ApT	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 ApT	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_ANY_COW
-: Used in pp_hot.c and regexec.c
+: Used in regexec.c
 pxXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
 #endif
 
