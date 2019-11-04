@@ -454,12 +454,8 @@ SKIP: {
         skip "Not valid only for EBCDIC", 4;
     }
     $s = $all255_twice;
-
-    {
-    local $TODO = 'tr/// broken for /sd';
     $c = $s =~ tr/[](){}<>\x00-\xff/[[(({{<</sd;
     is $s, "(<<[[{{", 'tr/[](){}<>\x00-\xff/[[(({{<</sd';
-    }
     is $c, 512, "count of above";
 
     $s = $all255_plus;

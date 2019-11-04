@@ -165,6 +165,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
     Size_t matches = 0;
+    const bool complement = cBOOL(PL_op->op_private & OPpTRANS_COMPLEMENT);
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
 
@@ -173,19 +174,31 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	U8 * const dstart = d;
 
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
-	    const U8* p = send;
+
+            /* What the mapping of the previous character was to.  If the new
+             * character has the same mapping, it is squashed from the output
+             * (but still is included in the count) */
+            short previous_map = (short) TR_OOB;
+
 	    while (s < send) {
 		const short this_map = tbl->map[*s];
 		if (this_map >= 0) {
-		    *d = (U8)this_map;
-		    matches++;
-		    if (p != d - 1 || *p != *d)
-			p = d++;
+                    matches++;
+                    if (this_map != previous_map) {
+                        *d++ = (U8)this_map;
+                        previous_map = this_map;
+                    }
 		}
-		else if (this_map == (short) TR_UNMAPPED)
-		    *d++ = *s;
-		else if (ch == (short) TR_DELETE)
-		    matches++;
+		else {
+                    if (this_map == (short) TR_UNMAPPED)
+                        *d++ = *s;
+                    else {
+                        assert(this_map == (short) TR_DELETE);
+                        matches++;
+                    }
+                    previous_map = (short) TR_OOB;
+                }
+
 		s++;
 	    }
 	}
@@ -235,7 +248,11 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             UV     ch;
             short sch;
 
-            sch = tbl->map[comp >= size ? size : comp];
+            sch = (comp < size)
+                  ? tbl->map[comp]
+                  : (! complement)
+                    ? (short) TR_UNMAPPED
+                    : tbl->map[size];
 
             if (sch >= 0) {
                 ch = (UV)sch;
