@@ -216,7 +216,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         /* What the mapping of the previous character was to.  If the new
          * character has the same mapping, it is squashed from the output (but
          * still is included in the count) */
-        UV pch = 0xfeedface;
+        UV pch = TR_OOB;
 
 	if (grows)
             /* Allow for worst-case expansion: Each input byte can become 2.
@@ -261,7 +261,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             }
 
             s += len;
-            pch = 0xfeedface;
+            pch = TR_OOB;
         }
 
 	if (grows) {
