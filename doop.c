@@ -175,14 +175,14 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    const U8* p = send;
 	    while (s < send) {
-		const short ch = tbl->map[*s];
-		if (ch >= 0) {
-		    *d = (U8)ch;
+		const short this_map = tbl->map[*s];
+		if (this_map >= 0) {
+		    *d = (U8)this_map;
 		    matches++;
 		    if (p != d - 1 || *p != *d)
 			p = d++;
 		}
-		else if (ch == (short) TR_UNMAPPED)
+		else if (this_map == (short) TR_UNMAPPED)
 		    *d++ = *s;
 		else if (ch == (short) TR_DELETE)
 		    matches++;
@@ -191,14 +191,14 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	}
 	else {  /* Not to squash */
 	    while (s < send) {
-		const short ch = tbl->map[*s];
-		if (ch >= 0) {
+		const short this_map = tbl->map[*s];
+		if (this_map >= 0) {
 		    matches++;
-		    *d++ = (U8)ch;
+		    *d++ = (U8)this_map;
 		}
-		else if (ch == (short) TR_UNMAPPED)
+		else if (this_map == (short) TR_UNMAPPED)
 		    *d++ = *s;
-		else if (ch == (short) TR_DELETE)
+		else if (this_map == (short) TR_DELETE)
 		    matches++;
 		s++;
 	    }
