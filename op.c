@@ -3118,6 +3118,8 @@ S_maybe_multiconcat(pTHX_ OP *o)
             && (SvPOK(sv) || SvIOK(sv))
             && (!SvGMAGICAL(sv))
         ) {
+            if (argop->op_private & OPpCONST_STRICT)
+                no_bareword_allowed(argop);
             argp++->p = sv;
             utf8   |= cBOOL(SvUTF8(sv));
             nconst++;
