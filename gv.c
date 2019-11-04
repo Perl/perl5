@@ -816,10 +816,10 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
                         "While trying to resolve method call %.*s->%.*s()"
                         " can not locate package \"%"SVf"\" yet it is mentioned in @%.*s::ISA"
                          " (perhaps you forgot to load \"%"SVf"\"?)",
-                         hvnamelen, hvname,
-                         len, name,
+                         (int) hvnamelen, hvname,
+                         (int) len, name,
                         SVfARG(linear_sv),
-                         hvnamelen, hvname,
+                         (int) hvnamelen, hvname,
                          SVfARG(linear_sv));
                 }
             }
