@@ -4859,30 +4859,25 @@ STATIC Size_t	S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const 
 #define PERL_ARGS_ASSERT_DO_TRANS_COMPLEX	\
 	assert(sv); assert(tbl)
 
-STATIC Size_t	S_do_trans_complex_utf8(pTHX_ SV * const sv)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_DO_TRANS_COMPLEX_UTF8	\
-	assert(sv)
-
 STATIC Size_t	S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_COUNT	\
 	assert(sv); assert(tbl)
 
-STATIC Size_t	S_do_trans_count_utf8(pTHX_ SV * const sv)
+STATIC Size_t	S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const map)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_DO_TRANS_COUNT_UTF8	\
-	assert(sv)
+#define PERL_ARGS_ASSERT_DO_TRANS_COUNT_INVMAP	\
+	assert(sv); assert(map)
+
+STATIC Size_t	S_do_trans_invmap(pTHX_ SV * const sv, AV * const map)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_DO_TRANS_INVMAP	\
+	assert(sv); assert(map)
 
 STATIC Size_t	S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DO_TRANS_SIMPLE	\
 	assert(sv); assert(tbl)
-
-STATIC Size_t	S_do_trans_simple_utf8(pTHX_ SV * const sv)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_DO_TRANS_SIMPLE_UTF8	\
-	assert(sv)
 
 #endif
 #if defined(PERL_IN_DUMP_C)
@@ -5540,12 +5535,6 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array);
 STATIC void	S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist);
 #define PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS	\
 	assert(pRExC_state); assert(invlist)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE SV*	S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST
-#endif
-
 STATIC U32	S_add_data(RExC_state_t* const pRExC_state, const char* const s, const U32 n)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ADD_DATA	\
@@ -5582,13 +5571,6 @@ STATIC SV *	S_get_ANYOFM_contents(pTHX_ const regnode * n)
 STATIC SV*	S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state, const regnode_charclass* const node);
 #define PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC	\
 	assert(pRExC_state); assert(node)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(SV* invlist)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
-	assert(invlist)
-#endif
-
 STATIC bool	S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode_offset* nodep, UV *code_point_p, int* cp_count, I32 *flagp, const bool strict, const U32 depth);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
 	assert(pRExC_state); assert(flagp)
@@ -5614,46 +5596,12 @@ PERL_STATIC_INLINE SV*	S_invlist_contents(pTHX_ SV* const invlist, const bool tr
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
-#define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
-	assert(invlist)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE UV	S_invlist_highest(SV* const invlist)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_INVLIST_HIGHEST	\
-	assert(invlist)
-#endif
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	S_invlist_is_iterating(SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_IS_ITERATING	\
 	assert(invlist)
 #endif
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_iterfinish(SV* invlist);
-#define PERL_ARGS_ASSERT_INVLIST_ITERFINISH	\
-	assert(invlist)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_iterinit(SV* invlist);
-#define PERL_ARGS_ASSERT_INVLIST_ITERINIT	\
-	assert(invlist)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_INVLIST_ITERNEXT	\
-	assert(invlist); assert(start); assert(end)
-#endif
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
-#define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
-	assert(invlist)
-#endif
 STATIC bool	S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc);
 #define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT	\
 	assert(pRExC_state); assert(ssc)
@@ -5811,6 +5759,55 @@ PERL_CALLCONV void	Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char*
 #define PERL_ARGS_ASSERT__INVLIST_DUMP	\
 	assert(file); assert(indent); assert(invlist)
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV*	S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(SV* invlist)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
+	assert(invlist)
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
+#define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
+	assert(invlist)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE UV	S_invlist_highest(SV* const invlist)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_INVLIST_HIGHEST	\
+	assert(invlist)
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_iterfinish(SV* invlist);
+#define PERL_ARGS_ASSERT_INVLIST_ITERFINISH	\
+	assert(invlist)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_iterinit(SV* invlist);
+#define PERL_ARGS_ASSERT_INVLIST_ITERINIT	\
+	assert(invlist)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_INVLIST_ITERNEXT	\
+	assert(invlist); assert(start); assert(end)
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
+#define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
+	assert(invlist)
+#endif
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV bool	Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b);
 #define PERL_ARGS_ASSERT__INVLISTEQ	\
@@ -5832,7 +5829,7 @@ PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode*
 #define PERL_ARGS_ASSERT_REGPROP	\
 	assert(sv); assert(o)
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_DOOP_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	S__invlist_contains_cp(SV* const invlist, const UV cp)
 			__attribute__warn_unused_result__;

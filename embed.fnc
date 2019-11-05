@@ -1870,7 +1870,7 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 ApR	|NV	|str_to_version	|NN SV *sv
 EXpR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 EXp	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
-#if defined(PERL_IN_REGCOMP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
 EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 Ei	|void	|invlist_extend    |NN SV* const invlist|const UV len
 Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
@@ -1922,7 +1922,8 @@ EpX	|SV*	|invlist_clone	|NN SV* const invlist|NULLOK SV* newlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	\
  || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		\
- || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)
+ || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		\
+ || defined(PERL_IN_DOOP_C)
 EiRT	|UV*	|invlist_array	|NN SV* const invlist
 EiRT	|bool	|is_invlist	|NULLOK SV* const invlist
 EiRT	|bool*	|get_invlist_offset_addr|NN SV* invlist
@@ -2308,9 +2309,8 @@ p	|void	|init_constants
 SR	|Size_t	|do_trans_simple	|NN SV * const sv|NN const OPtrans_map * const tbl
 SR	|Size_t	|do_trans_count		|NN SV * const sv|NN const OPtrans_map * const tbl
 SR	|Size_t	|do_trans_complex	|NN SV * const sv|NN const OPtrans_map * const tbl
-SR	|Size_t	|do_trans_simple_utf8	|NN SV * const sv
-SR	|Size_t	|do_trans_count_utf8	|NN SV * const sv
-SR	|Size_t	|do_trans_complex_utf8	|NN SV * const sv
+SR	|Size_t	|do_trans_invmap	|NN SV * const sv|NN AV * const map
+SR	|Size_t	|do_trans_count_invmap  |NN SV * const sv|NN AV * const map
 #endif
 
 #if defined(PERL_IN_GV_C)

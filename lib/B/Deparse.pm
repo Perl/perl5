@@ -279,6 +279,8 @@ BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
 # _pessimise_walk(): recursively walk the optree of a sub,
 # possibly undoing optimisations along the way.
 
+sub DEBUG { 0 }
+
 sub _pessimise_walk {
     my ($self, $startop) = @_;
 
@@ -5714,100 +5716,81 @@ sub tr_chr {
     }
 }
 
-# XXX This doesn't yet handle all cases correctly either
+sub tr_invmap {
+    my ($invlist_ref, $map_ref) = @_;
+
+    my $infinity = ~0 >> 1;     # IV_MAX
+    my $from = "";
+    my $to = "";
+
+    for my $i (0.. @$invlist_ref - 1) {
+        my $this_from = $invlist_ref->[$i];
+        my $map = $map_ref->[$i];
+        my $upper = ($i < @$invlist_ref - 1)
+                     ? $invlist_ref->[$i+1]
+                     : $infinity;
+        my $range = $upper - $this_from - 1;
+        if (DEBUG) {
+            print STDERR "i=$i, from=$this_from, upper=$upper, range=$range\n";
+        }
+        next if $map == ~0;
+        next if $map == ~0 - 1;
+        $from .= tr_chr($this_from);
+        $to .= tr_chr($map);
+        next if $range == 0;    # Single code point
+        if ($range == 1) {      # Adjacent code points
+            $from .= tr_chr($this_from + 1);
+            $to   .= tr_chr($map + 1);
+        }
+        elsif ($upper != $infinity) {
+            $from .= "-" . tr_chr($this_from + $range);
+            $to   .= "-" . tr_chr($map + $range);
+        }
+        else {
+            $from .= "-INFTY";
+            $to   .= "-INFTY";
+        }
+    }
+
+    return ($from, $to);
+}
 
 sub tr_decode_utf8 {
-    my($swash_hv, $flags) = @_;
-    my %swash = $swash_hv->ARRAY;
-    my $final = undef;
-    $final = $swash{'FINAL'}->IV if exists $swash{'FINAL'};
-    my $none = $swash{"NONE"}->IV;
-    my $extra = $none + 1;
-    my(@from, @delfrom, @to);
-    my $line;
-    foreach $line (split /\n/, $swash{'LIST'}->PV) {
-	my($min, $max, $result) = split(/\t/, $line);
-	$min = hex $min;
-	if (length $max) {
-	    $max = hex $max;
-	} else {
-	    $max = $min;
-	}
-	$result = hex $result;
-	if ($result == $extra) {
-	    push @delfrom, [$min, $max];
-	} else {
-	    push @from, [$min, $max];
-	    push @to, [$result, $result + $max - $min];
-	}
+    my($tr_av, $flags) = @_;
+    printf STDERR "flags=0x%x\n", $flags if DEBUG;
+    my $invlist = $tr_av->ARRAYelt(0);
+    my @invlist = unpack("J*", $invlist->PV);
+    my @map = unpack("J*", $tr_av->ARRAYelt(1)->PV);
+
+    if (DEBUG) {
+        for my $i (0 .. @invlist - 1) {
+            printf STDERR "[%d]\t%x\t", $i, $invlist[$i];
+            my $map = $map[$i];
+            if ($map == ~0) {
+                print STDERR "TR_UNMAPPED\n";
+            }
+            elsif ($map == ~0 - 1) {
+                print STDERR "TR_SPECIAL\n";
+            }
+            else {
+                printf STDERR "%x\n", $map;
+            }
+        }
     }
-    for my $i (0 .. $#from) {
-	if ($from[$i][0] == ord '-') {
-	    unshift @from, splice(@from, $i, 1);
-	    unshift @to, splice(@to, $i, 1);
-	    last;
-	} elsif ($from[$i][1] == ord '-') {
-	    $from[$i][1]--;
-	    $to[$i][1]--;
-	    unshift @from, ord '-';
-	    unshift @to, ord '-';
-	    last;
-	}
-    }
-    for my $i (0 .. $#delfrom) {
-	if ($delfrom[$i][0] == ord '-') {
-	    push @delfrom, splice(@delfrom, $i, 1);
-	    last;
-	} elsif ($delfrom[$i][1] == ord '-') {
-	    $delfrom[$i][1]--;
-	    push @delfrom, ord '-';
-	    last;
-	}
-    }
-    if (defined $final and $to[$#to][1] != $final) {
-	push @to, [$final, $final];
-    }
-    push @from, @delfrom;
+
+    my ($from, $to) = tr_invmap(\@invlist, \@map);
+
     if ($flags & OPpTRANS_COMPLEMENT) {
-	my @newfrom;
-	my $next = 0;
-	for my $i (0 .. $#from) {
-	    push @newfrom, [$next, $from[$i][0] - 1];
-	    $next = $from[$i][1] + 1;
-	}
-	@from = ();
-	for my $range (@newfrom) {
-	    if ($range->[0] <= $range->[1]) {
-		push @from, $range;
-	    }
-	}
+        shift @map;
+        pop @invlist;
+        my $throw_away;
+        ($from, $throw_away) = tr_invmap(\@invlist, \@map);
     }
-    my($from, $to, $diff);
-    for my $chunk (@from) {
-	$diff = $chunk->[1] - $chunk->[0];
-	if ($diff > 1) {
-	    $from .= tr_chr($chunk->[0]) . "-" . tr_chr($chunk->[1]);
-	} elsif ($diff == 1) {
-	    $from .= tr_chr($chunk->[0]) . tr_chr($chunk->[1]);
-	} else {
-	    $from .= tr_chr($chunk->[0]);
-	}
+
+    if (DEBUG) {
+        print STDERR "Returning ", escape_str($from), "/",
+                                   escape_str($to), "\n";
     }
-    for my $chunk (@to) {
-	$diff = $chunk->[1] - $chunk->[0];
-	if ($diff > 1) {
-	    $to .= tr_chr($chunk->[0]) . "-" . tr_chr($chunk->[1]);
-	} elsif ($diff == 1) {
-	    $to .= tr_chr($chunk->[0]) . tr_chr($chunk->[1]);
-	} else {
-	    $to .= tr_chr($chunk->[0]);
-	}
-    }
-    #$final = sprintf("%04x", $final) if defined $final;
-    #$none = sprintf("%04x", $none) if defined $none;
-    #$extra = sprintf("%04x", $extra) if defined $extra;
-    #print STDERR "final: $final\n none: $none\nextra: $extra\n";
-    #print STDERR $swash{'LIST'}->PV;
     return (escape_str($from), escape_str($to));
 }
 
@@ -5821,9 +5804,9 @@ sub pp_trans {
 	($from, $to) = tr_decode_byte($op->pv, $priv_flags);
     } elsif ($class eq "PADOP") {
 	($from, $to)
-	  = tr_decode_utf8($self->padval($op->padix)->RV, $priv_flags);
+	  = tr_decode_utf8($self->padval($op->padix), $priv_flags);
     } else { # class($op) eq "SVOP"
-	($from, $to) = tr_decode_utf8($op->sv->RV, $priv_flags);
+	($from, $to) = tr_decode_utf8($op->sv, $priv_flags);
     }
     my $flags = "";
     $flags .= "c" if $priv_flags & OPpTRANS_COMPLEMENT;

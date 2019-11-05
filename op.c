@@ -1059,7 +1059,7 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_TRANS:
     case OP_TRANSR:
 	if (   (o->op_type == OP_TRANS || o->op_type == OP_TRANSR)
-            && (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)))
+            && (o->op_private & OPpTRANS_USE_SVOP))
         {
 #ifdef USE_ITHREADS
 	    if (cPADOPo->op_padix > 0) {
@@ -6784,8 +6784,8 @@ static int uvcompare(const void *a, const void *b)
  *   OPpTRANS_SQUASH
  *   OPpTRANS_DELETE
  * flags as appropriate; this function may add
- *   OPpTRANS_FROM_UTF
- *   OPpTRANS_TO_UTF
+ *   OPpTRANS_USE_SVOP
+ *   OPpTRANS_CAN_FORCE_UTF8
  *   OPpTRANS_IDENTICAL
  *   OPpTRANS_GROWS
  * flags
@@ -6794,416 +6794,1028 @@ static int uvcompare(const void *a, const void *b)
 static OP *
 S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 {
+    /* This function compiles a tr///, from data gathered from toke.c, into a
+     * form suitable for use by do_trans() in doop.c at runtime.
+     *
+     * It first normalizes the data, while discarding extraneous inputs; then
+     * writes out the compiled data.  The normalization allows for complete
+     * analysis, and avoids some false negatives and positives earlier versions
+     * of this code had.
+     *
+     * The normalization form is an inversion map (described below in detail).
+     * This is essentially the compiled form for tr///'s that require UTF-8,
+     * and its easy to use it to write the 257-byte table for tr///'s that
+     * don't need UTF-8.  That table is identical to what's been in use for
+     * many perl versions, except that it doesn't handle some edge cases that
+     * it used to, involving code points above 255.  The UTF-8 form now handles
+     * these.  (This could be changed with extra coding should it shown to be
+     * desirable.)
+     *
+     * If the complement (/c) option is specified, the lhs string (tstr) is
+     * parsed into an inversion list.  Complementing these is trivial.  Then a
+     * complemented tstr is built from that, and used thenceforth.  This hides
+     * the fact that it was complemented from almost all successive code.
+     *
+     * One of the important characteristics to know about the input is whether
+     * the transliteration may be done in place, or does a temporary need to be
+     * allocated, then copied.  If the replacement for every character in every
+     * possible string takes up no more bytes than the the character it
+     * replaces, then it can be edited in place.  Otherwise the replacement
+     * could "grow", depending on the strings being processed.  Some inputs
+     * won't grow, and might even shrink under /d, but some inputs could grow,
+     * so we have to assume any given one might grow.  On very long inputs, the
+     * temporary could eat up a lot of memory, so we want to avoid it if
+     * possible.  For non-UTF-8 inputs, everything is single-byte, so can be
+     * edited in place, unless there is something in the pattern that could
+     * force it into UTF-8.  The inversion map makes it feasible to determine
+     * this.  Previous versions of this code pretty much punted on determining
+     * if UTF-8 could be edited in place.  Now, this code is rigorous in making
+     * that determination.
+     *
+     * Another characteristic we need to know is whether the lhs and rhs are
+     * identical.  If so, and no other flags are present, the only effect of
+     * the tr/// is to count the characters present in the input that are
+     * mentioned in the lhs string.  The implementation of that is easier and
+     * runs faster than the more general case.  Normalizing here allows for
+     * accurate determination of this.  Previously there were false negatives
+     * possible.
+     *
+     * Instead of 'transliterated', the comments here use 'unmapped' for the
+     * characters that are left unchanged by the operation; otherwise they are
+     * 'mapped'
+     *
+     * The lhs of the tr/// is here referred to as the t side.
+     * The rhs of the tr/// is here referred to as the r side.
+     */
+
     SV * const tstr = ((SVOP*)expr)->op_sv;
     SV * const rstr = ((SVOP*)repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
-    const U8 *t = (U8*)SvPV_const(tstr, tlen);
-    const U8 *r = (U8*)SvPV_const(rstr, rlen);
-    Size_t i, j;
-    bool grows = FALSE;
-    OPtrans_map *tbl;
-    SSize_t struct_size; /* malloced size of table struct */
+    const U8 * t0 = (U8*)SvPV_const(tstr, tlen);
+    const U8 * r0 = (U8*)SvPV_const(rstr, rlen);
+    const U8 * t = t0;
+    const U8 * r = r0;
+    Size_t t_count = 0, r_count = 0;  /* Number of characters in search and
+                                         replacement lists */
 
+    /* khw thinks some of the private flags for this op are quaintly named.
+     * OPpTRANS_GROWS for example is TRUE if the replacement for some lhs
+     * character when represented in UTF-8 is longer than the original
+     * character's UTF-8 representation */
     const bool complement = cBOOL(o->op_private & OPpTRANS_COMPLEMENT);
     const bool squash     = cBOOL(o->op_private & OPpTRANS_SQUASH);
     const bool del        = cBOOL(o->op_private & OPpTRANS_DELETE);
-    SV* swash;
+
+    /* Set to true if there is some character < 256 in the lhs that maps to >
+     * 255.  If so, a non-UTF-8 match string can be forced into requiring to be
+     * in UTF-8 by a tr/// operation. */
+    bool can_force_utf8 = FALSE;
+
+    /* What is the maximum expansion factor in UTF-8 transliterations.  If a
+     * 2-byte UTF-8 encoded character is to be replaced by a 3-byte one, its
+     * expansion factor is 1.5.  This number is used at runtime to calculate
+     * how much space to allocate for non-inplace transliterations.  Without
+     * this number, the worst case is 14, which is extremely unlikely to happen
+     * in real life, and would require significant memory overhead. */
+    NV max_expansion = 1.;
+
+    SSize_t t_range_count, r_range_count, min_range_count;
+    UV* t_array;
+    SV* t_invlist;
+    UV* r_map;
+    UV r_cp, t_cp;
+    IV t_cp_end = -1;
+    UV r_cp_end;
+    Size_t len;
+    AV* invmap;
+    UV final_map = TR_UNLISTED;    /* The final character in the replacement
+                                      list, updated as we go along.  Initialize
+                                      to something illegal */
+
+    bool rstr_utf8 = cBOOL(SvUTF8(rstr));
+    bool tstr_utf8 = cBOOL(SvUTF8(tstr));
+
+    const U8* tend = t + tlen;
+    const U8* rend = r + rlen;
+
+    SV * inverted_tstr = NULL;
+
+    Size_t i;
+    unsigned int pass2;
+
+    /* This routine implements detection of a transliteration having a longer
+     * UTF-8 representation than its source, by partitioning all the possible
+     * code points of the platform into equivalence classes of the same UTF-8
+     * byte length in the first pass.  As it constructs the mappings, it carves
+     * these up into smaller chunks, but doesn't merge any together.  This
+     * makes it easy to find the instances it's looking for.  A second pass is
+     * done after this has been determined which merges things together to
+     * shrink the table for runtime.  For ASCII platforms, the table is
+     * trivial, given below, and uses the fundamental characteristics of UTF-8
+     * to construct the values.  For EBCDIC, it isn't so, and we rely on a
+     * table constructed by the perl script that generates these kinds of
+     * things */
+#ifndef EBCDIC
+    UV PL_partition_by_byte_length[] = {
+        0,
+        0x80,
+        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),
+        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),
+        (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),
+        ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),
+        ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),
+        ( 2 * (1UL << (5 * UTF_ACCUMULATION_SHIFT)))
+
+#  ifdef UV_IS_QUAD
+                                                    ,
+        (     (1UL << (6 * UTF_ACCUMULATION_SHIFT)))
+
+#  endif
+#endif
+    };
 
     PERL_ARGS_ASSERT_PMTRANS;
 
     PL_hints |= HINT_BLOCK_SCOPE;
 
-    if (SvUTF8(tstr))
-        o->op_private |= OPpTRANS_FROM_UTF;
+    /* If /c, the search list is sorted and complemented.  This is now done by
+     * creating an inversion list from it, and then trivially inverting that.
+     * The previous implementation used qsort, but creating the list
+     * automatically keeps it sorted as we go along */
+    if (complement) {
+        UV start, end;
+        SV * inverted_tlist = _new_invlist(tlen);
+        Size_t temp_len;
 
-    if (SvUTF8(rstr))
-        o->op_private |= OPpTRANS_TO_UTF;
+        while (t < tend) {
 
-    if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
+            /* Non-utf8 strings don't have ranges, so each character is listed
+             * out */
+            if (! tstr_utf8) {
+                inverted_tlist = add_cp_to_invlist(inverted_tlist, *t);
+                t++;
+            }
+            else {  /* But UTF-8 strings have been parsed in toke.c to have
+                 * ranges if appropriate. */
+                UV t_cp;
+                Size_t t_char_len;
 
-        /* for utf8 translations, op_sv will be set to point to a swash
-         * containing codepoint ranges. This is done by first assembling
-         * a textual representation of the ranges in listsv then compiling
-         * it using swash_init(). For more details of the textual format,
-         * see L<perlunicode.pod/"User-Defined Character Properties"> .
-         */
+                /* Get the first character */
+                t_cp = valid_utf8_to_uvchr(t, &t_char_len);
+                t += t_char_len;
 
-	SV* const listsv = newSVpvs("# comment\n");
-	SV* transv = NULL;
-	const U8* tend = t + tlen;
-	const U8* rend = r + rlen;
-	STRLEN ulen;
-	UV tfirst = 1;
-	UV tlast = 0;
-	IV tdiff;
-	STRLEN tcount = 0;
-	UV rfirst = 1;
-	UV rlast = 0;
-	IV rdiff;
-	STRLEN rcount = 0;
-	IV diff;
-	I32 none = 0;
-	U32 max = 0;
-	I32 bits;
-	I32 havefinal = 0;
-	U32 final = 0;
-	const I32 from_utf  = o->op_private & OPpTRANS_FROM_UTF;
-	const I32 to_utf    = o->op_private & OPpTRANS_TO_UTF;
-	U8* tsave = NULL;
-	U8* rsave = NULL;
-	const U32 flags = UTF8_ALLOW_DEFAULT;
+                /* If the next byte indicates that this wasn't the first
+                 * element of a range, the range is just this one */
+                if (t >= tend || *t != RANGE_INDICATOR) {
+                    inverted_tlist = add_cp_to_invlist(inverted_tlist, t_cp);
+                }
+                else { /* Otherwise, ignore the indicator byte, and get the
+                          final element, and add the whole range */
+                    t++;
+                    t_cp_end = valid_utf8_to_uvchr(t, &t_char_len);
+                    t += t_char_len;
 
-	if (!from_utf) {
-	    STRLEN len = tlen;
-	    t = tsave = bytes_to_utf8(t, &len);
-	    tend = t + len;
-	}
-	if (!to_utf && rlen) {
-	    STRLEN len = rlen;
-	    r = rsave = bytes_to_utf8(r, &len);
-	    rend = r + len;
-	}
+                    inverted_tlist = _add_range_to_invlist(inverted_tlist,
+                                                      t_cp, t_cp_end);
+                }
+            }
+        } /* End of parse through tstr */
 
-/* There is a snag with this code on EBCDIC: scan_const() in toke.c has
- * encoded chars in native encoding which makes ranges in the EBCDIC 0..255
- * odd.  */
+        /* The inversion list is done; now invert it */
+        _invlist_invert(inverted_tlist);
 
-	if (complement) {
-            /* utf8 and /c:
-             * replace t/tlen/tend with a version that has the ranges
-             * complemented
-             */
-	    U8 tmpbuf[UTF8_MAXBYTES+1];
-	    UV *cp;
-	    UV nextmin = 0;
-	    Newx(cp, 2*tlen, UV);
-	    i = 0;
-	    transv = newSVpvs("");
+        /* Now go through the inverted list and create a new tstr for the rest
+         * of the routine to use.  Since the UTF-8 version can have ranges, and
+         * can be much more compact than the non-UTF-8 version, we create the
+         * string in UTF-8 even if not necessary.  (This is just an intermediate
+         * value that gets thrown away anyway.) */
+        invlist_iterinit(inverted_tlist);
+        inverted_tstr = newSVpvs("");
+        while (invlist_iternext(inverted_tlist, &start, &end)) {
+            U8 temp[UTF8_MAXBYTES];
+            U8 * temp_end_pos;
 
-            /* convert search string into array of (start,end) range
-             * codepoint pairs stored in cp[]. Most "ranges" will start
-             * and end at the same char */
-	    while (t < tend) {
-		cp[2*i] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
-		t += ulen;
-                /* the toker converts X-Y into (X, RANGE_INDICATOR, Y) */
-		if (t < tend && *t == RANGE_INDICATOR) {
-		    t++;
-		    cp[2*i+1] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
-		    t += ulen;
-		}
-		else {
-		 cp[2*i+1] = cp[2*i];
-		}
-		i++;
-	    }
+            /* IV_MAX keeps things from going out of bounds */
+            start = MIN(IV_MAX, start);
+            end   = MIN(IV_MAX, end);
 
-            /* sort the ranges */
-	    qsort(cp, i, 2*sizeof(UV), uvcompare);
+            temp_end_pos = uvchr_to_utf8(temp, start);
+            sv_catpvn(inverted_tstr, (char *) temp, temp_end_pos - temp);
 
-            /* Create a utf8 string containing the complement of the
-             * codepoint ranges. For example if cp[] contains [A,B], [C,D],
-             * then transv will contain the equivalent of:
-             * join '', map chr, 0,     RANGE_INDICATOR, A - 1,
-             *                   B + 1, RANGE_INDICATOR, C - 1,
-             *                   D + 1, RANGE_INDICATOR, 0x7fffffff;
-             * A range of a single char skips the RANGE_INDICATOR and
-             * end cp.
-             */
-	    for (j = 0; j < i; j++) {
-		UV  val = cp[2*j];
-		diff = val - nextmin;
-		if (diff > 0) {
-		    t = uvchr_to_utf8(tmpbuf,nextmin);
-		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
-		    if (diff > 1) {
-			U8  range_mark = RANGE_INDICATOR;
-			t = uvchr_to_utf8(tmpbuf, val - 1);
-			sv_catpvn(transv, (char *)&range_mark, 1);
-			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
-		    }
-	        }
-		val = cp[2*j+1];
-		if (val >= nextmin)
-		    nextmin = val + 1;
-	    }
+            if (start != end) {
+                Perl_sv_catpvf(aTHX_ inverted_tstr, "%c", RANGE_INDICATOR);
+                temp_end_pos = uvchr_to_utf8(temp, end);
+                sv_catpvn(inverted_tstr, (char *) temp, temp_end_pos - temp);
+            }
+        }
 
-	    t = uvchr_to_utf8(tmpbuf,nextmin);
-	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
-	    {
-		U8 range_mark = RANGE_INDICATOR;
-		sv_catpvn(transv, (char *)&range_mark, 1);
-	    }
-	    t = uvchr_to_utf8(tmpbuf, 0x7fffffff);
-	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
-	    t = (const U8*)SvPVX_const(transv);
-	    tlen = SvCUR(transv);
-	    tend = t + tlen;
-	    Safefree(cp);
-	}
-	else if (!rlen && !del) {
-	    r = t; rlen = tlen; rend = tend;
-	}
+        /* Set up so the remainder of the routine uses this complement, instead
+         * of the actual input */
+        t0 = t = (U8*)SvPV_const(inverted_tstr, temp_len);
+        tend = t0 + temp_len;
+        tstr_utf8 = TRUE;
 
-	if (!squash) {
-		if ((!rlen && !del) || t == r ||
-		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
-		{
-		    o->op_private |= OPpTRANS_IDENTICAL;
-		}
-	}
-
-        /* extract char ranges from t and r and append them to listsv */
-
-	while (t < tend || tfirst <= tlast) {
-	    /* see if we need more "t" chars */
-	    if (tfirst > tlast) {
-		tfirst = (I32)utf8n_to_uvchr(t, tend - t, &ulen, flags);
-		t += ulen;
-		if (t < tend && *t == RANGE_INDICATOR) {	/* illegal utf8 val indicates range */
-		    t++;
-		    tlast = (I32)utf8n_to_uvchr(t, tend - t, &ulen, flags);
-		    t += ulen;
-		}
-		else
-		    tlast = tfirst;
-	    }
-
-	    /* now see if we need more "r" chars */
-	    if (rfirst > rlast) {
-		if (r < rend) {
-		    rfirst = (I32)utf8n_to_uvchr(r, rend - r, &ulen, flags);
-		    r += ulen;
-		    if (r < rend && *r == RANGE_INDICATOR) {	/* illegal utf8 val indicates range */
-			r++;
-			rlast = (I32)utf8n_to_uvchr(r, rend - r, &ulen, flags);
-			r += ulen;
-		    }
-		    else
-			rlast = rfirst;
-		}
-		else {
-		    if (!havefinal++)
-			final = rlast;
-		    rfirst = rlast = 0xffffffff;
-		}
-	    }
-
-	    /* now see which range will peter out first, if either. */
-	    tdiff = tlast - tfirst;
-	    rdiff = rlast - rfirst;
-	    tcount += tdiff + 1;
-	    rcount += rdiff + 1;
-
-	    if (tdiff <= rdiff)
-		diff = tdiff;
-	    else
-		diff = rdiff;
-
-	    if (rfirst == 0xffffffff) {
-		diff = tdiff;	/* oops, pretend rdiff is infinite */
-		if (diff > 0)
-		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t%04lx\tXXXX\n",
-				   (long)tfirst, (long)tlast);
-		else
-		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t\tXXXX\n", (long)tfirst);
-	    }
-	    else {
-		if (diff > 0)
-		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t%04lx\t%04lx\n",
-				   (long)tfirst, (long)(tfirst + diff),
-				   (long)rfirst);
-		else
-		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t\t%04lx\n",
-				   (long)tfirst, (long)rfirst);
-
-		if (rfirst + diff > max)
-		    max = rfirst + diff;
-		if (!grows)
-		    grows = (tfirst < rfirst &&
-			     UVCHR_SKIP(tfirst) < UVCHR_SKIP(rfirst + diff));
-		rfirst += diff + 1;
-	    }
-	    tfirst += diff + 1;
-	}
-
-        /* compile listsv into a swash and attach to o */
-
-	none = ++max;
-	if (del)
-	    ++max;
-
-	if (max > 0xffff)
-	    bits = 32;
-	else if (max > 0xff)
-	    bits = 16;
-	else
-	    bits = 8;
-
-	swash = MUTABLE_SV(swash_init("utf8", "", listsv, bits, none));
-#ifdef USE_ITHREADS
-	cPADOPo->op_padix = pad_alloc(OP_TRANS, SVf_READONLY);
-	SvREFCNT_dec(PAD_SVl(cPADOPo->op_padix));
-	PAD_SETSV(cPADOPo->op_padix, swash);
-	SvPADTMP_on(swash);
-	SvREADONLY_on(swash);
-#else
-	cSVOPo->op_sv = swash;
-#endif
-	SvREFCNT_dec(listsv);
-	SvREFCNT_dec(transv);
-
-	if (!del && havefinal && rlen)
-	    (void)hv_store(MUTABLE_HV(SvRV(swash)), "FINAL", 5,
-			   newSVuv((UV)final), 0);
-
-	Safefree(tsave);
-	Safefree(rsave);
-
-	tlen = tcount;
-	rlen = rcount;
-	if (r < rend)
-	    rlen++;
-	else if (rlast == 0xffffffff)
-	    rlen = 0;
-
-	goto warnins;
+        SvREFCNT_dec_NN(inverted_tlist);
     }
+
+    /* For non-/d, an empty rhs means to use the lhs */
+    if (rlen == 0 && ! del) {
+        r0 = t0;
+        rend = tend;
+        rstr_utf8  = tstr_utf8;
+    }
+
+    t_invlist = _new_invlist(1);
+
+    /* Parse the (potentially adjusted) input, creating the inversion map.
+     * This is done in two passes.  The first pass is to determine if the
+     * transliteration can be done in place.  The inversion map it creates
+     * could be used, but generally would be larger and slower to run than the
+     * output of the second pass, which starts with a more compact table and
+     * allows more ranges to be merged */
+    for (pass2 = 0; pass2 < 2; pass2++) {
+
+        /* Initialize to a single range */
+        t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
+
+        /* In the second pass, we just have the single range */
+
+        if (pass2) {
+            len = 1;
+            t_array = invlist_array(t_invlist);
+        }
+        else {
+
+            /* But in the first pass, the lhs is partitioned such that the
+             * number of UTF-8 bytes required to represent a code point in each
+             * partition is the same as the number for any other code point in
+             * that partion.  We copy the pre-compiled partion. */
+            len = C_ARRAY_LENGTH(PL_partition_by_byte_length);
+            invlist_extend(t_invlist, len);
+            t_array = invlist_array(t_invlist);
+            Copy(PL_partition_by_byte_length, t_array, len, UV);
+            invlist_set_len(t_invlist,
+                            len,
+                            *(get_invlist_offset_addr(t_invlist)));
+            Newx(r_map, len + 1, UV);
+        }
+
+        /* And the mapping of each of the ranges is initialized.  Initially,
+         * everything is TR_UNLISTED. */
+        for (i = 0; i < len; i++) {
+            r_map[i] = TR_UNLISTED;
+        }
+
+        t = t0;
+        t_count = 0;
+        r = r0;
+        r_count = 0;
+        t_range_count = r_range_count = 0;
+
+        /* Now go through the search list constructing an inversion map.  The
+         * input is not necessarily in any particular order.  Making it an
+         * inversion map orders it, potentially simplifying, and makes it easy
+         * to deal with at run time.  This is the only place in core that
+         * generates an inversion map; if others were introduced, it might be
+         * better to create general purpose routines to handle them.
+         * (Inversion maps are created in perl in other places.)
+         *
+         * An inversion map consists of two parallel arrays.  One is
+         * essentially an inversion list: an ordered list of code points such
+         * that each element gives the first code point of a range of
+         * consecutive code points that map to the element in the other array
+         * that has the same index as this one (in other words, the
+         * corresponding element).  Thus the range extends up to (but not
+         * including) the code point given by the next higher element.  In a
+         * true inversion map, the corresponding element in the other array
+         * gives the mapping of the first code point in the range, with the
+         * understanding that the next higher code point in the inversion
+         * list's range will map to the next higher code point in the map.
+         *
+         * So if at element [i], let's say we have:
+         *
+         *     t_invlist  r_map
+         * [i]    A         a
+         *
+         * This means that A => a, B => b, C => c....  Let's say that the
+         * situation is such that:
+         *
+         * [i+1]  L        -1
+         *
+         * This means the sequence that started at [i] stops at K => k.  This
+         * illustrates that you need to look at the next element to find where
+         * a sequence stops.  Except, the highest element in the inversion list
+         * begins a range that is understood to extend to the platform's
+         * infinity.
+         *
+         * This routine modifies traditional inversion maps to reserve two
+         * mappings:
+         *
+         *  TR_UNLISTED (or -1) indicates that the no code point in the range
+         *      is listed in the tr/// searchlist.  At runtime, these are
+         *      always passed through unchanged.  In the inversion map, all
+         *      points in the range are mapped to -1, instead of increasing,
+         *      like the 'L' in the example above.
+         *
+         *      We start the parse with every code point mapped to this, and as
+         *      we parse and find ones that are listed in the search list, we
+         *      carve out ranges as we go along that override that.
+         *
+         *  TR_SPECIAL_HANDLING (or -2) indicates that every code point in the
+         *      range needs special handling.  Again, all code points in the
+         *      range are mapped to -2, instead of increasing.
+         *
+         *      Under /d this value means the code point should be deleted from
+         *      the transliteration when encountered.
+         *
+         *      Otherwise, it marks that every code point in the range is to
+         *      map to the final character in the replacement list.  This
+         *      happens only when the replacement list is shorter than the
+         *      search one, so there are things in the search list that have no
+         *      correspondence in the replacement list.  For example, in
+         *      tr/a-z/A/, 'A' is the final value, and the inversion map
+         *      generated for this would be like this:
+         *          \0  =>  -1
+         *          a   =>   A
+         *          b-z =>  -2
+         *          z+1 =>  -1
+         *      'A' appears once, then the remainder of the range maps to -2.
+         *      The use of -2 isn't strictly necessary, as an inversion map is
+         *      capable of representing this situation, but not nearly so
+         *      compactly, and this is actually quite commonly encountered.
+         *      Indeed, the original design of this code used a full inversion
+         *      map for this.  But things like
+         *          tr/\0-\x{FFFF}/A/
+         *      generated huge data structures, slowly, and the execution was
+         *      also slow.  So the current scheme was implemented.
+         *
+         *  So, if the next element in our example is:
+         *
+         * [i+2]  Q        q
+         *
+         * Then all of L, M, N, O, and P map to TR_UNLISTED.  If the next
+         * elements are
+         *
+         * [i+3]  R        z
+         * [i+4]  S       TR_UNLISTED
+         *
+         * Then Q => q; R => z; and S => TR_UNLISTED.  If [i+4] (the 'S') is
+         * the final element in the arrays, every code point from S to infinity
+         * maps to TR_UNLISTED.
+         *
+         */
+                           /* Finish up range started in what otherwise would
+                            * have been the final iteration */
+        while (t < tend || t_range_count > 0) {
+            bool adjacent_to_range_above = FALSE;
+            bool adjacent_to_range_below = FALSE;
+
+            bool merge_with_range_above = FALSE;
+            bool merge_with_range_below = FALSE;
+
+            SSize_t i, span, invmap_range_length_remaining;
+
+            /* If we are in the middle of processing a range in the 'target'
+             * side, the previous iteration has set us up.  Otherwise, look at
+             * the next character in the search list */
+            if (t_range_count <= 0) {
+                if (! tstr_utf8) {
+
+                    /* Here, not in the middle of a range, and not UTF-8.  The
+                     * next code point is the single byte where we're at */
+                    t_cp = *t;
+                    t_range_count = 1;
+                    t++;
+                }
+                else {
+                    Size_t t_char_len;
+
+                    /* Here, not in the middle of a range, and is UTF-8.  The
+                     * next code point is the next UTF-8 char in the input.  We
+                     * know the input is valid, because the toker constructed
+                     * it */
+                    t_cp = valid_utf8_to_uvchr(t, &t_char_len);
+                    t += t_char_len;
+
+                    /* UTF-8 strings (only) have been parsed in toke.c to have
+                     * ranges.  See if the next byte indicates that this was
+                     * the first element of a range.  If so, get the final
+                     * element and calculate the range size.  If not, the range
+                     * size is 1 */
+                    if (t < tend && *t == RANGE_INDICATOR) {
+                        t++;
+                        t_range_count = valid_utf8_to_uvchr(t, &t_char_len)
+                                      - t_cp + 1;
+                        t += t_char_len;
+                    }
+                    else {
+                        t_range_count = 1;
+                    }
+                }
+
+                /* Count the total number of listed code points * */
+                t_count += t_range_count;
+            }
+
+            /* Similarly, get the next character in the replacement list */
+            if (r_range_count <= 0) {
+                if (r >= rend) {
+
+                    /* But if we've exhausted the rhs, there is nothing to map
+                     * to, except the special handling one, and we make the
+                     * range the same size as the lhs one. */
+                    r_cp = TR_SPECIAL_HANDLING;
+                    r_range_count = t_range_count;
+                }
+                else {
+                    if (! rstr_utf8) {
+                        r_cp = *r;
+                        r_range_count = 1;
+                        r++;
+                    }
+                    else {
+                        Size_t r_char_len;
+
+                        r_cp = valid_utf8_to_uvchr(r, &r_char_len);
+                        r += r_char_len;
+                        if (r < rend && *r == RANGE_INDICATOR) {
+                            r++;
+                            r_range_count = valid_utf8_to_uvchr(r,
+                                                    &r_char_len) - r_cp + 1;
+                            r += r_char_len;
+                        }
+                        else {
+                            r_range_count = 1;
+                        }
+                    }
+
+                    if (r_cp == TR_SPECIAL_HANDLING) {
+                        r_range_count = t_range_count;
+                    }
+
+                    /* This is the final character so far */
+                    final_map = r_cp + r_range_count - 1;
+
+                    r_count += r_range_count;
+                }
+            }
+
+            /* Here, we have the next things ready in both sides.  They are
+             * potentially ranges.  We try to process as big a chunk as
+             * possible at once, but the lhs and rhs must be synchronized, so
+             * things like tr/A-Z/a-ij-z/ will need to be processed in 2 chunks
+             * */
+            min_range_count = MIN(t_range_count, r_range_count);
+
+            /* Search the inversion list for the entry that contains the input
+             * code point <cp>.  The inversion map was initialized to cover the
+             * entire range of possible inputs, so this should not fail.  So
+             * the return value is the index into the list's array of the range
+             * that contains <cp>, that is, 'i' such that array[i] <= cp <
+             * array[i+1] */
+            i = _invlist_search(t_invlist, t_cp);
+            assert(i >= 0);
+
+            /* Here, the data structure might look like:
+             *
+             * index    t   r     Meaning
+             * [i-1]    J   j   # J-L => j-l
+             * [i]      M  -1   # M => default; as do N, O, P, Q
+             * [i+1]    R   x   # R => x, S => x+1, T => x+2
+             * [i+2]    U   y   # U => y, V => y+1, ...
+             * ...
+             * [-1]     Z  -1   # Z => default; as do Z+1, ... infinity
+             *
+             * where 'x' and 'y' above are not to be taken literally.
+             *
+             * The maximum chunk we can handle in this loop iteration, is the
+             * smallest of the three components: the lhs 't_', the rhs 'r_',
+             * and the remainder of the range in element [i].  (In pass 1, that
+             * range will have everything in it be of the same class; we can't
+             * cross into another class.)  'min_range_count' already contains
+             * the smallest of the first two values.  The final one is
+             * irrelevant if the map is to the special indicator */
+
+            invmap_range_length_remaining = ((Size_t) i + 1 < len)
+                                            ? t_array[i+1] - t_cp
+                                            : IV_MAX - t_cp;
+            span = MAX(1, MIN(min_range_count, invmap_range_length_remaining));
+
+            /* The end point of this chunk is where we are, plus the span, but
+             * never larger than the platform's infinity */
+            t_cp_end = MIN(IV_MAX, t_cp + span - 1);
+
+            if (r_cp == TR_SPECIAL_HANDLING) {
+                r_cp_end = TR_SPECIAL_HANDLING;
+            }
+            else {
+                r_cp_end = MIN(IV_MAX, r_cp + span - 1);
+
+                /* If something on the lhs is below 256, and something on the
+                 * rhs is above, there is a potential mapping here across that
+                 * boundary.  Indeed the only way there isn't is if both sides
+                 * start at the same point.  That means they both cross at the
+                 * same time.  But otherwise one crosses before the other */
+                if (t_cp < 256 && r_cp_end > 255 && r_cp != t_cp) {
+                    can_force_utf8 = TRUE;
+                }
+            }
+
+            /* If a character appears in the search list more than once, the
+             * 2nd and succeeding occurrences are ignored, so only do this
+             * range if haven't already processed this character.  (The range
+             * has been set up so that all members in it will be of the same
+             * ilk) */
+            if (r_map[i] == TR_UNLISTED) {
+
+                /* This is the first definition for this chunk, hence is valid
+                 * and needs to be processed.  Here and in the comments below,
+                 * we use the above sample data.  The t_cp chunk must be any
+                 * contiguous subset of M, N, O, P, and/or Q.
+                 *
+                 * In the first pass, the t_invlist has been partitioned so
+                 * that all elements in any single range have the same number
+                 * of bytes in their UTF-8 representations.  And the r space is
+                 * either a single byte, or a range of strictly monotonically
+                 * increasing code points.  So the final element in the range
+                 * will be represented by no fewer bytes than the initial one.
+                 * That means that if the final code point in the t range has
+                 * at least as many bytes as the final code point in the r,
+                 * then all code points in the t range have at least as many
+                 * bytes as their corresponding r range element.  But if that's
+                 * not true, the transliteration of at least the final code
+                 * point grows in length.  As an example, suppose we had
+                 *      tr/\x{fff0}-\x{fff1}/\x{ffff}-\x{10000}/
+                 * The UTF-8 for all but 10000 occupies 3 bytes on ASCII
+                 * platforms.  We have deliberately set up the data structure
+                 * so that any range in the lhs gets split into chunks for
+                 * processing, such that every code point in a chunk has the
+                 * same number of UTF-8 bytes.  We only have to check the final
+                 * code point in the rhs against any code point in the lhs. */
+                if ( ! pass2
+                    && r_cp_end != TR_SPECIAL_HANDLING
+                    && UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end))
+                {
+                    NV ratio = UVCHR_SKIP(r_cp_end) / UVCHR_SKIP(t_cp);
+
+                    o->op_private |= OPpTRANS_GROWS;
+
+                    /* Now that we know it grows, we can keep track of the
+                     * largest ratio */
+                    if (ratio > max_expansion) {
+                        max_expansion = ratio;
+                    }
+                }
+
+                /* The very first range is marked as adjacent to the
+                 * non-existent range below it, as it causes things to "just
+                 * work" (TradeMark)
+                 *
+                 * If the lowest code point in this chunk is M, it adjoins the
+                 * J-L range */
+                if (t_cp == t_array[i]) {
+                    adjacent_to_range_below = TRUE;
+
+                    /* And if the map has the same offset from the beginning of
+                     * the range as does this new code point (or both are for
+                     * TR_SPECIAL_HANDLING), this chunk can be completely
+                     * merged with the range below.  EXCEPT, in the first pass,
+                     * we don't merge ranges whose UTF-8 byte representations
+                     * have different lengths, so that we can more easily
+                     * detect if a replacement is longer than the source, that
+                     * is if it 'grows'.  But in the 2nd pass, there's no
+                     * reason to not merge */
+                    if (   (i > 0 && (   pass2
+                                      || UVCHR_SKIP(t_array[i-1])
+                                                        == UVCHR_SKIP(t_cp)))
+                        && (   (   r_cp == TR_SPECIAL_HANDLING
+                                && r_map[i-1] == TR_SPECIAL_HANDLING)
+                            || (   r_cp != TR_SPECIAL_HANDLING
+                                && r_cp - r_map[i-1] == t_cp - t_array[i-1])))
+                    {
+                        merge_with_range_below = TRUE;
+                    }
+                }
+
+                /* Similarly, if the highest code point in this chunk is 'Q',
+                 * it adjoins the range above, and if the map is suitable, can
+                 * be merged with it */
+                if (    t_cp_end >= IV_MAX - 1
+                    || (   (Size_t) i + 1 < len
+                        && (Size_t) t_cp_end + 1 == t_array[i+1]))
+                {
+                    adjacent_to_range_above = TRUE;
+                    if ((Size_t) i + 1 < len)
+                    if (    (   pass2
+                             || UVCHR_SKIP(t_cp) == UVCHR_SKIP(t_array[i+1]))
+                        && (   (   r_cp == TR_SPECIAL_HANDLING
+                                && r_map[i+1] == (UV) TR_SPECIAL_HANDLING)
+                            || (   r_cp != TR_SPECIAL_HANDLING
+                                && r_cp_end == r_map[i+1] - 1)))
+                    {
+                        merge_with_range_above = TRUE;
+                    }
+                }
+
+                if (merge_with_range_below && merge_with_range_above) {
+
+                    /* Here the new chunk looks like M => m, ... Q => q; and
+                     * the range above is like R => r, ....  Thus, the [i-1]
+                     * and [i+1] ranges should be seamlessly melded so the
+                     * result looks like
+                     *
+                     * [i-1]    J   j   # J-T => j-t
+                     * [i]      U   y   # U => y, V => y+1, ...
+                     * ...
+                     * [-1]     Z  -1   # Z => default; as do Z+1, ... infinity
+                     */
+                    Move(t_array + i + 2, t_array + i, len - i - 2, UV);
+                    Move(r_map   + i + 2, r_map   + i, len - i - 2, UV);
+                    len -= 2;
+                    invlist_set_len(t_invlist,
+                                    len,
+                                    *(get_invlist_offset_addr(t_invlist)));
+                }
+                else if (merge_with_range_below) {
+
+                    /* Here the new chunk looks like M => m, .... But either
+                     * (or both) it doesn't extend all the way up through Q; or
+                     * the range above doesn't start with R => r. */
+                    if (! adjacent_to_range_above) {
+
+                        /* In the first case, let's say the new chunk extends
+                         * through O.  We then want:
+                         *
+                         * [i-1]    J   j   # J-O => j-o
+                         * [i]      P  -1   # P => -1, Q => -1
+                         * [i+1]    R   x   # R => x, S => x+1, T => x+2
+                         * [i+2]    U   y   # U => y, V => y+1, ...
+                         * ...
+                         * [-1]     Z  -1   # Z => default; as do Z+1, ...
+                         *                                            infinity
+                         */
+                        t_array[i] = t_cp_end + 1;
+                        r_map[i] = TR_UNLISTED;
+                    }
+                    else { /* Adjoins the range above, but can't merge with it
+                              (because 'x' is not the next map after q) */
+                        /*
+                         * [i-1]    J   j   # J-Q => j-q
+                         * [i]      R   x   # R => x, S => x+1, T => x+2
+                         * [i+1]    U   y   # U => y, V => y+1, ...
+                         * ...
+                         * [-1]     Z  -1   # Z => default; as do Z+1, ...
+                         *                                          infinity
+                         */
+
+                        Move(t_array + i + 1, t_array + i, len - i - 1, UV);
+                        Move(r_map + i + 1, r_map + i, len - i - 1, UV);
+                        len--;
+                        invlist_set_len(t_invlist, len,
+                                        *(get_invlist_offset_addr(t_invlist)));
+                    }
+                }
+                else if (merge_with_range_above) {
+
+                    /* Here the new chunk ends with Q => q, and the range above
+                     * must start with R => r, so the two can be merged. But
+                     * either (or both) the new chunk doesn't extend all the
+                     * way down to M; or the mapping of the final code point
+                     * range below isn't m */
+                    if (! adjacent_to_range_below) {
+
+                        /* In the first case, let's assume the new chunk starts
+                         * with P => p.  Then, because it's merge-able with the
+                         * range above, that range must be R => r.  We want:
+                         *
+                         * [i-1]    J   j   # J-L => j-l
+                         * [i]      M  -1   # M => -1, N => -1
+                         * [i+1]    P   p   # P-T => p-t
+                         * [i+2]    U   y   # U => y, V => y+1, ...
+                         * ...
+                         * [-1]     Z  -1   # Z => default; as do Z+1, ...
+                         *                                          infinity
+                         */
+                        t_array[i+1] = t_cp;
+                        r_map[i+1] = r_cp;
+                    }
+                    else { /* Adjoins the range below, but can't merge with it
+                            */
+                        /*
+                         * [i-1]    J   j   # J-L => j-l
+                         * [i]      M   x   # M-T => x-5 .. x+2
+                         * [i+1]    U   y   # U => y, V => y+1, ...
+                         * ...
+                         * [-1]     Z  -1   # Z => default; as do Z+1, ...
+                         *                                          infinity
+                         */
+                        Move(t_array + i + 1, t_array + i, len - i - 1, UV);
+                        Move(r_map   + i + 1, r_map   + i, len - i - 1, UV);
+                        len--;
+                        t_array[i] = t_cp;
+                        r_map[i] = r_cp;
+                        invlist_set_len(t_invlist, len,
+                                        *(get_invlist_offset_addr(t_invlist)));
+                    }
+                }
+                else if (adjacent_to_range_below && adjacent_to_range_above) {
+                    /* The new chunk completely fills the gap between the
+                     * ranges on either side, but can't merge with either of
+                     * them.
+                     *
+                     * [i-1]    J   j   # J-L => j-l
+                     * [i]      M   z   # M => z, N => z+1 ... Q => z+4
+                     * [i+1]    R   x   # R => x, S => x+1, T => x+2
+                     * [i+2]    U   y   # U => y, V => y+1, ...
+                     * ...
+                     * [-1]     Z  -1   # Z => default; as do Z+1, ... infinity
+                     */
+                    r_map[i] = r_cp;
+                }
+                else if (adjacent_to_range_below) {
+                    /* The new chunk adjoins the range below, but not the range
+                     * above, and can't merge.  Let's assume the chunk ends at
+                     * O.
+                     *
+                     * [i-1]    J   j   # J-L => j-l
+                     * [i]      M   z   # M => z, N => z+1, O => z+2
+                     * [i+1]    P   -1  # P => -1, Q => -1
+                     * [i+2]    R   x   # R => x, S => x+1, T => x+2
+                     * [i+3]    U   y   # U => y, V => y+1, ...
+                     * ...
+                     * [-w]     Z  -1   # Z => default; as do Z+1, ... infinity
+                     */
+                    invlist_extend(t_invlist, len + 1);
+                    t_array = invlist_array(t_invlist);
+                    Renew(r_map, len + 1, UV);
+
+                    Move(t_array + i + 1, t_array + i + 2, len - i - 1, UV);
+                    Move(r_map + i + 1,   r_map   + i + 2, len - i - 1, UV);
+                    r_map[i] = r_cp;
+                    t_array[i+1] = t_cp_end + 1;
+                    r_map[i+1] = TR_UNLISTED;
+                    len++;
+                    invlist_set_len(t_invlist, len,
+                                    *(get_invlist_offset_addr(t_invlist)));
+                }
+                else if (adjacent_to_range_above) {
+                    /* The new chunk adjoins the range above, but not the range
+                     * below, and can't merge.  Let's assume the new chunk
+                     * starts at O
+                     *
+                     * [i-1]    J   j   # J-L => j-l
+                     * [i]      M  -1   # M => default, N => default
+                     * [i+1]    O   z   # O => z, P => z+1, Q => z+2
+                     * [i+2]    R   x   # R => x, S => x+1, T => x+2
+                     * [i+3]    U   y   # U => y, V => y+1, ...
+                     * ...
+                     * [-1]     Z  -1   # Z => default; as do Z+1, ... infinity
+                     */
+                    invlist_extend(t_invlist, len + 1);
+                    t_array = invlist_array(t_invlist);
+                    Renew(r_map, len + 1, UV);
+
+                    Move(t_array + i + 1, t_array + i + 2, len - i - 1, UV);
+                    Move(r_map   + i + 1, r_map   + i + 2, len - i - 1, UV);
+                    t_array[i+1] = t_cp;
+                    r_map[i+1] = r_cp;
+                    len++;
+                    invlist_set_len(t_invlist, len,
+                                    *(get_invlist_offset_addr(t_invlist)));
+                }
+                else {
+                    /* The new chunk adjoins neither the range above, nor the
+                     * range below.  Lets assume it is N..P => n..p
+                     *
+                     * [i-1]    J   j   # J-L => j-l
+                     * [i]      M  -1   # M => default
+                     * [i+1]    N   n   # N..P => n..p
+                     * [i+2]    Q  -1   # Q => default
+                     * [i+3]    R   x   # R => x, S => x+1, T => x+2
+                     * [i+4]    U   y   # U => y, V => y+1, ...
+                     * ...
+                     * [-1]     Z  -1   # Z => default; as do Z+1, ... infinity
+                     */
+
+                    invlist_extend(t_invlist, len + 2);
+                    t_array = invlist_array(t_invlist);
+                    Renew(r_map, len + 2, UV);
+
+                    Move(t_array + i + 1,
+                         t_array + i + 2 + 1, len - i - (2 - 1), UV);
+                    Move(r_map   + i + 1,
+                         r_map   + i + 2 + 1, len - i - (2 - 1), UV);
+
+                    len += 2;
+                    invlist_set_len(t_invlist, len,
+                                    *(get_invlist_offset_addr(t_invlist)));
+
+                    t_array[i+1] = t_cp;
+                    r_map[i+1] = r_cp;
+
+                    t_array[i+2] = t_cp_end + 1;
+                    r_map[i+2] = TR_UNLISTED;
+                }
+            } /* End of this chunk needs to be processed */
+
+            /* Done with this chunk. */
+            t_cp += span;
+            if (t_cp >= IV_MAX) {
+                break;
+            }
+            t_range_count -= span;
+            if (r_cp != TR_SPECIAL_HANDLING) {
+                r_cp += span;
+                r_range_count -= span;
+            }
+            else {
+                r_range_count = 0;
+            }
+
+        } /* End of loop through the search list */
+
+        /* We don't need an exact count, but we do need to know if there is
+         * anything left over in the replacement list.  So, just assume it's
+         * one byte per character */
+        if (rend > r) {
+            r_count++;
+        }
+    } /* End of passes */
+
+    SvREFCNT_dec(inverted_tstr);
+
+    /* We now have normalized the input into an inversion map.
+     *
+     * See if the lhs and rhs are equivalent.  If so, this tr/// is a no-op
+     * except for the count, and streamlined runtime code can be used */
+    if (!del && !squash) {
+
+        /* They are identical if they point to same address, or if everything
+         * maps to UNLISTED or to itself.  This catches things that not looking
+         * at the normalized inversion map doesn't catch, like tr/aa/ab/ or
+         * tr/\x{100}-\x{104}/\x{100}-\x{102}\x{103}-\x{104}  */
+        if (r0 != t0) {
+            for (i = 0; i < len; i++) {
+                if (r_map[i] != TR_UNLISTED && r_map[i] != t_array[i]) {
+                    goto done_identical_check;
+                }
+            }
+        }
+
+        /* Here have gone through entire list, and didn't find any
+         * non-identical mappings */
+        o->op_private |= OPpTRANS_IDENTICAL;
+
+      done_identical_check: ;
+    }
+
+    t_array = invlist_array(t_invlist);
+
+    /* If has components above 255, we generally need to use the inversion map
+     * implementation */
+    if (   can_force_utf8
+        || (   len > 0
+            && t_array[len-1] > 255
+                 /* If the final range is 0x100-INFINITY and is a special
+                  * mapping, the table implementation can handle it */
+            && ! (   t_array[len-1] == 256
+                  && (   r_map[len-1] == TR_UNLISTED
+                      || r_map[len-1] == TR_SPECIAL_HANDLING))))
+    {
+        SV* r_map_sv;
+
+        /* A UTF-8 op is generated, indicated by this flag.  This op is an
+         * sv_op */
+        o->op_private |= OPpTRANS_USE_SVOP;
+
+        if (can_force_utf8) {
+            o->op_private |= OPpTRANS_CAN_FORCE_UTF8;
+        }
+
+        /* The inversion map is pushed; first the list. */
+	invmap = MUTABLE_AV(newAV());
+        av_push(invmap, t_invlist);
+
+        /* 2nd is the mapping */
+        r_map_sv = newSVpvn((char *) r_map, len * sizeof(UV));
+        av_push(invmap, r_map_sv);
+
+        /* 3rd is the max possible expansion factor */
+        av_push(invmap, newSVnv(max_expansion));
+
+        /* Characters that are in the search list, but not in the replacement
+         * list are mapped to the final character in the replacement list */
+        if (! del && r_count < t_count) {
+            av_push(invmap, newSVuv(final_map));
+        }
+
+#ifdef USE_ITHREADS
+        cPADOPo->op_padix = pad_alloc(OP_TRANS, SVf_READONLY);
+        SvREFCNT_dec(PAD_SVl(cPADOPo->op_padix));
+        PAD_SETSV(cPADOPo->op_padix, (SV *) invmap);
+        SvPADTMP_on(invmap);
+        SvREADONLY_on(invmap);
+#else
+        cSVOPo->op_sv = (SV *) invmap;
+#endif
+
+    }
+    else {
+        OPtrans_map *tbl;
+        Size_t i;
+
+        /* The OPtrans_map struct already contains one slot; hence the -1. */
+        SSize_t struct_size = sizeof(OPtrans_map)
+                            + (256 - 1 + 1)*sizeof(short);
 
         /* Non-utf8 case: set o->op_pv to point to a simple 256+ entry lookup
         * table. Entries with the value TR_UNMAPPED indicate chars not to be
         * translated, while TR_DELETE indicates a search char without a
         * corresponding replacement char under /d.
         *
-        * Normally, the table has 256 slots. However, in the presence of
-        * /c, the search charlist has an implicit \x{100}-\x{7fffffff}
-        * added, and if there are enough replacement chars to start pairing
-        * with the \x{100},... search chars, then a larger (> 256) table
-        * is allocated.
-        *
-        * In addition, regardless of whether under /c, an extra slot at the
-        * end is used to store the final repeating char, or TR_R_EMPTY under an
-        * empty replacement list, or TR_DELETE under /d; which makes the
-        * runtime code easier.
-        *
-        * The toker will have already expanded char ranges in t and r.
+        * In addition, an extra slot at the end is used to store the final
+        * repeating char, or TR_R_EMPTY under an empty replacement list, or
+        * TR_DELETE under /d; which makes the runtime code easier.
         */
 
-        /* Initially allocate 257-slot table: 256 for basic (non /c) usage,
-        * plus final slot for repeat/TR_DELETE/TR_R_EMPTY. Later we realloc if
-        * excess > * 0.  The OPtrans_map struct already contains one slot;
-        * hence the -1.
-        */
-        struct_size = sizeof(OPtrans_map) + (256 - 1 + 1)*sizeof(short);
+        /* Indicate this is an op_pv */
+        o->op_private &= ~OPpTRANS_USE_SVOP;
+
         tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
         tbl->size = 256;
         cPVOPo->op_pv = (char*)tbl;
 
-        if (complement) {
-            Size_t excess;
+        for (i = 0; i < len; i++) {
+            STATIC_ASSERT_DECL(TR_SPECIAL_HANDLING == TR_DELETE);
+            short upper = i >= len - 1 ? 256 : t_array[i+1];
+            short to = r_map[i];
+            short j;
+            bool do_increment = TRUE;
 
-            /* in this branch, j is a count of 'consumed' (i.e. paired off
-            * with a search char) replacement chars (so j <= rlen always)
-            */
-            for (i = 0; i < tlen; i++)
-                tbl->map[t[i]] = (short) TR_UNMAPPED;
+            /* Any code points above our limit should be irrelevant */
+            if (t_array[i] >= tbl->size) break;
 
-            for (i = 0, j = 0; i < 256; i++) {
-                if (!tbl->map[i]) {
-                    if (j == rlen) {
-                        if (del)
-                            tbl->map[i] = (short) TR_DELETE;
-                        else if (rlen)
-                            tbl->map[i] = r[j-1];
-                        else
-                            tbl->map[i] = (short)i;
-                    }
-                    else {
-                        tbl->map[i] = r[j++];
-                    }
-                    if (   tbl->map[i] >= 0
-                        &&  UVCHR_IS_INVARIANT((UV)i)
-                        && !UVCHR_IS_INVARIANT((UV)(tbl->map[i]))
-                    )
-                        grows = TRUE;
-                }
+            /* Set up the map */
+            if (to == (short) TR_SPECIAL_HANDLING && ! del) {
+                to = final_map;
+                do_increment = FALSE;
+            }
+            else if (to < 0) {
+                do_increment = FALSE;
             }
 
-            ASSUME(j <= rlen);
-            excess = rlen - j;
-
-            if (excess) {
-                /* More replacement chars than search chars:
-                * store excess replacement chars at end of main table.
-                */
-
-                struct_size += excess * sizeof(short);
-                tbl = (OPtrans_map*)PerlMemShared_realloc(tbl, struct_size);
-                tbl->size += excess;
-                cPVOPo->op_pv = (char*)tbl;
-
-                for (i = 0; i < excess; i++)
-                    tbl->map[i + 256] = r[j+i];
+            /* Create a map for everything in this range.  The value increases
+             * except for the special cases */
+            for (j = t_array[i]; j < upper; j++) {
+                tbl->map[j] = to;
+                if (do_increment) to++;
             }
-            else {
-                /* no more replacement chars than search chars */
-                if (!rlen && !del && !squash)
-                    o->op_private |= OPpTRANS_IDENTICAL;
-            }
+        }
 
-            tbl->map[tbl->size] = del
-                                  ? (short) TR_DELETE
-                                  : rlen
-                                    ? r[rlen - 1]
-                                    : (short) TR_R_EMPTY;
+        tbl->map[tbl->size] = del
+                              ? (short) TR_DELETE
+                              : rlen
+                                ? final_map
+                                : (short) TR_R_EMPTY;
+
+        SvREFCNT_dec(t_invlist);
+
+#if 0   /* code that added excess above-255 chars at the end of the table, in
+           case we ever want to not use the inversion map implementation for
+           this */
+
+        ASSUME(j <= rlen);
+        excess = rlen - j;
+
+        if (excess) {
+            /* More replacement chars than search chars:
+             * store excess replacement chars at end of main table.
+             */
+
+            struct_size += excess;
+            tbl = (OPtrans_map*)PerlMemShared_realloc(tbl,
+                        struct_size + excess * sizeof(short));
+            tbl->size += excess;
+            cPVOPo->op_pv = (char*)tbl;
+
+            for (i = 0; i < excess; i++)
+                tbl->map[i + 256] = r[j+i];
         }
         else {
-            if (!rlen && !del) {
-                r = t; rlen = tlen;
-                if (!squash)
-                    o->op_private |= OPpTRANS_IDENTICAL;
-            }
-            else if (!squash && rlen == tlen && memEQ((char*)t, (char*)r, tlen)) {
-                o->op_private |= OPpTRANS_IDENTICAL;
-            }
+            /* no more replacement chars than search chars */
+#endif
 
-            for (i = 0; i < 256; i++)
-                tbl->map[i] = (short) TR_UNMAPPED;
-            for (i = 0, j = 0; i < tlen; i++,j++) {
-                if (j >= rlen) {
-                    if (del) {
-                        if (tbl->map[t[i]] == (short) TR_UNMAPPED)
-                            tbl->map[t[i]] = (short) TR_DELETE;
-                        continue;
-                    }
-                    --j;
-                }
-                if (tbl->map[t[i]] == (short) TR_UNMAPPED) {
-                    if (     UVCHR_IS_INVARIANT(t[i])
-                        && ! UVCHR_IS_INVARIANT(r[j]))
-                        grows = TRUE;
-                    tbl->map[t[i]] = r[j];
-                }
-            }
-            tbl->map[tbl->size] = del
-                                  ? (short) TR_UNMAPPED
-                                  : rlen
-                                    ? (short) TR_UNMAPPED
-                                    : (short) TR_R_EMPTY;
-        }
+    }
 
-    /* both non-utf8 and utf8 code paths end up here */
+    Safefree(r_map);
 
-  warnins:
-    if(del && rlen == tlen) {
+    if(del && rlen != 0 && r_count == t_count) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator");
-    } else if(rlen > tlen && !complement) {
+    } else if(r_count > t_count) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
     }
 
-    if (grows)
-	o->op_private |= OPpTRANS_GROWS;
     op_free(expr);
     op_free(repl);
 
