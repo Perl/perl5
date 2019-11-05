@@ -8354,8 +8354,10 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 }
 
 static int
-yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c)
+yyl_key_core(pTHX_ char *s, STRLEN len, struct code c)
 {
+    I32 key = 0;
+    I32 orig_keyword = 0;
     STRLEN olen = len;
     char *d = s;
     s += 2;
@@ -8364,7 +8366,7 @@ yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c
         || (!(key = keyword(PL_tokenbuf, len, 1)) && *s == '\''))
     {
         Copy(PL_bufptr, PL_tokenbuf, olen, char);
-        return yyl_just_a_word(aTHX_ d, olen, orig_keyword, c);
+        return yyl_just_a_word(aTHX_ d, olen, 0, c);
     }
     if (!key)
         Perl_croak(aTHX_ "CORE::%" UTF8f " is not a keyword",
@@ -8401,7 +8403,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
     /* x::* is just a word, unless x is "CORE" */
     if (!anydelim && *s == ':' && s[1] == ':') {
         if (memEQs(PL_tokenbuf, len, "CORE"))
-            return yyl_key_core(aTHX_ s, len, 0, 0, c);
+            return yyl_key_core(aTHX_ s, len, c);
         return yyl_just_a_word(aTHX_ s, len, 0, c);
     }
 
