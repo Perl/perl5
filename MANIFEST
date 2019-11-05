@@ -4465,6 +4465,7 @@ ext/XS-APItest/t/handy08.t	XS::APItest: tests for handy.h
 ext/XS-APItest/t/handy09.t	XS::APItest: tests for handy.h
 ext/XS-APItest/t/handy_base.pl	XS::APItest: tests for handy.h
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
+ext/XS-APItest/t/hv_macro.t	XS::APItest: tests for low level macros used in hashing
 ext/XS-APItest/t/join_with_space.t	test op_convert_list
 ext/XS-APItest/t/keyword_multiline.t	test keyword plugin parsing across lines
 ext/XS-APItest/t/keyword_plugin.t	test keyword plugin mechanism
