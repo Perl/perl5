@@ -8385,7 +8385,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
 {
     STRLEN len;
     bool anydelim;
-    I32 tmp = 0;
+    I32 key;
     struct code c = no_code;
     I32 orig_keyword = 0;
     char *d;
@@ -8401,7 +8401,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
     /* x::* is just a word, unless x is "CORE" */
     if (!anydelim && *s == ':' && s[1] == ':') {
         if (memEQs(PL_tokenbuf, len, "CORE"))
-            return yyl_key_core(aTHX_ s, len, tmp, 0, c);
+            return yyl_key_core(aTHX_ s, len, 0, 0, c);
         return yyl_just_a_word(aTHX_ s, len, 0, c);
     }
 
@@ -8439,9 +8439,6 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
             Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'", PL_tokenbuf);
         }
     }
-
-    /* Check for built-in keyword */
-    tmp = keyword(PL_tokenbuf, len, 0);
 
     /* Is this a label? */
     if (!anydelim && PL_expect == XSTATE
@@ -8489,10 +8486,13 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
         c.off = 0;
     }
 
-    if (tmp < 0)
-        tmp = yyl_secondclass_keyword(aTHX_ s, len, tmp, &orig_keyword, &c.gv, &c.gvp);
+    /* Check for built-in keyword */
+    key = keyword(PL_tokenbuf, len, 0);
 
-    if (tmp && tmp != KEY___DATA__ && tmp != KEY___END__
+    if (key < 0)
+        key = yyl_secondclass_keyword(aTHX_ s, len, key, &orig_keyword, &c.gv, &c.gvp);
+
+    if (key && key != KEY___DATA__ && key != KEY___END__
      && (!anydelim || *s != '#')) {
         /* no override, and not s### either; skipspace is safe here
          * check for => on following line */
@@ -8507,7 +8507,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
             return yyl_fatcomma(aTHX_ s, len);
     }
 
-    return yyl_word_or_keyword(aTHX_ s, len, tmp, orig_keyword, c);
+    return yyl_word_or_keyword(aTHX_ s, len, key, orig_keyword, c);
 }
 
 static int
