@@ -7196,12 +7196,15 @@ yyl_strictwarn_bareword(pTHX_ const char lastchar)
 }
 
 static int
-yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c)
+yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
 {
     int pkgname = 0;
     const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
     bool safebw;
     bool no_op_error = FALSE;
+    /* Use this var to track whether intuit_method has been
+       called.  intuit_method returns 0 or > 255.  */
+    int key = 1;
 
     if (PL_expect == XOPERATOR) {
         if (PL_bufptr == PL_linestart) {
@@ -7290,10 +7293,6 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct cod
                     : ((CV *)c.gv)
             : rv2cv_op_cv(c.rv2cv_op, RV2CVOPCV_RETURN_STUB);
     }
-
-    /* Use this var to track whether intuit_method has been
-       called.  intuit_method returns 0 or > 255.  */
-    key = 1;
 
     /* See if it's the indirect object for a list operator. */
 
@@ -7451,7 +7450,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 {
     switch (key) {
     default:			/* not a keyword */
-        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword, c);
+        return yyl_just_a_word(aTHX_ s, len, orig_keyword, c);
 
     case KEY___FILE__:
         FUN0OP( newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0)) );
@@ -7489,7 +7488,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_END:
         if (PL_expect == XSTATE)
             return yyl_sub(aTHX_ PL_bufptr, key);
-        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword, c);
+        return yyl_just_a_word(aTHX_ s, len, orig_keyword, c);
 
     case KEY_abs:
         UNI(OP_ABS);
@@ -8344,7 +8343,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
             Mop(OP_REPEAT);
         }
         check_uni();
-        return yyl_just_a_word(aTHX_ s, len, key, orig_keyword, c);
+        return yyl_just_a_word(aTHX_ s, len, orig_keyword, c);
 
     case KEY_xor:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
@@ -8365,7 +8364,7 @@ yyl_key_core(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct code c
         || (!(key = keyword(PL_tokenbuf, len, 1)) && *s == '\''))
     {
         Copy(PL_bufptr, PL_tokenbuf, olen, char);
-        return yyl_just_a_word(aTHX_ d, olen, key, orig_keyword, c);
+        return yyl_just_a_word(aTHX_ d, olen, orig_keyword, c);
     }
     if (!key)
         Perl_croak(aTHX_ "CORE::%" UTF8f " is not a keyword",
@@ -8403,7 +8402,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
     if (!anydelim && *s == ':' && s[1] == ':') {
         if (memEQs(PL_tokenbuf, len, "CORE"))
             return yyl_key_core(aTHX_ s, len, tmp, 0, c);
-        return yyl_just_a_word(aTHX_ s, len, 0, 0, c);
+        return yyl_just_a_word(aTHX_ s, len, 0, c);
     }
 
     d = s;
@@ -8476,7 +8475,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
                 if (!c.gv) {
                     sv_free(c.sv);
                     c.sv = NULL;
-                    return yyl_just_a_word(aTHX_ s, len, tmp, 0, c);
+                    return yyl_just_a_word(aTHX_ s, len, 0, c);
                 }
             }
             else {
@@ -8485,7 +8484,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
                 c.cv = find_lexical_cv(c.off);
             }
             c.lex = TRUE;
-            return yyl_just_a_word(aTHX_ s, len, tmp, 0, c);
+            return yyl_just_a_word(aTHX_ s, len, 0, c);
         }
         c.off = 0;
     }
@@ -8677,7 +8676,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 	OPERATOR(',');
     case ':':
 	if (s[1] == ':')
-            return yyl_just_a_word(aTHX_ s, 0, 0, 0, no_code);
+            return yyl_just_a_word(aTHX_ s, 0, 0, no_code);
         return yyl_colon(aTHX_ s + 1);
 
     case '(':
