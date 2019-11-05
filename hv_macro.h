@@ -22,17 +22,17 @@
 
 #ifndef U8TO16_LE
   #if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
-    #define U8TO16_LE(ptr)   ((U32)(ptr)[1]|(U32)(ptr)[0]<<8)
-    #define U8TO32_LE(ptr)   ((U32)(ptr)[3]|(U32)(ptr)[2]<<8|(U32)(ptr)[1]<<16|(U32)(ptr)[0]<<24)
-    #define U8TO64_LE(ptr)   ((U64)(ptr)[7]|(U64)(ptr)[6]<<8|(U64)(ptr)[5]<<16|(U64)(ptr)[4]<<24|\
-                              (U64)(ptr)[3]<<32|(U64)(ptr)[2]<<40|\
-                              (U64)(ptr)[1]<<48|(U64)(ptr)[0]<<56)
-  #elif (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
     #define U8TO16_LE(ptr)   ((U32)(ptr)[0]|(U32)(ptr)[1]<<8)
     #define U8TO32_LE(ptr)   ((U32)(ptr)[0]|(U32)(ptr)[1]<<8|(U32)(ptr)[2]<<16|(U32)(ptr)[3]<<24)
     #define U8TO64_LE(ptr)   ((U64)(ptr)[0]|(U64)(ptr)[1]<<8|(U64)(ptr)[2]<<16|(U64)(ptr)[3]<<24|\
                               (U64)(ptr)[4]<<32|(U64)(ptr)[5]<<40|\
                               (U64)(ptr)[6]<<48|(U64)(ptr)[7]<<56)
+  #elif (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
+    #define U8TO16_LE(ptr)   ((U32)(ptr)[1]|(U32)(ptr)[0]<<8)
+    #define U8TO32_LE(ptr)   ((U32)(ptr)[3]|(U32)(ptr)[2]<<8|(U32)(ptr)[1]<<16|(U32)(ptr)[0]<<24)
+    #define U8TO64_LE(ptr)   ((U64)(ptr)[7]|(U64)(ptr)[6]<<8|(U64)(ptr)[5]<<16|(U64)(ptr)[4]<<24|\
+                              (U64)(ptr)[3]<<32|(U64)(ptr)[2]<<40|\
+                              (U64)(ptr)[1]<<48|(U64)(ptr)[0]<<56)
   #endif
 #endif
 
