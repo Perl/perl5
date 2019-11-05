@@ -3032,13 +3032,8 @@ S_scan_const(pTHX_ char *start)
                     s++;    /* Skip past the hyphen */
 
                     /* d now points to where the end-range character will be
-                     * placed.  Save it so won't have to go finding it later,
-                     * and drop down to get that character.  (Actually we
-                     * instead save the offset, to handle the case where a
-                     * realloc in the meantime could change the actual
-                     * pointer).  We'll finish processing the range the next
-                     * time through the loop */
-                    offset_to_max = d - SvPVX_const(sv);
+                     * placed.  Drop down to get that character.  We'll finish
+                     * processing the range the next time through the loop */
 
                     if (s_is_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
                         has_above_latin1 = TRUE;
@@ -3055,8 +3050,6 @@ S_scan_const(pTHX_ char *start)
                  *      are the range start and range end, in order.
                  * 'd'  points to just beyond the range end in the 'sv' string,
                  *      where we would next place something
-                 * 'offset_to_max' is the offset in 'sv' at which the character
-                 *      (the range's maximum end point) before 'd'  begins.
                  */
                 char * max_ptr;
                 char * min_ptr;
