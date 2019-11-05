@@ -23,14 +23,8 @@ env:
         - CONFIGURE_ARGS='-DPERL_GLOBAL_STRUCT_PRIVATE'
         - CONFIGURE_ARGS='-Duseshrplib -Dusesitecustomize'
 
-# only use gcc on linux, and only use clang on osx for now
 matrix:
   fast_finish: true
-  exclude:
-  - compiler: clang
-    os: linux
-  - compiler: gcc
-    os: osx
 
 script:
   - ./Configure -des -Dusedevel -Uversiononly -Dcc="ccache $CC" $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING
