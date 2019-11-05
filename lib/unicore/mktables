@@ -7614,7 +7614,7 @@ END
 
         $return .= <<END;
 
-# The name this swash is to be known by, with the format of the mappings in
+# The name this table is to be known by, with the format of the mappings in
 # the main body of the table, and what all code points missing from this file
 # map to.
 \$utf8::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}

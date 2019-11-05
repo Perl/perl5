@@ -1868,8 +1868,6 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
 				|const Size_t sv_count|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
-EXpR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
-EXp	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
 EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 Ei	|void	|invlist_extend    |NN SV* const invlist|const UV len
@@ -3093,10 +3091,6 @@ SR	|UV	|check_locale_boundary_crossing				    \
 iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
 				|NN const U8 *const e			    \
 				|NULLOK SV* const invlist
-SR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
-SR	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
-		|NN UV* max|NN UV* val|const bool wants_value		    \
-		|NN const U8* const typestr
 #endif
 
 EXiTp	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest

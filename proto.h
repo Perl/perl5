@@ -3770,14 +3770,6 @@ PERL_CALLCONV void	Perl_sv_vsetpvf_mg(pTHX_ SV *const sv, const char *const pat,
 PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted);
 #define PERL_ARGS_ASSERT_SV_VSETPVFN	\
 	assert(sv); assert(pat)
-PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8);
-#define PERL_ARGS_ASSERT_SWASH_FETCH	\
-	assert(swash); assert(ptr)
-PERL_CALLCONV SV*	Perl_swash_init(pTHX_ const char* pkg, const char* name, SV* listsv, I32 minbits, I32 none)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SWASH_INIT	\
-	assert(pkg); assert(name); assert(listsv)
-
 PERL_CALLCONV void	Perl_switch_to_global_locale(void);
 #define PERL_ARGS_ASSERT_SWITCH_TO_GLOBAL_LOCALE
 PERL_CALLCONV bool	Perl_sync_locale(void);
@@ -6385,16 +6377,6 @@ STATIC HV *	S_new_msg_hv(pTHX_ const char * const message, U32 categories, U32 f
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEW_MSG_HV	\
 	assert(message)
-
-STATIC U8*	S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val, const bool wants_value, const U8* const typestr)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SWASH_SCAN_LIST_LINE	\
-	assert(l); assert(lend); assert(min); assert(max); assert(val); assert(typestr)
-
-STATIC SV*	S_swatch_get(pTHX_ SV* swash, UV start, UV span)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SWATCH_GET	\
-	assert(swash)
 
 STATIC U8	S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp, const char dummy)
 			__attribute__warn_unused_result__;

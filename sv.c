@@ -6654,9 +6654,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		sv_del_backref(MUTABLE_SV(stash), sv);
 	    goto freescalar;
 	case SVt_PVHV:
-	    if (PL_last_swash_hv == (const HV *)sv) {
-		PL_last_swash_hv = NULL;
-	    }
 	    if (HvTOTALKEYS((HV*)sv) > 0) {
 		const HEK *hek;
 		/* this statement should match the one at the beginning of
@@ -15386,13 +15383,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_signalhook	= proto_perl->Isignalhook;
 
     PL_globhook		= proto_perl->Iglobhook;
-
-    /* swatch cache */
-    PL_last_swash_hv	= NULL;	/* reinits on demand */
-    PL_last_swash_klen	= 0;
-    PL_last_swash_key[0]= '\0';
-    PL_last_swash_tmps	= (U8*)NULL;
-    PL_last_swash_slen	= 0;
 
     PL_srand_called	= proto_perl->Isrand_called;
     Copy(&(proto_perl->Irandom_state), &PL_random_state, 1, PL_RANDOM_STATE_TYPE);

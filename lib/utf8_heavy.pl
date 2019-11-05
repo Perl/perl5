@@ -81,7 +81,6 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         ## Called from swash_init (see utf8.c) or SWASHNEW itself.
         ##
         ## Callers of swash_init:
-        ##     op.c:pmtrans             -- for tr/// and y///
         ##     Unicode::UCD::prop_invlist
         ##     Unicode::UCD::prop_invmap
         ##
@@ -102,7 +101,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         ## $none is undocumented, so I'm (khw) trying to do some documentation
         ## of it now.  It appears to be if there is a mapping in an input file
         ## that maps to 'XXXX', then that is replaced by $none+1, expressed in
-        ## hexadecimal.  It is used somehow in tr///.
+        ## hexadecimal.  It is no longer used.
         ##
         ## To make the parsing of $type clear, this code takes the a rather
         ## unorthodox approach of last'ing out of the block once we have the
@@ -488,7 +487,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
             my $taint = substr($list,0,0); # maintain taint
 
             # Separate the extras from the code point list, and make sure
-            # user-defined properties and tr/// are well-behaved for
+            # user-defined properties are well-behaved for
             # downstream code.
             if ($user_defined || $none) {
                 my @tmp = split(/^/m, $list);

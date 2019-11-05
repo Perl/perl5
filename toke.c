@@ -2691,8 +2691,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     }
     else {
         /* Similarly for utf8.  For invariants can check directly; for other
-         * Latin1, can calculate their code point and check; otherwise  use a
-         * swash */
+         * Latin1, can calculate their code point and check; otherwise  use an
+         * inversion list */
         if (UTF8_IS_INVARIANT(*s)) {
             if (! isALPHAU(*s)) {
                 goto bad_charname;

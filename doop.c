@@ -391,7 +391,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     bool inplace = ! cBOOL(PL_op->op_private & OPpTRANS_GROWS);
     const UV* from_array = invlist_array(from_invlist);
     UV final_map;
-    bool out_is_utf8 = SvUTF8(sv);
+    bool out_is_utf8 = cBOOL(SvUTF8(sv));
     STRLEN s_len;
 
     PERL_ARGS_ASSERT_DO_TRANS_INVMAP;

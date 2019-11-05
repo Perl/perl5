@@ -6103,7 +6103,6 @@ t/test_pl/tempfile.t		Tests for the simple testing library
 t/thread_it.pl			Run regression tests in a new thread
 t/uni/attrs.t			See if Unicode attributes work
 t/uni/bless.t			See if Unicode bless works
-t/uni/cache.t			See if Unicode swash caching works
 t/uni/caller.t			See if Unicode doesn't get mangled in caller()
 t/uni/case.pl			See if Unicode casing works
 t/uni/chomp.t			See if Unicode chomp works

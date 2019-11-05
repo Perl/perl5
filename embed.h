@@ -941,8 +941,6 @@
 #define skipspace_flags(a,b)	Perl_skipspace_flags(aTHX_ a,b)
 #define sv_magicext_mglob(a)	Perl_sv_magicext_mglob(aTHX_ a)
 #define sv_only_taint_gmagic	Perl_sv_only_taint_gmagic
-#define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
-#define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
 #define validate_proto(a,b,c,d)	Perl_validate_proto(aTHX_ a,b,c,d)
@@ -1924,8 +1922,6 @@
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define is_utf8_overlong_given_start_byte_ok	S_is_utf8_overlong_given_start_byte_ok
 #define new_msg_hv(a,b,c)	S_new_msg_hv(aTHX_ a,b,c)
-#define swash_scan_list_line(a,b,c,d,e,f,g)	S_swash_scan_list_line(aTHX_ a,b,c,d,e,f,g)
-#define swatch_get(a,b,c)	S_swatch_get(aTHX_ a,b,c)
 #define to_lower_latin1		S_to_lower_latin1
 #define turkic_fc(a,b,c,d)	S_turkic_fc(aTHX_ a,b,c,d)
 #define turkic_lc(a,b,c,d)	S_turkic_lc(aTHX_ a,b,c,d)
