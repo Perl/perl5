@@ -565,7 +565,7 @@ is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
 done_testing($tests);
 
 __DATA__
-# TODO [perl #120950] This succeeds when run a 2nd time
+# [perl #120950] Previously on a 2nd instance succeeded
 # y/uni/code/
 tr/\x{345}/\x{370}/;
 ####
