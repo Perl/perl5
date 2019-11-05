@@ -153,7 +153,8 @@ PROG
         my $substr= substr( $str, 1 );
         1 while $substr=~m/0/g;
         $elapsed += time;
-        ok( $elapsed <= 1, "should not COW on long string with substr and m//g");
+        ok( $elapsed <= 2, "should not COW on long string with substr and m//g")
+            or diag "elapsed=$elapsed";
     }
 
     # [perl #133185] Infinite loop
