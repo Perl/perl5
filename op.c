@@ -6754,27 +6754,6 @@ Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
     }
 }
 
-/* Helper function for S_pmtrans(): comparison function to sort an array
- * of codepoint range pairs. Sorts by start point, or if equal, by end
- * point */
-
-static int uvcompare(const void *a, const void *b)
-    __attribute__nonnull__(1)
-    __attribute__nonnull__(2)
-    __attribute__pure__;
-static int uvcompare(const void *a, const void *b)
-{
-    if (*((const UV *)a) < (*(const UV *)b))
-	return -1;
-    if (*((const UV *)a) > (*(const UV *)b))
-	return 1;
-    if (*((const UV *)a+1) < (*(const UV *)b+1))
-	return -1;
-    if (*((const UV *)a+1) > (*(const UV *)b+1))
-	return 1;
-    return 0;
-}
-
 /* Given an OP_TRANS / OP_TRANSR op o, plus OP_CONST ops expr and repl
  * containing the search and replacement strings, assemble into
  * a translation table attached as o->op_pv.
