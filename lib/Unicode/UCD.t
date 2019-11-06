@@ -903,7 +903,6 @@ is(prop_aliases("Is_Is_Any"), undef,
 is(prop_aliases("ccc=vr"), undef,
                           "prop_aliases('ccc=vr') doesn't generate a warning");
 
-require 'utf8_heavy.pl';
 require "unicore/Heavy.pl";
 
 # Keys are lists of properties. Values are defined if have been tested.
@@ -943,7 +942,7 @@ while (<$props>) {
         # matching, which the tested function does on all inputs.
         my $mod_name = "$extra_chars$alias";
 
-        my $loose = &utf8::_loose_name(lc $alias);
+        my $loose = &Unicode::UCD::loose_name(lc $alias);
 
         # Indicate we have tested this.
         $props{$loose} = 1;
@@ -999,12 +998,12 @@ while (<$props>) {
 foreach my $alias (sort keys %utf8::loose_to_file_of) {
     next if $alias =~ /=/;
     my $lc_name = lc $alias;
-    my $loose = &utf8::_loose_name($lc_name);
+    my $loose = &Unicode::UCD::loose_name($lc_name);
     next if exists $props{$loose};  # Skip if already tested
     $props{$loose} = 1;
     my $mod_name = "$extra_chars$alias";    # Tests loose matching
     my @aliases = prop_aliases($mod_name);
-    my $found_it = grep { &utf8::_loose_name(lc $_) eq $lc_name } @aliases;
+    my $found_it = grep { &Unicode::UCD::loose_name(lc $_) eq $lc_name } @aliases;
     if ($found_it) {
         pass("prop_aliases: '$lc_name' is listed as an alias for '$mod_name'");
     }
@@ -1023,14 +1022,14 @@ foreach my $alias (sort keys %utf8::loose_to_file_of) {
         # returned as an alias, so having successfully stripped it off above,
         # try again.
         if ($stripped) {
-            $found_it = grep { &utf8::_loose_name(lc $_) eq $lc_name } @aliases;
+            $found_it = grep { &Unicode::UCD::loose_name(lc $_) eq $lc_name } @aliases;
         }
 
         # If that didn't work, it could be that it's a block, which is always
         # returned with a leading 'In_' to avoid ambiguity.  Try comparing
         # with that stripped off.
         if (! $found_it) {
-            $found_it = grep { &utf8::_loose_name(s/^In_(.*)/\L$1/r) eq $lc_name }
+            $found_it = grep { &Unicode::UCD::loose_name(s/^In_(.*)/\L$1/r) eq $lc_name }
                               @aliases;
             # Could check that is a real block, but tests for invmap will
             # likely pickup any errors, since this will be tested there.
@@ -1163,8 +1162,8 @@ while (<$propvalues>) {
         $fields[0] = $fields[1];
     }
     elsif ($fields[0] ne $fields[1]
-           && &utf8::_loose_name(lc $fields[0])
-               eq &utf8::_loose_name(lc $fields[1])
+           && &Unicode::UCD::loose_name(lc $fields[0])
+               eq &Unicode::UCD::loose_name(lc $fields[1])
            && $fields[1] !~ /[[:upper:]]/)
     {
         # Also, there is a bug in the file in which "n/a" is omitted, and
@@ -1180,7 +1179,7 @@ while (<$propvalues>) {
     # the short and full names, respectively.  See comments in input file.
     splice (@fields, 0, 0, splice(@fields, 1, 2)) if $prop eq 'ccc';
 
-    my $loose_prop = &utf8::_loose_name(lc $prop);
+    my $loose_prop = &Unicode::UCD::loose_name(lc $prop);
     my $suppressed = grep { $_ eq $loose_prop }
                           @Unicode::UCD::suppressed_properties;
     push @this_prop_values, $fields[0] unless $suppressed;
@@ -1189,7 +1188,7 @@ while (<$propvalues>) {
             is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop");
             next;
         }
-        elsif (grep { $_ eq ("$loose_prop=" . &utf8::_loose_name(lc $value)) } @Unicode::UCD::suppressed_properties) {
+        elsif (grep { $_ eq ("$loose_prop=" . &Unicode::UCD::loose_name(lc $value)) } @Unicode::UCD::suppressed_properties) {
             is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop=$value");
             next;
         }
@@ -1231,10 +1230,10 @@ while (<$propvalues>) {
         else {
             my @all_names = prop_value_aliases($mod_prop, $mod_value);
             is_deeply(\@all_names, \@names_via_short, "In '$prop', prop_value_aliases() returns the same list for both '$short_name' and '$mod_value'");
-            ok((grep { &utf8::_loose_name(lc $_) eq &utf8::_loose_name(lc $value) } prop_value_aliases($prop, $short_name)), "'$value' is listed as an alias for prop_value_aliases('$prop', '$short_name')");
+            ok((grep { &Unicode::UCD::loose_name(lc $_) eq &Unicode::UCD::loose_name(lc $value) } prop_value_aliases($prop, $short_name)), "'$value' is listed as an alias for prop_value_aliases('$prop', '$short_name')");
         }
 
-        $pva_tested{&utf8::_loose_name(lc $prop) . "=" . &utf8::_loose_name(lc $value)} = 1;
+        $pva_tested{&Unicode::UCD::loose_name(lc $prop) . "=" . &Unicode::UCD::loose_name(lc $value)} = 1;
         $count++;
     }
 }
@@ -1285,7 +1284,7 @@ foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
             is_deeply(\@l_, \@LC, "prop_value_aliases('$mod_prop', '$mod_value) returns the same list as prop_value_aliases('gc', 'lc')");
         }
         else {
-            ok((grep { &utf8::_loose_name(lc $_) eq &utf8::_loose_name(lc $value) }
+            ok((grep { &Unicode::UCD::loose_name(lc $_) eq &Unicode::UCD::loose_name(lc $value) }
                 prop_value_aliases($mod_prop, $mod_value)),
                 "'$value' is listed as an alias for prop_value_aliases('$mod_prop', '$mod_value')");
         }
@@ -1300,7 +1299,7 @@ use Unicode::UCD qw(prop_invlist prop_invmap MAX_CP);
 
 # There were some problems with caching interfering with prop_invlist() vs
 # prop_invmap() on binary properties, and also between the 3 properties where
-# Perl used the same 'To' name as another property (see utf8_heavy.pl).
+# Perl used the same 'To' name as another property (see Unicode::UCD).
 # So, before testing all of prop_invlist(),
 #   1)  call prop_invmap() to try both orders of these name issues.  This uses
 #       up two of the 3 properties;  the third will be left so that invlist()
@@ -1663,7 +1662,7 @@ my %tested_invmaps;
 PROPERTY:
 foreach my $prop (sort(keys %props), sort keys %legacy_props) {
     my $is_legacy = 0;
-    my $loose_prop = &utf8::_loose_name(lc $prop);
+    my $loose_prop = &Unicode::UCD::loose_name(lc $prop);
     my $suppressed = grep { $_ eq $loose_prop }
                           @Unicode::UCD::suppressed_properties;
 
@@ -1713,14 +1712,14 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
 
     # Normalize the short name, as it is stored in the hashes under the
     # normalized version.
-    $name = &utf8::_loose_name(lc $name);
+    $name = &Unicode::UCD::loose_name(lc $name);
 
     # In the case of a combination property, both a map table and a match
     # table are generated.  For all the tests except prop_invmap(), this is
     # irrelevant, but for prop_invmap, having an 'is' prefix forces it to
     # return the match table; otherwise the map.  We thus need to distinguish
     # between the two forms.  The property name is what has this information.
-    $name = &utf8::_loose_name(lc $prop)
+    $name = &Unicode::UCD::loose_name(lc $prop)
                          if exists $Unicode::UCD::combination_property{$name};
 
     # Add in the characters that are supposed to be ignored to test loose
@@ -2712,7 +2711,8 @@ if ($v_unicode_version ge v3.1.0) { # No Script property before this
 
 ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
 
-if (! ok(@warnings == 0, "No warnings were generated")) {
+@warnings = grep { $_ !~ /Use of '.*' in \\p\{} or \\P\{} is deprecated because/ } @warnings;
+if (! ok(@warnings == 0, "The only warnings generated are about deprecated properties")) {
     diag(join "\n", "The warnings are:", @warnings);
 }
 

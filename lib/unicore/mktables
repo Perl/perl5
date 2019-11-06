@@ -145,15 +145,15 @@ my $map_directory = 'To';        # Where map files go.
 # Again, this is so that methods can be defined on one and not the others so
 # as to prevent operating on them in incorrect ways.
 #
-# Eventually, most tables are written out to files to be read by utf8_heavy.pl
-# in the perl core.  All tables could in theory be written, but some are
-# suppressed because there is no current practical use for them.  It is easy
-# to change which get written by changing various lists that are near the top
-# of the actual code in this file.  The table data structures contain enough
-# ancillary information to allow them to be treated as separate entities for
-# writing, such as the path to each one's file.  There is a heading in each
-# map table that gives the format of its entries, and what the map is for all
-# the code points missing from it.  (This allows tables to be more compact.)
+# Eventually, most tables are written out to files to be read by Unicode::UCD.
+# All tables could in theory be written, but some are suppressed because there
+# is no current practical use for them.  It is easy to change which get
+# written by changing various lists that are near the top of the actual code
+# in this file.  The table data structures contain enough ancillary
+# information to allow them to be treated as separate entities for writing,
+# such as the path to each one's file.  There is a heading in each map table
+# that gives the format of its entries, and what the map is for all the code
+# points missing from it.  (This allows tables to be more compact.)
 #
 # The Property data structure contains one or more tables.  All properties
 # contain a map table (except the $perl property which is a
@@ -1322,7 +1322,7 @@ my $EXTRACTED = ($EXTRACTED_DIR) ? "$EXTRACTED_DIR/" : "";
 my $AUXILIARY = 'auxiliary';
 
 # Hashes and arrays that will eventually go into Heavy.pl for the use of
-# utf8_heavy.pl and into UCD.pl for the use of UCD.pm
+# UCD.pl for the use of UCD.pm
 my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
@@ -10044,10 +10044,10 @@ sub standardize ($) {
     return lc $name;
 }
 
-sub utf8_heavy_name ($$) {
-    # Returns the name that utf8_heavy.pl will use to find a table.  XXX
+sub UCD_name ($$) {
+    # Returns the name that Unicode::UCD will use to find a table.  XXX
     # perhaps this function should be placed somewhere, like Heavy.pl so that
-    # utf8_heavy can use it directly without duplicating code that can get
+    # Unicode::UCD can use it directly without duplicating code that can get
     # out-of sync.
 
     my $table = shift;
@@ -12201,7 +12201,7 @@ END
         #       taking the data from Version 2, verified by analyzing
         #       DAge.txt.
         # 3)    There is a syntax error in the entry for U+09F8 which could
-        #       cause problems for utf8_heavy, and so is changed.  It's
+        #       cause problems for Unicode::UCD, and so is changed.  It's
         #       numeric value was simply a minus sign, without any number.
         #       (Eventually Unicode changed the code point to non-numeric.)
         # 4)    The decomposition types often don't match later versions
@@ -12967,7 +12967,7 @@ sub filter_jamo_line {
 
 sub register_fraction($) {
     # This registers the input rational number so that it can be passed on to
-    # utf8_heavy.pl, both in rational and floating forms.
+    # Unicode::UCD, both in rational and floating forms.
 
     my $rational = shift;
 
@@ -13964,7 +13964,7 @@ END
         }
 
         # For Perl 5.6 compatibility, all properties matchable in regexes can
-        # have an optional 'Is_' prefix.  This is now done in utf8_heavy.pl.
+        # have an optional 'Is_' prefix.  This is now done in Unicode::UCD.
         # But warn if this creates a conflict with a (new) Unicode property
         # name, although it appears that Unicode has made a decision never to
         # begin a property name with 'Is_', so this shouldn't happen.
@@ -16029,7 +16029,7 @@ sub register_file_for_name($$$) {
 
         my $file = join '/', @path;
 
-        # Create a hash entry for utf8_heavy to get the file that stores this
+        # Create a hash entry for Unicode::UCD to get the file that stores this
         # property's map table
         foreach my $alias ($table->aliases) {
             my $name = $alias->name;
@@ -16041,7 +16041,7 @@ sub register_file_for_name($$$) {
             }
         }
 
-        # And a way for utf8_heavy to find the proper key in the SwashInfo
+        # And a way for Unicode::UCD to find the proper key in the SwashInfo
         # hash for this property.
         $file_to_swash_name{$file} = "To" . $table->swash_name;
         return;
@@ -16124,7 +16124,7 @@ sub register_file_for_name($$$) {
         # goes through all aliases in the UCD that we generate regex match
         # files for
         foreach my $alias ($table->aliases) {
-            my $standard = utf8_heavy_name($table, $alias);
+            my $standard = UCD_name($table, $alias);
 
             # Generate an entry in either the loose or strict hashes, which
             # will translate the property and alias names combination into the
@@ -16144,9 +16144,9 @@ sub register_file_for_name($$$) {
                 else {
                     $stricter_to_file_of{$standard} = $sub_filename;
 
-                    # Tightly coupled with how utf8_heavy.pl works, for a
+                    # Tightly coupled with how Unicode::UCD works, for a
                     # floating point number that is a whole number, get rid of
-                    # the trailing decimal point and 0's, so that utf8_heavy
+                    # the trailing decimal point and 0's, so that Unicode::UCD
                     # will work.  Also note that this assumes that such a
                     # number is matched strictly; so if that were to change,
                     # this would be wrong.
@@ -16436,7 +16436,7 @@ sub make_re_pod_entries($) {
     # for each name each table goes by
     foreach my $table ($input_table, $input_table->children) {
 
-        # utf8_heavy.pl cannot deal with null string property values, so skip
+        # Unicode::UCD cannot deal with null string property values, so skip
         # any tables that have no non-null names.
         next if ! grep { $_->name ne "" } $table->aliases;
 
@@ -17668,7 +17668,7 @@ END
 
 sub make_Heavy () {
     # Create and write Heavy.pl, which passes info about the tables to
-    # utf8_heavy.pl
+    # Unicode::UCD
 
     # Stringify structures for output
     my $loose_property_name_of
@@ -17728,7 +17728,7 @@ sub make_Heavy () {
 $HEADER
 $INTERNAL_ONLY_HEADER
 
-# This file is for the use of utf8_heavy.pl and Unicode::UCD
+# This file is for the use of Unicode::UCD
 
 # Maps Unicode (not Perl single-form extensions) property names in loose
 # standard form to their corresponding standard names
@@ -18575,7 +18575,7 @@ sub write_all_tables() {
                 make_ucd_table_pod_entries($table);
 
                 # There is a mapping stored of the various synonyms to the
-                # standardized name of the property for utf8_heavy.pl.
+                # standardized name of the property for Unicode::UCD.
                 # Also, the pod file contains entries of the form:
                 # \p{alias: *}         \p{full: *}
                 # rather than show every possible combination of things.
@@ -18615,7 +18615,7 @@ sub write_all_tables() {
                         push @standard_list, $alias_standard;
                     }
 
-                    # For utf8_heavy, set the mapping of the alias to the
+                    # For Unicode::UCD, set the mapping of the alias to the
                     # property
                     if ($type == $STRING) {
                         if ($property->fate <= $MAP_PROXIED) {

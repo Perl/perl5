@@ -4895,7 +4895,6 @@ lib/User/pwent.pm		By-name interface to Perl's builtin getpw*
 lib/User/pwent.t		See if User::pwent works
 lib/utf8.pm			Pragma to control Unicode support
 lib/utf8.t			See if utf8 operations work
-lib/utf8_heavy.pl		Support routines for utf8 pragma
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" works
 lib/vars_carp.t			See if "use vars" doesn't load Carp.pm per default

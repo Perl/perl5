@@ -1417,7 +1417,6 @@ use File::Glob qw(:case);
                 lib/subs.{pm,t}
                 lib/unicore/
                 lib/utf8.{pm,t}
-                lib/utf8_heavy.pl
                 lib/vars{.pm,.t,_carp.t}
                 lib/vmsish.{pm,t}
                 ],
