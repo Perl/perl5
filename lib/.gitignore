@@ -93,6 +93,7 @@
 /File/Temp.pm
 /FileCache.pm
 /Filter/
+/FindBin.pm
 /GDBM_File.pm
 /Getopt/Long.pm
 /HTTP/
