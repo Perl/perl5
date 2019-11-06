@@ -10,7 +10,7 @@ print "1..2\n";
 use FindBin qw($Bin);
 
 print "# $Bin\n";
-print "not " unless $Bin =~ m,[/.]lib\]?$,;
+print "not " unless $Bin =~ m,[/.]t\]?$,;
 print "ok 1\n";
 
 $0 = "-";
