@@ -180,7 +180,7 @@ my %Extras = (
 
        );
 
-my $VERSION = "1.10" ;
+my $VERSION = "1.11" ;
 
 my $FH;
 
@@ -1201,7 +1201,7 @@ sub decode_Zip64
     }
 
     if (full32 $z64Data->[2] ) {
-        out_VV "  Offset to Central Dir";        
+        out_VV "  Offset to Local Dir";        
     }
 
     if ($z64Data->[3] == 0xFFFF ) {
@@ -2175,6 +2175,11 @@ Error handling is still a work in progress.  If the program encounters a
 problem reading a zip file it is likely to terminate with an unhelpful
 error message. 
 
+=head1 SUPPORT
+
+General feedback/questions/bug reports should be sent to 
+L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
 
 =head1 SEE ALSO
 

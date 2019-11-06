@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.087 ;
-use IO::Compress::Base::Common  2.087 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.087 ;
-use IO::Uncompress::Adapter::Identity 2.087 ;
-use IO::Compress::Zlib::Extra 2.087 ;
-use IO::Compress::Zip::Constants 2.087 ;
+use IO::Uncompress::RawInflate  2.089 ;
+use IO::Compress::Base::Common  2.089 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.089 ;
+use IO::Uncompress::Adapter::Identity 2.089 ;
+use IO::Compress::Zlib::Extra 2.089 ;
+use IO::Compress::Zip::Constants 2.089 ;
 
-use Compress::Raw::Zlib  2.087 () ;
+use Compress::Raw::Zlib  2.089 () ;
 
 BEGIN
 {
@@ -34,7 +34,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.087';
+$VERSION = '2.089';
 $UnzipError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);
@@ -1122,7 +1122,8 @@ The functional interface needs Perl5.005 or better.
 =head2 unzip $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<unzip> expects at least two parameters,
-C<$input_filename_or_reference> and C<$output_filename_or_reference>.
+C<$input_filename_or_reference> and C<$output_filename_or_reference>
+and zero or more optional parameters (see L</Optional Parameters>)
 
 =head3 The C<$input_filename_or_reference> parameter
 
@@ -1232,9 +1233,9 @@ files/buffers.
 
 =head2 Optional Parameters
 
-Unless specified below, the optional parameters for C<unzip>,
-C<OPTS>, are the same as those used with the OO interface defined in the
-L</"Constructor Options"> section below.
+The optional parameters for the one-shot function C<unzip>
+are (for the most part) identical to those used with the OO interface defined in the
+L</"Constructor Options"> section. The exceptions are listed below
 
 =over 5
 
@@ -1858,6 +1859,12 @@ Daniel S. Sterling has written a script that uses C<IO::Uncompress::UnZip>
 to read a zip file and unzip its contents to disk.
 
 The script is available from L<https://gist.github.com/eqhmcow/5389877>
+
+=head1 SUPPORT
+
+General feedback/questions/bug reports should be sent to 
+L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
 
 =head1 SEE ALSO
 

@@ -4,15 +4,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.087 qw(:Status );
+use IO::Compress::Base::Common 2.089 qw(:Status );
 
-use IO::Uncompress::Base 2.087 ;
-use IO::Uncompress::Adapter::Bunzip2 2.087 ;
+use IO::Uncompress::Base 2.089 ;
+use IO::Uncompress::Adapter::Bunzip2 2.089 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $Bunzip2Error);
 
-$VERSION = '2.087';
+$VERSION = '2.089';
 $Bunzip2Error = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);
@@ -209,7 +209,8 @@ The functional interface needs Perl5.005 or better.
 =head2 bunzip2 $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<bunzip2> expects at least two parameters,
-C<$input_filename_or_reference> and C<$output_filename_or_reference>.
+C<$input_filename_or_reference> and C<$output_filename_or_reference>
+and zero or more optional parameters (see L</Optional Parameters>)
 
 =head3 The C<$input_filename_or_reference> parameter
 
@@ -319,9 +320,9 @@ files/buffers.
 
 =head2 Optional Parameters
 
-Unless specified below, the optional parameters for C<bunzip2>,
-C<OPTS>, are the same as those used with the OO interface defined in the
-L</"Constructor Options"> section below.
+The optional parameters for the one-shot function C<bunzip2>
+are (for the most part) identical to those used with the OO interface defined in the
+L</"Constructor Options"> section. The exceptions are listed below
 
 =over 5
 
@@ -876,6 +877,12 @@ Same as doing this
 
 See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
+=head1 SUPPORT
+
+General feedback/questions/bug reports should be sent to 
+L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
+
 =head1 SEE ALSO
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzip>, L<IO::Uncompress::UnLzip>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Compress::Zstd>, L<IO::Uncompress::UnZstd>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
@@ -886,7 +893,7 @@ L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
 
-The primary site for the bzip2 program is L<http://www.bzip.org>.
+The primary site for the bzip2 program is L<https://sourceware.org/bzip2/>.
 
 See the module L<Compress::Bzip2|Compress::Bzip2>
 

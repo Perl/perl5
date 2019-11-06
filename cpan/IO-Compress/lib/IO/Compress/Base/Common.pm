@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.087';
+$VERSION = '2.089';
 
 @EXPORT = qw( isaFilehandle isaFilename isaScalar
               whatIsInput whatIsOutput

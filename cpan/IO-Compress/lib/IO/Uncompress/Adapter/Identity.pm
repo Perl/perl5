@@ -4,14 +4,14 @@ use warnings;
 use strict;
 use bytes;
 
-use IO::Compress::Base::Common  2.087 qw(:Status);
+use IO::Compress::Base::Common  2.089 qw(:Status);
 use IO::Compress::Zip::Constants ;
 
 our ($VERSION);
 
-$VERSION = '2.087';
+$VERSION = '2.089';
 
-use Compress::Raw::Zlib  2.087 ();
+use Compress::Raw::Zlib  2.089 ();
 
 sub mkUncompObject
 {
@@ -139,7 +139,7 @@ sub reset
 {
     my $self = shift;
 
-    $self->{CompSize}   = 0;
+    $self->{CompSize}->reset();
     $self->{UnCompSize} = 0;
     $self->{CRC32}      = Compress::Raw::Zlib::crc32('');
     $self->{ADLER32}    = Compress::Raw::Zlib::adler32('');      

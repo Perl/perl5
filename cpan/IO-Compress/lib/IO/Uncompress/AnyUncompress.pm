@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.087 ();
+use IO::Compress::Base::Common 2.089 ();
 
-use IO::Uncompress::Base 2.087 ;
+use IO::Uncompress::Base 2.089 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.087';
+$VERSION = '2.089';
 $AnyUncompressError = '';
 
 @ISA = qw(IO::Uncompress::Base Exporter);
@@ -33,26 +33,26 @@ BEGIN
    # Don't trigger any __DIE__ Hooks.
    local $SIG{__DIE__};
 
-   eval ' use IO::Uncompress::Adapter::Inflate 2.087 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.087 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.087 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.087 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzma 2.087 ;';
-   eval ' use IO::Uncompress::Adapter::UnXz 2.087 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.089 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.089 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.089 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.089 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.089 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.089 ;';
    eval ' use IO::Uncompress::Adapter::UnZstd 2.083 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzip 2.087 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzip 2.089 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.087 ;';
-   eval ' use IO::Uncompress::UnLzop 2.087 ;';
-   eval ' use IO::Uncompress::Gunzip 2.087 ;';
-   eval ' use IO::Uncompress::Inflate 2.087 ;';
-   eval ' use IO::Uncompress::RawInflate 2.087 ;';
-   eval ' use IO::Uncompress::Unzip 2.087 ;';
-   eval ' use IO::Uncompress::UnLzf 2.087 ;';
-   eval ' use IO::Uncompress::UnLzma 2.087 ;';
-   eval ' use IO::Uncompress::UnXz 2.087 ;';
-   eval ' use IO::Uncompress::UnZstd 2.087 ;';
-   eval ' use IO::Uncompress::UnLzip 2.087 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.089 ;';
+   eval ' use IO::Uncompress::UnLzop 2.089 ;';
+   eval ' use IO::Uncompress::Gunzip 2.089 ;';
+   eval ' use IO::Uncompress::Inflate 2.089 ;';
+   eval ' use IO::Uncompress::RawInflate 2.089 ;';
+   eval ' use IO::Uncompress::Unzip 2.089 ;';
+   eval ' use IO::Uncompress::UnLzf 2.089 ;';
+   eval ' use IO::Uncompress::UnLzma 2.089 ;';
+   eval ' use IO::Uncompress::UnXz 2.089 ;';
+   eval ' use IO::Uncompress::UnZstd 2.089 ;';
+   eval ' use IO::Uncompress::UnLzip 2.089 ;';
 
 }
 
@@ -270,7 +270,7 @@ __END__
 
 =head1 NAME
 
-IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop file/buffer
+IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2, xz, lzma, lzip, lzf or lzop file/buffer
 
 =head1 SYNOPSIS
 
@@ -367,7 +367,8 @@ The functional interface needs Perl5.005 or better.
 =head2 anyuncompress $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<anyuncompress> expects at least two parameters,
-C<$input_filename_or_reference> and C<$output_filename_or_reference>.
+C<$input_filename_or_reference> and C<$output_filename_or_reference>
+and zero or more optional parameters (see L</Optional Parameters>)
 
 =head3 The C<$input_filename_or_reference> parameter
 
@@ -477,9 +478,9 @@ files/buffers.
 
 =head2 Optional Parameters
 
-Unless specified below, the optional parameters for C<anyuncompress>,
-C<OPTS>, are the same as those used with the OO interface defined in the
-L</"Constructor Options"> section below.
+The optional parameters for the one-shot function C<anyuncompress>
+are (for the most part) identical to those used with the OO interface defined in the
+L</"Constructor Options"> section. The exceptions are listed below
 
 =over 5
 
@@ -1047,6 +1048,12 @@ Same as doing this
 =back
 
 =head1 EXAMPLES
+
+=head1 SUPPORT
+
+General feedback/questions/bug reports should be sent to 
+L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
 
 =head1 SEE ALSO
 

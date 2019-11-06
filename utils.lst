@@ -23,5 +23,6 @@ utils/ptardiff
 utils/ptargrep
 utils/shasum
 utils/splain
+utils/streamzip
 utils/xsubpp
 utils/zipdetails

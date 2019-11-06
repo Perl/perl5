@@ -939,6 +939,7 @@ UTILS		=			\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
 		..\utils\json_pp	\
+		..\utils\streamzip	\
 		bin\exetype.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
@@ -1772,7 +1773,7 @@ distclean: realclean
 	    perltru64.pod perltw.pod perluniprops.pod perlvos.pod \
 	    perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm h2xs \
-	    perldoc perlivp libnetcfg enc2xs encguess piconv cpan *.bat \
+	    perldoc perlivp libnetcfg enc2xs encguess piconv cpan streamzip *.bat \
 	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep shasum corelist zipdetails
 	-del /f ..\config.sh perlmain.c dlutils.c config.h.new \
 	    perlmainst.c

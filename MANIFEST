@@ -1007,6 +1007,7 @@ cpan/HTTP-Tiny/t/170_keepalive.t
 cpan/HTTP-Tiny/t/BrokenCookieJar.pm
 cpan/HTTP-Tiny/t/SimpleCookieJar.pm
 cpan/HTTP-Tiny/t/Util.pm
+cpan/IO-Compress/bin/streamzip
 cpan/IO-Compress/bin/zipdetails				IO::Compress
 cpan/IO-Compress/lib/Compress/Zlib.pm			IO::Compress
 cpan/IO-Compress/lib/File/GlobMapper.pm			IO::Compress
@@ -1138,6 +1139,9 @@ cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
 cpan/IO-Compress/t/files/bad-efs.zip
+cpan/IO-Compress/t/files/encrypt-aes.zip
+cpan/IO-Compress/t/files/encrypt-standard.zip
+cpan/IO-Compress/t/files/jar.zip
 cpan/IO-Compress/t/files/meta.xml
 cpan/IO-Compress/t/files/test.ods
 cpan/IO-Compress/t/globmapper.t				IO::Compress
@@ -6178,6 +6182,7 @@ utils/ptardiff.PL		The ptardiff utility
 utils/ptargrep.PL		The ptargrep utility
 utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
+utils/streamzip.PL
 utils/xsubpp.PL			External subroutine preprocessor
 utils/zipdetails.PL			display the internal structure of zip files
 vms/descrip_mms.template	Template MM[SK] description file for build

@@ -3,7 +3,7 @@
 use strict ;
 require 5.006 ;
 
-$::VERSION = '2.087' ;
+$::VERSION = '2.089' ;
 
 use lib '.';
 use private::MakeUtil;
@@ -42,7 +42,7 @@ WriteMakefile(
 
     INSTALLDIRS => ($] >= 5.009 && $] < 5.011 ? 'perl' : 'site'),
 
-    EXE_FILES => ['bin/zipdetails'],
+    EXE_FILES => ['bin/zipdetails', 'bin/streamzip'],
     
     (
     $] >= 5.009 && $] <= 5.011001 && ! $ENV{PERL_CORE}

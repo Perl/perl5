@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(IO::File Exporter);
 
 
-$VERSION = '2.087';
+$VERSION = '2.089';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.087 ;
+use IO::Compress::Base::Common 2.089 ;
 
 use IO::File ;
 use Symbol;
@@ -1533,6 +1533,12 @@ IO::Uncompress::Base - Base Class for IO::Uncompress modules
 
 This module is not intended for direct use in application code. Its sole
 purpose is to be sub-classed by IO::Uncompress modules.
+
+=head1 SUPPORT
+
+General feedback/questions/bug reports should be sent to 
+L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
 
 =head1 SEE ALSO
 
