@@ -405,14 +405,14 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
     my @recursed;
 
     sub SWASHNEW {
-        my ($class, $type, $list, $minbits, $none) = @_;
+        my ($class, $type, $list, $minbits) = @_;
         my $user_defined = 0;
         local $^D = 0 if $^D;
 
         $class = "" unless defined $class;
         print STDERR __LINE__, ": class=$class, type=$type, list=",
                                 (defined $list) ? $list : ':undef:',
-                                ", minbits=$minbits, none=$none\n" if DEBUG;
+                                ", minbits=$minbits\n" if DEBUG;
 
         ##
         ## Get the list of codepoints for the type.
@@ -435,8 +435,6 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         ##
         ##     For binary properties, only characters with the property value
         ##     of True should be listed. The 3rd column, if any, will be ignored
-        ##
-        ## $none is undocumented, and unused
         ##
         ## To make the parsing of $type clear, this code takes the a rather
         ## unorthodox approach of last'ing out of the block once we have the
@@ -798,7 +796,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
             # Separate the extras from the code point list, and make sure
             # user-defined properties are well-behaved for
             # downstream code.
-            if ($user_defined || $none) {
+            if ($user_defined) {
                 my @tmp = split(/^/m, $list);
                 my %seen;
                 no warnings;
@@ -831,11 +829,6 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
 
                 $extras = "$taint$1";
             }
-        }
-
-        if ($none) {
-            my $hextra = sprintf "%04x", $none + 1;
-            $list =~ s/\tXXXX$/\t$hextra/mg;
         }
 
         if ($minbits != 1 && $minbits < 32) { # not binary property
@@ -890,7 +883,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         }
 
         if (DEBUG) {
-            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none, INVERT_IT => $invert_it, USER_DEFINED => $user_defined";
+            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, INVERT_IT => $invert_it, USER_DEFINED => $user_defined";
             print STDERR "\nLIST =>\n$list" if defined $list;
             print STDERR "\nEXTRAS =>\n$extras" if defined $extras;
             print STDERR "\n";
@@ -901,7 +894,6 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
             BITS => $bits,
             EXTRAS => $extras,
             LIST => $list,
-            NONE => $none,
             USER_DEFINED => $user_defined,
             @extras,
         } => $class;
