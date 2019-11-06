@@ -903,8 +903,6 @@ is(prop_aliases("Is_Is_Any"), undef,
 is(prop_aliases("ccc=vr"), undef,
                           "prop_aliases('ccc=vr') doesn't generate a warning");
 
-require "unicore/Heavy.pl";
-
 # Keys are lists of properties. Values are defined if have been tested.
 my %props;
 
@@ -995,7 +993,7 @@ while (<$props>) {
 # official properties.  We have no way of knowing if mktables omitted a Perl
 # extension or not, but we do the best we can from its generated lists
 
-foreach my $alias (sort keys %utf8::loose_to_file_of) {
+foreach my $alias (sort keys %Unicode::UCD::loose_to_file_of) {
     next if $alias =~ /=/;
     my $lc_name = lc $alias;
     my $loose = &Unicode::UCD::loose_name($lc_name);
@@ -1050,7 +1048,7 @@ for my $prop (qw(Alnum Blank Cntrl Digit Graph Print Word XDigit)) {
 }
 
 my $done_equals = 0;
-foreach my $alias (keys %utf8::stricter_to_file_of) {
+foreach my $alias (keys %Unicode::UCD::stricter_to_file_of) {
     if ($alias =~ /=/) {    # Only test one case where there is an equals
         next if $done_equals;
         $done_equals = 1;
@@ -1240,7 +1238,7 @@ while (<$propvalues>) {
 }   # End of SKIP block
 
 # And test as best we can, the non-official pva's that mktables generates.
-foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
+foreach my $hash (\%Unicode::UCD::loose_to_file_of, \%Unicode::UCD::stricter_to_file_of) {
     foreach my $test (sort keys %$hash) {
         next if exists $pva_tested{$test};  # Skip if already tested
 
@@ -1248,7 +1246,7 @@ foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
         next unless defined $value; # prop_value_aliases() requires an input
                                     # 'value'
         my $mod_value;
-        if ($hash == \%utf8::loose_to_file_of) {
+        if ($hash == \%Unicode::UCD::loose_to_file_of) {
 
             # Add extra characters to test loose-match rhs value
             $mod_value = "$extra_chars$value";
@@ -1466,7 +1464,7 @@ my %tested_invlist;
 
 # Look at everything we think that mktables tells us exists, both loose and
 # strict
-foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of)
+foreach my $set_of_tables (\%Unicode::UCD::stricter_to_file_of, \%Unicode::UCD::loose_to_file_of)
 {
     foreach my $table (sort keys %$set_of_tables) {
 
@@ -1475,7 +1473,7 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         if (defined $value) {
 
             # If this is to be loose matched, add in characters to test that.
-            if ($set_of_tables == \%utf8::loose_to_file_of) {
+            if ($set_of_tables == \%Unicode::UCD::loose_to_file_of) {
                 $value = "$extra_chars$value";
             }
             else {  # Strict match
@@ -1497,7 +1495,7 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
 
             # Like above, use loose if required, and insert underscores
             # between digits if strict.
-            if ($set_of_tables == \%utf8::loose_to_file_of) {
+            if ($set_of_tables == \%Unicode::UCD::loose_to_file_of) {
                 $mod_table = "$extra_chars$table";
             }
             else {
@@ -1531,7 +1529,7 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         # it being an actual file to read.  The file is an index in to the
         # array of the definitions
         if ($file =~ s!^#/!!) {
-            $official = $utf8::inline_definitions[$file];
+            $official = $Unicode::UCD::inline_definitions[$file];
         }
         else {
             $official = do "unicore/lib/$file.pl";
@@ -1650,7 +1648,7 @@ my %tested_invmaps;
 # returned by the function with the tables that mktables generates.  Some of
 # these tables are directly stored as files on disk, in either the unicore or
 # unicore/To directories, and most should be listed in the mktables generated
-# hash %utf8::loose_property_to_file_of, with a few additional ones that this
+# hash %Unicode::UCD::loose_property_to_file_of, with a few additional ones that this
 # handles specially.  For these, the files are read in directly, massaged, and
 # compared with what invmap() returns.  The SPECIALS hash in some of these
 # files overrides values in the main part of the file.
@@ -1690,13 +1688,13 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
 
             # This legacy property is otherwise unknown to Perl; so shouldn't
             # have any information about it already.
-            ok(! exists $utf8::loose_property_to_file_of{$loose_prop},
+            ok(! exists $Unicode::UCD::loose_property_to_file_of{$loose_prop},
                "There isn't a hash entry for file lookup of $prop");
-            $utf8::loose_property_to_file_of{$loose_prop} = $base_file;
+            $Unicode::UCD::loose_property_to_file_of{$loose_prop} = $base_file;
 
-            ok(! exists $utf8::file_to_swash_name{$loose_prop},
+            ok(! exists $Unicode::UCD::file_to_swash_name{$loose_prop},
                "There isn't a hash entry for swash lookup of $prop");
-            $utf8::file_to_swash_name{$base_file}
+            $Unicode::UCD::file_to_swash_name{$base_file}
                                         = $legacy_props{$prop}->{'swash_name'};
             $display_prop = $prop;
             $is_legacy = 1;
@@ -1916,8 +1914,8 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
     if ($name ne 'na'
         && ($name eq 'blk'
             || defined
-                    ($base_file = $utf8::loose_property_to_file_of{$proxy_prop})
-            || exists $utf8::loose_to_file_of{$proxy_prop}
+                    ($base_file = $Unicode::UCD::loose_property_to_file_of{$proxy_prop})
+            || exists $Unicode::UCD::loose_to_file_of{$proxy_prop}
             || $name eq "dm"))
     {
         # In the above, blk is done unconditionally, as we need to test that
@@ -1987,7 +1985,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             # work would be needed in the unlikely event that an inverted
             # property comes along without these characteristics
             if (!defined $base_file) {
-                $base_file = $utf8::loose_to_file_of{$proxy_prop};
+                $base_file = $Unicode::UCD::loose_to_file_of{$proxy_prop};
                 $is_binary = ($base_file =~ s/!//) ? -1 : 1;
                 $base_file = "lib/$base_file" unless $base_file =~ m!^#/!;
             }
@@ -1996,7 +1994,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             # special case where the contents are in-lined with semi-colons
             # meaning new-lines, instead of it being an actual file to read.
             if ($base_file =~ s!^#/!!) {
-                $official = $utf8::inline_definitions[$base_file];
+                $official = $Unicode::UCD::inline_definitions[$base_file];
             }
             else {
                 $official = do "unicore/$base_file.pl";
@@ -2034,11 +2032,11 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
 
         # Get the format for the file, and if there are any special elements,
         # get a reference to them.
-        my $swash_name = $utf8::file_to_swash_name{$base_file};
+        my $swash_name = $Unicode::UCD::file_to_swash_name{$base_file};
         my $specials_ref;
         my $file_format;    # The 'format' given inside the file
         if ($swash_name) {
-            $specials_ref = $utf8::SwashInfo{$swash_name}{'specials_name'};
+            $specials_ref = $Unicode::UCD::SwashInfo{$swash_name}{'specials_name'};
             if ($specials_ref) {
 
                 # Convert from the name to the actual reference.
@@ -2046,7 +2044,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                 $specials_ref = \%{$specials_ref};
             }
 
-            $file_format = $utf8::SwashInfo{$swash_name}{'format'};
+            $file_format = $Unicode::UCD::SwashInfo{$swash_name}{'format'};
         }
 
         # Leading zeros used to be used with the values in the files that give,
@@ -2711,8 +2709,7 @@ if ($v_unicode_version ge v3.1.0) { # No Script property before this
 
 ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
 
-@warnings = grep { $_ !~ /Use of '.*' in \\p\{} or \\P\{} is deprecated because/ } @warnings;
-if (! ok(@warnings == 0, "The only warnings generated are about deprecated properties")) {
+if (! ok(@warnings == 0, "No warnings were generated")) {
     diag(join "\n", "The warnings are:", @warnings);
 }
 

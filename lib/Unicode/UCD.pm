@@ -143,6 +143,21 @@ Note that the largest code point in Unicode is U+10FFFF.
 
 =cut
 
+our %caseless_equivalent;
+our $e_precision;
+our %file_to_swash_name;
+our @inline_definitions;
+our %loose_property_name_of;
+our %loose_property_to_file_of;
+our %loose_to_file_of;
+our $MAX_CP;
+our %nv_floating_to_rational;
+our %prop_aliases;
+our %stricter_to_file_of;
+our %strict_property_to_file_of;
+our %SwashInfo;
+our %why_deprecated;
+
 my $v_unicode_version;  # v-string.
 
 sub openunicode {
@@ -367,7 +382,7 @@ my $number = qr{  ^ $sign $digits+ $
 sub loose_name ($) {
     # Given a lowercase property or property-value name, return its
     # standardized version that is expected for look-up in the 'loose' hashes
-    # in Heavy.pl (hence, this depends on what mktables does).  This squeezes
+    # in UCD.pl (hence, this depends on what mktables does).  This squeezes
     # out blanks, underscores and dashes.  The complication stems from the
     # grandfathered-in 'L_', which retains a single trailing underscore.
 
@@ -419,7 +434,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         ## Called from swash_init (see utf8.c) or SWASHNEW itself.
         ##
         ## Callers of swash_init:
-        ##     Unicode::UCD::prop_invlist
+        ##     prop_invlist
         ##     Unicode::UCD::prop_invmap
         ##
         ## Given a $type, our goal is to fill $list with the set of codepoint
@@ -443,7 +458,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         ##
         #   If a problem is found $type is returned;
         #   Upon success, a new (or cached) blessed object is returned with
-        #   keys TYPE, BITS, EXTRAS, LIST, and NONE with values having the
+        #   keys TYPE, BITS, EXTRAS, LIST, and with values having the
         #   same meanings as the input parameters.
         #   SPECIALS contains a reference to any special-treatment hash in the
         #       property.
@@ -513,7 +528,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                     }
                 }
 
-                require "$unicore_dir/Heavy.pl";
+                require "$unicore_dir/UCD.pl";
 
                 # All property names are matched caselessly
                 my $property_and_table = CORE::lc $type;
@@ -545,7 +560,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                     $property = loose_name($property) =~ s/^is//r;
 
                     # And convert to canonical form.  Quit if not valid.
-                    $property = $utf8::loose_property_name_of{$property};
+                    $property = $loose_property_name_of{$property};
                     if (! defined $property) {
                         pop @recursed if @recursed;
                         return $type;
@@ -625,11 +640,11 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                             # 5.00E-01, and look that up in the hash
 
                             my $float = sprintf "%.*e",
-                                                $utf8::e_precision,
+                                                $e_precision,
                                                 0 + $parts[0];
 
-                            if (exists $utf8::nv_floating_to_rational{$float}) {
-                                $table = $utf8::nv_floating_to_rational{$float};
+                            if (exists $nv_floating_to_rational{$float}) {
+                                $table = $nv_floating_to_rational{$float};
                             } else {
                                 pop @recursed if @recursed;
                                 return $type;
@@ -645,7 +660,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                 print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
 
                 # First try stricter matching.
-                $file = $utf8::stricter_to_file_of{$property_and_table};
+                $file = $stricter_to_file_of{$property_and_table};
 
                 # If didn't find it, try again with looser matching by editing
                 # out the applicable characters on the rhs and looking up
@@ -658,7 +673,8 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                     $table = loose_name($table);
                     $property_and_table = "$prefix$table";
                     print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
-                    $file = $utf8::loose_to_file_of{$property_and_table};
+                    $file = $loose_to_file_of{$property_and_table};
+                    print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
                 }
 
                 # Add the constant and go fetch it in.
@@ -669,9 +685,9 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                     $invert_it = 0 + $file =~ s/!//;
 
                     if ($caseless
-                        && exists $utf8::caseless_equivalent{$property_and_table})
+                        && exists $caseless_equivalent{$property_and_table})
                     {
-                        $file = $utf8::caseless_equivalent{$property_and_table};
+                        $file = $caseless_equivalent{$property_and_table};
                     }
 
                     # The pseudo-directory '#' means that there really isn't a
@@ -693,19 +709,19 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                     if ($property_and_table =~ s/^to//) {
                     # Look input up in list of properties for which we have
                     # mapping files.  First do it with the strict approach
-                        if (defined ($file = $utf8::strict_property_to_file_of{
+                        if (defined ($file = $strict_property_to_file_of{
                                                     $strict_property_and_table}))
                         {
-                            $type = $utf8::file_to_swash_name{$file};
+                            $type = $file_to_swash_name{$file};
                             print STDERR __LINE__, ": type set to $type\n"
                                                                         if DEBUG;
                             $file = "$unicore_dir/$file.pl";
                             last GETFILE;
                         }
                         elsif (defined ($file =
-                          $utf8::loose_property_to_file_of{$property_and_table}))
+                          $loose_property_to_file_of{$property_and_table}))
                         {
-                            $type = $utf8::file_to_swash_name{$file};
+                            $type = $file_to_swash_name{$file};
                             print STDERR __LINE__, ": type set to $type\n"
                                                                         if DEBUG;
                             $file = "$unicore_dir/$file.pl";
@@ -713,7 +729,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                         }   # If that fails see if there is a corresponding binary
                             # property file
                         elsif (defined ($file =
-                                    $utf8::loose_to_file_of{$property_and_table}))
+                                    $loose_to_file_of{$property_and_table}))
                         {
 
                             # Here, there is no map file for the property we
@@ -757,7 +773,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                 # new-lines.  Since it is in-line there is no advantage to
                 # caching the result
                 if ($file =~ s!^#/!!) {
-                    $list = $utf8::inline_definitions[$file];
+                    $list = $inline_definitions[$file];
                 }
                 else {
                     # Here, we have an actual file to read in and load, but it
@@ -787,7 +803,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
 
         my $bits = $minbits;
 
-        # mktables lists don't have extras, like '&utf8::prop', so don't need
+        # mktables lists don't have extras, like '&prop', so don't need
         # to separate them; also lists are already sorted, so don't need to do
         # that.
         if ($list && ! $list_is_from_mktables) {
@@ -859,7 +875,7 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
                     if ($char =~ /[-+!&]/) {
                         my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
                         my $subobj;
-                        if ($c eq 'utf8') {
+                        if ($c eq 'utf8') { # khw is unsure of this
                             $subobj = SWASHNEW($t, "", $minbits, 0);
                         }
                         elsif (exists &$name) {
@@ -901,10 +917,10 @@ my $numeric_re = qr! $integer_or_float_re | ^ -? \d+ / \d+ $ !x;
         if ($file) {
             $Cache{$class, $file, $invert_it} = $SWASH;
             if ($type
-                && exists $utf8::SwashInfo{$type}
-                && exists $utf8::SwashInfo{$type}{'specials_name'})
+                && exists $SwashInfo{$type}
+                && exists $SwashInfo{$type}{'specials_name'})
             {
-                my $specials_name = $utf8::SwashInfo{$type}{'specials_name'};
+                my $specials_name = $SwashInfo{$type}{'specials_name'};
                 no strict "refs";
                 print STDERR "\nspecials_name => $specials_name\n" if DEBUG;
                 $SWASH->{'SPECIALS'} = \%$specials_name;
@@ -982,7 +998,7 @@ sub charinfo {
 
     @CATEGORIES =_read_table("To/Gc.pl") unless @CATEGORIES;
     $prop{'category'} = _search(\@CATEGORIES, 0, $#CATEGORIES, $code)
-                        // $utf8::SwashInfo{'ToGc'}{'missing'};
+                        // $SwashInfo{'ToGc'}{'missing'};
     # Return undef if category value is 'Unassigned' or one of its synonyms
     return if grep { lc $_ eq 'unassigned' }
                                     prop_value_aliases('Gc', $prop{'category'});
@@ -995,7 +1011,7 @@ sub charinfo {
 
     @BIDIS =_read_table("To/Bc.pl") unless @BIDIS;
     $prop{'bidi'} = _search(\@BIDIS, 0, $#BIDIS, $code)
-                    // $utf8::SwashInfo{'ToBc'}{'missing'};
+                    // $SwashInfo{'ToBc'}{'missing'};
 
     # For most code points, we can just read in "unicore/Decomposition.pl", as
     # its contents are exactly what should be output.  But that file doesn't
@@ -1122,9 +1138,9 @@ sub _read_table ($;$) {
     # return takes much less memory when there are large ranges.
     #
     # This function has the side effect of setting
-    # $utf8::SwashInfo{$property}{'format'} to be the mktables format of the
+    # $SwashInfo{$property}{'format'} to be the mktables format of the
     #                                       table; and
-    # $utf8::SwashInfo{$property}{'missing'} to be the value for all entries
+    # $SwashInfo{$property}{'missing'} to be the value for all entries
     #                                        not listed in the table.
     # where $property is the Unicode property name, preceded by 'To' for map
     # properties., e.g., 'ToSc'.
@@ -1143,11 +1159,11 @@ sub _read_table ($;$) {
 
     # Look up if this property requires adjustments, which we do below if it
     # does.
-    require "unicore/Heavy.pl";
+    require "unicore/UCD.pl";
     my $property = $table =~ s/\.pl//r;
-    $property = $utf8::file_to_swash_name{$property};
+    $property = $file_to_swash_name{$property};
     my $to_adjust = defined $property
-                    && $utf8::SwashInfo{$property}{'format'} =~ / ^ a /x;
+                    && $SwashInfo{$property}{'format'} =~ / ^ a /x;
 
     for (split /^/m, $list) {
         my ($start, $end, $value) = / ^ (.+?) \t (.*?) \t (.+?)
@@ -1156,7 +1172,7 @@ sub _read_table ($;$) {
         my $decimal_start = hex $start;
         my $decimal_end = ($end eq "") ? $decimal_start : hex $end;
         $value = hex $value if $to_adjust
-                               && $utf8::SwashInfo{$property}{'format'} eq 'ax';
+                               && $SwashInfo{$property}{'format'} eq 'ax';
         if ($return_hash) {
             foreach my $i ($decimal_start .. $decimal_end) {
                 $return{$i} = ($to_adjust)
@@ -1302,7 +1318,7 @@ sub charprop ($$;$) {
             # extensions.  But this is misleading.  For now, return undef for
             # these, as currently documented.
             undef $map unless
-                exists $Unicode::UCD::prop_aliases{loose_name(lc $prop)};
+                exists $prop_aliases{loose_name(lc $prop)};
         }
         return $map;
     }
@@ -1377,7 +1393,7 @@ sub charprops_all($) {
 
     require "unicore/UCD.pl";
 
-    foreach my $prop (keys %Unicode::UCD::prop_aliases) {
+    foreach my $prop (keys %prop_aliases) {
 
         # Don't return a Perl extension.  (This is the only one that
         # %prop_aliases has in it.)
@@ -1578,7 +1594,7 @@ sub charscript {
     if (defined $code) {
 	my $result = _search(\@SCRIPTS, 0, $#SCRIPTS, $code);
         return $result if defined $result;
-        return $utf8::SwashInfo{'ToSc'}{'missing'};
+        return $SwashInfo{'ToSc'}{'missing'};
     } elsif (exists $SCRIPTS{$arg}) {
         return _dclone $SCRIPTS{$arg};
     }
@@ -2641,14 +2657,12 @@ about (and which is documented below in L</prop_invmap()>).
 our %string_property_loose_to_name;
 our %ambiguous_names;
 our %loose_perlprop_to_name;
-our %prop_aliases;
 
 sub prop_aliases ($) {
     my $prop = $_[0];
     return unless defined $prop;
 
     require "unicore/UCD.pl";
-    require "unicore/Heavy.pl";
 
     # The property name may be loosely or strictly matched; we don't know yet.
     # But both types use lower-case.
@@ -2656,7 +2670,7 @@ sub prop_aliases ($) {
 
     # It is loosely matched if its lower case isn't known to be strict.
     my $list_ref;
-    if (! exists $utf8::stricter_to_file_of{$prop}) {
+    if (! exists $stricter_to_file_of{$prop}) {
         my $loose = loose_name($prop);
 
         # There is a hash that converts from any loose name to its standard
@@ -2664,7 +2678,7 @@ sub prop_aliases ($) {
         # as a key into another hash.  The whole concept is for memory
         # savings, as the second hash doesn't have to have all the
         # combinations.  Actually, there are two hashes that do the
-        # conversion.  One is stored in Heavy.pl) for looking up properties
+        # conversion.  One is stored in UCD.pl) for looking up properties
         # matchable in regexes.  This function needs to access string
         # properties, which aren't available in regexes, so a second
         # conversion hash is made for them (stored in UCD.pl).  Look in the
@@ -2678,7 +2692,7 @@ sub prop_aliases ($) {
         else {
             my $retrying = 0;   # bool.  ? Has an initial 'is' been stripped
         RETRY:
-            if (exists $utf8::loose_property_name_of{$loose}
+            if (exists $loose_property_name_of{$loose}
                 && (! $retrying
                     || ! exists $ambiguous_names{$loose}))
             {
@@ -2691,7 +2705,7 @@ sub prop_aliases ($) {
                 # for the gc, script, or block properties, and the stripped
                 # 'is' means that they mean one of those, and not one of
                 # these
-                $prop = $utf8::loose_property_name_of{$loose};
+                $prop = $loose_property_name_of{$loose};
             }
             elsif (exists $loose_perlprop_to_name{$loose}) {
 
@@ -2706,7 +2720,7 @@ sub prop_aliases ($) {
                     $list_ref = \@list;
                 }
             }
-            elsif (! exists $utf8::loose_to_file_of{$loose}) {
+            elsif (! exists $loose_to_file_of{$loose}) {
 
                 # loose_to_file_of is a complete list of loose names.  If not
                 # there, the input is unknown.
@@ -2964,7 +2978,7 @@ sub prop_value_aliases ($$) {
         # a Perl-extension All perl extensions are binary, hence are
         # enumerateds, which means that we know that the input unknown value
         # is illegal.
-        return if ! exists $Unicode::UCD::prop_aliases{$prop};
+        return if ! exists $prop_aliases{$prop};
 
         # Otherwise, we assume it's valid, as documented.
         return $value;
@@ -2989,7 +3003,7 @@ sub prop_value_aliases ($$) {
     # %prop_value_aliases is set up so that the strict matches will appear as
     # if they were in loose form.  Thus, if the non-loose version is legal,
     # we're ok, can skip the further check.
-    if (! exists $utf8::stricter_to_file_of{"$prop=$value"}
+    if (! exists $stricter_to_file_of{"$prop=$value"}
 
         # We're also ok and skip the further check if value loosely matches.
         # mktables has verified that no strict name under loose rules maps to
@@ -3002,12 +3016,12 @@ sub prop_value_aliases ($$) {
         # 2) When the values are numeric, in which case we need to look
         #    further, but their squeezed-out loose values will be in
         #    %stricter_to_file_of
-        && exists $utf8::stricter_to_file_of{"$prop=$loose_value"})
+        && exists $stricter_to_file_of{"$prop=$loose_value"})
     {
         # The only thing that's legal loosely under strict is that can have an
         # underscore between digit pairs XXX
         while ($value =~ s/(\d)_(\d)/$1$2/g) {}
-        return unless exists $utf8::stricter_to_file_of{"$prop=$value"};
+        return unless exists $stricter_to_file_of{"$prop=$value"};
     }
 
     # Here, we know that the combination exists.  Return it.
@@ -3026,7 +3040,7 @@ sub prop_value_aliases ($$) {
 }
 
 # All 1 bits but the top one is the largest possible IV.
-$Unicode::UCD::MAX_CP = (~0) >> 1;
+$MAX_CP = (~0) >> 1;
 
 =pod
 
@@ -3212,7 +3226,7 @@ sub prop_invlist ($;$) {
                                     # beyond the end of the range.
                 no warnings 'portable';
                 my $end = hex $hex_end;
-                last if $end == $Unicode::UCD::MAX_CP;
+                last if $end == $MAX_CP;
                 push @invlist, $end + 1;
             }
             else {  # No end of range, is a single code point.
@@ -3873,8 +3887,8 @@ RETRY:
             my %blocks;
             $blocks{'LIST'} = "";
             $blocks{'TYPE'} = "ToBlk";
-            $utf8::SwashInfo{ToBlk}{'missing'} = "No_Block";
-            $utf8::SwashInfo{ToBlk}{'format'} = "s";
+            $SwashInfo{ToBlk}{'missing'} = "No_Block";
+            $SwashInfo{ToBlk}{'format'} = "s";
 
             foreach my $block (@BLOCKS) {
                 $blocks{'LIST'} .= sprintf "%x\t%x\t%s\n",
@@ -3957,8 +3971,8 @@ RETRY:
             } # End of loop through all the names
 
             $names{'TYPE'} = "ToNa";
-            $utf8::SwashInfo{ToNa}{'missing'} = "";
-            $utf8::SwashInfo{ToNa}{'format'} = "n";
+            $SwashInfo{ToNa}{'missing'} = "";
+            $SwashInfo{ToNa}{'format'} = "n";
             $swash = \%names;
         }
         elsif ($second_try =~ / ^ ( d [mt] ) $ /x) {
@@ -3970,8 +3984,8 @@ RETRY:
 
             if ($second_try eq 'dt') {
                 $decomps{'TYPE'} = "ToDt";
-                $utf8::SwashInfo{'ToDt'}{'missing'} = "None";
-                $utf8::SwashInfo{'ToDt'}{'format'} = "s";
+                $SwashInfo{'ToDt'}{'missing'} = "None";
+                $SwashInfo{'ToDt'}{'format'} = "s";
             }   # 'dm' is handled below, with 'nfkccf'
 
             $decomps{'LIST'} = "";
@@ -4165,8 +4179,8 @@ RETRY:
             $revised_swash{'SPECIALS'} = $swash->{'SPECIALS'};
             $swash = \%revised_swash;
 
-            $utf8::SwashInfo{$type}{'missing'} = 0;
-            $utf8::SwashInfo{$type}{'format'} = 'a';
+            $SwashInfo{$type}{'missing'} = 0;
+            $SwashInfo{$type}{'format'} = 'a';
         }
     }
 
@@ -4180,10 +4194,10 @@ RETRY:
 
     # All properties but binary ones should have 'missing' and 'format'
     # entries
-    $missing = $utf8::SwashInfo{$returned_prop}{'missing'};
+    $missing = $SwashInfo{$returned_prop}{'missing'};
     $missing = 'N' unless defined $missing;
 
-    $format = $utf8::SwashInfo{$returned_prop}{'format'};
+    $format = $SwashInfo{$returned_prop}{'format'};
     $format = 'b' unless defined $format;
 
     my $requires_adjustment = $format =~ /^a/;
@@ -4379,7 +4393,7 @@ RETRY:
             # iteration will pop this, unless there is no next iteration, and
             # we have filled all of the Unicode code space, so check for that
             # and skip.
-            if ($end < $Unicode::UCD::MAX_CP) {
+            if ($end < $MAX_CP) {
                 push @invlist, $end + 1;
                 push @invmap, $missing;
             }
