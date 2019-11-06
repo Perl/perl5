@@ -578,6 +578,11 @@ use File::Glob qw(:case);
         ],
     },
 
+    'FindBin' => {
+        'DISTRIBUTION' => 'XSAWYERX/FindBin-0.000.tar.gz',
+        'FILES'        => q[dist/FindBin],
+    },
+
     'Getopt::Long' => {
         'DISTRIBUTION' => 'JV/Getopt-Long-2.51.tar.gz',
         'FILES'        => q[cpan/Getopt-Long],
@@ -1361,7 +1366,6 @@ use File::Glob qw(:case);
                 lib/File/Copy.{pm,t}
                 lib/File/stat{.pm,.t,-7896.t}
                 lib/FileHandle.{pm,t}
-                lib/FindBin.{pm,t}
                 lib/Getopt/Std.{pm,t}
                 lib/Internals.pod
                 lib/Internals.t
