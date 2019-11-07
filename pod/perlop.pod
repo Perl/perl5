@@ -2299,7 +2299,7 @@ the delimiter or backslash is interpolated.
 =item C<qq/I<STRING>/>
 X<qq> X<quote, double> X<"> X<"">
 
-=item "I<STRING>"
+=item C<"I<STRING>">
 
 A double-quoted, interpolated string.
 
