@@ -6928,6 +6928,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         SV * inverted_tlist = _new_invlist(tlen);
         Size_t temp_len;
 
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "%d: tstr=%s\n",
+                              __LINE__, _byte_dump_string(t, tend - t, 0)));
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "rstr=%s\n",
+                                        _byte_dump_string(r, rend - r, 0)));
+
         while (t < tend) {
 
             /* Non-utf8 strings don't have ranges, so each character is listed
@@ -6964,6 +6969,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         /* The inversion list is done; now invert it */
         _invlist_invert(inverted_tlist);
+        DEBUG_y(sv_dump(inverted_tlist));
 
         /* Now go through the inverted list and create a new tstr for the rest
          * of the routine to use.  Since the UTF-8 version can have ranges, and
@@ -7052,6 +7058,14 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         r = r0;
         r_count = 0;
         t_range_count = r_range_count = 0;
+
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d:\ntstr=%s\n",
+                    __FILE__, __LINE__, _byte_dump_string(t, tend - t, 0)));
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "rstr=%s\n",
+                                        _byte_dump_string(r, rend - r, 0)));
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "/c=%d; /s=%d; /d=%d\n",
+                                                  complement, squash, del));
+        DEBUG_y(invmap_dump(t_invlist, r_map));
 
         /* Now go through the search list constructing an inversion map.  The
          * input is not necessarily in any particular order.  Making it an
@@ -7207,6 +7221,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * range the same size as the lhs one. */
                     r_cp = TR_SPECIAL_HANDLING;
                     r_range_count = t_range_count;
+
+                    if (! del) {
+                        DEBUG_yv(PerlIO_printf(Perl_debug_log,
+                                        "final_map =%" UVXf "\n", final_map));
+                    }
                 }
                 else {
                     if (! rstr_utf8) {
@@ -7308,6 +7327,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * has been set up so that all members in it will be of the same
              * ilk) */
             if (r_map[i] == TR_UNLISTED) {
+                DEBUG_yv(PerlIO_printf(Perl_debug_log,
+                    "Processing %" UVxf "-%" UVxf " => %" UVxf "-%" UVxf "\n",
+                    t_cp, t_cp_end, r_cp, r_cp_end));
 
                 /* This is the first definition for this chunk, hence is valid
                  * and needs to be processed.  Here and in the comments below,
@@ -7357,6 +7379,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * largest ratio */
                     if (ratio > max_expansion) {
                         max_expansion = ratio;
+                        DEBUG_y(PerlIO_printf(Perl_debug_log,
+                                        "New expansion factor: %" NVgf "\n",
+                                        max_expansion));
                     }
                 }
 
@@ -7590,6 +7615,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * [-1]     Z  -1   # Z => default; as do Z+1, ... infinity
                      */
 
+                    DEBUG_yv(PerlIO_printf(Perl_debug_log,
+                                        "Before fixing up: len=%d, i=%d\n",
+                                        (int) len, (int) i));
+                    DEBUG_yv(invmap_dump(t_invlist, r_map));
+
                     invlist_extend(t_invlist, len + 2);
                     t_array = invlist_array(t_invlist);
                     Renew(r_map, len + 2, UV);
@@ -7609,6 +7639,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     t_array[i+2] = t_cp_end + 1;
                     r_map[i+2] = TR_UNLISTED;
                 }
+                DEBUG_yv(PerlIO_printf(Perl_debug_log,
+                            "After iteration: span=%" IVdf ", t_range_count=%"
+                            IVdf ", r_range_count=%" IVdf "\n",
+                            span, t_range_count, r_range_count));
+                DEBUG_yv(invmap_dump(t_invlist, r_map));
             } /* End of this chunk needs to be processed */
 
             /* Done with this chunk. */
@@ -7636,6 +7671,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     } /* End of passes */
 
     SvREFCNT_dec(inverted_tstr);
+
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "After everything: \n"));
+    DEBUG_y(invmap_dump(t_invlist, r_map));
 
     /* We now have normalized the input into an inversion map.
      *
@@ -7770,6 +7808,22 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                               : (short) rlen
                                 ? (short) final_map
                                 : (short) TR_R_EMPTY;
+        DEBUG_y(PerlIO_printf(Perl_debug_log,"%s: %d\n", __FILE__, __LINE__));
+        for (i = 0; i < tbl->size; i++) {
+            if (tbl->map[i] < 0) {
+                DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%d",
+                                                (unsigned) i, tbl->map[i]));
+            }
+            else {
+                DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%02x",
+                                                (unsigned) i, tbl->map[i]));
+            }
+            if ((i+1) % 8 == 0 || i + 1 == tbl->size) {
+                DEBUG_y(PerlIO_printf(Perl_debug_log,"\n"));
+            }
+        }
+        DEBUG_y(PerlIO_printf(Perl_debug_log,"Final map 0x%x=>%02x\n",
+                                (unsigned) tbl->size, tbl->map[tbl->size]));
 
         SvREFCNT_dec(t_invlist);
 

@@ -3360,6 +3360,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  B  dump suBroutine definitions, including special Blocks like BEGIN\n",
       "  L  trace some locale setting information--for Perl core development\n",
       "  i  trace PerlIO layer processing\n",
+      "  y  trace y///, tr/// compilation and execution\n",
       NULL
     };
     UV uv = 0;
@@ -3368,7 +3369,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBLi";
+	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBLiy";
 
 	for (; isWORDCHAR(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);

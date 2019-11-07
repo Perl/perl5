@@ -46,6 +46,10 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     U8 * const send = s+len;
 
     PERL_ARGS_ASSERT_DO_TRANS_SIMPLE;
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_simple:"
+                                          " input sv:\n",
+                                          __FILE__, __LINE__));
+    DEBUG_y(sv_dump(sv));
 
     /* First, take care of non-UTF-8 input strings, because they're easy */
     if (!SvUTF8(sv)) {
@@ -101,6 +105,9 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	SvUTF8_on(sv);
 	SvSETMAGIC(sv);
     }
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+                                          __FILE__, __LINE__, matches));
+    DEBUG_y(sv_dump(sv));
     return matches;
 }
 
@@ -127,6 +134,11 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT;
 
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_count:"
+                                          " input sv:\n",
+                                          __FILE__, __LINE__));
+    DEBUG_y(sv_dump(sv));
+
     if (!SvUTF8(sv)) {
 	while (s < send) {
             if (tbl->map[*s++] >= 0)
@@ -147,6 +159,8 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	}
     }
 
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: count returning %" IVdf "\n",
+                                          __FILE__, __LINE__, matches));
     return matches;
 }
 
@@ -169,6 +183,11 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     const bool complement = cBOOL(PL_op->op_private & OPpTRANS_COMPLEMENT);
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
+
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_complex:"
+                                          " input sv:\n",
+                                          __FILE__, __LINE__));
+    DEBUG_y(sv_dump(sv));
 
     if (!SvUTF8(sv)) {
 	U8 *d = s;
@@ -293,6 +312,9 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	SvUTF8_on(sv);
     }
     SvSETMAGIC(sv);
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+                                          __FILE__, __LINE__, matches));
+    DEBUG_y(sv_dump(sv));
     return matches;
 }
 
@@ -322,6 +344,14 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
     UV* map = (UV *) SvPVX(to_invmap_sv);
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT_INVMAP;
+
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d:"
+                                          "entering do_trans_count_invmap:"
+                                          " input sv:\n",
+                                          __FILE__, __LINE__));
+    DEBUG_y(sv_dump(sv));
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "mapping:\n"));
+    DEBUG_y(invmap_dump(from_invlist, (UV *) SvPVX(to_invmap_sv)));
 
     s = (U8*)SvPV_nomg(sv, len);
 
@@ -356,9 +386,10 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
         s += s_len;
     }
 
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+                                          __FILE__, __LINE__, matches));
     return matches;
 }
-
 
 /* Helper function for do_trans().
  * Handles cases where an inversion map implementation is to be used and the
@@ -416,6 +447,13 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     }
 
     s = (U8*)SvPV_nomg(sv, len);
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_invmap:"
+                                          " input sv:\n",
+                                          __FILE__, __LINE__));
+    DEBUG_y(sv_dump(sv));
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "mapping:\n"));
+    DEBUG_y(invmap_dump(from_invlist, map));
+
     send = s + len;
     s0 = s;
 
@@ -535,9 +573,11 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     }
     SvSETMAGIC(sv);
 
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+                                          __FILE__, __LINE__, matches));
+    DEBUG_y(sv_dump(sv));
     return matches;
 }
-
 
 /* Execute a tr//. sv is the value to be translated, while PL_op
  * should be an OP_TRANS or OP_TRANSR op, whose op_pv field contains a

@@ -428,6 +428,7 @@ B<-D14> is equivalent to B<-Dtls>):
                subject to change
  134217728  i  trace PerlIO layer processing.  Set PERLIO_DEBUG to
                the filename to trace to.
+ 268435456  y  trace y///, tr/// compilation and execution
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see C<:opd> in L<Devel::Peek> or L<re/'debug' mode>
