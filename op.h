@@ -170,8 +170,9 @@ Deprecated.  Use C<GIMME_V> instead.
  *       from data in regen/op_private */
 
 
-#define OPpTRANS_ALL	(OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
-
+#define OPpTRANS_ALL	(OPpTRANS_USE_SVOP|OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
+#define OPpTRANS_FROM_UTF   OPpTRANS_USE_SVOP
+#define OPpTRANS_TO_UTF     OPpTRANS_CAN_FORCE_UTF8
 
 
 /* Mask for OP_ENTERSUB flags, the absence of which must be propagated
@@ -1108,6 +1109,18 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #   define FATAL_ABOVE_FF_MSG                                       \
       "Use of strings with code points over 0xFF as arguments to "  \
       "%s operator is not allowed"
+#endif
+#if defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_PERL_C)
+#  define TR_UNMAPPED           (UV)-1
+#  define TR_DELETE             (UV)-2
+#  define TR_R_EMPTY            (UV)-3  /* rhs (replacement) is empty */
+#  define TR_OOB                (UV)-4  /* Something that isn't one of the others */
+#  define TR_SPECIAL_HANDLING   TR_DELETE /* Can occupy same value */
+#  define TR_UNLISTED           TR_UNMAPPED /* A synonym whose name is clearer
+                                               at times */
+#endif
+#if defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
+#define RANGE_INDICATOR  ILLEGAL_UTF8_BYTE
 #endif
 
 /* stuff for OP_ARGCHECK */

@@ -2691,8 +2691,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     }
     else {
         /* Similarly for utf8.  For invariants can check directly; for other
-         * Latin1, can calculate their code point and check; otherwise  use a
-         * swash */
+         * Latin1, can calculate their code point and check; otherwise  use an
+         * inversion list */
         if (UTF8_IS_INVARIANT(*s)) {
             if (! isALPHAU(*s)) {
                 goto bad_charname;
@@ -2905,12 +2905,12 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;               /* are we in a translit range? */
     bool didrange = FALSE;              /* did we just finish a range? */
     bool in_charclass = FALSE;          /* within /[...]/ */
-    bool d_is_utf8 = FALSE;             /* Output constant is UTF8 */
     bool s_is_utf8 = cBOOL(UTF);        /* Is the source string assumed to be
                                            UTF8?  But, this can show as true
                                            when the source isn't utf8, as for
                                            example when it is entirely composed
                                            of hex constants */
+    bool d_is_utf8 = FALSE;             /* Output constant is UTF8 */
     STRLEN utf8_variant_count = 0;      /* When not in UTF-8, this counts the
                                            number of characters found so far
                                            that will expand (into 2 bytes)
@@ -2951,11 +2951,6 @@ S_scan_const(pTHX_ char *start)
     PERL_ARGS_ASSERT_SCAN_CONST;
 
     assert(PL_lex_inwhat != OP_TRANSR);
-    if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
-	/* If we are doing a trans and we know we want UTF8, set expectation */
-	d_is_utf8  = PL_parser->lex_sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
-	s_is_utf8  = PL_parser->lex_sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
-    }
 
     /* Protect sv from errors and fatal warnings. */
     ENTER_with_name("scan_const");
@@ -2987,12 +2982,13 @@ S_scan_const(pTHX_ char *start)
              * order to make the transliteration a simple table look-up.
              * Ranges that extend above Latin1 have to be done differently, so
              * there is no advantage to expanding them here, so they are
-             * stored here as Min, ILLEGAL_UTF8_BYTE, Max.  The illegal byte
-             * signifies a hyphen without any possible ambiguity.  On EBCDIC
-             * machines, if the range is expressed as Unicode, the Latin1
-             * portion is expanded out even if the range extends above
-             * Latin1.  This is because each code point in it has to be
-             * processed here individually to get its native translation */
+             * stored here as Min, RANGE_INDICATOR, Max.  'RANGE_INDICATOR' is
+             * a byte that can't occur in legal UTF-8, and hence can signify a
+             * hyphen without any possible ambiguity.  On EBCDIC machines, if
+             * the range is expressed as Unicode, the Latin1 portion is
+             * expanded out even if the range extends above Latin1.  This is
+             * because each code point in it has to be processed here
+             * individually to get its native translation */
 
 	    if (! dorange) {
 
@@ -3204,7 +3200,7 @@ S_scan_const(pTHX_ char *start)
                         while (e-- > max_ptr) {
                             *(e + 1) = *e;
                         }
-                        *(e + 1) = (char) ILLEGAL_UTF8_BYTE;
+                        *(e + 1) = (char) RANGE_INDICATOR;
                         goto range_done;
                     }
 
@@ -3362,7 +3358,7 @@ S_scan_const(pTHX_ char *start)
                     *d++ = (char) UTF8_TWO_BYTE_LO(0x100);
                     if (real_range_max > 0x100) {
                         if (real_range_max > 0x101) {
-                            *d++ = (char) ILLEGAL_UTF8_BYTE;
+                            *d++ = (char) RANGE_INDICATOR;
                         }
                         d = (char*)uvchr_to_utf8((U8*)d, real_range_max);
                     }
@@ -3645,13 +3641,6 @@ S_scan_const(pTHX_ char *start)
                         }
 
 		        d = (char*)uvchr_to_utf8((U8*)d, uv);
-			if (PL_lex_inwhat == OP_TRANS
-                            && PL_parser->lex_sub_op)
-                        {
-			    PL_parser->lex_sub_op->op_private |=
-				(PL_lex_repl ? OPpTRANS_FROM_UTF
-					     : OPpTRANS_TO_UTF);
-			}
 		    }
 		}
 #ifdef EBCDIC
@@ -4132,10 +4121,6 @@ S_scan_const(pTHX_ char *start)
     SvPOK_on(sv);
     if (d_is_utf8) {
 	SvUTF8_on(sv);
-	if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
-	    PL_parser->lex_sub_op->op_private |=
-		    (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
-	}
     }
 
     /* shrink the sv if we allocated more than we used */
@@ -10296,9 +10281,7 @@ S_scan_trans(pTHX_ char *start)
 
     o = newPVOP(nondestruct ? OP_TRANSR : OP_TRANS, 0, (char*)NULL);
     o->op_private &= ~OPpTRANS_ALL;
-    o->op_private |= del|squash|complement|
-      (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
-      (DO_UTF8(PL_parser->lex_sub_repl) ? OPpTRANS_TO_UTF   : 0);
+    o->op_private |= del|squash|complement;
 
     PL_lex_op = o;
     pl_yylval.ival = nondestruct ? OP_TRANSR : OP_TRANS;

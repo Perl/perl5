@@ -723,14 +723,6 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
-/* utf8 character class swashes */
-
-PERLVAR(I, last_swash_hv, HV *)
-PERLVAR(I, last_swash_tmps, U8 *)
-PERLVAR(I, last_swash_slen, STRLEN)
-PERLVARA(I, last_swash_key,UTF8_MAXBYTES-1, U8)
-PERLVAR(I, last_swash_klen, U8)		/* Only needs to store 0-12  */
-
 #ifdef FCRYPT
 PERLVARI(I, cryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
 #else
@@ -899,6 +891,8 @@ PERLVARI(I, dump_re_max_len, STRLEN, 60)
  */
 
 PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
+
+PERLVARA(I, TR_SPECIAL_HANDLING_UTF8, UTF8_MAXBYTES, char)
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */

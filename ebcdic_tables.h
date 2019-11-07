@@ -412,6 +412,60 @@ SOFTWARE.
 };
 #  endif
 
+/* This table partitions all the code points of the platform into ranges which
+ * have the property that all the code points in each range have the same
+ * number of bytes in their UTF-EBCDIC representations, and the adjacent
+ * ranges have a different number of bytes.
+ *
+ * Each number in the table begins such a range, which extends up to just
+ * before the following table entry, except the final entry is understood to
+ * extend to the platform's infinity
+ */
+#  ifndef DOINIT
+    EXTCONST UV PL_partition_by_byte_length[];
+#  else
+    EXTCONST UV PL_partition_by_byte_length[] = {
+	0x00,
+	0x41,
+	0x4b,
+	0x51,
+	0x5a,
+	0x62,
+	0x6b,
+	0x70,
+	0x79,
+	0x80,
+	0x81,
+	0x8a,
+	0x91,
+	0x9a,
+	0xa1,
+	0xaa,
+	0xad,
+	0xae,
+	0xbd,
+	0xbe,
+	0xc0,
+	0xca,
+	0xd0,
+	0xda,
+	0xe0,
+	0xe1,
+	0xe2,
+	0xea,
+	0xf0,
+	0xfa,
+	0xff,
+	0x100,
+	0x400,
+	0x4000,
+	0x40000,
+	0x400000,
+	0x4000000,
+	0x40000000
+};
+#  endif
+
 #endif	/* EBCDIC 1047 */
 
 #if 'A' == 193 /* EBCDIC 037 */ \
@@ -786,6 +840,62 @@ SOFTWARE.
 /*N6=84*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 42, 42, 42,
 /*N7=98*/  1,  1,  1,  1,  1,  1,  1,  1,  1, 42,  1,  1,  1,  1
 /*         0   1   2   3   4   5   6   7   8   9  10  11  12 13*/
+};
+#  endif
+
+/* This table partitions all the code points of the platform into ranges which
+ * have the property that all the code points in each range have the same
+ * number of bytes in their UTF-EBCDIC representations, and the adjacent
+ * ranges have a different number of bytes.
+ *
+ * Each number in the table begins such a range, which extends up to just
+ * before the following table entry, except the final entry is understood to
+ * extend to the platform's infinity
+ */
+#  ifndef DOINIT
+    EXTCONST UV PL_partition_by_byte_length[];
+#  else
+    EXTCONST UV PL_partition_by_byte_length[] = {
+	0x00,
+	0x41,
+	0x4b,
+	0x51,
+	0x5a,
+	0x5f,
+	0x60,
+	0x62,
+	0x6b,
+	0x70,
+	0x79,
+	0x80,
+	0x81,
+	0x8a,
+	0x91,
+	0x9a,
+	0xa1,
+	0xaa,
+	0xb0,
+	0xb1,
+	0xba,
+	0xbc,
+	0xc0,
+	0xca,
+	0xd0,
+	0xda,
+	0xe0,
+	0xe1,
+	0xe2,
+	0xea,
+	0xf0,
+	0xfa,
+	0xff,
+	0x100,
+	0x400,
+	0x4000,
+	0x40000,
+	0x400000,
+	0x4000000,
+	0x40000000
 };
 #  endif
 

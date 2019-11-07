@@ -13,7 +13,7 @@ use Unicode::UCD qw(prop_aliases
                    );
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
-require './lib/unicore/Heavy.pl';
+require './lib/unicore/UCD.pl';
 use re "/aa";
 
 # This program outputs charclass_invlists.h, which contains various inversion
@@ -93,8 +93,8 @@ my @a2n;
 my %prop_name_aliases;
 # Invert this hash so that for each canonical name, we get a list of things
 # that map to it (excluding itself)
-foreach my $name (sort keys %utf8::loose_property_name_of) {
-    my $canonical = $utf8::loose_property_name_of{$name};
+foreach my $name (sort keys %Unicode::UCD::loose_property_name_of) {
+    my $canonical = $Unicode::UCD::loose_property_name_of{$name};
     push @{$prop_name_aliases{$canonical}},  $name if $canonical ne $name;
 }
 
@@ -2382,12 +2382,12 @@ my $float_e_format = qr/ ^ -? \d \. \d+ e [-+] \d+ $ /x;
 #    'nv=5.00e-01' => 'Nv/1_2',
 #
 # %stricter_to_file_of contains far more than just the rationals.  Instead we
-# use %utf8::nv_floating_to_rational which should have an entry for each
+# use %Unicode::UCD::nv_floating_to_rational which should have an entry for each
 # nv in the former hash.
 my %floating_to_file_of;
-foreach my $key (keys %utf8::nv_floating_to_rational) {
-    my $value = $utf8::nv_floating_to_rational{$key};
-    $floating_to_file_of{$key} = $utf8::stricter_to_file_of{"nv=$value"};
+foreach my $key (keys %Unicode::UCD::nv_floating_to_rational) {
+    my $value = $Unicode::UCD::nv_floating_to_rational{$key};
+    $floating_to_file_of{$key} = $Unicode::UCD::stricter_to_file_of{"nv=$value"};
 }
 
 # Properties that are specified with a prop=value syntax
@@ -2406,16 +2406,16 @@ foreach my $property (sort
          or $a =~ /!/ <=> $b =~ /!/
          or length $a <=> length $b
          or $a cmp $b
-        }   keys %utf8::loose_to_file_of,
-            keys %utf8::stricter_to_file_of,
+        }   keys %Unicode::UCD::loose_to_file_of,
+            keys %Unicode::UCD::stricter_to_file_of,
             keys %floating_to_file_of
 ) {
 
     # These two hashes map properties to values that can be considered to
     # be checksums.  If two properties have the same checksum, they have
     # identical entries.  Otherwise they differ in some way.
-    my $tag = $utf8::loose_to_file_of{$property};
-    $tag = $utf8::stricter_to_file_of{$property} unless defined $tag;
+    my $tag = $Unicode::UCD::loose_to_file_of{$property};
+    $tag = $Unicode::UCD::stricter_to_file_of{$property} unless defined $tag;
     $tag = $floating_to_file_of{$property} unless defined $tag;
 
     # The tag may contain an '!' meaning it is identical to the one formed
@@ -2452,7 +2452,7 @@ foreach my $property (sort
             # stand-alone properties.
             no warnings 'once';
             next if $rhs eq "" &&  grep { $alias eq $_ }
-                                    keys %utf8::loose_property_to_file_of;
+                                    keys %Unicode::UCD::loose_property_to_file_of;
 
             my $new_entry = $alias . $rhs;
             push @this_entries, $new_entry;
@@ -2484,9 +2484,9 @@ foreach my $property (sort
 
         # Some properties are deprecated.  This hash tells us so, and the
         # warning message to raise if they are used.
-        if (exists $utf8::why_deprecated{$tag}) {
+        if (exists $Unicode::UCD::why_deprecated{$tag}) {
             $deprecated_tags{$enums{$tag}} = scalar @deprecated_messages;
-            push @deprecated_messages, $utf8::why_deprecated{$tag};
+            push @deprecated_messages, $Unicode::UCD::why_deprecated{$tag};
         }
 
         # Our sort above should have made sure that we see the
@@ -3185,7 +3185,7 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 		      {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 {
-    print $uni_pl "\%utf8::uni_prop_ptrs_indices = (\n";
+    print $uni_pl "\%Unicode::UCD::uni_prop_ptrs_indices = (\n";
     for my $name (sort keys %name_to_index) {
         print $uni_pl "    '$name' => $name_to_index{$name},\n";
     }
@@ -3211,7 +3211,7 @@ my $keywords_fh = open_new('uni_keywords.h', '>',
 no warnings 'once';
 print $keywords_fh <<"EOF";
 /* The precision to use in "%.*e" formats */
-#define PL_E_FORMAT_PRECISION $utf8::e_precision
+#define PL_E_FORMAT_PRECISION $Unicode::UCD::e_precision
 
 EOF
 

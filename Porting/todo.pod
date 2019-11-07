@@ -945,17 +945,6 @@ Logically all lexicals used only once should warn, if the user asks for
 warnings.  An unworked RT ticket (#5087) has been open for almost seven
 years for this discrepancy.
 
-=head2 UTF-8 revamp
-
-The handling of Unicode is unclean in many places.  In the regex engine
-there are especially many problems.  The swash data structure could be
-replaced my something better.  Inversion lists and maps are likely
-candidates.  The whole Unicode database could be placed in-core for a
-huge speed-up.  Only minimal work was done on the optimizer when utf8
-was added, with the result that the synthetic start class often will
-fail to narrow down the possible choices when given non-Latin1 input.
-Karl Williamson has been working on this - talk to him.
-
 =head2 state variable initialization in list context
 
 Currently this is illegal:

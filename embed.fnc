@@ -1506,6 +1506,7 @@ p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|NULLOK OP *repl \
 #if defined(PERL_IN_OP_C)
 S	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif
+p	|void	|invmap_dump	|NN SV* invlist|NN UV * map
 Ap	|void	|pop_scope
 Ap	|void	|push_scope
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
@@ -1867,9 +1868,7 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
 				|const Size_t sv_count|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
-EXpR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
-EXp	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
-#if defined(PERL_IN_REGCOMP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
 EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 Ei	|void	|invlist_extend    |NN SV* const invlist|const UV len
 Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
@@ -1919,7 +1918,10 @@ EXpR	|SV*	|_setup_canned_invlist|const STRLEN size|const UV element0|NN UV** oth
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
 EpX	|SV*	|invlist_clone	|NN SV* const invlist|NULLOK SV* newlist
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	\
+ || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		\
+ || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		\
+ || defined(PERL_IN_DOOP_C)
 EiRT	|UV*	|invlist_array	|NN SV* const invlist
 EiRT	|bool	|is_invlist	|NULLOK SV* const invlist
 EiRT	|bool*	|get_invlist_offset_addr|NN SV* invlist
@@ -2302,12 +2304,11 @@ Adp	|int	|nothreadhook
 p	|void	|init_constants
 
 #if defined(PERL_IN_DOOP_C)
-SR	|Size_t	|do_trans_simple	|NN SV * const sv
-SR	|Size_t	|do_trans_count		|NN SV * const sv
-SR	|Size_t	|do_trans_complex	|NN SV * const sv
-SR	|Size_t	|do_trans_simple_utf8	|NN SV * const sv
-SR	|Size_t	|do_trans_count_utf8	|NN SV * const sv
-SR	|Size_t	|do_trans_complex_utf8	|NN SV * const sv
+SR	|Size_t	|do_trans_simple	|NN SV * const sv|NN const OPtrans_map * const tbl
+SR	|Size_t	|do_trans_count		|NN SV * const sv|NN const OPtrans_map * const tbl
+SR	|Size_t	|do_trans_complex	|NN SV * const sv|NN const OPtrans_map * const tbl
+SR	|Size_t	|do_trans_invmap	|NN SV * const sv|NN AV * const map
+SR	|Size_t	|do_trans_count_invmap  |NN SV * const sv|NN AV * const map
 #endif
 
 #if defined(PERL_IN_GV_C)
@@ -3090,10 +3091,6 @@ SR	|UV	|check_locale_boundary_crossing				    \
 iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
 				|NN const U8 *const e			    \
 				|NULLOK SV* const invlist
-SR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
-SR	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
-		|NN UV* max|NN UV* val|const bool wants_value		    \
-		|NN const U8* const typestr
 #endif
 
 EXiTp	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest

@@ -2007,7 +2007,7 @@ do xa for my $a;
 do xa for my @a;
 EXPECT
 ########
-# TODO [perl #125493
+# [perl #125493
 use warnings;
 $_="3.14159";
 tr/0-9/\x{6F0}-\x{6F9}/;

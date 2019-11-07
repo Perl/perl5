@@ -5973,11 +5973,6 @@ assignment or as a subroutine argument for example).
 (P) Perl tried to force the upgrade of an SV to a type which was actually
 inferior to its current type.
 
-=item SWASHNEW didn't return an HV ref
-
-(P) Something went wrong internally when Perl was trying to look up
-Unicode characters.
-
 =item Switch (?(condition)... contains too many branches in regex; marked by 
 S<<-- HERE> in m/%s/
 

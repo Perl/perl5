@@ -479,7 +479,7 @@ unless (caller) {
     my %hash;
     {
         no warnings;
-        do "../perl/lib/unicore/Heavy.pl";
+        do "../perl/lib/unicore/UCD.pl";
         %hash= %utf8::loose_to_file_of;
     }
     if ($ENV{MERGE_KEYS}) {

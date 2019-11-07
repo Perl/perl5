@@ -122,7 +122,6 @@ lib/perldoc.pod
 lib/buildcustomize.pl
 lib/unicore/CombiningClass.pl
 lib/unicore/Decomposition.pl
-lib/unicore/Heavy.pl
 lib/unicore/Name.pl
 lib/unicore/Name.pm
 lib/unicore/TestProp.pl

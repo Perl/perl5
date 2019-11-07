@@ -145,15 +145,15 @@ my $map_directory = 'To';        # Where map files go.
 # Again, this is so that methods can be defined on one and not the others so
 # as to prevent operating on them in incorrect ways.
 #
-# Eventually, most tables are written out to files to be read by utf8_heavy.pl
-# in the perl core.  All tables could in theory be written, but some are
-# suppressed because there is no current practical use for them.  It is easy
-# to change which get written by changing various lists that are near the top
-# of the actual code in this file.  The table data structures contain enough
-# ancillary information to allow them to be treated as separate entities for
-# writing, such as the path to each one's file.  There is a heading in each
-# map table that gives the format of its entries, and what the map is for all
-# the code points missing from it.  (This allows tables to be more compact.)
+# Eventually, most tables are written out to files to be read by Unicode::UCD.
+# All tables could in theory be written, but some are suppressed because there
+# is no current practical use for them.  It is easy to change which get
+# written by changing various lists that are near the top of the actual code
+# in this file.  The table data structures contain enough ancillary
+# information to allow them to be treated as separate entities for writing,
+# such as the path to each one's file.  There is a heading in each map table
+# that gives the format of its entries, and what the map is for all the code
+# points missing from it.  (This allows tables to be more compact.)
 #
 # The Property data structure contains one or more tables.  All properties
 # contain a map table (except the $perl property which is a
@@ -1321,8 +1321,7 @@ my $EXTRACTED_DIR = (-d 'extracted') ? 'extracted' : "";
 my $EXTRACTED = ($EXTRACTED_DIR) ? "$EXTRACTED_DIR/" : "";
 my $AUXILIARY = 'auxiliary';
 
-# Hashes and arrays that will eventually go into Heavy.pl for the use of
-# utf8_heavy.pl and into UCD.pl for the use of UCD.pm
+# Hashes and arrays that will eventually go into UCD.pl for the use of UCD.pm
 my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
@@ -1335,7 +1334,7 @@ my @inline_definitions = "V0"; # Each element gives a definition of a unique
                             # this array.  The 0th element is initialized to
                             # the definition for a zero length inversion list
 my %file_to_swash_name;     # Maps the file name to its corresponding key name
-                            # in the hash %utf8::SwashInfo
+                            # in the hash %Unicode::UCD::SwashInfo
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps (non_string) property names to
@@ -6084,7 +6083,7 @@ END
             # utf8.c, which can't really deal with empty tables, but it can
             # deal with a table that matches nothing, as the inverse of 'All'
             # does.
-            push @OUT, "!utf8::All\n";
+            push @OUT, "!Unicode::UCD::All\n";
         }
         elsif ($self->name eq 'N'
 
@@ -6102,7 +6101,7 @@ END
                && $range_list{$addr}->ranges > 15
                && ! $annotate)  # Under --annotate, want to see everything
         {
-            push @OUT, "!utf8::" . $self->property->name . "\n";
+            push @OUT, "!Unicode::UCD::" . $self->property->name . "\n";
         }
         else {
             my $range_size_1 = $range_size_1{$addr};
@@ -7576,7 +7575,7 @@ END
         # respective header and trailer
         my $specials_name = "";
         if (@multi_code_point_maps) {
-            $specials_name = "utf8::ToSpec$name";
+            $specials_name = "Unicode::UCD::ToSpec$name";
             $pre_body .= <<END;
 
 # Some code points require special handling because their mappings are each to
@@ -7614,21 +7613,21 @@ END
 
         $return .= <<END;
 
-# The name this swash is to be known by, with the format of the mappings in
+# The name this table is to be known by, with the format of the mappings in
 # the main body of the table, and what all code points missing from this file
 # map to.
-\$utf8::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}
+\$Unicode::UCD::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}
 END
         if ($specials_name) {
             $return .= <<END;
-\$utf8::SwashInfo{'To$name'}{'specials_name'} = '$specials_name'; # Name of hash of special mappings
+\$Unicode::UCD::SwashInfo{'To$name'}{'specials_name'} = '$specials_name'; # Name of hash of special mappings
 END
         }
         my $default_map = $default_map{$addr};
 
         # For $CODE_POINT default maps and using adjustments, instead the default
         # becomes zero.
-        $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '"
+        $return .= "\$Unicode::UCD::SwashInfo{'To$name'}{'missing'} = '"
                 .  (($output_adjusted && $default_map eq $CODE_POINT)
                    ? "0"
                    : $default_map)
@@ -7797,7 +7796,7 @@ use parent '-norequire', '_Base_Table';
 #    two tables are unrelated but equivalent, one is arbitrarily chosen as the
 #    'leader', and the others are 'equivalents'.  This concept is useful
 #    to minimize the number of tables written out.  Only one file is used for
-#    any identical set of code points, with entries in Heavy.pl mapping all
+#    any identical set of code points, with entries in UCD.pl mapping all
 #    the involved tables to it.
 #
 #    Related tables will always be identical; we set them up to be so.  Thus
@@ -10044,10 +10043,10 @@ sub standardize ($) {
     return lc $name;
 }
 
-sub utf8_heavy_name ($$) {
-    # Returns the name that utf8_heavy.pl will use to find a table.  XXX
-    # perhaps this function should be placed somewhere, like Heavy.pl so that
-    # utf8_heavy can use it directly without duplicating code that can get
+sub UCD_name ($$) {
+    # Returns the name that Unicode::UCD will use to find a table.  XXX
+    # perhaps this function should be placed somewhere, like UCD.pm so that
+    # Unicode::UCD can use it directly without duplicating code that can get
     # out-of sync.
 
     my $table = shift;
@@ -12201,7 +12200,7 @@ END
         #       taking the data from Version 2, verified by analyzing
         #       DAge.txt.
         # 3)    There is a syntax error in the entry for U+09F8 which could
-        #       cause problems for utf8_heavy, and so is changed.  It's
+        #       cause problems for Unicode::UCD, and so is changed.  It's
         #       numeric value was simply a minus sign, without any number.
         #       (Eventually Unicode changed the code point to non-numeric.)
         # 4)    The decomposition types often don't match later versions
@@ -12967,7 +12966,7 @@ sub filter_jamo_line {
 
 sub register_fraction($) {
     # This registers the input rational number so that it can be passed on to
-    # utf8_heavy.pl, both in rational and floating forms.
+    # Unicode::UCD, both in rational and floating forms.
 
     my $rational = shift;
 
@@ -13964,7 +13963,7 @@ END
         }
 
         # For Perl 5.6 compatibility, all properties matchable in regexes can
-        # have an optional 'Is_' prefix.  This is now done in utf8_heavy.pl.
+        # have an optional 'Is_' prefix.  This is now done in Unicode::UCD.
         # But warn if this creates a conflict with a (new) Unicode property
         # name, although it appears that Unicode has made a decision never to
         # begin a property name with 'Is_', so this shouldn't happen.
@@ -16029,7 +16028,7 @@ sub register_file_for_name($$$) {
 
         my $file = join '/', @path;
 
-        # Create a hash entry for utf8_heavy to get the file that stores this
+        # Create a hash entry for Unicode::UCD to get the file that stores this
         # property's map table
         foreach my $alias ($table->aliases) {
             my $name = $alias->name;
@@ -16041,7 +16040,7 @@ sub register_file_for_name($$$) {
             }
         }
 
-        # And a way for utf8_heavy to find the proper key in the SwashInfo
+        # And a way for Unicode::UCD to find the proper key in the SwashInfo
         # hash for this property.
         $file_to_swash_name{$file} = "To" . $table->swash_name;
         return;
@@ -16124,7 +16123,7 @@ sub register_file_for_name($$$) {
         # goes through all aliases in the UCD that we generate regex match
         # files for
         foreach my $alias ($table->aliases) {
-            my $standard = utf8_heavy_name($table, $alias);
+            my $standard = UCD_name($table, $alias);
 
             # Generate an entry in either the loose or strict hashes, which
             # will translate the property and alias names combination into the
@@ -16144,9 +16143,9 @@ sub register_file_for_name($$$) {
                 else {
                     $stricter_to_file_of{$standard} = $sub_filename;
 
-                    # Tightly coupled with how utf8_heavy.pl works, for a
+                    # Tightly coupled with how Unicode::UCD works, for a
                     # floating point number that is a whole number, get rid of
-                    # the trailing decimal point and 0's, so that utf8_heavy
+                    # the trailing decimal point and 0's, so that Unicode::UCD
                     # will work.  Also note that this assumes that such a
                     # number is matched strictly; so if that were to change,
                     # this would be wrong.
@@ -16174,7 +16173,7 @@ sub register_file_for_name($$$) {
 
             # Keep a list of the deprecated properties and their filenames
             if ($deprecated && $complement == 0) {
-                $utf8::why_deprecated{$sub_filename} = $deprecated;
+                $Unicode::UCD::why_deprecated{$sub_filename} = $deprecated;
             }
 
             # And a substitute table, if any, for case-insensitive matching
@@ -16436,7 +16435,7 @@ sub make_re_pod_entries($) {
     # for each name each table goes by
     foreach my $table ($input_table, $input_table->children) {
 
-        # utf8_heavy.pl cannot deal with null string property values, so skip
+        # Unicode::UCD cannot deal with null string property values, so skip
         # any tables that have no non-null names.
         next if ! grep { $_->name ne "" } $table->aliases;
 
@@ -17666,146 +17665,6 @@ END
     return;
 }
 
-sub make_Heavy () {
-    # Create and write Heavy.pl, which passes info about the tables to
-    # utf8_heavy.pl
-
-    # Stringify structures for output
-    my $loose_property_name_of
-                           = simple_dumper(\%loose_property_name_of, ' ' x 4);
-    chomp $loose_property_name_of;
-
-    my $strict_property_name_of
-                           = simple_dumper(\%strict_property_name_of, ' ' x 4);
-    chomp $strict_property_name_of;
-
-    my $stricter_to_file_of = simple_dumper(\%stricter_to_file_of, ' ' x 4);
-    chomp $stricter_to_file_of;
-
-    my $inline_definitions = simple_dumper(\@inline_definitions, " " x 4);
-    chomp $inline_definitions;
-
-    my $loose_to_file_of = simple_dumper(\%loose_to_file_of, ' ' x 4);
-    chomp $loose_to_file_of;
-
-    my $nv_floating_to_rational
-                           = simple_dumper(\%nv_floating_to_rational, ' ' x 4);
-    chomp $nv_floating_to_rational;
-
-    my $why_deprecated = simple_dumper(\%utf8::why_deprecated, ' ' x 4);
-    chomp $why_deprecated;
-
-    # We set the key to the file when we associated files with tables, but we
-    # couldn't do the same for the value then, as we might not have the file
-    # for the alternate table figured out at that time.
-    foreach my $cased (keys %caseless_equivalent_to) {
-        my @path = $caseless_equivalent_to{$cased}->file_path;
-        my $path;
-        if ($path[0] eq "#") {  # Pseudo-directory '#'
-            $path = join '/', @path;
-        }
-        else {  # Gets rid of lib/
-            $path = join '/', @path[1, -1];
-        }
-        $caseless_equivalent_to{$cased} = $path;
-    }
-    my $caseless_equivalent_to
-                           = simple_dumper(\%caseless_equivalent_to, ' ' x 4);
-    chomp $caseless_equivalent_to;
-
-    my $loose_property_to_file_of
-                        = simple_dumper(\%loose_property_to_file_of, ' ' x 4);
-    chomp $loose_property_to_file_of;
-
-    my $strict_property_to_file_of
-                        = simple_dumper(\%strict_property_to_file_of, ' ' x 4);
-    chomp $strict_property_to_file_of;
-
-    my $file_to_swash_name = simple_dumper(\%file_to_swash_name, ' ' x 4);
-    chomp $file_to_swash_name;
-
-    my @heavy = <<END;
-$HEADER
-$INTERNAL_ONLY_HEADER
-
-# This file is for the use of utf8_heavy.pl and Unicode::UCD
-
-# Maps Unicode (not Perl single-form extensions) property names in loose
-# standard form to their corresponding standard names
-\%utf8::loose_property_name_of = (
-$loose_property_name_of
-);
-
-# Same, but strict names
-\%utf8::strict_property_name_of = (
-$strict_property_name_of
-);
-
-# Gives the definitions (in the form of inversion lists) for those properties
-# whose definitions aren't kept in files
-\@utf8::inline_definitions = (
-$inline_definitions
-);
-
-# Maps property, table to file for those using stricter matching.  For paths
-# whose directory is '#', the file is in the form of a numeric index into
-# \@inline_definitions
-\%utf8::stricter_to_file_of = (
-$stricter_to_file_of
-);
-
-# Maps property, table to file for those using loose matching.  For paths
-# whose directory is '#', the file is in the form of a numeric index into
-# \@inline_definitions
-\%utf8::loose_to_file_of = (
-$loose_to_file_of
-);
-
-# Maps floating point to fractional form
-\%utf8::nv_floating_to_rational = (
-$nv_floating_to_rational
-);
-
-# If a %e floating point number doesn't have this number of digits in it after
-# the decimal point to get this close to a fraction, it isn't considered to be
-# that fraction even if all the digits it does have match.
-\$utf8::e_precision = $E_FLOAT_PRECISION;
-
-# Deprecated tables to generate a warning for.  The key is the file containing
-# the table, so as to avoid duplication, as many property names can map to the
-# file, but we only need one entry for all of them.
-\%utf8::why_deprecated = (
-$why_deprecated
-);
-
-# A few properties have different behavior under /i matching.  This maps
-# those to substitute files to use under /i.
-\%utf8::caseless_equivalent = (
-$caseless_equivalent_to
-);
-
-# Property names to mapping files
-\%utf8::loose_property_to_file_of = (
-$loose_property_to_file_of
-);
-
-# Property names to mapping files
-\%utf8::strict_property_to_file_of = (
-$strict_property_to_file_of
-);
-
-# Files to the swash names within them.
-\%utf8::file_to_swash_name = (
-$file_to_swash_name
-);
-
-1;
-END
-
-    main::write("Heavy.pl", 0, \@heavy);  # The 0 means no utf8.
-    return;
-}
-
 sub make_Name_pm () {
     # Create and write Name.pm, which contains subroutines and data to use in
     # conjunction with Name.pl
@@ -18060,6 +17919,60 @@ sub make_UCD () {
     # Create and write UCD.pl, which passes info about the tables to
     # Unicode::UCD
 
+    # Stringify structures for output
+    my $loose_property_name_of
+                           = simple_dumper(\%loose_property_name_of, ' ' x 4);
+    chomp $loose_property_name_of;
+
+    my $strict_property_name_of
+                           = simple_dumper(\%strict_property_name_of, ' ' x 4);
+    chomp $strict_property_name_of;
+
+    my $stricter_to_file_of = simple_dumper(\%stricter_to_file_of, ' ' x 4);
+    chomp $stricter_to_file_of;
+
+    my $inline_definitions = simple_dumper(\@inline_definitions, " " x 4);
+    chomp $inline_definitions;
+
+    my $loose_to_file_of = simple_dumper(\%loose_to_file_of, ' ' x 4);
+    chomp $loose_to_file_of;
+
+    my $nv_floating_to_rational
+                           = simple_dumper(\%nv_floating_to_rational, ' ' x 4);
+    chomp $nv_floating_to_rational;
+
+    my $why_deprecated = simple_dumper(\%Unicode::UCD::why_deprecated, ' ' x 4);
+    chomp $why_deprecated;
+
+    # We set the key to the file when we associated files with tables, but we
+    # couldn't do the same for the value then, as we might not have the file
+    # for the alternate table figured out at that time.
+    foreach my $cased (keys %caseless_equivalent_to) {
+        my @path = $caseless_equivalent_to{$cased}->file_path;
+        my $path;
+        if ($path[0] eq "#") {  # Pseudo-directory '#'
+            $path = join '/', @path;
+        }
+        else {  # Gets rid of lib/
+            $path = join '/', @path[1, -1];
+        }
+        $caseless_equivalent_to{$cased} = $path;
+    }
+    my $caseless_equivalent_to
+                           = simple_dumper(\%caseless_equivalent_to, ' ' x 4);
+    chomp $caseless_equivalent_to;
+
+    my $loose_property_to_file_of
+                        = simple_dumper(\%loose_property_to_file_of, ' ' x 4);
+    chomp $loose_property_to_file_of;
+
+    my $strict_property_to_file_of
+                        = simple_dumper(\%strict_property_to_file_of, ' ' x 4);
+    chomp $strict_property_to_file_of;
+
+    my $file_to_swash_name = simple_dumper(\%file_to_swash_name, ' ' x 4);
+    chomp $file_to_swash_name;
+
     # Create a mapping from each alias of Perl single-form extensions to all
     # its equivalent aliases, for quick look-up.
     my %perlprop_to_aliases;
@@ -18235,6 +18148,75 @@ $INTERNAL_ONLY_HEADER
 # Hangul syllables
 \$Unicode::UCD::HANGUL_BEGIN = $SBase_string;
 \$Unicode::UCD::HANGUL_COUNT = $SCount;
+
+# Maps Unicode (not Perl single-form extensions) property names in loose
+# standard form to their corresponding standard names
+\%Unicode::UCD::loose_property_name_of = (
+$loose_property_name_of
+);
+
+# Same, but strict names
+\%Unicode::UCD::strict_property_name_of = (
+$strict_property_name_of
+);
+
+# Gives the definitions (in the form of inversion lists) for those properties
+# whose definitions aren't kept in files
+\@Unicode::UCD::inline_definitions = (
+$inline_definitions
+);
+
+# Maps property, table to file for those using stricter matching.  For paths
+# whose directory is '#', the file is in the form of a numeric index into
+# \@inline_definitions
+\%Unicode::UCD::stricter_to_file_of = (
+$stricter_to_file_of
+);
+
+# Maps property, table to file for those using loose matching.  For paths
+# whose directory is '#', the file is in the form of a numeric index into
+# \@inline_definitions
+\%Unicode::UCD::loose_to_file_of = (
+$loose_to_file_of
+);
+
+# Maps floating point to fractional form
+\%Unicode::UCD::nv_floating_to_rational = (
+$nv_floating_to_rational
+);
+
+# If a %e floating point number doesn't have this number of digits in it after
+# the decimal point to get this close to a fraction, it isn't considered to be
+# that fraction even if all the digits it does have match.
+\$Unicode::UCD::e_precision = $E_FLOAT_PRECISION;
+
+# Deprecated tables to generate a warning for.  The key is the file containing
+# the table, so as to avoid duplication, as many property names can map to the
+# file, but we only need one entry for all of them.
+\%Unicode::UCD::why_deprecated = (
+$why_deprecated
+);
+
+# A few properties have different behavior under /i matching.  This maps
+# those to substitute files to use under /i.
+\%Unicode::UCD::caseless_equivalent = (
+$caseless_equivalent_to
+);
+
+# Property names to mapping files
+\%Unicode::UCD::loose_property_to_file_of = (
+$loose_property_to_file_of
+);
+
+# Property names to mapping files
+\%Unicode::UCD::strict_property_to_file_of = (
+$strict_property_to_file_of
+);
+
+# Files to the swash names within them.
+\%Unicode::UCD::file_to_swash_name = (
+$file_to_swash_name
+);
 
 # Keys are all the possible "prop=value" combinations, in loose form; values
 # are the standard loose name for the 'value' part of the key
@@ -18537,7 +18519,7 @@ sub write_all_tables() {
                     # they will be identical, so don't have to compare tables
                     # frequently.  The tables have to have the same status to
                     # share a file, so add this to the bucket hash.  (The
-                    # reason for this latter is that Heavy.pl associates a
+                    # reason for this latter is that UCD.pm associates a
                     # status with a file.) We don't check tables that are
                     # inverses of others, as it would lead to some coding
                     # complications, and checking all the regular ones should
@@ -18575,7 +18557,7 @@ sub write_all_tables() {
                 make_ucd_table_pod_entries($table);
 
                 # There is a mapping stored of the various synonyms to the
-                # standardized name of the property for utf8_heavy.pl.
+                # standardized name of the property for Unicode::UCD.
                 # Also, the pod file contains entries of the form:
                 # \p{alias: *}         \p{full: *}
                 # rather than show every possible combination of things.
@@ -18615,7 +18597,7 @@ sub write_all_tables() {
                         push @standard_list, $alias_standard;
                     }
 
-                    # For utf8_heavy, set the mapping of the alias to the
+                    # For Unicode::UCD, set the mapping of the alias to the
                     # property
                     if ($type == $STRING) {
                         if ($property->fate <= $MAP_PROXIED) {
@@ -18735,10 +18717,10 @@ sub write_all_tables() {
         my $is_property = ($table == $property);
 
         # For very short tables, instead of writing them out to actual files,
-        # we in-line their inversion list definitions into Heavy.pl.  The
+        # we in-line their inversion list definitions into UCD.pm.  The
         # definition replaces the file name, and the special pseudo-directory
         # '#' is used to signal this.  This significantly cuts down the number
-        # of files written at little extra cost to the hashes in Heavy.pl.
+        # of files written at little extra cost to the hashes in UCD.pm.
         # And it means, no run-time files to read to get the definitions.
         if (! $is_property
             && ! $annotate  # For annotation, we want to explicitly show
@@ -18821,8 +18803,7 @@ sub write_all_tables() {
     # Write out the pod file
     make_pod;
 
-    # And Heavy.pl, Name.pm, UCD.pl
-    make_Heavy;
+    # And Name.pm, UCD.pl
     make_Name_pm;
     make_UCD;
 

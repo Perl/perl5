@@ -23000,7 +23000,7 @@ Perl_parse_uniprop_string(pTHX_
                                 Titlecase Mapping  (both full and simple)
                                 Uppercase Mapping  (both full and simple)
              * Move the part that looks at the property values into a perl
-             * script, like utf8_heavy.pl is done.  This makes things somewhat
+             * script, like utf8_heavy.pl was done.  This makes things somewhat
              * easier, but most importantly, it avoids always adding all these
              * strings to the memory usage when the feature is little-used.
              *

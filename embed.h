@@ -941,8 +941,6 @@
 #define skipspace_flags(a,b)	Perl_skipspace_flags(aTHX_ a,b)
 #define sv_magicext_mglob(a)	Perl_sv_magicext_mglob(aTHX_ a)
 #define sv_only_taint_gmagic	Perl_sv_only_taint_gmagic
-#define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
-#define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
 #define validate_proto(a,b,c,d)	Perl_validate_proto(aTHX_ a,b,c,d)
@@ -1014,7 +1012,6 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
-#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
 #define add_multi_match(a,b,c)	S_add_multi_match(aTHX_ a,b,c)
 #define change_engine_size(a,b)	S_change_engine_size(aTHX_ a,b)
@@ -1024,20 +1021,13 @@
 #define edit_distance		S_edit_distance
 #define get_ANYOFM_contents(a)	S_get_ANYOFM_contents(aTHX_ a)
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
-#define get_invlist_iter_addr	S_get_invlist_iter_addr
 #define grok_bslash_N(a,b,c,d,e,f,g)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f,g)
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
 #define handle_possible_posix(a,b,c,d,e)	S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
 #define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	Perl_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
-#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
-#define invlist_highest		S_invlist_highest
 #define invlist_is_iterating	S_invlist_is_iterating
-#define invlist_iterfinish	S_invlist_iterfinish
-#define invlist_iterinit	S_invlist_iterinit
-#define invlist_iternext	S_invlist_iternext
-#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_exactf_invlist(a,b)	S_make_exactf_invlist(aTHX_ a,b)
@@ -1083,6 +1073,16 @@
 #  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 #define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
 #  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
+#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
+#define get_invlist_iter_addr	S_get_invlist_iter_addr
+#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
+#define invlist_highest		S_invlist_highest
+#define invlist_iterfinish	S_invlist_iterfinish
+#define invlist_iterinit	S_invlist_iterinit
+#define invlist_iternext	S_invlist_iternext
+#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 #define _invlistEQ(a,b,c)	Perl__invlistEQ(aTHX_ a,b,c)
 #define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
@@ -1094,7 +1094,7 @@
 #endif
 #define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_DOOP_C)
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
@@ -1288,6 +1288,7 @@
 #define init_named_cv(a,b)	Perl_init_named_cv(aTHX_ a,b)
 #define init_uniprops()		Perl_init_uniprops(aTHX)
 #define invert(a)		Perl_invert(aTHX_ a)
+#define invmap_dump(a,b)	Perl_invmap_dump(aTHX_ a,b)
 #define io_close(a,b,c,d)	Perl_io_close(aTHX_ a,b,c,d)
 #define isinfnansv(a)		Perl_isinfnansv(aTHX_ a)
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
@@ -1601,12 +1602,11 @@
 #define openn_setup(a,b,c,d,e,f)	S_openn_setup(aTHX_ a,b,c,d,e,f)
 #  endif
 #  if defined(PERL_IN_DOOP_C)
-#define do_trans_complex(a)	S_do_trans_complex(aTHX_ a)
-#define do_trans_complex_utf8(a)	S_do_trans_complex_utf8(aTHX_ a)
-#define do_trans_count(a)	S_do_trans_count(aTHX_ a)
-#define do_trans_count_utf8(a)	S_do_trans_count_utf8(aTHX_ a)
-#define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)
-#define do_trans_simple_utf8(a)	S_do_trans_simple_utf8(aTHX_ a)
+#define do_trans_complex(a,b)	S_do_trans_complex(aTHX_ a,b)
+#define do_trans_count(a,b)	S_do_trans_count(aTHX_ a,b)
+#define do_trans_count_invmap(a,b)	S_do_trans_count_invmap(aTHX_ a,b)
+#define do_trans_invmap(a,b)	S_do_trans_invmap(aTHX_ a,b)
+#define do_trans_simple(a,b)	S_do_trans_simple(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_DUMP_C)
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
@@ -1922,8 +1922,6 @@
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define is_utf8_overlong_given_start_byte_ok	S_is_utf8_overlong_given_start_byte_ok
 #define new_msg_hv(a,b,c)	S_new_msg_hv(aTHX_ a,b,c)
-#define swash_scan_list_line(a,b,c,d,e,f,g)	S_swash_scan_list_line(aTHX_ a,b,c,d,e,f,g)
-#define swatch_get(a,b,c)	S_swatch_get(aTHX_ a,b,c)
 #define to_lower_latin1		S_to_lower_latin1
 #define turkic_fc(a,b,c,d)	S_turkic_fc(aTHX_ a,b,c,d)
 #define turkic_lc(a,b,c,d)	S_turkic_lc(aTHX_ a,b,c,d)

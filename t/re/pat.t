@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 967;  # Update this when adding/deleting tests.
+plan tests => 966;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1743,27 +1743,6 @@ EOP
         my $x = qr/[x]/i;
         utf8::upgrade($x);
         like("X", qr/$x/, "UTF-8 of /[x]/i matches upper case");
-    }
-
-SKIP: {   # make sure we get an error when \p{} cannot load Unicode tables
-        skip("Unicode tables always now loaded", 1);
-        fresh_perl_like(<<'        prog that cannot load uni tables',
-            BEGIN {
-                @INC = '../lib';
-                require utf8; require 'utf8_heavy.pl';
-                @INC = ();
-            }
-            $name = 'A B';
-            if ($name =~ /(\p{IsUpper}) (\p{IsUpper})/){
-                print "It's good! >$1< >$2<\n";
-            } else {
-                print "It's not good...\n";
-            }
-        prog that cannot load uni tables
-                  qr/^Can't locate unicore\/Heavy\.pl(?x:
-                   )|^Can't find Unicode property definition/,
-                  undef,
-                 '\p{} should not fail silently when uni tables evanesce');
     }
 
     {   # Special handling of literal-ended ranges in [...] was breaking this
