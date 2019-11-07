@@ -2717,6 +2717,36 @@ whatever the compiler has.
 If you are printing addresses of pointers, use UVxf combined
 with PTR2UV(), do not use %lx or %p.
 
+=head2 Formatted Printing of SVs
+
+The contents of SVs may be printed using the C<SVf> format, like so:
+
+ Perl_croak(aTHX_ "This croaked because: %" SVf "\n", SvfARG(err_msg))
+
+where C<err_msg> is an SV.
+
+Not all scalar types are printable.  Simple values certainly are: one of
+IV, UV, NV, or PV.  Also, if the SV is a reference to some value,
+either it will be dereferenced and the value printed, or information
+about the type of that value and its address are displayed.  The results
+of printing any other type of SV are undefined and likely to lead to an
+interpreter crash.  NVs are printed using a C<%g">-ish format.
+
+Note that the spaces are required around the C<SVf> in case the code is
+compiled with C++, to maintain compliance with its standard.
+
+Note that any filehandle being printed to under UTF-8 must be expecting
+UTF-8 in order to get good results and avoid Wide-character warnings.
+One way to do this for typical filehandles is to invoke perl with the
+C<-C>> parameter.  (See L<perlrun/-C [number/list]>.
+
+You can use this to concatenate two scalars:
+
+ SV *var1 = get_sv("var1", GV_ADD);
+ SV *var2 = get_sv("var2", GV_ADD);
+ SV *var3 = newSVpvf("var1=%" SVf " and var2=%" SVf,
+                     SVfARG(var1), SVfARG(var2));
+
 =head2 Formatted Printing of Strings
 
 If you just want the bytes printed in a NUL-terminated string, you can
