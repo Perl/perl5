@@ -390,7 +390,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     const bool delete_unfound = cBOOL(PL_op->op_private & OPpTRANS_DELETE);
     bool inplace = ! cBOOL(PL_op->op_private & OPpTRANS_GROWS);
     const UV* from_array = invlist_array(from_invlist);
-    UV final_map;
+    UV final_map = TR_OOB;
     bool out_is_utf8 = cBOOL(SvUTF8(sv));
     STRLEN s_len;
 

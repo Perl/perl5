@@ -7754,8 +7754,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         tbl->map[tbl->size] = del
                               ? (short) TR_DELETE
-                              : rlen
-                                ? final_map
+                              : (short) rlen
+                                ? (short) final_map
                                 : (short) TR_R_EMPTY;
 
         SvREFCNT_dec(t_invlist);
