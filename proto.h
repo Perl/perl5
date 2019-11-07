@@ -4565,9 +4565,9 @@ PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
 
 #endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-PERL_CALLCONV Signal_t	Perl_csighandler(int sig, siginfo_t *info, void *uap);
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig, Siginfo_t *info, void *uap);
 #define PERL_ARGS_ASSERT_CSIGHANDLER
-PERL_CALLCONV Signal_t	Perl_sighandler(int sig, siginfo_t *info, void *uap);
+PERL_CALLCONV Signal_t	Perl_sighandler(int sig, Siginfo_t *info, void *uap);
 #define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if defined(HAS_SOCKET)

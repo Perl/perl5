@@ -2793,6 +2793,24 @@ typedef struct padname PADNAME;
 #  define USE_ENVIRON_ARRAY
 #endif
 
+
+/* Siginfo_t:
+ * This is an alias for the OS's siginfo_t, except that where the OS
+ * doesn't support it, declare a dummy version instead. This allows us to
+ * have signal handler functions which always have a Siginfo_t parameter
+ * regardless of platform, (and which will just be passed a NULL value
+ * where the OS doesn't support HAS_SIGACTION).
+ */
+
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+    typedef siginfo_t Siginfo_t;
+#else
+    typedef struct {
+        int si_signo;
+    } Siginfo_t;
+#endif
+
+
 /*
  * initialise to avoid floating-point exceptions from overflow, etc
  */
