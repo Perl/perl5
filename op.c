@@ -6908,7 +6908,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 #  ifdef UV_IS_QUAD
                                                     ,
-        (     (1UL << (6 * UTF_ACCUMULATION_SHIFT)))
+        ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))
 
 #  endif
 #endif
