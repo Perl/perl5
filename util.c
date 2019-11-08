@@ -2377,23 +2377,23 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     /* If we managed to get status pipe check for exec fail */
     if (did_pipes && pid > 0) {
 	int errkid;
-	unsigned n = 0;
+	unsigned this_n = 0;
 
-	while (n < sizeof(int)) {
+	while (this_n < sizeof(int)) {
             const SSize_t n1 = PerlLIO_read(pp[0],
-			      (void*)(((char*)&errkid)+n),
-			      (sizeof(int)) - n);
+			      (void*)(((char*)&errkid)+this_n),
+			      (sizeof(int)) - this_n);
 	    if (n1 <= 0)
 		break;
-	    n += n1;
+	    this_n += n1;
 	}
 	PerlLIO_close(pp[0]);
 	did_pipes = 0;
-	if (n) {			/* Error */
+	if (this_n) {			/* Error */
 	    int pid2, status;
 	    PerlLIO_close(p[This]);
-	    if (n != sizeof(int))
-		Perl_croak(aTHX_ "panic: kid popen errno read, n=%u", n);
+	    if (this_n != sizeof(int))
+		Perl_croak(aTHX_ "panic: kid popen errno read, n=%u", this_n);
 	    do {
 		pid2 = wait4pid(pid, &status, 0);
 	    } while (pid2 == -1 && errno == EINTR);
