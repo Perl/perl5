@@ -12243,17 +12243,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
                 {
                     int i = 0;
-                    SV *sv = NULL;
+                    SV *this_sv = NULL;
                     bool neg = FALSE;
 
                     if (args)
                         i = va_arg(*args, int);
                     else {
                         ix = ix ? ix - 1 : svix++;
-                        sv = (ix < sv_count) ? svargs[ix]
+                        this_sv = (ix < sv_count) ? svargs[ix]
                                           : (arg_missing = TRUE, (SV*)NULL);
                     }
-                    precis = S_sprintf_arg_num_val(aTHX_ args, i, sv, &neg);
+                    precis = S_sprintf_arg_num_val(aTHX_ args, i, this_sv, &neg);
                     has_precis = !neg;
                     /* ignore negative precision */
                     if (!has_precis)
