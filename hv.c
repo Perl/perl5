@@ -2402,7 +2402,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 		     ? -iter->xhv_name_count
 		     :  iter->xhv_name_count
 		   );
-		while(hekp-- > this_name+1) 
+		while(hekp-- > this_name+1)
 		    unshare_hek_or_pvn(*hekp, 0, 0, 0);
 		/* The first elem may be null. */
 		if(*this_name) unshare_hek_or_pvn(*this_name, 0, 0, 0);
