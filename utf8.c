@@ -3881,8 +3881,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
 	    /* Look at every character in the result; if any cross the
 	    * boundary, the whole thing is disallowed */
 	    U8* s = ustrp;
-	    U8* e = ustrp + *lenp;
-	    while (s < e) {
+	    U8* this_e = ustrp + *lenp;
+	    while (s < this_e) {
 		if (isASCII(*s)) {
 		    /* Crossed, have to return the original */
 		    original = valid_utf8_to_uvchr(p, lenp);
