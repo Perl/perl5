@@ -1933,8 +1933,8 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags,
 	va_start(args, argc);
 
 	do {
-	    SV *const sv = va_arg(args, SV *);
-	    PUSHs(sv);
+	    SV *const this_sv = va_arg(args, SV *);
+	    PUSHs(this_sv);
 	} while (--argc);
 
 	va_end(args);
