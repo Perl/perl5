@@ -859,15 +859,15 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
        mro_isa_changed_in on each. */
     hv_iterinit(stashes);
     while((iter = hv_iternext(stashes))) {
-	HV * const stash = *(HV **)HEK_KEY(HeKEY_hek(iter));
-	if(HvENAME(stash)) {
+	HV * const this_stash = *(HV **)HEK_KEY(HeKEY_hek(iter));
+	if(HvENAME(this_stash)) {
 	    /* We have to restore the original meta->isa (that
 	       mro_gather_and_rename set aside for us) this way, in case
 	       one class in this list is a superclass of a another class
 	       that we have already encountered. In such a case, meta->isa
 	       will have been overwritten without old entries being deleted
 	       from PL_isarev. */
-	    struct mro_meta * const meta = HvMROMETA(stash);
+	    struct mro_meta * const meta = HvMROMETA(this_stash);
 	    if(meta->isa != (HV *)HeVAL(iter)){
 		SvREFCNT_dec(meta->isa);
 		meta->isa
@@ -876,7 +876,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 		    : (HV *)HeVAL(iter);
 		HeVAL(iter) = NULL; /* We donated our reference count. */
 	    }
-	    mro_isa_changed_in(stash);
+	    mro_isa_changed_in(this_stash);
 	}
     }
 }
