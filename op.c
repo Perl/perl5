@@ -7336,7 +7336,19 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     && r_cp_end != TR_SPECIAL_HANDLING
                     && UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end))
                 {
-                    NV ratio = UVCHR_SKIP(r_cp_end) / UVCHR_SKIP(t_cp);
+                    /* Consider tr/\xCB/\X{E000}/.  The maximum expansion
+                     * factor is 1 byte going to 3 if the lhs is not UTF-8, but
+                     * 2 bytes going to 3 if it is in UTF-8.  We could pass two
+                     * different values so doop could choose based on the
+                     * UTF-8ness of the target.  But khw thinks (perhaps
+                     * wrongly) that is overkill.  It is used only to make sure
+                     * we malloc enough space.  If no target string can force
+                     * the result to be UTF-8, then we don't have to worry
+                     * about this */
+                    NV t_size = (can_force_utf8 && t_cp < 256)
+                                ? 1
+                                : UVCHR_SKIP(t_cp_end);
+                    NV ratio = UVCHR_SKIP(r_cp_end) / t_size;
 
                     o->op_private |= OPpTRANS_GROWS;
 
