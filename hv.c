@@ -2396,17 +2396,17 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 	if (iter->xhv_name_u.xhvnameu_name) {
 	    if(iter->xhv_name_count) {
 	      if(flags & HV_NAME_SETALL) {
-		HEK ** const name = HvAUX(hv)->xhv_name_u.xhvnameu_names;
-		HEK **hekp = name + (
+		HEK ** const this_name = HvAUX(hv)->xhv_name_u.xhvnameu_names;
+		HEK **hekp = this_name + (
 		    iter->xhv_name_count < 0
 		     ? -iter->xhv_name_count
 		     :  iter->xhv_name_count
 		   );
-		while(hekp-- > name+1) 
+		while(hekp-- > this_name+1) 
 		    unshare_hek_or_pvn(*hekp, 0, 0, 0);
 		/* The first elem may be null. */
-		if(*name) unshare_hek_or_pvn(*name, 0, 0, 0);
-		Safefree(name);
+		if(*this_name) unshare_hek_or_pvn(*this_name, 0, 0, 0);
+		Safefree(this_name);
                 iter = HvAUX(hv); /* may been realloced */
 		spot = &iter->xhv_name_u.xhvnameu_name;
 		iter->xhv_name_count = 0;
