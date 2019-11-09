@@ -86,8 +86,9 @@ __UNDEF_NOT_PROVIDED__ UTF8_ALLOW_ANY  ( UTF8_ALLOW_CONTINUATION      \
 
 #if defined UTF8SKIP
 
-/* Don't use official version because it uses MIN, which may not be available */
+/* Don't use official versions because they use MIN, which may not be available */
 #undef UTF8_SAFE_SKIP
+#undef UTF8_CHK_SKIP
 
 __UNDEFINED__  UTF8_SAFE_SKIP(s, e)  (                                          \
                                       ((((e) - (s)) <= 0)                       \
