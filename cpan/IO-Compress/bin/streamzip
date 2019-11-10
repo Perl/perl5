@@ -111,7 +111,7 @@ streamzip - create a zip file from stdin
 
 =head1 SYNOPSIS
 
-    producer | streamzip [opts] | comsumer
+    producer | streamzip [opts] | consumer
     producer | streamzip [opts] -zipfile=output.zip
 
 =head1 DESCRIPTION

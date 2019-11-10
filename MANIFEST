@@ -1053,6 +1053,7 @@ cpan/IO-Compress/t/002any-zip.t				IO::Compress
 cpan/IO-Compress/t/004gziphdr.t				IO::Compress
 cpan/IO-Compress/t/005defhdr.t				IO::Compress
 cpan/IO-Compress/t/006zip.t				IO::Compress
+cpan/IO-Compress/t/011-streamzip.t
 cpan/IO-Compress/t/01misc.t				IO::Compress
 cpan/IO-Compress/t/020isize.t				IO::Compress
 cpan/IO-Compress/t/050interop-gzip.t			IO::Compress

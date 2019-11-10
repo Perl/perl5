@@ -8,9 +8,9 @@ use bytes;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.089';
+$VERSION = '2.090';
 
-use IO::Compress::Gzip::Constants 2.089 ;
+use IO::Compress::Gzip::Constants 2.090 ;
 
 sub ExtraFieldError
 {

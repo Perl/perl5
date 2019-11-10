@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.089 qw(:Status );
-use IO::Compress::RawDeflate 2.089 ();
-use IO::Compress::Adapter::Deflate 2.089 ;
-use IO::Compress::Adapter::Identity 2.089 ;
-use IO::Compress::Zlib::Extra 2.089 ;
-use IO::Compress::Zip::Constants 2.089 ;
+use IO::Compress::Base::Common  2.090 qw(:Status );
+use IO::Compress::RawDeflate 2.090 ();
+use IO::Compress::Adapter::Deflate 2.090 ;
+use IO::Compress::Adapter::Identity 2.090 ;
+use IO::Compress::Zlib::Extra 2.090 ;
+use IO::Compress::Zip::Constants 2.090 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.089 (); 
+use Compress::Raw::Zlib  2.090 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.089 ; 
+           import  IO::Compress::Adapter::Bzip2 2.090 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.089 ; 
+           import  IO::Compress::Bzip2 2.090 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.089 ; 
+           import  IO::Compress::Adapter::Lzma 2.090 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.089 ; 
+           import  IO::Compress::Lzma 2.090 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.089';
+$VERSION = '2.090';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -1356,7 +1356,7 @@ You should only need to use this option if you want the I<archive member name>
 to be different from the uncompressed filename or when the input is a filehandle or a buffer.
 
 The default behaviour for what I<archive member name> is used when the C<Name> option 
-is I<not> speficied depends on the form of the C<$input> parameter:
+is I<not> specified depends on the form of the C<$input> parameter:
 
 =over 5
 
