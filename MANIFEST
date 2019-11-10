@@ -1470,6 +1470,7 @@ cpan/Module-Load-Conditional/t/test_lib/a/X.pm			Module::Conditional tests
 cpan/Module-Load-Conditional/t/test_lib/b/X.pm			Module::Conditional tests
 cpan/Module-Load-Conditional/t/to_load/AutoLoad.pm		Module::Conditional tests
 cpan/Module-Load-Conditional/t/to_load/Commented.pm		Module::Conditional tests
+cpan/Module-Load-Conditional/t/to_load/HereDoc.pm
 cpan/Module-Load-Conditional/t/to_load/InPod.pm			Module::Load::Conditional tests
 cpan/Module-Load-Conditional/t/to_load/LoadIt.pm		Module::Conditional tests
 cpan/Module-Load-Conditional/t/to_load/LoadMe.pl		Module::Conditional tests
