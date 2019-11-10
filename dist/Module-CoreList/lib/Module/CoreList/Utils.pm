@@ -1513,6 +1513,7 @@ my %delta = (
         changed => {
         },
         removed => {
+            'podselect'             => 1,
         }
     },
     5.031002 => {
