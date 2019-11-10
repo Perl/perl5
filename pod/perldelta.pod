@@ -122,8 +122,8 @@ L<[perl #16969]|https://github.com/perl/perl5/issues/16969>
 
 =head1 Acknowledgements
 
-Perl 5.30.1 represents approximately 5 months of development since Perl 5.30.0
-and contains approximately 4,600 lines of changes across 67 files from 13
+Perl 5.30.1 represents approximately 6 months of development since Perl 5.30.0
+and contains approximately 4,700 lines of changes across 67 files from 14
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
@@ -133,9 +133,9 @@ Perl continues to flourish into its fourth decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
 the improvements that became Perl 5.30.1:
 
-Dan Book, David Mitchell, Hugo van der Sanden, James E Keenan, Karen Etheridge,
-Karl Williamson, Manuel Mausz, Max Maischein, Nicolas R., Sawyer X, Steve Hay,
-Tom Hukins, Tony Cook.
+Chris 'BinGOs' Williams, Dan Book, David Mitchell, Hugo van der Sanden, James E
+Keenan, Karen Etheridge, Karl Williamson, Manuel Mausz, Max Maischein, Nicolas
+R., Sawyer X, Steve Hay, Tom Hukins, Tony Cook.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
