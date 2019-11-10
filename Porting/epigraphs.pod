@@ -150,6 +150,22 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
 
+=head2 v5.30.1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act I: Brindisi
+
+L<Announced on 2019-11-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/11/msg256610.html>
+
+  VIOLETTA:
+  With you I would share
+  my days of happiness;
+  everything is folly in this world
+  that does not give us pleasure.
+  Let us enjoy life,
+  for the pleasures of love are swift and fleeting
+  as a flower that lives and dies
+  and can be enjoyed no more.
+  Let's take our pleasure while its ardent,
+  brilliant summons lures us on!
+
 =head2 v5.30.1-RC1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act I: Brindisi
 
 L<Announced on 2019-10-27 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/10/msg256542.html>
