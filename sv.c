@@ -15317,6 +15317,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_origalen		= proto_perl->Iorigalen;
 
     PL_sighandlerp	= proto_perl->Isighandlerp;
+    PL_sighandler1p	= proto_perl->Isighandler1p;
+    PL_sighandler3p	= proto_perl->Isighandler3p;
 
     PL_runops		= proto_perl->Irunops;
 

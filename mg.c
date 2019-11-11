@@ -62,6 +62,7 @@ tie.
 #  include <sys/prctl.h>
 #endif
 
+
 #ifdef PERL_USE_3ARG_SIGHANDLER
 Signal_t Perl_csighandler(int sig, Siginfo_t *, void *);
 #else
@@ -1486,12 +1487,37 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     return sv_unmagic(sv, mg->mg_type);
 }
 
-Signal_t
+
 #ifdef PERL_USE_3ARG_SIGHANDLER
-Perl_csighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+Signal_t
+Perl_csighandler(int sig, Siginfo_t *sip, void *uap)
+{
+    Perl_csighandler3(sig, sip, uap);
+}
 #else
+Signal_t
 Perl_csighandler(int sig)
+{
+    Perl_csighandler3(sig, NULL, NULL);
+}
 #endif
+
+Signal_t
+Perl_csighandler1(int sig)
+{
+    Perl_csighandler3(sig, NULL, NULL);
+}
+
+/* Handler intended to directly handle signal calls from the kernel.
+ * (Depending on configuration, the kernel may actually call one of the
+ * wrappers csighandler() or csighandler1() instead.)
+ * It either queues up the signal or dispatches it immediately depending
+ * on whether safe signals are enabled and whether the signal is capable
+ * of being deferred (e.g. SEGV isn't).
+ */
+
+Signal_t
+Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -3336,6 +3362,20 @@ Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
     return -1;
 }
 
+
+/* Perl_sighandler(), Perl_sighandler1(), Perl_sighandler3():
+ * these three function are intended to be called by the OS as 'C' level
+ * signal handler functions in the case where unsafe signals are being
+ * used - i.e. they immediately invoke Perl_perly_sighandler() to call the
+ * perl-level sighandler, rather than deferring.
+ * In fact, the core itself will normally use Perl_csighandler as the
+ * OS-level handler; that function will then decide whether to queue the
+ * signal or call Perl_sighandler / Perl_perly_sighandler itself. So these
+ * functions are more useful for e.g. POSIX.xs when it wants explicit
+ * control of what's happening.
+ */
+
+
 #ifdef PERL_USE_3ARG_SIGHANDLER
 
 Signal_t
@@ -3353,6 +3393,19 @@ Perl_sighandler(int sig)
 }
 
 #endif
+
+Signal_t
+Perl_sighandler1(int sig)
+{
+    Perl_perly_sighandler(sig, NULL, NULL, 0);
+}
+
+Signal_t
+Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+{
+    Perl_perly_sighandler(sig, sip, uap, 0);
+}
+
 
 /* Invoke the perl-level signal handler. This function is called either
  * directly from one of the C-level signals handlers (Perl_sighandler or
