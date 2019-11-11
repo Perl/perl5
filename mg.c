@@ -1539,7 +1539,7 @@ Perl_csighandler(int sig)
              * rather than via Perl_sighandler, passing the extra
              * 'safe = false' arg
              */
-            Perl_perly_sighandler(sig, NULL, NULL, 1 /* XXX tmp safe */);
+            Perl_perly_sighandler(sig, NULL, NULL, 0 /* unsafe */);
         else
 #ifdef PERL_USE_3ARG_SIGHANDLER
             (*PL_sighandlerp)(sig, NULL, NULL);
