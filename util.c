@@ -4912,51 +4912,40 @@ Perl_mem_log_del_sv(const SV *sv,
 #endif /* PERL_MEM_LOG */
 
 /*
-=for apidoc quadmath_format_single
+=for apidoc quadmath_format_valid
 
 C<quadmath_snprintf()> is very strict about its C<format> string and will
 fail, returning -1, if the format is invalid.  It accepts exactly
 one format spec.
 
-C<quadmath_format_single()> checks that the intended single spec looks
+C<quadmath_format_valid()> checks that the intended single spec looks
 sane: begins with C<%>, has only one C<%>, ends with C<[efgaEFGA]>,
 and has C<Q> before it.  This is not a full "printf syntax check",
 just the basics.
 
-Returns the format if it is valid, NULL if not.
-
-C<quadmath_format_single()> can and will actually patch in the missing
-C<Q>, if necessary.  In this case it will return the modified copy of
-the format, B<which the caller will need to free.>
+Returns true if it is valid, false if not.
 
 See also L</quadmath_format_needed>.
 
 =cut
 */
 #ifdef USE_QUADMATH
-const char*
-Perl_quadmath_format_single(const char* format)
+bool
+Perl_quadmath_format_valid(const char* format)
 {
     STRLEN len;
 
-    PERL_ARGS_ASSERT_QUADMATH_FORMAT_SINGLE;
+    PERL_ARGS_ASSERT_QUADMATH_FORMAT_VALID;
 
     if (format[0] != '%' || strchr(format + 1, '%'))
-        return NULL;
+        return FALSE;
     len = strlen(format);
     /* minimum length three: %Qg */
     if (len < 3 || strchr("efgaEFGA", format[len - 1]) == NULL)
-        return NULL;
-    if (format[len - 2] != 'Q') {
-        char* fixed;
-        Newx(fixed, len + 2, char);
-        memcpy(fixed, format, len - 1);
-        fixed[len - 1] = 'Q';
-        fixed[len    ] = format[len - 1];
-        fixed[len + 1] = 0;
-        return (const char*)fixed;
-    }
-    return format;
+        return FALSE;
+    if (format[len - 2] != 'Q')
+        return FALSE;
+    return TRUE;
 }
 #endif
 
@@ -4972,7 +4961,7 @@ but it should catch most common cases.
 
 If true is returned, those arguments B<should> in theory be processed
 with C<quadmath_snprintf()>, but in case there is more than one such
-format specifier (see L</quadmath_format_single>), and if there is
+format specifier (see L</quadmath_format_valid>), and if there is
 anything else beyond that one (even just a single byte), they
 B<cannot> be processed because C<quadmath_snprintf()> is very strict,
 accepting only one format spec, and nothing else.
@@ -5041,24 +5030,15 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     va_start(ap, format);
 #ifdef USE_QUADMATH
     {
-        const char* qfmt = quadmath_format_single(format);
         bool quadmath_valid = FALSE;
-        if (qfmt) {
+        if (quadmath_format_valid(format)) {
             /* If the format looked promising, use it as quadmath. */
-            retval = quadmath_snprintf(buffer, len, qfmt, va_arg(ap, NV));
+            retval = quadmath_snprintf(buffer, len, format, va_arg(ap, NV));
             if (retval == -1) {
-                if (qfmt != format) {
-                    dTHX;
-                    SAVEFREEPV(qfmt);
-                }
-                Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
+                Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", format);
             }
             quadmath_valid = TRUE;
-            if (qfmt != format)
-                Safefree(qfmt);
-            qfmt = NULL;
         }
-        assert(qfmt == NULL);
         /* quadmath_format_single() will return false for example for
          * "foo = %g", or simply "%g".  We could handle the %g by
          * using quadmath for the NV args.  More complex cases of

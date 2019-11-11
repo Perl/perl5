@@ -6670,8 +6670,8 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_
 PERL_CALLCONV bool	Perl_quadmath_format_needed(const char* format);
 #define PERL_ARGS_ASSERT_QUADMATH_FORMAT_NEEDED	\
 	assert(format)
-PERL_CALLCONV const char*	Perl_quadmath_format_single(const char* format);
-#define PERL_ARGS_ASSERT_QUADMATH_FORMAT_SINGLE	\
+PERL_CALLCONV bool	Perl_quadmath_format_valid(const char* format);
+#define PERL_ARGS_ASSERT_QUADMATH_FORMAT_VALID	\
 	assert(format)
 #endif
 #if defined(WIN32)

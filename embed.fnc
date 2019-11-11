@@ -3310,8 +3310,8 @@ XEopxR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 AMpTdf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
 AMpTd	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
 #ifdef USE_QUADMATH
-ApTd	|const char*	|quadmath_format_single|NN const char* format
-ApTd	|bool|quadmath_format_needed|NN const char* format
+pTd	|bool	|quadmath_format_valid|NN const char* format
+pTd	|bool|quadmath_format_needed|NN const char* format
 #endif
 
 : Used in mg.c, sv.c

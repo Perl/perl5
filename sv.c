@@ -13195,20 +13195,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
 #ifdef USE_QUADMATH
                 {
-                    const char* qfmt = quadmath_format_single(ptr);
-                    if (!qfmt)
+                    if (!quadmath_format_valid(ptr))
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
                     WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
                         elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
-                                                 qfmt, nv);
+                                                 ptr, nv);
                     );
                     if ((IV)elen == -1) {
-                        if (qfmt != ptr)
-                            SAVEFREEPV(qfmt);
-                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
+                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", ptr);
                     }
-                    if (qfmt != ptr)
-                        Safefree(qfmt);
                 }
 #elif defined(HAS_LONG_DOUBLE)
                 WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
