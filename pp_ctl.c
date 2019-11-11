@@ -881,15 +881,12 @@ PP(pp_formline)
                 arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
 #ifdef USE_QUADMATH
                 {
-                    const char* qfmt = quadmath_format_single(fmt);
                     int len;
-                    if (!qfmt)
+                    if (!quadmath_format_valid(fmt))
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", fmt);
-                    len = quadmath_snprintf(t, max, qfmt, (int) fieldsize, (int) arg, value);
+                    len = quadmath_snprintf(t, max, fmt, (int) fieldsize, (int) arg, value);
                     if (len == -1)
-                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
-                    if (qfmt != fmt)
-                        Safefree(fmt);
+                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", fmt);
                 }
 #else
                 /* we generate fmt ourselves so it is safe */

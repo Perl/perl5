@@ -905,10 +905,6 @@
 #define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
 #define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
 #endif
-#if defined(USE_QUADMATH)
-#define quadmath_format_needed	Perl_quadmath_format_needed
-#define quadmath_format_single	Perl_quadmath_format_single
-#endif
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
@@ -1966,6 +1962,10 @@
 #  if defined(USE_PERLIO)
 #define PerlIO_restore_errno(a)	Perl_PerlIO_restore_errno(aTHX_ a)
 #define PerlIO_save_errno(a)	Perl_PerlIO_save_errno(aTHX_ a)
+#  endif
+#  if defined(USE_QUADMATH)
+#define quadmath_format_needed	Perl_quadmath_format_needed
+#define quadmath_format_valid	Perl_quadmath_format_valid
 #  endif
 #  if defined(_MSC_VER)
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
