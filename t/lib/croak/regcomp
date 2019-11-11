@@ -79,3 +79,8 @@ EXPECT
 $x =~ /(?<=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=a\K <-- HERE a)a/ at - line 1.
+########
+# NAME numeric parsing buffer overflow in numeric.c
+0=~/\p{nV:-0}/
+EXPECT
+Can't find Unicode property definition "nV:-0" in regex; marked by <-- HERE in m/\p{nV:-0} <-- HERE / at - line 1.

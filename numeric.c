@@ -1560,7 +1560,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
         /* strtold() accepts 0x-prefixed hex and in POSIX implementations,
            0b-prefixed binary numbers, which is backward incompatible
         */
-        if ((len == 0 || len >= 2) && *s == '0' &&
+        if ((len == 0 || len - (s-orig) >= 2) && *s == '0' &&
             (isALPHA_FOLD_EQ(s[1], 'x') || isALPHA_FOLD_EQ(s[1], 'b'))) {
             *value = 0;
             return (char *)s+1;
