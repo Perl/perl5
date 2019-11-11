@@ -3053,6 +3053,8 @@ sigaction(sig, optaction, oldaction = 0)
 
 	    /* Remember old disposition if desired. */
 	    if (oldaction) {
+                int safe;
+
 		svp = hv_fetchs(oldaction, "HANDLER", TRUE);
 		if(!svp)
 		    croak("Can't supply an oldaction without a HANDLER");
@@ -3083,24 +3085,51 @@ sigaction(sig, optaction, oldaction = 0)
 		svp = hv_fetchs(oldaction, "FLAGS", TRUE);
 		sv_setiv(*svp, oact.sa_flags);
 
-		/* Get back whether the old handler used safe signals. */
+		/* Get back whether the old handler used safe signals;
+                 * i.e. it used Perl_csighandler[13] rather than
+                 * Perl_sighandler[13]
+                 */
+                safe = ((oact.sa_flags & SA_SIGINFO)
+                        ? (  oact.sa_sigaction == PL_csighandler3p
+#ifdef PERL_USE_3ARG_SIGHANDLER
+                          || oact.sa_sigaction == PL_csighandlerp
+#endif
+                          )
+                        : (  oact.sa_handler   == PL_csighandler1p
+                          || oact.sa_handler   == PL_csighandlerp /* XXX tmp */
+#ifndef PERL_USE_3ARG_SIGHANDLER
+                          || oact.sa_handler   == PL_csighandlerp
+#endif
+                          )
+                    );
+
 		svp = hv_fetchs(oldaction, "SAFE", TRUE);
-		sv_setiv(*svp,
-		/* compare incompatible pointers by casting to integer */
-		    PTR2nat(oact.sa_handler) == PTR2nat(PL_csighandlerp));
+		sv_setiv(*svp, safe);
 	    }
 
 	    if (action) {
+                int safe;
+
+		/* Set up any desired flags. */
+		svp = hv_fetchs(action, "FLAGS", FALSE);
+		act.sa_flags = svp ? SvIV(*svp) : 0;
+
 		/* Safe signals use "csighandler", which vectors through the
 		   PL_sighandlerp pointer when it's safe to do so.
 		   (BTW, "csighandler" is very different from "sighandler".) */
 		svp = hv_fetchs(action, "SAFE", FALSE);
-		act.sa_handler =
-			DPTR2FPTR(
-			    void (*)(int),
-			    (*svp && SvTRUE(*svp))
-				? PL_csighandlerp : PL_sighandlerp
-			);
+                safe = *svp && SvTRUE(*svp);
+
+                if (act.sa_flags & SA_SIGINFO) {
+                    /* 3-arg handler */
+                    act.sa_sigaction =
+			    safe ? PL_csighandler3p : PL_sighandler3p;
+                }
+                else {
+                    /* 1-arg handler */
+                    act.sa_handler =
+			    safe ? PL_csighandler1p : PL_sighandler1p;
+                }
 
 		/* Vector new Perl handler through %SIG.
 		   (The core signal handlers read %SIG to dispatch.) */
@@ -3134,10 +3163,6 @@ sigaction(sig, optaction, oldaction = 0)
 		}
 		else
 		    sigemptyset(& act.sa_mask);
-
-		/* Set up any desired flags. */
-		svp = hv_fetchs(action, "FLAGS", FALSE);
-		act.sa_flags = svp ? SvIV(*svp) : 0;
 
 		/* Don't worry about cleaning up *sigsvp if this fails,
 		 * because that means we tried to disposition a
