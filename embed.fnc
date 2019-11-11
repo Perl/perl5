@@ -1691,6 +1691,7 @@ ATp	|Signal_t |csighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
 Tp	|Signal_t |sighandler	|int sig
 ATp	|Signal_t |csighandler	|int sig
 #endif
+ATp	|Signal_t |perly_sighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap|bool safe
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|SSize_t n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 Xp	|void	|init_named_cv	|NN CV *cv|NN OP *nameop

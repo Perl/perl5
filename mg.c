@@ -1533,11 +1533,20 @@ Perl_csighandler(int sig)
 	   (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
 	/* Call the perl level handler now--
 	 * with risk we may be in malloc() or being destructed etc. */
+    {
+        if (PL_sighandlerp == Perl_sighandler)
+            /* default handler, so can call perly_sighandler() directly
+             * rather than via Perl_sighandler, passing the extra
+             * 'safe = false' arg
+             */
+            Perl_perly_sighandler(sig, NULL, NULL, 1 /* XXX tmp safe */);
+        else
 #ifdef PERL_USE_3ARG_SIGHANDLER
-	(*PL_sighandlerp)(sig, NULL, NULL);
+            (*PL_sighandlerp)(sig, NULL, NULL);
 #else
-	(*PL_sighandlerp)(sig);
+            (*PL_sighandlerp)(sig);
 #endif
+    }
     else {
 	if (!PL_psig_pend) return;
 	/* Set a flag to say this signal is pending, that is awaiting delivery after
@@ -1615,11 +1624,19 @@ Perl_despatch_signals(pTHX)
 	    }
 #endif
  	    PL_psig_pend[sig] = 0;
+            if (PL_sighandlerp == Perl_sighandler)
+                /* default handler, so can call perly_sighandler() directly
+                 * rather than via Perl_sighandler, passing the extra
+                 * 'safe = true' arg
+                 */
+                Perl_perly_sighandler(sig, NULL, NULL, 1 /* safe */);
+            else
 #ifdef PERL_USE_3ARG_SIGHANDLER
-	    (*PL_sighandlerp)(sig, NULL, NULL);
+                (*PL_sighandlerp)(sig, NULL, NULL);
 #else
-	    (*PL_sighandlerp)(sig);
+                (*PL_sighandlerp)(sig);
 #endif
+
 #ifdef HAS_SIGPROCMASK
 	    if (!was_blocked)
 		LEAVE;
@@ -3319,12 +3336,35 @@ Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
     return -1;
 }
 
-Signal_t
 #ifdef PERL_USE_3ARG_SIGHANDLER
+
+Signal_t
 Perl_sighandler(int sig, Siginfo_t *sip, void *uap)
+{
+    Perl_perly_sighandler(sig, sip, uap, 0);
+}
+
 #else
+
+Signal_t
 Perl_sighandler(int sig)
+{
+    Perl_perly_sighandler(sig, NULL, NULL, 0);
+}
+
 #endif
+
+/* Invoke the perl-level signal handler. This function is called either
+ * directly from one of the C-level signals handlers (Perl_sighandler or
+ * Perl_csighandler), or for safe signals, later from
+ * Perl_despatch_signals() at a suitable safe point during execution.
+ *
+ * 'safe' is a boolean indicating the latter call path.
+ */
+
+Signal_t
+Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
+                    void *uap PERL_UNUSED_DECL, bool safe)
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -3456,10 +3496,13 @@ Perl_sighandler(int sig)
 	 * blocked by the system when we entered.
 	 */
 #ifdef HAS_SIGPROCMASK
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-	    if (sip || uap)
-#endif
-	    {
+	    if (!safe) {
+                /* safe signals called via dispatch_signals() set up a
+                 * savestack destructor, unblock_sigmask(), to
+                 * automatically unblock the handler at the end. If
+                 * instead we get here directly, we have to do it
+                 * ourselves
+                 */
 		sigset_t set;
 		sigemptyset(&set);
 		sigaddset(&set,sig);
@@ -3467,6 +3510,9 @@ Perl_sighandler(int sig)
 	    }
 #else
 	    /* Not clear if this will work */
+            /* XXX not clear if this should be protected by 'if (safe)'
+             * too */
+
 	    (void)rsignal(sig, SIG_IGN);
 	    (void)rsignal(sig, PL_csighandlerp);
 #endif

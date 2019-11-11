@@ -432,6 +432,7 @@
 #define parse_stmtseq(a)	Perl_parse_stmtseq(aTHX_ a)
 #define parse_subsignature(a)	Perl_parse_subsignature(aTHX_ a)
 #define parse_termexpr(a)	Perl_parse_termexpr(aTHX_ a)
+#define perly_sighandler	Perl_perly_sighandler
 #define pmop_dump(a)		Perl_pmop_dump(aTHX_ a)
 #define pop_scope()		Perl_pop_scope(aTHX)
 #define pregcomp(a,b)		Perl_pregcomp(aTHX_ a,b)
