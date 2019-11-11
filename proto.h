@@ -4094,12 +4094,6 @@ STATIC const char*	S_my_nl_langinfo(const int item, bool toggle);
 #define PERL_ARGS_ASSERT_MY_NL_LANGINFO
 #  endif
 #endif
-#if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
-PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
-#define PERL_ARGS_ASSERT_CSIGHANDLER
-PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
-#define PERL_ARGS_ASSERT_SIGHANDLER
-#endif
 #if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
 PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
 #define PERL_ARGS_ASSERT_DO_EXEC	\
@@ -4111,6 +4105,12 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
 #define PERL_ARGS_ASSERT_MY_CXT_INIT	\
 	assert(indexp)
 #  endif
+#endif
+#if !(defined(PERL_USE_3ARG_SIGHANDLER))
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
+#define PERL_ARGS_ASSERT_CSIGHANDLER
+PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
+#define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if !(defined(_MSC_VER))
 PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
@@ -4563,12 +4563,6 @@ PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
 #define PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC	\
 	assert(pipefd)
 
-#endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-PERL_CALLCONV Signal_t	Perl_csighandler(int sig, Siginfo_t *info, void *uap);
-#define PERL_ARGS_ASSERT_CSIGHANDLER
-PERL_CALLCONV Signal_t	Perl_sighandler(int sig, Siginfo_t *info, void *uap);
-#define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if defined(HAS_SOCKET)
 PERL_CALLCONV int	Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr, Sock_size_t *addrlen)
@@ -6440,6 +6434,12 @@ PERL_CALLCONV Malloc_t	Perl_mem_log_realloc(const UV n, const UV typesize, const
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
 #define PERL_ARGS_ASSERT_PIDGONE
+#endif
+#if defined(PERL_USE_3ARG_SIGHANDLER)
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig, Siginfo_t *info, void *uap);
+#define PERL_ARGS_ASSERT_CSIGHANDLER
+PERL_CALLCONV Signal_t	Perl_sighandler(int sig, Siginfo_t *info, void *uap);
+#define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f);

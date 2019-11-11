@@ -1683,7 +1683,7 @@ Axpd	|OP*	|op_scope	|NULLOK OP* o
 pe	|void	|set_caret_X
 Apd	|void	|setdefout	|NN GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|SSize_t len|U32 hash
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_USE_3ARG_SIGHANDLER
 : Used in perl.c
 Tp	|Signal_t |sighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
 ATp	|Signal_t |csighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap

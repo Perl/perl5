@@ -761,7 +761,7 @@
 #define whichsig_sv(a)		Perl_whichsig_sv(aTHX_ a)
 #define wrap_keyword_plugin(a,b)	Perl_wrap_keyword_plugin(aTHX_ a,b)
 #define wrap_op_checker(a,b,c)	Perl_wrap_op_checker(aTHX_ a,b,c)
-#if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
+#if !(defined(PERL_USE_3ARG_SIGHANDLER))
 #define csighandler		Perl_csighandler
 #endif
 #if !defined(EBCDIC)
@@ -808,9 +808,6 @@
 #define pad_setsv(a,b)		Perl_pad_setsv(aTHX_ a,b)
 #define pad_sv(a)		Perl_pad_sv(aTHX_ a)
 #endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-#define csighandler		Perl_csighandler
-#endif
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_init()	Perl_sys_intern_init(aTHX)
@@ -847,6 +844,9 @@
 #define sv_setpvf_nocontext	Perl_sv_setpvf_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
+#endif
+#if defined(PERL_USE_3ARG_SIGHANDLER)
+#define csighandler		Perl_csighandler
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
@@ -1446,11 +1446,11 @@
 #define my_nl_langinfo		S_my_nl_langinfo
 #    endif
 #  endif
-#  if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
-#define sighandler		Perl_sighandler
-#  endif
 #  if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
 #define do_exec(a)		Perl_do_exec(aTHX_ a)
+#  endif
+#  if !(defined(PERL_USE_3ARG_SIGHANDLER))
+#define sighandler		Perl_sighandler
 #  endif
 #  if !(defined(_MSC_VER))
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
@@ -1549,9 +1549,6 @@
 #  endif
 #  if defined(HAS_PIPE)
 #define PerlProc_pipe_cloexec(a)	Perl_PerlProc_pipe_cloexec(aTHX_ a)
-#  endif
-#  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-#define sighandler		Perl_sighandler
 #  endif
 #  if defined(HAS_SOCKET)
 #define PerlSock_accept_cloexec(a,b,c)	Perl_PerlSock_accept_cloexec(aTHX_ a,b,c)
@@ -1943,6 +1940,9 @@
 #  endif
 #  if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)
+#  endif
+#  if defined(PERL_USE_3ARG_SIGHANDLER)
+#define sighandler		Perl_sighandler
 #  endif
 #  if defined(USE_C_BACKTRACE)
 #define get_c_backtrace(a,b)	Perl_get_c_backtrace(aTHX_ a,b)

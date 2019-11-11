@@ -62,7 +62,7 @@ tie.
 #  include <sys/prctl.h>
 #endif
 
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_USE_3ARG_SIGHANDLER
 Signal_t Perl_csighandler(int sig, Siginfo_t *, void *);
 #else
 Signal_t Perl_csighandler(int sig);
@@ -1487,7 +1487,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 }
 
 Signal_t
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_USE_3ARG_SIGHANDLER
 Perl_csighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
 #else
 Perl_csighandler(int sig)
@@ -1498,7 +1498,8 @@ Perl_csighandler(int sig)
 #else
     dTHX;
 #endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+
+#ifdef PERL_USE_3ARG_SIGHANDLER
 #if defined(__cplusplus) && defined(__GNUC__)
     /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
      * parameters would be warned about. */
@@ -1506,6 +1507,7 @@ Perl_csighandler(int sig)
     PERL_UNUSED_ARG(uap);
 #endif
 #endif
+
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
     if (PL_sig_ignoring[sig]) return;
@@ -1531,7 +1533,7 @@ Perl_csighandler(int sig)
 	   (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
 	/* Call the perl level handler now--
 	 * with risk we may be in malloc() or being destructed etc. */
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_USE_3ARG_SIGHANDLER
 	(*PL_sighandlerp)(sig, NULL, NULL);
 #else
 	(*PL_sighandlerp)(sig);
@@ -1613,7 +1615,7 @@ Perl_despatch_signals(pTHX)
 	    }
 #endif
  	    PL_psig_pend[sig] = 0;
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_USE_3ARG_SIGHANDLER
 	    (*PL_sighandlerp)(sig, NULL, NULL);
 #else
 	    (*PL_sighandlerp)(sig);
@@ -3318,7 +3320,7 @@ Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
 }
 
 Signal_t
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_USE_3ARG_SIGHANDLER
 Perl_sighandler(int sig, Siginfo_t *sip, void *uap)
 #else
 Perl_sighandler(int sig)

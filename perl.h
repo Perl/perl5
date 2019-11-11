@@ -2794,6 +2794,10 @@ typedef struct padname PADNAME;
 #endif
 
 
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#  define PERL_USE_3ARG_SIGHANDLER
+#endif
+
 /* Siginfo_t:
  * This is an alias for the OS's siginfo_t, except that where the OS
  * doesn't support it, declare a dummy version instead. This allows us to

@@ -51,7 +51,7 @@
 #include "perlio.h"
 
 #ifndef Sighandler_t
-#  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#  ifdef PERL_USE_3ARG_SIGHANDLER
 typedef Signal_t (*Sighandler_t) (int, Siginfo_t*, void*);
 #  else
 typedef Signal_t (*Sighandler_t) (int);
