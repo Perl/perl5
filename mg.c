@@ -3490,46 +3490,48 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
+
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     {
 	 struct sigaction oact;
 
 	 if (sip && sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
-		   HV *sih = newHV();
-		   SV *rv  = newRV_noinc(MUTABLE_SV(sih));
-		   /* The siginfo fields signo, code, errno, pid, uid,
-		    * addr, status, and band are defined by POSIX/SUSv3. */
-		   (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
-		   (void)hv_stores(sih, "code", newSViv(sip->si_code));
-#ifdef HAS_SIGINFO_SI_ERRNO
-		   (void)hv_stores(sih, "errno",      newSViv(sip->si_errno));
-#endif
-#ifdef HAS_SIGINFO_SI_STATUS
-		   (void)hv_stores(sih, "status",     newSViv(sip->si_status));
-#endif
-#ifdef HAS_SIGINFO_SI_UID
-		   {
-			SV *uid = newSV(0);
-			sv_setuid(uid, sip->si_uid);
-			(void)hv_stores(sih, "uid", uid);
-		   }
-#endif
-#ifdef HAS_SIGINFO_SI_PID
-		   (void)hv_stores(sih, "pid",        newSViv(sip->si_pid));
-#endif
-#ifdef HAS_SIGINFO_SI_ADDR
-		   (void)hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
-#endif
-#ifdef HAS_SIGINFO_SI_BAND
-		   (void)hv_stores(sih, "band",       newSViv(sip->si_band));
-#endif
-		   EXTEND(SP, 2);
-		   PUSHs(rv);
-		   mPUSHp((char *)sip, sizeof(*sip));
+               HV *sih = newHV();
+               SV *rv  = newRV_noinc(MUTABLE_SV(sih));
+               /* The siginfo fields signo, code, errno, pid, uid,
+                * addr, status, and band are defined by POSIX/SUSv3. */
+               (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
+               (void)hv_stores(sih, "code", newSViv(sip->si_code));
+#  ifdef HAS_SIGINFO_SI_ERRNO
+               (void)hv_stores(sih, "errno",      newSViv(sip->si_errno));
+#  endif
+#  ifdef HAS_SIGINFO_SI_STATUS
+               (void)hv_stores(sih, "status",     newSViv(sip->si_status));
+#  endif
+#  ifdef HAS_SIGINFO_SI_UID
+               {
+                    SV *uid = newSV(0);
+                    sv_setuid(uid, sip->si_uid);
+                    (void)hv_stores(sih, "uid", uid);
+               }
+#  endif
+#  ifdef HAS_SIGINFO_SI_PID
+               (void)hv_stores(sih, "pid",        newSViv(sip->si_pid));
+#  endif
+#  ifdef HAS_SIGINFO_SI_ADDR
+               (void)hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
+#  endif
+#  ifdef HAS_SIGINFO_SI_BAND
+               (void)hv_stores(sih, "band",       newSViv(sip->si_band));
+#  endif
+               EXTEND(SP, 2);
+               PUSHs(rv);
+               mPUSHp((char *)sip, sizeof(*sip));
 
 	 }
     }
 #endif
+
     PUTBACK;
 
     errsv_save = newSVsv(ERRSV);
@@ -3541,12 +3543,13 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
 	SV * const errsv = ERRSV;
 	if (SvTRUE_NN(errsv)) {
 	    SvREFCNT_dec(errsv_save);
+
 #ifndef PERL_MICRO
-	/* Handler "died", for example to get out of a restart-able read().
-	 * Before we re-do that on its behalf re-enable the signal which was
-	 * blocked by the system when we entered.
-	 */
-#ifdef HAS_SIGPROCMASK
+            /* Handler "died", for example to get out of a restart-able read().
+             * Before we re-do that on its behalf re-enable the signal which was
+             * blocked by the system when we entered.
+             */
+#  ifdef HAS_SIGPROCMASK
 	    if (!safe) {
                 /* safe signals called via dispatch_signals() set up a
                  * savestack destructor, unblock_sigmask(), to
@@ -3559,15 +3562,16 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
 		sigaddset(&set,sig);
 		sigprocmask(SIG_UNBLOCK, &set, NULL);
 	    }
-#else
+#  else
 	    /* Not clear if this will work */
             /* XXX not clear if this should be protected by 'if (safe)'
              * too */
 
 	    (void)rsignal(sig, SIG_IGN);
 	    (void)rsignal(sig, PL_csighandlerp);
-#endif
+#  endif
 #endif /* !PERL_MICRO */
+
 	    die_sv(errsv);
 	}
 	else {
