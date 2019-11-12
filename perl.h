@@ -2795,7 +2795,13 @@ typedef struct padname PADNAME;
 
 
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-#  define PERL_USE_3ARG_SIGHANDLER
+    /* having sigaction(2) means that the OS supports both 1-arg and 3-arg
+     * signal handlers. But the perl core itself only fully supports 1-arg
+     * handlers, so don't enable for now.
+     * NB: POSIX::sigaction() supports both.
+     *
+     * # define PERL_USE_3ARG_SIGHANDLER
+     */
 #endif
 
 /* Siginfo_t:

@@ -3096,7 +3096,6 @@ sigaction(sig, optaction, oldaction = 0)
 #endif
                           )
                         : (  oact.sa_handler   == PL_csighandler1p
-                          || oact.sa_handler   == PL_csighandlerp /* XXX tmp */
 #ifndef PERL_USE_3ARG_SIGHANDLER
                           || oact.sa_handler   == PL_csighandlerp
 #endif
