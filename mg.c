@@ -3494,8 +3494,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     {
 	 struct sigaction oact;
 
-	 if (sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
-	      if (sip) {
+	 if (sip && sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
 		   HV *sih = newHV();
 		   SV *rv  = newRV_noinc(MUTABLE_SV(sih));
 		   /* The siginfo fields signo, code, errno, pid, uid,
@@ -3527,7 +3526,6 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
 		   EXTEND(SP, 2);
 		   PUSHs(rv);
 		   mPUSHp((char *)sip, sizeof(*sip));
-	      }
 
 	 }
     }
