@@ -62,13 +62,6 @@ tie.
 #  include <sys/prctl.h>
 #endif
 
-
-#ifdef PERL_USE_3ARG_SIGHANDLER
-Signal_t Perl_csighandler(int sig, Siginfo_t *, void *);
-#else
-Signal_t Perl_csighandler(int sig);
-#endif
-
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 void setruid(uid_t id);
