@@ -844,6 +844,33 @@ Display the usage information and exit.
 
 =back
 
+=head1 EXAMPLES
+
+=head2 Code has started to crash under C<miniperl>
+
+=over 4
+
+=item * Problem
+
+Under C<make minitest> (but not under C<make test_harness>), F<t/re/pat.t> was
+failing to compile.  What was the first commit at which that compilation
+failure could be observed?
+
+=item * Solution
+
+Extract code from the test file at the point where C<./miniperl -Ilib -c> was
+showing a compilation failure.  Use that in bisection with the C<miniperl>
+target.
+
+    .../Porting/bisect.pl --target=miniperl \
+        --start=2ec4590e -e 'q|ace| =~ /c(?=.$)/; $#{^CAPTURE} == -1); exit 0;'
+
+=item * Reference
+
+L<GH issue 17293|https://github.com/Perl/perl5/issues/17293>
+
+=back
+
 =cut
 
 # Ensure we always exit with 255, to cause git bisect to abort.
