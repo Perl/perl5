@@ -275,7 +275,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<Configure> now correctly handles gcc-10. Previously it was interpreting it
+as gcc-1 and turned on C<-fpcc-struct-return>.
 
 =back
 
