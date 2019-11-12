@@ -6909,10 +6909,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #  ifdef UV_IS_QUAD
                                                     ,
         ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))
-
 #  endif
-#endif
+
     };
+
+#endif
 
     PERL_ARGS_ASSERT_PMTRANS;
 
