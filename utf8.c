@@ -3192,6 +3192,7 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 bool
 Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
     return is_utf8_common(p, e, PL_XPosix_ptrs[classnum]);
@@ -3200,6 +3201,7 @@ Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 bool
 Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
 
     return is_utf8_common(p, e, PL_utf8_perl_idstart);
@@ -3208,6 +3210,7 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 bool
 Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
 
     return is_utf8_common(p, e, PL_utf8_perl_idcont);

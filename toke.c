@@ -8364,6 +8364,7 @@ yyl_key_core(pTHX_ char *s, STRLEN len, struct code c)
 static int
 yyl_keylookup(pTHX_ char *s, GV *gv)
 {
+    dVAR;
     STRLEN len;
     bool anydelim;
     I32 key;
