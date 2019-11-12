@@ -11938,16 +11938,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 goto parse_rest;
             } /* end switch */
 	}
-	else {
-            if (*RExC_parse == '{') {
-                ckWARNregdep(RExC_parse + 1,
-                            "Unescaped left brace in regex is "
-                            "deprecated here (and will be fatal "
-                            "in Perl 5.32), passed through");
-            }
-            /* Not bothering to indent here, as the above 'else' is temporary
-             * */
-        if (!(RExC_flags & RXf_PMf_NOCAPTURE)) {   /* (...) */
+        else if (!(RExC_flags & RXf_PMf_NOCAPTURE)) {   /* (...) */
 	  capturing_parens:
 	    parno = RExC_npar;
 	    RExC_npar++;
@@ -12014,7 +12005,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             /* with RXf_PMf_NOCAPTURE treat (...) as (?:...) */
             paren = ':';
 	    ret = 0;
-	}
         }
     }
     else                        /* ! paren */
