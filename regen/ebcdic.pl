@@ -51,10 +51,11 @@ sub get_column_headers ($$;$) {
     return $header . "*/\n";
 }
 
-sub output_table_start($$$) {
-    my ($out_fh, $TYPE, $name) = @_;
+sub output_table_start($$$;$) {
+    my ($out_fh, $TYPE, $name, $size) = @_;
 
-    my $declaration = "EXTCONST $TYPE $name\[\]";
+    $size = "" unless defined $size;
+    my $declaration = "EXTCONST $TYPE $name\[$size\]";
     print $out_fh <<EOF;
 #  ifndef DOINIT
     $declaration;
@@ -779,9 +780,6 @@ END
  * extend to the platform's infinity
  */
 EOF
-        output_table_start($out_fh, "UV", "PL_partition_by_byte_length");
-        print $out_fh "\t";
-
         # The lengths of the characters between 0 and 255 are either 1 or 2,
         # with those whose ASCII platform equivalents below 160 being 1, and
         # the rest being 2.
@@ -810,6 +808,9 @@ EOF
         push @list, ( 4 * (1 << (4 * $UTF_ACCUMULATION_SHIFT)));
         push @list, ( 2 * (1 << (5 * $UTF_ACCUMULATION_SHIFT)));
         push @list, (     (1 << (6 * $UTF_ACCUMULATION_SHIFT)));
+
+        output_table_start($out_fh, "UV", "PL_partition_by_byte_length", scalar @list);
+        print $out_fh "\t";
 
         print $out_fh join ",\n\t", map { sprintf "0x%02x", $_ } @list;
         print $out_fh "\n";

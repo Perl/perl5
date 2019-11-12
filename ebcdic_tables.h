@@ -422,9 +422,9 @@ SOFTWARE.
  * extend to the platform's infinity
  */
 #  ifndef DOINIT
-    EXTCONST UV PL_partition_by_byte_length[];
+    EXTCONST UV PL_partition_by_byte_length[38];
 #  else
-    EXTCONST UV PL_partition_by_byte_length[] = {
+    EXTCONST UV PL_partition_by_byte_length[38] = {
 	0x00,
 	0x41,
 	0x4b,
@@ -853,9 +853,9 @@ SOFTWARE.
  * extend to the platform's infinity
  */
 #  ifndef DOINIT
-    EXTCONST UV PL_partition_by_byte_length[];
+    EXTCONST UV PL_partition_by_byte_length[40];
 #  else
-    EXTCONST UV PL_partition_by_byte_length[] = {
+    EXTCONST UV PL_partition_by_byte_length[40] = {
 	0x00,
 	0x41,
 	0x4b,
