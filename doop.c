@@ -523,6 +523,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     s += s_len;
     if (! inplace) {
 	sv_setpvn(sv, (char*)d0, d - d0);
+        Safefree(d0);
     }
     else {
 	*d = '\0';
