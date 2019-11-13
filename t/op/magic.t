@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 195); # some tests are run in BEGIN block
+    plan (tests => 192); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -483,8 +483,7 @@ SKIP:  {
 }
 
 # Check that we don't auto-load packages
-foreach (['powie::!', 'Errno'],
-	 ['powie::+', 'Tie::Hash::NamedCapture']) {
+foreach (['powie::!', 'Errno']) {
     my ($symbol, $package) = @$_;
     SKIP: {
 	(my $extension = $package) =~ s|::|/|g;
@@ -613,10 +612,9 @@ SKIP: {
 }
 
 SKIP: {
-    skip_if_miniperl("No XS in miniperl", 2);
+    skip_if_miniperl("No XS in miniperl", 1);
 
-    for ( [qw( %- Tie::Hash::NamedCapture )],
-          [qw( %! Errno )] ) {
+    for ( [qw( %! Errno )] ) {
 	my ($var, $mod) = @$_;
 	my $modfile = $mod =~ s|::|/|gr . ".pm";
 	fresh_perl_is
