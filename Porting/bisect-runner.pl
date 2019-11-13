@@ -862,8 +862,8 @@ Extract code from the test file at the point where C<./miniperl -Ilib -c> was
 showing a compilation failure.  Use that in bisection with the C<miniperl>
 target.
 
-    .../Porting/bisect.pl --target=miniperl \
-        --start=2ec4590e -e 'q|ace| =~ /c(?=.$)/; $#{^CAPTURE} == -1); exit 0;'
+    .../Porting/bisect.pl --target=miniperl --start=2ec4590e \
+        -e 'q|ace| =~ /c(?=.$)/; $#{^CAPTURE} == -1); exit 0;'
 
 =item * Reference
 
