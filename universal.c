@@ -1019,6 +1019,161 @@ XS(XS_Internals_getcwd)
 
 #endif
 
+XS(XS_NamedCapture_tie_it)
+{
+    dXSARGS;
+
+    if (items != 1)
+        croak_xs_usage(cv,  "sv");
+    {
+        SV *sv = ST(0);
+        GV * const gv = (GV *)sv;
+        HV * const hv = GvHVn(gv);
+        SV *rv = newSV_type(SVt_IV);
+        const char *gv_name = GvNAME(gv);
+
+        SvRV_set(rv, newSVuv(
+            strEQ(gv_name, "-") || strEQ(gv_name, "\003APTURE_ALL")
+            ? RXapif_ALL : RXapif_ONE));
+        SvROK_on(rv);
+        sv_bless(rv, GvSTASH(CvGV(cv)));
+
+        sv_unmagic((SV *)hv, PERL_MAGIC_tied);
+        sv_magic((SV *)hv, rv, PERL_MAGIC_tied, NULL, 0);
+        SvREFCNT_dec(rv); /* As sv_magic increased it by one.  */
+    }
+    XSRETURN_EMPTY;
+}
+
+XS(XS_NamedCapture_TIEHASH)
+{
+    dVAR; dXSARGS;
+    if (items < 1)
+       croak_xs_usage(cv,  "package, ...");
+    {
+	const char *	package = (const char *)SvPV_nolen(ST(0));
+	UV flag = RXapif_ONE;
+	mark += 2;
+	while(mark < sp) {
+	    STRLEN len;
+	    const char *p = SvPV_const(*mark, len);
+	    if(memEQs(p, len, "all"))
+		flag = SvTRUE(mark[1]) ? RXapif_ALL : RXapif_ONE;
+	    mark += 2;
+	}
+	ST(0) = sv_2mortal(newSV_type(SVt_IV));
+	sv_setuv(newSVrv(ST(0), package), flag);
+    }
+    XSRETURN(1);
+}
+
+/* These are tightly coupled to the RXapif_* flags defined in regexp.h  */
+#define UNDEF_FATAL  0x80000
+#define DISCARD      0x40000
+#define EXPECT_SHIFT 24
+#define ACTION_MASK  0x000FF
+
+#define FETCH_ALIAS  (RXapif_FETCH  | (2 << EXPECT_SHIFT))
+#define STORE_ALIAS  (RXapif_STORE  | (3 << EXPECT_SHIFT) | UNDEF_FATAL | DISCARD)
+#define DELETE_ALIAS (RXapif_DELETE | (2 << EXPECT_SHIFT) | UNDEF_FATAL)
+#define CLEAR_ALIAS  (RXapif_CLEAR  | (1 << EXPECT_SHIFT) | UNDEF_FATAL | DISCARD)
+#define EXISTS_ALIAS (RXapif_EXISTS | (2 << EXPECT_SHIFT))
+#define SCALAR_ALIAS (RXapif_SCALAR | (1 << EXPECT_SHIFT))
+
+XS(XS_NamedCapture_FETCH)
+{
+    dVAR; dXSARGS;
+    dXSI32;
+    PERL_UNUSED_VAR(cv); /* -W */
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    SP -= items;
+    {
+	REGEXP *const rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
+	U32 flags;
+	SV *ret;
+	const U32 action = ix & ACTION_MASK;
+	const int expect = ix >> EXPECT_SHIFT;
+	if (items != expect)
+	    croak_xs_usage(cv, expect == 2 ? "$key"
+				           : (expect == 3 ? "$key, $value"
+							  : ""));
+
+	if (!rx || !SvROK(ST(0))) {
+	    if (ix & UNDEF_FATAL)
+		Perl_croak_no_modify();
+	    else
+		XSRETURN_UNDEF;
+	}
+
+	flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
+
+	PUTBACK;
+	ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), expect >= 2 ? ST(1) : NULL,
+				    expect >= 3 ? ST(2) : NULL, flags | action);
+	SPAGAIN;
+
+	if (ix & DISCARD) {
+	    /* Called with G_DISCARD, so our return stack state is thrown away.
+	       Hence if we were returned anything, free it immediately.  */
+	    SvREFCNT_dec(ret);
+	} else {
+	    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+	}
+	PUTBACK;
+	return;
+    }
+}
+
+
+XS(XS_NamedCapture_FIRSTKEY)
+{
+    dVAR; dXSARGS;
+    dXSI32;
+    PERL_UNUSED_VAR(cv); /* -W */
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    SP -= items;
+    {
+	REGEXP *const rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
+	U32 flags;
+	SV *ret;
+	const int expect = ix ? 2 : 1;
+	const U32 action = ix ? RXapif_NEXTKEY : RXapif_FIRSTKEY;
+	if (items != expect)
+	    croak_xs_usage(cv, expect == 2 ? "$lastkey" : "");
+
+	if (!rx || !SvROK(ST(0)))
+	    XSRETURN_UNDEF;
+
+	flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
+
+	PUTBACK;
+	ret = RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx),
+					     expect >= 2 ? ST(1) : NULL,
+					     flags | action);
+	SPAGAIN;
+
+	PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+	PUTBACK;
+	return;
+    }
+}
+
+/* is this still needed? */
+XS(XS_NamedCapture_flags)
+{
+    dVAR; dXSARGS;
+    PERL_UNUSED_VAR(cv); /* -W */
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    SP -= items;
+    {
+	EXTEND(SP, 2);
+	mPUSHu(RXapif_ONE);
+	mPUSHu(RXapif_ALL);
+	PUTBACK;
+	return;
+    }
+}
+
 #include "vutil.h"
 #include "vxs.inc"
 
@@ -1026,36 +1181,48 @@ struct xsub_details {
     const char *name;
     XSUBADDR_t xsub;
     const char *proto;
+    int ix;
 };
 
 static const struct xsub_details these_details[] = {
-    {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL},
-    {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL},
-    {"UNIVERSAL::DOES", XS_UNIVERSAL_DOES, NULL},
+    {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL, 0 },
+    {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL, 0 },
+    {"UNIVERSAL::DOES", XS_UNIVERSAL_DOES, NULL, 0 },
 #define VXS_XSUB_DETAILS
 #include "vxs.inc"
 #undef VXS_XSUB_DETAILS
-    {"utf8::is_utf8", XS_utf8_is_utf8, NULL},
-    {"utf8::valid", XS_utf8_valid, NULL},
-    {"utf8::encode", XS_utf8_encode, NULL},
-    {"utf8::decode", XS_utf8_decode, NULL},
-    {"utf8::upgrade", XS_utf8_upgrade, NULL},
-    {"utf8::downgrade", XS_utf8_downgrade, NULL},
-    {"utf8::native_to_unicode", XS_utf8_native_to_unicode, NULL},
-    {"utf8::unicode_to_native", XS_utf8_unicode_to_native, NULL},
-    {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
-    {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
-    {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
-    {"constant::_make_const", XS_constant__make_const, "\\[$@]"},
-    {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
-    {"re::is_regexp", XS_re_is_regexp, "$"},
-    {"re::regname", XS_re_regname, ";$$"},
-    {"re::regnames", XS_re_regnames, ";$"},
-    {"re::regnames_count", XS_re_regnames_count, ""},
-    {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
+    {"utf8::is_utf8", XS_utf8_is_utf8, NULL, 0 },
+    {"utf8::valid", XS_utf8_valid, NULL, 0 },
+    {"utf8::encode", XS_utf8_encode, NULL, 0 },
+    {"utf8::decode", XS_utf8_decode, NULL, 0 },
+    {"utf8::upgrade", XS_utf8_upgrade, NULL, 0 },
+    {"utf8::downgrade", XS_utf8_downgrade, NULL, 0 },
+    {"utf8::native_to_unicode", XS_utf8_native_to_unicode, NULL, 0 },
+    {"utf8::unicode_to_native", XS_utf8_unicode_to_native, NULL, 0 },
+    {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$", 0 },
+    {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$", 0 },
+    {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%", 0 },
+    {"constant::_make_const", XS_constant__make_const, "\\[$@]", 0 },
+    {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@", 0 },
+    {"re::is_regexp", XS_re_is_regexp, "$", 0 },
+    {"re::regname", XS_re_regname, ";$$", 0 },
+    {"re::regnames", XS_re_regnames, ";$", 0 },
+    {"re::regnames_count", XS_re_regnames_count, "", 0 },
+    {"re::regexp_pattern", XS_re_regexp_pattern, "$", 0 },
 #ifdef HAS_GETCWD
-    {"Internals::getcwd", XS_Internals_getcwd, ""},
+    {"Internals::getcwd", XS_Internals_getcwd, "", 0 },
 #endif
+    {"Tie::Hash::NamedCapture::_tie_it", XS_NamedCapture_tie_it, NULL, 0 },
+    {"Tie::Hash::NamedCapture::TIEHASH", XS_NamedCapture_TIEHASH, NULL, 0 },
+    {"Tie::Hash::NamedCapture::FETCH", XS_NamedCapture_FETCH, NULL, FETCH_ALIAS },
+    {"Tie::Hash::NamedCapture::STORE", XS_NamedCapture_FETCH, NULL, STORE_ALIAS },
+    {"Tie::Hash::NamedCapture::DELETE", XS_NamedCapture_FETCH, NULL, DELETE_ALIAS },
+    {"Tie::Hash::NamedCapture::CLEAR", XS_NamedCapture_FETCH, NULL, CLEAR_ALIAS },
+    {"Tie::Hash::NamedCapture::EXISTS", XS_NamedCapture_FETCH, NULL, EXISTS_ALIAS },
+    {"Tie::Hash::NamedCapture::SCALAR", XS_NamedCapture_FETCH, NULL, SCALAR_ALIAS },
+    {"Tie::Hash::NamedCapture::FIRSTKEY", XS_NamedCapture_FIRSTKEY, NULL, 0 },
+    {"Tie::Hash::NamedCapture::NEXTKEY", XS_NamedCapture_FIRSTKEY, NULL, 1 },
+    {"Tie::Hash::NamedCapture::flags", XS_NamedCapture_flags, NULL, 0 },
 };
 
 STATIC OP*
@@ -1115,7 +1282,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     const struct xsub_details *end = C_ARRAY_END(these_details);
 
     do {
-	newXS_flags(xsub->name, xsub->xsub, file, xsub->proto, 0);
+        CV *cv = newXS_flags(xsub->name, xsub->xsub, file, xsub->proto, 0);
+        XSANY.any_i32 = xsub->ix;
     } while (++xsub < end);
 
 #ifndef EBCDIC
