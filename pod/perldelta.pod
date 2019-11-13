@@ -42,6 +42,19 @@ existing code that disables the warning category
 C<experimental::alpha_assertions> will continue to work without any
 changes needed.  Enabling the category has no effect.
 
+=head2 Feature checks are now faster
+
+Previously feature checks in the parser required a hash lookup when
+features we set outside of a feature bundle, this has been optimized
+to a bit mask check.  [#17229]
+
+=head2 Perl is now developed on Github
+
+Perl is now developed on Github, you can find us at
+L<https://github.com/Perl/perl5>.
+
+Non-security bugs should now be reported via Github.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -352,9 +365,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+The configuration for C<ccflags> and C<optimize> are now separate, as
+with POSIX platforms.  [#17156]
 
 =back
 
@@ -385,7 +399,18 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+printf() or sprintf() with the C<%n> format could cause a panic on
+debugging builds, or report an incorrectly cached length value when
+producing C<SVfUTF8> flagged strings. [#17221]
+
+=item *
+
+The tokenizer has been extensively refactored. [#17241][#17189]
+
+=item *
+
+C<use strict "subs"> is now enforced for bareword constants optimized
+into a C<multiconcat> operator.  [#17254]
 
 =back
 
