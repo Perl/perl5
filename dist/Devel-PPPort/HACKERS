@@ -85,18 +85,45 @@ execution time on perls earlier than 5.005
 
 =back
 
-You can use C<ok()> to report success or failure:
+As of version 3.56 of Devel::PPPort, the old Test style tests have been
+replaced with the more modern Test::More style, with some limitations.  This
+means, for example, that C<is> is finally available, as well as
+C<done_testing>.  You can pass the number of tests to C<skip>, instead of
+having to have your own C<for> loop.
 
- ok($got, $expected, 'name');
- ok($got == 42);     # Doesn't give good runtime diagnostics
+There is no C<like> nor C<unlike> (as those require C<qr> which didn't exist in
+the earliest perls that Devel::PPPort runs on).
 
- ok($got, eval "qr/foo/", 'name') # But don't execute this statement
-                                  # on perls earlier than 5.005
+C<skip> doesn't do a S<C<last SKIP>>.  (Perhaps it could, but that would mean
+converting all the skips in the existing tests.)
 
-Unfortunately, the test name C<'name'> is output only on failure, so it can be
-awkward finding which of many tests executed at the same point in a loop is the
-one failing.  Even though C<'name'> is optional, you will end up regretting not
-specifying it.
+The existing tests have been changed only as much as necessary so as to get
+things to work.  But feel free to use the full functionality for any new tests
+you write.
+
+Here's a list of the supported functions:
+
+ cmp_ok
+ curr_test
+ diag
+ display
+ done_testing
+ eq_array
+ eq_hash
+ fail
+ is
+ isnt
+ next_test
+ note
+ ok
+ pass
+ plan
+ skip
+ skip_all
+ within
+
+These are copied from F<t/test.pl> in the perl distribution.  Not all of them
+have been tested back as far as Devel::PPPort supports.  Bug reports welcome.
 
 It's fine to backport an element only as far as convenient and necessary.  But
 remember that your test file will end up being called on all perl versions
@@ -108,16 +135,11 @@ It also means you have to check for and skip tests that aren't relevant to this
 version.  The recommended way to do this is like:
 
  if (ivers($]) < ivers(5.6.2)) {
-    skip "reason", 0;
+    skip "reason", $count;
  }
  elsif (if (ivers($]) > ivers(5.5) {
-    skip "other reason", 0;
+    skip "other reason", $count;
  }
-
-C<skip> doesn't work quite like the modern C<skip()> in, say, C<Test::More>.
-But you can pretend it pretty much does, by using it like the above.  (And you
-really don't want to know the now-discarded API elements in it.)  The C<"0">
-parameter is just to make it look like you know what you're doing.
 
 C<ivers()> is a function automatically made available to all F<.t> files.  It
 converts any reasonble expression of a version number into an integer, which
