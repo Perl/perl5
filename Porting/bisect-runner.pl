@@ -871,6 +871,29 @@ L<GH issue 17293|https://github.com/Perl/perl5/issues/17293>
 
 =back
 
+=head2 Blead breaks CPAN on threaded builds only
+
+=over 4
+
+=item * Problem
+
+Tests in CPAN module XML::Parser's test suite had begun to fail when tested
+against blead in threaded builds only.
+
+=item * Solution
+
+Provide F<Configure>-style switch to bisection program.  Straightforward use
+of the C<--module> switch.
+
+    .../Porting/bisect.pl -Duseithreads \
+        --start=6256cf2c --end=f6f85064 --module=XML::Parser
+
+=item * Reference
+
+L<GH issue 16918|https://github.com/Perl/perl5/issues/16918>
+
+=back
+
 =cut
 
 # Ensure we always exit with 255, to cause git bisect to abort.
