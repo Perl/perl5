@@ -10,5 +10,4 @@ invlist_max                    # F added by devel/scanprov
 invlist_set_len                # F added by devel/scanprov
 invlist_trim                   # F added by devel/scanprov
 _new_invlist                   # F added by devel/scanprov
-Perl_feature_is_enabled        # F added by devel/scanprov
 regcurly                       # F added by devel/scanprov

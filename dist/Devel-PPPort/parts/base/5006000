@@ -63,7 +63,6 @@ isGRAPH_LC                     # E
 isPUNCT                        # E
 isPUNCT_LC                     # E
 is_utf8_char                   # U
-is_utf8_mark                   # E
 isXDIGIT                       # E
 IVdf                           # E
 IVSIZE                         # E
@@ -293,32 +292,6 @@ hv_magic_check                 # F added by devel/scanprov
 init_i18nl10n                  # F added by devel/scanprov
 init_i18nl14n                  # F added by devel/scanprov
 is_handle_constructor          # F added by devel/scanprov
-is_uni_alnum                   # F added by devel/scanprov
-is_uni_alnum_lc                # F added by devel/scanprov
-is_uni_alpha                   # F added by devel/scanprov
-is_uni_alpha_lc                # F added by devel/scanprov
-is_uni_ascii                   # F added by devel/scanprov
-is_uni_ascii_lc                # F added by devel/scanprov
-is_uni_cntrl                   # F added by devel/scanprov
-is_uni_cntrl_lc                # F added by devel/scanprov
-is_uni_digit                   # F added by devel/scanprov
-is_uni_digit_lc                # F added by devel/scanprov
-is_uni_graph                   # F added by devel/scanprov
-is_uni_graph_lc                # F added by devel/scanprov
-is_uni_idfirst                 # F added by devel/scanprov
-is_uni_idfirst_lc              # F added by devel/scanprov
-is_uni_lower                   # F added by devel/scanprov
-is_uni_lower_lc                # F added by devel/scanprov
-is_uni_print                   # F added by devel/scanprov
-is_uni_print_lc                # F added by devel/scanprov
-is_uni_punct                   # F added by devel/scanprov
-is_uni_punct_lc                # F added by devel/scanprov
-is_uni_space                   # F added by devel/scanprov
-is_uni_space_lc                # F added by devel/scanprov
-is_uni_upper                   # F added by devel/scanprov
-is_uni_upper_lc                # F added by devel/scanprov
-is_uni_xdigit                  # F added by devel/scanprov
-is_uni_xdigit_lc               # F added by devel/scanprov
 load_module_nocontext          # F added by devel/scanprov
 magic_killbackrefs             # F added by devel/scanprov
 magic_regdata_cnt              # F added by devel/scanprov
@@ -349,15 +322,10 @@ Slab_Alloc                     # F added by devel/scanprov
 sv_catpvf_nocontext            # F added by devel/scanprov
 sv_del_backref                 # F added by devel/scanprov
 sv_setpvf_nocontext            # F added by devel/scanprov
-swash_fetch                    # F added by devel/scanprov
-swash_init                     # F added by devel/scanprov
 sys_intern_dup                 # F added by devel/scanprov
 to_uni_lower                   # F added by devel/scanprov
-to_uni_lower_lc                # F added by devel/scanprov
 to_uni_title                   # F added by devel/scanprov
-to_uni_title_lc                # F added by devel/scanprov
 to_uni_upper                   # F added by devel/scanprov
-to_uni_upper_lc                # F added by devel/scanprov
 utf16_to_utf8                  # F added by devel/scanprov
 utf16_to_utf8_reversed         # F added by devel/scanprov
 warner_nocontext               # F added by devel/scanprov
