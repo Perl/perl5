@@ -791,6 +791,9 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                 /* "nanq" or "nans" are ok, though generating
                  * these portably is tricky. */
                 s++;
+                if (s == send) {
+                    return flags;
+                }
             }
             if (*s == '(') {
                 /* C99 style "nan(123)" or Perlish equivalent "nan($uv)". */
