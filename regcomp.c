@@ -13774,7 +13774,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    STRLEN len = 0;
 	    UV ender = 0;
 	    char *p;
-	    char *s;
+	    char *s, *old_s = NULL, *old_old_s = NULL;
 	    char *s0;
             U32 max_string_len = 255;
 
@@ -13796,20 +13796,20 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             U8 node_type = EXACT;
 
             /* Assume the node will be fully used; the excess is given back at
-             * the end.  Under /i, leave enough extra room so that we won't
-             * overflow the buffer when we fold a character which would end up
-             * overflowing the node.   We can't make any other length
-             * assumptions, as a byte input sequence could shrink down. */
+             * the end.  Under /i, we may need to temporarily add the fold of
+             * an extra character or two at the end to check for splitting
+             * multi-char folds, so allocate extra space for that.   We can't
+             * make any other length assumptions, as a byte input sequence
+             * could shrink down. */
             Ptrdiff_t current_string_nodes = STR_SZ(max_string_len
                                                  + ((! FOLD)
                                                     ? 0
-                                                    : 1 * ((UTF)
+                                                    : 2 * ((UTF)
                                                            ? UTF8_MAXBYTES_CASE
                         /* Max non-UTF-8 expansion is 2 */ : 2)));
 
             bool next_is_quantifier;
             char * oldp = NULL;
-            char * old_oldp = NULL;
 
             /* We can convert EXACTF nodes to EXACTFU if they contain only
              * characters that match identically regardless of the target
@@ -13895,8 +13895,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * The exceptions override this */
                 Size_t added_len = 1;
 
-                old_oldp = oldp;
 		oldp = p;
+                old_old_s = old_s;
+                old_s = s;
 
                 /* White space has already been ignored */
                 assert(   (RExC_flags & RXf_PMf_EXTENDED) == 0
@@ -14527,6 +14528,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             else if (! LOC) {  /* XXX shouldn't /l assume could be a UTF-8
                                 locale, and prepare for that? */
+                bool splittable = FALSE;
+                bool backed_up = FALSE;
+                char * e = s;
+
+                assert(FOLD);
 
                 /* Here is /i.  Running out of room creates a problem if we are
                  * folding, and the split happens in the middle of a
@@ -14539,188 +14545,261 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * things that fold to them) as 'ff' and 'ss' are
                  * multi-character folds.
                  *
-                 * At this point:
-                 *  old_oldp  points to the beginning in the input of the
-                 *              penultimate character in the node.
-                 *  oldp      points to the beginning in the input of the
-                 *              final character in the node.
-                 *  p         points to the beginning in the input of the
-                 *              next character in the input, the one that won't
-                 *              fit in the node.
+                 * The Unicode standard says that multi character folds consist
+                 * of either two or three characters.  That means we would be
+                 * splitting one if the final character in the node is at the
+                 * beginning of either type, or is the second of a three
+                 * character fold.
                  *
-                 * We aren't in the middle of a multi-char fold unless the
-                 * final character in the node can appear in a non-final
-                 * position in such a fold.  Very few characters actually
-                 * participate in multi-character folds, and fewer still can be
-                 * in the non-final position.  But it's complicated to know
-                 * here if that final character is folded or not, so skip this
-                 * check */
+                 * At this point:
+                 *  ender     is the code point of the character that won't fit
+                 *            in the node
+                 *  s         points to just beyond the final byte in the node.
+                 *            It's where we would place ender if there were
+                 *            room, and where in fact we do place ender's fold
+                 *            in the code below, as we've over-allocated space
+                 *            for s0 (hence s) to allow for this
+                 *  e         starts at 's' and advances as we append things.
+                 *  old_s     is the same as 's'.  (If ender had fit, 's' would
+                 *            have been advanced to beyond it).
+                 *  old_old_s points to the beginning byte of the final
+                 *            character in the node
+                 *  p         points to the beginning byte in the input of the
+                 *            character beyond 'ender'.
+                 *  oldp      points to the beginning byte in the input of
+                 *            'ender'.
+                 *
+                 * If the final character of the node and the fold of ender
+                 * form the first two characters of a three character fold, we
+                 * need to peek ahead at the next (unparsed) character in the
+                 * input to determine if the three actually do form such a
+                 * fold.  Just looking at that character is not generally
+                 * sufficient, as it could be, for example, an escape sequence
+                 * that evaluates to something else, and it needs to be folded.
+                 *
+                 * khw originally thought to just go through the parse loop one
+                 * extra time, but that doesn't work easily as that iteration
+                 * could cause things to think that the parse is over and to
+                 * goto loopdone.  The character could be a '$' for example, or
+                 * the character beyond could be a quantifier, and other
+                 * glitches as well.
+                 *
+                 * The solution used here for peeking ahead is to look at that
+                 * next character.  If it isn't ASCII punctuation, then it will
+                 * be something that continues in an EXACTish node if there
+                 * were space.  We append the fold of it to s, having reserved
+                 * enough room in s0 for the purpose.  If we can't reasonably
+                 * peek ahead, we instead assume the worst case: that it is
+                 * something that would form the completion of a multi-char
+                 * fold.
+                 *
+                 * If we can't split between s and ender, we work backwards
+                 * character-by-character down to s0.  At each current point
+                 * see if we are at the beginning of a multi-char fold.  If so,
+                 * that means we would be splitting the fold across nodes, and
+                 * so we back up one and try again.
+                 *
+                 * If we're not at the beginning, we still could be at the
+                 * final two characters of a (rare) three character fold.  We
+                 * check if the sequence starting at the character before the
+                 * current position (and including the current and next
+                 * characters) is a three character fold.  If not, the node can
+                 * be split here.  If it is, we have to backup two characters
+                 * and try again.
+                 *
+                 * Otherwise, the node can be split at the current position.
+                 */
+                s = old_old_s;  /* Point to the beginning of the final char
+                                   that fits in the node */
 
-                           /* Make sure enough space for final char of node,
-                            * first char of following node, and the fold of the
-                            * following char (so we don't have to worry about
-                            * that fold running off the end */
-                U8 foldbuf[UTF8_MAXBYTES_CASE * 5 + 1];
-                STRLEN fold_len;
-                UV folded;
-                char * const sav_oldp = oldp;
+                /* The same logic is used for UTF-8 patterns and not */
+                if (UTF) {
+                    Size_t added_len;
 
-                assert(FOLD);
+                    /* Append the fold of ender */
+                    (void) _to_uni_fold_flags(
+                        ender,
+                        (U8 *) e,
+                        &added_len,
+                        FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
+                                        ? FOLD_FLAGS_NOMIX_ASCII
+                                        : 0));
+                    e += added_len;
 
-                /* The Unicode standard says that multi character folds consist
-                 * of either two or three characters.  So we create a buffer
-                 * containing a window of three.  The first is the final
-                 * character in the node (folded), and then the two that begin
-                 * the following node.   But if the first character of the
-                 * following node can't be in a non-final fold position, there
-                 * is no need to look at its successor character.  The macros
-                 * used below to check for multi character folds require folded
-                 * inputs, so we have to fold these.  (The fold of p was likely
-                 * calculated in the loop above, but it hasn't beeen saved, and
-                 * khw thinks it would be too entangled to change to do so) */
-
-                if (UTF || LIKELY(UCHARAT(p) != MICRO_SIGN)) {
-                    folded = _to_uni_fold_flags(ender,
-                                                foldbuf,
-                                                &fold_len,
-                                                FOLD_FLAGS_FULL);
-                }
-                else {
-                    foldbuf[0] = folded = MICRO_SIGN;
-                    fold_len = 1;
-                }
-
-                /* Here, foldbuf contains the fold of the first character in
-                 * the next node.  We may also need the next one (if there is
-                 * one) to get our third, but if the first character folded to
-                 * more than one, those extra one(s) will serve as the third.
-                 * Also, we don't need a third unless the previous one can
-                 * appear in a non-final position in a fold */
-                if (  ((RExC_end - p) > ((UTF) ? UVCHR_SKIP(ender) : 1))
-                    && (fold_len == 1 || (   UTF
-                                          && UVCHR_SKIP(folded) == fold_len))
-                    &&  UNLIKELY(_invlist_contains_cp(PL_NonFinalFold, folded)))
-                {
-                    if (UTF) {
-                        STRLEN next_fold_len;
-
-                        toFOLD_utf8_safe((U8*) p + UTF8SKIP(p),
-                                         (U8*) RExC_end, foldbuf + fold_len,
-                                         &next_fold_len);
-                        fold_len += next_fold_len;
-                    }
-                    else {
-                        if (UNLIKELY(p[1] == LATIN_SMALL_LETTER_SHARP_S)) {
-                            foldbuf[fold_len] = 's';
+                    /* 's' and the character folded to by ender may be the
+                     * first two of a three-character fold, in which case the
+                     * node should not be split here.  That may mean examining
+                     * the so-far unparsed character starting at 'p'.  But if
+                     * ender folded to more than one character, we already have
+                     * three characters to look at.  Also, we first check if
+                     * the sequence consisting of s and the next character form
+                     * the first two of some three character fold.  If not,
+                     * there's no need to peek ahead. */
+                    if (   added_len <= UTF8SKIP(e - added_len)
+                        && UNLIKELY(is_THREE_CHAR_FOLD_HEAD_utf8_safe(s, e)))
+                    {
+                        /* Here, the two do form the beginning of a potential
+                         * three character fold.  The unexamined character may
+                         * or may not complete it.  Peek at it.  It might be
+                         * something that ends the node or an escape sequence,
+                         * in which case we don't know without a lot of work
+                         * what it evaluates to, so we have to assume the worst
+                         * case: that it does complete the fold, and so we
+                         * can't split here.  All such instances  will have
+                         * that character be an ASCII punctuation character,
+                         * like a backslash.  So, for that case, backup one and
+                         * drop down to try at that position */
+                        if (isPUNCT(*p)) {
+                            s = (char *) utf8_hop_back((U8 *) s, -1,
+                                       (U8 *) s0);
+                            backed_up = TRUE;
                         }
                         else {
-                            foldbuf[fold_len] = toLOWER_L1(p[1]);
+                            /* Here, since it's not punctuation, it must be a
+                             * real character, and we can append its fold to
+                             * 'e' (having deliberately reserved enough space
+                             * for this eventuality) and drop down to check if
+                             * the three actually do form a folded sequence */
+                            (void) _to_utf8_fold_flags(
+                                (U8 *) p, (U8 *) RExC_end,
+                                (U8 *) e,
+                                &added_len,
+                                FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
+                                                ? FOLD_FLAGS_NOMIX_ASCII
+                                                : 0));
+                            e += added_len;
                         }
-                        fold_len++;
+                    }
+
+                    /* Here, we either have three characters available in
+                     * sequence starting at 's', or we have two characters and
+                     * know that the following one can't possibly be part of a
+                     * three character fold.  We go through the node backwards
+                     * until we find a place where we can split it without
+                     * breaking apart a multi-character fold.  At any given
+                     * point we have to worry about if such a fold begins at
+                     * the current 's', and also if a three-character fold
+                     * begins at s-1, (containing s and s+1).  Splitting in
+                     * either case would break apart a fold */
+                    do {
+                        char *prev_s = (char *) utf8_hop_back((U8 *) s, -1,
+                                                                    (U8 *) s0);
+
+                        /* If is a multi-char fold, can't split here.  Backup
+                         * one char and try again */
+                        if (UNLIKELY(is_MULTI_CHAR_FOLD_utf8_safe(s, e))) {
+                            s = prev_s;
+                            backed_up = TRUE;
+                            continue;
+                        }
+
+                        /* If the two characters beginning at 's' are part of a
+                         * three character fold starting at the character
+                         * before s, we can't split either before or after s.
+                         * Backup two chars and try again */
+                        if (   LIKELY(s > s0)
+                            && UNLIKELY(is_THREE_CHAR_FOLD_utf8_safe(prev_s, e)))
+                        {
+                            s = prev_s;
+                            s = (char *) utf8_hop_back((U8 *) s, -1, (U8 *) s0);
+                            backed_up = TRUE;
+                            continue;
+                        }
+
+                        /* Here there's no multi-char fold between s and the
+                         * next character following it.  We can split */
+                        splittable = TRUE;
+                        break;
+
+                    } while (s > s0); /* End of loops backing up through the node */
+
+                    /* Here we either couldn't find a place to split the node,
+                     * or else we broke out of the loop setting 'splittable' to
+                     * true.  In the latter case, the place to split is between
+                     * the first and second characters in the sequence starting
+                     * at 's' */
+                    if (splittable) {
+                        s += UTF8SKIP(s);
+                    }
+                }
+                else {  /* Pattern not UTF-8 */
+                    if (   ender != LATIN_SMALL_LETTER_SHARP_S
+                        || ASCII_FOLD_RESTRICTED)
+                    {
+                        *e++ = toLOWER_L1(ender);
+                    }
+                    else {
+                        *e++ = 's';
+                        *e++ = 's';
+                    }
+
+                    if (   e - s  <= 1
+                        && UNLIKELY(is_THREE_CHAR_FOLD_HEAD_latin1_safe(s, e)))
+                    {
+                        if (isPUNCT(*p)) {
+                            s--;
+                            backed_up = TRUE;
+                        }
+                        else {
+                            if (   UCHARAT(p) != LATIN_SMALL_LETTER_SHARP_S
+                                || ASCII_FOLD_RESTRICTED)
+                            {
+                                *e++ = toLOWER_L1(ender);
+                            }
+                            else {
+                                *e++ = 's';
+                                *e++ = 's';
+                            }
+                        }
+                    }
+
+                    do {
+                        if (UNLIKELY(is_MULTI_CHAR_FOLD_latin1_safe(s, e))) {
+                            s--;
+                            backed_up = TRUE;
+                            continue;
+                        }
+
+                        if (   LIKELY(s > s0)
+                            && UNLIKELY(is_THREE_CHAR_FOLD_latin1_safe(s - 1, e)))
+                        {
+                            s -= 2;
+                            backed_up = TRUE;
+                            continue;
+                        }
+
+                        splittable = TRUE;
+                        break;
+
+                    } while (s > s0);
+
+                    if (splittable) {
+                        s++;
                     }
                 }
 
-                /* Here foldbuf contains the the fold of p, and if appropriate
-                 * that of the character following p in the input. */
+                /* Here, we are done backing up.  If we didn't backup at all
+                 * (the likely case), just proceed */
+                if (backed_up) {
 
-                /* Search backwards until find a place that doesn't split a
-                 * multi-char fold */
-                while (1) {
-                    STRLEN s_len;
-                    char s_fold_buf[UTF8_MAXBYTES_CASE];
-                    char * s_fold = s_fold_buf;
-
-                    if (s <= s0) {
-
-                        /* There's no safe place in the node to split.  Quit so
-                         * will take the whole node */
-                        oldp = sav_oldp;
-                        break;
-                    }
-
-                    /* Backup 1 character.  The first time through this moves s
-                     * to point to the final character in the node */
-                    if (UTF) {
-                        s = (char *) utf8_hop_back((U8 *) s, -1, (U8 *) s0);
-                    }
-                    else {
-                        s--;
-                    }
-
-                    /* 's' may or may not be folded; so make sure it is, and
-                     * use just the final character in its fold (should there
-                     * be more than one */
-                    if (UTF) {
-                        toFOLD_utf8_safe((U8*) s,
-                                         (U8*) s + UTF8SKIP(s),
-                                         (U8 *) s_fold_buf, &s_len);
-                        while (s_fold + UTF8SKIP(s_fold) < s_fold_buf + s_len)
-                        {
-                            s_fold += UTF8SKIP(s_fold);
-                        }
-                        s_len = UTF8SKIP(s_fold);
-                    }
-                    else {
-                        if (UNLIKELY(UCHARAT(s) == LATIN_SMALL_LETTER_SHARP_S))
-                        {
-                            s_fold_buf[0] = 's';
-                        }
-                        else {  /* This works for all other non-UTF-8 folds
-                                 */
-                            s_fold_buf[0] = toLOWER_L1(UCHARAT(s));
-                        }
-                        s_len = 1;
-                    }
-
-                    /* Unshift this character to the beginning of the buffer,
-                     * No longer needed trailing characters are overwritten.
-                     * */
-                    Move(foldbuf, foldbuf + s_len, sizeof(foldbuf) - s_len, U8);
-                    Copy(s_fold, foldbuf, s_len, U8);
-
-                    /* If this isn't a multi-character fold, we have found a
-                     * splittable place.  If this is the final character in the
-                     * node, that means the node is valid as-is, and can quit.
-                     * Otherwise, we note how much we can fill the node before
-                     * coming to a non-splittable position, and go parse it
-                     * again, stopping there. This is done because we know
-                     * where in the output to stop, but we don't have a map to
-                     * where that is in the input.  One could be created, but
-                     * it seems like overkill for such a rare event as we are
-                     * dealing with here */
-                    if (UTF) {
-                        if (! is_MULTI_CHAR_FOLD_utf8_safe(foldbuf,
-                                                foldbuf + UTF8_MAXBYTES_CASE))
-                        {
-                            upper_fill = s + UTF8SKIP(s) - s0;
-                            if (LIKELY(oldp)) {
-                                break;
-                            }
-                            goto reparse;
-                        }
-                    }
-                    else if (! is_MULTI_CHAR_FOLD_latin1_safe(foldbuf,
-                                                foldbuf + UTF8_MAXBYTES_CASE))
-                    {
-                        upper_fill = s + 1 - s0;
-                        if (LIKELY(oldp)) {
-                            break;
-                        }
+                   /* If we did find a place to split, reparse the entire node
+                    * stopping where we have calculated. */
+                    if (splittable) {
+                        upper_fill = s - s0;
                         goto reparse;
                     }
 
-                    oldp = old_oldp;
-                    old_oldp = NULL;
-
-                } /* End of loop backing up through the node */
                     /* Here the node consists entirely of non-final multi-char
                      * folds.  (Likely it is all 'f's or all 's's.)  There's no
                      * decent place to split it, so give up and just take the
                      * whole thing */
-
+                    len = old_s - s0;
+                }
 	    }   /* End of verifying node ends with an appropriate char */
 
-                p = oldp;
+            /* We need to start the next node at the character that didn't fit
+             * in this one */
+            p = oldp;
 
           loopdone:   /* Jumped to when encounters something that shouldn't be
                          in the node */
