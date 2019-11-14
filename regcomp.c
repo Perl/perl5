@@ -4544,31 +4544,31 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
          */
         JOIN_EXACT(scan,&min_subtract, &unfolded_multi_char, 0);
 
-	/* Follow the next-chain of the current node and optimize
-	   away all the NOTHINGs from it.  */
-	if (OP(scan) != CURLYX) {
-	    const int max = (reg_off_by_arg[OP(scan)]
-		       ? I32_MAX
-		       /* I32 may be smaller than U16 on CRAYs! */
-		       : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-	    int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
-	    int noff;
-	    regnode *n = scan;
+        /* Follow the next-chain of the current node and optimize
+           away all the NOTHINGs from it.  */
+        if (OP(scan) != CURLYX) {
+            const int max = (reg_off_by_arg[OP(scan)]
+                            ? I32_MAX
+                              /* I32 may be smaller than U16 on CRAYs! */
+                            : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
+            int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
+            int noff;
+            regnode *n = scan;
 
-	    /* Skip NOTHING and LONGJMP. */
-	    while ((n = regnext(n))
-		   && ((PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
-		       || ((OP(n) == LONGJMP) && (noff = ARG(n))))
-		   && off + noff < max)
-		off += noff;
-	    if (reg_off_by_arg[OP(scan)])
-		ARG(scan) = off;
-	    else
-		NEXT_OFF(scan) = off;
-	}
+            /* Skip NOTHING and LONGJMP. */
+            while (   (n = regnext(n))
+                   && (   (PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
+                       || ((OP(n) == LONGJMP) && (noff = ARG(n))))
+                   && off + noff < max)
+                off += noff;
+            if (reg_off_by_arg[OP(scan)])
+                ARG(scan) = off;
+            else
+                NEXT_OFF(scan) = off;
+        }
 
-	/* The principal pseudo-switch.  Cannot be a switch, since we
-	   look into several different things.  */
+        /* The principal pseudo-switch.  Cannot be a switch, since we look into
+         * several different things.  */
         if ( OP(scan) == DEFINEP ) {
             SSize_t minlen = 0;
             SSize_t deltanext = 0;
@@ -6177,7 +6177,6 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 	    }
 #endif
 	}
-
 	else if (OP(scan) == OPEN) {
 	    if (stopparen != (I32)ARG(scan))
 	        pars++;
@@ -10959,7 +10958,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     PERL_ARGS_ASSERT_REG;
     DEBUG_PARSE("reg ");
 
-
     max_open = get_sv(RE_COMPILE_RECURSION_LIMIT, GV_ADD);
     assert(max_open);
     if (!SvIOK(max_open)) {
@@ -13783,8 +13781,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* We may have to reparse the node, artificially stopping filling
              * it early, based on info gleaned in the first parse.  This
              * variable gives where we stop.  Make it above the normal stopping
-             * place first time through. */
-	    U32 upper_fill = max_string_len + 1;
+             * place first time through; otherwise it would stop too early */
+            U32 upper_fill = max_string_len + 1;
 
             /* We start out as an EXACT node, even if under /i, until we find a
              * character which is in a fold.  The algorithm now segregates into
@@ -14220,8 +14218,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                     /* Don't output if it would overflow */
                     if (UNLIKELY(len > max_string_len - ((UTF)
-                                                         ? UVCHR_SKIP(ender)
-                                                         : 1)))
+                                                      ? UVCHR_SKIP(ender)
+                                                      : 1)))
                     {
                         overflowed = TRUE;
                         break;
@@ -14302,7 +14300,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         goto loopdone;
                     }
 
-                    if (UTF) {  /* Use the folded value */
+                    if (UTF) {  /* Alway use the folded value for UTF-8
+                                   patterns */
                         if (UVCHR_IS_INVARIANT(ender)) {
                             if (UNLIKELY(len + 1 > max_string_len)) {
                                 overflowed = TRUE;
@@ -14354,16 +14353,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * multi-char fold SHARP S to 'ss' */
 
                         if (   UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)
-                                 || (   isALPHA_FOLD_EQ(ender, 's')
-                                     && len > 0
-                                     && isALPHA_FOLD_EQ(*(s-1), 's')))
+                            || (   isALPHA_FOLD_EQ(ender, 's')
+                                && len > 0
+                                && isALPHA_FOLD_EQ(*(s-1), 's')))
                         {
                             /* Here, we have one of the following:
                              *  a)  a SHARP S.  This folds to 'ss' only under
                              *      /u rules.  If we are in that situation,
-                             *      fold the SHARP S to 'ss'.  See the comments
-                             *      for join_exact() as to why we fold this
-                             *      non-UTF at compile time, and no others.
+                             *      fold the SHARP S to 'ss'.
                              *  b)  'ss'.  When under /u, there's nothing
                              *      special needed to be done here.  The
                              *      previous iteration handled the first 's',
@@ -14509,7 +14506,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 goto continue_parse;
             }
-            else if (! LOC) {
+            else if (! LOC) {  /* XXX shouldn't /l assume could be a UTF-8
+                                locale, and prepare for that? */
 
                 /* Here is /i.  Running out of room creates a problem if we are
                  * folding, and the split happens in the middle of a
@@ -14696,15 +14694,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     old_oldp = NULL;
 
                 } /* End of loop backing up through the node */
-
-                /* Here the node consists entirely of non-final multi-char
-                 * folds.  (Likely it is all 'f's or all 's's.)  There's no
-                 * decent place to split it, so give up and just take the whole
-                 * thing */
+                    /* Here the node consists entirely of non-final multi-char
+                     * folds.  (Likely it is all 'f's or all 's's.)  There's no
+                     * decent place to split it, so give up and just take the
+                     * whole thing */
 
 	    }   /* End of verifying node ends with an appropriate char */
 
-            p = oldp;
+                p = oldp;
 
           loopdone:   /* Jumped to when encounters something that shouldn't be
                          in the node */
@@ -18431,6 +18428,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     goto not_anyof;
                 }
             }
+
             /* For well-behaved locales, some classes are subsets of others,
              * so complementing the subset and including the non-complemented
              * superset should match everything, like [\D[:alnum:]], and
@@ -18535,7 +18533,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
         /* Next see if can optimize classes that contain just a few code points
          * into an EXACTish node.  The reason to do this is to let the
-         * optimizer join this node with adjacent EXACTish ones.
+         * optimizer join this node with adjacent EXACTish ones, and ANYOF
+         * nodes require conversion to code point from UTF-8.
          *
          * An EXACTFish node can be generated even if not under /i, and vice
          * versa.  But care must be taken.  An EXACTFish node has to be such
@@ -18911,7 +18910,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             if (invlist_highest(cp_list) <= max_permissible) {
                 UV this_start, this_end;
-                UV lowest_cp = UV_MAX;  /* inited to suppress compiler warn */
+                UV lowest_cp = UV_MAX;  /* init'ed to suppress compiler warn */
                 U8 bits_differing = 0;
                 Size_t full_cp_count = 0;
                 bool first_time = TRUE;
@@ -19133,7 +19132,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             /* We store the lowest possible first byte of the UTF-8
              * representation, using the flags field.  This allows for quick
              * ruling out of some inputs without having to convert from UTF-8
-             * to code point.  For EBCDIC, this has to be I8. */
+             * to code point.  For EBCDIC, we use I8, as not doing that
+             * transformation would not rule out nearly so many things */
             anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
 
             /* If the first UTF-8 start byte for the highest code point in the
@@ -21597,7 +21597,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         if (start >= NUM_ANYOF_CODE_POINTS) {
             this_end = end;
         }
-        else {
+        else {  /* Have to split range at the bitmap boundary */
             this_end = (end < NUM_ANYOF_CODE_POINTS)
                         ? end
                         : NUM_ANYOF_CODE_POINTS - 1;
