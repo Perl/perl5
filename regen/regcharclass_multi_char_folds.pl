@@ -60,10 +60,11 @@ sub gen_combinations ($;) {
     return @ret;
 }
 
-sub multi_char_folds ($) {
-    my $all_folds = shift;  # The single parameter is true if wants all
-                            # multi-char folds; false if just the ones that
-                            # are all ascii
+sub multi_char_folds ($$) {
+    my $type = shift;  # 'u' for UTF-8; 'l' for latin1
+    my $range = shift;  # 'a' for all; 'h' for starting 2 bytes; 'm' for ending 2
+    die "[lu] only valid values for first parameter" if $type !~ /[lu]/;
+    die "[aht3] only valid values for 2nd parameter" if $range !~ /[aht3]/;
 
     return () if pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) lt v3.0.1;
 
@@ -87,6 +88,16 @@ sub multi_char_folds ($) {
         die sprintf("regcomp.c can't cope with a latin1 multi-char fold (found in the fold of 0x%X", $cp_ref->[$i]) if grep { $_ < 256 && chr($_) !~ /[[:ascii:]]/ } @{$folds_ref->[$i]};
 
         @folds = @{$folds_ref->[$i]};
+        if ($range eq '3') {
+            next if @folds < 3;
+        }
+        elsif ($range eq 'h') {
+            pop @folds;
+        }
+        elsif ($range eq 't') {
+            next if @folds < 3;
+            shift @folds;
+        }
 
         # Create a line that looks like "\x{foo}\x{bar}\x{baz}" of the code
         # points that make up the fold (use the actual character if
@@ -100,7 +111,7 @@ sub multi_char_folds ($) {
         # Skip if something else already has this fold
         next if grep { $_ eq $fold } @output_folds;
 
-        if ($all_folds) {
+        if ($type eq 'u') {
             push @output_folds, $fold;
         }   # Skip if wants only all-ascii folds, and there is a non-ascii
         elsif (! grep { chr($_) =~ /[^[:ascii:]]/ } @folds) {
@@ -143,7 +154,7 @@ sub multi_char_folds ($) {
     #
     # No combinations of this with 's' need be added, as any of these
     # containing 's' are prohibited under /iaa.
-    push @output_folds, '"\x{17F}\x{17F}"' if $all_folds;
+    push @output_folds, '"\x{17F}\x{17F}"' if $type eq 'u' && $range eq 'a';
 
     return @output_folds;
 }
