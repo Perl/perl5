@@ -71,7 +71,9 @@ sub multi_char_folds ($) {
     die "Could not find inversion map for Case_Folding" unless defined $format;
     die "Incorrect format '$format' for Case_Folding inversion map"
                                                         unless $format eq 'al';
+
     my @folds;
+    my @output_folds;
 
     for my $i (0 .. @$folds_ref - 1) {
         next unless ref $folds_ref->[$i];   # Skip single-char folds
@@ -84,26 +86,28 @@ sub multi_char_folds ($) {
         # isn't there to occupy space and time; instead there is this check.
         die sprintf("regcomp.c can't cope with a latin1 multi-char fold (found in the fold of 0x%X", $cp_ref->[$i]) if grep { $_ < 256 && chr($_) !~ /[[:ascii:]]/ } @{$folds_ref->[$i]};
 
+        @folds = @{$folds_ref->[$i]};
+
         # Create a line that looks like "\x{foo}\x{bar}\x{baz}" of the code
         # points that make up the fold (use the actual character if
         # printable).
         my $fold = join "", map { chr $_ =~ /[[:print:]]/a
                                             ? chr $_
                                             : sprintf "\\x{%X}", $_
-                                } @{$folds_ref->[$i]};
+                                } @folds;
         $fold = "\"$fold\"";
 
         # Skip if something else already has this fold
-        next if grep { $_ eq $fold } @folds;
+        next if grep { $_ eq $fold } @output_folds;
 
         if ($all_folds) {
-            push @folds, $fold
+            push @output_folds, $fold;
         }   # Skip if wants only all-ascii folds, and there is a non-ascii
-        elsif (! grep { chr($_) =~ /[^[:ascii:]]/ } @{$folds_ref->[$i]}) {
+        elsif (! grep { chr($_) =~ /[^[:ascii:]]/ } @folds) {
 
             # If the fold is to a cased letter, replace the entry with an
             # array which also includes its upper case.
-            my $this_fold_ref = $folds_ref->[$i];
+            my $this_fold_ref = \@folds;
             for my $j (0 .. @$this_fold_ref - 1) {
                 my $this_ord = $this_fold_ref->[$j];
                 if (chr($this_ord) =~ /\p{Cased}/) {
@@ -114,7 +118,7 @@ sub multi_char_folds ($) {
             }
 
             # Then generate all combinations of upper/lower case of the fold.
-            push @folds, gen_combinations($this_fold_ref);
+            push @output_folds, gen_combinations($this_fold_ref);
 
         }
     }
@@ -139,10 +143,9 @@ sub multi_char_folds ($) {
     #
     # No combinations of this with 's' need be added, as any of these
     # containing 's' are prohibited under /iaa.
-    push @folds, '"\x{17F}\x{17F}"' if $all_folds;
+    push @output_folds, '"\x{17F}\x{17F}"' if $all_folds;
 
-
-    return @folds;
+    return @output_folds;
 }
 
 1
