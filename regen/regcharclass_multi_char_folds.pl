@@ -45,7 +45,9 @@ sub gen_combinations ($;) {
     foreach my $j (0 .. @{$fold_ref->[$i]} - 1) {
 
         # Append its representation to what we have currently
-        my $new_string = sprintf "$string\\x{%X}", $fold_ref->[$i][$j];
+        my $new_string = $fold_ref->[$i][$j] =~ /[[:print:]]/
+                         ? ($string . chr $fold_ref->[$i][$j])
+                         : sprintf "$string\\x{%X}", $fold_ref->[$i][$j];
 
         if ($i >=  @$fold_ref - 1) {    # Final level: just return it
             push @ret, "\"$new_string\"";
@@ -83,8 +85,12 @@ sub multi_char_folds ($) {
         die sprintf("regcomp.c can't cope with a latin1 multi-char fold (found in the fold of 0x%X", $cp_ref->[$i]) if grep { $_ < 256 && chr($_) !~ /[[:ascii:]]/ } @{$folds_ref->[$i]};
 
         # Create a line that looks like "\x{foo}\x{bar}\x{baz}" of the code
-        # points that make up the fold.
-        my $fold = join "", map { sprintf "\\x{%X}", $_ } @{$folds_ref->[$i]};
+        # points that make up the fold (use the actual character if
+        # printable).
+        my $fold = join "", map { chr $_ =~ /[[:print:]]/a
+                                            ? chr $_
+                                            : sprintf "\\x{%X}", $_
+                                } @{$folds_ref->[$i]};
         $fold = "\"$fold\"";
 
         # Skip if something else already has this fold
