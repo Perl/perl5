@@ -13858,6 +13858,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             p = RExC_parse;
             len = 0;
             s = s0;
+            node_type = EXACT;
+            oldp = NULL;
+            maybe_exactfu = FOLD && (DEPENDS_SEMANTICS || LOC);
+            maybe_SIMPLE = SIMPLE;
+            requires_utf8_target = FALSE;
+            has_ss = FALSE;
+            has_micro_sign = FALSE;
 
           continue_parse:
 
