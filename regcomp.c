@@ -14343,72 +14343,76 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             }
                         }
                     }
-                    else {
+                    else { /* Here is non-UTF8. */
 
-                        /* Here is non-UTF8.  First, see if the character's
-                         * fold differs between /d and /u. */
-                        if (PL_fold[ender] != PL_fold_latin1[ender]) {
-                            maybe_exactfu = FALSE;
+                        /* The fold will be one or (rarely) two characters.
+                         * Check that there's room for at least a single one
+                         * before setting any flags, etc.  Because otherwise an
+                         * overflowing character could cause a flag to be set
+                         * even though it doesn't end up in this node.  (For
+                         * the two character fold, we check again, before
+                         * setting any flags) */
+                        if (UNLIKELY(len + 1 > max_string_len)) {
+                            overflowed = TRUE;
+                            break;
                         }
 
 #if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
    || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
                                       || UNICODE_DOT_DOT_VERSION > 0)
 
-                        /* On non-ancient Unicode versions, this includes the
-                         * multi-char fold SHARP S to 'ss' */
+                        /* On non-ancient Unicodes, check for the only possible
+                         * multi-char fold  */
+                        if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
 
-                        if (   UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)
-                            || (   isALPHA_FOLD_EQ(ender, 's')
-                                && len > 0
-                                && isALPHA_FOLD_EQ(*(s-1), 's')))
-                        {
-                            /* Here, we have one of the following:
-                             *  a)  a SHARP S.  This folds to 'ss' only under
-                             *      /u rules.  If we are in that situation,
-                             *      fold the SHARP S to 'ss'.
-                             *  b)  'ss'.  When under /u, there's nothing
-                             *      special needed to be done here.  The
-                             *      previous iteration handled the first 's',
-                             *      and this iteration will handle the second.
-                             *      If, on the otherhand it's not /u, we have
-                             *      to exclude the possibility of moving to /u,
-                             *      so that we won't generate an unwanted
-                             *      match, unless, at runtime, the target
-                             *      string is in UTF-8.
-                             * */
-
+                            /* This potential multi-char fold means the node
+                             * can't be simple (because it could match more
+                             * than a single char).  And in some cases it will
+                             * match 'ss', so set that flag */
+                            maybe_SIMPLE = 0;
                             has_ss = TRUE;
-                            maybe_exactfu = FALSE;  /* Can't generate an
-                                                       EXACTFU node (unless we
-                                                       already are in one) */
-                            if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
-                                maybe_SIMPLE = 0;
-                                if (node_type == EXACTFU) {
 
-                                    if (UNLIKELY(len + 2 > max_string_len)) {
-                                        overflowed = TRUE;
-                                        break;
-                                    }
-
-                                    *(s++) = 's';
-
-                                    /* Let the code below add in the extra 's'
-                                     * */
-                                    ender = 's';
-                                    added_len = 2;
+                            /* It can't change to be an EXACTFU (unless already
+                             * is one).  We fold it iff under /u rules. */
+                            if (node_type != EXACTFU) {
+                                maybe_exactfu = FALSE;
+                            }
+                            else {
+                                if (UNLIKELY(len + 2 > max_string_len)) {
+                                    overflowed = TRUE;
+                                    break;
                                 }
+
+                                *(s++) = 's';
+                                *(s++) = 's';
+                                added_len = 2;
+
+                                goto done_with_this_char;
                             }
                         }
+                        else if (   UNLIKELY(isALPHA_FOLD_EQ(ender, 's'))
+                                 && LIKELY(len > 0)
+                                 && UNLIKELY(isALPHA_FOLD_EQ(*(s-1), 's')))
+                        {
+                            /* Also, the sequence 'ss' is special when not
+                             * under /u.  If the target string is UTF-8, it
+                             * should match SHARP S; otherwise it won't.  So,
+                             * here we have to exclude the possibility of this
+                             * node moving to /u.*/
+                            has_ss = TRUE;
+                            maybe_exactfu = FALSE;
+                        }
 #endif
+                        /* Here, the fold will be a single character */
 
-                        else if (UNLIKELY(ender == MICRO_SIGN)) {
+                        if (UNLIKELY(ender == MICRO_SIGN)) {
                             has_micro_sign = TRUE;
                         }
+                        else if (PL_fold[ender] != PL_fold_latin1[ender]) {
 
-                        if (UNLIKELY(len + 1 > max_string_len)) {
-                            overflowed = TRUE;
-                            break;
+                            /* If the character's fold differs between /d and
+                             * /u, this can't change to be an EXACTFU node */
+                            maybe_exactfu = FALSE;
                         }
 
                         *(s++) = (DEPENDS_SEMANTICS)
@@ -14423,6 +14427,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                  : (char) toLOWER_L1(ender);
                     }
 		} /* End of adding current character to the node */
+
+              done_with_this_char:
 
                 len += added_len;
 
