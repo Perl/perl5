@@ -13796,9 +13796,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             U8 node_type = EXACT;
 
             /* Assume the node will be fully used; the excess is given back at
-             * the end.  We can't make any other length assumptions, as a byte
-             * input sequence could shrink down. */
-            Ptrdiff_t current_string_nodes = STR_SZ(max_string_len);
+             * the end.  Under /i, leave enough extra room so that we won't
+             * overflow the buffer when we fold a character which would end up
+             * overflowing the node.   We can't make any other length
+             * assumptions, as a byte input sequence could shrink down. */
+            Ptrdiff_t current_string_nodes = STR_SZ(max_string_len
+                                                 + ((! FOLD)
+                                                    ? 0
+                                                    : 1 * ((UTF)
+                                                           ? UTF8_MAXBYTES_CASE
+                        /* Max non-UTF-8 expansion is 2 */ : 2)));
 
             bool next_is_quantifier;
             char * oldp = NULL;
@@ -14311,11 +14318,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             *(s)++ = (U8) toFOLD(ender);
                         }
                         else {
-                            U8 temp[UTF8_MAXBYTES_CASE+1];
-
                             UV folded = _to_uni_fold_flags(
                                     ender,
-                                    temp,
+                                    (U8 *) s,  /* We have allocated extra space
+                                                  in 's' so can't run off the
+                                                  end */
                                     &added_len,
                                     FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
                                                     ? FOLD_FLAGS_NOMIX_ASCII
@@ -14325,7 +14332,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 break;
                             }
 
-                            Copy(temp, s, added_len, char);
                             s += added_len;
 
                             if (   folded > 255
