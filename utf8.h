@@ -430,9 +430,7 @@ uppercase/lowercase/titlecase/fold into.
 =cut
 */
 #define UTF8_MAXBYTES_CASE	                                                \
-        (UTF8_MAXBYTES >= (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF))    \
-                           ? UTF8_MAXBYTES                                      \
-                           : (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF)))
+            MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF))
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
  * encoding, or happen to be the same in both ASCII and EBCDIC (at least at
