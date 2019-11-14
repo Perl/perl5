@@ -1905,5 +1905,5 @@
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 8cffbf838b6e8ea5310e4ad2e0498ad9c1d87d4babead678081859473591317c regen/regcharclass.pl
- * c6b0b0b7e4ac4f5a57d203e84194749987477ea55b2366e3b343aadf8cc7d6b5 regen/regcharclass_multi_char_folds.pl
+ * 1ff734f7ad2d8d8fbbb2d091e5301da4b175a37fd1cbce553cd228035e98ec72 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
