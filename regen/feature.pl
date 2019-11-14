@@ -312,44 +312,44 @@ for (
     my $NAME = uc $name;
     if ($last && $first eq 'DEFAULT') { #  '>= DEFAULT' warns
 	print $h <<EOI;
-#define FEATURE_$NAME\_IS_ENABLED \\
+#define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
 	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_ENABLED_MASK(FEATURE_\L$name\E_BIT)) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOI
     }
     elsif ($last) {
 	print $h <<EOH3;
-#define FEATURE_$NAME\_IS_ENABLED \\
+#define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
 	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_\U$name\E_BIT)) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOH3
     }
     elsif ($first) {
 	print $h <<EOH4;
-#define FEATURE_$NAME\_IS_ENABLED \\
+#define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_\U$name\E_BIT)) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOH4
     }
     else {
 	print $h <<EOH5;
-#define FEATURE_$NAME\_IS_ENABLED \\
+#define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_\U$name\E_BIT) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT) \\
     )
 
 EOH5
