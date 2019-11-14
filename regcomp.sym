@@ -121,23 +121,28 @@ EXACT       EXACT,      str       ; Match this string (flags field is the length
 #* In a long string node, the U32 argument is the length, and is
 #* immediately followed by the string.
 LEXACT      EXACT,  len:str 1; Match this long string (preceded by length; flags unused).
-EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect (used so locale-related warnings can be checked for).
-EXACTF      EXACT,      str       ; Like EXACT, but match using /id rules; (string not UTF-8, not guaranteed to be folded).
-EXACTFL     EXACT,      str       ; Like EXACT, but match using /il rules; (string not likely to be folded).
-EXACTFU     EXACT,      str	  ; Like EXACT, but match using /iu rules; (string folded).
-EXACTFAA    EXACT,      str	  ; Like EXACT, but match using /iaa rules; (string folded iff pattern is UTF8; folded length <= unfolded).
+EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect (used so locale-related warnings can be checked for)
+EXACTF      EXACT,      str       ; Like EXACT, but match using /id rules; (string not UTF-8, ASCII folded; non-ASCII not)
+EXACTFL     EXACT,      str       ; Like EXACT, but match using /il rules; (string not likely to be folded)
+EXACTFU     EXACT,      str	  ; Like EXACT, but match using /iu rules; (string folded)
+
+# The reason MICRO and SHARP S aren't folded in non-UTF8 patterns is because
+# they would fold to something that requires UTF-8.  SHARP S would normally
+# fold to 'ss', but because of /aa, it instead folds to a pair of LATIN SMALL
+# LETTER LONG S characters (U+017F)
+EXACTFAA    EXACT,      str	  ; Like EXACT, but match using /iaa rules; (string folded except in non-UTF8 patterns: MICRO, SHARP S; folded length <= unfolded)
 
 # End of important relative ordering.
 
-EXACTFUP    EXACT,      str	  ; Like EXACT, but match using /iu rules; (string not UTF-8, not guaranteed to be folded; and it is Problematic).
+EXACTFUP    EXACT,      str	  ; Like EXACT, but match using /iu rules; (string not UTF-8, folded except MICRO, SHARP S: hence Problematic)
 # In order for a non-UTF-8 EXACTFAA to think the pattern is pre-folded when
 # matching a UTF-8 target string, there would have to be something like an
 # EXACTFAA_MICRO which would not be considered pre-folded for UTF-8 targets,
 # since the fold of the MICRO SIGN would not be done, and would be
 # representable in the UTF-8 target string.
 
-EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255.
-EXACTFAA_NO_TRIE  EXACT, str	  ; Like EXACT, but match using /iaa rules (string not UTF-8, not guaranteed to be folded, not currently trie-able).
+EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255
+EXACTFAA_NO_TRIE  EXACT, str	  ; Like EXACT, but match using /iaa rules (string not UTF-8, not guaranteed to be folded, not currently trie-able)
 
 
 EXACT_REQ8   EXACT,      str      ; Like EXACT, but only UTF-8 encoded targets can match
@@ -146,7 +151,7 @@ EXACTFU_REQ8 EXACT,    str        ; Like EXACTFU, but only UTF-8 encoded targets
 # One could add EXACTFAA8 and something that has the same effect for /l,
 # but these would be extremely uncommon
 
-EXACTFU_S_EDGE EXACT,   str       ; /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only).
+EXACTFU_S_EDGE EXACT,   str       ; /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only)
 
 #*Do nothing types
 
@@ -207,7 +212,6 @@ UNLESSM     BRANCHJ,    off 1 . 1 ; Fails if the following matches; non-zero fla
 SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
 IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
 GROUPP      GROUPP,     num 1     ; Whether the group matched.
-
 
 #*The heavy worker
 

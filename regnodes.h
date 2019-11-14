@@ -50,18 +50,18 @@
 #define	BRANCH                	36	/* 0x24 Match this alternative, or the next... */
 #define	EXACT                 	37	/* 0x25 Match this string (flags field is the length). */
 #define	LEXACT                	38	/* 0x26 Match this long string (preceded by length; flags unused). */
-#define	EXACTL                	39	/* 0x27 Like EXACT, but /l is in effect (used so locale-related warnings can be checked for). */
-#define	EXACTF                	40	/* 0x28 Like EXACT, but match using /id rules; (string not UTF-8, not guaranteed to be folded). */
-#define	EXACTFL               	41	/* 0x29 Like EXACT, but match using /il rules; (string not likely to be folded). */
-#define	EXACTFU               	42	/* 0x2a Like EXACT, but match using /iu rules; (string folded). */
-#define	EXACTFAA              	43	/* 0x2b Like EXACT, but match using /iaa rules; (string folded iff pattern is UTF8; folded length <= unfolded). */
-#define	EXACTFUP              	44	/* 0x2c Like EXACT, but match using /iu rules; (string not UTF-8, not guaranteed to be folded; and it is Problematic). */
-#define	EXACTFLU8             	45	/* 0x2d Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255. */
-#define	EXACTFAA_NO_TRIE      	46	/* 0x2e Like EXACT, but match using /iaa rules (string not UTF-8, not guaranteed to be folded, not currently trie-able). */
+#define	EXACTL                	39	/* 0x27 Like EXACT, but /l is in effect (used so locale-related warnings can be checked for) */
+#define	EXACTF                	40	/* 0x28 Like EXACT, but match using /id rules; (string not UTF-8, ASCII folded; non-ASCII not) */
+#define	EXACTFL               	41	/* 0x29 Like EXACT, but match using /il rules; (string not likely to be folded) */
+#define	EXACTFU               	42	/* 0x2a Like EXACT, but match using /iu rules; (string folded) */
+#define	EXACTFAA              	43	/* 0x2b Like EXACT, but match using /iaa rules; (string folded except in non-UTF8 patterns: MICRO, SHARP S; folded length <= unfolded) */
+#define	EXACTFUP              	44	/* 0x2c Like EXACT, but match using /iu rules; (string not UTF-8, folded except MICRO, SHARP S: hence Problematic) */
+#define	EXACTFLU8             	45	/* 0x2d Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255 */
+#define	EXACTFAA_NO_TRIE      	46	/* 0x2e Like EXACT, but match using /iaa rules (string not UTF-8, not guaranteed to be folded, not currently trie-able) */
 #define	EXACT_REQ8            	47	/* 0x2f Like EXACT, but only UTF-8 encoded targets can match */
 #define	LEXACT_REQ8           	48	/* 0x30 Like LEXACT, but only UTF-8 encoded targets can match */
 #define	EXACTFU_REQ8          	49	/* 0x31 Like EXACTFU, but only UTF-8 encoded targets can match */
-#define	EXACTFU_S_EDGE        	50	/* 0x32 /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only). */
+#define	EXACTFU_S_EDGE        	50	/* 0x32 /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only) */
 #define	NOTHING               	51	/* 0x33 Match empty string. */
 #define	TAIL                  	52	/* 0x34 Match empty string. Can jump here from outside. */
 #define	STAR                  	53	/* 0x35 Match this (simple) thing 0 or more times. */

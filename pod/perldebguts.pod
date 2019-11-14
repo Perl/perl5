@@ -666,29 +666,29 @@ will be lost.
  LEXACT           len:str 1  Match this long string (preceded by length;
                              flags unused).
  EXACTL           str        Like EXACT, but /l is in effect (used so
-                             locale-related warnings can be checked
-                             for).
+                             locale-related warnings can be checked for)
  EXACTF           str        Like EXACT, but match using /id rules;
-                             (string not UTF-8, not guaranteed to be
-                             folded).
+                             (string not UTF-8, ASCII folded; non-ASCII
+                             not)
  EXACTFL          str        Like EXACT, but match using /il rules;
-                             (string not likely to be folded).
+                             (string not likely to be folded)
  EXACTFU          str        Like EXACT, but match using /iu rules;
-                             (string folded).
+                             (string folded)
+
  EXACTFAA         str        Like EXACT, but match using /iaa rules;
-                             (string folded iff pattern is UTF8; folded
-                             length <= unfolded).
+                             (string folded except in non-UTF8 patterns:
+                             MICRO, SHARP S; folded length <= unfolded)
 
  EXACTFUP         str        Like EXACT, but match using /iu rules;
-                             (string not UTF-8, not guaranteed to be
-                             folded; and it is Problematic).
+                             (string not UTF-8, folded except MICRO,
+                             SHARP S: hence Problematic)
 
  EXACTFLU8        str        Like EXACTFU, but use /il, UTF-8, (string
                              is folded, and everything in it is above
-                             255.
+                             255
  EXACTFAA_NO_TRIE str        Like EXACT, but match using /iaa rules
                              (string not UTF-8, not guaranteed to be
-                             folded, not currently trie-able).
+                             folded, not currently trie-able)
 
  EXACT_REQ8       str        Like EXACT, but only UTF-8 encoded targets
                              can match
@@ -699,7 +699,7 @@ will be lost.
 
  EXACTFU_S_EDGE   str        /di rules, but nothing in it precludes /ui,
                              except begins and/or ends with [Ss];
-                             (string not UTF-8; compile-time only).
+                             (string not UTF-8; compile-time only)
 
  # Do nothing types
 
