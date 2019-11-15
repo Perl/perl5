@@ -24,7 +24,7 @@ WriteMakefile(
     ABSTRACT_FROM   => 'Storable.pm',
     ($ExtUtils::MakeMaker::VERSION > 6.45 ?
      (META_MERGE        => { resources =>
-                               { bugtracker => 'https://rt.perl.org/perlbug/' },
+                               { bugtracker => 'https://github.com/Perl/perl5/issues' },
                             provides    => {
                                 'Storable'  => {
                                     file        => 'Storable.pm',
