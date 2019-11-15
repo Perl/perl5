@@ -290,7 +290,8 @@ It you have several replacements, you can group them together like so:
  #define bat baz
  /* Replace: 0 */
 
-These replace C<foo> with C<bar>; C<bat> with C<baz>.
+These replace C<bar> with C<foo>; C<baz> with C<bat>.  NOT the other way
+around.
 
 =back
 
