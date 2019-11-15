@@ -18159,6 +18159,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 /* Likewise for 'posixes' */
                 _invlist_union(posixes, cp_list, &cp_list);
+                SvREFCNT_dec(posixes);
 
                 /* Likewise for anything else in the range that matched only
                  * under UTF-8 */
