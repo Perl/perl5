@@ -1,0 +1,39 @@
+name: smoke-windows-mingw64
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+
+    runs-on: windows-latest
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@master
+        with:
+            fetch-depth: 10
+      - name: Set up Perl build environment
+        run: |
+          choco install strawberryperl
+          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+      - name: Host perl -V
+        run: perl -V
+      - name: gcc --version
+        run: gcc --version
+      - name: Build
+        shell: cmd
+        run: |
+            cd win32
+            gmake -f GNUMakefile -j4
+      - name: Run Tests
+        shell: cmd
+        run: |
+            cd win32
+            set HARNESS_OPTIONS=j4
+            gmake -f GNUMakefile test
