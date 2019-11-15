@@ -1,0 +1,44 @@
+name: smoke-windows-cygwin-amd64
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+
+    runs-on: windows-latest
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@master
+        with:
+            fetch-depth: 10
+      - name: Set up Cygwin
+        run: |
+          choco install cygwin cyg-get
+          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
+      - name: Find out environment
+        shell: cmd
+        run: |
+          dir c:\tools\cygwin
+          path
+      - name: Configure
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
+            c:\tools\cygwin\bin\sh.exe ./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g
+      - name: Build
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
+            make -j2
+      - name: Run Tests
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
+            make -j2 test
