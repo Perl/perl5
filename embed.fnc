@@ -1878,6 +1878,8 @@ EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 Ei	|void	|invlist_extend    |NN SV* const invlist|const UV len
 Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
 EiRT	|UV	|invlist_highest|NN SV* const invlist
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
 EiRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
 EiT	|void	|invlist_iterinit|NN SV* invlist
 EiRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end

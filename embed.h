@@ -1074,14 +1074,16 @@
 #  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 #define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
-#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
 #define get_invlist_iter_addr	S_get_invlist_iter_addr
-#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
-#define invlist_highest		S_invlist_highest
 #define invlist_iterfinish	S_invlist_iterfinish
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
+#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
+#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
+#define invlist_highest		S_invlist_highest
 #define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)

@@ -161,6 +161,9 @@ S_invlist_highest(SV* const invlist)
            : array[len - 1] - 1;
 }
 
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
+
 PERL_STATIC_INLINE STRLEN*
 S_get_invlist_iter_addr(SV* invlist)
 {
