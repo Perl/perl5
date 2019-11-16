@@ -6334,7 +6334,7 @@ STATIC int	S_yywarn(pTHX_ const char *const s, U32 flags);
 #endif
 #if defined(PERL_IN_UNIVERSAL_C)
 STATIC bool	S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 flags);
-STATIC bool	S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, STRLEN len, U32 flags);
+STATIC bool	S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags);
 #endif
 #if defined(PERL_IN_UTF8_C)
 STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const int * const invmap, const unsigned int * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);

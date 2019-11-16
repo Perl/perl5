@@ -3002,7 +3002,11 @@ EdXxp	|bool	|validate_proto	|NN SV *name|NULLOK SV *proto|bool warn \
 #if defined(PERL_IN_UNIVERSAL_C)
 SG	|bool	|isa_lookup	|NULLOK HV *stash|NULLOK SV *namesv|NULLOK const char * name \
                                         |STRLEN len|U32 flags
-SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv|NULLOK SV *namesv|NULLOK const char * name|STRLEN len|U32 flags
+SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
+				     |NULLOK SV *namesv			\
+				     |NULLOK const char * name		\
+				     |const STRLEN len			\
+				     |U32 flags
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
