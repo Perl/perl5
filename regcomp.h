@@ -160,7 +160,7 @@ struct regnode_lstring { /* Constructed this way to keep the string aligned. */
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 str_len;    /* Only 16 bits allowed before would overflow 'next_off' */
+    U32 str_len;    /* Only 18 bits allowed before would overflow 'next_off' */
     char string[1];
 };
 
