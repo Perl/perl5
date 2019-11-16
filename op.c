@@ -7740,8 +7740,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         for (i = 0; i < len; i++) {
             STATIC_ASSERT_DECL(TR_SPECIAL_HANDLING == TR_DELETE);
-            short upper = i >= len - 1 ? 256 : t_array[i+1];
-            short to = r_map[i];
+            short upper = i >= len - 1 ? 256 : (short) t_array[i+1];
+            short to = (short) r_map[i];
             short j;
             bool do_increment = TRUE;
 
@@ -7750,7 +7750,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
             /* Set up the map */
             if (to == (short) TR_SPECIAL_HANDLING && ! del) {
-                to = final_map;
+                to = (short) final_map;
                 do_increment = FALSE;
             }
             else if (to < 0) {
@@ -7759,7 +7759,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
             /* Create a map for everything in this range.  The value increases
              * except for the special cases */
-            for (j = t_array[i]; j < upper; j++) {
+            for (j = (short) t_array[i]; j < upper; j++) {
                 tbl->map[j] = to;
                 if (do_increment) to++;
             }

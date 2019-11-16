@@ -430,7 +430,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
          * this particular input string will grow.  However, the compilation
          * calculated the maximum expansion possible.  Use that to allocale
          * based on the worst case scenario. */
-	Newx(d, len * max_expansion + 1, U8);
+	Newx(d, (STRLEN) (len * max_expansion + 1 + 1), U8);
 	d0 = d;
     }
 
@@ -464,7 +464,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
 
         if (to == (UV) TR_UNLISTED) { /* Just copy the unreplaced character */
             if (UVCHR_IS_INVARIANT(from) || ! out_is_utf8) {
-                *d++ = from;
+                *d++ = (U8) from;
             }
             else if (SvUTF8(sv)) {
                 Move(s, d, s_len, U8);
@@ -511,7 +511,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
                     matches = 0;
                     goto restart;
                 }
-                *d++ = to;
+                *d++ = (U8) to;
             }
         }
 
