@@ -2152,7 +2152,7 @@ EOP
         "Check TRIE does not overwrite EXACT following NOTHING at start - RT #111842";
 
     {
-        my $single = ":";
+        my $single = "z";
         my $upper = "\x{390}";  # Fold is 3 chars.
         my $multi = CORE::fc($upper);
 
