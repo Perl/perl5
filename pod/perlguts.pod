@@ -2714,8 +2714,8 @@ compiled with C++, to maintain compliance with its standard.
 Note that there are different "long doubles": Perl will use
 whatever the compiler has.
 
-If you are printing addresses of pointers, use UVxf combined
-with PTR2UV(), do not use %lx or %p.
+If you are printing addresses of pointers, use %p or UVxf combined
+with PTR2UV().
 
 =head2 Formatted Printing of SVs
 
