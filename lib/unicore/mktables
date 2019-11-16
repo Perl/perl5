@@ -15014,10 +15014,6 @@ sub compile_perl() {
                Description =>
                    "Code points that are in some multiple character fold",
     );
-    my $non_final_fold = $perl->add_match_table(
-               "_Perl_Non_Final_Folds",
-               Description => "Code points that are in some multiple character fold, but not in the final position",
-    );
     if ($v_version lt v3.0.1) {
         push @tables_that_may_be_empty, '_Perl_Folds_To_Multi_Char',
                                         '_Perl_Is_In_Multi_Char_Fold',
@@ -15057,8 +15053,6 @@ sub compile_perl() {
 
             if ($folded_count > 1) {
                 $in_multi_fold->add_range($cp, $cp);
-                next if $i == $folded_count;    # In final position
-                $non_final_fold->add_range($cp, $cp);
             }
         }
 

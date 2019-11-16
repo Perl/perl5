@@ -362,8 +362,6 @@
 #define PL_GLB_invlist		(my_vars->GLB_invlist)
 #define PL_Latin1		(my_vars->GLatin1)
 #define PL_GLatin1		(my_vars->GLatin1)
-#define PL_NonFinalFold		(my_vars->GNonFinalFold)
-#define PL_GNonFinalFold	(my_vars->GNonFinalFold)
 #define PL_Posix_ptrs		(my_vars->GPosix_ptrs)
 #define PL_GPosix_ptrs		(my_vars->GPosix_ptrs)
 #define PL_Private_Use		(my_vars->GPrivate_Use)

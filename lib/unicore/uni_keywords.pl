@@ -12,12 +12,11 @@
     '_perl_idstart' => 1159,
     '_perl_is_in_multi_char_fold' => 1160,
     '_perl_nchar' => 1161,
-    '_perl_non_final_folds' => 1162,
-    '_perl_patws' => 1163,
-    '_perl_problematic_locale_foldeds_start' => 1164,
-    '_perl_problematic_locale_folds' => 1165,
-    '_perl_quotemeta' => 1166,
-    '_perl_surrogate' => 1167,
+    '_perl_patws' => 1162,
+    '_perl_problematic_locale_foldeds_start' => 1163,
+    '_perl_problematic_locale_folds' => 1164,
+    '_perl_quotemeta' => 1165,
+    '_perl_surrogate' => 1166,
     'adlm' => 1,
     'aegeannumbers' => 2,
     'age=10' => 3,
@@ -1261,7 +1260,7 @@
 # 78e2600e24fa7d5ab62117de50b382f8b31b08401c37a0782c38dacb340b64e7 lib/unicore/extracted/DLineBreak.txt
 # 1bde4ad73e271c6349fbd1972e54f38bba5cc1900c28f678e79b9e8909b31793 lib/unicore/extracted/DNumType.txt
 # 6278722699123f3890e4b1cc42011e96d8960e4958a3b93484361530983d2611 lib/unicore/extracted/DNumValues.txt
-# 0f310085a69b19f991fa1d8cf6e066d6c89d840b6238ec3c7c6e1059dc5dbe8b lib/unicore/mktables
+# 08071cd168b1ac72bf01f13a82c4d0470a391e2bdd0b706e9fe20ab17cc861c8 lib/unicore/mktables
 # a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
 # 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
 # e9283c761c5a95e3379384ca47c13a284f08d743c2be6e5091f1152b1b6b7a37 regen/mk_PL_charclass.pl

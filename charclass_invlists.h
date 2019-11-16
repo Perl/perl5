@@ -184033,220 +184033,6 @@ static const UV UNI__PERL_IS_IN_MULTI_CHAR_FOLD_invlist[] = {  /* for EBCDIC 037
 
 #  endif	/* EBCDIC 037 */
 
-#  if 'A' == 65 /* ASCII/Latin1 */
-
-static const UV UNI__PERL_NON_FINAL_FOLDS_invlist[] = {  /* for ASCII/Latin1 */
-	57,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x61,
-	0x62,
-	0x66,
-	0x67,
-	0x68,
-	0x6B,
-	0x73,
-	0x75,
-	0x77,
-	0x78,
-	0x79,
-	0x7A,
-	0x2BC,
-	0x2BD,
-	0x308,
-	0x309,
-	0x313,
-	0x314,
-	0x342,
-	0x343,
-	0x3AC,
-	0x3AD,
-	0x3AE,
-	0x3AF,
-	0x3B1,
-	0x3B2,
-	0x3B7,
-	0x3B8,
-	0x3B9,
-	0x3BA,
-	0x3C1,
-	0x3C2,
-	0x3C5,
-	0x3C6,
-	0x3C9,
-	0x3CA,
-	0x3CE,
-	0x3CF,
-	0x565,
-	0x566,
-	0x574,
-	0x575,
-	0x57E,
-	0x57F,
-	0x1F00,
-	0x1F08,
-	0x1F20,
-	0x1F28,
-	0x1F60,
-	0x1F68,
-	0x1F70,
-	0x1F71,
-	0x1F74,
-	0x1F75,
-	0x1F7C,
-	0x1F7D
-};
-
-#  endif	/* ASCII/Latin1 */
-
-#  if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
-
-static const UV UNI__PERL_NON_FINAL_FOLDS_invlist[] = {  /* for EBCDIC 1047 */
-	59,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x81,
-	0x82,
-	0x86,
-	0x87,
-	0x88,
-	0x8A,
-	0x91,
-	0x92,
-	0xA2,
-	0xA4,
-	0xA6,
-	0xA7,
-	0xA8,
-	0xA9,
-	0x2BC,
-	0x2BD,
-	0x308,
-	0x309,
-	0x313,
-	0x314,
-	0x342,
-	0x343,
-	0x3AC,
-	0x3AD,
-	0x3AE,
-	0x3AF,
-	0x3B1,
-	0x3B2,
-	0x3B7,
-	0x3B8,
-	0x3B9,
-	0x3BA,
-	0x3C1,
-	0x3C2,
-	0x3C5,
-	0x3C6,
-	0x3C9,
-	0x3CA,
-	0x3CE,
-	0x3CF,
-	0x565,
-	0x566,
-	0x574,
-	0x575,
-	0x57E,
-	0x57F,
-	0x1F00,
-	0x1F08,
-	0x1F20,
-	0x1F28,
-	0x1F60,
-	0x1F68,
-	0x1F70,
-	0x1F71,
-	0x1F74,
-	0x1F75,
-	0x1F7C,
-	0x1F7D
-};
-
-#  endif	/* EBCDIC 1047 */
-
-#  if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
-
-static const UV UNI__PERL_NON_FINAL_FOLDS_invlist[] = {  /* for EBCDIC 037 */
-	59,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x81,
-	0x82,
-	0x86,
-	0x87,
-	0x88,
-	0x8A,
-	0x91,
-	0x92,
-	0xA2,
-	0xA4,
-	0xA6,
-	0xA7,
-	0xA8,
-	0xA9,
-	0x2BC,
-	0x2BD,
-	0x308,
-	0x309,
-	0x313,
-	0x314,
-	0x342,
-	0x343,
-	0x3AC,
-	0x3AD,
-	0x3AE,
-	0x3AF,
-	0x3B1,
-	0x3B2,
-	0x3B7,
-	0x3B8,
-	0x3B9,
-	0x3BA,
-	0x3C1,
-	0x3C2,
-	0x3C5,
-	0x3C6,
-	0x3C9,
-	0x3CA,
-	0x3CE,
-	0x3CF,
-	0x565,
-	0x566,
-	0x574,
-	0x575,
-	0x57E,
-	0x57F,
-	0x1F00,
-	0x1F08,
-	0x1F20,
-	0x1F28,
-	0x1F60,
-	0x1F68,
-	0x1F70,
-	0x1F71,
-	0x1F74,
-	0x1F75,
-	0x1F7C,
-	0x1F7D
-};
-
-#  endif	/* EBCDIC 037 */
-
 static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist[] = {  /* for all charsets */
 	26,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -390476,7 +390262,6 @@ typedef enum {
 	UNI__PERL_IDSTART,
 	UNI__PERL_IS_IN_MULTI_CHAR_FOLD,
 	UNI__PERL_NCHAR,
-	UNI__PERL_NON_FINAL_FOLDS,
 	UNI__PERL_PATWS,
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START,
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDS,
@@ -391649,7 +391434,6 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI__PERL_IDSTART_invlist,
 	UNI__PERL_IS_IN_MULTI_CHAR_FOLD_invlist,
 	UNI__PERL_NCHAR_invlist,
-	UNI__PERL_NON_FINAL_FOLDS_invlist,
 	UNI__PERL_PATWS_invlist,
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist,
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist,
@@ -395365,7 +395149,7 @@ static const U8 WB_table[23][23] = {
  * 78e2600e24fa7d5ab62117de50b382f8b31b08401c37a0782c38dacb340b64e7 lib/unicore/extracted/DLineBreak.txt
  * 1bde4ad73e271c6349fbd1972e54f38bba5cc1900c28f678e79b9e8909b31793 lib/unicore/extracted/DNumType.txt
  * 6278722699123f3890e4b1cc42011e96d8960e4958a3b93484361530983d2611 lib/unicore/extracted/DNumValues.txt
- * 0f310085a69b19f991fa1d8cf6e066d6c89d840b6238ec3c7c6e1059dc5dbe8b lib/unicore/mktables
+ * 08071cd168b1ac72bf01f13a82c4d0470a391e2bdd0b706e9fe20ab17cc861c8 lib/unicore/mktables
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * e9283c761c5a95e3379384ca47c13a284f08d743c2be6e5091f1152b1b6b7a37 regen/mk_PL_charclass.pl
