@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 973;  # Update this when adding/deleting tests.
+plan tests => 1005;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1430,12 +1430,15 @@ EOP
     {   # Test that it avoids spllitting a multi-char fold across nodes.
         # These all fold to things that are like 'ss', which, if split across
         # nodes could fail to match a single character that folds to the
-        # combination.
+        # combination.  1F0 byte expands when folded;
         my $utf8_locale = find_utf8_ctype_locale();
-        for my $char('F', $sharp_s, "\x{FB00}") {
+        for my $char('F', $sharp_s, "\x{1F0}", "\x{FB00}") {
             my $length = 260;    # Long enough to overflow an EXACTFish regnode
             my $p = $char x $length;
-            my $s = ($char eq $sharp_s) ? 'ss' : 'ff';
+            my $s = ($char eq $sharp_s) ? 'ss'
+                                        : $char eq "\x{1F0}"
+                                          ? "j\x{30c}"
+                                          : 'ff';
             $s = $s x $length;
             for my $charset (qw(u d l aa)) {
                 for my $utf8 (0..1) {

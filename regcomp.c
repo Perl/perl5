@@ -14570,13 +14570,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 goto continue_parse;
             }
-            else if (! LOC) {  /* XXX shouldn't /l assume could be a UTF-8
-                                locale, and prepare for that? */
+            else if (FOLD) {
                 bool splittable = FALSE;
                 bool backed_up = FALSE;
-                char * e = s;
-
-                assert(FOLD);
+                char * e;
+                char * s_start;
 
                 /* Here is /i.  Running out of room creates a problem if we are
                  * folding, and the split happens in the middle of a
@@ -14612,6 +14610,132 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  *            character beyond 'ender'.
                  *  oldp      points to the beginning byte in the input of
                  *            'ender'.
+                 *
+                 * In the case of /il, we haven't folded anything that could be
+                 * affected by the locale.  That means only above-Latin1
+                 * characters that fold to other above-latin1 characters get
+                 * folded at compile time.  To check where a good place to
+                 * split nodes is, everything in it will have to be folded.
+                 * The boolean 'maybe_exactfu' keeps track in /il if there are
+                 * any unfolded characters in the node. */
+                bool need_to_fold_loc = LOC && ! maybe_exactfu;
+
+                /* If we do need to fold the node, we need a place to store the
+                 * folded copy, and a way to map back to the unfolded original
+                 * */
+                char * locfold_buf;
+                Size_t * loc_correspondence;
+
+                if (! need_to_fold_loc) {   /* The normal case.  Just
+                                               initialize to the actual node */
+                    e = s;
+                    s_start = s0;
+                    s = old_old_s;  /* Point to the beginning of the final char
+                                       that fits in the node */
+                }
+                else {
+
+                    /* Here, we have filled a /il node, and there are unfolded
+                     * characters in it.  If the runtime locale turns out to be
+                     * UTF-8, there are possible multi-character folds, just
+                     * like when not under /l.  The node hence can't terminate
+                     * in the middle of such a fold.  To determine this, we
+                     * have to create a folded copy of this node.  That means
+                     * reparsing the node, folding everything assuming a UTF-8
+                     * locale.  (If at runtime it isn't such a locale, the
+                     * actions here wouldn't have been necessary, but we have
+                     * to assume the worst case.)  If we find we need to back
+                     * off the folded string, we do so, and then map that
+                     * position back to the original unfolded node, which then
+                     * gets output, truncated at that spot */
+
+                    char * redo_p = RExC_parse;
+                    char * redo_e;
+                    char * old_redo_e;
+
+                    /* Allow enough space assuming a single byte input folds to
+                     * a single byte output, plus assume that the two unparsed
+                     * characters (that we may need) fold to the largest number
+                     * of bytes possible, plus extra for one more worst case
+                     * scenario.  In the loop below, if we start eating into
+                     * that final spare space, we enlarge this initial space */
+                    Size_t size = max_string_len + (3 * UTF8_MAXBYTES_CASE) + 1;
+
+                    Newxz(locfold_buf, size, char);
+                    Newxz(loc_correspondence, size, Size_t);
+
+                    /* Redo this node's parse, folding into 'locfold_buf' */
+                    redo_p = RExC_parse;
+                    redo_e = locfold_buf;
+                    while (redo_p <= oldp) {
+
+                        old_redo_e = redo_e;
+                        loc_correspondence[redo_e - locfold_buf]
+                                                        = redo_p - RExC_parse;
+
+                        if (UTF) {
+                            Size_t added_len;
+
+                            (void) _to_utf8_fold_flags((U8 *) redo_p,
+                                                       (U8 *) RExC_end,
+                                                       (U8 *) redo_e,
+                                                       &added_len,
+                                                       FOLD_FLAGS_FULL);
+                            redo_e += added_len;
+                            redo_p += UTF8SKIP(redo_p);
+                        }
+                        else {
+
+                            /* Note that if this code is run on some ancient
+                             * Unicode versions, SHARP S doesn't fold to 'ss',
+                             * but rather than clutter the code with #ifdef's,
+                             * as is done above, we ignore that possibility.
+                             * This is ok because this code doesn't affect what
+                             * gets matched, but merely where the node gets
+                             * split */
+                            if (UCHARAT(redo_p) != LATIN_SMALL_LETTER_SHARP_S) {
+                                *redo_e++ = toLOWER_L1(UCHARAT(redo_p));
+                            }
+                            else {
+                                *redo_e++ = 's';
+                                *redo_e++ = 's';
+                            }
+                            redo_p++;
+                        }
+
+
+                        /* If we're getting so close to the end that a
+                         * worst-case fold in the next character would cause us
+                         * to overflow, increase, assuming one byte output byte
+                         * per one byte input one, plus room for another worst
+                         * case fold */
+                        if (   redo_p <= oldp
+                            && redo_e > locfold_buf + size
+                                                    - (UTF8_MAXBYTES_CASE + 1))
+                        {
+                            Size_t new_size = size
+                                            + (oldp - redo_p)
+                                            + UTF8_MAXBYTES_CASE + 1;
+                            Ptrdiff_t e_offset = redo_e - locfold_buf;
+
+                            Renew(locfold_buf, new_size, char);
+                            Renew(loc_correspondence, new_size, Size_t);
+                            size = new_size;
+
+                            redo_e = locfold_buf + e_offset;
+                        }
+                    }
+
+                    /* Set so that things are in terms of the folded, temporary
+                     * string */
+                    s = old_redo_e;
+                    s_start = locfold_buf;
+                    e = redo_e;
+
+                }
+
+                /* Here, we have 's', 's_start' and 'e' set up to point to the
+                 * input that goes into the node, folded.
                  *
                  * If the final character of the node and the fold of ender
                  * form the first two characters of a three character fold, we
@@ -14652,11 +14776,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * and try again.
                  *
                  * Otherwise, the node can be split at the current position.
-                 */
-                s = old_old_s;  /* Point to the beginning of the final char
-                                   that fits in the node */
-
-                /* The same logic is used for UTF-8 patterns and not */
+                 *
+                 * The same logic is used for UTF-8 patterns and not */
                 if (UTF) {
                     Size_t added_len;
 
@@ -14695,7 +14816,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * drop down to try at that position */
                         if (isPUNCT(*p)) {
                             s = (char *) utf8_hop_back((U8 *) s, -1,
-                                       (U8 *) s0);
+                                       (U8 *) s_start);
                             backed_up = TRUE;
                         }
                         else {
@@ -14727,7 +14848,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * either case would break apart a fold */
                     do {
                         char *prev_s = (char *) utf8_hop_back((U8 *) s, -1,
-                                                                    (U8 *) s0);
+                                                            (U8 *) s_start);
 
                         /* If is a multi-char fold, can't split here.  Backup
                          * one char and try again */
@@ -14741,11 +14862,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * three character fold starting at the character
                          * before s, we can't split either before or after s.
                          * Backup two chars and try again */
-                        if (   LIKELY(s > s0)
+                        if (   LIKELY(s > s_start)
                             && UNLIKELY(is_THREE_CHAR_FOLD_utf8_safe(prev_s, e)))
                         {
                             s = prev_s;
-                            s = (char *) utf8_hop_back((U8 *) s, -1, (U8 *) s0);
+                            s = (char *) utf8_hop_back((U8 *) s, -1, (U8 *) s_start);
                             backed_up = TRUE;
                             continue;
                         }
@@ -14755,7 +14876,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         splittable = TRUE;
                         break;
 
-                    } while (s > s0); /* End of loops backing up through the node */
+                    } while (s > s_start); /* End of loops backing up through the node */
 
                     /* Here we either couldn't find a place to split the node,
                      * or else we broke out of the loop setting 'splittable' to
@@ -14804,7 +14925,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             continue;
                         }
 
-                        if (   LIKELY(s > s0)
+                        if (   LIKELY(s > s_start)
                             && UNLIKELY(is_THREE_CHAR_FOLD_latin1_safe(s - 1, e)))
                         {
                             s -= 2;
@@ -14815,7 +14936,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         splittable = TRUE;
                         break;
 
-                    } while (s > s0);
+                    } while (s > s_start);
 
                     if (splittable) {
                         s++;
@@ -14829,8 +14950,27 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                    /* If we did find a place to split, reparse the entire node
                     * stopping where we have calculated. */
                     if (splittable) {
-                        upper_fill = s - s0;
+
+                       /* If we created a temporary folded string under /l, we
+                        * have to map that back to the original */
+                        if (need_to_fold_loc) {
+                            upper_fill = loc_correspondence[s - s_start];
+                            Safefree(locfold_buf);
+                            Safefree(loc_correspondence);
+
+                            if (upper_fill == 0) {
+                                FAIL2("panic: loc_correspondence[%d] is 0",
+                                      (int) (s - s_start));
+                            }
+                        }
+                        else {
+                            upper_fill = s - s0;
+                        }
                         goto reparse;
+                    }
+                    else if (need_to_fold_loc) {
+                        Safefree(locfold_buf);
+                        Safefree(loc_correspondence);
                     }
 
                     /* Here the node consists entirely of non-final multi-char
