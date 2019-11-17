@@ -1451,8 +1451,10 @@ EOP
                             if (! defined $locale) {
                                 skip "No UTF-8 locale", 2;
                             }
+                            skip "Can't test in miniperl",2
+                              if is_miniperl();
 
-                            use POSIX;
+                            require POSIX;
                             POSIX::setlocale(&LC_CTYPE, $locale);
                         }
 
