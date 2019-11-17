@@ -1,0 +1,25 @@
+name: smoke-information
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+env:
+    PERL_SKIP_TTY_TEST: 1
+
+jobs:
+  perl:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+            fetch-depth: 10
+      - name: Involved authors
+        run: |
+            if \! -z "${GITHUB_HEAD_REF}" ; then git log --pretty=format:"Author: %an <%ae>" ${GITHUB_BASE_REF}..${GITHUB_HEAD_REF}; fi
