@@ -33,10 +33,10 @@ jobs:
         run: |
             call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
             cd win32
-            nmake CCTYPE=MSVC100FREE WIN64=undef
+            nmake CCTYPE=MSVC100 WIN64=undef
       - name: Run Tests
         shell: cmd
         run: |
             call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
             cd win32
-            nmake CCTYPE=MSVC100FREE WIN64=undef test
+            nmake CCTYPE=MSVC100 WIN64=undef test
