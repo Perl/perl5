@@ -22,4 +22,7 @@ jobs:
             fetch-depth: 10
       - name: Involved authors
         run: |
-            if \! -z "${GITHUB_HEAD_REF}" ; then git log --pretty=format:"Author: %an <%ae>" ${GITHUB_BASE_REF}..${GITHUB_HEAD_REF}; fi
+            if [ -n "${GITHUB_HEAD_REF}" ]; then
+                echo "Pull request"
+                git log --pretty=format:"Author: %an <%ae>" ${GITHUB_BASE_REF}..${GITHUB_HEAD_REF}
+            fi
