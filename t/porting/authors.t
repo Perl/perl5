@@ -24,6 +24,11 @@ if ( $ENV{TRAVIS} && defined $ENV{TRAVIS_COMMIT_RANGE} ) {
 	#	all the more a pull request should not be impacted by blead being incorrect
 	$revision_range = $ENV{TRAVIS_COMMIT_RANGE};
 }
+elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
+    # Same as above, except for Github Actions
+    # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
+	$revision_range = join '..', $ENV{GITHUB_BASE_REF}, $ENV{GITHUB_HEAD_REF};
+}
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
 print qx{git log --pretty=format:"Author: %an <%ae>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
