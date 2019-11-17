@@ -33,10 +33,10 @@ jobs:
         shell: cmd
         run: |
             cd win32
-            gmake -f GNUMakefile -j4
+            gmake -f GNUMakefile -j2
       - name: Run Tests
         shell: cmd
         run: |
             cd win32
-            set HARNESS_OPTIONS=j4
+            set HARNESS_OPTIONS=j2
             gmake -f GNUMakefile test
