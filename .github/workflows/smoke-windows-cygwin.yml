@@ -27,6 +27,11 @@ jobs:
         run: |
           dir c:\tools\cygwin
           path
+      - name: Check out again, using Cygwin git, to reset file permissions
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
+            git checkout --force
       - name: Configure
         shell: cmd
         run: |
