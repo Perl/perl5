@@ -105,7 +105,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	SvUTF8_on(sv);
 	SvSETMAGIC(sv);
     }
-    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %zu\n",
                                           __FILE__, __LINE__, matches));
     DEBUG_y(sv_dump(sv));
     return matches;
@@ -159,7 +159,7 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	}
     }
 
-    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: count returning %" IVdf "\n",
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: count returning %zu\n",
                                           __FILE__, __LINE__, matches));
     return matches;
 }
@@ -312,7 +312,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 	SvUTF8_on(sv);
     }
     SvSETMAGIC(sv);
-    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %zu\n",
                                           __FILE__, __LINE__, matches));
     DEBUG_y(sv_dump(sv));
     return matches;
@@ -386,7 +386,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
         s += s_len;
     }
 
-    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %zu\n",
                                           __FILE__, __LINE__, matches));
     return matches;
 }
@@ -573,7 +573,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     }
     SvSETMAGIC(sv);
 
-    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %" IVdf "\n",
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: returning %zu\n",
                                           __FILE__, __LINE__, matches));
     DEBUG_y(sv_dump(sv));
     return matches;

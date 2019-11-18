@@ -6927,10 +6927,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         SV * inverted_tlist = _new_invlist(tlen);
         Size_t temp_len;
 
-        DEBUG_y(PerlIO_printf(Perl_debug_log, "%d: tstr=%s\n",
-                              __LINE__, _byte_dump_string(t, tend - t, 0)));
-        DEBUG_y(PerlIO_printf(Perl_debug_log, "rstr=%s\n",
-                                        _byte_dump_string(r, rend - r, 0)));
+        DEBUG_y(PerlIO_printf(Perl_debug_log,
+                    "%s: %d: tstr before inversion=\n%s\n",
+                    __FILE__, __LINE__, _byte_dump_string(t, tend - t, 0)));
 
         while (t < tend) {
 
@@ -6968,7 +6967,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         /* The inversion list is done; now invert it */
         _invlist_invert(inverted_tlist);
-        DEBUG_y(sv_dump(inverted_tlist));
 
         /* Now go through the inverted list and create a new tstr for the rest
          * of the routine to use.  Since the UTF-8 version can have ranges, and
@@ -7642,9 +7640,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     r_map[i+2] = TR_UNLISTED;
                 }
                 DEBUG_yv(PerlIO_printf(Perl_debug_log,
-                            "After iteration: span=%" IVdf ", t_range_count=%"
-                            IVdf ", r_range_count=%" IVdf "\n",
-                            span, t_range_count, r_range_count));
+                          "After iteration: span=%" UVuf ", t_range_count=%"
+                          UVuf " r_range_count=%" UVuf "\n",
+                          span, t_range_count, r_range_count));
                 DEBUG_yv(invmap_dump(t_invlist, r_map));
             } /* End of this chunk needs to be processed */
 
@@ -7855,6 +7853,16 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #endif
 
     }
+
+    DEBUG_y(PerlIO_printf(Perl_debug_log,
+            "/d=%d, /s=%d, /c=%d, identical=%d, grows=%d,"
+            " use_svop=%d, can_force_utf8=%d,\nexpansion=%g\n",
+            del, squash, complement,
+            cBOOL(o->op_private & OPpTRANS_IDENTICAL),
+            cBOOL(o->op_private & OPpTRANS_USE_SVOP),
+            cBOOL(o->op_private & OPpTRANS_GROWS),
+            cBOOL(o->op_private & OPpTRANS_CAN_FORCE_UTF8),
+            max_expansion));
 
     Safefree(r_map);
 
