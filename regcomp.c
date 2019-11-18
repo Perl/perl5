@@ -357,7 +357,7 @@ struct RExC_state_t {
 /* Change from /d into /u rules, and restart the parse.  RExC_uni_semantics is
  * a flag that indicates we need to override /d with /u as a result of
  * something in the pattern.  It should only be used in regards to calling
- * set_regex_charset() or get_regex_charse() */
+ * set_regex_charset() or get_regex_charset() */
 #define REQUIRE_UNI_RULES(flagp, restart_retval)                            \
     STMT_START {                                                            \
             if (DEPENDS_SEMANTICS) {                                        \
@@ -18963,7 +18963,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * convert to UTF-8 if not already there */
                 if (value > 255) {
                     if (! UTF) {
-
                         SvREFCNT_dec(cp_list);;
                         REQUIRE_UTF8(flagp);
                     }
@@ -18984,17 +18983,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 len = (UTF) ? UVCHR_SKIP(value) : 1;
 
-                    ret = regnode_guts(pRExC_state, op, len, "exact");
-                    FILL_NODE(ret, op);
-                    RExC_emit += 1 + STR_SZ(len);
-                    setSTR_LEN(REGNODE_p(ret), len);
-                    if (len == 1) {
-                        *STRING(REGNODE_p(ret)) = (U8) value;
-                    }
-                    else {
-                        uvchr_to_utf8((U8 *) STRING(REGNODE_p(ret)), value);
-                    }
-                    goto not_anyof;
+                ret = regnode_guts(pRExC_state, op, len, "exact");
+                FILL_NODE(ret, op);
+                RExC_emit += 1 + STR_SZ(len);
+                setSTR_LEN(REGNODE_p(ret), len);
+                if (len == 1) {
+                    *STRINGs(REGNODE_p(ret)) = (U8) value;
+                }
+                else {
+                    uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(ret)), value);
+                }
+                goto not_anyof;
             }
         }
 
@@ -19411,7 +19410,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
                   (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
-                   ? listsv : NULL,
+                   ? listsv
+                   : NULL,
                   only_utf8_locale_list);
     return ret;
 
@@ -19880,7 +19880,7 @@ STATIC regnode_offset
 S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size, const char* const name)
 {
     /* Allocate a regnode for 'op', with 'extra_size' extra (smallest) regnode
-     * equivalents space.  It aligns and increments RExC_size and RExC_emit
+     * equivalents space.  It aligns and increments RExC_size
      *
      * It returns the regnode's offset into the regex engine program */
 
