@@ -18499,7 +18499,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     if (optimizable) {
         PERL_UINT_FAST8_T i;
-        Size_t partial_cp_count = 0;
+        UV partial_cp_count = 0;
         UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
         UV   end[MAX_FOLD_FROMS+1] = { 0 };
         bool single_range = FALSE;
