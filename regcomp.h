@@ -465,7 +465,7 @@ struct regnode_ssc {
  *  2)  A subset of item 1) is if all possible code points outside the bitmap
  *      match.  This is a common occurrence when the class is complemented,
  *      like /[^ij]/.  Therefore a bit is reserved to indicate this,
- *      rather than having a more expensive inversion list created,
+ *      rather than having an inversion list created,
  *      ANYOF_MATCHES_ALL_ABOVE_BITMAP.
  *  3)  Under /d rules, it can happen that code points that are in the upper
  *      latin1 range (\x80-\xFF or their equivalents on EBCDIC platforms) match
