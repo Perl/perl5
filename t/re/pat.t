@@ -22,7 +22,6 @@ BEGIN {
     set_up_inc('../lib', '.', '../ext/re');
 }
 
-skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
 plan tests => 1011;  # Update this when adding/deleting tests.
@@ -1486,7 +1485,9 @@ EOP
         }
     }
 
+    SKIP:
     {
+        skip "no re debug", 5 if is_miniperl;
         my $s = ("0123456789" x 26214) x 2; # Should fill 2 LEXACTS, plus
                                             # small change
         my $pattern_prefix = "use utf8; use re qw(Debug COMPILE)";
@@ -1813,9 +1814,10 @@ EOP
                 "test that we handle things like m/\\888888888/ without infinite loops" );
         }
 
+        SKIP:
         {   # Test that we handle some malformed UTF-8 without looping [perl
             # #123562]
-
+            skip "no Encode", 1 if is_miniperl;
             my $code='
                 BEGIN{require q(./test.pl);}
                 use Encode qw(_utf8_on);
