@@ -386,6 +386,14 @@ over 900 lines, and consists of a single C<switch> statement, all of whose
 C<case> groups are independent. This should be much easier to understand and
 maintain.
 
+=item *
+
+The OS-level signal handlers and type (Sighandler_t) used by the perl core
+were declared as having three parameters, but the OS was always told to
+call them with one argument. This has been fixed by declaring them to have
+one parameter. See the merge commit C<v5.31.5-346-g116e19abbf> for full
+details.
+
 =back
 
 =head1 Selected Bug Fixes
