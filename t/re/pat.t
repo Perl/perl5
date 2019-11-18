@@ -1442,42 +1442,44 @@ EOP
             $s = $s x $length;
             for my $charset (qw(u d l aa)) {
                 for my $utf8 (0..1) {
-                  SKIP:
                     for my $locale ('C', $utf8_locale) {
-                        skip "test skipped for non-C locales", 2
+                      SKIP:
+                        {
+                            skip "test skipped for non-C locales", 2
                                     if $charset ne 'l'
                                     && (! defined $locale || $locale ne 'C');
-                        if ($charset eq 'l') {
-                            if (! defined $locale) {
-                                skip "No UTF-8 locale", 2;
+                            if ($charset eq 'l') {
+                                if (! defined $locale) {
+                                    skip "No UTF-8 locale", 2;
+                                }
+                                skip "Can't test in miniperl",2
+                                  if is_miniperl();
+
+                                require POSIX;
+                                POSIX::setlocale(&LC_CTYPE, $locale);
                             }
-                            skip "Can't test in miniperl",2
-                              if is_miniperl();
 
-                            require POSIX;
-                            POSIX::setlocale(&LC_CTYPE, $locale);
+                            my $pat = $p;
+                            utf8::upgrade($pat) if $utf8;
+                            my $should_pass =
+                              (    $charset eq 'u'
+                                   || ($charset eq 'd' && $utf8)
+                                   || ($charset eq 'd' && (   $char =~ /[[:ascii:]]/
+                                                              || ord $char > 255))
+                                   || ($charset eq 'aa' && $char =~ /[[:ascii:]]/)
+                                   || ($charset eq 'l' && $locale ne 'C')
+                                   || ($charset eq 'l' && $char =~ /[[:ascii:]]/)
+                                  );
+                            my $name = "(?i$charset), utf8=$utf8, locale=$locale,"
+                              . " char=" . sprintf "%x", ord $char;
+                            no warnings 'locale';
+                            is (eval " '$s' =~ qr/(?i$charset)$pat/;",
+                                $should_pass, $name);
+                            fail "$name: $@" if $@;
+                            is (eval " 'a$s' =~ qr/(?i$charset)a$pat/;",
+                                $should_pass, "extra a, $name");
+                            fail "$name: $@" if $@;
                         }
-
-                        my $pat = $p;
-                        utf8::upgrade($pat) if $utf8;
-                        my $should_pass =
-                            (    $charset eq 'u'
-                             || ($charset eq 'd' && $utf8)
-                             || ($charset eq 'd' && (   $char =~ /[[:ascii:]]/
-                                                     || ord $char > 255))
-                             || ($charset eq 'aa' && $char =~ /[[:ascii:]]/)
-                             || ($charset eq 'l' && $locale ne 'C')
-                             || ($charset eq 'l' && $char =~ /[[:ascii:]]/)
-                            );
-                        my $name = "(?i$charset), utf8=$utf8, locale=$locale,"
-                                 . " char=" . sprintf "%x", ord $char;
-                        no warnings 'locale';
-                        is (eval " '$s' =~ qr/(?i$charset)$pat/;",
-                            $should_pass, $name);
-                        fail "$name: $@" if $@;
-                        is (eval " 'a$s' =~ qr/(?i$charset)a$pat/;",
-                            $should_pass, "extra a, $name");
-                        fail "$name: $@" if $@;
                     }
                 }
             }
