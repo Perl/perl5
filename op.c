@@ -6900,7 +6900,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         0,
         0x80,
         (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),
-        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),
         (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),
         ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),
         ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),
