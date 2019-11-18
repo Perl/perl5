@@ -2730,7 +2730,7 @@ IV, UV, NV, or PV.  Also, if the SV is a reference to some value,
 either it will be dereferenced and the value printed, or information
 about the type of that value and its address are displayed.  The results
 of printing any other type of SV are undefined and likely to lead to an
-interpreter crash.  NVs are printed using a C<%g">-ish format.
+interpreter crash.  NVs are printed using a C<%g>-ish format.
 
 Note that the spaces are required around the C<SVf> in case the code is
 compiled with C++, to maintain compliance with its standard.
@@ -2745,7 +2745,7 @@ You can use this to concatenate two scalars:
  SV *var1 = get_sv("var1", GV_ADD);
  SV *var2 = get_sv("var2", GV_ADD);
  SV *var3 = newSVpvf("var1=%" SVf " and var2=%" SVf,
-                     SVfARG(var1), SVfARG(var2));
+                     SVfARG(var1), SVfARG(var2));
 
 =head2 Formatted Printing of Strings
 
@@ -2784,7 +2784,7 @@ print as in the
 L<previous section|/Formatted Printing of IVs, UVs, and NVs>.
 
 But if you're using C<PerlIO_printf()>, it's less typing and visual
-clutter to use the C<"%z"> length modifier (for I<siZe>):
+clutter to use the C<%z> length modifier (for I<siZe>):
 
         PerlIO_printf("STRLEN is %zu\n", len);
 
