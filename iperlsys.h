@@ -50,11 +50,14 @@
 */
 #include "perlio.h"
 
+typedef Signal_t (*Sighandler1_t) (int);
+typedef Signal_t (*Sighandler3_t) (int, Siginfo_t*, void*);
+
 #ifndef Sighandler_t
-#  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-typedef Signal_t (*Sighandler_t) (int, siginfo_t*, void*);
+#  ifdef PERL_USE_3ARG_SIGHANDLER
+typedef Sighandler3_t Sighandler_t;
 #  else
-typedef Signal_t (*Sighandler_t) (int);
+typedef Sighandler1_t Sighandler_t;
 #  endif
 #endif
 

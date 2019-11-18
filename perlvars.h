@@ -73,8 +73,13 @@ PERLVARI(G, sig_trapped, int,	0)
 /* If Perl has to ignore SIGPFE, this is its saved state.
  * See perl.h macros PERL_FPU_INIT and PERL_FPU_{PRE,POST}_EXEC. */
 PERLVAR(G, sigfpe_saved, Sighandler_t)
-PERLVARI(G, csighandlerp, Sighandler_t, Perl_csighandler)
-					/* Pointer to C-level sighandler */
+
+/* these ptrs to functions are to avoid linkage problems; see
+ * perl-5.8.0-2193-g5c1546dc48
+ */
+PERLVARI(G, csighandlerp,  Sighandler_t,  Perl_csighandler)
+PERLVARI(G, csighandler1p, Sighandler1_t, Perl_csighandler1)
+PERLVARI(G, csighandler3p, Sighandler3_t, Perl_csighandler3)
 #endif
 
 /* This is constant on most architectures, a global on OS/2 */

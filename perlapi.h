@@ -139,6 +139,10 @@ END_EXTERN_C
 #define PL_check		(*Perl_Gcheck_ptr(NULL))
 #undef  PL_check_mutex
 #define PL_check_mutex		(*Perl_Gcheck_mutex_ptr(NULL))
+#undef  PL_csighandler1p
+#define PL_csighandler1p	(*Perl_Gcsighandler1p_ptr(NULL))
+#undef  PL_csighandler3p
+#define PL_csighandler3p	(*Perl_Gcsighandler3p_ptr(NULL))
 #undef  PL_csighandlerp
 #define PL_csighandlerp		(*Perl_Gcsighandlerp_ptr(NULL))
 #undef  PL_curinterp

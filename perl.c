@@ -262,7 +262,10 @@ perl_construct(pTHXx)
     SvREADONLY_on(&PL_sv_placeholder);
     SvREFCNT(&PL_sv_placeholder) = SvREFCNT_IMMORTAL;
 
-    PL_sighandlerp = (Sighandler_t) Perl_sighandler;
+    PL_sighandlerp  = Perl_sighandler;
+    PL_sighandler1p = Perl_sighandler1;
+    PL_sighandler3p = Perl_sighandler3;
+
 #ifdef PERL_USES_PL_PIDSTATUS
     PL_pidstatus = newHV();
 #endif

@@ -611,7 +611,11 @@ PERLVAR(I, pidstatus,	HV *)		/* pid-to-status mappings for waitpid */
 #endif
 PERLVAR(I, osname,	char *)		/* operating system */
 
-PERLVAR(I, sighandlerp,	Sighandler_t)
+PERLVAR(I, sighandlerp,	 Sighandler_t)
+/* these two are provided only to solve library linkage issues; they
+ * should not be hooked by user code */
+PERLVAR(I, sighandler1p, Sighandler1_t)
+PERLVAR(I, sighandler3p, Sighandler3_t)
 
 PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 

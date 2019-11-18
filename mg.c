@@ -62,12 +62,6 @@ tie.
 #  include <sys/prctl.h>
 #endif
 
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Signal_t Perl_csighandler(int sig, siginfo_t *, void *);
-#else
-Signal_t Perl_csighandler(int sig);
-#endif
-
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 void setruid(uid_t id);
@@ -1486,19 +1480,45 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     return sv_unmagic(sv, mg->mg_type);
 }
 
+
+#ifdef PERL_USE_3ARG_SIGHANDLER
 Signal_t
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Perl_csighandler(int sig, siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+Perl_csighandler(int sig, Siginfo_t *sip, void *uap)
+{
+    Perl_csighandler3(sig, sip, uap);
+}
 #else
+Signal_t
 Perl_csighandler(int sig)
+{
+    Perl_csighandler3(sig, NULL, NULL);
+}
 #endif
+
+Signal_t
+Perl_csighandler1(int sig)
+{
+    Perl_csighandler3(sig, NULL, NULL);
+}
+
+/* Handler intended to directly handle signal calls from the kernel.
+ * (Depending on configuration, the kernel may actually call one of the
+ * wrappers csighandler() or csighandler1() instead.)
+ * It either queues up the signal or dispatches it immediately depending
+ * on whether safe signals are enabled and whether the signal is capable
+ * of being deferred (e.g. SEGV isn't).
+ */
+
+Signal_t
+Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
 #else
     dTHX;
 #endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+
+#ifdef PERL_USE_3ARG_SIGHANDLER
 #if defined(__cplusplus) && defined(__GNUC__)
     /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
      * parameters would be warned about. */
@@ -1506,6 +1526,7 @@ Perl_csighandler(int sig)
     PERL_UNUSED_ARG(uap);
 #endif
 #endif
+
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
     if (PL_sig_ignoring[sig]) return;
@@ -1531,11 +1552,20 @@ Perl_csighandler(int sig)
 	   (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
 	/* Call the perl level handler now--
 	 * with risk we may be in malloc() or being destructed etc. */
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-	(*PL_sighandlerp)(sig, NULL, NULL);
+    {
+        if (PL_sighandlerp == Perl_sighandler)
+            /* default handler, so can call perly_sighandler() directly
+             * rather than via Perl_sighandler, passing the extra
+             * 'safe = false' arg
+             */
+            Perl_perly_sighandler(sig, NULL, NULL, 0 /* unsafe */);
+        else
+#ifdef PERL_USE_3ARG_SIGHANDLER
+            (*PL_sighandlerp)(sig, NULL, NULL);
 #else
-	(*PL_sighandlerp)(sig);
+            (*PL_sighandlerp)(sig);
 #endif
+    }
     else {
 	if (!PL_psig_pend) return;
 	/* Set a flag to say this signal is pending, that is awaiting delivery after
@@ -1613,11 +1643,19 @@ Perl_despatch_signals(pTHX)
 	    }
 #endif
  	    PL_psig_pend[sig] = 0;
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-	    (*PL_sighandlerp)(sig, NULL, NULL);
+            if (PL_sighandlerp == Perl_sighandler)
+                /* default handler, so can call perly_sighandler() directly
+                 * rather than via Perl_sighandler, passing the extra
+                 * 'safe = true' arg
+                 */
+                Perl_perly_sighandler(sig, NULL, NULL, 1 /* safe */);
+            else
+#ifdef PERL_USE_3ARG_SIGHANDLER
+                (*PL_sighandlerp)(sig, NULL, NULL);
 #else
-	    (*PL_sighandlerp)(sig);
+                (*PL_sighandlerp)(sig);
 #endif
+
 #ifdef HAS_SIGPROCMASK
 	    if (!was_blocked)
 		LEAVE;
@@ -3317,12 +3355,62 @@ Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
     return -1;
 }
 
+
+/* Perl_sighandler(), Perl_sighandler1(), Perl_sighandler3():
+ * these three function are intended to be called by the OS as 'C' level
+ * signal handler functions in the case where unsafe signals are being
+ * used - i.e. they immediately invoke Perl_perly_sighandler() to call the
+ * perl-level sighandler, rather than deferring.
+ * In fact, the core itself will normally use Perl_csighandler as the
+ * OS-level handler; that function will then decide whether to queue the
+ * signal or call Perl_sighandler / Perl_perly_sighandler itself. So these
+ * functions are more useful for e.g. POSIX.xs when it wants explicit
+ * control of what's happening.
+ */
+
+
+#ifdef PERL_USE_3ARG_SIGHANDLER
+
 Signal_t
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Perl_sighandler(int sig, siginfo_t *sip, void *uap)
+Perl_sighandler(int sig, Siginfo_t *sip, void *uap)
+{
+    Perl_perly_sighandler(sig, sip, uap, 0);
+}
+
 #else
+
+Signal_t
 Perl_sighandler(int sig)
+{
+    Perl_perly_sighandler(sig, NULL, NULL, 0);
+}
+
 #endif
+
+Signal_t
+Perl_sighandler1(int sig)
+{
+    Perl_perly_sighandler(sig, NULL, NULL, 0);
+}
+
+Signal_t
+Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+{
+    Perl_perly_sighandler(sig, sip, uap, 0);
+}
+
+
+/* Invoke the perl-level signal handler. This function is called either
+ * directly from one of the C-level signals handlers (Perl_sighandler or
+ * Perl_csighandler), or for safe signals, later from
+ * Perl_despatch_signals() at a suitable safe point during execution.
+ *
+ * 'safe' is a boolean indicating the latter call path.
+ */
+
+Signal_t
+Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
+                    void *uap PERL_UNUSED_DECL, bool safe)
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -3395,48 +3483,48 @@ Perl_sighandler(int sig)
     PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
+
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     {
 	 struct sigaction oact;
 
-	 if (sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
-	      if (sip) {
-		   HV *sih = newHV();
-		   SV *rv  = newRV_noinc(MUTABLE_SV(sih));
-		   /* The siginfo fields signo, code, errno, pid, uid,
-		    * addr, status, and band are defined by POSIX/SUSv3. */
-		   (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
-		   (void)hv_stores(sih, "code", newSViv(sip->si_code));
-#ifdef HAS_SIGINFO_SI_ERRNO
-		   (void)hv_stores(sih, "errno",      newSViv(sip->si_errno));
-#endif
-#ifdef HAS_SIGINFO_SI_STATUS
-		   (void)hv_stores(sih, "status",     newSViv(sip->si_status));
-#endif
-#ifdef HAS_SIGINFO_SI_UID
-		   {
-			SV *uid = newSV(0);
-			sv_setuid(uid, sip->si_uid);
-			(void)hv_stores(sih, "uid", uid);
-		   }
-#endif
-#ifdef HAS_SIGINFO_SI_PID
-		   (void)hv_stores(sih, "pid",        newSViv(sip->si_pid));
-#endif
-#ifdef HAS_SIGINFO_SI_ADDR
-		   (void)hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
-#endif
-#ifdef HAS_SIGINFO_SI_BAND
-		   (void)hv_stores(sih, "band",       newSViv(sip->si_band));
-#endif
-		   EXTEND(SP, 2);
-		   PUSHs(rv);
-		   mPUSHp((char *)sip, sizeof(*sip));
-	      }
+	 if (sip && sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
+               HV *sih = newHV();
+               SV *rv  = newRV_noinc(MUTABLE_SV(sih));
+               /* The siginfo fields signo, code, errno, pid, uid,
+                * addr, status, and band are defined by POSIX/SUSv3. */
+               (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
+               (void)hv_stores(sih, "code", newSViv(sip->si_code));
+#  ifdef HAS_SIGINFO_SI_ERRNO
+               (void)hv_stores(sih, "errno",      newSViv(sip->si_errno));
+#  endif
+#  ifdef HAS_SIGINFO_SI_STATUS
+               (void)hv_stores(sih, "status",     newSViv(sip->si_status));
+#  endif
+#  ifdef HAS_SIGINFO_SI_UID
+               {
+                    SV *uid = newSV(0);
+                    sv_setuid(uid, sip->si_uid);
+                    (void)hv_stores(sih, "uid", uid);
+               }
+#  endif
+#  ifdef HAS_SIGINFO_SI_PID
+               (void)hv_stores(sih, "pid",        newSViv(sip->si_pid));
+#  endif
+#  ifdef HAS_SIGINFO_SI_ADDR
+               (void)hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
+#  endif
+#  ifdef HAS_SIGINFO_SI_BAND
+               (void)hv_stores(sih, "band",       newSViv(sip->si_band));
+#  endif
+               EXTEND(SP, 2);
+               PUSHs(rv);
+               mPUSHp((char *)sip, sizeof(*sip));
 
 	 }
     }
 #endif
+
     PUTBACK;
 
     errsv_save = newSVsv(ERRSV);
@@ -3448,27 +3536,35 @@ Perl_sighandler(int sig)
 	SV * const errsv = ERRSV;
 	if (SvTRUE_NN(errsv)) {
 	    SvREFCNT_dec(errsv_save);
+
 #ifndef PERL_MICRO
-	/* Handler "died", for example to get out of a restart-able read().
-	 * Before we re-do that on its behalf re-enable the signal which was
-	 * blocked by the system when we entered.
-	 */
-#ifdef HAS_SIGPROCMASK
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-	    if (sip || uap)
-#endif
-	    {
+            /* Handler "died", for example to get out of a restart-able read().
+             * Before we re-do that on its behalf re-enable the signal which was
+             * blocked by the system when we entered.
+             */
+#  ifdef HAS_SIGPROCMASK
+	    if (!safe) {
+                /* safe signals called via dispatch_signals() set up a
+                 * savestack destructor, unblock_sigmask(), to
+                 * automatically unblock the handler at the end. If
+                 * instead we get here directly, we have to do it
+                 * ourselves
+                 */
 		sigset_t set;
 		sigemptyset(&set);
 		sigaddset(&set,sig);
 		sigprocmask(SIG_UNBLOCK, &set, NULL);
 	    }
-#else
+#  else
 	    /* Not clear if this will work */
+            /* XXX not clear if this should be protected by 'if (safe)'
+             * too */
+
 	    (void)rsignal(sig, SIG_IGN);
 	    (void)rsignal(sig, PL_csighandlerp);
-#endif
+#  endif
 #endif /* !PERL_MICRO */
+
 	    die_sv(errsv);
 	}
 	else {

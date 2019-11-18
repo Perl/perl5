@@ -2713,7 +2713,7 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 	return (Sighandler_t) SIG_ERR;
 #endif
 
-    act.sa_handler = (void(*)(int))handler;
+    act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
@@ -2758,7 +2758,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 	return -1;
 #endif
 
-    act.sa_handler = (void(*)(int))handler;
+    act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART

@@ -701,6 +701,10 @@ PERL_CALLCONV_NO_RET void	Perl_croak_xs_usage(const CV *const cv, const char *co
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE	\
 	assert(cv); assert(params)
 
+PERL_CALLCONV Signal_t	Perl_csighandler1(int sig);
+#define PERL_ARGS_ASSERT_CSIGHANDLER1
+PERL_CALLCONV Signal_t	Perl_csighandler3(int sig, Siginfo_t *info, void *uap);
+#define PERL_ARGS_ASSERT_CSIGHANDLER3
 PERL_CALLCONV regexp_engine const *	Perl_current_re_engine(pTHX);
 #define PERL_ARGS_ASSERT_CURRENT_RE_ENGINE
 #ifndef NO_MATHOMS
@@ -2647,6 +2651,8 @@ PERL_CALLCONV int	perl_parse(PerlInterpreter *my_perl, XSINIT_t xsinit, int argc
 PERL_CALLCONV int	perl_run(PerlInterpreter *my_perl);
 #define PERL_ARGS_ASSERT_PERL_RUN	\
 	assert(my_perl)
+PERL_CALLCONV Signal_t	Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
+#define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
 PERL_CALLCONV void	Perl_pmop_dump(pTHX_ PMOP* pm);
 #define PERL_ARGS_ASSERT_PMOP_DUMP
 PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor);
@@ -3114,6 +3120,10 @@ PERL_CALLCONV void	Perl_setfd_inhexec_for_sysfd(pTHX_ int fd);
 PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, SSize_t len, U32 hash);
 #define PERL_ARGS_ASSERT_SHARE_HEK	\
 	assert(str)
+PERL_CALLCONV Signal_t	Perl_sighandler1(int sig);
+#define PERL_ARGS_ASSERT_SIGHANDLER1
+PERL_CALLCONV Signal_t	Perl_sighandler3(int sig, Siginfo_t *info, void *uap);
+#define PERL_ARGS_ASSERT_SIGHANDLER3
 PERL_CALLCONV char*	Perl_skipspace_flags(pTHX_ char *s, U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SKIPSPACE_FLAGS	\
@@ -4094,12 +4104,6 @@ STATIC const char*	S_my_nl_langinfo(const int item, bool toggle);
 #define PERL_ARGS_ASSERT_MY_NL_LANGINFO
 #  endif
 #endif
-#if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
-PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
-#define PERL_ARGS_ASSERT_CSIGHANDLER
-PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
-#define PERL_ARGS_ASSERT_SIGHANDLER
-#endif
 #if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
 PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
 #define PERL_ARGS_ASSERT_DO_EXEC	\
@@ -4111,6 +4115,12 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
 #define PERL_ARGS_ASSERT_MY_CXT_INIT	\
 	assert(indexp)
 #  endif
+#endif
+#if !(defined(PERL_USE_3ARG_SIGHANDLER))
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
+#define PERL_ARGS_ASSERT_CSIGHANDLER
+PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
+#define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if !(defined(_MSC_VER))
 PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
@@ -4563,12 +4573,6 @@ PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
 #define PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC	\
 	assert(pipefd)
 
-#endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-PERL_CALLCONV Signal_t	Perl_csighandler(int sig, siginfo_t *info, void *uap);
-#define PERL_ARGS_ASSERT_CSIGHANDLER
-PERL_CALLCONV Signal_t	Perl_sighandler(int sig, siginfo_t *info, void *uap);
-#define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if defined(HAS_SOCKET)
 PERL_CALLCONV int	Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr, Sock_size_t *addrlen)
@@ -6440,6 +6444,12 @@ PERL_CALLCONV Malloc_t	Perl_mem_log_realloc(const UV n, const UV typesize, const
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
 #define PERL_ARGS_ASSERT_PIDGONE
+#endif
+#if defined(PERL_USE_3ARG_SIGHANDLER)
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig, Siginfo_t *info, void *uap);
+#define PERL_ARGS_ASSERT_CSIGHANDLER
+PERL_CALLCONV Signal_t	Perl_sighandler(int sig, Siginfo_t *info, void *uap);
+#define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f);
