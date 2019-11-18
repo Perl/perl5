@@ -6835,7 +6835,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     const U8 * r0 = (U8*)SvPV_const(rstr, rlen);
     const U8 * t = t0;
     const U8 * r = r0;
-    Size_t t_count = 0, r_count = 0;  /* Number of characters in search and
+    UV t_count = 0, r_count = 0;  /* Number of characters in search and
                                          replacement lists */
 
     /* khw thinks some of the private flags for this op are quaintly named.
@@ -6859,12 +6859,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * in real life, and would require significant memory overhead. */
     NV max_expansion = 1.;
 
-    SSize_t t_range_count, r_range_count, min_range_count;
+    UV t_range_count, r_range_count, min_range_count;
     UV* t_array;
     SV* t_invlist;
     UV* r_map;
     UV r_cp, t_cp;
-    IV t_cp_end = -1;
+    UV t_cp_end = (UV) -1;
     UV r_cp_end;
     Size_t len;
     AV* invmap;
@@ -7167,7 +7167,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             bool merge_with_range_above = FALSE;
             bool merge_with_range_below = FALSE;
 
-            SSize_t i, span, invmap_range_length_remaining;
+            UV span, invmap_range_length_remaining;
+            SSize_t j;
+            Size_t i;
 
             /* If we are in the middle of processing a range in the 'target'
              * side, the previous iteration has set us up.  Otherwise, look at
@@ -7272,8 +7274,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * the return value is the index into the list's array of the range
              * that contains <cp>, that is, 'i' such that array[i] <= cp <
              * array[i+1] */
-            i = _invlist_search(t_invlist, t_cp);
-            assert(i >= 0);
+            j = _invlist_search(t_invlist, t_cp);
+            assert(j >= 0);
+            i = j;
 
             /* Here, the data structure might look like:
              *
@@ -7295,7 +7298,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * the smallest of the first two values.  The final one is
              * irrelevant if the map is to the special indicator */
 
-            invmap_range_length_remaining = ((Size_t) i + 1 < len)
+            invmap_range_length_remaining = (i + 1 < len)
                                             ? t_array[i+1] - t_cp
                                             : IV_MAX - t_cp;
             span = MAX(1, MIN(min_range_count, invmap_range_length_remaining));
@@ -7418,11 +7421,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                  * it adjoins the range above, and if the map is suitable, can
                  * be merged with it */
                 if (    t_cp_end >= IV_MAX - 1
-                    || (   (Size_t) i + 1 < len
-                        && (Size_t) t_cp_end + 1 == t_array[i+1]))
+                    || (   i + 1 < len
+                        && t_cp_end + 1 == t_array[i+1]))
                 {
                     adjacent_to_range_above = TRUE;
-                    if ((Size_t) i + 1 < len)
+                    if (i + 1 < len)
                     if (    (   pass2
                              || UVCHR_SKIP(t_cp) == UVCHR_SKIP(t_array[i+1]))
                         && (   (   r_cp == TR_SPECIAL_HANDLING
@@ -7752,7 +7755,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     }
     else {
         OPtrans_map *tbl;
-        Size_t i;
+        unsigned short i;
 
         /* The OPtrans_map struct already contains one slot; hence the -1. */
         SSize_t struct_size = sizeof(OPtrans_map)
@@ -7817,7 +7820,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                 DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%02x",
                                                 (unsigned) i, tbl->map[i]));
             }
-            if ((i+1) % 8 == 0 || i + 1 == tbl->size) {
+            if ((i+1) % 8 == 0 || i + 1 == (short) tbl->size) {
                 DEBUG_y(PerlIO_printf(Perl_debug_log,"\n"));
             }
         }
