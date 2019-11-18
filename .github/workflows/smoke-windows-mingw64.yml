@@ -39,5 +39,5 @@ jobs:
         run: |
             cd win32
             set HARNESS_OPTIONS=j2
-            set CCHOME=C:\strawberry\c\bin
+            set CCHOME=C:\strawberry\c
             gmake -f GNUMakefile test
