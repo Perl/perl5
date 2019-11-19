@@ -28,8 +28,7 @@ jobs:
                 # Create the names of the branches here, as they don't seem
                 # to exist properly?!
                 git switch -c $GITHUB_HEAD_REF
-                git checkout $GITHUB_HEAD_REF
                 echo git merge-base origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF}
                 branch_off=$(git merge-base origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF})
-                git log --pretty=format:"Author: %an <%ae>" $branch_off..${GITHUB_SHA}^1
+                git log --pretty=format:"Author: %an <%ae>" $branch_off..HEAD^1
             fi

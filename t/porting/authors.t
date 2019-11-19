@@ -35,7 +35,7 @@ elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
     $common_ancestor =~ s!\s+!!g;
 
     # We want one before the GITHUB_SHA, as the github-SHA is a merge commit
-	$revision_range = join '..', $common_ancestor, $ENV{GITHUB_SHA} . '^1';
+	$revision_range = join '..', $common_ancestor, 'HEAD^1';
 }
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
