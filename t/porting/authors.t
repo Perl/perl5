@@ -31,11 +31,11 @@ elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
     system(qw( git checkout ), $ENV{GITHUB_HEAD_REF});
 
     # This hardcoded origin/ isn't great, but I'm not sure how to better fix it
-    my $common_ancestor = `git merge-base origin/$ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`
+    my $common_ancestor = `git merge-base origin/$ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`;
     $common_ancestor =~ s!\s+!!g;
 
     # We want one before the GITHUB_SHA, as the github-SHA is a merge commit
-	$revision_range = join '..', $common_ancestor, 'HEAD^1';
+	$revision_range = join '..', $common_ancestor, $ENV{GITHUB_SHA} . '^2';
 }
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
