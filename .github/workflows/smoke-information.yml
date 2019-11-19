@@ -25,7 +25,11 @@ jobs:
             if [ -n "${GITHUB_HEAD_REF}" ]; then
                 echo "Pull request"
                 env
-                echo git merge-base ${GITHUB_BASE_REF} ${GITHUB_HEAD_REF}
-                branch_off=$(git merge-base ${GITHUB_BASE_REF} ${GITHUB_HEAD_REF})
+                # Create the names of the branches here, as they don't seem
+                # to exist properly?!
+                git switch -c $GITHUB_HEAD_REF
+                git checkout $GITHUB_HEAD_REF
+                echo git merge-base origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF}
+                branch_off=$(git merge-base origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF})
                 git log --pretty=format:"Author: %an <%ae>" $branch_off..${GITHUB_SHA}
             fi
