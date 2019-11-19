@@ -27,9 +27,15 @@ if ( $ENV{TRAVIS} && defined $ENV{TRAVIS_COMMIT_RANGE} ) {
 elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
     # Same as above, except for Github Actions
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
-    my $common_ancestor = `git merge-base $ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`
+    system(qw( git switch -c  ), $ENV{GITHUB_HEAD_REF});
+    system(qw( git checkout ), $ENV{GITHUB_HEAD_REF});
+
+    # This hardcoded origin/ isn't great, but I'm not sure how to better fix it
+    my $common_ancestor = `git merge-base origin/$ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`
     $common_ancestor =~ s!\s+!!g;
-	$revision_range = join '..', $common_ancestor, $ENV{GITHUB_SHA};
+
+    # We want one before the GITHUB_SHA, as the github-SHA is a merge commit
+	$revision_range = join '..', $common_ancestor, $ENV{GITHUB_SHA} . '^1';
 }
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
