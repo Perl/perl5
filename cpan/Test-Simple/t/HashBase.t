@@ -83,10 +83,7 @@ is($pkg->do_it, 'const', "worked as expected");
     *main::Const::Test::FOO = sub { 0 };
 }
 ok(!$pkg->FOO, "overrode const sub");
-{
-local $TODO = "known to fail on $]" if $] le "5.006002";
 is($pkg->do_it, 'const', "worked as expected, const was constant");
-}
 
 BEGIN {
     $INC{'Object/HashBase/Test/HBase/Wrapped.pm'} = __FILE__;
@@ -135,17 +132,28 @@ BEGIN {
 
     package
         main::HBase2;
-    use Test2::Util::HashBase qw/foo -bar ^baz/;
+    use Test2::Util::HashBase qw/foo -bar ^baz <bat >ban +boo/;
 
     main::is(FOO, 'foo', "FOO CONSTANT");
     main::is(BAR, 'bar', "BAR CONSTANT");
     main::is(BAZ, 'baz', "BAZ CONSTANT");
+    main::is(BAT, 'bat', "BAT CONSTANT");
+    main::is(BAN, 'ban', "BAN CONSTANT");
+    main::is(BOO, 'boo', "BOO CONSTANT");
 }
 
-my $ro = main::HBase2->new(foo => 'foo', bar => 'bar', baz => 'baz');
+my $ro = main::HBase2->new(foo => 'foo', bar => 'bar', baz => 'baz', bat => 'bat', ban => 'ban');
 is($ro->foo, 'foo', "got foo");
 is($ro->bar, 'bar', "got bar");
 is($ro->baz, 'baz', "got baz");
+is($ro->bat, 'bat', "got bat");
+ok(!$ro->can('set_bat'), "No setter for bat");
+ok(!$ro->can('ban'), "No reader for ban");
+ok(!$ro->can('boo'), "No reader for boo");
+ok(!$ro->can('set_boo'), "No setter for boo");
+is($ro->{ban}, 'ban', "ban attribute is set");
+$ro->set_ban('xxx');
+is($ro->{ban}, 'xxx', "ban attribute can be set");
 
 is($ro->set_foo('xxx'), 'xxx', "Can set foo");
 is($ro->foo, 'xxx', "got foo");

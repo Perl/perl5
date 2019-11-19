@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-BEGIN { $main::cleanup1 = bless {}, 'My::Cleanup' }
+BEGIN { no warnings 'once'; $main::cleanup1 = bless {}, 'My::Cleanup' }
 
 use Test2::API qw/context/;
 
@@ -307,4 +307,4 @@ die "Testing should be done, but it is not!" unless Test2::API::test2_is_testing
 }
 
 # This should destroy the thing
-END { $main::cleanup2 = bless {}, 'My::Cleanup' }
+END { no warnings 'once'; $main::cleanup2 = bless {}, 'My::Cleanup' }
