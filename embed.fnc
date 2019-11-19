@@ -2569,6 +2569,7 @@ ES	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 ES	|void	|output_posix_warnings					    \
 				|NN RExC_state_t *pRExC_state		    \
 				|NN AV* posix_warnings
+EiT	|Size_t	 |find_first_differing_byte_pos|NN const U8 * s1|NN const U8 * s2| const Size_t max
 ES	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
 				|NN SV* multi_string			    \
 				|const STRLEN cp_count

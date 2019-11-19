@@ -1018,6 +1018,7 @@
 #define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
 #define edit_distance		S_edit_distance
+#define find_first_differing_byte_pos	S_find_first_differing_byte_pos
 #define get_ANYOFM_contents(a)	S_get_ANYOFM_contents(aTHX_ a)
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define grok_bslash_N(a,b,c,d,e,f,g)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f,g)

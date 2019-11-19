@@ -5559,6 +5559,11 @@ STATIC int	S_edit_distance(const UV *src, const UV *tgt, const STRLEN x, const S
 #define PERL_ARGS_ASSERT_EDIT_DISTANCE	\
 	assert(src); assert(tgt)
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE Size_t	S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max);
+#define PERL_ARGS_ASSERT_FIND_FIRST_DIFFERING_BYTE_POS	\
+	assert(s1); assert(s2)
+#endif
 STATIC SV *	S_get_ANYOFM_contents(pTHX_ const regnode * n)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS	\

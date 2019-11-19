@@ -16774,6 +16774,22 @@ S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
     UPDATE_WARNINGS_LOC(RExC_parse);
 }
 
+Size_t PERL_STATIC_INLINE
+S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max)
+{
+    const U8 * const start = s1;
+    const U8 * const send = start + max;
+
+    PERL_ARGS_ASSERT_FIND_FIRST_DIFFERING_BYTE_POS;
+
+    while (s1 < send && *s1  == *s2) {
+        s1++; s2++;
+    }
+
+    return s1 - start;
+}
+
+
 STATIC AV *
 S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN cp_count)
 {
