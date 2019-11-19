@@ -3089,18 +3089,21 @@ sigaction(sig, optaction, oldaction = 0)
                  * i.e. it used Perl_csighandler[13] rather than
                  * Perl_sighandler[13]
                  */
-                safe = ((oact.sa_flags & SA_SIGINFO)
+                safe =
+#ifdef SA_SIGINFO
+                    (oact.sa_flags & SA_SIGINFO)
                         ? (  oact.sa_sigaction == PL_csighandler3p
 #ifdef PERL_USE_3ARG_SIGHANDLER
                           || oact.sa_sigaction == PL_csighandlerp
 #endif
                           )
-                        : (  oact.sa_handler   == PL_csighandler1p
+                        :
+#endif
+                           (  oact.sa_handler   == PL_csighandler1p
 #ifndef PERL_USE_3ARG_SIGHANDLER
                           || oact.sa_handler   == PL_csighandlerp
 #endif
-                          )
-                    );
+                           );
 
 		svp = hv_fetchs(oldaction, "SAFE", TRUE);
 		sv_setiv(*svp, safe);
@@ -3118,13 +3121,15 @@ sigaction(sig, optaction, oldaction = 0)
 		   (BTW, "csighandler" is very different from "sighandler".) */
 		svp = hv_fetchs(action, "SAFE", FALSE);
                 safe = *svp && SvTRUE(*svp);
-
+#ifdef SA_SIGINFO
                 if (act.sa_flags & SA_SIGINFO) {
                     /* 3-arg handler */
                     act.sa_sigaction =
 			    safe ? PL_csighandler3p : PL_sighandler3p;
                 }
-                else {
+                else
+#endif
+                {
                     /* 1-arg handler */
                     act.sa_handler =
 			    safe ? PL_csighandler1p : PL_sighandler1p;
