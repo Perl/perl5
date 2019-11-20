@@ -17,6 +17,28 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.6 - Neal Stephenson, "Quicksilver"
+
+L<Announced on 2019-11-20 by Chris 'BinGOs' Williams|https://www.nntp.perl.org/group/perl.perl5.porters/2019/11/msg256646.html>
+
+  Invocation
+
+  State your intentions, Muse. I know you're there.
+  Dead bards who pined for you have said
+  You're bright as flame, but fickle as the air.
+  My pen and I, submerged in liquid shade,
+  Much dark can spread, on days and over reams
+  But without you, no radiance can shed.
+  Why rustle in the dark, when fledged with fire?
+  Craze the night with flails of light. Reave
+  Your turbid shroud. Bestow what I require.
+
+  But you're not in the dark. I do believe
+  I swim, like squid, in clouds of my own make,
+  To you, offensive. To us both, opaque.
+  What's constituted so, only a pen
+  Can penetrate. I have one here; let's go.
+
 =head2 v5.31.5 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Daddy Long-legs and the Fly
 
 L<Announced on 2019-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2019/10/msg256478.html>
