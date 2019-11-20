@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 966;  # Update this when adding/deleting tests.
+plan tests => 973;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2193,6 +2193,17 @@ SKIP:
                         qr/^$/,
                         {},
                         "Assertion failure matching /il on single char folding to multi");
+    }
+
+    {   # Test ANYOFHs
+        my $pat = qr/[\x{4000001}\x{4000003}\x{4000005}]+/;
+        unlike("\x{4000000}", $pat, "4000000 isn't in pattern");
+        like("\x{4000001}", $pat, "4000001 is in pattern");
+        unlike("\x{4000002}", $pat, "4000002 isn't in pattern");
+        like("\x{4000003}", $pat, "4000003 is in pattern");
+        unlike("\x{4000004}", $pat, "4000004 isn't in pattern");
+        like("\x{4000005}", $pat, "4000005 is in pattern");
+        unlike("\x{4000006}", $pat, "4000006 isn't in pattern");
     }
 
 } # End of sub run_tests

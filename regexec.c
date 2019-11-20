@@ -2205,6 +2205,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
+    case ANYOFHs:
+        if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
+            REXEC_FBC_CLASS_SCAN(TRUE,
+                  (   strend -s >= FLAGS(c)
+                   && memEQ(s, ((struct regnode_anyofhs *) c)->string, FLAGS(c))
+                   && reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target)));
+        }
+        break;
+
     case ANYOFR:
         if (utf8_target) {
             REXEC_FBC_CLASS_SCAN(TRUE,
@@ -6907,6 +6916,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto increment_locinput;
             break;
 
+        case ANYOFHs:
+            if (   ! utf8_target
+                ||   NEXTCHR_IS_EOS
+                ||   loceol - locinput < FLAGS(scan)
+                ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, FLAGS(scan))
+	        || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
+                                                                   utf8_target))
+            {
+                sayNO;
+            }
+            goto increment_locinput;
+            break;
+
         case ANYOFR:
             if (NEXTCHR_IS_EOS) {
                 sayNO;
@@ -9786,6 +9808,19 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         }
         break;
 
+    case ANYOFHs:
+        if (utf8_target) {  /* ANYOFH only can match UTF-8 targets */
+            while (   hardcount < max
+                   && scan + FLAGS(p) < this_eol
+                   && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
+                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+        }
+        break;
+
     case ANYOFR:
         if (utf8_target) {
             while (   hardcount < max
@@ -10079,7 +10114,7 @@ STATIC bool
 S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const p, const U8* const p_end, const bool utf8_target)
 {
     dVAR;
-    const char flags = (inRANGE(OP(n), ANYOFH, ANYOFHr))
+    const char flags = (inRANGE(OP(n), ANYOFH, ANYOFHs))
                         ? 0
                         : ANYOF_FLAGS(n);
     bool match = FALSE;

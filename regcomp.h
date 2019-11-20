@@ -164,6 +164,14 @@ struct regnode_lstring { /* Constructed this way to keep the string aligned. */
     char string[1];
 };
 
+struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
+    U8	flags;
+    U8  type;
+    U16 next_off;
+    U32 arg1;                           /* set by set_ANYOF_arg() */
+    char string[1];
+};
+
 /* Argument bearing node - workhorse, 
    arg1 is often for the data field */
 struct regnode_1 {

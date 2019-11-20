@@ -5865,6 +5865,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 case ANYOFH:
                 case ANYOFHb:
                 case ANYOFHr:
+                case ANYOFHs:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -19309,14 +19310,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             U8 low_utf8[UTF8_MAXBYTES+1];
             UV highest_cp = invlist_highest(cp_list);
 
-            op = ANYOFH;
-
             /* Currently the maximum allowed code point by the system is
              * IV_MAX.  Higher ones are reserved for future internal use.  This
              * particular regnode can be used for higher ones, but we can't
              * calculate the code point of those.  IV_MAX suffices though, as
              * it will be a large first byte */
-            (void) uvchr_to_utf8(low_utf8, MIN(start[0], IV_MAX));
+            Size_t low_len = uvchr_to_utf8(low_utf8, MIN(start[0], IV_MAX))
+                           - low_utf8;
 
             /* We store the lowest possible first byte of the UTF-8
              * representation, using the flags field.  This allows for quick
@@ -19325,23 +19325,51 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * transformation would not rule out nearly so many things */
             anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
 
+            op = ANYOFH;
+
             /* If the first UTF-8 start byte for the highest code point in the
              * range is suitably small, we may be able to get an upper bound as
              * well */
             if (highest_cp <= IV_MAX) {
                 U8 high_utf8[UTF8_MAXBYTES+1];
-
-                (void) uvchr_to_utf8(high_utf8, highest_cp);
+                Size_t high_len = uvchr_to_utf8(high_utf8, highest_cp)
+                                - high_utf8;
 
                 /* If the lowest and highest are the same, we can get an exact
-                 * first byte instead of a just minimum.  We signal this with a
-                 * different regnode */
+                 * first byte instead of a just minimum or even a sequence of
+                 * exact leading bytes.  We signal these with different
+                 * regnodes */
                 if (low_utf8[0] == high_utf8[0]) {
+                    Size_t len = find_first_differing_byte_pos(low_utf8,
+                                                               high_utf8,
+                                                       MIN(low_len, high_len));
 
-                    /* No need to convert to I8 for EBCDIC as this is an exact
-                     * match */
-                    anyof_flags = low_utf8[0];
-                    op = ANYOFHb;
+                    if (len == 1) {
+
+                        /* No need to convert to I8 for EBCDIC as this is an
+                         * exact match */
+                        anyof_flags = low_utf8[0];
+                        op = ANYOFHb;
+                    }
+                    else {
+                        op = ANYOFHs;
+                        ret = regnode_guts(pRExC_state, op,
+                                           regarglen[op] + STR_SZ(len),
+                                           "anyofhs");
+                        FILL_NODE(ret, op);
+                        RExC_emit += 1 + regarglen[op]
+                                   - 1 + STR_SZ(len); /* Replace the [1]
+                                                         element of the struct
+                                                         by the real value */
+                        REGNODE_p(ret)->flags = len;
+                        Copy(low_utf8,  /* Add the common bytes */
+                           ((struct regnode_anyofhs *) REGNODE_p(ret))->string,
+                           len, U8);
+                        NEXT_OFF(REGNODE_p(ret)) = regarglen[op] + STR_SZ(len);
+                        set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
+                                                  NULL, only_utf8_locale_list);
+                        goto not_anyof;
+                    }
                 }
                 else if (NATIVE_UTF8_TO_I8(high_utf8[0]) <= MAX_ANYOF_HRx_BYTE)
                 {
@@ -20873,7 +20901,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
-        if (inRANGE(OP(o), ANYOFH, ANYOFRb)) {
+        if (OP(o) == ANYOFHs) {
+            Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes=%s", _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, FLAGS(o), 1));
+        }
+        else if (inRANGE(OP(o), ANYOFH, ANYOFRb)) {
             U8 lowest = (OP(o) != ANYOFHr)
                          ? FLAGS(o)
                          : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
