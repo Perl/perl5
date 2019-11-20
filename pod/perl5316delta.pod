@@ -1,0 +1,308 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5316delta - what is new for perl v5.31.6
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.31.5 release and the 5.31.6
+release.
+
+If you are upgrading from an earlier release such as 5.31.4, first read
+L<perl5315delta>, which describes differences between 5.31.4 and 5.31.5.
+
+=head1 Core Enhancements
+
+=head2 Alpha assertions are no longer experimental
+
+See L<perlre/(*pla:pattern)>, L<perlre/(*plb:pattern)>,
+L<perlre/(*nla:pattern)>>, and L<perlre/(*nlb:pattern)>.
+Use of these no longer generates a warning; existing code that disables
+the warning category C<experimental::script_run> will continue to work
+without any changes needed.  Enabling the category has no effect.
+
+=head2 Script runs are no longer experimental
+
+See L<perlre/Script Runs>.  Use of these no longer generates a warning;
+existing code that disables the warning category
+C<experimental::alpha_assertions> will continue to work without any
+changes needed.  Enabling the category has no effect.
+
+=head2 Feature checks are now faster
+
+Previously feature checks in the parser required a hash lookup when
+features we set outside of a feature bundle, this has been optimized
+to a bit mask check.  [#17229]
+
+=head2 Perl is now developed on Github
+
+Perl is now developed on Github, you can find us at
+L<https://github.com/Perl/perl5>.
+
+Non-security bugs should now be reported via Github.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.50 to 1.51.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.087 to 2.090.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.087 to 2.090.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.54 to 3.55.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
+L<feature> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<IO::Compress::Base> has been upgraded from version 2.087 to 2.090.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999817_01 to 1.999818.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20191020 to 5.20191120.
+
+=item *
+
+L<Module::Load::Conditional> has been upgraded from version 0.68 to 0.70.
+
+=item *
+
+L<mro> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20190126 to 5.20191102.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.39 to 3.40.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.89 to 1.90.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.35 to 0.36.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302168 to 1.302169.
+
+=item *
+
+L<Tie::StdHandle> has been upgraded from version 4.5 to 4.6.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.73 to 0.74.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1203 to 0.1203_01.
+
+=back
+
+=head1 Utility Changes
+
+=head2 L<streamzip>
+
+=over 4
+
+=item *
+
+This is a new utility, included as part of an
+L<IO::Compress::Base> upgrade.
+
+L<streamzip> creates a zip file from stdin. The program will read data
+from stdin, compress it into a zip container and, by default, write a
+streamed zip file to stdout.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+F<Configure> now correctly handles gcc-10. Previously it was interpreting it
+as gcc-1 and turned on C<-fpcc-struct-return>.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+The configuration for C<ccflags> and C<optimize> are now separate, as
+with POSIX platforms.  [#17156]
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The lexer (C<Perl_yylex()> in F<toke.c>) was previously a single 4100-line
+function, relying heavily on C<goto> and a lot of widely-scoped local variables
+to do its work. It has now been pulled apart into a few dozen smaller static
+functions; the largest remaining chunk (C<yyl_word_or_keyword()>) is a little
+over 900 lines, and consists of a single C<switch> statement, all of whose
+C<case> groups are independent. This should be much easier to understand and
+maintain.
+
+=item *
+
+The OS-level signal handlers and type (Sighandler_t) used by the perl core
+were declared as having three parameters, but the OS was always told to
+call them with one argument. This has been fixed by declaring them to have
+one parameter. See the merge commit C<v5.31.5-346-g116e19abbf> for full
+details.
+
+=item *
+
+The code that handles C<tr///> has been extensively revised, fixing
+various bugs, especially when the source and/or replacement strings
+contain characters whose code points are above 255.  Some of the bugs
+were undocumented, one being that under some circumstances (but not all)
+with C</s>, the squeezing was done based on the source, rather than the
+replacement.  A documented bug that got fixed was [perl RT #125493].
+
+=item *
+
+A new macro for XS writers dealing with UTF-8-encoded Unicode strings
+has been created L<perlapi/C<UTF8_CHK_SKIP>> that is safer in the face
+of malformed UTF-8 input than L<perlapi/C<UTF8_SKIP>> (but not as safe
+as L<perlapi/C<UTF8_SAFE_SKIP>>).  It won't read past a NUL character.
+It has been backported in L<Devel::PPPort> 3.55 and later.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+printf() or sprintf() with the C<%n> format could cause a panic on
+debugging builds, or report an incorrectly cached length value when
+producing C<SVfUTF8> flagged strings. [#17221]
+
+=item *
+
+The tokenizer has been extensively refactored. [#17241][#17189]
+
+=item *
+
+C<use strict "subs"> is now enforced for bareword constants optimized
+into a C<multiconcat> operator.  [#17254]
+
+=item *
+
+A memory leak in regular expression patterns has been fixed [#17218].
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.31.6 represents approximately 4 weeks of development since Perl
+5.31.5 and contains approximately 43,000 lines of changes across 490 files
+from 31 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 35,000 lines of changes to 300 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.31.6:
+
+Aaron Crane, Chad Granum, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Dan Book, Dave Cross, David Mitchell, E. Choroba, Graham
+Knop, Hauke D, Ichinose Shogo, James E Keenan, Karen Etheridge, Karl
+Williamson, Matt Turner, Max Maischein, Nicholas Clark, Nicolas R., Pali,
+Paul Evans, Petr Písař, Richard Leach, Sergey Aleynikov, Steve Hay, Steve
+Peters, Todd Rinaldo, Tomasz Konojacki, Tom Hukins, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
