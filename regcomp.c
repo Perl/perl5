@@ -2142,6 +2142,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL);
+    SvREFCNT_dec(invlist);
 
     /* Make sure is clone-safe */
     ssc->invlist = NULL;
@@ -19429,6 +19430,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                    ? listsv
                    : NULL,
                   only_utf8_locale_list);
+    SvREFCNT_dec(cp_list);;
+    SvREFCNT_dec(only_utf8_locale_list);
     return ret;
 
   not_anyof:
@@ -19439,6 +19442,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
                                            RExC_parse - orig_parse);;
     SvREFCNT_dec(cp_list);;
+    SvREFCNT_dec(only_utf8_locale_list);
     return ret;
 }
 
@@ -19479,11 +19483,12 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	SV *rv;
 
         if (cp_list) {
-            av_store(av, INVLIST_INDEX, cp_list);
+            av_store(av, INVLIST_INDEX, SvREFCNT_inc(cp_list));
         }
 
         if (only_utf8_locale_list) {
-            av_store(av, ONLY_LOCALE_MATCHES_INDEX, only_utf8_locale_list);
+            av_store(av, ONLY_LOCALE_MATCHES_INDEX,
+                                          SvREFCNT_inc(only_utf8_locale_list));
         }
 
         if (runtime_defns) {
