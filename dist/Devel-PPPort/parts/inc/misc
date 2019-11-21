@@ -2798,6 +2798,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
             else {
                 $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
                 my $should_be = $types{"$native:$class"} || 0;
+                local $SIG{__WARN__} = sub {};
                 my $eval_string = "$fcn(\"$utf8\", 0)";
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i, $eval_string' gave $@" if $@;
