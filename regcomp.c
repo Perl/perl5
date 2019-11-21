@@ -5181,6 +5181,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		}
 
+                if ( ( minnext > 0 && mincount >= SSize_t_MAX / minnext )
+                    || min >= SSize_t_MAX - minnext * mincount )
+                {
+                    FAIL("Regexp out of space");
+                }
+
 		min += minnext * mincount;
 		is_inf_internal |= deltanext == SSize_t_MAX
                          || (maxcount == REG_INFTY && minnext + deltanext > 0);
