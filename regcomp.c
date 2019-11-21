@@ -16938,7 +16938,7 @@ S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
     UPDATE_WARNINGS_LOC(RExC_parse);
 }
 
-Size_t PERL_STATIC_INLINE
+PERL_STATIC_INLINE Size_t
 S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max)
 {
     const U8 * const start = s1;
