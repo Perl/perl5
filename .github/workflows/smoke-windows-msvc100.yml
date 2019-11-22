@@ -21,10 +21,21 @@ jobs:
       - uses: actions/checkout@master
         with:
             fetch-depth: 10
+      - name: Cache MSVC100 download
+        id: setup-msvc100
+        uses: actions/cache@v1
+        with:
+            path: "d:/chocolatey-cache"
+            key: vcexpress2010-chocolatey
       - name: Set up MSVC100
+        shell: cmd
         run: |
+          choco config set cacheLocation %HOME%\chocolatey-cache
           choco install vcexpress2010
-      - name: Help
+      - name: Cache status
+        if: steps.setup-msvc100.outputs.cache-hit != 'true'
+        run: echo Fresh download
+      - name: MSVC100 Help
         shell: cmd
         run: |
             call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" /help
