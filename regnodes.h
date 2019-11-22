@@ -19,11 +19,11 @@
 #define	MEOL                  	5	/* 0x05 Same, assuming multiline: /$/m */
 #define	EOS                   	6	/* 0x06 Match "" at end of string: /\z/ */
 #define	GPOS                  	7	/* 0x07 Matches where last m//g left off. */
-#define	BOUND                 	8	/* 0x08 Like BOUNDA for non-utf8, otherwise match "" between any Unicode \w\W or \W\w */
+#define	BOUND                 	8	/* 0x08 Like BOUNDA for non-utf8, otherwise like BOUNDU */
 #define	BOUNDL                	9	/* 0x09 Like BOUND/BOUNDU, but \w and \W are defined by current locale */
 #define	BOUNDU                	10	/* 0x0a Match "" at any boundary of a given type using /u rules. */
 #define	BOUNDA                	11	/* 0x0b Match "" at any boundary between \w\W or \W\w, where \w is [_a-zA-Z0-9] */
-#define	NBOUND                	12	/* 0x0c Like NBOUNDA for non-utf8, otherwise match "" between any Unicode \w\w or \W\W */
+#define	NBOUND                	12	/* 0x0c Like NBOUNDA for non-utf8, otherwise like BOUNDU */
 #define	NBOUNDL               	13	/* 0x0d Like NBOUND/NBOUNDU, but \w and \W are defined by current locale */
 #define	NBOUNDU               	14	/* 0x0e Match "" at any non-boundary of a given type using using /u rules. */
 #define	NBOUNDA               	15	/* 0x0f Match "" betweeen any \w\w or \W\W, where \w is [_a-zA-Z0-9] */

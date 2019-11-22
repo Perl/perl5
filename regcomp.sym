@@ -60,12 +60,12 @@ GPOS        GPOS,       no        ; Matches where last m//g left off.
 # in regcomp.c uses the enum value of the modifier as an offset from the /d
 # version.  The complements must come after the non-complements.
 # BOUND, POSIX and their complements are affected, as well as EXACTF.
-BOUND       BOUND,      no        ; Like BOUNDA for non-utf8, otherwise match "" between any Unicode \w\W or \W\w
+BOUND       BOUND,      no        ; Like BOUNDA for non-utf8, otherwise like BOUNDU
 BOUNDL      BOUND,      no        ; Like BOUND/BOUNDU, but \w and \W are defined by current locale
 BOUNDU      BOUND,      no        ; Match "" at any boundary of a given type using /u rules.
 BOUNDA      BOUND,      no        ; Match "" at any boundary between \w\W or \W\w, where \w is [_a-zA-Z0-9]
 # All NBOUND nodes are required by code in regexec.c to be greater than all BOUND ones
-NBOUND      NBOUND,     no        ; Like NBOUNDA for non-utf8, otherwise match "" between any Unicode \w\w or \W\W
+NBOUND      NBOUND,     no        ; Like NBOUNDA for non-utf8, otherwise like BOUNDU
 NBOUNDL     NBOUND,     no        ; Like NBOUND/NBOUNDU, but \w and \W are defined by current locale
 NBOUNDU     NBOUND,     no        ; Match "" at any non-boundary of a given type using using /u rules.
 NBOUNDA     NBOUND,     no        ; Match "" betweeen any \w\w or \W\W, where \w is [_a-zA-Z0-9]

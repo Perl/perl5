@@ -582,16 +582,16 @@ will be lost.
  GPOS             no         Matches where last m//g left off.
 
  # Word Boundary Opcodes:
- BOUND            no         Like BOUNDA for non-utf8, otherwise match
-                             "" between any Unicode \w\W or \W\w
+ BOUND            no         Like BOUNDA for non-utf8, otherwise like
+                             BOUNDU
  BOUNDL           no         Like BOUND/BOUNDU, but \w and \W are
                              defined by current locale
  BOUNDU           no         Match "" at any boundary of a given type
                              using /u rules.
  BOUNDA           no         Match "" at any boundary between \w\W or
                              \W\w, where \w is [_a-zA-Z0-9]
- NBOUND           no         Like NBOUNDA for non-utf8, otherwise match
-                             "" between any Unicode \w\w or \W\W
+ NBOUND           no         Like NBOUNDA for non-utf8, otherwise like
+                             BOUNDU
  NBOUNDL          no         Like NBOUND/NBOUNDU, but \w and \W are
                              defined by current locale
  NBOUNDU          no         Match "" at any non-boundary of a given
