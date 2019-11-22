@@ -165,7 +165,7 @@ struct regnode_lstring { /* Constructed this way to keep the string aligned. */
 };
 
 struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
-    U8	flags;
+    U8	str_len;
     U8  type;
     U16 next_off;
     U32 arg1;                           /* set by set_ANYOF_arg() */

@@ -621,7 +621,7 @@ will be lost.
  ANYOFHr          sv 1       Like ANYOFH, but the flags field contains
                              packed bounds for all matchable UTF-8 start
                              bytes.
- ANYOFHs          sv anyofhs Like ANYOFHb, but has a string field that
+ ANYOFHs          sv 1       Like ANYOFHb, but has a string field that
                              gives the leading matchable UTF-8 bytes;
                              flags field is len
  ANYOFR           packed 1   Matches any character in the range given by

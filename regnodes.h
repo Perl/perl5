@@ -351,7 +351,7 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFH       */
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHb      */
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHr      */
-	EXTRA_SIZE(struct regnode_anyofhs),  	/* ANYOFHs      */
+	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHs      */
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFR       */
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFRb      */
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFM       */

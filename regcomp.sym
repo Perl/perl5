@@ -82,7 +82,7 @@ ANYOFPOSIXL ANYOF,      sv charclass_posixl S    ; Like ANYOFL, but matches [[:p
 ANYOFH      ANYOF,      sv 1 S    ; Like ANYOF, but only has "High" matches, none in the bitmap; the flags field contains the lowest matchable UTF-8 start byte
 ANYOFHb     ANYOF,      sv 1 S    ; Like ANYOFH, but all matches share the same UTF-8 start byte, given in the flags field
 ANYOFHr     ANYOF,      sv 1 S    ; Like ANYOFH, but the flags field contains packed bounds for all matchable UTF-8 start bytes.
-ANYOFHs     ANYOF,      sv anyofhs S ; Like ANYOFHb, but has a string field that gives the leading matchable UTF-8 bytes; flags field is len
+ANYOFHs     ANYOF,      sv 1 S    ; Like ANYOFHb, but has a string field that gives the leading matchable UTF-8 bytes; flags field is len
 ANYOFR      ANYOFR,     packed 1  S  ; Matches any character in the range given by its packed args: upper 12 bits is the max delta from the base lower 20; the flags field contains the lowest matchable UTF-8 start byte
 ANYOFRb     ANYOFR,     packed 1  S ; Like ANYOFR, but all matches share the same UTF-8 start byte, given in the flags field
 # There is no ANYOFRr because khw doesn't think there are likely to be real-world cases where such a large range is used.

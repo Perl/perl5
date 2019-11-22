@@ -19516,15 +19516,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                            regarglen[op] + STR_SZ(len),
                                            "anyofhs");
                         FILL_NODE(ret, op);
-                        RExC_emit += 1 + regarglen[op]
-                                   - 1 + STR_SZ(len); /* Replace the [1]
-                                                         element of the struct
-                                                         by the real value */
-                        REGNODE_p(ret)->flags = len;
+                        ((struct regnode_anyofhs *) REGNODE_p(ret))->str_len
+                                                                        = len;
                         Copy(low_utf8,  /* Add the common bytes */
                            ((struct regnode_anyofhs *) REGNODE_p(ret))->string,
                            len, U8);
-                        NEXT_OFF(REGNODE_p(ret)) = regarglen[op] + STR_SZ(len);
+                        RExC_emit += NODE_SZ_STR(REGNODE_p(ret));
                         set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
                                                   NULL, only_utf8_locale_list);
                         goto not_anyof;
@@ -22571,7 +22568,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	else if ( op == PLUS || op == STAR) {
 	    DUMPUNTIL(NEXTOPER(node), NEXTOPER(node) + 1);
 	}
-	else if (PL_regkind[(U8)op] == EXACT) {
+	else if (PL_regkind[(U8)op] == EXACT || op == ANYOFHs) {
             /* Literal string, where present. */
 	    node += NODE_SZ_STR(node) - 1;
 	    node = NEXTOPER(node);

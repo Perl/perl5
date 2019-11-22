@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 1005;  # Update this when adding/deleting tests.
+plan tests => 1011;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2207,6 +2207,15 @@ SKIP:
         unlike("\x{4000004}", $pat, "4000004 isn't in pattern");
         like("\x{4000005}", $pat, "4000005 is in pattern");
         unlike("\x{4000006}", $pat, "4000006 isn't in pattern");
+
+        # gh #17319
+        $pat = qr/[\N{U+200D}\N{U+2000}]()/;
+        unlike("\x{1FFF}", $pat, "1FFF isn't in pattern");
+        like("\x{2000}", $pat, "2000 is in pattern");
+        unlike("\x{2001}", $pat, "2001 isn't in pattern");
+        unlike("\x{200C}", $pat, "200C isn't in pattern");
+        like("\x{200D}", $pat, "200 is in pattern");
+        unlike("\x{200E}", $pat, "200E isn't in pattern");
     }
 
 } # End of sub run_tests
