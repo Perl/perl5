@@ -410,8 +410,6 @@ struct regnode_ssc {
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
 #define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
-#define NODE_STEP_B	4
-
 #define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
 #define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
 
