@@ -17,8 +17,18 @@ jobs:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@master
         with:
-            fetch-depth: 10
+            fetch-depth: 1
+      # Caching (resp. restoring from cache) fails due to Cygwin not wanting
+      # dangling symlinks
+      #- name: Cache Cygwin installation
+      #  id: setup-cygwin
+      #  uses: actions/cache@v1
+      #  # You need to bust that cache if you want to add a new package or refresh
+      #  with:
+      #      path: "c:\\tools\\cygwin"
+      #      key: cygwin-20191122
       - name: Set up Cygwin
+        if: steps.setup-cygwin.outputs.cache-hit != 'true'
         run: |
           choco install cygwin cyg-get
           cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
@@ -46,4 +56,4 @@ jobs:
         shell: cmd
         run: |
             path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            make -j2 test
+            make -j3 test
