@@ -34,6 +34,16 @@
 # SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
 # IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
 # GROUPP      GROUPP,     num 1     ; Whether the group matched.
+#
+# If we were to start running out of regnodes, many of the ones that are
+# complements could be combined with their non-complement mates.  For example,
+# POSIXU could have the flags field have the bottom bit mean do we complement
+# or not, and the type be shifted left 1 bit.  Then all that would be needed to
+# extract which to do is a mask for the complement bit, and a right shift for
+# the other, an inconsequential increase in instructions.  It might actually be
+# clearer and slightly faster given the case statement and assignment are
+# removed.  Note that not everything could be collapsed: NPOSIXA, for example,
+# would require special handling for performance.
 
 
 #* Exit points
