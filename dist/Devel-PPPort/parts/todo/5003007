@@ -99,6 +99,7 @@ G_METHOD                       # T
 G_NOARGS                       # T
 gp_free                        # T
 gp_ref                         # T
+G_RETHROW                      # T
 grok_bin                       # T
 grok_hex                       # T
 grok_number                    # T
@@ -631,6 +632,7 @@ sv_dump                        # T
 SvEND                          # T
 sv_eq                          # T
 SVf                            # T
+SVfARG                         # T
 sv_free                        # T
 SVf_UTF8                       # T
 SvGETMAGIC                     # T

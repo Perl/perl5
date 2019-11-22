@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -58,15 +57,15 @@ my $rv;
 $Devel::PPPort::exception_caught = undef;
 
 $rv = eval { &Devel::PPPort::exception(0) };
-ok($@, '');
+is($@, '');
 ok(defined $rv);
-ok($rv, 42);
-ok($Devel::PPPort::exception_caught, 0);
+is($rv, 42);
+is($Devel::PPPort::exception_caught, 0);
 
 $Devel::PPPort::exception_caught = undef;
 
 $rv = eval { &Devel::PPPort::exception(1) };
-ok($@, "boo\n");
+is($@, "boo\n");
 ok(not defined $rv);
-ok($Devel::PPPort::exception_caught, 1);
+is($Devel::PPPort::exception_caught, 1);
 

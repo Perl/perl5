@@ -1,6 +1,5 @@
 5.031007
-dMY_CXT_SV                     # E
-my_lstat                       # U (Perl_my_lstat)
-my_stat                        # U (Perl_my_stat)
-pack_cat                       # U (Perl_pack_cat)
-pad_compname_type              # U (Perl_pad_compname_type)
+csighandler                    # E (Perl_csighandler)
+csighandler1                   # U
+csighandler3                   # E
+perly_sighandler               # E

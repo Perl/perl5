@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -53,15 +52,15 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(&Devel::PPPort::grok_number("42"), 42);
+is(&Devel::PPPort::grok_number("42"), 42);
 ok(!defined(&Devel::PPPort::grok_number("A")));
-ok(&Devel::PPPort::grok_bin("10000001"), 129);
-ok(&Devel::PPPort::grok_hex("deadbeef"), 0xdeadbeef);
-ok(&Devel::PPPort::grok_oct("377"), 255);
+is(&Devel::PPPort::grok_bin("10000001"), 129);
+is(&Devel::PPPort::grok_hex("deadbeef"), 0xdeadbeef);
+is(&Devel::PPPort::grok_oct("377"), 255);
 
-ok(&Devel::PPPort::Perl_grok_number("42"), 42);
+is(&Devel::PPPort::Perl_grok_number("42"), 42);
 ok(!defined(&Devel::PPPort::Perl_grok_number("A")));
-ok(&Devel::PPPort::Perl_grok_bin("10000001"), 129);
-ok(&Devel::PPPort::Perl_grok_hex("deadbeef"), 0xdeadbeef);
-ok(&Devel::PPPort::Perl_grok_oct("377"), 255);
+is(&Devel::PPPort::Perl_grok_bin("10000001"), 129);
+is(&Devel::PPPort::Perl_grok_hex("deadbeef"), 0xdeadbeef);
+is(&Devel::PPPort::Perl_grok_oct("377"), 255);
 

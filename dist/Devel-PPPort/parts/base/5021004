@@ -11,4 +11,3 @@ Perl_cvgv_from_hek             # F added by devel/scanprov
 put_charclass_bitmap_innards   # F added by devel/scanprov
 put_code_point                 # F added by devel/scanprov
 quadmath_format_needed         # F added by devel/scanprov
-quadmath_format_single         # F added by devel/scanprov

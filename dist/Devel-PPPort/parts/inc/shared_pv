@@ -87,4 +87,4 @@ newSVpvn_share()
 
 =tests plan => 1
 
-ok(&Devel::PPPort::newSVpvn_share(), 6);
+is(&Devel::PPPort::newSVpvn_share(), 6);

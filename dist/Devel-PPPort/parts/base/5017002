@@ -6,7 +6,6 @@ cv_forget_slab                 # F added by devel/scanprov
 find_runcv_where               # F added by devel/scanprov
 grok_bslash_x                  # F added by devel/scanprov
 invlist_highest                # F added by devel/scanprov
-is_uni_blank                   # F added by devel/scanprov
 magic_cleararylen_p            # F added by devel/scanprov
 opslab_force_free              # F added by devel/scanprov
 opslab_free                    # F added by devel/scanprov

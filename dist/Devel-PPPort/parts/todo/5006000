@@ -84,7 +84,6 @@ isUPPER_LC_utf8_safe           # U
 isUPPER_utf8_safe              # U
 isUPPER_uvchr                  # U
 is_utf8_char                   # U
-is_utf8_mark                   # U
 isWORDCHAR_LC_utf8_safe        # U
 isWORDCHAR_utf8_safe           # U
 isWORDCHAR_uvchr               # U

@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -79,7 +78,7 @@ if ($reason) {
 for (@pods) {
   print "# checking $_\n";
   if ($reason) {
-    skip("skip: $reason", 0);
+    skip("skip: $reason", 1);
   }
   else {
     pod_file_ok($_);

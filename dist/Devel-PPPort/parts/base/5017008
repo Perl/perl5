@@ -17,4 +17,3 @@ invlist_iterfinish             # F added by devel/scanprov
 isFOO_utf8_lc                  # F added by devel/scanprov
 _is_uni_FOO                    # F added by devel/scanprov
 _is_uni_perl_idcont            # F added by devel/scanprov
-_is_utf8_mark                  # F added by devel/scanprov

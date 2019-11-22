@@ -120,6 +120,7 @@ Amnd|U32|GIMME_V
 Amnhd||G_METHOD
 Amnhd||G_METHOD_NAMED
 AmnUd||G_NOARGS
+Amnhd||G_RETHROW
 AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
 AmnUd||G_SCALAR
 Amnhd||GV_ADD
@@ -682,6 +683,8 @@ Amnhd||SV_COW_DROP_PV
 Amd|STRLEN|SvCUR|SV* sv
 Amd|void|SvCUR_set|SV* sv|STRLEN len
 Amd|char*|SvEND|SV* sv
+Amnhd||SVf
+Amhd||SVfARG|SV *sv
 Amnhd||SVf_UTF8
 Amd|U32|SvGAMAGIC|SV* sv
 Amd|void|SvGETMAGIC|SV* sv

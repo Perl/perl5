@@ -2,7 +2,6 @@
 av_arylen_p                    # U
 ckwarn                         # U
 ckwarn_d                       # U
-csighandler                    # E (Perl_csighandler)
 dAXMARK                        # E
 dMULTICALL                     # E
 doref                          # U

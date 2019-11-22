@@ -55,5 +55,5 @@ newRV_noinc_REFCNT()
 
 =tests plan => 2
 
-ok(&Devel::PPPort::newRV_inc_REFCNT, 1);
-ok(&Devel::PPPort::newRV_noinc_REFCNT, 1);
+is(&Devel::PPPort::newRV_inc_REFCNT, 1);
+is(&Devel::PPPort::newRV_noinc_REFCNT, 1);

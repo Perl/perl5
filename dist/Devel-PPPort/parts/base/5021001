@@ -11,10 +11,5 @@ get_c_backtrace                # F added by devel/scanprov
 get_c_backtrace_dump           # F added by devel/scanprov
 _is_cur_LC_category_utf8       # F added by devel/scanprov
 _is_in_locale_category         # F added by devel/scanprov
-_is_utf8_idcont                # F added by devel/scanprov
-_is_utf8_idstart               # F added by devel/scanprov
-_is_utf8_xidcont               # F added by devel/scanprov
-_is_utf8_xidstart              # F added by devel/scanprov
 my_strerror                    # F added by devel/scanprov
 should_warn_nl                 # F added by devel/scanprov
-swash_scan_list_line           # F added by devel/scanprov

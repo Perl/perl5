@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -53,9 +52,9 @@ bootstrap Devel::PPPort;
 
 package main;
 
-ok(Devel::PPPort::HvNAME_get(\%Devel::PPPort::), 'Devel::PPPort');
+is(Devel::PPPort::HvNAME_get(\%Devel::PPPort::), 'Devel::PPPort');
 ok(!defined Devel::PPPort::HvNAME_get({}));
 
-ok(Devel::PPPort::HvNAMELEN_get(\%Devel::PPPort::), length('Devel::PPPort'));
-ok(Devel::PPPort::HvNAMELEN_get({}), 0);
+is(Devel::PPPort::HvNAMELEN_get(\%Devel::PPPort::), length('Devel::PPPort'));
+is(Devel::PPPort::HvNAMELEN_get({}), 0);
 

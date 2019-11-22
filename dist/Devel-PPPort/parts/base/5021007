@@ -13,7 +13,6 @@ padnamelist_store              # U
 PadnameREFCNT                  # U
 PadnameREFCNT_dec              # U
 gv_fetchmeth_internal          # F added by devel/scanprov
-_make_exactf_invlist           # F added by devel/scanprov
 opmethod_stash                 # F added by devel/scanprov
 pad_add_weakref                # F added by devel/scanprov
 padname_dup                    # F added by devel/scanprov

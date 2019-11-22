@@ -30,8 +30,7 @@ BEGIN {
   die qq[Cannot find "$FindBin::Bin/../parts/inc"] unless -d "$FindBin::Bin/../parts/inc";
 
   sub load {
-    eval "use Test";
-    require 'testutil.pl' if $@;
+    require 'testutil.pl';
     require 'inctools';
   }
 
@@ -59,16 +58,16 @@ ok(&Devel::PPPort::boolSV(1));
 ok(!&Devel::PPPort::boolSV(0));
 
 $_ = "Fred";
-ok(&Devel::PPPort::DEFSV(), "Fred");
-ok(&Devel::PPPort::UNDERBAR(), "Fred");
+is(&Devel::PPPort::DEFSV(), "Fred");
+is(&Devel::PPPort::UNDERBAR(), "Fred");
 
 if (ivers($]) >= ivers(5.9.2) && ivers($]) < ivers(5.23)) {
   eval q{
     no warnings "deprecated";
     no if $^V > v5.17.9, warnings => "experimental::lexical_topic";
     my $_ = "Tony";
-    ok(&Devel::PPPort::DEFSV(), "Fred");
-    ok(&Devel::PPPort::UNDERBAR(), "Tony");
+    is(&Devel::PPPort::DEFSV(), "Fred");
+    is(&Devel::PPPort::UNDERBAR(), "Tony");
   };
 }
 else {
@@ -79,11 +78,11 @@ else {
 my @r = &Devel::PPPort::DEFSV_modify();
 
 ok(@r == 3);
-ok($r[0], 'Fred');
-ok($r[1], 'DEFSV');
-ok($r[2], 'Fred');
+is($r[0], 'Fred');
+is($r[1], 'DEFSV');
+is($r[2], 'Fred');
 
-ok(&Devel::PPPort::DEFSV(), "Fred");
+is(&Devel::PPPort::DEFSV(), "Fred");
 
 eval { 1 };
 ok(!&Devel::PPPort::ERRSV());
@@ -114,46 +113,44 @@ ok(&Devel::PPPort::get_cv('my_cv', 0));
 ok(!&Devel::PPPort::get_cv('not_my_cv', 0));
 ok(&Devel::PPPort::get_cv('not_my_cv', 1));
 
-ok(Devel::PPPort::dXSTARG(42), 43);
-ok(Devel::PPPort::dAXMARK(4711), 4710);
+is(Devel::PPPort::dXSTARG(42), 43);
+is(Devel::PPPort::dAXMARK(4711), 4710);
 
-ok(Devel::PPPort::prepush(), 42);
+is(Devel::PPPort::prepush(), 42);
 
-ok(join(':', Devel::PPPort::xsreturn(0)), 'test1');
-ok(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
+is(join(':', Devel::PPPort::xsreturn(0)), 'test1');
+is(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
 
-ok(Devel::PPPort::PERL_ABS(42), 42);
-ok(Devel::PPPort::PERL_ABS(-13), 13);
+is(Devel::PPPort::PERL_ABS(42), 42);
+is(Devel::PPPort::PERL_ABS(-13), 13);
 
-ok(Devel::PPPort::SVf(42), ivers($]) >= ivers(5.4) ? '[42]' : '42');
-ok(Devel::PPPort::SVf('abc'), ivers($]) >= ivers(5.4) ? '[abc]' : 'abc');
+is(Devel::PPPort::SVf(42), ivers($]) >= ivers(5.4) ? '[42]' : '42');
+is(Devel::PPPort::SVf('abc'), ivers($]) >= ivers(5.4) ? '[abc]' : 'abc');
 
-ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
+is(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
 
-ok(&Devel::PPPort::ptrtests(), 63);
+is(&Devel::PPPort::ptrtests(), 63);
 
-ok(&Devel::PPPort::OpSIBLING_tests(), 0);
+is(&Devel::PPPort::OpSIBLING_tests(), 0);
 
 if (ivers($]) >= ivers(5.9)) {
   eval q{
-    ok(&Devel::PPPort::check_HeUTF8("hello"), "norm");
-    ok(&Devel::PPPort::check_HeUTF8("\N{U+263a}"), "utf8");
+    is(&Devel::PPPort::check_HeUTF8("hello"), "norm");
+    is(&Devel::PPPort::check_HeUTF8("\N{U+263a}"), "utf8");
   };
 } else {
-  ok(1, 1);
-  ok(1, 1);
+  skip("Too early perl version", 2);
 }
 
 @r = &Devel::PPPort::check_c_array();
-ok($r[0], 4);
-ok($r[1], "13");
+is($r[0], 4);
+is($r[1], "13");
 
 ok(!Devel::PPPort::SvRXOK(""));
 ok(!Devel::PPPort::SvRXOK(bless [], "Regexp"));
 
 if (ivers($]) < ivers(5.5)) {
-        skip 'no qr// objects in this perl', 0;
-        skip 'no qr// objects in this perl', 0;
+        skip 'no qr// objects in this perl', 2;
 } else {
         my $qr = eval 'qr/./';
         ok(Devel::PPPort::SvRXOK($qr));
@@ -293,14 +290,14 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                                 ? 0     # Fail on non-ASCII unless unicode
                                 : ($types{"$native:$class"} || 0);
                 if (ivers($]) < ivers(5.6) && $suffix eq '_uvchr') {
-                    skip("No UTF-8 on this perl", 0);
+                    skip("No UTF-8 on this perl", 1);
                     next;
                 }
 
                 my $eval_string = "Devel::PPPort::is${class}$suffix($hex)";
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i: $eval_string' gave $@" if $@;
-                ok($is, $should_be, "'$eval_string'");
+                is($is, $should_be, "'$eval_string'");
             }
         }
 
@@ -324,31 +321,32 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
             my $utf8;
 
             if ($skip) {
-                skip $skip, 0;
+                skip $skip, 1;
             }
             else {
                 $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
                 my $should_be = $types{"$native:$class"} || 0;
+                local $SIG{__WARN__} = sub {};
                 my $eval_string = "$fcn(\"$utf8\", 0)";
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i, $eval_string' gave $@" if $@;
-                ok($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
+                is($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
             }
 
             # And for the high code points, test that a too short malformation (the
             # -1) causes it to fail
             if ($i > 255) {
                 if ($skip) {
-                    skip $skip, 0;
+                    skip $skip, 1;
                 }
                 elsif (ivers($]) >= ivers(5.25.9)) {
-                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 0);
+                    skip("Prints an annoying error message that khw doesn't know how to easily suppress", 1);
                 }
                 else {
                     my $eval_string = "$fcn(\"$utf8\", -1)";
                     my $is = eval "no warnings; $eval_string" || 0;
                     die "eval '$eval_string' gave $@" if $@;
-                    ok($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
+                    is($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
                 }
             }
         }
@@ -408,9 +406,7 @@ for $name (keys %case_changing) {
             $skip = "Can't do uvchr on a multi-char string";
         }
         if ($skip) {
-            for (1..4) {
-                skip $skip, 0;
-            }
+            skip $skip, 4;
         }
         else {
             if ($is_cp) {
@@ -424,15 +420,15 @@ for $name (keys %case_changing) {
 
             my $ret = eval "Devel::PPPort::$fcn($original)";
             my $fail = $@;  # Have to save $@, as it gets destroyed
-            ok ($fail, "", "$fcn($original) didn't fail");
+            is ($fail, "", "$fcn($original) didn't fail");
             my $first = (ivers($]) != ivers(5.6))
                         ? substr($utf8_changed, 0, 1)
                         : $utf8_changed, 0, 1;
-            ok($ret->[0], ord $first,
+            is($ret->[0], ord $first,
                "ord of $fcn($original) is $changed");
-            ok($ret->[1], $utf8_changed,
+            is($ret->[1], $utf8_changed,
                "UTF-8 of of $fcn($original) is correct");
-            ok($ret->[2], $should_be_bytes,
+            is($ret->[2], $should_be_bytes,
                "Length of $fcn($original) is $should_be_bytes");
         }
 
@@ -455,9 +451,7 @@ for $name (keys %case_changing) {
                 $skip = "Don't try to test shortened single bytes";
             }
             if ($skip) {
-                for (1..4) {
-                    skip $skip, 0;
-                }
+                skip $skip, 4;
             }
             else {
                 my $fcn = "to${name}_utf8_safe";
@@ -468,30 +462,28 @@ for $name (keys %case_changing) {
                 my $ret = eval "no warnings; $eval_string" || 0;
                 my $fail = $@;  # Have to save $@, as it gets destroyed
                 if ($truncate == 0) {
-                    ok ($fail, "", "Didn't fail on full length input");
+                    is ($fail, "", "Didn't fail on full length input");
                     my $first = (ivers($]) != ivers(5.6))
                                 ? substr($utf8_changed, 0, 1)
                                 : $utf8_changed, 0, 1;
-                    ok($ret->[0], ord $first,
+                    is($ret->[0], ord $first,
                        "ord of $fcn($original) is $changed");
-                    ok($ret->[1], $utf8_changed,
+                    is($ret->[1], $utf8_changed,
                        "UTF-8 of of $fcn($original) is correct");
-                    ok($ret->[2], $should_be_bytes,
+                    is($ret->[2], $should_be_bytes,
                     "Length of $fcn($original) is $should_be_bytes");
                 }
                 else {
-                    ok ($fail, eval 'qr/Malformed UTF-8 character/',
+                    is ($fail, eval 'qr/Malformed UTF-8 character/',
                         "Gave appropriate error for short char: $original");
-                    for (1..3) {
-                        skip("Expected failure means remaining tests for"
-                           . " this aren't relevant", 0);
-                    }
+                    skip("Expected failure means remaining tests for"
+                       . " this aren't relevant", 3);
                 }
             }
         }
     }
 }
 
-ok(&Devel::PPPort::av_top_index([1,2,3]), 2);
-ok(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
+is(&Devel::PPPort::av_top_index([1,2,3]), 2);
+is(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
 

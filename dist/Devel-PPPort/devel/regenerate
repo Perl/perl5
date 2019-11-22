@@ -41,7 +41,7 @@ unless (-e 'parts/embed.fnc' and -e 'parts/apidoc.fnc') {
 }
 
 if (! $opt{'yes'}) {
-    ask_or_quit("Are you SURE you have:\n1) updated parts/embed.fnc to latest blead?\n2) run devel/mkapidoc.sh to update parts/apidoc.fnc?\n3) run devel/mkppport_fnc.pl to update parts/ppport.fnc?\n");
+    ask_or_quit("Are you SURE you have:\n1) updated parts/embed.fnc to latest blead?\n2) run devel/mkapidoc.pl to update parts/apidoc.fnc?\n3) run devel/mkppport_fnc.pl to update parts/ppport.fnc?\n");
 }
 
 my %files = map { ($_ => [glob "parts/$_/5*"]) } qw( base todo );
