@@ -20326,6 +20326,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         scan = REGNODE_OFFSET(temp);
     }
 
+    assert(val >= scan);
     if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
         assert((UV) (val - scan) <= U32_MAX);
         ARG_SET(REGNODE_p(scan), val - scan);
