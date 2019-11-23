@@ -40,20 +40,36 @@ jobs:
       - name: Check out again, using Cygwin git, to reset file permissions
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            git checkout --force
+            path c:\tools\cygwin\bin
+            c:\tools\cygwin\bin\sh.exe -c "find . -exec setfacl -b {} \;"
+      - name: Output environment
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin
+            c:\tools\cygwin\bin\sh.exe -c "env; pwd; mount; cat /etc/fstab"
+      - name: "mount; cat fstab"
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin
+            c:\tools\cygwin\bin\sh.exe -c "mount; cat /etc/fstab"
+      - name: "Strip/reset permissions"
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin
+            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5; setfacl -b ."
       - name: Configure
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            c:\tools\cygwin\bin\sh.exe ./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g
+            path c:\tools\cygwin\bin
+            @rem c:\tools\cygwin\bin\sh.exe -c "./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g"
+            c:\tools\cygwin\bin\sh.exe -c "./Configure -des -Dusedevel -Doptimize=-g"
       - name: Build
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            make -j2
+            path c:\tools\cygwin\bin
+            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5; pwd; echo $PATH; make -j2"
       - name: Run Tests
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            make -j3 test
+            path c:\tools\cygwin\bin
+            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5; pwd; echo $PATH; HARNESS_OPTIONS=j3 make -j3 test_harness"
