@@ -703,6 +703,7 @@ with a ptr argument.
                    ((IN_BYTES || !UTF)                                      \
                      ? isWORDCHAR(*(p))                                     \
                      : isWORDCHAR_utf8_safe((U8 *) p, (U8 *) e))
+#define isALNUM_lazy_if_safe(p, e, UTF) isWORDCHAR_lazy_if_safe(p, e, UTF)
 
 #define isALNUM_lazy_if(p,UTF)                                              \
             _is_utf8_FOO(_CC_IDFIRST, (const U8 *) p, "isALNUM_lazy_if",    \

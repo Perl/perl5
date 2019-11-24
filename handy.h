@@ -2229,7 +2229,9 @@ END_EXTERN_C
 #define isALNUM_uni(c)      isWORDCHAR_uni(c)
 #define isALNUM_LC_uvchr(c) isWORDCHAR_LC_uvchr(c)
 #define isALNUM_utf8(p,e)   isWORDCHAR_utf8(p,e)
+#define isALNUM_utf8_safe(p,e) isWORDCHAR_utf8_safe(p,e)
 #define isALNUM_LC_utf8(p,e)isWORDCHAR_LC_utf8(p,e)
+#define isALNUM_LC_utf8_safe(p,e)isWORDCHAR_LC_utf8_safe(p,e)
 #define isALNUMC_A(c)       isALPHANUMERIC_A(c)      /* Mnemonic: "C's alnum" */
 #define isALNUMC_L1(c)      isALPHANUMERIC_L1(c)
 #define isALNUMC(c)	    isALPHANUMERIC(c)
@@ -2237,7 +2239,8 @@ END_EXTERN_C
 #define isALNUMC_uni(c)     isALPHANUMERIC_uni(c)
 #define isALNUMC_LC_uvchr(c) isALPHANUMERIC_LC_uvchr(c)
 #define isALNUMC_utf8(p,e)  isALPHANUMERIC_utf8(p,e)
-#define isALNUMC_LC_utf8(p,e) isALPHANUMERIC_LC_utf8(p,e)
+#define isALNUMC_utf8_safe(p,e)  isALPHANUMERIC_utf8_safe(p,e)
+#define isALNUMC_LC_utf8_safe(p,e) isALPHANUMERIC_LC_utf8_safe(p,e)
 
 /* On EBCDIC platforms, CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII,
  * except that they don't necessarily mean the same characters, e.g. CTRL-D is
