@@ -14,6 +14,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      # Do a first check out using the system git
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@master
         with:
@@ -41,35 +42,42 @@ jobs:
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            c:\tools\cygwin\bin\sh.exe -c "find . -exec setfacl -b {} \;"
+            cd d:\a\perl5\
+            git clone perl5 perl5-build
+            cd d:\a\perl5\perl5-build
       - name: Output environment
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
+            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "env; pwd; mount; cat /etc/fstab"
       - name: "mount; cat fstab"
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
+            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "mount; cat /etc/fstab"
       - name: "Strip/reset permissions"
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5; setfacl -b ."
+            cd d:\a\perl5\perl5-build
+            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5-build; setfacl -b ."
       - name: Configure
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            @rem c:\tools\cygwin\bin\sh.exe -c "./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g"
+            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "./Configure -des -Dusedevel -Doptimize=-g"
       - name: Build
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5; pwd; echo $PATH; make -j2"
+            cd d:\a\perl5\perl5-build
+            c:\tools\cygwin\bin\sh.exe -c "pwd; echo $PATH; make -j2 test_prep"
       - name: Run Tests
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5; pwd; echo $PATH; HARNESS_OPTIONS=j3 make -j3 test_harness"
+            cd d:\a\perl5\perl5-build
+            c:\tools\cygwin\bin\sh.exe -c "HARNESS_OPTIONS=j3 make -j3 test_harness"
