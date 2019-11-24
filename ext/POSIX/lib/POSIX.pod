@@ -2257,6 +2257,9 @@ Create a set with C<SIGUSR1>.
 
 	$sigset = POSIX::SigSet->new( &POSIX::SIGUSR1 );
 
+Throws an error if any of the signals supplied cannot be added to the
+set.
+
 =item C<addset>
 
 Add a signal to a SigSet object.

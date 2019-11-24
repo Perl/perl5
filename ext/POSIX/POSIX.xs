@@ -1844,8 +1844,11 @@ new(packname = "POSIX::SigSet", ...)
 					       sizeof(sigset_t),
 					       packname);
 	    sigemptyset(s);
-	    for (i = 1; i < items; i++)
-		sigaddset(s, SvIV(ST(i)));
+	    for (i = 1; i < items; i++) {
+                IV sig = SvIV(ST(i));
+		if (sigaddset(s, sig) < 0)
+                    croak("POSIX::Sigset->new: failed to add signal %" IVdf, sig);
+            }
 	    XSRETURN(1);
 	}
 
