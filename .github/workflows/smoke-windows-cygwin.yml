@@ -15,35 +15,29 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
-        with:
-            fetch-depth: 10
       - name: Set up Cygwin
+        shell: cmd
         run: |
-          choco install cygwin cyg-get
+          choco install cygwin --params="/InstallDir:%GITHUB_WORKSPACE%\cygwin"
+          choco install cyg-get
           cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
-      - name: Find out environment
+      - name: Check out using Cygwin git, to ensure correct file permissions
         shell: cmd
         run: |
-          dir c:\tools\cygwin
-          path
-      - name: Check out again, using Cygwin git, to reset file permissions
-        shell: cmd
-        run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            git checkout --force
+            path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+            sh -c "mkdir -p ~; cd ~; echo "$GITHUB_REPOSITORY"; git clone -qn https://github.com/$GITHUB_REPOSITORY.git work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin $GITHUB_REF ; fi ; git checkout $GITHUB_SHA"
       - name: Configure
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            c:\tools\cygwin\bin\sh.exe ./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g
+            path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+            sh.exe -c "cd ~/work; ./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g -DDEBUGGING"
       - name: Build
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            make -j2
+            path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+            sh -c "cd ~/work; make -j2"
       - name: Run Tests
         shell: cmd
         run: |
-            path c:\tools\cygwin\bin;c:\tools\cygwin\usr\bin
-            make -j2 test
+            path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+            sh -c "cd ~/work; make -j2 test"
