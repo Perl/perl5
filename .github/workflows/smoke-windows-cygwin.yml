@@ -32,7 +32,7 @@ jobs:
         if: steps.setup-cygwin.outputs.cache-hit != 'true'
         run: |
           choco install cygwin cyg-get
-          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
+          cyg-get cygutils-extra cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
       - name: Find out environment
         shell: cmd
         run: |
@@ -42,42 +42,47 @@ jobs:
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\
-            git clone perl5 perl5-build
-            cd d:\a\perl5\perl5-build
+            git checkout --force
       - name: Output environment
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "env; pwd; mount; cat /etc/fstab"
       - name: "mount; cat fstab"
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "mount; cat /etc/fstab"
+      - name: id
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin
+            id
       - name: "Strip/reset permissions"
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\perl5-build
-            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5-build; setfacl -b ."
+            c:\tools\cygwin\bin\sh.exe -c "cd /cygdrive/d/a/perl5/perl5; setfacl -b ."
       - name: Configure
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "./Configure -des -Dusedevel -Doptimize=-g"
       - name: Build
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "pwd; echo $PATH; make -j2 test_prep"
+      - name: Run unprivileged FS stat tests
+        shell: cmd
+        run: |
+            path c:\tools\cygwin\bin
+            cygdrop sh -c "cd t; ../perl -I../lib op/stat.t"
+            cygdrop sh -c "cd t; ../perl -I../lib ../lib/File/stat.t"
+            cygdrop sh -c "cd t; ../perl -I../lib ../lib/File/Copy.t"
+            cygdrop sh -c "cd t; ../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t"
       - name: Run Tests
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            cd d:\a\perl5\perl5-build
             c:\tools\cygwin\bin\sh.exe -c "HARNESS_OPTIONS=j3 make -j3 test_harness"
