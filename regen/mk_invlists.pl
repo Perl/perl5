@@ -61,6 +61,29 @@ my $max_hdr_len = 3;    # In headings, how wide a name is allowed?
 
 print $out_fh "/* See the generating file for comments */\n\n";
 
+print $out_fh <<'EOF';
+/* This gives the number of code points that can be in the bitmap of an ANYOF
+ * node.  The shift number must currently be one of: 8..12.  It can't be less
+ * than 8 (256) because some code relies on it being at least that.  Above 12
+ * (4096), and you start running into warnings that some data structure widths
+ * have been exceeded, though the test suite as of this writing still passes
+ * for up through 16, which is as high as anyone would ever want to go,
+ * encompassing all of the Unicode BMP, and thus including all the economically
+ * important world scripts.  At 12 most of them are: including Arabic,
+ * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
+ * Japanese, nor Korean.  (The regarglen structure in regnodes.h is a U8, and
+ * the trie types TRIEC and AHOCORASICKC are larger than U8 for shift values
+ * above 12.)  Be sure to benchmark before changing, as larger sizes do
+ * significantly slow down the test suite */
+
+EOF
+
+my $num_anyof_code_points = '(1 << 8)';
+
+print $out_fh "#define NUM_ANYOF_CODE_POINTS   $num_anyof_code_points\n\n";
+
+$num_anyof_code_points = eval $num_anyof_code_points;
+
 # enums that should be made public
 my %public_enums = (
                     _Perl_SCX => 1
@@ -1124,6 +1147,13 @@ sub _Perl_CCC_non0_non230 {
     }
 
     @return = sort { $a <=> $b } @return;
+    @return = mk_invlist_from_sorted_cp_list(\@return);
+    return \@return;
+}
+
+sub _Perl_InBitmap {
+    my @return;
+    push @return, $_ for 0 .. $num_anyof_code_points - 1;
     @return = mk_invlist_from_sorted_cp_list(\@return);
     return \@return;
 }
@@ -2356,6 +2386,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     Case_Folding
                     &_Perl_IVCF
                     &_Perl_CCC_non0_non230
+                    &_Perl_InBitmap
                 );
                 # NOTE that the convention is that extra enum values come
                 # after the property name, separated by commas, with the enums

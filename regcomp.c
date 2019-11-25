@@ -7420,28 +7420,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
-    /* Initialize these here instead of as-needed, as is quick and avoids
-     * having to test them each time otherwise */
-    if (! PL_InBitmap) {
-#ifdef DEBUGGING
-        char * dump_len_string;
-#endif
-
-        /* This is calculated here, because the Perl program that generates the
-         * static global ones doesn't currently have access to
-         * NUM_ANYOF_CODE_POINTS */
-	PL_InBitmap = _new_invlist(2);
-	PL_InBitmap = _add_range_to_invlist(PL_InBitmap, 0,
-                                                    NUM_ANYOF_CODE_POINTS - 1);
-#ifdef DEBUGGING
-        dump_len_string = PerlEnv_getenv("PERL_DUMP_RE_MAX_LEN");
-        if (   ! dump_len_string
-            || ! grok_atoUV(dump_len_string, (UV *)&PL_dump_re_max_len, NULL))
-        {
-            PL_dump_re_max_len = 60;    /* A reasonable default */
-        }
-#endif
-    }
 
     pRExC_state->warn_text = NULL;
     pRExC_state->unlexed_names = NULL;
@@ -22599,6 +22577,17 @@ Perl_init_uniprops(pTHX)
 {
     dVAR;
 
+#ifdef DEBUGGING
+    char * dump_len_string;
+
+    dump_len_string = PerlEnv_getenv("PERL_DUMP_RE_MAX_LEN");
+    if (   ! dump_len_string
+        || ! grok_atoUV(dump_len_string, (UV *)&PL_dump_re_max_len, NULL))
+    {
+        PL_dump_re_max_len = 60;    /* A reasonable default */
+    }
+#endif
+
     PL_user_def_props = newHV();
 
 #ifdef USE_ITHREADS
@@ -22650,6 +22639,7 @@ Perl_init_uniprops(pTHX)
     PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
     PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
 
+    PL_InBitmap = _new_invlist_C_array(_Perl_InBitmap_invlist);
     PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
     PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
     PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);

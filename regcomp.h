@@ -199,21 +199,6 @@ struct regnode_2 {
     U16 arg2;
 };
 
-/* This give the number of code points that can be in the bitmap of an ANYOF
- * node.  The shift number must currently be one of: 8..12.  It can't be less
- * than 8 (256) because some code relies on it being at least that.  Above 12
- * (4096), and you start running into warnings that some data structure widths
- * have been exceeded, though the test suite as of this writing still passes
- * for up through 16, which is as high as anyone would ever want to go,
- * encompassing all of the Unicode BMP, and thus including all the economically
- * important world scripts.  At 12 most of them are: including Arabic,
- * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
- * Japanese, nor Korean.  (The regarglen structure in regnodes.h is a U8, and
- * the trie types TRIEC and AHOCORASICKC are larger than U8 for shift values
- * above 12.)  Be sure to benchmark before changing, as larger sizes do
- * significantly slow down the test suite */
-#define NUM_ANYOF_CODE_POINTS   (1 << 8)
-
 #define ANYOF_BITMAP_SIZE	(NUM_ANYOF_CODE_POINTS / 8)   /* 8 bits/Byte */
 
 /* Note that these form structs which are supersets of the next smaller one, by
