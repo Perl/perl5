@@ -1,16 +1,11 @@
 #!./perl
 
-BEGIN {
-    # Can't chdir in BEGIN before FindBin runs, as it then can't find us.
-    @INC = -d 't' ? 'lib' : '../lib';
-}
-
 print "1..2\n";
 
 use FindBin qw($Bin);
 
 print "# $Bin\n";
-print "not " unless $Bin =~ m,[/.]lib\]?$,;
+print "not " unless $Bin =~ m,[/.]t\]?$,;
 print "ok 1\n";
 
 $0 = "-";

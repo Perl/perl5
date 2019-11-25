@@ -28,6 +28,7 @@ no_index:
     - dist/ExtUtils-CBuilder
     - dist/ExtUtils-ParseXS
     - dist/Filter-Simple
+    - dist/FindBin
     - dist/I18N-Collate
     - dist/if
     - dist/IO/
