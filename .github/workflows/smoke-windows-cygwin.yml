@@ -80,15 +80,18 @@ jobs:
             cd t
             cd
             dir ..\perl.exe
-            psexec64 -l d:\a\perl5\perl5\perl -I../lib op/stat.t >d:\a\perl5\perl5\tmp.log 2>&1
-            psexec64 -l d:\a\perl5\perl5\perl -I../lib ../lib/File/stat.t >>d:\a\perl5\perl5\tmp.log 2>&1
-            psexec64 -l d:\a\perl5\perl5\perl -I../lib ../lib/File/Copy.t >>d:\a\perl5\perl5\tmp.log 2>&1
-            psexec64 -l d:\a\perl5\perl5\perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t >>d:\a\perl5\perl5\tmp.log 2>&1
-            dir d:\a\perl5\perl5\tmp.log
+            psexec64 -l sh -c "/cygdrive/d/a/perl5/perl5/perl -I../lib op/stat.t >/cygdrive/d/a/perl5/perl5/tmp.log 2>&1"
+            type d:\a\perl5\perl5\tmp.log
+            psexec64 -l sh -c "/cygdrive/d/a/perl5/perl5/perl -I../lib ../lib/File/stat.t >/cygdrive/d/a/perl5/perl5/tmp.log 2>&1"
+            type d:\a\perl5\perl5\tmp.log
+            psexec64 -l sh -c "/cygdrive/d/a/perl5/perl5/perl  -I../lib ../lib/File/Copy.t >/cygdrive/d/a/perl5/perl5/tmp.log 2>&1"
+            type d:\a\perl5\perl5\tmp.log
+            psexec64 -l sh -c "/cygdrive/d/a/perl5/perl5/perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t >/cygdrive/d/a/perl5/perl5/tmp.log 2>&1"
             type d:\a\perl5\perl5\tmp.log
       - name: Run Tests
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
             path d:\a\perl5\perl5;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\tools\cygwin\bin
-            psexec64 make test
+            psexec64 sh -c "make test >./tmp.log 2>&1"
+            type tmp.log
