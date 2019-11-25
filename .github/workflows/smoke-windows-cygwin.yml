@@ -78,12 +78,14 @@ jobs:
         run: |
             path d:\a\perl5\perl5;c:\tools\cygwin\bin;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\windows\system32
             cd t
-            psexec64 -l cmd.exe /c "../perl -I../lib op/stat.t 2>&1 >tmp.log"
-            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/stat.t 2>&1 >>tmp.log"
-            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/Copy.t 2>&1 >>tmp.log"
-            psexec64 -l cmd.exe /c "../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t 2>&1 >>tmp.log"
-            dir tmp.log
-            type tmp.log
+            cd
+            dir ..\perl.exe
+            psexec64 -l cmd.exe /c "../perl -I../lib op/stat.t 2>&1 >d:\a\perl5\perl5\tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/stat.t 2>&1 >>d:\a\perl5\perl5\tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/Copy.t 2>&1 >>d:\a\perl5\perl5\tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t 2>&1 >>d:\a\perl5\perl5\tmp.log"
+            dir d:\a\perl5\perl5\tmp.log
+            type d:\a\perl5\perl5\tmp.log
       - name: Run Tests
         shell: cmd
         run: |
