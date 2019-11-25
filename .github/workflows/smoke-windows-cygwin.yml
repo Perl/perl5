@@ -62,7 +62,7 @@ jobs:
         shell: cmd
         run: |
             path c:\tools\cygwin\bin;C:\ProgramData\chocolatey\lib\sysinternals\tools
-            psexec64 -l "sh -c id>/cygdrive/d/a/perl5/perl5/tmp.log"
+            psexec64 -l sh -c "id>/cygdrive/d/a/perl5/perl5/tmp.log"
             type tmp.log
       - name: "Strip/reset permissions"
         shell: cmd
