@@ -80,10 +80,10 @@ jobs:
             cd t
             cd
             dir ..\perl.exe
-            psexec64 -l cmd.exe /c "../perl -I../lib op/stat.t 2>&1 >d:\a\perl5\perl5\tmp.log"
-            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/stat.t 2>&1 >>d:\a\perl5\perl5\tmp.log"
-            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/Copy.t 2>&1 >>d:\a\perl5\perl5\tmp.log"
-            psexec64 -l cmd.exe /c "../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t 2>&1 >>d:\a\perl5\perl5\tmp.log"
+            psexec64 -l d:\a\perl5\perl5\perl -I../lib op/stat.t >d:\a\perl5\perl5\tmp.log 2>&1
+            psexec64 -l d:\a\perl5\perl5\perl -I../lib ../lib/File/stat.t >>d:\a\perl5\perl5\tmp.log 2>&1
+            psexec64 -l d:\a\perl5\perl5\perl -I../lib ../lib/File/Copy.t >>d:\a\perl5\perl5\tmp.log 2>&1
+            psexec64 -l d:\a\perl5\perl5\perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t >>d:\a\perl5\perl5\tmp.log 2>&1
             dir d:\a\perl5\perl5\tmp.log
             type d:\a\perl5\perl5\tmp.log
       - name: Run Tests
