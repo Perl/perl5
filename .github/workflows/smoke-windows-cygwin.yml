@@ -78,10 +78,11 @@ jobs:
         run: |
             path d:\a\perl5\perl5;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\tools\cygwin\bin
             cd t
-            psexec -l ../perl -I../lib op/stat.t
-            psexec -l ../perl -I../lib ../lib/File/stat.t
-            psexec -l ../perl -I../lib ../lib/File/Copy.t
-            psexec -l ../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t
+            psexec -l c:\windows\system32\cmd /c "../perl -I../lib op/stat.t 2>&1 >tmp.log"
+            psexec -l c:\windows\system32\cmd /c "../perl -I../lib ../lib/File/stat.t 2>&1 >>tmp.log"
+            psexec -l c:\windows\system32\cmd /c "../perl -I../lib ../lib/File/Copy.t 2>&1 >>tmp.log"
+            psexec -l c:\windows\system32\cmd /c "../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t 2>&1 >>tmp.log"
+            type tmp.log
       - name: Run Tests
         shell: cmd
         run: |
