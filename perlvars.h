@@ -275,41 +275,6 @@ PERLVARA(G, hash_chars, (1+256) * sizeof(U32), unsigned char) /* perl.c and hv.h
 PERLVAR(G, perllib_sep, char)
 #endif
 
-PERLVAR(G, AboveLatin1,	SV *)
-PERLVAR(G, Assigned_invlist, SV *)
-PERLVAR(G, GCB_invlist, SV *)
-PERLVAR(G, HasMultiCharFold,   SV *)
-PERLVAR(G, InMultiCharFold,   SV *)
-PERLVAR(G, Latin1,	SV *)
-PERLVAR(G, LB_invlist, SV *)
-PERLVAR(G, SB_invlist, SV *)
-PERLVAR(G, SCX_invlist, SV *)
-PERLVAR(G, UpperLatin1,	SV *)   /* Code points 128 - 255 */
-
-/* List of characters that participate in any fold defined by Unicode */
-PERLVAR(G, in_some_fold, SV *)
-
-PERLVAR(G, utf8_idcont,	SV *)
-PERLVAR(G, utf8_idstart, SV *)
-PERLVAR(G, utf8_perl_idcont, SV *)
-PERLVAR(G, utf8_perl_idstart, SV *)
-PERLVAR(G, utf8_xidcont, SV *)
-PERLVAR(G, utf8_xidstart, SV *)
-PERLVAR(G, WB_invlist, SV *)
-PERLVARA(G, XPosix_ptrs, POSIX_CC_COUNT, SV *)
-PERLVARA(G,  Posix_ptrs, POSIX_CC_COUNT, SV *)
-PERLVAR(G, utf8_toupper, SV *)
-PERLVAR(G, utf8_totitle, SV *)
-PERLVAR(G, utf8_tolower, SV *)
-PERLVAR(G, utf8_tofold,	SV *)
-PERLVAR(G, utf8_tosimplefold,	SV *)
-PERLVAR(G, utf8_charname_begin, SV *)
-PERLVAR(G, utf8_charname_continue, SV *)
-PERLVAR(G, utf8_mark,	SV *)
-PERLVARI(G, InBitmap,	SV *, NULL)
-PERLVAR(G, CCC_non0_non230,	SV *)
-PERLVAR(G, Private_Use,	SV *)
-
 /* Definitions of user-defined \p{} properties, as the subs that define them
  * are only called once */
 PERLVARI(G, user_def_props,	HV *, NULL)

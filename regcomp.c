@@ -22608,7 +22608,7 @@ Perl_init_uniprops(pTHX)
 
 #endif
 
-    /* Set up the inversion list global variables */
+    /* Set up the inversion list interpreter-level variables */
 
     PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
     PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALNUM]);

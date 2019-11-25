@@ -1197,6 +1197,75 @@ perl_destruct(pTHXx)
     PL_warn_locale       = NULL;
 #endif
 
+    SvREFCNT_dec(PL_AboveLatin1);
+    PL_AboveLatin1 = NULL;
+    SvREFCNT_dec(PL_Assigned_invlist);
+    PL_Assigned_invlist = NULL;
+    SvREFCNT_dec(PL_GCB_invlist);
+    PL_GCB_invlist = NULL;
+    SvREFCNT_dec(PL_HasMultiCharFold);
+    PL_HasMultiCharFold = NULL;
+    SvREFCNT_dec(PL_InMultiCharFold);
+    PL_InMultiCharFold = NULL;
+    SvREFCNT_dec(PL_Latin1);
+    PL_Latin1 = NULL;
+    SvREFCNT_dec(PL_LB_invlist);
+    PL_LB_invlist = NULL;
+    SvREFCNT_dec(PL_SB_invlist);
+    PL_SB_invlist = NULL;
+    SvREFCNT_dec(PL_SCX_invlist);
+    PL_SCX_invlist = NULL;
+    SvREFCNT_dec(PL_UpperLatin1);
+    PL_UpperLatin1 = NULL;
+    SvREFCNT_dec(PL_in_some_fold);
+    PL_in_some_fold = NULL;
+    SvREFCNT_dec(PL_utf8_idcont);
+    PL_utf8_idcont = NULL;
+    SvREFCNT_dec(PL_utf8_idstart);
+    PL_utf8_idstart = NULL;
+    SvREFCNT_dec(PL_utf8_perl_idcont);
+    PL_utf8_perl_idcont = NULL;
+    SvREFCNT_dec(PL_utf8_perl_idstart);
+    PL_utf8_perl_idstart = NULL;
+    SvREFCNT_dec(PL_utf8_xidcont);
+    PL_utf8_xidcont = NULL;
+    SvREFCNT_dec(PL_utf8_xidstart);
+    PL_utf8_xidstart = NULL;
+    SvREFCNT_dec(PL_WB_invlist);
+    PL_WB_invlist = NULL;
+    SvREFCNT_dec(PL_utf8_toupper);
+    PL_utf8_toupper = NULL;
+    SvREFCNT_dec(PL_utf8_totitle);
+    PL_utf8_totitle = NULL;
+    SvREFCNT_dec(PL_utf8_tolower);
+    PL_utf8_tolower = NULL;
+    SvREFCNT_dec(PL_utf8_tofold);
+    PL_utf8_tofold = NULL;
+    SvREFCNT_dec(PL_utf8_tosimplefold);
+    PL_utf8_tosimplefold = NULL;
+    SvREFCNT_dec(PL_utf8_charname_begin);
+    PL_utf8_charname_begin = NULL;
+    SvREFCNT_dec(PL_utf8_charname_continue);
+    PL_utf8_charname_continue = NULL;
+    SvREFCNT_dec(PL_utf8_mark);
+    PL_utf8_mark = NULL;
+    SvREFCNT_dec(PL_InBitmap);
+    PL_InBitmap = NULL;
+    SvREFCNT_dec(PL_CCC_non0_non230);
+    PL_CCC_non0_non230 = NULL;
+    SvREFCNT_dec(PL_Private_Use);
+    PL_Private_Use = NULL;
+
+    for (i = 0; i < POSIX_CC_COUNT; i++) {
+        SvREFCNT_dec(PL_XPosix_ptrs[i]);
+        PL_XPosix_ptrs[i] = NULL;
+
+        if (i != _CC_CASED) {   /* A copy of Alpha */
+            SvREFCNT_dec(PL_Posix_ptrs[i]);
+            PL_Posix_ptrs[i] = NULL;
+        }
+    }
+
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);
     PL_compiling.cop_warnings = NULL;

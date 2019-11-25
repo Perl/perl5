@@ -898,6 +898,41 @@ PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
 
 PERLVARA(I, TR_SPECIAL_HANDLING_UTF8, UTF8_MAXBYTES, char)
 
+PERLVAR(I, AboveLatin1,	SV *)
+PERLVAR(I, Assigned_invlist, SV *)
+PERLVAR(I, GCB_invlist, SV *)
+PERLVAR(I, HasMultiCharFold,   SV *)
+PERLVAR(I, InMultiCharFold,   SV *)
+PERLVAR(I, Latin1,	SV *)
+PERLVAR(I, LB_invlist, SV *)
+PERLVAR(I, SB_invlist, SV *)
+PERLVAR(I, SCX_invlist, SV *)
+PERLVAR(I, UpperLatin1,	SV *)   /* Code points 128 - 255 */
+
+/* List of characters that participate in any fold defined by Unicode */
+PERLVAR(I, in_some_fold, SV *)
+
+PERLVAR(I, utf8_idcont,	SV *)
+PERLVAR(I, utf8_idstart, SV *)
+PERLVAR(I, utf8_perl_idcont, SV *)
+PERLVAR(I, utf8_perl_idstart, SV *)
+PERLVAR(I, utf8_xidcont, SV *)
+PERLVAR(I, utf8_xidstart, SV *)
+PERLVAR(I, WB_invlist, SV *)
+PERLVARA(I, XPosix_ptrs, POSIX_CC_COUNT, SV *)
+PERLVARA(I,  Posix_ptrs, POSIX_CC_COUNT, SV *)
+PERLVAR(I, utf8_toupper, SV *)
+PERLVAR(I, utf8_totitle, SV *)
+PERLVAR(I, utf8_tolower, SV *)
+PERLVAR(I, utf8_tofold,	SV *)
+PERLVAR(I, utf8_tosimplefold,	SV *)
+PERLVAR(I, utf8_charname_begin, SV *)
+PERLVAR(I, utf8_charname_continue, SV *)
+PERLVAR(I, utf8_mark,	SV *)
+PERLVARI(I, InBitmap,	SV *, NULL)
+PERLVAR(I, CCC_non0_non230,	SV *)
+PERLVAR(I, Private_Use,	SV *)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

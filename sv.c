@@ -15682,6 +15682,47 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_setlocale_buf = NULL;
     PL_setlocale_bufsize = 0;
 
+    /* Unicode inversion lists */
+
+    PL_AboveLatin1            = sv_dup_inc(proto_perl->IAboveLatin1, param);
+    PL_Assigned_invlist       = sv_dup_inc(proto_perl->IAssigned_invlist, param);
+    PL_GCB_invlist            = sv_dup_inc(proto_perl->IGCB_invlist, param);
+    PL_HasMultiCharFold       = sv_dup_inc(proto_perl->IHasMultiCharFold, param);
+    PL_InMultiCharFold        = sv_dup_inc(proto_perl->IInMultiCharFold, param);
+    PL_Latin1                 = sv_dup_inc(proto_perl->ILatin1, param);
+    PL_LB_invlist             = sv_dup_inc(proto_perl->ILB_invlist, param);
+    PL_SB_invlist             = sv_dup_inc(proto_perl->ISB_invlist, param);
+    PL_SCX_invlist            = sv_dup_inc(proto_perl->ISCX_invlist, param);
+    PL_UpperLatin1            = sv_dup_inc(proto_perl->IUpperLatin1, param);
+    PL_in_some_fold           = sv_dup_inc(proto_perl->Iin_some_fold, param);
+    PL_utf8_idcont            = sv_dup_inc(proto_perl->Iutf8_idcont, param);
+    PL_utf8_idstart           = sv_dup_inc(proto_perl->Iutf8_idstart, param);
+    PL_utf8_perl_idcont       = sv_dup_inc(proto_perl->Iutf8_perl_idcont, param);
+    PL_utf8_perl_idstart      = sv_dup_inc(proto_perl->Iutf8_perl_idstart, param);
+    PL_utf8_xidcont           = sv_dup_inc(proto_perl->Iutf8_xidcont, param);
+    PL_utf8_xidstart          = sv_dup_inc(proto_perl->Iutf8_xidstart, param);
+    PL_WB_invlist             = sv_dup_inc(proto_perl->IWB_invlist, param);
+    for (i = 0; i < POSIX_CC_COUNT; i++) {
+        PL_XPosix_ptrs[i]     = sv_dup_inc(proto_perl->IXPosix_ptrs[i], param);
+        if (i != _CC_CASED && i != _CC_VERTSPACE) {
+            PL_Posix_ptrs[i]  = sv_dup_inc(proto_perl->IPosix_ptrs[i], param);
+        }
+    }
+    PL_Posix_ptrs[_CC_CASED]  = PL_Posix_ptrs[_CC_ALPHA];
+    PL_Posix_ptrs[_CC_VERTSPACE] = NULL;
+
+    PL_utf8_toupper           = sv_dup_inc(proto_perl->Iutf8_toupper, param);
+    PL_utf8_totitle           = sv_dup_inc(proto_perl->Iutf8_totitle, param);
+    PL_utf8_tolower           = sv_dup_inc(proto_perl->Iutf8_tolower, param);
+    PL_utf8_tofold            = sv_dup_inc(proto_perl->Iutf8_tofold, param);
+    PL_utf8_tosimplefold      = sv_dup_inc(proto_perl->Iutf8_tosimplefold, param);
+    PL_utf8_charname_begin    = sv_dup_inc(proto_perl->Iutf8_charname_begin, param);
+    PL_utf8_charname_continue = sv_dup_inc(proto_perl->Iutf8_charname_continue, param);
+    PL_utf8_mark              = sv_dup_inc(proto_perl->Iutf8_mark, param);
+    PL_InBitmap               = sv_dup_inc(proto_perl->IInBitmap, param);
+    PL_CCC_non0_non230        = sv_dup_inc(proto_perl->ICCC_non0_non230, param);
+    PL_Private_Use            = sv_dup_inc(proto_perl->IPrivate_Use, param);
+
 #if 0
     PL_seen_deprecated_macro = hv_dup_inc(proto_perl->Iseen_deprecated_macro, param);
 #endif
