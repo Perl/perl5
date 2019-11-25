@@ -31,7 +31,7 @@ jobs:
       - name: Set up Cygwin
         if: steps.setup-cygwin.outputs.cache-hit != 'true'
         run: |
-          choco install cygwin cyg-get
+          choco install cygwin cyg-get sysinternals
           cyg-get cygutils-extra cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
       - name: Find out environment
         shell: cmd
@@ -74,16 +74,17 @@ jobs:
             path c:\tools\cygwin\bin
             c:\tools\cygwin\bin\sh.exe -c "pwd; echo $PATH; make -j2 test_prep"
       - name: Run unprivileged FS stat tests
-        # https://stackoverflow.com/questions/20218076/batch-file-drop-elevated-privileges-run-a-command-as-original-user
         shell: cmd
         run: |
-            path C:\Windows\System32;c:\tools\cygwin\bin
-            runas /trustlevel:0x20000 sh -c "cd t; ../perl -I../lib op/stat.t"
-            @rem runas /trustlevel:0x20000 sh -c "cd t; ../perl -I../lib ../lib/File/stat.t"
-            @rem runas /trustlevel:0x20000 sh -c "cd t; ../perl -I../lib ../lib/File/Copy.t"
-            @rem runas /trustlevel:0x20000 sh -c "cd t; ../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t"
+            path d:\a\perl5\perl5;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\tools\cygwin\bin
+            cd t
+            psexec -l ../perl -I../lib op/stat.t
+            psexec -l ../perl -I../lib ../lib/File/stat.t
+            psexec -l ../perl -I../lib ../lib/File/Copy.t
+            psexec -l ../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t
       - name: Run Tests
         shell: cmd
         run: |
             path c:\tools\cygwin\bin
-            c:\tools\cygwin\bin\sh.exe -c "HARNESS_OPTIONS=j3 make -j3 test_harness"
+            path d:\a\perl5\perl5;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\tools\cygwin\bin
+            psexec64 make test
