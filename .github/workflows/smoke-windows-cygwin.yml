@@ -76,12 +76,13 @@ jobs:
       - name: Run unprivileged FS stat tests
         shell: cmd
         run: |
-            path d:\a\perl5\perl5;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\tools\cygwin\bin
+            path d:\a\perl5\perl5;c:\tools\cygwin\bin;C:\ProgramData\chocolatey\lib\sysinternals\tools;c:\windows\system32
             cd t
-            psexec -l c:\windows\system32\cmd /c "../perl -I../lib op/stat.t 2>&1 >tmp.log"
-            psexec -l c:\windows\system32\cmd /c "../perl -I../lib ../lib/File/stat.t 2>&1 >>tmp.log"
-            psexec -l c:\windows\system32\cmd /c "../perl -I../lib ../lib/File/Copy.t 2>&1 >>tmp.log"
-            psexec -l c:\windows\system32\cmd /c "../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t 2>&1 >>tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib op/stat.t 2>&1 >tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/stat.t 2>&1 >>tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib ../lib/File/Copy.t 2>&1 >>tmp.log"
+            psexec64 -l cmd.exe /c "../perl -I../lib ../cpan/ExtUtils-MakeMaker/t/fixin.t 2>&1 >>tmp.log"
+            dir tmp.log
             type tmp.log
       - name: Run Tests
         shell: cmd
