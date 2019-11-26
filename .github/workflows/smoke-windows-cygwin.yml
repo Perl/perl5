@@ -30,7 +30,7 @@ jobs:
         shell: cmd
         run: |
             path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-            sh.exe -c "cd ~/work; ./Configure -des -Dusedevel -Dissymlink='test -h' -Doptimize=-g -DDEBUGGING"
+            sh.exe -c "cd ~/work; ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING"
       - name: Build
         shell: cmd
         run: |
