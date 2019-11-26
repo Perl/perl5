@@ -27,8 +27,6 @@ if ( $ENV{TRAVIS} && defined $ENV{TRAVIS_COMMIT_RANGE} ) {
 elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
     # Same as above, except for Github Actions
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
-    system(qw( git switch -c  ), $ENV{GITHUB_HEAD_REF});
-    system(qw( git checkout ), $ENV{GITHUB_HEAD_REF});
 
     # This hardcoded origin/ isn't great, but I'm not sure how to better fix it
     my $common_ancestor = `git merge-base origin/$ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`;
