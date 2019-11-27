@@ -122,7 +122,7 @@ command line tool.  This tool will ensure that your bug report includes
 all the relevant system and configuration information.
 
 To browse existing Perl bugs and patches, you can use the web interface
-at L<https://rt.perl.org/>.
+at L<https://github.com/perl/perl5/issues>.
 
 Please check the archive of the perl5-porters list (see below) and/or
 the bug tracking system before submitting a bug report.  Often, you'll
@@ -1056,7 +1056,7 @@ situation by using the Devel::PatchPerl library from CPAN (not included in the
 core) to bring the source code at that commit to a buildable state.
 
 Here's a real world example, taken from work done to resolve
-L<perl #72414|https://rt.perl.org/Ticket/Display.html?id=72414>.
+L<perl #10118|https://github.com/Perl/perl5/issues/10118>.
 Use of F<Porting/bisect.pl> had identified commit
 C<ba77e4cc9d1ceebf472c9c5c18b2377ee47062e6> as the commit in which a bug was
 corrected.  To confirm, a P5P developer wanted to configure and build perl at

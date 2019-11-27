@@ -1,7 +1,7 @@
 #!./perl
 
 # print should not return EINTR
-# fails under 5.14.x see https://rt.perl.org/rt3/Ticket/Display.html?id=119097
+# fails under 5.14.x see https://github.com/Perl/perl5/issues/13142
 # also fails under 5.8.x
 
 BEGIN {

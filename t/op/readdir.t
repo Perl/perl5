@@ -58,8 +58,8 @@ isnt("$fh", "$fh[0]");
 isnt("$fh", "$fh{abc}");
 
 # See that perl does not segfault upon readdir($x=".");
-# https://rt.perl.org/rt3/Ticket/Display.html?id=68182
-fresh_perl_like(<<'EOP', qr/^no crash/, {}, 'RT #68182');
+# https://github.com/Perl/perl5/issues/9813
+fresh_perl_like(<<'EOP', qr/^no crash/, {}, 'GH #9813');
   eval {
     my $x = ".";
     my @files = readdir($x);

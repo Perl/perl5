@@ -1349,7 +1349,7 @@ get_hwnd_delay(pTHX, long child, DWORD tries)
      * caching reasons, and the child thread was attached to a different CPU
      * therefore there is no workload on that CPU and Sleep(0) returns control
      * without yielding the time slot.
-     * https://rt.perl.org/rt3/Ticket/Display.html?id=88840
+     * https://github.com/Perl/perl5/issues/11267
      */
     Sleep(0);
     win32_async_check(aTHX);

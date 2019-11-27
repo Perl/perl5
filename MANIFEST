@@ -5485,7 +5485,7 @@ t/base/rs.t			See if record-read works
 t/base/term.t			See if various terms work
 t/base/translate.t		See if character set translation works
 t/base/while.t			See if while work
-t/benchmark/rt26188-speed-up-keys-on-empty-hash.t	Benchmark if keys on empty hashes is fast enough
+t/benchmark/gh7094-speed-up-keys-on-empty-hash.t	Benchmark if keys on empty hashes is fast enough
 t/bigmem/hash.t			Check hashing too large strings throws an exception
 t/bigmem/index.t		Check that index() handles large offsets
 t/bigmem/pos.t			Check that pos() handles large offsets
@@ -5783,7 +5783,7 @@ t/op/exec.t			See if exec, system and qx work
 t/op/exists_sub.t		See if exists(&sub) works
 t/op/exp.t			See if math functions work
 t/op/fh.t			See if filehandles work
-t/op/filehandle.t		Tests for https://rt.perl.org/rt3/Ticket/Display.html?id=72586
+t/op/filehandle.t		Tests for https://github.com/Perl/perl5/issues/10133
 t/op/filetest.t			See if file tests work
 t/op/filetest_stack_ok.t	See if file tests leave their argument on the stack
 t/op/filetest_t.t		See if -t file test works

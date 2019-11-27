@@ -2277,7 +2277,7 @@ Some tests are known to fail:
 =item *
 
 F<ext/XS-APItest/t/call_checker.t> - see
-L<https://rt.perl.org/Ticket/Display.html?id=78502>
+L<https://github.com/Perl/perl5/issues/10750>
 
 =item *
 
