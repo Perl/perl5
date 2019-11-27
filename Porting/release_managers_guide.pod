@@ -141,11 +141,11 @@ Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
-=head3 rt.perl.org update access
+=head3 GitHub issue management access
 
-Make sure you have permission to close tickets on L<https://rt.perl.org/>
+Make sure you have permission to close tickets on L<https://github.com/Perl/perl5/issues>
 so you can respond to bug reports as necessary during your stint.  If you
-don't, make an account (if you don't have one) and contact the pumpking
+don't, make a GitHub account (if you don't have one) and contact the pumpking
 with your username to get ticket-closing permission.
 
 =head3 git checkout and commit bit
@@ -750,9 +750,9 @@ formatting, e.g.
     $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
         ~/perldelta.html
 
-You can add pod links for RT references thusly:
+You can add pod links for GitHub issue references thusly:
 
-    $ perl -p -i -e'BEGIN{undef $/}; s{(\[perl\s+#)(\d+)\]}{L<$1$2\]|https://rt.perl.org/Ticket/Display.html?id=$2>}mg' pod/perldelta.pod
+    $ perl -p -i -e'BEGIN{undef $/}; s{(\[perl\s+#)(\d+)\]}{L<$1$2\]|https://github.com/Perl/perl5/issues/$2>}mg' pod/perldelta.pod
 
 If you make changes, be sure to commit them.
 
