@@ -7,7 +7,7 @@ plan(tests => 6);
 
 =head1 NAME
 
-rt26188 - benchmark speed for keys() on empty hashes
+gh7094 - benchmark speed for keys() on empty hashes
 
 =head1 DESCRIPTION
 
@@ -23,9 +23,9 @@ the number or list of keys from an empty hash is about the same
 
 =head1 REFERENCE
 
-This test tests against RT ticket #26188
+This test tests against GitHub ticket #7094
 
-L<https://rt.perl.org/rt3/Public/Bug/Display.html?id=26188>
+L<https://github.com/Perl/perl5/issues/7094>
 
 =cut
 

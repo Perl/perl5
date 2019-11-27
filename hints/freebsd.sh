@@ -335,7 +335,7 @@ then
     d_uselocale='undef'
 fi
 
-# https://rt.perl.org/Ticket/Display.html?id=131337
+# https://github.com/Perl/perl5/issues/15984
 # Reported in 11.0-CURRENT with g++-4.8.5:
 # If using g++, the Configure scan for dlopen() fails.
 # Easier for now to just to forcibly set it.

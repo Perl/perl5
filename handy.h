@@ -2089,7 +2089,7 @@ END_EXTERN_C
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
- * https://rt.perl.org/rt3/Ticket/Display.html?id=74022 for more detail than you
+ * https://github.com/Perl/perl5/issues/10275 for more detail than you
  * ever wanted to know about.  (In the ASCII range, there isn't a difference.)
  * This used to be not the XID version, but we decided to go with the more
  * modern Unicode definition */

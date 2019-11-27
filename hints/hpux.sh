@@ -486,7 +486,7 @@ case "$ccisgcc" in
 			# > cc --version
 			# cc: HP C/aC++ B3910B A.06.15 [May 16 2007]
 			# Has optimizing problems with +O2 for blead (5.17.4),
-			# see https://rt.perl.org:443/rt3/Ticket/Display.html?id=103668.
+			# see https://github.com/Perl/perl5/issues/11748.
 			#
 			# +O2 +Onolimit +Onoprocelim  +Ostore_ordering \
 			# +Onolibcalls=strcmp

@@ -219,7 +219,7 @@ XS(Cygwin_cwd)
     dXSARGS;
     char *cwd;
 
-    /* See https://rt.perl.org/rt3/Ticket/Display.html?id=38628
+    /* See https://github.com/Perl/perl5/issues/8345
        There is Cwd->cwd() usage in the wild, and previous versions didn't die.
      */
     if(items > 1)
