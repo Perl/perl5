@@ -545,7 +545,7 @@ it doesn't need to fully describe how all old versions used to work.
 =head1 STANDARDS OF CONDUCT
 
 The official forum for the development of perl is the perl5-porters mailing
-list, mentioned above, and its bugtracker at rt.perl.org.  Posting to the
+list, mentioned above, and its bugtracker at GitHub.  Posting to the
 list and the bugtracker is not a right: all participants in discussion are
 expected to adhere to a standard of conduct.
 
@@ -582,8 +582,8 @@ decisions.
 
 Unacceptable behavior will result in a public and clearly identified
 warning.  A second instance of unacceptable behavior from the same
-individual will result in removal from the mailing list and rt.perl.org,
-for a period of one calendar month.  The rationale for this is to
+individual will result in removal from the mailing list and GitHub issue
+tracker, for a period of one calendar month.  The rationale for this is to
 provide an opportunity for the person to change the way they act.
 
 After the time-limited ban has been lifted, a third instance of
