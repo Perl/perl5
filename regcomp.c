@@ -14644,7 +14644,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                     /* Redo this node's parse, folding into 'locfold_buf' */
                     redo_p = RExC_parse;
-                    redo_e = locfold_buf;
+                    old_redo_e = redo_e = locfold_buf;
                     while (redo_p <= oldp) {
 
                         old_redo_e = redo_e;
