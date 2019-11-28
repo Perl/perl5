@@ -402,6 +402,7 @@ S_category_name(const int category)
  * known at compile time; "do_setlocale_r", not known until run time  */
 #  define do_setlocale_c(cat, locale) my_setlocale(cat, locale)
 #  define do_setlocale_r(cat, locale) my_setlocale(cat, locale)
+#  define FIX_GLIBC_LC_MESSAGES_BUG(i)
 
 #else   /* Below uses POSIX 2008 */
 
@@ -414,6 +415,22 @@ S_category_name(const int category)
 #  define do_setlocale_c(cat, locale)                                       \
                         emulate_setlocale(cat, locale, cat ## _INDEX, TRUE)
 #  define do_setlocale_r(cat, locale) emulate_setlocale(cat, locale, 0, FALSE)
+
+#  if ! defined(__GLIBC__) || ! defined(USE_LOCALE_MESSAGES)
+
+#    define FIX_GLIBC_LC_MESSAGES_BUG(i)
+
+#  else /* Invalidate glibc cache of loaded translations, see [perl #134264] */
+
+#    include <libintl.h>
+#    define FIX_GLIBC_LC_MESSAGES_BUG(i)                                        \
+        STMT_START {                                                        \
+            if ((i) == LC_MESSAGES_INDEX) {                                 \
+                textdomain(textdomain(NULL));                               \
+            }                                                               \
+        } STMT_END
+
+#  endif
 
 /* A third array, parallel to the ones above to map from category to its
  * equivalent mask */
@@ -1158,6 +1175,8 @@ S_emulate_setlocale(const int category,
             Safefree(PL_curlocales[i]);
             PL_curlocales[i] = savepv(locale);
         }
+
+        FIX_GLIBC_LC_MESSAGES_BUG(LC_MESSAGES_INDEX);
     }
     else {
 
@@ -1172,6 +1191,8 @@ S_emulate_setlocale(const int category,
         /* Then update the category's record */
         Safefree(PL_curlocales[index]);
         PL_curlocales[index] = savepv(locale);
+
+        FIX_GLIBC_LC_MESSAGES_BUG(index);
     }
 
 #  endif
