@@ -340,7 +340,7 @@ sub find_locales ($;$) {
     _trylocale("C", $categories, \@Locale, $allow_incompatible);
     _trylocale("POSIX", $categories, \@Locale, $allow_incompatible);
 
-    if ($Config{d_has_C_UTF8} eq 'true') {
+    if ($Config{d_has_C_UTF8} && $Config{d_has_C_UTF8} eq 'true') {
         _trylocale("C.UTF-8", $categories, \@Locale, $allow_incompatible);
     }
 
