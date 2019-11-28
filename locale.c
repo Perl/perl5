@@ -5274,9 +5274,9 @@ Perl_my_strerror(pTHX_ const int errnum)
         Safefree(save_locale);
     }
 
-#  elif defined(HAS_POSIX_2008_LOCALE)                      \
-     && defined(HAS_STRERROR_L)                             \
-     && defined(HAS_DUPLOCALE)
+#  elif   defined(USE_POSIX_2008_LOCALE)                      \
+     &&   defined(HAS_STRERROR_L)                             \
+     &&   defined(HAS_DUPLOCALE)
 
     /* This function is also trivial if we don't have to worry about thread
      * safety and have strerror_l(), as it handles the switch of locales so we
