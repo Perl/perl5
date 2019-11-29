@@ -2725,6 +2725,9 @@ The contents of SVs may be printed using the C<SVf> format, like so:
 
 where C<err_msg> is an SV.
 
+=for apidoc Amnh||SVf
+=for apidoc Amh||SVfARG|SV *sv
+
 Not all scalar types are printable.  Simple values certainly are: one of
 IV, UV, NV, or PV.  Also, if the SV is a reference to some value,
 either it will be dereferenced and the value printed, or information
