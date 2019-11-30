@@ -600,6 +600,7 @@
 #define sv_inc_nomg(a)		Perl_sv_inc_nomg(aTHX_ a)
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
 #define sv_isa(a,b)		Perl_sv_isa(aTHX_ a,b)
+#define sv_isa_sv(a,b)		Perl_sv_isa_sv(aTHX_ a,b)
 #define sv_isobject(a)		Perl_sv_isobject(aTHX_ a)
 #ifndef NO_MATHOMS
 #define sv_iv(a)		Perl_sv_iv(aTHX_ a)

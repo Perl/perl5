@@ -3417,6 +3417,11 @@ PERL_CALLCONV void	Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN off
 PERL_CALLCONV int	Perl_sv_isa(pTHX_ SV* sv, const char *const name);
 #define PERL_ARGS_ASSERT_SV_ISA	\
 	assert(name)
+PERL_CALLCONV bool	Perl_sv_isa_sv(pTHX_ SV* sv, SV *namesv)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_ISA_SV	\
+	assert(sv); assert(namesv)
+
 PERL_CALLCONV int	Perl_sv_isobject(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_SV_ISOBJECT
 #ifndef NO_MATHOMS

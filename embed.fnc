@@ -1777,6 +1777,7 @@ ApdR	|bool	|sv_derived_from_sv|NN SV* sv|NN SV *namesv|U32 flags
 ApdR	|bool	|sv_derived_from_pv|NN SV* sv|NN const char *const name|U32 flags
 ApdR	|bool	|sv_derived_from_pvn|NN SV* sv|NN const char *const name \
                                     |const STRLEN len|U32 flags
+ApdRx	|bool	|sv_isa_sv	|NN SV* sv|NN SV *namesv
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
 ApdR	|bool	|sv_does_sv	|NN SV* sv|NN SV* namesv|U32 flags
 ApdR	|bool	|sv_does_pv	|NN SV* sv|NN const char *const name|U32 flags

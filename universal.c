@@ -188,6 +188,71 @@ Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len,
 }
 
 /*
+=for apidoc sv_isa_sv
+
+Returns a boolean indicating whether the SV is an object reference and is
+derived from the specified class, respecting any C<isa()> method overloading
+it may have. Returns false if C<sv> is not a reference to an object, or is
+not derived from the specified class.
+
+This is the function used to implement the behaviour of the C<isa> operator.
+
+=cut
+
+*/
+
+bool
+Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
+{
+    GV *isagv;
+
+    PERL_ARGS_ASSERT_SV_ISA_SV;
+
+    if(!SvROK(sv) || !SvOBJECT(SvRV(sv)))
+        return FALSE;
+
+    /* This abuse of gv_fetchmeth_pv() with level = 1 skips the UNIVERSAL
+     * lookup
+     * TODO: Consider if we want a NOUNIVERSAL flag for requesting this in a
+     * more obvious way
+     */
+    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, 1, 0);
+    if(isagv) {
+        dSP;
+        CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
+        SV *retsv;
+        bool ret;
+
+        PUTBACK;
+
+        ENTER;
+        SAVETMPS;
+
+        EXTEND(SP, 2);
+        PUSHMARK(SP);
+        PUSHs(sv);
+        PUSHs(namesv);
+        PUTBACK;
+
+        call_sv((SV *)isacv, G_SCALAR);
+
+        SPAGAIN;
+        retsv = POPs;
+        ret = SvTRUE(retsv);
+        PUTBACK;
+
+        FREETMPS;
+        LEAVE;
+
+        return ret;
+    }
+
+    /* TODO: Support namesv being an HV ref to the stash directly? */
+
+    return sv_derived_from_sv(sv, namesv, 0);
+}
+
+/*
 =for apidoc sv_does_sv
 
 Returns a boolean indicating whether the SV performs a specific, named role.
