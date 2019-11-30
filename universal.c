@@ -197,6 +197,9 @@ not derived from the specified class.
 
 This is the function used to implement the behaviour of the C<isa> operator.
 
+Not to be confused with the older C<sv_isa> function, which does not use an
+overloaded C<isa()> method, nor will check subclassing.
+
 =cut
 
 */

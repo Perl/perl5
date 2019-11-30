@@ -10301,8 +10301,12 @@ Perl_sv_isobject(pTHX_ SV *sv)
 =for apidoc sv_isa
 
 Returns a boolean indicating whether the SV is blessed into the specified
-class.  This does not check for subtypes; use C<sv_derived_from> to verify
-an inheritance relationship.
+class.
+
+This does not check for subtypes or method overloading. Use C<sv_isa_sv> to
+verify an inheritance relationship in the same way as the C<isa> operator by
+respecting any C<isa()> method overloading; or C<sv_derived_from_sv> to test
+directly on the actual object type.
 
 =cut
 */
