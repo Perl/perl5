@@ -2532,8 +2532,12 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 }
 
 /*
-No = here because currently externally undocumented
-for apidoc bytes_from_utf8_loc
+=for comment
+skip apidoc
+This is not currently externally documented because we don't want people to use
+it for now.  XXX Perhaps that is too paranoid, and it should be documented?
+
+=for apidoc bytes_from_utf8_loc
 
 Like C<L</bytes_from_utf8>()>, but takes an extra parameter, a pointer to where
 to store the location of the first character in C<"s"> that cannot be

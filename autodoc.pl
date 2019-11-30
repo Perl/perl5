@@ -66,6 +66,7 @@ my $specialized_docs = join ", ", @specialized_docs;
 #
 
 my %docs;
+my %seen;
 my %funcflags;
 my %missing;
 
@@ -118,12 +119,33 @@ HDR_DOC:
             }
             next FUNC;
         }
-        if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
-            my $proto_in_file = $1;
+
+        # Parentheses are used to accept anything that looks like 'for
+        # apidoc', and later verify that things are the actual correct syntax.
+        my $apidoc_re = qr/^(\s*)(=?)(\s*)for(\s*)apidoc(\s*)(.*?)\s*\n/;
+
+        if ($in =~ /^=for comment/) {
+            $in = $get_next_line->();
+            if ($in =~ /skip apidoc/) {   # Skips the next apidoc-like line
+                while (defined($in = $get_next_line->())) {
+                    last if $in =~ $apidoc_re;
+                }
+            }
+            next FUNC;
+        }
+
+        if ($in =~ $apidoc_re) {
+            my $is_in_proper_form = length $1 == 0
+                                 && length $2 > 0
+                                 && length $3 == 0
+                                 && length $4 > 0
+                                 && length $5 > 0
+                                 && length $6 > 0;
+            my $proto_in_file = $6;
             my $proto = $proto_in_file;
             $proto = "||$proto" unless $proto =~ /\|/;
             my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
-            $name or die <<EOS;
+            $name && $is_in_proper_form or die <<EOS;
 Bad apidoc at $file line $.:
   $in
 Expected:
@@ -138,6 +160,14 @@ EOS
             die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
             warn ("'$name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
+
+            if (exists $seen{$name}) {
+                die ("'$name' in $file was already documented in $seen{$name}");
+            }
+            else {
+                $seen{$name} = $file;
+            }
+
             my $docs = "";
 DOC:
             while (defined($doc = $get_next_line->())) {
