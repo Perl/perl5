@@ -886,11 +886,39 @@ Provide F<Configure>-style switch to bisection program.  Straightforward use
 of the C<--module> switch.
 
     .../Porting/bisect.pl -Duseithreads \
-        --start=6256cf2c --end=f6f85064 --module=XML::Parser
+        --start=6256cf2c \
+        --end=f6f85064 \
+        --module=XML::Parser
 
 =item * Reference
 
 L<GH issue 16918|https://github.com/Perl/perl5/issues/16918>
+
+=back
+
+=head2 Point in time where code started to segfault is unknown
+
+=over 4
+
+=item * Problem
+
+User submitted code sample which when run caused F<perl> to segfault, but did
+not claim that this was a recent change.
+
+=item * Solution
+
+Used locally installed production releases of perl (previously created by
+F<perlbrew>) to identify the first production release at which the code would
+not compile.  Used that information to shorten bisection time.
+
+    .../perl Porting/bisect.pl \
+        --start=v5.14.4 \
+        --end=v5.16.3 \
+        --crash -- ./perl -Ilib ~/learn/perl/p5p/gh-17333-map.pl
+
+=item * Reference
+
+L<GH issue 17333|https://github.com/Perl/perl5/issues/17333>
 
 =back
 
