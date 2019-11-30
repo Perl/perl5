@@ -1763,7 +1763,7 @@ Perl_isinfnan(NV nv)
 }
 
 /*
-=for apidoc
+=for apidoc isinfnansv
 
 Checks whether the argument would be either an infinity or C<NaN> when used
 as a number, but is careful not to trigger non-numeric or uninitialized

@@ -3366,7 +3366,7 @@ pTo	|int	|my_mkstemp	|NN char *templte
 #endif
 
 APpdT	|bool	|isinfnan	|NV nv
-p	|bool	|isinfnansv	|NN SV *sv
+pd	|bool	|isinfnansv	|NN SV *sv
 
 #if !defined(HAS_SIGNBIT)
 AxdToP	|int	|Perl_signbit	|NV f
