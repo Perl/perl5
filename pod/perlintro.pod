@@ -473,7 +473,7 @@ detail.)
 
  =   assignment
  .   string concatenation
- x   string multiplication
+ x   string multiplication (repeats strings)
  ..  range operator (creates a list of numbers or strings)
 
 =back
