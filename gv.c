@@ -2069,10 +2069,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 if (memEQs(name, len, "\005NCODING"))
 		    goto magicalize;
 		break;
-            case '\006':
-                if (memEQs(name, len, "\006EATURE_BITS"))
-		    goto magicalize;
-                break;
 	    case '\007':	/* $^GLOBAL_PHASE */
                 if (memEQs(name, len, "\007LOBAL_PHASE"))
 		    goto ro_magicalize;
