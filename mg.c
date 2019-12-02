@@ -41,6 +41,7 @@ tie.
 #include "EXTERN.h"
 #define PERL_IN_MG_C
 #include "perl.h"
+#include "feature.h"
 
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #  ifdef I_GRP
@@ -1028,9 +1029,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\006':		/* ^F */
         if (nextchar == '\0') {
             sv_setiv(sv, (IV)PL_maxsysfd);
-        }
-        else if (strEQ(remaining, "EATURE_BITS")) {
-            sv_setuv(sv, PL_compiling.cop_features);
         }
 	break;
     case '\007':		/* ^GLOBAL_PHASE */
@@ -2886,9 +2884,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         if (mg->mg_ptr[1] == '\0') {
             PL_maxsysfd = SvIV(sv);
         }
-        else if (strEQ(mg->mg_ptr + 1, "EATURE_BITS")) {
-            PL_compiling.cop_features = SvUV(sv);
-        }
 	break;
     case '\010':	/* ^H */
         {
@@ -3680,6 +3675,7 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
     PL_hints |= HINT_LOCALIZE_HH;
     CopHINTHASH_set(&PL_compiling,
 	cophh_store_sv(CopHINTHASH_get(&PL_compiling), key, 0, sv, 0));
+    magic_sethint_feature(key, NULL, 0, sv, 0);
     return 0;
 }
 
@@ -3704,6 +3700,10 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
 				 MUTABLE_SV(mg->mg_ptr), 0, 0)
 	 : cophh_delete_pvn(CopHINTHASH_get(&PL_compiling),
 				 mg->mg_ptr, mg->mg_len, 0, 0));
+    if (mg->mg_len == HEf_SVKEY)
+        magic_sethint_feature(MUTABLE_SV(mg->mg_ptr), NULL, 0, NULL, FALSE);
+    else
+        magic_sethint_feature(NULL, mg->mg_ptr, mg->mg_len, NULL, FALSE);
     return 0;
 }
 
@@ -3722,6 +3722,7 @@ Perl_magic_clearhints(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
     cophh_free(CopHINTHASH_get(&PL_compiling));
     CopHINTHASH_set(&PL_compiling, cophh_new_empty());
+    CLEARFEATUREBITS();
     return 0;
 }
 

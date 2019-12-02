@@ -2068,16 +2068,6 @@ function.
 This variable was added in Perl 5.8.2 and removed in 5.26.0.
 Setting it to anything other than C<undef> was made fatal in Perl 5.28.0.
 
-=item ${^FEATURE_BITS}
-X<${^FEATURE_BITS}>
-
-The current set of features enabled by the C<use feature> pragma.  It
-has the same scoping as the C<$^H> and C<%^H> variables.  The exact
-values are considered internal to the L<feature> pragma and may change
-between versions of Perl.
-
-This variable was added in Perl v5.32.0.
-
 =item ${^GLOBAL_PHASE}
 X<${^GLOBAL_PHASE}>
 

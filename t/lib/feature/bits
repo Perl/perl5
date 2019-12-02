@@ -2,7 +2,6 @@ Test specifically for things that cop_features broke
 
 __END__
 # NAME check clearing $^H clears the bits
-# TODO this is broken
 use feature 'say';
 BEGIN { %^H = () }
 say "Fail";
@@ -13,7 +12,6 @@ syntax error at - line 3, near "say "Fail""
 Execution of - aborted due to compilation errors.
 ########
 # NAME check copying $^H restores the bits
-# TODO this isn't fixed yet
 use feature 'say';
 say "Hello";
 BEGIN { our %work = %^H; }
@@ -36,7 +34,6 @@ syntax error at - line 4, near "say "Goodbye""
 Execution of - aborted due to compilation errors.
 ########
 # NAME check deleting entries (bypass feature.pm) clears the bits
-# TODO this doesn't work yet
 use feature 'say';
 say "Hello";
 BEGIN { delete $^H{feature_say}; }

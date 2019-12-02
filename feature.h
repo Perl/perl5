@@ -190,6 +190,123 @@ S_enable_feature_bundle(pTHX_ SV *ver)
 }
 #endif /* PERL_IN_OP_C */
 
+#ifdef PERL_IN_MG_C
+
+#define magic_sethint_feature(keysv, keypv, keylen, valsv, valbool) \
+    S_magic_sethint_feature(aTHX_ (keysv), (keypv), (keylen), (valsv), (valbool))
+PERL_STATIC_INLINE void
+S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
+                        SV *valsv, bool valbool) {
+    if (keysv)
+      keypv = SvPV_const(keysv, keylen);
+
+    if (memBEGINs(keypv, keylen, "feature_")) {
+        const char *subf = keypv + (sizeof("feature_")-1);
+        U32 mask = 0;
+        switch (*subf) {
+        case '_':
+            if (keylen == sizeof("feature___SUB__")-1
+                 && memcmp(subf+1, "_SUB__", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE___SUB___BIT;
+                break;
+            }
+            return;
+
+        case 'b':
+            if (keylen == sizeof("feature_bitwise")-1
+                 && memcmp(subf+1, "itwise", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_BITWISE_BIT;
+                break;
+            }
+            return;
+
+        case 'e':
+            if (keylen == sizeof("feature_evalbytes")-1
+                 && memcmp(subf+1, "valbytes", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_EVALBYTES_BIT;
+                break;
+            }
+            return;
+
+        case 'f':
+            if (keylen == sizeof("feature_fc")-1
+                 && memcmp(subf+1, "c", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_FC_BIT;
+                break;
+            }
+            return;
+
+        case 'm':
+            if (keylen == sizeof("feature_myref")-1
+                 && memcmp(subf+1, "yref", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_MYREF_BIT;
+                break;
+            }
+            return;
+
+        case 'p':
+            if (keylen == sizeof("feature_postderef_qq")-1
+                 && memcmp(subf+1, "ostderef_qq", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_POSTDEREF_QQ_BIT;
+                break;
+            }
+            return;
+
+        case 'r':
+            if (keylen == sizeof("feature_refaliasing")-1
+                 && memcmp(subf+1, "efaliasing", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_REFALIASING_BIT;
+                break;
+            }
+            return;
+
+        case 's':
+            if (keylen == sizeof("feature_say")-1
+                 && memcmp(subf+1, "ay", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_SAY_BIT;
+                break;
+            }
+            else if (keylen == sizeof("feature_signatures")-1
+                 && memcmp(subf+1, "ignatures", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_SIGNATURES_BIT;
+                break;
+            }
+            else if (keylen == sizeof("feature_state")-1
+                 && memcmp(subf+1, "tate", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_STATE_BIT;
+                break;
+            }
+            else if (keylen == sizeof("feature_switch")-1
+                 && memcmp(subf+1, "witch", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_SWITCH_BIT;
+                break;
+            }
+            return;
+
+        case 'u':
+            if (keylen == sizeof("feature_unicode")-1
+                 && memcmp(subf+1, "nicode", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_UNICODE_BIT;
+                break;
+            }
+            else if (keylen == sizeof("feature_unieval")-1
+                 && memcmp(subf+1, "nieval", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_UNIEVAL_BIT;
+                break;
+            }
+            return;
+
+        default:
+            return;
+        }
+        if (valsv ? SvTRUE(valsv) : valbool)
+            PL_compiling.cop_features |= mask;
+        else
+            PL_compiling.cop_features &= ~mask;
+    }
+}
+#endif /* PERL_IN_MG_C */
+
 #endif /* PERL_FEATURE_H_ */
 
 /* ex: set ro: */

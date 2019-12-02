@@ -189,12 +189,6 @@ for(sort { length $a <=> length $b || $a cmp $b } keys %feature) {
 }
 print $pm ");\n\n";
 
-print $pm "\nmy %feature_bits = (\n";
-for (sort keys %feature_bits) {
-    printf $pm "    %-*s => %#06x,\n", $width, $_, $feature_bits{$_};
-}
-print $pm ");\n\n";
-
 print $pm "our %feature_bundle = (\n";
 my $bund_width = length longest values %UniqueBundles;
 for( sort { $UniqueBundles{$a} cmp $UniqueBundles{$b} }
@@ -404,6 +398,63 @@ print $h <<EOJ;
 }
 #endif /* PERL_IN_OP_C */
 
+#ifdef PERL_IN_MG_C
+
+#define magic_sethint_feature(keysv, keypv, keylen, valsv, valbool) \\
+    S_magic_sethint_feature(aTHX_ (keysv), (keypv), (keylen), (valsv), (valbool))
+PERL_STATIC_INLINE void
+S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
+                        SV *valsv, bool valbool) {
+    if (keysv)
+      keypv = SvPV_const(keysv, keylen);
+
+    if (memBEGINs(keypv, keylen, "feature_")) {
+        const char *subf = keypv + (sizeof("feature_")-1);
+        U32 mask = 0;
+        switch (*subf) {
+EOJ
+
+my %pref;
+for my $key (sort values %feature) {
+    push @{$pref{substr($key, 0, 1)}}, $key;
+}
+
+for my $pref (sort keys %pref) {
+    print $h <<EOS;
+        case '$pref':
+EOS
+    my $first = 1;
+    for my $subkey (@{$pref{$pref}}) {
+        my $rest = substr($subkey, 1);
+        my $if = $first ? "if" : "else if";
+        print $h <<EOJ;
+            $if (keylen == sizeof("feature_$subkey")-1
+                 && memcmp(subf+1, "$rest", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_\U${subkey}\E_BIT;
+                break;
+            }
+EOJ
+
+        $first = 0;
+    }
+    print $h <<EOS;
+            return;
+
+EOS
+}
+
+print $h <<EOJ;
+        default:
+            return;
+        }
+        if (valsv ? SvTRUE(valsv) : valbool)
+            PL_compiling.cop_features |= mask;
+        else
+            PL_compiling.cop_features &= ~mask;
+    }
+}
+#endif /* PERL_IN_MG_C */
+
 #endif /* PERL_FEATURE_H_ */
 EOJ
 
@@ -416,7 +467,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.56';
+our $VERSION = '1.57';
 
 FEATURES
 
@@ -798,16 +849,13 @@ sub __common {
     my $bundle_number = $^H & $hint_mask;
     my $features = $bundle_number != $hint_mask
       && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
-    my $bits = ${^FEATURE_BITS};
     if ($features) {
 	# Features are enabled implicitly via bundle hints.
 	# Delete any keys that may be left over from last time.
 	delete @^H{ values(%feature) };
-        $bits = 0;
 	$^H |= $hint_mask;
 	for (@$features) {
 	    $^H{$feature{$_}} = 1;
-            $bits |= $feature_bits{$_};
 	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
 	}
     }
@@ -835,15 +883,12 @@ sub __common {
         }
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
-            $bits |= $feature_bits{$name};
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
 	} else {
             delete $^H{$feature{$name}};
-            $bits &= ~$feature_bits{$name};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }
     }
-    ${^FEATURE_BITS} = $bits;
 }
 
 sub unknown_feature {

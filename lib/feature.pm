@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.56';
+our $VERSION = '1.57';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -21,23 +21,6 @@ our %feature = (
     unicode_eval    => 'feature_unieval',
     declared_refs   => 'feature_myref',
     unicode_strings => 'feature_unicode',
-);
-
-
-my %feature_bits = (
-    bitwise         => 0x0001,
-    current_sub     => 0x0002,
-    declared_refs   => 0x0004,
-    evalbytes       => 0x0008,
-    fc              => 0x0010,
-    postderef_qq    => 0x0020,
-    refaliasing     => 0x0040,
-    say             => 0x0080,
-    signatures      => 0x0100,
-    state           => 0x0200,
-    switch          => 0x0400,
-    unicode_eval    => 0x0800,
-    unicode_strings => 0x1000,
 );
 
 our %feature_bundle = (
@@ -503,16 +486,13 @@ sub __common {
     my $bundle_number = $^H & $hint_mask;
     my $features = $bundle_number != $hint_mask
       && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
-    my $bits = ${^FEATURE_BITS};
     if ($features) {
 	# Features are enabled implicitly via bundle hints.
 	# Delete any keys that may be left over from last time.
 	delete @^H{ values(%feature) };
-        $bits = 0;
 	$^H |= $hint_mask;
 	for (@$features) {
 	    $^H{$feature{$_}} = 1;
-            $bits |= $feature_bits{$_};
 	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
 	}
     }
@@ -540,15 +520,12 @@ sub __common {
         }
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
-            $bits |= $feature_bits{$name};
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
 	} else {
             delete $^H{$feature{$name}};
-            $bits &= ~$feature_bits{$name};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }
     }
-    ${^FEATURE_BITS} = $bits;
 }
 
 sub unknown_feature {
