@@ -382,6 +382,7 @@ asctime_r_proto=''
 d_asctime_r=''
 d_asinh=''
 d_atanh=''
+d_attribute_always_inline=''
 d_attribute_deprecated=''
 d_attribute_format=''
 d_attribute_malloc=''
@@ -933,6 +934,7 @@ d_voidsig=''
 signal_t=''
 d_wait4=''
 d_waitpid=''
+d_wcrtomb=''
 d_wcscmp=''
 d_wcstombs=''
 d_wcsxfrm=''
@@ -4701,7 +4703,7 @@ else
 fi
 $rm -f try try.*
 case "$gccversion" in
-1.*) cpp=`./loc gcc-cpp $cpp $pth` ;;
+1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
 esac
 case "$gccversion" in
 '') gccosandvers='' ;;
@@ -4741,7 +4743,7 @@ esac
 # gcc 3.* complain about adding -Idirectories that they already know about,
 # so we will take those off from locincpth.
 case "$gccversion" in
-3.*)
+3*)
     echo "main(){}">try.c
     for incdir in $locincpth; do
        warn=`$cc $ccflags -I$incdir -c try.c 2>&1 | \
@@ -5467,13 +5469,13 @@ fi
 case "$hint" in
 default|recommended)
 	case "$gccversion" in
-	1.*) dflt="$dflt -fpcc-struct-return" ;;
+	1*) dflt="$dflt -fpcc-struct-return" ;;
 	esac
 	case "$optimize:$DEBUGGING" in
 	*-g*:old) dflt="$dflt -DDEBUGGING";;
 	esac
 	case "$gccversion" in
-	2.*) if $test -d /etc/conf/kconfig.d &&
+	2*) if $test -d /etc/conf/kconfig.d &&
 			$contains _POSIX_VERSION $usrinc/sys/unistd.h >/dev/null 2>&1
 		then
 			# Interactive Systems (ISC) POSIX mode.
@@ -5482,7 +5484,7 @@ default|recommended)
 		;;
 	esac
 	case "$gccversion" in
-	1.*) ;;
+	1*) ;;
 	2.[0-8]*) ;;
 	?*)	set strict-aliasing -fno-strict-aliasing
 		eval $checkccflag
@@ -5600,7 +5602,7 @@ case "$cppflags" in
     ;;
 esac
 case "$gccversion" in
-1.*) cppflags="$cppflags -D__GNUC__"
+1*) cppflags="$cppflags -D__GNUC__"
 esac
 case "$mips_type" in
 '');;
@@ -9616,16 +9618,12 @@ prefixvar=sitescript
 set backtrace d_backtrace
 eval $inlibc
 
-: add flags if using c backtrace
+: Check if C backtrace is actually supported.
 case "$usecbacktrace" in
   "") usecbacktrace=$undef ;;
   [yY]*|true|$define)
     case "$d_backtrace" in
       [yY]*|true|$define)
-        case " $ccflags " in
-	  *" -DUSE_C_BACKTRACE "*) ;; # Already there.
-	  *) ccflags="$ccflags -DUSE_C_BACKTRACE -g" ;;
-	  esac
         ;;
       *)
         echo "This system does not support backtrace" >&4
@@ -11251,6 +11249,34 @@ fi
 *) val="$d_attribute_warn_unused_result" ;;
 esac
 set d_attribute_warn_unused_result
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute always_inline
+case "$d_attribute_always_inline" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((always_inline)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+static __inline__ __attribute__((always_inline)) int I_will_always_be_inlined(void);
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((always_inline))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((always_inline))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_always_inline" ;;
+esac
+set d_attribute_always_inline
 eval $setvar
 $rm -f attrib*
 
@@ -15785,7 +15811,7 @@ eval $inlibc
 echo "Checking to see if you have isless..." >&4
 $cat >try.c <<EOCP
 #include <math.h>
-int main() { return isless(0.0); }
+int main() { return isless(2.0, 1.0); }
 EOCP
 set try
 if eval $compile; then
@@ -19705,16 +19731,108 @@ EOM
 	;;
 esac
 
+: Checking 32bit alignedness
 $cat <<EOM
 
 Checking to see whether you can access character data unalignedly...
-
-We assume only aligned access is permitted.
 EOM
-: Checking 32bit alignedness
-: We no longer check and assume it is required.
 case "$d_u32align" in
-'') d_u32align="$define" ;;
+'')   $cat >try.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#define U32 $u32type
+#define BYTEORDER 0x$byteorder
+#define U8 $u8type
+#include <signal.h>
+#ifdef SIGBUS
+$signal_t bletch(int s) { exit(4); }
+#endif
+int main() {
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
+    volatile U8 buf[8];
+    volatile U32 *up;
+    int i;
+
+    if (sizeof(U32) != 4) {
+	printf("sizeof(U32) is not 4, but %d\n", sizeof(U32));
+	exit(1);
+    }
+
+    fflush(stdout);
+
+#ifdef SIGBUS
+    signal(SIGBUS, bletch);
+#endif
+
+    buf[0] = 0;
+    buf[1] = 0;
+    buf[2] = 0;
+    buf[3] = 1;
+    buf[4] = 0;
+    buf[5] = 0;
+    buf[6] = 0;
+    buf[7] = 1;
+
+    for (i = 0; i < 4; i++) {
+	up = (U32*)(buf + i);
+	if (! ((*up == 1 << (8*i)) ||   /* big-endian */
+	       (*up == 1 << (8*(3-i)))  /* little-endian */
+	      )
+	   )
+	{
+	    printf("read failed (%x)\n", *up);
+	    exit(2);
+	}
+    }
+
+    /* write test */
+    for (i = 0; i < 4; i++) {
+	up = (U32*)(buf + i);
+	*up = 0xBeef;
+	if (*up != 0xBeef) {
+	    printf("write failed (%x)\n", *up);
+	    exit(3);
+	}
+    }
+
+    exit(0);
+#else
+    printf("1\n");
+    exit(1);
+#endif
+    return 0;
+}
+EOCP
+set try
+if eval $compile_ok; then
+	echo "(Testing for character data alignment may crash the test.  That's okay.)" >&4
+	$run ./try 2>&1 >/dev/null
+	case "$?" in
+	0)	cat >&4 <<EOM
+You can access character data pretty unalignedly.
+EOM
+		d_u32align="$undef"
+		;;
+	*)	cat >&4 <<EOM
+It seems that you must access character data in an aligned manner.
+EOM
+		d_u32align="$define"
+		;;
+	esac
+else
+	rp='Can you access character data at unaligned addresses?'
+	dflt='n'
+	. ./myread
+	case "$ans" in
+	[yY]*)	d_u32align="$undef"  ;;
+	*)	d_u32align="$define" ;;
+	esac
+fi
+$rm_try
+;;
 esac
 
 : see if ualarm exists
@@ -19804,6 +19922,10 @@ eval $inlibc
 
 : see if waitpid exists
 set waitpid d_waitpid
+eval $inlibc
+
+: see if wcrtomb exists
+set wcrtomb d_wcrtomb
 eval $inlibc
 
 : look for wcscmp
@@ -23103,7 +23225,7 @@ fi
 
 : add -D_FORTIFY_SOURCE if feasible and not already there
 case "$gccversion" in
-[456789].*|[1-9][0-9]*)	case "$optimize$ccflags" in
+[456789].*)	case "$optimize$ccflags" in
 	*-O*)	case "$ccflags$cppsymbols" in
 		*_FORTIFY_SOURCE=*) # Don't add it again.
 			echo "You seem to have -D_FORTIFY_SOURCE already, not adding it." >&4
@@ -23956,6 +24078,7 @@ d_asinh='$d_asinh'
 d_atanh='$d_atanh'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
+d_attribute_always_inline='$d_attribute_always_inline'
 d_attribute_deprecated='$d_attribute_deprecated'
 d_attribute_format='$d_attribute_format'
 d_attribute_malloc='$d_attribute_malloc'
@@ -24473,6 +24596,7 @@ d_voidtty='$d_voidtty'
 d_vsnprintf='$d_vsnprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
+d_wcrtomb='$d_wcrtomb'
 d_wcscmp='$d_wcscmp'
 d_wcstombs='$d_wcstombs'
 d_wcsxfrm='$d_wcsxfrm'

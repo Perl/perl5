@@ -5,6 +5,13 @@
 #
 # See Porting/config_h.pl
 
+#!/bin/sh
+#
+# THIS IS A GENERATED FILE
+# DO NOT HAND-EDIT
+#
+# See Porting/config_h.pl
+
 : Set up for generating config_h.SH
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh;;
@@ -28,6 +35,9 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+case "$CONFIG_H" in
+already-done) echo "Not re-extracting config.h" ;;
+*)
 case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
@@ -1500,6 +1510,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_attribute_pure HASATTRIBUTE_PURE	/**/
 #$d_attribute_unused HASATTRIBUTE_UNUSED	/**/
 #$d_attribute_warn_unused_result HASATTRIBUTE_WARN_UNUSED_RESULT	/**/
+#$d_attribute_always_inline HASATTRIBUTE_ALWAYS_INLINE	/**/
 
 /* HAS_BACKTRACE:
  *	This symbol, if defined, indicates that the backtrace() routine is
@@ -5122,6 +5133,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_ttyname_r HAS_TTYNAME_R	/**/
 #define TTYNAME_R_PROTO $ttyname_r_proto	/**/
 
+/* HAS_WCRTOMB:
+ *	This symbol, if defined, indicates that the wcrtomb routine is
+ *	available to convert a wide character into a multi-byte character.
+ */
+#$d_wcrtomb HAS_WCRTOMB	/**/
+
 /* I_MACH_CTHREADS:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <mach/cthreads.h>.
@@ -5278,5 +5295,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 #endif
 !GROK!THIS!
+;;
+esac
 ;;
 esac

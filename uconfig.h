@@ -1465,6 +1465,7 @@
 /*#define HASATTRIBUTE_PURE	/ **/
 /*#define HASATTRIBUTE_UNUSED	/ **/
 /*#define HASATTRIBUTE_WARN_UNUSED_RESULT	/ **/
+/*#define HASATTRIBUTE_ALWAYS_INLINE	/ **/
 
 /* HAS_BACKTRACE:
  *	This symbol, if defined, indicates that the backtrace() routine is
@@ -5087,6 +5088,12 @@
 /*#define HAS_TTYNAME_R	/ **/
 #define TTYNAME_R_PROTO 0	/**/
 
+/* HAS_WCRTOMB:
+ *	This symbol, if defined, indicates that the wcrtomb routine is
+ *	available to convert a wide character into a multi-byte character.
+ */
+/*#define HAS_WCRTOMB	/ **/
+
 /* I_MACH_CTHREADS:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <mach/cthreads.h>.
@@ -5244,6 +5251,6 @@
 #endif
 
 /* Generated from:
- * e3dbc17ac938c9df0df81930ccebf94a0425dbff9d20c3edd18a84075eff4fc2 config_h.SH
- * a11d95f56af200907b9285ed0da243a4c20db34f5684af313d18195eaba2b18b uconfig.sh
+ * 0c6730559753fa1aa79fa3a10b50df81c20cae46d1fe3e3faef1c7d3aa13c92c config_h.SH
+ * 31c25f95118efbf99e358f81091058e6723b4cccb8474dfbc6d06c2b7d46ff17 uconfig.sh
  * ex: set ro: */
