@@ -14601,8 +14601,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 /* If we do need to fold the node, we need a place to store the
                  * folded copy, and a way to map back to the unfolded original
                  * */
-                char * locfold_buf;
-                Size_t * loc_correspondence;
+                char * locfold_buf = NULL;
+                Size_t * loc_correspondence = NULL;
 
                 if (! need_to_fold_loc) {   /* The normal case.  Just
                                                initialize to the actual node */
