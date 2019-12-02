@@ -3443,7 +3443,7 @@ static int get_regexp(pTHX_ stcxt_t *cxt, SV* sv, SV **re, SV **flags) {
     count = call_sv((SV*)cv, G_ARRAY);
     SPAGAIN;
     if (count < 2)
-      CROAK(("re::regexp_pattern returned only %d results", count));
+      CROAK(("re::regexp_pattern returned only %d results", (int)count));
     *flags = POPs;
     SvREFCNT_inc(*flags);
     *re = POPs;
@@ -6864,7 +6864,7 @@ static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname) {
     SPAGAIN;
 
     if (count != 1)
-        CROAK(("Bad count %d calling _make_re", count));
+        CROAK(("Bad count %d calling _make_re", (int)count));
 
     re_ref = POPs;
 
