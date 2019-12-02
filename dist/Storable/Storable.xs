@@ -5958,7 +5958,7 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
     }
 
     New(10003, s, len+1, char);
-    SAFEPVREAD(s, len, s);
+    SAFEPVREAD(s, (I32)len, s);
 
     sv = retrieve(aTHX_ cxt, cname);
     if (!sv) {
