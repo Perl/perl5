@@ -1490,7 +1490,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	     int imode, int perm, PerlIO *f, int narg, SV **args)
 {
     if (!f && narg == 1 && *args == &PL_sv_undef) {
-        int imode = PerlIOUnix_oflags(mode);
+        imode = PerlIOUnix_oflags(mode);
 
 	if (imode != -1 && (f = PerlIO_tmpfile_flags(imode))) {
 	    if (!layers || !*layers)
