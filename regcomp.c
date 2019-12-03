@@ -4783,7 +4783,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     if ( SvIV(re_trie_maxbuff)>=0  ) {
                         regnode *cur;
                         regnode *first = (regnode *)NULL;
-                        regnode *last = (regnode *)NULL;
+                        regnode *prev = (regnode *)NULL;
                         regnode *tail = scan;
                         U8 trietype = 0;
                         U32 count=0;
@@ -4914,7 +4914,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                     REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
                                 }
                                 Perl_re_printf( aTHX_  "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
-                                   REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
+                                   REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
 				   PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype]
 				);
                             });
@@ -4960,7 +4960,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 } else {
                                     if ( trietype == NOTHING )
                                         trietype = noper_trietype;
-                                    last = cur;
+                                    prev = cur;
                                 }
 				if (first)
 				    count++;
@@ -4970,7 +4970,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                  * noper may either be a triable node which can
                                  * not be tried together with the current trie,
                                  * or a non triable node */
-                                if ( last ) {
+                                if ( prev ) {
                                     /* If last is set and trietype is not
                                      * NOTHING then we have found at least two
                                      * triable branch sequences in a row of a
@@ -4983,7 +4983,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                         make_trie( pRExC_state,
                                                 startbranch, first, cur, tail,
                                                 count, trietype, depth+1 );
-                                    last = NULL; /* note: we clear/update
+                                    prev = NULL; /* note: we clear/update
                                                     first, trietype etc below,
                                                     so we dont do it here */
                                 }
@@ -5012,12 +5012,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
                               depth+1, SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur));
                             Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
-                               REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
+                               REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
                                PL_reg_name[trietype]
                             );
 
                         });
-                        if ( last && trietype ) {
+                        if ( prev && trietype ) {
                             if ( trietype != NOTHING ) {
                                 /* the last branch of the sequence was part of
                                  * a trie, so we have to construct it here
@@ -5062,9 +5062,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                         OP(opt)= OPTIMIZED;
                                 }
                             }
-                        } /* end if ( last) */
+                        } /* end if ( prev) */
                     } /* TRIE_MAXBUF is non zero */
-
                 } /* do trie */
 
 	    }
