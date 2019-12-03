@@ -65,7 +65,7 @@ notifications:
       - "Report for %{repository} (%{commit}) from %{author} (%{elapsed_time})"
       - "Status: %{message}"
       - "Build URL: %{build_url}"
-      - "GitHub URL: https://github.com/p5h/perl5demo/commit/%{commit}" # adjust this url to use the production repo
+      - "GitHub URL: https://github.com/%{repository_slug}/commit/%{commit}"
     on_success: change # default: always
     on_failure: always # default: always
 #    use_notice: true
