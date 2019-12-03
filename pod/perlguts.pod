@@ -2752,10 +2752,11 @@ You can use this to concatenate two scalars:
 
 =head2 Formatted Printing of Strings
 
-If you just want the bytes printed in a NUL-terminated string, you can
-just use C<%s> (assuming they are all printables).  But if there is a
-possibility the value will be encoded as UTF-8, you should instead use
-the C<UTF8f> format.  And as its parameter, use the C<UTF8fARG()> macro:
+If you just want the bytes printed in a 7bit NUL-terminated string, you can
+just use C<%s> (assuming they are all really only 7bit).  But if there is a
+possibility the value will be encoded as UTF-8 or contains bytes above
+C<0x7F> (and therefore 8bit), you should instead use the C<UTF8f> format.
+And as its parameter, use the C<UTF8fARG()> macro:
 
  chr * msg;
 
@@ -2770,7 +2771,7 @@ the C<UTF8f> format.  And as its parameter, use the C<UTF8fARG()> macro:
                   UTF8fARG(can_utf8, strlen(msg), msg));
 
 The first parameter to C<UTF8fARG> is a boolean: 1 if the string is in
-UTF-8; 0 if bytes.
+UTF-8; 0 if string is in native byte encoding (Latin1).
 The second parameter is the number of bytes in the string to print.
 And the third and final parameter is a pointer to the first byte in the
 string.
