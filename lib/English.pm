@@ -13,7 +13,7 @@ English - use nice English (or awk) names for ugly punctuation variables
 
     use English;
     use English qw( -no_match_vars ) ;  # Avoids regex performance
-                                        # penalty in perl 5.16 and
+                                        # penalty in perl 5.18 and
                                         # earlier
     ...
     if ($ERRNO =~ /denied/) { ... }
