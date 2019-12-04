@@ -608,13 +608,19 @@ END
       #        illegal (non-chars); the other continuations are legal
       # N12    Initial sequence is F[357] BF.  Continuation bytes BF
       #        transitions to N13; the other continuations to N1
-      # N13    Initial sequence is F[1357] BF BF or F8 x BF (where x is
-      #        something that can lead to a non-char.  Continuation bytes BE
-      #        and BF are illegal (non-chars); the other continuations are
+      # N13    Initial sequence is F[1357] BF BF or F8 x y BF (where x and y
+      #        are something that can lead to a non-char.  Continuation bytes
+      #        BE and BF are illegal (non-chars); the other continuations are
       #        legal
       # N14    Initial sequence is F8 A[9BDF]; or F8 B[13579BDF]; or F9 A1.
-      #        Continuation byte BF transitions to N13; the other
+      #        Continuation byte BF transitions to N15; the other
       #        continuations to N2
+      # N15    Initial sequence is F8 A[9BDF] BF; or F8 B[13579BDF] BF; or
+      #        F9 A1 BF.  Continuation byte BF transitions to N16; the other
+      #        continuations to N2
+      # N16    Initial sequence is F8 A[9BDF] BF BF; or F8 B[13579BDF] BF BF;
+      #        or F9 A1 BF BF.  Continuation bytes BE and BF are illegal
+      #        (non-chars); the other continuations are legal
       # 1      Reject.  All transitions not mentioned above (except the single
       #        byte ones (as they are always legal) are to this state.
 
@@ -634,6 +640,7 @@ END
         my $N12 = $N11 + $NUM_CLASSES;
         my $N13 = $N12 + $NUM_CLASSES;
         my $N14 = $N13 + $NUM_CLASSES;
+        my $N15 = $N14 + $NUM_CLASSES;
 
         my @strict_utf8_dfa;
         my @i8 = (
@@ -674,7 +681,8 @@ END
             1,1,  1,  1,  1,  1,  1,  1,  1,  1,   1,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0, # N11
             1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1,$N13, # N12
             1,1,  1,  1,  1,  1,  1,  1,  1,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1, # N13
-            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2,$N13, # N14
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2,$N15, # N14
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1,$N13, # N15
         );
         output_table(\@strict_utf8_dfa, "PL_strict_utf8_dfa_tab", $NUM_CLASSES);
     }
