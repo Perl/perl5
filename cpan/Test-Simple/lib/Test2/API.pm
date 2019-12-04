@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302169';
+our $VERSION = '1.302170';
 
 
 my $INST;
@@ -28,6 +28,8 @@ sub test2_set_is_end {
     return unless $INST;
     my $stack = $INST->stack or return;
     my $root = $stack->root or return;
+
+    return unless $root->count;
 
     return unless $$ == $INST->pid;
     return unless get_tid() == $INST->tid;

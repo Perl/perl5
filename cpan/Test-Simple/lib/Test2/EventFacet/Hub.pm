@@ -2,7 +2,7 @@ package Test2::EventFacet::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302169';
+our $VERSION = '1.302170';
 
 sub is_list { 1 }
 sub facet_key { 'hubs' }

@@ -2,7 +2,7 @@ package Test2::EventFacet;
 use strict;
 use warnings;
 
-our $VERSION = '1.302169';
+our $VERSION = '1.302170';
 
 use Test2::Util::HashBase qw/-details/;
 use Carp qw/croak/;
