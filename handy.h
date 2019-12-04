@@ -1540,7 +1540,7 @@ END_EXTERN_C
                           ||  (c) == '\f' || (c) == '\n' || (c) == '\r'     \
                           ||  (c) == '\t' || (c) == '\v'                    \
                           || inRANGE((c), 1, 3)     /* SOH, STX, ETX */     \
-                          ||  (c) == 7    /* U+7F DEL */                    \
+                          ||  (c) == 7F   /* U+7F DEL */                    \
                           || inRANGE((c), 0x0E, 0x13) /* SO SI DLE          \
                                                          DC[1-3] */         \
                           ||  (c) == 0x18 /* U+18 CAN */                    \
