@@ -5,6 +5,7 @@ os:
   - linux
 
 compiler:
+  - "gcc -m32"
   - gcc
 
 install:
@@ -12,6 +13,11 @@ install:
   # install & enable ccache on osx
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install ccache; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
+  - if [[ "$CC" =~ -m32 ]]; then
+      sudo apt-get install -yq --no-install-suggests --no-install-recommends libdb-dev:i386 libgdbm-dev:i386 zlib1g-dev:i386 libbz2-dev:i386 libc6-dev:i386 gcc-multilib ;
+    else
+      sudo apt-get install -yq --no-install-suggests --no-install-recommends libdb-dev libgdbm-dev zlib1g-dev libbz2-dev ;
+    fi
 
 env:
     global:
@@ -44,10 +50,6 @@ addons:
         packages:
             - file
             - cpio
-            - libdb-dev
-            - libgdbm-dev
-            - zlib1g-dev
-            - libbz2-dev
 
 notifications:
 ## use dedicated email for smoking ?
