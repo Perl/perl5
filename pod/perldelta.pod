@@ -131,6 +131,10 @@ If there was something important to note about this change, include that here.
 
 =item *
 
+L<English> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
 L<Test::Simple> has been upgraded from version 1.302169 to 1.302170.
 
 =back
