@@ -380,11 +380,19 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
      ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
- * This doesn't catch invariants (they are single-byte).  It also excludes the
+ * This excludes invariants (they are single-byte).  It also excludes the
  * illegal overlong sequences that begin with C0 and C1 on ASCII platforms, and
- * C0-C4 I8 start bytes on EBCDIC ones */
-#define UTF8_IS_START(c)    (__ASSERT_(FITS_IN_8_BITS(c))                   \
+ * C0-C4 I8 start bytes on EBCDIC ones.  On EBCDIC E0 can't start a
+ * non-overlong sequence, so we define a base macro and for those platforms,
+ * extend it to also exclude E0 */
+#define UTF8_IS_START_base(c)    (__ASSERT_(FITS_IN_8_BITS(c))              \
                              (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE))
+#ifdef EBCDIC
+#  define UTF8_IS_START(c)                                                  \
+                (UTF8_IS_START_base(c) && (c) != I8_TO_NATIVE_UTF8(0xE0))
+#else
+#  define UTF8_IS_START(c)  UTF8_IS_START_base(c)
+#endif
 
 #define UTF_MIN_ABOVE_LATIN1_BYTE                                           \
                     ((0x100 >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
