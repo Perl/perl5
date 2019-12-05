@@ -1465,13 +1465,13 @@ EOP
                             utf8::upgrade($pat) if $utf8;
                             my $should_pass =
                               (    $charset eq 'u'
-                                   || ($charset eq 'd' && $utf8)
-                                   || ($charset eq 'd' && (   $char =~ /[[:ascii:]]/
-                                                              || ord $char > 255))
-                                   || ($charset eq 'aa' && $char =~ /[[:ascii:]]/)
-                                   || ($charset eq 'l' && $locale ne 'C')
-                                   || ($charset eq 'l' && $char =~ /[[:ascii:]]/)
-                                  );
+                               || ($charset eq 'd' && $utf8)
+                               || ($charset eq 'd' && (   $char =~ /[[:ascii:]]/
+                                                       || ord $char > 255))
+                               || ($charset eq 'aa' && $char =~ /[[:ascii:]]/)
+                               || ($charset eq 'l' && $locale ne 'C')
+                               || ($charset eq 'l' && $char =~ /[[:ascii:]]/)
+                              );
                             my $name = "(?i$charset), utf8=$utf8, locale=$locale,"
                               . " char=" . sprintf "%x", ord $char;
                             no warnings 'locale';
