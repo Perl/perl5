@@ -367,7 +367,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Updates to C<cop_features> are now handled by magic on C<%^H> rather
+than by F<feature.pm> updating C<${^FEATURE_BITS}>, which has been
+removed.  This allows perl code to save and restore the contents of
+C<%^H> without also having to manage C<${^FEATURE_BITS}>.  [#17337]
 
 =back
 
