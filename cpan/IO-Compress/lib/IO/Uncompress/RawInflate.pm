@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.092 ;
-use IO::Compress::Base::Common  2.092 qw(:Status );
+use Compress::Raw::Zlib  2.093 ;
+use IO::Compress::Base::Common  2.093 qw(:Status );
 
-use IO::Uncompress::Base  2.092 ;
-use IO::Uncompress::Adapter::Inflate  2.092 ;
+use IO::Uncompress::Base  2.093 ;
+use IO::Uncompress::Adapter::Inflate  2.093 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.092';
+$VERSION = '2.093';
 $RawInflateError = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);
@@ -432,7 +432,7 @@ It can take one of the following forms:
 
 =item A filename
 
-If the <$input_filename_or_reference> parameter is a simple scalar, it is
+If the C<$input_filename_or_reference> parameter is a simple scalar, it is
 assumed to be a filename. This file will be opened for reading and the
 input data will be read from it.
 

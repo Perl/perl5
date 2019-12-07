@@ -8,12 +8,12 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.092 () ; 
-use IO::Compress::Adapter::Deflate 2.092 ;
+use IO::Compress::RawDeflate 2.093 () ; 
+use IO::Compress::Adapter::Deflate 2.093 ;
 
-use IO::Compress::Base::Common  2.092 qw(:Status );
-use IO::Compress::Gzip::Constants 2.092 ;
-use IO::Compress::Zlib::Extra 2.092 ;
+use IO::Compress::Base::Common  2.093 qw(:Status );
+use IO::Compress::Gzip::Constants 2.093 ;
+use IO::Compress::Zlib::Extra 2.093 ;
 
 BEGIN
 {
@@ -25,7 +25,7 @@ BEGIN
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $GzipError);
 
-$VERSION = '2.092';
+$VERSION = '2.093';
 $GzipError = '' ;
 
 @ISA    = qw(IO::Compress::RawDeflate Exporter);
@@ -362,7 +362,7 @@ It can take one of the following forms:
 
 =item A filename
 
-If the <$input_filename_or_reference> parameter is a simple scalar, it is
+If the C<$input_filename_or_reference> parameter is a simple scalar, it is
 assumed to be a filename. This file will be opened for reading and the
 input data will be read from it.
 

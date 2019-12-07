@@ -6,15 +6,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base 2.092 ;
-use IO::Compress::Base::Common  2.092 qw(:Status );
-use IO::Compress::Adapter::Deflate 2.092 ;
+use IO::Compress::Base 2.093 ;
+use IO::Compress::Base::Common  2.093 qw(:Status );
+use IO::Compress::Adapter::Deflate 2.093 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.092';
+$VERSION = '2.093';
 $RawDeflateError = '';
 
 @ISA = qw(IO::Compress::Base Exporter);
@@ -116,8 +116,8 @@ sub getExtraParams
     return getZlibParams();
 }
 
-use IO::Compress::Base::Common  2.092 qw(:Parse);
-use Compress::Raw::Zlib  2.092 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+use IO::Compress::Base::Common  2.093 qw(:Parse);
+use Compress::Raw::Zlib  2.093 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 our %PARAMS = (
             #'method'   => [IO::Compress::Base::Common::Parse_unsigned,  Z_DEFLATED],
             'level'     => [IO::Compress::Base::Common::Parse_signed,    Z_DEFAULT_COMPRESSION],
@@ -308,7 +308,7 @@ It can take one of the following forms:
 
 =item A filename
 
-If the <$input_filename_or_reference> parameter is a simple scalar, it is
+If the C<$input_filename_or_reference> parameter is a simple scalar, it is
 assumed to be a filename. This file will be opened for reading and the
 input data will be read from it.
 

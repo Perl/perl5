@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.092 qw(:Status );
-use IO::Compress::RawDeflate 2.092 ();
-use IO::Compress::Adapter::Deflate 2.092 ;
-use IO::Compress::Adapter::Identity 2.092 ;
-use IO::Compress::Zlib::Extra 2.092 ;
-use IO::Compress::Zip::Constants 2.092 ;
+use IO::Compress::Base::Common  2.093 qw(:Status );
+use IO::Compress::RawDeflate 2.093 ();
+use IO::Compress::Adapter::Deflate 2.093 ;
+use IO::Compress::Adapter::Identity 2.093 ;
+use IO::Compress::Zlib::Extra 2.093 ;
+use IO::Compress::Zip::Constants 2.093 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.092 (); 
+use Compress::Raw::Zlib  2.093 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.092 ; 
+           import  IO::Compress::Adapter::Bzip2 2.093 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.092 ; 
+           import  IO::Compress::Bzip2 2.093 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.092 ; 
+           import  IO::Compress::Adapter::Lzma 2.093 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.092 ; 
+           import  IO::Compress::Lzma 2.093 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.092';
+$VERSION = '2.093';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -966,7 +966,7 @@ It can take one of the following forms:
 
 =item A filename
 
-If the <$input_filename_or_reference> parameter is a simple scalar, it is
+If the C<$input_filename_or_reference> parameter is a simple scalar, it is
 assumed to be a filename. This file will be opened for reading and the
 input data will be read from it.
 

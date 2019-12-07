@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.092 ;
-use IO::Compress::Base::Common  2.092 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.092 ;
-use IO::Uncompress::Adapter::Identity 2.092 ;
-use IO::Compress::Zlib::Extra 2.092 ;
-use IO::Compress::Zip::Constants 2.092 ;
+use IO::Uncompress::RawInflate  2.093 ;
+use IO::Compress::Base::Common  2.093 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.093 ;
+use IO::Uncompress::Adapter::Identity 2.093 ;
+use IO::Compress::Zlib::Extra 2.093 ;
+use IO::Compress::Zip::Constants 2.093 ;
 
-use Compress::Raw::Zlib  2.092 () ;
+use Compress::Raw::Zlib  2.093 () ;
 
 BEGIN
 {
@@ -34,7 +34,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.092';
+$VERSION = '2.093';
 $UnzipError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);
@@ -1136,7 +1136,7 @@ It can take one of the following forms:
 
 =item A filename
 
-If the <$input_filename_or_reference> parameter is a simple scalar, it is
+If the C<$input_filename_or_reference> parameter is a simple scalar, it is
 assumed to be a filename. This file will be opened for reading and the
 input data will be read from it.
 
