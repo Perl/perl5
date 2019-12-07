@@ -523,7 +523,7 @@ copy_expand_unix_filename_escape(char *outspec, const char *inspec, int *output_
         /* Don't escape again if following character is 
          * already something we escape.
          */
-        if (strchr(".!#&\'`()+@{},;[]%^=_\\", *(inspec+1))) {
+        if (memCHRs(".!#&\'`()+@{},;[]%^=_\\", *(inspec+1))) {
 	    *outspec = *inspec;
 	    *output_cnt = 1;
 	    return 1;
@@ -8799,7 +8799,7 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
         /* Don't escape again if following character is 
          * already something we escape.
          */
-        if (strchr("\"`!#%^&()=+\'@[]{}:\\|<>_.", *(cp2+1))) {
+        if (memCHRs("\"`!#%^&()=+\'@[]{}:\\|<>_.", *(cp2+1))) {
 	    *(cp1++) = *(cp2++);
 	    break;
         }
@@ -9755,7 +9755,7 @@ vms_image_init(int *argcp, char ***argvp)
       for (cp = av[i]+1; *cp; cp++) {
         if (*cp == 'T') { will_taint = 1; break; }
         else if ( (*cp == 'd' || *cp == 'V') && *(cp+1) == ':' ||
-                  strchr("DFIiMmx",*cp)) break;
+                  memCHRs("DFIiMmx",*cp)) break;
       }
       if (will_taint) break;
     }

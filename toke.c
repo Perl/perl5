@@ -113,7 +113,7 @@ static const char* const ident_too_long = "Identifier too long";
 
 /* In variables named $^X, these are the legal values for X.
  * 1999-02-27 mjd-perl-patch@plover.com */
-#define isCONTROLVAR(x) (isUPPER(x) || strchr("[\\]^_?", (x)))
+#define isCONTROLVAR(x) (isUPPER(x) || memCHRs("[\\]^_?", (x)))
 
 #define SPACE_OR_TAB(c) isBLANK_A(c)
 
@@ -1647,11 +1647,11 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
 	    if (must_be_last)
 		proto_after_greedy_proto = TRUE;
 	    if (underscore) {
-		if (!strchr(";@%", *p))
+		if (!memCHRs(";@%", *p))
 		    bad_proto_after_underscore = TRUE;
 		underscore = FALSE;
 	    }
-	    if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
+	    if (!memCHRs("$@%*;[]&\\_+", *p) || *p == '\0') {
 		bad_proto = TRUE;
 	    }
 	    else {
@@ -2015,7 +2015,7 @@ S_force_next(pTHX_ I32 type)
 static int
 S_postderef(pTHX_ int const funny, char const next)
 {
-    assert(funny == DOLSHARP || strchr("$@%&*", funny));
+    assert(funny == DOLSHARP || memCHRs("$@%&*", funny));
     if (next == '*') {
 	PL_expect = XOPERATOR;
 	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
@@ -3445,7 +3445,7 @@ S_scan_const(pTHX_ char *start)
             {
 		break;
             }
-	    if (strchr(":'{$", s[1]))
+	    if (memCHRs(":'{$", s[1]))
 		break;
 	    if (!PL_lex_inpat && (s[1] == '+' || s[1] == '-'))
 		break; /* in regexp, neither @+ nor @- are interpolated */
@@ -3455,7 +3455,7 @@ S_scan_const(pTHX_ char *start)
 	else if (*s == '$') {
 	    if (!PL_lex_inpat)	/* not a regexp, so $ must be var */
 		break;
-	    if (s + 1 < send && !strchr("()| \r\n\t", s[1])) {
+	    if (s + 1 < send && !memCHRs("()| \r\n\t", s[1])) {
 		if (s[1] == '\\') {
 		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 				   "Possible unintended interpolation of $\\ in regex");
@@ -3492,7 +3492,7 @@ S_scan_const(pTHX_ char *start)
 	    }
 
 	    /* string-change backslash escapes */
-	    if (PL_lex_inwhat != OP_TRANS && *s && strchr("lLuUEQF", *s)) {
+	    if (PL_lex_inwhat != OP_TRANS && *s && memCHRs("lLuUEQF", *s)) {
 		--s;
 		break;
 	    }
@@ -4205,7 +4205,7 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (*s == '-' && s[1] == '>'
      && FEATURE_POSTDEREF_QQ_IS_ENABLED
      && ( (s[2] == '$' && (s[3] == '*' || (s[3] == '#' && s[4] == '*')))
-	||(s[2] == '@' && strchr("*[{",s[3])) ))
+	||(s[2] == '@' && memCHRs("*[{",s[3])) ))
 	return TRUE;
     if (*s != '{' && *s != '[')
 	return FALSE;
@@ -4270,9 +4270,9 @@ S_intuit_more(pTHX_ char *s, char *e)
 		}
 		else if (*s == '$'
                          && s[1]
-                         && strchr("[#!%*<>()-=",s[1]))
+                         && memCHRs("[#!%*<>()-=",s[1]))
                 {
-		    if (/*{*/ strchr("])} =",s[2]))
+		    if (/*{*/ memCHRs("])} =",s[2]))
 			weight -= 10;
 		    else
 			weight -= 1;
@@ -4281,11 +4281,11 @@ S_intuit_more(pTHX_ char *s, char *e)
 	    case '\\':
 		un_char = 254;
 		if (s[1]) {
-		    if (strchr("wds]",s[1]))
+		    if (memCHRs("wds]",s[1]))
 			weight += 100;
 		    else if (seen[(U8)'\''] || seen[(U8)'"'])
 			weight += 1;
-		    else if (strchr("rnftbxcav",s[1]))
+		    else if (memCHRs("rnftbxcav",s[1]))
 			weight += 40;
 		    else if (isDIGIT(s[1])) {
 			weight += 40;
@@ -4299,9 +4299,9 @@ S_intuit_more(pTHX_ char *s, char *e)
 	    case '-':
 		if (s[1] == '\\')
 		    weight += 50;
-		if (strchr("aA01! ",last_un_char))
+		if (memCHRs("aA01! ",last_un_char))
 		    weight += 30;
-		if (strchr("zZ79~",s[1]))
+		if (memCHRs("zZ79~",s[1]))
 		    weight += 30;
 		if (last_un_char == 255 && (isDIGIT(s[1]) || s[1] == '$'))
 		    weight -= 5;	/* cope with negative subscript */
@@ -4729,10 +4729,10 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 STATIC bool
 S_word_takes_any_delimiter(char *p, STRLEN len)
 {
-    return (len == 1 && strchr("msyq", p[0]))
+    return (len == 1 && memCHRs("msyq", p[0]))
             || (len == 2
                 && ((p[0] == 't' && p[1] == 'r')
-                    || (p[0] == 'q' && strchr("qwxr", p[1]))));
+                    || (p[0] == 'q' && memCHRs("qwxr", p[1]))));
 }
 
 static void
@@ -4747,7 +4747,7 @@ S_check_scalar_slice(pTHX_ char *s)
 	return;
     }
     while (    isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF)
-           || (*s && strchr(" \t$#+-'\"", *s)))
+           || (*s && memCHRs(" \t$#+-'\"", *s)))
     {
         s += UTF ? UTF8SKIP(s) : 1;
     }
@@ -4795,7 +4795,7 @@ yyl_sigvar(pTHX_ char *s)
     case '@':
     case '%':
         /* spot stuff that looks like an prototype */
-        if (strchr("$:@%&*;\\[]", *s)) {
+        if (memCHRs("$:@%&*;\\[]", *s)) {
             yyerror("Illegal character following sigil in a subroutine signature");
             break;
         }
@@ -4823,7 +4823,7 @@ yyl_sigvar(pTHX_ char *s)
         /* parse the = for the default ourselves to avoid '+=' etc being accepted here
          * as the ASSIGNOP, and exclude other tokens that start with =
          */
-        if (*s == '=' && (!s[1] || strchr("=~>", s[1]) == 0)) {
+        if (*s == '=' && (!s[1] || memCHRs("=~>", s[1]) == 0)) {
             /* save now to report with the same context as we did when
              * all ASSIGNOPS were accepted */
             PL_oldbufptr = s;
@@ -4886,7 +4886,7 @@ yyl_dollar(pTHX_ char *s)
 
     if (   s[1] == '#'
         && (   isIDFIRST_lazy_if_safe(s+2, PL_bufend, UTF)
-            || strchr("{$:+-@", s[2])))
+            || memCHRs("{$:+-@", s[2])))
     {
         PL_tokenbuf[0] = '@';
         s = scan_ident(s + 1, PL_tokenbuf + 1,
@@ -4987,9 +4987,9 @@ yyl_dollar(pTHX_ char *s)
             const bool islop = (PL_last_lop == PL_oldoldbufptr);
             if (!islop || PL_last_lop_op == OP_GREPSTART)
                 PL_expect = XOPERATOR;
-            else if (strchr("$@\"'`q", *s))
+            else if (memCHRs("$@\"'`q", *s))
                 PL_expect = XTERM;		/* e.g. print $fh "foo" */
-            else if (   strchr("&*<%", *s)
+            else if (   memCHRs("&*<%", *s)
                      && isIDFIRST_lazy_if_safe(s+1, PL_bufend, UTF))
             {
                 PL_expect = XTERM;		/* e.g. print $fh &sub */
@@ -5463,7 +5463,7 @@ yyl_hyphen(pTHX_ char *s)
             s = skipspace(s);
             if (((*s == '$' || *s == '&') && s[1] == '*')
               ||(*s == '$' && s[1] == '#' && s[2] == '*')
-              ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
+              ||((*s == '@' || *s == '%') && memCHRs("*[{", s[1]))
               ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
              )
             {
@@ -5959,7 +5959,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                     }
                     term = *t;
                     open = term;
-                    if (term && (tmps = strchr("([{< )]}> )]}>",term)))
+                    if (term && (tmps = memCHRs("([{< )]}> )]}>",term)))
                         term = tmps[5];
                     close = term;
                     if (open == close)
@@ -6968,7 +6968,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
              */
             if (d && *s != '#') {
                 const char *c = ipath;
-                while (*c && !strchr("; \t\r\n\f\v#", *c))
+                while (*c && !memCHRs("; \t\r\n\f\v#", *c))
                     c++;
                 if (c < d)
                     d = NULL;	/* "perl" not in first word; ignore */
@@ -7916,7 +7916,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
             char *d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
             for (t=d; isSPACE(*t);)
                 t++;
-            if ( *t && strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
+            if ( *t && memCHRs("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
                 /* [perl #16184] */
                 && !(t[0] == '=' && t[1] == '>')
                 && !(t[0] == ':' && t[1] == ':')
@@ -8733,7 +8733,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 	    if (tmp == '~')
 		PMop(OP_MATCH);
 	    if (tmp && isSPACE(*s) && ckWARN(WARN_SYNTAX)
-		&& strchr("+-*/%.^&|<",tmp))
+		&& memCHRs("+-*/%.^&|<",tmp))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "Reversed %c= operator",(int)tmp);
 	    s--;
@@ -9479,7 +9479,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	     * block / parens, boolean operators (&&, ||, //) and branch
 	     * constructs (or, and, if, until, unless, while, err, for).
 	     * Not a very solid hack... */
-	    if (!*w || !strchr(";&/|})]oaiuwef!=", *w))
+	    if (!*w || !memCHRs(";&/|})]oaiuwef!=", *w))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "%s (...) interpreted as function",name);
 	}
@@ -11753,7 +11753,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	/* read exponent part, if present */
 	if ((isALPHA_FOLD_EQ(*s, 'e')
               || UNLIKELY(hexfp && isALPHA_FOLD_EQ(*s, 'p')))
-            && strchr("+-0123456789_", s[1]))
+            && memCHRs("+-0123456789_", s[1]))
         {
             int exp_digits = 0;
             const char *save_s = s;

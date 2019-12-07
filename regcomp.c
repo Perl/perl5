@@ -114,7 +114,7 @@ typedef struct scan_frame {
 
 /* Certain characters are output as a sequence with the first being a
  * backslash. */
-#define isBACKSLASHED_PUNCT(c)  strchr("-[]\\^", c)
+#define isBACKSLASHED_PUNCT(c)  memCHRs("-[]\\^", c)
 
 
 struct RExC_state_t {
@@ -10722,7 +10722,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
     }
 
     while (RExC_parse < RExC_end) {
-        /* && strchr("iogcmsx", *RExC_parse) */
+        /* && memCHRs("iogcmsx", *RExC_parse) */
         /* (?g), (?gc) and (?o) are useless here
            and must be globally applied -- japhy */
         switch (*RExC_parse) {
@@ -23327,7 +23327,7 @@ Perl_parse_uniprop_string(pTHX_
                  * set of closing is so that if the opening is something like
                  * ']', the closing will be that as well.  Something similar is
                  * done in toke.c */
-                pos_in_brackets = strchr("([<)]>)]>", open);
+                pos_in_brackets = memCHRs("([<)]>)]>", open);
                 close = (pos_in_brackets) ? pos_in_brackets[3] : open;
 
                 if (    i >= name_len

@@ -711,7 +711,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
 	 && isASCII(name[1])
-	 && (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1]))) {
+	 && (!isPRINT(name[1]) || memCHRs("\t\n\r\f", name[1]))) {
 	    /* diag_listed_as: Can't use global %s in %s */
 	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in %s",
 			      name[0], toCTRL(name[1]),
@@ -5766,18 +5766,18 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	    bool sigil = FALSE;
 
 	    /* some heuristics to detect a potential error */
-	    while (*s && (strchr(", \t\n", *s)))
+	    while (*s && (memCHRs(", \t\n", *s)))
 		s++;
 
 	    while (1) {
-		if (*s && (strchr("@$%", *s) || (!lex && *s == '*'))
+		if (*s && (memCHRs("@$%", *s) || (!lex && *s == '*'))
 		       && *++s
 		       && (isWORDCHAR(*s) || UTF8_IS_CONTINUED(*s))) {
 		    s++;
 		    sigil = TRUE;
 		    while (*s && (isWORDCHAR(*s) || UTF8_IS_CONTINUED(*s)))
 			s++;
-		    while (*s && (strchr(", \t\n", *s)))
+		    while (*s && (memCHRs(", \t\n", *s)))
 			s++;
 		}
 		else
@@ -14364,7 +14364,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		continue;
 	    case '_':
 		/* _ must be at the end */
-		if (proto[1] && !strchr(";@%", proto[1]))
+		if (proto[1] && !memCHRs(";@%", proto[1]))
 		    goto oops;
                 /* FALLTHROUGH */
 	    case '$':

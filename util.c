@@ -4941,7 +4941,7 @@ Perl_quadmath_format_valid(const char* format)
         return FALSE;
     len = strlen(format);
     /* minimum length three: %Qg */
-    if (len < 3 || strchr("efgaEFGA", format[len - 1]) == NULL)
+    if (len < 3 || memCHRs("efgaEFGA", format[len - 1]) == NULL)
         return FALSE;
     if (format[len - 2] != 'Q')
         return FALSE;
@@ -4998,7 +4998,7 @@ Perl_quadmath_format_needed(const char* format)
       else
         while (isDIGIT(*q)) q++;
     }
-    if (strchr("efgaEFGA", *q)) /* Would have needed 'Q' in front. */
+    if (memCHRs("efgaEFGA", *q)) /* Would have needed 'Q' in front. */
       return TRUE;
     p = q + 1;
   }

@@ -170,7 +170,7 @@ Perl_taint_env(pTHX)
 #endif
 	if (t < e && isWORDCHAR(*t))
 	    t++;
-	while (t < e && (isWORDCHAR(*t) || strchr("-_.+", *t)))
+	while (t < e && (isWORDCHAR(*t) || memCHRs("-_.+", *t)))
 	    t++;
 	if (t < e) {
 	    TAINT;

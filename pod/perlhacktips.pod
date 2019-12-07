@@ -648,6 +648,39 @@ you have to pass its length to C<newSVpv>.
 
 =item *
 
+Perl strings are NOT the same as C strings:  They may contain C<NUL>
+characters, whereas a C string is terminated by the first C<NUL>.
+That is why Perl API functions that deal with strings generally take a
+pointer to the first byte and either a length or a pointer to the byte
+just beyond the final one.
+
+And this is the reason that many of the C library string handling
+functions should not be used.  They don't cope with the full generality
+of Perl strings.  It may be that your test cases don't have embedded
+C<NUL>s, and so the tests pass, whereas there may well eventually arise
+real-world cases where they fail.  A lesson here is to include C<NUL>s
+in your tests.  Now it's fairly rare in most real world cases to get
+C<NUL>s, so your code may seem to work, until one day a C<NUL> comes
+along.
+
+Here's an example.  It used to be a common paradigm, for decades, in the
+perl core to use S<C<strchr("list", c)>> to see if the character C<c> is
+any of the ones given in C<"list">, a double-quote-enclosed string of
+the set of characters that we are seeing if C<c> is one of.  As long as
+C<c> isn't a C<NUL>, it works.  But when C<c> is a C<NUL>, C<strchr>
+returns a pointer to the terminating C<NUL> in C<"list">.   This likely
+will result in a segfault or a security issue when the caller uses that
+end pointer as the starting point to read from.
+
+A solution to this and many similar issues is to use the C<mem>I<-foo> C
+library functions instead.  In this case C<memchr> can be used to see if
+C<c> is in C<"list"> and works even if C<c> is C<NUL>.  These functions
+need an additional parameter to give the string length.
+In the case of literal string parameters, perl has defined macros that
+calculate the length for you.  See L<perlapi/Miscellaneous Functions>.
+
+=item *
+
 malloc(0), realloc(0), calloc(0, 0) are non-portable.  To be portable
 allocate at least one byte.  (In general you should rarely need to work
 at this low level, but instead use the various malloc wrappers.)

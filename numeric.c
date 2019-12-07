@@ -1150,7 +1150,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     return IS_NUMBER_IN_UV;
   }
   /* We could be e.g. at "Inf" or "NaN", or at the "#" of "1.#INF". */
-  if ((s + 2 < send) && strchr("inqs#", toFOLD(*s))) {
+  if ((s + 2 < send) && memCHRs("inqs#", toFOLD(*s))) {
       /* Really detect inf/nan. Start at d, not s, since the above
        * code might have already consumed the "1." or "1". */
       const int infnan = Perl_grok_infnan(aTHX_ &d, send);

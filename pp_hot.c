@@ -3269,9 +3269,9 @@ Perl_do_readline(pTHX)
 	    }
 	    for (t1 = SvPVX_const(sv); *t1; t1++)
 #ifdef __VMS
-		if (strchr("*%?", *t1))
+		if (memCHRs("*%?", *t1))
 #else
-		if (strchr("$&*(){}[]'\";\\|?<>~`", *t1))
+		if (memCHRs("$&*(){}[]'\";\\|?<>~`", *t1))
 #endif
 			break;
 	    if (*t1 && PerlLIO_lstat(SvPVX_const(sv), &statbuf) < 0) {

@@ -12361,7 +12361,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    goto string;
 	}
 
-	if (vectorize && !strchr("BbDdiOouUXx", c))
+	if (vectorize && !memCHRs("BbDdiOouUXx", c))
             goto unknown;
 
         /* get next arg (individual branches do their own va_arg()

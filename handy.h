@@ -478,6 +478,13 @@ Like L</memNE>, but the second string is a literal enclosed in double quotes,
 C<l1> gives the number of bytes in C<s1>.
 Returns zero if non-equal, or zero if non-equal.
 
+=for apidoc Am|bool|memCHRs|"list"|char c
+Returns the position of the first occurence of the byte C<c> in the literal
+string C<"list">, or NULL if C<c> doesn't appear in C<"list">.  All bytes are
+treated as unsigned char.  Thus this macro can be used to determine if C<c> is
+in a set of particular characters.  Unlike L<strchr(3)>, it works even if C<c>
+is C<NUL> (and the set doesn't include C<NUL>).
+
 =cut
 
 New macros should use the following conventions for their names (which are
@@ -568,6 +575,8 @@ based on the underlying C library functions):
 #define memLE(s1,s2,l) (memcmp(s1,s2,l) <= 0)
 #define memGT(s1,s2,l) (memcmp(s1,s2,l) > 0)
 #define memGE(s1,s2,l) (memcmp(s1,s2,l) >= 0)
+
+#define memCHRs(s1,c) ((const char *) memchr("" s1 "" , c, sizeof(s1)-1))
 
 /*
  * Character classes.

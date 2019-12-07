@@ -2419,7 +2419,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 
     for (s = cmd; *s; s++) {
 	if (*s != ' ' && !isALPHA(*s) &&
-	    strchr("$&*(){}[]'\";\\|?<>~`\n",*s)) {
+	    memCHRs("$&*(){}[]'\";\\|?<>~`\n",*s)) {
 	    if (*s == '\n' && !s[1]) {
 		*s = '\0';
 		break;

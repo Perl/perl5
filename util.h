@@ -17,7 +17,7 @@
 	(*(f) == '/'							\
 	 || (strchr(f,':')						\
 	     || ((*(f) == '[' || *(f) == '<')				\
-		 && (isWORDCHAR((f)[1]) || strchr("$-_]>",(f)[1])))))
+		 && (isWORDCHAR((f)[1]) || memCHRs("$-_]>",(f)[1])))))
 
 #elif defined(WIN32) || defined(__CYGWIN__)
 #  define PERL_FILE_IS_ABSOLUTE(f) \
