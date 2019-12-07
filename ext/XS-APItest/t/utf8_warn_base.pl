@@ -728,7 +728,7 @@ sub isUTF8_CHAR($$) {   # Uses first principals to determine if this is legal
 
     return 0 if $utf8skip != $length;
 
-    # Acuumulate the $code point.  The remaining bits in the start byte count
+    # Accumulate the $code point.  The remaining bits in the start byte count
     # towards it
     my $cp = $bits >> $utf8skip;
 
@@ -881,8 +881,7 @@ if ($::TEST_CHUNK == 0
                             else {
 
                                 # Starting with the code point, use first
-                                # principals to find the equivalen UTF-8
-                                # string
+                                # principals to find the equivalent I8 string
                                 my @bytes;
                                 my $uv = $cp;
                                 for (my $i = $length - 1; $i > 0; $i--) {
