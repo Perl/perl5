@@ -699,7 +699,7 @@ sub do_warnings_test(@)
     return $succeeded;
 }
 
-my $min_cont = (isASCII) ? 0x80 : 0xA0;
+my $min_cont = $::lowest_continuation;
 my $continuation_shift = (isASCII) ? 6 : 5;
 my $continuation_mask = (1 << $continuation_shift) - 1;
 
@@ -793,9 +793,8 @@ if ($::TEST_CHUNK == 0
                         # character
                 $min_cont .. 0xFF   # But test every non-invariant individually
                 );
-    my $shift = (isASCII) ? 6 : 5;
     my $mark = $min_cont;
-    my $mask = (1 << $shift) - 1;
+    my $mask = (1 << $continuation_shift) - 1;
     for my $byte1 (@bytes) {
         for my $byte2 (@bytes) {
             last if $byte2 && ! $byte1;      # Don't test empty preceding byte
@@ -887,7 +886,7 @@ if ($::TEST_CHUNK == 0
                                 for (my $i = $length - 1; $i > 0; $i--) {
                                     $bytes[$i] = chr I8_to_native(($uv & $mask)
                                                                   | $mark);
-                                    $uv >>= $shift;
+                                    $uv >>= $continuation_shift;
                                 }
                                 $bytes[0] = chr I8_to_native((   $uv
                                                         & start_mask($length))
