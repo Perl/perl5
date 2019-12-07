@@ -19799,15 +19799,11 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                 UV prev_cp = 0;
                 U8 count = 0;
 
-                /* Ignore everything before the first new-line */
-                while (*si_string != '\n' && remaining > 0) {
-                    si_string++;
-                    remaining--;
-                }
-                assert(remaining > 0);
-
+                /* Ignore everything before and including the first new-line */
+                si_string = (const char *) memchr(si_string, '\n', SvCUR(si));
+                assert (si_string != NULL);
                 si_string++;
-                remaining--;
+                remaining = SvPVX(si) + SvCUR(si) - si_string;
 
                 while (remaining > 0) {
 
