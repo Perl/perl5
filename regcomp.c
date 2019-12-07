@@ -19849,22 +19849,21 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                      * here to the next \n */
 
                     remaining -= len;
-                    while (*(si_string + len) != '\n' && remaining > 0) {
-                        remaining--;
-                        len++;
-                    }
-                    if (*(si_string + len) == '\n') {
-                        len++;
-                        remaining--;
-                    }
+                    len = strcspn(si_string, "\n");
+                    remaining -= len;
                     if (matches_string) {
-                        sv_catpvn(matches_string, si_string, len - 1);
+                        sv_catpvn(matches_string, si_string, len);
                     }
                     else {
-                        matches_string = newSVpvn(si_string, len - 1);
+                        matches_string = newSVpvn(si_string, len);
                     }
-                    si_string += len;
                     sv_catpvs(matches_string, " ");
+
+                    si_string += len;
+                    if (remaining && UCHARAT(si_string) == '\n') {
+                        si_string++;
+                        remaining--;
+                    }
                 } /* end of loop through the text */
 
                 assert(matches_string);
