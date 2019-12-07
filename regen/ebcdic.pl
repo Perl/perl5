@@ -482,6 +482,7 @@ END
 
         my @perl_extended_utf8_dfa;
         my @i8 = (
+                # 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00-0F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10-1F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20-2F
@@ -594,7 +595,7 @@ END
       #        N2
       # N6     Start byte is F[357].  Continuation byte BF transitions to N12;
       #        other continuations to N2
-      # N5     Start byte is F8.  Continuation bytes A[0-7] are illegal
+      # N7     Start byte is F8.  Continuation bytes A[0-7] are illegal
       #        (overlong); continuations A[9BDF] and B[13579BDF] transition to
       #        N14; the other continuations to N3
       # N8     Start byte is F9.  Continuation byte A0 transitions to N3; A1
@@ -636,6 +637,7 @@ END
 
         my @strict_utf8_dfa;
         my @i8 = (
+                # 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00-0F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10-1F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20-2F
@@ -734,6 +736,7 @@ END
 
         my @C9_utf8_dfa;
         my @i8 = (
+                # 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00-0F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10-1F
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20-2F
