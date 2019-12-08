@@ -2,6 +2,7 @@
 #
 # Tests that have to do with checking whether characters have (or not have)
 # certain Unicode properties; belong (or not belong) to blocks, scripts, etc.
+# including user-defined properties
 #
 
 use strict;
