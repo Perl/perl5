@@ -19652,16 +19652,17 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	SV *rv;
 
         if (cp_list) {
-            av_store(av, INVLIST_INDEX, SvREFCNT_inc(cp_list));
+            av_store(av, INVLIST_INDEX, SvREFCNT_inc_NN(cp_list));
         }
 
         if (only_utf8_locale_list) {
             av_store(av, ONLY_LOCALE_MATCHES_INDEX,
-                                          SvREFCNT_inc(only_utf8_locale_list));
+                                     SvREFCNT_inc_NN(only_utf8_locale_list));
         }
 
         if (runtime_defns) {
-            av_store(av, DEFERRED_USER_DEFINED_INDEX, SvREFCNT_inc(runtime_defns));
+            av_store(av, DEFERRED_USER_DEFINED_INDEX,
+                         SvREFCNT_inc_NN(runtime_defns));
         }
 
 	rv = newRV_noinc(MUTABLE_SV(av));
