@@ -2750,16 +2750,16 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 
         /* This assumes that most uses will be in the first Unicode plane, not
          * needing surrogates */
-	if (UNLIKELY(uv >= UNICODE_SURROGATE_FIRST
-                  && uv <= UNICODE_SURROGATE_LAST))
+	if (UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,
+                                 UNICODE_SURROGATE_LAST)))
         {
             if (UNLIKELY(p >= pend) || UNLIKELY(uv > LAST_HIGH_SURROGATE)) {
                 Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
             }
 	    else {
 		UV low = (p[0] << 8) + p[1];
-		if (   UNLIKELY(low < FIRST_LOW_SURROGATE)
-                    || UNLIKELY(low > LAST_LOW_SURROGATE))
+		if (UNLIKELY(! inRANGE(low, FIRST_LOW_SURROGATE,
+                                            LAST_LOW_SURROGATE)))
                 {
 		    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
                 }
