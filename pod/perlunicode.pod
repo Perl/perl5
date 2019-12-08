@@ -1066,7 +1066,9 @@ You can define your own binary character properties by defining subroutines
 whose names begin with C<"In"> or C<"Is">.  (The experimental feature
 L<perlre/(?[ ])> provides an alternative which allows more complex
 definitions.)  The subroutines can be defined in any
-package.  The user-defined properties can be used in the regular expression
+package.  They override any Unicode properties expressed as the same
+names.  The user-defined properties can be used in the regular
+expression
 C<\p{}> and C<\P{}> constructs; if you are using a user-defined property from a
 package other than the one you are in, you must specify its package in the
 C<\p{}> or C<\P{}> construct.

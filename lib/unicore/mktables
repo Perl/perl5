@@ -17075,6 +17075,9 @@ other two shortcuts, and Unicode continues to define new properties that begin
 with C<"In">, so it's quite possible that a conflict will occur in the future.
 The compound form is guaranteed to not become obsolete, and its meaning is
 clearer anyway.  See L<perlunicode/"Blocks"> for more information about this.
+
+User-defined properties must begin with "In" or "Is".  These override any
+Unicode property of the same name.
 END
     }
     my $text = $Is_flags_text;

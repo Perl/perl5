@@ -426,6 +426,14 @@ struct RExC_state_t {
 #define _invlist_intersection_complement_2nd(a, b, output) \
                  _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 
+/* We add a marker if we are deferring expansion of a potential user-defined
+ * property until it is needed at runtime the first time it is encountered in a
+ * pattern match.  This marker that shouldn't conflict with any that could be
+ * in a legal name is appended to its name to indicate this.  There is a string
+ * and character form */
+#define DEFERRED_PROP_EXPANSION_MARKERs  "~"
+#define DEFERRED_PROP_EXPANSION_MARKERc  '~'
+
 /* About scan_data_t.
 
   During optimisation we recurse through the regexp program performing
@@ -19845,11 +19853,13 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                         continue;
                     }
 
-                    /* Here, didn't find a legal hex number.  Just add it from
-                     * here to the next \n */
+                    /* Here, didn't find a legal hex number.  Just add the text
+                     * from here up to the next \n, omitting any trailing
+                     * markers. */
 
                     remaining -= len;
-                    len = strcspn(si_string, "\n");
+                    len = strcspn(si_string,
+                                        DEFERRED_PROP_EXPANSION_MARKERs "\n");
                     remaining -= len;
                     if (matches_string) {
                         sv_catpvn(matches_string, si_string, len);
@@ -19860,6 +19870,13 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     sv_catpvs(matches_string, " ");
 
                     si_string += len;
+                    if (   remaining
+                        && UCHARAT(si_string)
+                                            == DEFERRED_PROP_EXPANSION_MARKERc)
+                    {
+                        si_string++;
+                        remaining--;
+                    }
                     if (remaining && UCHARAT(si_string) == '\n') {
                         si_string++;
                         remaining--;
@@ -23099,7 +23116,7 @@ Perl_parse_uniprop_string(pTHX_
      * Other parameters will be set on return as described below */
 
     const char * const name,    /* The first non-blank in the \p{}, \P{} */
-    const Size_t name_len,      /* Its length in bytes, not including any
+    Size_t name_len,            /* Its length in bytes, not including any
                                    trailing space */
     const bool is_utf8,         /* ? Is 'name' encoded in UTF-8 */
     const bool to_fold,         /* ? Is this under /i */
@@ -23147,6 +23164,9 @@ Perl_parse_uniprop_string(pTHX_
                                    qualified name */
     bool invert_return = FALSE; /* ? Do we need to complement the result before
                                      returning it */
+    bool stripped_utf8_pkg = FALSE; /* Set TRUE if the input includes an
+                                       explicit utf8:: package that we strip
+                                       off  */
 
     PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
@@ -23205,6 +23225,17 @@ Perl_parse_uniprop_string(pTHX_
             break;
         }
 
+        /* If this looks like it is a marker we inserted at compile time,
+         * ignore it; otherwise keep it as it would have been user input. */
+        if (     UNLIKELY(cur == DEFERRED_PROP_EXPANSION_MARKERc)
+            && ! deferrable
+            &&   could_be_user_defined
+            &&   i == name_len - 1)
+        {
+            name_len--;
+            continue;
+        }
+
         /* Otherwise, this character is part of the name. */
         lookup_name[j++] = cur;
 
@@ -23238,6 +23269,7 @@ Perl_parse_uniprop_string(pTHX_
         lookup_name +=  STRLENs("utf8::");
         j -=  STRLENs("utf8::");
         equals_pos -=  STRLENs("utf8::");
+        stripped_utf8_pkg = TRUE;
     }
 
     /* Here, we are either done with the whole property name, if it was simple;
@@ -23634,7 +23666,29 @@ Perl_parse_uniprop_string(pTHX_
         /* Here, the name could be for a user defined property, which are
          * implemented as subs. */
         user_sub = get_cvn_flags(name, name_len, 0);
-        if (user_sub) {
+        if (! user_sub) {
+
+            /* Here, the property name could be a user-defined one, but there
+             * is no subroutine to handle it (as of now).   Defer handling it
+             * until runtime.  Otherwise, a block defined by Unicode in a later
+             * release would get the synonym InFoo added for it, and existing
+             * code that used that name would suddenly break if it referred to
+             * the property before the sub was declared.  See [perl #134146] */
+            if (deferrable) {
+                goto definition_deferred;
+            }
+
+            /* If we haven't already stripped the package name (if one), do so
+             * now so can look for an official property with the stripped name.
+             * */
+            if (! stripped_utf8_pkg) {
+                lookup_name += non_pkg_begin;
+                j -= non_pkg_begin;
+            }
+
+            /* Drop down to look up in the official properties */
+        }
+        else {
             const char insecure[] = "Insecure user-defined property";
 
             /* Here, there is a sub by the correct name.  Normally we call it
@@ -24270,18 +24324,34 @@ Perl_parse_uniprop_string(pTHX_
 
   definition_deferred:
 
+    {
+        bool is_qualified = non_pkg_begin != 0;  /* If has "::" */
+
     /* Here it could yet to be defined, so defer evaluation of this
      * until its needed at runtime.  We need the fully qualified property name
-     * to avoid ambiguity, and a trailing newline */
+     * to avoid ambiguity */
     if (! fq_name) {
         fq_name = S_get_fq_name(aTHX_ name, name_len, is_utf8,
-                                      non_pkg_begin != 0 /* If has "::" */
-                               );
+                                      is_qualified);
     }
+
+        /* If it didn't come with a package, or the package is utf8::, this
+         * actually could be an official Unicode property whose inclusion we
+         * are deferring until runtime to make sure that it isn't overridden by
+         * a user-defined property of the same name (which we haven't
+         * encountered yet).  Add a marker to indicate this possibility, for
+         * use at such time when we first need the definition during pattern
+         * matching execution */
+        if (! is_qualified || memBEGINPs(name, non_pkg_begin, "utf8::")) {
+            sv_catpvs(fq_name, DEFERRED_PROP_EXPANSION_MARKERs);
+        }
+
+        /* We also need a trailing newline */
     sv_catpvs(fq_name, "\n");
 
     *user_defined_ptr = TRUE;
     return fq_name;
+    }
 }
 
 #endif

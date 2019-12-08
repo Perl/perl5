@@ -45,6 +45,20 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<\p{I<user-defined>}> properties now always override official
+Unicode ones
+
+Previously, if and only if a user-defined property was declared prior to
+the compilation of the regular expression pattern containing it, its
+definition was used instead of any official Unicode property with the
+same name.  Now, it always overrides the offical property.  This
+change could break existing code that relied (likely unwittingly) on the
+previous behavior.  Without this fix, if Unicode released a new version
+with a new property that happens to have the same name as the one you
+had long been using, your program would break when you upgraded to a
+perl that used that new Unicode version.  See L<perlunicode/User-Defined
+Character Properties>.  [GH #17205]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
