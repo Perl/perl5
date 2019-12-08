@@ -24327,13 +24327,13 @@ Perl_parse_uniprop_string(pTHX_
     {
         bool is_qualified = non_pkg_begin != 0;  /* If has "::" */
 
-    /* Here it could yet to be defined, so defer evaluation of this
-     * until its needed at runtime.  We need the fully qualified property name
-     * to avoid ambiguity */
-    if (! fq_name) {
-        fq_name = S_get_fq_name(aTHX_ name, name_len, is_utf8,
-                                      is_qualified);
-    }
+        /* Here it could yet to be defined, so defer evaluation of this until
+         * its needed at runtime.  We need the fully qualified property name to
+         * avoid ambiguity */
+        if (! fq_name) {
+            fq_name = S_get_fq_name(aTHX_ name, name_len, is_utf8,
+                                                                is_qualified);
+        }
 
         /* If it didn't come with a package, or the package is utf8::, this
          * actually could be an official Unicode property whose inclusion we
@@ -24347,10 +24347,10 @@ Perl_parse_uniprop_string(pTHX_
         }
 
         /* We also need a trailing newline */
-    sv_catpvs(fq_name, "\n");
+        sv_catpvs(fq_name, "\n");
 
-    *user_defined_ptr = TRUE;
-    return fq_name;
+        *user_defined_ptr = TRUE;
+        return fq_name;
     }
 }
 
