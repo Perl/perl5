@@ -742,6 +742,26 @@ THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     }
 }
 
+static OP *
+hoist_pp_nextstate(pTHX)
+{
+    dVAR;
+    COP *old_curcop = PL_curcop;
+    OP *next = PL_ppaddr[PL_op->op_type](aTHX);
+    PL_curcop = old_curcop;
+    return next;
+}
+
+static OP *
+hoist_ck_lineseq(pTHX_ OP *o)
+{
+    OP *kid = cBINOPo->op_first;
+    for (; kid; kid = OpSIBLING(kid))
+	if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+	    kid->op_ppaddr = hoist_pp_nextstate;
+    return o;
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -4496,6 +4516,16 @@ PerlIO_stdin()
 
 FILE *
 PerlIO_exportFILE(PerlIO *f, const char *mode)
+
+SV *
+create_hoisted_subs(const char *code)
+    CODE:
+	OP *(*old_ck_lineseq)(pTHX_ OP *) = PL_check[OP_LINESEQ];
+	PL_check[OP_LINESEQ] = hoist_ck_lineseq;
+	RETVAL = SvREFCNT_inc(eval_pv(code,FALSE));
+	PL_check[OP_LINESEQ] = old_ck_lineseq;
+    OUTPUT:
+	RETVAL
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 

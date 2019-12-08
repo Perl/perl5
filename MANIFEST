@@ -4438,6 +4438,7 @@ ext/XS-APItest/t/handy08.t	XS::APItest: tests for handy.h
 ext/XS-APItest/t/handy09.t	XS::APItest: tests for handy.h
 ext/XS-APItest/t/handy_base.pl	XS::APItest: tests for handy.h
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
+ext/XS-APItest/t/Hoisted.pm	used by pl_check.t
 ext/XS-APItest/t/join_with_space.t	test op_convert_list
 ext/XS-APItest/t/keyword_multiline.t	test keyword plugin parsing across lines
 ext/XS-APItest/t/keyword_plugin.t	test keyword plugin mechanism
@@ -4467,6 +4468,7 @@ ext/XS-APItest/t/op_list.t	test OP list construction API
 ext/XS-APItest/t/overload.t	XS::APItest: tests for overload related APIs
 ext/XS-APItest/t/pad_scalar.t	Test pad_findmy_* functions
 ext/XS-APItest/t/peep.t		test PL_peepp/PL_rpeepp
+ext/XS-APItest/t/pl_check.t	Test PL_check thread safety
 ext/XS-APItest/t/pmflag.t	Test removal of Perl_pmflag()
 ext/XS-APItest/t/postinc.t	test op_lvalue()
 ext/XS-APItest/t/printf.t	XS::APItest extension
