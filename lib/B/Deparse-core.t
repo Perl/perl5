@@ -83,7 +83,7 @@ sub testit {
 	my $code_ref;
 	if ($lexsub) {
 	    package lexsubtest;
-	    no warnings 'experimental::lexical_subs';
+	    no warnings 'experimental::lexical_subs', 'experimental::isa';
 	    use feature 'lexical_subs';
 	    no strict 'vars';
             $code = "sub { state sub $keyword; ${vars}() = $expr }";
@@ -93,6 +93,7 @@ sub testit {
 	}
 	else {
 	    package test;
+	    no warnings 'experimental::isa';
 	    use subs ();
 	    import subs $keyword;
 	    $code = "no strict 'vars'; sub { ${vars}() = $expr }";
