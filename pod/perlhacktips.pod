@@ -432,7 +432,7 @@ Mixing declarations and code
 
 That is C99 or C++.  Some C compilers allow that, but you shouldn't.
 
-The gcc option C<-Wdeclaration-after-statements> scans for such
+The gcc option C<-Wdeclaration-after-statement> scans for such
 problems (by default on starting from Perl 5.9.4).
 
 =item *
