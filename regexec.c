@@ -10647,7 +10647,7 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
      * is a stand-alone grapheme.  The UTF-8 for 'cp' begins at position 's' in
      * the larger string bounded by 'strbeg' and 'strend'.
      *
-     * 'cp' needs to be assigned (if not a future version of the Unicode
+     * 'cp' needs to be assigned (if not, a future version of the Unicode
      * Standard could make it something that combines with adjacent characters,
      * so code using it would then break), and there has to be a GCB break
      * before and after the character. */
