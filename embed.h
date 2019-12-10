@@ -1156,8 +1156,8 @@
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #  endif
-#  if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
-#define _is_grapheme(a,b,c,d)	Perl__is_grapheme(aTHX_ a,b,c,d)
+#  if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+#define is_grapheme(a,b,c,d)	Perl_is_grapheme(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define isFOO_lc(a,b)		Perl_isFOO_lc(aTHX_ a,b)

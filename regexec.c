@@ -10641,7 +10641,7 @@ S_to_byte_substr(pTHX_ regexp *prog)
 #ifndef PERL_IN_XSUB_RE
 
 bool
-Perl__is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const UV cp)
+Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const UV cp)
 {
     /* Temporary helper function for toke.c.  Verify that the code point 'cp'
      * is a stand-alone grapheme.  The UTF-8 for 'cp' begins at position 's' in
@@ -10657,7 +10657,7 @@ Perl__is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, cons
     GCB_enum cp_gcb_val, prev_cp_gcb_val, next_cp_gcb_val;
     const U8 * prev_cp_start;
 
-    PERL_ARGS_ASSERT__IS_GRAPHEME;
+    PERL_ARGS_ASSERT_IS_GRAPHEME;
 
     if (   UNLIKELY(UNICODE_IS_SUPER(cp))
         || UNLIKELY(UNICODE_IS_NONCHAR(cp)))

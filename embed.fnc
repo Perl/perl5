@@ -2761,8 +2761,8 @@ ESR	|bool	|regtail_study	|NN RExC_state_t *pRExC_state \
 EXRp	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
 
-#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
-ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *strend|const UV cp
+#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+ERp	|bool	|is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *strend|const UV cp
 #endif
 
 #if defined(PERL_IN_REGEXEC_C)

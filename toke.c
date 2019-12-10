@@ -11017,7 +11017,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     }
     else {
 	termcode = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
-        if (UTF && UNLIKELY(! _is_grapheme((U8 *) start,
+        if (UTF && UNLIKELY(! is_grapheme((U8 *) start,
                                            (U8 *) s,
                                            (U8 *) PL_bufend,
                                                   termcode)))
@@ -11089,7 +11089,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                         && memEQ(s + 1, (char*)termstr + 1, termlen - 1))
                     {
                         if (   UTF
-                            && UNLIKELY(! _is_grapheme((U8 *) start,
+                            && UNLIKELY(! is_grapheme((U8 *) start,
                                                        (U8 *) s,
                                                        (U8 *) PL_bufend,
                                                               termcode)))
