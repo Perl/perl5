@@ -668,7 +668,7 @@ at a distance like rewriting a pending exception in C<$@>. Plans to
 rectify this have been scrapped, as users found that rewriting a 
 pending exception is actually a useful feature, and not a bug.
 
-The C<$SIG{__DIE__}> doesn't support C<'IGNORE'>, it has the same
+C<$SIG{__DIE__}> doesn't support C<'IGNORE'>. It has the same
 effect as C<'DEFAULT'>.
 
 C<__DIE__>/C<__WARN__> handlers are very special in one respect: they
