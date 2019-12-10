@@ -319,6 +319,7 @@ my @death =
  '/\x{100}(?(/' => 'Unknown switch condition (?(...)) {#} m/\\x{100}(?({#}/', # [perl #133896]
  '/(?[\N{KEYCAP DIGIT NINE}/' => '\N{} here is restricted to one character {#} m/(?[\\N{U+39.FE0F.20E3{#}}/', # [perl #133988]
  '/0000000000000000[\N{U+0.00}0000/' => 'Unmatched [ {#} m/0000000000000000[{#}\N{U+0.00}0000/', # [perl #134059]
+ '/\p{nv=\b5\b}/' => 'Can\'t find Unicode property definition "nv=\\b5\\b" {#} m/\\p{nv=\\b5\\b}{#}/',
 );
 
 # These are messages that are death under 'use re "strict"', and may or may

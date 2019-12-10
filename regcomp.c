@@ -23290,10 +23290,13 @@ Perl_parse_uniprop_string(pTHX_
         /* Most punctuation after the equals indicates a subpattern, like
          * \p{foo=/bar/} */
         if (   isPUNCT_A(name[i])
-            && name[i] != '-'
-            && name[i] != '+'
-            && name[i] != '_'
-            && name[i] != '{')
+            &&  name[i] != '-'
+            &&  name[i] != '+'
+            &&  name[i] != '_'
+            &&  name[i] != '{'
+                /* A backslash means the real delimitter is the next character,
+                 * but it must be punctuation */
+            && (name[i] != '\\' || (i < name_len && isPUNCT_A(name[i+1]))))
         {
             /* Find the property.  The table includes the equals sign, so we
              * use 'j' as-is */
@@ -23309,8 +23312,8 @@ Perl_parse_uniprop_string(pTHX_
                 const char * pos_in_brackets;
                 bool escaped = 0;
 
-                /* A backslash means the real delimitter is the next character.
-                 * */
+                /* Backslash => delimitter is the character following.  We
+                 * already checked that it is punctuation */
                 if (open == '\\') {
                     open = name[i++];
                     escaped = 1;
