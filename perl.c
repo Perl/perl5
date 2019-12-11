@@ -3177,6 +3177,7 @@ as C<call_sv>, with the obvious exception of C<G_EVAL>.  See L<perlcall>.
 The C<G_RETHROW> flag can be used if you only need eval_sv() to
 execute code specified by a string, but not catch any errors.
 
+=for apidoc Amnh||G_RETHROW
 =cut
 */
 
