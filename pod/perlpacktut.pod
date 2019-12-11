@@ -678,7 +678,8 @@ sequences and generally have a friendlier interface.
 
 The pack code C<w> has been added to support a portable binary data
 encoding scheme that goes way beyond simple integers. (Details can
-be found at L<http://Casbah.org/>, the Scarab project.)  A BER (Binary Encoded
+be found at L<https://github.com/mworks-project/mw_scarab/blob/master/Scarab-0.1.00d19/doc/binary-serialization.txt>,
+the Scarab project.)  A BER (Binary Encoded
 Representation) compressed unsigned integer stores base 128
 digits, most significant digit first, with as few digits as possible.
 Bit eight (the high bit) is set on each byte except the last. There
