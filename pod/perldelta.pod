@@ -365,6 +365,11 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item Solaris
+
+C<Configure> will now find recent versions of the Oracle Developer Studio
+compiler, which are found under C</opt/developerstudio*>.
+
 =back
 
 =head1 Internal Changes
