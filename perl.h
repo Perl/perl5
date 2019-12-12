@@ -642,8 +642,8 @@ out of them.
                                     taint_proper(NULL, s);                  \
                                 }
 #   define TAINT_set(s)		(PL_tainted = (s))
-#   define TAINT_get		(PL_tainted)    /* Is something tainted? */
-#   define TAINTING_get		(PL_tainting)   /* Is taint checking enabled? */
+#   define TAINT_get		(cBOOL(UNLIKELY(PL_tainted)))    /* Is something tainted? */
+#   define TAINTING_get		(cBOOL(UNLIKELY(PL_tainting)))   /* Is taint checking enabled? */
 #   define TAINTING_set(s)	(PL_tainting = (s))
 #   define TAINT_WARN_get       (PL_taint_warn) /* FALSE => tainting violations
                                                             are fatal
