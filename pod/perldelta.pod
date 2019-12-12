@@ -399,6 +399,10 @@ than by F<feature.pm> updating C<${^FEATURE_BITS}>, which has been
 removed.  This allows perl code to save and restore the contents of
 C<%^H> without also having to manage C<${^FEATURE_BITS}>.  [#17337]
 
+=item *
+
+C<PL_check> is now interpreter-local rather than global.  [#14816]
+
 =back
 
 =head1 Known Problems
