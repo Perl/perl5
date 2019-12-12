@@ -1053,7 +1053,7 @@ Perl_leave_scope(pTHX_ I32 base)
 #ifdef NO_TAINT_SUPPORT
             PERL_UNUSED_VAR(was);
 #else
-	    if (UNLIKELY(a0.any_ptr == &(TAINT_get))) {
+	    if (UNLIKELY(a0.any_ptr == &(PL_tainted))) {
 		/* If we don't update <was>, to reflect what was saved on the
 		 * stack for PL_tainted, then we will overwrite this attempt to
 		 * restore it when we exit this routine.  Note that this won't
