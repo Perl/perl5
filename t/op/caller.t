@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 97 ); # some tests are run in a BEGIN block
+    plan( tests => 109 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -335,6 +335,22 @@ $::testing_caller = 1;
 
 do './op/caller.pl' or die $@;
 
+# GH #15109
+# See that callers within a nested series of 'use's gets the right
+# filenames.
+{
+    local @INC = 'lib/GH_15109/';
+    # Apack use's Bpack which use's Cpack which populates @Cpack::caller
+    # with the file:N of all the callers
+    eval 'use Apack; 1';
+    is($@, "", "GH #15109 - eval");
+    is (scalar(@Cpack::callers), 10, "GH #15109 - callers count");
+    like($Cpack::callers[$_], qr{GH_15109/Bpack.pm:3}, "GH #15109 level $_") for 0..2;
+    like($Cpack::callers[$_], qr{GH_15109/Apack.pm:3}, "GH #15109 level $_") for 3..5;
+    like($Cpack::callers[$_], qr{\(eval \d+\):1}, "GH #15109 level $_") for 6..8;
+    like($Cpack::callers[$_], qr{caller\.t}, "GH #15109 level $_") for 9;
+}
+
 {
     package RT129239;
     BEGIN {
@@ -348,3 +364,4 @@ do './op/caller.pl' or die $@;
 #line 12345 "virtually/op/caller.t"
     }
 }
+
