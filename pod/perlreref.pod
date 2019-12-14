@@ -234,19 +234,19 @@ There is no quantifier C<{,n}>. That's interpreted as a literal string.
    (?:...)           Groups subexpressions without capturing (cluster)
    (?pimsx-imsx:...) Enable/disable option (as per m// modifiers)
    (?=...)           Zero-width positive lookahead assertion
-   (?*pla:...)       Same, starting in 5.32; experimentally in 5.28
-   (?*positive_lookahead:...) Same, same versions as *pla
+   (*pla:...)        Same, starting in 5.32; experimentally in 5.28
+   (*positive_lookahead:...) Same, same versions as *pla
    (?!...)           Zero-width negative lookahead assertion
-   (?*nla:...)       Same, starting in 5.32; experimentally in 5.28
-   (?*negative_lookahead:...) Same, same versions as *nla
+   (*nla:...)        Same, starting in 5.32; experimentally in 5.28
+   (*negative_lookahead:...) Same, same versions as *nla
    (?<=...)          Zero-width positive lookbehind assertion
-   (?*plb:...)       Same, starting in 5.32; experimentally in 5.28
-   (?*positive_lookbehind:...) Same, same versions as *plb
+   (*plb:...)        Same, starting in 5.32; experimentally in 5.28
+   (*positive_lookbehind:...) Same, same versions as *plb
    (?<!...)          Zero-width negative lookbehind assertion
-   (?*nlb:...)       Same, starting in 5.32; experimentally in 5.28
-   (?*negative_lookbehind:...) Same, same versions as *plb
+   (*nlb:...)        Same, starting in 5.32; experimentally in 5.28
+   (*negative_lookbehind:...) Same, same versions as *plb
    (?>...)           Grab what we can, prohibit backtracking
-   (?*atomic:...)    Same, starting in 5.32; experimentally in 5.28
+   (*atomic:...)     Same, starting in 5.32; experimentally in 5.28
    (?|...)           Branch reset
    (?<name>...)      Named capture
    (?'name'...)      Named capture
