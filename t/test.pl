@@ -304,7 +304,7 @@ eval 'sub re::is_regexp { ref($_[0]) eq "Regexp" }'
 
 # keys are the codes \n etc map to, values are 2 char strings such as \n
 my %backslash_escape;
-foreach my $x (split //, 'nrtfa\\\'"') {
+foreach my $x (split //, 'enrtfa\\\'"') {
     $backslash_escape{ord eval "\"\\$x\""} = "\\$x";
 }
 # A way to display scalars containing control characters and Unicode.
