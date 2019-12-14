@@ -310,27 +310,17 @@ sub display {
                     $y = $y . sprintf "\\x{%x}", $c;
                 } elsif ($backslash_escape{$c}) {
                     $y = $y . $backslash_escape{$c};
-                } else {
-                    my $z = chr $c; # Maybe we can get away with a literal...
-
-                    if ($z !~ /[^[:^print:][:^ascii:]]/) {
-                        # The pattern above is equivalent (by de Morgan's
-                        # laws) to:
-                        #     $z !~ /(?[ [:print:] & [:ascii:] ])/
-                        # or, $z is not an ascii printable character
-
-                        # Use octal for characters with small ordinals that
-                        # are traditionally expressed as octal: the controls
-                        # below space, which on EBCDIC are almost all the
-                        # controls, but on ASCII don't include DEL nor the C1
-                        # controls.
-                        if ($c < ord " ") {
-                            $z = sprintf "\\%03o", $c;
-                        } else {
-                            $z = sprintf "\\x{%x}", $c;
-                        }
-                    }
-                    $y = $y . $z;
+                } elsif ($c < ord " ") {
+                    # Use octal for characters with small ordinals that are
+                    # traditionally expressed as octal: the controls below
+                    # space, which on EBCDIC are almost all the controls, but
+                    # on ASCII don't include DEL nor the C1 controls.
+                    $y = $y . sprintf "\\%03o", $c;
+                } elsif (chr $c =~ /[[:print:]]/a) {
+                    $y = $y . chr $c;
+                }
+                else {
+                    $y = $y . sprintf "\\x%02X", $c;
                 }
             }
             $x = $y;
