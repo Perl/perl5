@@ -458,7 +458,6 @@ perl_construct(pTHXx)
 #ifdef USE_POSIX_2008_LOCALE
     PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", NULL);
 #endif
-    Copy(Gcheck,  PL_check,  MAXO,  Perl_check_t);
 
     ENTER;
     init_i18nl10n(1);
