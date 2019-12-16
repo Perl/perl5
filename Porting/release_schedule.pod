@@ -62,7 +62,7 @@ you should reset the version numbers to the next blead series.
   2019-08-20  5.31.3 ✓       Tom Hukins
   2019-09-20  5.31.4 ✓       Max Maischein
   2019-10-20  5.31.5 ✓       Steve Hay
-  2019-11-20  5.31.6         BinGOs
+  2019-11-20  5.31.6 ✓       BinGOs
   2019-12-18  5.31.7         Atoomic
   2020-01-20  5.31.8         Matthew Horsfall
   2020-02-20  5.31.9         Renee Backer
