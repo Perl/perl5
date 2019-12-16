@@ -1,3 +1,8 @@
+IO 1.41_50 -- Dec 16 2019 - Ricardo Signes
+  * [ TRIAL RELEASE ]
+  * Loading IO is now threadsafe, avoiding the core bug reported as GH #14816.
+    Implemented by converting getline() and getlines() to XS code.
+
 IO 1.41 -- Dec 12 2019 - Ricardo Signes
   * [ TRIAL RELEASE ]
   * import the latest from blead, so some changes may be in intermediate
