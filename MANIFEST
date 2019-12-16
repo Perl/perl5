@@ -868,6 +868,7 @@ cpan/ExtUtils-MakeMaker/t/test_boilerplate.t			MakeMaker test
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch1/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch2/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testlib.t				See if ExtUtils::testlib works
+cpan/ExtUtils-MakeMaker/t/testrules.yml
 cpan/ExtUtils-MakeMaker/t/unicode.t
 cpan/ExtUtils-MakeMaker/t/VERSION_FROM.t			See if MakeMaker's VERSION_FROM works
 cpan/ExtUtils-MakeMaker/t/vstrings.t

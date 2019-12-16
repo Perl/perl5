@@ -7,6 +7,7 @@ Digest::MD5 cpan/Digest-MD5/Makefile.PL 3bf781444ee671da63f1c6360e0a31f11d9ba520
 Digest::MD5 cpan/Digest-MD5/MD5.pm df5f0663f0f755be7eda6e3d2f008f2629246b19
 Digest::MD5 cpan/Digest-MD5/MD5.xs 249bed648232192ce018f7f894ad127c3a639831
 Digest::MD5 cpan/Digest-MD5/t/files.t e987329d2411ff60ad9a2bdf93fdf5f6943467e8
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Any.pm 231d7e8db3303dc593350e54572270806a8de687
 Filter::Util::Call pod/perlfilter.pod e9833bf4ebc51087dfee5c553e0f8a5eef67212d
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 198ea6c6c584f5ea79a0fd7e9d411d0878f3b2af

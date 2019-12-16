@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.38';
+$VERSION = '7.40';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -63,10 +63,10 @@ ExtUtils::MM_Unix - methods used by ExtUtils::MakeMaker
 =head1 DESCRIPTION
 
 The methods provided by this package are designed to be used in
-conjunction with ExtUtils::MakeMaker. When MakeMaker writes a
+conjunction with L<ExtUtils::MakeMaker>. When MakeMaker writes a
 Makefile, it creates one or more objects that inherit their methods
-from a package C<MM>. MM itself doesn't provide any methods, but it
-ISA ExtUtils::MM_Unix class. The inheritance tree of MM lets operating
+from a package L<MM|ExtUtils::MM>. MM itself doesn't provide any methods, but
+it ISA ExtUtils::MM_Unix class. The inheritance tree of MM lets operating
 specific packages take the responsibility for all the methods provided
 by MM_Unix. We are trying to reduce the number of the necessary
 overrides by defining rather primitive operations within
@@ -93,8 +93,8 @@ Not all of the methods below are overridable in a
 Makefile.PL. Overridable methods are marked as (o). All methods are
 overridable by a platform specific MM_*.pm file.
 
-Cross-platform methods are being moved into MM_Any.  If you can't find
-something that used to be in here, look in MM_Any.
+Cross-platform methods are being moved into L<MM_Any|ExtUtils::MM_Any>.
+If you can't find something that used to be in here, look in MM_Any.
 
 =cut
 
@@ -3528,7 +3528,7 @@ sub escape_newlines {
 
 =item max_exec_len
 
-Using POSIX::ARG_MAX.  Otherwise falling back to 4096.
+Using L<POSIX>::ARG_MAX.  Otherwise falling back to 4096.
 
 =cut
 

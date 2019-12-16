@@ -1,7 +1,7 @@
 package ExtUtils::MM_UWIN;
 
 use strict;
-our $VERSION = '7.38';
+our $VERSION = '7.40';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Unix;
@@ -19,10 +19,10 @@ ExtUtils::MM_UWIN - U/WIN specific subclass of ExtUtils::MM_Unix
 
 =head1 DESCRIPTION
 
-This is a subclass of ExtUtils::MM_Unix which contains functionality for
+This is a subclass of L<ExtUtils::MM_Unix> which contains functionality for
 the AT&T U/WIN UNIX on Windows environment.
 
-Unless otherwise stated it works just like ExtUtils::MM_Unix
+Unless otherwise stated it works just like ExtUtils::MM_Unix.
 
 =head2 Overridden methods
 
