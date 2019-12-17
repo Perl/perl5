@@ -121,6 +121,8 @@ to be generated in evals, such as
 For state vars, C<SVs_PADSTALE> is overloaded to mean 'not yet initialised',
 but this internal state is stored in a separate pad entry.
 
+=for apidoc Amnh||SVs_PADSTALE
+
 =for apidoc AmnxU|PADNAMELIST *|PL_comppad_name
 
 During compilation, this points to the array containing the names part
@@ -2265,6 +2267,8 @@ If C<flags> has the C<CV_NAME_NOTQUAL> bit set, then the package name will not b
 included.  If the first argument is neither a CV nor a GV, this flag is
 ignored (subject to change).
 
+=for apidoc Amnh||CV_NAME_NOTQUAL
+
 =cut
 */
 
@@ -2749,6 +2753,8 @@ Constructs and returns a new pad name.  Only use this function for names
 that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  C<outer> is
 the outer pad name that this one mirrors.  The returned pad name has the
 C<PADNAMEt_OUTER> flag already set.
+
+=for apidoc Amnh||PADNAMEt_OUTER
 
 =cut
 */

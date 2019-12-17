@@ -184,6 +184,8 @@ it has not been precomputed.  Returns a mortal scalar copy of the value
 associated with the key, or C<&PL_sv_placeholder> if there is no value
 associated with the key.
 
+=for apidoc Amnh||COPHH_KEY_UTF8
+
 =cut
 */
 

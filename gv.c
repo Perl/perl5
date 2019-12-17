@@ -323,6 +323,8 @@ the return value of SvUTF8(sv).  It can also take the
 C<GV_ADDMULTI> flag, which means to pretend that the GV has been
 seen before (i.e., suppress "Used once" warnings).
 
+=for apidoc Amnh||GV_ADDMULTI
+
 =for apidoc gv_init
 
 The old form of C<gv_init_pvn()>.  It does not work with UTF-8 strings, as it
@@ -1462,6 +1464,11 @@ Note, use of C<gv_stashsv> instead of C<gv_stashpvn> where possible is strongly
 recommended for performance reasons.
 
 =for apidoc Amnh||GV_ADD
+=for apidoc Amnh||GV_NOADD_NOINIT
+=for apidoc Amnh||GV_NOINIT
+=for apidoc Amnh||GV_NOEXPAND
+=for apidoc Amnh||GV_ADDMG
+=for apidoc Amnh||SVf_UTF8
 
 =cut
 */

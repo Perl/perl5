@@ -308,6 +308,11 @@ Set by the L<perlfunc/exit> operator.
 
 =back
 
+=for apidoc Amnh||PERL_EXIT_EXPECTED
+=for apidoc Amnh||PERL_EXIT_ABORT
+=for apidoc Amnh||PERL_EXIT_DESTRUCT_END
+=for apidoc Amnh||PERL_EXIT_WARN
+
 =cut
 */
 

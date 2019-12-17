@@ -1003,6 +1003,8 @@ buffer is currently being interpreted (L</lex_bufutf8>).  If a string
 to be inserted is available as a Perl scalar, the L</lex_stuff_sv>
 function is more convenient.
 
+=for apidoc Amnh||LEX_STUFF_UTF8
+
 =cut
 */
 
@@ -1295,6 +1297,8 @@ consumed, then it will not be discarded regardless of the flag.
 
 Returns true if some new text was added to the buffer, or false if the
 buffer has reached the end of the input text.
+
+=for apidoc Amnh||LEX_KEEP_PREVIOUS
 
 =cut
 */
@@ -12715,7 +12719,10 @@ normally resulting in a single exception at the top level of parsing
 which covers all the compilation errors that occurred.  Some compilation
 errors, however, will throw an exception immediately.
 
+=for apidoc Amnh||PARSE_OPTIONAL
+
 =cut
+
 */
 
 OP *

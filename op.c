@@ -6506,6 +6506,8 @@ is automatically set.  C<first> supplies an optional op to be the direct
 child of the unary op; it is consumed by this function and become part
 of the constructed op tree.
 
+=for apidoc Amnh||OPf_KIDS
+
 =cut
 */
 
@@ -8713,6 +8715,10 @@ decremented. In addition, the C<name> argument is modified.
 
 If C<PERL_LOADMOD_DENY> is set, the module is loaded as if with C<no> rather
 than C<use>.
+
+=for apidoc Amnh||PERL_LOADMOD_DENY
+=for apidoc Amnh||PERL_LOADMOD_NOIMPORT
+=for apidoc Amnh||PERL_LOADMOD_IMPORT_OPS
 
 =cut */
 
@@ -14150,6 +14156,11 @@ referencing GV.  The resulting C<GV*> is cast to C<CV*> to be returned.
 A null pointer is returned as usual if there is no statically-determinable
 subroutine.
 
+=for apidoc Amnh||OPpEARLY_CV
+=for apidoc Amnh||OPpENTERSUB_AMPER
+=for apidoc Amnh||RV2CVOPCV_MARK_EARLY
+=for apidoc Amnh||RV2CVOPCV_RETURN_NAME_GV
+
 =cut
 */
 
@@ -14725,6 +14736,8 @@ recorded requirements.
 C<gflags> is a bitset passed into C<cv_get_call_checker_flags>, in which
 only the C<CALL_CHECKER_REQUIRE_GV> bit currently has a defined meaning
 (for which see above).  All other bits should be clear.
+
+=for apidoc Amnh||CALL_CHECKER_REQUIRE_GV
 
 =for apidoc cv_get_call_checker
 

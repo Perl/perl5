@@ -5489,6 +5489,10 @@ C<mg_set> on C<dsv> afterwards if appropriate.
 C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
 
+=for apidoc Amnh||SV_CATUTF8
+=for apidoc Amnh||SV_CATBYTES
+=for apidoc Amnh||SV_SMAGIC
+
 =cut
 */
 

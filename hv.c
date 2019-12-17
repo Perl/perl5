@@ -2672,6 +2672,8 @@ C<&PL_sv_placeholder>.  Note that the implementation of placeholders and
 restricted hashes may change, and the implementation currently is
 insufficiently abstracted for any change to be tidy.
 
+=for apidoc Amnh||HV_ITERNEXT_WANTPLACEHOLDERS
+
 =cut
 */
 

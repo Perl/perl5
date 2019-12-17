@@ -1286,6 +1286,20 @@ All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
 warn.
 
+=for apidoc Amnh||UTF8_CHECK_ONLY
+=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
+=for apidoc Amnh||UTF8_DISALLOW_SURROGATE
+=for apidoc Amnh||UTF8_DISALLOW_NONCHAR
+=for apidoc Amnh||UTF8_DISALLOW_SUPER
+=for apidoc Amnh||UTF8_WARN_ILLEGAL_INTERCHANGE
+=for apidoc Amnh||UTF8_WARN_ILLEGAL_C9_INTERCHANGE
+=for apidoc Amnh||UTF8_WARN_SURROGATE
+=for apidoc Amnh||UTF8_WARN_NONCHAR
+=for apidoc Amnh||UTF8_WARN_SUPER
+=for apidoc Amnh||UTF8_WARN_PERL_EXTENDED
+=for apidoc Amnh||UTF8_DISALLOW_PERL_EXTENDED
+
 =cut
 
 Also implemented as a macro in utf8.h
