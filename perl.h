@@ -7517,8 +7517,9 @@ START_EXTERN_C
  */
 
 /* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
-GCC_DIAG_IGNORE_DECL(-Wpragmas);
+#  ifndef USE_CPLUSPLUS
 GCC_DIAG_IGNORE_DECL(-Wc++-compat);
+#  endif
 
 #  ifdef USE_QUADMATH
 /* Cannot use HUGE_VALQ for PL_inf because not a compile-time
@@ -7588,8 +7589,9 @@ INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
 #    endif
 #  endif
 
+#  ifndef USE_CPLUSPLUS
 GCC_DIAG_RESTORE_DECL;
-GCC_DIAG_RESTORE_DECL;
+#  endif
 
 #else
 
