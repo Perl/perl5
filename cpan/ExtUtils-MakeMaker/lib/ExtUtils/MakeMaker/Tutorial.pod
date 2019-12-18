@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::Tutorial;
 
-our $VERSION = '7.40';
+our $VERSION = '7.42';
 $VERSION =~ tr/_//d;
 
 
@@ -205,7 +205,8 @@ L<perlmodstyle> gives stylistic help writing a module.
 L<perlnewmod> gives more information about how to write a module.
 
 There are modules to help you through the process of writing a module:
-L<ExtUtils::ModuleMaker>, L<Module::Install>, L<PAR>
+L<ExtUtils::ModuleMaker>, L<Module::Starter>, L<Minilla::Tutorial>,
+L<Dist::Milla::Tutorial>, L<Dist::Zilla::Starter>
 
 =cut
 
