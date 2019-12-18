@@ -32,6 +32,7 @@ B::Lint
 B::Lint::Debug
 B::Utils
 basename(1)
+bc(1)
 Benchmark::Perl::Formance
 bind(2)
 BSD::Resource
@@ -108,6 +109,7 @@ Encode::Locale
 Eval::WithLexicals
 execvp(3)
 exit(3)
+Expect
 Exporter::Easy
 ExtUtils::Constant::ProxySubs
 fchdir(2)
@@ -156,6 +158,7 @@ indirect
 inetd(8)
 invoker
 IO::Compress
+IO::Pty
 IO::Socket::IP
 ioctl(2)
 IPC::Run
@@ -243,6 +246,7 @@ PerlIO::via::Base64
 PerlIO::via::StripHTML
 perllexwarn(1)
 perlthanks
+pipe(2)
 POD2::FR
 POD2::IT
 pod2ipf(1)
@@ -301,6 +305,7 @@ sock_init(3)
 Socket
 socketpair(3)
 SOM
+sort(1)
 splain
 sprintf(3)
 stat(2)
