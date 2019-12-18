@@ -23332,7 +23332,11 @@ Perl_parse_uniprop_string(pTHX_
 
                 if (    i >= name_len
                     ||  name[name_len-1] != close
-                    || (escaped && name[name_len-2] != '\\'))
+                    || (escaped && name[name_len-2] != '\\')
+                        /* Also make sure that there are enough characters.
+                         * e.g., '\\\' would show up incorrectly as legal even
+                         * though it is too short */
+                    || (SSize_t) (name_len - i - 1 - escaped) < 0)
                 {
                     sv_catpvs(msg, "Unicode property wildcard not terminated");
                     goto append_name_to_msg;
