@@ -6684,8 +6684,8 @@ X<return>
 
 Returns from a subroutine, L<C<eval>|/eval EXPR>,
 L<C<do FILE>|/do EXPR>, L<C<sort>|/sort SUBNAME LIST> block or regex
-eval block (but not a L<C<grep>|/grep BLOCK LIST> or
-L<C<map>|/map BLOCK LIST> block) with the value
+eval block (but not a L<C<grep>|/grep BLOCK LIST>,
+L<C<map>|/map BLOCK LIST>, or L<C<do BLOCK>|/do BLOCK> block) with the value
 given in EXPR.  Evaluation of EXPR may be in list, scalar, or void
 context, depending on how the return value will be used, and the context
 may vary from one execution to the next (see
