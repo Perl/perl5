@@ -114,6 +114,8 @@ fchown(2)
 fcntl(2)
 fdopen(3)
 fetch(1)
+FFI::Platypus
+FFI::Raw
 fgrep(1)
 File::chdir
 File::Copy::Recursive
