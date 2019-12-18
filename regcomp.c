@@ -11376,6 +11376,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                 RExC_parse-seqstart, seqstart);
 		NOT_REACHED; /*NOTREACHED*/
             case '<':           /* (?<...) */
+                /* If you want to support (?<*...), first reconcile with GH #17363 */
 		if (*RExC_parse == '!')
 		    paren = ',';
 		else if (*RExC_parse != '=')
@@ -11949,6 +11950,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     ckWARNreg(RExC_parse, "Empty (?) without any modifiers");
                 }
                 /* FALLTHROUGH */
+            case '*': /* If you want to support (?*...), first reconcile with GH #17363 */
+	    /* FALLTHROUGH */
 	    default: /* e.g., (?i) */
 	        RExC_parse = (char *) seqstart + 1;
               parse_flags:
