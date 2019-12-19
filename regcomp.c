@@ -22654,7 +22654,7 @@ Perl_init_uniprops(pTHX)
     PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
     PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
 
-    PL_InBitmap = _new_invlist_C_array(_Perl_InBitmap_invlist);
+    PL_InBitmap = _new_invlist_C_array(InBitmap_invlist);
     PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
     PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
     PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);

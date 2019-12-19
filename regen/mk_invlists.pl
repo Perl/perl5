@@ -1151,13 +1151,6 @@ sub _Perl_CCC_non0_non230 {
     return \@return;
 }
 
-sub _Perl_InBitmap {
-    my @return;
-    push @return, $_ for 0 .. $num_anyof_code_points - 1;
-    @return = mk_invlist_from_sorted_cp_list(\@return);
-    return \@return;
-}
-
 sub output_table_common {
 
     # Common subroutine to actually output the generated rules table.
@@ -2340,6 +2333,14 @@ switch_pound_if ('ALL', 'PERL_IN_REGCOMP_C');
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
 
+if ($num_anyof_code_points == 256) {    # Same as Latin1
+    print $out_fh
+            "\nstatic const UV * const InBitmap_invlist = Latin1_invlist;\n";
+}
+else {
+    output_invlist("InBitmap", [ 0, $num_anyof_code_points ]);
+}
+
 end_file_pound_if;
 
 # We construct lists for all the POSIX and backslash sequence character
@@ -2386,7 +2387,6 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     Case_Folding
                     &_Perl_IVCF
                     &_Perl_CCC_non0_non230
-                    &_Perl_InBitmap
                 );
                 # NOTE that the convention is that extra enum values come
                 # after the property name, separated by commas, with the enums

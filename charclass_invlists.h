@@ -43,6 +43,8 @@ static const UV AboveLatin1_invlist[] = {
 	0x100
 };
 
+static const UV * const InBitmap_invlist = Latin1_invlist;
+
 #endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
@@ -29383,15 +29385,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 037 */
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 #if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
-
-static const UV _Perl_InBitmap_invlist[] = {  /* for all charsets */
-	2,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	0,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x100
-};
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
@@ -395178,5 +395171,5 @@ static const U8 WB_table[23][23] = {
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * e9283c761c5a95e3379384ca47c13a284f08d743c2be6e5091f1152b1b6b7a37 regen/mk_PL_charclass.pl
- * 65a08c53c038137b3293a52b3e73bce979d9859f237dea6d48ff7e1fb9efb4ef regen/mk_invlists.pl
+ * bddfa92837a1e11b3c74c80512e0492dc325a15ee9e2d768f246ddb3ef3bcef9 regen/mk_invlists.pl
  * ex: set ro: */
