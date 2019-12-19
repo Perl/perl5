@@ -110,26 +110,29 @@ my $test_num = 0;
 # translated again.
 my $first_already_converted_test_num = @tests + 1;
 
-sub convert_from_ascii {
-    my $string = shift;
+sub convert_from_ascii_guts {
+    my $string_ref = shift;
 
-    return $string if ord("A") == 65;
-    return $string if $test_num >= $first_already_converted_test_num;
+    return if $test_num >= $first_already_converted_test_num;
 
-    #my $save = $string;
+    #my $save = $string_ref;
     # Convert \x{...}, \o{...}
-    $string =~ s/ (?<! \\ ) \\x\{ ( .*? ) } / "\\x{" . sprintf("%X", utf8::unicode_to_native(hex $1)) .  "}" /gex;
-    $string =~ s/ (?<! \\ ) \\o\{ ( .*? ) } / "\\o{" . sprintf("%o", utf8::unicode_to_native(oct $1)) .  "}" /gex;
+    $$string_ref =~ s/ (?<! \\ ) \\x\{ ( .*? ) } / "\\x{" . sprintf("%X", utf8::unicode_to_native(hex $1)) .  "}" /gex;
+    $$string_ref =~ s/ (?<! \\ ) \\o\{ ( .*? ) } / "\\o{" . sprintf("%o", utf8::unicode_to_native(oct $1)) .  "}" /gex;
 
     # Convert \xAB
-    $string =~ s/ (?<! \\ ) \\x ( [A-Fa-f0-9]{2} ) / "\\x" . sprintf("%02X", utf8::unicode_to_native(hex $1)) /gex;
+    $$string_ref =~ s/ (?<! \\ ) \\x ( [A-Fa-f0-9]{2} ) / "\\x" . sprintf("%02X", utf8::unicode_to_native(hex $1)) /gex;
 
     # Convert \xA
-    $string =~ s/ (?<! \\ ) \\x ( [A-Fa-f0-9] ) (?! [A-Fa-f0-9] ) / "\\x" . sprintf("%X", utf8::unicode_to_native(hex $1)) /gex;
+    $$string_ref =~ s/ (?<! \\ ) \\x ( [A-Fa-f0-9] ) (?! [A-Fa-f0-9] ) / "\\x" . sprintf("%X", utf8::unicode_to_native(hex $1)) /gex;
 
-    #print STDERR __LINE__, ": $save\n$string\n" if $save ne $string;
-    return $string;
+    #print STDERR __LINE__, ": $save\n$string_ref\n" if $save ne $string_ref;
+    return;
 }
+
+*convert_from_ascii = (ord("A") == 65)
+                      ? sub { 1; }
+                      : convert_from_ascii_guts;
 
 $bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
 $ffff  = chr(0xff) x 2;
@@ -159,20 +162,20 @@ foreach (@tests) {
     my $input = join(':',$pat,$subject,$result,$repl,$expect);
 
     # the double '' below keeps simple syntax highlighters from going crazy
-    $pat = "'$pat'" unless $pat =~ /^[:''\/]/; 
+    $pat = "'$pat'" unless $pat =~ /^[:''\/]/;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g unless $regex_sets;
-    $pat = convert_from_ascii($pat);
+    convert_from_ascii(\$pat);
 
     my $no_null_pat;
     if ($no_null && $pat =~ /^'(.*)'\z/) {
        $no_null_pat = XS::APItest::string_without_null($1);
     }
 
-    $subject = convert_from_ascii($subject);
+    convert_from_ascii(\$subject);
     $subject = eval qq("$subject"); die $@ if $@;
 
-    $expect = convert_from_ascii($expect);
+    convert_from_ascii(\$expect);
     $expect  = eval qq("$expect"); die $@ if $@;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
 
