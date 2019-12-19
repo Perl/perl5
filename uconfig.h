@@ -346,7 +346,7 @@
 
 /* HAS_REGCOMP:
  *	This symbol, if defined, indicates that the regcomp() routine is
- *	available to do some regular patern matching (usually on POSIX.2
+ *	available to do some regular pattern matching (usually on POSIX.2
  *	conforming systems).
  */
 #define HAS_REGCOMP		/* POSIX.2 */
@@ -5251,6 +5251,6 @@
 #endif
 
 /* Generated from:
- * 0c6730559753fa1aa79fa3a10b50df81c20cae46d1fe3e3faef1c7d3aa13c92c config_h.SH
+ * 8762a3dfdfab48d1fe29cf7b27dfa150e1eec38b0d1f0f441d7cd9f5abef7dc8 config_h.SH
  * 31c25f95118efbf99e358f81091058e6723b4cccb8474dfbc6d06c2b7d46ff17 uconfig.sh
  * ex: set ro: */
