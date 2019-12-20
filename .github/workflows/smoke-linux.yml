@@ -1,0 +1,43 @@
+name: smoke-linux
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+
+jobs:
+  perl:
+
+    runs-on: ubuntu-latest
+
+    env:
+        PERL_SKIP_TTY_TEST: 1
+
+    strategy:
+        matrix:
+            # exercise a variety of build options
+            # threads often cause build issues
+            CONFIGURE_ARGS:
+              - "-Uusethreads"
+              - "-Dusethreads"
+              - "-DPERL_GLOBAL_STRUCT_PRIVATE"
+              - "-Duseshrplib -Dusesitecustomize -Duselongdouble PERL_UNICODE='' LANG='en_US.UTF-8'"
+              - "-Duseshrplib -Dusequadmath -Dusecbacktrace -Dusethreads PERL_UNICODE='' LANG='de_DE.UTF-8'"
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+            fetch-depth: 10
+      - name: Configure
+        run: |
+            sh ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix=$HOME/perl-blead -DDEBUGGING
+      - name: Build
+        run: |
+            make -j2
+      - name: Run Tests
+        run: |
+            TEST_JOBS=2 make -j2 test
