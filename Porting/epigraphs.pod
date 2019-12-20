@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.7 - Bernard Werber
+
+L<Announced on 2019-12-20 by Atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2019/12/msg256802.html>
+
+  Be quiet. Look at the stars and appreciate what you live.
+
 =head2 v5.31.6 - Neal Stephenson, "Quicksilver"
 
 L<Announced on 2019-11-20 by Chris 'BinGOs' Williams|https://www.nntp.perl.org/group/perl.perl5.porters/2019/11/msg256646.html>
