@@ -388,6 +388,14 @@ colon-delimited versions to use for comparison.  For example:
 
 L<http://analysis.cpantesters.org/beforemaintrelease?pair=5.20.2:5.22.0%20RC1>
 
+=head3 Monitor Continuous Integration smokers
+
+Currently both "Travis CI" and "GitHub Actions" smokers are setup.
+Their current status is available at:
+
+L<https://github.com/Perl/perl5/actions>
+L<https://travis-ci.org/Perl/perl5>
+
 =head3 update perldelta
 
 Get perldelta in a mostly finished state.
