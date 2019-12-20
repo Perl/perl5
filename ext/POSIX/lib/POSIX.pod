@@ -1822,7 +1822,7 @@ POSIX-compliant systems set C<$!> (C<$ERRNO>) to indicate a translation
 error, so clear C<$!> before calling C<strtod>.  However, non-POSIX systems
 may not check for overflow, and therefore will never set C<$!>.
 
-C<strtod> respects any POSIX C<setlocale()> C<LC_TIME> settings,
+C<strtod> respects any POSIX C<setlocale()> C<LC_NUMERIC> settings,
 regardless of whether or not it is called from Perl code that is within
 the scope of S<C<use locale>>.  This means it should not be used in a
 threaded application unless it's certain that the underlying locale is C
