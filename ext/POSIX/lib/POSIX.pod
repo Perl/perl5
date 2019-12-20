@@ -1451,14 +1451,18 @@ see L<perlfunc/eval>.
 
 =item C<setlocale>
 
-WARNING!  Do NOT use this function in a L<thread|threads>.  The locale
-will change in all other threads at the same time, and should your
-thread get paused by the operating system, and another started, that
-thread will not have the locale it is expecting.  On some platforms,
-there can be a race leading to segfaults if two threads call this
-function nearly simultaneously.
+WARNING!  Prior to Perl 5.28 or on a system that does not support
+thread-safe locale operations, do NOT use this function in a
+L<thread|threads>.  The locale will change in all other threads at the
+same time, and should your thread get paused by the operating system,
+and another started, that thread will not have the locale it is
+expecting.  On some platforms, there can be a race leading to segfaults
+if two threads call this function nearly simultaneously.  On unthreaded
+builds, or on Perl 5.28 and later on thread-safe systems, this warning
+does not apply.
 
-Modifies and queries the program's underlying locale.  Users of this
+This function
+modifies and queries the program's underlying locale.  Users of this
 function should read L<perllocale>, whch provides a comprehensive
 discussion of Perl locale handling, knowledge of which is necessary to
 properly use this function.  It contains
@@ -1466,7 +1470,9 @@ L<a section devoted to this function|perllocale/The setlocale function>.
 The discussion here is merely a summary reference for C<setlocale()>.
 Note that Perl itself is almost entirely unaffected by the locale
 except within the scope of S<C<"use locale">>.  (Exceptions are listed
-in L<perllocale/Not within the scope of "use locale">.)
+in L<perllocale/Not within the scope of "use locale">, and
+locale-dependent functions within the POSIX module ARE always affected
+by the current locale.)
 
 The following examples assume
 
