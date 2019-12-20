@@ -412,7 +412,9 @@ L<thread|threads>.  The locale will change in all other threads at the
 same time, and should your thread get paused by the operating system,
 and another started, that thread will not have the locale it is
 expecting.  On some platforms, there can be a race leading to segfaults
-if two threads call this function nearly simultaneously.
+if two threads call this function nearly simultaneously.  On unthreaded
+builds, or on Perl 5.28 and later on thread-safe systems, this warning
+does not apply.
 
 You can switch locales as often as you wish at run time with the
 C<POSIX::setlocale()> function:
