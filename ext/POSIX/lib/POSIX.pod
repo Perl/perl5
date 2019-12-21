@@ -1459,9 +1459,10 @@ L<thread|threads>.  The locale will change in all other threads at the
 same time, and should your thread get paused by the operating system,
 and another started, that thread will not have the locale it is
 expecting.  On some platforms, there can be a race leading to segfaults
-if two threads call this function nearly simultaneously.  On unthreaded
-builds, or on Perl 5.28 and later on thread-safe systems, this warning
-does not apply.
+if two threads call this function nearly simultaneously.  This warning
+does not apply on unthreaded builds, or on perls where
+C<${^SAFE_LOCALES}> exists and is non-zero; namely Perl 5.28 and later
+compiled to be locale-thread-safe.
 
 This function
 modifies and queries the program's underlying locale.  Users of this
