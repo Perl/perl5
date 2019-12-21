@@ -1827,8 +1827,9 @@ may not check for overflow, and therefore will never set C<$!>.
 
 C<strtod> respects any POSIX C<setlocale()> C<LC_NUMERIC> settings,
 regardless of whether or not it is called from Perl code that is within
-the scope of S<C<use locale>>.  This means it should not be used in a
-threaded application unless it's certain that the underlying locale is C
+the scope of S<C<use locale>>.  Prior to Perl 5.28, or when operating in
+a non thread-safe environment, it should not be used in a threaded
+application unless it's certain that the underlying locale is C
 or POSIX.  This is because it otherwise changes the locale, which
 globally affects all threads simultaneously.
 
