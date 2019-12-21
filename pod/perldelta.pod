@@ -27,14 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
-=head2 The C<POSIX::mblen()> function now works on shift state locales
+=head2 The C<POSIX::mblen()>, C<mbtowc> and C<wctomb> functions now work
+on shift state locales
 
-This function is always executed under the current C language locale.
+These functions are always executed under the current C language locale.
 (See L<perllocale>.)  Most locales are stateless, but a few, notably the
-very rarely encountered ISO 2022, maintain a state between calls to this
-function.  Previously the state was cleared on every call to this
-function, but now the state is not reset unless the first parameter is
-C<undef>.
+very rarely encountered ISO 2022, maintain a state between calls to
+these functions.  Previously the state was cleared on every call, but
+now the state is not reset unless the appropriate parameter is C<undef>.
 
 =head1 Security
 
@@ -372,7 +372,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Various bugs in C<POSIX::mbtowc> were fixed.   It could read past the
+end of the string if the second parameter was wrong, and the returned
+wide character likely would be garbage.
+
+Various bugs in C<POSIX::wctomb> were fixed.   It would segfault if the
+string parameter was shared or hadn't been pre-allocated with a string
+of sufficient length to hold the result.
 
 =back
 

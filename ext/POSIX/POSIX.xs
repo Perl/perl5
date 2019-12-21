@@ -3398,22 +3398,48 @@ mbstowcs(s, pwcs, n)
 
 int
 mbtowc(pwc, s, n)
-	wchar_t *	pwc
-	char *		s
+	SV *	        pwc
+	SV *		s
 	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
-        mbstate_t ps;
-#endif
     CODE:
-#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
-        memset(&ps, 0, sizeof(ps));;
-        PERL_UNUSED_RESULT(mbrtowc(pwc, NULL, 0, &ps));/* Reset any shift state */
-        errno = 0;
-        RETVAL = mbrtowc(pwc, s, n, &ps);   /* Prefer reentrant version */
-#else
-        RETVAL = mbtowc(pwc, s, n);
+        if (! SvOK(s)) {
+#ifdef USE_MBR
+            memzero(&PL_mbrtowc_ps, sizeof(PL_mbrtowc_ps)); /* Initialize state */
 #endif
+            errno = 0;
+
+            /* The return value of mbtowc() when the second parameter is NULL
+             * indicates if the locale is stateless or stateful.  If it
+             * matters, we prefer the more thread safe function mbrtowc(), but
+             * that function doesn't give this information.  Thus we have to
+             * call mbtowc() itself, and we use a semaphore to minizimize races.
+             * (The lock isn't fool-proof as the locale can be changed without
+             * a lock.) */
+            LOCALE_LOCK;
+            RETVAL = mbtowc(NULL, NULL, n);
+            LOCALE_UNLOCK;
+        }
+        else {  /* Not resetting state */
+            size_t len;
+            char * string = SvPV(s, len);
+            wchar_t wc;
+            if (n < len) {
+                len = n;
+            }
+            errno = 0;
+#ifdef USE_MBR
+            RETVAL = mbrtowc(&wc, string, len, &PL_mbrtowc_ps);
+#else
+            LOCALE_LOCK; /* This might prevent some races, but locales can be
+                            switched out without locking, so this isn't a cure
+                            all */
+            RETVAL = mbtowc(&wc, string, len);
+            LOCALE_UNLOCK;
+#endif
+            if (RETVAL > 0) {
+                sv_setiv_mg(pwc, wc);
+            }
+        }
     OUTPUT:
         RETVAL
 
@@ -3425,8 +3451,46 @@ wcstombs(s, pwcs, n)
 
 int
 wctomb(s, wchar)
-	char *		s
+	SV *		s
 	wchar_t		wchar
+    CODE:
+        if (s == &PL_sv_undef) {
+#ifdef USE_MBR
+            memzero(&PL_wcrtomb_ps, sizeof(PL_wcrtomb_ps)); /* Initialize state */
+#endif
+            errno = 0;
+
+            /* The return value of wctomb(), when the second parameter is NULL
+             * indicates if the locale is stateless or stateful.  If it
+             * matters, we prefer the more thread safe function wctombr(), but
+             * that function doesn't give this information.  Thus we have to
+             * call wctomb() itself, and we use a semaphore to minizimize races.
+             * (The lock isn't fool-proof as the locale can be changed without
+             * a lock.) */
+            LOCALE_LOCK;
+            RETVAL = wctomb(NULL, wchar);
+            LOCALE_UNLOCK;
+        }
+        else {  /* Not resetting state */
+            char buffer[MB_LEN_MAX];
+
+            errno = 0;
+#ifdef USE_MBR
+            RETVAL = wcrtomb(buffer, wchar, &PL_wcrtomb_ps);
+#else
+            LOCALE_LOCK; /* This might prevent some races, but locales can be
+                            switched out without locking, so this isn't a cure
+                            all */
+            RETVAL = wctomb(buffer, wchar);
+            LOCALE_UNLOCK;
+            if (RETVAL > 0) {
+                sv_setpvn(s, buffer, RETVAL);
+                sv_setpv_bufsize(s, RETVAL, RETVAL);
+            }
+#endif
+        }
+    OUTPUT:
+        RETVAL
 
 int
 strcoll(s1, s2)

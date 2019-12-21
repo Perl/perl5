@@ -3461,9 +3461,15 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #    endif
 #  endif    /* DEBUGGING */
 
+    /* Initialize the per-thread mbrFOO() state variables */
 #ifdef HAS_MBRLEN
-    /* Initialize the per-thread mbrlen() state variable */
     memzero(&PL_mbrlen_ps, sizeof(PL_mbrlen_ps));
+#endif
+#ifdef HAS_MBRTOWC
+    memzero(&PL_mbrtowc_ps, sizeof(PL_mbrtowc_ps));
+#endif
+#ifdef HAS_WCTOMBR
+    memzero(&PL_wctombr_ps, sizeof(PL_wctombr_ps));
 #endif
 
     /* Initialize the cache of the program's UTF-8ness for the always known

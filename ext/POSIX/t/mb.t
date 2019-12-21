@@ -19,19 +19,20 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 6;
+my $utf8_locale = find_utf8_ctype_locale();
+
+plan tests => 15;
 
 use POSIX qw();
 
 SKIP: {
     skip("mblen() not present", 6) unless $Config{d_mblen};
 
-    is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() basically works');
+    is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() works on ASCII input');
 
     skip("LC_CTYPE locale support not available", 5)
       unless locales_enabled('LC_CTYPE');
 
-    my $utf8_locale = find_utf8_ctype_locale();
     skip("no utf8 locale available", 5) unless $utf8_locale;
 
     local $ENV{LC_CTYPE} = $utf8_locale;
@@ -47,6 +48,7 @@ SKIP: {
     skip("mblen() broken (at least for c.utf8) on early HP-UX", 4)
         if   $Config{osname} eq 'hpux'
           && $major < 11 || ($major == 11 && $minor < 31);
+
     fresh_perl_is(
         'use POSIX; print &POSIX::mblen(undef,0);',
       0, {}, 'A UTF-8 locale is stateless (resets shift state as a side effect)');
@@ -66,5 +68,85 @@ SKIP: {
      'use POSIX; &POSIX::mblen(undef,0);
       my $wide; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", 1);',
      -1, {}, 'mblen() returns -1 when input length is too short');
+  }
+}
+
+SKIP: {
+    skip("mbtowc() not present", 6) unless $Config{d_mbtowc};
+
+    my $wide;
+
+    is(&POSIX::mbtowc($wide, "a", 1), 1, 'mbtowc() returns correct length on ASCII input');
+    is($wide , ord "a", 'mbtowc() returns correct ordinal on ASCII input');
+
+    skip("LC_CTYPE locale support not available", 4)
+      unless locales_enabled('LC_CTYPE');
+
+    skip("no utf8 locale available", 4) unless $utf8_locale;
+
+    local $ENV{LC_CTYPE} = $utf8_locale;
+    local $ENV{LC_ALL};
+    delete $ENV{LC_ALL};
+    local $ENV{PERL_UNICODE};
+    delete $ENV{PERL_UNICODE};
+
+  SKIP: {
+    my ($major, $minor, $rest) = $Config{osvers} =~ / (\d+) \. (\d+) .* /x;
+    skip("mbtowc() broken (at least for c.utf8) on early HP-UX", 4)
+        if   $Config{osname} eq 'hpux'
+          && $major < 11 || ($major == 11 && $minor < 31);
+    fresh_perl_is(
+        'use POSIX; print &POSIX::mbtowc(undef, undef,0);',
+      0, {}, 'mbtowc shows that a UTF-8 locale is stateless');
+
+    fresh_perl_is(
+        'use POSIX; &POSIX::mbtowc(undef, undef,0); my $wide; print &POSIX::mbtowc($wide, "'
+      . I8_to_native("\x{c3}\x{28}")
+      . '", 2)',
+      -1, {}, 'mbtowc() recognizes invalid multibyte characters');
+
+    fresh_perl_is(
+     'use POSIX; &POSIX::mbtowc(undef,undef,0);
+      my $wide; my $len = &POSIX::mbtowc($wide, "\N{GREEK SMALL LETTER SIGMA}", 2);
+      print "$len:$wide"',
+     "2:963", {}, 'mbtowc() works on UTF-8 characters');
+
+    fresh_perl_is(
+     'use POSIX; &POSIX::mbtowc(undef,undef,0);
+      my $wide; print &POSIX::mbtowc($wide, "\N{GREEK SMALL LETTER SIGMA}", 1);',
+     -1, {}, 'mbtowc() returns -1 when input length is too short');
+  }
+}
+
+SKIP: {
+    skip("mbtowc or wctomb() not present", 3) unless $Config{d_mbtowc} && $Config{d_wctomb};
+
+    fresh_perl_is('use POSIX; &POSIX::wctomb(undef,0); my $string; my $len = &POSIX::wctomb($string, ord "A"); print "$len:$string"',
+      "1:A", {}, 'wctomb() works on ASCII input');
+
+    skip("LC_CTYPE locale support not available", 2)
+      unless locales_enabled('LC_CTYPE');
+
+    skip("no utf8 locale available", 2) unless $utf8_locale;
+
+    local $ENV{LC_CTYPE} = $utf8_locale;
+    local $ENV{LC_ALL};
+    delete $ENV{LC_ALL};
+    local $ENV{PERL_UNICODE};
+    delete $ENV{PERL_UNICODE};
+
+  SKIP: {
+    my ($major, $minor, $rest) = $Config{osvers} =~ / (\d+) \. (\d+) .* /x;
+    skip("wctomb() broken (at least for c.utf8) on early HP-UX", 2)
+        if   $Config{osname} eq 'hpux'
+          && $major < 11 || ($major == 11 && $minor < 31);
+
+    fresh_perl_is('use POSIX; print &POSIX::wctomb(undef,0)',
+      0, {}, 'wctomb() shows that a UTF-8 locale is stateless');
+
+    fresh_perl_is('use POSIX; &POSIX::wctomb(undef,0); my $string; my $len = &POSIX::wctomb($string, 0x100); print "$len:$string"',
+      "2:" . I8_to_native("\x{c4}\x{80}"),
+      {}, 'wctomb() works on UTF-8 characters');
+
   }
 }

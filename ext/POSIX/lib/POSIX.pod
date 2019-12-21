@@ -1101,7 +1101,9 @@ See L</mblen>.
 
 =item C<mbtowc>
 
-This is identical to the C function C<mbtowc()>.
+This is identical to the C function C<mbtowc()>, except it is generally
+thread-safe when perl is compiled on a compiler that implements the C99
+(or above) C standard.
 
 See L</mblen>.
 
@@ -2138,7 +2140,12 @@ See L</mblen>.
 
 =item C<wctomb>
 
-This is identical to the C function C<wctomb()>.
+This is identical to the C function C<wctomb()>, except it is generally
+thread-safe when perl is compiled on a compiler that implements the C99
+(or above) C standard.
+
+To get the effect of a NULL first parameter to C<wctomb>, call this
+function with the first parameter being C<undef>.
 
 See L</mblen>.
 
