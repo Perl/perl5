@@ -1039,9 +1039,9 @@ which is why you should test from the tarball.
 
 =head4 Run the Installation Verification Procedure utility
 
-    $ ./perl -Ilib ./perlivp
+    $ ./perl -Ilib ./utils/perlivp
     # Or, perhaps:
-    $ ./perl5.x.y ./perlivp5.x.y
+    $ ./perl5.x.y ./utils/perlivp5.x.y
     ...
     All tests successful.
     $
