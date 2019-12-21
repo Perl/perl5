@@ -1,0 +1,429 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5317delta - what is new for perl v5.31.7
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.31.6 release and the 5.31.7
+release.
+
+If you are upgrading from an earlier release such as 5.31.5, first read
+L<perl5316delta>, which describes differences between 5.31.5 and 5.31.6.
+
+=head1 Core Enhancements
+
+=head2 The isa Operator
+
+A new experimental infix operator called C<isa> tests whether a given object
+is an instance of a given class or a class derived from it:
+
+    if( $obj isa Package::Name ) { ... }
+
+For more detail see L<perlop/Class Instance Operator>.
+
+=head1 Incompatible Changes
+
+=head2 C<\p{I<user-defined>}> properties now always override official
+Unicode ones
+
+Previously, if and only if a user-defined property was declared prior to
+the compilation of the regular expression pattern containing it, its
+definition was used instead of any official Unicode property with the
+same name.  Now, it always overrides the official property.  This
+change could break existing code that relied (likely unwittingly) on the
+previous behavior.  Without this fix, if Unicode released a new version
+with a new property that happens to have the same name as the one you
+had long been using, your program would break when you upgraded to a
+perl that used that new Unicode version.  See L<perlunicode/User-Defined
+Character Properties>.  [L<GH #17205|https://github.com/Perl/perl5/issues/17205>]
+
+
+=head1 Deprecations
+
+=head2 Module removals
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item B::Debug
+
+B::Debug is no longer shipped with Perl, you can still install it from CPAN.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.77 to 1.78.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.51 to 1.52.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.090 to 2.093.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.090 to 2.093.
+
+=item *
+
+L<CPAN> now points to version 2.27 instead of version 2.27-TRIAL2.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.55 to 3.56.
+
+=item *
+
+L<English> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.38 to 7.42.
+
+=item *
+
+L<feature> has been upgraded from version 1.56 to 1.57.
+
+=item *
+
+L<File::stat> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.95 to 0.96.
+
+=item *
+
+L<FindBin> is now a dual-life module.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.090 to 2.093.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20191120 to 5.20191220.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.71 to 2.72.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.44 to 1.45.
+
+=item *
+
+L<Storable> has been upgraded from version 3.17 to 3.18.
+
+fix to disallow vstring magic strings over 2GB.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302169 to 1.302170.
+
+=item *
+
+L<Tie::Hash::NamedCapture> has been upgraded from version 0.11 to 0.13.
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.44 to 2.45.
+
+=item *
+
+L<warnings> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.04 to 1.05.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perldebguts>
+
+=over 4
+
+=item Simplify a couple regnode definitions
+
+Update BOUND and NBOUND definitions.
+
+=item Add ANYOFHs regnode
+
+This node is like ANYOFHb, but is used when more than one leading byte
+is the same in all the matched code points.
+
+ANYOFHb is used to avoid having to convert from UTF-8 to code point for
+something that won't match.  It checks that the first byte in the UTF-8
+encoded target is the desired one, thus ruling out most of the possible
+code points.
+
+=back
+
+=head3 L<perldiag>
+
+=over 4
+
+=item Add documentation for experimental 'isa' operator
+
+(S experimental::isa) This warning is emitted if you use the (C<isa>)
+operator. This operator is currently experimental and its behaviour may
+change in future releases of Perl.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item caller
+
+Like L<C<__FILE__>|/__FILE__> and L<C<__LINE__>|/__LINE__>, the filename and
+line number returned here may be altered by the mechanism described at
+L<perlsyn/"Plain Old Comments (Not!)">.
+
+=item __FILE__
+
+It can be altered by the mechanism described at
+L<perlsyn/"Plain Old Comments (Not!)">.
+
+=item __LINE__
+
+It can be altered by the mechanism described at
+L<perlsyn/"Plain Old Comments (Not!)">.
+
+=item return
+
+Mention that you cannot return from do BLOCK
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item Update documentation for UTF8f
+
+=item Add missing '=for apidoc' lines
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item Perl strings are NOT the same as C strings
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item 'isa' operator is experimental
+
+This is an experimental feature and is available from Perl 5.31.6 when enabled
+by C<use feature 'isa'>. It emits a warning in the C<experimental::isa>
+category.
+
+=back
+
+=head3 L<perlreref>
+
+=over 4
+
+=item Fix some typos.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item Remove ${^FEATURE_BITS}.
+
+=back
+
+=head1 Utility Changes
+
+=head2 L<perlbug>
+
+=over 4
+
+=item Adjust bug tracker homepage url to point to GitHub.
+
+=back
+
+=head1 Configuration and Compilation
+
+=head2 F<Configure>
+
+=over 4
+
+=item Check if the compiler can handle inline attribute.
+
+=item Check for character data alignment.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item t/charset_tools.pl
+
+Avoid some work on ASCII platforms
+
+=item t/re/regexp.t
+
+Speed up many regex tests on ASCII platform
+
+=item t/re/pat.t
+
+Skip tests that don't work on EBCDIC
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Solaris
+
+C<Configure> will now find recent versions of the Oracle Developer Studio
+compiler, which are found under C</opt/developerstudio*>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item Fix MYMALLOC (PERL_MALLOC) build on Windows
+
+=item \p{user-defined} overrides official Unicode [L<GH #17025|https://github.com/Perl/perl5/issues/17025>]
+
+Prior to this patch, they only sometimes overrode.
+
+=item Regular Expressions
+
+Properly handle filled /il regnodes and multi-char folds
+
+=item Compilation error during make minitest [L<GH #17293|https://github.com/Perl/perl5/issues/17293>]
+
+move the implementation of %-, %+ into core
+
+=item read beyond buffer in grok_inf_nan [L<GH #17370|https://github.com/Perl/perl5/issues/17370>]
+
+=item Workaround glibc bug with LC_MESSAGES [L<GH #17081|https://github.com/Perl/perl5/issues/17081>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.31.7 represents approximately 4 weeks of development since Perl
+5.31.6 and contains approximately 9,300 lines of changes across 450 files
+from 22 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 5,200 lines of changes to 280 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.31.7:
+
+Ask Bjørn Hansen, brian d foy, Bryan Stenson, Chad Granum, Chris 'BinGOs'
+Williams, Dan Book, David Mitchell, Felipe Gasper, James E Keenan, Karl
+Williamson, Matthew Horsfall, Max Maischein, Nicolas R., Pali, Paul Evans,
+Ricardo Signes, Sawyer X, Stefan Seifert, Steve Hay, Tomasz Konojacki, Tony
+Cook, Vitali Peil.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
