@@ -117,12 +117,9 @@ these commands:
 
 =head1 BUG REPORTING
 
-If you want to report a bug in Perl, you must use the F<perlbug>
-command line tool.  This tool will ensure that your bug report includes
-all the relevant system and configuration information.
-
-To browse existing Perl bugs and patches, you can use the web interface
-at L<https://github.com/perl/perl5/issues>.
+If you want to report a bug in Perl, or browse existing Perl bugs and
+patches, use the GitHub issue tracker at
+L<https://github.com/perl/perl5/issues>.
 
 Please check the archive of the perl5-porters list (see below) and/or
 the bug tracking system before submitting a bug report.  Often, you'll
