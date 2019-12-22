@@ -61,8 +61,7 @@ Perl is a large and complex system that's used for everything from
 knitting to rocket science.  If you run into trouble, it's quite
 likely that someone else has already solved the problem you're
 facing. Once you've exhausted the documentation, please report bugs to us
-using the 'perlbug' tool. For more information about perlbug, either type
-'perldoc perlbug' or just 'perlbug' on a line by itself.
+at the GitHub issue tracker at https://github.com/Perl/perl5/issues
 
 While it was current when we made it available, Perl is constantly evolving
 and there may be a more recent version that fixes bugs you've run into or
