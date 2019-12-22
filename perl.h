@@ -3637,8 +3637,11 @@ hint to the compiler that this condition is likely to be false.
    STATIC_ASSERT_STMT expands to a statement and is suitable for use inside a
    function.
 */
-#if (defined(static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L)) && (!defined(__IBMC__) || __IBMC__ >= 1210)
-/* static_assert is a macro defined in <assert.h> in C11 or a compiler
+#if (! defined(__IBMC__) || __IBMC__ >= 1210)                               \
+ && ((   defined(static_assert) && (   defined(_ISOC11_SOURCE)              \
+                                    || (__STDC_VERSION__ - 0) >= 201101L))  \
+     || (defined(__cplusplus) && __cplusplus >= 201103L))
+/* XXX static_assert is a macro defined in <assert.h> in C11 or a compiler
    builtin in C++11.  But IBM XL C V11 does not support _Static_assert, no
    matter what <assert.h> says.
 */
