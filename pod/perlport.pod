@@ -670,7 +670,7 @@ When calculating specific times, such as for tests in time or date modules,
 it may be appropriate to calculate an offset for the epoch.
 
     use Time::Local qw(timegm);
-    my $offset = timegm(0, 0, 0, 1, 0, 70);
+    my $offset = timegm(0, 0, 0, 1, 0, 1970);
 
 The value for C<$offset> in Unix will be C<0>, but in Mac OS Classic
 will be some large number.  C<$offset> can then be added to a Unix time
