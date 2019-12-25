@@ -1087,10 +1087,12 @@ static OP *THX_parse_keyword_subsignature(pTHX)
 		    newSVpvf("nextstate:%u", (unsigned int)cCOPx(kid)->cop_line)));
 		break;
 	    case OP_ARGCHECK: {
-		UNOP_AUX_item *aux = cUNOP_AUXx(kid)->op_aux;
-		char slurpy = (char)(aux[2].iv);
+                struct op_argcheck_aux *p =
+                    (struct op_argcheck_aux*)(cUNOP_AUXx(kid)->op_aux);
 		retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
-		    newSVpvf("argcheck:%d:%d:%c", (int)(aux[0].iv), (int)(aux[1].iv), slurpy ? slurpy : '-')));
+		    newSVpvf("argcheck:%" UVuf ":%" UVuf ":%c",
+                            p->params, p->opt_params,
+                            p->slurpy ? p->slurpy : '-')));
 		break;
 	    }
 	    case OP_ARGELEM: {
