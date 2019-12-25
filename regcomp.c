@@ -431,8 +431,8 @@ struct RExC_state_t {
  * pattern match.  This marker that shouldn't conflict with any that could be
  * in a legal name is appended to its name to indicate this.  There is a string
  * and character form */
-#define DEFERRED_PROP_EXPANSION_MARKERs  "~"
-#define DEFERRED_PROP_EXPANSION_MARKERc  '~'
+#define DEFERRED_COULD_BE_OFFICIAL_MARKERs  "~"
+#define DEFERRED_COULD_BE_OFFICIAL_MARKERc  '~'
 
 /* About scan_data_t.
 
@@ -19863,7 +19863,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
                     remaining -= len;
                     len = strcspn(si_string,
-                                        DEFERRED_PROP_EXPANSION_MARKERs "\n");
+                                        DEFERRED_COULD_BE_OFFICIAL_MARKERs "\n");
                     remaining -= len;
                     if (matches_string) {
                         sv_catpvn(matches_string, si_string, len);
@@ -19876,7 +19876,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     si_string += len;
                     if (   remaining
                         && UCHARAT(si_string)
-                                            == DEFERRED_PROP_EXPANSION_MARKERc)
+                                            == DEFERRED_COULD_BE_OFFICIAL_MARKERc)
                     {
                         si_string++;
                         remaining--;
@@ -23231,7 +23231,7 @@ Perl_parse_uniprop_string(pTHX_
 
         /* If this looks like it is a marker we inserted at compile time,
          * ignore it; otherwise keep it as it would have been user input. */
-        if (     UNLIKELY(cur == DEFERRED_PROP_EXPANSION_MARKERc)
+        if (     UNLIKELY(cur == DEFERRED_COULD_BE_OFFICIAL_MARKERc)
             && ! deferrable
             &&   could_be_user_defined
             &&   i == name_len - 1)
@@ -24354,7 +24354,7 @@ Perl_parse_uniprop_string(pTHX_
          * use at such time when we first need the definition during pattern
          * matching execution */
         if (! is_qualified || memBEGINPs(name, non_pkg_begin, "utf8::")) {
-            sv_catpvs(fq_name, DEFERRED_PROP_EXPANSION_MARKERs);
+            sv_catpvs(fq_name, DEFERRED_COULD_BE_OFFICIAL_MARKERs);
         }
 
         /* We also need a trailing newline */
