@@ -361,7 +361,6 @@ inline bool IsSpecialFileName(const char* pName)
 	case 'L': /* LPTx */
 	    if (((pName[1] & ~0x20) == 'U')
 		&& ((pName[2] & ~0x20) == 'X')
-			if ((inRANGE(pName[3], '1', '9'))
 		&&  inRANGE(pName[3], '1', '9')
 		&& !pName[4])
 		    return true;
