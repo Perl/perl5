@@ -455,12 +455,12 @@ SKIP: {
     }
     $s = $all255_twice;
     $c = $s =~ tr/[](){}<>\x00-\xff/[[(({{<</sd;
-    is $s, "(<<[[{{", 'tr/[](){}<>\x00-\xff/[[(({{<</sd';
+    is $s, "(<[{", 'tr/[](){}<>\x00-\xff/[[(({{<</sd';
     is $c, 512, "count of above";
 
     $s = $all255_plus;
     $c = $s =~ tr/[](){}<>\x00-\xff/[[(({{<</sd;
-    is $s, "(<<[[{{" . $plus, 'tr/[](){}<>\x00-\xff/[[(({{<</sd';
+    is $s, "(<[{" . $plus, 'tr/[](){}<>\x00-\xff/[[(({{<</sd';
     is $c, 256, "count of above";
 }
 

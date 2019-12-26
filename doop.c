@@ -210,13 +210,14 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
                     }
 		}
 		else {
-                    if (this_map == (short) TR_UNMAPPED)
+                    if (this_map == (short) TR_UNMAPPED) {
                         *d++ = *s;
+                        previous_map = (short) TR_OOB;
+                    }
                     else {
                         assert(this_map == (short) TR_DELETE);
                         matches++;
                     }
-                    previous_map = (short) TR_OOB;
                 }
 
 		s++;
@@ -288,6 +289,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             else if (sch == (short) TR_UNMAPPED) {
                 Move(s, d, len, U8);
                 d += len;
+                pch = TR_OOB;
             }
             else if (sch == (short) TR_DELETE)
                 matches++;
@@ -298,7 +300,6 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             }
 
             s += len;
-            pch = TR_OOB;
         }
 
 	if (grows) {
@@ -522,7 +523,6 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
 
         if (to == (UV) TR_SPECIAL_HANDLING) {
             if (delete_unfound) {
-                previous_map = to;
                 s += s_len;
                 continue;
             }
