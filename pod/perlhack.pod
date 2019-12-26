@@ -1169,11 +1169,11 @@ configurations.
 
 Both efforts welcome volunteers.  In order to get involved in smoke
 testing of the perl itself visit
-L<https://search.cpan.org/dist/Test-Smoke/>.  In order to start smoke
+L<https://metacpan.org/release/Test-Smoke>.  In order to start smoke
 testing CPAN modules visit
-L<https://search.cpan.org/dist/CPANPLUS-YACSmoke/> or
-L<https://search.cpan.org/dist/minismokebox/> or
-L<https://search.cpan.org/dist/CPAN-Reporter/>.
+L<https://metacpan.org/release/CPANPLUS-YACSmoke> or
+L<https://metacpan.org/release/minismokebox> or
+L<https://metacpan.org/release/CPAN-Reporter>.
 
 =head1 WHAT NEXT?
 

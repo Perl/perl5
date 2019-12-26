@@ -109,7 +109,7 @@ polling loop.
 
 A port of dmake for Windows is available from:
 
-L<https://search.cpan.org/dist/dmake/>
+L<https://metacpan.org/release/dmake>
 
 Fetch and install dmake somewhere on your path.
 

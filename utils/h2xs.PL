@@ -1937,7 +1937,7 @@ WriteMakefile(
     AUTHOR            => '$author <$email>',
     #LICENSE           => 'perl',
     #Value must be from legacy list of licenses here
-    #http://search.cpan.org/perldoc?Module%3A%3ABuild%3A%3AAPI
+    #https://metacpan.org/pod/Module::Build::API
 END
 if (!$opt_X) { # print C stuff, unless XS is disabled
   $opt_F = '' unless defined $opt_F;

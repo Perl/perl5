@@ -1596,8 +1596,8 @@ If they haven't, ask Ask <ask@perl.org>.
 
 =item *
 
-Check L<https://search.cpan.org> to see if it has indexed the distribution.
-It should be visible at a URL like C<https://search.cpan.org/dist/perl-5.10.1/>.
+Check L<https://metacpan.org> to see if it has indexed the distribution.
+It should be visible at a URL like C<https://metacpan.org/release/DAPM/perl-5.10.1>.
 
 =back
 
