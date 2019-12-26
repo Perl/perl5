@@ -821,7 +821,7 @@ BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
 # Some old dmakes (including Sarathy's one at
-# http://search.cpan.org/CPAN/authors/id/G/GS/GSAR/dmake-4.1pl1-win32.zip)
+# https://www.cpan.org/authors/id/G/GS/GSAR/dmake-4.1pl1-win32.zip)
 # don't support logical OR (||) or logical AND (&&) in conditional
 # expressions and hence don't process this makefile correctly. Determine
 # whether this is the case so that we can give the user an error message.
@@ -1210,7 +1210,7 @@ CHECKDMAKE :
 	$(NOOP)
 .ELSE
 	@echo Your dmake doesn't support ^|^| or ^&^& in conditional expressions.
-	@echo Please get the latest dmake from http://search.cpan.org/dist/dmake/
+	@echo Please get the latest dmake from https://metacpan.org/release/dmake
 	@exit 1
 .ENDIF
 
