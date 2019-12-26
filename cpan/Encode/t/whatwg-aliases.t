@@ -11,7 +11,7 @@
 
 
 use Test::More
-    ($ENV{AUTHOR_TESTING} || $ENV{RELEASE_TESTING})
+    $ENV{AUTHOR_TESTING}
     ? 'no_plan'
     : (skip_all => 'For maintainers only');
 use Encode 'find_encoding';

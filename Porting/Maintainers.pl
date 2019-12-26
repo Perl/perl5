@@ -398,7 +398,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.01.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.02.tar.gz',
         'FILES'        => q[cpan/Encode],
     },
 

@@ -11,7 +11,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -144,6 +144,7 @@ getopts('CM:SQqOo:f:n:v',\%opt);
 $opt{M} and make_makefile_pl($opt{M}, @ARGV);
 $opt{C} and make_configlocal_pm($opt{C}, @ARGV);
 $opt{v} ||= $ENV{ENC2XS_VERBOSE};
+$opt{q} ||= $ENV{ENC2XS_NO_COMMENTS};
 
 sub verbose {
     print STDERR @_ if $opt{v};
