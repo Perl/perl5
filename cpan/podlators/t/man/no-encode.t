@@ -10,21 +10,18 @@
 #
 # SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
-use 5.006;
+use 5.008;
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 5;
 
-# Force the Encode module to be impossible to import.  Sometimes Encode is
-# already loaded before the test suite runs (this seems common for CPAN
-# Testers tests for some reason), so skip the test if that's the case.
+# Remove the record of the Encode module being loaded if it already was (it
+# may have been loaded before the test suite runs), and then make it
+# impossible to load it.  This should be enough to trigger the fallback code
+# in Pod::Man.
 BEGIN {
-    if ($INC{'Encode.pm'}) {
-        plan skip_all => 'Encode is already loaded';
-    } else {
-        plan tests => 5;
-    }
+    delete $INC{'Encode.pm'};
     my $reject_encode = sub {
         if ($_[1] eq 'Encode.pm') {
             die "refusing to load Encode\n";

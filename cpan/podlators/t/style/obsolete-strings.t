@@ -1,15 +1,15 @@
 #!/usr/bin/perl
 #
-# Check URLs in source files.
+# Check for obsolete strings in source files.
 #
-# Examine all source files in a distribution for bad URL patterns and report
-# on files that fail this check.  Currently, this just checks that all the
-# links to www.eyrie.org are https.
+# Examine all source files in a distribution for obsolete strings and report
+# on files that fail this check.  This catches various transitions I want to
+# do globally in all my packages, like changing my personal URLs to https.
 #
 # The canonical version of this file is maintained in the rra-c-util package,
 # which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
 #
-# Copyright 2016 Russ Allbery <eagle@eyrie.org>
+# Copyright 2016, 2018-2019 Russ Allbery <eagle@eyrie.org>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -31,41 +31,42 @@
 #
 # SPDX-License-Identifier: MIT
 
-use 5.006;
+use 5.008;
 use strict;
 use warnings;
 
 use lib 't/lib';
 
+use Test::RRA qw(skip_unless_automated);
+
 use File::Find qw(find);
 use Test::More;
-use Test::RRA qw(skip_unless_automated);
 
 # Bad patterns to search for.
 my @BAD_REGEXES = (qr{ http:// \S+ [.]eyrie[.]org }xms);
-my @BAD_STRINGS = qw(rra@stanford.edu);
+my @BAD_STRINGS = qw(rra@stanford.edu RRA_MAINTAINER_TESTS);
 
 # File or directory names to always skip.
-my %SKIP = map { $_ => 1 } qw(.git _build blib cover_db);
+my %SKIP = map { $_ => 1 } qw(
+  .git Changes _build blib cover_db obsolete-strings.t
+);
 
 # Only run this test during automated testing, since failure doesn't indicate
 # any user-noticable flaw in the package itself.
-skip_unless_automated('Documentation URL tests');
+skip_unless_automated('Obsolete strings tests');
 
 # Scan files for bad URL patterns.  This is meant to be run as the wanted
 # function from File::Find.
 sub check_file {
     my $filename = $_;
 
-    # Ignore this check itself (or the non-Perl version of it).  Ignore any
-    # directories or binary files.  Ignore and prune any skipped files.
+    # Ignore and prune any skipped files.  Ignore directories and binaries.
     if ($SKIP{$filename}) {
         $File::Find::prune = 1;
         return;
     }
     return if -d $filename;
     return if !-T $filename;
-    return if ($filename eq 'urls.t' || $filename eq 'urls-t');
 
     # Scan the file.
     open(my $fh, '<', $filename) or BAIL_OUT("Cannot open $File::Find::name");

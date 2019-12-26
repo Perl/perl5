@@ -8,7 +8,7 @@
 
 package Test::Podlators;
 
-use 5.006;
+use 5.008;
 use strict;
 use warnings;
 
@@ -278,8 +278,8 @@ sub test_snippet {
 
     # Check the output, errors, and any exception.
     is($got, $data_ref->{output}, "$data_ref->{name}: output");
-    if ($data_ref->{errors}) {
-        is($stderr, $data_ref->{errors}, "$data_ref->{name}: errors");
+    if ($data_ref->{errors} || $stderr) {
+        is($stderr, $data_ref->{errors} || q{}, "$data_ref->{name}: errors");
     }
     if ($data_ref->{exception} || $exception) {
         if ($exception) {
@@ -509,7 +509,7 @@ Russ Allbery <rra@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2015, 2016, 2018 Russ Allbery <rra@cpan.org>
+Copyright 2015-2016, 2018-2019 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
