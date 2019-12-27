@@ -702,12 +702,19 @@ sub output_invmap ($$$$$$$) {
 
         switch_pound_if($name, $where, $charset);
 
+        # The inversion lists here have to be UV because inversion lists are
+        # capable of storing any code point, and even though the the ones here
+        # are only Unicode ones, which need just 21 bits, they are linked to
+        # directly, rather than copied.  The inversion map and aux tables also
+        # only need be 21 bits, and so we can get away with declaring them
+        # 32-bits to save a little space and memory (on some 64-bit
+        # platforms), as they are copied.
         $invmap_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
-                                 : "int";
+                                 : "I32";
         $aux_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
-                                 : "unsigned int";
+                                 : "U32";
 
         $output_format = "${name_prefix}%s";
 

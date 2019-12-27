@@ -10623,7 +10623,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         else {  /* Single char fold */
             unsigned int k;
             unsigned int first_fold;
-            const unsigned int * remaining_folds;
+            const U32 * remaining_folds;
             Size_t folds_count;
 
             /* It matches itself */
@@ -16855,7 +16855,7 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
           {
             Size_t folds_count;
             unsigned int first_fold;
-            const unsigned int * remaining_folds;
+            const U32 * remaining_folds;
             UV folded_cp;
 
             if (isASCII(cp)) {
@@ -18306,7 +18306,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     unsigned int k;
                     Size_t folds_count;
                     unsigned int first_fold;
-                    const unsigned int * remaining_folds;
+                    const U32 * remaining_folds;
 
                     if (j < 256) {
 
@@ -19012,7 +19012,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     UV folded = _to_uni_fold_flags(start[0],
                                                         foldbuf, &foldlen, 0);
                     unsigned int first_fold;
-                    const unsigned int * remaining_folds;
+                    const U32 * remaining_folds;
                     Size_t folds_to_this_cp_count = _inverse_folds(
                                                             folded,
                                                             &first_fold,

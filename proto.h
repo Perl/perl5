@@ -126,7 +126,7 @@ PERL_CALLCONV char *	Perl__byte_dump_string(pTHX_ const U8 * const start, const 
 PERL_CALLCONV void	Perl__force_out_malformed_utf8_message(pTHX_ const U8 *const p, const U8 * const e, const U32 flags, const bool die_here);
 #define PERL_ARGS_ASSERT__FORCE_OUT_MALFORMED_UTF8_MESSAGE	\
 	assert(p); assert(e)
-PERL_CALLCONV Size_t	Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to, const unsigned int ** remaining_folds_to)
+PERL_CALLCONV Size_t	Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to, const U32 ** remaining_folds_to)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__INVERSE_FOLDS	\
 	assert(first_folds_to); assert(remaining_folds_to)
@@ -6365,7 +6365,7 @@ STATIC bool	S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN 
 STATIC bool	S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags);
 #endif
 #if defined(PERL_IN_UTF8_C)
-STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const int * const invmap, const unsigned int * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
+STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
 #define PERL_ARGS_ASSERT__TO_UTF8_CASE	\
 	assert(ustrp); assert(lenp); assert(invlist); assert(invmap); assert(normal)
 STATIC UV	S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* const ustrp, STRLEN *lenp)

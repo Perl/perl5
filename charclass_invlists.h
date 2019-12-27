@@ -1542,386 +1542,386 @@ typedef enum {
 
 #define HAS_CF_AUX_TABLES
 
-static const unsigned int CF_AUX_TABLE_1[] = {
+static const U32 CF_AUX_TABLE_1[] = {
 	0x73,
 	0x73
 };
 
-static const unsigned int CF_AUX_TABLE_2[] = {
+static const U32 CF_AUX_TABLE_2[] = {
 	0x69,
 	0x307
 };
 
-static const unsigned int CF_AUX_TABLE_3[] = {
+static const U32 CF_AUX_TABLE_3[] = {
 	0x2BC,
 	0x6E
 };
 
-static const unsigned int CF_AUX_TABLE_4[] = {
+static const U32 CF_AUX_TABLE_4[] = {
 	0x6A,
 	0x30C
 };
 
-static const unsigned int CF_AUX_TABLE_5[] = {
+static const U32 CF_AUX_TABLE_5[] = {
 	0x3B9,
 	0x308,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_6[] = {
+static const U32 CF_AUX_TABLE_6[] = {
 	0x3C5,
 	0x308,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_7[] = {
+static const U32 CF_AUX_TABLE_7[] = {
 	0x565,
 	0x582
 };
 
-static const unsigned int CF_AUX_TABLE_8[] = {
+static const U32 CF_AUX_TABLE_8[] = {
 	0x68,
 	0x331
 };
 
-static const unsigned int CF_AUX_TABLE_9[] = {
+static const U32 CF_AUX_TABLE_9[] = {
 	0x74,
 	0x308
 };
 
-static const unsigned int CF_AUX_TABLE_10[] = {
+static const U32 CF_AUX_TABLE_10[] = {
 	0x77,
 	0x30A
 };
 
-static const unsigned int CF_AUX_TABLE_11[] = {
+static const U32 CF_AUX_TABLE_11[] = {
 	0x79,
 	0x30A
 };
 
-static const unsigned int CF_AUX_TABLE_12[] = {
+static const U32 CF_AUX_TABLE_12[] = {
 	0x61,
 	0x2BE
 };
 
-static const unsigned int CF_AUX_TABLE_13[] = {
+static const U32 CF_AUX_TABLE_13[] = {
 	0x3C5,
 	0x313
 };
 
-static const unsigned int CF_AUX_TABLE_14[] = {
+static const U32 CF_AUX_TABLE_14[] = {
 	0x3C5,
 	0x313,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_15[] = {
+static const U32 CF_AUX_TABLE_15[] = {
 	0x3C5,
 	0x313,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_16[] = {
+static const U32 CF_AUX_TABLE_16[] = {
 	0x3C5,
 	0x313,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_17[] = {
+static const U32 CF_AUX_TABLE_17[] = {
 	0x1F00,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_18[] = {
+static const U32 CF_AUX_TABLE_18[] = {
 	0x1F01,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_19[] = {
+static const U32 CF_AUX_TABLE_19[] = {
 	0x1F02,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_20[] = {
+static const U32 CF_AUX_TABLE_20[] = {
 	0x1F03,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_21[] = {
+static const U32 CF_AUX_TABLE_21[] = {
 	0x1F04,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_22[] = {
+static const U32 CF_AUX_TABLE_22[] = {
 	0x1F05,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_23[] = {
+static const U32 CF_AUX_TABLE_23[] = {
 	0x1F06,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_24[] = {
+static const U32 CF_AUX_TABLE_24[] = {
 	0x1F07,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_25[] = {
+static const U32 CF_AUX_TABLE_25[] = {
 	0x1F20,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_26[] = {
+static const U32 CF_AUX_TABLE_26[] = {
 	0x1F21,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_27[] = {
+static const U32 CF_AUX_TABLE_27[] = {
 	0x1F22,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_28[] = {
+static const U32 CF_AUX_TABLE_28[] = {
 	0x1F23,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_29[] = {
+static const U32 CF_AUX_TABLE_29[] = {
 	0x1F24,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_30[] = {
+static const U32 CF_AUX_TABLE_30[] = {
 	0x1F25,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_31[] = {
+static const U32 CF_AUX_TABLE_31[] = {
 	0x1F26,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_32[] = {
+static const U32 CF_AUX_TABLE_32[] = {
 	0x1F27,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_33[] = {
+static const U32 CF_AUX_TABLE_33[] = {
 	0x1F60,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_34[] = {
+static const U32 CF_AUX_TABLE_34[] = {
 	0x1F61,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_35[] = {
+static const U32 CF_AUX_TABLE_35[] = {
 	0x1F62,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_36[] = {
+static const U32 CF_AUX_TABLE_36[] = {
 	0x1F63,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_37[] = {
+static const U32 CF_AUX_TABLE_37[] = {
 	0x1F64,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_38[] = {
+static const U32 CF_AUX_TABLE_38[] = {
 	0x1F65,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_39[] = {
+static const U32 CF_AUX_TABLE_39[] = {
 	0x1F66,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_40[] = {
+static const U32 CF_AUX_TABLE_40[] = {
 	0x1F67,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_41[] = {
+static const U32 CF_AUX_TABLE_41[] = {
 	0x1F70,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_42[] = {
+static const U32 CF_AUX_TABLE_42[] = {
 	0x3B1,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_43[] = {
+static const U32 CF_AUX_TABLE_43[] = {
 	0x3AC,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_44[] = {
+static const U32 CF_AUX_TABLE_44[] = {
 	0x3B1,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_45[] = {
+static const U32 CF_AUX_TABLE_45[] = {
 	0x3B1,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_46[] = {
+static const U32 CF_AUX_TABLE_46[] = {
 	0x1F74,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_47[] = {
+static const U32 CF_AUX_TABLE_47[] = {
 	0x3B7,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_48[] = {
+static const U32 CF_AUX_TABLE_48[] = {
 	0x3AE,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_49[] = {
+static const U32 CF_AUX_TABLE_49[] = {
 	0x3B7,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_50[] = {
+static const U32 CF_AUX_TABLE_50[] = {
 	0x3B7,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_51[] = {
+static const U32 CF_AUX_TABLE_51[] = {
 	0x3B9,
 	0x308,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_52[] = {
+static const U32 CF_AUX_TABLE_52[] = {
 	0x3B9,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_53[] = {
+static const U32 CF_AUX_TABLE_53[] = {
 	0x3B9,
 	0x308,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_54[] = {
+static const U32 CF_AUX_TABLE_54[] = {
 	0x3C5,
 	0x308,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_55[] = {
+static const U32 CF_AUX_TABLE_55[] = {
 	0x3C1,
 	0x313
 };
 
-static const unsigned int CF_AUX_TABLE_56[] = {
+static const U32 CF_AUX_TABLE_56[] = {
 	0x3C5,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_57[] = {
+static const U32 CF_AUX_TABLE_57[] = {
 	0x3C5,
 	0x308,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_58[] = {
+static const U32 CF_AUX_TABLE_58[] = {
 	0x1F7C,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_59[] = {
+static const U32 CF_AUX_TABLE_59[] = {
 	0x3C9,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_60[] = {
+static const U32 CF_AUX_TABLE_60[] = {
 	0x3CE,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_61[] = {
+static const U32 CF_AUX_TABLE_61[] = {
 	0x3C9,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_62[] = {
+static const U32 CF_AUX_TABLE_62[] = {
 	0x3C9,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_63[] = {
+static const U32 CF_AUX_TABLE_63[] = {
 	0x66,
 	0x66
 };
 
-static const unsigned int CF_AUX_TABLE_64[] = {
+static const U32 CF_AUX_TABLE_64[] = {
 	0x66,
 	0x69
 };
 
-static const unsigned int CF_AUX_TABLE_65[] = {
+static const U32 CF_AUX_TABLE_65[] = {
 	0x66,
 	0x6C
 };
 
-static const unsigned int CF_AUX_TABLE_66[] = {
+static const U32 CF_AUX_TABLE_66[] = {
 	0x66,
 	0x66,
 	0x69
 };
 
-static const unsigned int CF_AUX_TABLE_67[] = {
+static const U32 CF_AUX_TABLE_67[] = {
 	0x66,
 	0x66,
 	0x6C
 };
 
-static const unsigned int CF_AUX_TABLE_68[] = {
+static const U32 CF_AUX_TABLE_68[] = {
 	0x73,
 	0x74
 };
 
-static const unsigned int CF_AUX_TABLE_69[] = {
+static const U32 CF_AUX_TABLE_69[] = {
 	0x574,
 	0x576
 };
 
-static const unsigned int CF_AUX_TABLE_70[] = {
+static const U32 CF_AUX_TABLE_70[] = {
 	0x574,
 	0x565
 };
 
-static const unsigned int CF_AUX_TABLE_71[] = {
+static const U32 CF_AUX_TABLE_71[] = {
 	0x574,
 	0x56B
 };
 
-static const unsigned int CF_AUX_TABLE_72[] = {
+static const U32 CF_AUX_TABLE_72[] = {
 	0x57E,
 	0x576
 };
 
-static const unsigned int CF_AUX_TABLE_73[] = {
+static const U32 CF_AUX_TABLE_73[] = {
 	0x574,
 	0x56D
 };
 
-static const unsigned int * const CF_AUX_TABLE_ptrs[] = {
+static const U32 * const CF_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	CF_AUX_TABLE_1,
 	CF_AUX_TABLE_2,
@@ -2078,7 +2078,7 @@ static const U8 CF_AUX_TABLE_lengths[] = {
 	2	/* CF_AUX_TABLE_73 */
 };
 
-static const int Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
+static const I32 Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x61,
 	0,
@@ -4998,386 +4998,386 @@ typedef enum {
 
 #define HAS_CF_AUX_TABLES
 
-static const unsigned int CF_AUX_TABLE_1[] = {
+static const U32 CF_AUX_TABLE_1[] = {
 	0xA2,
 	0xA2
 };
 
-static const unsigned int CF_AUX_TABLE_2[] = {
+static const U32 CF_AUX_TABLE_2[] = {
 	0x89,
 	0x307
 };
 
-static const unsigned int CF_AUX_TABLE_3[] = {
+static const U32 CF_AUX_TABLE_3[] = {
 	0x2BC,
 	0x95
 };
 
-static const unsigned int CF_AUX_TABLE_4[] = {
+static const U32 CF_AUX_TABLE_4[] = {
 	0x91,
 	0x30C
 };
 
-static const unsigned int CF_AUX_TABLE_5[] = {
+static const U32 CF_AUX_TABLE_5[] = {
 	0x3B9,
 	0x308,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_6[] = {
+static const U32 CF_AUX_TABLE_6[] = {
 	0x3C5,
 	0x308,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_7[] = {
+static const U32 CF_AUX_TABLE_7[] = {
 	0x565,
 	0x582
 };
 
-static const unsigned int CF_AUX_TABLE_8[] = {
+static const U32 CF_AUX_TABLE_8[] = {
 	0x88,
 	0x331
 };
 
-static const unsigned int CF_AUX_TABLE_9[] = {
+static const U32 CF_AUX_TABLE_9[] = {
 	0xA3,
 	0x308
 };
 
-static const unsigned int CF_AUX_TABLE_10[] = {
+static const U32 CF_AUX_TABLE_10[] = {
 	0xA6,
 	0x30A
 };
 
-static const unsigned int CF_AUX_TABLE_11[] = {
+static const U32 CF_AUX_TABLE_11[] = {
 	0xA8,
 	0x30A
 };
 
-static const unsigned int CF_AUX_TABLE_12[] = {
+static const U32 CF_AUX_TABLE_12[] = {
 	0x81,
 	0x2BE
 };
 
-static const unsigned int CF_AUX_TABLE_13[] = {
+static const U32 CF_AUX_TABLE_13[] = {
 	0x3C5,
 	0x313
 };
 
-static const unsigned int CF_AUX_TABLE_14[] = {
+static const U32 CF_AUX_TABLE_14[] = {
 	0x3C5,
 	0x313,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_15[] = {
+static const U32 CF_AUX_TABLE_15[] = {
 	0x3C5,
 	0x313,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_16[] = {
+static const U32 CF_AUX_TABLE_16[] = {
 	0x3C5,
 	0x313,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_17[] = {
+static const U32 CF_AUX_TABLE_17[] = {
 	0x1F00,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_18[] = {
+static const U32 CF_AUX_TABLE_18[] = {
 	0x1F01,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_19[] = {
+static const U32 CF_AUX_TABLE_19[] = {
 	0x1F02,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_20[] = {
+static const U32 CF_AUX_TABLE_20[] = {
 	0x1F03,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_21[] = {
+static const U32 CF_AUX_TABLE_21[] = {
 	0x1F04,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_22[] = {
+static const U32 CF_AUX_TABLE_22[] = {
 	0x1F05,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_23[] = {
+static const U32 CF_AUX_TABLE_23[] = {
 	0x1F06,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_24[] = {
+static const U32 CF_AUX_TABLE_24[] = {
 	0x1F07,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_25[] = {
+static const U32 CF_AUX_TABLE_25[] = {
 	0x1F20,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_26[] = {
+static const U32 CF_AUX_TABLE_26[] = {
 	0x1F21,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_27[] = {
+static const U32 CF_AUX_TABLE_27[] = {
 	0x1F22,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_28[] = {
+static const U32 CF_AUX_TABLE_28[] = {
 	0x1F23,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_29[] = {
+static const U32 CF_AUX_TABLE_29[] = {
 	0x1F24,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_30[] = {
+static const U32 CF_AUX_TABLE_30[] = {
 	0x1F25,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_31[] = {
+static const U32 CF_AUX_TABLE_31[] = {
 	0x1F26,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_32[] = {
+static const U32 CF_AUX_TABLE_32[] = {
 	0x1F27,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_33[] = {
+static const U32 CF_AUX_TABLE_33[] = {
 	0x1F60,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_34[] = {
+static const U32 CF_AUX_TABLE_34[] = {
 	0x1F61,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_35[] = {
+static const U32 CF_AUX_TABLE_35[] = {
 	0x1F62,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_36[] = {
+static const U32 CF_AUX_TABLE_36[] = {
 	0x1F63,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_37[] = {
+static const U32 CF_AUX_TABLE_37[] = {
 	0x1F64,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_38[] = {
+static const U32 CF_AUX_TABLE_38[] = {
 	0x1F65,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_39[] = {
+static const U32 CF_AUX_TABLE_39[] = {
 	0x1F66,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_40[] = {
+static const U32 CF_AUX_TABLE_40[] = {
 	0x1F67,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_41[] = {
+static const U32 CF_AUX_TABLE_41[] = {
 	0x1F70,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_42[] = {
+static const U32 CF_AUX_TABLE_42[] = {
 	0x3B1,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_43[] = {
+static const U32 CF_AUX_TABLE_43[] = {
 	0x3AC,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_44[] = {
+static const U32 CF_AUX_TABLE_44[] = {
 	0x3B1,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_45[] = {
+static const U32 CF_AUX_TABLE_45[] = {
 	0x3B1,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_46[] = {
+static const U32 CF_AUX_TABLE_46[] = {
 	0x1F74,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_47[] = {
+static const U32 CF_AUX_TABLE_47[] = {
 	0x3B7,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_48[] = {
+static const U32 CF_AUX_TABLE_48[] = {
 	0x3AE,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_49[] = {
+static const U32 CF_AUX_TABLE_49[] = {
 	0x3B7,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_50[] = {
+static const U32 CF_AUX_TABLE_50[] = {
 	0x3B7,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_51[] = {
+static const U32 CF_AUX_TABLE_51[] = {
 	0x3B9,
 	0x308,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_52[] = {
+static const U32 CF_AUX_TABLE_52[] = {
 	0x3B9,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_53[] = {
+static const U32 CF_AUX_TABLE_53[] = {
 	0x3B9,
 	0x308,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_54[] = {
+static const U32 CF_AUX_TABLE_54[] = {
 	0x3C5,
 	0x308,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_55[] = {
+static const U32 CF_AUX_TABLE_55[] = {
 	0x3C1,
 	0x313
 };
 
-static const unsigned int CF_AUX_TABLE_56[] = {
+static const U32 CF_AUX_TABLE_56[] = {
 	0x3C5,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_57[] = {
+static const U32 CF_AUX_TABLE_57[] = {
 	0x3C5,
 	0x308,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_58[] = {
+static const U32 CF_AUX_TABLE_58[] = {
 	0x1F7C,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_59[] = {
+static const U32 CF_AUX_TABLE_59[] = {
 	0x3C9,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_60[] = {
+static const U32 CF_AUX_TABLE_60[] = {
 	0x3CE,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_61[] = {
+static const U32 CF_AUX_TABLE_61[] = {
 	0x3C9,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_62[] = {
+static const U32 CF_AUX_TABLE_62[] = {
 	0x3C9,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_63[] = {
+static const U32 CF_AUX_TABLE_63[] = {
 	0x86,
 	0x86
 };
 
-static const unsigned int CF_AUX_TABLE_64[] = {
+static const U32 CF_AUX_TABLE_64[] = {
 	0x86,
 	0x89
 };
 
-static const unsigned int CF_AUX_TABLE_65[] = {
+static const U32 CF_AUX_TABLE_65[] = {
 	0x86,
 	0x93
 };
 
-static const unsigned int CF_AUX_TABLE_66[] = {
+static const U32 CF_AUX_TABLE_66[] = {
 	0x86,
 	0x86,
 	0x89
 };
 
-static const unsigned int CF_AUX_TABLE_67[] = {
+static const U32 CF_AUX_TABLE_67[] = {
 	0x86,
 	0x86,
 	0x93
 };
 
-static const unsigned int CF_AUX_TABLE_68[] = {
+static const U32 CF_AUX_TABLE_68[] = {
 	0xA2,
 	0xA3
 };
 
-static const unsigned int CF_AUX_TABLE_69[] = {
+static const U32 CF_AUX_TABLE_69[] = {
 	0x574,
 	0x576
 };
 
-static const unsigned int CF_AUX_TABLE_70[] = {
+static const U32 CF_AUX_TABLE_70[] = {
 	0x574,
 	0x565
 };
 
-static const unsigned int CF_AUX_TABLE_71[] = {
+static const U32 CF_AUX_TABLE_71[] = {
 	0x574,
 	0x56B
 };
 
-static const unsigned int CF_AUX_TABLE_72[] = {
+static const U32 CF_AUX_TABLE_72[] = {
 	0x57E,
 	0x576
 };
 
-static const unsigned int CF_AUX_TABLE_73[] = {
+static const U32 CF_AUX_TABLE_73[] = {
 	0x574,
 	0x56D
 };
 
-static const unsigned int * const CF_AUX_TABLE_ptrs[] = {
+static const U32 * const CF_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	CF_AUX_TABLE_1,
 	CF_AUX_TABLE_2,
@@ -5534,7 +5534,7 @@ static const U8 CF_AUX_TABLE_lengths[] = {
 	2	/* CF_AUX_TABLE_73 */
 };
 
-static const int Case_Folding_invmap[] = {  /* for EBCDIC 1047 */
+static const I32 Case_Folding_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	CF_use_AUX_TABLE_1,
 	0,
@@ -8469,386 +8469,386 @@ typedef enum {
 
 #define HAS_CF_AUX_TABLES
 
-static const unsigned int CF_AUX_TABLE_1[] = {
+static const U32 CF_AUX_TABLE_1[] = {
 	0xA2,
 	0xA2
 };
 
-static const unsigned int CF_AUX_TABLE_2[] = {
+static const U32 CF_AUX_TABLE_2[] = {
 	0x89,
 	0x307
 };
 
-static const unsigned int CF_AUX_TABLE_3[] = {
+static const U32 CF_AUX_TABLE_3[] = {
 	0x2BC,
 	0x95
 };
 
-static const unsigned int CF_AUX_TABLE_4[] = {
+static const U32 CF_AUX_TABLE_4[] = {
 	0x91,
 	0x30C
 };
 
-static const unsigned int CF_AUX_TABLE_5[] = {
+static const U32 CF_AUX_TABLE_5[] = {
 	0x3B9,
 	0x308,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_6[] = {
+static const U32 CF_AUX_TABLE_6[] = {
 	0x3C5,
 	0x308,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_7[] = {
+static const U32 CF_AUX_TABLE_7[] = {
 	0x565,
 	0x582
 };
 
-static const unsigned int CF_AUX_TABLE_8[] = {
+static const U32 CF_AUX_TABLE_8[] = {
 	0x88,
 	0x331
 };
 
-static const unsigned int CF_AUX_TABLE_9[] = {
+static const U32 CF_AUX_TABLE_9[] = {
 	0xA3,
 	0x308
 };
 
-static const unsigned int CF_AUX_TABLE_10[] = {
+static const U32 CF_AUX_TABLE_10[] = {
 	0xA6,
 	0x30A
 };
 
-static const unsigned int CF_AUX_TABLE_11[] = {
+static const U32 CF_AUX_TABLE_11[] = {
 	0xA8,
 	0x30A
 };
 
-static const unsigned int CF_AUX_TABLE_12[] = {
+static const U32 CF_AUX_TABLE_12[] = {
 	0x81,
 	0x2BE
 };
 
-static const unsigned int CF_AUX_TABLE_13[] = {
+static const U32 CF_AUX_TABLE_13[] = {
 	0x3C5,
 	0x313
 };
 
-static const unsigned int CF_AUX_TABLE_14[] = {
+static const U32 CF_AUX_TABLE_14[] = {
 	0x3C5,
 	0x313,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_15[] = {
+static const U32 CF_AUX_TABLE_15[] = {
 	0x3C5,
 	0x313,
 	0x301
 };
 
-static const unsigned int CF_AUX_TABLE_16[] = {
+static const U32 CF_AUX_TABLE_16[] = {
 	0x3C5,
 	0x313,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_17[] = {
+static const U32 CF_AUX_TABLE_17[] = {
 	0x1F00,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_18[] = {
+static const U32 CF_AUX_TABLE_18[] = {
 	0x1F01,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_19[] = {
+static const U32 CF_AUX_TABLE_19[] = {
 	0x1F02,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_20[] = {
+static const U32 CF_AUX_TABLE_20[] = {
 	0x1F03,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_21[] = {
+static const U32 CF_AUX_TABLE_21[] = {
 	0x1F04,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_22[] = {
+static const U32 CF_AUX_TABLE_22[] = {
 	0x1F05,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_23[] = {
+static const U32 CF_AUX_TABLE_23[] = {
 	0x1F06,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_24[] = {
+static const U32 CF_AUX_TABLE_24[] = {
 	0x1F07,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_25[] = {
+static const U32 CF_AUX_TABLE_25[] = {
 	0x1F20,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_26[] = {
+static const U32 CF_AUX_TABLE_26[] = {
 	0x1F21,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_27[] = {
+static const U32 CF_AUX_TABLE_27[] = {
 	0x1F22,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_28[] = {
+static const U32 CF_AUX_TABLE_28[] = {
 	0x1F23,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_29[] = {
+static const U32 CF_AUX_TABLE_29[] = {
 	0x1F24,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_30[] = {
+static const U32 CF_AUX_TABLE_30[] = {
 	0x1F25,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_31[] = {
+static const U32 CF_AUX_TABLE_31[] = {
 	0x1F26,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_32[] = {
+static const U32 CF_AUX_TABLE_32[] = {
 	0x1F27,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_33[] = {
+static const U32 CF_AUX_TABLE_33[] = {
 	0x1F60,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_34[] = {
+static const U32 CF_AUX_TABLE_34[] = {
 	0x1F61,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_35[] = {
+static const U32 CF_AUX_TABLE_35[] = {
 	0x1F62,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_36[] = {
+static const U32 CF_AUX_TABLE_36[] = {
 	0x1F63,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_37[] = {
+static const U32 CF_AUX_TABLE_37[] = {
 	0x1F64,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_38[] = {
+static const U32 CF_AUX_TABLE_38[] = {
 	0x1F65,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_39[] = {
+static const U32 CF_AUX_TABLE_39[] = {
 	0x1F66,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_40[] = {
+static const U32 CF_AUX_TABLE_40[] = {
 	0x1F67,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_41[] = {
+static const U32 CF_AUX_TABLE_41[] = {
 	0x1F70,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_42[] = {
+static const U32 CF_AUX_TABLE_42[] = {
 	0x3B1,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_43[] = {
+static const U32 CF_AUX_TABLE_43[] = {
 	0x3AC,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_44[] = {
+static const U32 CF_AUX_TABLE_44[] = {
 	0x3B1,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_45[] = {
+static const U32 CF_AUX_TABLE_45[] = {
 	0x3B1,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_46[] = {
+static const U32 CF_AUX_TABLE_46[] = {
 	0x1F74,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_47[] = {
+static const U32 CF_AUX_TABLE_47[] = {
 	0x3B7,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_48[] = {
+static const U32 CF_AUX_TABLE_48[] = {
 	0x3AE,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_49[] = {
+static const U32 CF_AUX_TABLE_49[] = {
 	0x3B7,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_50[] = {
+static const U32 CF_AUX_TABLE_50[] = {
 	0x3B7,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_51[] = {
+static const U32 CF_AUX_TABLE_51[] = {
 	0x3B9,
 	0x308,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_52[] = {
+static const U32 CF_AUX_TABLE_52[] = {
 	0x3B9,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_53[] = {
+static const U32 CF_AUX_TABLE_53[] = {
 	0x3B9,
 	0x308,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_54[] = {
+static const U32 CF_AUX_TABLE_54[] = {
 	0x3C5,
 	0x308,
 	0x300
 };
 
-static const unsigned int CF_AUX_TABLE_55[] = {
+static const U32 CF_AUX_TABLE_55[] = {
 	0x3C1,
 	0x313
 };
 
-static const unsigned int CF_AUX_TABLE_56[] = {
+static const U32 CF_AUX_TABLE_56[] = {
 	0x3C5,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_57[] = {
+static const U32 CF_AUX_TABLE_57[] = {
 	0x3C5,
 	0x308,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_58[] = {
+static const U32 CF_AUX_TABLE_58[] = {
 	0x1F7C,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_59[] = {
+static const U32 CF_AUX_TABLE_59[] = {
 	0x3C9,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_60[] = {
+static const U32 CF_AUX_TABLE_60[] = {
 	0x3CE,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_61[] = {
+static const U32 CF_AUX_TABLE_61[] = {
 	0x3C9,
 	0x342
 };
 
-static const unsigned int CF_AUX_TABLE_62[] = {
+static const U32 CF_AUX_TABLE_62[] = {
 	0x3C9,
 	0x342,
 	0x3B9
 };
 
-static const unsigned int CF_AUX_TABLE_63[] = {
+static const U32 CF_AUX_TABLE_63[] = {
 	0x86,
 	0x86
 };
 
-static const unsigned int CF_AUX_TABLE_64[] = {
+static const U32 CF_AUX_TABLE_64[] = {
 	0x86,
 	0x89
 };
 
-static const unsigned int CF_AUX_TABLE_65[] = {
+static const U32 CF_AUX_TABLE_65[] = {
 	0x86,
 	0x93
 };
 
-static const unsigned int CF_AUX_TABLE_66[] = {
+static const U32 CF_AUX_TABLE_66[] = {
 	0x86,
 	0x86,
 	0x89
 };
 
-static const unsigned int CF_AUX_TABLE_67[] = {
+static const U32 CF_AUX_TABLE_67[] = {
 	0x86,
 	0x86,
 	0x93
 };
 
-static const unsigned int CF_AUX_TABLE_68[] = {
+static const U32 CF_AUX_TABLE_68[] = {
 	0xA2,
 	0xA3
 };
 
-static const unsigned int CF_AUX_TABLE_69[] = {
+static const U32 CF_AUX_TABLE_69[] = {
 	0x574,
 	0x576
 };
 
-static const unsigned int CF_AUX_TABLE_70[] = {
+static const U32 CF_AUX_TABLE_70[] = {
 	0x574,
 	0x565
 };
 
-static const unsigned int CF_AUX_TABLE_71[] = {
+static const U32 CF_AUX_TABLE_71[] = {
 	0x574,
 	0x56B
 };
 
-static const unsigned int CF_AUX_TABLE_72[] = {
+static const U32 CF_AUX_TABLE_72[] = {
 	0x57E,
 	0x576
 };
 
-static const unsigned int CF_AUX_TABLE_73[] = {
+static const U32 CF_AUX_TABLE_73[] = {
 	0x574,
 	0x56D
 };
 
-static const unsigned int * const CF_AUX_TABLE_ptrs[] = {
+static const U32 * const CF_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	CF_AUX_TABLE_1,
 	CF_AUX_TABLE_2,
@@ -9005,7 +9005,7 @@ static const U8 CF_AUX_TABLE_lengths[] = {
 	2	/* CF_AUX_TABLE_73 */
 };
 
-static const int Case_Folding_invmap[] = {  /* for EBCDIC 037 */
+static const I32 Case_Folding_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	CF_use_AUX_TABLE_1,
 	0,
@@ -11707,12 +11707,12 @@ typedef enum {
 
 #define HAS_LC_AUX_TABLES
 
-static const unsigned int LC_AUX_TABLE_1[] = {
+static const U32 LC_AUX_TABLE_1[] = {
 	0x69,
 	0x307
 };
 
-static const unsigned int * const LC_AUX_TABLE_ptrs[] = {
+static const U32 * const LC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	LC_AUX_TABLE_1
 };
@@ -11725,7 +11725,7 @@ static const U8 LC_AUX_TABLE_lengths[] = {
 	2	/* LC_AUX_TABLE_1 */
 };
 
-static const int Lowercase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
+static const I32 Lowercase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x61,
 	0,
@@ -14300,12 +14300,12 @@ typedef enum {
 
 #define HAS_LC_AUX_TABLES
 
-static const unsigned int LC_AUX_TABLE_1[] = {
+static const U32 LC_AUX_TABLE_1[] = {
 	0x89,
 	0x307
 };
 
-static const unsigned int * const LC_AUX_TABLE_ptrs[] = {
+static const U32 * const LC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	LC_AUX_TABLE_1
 };
@@ -14318,7 +14318,7 @@ static const U8 LC_AUX_TABLE_lengths[] = {
 	2	/* LC_AUX_TABLE_1 */
 };
 
-static const int Lowercase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
+static const I32 Lowercase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x42,
 	0,
@@ -16907,12 +16907,12 @@ typedef enum {
 
 #define HAS_LC_AUX_TABLES
 
-static const unsigned int LC_AUX_TABLE_1[] = {
+static const U32 LC_AUX_TABLE_1[] = {
 	0x89,
 	0x307
 };
 
-static const unsigned int * const LC_AUX_TABLE_ptrs[] = {
+static const U32 * const LC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	LC_AUX_TABLE_1
 };
@@ -16925,7 +16925,7 @@ static const U8 LC_AUX_TABLE_lengths[] = {
 	2	/* LC_AUX_TABLE_1 */
 };
 
-static const int Lowercase_Mapping_invmap[] = {  /* for EBCDIC 037 */
+static const I32 Lowercase_Mapping_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x42,
 	0,
@@ -30750,145 +30750,145 @@ typedef enum {
 
 #define HAS_IVCF_AUX_TABLES
 
-static const unsigned int IVCF_AUX_TABLE_1[] = {
+static const U32 IVCF_AUX_TABLE_1[] = {
 	0x4B,
 	0x212A
 };
 
-static const unsigned int IVCF_AUX_TABLE_2[] = {
+static const U32 IVCF_AUX_TABLE_2[] = {
 	0x53,
 	0x17F
 };
 
-static const unsigned int IVCF_AUX_TABLE_3[] = {
+static const U32 IVCF_AUX_TABLE_3[] = {
 	0xC5,
 	0x212B
 };
 
-static const unsigned int IVCF_AUX_TABLE_4[] = {
+static const U32 IVCF_AUX_TABLE_4[] = {
 	0x1C4,
 	0x1C5
 };
 
-static const unsigned int IVCF_AUX_TABLE_5[] = {
+static const U32 IVCF_AUX_TABLE_5[] = {
 	0x1C7,
 	0x1C8
 };
 
-static const unsigned int IVCF_AUX_TABLE_6[] = {
+static const U32 IVCF_AUX_TABLE_6[] = {
 	0x1CA,
 	0x1CB
 };
 
-static const unsigned int IVCF_AUX_TABLE_7[] = {
+static const U32 IVCF_AUX_TABLE_7[] = {
 	0x1F1,
 	0x1F2
 };
 
-static const unsigned int IVCF_AUX_TABLE_8[] = {
+static const U32 IVCF_AUX_TABLE_8[] = {
 	0x392,
 	0x3D0
 };
 
-static const unsigned int IVCF_AUX_TABLE_9[] = {
+static const U32 IVCF_AUX_TABLE_9[] = {
 	0x395,
 	0x3F5
 };
 
-static const unsigned int IVCF_AUX_TABLE_10[] = {
+static const U32 IVCF_AUX_TABLE_10[] = {
 	0x398,
 	0x3D1,
 	0x3F4
 };
 
-static const unsigned int IVCF_AUX_TABLE_11[] = {
+static const U32 IVCF_AUX_TABLE_11[] = {
 	0x345,
 	0x399,
 	0x1FBE
 };
 
-static const unsigned int IVCF_AUX_TABLE_12[] = {
+static const U32 IVCF_AUX_TABLE_12[] = {
 	0x39A,
 	0x3F0
 };
 
-static const unsigned int IVCF_AUX_TABLE_13[] = {
+static const U32 IVCF_AUX_TABLE_13[] = {
 	0xB5,
 	0x39C
 };
 
-static const unsigned int IVCF_AUX_TABLE_14[] = {
+static const U32 IVCF_AUX_TABLE_14[] = {
 	0x3A0,
 	0x3D6
 };
 
-static const unsigned int IVCF_AUX_TABLE_15[] = {
+static const U32 IVCF_AUX_TABLE_15[] = {
 	0x3A1,
 	0x3F1
 };
 
-static const unsigned int IVCF_AUX_TABLE_16[] = {
+static const U32 IVCF_AUX_TABLE_16[] = {
 	0x3A3,
 	0x3C2
 };
 
-static const unsigned int IVCF_AUX_TABLE_17[] = {
+static const U32 IVCF_AUX_TABLE_17[] = {
 	0x3A6,
 	0x3D5
 };
 
-static const unsigned int IVCF_AUX_TABLE_18[] = {
+static const U32 IVCF_AUX_TABLE_18[] = {
 	0x3A9,
 	0x2126
 };
 
-static const unsigned int IVCF_AUX_TABLE_19[] = {
+static const U32 IVCF_AUX_TABLE_19[] = {
 	0x412,
 	0x1C80
 };
 
-static const unsigned int IVCF_AUX_TABLE_20[] = {
+static const U32 IVCF_AUX_TABLE_20[] = {
 	0x414,
 	0x1C81
 };
 
-static const unsigned int IVCF_AUX_TABLE_21[] = {
+static const U32 IVCF_AUX_TABLE_21[] = {
 	0x41E,
 	0x1C82
 };
 
-static const unsigned int IVCF_AUX_TABLE_22[] = {
+static const U32 IVCF_AUX_TABLE_22[] = {
 	0x421,
 	0x1C83
 };
 
-static const unsigned int IVCF_AUX_TABLE_23[] = {
+static const U32 IVCF_AUX_TABLE_23[] = {
 	0x422,
 	0x1C84,
 	0x1C85
 };
 
-static const unsigned int IVCF_AUX_TABLE_24[] = {
+static const U32 IVCF_AUX_TABLE_24[] = {
 	0x42A,
 	0x1C86
 };
 
-static const unsigned int IVCF_AUX_TABLE_25[] = {
+static const U32 IVCF_AUX_TABLE_25[] = {
 	0x462,
 	0x1C87
 };
 
-static const unsigned int IVCF_AUX_TABLE_26[] = {
+static const U32 IVCF_AUX_TABLE_26[] = {
 	0x1E60,
 	0x1E9B
 };
 
-static const unsigned int IVCF_AUX_TABLE_27[] = {
+static const U32 IVCF_AUX_TABLE_27[] = {
 	0x1C88,
 	0xA64A
 };
 
-static const unsigned int * const IVCF_AUX_TABLE_ptrs[] = {
+static const U32 * const IVCF_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	IVCF_AUX_TABLE_1,
 	IVCF_AUX_TABLE_2,
@@ -30953,7 +30953,7 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 	2	/* IVCF_AUX_TABLE_27 */
 };
 
-static const int _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
+static const I32 _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x41,
 	IVCF_use_AUX_TABLE_1,
@@ -33657,145 +33657,145 @@ typedef enum {
 
 #define HAS_IVCF_AUX_TABLES
 
-static const unsigned int IVCF_AUX_TABLE_1[] = {
+static const U32 IVCF_AUX_TABLE_1[] = {
 	0x67,
 	0x212B
 };
 
-static const unsigned int IVCF_AUX_TABLE_2[] = {
+static const U32 IVCF_AUX_TABLE_2[] = {
 	0xD2,
 	0x212A
 };
 
-static const unsigned int IVCF_AUX_TABLE_3[] = {
+static const U32 IVCF_AUX_TABLE_3[] = {
 	0xE2,
 	0x17F
 };
 
-static const unsigned int IVCF_AUX_TABLE_4[] = {
+static const U32 IVCF_AUX_TABLE_4[] = {
 	0x1C4,
 	0x1C5
 };
 
-static const unsigned int IVCF_AUX_TABLE_5[] = {
+static const U32 IVCF_AUX_TABLE_5[] = {
 	0x1C7,
 	0x1C8
 };
 
-static const unsigned int IVCF_AUX_TABLE_6[] = {
+static const U32 IVCF_AUX_TABLE_6[] = {
 	0x1CA,
 	0x1CB
 };
 
-static const unsigned int IVCF_AUX_TABLE_7[] = {
+static const U32 IVCF_AUX_TABLE_7[] = {
 	0x1F1,
 	0x1F2
 };
 
-static const unsigned int IVCF_AUX_TABLE_8[] = {
+static const U32 IVCF_AUX_TABLE_8[] = {
 	0x392,
 	0x3D0
 };
 
-static const unsigned int IVCF_AUX_TABLE_9[] = {
+static const U32 IVCF_AUX_TABLE_9[] = {
 	0x395,
 	0x3F5
 };
 
-static const unsigned int IVCF_AUX_TABLE_10[] = {
+static const U32 IVCF_AUX_TABLE_10[] = {
 	0x398,
 	0x3D1,
 	0x3F4
 };
 
-static const unsigned int IVCF_AUX_TABLE_11[] = {
+static const U32 IVCF_AUX_TABLE_11[] = {
 	0x345,
 	0x399,
 	0x1FBE
 };
 
-static const unsigned int IVCF_AUX_TABLE_12[] = {
+static const U32 IVCF_AUX_TABLE_12[] = {
 	0x39A,
 	0x3F0
 };
 
-static const unsigned int IVCF_AUX_TABLE_13[] = {
+static const U32 IVCF_AUX_TABLE_13[] = {
 	0xA0,
 	0x39C
 };
 
-static const unsigned int IVCF_AUX_TABLE_14[] = {
+static const U32 IVCF_AUX_TABLE_14[] = {
 	0x3A0,
 	0x3D6
 };
 
-static const unsigned int IVCF_AUX_TABLE_15[] = {
+static const U32 IVCF_AUX_TABLE_15[] = {
 	0x3A1,
 	0x3F1
 };
 
-static const unsigned int IVCF_AUX_TABLE_16[] = {
+static const U32 IVCF_AUX_TABLE_16[] = {
 	0x3A3,
 	0x3C2
 };
 
-static const unsigned int IVCF_AUX_TABLE_17[] = {
+static const U32 IVCF_AUX_TABLE_17[] = {
 	0x3A6,
 	0x3D5
 };
 
-static const unsigned int IVCF_AUX_TABLE_18[] = {
+static const U32 IVCF_AUX_TABLE_18[] = {
 	0x3A9,
 	0x2126
 };
 
-static const unsigned int IVCF_AUX_TABLE_19[] = {
+static const U32 IVCF_AUX_TABLE_19[] = {
 	0x412,
 	0x1C80
 };
 
-static const unsigned int IVCF_AUX_TABLE_20[] = {
+static const U32 IVCF_AUX_TABLE_20[] = {
 	0x414,
 	0x1C81
 };
 
-static const unsigned int IVCF_AUX_TABLE_21[] = {
+static const U32 IVCF_AUX_TABLE_21[] = {
 	0x41E,
 	0x1C82
 };
 
-static const unsigned int IVCF_AUX_TABLE_22[] = {
+static const U32 IVCF_AUX_TABLE_22[] = {
 	0x421,
 	0x1C83
 };
 
-static const unsigned int IVCF_AUX_TABLE_23[] = {
+static const U32 IVCF_AUX_TABLE_23[] = {
 	0x422,
 	0x1C84,
 	0x1C85
 };
 
-static const unsigned int IVCF_AUX_TABLE_24[] = {
+static const U32 IVCF_AUX_TABLE_24[] = {
 	0x42A,
 	0x1C86
 };
 
-static const unsigned int IVCF_AUX_TABLE_25[] = {
+static const U32 IVCF_AUX_TABLE_25[] = {
 	0x462,
 	0x1C87
 };
 
-static const unsigned int IVCF_AUX_TABLE_26[] = {
+static const U32 IVCF_AUX_TABLE_26[] = {
 	0x1E60,
 	0x1E9B
 };
 
-static const unsigned int IVCF_AUX_TABLE_27[] = {
+static const U32 IVCF_AUX_TABLE_27[] = {
 	0x1C88,
 	0xA64A
 };
 
-static const unsigned int * const IVCF_AUX_TABLE_ptrs[] = {
+static const U32 * const IVCF_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	IVCF_AUX_TABLE_1,
 	IVCF_AUX_TABLE_2,
@@ -33860,7 +33860,7 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 	2	/* IVCF_AUX_TABLE_27 */
 };
 
-static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
+static const I32 _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x62,
 	IVCF_use_AUX_TABLE_1,
@@ -36577,145 +36577,145 @@ typedef enum {
 
 #define HAS_IVCF_AUX_TABLES
 
-static const unsigned int IVCF_AUX_TABLE_1[] = {
+static const U32 IVCF_AUX_TABLE_1[] = {
 	0x67,
 	0x212B
 };
 
-static const unsigned int IVCF_AUX_TABLE_2[] = {
+static const U32 IVCF_AUX_TABLE_2[] = {
 	0xD2,
 	0x212A
 };
 
-static const unsigned int IVCF_AUX_TABLE_3[] = {
+static const U32 IVCF_AUX_TABLE_3[] = {
 	0xE2,
 	0x17F
 };
 
-static const unsigned int IVCF_AUX_TABLE_4[] = {
+static const U32 IVCF_AUX_TABLE_4[] = {
 	0x1C4,
 	0x1C5
 };
 
-static const unsigned int IVCF_AUX_TABLE_5[] = {
+static const U32 IVCF_AUX_TABLE_5[] = {
 	0x1C7,
 	0x1C8
 };
 
-static const unsigned int IVCF_AUX_TABLE_6[] = {
+static const U32 IVCF_AUX_TABLE_6[] = {
 	0x1CA,
 	0x1CB
 };
 
-static const unsigned int IVCF_AUX_TABLE_7[] = {
+static const U32 IVCF_AUX_TABLE_7[] = {
 	0x1F1,
 	0x1F2
 };
 
-static const unsigned int IVCF_AUX_TABLE_8[] = {
+static const U32 IVCF_AUX_TABLE_8[] = {
 	0x392,
 	0x3D0
 };
 
-static const unsigned int IVCF_AUX_TABLE_9[] = {
+static const U32 IVCF_AUX_TABLE_9[] = {
 	0x395,
 	0x3F5
 };
 
-static const unsigned int IVCF_AUX_TABLE_10[] = {
+static const U32 IVCF_AUX_TABLE_10[] = {
 	0x398,
 	0x3D1,
 	0x3F4
 };
 
-static const unsigned int IVCF_AUX_TABLE_11[] = {
+static const U32 IVCF_AUX_TABLE_11[] = {
 	0x345,
 	0x399,
 	0x1FBE
 };
 
-static const unsigned int IVCF_AUX_TABLE_12[] = {
+static const U32 IVCF_AUX_TABLE_12[] = {
 	0x39A,
 	0x3F0
 };
 
-static const unsigned int IVCF_AUX_TABLE_13[] = {
+static const U32 IVCF_AUX_TABLE_13[] = {
 	0xA0,
 	0x39C
 };
 
-static const unsigned int IVCF_AUX_TABLE_14[] = {
+static const U32 IVCF_AUX_TABLE_14[] = {
 	0x3A0,
 	0x3D6
 };
 
-static const unsigned int IVCF_AUX_TABLE_15[] = {
+static const U32 IVCF_AUX_TABLE_15[] = {
 	0x3A1,
 	0x3F1
 };
 
-static const unsigned int IVCF_AUX_TABLE_16[] = {
+static const U32 IVCF_AUX_TABLE_16[] = {
 	0x3A3,
 	0x3C2
 };
 
-static const unsigned int IVCF_AUX_TABLE_17[] = {
+static const U32 IVCF_AUX_TABLE_17[] = {
 	0x3A6,
 	0x3D5
 };
 
-static const unsigned int IVCF_AUX_TABLE_18[] = {
+static const U32 IVCF_AUX_TABLE_18[] = {
 	0x3A9,
 	0x2126
 };
 
-static const unsigned int IVCF_AUX_TABLE_19[] = {
+static const U32 IVCF_AUX_TABLE_19[] = {
 	0x412,
 	0x1C80
 };
 
-static const unsigned int IVCF_AUX_TABLE_20[] = {
+static const U32 IVCF_AUX_TABLE_20[] = {
 	0x414,
 	0x1C81
 };
 
-static const unsigned int IVCF_AUX_TABLE_21[] = {
+static const U32 IVCF_AUX_TABLE_21[] = {
 	0x41E,
 	0x1C82
 };
 
-static const unsigned int IVCF_AUX_TABLE_22[] = {
+static const U32 IVCF_AUX_TABLE_22[] = {
 	0x421,
 	0x1C83
 };
 
-static const unsigned int IVCF_AUX_TABLE_23[] = {
+static const U32 IVCF_AUX_TABLE_23[] = {
 	0x422,
 	0x1C84,
 	0x1C85
 };
 
-static const unsigned int IVCF_AUX_TABLE_24[] = {
+static const U32 IVCF_AUX_TABLE_24[] = {
 	0x42A,
 	0x1C86
 };
 
-static const unsigned int IVCF_AUX_TABLE_25[] = {
+static const U32 IVCF_AUX_TABLE_25[] = {
 	0x462,
 	0x1C87
 };
 
-static const unsigned int IVCF_AUX_TABLE_26[] = {
+static const U32 IVCF_AUX_TABLE_26[] = {
 	0x1E60,
 	0x1E9B
 };
 
-static const unsigned int IVCF_AUX_TABLE_27[] = {
+static const U32 IVCF_AUX_TABLE_27[] = {
 	0x1C88,
 	0xA64A
 };
 
-static const unsigned int * const IVCF_AUX_TABLE_ptrs[] = {
+static const U32 * const IVCF_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	IVCF_AUX_TABLE_1,
 	IVCF_AUX_TABLE_2,
@@ -36780,7 +36780,7 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 	2	/* IVCF_AUX_TABLE_27 */
 };
 
-static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 037 */
+static const I32 _Perl_IVCF_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x62,
 	IVCF_use_AUX_TABLE_1,
@@ -96962,7 +96962,7 @@ static const UV Simple_Case_Folding_invlist[] = {  /* for ASCII/Latin1 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const int Simple_Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
+static const I32 Simple_Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x61,
 	0,
@@ -99584,7 +99584,7 @@ static const UV Simple_Case_Folding_invlist[] = {  /* for EBCDIC 1047 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 
-static const int Simple_Case_Folding_invmap[] = {  /* for EBCDIC 1047 */
+static const I32 Simple_Case_Folding_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x42,
 	0,
@@ -102220,7 +102220,7 @@ static const UV Simple_Case_Folding_invlist[] = {  /* for EBCDIC 037 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 
-static const int Simple_Case_Folding_invmap[] = {  /* for EBCDIC 037 */
+static const I32 Simple_Case_Folding_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x42,
 	0,
@@ -104935,246 +104935,246 @@ typedef enum {
 
 #define HAS_TC_AUX_TABLES
 
-static const unsigned int TC_AUX_TABLE_1[] = {
+static const U32 TC_AUX_TABLE_1[] = {
 	0x53,
 	0x73
 };
 
-static const unsigned int TC_AUX_TABLE_2[] = {
+static const U32 TC_AUX_TABLE_2[] = {
 	0x2BC,
 	0x4E
 };
 
-static const unsigned int TC_AUX_TABLE_3[] = {
+static const U32 TC_AUX_TABLE_3[] = {
 	0x4A,
 	0x30C
 };
 
-static const unsigned int TC_AUX_TABLE_4[] = {
+static const U32 TC_AUX_TABLE_4[] = {
 	0x399,
 	0x308,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_5[] = {
+static const U32 TC_AUX_TABLE_5[] = {
 	0x3A5,
 	0x308,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_6[] = {
+static const U32 TC_AUX_TABLE_6[] = {
 	0x535,
 	0x582
 };
 
-static const unsigned int TC_AUX_TABLE_7[] = {
+static const U32 TC_AUX_TABLE_7[] = {
 	0x48,
 	0x331
 };
 
-static const unsigned int TC_AUX_TABLE_8[] = {
+static const U32 TC_AUX_TABLE_8[] = {
 	0x54,
 	0x308
 };
 
-static const unsigned int TC_AUX_TABLE_9[] = {
+static const U32 TC_AUX_TABLE_9[] = {
 	0x57,
 	0x30A
 };
 
-static const unsigned int TC_AUX_TABLE_10[] = {
+static const U32 TC_AUX_TABLE_10[] = {
 	0x59,
 	0x30A
 };
 
-static const unsigned int TC_AUX_TABLE_11[] = {
+static const U32 TC_AUX_TABLE_11[] = {
 	0x41,
 	0x2BE
 };
 
-static const unsigned int TC_AUX_TABLE_12[] = {
+static const U32 TC_AUX_TABLE_12[] = {
 	0x3A5,
 	0x313
 };
 
-static const unsigned int TC_AUX_TABLE_13[] = {
+static const U32 TC_AUX_TABLE_13[] = {
 	0x3A5,
 	0x313,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_14[] = {
+static const U32 TC_AUX_TABLE_14[] = {
 	0x3A5,
 	0x313,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_15[] = {
+static const U32 TC_AUX_TABLE_15[] = {
 	0x3A5,
 	0x313,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_16[] = {
+static const U32 TC_AUX_TABLE_16[] = {
 	0x1FBA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_17[] = {
+static const U32 TC_AUX_TABLE_17[] = {
 	0x386,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_18[] = {
+static const U32 TC_AUX_TABLE_18[] = {
 	0x391,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_19[] = {
+static const U32 TC_AUX_TABLE_19[] = {
 	0x391,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_20[] = {
+static const U32 TC_AUX_TABLE_20[] = {
 	0x1FCA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_21[] = {
+static const U32 TC_AUX_TABLE_21[] = {
 	0x389,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_22[] = {
+static const U32 TC_AUX_TABLE_22[] = {
 	0x397,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_23[] = {
+static const U32 TC_AUX_TABLE_23[] = {
 	0x397,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_24[] = {
+static const U32 TC_AUX_TABLE_24[] = {
 	0x399,
 	0x308,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_25[] = {
+static const U32 TC_AUX_TABLE_25[] = {
 	0x399,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_26[] = {
+static const U32 TC_AUX_TABLE_26[] = {
 	0x399,
 	0x308,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_27[] = {
+static const U32 TC_AUX_TABLE_27[] = {
 	0x3A5,
 	0x308,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_28[] = {
+static const U32 TC_AUX_TABLE_28[] = {
 	0x3A1,
 	0x313
 };
 
-static const unsigned int TC_AUX_TABLE_29[] = {
+static const U32 TC_AUX_TABLE_29[] = {
 	0x3A5,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_30[] = {
+static const U32 TC_AUX_TABLE_30[] = {
 	0x3A5,
 	0x308,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_31[] = {
+static const U32 TC_AUX_TABLE_31[] = {
 	0x1FFA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_32[] = {
+static const U32 TC_AUX_TABLE_32[] = {
 	0x38F,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_33[] = {
+static const U32 TC_AUX_TABLE_33[] = {
 	0x3A9,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_34[] = {
+static const U32 TC_AUX_TABLE_34[] = {
 	0x3A9,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_35[] = {
+static const U32 TC_AUX_TABLE_35[] = {
 	0x46,
 	0x66
 };
 
-static const unsigned int TC_AUX_TABLE_36[] = {
+static const U32 TC_AUX_TABLE_36[] = {
 	0x46,
 	0x69
 };
 
-static const unsigned int TC_AUX_TABLE_37[] = {
+static const U32 TC_AUX_TABLE_37[] = {
 	0x46,
 	0x6C
 };
 
-static const unsigned int TC_AUX_TABLE_38[] = {
+static const U32 TC_AUX_TABLE_38[] = {
 	0x46,
 	0x66,
 	0x69
 };
 
-static const unsigned int TC_AUX_TABLE_39[] = {
+static const U32 TC_AUX_TABLE_39[] = {
 	0x46,
 	0x66,
 	0x6C
 };
 
-static const unsigned int TC_AUX_TABLE_40[] = {
+static const U32 TC_AUX_TABLE_40[] = {
 	0x53,
 	0x74
 };
 
-static const unsigned int TC_AUX_TABLE_41[] = {
+static const U32 TC_AUX_TABLE_41[] = {
 	0x544,
 	0x576
 };
 
-static const unsigned int TC_AUX_TABLE_42[] = {
+static const U32 TC_AUX_TABLE_42[] = {
 	0x544,
 	0x565
 };
 
-static const unsigned int TC_AUX_TABLE_43[] = {
+static const U32 TC_AUX_TABLE_43[] = {
 	0x544,
 	0x56B
 };
 
-static const unsigned int TC_AUX_TABLE_44[] = {
+static const U32 TC_AUX_TABLE_44[] = {
 	0x54E,
 	0x576
 };
 
-static const unsigned int TC_AUX_TABLE_45[] = {
+static const U32 TC_AUX_TABLE_45[] = {
 	0x544,
 	0x56D
 };
 
-static const unsigned int * const TC_AUX_TABLE_ptrs[] = {
+static const U32 * const TC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	TC_AUX_TABLE_1,
 	TC_AUX_TABLE_2,
@@ -105275,7 +105275,7 @@ static const U8 TC_AUX_TABLE_lengths[] = {
 	2	/* TC_AUX_TABLE_45 */
 };
 
-static const int Titlecase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
+static const I32 Titlecase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x41,
 	0,
@@ -108046,246 +108046,246 @@ typedef enum {
 
 #define HAS_TC_AUX_TABLES
 
-static const unsigned int TC_AUX_TABLE_1[] = {
+static const U32 TC_AUX_TABLE_1[] = {
 	0xE2,
 	0xA2
 };
 
-static const unsigned int TC_AUX_TABLE_2[] = {
+static const U32 TC_AUX_TABLE_2[] = {
 	0x2BC,
 	0xD5
 };
 
-static const unsigned int TC_AUX_TABLE_3[] = {
+static const U32 TC_AUX_TABLE_3[] = {
 	0xD1,
 	0x30C
 };
 
-static const unsigned int TC_AUX_TABLE_4[] = {
+static const U32 TC_AUX_TABLE_4[] = {
 	0x399,
 	0x308,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_5[] = {
+static const U32 TC_AUX_TABLE_5[] = {
 	0x3A5,
 	0x308,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_6[] = {
+static const U32 TC_AUX_TABLE_6[] = {
 	0x535,
 	0x582
 };
 
-static const unsigned int TC_AUX_TABLE_7[] = {
+static const U32 TC_AUX_TABLE_7[] = {
 	0xC8,
 	0x331
 };
 
-static const unsigned int TC_AUX_TABLE_8[] = {
+static const U32 TC_AUX_TABLE_8[] = {
 	0xE3,
 	0x308
 };
 
-static const unsigned int TC_AUX_TABLE_9[] = {
+static const U32 TC_AUX_TABLE_9[] = {
 	0xE6,
 	0x30A
 };
 
-static const unsigned int TC_AUX_TABLE_10[] = {
+static const U32 TC_AUX_TABLE_10[] = {
 	0xE8,
 	0x30A
 };
 
-static const unsigned int TC_AUX_TABLE_11[] = {
+static const U32 TC_AUX_TABLE_11[] = {
 	0xC1,
 	0x2BE
 };
 
-static const unsigned int TC_AUX_TABLE_12[] = {
+static const U32 TC_AUX_TABLE_12[] = {
 	0x3A5,
 	0x313
 };
 
-static const unsigned int TC_AUX_TABLE_13[] = {
+static const U32 TC_AUX_TABLE_13[] = {
 	0x3A5,
 	0x313,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_14[] = {
+static const U32 TC_AUX_TABLE_14[] = {
 	0x3A5,
 	0x313,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_15[] = {
+static const U32 TC_AUX_TABLE_15[] = {
 	0x3A5,
 	0x313,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_16[] = {
+static const U32 TC_AUX_TABLE_16[] = {
 	0x1FBA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_17[] = {
+static const U32 TC_AUX_TABLE_17[] = {
 	0x386,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_18[] = {
+static const U32 TC_AUX_TABLE_18[] = {
 	0x391,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_19[] = {
+static const U32 TC_AUX_TABLE_19[] = {
 	0x391,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_20[] = {
+static const U32 TC_AUX_TABLE_20[] = {
 	0x1FCA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_21[] = {
+static const U32 TC_AUX_TABLE_21[] = {
 	0x389,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_22[] = {
+static const U32 TC_AUX_TABLE_22[] = {
 	0x397,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_23[] = {
+static const U32 TC_AUX_TABLE_23[] = {
 	0x397,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_24[] = {
+static const U32 TC_AUX_TABLE_24[] = {
 	0x399,
 	0x308,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_25[] = {
+static const U32 TC_AUX_TABLE_25[] = {
 	0x399,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_26[] = {
+static const U32 TC_AUX_TABLE_26[] = {
 	0x399,
 	0x308,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_27[] = {
+static const U32 TC_AUX_TABLE_27[] = {
 	0x3A5,
 	0x308,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_28[] = {
+static const U32 TC_AUX_TABLE_28[] = {
 	0x3A1,
 	0x313
 };
 
-static const unsigned int TC_AUX_TABLE_29[] = {
+static const U32 TC_AUX_TABLE_29[] = {
 	0x3A5,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_30[] = {
+static const U32 TC_AUX_TABLE_30[] = {
 	0x3A5,
 	0x308,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_31[] = {
+static const U32 TC_AUX_TABLE_31[] = {
 	0x1FFA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_32[] = {
+static const U32 TC_AUX_TABLE_32[] = {
 	0x38F,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_33[] = {
+static const U32 TC_AUX_TABLE_33[] = {
 	0x3A9,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_34[] = {
+static const U32 TC_AUX_TABLE_34[] = {
 	0x3A9,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_35[] = {
+static const U32 TC_AUX_TABLE_35[] = {
 	0xC6,
 	0x86
 };
 
-static const unsigned int TC_AUX_TABLE_36[] = {
+static const U32 TC_AUX_TABLE_36[] = {
 	0xC6,
 	0x89
 };
 
-static const unsigned int TC_AUX_TABLE_37[] = {
+static const U32 TC_AUX_TABLE_37[] = {
 	0xC6,
 	0x93
 };
 
-static const unsigned int TC_AUX_TABLE_38[] = {
+static const U32 TC_AUX_TABLE_38[] = {
 	0xC6,
 	0x86,
 	0x89
 };
 
-static const unsigned int TC_AUX_TABLE_39[] = {
+static const U32 TC_AUX_TABLE_39[] = {
 	0xC6,
 	0x86,
 	0x93
 };
 
-static const unsigned int TC_AUX_TABLE_40[] = {
+static const U32 TC_AUX_TABLE_40[] = {
 	0xE2,
 	0xA3
 };
 
-static const unsigned int TC_AUX_TABLE_41[] = {
+static const U32 TC_AUX_TABLE_41[] = {
 	0x544,
 	0x576
 };
 
-static const unsigned int TC_AUX_TABLE_42[] = {
+static const U32 TC_AUX_TABLE_42[] = {
 	0x544,
 	0x565
 };
 
-static const unsigned int TC_AUX_TABLE_43[] = {
+static const U32 TC_AUX_TABLE_43[] = {
 	0x544,
 	0x56B
 };
 
-static const unsigned int TC_AUX_TABLE_44[] = {
+static const U32 TC_AUX_TABLE_44[] = {
 	0x54E,
 	0x576
 };
 
-static const unsigned int TC_AUX_TABLE_45[] = {
+static const U32 TC_AUX_TABLE_45[] = {
 	0x544,
 	0x56D
 };
 
-static const unsigned int * const TC_AUX_TABLE_ptrs[] = {
+static const U32 * const TC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	TC_AUX_TABLE_1,
 	TC_AUX_TABLE_2,
@@ -108386,7 +108386,7 @@ static const U8 TC_AUX_TABLE_lengths[] = {
 	2	/* TC_AUX_TABLE_45 */
 };
 
-static const int Titlecase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
+static const I32 Titlecase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x62,
 	0,
@@ -111171,246 +111171,246 @@ typedef enum {
 
 #define HAS_TC_AUX_TABLES
 
-static const unsigned int TC_AUX_TABLE_1[] = {
+static const U32 TC_AUX_TABLE_1[] = {
 	0xE2,
 	0xA2
 };
 
-static const unsigned int TC_AUX_TABLE_2[] = {
+static const U32 TC_AUX_TABLE_2[] = {
 	0x2BC,
 	0xD5
 };
 
-static const unsigned int TC_AUX_TABLE_3[] = {
+static const U32 TC_AUX_TABLE_3[] = {
 	0xD1,
 	0x30C
 };
 
-static const unsigned int TC_AUX_TABLE_4[] = {
+static const U32 TC_AUX_TABLE_4[] = {
 	0x399,
 	0x308,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_5[] = {
+static const U32 TC_AUX_TABLE_5[] = {
 	0x3A5,
 	0x308,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_6[] = {
+static const U32 TC_AUX_TABLE_6[] = {
 	0x535,
 	0x582
 };
 
-static const unsigned int TC_AUX_TABLE_7[] = {
+static const U32 TC_AUX_TABLE_7[] = {
 	0xC8,
 	0x331
 };
 
-static const unsigned int TC_AUX_TABLE_8[] = {
+static const U32 TC_AUX_TABLE_8[] = {
 	0xE3,
 	0x308
 };
 
-static const unsigned int TC_AUX_TABLE_9[] = {
+static const U32 TC_AUX_TABLE_9[] = {
 	0xE6,
 	0x30A
 };
 
-static const unsigned int TC_AUX_TABLE_10[] = {
+static const U32 TC_AUX_TABLE_10[] = {
 	0xE8,
 	0x30A
 };
 
-static const unsigned int TC_AUX_TABLE_11[] = {
+static const U32 TC_AUX_TABLE_11[] = {
 	0xC1,
 	0x2BE
 };
 
-static const unsigned int TC_AUX_TABLE_12[] = {
+static const U32 TC_AUX_TABLE_12[] = {
 	0x3A5,
 	0x313
 };
 
-static const unsigned int TC_AUX_TABLE_13[] = {
+static const U32 TC_AUX_TABLE_13[] = {
 	0x3A5,
 	0x313,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_14[] = {
+static const U32 TC_AUX_TABLE_14[] = {
 	0x3A5,
 	0x313,
 	0x301
 };
 
-static const unsigned int TC_AUX_TABLE_15[] = {
+static const U32 TC_AUX_TABLE_15[] = {
 	0x3A5,
 	0x313,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_16[] = {
+static const U32 TC_AUX_TABLE_16[] = {
 	0x1FBA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_17[] = {
+static const U32 TC_AUX_TABLE_17[] = {
 	0x386,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_18[] = {
+static const U32 TC_AUX_TABLE_18[] = {
 	0x391,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_19[] = {
+static const U32 TC_AUX_TABLE_19[] = {
 	0x391,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_20[] = {
+static const U32 TC_AUX_TABLE_20[] = {
 	0x1FCA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_21[] = {
+static const U32 TC_AUX_TABLE_21[] = {
 	0x389,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_22[] = {
+static const U32 TC_AUX_TABLE_22[] = {
 	0x397,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_23[] = {
+static const U32 TC_AUX_TABLE_23[] = {
 	0x397,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_24[] = {
+static const U32 TC_AUX_TABLE_24[] = {
 	0x399,
 	0x308,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_25[] = {
+static const U32 TC_AUX_TABLE_25[] = {
 	0x399,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_26[] = {
+static const U32 TC_AUX_TABLE_26[] = {
 	0x399,
 	0x308,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_27[] = {
+static const U32 TC_AUX_TABLE_27[] = {
 	0x3A5,
 	0x308,
 	0x300
 };
 
-static const unsigned int TC_AUX_TABLE_28[] = {
+static const U32 TC_AUX_TABLE_28[] = {
 	0x3A1,
 	0x313
 };
 
-static const unsigned int TC_AUX_TABLE_29[] = {
+static const U32 TC_AUX_TABLE_29[] = {
 	0x3A5,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_30[] = {
+static const U32 TC_AUX_TABLE_30[] = {
 	0x3A5,
 	0x308,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_31[] = {
+static const U32 TC_AUX_TABLE_31[] = {
 	0x1FFA,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_32[] = {
+static const U32 TC_AUX_TABLE_32[] = {
 	0x38F,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_33[] = {
+static const U32 TC_AUX_TABLE_33[] = {
 	0x3A9,
 	0x342
 };
 
-static const unsigned int TC_AUX_TABLE_34[] = {
+static const U32 TC_AUX_TABLE_34[] = {
 	0x3A9,
 	0x342,
 	0x345
 };
 
-static const unsigned int TC_AUX_TABLE_35[] = {
+static const U32 TC_AUX_TABLE_35[] = {
 	0xC6,
 	0x86
 };
 
-static const unsigned int TC_AUX_TABLE_36[] = {
+static const U32 TC_AUX_TABLE_36[] = {
 	0xC6,
 	0x89
 };
 
-static const unsigned int TC_AUX_TABLE_37[] = {
+static const U32 TC_AUX_TABLE_37[] = {
 	0xC6,
 	0x93
 };
 
-static const unsigned int TC_AUX_TABLE_38[] = {
+static const U32 TC_AUX_TABLE_38[] = {
 	0xC6,
 	0x86,
 	0x89
 };
 
-static const unsigned int TC_AUX_TABLE_39[] = {
+static const U32 TC_AUX_TABLE_39[] = {
 	0xC6,
 	0x86,
 	0x93
 };
 
-static const unsigned int TC_AUX_TABLE_40[] = {
+static const U32 TC_AUX_TABLE_40[] = {
 	0xE2,
 	0xA3
 };
 
-static const unsigned int TC_AUX_TABLE_41[] = {
+static const U32 TC_AUX_TABLE_41[] = {
 	0x544,
 	0x576
 };
 
-static const unsigned int TC_AUX_TABLE_42[] = {
+static const U32 TC_AUX_TABLE_42[] = {
 	0x544,
 	0x565
 };
 
-static const unsigned int TC_AUX_TABLE_43[] = {
+static const U32 TC_AUX_TABLE_43[] = {
 	0x544,
 	0x56B
 };
 
-static const unsigned int TC_AUX_TABLE_44[] = {
+static const U32 TC_AUX_TABLE_44[] = {
 	0x54E,
 	0x576
 };
 
-static const unsigned int TC_AUX_TABLE_45[] = {
+static const U32 TC_AUX_TABLE_45[] = {
 	0x544,
 	0x56D
 };
 
-static const unsigned int * const TC_AUX_TABLE_ptrs[] = {
+static const U32 * const TC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	TC_AUX_TABLE_1,
 	TC_AUX_TABLE_2,
@@ -111511,7 +111511,7 @@ static const U8 TC_AUX_TABLE_lengths[] = {
 	2	/* TC_AUX_TABLE_45 */
 };
 
-static const int Titlecase_Mapping_invmap[] = {  /* for EBCDIC 037 */
+static const I32 Titlecase_Mapping_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x62,
 	0,
@@ -114352,381 +114352,381 @@ typedef enum {
 
 #define HAS_UC_AUX_TABLES
 
-static const unsigned int UC_AUX_TABLE_1[] = {
+static const U32 UC_AUX_TABLE_1[] = {
 	0x53,
 	0x53
 };
 
-static const unsigned int UC_AUX_TABLE_2[] = {
+static const U32 UC_AUX_TABLE_2[] = {
 	0x2BC,
 	0x4E
 };
 
-static const unsigned int UC_AUX_TABLE_3[] = {
+static const U32 UC_AUX_TABLE_3[] = {
 	0x4A,
 	0x30C
 };
 
-static const unsigned int UC_AUX_TABLE_4[] = {
+static const U32 UC_AUX_TABLE_4[] = {
 	0x399,
 	0x308,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_5[] = {
+static const U32 UC_AUX_TABLE_5[] = {
 	0x3A5,
 	0x308,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_6[] = {
+static const U32 UC_AUX_TABLE_6[] = {
 	0x535,
 	0x552
 };
 
-static const unsigned int UC_AUX_TABLE_7[] = {
+static const U32 UC_AUX_TABLE_7[] = {
 	0x48,
 	0x331
 };
 
-static const unsigned int UC_AUX_TABLE_8[] = {
+static const U32 UC_AUX_TABLE_8[] = {
 	0x54,
 	0x308
 };
 
-static const unsigned int UC_AUX_TABLE_9[] = {
+static const U32 UC_AUX_TABLE_9[] = {
 	0x57,
 	0x30A
 };
 
-static const unsigned int UC_AUX_TABLE_10[] = {
+static const U32 UC_AUX_TABLE_10[] = {
 	0x59,
 	0x30A
 };
 
-static const unsigned int UC_AUX_TABLE_11[] = {
+static const U32 UC_AUX_TABLE_11[] = {
 	0x41,
 	0x2BE
 };
 
-static const unsigned int UC_AUX_TABLE_12[] = {
+static const U32 UC_AUX_TABLE_12[] = {
 	0x3A5,
 	0x313
 };
 
-static const unsigned int UC_AUX_TABLE_13[] = {
+static const U32 UC_AUX_TABLE_13[] = {
 	0x3A5,
 	0x313,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_14[] = {
+static const U32 UC_AUX_TABLE_14[] = {
 	0x3A5,
 	0x313,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_15[] = {
+static const U32 UC_AUX_TABLE_15[] = {
 	0x3A5,
 	0x313,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_16[] = {
+static const U32 UC_AUX_TABLE_16[] = {
 	0x1F08,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_17[] = {
+static const U32 UC_AUX_TABLE_17[] = {
 	0x1F09,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_18[] = {
+static const U32 UC_AUX_TABLE_18[] = {
 	0x1F0A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_19[] = {
+static const U32 UC_AUX_TABLE_19[] = {
 	0x1F0B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_20[] = {
+static const U32 UC_AUX_TABLE_20[] = {
 	0x1F0C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_21[] = {
+static const U32 UC_AUX_TABLE_21[] = {
 	0x1F0D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_22[] = {
+static const U32 UC_AUX_TABLE_22[] = {
 	0x1F0E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_23[] = {
+static const U32 UC_AUX_TABLE_23[] = {
 	0x1F0F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_24[] = {
+static const U32 UC_AUX_TABLE_24[] = {
 	0x1F28,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_25[] = {
+static const U32 UC_AUX_TABLE_25[] = {
 	0x1F29,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_26[] = {
+static const U32 UC_AUX_TABLE_26[] = {
 	0x1F2A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_27[] = {
+static const U32 UC_AUX_TABLE_27[] = {
 	0x1F2B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_28[] = {
+static const U32 UC_AUX_TABLE_28[] = {
 	0x1F2C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_29[] = {
+static const U32 UC_AUX_TABLE_29[] = {
 	0x1F2D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_30[] = {
+static const U32 UC_AUX_TABLE_30[] = {
 	0x1F2E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_31[] = {
+static const U32 UC_AUX_TABLE_31[] = {
 	0x1F2F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_32[] = {
+static const U32 UC_AUX_TABLE_32[] = {
 	0x1F68,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_33[] = {
+static const U32 UC_AUX_TABLE_33[] = {
 	0x1F69,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_34[] = {
+static const U32 UC_AUX_TABLE_34[] = {
 	0x1F6A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_35[] = {
+static const U32 UC_AUX_TABLE_35[] = {
 	0x1F6B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_36[] = {
+static const U32 UC_AUX_TABLE_36[] = {
 	0x1F6C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_37[] = {
+static const U32 UC_AUX_TABLE_37[] = {
 	0x1F6D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_38[] = {
+static const U32 UC_AUX_TABLE_38[] = {
 	0x1F6E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_39[] = {
+static const U32 UC_AUX_TABLE_39[] = {
 	0x1F6F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_40[] = {
+static const U32 UC_AUX_TABLE_40[] = {
 	0x1FBA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_41[] = {
+static const U32 UC_AUX_TABLE_41[] = {
 	0x391,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_42[] = {
+static const U32 UC_AUX_TABLE_42[] = {
 	0x386,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_43[] = {
+static const U32 UC_AUX_TABLE_43[] = {
 	0x391,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_44[] = {
+static const U32 UC_AUX_TABLE_44[] = {
 	0x391,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_45[] = {
+static const U32 UC_AUX_TABLE_45[] = {
 	0x1FCA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_46[] = {
+static const U32 UC_AUX_TABLE_46[] = {
 	0x397,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_47[] = {
+static const U32 UC_AUX_TABLE_47[] = {
 	0x389,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_48[] = {
+static const U32 UC_AUX_TABLE_48[] = {
 	0x397,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_49[] = {
+static const U32 UC_AUX_TABLE_49[] = {
 	0x397,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_50[] = {
+static const U32 UC_AUX_TABLE_50[] = {
 	0x399,
 	0x308,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_51[] = {
+static const U32 UC_AUX_TABLE_51[] = {
 	0x399,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_52[] = {
+static const U32 UC_AUX_TABLE_52[] = {
 	0x399,
 	0x308,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_53[] = {
+static const U32 UC_AUX_TABLE_53[] = {
 	0x3A5,
 	0x308,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_54[] = {
+static const U32 UC_AUX_TABLE_54[] = {
 	0x3A1,
 	0x313
 };
 
-static const unsigned int UC_AUX_TABLE_55[] = {
+static const U32 UC_AUX_TABLE_55[] = {
 	0x3A5,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_56[] = {
+static const U32 UC_AUX_TABLE_56[] = {
 	0x3A5,
 	0x308,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_57[] = {
+static const U32 UC_AUX_TABLE_57[] = {
 	0x1FFA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_58[] = {
+static const U32 UC_AUX_TABLE_58[] = {
 	0x3A9,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_59[] = {
+static const U32 UC_AUX_TABLE_59[] = {
 	0x38F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_60[] = {
+static const U32 UC_AUX_TABLE_60[] = {
 	0x3A9,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_61[] = {
+static const U32 UC_AUX_TABLE_61[] = {
 	0x3A9,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_62[] = {
+static const U32 UC_AUX_TABLE_62[] = {
 	0x46,
 	0x46
 };
 
-static const unsigned int UC_AUX_TABLE_63[] = {
+static const U32 UC_AUX_TABLE_63[] = {
 	0x46,
 	0x49
 };
 
-static const unsigned int UC_AUX_TABLE_64[] = {
+static const U32 UC_AUX_TABLE_64[] = {
 	0x46,
 	0x4C
 };
 
-static const unsigned int UC_AUX_TABLE_65[] = {
+static const U32 UC_AUX_TABLE_65[] = {
 	0x46,
 	0x46,
 	0x49
 };
 
-static const unsigned int UC_AUX_TABLE_66[] = {
+static const U32 UC_AUX_TABLE_66[] = {
 	0x46,
 	0x46,
 	0x4C
 };
 
-static const unsigned int UC_AUX_TABLE_67[] = {
+static const U32 UC_AUX_TABLE_67[] = {
 	0x53,
 	0x54
 };
 
-static const unsigned int UC_AUX_TABLE_68[] = {
+static const U32 UC_AUX_TABLE_68[] = {
 	0x544,
 	0x546
 };
 
-static const unsigned int UC_AUX_TABLE_69[] = {
+static const U32 UC_AUX_TABLE_69[] = {
 	0x544,
 	0x535
 };
 
-static const unsigned int UC_AUX_TABLE_70[] = {
+static const U32 UC_AUX_TABLE_70[] = {
 	0x544,
 	0x53B
 };
 
-static const unsigned int UC_AUX_TABLE_71[] = {
+static const U32 UC_AUX_TABLE_71[] = {
 	0x54E,
 	0x546
 };
 
-static const unsigned int UC_AUX_TABLE_72[] = {
+static const U32 UC_AUX_TABLE_72[] = {
 	0x544,
 	0x53D
 };
 
-static const unsigned int * const UC_AUX_TABLE_ptrs[] = {
+static const U32 * const UC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	UC_AUX_TABLE_1,
 	UC_AUX_TABLE_2,
@@ -114881,7 +114881,7 @@ static const U8 UC_AUX_TABLE_lengths[] = {
 	2	/* UC_AUX_TABLE_72 */
 };
 
-static const int Uppercase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
+static const I32 Uppercase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x41,
 	0,
@@ -117781,381 +117781,381 @@ typedef enum {
 
 #define HAS_UC_AUX_TABLES
 
-static const unsigned int UC_AUX_TABLE_1[] = {
+static const U32 UC_AUX_TABLE_1[] = {
 	0xE2,
 	0xE2
 };
 
-static const unsigned int UC_AUX_TABLE_2[] = {
+static const U32 UC_AUX_TABLE_2[] = {
 	0x2BC,
 	0xD5
 };
 
-static const unsigned int UC_AUX_TABLE_3[] = {
+static const U32 UC_AUX_TABLE_3[] = {
 	0xD1,
 	0x30C
 };
 
-static const unsigned int UC_AUX_TABLE_4[] = {
+static const U32 UC_AUX_TABLE_4[] = {
 	0x399,
 	0x308,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_5[] = {
+static const U32 UC_AUX_TABLE_5[] = {
 	0x3A5,
 	0x308,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_6[] = {
+static const U32 UC_AUX_TABLE_6[] = {
 	0x535,
 	0x552
 };
 
-static const unsigned int UC_AUX_TABLE_7[] = {
+static const U32 UC_AUX_TABLE_7[] = {
 	0xC8,
 	0x331
 };
 
-static const unsigned int UC_AUX_TABLE_8[] = {
+static const U32 UC_AUX_TABLE_8[] = {
 	0xE3,
 	0x308
 };
 
-static const unsigned int UC_AUX_TABLE_9[] = {
+static const U32 UC_AUX_TABLE_9[] = {
 	0xE6,
 	0x30A
 };
 
-static const unsigned int UC_AUX_TABLE_10[] = {
+static const U32 UC_AUX_TABLE_10[] = {
 	0xE8,
 	0x30A
 };
 
-static const unsigned int UC_AUX_TABLE_11[] = {
+static const U32 UC_AUX_TABLE_11[] = {
 	0xC1,
 	0x2BE
 };
 
-static const unsigned int UC_AUX_TABLE_12[] = {
+static const U32 UC_AUX_TABLE_12[] = {
 	0x3A5,
 	0x313
 };
 
-static const unsigned int UC_AUX_TABLE_13[] = {
+static const U32 UC_AUX_TABLE_13[] = {
 	0x3A5,
 	0x313,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_14[] = {
+static const U32 UC_AUX_TABLE_14[] = {
 	0x3A5,
 	0x313,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_15[] = {
+static const U32 UC_AUX_TABLE_15[] = {
 	0x3A5,
 	0x313,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_16[] = {
+static const U32 UC_AUX_TABLE_16[] = {
 	0x1F08,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_17[] = {
+static const U32 UC_AUX_TABLE_17[] = {
 	0x1F09,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_18[] = {
+static const U32 UC_AUX_TABLE_18[] = {
 	0x1F0A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_19[] = {
+static const U32 UC_AUX_TABLE_19[] = {
 	0x1F0B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_20[] = {
+static const U32 UC_AUX_TABLE_20[] = {
 	0x1F0C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_21[] = {
+static const U32 UC_AUX_TABLE_21[] = {
 	0x1F0D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_22[] = {
+static const U32 UC_AUX_TABLE_22[] = {
 	0x1F0E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_23[] = {
+static const U32 UC_AUX_TABLE_23[] = {
 	0x1F0F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_24[] = {
+static const U32 UC_AUX_TABLE_24[] = {
 	0x1F28,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_25[] = {
+static const U32 UC_AUX_TABLE_25[] = {
 	0x1F29,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_26[] = {
+static const U32 UC_AUX_TABLE_26[] = {
 	0x1F2A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_27[] = {
+static const U32 UC_AUX_TABLE_27[] = {
 	0x1F2B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_28[] = {
+static const U32 UC_AUX_TABLE_28[] = {
 	0x1F2C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_29[] = {
+static const U32 UC_AUX_TABLE_29[] = {
 	0x1F2D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_30[] = {
+static const U32 UC_AUX_TABLE_30[] = {
 	0x1F2E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_31[] = {
+static const U32 UC_AUX_TABLE_31[] = {
 	0x1F2F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_32[] = {
+static const U32 UC_AUX_TABLE_32[] = {
 	0x1F68,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_33[] = {
+static const U32 UC_AUX_TABLE_33[] = {
 	0x1F69,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_34[] = {
+static const U32 UC_AUX_TABLE_34[] = {
 	0x1F6A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_35[] = {
+static const U32 UC_AUX_TABLE_35[] = {
 	0x1F6B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_36[] = {
+static const U32 UC_AUX_TABLE_36[] = {
 	0x1F6C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_37[] = {
+static const U32 UC_AUX_TABLE_37[] = {
 	0x1F6D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_38[] = {
+static const U32 UC_AUX_TABLE_38[] = {
 	0x1F6E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_39[] = {
+static const U32 UC_AUX_TABLE_39[] = {
 	0x1F6F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_40[] = {
+static const U32 UC_AUX_TABLE_40[] = {
 	0x1FBA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_41[] = {
+static const U32 UC_AUX_TABLE_41[] = {
 	0x391,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_42[] = {
+static const U32 UC_AUX_TABLE_42[] = {
 	0x386,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_43[] = {
+static const U32 UC_AUX_TABLE_43[] = {
 	0x391,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_44[] = {
+static const U32 UC_AUX_TABLE_44[] = {
 	0x391,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_45[] = {
+static const U32 UC_AUX_TABLE_45[] = {
 	0x1FCA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_46[] = {
+static const U32 UC_AUX_TABLE_46[] = {
 	0x397,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_47[] = {
+static const U32 UC_AUX_TABLE_47[] = {
 	0x389,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_48[] = {
+static const U32 UC_AUX_TABLE_48[] = {
 	0x397,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_49[] = {
+static const U32 UC_AUX_TABLE_49[] = {
 	0x397,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_50[] = {
+static const U32 UC_AUX_TABLE_50[] = {
 	0x399,
 	0x308,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_51[] = {
+static const U32 UC_AUX_TABLE_51[] = {
 	0x399,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_52[] = {
+static const U32 UC_AUX_TABLE_52[] = {
 	0x399,
 	0x308,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_53[] = {
+static const U32 UC_AUX_TABLE_53[] = {
 	0x3A5,
 	0x308,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_54[] = {
+static const U32 UC_AUX_TABLE_54[] = {
 	0x3A1,
 	0x313
 };
 
-static const unsigned int UC_AUX_TABLE_55[] = {
+static const U32 UC_AUX_TABLE_55[] = {
 	0x3A5,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_56[] = {
+static const U32 UC_AUX_TABLE_56[] = {
 	0x3A5,
 	0x308,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_57[] = {
+static const U32 UC_AUX_TABLE_57[] = {
 	0x1FFA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_58[] = {
+static const U32 UC_AUX_TABLE_58[] = {
 	0x3A9,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_59[] = {
+static const U32 UC_AUX_TABLE_59[] = {
 	0x38F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_60[] = {
+static const U32 UC_AUX_TABLE_60[] = {
 	0x3A9,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_61[] = {
+static const U32 UC_AUX_TABLE_61[] = {
 	0x3A9,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_62[] = {
+static const U32 UC_AUX_TABLE_62[] = {
 	0xC6,
 	0xC6
 };
 
-static const unsigned int UC_AUX_TABLE_63[] = {
+static const U32 UC_AUX_TABLE_63[] = {
 	0xC6,
 	0xC9
 };
 
-static const unsigned int UC_AUX_TABLE_64[] = {
+static const U32 UC_AUX_TABLE_64[] = {
 	0xC6,
 	0xD3
 };
 
-static const unsigned int UC_AUX_TABLE_65[] = {
+static const U32 UC_AUX_TABLE_65[] = {
 	0xC6,
 	0xC6,
 	0xC9
 };
 
-static const unsigned int UC_AUX_TABLE_66[] = {
+static const U32 UC_AUX_TABLE_66[] = {
 	0xC6,
 	0xC6,
 	0xD3
 };
 
-static const unsigned int UC_AUX_TABLE_67[] = {
+static const U32 UC_AUX_TABLE_67[] = {
 	0xE2,
 	0xE3
 };
 
-static const unsigned int UC_AUX_TABLE_68[] = {
+static const U32 UC_AUX_TABLE_68[] = {
 	0x544,
 	0x546
 };
 
-static const unsigned int UC_AUX_TABLE_69[] = {
+static const U32 UC_AUX_TABLE_69[] = {
 	0x544,
 	0x535
 };
 
-static const unsigned int UC_AUX_TABLE_70[] = {
+static const U32 UC_AUX_TABLE_70[] = {
 	0x544,
 	0x53B
 };
 
-static const unsigned int UC_AUX_TABLE_71[] = {
+static const U32 UC_AUX_TABLE_71[] = {
 	0x54E,
 	0x546
 };
 
-static const unsigned int UC_AUX_TABLE_72[] = {
+static const U32 UC_AUX_TABLE_72[] = {
 	0x544,
 	0x53D
 };
 
-static const unsigned int * const UC_AUX_TABLE_ptrs[] = {
+static const U32 * const UC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	UC_AUX_TABLE_1,
 	UC_AUX_TABLE_2,
@@ -118310,7 +118310,7 @@ static const U8 UC_AUX_TABLE_lengths[] = {
 	2	/* UC_AUX_TABLE_72 */
 };
 
-static const int Uppercase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
+static const I32 Uppercase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x62,
 	0,
@@ -121224,381 +121224,381 @@ typedef enum {
 
 #define HAS_UC_AUX_TABLES
 
-static const unsigned int UC_AUX_TABLE_1[] = {
+static const U32 UC_AUX_TABLE_1[] = {
 	0xE2,
 	0xE2
 };
 
-static const unsigned int UC_AUX_TABLE_2[] = {
+static const U32 UC_AUX_TABLE_2[] = {
 	0x2BC,
 	0xD5
 };
 
-static const unsigned int UC_AUX_TABLE_3[] = {
+static const U32 UC_AUX_TABLE_3[] = {
 	0xD1,
 	0x30C
 };
 
-static const unsigned int UC_AUX_TABLE_4[] = {
+static const U32 UC_AUX_TABLE_4[] = {
 	0x399,
 	0x308,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_5[] = {
+static const U32 UC_AUX_TABLE_5[] = {
 	0x3A5,
 	0x308,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_6[] = {
+static const U32 UC_AUX_TABLE_6[] = {
 	0x535,
 	0x552
 };
 
-static const unsigned int UC_AUX_TABLE_7[] = {
+static const U32 UC_AUX_TABLE_7[] = {
 	0xC8,
 	0x331
 };
 
-static const unsigned int UC_AUX_TABLE_8[] = {
+static const U32 UC_AUX_TABLE_8[] = {
 	0xE3,
 	0x308
 };
 
-static const unsigned int UC_AUX_TABLE_9[] = {
+static const U32 UC_AUX_TABLE_9[] = {
 	0xE6,
 	0x30A
 };
 
-static const unsigned int UC_AUX_TABLE_10[] = {
+static const U32 UC_AUX_TABLE_10[] = {
 	0xE8,
 	0x30A
 };
 
-static const unsigned int UC_AUX_TABLE_11[] = {
+static const U32 UC_AUX_TABLE_11[] = {
 	0xC1,
 	0x2BE
 };
 
-static const unsigned int UC_AUX_TABLE_12[] = {
+static const U32 UC_AUX_TABLE_12[] = {
 	0x3A5,
 	0x313
 };
 
-static const unsigned int UC_AUX_TABLE_13[] = {
+static const U32 UC_AUX_TABLE_13[] = {
 	0x3A5,
 	0x313,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_14[] = {
+static const U32 UC_AUX_TABLE_14[] = {
 	0x3A5,
 	0x313,
 	0x301
 };
 
-static const unsigned int UC_AUX_TABLE_15[] = {
+static const U32 UC_AUX_TABLE_15[] = {
 	0x3A5,
 	0x313,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_16[] = {
+static const U32 UC_AUX_TABLE_16[] = {
 	0x1F08,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_17[] = {
+static const U32 UC_AUX_TABLE_17[] = {
 	0x1F09,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_18[] = {
+static const U32 UC_AUX_TABLE_18[] = {
 	0x1F0A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_19[] = {
+static const U32 UC_AUX_TABLE_19[] = {
 	0x1F0B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_20[] = {
+static const U32 UC_AUX_TABLE_20[] = {
 	0x1F0C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_21[] = {
+static const U32 UC_AUX_TABLE_21[] = {
 	0x1F0D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_22[] = {
+static const U32 UC_AUX_TABLE_22[] = {
 	0x1F0E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_23[] = {
+static const U32 UC_AUX_TABLE_23[] = {
 	0x1F0F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_24[] = {
+static const U32 UC_AUX_TABLE_24[] = {
 	0x1F28,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_25[] = {
+static const U32 UC_AUX_TABLE_25[] = {
 	0x1F29,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_26[] = {
+static const U32 UC_AUX_TABLE_26[] = {
 	0x1F2A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_27[] = {
+static const U32 UC_AUX_TABLE_27[] = {
 	0x1F2B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_28[] = {
+static const U32 UC_AUX_TABLE_28[] = {
 	0x1F2C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_29[] = {
+static const U32 UC_AUX_TABLE_29[] = {
 	0x1F2D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_30[] = {
+static const U32 UC_AUX_TABLE_30[] = {
 	0x1F2E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_31[] = {
+static const U32 UC_AUX_TABLE_31[] = {
 	0x1F2F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_32[] = {
+static const U32 UC_AUX_TABLE_32[] = {
 	0x1F68,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_33[] = {
+static const U32 UC_AUX_TABLE_33[] = {
 	0x1F69,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_34[] = {
+static const U32 UC_AUX_TABLE_34[] = {
 	0x1F6A,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_35[] = {
+static const U32 UC_AUX_TABLE_35[] = {
 	0x1F6B,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_36[] = {
+static const U32 UC_AUX_TABLE_36[] = {
 	0x1F6C,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_37[] = {
+static const U32 UC_AUX_TABLE_37[] = {
 	0x1F6D,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_38[] = {
+static const U32 UC_AUX_TABLE_38[] = {
 	0x1F6E,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_39[] = {
+static const U32 UC_AUX_TABLE_39[] = {
 	0x1F6F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_40[] = {
+static const U32 UC_AUX_TABLE_40[] = {
 	0x1FBA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_41[] = {
+static const U32 UC_AUX_TABLE_41[] = {
 	0x391,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_42[] = {
+static const U32 UC_AUX_TABLE_42[] = {
 	0x386,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_43[] = {
+static const U32 UC_AUX_TABLE_43[] = {
 	0x391,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_44[] = {
+static const U32 UC_AUX_TABLE_44[] = {
 	0x391,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_45[] = {
+static const U32 UC_AUX_TABLE_45[] = {
 	0x1FCA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_46[] = {
+static const U32 UC_AUX_TABLE_46[] = {
 	0x397,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_47[] = {
+static const U32 UC_AUX_TABLE_47[] = {
 	0x389,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_48[] = {
+static const U32 UC_AUX_TABLE_48[] = {
 	0x397,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_49[] = {
+static const U32 UC_AUX_TABLE_49[] = {
 	0x397,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_50[] = {
+static const U32 UC_AUX_TABLE_50[] = {
 	0x399,
 	0x308,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_51[] = {
+static const U32 UC_AUX_TABLE_51[] = {
 	0x399,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_52[] = {
+static const U32 UC_AUX_TABLE_52[] = {
 	0x399,
 	0x308,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_53[] = {
+static const U32 UC_AUX_TABLE_53[] = {
 	0x3A5,
 	0x308,
 	0x300
 };
 
-static const unsigned int UC_AUX_TABLE_54[] = {
+static const U32 UC_AUX_TABLE_54[] = {
 	0x3A1,
 	0x313
 };
 
-static const unsigned int UC_AUX_TABLE_55[] = {
+static const U32 UC_AUX_TABLE_55[] = {
 	0x3A5,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_56[] = {
+static const U32 UC_AUX_TABLE_56[] = {
 	0x3A5,
 	0x308,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_57[] = {
+static const U32 UC_AUX_TABLE_57[] = {
 	0x1FFA,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_58[] = {
+static const U32 UC_AUX_TABLE_58[] = {
 	0x3A9,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_59[] = {
+static const U32 UC_AUX_TABLE_59[] = {
 	0x38F,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_60[] = {
+static const U32 UC_AUX_TABLE_60[] = {
 	0x3A9,
 	0x342
 };
 
-static const unsigned int UC_AUX_TABLE_61[] = {
+static const U32 UC_AUX_TABLE_61[] = {
 	0x3A9,
 	0x342,
 	0x399
 };
 
-static const unsigned int UC_AUX_TABLE_62[] = {
+static const U32 UC_AUX_TABLE_62[] = {
 	0xC6,
 	0xC6
 };
 
-static const unsigned int UC_AUX_TABLE_63[] = {
+static const U32 UC_AUX_TABLE_63[] = {
 	0xC6,
 	0xC9
 };
 
-static const unsigned int UC_AUX_TABLE_64[] = {
+static const U32 UC_AUX_TABLE_64[] = {
 	0xC6,
 	0xD3
 };
 
-static const unsigned int UC_AUX_TABLE_65[] = {
+static const U32 UC_AUX_TABLE_65[] = {
 	0xC6,
 	0xC6,
 	0xC9
 };
 
-static const unsigned int UC_AUX_TABLE_66[] = {
+static const U32 UC_AUX_TABLE_66[] = {
 	0xC6,
 	0xC6,
 	0xD3
 };
 
-static const unsigned int UC_AUX_TABLE_67[] = {
+static const U32 UC_AUX_TABLE_67[] = {
 	0xE2,
 	0xE3
 };
 
-static const unsigned int UC_AUX_TABLE_68[] = {
+static const U32 UC_AUX_TABLE_68[] = {
 	0x544,
 	0x546
 };
 
-static const unsigned int UC_AUX_TABLE_69[] = {
+static const U32 UC_AUX_TABLE_69[] = {
 	0x544,
 	0x535
 };
 
-static const unsigned int UC_AUX_TABLE_70[] = {
+static const U32 UC_AUX_TABLE_70[] = {
 	0x544,
 	0x53B
 };
 
-static const unsigned int UC_AUX_TABLE_71[] = {
+static const U32 UC_AUX_TABLE_71[] = {
 	0x54E,
 	0x546
 };
 
-static const unsigned int UC_AUX_TABLE_72[] = {
+static const U32 UC_AUX_TABLE_72[] = {
 	0x544,
 	0x53D
 };
 
-static const unsigned int * const UC_AUX_TABLE_ptrs[] = {
+static const U32 * const UC_AUX_TABLE_ptrs[] = {
 	NULL,	/* Placeholder */
 	UC_AUX_TABLE_1,
 	UC_AUX_TABLE_2,
@@ -121753,7 +121753,7 @@ static const U8 UC_AUX_TABLE_lengths[] = {
 	2	/* UC_AUX_TABLE_72 */
 };
 
-static const int Uppercase_Mapping_invmap[] = {  /* for EBCDIC 037 */
+static const I32 Uppercase_Mapping_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x62,
 	0,
@@ -395171,5 +395171,5 @@ static const U8 WB_table[23][23] = {
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * e9283c761c5a95e3379384ca47c13a284f08d743c2be6e5091f1152b1b6b7a37 regen/mk_PL_charclass.pl
- * bddfa92837a1e11b3c74c80512e0492dc325a15ee9e2d768f246ddb3ef3bcef9 regen/mk_invlists.pl
+ * eb6b8e366260282e03108163fbf907367474c469310d716a4a5c7b244d88ce45 regen/mk_invlists.pl
  * ex: set ro: */

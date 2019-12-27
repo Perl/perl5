@@ -1986,8 +1986,8 @@ S	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN U8* ustrp					\
 				|NN STRLEN *lenp				\
 				|NN SV *invlist					\
-				|NN const int * const invmap			\
-				|NULLOK const unsigned int * const * const aux_tables	\
+				|NN const I32 * const invmap			\
+				|NULLOK const U32 * const * const aux_tables	\
 				|NULLOK const U8 * const aux_table_lengths	\
 				|NN const char * const normal
 S	|UV	|turkic_fc	|NN const U8 * const p |NN const U8 * const e|NN U8* ustrp|NN STRLEN *lenp
@@ -2085,7 +2085,7 @@ Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
 EXpR	|Size_t	|_inverse_folds	|const UV cp				    \
 				|NN unsigned int * first_folds_to	    \
-				|NN const unsigned int ** remaining_folds_to
+				|NN const U32 ** remaining_folds_to
 : Used by Data::Alias
 EXp	|void	|vivify_defelem	|NN SV* sv
 : Used in pp.c

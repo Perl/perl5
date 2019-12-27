@@ -3237,8 +3237,8 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 STATIC UV
 S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
-                      SV *invlist, const int * const invmap,
-                      const unsigned int * const * const aux_tables,
+                      SV *invlist, const I32 * const invmap,
+                      const U32 * const * const aux_tables,
                       const U8 * const aux_table_lengths,
                       const char * const normal)
 {
@@ -3410,7 +3410,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
 Size_t
 Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
-                          const unsigned int ** remaining_folds_to)
+                          const U32 ** remaining_folds_to)
 {
     /* Returns the count of the number of code points that fold to the input
      * 'cp' (besides itself).
@@ -3434,7 +3434,7 @@ Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [perl #133365] */
     SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
-    int base = _Perl_IVCF_invmap[index];
+    I32 base = _Perl_IVCF_invmap[index];
 
     PERL_ARGS_ASSERT__INVERSE_FOLDS;
 
@@ -3467,7 +3467,8 @@ Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
 #endif
 
     /* Only the single code point.  This works like 'fc(G) = G - A + a' */
-    *first_folds_to = base + cp - invlist_array(PL_utf8_foldclosures)[index];
+    *first_folds_to = (U32) (base + cp
+                                  - invlist_array(PL_utf8_foldclosures)[index]);
     *remaining_folds_to = NULL;
     return 1;
 }
