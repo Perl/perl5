@@ -147,6 +147,11 @@ with the core's base checker at the end.
 For thread safety, modules should not write directly to this array.
 Instead, use the function L</wrap_op_checker>.
 
+=for apidoc Amn|enum perl_phase|PL_phase
+
+A value that indicates the current Perl interpreter's phase. Use macros
+like PERL_PHASE_DESTRUCT to test it.
+
 =cut
 */
 
