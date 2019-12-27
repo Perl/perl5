@@ -147,6 +147,24 @@ with the core's base checker at the end.
 For thread safety, modules should not write directly to this array.
 Instead, use the function L</wrap_op_checker>.
 
+=for apidoc Amn|enum perl_phase|PL_phase
+
+A value that indicates the current Perl interpreter's phase. Possible values
+include C<PERL_PHASE_CONSTRUCT>, C<PERL_PHASE_START>, C<PERL_PHASE_CHECK>,
+C<PERL_PHASE_INIT>, C<PERL_PHASE_RUN>, C<PERL_PHASE_END>, and
+C<PERL_PHASE_DESTRUCT>.
+
+For example, the following determines whether the interpreter is in
+global destruction:
+
+    if (PL_phase == PERL_PHASE_DESTRUCT) {
+        // we are in global destruction
+    }
+
+C<PL_phase> was introduced in Perl 5.14; in prior perls you can use
+C<PL_dirty> (boolean) to determine whether the interpreter is in global
+destruction. (Use of C<PL_dirty> is discouraged since 5.14.)
+
 =cut
 */
 
