@@ -426,11 +426,14 @@ struct RExC_state_t {
 #define _invlist_intersection_complement_2nd(a, b, output) \
                  _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 
-/* We add a marker if we are deferring expansion of a potential user-defined
- * property until it is needed at runtime the first time it is encountered in a
- * pattern match.  This marker that shouldn't conflict with any that could be
- * in a legal name is appended to its name to indicate this.  There is a string
- * and character form */
+/* We add a marker if we are deferring expansion of a property that is both
+ * 1) potentiallly user-defined; and
+ * 2) could also be an official Unicode property.
+ *
+ * Without this marker, any deferred expansion can only be for a user-defined
+ * one.  This marker shouldn't conflict with any that could be in a legal name,
+ * and is appended to its name to indicate this.  There is a string and
+ * character form */
 #define DEFERRED_COULD_BE_OFFICIAL_MARKERs  "~"
 #define DEFERRED_COULD_BE_OFFICIAL_MARKERc  '~'
 
@@ -23172,6 +23175,12 @@ Perl_parse_uniprop_string(pTHX_
     bool stripped_utf8_pkg = FALSE; /* Set TRUE if the input includes an
                                        explicit utf8:: package that we strip
                                        off  */
+    /* The expansion of properties that could be either user-defined or
+     * official unicode ones is deferred until runtime, including a marker for
+     * those that might be in the latter category.  This boolean indicates if
+     * we've seen that marker.  If not, what we're parsing can't be such an
+     * official Unicode property whose expansion was deferred */
+    bool could_be_deferred_official = FALSE;
 
     PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
@@ -23231,13 +23240,15 @@ Perl_parse_uniprop_string(pTHX_
         }
 
         /* If this looks like it is a marker we inserted at compile time,
-         * ignore it; otherwise keep it as it would have been user input. */
+         * set a flag and otherwise ignore it.  If it isn't in the final
+         * position, keep it as it would have been user input. */
         if (     UNLIKELY(cur == DEFERRED_COULD_BE_OFFICIAL_MARKERc)
             && ! deferrable
             &&   could_be_user_defined
             &&   i == name_len - 1)
         {
             name_len--;
+            could_be_deferred_official = TRUE;
             continue;
         }
 
@@ -23691,12 +23702,15 @@ Perl_parse_uniprop_string(pTHX_
                 goto definition_deferred;
             }
 
-            /* If we haven't already stripped the package name (if one), do so
-             * now so can look for an official property with the stripped name.
-             * */
-            if (! stripped_utf8_pkg) {
+            /* Here, we are at runtime, and didn't find the user property.  It
+             * could be an official property, but only if no package was
+             * specified, or just the utf8:: package. */
+            if (could_be_deferred_official) {
                 lookup_name += lun_non_pkg_begin;
                 j -= lun_non_pkg_begin;
+            }
+            else if (! stripped_utf8_pkg) {
+                goto unknown_user_defined;
             }
 
             /* Drop down to look up in the official properties */
@@ -24048,9 +24062,7 @@ Perl_parse_uniprop_string(pTHX_
                  * property hasn't been encountered yet, but at runtime, it's
                  * an error to try to use an undefined one */
                 if (! deferrable) {
-                    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
-                    sv_catpvs(msg, "Unknown user-defined property name");
-                    goto append_name_to_msg;
+                    goto unknown_user_defined;;
                 }
 
                 goto definition_deferred;
@@ -24311,6 +24323,10 @@ Perl_parse_uniprop_string(pTHX_
     }
     return prop_definition;
 
+  unknown_user_defined:
+    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+    sv_catpvs(msg, "Unknown user-defined property name");
+    goto append_name_to_msg;
 
   failed:
     if (non_pkg_begin != 0) {
