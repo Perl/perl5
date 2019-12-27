@@ -24,7 +24,7 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
-plan tests => 1014;  # Update this when adding/deleting tests.
+plan tests => 1015;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2089,6 +2089,9 @@ CODE
     }
     {   # GH #17371, segfault
         fresh_perl_like('qr/\p{nv=\\\\\}(?0)|\337ss|\337ss//', qr/Unicode property wildcard not terminated/, {}, "GH #17371");
+    }
+    {   # GH #17384, ASAN/valgrind out-of-bounds access
+        fresh_perl_like('"q0" =~ /\p{__::Is0}/', qr/Unknown user-defined property name \\p\{__::Is0}/, {}, "GH #17384");
     }
 
   SKIP:

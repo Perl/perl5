@@ -23156,6 +23156,7 @@ Perl_parse_uniprop_string(pTHX_
                                    the normalized name in certain situations */
     Size_t non_pkg_begin = 0;   /* Offset of first byte in 'name' that isn't
                                    part of a package name */
+    Size_t lun_non_pkg_begin = 0;   /* Similarly for 'lookup_name' */
     bool could_be_user_defined = TRUE;  /* ? Could this be a user-defined
                                              property rather than a Unicode
                                              one. */
@@ -23256,6 +23257,7 @@ Perl_parse_uniprop_string(pTHX_
             i++;
             non_pkg_begin = i + 1;
             lookup_name[j++] = ':';
+            lun_non_pkg_begin = j;
         }
         else { /* Only word chars (and '::') can be in a user-defined name */
             could_be_user_defined = FALSE;
@@ -23693,8 +23695,8 @@ Perl_parse_uniprop_string(pTHX_
              * now so can look for an official property with the stripped name.
              * */
             if (! stripped_utf8_pkg) {
-                lookup_name += non_pkg_begin;
-                j -= non_pkg_begin;
+                lookup_name += lun_non_pkg_begin;
+                j -= lun_non_pkg_begin;
             }
 
             /* Drop down to look up in the official properties */
