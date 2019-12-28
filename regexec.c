@@ -4392,7 +4392,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             }
             else if (c1 > 255) {
                 const U32 * remaining_folds;
-                unsigned int first_fold;
+                U32 first_fold;
 
                 /* Look up what code points (besides c1) fold to c1;  e.g.,
                  * [ 'K', KELVIN_SIGN ] both fold to 'k'. */

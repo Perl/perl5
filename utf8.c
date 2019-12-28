@@ -3409,7 +3409,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 }
 
 Size_t
-Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
+Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
                           const U32 ** remaining_folds_to)
 {
     /* Returns the count of the number of code points that fold to the input
@@ -3428,7 +3428,12 @@ Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
      * The reason for this convolution is to avoid having to deal with
      * allocating and freeing memory.  The lists are already constructed, so
      * the return can point to them, but single code points aren't, so would
-     * need to be constructed if we didn't employ something like this API */
+     * need to be constructed if we didn't employ something like this API
+     *
+     * The code points returned by this function are all legal Unicode, which
+     * occupy at most 21 bits, and so a U32 is sufficient, and the lists are
+     * constructed with this size (to save space and memory), and we return
+     * pointers, so they must be this size */
 
     dVAR;
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
