@@ -2013,8 +2013,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                          * valid, avoid as much as possible reading past the
                          * end of the buffer */
                         int printlen = (flags & _UTF8_NO_CONFIDENCE_IN_CURLEN)
-                                       ? s - s0
-                                       : send - s0;
+                                       ? (int) (s - s0)
+                                       : (int) (send - s0);
                         pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_ "%s",
                             unexpected_non_continuation_text(s0,
