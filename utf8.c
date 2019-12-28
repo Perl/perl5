@@ -3463,9 +3463,8 @@ Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
          * to 'cp', and the parallel array containing the length of the list
          * array */
         *first_folds_to = IVCF_AUX_TABLE_ptrs[-base][0];
-        *remaining_folds_to = IVCF_AUX_TABLE_ptrs[-base] + 1; /* +1 excludes
-                                                                 *first_folds_to
-                                                                */
+        *remaining_folds_to = IVCF_AUX_TABLE_ptrs[-base] + 1;
+                                                /* +1 excludes first_folds_to */
         return IVCF_AUX_TABLE_lengths[-base];
     }
 
