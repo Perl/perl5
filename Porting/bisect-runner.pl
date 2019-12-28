@@ -914,11 +914,47 @@ not compile.  Used that information to shorten bisection time.
     .../perl Porting/bisect.pl \
         --start=v5.14.4 \
         --end=v5.16.3 \
-        --crash -- ./perl -Ilib ~/learn/perl/p5p/gh-17333-map.pl
+        --crash -- ./perl -Ilib /tmp/gh-17333-map.pl
+
+    $ cat gh-17333-map.pl
+
+    @N = 1..5;
+    map { pop @N } @N;
 
 =item * Reference
 
 L<GH issue 17333|https://github.com/Perl/perl5/issues/17333>
+
+=back
+
+=head2 When did perl start failing to build on a certain platform using C<g++> as the C-compiler?
+
+=over 4
+
+=item * Problem
+
+On NetBSD-8.0, C<perl> had never been smoke-tested using C<g++> as the
+C-compiler.  Once this was done, it became evident that changes in that
+version of the operating system's code were incompatible with some C<perl>
+source written long before that OS version was ever released!
+
+=item * Solution
+
+Bisection range was first narrowed using existing builds at release tags.
+Then, bisection specified the C-compiler via C<Configure>-style switch and
+used C<--test-build> to identify the commit which "broke" the build.
+
+    .../perl Porting/bisect.pl \
+        -Dcc=g++ \
+        --test-build \
+        --start=v5.21.6 \
+        --end=v5.21.7
+
+Then, problem was discussed with knowledgeable NetBSD user.
+
+=item * Reference
+
+L<GH issue 17381|https://github.com/Perl/perl5/issues/17381>
 
 =back
 
