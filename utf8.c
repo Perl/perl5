@@ -1874,7 +1874,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
         }
 
         while (possible_problems) { /* Handle each possible problem */
-            UV pack_warn = 0;
+            U32 pack_warn = 0;
             char * message = NULL;
             U32 this_flag_bit = 0;
 
