@@ -7858,7 +7858,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     DEBUG_y(PerlIO_printf(Perl_debug_log,
             "/d=%d, /s=%d, /c=%d, identical=%d, grows=%d,"
-            " use_svop=%d, can_force_utf8=%d,\nexpansion=%g\n",
+            " use_svop=%d, can_force_utf8=%d,\nexpansion=%" NVgf "\n",
             del, squash, complement,
             cBOOL(o->op_private & OPpTRANS_IDENTICAL),
             cBOOL(o->op_private & OPpTRANS_USE_SVOP),
