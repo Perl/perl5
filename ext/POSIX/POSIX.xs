@@ -1557,7 +1557,7 @@ END_EXTERN_C
 #define wcstombs(s, pwcs, n) not_here("wcstombs")
 #endif
 #ifndef HAS_WCTOMB
-#define wctomb(s, wchar) not_here("wcstombs")
+#define wctomb(s, wchar) not_here("wctomb")
 #endif
 #if !defined(HAS_MBLEN) && !defined(HAS_MBSTOWCS) && !defined(HAS_MBTOWC) && !defined(HAS_WCSTOMBS) && !defined(HAS_WCTOMB)
 /* If we don't have these functions, then we wouldn't have gotten a typedef
