@@ -7105,7 +7105,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
          * This routine modifies traditional inversion maps to reserve two
          * mappings:
          *
-         *  TR_UNLISTED (or -1) indicates that the no code point in the range
+         *  TR_UNLISTED (or -1) indicates that no code point in the range
          *      is listed in the tr/// searchlist.  At runtime, these are
          *      always passed through unchanged.  In the inversion map, all
          *      points in the range are mapped to -1, instead of increasing,
