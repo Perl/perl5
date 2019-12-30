@@ -150,8 +150,9 @@ Instead, use the function L</wrap_op_checker>.
 =for apidoc Amn|enum perl_phase|PL_phase
 
 A value that indicates the current Perl interpreter's phase. Possible values
-include PERL_PHASE_CONSTRUCT, PERL_PHASE_START, PERL_PHASE_CHECK,
-PERL_PHASE_INIT, PERL_PHASE_RUN, PERL_PHASE_END, and PERL_PHASE_DESTRUCT.
+include C<PERL_PHASE_CONSTRUCT>, C<PERL_PHASE_START>, C<PERL_PHASE_CHECK>,
+C<PERL_PHASE_INIT>, C<PERL_PHASE_RUN>, C<PERL_PHASE_END>, and
+C<PERL_PHASE_DESTRUCT>.
 
 For example, the following determines whether the interpreter is in
 global destruction:
