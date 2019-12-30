@@ -12,7 +12,7 @@ env:
     PERL_SKIP_TTY_TEST: 1
 
 jobs:
-  perl:
+  authors:
 
     runs-on: ubuntu-latest
 
@@ -22,10 +22,10 @@ jobs:
             fetch-depth: 10
       - name: Involved authors
         run: |
-            if [ -n "${GITHUB_HEAD_REF}" ]; then
+            if [ -n "${GITHUB_BASE_REF}" ]; then
                 echo "Pull request authors"
-                # env
-                echo git merge-base origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF}
-                branch_off=$(git merge-base origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF})
-                git log --pretty=format:"Author: %an <%ae>" $branch_off..${GITHUB_SHA}^2
+                git fetch origin >/dev/null 2>&1
+                echo "# git merge-base origin/${GITHUB_BASE_REF} HEAD"
+                branch_off=$(git merge-base origin/${GITHUB_BASE_REF} HEAD)
+                git log --pretty=format:"Author: %an <%ae>" $branch_off..${GITHUB_SHA::8}^2 | sort | uniq
             fi
