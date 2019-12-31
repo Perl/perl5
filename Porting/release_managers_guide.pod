@@ -508,6 +508,33 @@ release (so for 5.15.3 this would be 5.15.2).  If the last release manager
 followed instructions, this should have already been done after the last
 blead release, so you may find nothing to do here.
 
+=head3 update AUTHORS
+
+AUTHORS file can be updated by running C<Porting/checkAUTHORS.pl --update>
+The script detects missing authors or commiters since the last release using
+a known tag provided by the C<--from=v5.X.Y> argument, and will add missing
+entries to the AUTHORS file.
+
+    $ perl Porting/checkAUTHORS.pl --update --from=v5.X.Y
+
+For MAINT and BLEAD-FINAL releases, C<v5.X.Y> needs to refer to the last
+release in the previous development cycle (so for example, for a 5.14.x
+release, this would be 5.13.11).
+
+BLEAD-POINT releases, it needs to refer to the previous BLEAD-POINT
+release (so for 5.15.3 this would be 5.15.2).
+
+Note: this should not be harmful to use a wider range.
+
+Note: if you have uncommited changes this could cause some warnings,
+and you would like to use the addtional argument C<--to=upstream/blead>
+to use the last known git commit by GitHub.
+
+Review the changes to the AUTHORS file, be sure you are not adding duplicates
+entries or removing some AUTHORS, then commit your changes.
+
+    $ git commit -a AUTHORS -m 'Update AUTHORS list for 5.x.y'
+
 =head3 Check copyright years
 
 Check that the copyright years are up to date by running:
