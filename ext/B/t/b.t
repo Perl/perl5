@@ -540,5 +540,19 @@ SKIP: {
     is $sub2->PADLIST->outid, $sub1->PADLIST->outid, 'padlist outid';
 }
 
+# GH #17301 aux_list() sometimes returned wrong #args
+
+{
+    my $big = ($Config::Config{uvsize} > 4);
+    my $self;
+    my $sub = $big
+            ? sub { $self->{h1}{h2}{h3}{h4}{h5}{h6}{h7}{h8}{h9} }
+            : sub { $self->{h1}{h2}{h3}{h4} };
+    my $cv = B::svref_2object($sub);
+    my $op = $cv->ROOT->first->first->next;
+    my @items = $op->aux_list($cv);
+    is +@items, $big ? 11 : 6, 'GH #17301';
+}
+
 
 done_testing();

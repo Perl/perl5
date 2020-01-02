@@ -15762,12 +15762,11 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
         bool next_is_hash    = FALSE; /* is the next lookup to be a hash? */
         bool is_last         = FALSE; /* no more derefs to follow */
         bool maybe_aelemfast = FALSE; /* we can replace with aelemfast? */
+        UV action_word       = 0;     /* all actions so far */
         UNOP_AUX_item *arg     = arg_buf;
         UNOP_AUX_item *action_ptr = arg_buf;
 
-        if (pass)
-            action_ptr->uv = 0;
-        arg++;
+        arg++; /* reserve slot for first action word */
 
         switch (action) {
         case MDEREF_HV_gvsv_vivify_rv2hv_helem:
@@ -16158,22 +16157,28 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                     arg--;
             }
 
-            if (pass)
-                action_ptr->uv |= (action << (action_ix * MDEREF_SHIFT));
+            action_word |= (action << (action_ix * MDEREF_SHIFT));
             action_ix++;
             action_count++;
-            /* if there's no space for the next action, create a new slot
+            /* if there's no space for the next action, reserve a new slot
              * for it *before* we start adding args for that action */
             if ((action_ix + 1) * MDEREF_SHIFT > UVSIZE*8) {
-                action_ptr = arg;
                 if (pass)
-                    arg->uv = 0;
+                    action_ptr->uv = action_word;
+                action_word = 0;
+                action_ptr = arg;
                 arg++;
                 action_ix = 0;
             }
         } /* while !is_last */
 
         /* success! */
+
+        if (!action_ix)
+            /* slot reserved for next action word not now needed */
+            arg--;
+        else if (pass)
+            action_ptr->uv = action_word;
 
         if (pass) {
             OP *mderef;
