@@ -19,14 +19,15 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 6;
+plan tests => 7;
 
 use POSIX qw();
 
 SKIP: {
-    skip("mblen() not present", 6) unless $Config{d_mblen};
+    skip("mblen() not present", 7) unless $Config{d_mblen};
 
-    is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() basically works');
+    is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() works on ASCII input');
+    is(&POSIX::mblen("b"), 1, '... and the 2nd parameter is optional');
 
     skip("LC_CTYPE locale support not available", 4)
       unless locales_enabled('LC_CTYPE');

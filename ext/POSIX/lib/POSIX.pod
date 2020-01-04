@@ -1093,7 +1093,8 @@ is within the scope of S<C<use locale>>.  Perl makes no attempt at
 hiding from your code any differences in the C<errno> setting between
 C<mblen> and C<mbrlen>.  It does set C<errno> to 0 before calling them.
 
-See L</mblen>.
+The optional second parameter is ignored if it is larger than the
+actual length of the first parameter string.
 
 =item C<mbtowc>
 
