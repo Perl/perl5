@@ -19,20 +19,20 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 4;
+plan tests => 6;
 
 use POSIX qw();
 
 SKIP: {
-    skip("mblen() not present", 4) unless $Config{d_mblen};
+    skip("mblen() not present", 6) unless $Config{d_mblen};
 
     is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() basically works');
 
-    skip("LC_CTYPE locale support not available", 3)
+    skip("LC_CTYPE locale support not available", 4)
       unless locales_enabled('LC_CTYPE');
 
     my $utf8_locale = find_utf8_ctype_locale();
-    skip("no utf8 locale available", 3) unless $utf8_locale;
+    skip("no utf8 locale available", 4) unless $utf8_locale;
 
     local $ENV{LC_CTYPE} = $utf8_locale;
     local $ENV{LC_ALL};
@@ -44,17 +44,24 @@ SKIP: {
 
   SKIP: {
     my ($major, $minor, $rest) = $Config{osvers} =~ / (\d+) \. (\d+) .* /x;
-    skip("mblen() broken (at least for c.utf8) on early HP-UX", 2)
+    skip("mblen() broken (at least for c.utf8) on early HP-UX", 3)
         if   $Config{osname} eq 'hpux'
           && $major < 11 || ($major == 11 && $minor < 31);
+
     fresh_perl_is(
-        'use POSIX; print &POSIX::mblen("'
+        'use POSIX; &POSIX::mblen(undef,0); print &POSIX::mblen("'
       . I8_to_native("\x{c3}\x{28}")
       . '", 2)',
       -1, {}, 'mblen() recognizes invalid multibyte characters');
 
     fresh_perl_is(
-     'use POSIX; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", 2)',
+     'use POSIX; &POSIX::mblen(undef,0);
+      print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", 2)',
      2, {}, 'mblen() works on UTF-8 characters');
+
+    fresh_perl_is(
+     'use POSIX; &POSIX::mblen(undef,0);
+      my $wide; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", 1);',
+     -1, {}, 'mblen() returns -1 when input length is too short');
   }
 }

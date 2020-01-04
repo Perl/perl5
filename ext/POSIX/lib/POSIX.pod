@@ -1069,13 +1069,29 @@ Not implemented.  C<malloc()> is C-specific.  Perl does memory management transp
 
 =item C<mblen>
 
-This is identical to the C function C<mblen()>.
+This is the same as the C function C<mblen()> on unthreaded perls.  On
+threaded perls, it transparently (almost) substitutes the more
+thread-safe L<C<mbrlen>(3)>, if available, instead of C<mblen>.
 
-Core Perl does not have any support for the wide and multibyte
-characters of the C standards, except under UTF-8 locales, so this might
-be a rather useless function.
+Core Perl does not have any support for wide and multibyte locales,
+except Unicode UTF-8 locales.  This function, in conjunction with
+L</mbtowc> and L</wctomb> may be used to roll your own decoding/encoding
+of other types of multi-byte locales.
 
-However, Perl supports Unicode, see L<perluniintro>.
+Use C<undef> as the first parameter to this function to get the effect
+of passing NULL as the first parameter to C<mblen>.  This resets any
+shift state to its initial value.  The return value is undefined if
+C<mbrlen> was substituted, so you should never rely on it.
+
+When the first parameter is a scalar containing a value that either is a
+PV string or can be forced into one, the return value is the number of
+bytes occupied by the first character of that string; or 0 if that first
+character is the wide NUL character; or negative if there is an error.
+This is based on the locale that currently underlies the program,
+regardless of whether or not the function is called from Perl code that
+is within the scope of S<C<use locale>>.  Perl makes no attempt at
+hiding from your code any differences in the C<errno> setting between
+C<mblen> and C<mbrlen>.  It does set C<errno> to 0 before calling them.
 
 =item C<mbstowcs>
 

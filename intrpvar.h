@@ -938,6 +938,10 @@ PERLVARI(I, InBitmap,	SV *, NULL)
 PERLVAR(I, CCC_non0_non230,	SV *)
 PERLVAR(I, Private_Use,	SV *)
 
+#ifdef HAS_MBRLEN
+PERLVAR(I, mbrlen_ps, mbstate_t)
+#endif
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 
