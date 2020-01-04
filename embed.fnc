@@ -2024,8 +2024,8 @@ p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* a
 Cp	|void	|_force_out_malformed_utf8_message			    \
 		|NN const U8 *const p|NN const U8 * const e|const U32 flags \
 		|const bool die_here
-EXp	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
-EXp	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
+EXp	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen
+EXp	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen
 AdpR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
 AipdR	|IV	|utf8_distance	|NN const U8 *a|NN const U8 *b
 AipdRT	|U8*	|utf8_hop	|NN const U8 *s|SSize_t off

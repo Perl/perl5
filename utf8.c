@@ -2716,7 +2716,7 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
  * Do not use in-place.  We optimize for native, for obvious reasons. */
 
 U8*
-Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
+Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
 {
     U8* pend;
     U8* dstart = d;
@@ -2793,7 +2793,7 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 /* Note: this one is slightly destructive of the source. */
 
 U8*
-Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
+Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
 {
     U8* s = (U8*)p;
     U8* const send = s + bytelen;

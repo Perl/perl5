@@ -12355,7 +12355,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     while (1) {
 	STRLEN chars;
 	STRLEN have;
-	I32 newlen;
+	Size_t newlen;
 	U8 *end;
 	/* First, look in our buffer of existing UTF-8 data:  */
 	char *nl = (char *)memchr(SvPVX(utf8_buffer), '\n', SvCUR(utf8_buffer));

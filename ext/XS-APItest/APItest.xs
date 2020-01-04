@@ -3047,7 +3047,7 @@ utf16_to_utf8 (sv, ...)
         STRLEN len;
 	U8 *source;
 	SV *dest;
-	I32 got; /* Gah, badly thought out APIs */
+	Size_t got;
     CODE:
 	if (ix) (void)SvPV_force_nolen(sv);
 	source = (U8 *)SvPVbyte(sv, len);
