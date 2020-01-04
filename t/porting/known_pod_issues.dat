@@ -198,6 +198,7 @@ Math::Random::MT::Perl
 Math::Random::Secure
 Math::TrulyRandom
 mbrlen(3)
+mbrtowc(3)
 md5sum(1)
 Method::Signatures
 mmap(2)
@@ -345,6 +346,7 @@ wait4(2)
 waitpid(2)
 waitpid(3)
 Want
+wcrtomb(3)
 wget(1)
 Win32::Locale
 write(2)
