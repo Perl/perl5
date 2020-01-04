@@ -204,6 +204,7 @@
 #define PL_max_intro_pending	(vTHX->Imax_intro_pending)
 #define PL_maxsysfd		(vTHX->Imaxsysfd)
 #define PL_mbrlen_ps		(vTHX->Imbrlen_ps)
+#define PL_mbrtowc_ps		(vTHX->Imbrtowc_ps)
 #define PL_memory_debug_header	(vTHX->Imemory_debug_header)
 #define PL_mess_sv		(vTHX->Imess_sv)
 #define PL_min_intro_pending	(vTHX->Imin_intro_pending)
@@ -370,6 +371,7 @@
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_watchaddr		(vTHX->Iwatchaddr)
 #define PL_watchok		(vTHX->Iwatchok)
+#define PL_wcrtomb_ps		(vTHX->Iwcrtomb_ps)
 #define PL_xsubfilename		(vTHX->Ixsubfilename)
 
 #endif	/* MULTIPLICITY */

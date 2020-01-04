@@ -941,6 +941,12 @@ PERLVAR(I, Private_Use,	SV *)
 #ifdef HAS_MBRLEN
 PERLVAR(I, mbrlen_ps, mbstate_t)
 #endif
+#ifdef HAS_MBRTOWC
+PERLVAR(I, mbrtowc_ps, mbstate_t)
+#endif
+#ifdef HAS_WCRTOMB
+PERLVAR(I, wcrtomb_ps, mbstate_t)
+#endif
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
