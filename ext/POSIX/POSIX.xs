@@ -1542,10 +1542,8 @@ END_EXTERN_C
 #define waitpid(a,b,c) not_here("waitpid")
 #endif
 
-#ifndef HAS_MBLEN
-#ifndef mblen
+#if ! defined(HAS_MBLEN) && ! defined(HAS_MBRLEN)
 #define mblen(a,b) not_here("mblen")
-#endif
 #endif
 #ifndef HAS_MBTOWC
 #define mbtowc(pwc, s, n) not_here("mbtowc")
@@ -3342,30 +3340,55 @@ write(fd, buffer, nbytes)
 void
 abort()
 
-#ifdef I_WCHAR
-#  include <wchar.h>
+#if defined(HAS_MBRLEN) && (defined(USE_ITHREADS) || ! defined(HAS_MBLEN))
+#  define USE_MBRLEN
+#else
+#  undef USE_MBRLEN
 #endif
 
 int
 mblen(s, n)
-	char *		s
+	SV *		s
 	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        mbstate_t ps;
-#endif
     CODE:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        memset(&ps, 0, sizeof(ps)); /* Initialize state */
-        RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
-#else
-        /* This might prevent some races, but locales can be switched out
-         * without locking, so this isn't a cure all */
-        LOCALE_LOCK;
+        errno = 0;
 
-        RETVAL = mblen(s, n);
-        LOCALE_UNLOCK;
+        SvGETMAGIC(s);
+        if (! SvOK(s)) {
+#ifdef USE_MBRLEN
+            /* Initialize the shift state in PL_mbrlen_ps.  The Standard says
+             * that should be all zeros. */
+            memzero(&PL_mbrlen_ps, sizeof(PL_mbrlen_ps));
+            RETVAL = 0;
+#else
+            LOCALE_LOCK;
+            RETVAL = mblen(NULL, 0);
+            LOCALE_UNLOCK;
 #endif
+        }
+        else {  /* Not resetting state */
+            SV * byte_s = newSVsv_nomg(s);
+            if (! sv_utf8_downgrade_nomg(byte_s, TRUE)) {
+                SETERRNO(EINVAL, LIB_INVARG);
+                RETVAL = -1;
+            }
+            else {
+                size_t len;
+                char * string = SvPV(byte_s, len);
+#ifdef USE_MBRLEN
+                RETVAL = (SSize_t) mbrlen(string, len, &PL_mbrlen_ps);
+                if (RETVAL < 0) RETVAL = -1;    /* Use mblen() ret code for
+                                                   transparency */
+#else
+                /* Locking prevents races, but locales can be switched out
+                 * without locking, so this isn't a cure all */
+                LOCALE_LOCK;
+                RETVAL = mblen(string, len);
+                LOCALE_UNLOCK;
+#endif
+            }
+            SvREFCNT_dec_NN(byte_s);
+        }
     OUTPUT:
         RETVAL
 

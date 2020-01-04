@@ -3461,6 +3461,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #    endif
 #  endif    /* DEBUGGING */
 
+    /* Initialize the per-thread mbrFOO() state variable.  See POSIX.xs for
+     * why this particular incantation is used. */
+#ifdef HAS_MBRLEN
+    memzero(&PL_mbrlen_ps, sizeof(PL_mbrlen_ps));
+#endif
+
     /* Initialize the cache of the program's UTF-8ness for the always known
      * locales C and POSIX */
     my_strlcpy(PL_locale_utf8ness, C_and_POSIX_utf8ness,
