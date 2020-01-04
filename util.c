@@ -1088,7 +1088,7 @@ need to use the shared memory functions, such as C<L</savesharedpvn>>.
 */
 
 char *
-Perl_savepvn(pTHX_ const char *pv, I32 len)
+Perl_savepvn(pTHX_ const char *pv, Size_t len)
 {
     char *newaddr;
     PERL_UNUSED_CONTEXT;

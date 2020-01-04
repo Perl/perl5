@@ -3032,7 +3032,7 @@ PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* pv)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVEPV
 
-PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, I32 len)
+PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, Size_t len)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVEPVN

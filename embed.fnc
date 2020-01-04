@@ -1595,7 +1595,7 @@ p	|void	|rxres_save	|NN void **rsp|NN REGEXP *rx
 p	|I32	|same_dirent	|NN const char* a|NN const char* b
 #endif
 Apda	|char*	|savepv		|NULLOK const char* pv
-Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
+Apda	|char*	|savepvn	|NULLOK const char* pv|Size_t len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
 
 : NULLOK only to suppress a compiler warning
