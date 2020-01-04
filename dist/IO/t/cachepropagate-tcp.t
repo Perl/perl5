@@ -26,7 +26,7 @@ my $s = $listener->socktype();
 ok(defined($s), 'type defined');
 
 SKIP: {
-    skip "fork not available", 4
+    skip "fork not available", 5
 	unless $Config{d_fork} || $Config{d_pseudofork};
 
     my $cpid = fork();
