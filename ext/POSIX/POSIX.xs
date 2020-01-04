@@ -3353,7 +3353,7 @@ abort()
 #endif
 
 int
-mblen(s, n)
+mblen(s, n = ~0)
 	SV *		s
 	size_t		n
     CODE:
@@ -3370,13 +3370,14 @@ mblen(s, n)
             RETVAL = 0;
 #else
             LOCALE_LOCK;
-            RETVAL = mblen(NULL, n);
+            RETVAL = mblen(NULL, 0);
             LOCALE_UNLOCK;
 #endif
         }
         else {  /* Not resetting state */
             size_t len;
             char * string = SvPV(s, len);
+            if (n < len) len = n;
 #ifdef USE_MBRLEN
             RETVAL = (SSize_t) mbrlen(string, len, &PL_mbrlen_ps);
             if (RETVAL < 0) RETVAL = -1;    /* Use mblen() ret code for
