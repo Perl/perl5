@@ -2696,7 +2696,7 @@ ETSR	|int	|edit_distance	|NN const UV *src		    \
 				|const STRLEN y			    \
 				|const SSize_t maxDistance
 EpX	|SV *	|parse_uniprop_string|NN const char * const name	    \
-				     |const Size_t name_len		    \
+				     |Size_t name_len			    \
 				     |const bool is_utf8		    \
 				     |const bool to_fold		    \
 				     |const bool runtime		    \
