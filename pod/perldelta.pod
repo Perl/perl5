@@ -27,6 +27,23 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 The C<POSIX::mblen()> function now works on shift state locales
+and is thread-safe on C99 and above compilers
+when executed on a platform that has locale thread-safety.
+
+This function is always executed under the current C language locale.
+(See L<perllocale>.)  Most locales are stateless, but a few, notably the
+very rarely encountered ISO 2022, maintain a state between calls to this
+function.  Previously the state was cleared on every call to this
+function, but now the state is not reset unless the first parameter is
+C<undef>.
+
+On threaded perls, the C99 function L<mbrlen(3)>,
+when available, is substituted for plain
+C<mblen>.
+This makes this function thread-safe when executing on a locale
+thread-safe platform.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
