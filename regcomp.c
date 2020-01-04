@@ -8829,7 +8829,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 
         i = t1 - s1;
         if (is_utf8_string_loclen((U8*)s, i, &ep, &el))
-			i = el;
+            i = el;
     }
     return i;
 }
@@ -23135,7 +23135,7 @@ Perl_parse_uniprop_string(pTHX_
                                    user-defined property */
     SV * msg,                   /* Any error or warning msg(s) are appended to
                                    this */
-   const STRLEN level)          /* Recursion level of this call */
+    const STRLEN level)         /* Recursion level of this call */
 {
     dVAR;
     char* lookup_name;          /* normalized name for lookup in our tables */
