@@ -28,8 +28,8 @@ here, but most should go in the L</Performance Enhancements> section.
 [ List each enhancement as a =head2 entry ]
 
 =head2 The C<POSIX::mblen()> function now works on shift state locales
-and is thread-safe on C99 and above compilers
-when executed on a platform that has locale thread-safety.
+and is thread-safe on C99 and above compilers; the length parameter is
+now optional
 
 This function is always executed under the current C language locale.
 (See L<perllocale>.)  Most locales are stateless, but a few, notably the
@@ -43,6 +43,10 @@ when available, is substituted for plain
 C<mblen>.
 This makes this function thread-safe when executing on a locale
 thread-safe platform.
+
+The string length parameter is now optional; useful only if you wish to
+restrict the length parsed in the source string to less than the actual
+length.
 
 =head1 Security
 
