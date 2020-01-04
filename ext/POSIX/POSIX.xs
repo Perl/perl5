@@ -3347,7 +3347,7 @@ abort()
 #endif
 
 int
-mblen(s, n)
+mblen(s, n = ~0)
 	SV *		s
 	size_t		n
     CODE:
@@ -3375,6 +3375,7 @@ mblen(s, n)
             else {
                 size_t len;
                 char * string = SvPV(byte_s, len);
+                if (n < len) len = n;
 #ifdef USE_MBRLEN
                 RETVAL = (SSize_t) mbrlen(string, len, &PL_mbrlen_ps);
                 if (RETVAL < 0) RETVAL = -1;    /* Use mblen() ret code for
