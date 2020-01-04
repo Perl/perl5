@@ -91,7 +91,7 @@
 : The E flag is used instead for a function and its short name that is supposed
 :            to be used only in the core, and in extensions compiled with the
 :            PERL_EXT symbol defined.  Again, on some platforms, the function
-:            will be visible everywhere, so the 'p' flag is gnerally needed.
+:            will be visible everywhere, so the 'p' flag is generally needed.
 :            Also note that an XS writer can always cheat and pretend to be an
 :            extension by #defining PERL_EXT.
 :
