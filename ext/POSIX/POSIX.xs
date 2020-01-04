@@ -1548,13 +1548,14 @@ END_EXTERN_C
 #ifndef HAS_MBSTOWCS
 #define mbstowcs(s, pwcs, n) not_here("mbstowcs")
 #endif
-#ifndef HAS_MBTOWC
+#if ! defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
 #define mbtowc(pwc, s, n) not_here("mbtowc")
 #endif
 #ifndef HAS_WCSTOMBS
 #define wcstombs(s, pwcs, n) not_here("wcstombs")
 #endif
-#ifndef HAS_WCTOMB
+        
+#if ! defined(MB_LEN_MAX) || (! defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB))
 #define wctomb(s, wchar) not_here("wctomb")
 #endif
 #if !defined(HAS_MBLEN) && !defined(HAS_MBSTOWCS) && !defined(HAS_MBTOWC) && !defined(HAS_WCSTOMBS) && !defined(HAS_WCTOMB)
@@ -3399,24 +3400,54 @@ mbstowcs(s, pwcs, n)
 	char *		pwcs
 	size_t		n
 
-int
-mbtowc(pwc, s, n)
-	wchar_t *	pwc
-	char *		s
-	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
-        mbstate_t ps;
-#endif
-    CODE:
-#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
-        memset(&ps, 0, sizeof(ps));;
-        PERL_UNUSED_RESULT(mbrtowc(pwc, NULL, 0, &ps));/* Reset any shift state */
-        errno = 0;
-        RETVAL = mbrtowc(pwc, s, n, &ps);   /* Prefer reentrant version */
+#if defined(HAS_MBRTOWC) && (defined(USE_ITHREADS) || ! defined(HAS_MBTOWC))
+#  define USE_MBRTOWC
 #else
-        RETVAL = mbtowc(pwc, s, n);
+#  undef USE_MBRTOWC
 #endif
+
+int
+mbtowc(pwc, s, n = ~0)
+	SV *	        pwc
+	SV *		s
+	size_t		n
+    CODE:
+        errno = 0;
+        if (! SvOK(s)) { /* Initialize state */
+#ifdef USE_MBRTOWC
+            /* Initialize the shift state in PL_mbrtowc_ps.  It's a good guess
+             * that the initial state is all zeros.  On some platforms, It is
+             * even documented so.  Otherwise, the man pages are incomplete or
+             * vary about how to do this. */
+            memzero(&PL_mbrtowc_ps, sizeof(PL_mbrtowc_ps));
+            RETVAL = 0;
+#else
+            LOCALE_LOCK;
+            RETVAL = mbtowc(NULL, NULL, 0);
+            LOCALE_UNLOCK;
+#endif
+        }
+        else {  /* Not resetting state */
+            size_t len;
+            char * string = SvPV(s, len);
+            wchar_t wc;
+            if (n < len) len = n;
+#ifdef USE_MBRTOWC
+            RETVAL = (SSize_t) mbrtowc(&wc, string, len, &PL_mbrtowc_ps);
+#else
+            /* Locking prevents races, but locales can be switched out without
+             * locking, so this isn't a cure all */
+            LOCALE_LOCK;
+            RETVAL = mbtowc(&wc, string, len);
+            LOCALE_UNLOCK;
+#endif
+            if (RETVAL >= 0) {
+                sv_setiv_mg(pwc, wc);
+            }
+            else { /* Use mbtowc() ret code for transparency */
+                RETVAL = -1;
+            }
+        }
     OUTPUT:
         RETVAL
 
@@ -3426,10 +3457,47 @@ wcstombs(s, pwcs, n)
 	wchar_t *	pwcs
 	size_t		n
 
+#if defined(HAS_WCRTOMB) && (defined(USE_ITHREADS) || ! defined(HAS_WCTOMB))
+#  define USE_WCRTOMB
+#else
+#  undef USE_WCRTOMB
+#endif
+
 int
 wctomb(s, wchar)
-	char *		s
+	SV *		s
 	wchar_t		wchar
+    CODE:
+        errno = 0;
+        if (s == &PL_sv_undef) {
+#ifdef USE_WCRTOMB
+            /* The man pages khw looked at are in agreement that this works.
+             * But probably memzero would too */
+            RETVAL = wcrtomb(NULL, L'\0', &PL_wcrtomb_ps);
+#else
+            LOCALE_LOCK;
+            RETVAL = wctomb(NULL, L'\0');
+            LOCALE_UNLOCK;
+#endif
+        }
+        else {  /* Not resetting state */
+            char buffer[MB_LEN_MAX];
+#ifdef USE_WCRTOMB
+            RETVAL = wcrtomb(buffer, wchar, &PL_wcrtomb_ps);
+#else
+            /* Locking prevents races, but locales can be switched out without
+             * locking, so this isn't a cure all */
+            LOCALE_LOCK;
+            RETVAL = wctomb(buffer, wchar);
+            LOCALE_UNLOCK;
+#endif
+            if (RETVAL >= 0) {
+                sv_setpvn(s, buffer, RETVAL);
+                sv_setpv_bufsize(s, RETVAL, RETVAL);
+            }
+        }
+    OUTPUT:
+        RETVAL
 
 int
 strcoll(s1, s2)

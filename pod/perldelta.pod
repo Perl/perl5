@@ -27,26 +27,25 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
-=head2 The C<POSIX::mblen()> function now works on shift state locales
-and is thread-safe on C99 and above compilers; the length parameter is
-now optional
+=head2 The C<POSIX::mblen()>, C<mbtowc>, and C<wctomb> functions now
+work on shift state locales and are thread-safe on C99 and above
+compilers when executed on a platform that has locale thread-safety; the
+length parameters are now optional.
 
-This function is always executed under the current C language locale.
+These functions are always executed under the current C language locale.
 (See L<perllocale>.)  Most locales are stateless, but a few, notably the
-very rarely encountered ISO 2022, maintain a state between calls to this
-function.  Previously the state was cleared on every call to this
-function, but now the state is not reset unless the first parameter is
-C<undef>.
+very rarely encountered ISO 2022, maintain a state between calls to
+these functions.  Previously the state was cleared on every call, but
+now the state is not reset unless the appropriate parameter is C<undef>.
 
-On threaded perls, the C99 function L<mbrlen(3)>,
-when available, is substituted for plain
-C<mblen>.
-This makes this function thread-safe when executing on a locale
+On threaded perls, the C99 functions L<mbrlen(3)>, L<mbrtowc(3)>, and
+L<wcrtomb(3)>, when available, are substituted for the plain functions.
+This makes these functions thread-safe when executing on a locale
 thread-safe platform.
 
-The string length parameter is now optional; useful only if you wish to
-restrict the length parsed in the source string to less than the actual
-length.
+The string length parameters in C<mblen> and C<mbtowc> are now optional;
+useful only if you wish to restrict the length parsed in the source
+string to less than the actual length.
 
 =head1 Security
 
@@ -392,7 +391,14 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Various bugs in C<POSIX::mbtowc> were fixed.   Potential races with
+other threads are now avoided, and previously the returned wide
+character could well be garbage.
+
+Various bugs in C<POSIX::wctomb> were fixed. Potential races with other
+threads are now avoided, and previously it would segfault if the string
+parameter was shared or hadn't been pre-allocated with a string of
+sufficient length to hold the result.
 
 =back
 
