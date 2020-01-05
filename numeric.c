@@ -274,7 +274,7 @@ number may use C<"_"> characters to separate digits.
 
 =cut
 
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
 which suppresses any message for non-portable numbers, but which are valid
 on this platform.
  */
@@ -347,7 +347,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                          * slowing those down */
                     continue;
                 }
-                /* Bah. We're just overflowed.  */
+                /* Bah. We've just overflowed.  */
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
                                        "Integer overflow in %s number",
                                        (base == 16) ? "hexadecimal"
