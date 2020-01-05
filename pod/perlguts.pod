@@ -1935,11 +1935,6 @@ using the macros described in this section.  The macros provide the necessary
 transparency between differences in the actual malloc implementation that is
 used within perl.
 
-It is suggested that you enable the version of malloc that is distributed
-with Perl.  It keeps pools of various sizes of unallocated memory in
-order to satisfy allocation requests more quickly.  However, on some
-platforms, it may cause spurious malloc or free errors.
-
 The following three macros are used to initially allocate memory :
 
     Newx(pointer, number, type);
