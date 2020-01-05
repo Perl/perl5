@@ -1745,7 +1745,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
 /*
 =for apidoc isinfnan
 
-C<Perl_isinfnan()> is utility function that returns true if the NV
+C<Perl_isinfnan()> is a utility function that returns true if the NV
 argument is either an infinity or a C<NaN>, false otherwise.  To test
 in more detail, use C<Perl_isinf()> and C<Perl_isnan()>.
 
