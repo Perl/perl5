@@ -2290,17 +2290,22 @@ typedef U32 line_t;
 	} \
 	return a;
 
-/* Converts a character known to represent a hexadecimal digit (0-9, A-F, or
- * a-f) to its numeric value.  READ_XDIGIT's argument is a string pointer,
- * which is advanced.  The input is validated only by an assert() in DEBUGGING
- * builds.  In both ASCII and EBCDIC the last 4 bits of the digits are 0-9; and
- * the last 4 bits of A-F and a-f are 1-6, so adding 9 yields 10-15 */
-#define XDIGIT_VALUE(c) (__ASSERT_(isXDIGIT(c)) (0xf & (isDIGIT(c)        \
-                                                        ? (c)             \
-                                                        : ((c) + 9))))
-#define READ_XDIGIT(s)  (__ASSERT_(isXDIGIT(*s)) (0xf & (isDIGIT(*(s))     \
-                                                        ? (*(s)++)         \
-                                                        : (*(s)++ + 9))))
+/* Converts a character KNOWN to represent a hexadecimal digit (0-9, A-F, or
+ * a-f) to its numeric value without using any branches.  The input is
+ * validated only by an assert() in DEBUGGING builds.
+ *
+ * It works by right shifting and isolating the bit that is 0 for the digits,
+ * and 1 for at least the alphas A-F, a-f.  The bit is shifted to the ones
+ * position, and then to the eights position.  Both are added together to form
+ * 0 if the input is '0'-'9' and to form 9 if alpha.  This is added to the
+ * final four bits of the input to form the correct value. */
+#define XDIGIT_VALUE(c) (__ASSERT_(isXDIGIT(c))                             \
+           ((NATIVE_TO_LATIN1(c) >> 6) & 1)  /* 1 if alpha; 0 if not */     \
+         + ((NATIVE_TO_LATIN1(c) >> 3) & 8)  /* 8 if alpha; 0 if not */     \
+         + ((c) & 0xF))   /* 0-9 if input valid hex digit */
+
+/* The argument is a string pointer, which is advanced. */
+#define READ_XDIGIT(s)  ((s)++, XDIGIT_VALUE(*((s) - 1)))
 
 /* Converts a character known to represent an octal digit (0-7) to its numeric
  * value.  The input is validated only by an assert() in DEBUGGING builds.  In
