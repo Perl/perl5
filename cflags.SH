@@ -178,10 +178,10 @@ Intel*) ;; # # Is that you, Intel C++?
 # -std=c89 before -ansi
 # -pedantic* before -Werror=d-a-s
 #
-*) warns=-std=c89 -ansi $pedantic \
+*) warns="-std=c89 -ansi $pedantic \
 	-Werror=pointer-arith \
 	-Wextra -W \
-	-Wc++-compat -Wwrite-strings
+	-Wc++-compat -Wwrite-strings"
    # declaration after statement is normal in C++ rather than an
    # extension and compilers complain if we try to warn about it
    case "$d_cplusplus" in
