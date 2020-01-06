@@ -49,6 +49,9 @@ my %bit_names = (
             XDIGIT                  => 0,
             VERTSPACE               => 0,
             IS_IN_SOME_FOLD         => '_Perl_Any_Folds',
+            BINDIGIT                => [ ord '0', ord '1' ],
+            OCTDIGIT                => [ ord '0', ord '1', ord '2', ord '3',
+                                         ord '4', ord '5', ord '6', ord '7' ],
 
             # These are the control characters that there are mnemonics for
             MNEMONIC_CNTRL          => [ ord "\a", ord "\b", ord "\e", ord "\f",
