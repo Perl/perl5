@@ -874,6 +874,7 @@ roderick\100argon.org                   roderick\100gate.net
 argrath\100ub32.org                     root\100ub32.org
 rootbeer\100teleport.com                rootbeer\100redcat.com
 +                                       tomphoenix\100unknown
+rra\100stanford.edu                     rra\100cpan.org
 rurban\100x-ray.at                      rurban\100cpan.org
 +                                       rurban\100cpanel.net
 rvtol+news\100isolution.nl              rvtol\100isolution.nl

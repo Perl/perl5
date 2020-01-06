@@ -2,12 +2,12 @@
 #
 # Basic test suite for the Term::ANSIColor Perl module.
 #
-# Copyright 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2009, 2010, 2012, 2014
+# Copyright 1997-1998, 2000-2002, 2005-2006, 2009-2010, 2012, 2014, 2020
 #     Russ Allbery <rra@cpan.org>
 #
-# This program is free software; you may redistribute it and/or modify it
-# under the same terms as Perl itself.
+# SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
+use 5.008;
 use strict;
 use warnings;
 
@@ -24,7 +24,7 @@ BEGIN {
 # Various basic tests.
 is(color('blue on_green', 'bold'), "\e[34;42;1m", 'Simple attributes');
 is(colored('testing', 'blue', 'bold'), "\e[34;1mtesting\e[0m", 'colored');
-is((BLUE BOLD 'testing'), "\e[34m\e[1mtesting", 'Constants');
+is((BLUE BOLD 'testing'),              "\e[34m\e[1mtesting",   'Constants');
 is(join(q{}, BLUE, BOLD, 'testing'),
     "\e[34m\e[1mtesting", 'Constants with commas');
 is((BLUE 'test', 'ing'), "\e[34mtesting", 'Constants with multiple strings');
@@ -130,7 +130,7 @@ is((POPCOLOR 'text'),       "\e[31m\e[42mtext", '...and POPCOLOR works');
 is((LOCALCOLOR GREEN ON_BLUE 'text'),
     "\e[32m\e[44mtext\e[31m\e[42m", 'LOCALCOLOR');
 $Term::ANSIColor::AUTOLOCAL = 1;
-is((BLUE 'text'), "\e[34mtext\e[31m\e[42m", 'AUTOLOCAL');
+is((BLUE 'text'),     "\e[34mtext\e[31m\e[42m", 'AUTOLOCAL');
 is((BLUE 'te', 'xt'), "\e[34mtext\e[31m\e[42m", 'AUTOLOCAL with commas');
 $Term::ANSIColor::AUTOLOCAL = 0;
 is((POPCOLOR 'text'), "\e[0mtext", 'POPCOLOR with empty stack');

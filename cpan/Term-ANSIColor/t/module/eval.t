@@ -6,11 +6,11 @@
 # processing and lose its value or leak $@ values to the calling program.
 # This is a regression test to ensure that this problem doesn't return.
 #
-# Copyright 2012, 2013, 2014 Russ Allbery <rra@cpan.org>
+# Copyright 2012-2014, 2020 Russ Allbery <rra@cpan.org>
 #
-# This program is free software; you may redistribute it and/or modify it
-# under the same terms as Perl itself.
+# SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
+use 5.008;
 use strict;
 use warnings;
 

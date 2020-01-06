@@ -2013,6 +2013,7 @@ cpan/Term-ANSIColor/t/module/basic.t
 cpan/Term-ANSIColor/t/module/basic256.t
 cpan/Term-ANSIColor/t/module/eval.t
 cpan/Term-ANSIColor/t/module/stringify.t
+cpan/Term-ANSIColor/t/module/true-color.t
 cpan/Term-ANSIColor/t/taint/basic.t
 cpan/Term-Cap/Cap.pm			Perl module supporting termcap usage
 cpan/Term-Cap/test.pl			See if Term::Cap works
