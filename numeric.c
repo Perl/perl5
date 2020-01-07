@@ -337,7 +337,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                With gcc seems to be much straighter code than old scan_hex.  */
           redo:
             if (!overflowed) {
-                if (value <= max_div) {
+                if (LIKELY(value <= max_div)) {
                     value = (value << shift) | XDIGIT_VALUE(*s);
                         /* Note XDIGIT_VALUE() is branchless, works on binary
                          * and octal as well, so can be used here, without
