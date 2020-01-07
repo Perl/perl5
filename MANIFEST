@@ -1872,6 +1872,8 @@ cpan/podlators/t/data/snippets/man/utf8-nonbreaking
 cpan/podlators/t/data/snippets/man/utf8-verbatim
 cpan/podlators/t/data/snippets/man/x-whitespace
 cpan/podlators/t/data/snippets/man/x-whitespace-entry
+cpan/podlators/t/data/snippets/overstrike/tag-width
+cpan/podlators/t/data/snippets/overstrike/wrapping
 cpan/podlators/t/data/snippets/README			podlators test
 cpan/podlators/t/data/snippets/termcap/escape-wrapping
 cpan/podlators/t/data/snippets/termcap/tag-width
@@ -1883,6 +1885,7 @@ cpan/podlators/t/data/snippets/text/alt
 cpan/podlators/t/data/snippets/text/c-with-spaces
 cpan/podlators/t/data/snippets/text/code
 cpan/podlators/t/data/snippets/text/cpp			podlators test
+cpan/podlators/t/data/snippets/text/empty
 cpan/podlators/t/data/snippets/text/error-die
 cpan/podlators/t/data/snippets/text/error-none
 cpan/podlators/t/data/snippets/text/error-normal
@@ -1890,6 +1893,7 @@ cpan/podlators/t/data/snippets/text/error-pod
 cpan/podlators/t/data/snippets/text/error-stderr
 cpan/podlators/t/data/snippets/text/error-stderr-opt
 cpan/podlators/t/data/snippets/text/for
+cpan/podlators/t/data/snippets/text/iso-8859-1
 cpan/podlators/t/data/snippets/text/late-encoding
 cpan/podlators/t/data/snippets/text/link-rt
 cpan/podlators/t/data/snippets/text/link-url
@@ -1901,6 +1905,7 @@ cpan/podlators/t/data/snippets/text/quotes-opt
 cpan/podlators/t/data/snippets/text/s-whitespace
 cpan/podlators/t/data/snippets/text/sentence-spacing
 cpan/podlators/t/data/snippets/text/utf8
+cpan/podlators/t/data/snippets/text/utf8-iso
 cpan/podlators/t/data/snippets/text/verbatim
 cpan/podlators/t/data/termcap			podlators test
 cpan/podlators/t/docs/pod.t			podlators test
@@ -1928,11 +1933,12 @@ cpan/podlators/t/style/module-version.t			podlators test
 cpan/podlators/t/style/obsolete-strings.t
 cpan/podlators/t/style/strict.t			podlators test
 cpan/podlators/t/text/color.t			podlators test
-cpan/podlators/t/text/empty.t			podlators test
+cpan/podlators/t/text/invalid.t
+cpan/podlators/t/text/iso-8859-1.t
 cpan/podlators/t/text/overstrike.t			podlators test
-cpan/podlators/t/text/perlio.t			podlators test
 cpan/podlators/t/text/snippets.t
 cpan/podlators/t/text/termcap.t			podlators test
+cpan/podlators/t/text/utf8-io.t
 cpan/Scalar-List-Utils/lib/List/Util.pm		List::Util
 cpan/Scalar-List-Utils/lib/List/Util/XS.pm	List::Util
 cpan/Scalar-List-Utils/lib/Scalar/Util.pm	Scalar::Util

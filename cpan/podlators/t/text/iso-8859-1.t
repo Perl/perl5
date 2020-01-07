@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Test Pod::Man ISO-8859-1 handling
+# Test Pod::Text ISO-8859-1 handling
 #
 # Copyright 2016, 2019 Russ Allbery <rra@cpan.org>
 #
@@ -20,8 +20,8 @@ use Test::Podlators qw(test_snippet);
 
 # Load the module.
 BEGIN {
-    use_ok('Pod::Man');
+    use_ok('Pod::Text');
 }
 
 # Test the snippet with the proper encoding.
-test_snippet('Pod::Man', 'man/iso-8859-1');
+test_snippet('Pod::Text', 'text/iso-8859-1', { encoding => 'iso-8859-1' });

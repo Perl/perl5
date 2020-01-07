@@ -30,7 +30,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = '4.13';
+$VERSION = '4.14';
 
 # Ensure that $Pod::Simple::nbsp and $Pod::Simple::shy are available.  Code
 # taken from Pod::Simple 3.32, but was only added in 3.30.
@@ -912,7 +912,9 @@ being the file to write the formatted output to.
 You can also call parse_lines() to parse an array of lines or
 parse_string_document() to parse a document already in memory.  As with
 parse_file(), parse_lines() and parse_string_document() default to sending
-their output to C<STDOUT> unless changed with the output_fh() method.
+their output to C<STDOUT> unless changed with the output_fh() method.  Be
+aware that parse_lines() and parse_string_document() both expect raw bytes,
+not decoded characters.
 
 To put the output from any parse method into a string instead of a file
 handle, call the output_string() method instead of output_fh().
