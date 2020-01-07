@@ -2667,15 +2667,19 @@ zero-length sequence.  When such an escape is used in a character
 class its behavior is not well defined.  Check that the correct
 escape has been used, and the correct charname handler is in scope.
 
+=item Illegal %s digit '%c' ignored
+
+(W digit) Here C<%s> is one of "binary", "octal", or "hex".
+You may have tried to use a digit other than one that is legal for the
+given type, such as only 0 and 1 for binary.  For octals, this is raised
+only if the illegal character is an '8' or '9'.  For hex, 'A' - 'F' and
+'a' - 'f' are legal.
+Interpretation of the number stopped just before the offending digit or
+character.
+
 =item Illegal binary digit '%c'
 
 (F) You used a digit other than 0 or 1 in a binary number.
-
-=item Illegal binary digit %s ignored
-
-(W digit) You may have tried to use a digit other than 0 or 1 in a
-binary number.  Interpretation of the binary number stopped before the
-offending digit.
 
 =item Illegal character after '_' in prototype for %s : %s
 
@@ -2731,12 +2735,6 @@ you must always specify a block of code.  See L<perlsub>.
 your logic, or you need to put a conditional in to guard against
 meaningless input.
 
-=item Illegal hexadecimal digit %s ignored
-
-(W digit) You may have tried to use a character other than 0 - 9 or
-A - F, a - f in a hexadecimal number.  Interpretation of the hexadecimal
-number stopped before the illegal character.
-
 =item Illegal modulus zero
 
 (F) You tried to divide a number by 0 to get the remainder.  Most
@@ -2750,11 +2748,6 @@ two from 1 to 32 (or 64, if your platform supports that).
 =item Illegal octal digit '%c'
 
 (F) You used an 8 or 9 in an octal number.
-
-=item Illegal octal digit %s ignored
-
-(W digit) You may have tried to use an 8 or 9 in an octal number.
-Interpretation of the octal number stopped before the 8 or 9.
 
 =item Illegal operator following parameter in a subroutine signature
 
