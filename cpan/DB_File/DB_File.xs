@@ -6,7 +6,7 @@
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-2019 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2020 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -462,13 +462,21 @@ typedef DBT DBTKEY ;
       }                                                               \
     }
 
+/* Macro err_close only for use in croak_and_free */
+#ifdef BERKELEY_DB_1_OR_2 /* Berkeley DB Version 1  or 2 */
+#  define err_close(r)
+#else
+#  define err_close(r) db_close(r)
+#endif
+
 /* Macro croak_and_free only for use in ParseOpenInfo */
-#define croak_and_free(x)											  \
-	do 																  \
-	{																  \
-		Safefree(RETVAL);											  \
-		croak(x);													  \
-	} while (0)
+#define croak_and_free(x)                                             \
+    do                                                                \
+    {                                                                 \
+        if (RETVAL->dbp) err_close(RETVAL) ;                           \
+        Safefree(RETVAL);                                             \
+        croak(x);                                                     \
+    } while (0)
 
 #define my_SvUV32(sv) ((u_int32_t)SvUV(sv))
 
@@ -1284,7 +1292,8 @@ SV *   sv ;
     int     status ;
     dMY_CXT;
 
-/* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
+    Trace(("In ParseOpenInfo name=[%s] flags=[%d] mode=[%d] SV NULL=[%d]\n",\
+            name, flags, mode, sv == NULL)) ;
     Zero(RETVAL, 1, DB_File_type) ;
 
     /* Default to HASH */
@@ -1301,7 +1310,7 @@ SV *   sv ;
     RETVAL->in_memory = (name == NULL) ;
 
     status = db_create(&RETVAL->dbp, NULL,0) ;
-    /* printf("db_create returned %d %s\n", status, db_strerror(status)) ; */
+    Trace(("db_create returned %d %s\n", status, db_strerror(status))) ;
     if (status) {
         RETVAL->dbp = NULL ;
         return (RETVAL) ;
@@ -1518,12 +1527,12 @@ SV *   sv ;
         status = (RETVAL->dbp->open)(RETVAL->dbp, name, NULL, RETVAL->type,
                     Flags, mode) ;
 #endif
-        /* printf("open returned %d %s\n", status, db_strerror(status)) ; */
+        Trace(("open returned %d %s\n", status, db_strerror(status))) ; 
 
         if (status == 0) {
 
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor, 0) ;
-            /* printf("cursor returned %d %s\n", status, db_strerror(status)) ; */
+            Trace(("cursor returned %d %s\n", status, db_strerror(status))) ; 
         }
 
         if (status)
@@ -1578,6 +1587,7 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
         char *  name = (char *) NULL ;
         SV *    sv = (SV *) NULL ;
         STRLEN  n_a;
+        Trace(("In db_DoTie_\n"));
 
         if (items >= 3 && SvOK(ST(2)))
             name = (char*) SvPV(ST(2), n_a) ;
