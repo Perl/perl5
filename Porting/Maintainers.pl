@@ -158,6 +158,7 @@ use File::Glob qw(:case);
                 t/release-pod-syntax.t
                 t/socket.t
                 t/system.t
+                t/no-all.t
                 )
         ],
     },
