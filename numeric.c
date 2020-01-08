@@ -387,14 +387,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                (khw suspects that adding a LIKELY() just above would do the
                same thing) */
           redo:
-                if (LIKELY(value <= max_div)) {
-                    value = (value << shift) | XDIGIT_VALUE(*s);
-                        /* Note XDIGIT_VALUE() is branchless, works on binary
-                         * and octal as well, so can be used here, without
-                         * slowing those down */
-                    factor <<= shift;
-                    continue;
-                }
+            if (LIKELY(value <= max_div)) {
+                value = (value << shift) | XDIGIT_VALUE(*s);
+                    /* Note XDIGIT_VALUE() is branchless, works on binary
+                     * and octal as well, so can be used here, without
+                     * slowing those down */
+                factor <<= shift;
+                continue;
+            }
 
             /* Bah. We are about to overflow.  Instead, add the unoverflowed
              * value to an NV that contains an approximation to the correct
@@ -422,6 +422,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             }
             continue;
         }
+
         if (   *s == '_'
             && len
             && allow_underscores
@@ -431,8 +432,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             ++s;
             goto redo;
         }
-        if ( ! (*flags & PERL_SCAN_SILENT_ILLDIGIT)
-            &&  ckWARN(WARN_DIGIT))
+
+        if (   ! (*flags & PERL_SCAN_SILENT_ILLDIGIT)
+            &&    ckWARN(WARN_DIGIT))
         {
             if (base != 8) {
                 Perl_warner(aTHX_ packWARN(WARN_DIGIT),
@@ -453,6 +455,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                                        "Illegal octal digit '%c' ignored", *s);
             }
         }
+
         break;
     }
 
@@ -486,6 +489,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
         *flags = 0;
         return value;
     }
+
     *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
     if (result)
         *result = value_nv;
