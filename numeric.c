@@ -351,7 +351,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                                           ? _CC_OCTDIGIT
                                           : _CC_XDIGIT;
     const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
-    bool overflowed = FALSE;
+    bool already_output_overflow_warning = FALSE;
+
+    /* In overflows, this keeps track of how much to multiply the overflowed NV
+     * by as we continue to parse the remaining digits */
+    UV factor = 1;
 
     PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
 
@@ -383,32 +387,39 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                (khw suspects that adding a LIKELY() just above would do the
                same thing) */
           redo:
-            if (!overflowed) {
                 if (LIKELY(value <= max_div)) {
                     value = (value << shift) | XDIGIT_VALUE(*s);
                         /* Note XDIGIT_VALUE() is branchless, works on binary
                          * and octal as well, so can be used here, without
                          * slowing those down */
+                    factor <<= shift;
                     continue;
                 }
-                /* Bah. We've just overflowed.  */
+
+            /* Bah. We are about to overflow.  Instead, add the unoverflowed
+             * value to an NV that contains an approximation to the correct
+             * value.  Each time through the loop we have increased 'factor' so
+             * that it gives how much the current approximation needs to
+             * effectively be shifted to make room for this new value */
+            value_nv *= (NV) factor;
+            value_nv += (NV) value;
+
+            /* Then we keep accumulating digits, until all are parsed.  We
+             * start over using the current input value.  This will be added to
+             * 'value_nv' eventually, either when all digits are gone, or we
+             * have overflowed this fresh start. */
+            value = XDIGIT_VALUE(*s);
+            factor = 1 << shift;
+
+            if (! already_output_overflow_warning) {
+                already_output_overflow_warning = TRUE;
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
                                        "Integer overflow in %s number",
                                        (base == 16) ? "hexadecimal"
                                                     : (base == 2)
                                                       ? "binary"
                                                       : "octal");
-                overflowed = TRUE;
-                value_nv = (NV) value;
             }
-            value_nv *= base;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount of base-tuples. */
-            value_nv += (NV) XDIGIT_VALUE(*s);
             continue;
         }
         if (   *s == '_'
@@ -445,9 +456,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
         break;
     }
 
-    if (   ( overflowed && value_nv > 4294967295.0)
+    /* Calculate the final overflow approximation */
+    if (value_nv != 0.0) {
+        value_nv *= (NV) factor;
+        value_nv += (NV) value;
+    }
+
+    if (   ( value_nv > 4294967295.0)
 #if UVSIZE > 4
-        || (   !  overflowed && value > 0xffffffff
+        || (      value_nv == 0.0 && value > 0xffffffff
             && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
 #endif
     ) {
@@ -464,7 +481,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     }
 
     *len_p = s - start;
-    if (!overflowed) {
+
+    if (value_nv == 0.0) {  /* No overflow */
         *flags = 0;
         return value;
     }
