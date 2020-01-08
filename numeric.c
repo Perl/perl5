@@ -287,6 +287,43 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     return grok_hex(start, len_p, flags, result);
 }
 
+/*
+=for apidoc grok_oct
+
+converts a string representing an octal number to numeric form.
+
+On entry C<start> and C<*len> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
+The scan stops at the end of the string, or the first invalid character.
+Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
+8 or 9 will also trigger a warning.
+On return C<*len> is set to the length of the scanned string,
+and C<*flags> gives output flags.
+
+If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
+and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_oct>
+returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+and writes the value to C<*result> (or the value is discarded if C<result>
+is C<NULL>).
+
+If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the octal
+number may use C<"_"> characters to separate digits.
+
+=cut
+
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
+which suppresses any message for non-portable numbers, but which are valid
+on this platform.
+ */
+
+UV
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+{
+    PERL_ARGS_ASSERT_GROK_OCT;
+
+    return grok_oct(start, len_p, flags, result);
+}
+
 UV
 Perl_grok_bin_oct_hex(pTHX_ const char *start,
                         STRLEN *len_p,
@@ -428,43 +465,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     if (result)
         *result = value_nv;
     return UV_MAX;
-}
-
-/*
-=for apidoc grok_oct
-
-converts a string representing an octal number to numeric form.
-
-On entry C<start> and C<*len> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
-The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
-8 or 9 will also trigger a warning.
-On return C<*len> is set to the length of the scanned string,
-and C<*flags> gives output flags.
-
-If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_oct>
-returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to C<*result> (or the value is discarded if C<result>
-is C<NULL>).
-
-If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the octal
-number may use C<"_"> characters to separate digits.
-
-=cut
-
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
-which suppresses any message for non-portable numbers, but which are valid
-on this platform.
- */
-
-UV
-Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
-{
-    PERL_ARGS_ASSERT_GROK_OCT;
-
-    return grok_oct(start, len_p, flags, result);
 }
 
 /*
