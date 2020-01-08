@@ -158,6 +158,10 @@ use File::Glob qw(:case);
                 t/release-pod-syntax.t
                 t/socket.t
                 t/system.t
+                xt/author/critic.t
+                xt/author/pod-coverage.t
+                xt/author/pod-syntax.t
+                t/no-all.t
                 )
         ],
     },
