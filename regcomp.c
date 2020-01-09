@@ -2769,7 +2769,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         if (OP(noper) == NOTHING) {
             /* skip past a NOTHING at the start of an alternation
              * eg, /(?:)a|(?:b)/ should be the same as /a|b/
+             *
+             * If the next node is not something we are supposed to process
+             * we will just ignore it due to the condition guarding the
+             * next block.
              */
+
             regnode *noper_next= regnext(noper);
             if (noper_next < tail)
                 noper= noper_next;
@@ -2991,6 +2996,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 regnode *noper_next= regnext(noper);
                 if (noper_next < tail)
                     noper= noper_next;
+                /* we will undo this assignment if noper does not
+                 * point at a trieable type in the else clause of
+                 * the following statement. */
             }
 
             if (    noper < tail
@@ -3052,7 +3060,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %" IVdf, uvc );
 		    }
 		}
-	    }
+            } else {
+                /* If we end up here it is because we skipped past a NOTHING, but did not end up
+                 * on a trieable type. So we need to reset noper back to point at the first regop
+                 * in the branch before we call TRIE_HANDLE_WORD()
+                */
+                noper= NEXTOPER(cur);
+            }
             TRIE_HANDLE_WORD(state);
 
         } /* end second pass */
@@ -3216,6 +3230,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 regnode *noper_next= regnext(noper);
                 if (noper_next < tail)
                     noper= noper_next;
+                /* we will undo this assignment if noper does not
+                 * point at a trieable type in the else clause of
+                 * the following statement. */
             }
 
             if (    noper < tail
@@ -3256,6 +3273,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     /* charid is now 0 if we dont know the char read, or
                      * nonzero if we do */
                 }
+            } else {
+                /* If we end up here it is because we skipped past a NOTHING, but did not end up
+                 * on a trieable type. So we need to reset noper back to point at the first regop
+                 * in the branch before we call TRIE_HANDLE_WORD().
+                */
+                noper= NEXTOPER(cur);
             }
             accept_state = TRIE_NODENUM( state );
             TRIE_HANDLE_WORD(accept_state);
