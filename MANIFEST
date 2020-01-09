@@ -116,6 +116,8 @@ cpan/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
 cpan/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
 cpan/autodie/t/lib/Some/Module.pm	autodie - blog_hints.t helper
 cpan/autodie/t/mkdir.t			autodie - filesystem tests
+cpan/autodie/t/no-all.t
+cpan/autodie/t/no-default.t
 cpan/autodie/t/no_carp.t
 cpan/autodie/t/open.t			autodie - Testing open
 cpan/autodie/t/read.t

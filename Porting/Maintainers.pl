@@ -137,11 +137,12 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'PJF/autodie-2.29.tar.gz',
+        'DISTRIBUTION' => 'TODDR/autodie-2.31.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
             qr{README\.md},
+            qr{^xt/},
             # All these tests depend upon external
             # modules that don't exist when we're
             # building the core.  Hence, they can
@@ -158,17 +159,6 @@ use File::Glob qw(:case);
                 t/socket.t
                 t/system.t
                 )
-        ],
-        'CUSTOMIZED'   => [
-	    # CPAN RT 105344
-	    't/mkdir.t',
-	    # smartmatch changes
-	    'lib/autodie/exception.pm',
-	    'lib/autodie/hints.pm',
-	    't/exceptions.t',
-	    't/lib/Hints_pod_examples.pm',
-            # CPAN RT#127762
-            't/recv.t',
         ],
     },
 
