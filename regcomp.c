@@ -4498,6 +4498,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
 {
     dVAR;
+    SSize_t final_minlen;
     /* There must be at least this number of characters to match */
     SSize_t min = 0;
     I32 pars = 0, code;
@@ -6484,18 +6485,15 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 
     DEBUG_STUDYDATA("post-fin", data, depth, is_inf);
 
-    {
-        SSize_t final_minlen= min < stopmin ? min : stopmin;
-
-        if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
-            if (final_minlen > SSize_t_MAX - delta)
-                RExC_maxlen = SSize_t_MAX;
-            else if (RExC_maxlen < final_minlen + delta)
-                RExC_maxlen = final_minlen + delta;
-        }
-        return final_minlen;
+    final_minlen = min < stopmin
+            ? min : stopmin;
+    if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
+        if (final_minlen > SSize_t_MAX - delta)
+            RExC_maxlen = SSize_t_MAX;
+        else if (RExC_maxlen < final_minlen + delta)
+            RExC_maxlen = final_minlen + delta;
     }
-    NOT_REACHED; /* NOTREACHED */
+    return final_minlen;
 }
 
 STATIC U32
