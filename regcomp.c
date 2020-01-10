@@ -11227,21 +11227,28 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         goto parse_rest;
                     }
 
-                    if (paren == 's') {
-                        /* Here, we're starting a new regular script run */
-                        ret = reg_node(pRExC_state, SROPEN);
-                        RExC_in_script_run = 1;
-                        is_open = 1;
-                        goto parse_rest;
-                    }
+
 
                     /* Here, we are starting an atomic script run.  This is
                      * handled by recursing to deal with the atomic portion
                      * separately, enclosed in SROPEN ... SRCLOSE nodes */
-
+                    if (*RExC_parse == ')') {
+                        ret = reg_node(pRExC_state, NOTHING);
+                        RExC_parse++;
+                        DEBUG_PARSE("empty-script-run ");
+                        return ret; /* early exit! */
+                    }
+                    DEBUG_PARSE("script-run ");
                     ret = reg_node(pRExC_state, SROPEN);
 
                     RExC_in_script_run = 1;
+
+                    if (paren == 's') {
+                        /* Here, we're starting a new regular script run */
+                        is_open = 1;
+                        goto parse_rest;
+                    }
+
 
                     atomic = reg(pRExC_state, 'r', &flags, depth);
                     if (flags & (RESTART_PARSE|NEED_UTF8)) {
