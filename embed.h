@@ -188,7 +188,7 @@
 #define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
-#define grok_bin_oct_hex(a,b,c,d,e)	Perl_grok_bin_oct_hex(aTHX_ a,b,c,d,e)
+#define grok_bin_oct_hex(a,b,c,d,e,f,g)	Perl_grok_bin_oct_hex(aTHX_ a,b,c,d,e,f,g)
 #define grok_infnan(a,b)	Perl_grok_infnan(aTHX_ a,b)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
 #define grok_number_flags(a,b,c,d)	Perl_grok_number_flags(aTHX_ a,b,c,d)
@@ -1687,6 +1687,9 @@
 #define mro_clean_isarev(a,b,c,d,e,f)	S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)
 #define mro_gather_and_rename(a,b,c,d,e)	S_mro_gather_and_rename(aTHX_ a,b,c,d,e)
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
+#  endif
+#  if defined(PERL_IN_NUMERIC_C)
+#define output_non_portable(a)	S_output_non_portable(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_OP_C)
 #define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)

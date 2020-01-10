@@ -1168,7 +1168,12 @@ Cpd	|UV	|grok_bin_oct_hex|NN const char* start			    \
 				 |NN STRLEN* len_p			    \
 				 |NN I32* flags				    \
 			         |NULLOK NV *result			    \
-				 |const unsigned shift
+				 |const unsigned shift			    \
+				 |const U8 lookup_bit			    \
+				 |const char prefix
+#ifdef PERL_IN_NUMERIC_C
+S	|void	|output_non_portable|const U8 shift
+#endif
 EXpdT	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg

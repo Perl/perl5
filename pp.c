@@ -3084,11 +3084,16 @@ PP(pp_oct)
     if (*tmps == '0')
         tmps++, len--;
     if (isALPHA_FOLD_EQ(*tmps, 'x')) {
+        tmps++, len--;
+        flags |= PERL_SCAN_DISALLOW_PREFIX;
     hex:
         result_uv = grok_hex (tmps, &len, &flags, &result_nv);
     }
-    else if (isALPHA_FOLD_EQ(*tmps, 'b'))
+    else if (isALPHA_FOLD_EQ(*tmps, 'b')) {
+        tmps++, len--;
+        flags |= PERL_SCAN_DISALLOW_PREFIX;
         result_uv = grok_bin (tmps, &len, &flags, &result_nv);
+    }
     else
         result_uv = grok_oct (tmps, &len, &flags, &result_nv);
 

@@ -331,33 +331,71 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     return grok_oct(start, len_p, flags, result);
 }
 
+STATIC void
+S_output_non_portable(pTHX_ const U8 base)
+{
+    /* Display the proper message for a number in the given input base not
+     * fitting in 32 bits */
+    const char * which = (base == 2)
+                      ? "Binary number > 0b11111111111111111111111111111111"
+                      : (base == 8)
+                        ? "Octal number > 037777777777"
+                        : "Hexadecimal number > 0xffffffff";
+
+    PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE;
+
+    /* Also there are listings for the other two.  That's because, since they
+     * are the first word, it would be hard for a user to find them there
+     * starting with a %s */
+    /* diag_listed_as: Hexadecimal number > 0xffffffff non-portable */
+    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE), "%s non-portable", which);
+}
+
 UV
 Perl_grok_bin_oct_hex(pTHX_ const char *start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
-                        const unsigned shift) /* 1 for binary; 3 for octal;
+                        const unsigned shift, /* 1 for binary; 3 for octal;
                                                  4 for hex */
+                        const U8 class_bit,
+                        const char prefix
+                     )
+
 {
-    const char *s = start;
+    const char *s0 = start;
+    const char *s;
     STRLEN len = *len_p;
+    STRLEN bytes_so_far;    /* How many real digits have been processed */
     UV value = 0;
     NV value_nv = 0;
-    const PERL_UINT_FAST8_T base = 1 << shift;
-    const UV max_div= UV_MAX / base;
-    const PERL_UINT_FAST8_T class_bit = (base == 2)
-                                        ? _CC_BINDIGIT
-                                        : (base == 8)
-                                          ? _CC_OCTDIGIT
-                                          : _CC_XDIGIT;
+    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+    const UV max_div= UV_MAX / base;    /* Value above which, the next digit
+                                           processed would overflow */
     const I32 input_flags = *flags;
     const bool allow_underscores =
                                 cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
-    bool already_output_overflow_warning = FALSE;
+    bool overflowed = FALSE;
 
     /* In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
-    UV factor = 1;
+    UV factor;
+
+    /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
+     * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
+     * find the numeric value of a digit.  That requires more instructions than
+     * OCTAL_VALUE would, but gives the same result for the narrowed range of
+     * octal digits; same for binary.  If it were ever critical to squeeze more
+     * performance from this, the function could become grok_hex, and a regen
+     * perl script could scan it and write out two edited copies for the other
+     * two functions.  That would improve the performance of all three
+     * somewhat.  Besides eliminating XDIGIT_VALUE for the other two, extra
+     * parameters are now passed to this to avoid conditionals.  Those could
+     * become declared consts, like:
+     *      const U8 base = 16;
+     *      const U8 base = 8;
+     *      ...
+     */
 
     PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
 
@@ -366,25 +404,78 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     /* Clear output flags; unlikely to find a problem that sets them */
     *flags = 0;
 
-    if (base != 8 && !(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
-        const char prefix = base == 2 ? 'b' : 'x';
+    if (!(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
 
         /* strip off leading b or 0b; x or 0x.
            for compatibility silently suffer "b" and "0b" as valid binary; "x"
            and "0x" as valid hex numbers. */
         if (len >= 1) {
-            if (isALPHA_FOLD_EQ(s[0], prefix)) {
-                s++;
+            if (isALPHA_FOLD_EQ(s0[0], prefix)) {
+                s0++;
                 len--;
             }
-            else if (len >= 2 && s[0] == '0' && (isALPHA_FOLD_EQ(s[1], prefix))) {
-                s+=2;
+            else if (len >= 2 && s0[0] == '0' && (isALPHA_FOLD_EQ(s0[1], prefix))) {
+                s0+=2;
                 len-=2;
             }
         }
     }
 
-    for (; len-- && *s; s++) {
+    s = s0; /* s0 potentially advanced from 'start' */
+
+    /* Unroll the loop so that the first 7 digits are branchless except for the
+     * switch.  An eighth one could overflow a 32 bit word.  This should
+     * completely handle the common case without needing extra checks */
+    switch (len) {
+      case 0:
+          return 0;
+      default:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 6:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 5:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 4:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 3:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 2:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 1:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+
+          if (LIKELY(len <= 7)) {
+              return value;
+          }
+
+          s++;
+          break;
+    }
+
+    bytes_so_far = s - s0;
+    factor = shift << bytes_so_far;
+    len -= bytes_so_far;
+
+    for (; len--; s++) {
         if (_generic_isCC(*s, class_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
@@ -416,8 +507,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             value = XDIGIT_VALUE(*s);
             factor = 1 << shift;
 
-            if (! already_output_overflow_warning) {
-                already_output_overflow_warning = TRUE;
+            if (! overflowed) {
+                overflowed = TRUE;
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
                                        "Integer overflow in %s number",
                                        (base == 16) ? "hexadecimal"
@@ -438,14 +529,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             goto redo;
         }
 
-        if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
+        if (      *s
+            && ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
             &&    ckWARN(WARN_DIGIT))
         {
             if (base != 8) {
                 Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                                    "Illegal %s digit '%c' ignored",
-                                      ((base == 2)
-                                      ? "binary"
+                                   ((base == 2)
+                                    ? "binary"
                                       : "hexadecimal"),
                                     *s);
             }
@@ -464,35 +556,24 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
         break;
     }
 
-    /* Calculate the final overflow approximation */
-    if (value_nv != 0.0) {
-        value_nv *= (NV) factor;
-        value_nv += (NV) value;
-    }
-
-    if (   ( value_nv > 4294967295.0)
-#if UVSIZE > 4
-        || (      value_nv == 0.0 && value > 0xffffffff
-            && ! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))
-#endif
-    ) {
-        const char * which = (base == 2)
-                          ? "Binary number > 0b11111111111111111111111111111111"
-                          : (base == 8)
-                            ? "Octal number > 037777777777"
-                            : "Hexadecimal number > 0xffffffff";
-        /* Also there are listings for the other two.  Since they are the first
-         * word, it would be hard for a user to find them there starting with a
-         * %s. */
-        /* diag_listed_as: Hexadecimal number > 0xffffffff non-portable */
-        Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE), "%s non-portable", which);
-    }
-
     *len_p = s - start;
 
-    if (value_nv == 0.0) {  /* No overflow */
+    if (LIKELY(! overflowed)) {
+#if UVSIZE > 4
+        if (      UNLIKELY(value > 0xffffffff)
+            && ! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))
+        {
+            output_non_portable(base);
+        }
+#endif
         return value;
     }
+
+    /* Overflowed: Calculate the final overflow approximation */
+    value_nv *= (NV) factor;
+    value_nv += (NV) value;
+
+    output_non_portable(base);
 
     *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
     if (result)
