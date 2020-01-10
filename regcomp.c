@@ -343,9 +343,14 @@ struct RExC_state_t {
 
 #define PBYTE(u8str,paren) ((U8*)(u8str))[(paren) >> 3]
 #define PBITVAL(paren) (1 << ((paren) & 7))
-#define PAREN_TEST(u8str,paren) ( PBYTE(u8str,paren) & PBITVAL(paren))
-#define PAREN_SET(u8str,paren) PBYTE(u8str,paren) |= PBITVAL(paren)
-#define PAREN_UNSET(u8str,paren) PBYTE(u8str,paren) &= (~PBITVAL(paren))
+#define PAREN_OFFSET(depth) \
+    (RExC_study_chunk_recursed + (depth) * RExC_study_chunk_recursed_bytes)
+#define PAREN_TEST(depth, paren) \
+    (PBYTE(PAREN_OFFSET(depth), paren) & PBITVAL(paren))
+#define PAREN_SET(depth, paren) \
+    (PBYTE(PAREN_OFFSET(depth), paren) |= PBITVAL(paren))
+#define PAREN_UNSET(depth, paren) \
+    (PBYTE(PAREN_OFFSET(depth), paren) &= ~PBITVAL(paren))
 
 #define REQUIRE_UTF8(flagp) STMT_START {                                   \
                                      if (!UTF) {                           \
@@ -4542,15 +4547,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             U32 j;
             for ( j = 0 ; j < recursed_depth ; j++ ) {
                 for ( i = 0 ; i < (U32)RExC_total_parens ; i++ ) {
-                    if (
-                        PAREN_TEST(RExC_study_chunk_recursed +
-                                   ( j * RExC_study_chunk_recursed_bytes), i )
-                        && (
-                            !j ||
-                            !PAREN_TEST(RExC_study_chunk_recursed +
-                                   (( j - 1 ) * RExC_study_chunk_recursed_bytes), i)
-                        )
-                    ) {
+                    if (PAREN_TEST(j, i) && (!j || !PAREN_TEST(j - 1, i))) {
                         Perl_re_printf( aTHX_ " %d",(int)i);
                         break;
                     }
@@ -5152,8 +5149,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                 if (
                     !recursed_depth
-                    ||
-                    !PAREN_TEST(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes), paren)
+                    || !PAREN_TEST(recursed_depth - 1, paren)
                 ) {
                     /* it is quite possible that there are more efficient ways
                      * to do this. We maintain a bitmap per level of recursion
@@ -5168,13 +5164,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     if (!recursed_depth) {
                         Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes, U8);
                     } else {
-                        Copy(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes),
-                             RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes),
+                        Copy(PAREN_OFFSET(recursed_depth - 1),
+                             PAREN_OFFSET(recursed_depth),
                              RExC_study_chunk_recursed_bytes, U8);
                     }
                     /* we havent recursed into this paren yet, so recurse into it */
                     DEBUG_STUDYDATA("gosub-set", data, depth, is_inf);
-                    PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
+                    PAREN_SET(recursed_depth, paren);
                     my_recursed_depth= recursed_depth + 1;
                 } else {
                     DEBUG_STUDYDATA("gosub-inf", data, depth, is_inf);
