@@ -1740,8 +1740,6 @@ Acceptance of these code points is a Perl extension, and you should
 expect that nothing other than Perl can handle them; Perl itself on
 EBCDIC platforms before v5.24 does not handle them.
 
-Code points above 0xFFFF_FFFF require larger than a 32 bit word.
-
 Perl also makes no guarantees that the representation of these code
 points won't change at some point in the future, say when machines
 become available that have larger than a 64-bit word.  At that time,
