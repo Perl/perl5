@@ -352,7 +352,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
                                    category, flag);
             }
             else {
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE), format, uv);
+                Perl_ck_warner_d(aTHX_ category, format, uv);
             }
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
