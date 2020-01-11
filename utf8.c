@@ -340,6 +340,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
             /* Choose the more dire applicable warning */
             if (UNICODE_IS_PERL_EXTENDED(uv)) {
                 format = perl_extended_cp_format;
+                category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
                 if (flags & (UNICODE_WARN_PERL_EXTENDED
                             |UNICODE_DISALLOW_PERL_EXTENDED))
                 {
@@ -351,8 +352,11 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
                 *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),
                                    category, flag);
             }
-            else {
-                Perl_ck_warner_d(aTHX_ category, format, uv);
+            else if (    ckWARN_d(WARN_NON_UNICODE)
+                     || (   (flag & UNICODE_GOT_PERL_EXTENDED)
+                         && ckWARN(WARN_PORTABLE)))
+            {
+                Perl_warner(aTHX_ category, format, uv);
             }
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
@@ -2087,9 +2091,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 if (UNLIKELY(isUTF8_PERL_EXTENDED(s0))) {
                     if (  ! (flags & UTF8_CHECK_ONLY)
                         &&  (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
-                        &&  (msgs || ckWARN_d(WARN_NON_UNICODE)))
+                        &&  (msgs || (   ckWARN_d(WARN_NON_UNICODE)
+                                      || ckWARN(WARN_PORTABLE))))
                     {
-                        pack_warn = packWARN(WARN_NON_UNICODE);
+                        pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
 
                         /* If it is an overlong that evaluates to a code point
                          * that doesn't have to use the Perl extended UTF-8, it

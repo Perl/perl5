@@ -1645,7 +1645,7 @@ foreach my $test (@tests) {
 
               # We classify the warnings into certain "interesting" types,
               # described later
-              foreach my $warning_type (0..4) {
+              foreach my $warning_type (0..5) {
                 next if $skip_most_tests && $warning_type != 1;
                 foreach my $use_warn_flag (0, 1) {
                     if ($use_warn_flag) {
@@ -1709,8 +1709,9 @@ foreach my $test (@tests) {
                             = $controlling_warning_category eq 'non_unicode';
                         $expect_warnings_for_malformed = $which_func;
                     }
-                    elsif ($warning_type == 4) {  # Like type 3, but uses the
-                                                  # PERL_EXTENDED flags
+                    elsif ($warning_type =~ /^[45]$/) {
+                        # Like type 3, but uses the PERL_EXTENDED flags, and 5
+                        # uses PORTABLE warnings;
                         # The complement flags were set up so that the
                         # PERL_EXTENDED flags have been tested that they don't
                         # trigger wrongly for too small code points.  And the
@@ -1720,7 +1721,13 @@ foreach my $test (@tests) {
                         # trigger the PERL_EXTENDED flags.
                         next if ! requires_extended_utf8($allowed_uv);
                         next if $controlling_warning_category ne 'non_unicode';
-                        $eval_warn = "no warnings; use warnings 'non_unicode'";
+                        $eval_warn = "no warnings;";
+                        if ($warning_type == 4) {
+                            $eval_warn .= " use warnings 'non_unicode'";
+                        }
+                        else {
+                            $eval_warn .= " use warnings 'portable'";
+                        }
                         $expect_regular_warnings = 1;
                         $expect_warnings_for_overflow = 1;
                         $expect_warnings_for_malformed = 0;

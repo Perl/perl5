@@ -1731,10 +1731,13 @@ another template code following the slash.  See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, and not portable
 
-(S non_unicode) You had a code point that has never been in any
+(S non_unicode portable) You had a code point that has never been in any
 standard, so it is likely that languages other than Perl will NOT
-understand it.  At one time, it was legal in some standards to have code
-points up to 0x7FFF_FFFF, but not higher, and this code point is higher.
+understand it.  This code point also will not fit in a 32-bit word on
+ASCII platforms and therefore is non-portable between systems.
+
+At one time, it was legal in some standards to have code points up to
+0x7FFF_FFFF, but not higher, and this code point is higher.
 
 Acceptance of these code points is a Perl extension, and you should
 expect that nothing other than Perl can handle them; Perl itself on
