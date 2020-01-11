@@ -1743,8 +1743,8 @@ EBCDIC platforms before v5.24 does not handle them.
 Perl also makes no guarantees that the representation of these code
 points won't change at some point in the future, say when machines
 become available that have larger than a 64-bit word.  At that time,
-files written by an older Perl would require conversion before being
-readable by a newer Perl.
+files containing any of these, written by an older Perl might require
+conversion before being readable by a newer Perl.
 
 =item Code point 0x%X is not Unicode, may not be portable
 
