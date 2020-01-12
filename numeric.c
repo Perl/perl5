@@ -350,7 +350,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                                         : (base == 8)
                                           ? _CC_OCTDIGIT
                                           : _CC_XDIGIT;
-    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
+    const I32 input_flags = *flags;
+    const bool allow_underscores =
+                                cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
     bool already_output_overflow_warning = FALSE;
 
     /* In overflows, this keeps track of how much to multiply the overflowed NV
@@ -361,7 +363,10 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     ASSUME(inRANGE(shift, 1, 4) && shift != 2);
 
-    if (base != 8 && !(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
+    /* Clear output flags; unlikely to find a problem that sets them */
+    *flags = 0;
+
+    if (base != 8 && !(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
         const char prefix = base == 2 ? 'b' : 'x';
 
         /* strip off leading b or 0b; x or 0x.
@@ -433,7 +438,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             goto redo;
         }
 
-        if (   ! (*flags & PERL_SCAN_SILENT_ILLDIGIT)
+        if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
             &&    ckWARN(WARN_DIGIT))
         {
             if (base != 8) {
@@ -468,7 +473,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     if (   ( value_nv > 4294967295.0)
 #if UVSIZE > 4
         || (      value_nv == 0.0 && value > 0xffffffff
-            && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
+            && ! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))
 #endif
     ) {
         const char * which = (base == 2)
@@ -486,7 +491,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     *len_p = s - start;
 
     if (value_nv == 0.0) {  /* No overflow */
-        *flags = 0;
         return value;
     }
 
