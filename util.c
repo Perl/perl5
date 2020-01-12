@@ -5574,36 +5574,6 @@ Perl_my_strlcpy(char *dst, const char *src, Size_t size)
 }
 #endif
 
-/*
-=for apidoc my_strnlen
-
-The C library C<strnlen> if available, or a Perl implementation of it.
-
-C<my_strnlen()> computes the length of the string, up to C<maxlen>
-characters.  It will will never attempt to address more than C<maxlen>
-characters, making it suitable for use with strings that are not
-guaranteed to be NUL-terminated.
-
-=cut
-
-Description stolen from http://man.openbsd.org/strnlen.3,
-implementation stolen from PostgreSQL.
-*/
-#ifndef HAS_STRNLEN
-Size_t
-Perl_my_strnlen(const char *str, Size_t maxlen)
-{
-    const char *p = str;
-
-    PERL_ARGS_ASSERT_MY_STRNLEN;
-
-    while(maxlen-- && *p)
-        p++;
-
-    return p - str;
-}
-#endif
-
 #if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1400) && (WINVER < 0x0500)
 /* VC7 or 7.1, building with pre-VC7 runtime libraries. */
 long _ftol( double ); /* Defined by VC6 C libs. */

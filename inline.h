@@ -2495,6 +2495,36 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
     return 1;
 }
 
+/*
+=for apidoc my_strnlen
+
+The C library C<strnlen> if available, or a Perl implementation of it.
+
+C<my_strnlen()> computes the length of the string, up to C<maxlen>
+characters.  It will will never attempt to address more than C<maxlen>
+characters, making it suitable for use with strings that are not
+guaranteed to be NUL-terminated.
+
+=cut
+
+Description stolen from http://man.openbsd.org/strnlen.3,
+implementation stolen from PostgreSQL.
+*/
+#ifndef HAS_STRNLEN
+
+PERL_STATIC_INLINE Size_t
+Perl_my_strnlen(const char *str, Size_t maxlen)
+{
+    const char *end = (char *) memchr(str, '\0', maxlen);
+
+    PERL_ARGS_ASSERT_MY_STRNLEN;
+
+    if (end == NULL) return maxlen;
+    return end - str;
+}
+
+#endif
+
 #if ! defined (HAS_MEMRCHR) && (defined(PERL_CORE) || defined(PERL_EXT))
 
 PERL_STATIC_INLINE void *

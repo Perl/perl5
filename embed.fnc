@@ -3356,7 +3356,7 @@ ApTd	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t siz
 #endif
 
 #ifndef HAS_STRNLEN
-ApTd	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
+AipTd	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
 #endif
 
 #ifndef HAS_MKOSTEMP
