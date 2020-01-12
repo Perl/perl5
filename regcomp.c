@@ -5233,17 +5233,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                  || OP(scan) == LEXACT_REQ8
                  || OP(scan) == EXACTL)
         {
-	    SSize_t l = STR_LEN(scan);
+	    SSize_t bytelen = STR_LEN(scan), charlen;
 	    UV uc;
-            assert(l);
+            assert(bytelen);
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
-		uc = utf8_to_uvchr_buf(s, s + l, NULL);
-		l = utf8_length(s, s + l);
+		uc = utf8_to_uvchr_buf(s, s + bytelen, NULL);
+		charlen = utf8_length(s, s + bytelen);
 	    } else {
 		uc = *((U8*)STRING(scan));
+                charlen = bytelen;
 	    }
-	    min += l;
+	    min += charlen;
 	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
 		/* The code below prefers earlier match for fixed
 		   offset, later match for variable offset.  */
@@ -5252,7 +5253,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
  		    data->last_start_max = is_inf
  			? SSize_t_MAX : data->pos_min + data->pos_delta;
 		}
-		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
+		sv_catpvn(data->last_found, STRING(scan), bytelen);
 		if (UTF)
 		    SvUTF8_on(data->last_found);
 		{
@@ -5261,10 +5262,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			mg_find(sv, PERL_MAGIC_utf8) : NULL;
 		    if (mg && mg->mg_len >= 0)
 			mg->mg_len += utf8_length((U8*)STRING(scan),
-                                              (U8*)STRING(scan)+STR_LEN(scan));
+                                              (U8*)STRING(scan) + bytelen);
 		}
-		data->last_end = data->pos_min + l;
-		data->pos_min += l; /* As in the first entry. */
+		data->last_end = data->pos_min + charlen;
+		data->pos_min += charlen; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
 	    }
 
@@ -5286,7 +5287,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	}
         else if (PL_regkind[OP(scan)] == EXACT) {
             /* But OP != EXACT!, so is EXACTFish */
-	    SSize_t l = STR_LEN(scan);
+	    SSize_t bytelen = STR_LEN(scan), charlen;
             const U8 * s = (U8*)STRING(scan);
 
 	    /* Search for fixed substrings supports EXACT only. */
@@ -5294,17 +5295,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		assert(data);
                 scan_commit(pRExC_state, data, minlenp, is_inf);
 	    }
-	    if (UTF) {
-		l = utf8_length(s, s + l);
-	    }
+            charlen = UTF ? utf8_length(s, s + bytelen) : bytelen;
 	    if (unfolded_multi_char) {
                 RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
 	    }
-	    min += l - min_subtract;
+	    min += charlen - min_subtract;
             assert (min >= 0);
             delta += min_subtract;
 	    if (flags & SCF_DO_SUBSTR) {
-		data->pos_min += l - min_subtract;
+		data->pos_min += charlen - min_subtract;
 		if (data->pos_min < 0) {
                     data->pos_min = 0;
                 }
