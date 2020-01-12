@@ -233,7 +233,6 @@ leading underscore is accepted.
 =for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
 =for apidoc Amnh||PERL_SCAN_GREATER_THAN_UV_MAX
 =for apidoc Amnh||PERL_SCAN_SILENT_ILLDIGIT
-=for apidoc Amnh||PERL_SCAN_TRAILING
 
 =cut
 
@@ -876,6 +875,8 @@ number is larger than a UV.
 C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
 non-numeric text on an otherwise successful I<grok>, setting
 C<IS_NUMBER_TRAILING> on the result.
+
+=for apidoc Amnh||PERL_SCAN_TRAILING
 
 =for apidoc grok_number
 
