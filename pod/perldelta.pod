@@ -212,6 +212,10 @@ L<Code point 0x%X is not Unicode, and not portable|perldiag/"Code point 0x%X is 
 This is actually not a new message, but it is now output when the
 warnings category C<portable> is enabled.
 
+When raised during regular expression pattern compilation, the warning
+has extra text added at the end marking where precisely in the pattern
+it occured.
+
 =item *
 
 L<message|perldiag/"message">

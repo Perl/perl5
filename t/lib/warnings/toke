@@ -1718,3 +1718,12 @@ $_ = "";
 s/^/ @x {a} /e
 EXPECT
 Scalar value @x{"a"} better written as $x{"a"} at - line 4.
+########
+# NAME Warn on 32-bit code points
+# SKIP ? $Config{uvsize} < 8
+use warnings 'portable';
+my $a = "\x{8000_0000}";
+my $b = "\o{20_000_000_000}";
+EXPECT
+Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable at - line 2.
+Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable at - line 3.

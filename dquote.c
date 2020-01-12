@@ -59,7 +59,6 @@ bool
 Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
                       const char** error_msg,
                       const bool output_warning, const bool strict,
-                      const bool silence_non_portable,
                       const bool UTF)
 {
 
@@ -88,16 +87,13 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
  *	    them
  *	strict is true if this should fail instead of warn if there are
  *	    non-octal digits within the braces
- *      silence_non_portable is true if to suppress warnings about the code
- *          point returned being too large to fit on all platforms.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
     STRLEN numbers_len;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
 		| PERL_SCAN_DISALLOW_PREFIX
-		/* XXX Until the message is improved in grok_oct, handle errors
-		 * ourselves */
+                | PERL_SCAN_SILENT_NON_PORTABLE
 	        | PERL_SCAN_SILENT_ILLDIGIT;
 
     PERL_ARGS_ASSERT_GROK_BSLASH_O;
@@ -128,10 +124,6 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
         (*s)++;    /* Move past the } */
 	*error_msg = "Empty \\o{}";
 	return FALSE;
-    }
-
-    if (silence_non_portable) {
-        flags |= PERL_SCAN_SILENT_NON_PORTABLE;
     }
 
     *uv = grok_oct(*s, &numbers_len, &flags, NULL);
@@ -165,7 +157,6 @@ bool
 Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
                       const char** error_msg,
                       const bool output_warning, const bool strict,
-                      const bool silence_non_portable,
                       const bool UTF)
 {
 
@@ -197,13 +188,12 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
  *	    fail instead of warn or be silent.  For example, it requires
  *	    exactly 2 digits following the \x (when there are no braces).
  *	    3 digits could be a mistake, so is forbidden in this mode.
- *      silence_non_portable is true if to suppress warnings about the code
- *          point returned being too large to fit on all platforms.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
     STRLEN numbers_len;
-    I32 flags = PERL_SCAN_DISALLOW_PREFIX;
+    I32 flags = PERL_SCAN_DISALLOW_PREFIX
+              | PERL_SCAN_SILENT_NON_PORTABLE;
 
 
     PERL_ARGS_ASSERT_GROK_BSLASH_X;
@@ -275,9 +265,6 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
     }
 
     flags |= PERL_SCAN_ALLOW_UNDERSCORES;
-    if (silence_non_portable) {
-        flags |= PERL_SCAN_SILENT_NON_PORTABLE;
-    }
 
     *uv = grok_hex(*s, &numbers_len, &flags, NULL);
     /* Note that if has non-hex, will ignore everything starting with that up

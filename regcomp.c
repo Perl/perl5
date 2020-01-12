@@ -894,6 +894,20 @@ static const scan_data_t zero_scan_data = {
                                        "%s" REPORT_LOCATION,            \
                                   m, REPORT_LOCATION_ARGS(loc)))
 
+#define ckWARN2_non_literal_string(loc, packwarn, m, a1)                    \
+    STMT_START {                                                            \
+                char * format;                                              \
+                Size_t format_size = strlen(m) + strlen(REPORT_LOCATION)+ 1;\
+                Newx(format, format_size, char);                            \
+                my_strlcpy(format, m, format_size);                         \
+                my_strlcat(format, REPORT_LOCATION, format_size);           \
+                SAVEFREEPV(format);                                         \
+                _WARN_HELPER(loc, packwarn,                                 \
+                      Perl_ck_warner(aTHX_ packwarn,                        \
+                                        format,                             \
+                                        a1, REPORT_LOCATION_ARGS(loc)));    \
+    } STMT_END
+
 #define	ckWARNreg(loc,m) 					        \
     _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
                       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
@@ -14077,9 +14091,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 						       &error_msg,
 						       TO_OUTPUT_WARNINGS(p),
                                                        (bool) RExC_strict,
-                                                       TRUE, /* Output warnings
-                                                                for non-
-                                                                portables */
                                                        UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
@@ -14102,9 +14113,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 						       &error_msg,
                                                        TO_OUTPUT_WARNINGS(p),
                                                        (bool) RExC_strict,
-                                                       TRUE, /* Silence warnings
-                                                                for non-
-                                                                portables */
                                                        UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
@@ -14249,6 +14257,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 if (ender > 255) {
                     REQUIRE_UTF8(flagp);
+                    if (   UNICODE_IS_PERL_EXTENDED(ender)
+                        && TO_OUTPUT_WARNINGS(p))
+                    {
+                        ckWARN2_non_literal_string(p,
+                                                   packWARN(WARN_PORTABLE),
+                                                   PL_extended_cp_format,
+                                                   ender);
+                    }
                 }
 
                 /* We need to check if the next non-ignored thing is a
@@ -17612,7 +17628,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 					       &error_msg,
                                                TO_OUTPUT_WARNINGS(RExC_parse),
                                                strict,
-                                               silence_non_portable,
                                                UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
@@ -17631,7 +17646,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 					       &error_msg,
 					       TO_OUTPUT_WARNINGS(RExC_parse),
                                                strict,
-                                               silence_non_portable,
                                                UTF);
                     if (! valid) {
 			vFAIL(error_msg);
@@ -17934,6 +17948,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	/* non-Latin1 code point implies unicode semantics. */
 	if (value > 255) {
             REQUIRE_UNI_RULES(flagp, 0);
+            if (  ! silence_non_portable
+                &&  UNICODE_IS_PERL_EXTENDED(value)
+                &&  TO_OUTPUT_WARNINGS(RExC_parse))
+            {
+                ckWARN2_non_literal_string(RExC_parse,
+                                           packWARN(WARN_PORTABLE),
+                                           PL_extended_cp_format,
+                                           value);
+            }
 	}
 
         /* Ready to process either the single value, or the completed range.

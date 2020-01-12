@@ -1142,7 +1142,6 @@ EpRX	|bool	|grok_bslash_x	|NN char** s		 \
 				|NN const char** error_msg       \
 				|const bool output_warning       \
 				|const bool strict               \
-				|const bool silence_non_portable \
 				|const bool utf8
 EpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
 EpRX	|bool	|grok_bslash_o	|NN char** s		 \
@@ -1151,7 +1150,6 @@ EpRX	|bool	|grok_bslash_o	|NN char** s		 \
 				|NN const char** error_msg       \
 				|const bool output_warning       \
 				|const bool strict               \
-				|const bool silence_non_portable \
 				|const bool utf8
 EiR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
