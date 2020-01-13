@@ -57,7 +57,7 @@ C<-1> on such platforms.
 Some signals can be neither trapped nor ignored, such as the KILL and STOP
 (but not the TSTP) signals. Note that ignoring signals makes them disappear.
 If you only want them blocked temporarily without them getting lost you'll
-have to use POSIX' sigprocmask.
+have to use the C<POSIX> module's L<sigprocmask|POSIX/sigprocmask>.
 
 Sending a signal to a negative process ID means that you send the signal
 to the entire Unix process group.  This code sends a hang-up signal to all
