@@ -220,7 +220,8 @@ and removes the program's warning.
 You can enable automatic UTF-8-ification of your standard file
 handles, default C<open()> layer, and C<@ARGV> by using either
 the C<-C> command line switch or the C<PERL_UNICODE> environment
-variable, see L<perlrun> for the documentation of the C<-C> switch.
+variable, see L<perlrun|perlrun/-C [numberE<sol>list]> for the
+documentation of the C<-C> switch.
 
 Note that this means that Perl expects other software to work the same
 way:

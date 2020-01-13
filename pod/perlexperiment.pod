@@ -97,7 +97,7 @@ See L<re/'strict' mode>
 The ticket for this feature is
 L<[perl #13198]|https://github.com/Perl/perl5/issues/13198>.
 
-See also L<perlrun>
+See also L<perlrun/PERLIO>
 
 =item Declaring a reference to a variable
 
@@ -223,7 +223,7 @@ Accepted in Perl 5.20.0
 
 =item The <:pop> IO pseudolayer
 
-See also L<perlrun>
+See also L<perlrun/PERLIO>
 
 Accepted in Perl 5.20.0
 

@@ -249,10 +249,10 @@ When the taint mode (C<-T>) is in effect, the environment variables
 C<PERL5LIB> and C<PERLLIB>
 are ignored by Perl.  You can still adjust C<@INC> from outside the
 program by using the C<-I> command line option as explained in
-L<perlrun>.  The two environment variables are ignored because
-they are obscured, and a user running a program could be unaware that
-they are set, whereas the C<-I> option is clearly visible and
-therefore permitted.
+L<perlrun|perlrun/-Idirectory>.  The two environment variables are
+ignored because they are obscured, and a user running a program could
+be unaware that they are set, whereas the C<-I> option is clearly
+visible and therefore permitted.
 
 Another way to modify C<@INC> without modifying the program, is to use
 the C<lib> pragma, e.g.:
@@ -626,4 +626,5 @@ the issues overlap.
 
 =head1 SEE ALSO
 
-L<perlrun> for its description of cleaning up environment variables.
+L<perlrun/ENVIRONMENT> for its description of cleaning up environment
+variables.

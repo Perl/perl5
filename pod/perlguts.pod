@@ -2736,7 +2736,7 @@ compiled with C++, to maintain compliance with its standard.
 Note that any filehandle being printed to under UTF-8 must be expecting
 UTF-8 in order to get good results and avoid Wide-character warnings.
 One way to do this for typical filehandles is to invoke perl with the
-C<-C>> parameter.  (See L<perlrun/-C [number/list]>.
+C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
 You can use this to concatenate two scalars:
 
@@ -2774,7 +2774,7 @@ string.
 Note that any filehandle being printed to under UTF-8 must be expecting
 UTF-8 in order to get good results and avoid Wide-character warnings.
 One way to do this for typical filehandles is to invoke perl with the
-C<-C>> parameter.  (See L<perlrun/-C [number/list]>.
+C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
 =head2 Formatted Printing of C<Size_t> and C<SSize_t>
 

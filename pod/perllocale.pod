@@ -1533,8 +1533,8 @@ instead use the L<PerlIO::locale> module, or the L<Encode::Locale>
 module, both available from CPAN.  The latter module also has methods to
 ease the handling of C<ARGV> and environment variables, and can be used
 on individual strings.  If you know that all your locales will be
-UTF-8, as many are these days, you can use the L<B<-C>|perlrun/-C>
-command line switch.
+UTF-8, as many are these days, you can use the
+L<B<-C>|perlrun/-C [numberE<sol>list]> command line switch.
 
 This form of the pragma allows essentially seamless handling of locales
 with Unicode.  The collation order will be by Unicode code point order.
@@ -1610,7 +1610,8 @@ lowercase of U+0178 is itself.
 The same problems ensue if you enable automatic UTF-8-ification of your
 standard file handles, default C<open()> layer, and C<@ARGV> on non-ISO8859-1,
 non-UTF-8 locales (by using either the B<-C> command line switch or the
-C<PERL_UNICODE> environment variable; see L<perlrun>).
+C<PERL_UNICODE> environment variable; see
+L<perlrun|perlrun/-C [numberE<sol>list]>).
 Things are read in as UTF-8, which would normally imply a Unicode
 interpretation, but the presence of a locale causes them to be interpreted
 in that locale instead.  For example, a 0xD7 code point in the Unicode

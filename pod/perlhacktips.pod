@@ -777,9 +777,10 @@ program, and to see in which C function we are at (without the debugging
 information we might see only the numerical addresses of the functions,
 which is not very helpful). It will also turn on the C<DEBUGGING>
 compilation symbol which enables all the internal debugging code in Perl.
-There are a whole bunch of things you can debug with this: L<perlrun>
-lists them all, and the best way to find out about them is to play about
-with them.  The most useful options are probably
+There are a whole bunch of things you can debug with this:
+L<perlrun|perlrun/-Dletters> lists them all, and the best way to find out
+about them is to play about with them.  The most useful options are
+probably
 
     l  Context (loop) stack processing
     s  Stack snapshots (with v, displays all stacks)
