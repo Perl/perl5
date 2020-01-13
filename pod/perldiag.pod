@@ -3270,7 +3270,7 @@ given.  This is usually a mistake, since editing STDIN in place doesn't
 make sense, and can be confusing because it can make perl look like
 it is hanging when it is really just trying to read from STDIN.  You
 should either pass a filename to edit, or remove C<-i> from the command
-line.  See L<perlrun> for more details.
+line.  See L<perlrun|perlrun/-i[extension]> for more details.
 
 =item Junk on end of regexp in regex m/%s/
 
@@ -3839,8 +3839,8 @@ couldn't be created for some peculiar reason.
 =item Module name required with -%c option
 
 (F) The C<-M> or C<-m> options say that Perl should load some module, but
-you omitted the name of the module.  Consult L<perlrun> for full details
-about C<-M> and C<-m>.
+you omitted the name of the module.  Consult
+L<perlrun|perlrun/-m[-]module> for full details about C<-M> and C<-m>.
 
 =item More than one argument to '%s' open
 
@@ -6846,13 +6846,15 @@ discovered.  See L<perlre>.
 
 =item Unknown Unicode option letter '%c'
 
-(F) You specified an unknown Unicode option.  See L<perlrun> documentation
-of the C<-C> switch for the list of known options.
+(F) You specified an unknown Unicode option.  See
+L<perlrun|perlrun/-C [numberE<sol>list]> documentation of the C<-C> switch
+for the list of known options.
 
 =item Unknown Unicode option value %d
 
-(F) You specified an unknown Unicode option.  See L<perlrun> documentation
-of the C<-C> switch for the list of known options.
+(F) You specified an unknown Unicode option.  See
+L<perlrun|perlrun/-C [numberE<sol>list]> documentation of the C<-C> switch
+for the list of known options.
 
 =item Unknown verb pattern '%s' in regex; marked by S<<-- HERE> in m/%s/
 

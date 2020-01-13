@@ -483,9 +483,9 @@ time of the C<exec()>.
 X<@F>
 
 The array C<@F> contains the fields of each line read in when autosplit
-mode is turned on.  See L<perlrun> for the B<-a> switch.  This array
-is package-specific, and must be declared or given a full package name
-if not in package main when running under C<strict 'vars'>.
+mode is turned on.  See L<perlrun|perlrun/-a> for the B<-a> switch.  This
+array is package-specific, and must be declared or given a full package
+name if not in package main when running under C<strict 'vars'>.
 
 =item @INC
 X<@INC>
@@ -577,7 +577,7 @@ built, as determined during the configuration process.  For examples
 see L<perlport/PLATFORMS>.
 
 The value is identical to C<$Config{'osname'}>.  See also L<Config>
-and the B<-V> command-line switch documented in L<perlrun>.
+and the B<-V> command-line switch documented in L<perlrun|perlrun/-V>.
 
 In Windows platforms, C<$^O> is not very helpful: since it is always
 C<MSWin32>, it doesn't tell the difference between
@@ -762,9 +762,8 @@ is considerably faster, especially for files on network drives.
 
 This variable could be set in the F<sitecustomize.pl> file to
 configure the local Perl installation to use "sloppy" C<stat()> by
-default.  See the documentation for B<-f> in
-L<perlrun|perlrun/"Command Switches"> for more information about site
-customization.
+default.  See the documentation for B<-f> in L<perlrun|perlrun/-f>
+for more information about site customization.
 
 This variable was added in Perl v5.10.0.
 
@@ -1436,7 +1435,7 @@ X<ARGVOUT>
 The special filehandle that points to the currently open output file
 when doing edit-in-place processing with B<-i>.  Useful when you have
 to do a lot of inserting and don't want to keep modifying C<$_>.  See
-L<perlrun> for the B<-i> switch.
+L<perlrun|perlrun/-i[extension]> for the B<-i> switch.
 
 =item IO::Handle->output_field_separator( EXPR )
 
@@ -2350,9 +2349,9 @@ This variable was added in Perl v5.28.0.
 =item ${^UNICODE}
 X<${^UNICODE}>
 
-Reflects certain Unicode settings of Perl.  See L<perlrun>
-documentation for the C<-C> switch for more information about
-the possible values.
+Reflects certain Unicode settings of Perl.  See
+L<perlrun|perlrun/-C [numberE<sol>list]> documentation for the C<-C>
+switch for more information about the possible values.
 
 This variable is set during Perl startup and is thereafter read-only.
 
@@ -2375,7 +2374,8 @@ X<${^UTF8LOCALE}>
 This variable indicates whether a UTF-8 locale was detected by perl at
 startup.  This information is used by perl when it's in
 adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
-switch); see L<perlrun> for more info on this.
+switch); see L<perlrun|perlrun/-C [numberE<sol>list]> for more info on
+this.
 
 This variable was added in Perl v5.8.8.
 

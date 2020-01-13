@@ -360,7 +360,7 @@ for a listing.
 
 =head1 ENVIRONMENT
 
-See L<perlrun>.
+See L<perlrun/ENVIRONMENT>.
 
 =head1 AUTHOR
 
