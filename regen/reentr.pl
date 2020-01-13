@@ -855,10 +855,10 @@ Perl_reentrant_retry(const char *f, ...)
 		    p0    = va_arg(ap, void *);
 		    asize = va_arg(ap, size_t);
 		    anint  = va_arg(ap, int);
-		    retptr = gethostbyaddr(p0, asize, anint); break;
+		    retptr = gethostbyaddr((Netdb_host_t) p0, (Netdb_hlen_t) asize, anint); break;
 	        case OP_GHBYNAME:
 		    p0 = va_arg(ap, void *);
-		    retptr = gethostbyname((char *)p0); break;
+		    retptr = gethostbyname((Netdb_name_t) p0); break;
 	        case OP_GHOSTENT:
 		    retptr = gethostent(); break;
 	        default:
