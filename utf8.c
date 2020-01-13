@@ -3350,13 +3350,13 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
     {
         unsigned int i;
-        const unsigned int * cp_list;
+        const U32 * cp_list;
         U8 * d;
 
         /* 'index' is guaranteed to be non-negative, as this is an inversion
          * map that covers all possible inputs.  See [perl #133365] */
         SSize_t index = _invlist_search(invlist, uv1);
-        IV base = invmap[index];
+        I32 base = invmap[index];
 
         /* The data structures are set up so that if 'base' is non-negative,
          * the case change is 1-to-1; and if 0, the change is to itself */
