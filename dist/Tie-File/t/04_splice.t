@@ -13,7 +13,7 @@
 
 
 $| = 1;
-my $file = "tf$$.txt";
+my $file = "tf04-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
 print "1..118\n";

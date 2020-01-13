@@ -11,7 +11,7 @@
 
 use POSIX 'SEEK_SET';
 
-my $file = "tf$$.txt";
+my $file = "tf15-$$.txt";
 1 while unlink $file;
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";

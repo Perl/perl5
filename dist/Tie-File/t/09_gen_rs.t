@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-my $file = "tf$$.txt";
+my $file = "tf09-$$.txt";
 
 print "1..59\n";
 

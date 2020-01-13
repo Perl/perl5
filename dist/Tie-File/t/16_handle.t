@@ -3,7 +3,7 @@
 # Basic operation, initializing the object from an already-open handle
 # instead of from a filename
 
-my $file = "tf$$.txt";
+my $file = "tf16-$$.txt";
 $: = Tie::File::_default_recsep();
 
 if ($^O =~ /vms/i) {

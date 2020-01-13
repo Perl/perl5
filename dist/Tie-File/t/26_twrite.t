@@ -11,7 +11,7 @@
 # $len == 0 is a pure insert; $len == length($data) is a simple overwrite.
 #
 
-my $file = "tf$$.txt";
+my $file = "tf26-$$.txt";
 
 print "1..181\n";
 

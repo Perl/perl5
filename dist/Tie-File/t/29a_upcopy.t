@@ -10,7 +10,7 @@
 # but the source and destination regions may overlap.)
 
 
-my $file = "tf$$.txt";
+my $file = "tf29-$$.txt";
 
 print "1..55\n";
 

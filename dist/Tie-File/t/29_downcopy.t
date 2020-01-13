@@ -10,7 +10,7 @@
 #
 #
 
-my $file = "tf$$.txt";
+my $file = "tf29-$$.txt";
 
 print "1..718\n";
 

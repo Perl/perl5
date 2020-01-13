@@ -8,7 +8,7 @@
 # (tests _fill_offsets_to() )
 #
 
-my $file = "tf$$.txt";
+my $file = "tf03-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
 

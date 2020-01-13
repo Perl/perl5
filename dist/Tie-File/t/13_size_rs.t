@@ -6,7 +6,7 @@
 
 use POSIX 'SEEK_SET';
 
-my $file = "tf$$.txt";
+my $file = "tf13-$$.txt";
 my $data = "rec0blahrec1blahrec2blah";
 my ($o, $n);
 

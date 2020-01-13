@@ -7,7 +7,7 @@ use strict;
 use File::Spec;
 
 use POSIX 'SEEK_SET';
-my $file = "tf$$.txt";
+my $file = "tf42-$$.txt";
 
 BEGIN
   {

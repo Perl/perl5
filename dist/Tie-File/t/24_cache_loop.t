@@ -4,7 +4,7 @@
 #
 
 use Config;
-my $file = "tf$$.txt";
+my $file = "tf24-$$.txt";
 unless ($Config{d_alarm}) {
   print "1..0\n"; exit;
 }

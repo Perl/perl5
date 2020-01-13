@@ -3,7 +3,7 @@
 # Make sure it works to open the file in read-only mode
 #
 
-my $file = "tf$$.txt";
+my $file = "tf08-$$.txt";
 $: = Tie::File::_default_recsep();
 
 print "1..13\n";

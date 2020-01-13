@@ -4,7 +4,7 @@
 # (04_splice.t checks its effect on the file)
 #
 
-my $file = "tf$$.txt";
+my $file = "tf11-$$.txt";
 my $data = "rec0blahrec1blahrec2blah";
 
 print "1..50\n";

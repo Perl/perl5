@@ -12,7 +12,7 @@
 
 use POSIX 'SEEK_SET';
 
-my $file = "tf$$.txt";
+my $file = "tf10-$$.txt";
 my $data = "rec0blahrec1blahrec2blah";
 
 print "1..101\n";

@@ -11,7 +11,7 @@
 # (Because we inserted $data at the beginning) we copy as much as possible
 # and return a string containing the remainder.
 
-my $file = "tf$$.txt";
+my $file = "tf27-$$.txt";
 $| = 1;
 
 print "1..203\n";

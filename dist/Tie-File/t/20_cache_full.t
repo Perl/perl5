@@ -3,7 +3,7 @@
 # Tests for various caching errors
 #
 
-my $file = "tf$$.txt";
+my $file = "tf20-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = join $:, "record0" .. "record9", "";
 my $V = $ENV{INTEGRITY};        # Verbose integrity checking?

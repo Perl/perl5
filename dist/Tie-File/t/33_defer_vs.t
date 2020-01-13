@@ -9,7 +9,7 @@
 #
 
 use POSIX 'SEEK_SET';
-my $file = "tf$$.txt";
+my $file = "tf33-$$.txt";
 # print "1..0\n"; exit;
 $: = Tie::File::_default_recsep();
 my $data = "$:1$:22$:";

@@ -4,7 +4,7 @@
 #
 
 $|=1;
-my $file = "tf$$.txt";
+my $file = "tf19-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = join $:, "rec0" .. "rec9", "";
 my $V = $ENV{INTEGRITY};        # Verbose integrity checking?

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use POSIX 'SEEK_SET';
-my $file = "tf$$.txt";
+my $file = "tf18-$$.txt";
 $/ = "blah";
 
 print "1..5\n";

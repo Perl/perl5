@@ -18,7 +18,7 @@ BEGIN {
 
 use Fcntl ':flock';             # This works at least back to 5.004_04
 
-my $file = "tf$$.txt";
+my $file = "tf14-$$.txt";
 my ($o, $n);
 my @a;
 

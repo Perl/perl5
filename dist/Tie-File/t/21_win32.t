@@ -7,7 +7,7 @@
 #
 # These tests (Win32 only) make sure that the file had \r\n as it should.
 
-my $file = "tf$$.txt";
+my $file = "tf21-$$.txt";
 
 unless ($^O =~ /^(MSWin32|dos)$/) {
   print "1..0\n";

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-my $file = "tf$$.txt";
+my $file = "tf02-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec1$:rec2$:rec3$:";
 

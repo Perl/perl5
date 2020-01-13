@@ -8,7 +8,7 @@
 #
 
 use POSIX 'SEEK_SET';
-my $file = "tf$$.txt";
+my $file = "tf30-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
 my ($o, $n);

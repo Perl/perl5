@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-my $file = "tf$$.txt";
+my $file = "tf22-$$.txt";
 $: = Tie::File::_default_recsep();
 
 print "1..71\n";

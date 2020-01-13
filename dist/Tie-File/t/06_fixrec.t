@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use POSIX 'SEEK_SET';
-my $file = "tf$$.txt";
+my $file = "tf06-$$.txt";
 $: = Tie::File::_default_recsep();
 
 print "1..5\n";

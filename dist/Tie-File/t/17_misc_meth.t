@@ -4,7 +4,7 @@
 # EXTEND, CLEAR, DELETE, EXISTS
 #
 
-my $file = "tf$$.txt";
+my $file = "tf17-$$.txt";
 $: = Tie::File::_default_recsep();
 1 while unlink $file;
 
