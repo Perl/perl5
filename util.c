@@ -1093,8 +1093,6 @@ Perl_savepvn(pTHX_ const char *pv, Size_t len)
     char *newaddr;
     PERL_UNUSED_CONTEXT;
 
-    assert(len >= 0);
-
     Newx(newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
     if (pv) {
