@@ -5261,8 +5261,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 			mg_find(sv, PERL_MAGIC_utf8) : NULL;
 		    if (mg && mg->mg_len >= 0)
-			mg->mg_len += utf8_length((U8*)STRING(scan),
-                                              (U8*)STRING(scan) + bytelen);
+			mg->mg_len += charlen;
 		}
 		data->last_end = data->pos_min + charlen;
 		data->pos_min += charlen; /* As in the first entry. */
@@ -5295,7 +5294,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		assert(data);
                 scan_commit(pRExC_state, data, minlenp, is_inf);
 	    }
-            charlen = UTF ? utf8_length(s, s + bytelen) : bytelen;
+            charlen = UTF ? (SSize_t) utf8_length(s, s + bytelen) : bytelen;
 	    if (unfolded_multi_char) {
                 RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
 	    }
