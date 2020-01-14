@@ -15685,6 +15685,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
+#ifdef HAS_MBRLEN
+    PL_mbrlen_ps = proto_perl->Imbrlen_ps;
+#endif
+#ifdef HAS_MBRTOWC
+    PL_mbrtowc_ps = proto_perl->Imbrtowc_ps;
+#endif
+#ifdef HAS_WCRTOMB
+    PL_wcrtomb_ps = proto_perl->Iwcrtomb_ps;
+#endif
+
     PL_langinfo_buf = NULL;
     PL_langinfo_bufsize = 0;
 
