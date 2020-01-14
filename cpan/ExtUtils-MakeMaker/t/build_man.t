@@ -216,7 +216,7 @@ unlink $README;
             INSTALLDIRS  => $INSTALLDIRS,
         );
 
-        my $makefile = slurp('Makefile');
+        my $makefile = slurp($mm->{MAKEFILE});
 
         like $makefile, qr/\QMAN1SECTION = 1pm\E/xms, "Set MAN1SECTION";
         like $makefile, qr/\QMAN3SECTION = 3pm\E/xms, "Set MAN3SECTION";

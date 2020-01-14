@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.42';
+$VERSION = '7.44';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -1506,12 +1506,13 @@ sub init_MANPODS {
     foreach my $num (1,3) {
         my $installdirs = uc $self->{INSTALLDIRS};
         $installdirs = '' if $installdirs eq 'PERL';
-        my $mandir = $self->_expand_macros(
-            $self->{ "INSTALL${installdirs}MAN${num}DIR" } );
+        my @mandirs = File::Spec->splitdir( $self->_expand_macros(
+            $self->{ "INSTALL${installdirs}MAN${num}DIR" } ) );
+        my $mandir = pop @mandirs;
         my $section = $num;
 
         foreach ($num, "${num}p", "${num}pm", qw< l n o C L >, "L$num") {
-            if ( $mandir =~ /\b(?:man|cat)$_$/ ) {
+            if ( $mandir =~ /^(?:man|cat)$_$/ ) {
                 $section = $_;
                 last;
             }
