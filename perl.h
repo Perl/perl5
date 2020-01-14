@@ -7060,7 +7060,7 @@ C<strtoul>.
 #endif
 
 #if defined(HAS_FLOCK) && !defined(HAS_FLOCK_PROTO)
-int flock(int fd, int op);
+EXTERN_C int flock(int fd, int op);
 #endif
 
 #ifndef O_RDONLY
