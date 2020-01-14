@@ -1365,7 +1365,9 @@ or casts
 #  define _CC_QUOTEMETA                20
 #  define _CC_NON_FINAL_FOLD           21
 #  define _CC_IS_IN_SOME_FOLD          22
-#  define _CC_MNEMONIC_CNTRL           23
+#  define _CC_BINDIGIT                 23
+#  define _CC_OCTDIGIT                 24
+#  define _CC_MNEMONIC_CNTRL           25
 
 /* This next group is only used on EBCDIC platforms, so theoretically could be
  * shared with something entirely different that's only on ASCII platforms */

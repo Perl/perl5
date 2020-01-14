@@ -1148,6 +1148,9 @@ PERL_CALLCONV bool	Perl_grok_atoUV(const char* pv, UV* valptr, const char** endp
 PERL_CALLCONV UV	Perl_grok_bin(pTHX_ const char* start, STRLEN* len_p, I32* flags, NV *result);
 #define PERL_ARGS_ASSERT_GROK_BIN	\
 	assert(start); assert(len_p); assert(flags)
+PERL_CALLCONV UV	Perl_grok_bin_oct_hex(pTHX_ const char* start, STRLEN* len_p, I32* flags, NV *result, const unsigned shift, const U8 lookup_bit, const char prefix);
+#define PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX	\
+	assert(start); assert(len_p); assert(flags)
 PERL_CALLCONV UV	Perl_grok_hex(pTHX_ const char* start, STRLEN* len_p, I32* flags, NV *result);
 #define PERL_ARGS_ASSERT_GROK_HEX	\
 	assert(start); assert(len_p); assert(flags)
@@ -5094,6 +5097,10 @@ STATIC void	S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_st
 STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level);
 #define PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS	\
 	assert(stash)
+#endif
+#if defined(PERL_IN_NUMERIC_C)
+STATIC void	S_output_non_portable(pTHX_ const U8 shift);
+#define PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE
 #endif
 #if defined(PERL_IN_OP_C)
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs);

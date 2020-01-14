@@ -6890,6 +6890,14 @@ C<strtoul>.
 #   define Atoul(s)	Strtoul(s, NULL, 10)
 #endif
 
+#define grok_bin(s,lp,fp,rp)                                                \
+                    grok_bin_oct_hex(s, lp, fp, rp, 1, _CC_BINDIGIT, 'b')
+#define grok_oct(s,lp,fp,rp)                                                \
+                    (*(fp) |= PERL_SCAN_DISALLOW_PREFIX,                    \
+                    grok_bin_oct_hex(s, lp, fp, rp, 3, _CC_OCTDIGIT, '\0'))
+#define grok_hex(s,lp,fp,rp)                                                \
+                    grok_bin_oct_hex(s, lp, fp, rp, 4, _CC_XDIGIT, 'x')
+
 #ifndef PERL_SCRIPT_MODE
 #define PERL_SCRIPT_MODE "r"
 #endif

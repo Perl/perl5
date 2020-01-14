@@ -208,30 +208,31 @@ Perl_cast_uv(NV f)
 
 converts a string representing a binary number to numeric form.
 
-On entry C<start> and C<*len> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
-The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
-invalid character will also trigger a warning.
-On return C<*len> is set to the length of the scanned string,
-and C<*flags> gives output flags.
+On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
+scan stops at the end of the string, or at just before the first invalid
+character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
+encountering an invalid character (except NUL) will also trigger a warning.  On
+return C<*len_p> is set to the length of the scanned string, and C<*flags>
+gives output flags.
 
 If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
 and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_bin>
 returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to C<*result> (or the value is discarded if C<result>
-is NULL).
+and writes an approximation of the correct value into C<*result> (which is an
+NV; or the approximation is discarded if C<result> is NULL).
 
 The binary number may optionally be prefixed with C<"0b"> or C<"b"> unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the binary
-number may use C<"_"> characters to separate digits.
+C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.
+
+If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
+digits may be separated from each other by a single underscore; also a single
+leading underscore is accepted.
 
 =for apidoc Amnh||PERL_SCAN_ALLOW_UNDERSCORES
 =for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
 =for apidoc Amnh||PERL_SCAN_GREATER_THAN_UV_MAX
 =for apidoc Amnh||PERL_SCAN_SILENT_ILLDIGIT
-=for apidoc Amnh||PERL_SCAN_TRAILING
 
 =cut
 
@@ -243,93 +244,9 @@ on this platform.
 UV
 Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
-    const char *s = start;
-    STRLEN len = *len_p;
-    UV value = 0;
-    NV value_nv = 0;
-
-    const UV max_div_2 = UV_MAX / 2;
-    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
-    bool overflowed = FALSE;
-    char bit;
-
     PERL_ARGS_ASSERT_GROK_BIN;
 
-    if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
-        /* strip off leading b or 0b.
-           for compatibility silently suffer "b" and "0b" as valid binary
-           numbers. */
-        if (len >= 1) {
-            if (isALPHA_FOLD_EQ(s[0], 'b')) {
-                s++;
-                len--;
-            }
-            else if (len >= 2 && s[0] == '0' && (isALPHA_FOLD_EQ(s[1], 'b'))) {
-                s+=2;
-                len-=2;
-            }
-        }
-    }
-
-    for (; len-- && (bit = *s); s++) {
-        if (bit == '0' || bit == '1') {
-            /* Write it in this wonky order with a goto to attempt to get the
-               compiler to make the common case integer-only loop pretty tight.
-               With gcc seems to be much straighter code than old scan_bin.  */
-          redo:
-            if (!overflowed) {
-                if (value <= max_div_2) {
-                    value = (value << 1) | (bit - '0');
-                    continue;
-                }
-                /* Bah. We're just overflowed.  */
-		/* diag_listed_as: Integer overflow in %s number */
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
-				 "Integer overflow in binary number");
-                overflowed = TRUE;
-                value_nv = (NV) value;
-            }
-            value_nv *= 2.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount. */
-            value_nv += (NV)(bit - '0');
-            continue;
-        }
-        if (bit == '_' && len && allow_underscores && (bit = s[1])
-            && (bit == '0' || bit == '1'))
-	    {
-		--len;
-		++s;
-                goto redo;
-	    }
-        if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT))
-            Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
-			   "Illegal binary digit '%c' ignored", *s);
-        break;
-    }
-
-    if (   ( overflowed && value_nv > 4294967295.0)
-#if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff
-	    && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
-#endif
-	) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
-		       "Binary number > 0b11111111111111111111111111111111 non-portable");
-    }
-    *len_p = s - start;
-    if (!overflowed) {
-        *flags = 0;
-        return value;
-    }
-    *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
-    if (result)
-        *result = value_nv;
-    return UV_MAX;
+    return grok_bin(start, len_p, flags, result);
 }
 
 /*
@@ -338,27 +255,29 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 converts a string representing a hex number to numeric form.
 
 On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
-The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
-invalid character will also trigger a warning.
-On return C<*len> is set to the length of the scanned string,
-and C<*flags> gives output flags.
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
+scan stops at the end of the string, or at just before the first invalid
+character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
+encountering an invalid character (except NUL) will also trigger a warning.  On
+return C<*len_p> is set to the length of the scanned string, and C<*flags>
+gives output flags.
 
 If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
 and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_hex>
 returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to C<*result> (or the value is discarded if C<result>
-is C<NULL>).
+and writes an approximation of the correct value into C<*result> (which is an
+NV; or the approximation is discarded if C<result> is NULL).
 
 The hex number may optionally be prefixed with C<"0x"> or C<"x"> unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the hex
-number may use C<"_"> characters to separate digits.
+C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.
+
+If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
+digits may be separated from each other by a single underscore; also a single
+leading underscore is accepted.
 
 =cut
 
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
 which suppresses any message for non-portable numbers, but which are valid
 on this platform.
  */
@@ -366,91 +285,9 @@ on this platform.
 UV
 Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
-    const char *s = start;
-    STRLEN len = *len_p;
-    UV value = 0;
-    NV value_nv = 0;
-    const UV max_div_16 = UV_MAX / 16;
-    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
-    bool overflowed = FALSE;
-
     PERL_ARGS_ASSERT_GROK_HEX;
 
-    if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
-        /* strip off leading x or 0x.
-           for compatibility silently suffer "x" and "0x" as valid hex numbers.
-        */
-        if (len >= 1) {
-            if (isALPHA_FOLD_EQ(s[0], 'x')) {
-                s++;
-                len--;
-            }
-            else if (len >= 2 && s[0] == '0' && (isALPHA_FOLD_EQ(s[1], 'x'))) {
-                s+=2;
-                len-=2;
-            }
-        }
-    }
-
-    for (; len-- && *s; s++) {
-        if (isXDIGIT(*s)) {
-            /* Write it in this wonky order with a goto to attempt to get the
-               compiler to make the common case integer-only loop pretty tight.
-               With gcc seems to be much straighter code than old scan_hex.  */
-          redo:
-            if (!overflowed) {
-                if (value <= max_div_16) {
-                    value = (value << 4) | XDIGIT_VALUE(*s);
-                    continue;
-                }
-                /* Bah. We're just overflowed.  */
-		/* diag_listed_as: Integer overflow in %s number */
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
-				 "Integer overflow in hexadecimal number");
-                overflowed = TRUE;
-                value_nv = (NV) value;
-            }
-            value_nv *= 16.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount of 16-tuples. */
-            value_nv += (NV) XDIGIT_VALUE(*s);
-            continue;
-        }
-        if (*s == '_' && len && allow_underscores && s[1]
-		&& isXDIGIT(s[1]))
-	    {
-		--len;
-		++s;
-                goto redo;
-	    }
-        if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT))
-            Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
-                        "Illegal hexadecimal digit '%c' ignored", *s);
-        break;
-    }
-
-    if (   ( overflowed && value_nv > 4294967295.0)
-#if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff
-	    && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
-#endif
-	) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
-		       "Hexadecimal number > 0xffffffff non-portable");
-    }
-    *len_p = s - start;
-    if (!overflowed) {
-        *flags = 0;
-        return value;
-    }
-    *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
-    if (result)
-        *result = value_nv;
-    return UV_MAX;
+    return grok_hex(start, len_p, flags, result);
 }
 
 /*
@@ -458,22 +295,26 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 
 converts a string representing an octal number to numeric form.
 
-On entry C<start> and C<*len> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
-The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
-8 or 9 will also trigger a warning.
-On return C<*len> is set to the length of the scanned string,
-and C<*flags> gives output flags.
+On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
+scan stops at the end of the string, or at just before the first invalid
+character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
+encountering an invalid character (except NUL) will also trigger a warning.  On
+return C<*len_p> is set to the length of the scanned string, and C<*flags>
+gives output flags.
 
 If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
 and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_oct>
 returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to C<*result> (or the value is discarded if C<result>
-is C<NULL>).
+and writes an approximation of the correct value into C<*result> (which is an
+NV; or the approximation is discarded if C<result> is NULL).
 
-If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the octal
-number may use C<"_"> characters to separate digits.
+If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
+digits may be separated from each other by a single underscore; also a single
+leading underscore is accepted.
+
+The the C<PERL_SCAN_DISALLOW_PREFIX> flag is always treated as being set for
+this function.
 
 =cut
 
@@ -485,75 +326,255 @@ on this platform.
 UV
 Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
-    const char *s = start;
-    STRLEN len = *len_p;
-    UV value = 0;
-    NV value_nv = 0;
-    const UV max_div_8 = UV_MAX / 8;
-    const bool allow_underscores = cBOOL(*flags & PERL_SCAN_ALLOW_UNDERSCORES);
-    bool overflowed = FALSE;
-
     PERL_ARGS_ASSERT_GROK_OCT;
 
-    for (; len-- && *s; s++) {
-        if (isOCTAL(*s)) {
+    return grok_oct(start, len_p, flags, result);
+}
+
+STATIC void
+S_output_non_portable(pTHX_ const U8 base)
+{
+    /* Display the proper message for a number in the given input base not
+     * fitting in 32 bits */
+    const char * which = (base == 2)
+                      ? "Binary number > 0b11111111111111111111111111111111"
+                      : (base == 8)
+                        ? "Octal number > 037777777777"
+                        : "Hexadecimal number > 0xffffffff";
+
+    PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE;
+
+    /* Also there are listings for the other two.  That's because, since they
+     * are the first word, it would be hard for a user to find them there
+     * starting with a %s */
+    /* diag_listed_as: Hexadecimal number > 0xffffffff non-portable */
+    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE), "%s non-portable", which);
+}
+
+UV
+Perl_grok_bin_oct_hex(pTHX_ const char *start,
+                        STRLEN *len_p,
+                        I32 *flags,
+                        NV *result,
+                        const unsigned shift, /* 1 for binary; 3 for octal;
+                                                 4 for hex */
+                        const U8 class_bit,
+                        const char prefix
+                     )
+
+{
+    const char *s0 = start;
+    const char *s;
+    STRLEN len = *len_p;
+    STRLEN bytes_so_far;    /* How many real digits have been processed */
+    UV value = 0;
+    NV value_nv = 0;
+    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+    const UV max_div= UV_MAX / base;    /* Value above which, the next digit
+                                           processed would overflow */
+    const I32 input_flags = *flags;
+    const bool allow_underscores =
+                                cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
+    bool overflowed = FALSE;
+
+    /* In overflows, this keeps track of how much to multiply the overflowed NV
+     * by as we continue to parse the remaining digits */
+    UV factor;
+
+    /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
+     * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
+     * find the numeric value of a digit.  That requires more instructions than
+     * OCTAL_VALUE would, but gives the same result for the narrowed range of
+     * octal digits; same for binary.  If it were ever critical to squeeze more
+     * performance from this, the function could become grok_hex, and a regen
+     * perl script could scan it and write out two edited copies for the other
+     * two functions.  That would improve the performance of all three
+     * somewhat.  Besides eliminating XDIGIT_VALUE for the other two, extra
+     * parameters are now passed to this to avoid conditionals.  Those could
+     * become declared consts, like:
+     *      const U8 base = 16;
+     *      const U8 base = 8;
+     *      ...
+     */
+
+    PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
+
+    ASSUME(inRANGE(shift, 1, 4) && shift != 2);
+
+    /* Clear output flags; unlikely to find a problem that sets them */
+    *flags = 0;
+
+    if (!(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
+
+        /* strip off leading b or 0b; x or 0x.
+           for compatibility silently suffer "b" and "0b" as valid binary; "x"
+           and "0x" as valid hex numbers. */
+        if (len >= 1) {
+            if (isALPHA_FOLD_EQ(s0[0], prefix)) {
+                s0++;
+                len--;
+            }
+            else if (len >= 2 && s0[0] == '0' && (isALPHA_FOLD_EQ(s0[1], prefix))) {
+                s0+=2;
+                len-=2;
+            }
+        }
+    }
+
+    s = s0; /* s0 potentially advanced from 'start' */
+
+    /* Unroll the loop so that the first 7 digits are branchless except for the
+     * switch.  An eighth one could overflow a 32 bit word.  This should
+     * completely handle the common case without needing extra checks */
+    switch (len) {
+      case 0:
+          return 0;
+      default:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 6:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 5:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 4:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 3:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 2:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 1:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+
+          if (LIKELY(len <= 7)) {
+              return value;
+          }
+
+          s++;
+          break;
+    }
+
+    bytes_so_far = s - s0;
+    factor = shift << bytes_so_far;
+    len -= bytes_so_far;
+
+    for (; len--; s++) {
+        if (_generic_isCC(*s, class_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
-            */
+               With gcc seems to be much straighter code than old scan_hex.
+               (khw suspects that adding a LIKELY() just above would do the
+               same thing) */
           redo:
-            if (!overflowed) {
-                if (value <= max_div_8) {
-                    value = (value << 3) | OCTAL_VALUE(*s);
-                    continue;
-                }
-                /* Bah. We're just overflowed.  */
-		/* diag_listed_as: Integer overflow in %s number */
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
-			       "Integer overflow in octal number");
-                overflowed = TRUE;
-                value_nv = (NV) value;
+            if (LIKELY(value <= max_div)) {
+                value = (value << shift) | XDIGIT_VALUE(*s);
+                    /* Note XDIGIT_VALUE() is branchless, works on binary
+                     * and octal as well, so can be used here, without
+                     * slowing those down */
+                factor <<= shift;
+                continue;
             }
-            value_nv *= 8.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount of 8-tuples. */
-            value_nv += (NV) OCTAL_VALUE(*s);
+
+            /* Bah. We are about to overflow.  Instead, add the unoverflowed
+             * value to an NV that contains an approximation to the correct
+             * value.  Each time through the loop we have increased 'factor' so
+             * that it gives how much the current approximation needs to
+             * effectively be shifted to make room for this new value */
+            value_nv *= (NV) factor;
+            value_nv += (NV) value;
+
+            /* Then we keep accumulating digits, until all are parsed.  We
+             * start over using the current input value.  This will be added to
+             * 'value_nv' eventually, either when all digits are gone, or we
+             * have overflowed this fresh start. */
+            value = XDIGIT_VALUE(*s);
+            factor = 1 << shift;
+
+            if (! overflowed) {
+                overflowed = TRUE;
+                Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+                                       "Integer overflow in %s number",
+                                       (base == 16) ? "hexadecimal"
+                                                    : (base == 2)
+                                                      ? "binary"
+                                                      : "octal");
+            }
             continue;
         }
-        if (*s == '_' && len && allow_underscores && isOCTAL(s[1])) {
+
+        if (   *s == '_'
+            && len
+            && allow_underscores
+            && _generic_isCC(s[1], class_bit))
+        {
             --len;
             ++s;
             goto redo;
         }
-        /* Allow \octal to work the DWIM way (that is, stop scanning
-         * as soon as non-octal characters are seen, complain only if
-         * someone seems to want to use the digits eight and nine.  Since we
-         * know it is not octal, then if isDIGIT, must be an 8 or 9). */
-        if (isDIGIT(*s)) {
-            if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT))
-                Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
-			       "Illegal octal digit '%c' ignored", *s);
+
+        if (      *s
+            && ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
+            &&    ckWARN(WARN_DIGIT))
+        {
+            if (base != 8) {
+                Perl_warner(aTHX_ packWARN(WARN_DIGIT),
+                                   "Illegal %s digit '%c' ignored",
+                                   ((base == 2)
+                                    ? "binary"
+                                      : "hexadecimal"),
+                                    *s);
+            }
+            else if (isDIGIT(*s)) { /* octal base */
+
+                /* Allow \octal to work the DWIM way (that is, stop scanning as
+                 * soon as non-octal characters are seen, complain only if
+                 * someone seems to want to use the digits eight and nine.
+                 * Since we know it is not octal, then if isDIGIT, must be an 8
+                 * or 9). */
+                Perl_warner(aTHX_ packWARN(WARN_DIGIT),
+                                       "Illegal octal digit '%c' ignored", *s);
+            }
         }
+
         break;
     }
 
-    if (   ( overflowed && value_nv > 4294967295.0)
-#if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff
-	    && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
-#endif
-	) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
-		       "Octal number > 037777777777 non-portable");
-    }
     *len_p = s - start;
-    if (!overflowed) {
-        *flags = 0;
+
+    if (LIKELY(! overflowed)) {
+#if UVSIZE > 4
+        if (      UNLIKELY(value > 0xffffffff)
+            && ! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))
+        {
+            output_non_portable(base);
+        }
+#endif
         return value;
     }
+
+    /* Overflowed: Calculate the final overflow approximation */
+    value_nv *= (NV) factor;
+    value_nv += (NV) value;
+
+    output_non_portable(base);
+
     *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
     if (result)
         *result = value_nv;
@@ -961,6 +982,8 @@ number is larger than a UV.
 C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
 non-numeric text on an otherwise successful I<grok>, setting
 C<IS_NUMBER_TRAILING> on the result.
+
+=for apidoc Amnh||PERL_SCAN_TRAILING
 
 =for apidoc grok_number
 
