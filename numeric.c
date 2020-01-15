@@ -535,24 +535,24 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
         if (*s) {
             if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
-            &&    ckWARN(WARN_DIGIT))
-        {
-            if (base != 8) {
-                Perl_warner(aTHX_ packWARN(WARN_DIGIT),
-                                   "Illegal %s digit '%c' ignored",
-                                   ((base == 2)
-                                    ? "binary"
-                                      : "hexadecimal"),
-                                    *s);
-            }
-            else if (isDIGIT(*s)) { /* octal base */
+                &&    ckWARN(WARN_DIGIT))
+            {
+                if (base != 8) {
+                    Perl_warner(aTHX_ packWARN(WARN_DIGIT),
+                                           "Illegal %s digit '%c' ignored",
+                                           ((base == 2)
+                                            ? "binary"
+                                              : "hexadecimal"),
+                                            *s);
+                }
+                else if (isDIGIT(*s)) { /* octal base */
 
-                /* Allow \octal to work the DWIM way (that is, stop scanning as
-                 * soon as non-octal characters are seen, complain only if
-                 * someone seems to want to use the digits eight and nine.
-                 * Since we know it is not octal, then if isDIGIT, must be an 8
-                 * or 9). */
-                Perl_warner(aTHX_ packWARN(WARN_DIGIT),
+                    /* Allow \octal to work the DWIM way (that is, stop
+                     * scanning as soon as non-octal characters are seen,
+                     * complain only if someone seems to want to use the digits
+                     * eight and nine.  Since we know it is not octal, then if
+                     * isDIGIT, must be an 8 or 9). */
+                    Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                                        "Illegal octal digit '%c' ignored", *s);
                 }
             }
@@ -1044,8 +1044,8 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
      * belong in a number at all (unless it's a radix character in a weird
      * locale).  Given this, it's far more likely to be a minus than the
      * others.  (On EBCDIC it is one of 42, 44, 46, 48, 4A, 4C, 4E,  (not 40
-     * because can't be a space) 60, 62, 64, 66, 68, 6A, 6C, 6E.  Again, only
-     * potentially a weird radix character, or 4E='+', or 60='-') */
+     * because can't be a space)    60, 62, 64, 66, 68, 6A, 6C, 6E.  Again,
+     * only potentially a weird radix character, or 4E='+', or 60='-') */
     if (LIKELY(*s == '-')) {
         s++;
         numtype = IS_NUMBER_NEG;
