@@ -1139,7 +1139,7 @@ ApdR	|I32	|looks_like_number|NN SV *const sv
 EpRX	|bool	|grok_bslash_x	|NN char** s		 \
 				|NN const char* const send	 \
 				|NN UV* uv			 \
-				|NN const char** error_msg       \
+				|NN const char** message         \
 				|const bool output_warning       \
 				|const bool strict               \
 				|const bool utf8
@@ -1147,7 +1147,7 @@ EpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
 EpRX	|bool	|grok_bslash_o	|NN char** s		 \
 				|NN const char* const send	 \
 				|NN UV* uv			 \
-				|NN const char** error_msg       \
+				|NN const char** message         \
 				|const bool output_warning       \
 				|const bool strict               \
 				|const bool utf8

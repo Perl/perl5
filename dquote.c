@@ -57,7 +57,7 @@ Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
 
 bool
 Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
-                      const char** error_msg,
+                      const char** message,
                       const bool output_warning, const bool strict,
                       const bool UTF)
 {
@@ -80,7 +80,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
  *	    range *s..send-1
  *	uv  points to a UV that will hold the output value, valid only if the
  *	    return from the function is TRUE
- *      error_msg is a pointer that will be set to an internal buffer giving an
+ *      message is a pointer that will be set to an internal buffer giving an
  *	    error message upon failure (the return is FALSE).  Untouched if
  *	    function succeeds
  *	output_warning says whether to output any warning messages, or suppress
@@ -103,7 +103,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     (*s)++;
 
     if (send <= *s || **s != '{') {
-	*error_msg = "Missing braces on \\o{}";
+	*message = "Missing braces on \\o{}";
 	return FALSE;
     }
 
@@ -113,7 +113,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
         while (isOCTAL(**s)) { /* Position beyond the legal digits */
             (*s)++;
         }
-        *error_msg = "Missing right brace on \\o{";
+        *message = "Missing right brace on \\o{";
 	return FALSE;
     }
 
@@ -122,7 +122,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     numbers_len = e - *s;
     if (numbers_len == 0) {
         (*s)++;    /* Move past the } */
-	*error_msg = "Empty \\o{}";
+	*message = "Empty \\o{}";
 	return FALSE;
     }
 
@@ -134,7 +134,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
         if (strict) {
             *s += numbers_len;
             *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
-            *error_msg = "Non-octal character";
+            *message = "Non-octal character";
             return FALSE;
         }
         else if (output_warning) {
@@ -155,7 +155,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
 
 bool
 Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
-                      const char** error_msg,
+                      const char** message,
                       const bool output_warning, const bool strict,
                       const bool UTF)
 {
@@ -179,7 +179,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
  *	    range *s..send-1
  *	uv  points to a UV that will hold the output value, valid only if the
  *	    return from the function is TRUE
- *      error_msg is a pointer that will be set to an internal buffer giving an
+ *      message is a pointer that will be set to an internal buffer giving an
  *	    error message upon failure (the return is FALSE).  Untouched if
  *	    function succeeds
  *	output_warning says whether to output any warning messages, or suppress
@@ -205,7 +205,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
 
     if (send <= *s) {
         if (strict) {
-            *error_msg = "Empty \\x";
+            *message = "Empty \\x";
             return FALSE;
         }
 
@@ -227,10 +227,10 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
         if (strict && len != 2) {
             if (len < 2) {
                 *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
-                *error_msg = "Non-hex character";
+                *message = "Non-hex character";
             }
             else {
-                *error_msg = "Use \\x{...} for more than two hex characters";
+                *message = "Use \\x{...} for more than two hex characters";
             }
             return FALSE;
         }
@@ -246,7 +246,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
         /* XXX The corresponding message above for \o is just '\\o{'; other
          * messages for other constructs include the '}', so are inconsistent.
          */
-	*error_msg = "Missing right brace on \\x{}";
+	*message = "Missing right brace on \\x{}";
 	return FALSE;
     }
 
@@ -256,7 +256,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
     if (numbers_len == 0) {
         if (strict) {
             (*s)++;    /* Move past the } */
-            *error_msg = "Empty \\x{}";
+            *message = "Empty \\x{}";
             return FALSE;
         }
         *s = e + 1;
@@ -273,7 +273,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
     if (strict && numbers_len != (STRLEN) (e - *s)) {
         *s += numbers_len;
         *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
-        *error_msg = "Non-hex character";
+        *message = "Non-hex character";
         return FALSE;
     }
 
