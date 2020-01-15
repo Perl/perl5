@@ -4642,7 +4642,9 @@ EXTCONST char PL_no_localize_ref[]
   INIT("Can't localize through a reference");
 EXTCONST char PL_memory_wrap[]
   INIT("panic: memory wrap");
-
+EXTCONST char PL_extended_cp_format[]
+  INIT("Code point 0x%" UVXf " is not Unicode, requires a Perl extension,"
+                             " and so is not portable");
 EXTCONST char PL_Yes[]
   INIT("1");
 EXTCONST char PL_No[]

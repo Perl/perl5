@@ -171,9 +171,6 @@ const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf
                                    " is not recommended for open interchange";
 const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
                                    " may not be portable";
-const char perl_extended_cp_format[] = "Code point 0x%" UVXf " is not"        \
-                                       " Unicode, requires a Perl extension," \
-                                       " and so is not portable";
 
 #define HANDLE_UNICODE_SURROGATE(uv, flags, msgs)                   \
     STMT_START {                                                    \
@@ -339,7 +336,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
 
             /* Choose the more dire applicable warning */
             if (UNICODE_IS_PERL_EXTENDED(uv)) {
-                format = perl_extended_cp_format;
+                format = PL_extended_cp_format;
                 category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
                 if (flags & (UNICODE_WARN_PERL_EXTENDED
                             |UNICODE_DISALLOW_PERL_EXTENDED))
@@ -2107,7 +2104,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                          * */
                         if (UNICODE_IS_PERL_EXTENDED(uv)) {
                             message = Perl_form(aTHX_
-                                            perl_extended_cp_format, uv);
+                                            PL_extended_cp_format, uv);
                         }
                         else {
                             message = Perl_form(aTHX_
