@@ -1143,7 +1143,10 @@ EpRX	|bool	|grok_bslash_x	|NN char** s		 \
 				|const bool output_warning       \
 				|const bool strict               \
 				|const bool utf8
-EpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
+EpRX	|bool	|grok_bslash_c	|const char source		\
+				|NN U8 * result			\
+				|NN const char** message	\
+				|NULLOK U32 * packed_warn
 EpRX	|bool	|grok_bslash_o	|NN char** s		 \
 				|NN const char* const send	 \
 				|NN UV* uv			 \

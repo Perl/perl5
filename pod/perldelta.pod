@@ -230,7 +230,35 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Character following "\c" must be printable ASCII|perldiag/"Character following "\c" must be printable ASCII">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<Use "%s" instead of "%s"|perldiag/"Use "%s" instead of "%s"">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<Sequence "\c{" invalid|perldiag/"Sequence "\c{" invalid">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<"\c%c" is more clearly written simply as "%s"|perldiag/""\c%c" is more clearly written simply as "%s"">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
 
 =back
 

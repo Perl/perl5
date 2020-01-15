@@ -5912,9 +5912,10 @@ PERL_STATIC_INLINE char*	S_form_short_octal_warning(pTHX_ const char * const s, 
 	assert(s)
 #endif
 
-PERL_CALLCONV char	Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
+PERL_CALLCONV bool	Perl_grok_bslash_c(pTHX_ const char source, U8 * result, const char** message, U32 * packed_warn)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_C
+#define PERL_ARGS_ASSERT_GROK_BSLASH_C	\
+	assert(result); assert(message)
 
 PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** message, const bool output_warning, const bool strict, const bool utf8)
 			__attribute__warn_unused_result__;

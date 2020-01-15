@@ -1422,7 +1422,8 @@ use warnings;
 my $a = "\c{ack}";
 EXPECT
 OPTION fatal
-Use ";" instead of "\c{" at - line 9.
+Use ";" instead of "\c{" at - line 9, within string
+Execution of - aborted due to compilation errors.
 ########
 # toke.c
 BEGIN {
@@ -1441,7 +1442,8 @@ Sequence "\c{" invalid at - line 9.
 my $a = "\câ";
 EXPECT
 OPTION fatal
-Character following "\c" must be printable ASCII at - line 2.
+Character following "\c" must be printable ASCII at - line 2, within string
+Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use warnings 'syntax' ;

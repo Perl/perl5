@@ -3997,7 +3997,14 @@ S_scan_const(pTHX_ char *start)
 	    case 'c':
 		s++;
 		if (s < send) {
-		    *d++ = grok_bslash_c(*s, 1);
+                    const char * message;
+
+		    if (! grok_bslash_c(*s, (U8 *) d, &message, NULL)) {
+                        yyerror(message);
+                        yyquit();   /* Have always immediately croaked on
+                                       errors in this */
+                    }
+		    d++;
 		}
 		else {
 		    yyerror("Missing control char name in \\c");

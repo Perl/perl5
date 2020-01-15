@@ -11,48 +11,72 @@
 #include "dquote_inline.h"
 
 /* XXX Add documentation after final interface and behavior is decided */
-/* May want to show context for error, so would pass S_grok_bslash_c(pTHX_ const char* current, const char* start, const bool output_warning)
-    U8 source = *current;
-*/
 
-char
-Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
+bool
+Perl_grok_bslash_c(pTHX_ const char   source,
+                         U8 *         result,
+                         const char** message,
+                         U32 *        packed_warn)
 {
+    PERL_ARGS_ASSERT_GROK_BSLASH_C;
 
-    U8 result;
+    /* This returns TRUE if the \c? sequence is valid; FALSE otherwise.  If it
+     * is valid, the sequence evaluates to a single character, which will be
+     * stored into *result.
+     *
+     * source   is the character immediately after a '\c' sequence.
+     * result   points to a char variable into which this function will store
+     *          what the sequence evaluates to, if valid; unchanged otherwise.
+     * message  A pointer to any warning or error message will be stored into
+     *          this pointer; NULL if none.
+     * packed_warn if NULL on input asks that this routine display any warning
+     *          messages.  Otherwise, if the function found a warning, the
+     *          packed warning categories will be stored into *packed_warn (and
+     *          the corresponding message text into *message); 0 if none.
+     */
+
+    *message = NULL;
+    if (packed_warn) *packed_warn = 0;
 
     if (! isPRINT_A(source)) {
-        Perl_croak(aTHX_ "%s",
-                        "Character following \"\\c\" must be printable ASCII");
+        *message = "Character following \"\\c\" must be printable ASCII";
+        return FALSE;
     }
-    else if (source == '{') {
+
+    if (source == '{') {
         const char control = toCTRL('{');
         if (isPRINT_A(control)) {
             /* diag_listed_as: Use "%s" instead of "%s" */
-            Perl_croak(aTHX_ "Use \"%c\" instead of \"\\c{\"", control);
+            *message = Perl_form(aTHX_ "Use \"%c\" instead of \"\\c{\"", control);
         }
         else {
-            Perl_croak(aTHX_ "Sequence \"\\c{\" invalid");
+            *message = "Sequence \"\\c{\" invalid";
         }
+        return FALSE;
     }
 
-    result = toCTRL(source);
-    if (output_warning && isPRINT_A(result)) {
+    *result = toCTRL(source);
+    if (isPRINT_A(*result) && ckWARN(WARN_SYNTAX)) {
         U8 clearer[3];
         U8 i = 0;
-        if (! isWORDCHAR(result)) {
+        char format[] = "\"\\c%c\" is more clearly written simply as \"%s\"";
+
+        if (! isWORDCHAR(*result)) {
             clearer[i++] = '\\';
         }
-        clearer[i++] = result;
+        clearer[i++] = *result;
         clearer[i++] = '\0';
 
-        Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "\"\\c%c\" is more clearly written simply as \"%s\"",
-                        source,
-                        clearer);
+        if (packed_warn) {
+            *message = Perl_form(aTHX_ format, source, clearer);
+            *packed_warn = packWARN(WARN_SYNTAX);
+        }
+        else {
+            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), format, source, clearer);
+        }
     }
 
-    return result;
+    return TRUE;
 }
 
 bool
