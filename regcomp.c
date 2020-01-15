@@ -888,11 +888,13 @@ static const scan_data_t zero_scan_data = {
     } STMT_END
 
 /* m is not necessarily a "literal string", in this macro */
-#define reg_warn_non_literal_string(loc, m)                             \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
+#define warn_non_literal_string(loc, packed_warn, m)                    \
+    _WARN_HELPER(loc, packed_warn,                                      \
+                      Perl_warner(aTHX_ packed_warn,                    \
                                        "%s" REPORT_LOCATION,            \
                                   m, REPORT_LOCATION_ARGS(loc)))
+#define reg_warn_non_literal_string(loc, m)                             \
+                warn_non_literal_string(loc, packWARN(WARN_REGEXP), m)
 
 #define ckWARN2_non_literal_string(loc, packwarn, m, a1)                    \
     STMT_START {                                                            \
