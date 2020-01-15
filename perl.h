@@ -7125,17 +7125,33 @@ A synonym for L</grok_numeric_radix>
 */
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
-/* Input flags: */
+/* Number scan flags.  All are used for input, the ones used for output are so
+ * marked */
 #define PERL_SCAN_ALLOW_UNDERSCORES   0x01 /* grok_??? accept _ in numbers */
 #define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
-#define PERL_SCAN_SILENT_ILLDIGIT     0x04 /* grok_??? not warn about illegal digits */
-#define PERL_SCAN_SILENT_NON_PORTABLE 0x08 /* grok_??? not warn about very large
-					      numbers which are <= UV_MAX */
+
+/* grok_??? input: don't warn on overflowing a UV; output: found overflow */
+#define PERL_SCAN_GREATER_THAN_UV_MAX 0x04
+
+/* grok_??? don't warn about illegal digits.  To preserve total backcompat,
+ * this isn't set on output if one is found.  Instead, see
+ * PERL_SCAN_NOTIFY_ILLDIGIT. */
+#define PERL_SCAN_SILENT_ILLDIGIT     0x08
+
 #define PERL_SCAN_TRAILING            0x10 /* grok_number_flags() allow trailing
                                               and set IS_NUMBER_TRAILING */
 
-/* Output flags: */
-#define PERL_SCAN_GREATER_THAN_UV_MAX 0x02 /* should this merge with above? */
+#ifdef PERL_CORE    /* These are considered experimental, so not exposed
+                       publicly */
+/* grok_??? don't warn about very large numbers which are <= UV_MAX;
+ * output: found such a number */
+#  define PERL_SCAN_SILENT_NON_PORTABLE 0x20
+
+/* If this is set on input, and no illegal digit is found, it will be cleared
+ * on output; otherwise unchanged */
+#  define PERL_SCAN_NOTIFY_ILLDIGIT 0x40
+#endif
+
 
 /* to let user control profiling */
 #ifdef PERL_GPROF_CONTROL

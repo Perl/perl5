@@ -279,7 +279,7 @@ leading underscore is accepted.
 
 Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
 which suppresses any message for non-portable numbers, but which are valid
-on this platform.
+on this platform.  But, C<*flags>  will have the corresponding flag bit set.
  */
 
 UV
@@ -533,8 +533,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             goto redo;
         }
 
-        if (      *s
-            && ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
+        if (*s) {
+            if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
             &&    ckWARN(WARN_DIGIT))
         {
             if (base != 8) {
@@ -554,6 +554,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                  * or 9). */
                 Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                                        "Illegal octal digit '%c' ignored", *s);
+                }
+            }
+
+            if (input_flags & PERL_SCAN_NOTIFY_ILLDIGIT) {
+                *flags |= PERL_SCAN_NOTIFY_ILLDIGIT;
             }
         }
 
@@ -568,6 +573,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
             && ! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))
         {
             output_non_portable(base);
+            *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
         }
 #endif
         return value;
@@ -579,7 +585,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     output_non_portable(base);
 
-    *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
+    *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
+           |  PERL_SCAN_SILENT_NON_PORTABLE;
     if (result)
         *result = value_nv;
     return UV_MAX;
