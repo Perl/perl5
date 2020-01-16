@@ -17655,7 +17655,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     warn_non_literal_string(RExC_parse, packed_warn, message);
                 }
 
-                non_portable_endpoint++;
+                if (value < 256) {
+                    non_portable_endpoint++;
+                }
 		break;
 	    case 'x':
 		RExC_parse--;	/* function expects to be pointed at the 'x' */
@@ -17675,7 +17677,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     warn_non_literal_string(RExC_parse, packed_warn, message);
                 }
 
-                non_portable_endpoint++;
+                if (value < 256) {
+                    non_portable_endpoint++;
+                }
 		break;
 	    case 'c':
                 if (! grok_bslash_c(*RExC_parse, &grok_c_char, &message,
@@ -17722,7 +17726,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                  form_short_octal_warning(RExC_parse, numlen));
                         }
                     }
-                    non_portable_endpoint++;
+                    if (value < 256) {
+                        non_portable_endpoint++;
+                    }
 		    break;
 		}
 	    default:

@@ -662,7 +662,6 @@ my @warning_only_under_strict = (
     '/[a-\N{U+FF}]\x{100}/' => 'Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" {#} m/[a-\N{U+FF}{#}]\x{100}/',
     '/[\N{U+00}-\a]\x{100}/' => "",
     '/[\a-\N{U+FF}]\x{100}/' => "",
-    '/[\N{U+FF}-\x{100}]/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+FF}-\x{100}{#}]/',
     '/[\N{U+100}-\x{101}]/' => "",
     "/[%-%]/" => "",
     "/[:-\\x$colon_hex]\\x{100}/" => "\":-\\x$colon_hex\" is more clearly written simply as \":\" {#} m/[:-\\x$colon_hex\{#}]\\x{100}/",
