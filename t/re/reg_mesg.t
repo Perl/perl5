@@ -332,25 +332,23 @@ my @death_only_under_strict = (
     'm/[\xABC]/' => "",
                  => 'Use \x{...} for more than two hex characters {#} m/[\xABC{#}]/',
 
-    # XXX This is a confusing error message.  The G isn't ignored; it just
-    # terminates the \x.  Also some messages below are missing the <-- HERE,
-    # aren't all category 'regexp'.  (Hence we have to turn off 'digit'
-    # messages as well below)
-    'm/\xAG/' => 'Illegal hexadecimal digit \'G\' ignored',
+    # some messages below aren't all category 'regexp'.  (Hence we have to
+    # turn off 'digit' messages as well below)
+    'm/\xAG/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x0AG" {#} m/\xA{#}G/',
               => 'Non-hex character {#} m/\xAG{#}/',
-    'm/[\xAG]/' => 'Illegal hexadecimal digit \'G\' ignored',
+    'm/[\xAG]/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x0AG" {#} m/[\xA{#}G]/',
                 => 'Non-hex character {#} m/[\xAG{#}]/',
-    'm/\o{789}/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
+    'm/\o{789}/' => 'Non-octal character \'8\' terminates \o early.  Resolved as "\o{007}" {#} m/\o{789}{#}/',
                  => 'Non-octal character {#} m/\o{78{#}9}/',
-    'm/[\o{789}]/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
+    'm/[\o{789}]/' => 'Non-octal character \'8\' terminates \o early.  Resolved as "\o{007}" {#} m/[\o{789}{#}]/',
                    => 'Non-octal character {#} m/[\o{78{#}9}]/',
     'm/\x{}/' => "",
               => 'Empty \x{} {#} m/\x{}{#}/',
     'm/[\x{}]/' => "",
                 => 'Empty \x{} {#} m/[\x{}{#}]/',
-    'm/\x{ABCDEFG}/' => 'Illegal hexadecimal digit \'G\' ignored',
+    'm/\x{ABCDEFG}/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x{ABCDEF}" {#} m/\x{ABCDEFG}{#}/',
                      => 'Non-hex character {#} m/\x{ABCDEFG{#}}/',
-    'm/[\x{ABCDEFG}]/' => 'Illegal hexadecimal digit \'G\' ignored',
+    'm/[\x{ABCDEFG}]/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x{ABCDEF}" {#} m/[\x{ABCDEFG}{#}]/',
                        => 'Non-hex character {#} m/[\x{ABCDEFG{#}}]/',
     "m'[\\y]\\x{100}'" => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]\x{100}/',
                        => 'Unrecognized escape \y in character class {#} m/[\y{#}]\x{100}/',

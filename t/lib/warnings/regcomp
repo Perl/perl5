@@ -18,8 +18,8 @@ no warnings 'digit' ;
 my $a = qr/\o{1238456}\x{100}/;
 my $a = qr/[\o{6548321}]\x{100}/;
 EXPECT
-Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
-Non-octal character '8'.  Resolved as "\o{654}" at - line 4.
+Non-octal character '8' terminates \o early.  Resolved as "\o{123}" in regex; marked by <-- HERE in m/\o{1238456} <-- HERE \x{100}/ at - line 3.
+Non-octal character '8' terminates \o early.  Resolved as "\o{654}" in regex; marked by <-- HERE in m/[\o{6548321} <-- HERE ]\x{100}/ at - line 4.
 ########
 # regcomp.c
 BEGIN {

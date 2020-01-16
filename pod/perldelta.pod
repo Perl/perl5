@@ -218,6 +218,14 @@ it occured.
 
 =item *
 
+L<Non-hex character '%c' terminates \x early.  Resolved as "%s"|perldiag/"Non-hex character '%c' terminates \x early.  Resolved as "%s"">
+
+This replaces a warning that was much less specific, and which gave
+false information.  This new warning parallels the similar
+already-existing one raised for C<\o{}>.
+
+=item *
+
 L<message|perldiag/"message">
 
 =back
@@ -259,6 +267,15 @@ L<"\c%c" is more clearly written simply as "%s"|perldiag/""\c%c" is more clearly
 now has extra text added at the end, when raised during regular
 expression pattern compilation, marking where precisely in the pattern
 it occured.
+
+=item *
+
+L<Non-octal character '%c' terminates \o early.  Resolved as "%s"|perldiag/"Non-octal character '%c' terminates \o early.  Resolved as "%s"">
+
+now includes the phrase "terminates \o early", and has extra text added
+at the end, when raised during regular expression pattern compilation,
+marking where precisely in the pattern it occured.  In some instances
+the text of the resolution has been clarified.
 
 =back
 

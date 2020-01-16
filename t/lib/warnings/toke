@@ -1378,7 +1378,7 @@ my $a = "\o{1238456}";
 no warnings 'digit' ;
 my $a = "\o{1238456}";
 EXPECT
-Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
+Non-octal character '8' terminates \o early.  Resolved as "\o{123}" at - line 3.
 ########
 # toke.c
 use warnings;
@@ -1527,9 +1527,9 @@ print "aa" =~ m{^a{1,2}$}, "G\n";
 print "aq" =~ m[^a\[a-z\]$], "H\n";
 print "aq" =~ m(^a\(q\)$), "I\n";
 EXPECT
-Illegal hexadecimal digit '\' ignored at - line 5.
-Illegal hexadecimal digit '\' ignored at - line 7.
-Illegal hexadecimal digit '\' ignored at - line 9.
+Non-hex character '\\' terminates \x early.  Resolved as "\x00\\" in regex; marked by <-- HERE in m/^a\x <-- HERE \{61\}$/ at - line 5.
+Non-hex character '\\' terminates \x early.  Resolved as "\x00\\" in regex; marked by <-- HERE in m/^a\\\x <-- HERE \{6F\}$/ at - line 7.
+Non-hex character '\\' terminates \x early.  Resolved as "\x00\\" in regex; marked by <-- HERE in m/^a\\\\\x <-- HERE \{6F\}$/ at - line 9.
 A
 B
 1C

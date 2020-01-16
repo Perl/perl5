@@ -5905,6 +5905,15 @@ PERL_CALLCONV SV*	Perl_invlist_clone(pTHX_ SV* const invlist, SV* newlist);
 	assert(invlist)
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
+PERL_CALLCONV const char *	Perl_form_alien_digit_msg(pTHX_ const U8 which, const STRLEN valids_len, const char * const first_bad, const char * const send, const bool UTF, const bool braced)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG	\
+	assert(first_bad); assert(send)
+
+PERL_CALLCONV const char *	Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char * string, const Size_t len, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE char*	S_form_short_octal_warning(pTHX_ const char * const s, const STRLEN len)
 			__attribute__warn_unused_result__;
@@ -5917,12 +5926,12 @@ PERL_CALLCONV bool	Perl_grok_bslash_c(pTHX_ const char source, U8 * result, cons
 #define PERL_ARGS_ASSERT_GROK_BSLASH_C	\
 	assert(result); assert(message)
 
-PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** message, const bool output_warning, const bool strict, const bool utf8)
+PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
 	assert(s); assert(send); assert(uv); assert(message)
 
-PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV* uv, const char** message, const bool output_warning, const bool strict, const bool utf8)
+PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
 	assert(s); assert(send); assert(uv); assert(message)

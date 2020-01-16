@@ -1136,27 +1136,41 @@ Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-EpRX	|bool	|grok_bslash_x	|NN char** s		 \
-				|NN const char* const send	 \
-				|NN UV* uv			 \
-				|NN const char** message         \
-				|const bool output_warning       \
-				|const bool strict               \
+EpRX	|bool	|grok_bslash_x	|NN char** s			\
+				|NN const char* const send	\
+				|NN UV* uv			\
+				|NN const char** message	\
+				|NULLOK U32 * packed_warn	\
+				|const bool strict		\
+				|const bool allow_UV_MAX	\
 				|const bool utf8
 EpRX	|bool	|grok_bslash_c	|const char source		\
 				|NN U8 * result			\
 				|NN const char** message	\
 				|NULLOK U32 * packed_warn
-EpRX	|bool	|grok_bslash_o	|NN char** s		 \
-				|NN const char* const send	 \
-				|NN UV* uv			 \
-				|NN const char** message         \
-				|const bool output_warning       \
-				|const bool strict               \
+EpRX	|bool	|grok_bslash_o	|NN char** s			\
+				|NN const char* const send	\
+				|NN UV* uv			\
+				|NN const char** message        \
+				|NULLOK U32 * packed_warn	\
+				|const bool strict              \
+				|const bool allow_UV_MAX	\
 				|const bool utf8
+EpRX	|const char *|form_alien_digit_msg|const U8 which	\
+				|const STRLEN valids_len	\
+				|NN const char * const first_bad\
+				|NN const char * const send	\
+				|const bool UTF			\
+				|const bool braced
 EiR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
 EiRT	|I32	|regcurly	|NN const char *s
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
+EpRX	|const char *|form_cp_too_large_msg|const U8 which	\
+				|NULLOK const char * string	\
+				|const Size_t len		\
+				|const UV cp
 #endif
 AMpd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send

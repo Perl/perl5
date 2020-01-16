@@ -4152,6 +4152,15 @@ a hex one was expected, like
  (?[ [ \xDG ] ])
  (?[ [ \x{DEKA} ] ])
 
+=item Non-hex character '%c' terminates \x early.  Resolved as "%s"
+
+(W digit) In parsing a hexadecimal numeric constant, a character was
+unexpectedly encountered that isn't hexadecimal.  The resulting value
+is as indicated.
+
+Note that, within braces, every character starting with the first
+non-hexadecimal up to the ending brace is ignored.
+
 =item Non-octal character in regex; marked by S<<-- HERE> in m/%s/
 
 (F) In a regular expression, there was a non-octal character where
@@ -4159,11 +4168,14 @@ an octal one was expected, like
 
  (?[ [ \o{1278} ] ])
 
-=item Non-octal character '%c'.  Resolved as "%s"
+=item Non-octal character '%c' terminates \o early.  Resolved as "%s"
 
 (W digit) In parsing an octal numeric constant, a character was
 unexpectedly encountered that isn't octal.  The resulting value
 is as indicated.
+
+Note that, within braces, every character starting with the first
+non-octal up to the ending brace is ignored.
 
 =item "no" not allowed in expression
 
