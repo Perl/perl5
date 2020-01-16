@@ -14185,17 +14185,19 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         /* FALLTHROUGH */
                     case '0':
 			{
-			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
+			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT
+                                      | PERL_SCAN_NOTIFY_ILLDIGIT;
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    p += numlen;
-                            if (   isDIGIT(*p)  /* like \08, \178 */
-                                && ckWARN(WARN_REGEXP)
-                                && numlen < 3)
+                            if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
+                                && isDIGIT(*p)  /* like \08, \178 */
+                                && ckWARN(WARN_REGEXP))
                             {
 				reg_warn_non_literal_string(
-                                         p + 1,
-                                         form_short_octal_warning(p, numlen));
+                                     p + 1,
+                                     form_alien_digit_msg(8, numlen, p,
+                                                        RExC_end, UTF, FALSE));
                             }
 			}
 			break;
@@ -17705,7 +17707,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    case '5': case '6': case '7':
 		{
 		    /* Take 1-3 octal digits */
-		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
+		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT
+                              | PERL_SCAN_NOTIFY_ILLDIGIT;
                     numlen = (strict) ? 4 : 3;
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
@@ -17716,14 +17719,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                           : 1;
                             vFAIL("Need exactly 3 octal digits");
                         }
-                        else if (   numlen < 3 /* like \08, \178 */
+                        else if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
                                  && RExC_parse < RExC_end
                                  && isDIGIT(*RExC_parse)
                                  && ckWARN(WARN_REGEXP))
                         {
                             reg_warn_non_literal_string(
                                  RExC_parse + 1,
-                                 form_short_octal_warning(RExC_parse, numlen));
+                                 form_alien_digit_msg(8, numlen, RExC_parse,
+                                                        RExC_end, UTF, FALSE));
                         }
                     }
                     if (value < 256) {

@@ -7143,8 +7143,8 @@ A synonym for L</grok_numeric_radix>
 #define PERL_SCAN_TRAILING            0x10 /* grok_number_flags() allow trailing
                                               and set IS_NUMBER_TRAILING */
 
-#ifdef PERL_CORE    /* These are considered experimental, so not exposed
-                       publicly */
+/* These are considered experimental, so not exposed publicly */
+#if defined(PERL_CORE) || defined(PERL_EXT)
 /* grok_??? don't warn about very large numbers which are <= UV_MAX;
  * output: found such a number */
 #  define PERL_SCAN_SILENT_NON_PORTABLE 0x20

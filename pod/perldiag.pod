@@ -4174,6 +4174,13 @@ an octal one was expected, like
 unexpectedly encountered that isn't octal.  The resulting value
 is as indicated.
 
+When not using C<\o{...}>, you wrote something like C<\08>, or C<\179>
+in a double-quotish string.  The resolution is as indicated, with all
+but the last digit treated as a single character, specified in octal.
+The last digit is the next character in the string.  To tell Perl that
+this is indeed what you want, you can use the C<\o{ }> syntax, or use
+exactly three digits to specify the octal for the character.
+
 Note that, within braces, every character starting with the first
 non-octal up to the ending brace is ignored.
 
@@ -5453,6 +5460,8 @@ Supply these or check that you are using the right construct.
 
 =item '%s' resolved to '\o{%s}%d'
 
+As of Perl 5.32, this message is no longer generated.  Instead, see
+L</Non-octal character '%c' terminates \o early.  Resolved as "%s">.
 (W misc, regexp)  You wrote something like C<\08>, or C<\179> in a
 double-quotish string.  All but the last digit is treated as a single
 character, specified in octal.  The last digit is the next character in

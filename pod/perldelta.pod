@@ -277,6 +277,14 @@ at the end, when raised during regular expression pattern compilation,
 marking where precisely in the pattern it occured.  In some instances
 the text of the resolution has been clarified.
 
+=item *
+
+L<'%s' resolved to '\o{%s}%d'|perldiag/'%s' resolved to '\o{%s}%d'>
+
+As of Perl 5.32, this message is no longer generated.  Instead,
+L<perldiag/Non-octal character '%c' terminates \o early.  Resolved as "%s">
+is.
+
 =back
 
 =head1 Utility Changes

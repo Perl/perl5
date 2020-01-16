@@ -1162,8 +1162,6 @@ EpRX	|const char *|form_alien_digit_msg|const U8 which	\
 				|NN const char * const send	\
 				|const bool UTF			\
 				|const bool braced
-EiR	|char*|form_short_octal_warning|NN const char * const s  \
-				|const STRLEN len
 EiRT	|I32	|regcurly	|NN const char *s
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)

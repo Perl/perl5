@@ -3534,15 +3534,18 @@ S_scan_const(pTHX_ char *start)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
-                    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
+                    I32 flags = PERL_SCAN_SILENT_ILLDIGIT
+                              | PERL_SCAN_NOTIFY_ILLDIGIT;
                     STRLEN len = 3;
-		    uv = grok_oct(s, &len, &flags, NULL);
-		    s += len;
-                    if (len < 3 && s < send && isDIGIT(*s)
+                    uv = grok_oct(s, &len, &flags, NULL);
+                    s += len;
+                    if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
+                        && s < send
+                        && isDIGIT(*s)  /* like \08, \178 */
                         && ckWARN(WARN_MISC))
                     {
-                        Perl_warner(aTHX_ packWARN(WARN_MISC),
-                                    "%s", form_short_octal_warning(s, len));
+                        Perl_warner(aTHX_ packWARN(WARN_MISC), "%s",
+                            form_alien_digit_msg(8, len, s, send, UTF, FALSE));
                     }
 		}
 		goto NUM_ESCAPE_INSERT;
