@@ -4422,23 +4422,6 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 	    }
 #endif
 	}
-
-        if (     STR_LEN(scan) == 1
-            &&   isALPHA_A(* STRING(scan))
-            &&  (         OP(scan) == EXACTFAA
-                 || (     OP(scan) == EXACTFU
-                     && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(* STRING(scan)))))
-        {
-            U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
-
-            /* Replace a length 1 ASCII fold pair node with an ANYOFM node,
-             * with the mask set to the complement of the bit that differs
-             * between upper and lower case, and the lowest code point of the
-             * pair (which the '&' forces) */
-            OP(scan) = ANYOFM;
-            ARG_SET(scan, *STRING(scan) & mask);
-            FLAGS(scan) = mask;
-        }
     }
 
 #ifdef DEBUGGING
@@ -5288,6 +5271,25 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             /* But OP != EXACT!, so is EXACTFish */
 	    SSize_t bytelen = STR_LEN(scan), charlen;
             const U8 * s = (U8*)STRING(scan);
+
+            /* Replace a length 1 ASCII fold pair node with an ANYOFM node,
+             * with the mask set to the complement of the bit that differs
+             * between upper and lower case, and the lowest code point of the
+             * pair (which the '&' forces) */
+            if (     bytelen == 1
+                &&   isALPHA_A(*s)
+                &&  (         OP(scan) == EXACTFAA
+                     || (     OP(scan) == EXACTFU
+                         && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(*s))))
+            {
+                U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
+
+                OP(scan) = ANYOFM;
+                ARG_SET(scan, *s & mask);
+                FLAGS(scan) = mask;
+                /* we're not EXACTFish any more, so restudy */
+                continue;
+            }
 
 	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) {
