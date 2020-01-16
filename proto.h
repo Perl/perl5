@@ -5904,6 +5904,15 @@ PERL_CALLCONV SV*	Perl_invlist_clone(pTHX_ SV* const invlist, SV* newlist);
 #define PERL_ARGS_ASSERT_INVLIST_CLONE	\
 	assert(invlist)
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE I32	S_regcurly(const char *s)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_REGCURLY	\
+	assert(s)
+#endif
+
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
 PERL_CALLCONV const char *	Perl_form_alien_digit_msg(pTHX_ const U8 which, const STRLEN valids_len, const char * const first_bad, const char * const send, const bool UTF, const bool braced)
 			__attribute__warn_unused_result__;
@@ -5928,13 +5937,6 @@ PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
 	assert(s); assert(send); assert(uv); assert(message)
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	S_regcurly(const char *s)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_REGCURLY	\
-	assert(s)
-#endif
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)

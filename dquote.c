@@ -8,7 +8,6 @@
 #include "EXTERN.h"
 #define PERL_IN_DQUOTE_C
 #include "perl.h"
-#include "dquote_inline.h"
 
 /* XXX Add documentation after final interface and behavior is decided */
 

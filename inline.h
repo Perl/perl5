@@ -1979,6 +1979,36 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 
 #endif
 
+/* ------------------ regcomp.c, toke.c ------------ */
+
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+
+/*
+ - regcurly - a little FSA that accepts {\d+,?\d*}
+    Pulled from reg.c.
+ */
+PERL_STATIC_INLINE I32
+S_regcurly(const char *s)
+{
+    PERL_ARGS_ASSERT_REGCURLY;
+
+    if (*s++ != '{')
+	return FALSE;
+    if (!isDIGIT(*s))
+	return FALSE;
+    while (isDIGIT(*s))
+	s++;
+    if (*s == ',') {
+	s++;
+	while (isDIGIT(*s))
+	    s++;
+    }
+
+    return *s == '}';
+}
+
+#endif
+
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
 
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
