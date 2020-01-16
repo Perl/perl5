@@ -4053,9 +4053,9 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 /*
 =for apidoc pv_uni_display
 
-Build to the scalar C<dsv> a displayable version of the string C<spv>,
-length C<len>, the displayable version being at most C<pvlim> bytes long
-(if longer, the rest is truncated and C<"..."> will be appended).
+Build to the scalar C<dsv> a displayable version of the UTF-8 encoded string
+C<spv>, length C<len>, the displayable version being at most C<pvlim> bytes
+long (if longer, the rest is truncated and C<"..."> will be appended).
 
 The C<flags> argument can have C<UNI_DISPLAY_ISPRINT> set to display
 C<isPRINT()>able characters as themselves, C<UNI_DISPLAY_BACKSLASH>
@@ -4063,6 +4063,9 @@ to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
 (C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
 C<UNI_DISPLAY_QQ> (and its alias C<UNI_DISPLAY_REGEX>) have both
 C<UNI_DISPLAY_BACKSLASH> and C<UNI_DISPLAY_ISPRINT> turned on.
+
+Additionally, there is now C<UNI_DISPLAY_BACKSPACE> which allows C<\b> for a
+backspace, but only when C<UNI_DISPLAY_BACKSLASH> also is set.
 
 The pointer to the PV of the C<dsv> is returned.
 
@@ -4082,10 +4085,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
     SvUTF8_off(dsv);
     for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
-	  /* This serves double duty as a flag and a character to print after
-	     a \ when flags & UNI_DISPLAY_BACKSLASH is true.
-	  */
-	 char ok = 0;
+	 bool ok = 0;
 
 	 if (pvlim && SvCUR(dsv) >= pvlim) {
 	      truncated++;
@@ -4095,27 +4095,19 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
 	 if (u < 256) {
 	     const unsigned char c = (unsigned char)u & 0xFF;
 	     if (flags & UNI_DISPLAY_BACKSLASH) {
-	         switch (c) {
-		 case '\n':
-		     ok = 'n'; break;
-		 case '\r':
-		     ok = 'r'; break;
-		 case '\t':
-		     ok = 't'; break;
-		 case '\f':
-		     ok = 'f'; break;
-		 case '\a':
-		     ok = 'a'; break;
-		 case '\\':
-		     ok = '\\'; break;
-		 default: break;
-		 }
-		 if (ok) {
-		     const char string = ok;
-		     sv_catpvs(dsv, "\\");
-		     sv_catpvn(dsv, &string, 1);
-		 }
-	     }
+                 if (    isMNEMONIC_CNTRL(c)
+                     && (   c != '\b'
+                         || (flags & UNI_DISPLAY_BACKSPACE)))
+                 {
+                    const char * mnemonic = cntrl_to_mnemonic(c);
+                    sv_catpvn(dsv, mnemonic, strlen(mnemonic));
+                    ok = 1;
+                 }
+                 else if (c == '\\') {
+                    sv_catpvs(dsv, "\\\\");
+                    ok = 1;
+                 }
+             }
 	     /* isPRINT() is the locale-blind version. */
 	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
 		 const char string = c;

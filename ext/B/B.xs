@@ -258,7 +258,7 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 		sv_catpvs(sstr, "\\@");
 	    else if (*s == '\\')
 	    {
-		if (memCHRs("nrftax\\",*(s+1)))
+		if (memCHRs("nrftabx\\",*(s+1)))
 		    sv_catpvn(sstr, s++, 2);
 		else
 		    sv_catpvs(sstr, "\\\\");
