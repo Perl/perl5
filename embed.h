@@ -917,6 +917,7 @@
 #define _inverse_folds(a,b,c)	Perl__inverse_folds(aTHX_ a,b,c)
 #define append_utf8_from_native_byte	Perl_append_utf8_from_native_byte
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
+#define cntrl_to_mnemonic	Perl_cntrl_to_mnemonic
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define get_and_check_backslash_N_name(a,b,c,d)	Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
@@ -1013,7 +1014,6 @@
 #define add_data		S_add_data
 #define add_multi_match(a,b,c)	S_add_multi_match(aTHX_ a,b,c)
 #define change_engine_size(a,b)	S_change_engine_size(aTHX_ a,b)
-#define cntrl_to_mnemonic	S_cntrl_to_mnemonic
 #define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
 #define edit_distance		S_edit_distance

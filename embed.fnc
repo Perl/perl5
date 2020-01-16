@@ -785,6 +785,7 @@ p	|void	|dump_sub_perl	|NN const GV* gv|bool justperl
 Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
+pEXTR	|const char *|cntrl_to_mnemonic|const U8 c
 p	|CV *	|find_lexical_cv|PADOFFSET off
 : Defined in util.c, used only in perl.c
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
@@ -2714,7 +2715,6 @@ ES	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|U32 word_count|U32 flags|U32 depth
 ES	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
-ETSR	|const char *|cntrl_to_mnemonic|const U8 c
 ETSR	|int	|edit_distance	|NN const UV *src		    \
 				|NN const UV *tgt		    \
 				|const STRLEN x			    \

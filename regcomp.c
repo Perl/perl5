@@ -1399,29 +1399,6 @@ S_edit_distance(const UV* src,
 /* END of edit_distance() stuff
  * ========================================================= */
 
-/* is c a control character for which we have a mnemonic? */
-#define isMNEMONIC_CNTRL(c) _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
-
-STATIC const char *
-S_cntrl_to_mnemonic(const U8 c)
-{
-    /* Returns the mnemonic string that represents character 'c', if one
-     * exists; NULL otherwise.  The only ones that exist for the purposes of
-     * this routine are a few control characters */
-
-    switch (c) {
-        case '\a':       return "\\a";
-        case '\b':       return "\\b";
-        case ESC_NATIVE: return "\\e";
-        case '\f':       return "\\f";
-        case '\n':       return "\\n";
-        case '\r':       return "\\r";
-        case '\t':       return "\\t";
-    }
-
-    return NULL;
-}
-
 /* Mark that we cannot extend a found fixed substring at this point.
    Update the longest found anchored substring or the longest found
    floating substrings if needed. */

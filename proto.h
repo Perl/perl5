@@ -656,6 +656,10 @@ PERL_CALLCONV void	Perl_clear_defarray(pTHX_ AV* av, bool abandon);
 PERL_CALLCONV const COP*	Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop, bool opnext);
 #define PERL_ARGS_ASSERT_CLOSEST_COP	\
 	assert(cop)
+PERL_CALLCONV const char *	Perl_cntrl_to_mnemonic(const U8 c)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CNTRL_TO_MNEMONIC
+
 PERL_CALLCONV const char *	Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags);
 #define PERL_ARGS_ASSERT_COP_FETCH_LABEL	\
 	assert(cop)
@@ -5561,10 +5565,6 @@ STATIC AV*	S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, con
 STATIC void	S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
 #define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE	\
 	assert(pRExC_state)
-STATIC const char *	S_cntrl_to_mnemonic(const U8 c)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_CNTRL_TO_MNEMONIC
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE U8	S_compute_EXACTish(RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
