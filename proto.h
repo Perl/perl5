@@ -5906,7 +5906,7 @@ PERL_CALLCONV SV*	Perl_invlist_clone(pTHX_ SV* const invlist, SV* newlist);
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	S_regcurly(const char *s)
+PERL_STATIC_INLINE bool	S_regcurly(const char *s)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGCURLY	\
 	assert(s)
