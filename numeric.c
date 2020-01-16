@@ -423,13 +423,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     s = s0; /* s0 potentially advanced from 'start' */
 
-    /* Unroll the loop so that the first 7 digits are branchless except for the
-     * switch.  An eighth one could overflow a 32 bit word.  This should
-     * completely handle the common case without needing extra checks */
+    /* Unroll the loop so that the first 8 digits are branchless except for the
+     * switch.  A ninth one overflows a 32 bit word. */
     switch (len) {
       case 0:
           return 0;
       default:
+          if (! _generic_isCC(*s, class_bit))  break;
+          value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
+          /* FALLTHROUGH */
+      case 7:
           if (! _generic_isCC(*s, class_bit))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
@@ -463,7 +467,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
           if (! _generic_isCC(*s, class_bit))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
 
-          if (LIKELY(len <= 7)) {
+          if (LIKELY(len <= 8)) {
               return value;
           }
 
