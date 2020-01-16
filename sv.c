@@ -4944,6 +4944,9 @@ The C<len> parameter indicates the number of
 bytes to be copied.  If the C<ptr> argument is NULL the SV will become
 undefined.  Does not handle 'set' magic.  See C<L</sv_setpvn_mg>>.
 
+The UTF-8 flag is not changed by this function.  A terminating NUL byte is
+guaranteed.
+
 =cut
 */
 
