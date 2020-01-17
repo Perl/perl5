@@ -189,7 +189,11 @@ else {
     # deliberately the first test.
     require Config; import Config;
     use vars '%Config';
-    if ($Config{ccflags} =~ /-DDEBUGGING/) {
+    # VMS doesn't put DEBUGGING in ccflags and Windows doesn't have $Config{config_args}.
+    # When 5.14 or later can be assumed, use Config::non_bincompat_options(), but for
+    # now we're stuck with this.
+    if ($Config{ccflags} =~ /-DDEBUGGING/
+        || $^O eq 'VMS' && $Config{config_args} =~ /\bDDEBUGGING\b/) {
         shift @buf_tests;
         skip("Test not valid on DEBUGGING builds", 5);
     }
