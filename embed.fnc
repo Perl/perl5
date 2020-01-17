@@ -1164,7 +1164,7 @@ Apd	|int	|grok_number_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|U32 f
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 ApMd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 ApMd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-Cpd	|UV	|grok_bin_oct_hex|NN const char* start			    \
+Cp	|UV	|grok_bin_oct_hex|NN const char* start			    \
 				 |NN STRLEN* len_p			    \
 				 |NN I32* flags				    \
 			         |NULLOK NV *result			    \
