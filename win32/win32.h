@@ -70,11 +70,6 @@
 #    define __int64 long long
 #  endif
 #  define Win32_Winsock
-#ifdef __cplusplus
-/* Mingw32 gcc -xc++ objects to __attribute((unused)) at least */
-#undef  PERL_UNUSED_DECL
-#define PERL_UNUSED_DECL
-#endif
 #endif
 
 
