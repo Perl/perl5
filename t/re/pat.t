@@ -2203,7 +2203,7 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
                         $quote x 8 . $back x 69,
                         $quote x 5 . $back x 4,
                         $ff x 48;
-        like(runperl(prog => "$s", stderr => 1), qr/Unmatched \(/);
+        like(fresh_perl("$s", { stderr => 1, }), qr/Unmatched \(/);
    }
 
    {    # GitHub #17196, caused assertion failure
