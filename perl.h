@@ -294,9 +294,112 @@
           : (REGEXP *)NULL)
 #endif
 
+/* In case Configure was not used (we are using a "canned config"
+ * such as Win32, or a cross-compilation setup, for example) try going
+ * by the gcc major and minor versions.  One useful URL is
+ * http://www.ohse.de/uwe/articles/gcc-attributes.html,
+ * but contrary to this information warn_unused_result seems
+ * not to be in gcc 3.3.5, at least. --jhi
+ * Also, when building extensions with an installed perl, this allows
+ * the user to upgrade gcc and get the right attributes, rather than
+ * relying on the list generated at Configure time.  --AD
+ * Set these up now otherwise we get confused when some of the <*thread.h>
+ * includes below indirectly pull in <perlio.h> (which needs to know if we
+ * have HASATTRIBUTE_FORMAT).
+ */
 
+#ifndef PERL_MICRO
+#if defined __GNUC__ && !defined(__INTEL_COMPILER)
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
+#    define HASATTRIBUTE_DEPRECATED
+#  endif
+#  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
+#    define HASATTRIBUTE_FORMAT
+#    if defined __MINGW32__
+#      define PRINTF_FORMAT_NULL_OK
+#    endif
+#  endif
+#  if __GNUC__ >= 3 /* 3.0 -> */
+#    define HASATTRIBUTE_MALLOC
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
+#    define HASATTRIBUTE_NONNULL
+#  endif
+#  if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
+#    define HASATTRIBUTE_NORETURN
+#  endif
+#  if __GNUC__ >= 3 /* gcc 3.0 -> */
+#    define HASATTRIBUTE_PURE
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#    define HASATTRIBUTE_UNUSED
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
+#    define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#    define HASATTRIBUTE_WARN_UNUSED_RESULT
+#  endif
+#endif
+#endif /* #ifndef PERL_MICRO */
 
+#ifdef HASATTRIBUTE_DEPRECATED
+#  define __attribute__deprecated__         __attribute__((deprecated))
+#endif
+#ifdef HASATTRIBUTE_FORMAT
+#  define __attribute__format__(x,y,z)      __attribute__((format(x,y,z)))
+#endif
+#ifdef HASATTRIBUTE_MALLOC
+#  define __attribute__malloc__             __attribute__((__malloc__))
+#endif
+#ifdef HASATTRIBUTE_NONNULL
+#  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
+#endif
+#ifdef HASATTRIBUTE_NORETURN
+#  define __attribute__noreturn__           __attribute__((noreturn))
+#endif
+#ifdef HASATTRIBUTE_PURE
+#  define __attribute__pure__               __attribute__((pure))
+#endif
+#ifdef HASATTRIBUTE_UNUSED
+#  define __attribute__unused__             __attribute__((unused))
+#endif
+#ifdef HASATTRIBUTE_WARN_UNUSED_RESULT
+#  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
+#endif
 
+/* If we haven't defined the attributes yet, define them to blank. */
+#ifndef __attribute__deprecated__
+#  define __attribute__deprecated__
+#endif
+#ifndef __attribute__format__
+#  define __attribute__format__(x,y,z)
+#endif
+#ifndef __attribute__malloc__
+#  define __attribute__malloc__
+#endif
+#ifndef __attribute__nonnull__
+#  define __attribute__nonnull__(a)
+#endif
+#ifndef __attribute__noreturn__
+#  define __attribute__noreturn__
+#endif
+#ifndef __attribute__pure__
+#  define __attribute__pure__
+#endif
+#ifndef __attribute__unused__
+#  define __attribute__unused__
+#endif
+#ifndef __attribute__warn_unused_result__
+#  define __attribute__warn_unused_result__
+#endif
+
+/* Some OS warn on NULL format to printf */
+#ifdef PRINTF_FORMAT_NULL_OK
+#  define __attribute__format__null_ok__(x,y,z)  __attribute__format__(x,y,z)
+#else
+#  define __attribute__format__null_ok__(x,y,z)
+#endif
 
 /*
  * Because of backward compatibility reasons the PERL_UNUSED_DECL
@@ -310,20 +413,8 @@
  *
  */
 
-#if defined(__SYMBIAN32__) && defined(__GNUC__)
-#  ifdef __cplusplus
-#    define PERL_UNUSED_DECL
-#  else
-#    define PERL_UNUSED_DECL __attribute__((unused))
-#  endif
-#endif
-
 #ifndef PERL_UNUSED_DECL
-#  if defined(HASATTRIBUTE_UNUSED) && (!defined(__cplusplus) || __GNUC__ >= 4)
-#    define PERL_UNUSED_DECL __attribute__unused__
-#  else
-#    define PERL_UNUSED_DECL
-#  endif
+#  define PERL_UNUSED_DECL __attribute__unused__
 #endif
 
 /* gcc -Wall:
@@ -2938,55 +3029,6 @@ freeing any remaining Perl interpreters.
 #  endif
 #endif
 
-/* In case Configure was not used (we are using a "canned config"
- * such as Win32, or a cross-compilation setup, for example) try going
- * by the gcc major and minor versions.  One useful URL is
- * http://www.ohse.de/uwe/articles/gcc-attributes.html,
- * but contrary to this information warn_unused_result seems
- * not to be in gcc 3.3.5, at least. --jhi
- * Also, when building extensions with an installed perl, this allows
- * the user to upgrade gcc and get the right attributes, rather than
- * relying on the list generated at Configure time.  --AD
- * Set these up now otherwise we get confused when some of the <*thread.h>
- * includes below indirectly pull in <perlio.h> (which needs to know if we
- * have HASATTRIBUTE_FORMAT).
- */
-
-#ifndef PERL_MICRO
-#if defined __GNUC__ && !defined(__INTEL_COMPILER)
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
-#    define HASATTRIBUTE_DEPRECATED
-#  endif
-#  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
-#    define HASATTRIBUTE_FORMAT
-#    if defined __MINGW32__
-#      define PRINTF_FORMAT_NULL_OK
-#    endif
-#  endif
-#  if __GNUC__ >= 3 /* 3.0 -> */
-#    define HASATTRIBUTE_MALLOC
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
-#    define HASATTRIBUTE_NONNULL
-#  endif
-#  if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
-#    define HASATTRIBUTE_NORETURN
-#  endif
-#  if __GNUC__ >= 3 /* gcc 3.0 -> */
-#    define HASATTRIBUTE_PURE
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
-#    define HASATTRIBUTE_UNUSED
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
-#    define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
-#    define HASATTRIBUTE_WARN_UNUSED_RESULT
-#  endif
-#endif
-#endif /* #ifndef PERL_MICRO */
-
 /* USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
  * this results in many functions being undeclared which bothers C++
@@ -3525,57 +3567,6 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define UVf UVuf
 #endif
 
-#ifdef HASATTRIBUTE_DEPRECATED
-#  define __attribute__deprecated__         __attribute__((deprecated))
-#endif
-#ifdef HASATTRIBUTE_FORMAT
-#  define __attribute__format__(x,y,z)      __attribute__((format(x,y,z)))
-#endif
-#ifdef HASATTRIBUTE_MALLOC
-#  define __attribute__malloc__             __attribute__((__malloc__))
-#endif
-#ifdef HASATTRIBUTE_NONNULL
-#  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
-#endif
-#ifdef HASATTRIBUTE_NORETURN
-#  define __attribute__noreturn__           __attribute__((noreturn))
-#endif
-#ifdef HASATTRIBUTE_PURE
-#  define __attribute__pure__               __attribute__((pure))
-#endif
-#ifdef HASATTRIBUTE_UNUSED
-#  define __attribute__unused__             __attribute__((unused))
-#endif
-#ifdef HASATTRIBUTE_WARN_UNUSED_RESULT
-#  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
-#endif
-
-/* If we haven't defined the attributes yet, define them to blank. */
-#ifndef __attribute__deprecated__
-#  define __attribute__deprecated__
-#endif
-#ifndef __attribute__format__
-#  define __attribute__format__(x,y,z)
-#endif
-#ifndef __attribute__malloc__
-#  define __attribute__malloc__
-#endif
-#ifndef __attribute__nonnull__
-#  define __attribute__nonnull__(a)
-#endif
-#ifndef __attribute__noreturn__
-#  define __attribute__noreturn__
-#endif
-#ifndef __attribute__pure__
-#  define __attribute__pure__
-#endif
-#ifndef __attribute__unused__
-#  define __attribute__unused__
-#endif
-#ifndef __attribute__warn_unused_result__
-#  define __attribute__warn_unused_result__
-#endif
-
 #if !defined(DEBUGGING) && !defined(NDEBUG)
 #  define NDEBUG 1
 #endif
@@ -3588,13 +3579,6 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define NORETURN_FUNCTION_END NOT_REACHED;
 #else
 #  define NORETURN_FUNCTION_END NOT_REACHED; return 0
-#endif
-
-/* Some OS warn on NULL format to printf */
-#ifdef PRINTF_FORMAT_NULL_OK
-#  define __attribute__format__null_ok__(x,y,z)  __attribute__format__(x,y,z)
-#else
-#  define __attribute__format__null_ok__(x,y,z)
 #endif
 
 #ifdef HAS_BUILTIN_EXPECT
