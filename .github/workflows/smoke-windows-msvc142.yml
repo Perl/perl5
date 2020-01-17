@@ -10,11 +10,11 @@ on:
 
 jobs:
   perl:
+    runs-on: windows-latest
+
     env:
         PERL_SKIP_TTY_TEST: 1
         CONTINUOUS_INTEGRATION: 1
-
-    runs-on: windows-latest
 
     steps:
       - run: git config --global core.autocrlf false
