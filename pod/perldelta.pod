@@ -137,6 +137,10 @@ L<Encode> has been upgraded from version 3.01 to 3.02.
 
 L<Term::ANSIColor> has been upgraded from version 4.06 to 5.00.
 
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302170 to 1.302171.
+
 =back
 
 =head2 Removed Modules and Pragmata
