@@ -1012,109 +1012,153 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 
   PERL_ARGS_ASSERT_GROK_NUMBER_FLAGS;
 
-  while (s < send && isSPACE(*s))
-    s++;
-  if (s == send) {
-    return 0;
-  } else if (*s == '-') {
-    s++;
-    numtype = IS_NUMBER_NEG;
+  if (UNLIKELY(isSPACE(*s))) {
+      s++;
+      while (s < send) {
+        if (LIKELY(! isSPACE(*s))) goto non_space;
+        s++;
+      }
+      return 0;
+    non_space: ;
   }
-  else if (*s == '+')
-    s++;
 
-  if (s == send)
-    return 0;
+  /* See if signed.  This assumes it is more likely to be unsigned, so
+   * penalizes signed by an extra conditional; rewarding unsigned by one fewer
+   * (because we detect '+' and '-' with a single test and then add a
+   * conditional to determine which) */
+  if (UNLIKELY((*s & ~('+' ^ '-')) == ('+' & '-') )) {
+
+    /* Here, on ASCII platforms, *s is one of: 0x29 = ')', 2B = '+', 2D = '-',
+     * 2F = '/'.  That is, it is either a sign, or a character that doesn't
+     * belong in a number at all (unless it's a radix character in a weird
+     * locale).  Given this, it's far more likely to be a minus than the
+     * others.  (On EBCDIC it is one of 42, 44, 46, 48, 4A, 4C, 4E,  (not 40
+     * because can't be a space) 60, 62, 64, 66, 68, 6A, 6C, 6E.  Again, only
+     * potentially a weird radix character, or 4E='+', or 60='-') */
+    if (LIKELY(*s == '-')) {
+        s++;
+        numtype = IS_NUMBER_NEG;
+    }
+    else if (LIKELY(*s == '+'))
+        s++;
+    else  /* Can't just return failure here, as it could be a weird radix
+             character */
+        goto done_sign;
+
+    if (UNLIKELY(s == send))
+        return 0;
+  done_sign: ;
+    }
 
   /* The first digit (after optional sign): note that might
    * also point to "infinity" or "nan", or "1.#INF". */
   d = s;
 
   /* next must be digit or the radix separator or beginning of infinity/nan */
-  if (isDIGIT(*s)) {
+  if (LIKELY(isDIGIT(*s))) {
     /* UVs are at least 32 bits, so the first 9 decimal digits cannot
        overflow.  */
-    UV value = *s - '0';
-    /* This construction seems to be more optimiser friendly.
-       (without it gcc does the isDIGIT test and the *s - '0' separately)
-       With it gcc on arm is managing 6 instructions (6 cycles) per digit.
-       In theory the optimiser could deduce how far to unroll the loop
-       before checking for overflow.  */
-    if (++s < send) {
-      int digit = *s - '0';
-      if (inRANGE(digit, 0, 9)) {
+    UV value = *s - '0';    /* Process this first (perhaps only) digit */
+    int digit;
+
+    s++;
+
+    switch(send - s) {
+      default:      /* 8 or more remaining characters */
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
         value = value * 10 + digit;
-        if (++s < send) {
-          digit = *s - '0';
-          if (inRANGE(digit, 0, 9)) {
-            value = value * 10 + digit;
-            if (++s < send) {
-              digit = *s - '0';
-              if (inRANGE(digit, 0, 9)) {
+        s++;
+        /* FALLTHROUGH */
+      case 7:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 6:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 5:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 4:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 3:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 2:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 1:
+        digit = *s - '0';
+        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
+        value = value * 10 + digit;
+        s++;
+        /* FALLTHROUGH */
+      case 0:       /* This case means the string consists of just the one
+                       digit we already have processed */
+
+        /* If we got here by falling through other than the default: case, we
+         * have processed the whole string, and know it consists entirely of
+         * digits, and can't have overflowed. */
+        if (s >= send) {
+            if (valuep)
+              *valuep = value;
+            return numtype|IS_NUMBER_IN_UV;
+        }
+
+        /* Here, there are extra characters beyond the first 9 digits.  Use a
+         * loop to accumulate any remaining digits, until we get a non-digit or
+         * would overflow.  Note that leading zeros could cause us to get here
+         * without being close to overflowing.
+         *
+         * (The conditional 's >= send' above could be eliminated by making the
+         * default: in the switch to instead be 'case 8:', and process longer
+         * strings separately by using the loop below.  This would penalize
+         * these inputs by the extra instructions needed for looping.  That
+         * could be eliminated by copying the unwound code from above to handle
+         * the firt 9 digits of these.  khw didn't think this saving of a
+         * single conditional was worth it.) */
+        do {
+            digit = *s - '0';
+            if (! inRANGE(digit, 0, 9)) goto mantissa_done;
+            if (       value < uv_max_div_10
+                || (   value == uv_max_div_10
+                    && digit <= uv_max_mod_10))
+            {
                 value = value * 10 + digit;
-		if (++s < send) {
-                  digit = *s - '0';
-                  if (inRANGE(digit, 0, 9)) {
-                    value = value * 10 + digit;
-                    if (++s < send) {
-                      digit = *s - '0';
-                      if (inRANGE(digit, 0, 9)) {
-                        value = value * 10 + digit;
-                        if (++s < send) {
-                          digit = *s - '0';
-                          if (inRANGE(digit, 0, 9)) {
-                            value = value * 10 + digit;
-                            if (++s < send) {
-                              digit = *s - '0';
-                              if (inRANGE(digit, 0, 9)) {
-                                value = value * 10 + digit;
-                                if (++s < send) {
-                                  digit = *s - '0';
-                                  if (inRANGE(digit, 0, 9)) {
-                                    value = value * 10 + digit;
-                                    if (++s < send) {
-                                      /* Now got 9 digits, so need to check
-                                         each time for overflow.  */
-                                      digit = *s - '0';
-                                      while (    inRANGE(digit, 0, 9)
-                                             && (value < uv_max_div_10
-                                                 || (value == uv_max_div_10
-                                                     && digit <= uv_max_mod_10))) {
-                                        value = value * 10 + digit;
-                                        if (++s < send)
-                                          digit = *s - '0';
-                                        else
-                                          break;
-                                      }
-                                      if (inRANGE(digit, 0, 9)
-                                          && (s < send)) {
-                                        /* value overflowed.
-                                           skip the remaining digits, don't
-                                           worry about setting *valuep.  */
-                                        do {
-                                          s++;
-                                        } while (s < send && isDIGIT(*s));
-                                        numtype |=
-                                          IS_NUMBER_GREATER_THAN_UV_MAX;
-                                        goto skip_value;
-                                      }
-                                    }
-                                  }
-				}
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+                s++;
             }
-          }
-	}
-      }
-    }
+            else { /* value would overflow.  skip the remaining digits, don't
+                      worry about setting *valuep.  */
+                do {
+                    s++;
+                } while (s < send && isDIGIT(*s));
+                numtype |=
+                    IS_NUMBER_GREATER_THAN_UV_MAX;
+                goto skip_value;
+            }
+        } while (s < send);
+    }   /* End switch on input length */
+
+  mantissa_done:
     numtype |= IS_NUMBER_IN_UV;
     if (valuep)
       *valuep = value;
@@ -1125,7 +1169,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
       while (s < send && isDIGIT(*s))  /* optional digits after the radix */
         s++;
     }
-  }
+  } /* End of *s is a digit */
   else if (GROK_NUMERIC_RADIX(&s, send)) {
     numtype |= IS_NUMBER_NOT_INT | IS_NUMBER_IN_UV; /* valuep assigned below */
     /* no digits before the radix means we need digits after it */
@@ -1142,9 +1186,9 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
         return 0;
   }
 
-  if (s > d && s < send) {
+  if (LIKELY(s > d) && s < send) {
     /* we can have an optional exponent part */
-    if (isALPHA_FOLD_EQ(*s, 'e')) {
+    if (UNLIKELY(isALPHA_FOLD_EQ(*s, 'e'))) {
       s++;
       if (s < send && (*s == '-' || *s == '+'))
         s++;
@@ -1163,17 +1207,23 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
       numtype |= IS_NUMBER_NOT_INT;
     }
   }
-  while (s < send && isSPACE(*s))
+
+  while (s < send) {
+    if (LIKELY(! isSPACE(*s))) goto end_space;
     s++;
-  if (s >= send)
-    return numtype;
-  if (memEQs(pv, len, "0 but true")) {
+  }
+  return numtype;
+
+ end_space:
+
+  if (UNLIKELY(memEQs(pv, len, "0 but true"))) {
     if (valuep)
       *valuep = 0;
     return IS_NUMBER_IN_UV;
   }
+
   /* We could be e.g. at "Inf" or "NaN", or at the "#" of "1.#INF". */
-  if ((s + 2 < send) && memCHRs("inqs#", toFOLD(*s))) {
+  if ((s + 2 < send) && UNLIKELY(memCHRs("inqs#", toFOLD(*s)))) {
       /* Really detect inf/nan. Start at d, not s, since the above
        * code might have already consumed the "1." or "1". */
       const int infnan = Perl_grok_infnan(aTHX_ &d, send);
