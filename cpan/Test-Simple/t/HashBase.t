@@ -83,7 +83,10 @@ is($pkg->do_it, 'const', "worked as expected");
     *main::Const::Test::FOO = sub { 0 };
 }
 ok(!$pkg->FOO, "overrode const sub");
+{
+local $TODO = "known to fail on $]" if $] le "5.006002";
 is($pkg->do_it, 'const', "worked as expected, const was constant");
+}
 
 BEGIN {
     $INC{'Object/HashBase/Test/HBase/Wrapped.pm'} = __FILE__;

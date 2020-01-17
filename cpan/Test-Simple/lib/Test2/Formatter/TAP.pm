@@ -2,7 +2,7 @@ package Test2::Formatter::TAP;
 use strict;
 use warnings;
 
-our $VERSION = '1.302170';
+our $VERSION = '1.302171';
 
 use Test2::Util qw/clone_io/;
 
@@ -271,7 +271,10 @@ sub assert_tap {
         }
 
         my %seen;
-        my @order = grep { !$seen{$_}++ } sort keys %directives;
+
+        # Sort so that TODO comes before skip even on systems where lc sorts
+        # before uc, as other code depends on that ordering.
+        my @order = grep { !$seen{$_}++ } sort { lc $b cmp lc $a } keys %directives;
 
         $directives = ' # ' . join ' & ' => @order;
 
