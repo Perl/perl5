@@ -744,6 +744,8 @@ sub _create_runperl { # Create the string to qx in runperl().
 }
 
 # sub run_perl {} is alias to below
+# Since this uses backticks to run, it is subject to the rules of the shell.
+# Locale settings may pose a problem, depending on the program being run.
 sub runperl {
     die "test.pl:runperl() does not take a hashref"
 	if ref $_[0] and ref $_[0] eq 'HASH';
@@ -956,6 +958,8 @@ sub fresh_perl {
     # arguments in the hash referred to by '$runperl_args'.  The results are
     # returned, with $? set to the exit code.  Unless overridden, stderr is
     # redirected to stdout.
+    #
+    # Placing the program in a file bypasses various sh vagaries
 
     die sprintf "Second argument to fresh_perl_.* must be hashref of args to fresh_perl (or {})"
         unless !(defined $runperl_args) || ref($runperl_args) eq 'HASH';
