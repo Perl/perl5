@@ -957,7 +957,7 @@ sub fresh_perl {
     # returned, with $? set to the exit code.  Unless overridden, stderr is
     # redirected to stdout.
 
-    die sprintf "Third argument to fresh_perl_.* must be hashref of args to fresh_perl (or {})"
+    die sprintf "Second argument to fresh_perl_.* must be hashref of args to fresh_perl (or {})"
         unless !(defined $runperl_args) || ref($runperl_args) eq 'HASH';
 
     # Given the choice of the mis-parsable {}
