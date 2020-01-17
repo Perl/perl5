@@ -8,11 +8,11 @@ on:
       - '*'
   pull_request:
 
-env:
-    PERL_SKIP_TTY_TEST: 1
-
 jobs:
   perl:
+    env:
+        PERL_SKIP_TTY_TEST: 1
+        CONTINUOUS_INTEGRATION: 1
 
     runs-on: windows-latest
 
