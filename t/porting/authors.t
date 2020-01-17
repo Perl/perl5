@@ -32,6 +32,8 @@ elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
     my $common_ancestor = `git merge-base origin/$ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`;
     $common_ancestor =~ s!\s+!!g;
 
+    skip_all( "Cannot find common ancestor" ) if $? || !length $common_ancestor;
+
     # We want one before the GITHUB_SHA, as the github-SHA is a merge commit
 	$revision_range = join '..', $common_ancestor, $ENV{GITHUB_SHA} . '^2';
 }
