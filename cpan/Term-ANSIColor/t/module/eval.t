@@ -14,7 +14,7 @@ use 5.008;
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 # We refer to $@ in the test descriptions.
 ## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
@@ -23,6 +23,7 @@ use Test::More tests => 15;
 BEGIN {
     delete $ENV{ANSI_COLORS_ALIASES};
     delete $ENV{ANSI_COLORS_DISABLED};
+    delete $ENV{NO_COLOR};
     use_ok('Term::ANSIColor', qw(:constants));
 }
 
@@ -42,6 +43,12 @@ local $ENV{ANSI_COLORS_DISABLED} = 1;
 is(BOLD,  q{}, 'ANSI_COLORS_DISABLED works for BOLD');
 is(BLINK, q{}, '...and for BLINK');
 delete $ENV{ANSI_COLORS_DISABLED};
+
+# Now, NO_COLOR.
+local $ENV{NO_COLOR} = 'foo';
+is(BOLD,  q{}, 'NO_COLOR works for BOLD');
+is(BLINK, q{}, '...and for BLINK');
+delete $ENV{NO_COLOR};
 
 # Now, AUTORESET.
 $Term::ANSIColor::AUTORESET = 1;

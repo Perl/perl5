@@ -11,12 +11,13 @@ use 5.008;
 use strict;
 use warnings;
 
-use Test::More tests => 152;
+use Test::More tests => 169;
 
 # Load the module.
 BEGIN {
     delete $ENV{ANSI_COLORS_ALIASES};
     delete $ENV{ANSI_COLORS_DISABLED};
+    delete $ENV{NO_COLOR};
     use_ok('Term::ANSIColor',
         qw(:pushpop color colored uncolor colorstrip colorvalid));
 }
@@ -89,6 +90,18 @@ local $ENV{ANSI_COLORS_DISABLED} = q{};
 is(color('bold'), "\e[1m", '...likewise when set to an empty string');
 is((BOLD),        "\e[1m", '...likewise for constants');
 delete $ENV{ANSI_COLORS_DISABLED};
+
+# Similar tests for NO_COLOR, although NO_COLOR may be set to any value.
+local $ENV{NO_COLOR} = 1;
+is(color('blue'), q{}, 'color support for NO_COLOR');
+is(colored('testing', 'blue', 'on_red'),
+    'testing', 'colored support for NO_COLOR');
+is((BLUE 'testing'), 'testing', 'Constant support for NO_COLOR');
+local $ENV{NO_COLOR} = q{};
+is(color('blue'), q{}, 'color support for NO_COLOR with empty string');
+is((RED 'testing'),
+    'testing', 'Constant support for NO_COLOR with empty string');
+delete $ENV{NO_COLOR};
 
 # Make sure DARK is exported.  This was omitted in versions prior to 1.07.
 is((DARK 'testing'), "\e[2mtesting", 'DARK');
@@ -299,6 +312,22 @@ is(ON_GREEN,      q{}, '...and for ON_GREEN');
 is(ON_BLUE,       q{}, '...and for ON_BLUE');
 is(RESET,         q{}, '...and for RESET');
 delete $ENV{ANSI_COLORS_DISABLED};
+
+# Do the same for disabled colors with NO_COLOR.
+local $ENV{NO_COLOR} = 1;
+is(BOLD,          q{}, 'NO_COLOR works for BOLD');
+is(BLUE,          q{}, '...and for BLUE');
+is(GREEN,         q{}, '...and for GREEN');
+is(DARK,          q{}, '...and for DARK');
+is(FAINT,         q{}, '...and for FAINT');
+is(BRIGHT_RED,    q{}, '...and for BRIGHT_RED');
+is(ON_BRIGHT_RED, q{}, '...and for ON_BRIGHT_RED');
+is(ITALIC,        q{}, '...and for ITALIC');
+is(RED,           q{}, '...and for RED');
+is(ON_GREEN,      q{}, '...and for ON_GREEN');
+is(ON_BLUE,       q{}, '...and for ON_BLUE');
+is(RESET,         q{}, '...and for RESET');
+delete $ENV{NO_COLOR};
 
 # Do the same for AUTORESET.
 $Term::ANSIColor::AUTORESET = 1;

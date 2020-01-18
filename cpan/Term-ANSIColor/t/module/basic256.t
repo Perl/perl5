@@ -11,12 +11,13 @@ use 5.008;
 use strict;
 use warnings;
 
-use Test::More tests => 94;
+use Test::More tests => 100;
 
 # Load the module.
 BEGIN {
     delete $ENV{ANSI_COLORS_ALIASES};
     delete $ENV{ANSI_COLORS_DISABLED};
+    delete $ENV{NO_COLOR};
     use_ok('Term::ANSIColor', qw(:constants256 color uncolor colorvalid));
 }
 
@@ -97,6 +98,16 @@ is(RGB555, q{}, '...and for RGB555');
 is(GREY0,  q{}, '...and for GREY0');
 is(GREY23, q{}, '...and for GREY23');
 delete $ENV{ANSI_COLORS_DISABLED};
+
+# Do the same with NO_COLOR.
+local $ENV{NO_COLOR} = 0;
+is(ANSI0,  q{}, 'NO_COLOR works for ANSI0');
+is(ANSI15, q{}, '...and for ANSI15');
+is(RGB000, q{}, '...and for RGB000');
+is(RGB555, q{}, '...and for RGB555');
+is(GREY0,  q{}, '...and for GREY0');
+is(GREY23, q{}, '...and for GREY23');
+delete $ENV{NO_COLOR};
 
 # Do the same for AUTORESET.
 $Term::ANSIColor::AUTORESET = 1;

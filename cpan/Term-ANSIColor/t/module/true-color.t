@@ -16,6 +16,7 @@ use Test::More tests => 82;
 BEGIN {
     delete $ENV{ANSI_COLORS_ALIASES};
     delete $ENV{ANSI_COLORS_DISABLED};
+    delete $ENV{NO_COLOR};
     use_ok('Term::ANSIColor', qw(color uncolor colorvalid));
 }
 
