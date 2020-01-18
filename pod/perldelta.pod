@@ -135,7 +135,7 @@ L<Encode> has been upgraded from version 3.01 to 3.02.
 
 =item *
 
-L<Term::ANSIColor> has been upgraded from version 4.06 to 5.00.
+L<Term::ANSIColor> has been upgraded from version 4.06 to 5.01.
 
 =item *
 
