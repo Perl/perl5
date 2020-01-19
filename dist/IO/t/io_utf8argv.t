@@ -33,12 +33,17 @@ close $fh or die "close: $!";
 
 use IO::Handle;
 
-@ARGV = ('io_utf8argv') x 2;
-is *ARGV->getline, $bytes,
-  'getline (no open pragma) when magically opening ARGV';
+SKIP: {
+    skip("PERL_UNICODE set", 2)
+        if exists $ENV{PERL_UNICODE};
 
-is join('',*ARGV->getlines), $bytes,
-  'getlines (no open pragma) when magically opening ARGV';
+    @ARGV = ('io_utf8argv') x 2;
+    is *ARGV->getline, $bytes,
+        'getline (no open pragma) when magically opening ARGV';
+
+    is join('',*ARGV->getlines), $bytes,
+        'getlines (no open pragma) when magically opening ARGV';
+}
 
 use open ":std", ":utf8";
 
