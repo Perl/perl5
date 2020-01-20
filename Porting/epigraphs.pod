@@ -17,6 +17,41 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.8 - Joe Perham, "Joe Perham's Guide to Hunting and Guide to Fishing in Maine"
+
+L<Announced on 2020-01-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2020/01/msg256894.html>
+
+  Harry used to cut wood for the Brown company over in Stoneham Red
+  Rock Basin. And of course he was the best shot in camp. One day the
+  foreman told him to go get some meat.
+
+  "Take any gun you want."
+
+  Harry says "I'll take the .45-70."
+
+  Foreman said "That gun's only got one bullet."
+
+  Harry says "I only need one bullet."
+
+  Took the .45-70, went out, an hour later he was back with two Moose,
+  a dozen trout you see, and a fluffy partridge. Went back to work.
+
+  Well at supper that night foreman says "Harry, um, something's
+  bothering me here a little bit. How did you get all that food with
+  only one bullet. I'm a little confused about the... the partridge,
+  there ain't a mark on him."
+
+  "Well", Harry says, "I'll tell ya. I took that .45-70, went back into
+  the woods a piece there I come to this brook. And I just uh, got to
+  the other side when I happen to see two moose in the swamp off
+  there. I figured I could get both of 'em. So I took out my huntin'
+  knife and stuck it into the mud, hilt foremost, sharp edge on the
+  blade towards me of course. I took dead aim on that knife, fired,
+  split that bullet and killed those two moose. Well you know the
+  recoil knocked me back into the brook. When I come up out of the
+  water, my pants were so full of fish that it popped a button off my
+  fly and killed that bird."
+
 =head2 v5.31.7 - Bernard Werber
 
 L<Announced on 2019-12-20 by Atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2019/12/msg256802.html>
