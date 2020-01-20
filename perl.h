@@ -7130,7 +7130,7 @@ A synonym for L</grok_numeric_radix>
 #define PERL_SCAN_ALLOW_UNDERSCORES   0x01 /* grok_??? accept _ in numbers */
 #define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
 
-/* grok_??? input: don't warn on overflowing a UV; output: found overflow */
+/* grok_??? input: ignored; output: found overflow */
 #define PERL_SCAN_GREATER_THAN_UV_MAX 0x04
 
 /* grok_??? don't warn about illegal digits.  To preserve total backcompat,
