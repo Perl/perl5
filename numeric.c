@@ -513,12 +513,16 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
             if (! overflowed) {
                 overflowed = TRUE;
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+                if (   ! (input_flags & PERL_SCAN_SILENT_OVERFLOW)
+                    &&    ckWARN_d(WARN_OVERFLOW))
+                {
+                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                        "Integer overflow in %s number",
                                        (base == 16) ? "hexadecimal"
                                                     : (base == 2)
                                                       ? "binary"
                                                       : "octal");
+                }
             }
             continue;
         }
@@ -526,7 +530,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
         if (   *s == '_'
             && len
             && allow_underscores
-            && _generic_isCC(s[1], class_bit))
+            && _generic_isCC(s[1], class_bit)
+
+                /* Don't allow a leading underscore if the only-medial bit is
+                 * set */
+            && (   LIKELY(s > s0)
+                || UNLIKELY((input_flags & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)
+                                        != PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)))
         {
             --len;
             ++s;

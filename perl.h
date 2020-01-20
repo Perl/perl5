@@ -7150,6 +7150,12 @@ A synonym for L</grok_numeric_radix>
 /* If this is set on input, and no illegal digit is found, it will be cleared
  * on output; otherwise unchanged */
 #  define PERL_SCAN_NOTIFY_ILLDIGIT 0x40
+
+/* Don't warn on overflow; output flag still set */
+#  define PERL_SCAN_SILENT_OVERFLOW 0x80
+
+/* Forbid a leading underscore, which the other one doesn't */
+#  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES (0x100|PERL_SCAN_ALLOW_UNDERSCORES)
 #endif
 
 
