@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.31.8
 
 =head1 DESCRIPTION
@@ -17,7 +14,8 @@ L<perl5317delta>, which describes differences between 5.31.6 and 5.31.7.
 
 =head1 Notice
 
-XXX Any important notices here
+We are now in the Contentious Changes Freeze portion of the 5.31.X release
+cycle.
 
 =head1 Core Enhancements
 
@@ -89,7 +87,17 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+C<my_strnlen> has been sped up for systems that don't have their own
+C<strnlen> implementation.
+
+=item *
+
+C<grok_bin_oct_hex> (and so, C<grok_bin>, C<grok_oct>, and C<grok_hex>)
+have been sped up.
+
+=item *
+
+C<grok_number_flags> has been sped up.
 
 =back
 
@@ -155,9 +163,6 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 New Documentation
 
 XXX Changes which create B<new> files in F<pod/> go here.
@@ -172,19 +177,113 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, send email
 to L<https://github.com/Perl/perl5/issues>.
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+C<sv_2pvbyte> updated to mention it will croak if the SV cannot be
+downgraded.
+
+=item *
+
+C<sv_setpvn> updated to mention that the UTF-8 flag will not be changed by
+this function, and a terminating NUL byte is guaranteed.
+
+=item *
+
+Documentation for C<PL_phase> has been added.
+
+=item *
+
+The documentation for C<grok_bin, C<grok_oct>, and C<grok_hex> has been
+updated and clarified.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Don't suggest using perl's C<malloc> anymore. Modern system C<malloc> is
+assumed to be much better than perl's implementation at this point.
+
+=back
+
+=head3 L<perlintro>
+
+=item *
+
+The docs for the repetition operator C<x> have been clarified
+
+[L<GH #17335|https://github.com/Perl/perl5/issues/17335>]
+
+=head3 L<perlipc>
+
+=over 4
+
+=item *
+
+The documentation surrounding C<open> and handle usage has been modernized
+to prefer 3-arg open and lexical variables instead of barewords.
+
+=item *
+
+Various updates and fixes including making all examples strict-safe and
+replacing C<-w> with C<use warnings>.
+
+=back
+
+=head3 L<perlport>
+
+=over 4
+
+=item *
+
+Update C<timegm> example to use correct year format I<1970> instead of I<70>.
+
+[L<GH #16431|https://github.com/Perl/perl5/issues/16431>]
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Recommend stringifying C<$]> and comparing it numerically.
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+Suggest using libffi for simple library bindings.
+
+=back
+
+=head3 L<POSIX>
+
+=over 4
+
+=item *
+
+C<setlocale> warning about threaded builds updated to note it does not
+apply on Perl 5.28.X and later.
+
+=item *
+
+C<< Posix::SigSet->new(...) >> updated to state it throws an error if any of
+the supplied signals cannot be added to the set.
 
 =back
 
@@ -266,45 +365,39 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+For clang++, add C<< #include <stdlib.h> >> to Configure's probes for
+C<futimes>, C<strtoll>, C<strtoul>, C<strtoull>, C<strtouq>, otherwise the
+probes would fail to compile.
+
+=item *
+
+Use a compile and run test for C<lchown> to satisfy clang++ which should
+more reliably detect it.
+
+=item *
+
+For C++ compilers, add C<< #include <stdio.h> >> to Configure's probes for
+C<getpgrp> and C<setpgrp> as they use printf and C++ compilers may fail
+compilation instead of just warning.
 
 =back
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
-
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
-XXX If instead there were significant changes, say this:
-
 Tests were added and changed to reflect the other additions and
 changes in this release.  Furthermore, these significant changes were
 made:
-
-[ List each test improvement as an =item entry ]
 
 =over 4
 
 =item *
 
-XXX
+Certain test output of scalars containing control characters and Unicode
+has been fixed on EBCDIC.
 
 =back
 
 =head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
 
 =head2 New Platforms
 
@@ -335,16 +428,18 @@ XXX
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
-=item XXX-some-platform
+=item NetBSD 8.0
 
-XXX
+Fix compilation of Perl on NetBSD 8.0 with g++.
+
+[L<GH #17381|https://github.com/Perl/perl5/issues/17381>]
+
+=item Solaris
+
+Configure now uses the detected types for gethostby* functions, allowing
+Perl to once again compile on certain configurations of Solaris.
 
 =back
 
@@ -360,7 +455,8 @@ well.
 
 =item *
 
-XXX
+C<savepvn>'s len parameter is now a C<Size_t> instead of an C<I32> since we
+can handle longer strings than 31 bits.
 
 =back
 
@@ -375,7 +471,40 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A heap-buffer-overflow has been fixed in the regular expression engine.
+
+[L<GH #17384|https://github.com/Perl/perl5/issues/17384>]
+
+=item *
+
+Fix an assertion failure in the regular expression engine.
+
+[L<GH #17372|https://github.com/Perl/perl5/issues/17372>]
+
+=item *
+
+Fix regression in C<tr///> added somewhere in v5.31.6.
+
+[L<GH #17391|https://github.com/Perl/perl5/issues/17391>]
+
+=item *
+
+Fix coredump in pp_hot.c after C<B::UNOP_AUX::aux_list()>.
+
+[L<GH #17301|https://github.com/Perl/perl5/issues/17301>]
+
+=item *
+
+Commit bc62bf8519  ("Add some defensive coding to av_store()" has been
+reverted as it broke I<List-UtilsBy-XS-0.05> in v5.31.2.
+
+[L<GH #17265|https://github.com/Perl/perl5/issues/17265>]
+
+=item *
+
+Loading IO is now threadsafe.
+
+[L<GH #14816|https://github.com/Perl/perl5/issues/14816>]
 
 =back
 
