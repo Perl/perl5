@@ -425,7 +425,7 @@ use File::Glob qw(:case);
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.73.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.74.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
@@ -622,7 +622,7 @@ use File::Glob qw(:case);
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.39.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.42.tar.gz',
         'FILES'        => q[dist/IO/],
         'EXCLUDED'     => ['t/test.pl'],
     },
@@ -699,7 +699,7 @@ use File::Glob qw(:case);
     },
 
     'Locale::Maketext' => {
-        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.28.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.29.tar.gz',
         'FILES'        => q[dist/Locale-Maketext],
         'EXCLUDED'     => [
             qw(
@@ -1158,7 +1158,7 @@ use File::Glob qw(:case);
     },
 
     'Tie::File' => {
-        'DISTRIBUTION' => 'TODDR/Tie-File-1.00.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Tie-File-1.01.tar.gz',
         'FILES'        => q[dist/Tie-File],
     },
 
