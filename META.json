@@ -129,6 +129,6 @@
          "url" : "https://github.com/Perl/perl5"
       }
    },
-   "version" : "5.031008",
+   "version" : "5.031009",
    "x_serialization_backend" : "JSON::PP version 4.04"
 }
