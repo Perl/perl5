@@ -680,6 +680,7 @@ the strings?).
  Steve     5.31.5       2019-Oct-20
  BinGOs    5.31.6       2019-Nov-20
  Nicolas R 5.31.7       2019-Dec-20
+ Matthew H 5.31.8       2020-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
