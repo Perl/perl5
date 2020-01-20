@@ -5774,10 +5774,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 		continue;
 
 	    default:
-#ifdef DEBUGGING
                 Perl_croak(aTHX_ "panic: unexpected varying REx opcode %d",
                                                                     OP(scan));
-#endif
             case REF:
             case CLUMP:
 		if (flags & SCF_DO_SUBSTR) {
