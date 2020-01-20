@@ -1573,7 +1573,6 @@ my %delta = (
         removed => {
         }
     },
-
 );
 
 %utilities = Module::CoreList::_undelta(\%delta);
