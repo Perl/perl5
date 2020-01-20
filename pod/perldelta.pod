@@ -17,37 +17,6 @@ L<perl5317delta>, which describes differences between 5.31.6 and 5.31.7.
 We are now in the Contentious Changes Freeze portion of the 5.31.X release
 cycle.
 
-=head1 Core Enhancements
-
-=head2 Module removals
-
-XXX Remove this section if not applicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
-
 =head1 Performance Enhancements
 
 =over 4
@@ -70,43 +39,50 @@ C<grok_number_flags> has been sped up.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<autodie> has been upgraded from version 2.29 to 2.32.
 
-If there was something important to note about this change, include that here.
+=item *
+
+L<DB_File> has been upgraded from version 1.852 to 1.853.
 
 =item *
 
 L<Encode> has been upgraded from version 3.01 to 3.02.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.42 to 7.44.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.22 to 0.23.
+
+The Synopsis has been updated as the example code stopped working with
+newer perls.
+
+[L<GH #17399|https://github.com/Perl/perl5/issues/17399>]
+
+=item *
+
+L<IO> has been upgraded from version 1.41 to 1.42.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20191220 to 5.20200120.
+
+=item *
+
+L<podlators> has been upgraded from version 4.12 to 4.14.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.90 to 1.91.
 
 =item *
 
@@ -116,15 +92,9 @@ L<Term::ANSIColor> has been upgraded from version 4.06 to 5.01.
 
 L<Test::Simple> has been upgraded from version 1.302170 to 1.302171.
 
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
 =item *
 
-XXX
+L<XS::APItest> has been upgraded from version 1.05 to 1.06.
 
 =back
 
@@ -255,16 +225,6 @@ the supplied signals cannot be added to the set.
 The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
 
 =head2 Changes to Existing Diagnostics
 
