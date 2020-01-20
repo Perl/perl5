@@ -158,7 +158,7 @@ Documentation for C<PL_phase> has been added.
 
 =item *
 
-The documentation for C<grok_bin, C<grok_oct>, and C<grok_hex> has been
+The documentation for C<grok_bin>, C<grok_oct>, and C<grok_hex> has been
 updated and clarified.
 
 =back
