@@ -150,6 +150,7 @@ HTML::StripScripts
 HTTP::Lite
 iconv(1)
 iconv(3)
+indirect
 inetd(8)
 invoker
 IO::Compress

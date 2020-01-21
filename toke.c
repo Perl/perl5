@@ -4464,6 +4464,9 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 
     PERL_ARGS_ASSERT_INTUIT_METHOD;
 
+    if (!FEATURE_INDIRECT_IS_ENABLED)
+        return 0;
+
     if (gv && SvTYPE(gv) == SVt_PVGV && GvIO(gv))
 	    return 0;
     if (cv && SvPOK(cv)) {
@@ -7494,7 +7497,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
 
     /* If followed by var or block, call it a method (unless sub) */
 
-    if ((*s == '$' || *s == '{') && !c.cv) {
+    if ((*s == '$' || *s == '{') && !c.cv && FEATURE_INDIRECT_IS_ENABLED) {
         op_free(c.rv2cv_op);
         PL_last_lop = PL_oldbufptr;
         PL_last_lop_op = OP_METHOD;

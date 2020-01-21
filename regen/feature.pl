@@ -36,6 +36,7 @@ my %feature = (
     fc              => 'fc',
     signatures      => 'signatures',
     isa             => 'isa',
+    indirect        => 'indirect',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -45,29 +46,29 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 my %feature_bundle = (
      all     => [ keys %feature ],
-     default =>	[qw()],
-    "5.9.5"  =>	[qw(say state switch)],
-    "5.10"   =>	[qw(say state switch)],
-    "5.11"   =>	[qw(say state switch unicode_strings)],
-    "5.13"   =>	[qw(say state switch unicode_strings)],
+     default =>	[qw(indirect)],
+    "5.9.5"  =>	[qw(say state switch indirect)],
+    "5.10"   =>	[qw(say state switch indirect)],
+    "5.11"   =>	[qw(say state switch unicode_strings indirect)],
+    "5.13"   =>	[qw(say state switch unicode_strings indirect)],
     "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc indirect)],
     "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc indirect)],
     "5.19"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc indirect)],
     "5.21"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc indirect)],
     "5.23"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq)],
+		    evalbytes current_sub fc postderef_qq indirect)],
     "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq)],
+		    evalbytes current_sub fc postderef_qq indirect)],
     "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise)],
+		    evalbytes current_sub fc postderef_qq bitwise indirect)],
     "5.29"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise)],
+		    evalbytes current_sub fc postderef_qq bitwise indirect)],
     "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise)],
+		    evalbytes current_sub fc postderef_qq bitwise indirect)],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -468,7 +469,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.57';
+our $VERSION = '1.58';
 
 FEATURES
 
@@ -760,6 +761,18 @@ scalar given by the left operand is an object of the class given by the
 right operand. See L<perlop/Class Instance Operator> for more details.
 
 This feature is available from Perl 5.32 onwards.
+
+=head2 The 'indirect' feature
+
+This feature allows the use of L<indirect object
+syntax|perlobj/Indirect Object Syntax> for method calls, e.g.  C<new
+Foo 1, 2;>. It is enabled by default, but can be turned off to
+disallow indirect object syntax.
+
+This feature is available under this name from Perl 5.32 onwards. In
+previous versions, it was simply on all the time.  To disallow (or
+warn on) indirect object syntax on older Perls, see the L<indirect>
+CPAN module.
 
 =head1 FEATURE BUNDLES
 

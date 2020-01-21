@@ -179,6 +179,14 @@ old perls from CPAN.
 
 L<threads> has been upgraded from version 2.23 to 2.24.
 
+=item *
+
+L<feature> has been upgraded from version 1.57 to 1.58.
+
+A new C<indirect> feature has been added, which is enabled by default
+but allows turning off L<indirect object syntax|perlobj/Indirect
+Object Syntax>.
+
 =back
 
 =head2 Removed Modules and Pragmata
