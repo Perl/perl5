@@ -279,7 +279,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
     push @INC, "lib";
     ok(!eval { require CannotParse; }, "should fail to load");
     local %INC = %INC; # copies \&PL_sv_undef into a new undef
-    local $::TODO = "17428 isn't fixed yet";
     ok(!eval { require CannotParse; },
        "check the second attempt also fails");
     like $@, qr/Attempt to reload/, "check we failed for the right reason";

@@ -3861,7 +3861,7 @@ S_require_file(pTHX_ SV *sv)
 	if (op_is_require) {
 		/* can optimize to only perform one single lookup */
 		svp_cached = hv_fetch(GvHVn(PL_incgv), (char*) name, len, 0);
-		if ( svp_cached && *svp_cached != &PL_sv_undef ) RETPUSHYES;
+		if ( svp_cached && (SvGETMAGIC(*svp_cached), SvOK(*svp_cached)) ) RETPUSHYES;
 	}
 #endif
 
@@ -3906,7 +3906,10 @@ S_require_file(pTHX_ SV *sv)
 	/* reuse the previous hv_fetch result if possible */
 	SV * const * const svp = svp_cached ? svp_cached : hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
 	if ( svp ) {
-	    if (*svp != &PL_sv_undef)
+            /* we already did a get magic if this was cached */
+            if (!svp_cached)
+                SvGETMAGIC(*svp);
+	    if (SvOK(*svp))
 		RETPUSHYES;
 	    else
 		DIE(aTHX_ "Attempt to reload %s aborted.\n"
