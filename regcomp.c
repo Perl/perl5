@@ -12965,7 +12965,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                     /* Be sure to synchronize this message with the similar one
                      * in utf8.c */
                     vFAIL4("Use of code point 0x%.*s is not allowed; the"
-                        " permissible max is 0x%" UVxf,
+                        " permissible max is 0x%" UVXf,
                         (int) (RExC_parse - start_digit), start_digit,
                         MAX_LEGAL_CP);
                 }

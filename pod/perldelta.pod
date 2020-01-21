@@ -285,6 +285,15 @@ As of Perl 5.32, this message is no longer generated.  Instead,
 L<perldiag/Non-octal character '%c' terminates \o early.  Resolved as "%s">
 is.
 
+=item *
+
+
+L<Use of code point 0x%s is not allowed; the permissible max is 0x%X|perldiag/"Use of code point 0x%s is not allowed; the permissible max is 0x%X">
+
+Some instances of this message previously output the hex digits C<A>,
+C<B>, C<C>, C<D>, C<E>, and C<F> in lower case.  Now they are all
+consistently upper case.
+
 =back
 
 =head1 Utility Changes

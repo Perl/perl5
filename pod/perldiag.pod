@@ -7243,9 +7243,9 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
-=item Use of code point 0x%s is not allowed; the permissible max is 0x%x
+=item Use of code point 0x%s is not allowed; the permissible max is 0x%X
 
-=item Use of code point 0x%s is not allowed; the permissible max is 0x%x
+=item Use of code point 0x%s is not allowed; the permissible max is 0x%X
 in regex; marked by <-- HERE in m/%s/
 
 (F) You used a code point that is not allowed, because it is too large.
