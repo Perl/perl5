@@ -172,7 +172,8 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-XXX Description of the change here
+Links to the now defunct L<https://search.cpan.org> site now point at
+the equivalent L<https://metacpan.org> URL.  [GH #17393]
 
 =back
 
