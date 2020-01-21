@@ -5788,10 +5788,7 @@ compile='
 mc_file=$1;
 shift;
 case "$usedevel" in $define|true|[yY]*) if $test ! -f "${mc_file}.c"; then
-cat >&4 <<EOM
-Internal Configure script bug - compiler test file ${mc_file}.c is missing.
-Please report this to https://github.com/Perl/perl5/issues
-EOM
+echo "Internal Configure script bug - compiler test file ${mc_file}.c is missing. Please report this to https://github.com/Perl/perl5/issues" >&4;
 exit 1;
 fi;
 esac;
