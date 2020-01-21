@@ -28,7 +28,7 @@
 # Porting/pumpkin.pod.
 
 # Generated using [metaconfig 3.5 PL0]
-# (with additional metaconfig patches by perlbug@perl.org)
+# with additional metaconfig patches from https://github.com/Perl/metaconfig
 
 cat >c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -5788,7 +5788,10 @@ compile='
 mc_file=$1;
 shift;
 case "$usedevel" in $define|true|[yY]*) if $test ! -f "${mc_file}.c"; then
-echo "Internal Configure script bug - compiler test file ${mc_file}.c is missing. Please report this to https://github.com/Perl/perl5/issues" >&4;
+cat >&4 <<EOM
+Internal Configure script bug - compiler test file ${mc_file}.c is missing.
+Please report this to https://github.com/Perl/perl5/issues
+EOM
 exit 1;
 fi;
 esac;
@@ -15933,6 +15936,7 @@ else
 fi
 set d_lchown
 eval $setvar
+$rm_try
 
 : See if number of significant digits in a double precision number is known
 echo " "
