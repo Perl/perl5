@@ -585,7 +585,7 @@ EOM
 		fi
 	    fi
 	    case "${cc:-cc} -v 2>/dev/null" in
-	    *gcc*)
+	    *gcc*|*g++*)
 		echo 'int main() { return 0; }' > try.c
 		case "`${cc:-cc} $ccflags -mcpu=v9 -m64 -S try.c 2>&1 | grep 'm64 is not supported by this configuration'`" in
 		*"m64 is not supported"*)
