@@ -16,9 +16,23 @@ WriteMakefile(
     AUTHOR              => 'Perl 5 Porters',
     LICENSE             => 'perl',
     DISTNAME            => "Storable",
-# We now ship this in t/
-#    PREREQ_PM           => { 'Test::More' => '0.41' },
-    PREREQ_PM           => { XSLoader => 0 },
+    PREREQ_PM           =>
+      {
+          XSLoader => 0,
+      },
+    ( $ExtUtils::MakeMaker::VERSION >= 6.64 ?
+        (
+            CONFIGURE_REQUIRES => {
+                'ExtUtils::MakeMaker' => '6.31',
+            },
+            BUILD_REQUIRES => {
+                'ExtUtils::MakeMaker' => '6.31',
+            },
+            TEST_REQUIRES => {
+                'Test::More' => '0.41',
+            },
+           )
+        : () ),
     INSTALLDIRS => ($] >= 5.007 && $] < 5.012) ? 'perl' : 'site',
     VERSION_FROM    => 'Storable.pm',
     ABSTRACT_FROM   => 'Storable.pm',
