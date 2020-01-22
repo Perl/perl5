@@ -19872,10 +19872,11 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     /* The data consists of just strings defining user-defined
                      * property names, but in prior incarnations, and perhaps
                      * somehow from pluggable regex engines, it could still
-                     * hold hex code point definitions.  Each component of a
-                     * range would be separated by a tab, and each range by a
-                     * new-line.  If these are found, instead add them to the
-                     * inversion list */
+                     * hold hex code point definitions, all of which should be
+                     * legal (or it wouldn't have gotten this far).  Each
+                     * component of a range would be separated by a tab, and
+                     * each range by a new-line.  If these are found, instead
+                     * add them to the inversion list */
                     I32 grok_flags =  PERL_SCAN_SILENT_ILLDIGIT
                                      |PERL_SCAN_SILENT_NON_PORTABLE;
                     STRLEN len = remaining;
