@@ -37,11 +37,6 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
-/* Be sure to synchronize this message with the similar one in regcomp.c */
-static const char cp_above_legal_max[] =
-                        "Use of code point 0x%" UVXf " is not allowed; the"
-                        " permissible max is 0x%" UVXf;
-
 /*
 =head1 Unicode Support
 These are various utility functions for manipulating UTF8-encoded
@@ -324,7 +319,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
         if (UNLIKELY(      uv > MAX_LEGAL_CP
                      && ! (flags & UNICODE_ALLOW_ABOVE_IV_MAX)))
         {
-            Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_LEGAL_CP);
+            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, uv));
         }
         if (       (flags & UNICODE_WARN_SUPER)
             || (   (flags & UNICODE_WARN_PERL_EXTENDED)
@@ -3324,8 +3319,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
                 if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
                     if (UNLIKELY(uv1 > MAX_LEGAL_CP)) {
-                        Perl_croak(aTHX_ cp_above_legal_max, uv1,
-                                         MAX_LEGAL_CP);
+                        Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, uv1));
                     }
                     if (ckWARN_d(WARN_NON_UNICODE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;

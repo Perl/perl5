@@ -5919,10 +5919,6 @@ PERL_CALLCONV const char *	Perl_form_alien_digit_msg(pTHX_ const U8 which, const
 #define PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG	\
 	assert(first_bad); assert(send)
 
-PERL_CALLCONV const char *	Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char * string, const Size_t len, const UV cp)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG
-
 PERL_CALLCONV bool	Perl_grok_bslash_c(pTHX_ const char source, U8 * result, const char** message, U32 * packed_warn)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_BSLASH_C	\
@@ -5937,6 +5933,12 @@ PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
 	assert(s); assert(send); assert(uv); assert(message)
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV const char *	Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char * string, const Size_t len, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)

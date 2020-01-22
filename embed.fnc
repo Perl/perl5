@@ -1167,7 +1167,7 @@ EpRX	|const char *|form_alien_digit_msg|const U8 which	\
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 EiRT	|bool	|regcurly	|NN const char *s
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
 EpRX	|const char *|form_cp_too_large_msg|const U8 which	\
 				|NULLOK const char * string	\
 				|const Size_t len		\
