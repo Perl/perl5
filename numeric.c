@@ -379,7 +379,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     /* In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
-    UV factor;
+    NV factor = 0;
 
     /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
      * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
@@ -492,7 +492,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                     /* Note XDIGIT_VALUE() is branchless, works on binary
                      * and octal as well, so can be used here, without
                      * slowing those down */
-                factor <<= shift;
+                factor *= 1 << shift;
                 continue;
             }
 
@@ -501,7 +501,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
              * value.  Each time through the loop we have increased 'factor' so
              * that it gives how much the current approximation needs to
              * effectively be shifted to make room for this new value */
-            value_nv *= (NV) factor;
+            value_nv *= factor;
             value_nv += (NV) value;
 
             /* Then we keep accumulating digits, until all are parsed.  We
@@ -590,7 +590,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     }
 
     /* Overflowed: Calculate the final overflow approximation */
-    value_nv *= (NV) factor;
+    value_nv *= factor;
     value_nv += (NV) value;
 
     output_non_portable(base);
