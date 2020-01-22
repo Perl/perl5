@@ -540,3 +540,27 @@ Array found where operator expected at - line 1, near "0x@
 No digits found for hexadecimal literal at - line 1, near "0 0x@"
 syntax error at - line 1, near "0 0x"
 Execution of - aborted due to compilation errors.
+########
+# NAME Forbid illegal \x{} code points
+use Config;
+if ($Config{uvsize} < 8) {
+    my $a = "\x{8000_0000}";
+}
+else {
+    my $a = "\x{8000_0000_0000_0000}";
+}
+EXPECT
+OPTIONS regex
+Use of code point 0x80000000(00000000)? is not allowed; the permissible max is 0x7FFFFFFF(FFFFFFFF)? at - line \d+.
+########
+# NAME Forbid illegal \o{} code points
+use Config;
+if ($Config{uvsize} < 8) {
+    my $b = "\o{20_000_000_000}";
+}
+else {
+    my $b = "\o{1_000_000_000_000_000_000_000}";
+}
+EXPECT
+OPTIONS regex
+Use of code point 0x80000000(00000000)? is not allowed; the permissible max is 0x7FFFFFFF(FFFFFFFF)? at - line \d+.

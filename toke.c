@@ -3747,12 +3747,22 @@ S_scan_const(pTHX_ char *start)
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-				| PERL_SCAN_SILENT_ILLDIGIT
-				| PERL_SCAN_DISALLOW_PREFIX;
+				  | PERL_SCAN_SILENT_ILLDIGIT
+				  | PERL_SCAN_SILENT_OVERFLOW
+				  | PERL_SCAN_DISALLOW_PREFIX;
                         STRLEN len = e - s;
+
                         uv = grok_hex(s, &len, &flags, NULL);
                         if (len == 0 || (len != (STRLEN)(e - s)))
                             goto bad_NU;
+
+                        if (    uv > MAX_LEGAL_CP
+                            || (flags & PERL_SCAN_GREATER_THAN_UV_MAX))
+                        {
+                            yyerror(form_cp_too_large_msg(16, s, len, 0));
+                            uv = 0; /* drop through to ensure range ends are
+                                       set */
+                        }
 
                          /* For non-tr///, if the destination is not in utf8,
                           * unconditionally recode it to be so.  This is
