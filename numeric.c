@@ -429,42 +429,42 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
       case 0:
           return 0;
       default:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 7:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 6:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 5:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 4:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 3:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 2:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 1:
-          if (! _generic_isCC(*s, class_bit))  break;
+          if (UNLIKELY(! _generic_isCC(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
 
           if (LIKELY(len <= 8)) {
