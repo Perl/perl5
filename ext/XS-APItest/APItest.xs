@@ -4505,6 +4505,17 @@ PerlIO_stdin()
 FILE *
 PerlIO_exportFILE(PerlIO *f, const char *mode)
 
+SV *
+test_MAX_types()
+    CODE:
+        /* tests that IV_MAX and UV_MAX have types suitable
+           for the IVdf and UVdf formats.
+           If this warns then don't add casts here.
+        */
+        RETVAL = newSVpvf("iv %" IVdf " uv %" UVuf, IV_MAX, UV_MAX);
+    OUTPUT:
+	RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
