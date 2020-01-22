@@ -1887,13 +1887,13 @@ typedef UVTYPE UV;
 
 #if defined(USE_64_BIT_INT) && defined(HAS_QUAD)
 #  if QUADKIND == QUAD_IS_INT64_T && defined(INT64_MAX)
-#    define IV_MAX INT64_MAX
-#    define IV_MIN INT64_MIN
-#    define UV_MAX UINT64_MAX
+#    define IV_MAX ((IV)INT64_MAX)
+#    define IV_MIN ((IV)INT64_MIN)
+#    define UV_MAX ((UV)UINT64_MAX)
 #    ifndef UINT64_MIN
 #      define UINT64_MIN 0
 #    endif
-#    define UV_MIN UINT64_MIN
+#    define UV_MIN ((UV)UINT64_MIN)
 #  else
 #    define IV_MAX PERL_QUAD_MAX
 #    define IV_MIN PERL_QUAD_MIN
@@ -1904,17 +1904,17 @@ typedef UVTYPE UV;
 #  define UV_IS_QUAD
 #else
 #  if defined(INT32_MAX) && IVSIZE == 4
-#    define IV_MAX INT32_MAX
-#    define IV_MIN INT32_MIN
+#    define IV_MAX ((IV)INT32_MAX)
+#    define IV_MIN ((IV)INT32_MIN)
 #    ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
-#        define UV_MAX UINT32_MAX
+#        define UV_MAX ((UV)UINT32_MAX)
 #    else
-#        define UV_MAX 4294967295U
+#        define UV_MAX ((UV)4294967295U)
 #    endif
 #    ifndef UINT32_MIN
 #      define UINT32_MIN 0
 #    endif
-#    define UV_MIN UINT32_MIN
+#    define UV_MIN ((UV)UINT32_MIN)
 #  else
 #    define IV_MAX PERL_LONG_MAX
 #    define IV_MIN PERL_LONG_MIN
