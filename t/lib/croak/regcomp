@@ -63,6 +63,12 @@ my $p00="[\\x59\\N{U+.}]"; qr/$p00/ui;
 EXPECT
 Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/[\x59\N{U+. <-- HERE }]/ at - line 1.
 ########
+# NAME \N{U+...} leading underscore not allowed, medial is allowed
+my $p00='\N{U+FF_FF}'; qr/$p00/;
+$p00='\N{U+_FF}'; qr/$p00/;
+EXPECT
+Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/\N{U+_ <-- HERE FF}/ at - line 2.
+########
 # NAME ${^RE_COMPILE_RECURSION_LIMIT} [perl #131551]
 BEGIN { ${^RE_COMPILE_RECURSION_LIMIT} = ${^RE_COMPILE_RECURSION_LIMIT} = 2; }
 qr/(a)/;

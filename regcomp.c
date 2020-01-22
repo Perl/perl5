@@ -12941,48 +12941,30 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
          * thing. */
 
         do {    /* Loop until the ending brace */
-            UV cp = 0;
-            char * start_digit;     /* The first of the current code point */
-            if (! isXDIGIT(*RExC_parse)) {
+            I32 flags = PERL_SCAN_SILENT_OVERFLOW
+                      | PERL_SCAN_SILENT_ILLDIGIT
+                      | PERL_SCAN_NOTIFY_ILLDIGIT
+                      | PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES
+                      | PERL_SCAN_DISALLOW_PREFIX;
+            STRLEN len = endbrace - RExC_parse;
+            NV overflow_value;
+            char * start_digit = RExC_parse;
+            UV cp = grok_hex(RExC_parse, &len, &flags, &overflow_value);
+
+            if (len == 0) {
                 RExC_parse++;
+              bad_NU:
                 vFAIL("Invalid hexadecimal number in \\N{U+...}");
             }
 
-            start_digit = RExC_parse;
-            count++;
+            RExC_parse += len;
 
-            /* Loop through the hex digits of the current code point */
-            do {
-                /* Adding this digit will shift the result 4 bits.  If that
-                 * result would be above the legal max, it's overflow */
-                if (cp > MAX_LEGAL_CP >> 4) {
+            if (cp > MAX_LEGAL_CP) {
+                vFAIL(form_cp_too_large_msg(16, start_digit, len, 0));
+            }
 
-                    /* Find the end of the code point */
-                    do {
-                        RExC_parse ++;
-                    } while (isXDIGIT(*RExC_parse) || *RExC_parse == '_');
-
-                    /* Be sure to synchronize this message with the similar one
-                     * in utf8.c */
-                    vFAIL4("Use of code point 0x%.*s is not allowed; the"
-                        " permissible max is 0x%" UVXf,
-                        (int) (RExC_parse - start_digit), start_digit,
-                        MAX_LEGAL_CP);
-                }
-
-                /* Accumulate this (valid) digit into the running total */
-                cp  = (cp << 4) + READ_XDIGIT(RExC_parse);
-
-                /* READ_XDIGIT advanced the input pointer.  Ignore a single
-                 * underscore separator */
-                if (*RExC_parse == '_' && isXDIGIT(RExC_parse[1])) {
-                    RExC_parse++;
-                }
-            } while (isXDIGIT(*RExC_parse));
-
-            /* Here, have accumulated the next code point */
-            if (RExC_parse >= endbrace) {   /* If done ... */
-                if (count != 1) {
+            if (RExC_parse >= endbrace) { /* Got to the closing '}' */
+                if (count) {
                     goto do_concat;
                 }
 
@@ -12999,18 +12981,19 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                 return TRUE;
             }
 
-            /* Here, the only legal thing would be a multiple character
-             * sequence (of the form "\N{U+c1.c2. ... }".   So the next
-             * character must be a dot (and the one after that can't be the
-             * endbrace, or we'd have something like \N{U+100.} ) */
+            /* Here, the parse stopped bfore the ending brace.  This is legal
+             * only if that character is a dot separating code points, like a
+             * multiple character sequence (of the form "\N{U+c1.c2. ... }".
+             * So the next character must be a dot (and the one after that
+             * can't be the endbrace, or we'd have something like \N{U+100.} )
+             * */
             if (*RExC_parse != '.' || RExC_parse + 1 >= endbrace) {
                 RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
-                                ? UTF8SKIP(RExC_parse)
-                                : 1;
-                if (RExC_parse >= endbrace) { /* Guard against malformed utf8 */
-                    RExC_parse = endbrace;
-                }
-                vFAIL("Invalid hexadecimal number in \\N{U+...}");
+                              ? UTF8SKIP(RExC_parse)
+                              : 1;
+                RExC_parse = MIN(endbrace, RExC_parse);/* Guard against
+                                                          malformed utf8 */
+                goto bad_NU;
             }
 
             /* Here, looks like its really a multiple character sequence.  Fail
@@ -13028,7 +13011,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
              * but go through the motions of code point counting and error
              * checking, if the caller doesn't want a node returned. */
 
-            if (node_p && count == 1) {
+            if (node_p && ! substitute_parse) {
                 substitute_parse = newSVpvs("?:");
             }
 
