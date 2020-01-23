@@ -331,9 +331,14 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+With the release of the patch kit C99 V2.0, VSI has provided support for a
+number of previously-missing C99 features.  On systems with that patch kit
+installed, Perl's configuration process will now detect the presence of the
+header C<stdint.h> and the following functions: C<fpclassify>, C<isblank>, C<isless>,
+C<llrint>, C<llrintl>, C<llround>, C<llroundl>, C<nearbyint>, C<round>, C<scalbn>,
+and C<scalbnl>.
 
 =back
 
