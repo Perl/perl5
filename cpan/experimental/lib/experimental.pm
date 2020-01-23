@@ -252,7 +252,7 @@ be guaranteed in any way.
 
 =head1 SEE ALSO
 
-L<perlexperimental|perlexperimental> contains more information about experimental features.
+L<perlexperiment|perlexperiment> contains more information about experimental features.
 
 =head1 AUTHOR
 
