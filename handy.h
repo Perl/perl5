@@ -1497,8 +1497,11 @@ END_EXTERN_C
                                            _generic_isCC(c, _CC_NON_FINAL_FOLD)
 #   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
                                            _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
-#   define _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
-                                            _generic_isCC(c, _CC_MNEMONIC_CNTRL)
+
+/* is c a control character for which we have a mnemonic? */
+#  if defined(PERL_CORE) || defined(PERL_EXT)
+#     define isMNEMONIC_CNTRL(c) _generic_isCC(c, _CC_MNEMONIC_CNTRL)
+#  endif
 #else   /* else we don't have perl.h H_PERL */
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we

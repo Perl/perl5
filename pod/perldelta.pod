@@ -207,7 +207,26 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Code point 0x%X is not Unicode, and not portable|perldiag/"Code point 0x%X is not Unicode, and not portable">
+
+This is actually not a new message, but it is now output when the
+warnings category C<portable> is enabled.
+
+When raised during regular expression pattern compilation, the warning
+has extra text added at the end marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<Non-hex character '%c' terminates \x early.  Resolved as "%s"|perldiag/"Non-hex character '%c' terminates \x early.  Resolved as "%s"">
+
+This replaces a warning that was much less specific, and which gave
+false information.  This new warning parallels the similar
+already-existing one raised for C<\o{}>.
+
+=item *
+
+L<message|perldiag/"message">
 
 =back
 
@@ -219,7 +238,61 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Character following "\c" must be printable ASCII|perldiag/"Character following "\c" must be printable ASCII">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<Use "%s" instead of "%s"|perldiag/"Use "%s" instead of "%s"">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<Sequence "\c{" invalid|perldiag/"Sequence "\c{" invalid">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<"\c%c" is more clearly written simply as "%s"|perldiag/""\c%c" is more clearly written simply as "%s"">
+
+now has extra text added at the end, when raised during regular
+expression pattern compilation, marking where precisely in the pattern
+it occured.
+
+=item *
+
+L<Non-octal character '%c' terminates \o early.  Resolved as "%s"|perldiag/"Non-octal character '%c' terminates \o early.  Resolved as "%s"">
+
+now includes the phrase "terminates \o early", and has extra text added
+at the end, when raised during regular expression pattern compilation,
+marking where precisely in the pattern it occured.  In some instances
+the text of the resolution has been clarified.
+
+=item *
+
+L<'%s' resolved to '\o{%s}%d'|perldiag/'%s' resolved to '\o{%s}%d'>
+
+As of Perl 5.32, this message is no longer generated.  Instead,
+L<perldiag/Non-octal character '%c' terminates \o early.  Resolved as "%s">
+is.
+
+=item *
+
+
+L<Use of code point 0x%s is not allowed; the permissible max is 0x%X|perldiag/"Use of code point 0x%s is not allowed; the permissible max is 0x%X">
+
+Some instances of this message previously output the hex digits C<A>,
+C<B>, C<C>, C<D>, C<E>, and C<F> in lower case.  Now they are all
+consistently upper case.
 
 =back
 

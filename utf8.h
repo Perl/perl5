@@ -1009,7 +1009,13 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 
 #define UNI_DISPLAY_ISPRINT	0x0001
 #define UNI_DISPLAY_BACKSLASH	0x0002
-#define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
+#define UNI_DISPLAY_BACKSPACE	0x0004  /* Allow \b when also
+                                           UNI_DISPLAY_BACKSLASH */
+#define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT                \
+                                |UNI_DISPLAY_BACKSLASH              \
+                                |UNI_DISPLAY_BACKSPACE)
+
+/* Character classes could also allow \b, but not patterns in general */
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
 #define ANYOF_FOLD_SHARP_S(node, input, end)	\

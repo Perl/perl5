@@ -38,7 +38,6 @@ Individual members of C<PL_parser> have their own documentation.
 #include "EXTERN.h"
 #define PERL_IN_TOKE_C
 #include "perl.h"
-#include "dquote_inline.h"
 #include "invlist_inline.h"
 
 #define new_constant(a,b,c,d,e,f,g, h)	\
@@ -3534,15 +3533,18 @@ S_scan_const(pTHX_ char *start)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
-                    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
+                    I32 flags = PERL_SCAN_SILENT_ILLDIGIT
+                              | PERL_SCAN_NOTIFY_ILLDIGIT;
                     STRLEN len = 3;
-		    uv = grok_oct(s, &len, &flags, NULL);
-		    s += len;
-                    if (len < 3 && s < send && isDIGIT(*s)
+                    uv = grok_oct(s, &len, &flags, NULL);
+                    s += len;
+                    if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
+                        && s < send
+                        && isDIGIT(*s)  /* like \08, \178 */
                         && ckWARN(WARN_MISC))
                     {
-                        Perl_warner(aTHX_ packWARN(WARN_MISC),
-                                    "%s", form_short_octal_warning(s, len));
+                        Perl_warner(aTHX_ packWARN(WARN_MISC), "%s",
+                            form_alien_digit_msg(8, len, s, send, UTF, FALSE));
                     }
 		}
 		goto NUM_ESCAPE_INSERT;
@@ -3552,14 +3554,13 @@ S_scan_const(pTHX_ char *start)
 		{
 		    const char* error;
 
-		    bool valid = grok_bslash_o(&s, send,
+		    if (! grok_bslash_o(&s, send,
                                                &uv, &error,
-                                               TRUE, /* Output warning */
+                                               NULL,
                                                FALSE, /* Not strict */
-                                               TRUE, /* Output warnings for
-                                                         non-portables */
-                                               UTF);
-		    if (! valid) {
+                                               FALSE, /* No illegal cp's */
+                                               UTF))
+                    {
 			yyerror(error);
 			uv = 0; /* drop through to ensure range ends are set */
 		    }
@@ -3571,14 +3572,13 @@ S_scan_const(pTHX_ char *start)
 		{
 		    const char* error;
 
-		    bool valid = grok_bslash_x(&s, send,
+		    if (! grok_bslash_x(&s, send,
                                                &uv, &error,
-                                               TRUE, /* Output warning */
+                                               NULL,
                                                FALSE, /* Not strict */
-                                               TRUE,  /* Output warnings for
-                                                         non-portables */
-                                               UTF);
-		    if (! valid) {
+                                               FALSE, /* No illegal cp's */
+                                               UTF))
+                    {
 			yyerror(error);
 			uv = 0; /* drop through to ensure range ends are set */
 		    }
@@ -3644,7 +3644,10 @@ S_scan_const(pTHX_ char *start)
                             d = SvCUR(sv) + SvGROW(sv, needed);
                         }
 
-		        d = (char*)uvchr_to_utf8((U8*)d, uv);
+		        d = (char*) uvchr_to_utf8_flags((U8*)d, uv,
+                                                   (ckWARN(WARN_PORTABLE))
+                                                   ? UNICODE_WARN_PERL_EXTENDED
+                                                   : 0);
 		    }
 		}
 #ifdef EBCDIC
@@ -3744,12 +3747,22 @@ S_scan_const(pTHX_ char *start)
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-				| PERL_SCAN_SILENT_ILLDIGIT
-				| PERL_SCAN_DISALLOW_PREFIX;
+				  | PERL_SCAN_SILENT_ILLDIGIT
+				  | PERL_SCAN_SILENT_OVERFLOW
+				  | PERL_SCAN_DISALLOW_PREFIX;
                         STRLEN len = e - s;
+
                         uv = grok_hex(s, &len, &flags, NULL);
                         if (len == 0 || (len != (STRLEN)(e - s)))
                             goto bad_NU;
+
+                        if (    uv > MAX_LEGAL_CP
+                            || (flags & PERL_SCAN_GREATER_THAN_UV_MAX))
+                        {
+                            yyerror(form_cp_too_large_msg(16, s, len, 0));
+                            uv = 0; /* drop through to ensure range ends are
+                                       set */
+                        }
 
                          /* For non-tr///, if the destination is not in utf8,
                           * unconditionally recode it to be so.  This is
@@ -3789,7 +3802,10 @@ S_scan_const(pTHX_ char *start)
 			    *d++ = (char) LATIN1_TO_NATIVE(uv);
 			}
 			else {
-                            d = (char*) uvoffuni_to_utf8_flags((U8*)d, uv, 0);
+                            d = (char*) uvoffuni_to_utf8_flags((U8*)d, uv,
+                                                   (ckWARN(WARN_PORTABLE))
+                                                   ? UNICODE_WARN_PERL_EXTENDED
+                                                   : 0);
                         }
 		    }
 		}
@@ -3995,7 +4011,14 @@ S_scan_const(pTHX_ char *start)
 	    case 'c':
 		s++;
 		if (s < send) {
-		    *d++ = grok_bslash_c(*s, 1);
+                    const char * message;
+
+		    if (! grok_bslash_c(*s, (U8 *) d, &message, NULL)) {
+                        yyerror(message);
+                        yyquit();   /* Have always immediately croaked on
+                                       errors in this */
+                    }
+		    d++;
 		}
 		else {
 		    yyerror("Missing control char name in \\c");

@@ -82,7 +82,6 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 #  include "regcomp.h"
 #endif
 
-#include "dquote_inline.h"
 #include "invlist_inline.h"
 #include "unicode_constants.h"
 
@@ -888,11 +887,27 @@ static const scan_data_t zero_scan_data = {
     } STMT_END
 
 /* m is not necessarily a "literal string", in this macro */
-#define reg_warn_non_literal_string(loc, m)                             \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
+#define warn_non_literal_string(loc, packed_warn, m)                    \
+    _WARN_HELPER(loc, packed_warn,                                      \
+                      Perl_warner(aTHX_ packed_warn,                    \
                                        "%s" REPORT_LOCATION,            \
                                   m, REPORT_LOCATION_ARGS(loc)))
+#define reg_warn_non_literal_string(loc, m)                             \
+                warn_non_literal_string(loc, packWARN(WARN_REGEXP), m)
+
+#define ckWARN2_non_literal_string(loc, packwarn, m, a1)                    \
+    STMT_START {                                                            \
+                char * format;                                              \
+                Size_t format_size = strlen(m) + strlen(REPORT_LOCATION)+ 1;\
+                Newx(format, format_size, char);                            \
+                my_strlcpy(format, m, format_size);                         \
+                my_strlcat(format, REPORT_LOCATION, format_size);           \
+                SAVEFREEPV(format);                                         \
+                _WARN_HELPER(loc, packwarn,                                 \
+                      Perl_ck_warner(aTHX_ packwarn,                        \
+                                        format,                             \
+                                        a1, REPORT_LOCATION_ARGS(loc)));    \
+    } STMT_END
 
 #define	ckWARNreg(loc,m) 					        \
     _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
@@ -1383,29 +1398,6 @@ S_edit_distance(const UV* src,
 
 /* END of edit_distance() stuff
  * ========================================================= */
-
-/* is c a control character for which we have a mnemonic? */
-#define isMNEMONIC_CNTRL(c) _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
-
-STATIC const char *
-S_cntrl_to_mnemonic(const U8 c)
-{
-    /* Returns the mnemonic string that represents character 'c', if one
-     * exists; NULL otherwise.  The only ones that exist for the purposes of
-     * this routine are a few control characters */
-
-    switch (c) {
-        case '\a':       return "\\a";
-        case '\b':       return "\\b";
-        case ESC_NATIVE: return "\\e";
-        case '\f':       return "\\f";
-        case '\n':       return "\\n";
-        case '\r':       return "\\r";
-        case '\t':       return "\\t";
-    }
-
-    return NULL;
-}
 
 /* Mark that we cannot extend a found fixed substring at this point.
    Update the longest found anchored substring or the longest found
@@ -12949,48 +12941,30 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
          * thing. */
 
         do {    /* Loop until the ending brace */
-            UV cp = 0;
-            char * start_digit;     /* The first of the current code point */
-            if (! isXDIGIT(*RExC_parse)) {
+            I32 flags = PERL_SCAN_SILENT_OVERFLOW
+                      | PERL_SCAN_SILENT_ILLDIGIT
+                      | PERL_SCAN_NOTIFY_ILLDIGIT
+                      | PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES
+                      | PERL_SCAN_DISALLOW_PREFIX;
+            STRLEN len = endbrace - RExC_parse;
+            NV overflow_value;
+            char * start_digit = RExC_parse;
+            UV cp = grok_hex(RExC_parse, &len, &flags, &overflow_value);
+
+            if (len == 0) {
                 RExC_parse++;
+              bad_NU:
                 vFAIL("Invalid hexadecimal number in \\N{U+...}");
             }
 
-            start_digit = RExC_parse;
-            count++;
+            RExC_parse += len;
 
-            /* Loop through the hex digits of the current code point */
-            do {
-                /* Adding this digit will shift the result 4 bits.  If that
-                 * result would be above the legal max, it's overflow */
-                if (cp > MAX_LEGAL_CP >> 4) {
+            if (cp > MAX_LEGAL_CP) {
+                vFAIL(form_cp_too_large_msg(16, start_digit, len, 0));
+            }
 
-                    /* Find the end of the code point */
-                    do {
-                        RExC_parse ++;
-                    } while (isXDIGIT(*RExC_parse) || *RExC_parse == '_');
-
-                    /* Be sure to synchronize this message with the similar one
-                     * in utf8.c */
-                    vFAIL4("Use of code point 0x%.*s is not allowed; the"
-                        " permissible max is 0x%" UVxf,
-                        (int) (RExC_parse - start_digit), start_digit,
-                        MAX_LEGAL_CP);
-                }
-
-                /* Accumulate this (valid) digit into the running total */
-                cp  = (cp << 4) + READ_XDIGIT(RExC_parse);
-
-                /* READ_XDIGIT advanced the input pointer.  Ignore a single
-                 * underscore separator */
-                if (*RExC_parse == '_' && isXDIGIT(RExC_parse[1])) {
-                    RExC_parse++;
-                }
-            } while (isXDIGIT(*RExC_parse));
-
-            /* Here, have accumulated the next code point */
-            if (RExC_parse >= endbrace) {   /* If done ... */
-                if (count != 1) {
+            if (RExC_parse >= endbrace) { /* Got to the closing '}' */
+                if (count) {
                     goto do_concat;
                 }
 
@@ -13007,18 +12981,19 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                 return TRUE;
             }
 
-            /* Here, the only legal thing would be a multiple character
-             * sequence (of the form "\N{U+c1.c2. ... }".   So the next
-             * character must be a dot (and the one after that can't be the
-             * endbrace, or we'd have something like \N{U+100.} ) */
+            /* Here, the parse stopped bfore the ending brace.  This is legal
+             * only if that character is a dot separating code points, like a
+             * multiple character sequence (of the form "\N{U+c1.c2. ... }".
+             * So the next character must be a dot (and the one after that
+             * can't be the endbrace, or we'd have something like \N{U+100.} )
+             * */
             if (*RExC_parse != '.' || RExC_parse + 1 >= endbrace) {
                 RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
-                                ? UTF8SKIP(RExC_parse)
-                                : 1;
-                if (RExC_parse >= endbrace) { /* Guard against malformed utf8 */
-                    RExC_parse = endbrace;
-                }
-                vFAIL("Invalid hexadecimal number in \\N{U+...}");
+                              ? UTF8SKIP(RExC_parse)
+                              : 1;
+                RExC_parse = MIN(endbrace, RExC_parse);/* Guard against
+                                                          malformed utf8 */
+                goto bad_NU;
             }
 
             /* Here, looks like its really a multiple character sequence.  Fail
@@ -13036,7 +13011,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
              * but go through the motions of code point counting and error
              * checking, if the caller doesn't want a node returned. */
 
-            if (node_p && count == 1) {
+            if (node_p && ! substitute_parse) {
                 substitute_parse = newSVpvs("?:");
             }
 
@@ -13952,6 +13927,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        || ! is_PATWS_safe((p), RExC_end, UTF));
 
 		switch ((U8)*p) {
+                  const char* message;
+                  U32 packed_warn;
+                  U8 grok_c_char;
+
 		case '^':
 		case '$':
 		case '.':
@@ -14067,67 +14046,70 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			p++;
 			break;
 		    case 'o':
-			{
-			    UV result;
-			    const char* error_msg;
+                        if (! grok_bslash_o(&p,
+                                            RExC_end,
+                                            &ender,
+                                            &message,
+                                            &packed_warn,
+                                            (bool) RExC_strict,
+                                            FALSE, /* No illegal cp's */
+                                            UTF))
+                        {
+                            RExC_parse = p; /* going to die anyway; point to
+                                               exact spot of failure */
+                            vFAIL(message);
+                        }
 
-			    bool valid = grok_bslash_o(&p,
-                                                       RExC_end,
-						       &result,
-						       &error_msg,
-						       TO_OUTPUT_WARNINGS(p),
-                                                       (bool) RExC_strict,
-                                                       TRUE, /* Output warnings
-                                                                for non-
-                                                                portables */
-                                                       UTF);
-			    if (! valid) {
-				RExC_parse = p;	/* going to die anyway; point
-						   to exact spot of failure */
-				vFAIL(error_msg);
-			    }
-                            UPDATE_WARNINGS_LOC(p - 1);
-                            ender = result;
-			    break;
-			}
+                        if (message && TO_OUTPUT_WARNINGS(p)) {
+                            warn_non_literal_string(p, packed_warn, message);
+                        }
+                        break;
 		    case 'x':
-			{
-                            UV result = UV_MAX; /* initialize to erroneous
-                                                   value */
-			    const char* error_msg;
+                        if (! grok_bslash_x(&p,
+                                            RExC_end,
+                                            &ender,
+                                            &message,
+                                            &packed_warn,
+                                            (bool) RExC_strict,
+                                            FALSE, /* No illegal cp's */
+                                            UTF))
+                        {
+                            RExC_parse = p;	/* going to die anyway; point
+                                                   to exact spot of failure */
+                            vFAIL(message);
+                        }
 
-			    bool valid = grok_bslash_x(&p,
-                                                       RExC_end,
-						       &result,
-						       &error_msg,
-                                                       TO_OUTPUT_WARNINGS(p),
-                                                       (bool) RExC_strict,
-                                                       TRUE, /* Silence warnings
-                                                                for non-
-                                                                portables */
-                                                       UTF);
-			    if (! valid) {
-				RExC_parse = p;	/* going to die anyway; point
-						   to exact spot of failure */
-				vFAIL(error_msg);
-			    }
-                            UPDATE_WARNINGS_LOC(p - 1);
-                            ender = result;
+                        if (message && TO_OUTPUT_WARNINGS(p)) {
+                            warn_non_literal_string(p, packed_warn, message);
+                        }
 
 #ifdef EBCDIC
-                            if (ender < 0x100) {
-                                if (RExC_recode_x_to_native) {
-                                    ender = LATIN1_TO_NATIVE(ender);
-                                }
-			    }
+                        if (ender < 0x100) {
+                            if (RExC_recode_x_to_native) {
+                                ender = LATIN1_TO_NATIVE(ender);
+                            }
+                        }
 #endif
-			    break;
-			}
+                        break;
 		    case 'c':
-			p++;
-			ender = grok_bslash_c(*p, TO_OUTPUT_WARNINGS(p));
-                        UPDATE_WARNINGS_LOC(p);
                         p++;
+                        if (! grok_bslash_c(*p, &grok_c_char,
+                                            &message, &packed_warn))
+                        {
+                            /* going to die anyway; point to exact spot of
+                             * failure */
+                            RExC_parse = p + ((UTF)
+                                              ? UTF8_SAFE_SKIP(p, RExC_end)
+                                              : 1);
+                            vFAIL(message);
+                        }
+
+                        ender = grok_c_char;
+                        p++;
+                        if (message && TO_OUTPUT_WARNINGS(p)) {
+                            warn_non_literal_string(p, packed_warn, message);
+                        }
+
 			break;
                     case '8': case '9': /* must be a backreference */
                         --p;
@@ -14162,17 +14144,19 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         /* FALLTHROUGH */
                     case '0':
 			{
-			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
+			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT
+                                      | PERL_SCAN_NOTIFY_ILLDIGIT;
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    p += numlen;
-                            if (   isDIGIT(*p)  /* like \08, \178 */
-                                && ckWARN(WARN_REGEXP)
-                                && numlen < 3)
+                            if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
+                                && isDIGIT(*p)  /* like \08, \178 */
+                                && ckWARN(WARN_REGEXP))
                             {
 				reg_warn_non_literal_string(
-                                         p + 1,
-                                         form_short_octal_warning(p, numlen));
+                                     p + 1,
+                                     form_alien_digit_msg(8, numlen, p,
+                                                        RExC_end, UTF, FALSE));
                             }
 			}
 			break;
@@ -14249,6 +14233,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 if (ender > 255) {
                     REQUIRE_UTF8(flagp);
+                    if (   UNICODE_IS_PERL_EXTENDED(ender)
+                        && TO_OUTPUT_WARNINGS(p))
+                    {
+                        ckWARN2_non_literal_string(p,
+                                                   packWARN(WARN_PORTABLE),
+                                                   PL_extended_cp_format,
+                                                   ender);
+                    }
                 }
 
                 /* We need to check if the next non-ignored thing is a
@@ -16924,6 +16916,7 @@ S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
     PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS;
 
     if (! TO_OUTPUT_WARNINGS(RExC_parse)) {
+        CLEAR_POSIX_WARNINGS();
         return;
     }
 
@@ -17354,6 +17347,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * is already in 'value'.  Otherwise, need to translate the escape
              * into what it signifies. */
             if (! skip_white || ! isBLANK_A(value)) switch ((I32)value) {
+                const char * message;
+                U32 packed_warn;
+                U8 grok_c_char;
 
 	    case 'w':	namedclass = ANYOF_WORDCHAR;	break;
 	    case 'W':	namedclass = ANYOF_NWORDCHAR;	break;
@@ -17604,53 +17600,74 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    case 'a':	value = '\a';                   break;
 	    case 'o':
 		RExC_parse--;	/* function expects to be pointed at the 'o' */
-		{
-		    const char* error_msg;
-		    bool valid = grok_bslash_o(&RExC_parse,
-                                               RExC_end,
-					       &value,
-					       &error_msg,
-                                               TO_OUTPUT_WARNINGS(RExC_parse),
-                                               strict,
-                                               silence_non_portable,
-                                               UTF);
-		    if (! valid) {
-			vFAIL(error_msg);
-		    }
-                    UPDATE_WARNINGS_LOC(RExC_parse - 1);
-		}
-                non_portable_endpoint++;
+                if (! grok_bslash_o(&RExC_parse,
+                                            RExC_end,
+                                            &value,
+                                            &message,
+                                            &packed_warn,
+                                            strict,
+                                            range, /* MAX_UV allowed for range
+                                                      upper limit */
+                                            UTF))
+                {
+                    vFAIL(message);
+                }
+                else if (message && TO_OUTPUT_WARNINGS(RExC_parse)) {
+                    warn_non_literal_string(RExC_parse, packed_warn, message);
+                }
+
+                if (value < 256) {
+                    non_portable_endpoint++;
+                }
 		break;
 	    case 'x':
 		RExC_parse--;	/* function expects to be pointed at the 'x' */
-		{
-		    const char* error_msg;
-		    bool valid = grok_bslash_x(&RExC_parse,
-                                               RExC_end,
-					       &value,
-					       &error_msg,
-					       TO_OUTPUT_WARNINGS(RExC_parse),
-                                               strict,
-                                               silence_non_portable,
-                                               UTF);
-                    if (! valid) {
-			vFAIL(error_msg);
-		    }
-                    UPDATE_WARNINGS_LOC(RExC_parse - 1);
-		}
-                non_portable_endpoint++;
+                if (!  grok_bslash_x(&RExC_parse,
+                                            RExC_end,
+                                            &value,
+                                            &message,
+                                            &packed_warn,
+                                            strict,
+                                            range, /* MAX_UV allowed for range
+                                                      upper limit */
+                                            UTF))
+                {
+                    vFAIL(message);
+                }
+                else if (message && TO_OUTPUT_WARNINGS(RExC_parse)) {
+                    warn_non_literal_string(RExC_parse, packed_warn, message);
+                }
+
+                if (value < 256) {
+                    non_portable_endpoint++;
+                }
 		break;
 	    case 'c':
-		value = grok_bslash_c(*RExC_parse, TO_OUTPUT_WARNINGS(RExC_parse));
-                UPDATE_WARNINGS_LOC(RExC_parse);
-		RExC_parse++;
+                if (! grok_bslash_c(*RExC_parse, &grok_c_char, &message,
+                                                                &packed_warn))
+                {
+                    /* going to die anyway; point to exact spot of
+                        * failure */
+                    RExC_parse += (UTF)
+                                  ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
+                                  : 1;
+                    vFAIL(message);
+                }
+
+                value = grok_c_char;
+                RExC_parse++;
+                if (message && TO_OUTPUT_WARNINGS(RExC_parse)) {
+                    warn_non_literal_string(RExC_parse, packed_warn, message);
+                }
+
                 non_portable_endpoint++;
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7':
 		{
 		    /* Take 1-3 octal digits */
-		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
+		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT
+                              | PERL_SCAN_NOTIFY_ILLDIGIT;
                     numlen = (strict) ? 4 : 3;
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
@@ -17661,17 +17678,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                           : 1;
                             vFAIL("Need exactly 3 octal digits");
                         }
-                        else if (   numlen < 3 /* like \08, \178 */
+                        else if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
                                  && RExC_parse < RExC_end
                                  && isDIGIT(*RExC_parse)
                                  && ckWARN(WARN_REGEXP))
                         {
                             reg_warn_non_literal_string(
                                  RExC_parse + 1,
-                                 form_short_octal_warning(RExC_parse, numlen));
+                                 form_alien_digit_msg(8, numlen, RExC_parse,
+                                                        RExC_end, UTF, FALSE));
                         }
                     }
-                    non_portable_endpoint++;
+                    if (value < 256) {
+                        non_portable_endpoint++;
+                    }
 		    break;
 		}
 	    default:
@@ -17933,7 +17953,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 	/* non-Latin1 code point implies unicode semantics. */
 	if (value > 255) {
+            if (value > MAX_LEGAL_CP && (   value != UV_MAX
+                                         || prevvalue > MAX_LEGAL_CP))
+            {
+                vFAIL(form_cp_too_large_msg(16, NULL, 0, value));
+            }
             REQUIRE_UNI_RULES(flagp, 0);
+            if (  ! silence_non_portable
+                &&  UNICODE_IS_PERL_EXTENDED(value)
+                &&  TO_OUTPUT_WARNINGS(RExC_parse))
+            {
+                ckWARN2_non_literal_string(RExC_parse,
+                                           packWARN(WARN_PORTABLE),
+                                           PL_extended_cp_format,
+                                           value);
+            }
 	}
 
         /* Ready to process either the single value, or the completed range.
@@ -19838,10 +19872,11 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     /* The data consists of just strings defining user-defined
                      * property names, but in prior incarnations, and perhaps
                      * somehow from pluggable regex engines, it could still
-                     * hold hex code point definitions.  Each component of a
-                     * range would be separated by a tab, and each range by a
-                     * new-line.  If these are found, instead add them to the
-                     * inversion list */
+                     * hold hex code point definitions, all of which should be
+                     * legal (or it wouldn't have gotten this far).  Each
+                     * component of a range would be separated by a tab, and
+                     * each range by a new-line.  If these are found, instead
+                     * add them to the inversion list */
                     I32 grok_flags =  PERL_SCAN_SILENT_ILLDIGIT
                                      |PERL_SCAN_SILENT_NON_PORTABLE;
                     STRLEN len = remaining;

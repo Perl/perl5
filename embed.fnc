@@ -785,6 +785,7 @@ p	|void	|dump_sub_perl	|NN const GV* gv|bool justperl
 Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
+pEXTR	|const char *|cntrl_to_mnemonic|const U8 c
 p	|CV *	|find_lexical_cv|PADOFFSET off
 : Defined in util.c, used only in perl.c
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
@@ -1136,26 +1137,41 @@ Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-EpRX	|bool	|grok_bslash_x	|NN char** s		 \
-				|NN const char* const send	 \
-				|NN UV* uv			 \
-				|NN const char** error_msg       \
-				|const bool output_warning       \
-				|const bool strict               \
-				|const bool silence_non_portable \
+EpRX	|bool	|grok_bslash_x	|NN char** s			\
+				|NN const char* const send	\
+				|NN UV* uv			\
+				|NN const char** message	\
+				|NULLOK U32 * packed_warn	\
+				|const bool strict		\
+				|const bool allow_UV_MAX	\
 				|const bool utf8
-EpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
-EpRX	|bool	|grok_bslash_o	|NN char** s		 \
-				|NN const char* const send	 \
-				|NN UV* uv			 \
-				|NN const char** error_msg       \
-				|const bool output_warning       \
-				|const bool strict               \
-				|const bool silence_non_portable \
+EpRX	|bool	|grok_bslash_c	|const char source		\
+				|NN U8 * result			\
+				|NN const char** message	\
+				|NULLOK U32 * packed_warn
+EpRX	|bool	|grok_bslash_o	|NN char** s			\
+				|NN const char* const send	\
+				|NN UV* uv			\
+				|NN const char** message        \
+				|NULLOK U32 * packed_warn	\
+				|const bool strict              \
+				|const bool allow_UV_MAX	\
 				|const bool utf8
-EiR	|char*|form_short_octal_warning|NN const char * const s  \
-				|const STRLEN len
-EiRT	|I32	|regcurly	|NN const char *s
+EpRX	|const char *|form_alien_digit_msg|const U8 which	\
+				|const STRLEN valids_len	\
+				|NN const char * const first_bad\
+				|NN const char * const send	\
+				|const bool UTF			\
+				|const bool braced
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+EiRT	|bool	|regcurly	|NN const char *s
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
+EpRX	|const char *|form_cp_too_large_msg|const U8 which	\
+				|NULLOK const char * string	\
+				|const Size_t len		\
+				|const UV cp
 #endif
 AMpd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
@@ -2699,7 +2715,6 @@ ES	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|U32 word_count|U32 flags|U32 depth
 ES	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
-ETSR	|const char *|cntrl_to_mnemonic|const U8 c
 ETSR	|int	|edit_distance	|NN const UV *src		    \
 				|NN const UV *tgt		    \
 				|const STRLEN x			    \

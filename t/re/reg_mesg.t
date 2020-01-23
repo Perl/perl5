@@ -200,11 +200,11 @@ my @death =
  '/[\x{X]/' => 'Missing right brace on \x{} {#} m/[\x{{#}X]/',
  '/[\x{A]/' => 'Missing right brace on \x{} {#} m/[\x{A{#}]/',
 
- '/\o{1/' => 'Missing right brace on \o{ {#} m/\o{1{#}/',
- '/\o{X/' => 'Missing right brace on \o{ {#} m/\o{{#}X/',
+ '/\o{1/' => 'Missing right brace on \o{} {#} m/\o{1{#}/',
+ '/\o{X/' => 'Missing right brace on \o{} {#} m/\o{{#}X/',
 
- '/[\o{X]/' => 'Missing right brace on \o{ {#} m/[\o{{#}X]/',
- '/[\o{7]/' => 'Missing right brace on \o{ {#} m/[\o{7{#}]/',
+ '/[\o{X]/' => 'Missing right brace on \o{} {#} m/[\o{{#}X]/',
+ '/[\o{7]/' => 'Missing right brace on \o{} {#} m/[\o{7{#}]/',
 
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown {#} m/[[:barf:]{#}]/',
 
@@ -263,10 +263,10 @@ my @death =
  'm/(?[[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} here is restricted to one character {#} m/(?[[^\N{U+100.300{#}}]])/',
  'm/(?[ \p{Digit} & (?^(?[ \p{Thai} | \p{Lao} ]))])/' => 'Sequence (?^(...) not recognized {#} m/(?[ \p{Digit} & (?^({#}?[ \p{Thai} | \p{Lao} ]))])/',
  'm/(?[ \p{Digit} & (?(?[ \p{Thai} | \p{Lao} ]))])/' => 'Unexpected character {#} m/(?[ \p{Digit} & (?{#}(?[ \p{Thai} | \p{Lao} ]))])/',
- 'm/\o{/' => 'Missing right brace on \o{ {#} m/\o{{#}/',
+ 'm/\o{/' => 'Missing right brace on \o{} {#} m/\o{{#}/',
  'm/\o/' => 'Missing braces on \o{} {#} m/\o{#}/',
  'm/\o{}/' => 'Empty \o{} {#} m/\o{}{#}/',
- 'm/[\o{]/' => 'Missing right brace on \o{ {#} m/[\o{{#}]/',
+ 'm/[\o{]/' => 'Missing right brace on \o{} {#} m/[\o{{#}]/',
  'm/[\o]/' => 'Missing braces on \o{} {#} m/[\o{#}]/',
  'm/[\o{}]/' => 'Empty \o{} {#} m/[\o{}{#}]/',
  'm/(?^-i:foo)/' => 'Sequence (?^-...) not recognized {#} m/(?^-{#}i:foo)/',
@@ -283,7 +283,6 @@ my @death =
  "m/(?('/" => "Sequence (?('... not terminated {#} m/(?('{#}/",
  'm/\g{/'  => 'Sequence \g{... not terminated {#} m/\g{{#}/',
  'm/\k</'  => 'Sequence \k<... not terminated {#} m/\k<{#}/',
- 'm/\cß/' => "Character following \"\\c\" must be printable ASCII",
  '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', the \'(\' and \'?\' must be adjacent {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
  '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
  '/((?# This is a comment in the middle of a token)*script_run:foo)/' => 'In \'(*...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}script_run:foo)/',
@@ -333,25 +332,23 @@ my @death_only_under_strict = (
     'm/[\xABC]/' => "",
                  => 'Use \x{...} for more than two hex characters {#} m/[\xABC{#}]/',
 
-    # XXX This is a confusing error message.  The G isn't ignored; it just
-    # terminates the \x.  Also some messages below are missing the <-- HERE,
-    # aren't all category 'regexp'.  (Hence we have to turn off 'digit'
-    # messages as well below)
-    'm/\xAG/' => 'Illegal hexadecimal digit \'G\' ignored',
+    # some messages below aren't all category 'regexp'.  (Hence we have to
+    # turn off 'digit' messages as well below)
+    'm/\xAG/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x0AG" {#} m/\xA{#}G/',
               => 'Non-hex character {#} m/\xAG{#}/',
-    'm/[\xAG]/' => 'Illegal hexadecimal digit \'G\' ignored',
+    'm/[\xAG]/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x0AG" {#} m/[\xA{#}G]/',
                 => 'Non-hex character {#} m/[\xAG{#}]/',
-    'm/\o{789}/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
+    'm/\o{789}/' => 'Non-octal character \'8\' terminates \o early.  Resolved as "\o{007}" {#} m/\o{789}{#}/',
                  => 'Non-octal character {#} m/\o{78{#}9}/',
-    'm/[\o{789}]/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
+    'm/[\o{789}]/' => 'Non-octal character \'8\' terminates \o early.  Resolved as "\o{007}" {#} m/[\o{789}{#}]/',
                    => 'Non-octal character {#} m/[\o{78{#}9}]/',
     'm/\x{}/' => "",
               => 'Empty \x{} {#} m/\x{}{#}/',
     'm/[\x{}]/' => "",
                 => 'Empty \x{} {#} m/[\x{}{#}]/',
-    'm/\x{ABCDEFG}/' => 'Illegal hexadecimal digit \'G\' ignored',
+    'm/\x{ABCDEFG}/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x{ABCDEF}" {#} m/\x{ABCDEFG}{#}/',
                      => 'Non-hex character {#} m/\x{ABCDEFG{#}}/',
-    'm/[\x{ABCDEFG}]/' => 'Illegal hexadecimal digit \'G\' ignored',
+    'm/[\x{ABCDEFG}]/' => 'Non-hex character \'G\' terminates \x early.  Resolved as "\x{ABCDEF}" {#} m/[\x{ABCDEFG}{#}]/',
                        => 'Non-hex character {#} m/[\x{ABCDEFG{#}}]/',
     "m'[\\y]\\x{100}'" => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]\x{100}/',
                        => 'Unrecognized escape \y in character class {#} m/[\y{#}]\x{100}/',
@@ -369,9 +366,9 @@ my @death_only_under_strict = (
                                             => '\N{} here is restricted to one character {#} m/[\x03-\N{U+100.300{#}}]/',
     'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}-\x{10FFFF}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100.300}{#}-\x{10FFFF}]/',
                                                   => '\N{} here is restricted to one character {#} m/[\N{U+100.300{#}}-\x{10FFFF}]/',
-    '/[\08]/'   => '\'\08\' resolved to \'\o{0}8\' {#} m/[\08{#}]/',
+    '/[\08]/'   => 'Non-octal character \'8\' terminates \0 early.  Resolved as "\0008" {#} m/[\08{#}]/',
                 => 'Need exactly 3 octal digits {#} m/[\08{#}]/',
-    '/[\018]/'  => '\'\018\' resolved to \'\o{1}8\' {#} m/[\018{#}]/',
+    '/[\018]/'  => 'Non-octal character \'8\' terminates \0 early.  Resolved as "\0018" {#} m/[\018{#}]/',
                 => 'Need exactly 3 octal digits {#} m/[\018{#}]/',
     '/[\_\0]/'  => "",
                 => 'Need exactly 3 octal digits {#} m/[\_\0]{#}/',
@@ -466,7 +463,7 @@ my @death_utf8 = mark_as_utf8(
  '/ネ[\x{ネ]ネ/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]ネ/',
  '/ネ[\x{ネ]/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]/',
 
- '/ネ\o{ネ/' => 'Missing right brace on \o{ {#} m/ネ\o{{#}ネ/',
+ '/ネ\o{ネ/' => 'Missing right brace on \o{} {#} m/ネ\o{{#}ネ/',
 
  '/[ネ-a]ネ/' => 'Invalid [] range "ネ-a" {#} m/[ネ-a{#}]ネ/',
 
@@ -491,7 +488,8 @@ my @death_utf8 = mark_as_utf8(
  '/(?[ \t + \e # ネ This was supposed to be a comment ])/' =>
     "Syntax error in (?[...]) {#} m/(?[ \\t + \\e # ネ This was supposed to be a comment ]){#}/",
  'm/(*ネ)ネ/' => q<Unknown '(*...)' construct 'ネ' {#} m/(*ネ){#}ネ/>,
- '/\cネ/' => "Character following \"\\c\" must be printable ASCII",
+ '/\cネ/' => "Character following \"\\c\" must be printable ASCII {#} m/\\cネ{#}/",
+ '/[\cネ]/' => "Character following \"\\c\" must be printable ASCII {#} m/[\\cネ{#}]/",
  '/\b{ネ}/' => "'ネ' is an unknown bound type {#} m/\\b{ネ{#}}/",
  '/\B{ネ}/' => "'ネ' is an unknown bound type {#} m/\\B{ネ{#}}/",
 );
@@ -535,8 +533,9 @@ my @warning = (
     'm/(?[[:word]])\x{100}/' => "Assuming NOT a POSIX class since there is no terminating ':' {#} m/(?[[:word{#}]])\\x{100}/",
     "m'\\y\\x{100}'"     => 'Unrecognized escape \y passed through {#} m/\y{#}\x{100}/',
     '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match {#} m/x{3,1}{#}/',
-    '/\08/' => '\'\08\' resolved to \'\o{0}8\' {#} m/\08{#}/',
-    '/\018/' => '\'\018\' resolved to \'\o{1}8\' {#} m/\018{#}/',
+    '/\08/' => 'Non-octal character \'8\' terminates \0 early.  Resolved as "\0008" {#} m/\08{#}/',
+
+    '/\018/' => 'Non-octal character \'8\' terminates \0 early.  Resolved as "\0018" {#} m/\018{#}/',
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
@@ -664,7 +663,6 @@ my @warning_only_under_strict = (
     '/[a-\N{U+FF}]\x{100}/' => 'Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" {#} m/[a-\N{U+FF}{#}]\x{100}/',
     '/[\N{U+00}-\a]\x{100}/' => "",
     '/[\a-\N{U+FF}]\x{100}/' => "",
-    '/[\N{U+FF}-\x{100}]/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+FF}-\x{100}{#}]/',
     '/[\N{U+100}-\x{101}]/' => "",
     "/[%-%]/" => "",
     "/[:-\\x$colon_hex]\\x{100}/" => "\":-\\x$colon_hex\" is more clearly written simply as \":\" {#} m/[:-\\x$colon_hex\{#}]\\x{100}/",

@@ -656,6 +656,10 @@ PERL_CALLCONV void	Perl_clear_defarray(pTHX_ AV* av, bool abandon);
 PERL_CALLCONV const COP*	Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop, bool opnext);
 #define PERL_ARGS_ASSERT_CLOSEST_COP	\
 	assert(cop)
+PERL_CALLCONV const char *	Perl_cntrl_to_mnemonic(const U8 c)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CNTRL_TO_MNEMONIC
+
 PERL_CALLCONV const char *	Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags);
 #define PERL_ARGS_ASSERT_COP_FETCH_LABEL	\
 	assert(cop)
@@ -5561,10 +5565,6 @@ STATIC AV*	S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, con
 STATIC void	S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
 #define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE	\
 	assert(pRExC_state)
-STATIC const char *	S_cntrl_to_mnemonic(const U8 c)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_CNTRL_TO_MNEMONIC
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE U8	S_compute_EXACTish(RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
@@ -5904,34 +5904,41 @@ PERL_CALLCONV SV*	Perl_invlist_clone(pTHX_ SV* const invlist, SV* newlist);
 #define PERL_ARGS_ASSERT_INVLIST_CLONE	\
 	assert(invlist)
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE char*	S_form_short_octal_warning(pTHX_ const char * const s, const STRLEN len)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_FORM_SHORT_OCTAL_WARNING	\
-	assert(s)
-#endif
-
-PERL_CALLCONV char	Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_C
-
-PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
-	assert(s); assert(send); assert(uv); assert(error_msg)
-
-PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
-	assert(s); assert(send); assert(uv); assert(error_msg)
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	S_regcurly(const char *s)
+PERL_STATIC_INLINE bool	S_regcurly(const char *s)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGCURLY	\
 	assert(s)
 #endif
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
+PERL_CALLCONV const char *	Perl_form_alien_digit_msg(pTHX_ const U8 which, const STRLEN valids_len, const char * const first_bad, const char * const send, const bool UTF, const bool braced)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG	\
+	assert(first_bad); assert(send)
+
+PERL_CALLCONV bool	Perl_grok_bslash_c(pTHX_ const char source, U8 * result, const char** message, U32 * packed_warn)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GROK_BSLASH_C	\
+	assert(result); assert(message)
+
+PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
+	assert(s); assert(send); assert(uv); assert(message)
+
+PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
+	assert(s); assert(send); assert(uv); assert(message)
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV const char *	Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char * string, const Size_t len, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)

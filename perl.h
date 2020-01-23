@@ -4642,7 +4642,9 @@ EXTCONST char PL_no_localize_ref[]
   INIT("Can't localize through a reference");
 EXTCONST char PL_memory_wrap[]
   INIT("panic: memory wrap");
-
+EXTCONST char PL_extended_cp_format[]
+  INIT("Code point 0x%" UVXf " is not Unicode, requires a Perl extension,"
+                             " and so is not portable");
 EXTCONST char PL_Yes[]
   INIT("1");
 EXTCONST char PL_No[]
@@ -7141,8 +7143,8 @@ A synonym for L</grok_numeric_radix>
 #define PERL_SCAN_TRAILING            0x10 /* grok_number_flags() allow trailing
                                               and set IS_NUMBER_TRAILING */
 
-#ifdef PERL_CORE    /* These are considered experimental, so not exposed
-                       publicly */
+/* These are considered experimental, so not exposed publicly */
+#if defined(PERL_CORE) || defined(PERL_EXT)
 /* grok_??? don't warn about very large numbers which are <= UV_MAX;
  * output: found such a number */
 #  define PERL_SCAN_SILENT_NON_PORTABLE 0x20
@@ -7150,6 +7152,12 @@ A synonym for L</grok_numeric_radix>
 /* If this is set on input, and no illegal digit is found, it will be cleared
  * on output; otherwise unchanged */
 #  define PERL_SCAN_NOTIFY_ILLDIGIT 0x40
+
+/* Don't warn on overflow; output flag still set */
+#  define PERL_SCAN_SILENT_OVERFLOW 0x80
+
+/* Forbid a leading underscore, which the other one doesn't */
+#  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES (0x100|PERL_SCAN_ALLOW_UNDERSCORES)
 #endif
 
 

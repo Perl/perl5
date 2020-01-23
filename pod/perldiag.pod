@@ -1731,10 +1731,13 @@ another template code following the slash.  See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, and not portable
 
-(S non_unicode) You had a code point that has never been in any
+(S non_unicode portable) You had a code point that has never been in any
 standard, so it is likely that languages other than Perl will NOT
-understand it.  At one time, it was legal in some standards to have code
-points up to 0x7FFF_FFFF, but not higher, and this code point is higher.
+understand it.  This code point also will not fit in a 32-bit word on
+ASCII platforms and therefore is non-portable between systems.
+
+At one time, it was legal in some standards to have code points up to
+0x7FFF_FFFF, but not higher, and this code point is higher.
 
 Acceptance of these code points is a Perl extension, and you should
 expect that nothing other than Perl can handle them; Perl itself on
@@ -4149,6 +4152,15 @@ a hex one was expected, like
  (?[ [ \xDG ] ])
  (?[ [ \x{DEKA} ] ])
 
+=item Non-hex character '%c' terminates \x early.  Resolved as "%s"
+
+(W digit) In parsing a hexadecimal numeric constant, a character was
+unexpectedly encountered that isn't hexadecimal.  The resulting value
+is as indicated.
+
+Note that, within braces, every character starting with the first
+non-hexadecimal up to the ending brace is ignored.
+
 =item Non-octal character in regex; marked by S<<-- HERE> in m/%s/
 
 (F) In a regular expression, there was a non-octal character where
@@ -4156,11 +4168,21 @@ an octal one was expected, like
 
  (?[ [ \o{1278} ] ])
 
-=item Non-octal character '%c'.  Resolved as "%s"
+=item Non-octal character '%c' terminates \o early.  Resolved as "%s"
 
 (W digit) In parsing an octal numeric constant, a character was
 unexpectedly encountered that isn't octal.  The resulting value
 is as indicated.
+
+When not using C<\o{...}>, you wrote something like C<\08>, or C<\179>
+in a double-quotish string.  The resolution is as indicated, with all
+but the last digit treated as a single character, specified in octal.
+The last digit is the next character in the string.  To tell Perl that
+this is indeed what you want, you can use the C<\o{ }> syntax, or use
+exactly three digits to specify the octal for the character.
+
+Note that, within braces, every character starting with the first
+non-octal up to the ending brace is ignored.
 
 =item "no" not allowed in expression
 
@@ -5438,6 +5460,8 @@ Supply these or check that you are using the right construct.
 
 =item '%s' resolved to '\o{%s}%d'
 
+As of Perl 5.32, this message is no longer generated.  Instead, see
+L</Non-octal character '%c' terminates \o early.  Resolved as "%s">.
 (W misc, regexp)  You wrote something like C<\08>, or C<\179> in a
 double-quotish string.  All but the last digit is treated as a single
 character, specified in octal.  The last digit is the next character in
@@ -7219,9 +7243,9 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
-=item Use of code point 0x%s is not allowed; the permissible max is 0x%x
+=item Use of code point 0x%s is not allowed; the permissible max is 0x%X
 
-=item Use of code point 0x%s is not allowed; the permissible max is 0x%x
+=item Use of code point 0x%s is not allowed; the permissible max is 0x%X
 in regex; marked by <-- HERE in m/%s/
 
 (F) You used a code point that is not allowed, because it is too large.

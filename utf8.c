@@ -37,11 +37,6 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
-/* Be sure to synchronize this message with the similar one in regcomp.c */
-static const char cp_above_legal_max[] =
-                        "Use of code point 0x%" UVXf " is not allowed; the"
-                        " permissible max is 0x%" UVXf;
-
 /*
 =head1 Unicode Support
 These are various utility functions for manipulating UTF8-encoded
@@ -171,9 +166,6 @@ const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf
                                    " is not recommended for open interchange";
 const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
                                    " may not be portable";
-const char perl_extended_cp_format[] = "Code point 0x%" UVXf " is not"        \
-                                       " Unicode, requires a Perl extension," \
-                                       " and so is not portable";
 
 #define HANDLE_UNICODE_SURROGATE(uv, flags, msgs)                   \
     STMT_START {                                                    \
@@ -327,7 +319,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
         if (UNLIKELY(      uv > MAX_LEGAL_CP
                      && ! (flags & UNICODE_ALLOW_ABOVE_IV_MAX)))
         {
-            Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_LEGAL_CP);
+            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, uv));
         }
         if (       (flags & UNICODE_WARN_SUPER)
             || (   (flags & UNICODE_WARN_PERL_EXTENDED)
@@ -339,7 +331,8 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
 
             /* Choose the more dire applicable warning */
             if (UNICODE_IS_PERL_EXTENDED(uv)) {
-                format = perl_extended_cp_format;
+                format = PL_extended_cp_format;
+                category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
                 if (flags & (UNICODE_WARN_PERL_EXTENDED
                             |UNICODE_DISALLOW_PERL_EXTENDED))
                 {
@@ -351,8 +344,11 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
                 *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),
                                    category, flag);
             }
-            else {
-                Perl_ck_warner_d(aTHX_ category, format, uv);
+            else if (    ckWARN_d(WARN_NON_UNICODE)
+                     || (   (flag & UNICODE_GOT_PERL_EXTENDED)
+                         && ckWARN(WARN_PORTABLE)))
+            {
+                Perl_warner(aTHX_ category, format, uv);
             }
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
@@ -2087,9 +2083,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 if (UNLIKELY(isUTF8_PERL_EXTENDED(s0))) {
                     if (  ! (flags & UTF8_CHECK_ONLY)
                         &&  (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
-                        &&  (msgs || ckWARN_d(WARN_NON_UNICODE)))
+                        &&  (msgs || (   ckWARN_d(WARN_NON_UNICODE)
+                                      || ckWARN(WARN_PORTABLE))))
                     {
-                        pack_warn = packWARN(WARN_NON_UNICODE);
+                        pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
 
                         /* If it is an overlong that evaluates to a code point
                          * that doesn't have to use the Perl extended UTF-8, it
@@ -2102,7 +2099,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                          * */
                         if (UNICODE_IS_PERL_EXTENDED(uv)) {
                             message = Perl_form(aTHX_
-                                            perl_extended_cp_format, uv);
+                                            PL_extended_cp_format, uv);
                         }
                         else {
                             message = Perl_form(aTHX_
@@ -3322,8 +3319,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
                 if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
                     if (UNLIKELY(uv1 > MAX_LEGAL_CP)) {
-                        Perl_croak(aTHX_ cp_above_legal_max, uv1,
-                                         MAX_LEGAL_CP);
+                        Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, uv1));
                     }
                     if (ckWARN_d(WARN_NON_UNICODE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
@@ -4051,9 +4047,9 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 /*
 =for apidoc pv_uni_display
 
-Build to the scalar C<dsv> a displayable version of the string C<spv>,
-length C<len>, the displayable version being at most C<pvlim> bytes long
-(if longer, the rest is truncated and C<"..."> will be appended).
+Build to the scalar C<dsv> a displayable version of the UTF-8 encoded string
+C<spv>, length C<len>, the displayable version being at most C<pvlim> bytes
+long (if longer, the rest is truncated and C<"..."> will be appended).
 
 The C<flags> argument can have C<UNI_DISPLAY_ISPRINT> set to display
 C<isPRINT()>able characters as themselves, C<UNI_DISPLAY_BACKSLASH>
@@ -4061,6 +4057,9 @@ to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
 (C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
 C<UNI_DISPLAY_QQ> (and its alias C<UNI_DISPLAY_REGEX>) have both
 C<UNI_DISPLAY_BACKSLASH> and C<UNI_DISPLAY_ISPRINT> turned on.
+
+Additionally, there is now C<UNI_DISPLAY_BACKSPACE> which allows C<\b> for a
+backspace, but only when C<UNI_DISPLAY_BACKSLASH> also is set.
 
 The pointer to the PV of the C<dsv> is returned.
 
@@ -4080,10 +4079,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
     SvUTF8_off(dsv);
     for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
-	  /* This serves double duty as a flag and a character to print after
-	     a \ when flags & UNI_DISPLAY_BACKSLASH is true.
-	  */
-	 char ok = 0;
+	 bool ok = 0;
 
 	 if (pvlim && SvCUR(dsv) >= pvlim) {
 	      truncated++;
@@ -4093,27 +4089,19 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
 	 if (u < 256) {
 	     const unsigned char c = (unsigned char)u & 0xFF;
 	     if (flags & UNI_DISPLAY_BACKSLASH) {
-	         switch (c) {
-		 case '\n':
-		     ok = 'n'; break;
-		 case '\r':
-		     ok = 'r'; break;
-		 case '\t':
-		     ok = 't'; break;
-		 case '\f':
-		     ok = 'f'; break;
-		 case '\a':
-		     ok = 'a'; break;
-		 case '\\':
-		     ok = '\\'; break;
-		 default: break;
-		 }
-		 if (ok) {
-		     const char string = ok;
-		     sv_catpvs(dsv, "\\");
-		     sv_catpvn(dsv, &string, 1);
-		 }
-	     }
+                 if (    isMNEMONIC_CNTRL(c)
+                     && (   c != '\b'
+                         || (flags & UNI_DISPLAY_BACKSPACE)))
+                 {
+                    const char * mnemonic = cntrl_to_mnemonic(c);
+                    sv_catpvn(dsv, mnemonic, strlen(mnemonic));
+                    ok = 1;
+                 }
+                 else if (c == '\\') {
+                    sv_catpvs(dsv, "\\\\");
+                    ok = 1;
+                 }
+             }
 	     /* isPRINT() is the locale-blind version. */
 	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
 		 const char string = c;
