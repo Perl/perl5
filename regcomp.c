@@ -4560,13 +4560,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
             int noff;
             regnode *n = scan;
+            int last_op= OP(scan);
 
             /* Skip NOTHING and LONGJMP. */
             while (   (n = regnext(n))
                    && (   (PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
                        || ((OP(n) == LONGJMP) && (noff = ARG(n))))
                    && off + noff < max)
+            {
+                if (last_op == NOTHING && OP(n) == NOTHING)
+                    OP(n)= OPTIMIZED;
+                else
+                    last_op= OP(n);
                 off += noff;
+            }
             if (reg_off_by_arg[OP(scan)])
                 ARG(scan) = off;
             else
