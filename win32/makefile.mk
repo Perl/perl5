@@ -1498,7 +1498,7 @@ $(PERLDLL): $(PERLEXPLIB) $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .ELSE
 	$(LINK32) -dll -out:$@ $(BLINK_FLAGS) \
 	    @Extensions_static \
-	    @$(mktmp -base:0x28000000 $(DELAYLOAD) $(LIBFILES) \
+	    @$(mktmp $(DELAYLOAD) $(LIBFILES) \
 		$(PERLDLL_RES) $(PERLDLL_OBJ) $(PERLEXPLIB))
 	$(EMBED_DLL_MANI)
 .ENDIF

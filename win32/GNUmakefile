@@ -1572,7 +1572,7 @@ ifeq ($(CCTYPE),GCC)
 else
 	$(LINK32) -dll -out:$@ $(BLINK_FLAGS) \
 	    @Extensions_static \
-	    -base:0x28000000 $(DELAYLOAD) $(LIBFILES) \
+	    $(DELAYLOAD) $(LIBFILES) \
 	    $(PERLDLL_RES) $(PERLDLL_OBJ) $(PERLEXPLIB)
 	$(EMBED_DLL_MANI)
 endif
