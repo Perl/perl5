@@ -1368,7 +1368,7 @@ my $a = "\o{";
 my $a = "\o{}";
 EXPECT
 Missing braces on \o{} at - line 3, within string
-Missing right brace on \o{ at - line 4, within string
+Missing right brace on \o{} at - line 4, within string
 Empty \o{} at - line 5, within string
 BEGIN not safe after errors--compilation aborted at - line 6.
 ########

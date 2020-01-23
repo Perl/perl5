@@ -297,7 +297,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
         while (isOCTAL(**s)) { /* Position beyond the legal digits */
             (*s)++;
         }
-        *message = "Missing right brace on \\o{";
+        *message = "Missing right brace on \\o{}";
 	return FALSE;
     }
 
@@ -459,9 +459,6 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
         while (*s < send && isXDIGIT(**s)) { /* Position beyond legal digits */
             (*s)++;
         }
-        /* XXX The corresponding message above for \o is just '\\o{'; other
-         * messages for other constructs include the '}', so are inconsistent.
-         */
 	*message = "Missing right brace on \\x{}";
 	return FALSE;
     }

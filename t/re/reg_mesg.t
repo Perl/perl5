@@ -200,11 +200,11 @@ my @death =
  '/[\x{X]/' => 'Missing right brace on \x{} {#} m/[\x{{#}X]/',
  '/[\x{A]/' => 'Missing right brace on \x{} {#} m/[\x{A{#}]/',
 
- '/\o{1/' => 'Missing right brace on \o{ {#} m/\o{1{#}/',
- '/\o{X/' => 'Missing right brace on \o{ {#} m/\o{{#}X/',
+ '/\o{1/' => 'Missing right brace on \o{} {#} m/\o{1{#}/',
+ '/\o{X/' => 'Missing right brace on \o{} {#} m/\o{{#}X/',
 
- '/[\o{X]/' => 'Missing right brace on \o{ {#} m/[\o{{#}X]/',
- '/[\o{7]/' => 'Missing right brace on \o{ {#} m/[\o{7{#}]/',
+ '/[\o{X]/' => 'Missing right brace on \o{} {#} m/[\o{{#}X]/',
+ '/[\o{7]/' => 'Missing right brace on \o{} {#} m/[\o{7{#}]/',
 
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown {#} m/[[:barf:]{#}]/',
 
@@ -263,10 +263,10 @@ my @death =
  'm/(?[[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} here is restricted to one character {#} m/(?[[^\N{U+100.300{#}}]])/',
  'm/(?[ \p{Digit} & (?^(?[ \p{Thai} | \p{Lao} ]))])/' => 'Sequence (?^(...) not recognized {#} m/(?[ \p{Digit} & (?^({#}?[ \p{Thai} | \p{Lao} ]))])/',
  'm/(?[ \p{Digit} & (?(?[ \p{Thai} | \p{Lao} ]))])/' => 'Unexpected character {#} m/(?[ \p{Digit} & (?{#}(?[ \p{Thai} | \p{Lao} ]))])/',
- 'm/\o{/' => 'Missing right brace on \o{ {#} m/\o{{#}/',
+ 'm/\o{/' => 'Missing right brace on \o{} {#} m/\o{{#}/',
  'm/\o/' => 'Missing braces on \o{} {#} m/\o{#}/',
  'm/\o{}/' => 'Empty \o{} {#} m/\o{}{#}/',
- 'm/[\o{]/' => 'Missing right brace on \o{ {#} m/[\o{{#}]/',
+ 'm/[\o{]/' => 'Missing right brace on \o{} {#} m/[\o{{#}]/',
  'm/[\o]/' => 'Missing braces on \o{} {#} m/[\o{#}]/',
  'm/[\o{}]/' => 'Empty \o{} {#} m/[\o{}{#}]/',
  'm/(?^-i:foo)/' => 'Sequence (?^-...) not recognized {#} m/(?^-{#}i:foo)/',
@@ -463,7 +463,7 @@ my @death_utf8 = mark_as_utf8(
  '/ネ[\x{ネ]ネ/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]ネ/',
  '/ネ[\x{ネ]/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]/',
 
- '/ネ\o{ネ/' => 'Missing right brace on \o{ {#} m/ネ\o{{#}ネ/',
+ '/ネ\o{ネ/' => 'Missing right brace on \o{} {#} m/ネ\o{{#}ネ/',
 
  '/[ネ-a]ネ/' => 'Invalid [] range "ネ-a" {#} m/[ネ-a{#}]ネ/',
 
