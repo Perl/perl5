@@ -2818,6 +2818,7 @@ PerlIOUnix_close(pTHX_ PerlIO *f)
     const int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     int code = 0;
     if (PerlIOBase(f)->flags & PERLIO_F_OPEN) {
+        code = PerlIOBase_close(aTHX_ f);
 	if (PerlIOUnix_refcnt_dec(fd) > 0) {
 	    PerlIOBase(f)->flags &= ~PERLIO_F_OPEN;
 	    return 0;
