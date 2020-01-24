@@ -18707,16 +18707,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	invert = FALSE;
     }
 
+    /* All possible optimizations below still have these characteristics.
+     * (Multi-char folds aren't SIMPLE, but they don't get this far in this
+     * routine) */
+    *flagp |= HASWIDTH|SIMPLE;
+
     if (ret_invlist) {
         *ret_invlist = cp_list;
 
         return RExC_emit;
     }
-
-    /* All possible optimizations below still have these characteristics.
-     * (Multi-char folds aren't SIMPLE, but they don't get this far in this
-     * routine) */
-    *flagp |= HASWIDTH|SIMPLE;
 
     if (anyof_flags & ANYOF_LOCALE_FLAGS) {
         RExC_contains_locale = 1;
