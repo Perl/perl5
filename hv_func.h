@@ -130,7 +130,7 @@ U32 S_perl_hash_with_seed(const U8 * const seed, const U8 * const str, const STR
  * including reading from the environment, or we randomly setup the
  * seed. The seed will be passed into the PERL_HASH_SEED_STATE() function
  * defined for the configuration defined for this perl, which will then
- * initialze whatever state it might need later in hashing. */
+ * initialize whatever state it might need later in hashing. */
 
 #ifndef PERL_HASH_SEED
 #   if defined(USE_HASH_SEED)
@@ -197,8 +197,8 @@ void S_perl_siphash_seed_state(const unsigned char * const seed_buf, unsigned ch
 }
 
 #define PERL_SIPHASH_FNC(FNC,SIP_ROUNDS,SIP_FINAL_ROUNDS) \
-PERL_STATIC_INLINE U32 \
-FNC ## _with_state \
+PERL_STATIC_INLINE U64 \
+FNC ## _with_state_64 \
   (const unsigned char * const state, const unsigned char *in, const STRLEN inlen) \
 {                                           \
   const int left = inlen & 7;               \
@@ -223,12 +223,12 @@ FNC ## _with_state \
                                             \
   switch( left )                            \
   {                                         \
-  case 7: b |= ( ( U64 )in[ 6] )  << 48;    \
-  case 6: b |= ( ( U64 )in[ 5] )  << 40;    \
-  case 5: b |= ( ( U64 )in[ 4] )  << 32;    \
-  case 4: b |= ( ( U64 )in[ 3] )  << 24;    \
-  case 3: b |= ( ( U64 )in[ 2] )  << 16;    \
-  case 2: b |= ( ( U64 )in[ 1] )  <<  8;    \
+  case 7: b |= ( ( U64 )in[ 6] )  << 48; /*FALLTHROUGH*/    \
+  case 6: b |= ( ( U64 )in[ 5] )  << 40; /*FALLTHROUGH*/    \
+  case 5: b |= ( ( U64 )in[ 4] )  << 32; /*FALLTHROUGH*/    \
+  case 4: b |= ( ( U64 )in[ 3] )  << 24; /*FALLTHROUGH*/    \
+  case 3: b |= ( ( U64 )in[ 2] )  << 16; /*FALLTHROUGH*/    \
+  case 2: b |= ( ( U64 )in[ 1] )  <<  8; /*FALLTHROUGH*/    \
   case 1: b |= ( ( U64 )in[ 0] ); break;    \
   case 0: break;                            \
   }                                         \
@@ -244,8 +244,21 @@ FNC ## _with_state \
   SIP_FINAL_ROUNDS                          \
                                             \
   b = v0 ^ v1 ^ v2  ^ v3;                   \
-  return (U32)(b & U32_MAX);                \
+  return b;                                 \
 }                                           \
+                                            \
+PERL_STATIC_INLINE U32                      \
+FNC ## _with_state                          \
+  (const unsigned char * const state, const unsigned char *in, const STRLEN inlen) \
+{                                           \
+    union {                                 \
+        U64 h64;                            \
+        U32 h32[2];                         \
+    } h;                                    \
+    h.h64= FNC ## _with_state_64(state,in,inlen); \
+    return h.h32[0] ^ h.h32[1];             \
+}                                           \
+                                            \
                                             \
 PERL_STATIC_INLINE U32                      \
 FNC (const unsigned char * const seed, const unsigned char *in, const STRLEN inlen) \
@@ -267,6 +280,7 @@ PERL_SIPHASH_FNC(
     ,SIPROUND;SIPROUND;
     ,SIPROUND;SIPROUND;SIPROUND;SIPROUND;
 )
+
 #endif /* defined(CAN64BITHASH) */
 
 
