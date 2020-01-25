@@ -12167,7 +12167,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 	    break;
 	}
-        DEBUG_PARSE_r(
+        DEBUG_PARSE_r({
             DEBUG_PARSE_MSG("lsbr");
             regprop(RExC_rx, RExC_mysv1, REGNODE_p(lastbr), NULL, pRExC_state);
             regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender), NULL, pRExC_state);
@@ -12178,7 +12178,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                           (IV)ender,
                           (IV)(ender - lastbr)
             );
-        );
+        });
         if (! REGTAIL(pRExC_state, lastbr, ender)) {
             REQUIRE_BRANCHJ(flagp, 0);
         }
@@ -12219,7 +12219,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 br= PL_regkind[OP(ret_as_regnode)] != BRANCH
                                ? regnext(ret_as_regnode)
                                : ret_as_regnode;
-                DEBUG_PARSE_r(
+                DEBUG_PARSE_r({
                     DEBUG_PARSE_MSG("NADA");
                     regprop(RExC_rx, RExC_mysv1, ret_as_regnode,
                                      NULL, pRExC_state);
@@ -12232,7 +12232,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                   (IV)ender,
                                   (IV)(ender - ret)
                     );
-                );
+                });
                 OP(br)= NOTHING;
                 if (OP(REGNODE_p(ender)) == TAIL) {
                     NEXT_OFF(br)= 0;
