@@ -4,7 +4,7 @@ perlfaq3 - Programming Tools
 
 =head1 VERSION
 
-version 5.20191102
+version 5.20200125
 
 =head1 DESCRIPTION
 
@@ -1066,7 +1066,7 @@ guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
     L<http://www.perl.org/CGI_MetaFAQ.html>
 
-Looking in to L<Plack> and modern Perl web frameworks is highly recommended,
+Looking into L<https://plackperl.org> and modern Perl web frameworks is highly recommended,
 though; web programming in Perl has evolved a long way from the old days of
 simple CGI scripts.
 

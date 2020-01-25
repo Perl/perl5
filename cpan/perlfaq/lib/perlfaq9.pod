@@ -4,7 +4,7 @@ perlfaq9 - Web, Email and Networking
 
 =head1 VERSION
 
-version 5.20191102
+version 5.20200125
 
 =head1 DESCRIPTION
 
@@ -78,7 +78,7 @@ Plack is like Ruby's Rack or Python's Paste for WSGI.
 
 You could build a web site using L<Plack> and your own code,
 but for anything other than a very basic web site, using a web framework
-(that uses L<Plack>) is a better option.
+(that uses L<https://plackperl.org>) is a better option.
 
 =head2 How do I remove HTML from a string?
 
