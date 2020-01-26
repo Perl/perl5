@@ -24,7 +24,7 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
-plan tests => 1015;  # Update this when adding/deleting tests.
+plan tests => 1017;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2241,6 +2241,15 @@ SKIP:
         unlike("\x{200C}", $pat, "200C isn't in pattern");
         like("\x{200D}", $pat, "200 is in pattern");
         unlike("\x{200E}", $pat, "200E isn't in pattern");
+    }
+
+    # gh17490: test recursion check
+    {
+        my $eval = '(?{1})';
+        my $re = sprintf '(?&FOO)(?(DEFINE)(?<FOO>%sfoo))', $eval x 20;
+        my $result = eval qq{"foo" =~ /$re/};
+        is($@ // '', '', "many evals did not die");
+        ok($result, "regexp correctly matched");
     }
 
 } # End of sub run_tests
