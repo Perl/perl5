@@ -442,7 +442,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Previously L<perlfunc/require> would only treat the special built-in
+SV C<&PL_sv_undef> as a value in C<%INC> as if a previous C<require>
+has failed, treating other undefined SVs as if the previous C<require>
+has succeeded.  This could cause unexpected success from C<require>
+eg. on C<local %INC = %INC;>.  This has been fixed [GH #17428]
 
 =back
 
