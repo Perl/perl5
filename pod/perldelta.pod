@@ -177,6 +177,11 @@ Additionally, the following selected changes have been made:
 Links to the now defunct L<https://search.cpan.org> site now point at
 the equivalent L<https://metacpan.org> URL.  [GH #17393]
 
+=item *
+
+The man page for L<ExtUtils::XSSymSet> is now only installed on VMS,
+which is the only platform the module is installed on.  [GH #17424]
+
 =back
 
 =head1 Diagnostics
@@ -359,7 +364,8 @@ made:
 
 =item *
 
-XXX
+F<t/run/switches.t> no longer uses (and re-uses) the F<tmpinplace/>
+directory under F<t/>.  This may prevent spurious failures. [GH #17424]
 
 =back
 
