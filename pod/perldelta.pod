@@ -385,6 +385,11 @@ Fix an assertion failure in the regular expression engine.
 
 [L<GH #17372|https://github.com/Perl/perl5/issues/17372>]
 
+=item *
+
+C<(?{...})> eval groups in regular expressions no longer unintentionally
+trigger "EVAL without pos change exceeded limit in regex" [GH #17490].
+
 =back
 
 =head1 Known Problems
