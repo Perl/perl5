@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.48";
+our $VERSION = "1.49";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -335,16 +335,24 @@ sub bits
 
 sub import
 {
-    shift;
-
-    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
+    my $invocant = shift;
 
     # append 'all' when implied (empty import list or after a lone
     # "FATAL" or "NONFATAL")
     push @_, 'all'
-	if !@_ || (@_==1 && ($_[0] eq 'FATAL' || $_[0] eq 'NONFATAL'));
+        if !@_ || (@_==1 && ($_[0] eq 'FATAL' || $_[0] eq 'NONFATAL'));
 
-    ${^WARNING_BITS} = _bits($mask, @_);
+    my @fatal = ();
+    foreach my $warning (@_) {
+        if($warning =~ /^(NON)?FATAL$/) {
+            @fatal = ($warning);
+        } elsif(substr($warning, 0, 1) ne '-') {
+            my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
+            ${^WARNING_BITS} = _bits($mask, @fatal, $warning);
+        } else {
+            $invocant->unimport(substr($warning, 1));
+        }
+    }
 }
 
 sub unimport
@@ -571,7 +579,10 @@ warnings - Perl pragma to control optional warnings
     no warnings;
 
     use warnings "all";
-    no warnings "all";
+    no warnings "uninitialized";
+
+    # or equivalent to those last two ...
+    use warnings qw(all -uninitialized);
 
     use warnings::register;
     if (warnings::enabled()) {
@@ -657,6 +668,41 @@ be reported for the C<$x> variable.
 
 Note that neither the B<-w> flag or the C<$^W> can be used to
 disable/enable default warnings.  They are still mandatory in this case.
+
+=head2 "Negative warnings"
+
+As a convenience, you can (as of Perl 5.34) pass arguments to the
+C<import()> method both positively and negatively. Negative warnings
+are those with a C<-> sign prepended to their names; positive warnings
+are anything else. This lets you turn on some warnings and turn off
+others in one command. So, assuming that you've already turned on a
+bunch of warnings but want to tweak them a bit in some block, you can
+do this:
+
+    {
+        use warnings qw(uninitialized -redefine);
+        ...
+    }
+
+which is equivalent to:
+
+    {
+        use warnings qw(uninitialized);
+        no warnings qw(redefine);
+        ...
+    }
+
+The argument list is processed in the order you specify. So, for example, if you
+don't want to be warned about use of experimental features, except for C<somefeature>
+that you really dislike, you can say this:
+
+    use warnings qw(all -experimental experimental::somefeature);
+
+which is equivalent to:
+
+    use warnings 'all';
+    no warnings  'experimental';
+    use warnings 'experimental::somefeature';
 
 =head2 What's wrong with B<-w> and C<$^W>
 
