@@ -3962,6 +3962,7 @@ dist/threads-shared/t/sv_simple.t	thread shared variables
 dist/threads-shared/t/utf8.t		Test UTF-8 keys in shared hashes
 dist/threads-shared/t/wait.t		Test cond_wait and cond_timedwait
 dist/threads-shared/t/waithires.t	Test sub-second cond_timedwait
+dist/Tie-File/Changes				Tie::File
 dist/Tie-File/lib/Tie/File.pm		Files as tied arrays
 dist/Tie-File/t/00_version.t		Trivial test for Tie::File
 dist/Tie-File/t/01_gen.t		Generic read/write tests for Tie::File
