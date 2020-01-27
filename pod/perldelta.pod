@@ -450,6 +450,11 @@ has failed, treating other undefined SVs as if the previous C<require>
 has succeeded.  This could cause unexpected success from C<require>
 eg. on C<local %INC = %INC;>.  This has been fixed [GH #17428]
 
+=item *
+
+C<(?{...})> eval groups in regular expressions no longer unintentionally
+trigger "EVAL without pos change exceeded limit in regex" [GH #17490].
+
 =back
 
 =head1 Known Problems
