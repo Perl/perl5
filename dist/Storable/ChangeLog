@@ -1,3 +1,17 @@
+2020-01-27 11:01:00 TonyC
+    version 3.19
+        * add casts to match some I32 parameters to "%d" formats (#17339)
+        * fix dependencies in Makefile.PL -> META (#17422)
+        * make use of note() optional, this requires a newer version of
+          Test::More and there's a circular dependency between later
+          versions of Test::More and Storable  (#17422)
+
+2019-11-19 07:59:39 TonyC
+    version 3.18
+        * update bug tracker to point at github (#17298)
+        * disallow vstring magic strings over 2GB-1 (#17306)
+        * mark some ASCII dependent tests as ASCII platform only
+
 2019-08-08 11:48:00 TonyC
     version 3.17
         * correct a data type to ensure the check for too large results from
