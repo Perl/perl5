@@ -125,9 +125,11 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Storable> has been upgraded from version 3.18 to 3.19.
 
-If there was something important to note about this change, include that here.
+Use of note() from Test::More is now optional in tests.  This works
+around a circular dependency with Test::More when installing on very
+old perls from CPAN.
 
 =back
 
