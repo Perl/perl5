@@ -8047,28 +8047,28 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
      * also, mark any arrays as LIST/REF */
 
     if (expr->op_type == OP_LIST) {
-        OP *o;
-        for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o)) {
+        OP *child;
+        for (child = cLISTOPx(expr)->op_first; child; child = OpSIBLING(child)) {
 
-            if (o->op_type == OP_PADAV || o->op_type == OP_RV2AV) {
-                assert( !(o->op_flags  & OPf_WANT));
+            if (child->op_type == OP_PADAV || child->op_type == OP_RV2AV) {
+                assert( !(child->op_flags  & OPf_WANT));
                 /* push the array rather than its contents. The regex
                  * engine will retrieve and join the elements later */
-                o->op_flags |= (OPf_WANT_LIST | OPf_REF);
+                child->op_flags |= (OPf_WANT_LIST | OPf_REF);
                 continue;
             }
 
-            if (!(o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)))
+            if (!(child->op_type == OP_NULL && (child->op_flags & OPf_SPECIAL)))
                 continue;
-            o->op_next = NULL; /* undo temporary hack from above */
-            scalar(o);
-            LINKLIST(o);
-            if (cLISTOPo->op_first->op_type == OP_LEAVE) {
-                LISTOP *leaveop = cLISTOPx(cLISTOPo->op_first);
+            child->op_next = NULL; /* undo temporary hack from above */
+            scalar(child);
+            LINKLIST(child);
+            if (cLISTOPx(child)->op_first->op_type == OP_LEAVE) {
+                LISTOP *leaveop = cLISTOPx(cLISTOPx(child)->op_first);
                 /* skip ENTER */
                 assert(leaveop->op_first->op_type == OP_ENTER);
                 assert(OpHAS_SIBLING(leaveop->op_first));
-                o->op_next = OpSIBLING(leaveop->op_first);
+                child->op_next = OpSIBLING(leaveop->op_first);
                 /* skip leave */
                 assert(leaveop->op_flags & OPf_KIDS);
                 assert(leaveop->op_last->op_next == (OP*)leaveop);
@@ -8077,7 +8077,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
             }
             else {
                 /* skip SCOPE */
-                OP *scope = cLISTOPo->op_first;
+                OP *scope = cLISTOPx(child)->op_first;
                 assert(scope->op_type == OP_SCOPE);
                 assert(scope->op_flags & OPf_KIDS);
                 scope->op_next = NULL; /* stop on last op */
@@ -8092,15 +8092,15 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
              * to the same optree later (where hopefully it won't do any
              * harm as it can't convert an op to multiconcat if it's
              * already been converted */
-            optimize_optree(o);
+            optimize_optree(child);
 
             /* have to peep the DOs individually as we've removed it from
              * the op_next chain */
-            CALL_PEEP(o);
-            S_prune_chain_head(&(o->op_next));
+            CALL_PEEP(child);
+            S_prune_chain_head(&(child->op_next));
             if (is_compiletime)
                 /* runtime finalizes as part of finalizing whole tree */
-                finalize_optree(o);
+                finalize_optree(child);
         }
     }
     else if (expr->op_type == OP_PADAV || expr->op_type == OP_RV2AV) {
