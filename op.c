@@ -8047,8 +8047,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
      * also, mark any arrays as LIST/REF */
 
     if (expr->op_type == OP_LIST) {
-	OP *o;
-	for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o)) {
+        OP *o;
+        for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o)) {
 
             if (o->op_type == OP_PADAV || o->op_type == OP_RV2AV) {
                 assert( !(o->op_flags  & OPf_WANT));
@@ -8058,31 +8058,31 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
                 continue;
             }
 
-	    if (!(o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)))
-		continue;
-	    o->op_next = NULL; /* undo temporary hack from above */
-	    scalar(o);
-	    LINKLIST(o);
-	    if (cLISTOPo->op_first->op_type == OP_LEAVE) {
-		LISTOP *leaveop = cLISTOPx(cLISTOPo->op_first);
-		/* skip ENTER */
-		assert(leaveop->op_first->op_type == OP_ENTER);
-		assert(OpHAS_SIBLING(leaveop->op_first));
-		o->op_next = OpSIBLING(leaveop->op_first);
-		/* skip leave */
-		assert(leaveop->op_flags & OPf_KIDS);
-		assert(leaveop->op_last->op_next == (OP*)leaveop);
-		leaveop->op_next = NULL; /* stop on last op */
-		op_null((OP*)leaveop);
-	    }
-	    else {
-		/* skip SCOPE */
-		OP *scope = cLISTOPo->op_first;
-		assert(scope->op_type == OP_SCOPE);
-		assert(scope->op_flags & OPf_KIDS);
-		scope->op_next = NULL; /* stop on last op */
-		op_null(scope);
-	    }
+            if (!(o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)))
+                continue;
+            o->op_next = NULL; /* undo temporary hack from above */
+            scalar(o);
+            LINKLIST(o);
+            if (cLISTOPo->op_first->op_type == OP_LEAVE) {
+                LISTOP *leaveop = cLISTOPx(cLISTOPo->op_first);
+                /* skip ENTER */
+                assert(leaveop->op_first->op_type == OP_ENTER);
+                assert(OpHAS_SIBLING(leaveop->op_first));
+                o->op_next = OpSIBLING(leaveop->op_first);
+                /* skip leave */
+                assert(leaveop->op_flags & OPf_KIDS);
+                assert(leaveop->op_last->op_next == (OP*)leaveop);
+                leaveop->op_next = NULL; /* stop on last op */
+                op_null((OP*)leaveop);
+            }
+            else {
+                /* skip SCOPE */
+                OP *scope = cLISTOPo->op_first;
+                assert(scope->op_type == OP_SCOPE);
+                assert(scope->op_flags & OPf_KIDS);
+                scope->op_next = NULL; /* stop on last op */
+                op_null(scope);
+            }
 
             /* XXX optimize_optree() must be called on o before
              * CALL_PEEP(), as currently S_maybe_multiconcat() can't
@@ -8094,14 +8094,14 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
              * already been converted */
             optimize_optree(o);
 
-	    /* have to peep the DOs individually as we've removed it from
-	     * the op_next chain */
-	    CALL_PEEP(o);
+            /* have to peep the DOs individually as we've removed it from
+             * the op_next chain */
+            CALL_PEEP(o);
             S_prune_chain_head(&(o->op_next));
-	    if (is_compiletime)
-		/* runtime finalizes as part of finalizing whole tree */
-		finalize_optree(o);
-	}
+            if (is_compiletime)
+                /* runtime finalizes as part of finalizing whole tree */
+                finalize_optree(o);
+        }
     }
     else if (expr->op_type == OP_PADAV || expr->op_type == OP_RV2AV) {
         assert( !(expr->op_flags  & OPf_WANT));
