@@ -125,6 +125,15 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<IO> has been upgraded from version 1.42 to 1.43.
+
+L<IO::Socket> no longer caches a zero protocol value, since this
+indicates that the implementation will select a protocol.  This means
+that on platforms that don't implement C<SO_PROTOCOL> for a given
+socket type the protocol method may return C<undef>.
+
+=item *
+
 L<Storable> has been upgraded from version 3.18 to 3.19.
 
 Use of note() from Test::More is now optional in tests.  This works
