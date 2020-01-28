@@ -27,6 +27,17 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 13.0 (beta) is supported
+
+Using the beta causes us to participate in the soak cycle for
+Unicode.  Final approval for the existing changes has been made by the
+Unicode consortium, and there are few possibilities that this could
+break existing programs, as there are few changes to already existing
+characters.
+
+Information about the changes is at
+L<https://unicode.org/versions/beta-13.0.0.html>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

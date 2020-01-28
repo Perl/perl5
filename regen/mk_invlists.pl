@@ -1523,8 +1523,10 @@ sub output_LB_table() {
              [$lb_enums{'Regional_Indicator'}] = $lb_actions{'LB_RI_then_RI'};
 
     # LB30 Do not break between letters, numbers, or ordinary symbols and
-    # opening or closing parentheses.
-    # (AL | HL | NU) × OP
+    # non-East-Asian opening punctuation nor non-East-Asian closing
+    # parentheses.
+
+    # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Open_Punctuation'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Open_Punctuation'}]
@@ -1532,7 +1534,7 @@ sub output_LB_table() {
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Open_Punctuation'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
-    # CP × (AL | HL | NU)
+    # [CP-[\p{ea=F}\p{ea=W}\p{ea=H}]] × (AL | HL | NU)
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Alphabetic'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Hebrew_Letter'}]
@@ -1627,6 +1629,8 @@ sub output_LB_table() {
         # the code we can recover the underlying break value.
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Open_Punctuation'}]
                                     += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+    $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'East_Asian_OP'}]
+                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Open_Punctuation'}]
                                     += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Hyphen'}]
@@ -1636,6 +1640,8 @@ sub output_LB_table() {
 
     # ( OP | HY ) × NU
     $lb_table[$lb_enums{'Open_Punctuation'}][$lb_enums{'Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'East_Asian_OP'}][$lb_enums{'Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hyphen'}][$lb_enums{'Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
@@ -1653,6 +1659,8 @@ sub output_LB_table() {
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Close_Parenthesis'}]
                                                 = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Numeric'}][$lb_enums{'East_Asian_CP'}]
+                                                = $lb_actions{'LB_NOBREAK'};
 
         # Like earlier where we have to test in code, we add in the action so
         # that we can recover the underlying values.  This is done in rules
@@ -1669,6 +1677,8 @@ sub output_LB_table() {
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Close_Parenthesis'}]
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'East_Asian_CP'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Numeric'}]
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Break_Symbols'}]
@@ -1678,6 +1688,8 @@ sub output_LB_table() {
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Close_Punctuation'}]
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Close_Parenthesis'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'East_Asian_CP'}]
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
 
     # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
@@ -1690,6 +1702,8 @@ sub output_LB_table() {
 
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Postfix_Numeric'}]
                                     += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Postfix_Numeric'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Close_Punctuation'}][$lb_enums{'Postfix_Numeric'}]
                                     += $lb_actions{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Postfix_Numeric'}]
@@ -1698,6 +1712,8 @@ sub output_LB_table() {
                                     += $lb_actions{'LB_various_then_PO_or_PR'};
 
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Prefix_Numeric'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Prefix_Numeric'}]
                                     += $lb_actions{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Close_Punctuation'}][$lb_enums{'Prefix_Numeric'}]
                                     += $lb_actions{'LB_various_then_PO_or_PR'};
@@ -1759,33 +1775,10 @@ sub output_LB_table() {
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Hebrew_Letter'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
-    # LB22 Do not break between two ellipses, or between letters, numbers or
-    # exclamations and ellipsis.
-    # (AL | HL) × IN
-    $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
-    # Exclamation × IN
-    $lb_table[$lb_enums{'Exclamation'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
-    # (ID | EB | EM) × IN
-    $lb_table[$lb_enums{'Ideographic'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'E_Base'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'E_Modifier'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
-    # IN × IN
-    $lb_table[$lb_enums{'Inseparable'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
-    # NU × IN
-    $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+    # LB22 Do not break before ellipses
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'Inseparable'}] = $lb_actions{'LB_NOBREAK'};
+    }
 
     # LB21b Don’t break between Solidus and Hebrew letters.
     # SY × HL
@@ -1853,17 +1846,23 @@ sub output_LB_table() {
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Nonstarter'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+    $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Nonstarter'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
     $lb_table[$lb_enums{'Quotation'}][$lb_enums{'Open_Punctuation'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+    $lb_table[$lb_enums{'Quotation'}][$lb_enums{'East_Asian_OP'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$lb_enums{'Open_Punctuation'}][$i]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$lb_enums{'East_Asian_OP'}][$i]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     }
 
@@ -1883,6 +1882,8 @@ sub output_LB_table() {
         $lb_table[$i][$lb_enums{'Close_Punctuation'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$i][$lb_enums{'Close_Parenthesis'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$i][$lb_enums{'East_Asian_CP'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$i][$lb_enums{'Infix_Numeric'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
@@ -2427,7 +2428,7 @@ my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &UpperLatin1
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,ExtPict_XX
-                    _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner
+                    _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,East_Asian_CP,East_Asian_OP
                     _Perl_SB,EDGE,SContinue,CR,Extend,LF
                     _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,ExtPict_XX,ExtPict_LE
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID

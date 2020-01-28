@@ -45,7 +45,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v12.1.0;
+my $version_of_mk_invlist_bounds = v13.0.0;
 
 ##########################################################################
 #
@@ -1320,6 +1320,7 @@ my %map_table_formats = (
 my $EXTRACTED_DIR = (-d 'extracted') ? 'extracted' : "";
 my $EXTRACTED = ($EXTRACTED_DIR) ? "$EXTRACTED_DIR/" : "";
 my $AUXILIARY = 'auxiliary';
+my $EMOJI = 'emoji';
 
 # Hashes and arrays that will eventually go into UCD.pl for the use of UCD.pm
 my %loose_to_file_of;       # loosely maps table names to their respective
@@ -15605,6 +15606,7 @@ END
     }
 
     $perl_lb->set_default_map('Alphabetic', 'full_name');    # XX -> AL
+    my $ea = property_ref('East_Asian_Width');
 
     for my $range ($perl_lb->ranges) {
         my $value = standardize($range->value);
@@ -15629,6 +15631,25 @@ END
                 else {
                     $perl_lb->add_map($i, $i, 'Alphabetic',
                                       Replace => $UNCONDITIONALLY);
+                }
+            }
+        }
+        elsif (    defined $ea
+               && (   $value eq standardize('Close_Parenthesis')
+                   || $value eq standardize('Open_Punctuation')))
+        {
+            # Unicode 13 splits the OP and CP properties each into East Asian,
+            # and non-.  We retain the (now somewhat misleading) names OP and
+            # CP for the non-East Asian variety, as there are very few East
+            # Asian ones.
+            my $replace = ($value eq standardize('Open_Punctuation'))
+                          ? 'East_Asian_OP'
+                          : 'East_Asian_CP';
+            for my $i ($range->start .. $range->end) {
+                my $ea_val = $ea->value_of($i);
+                if ($ea_val eq 'F' || $ea_val eq 'W' || $ea_val eq 'H') {
+                    $perl_lb->add_map($i, $i, $replace,
+                                                Replace => $UNCONDITIONALLY);
                 }
             }
         }
@@ -19959,8 +19980,10 @@ my @input_file_objects = (
                                   'kIRG_KPSource',
                                   'kIRG_MSource',
                                   'kIRG_KSource',
+                                  'kIRG_SSource',
                                   'kIRG_TSource',
                                   'kIRG_USource',
+                                  'kIRG_UKSource',
                                   'kIRG_VSource',
                                ],
                     Pre_Handler => \&setup_unihan,
@@ -20074,10 +20097,15 @@ my @input_file_objects = (
                     # Is in UAX #51 and not the UCD, so must be updated
                     # separately, and the first line edited to indicate the
                     # UCD release we're pretending it to be in.  The UTC says
-                    # this is a transitional state.
+                    # this is a transitional state, and in fact was moved to
+                    # the UCD in 13.0
+                    Withdrawn => v13.0.0,
                     Pre_Handler => \&setup_emojidata,
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Each_Line_Handler => \&filter_emojidata_line,
+                   ),
+    Input_file->new("$EMOJI/emoji.txt", v13.0.0,
+                    Has_Missings_Defaults => $NOT_IGNORED,
                    ),
 );
 
