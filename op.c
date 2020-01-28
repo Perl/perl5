@@ -8019,22 +8019,22 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
     is_compiletime = 1;
     has_code = 0;
     if (expr->op_type == OP_LIST) {
-        OP *this_o;
-        for (this_o = cLISTOPx(expr)->op_first; this_o; this_o = OpSIBLING(this_o)) {
-            if (this_o->op_type == OP_NULL && (this_o->op_flags & OPf_SPECIAL)) {
+        OP *child;
+        for (child = cLISTOPx(expr)->op_first; child; child = OpSIBLING(child)) {
+            if (child->op_type == OP_NULL && (child->op_flags & OPf_SPECIAL)) {
                 has_code = 1;
-                assert(!this_o->op_next);
-                if (UNLIKELY(!OpHAS_SIBLING(this_o))) {
+                assert(!child->op_next);
+                if (UNLIKELY(!OpHAS_SIBLING(child))) {
                     assert(PL_parser && PL_parser->error_count);
                     /* This can happen with qr/ (?{(^{})/.  Just fake up
                        the op we were expecting to see, to avoid crashing
                        elsewhere.  */
-                    op_sibling_splice(expr, this_o, 0,
+                    op_sibling_splice(expr, child, 0,
                               newSVOP(OP_CONST, 0, &PL_sv_no));
                 }
-                this_o->op_next = OpSIBLING(this_o);
+                child->op_next = OpSIBLING(child);
             }
-            else if (this_o->op_type != OP_CONST && this_o->op_type != OP_PUSHMARK)
+            else if (child->op_type != OP_CONST && child->op_type != OP_PUSHMARK)
             is_compiletime = 0;
         }
     }
