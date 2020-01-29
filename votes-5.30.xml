@@ -2,10 +2,7 @@
 
 <data>
 
-<div><h2>Tickets Listed in #134127: 5.30.1 blockers</h2>
-
-I disagree with backporting this to 5.30.x. --arc
-<commit votes="steveh" id="1a1d29aaa2e0c668f9a8c960d52b516415f28983" ticket="131867" desc="%{^CAPTURE_ALL} was intended to be an alias for %-; make it so."/>
+<div><h2>Tickets Listed as 5.30.2 blockers</h2>
 
 </div>
 
@@ -22,9 +19,6 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-steveh: I'm not sure whether this one fits any of the categories allowed by perlpolicy for backporting, unless it's a regression bug?
-<commit votes="tonyc arc khw" id="40258daf9899686d934c460ba3630431312d7694" ticket="134072" desc="(perl #134072) allow \&amp;foo = \&amp;bar to work in main::"/>
-
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -35,28 +29,15 @@ steveh: I'm not sure whether this one fits any of the categories allowed by perl
 
 steveh: This adds a new member to struct RExC_state_t. Is that a problem for binary compatibility?
 khw vote contingent on bin compat being acceptable
-<commit votes="steveh arc khw" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="134059" desc="PATCH: [perl #134059] panic outputting a warning"/>
-
-steveh: This is quite a large change, which makes me nervous for a maint release. Maybe it's better off left out?
-<commit votes="steveh arc" id="69afcc21edd23e38a4aff806a14e666d77f2bd0c" ticket="130585" desc="(perl #130585) prevent a spurious ) in a subparse confusing the parser"/>
+<commit votes="steveh arc khw" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="16977" desc="PATCH: [perl #134059] panic outputting a warning"/>
 
 Only just put in blead; wait a while longer - maybe for 5.30.2:
 This is https://github.com/Perl/perl5-security/issues/115
-<commit votes="steveh khw xsawyerx" id="2df0dd21423ddf295fe2e5d2a6665300f4c5dd94" ticket="134335" desc="Assertion error (regexec.c:8673) in S_regmatch"/>
+<commit votes="steveh khw xsawyerx" id="2df0dd21423ddf295fe2e5d2a6665300f4c5dd94" ticket="" desc="Assertion error (regexec.c:8673) in S_regmatch"/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
-
-This could potentially break code written on 5.30.0 that expects "0x10" to numify to 16, but
-the bug fixed has the potential of silently(!) breaking code written with older perls that
-expect it to be 0.
-steveh - The potential breakage here makes me wonder if this is better left for 5.32 rather
-than being backported to a maint release? H.Merijn's data on the ticket shows a change in
-behaviour between 5.29.1 and 5.29.2, i.e. between 5.28 and 5.30. There was also an earlier
-change between 5.6.2 and 5.8.0 - again between major versions.  Users might expect it to be
-stable throughout 5.30 and not revert back until 5.32?
-<commit votes="tonyc arc" id="14d26b44a1d7eee67837ec0ea8fb0368ac6fe33e" ticket="134230" desc="(perl #134230) don't interpret 0x, 0b when numifying strings"/>
 
 </div>
 
@@ -107,12 +88,12 @@ stable throughout 5.30 and not revert back until 5.32?
                       <xsl:value-of select="@votes"/>
                     </td>
                     <td class="ref" style="vertical-align: top">
-                      <a href="http://perl5.git.perl.org/perl.git/commitdiff/{@id}">
+                      <a href="http://perl5.git.perl.org/perl5.git/commitdiff/{@id}">
                         <xsl:value-of select="@id"/>
                       </a>
                     </td>
                     <td style="vertical-align: top">
-                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                      <a href="https://github.com/Perl/perl5/issues/{@ticket}">
                         <xsl:value-of select="@ticket"/>
                       </a>
                     </td>
@@ -128,12 +109,12 @@ stable throughout 5.30 and not revert back until 5.32?
                       <xsl:value-of select="@votes"/>
                     </td>
                     <td class="ref" style="vertical-align: top">
-                      <a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}">
+                      <a href="http://perl5.git.perl.org/perl5.git/shortlog/refs/heads/{@branch}">
                         <xsl:value-of select="@branch"/>
                       </a>
                     </td>
                     <td style="vertical-align: top">
-                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                      <a href="https://github.com/Perl/perl5/issues/{@ticket}">
                         <xsl:value-of select="@ticket"/>
                       </a>
                     </td>
