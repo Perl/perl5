@@ -7,7 +7,7 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "1.05";
+$VERSION = "1.06";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -2013,13 +2013,13 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
- # This file documents Tie::File version 0.98
  use Tie::File;
 
  tie @array, 'Tie::File', filename or die ...;
 
- $array[13] = 'blah';     # line 13 of the file is now 'blah'
- print $array[42];        # display line 42 of the file
+ $array[0] = 'blah';      # first line of the file is now 'blah'
+                            # (line numbering starts at 0)
+ print $array[42];        # display line 43 of the file
 
  $n_recs = @array;        # how many records are in the file?
  $#array -= 2;            # chop two records off the end
