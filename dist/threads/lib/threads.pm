@@ -140,7 +140,7 @@ This document describes threads version 2.23
 
 The "interpreter-based threads" provided by Perl are not the fast, lightweight
 system for multitasking that one might expect or hope for.  Threads are
-implemented in a way that make them easy to misuse.  Few people know how to
+implemented in a way that makes them easy to misuse.  Few people know how to
 use them correctly or will be able to provide help.
 
 The use of interpreter-based threads in perl is officially
