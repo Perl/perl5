@@ -140,6 +140,10 @@ Use of note() from Test::More is now optional in tests.  This works
 around a circular dependency with Test::More when installing on very
 old perls from CPAN.
 
+=item *
+
+L<threads> has been upgraded from version 2.23 to 2.24.
+
 =back
 
 =head2 Removed Modules and Pragmata
