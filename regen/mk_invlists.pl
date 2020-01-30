@@ -1375,7 +1375,7 @@ sub output_GCB_table() {
 
     # Post 11.0: GB11  \p{Extended_Pictographic} Extend* ZWJ
     #                                               × \p{Extended_Pictographic}
-    $gcb_table[$gcb_enums{'ZWJ'}][$gcb_enums{'XPG_XX'}] =
+    $gcb_table[$gcb_enums{'ZWJ'}][$gcb_enums{'ExtPict_XX'}] =
                                          $gcb_actions{GCB_Maybe_Emoji_NonBreak};
 
     # This and the rule GB10 obsolete starting with Unicode 11.0, can be left
@@ -2136,7 +2136,7 @@ sub output_WB_table() {
     # WB13b  ExtendNumLet  ×  (ALetter | Hebrew_Letter | Numeric | Katakana)
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'ALetter'}]
                                                 = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'ExtPict_LE'}]
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'Hebrew_Letter'}]
                                                 = $wb_actions{'WB_NOBREAK'};
@@ -2149,7 +2149,7 @@ sub output_WB_table() {
     #        × ExtendNumLet
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'ExtendNumLet'}]
                                                 = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'ExtendNumLet'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'ExtendNumLet'}]
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ExtendNumLet'}]
                                                 = $wb_actions{'WB_NOBREAK'};
@@ -2187,7 +2187,7 @@ sub output_WB_table() {
     # WB10  Numeric  ×  (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'ALetter'}]
                                                 = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'Numeric'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'Numeric'}][$wb_enums{'ExtPict_LE'}]
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'Hebrew_Letter'}]
                                                 = $wb_actions{'WB_NOBREAK'};
@@ -2195,7 +2195,7 @@ sub output_WB_table() {
     # WB9  (ALetter | Hebrew_Letter)  ×  Numeric
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'Numeric'}]
                                                 = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'Numeric'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'Numeric'}]
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Numeric'}]
                                                 = $wb_actions{'WB_NOBREAK'};
@@ -2221,19 +2221,19 @@ sub output_WB_table() {
     #       × (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'ALetter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
-    $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'ExtPict_LE'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'Hebrew_Letter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'ALetter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
-    $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'ExtPict_LE'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'Hebrew_Letter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'ALetter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
-    $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'ExtPict_LE'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'Hebrew_Letter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
@@ -2242,19 +2242,19 @@ sub output_WB_table() {
     #       | Single_Quote) (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'MidNumLet'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'MidNumLet'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'MidNumLet'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'MidNumLet'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'MidLetter'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'MidLetter'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'MidLetter'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'MidLetter'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'Single_Quote'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'Single_Quote'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'Single_Quote'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Single_Quote'}]
                             += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
@@ -2263,19 +2263,19 @@ sub output_WB_table() {
     # WB5  (ALetter | Hebrew_Letter)  ×  (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'ALetter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'ALetter'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'ALetter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'Hebrew_Letter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'Hebrew_Letter'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'Hebrew_Letter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ALetter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ExtPict_LE'}]
                                                     = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Hebrew_Letter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'XPG_LE'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'ExtPict_LE'}]
                                                     = $wb_actions{'WB_NOBREAK'};
 
     # Ignore Format and Extend characters, except after sot, CR, LF, and
@@ -2316,9 +2316,9 @@ sub output_WB_table() {
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'E_Base_GAZ'}]
                                                 = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'XPG_XX'}]
+    $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'ExtPict_XX'}]
                                                 = $wb_actions{'WB_NOBREAK'};
-    $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'XPG_LE'}]
+    $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'ExtPict_LE'}]
                                                 = $wb_actions{'WB_NOBREAK'};
 
     # Break before and after newlines
@@ -2426,10 +2426,10 @@ no warnings 'qw';
 my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &UpperLatin1
-                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,XPG_XX
+                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,ExtPict_XX
                     _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner
                     _Perl_SB,EDGE,SContinue,CR,Extend,LF
-                    _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,XPG_XX,XPG_LE
+                    _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,ExtPict_XX,ExtPict_LE
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
                     Lowercase_Mapping
                     Titlecase_Mapping

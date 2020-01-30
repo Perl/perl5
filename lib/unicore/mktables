@@ -13520,7 +13520,7 @@ sub  filter_script_extensions_line {
 }
 
 sub setup_emojidata {
-    my $prop_ref = Property->new('XPG',
+    my $prop_ref = Property->new('ExtPict',
                                  Full_Name => 'Extended_Pictographic',
     );
     $prop_ref->set_fate($PLACEHOLDER,
@@ -15556,7 +15556,7 @@ END
     # created equivalence class whose name is a combination of the property
     # and the old class name, leaving unchanged everything that doesn't match
     # the non-UCD property.
-    my $pictographic_emoji = property_ref('XPG');
+    my $pictographic_emoji = property_ref('ExtPict');
     if (defined $pictographic_emoji) {
         foreach my $base_property (property_ref('GCB'),
                                    property_ref('WB'))
@@ -15566,7 +15566,7 @@ END
                 foreach my $i ($range->start .. $range->end) {
                     my $current = $property->value_of($i);
                     $current = $property->table($current)->short_name;
-                    $property->add_map($i, $i, 'XPG_' . $current,
+                    $property->add_map($i, $i, 'ExtPict_' . $current,
                                        Replace => $UNCONDITIONALLY);
                 }
             }

@@ -4588,7 +4588,7 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 }
                 while (prev == GCB_Extend);
 
-                return prev != GCB_XPG_XX;
+                return prev != GCB_ExtPict_XX;
             }
 
         default:
