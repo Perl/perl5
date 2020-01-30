@@ -466,104 +466,136 @@ sub output_invmap ($$$$$$$) {
                                             # one beyond the final used one
         }
 
+        # These properties have extra tables written out for them that we want
+        # to make as compact and legible as possible.  So we find short names
+        # for their property values.  For non-official ones we will need to
+        # add a legend at the top of the table to say what the abbreviation
+        # stands for.
+        my $property_needs_table_re = qr/ ^  _Perl_ (?: GCB | LB | WB ) $ /x;
+
+        my %short_enum_name;
+        my %need_explanation;   # For non-official abbreviations, we will need
+                                # to explain what the one we come up with
+                                # stands for
+        my $type = lc $prop_name;
+        if ($name =~ $property_needs_table_re) {
+            my @short_names;  # List of already used abbreviations, so we
+                              # don't duplicate
+            for my $enum (@enums) {
+                my $short_enum;
+                my $is_official_name = 0;
+
+                # Special case this wb property value to make the
+                # name more clear
+                if ($enum eq 'Perl_Tailored_HSpace') {
+                    $short_enum = 'hs';
+                }
+                else {
+
+                    # Use the official short name, if found.
+                    ($short_enum) = prop_value_aliases($type, $enum);
+                    if ( defined $short_enum) {
+                        $is_official_name = 1;
+                    }
+                    else {
+                        # But if there is no official name, use the name that
+                        # came from the data (if any).  Otherwise, the name
+                        # had to come from the extras list.  There are two
+                        # types of values in that list.
+                        #
+                        # First are those enums that are not part of the
+                        # property, but are defined by the code in this file.
+                        # By convention these have all-caps names.  We use the
+                        # lowercased name for these.
+                        #
+                        # Second are enums that are needed to get the
+                        # algorithms below to work and/or to get regexec.c to
+                        # compile, but don't exist in all Unicode releases.
+                        # These are handled outside this loop as
+                        # 'unused_enums' (as they are unused they all get
+                        # collapsed into a single column, and their names
+                        # don't matter)
+                        if (grep { $_ eq $enum } @input_enums) {
+                            $short_enum = $enum
+                        }
+                        else {
+                            $short_enum = lc $enum;
+                        }
+                    }
+
+                    # If our short name is too long, or we already know that
+                    # the name is an abbreviation, truncate to make sure it's
+                    # short enough, and remember that we did this so we can
+                    # later add a comment in the generated file
+                    if (length $short_enum > $max_hdr_len) {
+                        # First try using just the uppercase letters of the name;
+                        # if it is something like FooBar, FB is a better
+                        # abbreviation than Foo.  That's not the case if it is
+                        # entirely lowercase.
+                        my $uc = $short_enum;
+                        $uc =~ s/[[:^upper:]]//g;
+                        $short_enum = $uc if length $uc > 1
+                                          && length $uc < length $short_enum;
+
+                        $short_enum = substr($short_enum, 0, $max_hdr_len);
+                        $is_official_name = 0;
+                    }
+                }
+
+                # If the name we are to display conflicts, try another.
+                if (grep { $_ eq $short_enum } @short_names) {
+                    $is_official_name = 0;
+                    do { # The increment operator on strings doesn't work on
+                         # those containing an '_', so get rid of any final
+                         # portion.
+                        $short_enum =~ s/_//g;
+                        $short_enum++;
+                    } while grep { $_ eq $short_enum } @short_names;
+                }
+
+                push @short_names, $short_enum;
+                $short_enum_name{$enum} = $short_enum;
+                $need_explanation{$enum} = $short_enum unless $is_official_name;
+            }
+        } # End of calculating short enum names for certain properties
+
         # Assign a value to each element of the enum type we are creating.
         # The default value always gets 0; the others are arbitrarily
-        # assigned.
+        # assigned, but for the properties which have the extra table, it is
+        # in the order we have computed above so the rows and columns appear
+        # alphabetically by heading abbreviation.
         my $enum_val = 0;
         my $canonical_default = prop_value_aliases($prop_name, $default);
         $default = $canonical_default if defined $canonical_default;
         $enums{$default} = $enum_val++;
 
-        for my $enum (@enums) {
+        for my $enum (sort { ($name =~ $property_needs_table_re)
+                             ?     lc $short_enum_name{$a}  
+                               cmp lc $short_enum_name{$b}  
+                             : lc $a cmp lc $b
+                           } @enums)
+        {
             $enums{$enum} = $enum_val++ unless exists $enums{$enum};
         }
 
-        # Calculate the data for the special tables output for these properties.
-        if ($name =~ / ^  _Perl_ (?: GCB | LB | WB ) $ /x) {
+        # Now calculate the data for the special tables output for these
+        # properties.
+        if ($name =~ $property_needs_table_re) {
 
             # The data includes the hashes %gcb_enums, %lb_enums, etc.
             # Similarly we calculate column headings for the tables.
             #
             # We use string evals to allow the same code to work on
             # all the tables
-            my $type = lc $prop_name;
 
             # Skip if we've already done this code, which populated
             # this hash
             if (eval "! \%${type}_enums") {
 
                 # For each enum in the type ...
-                foreach my $enum (sort keys %enums) {
+                foreach my $enum (keys %enums) {
                     my $value = $enums{$enum};
-                    my $short;
-                    my $abbreviated_from;
-
-                    # Special case this wb property value to make the
-                    # name more clear
-                    if ($enum eq 'Perl_Tailored_HSpace') {
-                        $short = 'hs';
-                        $abbreviated_from = $enum;
-                    }
-                    else {
-
-                        # Use the official short name, if found.
-                        ($short) = prop_value_aliases($type, $enum);
-
-                        if (! defined $short) {
-
-                            # But if there is no official name, use the name
-                            # that came from the data (if any).  Otherwise,
-                            # the name had to come from the extras list.
-                            # There are two types of values in that list.
-                            #
-                            # First are those enums that are not part of the
-                            # property, but are defined by this code.  By
-                            # convention these have all-caps names.  We use
-                            # the lowercased name for these.
-                            #
-                            # Second are enums that are needed to get the
-                            # algorithms below to work and/or to get regexec.c
-                            # to compile, but don't exist in all Unicode
-                            # releases.  These are handled outside this loop
-                            # as 'unused_enums'
-                            if (grep { $_ eq $enum } @input_enums) {
-                                $short = $enum
-                            }
-                            else {
-                                $short = lc $enum;
-                            }
-                        }
-                    }
-
-                    # If our short name is too long, or we already
-                    # know that the name is an abbreviation, truncate
-                    # to make sure it's short enough, and remember
-                    # that we did this so we can later add a comment in the
-                    # generated file
-                    if (   $abbreviated_from
-                        || length $short > $max_hdr_len)
-                        {
-                        $short = substr($short, 0, $max_hdr_len);
-                        $abbreviated_from = $enum
-                                            unless $abbreviated_from;
-                        # If the name we are to display conflicts, try
-                        # another.
-                        while (eval "exists
-                                        \$${type}_abbreviations{$short}")
-                        {
-                            die $@ if $@;
-
-                            # The increment operator on strings doesn't work
-                            # on those containing an '_', so just use the
-                            # final portion.
-                            my @short = split '_', $short;
-                            $short[-1]++;
-                            $short = join "_", @short;
-                        }
-
-                        eval "\$${type}_abbreviations{$short} = '$enum'";
-                        die $@ if $@;
-                    }
+                    my $short_enum = $short_enum_name{$enum};
 
                     # Remember the mapping from the property value
                     # (enum) name to its value.
@@ -573,8 +605,14 @@ sub output_invmap ($$$$$$$) {
                     # Remember the inverse mapping to the short name
                     # so that we can properly label the generated
                     # table's rows and columns
-                    eval "\$${type}_short_enums[$value] = '$short'";
+                    eval "\$${type}_short_enums[$value] = '$short_enum'";
                     die $@ if $@;
+
+                    # And note the abbreviations that need explanation
+                    if ($need_explanation{$enum}) {
+                        eval "\$${type}_abbreviations{$short_enum} = '$enum'";
+                        die $@ if $@;
+                    }
                 }
 
                 # Each unused enum has the same value.  They all are collapsed
