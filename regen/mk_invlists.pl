@@ -394,7 +394,8 @@ sub output_invmap ($$$$$$$) {
     my $name_prefix;
 
     if ($input_format =~ / ^ [as] l? $ /x) {
-        $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
+        $prop_name = (prop_aliases($prop_name))[1]
+     // $prop_name =~ s/^_Perl_//r; # Get full name
         my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
         my @input_enums;
 
@@ -588,10 +589,10 @@ sub output_invmap ($$$$$$$) {
             }
         }
 
-        # The short names tend to be two lower case letters, but it looks
-        # better for those if they are upper. XXX
+        # The short property names tend to be two lower case letters, but it
+        # looks better for those if they are upper. XXX
         $short_name = uc($short_name) if length($short_name) < 3
-                                      || substr($short_name, 0, 1) =~ /[[:lower:]]/;
+                                || substr($short_name, 0, 1) =~ /[[:lower:]]/;
         $name_prefix = "${short_name}_";
 
         # Start the enum definition for this map
@@ -739,10 +740,11 @@ sub output_invmap ($$$$$$$) {
             foreach my $table_number (@sorted_table_list) {
                 my $table = $inverted_mults{$table_number};
                 output_table_header($out_fh,
-                                       $aux_declaration_type,
-                                       "$name_prefix$aux_table_prefix$table_number");
+                                $aux_declaration_type,
+                                "$name_prefix$aux_table_prefix$table_number");
 
-                # Earlier, we joined the elements of this table together with a comma
+                # Earlier, we joined the elements of this table together with
+                # a comma
                 my @elements = split ",", $table;
 
                 $aux_counts[$table_number] = scalar @elements;
@@ -780,8 +782,9 @@ sub output_invmap ($$$$$$$) {
                                    "${name_prefix}${aux_table_prefix}lengths");
             print $out_fh "\t0,\t/* Placeholder */\n";
             for my $i (1 .. @sorted_table_list) {
-                print $out_fh  ",\n" if $i > 1;
-                print $out_fh  "\t$aux_counts[$i]\t/* $name_prefix$aux_table_prefix$i */";
+                print $out_fh ",\n" if $i > 1;
+                print $out_fh
+                    "\t$aux_counts[$i]\t/* $name_prefix$aux_table_prefix$i */";
             }
             print $out_fh "\n";
             output_table_trailer();
@@ -1213,7 +1216,8 @@ sub output_table_common {
         $spacers[$i] = " " x (length($names_ref->[$i]) - $column_width);
     }
 
-    output_table_header($out_fh, $table_type, "${property}_table", undef, $size, $size);
+    output_table_header($out_fh, $table_type, "${property}_table", undef,
+                        $size, $size);
 
     # Calculate the column heading line
     my $header_line = "/* "
@@ -2397,9 +2401,29 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 );
                 # NOTE that the convention is that extra enum values come
                 # after the property name, separated by commas, with the enums
-                # that aren't ever defined by Unicode coming last, at least 4
-                # all-uppercase characters.  The others are enum names that
-                # are needed by perl, but aren't in all Unicode releases.
+                # that aren't ever defined by Unicode (with some exceptions)
+                # containing at least 4 all-uppercase characters.
+                
+                # Some of the enums are current official property values that
+                # are needed for the rules in constructing certain tables in
+                # this file, and perhaps in regexec.c as well.  They are here
+                # so that things don't crash when compiled on earlier Unicode
+                # releases where they don't exist.  Thus the rules that use
+                # them still get compiled, but no code point actually uses
+                # them, hence they won't get exercized on such Unicode
+                # versions, but the code will still compile and run, though
+                # may not give the precise results that those versions would
+                # expect, but reasonable results nonetheless.
+                #
+                # Other enums are due to the fact that Unicode has in more
+                # recent versions added criteria to the rules in these extra
+                # tables that are based on factors outside the property
+                # values.  And those have to be accounted for, essentially by
+                # here splitting certain enum equivalence classes based on
+                # those extra rules.
+                #
+                # EDGE is supposed to be a boundary between some types of
+                # enums, but khw thinks that isn't valid any more.
 
 my @bin_props;
 my @perl_prop_synonyms;
@@ -2556,7 +2580,7 @@ foreach my $property (sort
     }
 }
 
-@bin_props = sort {  exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
+@bin_props = sort { exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
                    or $a cmp $b
                   } @bin_props;
 @perl_prop_synonyms = sort(uniques(@perl_prop_synonyms));
@@ -2583,7 +2607,8 @@ foreach my $prop (@props) {
     $extra_enums = $1 if $prop_name =~ s/, ( .* ) //x;
     my $lookup_prop = $prop_name;
     $prop_name = sanitize_name($prop_name);
-    $prop_name = $table_name_prefix . $prop_name if grep { lc $lookup_prop eq lc $_ } @bin_props;
+    $prop_name = $table_name_prefix . $prop_name
+                                if grep { lc $lookup_prop eq lc $_ } @bin_props;
     my $l1_only = ($lookup_prop =~ s/^L1Posix/XPosix/
                     or $lookup_prop =~ s/^L1//);
     my $nonl1_only = 0;
@@ -2738,7 +2763,8 @@ foreach my $prop (@props) {
 
                     # This shouldn't actually happen, as prop_invmap() returns
                     # an extra element at the end that is beyond $upper_limit
-                    die "inversion map (for $prop_name) that extends to infinity is unimplemented" unless @invlist > 1;
+                    die "inversion map (for $prop_name) that extends to"
+                      . " infinity is unimplemented" unless @invlist > 1;
 
                     my $bucket;
 
@@ -2819,7 +2845,8 @@ foreach my $prop (@props) {
                     @{$mapped_lists{$bucket}}
                                     = sort{ $a <=> $b} @{$mapped_lists{$bucket}};
                     @{$mapped_lists{$bucket}}
-                     = mk_invlist_from_sorted_cp_list(\@{$mapped_lists{$bucket}});
+                     = mk_invlist_from_sorted_cp_list(
+                                                    \@{$mapped_lists{$bucket}});
 
                     # Add each even-numbered range in the bucket to %xlated;
                     # so that the keys of %xlated become the range start code
@@ -2835,9 +2862,10 @@ foreach my $prop (@props) {
                             # so that later the adjusting doesn't think the
                             # subsequent items can go away because of the
                             # adjusting.
-                            my $range_end = ($to_adjust && $bucket != $map_default)
-                                             ? $mapped_lists{$bucket}->[1] - 1
-                                             : $range_start;
+                            my $range_end = (     $to_adjust
+                                               && $bucket != $map_default)
+                                            ? $mapped_lists{$bucket}->[1] - 1
+                                            : $range_start;
                             for my $i ($range_start .. $range_end) {
                                 $xlated{$i} = $bucket;
                             }
@@ -2880,8 +2908,8 @@ foreach my $prop (@props) {
                     unshift @invmap, $xlated{$start};
                 }
 
-                # Finally prepend the inversion list we have just constructed to the
-                # one that contains anything we didn't process.
+                # Finally prepend the inversion list we have just constructed
+                # to the one that contains anything we didn't process.
                 unshift @invlist, @new_invlist;
             }
         }
@@ -2910,12 +2938,13 @@ foreach my $prop (@props) {
                     # odd-numbered give ones that begin ranges that don't match.
                     # If $i is odd, we are at the first code point above 255 that
                     # doesn't match, which means the range it is ending does
-                    # match, and crosses the 255/256 boundary.  We want to include
-                    # this ending point, so increment $i, so the splice below
-                    # includes it.  Conversely, if $i is even, it is the first
-                    # code point above 255 that matches, which means there was no
-                    # matching range that crossed the boundary, and we don't want
-                    # to include this code point, so splice before it.
+                    # match, and crosses the 255/256 boundary.  We want to
+                    # include this ending point, so increment $i, so the
+                    # splice below includes it.  Conversely, if $i is even, it
+                    # is the first code point above 255 that matches, which
+                    # means there was no matching range that crossed the
+                    # boundary, and we don't want to include this code point,
+                    # so splice before it.
                     $i++ if $i % 2 != 0;
 
                     # Remove everything past this.
@@ -3006,7 +3035,8 @@ if (scalar keys %deprecated_tags) {
     }
 }
 
-print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,  /* So no real value is zero */\n\t";
+print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,",
+              " /* So no real value is zero */\n\t";
 print $out_fh join ",\n\t", @enums;
 print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
@@ -3253,8 +3283,12 @@ print $keywords_fh <<"EOF";
 
 EOF
 
-my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows) = MinimalPerfectHash::make_mph_from_hash(\%keywords);
-print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1, $length_all_keys, $smart_blob, $rows, undef, undef, undef, 'match_uniprop' );
+my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows)
+                        = MinimalPerfectHash::make_mph_from_hash(\%keywords);
+print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1,
+                                                 $length_all_keys, $smart_blob,
+                                                 $rows, undef, undef, undef,
+                                                 'match_uniprop' );
 
 push @sources, 'regen/mph.pl';
 read_only_bottom_close_and_rename($keywords_fh, \@sources);
