@@ -20357,8 +20357,8 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 
 typedef enum {
 	GCB_Other = 0,
-	GCB_CR = 1,
-	GCB_Control = 2,
+	GCB_Control = 1,
+	GCB_CR = 2,
 	GCB_Extend = 3,
 	GCB_L = 4,
 	GCB_LF = 5,
@@ -23967,8 +23967,8 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 1047 */
 
 typedef enum {
 	GCB_Other = 0,
-	GCB_CR = 1,
-	GCB_Control = 2,
+	GCB_Control = 1,
+	GCB_CR = 2,
 	GCB_Extend = 3,
 	GCB_L = 4,
 	GCB_LF = 5,
@@ -27578,8 +27578,8 @@ static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 037 */
 
 typedef enum {
 	GCB_Other = 0,
-	GCB_CR = 1,
-	GCB_Control = 2,
+	GCB_Control = 1,
+	GCB_CR = 2,
 	GCB_Extend = 3,
 	GCB_L = 4,
 	GCB_LF = 5,
@@ -55821,8 +55821,8 @@ static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
 typedef enum {
 	SB_Other = 0,
 	SB_ATerm = 1,
-	SB_CR = 2,
-	SB_Close = 3,
+	SB_Close = 2,
+	SB_CR = 3,
 	SB_Extend = 4,
 	SB_Format = 5,
 	SB_LF = 6,
@@ -55830,9 +55830,9 @@ typedef enum {
 	SB_Numeric = 8,
 	SB_OLetter = 9,
 	SB_SContinue = 10,
-	SB_STerm = 11,
-	SB_Sep = 12,
-	SB_Sp = 13,
+	SB_Sep = 11,
+	SB_Sp = 12,
+	SB_STerm = 13,
 	SB_Upper = 14,
 	SB_EDGE = 15
 } SB_enum;
@@ -62090,8 +62090,8 @@ static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 1047 */
 typedef enum {
 	SB_Other = 0,
 	SB_ATerm = 1,
-	SB_CR = 2,
-	SB_Close = 3,
+	SB_Close = 2,
+	SB_CR = 3,
 	SB_Extend = 4,
 	SB_Format = 5,
 	SB_LF = 6,
@@ -62099,9 +62099,9 @@ typedef enum {
 	SB_Numeric = 8,
 	SB_OLetter = 9,
 	SB_SContinue = 10,
-	SB_STerm = 11,
-	SB_Sep = 12,
-	SB_Sp = 13,
+	SB_Sep = 11,
+	SB_Sp = 12,
+	SB_STerm = 13,
 	SB_Upper = 14,
 	SB_EDGE = 15
 } SB_enum;
@@ -68379,8 +68379,8 @@ static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 037 */
 typedef enum {
 	SB_Other = 0,
 	SB_ATerm = 1,
-	SB_CR = 2,
-	SB_Close = 3,
+	SB_Close = 2,
+	SB_CR = 3,
 	SB_Extend = 4,
 	SB_Format = 5,
 	SB_LF = 6,
@@ -68388,9 +68388,9 @@ typedef enum {
 	SB_Numeric = 8,
 	SB_OLetter = 9,
 	SB_SContinue = 10,
-	SB_STerm = 11,
-	SB_Sep = 12,
-	SB_Sp = 13,
+	SB_Sep = 11,
+	SB_Sp = 12,
+	SB_STerm = 13,
 	SB_Upper = 14,
 	SB_EDGE = 15
 } SB_enum;
@@ -394990,13 +394990,13 @@ UNI_wb_values
 #define GCB_Maybe_Emoji_NonBreak   4
 
 static const U8 GCB_table[17][17] = {
-   /* 'XPG' stands for 'XPG_XX'; 'edg' stands for 'EDGE'; u stands
+   /* 'edg' stands for 'EDGE'; 'XPG' stands for 'XPG_XX'; u stands
     * for 'unused in this Unicode release (and the data in the row
     * or column are garbage) */
-/*        XX CR CN EX  L LF LV LVT PP RI SM  T  V XPG ZWJ edg  u */
+/*        XX CN CR EX  L LF LV LVT PP RI SM  T  V XPG ZWJ edg  u */
 /* XX */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  1,  0,  1, 1 },
-/* CR */ { 1, 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 1, 1,  1,  1,  1, 1 },
 /* CN */ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  1,  1,  1, 1 },
+/* CR */ { 1, 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 1, 1,  1,  1,  1, 1 },
 /* EX */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  1,  0,  1, 3 },
 /* L  */ { 1, 1, 1, 0, 0, 1, 0,  0, 1, 1, 0, 1, 0,  1,  0,  1, 1 },
 /* LF */ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  1,  1,  1, 1 },
@@ -395081,10 +395081,10 @@ static const U8 LB_table[39][39] = {
 #define WB_RI_then_RI                    16
 
 static const U8 WB_table[23][23] = {
-   /* 'Ext' stands for 'Extend'; 'XPG' stands for 'XPG_LE'; 'XPH' stands for 'XPG_XX';
-    * 'edg' stands for 'EDGE'; 'hs' stands for 'Perl_Tailored_HSpace'; u stands for
-    * 'unused in this Unicode release (and the data in the row or column are garbage)
-    * */
+   /* 'edg' stands for 'EDGE'; 'Ext' stands for 'Extend'; 'hs' stands for
+    * 'Perl_Tailored_HSpace'; 'XPG' stands for 'XPG_LE'; 'XPH' stands for 'XPG_XX'; u
+    * stands for 'unused in this Unicode release (and the data in the row or column
+    * are garbage) */
 /*        XX LE CR DQ Ext EX FO HL KA LF ML MN MB NL NU hs RI SQ XPG XPH ZWJ edg  u */
 /* XX */ { 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1,  0,  1, 1 },
 /* LE */ { 1, 0, 1, 1,  0, 0, 0, 0, 1, 1, 9, 1, 9, 1, 0, 1, 1, 9,  1,  1,  0,  1, 1 },
@@ -395171,5 +395171,5 @@ static const U8 WB_table[23][23] = {
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 6bbad21de0848e0236b02f34f5fa0edd3cdae9ba8173cc9469a5513936b9e728 regen/mk_PL_charclass.pl
- * 1ff99adce69b8c7dee89b9251a429512650b2418cf54f0523d62d3d348849cf8 regen/mk_invlists.pl
+ * dfc67effb324792ccd0c3ed639645713acc60d1e2f90a7924251e7f4c925b946 regen/mk_invlists.pl
  * ex: set ro: */

@@ -186,6 +186,8 @@ sub uniques {
     return grep { ! $seen{$_}++ } @_;
 }
 
+sub caselessly { lc $a cmp lc $b }
+
 sub a2n($) {
     my $cp = shift;
 
@@ -405,7 +407,7 @@ sub output_invmap ($$$$$$$) {
         # expand the sublists first.
         if ($input_format !~ / ^ a /x) {
             if ($input_format ne 'sl') {
-                @input_enums = sort(uniques(@$invmap));
+                @input_enums = sort caselessly uniques(@$invmap);
             }
             else {
                 foreach my $element (@$invmap) {
@@ -416,7 +418,7 @@ sub output_invmap ($$$$$$$) {
                         push @input_enums, $element;
                     }
                 }
-                @input_enums = sort(uniques(@input_enums));
+                @input_enums = sort caselessly uniques(@input_enums);
             }
         }
 
@@ -459,7 +461,7 @@ sub output_invmap ($$$$$$$) {
                 }
             }
 
-            @unused_enums = sort @unused_enums;
+            @unused_enums = sort caselessly @unused_enums;
             $unused_enum_value = @enums;    # All unused have the same value,
                                             # one beyond the final used one
         }
@@ -633,7 +635,7 @@ sub output_invmap ($$$$$$$) {
                     $joined = join ",", @$element;
                 }
                 else {
-                    $joined = join ",", sort @$element;
+                    $joined = join ",", sort caselessly @$element;
                 }
                 my $already_found = exists $multiples{$joined};
 
@@ -1237,7 +1239,7 @@ sub output_table_common {
     # If we have annotations, output it now.
     if ($has_unused || scalar %$abbreviations_ref) {
         my $text = "";
-        foreach my $abbr (sort keys %$abbreviations_ref) {
+        foreach my $abbr (sort caselessly keys %$abbreviations_ref) {
             $text .= "; " if $text;
             $text .= "'$abbr' stands for '$abbreviations_ref->{$abbr}'";
         }
