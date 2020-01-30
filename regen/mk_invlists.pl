@@ -1245,7 +1245,7 @@ sub output_table_common {
         }
         if ($has_unused) {
             $text .= "; $unused_table_hdr stands for 'unused in this Unicode"
-                   . " release (and the data in the row or column are garbage)"
+                   . " release (and the data in its row and column are garbage)"
         }
 
         my $indent = " " x 3;

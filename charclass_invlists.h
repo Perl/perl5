@@ -394991,8 +394991,8 @@ UNI_wb_values
 
 static const U8 GCB_table[17][17] = {
    /* 'edg' stands for 'EDGE'; 'XPG' stands for 'XPG_XX'; u stands
-    * for 'unused in this Unicode release (and the data in the row
-    * or column are garbage) */
+    * for 'unused in this Unicode release (and the data in its row
+    * and column are garbage) */
 /*        XX CN CR EX  L LF LV LVT PP RI SM  T  V XPG ZWJ edg  u */
 /* XX */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  1,  0,  1, 1 },
 /* CN */ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  1,  1,  1, 1 },
@@ -395083,7 +395083,7 @@ static const U8 LB_table[39][39] = {
 static const U8 WB_table[23][23] = {
    /* 'edg' stands for 'EDGE'; 'Ext' stands for 'Extend'; 'hs' stands for
     * 'Perl_Tailored_HSpace'; 'XPG' stands for 'XPG_LE'; 'XPH' stands for 'XPG_XX'; u
-    * stands for 'unused in this Unicode release (and the data in the row or column
+    * stands for 'unused in this Unicode release (and the data in its row and column
     * are garbage) */
 /*        XX LE CR DQ Ext EX FO HL KA LF ML MN MB NL NU hs RI SQ XPG XPH ZWJ edg  u */
 /* XX */ { 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1,  0,  1, 1 },
@@ -395171,5 +395171,5 @@ static const U8 WB_table[23][23] = {
  * a712c758275b460d18fa77a26ed3589689bb3f69dcc1ea99b913e32db92a5cd2 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 6bbad21de0848e0236b02f34f5fa0edd3cdae9ba8173cc9469a5513936b9e728 regen/mk_PL_charclass.pl
- * dfc67effb324792ccd0c3ed639645713acc60d1e2f90a7924251e7f4c925b946 regen/mk_invlists.pl
+ * 5034a0379d7390c7150d79889d5020f0e09fd23a984bb0a3a12dc4d2d8511f5d regen/mk_invlists.pl
  * ex: set ro: */
