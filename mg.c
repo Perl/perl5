@@ -1753,7 +1753,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	       Ideally we'd find some way of making SVs at (C) compile time, or
 	       at least, doing most of the work.  */
 	    if (!PL_psig_name[i]) {
-		PL_psig_name[i] = newSVpvn(s, len);
+		const char* name = PL_sig_name[i];
+		PL_psig_name[i] = newSVpvn(name, strlen(name));
 		SvREADONLY_on(PL_psig_name[i]);
 	    }
 	} else {
