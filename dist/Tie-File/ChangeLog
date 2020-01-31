@@ -1,3 +1,9 @@
+What's new in version 1.06
+ - Correct misleading entries in SYNOPSIS
+
+What's new in version 1.05
+ - Remove unnecessary version change test
+
 What's new in version 1.04
  - Bump to add Changelog to source control.
 
