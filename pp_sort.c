@@ -1067,7 +1067,8 @@ PP(pp_sort)
             for (i = 0; i < max; i++)
                 base[i] = newSVsv(base[i]);
             av_clear(av);
-            av_extend(av, max);
+            if (max)
+                av_extend(av, max-1);
             for (i=0; i < max; i++) {
                 SV * const sv = base[i];
                 SV ** const didstore = av_store(av, i, sv);
@@ -1094,7 +1095,7 @@ PP(pp_sort)
             }
             av_clear(av);
             if (max > 0) {
-                av_extend(av, max);
+                av_extend(av, max-1);
                 Copy(base, AvARRAY(av), max, SV*);
             }
             AvFILLp(av) = max - 1;
