@@ -1,6 +1,10 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
 use POSIX 'SEEK_SET';
+
 my $file = "tf18-$$.txt";
 $/ = "blah";
 
@@ -10,6 +14,7 @@ my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
+my @a;
 my $o = tie @a, 'Tie::File', $file, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

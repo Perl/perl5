@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 #
 # Tests for various caching errors
 #
@@ -20,6 +24,7 @@ binmode F;
 print F $data;
 close F;
 
+my @a;
 my $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

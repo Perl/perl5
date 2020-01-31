@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
 $| = 1;
 my $file = "tf01-$$.txt";
 1 while unlink $file;
@@ -10,6 +13,7 @@ my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
+my @a;
 my $o = tie @a, 'Tie::File', $file, autochomp => 0, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

@@ -10,6 +10,9 @@
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
+use strict;
+use warnings;
+
 use POSIX 'SEEK_SET';
 
 my $file = "tf10-$$.txt";
@@ -23,6 +26,7 @@ print "ok $N\n"; $N++;  # partial credit just for showing up
 
 init_file($data);
 
+my @a;
 my $o = tie @a, 'Tie::File', $file, recsep => 'blah';
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

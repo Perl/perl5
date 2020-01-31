@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 #
 # Tests for various caching errors
 #
@@ -22,6 +26,7 @@ close F;
 # Limit cache size to 30 bytes 
 my $MAX = 30;
 #  -- that's enough space for 3 records, but not 4, on both \n and \r\n systems
+my @a;
 my $o = tie @a, 'Tie::File', $file, memory => $MAX, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
 my $file = "tf02-$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec1$:rec2$:rec3$:";
@@ -15,7 +18,7 @@ binmode F;
 print F $data;
 close F;
 
-
+my @a;
 my $o = tie @a, 'Tie::File', $file, autochomp => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
