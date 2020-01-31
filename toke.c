@@ -4957,13 +4957,40 @@ yyl_dollar(pTHX_ char *s)
                 if (ckWARN(WARN_SYNTAX)) {
                     char *t = s+1;
 
-                    while (   isSPACE(*t)
-                           || isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF)
-                           || *t == '$')
-                    {
-                        t += UTF ? UTF8SKIP(t) : 1;
+                    while ( t < PL_bufend ) {
+                        if (isSPACE(*t)) {
+                            do { t += UTF ? UTF8SKIP(t) : 1; } while (t < PL_bufend && isSPACE(*t));
+                            /* consumed one or more space chars */
+                        } else if (*t == '$' || *t == '@') {
+                            /* could be more than one '$' like $$ref or @$ref */
+                            do { t++; } while (t < PL_bufend && *t == '$');
+
+                            /* could be an abigail style identifier like $ foo */
+                            while (t < PL_bufend && *t == ' ') t++;
+
+                            /* strip off the name of the var */
+                            while (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
+                                t += UTF ? UTF8SKIP(t) : 1;
+                            /* consumed a varname */
+                        } else if (isDIGIT(*t)) {
+                            /* deal with hex constants like 0x11 */
+                            if (t[0] == '0' && t[1] == 'x') {
+                                t += 2;
+                                while (t < PL_bufend && isXDIGIT(*t)) t++;
+                            } else {
+                                /* deal with decimal/octal constants like 1 and 0123 */
+                                do { t++; } while (isDIGIT(*t));
+                                if (t<PL_bufend && *t == '.') {
+                                    do { t++; } while (isDIGIT(*t));
+                                }
+                            }
+                            /* consumed a number */
+                        } else {
+                            /* not a var nor a space nor a number */
+                            break;
+                        }
                     }
-                    if (*t++ == ',') {
+                    if (t < PL_bufend && *t++ == ',') {
                         PL_bufptr = skipspace(PL_bufptr); /* XXX can realloc */
                         while (t < PL_bufend && *t != ']')
                             t++;

@@ -1729,3 +1729,16 @@ my $b = "\o{20_000_000_000}";
 EXPECT
 Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable at - line 2.
 Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable at - line 3.
+########
+# NAME Check that our Multidimensional array heuristic doesn't false positive on function calls
+use warnings;
+my $str= "rst";
+my $substr= "s";
+my @array="A".."C";
+# force a numeric warning, but we should NOT see a Multidimensional warning here
+my $trigger_num_warn= $array[index $str,$substr] + 1;
+# this should trigger a Multidimensional warning
+my $should_warn_multi= $array[0x1,0x2];
+EXPECT
+Multidimensional syntax $array[0x1,0x2] not supported at - line 8.
+Argument "B" isn't numeric in addition (+) at - line 6.
