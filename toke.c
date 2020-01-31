@@ -2624,6 +2624,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
      * 'is_utf8' is TRUE if we know we want the result to be UTF-8 even if it
      * doesn't have to be. */
 
+    SV* char_name;
     SV* res;
     HV * table;
     SV **cvp;
@@ -2631,6 +2632,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     SV *rv;
     HV *stash;
     const char* backslash_ptr = s - 3; /* Points to the <\> of \N{... */
+    bool charnames_loaded = FALSE; /* Is charnames loaded? */
+    unsigned int i;
     dVAR;
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
@@ -2638,27 +2641,59 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     assert(e >= s);
     assert(s > (char *) 3);
 
-    res = newSVpvn_flags(s, e - s, (is_utf8) ? SVf_UTF8 : 0);
+    char_name = newSVpvn_flags(s, e - s, (is_utf8) ? SVf_UTF8 : 0);
 
-    if (!SvCUR(res)) {
-        SvREFCNT_dec_NN(res);
+    if (!SvCUR(char_name)) {
+        SvREFCNT_dec_NN(char_name);
         /* diag_listed_as: Unknown charname '%s' */
         *error_msg = Perl_form(aTHX_ "Unknown charname ''");
         return NULL;
     }
 
-    res = new_constant( NULL, 0, "charnames", res, NULL, backslash_ptr,
+    /* Autoload the charnames module */
+    for (i = 0; i < 2; i++) {
+        table = GvHV(PL_hintgv);		 /* ^H */
+
+        charnames_loaded =     table
+                           && (PL_hints & HINT_LOCALIZE_HH)
+                           && (cvp = hv_fetchs(table, "charnames", FALSE))
+                           && SvOK(*cvp);
+        /* Quit if loaded, or failed to load.  In the latter case, we break out
+         * so that new_constant()'s error handling takes care of the necessary
+         * messages. */
+        if (i > 0 || charnames_loaded) {
+            break;
+        }
+
+        Perl_load_module(aTHX_
+            0,
+            newSVpvs("_charnames"),
+
+              /* version parameter; no need to specify it, as if we get too
+               * early a version, will fail anyway, not being able to find
+               * '_charnames' */
+            NULL,
+            newSVpvs(":full"),
+            newSVpvs(":short"),
+            NULL);
+    }
+
+    *error_msg = NULL;
+    res = new_constant( NULL, 0, "charnames", char_name, NULL, backslash_ptr,
                         /* include the <}> */
                         e - backslash_ptr + 1, error_msg);
-    if (! SvPOK(res)) {
-        SvREFCNT_dec_NN(res);
+    if (*error_msg) {
+        if (charnames_loaded) {
+            *error_msg = Perl_form(aTHX_ "Unknown charname '%s'", SvPVX(char_name));
+        }
+
+        SvREFCNT_dec(res);
         return NULL;
     }
 
     /* See if the charnames handler is the Perl core's, and if so, we can skip
      * the validation needed for a user-supplied one, as Perl's does its own
      * validation. */
-    table = GvHV(PL_hintgv);		 /* ^H */
     cvp = hv_fetchs(table, "charnames", FALSE);
     if (cvp && (cv = *cvp) && SvROK(cv) && (rv = SvRV(cv),
         SvTYPE(rv) == SVt_PVCV) && ((stash = CvSTASH(rv)) != NULL))
@@ -9592,75 +9627,31 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     SV **cvp;
     SV *cv, *typesv;
     const char *why1 = "", *why2 = "", *why3 = "";
+    const char * optional_colon = ":";  /* Only some messages have a colon */
+    char *msg;
 
     PERL_ARGS_ASSERT_NEW_CONSTANT;
     /* We assume that this is true: */
-    if (*key == 'c') { assert (strEQ(key, "charnames")); }
     assert(type || s);
 
     sv_2mortal(sv);			/* Parent created it permanently */
-    if (!table
-	|| ! (PL_hints & HINT_LOCALIZE_HH)
-	|| ! (cvp = hv_fetch(table, key, keylen, FALSE))
-	|| ! SvOK(*cvp))
-    {
-	char *msg;
 
-	/* Here haven't found what we're looking for.  If it is charnames,
-	 * perhaps it needs to be loaded.  Try doing that before giving up */
-	if (*key == 'c') {
-	    Perl_load_module(aTHX_
-		            0,
-			    newSVpvs("_charnames"),
-			     /* version parameter; no need to specify it, as if
-			      * we get too early a version, will fail anyway,
-			      * not being able to find '_charnames' */
-			    NULL,
-			    newSVpvs(":full"),
-			    newSVpvs(":short"),
-			    NULL);
-            assert(sp == PL_stack_sp);
-	    table = GvHV(PL_hintgv);
-	    if (table
-		&& (PL_hints & HINT_LOCALIZE_HH)
-		&& (cvp = hv_fetch(table, key, keylen, FALSE))
-		&& SvOK(*cvp))
-	    {
-		goto now_ok;
-	    }
-	}
-	if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
-	    msg = Perl_form(aTHX_
-			       "Constant(%.*s) unknown",
-				(int)(type ? typelen : len),
-				(type ? type: s));
-	}
-	else {
-            why1 = "$^H{";
-            why2 = key;
-            why3 = "} is not defined";
-        report:
-            if (*key == 'c') {
-                msg = Perl_form(aTHX_
-                            /* The +3 is for '\N{'; -4 for that, plus '}' */
-                            "Unknown charname '%.*s'", (int)typelen - 4, type + 3
-                      );
-            }
-            else {
-                msg = Perl_form(aTHX_ "Constant(%.*s): %s%s%s",
-                                    (int)(type ? typelen : len),
-                                    (type ? type: s), why1, why2, why3);
-            }
-        }
-        if (error_msg) {
-            *error_msg = msg;
-        }
-        else {
-            yyerror_pv(msg, UTF ? SVf_UTF8 : 0);
-        }
-  	return SvREFCNT_inc_simple_NN(sv);
+    if (   ! table
+	|| ! (PL_hints & HINT_LOCALIZE_HH))
+    {
+        why1 = "unknown";
+        optional_colon = "";
+        goto report;
     }
-  now_ok:
+
+    cvp = hv_fetch(table, key, keylen, FALSE);
+    if (!cvp || !SvOK(*cvp)) {
+        why1 = "$^H{";
+        why2 = key;
+        why3 = "} is not defined";
+        goto report;
+    }
+
     cv = *cvp;
     if (!pv && s)
   	pv = newSVpvn_flags(s, len, SVs_TEMP);
@@ -9705,16 +9696,31 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     LEAVE ;
     POPSTACK;
 
-    if (!SvOK(res)) {
- 	why1 = "Call to &{$^H{";
- 	why2 = key;
- 	why3 = "}} did not return a defined value";
- 	sv = res;
-	(void)sv_2mortal(sv);
- 	goto report;
+    if (SvOK(res)) {
+        return res;
     }
 
-    return res;
+    sv = res;
+    (void)sv_2mortal(sv);
+
+    why1 = "Call to &{$^H{";
+    why2 = key;
+    why3 = "}} did not return a defined value";
+
+  report:
+
+    msg = Perl_form(aTHX_ "Constant(%.*s)%s %s%s%s",
+                        (int)(type ? typelen : len),
+                        (type ? type: s),
+                        optional_colon,
+                        why1, why2, why3);
+    if (error_msg) {
+        *error_msg = msg;
+    }
+    else {
+        yyerror_pv(msg, UTF ? SVf_UTF8 : 0);
+    }
+    return SvREFCNT_inc_simple_NN(sv);
 }
 
 PERL_STATIC_INLINE void
