@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 #
 # Check behavior of 'autodefer' feature
 # Mostly this isn't implemented yet

@@ -8,6 +8,9 @@
 # portable test for flocking.  I checked the Perl core distribution,
 # and found that Perl doesn't test flock either!
 
+use strict;
+use warnings;
+
 BEGIN {
   eval { flock STDOUT, 0 };
   if ($@ && $@ =~ /unimplemented/) {

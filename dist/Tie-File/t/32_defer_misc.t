@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 #
 # Check interactions of deferred writing
 # with miscellaneous methods like DELETE, EXISTS,
@@ -21,6 +25,8 @@ open F, '>', $file or die $!;
 binmode F;
 print F $data;
 close F;
+
+my @a;
 $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

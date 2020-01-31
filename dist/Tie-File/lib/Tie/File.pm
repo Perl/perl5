@@ -1,13 +1,17 @@
-
 package Tie::File;
+
 require 5.005;
+
+use strict;
+use warnings;
+
 use Carp ':DEFAULT', 'confess';
 use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "1.06";
+our $VERSION = "1.06";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -15,6 +19,10 @@ my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
 my %good_opt = map {$_ => 1, "-$_" => 1}
                  qw(memory dw_size mode recsep discipline 
                     autodefer autochomp autodefer_threshhold concurrent);
+
+our $DIAGNOSTIC = 0;
+our @OFF; # used as a temporary alias in some subroutines.
+our @H; # used as a temporary alias in _annotate_ad_history
 
 sub TIEARRAY {
   if (@_ % 2 != 0) {
@@ -1991,7 +1999,7 @@ sub _nodes {
   ($self->[$i], $self->_nodes($i*2), $self->_nodes($i*2+1));
 }
 
-"Cogito, ergo sum.";  # don't forget to return a true value from the file
+1;
 
 __END__
 

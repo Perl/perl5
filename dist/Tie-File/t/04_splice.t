@@ -12,6 +12,9 @@
 # contents.
 
 
+use strict;
+use warnings;
+
 $| = 1;
 my $file = "tf04-$$.txt";
 $: = Tie::File::_default_recsep();
@@ -24,6 +27,7 @@ my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;  # partial credit just for showing up
 
+my @a;
 my $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;

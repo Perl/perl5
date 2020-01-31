@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 # Demonstrate correctness of SYNOPSIS in documentation
 $| = 1;
 my $file = "tf42-$$.txt";
@@ -20,6 +24,8 @@ use Tie::File;
 print "ok $N - use Tie::File\n"; $N++;
 
 my $desc = 'Tie::File';
+
+my @array;
 my $o = tie @array, 'Tie::File', $file;
 defined ($o)
     ? print "ok $N - $desc\n"
@@ -39,7 +45,7 @@ $N++;
     $N++;
 
     $desc = "got expected amount of records in file";
-    $n_recs = @array;
+    my $n_recs = @array;
     ($n_recs == $MAX + 1)
         ? print "ok $N - $desc\n"
         : print "not ok $N - $desc\n";
@@ -56,7 +62,7 @@ $N++;
 
     $desc = "replace PERL with Perl everywhere in the file";
 for (@array) { s/PERL/Perl/g; }
-$exp = "Perl-" . ($MAX - 2);
+my $exp = "Perl-" . ($MAX - 2);
 ($array[-1] eq $exp)
     ? print "ok $N - $desc\n"
     : print "not ok $N - $desc\n";
@@ -154,6 +160,7 @@ my $u = untie @array;
 # TODO: perldoc -f untie does not specify return value for untie
 
 $desc = 'tie to dupe file';
+my @dupe;
 my $p = tie @dupe, 'Tie::File', $file;
 defined ($p)
     ? print "ok $N - $desc\n"

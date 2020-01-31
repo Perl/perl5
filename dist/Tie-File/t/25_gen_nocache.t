@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 #
 # Regular read-write tests with caching disabled
 # (Same as 01_gen.t)
@@ -11,6 +15,7 @@ my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
+my @a;
 my $o = tie @a, 'Tie::File', $file, autochomp => 0, autodefer => 0, memory => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
