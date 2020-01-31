@@ -1657,15 +1657,15 @@ minitest_prep:
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm, or the Unicode data files."
 	@echo " "
-	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE))
+	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE))
 
 MINITEST_TESTS = base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t
 
 minitest: $(MINIPERL_EXE) minitest_prep
-	- cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) <$(devtty)
+	cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) <$(devtty)
 
 minitest-notty minitest_notty: $(MINIPERL_EXE) minitest_prep
-	- cd t && PERL_SKIP_TTY_TEST=1 $(RUN_PERL) TEST $(MINITEST_TESTS)
+	cd t && PERL_SKIP_TTY_TEST=1 $(RUN_PERL) TEST $(MINITEST_TESTS)
 
 # Test via harness
 
