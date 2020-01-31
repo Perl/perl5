@@ -78,6 +78,7 @@ no_index:
     - dist/IO/t/cachepropagate-tcp.t
     - dist/IO/t/cachepropagate-udp.t
     - dist/IO/t/cachepropagate-unix.t
+    - dist/IO/t/gh17447.t
     - dist/IO/t/IO.t
     - dist/IO/t/io_const.t
     - dist/IO/t/io_dir.t
