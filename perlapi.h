@@ -141,6 +141,8 @@ END_EXTERN_C
 #define PL_locale_mutex		(*Perl_Glocale_mutex_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
+#undef  PL_minus_K
+#define PL_minus_K		(*Perl_Gminus_K_ptr(NULL))
 #undef  PL_mmap_page_size
 #define PL_mmap_page_size	(*Perl_Gmmap_page_size_ptr(NULL))
 #undef  PL_my_ctx_mutex

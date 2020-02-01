@@ -322,7 +322,7 @@ is runperl(stderr => 1, prog => '#!perl -M'),
 
 # Tests for switches which do not exist
 
-foreach my $switch (split //, "ABbGgHJjKkLNOoPQqRrYyZz123456789_")
+foreach my $switch (split //, "ABbGgHJjkLNOoPQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 
@@ -724,3 +724,13 @@ SWTEST
     );
     like( $r, qr/ok/, 'Spaces on the #! line (#30660)' );
 }
+
+$r = runperl(
+    switches	=> [ '-e', q("print(internals::Kover_mode_enabled() ? 'yes' : 'no');")]
+);
+is( $r, "no", "Without -K internal::Kover_mode_enabled() is false" );
+
+$r = runperl(
+    switches	=> [ '-Ke', q("print(internals::Kover_mode_enabled() ? 'yes' : 'no');")]
+);
+is( $r, "yes", "With -K internal::Kover_mode_enabled() is true" );

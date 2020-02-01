@@ -417,6 +417,8 @@
 #define PL_Glocale_mutex	(my_vars->Glocale_mutex)
 #define PL_malloc_mutex		(my_vars->Gmalloc_mutex)
 #define PL_Gmalloc_mutex	(my_vars->Gmalloc_mutex)
+#define PL_minus_K		(my_vars->Gminus_K)
+#define PL_Gminus_K		(my_vars->Gminus_K)
 #define PL_mmap_page_size	(my_vars->Gmmap_page_size)
 #define PL_Gmmap_page_size	(my_vars->Gmmap_page_size)
 #define PL_my_ctx_mutex		(my_vars->Gmy_ctx_mutex)

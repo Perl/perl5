@@ -3578,7 +3578,8 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     LEAVE_with_name("evalcomp");
 
     CopLINE_set(&PL_compiling, 0);
-    SAVEFREEOP(PL_eval_root);
+    if (!(in_require && PL_minus_K))
+        SAVEFREEOP(PL_eval_root);
     cv_forget_slab(evalcv);
 
     DEBUG_x(dump_eval());

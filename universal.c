@@ -1244,6 +1244,17 @@ XS(XS_NamedCapture_flags)
     }
 }
 
+XS(XS_internals_Kover_mode_enabled)
+{
+    dVAR; dXSARGS;
+    PERL_UNUSED_VAR(items);
+    if (PL_minus_K) {
+        XSRETURN_YES;
+    } else {
+        XSRETURN_NO;
+    }
+}
+
 #include "vutil.h"
 #include "vxs.inc"
 
@@ -1293,6 +1304,7 @@ static const struct xsub_details these_details[] = {
     {"Tie::Hash::NamedCapture::FIRSTKEY", XS_NamedCapture_FIRSTKEY, NULL, 0 },
     {"Tie::Hash::NamedCapture::NEXTKEY", XS_NamedCapture_FIRSTKEY, NULL, 1 },
     {"Tie::Hash::NamedCapture::flags", XS_NamedCapture_flags, NULL, 0 },
+    {"internals::Kover_mode_enabled", XS_internals_Kover_mode_enabled, "", 0 },
 };
 
 STATIC OP*

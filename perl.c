@@ -1025,6 +1025,7 @@ perl_destruct(pTHXx)
     PL_minus_l      = FALSE;
     PL_minus_a      = FALSE;
     PL_minus_F      = FALSE;
+    PL_minus_K      = FALSE;
     PL_doswitches   = FALSE;
     PL_dowarn       = G_WARN_OFF;
 #ifdef PERL_SAWAMPERSAND
@@ -2158,6 +2159,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'D':
 	case 'h':
 	case 'i':
+        case 'K':
 	case 'l':
 	case 'M':
 	case 'm':
@@ -3642,6 +3644,10 @@ Perl_moreswitches(pTHX_ const char *s)
 	else
 	    Perl_croak(aTHX_ "No directory specified for -I");
 	return s;
+    case 'K':
+        PL_minus_K = TRUE;
+        s++;
+        return s;
     case 'l':
 	PL_minus_l = TRUE;
 	s++;

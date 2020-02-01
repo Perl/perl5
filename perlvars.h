@@ -333,3 +333,4 @@ PERLVARI(G, my_cxt_keys, const char **, NULL)
 PERLVARI(G, my_cxt_keys_size, int,	0)	/* size of PL_my_cxt_keys */
 #  endif
 #endif
+PERLVARI(G, minus_K, bool, FALSE) /* perl.c and pp_ctl.c */
