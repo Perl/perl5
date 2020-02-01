@@ -7852,6 +7852,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         }
         else {
             /* no more replacement chars than search chars */
+        }
 #endif
 
     }
