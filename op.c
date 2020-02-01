@@ -7013,6 +7013,20 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     t_invlist = _new_invlist(1);
 
+    /* Initialize to a single range */
+    t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
+
+    /* For the first pass, the lhs is partitioned such that the
+     * number of UTF-8 bytes required to represent a code point in each
+     * partition is the same as the number for any other code point in
+     * that partion.  We copy the pre-compiled partion. */
+    len = C_ARRAY_LENGTH(PL_partition_by_byte_length);
+    invlist_extend(t_invlist, len);
+    t_array = invlist_array(t_invlist);
+    Copy(PL_partition_by_byte_length, t_array, len, UV);
+    invlist_set_len(t_invlist, len, *(get_invlist_offset_addr(t_invlist)));
+    Newx(r_map, len + 1, UV);
+
     /* Parse the (potentially adjusted) input, creating the inversion map.
      * This is done in two passes.  The first pass is to determine if the
      * transliteration can be done in place.  The inversion map it creates
@@ -7020,30 +7034,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * output of the second pass, which starts with a more compact table and
      * allows more ranges to be merged */
     for (pass2 = 0; pass2 < 2; pass2++) {
-
-        /* Initialize to a single range */
-        t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
-
-        /* In the second pass, we just have the single range */
-
         if (pass2) {
+            /* Initialize to a single range */
+            t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
+
+            /* In the second pass, we just have the single range */
             len = 1;
             t_array = invlist_array(t_invlist);
-        }
-        else {
-
-            /* But in the first pass, the lhs is partitioned such that the
-             * number of UTF-8 bytes required to represent a code point in each
-             * partition is the same as the number for any other code point in
-             * that partion.  We copy the pre-compiled partion. */
-            len = C_ARRAY_LENGTH(PL_partition_by_byte_length);
-            invlist_extend(t_invlist, len);
-            t_array = invlist_array(t_invlist);
-            Copy(PL_partition_by_byte_length, t_array, len, UV);
-            invlist_set_len(t_invlist,
-                            len,
-                            *(get_invlist_offset_addr(t_invlist)));
-            Newx(r_map, len + 1, UV);
         }
 
         /* And the mapping of each of the ranges is initialized.  Initially,
