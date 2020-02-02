@@ -1063,13 +1063,14 @@ PP(pp_sort)
     if (av) {
         /* copy back result to the array */
         SV** const base = MARK+1;
+        SSize_t max_minus_one = max - 1; /* attempt to work around mingw bug */
         if (SvMAGICAL(av)) {
-            for (i = 0; i < max; i++)
+            for (i = 0; i <= max_minus_one; i++)
                 base[i] = newSVsv(base[i]);
             av_clear(av);
-            if (max)
-                av_extend(av, max-1);
-            for (i=0; i < max; i++) {
+            if (max_minus_one >= 0)
+                av_extend(av, max_minus_one);
+            for (i=0; i <= max_minus_one; i++) {
                 SV * const sv = base[i];
                 SV ** const didstore = av_store(av, i, sv);
                 if (SvSMAGICAL(sv))
@@ -1085,7 +1086,7 @@ PP(pp_sort)
              * in the meantime. So bump and unbump the relevant refcounts
              * first.
              */
-            for (i = 0; i < max; i++) {
+            for (i = 0; i <= max_minus_one; i++) {
                 SV *sv = base[i];
                 assert(sv);
                 if (SvREFCNT(sv) > 1)
@@ -1094,11 +1095,11 @@ PP(pp_sort)
                     SvREFCNT_inc_simple_void_NN(sv);
             }
             av_clear(av);
-            if (max > 0) {
-                av_extend(av, max-1);
+            if (max_minus_one >= 0) {
+                av_extend(av, max_minus_one);
                 Copy(base, AvARRAY(av), max, SV*);
             }
-            AvFILLp(av) = max - 1;
+            AvFILLp(av) = max_minus_one;
             AvREIFY_off(av);
             AvREAL_on(av);
         }
