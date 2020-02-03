@@ -3657,27 +3657,28 @@ PP(pp_crypt)
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
     }
-#   ifdef USE_ITHREADS
-#     ifdef HAS_CRYPT_R
+#  ifdef USE_ITHREADS
+#    ifdef HAS_CRYPT_R
     if (!PL_reentrant_buffer->_crypt_struct_buffer) {
       /* This should be threadsafe because in ithreads there is only
        * one thread per interpreter.  If this would not be true,
        * we would need a mutex to protect this malloc. */
         PL_reentrant_buffer->_crypt_struct_buffer =
 	  (struct crypt_data *)safemalloc(sizeof(struct crypt_data));
-#if defined(__GLIBC__) || defined(__EMX__)
+#      if defined(__GLIBC__) || defined(__EMX__)
 	if (PL_reentrant_buffer->_crypt_struct_buffer) {
 	    PL_reentrant_buffer->_crypt_struct_buffer->initialized = 0;
 	}
-#endif
+#      endif
     }
-#     endif /* HAS_CRYPT_R */
-#   endif /* USE_ITHREADS */
-#   ifdef FCRYPT
+#    endif /* HAS_CRYPT_R */
+#  endif /* USE_ITHREADS */
+
+#  ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV_nolen_const(right)));
-#   else
+#  else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV_nolen_const(right)));
-#   endif
+#  endif
     SvUTF8_off(TARG);
     SETTARG;
     RETURN;
