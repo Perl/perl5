@@ -747,7 +747,6 @@ sub _oadjust {
   my $delta = 0;
   my $delta_recs = 0;
   my $prev_end = -1;
-  my %newkeys;
 
   for (@_) {
     my ($pos, $nrecs, @data) = @$_;
@@ -757,7 +756,6 @@ sub _oadjust {
     # to the first new one of this batch
     for my $i ($prev_end+2 .. $pos - 1) {
       $self->{offsets}[$i] += $delta;
-      $newkey{$i} = $i + $delta_recs;
     }
 
     $prev_end = $pos + @data - 1; # last record moved on this pass 
@@ -776,16 +774,6 @@ sub _oadjust {
       my $oldlen = $self->{offsets}[$i+1] - $self->{offsets}[$i];
       $delta -= $oldlen;
     }
-
-#    # also this data has changed, so update it in the cache
-#    for (0 .. $#data) {
-#      $self->{cache}->update($pos + $_, $data[$_]);
-#    }
-#    if ($delta_recs) {
-#      my @oldkeys = grep $_ >= $pos + @data, $self->{cache}->ckeys;
-#      my @newkeys = map $_ + $delta_recs, @oldkeys;
-#      $self->{cache}->rekey(\@oldkeys, \@newkeys);
-#    }
 
     # replace old offsets with new
     splice @{$self->{offsets}}, $pos, $nrecs+1, @newoff;
