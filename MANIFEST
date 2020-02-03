@@ -4898,6 +4898,8 @@ lib/unicore/extracted/DLineBreak.txt		Unicode character database
 lib/unicore/extracted/DNumType.txt		Unicode character database
 lib/unicore/extracted/DNumValues.txt		Unicode character database
 lib/unicore/HangulSyllableType.txt		Unicode character database
+lib/unicore/IdStatus.txt			Unicode UTS 39 database
+lib/unicore/IdType.txt				Unicode UTS 39 database
 lib/unicore/Index.txt				Unicode character database
 lib/unicore/IndicPositionalCategory.txt		Unicode character database
 lib/unicore/IndicSyllabicCategory.txt		Unicode character database
