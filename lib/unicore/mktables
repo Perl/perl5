@@ -16260,7 +16260,7 @@ sub register_file_for_name($$$) {
             my $short_dir = substr($directory, 0, 8);
             if (defined $full_dir_name_of{$short_dir}) {
                 next if $full_dir_name_of{$short_dir} eq $directory;
-                Carp::my_carp("$directory conflicts with $full_dir_name_of{$short_dir}.  Bad News.  Continuing anyway");
+                Carp::my_carp("Directory $directory conflicts with directory $full_dir_name_of{$short_dir}.  Bad News.  Continuing anyway");
             }
             else {
                 $full_dir_name_of{$short_dir} = $directory;
