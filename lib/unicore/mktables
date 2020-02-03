@@ -9094,6 +9094,13 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     main::set_access('pre_declared_maps',
                                     \%pre_declared_maps, 'r', 's');
 
+    my %match_subdir;
+    # For properties whose shortest names are too long for a DOS 8.3
+    # filesystem to distinguish between, this is used to manually give short
+    # names for the directory name immediately under $match_tables that the
+    # match tables for this property should be placed in.
+    main::set_access('match_subdir', \%match_subdir, 'r');
+
     my %has_dependency;
     # A boolean that gives whether some table somewhere is defined as the
     # complement of a table in this property.  This is a crude, but currently
@@ -9135,6 +9142,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                                     # values should be defined for all
                                     # properties, except those overriding this
                                     // $v_version ge v5.1.0;
+        $match_subdir{$addr} = delete $args{'Match_SubDir'};
 
         # Rest of parameters passed on.
 
@@ -18791,7 +18799,9 @@ sub write_all_tables() {
             # Match tables for the property go in lib/$subdirectory, which is
             # the property's name.  Don't use the standard file name for this,
             # as may get an unfamiliar alias
-            @directory = ($matches_directory, $property->external_name);
+            @directory = ($matches_directory, ($property->match_subdir)
+                                              ? $property->match_subdir
+                                              : $property->external_name);
         }
         else {
 
