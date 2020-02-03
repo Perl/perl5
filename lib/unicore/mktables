@@ -1468,6 +1468,7 @@ my $DI;         # Default_Ignorable_Code_Point property
 my $NChar;      # Noncharacter_Code_Point property
 my $script;
 my $scx;        # Script_Extensions property
+my $idt;        # Identifier_Type property
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
 my $has_In_conflicts = 0;
@@ -13546,6 +13547,36 @@ sub filter_emojidata_line {
     return;
 }
 
+sub setup_IdStatus {
+    my $ids = Property->new('Identifier_Status',
+                            Match_SubDir => 'IdStatus',
+                            Default_Map => 'Restricted',
+                           );
+    $ids->add_match_table('Allowed');
+}
+
+sub setup_IdType {
+    $idt = Property->new('Identifier_Type',
+                            Match_SubDir => 'IdType',
+                            Default_Map => 'Not_Character',
+                            Format => $STRING_WHITE_SPACE_LIST,
+                           );
+}
+
+sub  filter_IdType_line {
+
+    # Some code points have more than one type, separated by spaces on the
+    # input.  For now, we just add everything as a property value.  Later when
+    # we look for properties with format $STRING_WHITE_SPACE_LIST, we resolve
+    # things
+
+    my @fields = split /\s*;\s*/;
+    my $types = $fields[1];
+    $idt->add_match_table($types) unless defined $idt->table($types);
+
+    return;
+}
+
 sub generate_hst {
 
     # Populates the Hangul Syllable Type property from first principles
@@ -20132,6 +20163,15 @@ my @input_file_objects = (
                    ),
     Input_file->new("$EMOJI/emoji.txt", v13.0.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
+                   ),
+    Input_file->new('IdStatus.txt', v13.0.0,
+                    Pre_Handler => \&setup_IdStatus,
+                    Property => 'Identifier_Status',
+                   ),
+    Input_file->new('IdType.txt', v13.0.0,
+                    Pre_Handler => \&setup_IdType,
+                    Each_Line_Handler => \&filter_IdType_line,
+                    Property => 'Identifier_Type',
                    ),
 );
 
