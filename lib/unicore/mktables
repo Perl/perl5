@@ -13989,6 +13989,51 @@ END
                 );
             }
         } # End of loop through aliases for this property
+
+
+        # Properties that have sets of values for some characters are now
+        # converted.  For example, the Script_Extensions property started out
+        # as a clone of the Script property.  But processing its data file
+        # caused some elements to be replaced with different data.  (These
+        # elements were for the Common and Inherited properties.)  This data
+        # is a qw() list of all the scripts that the code points in the given
+        # range are in.  An example line is:
+        #
+        # 060C          ; Arab Syrc Thaa # Po       ARABIC COMMA
+        #
+        # Code executed earlier has created a new match table named "Arab Syrc
+        # Thaa" which contains 060C.  (The cloned table started out with this
+        # code point mapping to "Common".)  Now we add 060C to each of the
+        # Arab, Syrc, and Thaa match tables.  Then we delete the now spurious
+        # "Arab Syrc Thaa" match table.  This is repeated for all these tables
+        # and ranges.  The map data is retained in the map table for
+        # reference, but the spurious match tables are deleted.
+        my $format = $property->format;
+        if (defined $format && $format eq $STRING_WHITE_SPACE_LIST) {
+            foreach my $table ($property->tables) {
+
+                # Space separates the entries which should go in multiple
+                # tables
+                next unless $table->name =~ /\s/;
+
+                # The list of the entries, hence the names of the tables that
+                # everything in this combo table should be added to.
+                my @list = split /\s+/, $table->name;
+
+                # Add the entries from the combo table to each individual
+                # table
+                foreach my $individual (@list) {
+                    my $existing_table = $property->table($individual);
+
+                    # This should only be necessary if this particular entry
+                    # occurs only in combo with others.
+                    $existing_table = $property->add_match_table($individual)
+                                                unless defined $existing_table;
+                    $existing_table += $table;
+                }
+                $property->delete_match_table($table);
+            }
+        }
     } # End of loop through all Unicode properties.
 
     # Fill in the mappings that Unicode doesn't completely furnish.  First the
@@ -14077,40 +14122,11 @@ END
                     Initialize => property_ref('cf'),
     );
 
-    # The Script_Extensions property started out as a clone of the Script
-    # property.  But processing its data file caused some elements to be
-    # replaced with different data.  (These elements were for the Common and
-    # Inherited properties.)  This data is a qw() list of all the scripts that
-    # the code points in the given range are in.  An example line is:
-    # 060C          ; Arab Syrc Thaa # Po       ARABIC COMMA
-    #
-    # The code above has created a new match table named "Arab Syrc Thaa"
-    # which contains 060C.  (The cloned table started out with this code point
-    # mapping to "Common".)  Now we add 060C to each of the Arab, Syrc, and
-    # Thaa match tables.  Then we delete the now spurious "Arab Syrc Thaa"
-    # match table.  This is repeated for all these tables and ranges.  The map
-    # data is retained in the map table for reference, but the spurious match
-    # tables are deleted.
-
+    # Mark the scx table as the parent of the corresponding sc table for those
+    # which are identical.  This causes the pod for the script table to refer
+    # to the corresponding scx one.  This is done after everything, so as to
+    # wait until the tables are stabilized before checking for equivalency.
     if (defined $scx) {
-        foreach my $table ($scx->tables) {
-            next unless $table->name =~ /\s/;   # All the new and only the new
-                                                # tables have a space in their
-                                                # names
-            my @scripts = split /\s+/, $table->name;
-            foreach my $script (@scripts) {
-                my $script_table = $scx->table($script);
-                $script_table += $table;
-            }
-            $scx->delete_match_table($table);
-        }
-
-        # Mark the scx table as the parent of the corresponding sc table for
-        # those which are identical.  This causes the pod for the script table
-        # to refer to the corresponding scx one.
-        #
-        # This has to be in a separate loop from above, so as to wait until
-        # the tables are stabilized before checking for equivalency.
         if (defined $pod_directory) {
             foreach my $table ($scx->tables) {
                 my $plain_sc_equiv = $script->table($table->name);
