@@ -1550,6 +1550,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
     newsize = oldsize;
     while (wantsize > newsize) {
+#ifndef HAS_BUILTIN_MUL_OVERFLOW
         trysize = newsize << 1;
         if (trysize > newsize) {
             newsize = trysize;
@@ -1557,6 +1558,14 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
             /* we overflowed */
             return;
         }
+#else
+        if (LIKELY(! __builtin_mul_overflow(newsize, 2, &trysize))) {
+            newsize = trysize;
+        } else {
+            /* would overflow */
+            return;
+        }
+#endif /* ifndef HAS_BUILTIN_MUL_OVERFLOW */
     }
 
     if (newsize <= oldsize)
