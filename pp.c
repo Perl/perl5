@@ -3668,12 +3668,6 @@ PP(pp_crypt)
 #if defined(__GLIBC__) || defined(__EMX__)
 	if (PL_reentrant_buffer->_crypt_struct_buffer) {
 	    PL_reentrant_buffer->_crypt_struct_buffer->initialized = 0;
-#if (defined(__GLIBC__) && __GLIBC__ == 2) && \
-    (defined(__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 2 && __GLIBC_MINOR__ < 4)
-	    /* work around glibc-2.2.5 bug, has been fixed at some
-	     * time in glibc-2.3.X */
-	    PL_reentrant_buffer->_crypt_struct_buffer->current_saltbits = 0;
-#endif
 	}
 #endif
     }
