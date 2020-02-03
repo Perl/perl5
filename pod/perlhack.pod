@@ -763,18 +763,22 @@ tested.  Tests in F<t/opbasic>, for instance, have been placed there
 rather than in F<t/op> because they test functionality which
 F<t/test.pl> presumes has already been demonstrated to work.
 
-=item * F<t/cmd>, F<t/run>, F<t/io> and F<t/op>
+=item * All other subdirectories of F<t/>
 
 Now that basic require() and subroutines are tested, you can use the
 F<t/test.pl> library.
 
-You can also use certain libraries like Config conditionally, but be
+You can also use certain libraries like L<Config> conditionally, but be
 sure to skip the test gracefully if it's not there.
 
-=item * Everything else
+=item * Test files not found under F<t/>
 
-Now that the core of Perl is tested, L<Test::More> can and should be
-used.  You can also use the full suite of core modules in the tests.
+This category includes F<.t> files underneath directories such as F<dist>,
+F<ext> and F<lib>.  Since the core of Perl has now been tested, L<Test::More>
+can and now should be used.  You can also use the full suite of core modules
+in the tests.  (As noted in L<"Patching a core module"> above, changes to
+F<.t> files found under F<cpan/> should be submitted to the upstream
+maintainers of those modules.)
 
 =back
 
