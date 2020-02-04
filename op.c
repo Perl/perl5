@@ -2915,6 +2915,18 @@ S_maybe_multiconcat(pTHX_ OP *o)
         targetop = OpSIBLING(topop);
         if (!targetop) /* probably some sort of syntax error */
             return;
+
+        /* don't optimise away assign in 'local $foo = ....' */
+        if (   (targetop->op_private & OPpLVAL_INTRO)
+            /* these are the common ops which do 'local', but
+             * not all */
+            && (   targetop->op_type == OP_GVSV
+                || targetop->op_type == OP_RV2SV
+                || targetop->op_type == OP_AELEM
+                || targetop->op_type == OP_HELEM
+                )
+        )
+            return;
     }
     else if (   topop->op_type == OP_CONCAT
              && (topop->op_flags & OPf_STACKED)
