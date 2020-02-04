@@ -4619,19 +4619,13 @@ PP(pp_setpgrp)
 #endif
 }
 
-#if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3) || (__GLIBC__ > 2))
-#  define PRIORITY_WHICH_T(which) (__priority_which_t)which
-#else
-#  define PRIORITY_WHICH_T(which) which
-#endif
-
 PP(pp_getpriority)
 {
 #ifdef HAS_GETPRIORITY
     dSP; dTARGET;
     const int who = POPi;
     const int which = TOPi;
-    SETi( getpriority(PRIORITY_WHICH_T(which), who) );
+    SETi( getpriority(which, who) );
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getpriority");
@@ -4646,14 +4640,12 @@ PP(pp_setpriority)
     const int who = POPi;
     const int which = TOPi;
     TAINT_PROPER("setpriority");
-    SETi( setpriority(PRIORITY_WHICH_T(which), who, niceval) >= 0 );
+    SETi( setpriority(which, who, niceval) >= 0 );
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "setpriority");
 #endif
 }
-
-#undef PRIORITY_WHICH_T
 
 /* Time calls. */
 
