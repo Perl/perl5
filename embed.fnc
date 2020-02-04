@@ -2962,6 +2962,10 @@ EXpR	|SV*	|get_and_check_backslash_N_name|NN const char* s	\
 				|NN const char* const e			\
 				|const bool is_utf8			\
 				|NN const char** error_msg
+EXpR	|HV*	|load_charnames	|NN SV * char_name			\
+				|NN const char * context		\
+				|const STRLEN context_len		\
+				|NN const char ** error_msg
 
 : For use ONLY in B::Hooks::Parser, by special dispensation
 EXpxR	|char*	|scan_str	|NN char *start|int keep_quoted \

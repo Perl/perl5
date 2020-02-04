@@ -1771,6 +1771,11 @@ PERL_CALLCONV void	Perl_lex_unstuff(pTHX_ char* ptr);
 	assert(ptr)
 PERL_CALLCONV OP*	Perl_list(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_LIST
+PERL_CALLCONV HV*	Perl_load_charnames(pTHX_ SV * char_name, const char * context, const STRLEN context_len, const char ** error_msg)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_LOAD_CHARNAMES	\
+	assert(char_name); assert(context); assert(error_msg)
+
 PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...);
 #define PERL_ARGS_ASSERT_LOAD_MODULE	\
 	assert(name)

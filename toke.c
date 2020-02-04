@@ -2586,6 +2586,64 @@ S_sublex_done(pTHX)
     }
 }
 
+HV *
+Perl_load_charnames(pTHX_ SV * char_name, const char * context,
+                          const STRLEN context_len, const char ** error_msg)
+{
+    /* Load the official _charnames module if not already there.  The
+     * parameters are just to give info for any error messages generated:
+     *  char_name   a name to look up which is the reason for loading this
+     *  context     'char_name' in the context in the input in which it appears
+     *  context_len how many bytes 'context' occupies
+     *  error_msg   *error_msg will be set to any error
+     *
+     *  Returns the ^H table if success; otherwise NULL */
+
+    unsigned int i;
+    HV * table;
+    SV **cvp;
+    SV * res;
+
+    PERL_ARGS_ASSERT_LOAD_CHARNAMES;
+
+    /* This loop is executed 1 1/2 times.  On the first time through, if it
+     * isn't already loaded, try loading it, and iterate just once to see if it
+     * worked.  */
+    for (i = 0; i < 2; i++) {
+        table = GvHV(PL_hintgv);		 /* ^H */
+
+        if (    table
+            && (PL_hints & HINT_LOCALIZE_HH)
+            && (cvp = hv_fetchs(table, "charnames", FALSE))
+            &&  SvOK(*cvp))
+        {
+            return table;   /* Quit if already loaded */
+        }
+
+        if (i == 0) {
+            Perl_load_module(aTHX_
+                0,
+                newSVpvs("_charnames"),
+
+                /* version parameter; no need to specify it, as if we get too early
+                * a version, will fail anyway, not being able to find 'charnames'
+                * */
+                NULL,
+                newSVpvs(":full"),
+                newSVpvs(":short"),
+                NULL);
+        }
+    }
+
+    /* Here, it failed; new_constant will give appropriate error messages */
+    *error_msg = NULL;
+    res = new_constant( NULL, 0, "charnames", char_name, NULL,
+                        context, context_len, error_msg);
+    SvREFCNT_dec(res);
+
+    return NULL;
+}
+
 STATIC SV*
 S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const e)
 {
@@ -2631,8 +2689,6 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     SV *cv;
     SV *rv;
     HV *stash;
-    bool charnames_loaded = FALSE; /* Is charnames loaded? */
-    unsigned int i;
 
     /* Points to the beginning of the \N{... so that any messages include the
      * context of what's failing*/
@@ -2656,40 +2712,17 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     }
 
     /* Autoload the charnames module */
-    for (i = 0; i < 2; i++) {
-        table = GvHV(PL_hintgv);		 /* ^H */
 
-        charnames_loaded =     table
-                           && (PL_hints & HINT_LOCALIZE_HH)
-                           && (cvp = hv_fetchs(table, "charnames", FALSE))
-                           && SvOK(*cvp);
-        /* Quit if loaded, or failed to load.  In the latter case, we break out
-         * so that new_constant()'s error handling takes care of the necessary
-         * messages. */
-        if (i > 0 || charnames_loaded) {
-            break;
-        }
-
-        Perl_load_module(aTHX_
-            0,
-            newSVpvs("_charnames"),
-
-              /* version parameter; no need to specify it, as if we get too
-               * early a version, will fail anyway, not being able to find
-               * '_charnames' */
-            NULL,
-            newSVpvs(":full"),
-            newSVpvs(":short"),
-            NULL);
+    table = load_charnames(char_name, context, context_len, error_msg);
+    if (table == NULL) {
+        return NULL;
     }
 
     *error_msg = NULL;
     res = new_constant( NULL, 0, "charnames", char_name, NULL,
                         context, context_len, error_msg);
     if (*error_msg) {
-        if (charnames_loaded) {
-            *error_msg = Perl_form(aTHX_ "Unknown charname '%s'", SvPVX(char_name));
-        }
+        *error_msg = Perl_form(aTHX_ "Unknown charname '%s'", SvPVX(char_name));
 
         SvREFCNT_dec(res);
         return NULL;
