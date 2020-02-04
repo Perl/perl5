@@ -2631,9 +2631,14 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     SV *cv;
     SV *rv;
     HV *stash;
-    const char* backslash_ptr = s - 3; /* Points to the <\> of \N{... */
     bool charnames_loaded = FALSE; /* Is charnames loaded? */
     unsigned int i;
+
+    /* Points to the beginning of the \N{... so that any messages include the
+     * context of what's failing*/
+    const char* context = s - 3;
+    STRLEN context_len = e - context + 1; /* include all of \N{...} */
+
     dVAR;
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
@@ -2679,9 +2684,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     }
 
     *error_msg = NULL;
-    res = new_constant( NULL, 0, "charnames", char_name, NULL, backslash_ptr,
-                        /* include the <}> */
-                        e - backslash_ptr + 1, error_msg);
+    res = new_constant( NULL, 0, "charnames", char_name, NULL,
+                        context, context_len, error_msg);
     if (*error_msg) {
         if (charnames_loaded) {
             *error_msg = Perl_form(aTHX_ "Unknown charname '%s'", SvPVX(char_name));
@@ -2790,7 +2794,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         *error_msg = Perl_form(aTHX_
             "charnames alias definitions may not contain trailing "
             "white-space; marked by <-- HERE in %.*s<-- HERE %.*s",
-            (int)(s - backslash_ptr + 1), backslash_ptr,
+            (int)(s - context + 1), context,
             (int)(e - s + 1), s + 1);
         return NULL;
     }
@@ -2810,7 +2814,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
                                immediately after '%s' */
             *error_msg = Perl_form(aTHX_
                 "Malformed UTF-8 returned by %.*s immediately after '%.*s'",
-                 (int) (e - backslash_ptr + 1), backslash_ptr,
+                 (int) context_len, context,
                  (int) ((char *) first_bad_char_loc - str), str);
             return NULL;
         }
@@ -2826,7 +2830,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
                            in \N{%s} */
         *error_msg = Perl_form(aTHX_
             "Invalid character in \\N{...}; marked by <-- HERE in %.*s<-- HERE %.*s",
-            (int)(s - backslash_ptr + 1), backslash_ptr,
+            (int)(s - context + 1), context,
             (int)(e - s + 1), s + 1);
         return NULL;
     }
@@ -2838,7 +2842,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         *error_msg = Perl_form(aTHX_
             "charnames alias definitions may not contain a sequence of "
             "multiple spaces; marked by <-- HERE in %.*s<-- HERE %.*s",
-            (int)(s - backslash_ptr + 1), backslash_ptr,
+            (int)(s - context + 1), context,
             (int)(e - s + 1), s + 1);
         return NULL;
 }
