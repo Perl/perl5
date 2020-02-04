@@ -139,13 +139,6 @@ my @raw_alias = (
 		 Perl_pp_shostent => [qw(snetent sprotoent sservent)],
 		 Perl_pp_aelemfast => ['aelemfast_lex'],
 		 Perl_pp_grepstart => ['mapstart'],
-
-		 # 2 i_modulo mappings: 2nd is alt, needs 1st (explicit default) to not override the default
-		 Perl_pp_i_modulo  => ['i_modulo'],
-		 Perl_pp_i_modulo_glibc_bugfix => {
-                     'i_modulo' =>
-                         '#if defined(__GLIBC__) && IVSIZE == 8 '.
-                         ' && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))' },
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

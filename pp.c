@@ -2654,7 +2654,6 @@ PP(pp_i_divide)
 
 PP(pp_i_modulo)
 {
-     /* This is the vanilla old i_modulo. */
      dSP; dATARGET;
      tryAMAGICbin_MG(modulo_amg, AMGf_assign);
      {
@@ -2669,30 +2668,6 @@ PP(pp_i_modulo)
 	  RETURN;
      }
 }
-
-#if defined(__GLIBC__) && IVSIZE == 8 \
-    && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
-
-PP(pp_i_modulo_glibc_bugfix)
-{
-     /* This is the i_modulo with the workaround for the _moddi3 bug
-      * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
-      * See below for pp_i_modulo. */
-     dSP; dATARGET;
-     tryAMAGICbin_MG(modulo_amg, AMGf_assign);
-     {
-	  dPOPTOPiirl_nomg;
-	  if (!right)
-	       DIE(aTHX_ "Illegal modulus zero");
-	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
-	  if (right == -1)
-	      SETi( 0 );
-	  else
-	      SETi( left % PERL_ABS(right) );
-	  RETURN;
-     }
-}
-#endif
 
 PP(pp_i_add)
 {
