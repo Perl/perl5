@@ -4406,7 +4406,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
     if (*start == '$') {
         SSize_t start_off = start - SvPVX(PL_linestr);
 	if (cv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY
-            || isUPPER(*PL_tokenbuf))
+            || isUPPER(*PL_tokenbuf) || !FEATURE_INDIRECT_IS_ENABLED)
 	    return 0;
         /* this could be $# */
         if (isSPACE(*s))
@@ -7422,7 +7422,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
 
     /* If followed by var or block, call it a method (unless sub) */
 
-    if ((*s == '$' || *s == '{') && !c.cv) {
+    if ((*s == '$' || *s == '{') && !c.cv && FEATURE_INDIRECT_IS_ENABLED) {
         op_free(c.rv2cv_op);
         PL_last_lop = PL_oldbufptr;
         PL_last_lop_op = OP_METHOD;
