@@ -59,7 +59,7 @@ $Carp::Internal{ (__PACKAGE__) } = 1;
 
 # The hashes are stored as utf8 strings.  This makes it easier to deal with
 # sequences.  I (khw) also tried making Name.pl utf8, but it slowed things
-# down by a factor of 7.  I then tried making Name.pl store the ut8
+# down by a factor of 7.  I then tried making Name.pl store the utf8
 # equivalents but not calling them utf8.  That led to similar speed as leaving
 # it alone, but since that is harder for a human to parse, I left it as-is.
 
