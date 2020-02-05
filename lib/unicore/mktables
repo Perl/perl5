@@ -17163,6 +17163,13 @@ END
     push @match_properties, format_pod_line($indent_info_column,
                                             '\p{Is_*}',
                                             "\\p{*} $text");
+    push @match_properties, format_pod_line($indent_info_column,
+            '\p{Name=*}',
+            "Combination of Name and Name_Alias properties; has special"
+          . " loose matching rules, for which see Unicode UAX #44");
+    push @match_properties, format_pod_line($indent_info_column,
+                                            '\p{Na=*}',
+                                            '\p{Name=*}');
 
     # Sort the properties array for output.  It is sorted alphabetically
     # except numerically for numeric properties, and only output unique lines.
@@ -17670,11 +17677,11 @@ Also, Case_Folding is accessible through the C</i> modifier in regular
 expressions, the C<\\F> transliteration escape, and the C<L<fc|perlfunc/fc>>
 operator.
 
-And, the Name and Name_Aliases properties are accessible through the C<\\N{}>
-interpolation in double-quoted strings and regular expressions; and functions
-C<charnames::viacode()>, C<charnames::vianame()>, and
-C<charnames::string_vianame()> (which require a C<use charnames ();> to be
-specified.
+Besides being able to say C<\p{Name=...}>, the Name and Name_Aliases
+properties are accessible through the C<\\N{}> interpolation in double-quoted
+strings and regular expressions; and functions C<charnames::viacode()>,
+C<charnames::vianame()>, and C<charnames::string_vianame()> (which require a
+C<use charnames ();> to be specified.
 
 Finally, most properties related to decomposition are accessible via
 L<Unicode::Normalize>.

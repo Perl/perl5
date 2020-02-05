@@ -137,6 +137,10 @@ sub test_vianame ($$$) {
         use charnames ":full";
         $all_pass &= is(charnames::string_vianame($name), chr($i), "Verify string_vianame(\"$name\") is chr(0x$hex)");
     }
+
+    # \p{name=} is always loose matching
+    $all_pass &= like(chr($i), qr/^\p{name=$loose_name}$/, "Verify /\p{name=$loose_name}/ matches chr(0x$hex)");
+
     return $all_pass;
 }
 
@@ -217,6 +221,9 @@ sub test_vianame ($$$) {
     cmp_ok($warning_count, '==', scalar @WARN, "Verify vianame doesn't warn on unknown names");
     ok (! defined charnames::string_vianame("MORE NONE SUCH"), "Verify string_vianame returns undef for an undefined name");
     cmp_ok($warning_count, '==', scalar @WARN, "Verify string_vianame doesn't warn on unknown names");
+    eval "qr/\\p{name=MORE NONE SUCH}/";
+    like($@, qr/Can't find Unicode property definition "name=MORE NONE SUCH"/,
+            '\p{name=} returns an appropriate error message on an undefined name');
 
     use bytes;
     is(charnames::vianame("GOTHIC LETTER AHSA"), 0x10330, "Verify vianame \\N{name} is unaffected by 'use bytes'");
@@ -229,6 +236,8 @@ sub test_vianame ($$$) {
     ok(! defined charnames::string_vianame("GOTHIC LETTER AHSA"), "Verify string_vianame(\"GOTHIC LETTER AHSA\") is undefined under 'use bytes'");
     ok($warning_count == scalar @WARN - 1 && $WARN[-1] =~ /above 0xFF/, "Verify string_vianame gives appropriate warning for previous test");
     $warning_count = @WARN;
+    eval "qr/\\p{name=GOTHIC LETTER AHSA}/";
+    is($@, "", '\p{name=...} is unaffect by "use bytes"');
     is(charnames::string_vianame("U+FF"), chr(utf8::unicode_to_native(0xFF)), "Verify string_vianame(\"U+FF\") is chr(0xFF) under 'use bytes'");
     cmp_ok($warning_count, '==', scalar @WARN, "Verify string_vianame doesn't warn on legal inputs under 'use bytes'");
     is(charnames::string_vianame("LATIN SMALL LETTER Y WITH DIAERESIS"), chr(utf8::unicode_to_native(0xFF)), "Verify string_vianame(\"LATIN SMALL LETTER Y WITH DIAERESIS\") is chr(native 0xFF) under 'use bytes'");
@@ -793,16 +802,28 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     is("\N{mychar1}", "e", "Outer block: verify that \\N{mychar1} works");
     is(charnames::vianame("mychar1"), ord("e"), "Outer block: verify that vianame(mychar1) works");
     is(charnames::string_vianame("mychar1"), "e", "Outer block: verify that string_vianame(mychar1) works");
+    eval "qr/\\p{name=mychar1}/";
+    like($@, qr/Can't find Unicode property definition "name=mychar1"/,
+            '\p{name=} returns an appropriate error message on an alias');
     is("\N{mychar2}", "A", "Outer block: verify that \\N{mychar2} works");
     is(charnames::vianame("mychar2"), ord("A"), "Outer block: verify that vianame(mychar2) works");
     is(charnames::string_vianame("mychar2"), "A", "Outer block: verify that string_vianame(mychar2) works");
+    eval "qr/\\p{name=mychar2}/";
+    like($@, qr/Can't find Unicode property definition "name=mychar2"/,
+            '\p{name=} returns an appropriate error message on an alias');
     is("\N{myprivate1}", "\x{E8000}", "Outer block: verify that \\N{myprivate1} works");
     cmp_ok(charnames::vianame("myprivate1"), "==", 0xE8000, "Outer block: verify that vianame(myprivate1) works");
     is(charnames::string_vianame("myprivate1"), chr(0xE8000), "Outer block: verify that string_vianame(myprivate1) works");
+    eval "qr/\\p{name=myprivate1}/";
+    like($@, qr/Can't find Unicode property definition "name=myprivate1"/,
+            '\p{name=} returns an appropriate error message on an alias');
     is(charnames::viacode(0xE8000), "myprivate1", "Outer block: verify that myprivate1 viacode works");
     is("\N{myprivate2}", "\x{100000}", "Outer block: verify that \\N{myprivate2} works");
     cmp_ok(charnames::vianame("myprivate2"), "==", 0x100000, "Outer block: verify that vianame(myprivate2) works");
     is(charnames::string_vianame("myprivate2"), chr(0x100000), "Outer block: verify that string_vianame(myprivate2) works");
+    eval "qr/\\p{name=myprivate2}/";
+    like($@, qr/Can't find Unicode property definition "name=myprivate2"/,
+            '\p{name=} returns an appropriate error message on an alias');
     is(charnames::viacode(0x100000), "myprivate2", "Outer block: verify that myprivate2 viacode works");
     is("\N{BE}", "\N{KATAKANA LETTER BE}", "Outer block: verify that \\N uses the correct script ");
     cmp_ok(charnames::vianame("BE"), "==", ord("\N{KATAKANA LETTER BE}"), "Outer block: verify that vianame uses the correct script");
@@ -810,6 +831,9 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     is("\N{Hiragana: BE}", $hiragana_be, "Outer block: verify that :short works with \\N");
     cmp_ok(charnames::vianame("Hiragana: BE"), "==", ord($hiragana_be), "Outer block: verify that :short works with vianame");
     cmp_ok(charnames::string_vianame("Hiragana: BE"), "==", $hiragana_be, "Outer block: verify that :short works with string_vianame");
+    eval "qr/\\p{name=Hiragana: BE}/";
+    like($@, qr/Can't find Unicode property definition "name=Hiragana: BE"/,
+            '\p{name=} returns an appropriate error message on :short attempt');
 
     {
         use charnames ":full",
@@ -967,7 +991,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
 
     # We will look at the data grouped in "blocks" of the following
     # size.
-    my $block_size_bits = 7;   # above 16 is not sensible
+    my $block_size_bits = 8;   # above 16 is not sensible
     my $block_size = 2**$block_size_bits;
 
     # There are the regular names, like "SPACE", plus the ones
@@ -976,7 +1000,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     # of the character.  The percentage of each type to test is
     # fuzzily independently settable.  This breaks down when the block size is
     # 1 or is large enough that both types of names occur in the same block
-    my $percentage_of_regular_names = ($run_slow_tests) ? 100 : 13;
+    my $percentage_of_regular_names = ($run_slow_tests) ? 100 : 10;
     my $percentage_of_algorithmic_names = (100 / $block_size); # 1 test/block
 
     # If wants everything tested, do so by changing the block size to 1 so
@@ -1247,6 +1271,9 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
                         $all_pass &= ok(! defined charnames::vianame("CJK UNIFIED IDEOGRAPH-$hex"), "Verify vianame(\"CJK UNIFIED IDEOGRAPH-$hex\") is undefined");
                     } else {
                         $all_pass &= ok(! defined charnames::string_vianame("CJK UNIFIED IDEOGRAPH-$hex"), "Verify string_vianame(\"CJK UNIFIED IDEOGRAPH-$hex\") is undefined");
+                        eval "qr/\\p{name=CJK UNIFIED IDEOGRAPH-$hex}/";
+                        $all_pass &= like($@, qr/Can't find Unicode property definition "name=CJK UNIFIED IDEOGRAPH-$hex\"/,
+                                                "Verify string_vianame(\"CJK UNIFIED IDEOGRAPH-$hex\") is undefined");
                     }
                 }
             }

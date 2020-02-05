@@ -23204,8 +23204,8 @@ Perl_parse_uniprop_string(pTHX_
     char* lookup_name;          /* normalized name for lookup in our tables */
     unsigned lookup_len;        /* Its length */
     enum { Not_Strict = 0,      /* Some properties have stricter name */
-           Strict               /* normalization rules, which we decide */
-                                /* upon based on parsing */
+           Strict,              /* normalization rules, which we decide */
+           As_Is                /* upon based on parsing */
          } stricter = Not_Strict;
 
     /* nv= or numeric_value=, or possibly one of the cjk numeric properties
@@ -23536,6 +23536,93 @@ Perl_parse_uniprop_string(pTHX_
              * some constructs in their subpattern, like \A. */
         } /* End of is a wildcard subppattern */
 
+        /* \p{name=...} is handled specially.  Instead of using the normal
+         * mechanism involving charclass_invlists.h, it uses _charnames.pm
+         * which has the necessary (huge) data accessible to it, and which
+         * doesn't get loaded unless necessary.  The legal syntax for names is
+         * somewhat different than other properties due both to the vagaries of
+         * a few outlier official names, and the fact that only a few ASCII
+         * characters are permitted in them */
+        if (   memEQs(lookup_name, j - 1, "name")
+            || memEQs(lookup_name, j - 1, "na"))
+        {
+            dSP;
+            HV * table;
+            SV * character;
+            const char * error_msg;
+            CV* lookup_loose;
+            SV * character_name;
+            STRLEN character_len;
+            UV cp;
+
+            stricter = As_Is;
+
+            /* Since the RHS (after skipping initial space) is passed unchanged
+             * to charnames, and there are different criteria for what are
+             * legal characters in the name, just parse it here.  A character
+             * name must begin with an ASCII alphabetic */
+            if (! isALPHA(name[i])) {
+                goto failed;
+            }
+            lookup_name[j++] = name[i];
+
+            for (++i; i < name_len; i++) {
+                /* Official names can only be in the ASCII range, and only
+                 * certain characters */
+                if (! isASCII(name[i]) || ! isCHARNAME_CONT(name[i])) {
+                    goto failed;
+                }
+                lookup_name[j++] = name[i];
+            }
+
+            /* Finished parsing, save the name into an SV */
+            character_name = newSVpvn(lookup_name + equals_pos, j - equals_pos);
+
+            /* Make sure _charnames is loaded.  (The parameters give context
+             * for any errors generated */
+            table = load_charnames(character_name, name, name_len, &error_msg);
+            if (table == NULL) {
+                sv_catpv(msg, error_msg);
+                goto append_name_to_msg;
+            }
+
+            lookup_loose = get_cv("_charnames::_loose_regcomp_lookup", 0);
+            if (! lookup_loose) {
+                Perl_croak(aTHX_
+                       "panic: Can't find '_charnames::_loose_regcomp_lookup");
+            }
+
+            PUSHSTACKi(PERLSI_OVERLOAD);
+            ENTER ;
+            SAVETMPS;
+
+            PUSHMARK(SP) ;
+            XPUSHs(character_name);
+            PUTBACK;
+            call_sv(MUTABLE_SV(lookup_loose), G_SCALAR);
+
+            SPAGAIN ;
+
+            character = POPs;
+            SvREFCNT_inc_simple_void_NN(character);
+
+            PUTBACK ;
+            FREETMPS ;
+            LEAVE ;
+            POPSTACK;
+
+            if (! SvOK(character)) {
+                goto failed;
+            }
+
+            cp = valid_utf8_to_uvchr((U8 *) SvPVX(character), &character_len);
+            if (character_len < SvCUR(character)) {
+                goto failed;
+            }
+
+            prop_definition = add_cp_to_invlist(NULL, cp);
+            return prop_definition;
+        }
 
         /* Certain properties whose values are numeric need special handling.
          * They may optionally be prefixed by 'is'.  Ignore that prefix for the

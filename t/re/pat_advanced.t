@@ -934,6 +934,9 @@ sub run_tests {
         my $name = "foo\xDF";
         my $result = eval "'A${name}B'  =~ /^A\\N{$name}B\$/";
         ok !$@ && $result,  "Passthrough charname of non-ASCII, Latin1";
+        eval "qr/\\p{name=foo}/";
+        like($@, qr/Can't find Unicode property definition "name=foo"/,
+                '\p{name=} doesn\'t see a cumstom charnames translator');
         #
         # Why doesn't must_warn work here?
         #

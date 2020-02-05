@@ -267,6 +267,11 @@ Similarly, they can be used in regular expression literals
  $smiley =~ /\N{WHITE SMILING FACE}/;
  $smiley =~ /\N{U+263a}/;
 
+or, starting in v5.32:
+
+ $smiley =~ /\p{Name=WHITE SMILING FACE}/;
+ $smiley =~ /\p{Name=whitesmilingface}/;
+
 At run-time you can use:
 
  use charnames ();

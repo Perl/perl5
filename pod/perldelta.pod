@@ -47,6 +47,13 @@ that aren't part of the strict UCD (Unicode character database).  These
 two are used for examining inputs for security purposes.  Details on
 their usage is at L<https://www.unicode.org/reports/tr39/proposed.html>.
 
+=head2 It is now possible to write C<qr/\p{Name=...}/>, or C<\p{Na=...}>
+
+The Unicode Name property is now accessible in regular expression
+patterns using the above syntaxes, as an alternative to C<\N{...}>.
+A comparison of the two methods is given in
+L<perlunicode/Comparison of \N{...} and \p{name=...}>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

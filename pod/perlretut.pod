@@ -2005,6 +2005,17 @@ Consortium, L<https://www.unicode.org/charts/charindex.html>; explanatory
 material with links to other resources at
 L<https://www.unicode.org/standard/where>.
 
+Starting in Perl v5.32, an alternative to C<\N{...}> for full names is
+available, and that is to say
+
+ /\p{Name=greek small letter sigma}/
+
+The casing of the character name is irrelevant when used in C<\p{}>, as
+are most spaces, underscores and hyphens.  (A few outlier characters
+cause problems with ignoring all of them always.  The details (which you
+can look up when you get more proficient, and if ever needed) are in
+L<https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2>).
+
 The answer to requirement 2) is that a regexp (mostly)
 uses Unicode characters.  The "mostly" is for messy backward
 compatibility reasons, but starting in Perl 5.14, any regexp compiled in

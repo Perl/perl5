@@ -6,7 +6,7 @@
 package _charnames;
 use strict;
 use warnings;
-our $VERSION = '1.45';
+our $VERSION = '1.46';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -263,8 +263,9 @@ my %dummy_H = (
               );
 
 
-sub lookup_name ($$$) {
-  my ($name, $wants_ord, $runtime) = @_;
+sub lookup_name ($$$;$) {
+  my ($name, $wants_ord, $runtime, $regex_loose) = @_;
+  $regex_loose //= 0;
 
   # Lookup the name or sequence $name in the tables.  If $wants_ord is false,
   # returns the string equivalent of $name; if true, returns the ordinal value
@@ -281,7 +282,7 @@ sub lookup_name ($$$) {
   my $result;       # The string result
   my $save_input;
 
-  if ($runtime) {
+  if ($runtime && ! $regex_loose) {
 
     my $hints_ref = (caller($runtime))[10];
 
@@ -307,16 +308,16 @@ sub lookup_name ($$$) {
     $^H{charnames_short} = $hints_ref->{charnames_short};
   }
 
-  my $loose = $^H{charnames_loose};
+  my $loose = $regex_loose || $^H{charnames_loose};
   my $lookup_name;  # Input name suitably modified for grepping for in the
                     # table
 
   # User alias should be checked first or else can't override ours, and if we
   # were to add any, could conflict with theirs.
-  if (exists $^H{charnames_ord_aliases}{$name}) {
+  if (! $regex_loose && exists $^H{charnames_ord_aliases}{$name}) {
     $result = $^H{charnames_ord_aliases}{$name};
   }
-  elsif (exists $^H{charnames_name_aliases}{$name}) {
+  elsif (! $regex_loose && exists $^H{charnames_name_aliases}{$name}) {
     $name = $^H{charnames_name_aliases}{$name};
     $save_input = $lookup_name = $name;  # Cache the result for any error
                                          # message
@@ -422,7 +423,7 @@ sub lookup_name ($$$) {
       # the other way around slows down finding these immensely.
       # Algorithmically determinables are not placed in the cache because
       # that uses up memory, and finding these again is fast.
-      if (($loose || $^H{charnames_full})
+      if (   ($loose || $^H{charnames_full})
           && (defined (my $ord = charnames::name_to_code_point_special($lookup_name, $loose))))
       {
         $result = chr $ord;
@@ -463,6 +464,10 @@ sub lookup_name ($$$) {
         if (($loose || $^H{charnames_full}) && $txt =~ /\t$lookup_name$/m) {
           @off = ($-[0] + 1, $+[0]);    # The 1 is for the tab
           $cache_ref = ($loose) ? \%loose_names_cache : \%full_names_cache;
+        }
+        elsif ($regex_loose) {
+          # Currently don't allow :short when this is set
+          return;
         }
         else {
 
@@ -572,9 +577,11 @@ sub lookup_name ($$$) {
 
     # Here, wants string output.  If utf8 is acceptable, just return what
     # we've got; otherwise attempt to convert it to non-utf8 and return that.
-    my $in_bytes = ($runtime)
-                   ? (caller $runtime)[8] & $bytes::hint_bits
-                   : $^H & $bytes::hint_bits;
+    my $in_bytes =     ! $regex_loose   # \p{name=} doesn't currently care if
+                                        # in bytes or not
+                   && (($runtime)
+                       ? (caller $runtime)[8] & $bytes::hint_bits
+                       : $^H & $bytes::hint_bits);
     return $result if (! $in_bytes || utf8::downgrade($result, 1)) # The 1 arg
                                                   # means don't die on failure
   }
@@ -615,6 +622,15 @@ sub charnames {
   # The first 0 arg means wants a string returned; the second that we are in
   # compile time
   return lookup_name($_[0], 0, 0);
+}
+
+sub _loose_regcomp_lookup {
+  # For use only by regcomp.c to compile \p{name=...}
+  # khw thinks it best to not do :short matching, and only official names.
+  # But that is only a guess, and if demand warrants, could be changed
+  return lookup_name($_[0], 0, 1,
+                     1  # Always use :loose matching
+                    );
 }
 
 sub import

@@ -460,15 +460,20 @@ Upper/lower case differences in property names and values are irrelevant;
 thus C<\p{Upper}> means the same thing as C<\p{upper}> or even C<\p{UpPeR}>.
 Similarly, you can add or subtract underscores anywhere in the middle of a
 word, so that these are also equivalent to C<\p{U_p_p_e_r}>.  And white space
-is irrelevant adjacent to non-word characters, such as the braces and the equals
-or colon separators, so C<\p{   Upper  }> and C<\p{ Upper_case : Y }> are
-equivalent to these as well.  In fact, white space and even
-hyphens can usually be added or deleted anywhere.  So even C<\p{ Up-per case = Yes}> is
-equivalent.  All this is called "loose-matching" by Unicode.  The few places
-where stricter matching is used is in the middle of numbers, and in the Perl
-extension properties that begin or end with an underscore.  Stricter matching
-cares about white space (except adjacent to non-word characters),
-hyphens, and non-interior underscores.
+is generally irrelevant adjacent to non-word characters, such as the
+braces and the equals or colon separators, so C<\p{   Upper  }> and
+C<\p{ Upper_case : Y }> are equivalent to these as well.  In fact, white
+space and even hyphens can usually be added or deleted anywhere.  So
+even C<\p{ Up-per case = Yes}> is equivalent.  All this is called
+"loose-matching" by Unicode.  The "name" property has some restrictions
+on this due to a few outlier names.  Full details are given in
+L<https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2>.
+
+The few places where stricter matching is
+used is in the middle of numbers, the "name" property, and in the Perl
+extension properties that begin or end with an underscore.  Stricter
+matching cares about white space (except adjacent to non-word
+characters), hyphens, and non-interior underscores.
 
 You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 (C<^>) between the first brace and the property name: C<\p{^Tamil}> is
@@ -919,6 +924,60 @@ This is the same as C<\w>, including over 100_000 characters beyond ASCII.
 There are several of these, which are the standard Posix classes
 extended to the full Unicode range.  They are described in
 L<perlrecharclass/POSIX Character Classes>.
+
+=back
+
+=head2 Comparison of C<\N{...}> and C<\p{name=...}>
+
+Starting in Perl 5.32, you can specify a character by its name in
+regular expression patterns using C<\p{name=...}>.  This is in addition
+to the longstanding method of using C<\N{...}>.  The following
+summarizes the differences between these two:
+
+                       \N{...}       \p{Name=...}
+ can interpolate    only with eval       yes            [1]
+ custom names            yes             no             [2]
+ name aliases            yes             yes            [3]
+ named sequences         yes           not yet          [4]
+ name value parsing     exact       Unicode loose       [5]
+
+=over
+
+=item [1]
+
+The ability to interpolate means you can do something like
+
+ qr/\p{na=latin capital letter $which}/
+
+and specify C<$which> elsewhere.
+
+=item [2]
+
+You can create your own names for characters, and override official
+ones when using C<\N{...}>.  See L<charnames/CUSTOM ALIASES>.
+
+=item [3]
+
+Some characters have multiple names (synonyms).
+
+=item [4]
+
+Some particular sequences of characters are given a single name, in
+addition to their individual ones.
+
+It is planned to add support for named sequences to the C<\p{...}> form
+before 5.32; in the meantime, an accurate but not fully informative
+message is generated if use of one of these is attempted.
+
+=item [5]
+
+Exact name value matching means you have to specify case, hyphens,
+underscores, and spaces precisely in the name you want.  Loose matching
+follows the Unicode rules
+L<https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2>,
+where these are mostly irrelevant.  Except for a few outlier character
+names, these are the same rules as are already used for any other
+C<\p{...}> property.
 
 =back
 

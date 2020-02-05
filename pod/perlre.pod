@@ -465,7 +465,7 @@ Use of C</x> means that if you want real
 whitespace or C<"#"> characters in the pattern (outside a bracketed character
 class, which is unaffected by C</x>), then you'll either have to
 escape them (using backslashes or C<\Q...\E>) or encode them using octal,
-hex, or C<\N{}> escapes.
+hex, or C<\N{}> or C<\p{name=...}> escapes.
 It is ineffective to try to continue a comment onto the next line by
 escaping the C<\n> with a backslash or C<\Q>.
 
