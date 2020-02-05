@@ -366,7 +366,7 @@ it isn't already.
 
 Note that almost all properties are immune to case-insensitive matching.
 That is, adding a C</i> regular expression modifier does not change what
-they match.  There are two sets that are affected.  The first set is
+they match.  But there are two sets that are affected.  The first set is
 C<Uppercase_Letter>,
 C<Lowercase_Letter>,
 and C<Titlecase_Letter>,
