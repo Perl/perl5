@@ -449,7 +449,8 @@ Also, there are typically various synonyms for the values the property
 can be.   For binary properties, C<"True"> has 3 synonyms: C<"T">,
 C<"Yes">, and C<"Y">; and C<"False"> has correspondingly C<"F">,
 C<"No">, and C<"N">.  But be careful.  A short form of a value for one
-property may not mean the same thing as the same short form for another.
+property may not mean the same thing as the short form spelled the same
+for another.
 Thus, for the C<L</General_Category>> property, C<"L"> means
 C<"Letter">, but for the L<C<Bidi_Class>|/Bidirectional Character Types>
 property, C<"L"> means C<"Left">.  A complete list of properties and
