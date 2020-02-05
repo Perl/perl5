@@ -7130,6 +7130,30 @@ PP(pp_isa)
     RETURN;
 }
 
+PP(pp_cmpchain_and)
+{
+    dSP;
+    SV *result = POPs;
+    PUTBACK;
+    if (SvTRUE_NN(result)) {
+	return cLOGOP->op_other;
+    } else {
+	TOPs = result;
+	return NORMAL;
+    }
+}
+
+PP(pp_cmpchain_dup)
+{
+    dSP;
+    SV *right = TOPs;
+    SV *left = TOPm1s;
+    TOPm1s = right;
+    TOPs = left;
+    XPUSHs(right);
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.52';
+$VERSION = '1.53';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -3199,6 +3199,64 @@ sub logassignop {
 sub pp_andassign { logassignop(@_, "&&=") }
 sub pp_orassign  { logassignop(@_, "||=") }
 sub pp_dorassign { logassignop(@_, "//=") }
+
+my %cmpchain_cmpops = (
+	eq => ["==", 14],
+	i_eq => ["==", 14],
+	ne => ["!=", 14],
+	i_ne => ["!=", 14],
+	seq => ["eq", 14],
+	sne => ["ne", 14],
+	lt => ["<", 15],
+	i_lt => ["<", 15],
+	gt => [">", 15],
+	i_gt => [">", 15],
+	le => ["<=", 15],
+	i_le => ["<=", 15],
+	ge => [">=", 15],
+	i_ge => [">=", 15],
+	slt => ["lt", 15],
+	sgt => ["gt", 15],
+	sle => ["le", 15],
+	sge => ["ge", 15],
+);
+sub pp_cmpchain_and {
+    my($self, $op, $cx) = @_;
+    my($prec, $dep);
+    while(1) {
+	my($thiscmp, $rightcond);
+	if($op->name eq "cmpchain_and") {
+	    $thiscmp = $op->first;
+	    $rightcond = $thiscmp->sibling;
+	} else {
+	    $thiscmp = $op;
+	}
+	my $thiscmptype = $cmpchain_cmpops{$thiscmp->name} // (return "XXX");
+	if(defined $prec) {
+	    $thiscmptype->[1] == $prec or return "XXX";
+	    $thiscmp->first->name eq "null" &&
+		    !($thiscmp->first->flags & OPf_KIDS)
+		or return "XXX";
+	} else {
+	    $prec = $thiscmptype->[1];
+	    $dep = $self->deparse($thiscmp->first, $prec);
+	}
+	$dep .= " ".$thiscmptype->[0]." ";
+	my $operand = $thiscmp->last;
+	if(defined $rightcond) {
+	    $operand->name eq "cmpchain_dup" or return "XXX";
+	    $operand = $operand->first;
+	}
+	$dep .= $self->deparse($operand, $prec);
+	last unless defined $rightcond;
+	if($rightcond->name eq "null" && ($rightcond->flags & OPf_KIDS) &&
+		$rightcond->first->name eq "cmpchain_and") {
+	    $rightcond = $rightcond->first;
+	}
+	$op = $rightcond;
+    }
+    return $self->maybe_parens($dep, $cx, $prec);
+}
 
 sub rv2gv_or_string {
     my($self,$op) = @_;
