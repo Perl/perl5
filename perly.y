@@ -56,7 +56,7 @@
 %token <ival> GIVEN WHEN DEFAULT
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
-%token <ival> RELOP EQOP MULOP ADDOP
+%token <ival> MULOP ADDOP
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
 %token <ival> LOCAL MY REQUIRE
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
@@ -76,6 +76,7 @@
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
+%type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
 %type <opval> sigelem siglist siglistornull subsigguts subsignature optsubsignature
@@ -97,8 +98,8 @@
 %left <ival> ANDAND
 %left <ival> BITOROP
 %left <ival> BITANDOP
-%nonassoc EQOP
-%nonassoc RELOP
+%left <ival> CHEQOP NCEQOP
+%left <ival> CHRELOP NCRELOP
 %nonassoc UNIOP UNIOPSUB
 %nonassoc REQUIRE
 %left <ival> SHIFTOP
@@ -1028,10 +1029,10 @@ termbinop:	term ASSIGNOP term                     /* $x = $y, $x += $y */
 			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
 	|	term SHIFTOP term                      /* $x >> $y, $x << $y */
 			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
-	|	term RELOP term                        /* $x > $y, etc. */
-			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
-	|	term EQOP term                         /* $x == $y, $x eq $y */
-			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
+	|	termrelop %prec PREC_LOW               /* $x > $y, etc. */
+			{ $$ = $1; }
+	|	termeqop %prec PREC_LOW                /* $x == $y, $x cmp $y */
+			{ $$ = $1; }
 	|	term BITANDOP term                     /* $x & $y */
 			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
 	|	term BITOROP term                      /* $x | $y */
@@ -1047,6 +1048,38 @@ termbinop:	term ASSIGNOP term                     /* $x = $y, $x += $y */
 	|	term MATCHOP term                      /* $x =~ /$y/ */
 			{ $$ = bind_match($2, $1, $3); }
     ;
+
+termrelop:	relopchain %prec PREC_LOW
+			{ $$ = cmpchain_finish($1); }
+	|	term NCRELOP term
+			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
+	|	termrelop NCRELOP
+			{ yyerror("syntax error"); YYERROR; }
+	|	termrelop CHRELOP
+			{ yyerror("syntax error"); YYERROR; }
+	;
+
+relopchain:	term CHRELOP term
+			{ $$ = cmpchain_start($2, $1, $3); }
+	|	relopchain CHRELOP term
+			{ $$ = cmpchain_extend($2, $1, $3); }
+	;
+
+termeqop:	eqopchain %prec PREC_LOW
+			{ $$ = cmpchain_finish($1); }
+	|	term NCEQOP term
+			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
+	|	termeqop NCEQOP
+			{ yyerror("syntax error"); YYERROR; }
+	|	termeqop CHEQOP
+			{ yyerror("syntax error"); YYERROR; }
+	;
+
+eqopchain:	term CHEQOP term
+			{ $$ = cmpchain_start($2, $1, $3); }
+	|	eqopchain CHEQOP term
+			{ $$ = cmpchain_extend($2, $1, $3); }
+	;
 
 /* Unary operators and terms */
 termunop : '-' term %prec UMINUS                       /* -$x */
