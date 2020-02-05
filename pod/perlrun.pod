@@ -80,7 +80,7 @@ The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
 
     #!/bin/sh
-    #! -*-perl-*-
+    #! -*- perl -*- -p
     eval 'exec perl -x -wS $0 ${1+"$@"}'
         if 0;
 
