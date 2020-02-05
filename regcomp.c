@@ -23203,9 +23203,10 @@ Perl_parse_uniprop_string(pTHX_
     dVAR;
     char* lookup_name;          /* normalized name for lookup in our tables */
     unsigned lookup_len;        /* Its length */
-    bool stricter = FALSE;      /* Some properties have stricter name
-                                   normalization rules, which we decide upon
-                                   based on parsing */
+    enum { Not_Strict = 0,      /* Some properties have stricter name */
+           Strict               /* normalization rules, which we decide */
+                                /* upon based on parsing */
+         } stricter = Not_Strict;
 
     /* nv= or numeric_value=, or possibly one of the cjk numeric properties
      * (though it requires extra effort to download them from Unicode and
@@ -23356,7 +23357,7 @@ Perl_parse_uniprop_string(pTHX_
      * or are positioned just after the '=' if it is compound. */
 
     if (equals_pos >= 0) {
-        assert(! stricter); /* We shouldn't have set this yet */
+        assert(stricter == Not_Strict); /* We shouldn't have set this yet */
 
         /* Space immediately after the '=' is ignored */
         i++;
@@ -23587,12 +23588,12 @@ Perl_parse_uniprop_string(pTHX_
              * But the numeric type properties can have the alphas [Ee] to
              * signify an exponent, and it is still a number with stricter
              * rules.  So look for an alpha that signifies not-strict */
-            stricter = TRUE;
+            stricter = Strict;
             for (k = i; k < name_len; k++) {
                 if (   isALPHA_A(name[k])
                     && (! is_nv_type || ! isALPHA_FOLD_EQ(name[k], 'E')))
                 {
-                    stricter = FALSE;
+                    stricter = Not_Strict;
                     break;
                 }
             }
@@ -23630,7 +23631,7 @@ Perl_parse_uniprop_string(pTHX_
             && memNEs(lookup_name + 4, j - 4, "space")
             && memNEs(lookup_name + 4, j - 4, "word"))
         {
-            stricter = TRUE;
+            stricter = Strict;
 
             /* We set the inputs back to 0 and the code below will reparse,
              * using strict */
