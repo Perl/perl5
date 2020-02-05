@@ -839,6 +839,7 @@ bulk88\100hotmail.com                   bulk88
 
 chad.granum\100dreamhost.com            exodist7\100gmail.com
 choroba\100cpan.org                     choroba\100weed.(none)
++                                       choroba\100matfyz.cz
 chromatic\100wgz.org                    chromatic\100rmci.net
 ckuskie\100cadence.com                  colink\100perldreamer.com
 claes\100surfar.nu                      claes\100versed.se
