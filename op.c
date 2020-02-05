@@ -5499,6 +5499,120 @@ Perl_invert(pTHX_ OP *o)
     return newUNOP(OP_NOT, OPf_SPECIAL, scalar(o));
 }
 
+OP *
+Perl_cmpchain_start(pTHX_ Optype type, OP *left, OP *right)
+{
+    BINOP *bop;
+    OP *op;
+
+    if (!left)
+	left = newOP(OP_NULL, 0);
+    if (!right)
+	right = newOP(OP_NULL, 0);
+    scalar(left);
+    scalar(right);
+    NewOp(0, bop, 1, BINOP);
+    op = (OP*)bop;
+    ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP);
+    OpTYPE_set(op, type);
+    cBINOPx(op)->op_flags = OPf_KIDS;
+    cBINOPx(op)->op_private = 2;
+    cBINOPx(op)->op_first = left;
+    cBINOPx(op)->op_last = right;
+    OpMORESIB_set(left, right);
+    OpLASTSIB_set(right, op);
+    return op;
+}
+
+OP *
+Perl_cmpchain_extend(pTHX_ Optype type, OP *ch, OP *right)
+{
+    BINOP *bop;
+    OP *op;
+
+    PERL_ARGS_ASSERT_CMPCHAIN_EXTEND;
+    if (!right)
+	right = newOP(OP_NULL, 0);
+    scalar(right);
+    NewOp(0, bop, 1, BINOP);
+    op = (OP*)bop;
+    ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP);
+    OpTYPE_set(op, type);
+    if (ch->op_type != OP_NULL) {
+	UNOP *lch;
+	OP *nch, *cleft, *cright;
+	NewOp(0, lch, 1, UNOP);
+	nch = (OP*)lch;
+	OpTYPE_set(nch, OP_NULL);
+	nch->op_flags = OPf_KIDS;
+	cleft = cBINOPx(ch)->op_first;
+	cright = cBINOPx(ch)->op_last;
+	cBINOPx(ch)->op_first = NULL;
+	cBINOPx(ch)->op_last = NULL;
+	cBINOPx(ch)->op_private = 0;
+	cBINOPx(ch)->op_flags = 0;
+	cUNOPx(nch)->op_first = cright;
+	OpMORESIB_set(cright, ch);
+	OpMORESIB_set(ch, cleft);
+	OpLASTSIB_set(cleft, nch);
+	ch = nch;
+    }
+    OpMORESIB_set(right, op);
+    OpMORESIB_set(op, cUNOPx(ch)->op_first);
+    cUNOPx(ch)->op_first = right;
+    return ch;
+}
+
+OP *
+Perl_cmpchain_finish(pTHX_ OP *ch)
+{
+    PERL_ARGS_ASSERT_CMPCHAIN_FINISH;
+    if (ch->op_type != OP_NULL) {
+	Optype cmpoptype = ch->op_type;
+	ch = CHECKOP(cmpoptype, ch);
+	if(!ch->op_next && ch->op_type == cmpoptype)
+	    ch = fold_constants(op_integerize(op_std_init(ch)));
+	return ch;
+    } else {
+	OP *condop = NULL;
+	OP *rightarg = cUNOPx(ch)->op_first;
+	cUNOPx(ch)->op_first = OpSIBLING(rightarg);
+	OpLASTSIB_set(rightarg, NULL);
+	while (1) {
+	    OP *cmpop = cUNOPx(ch)->op_first;
+	    OP *leftarg = OpSIBLING(cmpop);
+	    Optype cmpoptype = cmpop->op_type;
+	    OP *nextrightarg;
+	    bool is_last;
+	    is_last = !(cUNOPx(ch)->op_first = OpSIBLING(leftarg));
+	    OpLASTSIB_set(cmpop, NULL);
+	    OpLASTSIB_set(leftarg, NULL);
+	    if (is_last) {
+		ch->op_flags = 0;
+		op_free(ch);
+		nextrightarg = NULL;
+	    } else {
+		nextrightarg = newUNOP(OP_CMPCHAIN_DUP, 0, leftarg);
+		leftarg = newOP(OP_NULL, 0);
+	    }
+	    cBINOPx(cmpop)->op_first = leftarg;
+	    cBINOPx(cmpop)->op_last = rightarg;
+	    OpMORESIB_set(leftarg, rightarg);
+	    OpLASTSIB_set(rightarg, cmpop);
+	    cmpop->op_flags = OPf_KIDS;
+	    cmpop->op_private = 2;
+	    cmpop = CHECKOP(cmpoptype, cmpop);
+	    if(!cmpop->op_next && cmpop->op_type == cmpoptype)
+		cmpop = fold_constants(op_integerize(op_std_init(cmpop)));
+	    condop = condop ? newLOGOP(OP_CMPCHAIN_AND, 0, cmpop, condop) :
+			cmpop;
+	    if (!nextrightarg)
+		return condop;
+	    rightarg = nextrightarg;
+	}
+    }
+}
+
 /*
 =for apidoc op_scope
 
@@ -17432,6 +17546,7 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_AND:
 	case OP_OR:
 	case OP_DOR:
+	case OP_CMPCHAIN_AND:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    while (o->op_next && (   o->op_type == o->op_next->op_type

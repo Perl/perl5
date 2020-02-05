@@ -544,6 +544,8 @@ EXTCONST char* const PL_op_name[] = {
 	"lvavref",
 	"anonconst",
 	"isa",
+	"cmpchain_and",
+	"cmpchain_dup",
 	"freed",
 };
 #endif
@@ -950,6 +952,8 @@ EXTCONST char* const PL_op_desc[] = {
 	"lvalue array reference",
 	"anonymous constant",
 	"derived class test",
+	"comparison chaining",
+	"comparand shuffling",
 	"freed op",
 };
 #endif
@@ -1368,6 +1372,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_lvavref,
 	Perl_pp_anonconst,
 	Perl_pp_isa,
+	Perl_pp_cmpchain_and,
+	Perl_pp_cmpchain_dup,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1782,6 +1788,8 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lvavref */
 	Perl_ck_null,		/* anonconst */
 	Perl_ck_isa,		/* isa */
+	Perl_ck_null,		/* cmpchain_and */
+	Perl_ck_null,		/* cmpchain_dup */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2192,6 +2200,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000b40,	/* lvavref */
 	0x00000144,	/* anonconst */
 	0x00000204,	/* isa */
+	0x00000300,	/* cmpchain_and */
+	0x00000100,	/* cmpchain_dup */
 };
 #endif
 
@@ -2861,6 +2871,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      234, /* lvavref */
        0, /* anonconst */
       12, /* isa */
+       0, /* cmpchain_and */
+       0, /* cmpchain_dup */
 
 };
 
@@ -2879,7 +2891,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup */
     0x2fdc, 0x41b9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0438, 0x1a50, 0x426c, 0x3d28, 0x3505, /* const */
@@ -3355,6 +3367,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
     /* ANONCONST  */ (OPpARG1_MASK),
     /* ISA        */ (OPpARG2_MASK),
+    /* CMPCHAIN_AND */ (OPpARG1_MASK),
+    /* CMPCHAIN_DUP */ (OPpARG1_MASK),
 
 };
 

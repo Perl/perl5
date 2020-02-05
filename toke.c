@@ -196,8 +196,10 @@ static const char* const lex_state_names[] = {
  * Aop          : addition-level operator
  * AopNOASSIGN  : addition-level operator that is never part of .=
  * Mop          : multiplication-level operator
- * Eop          : equality-testing operator
- * Rop          : relational operator <= != gt
+ * ChEop        : chaining equality-testing operator
+ * NCEop        : non-chaining comparison operator at equality precedence
+ * ChRop        : chaining relational operator <= != gt
+ * NCRop        : non-chaining relational operator isa
  *
  * Also see LOP and lop() below.
  */
@@ -234,8 +236,10 @@ static const char* const lex_state_names[] = {
 #define Aop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)ADDOP))
 #define AopNOASSIGN(f) return (pl_yylval.ival=f, PL_bufptr=s, REPORT((int)ADDOP))
 #define Mop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)MULOP))
-#define Eop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
-#define Rop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
+#define ChEop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)CHEQOP))
+#define NCEop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)NCEQOP))
+#define ChRop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)CHRELOP))
+#define NCRop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)NCRELOP))
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
@@ -330,6 +334,8 @@ static struct debug_tokens {
     { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
     { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
+    { CHEQOP,		TOKENTYPE_OPNUM,	"CHEQOP" },
+    { CHRELOP,		TOKENTYPE_OPNUM,	"CHRELOP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
     { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
     { DEFAULT,		TOKENTYPE_NONE,		"DEFAULT" },
@@ -340,7 +346,6 @@ static struct debug_tokens {
     { DOTDOT,		TOKENTYPE_IVAL,		"DOTDOT" },
     { ELSE,		TOKENTYPE_NONE,		"ELSE" },
     { ELSIF,		TOKENTYPE_IVAL,		"ELSIF" },
-    { EQOP,		TOKENTYPE_OPNUM,	"EQOP" },
     { FOR,		TOKENTYPE_IVAL,		"FOR" },
     { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
     { FORMLBRACK,	TOKENTYPE_NONE,		"FORMLBRACK" },
@@ -363,6 +368,8 @@ static struct debug_tokens {
     { METHOD,		TOKENTYPE_OPVAL,	"METHOD" },
     { MULOP,		TOKENTYPE_OPNUM,	"MULOP" },
     { MY,		TOKENTYPE_IVAL,		"MY" },
+    { NCEQOP,		TOKENTYPE_OPNUM,	"NCEQOP" },
+    { NCRELOP,		TOKENTYPE_OPNUM,	"NCRELOP" },
     { NOAMP,		TOKENTYPE_NONE,		"NOAMP" },
     { NOTOP,		TOKENTYPE_NONE,		"NOTOP" },
     { OROP,		TOKENTYPE_IVAL,		"OROP" },
@@ -380,7 +387,6 @@ static struct debug_tokens {
     { PRIVATEREF,	TOKENTYPE_OPVAL,	"PRIVATEREF" },
     { QWLIST,		TOKENTYPE_OPVAL,	"QWLIST" },
     { REFGEN,		TOKENTYPE_NONE,		"REFGEN" },
-    { RELOP,		TOKENTYPE_OPNUM,	"RELOP" },
     { REQUIRE,		TOKENTYPE_NONE,		"REQUIRE" },
     { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
     { SIGSUB,		TOKENTYPE_NONE,		"SIGSUB" },
@@ -6327,7 +6333,7 @@ yyl_bang(pTHX_ char *s)
             TOKEN(0);
         }
 
-        Eop(OP_NE);
+        ChEop(OP_NE);
     }
 
     if (tmp == '~')
@@ -6456,7 +6462,7 @@ yyl_tilde(pTHX_ char *s)
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
             "Smartmatch is experimental");
-        Eop(OP_SMARTMATCH);
+        NCEop(OP_SMARTMATCH);
     }
     s++;
     if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.') {
@@ -6524,14 +6530,14 @@ yyl_leftpointy(pTHX_ char *s)
                 s -= 3;
                 TOKEN(0);
             }
-            Eop(OP_NCMP);
+            NCEop(OP_NCMP);
         }
         s--;
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
             s -= 2;
             TOKEN(0);
         }
-        Rop(OP_LE);
+        ChRop(OP_LE);
     }
 
     s--;
@@ -6540,7 +6546,7 @@ yyl_leftpointy(pTHX_ char *s)
         TOKEN(0);
     }
 
-    Rop(OP_LT);
+    ChRop(OP_LT);
 }
 
 static int
@@ -6560,7 +6566,7 @@ yyl_rightpointy(pTHX_ char *s)
             s -= 2;
             TOKEN(0);
         }
-        Rop(OP_GE);
+        ChRop(OP_GE);
     }
 
     s--;
@@ -6569,7 +6575,7 @@ yyl_rightpointy(pTHX_ char *s)
         TOKEN(0);
     }
 
-    Rop(OP_GT);
+    ChRop(OP_GT);
 }
 
 static int
@@ -7657,7 +7663,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_cmp:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Eop(OP_SCMP);
+        NCEop(OP_SCMP);
 
     case KEY_caller:
         UNI(OP_CALLER);
@@ -7731,7 +7737,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_eq:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Eop(OP_SEQ);
+        ChEop(OP_SEQ);
 
     case KEY_exists:
         UNI(OP_EXISTS);
@@ -7809,12 +7815,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_gt:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SGT);
+        ChRop(OP_SGT);
 
     case KEY_ge:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SGE);
+        ChRop(OP_SGE);
 
     case KEY_grep:
         LOP(OP_GREPSTART, XREF);
@@ -7933,7 +7939,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_isa:
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__ISA), "isa is experimental");
-        Rop(OP_ISA);
+        NCRop(OP_ISA);
 
     case KEY_join:
         LOP(OP_JOIN,XTERM);
@@ -7962,12 +7968,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_lt:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SLT);
+        ChRop(OP_SLT);
 
     case KEY_le:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SLE);
+        ChRop(OP_SLE);
 
     case KEY_localtime:
         UNI(OP_LOCALTIME);
@@ -8020,7 +8026,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_ne:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Eop(OP_SNE);
+        ChEop(OP_SNE);
 
     case KEY_no:
         s = tokenize_use(0, s);
@@ -8845,7 +8851,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		    s -= 2;
 		    TOKEN(0);
 		}
-		Eop(OP_EQ);
+		ChEop(OP_EQ);
 	    }
 	    if (tmp == '>') {
 		if (!PL_lex_allbrackets

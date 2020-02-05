@@ -76,8 +76,8 @@ values only, not array values.
     left	+ - .
     left	<< >>
     nonassoc	named unary operators
-    nonassoc	< > <= >= lt gt le ge
-    nonassoc	== != <=> eq ne cmp ~~
+    chained 	< > <= >= lt gt le ge
+    chain/na	== != eq ne <=> cmp ~~
     nonassoc    isa
     left	&
     left	| ^
@@ -517,6 +517,19 @@ Binary C<"ge"> returns true if the left argument is stringwise greater
 than or equal to the right argument.
 X<< ge >>
 
+A sequence of relational operators, such as S<C<"$a E<lt> $b E<lt>=
+$c">>, does not group in accordance with left or right associativity,
+which would produce the almost-useless result of using the truth-value
+result of one comparison as a comparand in another comparison.  Instead
+the comparisons are I<chained>: each comparison is performed on the
+two arguments surrounding it, with each interior argument taking part
+in two comparisons, and the comparison results are implicitly ANDed.
+Thus S<C<"$a E<lt> $b E<lt>= $c">> behaves very much like S<C<"$a E<lt>
+$b && $b E<lt>= $c">>.  The ANDing short-circuits just like C<"&&">
+does, stopping the sequence of comparisons as soon as one yields false.
+Each argument expression is evaluated at most once, even if it takes
+part in two comparisons.
+
 =head2 Equality Operators
 X<equality> X<equal> X<equals> X<operator, equality>
 
@@ -527,6 +540,18 @@ X<==>
 Binary C<< "!=" >> returns true if the left argument is numerically not equal
 to the right argument.
 X<!=>
+
+Binary C<"eq"> returns true if the left argument is stringwise equal to
+the right argument.
+X<eq>
+
+Binary C<"ne"> returns true if the left argument is stringwise not equal
+to the right argument.
+X<ne>
+
+A sequence of the above equality operators, such as S<C<"$a == $b ==
+$c">>, performs chained comparisons, in the same manner as described in
+the previous section for relational operators.
 
 Binary C<< "<=>" >> returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
@@ -545,14 +570,6 @@ X<spaceship>
 (Note that the L<bigint>, L<bigrat>, and L<bignum> pragmas all
 support C<"NaN">.)
 
-Binary C<"eq"> returns true if the left argument is stringwise equal to
-the right argument.
-X<eq>
-
-Binary C<"ne"> returns true if the left argument is stringwise not equal
-to the right argument.
-X<ne>
-
 Binary C<"cmp"> returns -1, 0, or 1 depending on whether the left
 argument is stringwise less than, equal to, or greater than the right
 argument.
@@ -561,6 +578,10 @@ X<cmp>
 Binary C<"~~"> does a smartmatch between its arguments.  Smart matching
 is described in the next section.
 X<~~>
+
+The two-sided ordering operators C<"E<lt>=E<gt>"> and C<"cmp">, and the
+smartmatch operator C<"~~">, are non-associative with respect to each
+other and with respect to the equality operators of the same precedence.
 
 C<"lt">, C<"le">, C<"ge">, C<"gt"> and C<"cmp"> use the collation (sort)
 order specified by the current C<LC_COLLATE> locale if a S<C<use
