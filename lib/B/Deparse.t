@@ -20,6 +20,8 @@ my $deparse = B::Deparse->new();
 isa_ok($deparse, 'B::Deparse', 'instantiate a B::Deparse object');
 my %deparse;
 
+sub dummy_sub {42}
+
 $/ = "\n####\n";
 while (<DATA>) {
     chomp;
@@ -678,6 +680,19 @@ $_ .= readline(ARGV) . readline(ARGV) . readline($foo);
 readline $foo;
 glob $foo;
 glob $foo;
+####
+# more <>
+no warnings;
+no strict;
+my $fh;
+if (dummy_sub < $fh > /bar/g) { 1 }
+>>>>
+no warnings;
+no strict;
+my $fh;
+if (dummy_sub(glob((' ' . $fh . ' ')) / 'bar' / 'g')) {
+    1;
+}
 ####
 # readline
 readline 'FH';
