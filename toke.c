@@ -9848,12 +9848,17 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
     if (isSPACE(*s) || !*s)
 	s = skipspace(s);
-    if (isDIGIT(*s)) {
-	while (isDIGIT(*s)) {
-	    if (d >= e)
-		Perl_croak(aTHX_ "%s", ident_too_long);
-	    *d++ = *s++;
-	}
+    if (isDIGIT(*s)) { /* handle $0 and $1 $2 and $10 and etc */
+        if (*s == '0') {
+            /* the only digit var that starts with '0' is $0 */
+            *d++ = *s++;
+        } else {
+            do {
+                if (d >= e)
+                    Perl_croak(aTHX_ "%s", ident_too_long);
+                *d++ = *s++;
+            } while (isDIGIT(*s));
+        }
     }
     else {  /* See if it is a "normal" identifier */
         parse_ident(&s, &d, e, 1, is_utf8, FALSE, TRUE);
@@ -9905,6 +9910,15 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         }
         else {
             *d = *s++;
+            /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
+            if (isDIGIT(*d) && *d != '0') {
+                do {
+                    d++;
+                    if (d >= e)
+                        Perl_croak(aTHX_ "%s", ident_too_long);
+                    *d= *s++;
+                } while (isDIGIT(*s));
+            }
             d[1] = '\0';
         }
     }
