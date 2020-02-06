@@ -3393,7 +3393,7 @@ sub pp_glob {
     my $kid = $op->first->sibling;  # skip pushmark
     my $keyword =
 	$op->flags & OPf_SPECIAL ? 'glob' : $self->keyword('glob');
-    my $text = $self->deparse($kid);
+    my $text = $self->deparse($kid, $cx);
     return $cx >= 5 || $self->{'parens'}
 	? "$keyword($text)"
 	: "$keyword $text";
