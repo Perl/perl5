@@ -10,18 +10,24 @@ BEGIN {
     set_up_inc( qw(. ../lib ) );
 }
 
-plan(5);
+plan(6);
 
 # [perl #130814] can reallocate lineptr while looking ahead for
 # "Missing $ on loop variable" diagnostic.
 my $result = fresh_perl(
-    " foreach m0\n\$" . ("0" x 0x2000),
+    " foreach m0\n\$" . ("v" x 0x2000),
     { stderr => 1 },
 );
 is($result . "\n", <<EXPECT);
 syntax error at - line 3, near "foreach m0
 "
 Identifier too long at - line 3.
+EXPECT
+
+fresh_perl_is(<<'EOS', <<'EXPECT', {}, "check zero vars");
+print $001;
+EOS
+Numeric variables with more than one digit may not start with '0' at - line 1.
 EXPECT
 
 fresh_perl_is(<<EOS, <<'EXPECT', {}, "linestart before bufptr");

@@ -94,6 +94,7 @@ Individual members of C<PL_parser> have their own documentation.
     && ((XPVIV*)SvANY(sv))->xiv_u.xivu_eval_seen)
 
 static const char* const ident_too_long = "Identifier too long";
+static const char* const ident_var_zero_multi_digit = "Numeric variables with more than one digit may not start with '0'";
 
 #  define NEXTVAL_NEXTTOKE PL_nextval[PL_nexttoke]
 
@@ -9848,12 +9849,17 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
     if (isSPACE(*s) || !*s)
 	s = skipspace(s);
-    if (isDIGIT(*s)) {
-	while (isDIGIT(*s)) {
-	    if (d >= e)
-		Perl_croak(aTHX_ "%s", ident_too_long);
-	    *d++ = *s++;
-	}
+    if (isDIGIT(*s)) { /* handle $0 and $1 $2 and $10 and etc */
+        bool is_zero= *s == '0' ? TRUE : FALSE;
+        char *digit_start= d;
+        *d++ = *s++;
+        while (s < PL_bufend && isDIGIT(*s)) {
+            if (d >= e)
+                Perl_croak(aTHX_ "%s", ident_too_long);
+            *d++ = *s++;
+        } 
+        if (is_zero && d - digit_start > 1)
+            Perl_croak(aTHX_ ident_var_zero_multi_digit);
     }
     else {  /* See if it is a "normal" identifier */
         parse_ident(&s, &d, e, 1, is_utf8, FALSE, TRUE);
@@ -9905,6 +9911,19 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         }
         else {
             *d = *s++;
+            /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
+            if (isDIGIT(*d)) {
+                bool is_zero= *d == '0' ? TRUE : FALSE;
+                char *digit_start= d;
+                while (s < PL_bufend && isDIGIT(*s)) {
+                    d++;
+                    if (d >= e)
+                        Perl_croak(aTHX_ "%s", ident_too_long);
+                    *d= *s++;
+                }
+                if (is_zero && d - digit_start > 1)
+                    Perl_croak(aTHX_ ident_var_zero_multi_digit);
+            }
             d[1] = '\0';
         }
     }

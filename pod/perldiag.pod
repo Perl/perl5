@@ -4388,6 +4388,13 @@ the braces.
 or printf() would have been too large for the underlying C function to
 report.  This limit is typically 2GB.
 
+=item Numeric variables with more than one digit may not start with '0'
+
+(F) The only numeric variable which is allowed to start with a 0 is C<$0>,
+and you mentioned a variable that starts with 0 that has more than one
+digit. You probably want to remove the leading 0, or if the intent was
+to express a variable name in octal you should convert to decimal.
+
 =item Octal number > 037777777777 non-portable
 
 (W portable) The octal number you specified is larger than 2**32-1
