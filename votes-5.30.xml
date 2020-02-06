@@ -36,14 +36,14 @@ This is https://github.com/Perl/perl5-security/issues/115
 
 <commit votes="steveh" id="712e071bf4b91b0e2970bf38637b1a1b96dcc099" ticket="17221" desc="fix panic caused by printf with %n with utf8 length magic"/>
 <commit votes="steveh" id="08e55ec5e3ef6d6c040c0dc8bdec7d59f76bfbe8" ticket="16529" desc="win32: fix waitpid(-1, WNOHANG) segfault/panic"/>
-<commit votes="steveh" id="0463f3a19af7afac8b402655ad66e5b05c095bcc" ticket="17218" desc="PATCH: gh#17218 memory leak"/>
-<commit votes="steveh" id="81d11450691ee281f37c6c4e8055735b972733bd" ticket="17367" desc="PATCH: GH #17367 read 1 beyond end of buffer"/>
+<commit votes="steveh hv" id="0463f3a19af7afac8b402655ad66e5b05c095bcc" ticket="17218" desc="PATCH: gh#17218 memory leak"/>
+<commit votes="steveh hv" id="81d11450691ee281f37c6c4e8055735b972733bd" ticket="17367" desc="PATCH: GH #17367 read 1 beyond end of buffer"/>
 
 steveh: Both of these, or neither:
-<commit votes="steveh" id="9f16475a53933d1d9c547f871b97b3b12160cece" ticket="17370" desc="PATCH: GH #17370, read beyond buffer in grok_inf_nan"/>
-<commit votes="steveh" id="dca9f615c2ca4c784ef9cdd9a7a313de40998bcf" ticket="17370" desc="Actually fix GH #17370"/>
+<commit votes="steveh hv" id="9f16475a53933d1d9c547f871b97b3b12160cece" ticket="17370" desc="PATCH: GH #17370, read beyond buffer in grok_inf_nan"/>
+<commit votes="steveh hv" id="dca9f615c2ca4c784ef9cdd9a7a313de40998bcf" ticket="17370" desc="Actually fix GH #17370"/>
 
-<commit votes="steveh" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
+<commit votes="steveh hv" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
 
 <commit votes="hv" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
 
