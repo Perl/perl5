@@ -45,6 +45,8 @@ steveh: Both of these, or neither:
 
 <commit votes="steveh" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
 
+<commit votes="hv" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
