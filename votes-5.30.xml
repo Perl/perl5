@@ -19,6 +19,8 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
+<commit votes="demerphq" id="f2f32cd638746f538da6db804dab6dd54e654f30" ticket="15109" desc="avoid identical stack traces" />
+
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -43,9 +45,10 @@ steveh: Both of these, or neither:
 <commit votes="steveh hv" id="9f16475a53933d1d9c547f871b97b3b12160cece" ticket="17370" desc="PATCH: GH #17370, read beyond buffer in grok_inf_nan"/>
 <commit votes="steveh hv" id="dca9f615c2ca4c784ef9cdd9a7a313de40998bcf" ticket="17370" desc="Actually fix GH #17370"/>
 
-<commit votes="steveh hv" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
+<commit votes="steveh hv demerphq" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
 
-<commit votes="hv" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
+<commit votes="hv demerphq" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
+
 
 </div>
 
