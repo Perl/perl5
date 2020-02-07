@@ -51,6 +51,7 @@ steveh: Both of these, or neither:
 
 <commit votes="hv demerphq" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
 
+<commit votes="steveh" id="3b2e5620ed4a6b341f97ffd1d4b6466cc2c4bc5b" ticket="17117" desc="PATCH: [perl #134329] Use after free in regcomp.c"/>
 
 </div>
 
