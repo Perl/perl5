@@ -26,7 +26,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Security Fixes</h3>
 
 <commit votes="steveh" id="1bff26779d92ed756b7d4e5be908124dd5a0a450" ticket="17529" desc="Update Compress-Raw-Bzip2 to CPAN version 2.089"/>
-
+<commit votes="demerphq" id="ac3afc4b35675aec55918770197358190f782728" ticket="" desc="regcomp.c: make \K+ and \K* illegal." />
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
@@ -36,10 +36,10 @@ khw vote contingent on bin compat being acceptable
 <commit votes="steveh arc khw" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="16977" desc="PATCH: [perl #134059] panic outputting a warning"/>
 
 This is https://github.com/Perl/perl5-security/issues/115
-<commit votes="steveh khw xsawyerx" id="2df0dd21423ddf295fe2e5d2a6665300f4c5dd94" ticket="" desc="PATCH: [perl 134335], gh115,Assert fail in regmatch"/>
+<commit votes="steveh khw xsawyerx demerphq" id="2df0dd21423ddf295fe2e5d2a6665300f4c5dd94" ticket="" desc="PATCH: [perl 134335], gh115,Assert fail in regmatch"/>
 
-<commit votes="steveh" id="712e071bf4b91b0e2970bf38637b1a1b96dcc099" ticket="17221" desc="fix panic caused by printf with %n with utf8 length magic"/>
-<commit votes="steveh" id="08e55ec5e3ef6d6c040c0dc8bdec7d59f76bfbe8" ticket="16529" desc="win32: fix waitpid(-1, WNOHANG) segfault/panic"/>
+<commit votes="steveh demerphq" id="712e071bf4b91b0e2970bf38637b1a1b96dcc099" ticket="17221" desc="fix panic caused by printf with %n with utf8 length magic"/>
+<commit votes="steveh demerphq" id="08e55ec5e3ef6d6c040c0dc8bdec7d59f76bfbe8" ticket="16529" desc="win32: fix waitpid(-1, WNOHANG) segfault/panic"/>
 <commit votes="steveh hv" id="0463f3a19af7afac8b402655ad66e5b05c095bcc" ticket="17218" desc="PATCH: gh#17218 memory leak"/>
 <commit votes="steveh hv" id="81d11450691ee281f37c6c4e8055735b972733bd" ticket="17367" desc="PATCH: GH #17367 read 1 beyond end of buffer"/>
 
@@ -51,7 +51,7 @@ steveh: Both of these, or neither:
 
 <commit votes="hv demerphq" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
 
-<commit votes="steveh" id="3b2e5620ed4a6b341f97ffd1d4b6466cc2c4bc5b" ticket="17117" desc="PATCH: [perl #134329] Use after free in regcomp.c"/>
+<commit votes="steveh demerphq" id="3b2e5620ed4a6b341f97ffd1d4b6466cc2c4bc5b" ticket="17117" desc="PATCH: [perl #134329] Use after free in regcomp.c"/>
 
 </div>
 
