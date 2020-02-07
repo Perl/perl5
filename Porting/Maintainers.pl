@@ -1159,7 +1159,7 @@ use File::Glob qw(:case);
     },
 
     'Tie::File' => {
-        'DISTRIBUTION' => 'TODDR/Tie-File-1.01.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Tie-File-1.05.tar.gz',
         'FILES'        => q[dist/Tie-File],
     },
 
