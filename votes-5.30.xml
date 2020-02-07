@@ -19,7 +19,7 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-<commit votes="demerphq khw" id="f2f32cd638746f538da6db804dab6dd54e654f30" ticket="15109" desc="avoid identical stack traces" />
+<commit votes="demerphq khw steveh" id="f2f32cd638746f538da6db804dab6dd54e654f30" ticket="15109" desc="avoid identical stack traces" />
 
 </div>
 
@@ -49,7 +49,7 @@ steveh: Both of these, or neither:
 
 <commit votes="steveh hv demerphq khw" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
 
-<commit votes="hv demerphq khw" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
+<commit votes="hv demerphq khw steveh" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
 
 <commit votes="steveh demerphq khw" id="3b2e5620ed4a6b341f97ffd1d4b6466cc2c4bc5b" ticket="17117" desc="PATCH: [perl #134329] Use after free in regcomp.c"/>
 
