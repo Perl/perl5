@@ -25,6 +25,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
+<commit votes="steveh" id="1bff26779d92ed756b7d4e5be908124dd5a0a450" ticket="17529" desc="Update Compress-Raw-Bzip2 to CPAN version 2.089"/>
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
