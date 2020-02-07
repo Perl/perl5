@@ -17,7 +17,7 @@ our @EXPORT_OK = qw(
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.53";
+our $VERSION    = "1.54";
 $VERSION =~ tr/_//d;
 
 require List::Util; # List::Util loads the XS
@@ -133,6 +133,11 @@ is returned.
 
     $obj  = bless {}, "Foo";
     $type = reftype $obj;               # HASH
+
+Note that for internal reasons, all precompiled regexps (C<qr/.../>) are
+blessed references; thus C<ref()> returns the package name string C<"Regexp">
+on these but C<reftype()> will return the underlying C structure type of
+C<"REGEXP"> in all capitals.
 
 =head2 weaken
 

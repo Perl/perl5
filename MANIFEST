@@ -1967,9 +1967,11 @@ cpan/Scalar-List-Utils/t/product.t		List::Util
 cpan/Scalar-List-Utils/t/prototype.t
 cpan/Scalar-List-Utils/t/readonly.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reduce.t		List::Util
+cpan/Scalar-List-Utils/t/reductions.t
 cpan/Scalar-List-Utils/t/refaddr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reftype.t		Scalar::Util
 cpan/Scalar-List-Utils/t/rt-96343.t		Scalar::Util
+cpan/Scalar-List-Utils/t/sample.t
 cpan/Scalar-List-Utils/t/scalarutil-proto.t
 cpan/Scalar-List-Utils/t/shuffle.t		List::Util
 cpan/Scalar-List-Utils/t/stack-corruption.t	List::Util

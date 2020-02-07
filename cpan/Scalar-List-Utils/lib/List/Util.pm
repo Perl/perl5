@@ -12,15 +12,19 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
+  all any first min max minstr maxstr none notall product reduce reductions sum sum0
+  sample shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.53";
+our $VERSION    = "1.54";
 our $XS_VERSION = $VERSION;
 $VERSION =~ tr/_//d;
 
 require XSLoader;
 XSLoader::load('List::Util', $XS_VERSION);
+
+# Used by shuffle()
+our $RAND;
 
 sub import
 {
@@ -47,7 +51,7 @@ List::Util - A selection of general-utility list subroutines
 =head1 SYNOPSIS
 
     use List::Util qw(
-      reduce any all none notall first
+      reduce any all none notall first reductions
 
       max maxstr min minstr product sum sum0
 
@@ -69,7 +73,8 @@ By default C<List::Util> does not export any subroutines.
 
 =head1 LIST-REDUCTION FUNCTIONS
 
-The following set of functions all reduce a list down to a single value.
+The following set of functions all apply a given block of code to a list of
+values.
 
 =cut
 
@@ -129,8 +134,28 @@ block that accumulates lengths by writing this instead as:
 
     $total = reduce { $a + length $b } 0, @strings
 
-The remaining list-reduction functions are all specialisations of this generic
-idea.
+The other scalar-returning list reduction functions are all specialisations of
+this generic idea.
+
+=head2 reductions
+
+    @results = reductions { BLOCK } @list
+
+I<Since version 1.54.>
+
+Similar to C<reduce> except that it also returns the intermediate values along
+with the final result. As before, C<$a> is set to the first element of the
+given list, and the C<BLOCK> is then called once for remaining item in the
+list set into C<$b>, with the result being captured for return as well as
+becoming the new value for C<$a>.
+
+The returned list will begin with the initial value for C<$a>, followed by
+each return value from the block in order. The final value of the result will
+be identical to what the C<reduce> function would have returned given the same
+block and list.
+
+    reduce     { "$a-$b" }  "a".."d"    # "a-b-c-d"
+    reductions { "$a-$b" }  "a".."d"    # "a", "a-b", "a-b-c", "a-b-c-d"
 
 =head2 any
 
@@ -489,6 +514,25 @@ Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
 
+This function is affected by the C<$RAND> variable.
+
+=cut
+
+=head2 sample
+
+    my @items = sample $count, @values
+
+I<Since version 1.54.>
+
+Randomly select the given number of elements from the input list. Any given
+position in the input list will be selected at most once.
+
+If there are fewer than C<$count> items in the list then the function will
+return once all of them have been randomly selected; effectively the function
+behaves similarly to L</shuffle>.
+
+This function is affected by the C<$RAND> variable.
+
 =head2 uniq
 
     my @subset = uniq @values
@@ -586,6 +630,21 @@ all but the first C<$size> elements from C<@list>.
 
     @result = tail -2, qw( foo bar baz );
     # baz
+
+=head1 CONFIGURATION VARIABLES
+
+=head2 $RAND
+
+    local $List::Util::RAND = sub { ... };
+
+I<Since version 1.54.>
+
+This package variable is used by code which needs to generate random numbers
+(such as the L</shuffle> and L</sample> functions). If set to a CODE reference
+it provides an alternative to perl's builtin C<rand()> function. When a new
+random number is needed this function will be invoked with no arguments and is
+expected to return a floating-point value, of which only the fractional part
+will be used.
 
 =head1 KNOWN BUGS
 
