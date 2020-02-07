@@ -3200,6 +3200,14 @@ neither as a system call nor an ioctl call (SIOCATMARK).
 Perl.  The current valid ones are given in
 L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
+=item %s is forbidden - matches null string many times in regex; marked by S<<-- HERE> in
+m/%s/
+
+(F) The pattern you've specified might cause the regular expression to
+infinite loop so it is forbidden.  The S<<-- HERE>
+shows whereabouts in the regular expression the problem was discovered.
+See L<perlre>.
+
 =item %s() isn't allowed on :utf8 handles
 
 (F) The sysread(), recv(), syswrite() and send() operators are
