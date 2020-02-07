@@ -2319,6 +2319,11 @@ internally.  If you passed it a filehandle as above, you "own" the
 filehandle, and are responsible for closing it after you have untied
 the @array.
 
+Tie::File calls C<binmode> on filehandles that it opens internally, 
+but not on filehandles passed in by the user. For consistency,
+especially if using the tied files cross-platform, you may wish to
+call C<binmode> on the filehandle prior to tying the file. 
+
 =head1 Deferred Writing
 
 (This is an advanced feature.  Skip this section on first reading.)
