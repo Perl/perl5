@@ -9,3 +9,4 @@ PadnamelistREFCNT_dec          # U
 padnamelist_store              # U
 PadnameREFCNT                  # U
 PadnameREFCNT_dec              # U
+PADNAMEt_OUTER                 # E

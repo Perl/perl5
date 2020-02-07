@@ -91,7 +91,7 @@
 : The E flag is used instead for a function and its short name that is supposed
 :            to be used only in the core, and in extensions compiled with the
 :            PERL_EXT symbol defined.  Again, on some platforms, the function
-:            will be visible everywhere, so the 'p' flag is gnerally needed.
+:            will be visible everywhere, so the 'p' flag is generally needed.
 :            Also note that an XS writer can always cheat and pretend to be an
 :            extension by #defining PERL_EXT.
 :
@@ -785,6 +785,7 @@ p	|void	|dump_sub_perl	|NN const GV* gv|bool justperl
 Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
+pEXTR	|const char *|cntrl_to_mnemonic|const U8 c
 p	|CV *	|find_lexical_cv|PADOFFSET off
 : Defined in util.c, used only in perl.c
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
@@ -1135,35 +1136,60 @@ Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 : Used in perly.y
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
-Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-EpRX	|bool	|grok_bslash_x	|NN char** s		 \
-				|NN const char* const send	 \
-				|NN UV* uv			 \
-				|NN const char** error_msg       \
-				|const bool output_warning       \
-				|const bool strict               \
-				|const bool silence_non_portable \
+EpRX	|bool	|grok_bslash_x	|NN char** s			\
+				|NN const char* const send	\
+				|NN UV* uv			\
+				|NN const char** message	\
+				|NULLOK U32 * packed_warn	\
+				|const bool strict		\
+				|const bool allow_UV_MAX	\
 				|const bool utf8
-EpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
-EpRX	|bool	|grok_bslash_o	|NN char** s		 \
-				|NN const char* const send	 \
-				|NN UV* uv			 \
-				|NN const char** error_msg       \
-				|const bool output_warning       \
-				|const bool strict               \
-				|const bool silence_non_portable \
+EpRX	|bool	|grok_bslash_c	|const char source		\
+				|NN U8 * result			\
+				|NN const char** message	\
+				|NULLOK U32 * packed_warn
+EpRX	|bool	|grok_bslash_o	|NN char** s			\
+				|NN const char* const send	\
+				|NN UV* uv			\
+				|NN const char** message        \
+				|NULLOK U32 * packed_warn	\
+				|const bool strict              \
+				|const bool allow_UV_MAX	\
 				|const bool utf8
-EiR	|char*|form_short_octal_warning|NN const char * const s  \
-				|const STRLEN len
-EiRT	|I32	|regcurly	|NN const char *s
+EpRX	|const char *|form_alien_digit_msg|const U8 which	\
+				|const STRLEN valids_len	\
+				|NN const char * const first_bad\
+				|NN const char * const send	\
+				|const bool UTF			\
+				|const bool braced
 #endif
-Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+EiRT	|bool	|regcurly	|NN const char *s
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
+EpRX	|const char *|form_cp_too_large_msg|const U8 which	\
+				|NULLOK const char * string	\
+				|const Size_t len		\
+				|const UV cp
+#endif
+AMpd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
 Apd	|int	|grok_number_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|U32 flags
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
-Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
+ApMd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
+ApMd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
+Cp	|UV	|grok_bin_oct_hex|NN const char* start			    \
+				 |NN STRLEN* len_p			    \
+				 |NN I32* flags				    \
+			         |NULLOK NV *result			    \
+				 |const unsigned shift			    \
+				 |const U8 lookup_bit			    \
+				 |const char prefix
+#ifdef PERL_IN_NUMERIC_C
+S	|void	|output_non_portable|const U8 shift
+#endif
 EXpdT	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
@@ -1595,7 +1621,7 @@ p	|void	|rxres_save	|NN void **rsp|NN REGEXP *rx
 p	|I32	|same_dirent	|NN const char* a|NN const char* b
 #endif
 Apda	|char*	|savepv		|NULLOK const char* pv
-Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
+Apda	|char*	|savepvn	|NULLOK const char* pv|Size_t len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
 
 : NULLOK only to suppress a compiler warning
@@ -1777,6 +1803,7 @@ ApdR	|bool	|sv_derived_from_sv|NN SV* sv|NN SV *namesv|U32 flags
 ApdR	|bool	|sv_derived_from_pv|NN SV* sv|NN const char *const name|U32 flags
 ApdR	|bool	|sv_derived_from_pvn|NN SV* sv|NN const char *const name \
                                     |const STRLEN len|U32 flags
+ApdRx	|bool	|sv_isa_sv	|NN SV* sv|NN SV* namesv
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
 ApdR	|bool	|sv_does_sv	|NN SV* sv|NN SV* namesv|U32 flags
 ApdR	|bool	|sv_does_pv	|NN SV* sv|NN const char *const name|U32 flags
@@ -1878,6 +1905,8 @@ EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 Ei	|void	|invlist_extend    |NN SV* const invlist|const UV len
 Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
 EiRT	|UV	|invlist_highest|NN SV* const invlist
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
 EiRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
 EiT	|void	|invlist_iterinit|NN SV* invlist
 EiRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
@@ -1983,8 +2012,8 @@ S	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN U8* ustrp					\
 				|NN STRLEN *lenp				\
 				|NN SV *invlist					\
-				|NN const int * const invmap			\
-				|NULLOK const unsigned int * const * const aux_tables	\
+				|NN const I32 * const invmap			\
+				|NULLOK const U32 * const * const aux_tables	\
 				|NULLOK const U8 * const aux_table_lengths	\
 				|NN const char * const normal
 S	|UV	|turkic_fc	|NN const U8 * const p |NN const U8 * const e|NN U8* ustrp|NN STRLEN *lenp
@@ -2021,8 +2050,8 @@ p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* a
 Cp	|void	|_force_out_malformed_utf8_message			    \
 		|NN const U8 *const p|NN const U8 * const e|const U32 flags \
 		|const bool die_here
-EXp	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
-EXp	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
+EXp	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen
+EXp	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen
 AdpR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
 AipdR	|IV	|utf8_distance	|NN const U8 *a|NN const U8 *b
 AipdRT	|U8*	|utf8_hop	|NN const U8 *s|SSize_t off
@@ -2081,8 +2110,8 @@ Cdp	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
 EXpR	|Size_t	|_inverse_folds	|const UV cp				    \
-				|NN unsigned int * first_folds_to	    \
-				|NN const unsigned int ** remaining_folds_to
+				|NN U32 * first_folds_to		    \
+				|NN const U32 ** remaining_folds_to
 : Used by Data::Alias
 EXp	|void	|vivify_defelem	|NN SV* sv
 : Used in pp.c
@@ -2686,14 +2715,13 @@ ES	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|U32 word_count|U32 flags|U32 depth
 ES	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
-ETSR	|const char *|cntrl_to_mnemonic|const U8 c
 ETSR	|int	|edit_distance	|NN const UV *src		    \
 				|NN const UV *tgt		    \
 				|const STRLEN x			    \
 				|const STRLEN y			    \
 				|const SSize_t maxDistance
 EpX	|SV *	|parse_uniprop_string|NN const char * const name	    \
-				     |const Size_t name_len		    \
+				     |Size_t name_len			    \
 				     |const bool is_utf8		    \
 				     |const bool to_fold		    \
 				     |const bool runtime		    \
@@ -2758,8 +2786,8 @@ ESR	|bool	|regtail_study	|NN RExC_state_t *pRExC_state \
 EXRp	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
 
-#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
-ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *strend|const UV cp
+#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+ERp	|bool	|is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *strend|const UV cp
 #endif
 
 #if defined(PERL_IN_REGEXEC_C)
@@ -3353,7 +3381,7 @@ ApTd	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t siz
 #endif
 
 #ifndef HAS_STRNLEN
-ApTd	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
+AipTd	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
 #endif
 
 #ifndef HAS_MKOSTEMP
@@ -3364,7 +3392,7 @@ pTo	|int	|my_mkstemp	|NN char *templte
 #endif
 
 APpdT	|bool	|isinfnan	|NV nv
-p	|bool	|isinfnansv	|NN SV *sv
+pd	|bool	|isinfnansv	|NN SV *sv
 
 #if !defined(HAS_SIGNBIT)
 AxdToP	|int	|Perl_signbit	|NV f

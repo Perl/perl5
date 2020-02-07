@@ -11,7 +11,6 @@ isIDCONT_LC                    # U
 isIDCONT_LC_uvchr              # U
 WARN_EXPERIMENTAL__REGEX_SETS  # E
 croak_popstack                 # F added by devel/scanprov
-form_short_octal_warning       # F added by devel/scanprov
 invlist_is_iterating           # F added by devel/scanprov
 invlist_iterfinish             # F added by devel/scanprov
 isFOO_utf8_lc                  # F added by devel/scanprov

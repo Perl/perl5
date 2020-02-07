@@ -16,8 +16,8 @@
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :
 : This file lists all API functions/macros that are provided purely
-: by Devel::PPPort, or that are unXXX It is in the same format as the F<embed.fnc> that
-: ships with the Perl source code.
+: by Devel::PPPort, or that are not public.  It is in the same format as the
+: F<embed.fnc> that ships with the Perl source code.
 :
 : Since these are used only to provide the argument types, it's ok to have the
 : return value be void for some where it's an issues
@@ -36,9 +36,8 @@ Amn|void|GV_NOADD_MASK
 Amn|void|IN_PERL_COMPILETIME
 Amn|void|NOOP
 Amn|void|PERL_BCDVERSION
-Amn|void|PERL_LOADMOD_DENY
-Amn|void|PERL_LOADMOD_IMPORT_OPS
-Amn|void|PERL_LOADMOD_NOIMPORT
+Amn|void|Perl_eval_pv
+Amn|void|Perl_eval_sv
 Amn|void|PERL_MAGIC_glob
 Amn|void|PERL_MAGIC_mutex
 Amn|void|PERL_MAGIC_overload
@@ -88,12 +87,12 @@ Amn|void|PL_sv_arenaroot
 Amn|void|PL_tainted
 Amn|void|PL_tainting
 Amn|void|PL_tokenbuf
+Amn|void|PL_Xpv
 Amn|void|PTRV
 Amn|void|SAVE_DEFSV
 Amn|void|START_EXTERN_C
 Amn|void|SV_CONST_RETURN
 Amn|void|SV_COW_SHARED_HASH_KEYS
-Amn|void|SVf
 Am|void|sv_magic_portable|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name|I32 namlen
 Amn|void|SV_MUTABLE_RETURN
 Amn|void|SV_UTF8_NO_ENCODING

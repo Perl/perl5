@@ -34,9 +34,9 @@ BEGIN {
     require 'inctools';
   }
 
-  if (45) {
+  if (63) {
     load();
-    plan(tests => 45);
+    plan(tests => 63);
   }
 }
 
@@ -122,9 +122,6 @@ my $foo = 'bar';
 ok(Devel::PPPort::sv_magic_portable($foo));
 ok($foo eq 'bar');
 
-if ( "$]" < '5.007003' ) {
-    skip 'skip: no SV_NOSTEAL support', 22;
-} else {
     tie my $scalar, 'TieScalarCounter', 10;
     my $fetch = $scalar;
 
@@ -153,7 +150,50 @@ if ( "$]" < '5.007003' ) {
     is Devel::PPPort::magic_SvNV_nomg($object), 5.5;
     is Devel::PPPort::magic_SvPV_nomg_nolen($object), 'string';
     ok !Devel::PPPort::magic_SvTRUE_nomg($object);
+
+tie my $negative, 'TieScalarCounter', -1;
+$fetch = $negative;
+
+is tied($negative)->{fetch}, 1;
+is tied($negative)->{store}, 0;
+is Devel::PPPort::magic_SvIV_nomg($negative), -1;
+if (ivers($]) >= ivers(5.6)) {
+    ok !Devel::PPPort::SVf_IVisUV($negative);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
 }
+is tied($negative)->{fetch}, 1;
+is tied($negative)->{store}, 0;
+Devel::PPPort::magic_SvUV_nomg($negative);
+if (ivers($]) >= ivers(5.6)) {
+    ok !Devel::PPPort::SVf_IVisUV($negative);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
+}
+is tied($negative)->{fetch}, 1;
+is tied($negative)->{store}, 0;
+
+tie my $big, 'TieScalarCounter', Devel::PPPort::above_IV_MAX();
+$fetch = $big;
+
+is tied($big)->{fetch}, 1;
+is tied($big)->{store}, 0;
+Devel::PPPort::magic_SvIV_nomg($big);
+if (ivers($]) >= ivers(5.6)) {
+    ok Devel::PPPort::SVf_IVisUV($big);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
+}
+is tied($big)->{fetch}, 1;
+is tied($big)->{store}, 0;
+is Devel::PPPort::magic_SvUV_nomg($big), Devel::PPPort::above_IV_MAX();
+if (ivers($]) >= ivers(5.6)) {
+    ok Devel::PPPort::SVf_IVisUV($big);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
+}
+is tied($big)->{fetch}, 1;
+is tied($big)->{store}, 0;
 
 package TieScalarCounter;
 

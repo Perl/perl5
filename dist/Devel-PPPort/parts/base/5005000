@@ -38,6 +38,7 @@ PL_laststatval                 # M added by devel/scanprov
 PL_mess_sv                     # M added by devel/scanprov
 PL_statcache                   # M added by devel/scanprov
 PL_Sv                          # M added by devel/scanprov
+PL_Xpv                         # M added by devel/scanprov
 START_EXTERN_C                 # M added by devel/scanprov
 add_data                       # F added by devel/scanprov
 ao                             # F added by devel/scanprov

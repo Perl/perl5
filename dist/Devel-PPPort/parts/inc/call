@@ -29,9 +29,18 @@ __UNDEFINED__  call_sv       perl_call_sv
 __UNDEFINED__  call_pv       perl_call_pv
 __UNDEFINED__  call_argv     perl_call_argv
 __UNDEFINED__  call_method   perl_call_method
-
 __UNDEFINED__  eval_sv       perl_eval_sv
+#if { VERSION >= 5.3.98 } && { VERSION < 5.6.0 }
+__UNDEFINED__  eval_pv       perl_eval_pv
+#endif
 /* Replace: 0 */
+
+#if { VERSION < 5.6.0 }
+__UNDEFINED__ Perl_eval_sv   perl_eval_sv
+#if { VERSION >= 5.3.98 }
+__UNDEFINED__ Perl_eval_pv   perl_eval_pv
+#endif
+#endif
 
 __UNDEFINED__ PERL_LOADMOD_DENY         0x1
 __UNDEFINED__ PERL_LOADMOD_NOIMPORT     0x2
@@ -81,8 +90,7 @@ __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS   0x4
 # endif
 #endif
 
-/* Replace perl_eval_pv with eval_pv */
-
+/* This is backport for Perl 5.3.97d and older which do not provide perl_eval_pv */
 #ifndef eval_pv
 #if { NEED eval_pv }
 
@@ -336,7 +344,7 @@ load_module(flags, name, version, ...)
                 Perl_load_module(aTHX_ flags, SvREFCNT_inc_simple(name),
                                  SvREFCNT_inc_simple(version), NULL);
 
-=tests plan => 86
+=tests plan => 88
 
 sub f
 {
@@ -399,6 +407,7 @@ ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"', 1); 1 });
 ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 0); 1 });
 ok(!eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 1); 1 });
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
+ok(!eval { Devel::PPPort::eval_pv('die False->new', 1); 1 }, 'check false value is rethrown');
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };
@@ -425,6 +434,7 @@ ok(eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"', &Devel::PPPor
 ok(eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"; die "string3"', 0); 1 });
 ok(!eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"; die "string3"', &Devel::PPPort::G_RETHROW); 1 });
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
+ok(!eval { Devel::PPPort::eval_sv('die False->new', &Devel::PPPort::G_RETHROW); 1 }, 'check false value is rethrown');
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };

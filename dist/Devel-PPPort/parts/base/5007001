@@ -33,6 +33,7 @@ SvUOK                          # U
 sv_utf8_upgrade                # E (Perl_sv_utf8_upgrade)
 UNICODE_REPLACEMENT            # E
 UNI_TO_NATIVE                  # U
+UTF8_CHECK_ONLY                # E
 UTF8_IS_INVARIANT              # U
 utf8_length                    # U
 utf8n_to_uvchr                 # U

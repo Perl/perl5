@@ -312,7 +312,6 @@ TODO:
     warn_uninit
     watchaddr
     watchok
-    Xpv
     Yes
 
 * have an --env option for soak to set env variable combinations

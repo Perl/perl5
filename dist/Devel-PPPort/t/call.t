@@ -34,9 +34,9 @@ BEGIN {
     require 'inctools';
   }
 
-  if (86) {
+  if (88) {
     load();
-    plan(tests => 86);
+    plan(tests => 88);
   }
 }
 
@@ -113,6 +113,7 @@ ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"', 1); 1 });
 ok(eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 0); 1 });
 ok(!eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"', 1); 1 });
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
+ok(!eval { Devel::PPPort::eval_pv('die False->new', 1); 1 }, 'check false value is rethrown');
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };
@@ -139,6 +140,7 @@ ok(eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"', &Devel::PPPor
 ok(eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"; die "string3"', 0); 1 });
 ok(!eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"; die "string3"', &Devel::PPPort::G_RETHROW); 1 });
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
+ok(!eval { Devel::PPPort::eval_sv('die False->new', &Devel::PPPort::G_RETHROW); 1 }, 'check false value is rethrown');
 
 if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
     my $hashref = { key => 'value' };

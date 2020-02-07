@@ -38,5 +38,4 @@ toLOWER_utf8_safe              # U
 toTITLE_utf8_safe              # U
 toUPPER_utf8_safe              # U
 _force_out_malformed_utf8_message # F added by devel/scanprov
-_is_grapheme                   # F added by devel/scanprov
 warn_on_first_deprecated_use   # F added by devel/scanprov

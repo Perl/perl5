@@ -5,6 +5,8 @@ ckwarn_d                       # U
 dMULTICALL                     # E
 doref                          # U
 gv_const_sv                    # U
+GV_NOADD_NOINIT                # E
+GV_NOEXPAND                    # E
 hv_eiter_p                     # U
 hv_eiter_set                   # U
 hv_name_set                    # U

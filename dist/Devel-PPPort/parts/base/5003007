@@ -54,6 +54,7 @@ gp_free                        # T
 gp_ref                         # T
 G_SCALAR                       # T
 GV_ADD                         # T
+GV_ADDMULTI                    # T
 GvAV                           # T
 gv_AVadd                       # T
 gv_check                       # T
@@ -172,7 +173,9 @@ Nullch                         # T
 Nullcv                         # T
 Nullhv                         # T
 Nullsv                         # T
+OPf_KIDS                       # T
 op_free                        # T
+OPpENTERSUB_AMPER              # T
 ORIGMARK                       # T
 OSNAME                         # T
 pad_alloc                      # T

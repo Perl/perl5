@@ -99,6 +99,8 @@ newATTRSUB                     # U
 newXS                          # E (Perl_newXS)
 newXSproto                     # E
 op_dump                        # U
+OPpEARLY_CV                    # E
+PERL_EXIT_EXPECTED             # E
 perl_parse                     # E (perl_parse)
 PERL_SYS_INIT3                 # U
 PL_check                       # E
@@ -150,7 +152,6 @@ SvPVutf8x                      # U
 SvPVutf8x_force                # U
 sv_rvweaken                    # U
 SvUOK                          # U
-SvUTF8                         # U
 sv_utf8_decode                 # U
 sv_utf8_downgrade              # U
 sv_utf8_encode                 # U

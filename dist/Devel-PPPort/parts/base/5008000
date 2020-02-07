@@ -1,5 +1,6 @@
 5.008000
 hv_iternext_flags              # U
+HV_ITERNEXT_WANTPLACEHOLDERS   # E
 hv_store_flags                 # U
 nothreadhook                   # U
 Poison                         # E

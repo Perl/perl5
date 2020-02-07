@@ -31,12 +31,12 @@ reg_named_buff_nextkey         # U
 reg_named_buff_scalar          # U
 savesharedpvn                  # U
 scan_vstring                   # E (Perl_scan_vstring)
+SVfARG                         # U
 SvRX                           # U
 SvRXOK                         # U
 upg_version                    # E (Perl_upg_version)
 GV_NOADD_MASK                  # M added by devel/scanprov
 SV_COW_SHARED_HASH_KEYS        # M added by devel/scanprov
-SVfARG                         # M added by devel/scanprov
 boot_core_mro                  # F added by devel/scanprov
 find_and_forget_pmops          # F added by devel/scanprov
 mro_get_linear_isa_dfs         # F added by devel/scanprov

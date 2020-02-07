@@ -65,10 +65,12 @@ is($bar->x(), 'foobar');
 Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 is($bar->x(), 'hacker');
 
-if ( "$]" < '5.007003' ) {
-    skip 'skip: no SV_NOSTEAL support', 10;
-} else {
-    ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+    if (ivers($]) != ivers(5.7.2)) {
+        ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+    }
+    else {
+        skip("7.2 broken for NOSTEAL", 1);
+    }
 
     tie my $scalar, 'TieScalarCounter', 'string';
 
@@ -85,7 +87,6 @@ if ( "$]" < '5.007003' ) {
     is tied($scalar)->{fetch}, 1;
     is tied($scalar)->{store}, 0;
     is $copy2, 'string';
-}
 
 package TieScalarCounter;
 

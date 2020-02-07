@@ -13,6 +13,7 @@ parser_dup                     # U
 pMY_CXT                        # E
 regdupe_internal               # U
 save_set_svflags               # U
+SVs_PADSTALE                   # E
 vcmp                           # U
 vnumify                        # U
 vstringify                     # U

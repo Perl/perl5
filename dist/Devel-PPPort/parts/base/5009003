@@ -7,6 +7,8 @@ dMULTICALL                     # E
 doref                          # U
 dVAR                           # E
 gv_const_sv                    # U
+GV_NOADD_NOINIT                # E
+GV_NOEXPAND                    # E
 gv_stashpvs                    # U
 hv_eiter_p                     # U
 hv_eiter_set                   # U

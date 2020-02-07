@@ -68,12 +68,13 @@ is(Devel::PPPort::sprintf_iv(-8), 'XX_-8_XX');
 is(Devel::PPPort::sprintf_uv(15), 'XX_15_XX');
 
 my $ivsize = $Config::Config{ivsize};
-my $ivmax = ($ivsize == 4) ? '2147483647' : ($ivsize == 8) ? '9223372036854775807' : 0;
-my $uvmax = ($ivsize == 4) ? '4294967295' : ($ivsize == 8) ? '18446744073709551615' : 0;
-if ($ivmax == 0) {
-    skip 'skip: unknown ivsize', 2;
-} else {
+if ($ivsize && ($ivsize == 4 || $ivsize == 8)) {
+    my $ivmax = ($ivsize == 4) ? '2147483647' : '9223372036854775807';
+    my $uvmax = ($ivsize == 4) ? '4294967295' : '18446744073709551615';
     is(Devel::PPPort::sprintf_ivmax(), $ivmax);
     is(Devel::PPPort::sprintf_uvmax(), $uvmax);
+}
+else {
+    skip 'skip: unknown ivsize', 2;
 }
 

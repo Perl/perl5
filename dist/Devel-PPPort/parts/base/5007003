@@ -25,6 +25,7 @@ my_socketpair                  # U
 OP_DESC                        # U
 OP_NAME                        # U
 perl_destruct                  # E (perl_destruct)
+PERL_EXIT_DESTRUCT_END         # E
 PerlIO_clearerr                # U (PerlIO_clearerr)
 PerlIO_close                   # U (PerlIO_close)
 PerlIO_eof                     # U (PerlIO_eof)

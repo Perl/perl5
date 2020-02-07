@@ -6,7 +6,7 @@ $Data::Dumper::Sortkeys=1;
 #
 # This program should be run when regenerating the data for ppport.h
 # (devel/regenerate).  It should be run after parts/embed.fnc is updated, and
-# after mkapidoc.sh has been run.
+# after mkapidoc.pl has been run.
 #
 # Its purpose is to generate ppport.fnc, a file which has the same syntax as
 # embed.fnc and apidoc.fnc, but contains entries that should only be tested
@@ -151,8 +151,8 @@ print OUT <<EOF;
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :
 : This file lists all API functions/macros that are provided purely
-: by Devel::PPPort, or that are unXXX It is in the same format as the F<embed.fnc> that
-: ships with the Perl source code.
+: by Devel::PPPort, or that are not public.  It is in the same format as the
+: F<embed.fnc> that ships with the Perl source code.
 :
 : Since these are used only to provide the argument types, it's ok to have the
 : return value be void for some where it's an issues

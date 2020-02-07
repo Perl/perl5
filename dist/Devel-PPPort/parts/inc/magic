@@ -33,12 +33,21 @@ __UNDEFINED__  sv_catsv_nomg      sv_catsv
 __UNDEFINED__  sv_setsv_nomg      sv_setsv
 __UNDEFINED__  sv_pvn_nomg        sv_pvn
 
-#ifdef SV_NOSTEAL
+#ifdef SVf_IVisUV
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+__UNDEFINED__ SvIV_nomg(sv) (!SvGMAGICAL((sv)) ? SvIV((sv)) : ({ SV *_sviv = sv_mortalcopy_flags((sv), SV_NOSTEAL); IV _iv = SvIV(_sviv); SvFLAGS((sv)) = (SvFLAGS((sv)) & ~SVf_IVisUV) | (SvFLAGS(_sviv) & SVf_IVisUV); _iv; }))
+__UNDEFINED__ SvUV_nomg(sv) (!SvGMAGICAL((sv)) ? SvUV((sv)) : ({ SV *_svuv = sv_mortalcopy_flags((sv), SV_NOSTEAL); UV _uv = SvUV(_svuv); SvFLAGS((sv)) = (SvFLAGS((sv)) & ~SVf_IVisUV) | (SvFLAGS(_svuv) & SVf_IVisUV); _uv; }))
+#else
+__UNDEFINED__ SvIV_nomg(sv) (!SvGMAGICAL((sv)) ? SvIV((sv)) : ((PL_Sv = sv_mortalcopy_flags((sv), SV_NOSTEAL)), sv_upgrade(PL_Sv, SVt_PVIV), (SvIVX(PL_Sv) = SvIV(PL_Sv)), (SvFLAGS((sv)) = (SvFLAGS((sv)) & ~SVf_IVisUV) | (SvFLAGS(PL_Sv) & SVf_IVisUV)), SvIVX(PL_Sv)))
+__UNDEFINED__ SvUV_nomg(sv) (!SvGMAGICAL((sv)) ? SvIV((sv)) : ((PL_Sv = sv_mortalcopy_flags((sv), SV_NOSTEAL)), sv_upgrade(PL_Sv, SVt_PVIV), (SvUVX(PL_Sv) = SvUV(PL_Sv)), (SvFLAGS((sv)) = (SvFLAGS((sv)) & ~SVf_IVisUV) | (SvFLAGS(PL_Sv) & SVf_IVisUV)), SvUVX(PL_Sv)))
+#endif
+#else
 __UNDEFINED__ SvIV_nomg(sv) (!SvGMAGICAL((sv)) ? SvIV((sv)) : SvIVx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
 __UNDEFINED__ SvUV_nomg(sv) (!SvGMAGICAL((sv)) ? SvUV((sv)) : SvUVx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
+#endif
+
 __UNDEFINED__ SvNV_nomg(sv) (!SvGMAGICAL((sv)) ? SvNV((sv)) : SvNVx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
 __UNDEFINED__ SvTRUE_nomg(sv) (!SvGMAGICAL((sv)) ? SvTRUE((sv)) : SvTRUEx(sv_mortalcopy_flags((sv), SV_NOSTEAL)))
-#endif
 
 #ifndef sv_catpv_mg
 #  define sv_catpv_mg(sv, ptr)          \
@@ -491,6 +500,25 @@ sv_magic_portable(sv)
         OUTPUT:
                 RETVAL
 
+UV
+above_IV_MAX()
+        CODE:
+                RETVAL = (UV)IV_MAX+100;
+        OUTPUT:
+                RETVAL
+
+#ifdef SVf_IVisUV
+
+U32
+SVf_IVisUV(sv)
+        SV *sv
+        CODE:
+                RETVAL = (SvFLAGS(sv) & SVf_IVisUV);
+        OUTPUT:
+                RETVAL
+
+#endif
+
 #ifdef SvIV_nomg
 
 IV
@@ -551,7 +579,7 @@ magic_SvPV_nomg_nolen(sv)
 
 #endif
 
-=tests plan => 45
+=tests plan => 63
 
 # Find proper magic
 ok(my $obj1 = Devel::PPPort->new_with_mg());
@@ -623,9 +651,6 @@ my $foo = 'bar';
 ok(Devel::PPPort::sv_magic_portable($foo));
 ok($foo eq 'bar');
 
-if ( "$]" < '5.007003' ) {
-    skip 'skip: no SV_NOSTEAL support', 22;
-} else {
     tie my $scalar, 'TieScalarCounter', 10;
     my $fetch = $scalar;
 
@@ -654,7 +679,50 @@ if ( "$]" < '5.007003' ) {
     is Devel::PPPort::magic_SvNV_nomg($object), 5.5;
     is Devel::PPPort::magic_SvPV_nomg_nolen($object), 'string';
     ok !Devel::PPPort::magic_SvTRUE_nomg($object);
+
+tie my $negative, 'TieScalarCounter', -1;
+$fetch = $negative;
+
+is tied($negative)->{fetch}, 1;
+is tied($negative)->{store}, 0;
+is Devel::PPPort::magic_SvIV_nomg($negative), -1;
+if (ivers($]) >= ivers(5.6)) {
+    ok !Devel::PPPort::SVf_IVisUV($negative);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
 }
+is tied($negative)->{fetch}, 1;
+is tied($negative)->{store}, 0;
+Devel::PPPort::magic_SvUV_nomg($negative);
+if (ivers($]) >= ivers(5.6)) {
+    ok !Devel::PPPort::SVf_IVisUV($negative);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
+}
+is tied($negative)->{fetch}, 1;
+is tied($negative)->{store}, 0;
+
+tie my $big, 'TieScalarCounter', Devel::PPPort::above_IV_MAX();
+$fetch = $big;
+
+is tied($big)->{fetch}, 1;
+is tied($big)->{store}, 0;
+Devel::PPPort::magic_SvIV_nomg($big);
+if (ivers($]) >= ivers(5.6)) {
+    ok Devel::PPPort::SVf_IVisUV($big);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
+}
+is tied($big)->{fetch}, 1;
+is tied($big)->{store}, 0;
+is Devel::PPPort::magic_SvUV_nomg($big), Devel::PPPort::above_IV_MAX();
+if (ivers($]) >= ivers(5.6)) {
+    ok Devel::PPPort::SVf_IVisUV($big);
+} else {
+    skip 'SVf_IVisUV is unsupported', 1;
+}
+is tied($big)->{fetch}, 1;
+is tied($big)->{store}, 0;
 
 package TieScalarCounter;
 

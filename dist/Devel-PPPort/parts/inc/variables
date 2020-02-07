@@ -18,6 +18,7 @@ PL_DBsingle
 PL_DBsub
 PL_DBtrace
 PL_Sv
+PL_Xpv
 PL_bufend
 PL_bufptr
 PL_compiling
@@ -98,6 +99,7 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_DBsub                  DBsub
 #  define PL_DBtrace                DBtrace
 #  define PL_Sv                     Sv
+#  define PL_Xpv                    Xpv
 #  define PL_bufend                 bufend
 #  define PL_bufptr                 bufptr
 #  define PL_compiling              compiling

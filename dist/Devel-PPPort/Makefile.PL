@@ -38,13 +38,16 @@ unless ($ENV{'PERL_CORE'}) {
 @ARGV = map { /^--with-(apicheck)$/ && ++$opt{$1} ? () : $_ } @ARGV;
 
 my %mf = (
-  NAME          => 'Devel::PPPort',
-  VERSION_FROM  => 'PPPort_pm.PL',
-  PM            => { 'PPPort.pm' => '$(INST_LIBDIR)/PPPort.pm' },
-  H             => [ qw(ppport.h) ],
-  OBJECT        => 'RealPPPort$(OBJ_EXT) $(O_FILES)',
-  XSPROTOARG    => '-noprototypes',
-  CONFIGURE     => \&configure,
+  NAME           => 'Devel::PPPort',
+  VERSION_FROM   => 'PPPort_pm.PL',
+  PM             => { 'PPPort.pm' => '$(INST_LIBDIR)/PPPort.pm' },
+  H              => [ qw(ppport.h) ],
+  OBJECT         => 'RealPPPort$(OBJ_EXT) $(O_FILES)',
+  XSPROTOARG     => '-noprototypes',
+  CONFIGURE      => \&configure,
+  BUILD_REQUIRES => {
+    "FindBin" => "0",
+  },
 );
 WriteMakefile(%mf);
 

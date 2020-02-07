@@ -54,30 +54,30 @@ package main;
 
 use vars qw($my_sv @my_av %my_hv);
 
-ok(&Devel::PPPort::boolSV(1));
-ok(!&Devel::PPPort::boolSV(0));
+ok(&Devel::PPPort::boolSV(1), "Verify boolSV(1) is true");
+ok(!&Devel::PPPort::boolSV(0), "Verify boolSV(0) is false");
 
 $_ = "Fred";
-is(&Devel::PPPort::DEFSV(), "Fred");
-is(&Devel::PPPort::UNDERBAR(), "Fred");
+is(&Devel::PPPort::DEFSV(), "Fred", '$_ is FRED; Verify DEFSV is FRED');
+is(&Devel::PPPort::UNDERBAR(), "Fred", 'And verify UNDERBAR is FRED');
 
 if (ivers($]) >= ivers(5.9.2) && ivers($]) < ivers(5.23)) {
   eval q{
     no warnings "deprecated";
-    no if $^V > v5.17.9, warnings => "experimental::lexical_topic";
+    no if $^V >= v5.17.9, warnings => "experimental::lexical_topic";
     my $_ = "Tony";
-    is(&Devel::PPPort::DEFSV(), "Fred");
-    is(&Devel::PPPort::UNDERBAR(), "Tony");
+    is(&Devel::PPPort::DEFSV(), "Fred", 'lexical_topic eval: $_ is Tony; Verify DEFSV is Fred');
+    is(&Devel::PPPort::UNDERBAR(), "Tony", 'And verify UNDERBAR is Tony');
   };
+  die __FILE__ . __LINE__ . ": $@" if $@;
 }
 else {
-  ok(1);
-  ok(1);
+  skip("perl version outside testing range of lexical_topic", 2);
 }
 
 my @r = &Devel::PPPort::DEFSV_modify();
 
-ok(@r == 3);
+ok(@r == 3, "Verify got 3 elements");
 is($r[0], 'Fred');
 is($r[1], 'DEFSV');
 is($r[2], 'Fred');
@@ -85,9 +85,9 @@ is($r[2], 'Fred');
 is(&Devel::PPPort::DEFSV(), "Fred");
 
 eval { 1 };
-ok(!&Devel::PPPort::ERRSV());
+ok(!&Devel::PPPort::ERRSV(), "Verify ERRSV on true is false");
 eval { cannot_call_this_one() };
-ok(&Devel::PPPort::ERRSV());
+ok(&Devel::PPPort::ERRSV(), "Verify ERRSV on false is true");
 
 ok(&Devel::PPPort::gv_stashpvn('Devel::PPPort', 0));
 ok(!&Devel::PPPort::gv_stashpvn('does::not::exist', 0));
@@ -121,8 +121,8 @@ is(Devel::PPPort::prepush(), 42);
 is(join(':', Devel::PPPort::xsreturn(0)), 'test1');
 is(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
 
-is(Devel::PPPort::PERL_ABS(42), 42);
-is(Devel::PPPort::PERL_ABS(-13), 13);
+is(Devel::PPPort::PERL_ABS(42), 42, "Verify PERL_ABS(42) is 42");
+is(Devel::PPPort::PERL_ABS(-13), 13, "Verify PERL_ABS(-13) is 13");
 
 is(Devel::PPPort::SVf(42), ivers($]) >= ivers(5.4) ? '[42]' : '42');
 is(Devel::PPPort::SVf('abc'), ivers($]) >= ivers(5.4) ? '[abc]' : 'abc');
@@ -153,7 +153,7 @@ if (ivers($]) < ivers(5.5)) {
         skip 'no qr// objects in this perl', 2;
 } else {
         my $qr = eval 'qr/./';
-        ok(Devel::PPPort::SvRXOK($qr));
+        ok(Devel::PPPort::SvRXOK($qr), "SVRXOK(qr) is true");
         ok(Devel::PPPort::SvRXOK(bless $qr, "Surprise"));
 }
 
@@ -162,7 +162,7 @@ ok( Devel::PPPort::NATIVE_TO_LATIN1(0x1) == 0x1);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("A")) == 0x41);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("0")) == 0x30);
 
-ok( Devel::PPPort::LATIN1_TO_NATIVE(0xB6) == 0xB6);
+ok( Devel::PPPort::LATIN1_TO_NATIVE(0xB6) == 0xB6, "Verify LATIN1_TO_NATIVE(0xB6) is 0xB6");
 if (ord("A") == 65) {
     ok( Devel::PPPort::LATIN1_TO_NATIVE(0x41) == 0x41);
     ok( Devel::PPPort::LATIN1_TO_NATIVE(0x30) == 0x30);
@@ -176,14 +176,14 @@ ok(  Devel::PPPort::isALNUMC_L1(ord("5")));
 ok(  Devel::PPPort::isALNUMC_L1(0xFC));
 ok(! Devel::PPPort::isALNUMC_L1(0xB6));
 
-ok(  Devel::PPPort::isOCTAL(ord("7")));
-ok(! Devel::PPPort::isOCTAL(ord("8")));
+ok(  Devel::PPPort::isOCTAL(ord("7")), "Verify '7' is OCTAL");
+ok(! Devel::PPPort::isOCTAL(ord("8")), "Verify '8' isn't OCTAL");
 
-ok(  Devel::PPPort::isOCTAL_A(ord("0")));
-ok(! Devel::PPPort::isOCTAL_A(ord("9")));
+ok(  Devel::PPPort::isOCTAL_A(ord("0")), "Verify '0' is OCTAL_A");
+ok(! Devel::PPPort::isOCTAL_A(ord("9")), "Verify '9' isn't OCTAL_A");
 
-ok(  Devel::PPPort::isOCTAL_L1(ord("2")));
-ok(! Devel::PPPort::isOCTAL_L1(ord("8")));
+ok(  Devel::PPPort::isOCTAL_L1(ord("2")), "Verify '2' is OCTAL_L1");
+ok(! Devel::PPPort::isOCTAL_L1(ord("8")), "Verify '8' isn't OCTAL_L1");
 
 my $way_too_early_msg = 'UTF-8 not implemented on this perl';
 
@@ -283,7 +283,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                    XDIGIT))
     {
         if ($i < 256) {  # For the ones that can fit in a byte, test each of
-                         #three macros.
+                         # three macros.
             my $suffix;
             for $suffix ("", "_A", "_L1", "_uvchr") {
                 my $should_be = ($i > 0x7F && $suffix !~ /_(uvchr|L1)/)
@@ -295,6 +295,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 }
 
                 my $eval_string = "Devel::PPPort::is${class}$suffix($hex)";
+                local $SIG{__WARN__} = sub {};
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i: $eval_string' gave $@" if $@;
                 is($is, $should_be, "'$eval_string'");
@@ -324,10 +325,10 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 skip $skip, 1;
             }
             else {
-                $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
+                $utf8 = quotemeta Devel::PPPort::uvchr_to_utf8($native);
                 my $should_be = $types{"$native:$class"} || 0;
-                local $SIG{__WARN__} = sub {};
                 my $eval_string = "$fcn(\"$utf8\", 0)";
+                local $SIG{__WARN__} = sub {};
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i, $eval_string' gave $@" if $@;
                 is($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
@@ -344,7 +345,8 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 }
                 else {
                     my $eval_string = "$fcn(\"$utf8\", -1)";
-                    my $is = eval "no warnings; $eval_string" || 0;
+                    local $SIG{__WARN__} = sub {};
+                    my $is = eval "$eval_string" || 0;
                     die "eval '$eval_string' gave $@" if $@;
                     is($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
                 }
@@ -354,23 +356,30 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
 }
 
 my %case_changing = ( 'LOWER' => [ [ ord('A'), ord('a') ],
-                                   [ 0xC0, 0xE0 ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xC0),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xE0) ],
                                    [ 0x100, 0x101 ],
                                  ],
                       'FOLD'  => [ [ ord('C'), ord('c') ],
-                                   [ 0xC0, 0xE0 ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xC0),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xE0) ],
                                    [ 0x104, 0x105 ],
-                                   [ 0xDF, 'ss' ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xDF),
+                                     'ss' ],
                                  ],
-                      'UPPER' => [ [ ord('a'),ord('A'),  ],
-                                   [ 0xE0, 0xC0 ],
+                      'UPPER' => [ [ ord('a'), ord('A'),  ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xE0),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xC0) ],
                                    [ 0x101, 0x100 ],
-                                   [ 0xDF, 'SS' ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xDF),
+                                     'SS' ],
                                  ],
-                      'TITLE' => [ [ ord('c'),ord('C'),  ],
-                                   [ 0xE2, 0xC2 ],
+                      'TITLE' => [ [ ord('c'), ord('C'),  ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xE2),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xC2) ],
                                    [ 0x103, 0x102 ],
-                                   [ 0xDF, 'Ss' ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xDF),
+                                     'Ss' ],
                                  ],
                     );
 
@@ -387,11 +396,11 @@ for $name (keys %case_changing) {
         my $should_be_bytes;
         if (ivers($]) >= ivers(5.6)) {
             if ($is_cp) {
-                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $utf8_changed = Devel::PPPort::uvchr_to_utf8($changed);
                 $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
             }
             else {
-                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if eval '$utf8_changed =~ /[[:^ascii:]]/';
                 $should_be_bytes = length $utf8_changed;
             }
         }
@@ -410,11 +419,12 @@ for $name (keys %case_changing) {
         }
         else {
             if ($is_cp) {
-                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $utf8_changed = Devel::PPPort::uvchr_to_utf8($changed);
                 $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
             }
             else {
-                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                my $non_ascii_re = (ivers($]) >= ivers(5.6)) ? '[[:^ascii:]]' : '[^\x00-\x7F]';
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if eval '$utf8_changed =~ /$non_ascii_re/';
                 $should_be_bytes = length $utf8_changed;
             }
 
@@ -455,7 +465,7 @@ for $name (keys %case_changing) {
             }
             else {
                 my $fcn = "to${name}_utf8_safe";
-                my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($original);
+                my $utf8 = quotemeta Devel::PPPort::uvchr_to_utf8($original);
                 my $real_truncate = ($truncate < 2)
                                     ? $truncate : $should_be_bytes;
                 my $eval_string = "Devel::PPPort::$fcn(\"$utf8\", $real_truncate)";

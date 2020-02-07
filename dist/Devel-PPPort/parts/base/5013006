@@ -50,6 +50,8 @@ op_prepend_elem                # U
 parse_stmtseq                  # U
 PERL_MAGIC_checkcall           # E
 rv2cv_op_cv                    # U
+RV2CVOPCV_MARK_EARLY           # E
+RV2CVOPCV_RETURN_NAME_GV       # E
 savesharedpvs                  # U
 savesharedsvpv                 # U
 sv_2bool_flags                 # U

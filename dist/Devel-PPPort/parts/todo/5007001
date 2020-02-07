@@ -27,6 +27,7 @@ sv_force_normal_flags          # U
 sv_setref_uv                   # U
 sv_unref_flags                 # U
 sv_utf8_upgrade                # E (Perl_sv_utf8_upgrade)
+UTF8_CHECK_ONLY                # E
 utf8_length                    # U
 utf8n_to_uvchr                 # U
 uvchr_to_utf8                  # U

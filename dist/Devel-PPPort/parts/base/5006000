@@ -82,8 +82,13 @@ newXS                          # E (Perl_newXS)
 newXSproto                     # E
 NVTYPE                         # E
 op_dump                        # E
+OPpEARLY_CV                    # E
+PERL_EXIT_EXPECTED             # E
 PerlIO_printf                  # E
 PerlIO_stdoutf                 # E
+PERL_LOADMOD_DENY              # E
+PERL_LOADMOD_IMPORT_OPS        # E
+PERL_LOADMOD_NOIMPORT          # E
 perl_parse                     # E (perl_parse)
 PERL_REVISION                  # E
 PERL_SUBVERSION                # E
@@ -126,6 +131,7 @@ sv_2pvutf8                     # U
 sv_2pvutf8_nolen               # U
 sv_catpvf                      # E (Perl_sv_catpvf)
 sv_catpvf_mg                   # E (Perl_sv_catpvf_mg)
+SVf                            # E
 sv_force_normal                # U
 SVf_UTF8                       # E
 SvIOK_notUV                    # E
@@ -266,7 +272,6 @@ PL_ppaddr                      # M added by devel/scanprov
 pTHX_                          # M added by devel/scanprov
 PTRV                           # M added by devel/scanprov
 sv_catpvf_mg_nocontext         # M added by devel/scanprov
-SVf                            # M added by devel/scanprov
 sv_setpvf_mg_nocontext         # M added by devel/scanprov
 warn_nocontext                 # M added by devel/scanprov
 XSprePUSH                      # M added by devel/scanprov

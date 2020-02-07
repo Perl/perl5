@@ -63,11 +63,11 @@ else {
   # Try loading Test::Pod
   eval q{
     use Test::Pod;
-    $Test::Pod::VERSION >= 0.95
+    $Test::Pod::VERSION >= 1.41
         or die "Test::Pod version only $Test::Pod::VERSION";
     import Test::Pod tests => scalar @pods;
   };
-  $reason = 'Test::Pod >= 0.95 required' if $@;
+  $reason = 'Test::Pod >= 1.41 required' if $@;
 }
 
 if ($reason) {

@@ -73,7 +73,7 @@ my %seen;
 %seen =  map { $seen{$_->{name}}++; } @embeds;
 my @bads = grep { $seen{$_} > 1 } keys %seen;
 if (@bads) {
-    print "The following items have multiple entries in the part/*.fnc files.\n",
+    print "The following items have multiple entries in the parts/*.fnc files.\n",
           " Regenerate apidoc.fnc, then ppport.fnc and try again.  If this\n",
           " doesn't work, choose the best version for each symbol and delete\n",
           " the others: ",

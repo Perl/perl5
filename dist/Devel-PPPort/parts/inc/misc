@@ -50,7 +50,7 @@ __UNDEFINED__ __ASSERT_(statement)  assert(statement),
 __UNDEFINED__ __ASSERT_(statement)
 #endif
 
-/* These could become provided when they become part of the public API */
+/* These could become provided if/when they become part of the public API */
 __UNDEF_NOT_PROVIDED__ withinCOUNT(c, l, n)                                    \
    (((WIDEST_UTYPE) (((c)) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0))))
 __UNDEF_NOT_PROVIDED__ inRANGE(c, l, u)                                        \
@@ -58,6 +58,12 @@ __UNDEF_NOT_PROVIDED__ inRANGE(c, l, u)                                        \
     : (sizeof(c) == sizeof(U16)) ? withinCOUNT(((U16) (c)), (l), ((u) - (l)))  \
     : (sizeof(c) == sizeof(U32)) ? withinCOUNT(((U32) (c)), (l), ((u) - (l)))  \
     : (withinCOUNT(((WIDEST_UTYPE) (c)), (l), ((u) - (l)))))
+
+/* The '| 0' part ensures a compiler error if c is not integer (like e.g., a
+ * pointer) */
+#undef FITS_IN_8_BITS   /* handy.h version uses a core-only constant */
+__UNDEF_NOT_PROVIDED__ FITS_IN_8_BITS(c) (   (sizeof(c) == 1)               \
+                                    || !(((WIDEST_UTYPE)((c) | 0)) & ~0xFF))
 
 /* Create the macro for "is'macro'_utf8_safe(s, e)".  For code points below
  * 256, it calls the equivalent _L1 macro by converting the UTF-8 to code
@@ -575,10 +581,10 @@ __UNDEFINED__ isALPHANUMERIC_L1(c) (isALPHA_L1(c) || isDIGIT(c))
 __UNDEFINED__ isALPHANUMERIC_LC(c) (isALPHA_LC(c) || isDIGIT_LC(c))
 __UNDEFINED__ isBLANK(c)        ((c) == ' ' || (c) == '\t')
 __UNDEFINED__ isBLANK_L1(c) (    isBLANK(c)                                    \
-                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                             || (   FITS_IN_8_BITS(c)                          \
                                  && NATIVE_TO_LATIN1((U8) c) == 0xA0))
 __UNDEFINED__ isBLANK_LC(c)     isBLANK(c)
-__UNDEFINED__ isDIGIT(c)        ((c) <= '9' && (c) >= '0')
+__UNDEFINED__ isDIGIT(c)        inRANGE(c, '0', '9')
 __UNDEFINED__ isDIGIT_L1(c)     isDIGIT(c)
 __UNDEFINED__ isGRAPH(c)        (isWORDCHAR(c) || isPUNCT(c))
 __UNDEFINED__ isGRAPH_L1(c)     (   isPRINT_L1(c)                              \
@@ -591,7 +597,7 @@ __UNDEFINED__ isIDFIRST(c)      (isALPHA(c) || (c) == '_')
 __UNDEFINED__ isIDFIRST_L1(c)   (isALPHA_L1(c) || (U8) (c) == '_')
 __UNDEFINED__ isIDFIRST_LC(c)   (isALPHA_LC(c) || (U8) (c) == '_')
 __UNDEFINED__ isLOWER_L1(c) (    isLOWER(c)                                    \
-                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                             || (   FITS_IN_8_BITS(c)                          \
                                  && (  (   NATIVE_TO_LATIN1((U8) c) >= 0xDF    \
                                         && NATIVE_TO_LATIN1((U8) c) != 0xF7)   \
                                      || NATIVE_TO_LATIN1((U8) c) == 0xAA       \
@@ -600,7 +606,7 @@ __UNDEFINED__ isLOWER_L1(c) (    isLOWER(c)                                    \
 __UNDEFINED__ isOCTAL(c)        (((WIDEST_UTYPE)((c)) & ~7) == '0')
 __UNDEFINED__ isOCTAL_L1(c)     isOCTAL(c)
 __UNDEFINED__ isPRINT(c)        (isGRAPH(c) || (c) == ' ')
-__UNDEFINED__ isPRINT_L1(c)     ((WIDEST_UTYPE) (c) < 256 && ! isCNTRL_L1(c))
+__UNDEFINED__ isPRINT_L1(c)     (FITS_IN_8_BITS(c) && ! isCNTRL_L1(c))
 __UNDEFINED__ isPSXSPC(c)       isSPACE(c)
 __UNDEFINED__ isPSXSPC_L1(c)    isSPACE_L1(c)
 __UNDEFINED__ isPUNCT(c)    (   (c) == '-' || (c) == '!' || (c) == '"'         \
@@ -615,7 +621,7 @@ __UNDEFINED__ isPUNCT(c)    (   (c) == '-' || (c) == '!' || (c) == '"'         \
                              || (c) == '`' || (c) == '{' || (c) == '|'         \
                              || (c) == '}' || (c) == '~')
 __UNDEFINED__ isPUNCT_L1(c)  (    isPUNCT(c)                                   \
-                              || (   (WIDEST_UTYPE) (c) < 256                  \
+                              || (  FITS_IN_8_BITS(c)                          \
                                   && (   NATIVE_TO_LATIN1((U8) c) == 0xA1      \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xA7      \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xAB      \
@@ -626,11 +632,11 @@ __UNDEFINED__ isPUNCT_L1(c)  (    isPUNCT(c)                                   \
 __UNDEFINED__ isSPACE(c)        (   isBLANK(c) || (c) == '\n' || (c) == '\r'   \
                                  || (c) == '\v' || (c) == '\f')
 __UNDEFINED__ isSPACE_L1(c) (    isSPACE(c)                                    \
-                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                             || (FITS_IN_8_BITS(c)                             \
                                  && (   NATIVE_TO_LATIN1((U8) c) == 0x85       \
                                      || NATIVE_TO_LATIN1((U8) c) == 0xA0)))
 __UNDEFINED__ isUPPER_L1(c) (   isUPPER(c)                                     \
-                             || (   (WIDEST_UTYPE) (c) < 256                   \
+                             || (FITS_IN_8_BITS(c)                             \
                                  && (   NATIVE_TO_LATIN1((U8) c) >= 0xC0       \
                                      && NATIVE_TO_LATIN1((U8) c) <= 0xDE       \
                                      && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
@@ -665,20 +671,27 @@ __UNDEFINED__ isWORDCHAR_A(c)	   isWORDCHAR(c)
 __UNDEFINED__ isXDIGIT_A(c)	   isXDIGIT(c)
 
 __UNDEFINED__ isASCII_utf8_safe(s,e)  (((e) - (s)) <= 0 ? 0 : isASCII(*(s)))
-__UNDEFINED__ isASCII_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isASCII_L1(c) : 0)
+__UNDEFINED__ isASCII_uvchr(c)    (FITS_IN_8_BITS(c) ? isASCII_L1(c) : 0)
 
 #if { VERSION >= 5.006 }
-
-__UNDEFINED__ isALPHA_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isALPHA_L1(c) : is_uni_alpha((UV) (c)))
-__UNDEFINED__ isALPHANUMERIC_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                 \
-    ? isALPHANUMERIC_L1(c) : (is_uni_alpha((UV) (c)) || is_uni_digit((UV) (c))))
-#  ifdef is_uni_blank
-__UNDEFINED__ isBLANK_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isBLANK_L1(c) : is_uni_blank((UV) (c)))
+#  ifdef isALPHA_uni    /* If one defined, all are; this is just an exemplar */
+#    define D_PPP_is_ctype(upper, lower, c)                                 \
+        (FITS_IN_8_BITS(c)                                                  \
+        ? is ## upper ## _L1(c)                                             \
+        : is ## upper ## _uni((UV) (c)))    /* _uni is old synonym */
 #  else
-__UNDEFINED__ isBLANK_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                   \
+#    define D_PPP_is_ctype(upper, lower, c)                                 \
+        (FITS_IN_8_BITS(c)                                                  \
+        ? is ## upper ## _L1(c)                                             \
+        : is_uni_ ## lower((UV) (c)))     /* is_uni_ is even older */
+#  endif
+
+__UNDEFINED__ isALPHA_uvchr(c)    D_PPP_is_ctype(ALPHA, alpha, c)
+__UNDEFINED__ isALPHANUMERIC_uvchr(c) (isALPHA_uvchr(c) || isDIGIT_uvchr(c))
+#  ifdef is_uni_blank
+__UNDEFINED__ isBLANK_uvchr(c)    D_PPP_is_ctype(BLANK, blank, c)
+#  else
+__UNDEFINED__ isBLANK_uvchr(c)  (FITS_IN_8_BITS(c)                          \
                                  ? isBLANK_L1(c)                            \
                                  : (   (UV) (c) == 0x1680 /* Unicode 3.0 */ \
                                     || inRANGE((UV) (c), 0x2000, 0x200A)    \
@@ -686,30 +699,20 @@ __UNDEFINED__ isBLANK_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                   \
                                     || (UV) (c) == 0x205F  /* Unicode 3.2 */\
                                     || (UV) (c) == 0x3000))
 #  endif
-__UNDEFINED__ isCNTRL_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isCNTRL_L1(c) : is_uni_cntrl((UV) (c)))
-__UNDEFINED__ isDIGIT_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isDIGIT_L1(c) : is_uni_digit((UV) (c)))
-__UNDEFINED__ isGRAPH_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isGRAPH_L1(c) : is_uni_graph((UV) (c)))
-__UNDEFINED__ isIDCONT_uvchr(c)    isWORDCHAR_uvchr(c)
-__UNDEFINED__ isIDFIRST_uvchr(c)  ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isIDFIRST_L1(c) : is_uni_idfirst((UV) (c)))
-__UNDEFINED__ isLOWER_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isLOWER_L1(c) : is_uni_lower((UV) (c)))
-__UNDEFINED__ isPRINT_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isPRINT_L1(c) : is_uni_print((UV) (c)))
+__UNDEFINED__ isCNTRL_uvchr(c)    D_PPP_is_ctype(CNTRL, cntrl, c)
+__UNDEFINED__ isDIGIT_uvchr(c)    D_PPP_is_ctype(DIGIT, digit, c)
+__UNDEFINED__ isGRAPH_uvchr(c)    D_PPP_is_ctype(GRAPH, graph, c)
+__UNDEFINED__ isIDCONT_uvchr(c)   isWORDCHAR_uvchr(c)
+__UNDEFINED__ isIDFIRST_uvchr(c)  D_PPP_is_ctype(IDFIRST, idfirst, c)
+__UNDEFINED__ isLOWER_uvchr(c)    D_PPP_is_ctype(LOWER, lower, c)
+__UNDEFINED__ isPRINT_uvchr(c)    D_PPP_is_ctype(PRINT, print, c)
 __UNDEFINED__ isPSXSPC_uvchr(c)   isSPACE_uvchr(c)
-__UNDEFINED__ isPUNCT_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isPUNCT_L1(c) : is_uni_punct((UV) (c)))
-__UNDEFINED__ isSPACE_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isSPACE_L1(c) : is_uni_space((UV) (c)))
-__UNDEFINED__ isUPPER_uvchr(c)    ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isUPPER_L1(c) : is_uni_upper((UV) (c)))
-__UNDEFINED__ isXDIGIT_uvchr(c)   ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isXDIGIT_L1(c) : is_uni_xdigit((UV) (c)))
-__UNDEFINED__ isWORDCHAR_uvchr(c) ((WIDEST_UTYPE) (c) < 256                 \
-                                   ? isWORDCHAR_L1(c) : is_uni_alnum((UV) (c)))
+__UNDEFINED__ isPUNCT_uvchr(c)    D_PPP_is_ctype(PUNCT, punct, c)
+__UNDEFINED__ isSPACE_uvchr(c)    D_PPP_is_ctype(SPACE, space, c)
+__UNDEFINED__ isUPPER_uvchr(c)    D_PPP_is_ctype(UPPER, upper, c)
+__UNDEFINED__ isXDIGIT_uvchr(c)   D_PPP_is_ctype(XDIGIT, xdigit, c)
+__UNDEFINED__ isWORDCHAR_uvchr(c) (FITS_IN_8_BITS(c)                        \
+                               ? isWORDCHAR_L1(c) : isALPHANUMERIC_uvchr(c))
 
 __UNDEFINED__ isALPHA_utf8_safe(s,e)    D_PPP_IS_GENERIC_UTF8_SAFE(s, e, ALPHA)
 #  ifdef isALPHANUMERIC_utf8
@@ -1868,6 +1871,7 @@ isASCII_utf8_safe(s, offset)
     unsigned char * s
     int offset
     CODE:
+        PERL_UNUSED_ARG(offset);
         RETVAL = isASCII_utf8_safe(s, s + 1 + offset);
     OUTPUT:
         RETVAL
@@ -2169,6 +2173,7 @@ isASCII_LC_utf8_safe(s, offset)
     unsigned char * s
     int offset
     CODE:
+        PERL_UNUSED_ARG(offset);
         RETVAL = isASCII_utf8_safe(s, s + UTF8SKIP(s) + offset);
     OUTPUT:
         RETVAL
@@ -2526,30 +2531,30 @@ av_top_index(av)
 
 use vars qw($my_sv @my_av %my_hv);
 
-ok(&Devel::PPPort::boolSV(1));
-ok(!&Devel::PPPort::boolSV(0));
+ok(&Devel::PPPort::boolSV(1), "Verify boolSV(1) is true");
+ok(!&Devel::PPPort::boolSV(0), "Verify boolSV(0) is false");
 
 $_ = "Fred";
-is(&Devel::PPPort::DEFSV(), "Fred");
-is(&Devel::PPPort::UNDERBAR(), "Fred");
+is(&Devel::PPPort::DEFSV(), "Fred", '$_ is FRED; Verify DEFSV is FRED');
+is(&Devel::PPPort::UNDERBAR(), "Fred", 'And verify UNDERBAR is FRED');
 
 if (ivers($]) >= ivers(5.9.2) && ivers($]) < ivers(5.23)) {
   eval q{
     no warnings "deprecated";
-    no if $^V > v5.17.9, warnings => "experimental::lexical_topic";
+    no if $^V >= v5.17.9, warnings => "experimental::lexical_topic";
     my $_ = "Tony";
-    is(&Devel::PPPort::DEFSV(), "Fred");
-    is(&Devel::PPPort::UNDERBAR(), "Tony");
+    is(&Devel::PPPort::DEFSV(), "Fred", 'lexical_topic eval: $_ is Tony; Verify DEFSV is Fred');
+    is(&Devel::PPPort::UNDERBAR(), "Tony", 'And verify UNDERBAR is Tony');
   };
+  die __FILE__ . __LINE__ . ": $@" if $@;
 }
 else {
-  ok(1);
-  ok(1);
+  skip("perl version outside testing range of lexical_topic", 2);
 }
 
 my @r = &Devel::PPPort::DEFSV_modify();
 
-ok(@r == 3);
+ok(@r == 3, "Verify got 3 elements");
 is($r[0], 'Fred');
 is($r[1], 'DEFSV');
 is($r[2], 'Fred');
@@ -2557,9 +2562,9 @@ is($r[2], 'Fred');
 is(&Devel::PPPort::DEFSV(), "Fred");
 
 eval { 1 };
-ok(!&Devel::PPPort::ERRSV());
+ok(!&Devel::PPPort::ERRSV(), "Verify ERRSV on true is false");
 eval { cannot_call_this_one() };
-ok(&Devel::PPPort::ERRSV());
+ok(&Devel::PPPort::ERRSV(), "Verify ERRSV on false is true");
 
 ok(&Devel::PPPort::gv_stashpvn('Devel::PPPort', 0));
 ok(!&Devel::PPPort::gv_stashpvn('does::not::exist', 0));
@@ -2593,8 +2598,8 @@ is(Devel::PPPort::prepush(), 42);
 is(join(':', Devel::PPPort::xsreturn(0)), 'test1');
 is(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
 
-is(Devel::PPPort::PERL_ABS(42), 42);
-is(Devel::PPPort::PERL_ABS(-13), 13);
+is(Devel::PPPort::PERL_ABS(42), 42, "Verify PERL_ABS(42) is 42");
+is(Devel::PPPort::PERL_ABS(-13), 13, "Verify PERL_ABS(-13) is 13");
 
 is(Devel::PPPort::SVf(42), ivers($]) >= ivers(5.4) ? '[42]' : '42');
 is(Devel::PPPort::SVf('abc'), ivers($]) >= ivers(5.4) ? '[abc]' : 'abc');
@@ -2625,7 +2630,7 @@ if (ivers($]) < ivers(5.5)) {
         skip 'no qr// objects in this perl', 2;
 } else {
         my $qr = eval 'qr/./';
-        ok(Devel::PPPort::SvRXOK($qr));
+        ok(Devel::PPPort::SvRXOK($qr), "SVRXOK(qr) is true");
         ok(Devel::PPPort::SvRXOK(bless $qr, "Surprise"));
 }
 
@@ -2634,7 +2639,7 @@ ok( Devel::PPPort::NATIVE_TO_LATIN1(0x1) == 0x1);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("A")) == 0x41);
 ok( Devel::PPPort::NATIVE_TO_LATIN1(ord("0")) == 0x30);
 
-ok( Devel::PPPort::LATIN1_TO_NATIVE(0xB6) == 0xB6);
+ok( Devel::PPPort::LATIN1_TO_NATIVE(0xB6) == 0xB6, "Verify LATIN1_TO_NATIVE(0xB6) is 0xB6");
 if (ord("A") == 65) {
     ok( Devel::PPPort::LATIN1_TO_NATIVE(0x41) == 0x41);
     ok( Devel::PPPort::LATIN1_TO_NATIVE(0x30) == 0x30);
@@ -2648,14 +2653,14 @@ ok(  Devel::PPPort::isALNUMC_L1(ord("5")));
 ok(  Devel::PPPort::isALNUMC_L1(0xFC));
 ok(! Devel::PPPort::isALNUMC_L1(0xB6));
 
-ok(  Devel::PPPort::isOCTAL(ord("7")));
-ok(! Devel::PPPort::isOCTAL(ord("8")));
+ok(  Devel::PPPort::isOCTAL(ord("7")), "Verify '7' is OCTAL");
+ok(! Devel::PPPort::isOCTAL(ord("8")), "Verify '8' isn't OCTAL");
 
-ok(  Devel::PPPort::isOCTAL_A(ord("0")));
-ok(! Devel::PPPort::isOCTAL_A(ord("9")));
+ok(  Devel::PPPort::isOCTAL_A(ord("0")), "Verify '0' is OCTAL_A");
+ok(! Devel::PPPort::isOCTAL_A(ord("9")), "Verify '9' isn't OCTAL_A");
 
-ok(  Devel::PPPort::isOCTAL_L1(ord("2")));
-ok(! Devel::PPPort::isOCTAL_L1(ord("8")));
+ok(  Devel::PPPort::isOCTAL_L1(ord("2")), "Verify '2' is OCTAL_L1");
+ok(! Devel::PPPort::isOCTAL_L1(ord("8")), "Verify '8' isn't OCTAL_L1");
 
 my $way_too_early_msg = 'UTF-8 not implemented on this perl';
 
@@ -2755,7 +2760,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                    XDIGIT))
     {
         if ($i < 256) {  # For the ones that can fit in a byte, test each of
-                         #three macros.
+                         # three macros.
             my $suffix;
             for $suffix ("", "_A", "_L1", "_uvchr") {
                 my $should_be = ($i > 0x7F && $suffix !~ /_(uvchr|L1)/)
@@ -2767,6 +2772,7 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 }
 
                 my $eval_string = "Devel::PPPort::is${class}$suffix($hex)";
+                local $SIG{__WARN__} = sub {};
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i: $eval_string' gave $@" if $@;
                 is($is, $should_be, "'$eval_string'");
@@ -2796,10 +2802,10 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 skip $skip, 1;
             }
             else {
-                $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($i);
+                $utf8 = quotemeta Devel::PPPort::uvchr_to_utf8($native);
                 my $should_be = $types{"$native:$class"} || 0;
-                local $SIG{__WARN__} = sub {};
                 my $eval_string = "$fcn(\"$utf8\", 0)";
+                local $SIG{__WARN__} = sub {};
                 my $is = eval $eval_string || 0;
                 die "eval 'For $i, $eval_string' gave $@" if $@;
                 is($is, $should_be, sprintf("For U+%04X '%s'", $native, $eval_string));
@@ -2816,7 +2822,8 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
                 }
                 else {
                     my $eval_string = "$fcn(\"$utf8\", -1)";
-                    my $is = eval "no warnings; $eval_string" || 0;
+                    local $SIG{__WARN__} = sub {};
+                    my $is = eval "$eval_string" || 0;
                     die "eval '$eval_string' gave $@" if $@;
                     is($is, 0, sprintf("For U+%04X '%s'", $native, $eval_string));
                 }
@@ -2826,23 +2833,30 @@ for $i (sort { $a <=> $b } keys %code_points_to_test) {
 }
 
 my %case_changing = ( 'LOWER' => [ [ ord('A'), ord('a') ],
-                                   [ 0xC0, 0xE0 ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xC0),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xE0) ],
                                    [ 0x100, 0x101 ],
                                  ],
                       'FOLD'  => [ [ ord('C'), ord('c') ],
-                                   [ 0xC0, 0xE0 ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xC0),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xE0) ],
                                    [ 0x104, 0x105 ],
-                                   [ 0xDF, 'ss' ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xDF),
+                                     'ss' ],
                                  ],
-                      'UPPER' => [ [ ord('a'),ord('A'),  ],
-                                   [ 0xE0, 0xC0 ],
+                      'UPPER' => [ [ ord('a'), ord('A'),  ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xE0),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xC0) ],
                                    [ 0x101, 0x100 ],
-                                   [ 0xDF, 'SS' ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xDF),
+                                     'SS' ],
                                  ],
-                      'TITLE' => [ [ ord('c'),ord('C'),  ],
-                                   [ 0xE2, 0xC2 ],
+                      'TITLE' => [ [ ord('c'), ord('C'),  ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xE2),
+                                     Devel::PPPort::LATIN1_TO_NATIVE(0xC2) ],
                                    [ 0x103, 0x102 ],
-                                   [ 0xDF, 'Ss' ],
+                                   [ Devel::PPPort::LATIN1_TO_NATIVE(0xDF),
+                                     'Ss' ],
                                  ],
                     );
 
@@ -2859,11 +2873,11 @@ for $name (keys %case_changing) {
         my $should_be_bytes;
         if (ivers($]) >= ivers(5.6)) {
             if ($is_cp) {
-                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $utf8_changed = Devel::PPPort::uvchr_to_utf8($changed);
                 $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
             }
             else {
-                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if eval '$utf8_changed =~ /[[:^ascii:]]/';
                 $should_be_bytes = length $utf8_changed;
             }
         }
@@ -2882,11 +2896,12 @@ for $name (keys %case_changing) {
         }
         else {
             if ($is_cp) {
-                $utf8_changed = Devel::PPPort::uvoffuni_to_utf8($changed);
+                $utf8_changed = Devel::PPPort::uvchr_to_utf8($changed);
                 $should_be_bytes = Devel::PPPort::UTF8_SAFE_SKIP($utf8_changed, 0);
             }
             else {
-                die("Test currently doesn't work for non-ASCII multi-char case changes") if $utf8_changed =~ /[[:^ascii:]]/;
+                my $non_ascii_re = (ivers($]) >= ivers(5.6)) ? '[[:^ascii:]]' : '[^\x00-\x7F]';
+                die("Test currently doesn't work for non-ASCII multi-char case changes") if eval '$utf8_changed =~ /$non_ascii_re/';
                 $should_be_bytes = length $utf8_changed;
             }
 
@@ -2927,7 +2942,7 @@ for $name (keys %case_changing) {
             }
             else {
                 my $fcn = "to${name}_utf8_safe";
-                my $utf8 = quotemeta Devel::PPPort::uvoffuni_to_utf8($original);
+                my $utf8 = quotemeta Devel::PPPort::uvchr_to_utf8($original);
                 my $real_truncate = ($truncate < 2)
                                     ? $truncate : $should_be_bytes;
                 my $eval_string = "Devel::PPPort::$fcn(\"$utf8\", $real_truncate)";

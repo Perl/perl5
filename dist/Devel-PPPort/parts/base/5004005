@@ -2,6 +2,7 @@
 do_binmode                     # E
 dTHR                           # E
 ERRSV                          # E
+GV_NOINIT                      # E
 newCONSTSUB                    # E
 newSVpvn                       # E
 PL_curcop                      # E

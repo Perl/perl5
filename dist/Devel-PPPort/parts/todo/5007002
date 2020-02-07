@@ -8,13 +8,10 @@ malloc                         # U
 mfree                          # U
 mini_mktime                    # U
 my_strftime                    # U
-newSVsv_flags                  # U
 op_null                        # U
 OSVERS                         # E
 realloc                        # U
 sv_catpvn_flags                # U
 sv_catsv_flags                 # U
-sv_mortalcopy_flags            # U
-sv_setsv_flags                 # U
 sv_utf8_upgrade_flags          # U
 sv_utf8_upgrade_nomg           # U

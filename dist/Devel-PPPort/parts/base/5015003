@@ -1,4 +1,5 @@
 5.015003
+GV_ADDMG                       # E
 coresub_op                     # F added by devel/scanprov
 inplace_aassign                # F added by devel/scanprov
 op_integerize                  # F added by devel/scanprov
