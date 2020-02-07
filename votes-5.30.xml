@@ -26,7 +26,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Security Fixes</h3>
 
 <commit votes="steveh khw" id="1bff26779d92ed756b7d4e5be908124dd5a0a450" ticket="17529" desc="Update Compress-Raw-Bzip2 to CPAN version 2.089"/>
+
+steveh: Unless there is an overriding need for this on a security basis then I think this one has to be rejected because it fails
+one of our backporting criteria: It adds a new fatal error, which we undertake not to do in maint releases.
 <commit votes="khw demerphq" id="ac3afc4b35675aec55918770197358190f782728" ticket="" desc="regcomp.c: make \K+ and \K* illegal." />
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
