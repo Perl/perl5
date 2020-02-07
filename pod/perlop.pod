@@ -60,8 +60,9 @@ special evaluation rules that can result in an operand not being evaluated at
 all; in general, the top-level operator in an expression has control of
 operand evaluation.
 
-Some comparison operators, as their associativity, I<chain> with others
-of the same precedence.  This means that each comparison is performed
+Some comparison operators, as their associativity, I<chain> with some
+operators of the same precedence (but never with operators of different
+precedence).  This chaining means that each comparison is performed
 on the two arguments surrounding it, with each interior argument taking
 part in two comparisons, and the comparison results are implicitly ANDed.
 Thus S<C<"$a E<lt> $b E<lt>= $c">> behaves exactly like S<C<"$a E<lt>
@@ -562,6 +563,8 @@ X<< ge >>
 A sequence of relational operators, such as S<C<"$a E<lt> $b E<lt>=
 $c">>, performs chained comparisons, in the manner described above in
 the section L</"Operator Precedence and Associativity">.
+Beware that they do not chain with equality operators, which have lower
+precedence.
 
 =head2 Equality Operators
 X<equality> X<equal> X<equals> X<operator, equality>
@@ -585,6 +588,8 @@ X<ne>
 A sequence of the above equality operators, such as S<C<"$a == $b ==
 $c">>, performs chained comparisons, in the manner described above in
 the section L</"Operator Precedence and Associativity">.
+Beware that they do not chain with relational operators, which have
+higher precedence.
 
 Binary C<< "<=>" >> returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
