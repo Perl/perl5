@@ -854,7 +854,7 @@ use File::Glob qw(:case);
     },
 
     'parent' => {
-        'DISTRIBUTION' => 'CORION/parent-0.237.tar.gz',
+        'DISTRIBUTION' => 'CORION/parent-0.238.tar.gz',
         'FILES'        => q[cpan/parent],
         'EXCLUDED'     => [
             qr{^xt}
