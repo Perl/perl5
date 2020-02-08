@@ -656,7 +656,7 @@ PERL_CALLCONV void	Perl_clear_defarray(pTHX_ AV* av, bool abandon);
 PERL_CALLCONV const COP*	Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop, bool opnext);
 #define PERL_ARGS_ASSERT_CLOSEST_COP	\
 	assert(cop)
-PERL_CALLCONV OP*	Perl_cmpchain_extend(pTHX_ Optype type, OP* ch, OP* right)
+PERL_CALLCONV OP*	Perl_cmpchain_extend(pTHX_ I32 type, OP* ch, OP* right)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CMPCHAIN_EXTEND	\
 	assert(ch)
@@ -666,7 +666,7 @@ PERL_CALLCONV OP*	Perl_cmpchain_finish(pTHX_ OP* ch)
 #define PERL_ARGS_ASSERT_CMPCHAIN_FINISH	\
 	assert(ch)
 
-PERL_CALLCONV OP*	Perl_cmpchain_start(pTHX_ Optype type, OP* left, OP* right)
+PERL_CALLCONV OP*	Perl_cmpchain_start(pTHX_ I32 type, OP* left, OP* right)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CMPCHAIN_START
 

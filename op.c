@@ -5500,7 +5500,7 @@ Perl_invert(pTHX_ OP *o)
 }
 
 OP *
-Perl_cmpchain_start(pTHX_ Optype type, OP *left, OP *right)
+Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 {
     BINOP *bop;
     OP *op;
@@ -5525,7 +5525,7 @@ Perl_cmpchain_start(pTHX_ Optype type, OP *left, OP *right)
 }
 
 OP *
-Perl_cmpchain_extend(pTHX_ Optype type, OP *ch, OP *right)
+Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
 {
     BINOP *bop;
     OP *op;
@@ -5568,7 +5568,7 @@ Perl_cmpchain_finish(pTHX_ OP *ch)
 {
     PERL_ARGS_ASSERT_CMPCHAIN_FINISH;
     if (ch->op_type != OP_NULL) {
-	Optype cmpoptype = ch->op_type;
+	OPCODE cmpoptype = ch->op_type;
 	ch = CHECKOP(cmpoptype, ch);
 	if(!ch->op_next && ch->op_type == cmpoptype)
 	    ch = fold_constants(op_integerize(op_std_init(ch)));
@@ -5581,7 +5581,7 @@ Perl_cmpchain_finish(pTHX_ OP *ch)
 	while (1) {
 	    OP *cmpop = cUNOPx(ch)->op_first;
 	    OP *leftarg = OpSIBLING(cmpop);
-	    Optype cmpoptype = cmpop->op_type;
+	    OPCODE cmpoptype = cmpop->op_type;
 	    OP *nextrightarg;
 	    bool is_last;
 	    is_last = !(cUNOPx(ch)->op_first = OpSIBLING(leftarg));
