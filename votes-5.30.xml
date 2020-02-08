@@ -29,7 +29,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 steveh: Unless there is an overriding need for this on a security basis then I think this one has to be rejected because it fails
 one of our backporting criteria: It adds a new fatal error, which we undertake not to do in maint releases.
-<commit votes="khw demerphq" id="ac3afc4b35675aec55918770197358190f782728" ticket="" desc="regcomp.c: make \K+ and \K* illegal." />
+<commit votes="demerphq" id="ac3afc4b35675aec55918770197358190f782728" ticket="" desc="regcomp.c: make \K+ and \K* illegal." />
 
 </div>
 
