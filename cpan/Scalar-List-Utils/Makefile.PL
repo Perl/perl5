@@ -6,42 +6,12 @@ use Config;
 use File::Spec;
 use ExtUtils::MakeMaker;
 my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
-my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
-
-my $nv_digits;
-
-my $ivsize = $Config{ivsize} * 8;
-my $uv_digits = 1 + int(log(2) / log(10) * $ivsize);
-
-my $nvsize = $Config{nvsize} * 8;
-# we want NV and UV numbers in the same range to format the same, so make sure
-# NVs are given at least as many digits as UVs.  If IV/UVs have equal or
-# greater bits, there's no reason to check NV size since it won't be able to
-# have as much mantissa.
-if ($ivsize >= $nvsize) {
-  $nv_digits = $uv_digits;
-}
-else {
-  # maximum possible digits that could fit in something NV size
-  my $max_digits = 1 + int(log(2) / log(10) * $nvsize);
-
-  my $float = sprintf '%0.'.$max_digits.'g', 1/9;
-  my ($accurate_digits) = $float =~ /(1+)/;
-  # additional digit provides 'partial' accuracy
-  $nv_digits = 1 + length $accurate_digits;
-
-  if ($nv_digits < $uv_digits) {
-    $nv_digits = $uv_digits;
-  }
-}
-
-$defines .= " -DNV_MAX_PRECISION=$nv_digits";
 
 WriteMakefile(
   NAME         => q[List::Util],
   ABSTRACT     => q[Common Scalar and List utility subroutines],
   AUTHOR       => q[Graham Barr <gbarr@cpan.org>],
-  DEFINE       => $defines,
+  DEFINE       => ($ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H]),
   DISTNAME     => q[Scalar-List-Utils],
   VERSION_FROM => 'lib/List/Util.pm',
 

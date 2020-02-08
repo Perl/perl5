@@ -175,54 +175,6 @@ static enum slu_accum accum_type(SV *sv) {
 /* Magic for set_subname */
 static MGVTBL subname_vtbl;
 
-static void MY_initrand(pTHX)
-{
-#if (PERL_VERSION < 9)
-    struct op dmy_op;
-    struct op *old_op = PL_op;
-
-    /* We call pp_rand here so that Drand01 get initialized if rand()
-       or srand() has not already been called
-    */
-    memzero((char*)(&dmy_op), sizeof(struct op));
-    /* we let pp_rand() borrow the TARG allocated for this XS sub */
-    dmy_op.op_targ = PL_op->op_targ;
-    PL_op = &dmy_op;
-    (void)*(PL_ppaddr[OP_RAND])(aTHX);
-    PL_op = old_op;
-#else
-    /* Initialize Drand01 if rand() or srand() has
-       not already been called
-    */
-    if(!PL_srand_called) {
-        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
-        PL_srand_called = TRUE;
-    }
-#endif
-}
-
-static double MY_callrand(pTHX_ CV *randcv)
-{
-    dSP;
-    double ret;
-
-    ENTER;
-    PUSHMARK(SP);
-    PUTBACK;
-
-    call_sv((SV *)randcv, G_SCALAR);
-
-    SPAGAIN;
-
-    ret = POPn;
-    ret -= trunc(ret);      /* bound to < 1 */
-    if(ret < 0) ret += 1.0; /* bound to 0 <= ret < 1 */
-
-    LEAVE;
-
-    return ret;
-}
-
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -499,14 +451,10 @@ void
 reduce(block,...)
     SV *block
 PROTOTYPE: &@
-ALIAS:
-    reduce     = 0
-    reductions = 1
 CODE:
 {
     SV *ret = sv_newmortal();
     int index;
-    AV *retvals;
     GV *agv,*bgv,*gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -515,12 +463,8 @@ CODE:
     if(cv == Nullcv)
         croak("Not a subroutine reference");
 
-    if(items <= 1) {
-        if(ix)
-            XSRETURN(0);
-        else
-            XSRETURN_UNDEF;
-    }
+    if(items <= 1)
+        XSRETURN_UNDEF;
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
@@ -528,17 +472,6 @@ CODE:
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
-
-    if(ix) {
-        /* Precreate an AV for return values; -1 for cv, -1 for top index */
-        retvals = newAV();
-        av_extend(retvals, items-1-1);
-
-        /* so if throw an exception they can be reclaimed */
-        SAVEFREESV(retvals);
-
-        av_push(retvals, newSVsv(ret));
-    }
 #ifdef dMULTICALL
     assert(cv);
     if(!CvISXSUB(cv)) {
@@ -551,8 +484,6 @@ CODE:
             GvSV(bgv) = args[index];
             MULTICALL;
             SvSetMagicSV(ret, *PL_stack_sp);
-            if(ix)
-                av_push(retvals, newSVsv(ret));
         }
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
@@ -571,26 +502,11 @@ CODE:
             call_sv((SV*)cv, G_SCALAR);
 
             SvSetMagicSV(ret, *PL_stack_sp);
-            if(ix)
-                av_push(retvals, newSVsv(ret));
         }
     }
 
-    if(ix) {
-        int i;
-        SV **svs = AvARRAY(retvals);
-        /* steal the SVs from retvals */
-        for(i = 0; i < items-1; i++) {
-            ST(i) = sv_2mortal(svs[i]);
-            svs[i] = NULL;
-        }
-
-        XSRETURN(items-1);
-    }
-    else {
-        ST(0) = ret;
-        XSRETURN(1);
-    }
+    ST(0) = ret;
+    XSRETURN(1);
 }
 
 void
@@ -1221,69 +1137,37 @@ PROTOTYPE: @
 CODE:
 {
     int index;
-    SV *randsv = get_sv("List::Util::RAND", 0);
-    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
-        (CV *)SvRV(randsv) : NULL;
+#if (PERL_VERSION < 9)
+    struct op dmy_op;
+    struct op *old_op = PL_op;
 
-    if(!randcv)
-        MY_initrand(aTHX);
+    /* We call pp_rand here so that Drand01 get initialized if rand()
+       or srand() has not already been called
+    */
+    memzero((char*)(&dmy_op), sizeof(struct op));
+    /* we let pp_rand() borrow the TARG allocated for this XS sub */
+    dmy_op.op_targ = PL_op->op_targ;
+    PL_op = &dmy_op;
+    (void)*(PL_ppaddr[OP_RAND])(aTHX);
+    PL_op = old_op;
+#else
+    /* Initialize Drand01 if rand() or srand() has
+       not already been called
+    */
+    if(!PL_srand_called) {
+        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
+        PL_srand_called = TRUE;
+    }
+#endif
 
     for (index = items ; index > 1 ; ) {
-        int swap = (int)(
-            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(index--)
-        );
+        int swap = (int)(Drand01() * (double)(index--));
         SV *tmp = ST(swap);
         ST(swap) = ST(index);
         ST(index) = tmp;
     }
 
     XSRETURN(items);
-}
-
-void
-sample(...)
-PROTOTYPE: $@
-CODE:
-{
-    UV count = items ? SvUV(ST(0)) : 0;
-    int reti = 0;
-    SV *randsv = get_sv("List::Util::RAND", 0);
-    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
-        (CV *)SvRV(randsv) : NULL;
-
-    if(!count)
-        XSRETURN(0);
-
-    /* Now we've extracted count from ST(0) the rest of this logic will be a
-     * lot neater if we move the topmost item into ST(0) so we can just work
-     * within 0..items-1 */
-    ST(0) = POPs;
-    items--;
-
-    if(count > items)
-        count = items;
-
-    if(!randcv)
-        MY_initrand(aTHX);
-
-    /* Partition the stack into ST(0)..ST(reti-1) containing the sampled results
-     * and ST(reti)..ST(items-1) containing the remaining pending candidates
-     */
-    while(reti < count) {
-        int index = (int)(
-            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(items - reti)
-        );
-
-        SV *selected = ST(reti + index);
-        /* preserve the element we're about to stomp on by putting it back into
-         * the pending partition */
-        ST(reti + index) = ST(reti);
-
-        ST(reti) = selected;
-        reti++;
-    }
-
-    XSRETURN(reti);
 }
 
 
@@ -1317,7 +1201,6 @@ CODE:
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
-            NV nv_arg;
 #ifdef HV_FETCH_EMPTY_HE
             HE* he;
 #endif
@@ -1334,35 +1217,12 @@ CODE:
 #endif
             }
 
-            if(!SvOK(arg) || SvUOK(arg)) {
+            if(!SvOK(arg) || SvUOK(arg))
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
-            }
-            else if(SvIOK(arg)) {
+            else if(SvIOK(arg))
                 sv_setpvf(keysv, "%" IVdf, SvIV(arg));
-            }
-            else {
-                nv_arg = SvNV(arg);
-                /* use 0 for both 0 and -0.0 */
-                if(nv_arg == 0) {
-                    sv_setpvs(keysv, "0");
-                }
-                /* for NaN, use the platform's normal stringification */
-                else if (nv_arg != nv_arg) {
-                    sv_setpvf(keysv, "%" NVgf, nv_arg);
-                }
-                /* for numbers outside of the IV or UV range, we don't need to
-                 * use a comparable format, so just use the raw bytes, adding
-                 * 'f' to ensure not matching a stringified number */
-                else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
-                    sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));
-                    sv_catpvn(keysv, "f", 1);
-                }
-                /* smaller floats get formatted using %g and could be equal to
-                 * a UV or IV */
-                else {
-                    sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
-                }
-            }
+            else
+                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))

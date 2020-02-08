@@ -5,7 +5,7 @@ use warnings;
 
 use List::Util qw(reduce min);
 use Test::More;
-plan tests => 31 + ($::PERL_ONLY ? 0 : 2);
+plan tests => 30 + ($::PERL_ONLY ? 0 : 2);
 
 my $v = reduce {};
 
@@ -143,11 +143,6 @@ if (!$::PERL_ONLY) { SKIP: {
     like($@, qr/^Can't goto subroutine from a sort sub/, "goto sub");
 
 } }
-
-{
-  my @ret = reduce { $a + $b } 1 .. 5;
-  is_deeply( \@ret, [ 15 ], 'reduce in list context yields only final answer' );
-}
 
 # XSUB callback
 use constant XSUBC => 42;
