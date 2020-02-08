@@ -254,9 +254,9 @@ struct utsname {
 
 /* VC uses non-standard way to determine the size and alignment if bit-fields */
 /* MinGW will compile with -mms-bitfields, so should use the same types */
-#define PERL_BITFIELD8  unsigned char
-#define PERL_BITFIELD16 unsigned short int
-#define PERL_BITFIELD32 unsigned long int
+#define PERL_BITFIELD8  U8
+#define PERL_BITFIELD16 U16
+#define PERL_BITFIELD32 U32
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
 
