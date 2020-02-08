@@ -2179,9 +2179,9 @@ PP(pp_tell)
     }
 
 #if LSEEKSIZE > IVSIZE
-    PUSHn( do_tell(gv) );
+    PUSHn( (NV)do_tell(gv) );
 #else
-    PUSHi( do_tell(gv) );
+    PUSHi( (IV)do_tell(gv) );
 #endif
     RETURN;
 }
@@ -4653,9 +4653,9 @@ PP(pp_time)
 {
     dSP; dTARGET;
 #ifdef BIG_TIME
-    XPUSHn( time(NULL) );
+    XPUSHn( (NV)time(NULL) );
 #else
-    XPUSHi( time(NULL) );
+    XPUSHu( (UV)time(NULL) );
 #endif
     RETURN;
 }
@@ -4855,7 +4855,7 @@ PP(pp_sleep)
         }
     }
     (void)time(&when);
-    XPUSHi(when - lasttime);
+    XPUSHu((UV)(when - lasttime));
     RETURN;
 }
 
