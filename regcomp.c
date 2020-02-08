@@ -3586,7 +3586,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         str=STRING(convert);
                         setSTR_LEN(convert, 0);
                     }
-                    setSTR_LEN(convert, STR_LEN(convert) + len);
+                    assert( ( STR_LEN(convert) + len ) < 256 );
+                    setSTR_LEN(convert, (U8)(STR_LEN(convert) + len));
                     while (len--)
                         *str++ = *ch++;
 		} else {
@@ -3600,7 +3601,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 	    trie->prefixlen = (state-1);
             if (str) {
                 regnode *n = convert+NODE_SZ_STR(convert);
-                NEXT_OFF(convert) = NODE_SZ_STR(convert);
+                assert( NODE_SZ_STR(convert) <= U16_MAX );
+                NEXT_OFF(convert) = (U16)(NODE_SZ_STR(convert));
                 trie->startstate = state;
                 trie->minlen -= (state - 1);
                 trie->maxlen -= (state - 1);
@@ -4189,7 +4191,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             merged++;
 
             NEXT_OFF(scan) += NEXT_OFF(n);
-            setSTR_LEN(scan, STR_LEN(scan) + STR_LEN(n));
+            assert( ( STR_LEN(scan) + STR_LEN(n) ) < 256 );
+            setSTR_LEN(scan, (U8)(STR_LEN(scan) + STR_LEN(n)));
             next = n + NODE_SZ_STR(n);
             /* Now we can overwrite *n : */
             Move(STRING(n), STRING(scan) + oldl, STR_LEN(n), char);
@@ -14579,8 +14582,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             else if (FOLD) {
                 bool splittable = FALSE;
                 bool backed_up = FALSE;
-                char * e;
-                char * s_start;
+                char * e;       /* should this be U8? */
+                char * s_start; /* should this be U8? */
 
                 /* Here is /i.  Running out of room creates a problem if we are
                  * folding, and the split happens in the middle of a
@@ -14897,7 +14900,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     if (   ender != LATIN_SMALL_LETTER_SHARP_S
                         || ASCII_FOLD_RESTRICTED)
                     {
-                        *e++ = toLOWER_L1(ender);
+                        assert( toLOWER_L1(ender) < 256 );
+                        *e++ = (char)(toLOWER_L1(ender)); /* should e and the cast be U8? */
                     }
                     else {
                         *e++ = 's';
@@ -14915,7 +14919,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             if (   UCHARAT(p) != LATIN_SMALL_LETTER_SHARP_S
                                 || ASCII_FOLD_RESTRICTED)
                             {
-                                *e++ = toLOWER_L1(ender);
+                                assert( toLOWER_L1(ender) < 256 );
+                                *e++ = (char)(toLOWER_L1(ender)); /* should e and the cast be U8? */
                             }
                             else {
                                 *e++ = 's';
@@ -17616,7 +17621,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                             &message,
                                             &packed_warn,
                                             strict,
-                                            range, /* MAX_UV allowed for range
+                                            cBOOL(range), /* MAX_UV allowed for range
                                                       upper limit */
                                             UTF))
                 {
@@ -17638,7 +17643,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                             &message,
                                             &packed_warn,
                                             strict,
-                                            range, /* MAX_UV allowed for range
+                                            cBOOL(range), /* MAX_UV allowed for range
                                                       upper limit */
                                             UTF))
                 {
