@@ -983,9 +983,9 @@ p	|bool	|io_close	|NN IO* io|NULLOK GV *gv \
 				|bool not_implicit|bool warn_on_fail
 : Used in perly.y
 pR	|OP*	|invert		|NULLOK OP* cmd
-pR	|OP*	|cmpchain_start	|Optype type|NULLOK OP* left \
+pR	|OP*	|cmpchain_start	|I32 type|NULLOK OP* left \
 				|NULLOK OP* right
-pR	|OP*	|cmpchain_extend|Optype type|NN OP* ch|NULLOK OP* right
+pR	|OP*	|cmpchain_extend|I32 type|NN OP* ch|NULLOK OP* right
 pR	|OP*	|cmpchain_finish|NN OP* ch
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
