@@ -5,6 +5,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    skip_all_if_miniperl();
 }
 
 use strict;
