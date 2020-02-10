@@ -20,6 +20,7 @@ Adding new warnings, errors or deprecations
 The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="demerphq khw steveh" id="f2f32cd638746f538da6db804dab6dd54e654f30" ticket="15109" desc="avoid identical stack traces" />
+<commit votes="demerphq steveh" id="d8e1e69d20817fd4b9d94736c97ef585900451a4 " ticket="" desc="regcomp.c: restore {} braces to DEBUG_PARSE_r multi-statements" />
 
 </div>
 
