@@ -26,7 +26,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="steveh khw" id="1bff26779d92ed756b7d4e5be908124dd5a0a450" ticket="17529" desc="Update Compress-Raw-Bzip2 to CPAN version 2.089"/>
+<commit votes="steveh khw bingos" id="1bff26779d92ed756b7d4e5be908124dd5a0a450" ticket="17529" desc="Update Compress-Raw-Bzip2 to CPAN version 2.089"/>
 
 steveh: Unless there is an overriding need for this on a security basis then I think this one has to be rejected because it fails
 one of our backporting criteria: It adds a new fatal error, which we undertake not to do in maint releases.
@@ -72,8 +72,8 @@ steveh: Both of these, or neither:
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh khw" id="ff69e883532791953a441f1a5316276bb142797c" ticket="" desc="Fix MYMALLOC (PERL_MALLOC) build on Windows"/>
-<commit votes="steveh" id="6bd6308fcea3541e505651bf8e8127a4a03d22cd" ticket="" desc="Adapt Configure to GCC version 10"/>
+<commit votes="steveh khw bingos" id="ff69e883532791953a441f1a5316276bb142797c" ticket="" desc="Fix MYMALLOC (PERL_MALLOC) build on Windows"/>
+<commit votes="steveh bingos" id="6bd6308fcea3541e505651bf8e8127a4a03d22cd" ticket="" desc="Adapt Configure to GCC version 10"/>
 
 </div>
 
