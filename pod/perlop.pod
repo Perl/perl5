@@ -1214,6 +1214,14 @@ If you want to force strings to be interpreted as numbers, you could say
 
     @numbers = ( 0+$first .. 0+$last );
 
+B<Note:> In Perl versions 5.30 and below, I<any> string on the left-hand
+side beginning with C<"0">, including the string C<"0"> itself, would
+cause the magic string increment behavior. This means that on these Perl
+versions, C<"0".."-1"> would produce C<"0"> through C<"99">, which was
+inconsistent with C<0..-1>, which produces the empty list. This also means
+that C<"0".."9"> now produces a list of integers instead of a list of
+strings.
+
 =item *
 
 If the initial value specified isn't part of a magical increment
