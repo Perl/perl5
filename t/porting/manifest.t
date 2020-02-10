@@ -90,6 +90,7 @@ SKIP: {
         !m{\.git_patch$} &&
         !m{\.gitattributes$} &&
         !m{\.gitignore$} &&
+        !m{\.mailmap$} &&
         !m{^\.github/} &&
         !$seen{$_}++
         } `git ls-files`);
