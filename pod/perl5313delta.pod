@@ -24,14 +24,14 @@ This was due to a special case that treated strings starting with "0"
 as strings so ranges like C<"00" .. "03"> produced C<"00", "01", "02", "03">,
 but didn't specially handle the string C<"0">.
 
-[perl #133695]
+L<[perl #133695]|https://rt.perl.org/Ticket/Display.html?id=133695>
 
 =head2 C<\K> now disallowed in look-ahead and look-behind assertions
 
 This was disallowed because it causes unexpected behaviour, and no-one
 could define what the desired behaviour was.
 
-[perl #124256]
+L<[perl #124256]|https://rt.perl.org/Ticket/Display.html?id=124256>
 
 =head1 Modules and Pragmata
 
@@ -100,7 +100,7 @@ L<Thread> has been upgraded from version 3.04 to 3.05.
 L<Time::HiRes> has been upgraded from version 1.9761 to 1.9762.
 
 Removed obsolete code such as support for pre-5.6 perl and classic
-MacOS.  [perl #134288]
+MacOS.  L<[perl #134288]|https://rt.perl.org/Ticket/Display.html?id=134288>
 
 =item *
 
@@ -135,7 +135,7 @@ A new parser function L<parse_subsignature()|perlapi/parse_subsignature>
 allows a keyword plugin to parse a subroutine signature while C<use feature
 'signatures'> is in effect.  This allows custom keywords to implement
 semantics similar to regular C<sub> declarations that include signatures.
-[perl #132474]
+L<[perl #132474]|https://rt.perl.org/Ticket/Display.html?id=132474>
 
 =item *
 
@@ -143,7 +143,7 @@ Since on some platforms we need to hold a mutex when temporarily
 switching locales, new macros (C<STORE_LC_NUMERIC_SET_TO_NEEDED_IN>,
 C<WITH_LC_NUMERIC_SET_TO_NEEDED> and C<WITH_LC_NUMERIC_SET_TO_NEEDED_IN>)
 have been added to make it easier to do this safely and efficiently
-as part of [perl #134172].
+as part of L<[perl #134172]|https://rt.perl.org/Ticket/Display.html?id=134172>.
 
 =item *
 
@@ -159,18 +159,18 @@ reduced by 8 bytes per OP on 64-bit systems.
 =item *
 
 C<< $@ = 100; die; >> now correctly propagates the 100 as an exception
-instead of ignoring it.  [perl #134291]
+instead of ignoring it.  L<[perl #134291]|https://rt.perl.org/Ticket/Display.html?id=134291>
 
 =item *
 
-C<< 0 0x@ >> no longer asserts in S_no_op().  [perl #134310]
+C<< 0 0x@ >> no longer asserts in S_no_op().  L<[perl #134310]|https://rt.perl.org/Ticket/Display.html?id=134310>
 
 =item *
 
 Exceptions thrown while C<$@> is read-only could result in infinite
 recursion as perl tried to update C<$@>, which throws another
 exception, resulting in a stack overflow.  Perl now replaces C<$@>
-with a copy if it's not a simple writable SV.  [perl #134266]
+with a copy if it's not a simple writable SV.  L<[perl #134266]|https://rt.perl.org/Ticket/Display.html?id=134266>
 
 =back
 
