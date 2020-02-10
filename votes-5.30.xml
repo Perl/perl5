@@ -31,6 +31,8 @@ steveh: Unless there is an overriding need for this on a security basis then I t
 one of our backporting criteria: It adds a new fatal error, which we undertake not to do in maint releases.
 <commit votes="demerphq" id="ac3afc4b35675aec55918770197358190f782728" ticket="" desc="regcomp.c: make \K+ and \K* illegal." />
 
+steveh: There is also interest in backporting perl5-security #125, though it also adds a new fatal error.
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
@@ -70,6 +72,7 @@ steveh: Both of these, or neither:
 <div><h3>Build and Installation Fixes</h3>
 
 <commit votes="steveh khw" id="ff69e883532791953a441f1a5316276bb142797c" ticket="" desc="Fix MYMALLOC (PERL_MALLOC) build on Windows"/>
+<commit votes="steveh" id="6bd6308fcea3541e505651bf8e8127a4a03d22cd" ticket="" desc="Adapt Configure to GCC version 10"/>
 
 </div>
 
