@@ -16,13 +16,13 @@ L<perl5312delta>, which describes differences between 5.31.1 and 5.31.2.
 
 =head2 Plain "0" string now treated as a number for range operator
 
-Previously a range C< "0" .. "-1" > would produce a range of numeric
-strings from "0" through "99", this now produces an empty list, just
-as C< 0 .. -1 > does.
+Previously a range C<"0" .. "-1"> would produce a range of numeric
+strings from "0" through "99"; this now produces an empty list, just
+as C<0 .. -1> does.
 
 This was due to a special case that treated strings starting with "0"
-as strings so ranges like C< "00" .. "03" > produced C< "00", "01",
-"02", "03" >, but didn't specially handle the string C<"0">.
+as strings so ranges like C<"00" .. "03"> produced C<"00", "01", "02", "03">,
+but didn't specially handle the string C<"0">.
 
 [perl #133695]
 
