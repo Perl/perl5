@@ -1109,9 +1109,7 @@ Test L<perlbug> with the following:
     Action (Send/Display/Edit/Subject/Save to File): Q
 
 and carefully examine the output (in F<perlbug.rep]>), especially
-the "Locally applied patches" section. If everything appears okay, then
-delete the file, and try it again, this time actually submitting the bug
-report. Check that it shows up, then remember to close it!
+the "Locally applied patches" section.
 
 =for checklist skip BLEAD-POINT
 

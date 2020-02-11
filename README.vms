@@ -467,10 +467,9 @@ of the GNU cc headers.
 =head1 Reporting Bugs
 
 If you come across what you think might be a bug in Perl, please report
-it. There's a script in PERL_ROOT:[UTILS], perlbug, that walks you through
-the process of creating a bug report. This script includes details of your
-installation, and is very handy. Completed bug reports should go to
-perlbug@perl.org.
+it. The issue tracker at L<https://github.com/Perl/perl5/issues> walks you
+through the process of creating a bug report and including details of your
+installation.
 
 =head1 CAVEATS
 

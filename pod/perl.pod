@@ -421,11 +421,9 @@ displayed by diagnostics are internally stored as short integers,
 so they are limited to a maximum of 65535 (higher numbers usually being
 affected by wraparound).
 
-You may mail your bug reports (be sure to include full configuration
+You may submit your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source
-tree, or by C<perl -V>) to perlbug@perl.org .  If you've succeeded
-in compiling perl, the L<perlbug> script in the F<utils/> subdirectory
-can be used to help mail in a bug report.
+tree, or by C<perl -V>) to L<https://github.com/Perl/perl5/issues>.
 
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
 don't tell anyone I said that.

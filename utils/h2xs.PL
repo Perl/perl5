@@ -1999,7 +1999,7 @@ $generate_code
 __END__
 gave unexpected error $@
 Please report the circumstances of this bug in h2xs version $H2XS_VERSION
-using the perlbug script.
+using the issue tracker at https://github.com/Perl/perl5/issues.
 EOM
   } else {
     my $fail;
@@ -2020,7 +2020,7 @@ the files $ext$modpname/$constscfname and $ext$modpname/$constsxsfname
 correctly.
 
 Please report the circumstances of this bug in h2xs version $H2XS_VERSION
-using the perlbug script.
+using the issue tracker at https://github.com/Perl/perl5/issues.
 EOM
     } else {
       unlink $constscfname, $constsxsfname;
