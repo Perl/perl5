@@ -18,7 +18,8 @@ L<perl5312delta>, which describes differences between 5.31.1 and 5.31.2.
 
 Previously a range C<"0" .. "-1"> would produce a range of numeric
 strings from "0" through "99"; this now produces an empty list, just
-as C<0 .. -1> does.
+as C<0 .. -1> does. This also means that C<"0" .. "9"> now produces a
+list of integers, where previously it would produce a list of strings.
 
 This was due to a special case that treated strings starting with "0"
 as strings so ranges like C<"00" .. "03"> produced C<"00", "01", "02", "03">,
