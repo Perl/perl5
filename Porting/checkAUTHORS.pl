@@ -1107,13 +1107,14 @@ khw\100cpan.org                         khw\100karl.(none)
 radu\100netsoft.ro                      rgreab\100fx.ro
 rajagopa\100pauline.schrodinger.com     rajagopa\100schrodinger.com
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
-module@renee-baecker.de                 renee.baecker\100smart-websolutions.de
+module\100renee-baecker.de              renee.baecker\100smart-websolutions.de
 +                                       reneeb\100reneeb-desktop.(none)
-+                                       github@renee-baecker.de
++                                       github\100renee-baecker.de
 +                                       otrs\100ubuntu.(none)
 +                                       perl\100renee-baecker.de
 +                                       reb\100perl-services.de
 +                                       info\100perl-services.de
+rich+perl\100hyphen-dash-hyphen.info    richardleach\100users.noreply.github.com
 richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
 +                                       richard.foley\100ubsw.com
