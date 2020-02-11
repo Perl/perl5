@@ -226,7 +226,7 @@ The possessive forms (new in Perl 5.10) prevent backtracking: what gets
 matched by a pattern with a possessive quantifier will not be backtracked
 into, even if that causes the whole match to fail.
 
-There is no quantifier C<{,n}>. That's interpreted as a literal string.
+There is no quantifier C<{,n}>. That's currently illegal.
 
 =head2 EXTENDED CONSTRUCTS
 
