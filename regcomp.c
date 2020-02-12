@@ -14738,6 +14738,21 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (maybe_exactfu) {
                             node_type = EXACTFLU8;
                         }
+                        else if (UNLIKELY(
+                             _invlist_contains_cp(PL_HasMultiCharFold, ender)))
+                        {
+                            /* A character that folds to more than one will
+                             * match multiple characters, so can't be SIMPLE.
+                             * We don't have to worry about this with EXACTFLU8
+                             * nodes just above, as they have already been
+                             * folded (since the fold doesn't vary at run
+                             * time).  Here, if the final character in the node
+                             * folds to multiple, it can't be simple.  (This
+                             * only has an effect if the node has only a single
+                             * character, hence the final one, as elsewhere we
+                             * turn off simple for nodes whose length > 1 */
+                            maybe_SIMPLE = 0;
+                        }
                     }
                     else if (node_type == EXACTF) {  /* Means is /di */
 

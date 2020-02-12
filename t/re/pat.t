@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 864;  # Update this when adding/deleting tests.
+plan tests => 865;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2114,6 +2114,16 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
                         $ff x 48;
         like(runperl(prog => "$s", stderr => 1), qr/Unmatched \(/);
    }
+
+SKIP:
+    {   # [perl #134334], Assertion failure
+        my $utf8_locale = find_utf8_ctype_locale();
+        skip "no UTF-8 locale available" unless $utf8_locale;
+        fresh_perl_like("use POSIX; POSIX::setlocale(&LC_CTYPE, '$utf8_locale'); 'ssss' =~ /\xDF+?sX/il;",
+                        qr/^$/,
+                        {},
+                        "Assertion failure matching /il on single char folding to multi");
+    }
 
 } # End of sub run_tests
 
