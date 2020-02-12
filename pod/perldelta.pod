@@ -65,6 +65,14 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Stop pretending C<POSIX::mbstowcs> and C<POSIX::wcstombs> are
+supported
+
+These functions could never have worked due to a defective interface
+specification.  There is clearly no demand for them, given that no one
+has ever complained in the many years the functions were claimed to be
+available, hence so-called "support" for them is now dropped.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

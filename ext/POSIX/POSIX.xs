@@ -1547,14 +1547,8 @@ END_EXTERN_C
 #define mblen(a,b) not_here("mblen")
 #endif
 #endif
-#ifndef HAS_MBSTOWCS
-#define mbstowcs(s, pwcs, n) not_here("mbstowcs")
-#endif
 #ifndef HAS_MBTOWC
 #define mbtowc(pwc, s, n) not_here("mbtowc")
-#endif
-#ifndef HAS_WCSTOMBS
-#define wcstombs(s, pwcs, n) not_here("wcstombs")
 #endif
 #ifndef HAS_WCTOMB
 #define wctomb(s, wchar) not_here("wctomb")
@@ -3375,12 +3369,6 @@ mblen(s, n)
     OUTPUT:
         RETVAL
 
-size_t
-mbstowcs(s, pwcs, n)
-	wchar_t *	s
-	char *		pwcs
-	size_t		n
-
 int
 mbtowc(pwc, s, n)
 	wchar_t *	pwc
@@ -3401,12 +3389,6 @@ mbtowc(pwc, s, n)
 #endif
     OUTPUT:
         RETVAL
-
-int
-wcstombs(s, pwcs, n)
-	char *		s
-	wchar_t *	pwcs
-	size_t		n
 
 int
 wctomb(s, wchar)
