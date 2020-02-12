@@ -19,14 +19,11 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-<commit votes="demerphq khw steveh" id="f2f32cd638746f538da6db804dab6dd54e654f30" ticket="15109" desc="avoid identical stack traces" />
 <commit votes="demerphq steveh" id="d8e1e69d20817fd4b9d94736c97ef585900451a4 " ticket="" desc="regcomp.c: restore {} braces to DEBUG_PARSE_r multi-statements" />
 
 </div>
 
 <div><h3>Security Fixes</h3>
-
-<commit votes="steveh khw bingos" id="1bff26779d92ed756b7d4e5be908124dd5a0a450" ticket="17529" desc="Update Compress-Raw-Bzip2 to CPAN version 2.089"/>
 
 steveh: Unless there is an overriding need for this on a security basis then I think this one has to be rejected because it fails
 one of our backporting criteria: It adds a new fatal error, which we undertake not to do in maint releases.
@@ -37,28 +34,6 @@ steveh: There is also interest in backporting perl5-security #125, though it als
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
-
-steveh: This adds a new member to struct RExC_state_t. Is that a problem for binary compatibility?
-khw vote contingent on bin compat being acceptable
-<commit votes="steveh arc khw" id="cc16d262eb72677cdda2aa9395e943818b85ba38" ticket="16977" desc="PATCH: [perl #134059] panic outputting a warning"/>
-
-This is https://github.com/Perl/perl5-security/issues/115
-<commit votes="steveh khw xsawyerx demerphq" id="2df0dd21423ddf295fe2e5d2a6665300f4c5dd94" ticket="" desc="PATCH: [perl 134335], gh115,Assert fail in regmatch"/>
-
-<commit votes="steveh demerphq khw" id="712e071bf4b91b0e2970bf38637b1a1b96dcc099" ticket="17221" desc="fix panic caused by printf with %n with utf8 length magic"/>
-<commit votes="steveh demerphq khw" id="08e55ec5e3ef6d6c040c0dc8bdec7d59f76bfbe8" ticket="16529" desc="win32: fix waitpid(-1, WNOHANG) segfault/panic"/>
-<commit votes="steveh hv khw" id="0463f3a19af7afac8b402655ad66e5b05c095bcc" ticket="17218" desc="PATCH: gh#17218 memory leak"/>
-<commit votes="steveh hv khw" id="81d11450691ee281f37c6c4e8055735b972733bd" ticket="17367" desc="PATCH: GH #17367 read 1 beyond end of buffer"/>
-
-steveh: Both of these, or neither:
-<commit votes="steveh hv khw" id="9f16475a53933d1d9c547f871b97b3b12160cece" ticket="17370" desc="PATCH: GH #17370, read beyond buffer in grok_inf_nan"/>
-<commit votes="steveh hv khw" id="dca9f615c2ca4c784ef9cdd9a7a313de40998bcf" ticket="17370" desc="Actually fix GH #17370"/>
-
-<commit votes="steveh hv demerphq khw" id="ca902fb80835be4a725df117917a4b62cc7022fe" ticket="17372" desc="Fix Issue #17372 - Deal with NOTHING regops in trie code properly"/>
-
-<commit votes="hv demerphq khw steveh" id="af6880c950bceae5aa17dc228f139d0b4e797594" ticket="17490" desc="regexec: don't increment recursion counter for non-postponed EVAL"/>
-
-<commit votes="steveh demerphq khw" id="3b2e5620ed4a6b341f97ffd1d4b6466cc2c4bc5b" ticket="17117" desc="PATCH: [perl #134329] Use after free in regcomp.c"/>
 
 </div>
 
@@ -72,7 +47,6 @@ steveh: Both of these, or neither:
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh khw bingos" id="ff69e883532791953a441f1a5316276bb142797c" ticket="" desc="Fix MYMALLOC (PERL_MALLOC) build on Windows"/>
 <commit votes="steveh bingos" id="6bd6308fcea3541e505651bf8e8127a4a03d22cd" ticket="" desc="Adapt Configure to GCC version 10"/>
 
 </div>
