@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 867;  # Update this when adding/deleting tests.
+plan tests => 869;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2130,6 +2130,15 @@ SKIP:
                         qr/^$/,
                         {},
                         "Assertion failure matching /il on single char folding to multi");
+    }
+
+    # gh17490: test recursion check
+    {
+        my $eval = '(?{1})';
+        my $re = sprintf '(?&FOO)(?(DEFINE)(?<FOO>%sfoo))', $eval x 20;
+        my $result = eval qq{"foo" =~ /$re/};
+        is($@ // '', '', "many evals did not die");
+        ok($result, "regexp correctly matched");
     }
 
 } # End of sub run_tests
