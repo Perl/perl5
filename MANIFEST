@@ -5870,6 +5870,7 @@ t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping are
 t/porting/utils.t		Check that utility scripts still compile
 t/re/alpha_assertions.t		See if things like '(*postive_lookahed:...) work properly
 t/re/anyof.t			See if bracketed char classes [...] compile properly
+t/re/bigfuzzy_not_utf8.t	Big and ugly tests not storable as UTF-8
 t/re/charset.t			See if regex modifiers like /d, /u work properly
 t/re/fold_grind.pl		Core file to see if regex case folding works properly
 t/re/fold_grind_8.t		Wrapper for fold_grind.pl for /l testing with a UTF-8 locale
