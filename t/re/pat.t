@@ -25,7 +25,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 866;  # Update this when adding/deleting tests.
+plan tests => 867;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2008,6 +2008,9 @@ CODE
     }
     {   # [perl #133871], ASAN/valgrind out-of-bounds access
         fresh_perl_like('qr/\p{nv:NAnq}/', qr/Can't find Unicode property definition/, {}, "GH #17367");
+    }
+    {   # GH #17370, ASAN/valgrind out-of-bounds access
+        fresh_perl_like('qr/\p{nv:qnan}/', qr/Can't find Unicode property definition/, {}, "GH #17370");
     }
 
     {   # [perl #133921], segfault
