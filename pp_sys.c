@@ -4619,13 +4619,24 @@ PP(pp_setpgrp)
 #endif
 }
 
+/*
+ * The glibc headers typedef __priority_which_t to an enum under C, but
+ * under C++, it keeps it as int. -Wc++-compat doesn't know this, so we
+ * need to explicitly cast it to shut up the warning.
+ */
+#if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3) || (__GLIBC__ > 2))
+#  define PRIORITY_WHICH_T(which) (__priority_which_t)which
+#else
+#  define PRIORITY_WHICH_T(which) which
+#endif
+
 PP(pp_getpriority)
 {
 #ifdef HAS_GETPRIORITY
     dSP; dTARGET;
     const int who = POPi;
     const int which = TOPi;
-    SETi( getpriority(which, who) );
+    SETi( getpriority(PRIORITY_WHICH_T(which), who) );
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getpriority");
@@ -4640,12 +4651,14 @@ PP(pp_setpriority)
     const int who = POPi;
     const int which = TOPi;
     TAINT_PROPER("setpriority");
-    SETi( setpriority(which, who, niceval) >= 0 );
+    SETi( setpriority(PRIORITY_WHICH_T(which), who, niceval) >= 0 );
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "setpriority");
 #endif
 }
+
+#undef PRIORITY_WHICH_T
 
 /* Time calls. */
 
