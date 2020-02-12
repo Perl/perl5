@@ -21420,11 +21420,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                          : (OP(o) == ANYOFH || OP(o) == ANYOFR)
                            ? 0xFF
                            : lowest;
-            Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=%02X", lowest);
-            if (lowest != highest) {
-                Perl_sv_catpvf(aTHX_ sv, "-%02X", highest);
+#ifndef EBCDIC
+            if (OP(o) != ANYOFR || ! isASCII(ANYOFRbase(o) + ANYOFRdelta(o)))
+#endif
+            {
+                Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=%02X", lowest);
+                if (lowest != highest) {
+                    Perl_sv_catpvf(aTHX_ sv, "-%02X", highest);
+                }
+                Perl_sv_catpvf(aTHX_ sv, ")");
             }
-            Perl_sv_catpvf(aTHX_ sv, ")");
         }
 
         SvREFCNT_dec(unresolved);
