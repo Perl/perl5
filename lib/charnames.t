@@ -339,6 +339,9 @@ my $three_quarters = sprintf("%2X", utf8::unicode_to_native(0xBE));
 is(charnames::viacode("$three_quarters"), "VULGAR FRACTION THREE QUARTERS", 'Verify charnames::viacode(native "BE") eq "VULGAR FRACTION THREE QUARTERS"');
 is(charnames::viacode("U+00000000000FEED"), "ARABIC LETTER WAW ISOLATED FORM", 'Verify charnames::viacode("U+00000000000FEED") eq "ARABIC LETTER WAW ISOLATED FORM"');
 
+test_vianame(0x116C, "116C", "HANGUL JUNGSEONG OE");
+test_vianame(0x1180, "1180", "HANGUL JUNGSEONG O-E");
+
 {
     no warnings 'deprecated';
     is("\N{LINE FEED}", "\N{LINE FEED (LF)}", 'Verify "\N{LINE FEED}" eq "\N{LINE FEED (LF)}"', 'Verify \N{LINE FEED} eq \N{LINE FEED (LF)}');
