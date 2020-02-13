@@ -330,9 +330,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+The MYMALLOC (PERL_MALLOC) build on Windows has been fixed.
 
 =back
 
@@ -363,7 +363,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-printf() or sprintf() with the C<%n> format could cause a panic on
+printf() or sprintf() with the C<%n> format no longer cause a panic on
 debugging builds, or report an incorrectly cached length value when
 producing C<SVfUTF8> flagged strings. [#17221]
 
@@ -373,15 +373,11 @@ A memory leak in regular expression patterns has been fixed [#17218].
 
 =item *
 
-Fix MYMALLOC (PERL_MALLOC) build on Windows
+A read beyond buffer in grok_infnan has been fixed. [L<GH #17370|https://github.com/Perl/perl5/issues/17370>]
 
 =item *
 
-read beyond buffer in grok_inf_nan [L<GH #17370|https://github.com/Perl/perl5/issues/17370>]
-
-=item *
-
-Fix an assertion failure in the regular expression engine.
+An assertion failure in the regular expression engine has been fixed.
 
 [L<GH #17372|https://github.com/Perl/perl5/issues/17372>]
 
