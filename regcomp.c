@@ -24066,6 +24066,7 @@ Perl_parse_uniprop_string(pTHX_
              * but not yet used. */
             save_item(PL_subname);
 
+            /* G_SCALAR guarantees a single return value */
             (void) call_sv(user_sub_sv, G_EVAL|G_SCALAR);
 
             SPAGAIN;
@@ -24093,7 +24094,7 @@ Perl_parse_uniprop_string(pTHX_
                 (void) POPs;
                 prop_definition = NULL;
             }
-            else {  /* G_SCALAR guarantees a single return value */
+            else {
                 SV * contents = POPs;
 
                 /* The contents is supposed to be the expansion of the property
