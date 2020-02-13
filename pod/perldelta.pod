@@ -365,15 +365,21 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 printf() or sprintf() with the C<%n> format no longer cause a panic on
 debugging builds, or report an incorrectly cached length value when
-producing C<SVfUTF8> flagged strings. [#17221]
+producing C<SVfUTF8> flagged strings
+
+[L<GH #17221|https://github.com/Perl/perl5/issues/17221>]
 
 =item *
 
-A memory leak in regular expression patterns has been fixed [#17218].
+A memory leak in regular expression patterns has been fixed.
+
+[L<GH #17218|https://github.com/Perl/perl5/issues/17218>]
 
 =item *
 
-A read beyond buffer in grok_infnan has been fixed. [L<GH #17370|https://github.com/Perl/perl5/issues/17370>]
+A read beyond buffer in grok_infnan has been fixed.
+
+[L<GH #17370|https://github.com/Perl/perl5/issues/17370>]
 
 =item *
 
@@ -384,7 +390,9 @@ An assertion failure in the regular expression engine has been fixed.
 =item *
 
 C<(?{...})> eval groups in regular expressions no longer unintentionally
-trigger "EVAL without pos change exceeded limit in regex" [GH #17490].
+trigger "EVAL without pos change exceeded limit in regex".
+
+[L<GH #17490|https://github.com/Perl/perl5/issues/17490>]
 
 =back
 
