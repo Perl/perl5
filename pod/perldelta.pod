@@ -367,6 +367,10 @@ printf() or sprintf() with the C<%n> format could cause a panic on
 debugging builds, or report an incorrectly cached length value when
 producing C<SVfUTF8> flagged strings. [#17221]
 
+=item *
+
+A memory leak in regular expression patterns has been fixed [#17218].
+
 =back
 
 =head1 Known Problems
