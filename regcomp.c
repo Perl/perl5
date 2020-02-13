@@ -10844,8 +10844,8 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 vFAIL2("Regexp modifier \"%c\" may not appear after the \"-\"",
                                     *(RExC_parse - 1));
                 NOT_REACHED; /*NOTREACHED*/
-            case ONCE_PAT_MOD: /* 'o' */
             case GLOBAL_PAT_MOD: /* 'g' */
+            case ONCE_PAT_MOD: /* 'o' */
                 if (ckWARN(WARN_REGEXP)) {
                     const I32 wflagbit = *RExC_parse == 'o'
                                          ? WASTED_O
