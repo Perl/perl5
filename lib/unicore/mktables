@@ -17677,7 +17677,7 @@ Also, Case_Folding is accessible through the C</i> modifier in regular
 expressions, the C<\\F> transliteration escape, and the C<L<fc|perlfunc/fc>>
 operator.
 
-Besides being able to say C<\p{Name=...}>, the Name and Name_Aliases
+Besides being able to say C<\\p{Name=...}>, the Name and Name_Aliases
 properties are accessible through the C<\\N{}> interpolation in double-quoted
 strings and regular expressions; and functions C<charnames::viacode()>,
 C<charnames::vianame()>, and C<charnames::string_vianame()> (which require a
