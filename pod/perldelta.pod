@@ -379,6 +379,12 @@ Fix MYMALLOC (PERL_MALLOC) build on Windows
 
 read beyond buffer in grok_inf_nan [L<GH #17370|https://github.com/Perl/perl5/issues/17370>]
 
+=item *
+
+Fix an assertion failure in the regular expression engine.
+
+[L<GH #17372|https://github.com/Perl/perl5/issues/17372>]
+
 =back
 
 =head1 Known Problems
