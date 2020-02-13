@@ -448,7 +448,8 @@ EOP
         while (<$in_fh>) {
 
             # optional leading '_'.  Return symbol in $1, and strip it from
-            # comment of line
+            # comment of line.  Currently doesn't handle comments running onto
+            # next line
             if (s/^ \# \s* define \s+ ( _? RXf_ \w+ ) \s+ //xi) {
                 chomp;
                 my $define= $1;
