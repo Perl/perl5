@@ -146,6 +146,11 @@ $desc = "got expected element";
     : print "not ok $N - $desc\n";
 $N++;
 
+# Untie the first file
+my $u = untie @array;
+$o = undef;  # destroy object holding file open
+# TODO: perldoc -f untie does not specify return value for untie
+
 open my $G, "<", $file or die "Unable to open $file for reading: $!";
 open my $H, ">", $dupe or die "Unable to open $dupe for writing: $!";
 while (my $l = <$G>) {
@@ -154,10 +159,6 @@ while (my $l = <$G>) {
 }
 close $H or die "Unable to close $dupe after writing: $!";
 close $G or die "Unable to close $file after reading: $!";
-
-# Untie the first file
-my $u = untie @array; 
-# TODO: perldoc -f untie does not specify return value for untie
 
 $desc = 'tie to dupe file';
 my @dupe;
