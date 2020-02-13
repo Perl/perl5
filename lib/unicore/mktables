@@ -11233,7 +11233,7 @@ sub output_perl_charnames_line ($$) {
     # ordinals, but they are all private use or noncharacters which do not
     # have names, so won't be in this table.
 
-    return sprintf "%05X\t%s\n", $_[0], $_[1];
+    return sprintf "%05X\n%s\n\n", $_[0], $_[1];
 }
 
 { # Closure
@@ -12579,7 +12579,7 @@ sub process_NamedSequences {
         # Perl_charnames.  But it turns out that the code points don't have to
         # be 5 digits long, like the rest, based on the internal workings of
         # charnames.pm.  This could be easily changed for consistency.
-        push @named_sequences, "$sequence\t$name";
+        push @named_sequences, "$sequence\n$name\n";
     }
     return;
 }

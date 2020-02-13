@@ -2454,22 +2454,36 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
 
         $official = do "unicore/Name.pl";
 
+        # Change the double \n format of the file back to single lines with a tab
+        $official =~ s/\n\n/\e/g;     # Use a control that shouldn't occur
+                                      # in the file
+        $official =~ s/\n/\t/g;
+        $official =~ s/\e/\n/g;
+
         # Get rid of the named sequences portion of the file.  These don't
         # have a tab before the first blank on a line.
         $official =~ s/ ^ [^\t]+ \  .*? \n //xmg;
 
         # And get rid of the controls.  These are named in the file, but
-        # shouldn't be in the property.  This gets rid of the two ranges in
-        # one fell swoop, and also all the Unicode1_Name values that may not
-        # be in Name_Alias.
+        # shouldn't be in the property.  On all supported platforms, there are
+        # two ranges of controls.  The first range extends from 0..SPACE-1.
+        # The second depends on the platform.
+        $official =~ s/ ^ 00000 .*? ( .{5} \t SPACE ) $ /$1/xms;
+        my $range_2_start;
+        my $range_2_end_next;
         if ($::IS_ASCII) {
-            $official =~ s/ 00000 \t .* 0001F .*? \n//xs;
-            $official =~ s/ 0007F \t .* 0009F .*? \n//xs;
+            $range_2_start    = '0007F';
+            $range_2_end_next = '000A0';
         }
-        elsif ($::IS_EBCDIC) { # Won't work for POSIX-BC
-            $official =~ s/ 00000 \t .* 0003F .*? \n//xs;
-            $official =~ s/ 000FF \t .* 000FF .*? \n//xs;
+        elsif (ord '^' == 106) { # POSIX-BC
+            $range_2_start    = '005F';
+            $range_2_end_next = '0060';
         }
+        else {
+            $range_2_start    = '00FF';
+            $range_2_end_next = '0100';
+        }
+        $official =~ s/ ^ $range_2_start .*? ( $range_2_end_next ) /$1/xms;
 
         # And remove the aliases.  We read in the Name_Alias property, and go
         # through them one by one.
@@ -2499,6 +2513,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                 $official =~ s/$hex_code_point \t $alias \n //x;
             }
         }
+
         local $/ = "\n";
         chomp $official;
         $/ = $input_record_separator;
