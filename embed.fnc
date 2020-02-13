@@ -1919,6 +1919,11 @@ EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
 EixRT	|UV	|invlist_lowest|NN SV* const invlist
 #ifndef PERL_EXT_RE_BUILD
+ERS	|REGEXP*|compile_wildcard|NN const char * name|const STRLEN len	    \
+				 |const bool ignore_case
+ES	|I32	|execute_wildcard|NN REGEXP * const prog|NN char* stringarg \
+				|NN char* strend|NN char* strbeg \
+				|SSize_t minend |NN SV* screamer|U32 nosave
 EiRT	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiRT	|UV	|invlist_max	|NN SV* const invlist
 EiRT	|IV*	|get_invlist_previous_index_addr|NN SV* invlist

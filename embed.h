@@ -959,6 +959,8 @@
 #    if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init	S__invlist_array_init
+#define compile_wildcard(a,b,c)	S_compile_wildcard(aTHX_ a,b,c)
+#define execute_wildcard(a,b,c,d,e,f,g)	S_execute_wildcard(aTHX_ a,b,c,d,e,f,g)
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
 #define invlist_clear(a)	S_invlist_clear(aTHX_ a)
 #define invlist_max		S_invlist_max

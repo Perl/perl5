@@ -22814,6 +22814,42 @@ S_get_extended_utf8_msg(pTHX_ const UV cp)
 
 #  endif
 
+STATIC REGEXP *
+S_compile_wildcard(pTHX_ const char * name, const STRLEN len,
+                         const bool ignore_case)
+{
+    U32 flags = PMf_MULTILINE;
+    REGEXP * subpattern_re;
+
+    PERL_ARGS_ASSERT_COMPILE_WILDCARD;
+
+    if (ignore_case) {
+        flags |= PMf_FOLD;
+    }
+    set_regex_charset(&flags, REGEX_ASCII_MORE_RESTRICTED_CHARSET);
+
+    subpattern_re = re_op_compile_wrapper(sv_2mortal(newSVpvn(name, len)),
+                                        /* Like in op.c, we copy the compile
+                                         * time pm flags to the rx ones */
+                                        (flags & RXf_PMf_COMPILETIME), flags);
+
+    assert(subpattern_re);  /* Should have died if didn't compile successfully */
+    return subpattern_re;
+}
+
+STATIC I32
+S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
+	 char *strbeg, SSize_t minend, SV *screamer, U32 nosave)
+{
+    I32 result;
+
+    PERL_ARGS_ASSERT_EXECUTE_WILDCARD;
+
+    result = pregexec(prog, stringarg, strend, strbeg, minend, screamer, nosave);
+
+    return result;
+}
+
 SV *
 Perl_handle_user_defined_property(pTHX_
 
@@ -23410,8 +23446,6 @@ Perl_parse_uniprop_string(pTHX_
             if (table_index) {
                 const char * const * prop_values
                                             = UNI_prop_value_ptrs[table_index];
-                SV * subpattern;
-                Size_t subpattern_len;
                 REGEXP * subpattern_re;
                 char open = name[i++];
                 char close;
@@ -23455,14 +23489,10 @@ Perl_parse_uniprop_string(pTHX_
                  * pattern fails to compile, our added text to the user's
                  * pattern will be displayed to the user, which is not so
                  * desirable. */
-                subpattern_len = name_len - i - 1 - escaped;
-                subpattern = Perl_newSVpvf(aTHX_ "(?iaa:%.*s)",
-                                              (unsigned) subpattern_len,
-                                              name + i);
-                subpattern = sv_2mortal(subpattern);
-                subpattern_re = re_compile(subpattern, 0);
-                assert(subpattern_re);  /* Should have died if didn't compile
-                                         successfully */
+                subpattern_re = compile_wildcard(name + i,
+                                                 name_len - i - 1 - escaped,
+                                                 TRUE /* /i */
+                                                );
 
                 /* For each legal property value, see if the supplied pattern
                  * matches it. */
@@ -23471,7 +23501,7 @@ Perl_parse_uniprop_string(pTHX_
                     const Size_t len = strlen(entry);
                     SV* entry_sv = newSVpvn_flags(entry, len, SVs_TEMP);
 
-                    if (pregexec(subpattern_re,
+                    if (execute_wildcard(subpattern_re,
                                  (char *) entry,
                                  (char *) entry + len,
                                  (char *) entry, 0,

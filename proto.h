@@ -4256,6 +4256,14 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(SV* const invlist, const bool will_
 	assert(invlist)
 #endif
 
+STATIC REGEXP*	S_compile_wildcard(pTHX_ const char * name, const STRLEN len, const bool ignore_case)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_COMPILE_WILDCARD	\
+	assert(name)
+
+STATIC I32	S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char* strend, char* strbeg, SSize_t minend, SV* screamer, U32 nosave);
+#define PERL_ARGS_ASSERT_EXECUTE_WILDCARD	\
+	assert(prog); assert(stringarg); assert(strend); assert(strbeg); assert(screamer)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(SV* invlist)
 			__attribute__warn_unused_result__;

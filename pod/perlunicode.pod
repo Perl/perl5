@@ -1032,12 +1032,8 @@ This feature is not available when the left-hand side is prefixed by
 C<Is_>, nor for any form that is marked as "Discouraged" in
 L<perluniprops/Discouraged>.
 
-Perl wraps your pattern with C<(?iaa: ... )>.  This is because nothing
-outside ASCII can match the Unicode property values available in this
-release, and they should match caselessly.  If your pattern has a syntax
-error, this wrapping will be shown in the error message, even though you
-didn't specify it yourself.  This could be confusing if you don't know
-about this.
+By default, your pattern is matched case-insensitively, as if C</i> had
+been specified.  You can change this by saying C<(?-i)> in your pattern.
 
 This experimental feature has been added to begin to implement
 L<https://www.unicode.org/reports/tr18/#Wildcard_Properties>.  Using it
