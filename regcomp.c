@@ -6626,15 +6626,24 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 REGEXP *
 Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 {
-    SV *pat = pattern; /* defeat constness! */
     PERL_ARGS_ASSERT_RE_COMPILE;
+    return re_op_compile_wrapper(pattern, rx_flags, 0);
+}
+
+REGEXP *
+S_re_op_compile_wrapper(pTHX_ SV * const pattern, U32 rx_flags, const U32 pm_flags)
+{
+    SV *pat = pattern; /* defeat constness! */
+
+    PERL_ARGS_ASSERT_RE_OP_COMPILE_WRAPPER;
+
     return Perl_re_op_compile(aTHX_ &pat, 1, NULL,
 #ifdef PERL_IN_XSUB_RE
                                 &my_reg_engine,
 #else
                                 &PL_core_reg_engine,
 #endif
-                                NULL, NULL, rx_flags, 0);
+                                NULL, NULL, rx_flags, pm_flags);
 }
 
 

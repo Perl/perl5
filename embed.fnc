@@ -1913,6 +1913,7 @@ EiRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 EiT	|void	|invlist_iterfinish|NN SV* invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C)
+ERS	|REGEXP*|re_op_compile_wrapper|NN SV * const pattern|U32 orig_rx_flags|const U32 pm_flags
 EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
 EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
