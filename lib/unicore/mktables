@@ -17897,9 +17897,12 @@ $loose_names
 
     # And the following array gives the inverse mapping from code points to
     # names.  Lowest code points are first
-    my \@code_points_ending_in_code_point = (
+    \@code_points_ending_in_code_point = (
 $code_points_ending_in_code_point
     );
+
+    # Is exportable, make read-only
+    Internals::SvREADONLY(\@code_points_ending_in_code_point, 1);
 END
     # Earlier releases didn't have Jamos.  No sense outputting
     # them unless will be used.

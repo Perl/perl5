@@ -31,6 +31,17 @@ here, but most should go in the L</Performance Enhancements> section.
 
 See L<https://www.unicode.org/versions/Unicode13.0.0/> for details.
 
+=head2 It is now possible to write C<qr/\p{Name=...}/>, or
+C<qr!\p{na=/(SMILING|GRINNING) FACE/}!>
+
+The Unicode Name property is now accessible in regular expression
+patterns, as an alternative to C<\N{...}>.
+A comparison of the two methods is given in
+L<perlunicode/Comparison of \N{...} and \p{name=...}>.
+
+The second example above shows that wildcard subpatterns are also usable
+in this property.  See L<perlunicode/Wildcards in Property Values>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
