@@ -1308,8 +1308,7 @@ version 18, October 2016.
 
 =item [2]
 C<\p{...}> C<\P{...}>.  This requirement is for a minimal list of
-properties.  Perl supports these and all other Unicode character
-properties, as R2.7 asks (see L</"Unicode Character Properties"> above).
+properties.  Perl supports these.  See R2.7 for other properties.
 
 =item [3]
 Perl has C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]>
@@ -1416,12 +1415,14 @@ C<U+10FFFF> but also beyond C<U+10FFFF>
 
  RL2.1   Canonical Equivalents           - Retracted     [9]
                                            by Unicode
- RL2.2   Extended Grapheme Clusters      - Partial       [10]
+ RL2.2   Extended Grapheme Clusters and  - Partial       [10]
+         Character Classes with Strings
  RL2.3   Default Word Boundaries         - Done          [11]
  RL2.4   Default Case Conversion         - Done
  RL2.5   Name Properties                 - Done
  RL2.6   Wildcards in Property Values    - Partial       [12]
- RL2.7   Full Properties                 - Done
+ RL2.7   Full Properties                 - Partial       [13]
+ RL2.8   Optional Properties             - Partial       [14]
 
 =over 4
 
@@ -1434,7 +1435,9 @@ both your regular expressions and text to match them against (you
 can use L<Unicode::Normalize>).
 
 =item [10]
-Perl has C<\X> and C<\b{gcb}> but we don't have a "Grapheme Cluster Mode".
+Perl has C<\X> and C<\b{gcb}>.  Unicode has retracted their "Grapheme
+Cluster Mode", and recently added string properties, which Perl does not
+yet support.
 
 =item [11] see
 L<UAX#29 "Unicode Text Segmentation"|https://www.unicode.org/reports/tr29>,
@@ -1442,43 +1445,20 @@ L<UAX#29 "Unicode Text Segmentation"|https://www.unicode.org/reports/tr29>,
 =item [12] see
 L</Wildcards in Property Values> above.
 
+=item [13]
+Perl supports all the properties in the Unicode Character Database
+(UCD).  It does not yet support the listed properties that come from
+other Unicode sources.
+
+=item [14]
+The only optional property that Perl supports is Named Sequence.  None
+of these properties are in the UCD.
+
 =back
 
 =head3 Level 3 - Tailored Support
 
- RL3.1   Tailored Punctuation            - Missing
- RL3.2   Tailored Grapheme Clusters      - Missing       [13]
- RL3.3   Tailored Word Boundaries        - Missing
- RL3.4   Tailored Loose Matches          - Retracted by Unicode
- RL3.5   Tailored Ranges                 - Retracted by Unicode
- RL3.6   Context Matching                - Partial       [14]
- RL3.7   Incremental Matches             - Missing
- RL3.8   Unicode Set Sharing             - Retracted by Unicode
- RL3.9   Possible Match Sets             - Missing
- RL3.10  Folded Matching                 - Retracted by Unicode
- RL3.11  Submatchers                     - Partial       [15]
-
-=over 4
-
-=item [13]
-Perl has L<Unicode::Collate>, but it isn't integrated with regular
-expressions.  See
-L<UTS#10 "Unicode Collation Algorithms"|https://www.unicode.org/reports/tr10>.
-
-=item [14]
-Perl has C<(?<=x)> and C<(?=x)>, but this requirement says that it
-should be possible to specify that matches may occur only in a substring
-with the lookaheads and lookbehinds able to see beyond that matchable
-portion.
-
-=item [15]
-Perl has user-defined properties (L</"User-Defined Character
-Properties">) to look at single code points in ways beyond Unicode, and
-it might be possible, though probably not very clean, to use code blocks
-and things like C<(?(DEFINE)...)> (see L<perlre>) to do more specialized
-matching.
-
-=back
+This has been retracted by Unicode.
 
 =head2 Unicode Encodings
 
