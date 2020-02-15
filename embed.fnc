@@ -2067,7 +2067,7 @@ AxTp	|U8*	|bytes_from_utf8_loc|NN const U8 *s			    \
 				    |NN bool *is_utf8p			    \
 				    |NULLOK const U8 ** first_unconverted
 Apxd	|U8*	|bytes_to_utf8	|NN const U8 *s|NN STRLEN *lenp
-ApdD	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
+ApdDb	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
 CbpdD	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
 CbpD	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
 AMpd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
@@ -2098,7 +2098,7 @@ CTp	|UV	|_utf8n_to_uvchr_msgs_helper				    \
 				|NULLOK U32 * errors			    \
 				|NULLOK AV ** msgs
 CipTRd	|UV	|valid_utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
-Cdp	|UV	|utf8n_to_uvuni|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+CdbDp	|UV	|utf8n_to_uvuni|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
 
 Adm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
 Cp	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
@@ -2106,7 +2106,7 @@ Adm	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Admx	|U8*	|uvchr_to_utf8_flags_msgs|NN U8 *d|UV uv|UV flags|NULLOK HV ** msgs
 CMpd	|U8*	|uvoffuni_to_utf8_flags	|NN U8 *d|UV uv|const UV flags
 Cp	|U8*	|uvoffuni_to_utf8_flags_msgs|NN U8 *d|UV uv|const UV flags|NULLOK HV** msgs
-Cdp	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
+CdpbD	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
 EXpR	|Size_t	|_inverse_folds	|const UV cp				    \

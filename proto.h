@@ -3909,10 +3909,12 @@ PERL_CALLCONV STRLEN	Perl_utf8_length(pTHX_ const U8* s, const U8 *e)
 PERL_CALLCONV U8*	Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_UTF8_TO_BYTES	\
 	assert(s); assert(lenp)
+#ifndef NO_MATHOMS
 PERL_CALLCONV UV	Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 			__attribute__deprecated__;
 #define PERL_ARGS_ASSERT_UTF8_TO_UVCHR	\
 	assert(s)
+#endif
 
 PERL_CALLCONV UV	Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
 #define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF	\
@@ -3945,9 +3947,13 @@ PERL_STATIC_INLINE UV	Perl_utf8n_to_uvchr_msgs(const U8 *s, STRLEN curlen, STRLE
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS	\
 	assert(s)
 #endif
-PERL_CALLCONV UV	Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags);
+#ifndef NO_MATHOMS
+PERL_CALLCONV UV	Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+			__attribute__deprecated__;
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVUNI	\
 	assert(s)
+#endif
+
 PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop, OP* arg);
 #define PERL_ARGS_ASSERT_UTILIZE	\
 	assert(idop)
@@ -3966,9 +3972,13 @@ PERL_CALLCONV U8*	Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV 
 PERL_CALLCONV U8*	Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
 #define PERL_ARGS_ASSERT_UVUNI_TO_UTF8	\
 	assert(d)
-PERL_CALLCONV U8*	Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
+#ifndef NO_MATHOMS
+PERL_CALLCONV U8*	Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
+			__attribute__deprecated__;
 #define PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS	\
 	assert(d)
+#endif
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE UV	Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 			__attribute__warn_unused_result__;

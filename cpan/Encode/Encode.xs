@@ -231,7 +231,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
         if (dir == enc->f_utf8) {
         STRLEN clen;
         UV ch =
-            utf8n_to_uvuni(s+slen, (tlen-sdone-slen),
+            utf8n_to_uvchr(s+slen, (tlen-sdone-slen),
                    &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
         /* if non-representable multibyte prefix at end of current buffer - break*/
         if (clen > tlen - sdone - slen) break;

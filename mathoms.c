@@ -1321,6 +1321,102 @@ Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
     return sv_2pvbyte(sv, lp);
 }
 
+U8 *
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    PERL_ARGS_ASSERT_UVUNI_TO_UTF8;
+
+    return uvoffuni_to_utf8_flags(d, uv, 0);
+}
+
+/*
+=for apidoc utf8n_to_uvuni
+
+Instead use L<perlapi/utf8_to_uvchr_buf>, or rarely, L<perlapi/utf8n_to_uvchr>.
+
+This function was useful for code that wanted to handle both EBCDIC and
+ASCII platforms with Unicode properties, but starting in Perl v5.20, the
+distinctions between the platforms have mostly been made invisible to most
+code, so this function is quite unlikely to be what you want.  If you do need
+this precise functionality, use instead
+C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|perlapi/utf8_to_uvchr_buf>>
+or C<L<NATIVE_TO_UNI(utf8n_to_uvchr(...))|perlapi/utf8n_to_uvchr>>.
+
+=cut
+*/
+
+UV
+Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+{
+    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
+
+    return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
+}
+
+/*
+=for apidoc uvuni_to_utf8_flags
+
+Instead you almost certainly want to use L<perlapi/uvchr_to_utf8> or
+L<perlapi/uvchr_to_utf8_flags>.
+
+This function is a deprecated synonym for L</uvoffuni_to_utf8_flags>,
+which itself, while not deprecated, should be used only in isolated
+circumstances.  These functions were useful for code that wanted to handle
+both EBCDIC and ASCII platforms with Unicode properties, but starting in Perl
+v5.20, the distinctions between the platforms have mostly been made invisible
+to most code, so this function is quite unlikely to be what you want.
+
+=cut
+*/
+
+U8 *
+Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
+{
+    PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS;
+
+    return uvoffuni_to_utf8_flags(d, uv, flags);
+}
+
+/*
+=for apidoc utf8_to_uvchr
+
+Returns the native code point of the first character in the string C<s>
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Some, but not all, UTF-8 malformations are detected, and in fact, some
+malformed input could cause reading beyond the end of the input buffer, which
+is why this function is deprecated.  Use L</utf8_to_uvchr_buf> instead.
+
+If C<s> points to one of the detected malformations, and UTF8 warnings are
+enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
+C<NULL>) to -1.  If those warnings are off, the computed value if well-defined (or
+the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
+is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
+
+=cut
+*/
+
+UV
+Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR;
+
+    /* This function is unsafe if malformed UTF-8 input is given it, which is
+     * why the function is deprecated.  If the first byte of the input
+     * indicates that there are more bytes remaining in the sequence that forms
+     * the character than there are in the input buffer, it can read past the
+     * end.  But we can make it safe if the input string happens to be
+     * NUL-terminated, as many strings in Perl are, by refusing to read past a
+     * NUL, which is what UTF8_CHK_SKIP() does.  A NUL indicates the start of
+     * the next character anyway.  If the input isn't NUL-terminated, the
+     * function remains unsafe, as it always has been. */
+
+    return utf8_to_uvchr_buf(s, s + UTF8_CHK_SKIP(s), retlen);
+}
+
 GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */
