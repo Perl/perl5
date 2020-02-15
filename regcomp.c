@@ -23701,16 +23701,19 @@ S_parse_uniprop_string(pTHX_
                  * but it must be punctuation */
             && (name[i] != '\\' || (i < name_len && isPUNCT_A(name[i+1]))))
         {
-            /* Find the property.  The table includes the equals sign, so we
-             * use 'j' as-is */
-            table_index = do_uniprop_match(lookup_name, j);
-            if (table_index) {
-                const char * const * prop_values
-                                                = get_prop_values(table_index);
+            bool special_property = memEQs(lookup_name, j - 1, "name")
+                                 || memEQs(lookup_name, j - 1, "na");
+            if (! special_property) {
+                /* Find the property.  The table includes the equals sign, so
+                 * we use 'j' as-is */
+                table_index = do_uniprop_match(lookup_name, j);
+            }
+            if (special_property || table_index) {
                 REGEXP * subpattern_re;
                 char open = name[i++];
                 char close;
                 const char * pos_in_brackets;
+                const char * const * prop_values;
                 bool escaped = 0;
 
                 /* Backslash => delimitter is the character following.  We
@@ -23743,6 +23746,35 @@ S_parse_uniprop_string(pTHX_
                 Perl_ck_warner_d(aTHX_
                     packWARN(WARN_EXPERIMENTAL__UNIPROP_WILDCARDS),
                     "The Unicode property wildcards feature is experimental");
+
+                if (special_property) {
+                    const char * error_msg;
+                    const char * revised_name = name + i;
+                    Size_t revised_name_len = name_len - (i + 1 + escaped);
+
+                    /* Currently, the only 'special_property' is name, which we
+                     * lookup in _charnames.pm */
+
+                    if (! load_charnames(newSVpvs("placeholder"),
+                                         revised_name, revised_name_len,
+                                         &error_msg))
+                    {
+                        sv_catpv(msg, error_msg);
+                        goto append_name_to_msg;
+                    }
+
+                    /* Farm this out to a function just to make the current
+                     * function less unwieldy */
+                    if (handle_names_wildcard(revised_name, revised_name_len,
+                                &prop_definition))
+                    {
+                        return prop_definition;
+                    }
+
+                    goto failed;
+                }
+
+                prop_values = get_prop_values(table_index);
 
                 /* Now create and compile the wildcard subpattern.  Use /i
                  * because the property values are supposed to match with case
@@ -23838,11 +23870,6 @@ S_parse_uniprop_string(pTHX_
              * error.  Otherwise run the pattern against every code point in
              * the ssc.  The ssc is kind of like tr18's 3.9 Possible Match Sets
              * And it might be good to create an API to return the ssc.
-             *
-             * For the name properties, a new function could be created in
-             * charnames which essentially does the same thing as above,
-             * sharing Name.pl with the other charname functions.  Don't know
-             * about loose name matching, or algorithmically determined names.
              * Decomposition.pl similarly.
              *
              * It might be that a new pattern modifier would have to be
@@ -23932,6 +23959,7 @@ S_parse_uniprop_string(pTHX_
 
             cp = valid_utf8_to_uvchr((U8 *) SvPVX(character), &character_len);
             if (character_len < SvCUR(character)) {
+                /* Temporarily, named sequences aren't handled */
                 goto failed;
             }
 
@@ -24848,6 +24876,383 @@ S_parse_uniprop_string(pTHX_
         *user_defined_ptr = TRUE;
         return fq_name;
     }
+}
+
+STATIC bool
+S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
+                              const STRLEN wname_len, /* Its length */
+                              SV ** prop_definition)
+{
+    /* Deal with Name property wildcard subpatterns; returns TRUE if there were
+     * any matches, adding them to prop_definition */
+
+    dSP;
+
+    CV * get_names_info;        /* entry to charnames.pm to get info we need */
+    SV * names_string;          /* Contains all character names, except algo */
+    SV * algorithmic_names;     /* Contains info about algorithmically
+                                   generated character names */
+    REGEXP * subpattern_re;     /* The user's pattern to match with */
+    struct regexp * prog;       /* The compiled pattern */
+    char * all_names_start;     /* lib/unicore/Name.pl string of every
+                                   (non-algorithmic) character name */
+    char * cur_pos;             /* We match, effectively using /gc; this is
+                                   where we are now */
+    bool found_matches = FALSE; /* Did any name match so far? */
+    SV * empty;                 /* For matching zero length names */
+    SV * must;                  /* What substring, if any, must be in a name
+                                   for the subpattern to match */
+    SV * syllable_name = NULL;  /* For Hangul syllables */
+    const char hangul_prefix[] = "HANGUL SYLLABLE ";
+    const STRLEN hangul_prefix_len = sizeof(hangul_prefix) - 1;
+
+    /* There are a maximum of 7 bytes in the suffix of a hangul syllable */
+    const STRLEN syl_max_len = hangul_prefix_len + 7;
+
+    IV i;
+
+    PERL_ARGS_ASSERT_HANDLE_NAMES_WILDCARD;
+
+    /* Make sure _charnames is loaded.  (The parameters give context
+     * for any errors generated */
+    get_names_info = get_cv("_charnames::_get_names_info", 0);
+    if (! get_names_info) {
+        Perl_croak(aTHX_ "panic: Can't find '_charnames::_get_names_info");
+    }
+
+    /* Get the charnames data */
+    PUSHSTACKi(PERLSI_OVERLOAD);
+    ENTER ;
+    SAVETMPS;
+    save_re_context();
+
+    PUSHMARK(SP) ;
+    PUTBACK;
+
+    /* Special _charnames entry point that returns the info this routine
+     * requires */
+    call_sv(MUTABLE_SV(get_names_info), G_ARRAY);
+
+    SPAGAIN ;
+
+    /* Data structure for names which end in their very own code points */
+    algorithmic_names = POPs;
+    SvREFCNT_inc_simple_void_NN(algorithmic_names);
+
+    /* The lib/unicore/Name.pl string */
+    names_string = POPs;
+    SvREFCNT_inc_simple_void_NN(names_string);
+
+    PUTBACK ;
+    FREETMPS ;
+    LEAVE ;
+    POPSTACK;
+
+    if (   ! SvROK(names_string)
+        || ! SvROK(algorithmic_names))
+    {
+        return FALSE;
+    }
+
+    names_string = SvRV(names_string);
+    all_names_start = SvPVX(names_string);
+    cur_pos = all_names_start;
+
+    algorithmic_names= SvRV(algorithmic_names);
+
+    /* Compile the subpattern consisting of the name being looked for */
+    subpattern_re = compile_wildcard(wname, wname_len, FALSE /* /-i */ );
+    must = re_intuit_string(subpattern_re);
+    prog = ReANY(subpattern_re);
+
+    /* If only nothing is matched, skip to where empty names are looked for */
+    if (prog->maxlen == 0) {
+        goto check_empty;
+    }
+
+    /* And match against the string of all names /gc.  Don't even try if it
+     * must match a character not found in any name. */
+    if ( ! must
+        || SvCUR(must) == 0
+        || strspn(SvPVX(must), "\n -0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ()")
+                                                              == SvCUR(must))
+    {
+        while (execute_wildcard(subpattern_re,
+                                cur_pos,
+                                SvEND(names_string),
+                                all_names_start, 0,
+                                names_string,
+                                0))
+        { /* Here, matched. */
+
+            /* Note the string entries look like
+             *      00001\nSTART OF HEADING\n\n
+             * so we could match anywhere in that string.  We have to rule out
+             * matching a code point line */
+            char * this_name_start = all_names_start
+                                                + RX_OFFS(subpattern_re)->start;
+            char * this_name_end   = all_names_start
+                                                + RX_OFFS(subpattern_re)->end;
+            char * cp_start;
+            char * cp_end;
+            UV cp;
+
+            /* If matched nothing, advance to next possible match */
+            if (this_name_start == this_name_end) {
+                cur_pos = (char *) memchr(this_name_end + 1, '\n',
+                                          SvEND(names_string) - this_name_end);
+                if (cur_pos == NULL) {
+                    break;
+                }
+            }
+            else {
+                /* Position the next match to start beyond the current returned
+                 * entry */
+                cur_pos = (char *) memchr(this_name_end, '\n',
+                                          SvEND(names_string) - this_name_end);
+            }
+
+            /* Back up to the \n just before the beginning of the character. */
+            cp_end = (char *) my_memrchr(all_names_start,
+                                         '\n',
+                                         this_name_start - all_names_start);
+
+            /* If we didn't find a \n, it means it matched somewhere in the
+             * initial '00000' in the string, so isn't a real match */
+            if (cp_end == NULL) {
+                continue;
+            }
+
+            this_name_start = cp_end + 1;   /* The name starts just after */
+            cp_end--;                       /* the \n, and the code point */
+                                            /* ends just before it */
+
+            /* All code points are 5 digits long */
+            cp_start = cp_end - 4;
+
+            /* Except for the first line in the string, the sequence before the
+             * code point is \n\n.  If that isn't the case here, we didn't
+             * match the name of a character.  (We could have matched a named
+             * sequence, not currently handled */
+            if (      cp_start > all_names_start
+                && (*(cp_start - 1) != '\n' || *(cp_start - 2) != '\n'))
+            {
+                continue;
+            }
+
+            /* Calculate the code point from its 5 digits */
+            cp = (XDIGIT_VALUE(cp_start[0]) << 16)
+               + (XDIGIT_VALUE(cp_start[1]) << 12)
+               + (XDIGIT_VALUE(cp_start[2]) << 8)
+               + (XDIGIT_VALUE(cp_start[3]) << 4)
+               +  XDIGIT_VALUE(cp_start[4]);
+
+            /* We matched!  Add this to the list */
+            *prop_definition = add_cp_to_invlist(*prop_definition, cp);
+            found_matches = TRUE;
+        } /* End of loop through the non-algorithmic names string */
+    }
+
+    SvREFCNT_dec_NN(names_string);
+
+    /* There are also character names not in 'names_string'.  These are
+     * algorithmically generatable.  Try this pattern on each possible one.
+     * (khw originally planned to leave this out given the large number of
+     * matches attempted; but the speed turned out to be quite acceptable
+     *
+     * There are plenty of opportunities to optimize to skip many of the tests.
+     * beyond the rudimentary ones already here */
+
+    /* First see if the subpattern matches any of the algorithmic generatable
+     * Hangul syllable names.
+     *
+     * We know none of these syllable names will match if the input pattern
+     * requires more bytes than any syllable has, or if the input pattern only
+     * matches an empty name, or if the pattern has something it must match and
+     * one of the characters in that isn't in any Hangul syllable. */
+    if (    prog->minlen <= (SSize_t) syl_max_len
+        &&  prog->maxlen > 0
+        && ( ! must
+            || SvCUR(must) == 0
+            || strspn(SvPVX(must), "\n ABCDEGHIJKLMNOPRSTUWY") == SvCUR(must)))
+    {
+        /* These constants, names, values, and algorithm were taken from the
+         * Unicode standard, version 5.1, section 3.12, and should never
+         * change. */
+        const char * JamoL[] = {
+            "G", "GG", "N", "D", "DD", "R", "M", "B", "BB",
+            "S", "SS", "", "J", "JJ", "C", "K", "T", "P", "H"
+        };
+        const char * JamoV[] = {
+            "A", "AE", "YA", "YAE", "EO", "E", "YEO", "YE", "O", "WA",
+            "WAE", "OE", "YO", "U", "WEO", "WE", "WI", "YU", "EU", "YI",
+            "I"
+        };
+        const char * JamoT[] = {
+            "", "G", "GG", "GS", "N", "NJ", "NH", "D", "L",
+            "LG", "LM", "LB", "LS", "LT", "LP", "LH", "M", "B",
+            "BS", "S", "SS", "NG", "J", "C", "K", "T", "P", "H"
+        };
+
+        const int SCount = 11172;
+        const int SBase = 0xAC00;
+        const int LBase = 0x1100;
+        const int VBase = 0x1161;
+        const int TBase = 0x11A7;
+        const int VCount = 21;
+        const int TCount = 28;
+        const int NCount = VCount * TCount;
+
+        syllable_name = newSV(syl_max_len);
+        sv_setpvn(syllable_name, hangul_prefix, hangul_prefix_len);
+
+        for (i = 0; i < SCount; i++) {
+            const int L = LBase + i / NCount;
+            const int V = VBase + (i % NCount) / TCount;
+            const int T = TBase + i % TCount;
+
+            /* Truncate back to the prefix, which is unvarying */
+            SvCUR_set(syllable_name, hangul_prefix_len);
+
+            sv_catpv(syllable_name, JamoL[L - LBase]);
+            sv_catpv(syllable_name, JamoV[V - VBase]);
+            sv_catpv(syllable_name, JamoT[T - TBase]);
+
+            if (execute_wildcard(subpattern_re,
+                        SvPVX(syllable_name),
+                        SvEND(syllable_name),
+                        SvPVX(syllable_name), 0,
+                        syllable_name,
+                        0))
+            {
+                *prop_definition = add_cp_to_invlist(*prop_definition,
+                                                    i + SBase);
+                found_matches = TRUE;
+            }
+        }
+    }
+
+    SvREFCNT_dec(syllable_name);
+
+    /* The rest of the algorithmically generatable names are of the form
+     * "PREFIX-code_point".  The prefixes and the code point limits of each
+     * were returned to us in the array 'algorithmic_names' from data in
+     * lib/unicore/Name.pm.  'code_point' in the name is expressed in hex. */
+    for (i = 0; i <= av_top_index((AV *) algorithmic_names); i++) {
+        IV j;
+
+        /* Each element of the array is a hash, giving the details for the
+         * series of names it covers.  There is the base name of the characters
+         * in the series, and the low and high code points in the series.  And,
+         * for optimization purposes a string containing all the legal
+         * characters that could possibly be in a name in this series. */
+        HV * this_series = (HV *) SvRV(* av_fetch((AV *) algorithmic_names, i, 0));
+        SV * prefix = * hv_fetchs(this_series, "name", 0);
+        IV low = SvIV(* hv_fetchs(this_series, "low", 0));
+        IV high = SvIV(* hv_fetchs(this_series, "high", 0));
+        char * legal = SvPVX(* hv_fetchs(this_series, "legal", 0));
+
+        /* Pre-allocate an SV with enough space */
+        SV * algo_name = Perl_newSVpvf(aTHX_ "%s-0000", SvPVX(prefix));
+        if (high >= 0x10000) {
+            sv_catpvs(algo_name, "0");
+        }
+
+        /* This series can be skipped entirely if the pattern requires
+         * something longer than any name in the series, or can only match an
+         * empty name, or contains a character not found in any name in the
+         * series */
+        if (    prog->minlen <= (SSize_t) SvCUR(algo_name)
+            &&  prog->maxlen > 0
+            && ( ! must
+                || SvCUR(must) == 0
+                || strspn(SvPVX(must), legal) == SvCUR(must)))
+        {
+            for (j = low; j <= high; j++) { /* For each code point in the series */
+
+                /* Get its name, and see if it matches the subpattern */
+                Perl_sv_setpvf(aTHX_ algo_name, "%s-%X", SvPVX(prefix),
+                                     (unsigned) j);
+
+                if (execute_wildcard(subpattern_re,
+                                    SvPVX(algo_name),
+                                    SvEND(algo_name),
+                                    SvPVX(algo_name), 0,
+                                    algo_name,
+                                    0))
+                {
+                    *prop_definition = add_cp_to_invlist(*prop_definition, j);
+                    found_matches = TRUE;
+                }
+            }
+        }
+
+        SvREFCNT_dec_NN(algo_name);
+    }
+
+    SvREFCNT_dec_NN(algorithmic_names);
+
+  check_empty:
+    /* Finally, see if the subpattern matches an empty string */
+    empty = newSVpvs("");
+    if (execute_wildcard(subpattern_re,
+                         SvPVX(empty),
+                         SvEND(empty),
+                         SvPVX(empty), 0,
+                         empty,
+                         0))
+    {
+        /* Many code points have empty names.  Currently these are the \p{GC=C}
+         * ones, minus CC and CF */
+
+        SV * empty_names_ref = get_prop_definition(UNI_C);
+        SV * empty_names = invlist_clone(empty_names_ref, NULL);
+
+        SV * subtract = get_prop_definition(UNI_CC);
+
+        _invlist_subtract(empty_names, subtract, &empty_names);
+        SvREFCNT_dec_NN(empty_names_ref);
+        SvREFCNT_dec_NN(subtract);
+
+        subtract = get_prop_definition(UNI_CF);
+        _invlist_subtract(empty_names, subtract, &empty_names);
+        SvREFCNT_dec_NN(subtract);
+
+        _invlist_union(*prop_definition, empty_names, prop_definition);
+        found_matches = TRUE;
+        SvREFCNT_dec_NN(empty_names);
+    }
+    SvREFCNT_dec_NN(empty);
+
+#if 0
+    /* If we ever were to accept aliases for, say private use names, we would
+     * need to do something fancier to find empty names.  The code below works
+     * (at the time it was written), and is slower than the above */
+    const char empties_pat[] = "^.";
+    if (strNE(name, empties_pat)) {
+        SV * empty = newSVpvs("");
+        if (execute_wildcard(subpattern_re,
+                    SvPVX(empty),
+                    SvEND(empty),
+                    SvPVX(empty), 0,
+                    empty,
+                    0))
+        {
+            SV * empties = NULL;
+
+            (void) handle_names_wildcard(empties_pat, strlen(empties_pat), &empties);
+
+            _invlist_union_complement_2nd(*prop_definition, empties, prop_definition);
+            SvREFCNT_dec_NN(empties);
+
+            found_matches = TRUE;
+        }
+        SvREFCNT_dec_NN(empty);
+    }
+#endif
+
+    SvREFCNT_dec_NN(subpattern_re);
+    return found_matches;
 }
 
 /*

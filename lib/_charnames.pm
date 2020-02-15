@@ -641,6 +641,14 @@ sub _loose_regcomp_lookup {
                     );
 }
 
+sub _get_names_info {
+  # For use only by regcomp.c to compile \p{name=/.../}
+  populate_txt() unless $txt;
+
+
+  return ( \$txt, \@charnames::code_points_ending_in_code_point );
+}
+
 sub import
 {
   shift; ## ignore class name

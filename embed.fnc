@@ -1946,6 +1946,10 @@ ERS	|REGEXP*|compile_wildcard|NN const char * subpattern|const STRLEN len\
 ES	|I32	|execute_wildcard|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \
 				|SSize_t minend |NN SV* screamer|U32 nosave
+ES	|bool	|handle_names_wildcard					    \
+				|NN const char * wname			    \
+				|const STRLEN wname_len			    \
+				|NN SV ** prop_definition
 ES	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 Ei	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
