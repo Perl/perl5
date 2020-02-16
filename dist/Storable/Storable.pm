@@ -1227,9 +1227,9 @@ See CVE-2015-1592 and its metasploit module.
 If your application requires accepting data from untrusted sources,
 you are best off with a less powerful and more-likely safe
 serialization format and implementation. If your data is sufficiently
-simple, Cpanel::JSON::XS, Data::MessagePack or Serial are the best
-choices and offers maximum interoperability, but note that Serial is
-unsafe by default.
+simple, L<Cpanel::JSON::XS>, L<Data::MessagePack> or L<Sereal> are the best
+choices and offer maximum interoperability, but note that Sereal is
+L<unsafe by default|Sereal::Decoder/ROBUSTNESS>.
 
 =head1 WARNING
 

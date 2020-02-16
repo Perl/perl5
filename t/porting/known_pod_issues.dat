@@ -64,6 +64,7 @@ Coro
 cpan2dist(1)
 CPAN::Changes::Spec
 CPAN::Uploader
+Cpanel::JSON::XS
 cpanp(1)
 CPANPLUS
 crypt(3)
@@ -75,6 +76,7 @@ Data::Alias
 Data::Dump::Streamer
 Data::Entropy
 Data::Float
+Data::MessagePack
 Data::Structure::Util
 Data::Types
 Data::Util
@@ -279,6 +281,8 @@ sendmail(1)
 sendmsg(2)
 sendmsg(3)
 sendto(2)
+Sereal
+Sereal::Decoder
 setenv(3)
 setitimer(2)
 setlocale(3)
