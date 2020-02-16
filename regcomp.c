@@ -7399,7 +7399,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
  *
  * pm_flags contains the PMf_* flags, typically based on those from the
  * pm_flags field of the related PMOP. Currently we're only interested in
- * PMf_HAS_CV, PMf_IS_QR, PMf_USE_RE_EVAL.
+ * PMf_HAS_CV, PMf_IS_QR, PMf_USE_RE_EVAL, PMf_WILDCARD.
  *
  * For many years this code had an initial sizing pass that calculated
  * (sometimes incorrectly, leading to security holes) the size needed for the
@@ -10765,6 +10765,24 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         /* && memCHRs("iogcmsx", *RExC_parse) */
         /* (?g), (?gc) and (?o) are useless here
            and must be globally applied -- japhy */
+        if ((RExC_pm_flags & PMf_WILDCARD)) {
+            if (flagsp == & negflags) {
+                if (*RExC_parse == 'm') {
+                    RExC_parse++;
+                    /* diag_listed_as: Use of %s is not allowed in Unicode
+                       property wildcard subpatterns in regex; marked by <--
+                       HERE in m/%s/ */
+                    vFAIL("Use of modifier '-m' is not allowed in Unicode"
+                          " property wildcard subpatterns");
+                }
+            }
+            else {
+                if (*RExC_parse == 's') {
+                    goto modifier_illegal_in_wildcard;
+                }
+            }
+        }
+
         switch (*RExC_parse) {
 
             /* Code for the imsxn flags */
@@ -10845,6 +10863,10 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                                     *(RExC_parse - 1));
                 NOT_REACHED; /*NOTREACHED*/
             case GLOBAL_PAT_MOD: /* 'g' */
+                if (RExC_pm_flags & PMf_WILDCARD) {
+                    goto modifier_illegal_in_wildcard;
+                }
+                /*FALLTHROUGH*/
             case ONCE_PAT_MOD: /* 'o' */
                 if (ckWARN(WARN_REGEXP)) {
                     const I32 wflagbit = *RExC_parse == 'o'
@@ -10866,6 +10888,9 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 break;
 
             case CONTINUE_PAT_MOD: /* 'c' */
+                if (RExC_pm_flags & PMf_WILDCARD) {
+                    goto modifier_illegal_in_wildcard;
+                }
                 if (ckWARN(WARN_REGEXP)) {
                     if (! (wastedflags & WASTED_C) ) {
                         wastedflags |= WASTED_GC;
@@ -10880,6 +10905,9 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 }
                 break;
             case KEEPCOPY_PAT_MOD: /* 'p' */
+                if (RExC_pm_flags & PMf_WILDCARD) {
+                    goto modifier_illegal_in_wildcard;
+                }
                 if (flagsp == &negflags) {
                     ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
                 } else {
@@ -10899,6 +10927,18 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 break;
             case ':':
             case ')':
+
+                if (  (RExC_pm_flags & PMf_WILDCARD)
+                    && cs != REGEX_ASCII_MORE_RESTRICTED_CHARSET)
+                {
+                    RExC_parse++;
+                    /* diag_listed_as: Use of %s is not allowed in Unicode
+                       property wildcard subpatterns in regex; marked by <--
+                       HERE in m/%s/ */
+                    vFAIL2("Use of modifier '%c' is not allowed in Unicode"
+                           " property wildcard subpatterns",
+                           has_charset_modifier);
+                }
 
                 if ((posflags & (RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE)) == RXf_PMf_EXTENDED) {
                     negflags |= RXf_PMf_EXTENDED_MORE;
@@ -10925,6 +10965,13 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
     }
 
     vFAIL("Sequence (?... not terminated");
+
+  modifier_illegal_in_wildcard:
+    RExC_parse++;
+    /* diag_listed_as: Use of %s is not allowed in Unicode property wildcard
+       subpatterns in regex; marked by <-- HERE in m/%s/ */
+    vFAIL2("Use of modifier '%c' is not allowed in Unicode property wildcard"
+           " subpatterns", *(RExC_parse - 1));
 }
 
 /*
@@ -12533,6 +12580,23 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	  do_curly:
 	    if ((flags&SIMPLE)) {
                 if (min == 0 && max == REG_INFTY) {
+
+                    /* Going from 0..inf is currently forbidden in wildcard
+                     * subpatterns.  The only reason is to make it harder to
+                     * write patterns that take a long long time to halt, and
+                     * because the use of this construct isn't necessary in
+                     * matching Unicode property values */
+                    if (RExC_pm_flags & PMf_WILDCARD) {
+                        RExC_parse++;
+                        /* diag_listed_as: Use of %s is not allowed in Unicode
+                           property wildcard subpatterns in regex; marked by
+                           <-- HERE in m/%s/ */
+                        vFAIL("Use of quantifier '*' is not allowed in"
+                              " Unicode property wildcard subpatterns");
+                        /* Note, don't need to worry about {0,}, as a '}' isn't
+                         * legal at all in wildcards, so wouldn't get this far
+                         * */
+                    }
                     reginsert(pRExC_state, STAR, ret, depth+1);
                     MARK_NAUGHTY(4);
                     RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
@@ -13404,13 +13468,26 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;
-	    ret = reg_node(pRExC_state, SBOL);
-            /* SBOL is shared with /^/ so we set the flags so we can tell
-             * /\A/ from /^/ in split. */
-            FLAGS(REGNODE_p(ret)) = 1;
+            if (RExC_pm_flags & PMf_WILDCARD) {
+                ret = reg_node(pRExC_state, MBOL);
+            }
+            else {
+                ret = reg_node(pRExC_state, SBOL);
+                /* SBOL is shared with /^/ so we set the flags so we can tell
+                 * /\A/ from /^/ in split. */
+                FLAGS(REGNODE_p(ret)) = 1;
+            }
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'G':
+            if (RExC_pm_flags & PMf_WILDCARD) {
+                RExC_parse++;
+                /* diag_listed_as: Use of %s is not allowed in Unicode property
+                   wildcard subpatterns in regex; marked by <-- HERE in m/%s/
+                 */
+                vFAIL("Use of '\\G' is not allowed in Unicode property"
+                      " wildcard subpatterns");
+            }
 	    ret = reg_node(pRExC_state, GPOS);
             RExC_seen |= REG_GPOS_SEEN;
 	    *flagp |= SIMPLE;
@@ -13432,12 +13509,22 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 vFAIL("\\K not permitted in lookahead/lookbehind");
             }
 	case 'Z':
-	    ret = reg_node(pRExC_state, SEOL);
+            if (RExC_pm_flags & PMf_WILDCARD) {
+                ret = reg_node(pRExC_state, MEOL);
+            }
+            else {
+                ret = reg_node(pRExC_state, SEOL);
+            }
 	    *flagp |= SIMPLE;
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    goto finish_meta_pat;
 	case 'z':
-	    ret = reg_node(pRExC_state, EOS);
+            if (RExC_pm_flags & PMf_WILDCARD) {
+                ret = reg_node(pRExC_state, MEOL);
+            }
+            else {
+                ret = reg_node(pRExC_state, EOS);
+            }
 	    *flagp |= SIMPLE;
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    goto finish_meta_pat;
@@ -17456,6 +17543,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    case 'P':
 		{
 		char *e;
+
+                if (RExC_pm_flags & PMf_WILDCARD) {
+                    RExC_parse++;
+                    /* diag_listed_as: Use of %s is not allowed in Unicode
+                       property wildcard subpatterns in regex; marked by <--
+                       HERE in m/%s/ */
+                    vFAIL3("Use of '\\%c%c' is not allowed in Unicode property"
+                           " wildcard subpatterns", value, *(RExC_parse - 1));
+                }
 
 		/* \p means they want Unicode semantics */
 		REQUIRE_UNI_RULES(flagp, 0);
@@ -22818,7 +22914,7 @@ STATIC REGEXP *
 S_compile_wildcard(pTHX_ const char * name, const STRLEN len,
                          const bool ignore_case)
 {
-    U32 flags = PMf_MULTILINE;
+    U32 flags = PMf_MULTILINE|PMf_WILDCARD;
     REGEXP * subpattern_re;
 
     PERL_ARGS_ASSERT_COMPILE_WILDCARD;

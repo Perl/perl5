@@ -19251,6 +19251,8 @@ Error('\p{InKana}');    # 'Kana' is not a block so InKana shouldn't compile
 # Test_WB()
 Test_WB("$breakable 0020 $breakable 0020 $breakable 0308 $breakable");
 Test_LB("$nobreak 200B $nobreak 0020 $nobreak 0020 $breakable 2060 $breakable");
+Expect(1, ord(" "), '\p{gc=:(?aa)s:}', "");     # /aa is valid
+Expect(1, ord(" "), '\p{gc=:(?-s)s:}', "");     # /-s is valid
 EOF_CODE
 
     # Sort these so get results in same order on different runs of this

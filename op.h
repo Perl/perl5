@@ -372,6 +372,10 @@ struct pmop {
 #define PMf_IS_QR	(1U<<(PMf_BASE_SHIFT+15))
 #define PMf_USE_RE_EVAL	(1U<<(PMf_BASE_SHIFT+16)) /* use re'eval' in scope */
 
+/* Means that this is a subpattern being compiled while processing a \p{}
+ * wildcard.  This isn't called from op.c, but it is passed as a pm flag. */
+#define PMf_WILDCARD    (1U<<(PMf_BASE_SHIFT+17))
+
 /* See comments at the beginning of these defines about adding bits.  The
  * highest bit position should be used, so that if PMf_BASE_SHIFT gets
  * increased, the #error below will be triggered so that you will be reminded

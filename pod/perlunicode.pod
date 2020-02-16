@@ -1027,13 +1027,26 @@ C<$/>.
 No modifiers may follow the final delimiter.  Instead, use
 L<perlre/(?adlupimnsx-imnsx)> and/or
 L<perlre/(?adluimnsx-imnsx:pattern)> to specify modifiers.
+However, certain modifiers are illegal in your wildcard subpattern.
+The only character set modifier specifiable is C</aa>;
+any other character set, and C<-m>, and C<p>, and C<s> are all illegal.
+Specifying modifiers like C<qr/.../gc> that aren't legal in the
+C<(?...)> notation normally raise a warning, but with wildcard
+subpatterns, their use is an error.  The C<m> modifier is ineffective;
+everything that matches will be a single line.
+
+By default, your pattern is matched case-insensitively, as if C</i> had
+been specified.  You can change this by saying C<(?-i)> in your pattern.
+
+There are also certain operations that are illegal.  You can't nest
+C<\p{...}> and C<\P{...}> calls within a wildcard subpattern, and C<\G>
+doesn't make sense, so is also prohibited.
+
+And the C<*> quantifier (or its equivalent C<(0,}>) is illegal.
 
 This feature is not available when the left-hand side is prefixed by
 C<Is_>, nor for any form that is marked as "Discouraged" in
 L<perluniprops/Discouraged>.
-
-By default, your pattern is matched case-insensitively, as if C</i> had
-been specified.  You can change this by saying C<(?-i)> in your pattern.
 
 This experimental feature has been added to begin to implement
 L<https://www.unicode.org/reports/tr18/#Wildcard_Properties>.  Using it

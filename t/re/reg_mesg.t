@@ -319,6 +319,18 @@ my @death =
  '/(?[\N{KEYCAP DIGIT NINE}/' => '\N{} here is restricted to one character {#} m/(?[\\N{U+39.FE0F.20E3{#}}/', # [perl #133988]
  '/0000000000000000[\N{U+0.00}0000/' => 'Unmatched [ {#} m/0000000000000000[{#}\N{U+0.00}0000/', # [perl #134059]
  '/\p{nv=\b5\b}/' => 'Can\'t find Unicode property definition "nv=\\b5\\b" {#} m/\\p{nv=\\b5\\b}{#}/',
+ '/\p{nv=:(?g)10:}/' => 'Use of modifier \'g\' is not allowed in Unicode property wildcard subpatterns {#} m/(?g{#})10/',
+ '/\p{gc=:L*:}/' => 'Use of quantifier \'*\' is not allowed in Unicode property wildcard subpatterns {#} m/L*{#}/',
+ '/\p{gc=:L\G:}/' => 'Use of \'\G\' is not allowed in Unicode property wildcard subpatterns {#} m/L\G{#}/',
+ '/\p{gc=:(?a)L:}/' => 'Use of modifier \'a\' is not allowed in Unicode property wildcard subpatterns {#} m/(?a){#}L/',
+ '/\p{gc=:(?u)L:}/' => 'Use of modifier \'u\' is not allowed in Unicode property wildcard subpatterns {#} m/(?u){#}L/',
+ '/\p{gc=:(?d)L:}/' => 'Use of modifier \'d\' is not allowed in Unicode property wildcard subpatterns {#} m/(?d){#}L/',
+ '/\p{gc=:(?l)L:}/' => 'Use of modifier \'l\' is not allowed in Unicode property wildcard subpatterns {#} m/(?l){#}L/',
+ '/\p{gc=:(?-m)L:}/' => 'Use of modifier \'-m\' is not allowed in Unicode property wildcard subpatterns {#} m/(?-m{#})L/',
+ '/\p{gc=:\pS:}/' => 'Use of \'\\pS\' is not allowed in Unicode property wildcard subpatterns {#} m/\\pS{#}/',
+ '/\p{gc=:\PS:}/' => 'Use of \'\\PS\' is not allowed in Unicode property wildcard subpatterns {#} m/\\PS{#}/',
+ '/\p{gc=:[\pS]:}/' => 'Use of \'\\pS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\pS{#}]/',
+ '/\p{gc=:[\PS]:}/' => 'Use of \'\\PS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\PS{#}]/',
 );
 
 # These are messages that are death under 'use re "strict"', and may or may
@@ -731,6 +743,7 @@ for my $strict ("", "use re 'strict';") {
         else {
             no warnings 'experimental::regex_sets';
             no warnings 'experimental::re_strict';
+            no warnings 'experimental::uniprop_wildcards';
 
             warning_is(sub {
                     my $meaning_of_life;

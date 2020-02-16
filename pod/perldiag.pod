@@ -7331,6 +7331,15 @@ This was deprecated in Perl 5.004, and was made fatal in Perl 5.28.
 (F) You attempted to use a feature of printf that is accessible from
 only C.  This usually means there's a better way to do it in Perl.
 
+=item Use of %s is not allowed in Unicode property wildcard
+subpatterns in regex; marked by S<<-- HERE> in m/%s/
+
+(F) You were using a wildcard subpattern a Unicode property value, and
+the subpattern contained something that is illegal.  Not all regular
+expression capabilities are legal in such subpatterns, and this is one.
+Rewrite your subppattern to not use the offending construct.
+See L<perlunicode/Wildcards in Property Values>.
+
 =item Use of -l on filehandle%s
 
 (W io) A filehandle represents an opened file, and when you opened the file

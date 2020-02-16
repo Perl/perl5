@@ -72,6 +72,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Certain pattern matching features are now prohibited in compiling
+Unicode property value wildcard subpatterns
+
+These few features are either inappropriate or interfere with the
+algorithm used to accomplish this task.  The complete list is in
+L<perlunicode/Wildcards in Property Values>.
+
 =head2 Stop pretending C<POSIX::mbstowcs> and C<POSIX::wcstombs> are
 supported
 
