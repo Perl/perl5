@@ -1216,9 +1216,9 @@ CHECKDMAKE :
 
 $(GLOBEXE) : perlglob.c
 .IF "$(CCTYPE)" == "GCC"
-	$(LINK32) $(OPTIMIZE) $(BLINK_FLAGS) -mconsole -o $@ perlglob.c $(LIBFILES)
+	$(LINK32) $(EXTRACFLAGS) $(OPTIMIZE) $(BLINK_FLAGS) -mconsole -o $@ perlglob.c $(LIBFILES)
 .ELSE
-	$(CC) $(OPTIMIZE) $(PDBOUT) -Fe$@ perlglob.c -link $(BLINK_FLAGS) \
+	$(CC) $(EXTRACFLAGS) $(OPTIMIZE) $(PDBOUT) -Fe$@ perlglob.c -link $(BLINK_FLAGS) \
 	setargv$(o) $(LIBFILES) && $(EMBED_EXE_MANI)
 .ENDIF
 
