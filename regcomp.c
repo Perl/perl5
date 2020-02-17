@@ -16229,7 +16229,7 @@ redo_curchar:
                     && UCHARAT(RExC_parse + 1) == '?'
                     && UCHARAT(RExC_parse + 2) == '^')
                 {
-                    /* If is a '(?', could be an embedded '(?^flags:(?[...])'.
+                    /* If is a '(?^', could be an embedded '(?^flags:(?[...])'.
                      * This happens when we have some thing like
                      *
                      *   my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
