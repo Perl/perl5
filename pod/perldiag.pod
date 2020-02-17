@@ -2292,36 +2292,18 @@ to denote a capturing group of the form
 L<C<(?I<PARNO>)>|perlre/(?PARNO) (?-PARNO) (?+PARNO) (?R) (?0)>,
 but omitted the C<")">.
 
-=item Expecting close paren for nested extended charclass in regex; marked
-by <-- HERE in m/%s/
+=item Expecting interpolated extended charclass in regex; marked by <--
+HERE in m/%s/
 
-(F) While parsing a nested extended character class like:
+(F) It looked like you were attempting to interpolate an
+already-compiled extended character class, like so:
 
-    (?[ ... (?flags:(?[ ... ])) ... ])
-                             ^
+ my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
+ ...
+ qr/(?[ \p{Digit} & $thai_or_lao ])/;
 
-we expected to see a close paren ')' (marked by ^) but did not.
-
-=item Expecting close paren for wrapper for nested extended charclass in
-regex; marked by <-- HERE in m/%s/
-
-(F) While parsing a nested extended character class like:
-
-    (?[ ... (?flags:(?[ ... ])) ... ])
-                              ^
-
-we expected to see a close paren ')' (marked by ^) but did not.
-
-=item Expecting '(?flags:(?[...' in regex; marked by S<<-- HERE> in m/%s/
-
-(F) The C<(?[...])> extended character class regular expression construct
-only allows character classes (including character class escapes like
-C<\d>), operators, and parentheses.  The one exception is C<(?flags:...)>
-containing at least one flag and exactly one C<(?[...])> construct.
-This allows a regular expression containing just C<(?[...])> to be
-interpolated.  If you see this error message, then you probably
-have some other C<(?...)> construct inside your character class.  See
-L<perlrecharclass/Extended Bracketed Character Classes>.
+But the marked code isn't syntactically correct to be such an
+interpolated class.
 
 =item Experimental aliasing via reference not enabled
 

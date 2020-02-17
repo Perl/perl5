@@ -80,6 +80,14 @@ specification.  There is clearly no demand for them, given that no one
 has ever complained in the many years the functions were claimed to be
 available, hence so-called "support" for them is now dropped.
 
+=head2 A bug fix for C<(?[...])> may have caused some patterns to no
+longer compile
+
+See L</Selected Bug Fixes>.  The heuristics previously used may have let
+some constructs compile (perhaps not with the programmer's intended
+effect) that should have been errors.  None are known, but it is
+possible that some erroneous constructs no longer compile.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -262,6 +270,12 @@ and New Warnings
 
 XXX L<message|perldiag/"message">
 
+L<Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>
+|perldiag/"Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+This is a replacement for several error messages listed under
+L</Changes to Existing Diagnostics>.
+
 =back
 
 =head3 New Warnings
@@ -356,6 +370,18 @@ L<Use of code point 0x%s is not allowed; the permissible max is 0x%X|perldiag/"U
 Some instances of this message previously output the hex digits C<A>,
 C<B>, C<C>, C<D>, C<E>, and C<F> in lower case.  Now they are all
 consistently upper case.
+
+=item *
+
+The following three diagnostics have been removed, and replaced by
+L<C<Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+|perldiag/"Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>">.
+C<Expecting close paren for nested extended charclass in regex; marked
+by <-- HERE in mE<sol>%sE<sol>>,
+C<Expecting close paren for wrapper for nested extended charclass in
+regex; marked by <-- HERE in mE<sol>%sE<sol>>,
+and
+C<Expecting '(?flags:(?[...' in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>>.
 
 =back
 
@@ -516,6 +542,14 @@ eg. on C<local %INC = %INC;>.  This has been fixed [GH #17428]
 
 C<(?{...})> eval groups in regular expressions no longer unintentionally
 trigger "EVAL without pos change exceeded limit in regex" [GH #17490].
+
+=item *
+
+C<(?[...])> extended bracketed character classes do not wrongly raise an
+error on some cases where a previously-compiled such class is
+interpolated into another.  The heuristics previously used have been
+replaced by a reliable method, and hence the diagnostics generated have
+changed.  See L</Diagnostics>.
 
 =back
 

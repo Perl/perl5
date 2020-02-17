@@ -2583,6 +2583,8 @@ ES	|regnode_offset|regnode_guts|NN RExC_state_t *pRExC_state          \
 ES	|void	|change_engine_size|NN RExC_state_t *pRExC_state|const Ptrdiff_t size
 ES	|regnode_offset|reganode|NN RExC_state_t *pRExC_state|U8 op \
 				|U32 arg
+ES	|regnode_offset|regpnode|NN RExC_state_t *pRExC_state|U8 op \
+				|NN void * arg
 ES	|regnode_offset|reg2Lanode|NN RExC_state_t *pRExC_state		   \
 				|const U8 op				   \
 				|const U32 arg1				   \

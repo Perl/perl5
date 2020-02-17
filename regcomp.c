@@ -142,6 +142,8 @@ struct RExC_state_t {
     U32		seen;
     SSize_t	size;			/* Number of regnode equivalents in
                                            pattern */
+    Size_t      sets_depth;              /* Counts recursion depth of already-
+                                           compiled regex set patterns */
 
     /* position beyond 'precomp' of the warning message furthest away from
      * 'precomp'.  During the parse, no warnings are raised for any problems
@@ -266,6 +268,7 @@ struct RExC_state_t {
 #define RExC_paren_names	(pRExC_state->paren_names)
 #define RExC_recurse	(pRExC_state->recurse)
 #define RExC_recurse_count	(pRExC_state->recurse_count)
+#define RExC_sets_depth         (pRExC_state->sets_depth)
 #define RExC_study_chunk_recursed        (pRExC_state->study_chunk_recursed)
 #define RExC_study_chunk_recursed_bytes  \
                                    (pRExC_state->study_chunk_recursed_bytes)
@@ -6421,6 +6424,11 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     	    if (trie->jump) /* no more substrings -- for now /grr*/
                flags &= ~SCF_DO_SUBSTR;
 	}
+        else if (OP(scan) == REGEX_SET) {
+            Perl_croak(aTHX_ "panic: %s regnode should be resolved"
+                             " before optimization", reg_name[REGEX_SET]);
+        }
+
 #endif /* old or new */
 #endif /* TRIE_STUDY_OPT */
 
@@ -7670,6 +7678,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_study_chunk_recursed = NULL;
     RExC_study_chunk_recursed_bytes= 0;
     RExC_recurse_count = 0;
+    RExC_sets_depth = 0;
     pRExC_state->code_index = 0;
 
     /* Initialize the string in the compiled pattern.  This is so that there is
@@ -16229,6 +16238,9 @@ redo_curchar:
                     && UCHARAT(RExC_parse + 1) == '?'
                     && UCHARAT(RExC_parse + 2) == '^')
                 {
+                    const regnode_offset orig_emit = RExC_emit;
+                    SV * resultant_invlist;
+
                     /* If is a '(?^', could be an embedded '(?^flags:(?[...])'.
                      * This happens when we have some thing like
                      *
@@ -16238,62 +16250,33 @@ redo_curchar:
                      *
                      * Here we would be handling the interpolated
                      * '$thai_or_lao'.  We handle this by a recursive call to
-                     * ourselves which returns the inversion list the
-                     * interpolated expression evaluates to.  We use the flags
-                     * from the interpolated pattern. */
-                    U32 save_flags = RExC_flags;
-                    const char * save_parse;
+                     * reg which returns the inversion list the
+                     * interpolated expression evaluates to.  Actually, the
+                     * return is a special regnode containing a pointer to that
+                     * inversion list.  If the return isn't that regnode alone,
+                     * we know that this wasn't such an interpolation, which is
+                     * an error: we need to get a single inversion list back
+                     * from the recursion */
 
-                    RExC_parse += 2;        /* Skip past the '(?' */
-                    save_parse = RExC_parse;
+                    RExC_parse++;
+                    RExC_sets_depth++;
 
-                    /* Parse the flags for the '(?'.  We already know the first
-                     * flag to parse is a '^' */
-                    parse_lparen_question_flags(pRExC_state);
+	            node = reg(pRExC_state, 2, flagp, depth+1);
+                    RETURN_FAIL_ON_RESTART(*flagp, flagp);
 
-                    if (   RExC_parse >= RExC_end - 4
-                        || UCHARAT(RExC_parse) != ':'
-                        || UCHARAT(++RExC_parse) != '('
-                        || UCHARAT(++RExC_parse) != '?'
-                        || UCHARAT(++RExC_parse) != '[')
-                    {
-
-                        /* In combination with the above, this moves the
-                         * pointer to the point just after the first erroneous
-                         * character. */
-                        if (RExC_parse >= RExC_end - 4) {
-                            RExC_parse = RExC_end;
-                        }
-                        else if (RExC_parse != save_parse) {
-                            RExC_parse += (UTF)
-                                          ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                                          : 1;
-                        }
-                        vFAIL("Expecting '(?flags:(?[...'");
+                    if (   OP(REGNODE_p(node)) != REGEX_SET
+                           /* If more than a single node returned, the nested
+                            * parens evaluated to more than just a (?[...]),
+                            * which isn't legal */
+                        || node != 1) {
+                        vFAIL("Expecting interpolated extended charclass");
                     }
+                    resultant_invlist = (SV *) ARGp(REGNODE_p(node));
+                    current = invlist_clone(resultant_invlist, NULL);
+                    SvREFCNT_dec(resultant_invlist);
 
-                    /* Recurse, with the meat of the embedded expression */
-                    RExC_parse++;
-                    if (! handle_regex_sets(pRExC_state, &current, flagp,
-                                                    depth+1, oregcomp_parse))
-                    {
-                        RETURN_FAIL_ON_RESTART(*flagp, flagp);
-                    }
-
-                    /* Here, 'current' contains the embedded expression's
-                     * inversion list, and RExC_parse points to the trailing
-                     * ']'; the next character should be the ')' */
-                    RExC_parse++;
-                    if (UCHARAT(RExC_parse) != ')')
-                        vFAIL("Expecting close paren for nested extended charclass");
-
-                    /* Then the ')' matching the original '(' handled by this
-                     * case: statement */
-                    RExC_parse++;
-                    if (UCHARAT(RExC_parse) != ')')
-                        vFAIL("Expecting close paren for wrapper for nested extended charclass");
-
-                    RExC_flags = save_flags;
+                    RExC_sets_depth--;
+                    RExC_emit = orig_emit;
                     goto handle_operand;
                 }
 
@@ -16681,6 +16664,13 @@ redo_curchar:
         return END;
     }
 
+    if (RExC_sets_depth) {  /* If within a recursive call, return in a special
+                               regnode */
+        RExC_parse++;
+        node = regpnode(pRExC_state, REGEX_SET, (void *) final);
+    }
+    else {
+
     /* Otherwise generate a resultant node, based on 'final'.  regclass() is
      * expecting a string of ranges and individual code points */
     invlist_iterinit(final);
@@ -16763,6 +16753,7 @@ redo_curchar:
         OP(REGNODE_p(node)) = ANYOFL;
         ANYOF_FLAGS(REGNODE_p(node))
                 |= ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+    }
     }
 
     nextchar(pRExC_state);
@@ -20212,6 +20203,22 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     assert(regarglen[op] == 1);
 
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
+    RExC_emit = ptr;
+    return(ret);
+}
+
+/*
+- regpnode - emit a temporary node with a void* argument
+*/
+STATIC regnode_offset /* Location. */
+S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, void * arg)
+{
+    const regnode_offset ret = regnode_guts(pRExC_state, op, regarglen[op], "regvnode");
+    regnode_offset ptr = ret;
+
+    PERL_ARGS_ASSERT_REGPNODE;
+
+    FILL_ADVANCE_NODE_ARGp(ptr, op, arg);
     RExC_emit = ptr;
     return(ret);
 }

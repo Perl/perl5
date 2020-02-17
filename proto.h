@@ -5715,6 +5715,9 @@ STATIC regnode_offset	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 o
 STATIC regnode_offset	S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)
+STATIC regnode_offset	S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, void * arg);
+#define PERL_ARGS_ASSERT_REGPNODE	\
+	assert(pRExC_state); assert(arg)
 STATIC bool	S_regtail(pTHX_ RExC_state_t * pRExC_state, const regnode_offset p, const regnode_offset val, const U32 depth)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGTAIL	\

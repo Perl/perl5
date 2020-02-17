@@ -311,7 +311,7 @@ my @death =
  '/\p{Latin}{,4 }/' => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#},4 }/',
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
- "/$bug133423/" => "Operand with no preceding operator {#} m/(?[(?^:(?[\\ ]))\\{#}] |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
+ "/$bug133423/" => "Unexpected ']' with no following ')' in (?[... {#} m/(?[(?^:(?[\\ ]))\\]{#} |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
  '/[^/' => 'Unmatched [ {#} m/[{#}^/', # [perl #133767]
  '/\p{Is_Other_Alphabetic=F}/ ' => 'Can\'t find Unicode property definition "Is_Other_Alphabetic=F" {#} m/\p{Is_Other_Alphabetic=F}{#}/',
  '/\p{Is_Other_Alphabetic=F}/ ' => 'Can\'t find Unicode property definition "Is_Other_Alphabetic=F" {#} m/\p{Is_Other_Alphabetic=F}{#}/',
