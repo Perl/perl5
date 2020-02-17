@@ -858,6 +858,9 @@ will be lost.
  # mean "not seen anything to optimize yet".
  PSEUDO           off        Pseudo opcode for internal use.
 
+ REGEX_SET        depth p    Regex set, temporary node used in pre-
+                             optimization compilation
+
 =for regcomp.pl end
 
 =for unprinted-credits

@@ -297,6 +297,8 @@ OPTIMIZED   NOTHING,    off       ; Placeholder for dump.
 #* mean "not seen anything to optimize yet".
 PSEUDO      PSEUDO,     off       ; Pseudo opcode for internal use.
 
+REGEX_SET   REGEX_SET,  depth p S ; Regex set, temporary node used in pre-optimization compilation
+
 -------------------------------------------------------------------------------
 # Format for second section:
 # REGOP \t typelist [ \t typelist]

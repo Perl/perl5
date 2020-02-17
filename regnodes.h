@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	108
-#define REGMATCH_STATE_MAX    	148
+#define REGNODE_MAX           	109
+#define REGMATCH_STATE_MAX    	149
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -120,6 +120,7 @@
 #define	LNBREAK               	106	/* 0x6a generic newline pattern */
 #define	OPTIMIZED             	107	/* 0x6b Placeholder for dump. */
 #define	PSEUDO                	108	/* 0x6c Pseudo opcode for internal use. */
+#define	REGEX_SET             	109	/* 0x6d Regex set, temporary node used in pre-optimization compilation */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -277,6 +278,7 @@ EXTCONST U8 PL_regkind[] = {
 	LNBREAK,  	/* LNBREAK                */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
+	REGEX_SET,	/* REGEX_SET              */
 	/* ------------ States ------------- */
 	TRIE,     	/* TRIE_next              */
 	TRIE,     	/* TRIE_next_fail         */
@@ -435,6 +437,7 @@ static const U8 regarglen[] = {
 	0,                                   	/* LNBREAK      */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
+	EXTRA_SIZE(struct regnode_p),        	/* REGEX_SET    */
 };
 
 /* reg_off_by_arg[] - Which argument holds the offset to the next node */
@@ -549,6 +552,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* LNBREAK      */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
+	0,	/* REGEX_SET    */
 };
 
 #endif /* REG_COMP_C */
@@ -669,6 +673,7 @@ EXTCONST char * const PL_reg_name[] = {
 	"LNBREAK",               	/* 0x6a */
 	"OPTIMIZED",             	/* 0x6b */
 	"PSEUDO",                	/* 0x6c */
+	"REGEX_SET",             	/* 0x6d */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -817,7 +822,7 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__;
 EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
     REG_ANY, SANY, ANYOF, ANYOFD, ANYOFL, ANYOFPOSIXL, ANYOFH, ANYOFHb,
     ANYOFHr, ANYOFHs, ANYOFR, ANYOFRb, ANYOFM, NANYOFM, POSIXD, POSIXL,
-    POSIXU, POSIXA, NPOSIXD, NPOSIXL, NPOSIXU, NPOSIXA,
+    POSIXU, POSIXA, NPOSIXD, NPOSIXL, NPOSIXU, NPOSIXA, REGEX_SET,
     0
 };
 #endif /* DOINIT */
@@ -826,7 +831,7 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
 EXTCONST U8 PL_simple_bitmask[];
 #else
 EXTCONST U8 PL_simple_bitmask[] = {
-    0x00, 0x00, 0xFF, 0xFF, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    0x00, 0x00, 0xFF, 0xFF, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20
 };
 #endif /* DOINIT */
 
