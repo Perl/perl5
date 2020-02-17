@@ -1268,9 +1268,9 @@ static: $(PERLEXESTATIC)
 
 $(GLOBEXE) : perlglob.c
 ifeq ($(CCTYPE),GCC)
-	$(LINK32) $(OPTIMIZE) $(BLINK_FLAGS) -mconsole -o $@ perlglob.c $(LIBFILES)
+	$(LINK32) $(EXTRACFLAGS) $(OPTIMIZE) $(BLINK_FLAGS) -mconsole -o $@ perlglob.c $(LIBFILES)
 else
-	$(CC) $(OPTIMIZE) $(PDBOUT) -Fe$@ perlglob.c -link $(BLINK_FLAGS) \
+	$(CC) $(EXTRACFLAGS) $(OPTIMIZE) $(PDBOUT) -Fe$@ perlglob.c -link $(BLINK_FLAGS) \
 	setargv$(o) $(LIBFILES) && $(EMBED_EXE_MANI)
 endif
 
