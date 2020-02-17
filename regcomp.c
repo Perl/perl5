@@ -16107,7 +16107,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                        with left paren in stack is; -1 if none.
                                      */
     STRLEN len;                     /* Temporary */
-    regnode_offset node;                  /* Temporary, and final regnode returned by
+    regnode_offset node;            /* Temporary, and final regnode returned by
                                        this function */
     const bool save_fold = FOLD;    /* Temporary */
     char *save_end, *save_parse;    /* Temporaries */
@@ -16681,89 +16681,89 @@ redo_curchar:
     }
     else {
 
-    /* Otherwise generate a resultant node, based on 'final'.  regclass() is
-     * expecting a string of ranges and individual code points */
-    invlist_iterinit(final);
-    result_string = newSVpvs("");
-    while (invlist_iternext(final, &start, &end)) {
-        if (start == end) {
-            Perl_sv_catpvf(aTHX_ result_string, "\\x{%" UVXf "}", start);
+        /* Otherwise generate a resultant node, based on 'final'.  regclass()
+         * is expecting a string of ranges and individual code points */
+        invlist_iterinit(final);
+        result_string = newSVpvs("");
+        while (invlist_iternext(final, &start, &end)) {
+            if (start == end) {
+                Perl_sv_catpvf(aTHX_ result_string, "\\x{%" UVXf "}", start);
+            }
+            else {
+                Perl_sv_catpvf(aTHX_ result_string, "\\x{%" UVXf "}-\\x{%"
+                                                        UVXf "}", start, end);
+            }
         }
-        else {
-            Perl_sv_catpvf(aTHX_ result_string, "\\x{%" UVXf "}-\\x{%" UVXf "}",
-                                                     start,          end);
+
+        /* About to generate an ANYOF (or similar) node from the inversion list
+         * we have calculated */
+        save_parse = RExC_parse;
+        RExC_parse = SvPV(result_string, len);
+        save_end = RExC_end;
+        RExC_end = RExC_parse + len;
+        TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE;
+
+        /* We turn off folding around the call, as the class we have
+         * constructed already has all folding taken into consideration, and we
+         * don't want regclass() to add to that */
+        RExC_flags &= ~RXf_PMf_FOLD;
+        /* regclass() can only return RESTART_PARSE and NEED_UTF8 if multi-char
+         * folds are allowed.  */
+        node = regclass(pRExC_state, flagp, depth+1,
+                        FALSE, /* means parse the whole char class */
+                        FALSE, /* don't allow multi-char folds */
+                        TRUE, /* silence non-portable warnings.  The above may
+                                 very well have generated non-portable code
+                                 points, but they're valid on this machine */
+                        FALSE, /* similarly, no need for strict */
+
+                        /* We can optimize into something besides an ANYOF,
+                         * except under /l, which needs to be ANYOF because of
+                         * runtime checks for locale sanity, etc */
+                    ! in_locale,
+                        NULL
+                    );
+
+        RESTORE_WARNINGS;
+        RExC_parse = save_parse + 1;
+        RExC_end = save_end;
+        SvREFCNT_dec_NN(final);
+        SvREFCNT_dec_NN(result_string);
+
+        if (save_fold) {
+            RExC_flags |= RXf_PMf_FOLD;
         }
-    }
 
-    /* About to generate an ANYOF (or similar) node from the inversion list we
-     * have calculated */
-    save_parse = RExC_parse;
-    RExC_parse = SvPV(result_string, len);
-    save_end = RExC_end;
-    RExC_end = RExC_parse + len;
-    TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE;
+        if (!node) {
+            RETURN_FAIL_ON_RESTART(*flagp, flagp);
+            goto regclass_failed;
+        }
 
-    /* We turn off folding around the call, as the class we have constructed
-     * already has all folding taken into consideration, and we don't want
-     * regclass() to add to that */
-    RExC_flags &= ~RXf_PMf_FOLD;
-    /* regclass() can only return RESTART_PARSE and NEED_UTF8 if multi-char
-     * folds are allowed.  */
-    node = regclass(pRExC_state, flagp, depth+1,
-                    FALSE, /* means parse the whole char class */
-                    FALSE, /* don't allow multi-char folds */
-                    TRUE, /* silence non-portable warnings.  The above may very
-                             well have generated non-portable code points, but
-                             they're valid on this machine */
-                    FALSE, /* similarly, no need for strict */
+        /* Fix up the node type if we are in locale.  (We have pretended we are
+         * under /u for the purposes of regclass(), as this construct will only
+         * work under UTF-8 locales.  But now we change the opcode to be ANYOFL
+         * (so as to cause any warnings about bad locales to be output in
+         * regexec.c), and add the flag that indicates to check if not in a
+         * UTF-8 locale.  The reason we above forbid optimization into
+         * something other than an ANYOF node is simply to minimize the number
+         * of code changes in regexec.c.  Otherwise we would have to create new
+         * EXACTish node types and deal with them.  This decision could be
+         * revisited should this construct become popular.
+         *
+         * (One might think we could look at the resulting ANYOF node and
+         * suppress the flag if everything is above 255, as those would be
+         * UTF-8 only, but this isn't true, as the components that led to that
+         * result could have been locale-affected, and just happen to cancel
+         * each other out under UTF-8 locales.) */
+        if (in_locale) {
+            set_regex_charset(&RExC_flags, REGEX_LOCALE_CHARSET);
 
-                    /* We can optimize into something besides an ANYOF, except
-                     * under /l, which needs to be ANYOF because of runtime
-                     * checks for locale sanity, etc */
-                  ! in_locale,
-                    NULL
-                );
+            assert(OP(REGNODE_p(node)) == ANYOF);
 
-    RESTORE_WARNINGS;
-    RExC_parse = save_parse + 1;
-    RExC_end = save_end;
-    SvREFCNT_dec_NN(final);
-    SvREFCNT_dec_NN(result_string);
-
-    if (save_fold) {
-        RExC_flags |= RXf_PMf_FOLD;
-    }
-
-    if (!node) {
-        RETURN_FAIL_ON_RESTART(*flagp, flagp);
-        goto regclass_failed;
-    }
-
-    /* Fix up the node type if we are in locale.  (We have pretended we are
-     * under /u for the purposes of regclass(), as this construct will only
-     * work under UTF-8 locales.  But now we change the opcode to be ANYOFL (so
-     * as to cause any warnings about bad locales to be output in regexec.c),
-     * and add the flag that indicates to check if not in a UTF-8 locale.  The
-     * reason we above forbid optimization into something other than an ANYOF
-     * node is simply to minimize the number of code changes in regexec.c.
-     * Otherwise we would have to create new EXACTish node types and deal with
-     * them.  This decision could be revisited should this construct become
-     * popular.
-     *
-     * (One might think we could look at the resulting ANYOF node and suppress
-     * the flag if everything is above 255, as those would be UTF-8 only,
-     * but this isn't true, as the components that led to that result could
-     * have been locale-affected, and just happen to cancel each other out
-     * under UTF-8 locales.) */
-    if (in_locale) {
-        set_regex_charset(&RExC_flags, REGEX_LOCALE_CHARSET);
-
-        assert(OP(REGNODE_p(node)) == ANYOF);
-
-        OP(REGNODE_p(node)) = ANYOFL;
-        ANYOF_FLAGS(REGNODE_p(node))
-                |= ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
-    }
+            OP(REGNODE_p(node)) = ANYOFL;
+            ANYOF_FLAGS(REGNODE_p(node))
+                    |= ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+        }
     }
 
     nextchar(pRExC_state);
