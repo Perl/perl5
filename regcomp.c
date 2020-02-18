@@ -22668,14 +22668,14 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 
 #ifndef PERL_IN_XSUB_RE
 
-#include "uni_keywords.h"
+#  include "uni_keywords.h"
 
 void
 Perl_init_uniprops(pTHX)
 {
     dVAR;
 
-#ifdef DEBUGGING
+#  ifdef DEBUGGING
     char * dump_len_string;
 
     dump_len_string = PerlEnv_getenv("PERL_DUMP_RE_MAX_LEN");
@@ -22684,16 +22684,16 @@ Perl_init_uniprops(pTHX)
     {
         PL_dump_re_max_len = 60;    /* A reasonable default */
     }
-#endif
+#  endif
 
     PL_user_def_props = newHV();
 
-#ifdef USE_ITHREADS
+#  ifdef USE_ITHREADS
 
     HvSHAREKEYS_off(PL_user_def_props);
     PL_user_def_props_aTHX = aTHX;
 
-#endif
+#  endif
 
     /* Set up the inversion list interpreter-level variables */
 
@@ -22765,15 +22765,15 @@ Perl_init_uniprops(pTHX)
     PL_CCC_non0_non230 = _new_invlist_C_array(_Perl_CCC_non0_non230_invlist);
     PL_Private_Use = _new_invlist_C_array(uni_prop_ptrs[UNI_CO]);
 
-#ifdef UNI_XIDC
+#  ifdef UNI_XIDC
     /* The below are used only by deprecated functions.  They could be removed */
     PL_utf8_xidcont  = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDC]);
     PL_utf8_idcont   = _new_invlist_C_array(uni_prop_ptrs[UNI_IDC]);
     PL_utf8_xidstart = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDS]);
-#endif
+#  endif
 }
 
-#if 0
+#  if 0
 
 This code was mainly added for backcompat to give a warning for non-portable
 code points in user-defined properties.  But experiments showed that the
@@ -22803,7 +22803,7 @@ S_get_extended_utf8_msg(pTHX_ const UV cp)
     return SvPVX(*msg);
 }
 
-#endif
+#  endif
 
 SV *
 Perl_handle_user_defined_property(pTHX_
@@ -22976,7 +22976,7 @@ Perl_handle_user_defined_property(pTHX_
             goto return_failure;
         }
 
-#if 0   /* See explanation at definition above of get_extended_utf8_msg() */
+#  if 0   /* See explanation at definition above of get_extended_utf8_msg() */
 
         if (   UNICODE_IS_PERL_EXTENDED(min)
             || UNICODE_IS_PERL_EXTENDED(max))
@@ -22994,7 +22994,7 @@ Perl_handle_user_defined_property(pTHX_
             sv_catpvs(msg, "\"");
         }
 
-#endif
+#  endif
 
         /* Here, this line contains a legal range */
         this_definition = sv_2mortal(_new_invlist(2));
@@ -23103,21 +23103,21 @@ Perl_handle_user_defined_property(pTHX_
 
 /* As explained below, certain operations need to take place in the first
  * thread created.  These macros switch contexts */
-#ifdef USE_ITHREADS
-#  define DECLARATION_FOR_GLOBAL_CONTEXT                                    \
+#  ifdef USE_ITHREADS
+#    define DECLARATION_FOR_GLOBAL_CONTEXT                                  \
                                         PerlInterpreter * save_aTHX = aTHX;
-#  define SWITCH_TO_GLOBAL_CONTEXT                                          \
+#    define SWITCH_TO_GLOBAL_CONTEXT                                        \
                            PERL_SET_CONTEXT((aTHX = PL_user_def_props_aTHX))
-#  define RESTORE_CONTEXT  PERL_SET_CONTEXT((aTHX = save_aTHX));
-#  define CUR_CONTEXT      aTHX
-#  define ORIGINAL_CONTEXT save_aTHX
-#else
-#  define DECLARATION_FOR_GLOBAL_CONTEXT
-#  define SWITCH_TO_GLOBAL_CONTEXT          NOOP
-#  define RESTORE_CONTEXT                   NOOP
-#  define CUR_CONTEXT                       NULL
-#  define ORIGINAL_CONTEXT                  NULL
-#endif
+#    define RESTORE_CONTEXT  PERL_SET_CONTEXT((aTHX = save_aTHX));
+#    define CUR_CONTEXT      aTHX
+#    define ORIGINAL_CONTEXT save_aTHX
+#  else
+#    define DECLARATION_FOR_GLOBAL_CONTEXT
+#    define SWITCH_TO_GLOBAL_CONTEXT          NOOP
+#    define RESTORE_CONTEXT                   NOOP
+#    define CUR_CONTEXT                       NULL
+#    define ORIGINAL_CONTEXT                  NULL
+#  endif
 
 STATIC void
 S_delete_recursion_entry(pTHX_ void *key)
@@ -23357,7 +23357,7 @@ Perl_parse_uniprop_string(pTHX_
     } /* End of parsing through the lhs of the property name (or all of it if
          no rhs) */
 
-#define STRLENs(s)  (sizeof("" s "") - 1)
+#  define STRLENs(s)  (sizeof("" s "") - 1)
 
     /* If there is a single package name 'utf8::', it is ambiguous.  It could
      * be for a user-defined property, or it could be a Unicode property, as
@@ -24553,7 +24553,7 @@ Perl_parse_uniprop_string(pTHX_
     }
 }
 
-#endif
+#endif /* end of ! PERL_IN_XSUB_RE */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
