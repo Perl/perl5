@@ -4528,6 +4528,44 @@ S_unwind_scan_frames(pTHX_ const void *p)
     } while (f);
 }
 
+/* Follow the next-chain of the current node and optimize away
+   all the NOTHINGs from it.
+ */
+STATIC void
+S_rck_elide_nothing(pTHX_ regnode *node)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING;
+
+    if (OP(node) != CURLYX) {
+        const int max = (reg_off_by_arg[OP(node)]
+                        ? I32_MAX
+                          /* I32 may be smaller than U16 on CRAYs! */
+                        : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
+        int off = (reg_off_by_arg[OP(node)] ? ARG(node) : NEXT_OFF(node));
+        int noff;
+        regnode *n = node;
+
+        /* Skip NOTHING and LONGJMP. */
+        while (
+            (n = regnext(n))
+            && (
+                (PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
+                || ((OP(n) == LONGJMP) && (noff = ARG(n)))
+            )
+            && off + noff < max
+        ) {
+            off += noff;
+        }
+        if (reg_off_by_arg[OP(node)])
+            ARG(node) = off;
+        else
+            NEXT_OFF(node) = off;
+    }
+    return;
+}
+
 /* the return from this sub is the minimum length that could possibly match */
 STATIC SSize_t
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
@@ -4630,27 +4668,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         }
 
         /* Follow the next-chain of the current node and optimize
-           away all the NOTHINGs from it.  */
-        if (OP(scan) != CURLYX) {
-            const int max = (reg_off_by_arg[OP(scan)]
-                            ? I32_MAX
-                              /* I32 may be smaller than U16 on CRAYs! */
-                            : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-            int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
-            int noff;
-            regnode *n = scan;
-
-            /* Skip NOTHING and LONGJMP. */
-            while (   (n = regnext(n))
-                   && (   (PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
-                       || ((OP(n) == LONGJMP) && (noff = ARG(n))))
-                   && off + noff < max)
-                off += noff;
-            if (reg_off_by_arg[OP(scan)])
-                ARG(scan) = off;
-            else
-                NEXT_OFF(scan) = off;
-        }
+           away all the NOTHINGs from it.
+         */
+        rck_elide_nothing(scan);
 
         /* The principal pseudo-switch.  Cannot be a switch, since we look into
          * several different things.  */
@@ -5847,11 +5867,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 		if (data && (fl & SF_HAS_EVAL))
 		    data->flags |= SF_HAS_EVAL;
 	      optimize_curly_tail:
-		if (OP(oscan) != CURLYX) {
-		    while (PL_regkind[OP(next = regnext(oscan))] == NOTHING
-			   && NEXT_OFF(next))
-			NEXT_OFF(oscan) += NEXT_OFF(next);
-		}
+		rck_elide_nothing(oscan);
 		continue;
 
 	    default:

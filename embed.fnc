@@ -2046,6 +2046,7 @@ ES	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
                                 |I32 stopparen|U32 recursed_depth \
 				|NULLOK regnode_ssc *and_withp \
 				|U32 flags|U32 depth
+ES	|void	|rck_elide_nothing|NN regnode *node
 ESR	|SV *	|get_ANYOFM_contents|NN const regnode * n
 ESRT	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
