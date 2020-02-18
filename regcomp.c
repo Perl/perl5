@@ -224,6 +224,8 @@ struct RExC_state_t {
     bool        study_started;
     bool        in_script_run;
     bool        use_BRANCHJ;
+    bool        sWARN_EXPERIMENTAL__VLB;
+    bool        sWARN_EXPERIMENTAL__REGEX_SETS;
 };
 
 #define RExC_flags	(pRExC_state->flags)
@@ -293,6 +295,8 @@ struct RExC_state_t {
 #define RExC_warn_text (pRExC_state->warn_text)
 #define RExC_in_script_run      (pRExC_state->in_script_run)
 #define RExC_use_BRANCHJ        (pRExC_state->use_BRANCHJ)
+#define RExC_warned_WARN_EXPERIMENTAL__VLB (pRExC_state->sWARN_EXPERIMENTAL__VLB)
+#define RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS (pRExC_state->sWARN_EXPERIMENTAL__REGEX_SETS)
 #define RExC_unlexed_names (pRExC_state->unlexed_names)
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
@@ -990,10 +994,15 @@ static const scan_data_t zero_scan_data = {
                                        REPORT_LOCATION_ARGS(loc)))
 
 #define	ckWARNexperimental(loc, class, m)                               \
-    _WARN_HELPER(loc, packWARN(class),                                  \
+    STMT_START {                                                        \
+        if (! RExC_warned_ ## class) { /* warn once per compilation */  \
+            RExC_warned_ ## class = 1;                                  \
+            _WARN_HELPER(loc, packWARN(class),                          \
                       Perl_ck_warner_d(aTHX_ packWARN(class),           \
                                             m REPORT_LOCATION,          \
-                                            REPORT_LOCATION_ARGS(loc)))
+                                            REPORT_LOCATION_ARGS(loc)));\
+        }                                                               \
+    } STMT_END
 
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
@@ -7566,6 +7575,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_frame_count= 0;
     RExC_latest_warn_offset = 0;
     RExC_use_BRANCHJ = 0;
+    RExC_warned_WARN_EXPERIMENTAL__VLB = 0;
+    RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS = 0;
     RExC_total_parens = 0;
     RExC_open_parens = NULL;
     RExC_close_parens = NULL;
@@ -16231,7 +16242,6 @@ redo_curchar:
             SV* rhs;                /* Operand to the right of the operator */
             SV* fence_ptr;          /* Pointer to top element of the fence
                                        stack */
-
             case '(':
 
                 if (   RExC_parse < RExC_end - 2
