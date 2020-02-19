@@ -868,8 +868,10 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
                         if ($this_default_on || grep { $_ =~ /\Q(?[/ } @expect ) {
                            ok @warns > 0, "... and the warning is on by default";
                         }
-                        else {
-                         ok @warns == 0, "... and the warning is off by default";
+                        elsif (! (ok @warns == 0,
+                                     "... and the warning is off by default"))
+                        {
+                               diag("GOT\n" . join "\n", @warns);
                         }
                     }
                 }
