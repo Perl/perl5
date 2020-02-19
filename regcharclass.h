@@ -2200,7 +2200,7 @@
 
 /* Generated from:
  * 64f46a4b25d29a7f952077ee277909df8599a7a803759805c865914d981671a2 lib/Unicode/UCD.pm
- * 8c61fd492bc628cc72badf764592542e683b1ba1975bcece3765a1a465be1974 lib/unicore/ArabicShaping.txt
+ * ce96627d4fc91b4fd886c409caeb9b76cf7bd345e12f05c6701add7f233f6437 lib/unicore/ArabicShaping.txt
  * 0e69eef3da722cc104522d8372e86d5b86bb7afcc761b0c991e39e832294946d lib/unicore/BidiBrackets.txt
  * a00d9d21585106a52113fb7b1d3d0373a5835be72e76862fb559ebddd474d70e lib/unicore/BidiMirroring.txt
  * 81a82b6a9fcf1a9c12f588d7a1decd73a9afdc4cac95b0eb7e576e7942d6c19f lib/unicore/Blocks.txt
@@ -2212,12 +2212,12 @@
  * 4f822ec7a9ebbb3138ad29bade8b9688d25b39c7a3c0b7431f01e7229e4fcb6e lib/unicore/EastAsianWidth.txt
  * fc535aa1047a70105ab9a22c2b4c3f363a2ff02fe48ebbc5eeb9873b2752ff0b lib/unicore/EquivalentUnifiedIdeograph.txt
  * b9c5158ce944d2fec57e0e4ecb716bdabfc3bdde73525f1772fe03f61a30d473 lib/unicore/HangulSyllableType.txt
- * a8a51d020f05b3fdb5e05413acbf106bef49de2d5715f9725f9350d52373c544 lib/unicore/IdStatus.txt
- * 48f6f91216cc9f9d5c3cd2b55d768b48dd6696400e1f4290eccd1ec81f5958da lib/unicore/IdType.txt
+ * 36c1b2a626ff1fb23b8b21e6ea8712698f8ce668dded1cb48b8ddf6a6a1b04e9 lib/unicore/IdStatus.txt
+ * 4857c4ffa3898e6128b2d46b0a02e499a663fb91464a69ef3611096f01293acc lib/unicore/IdType.txt
  * 69197b019fa5f2fb0d8c6ed1ed8acb9f2e8b5b8f45a947953ffa652f3bf54983 lib/unicore/IndicPositionalCategory.txt
  * 6604e2f0fde7428675364aa0006bc686b79488dcc60ae8cb29800af2be3352e8 lib/unicore/IndicSyllabicCategory.txt
  * 84ead63924aaa74b988b2eaf254a8733276ed108633ce2ef77a9ee1de7818162 lib/unicore/Jamo.txt
- * 49160ffd5819cfa45db000d7e17c12cfa69596168b0634c46298712b9f9d9318 lib/unicore/LineBreak.txt
+ * d5abcd8f54c8a2aa912924c485ccf7f968ad98feaa303d8e9a29ad89172f1faf lib/unicore/LineBreak.txt
  * 985128e8c8b2540233331d9b27d897d2c23bd5bcf1d05da960befce6efc59542 lib/unicore/NameAliases.txt
  * 27282b8aa01d4d0c44aef436cb74195ae8639ffa187aeee4e6247af76febea76 lib/unicore/NamedSequences.txt
  * 485b5a3ed25dbf1f94dfa5a9b69d8b4550ffd0c33045ccc55ccfd7c80b2a40cf lib/unicore/PropList.txt
@@ -2235,7 +2235,7 @@
  * 09e3166ebab166ac630a227f77f4e794ebd433271abd5588f5a67e7f199c71ee lib/unicore/auxiliary/SentenceBreakProperty.txt
  * bf5373ce28a5df06796c93dc159dd15a997bb2950c92704b40ae8190cfc3716d lib/unicore/auxiliary/WBTest.txt
  * a2b7373cf2fe3fa3b26dbb53405ca849985f771ff47f1c61743978003ff80499 lib/unicore/auxiliary/WordBreakProperty.txt
- * 6c2e6ed0b64e2e1a5f4a2ca956544eb294953ef9e66691aa07cf6166f5116723 lib/unicore/emoji/emoji.txt
+ * d2686f400a638c80775d7c662556fb8fa8dd3bbe4aa548d9d31624264c6e1bb1 lib/unicore/emoji/emoji.txt
  * b827ae5da8c2b08947cc9a120a7b7fd2f1676fb160b508df78075381635b127c lib/unicore/extracted/DBidiClass.txt
  * 6fdc5b5ef40444a8f0c772e6b67c00498d4216fe0c0fdf76744ce338f2ad3810 lib/unicore/extracted/DBinaryProperties.txt
  * e14928a5bf6ad5958a80332bd42e96e14420080a95c660e5da29384e496755d0 lib/unicore/extracted/DCombiningClass.txt
@@ -2244,7 +2244,7 @@
  * 4502f0969e4e6558c4b4c6ca4c23dad70b863d61dd3d5eed1a62a6c3c99fd570 lib/unicore/extracted/DGeneralCategory.txt
  * 00bb88b89e2adb646f3177f9444e2d3192386b81a5de9556104b338274b253e1 lib/unicore/extracted/DJoinGroup.txt
  * ac835b6e11a60c9820d3cf2d1cb0558dd68efb8f53f404a51632e4726690a6d7 lib/unicore/extracted/DJoinType.txt
- * 0fea35394151afefbb4121b6380db1b480be6f9bafb4eba3382dc292dcf68526 lib/unicore/extracted/DLineBreak.txt
+ * baba9dfc133e3cb770a89aaf0973b1341fa61c2da6c176baf6428898b3b568d8 lib/unicore/extracted/DLineBreak.txt
  * 6d4a8c945dd7db83ed617cbb7d937de7f4ecf016ff22970d846e996a7c9a2a5d lib/unicore/extracted/DNumType.txt
  * 5b7c14380d5cceeaffcfbc18db1ed936391d2af2d51f5a41f1a17b692c77e59b lib/unicore/extracted/DNumValues.txt
  * 93f508a690aa8949f213d50b573710f0b4a4e843c17283938035ecf19e0220e2 lib/unicore/mktables

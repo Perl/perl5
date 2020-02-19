@@ -1,6 +1,6 @@
-# IdentifierType-13.0.0.txt
-# Date: 2019-11-05, 08:05:20 GMT
-# © 2019 Unicode®, Inc.
+﻿# IdentifierType.txt
+# Date: 2020-02-07, 22:02:47 GMT
+# © 2020 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -15,6 +15,18 @@
 # Field 1: set of Identifier_Type values (see Table 1 of http://www.unicode.org/reports/tr39)
 #
 # Any missing code points have the Identifier_Type value Not_Character
+#
+# For the purpose of regular expressions, the property Identifier_Type is defined as
+# mapping each code point to a set of enumerated values.
+# The short name of Identifier_Type is the same as the long name.
+# The possible values are:
+#   Not_Character, Deprecated, Default_Ignorable, Not_NFKC, Not_XID,
+#   Exclusion, Obsolete, Technical, Uncommon_Use, Limited_Use, Inclusion, Recommended
+# The short name of each value is the same as its long name.
+# The default property value for all Unicode code points U+0000..U+10FFFF
+# not mentioned in this data file is Not_Character.
+# As usual, sets are unordered, with no duplicate values.
+
 
 #	Identifier_Type:	Recommended
 
@@ -264,7 +276,6 @@
 0CF1..0CF2    ; Recommended                    # 5.0    [2] KANNADA SIGN JIHVAMULIYA..KANNADA SIGN UPADHMANIYA
 0D00          ; Recommended                    # 10.0       MALAYALAM SIGN COMBINING ANUSVARA ABOVE
 0D02..0D03    ; Recommended                    # 1.1    [2] MALAYALAM SIGN ANUSVARA..MALAYALAM SIGN VISARGA
-0D04          ; Recommended                    # 13.0       MALAYALAM LETTER VEDIC ANUSVARA
 0D05..0D0C    ; Recommended                    # 1.1    [8] MALAYALAM LETTER A..MALAYALAM LETTER VOCALIC L
 0D0E..0D10    ; Recommended                    # 1.1    [3] MALAYALAM LETTER E..MALAYALAM LETTER AI
 0D12..0D28    ; Recommended                    # 1.1   [23] MALAYALAM LETTER O..MALAYALAM LETTER NA
@@ -281,7 +292,6 @@
 0D60..0D61    ; Recommended                    # 1.1    [2] MALAYALAM LETTER VOCALIC RR..MALAYALAM LETTER VOCALIC LL
 0D66..0D6F    ; Recommended                    # 1.1   [10] MALAYALAM DIGIT ZERO..MALAYALAM DIGIT NINE
 0D7A..0D7F    ; Recommended                    # 5.1    [6] MALAYALAM LETTER CHILLU NN..MALAYALAM LETTER CHILLU K
-0D81          ; Recommended                    # 13.0       SINHALA SIGN CANDRABINDU
 0D82..0D83    ; Recommended                    # 3.0    [2] SINHALA SIGN ANUSVARAYA..SINHALA SIGN VISARGAYA
 0D85..0D8E    ; Recommended                    # 3.0   [10] SINHALA LETTER AYANNA..SINHALA LETTER IRUUYANNA
 0D91..0D96    ; Recommended                    # 3.0    [6] SINHALA LETTER EYANNA..SINHALA LETTER AUYANNA
@@ -425,7 +435,6 @@
 17D7          ; Recommended                    # 3.0        KHMER SIGN LEK TOO
 17DC          ; Recommended                    # 3.0        KHMER SIGN AVAKRAHASANYA
 17E0..17E9    ; Recommended                    # 3.0   [10] KHMER DIGIT ZERO..KHMER DIGIT NINE
-1ABF..1AC0    ; Recommended                    # 13.0   [2] COMBINING LATIN SMALL LETTER W BELOW..COMBINING LATIN SMALL LETTER TURNED W BELOW
 1C90..1CBA    ; Recommended                    # 11.0  [43] GEORGIAN MTAVRULI CAPITAL LETTER AN..GEORGIAN MTAVRULI CAPITAL LETTER AIN
 1CBD..1CBF    ; Recommended                    # 11.0   [3] GEORGIAN MTAVRULI CAPITAL LETTER AEN..GEORGIAN MTAVRULI CAPITAL LETTER LABIAL SIGN
 1E00..1E99    ; Recommended                    # 1.1  [154] LATIN CAPITAL LETTER A WITH RING BELOW..LATIN SMALL LETTER Y WITH RING ABOVE
@@ -508,7 +517,6 @@ A7AE          ; Recommended                    # 9.0        LATIN CAPITAL LETTER
 A7B8..A7B9    ; Recommended                    # 11.0   [2] LATIN CAPITAL LETTER U WITH STROKE..LATIN SMALL LETTER U WITH STROKE
 A7C2..A7C6    ; Recommended                    # 12.0   [5] LATIN CAPITAL LETTER ANGLICANA W..LATIN CAPITAL LETTER Z WITH PALATAL HOOK
 A7C7..A7CA    ; Recommended                    # 13.0   [4] LATIN CAPITAL LETTER D WITH SHORT STROKE OVERLAY..LATIN SMALL LETTER S WITH SHORT STROKE OVERLAY
-A7F5..A7F6    ; Recommended                    # 13.0   [2] LATIN CAPITAL LETTER REVERSED HALF H..LATIN SMALL LETTER REVERSED HALF H
 A9E7..A9FE    ; Recommended                    # 7.0   [24] MYANMAR LETTER TAI LAING NYA..MYANMAR LETTER TAI LAING BHA
 AA60..AA76    ; Recommended                    # 5.2   [23] MYANMAR LETTER KHAMTI GA..MYANMAR LOGOGRAM KHAMTI HM
 AA7A..AA7B    ; Recommended                    # 5.2    [2] MYANMAR LETTER AITON RA..MYANMAR SIGN PAO KAREN TONE
@@ -519,7 +527,6 @@ AB11..AB16    ; Recommended                    # 6.0    [6] ETHIOPIC SYLLABLE DZ
 AB20..AB26    ; Recommended                    # 6.0    [7] ETHIOPIC SYLLABLE CCHHA..ETHIOPIC SYLLABLE CCHHO
 AB28..AB2E    ; Recommended                    # 6.0    [7] ETHIOPIC SYLLABLE BBA..ETHIOPIC SYLLABLE BBO
 AB66..AB67    ; Recommended                    # 12.0   [2] LATIN SMALL LETTER DZ DIGRAPH WITH RETROFLEX HOOK..LATIN SMALL LETTER TS DIGRAPH WITH RETROFLEX HOOK
-AB68          ; Recommended                    # 13.0       LATIN SMALL LETTER TURNED R WITH MIDDLE TILDE
 AC00..D7A3    ; Recommended                    # 2.0 [11172] HANGUL SYLLABLE GA..HANGUL SYLLABLE HIH
 FA0E..FA0F    ; Recommended                    # 1.1    [2] CJK COMPATIBILITY IDEOGRAPH-FA0E..CJK COMPATIBILITY IDEOGRAPH-FA0F
 FA11          ; Recommended                    # 1.1        CJK COMPATIBILITY IDEOGRAPH-FA11
@@ -543,7 +550,7 @@ FA27..FA29    ; Recommended                    # 1.1    [3] CJK COMPATIBILITY ID
 2CEB0..2EBE0  ; Recommended                    # 10.0 [7473] CJK UNIFIED IDEOGRAPH-2CEB0..CJK UNIFIED IDEOGRAPH-2EBE0
 30000..3134A  ; Recommended                    # 13.0 [4939] CJK UNIFIED IDEOGRAPH-30000..CJK UNIFIED IDEOGRAPH-3134A
 
-# Total code points: 107823
+# Total code points: 107816
 
 #	Identifier_Type:	Inclusion
 
@@ -922,8 +929,10 @@ A8FC          ; Uncommon_Use Obsolete Not_XID  # 8.0        DEVANAGARI SIGN SIDD
 0560          ; Technical                      # 11.0       ARMENIAN SMALL LETTER TURNED AYB
 0588          ; Technical                      # 11.0       ARMENIAN SMALL LETTER YI WITH STROKE
 0953..0954    ; Technical                      # 1.1    [2] DEVANAGARI GRAVE ACCENT..DEVANAGARI ACUTE ACCENT
+0D81          ; Technical                      # 13.0       SINHALA SIGN CANDRABINDU
 0F18..0F19    ; Technical                      # 2.0    [2] TIBETAN ASTROLOGICAL SIGN -KHYUD PA..TIBETAN ASTROLOGICAL SIGN SDONG TSHUGS
 17CB..17D0    ; Technical                      # 3.0    [6] KHMER SIGN BANTOC..KHMER SIGN SAMYOK SANNYA
+1ABF..1AC0    ; Technical                      # 13.0   [2] COMBINING LATIN SMALL LETTER W BELOW..COMBINING LATIN SMALL LETTER TURNED W BELOW
 1D00..1D2B    ; Technical                      # 4.0   [44] LATIN LETTER SMALL CAPITAL A..CYRILLIC LETTER SMALL CAPITAL EL
 1D2F          ; Technical                      # 4.0        MODIFIER LETTER CAPITAL BARRED B
 1D3B          ; Technical                      # 4.0        MODIFIER LETTER CAPITAL REVERSED N
@@ -963,6 +972,7 @@ A78E          ; Technical                      # 6.0        LATIN SMALL LETTER L
 A7AF          ; Technical                      # 11.0       LATIN LETTER SMALL CAPITAL Q
 A7BA..A7BF    ; Technical                      # 12.0   [6] LATIN CAPITAL LETTER GLOTTAL A..LATIN SMALL LETTER GLOTTAL U
 A7FA          ; Technical                      # 6.0        LATIN LETTER SMALL CAPITAL TURNED M
+AB68          ; Technical                      # 13.0       LATIN SMALL LETTER TURNED R WITH MIDDLE TILDE
 FE20..FE23    ; Technical                      # 1.1    [4] COMBINING LIGATURE LEFT HALF..COMBINING DOUBLE TILDE RIGHT HALF
 FE24..FE26    ; Technical                      # 5.1    [3] COMBINING MACRON LEFT HALF..COMBINING CONJOINING MACRON
 FE27..FE2D    ; Technical                      # 7.0    [7] COMBINING LIGATURE LEFT HALF BELOW..COMBINING CONJOINING MACRON BELOW
@@ -973,7 +983,7 @@ FE73          ; Technical                      # 3.2        ARABIC TAIL FRAGMENT
 1D185..1D18B  ; Technical                      # 3.1    [7] MUSICAL SYMBOL COMBINING DOIT..MUSICAL SYMBOL COMBINING TRIPLE TONGUE
 1D1AA..1D1AD  ; Technical                      # 3.1    [4] MUSICAL SYMBOL COMBINING DOWN BOW..MUSICAL SYMBOL COMBINING SNAP PIZZICATO
 
-# Total code points: 447
+# Total code points: 451
 
 #	Identifier_Type:	Technical Exclusion
 
@@ -993,6 +1003,7 @@ FE73          ; Technical                      # 3.2        ARABIC TAIL FRAGMENT
 03F3          ; Technical Obsolete             # 1.1        GREEK LETTER YOT
 0484..0486    ; Technical Obsolete             # 1.1    [3] COMBINING CYRILLIC PALATALIZATION..COMBINING CYRILLIC PSILI PNEUMATA
 0487          ; Technical Obsolete             # 5.1        COMBINING CYRILLIC POKRYTIE
+0D04          ; Technical Obsolete             # 13.0       MALAYALAM LETTER VEDIC ANUSVARA
 17D1          ; Technical Obsolete             # 3.0        KHMER SIGN VIRIAM
 17DD          ; Technical Obsolete             # 4.0        KHMER SIGN ATTHACAN
 1DC0..1DC3    ; Technical Obsolete             # 4.1    [4] COMBINING DOTTED GRAVE ACCENT..COMBINING SUSPENSION MARK
@@ -1004,7 +1015,7 @@ FE73          ; Technical                      # 3.2        ARABIC TAIL FRAGMENT
 A722..A72F    ; Technical Obsolete             # 5.1   [14] LATIN CAPITAL LETTER EGYPTOLOGICAL ALEF..LATIN SMALL LETTER CUATRILLO WITH COMMA
 1D242..1D244  ; Technical Obsolete             # 4.1    [3] COMBINING GREEK MUSICAL TRISEME..COMBINING GREEK MUSICAL PENTASEME
 
-# Total code points: 66
+# Total code points: 67
 
 #	Identifier_Type:	Technical Obsolete Not_XID
 
@@ -1464,6 +1475,7 @@ A794..A79F    ; Obsolete                       # 7.0   [12] LATIN SMALL LETTER C
 A7A0..A7A9    ; Obsolete                       # 6.0   [10] LATIN CAPITAL LETTER G WITH OBLIQUE STROKE..LATIN SMALL LETTER S WITH OBLIQUE STROKE
 A7AB..A7AD    ; Obsolete                       # 7.0    [3] LATIN CAPITAL LETTER REVERSED OPEN E..LATIN CAPITAL LETTER L WITH BELT
 A7B0..A7B1    ; Obsolete                       # 7.0    [2] LATIN CAPITAL LETTER TURNED K..LATIN CAPITAL LETTER TURNED T
+A7F5..A7F6    ; Obsolete                       # 13.0   [2] LATIN CAPITAL LETTER REVERSED HALF H..LATIN SMALL LETTER REVERSED HALF H
 A7F7          ; Obsolete                       # 7.0        LATIN EPIGRAPHIC LETTER SIDEWAYS I
 A7FB..A7FF    ; Obsolete                       # 5.1    [5] LATIN EPIGRAPHIC LETTER REVERSED F..LATIN EPIGRAPHIC LETTER ARCHAIC M
 A8E0..A8F7    ; Obsolete                       # 5.2   [24] COMBINING DEVANAGARI DIGIT ZERO..DEVANAGARI SIGN CANDRABINDU AVAGRAHA
@@ -1482,7 +1494,7 @@ D7CB..D7FB    ; Obsolete                       # 5.2   [49] HANGUL JONGSEONG NIE
 1B000..1B001  ; Obsolete                       # 6.0    [2] KATAKANA LETTER ARCHAIC E..HIRAGANA LETTER ARCHAIC YE
 1B002..1B11E  ; Obsolete                       # 10.0 [285] HENTAIGANA LETTER A-1..HENTAIGANA LETTER N-MU-MO-2
 
-# Total code points: 1323
+# Total code points: 1325
 
 #	Identifier_Type:	Obsolete Not_XID
 
@@ -2357,4 +2369,3 @@ E0100..E01EF  ; Default_Ignorable              # 4.0  [240] VARIATION SELECTOR-1
 E0001         ; Deprecated                     # 3.1        LANGUAGE TAG
 
 # Total code points: 15
-

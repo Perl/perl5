@@ -1,6 +1,6 @@
-# IdentifierStatus-13.0.0.txt
-# Date: 2019-10-22, 13:05:26 GMT
-# © 2019 Unicode®, Inc.
+﻿# IdentifierStatus.txt
+# Date: 2020-02-07, 22:02:47 GMT
+# © 2020 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -15,6 +15,16 @@
 # Field 1: Identifier_Status value (see Table 1 of http://www.unicode.org/reports/tr39)
 #
 # Any missing code points have the Identifier_Status value Restricted
+#
+# For the purpose of regular expressions, the property Identifier_Status is defined as
+# an enumerated property of code points.
+# The short name of Identifier_Status is the same as the long name.
+# The possible values are:
+#   Allowed, Restricted
+# The short name of each value is the same as its long name.
+# The default property value for all Unicode code points U+0000..U+10FFFF
+# not mentioned in this data file is Restricted.
+
 
 #	Identifier_Status:	Allowed
 
@@ -269,7 +279,6 @@
 0CF1..0CF2    ; Allowed    # 5.0    [2] KANNADA SIGN JIHVAMULIYA..KANNADA SIGN UPADHMANIYA
 0D00          ; Allowed    # 10.0       MALAYALAM SIGN COMBINING ANUSVARA ABOVE
 0D02..0D03    ; Allowed    # 1.1    [2] MALAYALAM SIGN ANUSVARA..MALAYALAM SIGN VISARGA
-0D04          ; Allowed    # 13.0       MALAYALAM LETTER VEDIC ANUSVARA
 0D05..0D0C    ; Allowed    # 1.1    [8] MALAYALAM LETTER A..MALAYALAM LETTER VOCALIC L
 0D0E..0D10    ; Allowed    # 1.1    [3] MALAYALAM LETTER E..MALAYALAM LETTER AI
 0D12..0D28    ; Allowed    # 1.1   [23] MALAYALAM LETTER O..MALAYALAM LETTER NA
@@ -286,7 +295,6 @@
 0D60..0D61    ; Allowed    # 1.1    [2] MALAYALAM LETTER VOCALIC RR..MALAYALAM LETTER VOCALIC LL
 0D66..0D6F    ; Allowed    # 1.1   [10] MALAYALAM DIGIT ZERO..MALAYALAM DIGIT NINE
 0D7A..0D7F    ; Allowed    # 5.1    [6] MALAYALAM LETTER CHILLU NN..MALAYALAM LETTER CHILLU K
-0D81          ; Allowed    # 13.0       SINHALA SIGN CANDRABINDU
 0D82..0D83    ; Allowed    # 3.0    [2] SINHALA SIGN ANUSVARAYA..SINHALA SIGN VISARGAYA
 0D85..0D8E    ; Allowed    # 3.0   [10] SINHALA LETTER AYANNA..SINHALA LETTER IRUUYANNA
 0D91..0D96    ; Allowed    # 3.0    [6] SINHALA LETTER EYANNA..SINHALA LETTER AUYANNA
@@ -431,7 +439,6 @@
 17D7          ; Allowed    # 3.0        KHMER SIGN LEK TOO
 17DC          ; Allowed    # 3.0        KHMER SIGN AVAKRAHASANYA
 17E0..17E9    ; Allowed    # 3.0   [10] KHMER DIGIT ZERO..KHMER DIGIT NINE
-1ABF..1AC0    ; Allowed    # 13.0   [2] COMBINING LATIN SMALL LETTER W BELOW..COMBINING LATIN SMALL LETTER TURNED W BELOW
 1C90..1CBA    ; Allowed    # 11.0  [43] GEORGIAN MTAVRULI CAPITAL LETTER AN..GEORGIAN MTAVRULI CAPITAL LETTER AIN
 1CBD..1CBF    ; Allowed    # 11.0   [3] GEORGIAN MTAVRULI CAPITAL LETTER AEN..GEORGIAN MTAVRULI CAPITAL LETTER LABIAL SIGN
 1E00..1E99    ; Allowed    # 1.1  [154] LATIN CAPITAL LETTER A WITH RING BELOW..LATIN SMALL LETTER Y WITH RING ABOVE
@@ -518,7 +525,6 @@ A7AE          ; Allowed    # 9.0        LATIN CAPITAL LETTER SMALL CAPITAL I
 A7B8..A7B9    ; Allowed    # 11.0   [2] LATIN CAPITAL LETTER U WITH STROKE..LATIN SMALL LETTER U WITH STROKE
 A7C2..A7C6    ; Allowed    # 12.0   [5] LATIN CAPITAL LETTER ANGLICANA W..LATIN CAPITAL LETTER Z WITH PALATAL HOOK
 A7C7..A7CA    ; Allowed    # 13.0   [4] LATIN CAPITAL LETTER D WITH SHORT STROKE OVERLAY..LATIN SMALL LETTER S WITH SHORT STROKE OVERLAY
-A7F5..A7F6    ; Allowed    # 13.0   [2] LATIN CAPITAL LETTER REVERSED HALF H..LATIN SMALL LETTER REVERSED HALF H
 A9E7..A9FE    ; Allowed    # 7.0   [24] MYANMAR LETTER TAI LAING NYA..MYANMAR LETTER TAI LAING BHA
 AA60..AA76    ; Allowed    # 5.2   [23] MYANMAR LETTER KHAMTI GA..MYANMAR LOGOGRAM KHAMTI HM
 AA7A..AA7B    ; Allowed    # 5.2    [2] MYANMAR LETTER AITON RA..MYANMAR SIGN PAO KAREN TONE
@@ -529,7 +535,6 @@ AB11..AB16    ; Allowed    # 6.0    [6] ETHIOPIC SYLLABLE DZU..ETHIOPIC SYLLABLE
 AB20..AB26    ; Allowed    # 6.0    [7] ETHIOPIC SYLLABLE CCHHA..ETHIOPIC SYLLABLE CCHHO
 AB28..AB2E    ; Allowed    # 6.0    [7] ETHIOPIC SYLLABLE BBA..ETHIOPIC SYLLABLE BBO
 AB66..AB67    ; Allowed    # 12.0   [2] LATIN SMALL LETTER DZ DIGRAPH WITH RETROFLEX HOOK..LATIN SMALL LETTER TS DIGRAPH WITH RETROFLEX HOOK
-AB68          ; Allowed    # 13.0       LATIN SMALL LETTER TURNED R WITH MIDDLE TILDE
 AC00..D7A3    ; Allowed    # 2.0 [11172] HANGUL SYLLABLE GA..HANGUL SYLLABLE HIH
 FA0E..FA0F    ; Allowed    # 1.1    [2] CJK COMPATIBILITY IDEOGRAPH-FA0E..CJK COMPATIBILITY IDEOGRAPH-FA0F
 FA11          ; Allowed    # 1.1        CJK COMPATIBILITY IDEOGRAPH-FA11
@@ -553,5 +558,4 @@ FA27..FA29    ; Allowed    # 1.1    [3] CJK COMPATIBILITY IDEOGRAPH-FA27..CJK CO
 2CEB0..2EBE0  ; Allowed    # 10.0 [7473] CJK UNIFIED IDEOGRAPH-2CEB0..CJK UNIFIED IDEOGRAPH-2EBE0
 30000..3134A  ; Allowed    # 13.0 [4939] CJK UNIFIED IDEOGRAPH-30000..CJK UNIFIED IDEOGRAPH-3134A
 
-# Total code points: 107842
-
+# Total code points: 107835

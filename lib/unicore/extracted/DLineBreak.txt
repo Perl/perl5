@@ -1,5 +1,5 @@
 # DerivedLineBreak-13.0.0.txt
-# Date: 2020-01-22, 00:07:22 GMT
+# Date: 2020-02-17, 18:43:18 GMT
 # © 2020 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -1740,7 +1740,8 @@ FFE4          ; ID # So       FULLWIDTH BROKEN BAR
 1F920..1F925  ; ID # So   [6] FACE WITH COWBOY HAT..LYING FACE
 1F927..1F92F  ; ID # So   [9] SNEEZING FACE..SHOCKED FACE WITH EXPLODING HEAD
 1F93A..1F93B  ; ID # So   [2] FENCER..MODERN PENTATHLON
-1F93F..1F978  ; ID # So  [58] DIVING MASK..DISGUISED FACE
+1F93F..1F976  ; ID # So  [56] DIVING MASK..FREEZING FACE
+1F978         ; ID # So       DISGUISED FACE
 1F979         ; ID # Cn       <reserved-1F979>
 1F97A..1F9B4  ; ID # So  [59] FACE WITH PLEADING EYES..BONE
 1F9B7         ; ID # So       TOOTH
@@ -1782,7 +1783,7 @@ FFE4          ; ID # So       FULLWIDTH BROKEN BAR
 30000..3134A  ; ID # Lo [4939] CJK UNIFIED IDEOGRAPH-30000..CJK UNIFIED IDEOGRAPH-3134A
 3134B..3FFFD  ; ID # Cn [60595] <reserved-3134B>..<reserved-3FFFD>
 
-# Total code points: 172463
+# Total code points: 172462
 
 # ================================================
 
@@ -3691,13 +3692,14 @@ FF70          ; CJ # Lm       HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK
 1F926         ; EB # So       FACE PALM
 1F930..1F939  ; EB # So  [10] PREGNANT WOMAN..JUGGLING
 1F93C..1F93E  ; EB # So   [3] WRESTLERS..HANDBALL
+1F977         ; EB # So       NINJA
 1F9B5..1F9B6  ; EB # So   [2] LEG..FOOT
 1F9B8..1F9B9  ; EB # So   [2] SUPERHERO..SUPERVILLAIN
 1F9BB         ; EB # So       EAR WITH HEARING AID
 1F9CD..1F9CF  ; EB # So   [3] STANDING PERSON..DEAF PERSON
 1F9D1..1F9DD  ; EB # So  [13] ADULT..ELF
 
-# Total code points: 121
+# Total code points: 122
 
 # ================================================
 

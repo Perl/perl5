@@ -1,5 +1,5 @@
 # LineBreak-13.0.0.txt
-# Date: 2020-01-21, 10:56:19 GMT [KW, LI]
+# Date: 2020-02-17, 07:43:02 GMT [KW, LI]
 # © 2020 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -3425,7 +3425,9 @@ FFFD;AI           # So         REPLACEMENT CHARACTER
 1F930..1F939;EB   # So    [10] PREGNANT WOMAN..JUGGLING
 1F93A..1F93B;ID   # So     [2] FENCER..MODERN PENTATHLON
 1F93C..1F93E;EB   # So     [3] WRESTLERS..HANDBALL
-1F93F..1F978;ID   # So    [58] DIVING MASK..DISGUISED FACE
+1F93F..1F976;ID   # So    [56] DIVING MASK..FREEZING FACE
+1F977;EB          # So         NINJA
+1F978;ID          # So         DISGUISED FACE
 1F979;ID          # Cn         <reserved-1F979>
 1F97A..1F9B4;ID   # So    [59] FACE WITH PLEADING EYES..BONE
 1F9B5..1F9B6;EB   # So     [2] LEG..FOOT

@@ -1,19 +1,27 @@
 ; charset=UTF-8
 @@@	The Unicode Standard 13.0.0
-@@@+	U13M191205.lst
-	Unicode 13.0.0 names list, seventh delta.
+@@@+	U13M200203.lst
+	Unicode 13.0.0 names list, eighth delta.
 	Repertoire synched with UnicodeData-13.0.0d6.txt
-	Sixth delta of annotation fixes.
-	Added annotations re Pinyin use of 0300, 0301, 0304, 030C.
-	Added Serbian to annotations for 0107, 0111.
-	Adjusted subhead and added notice at 01C4.
+	Eighth delta of annotation fixes.
+	Added xrefs for 27C7, 27D1, 2227, 2228. Adjusted subhead for 27C7.
+	Updated aliases for 26A5, 26A4, 26A2, 263F.
+	Updated subheads and annotations for 1DF8 through 1DFB.
+	Updated title of UTR #54 in notice at 1800.
+	Added xref to 202F for 0020.
+	Added annotations about abbreviations for 2066 through 2069 for consistency.
+	Separated aliases for 0009 and 000A onto separate lines.
+	Removed superfluous xrefs for 2011.
+	Adjusted subheads for 2028 and 202A.
+	Added notices for the sets of composition exclusions in four Indic scripts.
+	Added xrefs for 029C, 1D34, 1D78, A7F8 and a notice at A7F8.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		© 2019 Unicode®, Inc.
+@+		© 2020 Unicode®, Inc.
 	For terms of use, see http://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -39,10 +47,12 @@
 	= BACKSPACE
 0009	<control>
 	= CHARACTER TABULATION
-	= horizontal tabulation (HT), tab
+	= horizontal tabulation (HT)
+	= tab
 000A	<control>
 	= LINE FEED (LF)
-	= new line (NL), end of line (EOL)
+	= new line (NL)
+	= end of line (EOL)
 000B	<control>
 	= LINE TABULATION
 	= vertical tabulation (VT)
@@ -100,6 +110,7 @@
 	* other space characters: 2000-200A
 	x (no-break space - 00A0)
 	x (zero width space - 200B)
+	x (narrow no-break space - 202F)
 	x (word joiner - 2060)
 	x (ideographic space - 3000)
 	x (zero width no-break space - FEFF)
@@ -1995,6 +2006,8 @@
 	* voiced uvular implosive
 029C	LATIN LETTER SMALL CAPITAL H
 	* voiceless epiglottal fricative
+	x (modifier letter capital h - 1D34)
+	x (modifier letter capital h with stroke - A7F8)
 029D	LATIN SMALL LETTER J WITH CROSSED-TAIL
 	* voiced palatal fricative
 	* uppercase is A7B2
@@ -4974,6 +4987,7 @@
 0956	DEVANAGARI VOWEL SIGN UE
 0957	DEVANAGARI VOWEL SIGN UUE
 @		Additional consonants
+@+		These eight consonants with nuktas are listed in CompositionExclusions.txt. That means that they do not recompose during normalization. The NFC form is the same as the decomposed sequence.
 0958	DEVANAGARI LETTER QA
 	: 0915 093C
 0959	DEVANAGARI LETTER KHHA
@@ -5133,6 +5147,7 @@
 @		Sign
 09D7	BENGALI AU LENGTH MARK
 @		Additional consonants
+@+		These three consonants with nuktas are listed in CompositionExclusions.txt. That means that they do not recompose during normalization. The NFC form is the same as the decomposed sequence.
 09DC	BENGALI LETTER RRA
 	: 09A1 09BC
 09DD	BENGALI LETTER RHA
@@ -5248,9 +5263,11 @@
 0A32	GURMUKHI LETTER LA
 0A33	GURMUKHI LETTER LLA
 	: 0A32 0A3C
+@+		This consonant with nukta is listed in CompositionExclusions.txt. That means that it does not recompose during normalization. The NFC form is the same as the decomposed sequence.
 0A35	GURMUKHI LETTER VA
 0A36	GURMUKHI LETTER SHA
 	: 0A38 0A3C
+@+		This consonant with nukta is listed in CompositionExclusions.txt. That means that it does not recompose during normalization. The NFC form is the same as the decomposed sequence.
 0A38	GURMUKHI LETTER SA
 0A39	GURMUKHI LETTER HA
 @		Various signs
@@ -5282,6 +5299,7 @@
 @		Sign
 0A51	GURMUKHI SIGN UDAAT
 @		Additional consonants
+@+		These four consonants with nuktas (not including 0A5C) are listed in CompositionExclusions.txt. That means that they do not recompose during normalization. The NFC form is the same as the decomposed sequence.
 0A59	GURMUKHI LETTER KHHA
 	: 0A16 0A3C
 0A5A	GURMUKHI LETTER GHHA
@@ -5529,6 +5547,7 @@
 0B56	ORIYA AI LENGTH MARK
 0B57	ORIYA AU LENGTH MARK
 @		Additional consonants
+@+		These two consonants with nuktas (not including 0B5F) are listed in CompositionExclusions.txt. That means that they do not recompose during normalization. The NFC form is the same as the decomposed sequence.
 0B5C	ORIYA LETTER RRA
 	= dda
 	: 0B21 0B3C
@@ -9377,7 +9396,7 @@
 17F9	KHMER SYMBOL LEK ATTAK PRAM-BUON
 @@	1800	Mongolian	18AF
 @@+
-@+		A copy of the Mongolian code chart showing glyphs for all Mongolian positional variants and variation sequences can be found in UTR #54, Unicode Mongolian 12.1 Baseline.
+@+		A copy of the Mongolian code chart showing glyphs for all Mongolian positional variants and variation sequences can be found in UTR #54, Unicode Mongolian 12.1 Snapshot.
 @		Punctuation
 @+		Additional birgas are encoded in the Mongolian Supplement block at 11660-1167F.
 1800	MONGOLIAN BIRGA
@@ -10963,6 +10982,8 @@
 1D33	MODIFIER LETTER CAPITAL G
 	# <super> 0047
 1D34	MODIFIER LETTER CAPITAL H
+	x (latin letter small capital h - 029C)
+	x (modifier letter cyrillic en - 1D78)
 	# <super> 0048
 1D35	MODIFIER LETTER CAPITAL I
 	# <super> 0049
@@ -11096,6 +11117,7 @@
 	* Georgian transcription
 	x (georgian letter turned gan - 10F9)
 1D78	MODIFIER LETTER CYRILLIC EN
+	x (modifier letter capital h - 1D34)
 	# <super> 043D
 @		Other phonetic symbols
 1D79	LATIN SMALL LETTER INSULAR G
@@ -11332,11 +11354,14 @@
 1DF6	COMBINING KAVYKA ABOVE RIGHT
 1DF7	COMBINING KAVYKA ABOVE LEFT
 	x (combining cyrillic kavyka - A67C)
+@		Miscellaneous marks
 1DF8	COMBINING DOT ABOVE LEFT
+	* used in Syriac as a disambiguation dot
+	* used in Typicon Cyrillic, where the dot may have a square appearance
 	x (combining dot above right - 0358)
 1DF9	COMBINING WIDE INVERTED BRIDGE BELOW
+	* used as a Typicon mark
 	x (combining inverted bridge below - 033A)
-@		Miscellaneous mark
 1DFB	COMBINING DELETION MARK
 	* used for "mhusaa" in Newa scribal tradition
 @		Double diacritic mark for UPA
@@ -12435,8 +12460,6 @@
 	x (hyphen-minus - 002D)
 	x (soft hyphen - 00AD)
 2011	NON-BREAKING HYPHEN
-	x (hyphen-minus - 002D)
-	x (soft hyphen - 00AD)
 	# <noBreak> 2010
 2012	FIGURE DASH
 2013	EN DASH
@@ -12531,11 +12554,12 @@
 	# 002E 002E 002E
 2027	HYPHENATION POINT
 	* visible symbol used to indicate correct positions for word breaking, as in dic·tion·ar·ies
-@		Format characters
+@		Separators
 2028	LINE SEPARATOR
 	* may be used to represent this semantic unambiguously
 2029	PARAGRAPH SEPARATOR
 	* may be used to represent this semantic unambiguously
+@		Format characters
 202A	LEFT-TO-RIGHT EMBEDDING
 	* commonly abbreviated LRE
 202B	RIGHT-TO-LEFT EMBEDDING
@@ -12743,9 +12767,13 @@
 	* contiguity operator indicating addition
 @		Format characters
 2066	LEFT-TO-RIGHT ISOLATE
+	* commonly abbreviated LRI
 2067	RIGHT-TO-LEFT ISOLATE
+	* commonly abbreviated RLI
 2068	FIRST STRONG ISOLATE
+	* commonly abbreviated FSI
 2069	POP DIRECTIONAL ISOLATE
+	* commonly abbreviated PDI
 @		Deprecated
 @+		Use of these characters is strongly discouraged.
 206A	INHIBIT SYMMETRIC SWAPPING
@@ -13737,10 +13765,12 @@
 	= wedge, conjunction
 	x (n-ary logical and - 22C0)
 	x (up arrowhead - 2303)
+	x (and with dot - 27D1)
 2228	LOGICAL OR
 	= vee, disjunction
 	x (n-ary logical or - 22C1)
 	x (down arrowhead - 2304)
+	x (or with dot inside - 27C7)
 2229	INTERSECTION
 	= cap, hat
 	x (n-ary intersection - 22C2)
@@ -15646,6 +15676,7 @@
 	x (crescent moon - 1F319)
 263F	MERCURY
 	= alchemical symbol for quicksilver
+	= intersexuality
 2640	FEMALE SIGN
 	= Venus
 	= alchemical symbol for copper
@@ -15862,7 +15893,7 @@
 	x (lightning mood - 1F5F2)
 @		Gender symbols
 26A2	DOUBLED FEMALE SIGN
-	= lesbianism
+	= female homosexuality
 	x (two women holding hands - 1F46D)
 26A3	DOUBLED MALE SIGN
 	* a glyph variant has the two circles on the same line
@@ -15870,9 +15901,9 @@
 	x (two men holding hands - 1F46C)
 26A4	INTERLOCKED FEMALE AND MALE SIGN
 	* a glyph variant has the two circles on the same line
-	= bisexuality
+	= heterosexuality
 26A5	MALE AND FEMALE SIGN
-	= transgender
+	= intersex, androgynous
 	= hermaphrodite (in entomology)
 26A6	MALE WITH STROKE SIGN
 	= transgender
@@ -16438,8 +16469,12 @@
 @		Paired punctuation
 27C5	LEFT S-SHAPED BAG DELIMITER
 27C6	RIGHT S-SHAPED BAG DELIMITER
-@		Miscellaneous symbols
+@		Operator
 27C7	OR WITH DOT INSIDE
+	x (logical or - 2228)
+	x (multiset multiplication - 228D)
+	x (and with dot - 27D1)
+@		Miscellaneous symbols
 27C8	REVERSE SOLIDUS PRECEDING SUBSET
 27C9	SUPERSET PRECEDING SOLIDUS
 @		Vertical line operator
@@ -16478,6 +16513,7 @@
 @		Operators
 27D1	AND WITH DOT
 	x (logical and - 2227)
+	x (or with dot inside - 27C7)
 	x (intersection with dot - 2A40)
 27D2	ELEMENT OF OPENING UPWARDS
 	x (element of opening downwards - 2AD9)
@@ -24002,8 +24038,10 @@ A7F7	LATIN EPIGRAPHIC LETTER SIDEWAYS I
 	* Celtic inscriptions
 @		Additions for Extended IPA
 A7F8	MODIFIER LETTER CAPITAL H WITH STROKE
-	* faucalized
 	# <super> 0126
+@+		A typographical distinction between a capital form and a small capital form is not distinctive for this IPA usage.
+	* faucalized
+	x (latin letter small capital h - 029C)
 A7F9	MODIFIER LETTER SMALL LIGATURE OE
 	* labialized: open-rounded
 	# <super> 0153

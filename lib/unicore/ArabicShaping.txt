@@ -1,5 +1,5 @@
 # ArabicShaping-13.0.0.txt
-# Date: 2020-01-20, 16:20:00 GMT [KW, RP]
+# Date: 2020-01-31, 23:55:00 GMT [KW, RP]
 # © 2020 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -8,16 +8,16 @@
 # Unicode Character Database.
 #
 # This file defines the Joining_Type and Joining_Group property
-# values for Arabic, Syriac, N'Ko, Mandaic, Manichaean,
-# Hanifi Rohingya, and Sogdian positional
+# values for Arabic, Syriac, N'Ko, Mandaic, and Manichaean positional
 # shaping, repeating in machine readable form the information
 # exemplified in Tables 9-3, 9-8, 9-9, 9-10, 9-14, 9-15, 9-16, 9-19,
-# 9-20, 10-4, 10-5, 10-6, 10-7, 14-10, 16-16, and 19-5 of The Unicode Standard core
+# 9-20, 10-4, 10-5, 10-6, 10-7, and 19-5 of The Unicode Standard core
 # specification. This file also defines Joining_Type values for
-# Mongolian, Phags-pa, Psalter Pahlavi, Chorasmian, and Adlam positional shaping,
+# Mongolian, Phags-pa, Psalter Pahlavi, Sogdian, Chorasmian, and Adlam positional shaping,
+# and Joining_Type and Joining_Group values for Hanifi Rohingya positional shaping,
 # which are not listed in tables in the standard.
 #
-# See Sections 9.2, 9.3, 9.5, 10.5, 10.6, 13.4, 14.3, 14.10, 16.13, 19.4, and 19.9
+# See Sections 9.2, 9.3, 9.5, 10.5, 10.6, 13.4, 14.3, 14.10, 16.14, 19.4, and 19.9
 # of The Unicode Standard core specification for more information.
 #
 # Each line contains four fields, separated by a semicolon.
