@@ -5,6 +5,8 @@ use strict;
 # selection of names is tested, a higher percentage of regular names is tested
 # than algorithmically-determined names.
 
+my $run_slow_tests = $ENV{PERL_RUN_SLOW_TESTS} || 0;
+
 my $RUN_SLOW_TESTS_EVERY_CODE_POINT = 100;
 
 # If $ENV{PERL_RUN_SLOW_TESTS} is at least 1 and less than the number above,
@@ -986,8 +988,6 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     else {
         $seed = srand;
     }
-
-    my $run_slow_tests = $ENV{PERL_RUN_SLOW_TESTS} || 0;
 
     # We will look at the data grouped in "blocks" of the following
     # size.
