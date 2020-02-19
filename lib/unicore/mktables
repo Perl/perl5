@@ -2375,6 +2375,11 @@ sub trace { return main::trace(@_); }
     # giving the first release without this file.
     main::set_access('withdrawn', \%withdrawn, 'c');
 
+    my %ucd;
+    # Some files are not actually part of the Unicode Character Database.
+    # These typically have a different way of indicating their version
+    main::set_access('ucd', \%ucd, 'c');
+
     my %in_this_release;
     # Calculated value from %first_released and %withdrawn.  Are we compiling
     # a Unicode release which includes this file?
@@ -2404,6 +2409,7 @@ sub trace { return main::trace(@_); }
         $missings{$addr} = [ ];
         $early{$addr} = [ ];
         $optional{$addr} = [ ];
+        $ucd{$addr} = 1;
 
         # Two positional parameters.
         return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
@@ -2839,6 +2845,8 @@ END
                 && ! $early{$addr}[0]
                 && lc($file) ne 'unicodedata.txt')
             {
+                my $this_version;
+
                 if ($file !~ /^Unihan/i) {
 
                     # The non-Unihan files started getting version numbers in
@@ -2849,17 +2857,39 @@ END
                     # numbers are correct.
                     if ($v_version ge v4.0.1) {
                         $_ = <$file_handle>;    # The version number is in the
-                                                # very first line
-                        if ($_ !~ / - $string_version \. /x) {
-                            chomp;
+                                                # very first line if it is a
+                                                # UCD file; otherwise, it
+                                                # might be
+                        goto valid_version if $_ =~ / - $string_version \. /x;
+                        chomp;
+                        if ($ucd{$addr}) {
                             $_ =~ s/^#\s*//;
 
                             # 4.0.1 had some valid files that weren't updated.
-                            if (! ($v_version eq v4.0.1 && $_ =~ /4\.0\.0/)) {
-                                die Carp::my_carp("File '$file' is version "
-                                                . "'$_'.  It should be "
-                                                . "version $string_version");
+                            goto valid_version
+                                    if $v_version eq v4.0.1 && $_ =~ /4\.0\.0/;
+                            $this_version = $_;
+                            goto wrong_version;
+                        }
+                        else {
+                            my $BOM = "\x{FEFF}";
+                            utf8::encode($BOM);
+                            my $BOM_re = qr/ ^ (?:$BOM)? /x;
+
+                            while ($_ =~ s/$BOM_re//) { # BOM; seems to be on
+                                                        # many lines in some files!!
+                                $_ = <$file_handle>;
+                                chomp;
+                                if ($_ =~ /^# Version: (.*)/) {
+                                    $this_version = $1;
+                                    goto valid_version
+                                        if $this_version eq $string_version;
+                                    goto valid_version
+                                        if "$this_version.0" eq $string_version;
+                                    goto wrong_version;
+                                }
                             }
+                            goto no_version;
                         }
                     }
                 }
@@ -2869,23 +2899,30 @@ END
                     # 6.0.  The version is somewhere in the first comment
                     # block
                     while (<$file_handle>) {
-                        if ($_ !~ /^#/) {
-                            Carp::my_carp_bug("Could not find the expected "
-                                            . "version info in file '$file'");
-                            last;
-                        }
+                        goto no_version if $_ !~ /^#/;
                         chomp;
                         $_ =~ s/^#\s*//;
                         next if $_ !~ / version: /x;
-                        last if $_ =~ /$string_version/;
-                        die Carp::my_carp("File '$file' is version "
-                                        . "'$_'.  It should be "
-                                        . "version $string_version");
+                        goto valid_version if $_ =~ /$string_version/;
+                        goto wrong_version;
                     }
+                    goto no_version;
                 }
+                else {  # Old Unihan; have to assume is valid
+                    goto valid_version;
+                }
+
+              wrong_version:
+                die Carp::my_carp("File '$file' is version "
+                                . "'$this_version'.  It should be "
+                                . "version $string_version");
+              no_version:
+                Carp::my_carp_bug("Could not find the expected "
+                                . "version info in file '$file'");
             }
         }
 
+      valid_version:
         print "$progress_message{$addr}\n" if $verbosity >= $PROGRESS;
 
         # Call any special handler for before the file.
@@ -20167,18 +20204,26 @@ my @input_file_objects = (
                     Pre_Handler => \&setup_emojidata,
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Each_Line_Handler => \&filter_emojidata_line,
+                    UCD => 0,
                    ),
     Input_file->new("$EMOJI/emoji.txt", v13.0.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
+                    UCD => 0,
+                   ),
+    Input_file->new("$EMOJI/ReadMe.txt", v13.0.0,
+                    Skip => $Documentation,
+                    UCD => 0,
                    ),
     Input_file->new('IdStatus.txt', v13.0.0,
                     Pre_Handler => \&setup_IdStatus,
                     Property => 'Identifier_Status',
+                    UCD => 0,
                    ),
     Input_file->new('IdType.txt', v13.0.0,
                     Pre_Handler => \&setup_IdType,
                     Each_Line_Handler => \&filter_IdType_line,
                     Property => 'Identifier_Type',
+                    UCD => 0,
                    ),
 );
 
