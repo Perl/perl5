@@ -132,23 +132,28 @@ sub test_vianame ($$$) {
     # Switch loose and full in vianame vs string_vianame half the time
     if (rand() < .5) {
         use charnames ":full";
-        $all_pass &= is(charnames::vianame($name), $i, "Verify vianame(\"$name\") is 0x$hex");
+        $all_pass &= is(charnames::vianame($name), $i,
+                        "Verify vianame(\"$name\") is 0x$hex");
         use charnames ":loose";
-        $all_pass &= is(charnames::string_vianame($loose_name), chr($i), "Verify string_vianame(\"$loose_name\") is chr(0x$hex)");
+        $all_pass &= is(charnames::string_vianame($loose_name), chr($i),
+                    "Verify string_vianame(\"$loose_name\") is chr(0x$hex)");
         $right_anchor = '\\Z';
     }
     else {
         use charnames ":loose";
-        $all_pass &= is(charnames::vianame($loose_name), $i, "Verify vianame(\"$loose_name\") is 0x$hex");
+        $all_pass &= is(charnames::vianame($loose_name), $i,
+                        "Verify vianame(\"$loose_name\") is 0x$hex");
         use charnames ":full";
-        $all_pass &= is(charnames::string_vianame($name), chr($i), "Verify string_vianame(\"$name\") is chr(0x$hex)");
+        $all_pass &= is(charnames::string_vianame($name), chr($i),
+                        "Verify string_vianame(\"$name\") is chr(0x$hex)");
         $right_anchor = '\\z';
     }
 
     my $left_anchor = (rand() < .5) ? '^' : '\\A';
 
     # \p{name=} is always loose matching
-    $all_pass &= like(chr($i), qr/^\p{name=$loose_name}$/, "Verify /\p{name=$loose_name}/ matches chr(0x$hex)");
+    $all_pass &= like(chr($i), qr/^\p{name=$loose_name}$/,
+                      "Verify /\p{name=$loose_name}/ matches chr(0x$hex)");
 
     $wildcard_count++;
 
