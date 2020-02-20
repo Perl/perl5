@@ -23612,6 +23612,7 @@ Perl_parse_uniprop_string(pTHX_
             PUSHSTACKi(PERLSI_OVERLOAD);
             ENTER ;
             SAVETMPS;
+            save_re_context();
 
             PUSHMARK(SP) ;
             XPUSHs(character_name);
