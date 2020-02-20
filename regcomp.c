@@ -23837,31 +23837,20 @@ S_parse_uniprop_string(pTHX_
             }
 
             /* Here's how khw thinks we should proceed to handle the properties
-             * not yet done:    Bidi Mirroring Glyph
-                                Bidi Paired Bracket
+             * not yet done:    Bidi Mirroring Glyph        can map to ""
+                                Bidi Paired Bracket         can map to ""
                                 Case Folding  (both full and simple)
+                                            Shouldn't /i be good enough for Full
                                 Decomposition Mapping
-                                Equivalent Unified Ideograph
-                                Name
-                                Name Alias
+                                Equivalent Unified Ideograph    can map to ""
                                 Lowercase Mapping  (both full and simple)
-                                NFKC Case Fold
+                                NFKC Case Fold                  can map to ""
                                 Titlecase Mapping  (both full and simple)
                                 Uppercase Mapping  (both full and simple)
-             * Move the part that looks at the property values into a perl
-             * script, like utf8_heavy.pl was done.  This makes things somewhat
-             * easier, but most importantly, it avoids always adding all these
-             * strings to the memory usage when the feature is little-used.
-             *
-             * The property values would all be concatenated into a single
-             * string per property with each value on a separate line, and the
-             * code point it's for on alternating lines.  Then we match the
-             * user's input pattern m//mg, without having to worry about their
-             * uses of '^' and '$'.  Only the values that aren't the default
-             * would be in the strings.  Code points would be in UTF-8.  The
-             * search pattern that we would construct would look like
-             * (?: \n (code-point_re) \n (?aam: user-re ) \n )
-             * And so $1 would contain the code point that matched the user-re.
+             * Handle these the same way Name is done, using say, _wild.pm, but
+             * having both loose and full, like in charclass_invlists.h.
+             * Perhaps move block and script to that as they are somewhat large
+             * in charclass_invlists.h.
              * For properties where the default is the code point itself, such
              * as any of the case changing mappings, the string would otherwise
              * consist of all Unicode code points in UTF-8 strung together.
@@ -23870,11 +23859,8 @@ S_parse_uniprop_string(pTHX_
              * error.  Otherwise run the pattern against every code point in
              * the ssc.  The ssc is kind of like tr18's 3.9 Possible Match Sets
              * And it might be good to create an API to return the ssc.
-             * Decomposition.pl similarly.
-             *
-             * It might be that a new pattern modifier would have to be
-             * created, like /t for resTricTed, which changed the behavior of
-             * some constructs in their subpattern, like \A. */
+             * Or handle them like the algorithmic names are done
+             */
         } /* End of is a wildcard subppattern */
 
         /* \p{name=...} is handled specially.  Instead of using the normal
