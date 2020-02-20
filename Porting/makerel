@@ -77,7 +77,7 @@ print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
 @$missentry
-    = grep {$_ !~ m!^\.(?:git|github)! and $_ !~ m!(?:/|^)\.gitignore!} @$missentry;
+    = grep {$_ !~ m!^\.(?:git|github|mailmap)! and $_ !~ m!(?:/|^)\.gitignore!} @$missentry;
 if (@$missfile ) {
     warn "Can't make a release with MANIFEST files missing:\n";
     warn "\t".$_."\n" for (@$missfile);
