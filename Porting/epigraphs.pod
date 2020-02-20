@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.9 - Sten Nadolny, book The Discovery of Slowness
+
+L<Announced on 2020-01-20 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2020/02/msg257144.html>
+
+  „When people talk too fast the content becomes as superfluous as the speed.“
+
 =head2 v5.31.8 - Joe Perham, "Joe Perham's Guide to Hunting and Guide to Fishing in Maine"
 
 L<Announced on 2020-01-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2020/01/msg256894.html>
