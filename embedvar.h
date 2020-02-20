@@ -398,6 +398,8 @@
 #define PL_Gdo_undump		(my_vars->Gdo_undump)
 #define PL_dollarzero_mutex	(my_vars->Gdollarzero_mutex)
 #define PL_Gdollarzero_mutex	(my_vars->Gdollarzero_mutex)
+#define PL_env_mutex		(my_vars->Genv_mutex)
+#define PL_Genv_mutex		(my_vars->Genv_mutex)
 #define PL_fold_locale		(my_vars->Gfold_locale)
 #define PL_Gfold_locale		(my_vars->Gfold_locale)
 #define PL_hash_chars		(my_vars->Ghash_chars)

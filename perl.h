@@ -2898,6 +2898,21 @@ typedef struct padname PADNAME;
 #  define USE_ENVIRON_ARRAY
 #endif
 
+#ifdef USE_ITHREADS
+   /* On some platforms it would be safe to use a read/write mutex with many
+    * readers possible at the same time.  On other platforms, notably IBM ones,
+    * subsequent getenv calls destroy earlier ones.  Those platforms would not
+    * be able to handle simultaneous getenv calls */
+#  define ENV_LOCK            MUTEX_LOCK(&PL_env_mutex)
+#  define ENV_UNLOCK          MUTEX_UNLOCK(&PL_env_mutex)
+#  define ENV_INIT            MUTEX_INIT(&PL_env_mutex);
+#  define ENV_TERM            MUTEX_DESTROY(&PL_env_mutex);
+#else
+#  define ENV_LOCK       NOOP;
+#  define ENV_UNLOCK     NOOP;
+#  define ENV_INIT       NOOP;
+#  define ENV_TERM       NOOP;
+#endif
 
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     /* having sigaction(2) means that the OS supports both 1-arg and 3-arg
