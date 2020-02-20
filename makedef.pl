@@ -399,6 +399,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_regex_pad
 		    PL_regex_padav
 		    PL_dollarzero_mutex
+		    PL_env_mutex
 		    PL_hints_mutex
 		    PL_locale_mutex
 		    PL_lc_numeric_mutex

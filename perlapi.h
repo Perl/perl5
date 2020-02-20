@@ -119,6 +119,8 @@ END_EXTERN_C
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
 #undef  PL_dollarzero_mutex
 #define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
+#undef  PL_env_mutex
+#define PL_env_mutex		(*Perl_Genv_mutex_ptr(NULL))
 #undef  PL_fold_locale
 #define PL_fold_locale		(*Perl_Gfold_locale_ptr(NULL))
 #undef  PL_hash_chars
