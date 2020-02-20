@@ -94,6 +94,34 @@ possible that some erroneous constructs no longer compile.
 
 =item *
 
+L<Archive::Tar> has been upgraded from version 2.32 to 2.36.
+
+=item *
+
+L<B> has been upgraded from version 1.78 to 1.80.
+
+=item *
+
+L<charnames> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.56 to 3.57.
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<Encode> has been upgraded from version 3.02 to 3.03.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280233 to 0.280234.
+
+=item *
+
 L<feature> has been upgraded from version 1.57 to 1.58.
 
 A new C<indirect> feature has been added, which is enabled by default
@@ -115,6 +143,22 @@ L<Module::CoreList> has been upgraded from version 5.20200120 to 5.20200220.
 
 =item *
 
+L<parent> has been upgraded from version 0.237 to 0.238.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20191102 to 5.20200125.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.91 to 1.92.
+
+=item *
+
 L<Storable> has been upgraded from version 3.18 to 3.19.
 
 Use of note() from Test::More is now optional in tests.  This works
@@ -124,6 +168,14 @@ old perls from CPAN.
 =item *
 
 L<threads> has been upgraded from version 2.23 to 2.24.
+
+=item *
+
+L<Tie::File> has been upgraded from version 1.03 to 1.06.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.06 to 1.07.
 
 =back
 
