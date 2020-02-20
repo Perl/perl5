@@ -16212,6 +16212,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
+    PERL_UNUSED_ARG(oregcomp_parse); /* Only for Set_Node_Length */
 
     DEBUG_PARSE("xcls");
 
