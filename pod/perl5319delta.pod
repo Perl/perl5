@@ -190,12 +190,12 @@ Additionally, the following selected changes have been made:
 =item *
 
 Links to the now defunct L<https://search.cpan.org> site now point at
-the equivalent L<https://metacpan.org> URL.  [GH #17393]
+the equivalent L<https://metacpan.org> URL.  [L<GH #17393|https://github.com/Perl/perl5/issues/17393>]
 
 =item *
 
 The man page for L<ExtUtils::XSSymSet> is now only installed on VMS,
-which is the only platform the module is installed on.  [GH #17424]
+which is the only platform the module is installed on.  [L<GH #17424|https://github.com/Perl/perl5/issues/17424>]
 
 =back
 
@@ -333,7 +333,7 @@ made:
 =item *
 
 F<t/run/switches.t> no longer uses (and re-uses) the F<tmpinplace/>
-directory under F<t/>.  This may prevent spurious failures. [GH #17424]
+directory under F<t/>.  This may prevent spurious failures. [L<GH #17424|https://github.com/Perl/perl5/issues/17424>]
 
 =item *
 
@@ -377,12 +377,12 @@ Previously L<perlfunc/require> would only treat the special built-in
 SV C<&PL_sv_undef> as a value in C<%INC> as if a previous C<require>
 has failed, treating other undefined SVs as if the previous C<require>
 has succeeded.  This could cause unexpected success from C<require>
-eg. on C<local %INC = %INC;>.  This has been fixed [GH #17428]
+eg. on C<local %INC = %INC;>.  This has been fixed [L<GH #17428|https://github.com/Perl/perl5/issues/17428>]
 
 =item *
 
 C<(?{...})> eval groups in regular expressions no longer unintentionally
-trigger "EVAL without pos change exceeded limit in regex" [GH #17490].
+trigger "EVAL without pos change exceeded limit in regex" [L<GH #17490|https://github.com/Perl/perl5/issues/17490>].
 
 =item *
 
