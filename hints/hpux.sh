@@ -160,7 +160,7 @@ case `$cc -v 2>&1`"" in
 	    ccversion=`what $cc_found | awk '/Compiler/{print $2}/Itanium/{print $6,$7}/for Integrity/{print $6,$7}'`
 	    case "$ccflags" in
                "-Ae "*) ;;
-		*)  ccflags="-Ae -Wp,-H65000 $cc_cppflags"
+		*)  ccflags="-Ae -Wp,-H150000 $cc_cppflags"
 		    # +vnocompatwarnings not known in 10.10 and older
 		    if [ $xxOsRev -ge 1020 ]; then
 			ccflags="$ccflags -Wl,+vnocompatwarnings"
