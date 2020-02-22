@@ -312,7 +312,7 @@ consistently upper case.
 
 The following three diagnostics have been removed, and replaced by
 L<C<Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>>
-|perldiag/"Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>">.
+|perldiag/"Expecting interpolated extended charclass in regex; marked by <-- HERE in mE<sol>%sE<sol>">:
 C<Expecting close paren for nested extended charclass in regex; marked
 by <-- HERE in mE<sol>%sE<sol>>,
 C<Expecting close paren for wrapper for nested extended charclass in
