@@ -256,7 +256,7 @@ Mention that you cannot return from do BLOCK
 
 =item 'isa' operator is experimental
 
-This is an experimental feature and is available from Perl 5.31.6 when enabled
+This is an experimental feature and is available from Perl 5.31.7 when enabled
 by C<use feature 'isa'>. It emits a warning in the C<experimental::isa>
 category.
 
