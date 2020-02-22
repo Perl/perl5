@@ -579,11 +579,11 @@ function, available in Perl v5.16 or later:
 =head2 Class Instance Operator
 X<isa operator>
 
-Binary C<isa> evaluates to true when left argument is an object instance of
+Binary C<isa> evaluates to true when the left argument is an object instance of
 the class (or a subclass derived from that class) given by the right argument.
-If the left argument is not defined, not a blessed object instance, or does
+If the left argument is not defined, not a blessed object instance, nor does
 not derive from the class given by the right argument, the operator evaluates
-as false. The right argument may give the class either as a barename or a
+as false. The right argument may give the class either as a bareword or a
 scalar expression that yields a string class name:
 
     if( $obj isa Some::Class ) { ... }
