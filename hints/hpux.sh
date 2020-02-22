@@ -826,3 +826,7 @@ esac
 # needed, but for now simply undefine them
 d_mbrlen='undef'
 d_mbrtowc='undef'
+# And this one is not know on 11.11 (with HP C-ANSI-C)
+if [ "$xxOsRevMajor" -lt 11 ] || [ "$xxOsRevMinor" -lt 12 ]; then
+d_wcrtomb='undef'
+fi
