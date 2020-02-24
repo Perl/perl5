@@ -4231,10 +4231,11 @@ Gid_t getegid (void);
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
 
-#  ifndef PERL_EXT_RE_BUILD
-#    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
-#  else
+/* For re_comp.c, re_exec.c, assume -Dr has been specified */
+#  ifdef PERL_EXT_RE_BUILD
 #    define DEBUG_r(a) STMT_START {a;} STMT_END
+#  else
+#    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  endif /* PERL_EXT_RE_BUILD */
 
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
