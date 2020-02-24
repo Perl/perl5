@@ -70,6 +70,63 @@
  * precedence is structured in regular expressions.  Serious changes in
  * regular-expression syntax might require a total rethink.
  */
+
+/* Note on debug output:
+ *
+ * This is set up so that -Dr turns on debugging like all other flags that are
+ * enabled by -DDEBUGGING.  -Drv gives more verbose output.  This applies to
+ * all regular expressions encountered in a program, and gives a huge amount of
+ * output for all but the shortest programs.
+ *
+ * The ability to output pattern debugging information lexically, and with much
+ * finer grained control was added, with 'use re qw(Debug ....);' available even
+ * in non-DEBUGGING builds.  This is accomplished by copying the contents of
+ * regcomp.c to ext/re/re_comp.c, and regexec.c is copied to ext/re/re_exec.c.
+ * Those files are compiled and linked into the perl executable, and they are
+ * compiled essentially as if DEBUGGING were enabled, and controlled by calls
+ * to re.pm.
+ *
+ * That would normally mean linking errors when two functions of the same name
+ * are attempted to be placed into the same executable.  That is solved in one
+ * of four ways:
+ *  1)  Static functions aren't known outside the file they are in, so for the
+ *      many functions of that type in this file, it just isn't a problem.
+ *  2)  Most externally known functions are enclosed in
+ *          #ifndef PERL_IN_XSUB_RE
+ *          ...
+ *          #endif
+ *      blocks, so there is only one defintion for them in the whole
+ *      executable, the one in regcomp.c (or regexec.c).  The implication of
+ *      that is any debugging info that comes from them is controlled only by
+ *      -Dr.  Further, any static function they call will also be the version
+ *      in regcomp.c (or regexec.c), so its debugging will also be by -Dr.
+ *  3)  About a dozen external functions are re-#defined in ext/re/re_top.h, to
+ *      have different names, so that what gets loaded in the executable is
+ *      'Perl_foo' from regcomp.c (and regexec.c), and the identical function
+ *      from re_comp.c (and re_exec.c), but with the name 'my_foo'  Debugging
+ *      in the 'Perl_foo' versions is controlled by -Dr, but the 'my_foo'
+ *      versions and their callees are under control of re.pm.   The catch is
+ *      that references to all these go through the regexp_engine structure,
+ *      which is initialized in regcomp.h to the Perl_foo versions, and
+ *      substituted out in lexical scopes where 'use re' is in effect to the
+ *      'my_foo' ones.   That structure is public API, so it would be a hard
+ *      sell to add any additional members.
+ *  4)  For functions in regcomp.c and re_comp.c that are called only from,
+ *      respectively, regexec.c and re_exec.c, they can have two different
+ *      names, depending on #ifdef'ing PERL_IN_XSUB_RE, in both regexec.c and
+ *      embed.fnc.
+ *
+ * The bottom line is that if you add code to one of the public functions
+ * listed in ext/re/re_top.h, debugging automagically works.  But if you write
+ * a new function that needs to do debugging or there is a chain of calls from
+ * it that need to do debugging, all functions in the chain should use options
+ * 2) or 4) above.
+ *
+ * A function may have to be split so that debugging stuff is static, but it
+ * calls out to some other function that only gets compiled in regcomp.c to
+ * access data that we don't want to duplicate.
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_REGCOMP_C
 #include "perl.h"
