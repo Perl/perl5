@@ -5590,10 +5590,10 @@ STATIC AV*	S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, con
 STATIC void	S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
 #define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE	\
 	assert(pRExC_state)
-STATIC REGEXP*	S_compile_wildcard(pTHX_ const char * name, const STRLEN len, const bool ignore_case)
+STATIC REGEXP*	S_compile_wildcard(pTHX_ const char * subpattern, const STRLEN len, const bool ignore_case)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_COMPILE_WILDCARD	\
-	assert(name)
+	assert(subpattern)
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE U8	S_compute_EXACTish(RExC_state_t *pRExC_state);

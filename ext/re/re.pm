@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.38";
+our $VERSION     = "0.39";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -67,7 +67,7 @@ my %flags = (
     MATCH             => 0x000200,
     TRIEE             => 0x000400,
 
-    EXTRA             => 0x1FF0000,
+    EXTRA             => 0x3FF0000,
     TRIEM             => 0x0010000,
     OFFSETS           => 0x0020000,
     OFFSETSDBG        => 0x0040000,
@@ -77,9 +77,14 @@ my %flags = (
     BUFFERS           => 0x0400000,
     GPOS              => 0x0800000,
     DUMP_PRE_OPTIMIZE => 0x1000000,
+    WILDCARD          => 0x2000000,
 );
-$flags{ALL} = -1 &
- ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS}|$flags{DUMP_PRE_OPTIMIZE});
+$flags{ALL} = -1 & ~($flags{OFFSETS}
+                    |$flags{OFFSETSDBG}
+                    |$flags{BUFFERS}
+                    |$flags{DUMP_PRE_OPTIMIZE}
+                    |$flags{WILDCARD}
+                    );
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{Extra} = $flags{EXECUTE} | $flags{COMPILE} | $flags{GPOS};
 $flags{More} = $flags{MORE} =
@@ -623,6 +628,19 @@ on the offsets part of the debug engine.
 =item DUMP_PRE_OPTIMIZE
 
 Enable the dumping of the compiled pattern before the optimization phase.
+
+=item WILDCARD
+
+Normally, all debugging is turned off during the handling of subpatterns in
+Unicode property wildcards.  Specifying this, enables it.  See
+L<perlunicode/Wildcards in Property Values>.
+
+Note that this option alone doesn't cause any debugging information to be
+output.  What it does is enable other debugging options to have effect in the
+compilation of wildcards.
+
+Especially on the name property, which has hundreds of thousands of possible
+names, this can cause a lot of output.
 
 =back
 
