@@ -22973,6 +22973,7 @@ S_get_extended_utf8_msg(pTHX_ const UV cp)
 }
 
 #  endif
+#endif /* end of ! PERL_IN_XSUB_RE */
 
 STATIC REGEXP *
 S_compile_wildcard(pTHX_ const char * name, const STRLEN len,
@@ -23009,6 +23010,8 @@ S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
 
     return result;
 }
+
+#ifndef PERL_IN_XSUB_RE
 
 SV *
 Perl_handle_user_defined_property(pTHX_

@@ -959,8 +959,6 @@
 #    if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init	S__invlist_array_init
-#define compile_wildcard(a,b,c)	S_compile_wildcard(aTHX_ a,b,c)
-#define execute_wildcard(a,b,c,d,e,f,g)	S_execute_wildcard(aTHX_ a,b,c,d,e,f,g)
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
 #define invlist_clear(a)	S_invlist_clear(aTHX_ a)
 #define invlist_max		S_invlist_max
@@ -1020,9 +1018,11 @@
 #define add_data		S_add_data
 #define add_multi_match(a,b,c)	S_add_multi_match(aTHX_ a,b,c)
 #define change_engine_size(a,b)	S_change_engine_size(aTHX_ a,b)
+#define compile_wildcard(a,b,c)	S_compile_wildcard(aTHX_ a,b,c)
 #define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
 #define edit_distance		S_edit_distance
+#define execute_wildcard(a,b,c,d,e,f,g)	S_execute_wildcard(aTHX_ a,b,c,d,e,f,g)
 #define find_first_differing_byte_pos	S_find_first_differing_byte_pos
 #define get_ANYOFM_contents(a)	S_get_ANYOFM_contents(aTHX_ a)
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)

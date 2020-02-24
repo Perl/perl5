@@ -4256,14 +4256,6 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(SV* const invlist, const bool will_
 	assert(invlist)
 #endif
 
-STATIC REGEXP*	S_compile_wildcard(pTHX_ const char * name, const STRLEN len, const bool ignore_case)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_COMPILE_WILDCARD	\
-	assert(name)
-
-STATIC I32	S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char* strend, char* strbeg, SSize_t minend, SV* screamer, U32 nosave);
-#define PERL_ARGS_ASSERT_EXECUTE_WILDCARD	\
-	assert(prog); assert(stringarg); assert(strend); assert(strbeg); assert(screamer)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(SV* invlist)
 			__attribute__warn_unused_result__;
@@ -5581,6 +5573,11 @@ STATIC AV*	S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, con
 STATIC void	S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
 #define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE	\
 	assert(pRExC_state)
+STATIC REGEXP*	S_compile_wildcard(pTHX_ const char * name, const STRLEN len, const bool ignore_case)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_COMPILE_WILDCARD	\
+	assert(name)
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE U8	S_compute_EXACTish(RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
@@ -5594,6 +5591,9 @@ STATIC int	S_edit_distance(const UV *src, const UV *tgt, const STRLEN x, const S
 #define PERL_ARGS_ASSERT_EDIT_DISTANCE	\
 	assert(src); assert(tgt)
 
+STATIC I32	S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char* strend, char* strbeg, SSize_t minend, SV* screamer, U32 nosave);
+#define PERL_ARGS_ASSERT_EXECUTE_WILDCARD	\
+	assert(prog); assert(stringarg); assert(strend); assert(strbeg); assert(screamer)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE Size_t	S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max);
 #define PERL_ARGS_ASSERT_FIND_FIRST_DIFFERING_BYTE_POS	\
