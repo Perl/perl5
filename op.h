@@ -250,6 +250,7 @@ struct methop {
 
 struct pmop {
     BASEOP
+    U32         op_pmflags;
     OP *	op_first;
     OP *	op_last;
 #ifdef USE_ITHREADS
@@ -257,7 +258,6 @@ struct pmop {
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
-    U32         op_pmflags;
     union {
 	OP *	op_pmreplroot;		/* For OP_SUBST */
 	PADOFFSET op_pmtargetoff;	/* For OP_SPLIT lex ary or thr GV */
