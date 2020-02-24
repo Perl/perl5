@@ -1029,7 +1029,7 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXECUTE_TRIE      0x000400
 
 /* Extra */
-#define RE_DEBUG_EXTRA_MASK              0x1FF0000
+#define RE_DEBUG_EXTRA_MASK              0x3FF0000
 #define RE_DEBUG_EXTRA_TRIE              0x0010000
 #define RE_DEBUG_EXTRA_OFFSETS           0x0020000
 #define RE_DEBUG_EXTRA_OFFDEBUG          0x0040000
@@ -1038,6 +1038,7 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXTRA_BUFFERS           0x0400000
 #define RE_DEBUG_EXTRA_GPOS              0x0800000
 #define RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE 0x1000000
+#define RE_DEBUG_EXTRA_WILDCARD          0x2000000
 /* combined */
 #define RE_DEBUG_EXTRA_STACK             0x0280000
 
@@ -1116,6 +1117,8 @@ re.pm, especially to the documentation.
 #define DECLARE_AND_GET_RE_DEBUG_FLAGS volatile IV re_debug_flags = 0; \
         PERL_UNUSED_VAR(re_debug_flags); GET_RE_DEBUG_FLAGS;
 
+#define isDEBUG_WILDCARD (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_WILDCARD))
+
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)   \
     const char * const rpv =                                \
         pv_pretty((dsv), (pv), (l), (m),                    \
@@ -1149,6 +1152,7 @@ re.pm, especially to the documentation.
 #define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)
 #define RE_SV_DUMPLEN(ItEm)
 #define RE_SV_TAIL(ItEm)
+#define isDEBUG_WILDCARD 0
 
 #endif /* DEBUG RELATED DEFINES */
 

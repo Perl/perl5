@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.38";
+our $VERSION     = "0.39";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -67,7 +67,7 @@ my %flags = (
     MATCH             => 0x000200,
     TRIEE             => 0x000400,
 
-    EXTRA             => 0x1FF0000,
+    EXTRA             => 0x3FF0000,
     TRIEM             => 0x0010000,
     OFFSETS           => 0x0020000,
     OFFSETSDBG        => 0x0040000,
@@ -77,9 +77,14 @@ my %flags = (
     BUFFERS           => 0x0400000,
     GPOS              => 0x0800000,
     DUMP_PRE_OPTIMIZE => 0x1000000,
+    WILDCARD          => 0x2000000,
 );
-$flags{ALL} = -1 &
- ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS}|$flags{DUMP_PRE_OPTIMIZE});
+$flags{ALL} = -1 & ~($flags{OFFSETS}
+                    |$flags{OFFSETSDBG}
+                    |$flags{BUFFERS}
+                    |$flags{DUMP_PRE_OPTIMIZE}
+                    |$flags{WILDCARD}
+                    );
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{Extra} = $flags{EXECUTE} | $flags{COMPILE} | $flags{GPOS};
 $flags{More} = $flags{MORE} =
@@ -624,6 +629,33 @@ on the offsets part of the debug engine.
 
 Enable the dumping of the compiled pattern before the optimization phase.
 
+=item WILDCARD
+
+When Perl encounters a wildcard subpattern, (see L<perlunicode/Wildcards in
+Property Values>), it suspends compilation of the main pattern, compiles the
+subpattern, and then matches that against all legal possibilities to determine
+the actual code points the subpattern matches.  After that it adds these to
+the main pattern, and continues its compilation.
+
+You may very well want to see how your subpattern gets compiled, but it is
+likely of less use to you to see how Perl matches that against all the legal
+possibilities, as that is under control of Perl, not you.   Therefore, the
+debugging information of the compilation portion is as specified by the other
+options, but the debugging output of the matching portion is normally
+suppressed.
+
+You can use the WILDCARD option to enable the debugging output of this
+subpattern matching.  Careful!  This can lead to voluminous outputs, and it
+may not make much sense to you what and why Perl is doing what it is.
+But it may be helpful to you to see why things aren't going the way you
+expect.
+
+Note that this option alone doesn't cause any debugging information to be
+output.  What it does is stop the normal suppression of execution-related
+debugging information during the matching portion of the compilation of
+wildcards.  You also have to specify which execution debugging information you
+want, such as by also including the EXECUTE option.
+
 =back
 
 =item Other useful flags
@@ -634,7 +666,7 @@ These are useful shortcuts to save on the typing.
 
 =item ALL
 
-Enable all options at once except OFFSETS, OFFSETSDBG and BUFFERS and
+Enable all options at once except OFFSETS, OFFSETSDBG, BUFFERS, WILDCARD, and
 DUMP_PRE_OPTIMIZE.
 (To get every single option without exception, use both ALL and EXTRA, or
 starting in 5.30 on a C<-DDEBUGGING>-enabled perl interpreter, use
@@ -642,7 +674,7 @@ the B<-Drv> command-line switches.)
 
 =item All
 
-Enable DUMP and all execute options. Equivalent to:
+Enable DUMP and all non-extra execute options. Equivalent to:
 
   use re 'debug';
 

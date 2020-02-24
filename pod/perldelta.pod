@@ -363,7 +363,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Regular expression debugging information available through the C<re>
+module now works when compiling Unicode property wildcard subpatterns.
+See L<perlunicode/Wildcards in Property Values>.  Some potentially
+voluminous output requires a new option, WILDCARD, to be specified to
+enable.  See L<re/WILDCARD>.
 
 =back
 

@@ -1934,7 +1934,7 @@ ES	|SV *	|handle_user_defined_property|NN const char * name	    \
 					     |NN bool *user_defined_ptr	    \
 					     |NN SV * msg		    \
 					     |const STRLEN level
-ERS	|REGEXP*|compile_wildcard|NN const char * name|const STRLEN len	    \
+ERS	|REGEXP*|compile_wildcard|NN const char * subpattern|const STRLEN len\
 				 |const bool ignore_case
 ES	|I32	|execute_wildcard|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \
