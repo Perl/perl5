@@ -5382,13 +5382,6 @@ PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, co
 	assert(sv); assert(what); assert(spp)
 
 #endif
-#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE const char *	S_get_regex_charset_name(const U32 flags, STRLEN* const lenp);
-#define PERL_ARGS_ASSERT_GET_REGEX_CHARSET_NAME	\
-	assert(lenp)
-#endif
-#endif
 #if defined(PERL_IN_PP_CTL_C)
 STATIC PerlIO *	S_check_type_and_open(pTHX_ SV *name)
 			__attribute__warn_unused_result__;
@@ -5818,6 +5811,89 @@ PERL_CALLCONV void	Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char*
 #define PERL_ARGS_ASSERT__INVLIST_DUMP	\
 	assert(file); assert(indent); assert(invlist)
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV*	S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
+#define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
+	assert(invlist)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE UV	S_invlist_highest(SV* const invlist)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_INVLIST_HIGHEST	\
+	assert(invlist)
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
+#define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
+	assert(invlist)
+#endif
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV SV*	Perl__add_range_to_invlist(pTHX_ SV* invlist, UV start, UV end)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT__ADD_RANGE_TO_INVLIST
+
+/* PERL_CALLCONV void	_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i); */
+#define PERL_ARGS_ASSERT__INVLIST_INTERSECTION
+PERL_CALLCONV void	Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** i);
+#define PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND	\
+	assert(b); assert(i)
+PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist);
+#define PERL_ARGS_ASSERT__INVLIST_INVERT	\
+	assert(invlist)
+/* PERL_CALLCONV void	_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result); */
+#define PERL_ARGS_ASSERT__INVLIST_SUBTRACT
+/* PERL_CALLCONV void	_invlist_union(pTHX_ SV* const a, SV* const b, SV** output); */
+#define PERL_ARGS_ASSERT__INVLIST_UNION
+PERL_CALLCONV void	Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** output);
+#define PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND	\
+	assert(b); assert(output)
+PERL_CALLCONV SV*	Perl__new_invlist(pTHX_ IV initial_size)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT__NEW_INVLIST
+
+PERL_CALLCONV SV*	Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0, UV** other_elements_ptr)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST	\
+	assert(other_elements_ptr)
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_TOKE_C)
+PERL_CALLCONV const char *	Perl_form_alien_digit_msg(pTHX_ const U8 which, const STRLEN valids_len, const char * const first_bad, const char * const send, const bool UTF, const bool braced)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG	\
+	assert(first_bad); assert(send)
+
+PERL_CALLCONV bool	Perl_grok_bslash_c(pTHX_ const char source, U8 * result, const char** message, U32 * packed_warn)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GROK_BSLASH_C	\
+	assert(result); assert(message)
+
+PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
+	assert(s); assert(send); assert(uv); assert(message)
+
+PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
+	assert(s); assert(send); assert(uv); assert(message)
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV const char *	Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char * string, const Size_t len, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG
+
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(SV* invlist)
@@ -5844,31 +5920,6 @@ PERL_STATIC_INLINE bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
 #endif
 
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE SV*	S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST
-#endif
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
-#define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
-	assert(invlist)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE UV	S_invlist_highest(SV* const invlist)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_INVLIST_HIGHEST	\
-	assert(invlist)
-#endif
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
-#define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
-	assert(invlist)
-#endif
-#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV bool	Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b);
 #define PERL_ARGS_ASSERT__INVLISTEQ	\
@@ -5878,6 +5929,13 @@ PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 #define PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY	\
 	assert(list)
 
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE const char *	S_get_regex_charset_name(const U32 flags, STRLEN* const lenp);
+#define PERL_ARGS_ASSERT_GET_REGEX_CHARSET_NAME	\
+	assert(lenp)
+#endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
@@ -5892,7 +5950,7 @@ PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode*
 #define PERL_ARGS_ASSERT_REGPROP	\
 	assert(sv); assert(o)
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_DOOP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_DOOP_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	S__invlist_contains_cp(SV* const invlist, const UV cp)
 			__attribute__warn_unused_result__;
@@ -5933,6 +5991,18 @@ PERL_STATIC_INLINE bool	S_is_invlist(SV* const invlist)
 #endif
 
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
+PERL_CALLCONV bool	Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 *strend, const UV cp)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_GRAPHEME	\
+	assert(strbeg); assert(s); assert(strend)
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV UV	Perl__to_fold_latin1(const U8 c, U8 *p, STRLEN *lenp, const unsigned int flags);
+#define PERL_ARGS_ASSERT__TO_FOLD_LATIN1	\
+	assert(p); assert(lenp)
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV SV*	Perl_invlist_clone(pTHX_ SV* const invlist, SV* newlist);
 #define PERL_ARGS_ASSERT_INVLIST_CLONE	\
@@ -5945,64 +6015,6 @@ PERL_STATIC_INLINE bool	S_regcurly(const char *s)
 #define PERL_ARGS_ASSERT_REGCURLY	\
 	assert(s)
 #endif
-
-#endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-PERL_CALLCONV const char *	Perl_form_alien_digit_msg(pTHX_ const U8 which, const STRLEN valids_len, const char * const first_bad, const char * const send, const bool UTF, const bool braced)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG	\
-	assert(first_bad); assert(send)
-
-PERL_CALLCONV bool	Perl_grok_bslash_c(pTHX_ const char source, U8 * result, const char** message, U32 * packed_warn)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_C	\
-	assert(result); assert(message)
-
-PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
-	assert(s); assert(send); assert(uv); assert(message)
-
-PERL_CALLCONV bool	Perl_grok_bslash_x(pTHX_ char** s, const char* const send, UV* uv, const char** message, U32 * packed_warn, const bool strict, const bool allow_UV_MAX, const bool utf8)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
-	assert(s); assert(send); assert(uv); assert(message)
-
-#endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
-PERL_CALLCONV const char *	Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char * string, const Size_t len, const UV cp)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG
-
-#endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
-PERL_CALLCONV SV*	Perl__add_range_to_invlist(pTHX_ SV* invlist, UV start, UV end)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__ADD_RANGE_TO_INVLIST
-
-/* PERL_CALLCONV void	_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i); */
-#define PERL_ARGS_ASSERT__INVLIST_INTERSECTION
-PERL_CALLCONV void	Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** i);
-#define PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND	\
-	assert(b); assert(i)
-PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist);
-#define PERL_ARGS_ASSERT__INVLIST_INVERT	\
-	assert(invlist)
-/* PERL_CALLCONV void	_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result); */
-#define PERL_ARGS_ASSERT__INVLIST_SUBTRACT
-/* PERL_CALLCONV void	_invlist_union(pTHX_ SV* const a, SV* const b, SV** output); */
-#define PERL_ARGS_ASSERT__INVLIST_UNION
-PERL_CALLCONV void	Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** output);
-#define PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND	\
-	assert(b); assert(output)
-PERL_CALLCONV SV*	Perl__new_invlist(pTHX_ IV initial_size)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__NEW_INVLIST
-
-PERL_CALLCONV SV*	Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0, UV** other_elements_ptr)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST	\
-	assert(other_elements_ptr)
 
 #endif
 #if defined(PERL_IN_REGEXEC_C)
@@ -6146,13 +6158,6 @@ STATIC bool	S_to_byte_substr(pTHX_ regexp * prog);
 STATIC void	S_to_utf8_substr(pTHX_ regexp * prog);
 #define PERL_ARGS_ASSERT_TO_UTF8_SUBSTR	\
 	assert(prog)
-#endif
-#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-PERL_CALLCONV bool	Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 *strend, const UV cp)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_GRAPHEME	\
-	assert(strbeg); assert(s); assert(strend)
-
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV bool	Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
@@ -6478,11 +6483,6 @@ STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, STRLE
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 PERL_CALLCONV UV	Perl__to_upper_title_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s);
 #define PERL_ARGS_ASSERT__TO_UPPER_TITLE_LATIN1	\
-	assert(p); assert(lenp)
-#endif
-#if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-PERL_CALLCONV UV	Perl__to_fold_latin1(const U8 c, U8 *p, STRLEN *lenp, const unsigned int flags);
-#define PERL_ARGS_ASSERT__TO_FOLD_LATIN1	\
 	assert(p); assert(lenp)
 #endif
 #if defined(PERL_IN_UTIL_C)

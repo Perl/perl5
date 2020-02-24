@@ -1015,9 +1015,6 @@
 #  if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 #define gv_stashsvpvn_cached(a,b,c,d)	Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
 #  endif
-#  if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
-#define get_regex_charset_name	S_get_regex_charset_name
-#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
 #define add_data		S_add_data
@@ -1084,21 +1081,41 @@
 #  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 #define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
 #  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)
+#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
+#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
+#define invlist_highest		S_invlist_highest
+#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_UTF8_C)
+#define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
+#define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
+#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
+#define _invlist_union_maybe_complement_2nd(a,b,c,d)	Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
+#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
+#define _setup_canned_invlist(a,b,c)	Perl__setup_canned_invlist(aTHX_ a,b,c)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_TOKE_C)
+#define form_alien_digit_msg(a,b,c,d,e,f)	Perl_form_alien_digit_msg(aTHX_ a,b,c,d,e,f)
+#define grok_bslash_c(a,b,c,d)	Perl_grok_bslash_c(aTHX_ a,b,c,d)
+#define grok_bslash_o(a,b,c,d,e,f,g,h)	Perl_grok_bslash_o(aTHX_ a,b,c,d,e,f,g,h)
+#define grok_bslash_x(a,b,c,d,e,f,g,h)	Perl_grok_bslash_x(aTHX_ a,b,c,d,e,f,g,h)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
+#define form_cp_too_large_msg(a,b,c,d)	Perl_form_cp_too_large_msg(aTHX_ a,b,c,d)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
 #define get_invlist_iter_addr	S_get_invlist_iter_addr
 #define invlist_iterfinish	S_invlist_iterfinish
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
-#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
-#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
-#define invlist_highest		S_invlist_highest
-#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
-#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 #define _invlistEQ(a,b,c)	Perl__invlistEQ(aTHX_ a,b,c)
 #define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#define get_regex_charset_name	S_get_regex_charset_name
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
@@ -1107,7 +1124,7 @@
 #endif
 #define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_DOOP_C)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_DOOP_C)
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
@@ -1115,28 +1132,17 @@
 #define invlist_array		S_invlist_array
 #define is_invlist		S_is_invlist
 #  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
+#define is_grapheme(a,b,c,d)	Perl_is_grapheme(aTHX_ a,b,c,d)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#define _to_fold_latin1		Perl__to_fold_latin1
+#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
 #define invlist_clone(a,b)	Perl_invlist_clone(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #define regcurly		S_regcurly
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-#define form_alien_digit_msg(a,b,c,d,e,f)	Perl_form_alien_digit_msg(aTHX_ a,b,c,d,e,f)
-#define grok_bslash_c(a,b,c,d)	Perl_grok_bslash_c(aTHX_ a,b,c,d)
-#define grok_bslash_o(a,b,c,d,e,f,g,h)	Perl_grok_bslash_o(aTHX_ a,b,c,d,e,f,g,h)
-#define grok_bslash_x(a,b,c,d,e,f,g,h)	Perl_grok_bslash_x(aTHX_ a,b,c,d,e,f,g,h)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_UTF8_C)
-#define form_cp_too_large_msg(a,b,c,d)	Perl_form_cp_too_large_msg(aTHX_ a,b,c,d)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
-#define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
-#define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
-#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
-#define _invlist_union_maybe_complement_2nd(a,b,c,d)	Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
-#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
-#define _setup_canned_invlist(a,b,c)	Perl__setup_canned_invlist(aTHX_ a,b,c)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define advance_one_LB(a,b,c)	S_advance_one_LB(aTHX_ a,b,c)
@@ -1170,14 +1176,8 @@
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #  endif
-#  if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-#define is_grapheme(a,b,c,d)	Perl_is_grapheme(aTHX_ a,b,c,d)
-#  endif
 #  if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define isFOO_lc(a,b)		Perl_isFOO_lc(aTHX_ a,b)
-#  endif
-#  if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define _to_fold_latin1		Perl__to_fold_latin1
 #  endif
 #endif
 #ifdef PERL_CORE
