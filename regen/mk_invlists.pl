@@ -238,8 +238,10 @@ sub switch_pound_if ($$;$) {
     foreach my $element (@new_pound_if) {
 
         # regcomp.c is arranged so that the tables are not compiled in
-        # re_comp.c */
-        my $no_xsub = 1 if $element =~ / PERL_IN_ (?: REGCOMP ) _C /x;
+        # re_comp.c, but general enums and defines (which take no space) are
+        # compiled */
+        my $no_xsub = 1 if $name !~ /enum|define/
+                        && $element =~ / PERL_IN_ (?: REGCOMP ) _C /x;
         $element = "defined($element)";
         $element = "($element && ! defined(PERL_IN_XSUB_RE))" if $no_xsub;
     }
