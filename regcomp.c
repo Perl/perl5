@@ -139,11 +139,16 @@ struct RExC_state_t {
     regnode_offset emit;		/* Code-emit pointer */
     I32		naughty;		/* How bad is this pattern? */
     I32		sawback;		/* Did we see \1, ...? */
-    U32		seen;
     SSize_t	size;			/* Number of regnode equivalents in
                                            pattern */
     Size_t      sets_depth;              /* Counts recursion depth of already-
                                            compiled regex set patterns */
+    U32		seen;
+
+    I32      parens_buf_size;           /* #slots malloced open/close_parens */
+    regnode_offset *open_parens;	/* offsets to open parens */
+    regnode_offset *close_parens;	/* offsets to close parens */
+    HV		*paren_names;		/* Paren names */
 
     /* position beyond 'precomp' of the warning message furthest away from
      * 'precomp'.  During the parse, no warnings are raised for any problems
@@ -164,9 +169,6 @@ struct RExC_state_t {
     I32		nestroot;		/* root parens we are in - used by
                                            accept */
     I32		seen_zerolen;
-    regnode_offset *open_parens;	/* offsets to open parens */
-    regnode_offset *close_parens;	/* offsets to close parens */
-    I32      parens_buf_size;           /* #slots malloced open/close_parens */
     regnode     *end_op;                /* END node in program */
     I32		utf8;		/* whether the pattern is utf8 or not */
     I32		orig_utf8;	/* whether the pattern was originally in utf8 */
@@ -175,10 +177,9 @@ struct RExC_state_t {
     I32		uni_semantics;	/* If a d charset modifier should use unicode
 				   rules, even if the pattern is not in
 				   utf8 */
-    HV		*paren_names;		/* Paren names */
 
-    regnode	**recurse;		/* Recurse regops */
     I32         recurse_count;          /* Number of recurse regops we have generated */
+    regnode	**recurse;		/* Recurse regops */
     U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
@@ -188,9 +189,9 @@ struct RExC_state_t {
     I32		override_recoding;
     I32         recode_x_to_native;
     I32		in_multi_char_class;
+    int		code_index;		/* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
 					    within pattern */
-    int		code_index;		/* next code_blocks[] slot */
     SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
     scan_frame *frame_head;
     scan_frame *frame_last;
@@ -205,8 +206,8 @@ struct RExC_state_t {
 #ifdef DEBUGGING
     const char  *lastparse;
     I32         lastnum;
-    AV          *paren_name_list;       /* idx -> name */
     U32         study_chunk_recursed_count;
+    AV          *paren_name_list;       /* idx -> name */
     SV          *mysv1;
     SV          *mysv2;
 
