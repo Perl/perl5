@@ -84,6 +84,12 @@ print $out_fh "#define NUM_ANYOF_CODE_POINTS   $num_anyof_code_points\n\n";
 
 $num_anyof_code_points = eval $num_anyof_code_points;
 
+no warnings 'once';
+print $out_fh <<"EOF";
+/* The precision to use in "%.*e" formats */
+#define PL_E_FORMAT_PRECISION $Unicode::UCD::e_precision
+EOF
+
 # enums that should be made public
 my %public_enums = (
                     _Perl_SCX => 1
@@ -3316,13 +3322,6 @@ sub token_name
 my $keywords_fh = open_new('uni_keywords.h', '>',
 		  {style => '*', by => 'regen/mk_invlists.pl',
                   from => "mph.pl"});
-
-no warnings 'once';
-print $keywords_fh <<"EOF";
-/* The precision to use in "%.*e" formats */
-#define PL_E_FORMAT_PRECISION $Unicode::UCD::e_precision
-
-EOF
 
 my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows)
                         = MinimalPerfectHash::make_mph_from_hash(\%keywords);
