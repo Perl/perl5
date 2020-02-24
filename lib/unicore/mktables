@@ -7505,9 +7505,23 @@ END
                 push @{$loose_names_ending_in_code_point{$squeezed}->{'high'}},
                                                                          $high;
 
+                # Calculate the set of legal characters in names of this
+                # series.  It includes every character in the name prefix.
+                my %legal;
+                $legal{$_} = 1 for split //, $map;
+
+                # Plus the hex code point chars, blank, and minus.  Also \n
+                # can show up as being required due to anchoring
+                for my $i ('0' .. '9', 'A' .. 'F', '-', ' ', "\n") {
+                    $legal{$i} = 1;
+                }
+                my $legal = join "", sort { $a cmp $b } keys %legal;
+
+                # The legal chars can be used in match optimizations
                 push @code_points_ending_in_code_point, { low => $low,
                                                         high => $high,
-                                                        name => $map
+                                                        name => $map,
+                                                        legal => $legal,
                                                         };
             }
         }
