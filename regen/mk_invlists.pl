@@ -3048,11 +3048,11 @@ foreach my $prop (@props) {
     }
 }
 
-switch_pound_if ('binary_property_tables', 'PERL_IN_REGCOMP_C');
-
 print $out_fh "\nconst char * const deprecated_property_msgs[] = {\n\t";
 print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
 print $out_fh "\n};\n";
+
+switch_pound_if ('binary_invlist_enum', 'PERL_IN_REGCOMP_C');
 
 my @enums = sort values %enums;
 
@@ -3091,6 +3091,8 @@ print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 
+switch_pound_if ('binary_property_tables', 'PERL_IN_REGCOMP_C');
+
 output_table_header($out_fh, "UV *", "uni_prop_ptrs");
 print $out_fh "\tNULL,\t/* Placeholder */\n";
 print $out_fh "\t";
@@ -3098,6 +3100,8 @@ print $out_fh join ",\n\t", @invlist_names;
 print $out_fh "\n";
 
 output_table_trailer();
+
+switch_pound_if ('synonym defines', 'PERL_IN_REGCOMP_C');
 
 print $out_fh join "\n", "\n",
                          #'#    ifdef DOINIT',
