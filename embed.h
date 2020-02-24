@@ -926,7 +926,11 @@
 #define cntrl_to_mnemonic	Perl_cntrl_to_mnemonic
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define do_uniprop_match	Perl_do_uniprop_match
 #define get_and_check_backslash_N_name(a,b,c,d)	Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
+#define get_deprecated_property_msg	Perl_get_deprecated_property_msg
+#define get_prop_definition(a)	Perl_get_prop_definition(aTHX_ a)
+#define get_prop_values		Perl_get_prop_values
 #define grok_atoUV		Perl_grok_atoUV
 #define load_charnames(a,b,c,d)	Perl_load_charnames(aTHX_ a,b,c,d)
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
@@ -1030,7 +1034,7 @@
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
 #define handle_possible_posix(a,b,c,d,e)	S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
-#define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	Perl_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	S_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
 #define invlist_is_iterating	S_invlist_is_iterating
 #define invlist_lowest		S_invlist_lowest
@@ -1042,7 +1046,7 @@
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #define output_posix_warnings(a,b)	S_output_posix_warnings(aTHX_ a,b)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
-#define parse_uniprop_string(a,b,c,d,e,f,g,h,i)	Perl_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i)
+#define parse_uniprop_string(a,b,c,d,e,f,g,h,i)	S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i)
 #define populate_ANYOF_from_invlist(a,b)	S_populate_ANYOF_from_invlist(aTHX_ a,b)
 #define re_op_compile_wrapper(a,b,c)	S_re_op_compile_wrapper(aTHX_ a,b,c)
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)

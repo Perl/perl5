@@ -1864,6 +1864,10 @@ EXp	|I32|reg_numbered_buff_length|NN REGEXP * const rx|NN const SV * const sv|co
 
 : FIXME - is anything in re using this now?
 EXp	|SV*|reg_qr_package|NN REGEXP * const rx
+EXpRT	|I16	|do_uniprop_match|NN const char * const key|const U16 key_len
+EXpRT	|const char * const *|get_prop_values|const int table_index
+EXpR	|SV *	|get_prop_definition|const int table_index
+EXpRT	|const char *|get_deprecated_property_msg|const Size_t warning_offset
 #if defined(PERL_IN_REGCOMP_C)
 ERS	|REGEXP*|re_op_compile_wrapper|NN SV * const pattern|U32 orig_rx_flags|const U32 pm_flags
 EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
@@ -1911,6 +1915,30 @@ ES	|regnode_offset|regclass|NN RExC_state_t *pRExC_state                 \
 				|const bool strict                            \
 				|bool optimizable			      \
 				|NULLOK SV** ret_invlist
+ES	|SV *	|parse_uniprop_string|NN const char * const name	    \
+				     |Size_t name_len			    \
+				     |const bool is_utf8		    \
+				     |const bool to_fold		    \
+				     |const bool runtime		    \
+				     |const bool deferrable		    \
+				     |NN bool * user_defined_ptr	    \
+				     |NN SV * msg			    \
+				     |const STRLEN level
+ES	|SV *	|handle_user_defined_property|NN const char * name	    \
+					     |const STRLEN name_len	    \
+					     |const bool is_utf8	    \
+					     |const bool to_fold	    \
+					     |const bool runtime	    \
+					     |const bool deferrable	    \
+					     |NN SV* contents		    \
+					     |NN bool *user_defined_ptr	    \
+					     |NN SV * msg		    \
+					     |const STRLEN level
+ERS	|REGEXP*|compile_wildcard|NN const char * name|const STRLEN len	    \
+				 |const bool ignore_case
+ES	|I32	|execute_wildcard|NN REGEXP * const prog|NN char* stringarg \
+				|NN char* strend|NN char* strbeg \
+				|SSize_t minend |NN SV* screamer|U32 nosave
 ES	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 Ei	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
@@ -2021,30 +2049,6 @@ ETSR	|int	|edit_distance	|NN const UV *src		    \
 				|const STRLEN x			    \
 				|const STRLEN y			    \
 				|const SSize_t maxDistance
-EpX	|SV *	|parse_uniprop_string|NN const char * const name	    \
-				     |Size_t name_len			    \
-				     |const bool is_utf8		    \
-				     |const bool to_fold		    \
-				     |const bool runtime		    \
-				     |const bool deferrable		    \
-				     |NN bool * user_defined_ptr	    \
-				     |NN SV * msg			    \
-				     |const STRLEN level
-EXp	|SV *	|handle_user_defined_property|NN const char * name	    \
-					     |const STRLEN name_len	    \
-					     |const bool is_utf8	    \
-					     |const bool to_fold	    \
-					     |const bool runtime	    \
-					     |const bool deferrable	    \
-					     |NN SV* contents		    \
-					     |NN bool *user_defined_ptr	    \
-					     |NN SV * msg		    \
-					     |const STRLEN level
-ERS	|REGEXP*|compile_wildcard|NN const char * name|const STRLEN len	    \
-				 |const bool ignore_case
-ES	|I32	|execute_wildcard|NN REGEXP * const prog|NN char* stringarg \
-				|NN char* strend|NN char* strbeg \
-				|SSize_t minend |NN SV* screamer|U32 nosave
 #  ifdef DEBUGGING
 EFp	|int	|re_indentf	|NN const char *fmt|U32 depth|...
 ES	|void        |regdump_intflags|NULLOK const char *lead| const U32 flags

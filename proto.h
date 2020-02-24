@@ -938,6 +938,11 @@ PERL_CALLCONV Off_t	Perl_do_tell(pTHX_ GV* gv)
 PERL_CALLCONV Size_t	Perl_do_trans(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_DO_TRANS	\
 	assert(sv)
+PERL_CALLCONV I16	Perl_do_uniprop_match(const char * const key, const U16 key_len)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_DO_UNIPROP_MATCH	\
+	assert(key)
+
 PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, STRLEN offset, int size);
 #define PERL_ARGS_ASSERT_DO_VECGET	\
 	assert(sv)
@@ -1099,6 +1104,10 @@ PERL_CALLCONV CV*	Perl_get_cvn_flags(pTHX_ const char* name, STRLEN len, I32 fla
 PERL_CALLCONV void	Perl_get_db_sub(pTHX_ SV **svp, CV *cv);
 #define PERL_ARGS_ASSERT_GET_DB_SUB	\
 	assert(cv)
+PERL_CALLCONV const char *	Perl_get_deprecated_property_msg(const Size_t warning_offset)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_DEPRECATED_PROPERTY_MSG
+
 PERL_CALLCONV void	Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer);
 #define PERL_ARGS_ASSERT_GET_HASH_SEED	\
 	assert(seed_buffer)
@@ -1129,6 +1138,14 @@ PERL_CALLCONV PPADDR_t*	Perl_get_ppaddr(pTHX)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_GET_PPADDR
+
+PERL_CALLCONV SV *	Perl_get_prop_definition(pTHX_ const int table_index)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_PROP_DEFINITION
+
+PERL_CALLCONV const char * const *	Perl_get_prop_values(const int table_index)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_PROP_VALUES
 
 PERL_CALLCONV REGEXP *	Perl_get_re_arg(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_GET_RE_ARG
@@ -5621,7 +5638,7 @@ STATIC int	S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state, const char* 
 STATIC regnode_offset	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse);
 #define PERL_ARGS_ASSERT_HANDLE_REGEX_SETS	\
 	assert(pRExC_state); assert(flagp); assert(oregcomp_parse)
-PERL_CALLCONV SV *	Perl_handle_user_defined_property(pTHX_ const char * name, const STRLEN name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, SV* contents, bool *user_defined_ptr, SV * msg, const STRLEN level);
+STATIC SV *	S_handle_user_defined_property(pTHX_ const char * name, const STRLEN name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, SV* contents, bool *user_defined_ptr, SV * msg, const STRLEN level);
 #define PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY	\
 	assert(name); assert(contents); assert(user_defined_ptr); assert(msg)
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -5673,7 +5690,7 @@ STATIC void	S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_w
 STATIC void	S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS	\
 	assert(pRExC_state)
-PERL_CALLCONV SV *	Perl_parse_uniprop_string(pTHX_ const char * const name, Size_t name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, bool * user_defined_ptr, SV * msg, const STRLEN level);
+STATIC SV *	S_parse_uniprop_string(pTHX_ const char * const name, Size_t name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, bool * user_defined_ptr, SV * msg, const STRLEN level);
 #define PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING	\
 	assert(name); assert(user_defined_ptr); assert(msg)
 STATIC void	S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr);

@@ -22942,6 +22942,43 @@ Perl_init_uniprops(pTHX)
 #  endif
 }
 
+/* These four functions are compiled only in regcomp.c, where they have access
+ * to the data they return.  They are a way for re_comp.c to get access to that
+ * data without having to compile the whole data structures. */
+
+I16
+Perl_do_uniprop_match(const char * const key, const U16 key_len)
+{
+    PERL_ARGS_ASSERT_DO_UNIPROP_MATCH;
+
+    return match_uniprop((U8 *) key, key_len);
+}
+
+SV *
+Perl_get_prop_definition(pTHX_ const int table_index)
+{
+    PERL_ARGS_ASSERT_GET_PROP_DEFINITION;
+
+    /* Create and return the inversion list */
+    return _new_invlist_C_array(uni_prop_ptrs[table_index]);
+}
+
+const char * const *
+Perl_get_prop_values(const int table_index)
+{
+    PERL_ARGS_ASSERT_GET_PROP_VALUES;
+
+    return UNI_prop_value_ptrs[table_index];
+}
+
+const char *
+Perl_get_deprecated_property_msg(const Size_t warning_offset)
+{
+    PERL_ARGS_ASSERT_GET_DEPRECATED_PROPERTY_MSG;
+
+    return deprecated_property_msgs[warning_offset];
+}
+
 #  if 0
 
 This code was mainly added for backcompat to give a warning for non-portable
@@ -23011,10 +23048,8 @@ S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
     return result;
 }
 
-#ifndef PERL_IN_XSUB_RE
-
 SV *
-Perl_handle_user_defined_property(pTHX_
+S_handle_user_defined_property(pTHX_
 
     /* Parses the contents of a user-defined property definition; returning the
      * expanded definition if possible.  If so, the return is an inversion
@@ -23388,8 +23423,8 @@ S_get_fq_name(pTHX_
     return fq_name;
 }
 
-SV *
-Perl_parse_uniprop_string(pTHX_
+STATIC SV *
+S_parse_uniprop_string(pTHX_
 
     /* Parse the interior of a \p{}, \P{}.  Returns its definition if knowable
      * now.  If so, the return is an inversion list.
@@ -23605,10 +23640,10 @@ Perl_parse_uniprop_string(pTHX_
         {
             /* Find the property.  The table includes the equals sign, so we
              * use 'j' as-is */
-            table_index = match_uniprop((U8 *) lookup_name, j);
+            table_index = do_uniprop_match(lookup_name, j);
             if (table_index) {
                 const char * const * prop_values
-                                            = UNI_prop_value_ptrs[table_index];
+                                                = get_prop_values(table_index);
                 REGEXP * subpattern_re;
                 char open = name[i++];
                 char close;
@@ -24401,7 +24436,7 @@ Perl_parse_uniprop_string(pTHX_
 
     /* Get the index into our pointer table of the inversion list corresponding
      * to the property */
-    table_index = match_uniprop((U8 *) lookup_name, lookup_len);
+    table_index = do_uniprop_match(lookup_name, lookup_len);
 
     /* If it didn't find the property ... */
     if (table_index == 0) {
@@ -24416,7 +24451,7 @@ Perl_parse_uniprop_string(pTHX_
             equals_pos -= 2;
             slash_pos -= 2;
 
-            table_index = match_uniprop((U8 *) lookup_name, lookup_len);
+            table_index = do_uniprop_match(lookup_name, lookup_len);
         }
 
         if (table_index == 0) {
@@ -24580,7 +24615,7 @@ Perl_parse_uniprop_string(pTHX_
             }
 
             /* Here, we have the number in canonical form.  Try that */
-            table_index = match_uniprop((U8 *) canonical, strlen(canonical));
+            table_index = do_uniprop_match(canonical, strlen(canonical));
             if (table_index == 0) {
                 goto failed;
             }
@@ -24604,7 +24639,8 @@ Perl_parse_uniprop_string(pTHX_
         table_index %= MAX_UNI_KEYWORD_INDEX;
         Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
                 "Use of '%.*s' in \\p{} or \\P{} is deprecated because: %s",
-                (int) name_len, name, deprecated_property_msgs[warning_offset]);
+                (int) name_len, name,
+                get_deprecated_property_msg(warning_offset));
     }
 
     /* In a few properties, a different property is used under /i.  These are
@@ -24632,9 +24668,8 @@ Perl_parse_uniprop_string(pTHX_
     }
 
     /* Create and return the inversion list */
-    prop_definition =_new_invlist_C_array(uni_prop_ptrs[table_index]);
+    prop_definition = get_prop_definition(table_index);
     sv_2mortal(prop_definition);
-
 
     /* See if there is a private use override to add to this definition */
     {
@@ -24754,8 +24789,6 @@ Perl_parse_uniprop_string(pTHX_
         return fq_name;
     }
 }
-
-#endif /* end of ! PERL_IN_XSUB_RE */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
