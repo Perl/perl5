@@ -21338,6 +21338,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 SV *
 Perl_re_intuit_string(pTHX_ REGEXP * const r)
 {				/* Assume that RE_INTUIT is set */
+    /* Returns an SV containing a string that must appear in the target for it
+     * to match */
+
     struct regexp *const prog = ReANY(r);
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -21346,11 +21349,12 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 
     DEBUG_COMPILE_r(
 	{
-	    const char * const s = SvPV_nolen_const(RX_UTF8(r)
+            if (prog->maxlen > 0) {
+                const char * const s = SvPV_nolen_const(RX_UTF8(r)
 		      ? prog->check_utf8 : prog->check_substr);
 
-	    if (!PL_colorset) reginitcolors();
-            Perl_re_printf( aTHX_
+                if (!PL_colorset) reginitcolors();
+                Perl_re_printf( aTHX_
 		      "%sUsing REx %ssubstr:%s \"%s%.60s%s%s\"\n",
 		      PL_colors[4],
 		      RX_UTF8(r) ? "utf8 " : "",
@@ -21358,6 +21362,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 		      s,
 		      PL_colors[1],
 		      (strlen(s) > PL_dump_re_max_len ? "..." : ""));
+            }
 	} );
 
     /* use UTF8 check substring if regexp pattern itself is in UTF8 */
