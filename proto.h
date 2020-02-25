@@ -4143,6 +4143,13 @@ PERL_STATIC_INLINE void *	S_my_memrchr(const char * s, const char c, const STRLE
 	assert(s)
 #endif
 #endif
+#if !(!defined(PERL_EXT_RE_BUILD))
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+PERL_CALLCONV SV*	Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
+#define PERL_ARGS_ASSERT_GET_RE_GCLASS_NONBITMAP_DATA	\
+	assert(node)
+#  endif
+#endif
 #if !(defined(DEBUGGING))
 #  if !defined(NV_PRESERVES_UV)
 #    if defined(PERL_IN_SV_C)
@@ -4324,6 +4331,11 @@ PERL_STATIC_INLINE void	S_invlist_trim(SV* invlist);
 #define PERL_ARGS_ASSERT_INVLIST_TRIM	\
 	assert(invlist)
 #endif
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+PERL_CALLCONV SV*	Perl_get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
+#define PERL_ARGS_ASSERT_GET_REGCLASS_NONBITMAP_DATA	\
+	assert(node)
 #  endif
 #endif
 #if !defined(PERL_IMPLICIT_SYS)
@@ -6054,9 +6066,6 @@ PERL_STATIC_INLINE const char *	S_get_regex_charset_name(const U32 flags, STRLEN
 #endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
-#define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
-	assert(node)
 PERL_CALLCONV int	Perl_re_printf(pTHX_ const char *fmt, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_RE_PRINTF	\

@@ -19908,14 +19908,13 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     }
 }
 
-#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
 SV *
-Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
-                                        const regnode* node,
-                                        bool doinit,
-                                        SV** listsvp,
-                                        SV** only_utf8_locale_ptr,
-                                        SV** output_invlist)
+
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+Perl_get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
+#else
+Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
+#endif
 
 {
     /* For internal core use only.
@@ -19951,7 +19950,11 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
     RXi_GET_DECL(prog, progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
 
-    PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA;
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+    PERL_ARGS_ASSERT_GET_REGCLASS_NONBITMAP_DATA;
+#else
+    PERL_ARGS_ASSERT_GET_RE_GCLASS_NONBITMAP_DATA;
+#endif
     assert(! output_invlist || listsvp);
 
     if (data && data->count) {
@@ -20154,7 +20157,6 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
     return invlist;
 }
-#endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
 /* reg_skipcomment()
 
@@ -21166,10 +21168,17 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                             ANYOFRbase(o) + ANYOFRdelta(o));
             }
             else {
-                (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+                (void) get_regclass_nonbitmap_data(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
+#else
+                (void) get_re_gclass_nonbitmap_data(prog, o, FALSE,
+                                                &unresolved,
+                                                &only_utf8_locale_invlist,
+                                                &nonbitmap_invlist);
+#endif
             }
 
             /* The non-bitmap data may contain stuff that could fit in the

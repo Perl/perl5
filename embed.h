@@ -960,6 +960,11 @@
 #  if ! defined(HAS_MEMRCHR) && (defined(PERL_CORE) || defined(PERL_EXT))
 #define my_memrchr		S_my_memrchr
 #  endif
+#  if !(!defined(PERL_EXT_RE_BUILD))
+#    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define get_re_gclass_nonbitmap_data(a,b,c,d,e,f)	Perl_get_re_gclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
+#    endif
+#  endif
 #  if !defined(PERL_EXT_RE_BUILD)
 #    if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
@@ -971,6 +976,9 @@
 #define invlist_replace_list_destroys_src(a,b)	S_invlist_replace_list_destroys_src(aTHX_ a,b)
 #define invlist_set_previous_index	S_invlist_set_previous_index
 #define invlist_trim		S_invlist_trim
+#    endif
+#    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl_get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
 #  if defined(DEBUGGING)
@@ -1124,7 +1132,6 @@
 #define get_regex_charset_name	S_get_regex_charset_name
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define re_printf		Perl_re_printf
 #endif

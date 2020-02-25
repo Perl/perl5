@@ -10244,8 +10244,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                          && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
-	    SV * const definition = _get_regclass_nonbitmap_data(prog, n, TRUE,
-                                                   0, &only_utf8_locale, NULL);
+	    SV * const definition =
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+                get_regclass_nonbitmap_data(prog, n, TRUE, 0,
+                                            &only_utf8_locale, NULL);
+#else
+                get_re_gclass_nonbitmap_data(prog, n, TRUE, 0,
+                                             &only_utf8_locale, NULL);
+#endif
 	    if (definition) {
                 U8 utf8_buffer[2];
 		U8 * utf8_p;
