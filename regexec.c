@@ -3351,7 +3351,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                 if (!startpos ||
                     ((flags & REXEC_FAIL_ON_UNDERFLOW) && startpos < stringarg))
                 {
-                    DEBUG_r(Perl_re_printf( aTHX_
+                    DEBUG_GPOS_r(Perl_re_printf( aTHX_
                             "fail: ganch-gofs before earliest possible start\n"));
                     return 0;
                 }
