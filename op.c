@@ -254,6 +254,46 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
     return slab;
 }
 
+/* opslot_size includes the size of the slot header, and an op can't be smaller than BASEOP */
+#define OPSLOT_SIZE_BASE (SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P)
+#define OPSLOT_SIZE_TO_INDEX(sz) ((sz) - OPSLOT_SIZE_BASE)
+
+#define link_freed_op(slab, o) S_link_freed_op(aTHX_ slab, o)
+static void
+S_link_freed_op(pTHX_ OPSLAB *slab, OP *o) {
+    U16 sz = OpSLOT(o)->opslot_size;
+    U16 index = OPSLOT_SIZE_TO_INDEX(sz);
+
+    assert(sz >= OPSLOT_SIZE_BASE);
+    /* make sure the array is large enough to include ops this large */
+    if (!slab->opslab_freed) {
+        /* we don't have a free list array yet, make a new one */
+        slab->opslab_freed_size = index+1;
+        slab->opslab_freed = (OP**)PerlMemShared_calloc((slab->opslab_freed_size), sizeof(OP*));
+
+        if (!slab->opslab_freed)
+            croak_no_mem();
+    }
+    else if (index >= slab->opslab_freed_size) {
+        /* It's probably not worth doing exponential expansion here, the number of op sizes
+           is small.
+        */
+        /* We already have a list that isn't large enough, expand it */
+        size_t newsize = index+1;
+        OP **p = (OP **)PerlMemShared_realloc(slab->opslab_freed, newsize * sizeof(OP*));
+
+        if (!p)
+            croak_no_mem();
+
+        Zero(p+slab->opslab_freed_size, newsize - slab->opslab_freed_size, OP *);
+
+        slab->opslab_freed = p;
+        slab->opslab_freed_size = newsize;
+    }
+
+    o->op_next = slab->opslab_freed[index];
+    slab->opslab_freed[index] = o;
+}
 
 /* Returns a sz-sized block of memory (suitable for holding an op) from
  * a free slot in the chain of op slabs attached to PL_compcv.
@@ -300,28 +340,28 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     opsz = SIZE_TO_PSIZE(sz);
     sz = opsz + OPSLOT_HEADER_P;
 
-    /* The slabs maintain a free list of OPs. In particular, constant folding
+    /* The head slab for each CV maintains a free list of OPs. In particular, constant folding
        will free up OPs, so it makes sense to re-use them where possible. A
        freed up slot is used in preference to a new allocation.  */
-    if (head_slab->opslab_freed) {
-	OP **too = &head_slab->opslab_freed;
-	o = *too;
-        DEBUG_S_warn((aTHX_ "found free op at %p, slab %p, head slab %p",
-            (void*)o,
-            (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
-            (void*)head_slab));
+    if (head_slab->opslab_freed &&
+        OPSLOT_SIZE_TO_INDEX(sz) < head_slab->opslab_freed_size) {
+        U16 base_index;
 
-	while (o && OpSLOT(o)->opslot_size < sz) {
-	    DEBUG_S_warn((aTHX_ "Alas! too small"));
-	    o = *(too = &o->op_next);
-	    if (o) { DEBUG_S_warn((aTHX_ "found another free op at %p", (void*)o)); }
-	}
-	if (o) {
+        /* look for a large enough size with any freed ops */
+        for (base_index = OPSLOT_SIZE_TO_INDEX(sz);
+             base_index < head_slab->opslab_freed_size && !head_slab->opslab_freed[base_index];
+             ++base_index) {
+        }
+
+        if (base_index < head_slab->opslab_freed_size) {
+            /* found a freed op */
+            o = head_slab->opslab_freed[base_index];
+
             DEBUG_S_warn((aTHX_ "realloced  op at %p, slab %p, head slab %p",
                 (void*)o,
                 (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
                 (void*)head_slab));
-	    *too = o->op_next;
+	    head_slab->opslab_freed[base_index] = o->op_next;
 	    Zero(o, opsz, I32 *);
 	    o->op_slabbed = 1;
 	    goto gotit;
@@ -345,8 +385,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	    slot = &slab2->opslab_slots;
 	    INIT_OPSLOT(slab2->opslab_free_space);
 	    o->op_type = OP_FREED;
-	    o->op_next = head_slab->opslab_freed;
-	    head_slab->opslab_freed = o;
+            link_freed_op(head_slab, o);
 	}
 
 	/* Create a new slab.  Make this one twice as big. */
@@ -463,8 +502,7 @@ Perl_Slab_Free(pTHX_ void *op)
     /* If this op is already freed, our refcount will get screwy. */
     assert(o->op_type != OP_FREED);
     o->op_type = OP_FREED;
-    o->op_next = slab->opslab_freed;
-    slab->opslab_freed = o;
+    link_freed_op(slab, o);
     DEBUG_S_warn((aTHX_ "freeing    op at %p, slab %p, head slab %p",
         (void*)o,
         (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
@@ -503,6 +541,7 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
     PERL_UNUSED_CONTEXT;
     DEBUG_S_warn((aTHX_ "freeing slab %p", (void*)slab));
     assert(slab->opslab_refcnt == 1);
+    PerlMemShared_free(slab->opslab_freed);
     do {
 	slab2 = slab->opslab_next;
 #ifdef DEBUGGING
