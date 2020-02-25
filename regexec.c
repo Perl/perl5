@@ -3370,8 +3370,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     minlen = prog->minlen;
     if ((startpos + minlen) > strend || startpos < strbeg) {
-        DEBUG_r(Perl_re_printf( aTHX_
-                    "Regex match can't succeed, so not even tried\n"));
+	DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                        "Regex match can't succeed, so not even tried\n"));
         return 0;
     }
 
