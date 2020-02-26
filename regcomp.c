@@ -17551,7 +17551,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                        property wildcard subpatterns in regex; marked by <--
                        HERE in m/%s/ */
                     vFAIL3("Use of '\\%c%c' is not allowed in Unicode property"
-                           " wildcard subpatterns", value, *(RExC_parse - 1));
+                           " wildcard subpatterns", (char) value, *(RExC_parse - 1));
                 }
 
 		/* \p means they want Unicode semantics */
