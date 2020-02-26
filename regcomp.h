@@ -1071,63 +1071,63 @@ re.pm, especially to the documentation.
 /* combined */
 #define RE_DEBUG_EXTRA_STACK             0x0280000
 
-#define RE_DEBUG_FLAG(x) (re_debug_flags & x)
+#define RE_DEBUG_FLAG(x) (re_debug_flags & (x))
 /* Compile */
 #define DEBUG_COMPILE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_MASK)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_MASK)) x  )
 #define DEBUG_PARSE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_PARSE)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_PARSE)) x  )
 #define DEBUG_OPTIMISE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_OPTIMISE)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_OPTIMISE)) x  )
 #define DEBUG_DUMP_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_DUMP)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_DUMP)) x  )
 #define DEBUG_TRIE_COMPILE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_TRIE)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TRIE)) x )
 #define DEBUG_FLAGS_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_FLAGS)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_FLAGS)) x )
 #define DEBUG_TEST_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_COMPILE_TEST)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TEST)) x )
 /* Execute */
 #define DEBUG_EXECUTE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXECUTE_MASK)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MASK)) x  )
 #define DEBUG_INTUIT_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXECUTE_INTUIT)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_INTUIT)) x  )
 #define DEBUG_MATCH_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXECUTE_MATCH)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MATCH)) x  )
 #define DEBUG_TRIE_EXECUTE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXECUTE_TRIE)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_TRIE)) x )
 
 /* Extra */
 #define DEBUG_EXTRA_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_MASK)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_MASK)) x  )
 #define DEBUG_OFFSETS_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_OFFSETS)) x  )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_OFFSETS)) x  )
 #define DEBUG_STATE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_STATE)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STATE)) x )
 #define DEBUG_STACK_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_STACK)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STACK)) x )
 #define DEBUG_BUFFERS_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_BUFFERS)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_BUFFERS)) x )
 
 #define DEBUG_OPTIMISE_MORE_r(x) DEBUG_r( \
     if (DEBUG_v_TEST || ((RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE) == \
-         (re_debug_flags & (RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE)))) x )
+         RE_DEBUG_FLAG(RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE))) x )
 #define MJD_OFFSET_DEBUG(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_OFFDEBUG)) \
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_OFFDEBUG)) \
         Perl_warn_nocontext x )
 #define DEBUG_TRIE_COMPILE_MORE_r(x) DEBUG_TRIE_COMPILE_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_TRIE)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_TRIE)) x )
 #define DEBUG_TRIE_EXECUTE_MORE_r(x) DEBUG_TRIE_EXECUTE_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_TRIE)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_TRIE)) x )
 
 #define DEBUG_TRIE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & (RE_DEBUG_COMPILE_TRIE \
-        | RE_DEBUG_EXECUTE_TRIE ))) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TRIE \
+        | RE_DEBUG_EXECUTE_TRIE )) x )
 #define DEBUG_GPOS_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_GPOS)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_GPOS)) x )
 
 #define DEBUG_DUMP_PRE_OPTIMIZE_r(x) DEBUG_r( \
-    if (DEBUG_v_TEST || (re_debug_flags & RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
+    if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
 /* get_sv() can return NULL during global destruction. */
