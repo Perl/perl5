@@ -3491,7 +3491,7 @@ C<ENTER>.
 =head2 Scope Stack
 
 As with the mark stack to the value stack, the scope stack forms a pair with
-the save stack. The scope stack stores the height of the scope stack at which
+the save stack. The scope stack stores the height of the save stack at which
 nested scopes begin, and allows the save stack to be unwound back to that
 point when the scope is left.
 
