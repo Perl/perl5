@@ -732,8 +732,8 @@ static stcxt_t *Context_ptr = NULL;
         STRLEN nsz = (STRLEN) round_mgrow((x)+msiz);            \
         STRLEN offset = mptr - mbase;                           \
         ASSERT(!cxt->membuf_ro, ("mbase is not read-only"));    \
-        TRACEME(("** extending mbase from %ld to %ld bytes (wants %ld new)", \
-                 (long)msiz, nsz, (long)(x)));                  \
+        TRACEME(("** extending mbase from %lu to %lu bytes (wants %lu new)", \
+                 (unsigned long)msiz, (unsigned long)nsz, (unsigned long)(x)));  \
         Renew(mbase, nsz, char);                                \
         msiz = nsz;                                             \
         mptr = mbase + offset;                                  \
