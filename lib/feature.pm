@@ -26,13 +26,12 @@ our %feature = (
 );
 
 our %feature_bundle = (
-    "5.10"    => [qw(indirect say state switch)],
-    "5.11"    => [qw(indirect say state switch unicode_strings)],
-    "5.15"    => [qw(current_sub evalbytes fc indirect say state switch unicode_eval unicode_strings)],
-    "5.23"    => [qw(current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.27"    => [qw(bitwise current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
-    "7.0"     => [qw(bitwise current_sub declared_refs evalbytes fc indirect isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
-    "default" => [qw(indirect)],
+    "5.10" => [qw(indirect say state switch)],
+    "5.11" => [qw(indirect say state switch unicode_strings)],
+    "5.15" => [qw(current_sub evalbytes fc indirect say state switch unicode_eval unicode_strings)],
+    "5.23" => [qw(current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
+    "5.27" => [qw(bitwise current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
+    "7.0"  => [qw(bitwise current_sub declared_refs evalbytes fc indirect isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
 );
 
 $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
@@ -55,6 +54,7 @@ $feature_bundle{"5.31"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.32"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 $feature_bundle{"all"} = $feature_bundle{"7.0"};
+$feature_bundle{"default"} = $feature_bundle{"7.0"};
 my %noops = (
     postderef => 1,
     lexical_subs => 1,
@@ -385,7 +385,10 @@ The following feature bundles are available:
 
   bundle    features included
   --------- -----------------
-  :default  indirect
+  :default  bitwise current_sub declared_refs evalbytes
+            fc indirect isa postderef_qq refaliasing say
+            signatures state switch unicode_eval
+            unicode_strings
 
   :5.10     say state switch indirect
 

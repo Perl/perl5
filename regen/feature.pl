@@ -44,9 +44,11 @@ my %feature = (
 #       be changed to account.
 
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
+my @all_features = sort keys %feature;
+
 my %feature_bundle = (
-     all     => [ sort keys %feature ],
-     default =>	[qw(indirect)],
+     all     => [ @all_features ],
+     default =>	[ @all_features ],
     "5.9.5"  =>	[qw(say state switch indirect)],
     "5.10"   =>	[qw(say state switch indirect)],
     "5.11"   =>	[qw(say state switch unicode_strings indirect)],
@@ -69,7 +71,7 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
     "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "7.0"   => [ sort keys %feature ],
+    "7.0"   => [ @all_features ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -91,8 +93,8 @@ for my $feature (sort keys %feature) {
 }
 
 for (keys %feature_bundle) {
-    next unless /^5\.(\d*[13579])\z/;
-    $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
+    next unless /^(\d+)\.(\d*[13579])\z/;
+    $feature_bundle{"$1.".($2+1)} ||= $feature_bundle{$_};
 }
 
 my %UniqueBundles; # "say state switch" => 5.10
