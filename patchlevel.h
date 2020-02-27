@@ -13,7 +13,7 @@
 /* do not adjust the whitespace! Configure expects the numbers to be
  * exactly on the third column */
 
-#define PERL_REVISION	5		/* age */
+#define PERL_REVISION	7		/* age */
 #define PERL_VERSION	0		/* epoch */
 #define PERL_SUBVERSION	0		/* generation */
 
