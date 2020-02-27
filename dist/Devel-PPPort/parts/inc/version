@@ -31,7 +31,7 @@ PERL_PATCHLEVEL_H_IMPLICIT
 #    include <could_not_find_Perl_patchlevel.h>
 #  endif
 #  ifndef PERL_REVISION
-#    define PERL_REVISION       (5)
+#    define PERL_REVISION       (7)
      /* Replace: 1 */
 #    define PERL_VERSION        PATCHLEVEL
 #    define PERL_SUBVERSION     SUBVERSION
@@ -43,9 +43,3 @@ PERL_PATCHLEVEL_H_IMPLICIT
 #define D_PPP_DEC2BCD(dec) ((((dec)/100)<<8)|((((dec)%100)/10)<<4)|((dec)%10))
 #define PERL_BCDVERSION ((D_PPP_DEC2BCD(PERL_REVISION)<<24)|(D_PPP_DEC2BCD(PERL_VERSION)<<12)|D_PPP_DEC2BCD(PERL_SUBVERSION))
 
-/* It is very unlikely that anyone will try to use this with Perl 6
-   (or greater), but who knows.
- */
-#if PERL_REVISION != 5
-#  error ppport.h only works with Perl version 5
-#endif /* PERL_REVISION != 5 */
