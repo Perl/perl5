@@ -34,7 +34,7 @@
    to be released for blead releases, and to 5.X.0 for maint releases. Manually
    changing them should not be necessary.
 */
-#define PERL_API_REVISION	5
+#define PERL_API_REVISION	7
 #define PERL_API_VERSION	0
 #define PERL_API_SUBVERSION	0
 /*
