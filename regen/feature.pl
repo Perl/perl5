@@ -45,7 +45,7 @@ my %feature = (
 
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 my %feature_bundle = (
-     all     => [ keys %feature ],
+     all     => [ sort keys %feature ],
      default =>	[qw(indirect)],
     "5.9.5"  =>	[qw(say state switch indirect)],
     "5.10"   =>	[qw(say state switch indirect)],
@@ -69,6 +69,7 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
     "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
+    "7.0"   => [ sort keys %feature ],
 );
 
 my @noops = qw( postderef lexical_subs );
