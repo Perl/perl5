@@ -31,8 +31,6 @@ use Text::Tabs;
 use re "/aa";
 
 use feature 'state';
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
@@ -3371,8 +3369,6 @@ package Multi_Default;
 use strict;
 use warnings;
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 {   # Closure
 
@@ -3434,9 +3430,6 @@ package Alias;
 
 use strict;
 use warnings;
-
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 
 {   # Closure
@@ -3512,8 +3505,6 @@ package Range;
 use strict;
 use warnings;
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 sub trace { return main::trace(@_); }
 
@@ -3624,8 +3615,6 @@ package _Range_List_Base;
 use strict;
 use warnings;
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 # Base class for range lists.  A range list is simply an ordered list of
 # ranges, so that the ranges with the lowest starting numbers are first in it.
@@ -4823,8 +4812,6 @@ use parent '-norequire', '_Range_List_Base';
 use warnings;
 use strict;
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 # A Range_List is a range list for match tables; i.e. the range values are
 # not significant.  Thus a number of operations can be safely added to it,
@@ -5188,8 +5175,6 @@ use parent '-norequire', '_Range_List_Base';
 use strict;
 use warnings;
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 # A Range_Map is a range list in which the range values (called maps) are
 # significant, and hence shouldn't be manipulated by our other code, which
@@ -5232,8 +5217,6 @@ package _Base_Table;
 use strict;
 use warnings;
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
 
 # A table is the basic data structure that gets written out into a file for
 # use by the Perl core.  This is the abstract base class implementing the
@@ -20110,9 +20093,7 @@ __DATA__
 use strict;
 use warnings;
 
-use feature 'signatures';
 
-no warnings 'experimental::signatures';
 no warnings 'experimental::uniprop_wildcards';
 
 # Test qr/\X/ and the \p{} regular expression constructs.  This file is
