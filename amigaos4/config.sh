@@ -16,7 +16,7 @@ libsfound=' /SDK/newlib/lib/libsocket.a /SDK/newlib/lib/libm.a /SDK/newlib/lib/l
 libspath=' /SDK/newlib/lib /SDK/local/newlib/lib'
 make_set_make='MAKE=/SDK/C/gmake'
 pager='/SYS/Utilities/MultiView'
-perl5='/SDK/Local/C/perl'
+perl7='/SDK/Local/C/perl'
 perlpath='/SDK/Local/C/perl'
 prefix='/SDK/Local/newlib'
 prefixexp='/SDK/Local/newlib'

@@ -68,7 +68,7 @@ shift
 cppflags="-Aa -D__STDC_EXT__ $cc_cppflags"
 
 case "$prefix" in
-    "") prefix='/opt/perl5' ;;
+    "") prefix='/opt/perl7' ;;
     esac
 
     gnu_as=no

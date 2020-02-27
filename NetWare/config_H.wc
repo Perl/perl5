@@ -11,7 +11,7 @@
  */
 
 /*
- * Package name      : perl5
+ * Package name      : perl7
  * Source directory  : 
  * Configuration time: Thu Jun 21 17:44:02 2001
  * Configured by     : Administrator
@@ -877,7 +877,7 @@
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
  *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
+ *	library files for perl7.  It is most often a local directory
  *	such as /usr/local/lib.  Programs using this variable must be
  *	prepared to deal with filename expansion.  If ARCHLIB is the
  *	same as PRIVLIB, it is not defined, since presumably the

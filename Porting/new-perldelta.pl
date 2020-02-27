@@ -20,7 +20,7 @@ if ($was_minor < 0) {
     $was_minor = 0;
     --$was_major;
 }
-my $newdelta_filename = "perl5$new_major${new_minor}delta.pod";
+my $newdelta_filename = "perl7$new_major${new_minor}delta.pod";
 
 {
     # For now, just tell the user what to add, as it's safer.
@@ -60,7 +60,7 @@ $olddelta =~ s{^(perl)(delta - what is new for perl v5.$old_major.$old_minor)$}
               {$1 . "5$old_major$old_minor" . $2}me
     or die "Can't find expected NAME contents in $olddelta";
 
-my $olddeltaname = "pod/perl5$old_major${old_minor}delta.pod";
+my $olddeltaname = "pod/perl7$old_major${old_minor}delta.pod";
 # in a built tree, $olddeltaname is a symlink to perldelta.pod, make sure
 # we don't write through it
 unlink($olddeltaname);
@@ -88,10 +88,10 @@ git_add_modified('pod/perldelta.pod');
 $filename = 'pod/perl.pod';
 my $pod_master = slurp_or_die($filename);
 
-$pod_master =~ s{^(\s*perl5)($was_major$was_minor)(delta\s+Perl changes in version )(5\.\d+\.\d+)(.*)}
+$pod_master =~ s{^(\s*perl7)($was_major$was_minor)(delta\s+Perl changes in version )(5\.\d+\.\d+)(.*)}
     {$1 . $old_major . $old_minor .$3 . "5.$old_major.$old_minor" . $5 . "\n" .
          "$1$2$3$4$5"}me
-    or warn "Couldn't find perldelta line (for perl5$was_major${was_minor}delta) in $filename";
+    or warn "Couldn't find perldelta line (for perl7$was_major${was_minor}delta) in $filename";
 
 write_or_die($filename, $pod_master);
 git_add_modified($filename);

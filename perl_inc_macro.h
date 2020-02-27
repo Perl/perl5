@@ -71,7 +71,7 @@
 
 /* used by INCPUSH_PRIVLIB_EXP */
 #ifndef PRIVLIB_EXP
-#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
+#  define PRIVLIB_EXP "/usr/local/lib/perl7:/usr/local/lib/perl"
 #endif
 
 #if defined(WIN32)

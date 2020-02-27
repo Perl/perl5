@@ -7,7 +7,7 @@
  * For a more permanent change edit uconfig.sh and rerun config_h.SH.
  */
 
-/* Package name      : perl5
+/* Package name      : perl7
  * Source directory  : .
  * Configuration time: Thu Jan  1 00:00:00 GMT 1970
  * Configured by     : root@localhost
@@ -1219,7 +1219,7 @@
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
  *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
+ *	library files for perl7.  It is most often a local directory
  *	such as /usr/local/lib.  Programs using this variable must be
  *	prepared to deal with filename expansion.  If ARCHLIB is the
  *	same as PRIVLIB, it is not defined, since presumably the
@@ -1229,8 +1229,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/7.0/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/7.0/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl7/7.0/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl7/7.0/unknown"		/ **/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1283,8 +1283,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/7.0"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/7.0"		/**/
+#define PRIVLIB "/usr/local/lib/perl7/7.0"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl7/7.0"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1301,8 +1301,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define SITEARCH "/usr/local/lib/perl5/7.0/unknown"		/ **/
-/*#define SITEARCH_EXP "/usr/local/lib/perl5/7.0/unknown"		/ **/
+/*#define SITEARCH "/usr/local/lib/perl7/7.0/unknown"		/ **/
+/*#define SITEARCH_EXP "/usr/local/lib/perl7/7.0/unknown"		/ **/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1324,9 +1324,9 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/usr/local/lib/perl5/7.0"		/**/
-#define SITELIB_EXP "/usr/local/lib/perl5/7.0"		/**/
-#define SITELIB_STEM "/usr/local/lib/perl5"		/**/
+#define SITELIB "/usr/local/lib/perl7/7.0"		/**/
+#define SITELIB_EXP "/usr/local/lib/perl7/7.0"		/**/
+#define SITELIB_STEM "/usr/local/lib/perl7"		/**/
 
 /* PERL_VENDORARCH:
  *	If defined, this symbol contains the name of a private library.

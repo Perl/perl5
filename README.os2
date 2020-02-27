@@ -1291,10 +1291,10 @@ forget to pack the necessary external DLLs accordingly.  Include the
 description of the bugs and test suite failures you could not fix.  Include
 the small-stack versions of Perl executables from Perl build directory.
 
-Include F<perl5.def> so that people can relink the perl DLL preserving
+Include F<perl7.def> so that people can relink the perl DLL preserving
 the binary compatibility, or can create compatibility DLLs.  Include the diff
 files (C<diff -pu old new>) of fixes you did so that people can rebuild your
-version.  Include F<perl5.map> so that one can use remote debugging.
+version.  Include F<perl7.map> so that one can use remote debugging.
 
 =item 10.
 
@@ -2583,7 +2583,7 @@ L<Cwd::extLibpath_set|/Cwd::extLibpath_set( path [, type ] )>.
 
 Assume that the old DLL is named F<perlE0AC.dll> (as is one for
 5.005_53), and the new version is 5.6.1.  Create a file
-F<perl5shim.def-leader> with
+F<perl7shim.def-leader> with
 
   LIBRARY 'perlE0AC' INITINSTANCE TERMINSTANCE
   DESCRIPTION '@#perl5-porters@perl.org:5.006001#@ Perl module for 5.00553 -> Perl 5.6.1 forwarder'
@@ -2594,13 +2594,13 @@ F<perl5shim.def-leader> with
 modifying the versions/names as needed.  Run
 
  perl -wnle "next if 0../EXPORTS/; print qq(  \"$1\")
-                                          if /\"(\w+)\"/" perl5.def >lst
+                                          if /\"(\w+)\"/" perl7.def >lst
 
-in the Perl build directory (to make the DLL smaller replace perl5.def
+in the Perl build directory (to make the DLL smaller replace perl7.def
 with the definition file for the older version of Perl if present).
 
- cat perl5shim.def-leader lst >perl5shim.def
- gcc -Zomf -Zdll -o perlE0AC.dll perl5shim.def -s -llibperl
+ cat perl7shim.def-leader lst >perl7shim.def
+ gcc -Zomf -Zdll -o perlE0AC.dll perl7shim.def -s -llibperl
 
 (ignore multiple C<warning L4085>).
 

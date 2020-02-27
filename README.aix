@@ -130,7 +130,7 @@ Should yield no problems with AIX 5.1 / 5.2 / 5.3 / 6.1 / 7.1.
 IBM uses the AIX system Perl (V5.6.0 on AIX 5.1 and V5.8.2 on
 AIX 5.2 / 5.3 and 6.1; V5.8.8 on AIX 5.3 TL11 and AIX 6.1 TL4; V5.10.1
 on AIX 7.1) for some AIX system scripts. If you switch the links in
-/usr/bin from the AIX system Perl (/usr/opt/perl5) to the newly build
+/usr/bin from the AIX system Perl (/usr/opt/perl7) to the newly build
 Perl then you get the same features as with the IBM AIX system Perl if
 the threaded options are used.
 
@@ -185,7 +185,7 @@ configuration for the Perl builds that AIX ships with.
     -Dcc=cc_r \
     -Duseshrplib \
     -Dusethreads \
-    -Dprefix=/usr/opt/perl5_32
+    -Dprefix=/usr/opt/perl7_32
 
 The -Dprefix option will install Perl in a directory parallel to the 
 IBM AIX system Perl installation.
@@ -200,7 +200,7 @@ all make tests in 32-bit mode.
     -d \
     -Dcc=cc_r \
     -Duseshrplib \
-    -Dprefix=/usr/opt/perl5_32
+    -Dprefix=/usr/opt/perl7_32
 
 The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.
@@ -219,7 +219,7 @@ passes all make tests in 64-bit mode.
  -Duseshrplib \
  -Dusethreads \
  -Duse64bitall \
- -Dprefix=/usr/opt/perl5_64
+ -Dprefix=/usr/opt/perl7_64
 
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (64-bit)
 
@@ -234,7 +234,7 @@ make tests in 64-bit mode.
  -Dcc=cc_r \
  -Duseshrplib \
  -Duse64bitall \
- -Dprefix=/usr/opt/perl5_64
+ -Dprefix=/usr/opt/perl7_64
 
 The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.

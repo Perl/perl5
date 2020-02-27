@@ -220,8 +220,8 @@ Type:
 
 This will copy the newly compiled perl and libraries into your DJGPP
 directory structure. Perl.exe and the utilities go into C<($DJDIR)/bin>,
-and the library goes under C<($DJDIR)/lib/perl5>. The pod documentation
-goes under C<($DJDIR)/lib/perl5/pod>.
+and the library goes under C<($DJDIR)/lib/perl7>. The pod documentation
+goes under C<($DJDIR)/lib/perl7/pod>.
 
 =head1 BUILDING AND INSTALLING MODULES ON DOS
 

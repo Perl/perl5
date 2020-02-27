@@ -856,8 +856,8 @@ os2)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 MINIPERLEXP		= miniperl
 
-perl5.def: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
-	$(MINIPERL) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
+perl7.def: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
+	$(MINIPERL) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl7.def
 
 !NO!SUBS!
 	;;
