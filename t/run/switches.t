@@ -301,10 +301,11 @@ is runperl(stderr => 1, prog => '#!perl -M'),
         skip "Win32 miniperl produces a default archname in -v", 1
 	  if $^O eq 'MSWin32' && is_miniperl;
         my $v = sprintf "%vd", $^V;
+        my $rev = $Config{PERL_REVISION};
         my $ver = $Config{PERL_VERSION};
         my $rel = $Config{PERL_SUBVERSION};
         like( runperl( switches => ['-v'] ),
-	      qr/This is perl 5, version \Q$ver\E, subversion \Q$rel\E \(v\Q$v\E(?:[-*\w]+| \([^)]+\))?\) built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
+	      qr/This is perl \Q$rev\E, version \Q$ver\E, subversion \Q$rel\E \(v\Q$v\E(?:[-*\w]+| \([^)]+\))?\) built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
               '-v looks okay' );
     }
 }
