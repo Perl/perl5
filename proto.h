@@ -5686,10 +5686,10 @@ PERL_CALLCONV SV *	Perl_parse_uniprop_string(pTHX_ const char * const name, Size
 STATIC void	S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr);
 #define PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST	\
 	assert(node); assert(invlist_ptr)
-PERL_STATIC_NO_RET void	S_re_croak2(pTHX_ bool utf8, const char* pat1, const char* pat2, ...)
+PERL_STATIC_NO_RET void	S_re_croak(pTHX_ bool utf8, const char* pat, ...)
 			__attribute__noreturn__;
-#define PERL_ARGS_ASSERT_RE_CROAK2	\
-	assert(pat1); assert(pat2)
+#define PERL_ARGS_ASSERT_RE_CROAK	\
+	assert(pat)
 
 STATIC REGEXP*	S_re_op_compile_wrapper(pTHX_ SV * const pattern, U32 orig_rx_flags, const U32 pm_flags)
 			__attribute__warn_unused_result__;

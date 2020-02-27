@@ -792,7 +792,7 @@ static const scan_data_t zero_scan_data = {
  * Like Simple_vFAIL(), but accepts two arguments.
  */
 #define	Simple_vFAIL2(m,a1) STMT_START {			\
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1,		\
+    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,		\
                       REPORT_LOCATION_ARGS(RExC_parse));	\
 } STMT_END
 
@@ -809,7 +809,7 @@ static const scan_data_t zero_scan_data = {
  * Like Simple_vFAIL(), but accepts three arguments.
  */
 #define	Simple_vFAIL3(m, a1, a2) STMT_START {			\
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2,		\
+    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,		\
 	    REPORT_LOCATION_ARGS(RExC_parse));	                \
 } STMT_END
 
@@ -825,7 +825,7 @@ static const scan_data_t zero_scan_data = {
  * Like Simple_vFAIL(), but accepts four arguments.
  */
 #define	Simple_vFAIL4(m, a1, a2, a3) STMT_START {		\
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2, a3,	\
+    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2, a3,	\
 	    REPORT_LOCATION_ARGS(RExC_parse));	                \
 } STMT_END
 
@@ -837,13 +837,13 @@ static const scan_data_t zero_scan_data = {
 /* A specialized version of vFAIL2 that works with UTF8f */
 #define vFAIL2utf8f(m, a1) STMT_START {             \
     PREPARE_TO_DIE;                                 \
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1,  \
+    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,  \
             REPORT_LOCATION_ARGS(RExC_parse));      \
 } STMT_END
 
 #define vFAIL3utf8f(m, a1, a2) STMT_START {             \
     PREPARE_TO_DIE;                                     \
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2,  \
+    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,  \
             REPORT_LOCATION_ARGS(RExC_parse));          \
 } STMT_END
 
@@ -21935,34 +21935,30 @@ Perl_regnext(pTHX_ regnode *p)
 #endif
 
 STATIC void
-S_re_croak2(pTHX_ bool utf8, const char* pat1, const char* pat2,...)
+S_re_croak(pTHX_ bool utf8, const char* pat,...)
 {
     va_list args;
-    STRLEN l1 = strlen(pat1);
-    STRLEN l2 = strlen(pat2);
+    STRLEN len = strlen(pat);
     char buf[512];
     SV *msv;
     const char *message;
 
-    PERL_ARGS_ASSERT_RE_CROAK2;
+    PERL_ARGS_ASSERT_RE_CROAK;
 
-    if (l1 > 510)
-	l1 = 510;
-    if (l1 + l2 > 510)
-	l2 = 510 - l1;
-    Copy(pat1, buf, l1 , char);
-    Copy(pat2, buf + l1, l2 , char);
-    buf[l1 + l2] = '\n';
-    buf[l1 + l2 + 1] = '\0';
-    va_start(args, pat2);
+    if (len > 510)
+	len = 510;
+    Copy(pat, buf, len , char);
+    buf[len] = '\n';
+    buf[len + 1] = '\0';
+    va_start(args, pat);
     msv = vmess(buf, &args);
     va_end(args);
-    message = SvPV_const(msv, l1);
-    if (l1 > 512)
-	l1 = 512;
-    Copy(message, buf, l1 , char);
-    /* l1-1 to avoid \n */
-    Perl_croak(aTHX_ "%" UTF8f, UTF8fARG(utf8, l1-1, buf));
+    message = SvPV_const(msv, len);
+    if (len > 512)
+	len = 512;
+    Copy(message, buf, len , char);
+    /* len-1 to avoid \n */
+    Perl_croak(aTHX_ "%" UTF8f, UTF8fARG(utf8, len-1, buf));
 }
 
 /* XXX Here's a total kludge.  But we need to re-enter for swash routines. */
