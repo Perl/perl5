@@ -3661,7 +3661,7 @@ safely.  (See L<perlipc/"Deferred Signals (Safe Signals)">.)
 
 =item "%s" may clash with future reserved word
 
-(W) This warning may be due to running a perl7 script through a perl4
+(W) This warning may be due to running a perl5 script through a perl4
 interpreter, especially if the word that is being warned about is
 "use" or "my".
 
@@ -4098,7 +4098,7 @@ doesn't know where you want to pipe the output from this command.
 =item No DB::DB routine defined
 
 (F) The currently executing code was compiled with the B<-d> switch, but
-for some reason the current debugger (e.g. F<perl7db.pl> or a C<Devel::>
+for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a routine to be called at the beginning of each
 statement.
 
@@ -4110,7 +4110,7 @@ supply dbm nowadays, because Perl comes with SDBM.  See L<SDBM_File>.
 =item No DB::sub routine defined
 
 (F) The currently executing code was compiled with the B<-d> switch, but
-for some reason the current debugger (e.g. F<perl7db.pl> or a C<Devel::>
+for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a C<DB::sub> routine to be called at the beginning
 of each ordinary subroutine call.
 
@@ -6084,7 +6084,7 @@ yourself.
 
 =item syntax error in file %s at line %d, next 2 tokens "%s"
 
-(F) This error is likely to occur if you run a perl7 script through
+(F) This error is likely to occur if you run a perl5 script through
 a perl4 interpreter, especially if the next 2 tokens are "use strict"
 or "my $var" or "our $var".
 

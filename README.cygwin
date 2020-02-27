@@ -561,10 +561,10 @@ be kept as clean as possible.
 
  INSTALL README.cygwin README.win32 MANIFEST
  pod/perl.pod pod/perlport.pod pod/perlfaq3.pod
- pod/perldelta.pod pod/perl7004delta.pod pod/perl76delta.pod
- pod/perl761delta.pod pod/perl770delta.pod pod/perl772delta.pod
- pod/perl773delta.pod pod/perl58delta.pod pod/perl581delta.pod
- pod/perl790delta.pod pod/perlhist.pod pod/perlmodlib.pod
+ pod/perldelta.pod pod/perl5004delta.pod pod/perl56delta.pod
+ pod/perl561delta.pod pod/perl570delta.pod pod/perl572delta.pod
+ pod/perl573delta.pod pod/perl58delta.pod pod/perl581delta.pod
+ pod/perl590delta.pod pod/perlhist.pod pod/perlmodlib.pod
  pod/perltoc.pod Porting/Glossary pod/perlgit.pod
  Porting/checkAUTHORS.pl
  dist/Cwd/Changes ext/Compress-Raw-Zlib/Changes

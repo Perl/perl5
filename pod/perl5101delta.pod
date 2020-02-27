@@ -1,6 +1,6 @@
 =head1 NAME
 
-perl7101delta - what is new for perl v5.10.1
+perl5101delta - what is new for perl v5.10.1
 
 =head1 DESCRIPTION
 
@@ -8,7 +8,7 @@ This document describes differences between the 5.10.0 release and
 the 5.10.1 release.
 
 If you are upgrading from an earlier release such as 5.8.8, first read
-the L<perl7100delta>, which describes differences between 5.8.8 and
+the L<perl5100delta>, which describes differences between 5.8.8 and
 5.10.0
 
 =head1 Incompatible Changes
@@ -905,7 +905,7 @@ No longer incorrectly treats enum values like macros (Daniel Burr).
 Now handles C++ style constants (C<//>) properly in enums. (A patch from
 Rainer Weikusat was used; Daniel Burr also proposed a similar fix).
 
-=item F<perl7db.pl>
+=item F<perl5db.pl>
 
 C<LVALUE> subroutines now work under the debugger.
 
@@ -1750,7 +1750,7 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl7-security-report@perl.org. This points to a closed subscription
+it to perl5-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes
 all the core committers, who will be able
 to help assess the impact of issues, figure out a resolution, and help

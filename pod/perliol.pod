@@ -14,8 +14,8 @@ abstraction described in L<perlapio> when C<USE_PERLIO> is defined.
 
 =head2 History and Background
 
-The PerlIO abstraction was introduced in perl7.003_02 but languished as
-just an abstraction until perl7.7.0. However during that time a number
+The PerlIO abstraction was introduced in perl5.003_02 but languished as
+just an abstraction until perl5.7.0. However during that time a number
 of perl extensions switched to using it, so the API is mostly fixed to
 maintain (source) compatibility.
 

@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl7240delta - what is new for perl v5.24.0
+perl5240delta - what is new for perl v5.24.0
 
 =head1 DESCRIPTION
 

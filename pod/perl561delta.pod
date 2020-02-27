@@ -1,6 +1,6 @@
 =head1 NAME
 
-perl761delta - what's new for perl v5.6.1
+perl561delta - what's new for perl v5.6.1
 
 =head1 DESCRIPTION
 
@@ -1221,7 +1221,7 @@ number where the eval is located, in addition to the eval sequence
 number and the line number within the evaluated text itself.  For
 example:
 
-    Not enough arguments for scalar at (eval 4)[newlib/perl7db.pl:1411] line 2, at EOF
+    Not enough arguments for scalar at (eval 4)[newlib/perl5db.pl:1411] line 2, at EOF
 
 =head2 Diagnostics follow STDERR
 
@@ -1927,7 +1927,7 @@ first.
 
 =head2 The Perl Debugger
 
-Many bug fixes and enhancements were added to F<perl7db.pl>, the
+Many bug fixes and enhancements were added to F<perl5db.pl>, the
 Perl debugger.  The help documentation was rearranged.  New commands
 include C<< < ? >>, C<< > ? >>, and C<< { ? >> to list out current
 actions, C<man I<docpage>> to run your doc viewer on some perl

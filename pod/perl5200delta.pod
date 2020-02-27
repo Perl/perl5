@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl7200delta - what is new for perl v5.20.0
+perl5200delta - what is new for perl v5.20.0
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.18.0 release and the
 5.20.0 release.
 
 If you are upgrading from an earlier release such as 5.16.0, first read
-L<perl7180delta>, which describes differences between 5.16.0 and 5.18.0.
+L<perl5180delta>, which describes differences between 5.16.0 and 5.18.0.
 
 =head1 Core Enhancements
 
@@ -494,7 +494,7 @@ is now optimized to:
   my ($x, $y);
 
 In combination with the L<padrange optimization introduced in
-v5.18.0|perl7180delta/Internal Changes>, this means longer uninitialized my
+v5.18.0|perl5180delta/Internal Changes>, this means longer uninitialized my
 variable statements are also optimized, so:
 
   my $x; my @y; my %z;
@@ -2159,7 +2159,7 @@ appropriate.  [perl #119857]
 =item *
 
 The BUILD_STATIC and ALL_STATIC makefile options for linking some or (nearly)
-all extensions statically (into perl720.dll, and into a separate
+all extensions statically (into perl520.dll, and into a separate
 perl-static.exe too) were broken for MinGW builds. This has now been fixed.
 
 The ALL_STATIC option has also been improved to include the Encode and Win32
@@ -3706,7 +3706,7 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send it
-to perl7-security-report@perl.org.  This points to a closed subscription
+to perl5-security-report@perl.org.  This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who will be
 able to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all

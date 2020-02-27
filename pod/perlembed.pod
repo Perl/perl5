@@ -103,15 +103,15 @@ If your copy of Perl is recent enough to contain this documentation
 I<perl.h>, which you'll also need) will reside in a directory
 that looks like this:
 
-    /usr/local/lib/perl7/your_architecture_here/CORE
+    /usr/local/lib/perl5/your_architecture_here/CORE
 
 or perhaps just
 
-    /usr/local/lib/perl7/CORE
+    /usr/local/lib/perl5/CORE
 
 or maybe something like
 
-    /usr/opt/perl7/CORE
+    /usr/opt/perl5/CORE
 
 Execute this statement for a hint about where to find CORE:
 
@@ -121,16 +121,16 @@ Here's how you'd compile the example in the next section,
 L</Adding a Perl interpreter to your C program>, on my Linux box:
 
     % gcc -O2 -Dbool=char -DHAS_BOOL -I/usr/local/include
-    -I/usr/local/lib/perl7/i586-linux/5.003/CORE
-    -L/usr/local/lib/perl7/i586-linux/5.003/CORE
+    -I/usr/local/lib/perl5/i586-linux/5.003/CORE
+    -L/usr/local/lib/perl5/i586-linux/5.003/CORE
     -o interp interp.c -lperl -lm
 
 (That's all one line.)  On my DEC Alpha running old 5.003_05, the
 incantation is a bit different:
 
     % cc -O2 -Olimit 2900 -I/usr/local/include
-    -I/usr/local/lib/perl7/alpha-dec_osf/5.00305/CORE
-    -L/usr/local/lib/perl7/alpha-dec_osf/5.00305/CORE -L/usr/local/lib
+    -I/usr/local/lib/perl5/alpha-dec_osf/5.00305/CORE
+    -L/usr/local/lib/perl5/alpha-dec_osf/5.00305/CORE -L/usr/local/lib
     -D__LANGUAGE_C__ -D_NO_PROTO -o interp interp.c -lperl -lm
 
 How can you figure out what to add?  Assuming your Perl is post-5.001,

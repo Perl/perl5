@@ -321,7 +321,7 @@ breakpoint is taken only if the condition is true.  Breakpoints may only be set
 on lines that begin an executable statement.  Conditions don't use C<if>:
 
     b lib/MyModule.pm:237 $x > 30
-    b /usr/lib/perl7/site_perl/CGI.pm:100 ++$count100 < 11
+    b /usr/lib/perl5/site_perl/CGI.pm:100 ++$count100 < 11
 
 =item b subname [condition]
 X<breakpoint>
@@ -1114,12 +1114,12 @@ Which would attempt to set breakpoints on lines 4 and 6 immediately
 after debugger initialization. Note that @DB::typeahead is not a supported
 interface and is subject to change in future releases.
 
-If you want to modify the debugger, copy F<perl7db.pl> from the
+If you want to modify the debugger, copy F<perl5db.pl> from the
 Perl library to another name and hack it to your heart's content.
 You'll then want to set your C<PERL5DB> environment variable to say
 something like this:
 
-    BEGIN { require "myperl7db.pl" }
+    BEGIN { require "myperl5db.pl" }
 
 As a last resort, you could also use C<PERL5DB> to customize the debugger
 by directly setting internal variables or calling debugger functions.

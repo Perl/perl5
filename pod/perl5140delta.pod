@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl7140delta - what is new for perl v5.14.0
+perl5140delta - what is new for perl v5.14.0
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.12.0 release and
 the 5.14.0 release.
 
 If you are upgrading from an earlier release such as 5.10.0, first read
-L<perl7120delta>, which describes differences between 5.10.0 and
+L<perl5120delta>, which describes differences between 5.10.0 and
 5.12.0.
 
 Some of the bug fixes in this release have been backported to subsequent
@@ -2266,7 +2266,7 @@ F<README> distributed with Perl (5.12.1).
 =head3 Perl 5.12.x delta files
 
 The perldelta files for Perl 5.12.1 to 5.12.3 have been added from the
-maintenance branch: L<perl7121delta>, L<perl7122delta>, L<perl7123delta>.
+maintenance branch: L<perl5121delta>, L<perl5122delta>, L<perl5123delta>.
 
 =head3 L<perlpodstyle>
 
@@ -2598,7 +2598,7 @@ and B<-v> options (5.12.2).
 
 =back
 
-=head3 L<perl7db.pl>
+=head3 L<perl5db.pl>
 
 =over
 
@@ -4484,7 +4484,7 @@ get to before the release; please watch CPAN for updates.
 You can now use the keys(), values(), and each() builtins on arrays;
 previously you could use them only on hashes.  See L<perlfunc> for details.
 This is actually a change introduced in perl 5.12.0, but it was missed from
-that release's L<perl7120delta>.
+that release's L<perl5120delta>.
 
 =head2 split() and C<@_>
 
@@ -4568,7 +4568,7 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl7-security-report@perl.org.  This points to a closed subscription
+it to perl5-security-report@perl.org.  This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who are able
 to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all

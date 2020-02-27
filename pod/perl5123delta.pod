@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl7123delta - what is new for perl v5.12.3
+perl5123delta - what is new for perl v5.12.3
 
 =head1 DESCRIPTION
 
@@ -10,8 +10,8 @@ This document describes differences between the 5.12.2 release and
 the 5.12.3 release.
 
 If you are upgrading from an earlier release such as 5.12.1, first read
-L<perl7122delta>, which describes differences between 5.12.1 and
-5.12.2.  The major changes made in 5.12.0 are described in L<perl7120delta>.
+L<perl5122delta>, which describes differences between 5.12.1 and
+5.12.2.  The major changes made in 5.12.0 are described in L<perl5120delta>.
 
 =head1 Incompatible Changes
 
@@ -95,7 +95,7 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl7-security-report@perl.org. This points to a closed subscription
+it to perl5-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes
 all the core committers, who will be able
 to help assess the impact of issues, figure out a resolution, and help

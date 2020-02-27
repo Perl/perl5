@@ -186,7 +186,7 @@ Documentation
   INSTALL README.cygwin README.win32 MANIFEST
   Changes Changes5.005 Changes5.004 Changes5.6
   pod/perl.pod pod/perlport.pod pod/perlfaq3.pod
-  pod/perldelta.pod pod/perl7004delta.pod pod/perl76delta.pod
+  pod/perldelta.pod pod/perl5004delta.pod pod/perl56delta.pod
   pod/perlhist.pod pod/perlmodlib.pod pod/buildtoc.PL pod/perltoc.pod
 Build, Configure, Make, Install
   cygwin/Makefile.SHs

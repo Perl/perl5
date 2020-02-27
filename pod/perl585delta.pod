@@ -207,7 +207,7 @@ any name.
 When perl fails to find the specified script, it now outputs a second line
 suggesting that the user use the C<-S> flag:
 
-    $ perl7.8.5 missing.pl
+    $ perl5.8.5 missing.pl
     Can't open perl script "missing.pl": No such file or directory.
     Use -S to search $PATH for it.
 

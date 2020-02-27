@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl7122delta - what is new for perl v5.12.2
+perl5122delta - what is new for perl v5.12.2
 
 =head1 DESCRIPTION
 
@@ -10,8 +10,8 @@ This document describes differences between the 5.12.1 release and
 the 5.12.2 release.
 
 If you are upgrading from an earlier major version, such as 5.10.1,
-first read L<perl7120delta>, which describes differences between 5.10.1
-and 5.12.0, as well as L<perl7121delta>, which describes earlier changes
+first read L<perl5120delta>, which describes differences between 5.10.1
+and 5.12.0, as well as L<perl5121delta>, which describes earlier changes
 in the 5.12 stable release series.
 
 =head1 Incompatible Changes
@@ -151,7 +151,7 @@ removed in earlier versions of Perl have been documented.
 
 The version of L<perlfaq> shipped with the Perl core has been updated from the
 official FAQ version, which is now maintained in the C<briandfoy/perlfaq>
-branch of the Perl repository at L<git://perl7.git.perl.org/perl.git>.
+branch of the Perl repository at L<git://perl5.git.perl.org/perl.git>.
 
 =back
 
@@ -324,7 +324,7 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl7-security-report@perl.org. This points to a closed subscription
+it to perl5-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes
 all the core committers, who will be able
 to help assess the impact of issues, figure out a resolution, and help

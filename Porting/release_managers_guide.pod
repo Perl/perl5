@@ -1464,8 +1464,8 @@ I<You MUST SKIP this step for RC, BLEAD-POINT>
 Copy the perldelta.pod for this release into blead; for example:
 
  $ cd ..../blead
- $ cp -i ../5.10.x/pod/perldelta.pod pod/perl7101delta.pod  #for example
- $ git add pod/perl7101delta.pod
+ $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  #for example
+ $ git add pod/perl5101delta.pod
 
 Don't forget to set the NAME correctly in the new file (e.g. perl7101delta
 rather than perldelta).

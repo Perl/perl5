@@ -202,7 +202,7 @@ sub do_unix {
                                grep {!/perltoc/} keys %{$state->{generated}})
                       }mge;
 
-    # pod/perl711delta.pod: pod/perldelta.pod
+    # pod/perl511delta.pod: pod/perldelta.pod
     #         cd pod && $(LNS) perldelta.pod perl711delta.pod
 
     # although it seems that HP-UX make gets confused, always tried to

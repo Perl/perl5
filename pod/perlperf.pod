@@ -359,11 +359,11 @@ L<Devel::DProf> first, to set a baseline for Perl profiling tools.  Run the
 above program under the control of C<Devel::DProf> by using the C<-d> switch on
 the command-line.
 
- $> perl -d:DProf wordmatch -f perl7db.pl
+ $> perl -d:DProf wordmatch -f perl5db.pl
 
  <...multiple lines snipped...>
 
- wordmatch report for perl7db.pl:
+ wordmatch report for perl5db.pl:
  lines in file: 9428
  words in file: 50243
  words with special (non-word) characters: 20480
@@ -415,11 +415,11 @@ C<Devel::Profiler>, a drop-in Perl-only replacement for C<Devel::DProf>.  The
 usage is very slightly different in that instead of using the special C<-d:>
 flag, you pull C<Devel::Profiler> in directly as a module using C<-M>.
 
- $> perl -MDevel::Profiler wordmatch -f perl7db.pl
+ $> perl -MDevel::Profiler wordmatch -f perl5db.pl
 
  <...multiple lines snipped...>
 
- wordmatch report for perl7db.pl:
+ wordmatch report for perl5db.pl:
  lines in file: 9428
  words in file: 50243
  words with special (non-word) characters: 20480
@@ -480,11 +480,11 @@ produces a line-by-line listing to show how many times each line was called,
 and how long each line took to execute.  It is called by supplying the familiar
 C<-d> flag to Perl at runtime.
 
- $> perl -d:SmallProf wordmatch -f perl7db.pl
+ $> perl -d:SmallProf wordmatch -f perl5db.pl
 
  <...multiple lines snipped...>
 
- wordmatch report for perl7db.pl:
+ wordmatch report for perl5db.pl:
  lines in file: 9428
  words in file: 50243
  words with special (non-word) characters: 20480
@@ -541,11 +541,11 @@ to getting a faster line profiler, than is possible with for example
 C<Devel::SmallProf>, because it's written in C<C>.  To use C<Devel::FastProf>,
 supply the C<-d> argument to Perl:
 
- $> perl -d:FastProf wordmatch -f perl7db.pl
+ $> perl -d:FastProf wordmatch -f perl5db.pl
 
  <...multiple lines snipped...>
 
- wordmatch report for perl7db.pl:
+ wordmatch report for perl5db.pl:
  lines in file: 9428
  words in file: 50243
  words with special (non-word) characters: 20480
@@ -594,9 +594,9 @@ available for Perl.  The list of coolness just goes on.  Enough of that, let's
 see how to it works - just use the familiar C<-d> switch to plug it in and run
 the code.
 
- $> perl -d:NYTProf wordmatch -f perl7db.pl
+ $> perl -d:NYTProf wordmatch -f perl5db.pl
 
- wordmatch report for perl7db.pl:
+ wordmatch report for perl5db.pl:
  lines in file: 9427
  words in file: 50243
  words with special (non-word) characters: 20480

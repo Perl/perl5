@@ -168,7 +168,7 @@ We have a backlog of unresolved bugs. Dealing with bugs and bug reports
 is unglamorous work; not something ideally suited to volunteer labour,
 but that is all that we have.
 
-The perl7 development team are implementing changes to help address this
+The perl5 development team are implementing changes to help address this
 problem, which should go live in early 2004.
 
 =head1 Future Directions

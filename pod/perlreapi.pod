@@ -665,7 +665,7 @@ pointed to by C<RE_ENGINE_PTR>.
 
 =head2 C<mother_re>
 
-TODO, see L<http://www.mail-archive.com/perl7-changes@perl.org/msg17328.html>
+TODO, see L<http://www.mail-archive.com/perl5-changes@perl.org/msg17328.html>
 
 =head2 C<extflags>
 

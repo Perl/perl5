@@ -16,7 +16,7 @@ Many of these changes have been further developed since 5.6.1 was released,
 those are marked C<[561+]>.
 
 You can see the list of changes in the 5.6.1 release (both from the
-5.005_03 release and the 5.6.0 release) by reading L<perl761delta>.
+5.005_03 release and the 5.6.0 release) by reading L<perl561delta>.
 
 =head1 Highlights In 5.8.0
 
@@ -943,7 +943,7 @@ of modules.
 
 =item *
 
-L<libnet>, by Graham Barr, is a collection of perl7 modules related
+L<libnet>, by Graham Barr, is a collection of perl5 modules related
 to network programming.  See L<Net::FTP>, L<Net::NNTP>, L<Net::Ping>
 (not part of libnet, but related), L<Net::POP3>, L<Net::SMTP>,
 and L<Net::Time>.
@@ -1556,7 +1556,7 @@ C<xsubpp> now supports the OUT keyword.
 
 =item *
 
-perl76delta details the changes between the 5.005 release and the
+perl56delta details the changes between the 5.005 release and the
 5.6.0 release.
 
 =item *
@@ -2147,8 +2147,8 @@ now goes correctly to the socket if RemotePort is set. [561]
 
 =item *
 
-The debugger (perl7db.pl) has been modified to present a more
-consistent commands interface, via (CommandSet=580).  perl7db.t was
+The debugger (perl5db.pl) has been modified to present a more
+consistent commands interface, via (CommandSet=580).  perl5db.t was
 also added to test the changes, and as a placeholder for further tests.
 
 See L<perldebug>.

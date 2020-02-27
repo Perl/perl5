@@ -1594,13 +1594,13 @@ and Slashdot.
 
 Under 5.8.8 and earlier:
 
-    $ perl7.8.8 -e 'use strict; eval "use foo bar" or die $@'
+    $ perl5.8.8 -e 'use strict; eval "use foo bar" or die $@'
     Can't locate foo.pm in @INC (@INC contains: ... .) at (eval 1) line 2.
     BEGIN failed--compilation aborted at (eval 1) line 2.
 
 Under 5.8.9 and later:
 
-    $ perl7.8.9 -e 'use strict; eval "use foo bar" or die $@'
+    $ perl5.8.9 -e 'use strict; eval "use foo bar" or die $@'
     Bareword "bar" not allowed while "strict subs" in use at (eval 1) line 1.
 
 This may cause problems with programs that parse the error message and rely
@@ -2316,7 +2316,7 @@ the Perl 5 bugs at http://bugs.perl.org/
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl7-security-report@perl.org. This points to a closed subscription
+it to perl5-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes
 all the core committers, who will be able
 to help assess the impact of issues, figure out a resolution, and help
