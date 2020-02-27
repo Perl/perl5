@@ -60,7 +60,7 @@ $olddelta =~ s{^(perl)(delta - what is new for perl v5.$old_major.$old_minor)$}
               {$1 . "5$old_major$old_minor" . $2}me
     or die "Can't find expected NAME contents in $olddelta";
 
-my $olddeltaname = "pod/perl7$old_major${old_minor}delta.pod";
+my $olddeltaname = "pod/perl5$old_major${old_minor}delta.pod";
 # in a built tree, $olddeltaname is a symlink to perldelta.pod, make sure
 # we don't write through it
 unlink($olddeltaname);
