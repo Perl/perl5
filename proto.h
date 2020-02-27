@@ -5687,7 +5687,8 @@ STATIC void	S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 #define PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST	\
 	assert(node); assert(invlist_ptr)
 PERL_STATIC_NO_RET void	S_re_croak(pTHX_ bool utf8, const char* pat, ...)
-			__attribute__noreturn__;
+			__attribute__noreturn__
+			__attribute__format__(__printf__,pTHX_2,pTHX_3);
 #define PERL_ARGS_ASSERT_RE_CROAK	\
 	assert(pat)
 

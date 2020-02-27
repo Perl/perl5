@@ -2710,7 +2710,7 @@ ES	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 ESR	|SV *	|get_ANYOFM_contents|NN const regnode * n
 ESRT	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
-rS	|void	|re_croak	|bool utf8|NN const char* pat|...
+frS	|void	|re_croak	|bool utf8|NN const char* pat|...
 ES	|int	|handle_possible_posix					    \
 				|NN RExC_state_t *pRExC_state		    \
 				|NN const char* const s			    \
