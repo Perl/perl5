@@ -134,11 +134,11 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define slu_sv_value(sv) (SvIOK(sv)) ? (NV)(SvIVX(sv)) : (SvNV(sv))
 #endif
 
-#if PERL_VERSION < 13 || (PERL_VERSION == 13 && PERL_SUBVERSION < 9)
+#if PERL_REVISION == 5 && (PERL_VERSION < 13 || (PERL_VERSION == 13 && PERL_SUBVERSION < 9))
 #  define PERL_HAS_BAD_MULTICALL_REFCOUNT
 #endif
 
-#if PERL_VERSION < 14
+#if PERL_REVISION == 5 && PERL_VERSION < 14
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
@@ -199,7 +199,7 @@ static MGVTBL subname_vtbl;
 
 static void MY_initrand(pTHX)
 {
-#if (PERL_VERSION < 9)
+#if (PERL_REVISION == 5 && PERL_VERSION < 9)
     struct op dmy_op;
     struct op *old_op = PL_op;
 
@@ -1699,7 +1699,7 @@ CODE:
     else if (SvREADONLY(sv)) croak_no_modify();
 
     tsv = SvRV(sv);
-#if PERL_VERSION >= 14
+#if PERL_REVISION > 5 || (PERL_REVISION == 5 && PERL_VERSION >= 14)
     SvWEAKREF_off(sv); SvROK_on(sv);
     SvREFCNT_inc_NN(tsv);
     Perl_sv_del_backref(aTHX_ tsv, sv);
