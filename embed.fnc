@@ -248,9 +248,11 @@
 :
 :   f  Function takes a format string. If the function name =~ qr/strftime/
 :      then it is assumed to take a strftime-style format string as the 1st
-:      arg; otherwise it's assumed to be a printf style format string, varargs
-:      (hence any entry that would otherwise go in embed.h is suppressed):
+:      arg; otherwise it's assumed to take a printf style format string, not
+:      necessarily the 1st arg.  All the arguments following it (including
+:      possibly '...') are assumed to be for the format.
 :
+:         embed.h: any entry in here is suppressed because of varargs
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
 :   G  Suppress empty PERL_ARGS_ASSERT_foo macro.  Normally such a macro is
