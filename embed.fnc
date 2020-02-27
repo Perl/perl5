@@ -255,6 +255,12 @@
 :         embed.h: any entry in here is suppressed because of varargs
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
+:   F  Function has a '...' parameter, but don't assume it is a format.  This
+:      is to make sure that new functions with formats can't be added without
+:      considering if they are format functions or not.  A reason to use this
+:      flag even on a format function is if the format would generate
+:	    error: format string argument is not a string type
+:
 :   G  Suppress empty PERL_ARGS_ASSERT_foo macro.  Normally such a macro is
 :      generated for all entries for functions 'foo' in this file.  If there is
 :      a pointer argument to 'foo', it needs to be declared in this file as
@@ -585,7 +591,7 @@ AfTrp	|void	|croak_nocontext|NULLOK const char* pat|...
 AfTrp	|OP*    |die_nocontext  |NULLOK const char* pat|...
 AfTp	|void	|deb_nocontext	|NN const char* pat|...
 AfTp	|char*	|form_nocontext	|NN const char* pat|...
-ATp	|void	|load_module_nocontext|U32 flags|NN SV* name|NULLOK SV* ver|...
+AFTp	|void	|load_module_nocontext|U32 flags|NN SV* name|NULLOK SV* ver|...
 AfTp	|SV*	|mess_nocontext	|NN const char* pat|...
 AfTp	|void	|warn_nocontext	|NN const char* pat|...
 AfTp	|void	|warner_nocontext|U32 err|NN const char* pat|...
@@ -1133,7 +1139,7 @@ ApdT	|OP*	|op_parent|NN OP *o
 S	|OP*	|listkids	|NULLOK OP* o
 #endif
 p	|OP*	|list		|NULLOK OP* o
-Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
+AFpd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
 Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 : Used in perly.y
 p	|OP*	|localize	|NN OP *o|I32 lex
@@ -1254,7 +1260,7 @@ p	|int	|magic_setutf8	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_set_all_env|NN SV* sv|NN MAGIC* mg
 p	|U32	|magic_sizepack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_wipepack	|NN SV* sv|NN MAGIC* mg
-pod	|SV*	|magic_methcall	|NN SV *sv|NN const MAGIC *mg \
+Fpod	|SV*	|magic_methcall	|NN SV *sv|NN const MAGIC *mg \
 				|NN SV *meth|U32 flags \
 				|U32 argc|...
 Ap	|I32 *	|markstack_grow
@@ -1486,7 +1492,7 @@ dopx	|PerlIO*|start_glob	|NN SV *tmpglob|NN IO *io
 Ap	|void	|reentrant_size
 Ap	|void	|reentrant_init
 Ap	|void	|reentrant_free
-ATp	|void*	|reentrant_retry|NN const char *f|...
+AFTp	|void*	|reentrant_retry|NN const char *f|...
 
 : "Very" special - can't use the O flag for this one:
 : (The rename from perl_atexit to Perl_call_atexit was in 864dbfa3ca8032ef)
@@ -2572,14 +2578,14 @@ SR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
 S	|SV *	|space_join_names_mortal|NULLOK char *const *array
 #endif
-p	|OP *	|tied_method|NN SV *methname|NN SV **sp \
+Fp	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 				|NN SV *const sv|NN const MAGIC *const mg \
 				|const U32 flags|U32 argc|...
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o|NULLOK const regmatch_info *reginfo \
 				|NULLOK const RExC_state_t *pRExC_state
-Ep	|int	|re_printf	|NN const char *fmt|...
+Efp	|int	|re_printf	|NN const char *fmt|...
 #endif
 #if defined(PERL_IN_REGCOMP_C)
 ES	|regnode_offset|reg	|NN RExC_state_t *pRExC_state \
@@ -2750,7 +2756,7 @@ EXp	|SV *	|handle_user_defined_property|NN const char * name	    \
 					     |NN SV * msg		    \
 					     |const STRLEN level
 #  ifdef DEBUGGING
-Ep	|int	|re_indentf	|NN const char *fmt|U32 depth|...
+EFp	|int	|re_indentf	|NN const char *fmt|U32 depth|...
 ES	|void        |regdump_intflags|NULLOK const char *lead| const U32 flags
 ES	|void	|regdump_extflags|NULLOK const char *lead| const U32 flags
 ES	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
@@ -2890,7 +2896,7 @@ ES	|void	|debug_start_match|NN const REGEXP *prog|const bool do_utf8\
 				|NN const char *start|NN const char *end\
 				|NN const char *blurb
 
-Ep	|int	|re_exec_indentf	|NN const char *fmt|U32 depth|...
+EFp	|int	|re_exec_indentf|NN const char *fmt|U32 depth|...
 #  endif
 #endif
 
@@ -3383,7 +3389,7 @@ Apo	|void*	|my_cxt_init	|NN int *indexp|size_t size
 So	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 				|STRLEN xs_len
 #endif
-XpoT	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
+FXpoT	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
 				|NN const char * file| ...
 Xp	|void	|xs_boot_epilog	|const I32 ax
 #ifndef HAS_STRLCAT
@@ -3473,7 +3479,7 @@ ATop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
 
 : Used in perl.c and toke.c
-op	|void	|populate_isa	|NN const char *name|STRLEN len|...
+Fop	|void	|populate_isa	|NN const char *name|STRLEN len|...
 
 : Some static inline functions need predeclaration because they are used
 : inside other static inline functions.

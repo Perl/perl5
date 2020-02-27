@@ -5883,9 +5883,11 @@ PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
 #define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
 	assert(node)
-PERL_CALLCONV int	Perl_re_printf(pTHX_ const char *fmt, ...);
+PERL_CALLCONV int	Perl_re_printf(pTHX_ const char *fmt, ...)
+			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_RE_PRINTF	\
 	assert(fmt)
+
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_REGPROP	\
 	assert(sv); assert(o)

@@ -81,7 +81,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabCDdEefGhiMmNnOoPpRrSsTUuWXx] ) /x) {
+        if ($flags =~ / ( [^AabCDdEefFGhiMmNnOoPpRrSsTUuWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
@@ -230,6 +230,10 @@ my ($embed, $core, $ext, $api) = setup_embed();
 		push @attrs, sprintf "%s(__printf__,%s%d,%s)", $macro,
 				    $prefix, $pat, $args;
 	    }
+	}
+	elsif ((grep { $_ eq '...' } @args) && $flags !~ /F/) {
+	    die_at_end "$plain_func: Function with '...' arguments must have"
+	             . " f or F flag";
 	}
 	if ( @attrs ) {
 	    $ret .= "\n";
