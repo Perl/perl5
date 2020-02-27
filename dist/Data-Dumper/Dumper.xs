@@ -8,7 +8,7 @@
 #  include "ppport.h"
 #endif
 
-#if PERL_VERSION < 8
+#if PERL_REVISION == 5 && PERL_VERSION < 8
 #  define DD_USE_OLD_ID_FORMAT
 #endif
 
@@ -109,7 +109,7 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
  * length parameter.  This wrongly allowed reading beyond the end of buffer
  * given malformed input */
 
-#if PERL_VERSION <= 6 /* Perl 5.6 and earlier */
+#if PERL_REVISION == 5 && PERL_VERSION <= 6 /* Perl 5.6 and earlier */
 
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
@@ -128,7 +128,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 #endif /* PERL_VERSION <= 6 */
 
 /* Perl 5.7 through part of 5.15 */
-#if PERL_VERSION > 6 && PERL_VERSION <= 15 && ! defined(utf8_to_uvchr_buf)
+#if PERL_REVISION == 5 && PERL_VERSION > 6 && PERL_VERSION <= 15 && ! defined(utf8_to_uvchr_buf)
 
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
@@ -151,7 +151,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 /* Changes in 5.7 series mean that now IOK is only set if scalar is
    precisely integer but in 5.6 and earlier we need to do a more
    complex test  */
-#if PERL_VERSION <= 6
+#if PERL_REVISION == 5 && PERL_VERSION <= 6
 #define DD_is_integer(sv) (SvIOK(sv) && (SvIsUV(val) ? SvUV(sv) == SvNV(sv) : SvIV(sv) == SvNV(sv)))
 #else
 #define DD_is_integer(sv) SvIOK(sv)
@@ -429,7 +429,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
                 * first byte */
                 increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
 
-#if PERL_VERSION < 10
+#if PERL_REVISION == 5 && PERL_VERSION < 10
                 sprintf(r, "\\x{%" UVxf "}", k);
                 r += strlen(r);
                 /* my_sprintf is not supported by ppport.h */
@@ -565,13 +565,13 @@ deparsed_output(pTHX_ SV *val)
      * the stack moving underneath anything that directly or indirectly calls
      * Perl_load_module()". If we're in an older Perl, we can't rely on that
      * stack, and must create a fresh sacrificial stack of our own. */
-#if PERL_VERSION < 20
+#if PERL_REVISION == 5 && PERL_VERSION < 20
     PUSHSTACKi(PERLSI_REQUIRE);
 #endif
 
     load_module(PERL_LOADMOD_NOIMPORT, pkg, 0);
 
-#if PERL_VERSION < 20
+#if PERL_REVISION == 5 && PERL_VERSION < 20
     POPSTACK;
     SPAGAIN;
 #endif
@@ -768,9 +768,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         /* regexps dont have to be blessed into package "Regexp"
          * they can be blessed into any package. 
          */
-#if PERL_VERSION < 8
+#if PERL_REVISION == 5 && PERL_VERSION < 8
 	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) 
-#elif PERL_VERSION < 11
+#elif PERL_REVISION == 5 && PERL_VERSION < 11
         if (realpack && realtype == SVt_PVMG && mg_find(ival, PERL_MAGIC_qr))
 #else        
         if (realpack && realtype == SVt_REGEXP) 
@@ -872,7 +872,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	      sv_catsv(retval, sv_flags);
 	} 
         else if (
-#if PERL_VERSION < 9
+#if PERL_REVISION == 5 && PERL_VERSION < 9
 		realtype <= SVt_PVBM
 #else
 		realtype <= SVt_PVMG
@@ -955,7 +955,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
-#if PERL_VERSION < 10
+#if PERL_REVISION == 5 && PERL_VERSION < 10
                 (void) sprintf(iname+ilen, "%" IVdf, (IV)ix);
 		ilen = strlen(iname);
 #else
@@ -1027,7 +1027,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	    /* If requested, get a sorted/filtered array of hash keys */
 	    if (style->sortkeys) {
-#if PERL_VERSION >= 8
+#if PERL_REVISION > 5 || (PERL_REVISION == 5 && PERL_VERSION >= 8)
 		if (style->sortkeys == &PL_sv_yes) {
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
@@ -1347,7 +1347,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if(i) ++c, --i;			/* just get the name */
 	    if (memBEGINs(c, i, "main::")) {
 		c += 4;
-#if PERL_VERSION < 7
+#if PERL_REVISION == 5 && PERL_VERSION < 7
 		if (i == 6 || (i == 7 && c[6] == '\0'))
 #else
 		if (i == 6)
@@ -1424,9 +1424,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 #ifdef SvVOK
 	else if (SvMAGICAL(val) && (mg = mg_find(val, 'V'))) {
-# if !defined(PL_vtbl_vstring) && PERL_VERSION < 17
+# if !defined(PL_vtbl_vstring) && PERL_REVISION == 5 && PERL_VERSION < 17
 	    SV * const vecsv = sv_newmortal();
-#  if PERL_VERSION < 10
+#  if PERL_REVISION == 5 && PERL_VERSION < 10
 	    scan_vstring(mg->mg_ptr, vecsv);
 #  else
 	    scan_vstring(mg->mg_ptr, mg->mg_ptr + mg->mg_len, vecsv);
@@ -1600,7 +1600,7 @@ Data_Dumper_Dumpxs(href, ...)
                         style.sortkeys = NULL;
                     else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
                         style.sortkeys = sv;
-                    else if (PERL_VERSION < 8)
+                    else if (PERL_REVISION == 5 && PERL_VERSION < 8)
                         /* 5.6 doesn't make sortsv() available to XS code,
                          * so we must use this helper instead. Note that we
                          * always allocate this mortal SV, but it will be
