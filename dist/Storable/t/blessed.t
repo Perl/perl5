@@ -72,7 +72,7 @@ package main;
 
 # Still less than 256 bytes, so long classname logic not fully exercised
 #   Identifier too long - 5.004
-#   parser.h: char	tokenbuf[256]: cperl5.24 => 1024
+#   parser.h: char	tokenbuf[256]: cperl7.24 => 1024
 my $m = ($Config{usecperl} and $] >= 5.024) ? 56 : 14;
 my $longname = "LONG_NAME_" . ('xxxxxxxxxxxxx::' x $m) . "final";
 

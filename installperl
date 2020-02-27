@@ -50,10 +50,10 @@ my $exe_ext = $Config{exe_ext};
 # Allow "make install PERLNAME=something_besides_perl":
 my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
 
-# This is the base used for versioned names, like "perl5.6.0".
+# This is the base used for versioned names, like "perl7.6.0".
 # It's separate because a common use of $PERLNAME is to install
-# perl as "perl5", if that's used as base for versioned files you
-# get "perl55.6.0".
+# perl as "perl7", if that's used as base for versioned files you
+# get "perl75.6.0".
 my $perl_verbase = defined($ENV{PERLNAME_VERBASE})
 		    ? $ENV{PERLNAME_VERBASE}
 		    : $perl;
@@ -267,7 +267,7 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
     if ($Is_Cygwin) {
 	$perldll = $libperl;
     } else {
-	$perldll = 'perl5'.$Config{patchlevel}.'.'.$so;
+	$perldll = 'perl7'.$Config{patchlevel}.'.'.$so;
     }
 
     if ($dlsrc ne "dl_none.xs") {
@@ -729,7 +729,7 @@ sub installlib {
 # Also preserve modification times for .a libraries.
 # On some systems, if you do
 #   ranlib libperl.a
-#   cp libperl.a /usr/local/lib/perl5/archlib/CORE/libperl.a
+#   cp libperl.a /usr/local/lib/perl7/archlib/CORE/libperl.a
 # and then try to link against the installed libperl.a, you might
 # get an error message to the effect that the symbol table is older
 # than the library.

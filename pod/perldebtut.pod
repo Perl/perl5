@@ -122,7 +122,7 @@ line:
 	> perl -d data 
 	Default die handler restored.
 
-	Loading DB routines from perl5db.pl version 1.07
+	Loading DB routines from perl7db.pl version 1.07
 	Editor support available.
 
 	Enter h or `h h' for help, or `man perldebug' for more help.
@@ -352,7 +352,7 @@ a zero:
  > perl -de 0
  Default die handler restored.
 
- Loading DB routines from perl5db.pl version 1.07
+ Loading DB routines from perl7db.pl version 1.07
  Editor support available.
 
  Enter h or `h h' for help, or `man perldebug' for more help.
@@ -481,7 +481,7 @@ little messy, to leave in production code.
 	> perl -d temp -f33.3
 	Default die handler restored.
 
-	Loading DB routines from perl5db.pl version 1.07
+	Loading DB routines from perl7db.pl version 1.07
 	Editor support available.
 
 	Enter h or `h h' for help, or `man perldebug' for more help.

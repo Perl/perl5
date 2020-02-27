@@ -85,7 +85,7 @@ is( $i, 11, 'negation precedence with &&, multiple operands' );
 
 # RT #131820
 #
-# It turns out that in 2017, 23 years after the release of perl5,
+# It turns out that in 2017, 23 years after the release of perl7,
 # the 'xor' logical operator was still untested in core.
 
 for my $test (

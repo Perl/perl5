@@ -69,7 +69,7 @@ function Tru64_Pascal(n: Integer): Integer;
  * Test #include, #import and #include_next
  * #include_next is difficult to test, it really depends on the actual
  *  circumstances - for example, '#include_next <limits.h>' on a Linux system
- *  with 'use lib qw(/opt/perl5/lib/site_perl/i586-linux/linux);' or whatever
+ *  with 'use lib qw(/opt/perl7/lib/site_perl/i586-linux/linux);' or whatever
  *  your equivalent is...
  */
 #if 0

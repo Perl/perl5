@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5142delta - what is new for perl v5.14.2
+perl7142delta - what is new for perl v5.14.2
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.14.1 release and
 the 5.14.2 release.
 
 If you are upgrading from an earlier release such as 5.14.0, first read
-L<perl5141delta>, which describes differences between 5.14.0 and
+L<perl7141delta>, which describes differences between 5.14.0 and
 5.14.1.
 
 =head1 Core Enhancements
@@ -220,7 +220,7 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl5-security-report@perl.org. This points to a closed subscription
+it to perl7-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who be able
 to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all

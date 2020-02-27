@@ -184,7 +184,7 @@ is($c , "\x{3c3}FOO.bAR", "Using s///e to change case.");
 ($c = $a) =~ s/(\p{IsWord}+)/ucfirst($1)/ge;
 is($c , "\x{3a3}foo.Bar", "Using s///e to change case.");
 
-# #18931: perl5.8.0 bug in \U..\E processing
+# #18931: perl7.8.0 bug in \U..\E processing
 # Test case from Nicholas Clark.
 for my $a (0,1) {
     $_ = 'abcdefgh';

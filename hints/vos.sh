@@ -43,7 +43,7 @@ glibpth="$loclibpth"
 locincpth=""
 usrinc=${USRINC-"/system/include_library"}
 
-# Where to install perl5.
+# Where to install perl7.
 prefix=/system/ported
 
 # Linker is gcc.

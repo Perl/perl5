@@ -1785,7 +1785,7 @@ sub do_selftest {
 ==32350== Cachegrind, a cache and branch-prediction profiler
 ==32350== Copyright (C) 2002-2013, and GNU GPL'd, by Nicholas Nethercote et al.
 ==32350== Using Valgrind-3.9.0 and LibVEX; rerun with -h for copyright info
-==32350== Command: perl5211o /tmp/uiS2gjdqe5 1
+==32350== Command: perl7211o /tmp/uiS2gjdqe5 1
 ==32350== 
 --32350-- warning: L3 cache found, using its data for the LL simulation.
 ==32350== 

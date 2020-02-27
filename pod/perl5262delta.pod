@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5262delta - what is new for perl v5.26.2
+perl7262delta - what is new for perl v5.26.2
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.26.1 release and the 5.26.2
 release.
 
 If you are upgrading from an earlier release such as 5.26.0, first read
-L<perl5261delta>, which describes differences between 5.26.0 and 5.26.1.
+L<perl7261delta>, which describes differences between 5.26.0 and 5.26.1.
 
 =head1 Security
 

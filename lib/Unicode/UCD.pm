@@ -4783,7 +4783,7 @@ value.
 
 =head1 AUTHOR
 
-Jarkko Hietaniemi.  Now maintained by perl5 porters.
+Jarkko Hietaniemi.  Now maintained by perl7 porters.
 
 =cut
 

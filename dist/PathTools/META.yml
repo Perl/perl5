@@ -25,6 +25,6 @@ requires:
 resources:
   bugtracker: https://rt.perl.org/rt3/
   homepage: http://dev.perl.org/
-  repository: git://perl5.git.perl.org/perl.git
+  repository: git://perl7.git.perl.org/perl.git
 version: '3.73'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

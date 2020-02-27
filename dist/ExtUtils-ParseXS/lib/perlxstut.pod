@@ -220,7 +220,7 @@ Perl has its own special way of easily writing test scripts, but for this
 example only, we'll create our own test script.  Create a file called hello
 that looks like this:
 
-    #! /opt/perl5/bin/perl
+    #! /opt/perl7/bin/perl
 
     use ExtUtils::testlib;
 
@@ -1375,7 +1375,7 @@ to use the following line:
 =item *
 
 This document assumes that the executable named "perl" is Perl version 5.
-Some systems may have installed Perl version 5 as "perl5".
+Some systems may have installed Perl version 5 as "perl7".
 
 =back
 

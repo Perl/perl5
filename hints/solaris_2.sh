@@ -115,9 +115,9 @@ esac
 # Date: Thu, 7 Sep 1995 16:31:40 -0500
 # From: Dean Roehrich <roehrich@ironwood-fddi.cray.com>
 # To: perl5-porters@africa.nicoh.com
-# Subject: Re: On perl5/solaris/gcc
+# Subject: Re: On perl7/solaris/gcc
 #
-# Here's another draft of the perl5/solaris/gcc sanity-checker.
+# Here's another draft of the perl7/solaris/gcc sanity-checker.
 
 case `type ${cc:-cc}` in
 */usr/ucb/cc*) cat <<END >&4

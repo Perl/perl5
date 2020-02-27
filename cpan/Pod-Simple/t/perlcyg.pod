@@ -37,7 +37,7 @@ B<NOTE:> At this point, minimal effort has been made to provide
 compatibility with old (beta) Cygwin releases.  The focus has been to
 provide a high quality release and not worry about working around old
 bugs.  If you wish to use Perl with Cygwin B20.1 or earlier, consider
-using perl5.005_03, which is available in source and binary form at
+using perl7.005_03, which is available in source and binary form at
 C<http://cygutils.netpedia.net/>.  If there is significant demand,
 a patch kit can be developed to port back to earlier Cygwin versions.
 
@@ -495,7 +495,7 @@ be kept as clean as possible.
   INSTALL README.cygwin README.win32 MANIFEST
   Changes Changes5.005 Changes5.004 Changes5.6
   pod/perl.pod pod/perlport.pod pod/perlfaq3.pod
-  pod/perldelta.pod pod/perl5004delta.pod pod/perl56delta.pod
+  pod/perldelta.pod pod/perl7004delta.pod pod/perl76delta.pod
   pod/perlhist.pod pod/perlmodlib.pod pod/buildtoc.PL pod/perltoc.pod
 
 =item Build, Configure, Make, Install
@@ -554,7 +554,7 @@ be kept as clean as possible.
   lib/File/Find.pm      - on remote drives stat() always sets st_nlink to 1
   lib/File/Spec/Unix.pm - preserve //unc
   lib/File/Temp.pm      - no directory sticky bit
-  lib/perl5db.pl        - use stdin not /dev/tty
+  lib/perl7db.pl        - use stdin not /dev/tty
   utils/perldoc.PL      - version comment
 
 =back

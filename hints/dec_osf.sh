@@ -263,7 +263,7 @@ toke_cflags='optimize=-O2'
 esac
 
 # The patch 23787
-# https://github.com/Perl/perl5/commit/73cb726371990cd489597c4fee405a9815abf4da
+# https://github.com/Perl/perl7/commit/73cb726371990cd489597c4fee405a9815abf4da
 # broke things for gcc (at least gcc 3.3) so that many of the pack()
 # checksum tests for formats L, j, J, especially when combined
 # with the < and > specifiers, started to fail if compiled with plain -O3.
@@ -567,13 +567,13 @@ unset _DEC_cc_style
 #
 # History:
 #
-# perl5.005_51:
+# perl7.005_51:
 #
 #	September-1998 Jarkko Hietaniemi <jhi@iki.fi>
 #
 #	* Added the -DNO_EFF_ONLY_OK flag ('use filetest;' support).
 #
-# perl5.004_57:
+# perl7.004_57:
 #
 #	19-Dec-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
 #
@@ -589,14 +589,14 @@ unset _DEC_cc_style
 #	* Fix -pthread additions for useshrplib.  ld has no -pthread option.
 #
 #
-# perl5.004_04:
+# perl7.004_04:
 #
 #       19-Sep-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
 #
 #	* libnet on Digital UNIX is for JAVA, not for sockets.
 #
 #
-# perl5.003_28:
+# perl7.003_28:
 #
 #       22-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
 #
@@ -622,21 +622,21 @@ unset _DEC_cc_style
 #	* $optimize also in $lddflags.
 #
 #
-# perl5.003_27:
+# perl7.003_27:
 #
 #	18-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
 #
 #	* unset _DEC_cc_style and more commentary on -std.
 #
 #
-# perl5.003_26:
+# perl7.003_26:
 #
 #	15-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
 #
 #	* -std and -ansi.
 #
 #
-# perl5.003_24:
+# perl7.003_24:
 #
 #	30-Jan-1997 Jarkko Hietaniemi <jhi@iki.fi>
 #
@@ -645,7 +645,7 @@ unset _DEC_cc_style
 #	* Note on -O5 -fast.
 #
 #
-# perl5.003_23:
+# perl7.003_23:
 #
 #	26-Jan-1997 Jarkko Hietaniemi <jhi@iki.fi>
 #
@@ -661,7 +661,7 @@ unset _DEC_cc_style
 #	* $optimize based on which compiler we have.
 #
 #
-# perl5.003_22:
+# perl7.003_22:
 #
 #	23-Jan-1997 Achim Bohnet <ach@rosat.mpe-garching.mpg.de>
 #

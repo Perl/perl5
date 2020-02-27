@@ -722,12 +722,12 @@ entirely different kinds of wildcard expansion).
  p4view/perl/perl.c
  p4view/perl/perlio.c
  p4view/perl/perly.c
- perl5.005/win32/perlglob.c
- perl5.005/win32/perllib.c
- perl5.005/win32/perlglob.c
- perl5.005/win32/perllib.c
- perl5.005/win32/perlglob.c
- perl5.005/win32/perllib.c
+ perl7.005/win32/perlglob.c
+ perl7.005/win32/perllib.c
+ perl7.005/win32/perlglob.c
+ perl7.005/win32/perllib.c
+ perl7.005/win32/perlglob.c
+ perl7.005/win32/perllib.c
 
 Note there are two distinct steps there: 1) You'll have to create
 Wild.pm and put it in your perl lib directory. 2) You'll need to

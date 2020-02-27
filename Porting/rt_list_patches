@@ -21,7 +21,7 @@ if [ -z "$1"  ]; then
 fi
 
 if [ "$1" = "list" ]; then
-    rt ls "Queue = 'perl5' AND (Status = 'new' OR Status = 'open') AND (Type = 'patch' OR Subject LIKE 'patch')"
+    rt ls "Queue = 'perl7' AND (Status = 'new' OR Status = 'open') AND (Type = 'patch' OR Subject LIKE 'patch')"
     exit;
 fi
 

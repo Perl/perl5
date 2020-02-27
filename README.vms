@@ -198,7 +198,7 @@ automatically.  Some options can be given explicitly on the command line;
 the following example specifies a non-default location for where Perl
 will be installed:
 
-    @configure "-d" "-Dprefix=dka100:[utils.perl5.]"
+    @configure "-d" "-Dprefix=dka100:[utils.perl7.]"
 
 Note that the installation location would be by default where you unpacked 
 the source with a "_ROOT." appended.  For example if you unpacked the perl 

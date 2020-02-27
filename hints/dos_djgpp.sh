@@ -57,7 +57,7 @@ usemymalloc='n'
 timetype='time_t'
 
 prefix=$DJDIR
-privlib=$prefix/lib/perl5
+privlib=$prefix/lib/perl7
 archlib=$privlib
 sitelib=$privlib/site
 sitearch=$sitelib

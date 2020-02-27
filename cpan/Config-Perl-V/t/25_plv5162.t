@@ -120,7 +120,7 @@ is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys
 
 
 __END__
-Summary of my perl5 (revision 5 version 16 subversion 2) configuration:
+Summary of my perl7 (revision 5 version 16 subversion 2) configuration:
    
   Platform:
     osname=darwin, osvers=13.0, archname=darwin-thread-multi-2level

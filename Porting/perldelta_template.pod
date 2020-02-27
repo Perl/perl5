@@ -13,7 +13,7 @@ This document describes differences between the 5.sXXX.bXXX release and the 5.tX
 release.
 
 If you are upgrading from an earlier release such as 5.rXXX.aXXX, first read
-L<perl5XXXdelta>, which describes differences between 5.rXXX.aXXX and 5.sXXX.bXXX.
+L<perl7XXXdelta>, which describes differences between 5.rXXX.aXXX and 5.sXXX.bXXX.
 
 =head1 Notice
 

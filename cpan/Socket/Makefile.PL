@@ -131,7 +131,7 @@ check_for(
     main    => "struct ipv6_mreq mreq; mreq.ipv6mr_interface = 0;"
 );
 
-# TODO: Needs adding to perl5 core before importing dual-life again
+# TODO: Needs adding to perl7 core before importing dual-life again
 check_for(
     confkey => "i_netinet_ip",
     define  => "I_NETINET_IP",

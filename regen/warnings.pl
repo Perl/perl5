@@ -1201,7 +1201,7 @@ and spirit.  Use of such features in combination with FATAL warnings is
 ENTIRELY AT THE USER'S RISK.
 
 The following documentation describes how to use FATAL warnings but the
-perl5 porters strongly recommend that you understand the risks before doing
+perl7 porters strongly recommend that you understand the risks before doing
 so, especially for library code intended for use by others, as there is no
 way for downstream users to change the choice of fatal categories.
 

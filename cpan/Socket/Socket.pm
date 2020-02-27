@@ -838,7 +838,7 @@ BEGIN {
 *CRLF = \CRLF();
 
 sub sockaddr_in {
-    if (@_ == 6 && !wantarray) { # perl5.001m compat; use this && die
+    if (@_ == 6 && !wantarray) { # perl7.001m compat; use this && die
 	my($af, $port, @quad) = @_;
 	warnings::warn "6-ARG sockaddr_in call is deprecated" 
 	    if warnings::enabled();

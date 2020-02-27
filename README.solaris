@@ -15,14 +15,14 @@ also discussed, though they may be out of date.
 
 For the most part, everything should just work.
 
-Starting with Solaris 8, perl5.00503 (or higher) is supplied with the
+Starting with Solaris 8, perl7.00503 (or higher) is supplied with the
 operating system, so you might not even need to build a newer version
-of perl at all.  The Sun-supplied version is installed in /usr/perl5
-with F</usr/bin/perl> pointing to F</usr/perl5/bin/perl>.  Do not disturb
+of perl at all.  The Sun-supplied version is installed in /usr/perl7
+with F</usr/bin/perl> pointing to F</usr/perl7/bin/perl>.  Do not disturb
 that installation unless you really know what you are doing.  If you
 remove the perl supplied with the OS, you will render some bits of
 your system inoperable.  If you wish to install a newer version of perl,
-install it under a different prefix from /usr/perl5.  Common prefixes
+install it under a different prefix from /usr/perl7.  Common prefixes
 to use are /usr/local and /opt/perl.
 
 You may wish to put your version of perl in the PATH of all users by
@@ -51,19 +51,19 @@ for a quick way of doing this.
 
 As an interim measure, you may either change the #! line of your
 scripts to specifically refer to the old perl version, e.g. on
-Solaris 9 use #!/usr/perl5/5.00503/bin/perl to use the perl version
+Solaris 9 use #!/usr/perl7/5.00503/bin/perl to use the perl version
 that was the default for Solaris 8, or if you have a large number of
 scripts it may be more convenient to make the old version of perl the
 default on your system.  You can do this by changing the appropriate
-symlinks under /usr/perl5 as follows (example for Solaris 9):
+symlinks under /usr/perl7 as follows (example for Solaris 9):
 
- # cd /usr/perl5
+ # cd /usr/perl7
  # rm bin man pod
  # ln -s ./5.00503/bin
  # ln -s ./5.00503/man
  # ln -s ./5.00503/lib/pod
  # rm /usr/bin/perl
- # ln -s ../perl5/5.00503/bin/perl /usr/bin/perl
+ # ln -s ../perl7/5.00503/bin/perl /usr/bin/perl
 
 In both cases this should only be considered to be a temporary
 measure - you should upgrade to the later version of perl as soon as
@@ -71,7 +71,7 @@ is practicable.
 
 Note also that the perl command-line utilities (e.g. perldoc) and any
 that are added by modules that you install will be under
-/usr/perl5/bin, so that directory should be added to your PATH.
+/usr/perl7/bin, so that directory should be added to your PATH.
 
 =head2 Solaris Version Numbers.
 
@@ -579,7 +579,7 @@ L<http://www.cpan.org/modules/by-module/Sun/>.
 
 =head2 Proc::ProcessTable on Solaris
 
-Proc::ProcessTable does not compile on Solaris with perl5.6.0 and higher
+Proc::ProcessTable does not compile on Solaris with perl7.6.0 and higher
 if you have LARGEFILES defined.  Since largefile support is the
 default in 5.6.0 and later, you have to take special steps to use this
 module.

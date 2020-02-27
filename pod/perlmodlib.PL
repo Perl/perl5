@@ -1545,7 +1545,7 @@ the application could invoked as:
 
      % perl -e 'use Module::Name; method(@ARGV)' ...
 or
-     % perl -mModule::Name ...    (in perl5.002 or higher)
+     % perl -mModule::Name ...    (in perl7.002 or higher)
 
 =back
 

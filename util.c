@@ -5372,13 +5372,13 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
    "PerlInterpreter *" and represents the callers context; otherwise it is
    of type "CV *", and is the boot xsub's CV.
 
-   v_my_perl will catch where a threaded future perl526.dll calling IO.dll
-   for example, and IO.dll was linked with threaded perl524.dll, and both
-   perl526.dll and perl524.dll are in %PATH and the Win32 DLL loader
+   v_my_perl will catch where a threaded future perl726.dll calling IO.dll
+   for example, and IO.dll was linked with threaded perl724.dll, and both
+   perl726.dll and perl724.dll are in %PATH and the Win32 DLL loader
    successfully can load IO.dll into the process but simultaneously it
    loaded an interpreter of a different version into the process, and XS
-   code will naturally pass SV*s created by perl524.dll for perl526.dll to
-   use through perl526.dll's my_perl->Istack_base.
+   code will naturally pass SV*s created by perl724.dll for perl726.dll to
+   use through perl726.dll's my_perl->Istack_base.
 
    v_my_perl cannot be the first arg, since then 'key' will be out of
    place in a threaded vs non-threaded mixup; and analyzing the key
@@ -5423,10 +5423,10 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     got = xs_interp;
     need = my_perl;
 #else
-/* try to catch where an unthreaded perl interp DLL (for ex. perl522.dll) is
-   loaded into a process by a XS DLL built by an unthreaded perl522.dll perl,
+/* try to catch where an unthreaded perl interp DLL (for ex. perl722.dll) is
+   loaded into a process by a XS DLL built by an unthreaded perl722.dll perl,
    but the DynaLoder/Perl that started the process and loaded the XS DLL is
-   unthreaded perl524.dll, since unthreadeds don't pass my_perl (a unique *)
+   unthreaded perl724.dll, since unthreadeds don't pass my_perl (a unique *)
    through pp_entersub, use a unique value (which is a pointer to PL_stack_sp's
    location in the unthreaded perl binary) stored in CV * to figure out if this
    Perl_xs_handshake was called by the same pp_entersub */
@@ -5447,7 +5447,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 	SAVEPPTR(PL_xsubfilename);/* which was require'd from a XSUB BEGIN */
 	PL_xsubfilename = file;   /* so the old name must be restored for
 				     additional XSUBs to register themselves */
-	/* XSUBs can't be perl lang/perl5db.pl debugged
+	/* XSUBs can't be perl lang/perl7db.pl debugged
 	if (PERLDB_LINE_OR_SAVESRC)
 	    (void)gv_fetchfile(file); */
     }

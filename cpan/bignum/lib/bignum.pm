@@ -328,7 +328,7 @@ The entire upgrading/downgrading is still experimental and might not work
 as you expect or may even have bugs. You might get errors like this:
 
         Can't use an undefined value as an ARRAY reference at
-        /usr/local/lib/perl5/5.8.0/Math/BigInt/Calc.pm line 864
+        /usr/local/lib/perl7/5.8.0/Math/BigInt/Calc.pm line 864
 
 This means somewhere a routine got a BigFloat/Lite but expected a BigInt (or
 vice versa) and the upgrade/downgrad path was missing. This is a bug, please

@@ -4,7 +4,7 @@ use warnings;
 use File::Path;
 use Cwd;
 
-# This is a quick and dirty snapshot generator for the perl5.git.perl.org web page
+# This is a quick and dirty snapshot generator for the perl7.git.perl.org web page
 # to use to generate the snapshot files. Yes it is ugly and contains hard coded crap
 # and could use some love. But for this todo I am out of time now. -- Yves
 

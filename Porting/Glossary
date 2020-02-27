@@ -3971,9 +3971,9 @@ installstyle (installstyle.U):
 	manipulate entire perl distributions.  Perl itself doesn't use
 	this to find its libraries -- the library directories are
 	stored directly in Config.pm.  Currently, there are only two
-	styles:  "lib" and "lib/perl5".  The default library locations
+	styles:  "lib" and "lib/perl7".  The default library locations
 	(e.g. privlib, sitelib) are either $prefix/lib or
-	$prefix/lib/perl5.  The former is useful if $prefix is a
+	$prefix/lib/perl7.  The former is useful if $prefix is a
 	directory dedicated to perl (e.g. /opt/perl), while the latter
 	is useful if $prefix is shared by many packages, e.g. if
 	$prefix=/usr/local.
@@ -3997,7 +3997,7 @@ installstyle (installstyle.U):
 	This may later be extended to include other information, so
 	be careful with pattern-matching on the results.
 
-	For compatibility with perl5.005 and earlier, the default
+	For compatibility with perl7.005 and earlier, the default
 	setting is based on whether or not $prefix contains the string
 	"perl".
 
@@ -4589,9 +4589,9 @@ perl (Loc.U):
 	full pathname (if any) of the perl program.  After Configure runs,
 	the value is reset to a plain "perl" and is not useful.
 
-perl5 (perl5.U):
+perl7 (perl7.U):
 	This variable contains the full path (if any) to a previously
-	installed perl5.005 or later suitable for running the script
+	installed perl7.005 or later suitable for running the script
 	to determine inc_version_list.
 
 PERL_API_REVISION (patchlevel.h):
@@ -4657,7 +4657,7 @@ PERL_VERSION (Oldsyms.U):
 	This value is manually set in patchlevel.h
 
 perladmin (perladmin.U):
-	Electronic mail address of the perl5 administrator.
+	Electronic mail address of the perl7 administrator.
 
 perllibs (End.U):
 	The list of libraries needed by Perl only (any libraries needed

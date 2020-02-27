@@ -247,8 +247,8 @@ X<time> X<date>
 
 C<gmtime>, C<localtime>, C<time>, C<times>
 
-=item Functions new in perl5
-X<perl5>
+=item Functions new in perl7
+X<perl7>
 
 C<abs>, C<bless>, C<break>, C<chomp>, C<chr>, C<continue>, C<default>, 
 C<exists>, C<formline>, C<given>, C<glob>, C<import>, C<lc>, C<lcfirst>,
@@ -259,7 +259,7 @@ C<ucfirst>, C<untie>, C<use>, C<when>
 * C<sub> was a keyword in Perl 4, but in Perl 5 it is an
 operator, which can be used in expressions.
 
-=item Functions obsoleted in perl5
+=item Functions obsoleted in perl7
 
 C<dbmclose>, C<dbmopen>
 

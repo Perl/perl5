@@ -33,7 +33,7 @@ sub format_linker_cmd {
   my $cf = $self->{config};
 
   # The Config.pm variable 'libperl' is hardcoded to the full name
-  # of the perl import library (i.e. 'libperl56.a'). GCC will not
+  # of the perl import library (i.e. 'libperl76.a'). GCC will not
   # find it unless the 'lib' prefix & the extension are stripped.
   $spec{libperl} =~ s/^(?:lib)?([^.]+).*$/-l$1/;
 

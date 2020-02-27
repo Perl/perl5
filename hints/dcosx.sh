@@ -18,7 +18,7 @@ glibpth="$*"
 set `echo " $libswanted " | sed -e 's@ ucb @ @'`
 libswanted="$*"
 
-# Here's another draft of the perl5/solaris/gcc sanity-checker. 
+# Here's another draft of the perl7/solaris/gcc sanity-checker. 
 
 case $PATH in
 */usr/ucb*:/usr/bin:*|*/usr/ucb*:/usr/bin) cat <<END >&2

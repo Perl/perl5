@@ -1579,8 +1579,8 @@ Like PREFIX, it sets several INSTALL* attributes at once.  Unlike
 PREFIX it is easy to predict where the module will end up.  The
 installation pattern looks like this:
 
-    INSTALLARCHLIB     INSTALL_BASE/lib/perl5/$Config{archname}
-    INSTALLPRIVLIB     INSTALL_BASE/lib/perl5
+    INSTALLARCHLIB     INSTALL_BASE/lib/perl7/$Config{archname}
+    INSTALLPRIVLIB     INSTALL_BASE/lib/perl7
     INSTALLBIN         INSTALL_BASE/bin
     INSTALLSCRIPT      INSTALL_BASE/bin
     INSTALLMAN1DIR     INSTALL_BASE/man/man1

@@ -29,7 +29,7 @@ my $has_too_many = ($Config{usecperl} and
 # These overlarge sizes are enabled only since Storable 3.00 and some
 # cases need cperl support. Perl5 (as of 5.24) has some internal
 # problems with >I32 sizes, which only cperl has fixed.
-# perl5 is not yet 2GB safe, esp. with hashes.
+# perl7 is not yet 2GB safe, esp. with hashes.
 
 # string len (xpv_cur): STRLEN (ptrsize>=8)
 # array size (xav_max): SSize_t (I32/I64) (ptrsize>=8)
@@ -73,7 +73,7 @@ if ($Config{ptrsize} > 4 and !$has_too_many) {
 if (!$has_too_many) {
     # needs >90G virtual mem, and is evtl. killed
     if ($ENV{PERL_TEST_MEMORY} >= 96) {
-        # number of keys >I32. impossible to handle with perl5, but Storable can.
+        # number of keys >I32. impossible to handle with perl7, but Storable can.
         push @cases,
           ['huge hash',
            sub { my %x = (0 .. $huge); \%x } ];

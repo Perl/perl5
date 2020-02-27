@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# This code is used by lib/perl5db.t !!!
+# This code is used by lib/perl7db.t !!!
 #
 
 my $i;

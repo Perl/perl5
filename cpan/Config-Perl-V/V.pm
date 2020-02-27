@@ -450,11 +450,11 @@ C<perl -V>, and usually looks something like
    Built under linux
    Compiled at Jun 13 2005 10:44:20
    @INC:
-     /usr/lib/perl5/5.8.7/i686-linux-64int
-     /usr/lib/perl5/5.8.7
-     /usr/lib/perl5/site_perl/5.8.7/i686-linux-64int
-     /usr/lib/perl5/site_perl/5.8.7
-     /usr/lib/perl5/site_perl
+     /usr/lib/perl7/5.8.7/i686-linux-64int
+     /usr/lib/perl7/5.8.7
+     /usr/lib/perl7/site_perl/5.8.7/i686-linux-64int
+     /usr/lib/perl7/site_perl/5.8.7
+     /usr/lib/perl7/site_perl
      .
 
 or

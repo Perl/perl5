@@ -90,7 +90,7 @@ $VERSION = "5.5011"; # see also CPAN::Config::VERSION at end of file
      "password",
      "patch",
      "patches_dir",
-     "perl5lib_verbosity",
+     "perl7lib_verbosity",
      "plugin_list",
      "prefer_external_tar",
      "prefer_installer",

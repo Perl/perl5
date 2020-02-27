@@ -505,7 +505,7 @@ After @19053:
 	Better detection of OS/2 in Configure scripts (if c:/ is not readable).
 	Better Configure support for \\ inside cpp-emited # lineno "filename".
 	Export pthread-support functions from threaded DLL.
-	[older change] If perl5.def file is present, the new perl5.def has
+	[older change] If perl7.def file is present, the new perl7.def has
 		compatible ordinals.
 	OS/2 code compiles with threads enabled; much more robust pthreads
 		emulation (but some statics still present); survives fork().

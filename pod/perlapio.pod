@@ -137,11 +137,11 @@ There are currently two implementations:
 All above are #define'd to stdio functions or are trivial wrapper
 functions which call stdio. In this case I<only> PerlIO * is a FILE *.
 This has been the default implementation since the abstraction was
-introduced in perl5.003_02.
+introduced in perl7.003_02.
 
 =item 2. USE_PERLIO
 
-Introduced just after perl5.7.0, this is a re-implementation of the
+Introduced just after perl7.7.0, this is a re-implementation of the
 above abstraction which allows perl more control over how IO is done
 as it decouples IO from the way the operating system and C library
 choose to do things. For USE_PERLIO PerlIO * has an extra layer of
@@ -501,7 +501,7 @@ happened to C<read()> (or whatever) last time IO was requested.
 
 The new interface to the USE_PERLIO implementation. The layers ":crlf"
 and ":raw" are only ones allowed for other implementations and those
-are silently ignored. (As of perl5.8 ":raw" is deprecated.)  Use
+are silently ignored. (As of perl7.8 ":raw" is deprecated.)  Use
 PerlIO_binmode() below for the portable case.
 
 =item PerlIO_binmode(f,ptype,imode,layers)
@@ -522,7 +522,7 @@ B<ptype> is perl's character for the kind of IO:
 B<imode> is C<O_BINARY> or C<O_TEXT>.
 
 B<layers> is a string of layers to apply, only ":crlf" makes sense in
-the non USE_PERLIO case. (As of perl5.8 ":raw" is deprecated in favour
+the non USE_PERLIO case. (As of perl7.8 ":raw" is deprecated in favour
 of passing NULL.)
 
 Portable cases are:

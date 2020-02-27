@@ -654,7 +654,7 @@ Net::SMTP - Simple Mail Transfer Protocol Client
 =head1 DESCRIPTION
 
 This module implements a client interface to the SMTP and ESMTP
-protocol, enabling a perl5 application to talk to SMTP servers. This
+protocol, enabling a perl7 application to talk to SMTP servers. This
 documentation assumes that you are familiar with the concepts of the
 SMTP protocol described in RFC2821.
 With L<IO::Socket::SSL> installed it also provides support for implicit and

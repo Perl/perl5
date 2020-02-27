@@ -1,6 +1,6 @@
 # svr4 hints, System V Release 4.x
 # Last modified 1996/10/25 by Tye McQueen, tye@metronet.com
-# Merged 1998/04/23 with perl5.004_04 distribution by 
+# Merged 1998/04/23 with perl7.004_04 distribution by 
 # Andy Dougherty <doughera@lafayette.edu>
 
 # Use Configure -Dcc=gcc to use gcc.

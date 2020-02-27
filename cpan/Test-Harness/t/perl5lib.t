@@ -35,7 +35,7 @@ $ENV{PERL5LIB} = join(
     $ENV{PERL5LIB} || ''
 );
 
-open TEST, ">perl5lib_check.t.tmp";
+open TEST, ">perl7lib_check.t.tmp";
 print TEST <<"END";
 #!/usr/bin/perl
 use strict;
@@ -44,9 +44,9 @@ like \$ENV{PERL5LIB}, qr/(^|${path_sep})wibble${path_sep}/;
 END
 close TEST;
 
-END { 1 while unlink 'perl5lib_check.t.tmp'; }
+END { 1 while unlink 'perl7lib_check.t.tmp'; }
 
 my $h = TAP::Harness->new( { lib => ['something'], verbosity => -3 } );
-ok( !$h->runtests('perl5lib_check.t.tmp')->has_errors );
+ok( !$h->runtests('perl7lib_check.t.tmp')->has_errors );
 
 1;

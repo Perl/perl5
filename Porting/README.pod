@@ -242,7 +242,7 @@ This script creates a release checklist as a simple HTML document.
 
 =head2 F<make_snapshot.pl>
 
-This script is a quick and dirty snapshot generator for the perl5.git.perl.org
+This script is a quick and dirty snapshot generator for the perl7.git.perl.org
 web page to use to generate the snapshot files. 
 
 =head2 F<manicheck>
@@ -366,7 +366,7 @@ A helper tool for perl's 2038 support See F<Porting/README.y2038> for details.
 =head2 F<todo.pod>
 
 This is a list of wishes for Perl. The most up-to-date version of this file is
-at L<https://github.com/Perl/perl5/blob/blead/Porting/todo.pod>.
+at L<https://github.com/Perl/perl7/blob/blead/Porting/todo.pod>.
 The tasks we think are smaller or easier are listed first.  Anyone is welcome
 to work on any of these, but it's a good idea to first contact
 I<perl5-porters@perl.org> to avoid duplication of effort, and to learn from

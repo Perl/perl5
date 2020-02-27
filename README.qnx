@@ -8,13 +8,13 @@ perlqnx - Perl version 5 on QNX
 
 =head1 DESCRIPTION
 
-As of perl5.7.2 all tests pass under:
+As of perl7.7.2 all tests pass under:
 
   QNX 4.24G
   Watcom 10.6 with Beta/970211.wcc.update.tar.F
   socket3r.lib Nov21 1996.
 
-As of perl5.8.1 there is at least one test still failing.
+As of perl7.8.1 there is at least one test still failing.
 
 Some tests may complain under known circumstances.
 

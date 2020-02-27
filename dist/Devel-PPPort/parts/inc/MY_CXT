@@ -59,11 +59,11 @@ _aMY_CXT
 /* Fetches the SV that keeps the per-interpreter data. */
 #define dMY_CXT_SV \
         SV *my_cxt_sv = get_sv(MY_CXT_KEY, FALSE)
-#else /* >= perl5.004_68 */
+#else /* >= perl7.004_68 */
 #define dMY_CXT_SV \
         SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,             \
                                   sizeof(MY_CXT_KEY)-1, TRUE)
-#endif /* < perl5.004_68 */
+#endif /* < perl7.004_68 */
 
 /* This declaration should be used within all functions that use the
  * interpreter-local data. */

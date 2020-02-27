@@ -166,9 +166,9 @@ pre-release testing, and you may wish to upload to PAUSE via URL.
 Make sure you have a way of sharing files, such as a web server or
 file-sharing service.
 
-Porters have access to the "dromedary" server (users.perl5.git.perl.org),
+Porters have access to the "dromedary" server (users.perl7.git.perl.org),
 which has a F<public_html> directory to share files with.
-(L<http://users.perl5.git.perl.org/~username/perl-5.xx.y.tar.gz>)
+(L<http://users.perl7.git.perl.org/~username/perl-5.xx.y.tar.gz>)
 
 If you use Dropbox, you can append "raw=1" as a parameter to their usual
 sharing link to allow direct download (albeit with redirects).
@@ -366,7 +366,7 @@ This comes down to:
 =head3 monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
-L<https://tux.nl/perl5/smoke/index.html>, L<https://perl5.test-smoke.org/>
+L<https://tux.nl/perl7/smoke/index.html>, L<https://perl7.test-smoke.org/>
 and L<http://perl.develop-help.com> for a summary. See also
 L<https://www.nntp.perl.org/group/perl.daily-build.reports/> which has
 the raw reports.
@@ -940,7 +940,7 @@ especially as regards version numbers, patch and/or RC levels, and @INC
 paths. Note that as they have been built from a git working
 directory, they will still identify themselves using git tags and
 commits. (Note that for an odd-numbered version, perl will install
-itself as C<perl5.x.y>). C<perl -v> will identify itself as:
+itself as C<perl7.x.y>). C<perl -v> will identify itself as:
 
  This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
 
@@ -1177,7 +1177,7 @@ eliminate anxious gnashing of teeth while you wait to see if your
 cable modem.
 
 You can make use of your home directory on dromedary for
-this purpose: F<http://users.perl5.git.perl.org/~USERNAME> maps to
+this purpose: F<http://users.perl7.git.perl.org/~USERNAME> maps to
 F</home/USERNAME/public_html>, where F<USERNAME> is your login account
 on dromedary.
 
@@ -1276,7 +1276,7 @@ why you chose that particular quote for your epigraph.
 =head3 update the link to the latest perl on perlweb
 
 Submit a pull request to L<https://github.com/perlorg/perlweb> to update the
-link in F<docs/dev/perl5/index.html> to point to your release.
+link in F<docs/dev/perl7/index.html> to point to your release.
 
 =for checklist skip RC
 
@@ -1464,15 +1464,15 @@ I<You MUST SKIP this step for RC, BLEAD-POINT>
 Copy the perldelta.pod for this release into blead; for example:
 
  $ cd ..../blead
- $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  #for example
- $ git add pod/perl5101delta.pod
+ $ cp -i ../5.10.x/pod/perldelta.pod pod/perl7101delta.pod  #for example
+ $ git add pod/perl7101delta.pod
 
-Don't forget to set the NAME correctly in the new file (e.g. perl5101delta
+Don't forget to set the NAME correctly in the new file (e.g. perl7101delta
 rather than perldelta).
 
 Edit F<pod/perl.pod> to add an entry for the file, e.g.:
 
-    perl5101delta		Perl changes in version 5.10.1
+    perl7101delta		Perl changes in version 5.10.1
 
 Then rebuild various files:
 

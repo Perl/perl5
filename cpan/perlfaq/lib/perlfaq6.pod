@@ -521,7 +521,7 @@ in the outer capture group as an independent part of the regex.
 
 Putting it all together, you have:
 
-    #!/usr/local/bin/perl5.10.0
+    #!/usr/local/bin/perl7.10.0
 
     my $string =<<"HERE";
     I have some <brackets in <nested brackets> > and
@@ -556,7 +556,7 @@ get a balanced match, remove its outer delimiter (that's the one you
 just matched so don't match it again) and add it to a queue of strings
 to process. Keep doing that until you get no matches:
 
-    #!/usr/local/bin/perl5.10.0
+    #!/usr/local/bin/perl7.10.0
 
     my @queue =<<"HERE";
     I have some <brackets in <nested brackets> > and

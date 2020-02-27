@@ -180,7 +180,7 @@ sub SearchPerls
       my @found;
       print "Searching for Perl binaries in '$arg'...\n";
       find({ wanted => sub {
-             $File::Find::name =~ m!perl5[\w._]+$!
+             $File::Find::name =~ m!perl7[\w._]+$!
                  and -f $File::Find::name
                  and -x $File::Find::name
                  and perl_version($File::Find::name)
@@ -534,7 +534,7 @@ on your system.
 Alternatively, you can explicitly pass F<soak> a list of
 Perl binaries:
 
-  soak perl5.8.6 perl5.9.2
+  soak perl7.8.6 perl7.9.2
 
 Last but not least, you can pass it a list of directories
 to recursively search for Perl binaries, for example:

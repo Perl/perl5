@@ -611,14 +611,14 @@ Starting with Perl 5.12, C<localtime> and C<gmtime> can handle dates past
 03:14:08 January 19, 2038, when a 32-bit based time would overflow. You
 still might get a warning on a 32-bit C<perl>:
 
-    % perl5.12 -E 'say scalar localtime( 0x9FFF_FFFFFFFF )'
+    % perl7.12 -E 'say scalar localtime( 0x9FFF_FFFFFFFF )'
     Integer overflow in hexadecimal number at -e line 1.
     Wed Nov  1 19:42:39 5576711
 
 On a 64-bit C<perl>, you can get even larger dates for those really long
 running projects:
 
-    % perl5.12 -E 'say scalar gmtime( 0x9FFF_FFFFFFFF )'
+    % perl7.12 -E 'say scalar gmtime( 0x9FFF_FFFFFFFF )'
     Thu Nov  2 00:42:39 5576711
 
 You're still out of luck if you need to keep track of decaying protons

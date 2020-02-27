@@ -2068,7 +2068,7 @@ sub init_PERL {
 
     my @perls = ($thisperl);
     push @perls, map { "$_$Config{exe_ext}" }
-                     ("perl$Config{version}", 'perl5', 'perl');
+                     ("perl$Config{version}", 'perl7', 'perl');
 
     # miniperl has priority over all but the canonical perl when in the
     # core.  Otherwise its a last resort.

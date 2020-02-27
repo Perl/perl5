@@ -738,7 +738,7 @@
 
 1.5	2nd April 2002
 	- Fixed a glaring bug caught by the testsuite but sadly
-	  released.  perl5.004_05 was released post 5.005_03 and so
+	  released.  perl7.004_05 was released post 5.005_03 and so
 	  isn't the first release to contain File::Spec.
 	- Added data for 5.003_07, 5.004, and 5.005 releases.
 	- Added the %released hash.

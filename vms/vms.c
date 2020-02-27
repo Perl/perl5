@@ -1,6 +1,6 @@
 /*    vms.c
  *
- *    VMS-specific routines for perl5
+ *    VMS-specific routines for perl7
  *
  *    Copyright (C) 1993-2015 by Charles Bailey and others.
  *
@@ -4135,7 +4135,7 @@ create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     /* Assign a channel on this so that it will persist, and not login */
     /* We stash this channel in the info structure for reference. */
     /* The created xterm self destructs when the last channel is removed */
-    /* and it appears that perl5db.pl (perl debugger) does this routinely */
+    /* and it appears that perl7db.pl (perl debugger) does this routinely */
     /* So leave this assigned. */
     device_name_dsc.dsc$w_length = device_name_len;
     status = sys$assign(&device_name_dsc,&info->xchan,0,0);
@@ -9103,7 +9103,7 @@ Perl_tounixpath_utf8_ts(pTHX_ const char *path, char *buf, int * utf8_fl)
  *  distributions of the software.  The code may be modified and             *
  *  distributed under the same terms as Perl itself.                         *
  *                                                                           *
- *  27-Aug-1994 Modified for inclusion in perl5                              *
+ *  27-Aug-1994 Modified for inclusion in perl7                              *
  *              by Charles Bailey  (bailey AT newman DOT upenn DOT edu)      *
  *****************************************************************************
  */

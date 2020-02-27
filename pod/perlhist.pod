@@ -265,19 +265,19 @@ the strings?).
  Chip    5.004          1997-May-15     A major maintenance release.
 
  Tim      5.004_01-t1   1997-???-??     The 5.004 maintenance track.
-          5.004_01-t2   1997-Jun-11     aka perl5.004m1t2
+          5.004_01-t2   1997-Jun-11     aka perl7.004m1t2
           5.004_01      1997-Jun-13
-          5.004_01_01   1997-Jul-29     aka perl5.004m2t1
-          5.004_01_02   1997-Aug-01     aka perl5.004m2t2
-          5.004_01_03   1997-Aug-05     aka perl5.004m2t3
+          5.004_01_01   1997-Jul-29     aka perl7.004m2t1
+          5.004_01_02   1997-Aug-01     aka perl7.004m2t2
+          5.004_01_03   1997-Aug-05     aka perl7.004m2t3
           5.004_02      1997-Aug-07
-          5.004_02_01   1997-Aug-12     aka perl5.004m3t1
-          5.004_03-t2   1997-Aug-13     aka perl5.004m3t2
+          5.004_02_01   1997-Aug-12     aka perl7.004m3t1
+          5.004_03-t2   1997-Aug-13     aka perl7.004m3t2
           5.004_03      1997-Sep-05
-          5.004_04-t1   1997-Sep-19     aka perl5.004m4t1
-          5.004_04-t2   1997-Sep-23     aka perl5.004m4t2
-          5.004_04-t3   1997-Oct-10     aka perl5.004m4t3
-          5.004_04-t4   1997-Oct-14     aka perl5.004m4t4
+          5.004_04-t1   1997-Sep-19     aka perl7.004m4t1
+          5.004_04-t2   1997-Sep-23     aka perl7.004m4t2
+          5.004_04-t3   1997-Oct-10     aka perl7.004m4t3
+          5.004_04-t4   1997-Oct-14     aka perl7.004m4t4
           5.004_04      1997-Oct-15
           5.004_04-m1   1998-Mar-04     (5.004m5t1) Maint. trials for 5.004_05.
           5.004_04-m2   1998-May-01

@@ -22,14 +22,14 @@ I<github.com>.
 
 You can make a read-only clone of the repository by running:
 
-  % git clone git://github.com/Perl/perl5.git perl
+  % git clone git://github.com/Perl/perl7.git perl
 
 This uses the git protocol (port 9418).
 
 If you cannot use the git protocol for firewall reasons, you can also
 clone via http:
 
-  % git clone https://github.com/Perl/perl5.git perl
+  % git clone https://github.com/Perl/perl7.git perl
 
 =head1 WORKING WITH THE REPOSITORY
 
@@ -259,7 +259,7 @@ Now, create a fork on GitHub to push your branch to, and add it as a
 remote if you haven't already, as described in the GitHub documentation
 at L<https://help.github.com/en/articles/working-with-forks>:
 
-  % git remote add fork git@github.com:MyUser/perl5.git
+  % git remote add fork git@github.com:MyUser/perl7.git
 
 And push the branch to your fork:
 
@@ -493,9 +493,9 @@ producing an error like this:
   *** It is forbidden to delete blead/maint branches in this repository
   error: hooks/update exited with error code 1
   error: hook declined to update refs/heads/blead
-  To ssh://perl5.git.perl.org/perl
+  To ssh://perl7.git.perl.org/perl
    ! [remote rejected] blead (hook declined)
-   error: failed to push some refs to 'ssh://perl5.git.perl.org/perl'
+   error: failed to push some refs to 'ssh://perl7.git.perl.org/perl'
 
 As a matter of policy we do B<not> edit the history of the blead and
 maint-* branches. If a typo (or worse) sneaks into a commit to blead or
@@ -528,7 +528,7 @@ Once you have write access, you will need to modify the URL for the
 origin remote to enable pushing. Edit F<.git/config> with the
 git-config(1) command:
 
-  % git config remote.origin.url git@github.com:Perl/perl5.git
+  % git config remote.origin.url git@github.com:Perl/perl7.git
 
 You can also set up your user name and e-mail address. Most people do
 this once globally in their F<~/.gitconfig> by doing something like:
@@ -544,7 +544,7 @@ execute something like the following in F<perl>:
 It is also possible to keep C<origin> as a git remote, and add a new
 remote for ssh access:
 
-  % git remote add camel git@github.com:Perl/perl5.git
+  % git remote add camel git@github.com:Perl/perl7.git
 
 This allows you to update your local repository by pulling from
 C<origin>, which is faster and doesn't require you to authenticate, and
@@ -677,9 +677,9 @@ Sometimes, blead will move while you're building or testing your
 changes.  When this happens, your push will be rejected with a message
 like this:
 
- To ssh://perl5.git.perl.org/perl.git
+ To ssh://perl7.git.perl.org/perl.git
   ! [rejected]        blead -> blead (non-fast-forward)
- error: failed to push some refs to 'ssh://perl5.git.perl.org/perl.git'
+ error: failed to push some refs to 'ssh://perl7.git.perl.org/perl.git'
  To prevent you from losing history, non-fast-forward updates were
  rejected Merge the remote changes (e.g. 'git pull') before pushing
  again.  See the 'Note about fast-forwards' section of 'git push --help'

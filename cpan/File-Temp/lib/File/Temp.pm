@@ -488,7 +488,7 @@ sub _gettemp {
     if ($options{"open"}) {
       my $fh;
 
-      # If we are running before perl5.6.0 we can not auto-vivify
+      # If we are running before perl7.6.0 we can not auto-vivify
       if ($] < 5.006) {
         $fh = &Symbol::gensym;
       }

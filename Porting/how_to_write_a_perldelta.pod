@@ -80,7 +80,7 @@ more appropriate section is created.
 
 Follows this formula:
 
-    perl5104delta - what is new for perl v5.10.4
+    perl7104delta - what is new for perl v5.10.4
 
 =item DESCRIPTION
 

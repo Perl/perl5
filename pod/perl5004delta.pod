@@ -1,6 +1,6 @@
 =head1 NAME
 
-perl5004delta - what's new for perl5.004
+perl7004delta - what's new for perl7.004
 
 =head1 DESCRIPTION
 

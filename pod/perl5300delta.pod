@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5300delta - what is new for perl v5.30.0
+perl7300delta - what is new for perl v5.30.0
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.28.0 release and the 5.30.0
 release.
 
 If you are upgrading from an earlier release such as 5.26.0, first read
-L<perl5280delta>, which describes differences between 5.26.0 and 5.28.0.
+L<perl7280delta>, which describes differences between 5.26.0 and 5.28.0.
 
 =head1 Notice
 
@@ -254,7 +254,7 @@ L<[perl #133691]|https://rt.perl.org/Ticket/Display.html?id=133691>.
 =item *
 
 Improvements based on LGTM analysis and recommendation.
-(L<https://lgtm.com/projects/g/Perl/perl5/alerts/?mode=tree>). 
+(L<https://lgtm.com/projects/g/Perl/perl7/alerts/?mode=tree>). 
 L<[perl #133686]|https://rt.perl.org/Ticket/Display.html?id=133686>.
 L<[perl #133699]|https://rt.perl.org/Ticket/Display.html?id=133699>.
 
@@ -523,7 +523,7 @@ L<parent> has been upgraded from version 0.236 to 0.237.
 
 =item *
 
-L<perl5db.pl> has been upgraded from version 1.54 to 1.55.
+L<perl7db.pl> has been upgraded from version 1.54 to 1.55.
 
 Debugging threaded code no longer deadlocks in C<DB::sub> nor
 C<DB::lsub>.

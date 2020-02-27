@@ -1,4 +1,4 @@
-#!/usr/local/perl5.6.1/bin/perl -w
+#!/usr/local/perl7.6.1/bin/perl -w
 use strict;
 use warnings;
 use Module::CoreList;

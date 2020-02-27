@@ -251,7 +251,7 @@ fi
 
 # On SPARClinux,
 # The following csh consistently coredumped in the test directory
-# "/home/mikedlr/perl5.003_94/t", though not most other directories.
+# "/home/mikedlr/perl7.003_94/t", though not most other directories.
 
 #Name        : csh                    Distribution: Red Hat Linux (Rembrandt)
 #Version     : 5.2.6                        Vendor: Red Hat Software

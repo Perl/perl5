@@ -304,11 +304,11 @@ $_ = 'Foo';
 ok($_, 'Foo');
 
 $_ = 'Foo';
-@temp = $c->index("perl5", "RL");
+@temp = $c->index("perl7", "RL");
 ok($_, 'Foo');
 
 $_ = 'Foo';
-@temp = $c->index("perl5", "LR");
+@temp = $c->index("perl7", "LR");
 ok($_, 'Foo');
 
 # 91

@@ -2044,12 +2044,12 @@ sub init_INSTALL_from_PREFIX {
     my $version = $Config{version};
 
     # default style
-    my $libstyle = $Config{installstyle} || 'lib/perl5';
+    my $libstyle = $Config{installstyle} || 'lib/perl7';
     my $manstyle = '';
 
     if( $self->{LIBSTYLE} ) {
         $libstyle = $self->{LIBSTYLE};
-        $manstyle = $self->{LIBSTYLE} eq 'lib/perl5' ? 'lib/perl5' : '';
+        $manstyle = $self->{LIBSTYLE} eq 'lib/perl7' ? 'lib/perl7' : '';
     }
 
     # Some systems, like VOS, set installman*dir to '' if they can't
@@ -2193,8 +2193,8 @@ sub init_INSTALL_from_PREFIX {
 =cut
 
 my %map = (
-           lib      => [qw(lib perl5)],
-           arch     => [('lib', 'perl5', $Config{archname})],
+           lib      => [qw(lib perl7)],
+           arch     => [('lib', 'perl7', $Config{archname})],
            bin      => [qw(bin)],
            man1dir  => [qw(man man1)],
            man3dir  => [qw(man man3)]

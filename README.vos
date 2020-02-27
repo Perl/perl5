@@ -50,19 +50,19 @@ modules distributed with perl, the following directories can be
 used to hold such files (replace the string VERSION by the
 appropriate version number):
 
-     >system>ported>lib>perl5>VERSION>i786
+     >system>ported>lib>perl7>VERSION>i786
 
 =item 3
 
 Site-specific perl extensions and modules can be installed in one of
 two places.  Put architecture-independent files into:
 
-     >system>ported>lib>perl5>site_perl>VERSION
+     >system>ported>lib>perl7>site_perl>VERSION
 
 Put site-specific architecture-dependent files into one of the
 following directories:
 
-     >system>ported>lib>perl5>site_perl>VERSION>i786
+     >system>ported>lib>perl7>site_perl>VERSION>i786
 
 =item 4
 

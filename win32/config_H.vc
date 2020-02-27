@@ -7,7 +7,7 @@
  * For a more permanent change edit undef and rerun config_h.SH.
  */
 
-/* Package name      : perl5
+/* Package name      : perl7
  * Source directory  : 
  * Configuration time: Tue Oct 17 08:29:51 2017
  * Configured by     : shay
@@ -1213,7 +1213,7 @@
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
  *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
+ *	library files for perl7.  It is most often a local directory
  *	such as /usr/local/lib.  Programs using this variable must be
  *	prepared to deal with filename expansion.  If ARCHLIB is the
  *	same as PRIVLIB, it is not defined, since presumably the

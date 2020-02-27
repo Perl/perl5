@@ -3842,7 +3842,7 @@ S_minus_v(pTHX)
 #ifdef DJGPP
 	PerlIO_printf(PIO_stdout,
 		      "djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n"
-		      "djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
+		      "djgpp v2 port (perl7004+) by Laszlo Molnar, 1997-1999\n");
 #endif
 #ifdef OS2
 	PerlIO_printf(PIO_stdout,
@@ -4690,7 +4690,7 @@ STATIC void
 S_init_perllib(pTHX)
 {
 #ifndef VMS
-    const char *perl5lib = NULL;
+    const char *perl7lib = NULL;
 #endif
     const char *s;
 #if defined(WIN32) && !defined(PERL_IS_MINIPERL)
@@ -4699,18 +4699,18 @@ S_init_perllib(pTHX)
 
     if (!TAINTING_get) {
 #ifndef VMS
-	perl5lib = PerlEnv_getenv("PERL5LIB");
+	perl7lib = PerlEnv_getenv("PERL5LIB");
 /*
  * It isn't possible to delete an environment variable with
  * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
  * case we treat PERL5LIB as undefined if it has a zero-length value.
  */
 #if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
-	if (perl5lib && *perl5lib != '\0')
+	if (perl7lib && *perl7lib != '\0')
 #else
-	if (perl5lib)
+	if (perl7lib)
 #endif
-	    incpush_use_sep(perl5lib, 0, INCPUSH_ADD_SUB_DIRS);
+	    incpush_use_sep(perl7lib, 0, INCPUSH_ADD_SUB_DIRS);
 	else {
 	    s = PerlEnv_getenv("PERLLIB");
 	    if (s)
@@ -4850,8 +4850,8 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 * and the leading "../" from the @INC element. ie a logical "../"
 	 * cleanup
 	 * Finally concatenate the prefix and the remainder of the @INC element
-	 * The intent is that /usr/local/bin/perl and .../../lib/perl5
-	 * generates /usr/local/lib/perl5
+	 * The intent is that /usr/local/bin/perl and .../../lib/perl7
+	 * generates /usr/local/lib/perl7
 	 */
 	    const char *libpath = SvPVX(libdir);
 	    STRLEN libpath_len = SvCUR(libdir);

@@ -66,7 +66,7 @@ Configure will B<not> prompt you to install I<man> pages.
 
 The default options gathered by Configure with the assistance of
 F<hints/cygwin.sh> will build a Perl that supports dynamic loading
-(which requires a shared F<cygperl5_16.dll>).
+(which requires a shared F<cygperl7_16.dll>).
 
 This will run Configure and keep a record:
 
@@ -561,10 +561,10 @@ be kept as clean as possible.
 
  INSTALL README.cygwin README.win32 MANIFEST
  pod/perl.pod pod/perlport.pod pod/perlfaq3.pod
- pod/perldelta.pod pod/perl5004delta.pod pod/perl56delta.pod
- pod/perl561delta.pod pod/perl570delta.pod pod/perl572delta.pod
- pod/perl573delta.pod pod/perl58delta.pod pod/perl581delta.pod
- pod/perl590delta.pod pod/perlhist.pod pod/perlmodlib.pod
+ pod/perldelta.pod pod/perl7004delta.pod pod/perl76delta.pod
+ pod/perl761delta.pod pod/perl770delta.pod pod/perl772delta.pod
+ pod/perl773delta.pod pod/perl58delta.pod pod/perl581delta.pod
+ pod/perl790delta.pod pod/perlhist.pod pod/perlmodlib.pod
  pod/perltoc.pod Porting/Glossary pod/perlgit.pod
  Porting/checkAUTHORS.pl
  dist/Cwd/Changes ext/Compress-Raw-Zlib/Changes
@@ -709,7 +709,7 @@ be kept as clean as possible.
  lib/Pod/Perldoc/ToMan.pm - '-c' switch for pod2man
  lib/Pod/Perldoc.pm    - Use 'less' pager, and use .exe extension
  lib/Term/ANSIColor.pm - Cygwin terminal info
- lib/perl5db.pl        - use stdin not /dev/tty
+ lib/perl7db.pl        - use stdin not /dev/tty
  utils/perlbug.PL      - Add CYGWIN environment variable to report
 
 =item Perl Module Tests

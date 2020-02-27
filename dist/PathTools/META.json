@@ -47,7 +47,7 @@
       "homepage" : "http://dev.perl.org/",
       "repository" : {
          "type" : "git",
-         "url" : "git://perl5.git.perl.org/perl.git"
+         "url" : "git://perl7.git.perl.org/perl.git"
       }
    },
    "version" : "3.73",

@@ -5,7 +5,7 @@ todo - Perl TO-DO list
 =head1 DESCRIPTION
 
 This is a list of wishes for Perl. The most up to date version of this file
-is at L<https://github.com/Perl/perl5/blob/blead/Porting/todo.pod>.
+is at L<https://github.com/Perl/perl7/blob/blead/Porting/todo.pod>.
 
 The tasks we think are smaller or easier are listed first. Anyone is welcome
 to work on any of these, but it's a good idea to first contact
@@ -432,7 +432,7 @@ completely different. Andy Dougherty makes the counter argument "In parrot, I
 tried to call the command used to link object files and  libraries into an
 executable F<link>, since that's what my vaguely-remembered DOS and VMS
 experience suggested. I don't think any real confusion has ensued, so it's
-probably a reasonable name for perl5 to use."
+probably a reasonable name for perl7 to use."
 
 "Alas, I've always worried that introducing it would make things worse, 
 since now the module building utilities would have to look for 
@@ -608,7 +608,7 @@ called when the parser is finished building an C<entersub> op which calls
 them.
 
 Registration is done with C<Perl_cv_set_call_checker>, is documented at the
-API level in L<perlapi>, and L<perl5140delta/Custom per-subroutine check hooks>
+API level in L<perlapi>, and L<perl7140delta/Custom per-subroutine check hooks>
 notes that it can be used to inline a subroutine, by replacing it with a
 custom op. However there is no further detail of the code needed to do this.
 It would be useful to add one or more annotated examples of how to create

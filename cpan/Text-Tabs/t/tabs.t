@@ -1,4 +1,4 @@
-#!/usr/old/bin/perl5.004_01 -w
+#!/usr/old/bin/perl7.004_01 -w
 
 @tests = (split(/\nEND\n/s, <<DONE));
 TEST 1 u

@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5260delta - what is new for perl v5.26.0
+perl7260delta - what is new for perl v5.26.0
 
 =head1 DESCRIPTION
 
@@ -934,7 +934,7 @@ L<parent> has been upgraded from version 0.234 to 0.236.
 
 =item *
 
-L<perl5db.pl> has been upgraded from version 1.50 to 1.51.
+L<perl7db.pl> has been upgraded from version 1.50 to 1.51.
 
 It now ignores F</dev/tty> on non-Unix systems.
 L<[perl #113960]|https://rt.perl.org/Public/Bug/Display.html?id=113960>
@@ -2179,7 +2179,7 @@ L<[perl #124050]|https://rt.perl.org/Public/Bug/Display.html?id=124050>
 
 =item *
 
-Prevent debugger tests (F<lib/perl5db.t>) from failing due to the contents
+Prevent debugger tests (F<lib/perl7db.t>) from failing due to the contents
 of C<$ENV{PERLDB_OPTS}>.
 L<[perl #130445]|https://rt.perl.org/Public/Bug/Display.html?id=130445>
 
@@ -2501,7 +2501,7 @@ default.  To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
 This flag alters how the C<op_sibling> field is used in C<OP> structures,
 and has been available optionally since perl 5.22.
 
-See L<perl5220delta/"Internal Changes"> for more details of what this
+See L<perl7220delta/"Internal Changes"> for more details of what this
 build option does.
 
 =item *

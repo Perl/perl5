@@ -245,10 +245,10 @@ my @test_cases = (
 
 # This block added to verify fix for RT #87322
 if ($::os_id == 2 and $::os_major == 6) {    # Vista, Server 2008 (incl R2), 7
-  my @big_perl5lib = ('z' x 16) x 2049;
+  my @big_perl7lib = ('z' x 16) x 2049;
     push @testcases, [
         'enough items so PERL5LIB val is longer than 32k',
-        join($sep, @big_perl5lib), @big_perl5lib,
+        join($sep, @big_perl7lib), @big_perl7lib,
     ];
 }
 

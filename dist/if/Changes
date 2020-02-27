@@ -35,7 +35,7 @@ Revision history for Perl extension if.
         - Update email address.
 
 0.05      2006-01-28 (perl v5.9.3)
-        - Sync with perl5.12.2:
+        - Sync with perl7.12.2:
         - Better error handling.
         - Suggest significance of => in the docs.
 

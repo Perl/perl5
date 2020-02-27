@@ -81,7 +81,7 @@ The latest versions of perl have more bug fixes.
 
 The latest versions of perl may contain performance improvements and
 features not present in older versions.  There have been many changes
-in perl since perl5 was first introduced.
+in perl since perl7 was first introduced.
 
 =item *
 
@@ -111,14 +111,14 @@ L<perlpolicy/"MAINTENANCE AND SUPPORT"> for more information.
 
 There are really two tracks of perl development: a maintenance version
 and an experimental version. The maintenance versions are stable, and
-have an even number as the minor release (i.e. perl5.24.x, where 24 is the
+have an even number as the minor release (i.e. perl7.24.x, where 24 is the
 minor release). The experimental versions may include features that
 don't make it into the stable versions, and have an odd number as the
-minor release (i.e. perl5.25.x, where 25 is the minor release).
+minor release (i.e. perl7.25.x, where 25 is the minor release).
 
 =item *
 
-You can consult L<releases|http://dev.perl.org/perl5> to determine the
+You can consult L<releases|http://dev.perl.org/perl7> to determine the
 current stable release of Perl.
 
 =back

@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-perl5db.pl - the perl debugger
+perl7db.pl - the perl debugger
 
 =head1 SYNOPSIS
 
@@ -9,9 +9,9 @@ perl5db.pl - the perl debugger
 
 =head1 DESCRIPTION
 
-C<perl5db.pl> is the perl debugger. It is loaded automatically by Perl when
+C<perl7db.pl> is the perl debugger. It is loaded automatically by Perl when
 you invoke a script with C<perl -d>. This documentation tries to outline the
-structure and services provided by C<perl5db.pl>, and to describe how you
+structure and services provided by C<perl7db.pl>, and to describe how you
 can use them.
 
 =head1 GENERAL NOTES
@@ -183,7 +183,7 @@ The hash C<%{'_<'.$filename}> (aliased locally to C<%dbline> via glob
 assignment) contains breakpoints and actions.  The keys are line numbers;
 you can set individual values, but not the whole hash. The Perl interpreter
 uses this hash to determine where breakpoints have been set. Any true value is
-considered to be a breakpoint; C<perl5db.pl> uses C<$break_condition\0$action>.
+considered to be a breakpoint; C<perl7db.pl> uses C<$break_condition\0$action>.
 Values are magical in numeric context: 1 if the line is breakable, 0 if not.
 
 The scalar C<${"_<$filename"}> simply contains the string C<$filename>.
@@ -193,7 +193,7 @@ like C<(eval 34)>.
 
 =head1 DEBUGGER STARTUP
 
-When C<perl5db.pl> starts, it reads an rcfile (C<perl5db.ini> for
+When C<perl7db.pl> starts, it reads an rcfile (C<perl7db.ini> for
 non-interactive sessions, C<.perldb> for interactive ones) that can set a number
 of options. In addition, this file may define a subroutine C<&afterinit>
 that will be executed (in the debugger's context) after the debugger has
@@ -268,7 +268,7 @@ Perl supplies the values for C<%sub>.  It effectively inserts
 a C<&DB::DB();> in front of each place that can have a
 breakpoint. At each subroutine call, it calls C<&DB::sub> with
 C<$DB::sub> set to the called subroutine. It also inserts a C<BEGIN
-{require 'perl5db.pl'}> before the first line.
+{require 'perl7db.pl'}> before the first line.
 
 After each C<require>d file is compiled, but before it is executed, a
 call to C<&DB::postponed($main::{'_<'.$filename})> is done. C<$filename>
@@ -3916,7 +3916,7 @@ sub _handle_save_command {
     my $self = shift;
 
     if (my $new_fn = $self->cmd_args) {
-        my $filename = $new_fn || '.perl5dbrc';    # default?
+        my $filename = $new_fn || '.perl7dbrc';    # default?
         if ( open my $fh, '>', $filename ) {
 
             # chomp to remove extraneous newlines from source'd files
@@ -8018,7 +8018,7 @@ sub list_modules {    # versions
         $file = $_;                                # get the module name
         s,\.p[lm]$,,i;                             # remove '.pl' or '.pm'
         s,/,::,g;                                  # change '/' to '::'
-        s/^perl5db$/DB/;                           # Special case: debugger
+        s/^perl7db$/DB/;                           # Special case: debugger
                                                    # moves to package DB
         s/^Term::ReadLine::readline$/readline/;    # simplify readline
 
@@ -9735,7 +9735,7 @@ sub restart {
     # corresponding to the one-liner read all the lines
     # out of it (except for the first one, which is going
     # to be added back on again when 'perl -d' runs: that's
-    # the 'require perl5db.pl;' line), and add them back on
+    # the 'require perl7db.pl;' line), and add them back on
     # to the command line to be executed.
     if ( $0 eq '-e' ) {
         my $lines = *{$main::{'_<-e'}}{ARRAY};

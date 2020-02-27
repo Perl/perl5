@@ -1,7 +1,7 @@
 package ExtUtils::Constant::XS;
 
 use strict;
-use vars qw($VERSION %XS_Constant %XS_TypeSet @ISA @EXPORT_OK $is_perl56);
+use vars qw($VERSION %XS_Constant %XS_TypeSet @ISA @EXPORT_OK $is_perl76);
 use Carp;
 use ExtUtils::Constant::Utils 'perl_stringify';
 require ExtUtils::Constant::Base;
@@ -12,7 +12,7 @@ require ExtUtils::Constant::Base;
 
 $VERSION = '0.03';
 
-$is_perl56 = ($] < 5.007 && $] > 5.005_50);
+$is_perl76 = ($] < 5.007 && $] > 5.005_50);
 
 =head1 NAME
 

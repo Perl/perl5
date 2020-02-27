@@ -8,8 +8,8 @@ use Carp;
 @EXPORT_OK = qw(C_stringify perl_stringify);
 $VERSION = '0.04';
 
-use constant is_perl55 => ($] < 5.005_50);
-use constant is_perl56 => ($] < 5.007 && $] > 5.005_50);
+use constant is_perl75 => ($] < 5.005_50);
+use constant is_perl76 => ($] < 5.007 && $] > 5.005_50);
 use constant is_sane_perl => $] > 5.007;
 
 =head1 NAME
@@ -48,7 +48,7 @@ sub C_stringify {
     if tr/\0-\377// != length;
   # grr 5.6.1 more so because its regexps will break on data that happens to
   # be utf8, which includes my 8 bit test cases.
-  $_ = pack 'C*', unpack 'U*', $_ . pack 'U*' if is_perl56;
+  $_ = pack 'C*', unpack 'U*', $_ . pack 'U*' if is_perl76;
   s/\\/\\\\/g;
   s/([\"\'])/\\$1/g;	# Grr. fix perl mode.
   s/\n/\\n/g;		# Ensure newlines don't end up in octal
@@ -56,7 +56,7 @@ sub C_stringify {
   s/\t/\\t/g;
   s/\f/\\f/g;
   s/\a/\\a/g;
-  unless (is_perl55) {
+  unless (is_perl75) {
     # This will elicit a warning on 5.005_03 about [: :] being reserved unless
     # I cheat
     my $cheat = '([[:^print:]])';
@@ -93,7 +93,7 @@ sub perl_stringify {
   s/\t/\\t/g;
   s/\f/\\f/g;
   s/\a/\\a/g;
-  unless (is_perl55) {
+  unless (is_perl75) {
     # This will elicit a warning on 5.005_03 about [: :] being reserved unless
     # I cheat
     my $cheat = '([[:^print:]])';

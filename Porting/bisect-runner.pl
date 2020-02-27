@@ -790,7 +790,7 @@ Passing this to F<bisect.pl> will likely cause the bisect to fail badly.
 
 Test that all stable (.0) revisions can be built. By default, attempts to
 build I<blead>, then tagged stable releases in reverse order down to
-I<perl-5.002> (or I<perl5.005> on a case insensitive file system). Stops at
+I<perl-5.002> (or I<perl7.005> on a case insensitive file system). Stops at
 the first failure, without cleaning the checkout. Use I<--start> to specify
 the earliest revision to test, I<--end> to specify the most recent. Useful
 for validating a new OS/CPU/compiler combination. For example
@@ -1642,7 +1642,7 @@ force_manifest_cleanup($missing, $created_dirs)
 
 if($options{'force-regen'}
    && extract_from_file('Makefile', qr/\bregen_headers\b/)) {
-    # regen_headers was added in e50aee73b3d4c555, patch.1m for perl5.001
+    # regen_headers was added in e50aee73b3d4c555, patch.1m for perl7.001
     # It's not worth faking it for earlier revisions.
     system_or_die('make regen_headers');
 }
@@ -1957,7 +1957,7 @@ EOPATCH
         # the ld flags if libraries are found there. It shifts the code to set
         # up libpth earlier, and then adds the code to add libpth entries to
         # ldflags
-        # mips was changed to ./mips in ecfc54246c2a6f42, perl5.000 patch.0g
+        # mips was changed to ./mips in ecfc54246c2a6f42, perl7.000 patch.0g
         apply_patch(sprintf <<'EOPATCH', $mips);
 diff --git a/Configure b/Configure
 index 53649d5..0635a6e 100755
@@ -2132,7 +2132,7 @@ EOPATCH
 
         if (extract_from_file('Configure', qr/xxx_prompt=y/)) {
             # 8e07c86ebc651fe9 or later
-            # ("This is my patch  patch.1n  for perl5.001.")
+            # ("This is my patch  patch.1n  for perl7.001.")
             apply_patch(<<'EOPATCH');
 diff --git a/Configure b/Configure
 index 62249dd..c5c384e 100755
@@ -2592,7 +2592,7 @@ EOPATCH
     } elsif ($^O eq 'linux') {
         if ($major < 1) {
             # sparc linux seems to need the -Dbool=char -DHAS_BOOL part of
-            # perl5.000 patch.0n: [address Configure and build issues]
+            # perl7.000 patch.0n: [address Configure and build issues]
             edit_file('hints/linux.sh', sub {
                           my $code = shift;
                           $code =~ s!-I/usr/include/bsd!-Dbool=char -DHAS_BOOL!g;

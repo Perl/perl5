@@ -23,7 +23,7 @@
  &return e$wrong_version
 &end
 &
-&if ^ (exists -directory (master_disk)>system>gnu_library>lib>perl5)
+&if ^ (exists -directory (master_disk)>system>gnu_library>lib>perl7)
 &then &do
  &display_line You must have S877 - GNU C/C++ and GNU Tools Release 2.0.1 to use this macro.
  &return e$wrong_version

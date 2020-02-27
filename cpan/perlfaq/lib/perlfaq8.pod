@@ -1306,7 +1306,7 @@ You can configure C<CPAN.pm> to automatically use this option too:
     cpan> o conf commit
 
 INSTALL_BASE tells these tools to put your modules into
-F</mydir/perl/lib/perl5>. See L<How do I add a directory to my
+F</mydir/perl/lib/perl7>. See L<How do I add a directory to my
 include path (@INC) at runtime?> for details on how to run your newly
 installed modules.
 
@@ -1363,7 +1363,7 @@ You can also use L<local::lib> to do much of the same thing. Install
 modules using L<local::lib>'s settings then use the module in your
 program:
 
-     use local::lib; # sets up a local lib at ~/perl5
+     use local::lib; # sets up a local lib at ~/perl7
 
 See the L<local::lib> documentation for more details.
 

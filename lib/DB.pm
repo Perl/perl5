@@ -796,7 +796,7 @@ highly experimental and subject to change.
 
 Gurusamy Sarathy	gsar@activestate.com
 
-This code heavily adapted from an early version of perl5db.pl attributable
+This code heavily adapted from an early version of perl7db.pl attributable
 to Larry Wall and the Perl Porters.
 
 =cut

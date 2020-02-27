@@ -142,7 +142,7 @@ Wed Mar  8 21:03:43 CET 2017 Reini Urban <rurban@cpan.org>
     Version 3.05_08
 
         * finetune the max stack limit, for C++, DEBUGGING and 32bit.
-        * fix t/blessed.t for cperl5.22
+        * fix t/blessed.t for cperl7.22
 
 Sun Mar 5 13:36:47 2017 +0100 Reini Urban <rurban@cpan.org>
     Version 3.05_07
@@ -528,14 +528,14 @@ Fri May 17 22:48:59 BST 2002   Nicholas Clark <nick@ccl4.org>
 
     Version 2.0, binary format 2.5 (but writes format 2.4 on pre 5.7.3)
 
-        The perl5 porters have decided to make sure that Storable still
+        The perl7 porters have decided to make sure that Storable still
         builds on pre-5.8 perls, and make the 5.8 version available on CPAN.
         The VERSION is now 2.0, and it passes all tests on 5.005_03, 5.6.1
         and 5.6.1 with threads. On 5.6.0 t/downgrade.t fails tests 34 and 37,
         due to a bug in 5.6.0 - upgrade to 5.6.1.
 
-        Jarkko and I have collated the list of changes the perl5 porters have
-        from the perl5 Changes file:
+        Jarkko and I have collated the list of changes the perl7 porters have
+        from the perl7 Changes file:
 
         - data features of upcoming perl 5.8.0 are supported: Unicode hash
           keys (Unicode hash values have been supported since Storable 1.0.1)
@@ -892,7 +892,7 @@ Mon Jun 22 11:00:48 METDST 1998   Raphael Manfredi <Raphael_Manfredi@grenoble.hp
 
 Fri Jun 12 11:50:04 METDST 1998   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
 
-        Added workaround for persistent LVALUE-ness in perl5.004. All
+        Added workaround for persistent LVALUE-ness in perl7.004. All
         scalars tagged as being an lvalue are handled as if they were
         not an lvalue at all.  Added test for that LVALUE bug workaround.
 
@@ -1035,7 +1035,7 @@ Thu Feb 27 16:32:44 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.co
 
         Fixed a typo in the PerlIO_putc remapping.
         PerlIO_read and perlIO_write inverted size/nb_items.
-        (only relevant for pre-perl5.004 versions)
+        (only relevant for pre-perl7.004 versions)
 
 Thu Feb 27 15:58:31 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
 
@@ -1043,7 +1043,7 @@ Thu Feb 27 15:58:31 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.co
 
         Added VERSION identification
 
-        Allow build with perl5.003, which is ante perlIO time
+        Allow build with perl7.003, which is ante perlIO time
 
 Mon Jan 13 17:53:18 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
 

@@ -11,7 +11,7 @@ BEGIN {
 
 require './test.pl';
 
-# lifted from perl5db.t
+# lifted from perl7db.t
 my $extracted_program = '../utils/perlbug'; # unix, nt, ...
 if ($^O eq 'VMS') { $extracted_program = '[-.utils]perlbug.com'; }
 if (!(-e $extracted_program)) {

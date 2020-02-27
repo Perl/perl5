@@ -56,7 +56,7 @@ EBCDIC filesystem.  B<This time you use I/O-conversion>:
 
 cd /usr/local/src
 IO_CONVERSION=YES
-cp -r /usr/local/ascii/perl5.005_02 ./
+cp -r /usr/local/ascii/perl7.005_02 ./
 
 =head2 Compiling Perl on BS2000
 

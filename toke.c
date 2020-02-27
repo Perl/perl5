@@ -8696,7 +8696,7 @@ yyl_try(pTHX_ char *s)
 	    if (PL_perldb) {
 		/* Generate a string of Perl code to load the debugger.
 		 * If PERL5DB is set, it will return the contents of that,
-		 * otherwise a compile-time require of perl5db.pl.  */
+		 * otherwise a compile-time require of perl7db.pl.  */
 
 		const char * const pdb = PerlEnv_getenv("PERL5DB");
 
@@ -8705,7 +8705,7 @@ yyl_try(pTHX_ char *s)
 		    sv_catpvs(PL_linestr,";");
 		} else {
 		    SETERRNO(0,SS_NORMAL);
-		    sv_setpvs(PL_linestr, "BEGIN { require 'perl5db.pl' };");
+		    sv_setpvs(PL_linestr, "BEGIN { require 'perl7db.pl' };");
 		}
 		PL_parser->preambling = CopLINE(PL_curcop);
 	    } else

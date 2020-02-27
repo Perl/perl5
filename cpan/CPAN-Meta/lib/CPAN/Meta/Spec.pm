@@ -1153,7 +1153,7 @@ many dists from the days when it was normal to put the main .pm file in the
 root of the distribution archive - so PAUSE currently indexes all .pm and .PL
 files that are not either (a) specifically excluded by no_index (b) in
 C<inc>, C<xt>, or C<t> directories, or common 'mistake' directories such as
-C<perl5>.
+C<perl7>.
 
 Or: If you're trying to be PAUSE-like, make sure you skip C<inc>, C<xt> and
 C<t> as well as anything marked as no_index.

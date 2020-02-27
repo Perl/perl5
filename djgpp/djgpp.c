@@ -408,7 +408,7 @@ Perl_init_os_extras(pTHX)
 
 static char *perlprefix;
 
-#define PERL5 "/perl5"
+#define PERL5 "/perl7"
 
 char *
 djgpp_pathexp (const char *p)

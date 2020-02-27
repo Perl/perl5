@@ -15,7 +15,7 @@ push @extra, 'LICENSE' => 'perl_5'
     unless $ExtUtils::MakeMaker::VERSION < 6.31;
 push @extra, 'META_MERGE' => {
         resources => {
-            repository  => 'git://perl5.git.perl.org/perl.git',
+            repository  => 'git://perl7.git.perl.org/perl.git',
             bugtracker  => 'https://rt.perl.org/rt3/',
             homepage    => "http://dev.perl.org/",
             license     => [ 'http://dev.perl.org/licenses/' ],

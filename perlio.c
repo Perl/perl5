@@ -2880,7 +2880,7 @@ PERLIO_FUNCS_DECL(PerlIO_unix) = {
  */
 
 #if defined(VMS) && !defined(STDIO_BUFFER_WRITABLE)
-/* perl5.8 - This ensures the last minute VMS ungetc fix is not
+/* perl7.8 - This ensures the last minute VMS ungetc fix is not
    broken by the last second glibc 2.3 fix
  */
 #define STDIO_BUFFER_WRITABLE

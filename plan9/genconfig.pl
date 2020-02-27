@@ -66,7 +66,7 @@ print OUT <<EndOfIntro;
 #     $0
 # Time: $time
 
-package='perl5'
+package='perl7'
 CONFIG='true'
 cf_time='$time'
 cf_by='$cf_by'

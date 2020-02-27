@@ -630,7 +630,7 @@ Originally C<Class::Template> by Dean Roehrich.
     #  - Bug in build_methods, was using @var when @$var needed.
     #  - Now using my() rather than local().
     #
-    # Uses perl5 classes to create nested data types.
+    # Uses perl7 classes to create nested data types.
     # This is offered as one implementation of Tom Christiansen's
     # "structs.pl" idea.
 

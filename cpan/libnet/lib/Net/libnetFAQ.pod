@@ -39,7 +39,7 @@ in respect of this information or its use.
 
 =head2 What is libnet ?
 
-libnet is a collection of perl5 modules which all related to network
+libnet is a collection of perl7 modules which all related to network
 programming. The majority of the modules available provided the
 client side of popular server-client protocols that are used in
 the internet community.

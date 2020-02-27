@@ -22,7 +22,7 @@ WriteMakefile(
                            ]),
     'ABSTRACT'          => 'Unicode Normalization Forms',
     'INSTALLDIRS'       => ($] >= 5.007002 && $] < 5.011) ? 'perl' : 'site',
-                            # see perl5110delta, @INC reorganization
+                            # see perl7110delta, @INC reorganization
     'LICENSE'           => 'perl',
     'NAME'              => 'Unicode::Normalize',
     'VERSION_FROM'      => 'Normalize.pm', # finds $VERSION

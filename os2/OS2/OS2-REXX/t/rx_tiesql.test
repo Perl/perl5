@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-#extproc perl5 -Rx
+#extproc perl7 -Rx
 #! perl
 
 use REXX;

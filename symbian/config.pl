@@ -866,7 +866,7 @@ clean:	clean_${WIN} clean_arm rerename_makedef
 	-del /f symbian\\*.lst
 	-del /f abld.bat @unclean *.pkg *.sis *.zip
 	-del /f symbian\\abld.bat symbian\\*.sis symbian\\*.zip
-	-del /f symbian\\perl5*.pkg symbian\\miniperl.pkg
+	-del /f symbian\\perl7*.pkg symbian\\miniperl.pkg
 	-del arm_*.mf ${WIN}_*.mf vc*.mf cw*.mf
 	-del symbian\\Makefile
 	-del symbian\\PerlUi.rss symbian\\PerlApp.rss

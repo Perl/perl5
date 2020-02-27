@@ -1468,7 +1468,7 @@ Amiga, F<README.amiga> (installed as L<perlamiga>).
 
 =item *
 
-A free perl5-based PERL.NLM for Novell Netware is available in
+A free perl7-based PERL.NLM for Novell Netware is available in
 precompiled binary and source code form from L<http://www.novell.com/>
 as well as from CPAN.
 

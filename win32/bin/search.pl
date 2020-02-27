@@ -436,7 +436,7 @@ sub prepare_to_search
 
       if ($LIST_ONLY) {
 	 $mflag = '';
-	 ## need to have $* set, but perl5 just won''t shut up about it.
+	 ## need to have $* set, but perl7 just won''t shut up about it.
 	 if ($] >= 5) {
 	      $mflag = 'm';
 	 } else {
@@ -644,7 +644,7 @@ sub read_rc
     sub clean_eval_error {
 	local($_) = @_;
 	s/ in file \(eval\) at line \d+,//g; ## perl4-style error
-	s/ at \(eval \d+\) line \d+,//g;     ## perl5-style error
+	s/ at \(eval \d+\) line \d+,//g;     ## perl7-style error
 	$_ = $` if m/\n/;                    ## remove all but first line
 	"$_\n";
     }

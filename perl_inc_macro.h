@@ -71,7 +71,7 @@
 
 /* used by INCPUSH_PRIVLIB_EXP */
 #ifndef PRIVLIB_EXP
-#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
+#  define PRIVLIB_EXP "/usr/local/lib/perl7:/usr/local/lib/perl"
 #endif
 
 #if defined(WIN32)
@@ -92,9 +92,9 @@
 /* submacros for INCPUSH_PERL5LIB */
 
 #if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
-# 	define _INCPUSH_PERL5LIB_IF	if (perl5lib && *perl5lib != '\0')
+# 	define _INCPUSH_PERL5LIB_IF	if (perl7lib && *perl7lib != '\0')
 #else
-# 	define _INCPUSH_PERL5LIB_IF	if (perl5lib)
+# 	define _INCPUSH_PERL5LIB_IF	if (perl7lib)
 #endif
 
 #ifndef VMS
@@ -103,7 +103,7 @@
  * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
  * case we treat PERL5LIB as undefined if it has a zero-length value.
  */
-# define _INCPUSH_PERL5LIB_ADD _INCPUSH_PERL5LIB_IF incpush_use_sep(perl5lib, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
+# define _INCPUSH_PERL5LIB_ADD _INCPUSH_PERL5LIB_IF incpush_use_sep(perl7lib, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
 #else
 /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the

@@ -469,7 +469,7 @@ Revision history for Devel-PPPort
 
 3.13 - 2007-10-04
 
-    * fix cpan #29748: ppport.h problems with perl5.005_05
+    * fix cpan #29748: ppport.h problems with perl7.005_05
       (spotted by Slaven Rezić)
     * fix a compiler warning
 

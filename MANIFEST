@@ -2131,7 +2131,7 @@ cpan/Test-Harness/t/object.t				Test::Harness test
 cpan/Test-Harness/t/parse.t				Test::Harness test
 cpan/Test-Harness/t/parser-config.t			Test::Harness test
 cpan/Test-Harness/t/parser-subclass.t			Test::Harness test
-cpan/Test-Harness/t/perl5lib.t				Test::Harness test
+cpan/Test-Harness/t/perl7lib.t				Test::Harness test
 cpan/Test-Harness/t/premature-bailout.t			Test::Harness test
 cpan/Test-Harness/t/process.t				Test::Harness test
 cpan/Test-Harness/t/prove.t				Test::Harness test

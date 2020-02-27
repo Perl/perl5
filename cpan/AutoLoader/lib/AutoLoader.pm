@@ -67,8 +67,8 @@ sub find_filename {
 	# Try to find the autoloaded file from the package-qualified
 	# name of the sub. e.g., if the sub needed is
 	# Getopt::Long::GetOptions(), then $INC{Getopt/Long.pm} is
-	# something like '/usr/lib/perl5/Getopt/Long.pm', and the
-	# autoload file is '/usr/lib/perl5/auto/Getopt/Long/GetOptions.al'.
+	# something like '/usr/lib/perl7/Getopt/Long.pm', and the
+	# autoload file is '/usr/lib/perl7/auto/Getopt/Long/GetOptions.al'.
 	#
 	# However, if @INC is a relative path, this might not work.  If,
 	# for example, @INC = ('lib'), then $INC{Getopt/Long.pm} is
@@ -151,8 +151,8 @@ sub import {
     #
     # Try to find the autosplit index file.  Eg., if the call package
     # is POSIX, then $INC{POSIX.pm} is something like
-    # '/usr/local/lib/perl5/POSIX.pm', and the autosplit index file is in
-    # '/usr/local/lib/perl5/auto/POSIX/autosplit.ix', so we require that.
+    # '/usr/local/lib/perl7/POSIX.pm', and the autosplit index file is in
+    # '/usr/local/lib/perl7/auto/POSIX/autosplit.ix', so we require that.
     #
     # However, if @INC is a relative path, this might not work.  If,
     # for example, @INC = ('lib'), then
@@ -237,8 +237,8 @@ subroutine in is called in a client module of B<AutoLoader>,
 B<AutoLoader>'s AUTOLOAD subroutine attempts to locate the subroutine in a
 file with a name related to the location of the file from which the
 client module was read.  As an example, if F<POSIX.pm> is located in
-F</usr/local/lib/perl5/POSIX.pm>, B<AutoLoader> will look for perl
-subroutines B<POSIX> in F</usr/local/lib/perl5/auto/POSIX/*.al>, where
+F</usr/local/lib/perl7/POSIX.pm>, B<AutoLoader> will look for perl
+subroutines B<POSIX> in F</usr/local/lib/perl7/auto/POSIX/*.al>, where
 the C<.al> file has the same name as the subroutine, sans package.  If
 such a file exists, AUTOLOAD will read and evaluate it,
 thus (presumably) defining the needed subroutine.  AUTOLOAD will then
@@ -393,7 +393,7 @@ Maintainer of the CPAN release: Steffen Mueller <smueller@cpan.org>
 =head1 COPYRIGHT AND LICENSE
 
 This package has been part of the perl core since the first release
-of perl5. It has been released separately to CPAN so older installations
+of perl7. It has been released separately to CPAN so older installations
 can benefit from bug fixes.
 
 This package has the same copyright and license as the perl core:

@@ -50,9 +50,9 @@ insecurities. Currently there are no known holes in C<suidperl>, but previous
 experience shows that we cannot be confident that these were the last. You may
 no longer invoke the set uid perl directly, so to preserve backwards
 compatibility with scripts that invoke #!/usr/bin/suidperl the only set uid
-binary is now C<sperl5.8.>I<n> (C<sperl5.8.4> for this release). C<suidperl>
+binary is now C<sperl7.8.>I<n> (C<sperl7.8.4> for this release). C<suidperl>
 is installed as a hard link to C<perl>; both C<suidperl> and C<perl> will
-invoke C<sperl5.8.4> automatically the set uid binary, so this change should
+invoke C<sperl7.8.4> automatically the set uid binary, so this change should
 be completely transparent.
 
 For new projects the core perl team would strongly recommend that you use
@@ -177,7 +177,7 @@ Optimised C<map> in scalar context
 
 =head1 Utility Changes
 
-The Perl debugger (F<lib/perl5db.pl>) can now save all debugger commands for
+The Perl debugger (F<lib/perl7db.pl>) can now save all debugger commands for
 sourcing later, and can display the parent inheritance tree of a given class.
 
 =head1 Installation and Configuration Improvements

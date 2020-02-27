@@ -32,19 +32,19 @@ like so:
     # Non-unix folks, replace ~ with /path/to/your/home/dir
     perl Makefile.PL INSTALL_BASE=~
 
-This will put modules into F<~/lib/perl5>, man pages into F<~/man> and
+This will put modules into F<~/lib/perl7>, man pages into F<~/man> and
 programs into F<~/bin>.
 
 To ensure your Perl programs can see these newly installed modules,
-set your C<PERL5LIB> environment variable to F<~/lib/perl5> or tell
+set your C<PERL5LIB> environment variable to F<~/lib/perl7> or tell
 each of your programs to look in that directory with the following:
 
-    use lib "$ENV{HOME}/lib/perl5";
+    use lib "$ENV{HOME}/lib/perl7";
 
 or if $ENV{HOME} isn't set and you don't want to set it for some
 reason, do it the long way.
 
-    use lib "/path/to/your/home/dir/lib/perl5";
+    use lib "/path/to/your/home/dir/lib/perl7";
 
 =item How do I get MakeMaker and Module::Build to install to the same place?
 
@@ -116,7 +116,7 @@ The other is to install the module in a temporary location.
         make test
         make install
 
-And then set PERL5LIB to F<~/tmp/lib/perl5>.  This works well when you
+And then set PERL5LIB to F<~/tmp/lib/perl7>.  This works well when you
 have multiple modules to work with.  It also ensures that the module
 goes through its full installation process which may modify it.
 Again, L<local::lib> may assist you here.
@@ -209,7 +209,7 @@ of the module location were removed.
 
 =over 4
 
-=item "No rule to make target `/usr/lib/perl5/CORE/config.h', needed by `Makefile'"
+=item "No rule to make target `/usr/lib/perl7/CORE/config.h', needed by `Makefile'"
 
 Just what it says, you're missing that file.  MakeMaker uses it to
 determine if perl has been rebuilt since the Makefile was made.  It's

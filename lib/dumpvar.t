@@ -31,7 +31,7 @@ sub unctrl    { print dumpvar::unctrl($_[0]), "\n" }
 sub uniescape { print dumpvar::uniescape($_[0]), "\n" }
 sub stringify { print dumpvar::stringify($_[0]), "\n" }
 sub dumpvalue { 
-	# Call main::dumpValue exactly as the perl5db.pl calls it.
+	# Call main::dumpValue exactly as the perl7db.pl calls it.
         local $\ = '';
         local $, = '';
         local $" = ' ';

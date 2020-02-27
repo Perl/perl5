@@ -1,7 +1,7 @@
 # AtheOS hints file ( http://www.atheos.cx/ )
 # Kurt Skauen, kurt@atheos.cx 
  
-prefix="/usr/perl5"
+prefix="/usr/perl7"
 
 libpth='/system/libs /usr/lib'
 usrinc='/include'

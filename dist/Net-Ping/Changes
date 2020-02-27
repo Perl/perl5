@@ -102,7 +102,7 @@ CHANGES
        Bugfixes
         - skip udp ping tests on more platforms: hpux, irix, aix.
           also pingecho on os390.
-          (from perl5 core)
+          (from perl7 core)
        Features
         - added a make release target
 
@@ -256,7 +256,7 @@ CHANGES
 
 2.35  Feb 08 14:42 2008
 	- Patch in Perl change #33242 by Nicholas Clark 
-		<http://perl5.git.perl.org/perl.git/commit/5d6b07c5a4c042580b85248d570ee299fd102a79>
+		<http://perl7.git.perl.org/perl.git/commit/5d6b07c5a4c042580b85248d570ee299fd102a79>
 
 2.34  Dec 19 08:51 2007
         - Release primarily to prevent problems with the Perl core in
@@ -318,7 +318,7 @@ CHANGES
 	- VMS patch from Craig Berry to pre-check echo.
 	- Apply bleadperl patch (change #18904)
 	- Apply bleadperl patch as explained:
-	http://www.xray.mpe.mpg.de/mailing-lists/perl5-
+	http://www.xray.mpe.mpg.de/mailing-lists/perl7-
 	porters/2003-03/msg00992.html
 
 2.28  Jan 23 18:00 2003

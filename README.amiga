@@ -126,7 +126,7 @@ This approach will preserve links in the installation without creating
 duplicate binaries.
 
 If you have the earlier ports perl 5.16 or 5.8 installed you may like
-to rename your perl executable to perl516 or perl58 or something
+to rename your perl executable to perl716 or perl58 or something
 similar before the installation of 5.22.1, this will allow you to use
 both versions at the same time.
 

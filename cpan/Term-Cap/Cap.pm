@@ -727,7 +727,7 @@ sub Trequire
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1995-2015 (c) perl5 porters.
+Copyright 1995-2015 (c) perl7 porters.
 
 This software is free software and can be modified and distributed under
 the same terms as Perl itself.

@@ -1416,8 +1416,8 @@ use File::Glob qw(:case);
                 lib/overload/numbers.pm
                 lib/overloading.{pm,t}
                 lib/overload{.pm,.t,64.t}
-                lib/perl5db.{pl,t}
-                lib/perl5db/
+                lib/perl7db.{pl,t}
+                lib/perl7db/
                 lib/perlbug.t
                 lib/sigtrap.{pm,t}
                 lib/sort.{pm,t}

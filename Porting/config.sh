@@ -6,7 +6,7 @@
 # instead choose to run each of the .SH files by yourself, or "Configure -S".
 #
 
-# Package name      : perl5
+# Package name      : perl7
 # Source directory  : .
 # Configuration time: Fri Dec 22 16:17:32 GMT 2017
 # Configured by     : yourname
@@ -976,12 +976,12 @@ orderlib='false'
 osname='linux'
 osvers='3.16.0-4-amd64'
 otherlibdirs=' '
-package='perl5'
+package='perl7'
 pager='/usr/bin/less -R'
 passcat='cat /etc/passwd'
 patchlevel='27'
 path_sep=':'
-perl5='/usr/bin/perl'
+perl7='/usr/bin/perl'
 perl='perl'
 perl_patchlevel=''
 perl_static_inline='static __inline__'

@@ -94,12 +94,12 @@ F<ExtUtils> which are subdirectories of directories found in C<@INC> --
 I<provided> a file named F<typemap> actually exists in such a directory.
 Example:
 
-  '/usr/local/lib/perl5/5.10.1/ExtUtils/typemap',
+  '/usr/local/lib/perl7/5.10.1/ExtUtils/typemap',
 
 However, these filepaths appear in the list returned by
 C<standard_typemap_locations()> in reverse order, I<i.e.>, lowest-to-highest.
 
-  '/usr/local/lib/perl5/5.10.1/ExtUtils/typemap',
+  '/usr/local/lib/perl7/5.10.1/ExtUtils/typemap',
   '../../../../lib/ExtUtils/typemap',
   '../../../../typemap',
   '../../../lib/ExtUtils/typemap',

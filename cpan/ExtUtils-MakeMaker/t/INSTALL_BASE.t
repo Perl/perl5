@@ -68,11 +68,11 @@ for my $instdir (@INSTDIRS) {
   ok( -r $instdir,      '  install dir created' );
 
   my @installed_files =
-    ("$instdir/lib/perl5/Big/Dummy.pm",
-     "$instdir/lib/perl5/Big/Liar.pm",
+    ("$instdir/lib/perl7/Big/Dummy.pm",
+     "$instdir/lib/perl7/Big/Liar.pm",
      "$instdir/bin/program",
-     "$instdir/lib/perl5/$Config{archname}/perllocal.pod",
-     "$instdir/lib/perl5/$Config{archname}/auto/Big/Dummy/.packlist"
+     "$instdir/lib/perl7/$Config{archname}/perllocal.pod",
+     "$instdir/lib/perl7/$Config{archname}/auto/Big/Dummy/.packlist"
     );
 
   foreach my $file (@installed_files) {

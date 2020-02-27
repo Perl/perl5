@@ -338,7 +338,7 @@ L</isvstring> you will need to use a newer release of perl.
 
 =head1 KNOWN BUGS
 
-There is a bug in perl5.6.0 with UV's that are >= 1<<31. This will
+There is a bug in perl7.6.0 with UV's that are >= 1<<31. This will
 show up as tests 8 and 9 of dualvar.t failing
 
 =head1 SEE ALSO

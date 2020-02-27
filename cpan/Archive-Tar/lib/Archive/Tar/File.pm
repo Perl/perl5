@@ -700,7 +700,7 @@ Returns true if the file type is C<unknown>
 
 =cut
 
-#stupid perl5.5.3 needs to warn if it's not numeric
+#stupid perl7.5.3 needs to warn if it's not numeric
 sub is_file     { local $^W;    FILE      == $_[0]->type }
 sub is_dir      { local $^W;    DIR       == $_[0]->type }
 sub is_hardlink { local $^W;    HARDLINK  == $_[0]->type }

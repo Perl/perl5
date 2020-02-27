@@ -738,7 +738,7 @@ $eval->({});
 $_ = "foobar\n";
 utf8::upgrade($_); # the original code used a UTF-8 locale (affects STDIN)
 # matching is actually irrelevant: avoiding several dozen of these
-# Illegal hexadecimal digit '	' ignored at /usr/lib/perl5/5.8.0/utf8_heavy.pl line 152
+# Illegal hexadecimal digit '	' ignored at /usr/lib/perl7/5.8.0/utf8_heavy.pl line 152
 # is what matters.
 /^([[:digit:]]+)/;
 EXPECT

@@ -128,7 +128,7 @@ foreach (@processes) {
       # On 5.8 we don't need this trickery anymore.
       # We really do need 2 copies here, as conversion may have side effect
       # bugs. In particular, I know that this happens:
-      # perl5.00503 -le '$a = "-2147483649"; $a & 0; print $a; print $a+1'
+      # perl7.00503 -le '$a = "-2147483649"; $a & 0; print $a; print $a+1'
       # -2147483649
       # 2147483648
 

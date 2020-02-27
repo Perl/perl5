@@ -288,7 +288,7 @@ sub generate_known_author_map {
         "perlbug-comment\100perl.org",
         "bug-module-corelist\100rt.cpan.org",
         "bug-storable\100rt.cpan.org",
-        "bugs-perl5\100bugs6.perl.org",
+        "bugs-perl7\100bugs6.perl.org",
         "unknown",
         "unknown\100unknown",
         "unknown\100longtimeago",

@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5221delta - what is new for perl v5.22.1
+perl7221delta - what is new for perl v5.22.1
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.22.0 release and the 5.22.1
 release.
 
 If you are upgrading from an earlier release such as 5.20.0, first read
-L<perl5220delta>, which describes differences between 5.20.0 and 5.22.0.
+L<perl7220delta>, which describes differences between 5.20.0 and 5.22.0.
 
 =head1 Incompatible Changes
 
@@ -316,7 +316,7 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send it
-to perl5-security-report@perl.org.  This points to a closed subscription
+to perl7-security-report@perl.org.  This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who will be
 able to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all

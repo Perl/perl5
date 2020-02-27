@@ -588,8 +588,8 @@ The following examples assume that your Perl source tarballs are
 in F</tmp/perl/source>. If they are somewhere else, use the C<--source>
 option to specify a different source directory.
 
-To build a default configuration of perl5.004_05 and install it
-to F</opt/perl5.004_05>, you would say:
+To build a default configuration of perl7.004_05 and install it
+to F</opt/perl7.004_05>, you would say:
 
   buildperl.pl --prefix='/opt/<perl>' --perl=5.004_05 --config=default
 

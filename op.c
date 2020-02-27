@@ -12103,7 +12103,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 
         CvGV_set(cv, gv);
         if(filename) {
-            /* XSUBs can't be perl lang/perl5db.pl debugged
+            /* XSUBs can't be perl lang/perl7db.pl debugged
             if (PERLDB_LINE_OR_SAVESRC)
                 (void)gv_fetchfile(filename); */
             assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */

@@ -568,7 +568,7 @@ you may need to configure CPAN::Reporter before sending reports.
 
 Generate test reports if CPAN::Reporter is installed (yes/no)?
 
-=item perl5lib_verbosity
+=item perl7lib_verbosity
 
 When CPAN.pm extends @INC via PERL5LIB, it prints a list of
 directories added (or a summary of how many directories are
@@ -1069,7 +1069,7 @@ sub init {
                    'none|v|vv');
     my_prompt_loop(load_module_verbosity => 'none', $matcher,
                    'none|v');
-    my_prompt_loop(perl5lib_verbosity => 'none', $matcher,
+    my_prompt_loop(perl7lib_verbosity => 'none', $matcher,
                    'none|v');
     my_yn_prompt(inhibit_startup_message => 0, $matcher);
 
@@ -1481,11 +1481,11 @@ HERE
 
 
 sub _local_lib_inc_path {
-    return File::Spec->catdir(_local_lib_path(), qw/lib perl5/);
+    return File::Spec->catdir(_local_lib_path(), qw/lib perl7/);
 }
 
 sub _local_lib_path {
-    return File::Spec->catdir(_local_lib_home(), 'perl5');
+    return File::Spec->catdir(_local_lib_home(), 'perl7');
 }
 
 # Adapted from resolve_home_path() in local::lib -- this is where

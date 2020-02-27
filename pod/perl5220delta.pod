@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5220delta - what is new for perl v5.22.0
+perl7220delta - what is new for perl v5.22.0
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.20.0 release and the 5.22.0
 release.
 
 If you are upgrading from an earlier release such as 5.18.0, first read
-L<perl5200delta>, which describes differences between 5.18.0 and 5.20.0.
+L<perl7200delta>, which describes differences between 5.18.0 and 5.20.0.
 
 =head1 Core Enhancements
 
@@ -1037,7 +1037,7 @@ Don't turn leading C<//> into C</> on Cygwin. [perl #122635]
 
 =item *
 
-L<perl5db.pl> has been upgraded to version 1.49.
+L<perl7db.pl> has been upgraded to version 1.49.
 
 The debugger would cause an assertion failure.
 L<[perl #124127]|https://rt.perl.org/Ticket/Display.html?id=124127>
@@ -3166,7 +3166,7 @@ Some cases of nested lexical state subs inside anonymous subs could cause
 
 =item *
 
-When trying to emit warnings, perl's default debugger (F<perl5db.pl>) was
+When trying to emit warnings, perl's default debugger (F<perl7db.pl>) was
 sometimes giving 'Undefined subroutine &DB::db_warn called' instead.  This
 bug, which started to occur in Perl 5.18, has been fixed.
 L<[perl #123553]|https://rt.perl.org/Ticket/Display.html?id=123553>.
@@ -4017,7 +4017,7 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send it
-to perl5-security-report@perl.org.  This points to a closed subscription
+to perl7-security-report@perl.org.  This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who will be
 able to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all

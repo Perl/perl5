@@ -965,9 +965,9 @@ Or you can just call this in void context.
 Regardless of calling context, calling C<survey> saves
 its results in its C<name2path> and C<path2name> attributes.
 
-E.g., when searching in F<$HOME/perl5lib>, the file
-F<$HOME/perl5lib/MyModule.pm> would get the POD name I<MyModule>,
-whereas F<$HOME/perl5lib/Myclass/Subclass.pm> would be
+E.g., when searching in F<$HOME/perl7lib>, the file
+F<$HOME/perl7lib/MyModule.pm> would get the POD name I<MyModule>,
+whereas F<$HOME/perl7lib/Myclass/Subclass.pm> would be
 I<Myclass::Subclass>. The name information can be used for POD
 translators.
 

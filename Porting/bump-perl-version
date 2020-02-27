@@ -181,7 +181,7 @@ my @maps =  (
 	undef,
     ],
 
-    # perl511, perl511.dll, perl511.lib, perl511s.lib, libperl511.a
+    # perl711, perl711.dll, perl711.lib, perl711s.lib, libperl711.a
     [
 	qr{\b ((?:lib)?) perl (\d\d\d) (s?) \b }x,
 	sub {$2, "$1perl$newx$newy$3" },

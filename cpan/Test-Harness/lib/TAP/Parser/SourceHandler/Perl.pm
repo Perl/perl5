@@ -166,11 +166,11 @@ sub _mangle_switches {
     # PERL5LIB as -I switches and place PERL5OPT on the command line
     # in order that it be seen.
     if ( $class->_has_taint_switch($switches) ) {
-        my @perl5lib = defined $ENV{PERL5LIB} ? split /$Config{path_sep}/, $ENV{PERL5LIB} : ();
+        my @perl7lib = defined $ENV{PERL5LIB} ? split /$Config{path_sep}/, $ENV{PERL5LIB} : ();
         return (
             $libs,
             [   @{$switches},
-                $class->_libs2switches([@$libs, @perl5lib]),
+                $class->_libs2switches([@$libs, @perl7lib]),
                 defined $ENV{PERL5OPT} ? shellwords( $ENV{PERL5OPT} ) : ()
             ],
         );

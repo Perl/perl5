@@ -8,7 +8,7 @@
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
-#               Copyright (C) 2018, The perl5 porters
+#               Copyright (C) 2018, The perl7 porters
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -497,7 +497,7 @@ __DATA__
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
-#               Copyright (C) 2018, The perl5 porters
+#               Copyright (C) 2018, The perl7 porters
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -691,7 +691,7 @@ Versions >= 3.22 are maintained by perl5 porters
 
 Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
 
-             Copyright (C) 2018, The perl5 porters
+             Copyright (C) 2018, The perl7 porters
 
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 

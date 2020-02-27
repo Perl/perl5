@@ -164,7 +164,7 @@ not to mention the even more advanced DB_File.
 
 If you get an error like
 
-    Can't load '.../OSF1/lib/perl5/5.8.0/alpha-dec_osf/auto/IO/IO.so' for module IO: Unresolved symbol in .../lib/perl5/5.8.0/alpha-dec_osf/auto/IO/IO.so: sockatmark at .../lib/perl5/5.8.0/alpha-dec_osf/XSLoader.pm line 75.
+    Can't load '.../OSF1/lib/perl7/5.8.0/alpha-dec_osf/auto/IO/IO.so' for module IO: Unresolved symbol in .../lib/perl7/5.8.0/alpha-dec_osf/auto/IO/IO.so: sockatmark at .../lib/perl7/5.8.0/alpha-dec_osf/XSLoader.pm line 75.
 
 you need to either recompile your Perl in Tru64 4.0D or upgrade your
 Tru64 4.0D to at least 4.0F: the sockatmark() system call was

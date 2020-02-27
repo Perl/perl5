@@ -625,8 +625,8 @@ variables are in the file Porting/Glossary.
     $prefixexp		/usr/local
     $binexp		$prefixexp/bin
     $scriptdirexp	$prefixexp/bin
-    $privlibexp		$prefixexp/lib/perl5/$version
-    $archlibexp		$prefixexp/lib/perl5/$version/$archname
+    $privlibexp		$prefixexp/lib/perl7/$version
+    $archlibexp		$prefixexp/lib/perl7/$version/$archname
     $man1direxp		$prefixexp/man/man1
     $man3direxp		$prefixexp/man/man3
     $html1direxp	(none)
@@ -655,9 +655,9 @@ be used for installing those add-on modules and scripts.
  $siteprefixexp    $prefixexp
  $sitebinexp       $siteprefixexp/bin
  $sitescriptexp    $siteprefixexp/bin
- $sitelibexp       $siteprefixexp/lib/perl5/site_perl/$version
+ $sitelibexp       $siteprefixexp/lib/perl7/site_perl/$version
  $sitearchexp
-               $siteprefixexp/lib/perl5/site_perl/$version/$archname
+               $siteprefixexp/lib/perl7/site_perl/$version/$archname
  $siteman1direxp   $siteprefixexp/man/man1
  $siteman3direxp   $siteprefixexp/man/man3
  $sitehtml1direxp  (none)
@@ -680,9 +680,9 @@ for you to use to distribute add-on modules.
 
  $vendorbinexp       $vendorprefixexp/bin
  $vendorscriptexp    $vendorprefixexp/bin
- $vendorlibexp       $vendorprefixexp/lib/perl5/vendor_perl/$version
+ $vendorlibexp       $vendorprefixexp/lib/perl7/vendor_perl/$version
  $vendorarchexp
-           $vendorprefixexp/lib/perl5/vendor_perl/$version/$archname
+           $vendorprefixexp/lib/perl7/vendor_perl/$version/$archname
  $vendorman1direxp   $vendorprefixexp/man/man1
  $vendorman3direxp   $vendorprefixexp/man/man3
  $vendorhtml1direxp  (none)
@@ -699,22 +699,22 @@ This would have the effect of setting the following:
 
  $binexp           /usr/bin
  $scriptdirexp     /usr/bin
- $privlibexp       /usr/lib/perl5/$version
- $archlibexp       /usr/lib/perl5/$version/$archname
+ $privlibexp       /usr/lib/perl7/$version
+ $archlibexp       /usr/lib/perl7/$version/$archname
  $man1direxp       /usr/man/man1
  $man3direxp       /usr/man/man3
 
  $sitebinexp       /usr/local/bin
  $sitescriptexp    /usr/local/bin
- $sitelibexp       /usr/local/lib/perl5/site_perl/$version
- $sitearchexp      /usr/local/lib/perl5/site_perl/$version/$archname
+ $sitelibexp       /usr/local/lib/perl7/site_perl/$version
+ $sitearchexp      /usr/local/lib/perl7/site_perl/$version/$archname
  $siteman1direxp   /usr/local/man/man1
  $siteman3direxp   /usr/local/man/man3
 
  $vendorbinexp     /usr/bin
  $vendorscriptexp  /usr/bin
- $vendorlibexp     /usr/lib/perl5/vendor_perl/$version
- $vendorarchexp    /usr/lib/perl5/vendor_perl/$version/$archname
+ $vendorlibexp     /usr/lib/perl7/vendor_perl/$version
+ $vendorarchexp    /usr/lib/perl7/vendor_perl/$version/$archname
  $vendorman1direxp /usr/man/man1
  $vendorman3direxp /usr/man/man3
 
@@ -748,7 +748,7 @@ version-specific subdirectories) for add-on modules and extensions.
 For example, if you have a bundle of perl libraries from a previous
 installation, perhaps in a strange place:
 
-	sh Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
+	sh Configure -Dotherlibdirs=/usr/lib/perl7/site_perl/5.8.1
 
 =item APPLLIB_EXP
 
@@ -825,7 +825,7 @@ discussed in L<"Coexistence with earlier versions of perl 5"> below.
 
 If you specify a prefix that contains the string "perl", then the
 library directory structure is slightly simplified.  Instead of
-suggesting $prefix/lib/perl5/, Configure will suggest $prefix/lib.
+suggesting $prefix/lib/perl7/, Configure will suggest $prefix/lib.
 
 Thus, for example, if you Configure with
 -Dprefix=/opt/perl, then the default library directories for 5.9.0 are
@@ -851,15 +851,15 @@ to its final destination.  There are two ways to do that:
 
 =item installprefix
 
-To install perl under the /tmp/perl5 directory, use the following
+To install perl under the /tmp/perl7 directory, use the following
 command line:
 
-    sh Configure -Dinstallprefix=/tmp/perl5
+    sh Configure -Dinstallprefix=/tmp/perl7
 
-(replace /tmp/perl5 by a directory of your choice).
+(replace /tmp/perl7 by a directory of your choice).
 
 Beware, though, that if you go to try to install new add-on
-modules, they too will get installed in under '/tmp/perl5' if you
+modules, they too will get installed in under '/tmp/perl7' if you
 follow this example.  That's why it's usually better to use DESTDIR,
 as shown in the next section.
 
@@ -876,9 +876,9 @@ simply do:
     sh Configure -Dprefix=/opt/perl -des
     make
     make test
-    make install DESTDIR=/tmp/perl5
-    cd /tmp/perl5/opt/perl
-    tar cvf /tmp/perl5-archive.tar .
+    make install DESTDIR=/tmp/perl7
+    cd /tmp/perl7/opt/perl
+    tar cvf /tmp/perl7-archive.tar .
 
 =back
 
@@ -2096,7 +2096,7 @@ different.
 
 On some systems, particularly those with smaller amounts of RAM, some
 of the tests in t/op/pat.t may fail with an "Out of memory" message.
-For example, on my SparcStation IPC with 12 MB of RAM, in perl5.5.670,
+For example, on my SparcStation IPC with 12 MB of RAM, in perl7.5.670,
 test 85 will fail if run under either t/TEST or t/harness.
 
 Try stopping other jobs on the system and then running the test by itself:
@@ -2202,20 +2202,20 @@ indicate the alternate name on the "make install" line, such as:
     make install PERLNAME=myperl
 
 You can separately change the base used for versioned names (like
-"perl5.8.9") by setting PERLNAME_VERBASE, like
+"perl7.8.9") by setting PERLNAME_VERBASE, like
 
-    make install PERLNAME=perl5 PERLNAME_VERBASE=perl
+    make install PERLNAME=perl7 PERLNAME_VERBASE=perl
 
-This can be useful if you have to install perl as "perl5" (e.g. to avoid
+This can be useful if you have to install perl as "perl7" (e.g. to avoid
 conflicts with an ancient version in /usr/bin supplied by your vendor).
-Without this the versioned binary would be called "perl55.8.8".
+Without this the versioned binary would be called "perl75.8.8".
 
 =head2 Installing perl under a different directory
 
 You can install perl under a different destination directory by using
 the DESTDIR variable during C<make install>, with a command like
 
-	make install DESTDIR=/tmp/perl5
+	make install DESTDIR=/tmp/perl7
 
 DESTDIR is automatically prepended to all the installation paths.  See
 the example in L<"DESTDIR"> above.
@@ -2233,7 +2233,7 @@ make install will install the following:
     binaries
 
 	perl,
-	    perl5.n.n	where 5.n.n is the current release number.  This
+	    perl7.n.n	where 5.n.n is the current release number.  This
 			will be a link to perl.
 
     scripts
@@ -2275,7 +2275,7 @@ make install will install the following:
     library files
 
 			in $privlib and $archlib specified to
-			Configure, usually under /usr/local/lib/perl5/.
+			Configure, usually under /usr/local/lib/perl7/.
 
     documentation
 
@@ -2453,22 +2453,22 @@ used with a newer version of Perl.  Here is how it is supposed to work.
 Suppose you already have version 5.8.7 installed.  The directories
 searched by 5.8.7 are typically like:
 
-	/usr/local/lib/perl5/5.8.7/$archname
-	/usr/local/lib/perl5/5.8.7
-	/usr/local/lib/perl5/site_perl/5.8.7/$archname
-	/usr/local/lib/perl5/site_perl/5.8.7
+	/usr/local/lib/perl7/5.8.7/$archname
+	/usr/local/lib/perl7/5.8.7
+	/usr/local/lib/perl7/site_perl/5.8.7/$archname
+	/usr/local/lib/perl7/site_perl/5.8.7
 
 Now, suppose you install version 5.8.8.  The directories
 searched by version 5.8.8 will be:
 
-	/usr/local/lib/perl5/5.8.8/$archname
-	/usr/local/lib/perl5/5.8.8
-	/usr/local/lib/perl5/site_perl/5.8.8/$archname
-	/usr/local/lib/perl5/site_perl/5.8.8
+	/usr/local/lib/perl7/5.8.8/$archname
+	/usr/local/lib/perl7/5.8.8
+	/usr/local/lib/perl7/site_perl/5.8.8/$archname
+	/usr/local/lib/perl7/site_perl/5.8.8
 
-	/usr/local/lib/perl5/site_perl/5.8.7/$archname
-	/usr/local/lib/perl5/site_perl/5.8.7
-	/usr/local/lib/perl5/site_perl/
+	/usr/local/lib/perl7/site_perl/5.8.7/$archname
+	/usr/local/lib/perl7/site_perl/5.8.7
+	/usr/local/lib/perl7/site_perl/
 
 Notice the last three entries -- Perl understands the default structure
 of the $sitelib directories and will look back in older, compatible
@@ -2476,26 +2476,26 @@ directories.  This way, modules installed under 5.8.7 will continue
 to be usable by 5.8.7 but will also accessible to 5.8.8.  Further,
 suppose that you upgrade a module to one which requires features
 present only in 5.8.8.  That new module will get installed into
-/usr/local/lib/perl5/site_perl/5.8.8 and will be available to 5.8.8,
+/usr/local/lib/perl7/site_perl/5.8.8 and will be available to 5.8.8,
 but will not interfere with the 5.8.7 version.
 
-The last entry, /usr/local/lib/perl5/site_perl/, is there so that
+The last entry, /usr/local/lib/perl7/site_perl/, is there so that
 5.6.0 and above will look for 5.004-era pure perl modules.
 
 Lastly, suppose you now install 5.10.0, which is not binary compatible
 with 5.8.x.  The directories searched by 5.10.0 (if you don't change the
 Configure defaults) will be:
 
-	/usr/local/lib/perl5/5.10.0/$archname
-	/usr/local/lib/perl5/5.10.0
-	/usr/local/lib/perl5/site_perl/5.10.0/$archname
-	/usr/local/lib/perl5/site_perl/5.10.0
+	/usr/local/lib/perl7/5.10.0/$archname
+	/usr/local/lib/perl7/5.10.0
+	/usr/local/lib/perl7/site_perl/5.10.0/$archname
+	/usr/local/lib/perl7/site_perl/5.10.0
 
-	/usr/local/lib/perl5/site_perl/5.8.8
+	/usr/local/lib/perl7/site_perl/5.8.8
 
-	/usr/local/lib/perl5/site_perl/5.8.7
+	/usr/local/lib/perl7/site_perl/5.8.7
 
-	/usr/local/lib/perl5/site_perl/
+	/usr/local/lib/perl7/site_perl/
 
 Note that the earlier $archname entries are now gone, but pure perl
 modules from earlier versions will still be found.
@@ -2569,12 +2569,12 @@ Firstly, the bare minimum to run this script
 in Linux with perl-7.0.0 is as follows (under $Config{prefix}):
 
   ./bin/perl
-  ./lib/perl5/7.0.0/strict.pm
-  ./lib/perl5/7.0.0/warnings.pm
-  ./lib/perl5/7.0.0/i686-linux/File/Glob.pm
-  ./lib/perl5/7.0.0/feature.pm
-  ./lib/perl5/7.0.0/XSLoader.pm
-  ./lib/perl5/7.0.0/i686-linux/auto/File/Glob/Glob.so
+  ./lib/perl7/7.0.0/strict.pm
+  ./lib/perl7/7.0.0/warnings.pm
+  ./lib/perl7/7.0.0/i686-linux/File/Glob.pm
+  ./lib/perl7/7.0.0/feature.pm
+  ./lib/perl7/7.0.0/XSLoader.pm
+  ./lib/perl7/7.0.0/i686-linux/auto/File/Glob/Glob.so
 
 Secondly, for perl-5.10.1, the Debian perl-base package contains 591
 files, (of which 510 are for lib/unicore) totaling about 3.5MB in its
@@ -2582,7 +2582,7 @@ i386 version.  Omitting the lib/unicore/* files for brevity, the
 remaining files are:
 
   /usr/bin/perl
-  /usr/bin/perl5.10.1
+  /usr/bin/perl7.10.1
   /usr/lib/perl/5.10.1/Config.pm
   /usr/lib/perl/5.10.1/Config_git.pl
   /usr/lib/perl/5.10.1/Config_heavy.pl
@@ -2629,7 +2629,7 @@ remaining files are:
   /usr/share/doc/perl/copyright
   /usr/share/lintian/overrides/perl-base
   /usr/share/man/man1/perl.1.gz
-  /usr/share/man/man1/perl5.10.1.1.gz
+  /usr/share/man/man1/perl7.10.1.1.gz
   /usr/share/perl/5.10.1/AutoLoader.pm
   /usr/share/perl/5.10.1/Carp.pm
   /usr/share/perl/5.10.1/Carp/Heavy.pm

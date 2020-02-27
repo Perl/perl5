@@ -470,7 +470,7 @@ F<Foo-Bar/lib/Foo/Bar.pm> instead of F<Foo/Bar/Bar.pm>.
 Also, the boilerplate test is now called F<t/Foo-Bar.t>
 instead of F<t/1.t>.
 
-The Perl debugger (F<lib/perl5db.pl>) has now been extensively
+The Perl debugger (F<lib/perl7db.pl>) has now been extensively
 documented and bugs found while documenting have been fixed.
 
 C<perldoc> has been rewritten from scratch to be more robust and
@@ -482,7 +482,7 @@ to be experimental.)
 
 =head1 New Documentation
 
-perl573delta has been added to list the differences between the
+perl773delta has been added to list the differences between the
 (now quite obsolete) development releases 5.7.2 and 5.7.3.
 
 perl58delta has been added: it is the perldelta of 5.8.0, detailing

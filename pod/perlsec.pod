@@ -15,7 +15,7 @@ untrustworthy) programs to accomplish its purposes.
 =head1 SECURITY VULNERABILITY CONTACT INFORMATION
 
 If you believe you have found a security vulnerability in Perl, please
-email the details to perl5-security-report@perl.org. This creates a new
+email the details to perl7-security-report@perl.org. This creates a new
 Request Tracker ticket in a special queue which isn't initially publicly
 accessible. The email will also be copied to a closed subscription
 unarchived mailing list which includes all the core committers, who will
@@ -30,7 +30,7 @@ don't Cc any other parties, because if they reply to all, the reply will
 generate yet another new ticket. Once you have received an initial reply
 with a C<[perl #NNNNNN]> ticket number in  the headline, it's okay to Cc
 subsequent replies to third parties: all emails to the
-perl5-security-report address with the ticket number in the subject line
+perl7-security-report address with the ticket number in the subject line
 will be added to the ticket; without it, a new ticket will be created.
 
 =head1 SECURITY MECHANISMS AND CONCERNS

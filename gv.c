@@ -579,7 +579,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     }
     CvGV_set(cv, gv); /* This stops new ATTRSUB from setting CvFILE
                          from PL_curcop. */
-    /* XSUBs can't be perl lang/perl5db.pl debugged
+    /* XSUBs can't be perl lang/perl7db.pl debugged
     if (PERLDB_LINE_OR_SAVESRC)
         (void)gv_fetchfile(file); */
     CvFILE(cv) = (char *)file;

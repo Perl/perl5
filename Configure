@@ -16,7 +16,7 @@
 # you should use metaconfig. Perl uses a modified version of this
 # tool, and this, together with the metaconfig units, are available
 # in the git repository:
-#    $ git clone https://github.com/perl5-metaconfig/metaconfig metaconfig
+#    $ git clone https://github.com/perl7-metaconfig/metaconfig metaconfig
 # The original dist package (including metaconfig) is available on github:
 #    $ git clone https://github.com/rmanfredi/dist.git dist-git
 #
@@ -1194,7 +1194,7 @@ revision=''
 subversion=''
 version=''
 version_patchlevel_string=''
-perl5=''
+perl7=''
 perladmin=''
 perlpath=''
 d_nv_preserves_uv=''
@@ -1841,7 +1841,7 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
          -Dinc_version_list=none  do not include older perl trees in @INC
          -DEBUGGING=none          DEBUGGING options
          -Dcc=gcc                 choose your compiler
-         -Dprefix=/opt/perl5      choose your destination
+         -Dprefix=/opt/perl7      choose your destination
   -E : stop at the end of questions, after having produced config.sh.
   -K : do not use unless you know what you are doing.
   -O : ignored for backward compatibility
@@ -1901,7 +1901,7 @@ fi
 touch posthint.sh
 
 : set package name
-package='perl5'
+package='perl7'
 first=`echo $package | sed -e 's/^\(.\).*/\1/'`
 last=`echo $package | sed -e 's/^.\(.*\)/\1/'`
 case "`echo AbyZ | tr '[:lower:]' '[:upper:]' 2>/dev/null`"-"`echo AbyZ | tr '[:upper:]' '[:lower:]' 2>/dev/null`" in
@@ -2362,7 +2362,7 @@ if $needman; then
 	cat <<EOH
 
 This installation shell script will examine your system and ask you questions
-to determine how the perl5 package should be installed. If you get
+to determine how the perl7 package should be installed. If you get
 stuck on a question, you may use a ! shell escape to start a subshell or
 execute a command.  Many of the questions will have default answers in square
 brackets; typing carriage return will give you the default.
@@ -7285,7 +7285,7 @@ esac'
 case "$installstyle" in
 '')	case "$prefix" in
 		*perl*) dflt='lib';;
-		*) dflt='lib/perl5' ;;
+		*) dflt='lib/perl7' ;;
 	esac
 	;;
 *)	dflt="$installstyle" ;;
@@ -7346,12 +7346,12 @@ $define|true|[yY]*)
 esac
 
 : determine where private library files go
-: Usual default is /usr/local/lib/perl5/$version.
+: Usual default is /usr/local/lib/perl7/$version.
 : Also allow things like /opt/perl/lib/$version, since
-: /opt/perl/lib/perl5... would be redundant.
+: /opt/perl/lib/perl7... would be redundant.
 : The default "style" setting is made in installstyle.U
 case "$installstyle" in
-*lib/perl5*) set dflt privlib lib/$package/$version ;;
+*lib/perl7*) set dflt privlib lib/$package/$version ;;
 *)	 set dflt privlib lib/$version ;;
 esac
 eval $prefixit
@@ -7533,26 +7533,26 @@ EOH
     d_dosuid=undef
 fi
 
-: Find perl5.005 or later.
-echo "Looking for a previously installed perl5.005 or later... "
-case "$perl5" in
+: Find perl7.005 or later.
+echo "Looking for a previously installed perl7.005 or later... "
+case "$perl7" in
 '')	for tdir in `echo "$binexp$path_sep$PATH" | $sed "s/$path_sep/ /g"`; do
 		: Check if this perl is recent and can load a simple module
 		if $test -x $tdir/perl$exe_ext && $tdir/perl -Mless -e 'use 5.005;' >/dev/null 2>&1; then
-			perl5=$tdir/perl
+			perl7=$tdir/perl
 			break;
-		elif $test -x $tdir/perl5$exe_ext && $tdir/perl5 -Mless -e 'use 5.005;' >/dev/null 2>&1; then
-			perl5=$tdir/perl5
+		elif $test -x $tdir/perl7$exe_ext && $tdir/perl7 -Mless -e 'use 5.005;' >/dev/null 2>&1; then
+			perl7=$tdir/perl7
 			break;
 		fi
 	done
 	;;
-*)	perl5="$perl5"
+*)	perl7="$perl7"
 	;;
 esac
-case "$perl5" in
+case "$perl7" in
 '')	echo "None found.  That's ok.";;
-*)	echo "Using $perl5." ;;
+*)	echo "Using $perl7." ;;
 esac
 
 : Set the siteprefix variables
@@ -7593,13 +7593,13 @@ siteprefix="$ans"
 siteprefixexp="$ansexp"
 
 : determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl/$version
+: Usual default is /usr/local/lib/perl7/site_perl/$version
 : The default "style" setting is made in installstyle.U
 : XXX No longer works with Prefixit stuff.
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$sitelib" in
 '') case "$installstyle" in
-	*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
+	*lib/perl7*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
 	*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
 	esac
 	;;
@@ -7623,7 +7623,7 @@ sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 
 : Determine list of previous versions to include in @INC
 $cat > getverlist <<EOPL
-#!$perl5 -w
+#!$perl7 -w
 use File::Basename;
 \$api_versionstring = "$api_versionstring";
 \$version = "$version";
@@ -7678,8 +7678,8 @@ else {
 EOPL
 chmod +x getverlist
 case "$inc_version_list" in
-'')	if test -x "$perl5$exe_ext"; then
-		dflt=`$perl5 getverlist`
+'')	if test -x "$perl7$exe_ext"; then
+		dflt=`$perl7 getverlist`
 	else
 		dflt='none'
 	fi
@@ -7917,8 +7917,8 @@ esac
 echo "Your system uses $freetype free(), it would seem." >&4
 $rm -f malloc.[co]
 : determine where site specific architecture-dependent libraries go.
-: sitelib  default is /usr/local/lib/perl5/site_perl/$version
-: sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
+: sitelib  default is /usr/local/lib/perl7/site_perl/$version
+: sitearch default is /usr/local/lib/perl7/site_perl/$version/$archname
 : sitelib may have an optional trailing /share.
 case "$sitearch" in
 '')	dflt=`echo $sitelib | $sed 's,/share$,,'`
@@ -8011,12 +8011,12 @@ case "$vendorprefix" in
 	;;
 *)	d_vendorlib="$define"
 	: determine where vendor-supplied modules go.
-	: Usual default is /usr/local/lib/perl5/vendor_perl/$version
+	: Usual default is /usr/local/lib/perl7/vendor_perl/$version
 	case "$vendorlib" in
 	'')
 		prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 		case "$installstyle" in
-		*lib/perl5*) dflt=$vendorprefix/lib/$package/vendor_$prog/$version ;;
+		*lib/perl7*) dflt=$vendorprefix/lib/$package/vendor_$prog/$version ;;
 		*)	     dflt=$vendorprefix/lib/vendor_$prog/$version ;;
 		esac
 		;;
@@ -8042,8 +8042,8 @@ case "$vendorprefix" in
 	;;
 *)	d_vendorarch="$define"
 	: determine where vendor-supplied architecture-dependent libraries go.
-	: vendorlib  default is /usr/local/lib/perl5/vendor_perl/$version
-	: vendorarch default is /usr/local/lib/perl5/vendor_perl/$version/$archname
+	: vendorlib  default is /usr/local/lib/perl7/vendor_perl/$version
+	: vendorarch default is /usr/local/lib/perl7/vendor_perl/$version/$archname
 	: vendorlib may have an optional trailing /share.
 	case "$vendorarch" in
 	'')	dflt=`echo $vendorlib | $sed 's,/share$,,'`
@@ -8738,10 +8738,10 @@ true)
 			dflt=libperl.$so
 			;;
 		cygwin*) # ld links now against the dll directly
-			majmin="cygperl5_${patchlevel}_${subversion}.${so}"
+			majmin="cygperl7_${patchlevel}_${subversion}.${so}"
 			majonly=`echo $patchlevel $subversion |
 				$awk '{printf "%03d%03d", $1, $2}'`
-			majonly=cygperl5.$majonly.$so
+			majonly=cygperl7.$majonly.$so
 			dflt=$majmin
 			;;
 		*)	# Try to guess based on whether libc has major.minor.
@@ -24942,7 +24942,7 @@ pager='$pager'
 passcat='$passcat'
 patchlevel='$patchlevel'
 path_sep='$path_sep'
-perl5='$perl5'
+perl7='$perl7'
 perl='$perl'
 perl_patchlevel='$perl_patchlevel'
 perl_static_inline='$perl_static_inline'

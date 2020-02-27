@@ -20,7 +20,7 @@ Have you read the appropriate man pages?  Here's a brief index:
 	Data Structures	perlref, perllol, perldsc
 	Modules		perlmod, perlmodlib, perlsub
 	Regexes		perlre, perlfunc, perlop, perllocale
-	Moving to perl5	perltrap, perl
+	Moving to perl7	perltrap, perl
 	Linking w/C	perlxstut, perlxs, perlcall, perlguts, perlembed
 	Various 	http://www.perl.com/CPAN/doc/FMTEYEWTK/index.html
 			(not a man-page but still useful)
@@ -578,7 +578,7 @@ you want to be sure your license's wording will stand up in court.
 
 Malcolm Beattie has written a multifunction backend compiler,
 available from CPAN, that can do both these things.  It is included
-in the perl5.005 release, but is still considered experimental.
+in the perl7.005 release, but is still considered experimental.
 This means it's fun to play with if you're a programmer but not
 really for people looking for turn-key solutions.
 

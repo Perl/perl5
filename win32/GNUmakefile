@@ -110,7 +110,7 @@ USE_IMP_SYS	:= define
 # Comment out next assign to disable perl's I/O subsystem and use compiler's
 # stdio for IO - depending on your compiler vendor and run time library you may
 # then get a number of fails from make test i.e. bugs - complain to them not us ;-).
-# You will also be unable to take full advantage of perl5.8's support for multiple
+# You will also be unable to take full advantage of perl7.8's support for multiple
 # encodings and may see lower IO performance. You have been warned.
 #
 USE_PERLIO	:= define

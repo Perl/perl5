@@ -88,14 +88,14 @@ END
 
 # [rt.cpan.org 29442]
 test_fixin(<<END,
-#!/foo/bar/perl5.8.8 -w
+#!/foo/bar/perl7.8.8 -w
 
 blah blah blah
 END
 
     sub {
         my @lines = @_;
-        unlike $lines[$shb_line_num], qr[/foo/bar/perl5.8.8], "#! replaced";
+        unlike $lines[$shb_line_num], qr[/foo/bar/perl7.8.8], "#! replaced";
         like   $lines[$shb_line_num], qr[ -w\b], "switch retained";
 
         # In between might be that "not running under some shell" madness.

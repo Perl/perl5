@@ -92,7 +92,7 @@ A similar trick involves the I<env> program, if you have it.
 
 The examples above use a relative path to the perl interpreter,
 getting whatever version is first in the user's path.  If you want
-a specific version of Perl, say, perl5.14.1, you should place
+a specific version of Perl, say, perl7.14.1, you should place
 that directly in the C<#!> line's path.
 
 If the C<#!> line does not contain the word "perl" nor the word "indir",
@@ -207,7 +207,7 @@ In this documentation, C<#!/usr/bin/perl> on the first line of the program
 will stand in for whatever method works on your system.  You are
 advised to use a specific path if you care about a specific version.
 
-    #!/usr/local/bin/perl5.14
+    #!/usr/local/bin/perl7.14
 
 or if you just want to be running at least version, place a statement
 like this at the top of your program:
@@ -1162,7 +1162,7 @@ X<PERL5DB>
 
 The command used to load the debugger code.  The default is:
 
-	BEGIN { require "perl5db.pl" }
+	BEGIN { require "perl7db.pl" }
 
 The PERL5DB environment variable is only used when Perl is started with
 a bare L</-d> switch.

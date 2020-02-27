@@ -73,7 +73,7 @@ Pod::Parser - base class for creating POD filters and translators
 
 =head1 REQUIRES
 
-perl5.005, Pod::InputObjects, Exporter, Symbol, Carp
+perl7.005, Pod::InputObjects, Exporter, Symbol, Carp
 
 =head1 EXPORTS
 

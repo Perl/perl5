@@ -264,7 +264,7 @@ ftp:passive-mode
 ftp:
 http:[-
 http://search.cpan.org/src/KWILLIAMS/Module-Build-0.30/lib/Module/Build/Platform/Windows.pm:split_like_shell
-http://www.xray.mpe.mpg.de/mailing-lists/perl5-
+http://www.xray.mpe.mpg.de/mailing-lists/perl7-
 http://support.microsoft.com/support/kb/articles/Q280/3/41.ASP:
 http://perl.come/
 http://www.perl.come/
@@ -272,7 +272,7 @@ http://www.perl.come/
 # these are used as an example
 http://example.com/
 http://something.here/
-http://users.perl5.git.perl.org/~yourlogin/
+http://users.perl7.git.perl.org/~yourlogin/
 http://github.com/USERNAME/perl/tree/orange
 http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi
 http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi/somewhere/else?game=chess;game=checkers;weather=dull;foo=bar
@@ -335,7 +335,7 @@ http://www.fh-wedel.de/elvis/
 ftp://ftp.blarg.net/users/amol/zsh/
 ftp://ftp.funet.fi/pub/languages/perl/CPAN
 http://search.cpan.org/CPAN/authors/id/S/SH/SHAY/dmake-4.5-20060619-SHAY.zip
-http://users.perl5.git.perl.org/~USERNAME
+http://users.perl7.git.perl.org/~USERNAME
 http://foo/x//y/script.cgi/a//b
 http://xxx/script.cgi/http://foo
 http://foo/./x//z/script.cgi/a/../b//c

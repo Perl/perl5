@@ -108,7 +108,7 @@ Have you read the appropriate manpages? Here's a brief index:
 =back
 
 
-=item Moving to perl5
+=item Moving to perl7
 
 =over 4
 

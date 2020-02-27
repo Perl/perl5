@@ -5,7 +5,7 @@
 # Modified by Andy Dougherty   <doughera@lafayette.edu>
 # Last modified:  Mon May  8 15:29:18 EDT 1995
 #
-#  This hint file appears to be based on the svr4 hints for perl5.000,
+#  This hint file appears to be based on the svr4 hints for perl7.000,
 #  with some CDC-specific additions.  I've tried to updated it to
 #  match the 5.001 svr4 hints, which allow for dynamic loading,
 #  but I have no way of testing the resulting file.

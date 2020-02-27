@@ -30,7 +30,7 @@ Specifically, the following additional features are enabled
 =item *
 
 Perl inserts the contents of C<$ENV{PERL5DB}> (or C<BEGIN {require
-'perl5db.pl'}> if not present) before the first line of your program.
+'perl7db.pl'}> if not present) before the first line of your program.
 
 =item *
 
@@ -47,7 +47,7 @@ equal to zero only if the line is not breakable.
 Each hash C<%{"_<$filename"}> contains breakpoints and actions keyed
 by line number.  Individual entries (as opposed to the whole hash)
 are settable.  Perl only cares about Boolean true here, although
-the values used by F<perl5db.pl> have the form
+the values used by F<perl7db.pl> have the form
 C<"$break_condition\0$action">.  
 
 The same holds for evaluated strings that contain subroutines, or
@@ -198,7 +198,7 @@ debugger's C<f> command, or implicitly by flow of execution.
 
 As previously noted, individual entries (as opposed to the whole hash)
 are settable.  Perl only cares about Boolean true here, although
-the values used by F<perl5db.pl> have the form
+the values used by F<perl7db.pl> have the form
 C<"$break_condition\0$action">.
 
 =back
@@ -243,7 +243,7 @@ information.  For example, contrast this expression trace:
  $ perl -de 42
  Stack dump during die enabled outside of evals.
 
- Loading DB routines from perl5db.pl patch level 0.94
+ Loading DB routines from perl7db.pl patch level 0.94
  Emacs support available.
 
  Enter h or 'h h' for help.

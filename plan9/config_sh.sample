@@ -6,7 +6,7 @@
 # instead choose to run each of the .SH files by yourself, or "Configure -S".
 #
 
-# Package name      : perl5
+# Package name      : perl7
 # Source directory  : .
 # Configuration time: Sun Nov 24 20:57:48 EST 2002
 # Configured by     : unknown
@@ -35,8 +35,8 @@ api_subversion='0'
 api_version='0'
 api_versionstring='7.0.0'
 ar='ar'
-archlib='/sys/lib/perl5/7.0.0/386'
-archlibexp='/sys/lib/perl5/7.0.0/386'
+archlib='/sys/lib/perl7/7.0.0/386'
+archlibexp='/sys/lib/perl7/7.0.0/386'
 archname64=''
 archname='386'
 archobjs=''
@@ -829,7 +829,7 @@ installscript='/usr/bin'
 installsitearch='/sys/lib/perl/7.0.0/site_perl/386'
 installsitebin='/usr/bin'
 installsitelib='/sys/lib/perl/7.0.0/site_perl'
-installstyle='lib/perl5'
+installstyle='lib/perl7'
 installusrbinperl='undef'
 installvendorarch=''
 installvendorbin=''
@@ -933,12 +933,12 @@ orderlib='false'
 osname='plan9'
 osvers='1'
 otherlibdirs=' '
-package='perl5'
+package='perl7'
 pager='/usr/ucb/more'
 passcat=''
 patchlevel='8'
 path_sep=':'
-perl5=''
+perl7=''
 perl=''
 perl_patchlevel=''
 perl_static_inline='static'

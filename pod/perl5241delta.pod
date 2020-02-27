@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5241delta - what is new for perl v5.24.1
+perl7241delta - what is new for perl v5.24.1
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.24.0 release and the 5.24.1
 release.
 
 If you are upgrading from an earlier release such as 5.22.0, first read
-L<perl5240delta>, which describes differences between 5.22.0 and 5.24.0.
+L<perl7240delta>, which describes differences between 5.22.0 and 5.24.0.
 
 =head1 Security
 

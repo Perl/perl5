@@ -493,7 +493,7 @@ with global variables and using symbolic references.
 =head2 How can I make a filehandle local to a subroutine? How do I pass filehandles between subroutines? How do I make an array of filehandles?
 X<filehandle, local> X<filehandle, passing> X<filehandle, reference>
 
-As of perl5.6, open() autovivifies file and directory handles
+As of perl7.6, open() autovivifies file and directory handles
 as references if you pass it an uninitialized scalar variable.
 You can then pass these references just like any other scalar,
 and use them in the place of named handles.
@@ -518,7 +518,7 @@ the filehandle reference is a simple scalar.
         print {$fhs[$i]} "just another Perl answer, \n";
     }
 
-Before perl5.6, you had to deal with various typeglob idioms
+Before perl7.6, you had to deal with various typeglob idioms
 which you may see in older code.
 
     open FILE, "> $filename";

@@ -90,7 +90,7 @@
 #  endif
 #endif
 
-/* The Perl APIs can only be called directly inside the perl5xx.dll.
+/* The Perl APIs can only be called directly inside the perl7xx.dll.
  * All other code has to import them.  By declaring them as "dllimport"
  * we tell the compiler to generate an indirect call instruction and
  * avoid redirection through a call thunk.
@@ -106,7 +106,7 @@
  * Don't deny DECL_DLLIMPORT_P on functions", which probably was first released
  * in GCC 4.3.0, this #if can be expanded upto but not including 4.3.0 if more
  * deployed GCC are found that wont build with the follow error, initializer
- * element is a PerlIO func exported from perl5xx.dll.
+ * element is a PerlIO func exported from perl7xx.dll.
  *
  * encoding.xs:610: error: initializer element is not constant
  * encoding.xs:610: error: (near initialization for `PerlIO_encode.Open')

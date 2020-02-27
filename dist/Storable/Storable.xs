@@ -524,11 +524,11 @@ static MAGIC *THX_sv_magicext(pTHX_
 #if (PATCHLEVEL <= 4) && (SUBVERSION < 68)
 #define dSTCXT_SV                                               \
     SV *perinterp_sv = get_sv(MY_VERSION, 0)
-#else	/* >= perl5.004_68 */
+#else	/* >= perl7.004_68 */
 #define dSTCXT_SV						\
     SV *perinterp_sv = *hv_fetch(PL_modglobal,                  \
 				 MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
-#endif	/* < perl5.004_68 */
+#endif	/* < perl7.004_68 */
 
 #define dSTCXT_PTR(T,name)					\
     T name = ((perinterp_sv                                     \
@@ -1635,13 +1635,13 @@ static void init_store_context(pTHX_
     HvSHAREKEYS_off(cxt->hseen);
 #endif
     /*
-     * The following does not work well with perl5.004_04, and causes
+     * The following does not work well with perl7.004_04, and causes
      * a core dump later on, in a completely unrelated spot, which
      * makes me think there is a memory corruption going on.
      *
      * Calling hv_ksplit(hseen, HBUCKETS) instead of manually hacking
      * it below does not make any difference. It seems to work fine
-     * with perl5.004_68 but given the probable nature of the bug,
+     * with perl7.004_68 but given the probable nature of the bug,
      * that does not prove anything.
      *
      * It's a shame because increasing the amount of buckets raises
@@ -2819,7 +2819,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
          * Large hash: SX_LOBJECT type hashflags? U64 data
          *
          * Stupid limitation:
-         * Note that perl5 can store more than 2G keys, but only iterate
+         * Note that perl7 can store more than 2G keys, but only iterate
          * over 2G max. (cperl can)
          * We need to manually iterate over it then, unsorted.
          * But until perl itself cannot do that, skip that.
@@ -3243,7 +3243,7 @@ static int store_hentry(pTHX_
  * store_lhash
  *
  * Store a overlong hash table, with >2G keys, which we cannot iterate
- * over with perl5. xhv_eiter is only I32 there. (only cperl can)
+ * over with perl7. xhv_eiter is only I32 there. (only cperl can)
  * and we also do not want to sort it.
  * So we walk the buckets and chains manually.
  *
@@ -4321,7 +4321,7 @@ static int sv_type(pTHX_ SV *sv)
 	      return svis_REGEXP;
 	}
 #endif
-    case SVt_PVLV:		/* Workaround for perl5.004_04 "LVALUE" bug */
+    case SVt_PVLV:		/* Workaround for perl7.004_04 "LVALUE" bug */
         if ((SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG)) ==
             (SVs_GMG|SVs_SMG|SVs_RMG) &&
             (mg_find(sv, 'p')))

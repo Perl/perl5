@@ -826,7 +826,7 @@ problems on a Unicode naive version of ExtUtils::Constant (ie 0.11):
 
 nick@thinking-cap 15439-32-utf$ PERL_CORE=1 ./perl lib/ExtUtils/t/Constant.t
 1..33
-# perl=/stuff/perl5/15439-32-utf/perl
+# perl=/stuff/perl7/15439-32-utf/perl
 # ext-30370 being created...
 Wide character in print at lib/ExtUtils/t/Constant.t line 140.
 ok 1

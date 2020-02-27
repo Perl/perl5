@@ -150,7 +150,7 @@ $config_txt .= sprintf << 'EOT', $], $export_funcs;
 
 # for a description of the variables, please have a look at the
 # Glossary file, as written in the Porting folder, or use the url:
-# https://github.com/Perl/perl5/blob/blead/Porting/Glossary
+# https://github.com/Perl/perl7/blob/blead/Porting/Glossary
 
 package Config;
 use strict;
@@ -896,7 +896,7 @@ named variable exists.
 
 For a description of the variables, please have a look at the
 Glossary file, as written in the Porting folder, or use the url:
-https://github.com/Perl/perl5/blob/blead/Porting/Glossary
+https://github.com/Perl/perl7/blob/blead/Porting/Glossary
 
 =over 4
 

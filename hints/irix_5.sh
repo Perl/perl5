@@ -43,7 +43,7 @@ libswanted="$*"
 # Date: Fri, 22 Dec 1995 11:49:17 -0800
 # From: Matthew Black <black@csulb.edu>
 # Subject: sockets broken under IRIX 5.3? YES...how to fix
-# Anyone attempting to use perl4 or perl5 with SGI IRIX 5.3 may discover
+# Anyone attempting to use perl4 or perl7 with SGI IRIX 5.3 may discover
 # that sockets are essentially broken.  The syslog interface for perl also
 # fails because it uses the broken socket interface.  This problem was
 # reported to SGI as bug #255347 and it can be fixed by installing 

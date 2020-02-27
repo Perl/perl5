@@ -623,7 +623,7 @@ Net::POP3 - Post Office Protocol 3 Client class (RFC1939)
 =head1 DESCRIPTION
 
 This module implements a client interface to the POP3 protocol, enabling
-a perl5 application to talk to POP3 servers. This documentation assumes
+a perl7 application to talk to POP3 servers. This documentation assumes
 that you are familiar with the POP3 protocol described in RFC1939.
 With L<IO::Socket::SSL> installed it also provides support for implicit and
 explicit TLS encryption, i.e. POP3S or POP3+STARTTLS.

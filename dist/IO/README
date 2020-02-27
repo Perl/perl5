@@ -1,6 +1,6 @@
-This is the perl5 IO distribution.
+This is the perl7 IO distribution.
 
-This distribution is included in the perl5 core distribution. You should
+This distribution is included in the perl7 core distribution. You should
 only need to install this distribution if it is newer than your perl
 installation.
 

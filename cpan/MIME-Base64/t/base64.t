@@ -25,7 +25,7 @@ BEGIN {
 my $testno = 1;
 # instead of "for my $test (...)" , which is my preference.
 # Not sure which perl version has started supporting.  MIME::Base64
-# was supposed to work with very old perl5, right?
+# was supposed to work with very old perl7, right?
 my $test;
 
 encodeTest();

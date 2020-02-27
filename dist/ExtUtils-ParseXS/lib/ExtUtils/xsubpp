@@ -143,7 +143,7 @@ Disable recognition of ANSI-like descriptions of function signature.
 =item B<-C++>
 
 Currently doesn't do anything at all.  This flag has been a no-op for
-many versions of perl, at least as far back as perl5.003_07.  It's
+many versions of perl, at least as far back as perl7.003_07.  It's
 allowed here for backwards compatibility.
 
 =item B<-s=...> or B<-strip=...>

@@ -84,14 +84,14 @@ sub afterinit {
 EOF
     );
 
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/proxy-constants');
+    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl7db/t/proxy-constants');
     is($output, "", "proxy constant subroutines");
 }
 
 # [perl #66110] Call a subroutine inside a regex
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-66110');
+    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl7db/t/rt-66110');
     like($output, qr/\bAll tests successful\.$/, "[perl #66110]");
 }
 # [ perl #116769] Frame=2
@@ -288,7 +288,7 @@ sub _run {
             switches =>
             [
                 ($self->_switches ? (@{$self->_switches()}) : ('-d')),
-                ($self->_include_t ? ('-I', '../lib/perl5db/t') : ())
+                ($self->_include_t ? ('-I', '../lib/perl7db/t') : ())
             ],
             (defined($self->_stderr_val())
                 ? (stderr => $self->_stderr_val())
@@ -341,7 +341,7 @@ package main;
 
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    my $target = '../lib/perl5db/t/eval-line-bug';
+    my $target = '../lib/perl7db/t/eval-line-bug';
     my $wrapper = DebugWrap->new(
         {
             cmds =>
@@ -412,7 +412,7 @@ sub _calc_threads_wrapper
 }
 
 {
-    _calc_new_var_wrapper({ prog => '../lib/perl5db/t/eval-line-bug'})
+    _calc_new_var_wrapper({ prog => '../lib/perl7db/t/eval-line-bug'})
         ->contents_like(
             qr/new_var = <Foo>/,
             "no strict 'vars' in evaluated lines.",
@@ -422,7 +422,7 @@ sub _calc_threads_wrapper
 {
     _calc_new_var_wrapper(
         {
-            prog => '../lib/perl5db/t/lvalue-bug',
+            prog => '../lib/perl7db/t/lvalue-bug',
             stderr => undef(),
         },
     )->output_like(
@@ -434,7 +434,7 @@ sub _calc_threads_wrapper
 {
     _calc_new_var_wrapper(
         {
-            prog =>  '../lib/perl5db/t/symbol-table-bug',
+            prog =>  '../lib/perl7db/t/symbol-table-bug',
             extra_opts => "NonStop=1",
             stderr => undef(),
         }
@@ -453,7 +453,7 @@ SKIP:
         my $error = 'This Perl not built to support threads';
         _calc_threads_wrapper(
             {
-                prog => '../lib/perl5db/t/eval-line-bug',
+                prog => '../lib/perl7db/t/eval-line-bug',
             }
         )->output_like(
             qr/\Q$error\E/,
@@ -467,7 +467,7 @@ SKIP:
     if ( $Config{usethreads} ) {
         _calc_threads_wrapper(
             {
-                prog =>  '../lib/perl5db/t/symbol-table-bug',
+                prog =>  '../lib/perl7db/t/symbol-table-bug',
             }
         )->output_like(
             qr/Undefined symbols 0/,
@@ -489,7 +489,7 @@ SKIP:
                 'm Pie',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-61222',
+            prog => '../lib/perl7db/t/rt-61222',
         }
     );
 
@@ -515,7 +515,7 @@ sub _calc_trace_wrapper
 
 # [perl 104168] level option for tracing
 {
-    my $wrapper = _calc_trace_wrapper({ prog =>  '../lib/perl5db/t/rt-104168' });
+    my $wrapper = _calc_trace_wrapper({ prog =>  '../lib/perl7db/t/rt-104168' });
     $wrapper->contents_like(qr/level 2/, "[perl #104168] - level 2 appears");
     $wrapper->contents_unlike(qr/baz/, "[perl #104168] - no 'baz'");
 }
@@ -524,7 +524,7 @@ sub _calc_trace_wrapper
 {
     my $wrapper = _calc_trace_wrapper(
         {
-            prog => '../lib/perl5db/t/taint',
+            prog => '../lib/perl7db/t/taint',
             extra_opts => ' NonStop=1',
             switches => [ '-d', '-T', ],
         }
@@ -541,14 +541,14 @@ sub _calc_trace_wrapper
         {
             cmds =>
             [
-                'b ../lib/perl5db/t/MyModule.pm:12',
+                'b ../lib/perl7db/t/MyModule.pm:12',
                 'c',
                 q/do { use IO::Handle; STDOUT->autoflush(1); print "Var=$var\n"; }/,
                 'c',
                 'q',
             ],
             include_t => 1,
-            prog => '../lib/perl5db/t/filename-line-breakpoint'
+            prog => '../lib/perl7db/t/filename-line-breakpoint'
         }
     );
 
@@ -567,7 +567,7 @@ sub _calc_trace_wrapper
 {
     my $wrapper = DebugWrap->new(
         {
-            prog => '../lib/perl5db/t/breakpoint-bug',
+            prog => '../lib/perl7db/t/breakpoint-bug',
             cmds =>
             [
                 'b 6',
@@ -589,7 +589,7 @@ sub _calc_trace_wrapper
 {
     my $wrapper = DebugWrap->new(
         {
-            prog =>  '../lib/perl5db/t/disable-breakpoints-1',
+            prog =>  '../lib/perl7db/t/disable-breakpoints-1',
             cmds =>
             [
                 'b 7',
@@ -611,7 +611,7 @@ sub _calc_trace_wrapper
 {
     my $wrapper = DebugWrap->new(
         {
-            prog =>  '../lib/perl5db/t/disable-breakpoints-2',
+            prog =>  '../lib/perl7db/t/disable-breakpoints-2',
             cmds =>
             [
                 'b 8',
@@ -643,16 +643,16 @@ sub _calc_trace_wrapper
             cmds =>
             [
                 'b 10',
-                'b ../lib/perl5db/t/EnableModule.pm:14',
-                'disable ../lib/perl5db/t/EnableModule.pm:14',
+                'b ../lib/perl7db/t/EnableModule.pm:14',
+                'disable ../lib/perl7db/t/EnableModule.pm:14',
                 'c',
-                'enable ../lib/perl5db/t/EnableModule.pm:14',
+                'enable ../lib/perl7db/t/EnableModule.pm:14',
                 'c',
                 q/print "X={$x}\n";/,
                 'c',
                 'q',
             ],
-            prog =>  '../lib/perl5db/t/disable-breakpoints-3',
+            prog =>  '../lib/perl7db/t/disable-breakpoints-3',
             include_t => 1,
         }
     );
@@ -668,7 +668,7 @@ sub _calc_trace_wrapper
     my $wrapper = DebugWrap->new(
         {
             cmds => ['q'],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -694,7 +694,7 @@ sub _calc_trace_wrapper
                 q/print "X={$x};dummy={$dummy}\n";/,
                 'q',
             ],
-            prog =>  '../lib/perl5db/t/disable-breakpoints-1',
+            prog =>  '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -714,7 +714,7 @@ sub _calc_trace_wrapper
                 'c',
                 'q',
             ],
-            prog =>  '../lib/perl5db/t/disable-breakpoints-1',
+            prog =>  '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -736,7 +736,7 @@ sub _calc_trace_wrapper
                 q/print "Exp={$exp}\n";/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/break-on-dot',
+            prog => '../lib/perl7db/t/break-on-dot',
         }
     );
 
@@ -756,7 +756,7 @@ sub _calc_trace_wrapper
                 'c back',
                 'q',
             ],
-            prog => '../lib/perl5db/t/with-subroutine',
+            prog => '../lib/perl7db/t/with-subroutine',
         }
     );
 
@@ -777,7 +777,7 @@ sub _calc_trace_wrapper
                 'p "<<<" . (4*6) . ">>>"',
                 'q',
             ],
-            prog => '../lib/perl5db/t/with-subroutine',
+            prog => '../lib/perl7db/t/with-subroutine',
         }
     );
 
@@ -795,7 +795,7 @@ sub _calc_trace_wrapper
                 q/x {500 => 600}/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/with-subroutine',
+            prog => '../lib/perl7db/t/with-subroutine',
         }
     );
 
@@ -817,7 +817,7 @@ sub _calc_trace_wrapper
                 'x @_',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-passing-at-underscore-to-x-etc',
+            prog => '../lib/perl7db/t/test-passing-at-underscore-to-x-etc',
         }
     );
 
@@ -840,7 +840,7 @@ sub _calc_trace_wrapper
                 'print "\n\n\n(((" . join(",", @_) . ")))\n\n\n"',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-passing-at-underscore-to-x-etc',
+            prog => '../lib/perl7db/t/test-passing-at-underscore-to-x-etc',
         }
     );
 
@@ -863,7 +863,7 @@ sub _calc_trace_wrapper
                 q/x \$x/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/with-subroutine',
+            prog => '../lib/perl7db/t/with-subroutine',
         }
     );
 
@@ -876,7 +876,7 @@ sub _calc_trace_wrapper
 
 # Tests for "T" (stack trace).
 {
-    my $prog_fn = '../lib/perl5db/t/rt-104168';
+    my $prog_fn = '../lib/perl7db/t/rt-104168';
     my $wrapper = DebugWrap->new(
         {
             prog => $prog_fn,
@@ -921,7 +921,7 @@ sub _calc_trace_wrapper
                 q/print "X={$x};dummy={$dummy}\n";/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1'
+            prog => '../lib/perl7db/t/disable-breakpoints-1'
         }
     );
 
@@ -944,7 +944,7 @@ sub _calc_trace_wrapper
                 q/print "Exp={$exp}\n";/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/break-on-dot'
+            prog => '../lib/perl7db/t/break-on-dot'
         }
     );
 
@@ -955,7 +955,7 @@ sub _calc_trace_wrapper
 }
 
 {
-    my $prog_fn = '../lib/perl5db/t/rt-104168';
+    my $prog_fn = '../lib/perl7db/t/rt-104168';
     my $wrapper = DebugWrap->new(
         {
             cmds =>
@@ -986,7 +986,7 @@ sub _calc_trace_wrapper
                 'q',
             ],
 
-            prog => '../lib/perl5db/t/uncalled-subroutine'}
+            prog => '../lib/perl7db/t/uncalled-subroutine'}
     );
 
     $wrapper->output_like(
@@ -1004,7 +1004,7 @@ sub _calc_trace_wrapper
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/uncalled-subroutine',
+            prog => '../lib/perl7db/t/uncalled-subroutine',
         }
     );
 
@@ -1027,7 +1027,7 @@ sub _calc_trace_wrapper
                 'print "<$n>"',
                 'q',
             ],
-            prog => '../lib/perl5db/t/fact',
+            prog => '../lib/perl7db/t/fact',
         }
     );
 
@@ -1045,7 +1045,7 @@ DebugWrap->new({
         'n', 'print "<$x>\n"',
         'q',
     ],
-    prog => '../lib/perl5db/t/lsub-n',
+    prog => '../lib/perl7db/t/lsub-n',
 })->output_like(
     qr/<1>\n<11>\n/,
     'n steps over lvalue subs',
@@ -1060,7 +1060,7 @@ DebugWrap->new({
                 'M',
                 'q',
             ],
-            prog => '../lib/perl5db/t/load-modules'
+            prog => '../lib/perl7db/t/load-modules'
         }
     );
 
@@ -1082,7 +1082,7 @@ DebugWrap->new({
                 'print "Var=$var\n";',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-r-statement',
+            prog => '../lib/perl7db/t/test-r-statement',
         }
     );
 
@@ -1106,7 +1106,7 @@ DebugWrap->new({
                 'l',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-l-statement-1',
+            prog => '../lib/perl7db/t/test-l-statement-1',
         }
     );
 
@@ -1135,7 +1135,7 @@ DebugWrap->new({
                 q/# After -/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-l-statement-1',
+            prog => '../lib/perl7db/t/test-l-statement-1',
         }
     );
 
@@ -1189,7 +1189,7 @@ DebugWrap->new({
                 'l fact',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-l-statement-2',
+            prog => '../lib/perl7db/t/test-l-statement-2',
         }
     );
 
@@ -1223,7 +1223,7 @@ DebugWrap->new({
                 '.',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-l-statement-2',
+            prog => '../lib/perl7db/t/test-l-statement-2',
         }
     );
 
@@ -1248,7 +1248,7 @@ DebugWrap->new({
         {
             cmds =>
             [
-                'f ../lib/perl5db/t/MyModule.pm',
+                'f ../lib/perl7db/t/MyModule.pm',
                 'b 12',
                 'c',
                 q/do { use IO::Handle; STDOUT->autoflush(1); print "Var=$var\n"; }/,
@@ -1256,7 +1256,7 @@ DebugWrap->new({
                 'q',
             ],
             include_t => 1,
-            prog => '../lib/perl5db/t/filename-line-breakpoint'
+            prog => '../lib/perl7db/t/filename-line-breakpoint'
         }
     );
 
@@ -1273,12 +1273,12 @@ DebugWrap->new({
 }
 
 # We broke the /pattern/ command because apparently the CORE::eval-s inside
-# lib/perl5db.pl cannot handle lexical variable properly. So we now fix this
+# lib/perl7db.pl cannot handle lexical variable properly. So we now fix this
 # bug.
 #
 # TODO :
 #
-# 1. Go over the rest of the "eval"s in lib/perl5db.t and see if they cause
+# 1. Go over the rest of the "eval"s in lib/perl7db.t and see if they cause
 # problems.
 {
     my $wrapper = DebugWrap->new(
@@ -1288,7 +1288,7 @@ DebugWrap->new({
                 '/for/',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1308,7 +1308,7 @@ DebugWrap->new({
                 '?for?',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1329,7 +1329,7 @@ DebugWrap->new({
                 'L',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1355,7 +1355,7 @@ DebugWrap->new({
                 'L',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1379,7 +1379,7 @@ DebugWrap->new({
                 'L',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1404,7 +1404,7 @@ DebugWrap->new({
                 'L',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1428,7 +1428,7 @@ DebugWrap->new({
                 'S',
                 'q',
             ],
-            prog =>  '../lib/perl5db/t/rt-104168',
+            prog =>  '../lib/perl7db/t/rt-104168',
         }
     );
 
@@ -1450,7 +1450,7 @@ DebugWrap->new({
                 'S ^main::ba',
                 'q',
             ],
-            prog =>  '../lib/perl5db/t/rt-104168',
+            prog =>  '../lib/perl7db/t/rt-104168',
         }
     );
 
@@ -1472,7 +1472,7 @@ DebugWrap->new({
                 'S !^main::ba',
                 'q',
             ],
-            prog =>  '../lib/perl5db/t/rt-104168',
+            prog =>  '../lib/perl7db/t/rt-104168',
         }
     );
 
@@ -1501,7 +1501,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1526,7 +1526,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-a-statement-1',
+            prog => '../lib/perl7db/t/test-a-statement-1',
         }
     );
 
@@ -1548,7 +1548,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1570,7 +1570,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/eval-line-bug',
+            prog => '../lib/perl7db/t/eval-line-bug',
         }
     );
 
@@ -1591,7 +1591,7 @@ DebugWrap->new({
                 'print "\nIDX=<$idx>\n"',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-w-statement-1',
+            prog => '../lib/perl7db/t/test-w-statement-1',
         }
     );
 
@@ -1622,7 +1622,7 @@ DebugWrap->new({
                 'print "\nIDX=<$idx>\n"',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-w-statement-1',
+            prog => '../lib/perl7db/t/test-w-statement-1',
         }
     );
 
@@ -1653,7 +1653,7 @@ DebugWrap->new({
                 'print "\nIDX=<$idx>\n"',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-w-statement-1',
+            prog => '../lib/perl7db/t/test-w-statement-1',
         }
     );
 
@@ -1679,7 +1679,7 @@ DebugWrap->new({
                 'o',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-w-statement-1',
+            prog => '../lib/perl7db/t/test-w-statement-1',
         }
     );
 
@@ -1717,7 +1717,7 @@ DebugWrap->new({
                 'o hashDepth? signalLevel?',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-w-statement-1',
+            prog => '../lib/perl7db/t/test-w-statement-1',
         }
     );
 
@@ -1752,7 +1752,7 @@ DebugWrap->new({
                 'o',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-w-statement-1',
+            prog => '../lib/perl7db/t/test-w-statement-1',
         }
     );
 
@@ -1783,7 +1783,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1813,7 +1813,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1835,7 +1835,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1865,7 +1865,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1889,7 +1889,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1913,7 +1913,7 @@ DebugWrap->new({
                 q/c/,
                 q/q/,
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1947,7 +1947,7 @@ DebugWrap->new({
                 q/print (("One" x 5), "\n");/,
                 q/q/,
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1972,7 +1972,7 @@ DebugWrap->new({
                 '!',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -1999,7 +1999,7 @@ DebugWrap->new({
                 '! -1',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2023,13 +2023,13 @@ DebugWrap->new({
         {
             cmds =>
             [
-                'source ../lib/perl5db/t/source-cmd-test.perldb',
+                'source ../lib/perl7db/t/source-cmd-test.perldb',
                 # If we have a 'q' here, then the typeahead will override the
                 # input, and so it won't be reached - solution:
                 # put a q inside the .perldb commands.
                 # ( This may be a bug or a misfeature. )
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2053,10 +2053,10 @@ DebugWrap->new({
         {
             cmds =>
             [
-                'source ../lib/perl5db/t/source-cmd-test-no-q.perldb',
+                'source ../lib/perl7db/t/source-cmd-test-no-q.perldb',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2089,7 +2089,7 @@ DebugWrap->new({
                 'H -7',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2121,7 +2121,7 @@ DebugWrap->new({
                 'H',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2147,7 +2147,7 @@ DebugWrap->new({
                 'foobar',
                 'quit',
             ],
-            prog => '../lib/perl5db/t/test-l-statement-1',
+            prog => '../lib/perl7db/t/test-l-statement-1',
         }
     );
 
@@ -2172,7 +2172,7 @@ DebugWrap->new({
                 'm main',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2200,7 +2200,7 @@ DebugWrap->new({
                 'm $obj',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-m-statement-1',
+            prog => '../lib/perl7db/t/test-m-statement-1',
         }
     );
 
@@ -2222,7 +2222,7 @@ DebugWrap->new({
                 'M',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-m-statement-1',
+            prog => '../lib/perl7db/t/test-m-statement-1',
         }
     );
 
@@ -2246,7 +2246,7 @@ DebugWrap->new({
                 '% -1',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2274,7 +2274,7 @@ DebugWrap->new({
                 q/c/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-dieLevel-option-1',
+            prog => '../lib/perl7db/t/test-dieLevel-option-1',
         }
     );
 
@@ -2299,7 +2299,7 @@ DebugWrap->new({
                 q/c/,
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+            prog => '../lib/perl7db/t/test-warnLevel-option-1',
         }
     );
 
@@ -2324,7 +2324,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2348,7 +2348,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/disable-breakpoints-1',
+            prog => '../lib/perl7db/t/disable-breakpoints-1',
         }
     );
 
@@ -2375,7 +2375,7 @@ DebugWrap->new({
                 'x ["bar"]',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+            prog => '../lib/perl7db/t/test-warnLevel-option-1',
         }
     );
 
@@ -2406,7 +2406,7 @@ DebugWrap->new({
                 'x ["bar"]',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+            prog => '../lib/perl7db/t/test-warnLevel-option-1',
         }
     );
 
@@ -2433,7 +2433,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+            prog => '../lib/perl7db/t/test-warnLevel-option-1',
         }
     );
 
@@ -2457,7 +2457,7 @@ DebugWrap->new({
                 'n',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+            prog => '../lib/perl7db/t/test-warnLevel-option-1',
         }
     );
 
@@ -2483,7 +2483,7 @@ DebugWrap->new({
                 'r',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+            prog => '../lib/perl7db/t/test-PrintRet-option-1',
         }
     );
 
@@ -2508,7 +2508,7 @@ DebugWrap->new({
                 'r',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+            prog => '../lib/perl7db/t/test-PrintRet-option-1',
         }
     );
 
@@ -2533,7 +2533,7 @@ DebugWrap->new({
                 'r',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+            prog => '../lib/perl7db/t/test-PrintRet-option-1',
         }
     );
 
@@ -2558,7 +2558,7 @@ DebugWrap->new({
                 'r',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+            prog => '../lib/perl7db/t/test-PrintRet-option-1',
         }
     );
 
@@ -2583,7 +2583,7 @@ DebugWrap->new({
                 'r',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+            prog => '../lib/perl7db/t/test-PrintRet-option-1',
         }
     );
 
@@ -2608,7 +2608,7 @@ DebugWrap->new({
                 'r',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+            prog => '../lib/perl7db/t/test-PrintRet-option-1',
         }
     );
 
@@ -2633,7 +2633,7 @@ DebugWrap->new({
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-frame-option-1',
+            prog => '../lib/perl7db/t/test-frame-option-1',
         }
     );
 
@@ -2657,7 +2657,7 @@ DebugWrap->new({
                 't fact(3)',
                 'q',
             ],
-            prog => '../lib/perl5db/t/fact',
+            prog => '../lib/perl7db/t/fact',
         }
     );
 
@@ -2684,7 +2684,7 @@ DebugWrap->new({
                 'n',
                 'q',
             ],
-            prog => '../lib/perl5db/t/break-on-dot',
+            prog => '../lib/perl7db/t/break-on-dot',
         }
     );
 
@@ -2731,7 +2731,7 @@ DebugWrap->new({
                 'n',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-121509-restart-after-chdir',
+            prog => '../lib/perl7db/t/rt-121509-restart-after-chdir',
         }
     );
 
@@ -2764,7 +2764,7 @@ SKIP:
                 'perldoc perlrules',
                 'q',
             ],
-            prog => '../lib/perl5db/t/fact',
+            prog => '../lib/perl7db/t/fact',
         }
     );
 
@@ -2786,7 +2786,7 @@ SKIP:
                 's',
                 'q',
             ],
-            prog => '../lib/perl5db/t/test-a-statement-2',
+            prog => '../lib/perl7db/t/test-a-statement-2',
             switches => [ '-dw', ],
             stderr => 1,
         }
@@ -2802,7 +2802,7 @@ SKIP:
 {
     # perl 5 RT #126735 regression bug.
     local $ENV{PERLDB_OPTS} = "NonStop=0 RemotePort=non-existent-host.tld:9001";
-    my $output = runperl( stdin => "q\n", stderr => 1, switches => [ '-d' ], prog => '../lib/perl5db/t/fact' );
+    my $output = runperl( stdin => "q\n", stderr => 1, switches => [ '-d' ], prog => '../lib/perl7db/t/fact' );
     like(
         $output,
         qr/^Unable to connect to remote host:/ms,
@@ -2826,7 +2826,7 @@ SKIP:
                 'p@abc',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-120174',
+            prog => '../lib/perl7db/t/rt-120174',
         }
     );
 
@@ -2847,7 +2847,7 @@ SKIP:
                 'x@abc',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-120174',
+            prog => '../lib/perl7db/t/rt-120174',
         }
     );
 
@@ -2868,7 +2868,7 @@ SKIP:
                 'x\@abc',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-120174',
+            prog => '../lib/perl7db/t/rt-120174',
         }
     );
 
@@ -2889,7 +2889,7 @@ SKIP:
                 'x\%xyz',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-120174',
+            prog => '../lib/perl7db/t/rt-120174',
         }
     );
 
@@ -2935,7 +2935,7 @@ SKIP:
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-124203',
+            prog => '../lib/perl7db/t/rt-124203',
         }
     );
 
@@ -2950,7 +2950,7 @@ SKIP:
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/rt-124203b',
+            prog => '../lib/perl7db/t/rt-124203b',
         }
     );
 

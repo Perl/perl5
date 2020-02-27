@@ -609,7 +609,7 @@ sub dbgoutflag {
 =item cflags
 
 Defines the PERLDLL symbol if we are configured for static building since all
-code destined for the perl5xx.dll must be compiled with the PERLDLL symbol
+code destined for the perl7xx.dll must be compiled with the PERLDLL symbol
 defined.
 
 =cut

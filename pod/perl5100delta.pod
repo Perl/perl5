@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5100delta - what is new for perl 5.10.0
+perl7100delta - what is new for perl 5.10.0
 
 =head1 DESCRIPTION
 
@@ -1617,7 +1617,7 @@ analysed by the Perl porting team.
 
 =head1 SEE ALSO
 
-The F<Changes> file and the perl590delta to perl595delta man pages for
+The F<Changes> file and the perl790delta to perl795delta man pages for
 exhaustive details on what changed.
 
 The F<INSTALL> file for how to build Perl.

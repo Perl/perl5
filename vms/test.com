@@ -1,4 +1,4 @@
-$!  Test.Com - DCL wrapper for perl5 regression test driver
+$!  Test.Com - DCL wrapper for perl7 regression test driver
 $!
 $!  Version 2.0  25-April-2002   Craig Berry  craigberry@mac.com
 $!                               (and many other hands in the last 7+ years)

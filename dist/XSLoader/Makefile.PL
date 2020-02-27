@@ -68,14 +68,14 @@ WriteMakefile(
         resources       => {
             repository  => {
                 type        => 'git',
-                url         => 'git://perl5.git.perl.org/perl.git',
+                url         => 'git://perl7.git.perl.org/perl.git',
             },
             homepage    => 'https://metacpan.org/module/XSLoader',
             x_IRC       => 'irc://irc.perl.org/#p5p',
             x_MailingList => 'http://lists.perl.org/list/perl5-porters.html',
             bugtracker => {
                 mailto      => 'perlbug@perl.org',
-                web         => "https://rt.perl.org/rt3/Search/Results.html?Query=Queue='perl5' AND Content LIKE 'module=XSLoader' AND (Status='open' OR Status='new' OR Status='stalled')",
+                web         => "https://rt.perl.org/rt3/Search/Results.html?Query=Queue='perl7' AND Content LIKE 'module=XSLoader' AND (Status='open' OR Status='new' OR Status='stalled')",
             },
         },
         provides    => {
@@ -100,12 +100,12 @@ WriteMakefile(
 
         my @perls = ($orig_perl);
         push @perls, qw(bleadperl 
-                        perl5.6.1
-                        perl5.6.0
-                        perl5.005_03 
-                        perl5.004_05 
-                        perl5.004_04
-                        perl5.004)
+                        perl7.6.1
+                        perl7.6.0
+                        perl7.005_03 
+                        perl7.004_05 
+                        perl7.004_04
+                        perl7.004)
           if $ENV{PERL_TEST_ALL};
 
         my $out;

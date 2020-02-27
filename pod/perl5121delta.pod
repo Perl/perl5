@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perl5121delta - what is new for perl v5.12.1
+perl7121delta - what is new for perl v5.12.1
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This document describes differences between the 5.12.0 release and
 the 5.12.1 release.
 
 If you are upgrading from an earlier release such as 5.10.1, first read
-L<perl5120delta>, which describes differences between 5.10.1 and
+L<perl7120delta>, which describes differences between 5.10.1 and
 5.12.0.
 
 =head1 Incompatible Changes
@@ -91,7 +91,7 @@ We updated the GitHub mirror link in L<perlrepository> to mirrors/perl, not gith
 
 =item *
 
-We fixed a minor error in L<perl5114delta.pod>.
+We fixed a minor error in L<perl7114delta.pod>.
 
 =item * 
 
@@ -167,7 +167,7 @@ F<lib/blib.t> and F<lib/locale.t>: Fixes for test failures on Darwin/PPC
 
 =item *
 
-F<perl5db.t>: Fix for test failures when C<Term::ReadLine::Gnu> is installed.
+F<perl7db.t>: Fix for test failures when C<Term::ReadLine::Gnu> is installed.
 
 =back
 
@@ -387,7 +387,7 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl5-security-report@perl.org. This points to a closed subscription
+it to perl7-security-report@perl.org. This points to a closed subscription
 unarchived mailing list, which includes
 all the core committers, who will be able
 to help assess the impact of issues, figure out a resolution, and help

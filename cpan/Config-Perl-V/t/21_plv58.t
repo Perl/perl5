@@ -45,7 +45,7 @@ ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
 is ($sig, $md5, "MD5");
 
 __END__
-Summary of my perl5 (revision 5 version 8 subversion 9) configuration:
+Summary of my perl7 (revision 5 version 8 subversion 9) configuration:
   Platform:
     osname=linux, osvers=2.6.34.7-0.4-desktop, archname=i686-linux-thread-multi-64int-ld
     uname='linux tux09.procura.nl 2.6.34.7-0.4-desktop #1 smp preempt 2010-10-07 19:07:51 +0200 i686 i686 i386 gnulinux '

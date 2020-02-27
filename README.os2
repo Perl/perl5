@@ -917,7 +917,7 @@ to apply to the current source of perl.
 
 Extract it like this
 
-  tar vzxf perl5.00409.tar.gz
+  tar vzxf perl7.00409.tar.gz
 
 You may see a message about errors while extracting F<Configure>. This is
 because there is a conflict with a similarly-named file F<configure>.
@@ -1119,7 +1119,7 @@ runs fine.
 =item 2.
 
 Fully install Perl, including C<installcmd> target.  Copy the generated DLLs
-to C<LIBPATH>; copy the numbered Perl executables (as in F<perl5.8.2.exe>)
+to C<LIBPATH>; copy the numbered Perl executables (as in F<perl7.8.2.exe>)
 to C<PATH>; copy C<perl_.exe> to C<PATH> as C<perl_5.8.2.exe>.  Think whether
 you need backward-compatibility DLLs.  In most cases you do not need to install
 them yet; but sometime this may simplify the following steps.
@@ -1133,15 +1133,15 @@ to manually install C<Net::FTP>.
 
 Install the bundle C<Bundle::OS2_default>
 
- perl5.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_1
+ perl7.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_1
 
 This may take a couple of hours on 1GHz processor (when run the first time).
 And this should not be necessarily a smooth procedure.  Some modules may not
 specify required dependencies, so one may need to repeat this procedure several
 times until the results stabilize.
 
- perl5.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_2
- perl5.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_3
+ perl7.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_2
+ perl7.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_3
 
 Even after they stabilize, some tests may fail.
 
@@ -1173,7 +1173,7 @@ Reset back to the default value C<1> when you are finished.
 =item 5.
 
 When satisfied with the results, rerun the C<installcmd> target.  Now you
-can copy C<perl5.8.2.exe> to C<perl.exe>, and install the other OMF-build
+can copy C<perl7.8.2.exe> to C<perl.exe>, and install the other OMF-build
 executables: C<perl__.exe> etc.  They are ready to be used.
 
 =item 6.
@@ -1291,10 +1291,10 @@ forget to pack the necessary external DLLs accordingly.  Include the
 description of the bugs and test suite failures you could not fix.  Include
 the small-stack versions of Perl executables from Perl build directory.
 
-Include F<perl5.def> so that people can relink the perl DLL preserving
+Include F<perl7.def> so that people can relink the perl DLL preserving
 the binary compatibility, or can create compatibility DLLs.  Include the diff
 files (C<diff -pu old new>) of fixes you did so that people can rebuild your
-version.  Include F<perl5.map> so that one can use remote debugging.
+version.  Include F<perl7.map> so that one can use remote debugging.
 
 =item 10.
 
@@ -1634,7 +1634,7 @@ necessary type.  Call via C<OS2::Process> to disable this magic.
 
 B<WARNING>.  Due to the described logic, you need to explicitly
 specify F<.com> extension if needed.  Moreover, if the executable
-F<perl5.6.1> is requested, Perl will not look for F<perl5.6.1.exe>.
+F<perl7.6.1> is requested, Perl will not look for F<perl7.6.1.exe>.
 [This may change in the future.]
 
 =head2 C<extproc> on the first line
@@ -2583,7 +2583,7 @@ L<Cwd::extLibpath_set|/Cwd::extLibpath_set( path [, type ] )>.
 
 Assume that the old DLL is named F<perlE0AC.dll> (as is one for
 5.005_53), and the new version is 5.6.1.  Create a file
-F<perl5shim.def-leader> with
+F<perl7shim.def-leader> with
 
   LIBRARY 'perlE0AC' INITINSTANCE TERMINSTANCE
   DESCRIPTION '@#perl5-porters@perl.org:5.006001#@ Perl module for 5.00553 -> Perl 5.6.1 forwarder'
@@ -2594,13 +2594,13 @@ F<perl5shim.def-leader> with
 modifying the versions/names as needed.  Run
 
  perl -wnle "next if 0../EXPORTS/; print qq(  \"$1\")
-                                          if /\"(\w+)\"/" perl5.def >lst
+                                          if /\"(\w+)\"/" perl7.def >lst
 
-in the Perl build directory (to make the DLL smaller replace perl5.def
+in the Perl build directory (to make the DLL smaller replace perl7.def
 with the definition file for the older version of Perl if present).
 
- cat perl5shim.def-leader lst >perl5shim.def
- gcc -Zomf -Zdll -o perlE0AC.dll perl5shim.def -s -llibperl
+ cat perl7shim.def-leader lst >perl7shim.def
+ gcc -Zomf -Zdll -o perlE0AC.dll perl7shim.def -s -llibperl
 
 (ignore multiple C<warning L4085>).
 

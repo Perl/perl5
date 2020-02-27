@@ -8,7 +8,7 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Date: 1994/03/07 00:21:43 $
- * $Source: /home/rsanders/src/perl5alpha6/RCS/dld_dl.c,v $
+ * $Source: /home/rsanders/src/perl7alpha6/RCS/dld_dl.c,v $
  * $Revision: 1.4 $
  * $State: Exp $
  *
