@@ -25,9 +25,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 steveh: Unless there is an overriding need for this on a security basis then I think this one has to be rejected because it fails
 one of our backporting criteria: It adds a new fatal error, which we undertake not to do in maint releases.
+steveh: That policy may be revised shortly. We also have two new options for how to fix this, and it is no longer deemed a security
+issue anyway. I'm inclined to delay this for a security-based 5.30.3 that will hopefully also include fixes for sec-125 (which also
+adds a new error) and sec-130 too.
 <commit votes="demerphq" id="ac3afc4b35675aec55918770197358190f782728" ticket="" desc="regcomp.c: make \K+ and \K* illegal." />
-
-steveh: There is also interest in backporting perl5-security #125, though it also adds a new fatal error.
 
 </div>
 
