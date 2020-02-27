@@ -38,7 +38,7 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.084 to 2.089.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20191110 to 5.20200307.
+L<Module::CoreList> has been upgraded from version 5.20191110 to 5.20200314.
 
 =back
 
