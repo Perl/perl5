@@ -655,7 +655,7 @@ the table is sorted on the right operand instead of on the left.
  Left      Right      Description and pseudocode
  ===============================================================
  HASH1     HASH2      all same keys in both HASHes
-                like: keys HASH1 ==
+                like: keys HASH1 ~~
                          grep { exists HASH2->{$_} } keys HASH1
  ARRAY     HASH       any ARRAY elements exist as HASH keys
                 like: grep { exists HASH->{$_} } ARRAY
