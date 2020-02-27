@@ -19,8 +19,6 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-<commit votes="demerphq khw steveh" id="d8e1e69d20817fd4b9d94736c97ef585900451a4 " ticket="" desc="regcomp.c: restore {} braces to DEBUG_PARSE_r multi-statements" />
-
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -46,8 +44,6 @@ steveh: There is also interest in backporting perl5-security #125, though it als
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-<commit votes="steveh khw bingos" id="6bd6308fcea3541e505651bf8e8127a4a03d22cd" ticket="" desc="Adapt Configure to GCC version 10"/>
 
 </div>
 
