@@ -21,7 +21,7 @@
 #  include "ppport.h" 
 #endif
 
-#if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 )) )
 
 #    ifdef SvPVbyte_force
 #        undef SvPVbyte_force
@@ -36,7 +36,7 @@
 #endif
 
 
-#if PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 )) )
 #    define UTF8_AVAILABLE
 #endif
 

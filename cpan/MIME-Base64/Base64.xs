@@ -110,7 +110,7 @@ encode_base64(sv,...)
 	U32 had_utf8;
 
 	CODE:
-#if PERL_REVISION == 5 && PERL_VERSION >= 6
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && PERL_VERSION >= 6 )
 	had_utf8 = SvUTF8(sv);
 	sv_utf8_downgrade(sv, FALSE);
 #endif
@@ -171,7 +171,7 @@ encode_base64(sv,...)
 		*r++ = *c++;
 	}
 	*r = '\0';  /* every SV in perl should be NUL-terminated */
-#if PERL_REVISION == 5 && PERL_VERSION >= 6
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && PERL_VERSION >= 6 )
 	if (had_utf8)
 	    sv_utf8_upgrade(sv);
 #endif
@@ -251,12 +251,12 @@ encoded_base64_length(sv,...)
 	U32 had_utf8;
 
 	CODE:
-#if PERL_REVISION == 5 && PERL_VERSION >= 6
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && PERL_VERSION >= 6 )
 	had_utf8 = SvUTF8(sv);
 	sv_utf8_downgrade(sv, FALSE);
 #endif
 	len = SvCUR(sv);
-#if PERL_REVISION == 5 && PERL_VERSION >= 6
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && PERL_VERSION >= 6 )
 	if (had_utf8)
 	    sv_utf8_upgrade(sv);
 #endif
@@ -332,7 +332,7 @@ encode_qp(sv,...)
 	U32 had_utf8;
 
 	CODE:
-#if PERL_REVISION == 5 && PERL_VERSION >= 6
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && PERL_VERSION >= 6 )
         had_utf8 = SvUTF8(sv);
 	sv_utf8_downgrade(sv, FALSE);
 #endif
@@ -426,7 +426,7 @@ encode_qp(sv,...)
 	    sv_catpvn(RETVAL, "=", 1);
 	    sv_catpvn(RETVAL, eol, eol_len);
 	}
-#if PERL_REVISION == 5 && PERL_VERSION >= 6
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && PERL_VERSION >= 6 )
 	if (had_utf8)
 	    sv_utf8_upgrade(sv);
 #endif

@@ -116,7 +116,7 @@
 #  endif
 #endif
 
-#if PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
+#if PERL_REVISION > 5 || ( PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 )) )
 #    define UTF8_AVAILABLE
 #endif
 
