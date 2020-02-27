@@ -11478,7 +11478,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         || *RExC_parse != paren)
                     {
 		        vFAIL2("Sequence (?%c... not terminated",
-		            paren=='>' ? '<' : paren);
+		            paren=='>' ? '<' : (char) paren);
                     }
 		    {
 			HE *he_str;
