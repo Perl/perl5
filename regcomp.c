@@ -197,10 +197,6 @@ struct RExC_state_t {
     U32         frame_count;
     AV         *warn_text;
     HV         *unlexed_names;
-#ifdef ADD_TO_REGEXEC
-    char 	*starttry;		/* -Dr: where regtry was called. */
-#define RExC_starttry	(pRExC_state->starttry)
-#endif
     SV		*runtime_code_qr;	/* qr with the runtime code blocks */
 #ifdef DEBUGGING
     const char  *lastparse;
