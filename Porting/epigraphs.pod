@@ -219,6 +219,51 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
 
+=head2 v5.30.2-RC1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act II, Scene 2
+
+L<Announced on 2020-02-29 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/02/msg257163.html>
+
+  ALFREDO
+  For me this woman lost
+  all she possessed.
+  I was blind, a wretched coward,
+  I accepted it all.
+  But it's time now for me to clear
+  myself from debt.
+  I call you all to witness here
+  that I've paid her back!
+
+  (Contemptuously, he throws his winnings at Violetta's feet.
+  She swoons in Flora's arms. Alfredo's father arrives suddenly.)
+
+  ALL
+  What you have done
+  is shameful!
+  To strike down
+  a tender heart that way!
+  You have insulted
+  a woman!
+  Get out of here!
+  We've no use for the likes of you!
+  Go!
+
+  GERMONT
+  (dignified in his anger)
+  A man who offends a woman, even in anger,
+  deserves nothing but scorn.
+  Where is my son? I no longer see him
+  in you, Alfredo.
+
+  ALFREDO
+  (What have I done? Yes, I despise myself!
+  Jealous madness, love deceived,
+  ravaged my soul, destroyed my reason.
+  How can I ever gain her pardon?
+  I would have left her, but I couldn't;
+  I came here to vent my anger,
+  But now I've done that, wretch that I am,
+  I feel nothing but deep remorse!)
+
 =head2 v5.30.1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act I: Brindisi
 
 L<Announced on 2019-11-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2019/11/msg256610.html>
