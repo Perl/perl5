@@ -8967,7 +8967,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
         Perl_re_printf( aTHX_ "%16s","");                       \
                                                                 \
     if (RExC_lastnum!=RExC_emit)                                \
-       Perl_re_printf( aTHX_ "|%4d", RExC_emit);                \
+       Perl_re_printf( aTHX_ "|%4zu", RExC_emit);                \
     else                                                        \
        Perl_re_printf( aTHX_ "|%4s","");                        \
     Perl_re_printf( aTHX_ "|%*s%-4s",                           \
@@ -11391,7 +11391,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
             if ( arg_required && !start_arg ) {
                 vFAIL3("Verb pattern '%.*s' has a mandatory argument",
-                    verb_len, start_verb);
+                    (int) verb_len, start_verb);
             }
             if (internal_argval == -1) {
                 ret = reganode(pRExC_state, op, 0);
@@ -11457,7 +11457,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
 		vFAIL3("Sequence (%.*s...) not recognized",
-                                RExC_parse-seqstart, seqstart);
+                                (int) (RExC_parse - seqstart), seqstart);
 		NOT_REACHED; /*NOTREACHED*/
             case '<':           /* (?<...) */
                 /* If you want to support (?<*...), first reconcile with GH #17363 */
@@ -12106,7 +12106,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             if (RExC_open_parens && !RExC_open_parens[parno])
             {
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
-                    "%*s%*s Setting open paren #%" IVdf " to %d\n",
+                    "%*s%*s Setting open paren #%" IVdf " to %zu\n",
                     22, "|    |", (int)(depth * 2 + 1), "",
                     (IV)parno, ret));
                 RExC_open_parens[parno]= ret;
@@ -12201,7 +12201,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	    ender = reganode(pRExC_state, CLOSE, parno);
             if ( RExC_close_parens ) {
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
-                        "%*s%*s Setting close paren #%" IVdf " to %d\n",
+                        "%*s%*s Setting close paren #%" IVdf " to %zu\n",
                         22, "|    |", (int)(depth * 2 + 1), "",
                         (IV)parno, ender));
                 RExC_close_parens[parno]= ender;
@@ -12235,7 +12235,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             RExC_end_op = REGNODE_p(ender);
             if (RExC_close_parens) {
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
-                    "%*s%*s Setting close paren #0 (END) to %d\n",
+                    "%*s%*s Setting close paren #0 (END) to %zu\n",
                     22, "|    |", (int)(depth * 2 + 1), "",
                     ender));
 
@@ -20498,7 +20498,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         DEBUG_PARSE_r({
             DEBUG_PARSE_MSG((scan==p ? "tail" : ""));
             regprop(RExC_rx, RExC_mysv, REGNODE_p(scan), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ %s (%d) %s %s\n",
+            Perl_re_printf( aTHX_  "~ %s (%zu) %s %s\n",
                 SvPV_nolen_const(RExC_mysv), scan,
                     (temp == NULL ? "->" : ""),
                     (temp == NULL ? PL_reg_name[OP(REGNODE_p(val))] : "")
@@ -20605,7 +20605,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         DEBUG_PARSE_r({
             DEBUG_PARSE_MSG((scan==p ? "tsdy" : ""));
             regprop(RExC_rx, RExC_mysv, REGNODE_p(scan), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ %s (%d) -> %s\n",
+            Perl_re_printf( aTHX_  "~ %s (%zu) -> %s\n",
                 SvPV_nolen_const(RExC_mysv),
                 scan,
                 PL_reg_name[exact]);
