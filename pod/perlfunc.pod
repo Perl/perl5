@@ -8084,8 +8084,8 @@ as supported by the compiler used to build Perl:
                64-bit integers)
    t           interpret integer as C type "ptrdiff_t" on Perl
                5.14 or later
-   z           interpret integer as C type "size_t" on Perl 5.14
-               or later
+   z           interpret integer as C types "size_t" or
+               "ssize_t" on Perl 5.14 or later
 
 As of 5.14, none of these raises an exception if they are not supported on
 your platform.  However, if warnings are enabled, a warning of the
