@@ -146,9 +146,9 @@ $desc = "got expected element";
     : print "not ok $N - $desc\n";
 $N++;
 
+$o = undef;  # destroy Tie::File object holding file open
 # Untie the first file
 my $u = untie @array;
-$o = undef;  # destroy object holding file open
 # TODO: perldoc -f untie does not specify return value for untie
 
 open my $G, "<", $file or die "Unable to open $file for reading: $!";
@@ -195,10 +195,10 @@ $desc = "last element in dupe array corresponds to last line of dupe file";
 $N++;
 
 END {
-    untie @array;
-    untie @dupe;
     undef $o;
     undef $p;
+    untie @array;
+    untie @dupe;
     1 while unlink $file;
     1 while unlink $dupe;
 }
