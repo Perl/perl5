@@ -584,6 +584,12 @@ variables for C compiler switches etc.">.  You can force an embedded perl
 to use direct manipulation by setting C<PL_use_safe_putenv = 0;> after
 the C<perl_construct()> call.
 
+=head3 External glob
+
+Before File::Glob entered core in 5.6.0 globbing was implemented by shelling
+out. If the environmental variable PERL_EXTERNAL_GLOB is defined and if the
+F<csh> shell is available, perl will still do this the old way.
+
 =head2 Installation Directories
 
 The installation directories can all be changed by answering the
