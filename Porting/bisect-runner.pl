@@ -958,6 +958,50 @@ L<GH issue 17381|https://github.com/Perl/perl5/issues/17381>
 
 =back
 
+=head2 When did a test file start to emit warnings?
+
+=over 4
+
+=item * Problem
+
+When F<dist/Tie-File/t/43_synopsis> was run as part of C<make test>, we
+observed warnings not previously seen.  At what commit were those warnings
+first emitted?
+
+=item * Solution
+
+We know that when this test file was first committed to blead, no warnings
+were observed and there was no output to C<STDERR>.  So that commit becomes
+the value for C<--start>.
+
+Since the test file in question is for a CPAN distribution maintained by core,
+we must prepare to run that test by including C<--target=test_prep> in the
+bisection invocation.  We then run the test file in a way that captures
+C<STDERR> in a file.  If that file has non-zero size, then we have presumably
+captured the newly seen warnings.
+
+    export ERR="/tmp/err"
+
+    .../perl Porting/bisect.pl \
+      --start=507614678018ae1abd55a22e9941778c65741ba3 \
+      --end=d34b46d077dcfc479c36f65b196086abd7941c76 \
+      --target=test_prep \
+      -e 'chdir("t");
+        system(
+          "./perl harness ../dist/Tie-File/t/43_synopsis.t
+            2>$ENV{ERR}"
+        );
+        -s $ENV{ERR} and die "See $ENV{ERR} for warnings thrown";'
+
+Bisection pointed to a commit where strictures and warnings were first turned
+on throughout the F<dist/Tie-File/> directory.
+
+=item * Reference
+
+L<Commit 125e1a3|https://github.com/Perl/perl5/commit/125e1a36a939>
+
+=back
+
 =cut
 
 # Ensure we always exit with 255, to cause git bisect to abort.
