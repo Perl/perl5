@@ -1491,14 +1491,14 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	if (!i) /* fixed */
 	    data->substrs[0].max_offset = data->substrs[0].min_offset;
 	else { /* float */
-	    data->substrs[1].max_offset = (l
+	    data->substrs[1].max_offset =
+                      (is_inf)
+                       ? OPTIMIZE_INFTY
+                       : (l
                           ? data->last_start_max
                           : (data->pos_delta > OPTIMIZE_INFTY - data->pos_min
 					 ? OPTIMIZE_INFTY
 					 : data->pos_min + data->pos_delta));
-	    if (is_inf
-		 || (STRLEN)data->substrs[1].max_offset > (STRLEN)OPTIMIZE_INFTY)
-		data->substrs[1].max_offset = OPTIMIZE_INFTY;
         }
 
         if (data->flags & SF_BEFORE_EOL)
