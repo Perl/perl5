@@ -30,17 +30,13 @@
 #define PERL_IN_PP_SORT_C
 #include "perl.h"
 
-#define sv_cmp_static Perl_sv_cmp
-#define sv_cmp_locale_static Perl_sv_cmp_locale
-
 #ifndef SMALLSORT
 #define SMALLSORT (200)
 #endif
 
 /* Flags for sortsv_flags */
-#define SORTf_DESC   1
-#define SORTf_STABLE 2
-#define SORTf_UNSTABLE 8
+#define SORTf_STABLE 1
+#define SORTf_UNSTABLE 2
 
 /*
  * The mergesort implementation is by Peter M. Mcilroy <pmcilroy@lucent.com>.
@@ -179,7 +175,7 @@ typedef SV * gptr;              /* pointers in our lists */
 */
 
 
-static IV
+PERL_STATIC_FORCE_INLINE IV __attribute__always_inline__
 dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, const SVCOMPARE_t cmp)
 {
     I32 sense;
@@ -338,25 +334,8 @@ typedef struct {
     IV  runs;           /* how many runs must be combined into 1 */
 } off_runs;             /* pseudo-stack element */
 
-
-static I32
-cmp_desc(pTHX_ gptr const a, gptr const b)
-{
-    return -PL_sort_RealCmp(aTHX_ a, b);
-}
-
-/*
-=head1 SV Manipulation Functions
-
-=for apidoc sortsv_flags
-
-In-place sort an array of SV pointers with the given comparison routine,
-with various SORTf_* flag options.
-
-=cut
-*/
-void
-Perl_sortsv_flags(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
+PERL_STATIC_FORCE_INLINE void
+S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
     IV i, run, offset;
     I32 sense, level;
@@ -367,16 +346,9 @@ Perl_sortsv_flags(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     gptr small[SMALLSORT];
     gptr *which[3];
     off_runs stack[60], *stackp;
-    SVCOMPARE_t savecmp = NULL;
 
-    PERL_ARGS_ASSERT_SORTSV_FLAGS;
+    PERL_ARGS_ASSERT_SORTSV_FLAGS_IMPL;
     if (nmemb <= 1) return;                     /* sorted trivially */
-
-    if ((flags & SORTf_DESC) != 0) {
-        savecmp = PL_sort_RealCmp;      /* Save current comparison routine, if any */
-        PL_sort_RealCmp = cmp;  /* Put comparison routine where cmp_desc can find it */
-        cmp = cmp_desc;
-    }
 
     if (nmemb <= SMALLSORT) aux = small;        /* use stack for aux array */
     else { Newx(aux,nmemb,gptr); }              /* allocate auxiliary array */
@@ -563,11 +535,137 @@ Perl_sortsv_flags(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     }
   done:
     if (aux != small) Safefree(aux);    /* free iff allocated */
-    if (savecmp != NULL) {
-         PL_sort_RealCmp = savecmp;     /* Restore current comparison routine, if any */
-    }
+
     return;
 }
+
+/*
+=head1 SV Manipulation Functions
+
+=for apidoc sortsv_flags
+
+In-place sort an array of SV pointers with the given comparison routine,
+with various SORTf_* flag options.
+
+=cut
+*/
+void
+Perl_sortsv_flags(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
+{
+    PERL_ARGS_ASSERT_SORTSV_FLAGS;
+
+    sortsv_flags_impl(base, nmemb, cmp, flags);
+}
+
+/*
+ * Each of sortsv_* functions contains an inlined copy of
+ * sortsv_flags_impl() with an inlined comparator. Basically, we are
+ * emulating C++ templates by using __attribute__((always_inline)).
+ *
+ * The purpose of that is to avoid the function call overhead inside
+ * the sorting routine, which calls the comparison function multiple
+ * times per sorted item.
+ */
+
+static void
+sortsv_amagic_i_ncmp(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_i_ncmp, flags);
+}
+
+static void
+sortsv_amagic_i_ncmp_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_i_ncmp_desc, flags);
+}
+
+static void
+sortsv_i_ncmp(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_sv_i_ncmp, flags);
+}
+
+static void
+sortsv_i_ncmp_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_sv_i_ncmp_desc, flags);
+}
+
+static void
+sortsv_amagic_ncmp(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_ncmp, flags);
+}
+
+static void
+sortsv_amagic_ncmp_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_ncmp_desc, flags);
+}
+
+static void
+sortsv_ncmp(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_sv_ncmp, flags);
+}
+
+static void
+sortsv_ncmp_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_sv_ncmp_desc, flags);
+}
+
+static void
+sortsv_amagic_cmp(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_cmp, flags);
+}
+
+static void
+sortsv_amagic_cmp_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_cmp_desc, flags);
+}
+
+static void
+sortsv_cmp(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, Perl_sv_cmp, flags);
+}
+
+static void
+sortsv_cmp_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_cmp_desc, flags);
+}
+
+#ifdef USE_LOCALE_COLLATE
+
+static void
+sortsv_amagic_cmp_locale(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_cmp_locale, flags);
+}
+
+static void
+sortsv_amagic_cmp_locale_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_amagic_cmp_locale_desc, flags);
+}
+
+static void
+sortsv_cmp_locale(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, Perl_sv_cmp_locale, flags);
+}
+
+static void
+sortsv_cmp_locale_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
+{
+    sortsv_flags_impl(base, nmemb, S_cmp_locale_desc, flags);
+}
+
+#endif
 
 /*
 =head1 Array Manipulation Functions
@@ -611,10 +709,10 @@ PP(pp_sort)
     const U8 priv = PL_op->op_private;
     const U8 flags = PL_op->op_flags;
     U32 sort_flags = 0;
-    I32 all_SIVs = 1;
+    I32 all_SIVs = 1, descending = 0;
 
     if ((priv & OPpSORT_DESCEND) != 0)
-        sort_flags |= SORTf_DESC;
+        descending = 1;
     if ((priv & OPpSORT_STABLE) != 0)
         sort_flags |= SORTf_STABLE;
     if ((priv & OPpSORT_UNSTABLE) != 0)
@@ -839,30 +937,54 @@ PP(pp_sort)
             if (priv & OPpSORT_NUMERIC) {
                 if ((priv & OPpSORT_INTEGER) || all_SIVs) {
                     if (overloading)
-                        Perl_sortsv_flags(aTHX_ start, max, S_amagic_i_ncmp, sort_flags);
+                        if (descending)
+                            sortsv_amagic_i_ncmp_desc(aTHX_ start, max, sort_flags);
+                        else
+                            sortsv_amagic_i_ncmp(aTHX_ start, max, sort_flags);
                     else
-                        Perl_sortsv_flags(aTHX_ start, max, S_sv_i_ncmp, sort_flags);
+                        if (descending)
+                            sortsv_i_ncmp_desc(aTHX_ start, max, sort_flags);
+                        else
+                            sortsv_i_ncmp(aTHX_ start, max, sort_flags);
                 }
                 else {
                     if (overloading)
-                        Perl_sortsv_flags(aTHX_ start, max, S_amagic_ncmp, sort_flags);
+                        if (descending)
+                            sortsv_amagic_ncmp_desc(aTHX_ start, max, sort_flags);
+                        else
+                            sortsv_amagic_ncmp(aTHX_ start, max, sort_flags);
                     else
-                        Perl_sortsv_flags(aTHX_ start, max, S_sv_ncmp, sort_flags);
+                        if (descending)
+                            sortsv_ncmp_desc(aTHX_ start, max, sort_flags);
+                        else
+                            sortsv_ncmp(aTHX_ start, max, sort_flags);
                 }
             }
 #ifdef USE_LOCALE_COLLATE
             else if(IN_LC_RUNTIME(LC_COLLATE)) {
                 if (overloading)
-                    Perl_sortsv_flags(aTHX_ start, max, S_amagic_cmp_locale, sort_flags);
+                    if (descending)
+                        sortsv_amagic_cmp_locale_desc(aTHX_ start, max, sort_flags);
+                    else
+                        sortsv_amagic_cmp_locale(aTHX_ start, max, sort_flags);
                 else
-                    Perl_sortsv_flags(aTHX_ start, max, sv_cmp_locale_static, sort_flags);
+                    if (descending)
+                        sortsv_cmp_locale_desc(aTHX_ start, max, sort_flags);
+                    else
+                        sortsv_cmp_locale(aTHX_ start, max, sort_flags);
             }
 #endif
             else {
                 if (overloading)
-                    Perl_sortsv_flags(aTHX_ start, max, S_amagic_cmp, sort_flags);
+                    if (descending)
+                        sortsv_amagic_cmp_desc(aTHX_ start, max, sort_flags);
+                    else
+                        sortsv_amagic_cmp(aTHX_ start, max, sort_flags);
                 else
-                    Perl_sortsv_flags(aTHX_ start, max, sv_cmp_static, sort_flags);
+                    if (descending)
+                        sortsv_cmp_desc(aTHX_ start, max, sort_flags);
+                    else
+                        sortsv_cmp(aTHX_ start, max, sort_flags);
             }
         }
         if ((priv & OPpSORT_REVERSE) != 0) {
@@ -1031,7 +1153,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 }
 
 
-static I32
+PERL_STATIC_FORCE_INLINE I32
 S_sv_ncmp(pTHX_ SV *const a, SV *const b)
 {
     I32 cmp = do_ncmp(a, b);
@@ -1046,7 +1168,15 @@ S_sv_ncmp(pTHX_ SV *const a, SV *const b)
     return cmp;
 }
 
-static I32
+PERL_STATIC_FORCE_INLINE I32
+S_sv_ncmp_desc(pTHX_ SV *const a, SV *const b)
+{
+    PERL_ARGS_ASSERT_SV_NCMP_DESC;
+
+    return -S_sv_ncmp(aTHX_ a, b);
+}
+
+PERL_STATIC_FORCE_INLINE I32
 S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 {
     const IV iv1 = SvIV(a);
@@ -1057,6 +1187,14 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
     return iv1 < iv2 ? -1 : iv1 > iv2 ? 1 : 0;
 }
 
+PERL_STATIC_FORCE_INLINE I32
+S_sv_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
+{
+    PERL_ARGS_ASSERT_SV_I_NCMP_DESC;
+
+    return -S_sv_i_ncmp(aTHX_ a, b);
+}
+
 #define tryCALL_AMAGICbin(left,right,meth) \
     (SvAMAGIC(left)||SvAMAGIC(right)) \
         ? amagic_call(left, right, meth, 0) \
@@ -1064,7 +1202,7 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 
 #define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
 
-static I32
+PERL_STATIC_FORCE_INLINE I32
 S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
@@ -1084,7 +1222,15 @@ S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
      return S_sv_ncmp(aTHX_ a, b);
 }
 
-static I32
+PERL_STATIC_FORCE_INLINE I32
+S_amagic_ncmp_desc(pTHX_ SV *const a, SV *const b)
+{
+    PERL_ARGS_ASSERT_AMAGIC_NCMP_DESC;
+
+    return -S_amagic_ncmp(aTHX_ a, b);
+}
+
+PERL_STATIC_FORCE_INLINE I32
 S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
@@ -1104,7 +1250,15 @@ S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
     return S_sv_i_ncmp(aTHX_ a, b);
 }
 
-static I32
+PERL_STATIC_FORCE_INLINE I32
+S_amagic_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
+{
+    PERL_ARGS_ASSERT_AMAGIC_I_NCMP_DESC;
+
+    return -S_amagic_i_ncmp(aTHX_ a, b);
+}
+
+PERL_STATIC_FORCE_INLINE I32
 S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
@@ -1124,9 +1278,25 @@ S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
     return sv_cmp(str1, str2);
 }
 
+PERL_STATIC_FORCE_INLINE I32
+S_amagic_cmp_desc(pTHX_ SV *const str1, SV *const str2)
+{
+    PERL_ARGS_ASSERT_AMAGIC_CMP_DESC;
+
+    return -S_amagic_cmp(aTHX_ str1, str2);
+}
+
+PERL_STATIC_FORCE_INLINE I32
+S_cmp_desc(pTHX_ SV *const str1, SV *const str2)
+{
+    PERL_ARGS_ASSERT_CMP_DESC;
+
+    return -sv_cmp(str1, str2);
+}
+
 #ifdef USE_LOCALE_COLLATE
 
-static I32
+PERL_STATIC_FORCE_INLINE I32
 S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
@@ -1144,6 +1314,22 @@ S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
         }
     }
     return sv_cmp_locale(str1, str2);
+}
+
+PERL_STATIC_FORCE_INLINE I32
+S_amagic_cmp_locale_desc(pTHX_ SV *const str1, SV *const str2)
+{
+    PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE_DESC;
+
+    return -S_amagic_cmp_locale(aTHX_ str1, str2);
+}
+
+PERL_STATIC_FORCE_INLINE I32
+S_cmp_locale_desc(pTHX_ SV *const str1, SV *const str2)
+{
+    PERL_ARGS_ASSERT_CMP_LOCALE_DESC;
+
+    return -sv_cmp_locale(str1, str2);
 }
 
 #endif
