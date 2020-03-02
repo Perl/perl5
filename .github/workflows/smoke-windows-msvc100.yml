@@ -11,8 +11,8 @@ on:
 
 jobs:
   perl:
-
     runs-on: windows-latest
+    timeout-minutes: 120
 
     env:
         PERL_SKIP_TTY_TEST: 1
