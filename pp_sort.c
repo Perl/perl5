@@ -611,8 +611,6 @@ PP(pp_sort)
     const U8 priv = PL_op->op_private;
     const U8 flags = PL_op->op_flags;
     U32 sort_flags = 0;
-    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
-      = Perl_sortsv_flags;
     I32 all_SIVs = 1;
 
     if ((priv & OPpSORT_DESCEND) != 0)
@@ -812,7 +810,7 @@ PP(pp_sort)
             }
 
             start = p1 - max;
-            sortsvp(aTHX_ start, max,
+            Perl_sortsv_flags(aTHX_ start, max,
                     (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),
                     sort_flags);
 
@@ -838,7 +836,7 @@ PP(pp_sort)
         else {
             MEXTEND(SP, 20);    /* Can't afford stack realloc on signal. */
             start = ORIGMARK+1;
-            sortsvp(aTHX_ start, max,
+            Perl_sortsv_flags(aTHX_ start, max,
                     (priv & OPpSORT_NUMERIC)
                         ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
                             ? ( overloading ? S_amagic_i_ncmp : S_sv_i_ncmp)
