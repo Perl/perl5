@@ -836,21 +836,34 @@ PP(pp_sort)
         else {
             MEXTEND(SP, 20);    /* Can't afford stack realloc on signal. */
             start = ORIGMARK+1;
-            Perl_sortsv_flags(aTHX_ start, max,
-                    (priv & OPpSORT_NUMERIC)
-                        ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
-                            ? ( overloading ? S_amagic_i_ncmp : S_sv_i_ncmp)
-                            : ( overloading ? S_amagic_ncmp : S_sv_ncmp ) )
-                        : (
+            if (priv & OPpSORT_NUMERIC) {
+                if ((priv & OPpSORT_INTEGER) || all_SIVs) {
+                    if (overloading)
+                        Perl_sortsv_flags(aTHX_ start, max, S_amagic_i_ncmp, sort_flags);
+                    else
+                        Perl_sortsv_flags(aTHX_ start, max, S_sv_i_ncmp, sort_flags);
+                }
+                else {
+                    if (overloading)
+                        Perl_sortsv_flags(aTHX_ start, max, S_amagic_ncmp, sort_flags);
+                    else
+                        Perl_sortsv_flags(aTHX_ start, max, S_sv_ncmp, sort_flags);
+                }
+            }
 #ifdef USE_LOCALE_COLLATE
-                           IN_LC_RUNTIME(LC_COLLATE)
-                            ? ( overloading
-                                ? (SVCOMPARE_t)S_amagic_cmp_locale
-                                : (SVCOMPARE_t)sv_cmp_locale_static)
-                            :
+            else if(IN_LC_RUNTIME(LC_COLLATE)) {
+                if (overloading)
+                    Perl_sortsv_flags(aTHX_ start, max, S_amagic_cmp_locale, sort_flags);
+                else
+                    Perl_sortsv_flags(aTHX_ start, max, sv_cmp_locale_static, sort_flags);
+            }
 #endif
-                              ( overloading ? (SVCOMPARE_t)S_amagic_cmp : (SVCOMPARE_t)sv_cmp_static)),
-                    sort_flags);
+            else {
+                if (overloading)
+                    Perl_sortsv_flags(aTHX_ start, max, S_amagic_cmp, sort_flags);
+                else
+                    Perl_sortsv_flags(aTHX_ start, max, sv_cmp_static, sort_flags);
+            }
         }
         if ((priv & OPpSORT_REVERSE) != 0) {
             SV **q = start+max-1;
