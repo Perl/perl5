@@ -15376,9 +15376,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Recursion stopper for PerlIO_find_layer */
     PL_in_load_module	= proto_perl->Iin_load_module;
 
-    /* sort() routine */
-    PL_sort_RealCmp	= proto_perl->Isort_RealCmp;
-
     /* Not really needed/useful since the reenrant_retint is "volatile",
      * but do it for consistency's sake. */
     PL_reentrant_retint	= proto_perl->Ireentrant_retint;

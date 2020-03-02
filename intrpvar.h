@@ -793,8 +793,6 @@ PERLVARI(I, known_layers, PerlIO_list_t *, NULL)
 PERLVARI(I, def_layerlist, PerlIO_list_t *, NULL)
 #endif
 
-PERLVAR(I, sort_RealCmp, SVCOMPARE_t)
-
 PERLVARI(I, checkav_save, AV *, NULL)	/* save CHECK{}s when compiling */
 PERLVARI(I, unitcheckav_save, AV *, NULL)
 					/* save UNITCHECK{}s when compiling */

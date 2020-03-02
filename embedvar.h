@@ -296,7 +296,6 @@
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_signalhook		(vTHX->Isignalhook)
 #define PL_signals		(vTHX->Isignals)
-#define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_sortcop		(vTHX->Isortcop)
 #define PL_sortstash		(vTHX->Isortstash)
 #define PL_splitstr		(vTHX->Isplitstr)
