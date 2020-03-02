@@ -11,6 +11,7 @@ on:
 jobs:
   perl:
     runs-on: macos-latest
+    timeout-minutes: 120
 
     env:
         PERL_SKIP_TTY_TEST: 1
