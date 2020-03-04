@@ -4145,18 +4145,6 @@ S_require_file(pTHX_ SV *sv)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
-#elif defined(__SYMBIAN32__)
-		    if (PL_origfilename[0] &&
-			PL_origfilename[1] == ':' &&
-			!(dir[0] && dir[1] == ':'))
-		        Perl_sv_setpvf(aTHX_ namesv,
-				       "%c:%s\\%s",
-				       PL_origfilename[0],
-				       dir, name);
-		    else
-		        Perl_sv_setpvf(aTHX_ namesv,
-				       "%s\\%s",
-				       dir, name);
 #else
 		    /* The equivalent of		    
 		       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);

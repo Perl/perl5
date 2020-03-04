@@ -2705,30 +2705,16 @@ PP(pp_ssockopt)
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT: {
-#if defined(__SYMBIAN32__)
-# define SETSOCKOPT_OPTION_VALUE_T void *
-#else
-# define SETSOCKOPT_OPTION_VALUE_T const char *
-#endif
-	/* XXX TODO: We need to have a proper type (a Configure probe,
-	 * etc.) for what the C headers think of the third argument of
-	 * setsockopt(), the option_value read-only buffer: is it
-	 * a "char *", or a "void *", const or not.  Some compilers
-	 * don't take kindly to e.g. assuming that "char *" implicitly
-	 * promotes to a "void *", or to explicitly promoting/demoting
-	 * consts to non/vice versa.  The "const void *" is the SUS
-	 * definition, but that does not fly everywhere for the above
-	 * reasons. */
-	    SETSOCKOPT_OPTION_VALUE_T buf;
+	    const char *buf;
 	    int aint;
 	    if (SvPOKp(sv)) {
 		STRLEN l;
-		buf = (SETSOCKOPT_OPTION_VALUE_T) SvPV_const(sv, l);
+		buf = SvPV_const(sv, l);
 		len = l;
 	    }
 	    else {
 		aint = (int)SvIV(sv);
-		buf = (SETSOCKOPT_OPTION_VALUE_T) &aint;
+		buf = (const char *) &aint;
 		len = sizeof(int);
 	    }
 	    if (PerlSock_setsockopt(fd, lvl, optname, buf, len) < 0)
@@ -4494,14 +4480,14 @@ PP(pp_system)
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
-#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
+#  if defined(WIN32) || defined(OS2) || defined(__VMS)
 	value = (I32)do_aspawn(really, MARK, SP);
 #  else
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
 #  endif
     }
     else if (SP - MARK != 1) {
-#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
+#  if defined(WIN32) || defined(OS2) || defined(__VMS)
 	value = (I32)do_aspawn(NULL, MARK, SP);
 #  else
 	value = (I32)do_aspawn(NULL, (void **)MARK, (void **)SP);

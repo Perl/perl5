@@ -28,11 +28,11 @@
 	(((f)[0] && (f)[1] == ':')		/* drive name */	\
 	 || ((f)[0] == '\\' && (f)[1] == '\\')	/* UNC path */	\
 	 ||	((f)[3] == ':'))				/* volume name, currently only sys */
-#elif defined(DOSISH) || defined(__SYMBIAN32__)
+#elif defined(DOSISH)
 #  define PERL_FILE_IS_ABSOLUTE(f) \
 	(*(f) == '/'							\
 	 || ((f)[0] && (f)[1] == ':'))		/* drive name */
-#else	/* NEITHER DOSISH NOR SYMBIANISH */
+#else	/* NOT DOSISH */
 #  define PERL_FILE_IS_ABSOLUTE(f)	(*(f) == '/')
 #endif
 

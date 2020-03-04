@@ -486,14 +486,6 @@ sub dl_findfile {
             push(@names, $_);
         }
 	my $dirsep = '/';
-	<<$^O-eq-symbian>>
-	$dirsep = '\\';
-	if ($0 =~ /^([a-z]):/i) {
-	    my $drive = $1;
-	    @dirs = map { "$drive:$_" } @dirs;
-	    @dl_library_path = map { "$drive:$_" } @dl_library_path;
-	}
-	<</$^O-eq-symbian>>
         foreach $dir (@dirs, @dl_library_path) {
             next unless -d $dir;
 	    <<$^O-eq-VMS>>

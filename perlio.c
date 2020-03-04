@@ -236,7 +236,7 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
-#if defined(PERL_MICRO) || defined(__SYMBIAN32__)
+#if defined(PERL_MICRO)
     return NULL;
 #elif defined(PERL_IMPLICIT_SYS)
     return PerlSIO_fdupopen(f);

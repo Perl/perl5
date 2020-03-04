@@ -6894,7 +6894,7 @@ PERL_CALLCONV_NO_RET void	win32_croak_not_implemented(const char * fname)
 	assert(fname)
 
 #endif
-#if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
+#if defined(WIN32) || defined(VMS)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp);
 #define PERL_ARGS_ASSERT_DO_ASPAWN	\
 	assert(mark); assert(sp)

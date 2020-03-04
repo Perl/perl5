@@ -1655,9 +1655,6 @@ code.
 (SunOS, Solaris, HP-UX)
 Does not automatically flush output handles on some platforms.
 
-(Symbian OS)
-Not supported.
-
 =item exit
 
 (VMS)
@@ -2301,8 +2298,6 @@ F<ext/Win32CORE/t/win32core.t> - may fail on recent cygwin installs.
 
 =back
 
-=item Symbian
-
 =item NetBSD
 
 =item FreeBSD
@@ -2332,8 +2327,6 @@ Caveats:
 =item time_t issues that may or may not be fixed
 
 =back
-
-=item Symbian (Series 60 v3, 3.2 and 5 - what else?)
 
 =item Stratus VOS / OpenVOS
 

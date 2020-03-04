@@ -8854,13 +8854,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
    else
     {
        /*The big, slow, and stupid way. */
-#ifdef USE_HEAP_INSTEAD_OF_STACK	/* Even slower way. */
-	STDCHAR *buf = NULL;
-	Newx(buf, 8192, STDCHAR);
-	assert(buf);
-#else
 	STDCHAR buf[8192];
-#endif
 
       screamer2:
 	if (rslen) {
@@ -8909,9 +8903,6 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		goto screamer2;
 	}
 
-#ifdef USE_HEAP_INSTEAD_OF_STACK
-	Safefree(buf);
-#endif
     }
 
     if (rspara) {		/* have to do this both before and after */
