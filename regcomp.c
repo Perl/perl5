@@ -12905,8 +12905,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
     PERL_ARGS_ASSERT_GROK_BSLASH_N;
 
-    GET_RE_DEBUG_FLAGS;
-
     assert(cBOOL(node_p) ^ cBOOL(code_point_p));  /* Exactly one should be set */
     assert(! (node_p && cp_count));               /* At most 1 should be set */
 
