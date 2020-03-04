@@ -119,7 +119,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    }
 	    $retval = "$type $retval";
 	    die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
-	    $static_inline = $type eq 'PERL_STATIC_INLINE';
+	    $static_inline = $type =~ /^PERL_STATIC_INLINE/;
 	}
 	else {
 	    if ($never_returns) {
