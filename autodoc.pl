@@ -26,6 +26,7 @@
 # documented at the top of embed.fnc.
 
 use strict;
+use feature q{:all};
 
 if (@ARGV) {
     my $workdir = shift;
@@ -46,8 +47,7 @@ my @specialized_docs = sort qw( perlguts
                                 perlmroapi
                                 config.h
                               );
-sub name_in_pod($) {
-    my $name = shift;
+sub name_in_pod($name) {
     return "F<$name>" if $name =~ /\./;
     return "L<$name>";
 }
@@ -72,8 +72,7 @@ my %missing;
 
 my $curheader = "Unknown section";
 
-sub autodoc ($$) { # parse a file and extract documentation info
-    my($fh,$file) = @_;
+sub autodoc ($fh, $file) { # parse a file and extract documentation info
     my($in, $doc, $line, $header_doc);
 
     # Count lines easier
@@ -228,8 +227,7 @@ DOC:
     }
 }
 
-sub docout ($$$) { # output the docs for one function
-    my($fh, $name, $docref) = @_;
+sub docout ($fh, $name, $docref) { # output the docs for one function
     my($flags, $docs, $ret, $file, @args) = @$docref;
     $name =~ s/\s*$//;
 
