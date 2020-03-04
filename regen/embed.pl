@@ -132,7 +132,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	die_at_end "For '$plain_func', M flag requires p flag"
 					    if $flags =~ /M/ && $flags !~ /p/;
-	die_at_end "For '$plain_func', C flag requires one of [pim] flag"
+	die_at_end "For '$plain_func', C flag requires one of [pimb] flags"
 					    if $flags =~ /C/ && $flags !~ /[ibmp]/;
 	die_at_end "For '$plain_func', X flag requires p or i flag"
 					    if $flags =~ /X/ && $flags !~ /[ip]/;
