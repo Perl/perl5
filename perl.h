@@ -340,6 +340,9 @@
 #  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
 #    define HASATTRIBUTE_WARN_UNUSED_RESULT
 #  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
+#    define HASATTRIBUTE_ALWAYS_INLINE
+#  endif
 #endif
 #endif /* #ifndef PERL_MICRO */
 
@@ -367,6 +370,9 @@
 #ifdef HASATTRIBUTE_WARN_UNUSED_RESULT
 #  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
 #endif
+#ifdef HASATTRIBUTE_ALWAYS_INLINE
+#  define __attribute__always_inline__      __attribute__((always_inline))
+#endif
 
 /* If we haven't defined the attributes yet, define them to blank. */
 #ifndef __attribute__deprecated__
@@ -392,6 +398,9 @@
 #endif
 #ifndef __attribute__warn_unused_result__
 #  define __attribute__warn_unused_result__
+#endif
+#ifndef __attribute__always_inline__
+#  define __attribute__always_inline__
 #endif
 
 /* Some OS warn on NULL format to printf */
@@ -3814,6 +3823,14 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 */
 #ifndef PERL_STATIC_INLINE_NO_RET
 #  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
+#endif
+
+#ifndef PERL_STATIC_FORCE_INLINE
+#  define PERL_STATIC_FORCE_INLINE PERL_STATIC_INLINE
+#endif
+
+#ifndef PERL_STATIC_FORCE_INLINE_NO_RET
+#  define PERL_STATIC_FORCE_INLINE_NO_RET PERL_STATIC_INLINE
 #endif
 
 #if !defined(OS2)
