@@ -139,6 +139,8 @@
 #ifdef _MSC_VER
 #  define PERL_STATIC_NO_RET __declspec(noreturn) static
 #  define PERL_STATIC_INLINE_NO_RET __declspec(noreturn) PERL_STATIC_INLINE
+#  define PERL_STATIC_FORCE_INLINE __forceinline static
+#  define PERL_STATIC_FORCE_INLINE_NO_RET __declspec(noreturn) __forceinline static
 #endif
 
 #define  WIN32_LEAN_AND_MEAN

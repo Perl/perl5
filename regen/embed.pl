@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    embed.h
@@ -51,7 +51,7 @@ sub full_name ($$) { # Returns the function name with potentially the
     my ($func, $flags) = @_;
 
     return "Perl_$func" if $flags =~ /p/;
-    return "S_$func" if $flags =~ /[Si]/;
+    return "S_$func" if $flags =~ /[SIi]/;
     return $func;
 }
 
@@ -81,7 +81,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabCDdEefFGhiMmNnOoPpRrSsTUuWXx] ) /x) {
+        if ($flags =~ / ( [^AabCDdEefFGhIiMmNnOoPpRrSsTUuWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
@@ -109,17 +109,25 @@ my ($embed, $core, $ext, $api) = setup_embed();
 							    && $flags !~ /m/;
 
 	my $static_inline = 0;
-	if ($flags =~ /([Si])/) {
+	if ($flags =~ /([SIi])/) {
 	    my $type;
 	    if ($never_returns) {
-		$type = $1 eq 'S' ? "PERL_STATIC_NO_RET" : "PERL_STATIC_INLINE_NO_RET";
+		$type = {
+		    'S' => 'PERL_STATIC_NO_RET',
+		    'i' => 'PERL_STATIC_INLINE_NO_RET',
+		    'I' => 'PERL_STATIC_FORCE_INLINE_NO_RET'
+		}->{$1};
 	    }
 	    else {
-		$type = $1 eq 'S' ? "STATIC" : "PERL_STATIC_INLINE";
+		$type = {
+		    'S' => 'STATIC',
+		    'i' => 'PERL_STATIC_INLINE',
+		    'I' => 'PERL_STATIC_FORCE_INLINE'
+		}->{$1};
 	    }
 	    $retval = "$type $retval";
 	    die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
-	    $static_inline = $type =~ /^PERL_STATIC_INLINE/;
+	    $static_inline = $type =~ /^PERL_STATIC(?:_FORCE)?_INLINE/;
 	}
 	else {
 	    if ($never_returns) {
@@ -132,18 +140,20 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	die_at_end "For '$plain_func', M flag requires p flag"
 					    if $flags =~ /M/ && $flags !~ /p/;
-	die_at_end "For '$plain_func', C flag requires one of [pimb] flags"
-					    if $flags =~ /C/ && $flags !~ /[ibmp]/;
-	die_at_end "For '$plain_func', X flag requires p or i flag"
-					    if $flags =~ /X/ && $flags !~ /[ip]/;
+	die_at_end "For '$plain_func', C flag requires one of [pIimb] flags"
+					    if $flags =~ /C/ && $flags !~ /[Iibmp]/;
+	die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
+					    if $flags =~ /X/ && $flags !~ /[Iip]/;
 	die_at_end "For '$plain_func', X and m flags are mutually exclusive"
 					    if $flags =~ /X/ && $flags =~ /m/;
-	die_at_end "For '$plain_func', i with [ACX] requires p flag"
-			if $flags =~ /i/ && $flags =~ /[ACX]/ && $flags !~ /p/;
+	die_at_end "For '$plain_func', [Ii] with [ACX] requires p flag"
+			if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
 	die_at_end "For '$plain_func', b and m flags are mutually exclusive"
 	         . " (try M flag)" if $flags =~ /b/ && $flags =~ /m/;
 	die_at_end "For '$plain_func', b flag without M flag requires D flag"
 			    if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
+	die_at_end "For '$plain_func', I and i flags are mutually exclusive"
+					    if $flags =~ /I/ && $flags =~ /i/;
 
 	$func = full_name($plain_func, $flags);
 	$ret = "";
@@ -201,6 +211,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 	if ( $flags =~ /P/ ) {
 	    push @attrs, "__attribute__pure__";
+	}
+	if ( $flags =~ /I/ ) {
+	    push @attrs, "__attribute__always_inline__";
 	}
 	if( $flags =~ /f/ ) {
 	    my $prefix	= $has_context ? 'pTHX_' : '';
