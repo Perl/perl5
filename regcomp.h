@@ -1143,7 +1143,7 @@ re.pm, especially to the documentation.
 
 #ifdef DEBUGGING
 
-#define GET_RE_DEBUG_FLAGS_DECL volatile IV re_debug_flags = 0; \
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS volatile IV re_debug_flags = 0; \
         PERL_UNUSED_VAR(re_debug_flags); GET_RE_DEBUG_FLAGS;
 
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)   \
@@ -1173,7 +1173,7 @@ re.pm, especially to the documentation.
     
 #else /* if not DEBUGGING */
 
-#define GET_RE_DEBUG_FLAGS_DECL
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)
 #define RE_SV_ESCAPE(rpv,isuni,dsv,sv,m)
 #define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)
