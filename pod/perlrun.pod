@@ -310,11 +310,11 @@ STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
 nor toggling.
 
 The C<io> options mean that any subsequent open() (or similar I/O
-operations) in the current file scope will have the C<:utf8> PerlIO layer
+operations) in main program scope will have the C<:utf8> PerlIO layer
 implicitly applied to them, in other words, UTF-8 is expected from any
 input stream, and UTF-8 is produced to any output stream.  This is just
 the default, with explicit layers in open() and with binmode() one can
-manipulate streams as usual.
+manipulate streams as usual.  This has no effect on code run in modules.
 
 B<-C> on its own (not followed by any number or option list), or the
 empty string C<""> for the L</PERL_UNICODE> environment variable, has the
