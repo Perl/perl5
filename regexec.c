@@ -218,7 +218,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
     const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
     I32 p;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGCPPUSH;
 
@@ -328,7 +328,7 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
 {
     UV i;
     U32 paren;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGCPPOP;
 
@@ -859,7 +859,7 @@ Perl_re_intuit_start(pTHX_
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
     regmatch_info *const reginfo = &reginfo_buf;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_RE_INTUIT_START;
     PERL_UNUSED_ARG(flags);
@@ -2914,7 +2914,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             U8 *bitmap=NULL;
 
 
-            GET_RE_DEBUG_FLAGS_DECL;
+            DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
             /* We can't just allocate points here. We need to wrap it in
              * an SV so it gets freed properly if there is a croak while
@@ -3297,7 +3297,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     regmatch_info *const reginfo = &reginfo_buf;
     regexp_paren_pair *swap = NULL;
     I32 oldsave;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGEXEC_FLAGS;
     PERL_UNUSED_ARG(data);
@@ -3983,7 +3983,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     U32 depth = 0; /* used by REGCP_SET */
 #endif
     RXi_GET_DECL(prog,progi);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGTRY;
 
@@ -5840,7 +5840,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #endif
 
 #ifdef DEBUGGING
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 #endif
 
     /* protect against undef(*^R) */
@@ -7390,7 +7390,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 rex->recurse_locinput[arg]= locinput;
 
                 DEBUG_r({
-                    GET_RE_DEBUG_FLAGS_DECL;
+                    DECLARE_AND_GET_RE_DEBUG_FLAGS;
                     DEBUG_STACK_r({
                         Perl_re_exec_indentf( aTHX_
                             "entering GOSUB, prev_recurse_locinput=%p recurse_locinput[%d]=%p\n",
@@ -10082,7 +10082,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     *startposp = scan;
 
     DEBUG_r({
-	GET_RE_DEBUG_FLAGS_DECL;
+	DECLARE_AND_GET_RE_DEBUG_FLAGS;
 	DEBUG_EXECUTE_r({
 	    SV * const prop = sv_newmortal();
             regprop(prog, prop, p, reginfo, NULL);

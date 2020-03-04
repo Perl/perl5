@@ -1237,7 +1237,7 @@ static void
 S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
                     U32 depth, int is_inf)
 {
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     DEBUG_OPTIMISE_MORE_r({
         if (!data)
@@ -1291,7 +1291,7 @@ static void
 S_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state,
                 regnode *scan, U32 depth, U32 flags)
 {
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     DEBUG_OPTIMISE_r({
         regnode *Next;
@@ -1479,7 +1479,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
     const STRLEN l = CHR_SVLEN(data->last_found);
     SV * const longest_sv = data->substrs[data->cur_is_floating].str;
     const STRLEN old_l = CHR_SVLEN(longest_sv);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_SCAN_COMMIT;
 
@@ -2272,7 +2272,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
     SV *sv=sv_newmortal();
     int colwidth= widecharmap ? 6 : 4;
     U16 word;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_DUMP_TRIE;
 
@@ -2366,7 +2366,7 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
     U32 state;
     SV *sv=sv_newmortal();
     int colwidth= widecharmap ? 6 : 4;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_LIST;
 
@@ -2427,7 +2427,7 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
     U16 charid;
     SV *sv=sv_newmortal();
     int colwidth= widecharmap ? 6 : 4;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_TABLE;
 
@@ -2772,7 +2772,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     STRLEN trie_charcount=0;
 #endif
     SV *re_trie_maxbuff;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_MAKE_TRIE;
 #ifndef DEBUGGING
@@ -3862,7 +3862,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
     reg_ac_data *aho;
     const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("T"));
     regnode *stclass;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_CONSTRUCT_AHOCORASICK_FROM_TRIE;
     PERL_UNUSED_CONTEXT;
@@ -4111,7 +4111,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     U32 stopnow = 0;
 #ifdef DEBUGGING
     regnode *stop = scan;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 #else
     PERL_UNUSED_ARG(depth);
 #endif
@@ -4559,7 +4559,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     regnode *first_non_open = scan;
     SSize_t stopmin = OPTIMIZE_INFTY;
     scan_frame *frame = NULL;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_STUDY_CHUNK;
     RExC_study_started= 1;
@@ -6663,7 +6663,7 @@ REGEXP *
 Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 {
     regexp_engine const *eng = current_re_engine();
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_PREGCOMP;
 
@@ -6756,7 +6756,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     int n=0;
     STRLEN s = 0;
     bool do_end = 0;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     DEBUG_PARSE_r(Perl_re_printf( aTHX_
         "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
@@ -7096,7 +7096,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 {
     SV *qr;
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     if (pRExC_state->runtime_code_qr) {
 	/* this is the second time we've been called; this should
@@ -7516,7 +7516,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     int restudied = 0;
     RExC_state_t copyRExC_state;
 #endif
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_RE_OP_COMPILE;
 
@@ -7941,7 +7941,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     DEBUG_OFFSETS_r(if (RExC_offsets) {
         const STRLEN len = RExC_offsets[0];
         STRLEN i;
-        GET_RE_DEBUG_FLAGS_DECL;
+        DECLARE_AND_GET_RE_DEBUG_FLAGS;
         Perl_re_printf( aTHX_
                       "Offsets: [%" UVuf "]\n\t", (UV)RExC_offsets[0]);
         for (i = 1; i <= len; i++) {
@@ -8637,7 +8637,7 @@ SV*
 Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const r, const U32 flags)
 {
     struct regexp *const rx = ReANY(r);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_NEXTKEY;
 
@@ -11059,7 +11059,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
     char* name_start = RExC_parse;
     U32 num = 0;
     SV *sv_dat = reg_scan_name(pRExC_state, REG_RSN_RETURN_DATA);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF;
 
@@ -11127,7 +11127,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REG;
     DEBUG_PARSE("reg ");
@@ -12463,7 +12463,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
     regnode_offset chain = 0;
     regnode_offset latest;
     I32 flags = 0, c = 0;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGBRANCH;
 
@@ -12560,7 +12560,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Save the original in case we change the emitted regop to a FAIL. */
     const regnode_offset orig_emit = RExC_emit;
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGPIECE;
 
@@ -12901,7 +12901,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     char *save_start;
     I32 flags;
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_GROK_BSLASH_N;
 
@@ -13411,7 +13411,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     U8 op;
     int invert = 0;
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     *flagp = WORST;		/* Tentatively. */
 
@@ -16271,7 +16271,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     char *save_end, *save_parse;    /* Temporaries */
     const bool in_locale = LOC;     /* we turn off /l during processing */
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
     PERL_UNUSED_ARG(oregcomp_parse); /* Only for Set_Node_Length */
@@ -17335,7 +17335,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                             what gets folded */
     U32 has_runtime_dependency = 0;     /* OR of the above flags */
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGCLASS;
 #ifndef DEBUGGING
@@ -20319,7 +20319,7 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_
 
     const regnode_offset ret = RExC_emit;
 
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGNODE_GUTS;
 
@@ -20441,7 +20441,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     regnode *place;
     const int offset = regarglen[(U8)op];
     const int size = NODE_STEP_REGNODE + offset;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGINSERT;
     PERL_UNUSED_CONTEXT;
@@ -20545,7 +20545,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
                 const U32 depth)
 {
     regnode_offset scan;
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGTAIL;
 #ifndef DEBUGGING
@@ -20619,7 +20619,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 #ifdef EXPERIMENTAL_INPLACESCAN
     I32 min = 0;
 #endif
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGTAIL_STUDY;
 
@@ -20823,7 +20823,7 @@ Perl_regdump(pTHX_ const regexp *r)
     SV * const sv = sv_newmortal();
     SV *dsv= sv_newmortal();
     RXi_GET_DECL(r, ri);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGDUMP;
 
@@ -20965,7 +20965,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     dVAR;
     int k;
     RXi_GET_DECL(prog, progi);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGPROP;
 
@@ -21400,7 +21400,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
      * to match */
 
     struct regexp *const prog = ReANY(r);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_RE_INTUIT_STRING;
     PERL_UNUSED_CONTEXT;
@@ -21450,7 +21450,7 @@ void
 Perl_pregfree2(pTHX_ REGEXP *rx)
 {
     struct regexp *const r = ReANY(rx);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_PREGFREE2;
 
@@ -21614,7 +21614,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 {
     struct regexp *const r = ReANY(rx);
     RXi_GET_DECL(r, ri);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGFREE_INTERNAL;
 
@@ -22689,7 +22689,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     const regnode *optstart= NULL;
 
     RXi_GET_DECL(r, ri);
-    GET_RE_DEBUG_FLAGS_DECL;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_DUMPUNTIL;
 
