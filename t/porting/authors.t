@@ -24,21 +24,19 @@ if ( $ENV{TRAVIS} && defined $ENV{TRAVIS_COMMIT_RANGE} ) {
 	#	all the more a pull request should not be impacted by blead being incorrect
 	$revision_range = $ENV{TRAVIS_COMMIT_RANGE};
 }
-elsif( $ENV{GITHUB_ACTIONS} && defined $ENV{GITHUB_HEAD_REF} ) {
+elsif( $ENV{GITHUB_ACTIONS} && length $ENV{GITHUB_BASE_REF} ) {
     # Same as above, except for Github Actions
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
 
     # This hardcoded origin/ isn't great, but I'm not sure how to better fix it
-    my $common_ancestor = `git merge-base origin/$ENV{GITHUB_BASE_REF} $ENV{GITHUB_HEAD_REF}`;
-    $common_ancestor =~ s!\s+!!g;
+    my $common_ancestor = `git merge-base "origin/$ENV{GITHUB_BASE_REF}" "HEAD~2" 2>/dev/null`;
 
-    skip_all( "Cannot find common ancestor" ) if $? || !length $common_ancestor;
+    chomp($common_ancestor);
 
-    # We want one before the GITHUB_SHA, as the github-SHA is a merge commit
-	$revision_range = join '..', $common_ancestor, $ENV{GITHUB_SHA} . '^2';
+    $revision_range = "${common_ancestor}..HEAD" if length $common_ancestor
 }
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
-print qx{git log --pretty=format:"Author: %an <%ae>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
+print qx{git log --no-merges --pretty=format:"Author: %an <%ae>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
 
 # EOF
