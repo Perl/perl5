@@ -8725,10 +8725,9 @@ yyl_try(pTHX_ char *s)
 		sv_catpvs(PL_linestr,
 			  "use feature ':" STRINGIFY(PERL_REVISION) "." STRINGIFY(PERL_VERSION) "';");
 
-        if (PL_minus_5)
-            sv_catpvs(PL_linestr, "use feature ':p5';");
-        else /* by default load p7 feature */
-            sv_catpvs(PL_linestr, "use feature ':p7';");
+        if (!PL_minus_5) /* by default load p7 feature */
+            sv_catpvs(PL_linestr, "use p7;"); /* try avoiding loading a module... */
+        /* no need to load p5 when PL_minus_5 is set... this is already the defaults */
 
         if (PL_minus_n || PL_minus_p) {
 		sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
