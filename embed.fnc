@@ -2844,6 +2844,9 @@ pReo	|GV*	|softref2xv	|NN SV *const sv|NN const char *const what \
 				|const svtype type|NN SV ***spp
 iTR	|bool	|lossless_NV_to_IV|const NV nv|NN IV * ivp
 #endif
+#if defined(PERL_IN_PP_HOT_C)
+IR	|bool	|should_we_output_Debug_r|NN regexp * prog
+#endif
 
 #if defined(PERL_IN_PP_PACK_C)
 S	|SSize_t|unpack_rec	|NN struct tempsym* symptr|NN const char *s \
