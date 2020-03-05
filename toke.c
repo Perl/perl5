@@ -8721,7 +8721,7 @@ yyl_try(pTHX_ char *s)
 		sv_free(MUTABLE_SV(PL_preambleav));
 		PL_preambleav = NULL;
 	    }
-	    if (1||PL_minus_E)
+	    if (!PL_minus_5||PL_minus_E)
 		sv_catpvs(PL_linestr,
 			  "use feature ':" STRINGIFY(PERL_REVISION) "." STRINGIFY(PERL_VERSION) "';");
 	    if (PL_minus_n || PL_minus_p) {

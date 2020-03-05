@@ -427,6 +427,7 @@ PERLVAR(I, minus_a,	bool)
 PERLVAR(I, minus_F,	bool)
 PERLVAR(I, doswitches,	bool)
 PERLVAR(I, minus_E,	bool)
+PERLVAR(I, minus_5,	bool)
 
 PERLVAR(I, inplace,	char *)
 PERLVAR(I, e_script,	SV *)
