@@ -1101,8 +1101,24 @@ re.pm, especially to the documentation.
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
+/* Get the debug flags for code not in regcomp.c nor regexec.c.  This doesn't
+ * initialize the variable if it isn't already there, instead it just assumes
+ * the flags are 0 */
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX                               \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
+    STMT_START {                                                               \
+        SV * re_debug_flags_sv = NULL;                                         \
+                     /* get_sv() can return NULL during global destruction. */ \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
+        if (re_debug_flags_sv && SvIOK(re_debug_flags_sv))                     \
+            re_debug_flags=SvIV(re_debug_flags_sv);                            \
+    } STMT_END
+
+
 #ifdef DEBUGGING
 
+/* For use in regcomp.c and regexec.c,  Get the debug flags, and initialize to
+ * the defaults if not done already */
 #define DECLARE_AND_GET_RE_DEBUG_FLAGS                                         \
     volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
     STMT_START {                                                               \
