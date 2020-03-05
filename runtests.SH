@@ -74,6 +74,8 @@ if test X"$TESTFILE" = X; then
     TESTFILE=TEST
 fi
 
+ PERL_LIB=${PWD}/lib
+
 cd t
 
 # If this is run under an old shell that doesn't automatically 
@@ -92,9 +94,9 @@ $spitshell >>runtests <<!GROK!THIS!
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 if test \$tty = Y; then
-    ./perl$_exe \$TESTFILE \$TEST_ARGS \$TEST_FILES </dev/tty
+    ./perl$_exe -I\$PERL_LIB \$TESTFILE \$TEST_ARGS \$TEST_FILES </dev/tty
 else
-    PERL_SKIP_TTY_TEST=1 ./perl$_exe \$TESTFILE \$TEST_ARGS \$TEST_FILES
+    PERL_SKIP_TTY_TEST=1 ./perl$_exe -I\$PERL_LIB \$TESTFILE \$TEST_ARGS \$TEST_FILES
 fi
 
 echo "Ran tests" > rantests
