@@ -132,6 +132,8 @@ EOT
 
 my @dl_library_path;
 
+our @dl_library_path;
+
 print OUT expand_os_specific(<<'EOT');
 
 <<$^O-eq-VMS>>
