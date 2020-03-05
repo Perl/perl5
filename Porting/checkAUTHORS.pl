@@ -937,6 +937,8 @@ jbuehler\100hekimian.com                jhpb\100hekimian.com
 jcromie\100cpan.org                      jcromie\100100divsol.com
 +                                       jim.cromie\100gmail.com
 jd\100cpanel.net                        lightsey\100debian.org
++                                       john\10004755.net
++                                       john\100nixnuts.net
 jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\1001979.usna.com
 +                                       jdhedden\100gmail.com
