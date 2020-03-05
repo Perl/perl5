@@ -1832,6 +1832,7 @@
 #  if defined(PERL_IN_PP_HOT_C)
 #define do_oddball(a,b)		S_do_oddball(aTHX_ a,b)
 #define opmethod_stash(a)	S_opmethod_stash(aTHX_ a)
+#define should_we_output_Debug_r(a)	S_should_we_output_Debug_r(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_PACK_C)
 #define div128(a,b)		S_div128(aTHX_ a,b)

@@ -5506,6 +5506,14 @@ PERL_STATIC_INLINE HV*	S_opmethod_stash(pTHX_ SV* meth);
 #define PERL_ARGS_ASSERT_OPMETHOD_STASH	\
 	assert(meth)
 #endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_FORCE_INLINE bool	S_should_we_output_Debug_r(pTHX_ regexp * prog)
+			__attribute__warn_unused_result__
+			__attribute__always_inline__;
+#define PERL_ARGS_ASSERT_SHOULD_WE_OUTPUT_DEBUG_R	\
+	assert(prog)
+#endif
+
 #endif
 #if defined(PERL_IN_PP_PACK_C)
 STATIC int	S_div128(pTHX_ SV *pnum, bool *done);

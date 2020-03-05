@@ -34,6 +34,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_HOT_C
 #include "perl.h"
+#include "regcomp.h"
 
 /* Hot code. */
 
@@ -2889,6 +2890,47 @@ PP(pp_qr)
     RETURN;
 }
 
+STATIC bool
+S_are_we_in_Debug_EXECUTE_r(pTHX)
+{
+    /* Given a 'use re' is in effect, does it ask for outputting execution
+     * debug info?
+     *
+     * This is separated from the sole place it's called, an inline function,
+     * because it is the large-ish slow portion of the function */
+
+    DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX;
+
+    return cBOOL(RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MASK));
+}
+
+PERL_STATIC_INLINE bool
+S_should_we_output_Debug_r(pTHX_ regexp *prog)
+{
+    PERL_ARGS_ASSERT_SHOULD_WE_OUTPUT_DEBUG_R;
+
+    /* pp_match can output regex debugging info.  This function returns a
+     * boolean as to whether or not it should.
+     *
+     * Under -Dr, it should.  Any reasonable compiler will optimize this bit of
+     * code away on non-debugging builds. */
+    if (UNLIKELY(DEBUG_r_TEST)) {
+        return TRUE;
+    }
+
+    /* If the regex engine is using the non-debugging execution routine, then
+     * no debugging should be output.  Same if the field is NULL that pluggable
+     * engines are not supposed to fill. */
+    if (     LIKELY(prog->engine->exec == &Perl_regexec_flags)
+        || UNLIKELY(prog->engine->op_comp == NULL))
+    {
+        return FALSE;
+    }
+
+    /* Otherwise have to check */
+    return S_are_we_in_Debug_EXECUTE_r(aTHX);
+}
+
 PP(pp_match)
 {
     dSP; dTARG;
@@ -2944,7 +2986,9 @@ PP(pp_match)
         pm->op_pmflags & PMf_USED
 #endif
     ) {
-        DEBUG_r(PerlIO_printf(Perl_debug_log, "?? already matched once"));
+        if (UNLIKELY(should_we_output_Debug_r(prog))) {
+            PerlIO_printf(Perl_debug_log, "?? already matched once");
+        }
 	goto nope;
     }
 
@@ -2966,9 +3010,11 @@ PP(pp_match)
     }
 
     if (RXp_MINLEN(prog) >= 0 && (STRLEN)RXp_MINLEN(prog) > len) {
-        DEBUG_r(PerlIO_printf(Perl_debug_log,
+        if (UNLIKELY(should_we_output_Debug_r(prog))) {
+            PerlIO_printf(Perl_debug_log,
                 "String shorter than min possible regex match (%zd < %zd)\n",
-                                                        len, RXp_MINLEN(prog)));
+                                                        len, RXp_MINLEN(prog));
+        }
 	goto nope;
     }
 
