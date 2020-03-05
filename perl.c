@@ -2182,10 +2182,14 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    s++;
 	    goto reswitch;
 
+    case '5':
+        PL_minus_5 = TRUE;
+        goto minus_e;
 	case 'E':
 	    PL_minus_E = TRUE;
 	    /* FALLTHROUGH */
 	case 'e':
+        minus_e:
 	    forbid_setid('e', FALSE);
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");

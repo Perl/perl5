@@ -15283,6 +15283,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_minus_l		= proto_perl->Iminus_l;
     PL_minus_a		= proto_perl->Iminus_a;
     PL_minus_E		= proto_perl->Iminus_E;
+    PL_minus_5          = proto_perl->Iminus_5;
     PL_minus_F		= proto_perl->Iminus_F;
     PL_doswitches	= proto_perl->Idoswitches;
     PL_dowarn		= proto_perl->Idowarn;
