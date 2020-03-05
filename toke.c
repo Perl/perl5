@@ -8721,10 +8721,16 @@ yyl_try(pTHX_ char *s)
 		sv_free(MUTABLE_SV(PL_preambleav));
 		PL_preambleav = NULL;
 	    }
-	    if (!PL_minus_5||PL_minus_E)
+	    if (PL_minus_E)
 		sv_catpvs(PL_linestr,
 			  "use feature ':" STRINGIFY(PERL_REVISION) "." STRINGIFY(PERL_VERSION) "';");
-	    if (PL_minus_n || PL_minus_p) {
+
+        if (PL_minus_5)
+            sv_catpvs(PL_linestr, "use feature ':p5';");
+        else /* by default load p7 feature */
+            sv_catpvs(PL_linestr, "use feature ':p7';");
+
+        if (PL_minus_n || PL_minus_p) {
 		sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
 		if (PL_minus_l)
 		    sv_catpvs(PL_linestr,"chomp;");
