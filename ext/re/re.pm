@@ -121,6 +121,7 @@ sub bits {
     my $on = shift;
     my $bits = 0;
     my $turning_all_off = ! @_ && ! $on;
+    my $seen_Debug = 0;
     if ($turning_all_off) {
 
         # Pretend were called with certain parameters, which are best dealt
@@ -134,8 +135,15 @@ sub bits {
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
         if ($s eq 'Debug' or $s eq 'Debugcolor') {
+            if (! $seen_Debug) {
+                $seen_Debug = 1;
+
+                # Reset to nothing, and then add what follows.  $seen_Debug
+                # allows, though unlikely someone would do it, more than one
+                # Debug and flags in the arguments
+                ${^RE_DEBUG_FLAGS} = 0;
+            }
             setcolor() if $s =~/color/i;
-            ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
             for my $idx ($idx+1..$#_) {
                 if ($flags{$_[$idx]}) {
                     if ($on) {
@@ -152,6 +160,10 @@ sub bits {
             _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
             last;
         } elsif ($s eq 'debug' or $s eq 'debugcolor') {
+
+            # These default flags should be kept in sync with the same values
+            # in regcomp.h
+            ${^RE_DEBUG_FLAGS} = $flags{'EXECUTE'} | $flags{'DUMP'};
 	    setcolor() if $s =~/color/i;
 	    _load_unload($on);
 	    last;
