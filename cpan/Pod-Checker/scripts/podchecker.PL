@@ -13,9 +13,9 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-$origdir = cwd;
+my $origdir = cwd;
 chdir(dirname($0));
-($file = basename($0)) =~ s/\.PL$//;
+(my $file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
         if ($^O eq 'VMS' or $^O eq 'os2' or $^O eq 'dos');  # "case-forgiving"
 $file .= '.com' if $^O eq 'VMS';
