@@ -72,10 +72,6 @@ our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 7.0 );
 # See HINT_UNI_8_BIT in perl.h.
 our $hint_uni8bit = 0x00000800;
 
-our $hint_utf8   = 0x00800000;
-our $hint_strict = 0x00000602;
-our $warnings_p7 = '555555555555555555555555150001500101';
-
 # TODO:
 # - think about versioned features (use feature switch => 2)
 
@@ -531,19 +527,6 @@ sub __common {
         my $name = shift;
         if (substr($name, 0, 1) eq ":") {
             my $v = substr($name, 1);
-
-            if ($v =~ m{^p([0-9])$}) {
-                my $p = $1;
-                next if $p == 5; # no warnings / no features...
-                if ( $p == 7 ) {
-                    if ($import) {
-                        ${^WARNING_BITS} = pack( "H*", $warnings_p7 );
-                        $^H |= $hint_utf8 | $hint_strict;
-                    }
-                    $v = '7.0'; # fallback to features 7.0
-                }
-            }
-
             if (!exists $feature_bundle{$v}) {
                 $v =~ s/^([0-9]+)\.([0-9]+).[0-9]+$/$1.$2/;
                 if (!exists $feature_bundle{$v}) {
@@ -562,10 +545,10 @@ sub __common {
             }
             unknown_feature($name);
         }
-	    if ($import) {
-	       $^H{$feature{$name}} = 1;
-	       $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-	    } else {
+	if ($import) {
+	    $^H{$feature{$name}} = 1;
+	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }
