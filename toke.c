@@ -12729,7 +12729,7 @@ look something like this:
 
     static Perl_keyword_plugin_t next_keyword_plugin;
     static OP *my_keyword_plugin(pTHX_
-        char *keyword_plugin, STRLEN keyword_len, OP **op_ptr)
+        char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
     {
         if (memEQs(keyword_ptr, keyword_len,
                    "my_new_keyword")) {
