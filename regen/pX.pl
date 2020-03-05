@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    lib/p7.pm
@@ -32,15 +32,23 @@ my $HintUTF8;
 
         m{^#define SAWAMPERSAND_LEFT\s} and last;
 
-    }    
+    }
 }
 die "No HintUTF8 defined in perl.h"          unless $HintUTF8;
 die "No HintStrict defined in perl.h"        unless $HintStrict;
 
 my $oneliner = q[use warnings; no warnings qw/experimental/; our $w; BEGIN {$w = ${^WARNING_BITS} } print unpack("H*", $w)];
-my $WARNINGS_P7 = qx|$^X -Ilib -e '$oneliner'|;
+-x "./miniperl" or die "miniperl is required to run $0";
+my $WARNINGS_P7 = qx|./miniperl -Ilib -e '$oneliner'|; # force to use current miniperl
 die q[Fail to generate $WARNINGS_P7] unless $? == 0;
 
+# {
+#     open my $warnings_h, '<', 'warnings.h' or die "$0 cannot open warnings.h: $!";
+#     while (readline $warnings_h) {
+#         next unless m{^#define WARN_EXPERIMENTAL};        
+#         print $_;
+#     }
+# }
 
 ###########################################################################
 # Open files to be generated
@@ -90,17 +98,15 @@ print {$p7} <<EOV;
 
 our \$VERSION = '$VERSION';
 
-our \$p7_hints;
-our \$p7_warnings;
-
-BEGIN {
-    \$p7_hints    = $hints_v7;
-    \$p7_warnings = '$WARNINGS_P7';    
-}
-
 EOV
 
+my %VARS = (
+    P7_WARNINGS => $WARNINGS_P7,
+    P7_HINTS    => $hints_v7,
+);
+
 while (<DATA>) {
+    s{~(\w+)~}{$VARS{$1}}g;
     print {$p7} $_;
 }
 
@@ -124,7 +130,7 @@ __VARS__
 sub _warn_once {
     local $^W = 0;
     *_warn_once = sub{};
-    
+
     warn("This code is being run using Perl $]. It should be updated or may break in Perl 8. See YYY for more information.");
 }
 
@@ -137,12 +143,17 @@ sub import {
     # no warnings;
     ${^WARNING_BITS} = 0;
 
-    # perl  -e'my $h; BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); ' 
-    $^H = 0x0;
+    # perl  -e'my $h; BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); '
+    $^H = 0x0; # FIXME only reset the features...
     %^H = ();
 }
 
-#sub unimport {} # maybe restore?
+sub unimport {
+    # maybe restore? p7 warnings... and co... 
+    # we want to restore p7 behavior..
+    require p7;
+    p7->import;
+}
 
 1;
 
@@ -165,11 +176,11 @@ sub import {
 
     # use warnings; no warnings qw/experimental/;
     # perl -e'use warnings; no warnings qw/experimental/;  my $w; BEGIN {$w = ${^WARNING_BITS} } print unpack("H*", $w) . "\n"'
-    ${^WARNING_BITS} = pack( "H*", $p7_warnings );
+    ${^WARNING_BITS} = pack( "H*", '~P7_WARNINGS~' );
 
     # use strict; use utf8;
     # perl  -MData::Dumper -e'my $h; use strict; use utf8; use feature (qw/bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings/); BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); print Dumper \%^H; '
-    $^H |= $p7_hints;
+    $^H |= ~P7_HINTS~;
 
     require feature;
     feature->import(':7.0');
