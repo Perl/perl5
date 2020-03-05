@@ -12731,12 +12731,12 @@ look something like this:
     static OP *my_keyword_plugin(pTHX_
         char *keyword_plugin, STRLEN keyword_len, OP **op_ptr)
     {
-        if (memEQs(keyword_ptr, keyword_len,
+        if (memEQs(keyword_plugin, keyword_len,
                    "my_new_keyword")) {
             ...
         } else {
             return next_keyword_plugin(aTHX_
-                keyword_ptr, keyword_len, op_ptr);
+                keyword_plugin, keyword_len, op_ptr);
         }
     }
     BOOT:
