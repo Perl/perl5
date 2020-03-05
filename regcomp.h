@@ -1130,21 +1130,22 @@ re.pm, especially to the documentation.
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
-/* get_sv() can return NULL during global destruction. */
-#define GET_RE_DEBUG_FLAGS DEBUG_r({ \
-        SV * re_debug_flags_sv = NULL; \
-        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
-        if (re_debug_flags_sv) { \
-            if (!SvIOK(re_debug_flags_sv)) \
-                sv_setuv(re_debug_flags_sv, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
-            re_debug_flags=SvIV(re_debug_flags_sv); \
-        }\
-})
-
 #ifdef DEBUGGING
 
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS volatile IV re_debug_flags = 0; \
-        PERL_UNUSED_VAR(re_debug_flags); GET_RE_DEBUG_FLAGS;
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS                                         \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
+    STMT_START {                                                               \
+        SV * re_debug_flags_sv = NULL;                                         \
+                     /* get_sv() can return NULL during global destruction. */ \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
+        if (re_debug_flags_sv) {                                               \
+            if (!SvIOK(re_debug_flags_sv)) /* If doesnt exist set to default */\
+                sv_setuv(re_debug_flags_sv,                                    \
+                        /* These defaults should be kept in sync with re.pm */ \
+                            RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );   \
+            re_debug_flags=SvIV(re_debug_flags_sv);                            \
+        }                                                                      \
+    } STMT_END
 
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)   \
     const char * const rpv =                                \
