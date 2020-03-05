@@ -31,36 +31,6 @@
 #endif
 
 /*
- * The "internal use only" fields in regexp.h are present to pass info from
- * compile to execute that permits the execute phase to run lots faster on
- * simple cases.  They are:
- *
- * regstart	sv that must begin a match; NULL if none obvious
- * reganch	is the match anchored (at beginning-of-line only)?
- * regmust	string (pointer into program) that match must include, or NULL
- *  [regmust changed to SV* for bminstr()--law]
- * regmlen	length of regmust string
- *  [regmlen not used currently]
- *
- * Regstart and reganch permit very fast decisions on suitable starting points
- * for a match, cutting down the work a lot.  Regmust permits fast rejection
- * of lines that cannot possibly match.  The regmust tests are costly enough
- * that pregcomp() supplies a regmust only if the r.e. contains something
- * potentially expensive (at present, the only such thing detected is * or +
- * at the start of the r.e., which can involve a lot of backup).  Regmlen is
- * supplied because the test in pregexec() needs it and pregcomp() is computing
- * it anyway.
- * [regmust is now supplied always.  The tests that use regmust have a
- * heuristic that disables the test if it usually matches.]
- *
- * [In fact, we now use regmust in many cases to locate where the search
- * starts in the string, so if regback is >= 0, the regmust search is never
- * wasted effort.  The regback variable says how many characters back from
- * where regmust matched is the earliest possible start of the match.
- * For instance, /[a-z].foo/ has a regmust of 'foo' and a regback of 2.]
- */
-
-/*
  * Structure for regexp "program".  This is essentially a linear encoding
  * of a nondeterministic finite-state machine (aka syntax charts or
  * "railroad normal form" in parsing technology).  Each node is an opcode
