@@ -12,14 +12,6 @@ package p7;
 
 our $VERSION = '0.00001';
 
-our $p7_hints;
-our $p7_warnings;
-
-BEGIN {
-    $p7_hints    = 0x00800602;
-    $p7_warnings = '555555555555555555555555150001500101';    
-}
-
 
 BEGIN {
     # This code is a proof of concept provided against 5.30. In order for this code to work on other versions of perl
@@ -31,11 +23,11 @@ sub import {
 
     # use warnings; no warnings qw/experimental/;
     # perl -e'use warnings; no warnings qw/experimental/;  my $w; BEGIN {$w = ${^WARNING_BITS} } print unpack("H*", $w) . "\n"'
-    ${^WARNING_BITS} = pack( "H*", $p7_warnings );
+    ${^WARNING_BITS} = pack( "H*", '555555555555555555555555150001500101' );
 
     # use strict; use utf8;
     # perl  -MData::Dumper -e'my $h; use strict; use utf8; use feature (qw/bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings/); BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); print Dumper \%^H; '
-    $^H |= $p7_hints;
+    $^H |= 0x00800602;
 
     require feature;
     feature->import(':7.0');
