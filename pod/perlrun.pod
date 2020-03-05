@@ -1440,3 +1440,103 @@ lines before doing anything else, just to keep people honest:
     $ENV{PATH}  = "/bin:/usr/bin";    # or whatever you need
     $ENV{SHELL} = "/bin/sh" if exists $ENV{SHELL};
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+
+=head1 ORDER OF APPLICATION
+
+Some options, in particular C<-I>, C<-M>, C<PERL5LIB> and C<PERL5OPT> can
+interact, and the order in which they are applied is important.
+
+NB that there are other rarer options that may come in to play. We do not
+consider them in this section. And this section does not document what
+I<actually> happens inside the perl interpreter, it documents what
+I<effectively> happens.
+
+=over
+
+=item -I
+
+The effect of multiple C<-I> options is to C<unshift> them onto C<@INC>
+from right to left. So for example:
+
+    perl -I 1 -I 2 -I 3
+
+will first prepend C<3> onto the front of C<@INC>, then prepend C<2>, and
+then prepend C<1>. The result is that C<@INC> begins with:
+
+    qw(1 2 3)
+
+=item -M
+
+Multiple C<-M> options are processed from left to right. So this:
+
+    perl -Mlib=1 -Mlib=2 -Mlib=3
+
+will first use the L<lib> pragma to prepend C<1> to C<@INC>, then
+it will prepend C<2>, then it will prepend C<3>, resulting in an C<@INC>
+that begins with:
+
+    qw(3 2 1)
+
+=item the PERL5LIB environment variable
+
+This contains a list of directories, separated by colons. The entire list
+is prepended to C<@INC> in one go. This:
+
+    PERL5LIB=1:2:3 perl
+
+will result in an C<@INC> that begins with:
+
+    qw(1 2 3)
+
+=item combinations of -I, -M and PERL5LIB
+
+C<PERL5LIB> is applied first, then all the C<-I> arguments, then all the
+C<-M> arguments. This:
+
+    PERL5LIB=e1:e2 perl -I i1 -Mlib=m1 -I i2 -Mlib=m2
+
+will result in an C<@INC> that begins with:
+
+    qw(m2 m1 i1 i2 e1 e2)
+
+=item the PERL5OPT environment variable
+
+This contains a space separated list of switches. We only consider the
+effects of C<-M> and C<-I> in this section.
+
+After normal processing of C<-I> switches from the command line, all
+the C<-I> switches in C<PERL5OPT> are extracted. They are processed from
+left to right instead of from right to left. Also note that while
+whitespace is allowed between a C<-I> and its directory on the command
+line, it is not allowed in C<PERL5OPT>.
+
+After normal processing of C<-M> switches from the command line, all
+the C<-M> switches in C<PERL5OPT> are extracted. They are processed from
+left to right, ie the same as those on the command line.
+
+And example may make this clearer:
+
+    export PERL5OPT="-Mlib=optm1 -Iopti1 -Mlib=optm2 -Iopti2"
+    export PERL5LIB=e1:e2
+    perl -I i1 -Mlib=m1 -I i2 -Mlib=m2
+
+will result in an C<@INC> that begins with:
+
+    qw(
+        optm2
+        optm1
+
+        m2
+        m1
+
+        opti2
+        opti1
+
+        i1
+        i2
+
+        e1
+        e2
+    )
+
+=back
