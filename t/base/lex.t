@@ -1,5 +1,7 @@
 #!./perl
 
+use p5; # too many craziness there
+
 print "1..120\n";
 
 $x = 'x';
