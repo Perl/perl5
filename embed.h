@@ -313,6 +313,7 @@
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
 #define mini_mktime		Perl_mini_mktime
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
+#define mortal_getenv		Perl_mortal_getenv
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
 #define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)

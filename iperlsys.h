@@ -562,10 +562,18 @@ struct IPerlEnvInfo
 	(*PL_Env->pGetChildIO)(PL_Env, ptr)
 #endif
 
-#else	/* PERL_IMPLICIT_SYS */
+#else	/* below is ! PERL_IMPLICIT_SYS */
+#  ifdef USE_ITHREADS
 
-#define PerlEnv_putenv(str)		putenv((str))
-#define PerlEnv_getenv(str)		getenv((str))
+     /* Use the comma operator to return 0/non-zero, while avoiding putting
+      * this in an inline function */
+#    define PerlEnv_putenv(str)	(ENV_LOCK, (putenv(str)                 \
+                                            ? (ENV_UNLOCK, 1)           \
+                                            : (ENV_UNLOCK, 0)))
+#  else
+#    define PerlEnv_putenv(str)		putenv(str)
+#  endif
+#define PerlEnv_getenv(str)		mortal_getenv(str)
 #define PerlEnv_getenv_len(str,l)	getenv_len((str), (l))
 #ifdef HAS_ENVGETENV
 #  define PerlEnv_ENVgetenv(str)	ENVgetenv((str))
@@ -588,7 +596,9 @@ struct IPerlEnvInfo
 #define PerlEnv_get_childdir()		win32_get_childdir()
 #define PerlEnv_free_childdir(d)	win32_free_childdir((d))
 #else
-#define PerlEnv_clearenv()		clearenv()
+#define PerlEnv_clearenv(str)	        (ENV_LOCK, (clearenv(str)           \
+                                                    ? (ENV_UNLOCK, 1)       \
+                                                    : (ENV_UNLOCK, 0)))
 #define PerlEnv_get_childenv()		get_childenv()
 #define PerlEnv_free_childenv(e)	free_childenv((e))
 #define PerlEnv_get_childdir()		get_childdir()

@@ -453,6 +453,8 @@
 :
 : Individual flags may be separated by non-tab whitespace.
 
+CipRTX	|char *	|mortal_getenv	|NN const char * str
+
 #if defined(PERL_IMPLICIT_SYS)
 ATo	|PerlInterpreter*|perl_alloc_using \
 				|NN struct IPerlMem *ipM \

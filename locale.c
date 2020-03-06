@@ -791,16 +791,6 @@ S_emulate_setlocale(const int category,
             if (! default_name || strEQ(default_name, "")) {
                 default_name = "C";
             }
-            else if (PL_scopestack_ix != 0) {
-                /* To minimize other threads messing with the environment,
-                 * we copy the variable, making it a temporary.  But this
-                 * doesn't work upon program initialization before any
-                 * scopes are created, and at this time, there's nothing
-                 * else going on that would interfere.  So skip the copy
-                 * in that case */
-                default_name = savepv(default_name);
-                SAVEFREEPV(default_name);
-            }
 
             if (category != LC_ALL) {
                 const char * const name = PerlEnv_getenv(category_names[index]);
@@ -835,22 +825,19 @@ S_emulate_setlocale(const int category,
 
                 for (i = 0; i < LC_ALL_INDEX; i++) {
                     const char * const env_override
-                                    = savepv(PerlEnv_getenv(category_names[i]));
+                                            = PerlEnv_getenv(category_names[i]);
                     const char * this_locale = (   env_override
                                                 && strNE(env_override, ""))
                                                ? env_override
                                                : default_name;
                     if (! emulate_setlocale(categories[i], this_locale, i, TRUE))
                     {
-                        Safefree(env_override);
                         return NULL;
                     }
 
                     if (strNE(this_locale, default_name)) {
                         did_override = TRUE;
                     }
-
-                    Safefree(env_override);
                 }
 
                 /* If all the categories are the same, we can set LC_ALL to
@@ -3310,7 +3297,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #else  /* USE_LOCALE */
 #  ifdef __GLIBC__
 
-    const char * const language   = savepv(PerlEnv_getenv("LANGUAGE"));
+    const char * const language = PerlEnv_getenv("LANGUAGE");
 
 #  endif
 
@@ -3320,8 +3307,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                         : "";
     const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
-    const char * const lc_all     = savepv(PerlEnv_getenv("LC_ALL"));
-    const char * const lang       = savepv(PerlEnv_getenv("LANG"));
+    const char * const lc_all     = PerlEnv_getenv("LC_ALL");
+    const char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
     unsigned int i;
 
@@ -3909,15 +3896,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     }
 
 #  endif
-#  ifdef __GLIBC__
-
-    Safefree(language);
-
-#  endif
-
-    Safefree(lc_all);
-    Safefree(lang);
-
 #endif /* USE_LOCALE */
 #ifdef DEBUGGING
 
