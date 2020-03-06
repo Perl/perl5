@@ -1446,10 +1446,8 @@ lines before doing anything else, just to keep people honest:
 Some options, in particular C<-I>, C<-M>, C<PERL5LIB> and C<PERL5OPT> can
 interact, and the order in which they are applied is important.
 
-NB that there are other rarer options that may come in to play. We do not
-consider them in this section. And this section does not document what
-I<actually> happens inside the perl interpreter, it documents what
-I<effectively> happens.
+Note that this section does not document what I<actually> happens inside the
+perl interpreter, it documents what I<effectively> happens.
 
 =over
 
@@ -1512,9 +1510,9 @@ line, it is not allowed in C<PERL5OPT>.
 
 After normal processing of C<-M> switches from the command line, all
 the C<-M> switches in C<PERL5OPT> are extracted. They are processed from
-left to right, ie the same as those on the command line.
+left to right, I<i.e.> the same as those on the command line.
 
-And example may make this clearer:
+An example may make this clearer:
 
     export PERL5OPT="-Mlib=optm1 -Iopti1 -Mlib=optm2 -Iopti2"
     export PERL5LIB=e1:e2
@@ -1538,5 +1536,18 @@ will result in an C<@INC> that begins with:
         e1
         e2
     )
+
+=item Other complications
+
+There are some complications that are ignored in the examples above:
+
+=over
+
+=item arch and version subdirs
+
+All of C<-I>, C<PERL5LIB> and C<use lib> will also prepend arch and version
+subdirs if they are present
+
+=item sitecustomize.pl
 
 =back
