@@ -122,6 +122,7 @@ sub bits {
     my $bits = 0;
     my $turning_all_off = ! @_ && ! $on;
     my $seen_Debug = 0;
+    my $seen_debug = 0;
     if ($turning_all_off) {
 
         # Pretend were called with certain parameters, which are best dealt
@@ -166,7 +167,7 @@ sub bits {
             ${^RE_DEBUG_FLAGS} = $flags{'EXECUTE'} | $flags{'DUMP'};
 	    setcolor() if $s =~/color/i;
 	    _load_unload($on);
-	    last;
+            $seen_debug = 1;
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
 	} elsif ($EXPORT_OK{$s}) {
@@ -275,9 +276,15 @@ sub bits {
 	                    : ($^H &= ~$flags_hint);
 	} else {
 	    require Carp;
-	    Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
+            if ($seen_debug && defined $flags{$s}) {
+                Carp::carp("Use \"Debug\" not \"debug\", to list debug types"
+                         . " in \"re\".  \"$s\" ignored");
+            }
+            else {
+                Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
                        join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
                        ")");
+            }
 	}
     }
 
