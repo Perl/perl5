@@ -2043,6 +2043,13 @@ PERL_CALLCONV void *	Perl_more_bodies(pTHX_ const svtype sv_type, const size_t b
 PERL_CALLCONV const char*	Perl_moreswitches(pTHX_ const char* s);
 #define PERL_ARGS_ASSERT_MORESWITCHES	\
 	assert(s)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE char *	Perl_mortal_getenv(const char * str)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MORTAL_GETENV	\
+	assert(str)
+#endif
+
 PERL_CALLCONV const struct mro_alg *	Perl_mro_get_from_name(pTHX_ SV *name);
 #define PERL_ARGS_ASSERT_MRO_GET_FROM_NAME	\
 	assert(name)
