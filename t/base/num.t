@@ -2,6 +2,8 @@
 
 print "1..53\n";
 
+no warnings 'void'; # use string in void context
+
 # First test whether the number stringification works okay.
 # (Testing with == would exercise the IV/NV part, not the PV.)
 
