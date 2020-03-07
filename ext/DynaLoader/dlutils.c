@@ -115,7 +115,7 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 #endif
 
 #if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
-    if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL
+    if ( (perl_dl_nonlazy = PerlEnv_getenv("PERL_DL_NONLAZY")) != NULL
 	&& grok_atoUV(perl_dl_nonlazy, &uv, NULL)
 	&& uv <= INT_MAX
     ) {
