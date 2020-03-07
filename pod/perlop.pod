@@ -2396,14 +2396,16 @@ X<qx> X<`> X<``> X<backtick>
 =item C<`I<STRING>`>
 
 A string which is (possibly) interpolated and then executed as a
-system command with F</bin/sh> or its equivalent.  Shell wildcards,
-pipes, and redirections will be honored.  The collected standard
-output of the command is returned; standard error is unaffected.  In
-scalar context, it comes back as a single (potentially multi-line)
-string, or C<undef> if the command could not be executed.  In list
-context, returns a list of lines (however you've defined lines with
-C<$/> or C<$INPUT_RECORD_SEPARATOR>), or an empty list if the command
-could not be executed.
+system command, via F</bin/sh> or its equivalent if required.  Shell
+wildcards, pipes, and redirections will be honored.  Similarly to
+C<system>, if the string contains no shell metacharacters then it will
+executed directly.  The collected standard output of the command is
+returned; standard error is unaffected.  In scalar context, it comes
+back as a single (potentially multi-line) string, or C<undef> if the
+shell (or command) could not be started.  In list context, returns a
+list of lines (however you've defined lines with C<$/> or
+C<$INPUT_RECORD_SEPARATOR>), or an empty list if the shell (or command)
+could not be started.
 
 Because backticks do not affect standard error, use shell file descriptor
 syntax (assuming the shell supports this) if you care to address this.
