@@ -1679,7 +1679,7 @@ morecore(int bucket)
 	    /* It's our first time.  Initialize ourselves */
 	    were_called = 1;	/* Avoid a loop */
 	    if (!MallocCfg[MallocCfg_skip_cfg_env]) {
-		char *s = getenv("PERL_MALLOC_OPT"), *t = s, *off;
+		char *s = PerlEnv_getenv("PERL_MALLOC_OPT"), *t = s, *off;
 		const char *opts = PERL_MALLOC_OPT_CHARS;
 		int changed = 0;
 
