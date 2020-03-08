@@ -694,8 +694,8 @@ loadByOrdinal(enum entries_ordinals ord, int fail)
 
 	if (!loadOrdinals[ord].dll->handle) {
 	    if (loadOrdinals[ord].dll->requires_pm && my_type() < 2) { /* FS */
-		char *s = getenv("PERL_ASIF_PM");
-		
+		char *s = PerlEnv_getenv("PERL_ASIF_PM");
+
 		if (!s || !atoi(s)) {
 		    /* The module will not function well without PM.
 		       The usual way to detect PM is the existence of the mutex
@@ -1226,14 +1226,13 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
 			    /* In fact we tried all what pdksh would
 			       try.  There is no point in calling
 			       pdksh, we may just emulate its logic. */
-			    char *shell = getenv("EXECSHELL");
+			    char *shell = PerlEnv_getenv("EXECSHELL");
 			    char *shell_opt = NULL;
-
 			    if (!shell) {
 				char *s;
 
 				shell_opt = "/c";
-				shell = getenv("OS2_SHELL");
+				shell = PerlEnv_getenv("OS2_SHELL");
 				if (inicmd) { /* No spaces at start! */
 				    s = inicmd;
 				    while (*s && !isSPACE(*s)) {
@@ -1357,11 +1356,11 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 
     ENTER;
 #ifdef TRYSHELL
-    if ((shell = getenv("EMXSHELL")) != NULL)
+    if ((shell = PerlEnv_getenv("EMXSHELL")) != NULL)
     	copt = "-c";
-    else if ((shell = getenv("SHELL")) != NULL)
+    else if ((shell = PerlEnv_getenv("SHELL")) != NULL)
     	copt = "-c";
-    else if ((shell = getenv("COMSPEC")) != NULL)
+    else if ((shell = PerlEnv_getenv("COMSPEC")) != NULL)
     	copt = "/C";
     else
     	shell = "cmd.exe";
@@ -1658,7 +1657,8 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
 #  ifdef TRYSHELL
     res = popen(cmd, mode);
 #  else
-    char *shell = getenv("EMXSHELL");
+
+    char *shell = PerlEnv_getenv("EMXSHELL");
 
     my_setenv("EMXSHELL", PL_sh_path);
     res = popen(cmd, mode);
@@ -1837,11 +1837,11 @@ const char *tmppath = TMPPATH1;
 void
 settmppath()
 {
-    char *p = getenv("TMP"), *tpath;
+    char *p = PerlEnv_getenv("TMP"), *tpath;
     int len;
 
-    if (!p) p = getenv("TEMP");
-    if (!p) p = getenv("TMPDIR");
+    if (!p) p = PerlEnv_getenv("TEMP");
+    if (!p) p = PerlEnv_getenv("TMPDIR");
     if (!p) return;
     len = strlen(p);
     tpath = (char *)malloc(len + strlen(TMPPATH1) + 2);
@@ -2411,16 +2411,16 @@ perllib_mangle(char *s, unsigned int l)
     if (perllib_mangle_installed && (name = perllib_mangle_installed(s,l)))
 	return name;
     if (!newp && !notfound) {
-	newp = getenv(name = "PERLLIB_" STRINGIFY(PERL_REVISION)
+	newp = PerlEnv_getenv(name = "PERLLIB_" STRINGIFY(PERL_REVISION)
 		      STRINGIFY(PERL_VERSION) STRINGIFY(PERL_SUBVERSION)
 		      "_PREFIX");
 	if (!newp)
-	    newp = getenv(name = "PERLLIB_" STRINGIFY(PERL_REVISION)
+	    newp = PerlEnv_getenv(name = "PERLLIB_" STRINGIFY(PERL_REVISION)
 			  STRINGIFY(PERL_VERSION) "_PREFIX");
 	if (!newp)
-	    newp = getenv(name = "PERLLIB_" STRINGIFY(PERL_REVISION) "_PREFIX");
+	    newp = PerlEnv_getenv(name = "PERLLIB_" STRINGIFY(PERL_REVISION) "_PREFIX");
 	if (!newp)
-	    newp = getenv(name = "PERLLIB_PREFIX");
+	    newp = PerlEnv_getenv(name = "PERLLIB_PREFIX");
 	if (newp) {
 	    char *s, b[300];
 	    
@@ -4957,11 +4957,11 @@ Perl_OS2_init3(char **env, void **preg, int flags)
 
 	Newx(PL_sh_path, l + 1, char);
 	memcpy(PL_sh_path, perl_sh_installed, l + 1);
-    } else if ( (shell = getenv("PERL_SH_DRIVE")) ) {
+    } else if ( (shell = PerlEnv_getenv("PERL_SH_DRIVE")) ) {
 	Newx(PL_sh_path, strlen(SH_PATH) + 1, char);
 	strcpy(PL_sh_path, SH_PATH);
 	PL_sh_path[0] = shell[0];
-    } else if ( (shell = getenv("PERL_SH_DIR")) ) {
+    } else if ( (shell = PerlEnv_getenv("PERL_SH_DIR")) ) {
 	int l = strlen(shell), i;
 
 	while (l && (shell[l-1] == '/' || shell[l-1] == '\\'))
@@ -4979,17 +4979,17 @@ Perl_OS2_init3(char **env, void **preg, int flags)
     os2_mytype_ini = os2_mytype;
     Perl_os2_initial_mode = -1;		/* Uninit */
 
-    s = getenv("PERL_BEGINLIBPATH");
+    s = PerlEnv_getenv("PERL_BEGINLIBPATH");
     if (s)
       rc = fill_extLibpath(0, s, NULL, 1, "PERL_BEGINLIBPATH");
     else
-      rc = fill_extLibpath(0, getenv("PERL_PRE_BEGINLIBPATH"), getenv("PERL_POST_BEGINLIBPATH"), 0, "PERL_(PRE/POST)_BEGINLIBPATH");
+      rc = fill_extLibpath(0, PerlEnv_getenv("PERL_PRE_BEGINLIBPATH"), PerlEnv_getenv("PERL_POST_BEGINLIBPATH"), 0, "PERL_(PRE/POST)_BEGINLIBPATH");
     if (!rc) {
-	s = getenv("PERL_ENDLIBPATH");
+	s = PerlEnv_getenv("PERL_ENDLIBPATH");
 	if (s)
 	    rc = fill_extLibpath(1, s, NULL, 1, "PERL_ENDLIBPATH");
 	else
-	    rc = fill_extLibpath(1, getenv("PERL_PRE_ENDLIBPATH"), getenv("PERL_POST_ENDLIBPATH"), 0, "PERL_(PRE/POST)_ENDLIBPATH");
+	    rc = fill_extLibpath(1, PerlEnv_getenv("PERL_PRE_ENDLIBPATH"), PerlEnv_getenv("PERL_POST_ENDLIBPATH"), 0, "PERL_(PRE/POST)_ENDLIBPATH");
     }
     if (rc) {
 	char buf[1024];
@@ -5045,14 +5045,17 @@ dup(int from)
 char *
 my_tmpnam (char *str)
 {
-    char *p = getenv("TMP"), *tpath;
+    char *p = PerlEnv_getenv("TMP"), *tpath;
 
-    if (!p) p = getenv("TEMP");
+    if (!p) p = PerlEnv_getenv("TEMP");
+    ENV_LOCK;
     tpath = tempnam(p, "pltmp");
     if (str && tpath) {
 	strcpy(str, tpath);
+        ENV_UNLOCK;
 	return str;
     }
+    ENV_UNLOCK;
     return tpath;
 }
 
@@ -5137,7 +5140,7 @@ my_flock(int handle, int o)
   if (use_my_flock == -1) {
    MUTEX_LOCK(&perlos2_state_mutex);
    if (use_my_flock == -1) {
-    char *s = getenv("USE_PERL_FLOCK");
+    char *s = PerlEnv_getenv("USE_PERL_FLOCK");
     if (s)
 	use_my_flock = atoi(s);
     else 
@@ -5243,7 +5246,7 @@ static int
 use_my_pwent(void)
 {
   if (_my_pwent == -1) {
-    char *s = getenv("USE_PERL_PWENT");
+    char *s = PerlEnv_getenv("USE_PERL_PWENT");
     if (s)
 	_my_pwent = atoi(s);
     else 
@@ -5318,9 +5321,10 @@ passw_wrap(struct passwd *p)
     if (!p || (p->pw_passwd && *p->pw_passwd)) /* Not a dangerous password */
 	return p;
     pw = *p;
-    s = getenv("PW_PASSWD");
+    s = PerlEnv_getenv("PW_PASSWD");
     if (!s)
 	s = (char*)pw_p;		/* Make match impossible */
+
 
     pw.pw_passwd = s;
     return &pw;    
@@ -5329,12 +5333,18 @@ passw_wrap(struct passwd *p)
 struct passwd *
 my_getpwuid (uid_t id)
 {
+    /* On Linux, only getpwuid_r is thread safe, and even then not if the
+     * locale changes */
+
     return passw_wrap(getpwuid(id));
 }
 
 struct passwd *
 my_getpwnam (__const__ char *n)
 {
+    /* On Linux, only getpwnam_r is thread safe, and even then not if the
+     * locale changes */
+
     return passw_wrap(getpwnam(n));
 }
 
