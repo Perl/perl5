@@ -732,12 +732,6 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
-#ifdef FCRYPT
-PERLVARI(I, cryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
-#else
-/* One byte hole in the interpreter structure.  */
-#endif
-
 PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
 PERLVAR(I, srand_called, bool)
 

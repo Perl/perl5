@@ -219,7 +219,6 @@ sub readvar {
 
 if ($ARGS{PLATFORM} ne 'os2') {
     ++$skip{$_} foreach qw(
-		     PL_cryptseen
 		     PL_opsave
 		     Perl_GetVars
 		     Perl_dump_fds
