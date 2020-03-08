@@ -18,6 +18,7 @@ extern "C" {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "reentr.h"
 #ifdef USE_PPPORT_H
 #  include "ppport.h"
 #endif
@@ -41,6 +42,9 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+#define PERL_REENTRANT /* Use reentrant calls if available for better thread
+                          safety */
 
 #define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
 #define PERL_DECIMAL_VERSION \
@@ -89,6 +93,13 @@ extern "C" {
 #  undef ITIMER_VIRTUAL
 #  undef ITIMER_PROF
 #  undef ITIMER_REALPROF
+#endif
+
+#ifndef ENV_LOCALE_LOCK
+#  define ENV_LOCALE_LOCK
+#endif
+#ifndef ENV_LOCALE_UNLOCK
+#  define ENV_LOCALE_UNLOCK
 #endif
 
 #ifndef TIME_HIRES_CLOCKID_T
@@ -374,20 +385,32 @@ static struct dsc$descriptor_s *fildev[] = { &fildevdsc, NULL };
 
 static time_t toutc_dst(time_t loc) {
     struct tm *rsltmp;
+    time_t result = -1;
 
-    if ((rsltmp = localtime(&loc)) == NULL) return -1;
-    loc -= utc_offset_secs;
-    if (rsltmp->tm_isdst) loc -= 3600;
-    return loc;
+    ENV_LOCALE_LOCK;
+    rsltmp = localtime(&loc);
+    if (rsltmp != NULL) {
+        loc -= utc_offset_secs;
+        if (rsltmp->tm_isdst) loc -= 3600;
+        result = loc;
+    }
+    ENV_LOCALE_UNLOCK;
+    return result;
 }
 
 static time_t toloc_dst(time_t utc) {
     struct tm *rsltmp;
+    time_t result = -1;
 
     utc += utc_offset_secs;
-    if ((rsltmp = localtime(&utc)) == NULL) return -1;
-    if (rsltmp->tm_isdst) utc += 3600;
-    return utc;
+    ENV_LOCALE_LOCK;
+    rsltmp = localtime(&utc);
+    if (rsltmp != NULL) {
+        if (rsltmp->tm_isdst) utc += 3600;
+        result = utc;
+    }
+    ENV_LOCALE_UNLOCK;
+    return result;
 }
 
 #  define _toutc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
@@ -412,9 +435,12 @@ timezone_setup(void)
                                   /* for same &base */
 
         gmtime_emulation_type++;
-        if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
+        ENV_LOCALE_LOCK;
+        tm_p = gmtime(&base);
+        if (tm_p == NULL) { /* CRTL gmtime() is a fake */
             char off[LNM$C_NAMLENGTH+1];;
 
+            ENV_LOCALE_UNLOCK;
             gmtime_emulation_type++;
             if (!Perl_vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
                 gmtime_emulation_type++;
@@ -433,6 +459,7 @@ timezone_setup(void)
             utc_offset_secs += (local.tm_hour - gmt.tm_hour) * 3600;
             utc_offset_secs += (local.tm_min  - gmt.tm_min)  * 60;
             utc_offset_secs += (local.tm_sec  - gmt.tm_sec);
+            ENV_LOCALE_UNLOCK;
         }
     }
     return 1;
