@@ -152,12 +152,12 @@ typedef struct regexp {
 
     /*---------------------------------------------------------------------- */
 
+    char *subbeg;       /* saved or original string so \digit works forever. */
     SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
     SSize_t sublen;     /* Length of string pointed by subbeg */
     SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
     SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
     SSize_t maxlen;  /* minimum possible number of chars in string to match */
-    char *subbeg;       /* saved or original string so \digit works forever. */
 
     /*---------------------------------------------------------------------- */
 
