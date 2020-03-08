@@ -3,9 +3,8 @@
  *
  * This file defines the system level functionality that perl needs.
  *
- * When using C, this definition is in the form of a set of macros
- * that can be #defined to the system-level function (or a wrapper
- * provided elsewhere).
+ * When using C, this definition is in the form of a set of macros that can be
+ * #defined to the system-level function (or a wrapper provided elsewhere).
  *
  * GSAR 21-JUN-98
  */
@@ -19,8 +18,8 @@
  * XXX := functional group
  * YYY := stdlib/OS function name
  *
- * Continuing with the theme of PerlIO, all OS functionality was
- * encapsulated into one of several interfaces.
+ * Continuing with the theme of PerlIO, all OS functionality was encapsulated
+ * into one of several interfaces.
  *
  * PerlIO - stdio
  * PerlLIO - low level I/O
@@ -66,7 +65,7 @@ typedef Sighandler1_t Sighandler_t;
 /* IPerlStdIO		*/
 struct IPerlStdIO;
 struct IPerlStdIOInfo;
-typedef FILE*		(*LPStdin)(struct IPerlStdIO*);
+typedef FILE*           (*LPStdin)(struct IPerlStdIO*);
 typedef FILE*		(*LPStdout)(struct IPerlStdIO*);
 typedef FILE*		(*LPStderr)(struct IPerlStdIO*);
 typedef FILE*		(*LPOpen)(struct IPerlStdIO*, const char*,
