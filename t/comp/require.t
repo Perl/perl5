@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '.';
@@ -324,7 +326,7 @@ if (defined &DynaLoader::boot_DynaLoader) {
     if ($@ =~ /^This is an expected error/) {
 	print "ok $i - require(func())\n";
     } else {
-	print "not ok $i - require(func())\n";
+	print "not ok $i - require(func()) -- $@\n";
     }
 } else {
     print "ok $i # SKIP Cwd may not be available in miniperl\n";
