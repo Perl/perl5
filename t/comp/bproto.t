@@ -14,19 +14,20 @@ my $bar = "bar";
 sub test_too_many {
     eval $_[0];
     print "not " unless $@ =~ /^Too many arguments/;
-    printf "ok %d\n",$i++;
+    printf "ok %d - test_too_many\n",$i++;
 }
 
 sub test_too_few {
     eval $_[0];
     print "not " unless $@ =~ /^Not enough arguments/;
-    printf "ok %d\n",$i++;
+    printf "ok %d - test_too_few\n",$i++;
 }
 
 sub test_no_error {
+    no warnings 'void';
     eval $_[0];
     print "not " if $@;
-    printf "ok %d\n",$i++;
+    printf "ok %d - test_no_error\n",$i++;
 }
 
 test_too_many($_) for split /\n/,

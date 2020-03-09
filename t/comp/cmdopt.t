@@ -16,7 +16,7 @@ if (!0) { print "ok 6\n";} else { print "not ok 6\n";}
 unless (!0) { print "not ok 7\n";} else { print "ok 7\n";}
 if (!1) { print "not ok 8\n";} else { print "ok 8\n";}
 
-$x = 1;
+my $x = 1;
 if (1 && $x) { print "ok 9\n";} else { print "not ok 9\n";}
 if (0 && $x) { print "not ok 10\n";} else { print "ok 10\n";}
 $x = '';

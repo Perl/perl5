@@ -4,11 +4,13 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
+use p5;
+
 print "1..7\n";
 
 # check "" interpretation
 
-$x = "\n";
+my $x = "\n";
 # 10 is ASCII/Iso Latin, 13 is Mac OS, 21 is EBCDIC.
 if ($x eq chr(10)) { print "ok 1\n";}
 elsif ($x eq chr(13)) { print "ok 1 # Mac OS\n"; }
@@ -17,14 +19,14 @@ else {print "not ok 1\n";}
 
 # check `` processing
 
-$x = `$^X -le "print 'hi there'"`;
+$x = `$^X -I../lib -le "print 'hi there'"`;
 if ($x eq "hi there\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
 # check $#array
-
+my @x;
 $x[0] = 'foo';
 $x[1] = 'foo';
-$tmp = $#x;
+my $tmp = $#x;
 print "#3\t:$tmp: == :1:\n";
 if ($#x == '1') {print "ok 3\n";} else {print "not ok 3\n";}
 
