@@ -23016,8 +23016,11 @@ S_compile_wildcard(pTHX_ const char * subpattern, const STRLEN len,
                          const bool ignore_case)
 {
     /* Pretends that the input subpattern is qr/subpattern/aam, compiling it
-     * possibly with /i if the 'ignore_case' parameter is true.  Sets up the
-     * debugging info */
+     * possibly with /i if the 'ignore_case' parameter is true.  Use /aa
+     * because nothing outside of ASCII will match.  Use /m because the input
+     * string may be a bunch of lines strung together.
+     *
+     * Also sets up the debugging info */
 
     U32 flags = PMf_MULTILINE|PMf_WILDCARD;
     U32 rx_flags;
@@ -23741,12 +23744,9 @@ S_parse_uniprop_string(pTHX_
                     packWARN(WARN_EXPERIMENTAL__UNIPROP_WILDCARDS),
                     "The Unicode property wildcards feature is experimental");
 
-                /* Now create and compile the wildcard subpattern.  Use /iaa
-                 * because nothing outside of ASCII will match, and it the
-                 * property values should all match /i.  Note that when the
-                 * pattern fails to compile, our added text to the user's
-                 * pattern will be displayed to the user, which is not so
-                 * desirable. */
+                /* Now create and compile the wildcard subpattern.  Use /i
+                 * because the property values are supposed to match with case
+                 * ignored. */
                 subpattern_re = compile_wildcard(name + i,
                                                  name_len - i - 1 - escaped,
                                                  TRUE /* /i */
