@@ -54,7 +54,7 @@ adds a new error) and sec-130 too.
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh bingos" id="d74b131b0ba952f0c894f2462279e1dc12f94d82" ticket="" desc="Fix libperl.t 'no symbols' warning on darwin" />
+<commit votes="steveh khw bingos" id="d74b131b0ba952f0c894f2462279e1dc12f94d82" ticket="" desc="Fix libperl.t 'no symbols' warning on darwin" />
 
 </div>
 
