@@ -103,6 +103,7 @@ sub test_not_inherited {
 sub test_inherited {
     my $expected_fd = shift;
     ok( -f $tmpfile1, "tmpfile '$tmpfile1' exists" );
+
     my $cmd = qq{$Perl -e $quote$Child_prog$quote $expected_fd};
     my $out = `$cmd`;
     my $rc  = $? >> 8;

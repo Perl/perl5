@@ -21,6 +21,10 @@
 
 use p5;
 
+BEGIN {
+    $ENV{PERL5LIB} = join(':', @INC );
+}
+
 $| = 1;
 $Level = 1;
 my $test = 1;
