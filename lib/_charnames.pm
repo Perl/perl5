@@ -140,6 +140,14 @@ sub carp
   require Carp; goto &Carp::carp;
 } # carp
 
+sub populate_txt()
+{
+  return if $txt;
+
+  $txt = do "unicore/Name.pl";
+  Internals::SvREADONLY($txt, 1);
+}
+
 sub alias (@) # Set up a single alias
 {
   my @errors;
@@ -408,7 +416,7 @@ sub lookup_name ($$$;$) {
       ##     "00052\nLATIN CAPITAL LETTER R\n\n"
       # or
       #      "0052 0303\nLATIN CAPITAL LETTER R WITH TILDE\n\n"
-      $txt = do "unicore/Name.pl" unless $txt;
+      populate_txt() unless $txt;
 
       ## @off will hold the index into the code/name string of the start and
       ## end of the name as we find it.
@@ -695,7 +703,7 @@ sub import
   ## see if at least we can find one letter from each script.
   ##
   if (warnings::enabled('utf8') && @scripts) {
-    $txt = do "unicore/Name.pl" unless $txt;
+    populate_txt() unless $txt;
 
     for my $script (@scripts) {
       if (not $txt =~ m/^$script (?:CAPITAL |SMALL )?LETTER /m) {
@@ -773,7 +781,7 @@ sub viacode {
   # If the code point is above the max in the table, there's no point
   # looking through it.  Checking the length first is slightly faster
   if (length($hex) <= 5 || CORE::hex($hex) <= 0x10FFFF) {
-    $txt = do "unicore/Name.pl" unless $txt;
+    populate_txt() unless $txt;
 
     # See if the name is algorithmically determinable.
     my $algorithmic = charnames::code_point_to_name_special(CORE::hex $hex);
