@@ -466,7 +466,7 @@ SKIP: {
         # anyway.  If the POSIX 2008 locale functions are being used, the
         # syntax becomes mostly irrelevant, so do the test anyway if they are.
         # It's a lot of trouble to figure out in a perl script.
-        if ($Config{d_setlocale_accepts_any_locale_name} eq 'true')
+        if (defined $Config{d_setlocale_accepts_any_locale_name} && $Config{d_setlocale_accepts_any_locale_name} eq 'true')
         {
             skip("Can't distinguish between valid and invalid locale names on this system", 2);
         }
