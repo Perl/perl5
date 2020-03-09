@@ -17,7 +17,7 @@ sub _warn_once {
     local $^W = 0;
     *_warn_once = sub{};
 
-    warn("This code is being run using Perl $]. It should be updated or may break in Perl 8. See YYY for more information.");
+    warn("# This code is being run using Perl $]. It should be updated or may break in Perl 8. See YYY for more information.");
 }
 
 BEGIN {

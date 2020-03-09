@@ -69,7 +69,7 @@ sub isnt {
 	    print "ok $test - $name # TODO: $::TODO\n";
 	}
 	else {
-	    print "ok $test - $name\n";
+	    print "ok $test - ".($name // 'undef')."\n";
 	}
 	return 1;
     }
@@ -115,7 +115,8 @@ sub y  { return "y-".shift }
 # m operator
 can_ok( 'main', "m" );
 SILENCE_WARNING: { # Complains because $_ is undef
-    local $^W;		       
+    local $^W;
+    $_ //= '';
     isnt( m('unqualified'), "m-unqualified", "m('unqualified') is oper" );
 }
 is( main::m('main'), "m-main", "main::m() is func" );

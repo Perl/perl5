@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 print "1..14\n";
 
 $blurfl = 123;
