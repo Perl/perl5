@@ -1077,7 +1077,7 @@ have spaces:
  qr!\p{scx= /Hebrew|Greek/ }!
 
 To be safe, we should have anchored the above example, to prevent
-matches for something like C<Hebrew_Braile>, but there aren't
+matches for something like C<Hebrew_Braille>, but there aren't
 any script names like that.
 
 There are certain properties that it doesn't currently work with.  These
