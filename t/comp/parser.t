@@ -3,12 +3,16 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
+use p5;
+
 BEGIN {
     @INC = qw(. ../lib);
     chdir 't' if -d 't';
 }
 
 print "1..188\n";
+
+our $test;
 
 sub failed {
     my ($got, $expected, $name) = @_;

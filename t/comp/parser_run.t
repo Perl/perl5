@@ -4,6 +4,8 @@
 # reads through invalid pointers.
 # Note that this should still be runnable under miniperl.
 
+use p5;
+
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';

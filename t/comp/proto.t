@@ -9,6 +9,8 @@
 # we should test as many as we can.
 #
 
+use p5;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';

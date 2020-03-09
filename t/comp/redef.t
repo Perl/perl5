@@ -2,6 +2,10 @@
 #
 # Contributed by Graham Barr <Graham.Barr@tiuk.ti.com>
 
+use p5;
+
+our $warn;
+
 BEGIN {
     $warn = "";
     $SIG{__WARN__} = sub { $warn .= join("",@_) }
