@@ -1016,6 +1016,8 @@ L<perlcall>.
 
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.
+ * Which one to use (or add) is mostly, but not completely arbitrary:  See
+ * http://nntp.perl.org/group/perl.perl5.porters/257169
  */
 
 #define PERLSI_UNKNOWN		-1
