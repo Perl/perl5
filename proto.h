@@ -684,11 +684,9 @@ PERL_CALLCONV_NO_RET void	Perl_croak_caller(const char* pat, ...)
 			__attribute__format__null_ok__(__printf__,1,2);
 #define PERL_ARGS_ASSERT_CROAK_CALLER
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE_NO_RET void	Perl_croak_memory_wrap(void)
+PERL_CALLCONV_NO_RET void	Perl_croak_memory_wrap(void)
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_CROAK_MEMORY_WRAP
-#endif
 
 PERL_CALLCONV_NO_RET void	Perl_croak_no_mem(void)
 			__attribute__noreturn__;

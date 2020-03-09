@@ -1766,6 +1766,15 @@ Perl_croak_nocontext(const char *pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+/* saves machine code for a common noreturn idiom typically used in Newx*() */
+GCC_DIAG_IGNORE_DECL(-Wunused-function);
+void
+Perl_croak_memory_wrap(void)
+{
+    Perl_croak_nocontext("%s",PL_memory_wrap);
+}
+GCC_DIAG_RESTORE_DECL;
+
 void
 Perl_croak(pTHX_ const char *pat, ...)
 {
