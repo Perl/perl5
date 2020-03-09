@@ -8,9 +8,9 @@ BEGIN {
 
 plan tests => 52;
 
-$a = "B\x{fc}f";
-$b = "G\x{100}r";
-$c = 0x200;
+my $a = "B\x{fc}f";
+my $b = "G\x{100}r";
+my $c = 0x200;
 
 {
     my $s = sprintf "%s", $a;

@@ -47,7 +47,7 @@ my $ungetc_count = 8200;    # Somewhat over the likely buffer size
 	my $pos = tell $fh; # pos must be behind "xxx", before "\nxxy\n"
 	seek $fh, $pos, 0;
 	$/ = "\n";
-	$s = <$fh>.<$fh>;
+	my $s = <$fh>.<$fh>;
 	is($s, "\nxxy\n");
 
         for my $i (0 .. $ungetc_count - 1) {

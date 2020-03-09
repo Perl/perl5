@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";

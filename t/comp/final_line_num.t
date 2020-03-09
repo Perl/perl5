@@ -2,6 +2,7 @@
 
 BEGIN { print "1..1\n"; }
 
+our $last_line_num;
 BEGIN { $SIG{__DIE__} = sub {
 	$_[0] =~ /\Asyntax error at [^ ]+ line ([0-9]+), at EOF/ or exit 1;
 	my $error_line_num = $1;

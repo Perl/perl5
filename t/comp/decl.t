@@ -17,6 +17,10 @@ two();
 sub two {
     print "ok 2\n";
 }
+
+my $foo;
+my $x = q[];
+
 format two =
 @<<<
 $foo

@@ -2,6 +2,8 @@
 
 # Tests the scoping of $^H and %^H
 
+use p5;
+
 BEGIN {
     @INC = qw(. ../lib ../ext/re);
     chdir 't' if -d 't';

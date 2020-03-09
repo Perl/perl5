@@ -16,6 +16,7 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
+my $wd;
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     $wd = `cd`;
 }
@@ -128,7 +129,7 @@ SKIP: {
     }
 }
 
-$newmode = (($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? 0444 : 0777;
+my $newmode = (($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? 0444 : 0777;
 
 is(chmod($newmode,'a'), 1, "chmod succeeding");
 
@@ -240,13 +241,13 @@ is(rename('a','b'), 1, "rename a b");
 
 is($ino, undef, "ino of renamed file a should be undef");
 
-$delta = $accurate_timestamps ? 1 : 2;	# Granularity of time on the filesystem
+my $delta = $accurate_timestamps ? 1 : 2;	# Granularity of time on the filesystem
 chmod 0777, 'b';
 
-$ut = 500000000;
+my $ut = 500000000;
 
 note("basic check of atime and mtime");
-$foo = (utime $ut,$ut + $delta,'b');
+my $foo = (utime $ut,$ut + $delta,'b');
 is($foo, 1, "utime");
 check_utime_result($ut, $accurate_timestamps, $delta);
 

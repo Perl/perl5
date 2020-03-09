@@ -120,7 +120,9 @@ is ($@, '', 'no error');
 }
 
 # [perl #78064] or print
-package other { # hide the "ok" sub
+package other { # hide the "ok" sub 
+ no strict 'subs';
+ use p5;
  BEGIN { $^W = 0 }
  print 0 ? not_ok : ok;
  print " ", ++$test, " - print followed by const ? BEAR : BEAR\n";
@@ -134,11 +136,15 @@ package other { # hide the "ok" sub
 }
 
 # or stat
-print "not " unless stat(1 ? INSTALL : 0) eq stat("INSTALL");
-print "ok ", ++$test, " - stat(const ? word : ....)\n";
-# in case we are in t/
-print "not " unless stat(1 ? TEST : 0) eq stat("TEST");
-print "ok ", ++$test, " - stat(const ? word : ....)\n";
+{
+    no strict 'subs';
+
+    print "not " unless stat(1 ? INSTALL : 0) eq stat("INSTALL");
+    print "ok ", ++$test, " - stat(const ? word : ....)\n";
+    # in case we are in t/
+    print "not " unless stat(1 ? TEST : 0) eq stat("TEST");
+    print "ok ", ++$test, " - stat(const ? word : ....)\n";
+}
 
 # or truncate
 my $n = "for_fold_dot_t$$";
