@@ -5766,10 +5766,10 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 
 /* Macros for regmatch(), using its internal variables */
 #define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
-#define NEXTCHR_IS_EOS (nextchr < 0)
+#define NEXTCHR_IS_EOS (nextbyte < 0)
 
 #define SET_nextchr \
-    nextchr = ((locinput < reginfo->strend) ? UCHARAT(locinput) : NEXTCHR_EOS)
+    nextbyte = ((locinput < reginfo->strend) ? UCHARAT(locinput) : NEXTCHR_EOS)
 
 #define SET_locinput(p) \
     locinput = (p);  \
@@ -6007,7 +6007,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     char *pushinput; /* where to continue after a PUSH */
     char *pusheol;   /* where to stop matching (loceol) after a PUSH */
     U8   *pushsr0;   /* save starting pos of script run */
-    I32 nextchr;   /* is always set to UCHARAT(locinput), or -1 at EOS */
+    PERL_INT_FAST16_T nextbyte;   /* is always set to UCHARAT(locinput), or -1
+                                     at EOS */
 
     bool result = 0;	    /* return value of S_regmatch */
     U32 depth = 0;            /* depth of backtrack stack */
@@ -6082,7 +6083,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
     st = PL_regmatch_state;
 
-    /* Note that nextchr is a byte even in UTF */
+    /* Note that nextbyte is a byte even in UTF */
     SET_nextchr;
     scan = prog;
 
@@ -6118,7 +6119,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         to_complement = 0;
 
         SET_nextchr;
-        assert(nextchr < 256 && (nextchr >= 0 || nextchr == NEXTCHR_EOS));
+        assert(nextbyte < 256 && (nextbyte >= 0 || nextbyte == NEXTCHR_EOS));
 
 	switch (state_num) {
 	case SBOL: /*  /^../ and /\A../  */
@@ -6154,12 +6155,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    NOT_REACHED; /* NOTREACHED */
 
 	case MEOL: /* /..$/m  */
-	    if (!NEXTCHR_IS_EOS && nextchr != '\n')
+	    if (!NEXTCHR_IS_EOS && nextbyte != '\n')
 		sayNO;
 	    break;
 
 	case SEOL: /* /..$/  */
-	    if (!NEXTCHR_IS_EOS && nextchr != '\n')
+	    if (!NEXTCHR_IS_EOS && nextbyte != '\n')
 		sayNO;
 	    if (reginfo->strend - locinput > 1)
 		sayNO;
@@ -6178,7 +6179,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case REG_ANY: /*  /./  */
 	    if (   NEXTCHR_IS_EOS
                 || locinput >= loceol
-                || nextchr == '\n')
+                || nextbyte == '\n')
             {
 		sayNO;
             }
@@ -6193,7 +6194,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              */
             if ( !   NEXTCHR_IS_EOS
                 &&   locinput < loceol
-                && ! ANYOF_BITMAP_TEST(scan, nextchr))
+                && ! ANYOF_BITMAP_TEST(scan, nextbyte))
             {
                 DEBUG_EXECUTE_r(
                     Perl_re_exec_indentf( aTHX_  "%sTRIE: failed to match trie start class...%s\n",
@@ -6262,7 +6263,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
                     if (utf8_target
                         && ! NEXTCHR_IS_EOS
-                        && UTF8_IS_ABOVE_LATIN1(nextchr)
+                        && UTF8_IS_ABOVE_LATIN1(nextbyte)
                         && scan->flags == EXACTL)
                     {
                         /* We only output for EXACTL, as we let the folder
@@ -6275,7 +6276,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 if (   trie->bitmap
                     && (     NEXTCHR_IS_EOS
                         ||   locinput >= loceol
-                        || ! TRIE_BITMAP_TEST(trie, nextchr)))
+                        || ! TRIE_BITMAP_TEST(trie, nextbyte)))
                 {
         	    if (trie->states[ state ].wordnum) {
         	         DEBUG_EXECUTE_r(
@@ -6655,7 +6656,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 /* The target and the pattern have the same utf8ness. */
                 /* Inline the first character, for speed. */
                 if (   loceol - locinput < ln
-                    || UCHARAT(s) != nextchr
+                    || UCHARAT(s) != nextbyte
                     || (ln > 1 && memNE(s, locinput, ln)))
                 {
                     sayNO;
@@ -6762,9 +6763,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 
 	    /* Neither the target nor the pattern are utf8 */
-	    if (UCHARAT(s) != nextchr
+	    if (UCHARAT(s) != nextbyte
                 && !NEXTCHR_IS_EOS
-		&& UCHARAT(s) != fold_array[nextchr])
+		&& UCHARAT(s) != fold_array[nextbyte])
 	    {
 		sayNO;
 	    }
@@ -6809,7 +6810,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                      : isWORDCHAR_LC(UCHARAT(locinput - 1));
                 b2 = (NEXTCHR_IS_EOS)
                     ? isWORDCHAR_LC('\n')
-                    : isWORDCHAR_LC(nextchr);
+                    : isWORDCHAR_LC(nextbyte);
 	    }
             if (to_complement ^ (b1 == b2)) {
                 sayNO;
@@ -6850,7 +6851,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  : isWORDCHAR_A(UCHARAT(locinput - 1));
             b2 = (NEXTCHR_IS_EOS)
                 ? isWORDCHAR_A('\n')
-                : isWORDCHAR_A(nextchr);
+                : isWORDCHAR_A(nextbyte);
             if (to_complement ^ (b1 == b2)) {
                 sayNO;
             }
@@ -6982,7 +6983,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             : isWORDCHAR_L1(UCHARAT(locinput - 1));
                         b2 = (NEXTCHR_IS_EOS)
                             ? 0 /* isWORDCHAR_L1('\n') */
-                            : isWORDCHAR_L1(nextchr);
+                            : isWORDCHAR_L1(nextbyte);
                         match = cBOOL(b1 != b2);
                         break;
                     }
@@ -7216,8 +7217,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* Use isFOO_lc() for characters within Latin1.  (Note that
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
              * wouldn't be invariant) */
-            if (UTF8_IS_INVARIANT(nextchr) || ! utf8_target) {
-                if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan), (U8) nextchr)))) {
+            if (UTF8_IS_INVARIANT(nextbyte) || ! utf8_target) {
+                if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan), (U8) nextbyte)))) {
                     sayNO;
                 }
 
@@ -7235,7 +7236,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* Here is a UTF-8 variant code point below 256 and the target is
              * UTF-8 */
             if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan),
-                                            EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
+                                            EIGHT_BIT_UTF8_TO_NATIVE(nextbyte,
                                             *(locinput + 1))))))
             {
                 sayNO;
@@ -7260,7 +7261,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
             /* All UTF-8 variants match */
-            if (! UTF8_IS_INVARIANT(nextchr)) {
+            if (! UTF8_IS_INVARIANT(nextbyte)) {
                 goto increment_locinput;
             }
 
@@ -7280,7 +7281,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
           join_nposixa:
 
-            if (! (to_complement ^ cBOOL(_generic_isCC_A(nextchr,
+            if (! (to_complement ^ cBOOL(_generic_isCC_A(nextbyte,
                                                                 FLAGS(scan)))))
             {
                 sayNO;
@@ -7304,8 +7305,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* Use _generic_isCC() for characters within Latin1.  (Note that
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
              * wouldn't be invariant) */
-            if (UTF8_IS_INVARIANT(nextchr) || ! utf8_target) {
-                if (! (to_complement ^ cBOOL(_generic_isCC(nextchr,
+            if (UTF8_IS_INVARIANT(nextbyte) || ! utf8_target) {
+                if (! (to_complement ^ cBOOL(_generic_isCC(nextbyte,
                                                            FLAGS(scan)))))
                 {
                     sayNO;
@@ -7314,7 +7315,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(locinput, reginfo->strend)) {
                 if (! (to_complement
-                       ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
+                       ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(nextbyte,
                                                                *(locinput + 1)),
                                              FLAGS(scan)))))
                 {
@@ -7385,7 +7386,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		/* Match either CR LF  or '.', as all the other possibilities
 		 * require utf8 */
 		locinput++;	    /* Match the . or CR */
-		if (nextchr == '\r' /* And if it was CR, and the next is LF,
+		if (nextbyte == '\r' /* And if it was CR, and the next is LF,
 				       match the LF */
 		    && locinput <  loceol
 		    && UCHARAT(locinput) == '\n')
@@ -7545,9 +7546,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    /* Not utf8:  Inline the first character, for speed. */
 	    if ( ! NEXTCHR_IS_EOS
                 && locinput < loceol
-                && UCHARAT(s) != nextchr
+                && UCHARAT(s) != nextbyte
                 && (   type == REF
-                    || UCHARAT(s) != fold_array[nextchr]))
+                    || UCHARAT(s) != fold_array[nextbyte]))
             {
 		sayNO;
             }
@@ -8696,7 +8697,7 @@ NULL
                     depth, (IV)ST.count)
 		);
 	    if (! NEXTCHR_IS_EOS && ST.c1 != CHRTEST_VOID) {
-                if (! UTF8_IS_INVARIANT(nextchr) && utf8_target) {
+                if (! UTF8_IS_INVARIANT(nextbyte) && utf8_target) {
 
                            /* (We can use memEQ and memNE in this file without
                             * having to worry about one being shorter than the
@@ -8719,12 +8720,12 @@ NULL
                         goto reenter_switch;
                     }
                 }
-                else if (nextchr != ST.c1 && nextchr != ST.c2) {
+                else if (nextbyte != ST.c1 && nextbyte != ST.c2) {
                     /* simulate B failing */
                     DEBUG_OPTIMISE_r(
                         Perl_re_exec_indentf( aTHX_  "CURLYM Fast bail next target=0x%X c1=0x%X c2=0x%X\n",
                             depth,
-                            (int) nextchr, ST.c1, ST.c2)
+                            (int) nextbyte, ST.c1, ST.c2)
                     );
                     state_num = CURLYM_B_fail;
                     goto reenter_switch;
@@ -9408,7 +9409,7 @@ NULL
           increment_locinput:
             assert(!NEXTCHR_IS_EOS);
             if (utf8_target) {
-                locinput += PL_utf8skip[nextchr];
+                locinput += PL_utf8skip[nextbyte];
                 /* locinput is allowed to go 1 char off the end (signifying
                  * EOS), but not 2+ */
                 if (locinput >  loceol)
