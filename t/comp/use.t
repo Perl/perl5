@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib', 'lib');
@@ -56,16 +58,16 @@ sub _ok {
     $result;
 }
 
-sub like ($$;$) {
+sub like :prototype($$;$) {
     _ok ('like', @_);
 }
-sub is ($$;$) {
+sub is :prototype($$;$) {
     _ok ('is', @_);
 }
-sub isnt ($$;$) {
+sub isnt :prototype($$;$) {
     _ok ('isnt', @_);
 }
-sub ok($;$) {
+sub ok :prototype($;$) {
     _ok ('ok', shift, undef, @_);
 }
 
@@ -95,10 +97,10 @@ is ($@, '');
 eval "use 5.000;";
 is ($@, '');
 
-eval "use 6.000;";
-like ($@, qr/Perl v6\.0\.0 required--this is only \Q$^V\E, stopped/);
+eval "use 66.000;";
+like ($@, qr/Perl v66\.0\.0 required--this is only \Q$^V\E, stopped/);
 
-eval "no 6.000;";
+eval "no 66.000;";
 is ($@, '');
 
 eval "no 5.000;";
@@ -265,6 +267,7 @@ foreach my $index (-3..+3) {
 		++$parts[$index - 1];
 	    }
 	}
+	do { ok( 1, "skipped ".join('.', @parts) ) for 1..2; next } if grep { $_ < 0 } @parts;
 	my $v_version = sprintf "v%d.%d.%d", @parts;
 	my $version;
 	if ($v) {

@@ -15,6 +15,7 @@ sub run {
     return system($^X, "-e", $code);
 }
 
+my $numtests;
 BEGIN {
     $numtests = ($^O eq 'VMS') ? 16 : 17;
 }
@@ -45,7 +46,7 @@ plan(tests => $numtests);
 my $native_success = 0;
    $native_success = 1 if $^O eq 'VMS';
 
-my $exit, $exit_arg;
+my ( $exit, $exit_arg );
 
 $exit = run('exit');
 is( $exit >> 8, 0,              'Normal exit' );

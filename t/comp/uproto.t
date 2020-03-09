@@ -1,5 +1,7 @@
 #!perl
 
+use p5;
+
 print "1..32\n";
 my $test = 0;
 
@@ -48,7 +50,7 @@ sub is {
     }
 }
 
-sub f($$_) { my $x = shift; is("@_", $x) }
+sub f :prototype($$_) { my $x = shift; is("@_", $x) }
 
 $foo = "FOO";
 my $bar = "BAR";
