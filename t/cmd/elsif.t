@@ -17,6 +17,8 @@ sub foo {
 
 print "1..4\n";
 
+my $x;
+
 if (($x = &foo(1)) == 1) {print "ok 1\n";} else {print "not ok 1 '$x'\n";}
 if (($x = &foo(2)) == 2) {print "ok 2\n";} else {print "not ok 2 '$x'\n";}
 if (($x = &foo(3)) == 3) {print "ok 3\n";} else {print "not ok 3 '$x'\n";}
