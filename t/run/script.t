@@ -11,13 +11,13 @@ my $Perl = which_perl();
 
 my $filename = tempfile();
 
-$x = `$Perl -le "print 'ok';"`;
+my $x = `$Perl -le "print 'ok';"`;
 
 is($x, "ok\n", "Got expected 'perl -le' output");
 
-open(try,">$filename") || (die "Can't open temp file.");
-print try 'print "ok\n";'; print try "\n";
-close try or die "Could not close: $!";
+open(my $fh,">$filename") || (die "Can't open temp file.");
+print {$fh} 'print "ok\n";'; print {$fh} "\n";
+close($fh) or die "Could not close: $!";
 
 $x = `$Perl $filename`;
 
