@@ -1,4 +1,5 @@
 # Tools to aid testing across platforms with different character sets.
+use p5;
 
 $::IS_ASCII  = ord 'A' ==  65;
 $::IS_EBCDIC = ord 'A' == 193;

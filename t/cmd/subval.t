@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 sub foo1 {
     'true1';
     if ($_[0]) { 'true2'; }

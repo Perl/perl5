@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 print "1..14\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
