@@ -2600,6 +2600,10 @@ cpan/Time-Piece/t/04mjd.t	Test for Time::Piece
 cpan/Time-Piece/t/05overload.t	Test for Time::Piece
 cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
 cpan/Time-Piece/t/07arith.t	Test for Time::Piece
+cpan/Time-Piece/t/08truncate.t
+cpan/Time-Piece/t/09locales.t
+cpan/Time-Piece/t/10overload.t
+cpan/Time-Piece/t/99legacy.t
 cpan/Time-Piece/t/lib/Time/Piece/Twin.pm
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate.xs			Unicode::Collate
