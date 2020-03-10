@@ -23933,7 +23933,7 @@ S_parse_uniprop_string(pTHX_
                        "panic: Can't find '_charnames::_loose_regcomp_lookup");
             }
 
-            PUSHSTACKi(PERLSI_OVERLOAD);
+            PUSHSTACKi(PERLSI_REGCOMP);
             ENTER ;
             SAVETMPS;
             save_re_context();
@@ -24373,7 +24373,7 @@ S_parse_uniprop_string(pTHX_
              * for this property in the hash.  So we have the go ahead to
              * expand the definition ourselves. */
 
-            PUSHSTACKi(PERLSI_MAGIC);
+            PUSHSTACKi(PERLSI_REGCOMP);
             ENTER;
 
             /* Create a temporary placeholder in the hash to detect recursion
@@ -24923,7 +24923,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     }
 
     /* Get the charnames data */
-    PUSHSTACKi(PERLSI_OVERLOAD);
+    PUSHSTACKi(PERLSI_REGCOMP);
     ENTER ;
     SAVETMPS;
     save_re_context();

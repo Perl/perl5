@@ -1032,6 +1032,7 @@ L<perlcall>.
 #define PERLSI_DIEHOOK		8
 #define PERLSI_REQUIRE		9
 #define PERLSI_MULTICALL       10
+#define PERLSI_REGCOMP         11
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
