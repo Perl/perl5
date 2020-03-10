@@ -1953,7 +1953,7 @@ ES	|bool	|handle_names_wildcard					    \
 				|NN SV ** prop_definition
 ES	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
-Ei	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
+ES	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
 				|NN I32 *flagp				    \
 				|NN char * parse_start			    \
 				|char ch
@@ -1994,7 +1994,7 @@ ES	|U32	|join_exact	|NN RExC_state_t *pRExC_state \
 				|NN regnode *scan|NN UV *min_subtract  \
 				|NN bool *unfolded_multi_char          \
 				|U32 flags|NULLOK regnode *val|U32 depth
-EiT	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
+EST	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
 ES	|void	|nextchar	|NN RExC_state_t *pRExC_state
 ES	|void	|skip_to_be_ignored_text|NN RExC_state_t *pRExC_state  \
 				|NN char ** p			    \
@@ -2020,15 +2020,15 @@ ES	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 ES	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
 				|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_charclass* const node
-Ei	|void	|ssc_intersection|NN regnode_ssc *ssc \
+ES	|void	|ssc_intersection|NN regnode_ssc *ssc \
 				|NN SV* const invlist|const bool invert_2nd
-Ei	|void	|ssc_union	|NN regnode_ssc *ssc \
+ES	|void	|ssc_union	|NN regnode_ssc *ssc \
 				|NN SV* const invlist|const bool invert_2nd
-Ei	|void	|ssc_add_range	|NN regnode_ssc *ssc \
+ES	|void	|ssc_add_range	|NN regnode_ssc *ssc \
 				|UV const start|UV const end
-Ei	|void	|ssc_cp_and	|NN regnode_ssc *ssc \
+ES	|void	|ssc_cp_and	|NN regnode_ssc *ssc \
 				|UV const cp
-EiT	|void	|ssc_clear_locale|NN regnode_ssc *ssc
+EST	|void	|ssc_clear_locale|NN regnode_ssc *ssc
 ETS	|bool	|is_ssc_worth_it|NN const RExC_state_t * pRExC_state \
 				|NN const regnode_ssc * ssc
 ES	|void	|ssc_finalize	|NN RExC_state_t *pRExC_state \
