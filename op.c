@@ -5906,9 +5906,10 @@ S_op_integerize(pTHX_ OP *o)
 }
 
 /* This function exists solely to provide a scope to limit
-   setjmp/longjmp() messing with auto variables.
+   setjmp/longjmp() messing with auto variables.  It cannot be inlined because
+   it uses setjmp
  */
-PERL_STATIC_INLINE int
+STATIC int
 S_fold_constants_eval(pTHX) {
     int ret = 0;
     dJMPENV;
