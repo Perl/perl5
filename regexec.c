@@ -9212,8 +9212,10 @@ NULL
 	/* push a new regex state, then continue at scan  */
 	{
 	    regmatch_state *newst;
+            DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-	    DEBUG_STACK_r({
+            DEBUG_r( /* DEBUG_STACK_r */
+              if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STACK)) {
 	        regmatch_state *cur = st;
 	        regmatch_state *curyes = yes_state;
 	        U32 i;
@@ -9232,9 +9234,9 @@ NULL
                     if (curyes == cur)
 	                curyes = cur->u.yes.prev_yes_state;
                 }
-            } else 
+            } else {
                 DEBUG_STATE_pp("push")
-            );
+            });
 	    depth++;
 	    st->locinput = locinput;
 	    st->loceol = loceol;
