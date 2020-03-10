@@ -1245,9 +1245,7 @@ perl_destruct(pTHXx)
         }
     }
 
-    if (!specialWARN(PL_compiling.cop_warnings))
-	PerlMemShared_free(PL_compiling.cop_warnings);
-    PL_compiling.cop_warnings = NULL;
+    free_and_set_cop_warnings(PL_compiling, NULL);
     cophh_free(CopHINTHASH_get(&PL_compiling));
     CopHINTHASH_set(&PL_compiling, cophh_new_empty());
     CopFILE_free(&PL_compiling);
@@ -3740,16 +3738,12 @@ Perl_moreswitches(pTHX_ const char *s)
 	return s;
     case 'W':
 	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
-        if (!specialWARN(PL_compiling.cop_warnings))
-            PerlMemShared_free(PL_compiling.cop_warnings);
-	PL_compiling.cop_warnings = pWARN_ALL ;
+    free_and_set_cop_warnings(PL_compiling, pWARN_ALL);
 	s++;
 	return s;
     case 'X':
 	PL_dowarn = G_WARN_ALL_OFF;
-        if (!specialWARN(PL_compiling.cop_warnings))
-            PerlMemShared_free(PL_compiling.cop_warnings);
-	PL_compiling.cop_warnings = pWARN_NONE ;
+    free_and_set_cop_warnings(PL_compiling, pWARN_NONE);
 	s++;
 	return s;
     case '*':
