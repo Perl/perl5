@@ -784,6 +784,9 @@ print $c <<"EOF";
 void
 Perl_reentrant_size(pTHX) {
 	PERL_UNUSED_CONTEXT;
+
+        /* Set the sizes of the reentrant buffers */
+
 #ifdef USE_REENTRANT_API
 #define REENTRANTSMALLSIZE	 256	/* Make something up. */
 #define REENTRANTUSUALSIZE	4096	/* Make something up. */
@@ -794,6 +797,9 @@ Perl_reentrant_size(pTHX) {
 void
 Perl_reentrant_init(pTHX) {
 	PERL_UNUSED_CONTEXT;
+
+        /* Initialize the whole thing */
+
 #ifdef USE_REENTRANT_API
 	Newx(PL_reentrant_buffer, 1, REENTR);
 	Perl_reentrant_size(aTHX);
@@ -804,6 +810,9 @@ Perl_reentrant_init(pTHX) {
 void
 Perl_reentrant_free(pTHX) {
 	PERL_UNUSED_CONTEXT;
+
+        /* Tear down */
+
 #ifdef USE_REENTRANT_API
 @free
 	Safefree(PL_reentrant_buffer);
@@ -813,6 +822,18 @@ Perl_reentrant_free(pTHX) {
 void*
 Perl_reentrant_retry(const char *f, ...)
 {
+    /* This function is set up to be called if the normal function returns
+     * failure with errno ERANGE, which indicates the buffer is too small.
+     * This function calls the failing one again with a larger buffer.
+     *
+     * What has happened is that, due to the magic of C preprocessor macro
+     * expansion, when the original code called function 'foo(args)', it was
+     * instead compiled into something like a call of 'foo_r(args, buffer)'
+     * Below we retry with 'foo', but the preprocessor has changed that into
+     * 'foo_r', so this function will end up calling itself recursively, each
+     * time with a larger buffer.  If PERL_REENTRANT_MAXSIZE is defined, it
+     * won't increase beyond that, instead failing. */
+
     void *retptr = NULL;
     va_list ap;
 #ifdef USE_REENTRANT_API
@@ -1045,6 +1066,8 @@ EOF
 
 read_only_bottom_close_and_rename($c);
 
+# The meanings of the flags are derivable from %map above
+# Fnc, arg flags| hdr   | ? struct type | prototypes...
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI
 crypt CC	|crypt	|struct crypt_data|B_CCS|B_CCD|D=CRYPTD*
