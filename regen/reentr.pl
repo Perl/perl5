@@ -495,8 +495,11 @@ for my $func (@seenf) {
 	char*	_${func}_buffer;
 	size_t	_${func}_size;
 EOF
+            my $size = ($func =~ /^(asctime|ctime)$/)
+                       ? 26
+                       : "REENTRANTSMALLSIZE";
 	    push @size, <<EOF;
-	PL_reentrant_buffer->_${func}_size = REENTRANTSMALLSIZE;
+	PL_reentrant_buffer->_${func}_size = $size;
 EOF
 	    pushinitfree $func;
 	    pushssif $endif;
