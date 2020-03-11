@@ -38,8 +38,8 @@ jobs:
             fetch-depth: 10
       - name: Install 32bit dependencies
         run: |
-            sudo dpkg --add-architecture i386
-            sudo apt-get -y install gcc-multilib
+            sudo dpkg --add-architecture i386 ||:
+            sudo apt-get -y install gcc-multilib ||:
       - name: Configure
         run: |
             ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
