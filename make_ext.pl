@@ -523,6 +523,7 @@ EOM
 		'INSTALLMAN3DIR=none';
 	}
 	push @args, @$pass_through;
+	push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
 	_quote_args(\@args) if IS_VMS;
 	print join(' ', $perl, @args), "\n" if $verbose;
 	my $code = do {
