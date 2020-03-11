@@ -21,54 +21,57 @@ use strict ;
 # Hand-editable data
 
 # (feature name) => (internal name, used in %^H and macro names)
-my %feature = (
-    say             => 'say',
-    state           => 'state',
-    switch          => 'switch',
-    bitwise         => 'bitwise',
-    evalbytes       => 'evalbytes',
-    current_sub     => '__SUB__',
-    refaliasing     => 'refaliasing',
-    postderef_qq    => 'postderef_qq',
-    unicode_eval    => 'unieval',
-    declared_refs   => 'myref',
-    unicode_strings => 'unicode',
-    fc              => 'fc',
-    signatures      => 'signatures',
-    isa             => 'isa',
-    indirect        => 'indirect',
-);
+my %feature;
+BEGIN {
+    %feature = (
+        say             => 'say',
+        state           => 'state',
+        switch          => 'switch',
+        bitwise         => 'bitwise',
+        evalbytes       => 'evalbytes',
+        current_sub     => '__SUB__',
+        refaliasing     => 'refaliasing',
+        postderef_qq    => 'postderef_qq',
+        unicode_eval    => 'unieval',
+        declared_refs   => 'myref',
+        unicode_strings => 'unicode',
+        fc              => 'fc',
+        signatures      => 'signatures',
+        isa             => 'isa',
+        indirect        => 'indirect',
+    );
+}
+
+use constant ALL_FEATURES => sort keys %feature;
+use constant V5_9_5 => sort qw(say state switch indirect);
+use constant V5_11  => sort ( +V5_9_5, qw(unicode_strings) );
+use constant V5_15  => sort ( +V5_11, qw(unicode_eval evalbytes current_sub fc) );
+use constant V5_23  => sort ( +V5_15, qw(postderef_qq) );
+use constant V5_27  => sort ( +V5_23, qw(bitwise) );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
 #       versions, any code below that uses %BundleRanges will have to
 #       be changed to account.
 
+my @all_features = sort keys %feature;
+
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 my %feature_bundle = (
-     all     => [ keys %feature ],
+     all     => [ +ALL_FEATURES ],
      default =>	[qw(indirect)],
-    "5.9.5"  =>	[qw(say state switch indirect)],
-    "5.10"   =>	[qw(say state switch indirect)],
-    "5.11"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.13"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.19"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.21"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.23"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq indirect)],
-    "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq indirect)],
-    "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.29"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
+    "5.9.5"  =>	[ +V5_9_5 ],
+    "5.10"   =>	[ +V5_9_5 ],
+    "5.11"   =>	[ +V5_11 ],
+    "5.13"   =>	[ +V5_11 ],
+    "5.15"   =>	[ +V5_15 ],
+    "5.17"   =>	[ +V5_15 ],
+    "5.19"   =>	[ +V5_15 ],
+    "5.21"   =>	[ +V5_15 ],
+    "5.23"   =>	[ +V5_23 ],
+    "5.25"   =>	[ +V5_23 ],
+    "5.27"   =>	[ +V5_27 ],
+    "5.29"   =>	[ +V5_27 ],
+    "5.31"   =>	[ +V5_27 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -90,8 +93,8 @@ for my $feature (sort keys %feature) {
 }
 
 for (keys %feature_bundle) {
-    next unless /^5\.(\d*[13579])\z/;
-    $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
+    next unless /^(\d+)\.(\d*[13579])\z/a;
+    $feature_bundle{"$1.".($2+1)} ||= $feature_bundle{$_};
 }
 
 my %UniqueBundles; # "say state switch" => 5.10
@@ -469,7 +472,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.58';
+our $VERSION = '1.59';
 
 FEATURES
 
