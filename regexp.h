@@ -148,9 +148,6 @@ typedef struct regexp {
     SSize_t sublen;     /* Length of string pointed by subbeg */
     SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
     SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
-
-    /* Information about the match that isn't often used */
-
     SSize_t maxlen;  /* minimum possible number of chars in string to match */
 
     /*---------------------------------------------------------------------- */
