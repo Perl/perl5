@@ -434,6 +434,9 @@ define('FPTR', 'H',
 define('BUFFER',  'B',
        qw(getpwent getpwgid getpwnam));
 
+define('BUFFER',  'B',
+       qw(getspent getspnam));
+
 define('PTR', 'R',
        qw(gethostent gethostbyaddr gethostbyname));
 define('PTR', 'R',
@@ -739,6 +742,12 @@ typedef struct {
 /* The wrappers. */
 
 @wrap
+
+/* Special case this; if others came along, could automate it */
+#  ifdef HAS_GETSPNAM_R
+#    define KEY_getspnam -1
+#  endif
+
 #endif /* USE_REENTRANT_API */
  
 #endif
@@ -860,6 +869,16 @@ Perl_reentrant_retry(const char *f, ...)
 #endif
 
     if (key == 0) {
+
+#ifdef HAS_GETSPNAM_R
+
+	/* This is a #define as has no corresponding keyword */
+        if (strEQ(f, "getspnam")) {
+            key = KEY_getspnam;
+        }
+
+#endif
+
     }
     else if (key < 0) {
         key = -key;
@@ -989,9 +1008,9 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 #  ifdef USE_PWENT_BUFFER
 
-    case KEY_getpwnam:
-    case KEY_getpwuid:
-    case KEY_getpwent:
+    case  KEY_getpwnam:
+    case  KEY_getpwuid:
+    case  KEY_getpwent:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -1026,6 +1045,31 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
             }
 	    }
+	}
+	break;
+
+#  endif
+#  ifdef USE_SPENT_BUFFER
+
+    case KEY_getspnam:
+	{
+            char * name;
+
+#    ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_spent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+
+#    endif
+            RenewDouble(PL_reentrant_buffer->_spent_buffer,
+                    &PL_reentrant_buffer->_spent_size, char);
+            switch (key) {
+	        case KEY_getspnam:
+		    name = va_arg(ap, char *);
+		    retptr = getspnam(name); break;
+	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
+		    break;
+            }
 	}
 	break;
 
