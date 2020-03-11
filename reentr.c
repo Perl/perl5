@@ -32,6 +32,7 @@
 #define PERL_IN_REENTR_C
 #include "perl.h"
 #include "reentr.h"
+#include "keywords.h"
 
 #define RenewDouble(data_pointer, size_pointer, type) \
     STMT_START { \
@@ -365,15 +366,25 @@ Perl_reentrant_retry(const char *f, ...)
     void *retptr = NULL;
     va_list ap;
 
+    I32 key;
+
 #ifdef USE_REENTRANT_API
 
     dTHX;
+
+    key = Perl_keyword (aTHX_ f, strlen(f), FALSE /* not feature enabled */);
 
     /* Easier to special case this here than in embed.pl. (Look at what it
        generates for proto.h) */
     PERL_ARGS_ASSERT_REENTRANT_RETRY;
 
 #endif
+
+    if (key == 0) {
+    }
+    else if (key < 0) {
+        key = -key;
+    }
 
     va_start(ap, f);
     {
@@ -392,13 +403,13 @@ Perl_reentrant_retry(const char *f, ...)
     int anint;
 #  endif
 
-    switch (PL_op->op_type) {
+    switch (key) {
 
 #  ifdef USE_HOSTENT_BUFFER
 
-    case OP_GHBYADDR:
-    case OP_GHBYNAME:
-    case OP_GHOSTENT:
+    case KEY_gethostbyaddr:
+    case KEY_gethostbyname:
+    case KEY_endhostent:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -406,18 +417,16 @@ Perl_reentrant_retry(const char *f, ...)
 		PERL_REENTRANT_MAXSIZE / 2)
 #    endif
 	    {
-            RenewDouble(PL_reentrant_buffer->_hostent_buffer,
-                    &PL_reentrant_buffer->_hostent_size, char);
-            switch (PL_op->op_type) {
-	        case OP_GHBYADDR:
+            switch (key) {
+            case KEY_gethostbyaddr:
 		    p0    = va_arg(ap, void *);
 		    asize = va_arg(ap, size_t);
 		    anint  = va_arg(ap, int);
 		    retptr = gethostbyaddr((Netdb_host_t) p0, (Netdb_hlen_t) asize, anint); break;
-	        case OP_GHBYNAME:
+	        case KEY_gethostbyname:
 		    p0 = va_arg(ap, void *);
 		    retptr = gethostbyname((Netdb_name_t) p0); break;
-	        case OP_GHOSTENT:
+	        case KEY_endhostent:
 		    retptr = gethostent(); break;
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
@@ -430,9 +439,9 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 #  ifdef USE_GRENT_BUFFER
 
-    case OP_GGRNAM:
-    case OP_GGRGID:
-    case OP_GGRENT:
+    case KEY_getgrent:
+    case KEY_getgrgid:
+    case KEY_getgrnam:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -443,19 +452,18 @@ Perl_reentrant_retry(const char *f, ...)
 		Gid_t gid;
             RenewDouble(PL_reentrant_buffer->_grent_buffer,
                     &PL_reentrant_buffer->_grent_size, char);
-            switch (PL_op->op_type) {
-	        case OP_GGRNAM:
+            switch (key) {
+                case KEY_getgrnam:
 		    p0 = va_arg(ap, void *);
 		    retptr = getgrnam((char *)p0); break;
-                case OP_GGRGID:
-
+	        case KEY_getgrgid:
 #    if Gid_t_size < INTSIZE
                     gid = (Gid_t)va_arg(ap, int);
 #    else
 		    gid = va_arg(ap, Gid_t);
 #    endif
 		    retptr = getgrgid(gid); break;
-	        case OP_GGRENT:
+	        case KEY_getgrent:
 		    retptr = getgrent(); break;
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
@@ -468,9 +476,9 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 #  ifdef USE_NETENT_BUFFER
 
-    case OP_GNBYADDR:
-    case OP_GNBYNAME:
-    case OP_GNETENT:
+    case KEY_getnetbyaddr:
+    case KEY_getnetbyname:
+    case KEY_getnetent:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -481,15 +489,15 @@ Perl_reentrant_retry(const char *f, ...)
 		Netdb_net_t net;
             RenewDouble(PL_reentrant_buffer->_netent_buffer,
                     &PL_reentrant_buffer->_netent_size, char);
-            switch (PL_op->op_type) {
-	        case OP_GNBYADDR:
+            switch (key) {
+	        case KEY_getnetbyaddr:
 		    net = va_arg(ap, Netdb_net_t);
 		    anint = va_arg(ap, int);
 		    retptr = getnetbyaddr(net, anint); break;
-	        case OP_GNBYNAME:
+	        case KEY_getnetbyname:
 		    p0 = va_arg(ap, void *);
 		    retptr = getnetbyname((char *)p0); break;
-	        case OP_GNETENT:
+	        case KEY_getnetent:
 		    retptr = getnetent(); break;
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
@@ -502,9 +510,9 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 #  ifdef USE_PWENT_BUFFER
 
-    case OP_GPWNAM:
-    case OP_GPWUID:
-    case OP_GPWENT:
+    case KEY_getpwnam:
+    case KEY_getpwuid:
+    case KEY_getpwent:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -516,11 +524,11 @@ Perl_reentrant_retry(const char *f, ...)
 		Uid_t uid;
             RenewDouble(PL_reentrant_buffer->_pwent_buffer,
                     &PL_reentrant_buffer->_pwent_size, char);
-            switch (PL_op->op_type) {
-	        case OP_GPWNAM:
+            switch (key) {
+	        case KEY_getpwnam:
 		    p0 = va_arg(ap, void *);
 		    retptr = getpwnam((char *)p0); break;
-	        case OP_GPWUID:
+	        case KEY_getpwuid:
 
 #    if Uid_t_size < INTSIZE
 		    uid = (Uid_t)va_arg(ap, int);
@@ -530,7 +538,8 @@ Perl_reentrant_retry(const char *f, ...)
 		    retptr = getpwuid(uid); break;
 
 #  if defined(HAS_GETPWENT) || defined(HAS_GETPWENT_R)
-	        case OP_GPWENT:
+
+	        case KEY_getpwent:
 		    retptr = getpwent(); break;
 #  endif
 	        default:
@@ -544,9 +553,9 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 #  ifdef USE_PROTOENT_BUFFER
 
-    case OP_GPBYNAME:
-    case OP_GPBYNUMBER:
-    case OP_GPROTOENT:
+    case KEY_getprotobyname:
+    case KEY_getprotobynumber:
+    case KEY_getprotoent:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -556,14 +565,14 @@ Perl_reentrant_retry(const char *f, ...)
 	    {
             RenewDouble(PL_reentrant_buffer->_protoent_buffer,
                     &PL_reentrant_buffer->_protoent_size, char);
-            switch (PL_op->op_type) {
-	        case OP_GPBYNAME:
+            switch (key) {
+	        case KEY_getprotobyname:
 		    p0 = va_arg(ap, void *);
 		    retptr = getprotobyname((char *)p0); break;
-	        case OP_GPBYNUMBER:
+	        case KEY_getprotobynumber:
 		    anint = va_arg(ap, int);
 		    retptr = getprotobynumber(anint); break;
-	        case OP_GPROTOENT:
+	        case KEY_getprotoent:
 		    retptr = getprotoent(); break;
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
@@ -576,9 +585,9 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 #  ifdef USE_SERVENT_BUFFER
 
-    case OP_GSBYNAME:
-    case OP_GSBYPORT:
-    case OP_GSERVENT:
+    case KEY_getservbyname:
+    case KEY_getservbyport:
+    case KEY_getservent:
 	{
 
 #    ifdef PERL_REENTRANT_MAXSIZE
@@ -588,16 +597,16 @@ Perl_reentrant_retry(const char *f, ...)
 	    {
             RenewDouble(PL_reentrant_buffer->_servent_buffer,
                     &PL_reentrant_buffer->_servent_size, char);
-            switch (PL_op->op_type) {
-	        case OP_GSBYNAME:
+            switch (key) {
+	        case KEY_getservbyname:
 		    p0 = va_arg(ap, void *);
 		    p1 = va_arg(ap, void *);
 		    retptr = getservbyname((char *)p0, (char *)p1); break;
-	        case OP_GSBYPORT:
+	        case KEY_getservbyport:
 		    anint = va_arg(ap, int);
 		    p0 = va_arg(ap, void *);
 		    retptr = getservbyport(anint, (char *)p0); break;
-	        case OP_GSERVENT:
+	        case KEY_getservent:
 		    retptr = getservent(); break;
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
