@@ -1,5 +1,8 @@
 use Config;
 
+use strict;
+use warnings;
+
 sub to_string {
     my ($value) = @_;
     $value =~ s/\\/\\\\/g;
@@ -85,7 +88,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.46';
+    $VERSION = '1.47';
 }
 
 EOT
@@ -126,6 +129,8 @@ else {
 ($dl_dlext, $dl_so, $dlsrc) = @Config::Config{qw(dlext so dlsrc)};
 EOT
 }
+
+my @dl_library_path;
 
 print OUT expand_os_specific(<<'EOT');
 
