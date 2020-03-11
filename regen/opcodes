@@ -2,8 +2,8 @@
 # The restriction on having custom as the last op has been removed
 
 # A recapitulation of the format of this file:
-# The file consists of five columns: the name of the op, an English
-# description, the name of the "check" routine used to optimize this
+# The file consists of five tab-separated columns: the name of the op, an
+# English description, the name of the "check" routine used to optimize this
 # operation, some flags, and a description of the operands.
 
 # The flags consist of options followed by a mandatory op class signifier
