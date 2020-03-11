@@ -1058,7 +1058,6 @@
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
 #define parse_uniprop_string(a,b,c,d,e,f,g,h,i)	S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i)
 #define populate_ANYOF_from_invlist(a,b)	S_populate_ANYOF_from_invlist(aTHX_ a,b)
-#define re_op_compile_wrapper(a,b,c)	S_re_op_compile_wrapper(aTHX_ a,b,c)
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reg2Lanode(a,b,c,d)	S_reg2Lanode(aTHX_ a,b,c,d)
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)

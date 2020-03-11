@@ -6685,16 +6685,9 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 REGEXP *
 Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 {
-    PERL_ARGS_ASSERT_RE_COMPILE;
-    return re_op_compile_wrapper(pattern, rx_flags, 0);
-}
-
-REGEXP *
-S_re_op_compile_wrapper(pTHX_ SV * const pattern, U32 rx_flags, const U32 pm_flags)
-{
     SV *pat = pattern; /* defeat constness! */
 
-    PERL_ARGS_ASSERT_RE_OP_COMPILE_WRAPPER;
+    PERL_ARGS_ASSERT_RE_COMPILE;
 
     return Perl_re_op_compile(aTHX_ &pat, 1, NULL,
 #ifdef PERL_IN_XSUB_RE
@@ -6702,9 +6695,8 @@ S_re_op_compile_wrapper(pTHX_ SV * const pattern, U32 rx_flags, const U32 pm_fla
 #else
                                 &PL_core_reg_engine,
 #endif
-                                NULL, NULL, rx_flags, pm_flags);
+                                NULL, NULL, rx_flags, 0);
 }
-
 
 static void
 S_free_codeblocks(pTHX_ struct reg_code_blocks *cbs)

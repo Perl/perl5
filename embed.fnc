@@ -1878,7 +1878,6 @@ EXpRT	|const char * const *|get_prop_values|const int table_index
 EXpR	|SV *	|get_prop_definition|const int table_index
 EXpRT	|const char *|get_deprecated_property_msg|const Size_t warning_offset
 #if defined(PERL_IN_REGCOMP_C)
-ERS	|REGEXP*|re_op_compile_wrapper|NN SV * const pattern|U32 orig_rx_flags|const U32 pm_flags
 EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
 EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style

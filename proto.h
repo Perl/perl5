@@ -5813,11 +5813,6 @@ PERL_STATIC_NO_RET void	S_re_croak(pTHX_ bool utf8, const char* pat, ...)
 #define PERL_ARGS_ASSERT_RE_CROAK	\
 	assert(pat)
 
-STATIC REGEXP*	S_re_op_compile_wrapper(pTHX_ SV * const pattern, U32 orig_rx_flags, const U32 pm_flags)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_RE_OP_COMPILE_WRAPPER	\
-	assert(pattern)
-
 STATIC regnode_offset	S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_REG	\
 	assert(pRExC_state); assert(flagp)
