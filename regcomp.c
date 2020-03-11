@@ -20384,7 +20384,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 STATIC regnode_offset /* Location. */
 S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, void * arg)
 {
-    const regnode_offset ret = regnode_guts(pRExC_state, op, regarglen[op], "regvnode");
+    const regnode_offset ret = regnode_guts(pRExC_state, op, regarglen[op], "regpnode");
     regnode_offset ptr = ret;
 
     PERL_ARGS_ASSERT_REGPNODE;
