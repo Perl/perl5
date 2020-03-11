@@ -73,11 +73,11 @@ print $h <<EOF;
  */
 
 #ifndef PERL_REENTR_API
-# if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_REENTRANT)
-#  define PERL_REENTR_API 1
-# else
-#  define PERL_REENTR_API 0
-# endif
+#  if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_REENTRANT)
+#    define PERL_REENTR_API 1
+#  else
+#    define PERL_REENTR_API 0
+#  endif
 #endif
 
 #ifdef USE_REENTRANT_API
@@ -89,81 +89,81 @@ print $h <<EOF;
  * If you know of more deprecations on some platforms, please add your own
  * (by editing reentr.pl, mind!) */
 
-#ifdef __hpux
-#   undef HAS_CRYPT_R
-#   undef HAS_ENDGRENT_R
-#   undef HAS_ENDPWENT_R
-#   undef HAS_GETGRENT_R
-#   undef HAS_GETPWENT_R
-#   undef HAS_SETLOCALE_R
-#   undef HAS_STRERROR_R
-#   define NETDB_R_OBSOLETE
-#endif
+#  ifdef __hpux
+#    undef HAS_CRYPT_R
+#    undef HAS_ENDGRENT_R
+#    undef HAS_ENDPWENT_R
+#    undef HAS_GETGRENT_R
+#    undef HAS_GETPWENT_R
+#    undef HAS_SETLOCALE_R
+#    undef HAS_STRERROR_R
+#    define NETDB_R_OBSOLETE
+#  endif
 
-#if defined(__osf__) && defined(__alpha) /* Tru64 aka Digital UNIX */
-#   undef HAS_CRYPT_R
-#   undef HAS_STRERROR_R
-#   define NETDB_R_OBSOLETE
-#endif
+#  if defined(__osf__) && defined(__alpha) /* Tru64 aka Digital UNIX */
+#    undef HAS_CRYPT_R
+#    undef HAS_STRERROR_R
+#    define NETDB_R_OBSOLETE
+#  endif
 
-#if defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 24))
-#   undef HAS_READDIR_R
-#   undef HAS_READDIR64_R
-#endif
+#  if defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 24))
+#    undef HAS_READDIR_R
+#    undef HAS_READDIR64_R
+#  endif
 
 /*
  * As of OpenBSD 3.7, reentrant functions are now working, they just are
  * incompatible with everyone else.  To make OpenBSD happy, we have to
  * memzero out certain structures before calling the functions.
  */
-#if defined(__OpenBSD__)
+#  if defined(__OpenBSD__)
 #    define REENTR_MEMZERO(a,b) memzero(a,b)
-#else
+#  else
 #    define REENTR_MEMZERO(a,b) 0
-#endif 
+#  endif 
 
-#ifdef NETDB_R_OBSOLETE
-#   undef HAS_ENDHOSTENT_R
-#   undef HAS_ENDNETENT_R
-#   undef HAS_ENDPROTOENT_R
-#   undef HAS_ENDSERVENT_R
-#   undef HAS_GETHOSTBYADDR_R
-#   undef HAS_GETHOSTBYNAME_R
-#   undef HAS_GETHOSTENT_R
-#   undef HAS_GETNETBYADDR_R
-#   undef HAS_GETNETBYNAME_R
-#   undef HAS_GETNETENT_R
-#   undef HAS_GETPROTOBYNAME_R
-#   undef HAS_GETPROTOBYNUMBER_R
-#   undef HAS_GETPROTOENT_R
-#   undef HAS_GETSERVBYNAME_R
-#   undef HAS_GETSERVBYPORT_R
-#   undef HAS_GETSERVENT_R
-#   undef HAS_SETHOSTENT_R
-#   undef HAS_SETNETENT_R
-#   undef HAS_SETPROTOENT_R
-#   undef HAS_SETSERVENT_R
-#endif
+#  ifdef NETDB_R_OBSOLETE
+#    undef HAS_ENDHOSTENT_R
+#    undef HAS_ENDNETENT_R
+#    undef HAS_ENDPROTOENT_R
+#    undef HAS_ENDSERVENT_R
+#    undef HAS_GETHOSTBYADDR_R
+#    undef HAS_GETHOSTBYNAME_R
+#    undef HAS_GETHOSTENT_R
+#    undef HAS_GETNETBYADDR_R
+#    undef HAS_GETNETBYNAME_R
+#    undef HAS_GETNETENT_R
+#    undef HAS_GETPROTOBYNAME_R
+#    undef HAS_GETPROTOBYNUMBER_R
+#    undef HAS_GETPROTOENT_R
+#    undef HAS_GETSERVBYNAME_R
+#    undef HAS_GETSERVBYPORT_R
+#    undef HAS_GETSERVENT_R
+#    undef HAS_SETHOSTENT_R
+#    undef HAS_SETNETENT_R
+#    undef HAS_SETPROTOENT_R
+#    undef HAS_SETSERVENT_R
+#  endif
 
-#ifdef I_PWD
-#   include <pwd.h>
-#endif
-#ifdef I_GRP
-#   include <grp.h>
-#endif
-#ifdef I_NETDB
-#   include <netdb.h>
-#endif
-#ifdef I_CRYPT
-#   ifdef I_CRYPT
-#       include <crypt.h>
-#   endif
-#endif
-#ifdef HAS_GETSPNAM_R
-#   ifdef I_SHADOW
-#       include <shadow.h>
-#   endif
-#endif
+#  ifdef I_PWD
+#    include <pwd.h>
+#  endif
+#  ifdef I_GRP
+#    include <grp.h>
+#  endif
+#  ifdef I_NETDB
+#    include <netdb.h>
+#  endif
+#  ifdef I_CRYPT
+#    ifdef I_CRYPT
+#      include <crypt.h>
+#    endif
+#  endif
+#  ifdef HAS_GETSPNAM_R
+#    ifdef I_SHADOW
+#      include <shadow.h>
+#    endif
+#  endif
 
 EOF
 
@@ -337,7 +337,7 @@ close DATA;
     # Write out all the known prototype signatures.
     my $i = 1;
     for my $p (sort keys %seenp) {
-	print $h "#define REENTRANT_PROTO_${p}	${i}\n";
+	print $h "#  define REENTRANT_PROTO_${p}	${i}\n";
 	$i++;
     }
 }
@@ -390,13 +390,13 @@ EOF
 	    $GENFUNC =~ s/^GET//;
 	}
 	if (@h) {
-	    push @define, "#if defined(HAS_${FUNC}_R) && (" . join(" || ", map { "${FUNC}_R_PROTO == REENTRANT_PROTO_$_" } @h) . ")\n";
+	    push @define, "#  if defined(HAS_${FUNC}_R) && (" . join(" || ", map { "${FUNC}_R_PROTO == REENTRANT_PROTO_$_" } @h) . ")\n";
 
 	    push @define, <<EOF;
-#   define $HAS
-#else
-#   undef  $HAS
-#endif
+#    define $HAS
+#  else
+#    undef  $HAS
+#  endif
 EOF
         }
     }
@@ -406,12 +406,12 @@ EOF
 /* Any of the @F using \L$n? */
 
 EOF
-    push @define, "#if (" . join(" || ", map { "defined($_)" } @H) . ")\n";
+    push @define, "#  if (" . join(" || ", map { "defined($_)" } @H) . ")\n";
     push @define, <<EOF;
-#   define USE_${GENFUNC}_$n
-#else
-#   undef  USE_${GENFUNC}_$n
-#endif
+#    define USE_${GENFUNC}_$n
+#  else
+#    undef  USE_${GENFUNC}_$n
+#  endif
 
 EOF
 }
@@ -467,8 +467,8 @@ define('ERRNO', 'E',
 
 for my $func (@seenf) {
     my $FUNC = uc $func;
-    my $ifdef = "#ifdef HAS_${FUNC}_R\n";
-    my $endif = "#endif /* HAS_${FUNC}_R */\n";
+    my $ifdef = "#  ifdef HAS_${FUNC}_R\n";
+    my $endif = "#  endif /* HAS_${FUNC}_R */\n\n";
     if (exists $seena{$func}) {
 	my @p = @{$seena{$func}};
 	if ($func =~ /^(asctime|ctime|getlogin|setlocale|strerror|ttyname)$/) {
@@ -486,21 +486,21 @@ EOF
         elsif ($func =~ /^(crypt)$/) {
 	    pushssif $ifdef;
 	    push @struct, <<EOF;
-#if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
+#  if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
 	$seend{$func} _${func}_data;
-#else
+#  else
 	$seent{$func} *_${func}_struct_buffer;
-#endif
+#  endif
 EOF
     	    push @init, <<EOF;
-#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+#  if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
 	PL_reentrant_buffer->_${func}_struct_buffer = 0;
-#endif
+#  endif
 EOF
     	    push @free, <<EOF;
-#if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
+#  if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
 	Safefree(PL_reentrant_buffer->_${func}_struct_buffer);
-#endif
+#  endif
 EOF
 	    pushssif $endif;
 	}
@@ -536,17 +536,17 @@ EOF
 		    '_SC_GETGR_R_SIZE_MAX' : '_SC_GETPW_R_SIZE_MAX';
 	    my $sz = "_${genfunc}_size";
 	    push @size, <<EOF;
-#   if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
+#    if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
 	PL_reentrant_buffer->$sz = sysconf($sc);
 	if (PL_reentrant_buffer->$sz == (size_t) -1)
 		PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
-#   elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
+#    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->$sz = SIABUFSIZ;
-#   elif defined(__sgi)
+#    elif defined(__sgi)
 	PL_reentrant_buffer->$sz = BUFSIZ;
-#   else
+#    else
 	PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
-#   endif 
+#    endif 
 EOF
 	    pushinitfree $genfunc;
 	    pushssif $endif;
@@ -578,19 +578,19 @@ EOF
 #   endif 
 EOF
 	    push @size, <<EOF;
-#if   !($D)
+#  if !($D)
 	PL_reentrant_buffer->_${genfunc}_size = REENTRANTUSUALSIZE;
-#endif
+#  endif
 EOF
 	    push @init, <<EOF;
-#if   !($D)
+#  if !($D)
 	Newx(PL_reentrant_buffer->_${genfunc}_buffer, PL_reentrant_buffer->_${genfunc}_size, char);
-#endif
+#  endif
 EOF
 	    push @free, <<EOF;
-#if   !($D)
+#  if !($D)
 	Safefree(PL_reentrant_buffer->_${genfunc}_buffer);
-#endif
+#  endif
 EOF
 	    pushssif $endif;
 	}
@@ -731,6 +731,7 @@ print $h <<EOF;
 
 @define
 typedef struct {
+
 @struct
     int dummy; /* cannot have empty structs */
 } REENTR;
@@ -738,7 +739,6 @@ typedef struct {
 /* The wrappers. */
 
 @wrap
-
 #endif /* USE_REENTRANT_API */
  
 #endif
@@ -788,10 +788,12 @@ Perl_reentrant_size(pTHX) {
         /* Set the sizes of the reentrant buffers */
 
 #ifdef USE_REENTRANT_API
-#define REENTRANTSMALLSIZE	 256	/* Make something up. */
-#define REENTRANTUSUALSIZE	4096	/* Make something up. */
+#  define REENTRANTSMALLSIZE	 256	/* Make something up. */
+#  define REENTRANTUSUALSIZE	4096	/* Make something up. */
+
 @size
 #endif /* USE_REENTRANT_API */
+
 }
 
 void
@@ -801,10 +803,13 @@ Perl_reentrant_init(pTHX) {
         /* Initialize the whole thing */
 
 #ifdef USE_REENTRANT_API
+
 	Newx(PL_reentrant_buffer, 1, REENTR);
 	Perl_reentrant_size(aTHX);
+
 @init
 #endif /* USE_REENTRANT_API */
+
 }
 
 void
@@ -814,8 +819,10 @@ Perl_reentrant_free(pTHX) {
         /* Tear down */
 
 #ifdef USE_REENTRANT_API
+
 @free
 	Safefree(PL_reentrant_buffer);
+
 #endif /* USE_REENTRANT_API */
 }
 
@@ -836,14 +843,20 @@ Perl_reentrant_retry(const char *f, ...)
 
     void *retptr = NULL;
     va_list ap;
+
 #ifdef USE_REENTRANT_API
+
     dTHX;
+
     /* Easier to special case this here than in embed.pl. (Look at what it
        generates for proto.h) */
     PERL_ARGS_ASSERT_REENTRANT_RETRY;
+
 #endif
+
     va_start(ap, f);
     {
+
 #ifdef USE_REENTRANT_API
 #  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     void *p0;
@@ -859,19 +872,22 @@ Perl_reentrant_retry(const char *f, ...)
 #  endif
 
     switch (PL_op->op_type) {
-#ifdef USE_HOSTENT_BUFFER
+
+#  ifdef USE_HOSTENT_BUFFER
+
     case OP_GHBYADDR:
     case OP_GHBYNAME:
     case OP_GHOSTENT:
 	{
-#ifdef PERL_REENTRANT_MAXSIZE
+
+#    ifdef PERL_REENTRANT_MAXSIZE
 	    if (PL_reentrant_buffer->_hostent_size <=
 		PERL_REENTRANT_MAXSIZE / 2)
-#endif
+#    endif
 	    {
-		RenewDouble(PL_reentrant_buffer->_hostent_buffer,
-			&PL_reentrant_buffer->_hostent_size, char);
-		switch (PL_op->op_type) {
+            RenewDouble(PL_reentrant_buffer->_hostent_buffer,
+                    &PL_reentrant_buffer->_hostent_size, char);
+            switch (PL_op->op_type) {
 	        case OP_GHBYADDR:
 		    p0    = va_arg(ap, void *);
 		    asize = va_arg(ap, size_t);
@@ -885,59 +901,66 @@ Perl_reentrant_retry(const char *f, ...)
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
-	        }
+            }
 	    }
 	}
 	break;
-#endif
-#ifdef USE_GRENT_BUFFER
+
+#  endif
+#  ifdef USE_GRENT_BUFFER
+
     case OP_GGRNAM:
     case OP_GGRGID:
     case OP_GGRENT:
 	{
-#ifdef PERL_REENTRANT_MAXSIZE
+
+#    ifdef PERL_REENTRANT_MAXSIZE
 	    if (PL_reentrant_buffer->_grent_size <=
 		PERL_REENTRANT_MAXSIZE / 2)
-#endif
+#    endif
 	    {
 		Gid_t gid;
-		RenewDouble(PL_reentrant_buffer->_grent_buffer,
-		      &PL_reentrant_buffer->_grent_size, char);
-		switch (PL_op->op_type) {
+            RenewDouble(PL_reentrant_buffer->_grent_buffer,
+                    &PL_reentrant_buffer->_grent_size, char);
+            switch (PL_op->op_type) {
 	        case OP_GGRNAM:
 		    p0 = va_arg(ap, void *);
 		    retptr = getgrnam((char *)p0); break;
-	        case OP_GGRGID:
-#if Gid_t_size < INTSIZE
-		    gid = (Gid_t)va_arg(ap, int);
-#else
+                case OP_GGRGID:
+
+#    if Gid_t_size < INTSIZE
+                    gid = (Gid_t)va_arg(ap, int);
+#    else
 		    gid = va_arg(ap, Gid_t);
-#endif
+#    endif
 		    retptr = getgrgid(gid); break;
 	        case OP_GGRENT:
 		    retptr = getgrent(); break;
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
-	        }
+            }
 	    }
 	}
 	break;
-#endif
-#ifdef USE_NETENT_BUFFER
+
+#  endif
+#  ifdef USE_NETENT_BUFFER
+
     case OP_GNBYADDR:
     case OP_GNBYNAME:
     case OP_GNETENT:
 	{
-#ifdef PERL_REENTRANT_MAXSIZE
+
+#    ifdef PERL_REENTRANT_MAXSIZE
 	    if (PL_reentrant_buffer->_netent_size <=
 		PERL_REENTRANT_MAXSIZE / 2)
-#endif
+#    endif
 	    {
 		Netdb_net_t net;
-		RenewDouble(PL_reentrant_buffer->_netent_buffer,
-		      &PL_reentrant_buffer->_netent_size, char);
-		switch (PL_op->op_type) {
+            RenewDouble(PL_reentrant_buffer->_netent_buffer,
+                    &PL_reentrant_buffer->_netent_size, char);
+            switch (PL_op->op_type) {
 	        case OP_GNBYADDR:
 		    net = va_arg(ap, Netdb_net_t);
 		    anint = va_arg(ap, int);
@@ -950,60 +973,69 @@ Perl_reentrant_retry(const char *f, ...)
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
-	        }
-	    }
+            }
+            }
 	}
 	break;
-#endif
-#ifdef USE_PWENT_BUFFER
+
+#  endif
+#  ifdef USE_PWENT_BUFFER
+
     case OP_GPWNAM:
     case OP_GPWUID:
     case OP_GPWENT:
 	{
-#ifdef PERL_REENTRANT_MAXSIZE
+
+#    ifdef PERL_REENTRANT_MAXSIZE
 	    if (PL_reentrant_buffer->_pwent_size <=
 		PERL_REENTRANT_MAXSIZE / 2)
-#endif
+
+#    endif
 	    {
 		Uid_t uid;
-		RenewDouble(PL_reentrant_buffer->_pwent_buffer,
-		      &PL_reentrant_buffer->_pwent_size, char);
-		switch (PL_op->op_type) {
+            RenewDouble(PL_reentrant_buffer->_pwent_buffer,
+                    &PL_reentrant_buffer->_pwent_size, char);
+            switch (PL_op->op_type) {
 	        case OP_GPWNAM:
 		    p0 = va_arg(ap, void *);
 		    retptr = getpwnam((char *)p0); break;
 	        case OP_GPWUID:
-#if Uid_t_size < INTSIZE
+
+#    if Uid_t_size < INTSIZE
 		    uid = (Uid_t)va_arg(ap, int);
-#else
+#    else
 		    uid = va_arg(ap, Uid_t);
-#endif
+#    endif
 		    retptr = getpwuid(uid); break;
-#if defined(HAS_GETPWENT) || defined(HAS_GETPWENT_R)
+
+#  if defined(HAS_GETPWENT) || defined(HAS_GETPWENT_R)
 	        case OP_GPWENT:
 		    retptr = getpwent(); break;
-#endif
+#  endif
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
-	        }
+            }
 	    }
 	}
 	break;
-#endif
-#ifdef USE_PROTOENT_BUFFER
+
+#  endif
+#  ifdef USE_PROTOENT_BUFFER
+
     case OP_GPBYNAME:
     case OP_GPBYNUMBER:
     case OP_GPROTOENT:
 	{
-#ifdef PERL_REENTRANT_MAXSIZE
+
+#    ifdef PERL_REENTRANT_MAXSIZE
 	    if (PL_reentrant_buffer->_protoent_size <=
 		PERL_REENTRANT_MAXSIZE / 2)
-#endif
+#    endif
 	    {
-		RenewDouble(PL_reentrant_buffer->_protoent_buffer,
-		      &PL_reentrant_buffer->_protoent_size, char);
-		switch (PL_op->op_type) {
+            RenewDouble(PL_reentrant_buffer->_protoent_buffer,
+                    &PL_reentrant_buffer->_protoent_size, char);
+            switch (PL_op->op_type) {
 	        case OP_GPBYNAME:
 		    p0 = va_arg(ap, void *);
 		    retptr = getprotobyname((char *)p0); break;
@@ -1015,24 +1047,27 @@ Perl_reentrant_retry(const char *f, ...)
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
-	        }
+	    }
 	    }
 	}
 	break;
-#endif
-#ifdef USE_SERVENT_BUFFER
+
+#  endif
+#  ifdef USE_SERVENT_BUFFER
+
     case OP_GSBYNAME:
     case OP_GSBYPORT:
     case OP_GSERVENT:
 	{
-#ifdef PERL_REENTRANT_MAXSIZE
+
+#    ifdef PERL_REENTRANT_MAXSIZE
 	    if (PL_reentrant_buffer->_servent_size <=
 		PERL_REENTRANT_MAXSIZE / 2)
-#endif
+#    endif
 	    {
-		RenewDouble(PL_reentrant_buffer->_servent_buffer,
-		      &PL_reentrant_buffer->_servent_size, char);
-		switch (PL_op->op_type) {
+            RenewDouble(PL_reentrant_buffer->_servent_buffer,
+                    &PL_reentrant_buffer->_servent_size, char);
+            switch (PL_op->op_type) {
 	        case OP_GSBYNAME:
 		    p0 = va_arg(ap, void *);
 		    p1 = va_arg(ap, void *);
@@ -1046,18 +1081,24 @@ Perl_reentrant_retry(const char *f, ...)
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
-	        }
+            }
 	    }
 	}
 	break;
-#endif
+
+#  endif
+
     default:
 	/* Not known how to retry, so just fail. */
 	break;
     }
+
 #else
+
     PERL_UNUSED_ARG(f);
+
 #endif
+
     }
     va_end(ap);
     return retptr;
