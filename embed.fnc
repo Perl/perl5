@@ -1463,10 +1463,10 @@ p	|void	|rpeep		|NULLOK OP* o
 : Defined in doio.c, used only in pp_hot.c
 dopx	|PerlIO*|start_glob	|NN SV *tmpglob|NN IO *io
 
-Ap	|void	|reentrant_size
-Ap	|void	|reentrant_init
-Ap	|void	|reentrant_free
-AFTp	|void*	|reentrant_retry|NN const char *f|...
+Cp	|void	|reentrant_size
+Cp	|void	|reentrant_init
+Cp	|void	|reentrant_free
+CFTp	|void*	|reentrant_retry|NN const char *f|...
 
 : "Very" special - can't use the O flag for this one:
 : (The rename from perl_atexit to Perl_call_atexit was in 864dbfa3ca8032ef)
