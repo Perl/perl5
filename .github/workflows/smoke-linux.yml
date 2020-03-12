@@ -19,6 +19,7 @@ jobs:
         CONTINUOUS_INTEGRATION: 1
 
     strategy:
+        fail-fast: false
         matrix:
             # exercise a variety of build options
             # threads often cause build issues
