@@ -8,7 +8,6 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     require './charset_tools.pl';
-    set_up_inc(qw '../lib .');
     skip_all_if_miniperl("miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-");
 }
 

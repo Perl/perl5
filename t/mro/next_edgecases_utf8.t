@@ -6,7 +6,6 @@ use warnings;
 BEGIN {
     chdir 't' if -d 't';
     require q(./test.pl);
-    set_up_inc('../lib', 'lib');
 }
 
 use utf8;

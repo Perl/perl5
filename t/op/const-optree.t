@@ -6,7 +6,6 @@
 BEGIN {
     chdir 't';
     require './test.pl';
-    set_up_inc('../lib');
 }
 plan 148;
 

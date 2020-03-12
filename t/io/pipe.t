@@ -4,7 +4,6 @@ BEGIN {
     chdir 't' if -d 't';
     require Config; import Config;
     require './test.pl';
-    set_up_inc('../lib');
 }
 if (!$Config{'d_fork'}) {
     skip_all("fork required to pipe");

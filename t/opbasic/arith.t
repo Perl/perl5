@@ -3,7 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
 }
 
 # This file has been placed in t/opbasic to indicate that it should not use

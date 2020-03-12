@@ -4,7 +4,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
 }
 
 # This calculation ought to be within 0.001 of the right answer.

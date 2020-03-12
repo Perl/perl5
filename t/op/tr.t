@@ -4,7 +4,6 @@ $|=1;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
     if (is_miniperl()) {
 	eval 'require utf8';
         if ($@) { skip_all("miniperl, no 'utf8'") }

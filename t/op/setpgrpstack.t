@@ -3,7 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
     skip_all_without_config('d_setpgrp');
 }
 

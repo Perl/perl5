@@ -4,7 +4,6 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     skip_all('ASCII sensitive') if $::IS_EBCDIC;
-    set_up_inc('../lib');
 }
 
 plan tests => 2;

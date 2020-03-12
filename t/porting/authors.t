@@ -4,7 +4,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
-    set_up_inc('../lib', '..');
 }
 
 use TestInit qw(T);    # T is chdir to the top level

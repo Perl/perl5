@@ -3,7 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
 
     eval { require AnyDBM_File }; # not all places have dbm* functions
     skip_all("No dbm functions") if $@;

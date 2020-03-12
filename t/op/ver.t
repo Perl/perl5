@@ -4,7 +4,6 @@ BEGIN {
     chdir 't' if -d 't';
     $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN };
     require "./test.pl";
-    set_up_inc( qw(. ../lib) );
     require "./charset_tools.pl";
 }
 

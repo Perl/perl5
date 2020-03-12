@@ -7,7 +7,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
 }
 
 my @ops = split //, 'rwxoRWXOezsfdlpSbctugkTMBAC';

@@ -3,7 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib', '.');
 }   
 # Avoid using eq_array below as it uses .. internally.
 

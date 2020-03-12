@@ -5,7 +5,6 @@ BEGIN {
     unless (-d 'blib') {
         chdir 't' if -d 't';
     }
-    set_up_inc('../lib');
 }
 
 use strict;

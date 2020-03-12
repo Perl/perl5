@@ -3,7 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc( qw(../lib) );
     plan (tests => 22); # some tests are run in BEGIN block
 }
 

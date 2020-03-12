@@ -5,7 +5,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc( qw(../lib) );
     skip_all_if_miniperl(
 	"no dynamic loading on miniperl, no threads/attributes"
     );

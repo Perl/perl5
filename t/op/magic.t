@@ -4,7 +4,6 @@ BEGIN {
     $| = 1;
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc( '../lib' );
     plan (tests => 192); # some tests are run in BEGIN block
 }
 

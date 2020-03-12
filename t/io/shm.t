@@ -17,7 +17,6 @@
 BEGIN {
   chdir 't' if -d 't' && $ENV{'PERL_CORE'};
   require "./test.pl";
-  set_up_inc('../lib') if $ENV{'PERL_CORE'} && -d '../lib' && -d '../ext';
 
   require Config; import Config;
 

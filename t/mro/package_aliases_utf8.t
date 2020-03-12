@@ -6,7 +6,6 @@ BEGIN {
         chdir 't' if -d 't';
     }
     require q(./test.pl);
-    set_up_inc('../lib');
 }
 
 use strict;

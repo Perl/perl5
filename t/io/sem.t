@@ -4,7 +4,6 @@ BEGIN {
   chdir 't' if -d 't';
 
   require "./test.pl";
-  set_up_inc( '../lib' ) if -d '../lib' && -d '../ext';
   require Config; import Config;
 
   if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {

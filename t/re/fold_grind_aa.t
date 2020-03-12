@@ -10,7 +10,6 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     require './loc_tools.pl';
-    set_up_inc('../lib');
 }
 
 $::TEST_CHUNK = 'aa';

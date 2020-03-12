@@ -5,7 +5,6 @@ my $PERLIO;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
     skip_all_without_perlio();
     # FIXME - more of these could be tested without Encode or full perl
     skip_all_without_dynamic_extension('Encode');

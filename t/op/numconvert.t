@@ -41,7 +41,6 @@ BEGIN {
     if (pack("d", 1) =~ /^[\x80\10]\x40/) {
         skip_all("VAX float cannot do infinity");
     }
-    set_up_inc('../lib');
 }
 
 use strict;

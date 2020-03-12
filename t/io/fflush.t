@@ -3,7 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    set_up_inc('../lib');
 }
 
 # Script to test auto flush on fork/exec/system/qx.  The idea is to

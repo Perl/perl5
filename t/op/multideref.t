@@ -12,7 +12,6 @@
 BEGIN {
     chdir 't';
     require './test.pl';
-    set_up_inc("../lib");
 }
 
 use warnings;
