@@ -347,6 +347,7 @@ S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     gptr *which[3];
     off_runs stack[60], *stackp;
 
+    PERL_UNUSED_ARG(flags);
     PERL_ARGS_ASSERT_SORTSV_FLAGS_IMPL;
     if (nmemb <= 1) return;                     /* sorted trivially */
 
