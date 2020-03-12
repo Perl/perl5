@@ -36,7 +36,7 @@
 
 #define RenewDouble(data_pointer, size_pointer, type) \
     STMT_START { \
-	const size_t size = *(size_pointer) * 2; \
+	const size_t size = MAX(*(size_pointer), 1) * 2; \
 	Renew((data_pointer), (size), type); \
 	*(size_pointer) = size; \
     } STMT_END
