@@ -175,6 +175,15 @@ sub skip_all_without_unicode_tables { # (but only under miniperl)
 
 sub find_git_or_skip {
     my ($source_dir, $reason);
+
+    if ( $ENV{CONTINUOUS_INTEGRATION} && $ENV{WORKSPACE} ) {
+        $source_dir = $ENV{WORKSPACE};
+        if ( -d "${source_dir}/.git" ) {
+            $ENV{GIT_DIR} = "${source_dir}/.git";
+            return $source_dir;
+        }
+    }
+
     if (-d '.git') {
 	$source_dir = '.';
     } elsif (-l 'MANIFEST' && -l 'AUTHORS') {

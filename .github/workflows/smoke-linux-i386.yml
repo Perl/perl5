@@ -20,6 +20,7 @@ jobs:
         env:
           PERL_SKIP_TTY_TEST: 1
           CONTINUOUS_INTEGRATION: 1
+          WORKSPACE: ${{ github.workspace }}
 
     strategy:
         fail-fast: false
@@ -30,13 +31,17 @@ jobs:
               - "-Dusedevel"
 
     steps:
-      - uses: actions/checkout@v1
-        with:
-            fetch-depth: 10
       - name: Install System dependencies
         run: |
             apt-get update ||:
-            apt-get -y install build-essential
+            apt-get -y install build-essential git-core
+      - uses: actions/checkout@v1
+        with:
+            fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
             ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING

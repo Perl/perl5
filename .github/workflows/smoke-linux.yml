@@ -17,6 +17,7 @@ jobs:
     env:
         PERL_SKIP_TTY_TEST: 1
         CONTINUOUS_INTEGRATION: 1
+        WORKSPACE: ${{ github.workspace }}
 
     strategy:
         fail-fast: false
@@ -33,9 +34,13 @@ jobs:
               - "-Dcc='clang'"
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
-            fetch-depth: 10
+            fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
             ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
