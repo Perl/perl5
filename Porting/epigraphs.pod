@@ -221,7 +221,7 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
 
 =head2 v5.30.2 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act II, Scene 2
 
-L<Announced on 2020-03-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/03/msg.html>
+L<Announced on 2020-03-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/03/msg257227.html>
 
   FLORA, GASTON, DOCTOR, MARQUIS, CHORUS
   (to Violetta)
