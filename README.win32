@@ -922,8 +922,8 @@ Thus, signals may work only for simple things like setting a flag
 variable in the handler.  Using signals under this port should
 currently be considered unsupported.
 
-Please send detailed descriptions of any problems and solutions that
-you may find to E<lt>L<https://github.com/Perl/perl5/issues>E<gt>,
+Please report detailed descriptions of any problems and solutions that
+you may find at E<lt>L<https://github.com/Perl/perl5/issues>E<gt>,
 along with the output produced by C<perl -V>.
 
 =head1 ACKNOWLEDGEMENTS
