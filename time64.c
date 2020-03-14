@@ -467,11 +467,12 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
     struct TM gm_tm;
     Year orig_year;
     int month_diff;
+    const bool use_system = SHOULD_USE_SYSTEM_LOCALTIME(*time);
 
     assert(local_tm != NULL);
 
     /* Use the system localtime() if time_t is small enough */
-    if( SHOULD_USE_SYSTEM_LOCALTIME(*time) ) {
+    if (use_system) {
         safe_time = (time_t)*time;
 
         TIME64_TRACE1("Using system localtime for %lld\n", *time);
