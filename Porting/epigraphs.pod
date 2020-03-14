@@ -219,6 +219,46 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
 
+=head2 v5.30.2 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act II, Scene 2
+
+L<Announced on 2020-03-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/03/msg.html>
+
+  FLORA, GASTON, DOCTOR, MARQUIS, CHORUS
+  (to Violetta)
+  Yes, you have suffered, but take heart!
+  Every one of us has shared your pain;
+  friends are around you to dry the tears
+  you have shed.
+
+  GERMONT
+  (I alone know the true devotion
+  this poor girl hides within her breast;
+  I know her faithful heart,
+  but I'm vowed so cruelly to silence.)
+
+  BARON
+  (softly to Alfredo)
+  Your deadly insult to this lady
+  offends us all, but such an outrage
+  shall not go unavenged!
+  I shall find a way to humble your pride!
+
+  ALFREDO
+  (Alas, what have I done? I feel terrible about it.
+  She will never forgive me.)
+
+  VIOLETTA
+  (coming to herself)
+  Alfredo, how should you understand
+  all the love that's in my heart?
+  How should you know that I have proved it,
+  even at the price of your contempt?
+
+  But the time will come when you will know,
+  when you'll admit how much I loved you.
+  God save you then from all remorse!
+  Even after death I shall still love you.
+
 =head2 v5.30.2-RC1 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act II, Scene 2
 
 L<Announced on 2020-02-29 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/02/msg257163.html>
