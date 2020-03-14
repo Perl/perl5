@@ -53,12 +53,12 @@ PERLVARI(I, tmps_ix,	SSize_t,	-1)
 PERLVARI(I, tmps_floor,	SSize_t,	-1)
 PERLVAR(I, tmps_max,	SSize_t)        /* first unalloced slot in tmps stack */
 
-PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
-
 PERLVAR(I, markstack,	I32 *)		/* stack_sp locations we're
 					   remembering */
 PERLVAR(I, markstack_ptr, I32 *)
 PERLVAR(I, markstack_max, I32 *)
+
+PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS
 #ifdef USE_PERL_PERTURB_KEYS
@@ -94,18 +94,6 @@ PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
 PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
 
 /*
-=for apidoc Amn|GV *|PL_defgv
-
-The GV representing C<*_>.  Useful for access to C<$_>.
-
-=cut
-*/
-
-PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
-PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
-PERLVAR(I, defgv,	GV *)           /* the *_ glob */
-/*
-
 =for apidoc mn|U8|PL_dowarn
 
 The C variable that roughly corresponds to Perl's C<$^W> warning variable.
@@ -124,6 +112,18 @@ PERLVAR(I, dowarn,	U8)
 #endif
 PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 #undef PERL___I
+
+/*
+=for apidoc Amn|GV *|PL_defgv
+
+The GV representing C<*_>.  Useful for access to C<$_>.
+
+=cut
+*/
+
+PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
+PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
+PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 
 /*
 =for apidoc Amn|HV*|PL_curstash
@@ -680,15 +680,15 @@ PERLVARI(I, setlocale_bufsize, Size_t, 0)
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */
 #endif
 
-PERLVAR(I, unsafe,	bool)
-PERLVAR(I, colorset,	bool)		/* PERL_RE_COLORS env var is in use */
-
 /* current phase the interpreter is in
    for ordering this structure to remove holes, we're assuming that this is 4
    bytes.  */
 PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
 
 PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
+
+PERLVAR(I, unsafe,	bool)
+PERLVAR(I, colorset,	bool)		/* PERL_RE_COLORS env var is in use */
 
 /*
 =for apidoc Amn|signed char|PL_perl_destruct_level
@@ -715,13 +715,24 @@ value of C<PL_perl_destruct_level> its value is used instead.
 /* mod_perl is special, and also assigns a meaning -1 */
 PERLVARI(I, perl_destruct_level, signed char,	0)
 
+PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
+
+PERLVAR(I, srand_called, bool)
+
+#ifdef FCRYPT
+PERLVARI(I, cryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
+/* Seven byte hole in the interpreter structure.  */
+/* GH#17623 - FCRYPT may never be defined, consequently may be removed soon.  */
+#endif
+
 #ifdef USE_LOCALE_NUMERIC
 
-PERLVARI(I, numeric_standard, int, TRUE)
-					/* Assume C locale numerics */
 PERLVARI(I, numeric_underlying, bool, TRUE)
 					/* Assume underlying locale numerics */
 PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
+
+PERLVARI(I, numeric_standard, int, TRUE)
+					/* Assume C locale numerics */
 PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
@@ -731,15 +742,6 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
-
-#ifdef FCRYPT
-PERLVARI(I, cryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
-#else
-/* One byte hole in the interpreter structure.  */
-#endif
-
-PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
-PERLVAR(I, srand_called, bool)
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
