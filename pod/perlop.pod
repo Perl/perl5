@@ -65,8 +65,8 @@ operators of the same precedence (but never with operators of different
 precedence).  This chaining means that each comparison is performed
 on the two arguments surrounding it, with each interior argument taking
 part in two comparisons, and the comparison results are implicitly ANDed.
-Thus S<C<"$a E<lt> $b E<lt>= $c">> behaves exactly like S<C<"$a E<lt>
-$b && $b E<lt>= $c">>, assuming that C<"$b"> is as simple a scalar as
+Thus S<C<"$x E<lt> $y E<lt>= $z">> behaves exactly like S<C<"$x E<lt>
+$y && $y E<lt>= $z">>, assuming that C<"$y"> is as simple a scalar as
 it looks.  The ANDing short-circuits just like C<"&&"> does, stopping
 the sequence of comparisons as soon as one yields false.
 
@@ -76,16 +76,16 @@ at all if the short-circuiting means that it's not required for any
 comparisons.)  This matters if the computation of an interior argument
 is expensive or non-deterministic.  For example,
 
-    if($a < expensive_sub() <= $c) { ...
+    if($x < expensive_sub() <= $z) { ...
 
 is not entirely like
 
-    if($a < expensive_sub() && expensive_sub() <= $c) { ...
+    if($x < expensive_sub() && expensive_sub() <= $z) { ...
 
 but instead closer to
 
     my $tmp = expensive_sub();
-    if($a < $tmp && $tmp <= $c) { ...
+    if($x < $tmp && $tmp <= $z) { ...
 
 in that the subroutine is only called once.  However, it's not exactly
 like this latter code either, because the chained comparison doesn't
@@ -100,7 +100,7 @@ once for each comparison in which it is actually used.
 
 Some operators are instead non-associative, meaning that it is a syntax
 error to use a sequence of those operators of the same precedence.
-For example, S<C<"$a .. $b .. $c">> is an error.
+For example, S<C<"$x .. $y .. $z">> is an error.
 
 Perl operators have the following associativity and precedence,
 listed from highest precedence to lowest.  Operators borrowed from
@@ -560,8 +560,8 @@ Binary C<"ge"> returns true if the left argument is stringwise greater
 than or equal to the right argument.
 X<< ge >>
 
-A sequence of relational operators, such as S<C<"$a E<lt> $b E<lt>=
-$c">>, performs chained comparisons, in the manner described above in
+A sequence of relational operators, such as S<C<"$x E<lt> $y E<lt>=
+$z">>, performs chained comparisons, in the manner described above in
 the section L</"Operator Precedence and Associativity">.
 Beware that they do not chain with equality operators, which have lower
 precedence.
@@ -585,8 +585,8 @@ Binary C<"ne"> returns true if the left argument is stringwise not equal
 to the right argument.
 X<ne>
 
-A sequence of the above equality operators, such as S<C<"$a == $b ==
-$c">>, performs chained comparisons, in the manner described above in
+A sequence of the above equality operators, such as S<C<"$x == $y ==
+$z">>, performs chained comparisons, in the manner described above in
 the section L</"Operator Precedence and Associativity">.
 Beware that they do not chain with relational operators, which have
 higher precedence.
