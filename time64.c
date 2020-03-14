@@ -476,15 +476,8 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
         safe_time = (time_t)*time;
 
         TIME64_TRACE1("Using system localtime for %lld\n", *time);
-
-        LOCALTIME_R(&safe_time, &safe_date);
-
-        S_copy_little_tm_to_big_TM(&safe_date, local_tm);
-        assert(S_check_tm(local_tm));
-
-        return local_tm;
     }
-
+    else {
     if( Perl_gmtime64_r(time, &gm_tm) == NULL ) {
         TIME64_TRACE1("gmtime64_r returned null for %lld\n", *time);
         return NULL;
@@ -501,12 +494,16 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
     }
 
     safe_time = (time_t)S_timegm64(&gm_tm);
+    }
+
     if( LOCALTIME_R(&safe_time, &safe_date) == NULL ) {
         TIME64_TRACE1("localtime_r(%d) returned NULL\n", (int)safe_time);
         return NULL;
     }
 
     S_copy_little_tm_to_big_TM(&safe_date, local_tm);
+
+    if (! use_system) {
 
     local_tm->tm_year = orig_year;
     if( local_tm->tm_year != orig_year ) {
@@ -544,6 +541,8 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
     */
     if( !IS_LEAP(local_tm->tm_year) && local_tm->tm_yday == 365 )
         local_tm->tm_yday--;
+
+    }
 
     assert(S_check_tm(local_tm));
 
