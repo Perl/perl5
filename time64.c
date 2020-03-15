@@ -307,6 +307,8 @@ struct TM *Perl_gmtime64_r (const Time64_T *in_time, struct TM *p)
         struct tm safe_date;
         struct tm * result;
 
+        ENV_LOCALE_LOCK;
+
         /* reentr.h will automatically replace this with a call to gmtime_r()
          * when appropriate */
         result = gmtime(&safe_time);
@@ -318,11 +320,12 @@ struct TM *Perl_gmtime64_r (const Time64_T *in_time, struct TM *p)
         PERL_UNUSED_VAR(safe_date);
 #else
         /* Here, no gmtime_r() and is a threaded perl.  Copy to a safe place,
-         * hopefully before another gmtime can jump in and trash this
-         * result. */
+         * hopefully before another gmtime that isn't using the mutexes can
+         * jump in and trash this result. */
         memcpy(safe_date, result, sizeof(safe_date));
         result = safe_date;
 #endif
+        ENV_LOCALE_UNLOCK;
 
         S_copy_little_tm_to_big_TM(result, p);
         assert(S_check_tm(p));
@@ -474,6 +477,7 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
         safe_time = (time_t)S_timegm64(&gm_tm);
     }
 
+    ENV_LOCALE_LOCK;
     L_R_TZSET
 
     /* reentr.h will automatically replace this with a call to localtime_r()
@@ -481,6 +485,7 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
     result = localtime(&safe_time);
 
     if( result == NULL ) {
+        ENV_LOCALE_UNLOCK;
         TIME64_TRACE1("localtime(%d) returned NULL\n", (int)safe_time);
         return NULL;
     }
@@ -492,11 +497,14 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
 #else
 
     /* Here, no localtime_r() and is a threaded perl.  Copy to a safe place,
-     * hopefully before another localtime can jump in and trash this result. */
+     * hopefully before another localtime that isn't using the mutexes can jump
+     * in and trash this result. */
     memcpy(safe_date, result, sizeof(safe_date));
     result = safe_date;
 
 #endif
+
+    ENV_LOCALE_UNLOCK;
 
     S_copy_little_tm_to_big_TM(result, local_tm);
 
