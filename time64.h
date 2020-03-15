@@ -53,10 +53,4 @@ struct TM64 {
 struct TM *Perl_gmtime64_r    (const Time64_T *, struct TM *);
 struct TM *Perl_localtime64_r (const Time64_T *, struct TM *);
 
-/* Not everyone has gmtime_r(), provide a replacement */
-#ifdef HAS_GMTIME_R
-#    define GMTIME_R(clock, result)    gmtime_r(clock, result)
-#else
-#    define GMTIME_R(clock, result)    S_gmtime_r(clock, result)
-#endif
 #endif
