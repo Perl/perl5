@@ -478,22 +478,23 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
         TIME64_TRACE1("Using system localtime for %lld\n", *time);
     }
     else {
-    if( Perl_gmtime64_r(time, &gm_tm) == NULL ) {
-        TIME64_TRACE1("gmtime64_r returned null for %lld\n", *time);
-        return NULL;
-    }
+        if (Perl_gmtime64_r(time, &gm_tm) == NULL) {
+            TIME64_TRACE1("gmtime64_r returned null for %lld\n", *time);
+            return NULL;
+        }
 
-    orig_year = gm_tm.tm_year;
+        orig_year = gm_tm.tm_year;
 
-    if (gm_tm.tm_year > (2037 - 1900) ||
-        gm_tm.tm_year < (1970 - 1900)
-       )
-    {
-        TIME64_TRACE1("Mapping tm_year %lld to safe_year\n", (Year)gm_tm.tm_year);
-        gm_tm.tm_year = S_safe_year((Year)(gm_tm.tm_year + 1900)) - 1900;
-    }
+        if (gm_tm.tm_year > (2037 - 1900) ||
+            gm_tm.tm_year < (1970 - 1900)
+           )
+        {
+            TIME64_TRACE1("Mapping tm_year %lld to safe_year\n",
+                                                        (Year)gm_tm.tm_year);
+            gm_tm.tm_year = S_safe_year((Year)(gm_tm.tm_year + 1900)) - 1900;
+        }
 
-    safe_time = (time_t)S_timegm64(&gm_tm);
+        safe_time = (time_t)S_timegm64(&gm_tm);
     }
 
     if( LOCALTIME_R(&safe_time, &safe_date) == NULL ) {
@@ -505,42 +506,41 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
 
     if (! use_system) {
 
-    local_tm->tm_year = orig_year;
-    if( local_tm->tm_year != orig_year ) {
-        TIME64_TRACE2("tm_year overflow: tm_year %lld, orig_year %lld\n",
-              (Year)local_tm->tm_year, (Year)orig_year);
+        local_tm->tm_year = orig_year;
+        if( local_tm->tm_year != orig_year ) {
+            TIME64_TRACE2("tm_year overflow: tm_year %lld, orig_year %lld\n",
+                  (Year)local_tm->tm_year, (Year)orig_year);
 
 #ifdef EOVERFLOW
-        errno = EOVERFLOW;
+            errno = EOVERFLOW;
 #endif
-        return NULL;
-    }
+            return NULL;
+        }
 
+        month_diff = local_tm->tm_mon - gm_tm.tm_mon;
 
-    month_diff = local_tm->tm_mon - gm_tm.tm_mon;
+        /*  When localtime is Dec 31st previous year and
+            gmtime is Jan 1st next year.
+        */
+        if( month_diff == 11 ) {
+            local_tm->tm_year--;
+        }
 
-    /*  When localtime is Dec 31st previous year and
-        gmtime is Jan 1st next year.
-    */
-    if( month_diff == 11 ) {
-        local_tm->tm_year--;
-    }
+        /*  When localtime is Jan 1st, next year and
+            gmtime is Dec 31st, previous year.
+        */
+        if( month_diff == -11 ) {
+            local_tm->tm_year++;
+        }
 
-    /*  When localtime is Jan 1st, next year and
-        gmtime is Dec 31st, previous year.
-    */
-    if( month_diff == -11 ) {
-        local_tm->tm_year++;
-    }
-
-    /* GMT is Jan 1st, xx01 year, but localtime is still Dec 31st
-       in a non-leap xx00.  There is one point in the cycle
-       we can't account for which the safe xx00 year is a leap
-       year.  So we need to correct for Dec 31st coming out as
-       the 366th day of the year.
-    */
-    if( !IS_LEAP(local_tm->tm_year) && local_tm->tm_yday == 365 )
-        local_tm->tm_yday--;
+        /* GMT is Jan 1st, xx01 year, but localtime is still Dec 31st
+           in a non-leap xx00.  There is one point in the cycle
+           we can't account for which the safe xx00 year is a leap
+           year.  So we need to correct for Dec 31st coming out as
+           the 366th day of the year.
+        */
+        if( !IS_LEAP(local_tm->tm_year) && local_tm->tm_yday == 365 )
+            local_tm->tm_yday--;
 
     }
 
