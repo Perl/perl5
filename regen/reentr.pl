@@ -483,6 +483,13 @@ EOF
 	    pushinitfree $func;
 	    pushssif $endif;
 	}
+	elsif ($func =~ /^(gm|local)time$/) {
+	    pushssif $ifdef;
+	    push @struct, <<EOF;    # Fixed size
+	$seent{$func} _${func}_struct;
+EOF
+	    pushssif $endif;
+	}
         elsif ($func =~ /^(crypt)$/) {
 	    pushssif $ifdef;
 	    push @struct, <<EOF;
@@ -1140,6 +1147,8 @@ getservbyname CC|netdb	|struct servent	|I_CCSBWR|S_CCSBI|I_CCSD|D=struct servent
 getservbyport IC|netdb	|struct servent	|I_ICSBWR|S_ICSBI|I_ICSD|D=struct servent_data*
 getservent	|netdb	|struct servent	|I_SBWR|I_SBI|S_SBI|I_SD|D=struct servent_data*
 getspnam C	|shadow	|struct spwd	|I_CSBWR|S_CSBI
+gmtime T	|time	|struct tm 	|S_TS|T=time_t*
+localtime T	|time	|struct tm 	|S_TS|T=time_t*
 readdir T	|dirent	|struct dirent	|I_TSR|I_TS|T=DIR*
 readdir64 T	|dirent	|struct dirent64|I_TSR|I_TS|T=DIR*
 setgrent	|grp	|		|I_H|V_H
