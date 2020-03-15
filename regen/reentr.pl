@@ -672,27 +672,26 @@ EOF
 	    }
 	    if (length $b) {
 		$w = join ", ",
-		         map {
-			     $_ eq 'R' ?
-				 "&PL_reentrant_buffer->_${genfunc}_ptr" :
-			     $_ eq 'E' ?
-				 "&PL_reentrant_buffer->_${genfunc}_errno" :
-			     $_ eq 'B' ?
-				 "PL_reentrant_buffer->_${genfunc}_buffer" :
-			     $_ =~ /^[WI]$/ ?
-				 "PL_reentrant_buffer->_${genfunc}_size" :
-			     $_ eq 'H' ?
-				 "&PL_reentrant_buffer->_${genfunc}_fptr" :
-			     $_ eq 'D' ?
-				 "&PL_reentrant_buffer->_${genfunc}_data" :
-			     $_ eq 'S' ?
-				 ($func =~ /^readdir\d*$/ ?
-				  "PL_reentrant_buffer->_${genfunc}_struct" :
-				  $func =~ /^crypt$/ ?
-				  "PL_reentrant_buffer->_${genfunc}_struct_buffer" :
-				  "&PL_reentrant_buffer->_${genfunc}_struct") :
-				 $_
-			 } split '', $b;
+                   map { $_ eq 'R'
+                         ?  "&PL_reentrant_buffer->_${genfunc}_ptr"
+                         : $_ eq 'E'
+                           ? "&PL_reentrant_buffer->_${genfunc}_errno"
+                           : $_ eq 'B'
+                             ? "PL_reentrant_buffer->_${genfunc}_buffer"
+                             : $_ =~ /^[WI]$/
+                             ? "PL_reentrant_buffer->_${genfunc}_size"
+                             : $_ eq 'H'
+                             ? "&PL_reentrant_buffer->_${genfunc}_fptr"
+                             : $_ eq 'D'
+                               ? "&PL_reentrant_buffer->_${genfunc}_data"
+                               : $_ eq 'S'
+                                 ? ($func =~ /^readdir\d*$/
+                                   ? "PL_reentrant_buffer->_${genfunc}_struct"
+                                   : $func =~ /^crypt$/
+                                     ? "PL_reentrant_buffer->_${genfunc}_struct_buffer"
+                                     : "&PL_reentrant_buffer->_${genfunc}_struct")
+                                 : $_
+                       } split '', $b;
 		$w = ", $w" if length $v;
 	    }
 
