@@ -290,27 +290,6 @@ static void S_copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
 }
 
 
-#ifndef HAS_LOCALTIME_R
-/* Simulate localtime_r() to the best of our ability */
-static struct tm * S_localtime_r(const time_t *clock, struct tm *result) {
-#ifdef __VMS
-    dTHX;    /* the following is defined as Perl_my_localtime(aTHX_ ...) */
-#endif
-    const struct tm * const static_result = localtime(clock);
-
-    assert(result != NULL);
-
-    if( static_result == NULL ) {
-        memset(result, 0, sizeof(*result));
-        return NULL;
-    }
-    else {
-        memcpy(result, static_result, sizeof(*result));
-        return result;
-    }
-}
-#endif
-
 #ifndef HAS_GMTIME_R
 /* Simulate gmtime_r() to the best of our ability */
 static struct tm * S_gmtime_r(const time_t *clock, struct tm *result) {
@@ -464,10 +443,12 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
 {
     time_t safe_time;
     struct tm safe_date;
+    const struct tm * result;
     struct TM gm_tm;
     Year orig_year;
     int month_diff;
     const bool use_system = SHOULD_USE_SYSTEM_LOCALTIME(*time);
+    dTHX;
 
     assert(local_tm != NULL);
 
@@ -497,12 +478,31 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
         safe_time = (time_t)S_timegm64(&gm_tm);
     }
 
-    if( LOCALTIME_R(&safe_time, &safe_date) == NULL ) {
-        TIME64_TRACE1("localtime_r(%d) returned NULL\n", (int)safe_time);
+    /* reentr.h will automatically replace this with a call to localtime_r()
+     * when appropriate */
+    result = localtime(&safe_time);
+
+    if( result == NULL ) {
+        TIME64_TRACE1("localtime(%d) returned NULL\n", (int)safe_time);
         return NULL;
     }
 
-    S_copy_little_tm_to_big_TM(&safe_date, local_tm);
+#if ! defined(USE_REENTRANT_API) || defined(PERL_REENTR_USING_LOCALTIME_R)
+
+    PERL_UNUSED_VAR(safe_date);
+
+#else
+
+    /* Here, would be using localtime_r() if it could, meaning there isn't one,
+     * and is a threaded perl where the result can be overwritten by a call in
+     * another thread.  Copy to a safe place, hopefully before another
+     * localtime can jump in and trash this result. */
+    memcpy(&safe_date, result, sizeof(safe_date));
+    result = &safe_date;
+
+#endif
+
+    S_copy_little_tm_to_big_TM(result, local_tm);
 
     if (! use_system) {
 
