@@ -190,12 +190,13 @@
 #  define REENTRANT_PROTO_S_SBIE	64
 #  define REENTRANT_PROTO_S_SBW	65
 #  define REENTRANT_PROTO_S_TISBI	66
-#  define REENTRANT_PROTO_S_TSBI	67
-#  define REENTRANT_PROTO_S_TSBIE	68
-#  define REENTRANT_PROTO_S_TWISBIE	69
-#  define REENTRANT_PROTO_V_D	70
-#  define REENTRANT_PROTO_V_H	71
-#  define REENTRANT_PROTO_V_ID	72
+#  define REENTRANT_PROTO_S_TS	67
+#  define REENTRANT_PROTO_S_TSBI	68
+#  define REENTRANT_PROTO_S_TSBIE	69
+#  define REENTRANT_PROTO_S_TWISBIE	70
+#  define REENTRANT_PROTO_V_D	71
+#  define REENTRANT_PROTO_V_H	72
+#  define REENTRANT_PROTO_V_ID	73
 
 /* Defines for indicating which special features are supported. */
 
@@ -767,6 +768,14 @@ typedef struct {
 	FILE*	_spent_fptr;
 #   endif
 #  endif /* HAS_GETSPNAM_R */
+
+#  ifdef HAS_GMTIME_R
+	struct tm _gmtime_struct;
+#  endif /* HAS_GMTIME_R */
+
+#  ifdef HAS_LOCALTIME_R
+	struct tm _localtime_struct;
+#  endif /* HAS_LOCALTIME_R */
 
 #  ifdef HAS_READDIR_R
 	struct dirent*	_readdir_struct;
@@ -1451,6 +1460,32 @@ typedef struct {
 #      endif
 #    endif
 #  endif /* HAS_GETSPNAM_R */
+
+
+#  ifdef HAS_GMTIME_R
+#    if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
+#      undef gmtime
+#      if !defined(gmtime) && GMTIME_R_PROTO == REENTRANT_PROTO_S_TS
+#        define gmtime(a) (gmtime_r(a, &PL_reentrant_buffer->_gmtime_struct) ? &PL_reentrant_buffer->_gmtime_struct : 0)
+#      endif
+#      if defined(gmtime)
+#        define PERL_REENTR_USING_GMTIME_R
+#      endif
+#    endif
+#  endif /* HAS_GMTIME_R */
+
+
+#  ifdef HAS_LOCALTIME_R
+#    if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
+#      undef localtime
+#      if !defined(localtime) && LOCALTIME_R_PROTO == REENTRANT_PROTO_S_TS
+#        define localtime(a) (L_R_TZSET localtime_r(a, &PL_reentrant_buffer->_localtime_struct) ? &PL_reentrant_buffer->_localtime_struct : 0)
+#      endif
+#      if defined(localtime)
+#        define PERL_REENTR_USING_LOCALTIME_R
+#      endif
+#    endif
+#  endif /* HAS_LOCALTIME_R */
 
 
 #  ifdef HAS_READDIR_R
