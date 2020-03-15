@@ -115,6 +115,40 @@ static const short safe_years[SOLAR_CYCLE_LENGTH] = {
 #    define TIME64_TRACE3(format, var1, var2, var3) ((void)0)
 #endif
 
+/* Set up the mutexes for this file.  There are no races possible on
+ * non-threaded perls, nor platforms that naturally don't have them.
+ * Otherwise, we need to have mutexes.  If we have reentrant versions of the
+ * functions below, they automatically will be substituted for the
+ * non-reentrant ones.  That solves the problem of the buffers being trashed by
+ * another thread, but not of the environment or locale changing during their
+ * execution.  To do that, we only need a read lock (which prevents writing by
+ * others).  However, if we don't have re-entrant functions, we can gain some
+ * measure of thread-safety by using an exclusive lock during their execution.
+ * That will protect against any other use of the functions that use the
+ * mutexes, which all of core should be using. */
+#ifdef USE_REENTRANT_API  /* This indicates a platform where we need reentrant
+                             versions if have them */
+#  ifdef PERL_REENTR_USING_LOCALTIME_R
+#    define LOCALTIME_LOCK    ENV_LOCALE_READ_LOCK
+#    define LOCALTIME_UNLOCK  ENV_LOCALE_READ_UNLOCK
+#  else
+#    define LOCALTIME_LOCK    ENV_LOCALE_LOCK
+#    define LOCALTIME_UNLOCK  ENV_LOCALE_UNLOCK
+#  endif
+#  ifdef PERL_REENTR_USING_GMTIME_R
+#    define GMTIME_LOCK    ENV_LOCALE_READ_LOCK
+#    define GMTIME_UNLOCK  ENV_LOCALE_READ_UNLOCK
+#  else
+#    define GMTIME_LOCK    ENV_LOCALE_LOCK
+#    define GMTIME_UNLOCK  ENV_LOCALE_UNLOCK
+#  endif
+#else   /* Reentrant not needed, so races not possible */
+#  define LOCALTIME_LOCK    NOOP
+#  define LOCALTIME_UNLOCK  NOOP
+#  define GMTIME_LOCK       NOOP
+#  define GMTIME_UNLOCK     NOOP
+#endif
+
 static int S_is_exception_century(Year year)
 {
     const int is_exception = ((year % 100 == 0) && !(year % 400 == 0));
@@ -307,6 +341,8 @@ struct TM *Perl_gmtime64_r (const Time64_T *in_time, struct TM *p)
         struct tm safe_date;
         struct tm * result;
 
+        GMTIME_LOCK;
+
         /* reentr.h will automatically replace this with a call to gmtime_r()
          * when appropriate */
         result = gmtime(&safe_time);
@@ -319,11 +355,12 @@ struct TM *Perl_gmtime64_r (const Time64_T *in_time, struct TM *p)
 #else
         /* Here, no gmtime_r() and is a threaded perl where the result can be
          * overwritten by a call in another thread.  Copy to a safe place,
-         * hopefully before another gmtime can jump in and trash this
-         * result. */
+         * hopefully before another gmtime that isn't using the mutexes can
+         * jump in and trash this result. */
         memcpy(&safe_date, result, sizeof(safe_date));
         result = &safe_date;
 #endif
+        GMTIME_UNLOCK;
 
         S_copy_little_tm_to_big_TM(result, p);
         assert(S_check_tm(p));
@@ -475,11 +512,14 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
         safe_time = (time_t)S_timegm64(&gm_tm);
     }
 
+    LOCALTIME_LOCK;
+
     /* reentr.h will automatically replace this with a call to localtime_r()
      * when appropriate */
     result = localtime(&safe_time);
 
     if( result == NULL ) {
+        LOCALTIME_UNLOCK;
         TIME64_TRACE1("localtime(%d) returned NULL\n", (int)safe_time);
         return NULL;
     }
@@ -493,11 +533,14 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
     /* Here, would be using localtime_r() if it could, meaning there isn't one,
      * and is a threaded perl where the result can be overwritten by a call in
      * another thread.  Copy to a safe place, hopefully before another
-     * localtime can jump in and trash this result. */
+     * localtime that isn't using the mutexes can jump in and trash this
+     * result. */
     memcpy(&safe_date, result, sizeof(safe_date));
     result = &safe_date;
 
 #endif
+
+    LOCALTIME_UNLOCK;
 
     S_copy_little_tm_to_big_TM(result, local_tm);
 
