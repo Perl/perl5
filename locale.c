@@ -4548,7 +4548,7 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category, const int 
         Safefree(restore_to_locale);
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
-                            category_name(switch_category), restore_to_locale));
+                            category_name(switch_category), template_locale));
 
         return NULL;
     }
