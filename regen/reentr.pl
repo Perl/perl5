@@ -72,6 +72,13 @@ print $h <<EOF;
  * extensions, but not generally for XS modules unless they
  *    #define PERL_REENTRANT
  * See L<perlxs/Thread-aware system interfaces>.
+ *
+ * For a function 'foo', use the compile-time directive
+ *    #ifdef PERL_REENTR_USING_FOO_R
+ * to test if the function actually did get replaced by the reentrant version.
+ * (If it isn't getting replaced, it might mean it uses a different prototype
+ * on the given platform than any we are expecting.  To fix that, add the
+ * prototype to the __DATA__ section of regen/reentr.pl.)
  */
 
 #ifndef PERL_REENTR_API
@@ -719,6 +726,11 @@ EOF
 #      endif
 EOF
 	}
+		    push @wrap, <<EOF;
+#      if defined($func)
+#        define PERL_REENTR_USING_${FUNC}_R
+#      endif
+EOF
 
 	    push @wrap, <<EOF;  #  defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
 #    endif
