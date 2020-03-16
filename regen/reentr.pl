@@ -624,8 +624,8 @@ EOF
 	push @wrap, $ifdef;
 
 	push @wrap, <<EOF;
-#  if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
-#   undef $func
+#    if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
+#      undef $func
 EOF
 
         # Write out what we have learned.
@@ -689,37 +689,37 @@ EOF
                 $memzero = 'REENTR_MEMZERO(&PL_reentrant_buffer->_' . $genfunc . '_data, sizeof(PL_reentrant_buffer->_' . $genfunc . '_data)),';
             }
 	    push @wrap, <<EOF;
-#   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
+#      if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
 EOF
 	    if ($r eq 'V' || $r eq 'B') {
 	        push @wrap, <<EOF;
-#       define $func($v) $call
+#        define $func($v) $call
 EOF
 	    } else {
 		if ($func =~ /^get/) {
 		    my $rv = $v ? ", $v" : "";
 		    if ($r eq 'I') {
 			push @wrap, <<EOF;
-#       define $func($v) ($memzero(PL_reentrant_retint = $call)$test ? $true : ((PL_reentrant_retint == ERANGE) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
+#        define $func($v) ($memzero(PL_reentrant_retint = $call)$test ? $true : ((PL_reentrant_retint == ERANGE) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
 EOF
 		    } else {
 			push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : ((errno == ERANGE) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
+#        define $func($v) ($call$test ? $true : ((errno == ERANGE) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
 EOF
                     }
 		} else {
 		    push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : 0)
+#        define $func($v) ($call$test ? $true : 0)
 EOF
 		}
 	    }
-	    push @wrap, <<EOF;  # !defined(xxx) && XXX_R_PROTO == REENTRANT_PROTO_Y_TS
-#   endif
+	    push @wrap, <<EOF;  #  !defined(xxx) && XXX_R_PROTO == REENTRANT_PROTO_Y_TS
+#      endif
 EOF
 	}
 
-	    push @wrap, <<EOF;  # defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
-#  endif
+	    push @wrap, <<EOF;  #  defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
+#    endif
 EOF
 
 	push @wrap, $endif, "\n";
