@@ -2923,6 +2923,21 @@ typedef struct padname PADNAME;
 #  define ENV_TERM       NOOP;
 #endif
 
+/* Some critical sections need to lock both the locale and the environment.
+ * XXX khw intends to change this to lock both mutexes, but that brings up
+ * issues of potential deadlock, so should be done at the beginning of a
+ * development cycle.  So for now, it just locks the environment.  Note that
+ * many modern platforms are locale-thread-safe anyway, so locking the locale
+ * mutex is a no-op anyway */
+#define ENV_LOCALE_LOCK     ENV_LOCK
+#define ENV_LOCALE_UNLOCK   ENV_UNLOCK
+
+/* And some critical sections care only that no one else is writing either the
+ * locale nor the environment.  XXX Again this is for the future.  This can be
+ * simulated with using COND_WAIT in thread.h */
+#define ENV_LOCALE_READ_LOCK     ENV_LOCALE_LOCK
+#define ENV_LOCALE_READ_UNLOCK   ENV_LOCALE_UNLOCK
+
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     /* having sigaction(2) means that the OS supports both 1-arg and 3-arg
      * signal handlers. But the perl core itself only fully supports 1-arg
