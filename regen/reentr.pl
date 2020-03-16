@@ -68,8 +68,10 @@ print $h <<EOF;
 /* If compiling for a threaded perl, we will macro-wrap the system/library
  * interfaces (e.g. getpwent()) which have threaded versions
  * (e.g. getpwent_r()), which will handle things correctly for
- * the Perl interpreter, but otherwise (for XS) the wrapping does
- * not take place.  See L<perlxs/Thread-aware system interfaces>.
+ * the Perl interpreter.  This is done automatically for the perl core and
+ * extensions, but not generally for XS modules unless they
+ *    #define PERL_REENTRANT
+ * See L<perlxs/Thread-aware system interfaces>.
  */
 
 #ifndef PERL_REENTR_API
