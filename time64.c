@@ -518,7 +518,7 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
      * when appropriate */
     result = localtime(&safe_time);
 
-    if( result == NULL ) {
+    if(UNLIKELY(result == NULL)) {
         LOCALTIME_UNLOCK;
         TIME64_TRACE1("localtime(%d) returned NULL\n", (int)safe_time);
         return NULL;
