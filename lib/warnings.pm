@@ -344,6 +344,11 @@ sub import
     ${^WARNING_BITS} = _bits($mask, @_);
 }
 
+my %removedWarningsFor = (
+    'FATAL'                    => 1,
+    'experimental::signatures' => 1,
+);
+
 sub unimport
 {
     shift;
@@ -356,7 +361,7 @@ sub unimport
 
     $mask = _expand_bits($mask);
     foreach my $word ( @_ ) {
-	if ($word eq 'FATAL') {
+	if ($removedWarningsFor{$word}) {
 	    next;
 	}
 	elsif ($catmask = $Bits{$word}) {
