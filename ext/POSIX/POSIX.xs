@@ -3820,14 +3820,14 @@ char *
 ctermid(s = 0)
 	char *          s = 0;
     CODE:
-#ifdef HAS_CTERMID_R
+#ifdef I_TERMIOS
 	s = (char *) safemalloc((size_t) L_ctermid);
 #endif
 	RETVAL = ctermid(s);
     OUTPUT:
 	RETVAL
     CLEANUP:
-#ifdef HAS_CTERMID_R
+#ifdef I_TERMIOS
 	Safefree(s);
 #endif
 
