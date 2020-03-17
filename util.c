@@ -1067,8 +1067,8 @@ string which is a duplicate of C<pv>.  The size of the string is
 determined by C<strlen()>, which means it may not contain embedded C<NUL>
 characters and must have a trailing C<NUL>.  To prevent memory leaks, the
 memory allocated for the new string needs to be freed when no longer needed.
-This can be done with the L</C<Safefree> function, or
-L<C<SAFEFREEPV>perlguts/SAFEFREEPV>.
+This can be done with the L</C<Safefree>> function, or
+L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
 is deallocated when that thread ends.  So if you need that not to happen, you
