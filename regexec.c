@@ -4512,7 +4512,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     UV c1 = (UV)CHRTEST_NOT_A_CP_1;
     UV c2 = (UV)CHRTEST_NOT_A_CP_2;
     bool use_chrtest_void = FALSE;
-    const bool is_utf8_pat = reginfo->is_utf8_pat;
+    const bool utf8_pat = reginfo->is_utf8_pat;
 
     /* Used when we have both utf8 input and utf8 output, to avoid converting
      * to/from code points */
@@ -4528,7 +4528,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
          * character.  If both the pat and the target are UTF-8, we can just
          * copy the input to the output, avoiding finding the code point of
          * that character */
-        if (!is_utf8_pat) {
+        if (! utf8_pat) {
             assert(! isEXACT_REQ8(OP(text_node)));
             c2 = c1 = *pat;
         }
@@ -4560,7 +4560,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
          * in the node isn't one of the tricky ones */
         if (OP(text_node) == EXACTFL) {
 
-            if (! is_utf8_pat) {
+            if (! utf8_pat) {
                 if (IN_UTF8_CTYPE_LOCALE && *pat == LATIN_SMALL_LETTER_SHARP_S)
                 {
                     folded[0] = folded[1] = 's';
@@ -4595,8 +4595,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             }
         }
 
-        if (    ( is_utf8_pat && is_MULTI_CHAR_FOLD_utf8_safe(pat, pat_end))
-             || (!is_utf8_pat && is_MULTI_CHAR_FOLD_latin1_safe(pat, pat_end)))
+        if (    ( utf8_pat && is_MULTI_CHAR_FOLD_utf8_safe(pat, pat_end))
+             || (!utf8_pat && is_MULTI_CHAR_FOLD_latin1_safe(pat, pat_end)))
         {
             /* Multi-character folds require more context to sort out.  Also
              * PL_utf8_foldclosures used below doesn't handle them, so have to
@@ -4604,7 +4604,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             use_chrtest_void = TRUE;
         }
         else { /* an EXACTFish node which doesn't begin with a multi-char fold */
-            c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
+            c1 = utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
 
             if (   UNLIKELY(PL_in_utf8_turkic_locale)
                 && OP(text_node) == EXACTFL
@@ -4693,7 +4693,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
                     case EXACTF:   /* This node only generated for non-utf8
                                     patterns */
-                        assert(! is_utf8_pat);
+                        assert(! utf8_pat);
                         if (! utf8_target) {    /* /d rules */
                             c2 = PL_fold[c1];
                             break;
@@ -4703,7 +4703,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         * EXACTFAA as nothing in Latin1 folds to ASCII */
                     case EXACTFAA_NO_TRIE:   /* This node only generated for
                                                 non-utf8 patterns */
-                        assert(! is_utf8_pat);
+                        assert(! utf8_pat);
                         /* FALLTHROUGH */
                     case EXACTFAA:
                     case EXACTFUP:
