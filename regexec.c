@@ -4521,6 +4521,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
     U8 *pat = (U8*)STRING(text_node);
     U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
+    const U8 op = OP(text_node);
 
     if (! isEXACTFish(OP(text_node))) {
 
@@ -4558,7 +4559,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
          * fold.  But, in such a pattern only locale-problematic characters
          * aren't folded, so we can skip this completely if the first character
          * in the node isn't one of the tricky ones */
-        if (OP(text_node) == EXACTFL) {
+        if (op == EXACTFL) {
 
             if (! utf8_pat) {
                 if (IN_UTF8_CTYPE_LOCALE && *pat == LATIN_SMALL_LETTER_SHARP_S)
@@ -4607,7 +4608,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             c1 = utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
 
             if (   UNLIKELY(PL_in_utf8_turkic_locale)
-                && OP(text_node) == EXACTFL
+                && op == EXACTFL
                 && UNLIKELY(   c1 == 'i' || c1 == 'I'
                             || c1 == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE
                             || c1 == LATIN_SMALL_LETTER_DOTLESS_I))
@@ -4653,10 +4654,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                      * circumstances.  If it isn't, it means the only legal
                      * match of c1 is itself. */
                     if (    c2 < 256
-                        && (   (   OP(text_node) == EXACTFL
+                        && (   (   op == EXACTFL
                                 && ! IN_UTF8_CTYPE_LOCALE)
-                            || ((     OP(text_node) == EXACTFAA
-                                   || OP(text_node) == EXACTFAA_NO_TRIE)
+                            || ((     op == EXACTFAA
+                                   || op == EXACTFAA_NO_TRIE)
                                 && (isASCII(c1) || isASCII(c2)))))
                     {
                         c2 = c1;
@@ -4666,9 +4667,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             else /* Here, c1 is <= 255 */
                 if (   utf8_target
                     && HAS_NONLATIN1_FOLD_CLOSURE(c1)
-                    && ( ! (OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
-                    && (   (   OP(text_node) != EXACTFAA
-                            && OP(text_node) != EXACTFAA_NO_TRIE)
+                    && ( ! (op == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
+                    && (   (   op != EXACTFAA
+                            && op != EXACTFAA_NO_TRIE)
                         ||   ! isASCII(c1)))
             {
                 /* Here, there could be something above Latin1 in the target
@@ -4685,7 +4686,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             }
             else { /* Here nothing above Latin1 can fold to the pattern
                       character */
-                switch (OP(text_node)) {
+                switch (op) {
 
                     case EXACTFL:   /* /l rules */
                         c2 = PL_fold_locale[c1];
@@ -4715,7 +4716,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         NOT_REACHED; /* NOTREACHED */
 
                     default:
-                        Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
+                        Perl_croak(aTHX_ "panic: Unexpected op %u", op);
                         NOT_REACHED; /* NOTREACHED */
                 }
             }
