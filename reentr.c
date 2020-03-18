@@ -424,6 +424,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    host_addr = va_arg(ap, char *);
 		    asize = va_arg(ap, Size_t);
 		    anint  = va_arg(ap, int);
+                    /* socklen_t is what Posix 2001 says this should be */
 		    retptr = gethostbyaddr(host_addr, (socklen_t) asize, anint); break;
 	        case KEY_gethostbyname:
 		    host_name = va_arg(ap, char *);
