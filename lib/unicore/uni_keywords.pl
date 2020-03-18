@@ -1299,5 +1299,5 @@
 # 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
 # 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
 # 6bbad21de0848e0236b02f34f5fa0edd3cdae9ba8173cc9469a5513936b9e728 regen/mk_PL_charclass.pl
-# 7a7e778e903508b1c244a77bae57ec57606ab775bb5f81719dbb122eb66d4259 regen/mk_invlists.pl
+# d99eae7d3b60d8ed3af56e6fdc41ab53b22288238749812aa1cd01f847fe9d5f regen/mk_invlists.pl
 # ex: set ro:
