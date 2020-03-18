@@ -2241,7 +2241,6 @@ win32_async_check(pTHX)
 DllExport DWORD
 win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
 {
-    int retry = 0;
     /* We may need several goes at this - so compute when we stop */
     FT_t ticks = {0};
     unsigned __int64 endtime = timeout;
@@ -2264,13 +2263,12 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
      * from another process (msctf.dll doing IPC among its instances, VS debugger
      * causes msctf.dll to be loaded into Perl by kernel), see [perl #33096].
      */
-    while (ticks.ft_i64 <= endtime || retry) {
+    while (ticks.ft_i64 <= endtime) {
 	/* if timeout's type is lengthened, remember to split 64b timeout
 	 * into multiple non-infinity runs of MWFMO */
 	DWORD result = MsgWaitForMultipleObjects(count, handles, FALSE,
 						(DWORD)(endtime - ticks.ft_i64),
 						QS_POSTMESSAGE|QS_TIMER|QS_SENDMESSAGE);
-        retry = 0;
 	if (resultp)
 	   *resultp = result;
 	if (result == WAIT_TIMEOUT) {
@@ -2286,7 +2284,12 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
 	if (result == WAIT_OBJECT_0 + count) {
 	    /* Message has arrived - check it */
 	    (void)win32_async_check(aTHX);
-            retry = 1;
+
+            /* retry */
+            if (ticks.ft_i64 > endtime)
+                endtime = ticks.ft_i64;
+
+            continue;
 	}
 	else {
 	   /* Not timeout or message - one of handles is ready */
