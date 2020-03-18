@@ -686,19 +686,20 @@ will be lost.
                              (string folded)
 
  EXACTFAA         str        Like EXACT, but match using /iaa rules;
-                             (string folded except in non-UTF8 patterns:
-                             MICRO, SHARP S; folded length <= unfolded)
+                             (string folded except MICRO in non-UTF8
+                             patterns; doesn't contain SHARP S unless
+                             UTF-8; folded length <= unfolded)
 
  EXACTFUP         str        Like EXACT, but match using /iu rules;
-                             (string not UTF-8, folded except MICRO,
-                             SHARP S: hence Problematic)
+                             (string not UTF-8, folded except MICRO:
+                             hence Problematic)
 
  EXACTFLU8        str        Like EXACTFU, but use /il, UTF-8, (string
                              is folded, and everything in it is above
                              255
- EXACTFAA_NO_TRIE str        Like EXACT, but match using /iaa rules
-                             (string not UTF-8, not guaranteed to be
-                             folded, not currently trie-able)
+ EXACTFAA_NO_TRIE str        Like EXACTFAA, (string not UTF-8, folded
+                             except: MICRO, SHARP S; folded length <=
+                             unfolded, not currently trie-able)
 
  EXACT_REQ8       str        Like EXACT, but only UTF-8 encoded targets
                              can match

@@ -382,8 +382,9 @@
 
 #define EXACTFAA                     46     /* 0x2e Like EXACT, but match using
                                                /iaa rules; (string folded
-                                               except in non-UTF8 patterns:
-                                               MICRO, SHARP S; folded length <=
+                                               except MICRO in non-UTF8
+                                               patterns; doesn't contain SHARP
+                                               S unless UTF-8; folded length <=
                                                unfolded) */
 #define EXACTFAA_tb_pb                 184  /*      0x0b8 */
 #define EXACTFAA_tb_p8                 185  /*      0x0b9 */
@@ -392,8 +393,8 @@
 
 #define EXACTFUP                     47     /* 0x2f Like EXACT, but match using
                                                /iu rules; (string not UTF-8,
-                                               folded except MICRO, SHARP S:
-                                               hence Problematic) */
+                                               folded except MICRO: hence
+                                               Problematic) */
 #define EXACTFUP_tb_pb                 188  /*      0x0bc */
 #define EXACTFUP_tb_p8                 189  /*      0x0bd */
 #define EXACTFUP_t8_pb                 190  /*      0x0be */
@@ -407,10 +408,11 @@
 #define EXACTFLU8_t8_pb                194  /*      0x0c2 */
 #define EXACTFLU8_t8_p8                195  /*      0x0c3 */
 
-#define EXACTFAA_NO_TRIE             49     /* 0x31 Like EXACT, but match using
-                                               /iaa rules (string not UTF-8,
-                                               not guaranteed to be folded, not
-                                               currently trie-able) */
+#define EXACTFAA_NO_TRIE             49     /* 0x31 Like EXACTFAA, (string not
+                                               UTF-8, folded except: MICRO,
+                                               SHARP S; folded length <=
+                                               unfolded, not currently
+                                               trie-able) */
 #define EXACTFAA_NO_TRIE_tb_pb         196  /*      0x0c4 */
 #define EXACTFAA_NO_TRIE_tb_p8         197  /*      0x0c5 */
 #define EXACTFAA_NO_TRIE_t8_pb         198  /*      0x0c6 */
