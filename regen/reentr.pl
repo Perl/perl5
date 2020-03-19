@@ -1173,6 +1173,13 @@ EOF
 
 read_only_bottom_close_and_rename($c);
 
+# As of March 2020, the config.h entries that have reentrant prototypes that
+# aren't in this file are:
+#       drand48
+#       random
+#       srand48
+#       srandom
+
 # The meanings of the flags are derivable from %map above
 # Fnc, arg flags| hdr   | ? struct type | prototypes...
 __DATA__
