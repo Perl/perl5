@@ -529,7 +529,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.55';
+$VERSION = '1.56';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -5480,6 +5480,9 @@ Display the (nested) parentage of the module or object given.
 sub cmd_i {
     my $cmd  = shift;
     my $line = shift;
+
+    require mro;
+
     foreach my $isa ( split( /\s+/, $line ) ) {
         $evalarg = $isa;
         # The &-call is here to ascertain the mutability of @_.
