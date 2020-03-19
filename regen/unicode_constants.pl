@@ -268,7 +268,9 @@ LF  native
 VT  native
 ESC native
 U+00DF native
+U+00DF string
 U+00E5 native
 U+00C5 native
 U+00FF native
 U+00B5 native
+U+00B5 string
