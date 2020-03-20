@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.31.11
+perldelta - what is new for perl v5.32.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.31.10 release and the 5.31.11
+This document describes differences between the 5.30.0 release and the 5.32.0
 release.
 
-If you are upgrading from an earlier release such as 5.31.9, first read
-L<perl53110delta>, which describes differences between 5.31.9 and 5.31.10.
+If you are upgrading from an earlier release such as 5.28.0, first read
+L<perl5300delta>, which describes differences between 5.28.0 and 5.30.0.
 
 =head1 Notice
 
@@ -403,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.31.10..HEAD
+  perl Porting/acknowledgements.pl v5.30.0..HEAD
 
 =head1 Reporting Bugs
 
