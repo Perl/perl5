@@ -42,6 +42,23 @@ L<perlunicode/Comparison of \N{...} and \p{name=...}>.
 The second example above shows that wildcard subpatterns are also usable
 in this property.  See L<perlunicode/Wildcards in Property Values>.
 
+=head2 Chained comparisons capability
+
+Some comparison operators, as their associativity, I<chain> with some
+operators of the same precedence (but never with operators of different
+precedence).
+
+    if ( $x < $y <= $z ) {...}
+
+behaves exactly like:
+
+    if ( $x < $y && $y <= $z ) {...}
+
+(assuming that C<"$y"> is as simple a scalar as it looks.)
+
+You can read more about this in L<perlop> under
+L<perlop/Operator Precedence and Associativity>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
