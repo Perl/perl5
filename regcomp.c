@@ -25037,12 +25037,12 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                 continue;
             }
 
-            /* Calculate the code point from its 5 digits */
-            cp = (XDIGIT_VALUE(cp_start[0]) << 16)
-               + (XDIGIT_VALUE(cp_start[1]) << 12)
-               + (XDIGIT_VALUE(cp_start[2]) << 8)
-               + (XDIGIT_VALUE(cp_start[3]) << 4)
-               +  XDIGIT_VALUE(cp_start[4]);
+                /* Calculate the code point from its 5 digits */
+                cp = (XDIGIT_VALUE(cp_start[0]) << 16)
+                   + (XDIGIT_VALUE(cp_start[1]) << 12)
+                   + (XDIGIT_VALUE(cp_start[2]) << 8)
+                   + (XDIGIT_VALUE(cp_start[3]) << 4)
+                   +  XDIGIT_VALUE(cp_start[4]);
 
             /* We matched!  Add this to the list */
             *prop_definition = add_cp_to_invlist(*prop_definition, cp);
