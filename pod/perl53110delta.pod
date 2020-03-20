@@ -1,0 +1,127 @@
+=encoding utf8
+
+=head1 NAME
+
+perl53110delta - what is new for perl v5.31.10
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.31.9 release and the 5.31.10
+release.
+
+If you are upgrading from an earlier release such as 5.31.8, first read
+L<perl5319delta>, which describes differences between 5.31.8 and 5.31.9.
+
+=head1 Core Enhancements
+
+=head2 Unicode 13.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode13.0.0/> for details.
+
+=head2 It is now possible to write C<qr/\p{Name=...}/>, or
+C<qr!\p{na=/(SMILING|GRINNING) FACE/}!>
+
+The Unicode Name property is now accessible in regular expression
+patterns, as an alternative to C<\N{...}>.
+A comparison of the two methods is given in
+L<perlunicode/Comparison of \N{...} and \p{name=...}>.
+
+The second example above shows that wildcard subpatterns are also usable
+in this property.  See L<perlunicode/Wildcards in Property Values>.
+
+=head2 Chained comparisons capability
+
+Some comparison operators, as their associativity, I<chain> with some
+operators of the same precedence (but never with operators of different
+precedence).
+
+    if ( $x < $y <= $z ) {...}
+
+behaves exactly like:
+
+    if ( $x < $y && $y <= $z ) {...}
+
+(assuming that C<"$y"> is as simple a scalar as it looks.)
+
+You can read more about this in L<perlop> under
+L<perlop/Operator Precedence and Associativity>.
+
+=head1 Obituary
+
+Jeff Goff (JGOFF or DrForr), an integral part of the Perl and Raku
+communities and a dear friend to all of us, has passed away on March
+13th, 2020. DrForr was a prominent member of the communities, attending
+and speaking at countless events, contributing to numerous projects,
+and assisting and helping in any way he could.
+
+His passing leaves a hole in our hearts and in our communities and he
+will be sorely missed.
+
+=head1 Acknowledgements
+
+Perl 5.31.10 represents approximately 4 weeks of development since Perl
+5.31.9 and contains approximately 17,000 lines of changes across 180 files
+from 29 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 9,000 lines of changes to 85 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.31.10:
+
+Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan
+Book, Daniel Dragan, Dave Rolsky, David Cantrell, David Mitchell, Hauke D,
+H.Merijn Brand, Hugo van der Sanden, James E Keenan, John Lightsey, Karen
+Etheridge, Karl Williamson, Nicolas R., Pali, Paul Evans, Peter Oliver,
+Renee Baecker, Richard Leach, Sawyer X, Shlomi Fish, Stefan Seifert, Steve
+Hay, Tomasz Konojacki, Tony Cook, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
