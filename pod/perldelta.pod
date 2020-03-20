@@ -432,8 +432,14 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Jeff Goff (JGOFF or DrForr), an integral part of the Perl and Raku
+communities and a dear friend to all of us, has passed away on March
+13th, 2020. DrForr was a prominent member of the communities, attending
+and speaking at countless events, contributing to numerous projects,
+and assisting and helping in any way he could.
+
+His passing leaves a hole in our hearts and in our communities and he
+will be sorely missed.
 
 =head1 Acknowledgements
 
