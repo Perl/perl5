@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20200320';
+our $VERSION = '5.20200420';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -362,6 +362,7 @@ sub changes_between {
     5.031009 => '2020-02-20',
     5.030002 => '2020-03-14',
     5.031010 => '2020-03-20',
+    5.032000 => '2020-04-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -17365,6 +17366,33 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.032000 => {
+        delta_from => 5.03101,
+        changed => {
+            'B::Deparse'            => '1.53',
+            'B::Op_private'         => '5.032000',
+            'Config'                => '5.032',
+            'DynaLoader'            => '1.47',
+            'Encode'                => '3.04',
+            'IPC::Open2'            => '1.05',
+            'IPC::Open3'            => '1.21',
+            'Module::CoreList'      => '5.20200420',
+            'Module::CoreList::Utils'=> '5.20200420',
+            'Opcode'                => '1.46',
+            'POSIX'                 => '1.93',
+            'PerlIO'                => '1.11',
+            'Storable'              => '3.20',
+            'Time::Piece'           => '1.34',
+            'Time::Seconds'         => '1.34',
+            'Unicode::UCD'          => '0.75',
+            'XS::APItest'           => '1.08',
+            '_charnames'            => '1.47',
+            'charnames'             => '1.47',
+            're'                    => '0.39',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -18453,6 +18481,13 @@ sub is_core
     },
     5.031010 => {
         delta_from => 5.031009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.032000 => {
+        delta_from => 5.031010,
         changed => {
         },
         removed => {
