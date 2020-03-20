@@ -1933,6 +1933,7 @@ ES	|SV *	|parse_uniprop_string|NN const char * const name	    \
 				     |const bool to_fold		    \
 				     |const bool runtime		    \
 				     |const bool deferrable		    \
+				     |NULLOK AV ** strings		    \
 				     |NN bool * user_defined_ptr	    \
 				     |NN SV * msg			    \
 				     |const STRLEN level
@@ -1954,7 +1955,8 @@ ES	|I32	|execute_wildcard|NN REGEXP * const prog|NN char* stringarg \
 ES	|bool	|handle_names_wildcard					    \
 				|NN const char * wname			    \
 				|const STRLEN wname_len			    \
-				|NN SV ** prop_definition
+				|NN SV ** prop_definition		    \
+				|NN AV ** strings
 ES	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 ES	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \

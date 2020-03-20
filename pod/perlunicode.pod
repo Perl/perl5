@@ -938,7 +938,7 @@ summarizes the differences between these two:
  can interpolate    only with eval       yes            [1]
  custom names            yes             no             [2]
  name aliases            yes             yes            [3]
- named sequences         yes           not yet          [4]
+ named sequences         yes             yes            [4]
  name value parsing     exact       Unicode loose       [5]
 
 =over
@@ -964,10 +964,6 @@ Some characters have multiple names (synonyms).
 
 Some particular sequences of characters are given a single name, in
 addition to their individual ones.
-
-It is planned to add support for named sequences to the C<\p{...}> form
-before 5.32; in the meantime, an accurate but not fully informative
-message is generated if use of one of these is attempted.
 
 =item [5]
 
@@ -1079,11 +1075,11 @@ matched by your pattern.  It's likely that a future release will raise a
 warning if your pattern ends up causing every possible code point to
 match.
 
-Starting in 5.32, the Name and Name Aliases properties are allowed to be
-matched.  They are considered to be a single combination property, just
-as has long been the case for C<\N{}>.  Loose matching doesn't work in
-exactly the same way for these as it does for the values of other
-properties.  The rules are given in
+Starting in 5.32, the Name, Name Aliases, and Named Sequences properties
+are allowed to be matched.  They are considered to be a single
+combination property, just as has long been the case for C<\N{}>.  Loose
+matching doesn't work in exactly the same way for these as it does for
+the values of other properties.  The rules are given in
 L<https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2>.  As a
 result, Perl doesn't try loose matching for you, like it does in other
 properties.  All letters in names are uppercase, but you can add C<(?i)>

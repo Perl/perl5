@@ -17670,6 +17670,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     /* If set TRUE, the property is user-defined as opposed to
                      * official Unicode */
                     bool user_defined = FALSE;
+                    AV * strings = NULL;
 
                     SV * prop_definition = parse_uniprop_string(
                                             name, n, UTF, FOLD,
@@ -17680,6 +17681,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                              * this call */
                                             ! cBOOL(ret_invlist),
 
+                                            &strings,
                                             &user_defined,
                                             msg,
                                             0 /* Base level */
@@ -17697,7 +17699,55 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                     SvCUR(msg), SvPVX(msg)));
                     }
 
-                    if (! is_invlist(prop_definition)) {
+                    assert(prop_definition || strings);
+
+                    if (strings) {
+                        if (! RExC_in_multi_char_class) {
+                            if (invert ^ (value == 'P')) {
+                                RExC_parse = e + 1;
+                                vFAIL("Inverting a character class which contains"
+                                    " a multi-character sequence is illegal");
+                            }
+
+                            /* For each multi-character string ... */
+                            while (av_tindex(strings) >= 0) {
+                                /* ... Each entry is itself an array of code
+                                * points. */
+                                AV * this_string = (AV *) av_shift( strings);
+                                STRLEN cp_count = av_tindex(this_string) + 1;
+                                SV * final = newSV(cp_count * 4);
+                                SvPVCLEAR(final);
+
+                                /* Create another string of sequences of \x{...} */
+                                while (av_tindex(this_string) >= 0) {
+                                    SV * character = av_shift(this_string);
+                                    UV cp = SvUV(character);
+
+                                    if (cp > 255) {
+                                        REQUIRE_UTF8(flagp);
+                                    }
+                                    Perl_sv_catpvf(aTHX_ final, "\\x{%" UVXf "}",
+                                                                        cp);
+                                    SvREFCNT_dec_NN(character);
+                                }
+                                SvREFCNT_dec_NN(this_string);
+
+                                /* And add that to the list of such things */
+                                multi_char_matches
+                                            = add_multi_match(multi_char_matches,
+                                                            final,
+                                                            cp_count);
+                            }
+                        }
+                        SvREFCNT_dec_NN(strings);
+                    }
+
+                    if (! prop_definition) {    /* If we got only a string,
+                                                   this iteration didn't really
+                                                   find a character */
+                        element_count--;
+                    }
+                    else if (! is_invlist(prop_definition)) {
 
                         /* Here, the definition isn't known, so we have gotten
                          * returned a string that will be evaluated if and when
@@ -23334,6 +23384,7 @@ S_handle_user_defined_property(pTHX_
         this_definition = parse_uniprop_string(s0, s - s0,
                                                is_utf8, to_fold, runtime,
                                                deferrable,
+                                               NULL,
                                                user_defined_ptr, msg,
                                                (name_len == 0)
                                                 ? level /* Don't increase level
@@ -23523,6 +23574,8 @@ S_parse_uniprop_string(pTHX_
     const bool runtime,         /* TRUE if this is being called at run time */
     const bool deferrable,      /* TRUE if it's ok for the definition to not be
                                    known at this call */
+    AV ** strings,              /* To return string property values, like named
+                                   sequences */
     bool *user_defined_ptr,     /* Upon return from this function it will be
                                    set to TRUE if any component is a
                                    user-defined property */
@@ -23773,7 +23826,8 @@ S_parse_uniprop_string(pTHX_
                     /* Farm this out to a function just to make the current
                      * function less unwieldy */
                     if (handle_names_wildcard(revised_name, revised_name_len,
-                                &prop_definition))
+                                              &prop_definition,
+                                              strings))
                     {
                         return prop_definition;
                     }
@@ -23822,6 +23876,7 @@ S_parse_uniprop_string(pTHX_
                                                            to_fold,
                                                            runtime,
                                                            deferrable,
+                                                           NULL,
                                                            user_defined_ptr,
                                                            msg,
                                                            level + 1);
@@ -23951,12 +24006,36 @@ S_parse_uniprop_string(pTHX_
             }
 
             cp = valid_utf8_to_uvchr((U8 *) SvPVX(character), &character_len);
-            if (character_len < SvCUR(character)) {
-                /* Temporarily, named sequences aren't handled */
-                goto failed;
+            if (character_len == SvCUR(character)) {
+                prop_definition = add_cp_to_invlist(NULL, cp);
+            }
+            else {
+                AV * this_string;
+
+                /* First of the remaining characters in the string. */
+                char * remaining = SvPVX(character) + character_len;
+
+                if (strings == NULL) {
+                    goto failed;    /* XXX Perhaps a specific msg instead, like
+                                       'not available here' */
+                }
+
+                if (*strings == NULL) {
+                    *strings = newAV();
+                }
+
+                this_string = newAV();
+                av_push(this_string, newSVuv(cp));
+
+                do {
+                    cp = valid_utf8_to_uvchr((U8 *) remaining, &character_len);
+                    av_push(this_string, newSVuv(cp));
+                    remaining += character_len;
+                } while (remaining < SvEND(character));
+
+                av_push(*strings, (SV *) this_string);
             }
 
-            prop_definition = add_cp_to_invlist(NULL, cp);
             return prop_definition;
         }
 
@@ -24874,7 +24953,8 @@ S_parse_uniprop_string(pTHX_
 STATIC bool
 S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                               const STRLEN wname_len, /* Its length */
-                              SV ** prop_definition)
+                              SV ** prop_definition,
+                              AV ** strings)
 {
     /* Deal with Name property wildcard subpatterns; returns TRUE if there were
      * any matches, adding them to prop_definition */
@@ -24992,7 +25072,9 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                                                 + RX_OFFS(subpattern_re)->end;
             char * cp_start;
             char * cp_end;
-            UV cp;
+            UV cp = 0;      /* Silences some compilers */
+            AV * this_string = NULL;
+            bool is_multi = FALSE;
 
             /* If matched nothing, advance to next possible match */
             if (this_name_start == this_name_end) {
@@ -25027,26 +25109,69 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
             /* All code points are 5 digits long */
             cp_start = cp_end - 4;
 
+            /* This shouldn't happen, as we found a \n, and the first \n is
+             * further along than what we subtracted */
+            assert(cp_start >= all_names_start);
+
+            if (cp_start == all_names_start) {
+                *prop_definition = add_cp_to_invlist(*prop_definition, 0);
+                continue;
+            }
+
+            /* If the character is a blank, we either have a named sequence, or
+             * something is wrong */
+            if (*(cp_start - 1) == ' ') {
+                cp_start = (char *) my_memrchr(all_names_start,
+                                               '\n',
+                                               cp_start - all_names_start);
+                cp_start++;
+            }
+
+            assert(cp_start != NULL && cp_start >= all_names_start + 2);
+
             /* Except for the first line in the string, the sequence before the
              * code point is \n\n.  If that isn't the case here, we didn't
              * match the name of a character.  (We could have matched a named
              * sequence, not currently handled */
-            if (      cp_start > all_names_start + 1
-                && (*(cp_start - 1) != '\n' || *(cp_start - 2) != '\n'))
-            {
+            if (*(cp_start - 1) != '\n' || *(cp_start - 2) != '\n') {
                 continue;
             }
 
-                /* Calculate the code point from its 5 digits */
+            /* We matched!  Add this to the list */
+            found_matches = TRUE;
+
+            /* Loop through all the code points in the sequence */
+            while (cp_start < cp_end) {
+
+                /* Calculate this code point from its 5 digits */
                 cp = (XDIGIT_VALUE(cp_start[0]) << 16)
                    + (XDIGIT_VALUE(cp_start[1]) << 12)
                    + (XDIGIT_VALUE(cp_start[2]) << 8)
                    + (XDIGIT_VALUE(cp_start[3]) << 4)
                    +  XDIGIT_VALUE(cp_start[4]);
 
-            /* We matched!  Add this to the list */
-            *prop_definition = add_cp_to_invlist(*prop_definition, cp);
-            found_matches = TRUE;
+                cp_start += 6;  /* Go past any blank */
+
+                if (cp_start < cp_end || is_multi) {
+                    if (this_string == NULL) {
+                        this_string = newAV();
+                    }
+
+                    is_multi = TRUE;
+                    av_push(this_string, newSVuv(cp));
+                }
+            }
+
+            if (is_multi) { /* Was more than one code point */
+                if (*strings == NULL) {
+                    *strings = newAV();
+                }
+
+                av_push(*strings, (SV *) this_string);
+            }
+            else {  /* Only a single code point */
+                *prop_definition = add_cp_to_invlist(*prop_definition, cp);
+            }
         } /* End of loop through the non-algorithmic names string */
     }
 

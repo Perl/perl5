@@ -3151,6 +3151,20 @@ an arbitrary reference was blessed into the "version" class.
 =item In '(*VERB...)', the '(' and '*' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
 
+=item Inverting a character class which contains a multi-character
+sequence is illegal in regex; marked by <-- HERE in m/%s/
+
+(F) You wrote something like
+
+ qr/\P{name=KATAKANA LETTER AINU P}/
+ qr/[^\p{name=KATAKANA LETTER AINU P}]/
+
+This name actually evaluates to a sequence of two Katakana characters,
+not just a single one, and it is illegal to try to take the complement
+of a sequence.  (Mathematically it would mean any sequence of characters
+from 0 to infinity in length that weren't these two in a row, and that
+is likely not of any real use.)
+
 (F) The two-character sequence C<"(*"> in this context in a regular
 expression pattern should be an indivisible token, with nothing
 intervening between the C<"("> and the C<"*">, but you separated them.
