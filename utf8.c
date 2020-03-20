@@ -55,8 +55,7 @@ within non-zero characters.
 static void
 S_restore_cop_warnings(pTHX_ void *p)
 {
-    COP curcop = *PL_curcop;
-    free_and_set_cop_warnings(curcop, (STRLEN*) p);
+    free_and_set_cop_warnings(PL_curcop, (STRLEN*) p);
 }
 
 

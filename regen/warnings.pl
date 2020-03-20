@@ -393,8 +393,8 @@ EOM
 #define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
 
 #define free_and_set_cop_warnings(cmp,w) STMT_START { \
-  if (!specialWARN(cmp.cop_warnings)) PerlMemShared_free(cmp.cop_warnings); \
-  cmp.cop_warnings = w; \
+  if (!specialWARN((cmp)->cop_warnings)) PerlMemShared_free((cmp)->cop_warnings); \
+  (cmp)->cop_warnings = w; \
 } STMT_END
 
 /*
