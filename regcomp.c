@@ -18443,13 +18443,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         /* If the character class contains anything else besides these
          * multi-character folds, have to include it in recursive parsing */
         if (element_count) {
-            sv_catpvs(substitute_parse, "|[");
+            bool has_l_bracket = orig_parse > RExC_start && *(orig_parse - 1) == '[';
+
+            sv_catpvs(substitute_parse, "|");
+            if (has_l_bracket) {    /* Add an [ if the original had one */
+                sv_catpvs(substitute_parse, "[");
+            }
             constructed_prefix_len = SvCUR(substitute_parse);
             sv_catpvn(substitute_parse, orig_parse, RExC_parse - orig_parse);
 
-            /* Put in a closing ']' only if not going off the end, as otherwise
-             * we are adding something that really isn't there */
-            if (RExC_parse < RExC_end) {
+            /* Put in a closing ']' to match any opening one, but not if going
+             * off the end, as otherwise we are adding something that really
+             * isn't there */
+            if (has_l_bracket && RExC_parse < RExC_end) {
                 sv_catpvs(substitute_parse, "]");
             }
         }
