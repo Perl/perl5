@@ -18465,7 +18465,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 #endif
 
-        /* Look at the longest folds first */
+        /* Look at the longest strings first */
         for (cp_count = av_tindex_skip_len_mg(multi_char_matches);
                         cp_count > 0;
                         cp_count--)
@@ -18491,7 +18491,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         /* If the character class contains anything else besides these
-         * multi-character folds, have to include it in recursive parsing */
+         * multi-character strings, have to include it in recursive parsing */
         if (element_count) {
             bool has_l_bracket = orig_parse > RExC_start && *(orig_parse - 1) == '[';
 
