@@ -3632,6 +3632,7 @@ void
 Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 {
 #ifdef HAS_TM_TM_ZONE
+    dVAR;
     Time_t now;
     const struct tm* my_tm;
     PERL_UNUSED_CONTEXT;

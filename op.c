@@ -5502,6 +5502,7 @@ Perl_invert(pTHX_ OP *o)
 OP *
 Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 {
+    dVAR;
     BINOP *bop;
     OP *op;
 
@@ -5527,6 +5528,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 OP *
 Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
 {
+    dVAR;
     BINOP *bop;
     OP *op;
 
@@ -5566,6 +5568,8 @@ Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
 OP *
 Perl_cmpchain_finish(pTHX_ OP *ch)
 {
+    dVAR;
+
     PERL_ARGS_ASSERT_CMPCHAIN_FINISH;
     if (ch->op_type != OP_NULL) {
 	OPCODE cmpoptype = ch->op_type;
