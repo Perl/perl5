@@ -471,8 +471,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  define VTBL_amagicelem	&PL_vtbl_amagicelem
 #endif
 
-#include "perlapi.h"
-
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX
 #  undef aTHX_

@@ -80,12 +80,6 @@ right combination of C<const>s:
     static const char * const yippee[] =
         {"hi", "ho", "silver"};
 
-There is a way to completely hide any modifiable globals (they are all
-moved to heap), the compilation setting
-C<-DPERL_GLOBAL_STRUCT_PRIVATE>.  It is not normally used, but can be
-used for testing, read more about it in L<perlguts/"Background and
-PERL_IMPLICIT_CONTEXT">.
-
 =item *
 
 Not exporting your new function

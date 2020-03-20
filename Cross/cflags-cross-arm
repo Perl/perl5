@@ -88,7 +88,6 @@ for file do
     opmini) ;;
     pad) ;;
     perl) ;;
-    perlapi) ;;
     perlmain) ;;
     perly) ;;
     pp) ;;

@@ -172,11 +172,6 @@ destruction. (Use of C<PL_dirty> is discouraged since 5.14.)
 #if defined(USE_ITHREADS)
 PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 #endif
-#ifdef PERL_GLOBAL_STRUCT 
-PERLVAR(G, ppaddr,	Perl_ppaddr_t *) /* or opcode.h */
-PERLVAR(G, check,	Perl_check_t *) /* or opcode.h */
-PERLVARA(G, fold_locale, 256, unsigned char) /* or perl.h */
-#endif
 
 #ifdef PERL_NEED_APPCTX
 PERLVAR(G, appctx,	void*)		/* the application context */
@@ -322,11 +317,4 @@ PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
 PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-/* per-module array of pointers to MY_CXT_KEY constants.
- * It simulates each module having a static my_cxt_index var on builds
- * which don't allow static vars */
-PERLVARI(G, my_cxt_keys, const char **, NULL)
-PERLVARI(G, my_cxt_keys_size, int,	0)	/* size of PL_my_cxt_keys */
-#  endif
 #endif

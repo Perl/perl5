@@ -4186,13 +4186,6 @@ PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
 #define PERL_ARGS_ASSERT_DO_EXEC	\
 	assert(cmd)
 #endif
-#if !(defined(PERL_GLOBAL_STRUCT_PRIVATE))
-#  if defined(PERL_IMPLICIT_CONTEXT)
-PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
-#define PERL_ARGS_ASSERT_MY_CXT_INIT	\
-	assert(indexp)
-#  endif
-#endif
 #if !(defined(PERL_USE_3ARG_SIGHANDLER))
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
 #define PERL_ARGS_ASSERT_CSIGHANDLER
@@ -4795,25 +4788,6 @@ PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV *gv);
 #define PERL_ARGS_ASSERT_GV_SVADD
 #endif
 #endif
-#if defined(PERL_GLOBAL_STRUCT)
-PERL_CALLCONV struct perl_vars *	Perl_GetVars(pTHX);
-#define PERL_ARGS_ASSERT_GETVARS
-PERL_CALLCONV void	Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp);
-#define PERL_ARGS_ASSERT_FREE_GLOBAL_STRUCT	\
-	assert(plvarsp)
-PERL_CALLCONV struct perl_vars*	Perl_init_global_struct(pTHX);
-#define PERL_ARGS_ASSERT_INIT_GLOBAL_STRUCT
-#endif
-#if defined(PERL_GLOBAL_STRUCT_PRIVATE)
-#  if defined(PERL_IMPLICIT_CONTEXT)
-PERL_CALLCONV int	Perl_my_cxt_index(pTHX_ const char *my_cxt_key);
-#define PERL_ARGS_ASSERT_MY_CXT_INDEX	\
-	assert(my_cxt_key)
-PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size);
-#define PERL_ARGS_ASSERT_MY_CXT_INIT	\
-	assert(my_cxt_key)
-#  endif
-#endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 PERL_CALLCONV_NO_RET void	Perl_croak_nocontext(const char* pat, ...)
 			__attribute__noreturn__
@@ -4851,6 +4825,9 @@ PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
 #define PERL_ARGS_ASSERT_MESS_NOCONTEXT	\
 	assert(pat)
 
+PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
+#define PERL_ARGS_ASSERT_MY_CXT_INIT	\
+	assert(indexp)
 PERL_CALLCONV SV*	Perl_newSVpvf_nocontext(const char *const pat, ...)
 			__attribute__format__(__printf__,1,2);
 #define PERL_ARGS_ASSERT_NEWSVPVF_NOCONTEXT	\

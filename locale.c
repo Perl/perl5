@@ -60,7 +60,7 @@
 /* If the environment says to, we can output debugging information during
  * initialization.  This is done before option parsing, and before any thread
  * creation, so can be a file-level static */
-#if ! defined(DEBUGGING) || defined(PERL_GLOBAL_STRUCT)
+#if ! defined(DEBUGGING)
 #  define debug_initialization 0
 #  define DEBUG_INITIALIZATION_set(v)
 #else
@@ -5642,11 +5642,7 @@ S_setlocale_debug_string(const int category,        /* category number,
      * be overwritten by the next call, so this should be used just to
      * formulate a string to immediately print or savepv() on. */
 
-    /* initialise to a non-null value to keep it out of BSS and so keep
-     * -DPERL_GLOBAL_STRUCT_PRIVATE happy */
-    static char ret[256] = "If you can read this, thank your buggy C"
-                           " library strlcpy(), and change your hints file"
-                           " to undef it";
+    static char ret[256];
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
     my_strlcat(ret, category_name(category), sizeof(ret));

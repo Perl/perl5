@@ -828,11 +828,6 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(PERL_GLOBAL_STRUCT)
-#define GetVars()		Perl_GetVars(aTHX)
-#define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
-#define init_global_struct()	Perl_init_global_struct(aTHX)
-#endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
 #define deb_nocontext		Perl_deb_nocontext

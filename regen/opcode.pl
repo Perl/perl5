@@ -819,9 +819,7 @@ sub print_PL_op_private_tables {
     print $fh <<EOF;
 START_EXTERN_C
 
-#ifndef PERL_GLOBAL_STRUCT_INIT
-
-#  ifndef DOINIT
+#ifndef DOINIT
 
 /* data about the flags in op_private */
 
@@ -831,7 +829,7 @@ EXTCONST char PL_op_private_labels[];
 EXTCONST I16  PL_op_private_bitfields[];
 EXTCONST U8   PL_op_private_valid[];
 
-#  else
+#else
 
 
 /* PL_op_private_labels[]: the short descriptions of private flags.
@@ -893,8 +891,7 @@ EXTCONST U8 PL_op_private_valid[] = {
 $PL_op_private_valid
 };
 
-#  endif /* !DOINIT */
-#endif /* !PERL_GLOBAL_STRUCT_INIT */
+#endif /* !DOINIT */
 
 END_EXTERN_C
 
@@ -922,8 +919,6 @@ require './regen/op_private';
 
 
 # Emit defines.
-
-print $oc    "#ifndef PERL_GLOBAL_STRUCT_INIT\n\n";
 
 {
     my $last_cond = '';
@@ -1012,8 +1007,6 @@ print $oc <<'END';
 #endif
 
 END_EXTERN_C
-
-#endif /* !PERL_GLOBAL_STRUCT_INIT */
 END
 
 # Emit ppcode switch array.
@@ -1022,15 +1015,8 @@ print $oc <<'END';
 
 START_EXTERN_C
 
-#ifdef PERL_GLOBAL_STRUCT_INIT
-#  define PERL_PPADDR_INITED
-static const Perl_ppaddr_t Gppaddr[]
-#elif !defined(PERL_GLOBAL_STRUCT)
-#  define PERL_PPADDR_INITED
 EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
-#endif /* PERL_GLOBAL_STRUCT */
-#if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
-#  define PERL_PPADDR_INITED
+#if defined(DOINIT)
 = {
 END
 
@@ -1048,19 +1034,10 @@ for (@ops) {
 print $oc <<'END';
 }
 #endif
-#ifdef PERL_PPADDR_INITED
 ;
-#endif
 
-#ifdef PERL_GLOBAL_STRUCT_INIT
-#  define PERL_CHECK_INITED
-static const Perl_check_t Gcheck[]
-#elif !defined(PERL_GLOBAL_STRUCT)
-#  define PERL_CHECK_INITED
 EXT Perl_check_t PL_check[] /* or perlvars.h */
-#endif
-#if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
-#  define PERL_CHECK_INITED
+#if defined(DOINIT)
 = {
 END
 
@@ -1071,11 +1048,7 @@ for (@ops) {
 print $oc <<'END';
 }
 #endif
-#ifdef PERL_CHECK_INITED
 ;
-#endif /* #ifdef PERL_CHECK_INITED */
-
-#ifndef PERL_GLOBAL_STRUCT_INIT
 
 #ifndef DOINIT
 EXTCONST U32 PL_opargs[];
@@ -1184,8 +1157,6 @@ for my $op (@ops) {
 print $oc <<'END';
 };
 #endif
-
-#endif /* !PERL_GLOBAL_STRUCT_INIT */
 
 END_EXTERN_C
 END

@@ -701,7 +701,6 @@ MICROCORE_SRC	=		\
 		..\numeric.c	\
 		..\op.c		\
 		..\perl.c	\
-		..\perlapi.c	\
 		..\perly.c	\
 		..\pp.c		\
 		..\pp_ctl.c	\

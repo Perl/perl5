@@ -1085,14 +1085,9 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
     char *start;
     const char *end;
     const size_t good_arena_size = Perl_malloc_good_size(arena_size);
-#if defined(DEBUGGING) && defined(PERL_GLOBAL_STRUCT)
-    dVAR;
-#endif
-#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT)
+#if defined(DEBUGGING)
     static bool done_sanity_check;
 
-    /* PERL_GLOBAL_STRUCT cannot coexist with global
-     * variables like done_sanity_check. */
     if (!done_sanity_check) {
 	unsigned int i = SVt_LAST;
 
@@ -15940,11 +15935,9 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 void
 Perl_clone_params_del(CLONE_PARAMS *param)
 {
-    /* This seemingly funky ordering keeps the build with PERL_GLOBAL_STRUCT
-       happy: */
+    PerlInterpreter *const was = PERL_GET_THX;
     PerlInterpreter *const to = param->new_perl;
     dTHXa(to);
-    PerlInterpreter *const was = PERL_GET_THX;
 
     PERL_ARGS_ASSERT_CLONE_PARAMS_DEL;
 

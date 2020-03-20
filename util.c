@@ -3417,15 +3417,6 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
-#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
-struct perl_vars *
-Perl_GetVars(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-    return &PL_Vars;
-}
-#endif
-
 char **
 Perl_get_op_names(pTHX)
 {
@@ -4641,93 +4632,6 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 #endif
 }
 
-#ifdef PERL_GLOBAL_STRUCT
-
-#define PERL_GLOBAL_STRUCT_INIT
-#include "opcode.h" /* the ppaddr and check */
-
-struct perl_vars *
-Perl_init_global_struct(pTHX)
-{
-    struct perl_vars *plvarsp = NULL;
-# ifdef PERL_GLOBAL_STRUCT
-    const IV nppaddr = C_ARRAY_LENGTH(Gppaddr);
-    const IV ncheck  = C_ARRAY_LENGTH(Gcheck);
-    PERL_UNUSED_CONTEXT;
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    /* PerlMem_malloc() because can't use even safesysmalloc() this early. */
-    plvarsp = (struct perl_vars*)PerlMem_malloc(sizeof(struct perl_vars));
-    if (!plvarsp)
-        exit(1);
-#  else
-    plvarsp = PL_VarsPtr;
-#  endif /* PERL_GLOBAL_STRUCT_PRIVATE */
-#  undef PERLVAR
-#  undef PERLVARA
-#  undef PERLVARI
-#  undef PERLVARIC
-#  define PERLVAR(prefix,var,type) /**/
-#  define PERLVARA(prefix,var,n,type) /**/
-#  define PERLVARI(prefix,var,type,init) plvarsp->prefix##var = init;
-#  define PERLVARIC(prefix,var,type,init) plvarsp->prefix##var = init;
-#  include "perlvars.h"
-#  undef PERLVAR
-#  undef PERLVARA
-#  undef PERLVARI
-#  undef PERLVARIC
-#  ifdef PERL_GLOBAL_STRUCT
-    plvarsp->Gppaddr =
-	(Perl_ppaddr_t*)
-	PerlMem_malloc(nppaddr * sizeof(Perl_ppaddr_t));
-    if (!plvarsp->Gppaddr)
-        exit(1);
-    plvarsp->Gcheck  =
-	(Perl_check_t*)
-	PerlMem_malloc(ncheck  * sizeof(Perl_check_t));
-    if (!plvarsp->Gcheck)
-        exit(1);
-    Copy(Gppaddr, plvarsp->Gppaddr, nppaddr, Perl_ppaddr_t); 
-    Copy(Gcheck,  plvarsp->Gcheck,  ncheck,  Perl_check_t); 
-#  endif
-#  ifdef PERL_SET_VARS
-    PERL_SET_VARS(plvarsp);
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    plvarsp->Gsv_placeholder.sv_flags = 0;
-    memset(plvarsp->Ghash_seed, 0, sizeof(plvarsp->Ghash_seed));
-#  endif
-# undef PERL_GLOBAL_STRUCT_INIT
-# endif
-    return plvarsp;
-}
-
-#endif /* PERL_GLOBAL_STRUCT */
-
-#ifdef PERL_GLOBAL_STRUCT
-
-void
-Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
-{
-    int veto = plvarsp->Gveto_cleanup;
-
-    PERL_ARGS_ASSERT_FREE_GLOBAL_STRUCT;
-    PERL_UNUSED_CONTEXT;
-# ifdef PERL_GLOBAL_STRUCT
-#  ifdef PERL_UNSET_VARS
-    PERL_UNSET_VARS(plvarsp);
-#  endif
-    if (veto)
-        return;
-    free(plvarsp->Gppaddr);
-    free(plvarsp->Gcheck);
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    free(plvarsp);
-#  endif
-# endif
-}
-
-#endif /* PERL_GLOBAL_STRUCT */
-
 #ifdef PERL_MEM_LOG
 
 /* -DPERL_MEM_LOG: the Perl_mem_log_..() is compiled, including
@@ -5221,32 +5125,6 @@ Perl_my_clearenv(pTHX)
 #ifdef PERL_IMPLICIT_CONTEXT
 
 
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-
-/* rather than each module having a static var holding its index,
- * use a global array of name to index mappings
- */
-int
-Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
-{
-    dVAR;
-    int index;
-
-    PERL_ARGS_ASSERT_MY_CXT_INDEX;
-
-    for (index = 0; index < PL_my_cxt_index; index++) {
-	const char *key = PL_my_cxt_keys[index];
-	/* try direct pointer compare first - there are chances to success,
-	 * and it's much faster.
-	 */
-	if ((key == my_cxt_key) || strEQ(key, my_cxt_key))
-	    return index;
-    }
-    return -1;
-}
-#  endif
-
-
 /* Implements the MY_CXT_INIT macro. The first time a module is loaded,
 the global PL_my_cxt_index is incremented, and that value is assigned to
 that module's static my_cxt_index (who's address is passed as an arg).
@@ -5255,11 +5133,7 @@ void* slot is available to hang the static data off, by allocating or
 extending the interpreter's PL_my_cxt_list array */
 
 void *
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
-#  else
 Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
-#  endif
 {
     dVAR;
     void *p;
@@ -5267,11 +5141,7 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
 
     PERL_ARGS_ASSERT_MY_CXT_INIT;
 
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    index = Perl_my_cxt_index(aTHX_ my_cxt_key);
-#  else
     index = *indexp;
-#  endif
     /* do initial check without locking.
      * -1:    not allocated or another thread currently allocating
      *  other: already allocated by another thread
@@ -5279,45 +5149,11 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
     if (index == -1) {
 	MUTEX_LOCK(&PL_my_ctx_mutex);
         /*now a stricter check with locking */
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-        index = Perl_my_cxt_index(aTHX_ my_cxt_key);
-#  else
         index = *indexp;
-#  endif
         if (index == -1)
             /* this module hasn't been allocated an index yet */
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-            index = PL_my_cxt_index++;
-
-        /* Store the index in a global MY_CXT_KEY string to index mapping
-         * table. This emulates the perl-module static my_cxt_index var on
-         * builds which don't allow static vars */
-        if (PL_my_cxt_keys_size <= index) {
-            int old_size = PL_my_cxt_keys_size;
-            int i;
-            if (PL_my_cxt_keys_size) {
-                IV new_size = PL_my_cxt_keys_size;
-                while (new_size <= index)
-                    new_size *= 2;
-                PL_my_cxt_keys = (const char **)PerlMemShared_realloc(
-                                        PL_my_cxt_keys,
-                                        new_size * sizeof(const char *));
-                PL_my_cxt_keys_size = new_size;
-            }
-            else {
-                PL_my_cxt_keys_size = 16;
-                PL_my_cxt_keys = (const char **)PerlMemShared_malloc(
-                            PL_my_cxt_keys_size * sizeof(const char *));
-            }
-            for (i = old_size; i < PL_my_cxt_keys_size; i++) {
-                PL_my_cxt_keys[i] = 0;
-            }
-        }
-        PL_my_cxt_keys[index] = my_cxt_key;
-#  else
             *indexp = PL_my_cxt_index++;
         index = *indexp;
-#  endif
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
 

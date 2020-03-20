@@ -60,9 +60,6 @@
 #  define prime_env_iter()
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
-#  ifdef PERL_GLOBAL_STRUCT
-#    error PERL_GLOBAL_STRUCT cannot be defined with PERL_IMPLICIT_SYS
-#  endif
 #endif
 
 #ifdef __GNUC__
@@ -230,8 +227,6 @@ struct utsname {
 #else
 #  define WIN32_NO_REGISTRY_M_(x) x,
 #endif
-
-#define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 
 #define ENV_IS_CASELESS
 

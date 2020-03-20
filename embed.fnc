@@ -2549,11 +2549,6 @@ ATpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 ATpR	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 ATp	|Free_t	|safesysfree	|Malloc_t where
 CrTp	|void	|croak_memory_wrap
-#if defined(PERL_GLOBAL_STRUCT)
-Ap	|struct perl_vars *|GetVars
-Ap	|struct perl_vars*|init_global_struct
-Ap	|void	|free_global_struct|NN struct perl_vars *plvarsp
-#endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
 Afpd	|void	|sv_catpvf_mg	|NN SV *const sv|NN const char *const pat|...
@@ -3416,12 +3411,7 @@ pTd	|bool|quadmath_format_needed|NN const char* format
 pe	|void	|my_clearenv
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-Apo	|void*	|my_cxt_init	|NN const char *my_cxt_key|size_t size
-Apo	|int	|my_cxt_index	|NN const char *my_cxt_key
-#else
 Apo	|void*	|my_cxt_init	|NN int *indexp|size_t size
-#endif
 #endif
 #if defined(PERL_IN_UTIL_C)
 So	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \

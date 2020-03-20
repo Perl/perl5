@@ -1080,7 +1080,7 @@ C<make>, however, failed with output (excerpted) like this:
       mg.o reentr.o mro.o hv.o av.o run.o pp_hot.o sv.o \
       pp.o scope.o pp_ctl.o pp_sys.o doop.o doio.o regexec.o \
       utf8.o taint.o deb.o universal.o globals.o perlio.o \
-      perlapi.o numeric.o mathoms.o locale.o pp_pack.o pp_sort.o  \
+      numeric.o mathoms.o locale.o pp_pack.o pp_sort.o  \
       miniperlmain.o opmini.o perlmini.o
     pp.o: In function `Perl_pp_pow':
     pp.c:(.text+0x2db9): undefined reference to `pow'
