@@ -2794,7 +2794,7 @@ S_check_op_type(pTHX_ OP * const o)
 
 PP(pp_goto)
 {
-    dVAR; dSP;
+    dSP;
     OP *retop = NULL;
     I32 ix;
     PERL_CONTEXT *cx;
@@ -3752,7 +3752,7 @@ S_path_is_searchable(const char *name)
 static OP *
 S_require_version(pTHX_ SV *sv)
 {
-    dVAR; dSP;
+    dSP;
 
     sv = sv_2mortal(new_version(sv));
     if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
@@ -3818,7 +3818,7 @@ S_require_version(pTHX_ SV *sv)
 static OP *
 S_require_file(pTHX_ SV *sv)
 {
-    dVAR; dSP;
+    dSP;
 
     PERL_CONTEXT *cx;
     const char *name;

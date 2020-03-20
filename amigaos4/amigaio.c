@@ -645,7 +645,6 @@ static void S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 
 static I32 S_do_amigaos_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
-	dVAR;
 	const char **argv, **a;
 	char *s;
 	char *buf;
@@ -750,7 +749,6 @@ leave:
 I32 S_do_amigaos_aexec5(
     pTHX_ SV *really, SV **mark, SV **sp, int fd, int do_report)
 {
-	dVAR;
 	I32 result = -1;
 	PERL_ARGS_ASSERT_DO_AEXEC5;
 	ENTER;

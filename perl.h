@@ -111,10 +111,6 @@
 /* this used to be off by default, now its on, see perlio.h */
 #define PERLIO_FUNCS_CONST
 
-#define pVAR    struct perl_vars* my_vars PERL_UNUSED_DECL
-
-#  define dVAR		dNOOP
-
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY
@@ -542,7 +538,9 @@
 #  define pTHX_12	12
 #endif
 
-#ifndef dVAR
+#ifndef PERL_CORE
+/* Backwards compatibility macro for XS code. It used to be part of
+ * the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
 #  define dVAR		dNOOP
 #endif
 

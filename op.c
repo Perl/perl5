@@ -846,7 +846,6 @@ to from any optree.
 void
 Perl_op_free(pTHX_ OP *o)
 {
-    dVAR;
     OPCODE type;
     OP *top_op = o;
     OP *next_op = o;
@@ -1020,7 +1019,6 @@ void
 Perl_op_clear(pTHX_ OP *o)
 {
 
-    dVAR;
 
     PERL_ARGS_ASSERT_OP_CLEAR;
 
@@ -1390,7 +1388,6 @@ other ops.
 void
 Perl_op_null(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_OP_NULL;
 
@@ -1406,7 +1403,6 @@ Perl_op_refcnt_lock(pTHX)
   PERL_TSA_ACQUIRE(PL_op_mutex)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_LOCK;
@@ -1417,7 +1413,6 @@ Perl_op_refcnt_unlock(pTHX)
   PERL_TSA_RELEASE(PL_op_mutex)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_UNLOCK;
@@ -1629,7 +1624,6 @@ S_op_sibling_newUNOP(pTHX_ OP *parent, OP *start, I32 type, I32 flags)
 LOGOP *
 Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 {
-    dVAR;
     LOGOP *logop;
     OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
@@ -2068,7 +2062,6 @@ Perl_scalar(pTHX_ OP *o)
 OP *
 Perl_scalarvoid(pTHX_ OP *arg)
 {
-    dVAR;
     OP *kid;
     SV* sv;
     OP *o = arg;
@@ -2874,7 +2867,6 @@ S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
 STATIC void
 S_maybe_multiconcat(pTHX_ OP *o)
 {
-    dVAR;
     OP *lastkidop;   /* the right-most of any kids unshifted onto o */
     OP *topop;       /* the top-most op in the concat tree (often equals o,
                         unless there are assign/stringify ops above it */
@@ -4079,7 +4071,6 @@ S_vivifies(const OPCODE type)
 static void
 S_lvref(pTHX_ OP *o, I32 type)
 {
-    dVAR;
     OP *kid;
     OP * top_op = o;
 
@@ -4257,7 +4248,6 @@ op_lvalue().  The flags param has these bits:
 OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
-    dVAR;
     OP *top_op = o;
 
     if (!o || (PL_parser && PL_parser->error_count))
@@ -4875,7 +4865,6 @@ S_refkids(pTHX_ OP *o, I32 type)
 OP *
 Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 {
-    dVAR;
     OP * top_op = o;
 
     PERL_ARGS_ASSERT_DOREF;
@@ -5500,7 +5489,6 @@ Perl_invert(pTHX_ OP *o)
 OP *
 Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 {
-    dVAR;
     BINOP *bop;
     OP *op;
 
@@ -5526,7 +5514,6 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 OP *
 Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
 {
-    dVAR;
     BINOP *bop;
     OP *op;
 
@@ -5566,7 +5553,6 @@ Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
 OP *
 Perl_cmpchain_finish(pTHX_ OP *ch)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_CMPCHAIN_FINISH;
     if (ch->op_type != OP_NULL) {
@@ -5632,7 +5618,6 @@ structure.
 OP *
 Perl_op_scope(pTHX_ OP *o)
 {
-    dVAR;
     if (o) {
 	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
 	    o = op_prepend_elem(OP_LINESEQ,
@@ -6010,7 +5995,6 @@ S_op_integerize(pTHX_ OP *o)
     /* integerize op. */
     if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
     {
-	dVAR;
 	o->op_ppaddr = PL_ppaddr[++(o->op_type)];
     }
 
@@ -6044,7 +6028,6 @@ S_fold_constants_eval(pTHX) {
 static OP *
 S_fold_constants(pTHX_ OP *const o)
 {
-    dVAR;
     OP *curop;
     OP *newop;
     I32 type = o->op_type;
@@ -6234,7 +6217,6 @@ S_fold_constants(pTHX_ OP *const o)
 static void
 S_gen_constant_list(pTHX_ OP *o)
 {
-    dVAR;
     OP *curop, *old_next;
     SV * const oldwarnhook = PL_warnhook;
     SV * const olddiehook  = PL_diehook;
@@ -6473,7 +6455,6 @@ C<op_convert_list> to make it the right type.
 OP *
 Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 {
-    dVAR;
     if (type < 0) type = -type, flags |= OPf_SPECIAL;
     if (!o || o->op_type != OP_LIST)
         o = force_list(o, 0);
@@ -6585,7 +6566,6 @@ See L</op_convert_list> for more information.
 OP *
 Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 {
-    dVAR;
     LISTOP *listop;
     /* Note that allocating an OP_PUSHMARK can die under Safe.pm if
      * pushmark is banned. So do it now while existing ops are in a
@@ -6637,7 +6617,6 @@ of C<op_private>.
 OP *
 Perl_newOP(pTHX_ I32 type, I32 flags)
 {
-    dVAR;
     OP *o;
 
     if (type == -OP_ENTEREVAL) {
@@ -6682,7 +6661,6 @@ of the constructed op tree.
 OP *
 Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 {
-    dVAR;
     UNOP *unop;
 
     if (type == -OP_ENTEREVAL) {
@@ -6732,7 +6710,6 @@ initialised to C<aux>
 OP *
 Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
 {
-    dVAR;
     UNOP_AUX *unop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP_AUX
@@ -6771,7 +6748,6 @@ Supported optypes: C<OP_METHOD>.
 
 static OP*
 S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth) {
-    dVAR;
     METHOP *methop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_METHOP
@@ -6847,7 +6823,6 @@ by this function and become part of the constructed op tree.
 OP *
 Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 {
-    dVAR;
     BINOP *binop;
 
     ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP
@@ -8101,7 +8076,6 @@ and, shifted up eight bits, the eight bits of C<op_private>.
 OP *
 Perl_newPMOP(pTHX_ I32 type, I32 flags)
 {
-    dVAR;
     PMOP *pmop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PMOP
@@ -8588,7 +8562,6 @@ takes ownership of one reference to it.
 OP *
 Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
-    dVAR;
     SVOP *svop;
 
     PERL_ARGS_ASSERT_NEWSVOP;
@@ -8644,7 +8617,6 @@ This function only exists if Perl has been compiled to use ithreads.
 OP *
 Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
-    dVAR;
     PADOP *padop;
 
     PERL_ARGS_ASSERT_NEWPADOP;
@@ -8712,7 +8684,6 @@ have been allocated using C<PerlMemShared_malloc>.
 OP *
 Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 {
-    dVAR;
     const bool utf8 = cBOOL(flags & SVf_UTF8);
     PVOP *pvop;
 
@@ -9130,7 +9101,6 @@ S_assignment_type(pTHX_ const OP *o)
 static OP *
 S_newONCEOP(pTHX_ OP *initop, OP *padop)
 {
-    dVAR;
     const PADOFFSET target = padop->op_targ;
     OP *const other = newOP(OP_PADSV,
 			    padop->op_flags
@@ -9394,7 +9364,6 @@ is consumed by this function and becomes part of the returned op tree.
 OP *
 Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 {
-    dVAR;
     const U32 seq = intro_my();
     const U32 utf8 = flags & SVf_UTF8;
     COP *cop;
@@ -9545,7 +9514,6 @@ S_search_const(pTHX_ OP *o)
 STATIC OP *
 S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 {
-    dVAR;
     LOGOP *logop;
     OP *o;
     OP *first;
@@ -9757,7 +9725,6 @@ this function and become part of the constructed op tree.
 OP *
 Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 {
-    dVAR;
     LOGOP *logop;
     OP *start;
     OP *o;
@@ -10011,7 +9978,6 @@ OP *
 Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
 	OP *expr, OP *block, OP *cont, I32 has_my)
 {
-    dVAR;
     OP *redo;
     OP *next = NULL;
     OP *listop;
@@ -10135,7 +10101,6 @@ automatically.
 OP *
 Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 {
-    dVAR;
     LOOP *loop;
     OP *wop;
     PADOFFSET padoff = 0;
@@ -10358,7 +10323,6 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
 		   I32 enter_opcode, I32 leave_opcode,
 		   PADOFFSET entertarg)
 {
-    dVAR;
     LOGOP *enterop;
     OP *o;
 
@@ -10854,7 +10818,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
 	else {
-            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    CvNAME_HEK_set(*spot, hek =
@@ -11014,7 +10977,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!CvNAME_HEK(cv)) {
 	if (hek) (void)share_hek_hek(hek);
 	else {
-            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    hek = share_hek(PadnamePV(name)+1,
@@ -11521,7 +11483,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		assert(CvGV(cv) == gv);
 	    }
 	    else {
-		dVAR;
 		U32 hash;
 		PERL_HASH(hash, name, namlen);
 		CvNAME_HEK_set(cv,
@@ -11592,7 +11553,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	if (isGV(gv))
             CvGV_set(cv, gv);
 	else {
-            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, name, namlen);
 	    CvNAME_HEK_set(cv, share_hek(name,
@@ -12260,7 +12220,6 @@ Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 OP *
 Perl_oopsAV(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_OOPSAV;
 
@@ -12286,7 +12245,6 @@ Perl_oopsAV(pTHX_ OP *o)
 OP *
 Perl_oopsHV(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_OOPSHV;
 
@@ -12314,7 +12272,6 @@ Perl_oopsHV(pTHX_ OP *o)
 OP *
 Perl_newAVREF(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWAVREF;
 
@@ -12339,7 +12296,6 @@ Perl_newGVREF(pTHX_ I32 type, OP *o)
 OP *
 Perl_newHVREF(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWHVREF;
 
@@ -12357,7 +12313,6 @@ OP *
 Perl_newCVREF(pTHX_ I32 flags, OP *o)
 {
     if (o->op_type == OP_PADANY) {
-	dVAR;
         OpTYPE_set(o, OP_PADCV);
     }
     return newUNOP(OP_RV2CV, flags, scalar(o));
@@ -12366,7 +12321,6 @@ Perl_newCVREF(pTHX_ I32 flags, OP *o)
 OP *
 Perl_newSVREF(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWSVREF;
 
@@ -12641,7 +12595,6 @@ Perl_ck_concat(pTHX_ OP *o)
 OP *
 Perl_ck_spair(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_CK_SPAIR;
 
@@ -12740,7 +12693,6 @@ Perl_ck_eof(pTHX_ OP *o)
 OP *
 Perl_ck_eval(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_CK_EVAL;
 
@@ -12846,7 +12798,6 @@ Perl_ck_exists(pTHX_ OP *o)
 OP *
 Perl_ck_rvconst(pTHX_ OP *o)
 {
-    dVAR;
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_RVCONST;
@@ -12941,7 +12892,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
 OP *
 Perl_ck_ftst(pTHX_ OP *o)
 {
-    dVAR;
     const I32 type = o->op_type;
 
     PERL_ARGS_ASSERT_CK_FTST;
@@ -13483,7 +13433,6 @@ Perl_ck_listiob(pTHX_ OP *o)
 OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
-    dVAR;
     PERL_ARGS_ASSERT_CK_SMARTMATCH;
     if (0 == (o->op_flags & OPf_SPECIAL)) {
 	OP *first  = cBINOPo->op_first;
@@ -13548,7 +13497,6 @@ S_maybe_targlex(pTHX_ OP *o)
 OP *
 Perl_ck_sassign(pTHX_ OP *o)
 {
-    dVAR;
     OP * const kid = cBINOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_SASSIGN;
@@ -13830,7 +13778,6 @@ Perl_ck_require(pTHX_ OP *o)
 	  SV * const sv = kid->op_sv;
 	  U32 const was_readonly = SvREADONLY(sv);
 	  if (kid->op_private & OPpCONST_BARE) {
-            dVAR;
 	    const char *end;
             HEK *hek;
 
@@ -13875,7 +13822,6 @@ Perl_ck_require(pTHX_ OP *o)
 		SvREFCNT_dec_NN(sv);
 	    }
 	    else {
-                dVAR;
                 HEK *hek;
 		if (was_readonly) SvREADONLY_off(sv);
 		PERL_HASH(hash, s, len);
@@ -13928,7 +13874,6 @@ Perl_ck_return(pTHX_ OP *o)
 OP *
 Perl_ck_select(pTHX_ OP *o)
 {
-    dVAR;
     OP* kid;
 
     PERL_ARGS_ASSERT_CK_SELECT;
@@ -14170,7 +14115,6 @@ S_simplify_sort(pTHX_ OP *o)
 OP *
 Perl_ck_split(pTHX_ OP *o)
 {
-    dVAR;
     OP *kid;
     OP *sibs;
 
@@ -15228,7 +15172,6 @@ Perl_ck_tell(pTHX_ OP *o)
 OP *
 Perl_ck_each(pTHX_ OP *o)
 {
-    dVAR;
     OP *kid = o->op_flags & OPf_KIDS ? cUNOPo->op_first : NULL;
     const unsigned orig_type  = o->op_type;
 
@@ -15919,7 +15862,6 @@ S_inplace_aassign(pTHX_ OP *o) {
 STATIC void
 S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 {
-    dVAR;
     int pass;
     UNOP_AUX_item *arg_buf = NULL;
     bool reset_start_targ  = FALSE; /* start->op_targ needs zeroing */
@@ -16714,7 +16656,6 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
 void
 Perl_rpeep(pTHX_ OP *o)
 {
-    dVAR;
     OP* oldop = NULL;
     OP* oldoldop = NULL;
     OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
@@ -18489,7 +18430,6 @@ void
 Perl_wrap_op_checker(pTHX_ Optype opcode,
     Perl_check_t new_checker, Perl_check_t *old_checker_p)
 {
-    dVAR;
 
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_OP_CHECKER;

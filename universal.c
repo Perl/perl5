@@ -1117,7 +1117,7 @@ XS(XS_NamedCapture_tie_it)
 
 XS(XS_NamedCapture_TIEHASH)
 {
-    dVAR; dXSARGS;
+    dXSARGS;
     if (items < 1)
        croak_xs_usage(cv,  "package, ...");
     {
@@ -1152,7 +1152,7 @@ XS(XS_NamedCapture_TIEHASH)
 
 XS(XS_NamedCapture_FETCH)
 {
-    dVAR; dXSARGS;
+    dXSARGS;
     dXSI32;
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
@@ -1197,7 +1197,7 @@ XS(XS_NamedCapture_FETCH)
 
 XS(XS_NamedCapture_FIRSTKEY)
 {
-    dVAR; dXSARGS;
+    dXSARGS;
     dXSI32;
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
@@ -1231,7 +1231,7 @@ XS(XS_NamedCapture_FIRSTKEY)
 /* is this still needed? */
 XS(XS_NamedCapture_flags)
 {
-    dVAR; dXSARGS;
+    dXSARGS;
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;

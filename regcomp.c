@@ -1661,7 +1661,6 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * returned list must, and will, contain every code point that is a
      * possibility. */
 
-    dVAR;
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
     unsigned int i;
@@ -4534,8 +4533,6 @@ S_unwind_scan_frames(pTHX_ const void *p)
 STATIC void
 S_rck_elide_nothing(pTHX_ regnode *node)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING;
 
     if (OP(node) != CURLYX) {
@@ -4584,7 +4581,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* recursed: which subroutines have we recursed into */
 			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
 {
-    dVAR;
     SSize_t final_minlen;
     /* There must be at least this number of characters to match */
     SSize_t min = 0;
@@ -7528,7 +7524,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
 		     bool *is_bare_re, const U32 orig_rx_flags, const U32 pm_flags)
 {
-    dVAR;
     REGEXP *Rx;         /* Capital 'R' means points to a REGEXP */
     STRLEN plen;
     char *exp;
@@ -10651,7 +10646,6 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 STATIC SV*
 S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 {
-    dVAR;
     const U8 * s = (U8*)STRING(node);
     SSize_t bytelen = STR_LEN(node);
     UV uc;
@@ -13468,7 +13462,6 @@ S_backref_value(char *p, char *e)
 STATIC regnode_offset
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
-    dVAR;
     regnode_offset ret = 0;
     I32 flags = 0;
     char *parse_start;
@@ -15390,7 +15383,6 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
      * sets up the bitmap and any flags, removing those code points from the
      * inversion list, setting it to NULL should it become completely empty */
 
-    dVAR;
 
     PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST;
     assert(PL_regkind[OP(node)] == ANYOF);
@@ -17303,7 +17295,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * UTF-8
      */
 
-    dVAR;
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
     IV range = 0;
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
@@ -21102,7 +21093,6 @@ void
 Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
 {
 #ifdef DEBUGGING
-    dVAR;
     int k;
     RXi_GET_DECL(prog, progi);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
@@ -21820,7 +21810,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                     U32 refcount;
                     reg_ac_data *aho=(reg_ac_data*)ri->data->data[n];
 #ifdef USE_ITHREADS
-                    dVAR;
 #endif
                     OP_REFCNT_LOCK;
                     refcount = --aho->refcount;
@@ -21849,7 +21838,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	            U32 refcount;
 	            reg_trie_data *trie=(reg_trie_data*)ri->data->data[n];
 #ifdef USE_ITHREADS
-                    dVAR;
 #endif
                     OP_REFCNT_LOCK;
                     refcount = --trie->refcount;
@@ -21902,7 +21890,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 void
 Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 {
-    dVAR;
     I32 npar;
     const struct regexp *r = ReANY(sstr);
     struct regexp *ret = ReANY(dstr);
@@ -22005,7 +21992,6 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 void *
 Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 {
-    dVAR;
     struct regexp *const r = ReANY(rx);
     regexp_internal *reti;
     int len;
@@ -22496,7 +22482,6 @@ S_put_charclass_bitmap_innards_common(pTHX_
      * output would have been only the inversion indicator '^', NULL is instead
      * returned. */
 
-    dVAR;
     SV * output;
 
     PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_COMMON;
@@ -22603,7 +22588,6 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      * cases where it can't try inverting, as what actually matches isn't known
      * until runtime, and hence the inversion isn't either. */
 
-    dVAR;
     bool inverting_allowed = ! force_as_is_display;
 
     int i;
@@ -22996,7 +22980,6 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 void
 Perl_init_uniprops(pTHX)
 {
-    dVAR;
 
 #  ifdef DEBUGGING
     char * dump_len_string;
@@ -23588,7 +23571,6 @@ S_delete_recursion_entry(pTHX_ void *key)
      * properties.  This is a function so it can be set up to be called even if
      * the program unexpectedly quits */
 
-    dVAR;
     SV ** current_entry;
     const STRLEN key_len = strlen((const char *) key);
     DECLARATION_FOR_GLOBAL_CONTEXT;
@@ -23681,7 +23663,6 @@ S_parse_uniprop_string(pTHX_
                                    this */
     const STRLEN level)         /* Recursion level of this call */
 {
-    dVAR;
     char* lookup_name;          /* normalized name for lookup in our tables */
     unsigned lookup_len;        /* Its length */
     enum { Not_Strict = 0,      /* Some properties have stricter name */

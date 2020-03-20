@@ -6580,7 +6580,6 @@ instead.
 void
 Perl_sv_clear(pTHX_ SV *const orig_sv)
 {
-    dVAR;
     HV *stash;
     U32 type;
     const struct body_details *sv_type_details;
@@ -7103,7 +7102,6 @@ Perl_sv_free(pTHX_ SV *const sv)
 void
 Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_SV_FREE2;
 
@@ -9369,7 +9367,6 @@ C<L</sv_newmortal>> and C<L</sv_mortalcopy>>.
 SV *
 Perl_sv_2mortal(pTHX_ SV *const sv)
 {
-    dVAR;
     if (!sv)
 	return sv;
     if (SvIMMORTAL(sv))
@@ -9516,7 +9513,6 @@ C<SvPVX_const == HeKEY> and hash lookup will avoid string compare.
 SV *
 Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
-    dVAR;
     SV *sv;
     bool is_utf8 = FALSE;
     const char *const orig_src = src;
@@ -14111,7 +14107,6 @@ S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest,
 static SV *
 S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 {
-    dVAR;
     SV *dstr;
 
     PERL_ARGS_ASSERT_SV_DUP_COMMON;
@@ -14769,7 +14764,6 @@ Perl_any_dup(pTHX_ void *v, const PerlInterpreter *proto_perl)
 ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
-    dVAR;
     ANY * const ss	= proto_perl->Isavestack;
     const I32 max	= proto_perl->Isavestack_max + SS_MAXPUSH;
     I32 ix		= proto_perl->Isavestack_ix;
@@ -15124,7 +15118,6 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags);
 PerlInterpreter *
 perl_clone(PerlInterpreter *proto_perl, UV flags)
 {
-   dVAR;
 #ifdef PERL_IMPLICIT_SYS
 
     PERL_ARGS_ASSERT_PERL_CLONE;
@@ -15959,7 +15952,6 @@ Perl_clone_params_del(CLONE_PARAMS *param)
 CLONE_PARAMS *
 Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 {
-    dVAR;
     /* Need to play this game, as newAV() can call safesysmalloc(), and that
        does a dTHX; to get the context from thread local storage.
        FIXME - under PERL_CORE Newx(), Safefree() and friends should expand to
@@ -15994,7 +15986,6 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 void
 Perl_init_constants(pTHX)
 {
-    dVAR;
 
     SvREFCNT(&PL_sv_undef)	= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVf_PROTECT|SVt_NULL;
@@ -16207,7 +16198,6 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 STATIC SV*
 S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 {
-    dVAR;
     HE **array;
     I32 i;
 
@@ -16358,7 +16348,6 @@ STATIC SV *
 S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		  bool match, const char **desc_p)
 {
-    dVAR;
     SV *sv;
     const GV *gv;
     const OP *o, *o2, *kid;

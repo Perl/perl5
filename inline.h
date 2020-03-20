@@ -2506,7 +2506,6 @@ same case-insensitively in the current locale; false otherwise.
 PERL_STATIC_INLINE I32
 Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 {
-    dVAR;
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
 

@@ -1588,7 +1588,6 @@ S_new_ctype(pTHX_ const char *newctype)
      * this function should be called directly only from this file and from
      * POSIX::setlocale() */
 
-    dVAR;
     unsigned int i;
 
     /* Don't check for problems if we are suppressing the warnings */
@@ -3316,7 +3315,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * values for our db, instead of trying to change them.
      * */
 
-    dVAR;
 
     int ok = 1;
 
@@ -5249,7 +5247,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 bool
 Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 {
-    dVAR;
     /* Internal function which returns if we are in the scope of a pragma that
      * enables the locale category 'category'.  'compiling' should indicate if
      * this is during the compilation phase (TRUE) or not (FALSE). */
@@ -5280,7 +5277,6 @@ Perl_my_strerror(pTHX_ const int errnum)
      * to the C locale */
 
     char *errstr;
-    dVAR;
 
 #ifndef USE_LOCALE_MESSAGES
 
@@ -5717,7 +5713,6 @@ Perl_thread_locale_term()
 #  ifndef WIN32
 
     {   /* Free up */
-        dVAR;
         locale_t cur_obj = uselocale(LC_GLOBAL_LOCALE);
         if (cur_obj != LC_GLOBAL_LOCALE && cur_obj != PL_C_locale_obj) {
             freelocale(cur_obj);

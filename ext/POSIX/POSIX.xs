@@ -2975,7 +2975,6 @@ sigaction(sig, optaction, oldaction = 0)
 # interface look beautiful, which is hard.
 
 	{
-	    dVAR;
 	    POSIX__SigAction action;
 	    GV *siggv = gv_fetchpvs("SIG", GV_ADD, SVt_PVHV);
 	    struct sigaction act;

@@ -83,7 +83,6 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)
 {
-    dVAR;
     if (!PL_curinterp) {			
 	PERL_SET_INTERP(my_perl);
 #if defined(USE_ITHREADS)
@@ -117,7 +116,6 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 void
 Perl_sys_init(int* argc, char*** argv)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_SYS_INIT;
 
@@ -129,7 +127,6 @@ Perl_sys_init(int* argc, char*** argv)
 void
 Perl_sys_init3(int* argc, char*** argv, char*** env)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_SYS_INIT3;
 
@@ -142,7 +139,6 @@ Perl_sys_init3(int* argc, char*** argv, char*** env)
 void
 Perl_sys_term(void)
 {
-    dVAR;
     if (!PL_veto_cleanup) {
 	PERL_SYS_TERM_BODY();
     }
@@ -220,7 +216,6 @@ Initializes a new Perl interpreter.  See L<perlembed>.
 void
 perl_construct(pTHXx)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_PERL_CONSTRUCT;
 
@@ -593,7 +588,6 @@ interpret specific numeric values as having specific meanings.
 int
 perl_destruct(pTHXx)
 {
-    dVAR;
     volatile signed char destruct_level;  /* see possible values in intrpvar.h */
     HV *hv;
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
@@ -1541,7 +1535,6 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_PERL_FREE;
 
@@ -1610,7 +1603,6 @@ __attribute__((destructor))
 #endif
 perl_fini(void)
 {
-    dVAR;
     if (
         PL_curinterp && !PL_veto_cleanup)
 	FREE_THREAD_KEY;
@@ -1697,7 +1689,6 @@ bug is due to be fixed in Perl 5.30.
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
-    dVAR;
     I32 oldscope;
     int ret;
     dJMPENV;
@@ -2093,7 +2084,6 @@ S_Internals_V(pTHX_ CV *cv)
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
-    dVAR;
     PerlIO *rsfp;
     int argc = PL_origargc;
     char **argv = PL_origargv;
@@ -3001,7 +2991,6 @@ I32
 Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
           		/* See G_* flags in cop.h */
 {
-    dVAR;
     LOGOP myop;		/* fake syntax tree node */
     METHOP method_op;
     I32 oldmark;
@@ -3155,7 +3144,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
           		/* See G_* flags in cop.h */
 {
-    dVAR;
     UNOP myop;		/* fake syntax tree node */
     volatile I32 oldmark;
     volatile I32 retval = 0;
@@ -3441,7 +3429,6 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 const char *
 Perl_moreswitches(pTHX_ const char *s)
 {
-    dVAR;
     UV rschar;
     const char option = *s; /* used to remember option in -m/-M code */
 
@@ -4136,7 +4123,6 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
     PERL_ARGS_ASSERT_VALIDATE_SUID;
 
     if (my_euid != my_uid || my_egid != my_gid) {	/* (suidperl doesn't exist, in fact) */
-	dVAR;
         int fd = PerlIO_fileno(rsfp);
         Stat_t statbuf;
         if (fd < 0 || PerlLIO_fstat(fd, &statbuf) < 0) { /* may be either wrapped or real suid */
@@ -4554,7 +4540,6 @@ STATIC void
 S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     GV* tmpgv;
 

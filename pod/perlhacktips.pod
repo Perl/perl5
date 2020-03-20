@@ -43,7 +43,7 @@ APIs, for example:
 The first one explicitly passes in the context, which is needed for
 e.g. threaded builds.  The second one does that implicitly; do not get
 them mixed.  If you are not passing in a aTHX_, you will need to do a
-dTHX (or a dVAR) as the first thing in the function.
+dTHX as the first thing in the function.
 
 See L<perlguts/"How multiple interpreters and concurrency are
 supported"> for further discussion about context.

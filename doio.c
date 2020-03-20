@@ -191,7 +191,6 @@ Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
      * to extend it, so for the time being this just isn't available on
      * PERL_IMPLICIT_SYS builds.
      */
-    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
         PL_strategy_dup,
 	fcntl(oldfd, F_DUPFD_CLOEXEC, 0),
@@ -210,7 +209,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
      * to extend it, so for the time being this just isn't available on
      * PERL_IMPLICIT_SYS builds.
      */
-    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
         PL_strategy_dup2,
 	dup3(oldfd, newfd, O_CLOEXEC),
@@ -223,7 +221,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
 int
 Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 {
-    dVAR;
     PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
@@ -238,7 +235,6 @@ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 int
 Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 {
-    dVAR;
     PERL_ARGS_ASSERT_PERLLIO_OPEN3_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
@@ -253,7 +249,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 int
 Perl_my_mkstemp_cloexec(char *templte)
 {
-    dVAR;
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
@@ -268,7 +263,6 @@ Perl_my_mkstemp_cloexec(char *templte)
 int
 Perl_my_mkostemp_cloexec(char *templte, int flags)
 {
-    dVAR;
     PERL_ARGS_ASSERT_MY_MKOSTEMP_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
@@ -284,7 +278,6 @@ Perl_my_mkostemp_cloexec(char *templte, int flags)
 int
 Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
 {
-    dVAR;
     PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC;
     /*
      * struct IPerlProc doesn't cover pipe2(), and there's no clear way
@@ -307,7 +300,6 @@ int
 Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 {
 #  if defined(SOCK_CLOEXEC)
-    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
         PL_strategy_socket,
 	PerlSock_socket(domain, type | SOCK_CLOEXEC, protocol),
@@ -328,7 +320,6 @@ Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr,
      * way to extend it, so for the time being this just isn't available
      * on PERL_IMPLICIT_SYS builds.
      */
-    dVAR;
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
         PL_strategy_accept,
 	accept4(listenfd, addr, addrlen, SOCK_CLOEXEC),
@@ -347,7 +338,6 @@ int
 Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol,
     int *pairfd)
 {
-    dVAR;
     PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC;
 #  ifdef SOCK_CLOEXEC
     DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy_socketpair, pairfd,
@@ -2297,7 +2287,6 @@ bool
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	       int fd, int do_report)
 {
-    dVAR;
     PERL_ARGS_ASSERT_DO_AEXEC5;
 #if defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
@@ -2348,7 +2337,6 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
-    dVAR;
     const char **argv, **a;
     char *s;
     char *buf;

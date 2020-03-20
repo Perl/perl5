@@ -1064,7 +1064,6 @@ emergency_sbrk(MEM_SIZE size)
 static void
 botch(const char *diag, const char *s, const char *file, int line)
 {
-    dVAR;
     dTHX;
     if (!(PERL_MAYBE_ALIVE && PERL_GET_THX))
 	goto do_write;
@@ -1235,7 +1234,6 @@ These have the same interfaces as the C lib ones, so are considered documented
 Malloc_t
 Perl_malloc(size_t nbytes)
 {
-        dVAR;
   	union overhead *p;
   	int bucket;
 #if defined(DEBUGGING) || defined(RCHECK)
@@ -1471,7 +1469,6 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
 static union overhead *
 getpages(MEM_SIZE needed, int *nblksp, int bucket)
 {
-    dVAR;
     /* Need to do (possibly expensive) system call. Try to
        optimize it for rare calling. */
     MEM_SIZE require = needed - sbrked_remains;
@@ -1666,7 +1663,6 @@ getpages_adjacent(MEM_SIZE require)
 static void
 morecore(int bucket)
 {
-        dVAR;
   	union overhead *ovp;
   	int rnu;       /* 2^rnu bytes will be requested */
   	int nblks;		/* become nblks blocks of the desired size */
@@ -1803,7 +1799,6 @@ morecore(int bucket)
 Free_t
 Perl_mfree(Malloc_t where)
 {
-        dVAR;
   	MEM_SIZE size;
 	union overhead *ovp;
 	char *cp = (char*)where;
@@ -1899,7 +1894,6 @@ Perl_mfree(Malloc_t where)
 Malloc_t
 Perl_realloc(void *mp, size_t nbytes)
 {
-        dVAR;
   	MEM_SIZE onb;
 	union overhead *ovp;
   	char *res;

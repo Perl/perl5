@@ -1031,7 +1031,6 @@ win32_closedir(DIR *dirp)
 DllExport DIR *
 win32_dirp_dup(DIR *const dirp, CLONE_PARAMS *const param)
 {
-    dVAR;
     PerlInterpreter *const from = param->proto_perl;
     PerlInterpreter *const to   = (PerlInterpreter *)PERL_GET_THX;
 
@@ -1685,7 +1684,6 @@ win32_longpath(char *path)
 static void
 out_of_memory(void)
 {
-    dVAR;
 
     if (PL_curinterp)
 	croak_no_mem();
@@ -4726,7 +4724,6 @@ win32_csighandler(int sig)
 void
 Perl_sys_intern_init(pTHX)
 {
-    dVAR;
     int i;
 
     w32_perlshell_tokens	= NULL;
@@ -4776,7 +4773,6 @@ Perl_sys_intern_init(pTHX)
 void
 Perl_sys_intern_clear(pTHX)
 {
-    dVAR;
 
     Safefree(w32_perlshell_tokens);
     Safefree(w32_perlshell_vec);
