@@ -362,7 +362,7 @@ sub changes_between {
     5.031009 => '2020-02-20',
     5.030002 => '2020-03-14',
     5.031010 => '2020-03-20',
-    5.032000 => '2020-04-20',
+    5.031011 => '2020-04-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -17366,7 +17366,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.032000 => {
+    5.031011 => {
         delta_from => 5.03101,
         changed => {
             'B::Deparse'            => '1.53',
@@ -18486,7 +18486,7 @@ sub is_core
         removed => {
         }
     },
-    5.032000 => {
+    5.031011 => {
         delta_from => 5.03101,
         changed => {
         },
