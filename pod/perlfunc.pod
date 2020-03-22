@@ -6137,7 +6137,8 @@ results in the string being padded to the required size with C<"\0">
 bytes before the result of the read is appended.
 
 The call is implemented in terms of either Perl's or your system's native
-L<fread(3)> library function.  To get a true L<read(2)> system call, see
+L<fread(3)> library function, via the L<PerlIO> layers applied to the
+handle.  To get a true L<read(2)> system call, see
 L<sysread|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET>.
 
 Note the I<characters>: depending on the status of the filehandle,
@@ -8636,6 +8637,15 @@ parameters FILENAME, MODE, and PERMS.
 
 Returns true on success and L<C<undef>|/undef EXPR> otherwise.
 
+L<PerlIO> layers will be applied to the handle the same way they would in an
+L<C<open>|/open FILEHANDLE,EXPR> call that does not specify layers. That is,
+the current value of L<C<${^OPEN}>|perlvar/${^OPEN}> as set by the L<open>
+pragma in a lexical scope, or the C<-C> commandline option or C<PERL_UNICODE>
+environment variable in the main program scope, falling back to the platform
+defaults as described in L<PerlIO/Defaults and how to override them>. If you
+want to remove any layers that may transform the byte stream, use
+L<C<binmode>|/binmode FILEHANDLE, LAYER> after opening it.
+
 The possible values and flag bits of the MODE parameter are
 system-dependent; they are available via the standard module
 L<C<Fcntl>|Fcntl>.  See the documentation of your operating system's
@@ -8685,6 +8695,13 @@ L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE>, because
 that takes away the user's option to have a more permissive umask.
 Better to omit it.  See L<C<umask>|/umask EXPR> for more on this.
 
+This function has no direct relation to the usage of
+L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET>,
+L<C<syswrite>|/syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET>,
+or L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>.  A handle opened with
+this function can be used with buffered IO just as one opened with
+L<C<open>|/open FILEHANDLE,EXPR> can be used with unbuffered IO.
+
 Note that under Perls older than 5.8.0,
 L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE> depends on the
 L<fdopen(3)> C library function.  On many Unix systems, L<fdopen(3)> is known
@@ -8705,13 +8722,14 @@ X<sysread>
 =for Pod::Functions fixed-length unbuffered input from a filehandle
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using L<read(2)>.  It bypasses
-buffered IO, so mixing this with other kinds of reads,
+specified FILEHANDLE, using L<read(2)>.  It bypasses any L<PerlIO> layers
+including buffered IO (but is affected by the presence of the C<:utf8>
+layer as described later), so mixing this with other kinds of reads,
 L<C<print>|/print FILEHANDLE LIST>, L<C<write>|/write FILEHANDLE>,
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
 L<C<tell>|/tell FILEHANDLE>, or L<C<eof>|/eof FILEHANDLE> can cause
 confusion because the
-perlio or stdio layers usually buffer data.  Returns the number of
+C<:perlio> or C<:crlf> layers usually buffer data.  Returns the number of
 bytes actually read, C<0> at end of file, or undef if there was an
 error (in the latter case L<C<$!>|perlvar/$!> is also set).  SCALAR will
 be grown or
@@ -8875,12 +8893,14 @@ X<syswrite>
 
 Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using L<write(2)>.  If LENGTH is
-not specified, writes whole SCALAR.  It bypasses buffered IO, so
+not specified, writes whole SCALAR.  It bypasses any L<PerlIO> layers
+including buffered IO (but is affected by the presence of the C<:utf8>
+layer as described later), so
 mixing this with reads (other than C<sysread)>),
 L<C<print>|/print FILEHANDLE LIST>, L<C<write>|/write FILEHANDLE>,
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
 L<C<tell>|/tell FILEHANDLE>, or L<C<eof>|/eof FILEHANDLE> may cause
-confusion because the perlio and stdio layers usually buffer data.
+confusion because the C<:perlio> and C<:crlf> layers usually buffer data.
 Returns the number of bytes actually written, or L<C<undef>|/undef EXPR>
 if there was an error (in this case the errno variable
 L<C<$!>|perlvar/$!> is also set).  If the LENGTH is greater than the
