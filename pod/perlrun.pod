@@ -313,7 +313,8 @@ The C<io> options mean that any subsequent open() (or similar I/O
 operations) in main program scope will have the C<:utf8> PerlIO layer
 implicitly applied to them, in other words, UTF-8 is expected from any
 input stream, and UTF-8 is produced to any output stream.  This is just
-the default, with explicit layers in open() and with binmode() one can
+the default set via L<C<${^OPEN}>|perlvar/${^OPEN}>,
+with explicit layers in open() and with binmode() one can
 manipulate streams as usual.  This has no effect on code run in modules.
 
 B<-C> on its own (not followed by any number or option list), or the

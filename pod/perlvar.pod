@@ -2255,9 +2255,29 @@ This variable was added in Perl v5.6.0.
 =item ${^OPEN}
 X<${^OPEN}>
 
-An internal variable used by PerlIO.  A string in two parts, separated
+An internal variable used by L<PerlIO>.  A string in two parts, separated
 by a C<\0> byte, the first part describes the input layers, the second
 part describes the output layers.
+
+This is the mechanism that applies the lexical effects of the L<open>
+pragma, and the main program scope effects of the C<io> or C<D> options
+for the L<-C command-line switch|perlrun/-C [I<numberE<sol>list>]> and
+L<PERL_UNICODE environment variable|perlrun/PERL_UNICODE>.
+
+The functions C<accept()>, C<open()>, C<pipe()>, C<readpipe()> (as well
+as the related C<qx> and C<`STRING`> operators), C<socket()>,
+C<socketpair()>, and C<sysopen()> are affected by the lexical value of
+this variable.  The implicit L</ARGV> handle opened by C<readline()> (or
+the related C<< <> >> and C<<< <<>> >>> operators) on passed filenames is
+also affected (but not if it opens C<STDIN>).  If this variable is not
+set, these functions will set the default layers as described in
+L<PerlIO/Defaults and how to override them>.
+
+C<open()> ignores this variable (and the default layers) when called with
+3 arguments and explicit layers are specified.  Indirect calls to these
+functions via modules like L<IO::Handle> are not affected as they occur
+in a different lexical scope.  Directory handles such as opened by
+C<opendir()> are not currently affected.
 
 This variable was added in Perl v5.8.0.
 
