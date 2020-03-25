@@ -1733,6 +1733,8 @@ Data_Dumper_Dumpxs(href, ...)
 		croak("Call to new() method failed to return HASH ref");
 	    if (gimme != G_ARRAY)
 		XPUSHs(sv_2mortal(retval));
+            else if (imax < 0) /* Would leak if there was nothing to dump */
+                SvREFCNT_dec(retval);
 	}
 
 SV *
