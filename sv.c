@@ -883,6 +883,23 @@ struct body_details {
     U32 arena_size;                 /* Size of arena to allocate */
 };
 
+#define ALIGNED_TYPE_NAME(name) name##_aligned
+#define ALIGNED_TYPE(name) 		\
+    typedef union { 	\
+        name align_me;				\
+        NV nv;				\
+        IV iv;				\
+    } ALIGNED_TYPE_NAME(name);
+
+ALIGNED_TYPE(regexp);
+ALIGNED_TYPE(XPVGV);
+ALIGNED_TYPE(XPVLV);
+ALIGNED_TYPE(XPVAV);
+ALIGNED_TYPE(XPVHV);
+ALIGNED_TYPE(XPVCV);
+ALIGNED_TYPE(XPVFM);
+ALIGNED_TYPE(XPVIO);
+
 #define HADNV FALSE
 #define NONV TRUE
 
@@ -971,48 +988,48 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
-    { sizeof(regexp),
+    { sizeof(ALIGNED_TYPE_NAME(regexp)),
       sizeof(regexp),
       0,
       SVt_REGEXP, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(regexp))
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
     },
 
-    { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVGV)) },
+    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
     
-    { sizeof(XPVLV), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
+    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
 
-    { sizeof(XPVAV),
+    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
       copy_length(XPVAV, xav_alloc),
       0,
       SVt_PVAV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVAV)) },
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
 
-    { sizeof(XPVHV),
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
       copy_length(XPVHV, xhv_max),
       0,
       SVt_PVHV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVHV)) },
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
 
-    { sizeof(XPVCV),
+    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
       sizeof(XPVCV),
       0,
       SVt_PVCV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVCV)) },
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
 
-    { sizeof(XPVFM),
+    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
       sizeof(XPVFM),
       0,
       SVt_PVFM, TRUE, NONV, NOARENA,
-      FIT_ARENA(20, sizeof(XPVFM)) },
+      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
 
-    { sizeof(XPVIO),
+    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
       sizeof(XPVIO),
       0,
       SVt_PVIO, TRUE, NONV, HASARENA,
-      FIT_ARENA(24, sizeof(XPVIO)) },
+      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
 };
 
 #define new_body_allocated(sv_type)		\
