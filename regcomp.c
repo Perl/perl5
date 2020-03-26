@@ -2941,11 +2941,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 /* See if *uc is the beginning of a multi-character fold.  If
                  * so, we decrement the length remaining to look at, to account
                  * for the current character this iteration.  (We can use 'uc'
-                 * instead of the fold returned by TRIE_READ_CHAR because for
-                 * non-UTF, the latin1_safe macro is smart enough to account
-                 * for all the unfolded characters, and because for UTF, the
-                 * string will already have been folded earlier in the
-                 * compilation process */
+                 * instead of the fold returned by TRIE_READ_CHAR because the
+                 * macro is smart enough to account for any unfolded
+                 * characters. */
                 if (UTF) {
                     if ((foldlen = is_MULTI_CHAR_FOLD_utf8_safe(uc, e))) {
                         foldlen -= UTF8SKIP(uc);
@@ -10725,12 +10723,8 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
          * the folded string to be just past any possible multi-char
          * fold.
          *
-         * Unlike the non-UTF-8 case, the macro for determining if a
-         * string is a multi-char fold requires all the characters to
-         * already be folded.  This is because of all the complications
-         * if not.  Note that they are folded anyway, except in EXACTFL
-         * nodes.  Like the non-UTF case above, we punt if the node
-         * begins with a multi-char fold  */
+         * Like the non-UTF case above, we punt if the node begins with a
+         * multi-char fold  */
 
         if (is_MULTI_CHAR_FOLD_utf8_safe(s, e)) {
             invlist = _add_range_to_invlist(invlist, 0, UV_MAX);
