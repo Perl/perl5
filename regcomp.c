@@ -15005,12 +15005,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  *
                  * The solution used here for peeking ahead is to look at that
                  * next character.  If it isn't ASCII punctuation, then it will
-                 * be something that continues in an EXACTish node if there
-                 * were space.  We append the fold of it to s, having reserved
-                 * enough room in s0 for the purpose.  If we can't reasonably
-                 * peek ahead, we instead assume the worst case: that it is
-                 * something that would form the completion of a multi-char
-                 * fold.
+                 * be something that would continue on in an EXACTish node if
+                 * there were space.  We append the fold of it to s, having
+                 * reserved enough room in s0 for the purpose.  If we can't
+                 * reasonably peek ahead, we instead assume the worst case:
+                 * that it is something that would form the completion of a
+                 * multi-char fold.
                  *
                  * If we can't split between s and ender, we work backwards
                  * character-by-character down to s0.  At each current point
