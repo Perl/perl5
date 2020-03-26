@@ -741,6 +741,18 @@ unless ($define{'USE_QUADMATH'}) {
   ++$skip{Perl_quadmath_format_single};
 }
 
+unless ($Config{d_mbrlen}) {
+    ++$skip{PL_mbrlen_ps};
+}
+
+unless ($Config{d_mbrtowc}) {
+    ++$skip{PL_mbrtowc_ps};
+}
+
+unless ($Config{d_wcrtomb}) {
+    ++$skip{PL_wcrtomb_ps};
+}
+
 ###############################################################################
 
 # At this point all skip lists should be completed, as we are about to test
