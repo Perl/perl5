@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302171';
+our $VERSION = '1.302173';
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
@@ -117,12 +117,24 @@ sub drop_hub {
     }
 
     opendir(my $dh, $tdir) or $self->abort_trace("Could not open temp dir!");
+
+    my %bad;
     for my $file (readdir($dh)) {
         next if $file =~ m{\.complete$};
         next unless $file =~ m{^$hid};
-        $self->abort_trace("Not all files from hub '$hid' have been collected!");
+
+        eval { $bad{$file} = $self->read_event_file(File::Spec->catfile($tdir, $file)); 1 } or $bad{$file} = $@ || "Unknown error reading file";
     }
     closedir($dh);
+
+    return unless keys %bad;
+
+    require JSON::PP;
+    local *UNIVERSAL::TO_JSON = sub { +{ %{$_[0]} } };
+    my $json = JSON::PP->new->ascii->pretty->canonical->allow_unknown->allow_blessed->convert_blessed;
+    my $data = $json->encode(\%bad);
+
+    $self->abort_trace("Not all files from hub '$hid' have been collected!\nHere is the leftover data:\n========================\n$data\n===================\n");
 }
 
 sub send {
