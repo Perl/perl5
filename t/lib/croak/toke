@@ -565,7 +565,7 @@ EXPECT
 OPTIONS regex
 Use of code point 0x80000000(00000000)? is not allowed; the permissible max is 0x7FFFFFFF(FFFFFFFF)? at - line \d+.
 ########
-# TODO gh-17645: conflict marker detection should not read out of bounds
+# NAME gh-17645: conflict marker detection should not read out of bounds
 m/$0[
 ==0/
 EXPECT

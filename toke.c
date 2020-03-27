@@ -8835,7 +8835,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 
     case '=':
         if (s[1] == '=' && (s == PL_linestart || s[-1] == '\n')
-            && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), "====="))
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - (s + 2)), "====="))
         {
             s = vcs_conflict_marker(s + 7);
             goto retry;
@@ -8929,7 +8929,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 
     case '<':
         if (s[1] == '<' && (s == PL_linestart || s[-1] == '\n')
-            && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - (s + 2)), "<<<<<"))
         {
             s = vcs_conflict_marker(s + 7);
             goto retry;
@@ -8938,7 +8938,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 
     case '>':
         if (s[1] == '>' && (s == PL_linestart || s[-1] == '\n')
-            && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), ">>>>>"))
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - (s + 2)), ">>>>>"))
         {
             s = vcs_conflict_marker(s + 7);
             goto retry;
