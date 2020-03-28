@@ -10685,8 +10685,8 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             /* Some characters match above-Latin1 ones under /i.  This
              * is true of EXACTFL ones when the locale is UTF-8 */
             if (HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(uc)
-                && (! isASCII(uc) || (OP(node) != EXACTFAA
-                                    && OP(node) != EXACTFAA_NO_TRIE)))
+                && (! isASCII(uc) || ! inRANGE(OP(node), EXACTFAA,
+                                                         EXACTFAA_NO_TRIE)))
             {
                 add_above_Latin1_folds(pRExC_state, (U8) uc, &invlist);
             }
@@ -10767,7 +10767,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
                 UV c = (k == 0) ? first_fold : remaining_folds[k-1];
 
                 /* /aa doesn't allow folds between ASCII and non- */
-                if (   (OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
+                if (   inRANGE(OP(node), EXACTFAA, EXACTFAA_NO_TRIE)
                     && isASCII(c) != isASCII(fc))
                 {
                     continue;
