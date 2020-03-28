@@ -391,32 +391,32 @@
 #define EXACTFAA_t8_pb                 186  /*      0x0ba */
 #define EXACTFAA_t8_p8                 187  /*      0x0bb */
 
-#define EXACTFUP                     47     /* 0x2f Like EXACT, but match using
-                                               /iu rules; (string not UTF-8,
-                                               folded except MICRO: hence
-                                               Problematic) */
-#define EXACTFUP_tb_pb                 188  /*      0x0bc */
-#define EXACTFUP_tb_p8                 189  /*      0x0bd */
-#define EXACTFUP_t8_pb                 190  /*      0x0be */
-#define EXACTFUP_t8_p8                 191  /*      0x0bf */
-
-#define EXACTFLU8                    48     /* 0x30 Like EXACTFU, but use /il,
-                                               UTF-8, (string is folded, and
-                                               everything in it is above 255 */
-#define EXACTFLU8_tb_pb                192  /*      0x0c0 */
-#define EXACTFLU8_tb_p8                193  /*      0x0c1 */
-#define EXACTFLU8_t8_pb                194  /*      0x0c2 */
-#define EXACTFLU8_t8_p8                195  /*      0x0c3 */
-
-#define EXACTFAA_NO_TRIE             49     /* 0x31 Like EXACTFAA, (string not
+#define EXACTFAA_NO_TRIE             47     /* 0x2f Like EXACTFAA, (string not
                                                UTF-8, folded except: MICRO,
                                                SHARP S; folded length <=
                                                unfolded, not currently
                                                trie-able) */
-#define EXACTFAA_NO_TRIE_tb_pb         196  /*      0x0c4 */
-#define EXACTFAA_NO_TRIE_tb_p8         197  /*      0x0c5 */
-#define EXACTFAA_NO_TRIE_t8_pb         198  /*      0x0c6 */
-#define EXACTFAA_NO_TRIE_t8_p8         199  /*      0x0c7 */
+#define EXACTFAA_NO_TRIE_tb_pb         188  /*      0x0bc */
+#define EXACTFAA_NO_TRIE_tb_p8         189  /*      0x0bd */
+#define EXACTFAA_NO_TRIE_t8_pb         190  /*      0x0be */
+#define EXACTFAA_NO_TRIE_t8_p8         191  /*      0x0bf */
+
+#define EXACTFUP                     48     /* 0x30 Like EXACT, but match using
+                                               /iu rules; (string not UTF-8,
+                                               folded except MICRO: hence
+                                               Problematic) */
+#define EXACTFUP_tb_pb                 192  /*      0x0c0 */
+#define EXACTFUP_tb_p8                 193  /*      0x0c1 */
+#define EXACTFUP_t8_pb                 194  /*      0x0c2 */
+#define EXACTFUP_t8_p8                 195  /*      0x0c3 */
+
+#define EXACTFLU8                    49     /* 0x31 Like EXACTFU, but use /il,
+                                               UTF-8, (string is folded, and
+                                               everything in it is above 255 */
+#define EXACTFLU8_tb_pb                196  /*      0x0c4 */
+#define EXACTFLU8_tb_p8                197  /*      0x0c5 */
+#define EXACTFLU8_t8_pb                198  /*      0x0c6 */
+#define EXACTFLU8_t8_p8                199  /*      0x0c7 */
 
 #define EXACT_REQ8                   50     /* 0x32 Like EXACT, but only UTF-8
                                                encoded targets can match */
@@ -1134,9 +1134,9 @@ EXTCONST U8 PL_regkind[] = {
 	EXACT,    	/* EXACTFL                */
 	EXACT,    	/* EXACTFU                */
 	EXACT,    	/* EXACTFAA               */
+	EXACT,    	/* EXACTFAA_NO_TRIE       */
 	EXACT,    	/* EXACTFUP               */
 	EXACT,    	/* EXACTFLU8              */
-	EXACT,    	/* EXACTFAA_NO_TRIE       */
 	EXACT,    	/* EXACT_REQ8             */
 	EXACT,    	/* LEXACT_REQ8            */
 	EXACT,    	/* EXACTFU_REQ8           */
@@ -1293,9 +1293,9 @@ static const U8 regarglen[] = {
 	0,                                   	/* EXACTFL      */
 	0,                                   	/* EXACTFU      */
 	0,                                   	/* EXACTFAA     */
+	0,                                   	/* EXACTFAA_NO_TRIE */
 	0,                                   	/* EXACTFUP     */
 	0,                                   	/* EXACTFLU8    */
-	0,                                   	/* EXACTFAA_NO_TRIE */
 	0,                                   	/* EXACT_REQ8   */
 	EXTRA_SIZE(struct regnode_1),        	/* LEXACT_REQ8  */
 	0,                                   	/* EXACTFU_REQ8 */
@@ -1408,9 +1408,9 @@ static const char reg_off_by_arg[] = {
 	0,	/* EXACTFL      */
 	0,	/* EXACTFU      */
 	0,	/* EXACTFAA     */
+	0,	/* EXACTFAA_NO_TRIE */
 	0,	/* EXACTFUP     */
 	0,	/* EXACTFLU8    */
-	0,	/* EXACTFAA_NO_TRIE */
 	0,	/* EXACT_REQ8   */
 	0,	/* LEXACT_REQ8  */
 	0,	/* EXACTFU_REQ8 */
@@ -1529,9 +1529,9 @@ EXTCONST char * const PL_reg_name[] = {
 	"EXACTFL",               	/* 0x2c */
 	"EXACTFU",               	/* 0x2d */
 	"EXACTFAA",              	/* 0x2e */
-	"EXACTFUP",              	/* 0x2f */
-	"EXACTFLU8",             	/* 0x30 */
-	"EXACTFAA_NO_TRIE",      	/* 0x31 */
+	"EXACTFAA_NO_TRIE",      	/* 0x2f */
+	"EXACTFUP",              	/* 0x30 */
+	"EXACTFLU8",             	/* 0x31 */
 	"EXACT_REQ8",            	/* 0x32 */
 	"LEXACT_REQ8",           	/* 0x33 */
 	"EXACTFU_REQ8",          	/* 0x34 */

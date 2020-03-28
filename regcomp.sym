@@ -145,6 +145,8 @@ EXACTFU     EXACT,      str	  ; Like EXACT, but match using /iu rules; (string f
 # fold to 'ss', but because of /aa, it instead folds to a pair of LATIN SMALL
 # LETTER LONG S characters (U+017F)
 EXACTFAA    EXACT,      str	  ; Like EXACT, but match using /iaa rules; (string folded except MICRO in non-UTF8 patterns; doesn't contain SHARP S unless UTF-8; folded length <= unfolded)
+# must immediately follow EXACTFAA
+EXACTFAA_NO_TRIE  EXACT, str	  ; Like EXACTFAA, (string not UTF-8, folded except: MICRO, SHARP S; folded length <= unfolded, not currently trie-able)
 
 # End of important relative ordering.
 
@@ -156,7 +158,6 @@ EXACTFUP    EXACT,      str	  ; Like EXACT, but match using /iu rules; (string n
 # representable in the UTF-8 target string.
 
 EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255
-EXACTFAA_NO_TRIE  EXACT, str	  ; Like EXACTFAA, (string not UTF-8, folded except: MICRO, SHARP S; folded length <= unfolded, not currently trie-able)
 
 
 EXACT_REQ8   EXACT,      str      ; Like EXACT, but only UTF-8 encoded targets can match
