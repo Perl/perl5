@@ -751,15 +751,6 @@
 	: 0 )                                                               \
 : 0 )
 
-/*** GENERATED CODE ***/
-#define is_PATWS_cp(cp)                                                     \
-( inRANGE(cp, '\t', '\r') || ( '\r' < cp &&                                 \
-( ' ' == cp || ( ' ' < cp &&                                                \
-( 0x85 == cp || ( 0x85 < cp &&                                              \
-( 0x200E == cp || ( 0x200E < cp &&                                          \
-( 0x200F == cp || ( 0x200F < cp &&                                          \
-( 0x2028 == cp || 0x2029 == cp ) ) ) ) ) ) ) ) ) ) )
-
 /*
 	HANGUL_ED: Hangul syllables whose first character is \xED
 
@@ -1509,17 +1500,6 @@
 		: ( ( 0x42 == ((const U8*)s)[1] ) && ( inRANGE(((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 ) : 0 )\
 : 0 )
 
-/*** GENERATED CODE ***/
-#define is_PATWS_cp(cp)                                                     \
-( '\t' == cp || ( '\t' < cp &&                                              \
-( inRANGE(cp, '\v', '\r') || ( '\r' < cp &&                                 \
-( '\n' == cp || ( '\n' < cp &&                                              \
-( 0x25 == cp || ( 0x25 < cp &&                                              \
-( ' ' == cp || ( ' ' < cp &&                                                \
-( 0x200E == cp || ( 0x200E < cp &&                                          \
-( 0x200F == cp || ( 0x200F < cp &&                                          \
-( 0x2028 == cp || 0x2029 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
-
 #endif	/* EBCDIC 1047 */
 
 #if 'A' == 193 /* EBCDIC 037 */ \
@@ -2268,17 +2248,6 @@
 		: ( ( 0x42 == ((const U8*)s)[1] ) && ( inRANGE(((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 ) : 0 )\
 : 0 )
 
-/*** GENERATED CODE ***/
-#define is_PATWS_cp(cp)                                                     \
-( '\t' == cp || ( '\t' < cp &&                                              \
-( inRANGE(cp, '\v', '\r') || ( '\r' < cp &&                                 \
-( 0x15 == cp || ( 0x15 < cp &&                                              \
-( '\n' == cp || ( '\n' < cp &&                                              \
-( ' ' == cp || ( ' ' < cp &&                                                \
-( 0x200E == cp || ( 0x200E < cp &&                                          \
-( 0x200F == cp || ( 0x200F < cp &&                                          \
-( 0x2028 == cp || 0x2029 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
-
 #endif	/* EBCDIC 037 */
 
 #endif /* PERL_REGCHARCLASS_H_ */
@@ -2335,6 +2304,6 @@
  * ee0dd174fd5b158d82dfea95d7d822ca0bfcd490182669353dca3ab39a8ee807 lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
- * e44d836c4a344d535e81585842da1e85bbc24f2f67f4f3e7e3ec32b16262f856 regen/regcharclass.pl
+ * a9698b1cfbd50099b3305ce0a331a680327887126e2881c108fdae1768b86ea2 regen/regcharclass.pl
  * c0a5e4cb2b9ffad78691938e122c1310bbc98aca2364af243e5c6b2ec0f59dc3 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

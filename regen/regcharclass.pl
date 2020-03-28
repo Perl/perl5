@@ -1671,7 +1671,7 @@ PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
 PATWS: pattern white space
-=> generic cp : safe
+=> generic : safe
 \p{_Perl_PatWS}
 
 HANGUL_ED: Hangul syllables whose first character is \xED
