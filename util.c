@@ -672,23 +672,32 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
     return ninstr(big, bigend, little, lend);
 #else
 
-    if (little >= lend)
-        return (char*)big;
-    {
-        const char first = *little;
-        bigend -= lend - little++;
-    OUTER:
+    if (little >= lend) {
+        return (char*) big;
+    }
+    else {
+        const U8 first = *little;
+        Size_t lsize;
+
+        /* No match can start closer to the end of the haystack than the length
+         * of the needle. */
+        bigend -= lend - little;
+        little++;       /* Look for 'first', then the remainder is in here */
+        lsize = lend - little;
+
         while (big <= bigend) {
-            if (*big++ == first) {
-                const char *s, *x;
-                for (x=big,s=little; s < lend; x++,s++) {
-                    if (*s != *x)
-                        goto OUTER;
-                }
-                return (char*)(big-1);
+            big = (char *) memchr((U8 *) big, first, bigend - big + 1);
+            if (big == NULL || big > bigend) {
+                return NULL;
             }
+
+            if (memEQ(big + 1, little, lsize)) {
+                return (char*) big;
+            }
+            big++;
         }
     }
+
     return NULL;
 
 #endif
