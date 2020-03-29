@@ -6,7 +6,6 @@ use warnings;
 use warnings FATAL => 'all';
 use Data::Dumper;
 $Data::Dumper::Useqq= 1;
-our $hex_fmt= "0x%02X";
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -303,6 +302,20 @@ sub __cond_join {
     }
 }
 
+my $hex_fmt= "0x%02X";
+
+sub val_fmt
+{
+    my $self = shift;
+    my $arg = shift;
+
+    # Return what always returned for an unexpected argument
+    return $hex_fmt unless defined $arg && $arg !~ /\D/;
+
+    # Otherwise, just the input, formatted
+    return sprintf $hex_fmt, $arg;
+}
+
 # Methods
 
 # constructor
@@ -411,7 +424,6 @@ sub new {
         $self->{has_low}   ||= $low && @$low;
         $self->{has_high}  ||= !$low && !$latin1;
     }
-    $self->{val_fmt}= $hex_fmt;
     $self->{count}= 0 + keys %{ $self->{strs} };
     return $self;
 }
@@ -488,12 +500,12 @@ sub _optree {
         # after this point should return the value from this.
         if ( $ret_type eq 'cp' ) {
             $else= $self->{strs}{ $trie->{''} }{cp}[0];
-            $else= sprintf "$self->{val_fmt}", $else if $else > 9;
+            $else= $self->val_fmt($else) if $else > 9;
         } elsif ( $ret_type eq 'len' ) {
             $else= $depth;
         } elsif ( $ret_type eq 'both') {
             $else= $self->{strs}{ $trie->{''} }{cp}[0];
-            $else= sprintf "$self->{val_fmt}", $else if $else > 9;
+            $else= $self->val_fmt($else) if $else > 9;
             $else= "len=$depth, $else";
         }
     }
@@ -1012,10 +1024,10 @@ sub _cond_as_str {
     if ($is_cp_ret) {
         @ranges= map {
             ref $_
-            ? sprintf(
-                "isRANGE( $test, $self->{val_fmt}, $self->{val_fmt} )",
-                @$_ )
-            : sprintf( "$self->{val_fmt} == $test", $_ );
+            ?   "isRANGE( $test, "
+              . $self->val_fmt($_[0]) . ", "
+              . $self->val_fmt($_[1]) . " )"
+            : $self->val_fmt($_) . " == $test";
         } @ranges;
 
         return "( " . join( " || ", @ranges ) . " )";
@@ -1042,10 +1054,12 @@ sub _cond_as_str {
             my @return;
             foreach my $mask_ref (@masks) {
                 if (defined $mask_ref->[1]) {
-                    push @return, sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask_ref->[1], $mask_ref->[0];
+                    push @return, "( ( $test & "
+                                . $self->val_fmt($mask_ref->[1]) . " ) == "
+                                . $self->val_fmt($mask_ref->[0]) . " )";
                 }
                 else {  # An undefined mask means to use the value as-is
-                    push @return, sprintf "$test == $self->{val_fmt}", $mask_ref->[0];
+                    push @return, "$test == " . $self->val_fmt($mask_ref->[0]);
                 }
             }
 
@@ -1066,26 +1080,25 @@ sub _cond_as_str {
     my $range_count_extra = 0;
     for (my $i = 0; $i < @ranges; $i++) {
         if (! ref $ranges[$i]) {    # Trivial case: no range
-            $ranges[$i] = sprintf "$self->{val_fmt} == $test", $ranges[$i];
+            $ranges[$i] = $self->val_fmt($ranges[$i]) . " == $test";
         }
         elsif ($ranges[$i]->[0] == $ranges[$i]->[1]) {
             $ranges[$i] =           # Trivial case: single element range
-                    sprintf "$self->{val_fmt} == $test", $ranges[$i]->[0];
+                    $self->val_fmt($ranges[$i]->[0]) . " == $test";
         }
         elsif ($ranges[$i]->[0] == 0) {
             # If the range matches all 256 possible bytes, it is trivially
             # true.
             return 1 if $ranges[0]->[1] == 0xFF;    # @ranges must be 1 in
                                                     # this case
-            $ranges[$i] = sprintf "( $test <= $self->{val_fmt} )",
-                                                               $ranges[$i]->[1];
+            $ranges[$i] = "( $test <= "
+                        . $self->val_fmt($ranges[$i]->[1]) . " )";
         }
         elsif ($ranges[$i]->[1] == 255) {
 
             # Similarly the max possible is 255, so can omit an upper bound
             # test if the calculated max is the max possible one.
-            $ranges[$i] = sprintf "( $test >= $self->{val_fmt} )",
-                                                                $ranges[0]->[0];
+            $ranges[$i] = "( $test >= " . $self->val_fmt($ranges[0]->[0]) . " )";
         }
         else {
             my $output = "";
@@ -1114,9 +1127,9 @@ sub _cond_as_str {
             # bounds.  But inRANGE() allows us to have a single conditional,
             # so the only cost of making sure it's a legal UTF-8 continuation
             # byte is an extra subtraction instruction, a trivial expense.
-            $ranges[$i] = sprintf("inRANGE($test, $self->{val_fmt},"
-                                                . " $self->{val_fmt} )",
-                                        $ranges[$i]->[0], $ranges[$i]->[1]);
+            $ranges[$i] = "inRANGE($test, "
+                        . $self->val_fmt($ranges[$i]->[0]) .", "
+                        . $self->val_fmt($ranges[$i]->[1]) . ")";
         }
     }
 
@@ -1144,17 +1157,17 @@ sub _combine {
         if ($item->[0] == 0) {  # UV's are never negative, so skip "0 <= "
                                 # test which could generate a compiler warning
                                 # that test is always true
-            $cstr= sprintf( "$test <= $self->{val_fmt}", $item->[1] );
+            $cstr= "$test <= " . $self->val_fmt($item->[1]);
         }
         else {
-            $cstr=
-          sprintf( "inRANGE($test, $self->{val_fmt}, $self->{val_fmt})",
-                   @$item );
+            $cstr = "inRANGE($test, "
+                  . $self->val_fmt($item->[0]) . ", "
+                  . $self->val_fmt($item->[1]) . ")";
         }
-        $gtv= sprintf "$self->{val_fmt}", $item->[1];
+        $gtv= $self->val_fmt($item->[1]);
     } else {
-        $cstr= sprintf( "$self->{val_fmt} == $test", $item );
-        $gtv= sprintf "$self->{val_fmt}", $item;
+        $cstr= $self->val_fmt($item) . " == $test";
+        $gtv= $self->val_fmt($item)
     }
     if ( @cond ) {
         my $combine= $self->_combine( $test, @cond );
