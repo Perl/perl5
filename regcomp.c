@@ -5966,7 +5966,10 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                                                           (regnode_charclass *) scan);
 		    break;
 
-                case NANYOFM:
+                case NANYOFM: /* NANYOFM already contains the inversion of the
+                                 input ANYOF data, so, unlike things like
+                                 NPOSIXA, don't change 'invert' to TRUE */
+                    /* FALLTHROUGH */
                 case ANYOFM:
                   {
                     SV* cp_list = get_ANYOFM_contents(scan);
