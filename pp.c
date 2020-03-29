@@ -6432,11 +6432,11 @@ PP(unimplemented_op)
        Secondly, as the three ops we "panic" on are padmy, mapstart and custom,
        if we get here for a custom op then that means that the custom op didn't
        have an implementation. Given that OP_NAME() looks up the custom op
-       by its pp_addr, likely it will return NULL, unless someone (unhelpfully)
-       registers &PL_unimplemented_op as the address of their custom op.
+       by its op_ppaddr, likely it will return NULL, unless someone (unhelpfully)
+       registers &Perl_unimplemented_op as the address of their custom op.
        NULL doesn't generate a useful error message. "custom" does. */
     const char *const name = op_type >= OP_max
-	? "[out of range]" : PL_op_name[PL_op->op_type];
+	? "[out of range]" : PL_op_name[op_type];
     if(OP_IS_SOCKET(op_type))
 	DIE(aTHX_ PL_no_sock_func, name);
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
