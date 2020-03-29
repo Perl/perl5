@@ -166,13 +166,13 @@ License or the Artistic License, as specified in the README file.
 #
 
 sub __uni_latin1 {
-    my $charset= shift;
+    my $charset = shift;
+    my $a2n= shift;
     my $str= shift;
     my $max= 0;
     my @cp;
     my @cp_high;
     my $only_has_invariants = 1;
-    my $a2n = get_a2n($charset);
     for my $ch ( split //, $str ) {
         my $cp= ord $ch;
         $max= $cp if $max < $cp;
@@ -352,6 +352,10 @@ sub new {
         op    => $opt{op},
         title => $opt{title} || '',
     }, $class;
+
+    my $charset = $opt{charset};
+    my $a2n = get_a2n($charset);
+
     foreach my $txt ( @{ $opt{txt} } ) {
         my $str= $txt;
         if ( $str =~ /^[""]/ ) {
@@ -405,7 +409,7 @@ sub new {
         } else {
             die "Unparsable line: $txt\n";
         }
-        my ( $cp, $cp_high, $low, $latin1, $utf8 )= __uni_latin1( $opt{charset}, $str );
+        my ( $cp, $cp_high, $low, $latin1, $utf8 )= __uni_latin1($charset, $a2n, $str );
         my $UTF8= $low   || $utf8;
         my $LATIN1= $low || $latin1;
         my $high = (scalar grep { $_ < 256 } @$cp) ? 0 : $utf8;
