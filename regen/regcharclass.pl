@@ -309,8 +309,28 @@ sub val_fmt
     my $self = shift;
     my $arg = shift;
 
+    # Format 'arg' using the printable character if it has one, or a %x if
+    # not, returning a string containing the result
+
     # Return what always returned for an unexpected argument
     return $hex_fmt unless defined $arg && $arg !~ /\D/;
+
+    # We convert only things inside Latin1
+    if ($arg < 256) {
+
+        # Find the ASCII equivalent of this argument (as the current character
+        # set might not be ASCII)
+        my $char = chr $self->{n2a}->[$arg];
+
+        # If printable, return it, escaping \ and '
+        return "'$char'" if $char =~ /[^\\'[:^print:]]/a;
+        return "'\\\\'" if $char eq "\\";
+        return "'\''" if $char eq "'";
+
+        # Handle the mnemonic controls
+        my $pos = index("\a\b\e\f\n\r\t\cK", $char);
+        return "'\\" . substr("abefnrtv", $pos, 1) . "'" if $pos >= 0;
+    }
 
     # Otherwise, just the input, formatted
     return sprintf $hex_fmt, $arg;
@@ -339,7 +359,9 @@ sub val_fmt
 # Size data is tracked per type in the 'size' subhash.
 #
 # Return an object
-#
+
+my %n2a;    # Inversion of a2n, for each character set
+
 sub new {
     my $class= shift;
     my %opt= @_;
@@ -355,6 +377,13 @@ sub new {
 
     my $charset = $opt{charset};
     my $a2n = get_a2n($charset);
+
+    # We need to construct the map going the other way if not already done
+    unless (defined $n2a{$charset}) {
+        for (my $i = 0; $i < 256; $i++) {
+            $n2a{$charset}->[$a2n->[$i]] = $i;
+        }
+    }
 
     foreach my $txt ( @{ $opt{txt} } ) {
         my $str= $txt;
@@ -428,6 +457,7 @@ sub new {
         $self->{has_low}   ||= $low && @$low;
         $self->{has_high}  ||= !$low && !$latin1;
     }
+    $self->{n2a} = $n2a{$charset};
     $self->{count}= 0 + keys %{ $self->{strs} };
     return $self;
 }
