@@ -225,10 +225,11 @@ sub __clean {
     #       ( ( (cond1) && (cond2) ) ? X : Y )
     # Also similarly handles expressions like:
     #       : (cond1) ? ( (cond2) ? X : Y ) : Y )
-    # Note the inclusion of the close paren in ([:()]) and the open paren in ([()]) is
-    # purely to ensure we have a balanced set of parens in the expression which makes
-    # it easier to understand the pattern in an editor that understands paren's, we do
-    # not expect either of these cases to actually fire. - Yves
+    # Note the inclusion of the close paren in ([:()]) and the open paren in
+    # ([()]) is purely to ensure we have a balanced set of parens in the
+    # expression which makes it easier to understand the pattern in an editor
+    # that understands paren's, we do not expect either of these cases to
+    # actually fire. - Yves
     1 while $expr =~ s/
         ([:()])  \s*
             ($parens) \s*
@@ -392,7 +393,8 @@ sub new {
         } elsif ($str =~ / - /x ) { # A range:  Replace this element on the
                                     # list with its expansion
             my ($lower, $upper) = $str =~ / 0x (.+?) \s* - \s* 0x (.+) /x;
-            die "Format must be like '0xDEAD - 0xBEAF'; instead was '$str'" if ! defined $lower || ! defined $upper;
+            die "Format must be like '0xDEAD - 0xBEAF'; instead was '$str'"
+                                        if ! defined $lower || ! defined $upper;
             foreach my $cp (hex $lower .. hex $upper) {
                 push @{$opt{txt}}, sprintf "0x%X", $cp;
             }
@@ -438,7 +440,8 @@ sub new {
         } else {
             die "Unparsable line: $txt\n";
         }
-        my ( $cp, $cp_high, $low, $latin1, $utf8 )= __uni_latin1($charset, $a2n, $str );
+        my ( $cp, $cp_high, $low, $latin1, $utf8 )
+                                        = __uni_latin1($charset, $a2n, $str );
         my $UTF8= $low   || $utf8;
         my $LATIN1= $low || $latin1;
         my $high = (scalar grep { $_ < 256 } @$cp) ? 0 : $utf8;
@@ -561,7 +564,8 @@ sub _optree {
     foreach my $cond ( @conds ) {
 
         # get the optree for this child/condition
-        my $res= $self->_optree( $trie->{$cond}, $test_type, $ret_type, $else, $depth + 1 );
+        my $res= $self->_optree( $trie->{$cond}, $test_type, $ret_type,
+                                                            $else, $depth + 1 );
         # convert it to a string with Dumper
         my $res_code= Dumper( $res );
 
@@ -572,7 +576,8 @@ sub _optree {
         }
     }
 
-    # now that we have deduped the optrees we construct a new optree containing the merged
+    # now that we have deduped the optrees we construct a new optree
+    # containing the merged
     # results.
     my %root;
     my $node= \%root;
@@ -687,7 +692,7 @@ sub length_optree {
             @size= sort { $a <=> $b } keys %{ $self->{size}{$type} };
         }
         for my $size ( @size ) {
-            my $optree= $self->$method( %opt, type => $type, max_depth => $size );
+            my $optree= $self->$method(%opt, type => $type, max_depth => $size);
             my $cond= "((e)-(s) > " . ( $size - 1 ).")";
             $else= __cond_join( $cond, $optree, $else );
         }
@@ -706,7 +711,9 @@ sub length_optree {
 
         # If we do want more than the 0-255 range, find those, and if they
         # exist...
-        if ($opt{type} !~ /latin1/i && ($utf8 = $self->make_trie($trie_type, 0))) {
+        if (   $opt{type} !~ /latin1/i
+            && ($utf8 = $self->make_trie($trie_type, 0)))
+        {
 
             # ... get them into an optree, and set them up as the 'else' clause
             $utf8 = $self->_optree( $utf8, 'depth', $opt{ret_type}, 0, 0 );
@@ -728,7 +735,7 @@ sub length_optree {
             my $latin1;
             if ($method eq 'generic_optree') {
                 $latin1 = $self->make_trie( 'latin1', 1);
-                $latin1= $self->_optree( $latin1, 'depth', $opt{ret_type}, 0, 0 );
+                $latin1= $self->_optree($latin1, 'depth', $opt{ret_type}, 0, 0);
             }
 
             # If we want the UTF-8 invariants, get those.
@@ -898,25 +905,29 @@ sub calculate_mask(@) {
             my @bits_that_differ = pop_count($list[$i] ^ $list[$j]);
             my $differ_count = @bits_that_differ;
             my $key = join ",", @bits_that_differ;
-            push @{$hash{$differ_count}{$key}}, $list[$i] unless grep { $_ == $list[$i] } @{$hash{$differ_count}{$key}};
+            push @{$hash{$differ_count}{$key}}, $list[$i]
+                unless grep { $_ == $list[$i] } @{$hash{$differ_count}{$key}};
             push @{$hash{$differ_count}{$key}}, $list[$j];
         }
     }
 
-    print STDERR __LINE__, ": calculate_mask() called:  List of values grouped by differing bits: ", Dumper \%hash if DEBUG;
+    print STDERR __LINE__, ": calculate_mask() called:  List of values grouped",
+                                " by differing bits: ", Dumper \%hash if DEBUG;
 
     my @final_results;
     foreach my $count (reverse sort { $a <=> $b } keys %hash) {
         my $need = 2 ** $count;     # Need 8 values for 3 differing bits, etc
         foreach my $bits (sort keys $hash{$count}->%*) {
 
-            print STDERR __LINE__, ": For $count bit(s) difference ($bits), need $need; have ", scalar @{$hash{$count}{$bits}}, "\n" if DEBUG;
+            print STDERR __LINE__, ": For $count bit(s) difference ($bits),",
+            " need $need; have ", scalar @{$hash{$count}{$bits}}, "\n" if DEBUG;
 
             # Look only as long as there are at least as many elements in the
             # subset as are needed
             while ((my $cur_count = @{$hash{$count}{$bits}}) >= $need) {
 
-                print STDERR __LINE__, ": Looking at bit positions ($bits): ", Dumper $hash{$count}{$bits} if DEBUG;
+                print STDERR __LINE__, ": Looking at bit positions ($bits): ",
+                                          Dumper $hash{$count}{$bits} if DEBUG;
 
                 # Start with the first element in it
                 my $try_base = $hash{$count}{$bits}[0];
@@ -940,14 +951,20 @@ sub calculate_mask(@) {
                     my $try_this = $hash{$count}{$bits}[$i];
                     my @positions = pop_count($try_base ^ $try_this);
 
-                    print STDERR __LINE__, ": $try_base vs $try_this: is (", join(',', @positions), ") a subset of ($bits)?" if DEBUG;;
+                    print STDERR __LINE__, ": $try_base vs $try_this: is (",
+                      join(',', @positions), ") a subset of ($bits)?" if DEBUG;
 
                     foreach my $pos (@positions) {
                         unless (grep { $pos == $_ } @bits) {
                             print STDERR "  No\n" if DEBUG;
                             my $remaining = $cur_count - $i - 1;
                             if ($remaining && @subset + $remaining < $need) {
-                                print STDERR __LINE__, ": Can stop trying $try_base, because even if all the remaining $remaining values work, they wouldn't add up to the needed $need when combined with the existing ", scalar @subset, " ones\n" if DEBUG;
+                                print STDERR __LINE__, ": Can stop trying",
+                                    " $try_base, because even if all the",
+                                    " remaining $remaining values work, they",
+                                    " wouldn't add up to the needed $need when",
+                                    " combined with the existing ",
+                                            scalar @subset, " ones\n" if DEBUG;
                                 last TRY;
                             }
                             next TRY;
@@ -962,7 +979,8 @@ sub calculate_mask(@) {
                     $compare &= $try_this;
                 }
 
-                print STDERR __LINE__, ": subset (", join(", ", @subset), ") has ", scalar @subset, " elements; needs $need\n" if DEBUG;
+                print STDERR __LINE__, ": subset (", join(", ", @subset),
+                 ") has ", scalar @subset, " elements; needs $need\n" if DEBUG;
 
                 if (@subset < $need) {
                     shift @{$hash{$count}{$bits}};
@@ -977,14 +995,17 @@ sub calculate_mask(@) {
                 $mask = ~$mask & 0xFF;
                 push @final_results, [$compare, $mask];
 
-                printf STDERR "%d: Got it: compare=%d=0x%X; mask=%X\n", __LINE__, $compare, $compare, $mask if DEBUG;
+                printf STDERR "%d: Got it: compare=%d=0x%X; mask=%X\n",
+                                __LINE__, $compare, $compare, $mask if DEBUG;
 
                 # These values are now spoken for.  Remove them from future
                 # consideration
                 foreach my $remove_count (sort keys %hash) {
                     foreach my $bits (sort keys %{$hash{$remove_count}}) {
                         foreach my $to_remove (@subset) {
-                            @{$hash{$remove_count}{$bits}} = grep { $_ != $to_remove } @{$hash{$remove_count}{$bits}};
+                            @{$hash{$remove_count}{$bits}}
+                                    = grep { $_ != $to_remove }
+                                                @{$hash{$remove_count}{$bits}};
                         }
                     }
                 }
@@ -1227,10 +1248,12 @@ sub _render {
     my $cond= $self->_cond_as_str( $op, $combine, $opts_ref );
     #no warnings 'recursion';   # This would allow really really inefficient
                                 # code to be generated.  See pod
-    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref, $def, $submacros );
+    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref, $def,
+                                                                    $submacros);
     return $yes if $cond eq '1';
 
-    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref, $def, $submacros );
+    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref, $def,
+                                                                    $submacros);
     return "( $cond )" if $yes eq '1' and $no eq '0';
     my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
     return "$lb$cond ? $yes : $no$rb"
@@ -1246,9 +1269,12 @@ sub _render {
 
     my $str= "$lb$cond ?$yes$ind: $no$rb";
     if (length $str > 6000) {
-        push @$submacros, sprintf "#define $def\n( %s )", "_part" . (my $yes_idx= 0+@$submacros), $yes;
-        push @$submacros, sprintf "#define $def\n( %s )", "_part" . (my $no_idx= 0+@$submacros), $no;
-        return sprintf "%s%s ? $def : $def%s", $lb, $cond, "_part$yes_idx", "_part$no_idx", $rb;
+        push @$submacros, sprintf "#define $def\n( %s )", "_part"
+                                  . (my $yes_idx= 0+@$submacros), $yes;
+        push @$submacros, sprintf "#define $def\n( %s )", "_part"
+                                  . (my $no_idx= 0+@$submacros), $no;
+        return sprintf "%s%s ? $def : $def%s", $lb, $cond, "_part$yes_idx",
+                                                            "_part$no_idx", $rb;
     }
     return $str;
 }
@@ -1262,11 +1288,15 @@ sub _render {
 # Currently only used for type 'cp' macros.
 sub render {
     my ( $self, $op, $combine, $opts_ref, $def_fmt )= @_;
-    
-    my @submacros;
-    my $macro= sprintf "#define $def_fmt\n( %s )", "", $self->_render( $op, $combine, 0, $opts_ref, $def_fmt, \@submacros );
 
-    return join "\n\n", map { "/*** GENERATED CODE ***/\n" . __macro( __clean( $_ ) ) } @submacros, $macro;
+    my @submacros;
+    my $macro= sprintf "#define $def_fmt\n( %s )", "",
+                       $self->_render( $op, $combine, 0, $opts_ref, $def_fmt,
+                                                                 \@submacros);
+
+    return join "\n\n",
+            map { "/*** GENERATED CODE ***/\n" . __macro( __clean( $_ ) ) }
+                                                            @submacros, $macro;
 }
 
 # make_macro
@@ -1300,10 +1330,12 @@ sub make_macro {
     my $type= $opts{type} || 'generic';
     if ($self->{has_multi}) {
         if ($type =~ /^cp/) {
-            die "Can't do a 'cp' on multi-codepoint character class '$self->{op}'"
+            die "Can't do a 'cp' on multi-codepoint character class"
+              . " '$self->{op}'"
         }
         elsif (! $opts{safe}) {
-            die "'safe' is required on multi-codepoint character class '$self->{op}'"
+            die "'safe' is required on multi-codepoint character class"
+               ." '$self->{op}'"
         }
     }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
@@ -1319,7 +1351,7 @@ sub make_macro {
     push @args, "e" if $opts{safe};
     push @args, "is_utf8" if $type =~ /generic/;
     push @args, "len" if $ret_type eq 'both';
-    my $pfx= $ret_type eq 'both'    ? 'what_len_' : 
+    my $pfx= $ret_type eq 'both'    ? 'what_len_' :
              $ret_type eq 'cp'      ? 'what_'     : 'is_';
     my $ext= $type     =~ /generic/ ? ''          : '_' . lc( $type );
     $ext .= '_non_low' if $type eq 'generic_non_low';
@@ -1353,7 +1385,8 @@ WARNING: These macros are for internal Perl core use only, and may be
 changed or removed without notice.
 EOF
     );
-    print $out_fh "\n#ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */\n#define PERL_REGCHARCLASS_H_\n";
+    print $out_fh "\n#ifndef PERL_REGCHARCLASS_H_ /* Guard against nested",
+                  " #includes */\n#define PERL_REGCHARCLASS_H_\n";
 
     my ( $op, $title, @txt, @types, %mods );
     my $doit= sub ($) {
@@ -1367,17 +1400,17 @@ EOF
 
         print $out_fh "/*\n\t$op: $title\n\n";
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
-        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt, charset => $charset);
+        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt,
+                                                        charset => $charset);
 
         #die Dumper(\@types,\%mods);
 
         my @mods;
         push @mods, 'safe' if delete $mods{safe};
         push @mods, 'no_length_checks' if delete $mods{no_length_checks};
-        unshift @mods, 'fast' if delete $mods{fast} || ! @mods; # Default to 'fast'
-                                                                # do this one
-                                                                # first, as
-                                                                # traditional
+
+        # Default to 'fast' do this one first, as traditional
+        unshift @mods, 'fast' if delete $mods{fast} || ! @mods;
         if (%mods) {
             die "Unknown modifiers: ", join ", ", map { "'$_'" } sort keys %mods;
         }
@@ -1400,7 +1433,8 @@ EOF
                     ret_type => $ret,
                     safe     => $mod eq 'safe' && $type !~ /^cp/,
                     charset  => $charset,
-                    no_length_checks => $mod eq 'no_length_checks' && $type !~ /^cp/,
+                    no_length_checks => $mod eq 'no_length_checks'
+                                     && $type !~ /^cp/,
                 );
                 print $out_fh $macro, "\n";
             }
