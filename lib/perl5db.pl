@@ -2512,6 +2512,37 @@ EOP
     return;
 }
 
+=head3 C<_DB__handle_i_command> - inheritance display
+
+Display the (nested) parentage of the module or object given.
+
+=cut
+
+sub _DB__handle_i_command {
+    my $self = shift;
+
+    my $line = $self->cmd_args;
+    require mro;
+    foreach my $isa ( split( /\s+/, $line ) ) {
+        $evalarg = "$isa";
+        # The &-call is here to ascertain the mutability of @_.
+        ($isa) = &DB::eval;
+        no strict 'refs';
+        print join(
+            ', ',
+            map {
+                "$_"
+                  . (
+                    defined( ${"$_\::VERSION"} )
+                    ? ' ' . ${"$_\::VERSION"}
+                    : undef )
+              } @{mro::get_linear_isa(ref($isa) || $isa)}
+        );
+        print "\n";
+    }
+    next CMD;
+}
+
 # 't' is type.
 # 'm' is method.
 # 'v' is the value (i.e: method name or subroutine ref).
@@ -2531,6 +2562,7 @@ BEGIN
     'W' => { t => 'm', v => '_handle_W_command', },
     'c' => { t => 's', v => \&_DB__handle_c_command, },
     'f' => { t => 's', v => \&_DB__handle_f_command, },
+    'i' => { t => 's', v => \&_DB__handle_i_command, },
     'm' => { t => 's', v => \&_DB__handle_m_command, },
     'n' => { t => 'm', v => '_handle_n_command', },
     'p' => { t => 'm', v => '_handle_p_command', },
@@ -2551,7 +2583,7 @@ BEGIN
         { t => 's', v => \&_DB__handle_restart_and_rerun_commands, },
         } qw(R rerun)),
     (map { $_ => {t => 'm', v => '_handle_cmd_wrapper_commands' }, }
-        qw(a A b B e E h i l L M o O v w W)),
+        qw(a A b B e E h l L M o O v w W)),
 );
 };
 
@@ -5467,37 +5499,6 @@ sub cmd_h {
         print_help($summary);
     }
 } ## end sub cmd_h
-
-=head3 C<cmd_i> - inheritance display
-
-Display the (nested) parentage of the module or object given.
-
-=cut
-
-sub cmd_i {
-    my $cmd  = shift;
-    my $line = shift;
-
-    require mro;
-
-    foreach my $isa ( split( /\s+/, $line ) ) {
-        $evalarg = $isa;
-        # The &-call is here to ascertain the mutability of @_.
-        ($isa) = &DB::eval;
-        no strict 'refs';
-        print join(
-            ', ',
-            map {
-                "$_"
-                  . (
-                    defined( ${"$_\::VERSION"} )
-                    ? ' ' . ${"$_\::VERSION"}
-                    : undef )
-              } @{mro::get_linear_isa(ref($isa) || $isa)}
-        );
-        print "\n";
-    }
-} ## end sub cmd_i
 
 =head3 C<cmd_l> - list lines (command)
 
