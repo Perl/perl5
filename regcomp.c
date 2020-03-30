@@ -1502,10 +1502,8 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 					 : data->pos_min + data->pos_delta));
         }
 
-        if (data->flags & SF_BEFORE_EOL)
-            data->substrs[i].flags |= (data->flags & SF_BEFORE_EOL);
-        else
-            data->substrs[i].flags &= ~SF_BEFORE_EOL;
+        data->substrs[i].flags &= ~SF_BEFORE_EOL;
+        data->substrs[i].flags |= data->flags & SF_BEFORE_EOL;
         data->substrs[i].minlenp = minlenp;
         data->substrs[i].lookbehind = 0;
     }
