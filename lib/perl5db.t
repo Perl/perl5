@@ -2946,6 +2946,26 @@ SKIP:
        );
 }
 
+{
+    # gh #17661
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'i $obj',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-17661',
+        }
+    );
+
+    $wrapper->output_like(
+        qr/C5, C1, C2, C3, C4/,
+        q/check for reasonable result/,
+       );
+}
+
 SKIP:
 {
     $Config{usethreads}
