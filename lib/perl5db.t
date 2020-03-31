@@ -2966,6 +2966,31 @@ SKIP:
        );
 }
 
+{
+    # gh #17661 related - C<l $var> where $var is lexical
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'l $x',
+                'l $y',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-17661b',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/sub bar/,
+        q/check bar was listed/,
+       );
+    $wrapper->contents_like(
+        qr/sub foo/,
+        q/check foo was listed/,
+       );
+}
+
 SKIP:
 {
     $Config{usethreads}
