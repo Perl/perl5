@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.46';
+$VERSION = '1.47';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -1011,6 +1011,10 @@ disable compile-time warnings you need to rewrite the code like this:
 	 my $a =+ 2;
 	 my $b; chop $b;
      }
+
+And note that unlike the first example, this will permanently set C<$^W>
+since it cannot both run during compile-time and be localized to a
+run-time block.
 
 The other big problem with C<$^W> is the way you can inadvertently
 change the warning setting in unexpected places in your code.  For example,

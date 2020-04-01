@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.46";
+our $VERSION = "1.47";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -688,6 +688,10 @@ disable compile-time warnings you need to rewrite the code like this:
 	 my $a =+ 2;
 	 my $b; chop $b;
      }
+
+And note that unlike the first example, this will permanently set C<$^W>
+since it cannot both run during compile-time and be localized to a
+run-time block.
 
 The other big problem with C<$^W> is the way you can inadvertently
 change the warning setting in unexpected places in your code.  For example,
