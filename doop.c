@@ -442,9 +442,6 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
      * assume cannot */
     if (! out_is_utf8 && (PL_op->op_private & OPpTRANS_CAN_FORCE_UTF8)) {
         inplace = FALSE;
-        if (max_expansion < 2) {
-            max_expansion = 2;
-        }
     }
 
     s = (U8*)SvPV_nomg(sv, len);
