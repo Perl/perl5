@@ -7475,7 +7475,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             t_cp_end = MIN(IV_MAX, t_cp + span - 1);
 
             if (r_cp == TR_SPECIAL_HANDLING) {
-                r_cp_end = TR_SPECIAL_HANDLING;
+
+                /* If unmatched lhs code points map to the final map, use that
+                 * value.  This being set to TR_SPECIAL_HANDLING indicates that
+                 * we don't have a final map: unmatched lhs code points are
+                 * simply deleted */
+                r_cp_end = (del) ? TR_SPECIAL_HANDLING : final_map;
             }
             else {
                 r_cp_end = MIN(IV_MAX, r_cp + span - 1);
