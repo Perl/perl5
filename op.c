@@ -6972,16 +6972,17 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * allocated, then copied.  If the replacement for every character in every
      * possible string takes up no more bytes than the the character it
      * replaces, then it can be edited in place.  Otherwise the replacement
-     * could "grow", depending on the strings being processed.  Some inputs
-     * won't grow, and might even shrink under /d, but some inputs could grow,
-     * so we have to assume any given one might grow.  On very long inputs, the
-     * temporary could eat up a lot of memory, so we want to avoid it if
-     * possible.  For non-UTF-8 inputs, everything is single-byte, so can be
-     * edited in place, unless there is something in the pattern that could
-     * force it into UTF-8.  The inversion map makes it feasible to determine
-     * this.  Previous versions of this code pretty much punted on determining
-     * if UTF-8 could be edited in place.  Now, this code is rigorous in making
-     * that determination.
+     * could overwrite a byte we are about to read, depending on the strings
+     * being processed.  The comments and variable names here refer to this as
+     * "growing".  Some inputs won't grow, and might even shrink under /d, but
+     * some inputs could grow, so we have to assume any given one might grow.
+     * On very long inputs, the temporary could eat up a lot of memory, so we
+     * want to avoid it if possible.  For non-UTF-8 inputs, everything is
+     * single-byte, so can be edited in place, unless there is something in the
+     * pattern that could force it into UTF-8.  The inversion map makes it
+     * feasible to determine this.  Previous versions of this code pretty much
+     * punted on determining if UTF-8 could be edited in place.  Now, this code
+     * is rigorous in making that determination.
      *
      * Another characteristic we need to know is whether the lhs and rhs are
      * identical.  If so, and no other flags are present, the only effect of
@@ -7018,9 +7019,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     const bool squash     = cBOOL(o->op_private & OPpTRANS_SQUASH);
     const bool del        = cBOOL(o->op_private & OPpTRANS_DELETE);
 
-    /* Set to true if there is some character < 256 in the lhs that maps to >
-     * 255.  If so, a non-UTF-8 match string can be forced into requiring to be
-     * in UTF-8 by a tr/// operation. */
+    /* Set to true if there is some character < 256 in the lhs that maps to
+     * above 255.  If so, a non-UTF-8 match string can be forced into being in
+     * UTF-8 by a tr/// operation. */
     bool can_force_utf8 = FALSE;
 
     /* What is the maximum expansion factor in UTF-8 transliterations.  If a
@@ -7028,7 +7029,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * expansion factor is 1.5.  This number is used at runtime to calculate
      * how much space to allocate for non-inplace transliterations.  Without
      * this number, the worst case is 14, which is extremely unlikely to happen
-     * in real life, and would require significant memory overhead. */
+     * in real life, and could require significant memory overhead. */
     NV max_expansion = 1.;
 
     UV t_range_count, r_range_count, min_range_count;
@@ -7070,16 +7071,16 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #ifndef EBCDIC
     UV PL_partition_by_byte_length[] = {
         0,
-        0x80,
-        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),
-        (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),
-        ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),
-        ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),
-        ( 2 * (1UL << (5 * UTF_ACCUMULATION_SHIFT)))
+        0x80,   /* Below this is 1 byte representations */
+        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),   /* 2 bytes below this */
+        (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),   /* 3 bytes below this */
+        ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),   /* 4 bytes below this */
+        ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),   /* 5 bytes below this */
+        ( 2 * (1UL << (5 * UTF_ACCUMULATION_SHIFT)))    /* 6 bytes below this */
 
 #  ifdef UV_IS_QUAD
                                                     ,
-        ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))
+        ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))    /* 7 bytes below this */
 #  endif
 
     };
@@ -7510,6 +7511,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                  * we use the above sample data.  The t_cp chunk must be any
                  * contiguous subset of M, N, O, P, and/or Q.
                  *
+                 * In the first pass, calculate if there is any possible input
+                 * string that has a character whose transliteration will be
+                 * longer than it.  If none, the transliteration may be done
+                 * in-place, as it can't write over a so-far unread byte.
+                 * Otherwise, a copy must first be made.  This could be
+                 * expensive for long inputs.
+                 *
                  * In the first pass, the t_invlist has been partitioned so
                  * that all elements in any single range have the same number
                  * of bytes in their UTF-8 representations.  And the r space is
@@ -7533,15 +7541,25 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     && r_cp_end != TR_SPECIAL_HANDLING
                     && UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end))
                 {
-                    /* Consider tr/\xCB/\X{E000}/.  The maximum expansion
-                     * factor is 1 byte going to 3 if the lhs is not UTF-8, but
-                     * 2 bytes going to 3 if it is in UTF-8.  We could pass two
-                     * different values so doop could choose based on the
-                     * UTF-8ness of the target.  But khw thinks (perhaps
-                     * wrongly) that is overkill.  It is used only to make sure
-                     * we malloc enough space.  If no target string can force
-                     * the result to be UTF-8, then we don't have to worry
-                     * about this */
+                    /* Here, we will need to make a copy of the input string
+                     * before doing the transliteration.  The worst possible
+                     * case is an expansion ratio of 14:1. This is rare, and
+                     * we'd rather allocate only the necessary amount of extra
+                     * memory for that copy.  We can calculate the worst case
+                     * for this particular transliteration is by keeping track
+                     * of the expansion factor for each range.
+                     *
+                     * Consider tr/\xCB/\X{E000}/.  The maximum expansion
+                     * factor is 1 byte going to 3 if the target string is not
+                     * UTF-8, but 2 bytes going to 3 if it is in UTF-8.  We
+                     * could pass two different values so doop could choose
+                     * based on the UTF-8ness of the target.  But khw thinks
+                     * (perhaps wrongly) that is overkill.  It is used only to
+                     * make sure we malloc enough space.
+                     *
+                     * If no target string can force the result to be UTF-8,
+                     * then we don't have to worry about the case of the target
+                     * string not being UTF-8 */
                     NV t_size = (can_force_utf8 && t_cp < 256)
                                 ? 1
                                 : UVCHR_SKIP(t_cp_end);
