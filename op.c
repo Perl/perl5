@@ -6926,6 +6926,106 @@ Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
     }
 }
 
+STATIC bool
+S_expands(UV t_cp, UV t_cp_end, UV r_cp, UV r_cp_end)
+{
+    /* Returns a boolean as to whether or not there is a code point in the r
+     * range (r_cp..r_cp_end) whose UTF-8 representation is larger than its
+     * corresponding code point in the t range.
+     *
+     * This must be run in the first pass, which makes this task trivial on
+     * ASCII platforms due to the special partitioning in that pass, as
+     * explained below.  Any compiler should then inline this function, but
+     * experience has shown that compilation is not a performance bottleneck,
+     * so it isn't a problem even if it doesn't get inlined.
+     *
+     * During the first pass, the t_invlist has been partitioned so that all
+     * elements in any single range have the same number of bytes in their
+     * UTF-8 representations.  And the r space is either a single byte, or a
+     * range of strictly monotonically increasing code points.  So on ASCII
+     * platforms, the final element in the range will be represented by no
+     * fewer bytes than the initial one.  (See below for EBCDIC.) That means
+     * that, on ASCII platforms, if the final code point in the t range has at
+     * least as many bytes as the final code point in the r, then all code
+     * points in the t range have at least as many bytes as their corresponding
+     * r range element.  But if the final code point has more bytes than the
+     * corresponding t range one, at least that transliteration grows in
+     * length.  As an example, suppose we had
+     *      tr/\x{fff0}-\x{fff1}/\x{ffff}-\x{10000}/
+     * The UTF-8 for all but 10000 occupies 3 bytes on ASCII platforms.  We
+     * have deliberately set up the data structure so that any range in the lhs
+     * gets split into chunks for processing, such that every code point in a
+     * chunk has the same number of UTF-8 bytes.  We only have to check the
+     * final code point in the rhs against any code point in the lhs.
+     *
+     * On EBCDIC platforms, the above is true for any r range whose final code
+     * point is above 255.  But ranges below it could have a mixture of one and
+     * two byte UTF-8 representations, so special code is needed for
+     * determining that.
+     */
+
+#ifndef EBCDIC
+
+    /* On ASCII platforms, the lengths needed to represent code points in UTF-8
+     * are monotonically increasing with code point.  Thus if the final code
+     * point in the t range is not greater than the corresponding final code
+     * point in the r range, there is no growth */
+    PERL_UNUSED_ARG(t_cp);
+    PERL_UNUSED_ARG(r_cp);
+
+    return UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end);
+
+#else
+
+    /* But on EBCDIC platforms, there is a mixture of 1 and 2 byte
+     * representations for characters below 256.  But above that, everything
+     * behaves like the ASCII case */
+    if (t_cp_end > 255 || r_cp_end > 255) {
+        return UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end);
+    }
+
+    /* Here, is in range 0-255: UTF-8 size is 1 or 2.
+     *
+     * Everything SPACE and below is 1 byte, so can't be larger than the lhs */
+    if (r_cp_end <= ' ') {
+        return FALSE;
+    }
+
+    /* Handle the case of everything on the lhs mapping to the final mapping on
+     * the rhs */
+    if (r_cp == TR_SPECIAL_HANDLING) {
+
+        /* If the final mapping is size 1, then nothing will be less than it */
+        if (UVCHR_IS_INVARIANT(r_cp_end)) {
+            return FALSE;
+        }
+
+        /* Otherwise it is size 2; if anything is size 1, that will grow */
+        while (t_cp <= t_cp_end) {
+            if (UVCHR_IS_INVARIANT(t_cp)) {
+                return TRUE;
+            }
+            t_cp++;
+        }
+
+        return FALSE;
+    }
+
+    /* Handle the general case.  If any character in the lhs is size one, and
+     * it maps to a size two character, it grows */
+    while (t_cp <= t_cp_end) {
+        if (! UVCHR_IS_INVARIANT(t_cp) && UVCHR_IS_INVARIANT(r_cp)) {
+            return TRUE;
+        }
+        t_cp++; r_cp++;
+    }
+
+    return FALSE;
+
+#endif
+
+}
+
 /* Given an OP_TRANS / OP_TRANSR op o, plus OP_CONST ops expr and repl
  * containing the search and replacement strings, assemble into
  * a translation table attached as o->op_pv.
@@ -7065,13 +7165,17 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * done after this has been determined which merges things together to
      * shrink the table for runtime.  For ASCII platforms, the table is
      * trivial, given below, and uses the fundamental characteristics of UTF-8
-     * to construct the values.  For EBCDIC, it isn't so, and we rely on a
-     * table constructed by the perl script that generates these kinds of
-     * things */
-#ifndef EBCDIC
+     * to construct the values.  For EBCDIC, the table is useless for code
+     * points below 256, as they are intermixed in size between 1 and 2.  But
+     * it is the same as ASCII for higher code points, so this just makes the
+     * lower 256 a single pool, and code is executed to tease things apart. */
     UV PL_partition_by_byte_length[] = {
         0,
+#ifdef EBCDIC
+        0x100,  /* Below this is 1 and 2 byte representations */
+#else
         0x80,   /* Below this is 1 byte representations */
+#endif
         (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),   /* 2 bytes below this */
         (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),   /* 3 bytes below this */
         ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),   /* 4 bytes below this */
@@ -7084,8 +7188,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #  endif
 
     };
-
-#endif
 
     PERL_ARGS_ASSERT_PMTRANS;
 
@@ -7516,30 +7618,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                  * longer than it.  If none, the transliteration may be done
                  * in-place, as it can't write over a so-far unread byte.
                  * Otherwise, a copy must first be made.  This could be
-                 * expensive for long inputs.
-                 *
-                 * In the first pass, the t_invlist has been partitioned so
-                 * that all elements in any single range have the same number
-                 * of bytes in their UTF-8 representations.  And the r space is
-                 * either a single byte, or a range of strictly monotonically
-                 * increasing code points.  So the final element in the range
-                 * will be represented by no fewer bytes than the initial one.
-                 * That means that if the final code point in the t range has
-                 * at least as many bytes as the final code point in the r,
-                 * then all code points in the t range have at least as many
-                 * bytes as their corresponding r range element.  But if that's
-                 * not true, the transliteration of at least the final code
-                 * point grows in length.  As an example, suppose we had
-                 *      tr/\x{fff0}-\x{fff1}/\x{ffff}-\x{10000}/
-                 * The UTF-8 for all but 10000 occupies 3 bytes on ASCII
-                 * platforms.  We have deliberately set up the data structure
-                 * so that any range in the lhs gets split into chunks for
-                 * processing, such that every code point in a chunk has the
-                 * same number of UTF-8 bytes.  We only have to check the final
-                 * code point in the rhs against any code point in the lhs. */
+                 * expensive for long inputs. */
                 if ( ! pass2
                     && r_cp_end != TR_SPECIAL_HANDLING
-                    && UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end))
+                    && S_expands(t_cp, t_cp_end, r_cp, r_cp_end))
                 {
                     /* Here, we will need to make a copy of the input string
                      * before doing the transliteration.  The worst possible
