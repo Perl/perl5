@@ -467,8 +467,9 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     else {
         /* Here, we can't edit in place.  We have no idea how much, if any,
          * this particular input string will grow.  However, the compilation
-         * calculated the maximum expansion possible.  Use that to allocale
-         * based on the worst case scenario. */
+         * calculated the maximum expansion possible.  Use that to allocate
+         * based on the worst case scenario.  (First +1 is to round up; 2nd is
+         * for \0) */
 	Newx(d, (STRLEN) (len * max_expansion + 1 + 1), U8);
 	d0 = d;
     }
