@@ -11739,16 +11739,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 } else if ( paren == '+' ) {
                     num = RExC_npar + num - 1;
                 }
-                /* We keep track how many GOSUB items we have produced.
-                   To start off the ARG2L() of the GOSUB holds its "id",
-                   which is used later in conjunction with RExC_recurse
-                   to calculate the offset we need to jump for the GOSUB,
-                   which it will store in the final representation.
-                   We have to defer the actual calculation until much later
-                   as the regop may move.
-                 */
 
-                ret = reg2Lanode(pRExC_state, GOSUB, num, RExC_recurse_count);
                 if (num >= RExC_npar) {
 
                     /* It might be a forward reference; we can't fail until we
@@ -11764,6 +11755,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         REQUIRE_PARENS_PASS;
                     }
                 }
+
+                /* We keep track how many GOSUB items we have produced.
+                   To start off the ARG2L() of the GOSUB holds its "id",
+                   which is used later in conjunction with RExC_recurse
+                   to calculate the offset we need to jump for the GOSUB,
+                   which it will store in the final representation.
+                   We have to defer the actual calculation until much later
+                   as the regop may move.
+                 */
+                ret = reg2Lanode(pRExC_state, GOSUB, num, RExC_recurse_count);
                 RExC_recurse_count++;
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                     "%*s%*s Recurse #%" UVuf " to %" IVdf "\n",
