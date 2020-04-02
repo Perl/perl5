@@ -2527,6 +2527,11 @@ EOF
                       "", {}, "*COMMIT caused positioning beyond EOS");
     }
 
+    {   # [GH #17486]    Previously assertion failure
+        fresh_perl_is('0=~/(?iaa)ss\337(?0)|/',
+                      "", {}, "EXACTFUP node isn't changed into something else");
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
@@ -2536,3 +2541,4 @@ EOF
 } # End of sub run_tests
 
 1;
+0=~/(?iaa)ss\337(?0)|/

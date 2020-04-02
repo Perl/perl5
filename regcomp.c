@@ -4440,7 +4440,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 s++;
             }
         }
-	else {
+	else if (OP(scan) != EXACTFAA_NO_TRIE) {
 
             /* Non-UTF-8 pattern, not EXACTFAA node.  Look for the multi-char
              * folds that are all Latin1.  As explained in the comments
