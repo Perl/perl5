@@ -6982,9 +6982,29 @@ siphash24(SV *state_sv, SV *str_sv)
     {
         STRLEN state_len;
         STRLEN str_len;
-        U8 *state_pv= (U8*)SvPV(state_sv,state_len);
         U8 *str_pv= (U8*)SvPV(str_sv,str_len);
+        /* (U8*)SvPV(state_sv, state_len) return differs between little-endian *
+         * and big-endian. It's the same values, but in a different order.     *
+         * On big-endian architecture, we transpose the values into the same   *
+         * order as for little-endian, so that we can test against the same    *
+         * test vectors.                                                       *
+         * We could alternatively alter the code that produced state_sv to     *
+         * output identical arrangements for big-endian and little-endian.     */
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+        U8 *state_pv= (U8*)SvPV(state_sv,state_len);
         if (state_len!=32) croak("siphash state should be exactly 32 bytes");
+#else
+        U8 *temp_pv = (U8*)SvPV(state_sv, state_len);
+        U8 state_pv[32];
+        int i;
+        if (state_len!=32) croak("siphash state should be exactly 32 bytes");
+        for( i = 0; i < 32; i++ ) { 
+            if     (i <  8) state_pv[ 7 - i] = temp_pv[i];
+            else if(i < 16) state_pv[23 - i] = temp_pv[i];
+            else if(i < 24) state_pv[39 - i] = temp_pv[i];
+            else            state_pv[55 - i] = temp_pv[i];
+        }
+#endif
         if (ix) {
             RETVAL= S_perl_hash_siphash_1_3_with_state_64(state_pv,str_pv,str_len);
         } else {
@@ -7142,10 +7162,28 @@ test_siphash24()
         int i,j;
         int failed = 0;
         U32 hash32;
-
+        /* S_perl_siphash_seed_state(seed_pv, state_pv) sets state_pv          *
+         * differently between little-endian and big-endian. It's the same     *
+         * values, but in a different order.                                   *
+         * On big-endian architecture, we transpose the values into the same   *
+         * order as for little-endian, so that we can test against the same    *
+         * test vectors.                                                       *
+         * We could alternatively alter the code that produces state_pv to     *
+         * output identical arrangements for big-endian and little-endian.     */
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
         for( i = 0; i < 16; ++i ) seed_pv[i] = i;
         S_perl_siphash_seed_state(seed_pv, state_pv);
-
+#else
+        U8 temp_pv[32];
+        for( i = 0; i < 16; ++i ) seed_pv[i] = i;
+        S_perl_siphash_seed_state(seed_pv, temp_pv);
+        for( i = 0; i < 32; ++i ) {
+            if     (i <  8) state_pv[ 7 - i] = temp_pv[i];
+            else if(i < 16) state_pv[23 - i] = temp_pv[i];
+            else if(i < 24) state_pv[39 - i] = temp_pv[i];
+            else            state_pv[55 - i] = temp_pv[i];
+        }
+#endif
         for( i = 0; i < MAXLEN; ++i )
         {
             in[i] = i;
@@ -7153,18 +7191,37 @@ test_siphash24()
             out.hash= S_perl_hash_siphash_2_4_with_state_64( state_pv, in, i );
 
             hash32= S_perl_hash_siphash_2_4_with_state( state_pv, in, i);
+            /* The test vectors need to reversed here for big-endian architecture   *
+             * Alternatively we could rewrite S_perl_hash_siphash_2_4_with_state_64 *
+             * to produce reversed vectors when run on big-endian architecture      */
+#if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321 /* reverse order of vectors[i] */
+            temp_pv   [0] = vectors[i][0]; /* temp_pv is temporary holder of vectors[i][0] */
+            vectors[i][0] = vectors[i][7];
+            vectors[i][7] = temp_pv[0];
 
+            temp_pv   [0] = vectors[i][1]; /* temp_pv is temporary holder of vectors[i][1] */
+            vectors[i][1] = vectors[i][6];
+            vectors[i][6] = temp_pv[0];
+
+            temp_pv   [0] = vectors[i][2]; /* temp_pv is temporary holder of vectors[i][2] */
+            vectors[i][2] = vectors[i][5];
+            vectors[i][5] = temp_pv[0];
+
+            temp_pv   [0] = vectors[i][3]; /* temp_pv is temporary holder of vectors[i][3] */
+            vectors[i][3] = vectors[i][4];
+            vectors[i][4] = temp_pv[0];
+#endif
             if ( memcmp( out.bytes, vectors[i], 8 ) )
             {
                 failed++;
                 printf( "Error in 64 bit result on test vector of length %d for siphash24\n    have: {", i );
                 for (j=0;j<7;j++)
                     printf( "0x%02x, ", out.bytes[j]);
-                printf( "%02x },\n", out.bytes[7]);
+                printf( "0x%02x },\n", out.bytes[7]);
                 printf( "    want: {" );
                 for (j=0;j<7;j++)
-                    printf( "0x%02x, ", out.bytes[j]);
-                printf( "%02x },\n", out.bytes[7]);
+                    printf( "0x%02x, ", vectors[i][j]);
+                printf( "0x%02x },\n", vectors[i][7]);
             }
             if (hash32 != vectors_32[i]) {
                 failed++;
@@ -7326,29 +7383,66 @@ test_siphash13()
         int i,j;
         int failed = 0;
         U32 hash32;
-
+        /* S_perl_siphash_seed_state(seed_pv, state_pv) sets state_pv          *
+         * differently between little-endian and big-endian. It's the same     *
+         * values, but in a different order.                                   *
+         * On big-endian architecture, we transpose the values into the same   *
+         * order as for little-endian, so that we can test against the same    *
+         * test vectors.                                                       *
+         * We could alternatively alter the code that produces state_pv to     *
+         * output identical arrangements for big-endian and little-endian.     */
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
         for( i = 0; i < 16; ++i ) seed_pv[i] = i;
         S_perl_siphash_seed_state(seed_pv, state_pv);
-
-        for( i = 0; i < MAXLEN; ++i )
+#else
+        U8 temp_pv[32];
+        for( i = 0; i < 16; ++i ) seed_pv[i] = i;
+        S_perl_siphash_seed_state(seed_pv, temp_pv);
+        for( i = 0; i < 32; ++i ) {
+            if     (i <  8) state_pv[ 7 - i] = temp_pv[i];
+            else if(i < 16) state_pv[23 - i] = temp_pv[i];
+            else if(i < 24) state_pv[39 - i] = temp_pv[i];
+            else            state_pv[55 - i] = temp_pv[i];
+        }
+#endif
+        for( i = 0; i < MAXLEN;  ++i )
         {
             in[i] = i;
 
             out.hash= S_perl_hash_siphash_1_3_with_state_64( state_pv, in, i );
 
             hash32= S_perl_hash_siphash_1_3_with_state( state_pv, in, i);
+            /* The test vectors need to reversed here for big-endian architecture   *
+             * Alternatively we could rewrite S_perl_hash_siphash_1_3_with_state_64 *
+             * to produce reversed vectors when run on big-endian architecture      */
+#if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+            temp_pv   [0] = vectors[i][0]; /* temp_pv is temporary holder of vectors[i][0] */
+            vectors[i][0] = vectors[i][7];
+            vectors[i][7] = temp_pv[0];
 
+            temp_pv   [0] = vectors[i][1]; /* temp_pv is temporary holder of vectors[i][1] */
+            vectors[i][1] = vectors[i][6];
+            vectors[i][6] = temp_pv[0];
+
+            temp_pv   [0] = vectors[i][2]; /* temp_pv is temporary holder of vectors[i][2] */
+            vectors[i][2] = vectors[i][5];
+            vectors[i][5] = temp_pv[0];
+
+            temp_pv   [0] = vectors[i][3]; /* temp_pv is temporary holder of vectors[i][3] */
+            vectors[i][3] = vectors[i][4];
+            vectors[i][4] = temp_pv[0];
+#endif
             if ( memcmp( out.bytes, vectors[i], 8 ) )
             {
                 failed++;
                 printf( "Error in 64 bit result on test vector of length %d for siphash13\n    have: {", i );
                 for (j=0;j<7;j++)
                     printf( "0x%02x, ", out.bytes[j]);
-                printf( "%02x },\n", out.bytes[7]);
+                printf( "0x%02x },\n", out.bytes[7]);
                 printf( "    want: {" );
                 for (j=0;j<7;j++)
-                    printf( "0x%02x, ", out.bytes[j]);
-                printf( "%02x },\n", out.bytes[7]);
+                    printf( "0x%02x, ", vectors[i][j]);
+                printf( "0x%02x },\n", vectors[i][7]);
             }
             if (hash32 != vectors_32[i]) {
                 failed++;
