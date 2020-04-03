@@ -4522,20 +4522,14 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     U8 *pat = (U8*)STRING(text_node);
     U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
 
-    if (   OP(text_node) == EXACT
-        || OP(text_node) == LEXACT
-        || OP(text_node) == EXACT_REQ8
-        || OP(text_node) == LEXACT_REQ8
-        || OP(text_node) == EXACTL)
-    {
+    if (! isEXACTFish(OP(text_node))) {
 
         /* In an exact node, only one thing can be matched, that first
          * character.  If both the pat and the target are UTF-8, we can just
          * copy the input to the output, avoiding finding the code point of
          * that character */
         if (!is_utf8_pat) {
-            assert(   OP(text_node) != EXACT_REQ8
-                   && OP(text_node) != LEXACT_REQ8);
+            assert(! isEXACT_REQ8(OP(text_node)));
             c2 = c1 = *pat;
         }
         else if (utf8_target) {
@@ -4543,9 +4537,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             Copy(pat, c2_utf8, UTF8SKIP(pat), U8);
             utf8_has_been_setup = TRUE;
         }
-        else if (   OP(text_node) == EXACT_REQ8
-                 || OP(text_node) == LEXACT_REQ8)
-        {
+        else if (isEXACT_REQ8(OP(text_node))) {
             return FALSE;   /* Can only match UTF-8 target */
         }
         else {

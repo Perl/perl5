@@ -5303,12 +5303,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        continue;
 	    }
 	}
-	else if (   OP(scan) == EXACT
-                 || OP(scan) == LEXACT
-                 || OP(scan) == EXACT_REQ8
-                 || OP(scan) == LEXACT_REQ8
-                 || OP(scan) == EXACTL)
-        {
+	else if (PL_regkind[OP(scan)] == EXACT && ! isEXACTFish(OP(scan))) {
 	    SSize_t bytelen = STR_LEN(scan), charlen;
 	    UV uc;
             assert(bytelen);
@@ -5447,11 +5442,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    case PLUS:
 		if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
 		    next = NEXTOPER(scan);
-		    if (   OP(next) == EXACT
-                        || OP(next) == LEXACT
-                        || OP(next) == EXACT_REQ8
-                        || OP(next) == LEXACT_REQ8
-                        || OP(next) == EXACTL
+		    if (   (     PL_regkind[OP(next)] == EXACT
+                            && ! isEXACTFish(OP(next)))
                         || (flags & SCF_DO_STCLASS))
                     {
 			mincount = 1;
@@ -8123,12 +8115,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         DEBUG_PEEP("first:", first, 0, 0);
         /* Ignore EXACT as we deal with it later. */
 	if (PL_regkind[OP(first)] == EXACT) {
-	    if (   OP(first) == EXACT
-	        || OP(first) == LEXACT
-                || OP(first) == EXACT_REQ8
-                || OP(first) == LEXACT_REQ8
-                || OP(first) == EXACTL)
-            {
+	    if (! isEXACTFish(OP(first))) {
 		NOOP;	/* Empty, get anchored substr later. */
             }
 	    else
@@ -8472,9 +8459,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                  && nop == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
-                  && (   fop == EXACT || fop == LEXACT
-                      || fop == EXACT_REQ8 || fop == LEXACT_REQ8
-                      || fop == EXACTL)
+                  && (PL_regkind[fop] == EXACT && ! isEXACTFish(fop))
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
                   && nop == END )
