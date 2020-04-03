@@ -129,6 +129,9 @@ BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 
 #*Literals
 # NOTE: the relative ordering of these types is important do not change it
+# By convention, folding nodes begin with EXACTF; A digit 8 is in the name if
+# and only if it it requires a UTF-8 target string in order to successfully
+# match.
 
 EXACT       EXACT,      str       ; Match this string (flags field is the length).
 
@@ -158,8 +161,6 @@ EXACTFUP    EXACT,      str	  ; Like EXACT, but match using /iu rules; (string n
 # representable in the UTF-8 target string.
 
 EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255
-
-
 EXACT_REQ8   EXACT,      str      ; Like EXACT, but only UTF-8 encoded targets can match
 LEXACT_REQ8  EXACT,  len:str 1    ; Like LEXACT, but only UTF-8 encoded targets can match
 EXACTFU_REQ8 EXACT,    str        ; Like EXACTFU, but only UTF-8 encoded targets can match

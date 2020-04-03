@@ -244,6 +244,49 @@ EXTCONST U8 PL_${varname}_bitmask[] = {
 EOP
 }
 
+sub print_process_EXACTish {
+    my ($out)= @_;
+
+    # Creates some bitmaps for EXACTish nodes.
+
+    my @folded;
+    my @req8;
+
+    my $base;
+    for my $node (@ops) {
+        next unless $node->{type} eq 'EXACT';
+        my $name = $node->{name};
+        $base = $node->{id} if $name eq 'EXACT';
+
+        my $index = $node->{id} - $base;
+
+        # This depends entirely on naming conventions in regcomp.sym
+        $folded[$index] = $name =~ /^EXACTF/ || 0;
+        $req8[$index] = $name =~ /8/ || 0;
+    }
+
+    die "Can't cope with > 32 EXACTish nodes" if @folded > 32;
+
+    my $exactf = sprintf "%X", oct("0b" . join "", reverse @folded);
+    my $req8 =   sprintf "%X", oct("0b" . join "", reverse @req8);
+    print $out <<EOP,
+
+/* Is 'op', known to be of type EXACT, folding? */
+#define isEXACTFish(op) (__ASSERT_(PL_regkind[op] == EXACT) (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
+
+/* Do only UTF-8 target strings match 'op', known to be of type EXACT? */
+#define isEXACT_REQ8(op) (__ASSERT_(PL_regkind[op] == EXACT) (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
+
+#ifndef DOINIT
+EXTCONST U32 PL_EXACTFish_bitmask;
+EXTCONST U32 PL_EXACT_REQ8_bitmask;
+#else
+EXTCONST U32 PL_EXACTFish_bitmask = 0x$exactf;
+EXTCONST U32 PL_EXACT_REQ8_bitmask = 0x$req8;
+#endif /* DOINIT */
+EOP
+}
+
 sub read_definition {
     my ( $file )= @_;
     my ( $seen_sep, $pod_comment )= "";
@@ -752,6 +795,7 @@ print_reg_name($out);
 print_reg_extflags_name($out);
 print_reg_intflags_name($out);
 print_process_flags($out);
+print_process_EXACTish($out);
 read_only_bottom_close_and_rename($out);
 
 do_perldebguts();

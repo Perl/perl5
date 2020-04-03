@@ -1753,4 +1753,18 @@ EXTCONST U8 PL_simple_bitmask[] = {
 };
 #endif /* DOINIT */
 
+/* Is 'op', known to be of type EXACT, folding? */
+#define isEXACTFish(op) (__ASSERT_(PL_regkind[op] == EXACT) (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
+
+/* Do only UTF-8 target strings match 'op', known to be of type EXACT? */
+#define isEXACT_REQ8(op) (__ASSERT_(PL_regkind[op] == EXACT) (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
+
+#ifndef DOINIT
+EXTCONST U32 PL_EXACTFish_bitmask;
+EXTCONST U32 PL_EXACT_REQ8_bitmask;
+#else
+EXTCONST U32 PL_EXACTFish_bitmask = 0x33F8;
+EXTCONST U32 PL_EXACT_REQ8_bitmask = 0x1E00;
+#endif /* DOINIT */
+
 /* ex: set ro: */

@@ -700,7 +700,6 @@ will be lost.
  EXACTFLU8        str        Like EXACTFU, but use /il, UTF-8, (string
                              is folded, and everything in it is above
                              255
-
  EXACT_REQ8       str        Like EXACT, but only UTF-8 encoded targets
                              can match
  LEXACT_REQ8      len:str 1  Like LEXACT, but only UTF-8 encoded targets
