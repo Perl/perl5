@@ -20761,29 +20761,14 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 	}
 #endif
         if ( exact ) {
-            switch (OP(REGNODE_p(scan))) {
-                case LEXACT:
-                case EXACT:
-                case LEXACT_REQ8:
-                case EXACT_REQ8:
-                case EXACTL:
-                case EXACTF:
-                case EXACTFU_S_EDGE:
-                case EXACTFAA_NO_TRIE:
-                case EXACTFAA:
-                case EXACTFU:
-                case EXACTFU_REQ8:
-                case EXACTFLU8:
-                case EXACTFUP:
-                case EXACTFL:
-                        if( exact == PSEUDO )
-                            exact= OP(REGNODE_p(scan));
-                        else if ( exact != OP(REGNODE_p(scan)) )
-                            exact= 0;
-                case NOTHING:
-                    break;
-                default:
+            if (PL_regkind[OP(REGNODE_p(scan))] == EXACT) {
+                if (exact == PSEUDO )
+                    exact= OP(REGNODE_p(scan));
+                else if (exact != OP(REGNODE_p(scan)) )
                     exact= 0;
+            }
+            else if (OP(REGNODE_p(scan)) != NOTHING) {
+                exact= 0;
             }
         }
         DEBUG_PARSE_r({
