@@ -73,6 +73,19 @@ sub multi_char_folds ($$) {
     die "Incorrect format '$format' for Case_Folding inversion map"
                                                         unless $format eq 'al';
 
+    my %inverse_latin1_folds;
+    for my $i (0 .. @$cp_ref - 1) {
+        next if ref $folds_ref->[$i];   # multi-char fold
+        next if $folds_ref->[$i] == 0;  # Not folded
+        my $cp_base = $cp_ref->[$i];
+
+        for my $j ($cp_base .. $cp_ref->[$i+1] - 1) {
+            my $folded_base = $folds_ref->[$i];
+            next if $folded_base > 255;         # only interested in Latin1
+            push @{$inverse_latin1_folds{$folded_base + $j - $cp_base}}, $j;
+        }
+    }
+
     my @folds;
     my @output_folds;
 
@@ -118,9 +131,11 @@ sub multi_char_folds ($$) {
             my $this_ord = $this_fold_ref->[$j];
             undef $this_fold_ref->[$j];
             
-            if ($this_ord < 256 && chr($this_ord) =~ /\p{Cased}/) {
-                my $uc = ord(uc(chr($this_ord)));
-                @{$this_fold_ref->[$j]} = ( $this_ord, $uc);
+            # If the fold is to a Latin1-range cased letter, replace the entry
+            # with an array which also includes everything that folds to it.
+            if (exists $inverse_latin1_folds{$this_ord}) {
+                push @{$this_fold_ref->[$j]},
+                      ( $this_ord, @{$inverse_latin1_folds{$this_ord}} );
             }
             else {  # Otherwise, just itself. (gen_combinations() needs a ref)
                 @{$this_fold_ref->[$j]} = ( $this_ord );
