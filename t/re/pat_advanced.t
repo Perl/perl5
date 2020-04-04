@@ -2541,4 +2541,3 @@ EOF
 } # End of sub run_tests
 
 1;
-0=~/(?iaa)ss\337(?0)|/
