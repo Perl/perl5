@@ -14547,6 +14547,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * things */
                     maybe_exactfu = FALSE;
 
+                    /* Although these two characters have folds that are
+                     * locale-problematic, they also have folds to above Latin1
+                     * that aren't a problem.  Doing these now helps at
+                     * runtime. */
+                    if (UNLIKELY(   ender == GREEK_CAPITAL_LETTER_MU
+                                 || ender == LATIN_CAPITAL_LETTER_SHARP_S))
+                    {
+                        goto fold_anyway;
+                    }
+
                     /* Here, we are adding a problematic fold character.
                      * "Problematic" in this context means that its fold isn't
                      * known until runtime.  (The non-problematic code points
@@ -14600,15 +14610,20 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             *(s)++ = (U8) toFOLD(ender);
                         }
                         else {
-                            UV folded = _to_uni_fold_flags(
+                            UV folded;
+
+                          fold_anyway:
+                            folded = _to_uni_fold_flags(
                                     ender,
                                     (U8 *) s,  /* We have allocated extra space
                                                   in 's' so can't run off the
                                                   end */
                                     &added_len,
-                                    FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
-                                                    ? FOLD_FLAGS_NOMIX_ASCII
-                                                    : 0));
+                                    FOLD_FLAGS_FULL
+                                  | ((   ASCII_FOLD_RESTRICTED
+                                      || node_type == EXACTFL)
+                                    ? FOLD_FLAGS_NOMIX_ASCII
+                                    : 0));
                             if (UNLIKELY(len + added_len > max_string_len)) {
                                 overflowed = TRUE;
                                 break;
