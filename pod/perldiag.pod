@@ -3098,6 +3098,12 @@ problem was discovered.  See L<perlre>.
 (F) The range specified in the tr/// or y/// operator had a minimum
 character greater than the maximum character.  See L<perlop>.
 
+=item Invalid reference to group in regex; marked by S<<-- HERE> in m/%s/
+
+(F) The capture group you specified can't possibly exist because the
+number you used is not within the legal range of possible values for
+this machine.
+
 =item Invalid separator character %s in attribute list
 
 (F) Something other than a colon or whitespace was seen between the
