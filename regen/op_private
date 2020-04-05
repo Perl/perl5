@@ -515,9 +515,9 @@ for (qw(trans transr)) {
     addbits($_,
         # There is a character in the lhs representable not using UTF-8 whose
         # replacement requires UTF-8.
-        0 => qw(OPpTRANS_CAN_FORCE_UTF8 CAN_FORCE_UTF8),
-
-        1 => qw(OPpTRANS_USE_SVOP   USE_SVOP),# This is implemented as an svop
+        0 => qw(OPpTRANS_CAN_FORCE_UTF8 CAN_FORCE_UTF8),    # 0-255 range
+                                              # character maps to 256-INF
+        1 => qw(OPpTRANS_USE_SVOP   USE_SVOP),# This is implemented an an svop
                                               # vs pvop
         2 => qw(OPpTRANS_IDENTICAL  IDENT),   # right side is same as left
         3 => qw(OPpTRANS_SQUASH     SQUASH),  # /s
