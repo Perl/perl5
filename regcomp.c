@@ -11705,7 +11705,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     } else
                         num = I32_MAX;
                     if (is_neg) {
-                        /* Some limit for num? */
+                        /* -num is always representable on 1 and 2's complement
+                         * machines */
                         num = -num;
                     }
                 }
