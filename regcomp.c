@@ -11703,8 +11703,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     ) {
                         num = (I32)unum;
                         RExC_parse = (char*)endptr;
-                    } else
-                        num = I32_MAX;
+                    }
+                    else {  /* Overflow, or something like that.  Position
+                               beyond all digits for the message */
+                        while (RExC_parse < RExC_end && isDIGIT(*RExC_parse))  {
+                            RExC_parse++;
+                        }
+                        vFAIL(impossible_group);
+                    }
                     if (is_neg) {
                         /* -num is always representable on 1 and 2's complement
                          * machines */
