@@ -2541,6 +2541,16 @@ EOF
                       "Reference to nonexistent group in regex; marked by <--"
                     . " HERE in m/((?-2147483647) <-- HERE )/ at - line 1.",
                       {}, "Large negative relative capture group");
+        fresh_perl_is('qr/((?+18446744073709551615))/',
+                      "Invalid reference to group in regex; marked by <--"
+                    . " HERE in m/((?+18446744073709551615 <-- HERE ))/ at -"
+                    . " line 1.",
+                      {}, "Too large relative group number");
+        fresh_perl_is('qr/((?-18446744073709551615))/',
+                      "Invalid reference to group in regex; marked by <--"
+                    . " HERE in m/((?-18446744073709551615 <-- HERE ))/ at -"
+                    . " line 1.",
+                      {}, "Too large negative relative group number");
     }
 
 
