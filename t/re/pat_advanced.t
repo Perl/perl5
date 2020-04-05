@@ -2532,6 +2532,13 @@ EOF
                       "", {}, "EXACTFUP node isn't changed into something else");
     }
 
+    {
+        fresh_perl_is('qr/((?-2147483647))/',
+                      "Reference to nonexistent group in regex; marked by <--"
+                    . " HERE in m/((?-2147483647) <-- HERE )/ at - line 1.",
+                      {}, "Large negative relative capture group");
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
