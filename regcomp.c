@@ -11729,16 +11729,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     num = RExC_npar + num;
                     if (num < 1)  {
 
-                        /* It might be a forward reference; we can't fail until
-                         * we know, by completing the parse to get all the
-                         * groups, and then reparsing */
-                        if (ALL_PARENS_COUNTED)  {
-                            RExC_parse++;
+                        RExC_parse++;
                         vFAIL(non_existent_group_msg);
-                        }
-                        else {
-                            REQUIRE_PARENS_PASS;
-                        }
                     }
                 } else if ( paren == '+' ) {
                     num = RExC_npar + num - 1;
