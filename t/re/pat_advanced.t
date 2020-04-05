@@ -2532,7 +2532,11 @@ EOF
                       "", {}, "EXACTFUP node isn't changed into something else");
     }
 
-    {
+    {   # [GH #17593]
+        fresh_perl_is('qr/((?+2147483647))/',
+                      "Invalid reference to group in regex; marked by <--"
+                    . " HERE in m/((?+2147483647) <-- HERE )/ at - line 1.",
+                      {}, "integer overflow, undefined behavior in ASAN");
         fresh_perl_is('qr/((?-2147483647))/',
                       "Reference to nonexistent group in regex; marked by <--"
                     . " HERE in m/((?-2147483647) <-- HERE )/ at - line 1.",

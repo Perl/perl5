@@ -11475,6 +11475,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             const char * endptr;
             const char non_existent_group_msg[]
                                             = "Reference to nonexistent group";
+            const char impossible_group[] = "Invalid reference to group";
 
             if (has_intervening_patws) {
                 RExC_parse++;
@@ -11714,26 +11715,41 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	            vFAIL("Expecting close bracket");
 
               gen_recurse_regop:
-                if ( paren == '-' ) {
+                if (paren == '-' || paren == '+') {
+
+                    /* Don't overflow */
+                    if (UNLIKELY(I32_MAX - RExC_npar < num)) {
+                        RExC_parse++;
+                        vFAIL(impossible_group);
+                    }
+
                     /*
                     Diagram of capture buffer numbering.
                     Top line is the normal capture buffer numbers
                     Bottom line is the negative indexing as from
                     the X (the (?-2))
 
-                    +   1 2    3 4 5 X          6 7
+                        1 2    3 4 5 X   Y      6 7
+                       /(a(x)y)(a(b(c(?+2)d)e)f)(g(h))/
                        /(a(x)y)(a(b(c(?-2)d)e)f)(g(h))/
-                    -   5 4    3 2 1 X          x x
+                    -   5 4    3 2 1 X   Y      x x
 
+                    Resolve to absolute group.  Recall that RExC_npar is +1 of
+                    the actual parenthesis group number.  For lookahead, we
+                    have to compensate for that.  Using the above example, when
+                    we get to Y in the parse, num is 2 and RExC_npar is 6.  We
+                    want 7 for +2, and 4 for -2.
                     */
-                    num = RExC_npar + num;
-                    if (num < 1)  {
+                    if ( paren == '+' ) {
+                        num--;
+                    }
 
+                    num += RExC_npar;
+
+                    if (paren == '-' && num < 1) {
                         RExC_parse++;
                         vFAIL(non_existent_group_msg);
                     }
-                } else if ( paren == '+' ) {
-                    num = RExC_npar + num - 1;
                 }
 
                 if (num >= RExC_npar) {
