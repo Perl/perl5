@@ -424,7 +424,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     s = s0; /* s0 potentially advanced from 'start' */
 
     /* Unroll the loop so that the first 8 digits are branchless except for the
-     * switch.  A ninth one overflows a 32 bit word. */
+     * switch.  A ninth hex one overflows a 32 bit word. */
     switch (len) {
       case 0:
           return 0;
@@ -1281,7 +1281,8 @@ If you constrain the portion of C<pv> that is looked at by this function (by
 passing a non-NULL C<endptr>), and if the intial bytes of that portion form a
 valid value, it will return TRUE, setting C<*endptr> to the byte following the
 final digit of the value.  But if there is no constraint at what's looked at,
-all of C<pv> must be valid in order for TRUE to be returned.
+all of C<pv> must be valid in order for TRUE to be returned.  C<*endptr> is
+unchanged from its value on input if FALSE is returned;
 
 The only characters this accepts are the decimal digits '0'..'9'.
 
