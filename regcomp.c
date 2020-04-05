@@ -13939,10 +13939,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         num > 9
                         /* any numeric escape < RExC_npar is a backref */
                         && num >= RExC_npar
-                        /* cannot be an octal escape if it starts with 8 */
-                        && *RExC_parse != '8'
-                        /* cannot be an octal escape if it starts with 9 */
-                        && *RExC_parse != '9'
+                        /* cannot be an octal escape if it starts with [89] */
+                        && ! inRANGE(*RExC_parse, '8', '9')
                     ) {
                         /* Probably not meant to be a backref, instead likely
                          * to be an octal character escape, e.g. \35 or \777.
