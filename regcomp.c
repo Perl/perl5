@@ -11473,6 +11473,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
             const char * endptr;
+            const char non_existent_group_msg[]
+                                            = "Reference to nonexistent group";
+
             if (has_intervening_patws) {
                 RExC_parse++;
                 vFAIL("In '(?...)', the '(' and '?' must be adjacent");
@@ -11730,7 +11733,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                          * groups, and then reparsing */
                         if (ALL_PARENS_COUNTED)  {
                             RExC_parse++;
-                            vFAIL("Reference to nonexistent group");
+                        vFAIL(non_existent_group_msg);
                         }
                         else {
                             REQUIRE_PARENS_PASS;
@@ -11748,7 +11751,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     if (ALL_PARENS_COUNTED)  {
                         if (num >= RExC_total_parens) {
                             RExC_parse++;
-                            vFAIL("Reference to nonexistent group");
+                            vFAIL(non_existent_group_msg);
                         }
                     }
                     else {
