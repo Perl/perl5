@@ -643,6 +643,7 @@ use vars qw(
     $filename
     $histfile
     $histsize
+    $histitemminlength
     $IN
     $inhibit_exit
     @ini_INC
@@ -938,6 +939,7 @@ are to be accepted.
 
 @options = qw(
   CommandSet   HistFile      HistSize
+  HistItemMinLength
   hashDepth    arrayDepth    dumpDepth
   DumpDBFiles  DumpPackages  DumpReused
   compactDump  veryCompact   quote
@@ -986,6 +988,7 @@ use vars qw(%optionVars);
     windowSize    => \$window,
     HistFile      => \$histfile,
     HistSize      => \$histsize,
+    HistItemMinLength => \$histitemminlength
 );
 
 =pod
@@ -2821,7 +2824,7 @@ it up.
                 $cmd = $laststep;
             }
             chomp($cmd);    # get rid of the annoying extra newline
-            if (length($cmd) >= 2) {
+            if (length($cmd) >= option_val('HistItemMinLength', 2)) {
                 push( @hist, $cmd );
             }
             push( @truehist, $cmd );
@@ -3731,10 +3734,7 @@ sub _handle_H_command {
         my $i;
 
         for ( $i = $#hist ; $i > $end ; $i-- ) {
-
-            # Print the command  unless it has no arguments.
-            print $OUT "$i: ", $hist[$i], "\n"
-            unless $hist[$i] =~ /^.?$/;
+            print $OUT "$i: ", $hist[$i], "\n";
         }
 
         next CMD;
@@ -7327,7 +7327,7 @@ sub readline {
 
         # Add it to the terminal history (if possible).
         $term->AddHistory($got)
-          if length($got) > 1
+          if length($got) >= option_val("HistItemMinLength", 2)
           and defined $term->Features->{addHistory};
         return $got;
     } ## end if (@typeahead)
