@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.54';
+$VERSION = '1.55';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -5765,6 +5765,9 @@ sub tr_decode_byte {
     return ($from, $to);
 }
 
+my $unmapped = ~0;
+my $special_handling = ~0 - 1;
+
 sub tr_chr {
     my $x = shift;
     if ($x == ord "-") {
@@ -5793,8 +5796,8 @@ sub tr_invmap {
         if (DEBUG) {
             print STDERR "i=$i, from=$this_from, upper=$upper, range=$range\n";
         }
-        next if $map == ~0;
-        next if $map == ~0 - 1;
+        next if $map == $unmapped;
+        next if $map == $special_handling;
         $from .= tr_chr($this_from);
         $to .= tr_chr($map);
         next if $range == 0;    # Single code point
@@ -5826,10 +5829,10 @@ sub tr_decode_utf8 {
         for my $i (0 .. @invlist - 1) {
             printf STDERR "[%d]\t%x\t", $i, $invlist[$i];
             my $map = $map[$i];
-            if ($map == ~0) {
+            if ($map == $unmapped) {
                 print STDERR "TR_UNMAPPED\n";
             }
-            elsif ($map == ~0 - 1) {
+            elsif ($map == $special_handling) {
                 print STDERR "TR_SPECIAL\n";
             }
             else {
