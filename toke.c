@@ -147,6 +147,15 @@ static const char* const ident_var_zero_multi_digit = "Numeric variables with mo
 #define LEX_INTERPCONST		 2 /* NOT USED */
 #define LEX_FORMLINE		 1 /* expecting a format line               */
 
+/* returned to yyl_try() to request it to retry the parse loop, expected to only
+   be returned directly by yyl_fake_eof(), but functions that call yyl_fake_eof()
+   can also return it.
+
+   yylex (aka Perl_yylex) returns 0 on EOF rather than returning -1,
+   other token values are 258 or higher (see perly.h), so -1 should be
+   a safe value here.
+*/
+#define YYL_RETRY (-1)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -7182,13 +7191,13 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
                              we must not do it again */
                     {
                         SvPVCLEAR(PL_linestr);
-                        PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
+                        PL_bufptr = PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
                         PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
                         PL_last_lop = PL_last_uni = NULL;
                         PL_preambled = FALSE;
                         if (PERLDB_LINE_OR_SAVESRC)
                             (void)gv_fetchfile(PL_origfilename);
-                        return yyl_try(aTHX_ s);
+                        return YYL_RETRY;
                     }
                 }
             }
@@ -7201,7 +7210,8 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
         TOKEN(';');
     }
 
-    return yyl_try(aTHX_ s);
+    PL_bufptr = s;
+    return YYL_RETRY;
 }
 
 static int
@@ -8638,18 +8648,26 @@ yyl_try(pTHX_ char *s)
 {
     char *d;
     GV *gv = NULL;
+    int tok;
 
   retry:
     switch (*s) {
     default:
-        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s))
-            return yyl_keylookup(aTHX_ s, gv);
+        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s)) {
+            if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+                return tok;
+            goto retry_bufptr;
+        }
         yyl_croak_unrecognised(aTHX_ s);
 
     case 4:
     case 26:
         /* emulate EOF on ^D or ^Z */
-        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s);
+        if ((tok = yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s)) != YYL_RETRY)
+            return tok;
+    retry_bufptr:
+        s = PL_bufptr;
+        goto retry;
 
     case 0:
 	if ((!PL_rsfp || PL_lex_inwhat)
@@ -8750,7 +8768,9 @@ yyl_try(pTHX_ char *s)
 		update_debugger_info(PL_linestr, NULL, 0);
 	    goto retry;
 	}
-        return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s);
+        if ((tok = yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
 
     case '\r':
 #ifdef PERL_STRICT_CR
@@ -9039,13 +9059,19 @@ yyl_try(pTHX_ char *s)
 		TERM(THING);
 	    }
 	    else if ((*start == ':' && start[1] == ':')
-		  || (PL_expect == XSTATE && *start == ':'))
-                return yyl_keylookup(aTHX_ s, gv);
+                     || (PL_expect == XSTATE && *start == ':')) {
+                if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+                    return tok;
+                goto retry_bufptr;
+            }
 	    else if (PL_expect == XSTATE) {
 		d = start;
 		while (d < PL_bufend && isSPACE(*d)) d++;
-		if (*d == ':')
-                    return yyl_keylookup(aTHX_ s, gv);
+		if (*d == ':') {
+                    if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+                        return tok;
+                    goto retry_bufptr;
+                }
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    if (!isALPHA(*start) && (PL_expect == XTERM
@@ -9059,14 +9085,18 @@ yyl_try(pTHX_ char *s)
 		}
 	    }
 	}
-        return yyl_keylookup(aTHX_ s, gv);
+        if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
 
     case 'x':
 	if (isDIGIT(s[1]) && PL_expect == XOPERATOR) {
 	    s++;
 	    Mop(OP_REPEAT);
 	}
-        return yyl_keylookup(aTHX_ s, gv);
+        if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
 
     case '_':
     case 'a': case 'A':
@@ -9095,7 +9125,9 @@ yyl_try(pTHX_ char *s)
 	      case 'X':
     case 'y': case 'Y':
     case 'z': case 'Z':
-        return yyl_keylookup(aTHX_ s, gv);
+        if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
     }
 }
 

@@ -62,7 +62,6 @@ Execution of - aborted due to compilation errors.
 EXPECTED
 
 {
-    local $::TODO = "yyl_try recursion bug";
     my $work = tempfile;
     open my $fh, ">", $work or die;
     binmode $fh;
