@@ -340,7 +340,8 @@
 #  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
 #    define HASATTRIBUTE_WARN_UNUSED_RESULT
 #  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
+/* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
+#  if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4 /* 4.7 -> */
 #    define HASATTRIBUTE_ALWAYS_INLINE
 #  endif
 #endif
@@ -371,7 +372,10 @@
 #  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
 #endif
 #ifdef HASATTRIBUTE_ALWAYS_INLINE
-#  define __attribute__always_inline__      __attribute__((always_inline))
+/* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
+#  if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4
+#    define __attribute__always_inline__      __attribute__((always_inline))
+#  endif
 #endif
 
 /* If we haven't defined the attributes yet, define them to blank. */
