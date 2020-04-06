@@ -90,7 +90,7 @@ my %temp_needs_dot  = map { $_ => 1 } qw(
 # but allow override via *_TEST env var if wanted
 # (e.g. PERL5OPT_TEST=-d:NYTProf)
 my @bad_env_vars = qw(
-    PERL5LIB PERLLIB PERL5OPT
+    PERL5LIB PERLLIB PERL5OPT PERL_UNICODE
     PERL_YAML_BACKEND PERL_JSON_BACKEND
 );
 
