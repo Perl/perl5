@@ -6594,9 +6594,10 @@ yyl_sglquote(pTHX_ char *s)
 }
 
 static int
-yyl_dblquote(pTHX_ char *s, STRLEN len)
+yyl_dblquote(pTHX_ char *s)
 {
     char *d;
+    STRLEN len;
     s = scan_str(s,FALSE,FALSE,FALSE,NULL);
     DEBUG_T( {
         if (s)
@@ -9021,7 +9022,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
         return yyl_sglquote(aTHX_ s);
 
     case '"':
-        return yyl_dblquote(aTHX_ s, len);
+        return yyl_dblquote(aTHX_ s);
 
     case '`':
         return yyl_backtick(aTHX_ s);
