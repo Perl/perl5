@@ -307,7 +307,6 @@ struct code {
 
 static const struct code no_code = { NULL, NULL, NULL, NULL, NULL, 0, FALSE };
 
-
 #ifdef DEBUGGING
 
 /* how to interpret the pl_yylval associated with the token */
@@ -6891,7 +6890,7 @@ yyl_my(pTHX_ char *s, I32 my)
     OPERATOR(MY);
 }
 
-static int yyl_try(pTHX_ char*, STRLEN);
+static int yyl_try(pTHX_ char*);
 
 static bool
 yyl_eol_needs_semicolon(pTHX_ char **ps)
@@ -6941,7 +6940,7 @@ yyl_eol_needs_semicolon(pTHX_ char **ps)
 }
 
 static int
-yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
+yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
 {
     char *d;
 
@@ -7189,7 +7188,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
                         PL_preambled = FALSE;
                         if (PERLDB_LINE_OR_SAVESRC)
                             (void)gv_fetchfile(PL_origfilename);
-                        return yyl_try(aTHX_ s, len);
+                        return yyl_try(aTHX_ s);
                     }
                 }
             }
@@ -7202,7 +7201,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
         TOKEN(';');
     }
 
-    return yyl_try(aTHX_ s, len);
+    return yyl_try(aTHX_ s);
 }
 
 static int
@@ -7588,7 +7587,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY___END__:
         if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D'))
             yyl_data_handle(aTHX);
-        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s, len);
+        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s);
 
     case KEY___SUB__:
         FUN0OP(CvCLONE(PL_compcv)
@@ -8635,7 +8634,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
 }
 
 static int
-yyl_try(pTHX_ char *s, STRLEN len)
+yyl_try(pTHX_ char *s)
 {
     char *d;
     GV *gv = NULL;
@@ -8650,7 +8649,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
     case 4:
     case 26:
         /* emulate EOF on ^D or ^Z */
-        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s, len);
+        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s);
 
     case 0:
 	if ((!PL_rsfp || PL_lex_inwhat)
@@ -8751,7 +8750,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		update_debugger_info(PL_linestr, NULL, 0);
 	    goto retry;
 	}
-        return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s, len);
+        return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s);
 
     case '\r':
 #ifdef PERL_STRICT_CR
@@ -9404,7 +9403,7 @@ Perl_yylex(pTHX)
            expecting an operator) have been a sigil.
         */
         bool expected_operator = (PL_expect == XOPERATOR);
-        int ret = yyl_try(aTHX_ s, 0);
+        int ret = yyl_try(aTHX_ s);
         switch (pl_yylval.ival) {
         case OP_BIT_AND:
         case OP_MODULO:
