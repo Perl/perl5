@@ -294,6 +294,11 @@
           : (REGEXP *)NULL)
 #endif
 
+/* some compilers impersonate gcc */
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#  define PERL_IS_GCC 1
+#endif
+
 /* In case Configure was not used (we are using a "canned config"
  * such as Win32, or a cross-compilation setup, for example) try going
  * by the gcc major and minor versions.  One useful URL is
@@ -373,7 +378,7 @@
 #endif
 #ifdef HASATTRIBUTE_ALWAYS_INLINE
 /* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
-#  if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4
+#  if !defined(PERL_IS_GCC) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4)
 #    define __attribute__always_inline__      __attribute__((always_inline))
 #  endif
 #endif
