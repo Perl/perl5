@@ -5818,6 +5818,24 @@ sub tr_invmap {
     return ($from, $to);
 }
 
+sub dump_invmap {
+    my ($invlist_ref, $map_ref) = @_;
+
+    for my $i (0 .. @$invlist_ref - 1) {
+        printf STDERR "[%d]\t%x\t", $i, $invlist_ref->[$i];
+        my $map = $map_ref->[$i];
+        if ($map == $unmapped) {
+            print STDERR "TR_UNMAPPED\n";
+        }
+        elsif ($map == $special_handling) {
+            print STDERR "TR_SPECIAL\n";
+        }
+        else {
+            printf STDERR "%x\n", $map;
+        }
+    }
+}
+
 sub tr_decode_utf8 {
     my($tr_av, $flags) = @_;
     printf STDERR "flags=0x%x\n", $flags if DEBUG;
@@ -5825,21 +5843,7 @@ sub tr_decode_utf8 {
     my @invlist = unpack("J*", $invlist->PV);
     my @map = unpack("J*", $tr_av->ARRAYelt(1)->PV);
 
-    if (DEBUG) {
-        for my $i (0 .. @invlist - 1) {
-            printf STDERR "[%d]\t%x\t", $i, $invlist[$i];
-            my $map = $map[$i];
-            if ($map == $unmapped) {
-                print STDERR "TR_UNMAPPED\n";
-            }
-            elsif ($map == $special_handling) {
-                print STDERR "TR_SPECIAL\n";
-            }
-            else {
-                printf STDERR "%x\n", $map;
-            }
-        }
-    }
+    dump_invmap(\@invlist, \@map) if DEBUG;
 
     my ($from, $to) = tr_invmap(\@invlist, \@map);
 
