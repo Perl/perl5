@@ -5658,8 +5658,9 @@ sub double_delim {
 # Escape a characrter.
 # Only used by tr///, so backslashes hyphens
 
-sub pchr { # ASCII
+sub pchr {
     my($n) = @_;
+    return sprintf("\\x{%X}", $n) if $n > 255;
     if ($n == ord '\\') {
 	return '\\\\';
     } elsif ($n == ord "-") {
@@ -5768,17 +5769,6 @@ sub tr_decode_byte {
 my $unmapped = ~0;
 my $special_handling = ~0 - 1;
 
-sub tr_chr {
-    my $x = shift;
-    if ($x == ord "-") {
-	return "\\-";
-    } elsif ($x == ord "\\") {
-	return "\\\\";
-    } else {
-	return chr $x;
-    }
-}
-
 sub tr_invmap {
     my ($invlist_ref, $map_ref) = @_;
 
@@ -5798,16 +5788,16 @@ sub tr_invmap {
         }
         next if $map == $unmapped;
         next if $map == $special_handling;
-        $from .= tr_chr($this_from);
-        $to .= tr_chr($map);
+        $from .= pchr($this_from);
+        $to .= pchr($map);
         next if $range == 0;    # Single code point
         if ($range == 1) {      # Adjacent code points
-            $from .= tr_chr($this_from + 1);
-            $to   .= tr_chr($map + 1);
+            $from .= pchr($this_from + 1);
+            $to   .= pchr($map + 1);
         }
         elsif ($upper != $infinity) {
-            $from .= "-" . tr_chr($this_from + $range);
-            $to   .= "-" . tr_chr($map + $range);
+            $from .= "-" . pchr($this_from + $range);
+            $to   .= "-" . pchr($map + $range);
         }
         else {
             $from .= "-INFTY";
