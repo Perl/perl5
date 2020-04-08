@@ -5661,36 +5661,21 @@ sub double_delim {
 sub pchr {
     my($n) = @_;
     return sprintf("\\x{%X}", $n) if $n > 255;
-    if ($n == ord '\\') {
-	return '\\\\';
-    } elsif ($n == ord "-") {
-	return "\\-";
-    } elsif (utf8::native_to_unicode($n) >= utf8::native_to_unicode(ord(' '))
-             and utf8::native_to_unicode($n) <= utf8::native_to_unicode(ord('~')))
-    {
-        # I'm presuming a regex is not ok here, otherwise we could have used
-        # /[[:print:]]/a to get here
-	return chr($n);
-    } elsif ($n == ord "\a") {
-	return '\\a';
-    } elsif ($n == ord "\b") {
-	return '\\b';
-    } elsif ($n == ord "\t") {
-	return '\\t';
-    } elsif ($n == ord "\n") {
-	return '\\n';
-    } elsif ($n == ord "\e") {
-	return '\\e';
-    } elsif ($n == ord "\f") {
-	return '\\f';
-    } elsif ($n == ord "\r") {
-	return '\\r';
-    } elsif ($n >= ord("\cA") and $n <= ord("\cZ")) {
-	return '\\c' . $unctrl{chr $n};
-    } else {
-#	return '\x' . sprintf("%02x", $n);
-	return '\\' . sprintf("%03o", $n);
-    }
+    return '\\\\' if $n == ord '\\';
+    return "\\-" if $n == ord "-";
+    # I'm presuming a regex is not ok here, otherwise we could have used
+    # /[[:print:]]/a to get here
+    return chr($n) if (        utf8::native_to_unicode($n)
+                            >= utf8::native_to_unicode(ord(' '))
+                        and    utf8::native_to_unicode($n)
+                            <= utf8::native_to_unicode(ord('~')));
+
+    my $mnemonic_pos = index("\a\b\e\f\n\r\t", chr($n));
+    return "\\" . substr("abefnrt", $mnemonic_pos, 1) if $mnemonic_pos >= 0;
+
+    return '\\c' . $unctrl{chr $n} if $n >= ord("\cA") and $n <= ord("\cZ");
+#   return '\x' . sprintf("%02x", $n);
+    return '\\' . sprintf("%03o", $n);
 }
 
 # Convert a list of characters into a string suitable for tr/// search or
