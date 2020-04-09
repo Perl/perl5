@@ -145,6 +145,8 @@ L<perldata/Scalar values> for definitions of true and false.
 
 The C<for(each)> modifier is an iterator: it executes the statement once
 for each item in the LIST (with C<$_> aliased to each item in turn).
+There is no syntax to specify a C-style for loop or a lexically scoped
+iteration variable in this form.
 
     print "Hello $_!\n" for qw(world Dolly nurse);
 
