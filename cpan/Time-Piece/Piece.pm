@@ -19,7 +19,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.34';
+our $VERSION = '1.3401';
 
 XSLoader::load( 'Time::Piece', $VERSION );
 
@@ -126,7 +126,7 @@ sub _mktime {
     if ($class->_is_time_struct($time)) {
         my @new_time = @$time;
         my @tm_parts = (@new_time[c_sec .. c_mon], $new_time[c_year]+1900);
-        #TODO: what happens here for data below 1970?
+
         $new_time[c_epoch] = $islocal ? timelocal(@tm_parts) : timegm(@tm_parts);
 
         return wantarray ? @new_time : bless [@new_time[0..9], $islocal], $class;
@@ -806,8 +806,14 @@ sub use_locale {
     #get locale month/day names from posix strftime (from Piece.xs)
     my $locales = _get_localization();
 
-    $locales->{PM} ||= '';
-    $locales->{AM} ||= '';
+    #If AM and PM are the same, set both to ''
+    if (   !$locales->{PM}
+        || !$locales->{AM}
+        || ( $locales->{PM} eq $locales->{AM} ) )
+    {
+        $locales->{PM} = '';
+        $locales->{AM} = '';
+    }
 
     $locales->{pm} = lc $locales->{PM};
     $locales->{am} = lc $locales->{AM};

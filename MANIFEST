@@ -2598,6 +2598,7 @@ cpan/Time-Piece/t/02core_dst.t
 cpan/Time-Piece/t/03compare.t	Test for Time::Piece
 cpan/Time-Piece/t/04mjd.t	Test for Time::Piece
 cpan/Time-Piece/t/05overload.t	Test for Time::Piece
+cpan/Time-Piece/t/06large.t
 cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
 cpan/Time-Piece/t/07arith.t	Test for Time::Piece
 cpan/Time-Piece/t/08truncate.t
