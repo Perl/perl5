@@ -1496,6 +1496,49 @@ tr/\000-\375/A-C/cds;
 tr/\000-\375/A-D/cds;
 tr/\000-\375/A-I/cds;
 ####
+# tr/// with all the flags: empty replacement
+tr/\x{101}-\x{106}//;
+tr/\x{101}-\x{106}//c;
+tr/\x{101}-\x{106}//d;
+tr/\x{101}-\x{106}//s;
+tr/\x{101}-\x{106}//cd;
+tr/\x{101}-\x{106}//ds;
+tr/\x{101}-\x{106}//cs;
+tr/\x{101}-\x{106}//cds;
+tr/\x{101}-\x{106}//r;
+####
+# tr/// with all the flags: short replacement
+tr/\x{101}-\x{106}/\x{111}/;
+tr/\x{101}-\x{106}/\x{111}/c;
+tr/\x{101}-\x{106}/\x{111}/d;
+tr/\x{101}-\x{106}/\x{111}/s;
+tr/\x{101}-\x{106}/\x{111}/cd;
+tr/\x{101}-\x{106}/\x{111}/ds;
+tr/\x{101}-\x{106}/\x{111}/cs;
+tr/\x{101}-\x{106}/\x{111}/cds;
+tr/\x{101}-\x{106}/\x{111}/r;
+####
+# tr/// with all the flags: equal length replacement
+tr/\x{101}-\x{106}/\x{111}-\x{116}/;
+tr/\x{101}-\x{106}/\x{111}-\x{116}/c;
+tr/\x{101}-\x{106}/\x{111}-\x{116}/s;
+tr/\x{101}-\x{106}/\x{111}-\x{116}/cs;
+tr/\x{101}-\x{106}/\x{111}-\x{116}/r;
+####
+# tr across 255/256 boundary, complemented
+tr/\cA-\x{100}/AB/c;
+tr/\cA-\x{100}/A-C/c;
+tr/\cA-\x{100}/A-D/c;
+tr/\cA-\x{100}/A-I/c;
+tr/\cA-\x{100}/AB/cd;
+tr/\cA-\x{100}/A-C/cd;
+tr/\cA-\x{100}/A-D/cd;
+tr/\cA-\x{100}/A-I/cd;
+tr/\cA-\x{100}/AB/cds;
+tr/\cA-\x{100}/A-C/cds;
+tr/\cA-\x{100}/A-D/cds;
+tr/\cA-\x{100}/A-I/cds;
+####
 # [perl #119807] s//\(3)/ge should not warn when deparsed (\3 warns)
 s/foo/\(3);/eg;
 ####
