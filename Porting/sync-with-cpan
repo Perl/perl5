@@ -301,6 +301,8 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
 sub wget {
     my ($url, $saveas) = @_;
     eval {
+        require IO::Socket::SSL;
+        require Net::SSLeay;
         require HTTP::Tiny;
         my $http= HTTP::Tiny->new();
         $http->mirror( $url => $saveas );
