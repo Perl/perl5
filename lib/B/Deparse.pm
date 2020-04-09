@@ -280,6 +280,7 @@ BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
 # possibly undoing optimisations along the way.
 
 sub DEBUG { 0 }
+use if DEBUG, 'Data::Dumper';
 
 sub _pessimise_walk {
     my ($self, $startop) = @_;
@@ -5751,47 +5752,85 @@ sub tr_decode_byte {
     return ($from, $to);
 }
 
-my $unmapped = ~0;
-my $special_handling = ~0 - 1;
+my $infinity = ~0 >> 1;     # IV_MAX
 
-sub tr_invmap {
-    my ($invlist_ref, $map_ref) = @_;
+sub tr_append_to_invlist {
+    my ($list_ref, $current, $next) = @_;
 
-    my $infinity = ~0 >> 1;     # IV_MAX
-    my $from = "";
-    my $to = "";
+    # Appends the range $current..$next-1 to the inversion list $list_ref
 
-    for my $i (0.. @$invlist_ref - 1) {
-        my $this_from = $invlist_ref->[$i];
-        my $map = $map_ref->[$i];
-        my $upper = ($i < @$invlist_ref - 1)
-                     ? $invlist_ref->[$i+1]
-                     : $infinity;
-        my $range = $upper - $this_from - 1;
-        if (DEBUG) {
-            print STDERR "i=$i, from=$this_from, upper=$upper, range=$range\n";
-        }
-        next if $map == $unmapped;
-        next if $map == $special_handling;
-        $from .= pchr($this_from);
-        $to .= pchr($map);
-        next if $range == 0;    # Single code point
-        if ($range == 1) {      # Adjacent code points
-            $from .= pchr($this_from + 1);
-            $to   .= pchr($map + 1);
-        }
-        elsif ($upper != $infinity) {
-            $from .= "-" . pchr($this_from + $range);
-            $to   .= "-" . pchr($map + $range);
+    printf STDERR "%d: %d..%d %s", __LINE__, $current, $next, Dumper $list_ref if DEBUG;
+
+    if (@$list_ref && $list_ref->[-1] == $current) {
+
+        # The new range extends the current final one.  If it is a finite
+        # rane, replace the current final by the new ending.
+        if (defined $next) {
+            $list_ref->[-1] = $next;
         }
         else {
-            $from .= "-INFTY";
-            $to   .= "-INFTY";
+            # The new range extends to infinity, which means the current end
+            # of the inversion list is dangling.  Removing it causes things to
+            # work.
+            pop @$list_ref;
         }
     }
+    else {  # The new range starts after the current final one; add it as a
+            # new range
+        push @$list_ref, $current;
+        push @$list_ref, $next if defined $next;
+    }
 
-    return ($from, $to);
+    print STDERR __LINE__, ": ", Dumper $list_ref if DEBUG;
 }
+
+sub tr_invlist_to_string {
+    my ($list_ref, $to_complement) = @_;
+
+    # Stringify the inversion list $list_ref, possibly complementing it first.
+    # CAUTION: this can modify $list_ref.
+
+    print STDERR __LINE__, ": ", Dumper $list_ref if DEBUG;
+
+    if ($to_complement) {
+
+        # Complementing an inversion list is done by prepending a 0 if it
+        # doesn't have one there already; otherwise removing the leading 0.
+        if ($list_ref->[0] == 0) {
+            shift @$list_ref;
+        }
+        else {
+            unshift @$list_ref, 0;
+        }
+
+        print STDERR __LINE__, ": ", Dumper $list_ref if DEBUG;
+    }
+
+    my $output = "";
+
+    # Every other element is in the list.
+    for (my $i = 0; $i < @$list_ref; $i += 2) {
+        my $base = $list_ref->[$i];
+        $output .= pchr($base);
+        last unless defined $list_ref->[$i+1];
+
+        # The beginning of the next element starts the range of items not in
+        # the list.
+        my $upper = $list_ref->[$i+1] - 1;
+        my $range = $upper - $base;
+        $output .= '-' if $range > 1; # Adjacent characters don't have a
+                                      # minus, though it would be legal to do
+                                      # so
+        $output .= pchr($upper) if $range > 0;
+    }
+
+    print STDERR __LINE__, ": tr_invlist_to_string() returning '$output'\n"
+                                                                       if DEBUG;
+    return $output;
+}
+
+my $unmapped = ~0;
+my $special_handling = ~0 - 1;
 
 sub dump_invmap {
     my ($invlist_ref, $map_ref) = @_;
@@ -5813,26 +5852,70 @@ sub dump_invmap {
 
 sub tr_decode_utf8 {
     my($tr_av, $flags) = @_;
-    printf STDERR "flags=0x%x\n", $flags if DEBUG;
+
+    printf STDERR "\n%s: %d: flags=0x%x\n", __FILE__, __LINE__, $flags if DEBUG;
+
     my $invlist = $tr_av->ARRAYelt(0);
     my @invlist = unpack("J*", $invlist->PV);
     my @map = unpack("J*", $tr_av->ARRAYelt(1)->PV);
 
     dump_invmap(\@invlist, \@map) if DEBUG;
 
-    my ($from, $to) = tr_invmap(\@invlist, \@map);
+    my @from;
+    my @to;
 
-    if ($flags & OPpTRANS_COMPLEMENT) {
-        shift @map;
-        pop @invlist;
-        my $throw_away;
-        ($from, $throw_away) = tr_invmap(\@invlist, \@map);
+    # Go through the whole map
+    for (my $i = 0; $i < @invlist; $i++) {
+        my $map = $map[$i];
+        printf STDERR "%d: i=%d, source=%x, map=%x\n",
+                      __LINE__, $i, $invlist[$i], $map if DEBUG;
+
+        # Ignore any lines that are unmapped
+        next if $map == $unmapped;
+
+        # Calculate this component of the mapping;  First the lhs
+        my $this_from = $invlist[$i];
+        my $next_from = $invlist[$i+1] if $i < @invlist - 1;
+
+        # The length of the rhs is the same as the lhs, except when special
+        my $next_map = $map - $this_from + $next_from
+                            if $map != $special_handling && defined $next_from;
+
+        if (DEBUG) {
+            printf STDERR "%d: i=%d, from=%x, to=%x",
+                          __LINE__, $i, $this_from, $map;
+            printf STDERR ", next_from=%x,", $next_from if defined $next_from;
+            printf STDERR ", next_map=%x", $next_map if defined $next_map;
+            print  STDERR "\n";
+        }
+
+        # Add the lhs.
+        tr_append_to_invlist(\@from, $this_from, $next_from);
+
+        # And, the rhs; special handling doesn't get output as it really is an
+        # unmatched rhs
+        tr_append_to_invlist(\@to, $map, $next_map) if $map != $special_handling;
     }
 
-    if (DEBUG) {
-        print STDERR "Returning ", escape_str($from), "/",
-                                   escape_str($to), "\n";
+    # Done with the input.
+
+    my $to;
+    if (join("", @from) eq join("", @to)) {
+
+        # the rhs is suppressed if identical to the left.  That's because
+        # tr/ABC/ABC/ can be written as tr/ABC//.  (Do this comparison before
+        # any complementing)
+        $to = "";
     }
+    else {
+        $to = tr_invlist_to_string(\@to, 0);  # rhs not complemented
+    }
+
+    my $from = tr_invlist_to_string(\@from,
+                                   ($flags & OPpTRANS_COMPLEMENT) != 0);
+
+    print STDERR "Returning ", escape_str($from), "/",
+                               escape_str($to), "\n" if DEBUG;
     return (escape_str($from), escape_str($to));
 }
 
