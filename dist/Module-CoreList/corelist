@@ -172,7 +172,7 @@ if(exists $Opts{r} ){
     }
 
     my $num_r = numify_version( $Opts{r} );
-    my $version_hash = Module::CoreList->find_version($num_r);
+    my $version_hash = Module::CoreList::find_version($num_r);
 
     if( !$version_hash ) {
         print "\nModule::CoreList has no info on perl $Opts{r}\n\n";
@@ -198,7 +198,7 @@ if(exists $Opts{v} ){
         exit 0;
     }
 
-    my $version_hash = Module::CoreList->find_version($num_v);
+    my $version_hash = Module::CoreList::find_version($num_v);
 
     if( !$version_hash ) {
         print "\nModule::CoreList has no info on perl $Opts{v}\n\n";
@@ -332,7 +332,7 @@ while (@ARGV) {
 		warn "\n$mod  is a bad regex: $errmsg\n";
 		next;
 	    }
-	    my @mod = Module::CoreList->find_modules($re);
+	    my @mod = Module::CoreList::find_modules($re);
 	    if (@mod) {
 		module_version($_, $ver) for @mod;
 	    } else {
@@ -350,7 +350,7 @@ sub module_version {
 
     if ( $Opts{v} ) {
 	my $numeric_v = numify_version($Opts{v});
-	my $version_hash = Module::CoreList->find_version($numeric_v);
+	my $version_hash = Module::CoreList::find_version($numeric_v);
 	if ($version_hash) {
 	    print $mod, " ", $version_hash->{$mod} || 'undef', "\n";
 	    return;
@@ -359,20 +359,20 @@ sub module_version {
     }
 
     my $ret = $Opts{d}
-	? Module::CoreList->first_release_by_date(@_)
-	: Module::CoreList->first_release(@_);
+	? Module::CoreList::first_release_by_date(@_)
+	: Module::CoreList::first_release(@_);
     my $msg = $mod;
     $msg .= " $ver" if $ver;
 
     my $rem = $Opts{d}
-	? Module::CoreList->removed_from_by_date($mod)
-	: Module::CoreList->removed_from($mod);
+	? Module::CoreList::removed_from_by_date($mod)
+	: Module::CoreList::removed_from($mod);
 
 	my $when = maxstr(values %Module::CoreList::released);
     print "\n","Data for $when\n";
 
     if( defined $ret ) {
-        my $deprecated = Module::CoreList->deprecated_in($mod);
+        my $deprecated = Module::CoreList::deprecated_in($mod);
         $msg .= " was ";
         $msg .= "first " unless $ver;
         $msg .= "released with perl " . format_perl_version($ret);
