@@ -28,7 +28,7 @@ if ( @ARGV ) {
 # run under miniperl when nothing but miniperl will build :-(.
 # Text::ParseWords is required in ExtUtils::Liblist::Kid
 
-my @toolchain = qw(cpan/AutoLoader/lib
+my @toolchain = qw(dist/AutoLoader/lib
 		   dist/Carp/lib
 		   dist/PathTools dist/PathTools/lib
 		   cpan/ExtUtils-Install/lib

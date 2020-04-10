@@ -137,10 +137,6 @@ cpan/autodie/t/utf8_open.t
 cpan/autodie/t/utime.t
 cpan/autodie/t/version.t		autodie - versioning tests
 cpan/autodie/t/version_tag.t
-cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
-cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
-cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
-cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/bignum/lib/bigint.pm		bigint
 cpan/bignum/lib/bignum.pm		bignum
 cpan/bignum/lib/bigrat.pm		bigrat
@@ -2927,6 +2923,10 @@ dist/Attribute-Handlers/t/constants.t			Test constants and Attribute::Handlers
 dist/Attribute-Handlers/t/data_convert.t		Test attribute data conversion
 dist/Attribute-Handlers/t/linerep.t			See if Attribute::Handlers works
 dist/Attribute-Handlers/t/multi.t			See if Attribute::Handlers works
+dist/AutoLoader/lib/AutoLoader.pm	Autoloader base class
+dist/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
+dist/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
+dist/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 dist/autouse/lib/autouse.pm		Load and call a function only when it's used
 dist/autouse/t/autouse.t		See if autouse works
 dist/autouse/t/lib/MyTestModule.pm	Test module for autouse
