@@ -3,7 +3,6 @@
 
 my($incdir, $lib);
 BEGIN {
-    chdir 't' if -d 't';
     if ($^O eq 'dos') {
 	print "1..0 # This test is not 8.3-aware.\n";
 	    exit 0;
