@@ -313,7 +313,7 @@ the fact that the given scope ends at the C<__END__> marker.  A module
 using such variables as package globals will not work properly under the
 B<AutoLoader>.
 
-The C<vars> pragma (see L<perlmod/"vars">) may be used in such
+The C<vars> pragma may be used in such
 situations as an alternative to explicitly qualifying all globals with
 the package namespace.  Variables pre-declared with this pragma will be
 visible to any autoloaded routines (but will not be invisible outside
