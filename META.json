@@ -16,6 +16,7 @@
       "directory" : [
          "cpan",
          "dist/Attribute-Handlers",
+         "dist/AutoLoader",
          "dist/autouse",
          "dist/base",
          "dist/Carp",
