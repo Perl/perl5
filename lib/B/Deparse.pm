@@ -2472,7 +2472,7 @@ sub unop {
 	    return $self->maybe_parens(
 			$self->keyword($name) . " $kid", $cx, 16
 		   );
-	}   
+	}
 	return $self->maybe_parens_unop($name, $kid, $cx);
     } else {
 	return $self->maybe_parens(
@@ -2512,7 +2512,7 @@ sub pp_each { unop(@_, "each") }
 sub pp_values { unop(@_, "values") }
 sub pp_keys { unop(@_, "keys") }
 { no strict 'refs'; *{"pp_r$_"} = *{"pp_$_"} for qw< keys each values >; }
-sub pp_boolkeys { 
+sub pp_boolkeys {
     # no name because its an optimisation op that has no keyword
     unop(@_,"");
 }
