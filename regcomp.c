@@ -16848,7 +16848,7 @@ redo_curchar:
     if (RExC_sets_depth) {  /* If within a recursive call, return in a special
                                regnode */
         RExC_parse++;
-        node = regpnode(pRExC_state, REGEX_SET, (void *) final);
+        node = regpnode(pRExC_state, REGEX_SET, final);
     }
     else {
 
@@ -20456,10 +20456,10 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 }
 
 /*
-- regpnode - emit a temporary node with a void* argument
+- regpnode - emit a temporary node with a SV* argument
 */
 STATIC regnode_offset /* Location. */
-S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, void * arg)
+S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, SV * arg)
 {
     const regnode_offset ret = regnode_guts(pRExC_state, op, regarglen[op], "regpnode");
     regnode_offset ptr = ret;

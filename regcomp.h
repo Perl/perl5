@@ -151,14 +151,13 @@ struct regnode_1 {
     U32 arg1;
 };
 
-/* Node whose argument is 'void *', a pointer to void.  This needs to be used
- * very carefully in situations where pointers won't become invalid because of,
- * say re-mallocs */
+/* Node whose argument is 'SV *'.  This needs to be used very carefully in
+ * situations where pointers won't become invalid because of, say re-mallocs */
 struct regnode_p {
     U8	flags;
     U8  type;
     U16 next_off;
-    void * arg1;
+    SV * arg1;
 };
 
 /* Similar to a regnode_1 but with an extra signed argument */
