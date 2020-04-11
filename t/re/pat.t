@@ -24,7 +24,7 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
-plan tests => 1017;  # Update this when adding/deleting tests.
+plan tests => 1018;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2250,6 +2250,13 @@ SKIP:
         my $result = eval qq{"foo" =~ /$re/};
         is($@ // '', '', "many evals did not die");
         ok($result, "regexp correctly matched");
+    }
+
+    # gh16947: test regexp corruption
+    {
+        fresh_perl_is(q{
+            'xy' =~ /x(?0)|x(?|y|y)/ && print 'ok'
+        }, 'ok', {}, 'gh16947: test regexp corruption');
     }
 
 } # End of sub run_tests
