@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 848;  # Update this when adding/deleting tests.
+plan tests => 852;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1946,6 +1946,30 @@ EOP
     }
     {   # [perl $132164]
         fresh_perl_is('m m0*0+\Rm', "",{},"Undefined behavior in address sanitizer");
+    }
+
+    # gh16947: test regexp corruption (GOSUB)
+    {
+        fresh_perl_is(q{
+            'xy' =~ /x(?0)|x(?|y|y)/ && print 'ok'
+        }, 'ok', {}, 'gh16947: test regexp corruption (GOSUB)');
+    }
+    # gh16947: test fix doesn't break SUSPEND
+    {
+        fresh_perl_is(q{ 'sx' =~ m{ss++}i; print 'ok' },
+                'ok', {}, "gh16947: test fix doesn't break SUSPEND");
+    }
+
+    # gh17743: more regexp corruption via GOSUB
+    {
+        fresh_perl_is(q{
+            "0" =~ /((0(?0)|000(?|0000|0000)(?0))|)/; print "ok"
+        }, 'ok', {}, 'gh17743: test regexp corruption (1)');
+
+        fresh_perl_is(q{
+            "000000000000" =~ /(0(())(0((?0)())|000(?|\x{ef}\x{bf}\x{bd}|\x{ef}\x{bf}\x{bd}))|)/;
+            print "ok"
+        }, 'ok', {}, 'gh17743: test regexp corruption (2)');
     }
 
 } # End of sub run_tests
