@@ -4804,9 +4804,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		}
 
-                if (PERL_ENABLE_TRIE_OPTIMISATION &&
-                        OP( startbranch ) == BRANCH )
-                {
+                if (PERL_ENABLE_TRIE_OPTIMISATION
+                    && OP(startbranch) == BRANCH
+                    && !frame
+                ) {
 		/* demq.
 
                    Assuming this was/is a branch we are dealing with: 'scan'
