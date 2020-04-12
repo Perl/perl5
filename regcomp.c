@@ -4616,10 +4616,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
          * parsing code, as each (?:..) is handled by a different invocation of
          * reg() -- Yves
          */
-        if (PL_regkind[OP(scan)] == EXACT && OP(scan) != LEXACT
-                                          && OP(scan) != LEXACT_REQ8)
+        if (PL_regkind[OP(scan)] == EXACT
+            && OP(scan) != LEXACT
+            && OP(scan) != LEXACT_REQ8
+            && !frame
+        ) {
             join_exact(pRExC_state, scan, &min_subtract, &unfolded_multi_char,
                     0, NULL, depth + 1);
+        }
 
         /* Follow the next-chain of the current node and optimize
            away all the NOTHINGs from it.  */
@@ -5344,8 +5348,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 &&   isALPHA_A(*s)
                 &&  (         OP(scan) == EXACTFAA
                      || (     OP(scan) == EXACTFU
-                         && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(*s))))
-            {
+                         && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(*s)))
+                &&   !frame
+            ) {
                 U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
 
                 OP(scan) = ANYOFM;
@@ -5438,7 +5443,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                 /* This temporary node can now be turned into EXACTFU, and
                  * must, as regexec.c doesn't handle it */
-                if (OP(next) == EXACTFU_S_EDGE) {
+                if (OP(next) == EXACTFU_S_EDGE && !frame) {
                     OP(next) = EXACTFU;
                 }
 
@@ -5446,8 +5451,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     &&   isALPHA_A(* STRING(next))
                     && (         OP(next) == EXACTFAA
                         || (     OP(next) == EXACTFU
-                            && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(* STRING(next)))))
-                {
+                            && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(* STRING(next))))
+                    &&   !frame
+                ) {
                     /* These differ in just one bit */
                     U8 mask = ~ ('A' ^ 'a');
 
@@ -5594,7 +5600,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (  OP(oscan) == CURLYX && data
 		      && data->flags & SF_IN_PAR
 		      && !(data->flags & SF_HAS_EVAL)
-		      && !deltanext && minnext == 1 ) {
+		      && !deltanext && minnext == 1
+                      && !frame
+                ) {
 		    /* Try to optimize to CURLYN.  */
 		    regnode *nxt = NEXTOPER(oscan) + EXTRA_STEP_2ARGS;
 		    regnode * const nxt1 = nxt;
@@ -5644,10 +5652,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext	/* atom is fixed width */
 		      && minnext != 0	/* CURLYM can't handle zero width */
-
                          /* Nor characters whose fold at run-time may be
                           * multi-character */
                       && ! (RExC_seen & REG_UNFOLDED_MULTI_SEEN)
+                      && !frame
 		) {
 		    /* XXXX How to optimize if data == 0? */
 		    /* Optimize to a simpler form.  */
