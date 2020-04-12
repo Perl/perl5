@@ -543,6 +543,8 @@ Returns a L<TAP::Parser::Aggregator> containing the test results.
 
 sub runtests {
     my ( $self, @tests ) = @_;
+        use Data::Dumper;
+        #print STDERR __FILE__, __LINE__, Dumper \@tests;
 
     my $aggregate = $self->_construct( $self->aggregator_class );
 
@@ -555,6 +557,8 @@ sub runtests {
         $self->_make_callback( 'after_runtests', $aggregate );
     };
     my $run = sub {
+        use Data::Dumper;
+        #print STDERR __FILE__, __LINE__, Dumper \@tests;
         $self->aggregate_tests( $aggregate, @tests );
         $finish->();
     };
@@ -606,21 +610,31 @@ sub _aggregate_parallel {
 
     my $jobs = $self->jobs;
     my $mux  = $self->_construct( $self->multiplexer_class );
+    use Data::Dumper;
+    #print STDERR __FILE__, __LINE__, Dumper $jobs;
 
     RESULT: {
+    my $is_podcheck=0;
 
         # Keep multiplexer topped up
         FILL:
+        # XXX <= ?
         while ( $mux->parsers < $jobs ) {
             my $job = $scheduler->get_job;
 
             # If we hit a spinner stop filling and start running.
             last FILL if !defined $job || $job->is_spinner;
+            #print STDERR __FILE__, __LINE__, ": parsers=", $mux->parsers, "; New job at ", time(), " ", Dumper $job if $job->filename =~ /podcheck/;
 
             my ( $parser, $session ) = $self->make_parser($job);
             $mux->add( $parser, [ $session, $job ] );
+            $parser->start_time( $parser->get_time );
+            $parser->start_times( $parser->get_times );
+            $is_podcheck = 1 if $job->filename =~ /podcheck/;
+            #print STDERR __FILE__, __LINE__, ": muxed at ", time(), " ", Dumper $parser, $session if $is_podcheck;
         }
 
+            #print STDERR __FILE__, __LINE__, ": muxed at ", time(), " ", Dumper $mux if $is_podcheck;
         if ( my ( $parser, $stash, $result ) = $mux->next ) {
             my ( $session, $job ) = @$stash;
             if ( defined $result ) {
@@ -736,6 +750,8 @@ sub aggregate_tests {
     # Formatter gets only names.
     $self->formatter->prepare( map { $_->description } $scheduler->get_all );
 
+    use Data::Dumper;
+    #print STDERR __FILE__, __LINE__, ": ", Dumper $self;
     if ( $self->jobs > 1 ) {
         $self->_aggregate_parallel( $aggregate, $scheduler );
     }

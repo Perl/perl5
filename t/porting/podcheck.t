@@ -1,3 +1,4 @@
+
 #!/usr/bin/perl -w
 
 package main;
@@ -35,6 +36,8 @@ BEGIN {
     }
     require '../regen/regen_lib.pl';
 }
+BEGIN{ print STDOUT __FILE__, __LINE__, ": podcheck compilation, execution start_time ", time(), "\n"; }
+#END{ print STDERR __FILE__, __LINE__, ": podcheck execution end_time ", time(), "\n"; }
 
 sub DEBUG { 0 };
 

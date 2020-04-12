@@ -466,7 +466,7 @@ unless (@ARGV) {
     # then comp, to validate that require works
     # then run, to validate that -M works
     # then we know we can -MTestInit for everything else, making life simpler
-    foreach my $dir (qw(base comp run cmd io re opbasic op uni mro perf)) {
+    foreach my $dir (qw(base comp run re uni cmd io opbasic op mro perf)) {
 	_find_tests($dir);
     }
     unless ($::core) {
@@ -514,6 +514,7 @@ unless (@ARGV) {
 	"cmd",
 	"io",
 	"re",
+	"porting",
 	"opbasic",
 	"op",
 	"uni",
@@ -523,7 +524,6 @@ unless (@ARGV) {
 	"dist",
 	"cpan",
 	"perf",
-	"porting",
     );
     my %order= map { $order[$_] => 1+$_ } 0..$#order;
     my $idx= 0;
@@ -609,6 +609,7 @@ EOT
         my ($test_start_time, @starttimes) = 0;
 	if ($show_elapsed_time) {
 	    $test_start_time = Time::HiRes::time();
+	    print STDERR "test=$test: $max, $test_start_time\n";
 	    # times() reports usage by TEST, but we want usage of each
 	    # testprog it calls, so record accumulated times now,
 	    # subtract them out afterwards.  Ideally, we'd take times
@@ -776,6 +777,7 @@ EOT
 	    $failed_tests{$test} = 1;
 	}
 	else {
+	    print STDERR "test=$test, max=$max, $test_start_time\n";
 	    if ($max) {
 		my ($elapsed, $etms) = ("", 0);
 		if ( $show_elapsed_time ) {

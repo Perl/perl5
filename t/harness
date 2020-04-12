@@ -117,17 +117,26 @@ if (@ARGV) {
     unless (@tests) {
 	my @seq = <base/*.t>;
 
-	my @next = qw(comp run cmd io re opbasic op uni mro lib porting perf);
-	push @next, 'japh' if $torture;
-	push @next, 'win32' if $^O eq 'MSWin32';
-	push @next, 'benchmark' if $ENV{PERL_BENCHMARK};
-	push @next, 'bigmem' if $ENV{PERL_TEST_MEMORY};
+	my @next = qw(comp run cmd);
+        my @last = qw(io re opbasic op uni mro lib porting perf);
+	push @last, 'japh' if $torture;
+	push @last, 'win32' if $^O eq 'MSWin32';
+	push @last, 'benchmark' if $ENV{PERL_BENCHMARK};
+	push @last, 'bigmem' if $ENV{PERL_TEST_MEMORY};
 	# Hopefully TAP::Parser::Scheduler will support this syntax soon.
 	# my $next = { par => '{' . join (',', @next) . '}/*.t' };
 	my $next = { par => [
 			     map { "$_/*.t" } @next
 			    ] };
 	@tests = _extract_tests ($next);
+	my $last = { par => [
+			     map { "$_/*.t" } @last
+			    ] };
+	@last = _extract_tests ($last);
+        #use Data::Dumper;
+        #$Data::Dumper::Sortkeys=1;
+        #print STDERR __FILE__, __LINE__, Dumper \@last;
+
 
 	# This is a bit of a game, because we only want to sort these tests in
 	# speed order. base/*.t wants to run first, and ext,lib etc last and in
@@ -147,7 +156,7 @@ if (@ARGV) {
 	@tests = (@seq, @tests);
 	push @seq, $next;
 
-	my @last;
+	#my @last;
 	push @last,
 	    _tests_from_manifest($Config{extensions}, $Config{known_extensions});
 	my %times;
@@ -171,7 +180,8 @@ if (@ARGV) {
 
             # Keep a list of the distinct directory names, and another list of
             # those which contain a file whose name begins with a 0
-            if ( m! \A \.\. /
+            #use re qw(Debug ALL);
+            if ( m! \A (?: \.\. / )?
                                 ( .*? )         # $1 is the directory path name
                             /
                                 ( [^/]* \.t )   # $2 is the .t name
@@ -183,6 +193,7 @@ if (@ARGV) {
                 $serials{$path} = 1 if $2 =~ / \A 0 /x;
             }
         }
+        #print STDERR __FILE__, __LINE__, Dumper \%all_dirs, \%serials;
 
         # We assume that the reason a test file's name begins with a 0 is to
         # order its execution among the tests in its directory.  Hence, a
@@ -207,10 +218,11 @@ if (@ARGV) {
         undef %all_dirs;
         undef %serials;
 
+        #print STDERR __FILE__, __LINE__, Dumper \@last;
 	for (@last) {
             # Treat every file in each non-serial directory as its own
             # "directory", so that it can be executed in parallel
-            m! \A ( \.\. / (?: $non_serials )
+            m! \A ( (?: \.\. / )? (?: $non_serials )
                          / [^/]+ \.t \z | .* [/] ) !x
                 or die "'$_'";
 	    push @{$dir{$1}}, $_;
@@ -219,7 +231,8 @@ if (@ARGV) {
             # as a whole
 	    $total_time{$1} += $times{$_} || 0;
 	}
-        #print STDERR __LINE__, join "\n", sort { $total_time{$b} <=> $total_time{$a} } keys %dir, "  ";
+        #print STDERR __FILE__, __LINE__, Dumper \%dir, \%total_time;
+        #print STDERR __FILE__, __LINE__, join "\n", sort { print STDERR "a='$a'\n" unless defined $total_time{$a};print STDERR "b='$b'\n" unless defined $total_time{$b}; $total_time{$b} <=> $total_time{$a} } keys %dir; #, "  ";
 
 	push @tests, @last;
 
@@ -320,6 +333,9 @@ if ($ENV{PERL_VALGRIND}) {
 if ($state) {
     $h->callback(
 		 after_test => sub {
+                    use Data::Dumper;
+                    use Time::HiRes;
+                    #print STDERR __FILE__, __LINE__,  ": After test: ", time(), "\n", Dumper \@_ if grep { $_ =~ /podcheck/ } @{$_[0]};
 		     $state->observe_test(@_);
 		 }
 		 );
@@ -335,6 +351,9 @@ $h->callback(
 		 my ($args, $job) = @_;
 		 my $test = $job->[0];
 		 _before_fork($options{$test});
+                use Data::Dumper;
+                use Time::HiRes;
+                #print STDERR __FILE__, __LINE__,  ": After fork: ", time(), "\n", Dumper $_[0]->{exec} if grep { $_ =~ /podcheck/ } @{$_[0]->{exec}};
 		 push @{ $args->{switches} }, "-I../../lib";
 	     }
 	     );
@@ -345,9 +364,14 @@ $h->callback(
 		 my $test = $job->[0];
 		 my $options = delete $options{$test};
 		 _after_fork($options);
+                use Data::Dumper;
+                use Time::HiRes;
+                #print STDERR __FILE__, __LINE__,  ": After parser made: ", time(), "\n", Dumper \@_ if grep { $_ =~ /podcheck/ } @{$_[1]};
 	     }
 	     );
 
+use Data::Dumper;
+#print STDERR __FILE__, __LINE__, Dumper \@tests;
 my $agg = $h->runtests(@tests);
 _cleanup_valgrind(\$htoolnm, \$hgrind_ct);
 exit $agg->has_errors ? 1 : 0;

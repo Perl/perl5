@@ -312,6 +312,8 @@ module and related classes for more information on how to use them.
 
 sub next {
     my $self = shift;
+    use Data::Dumper;
+    #print STDERR __FILE__, __LINE__, ": ", time(), " ", Dumper $self if grep { /podcheck/ } @{$self->_iterator->{command}};
     return ( $self->{_iter} ||= $self->_iter )->();
 }
 
@@ -327,6 +329,7 @@ This method merely runs the parser and parses all of the TAP.
 
 sub run {
     my $self = shift;
+    #print STDERR __FILE__, __LINE__, ": ", time(), " ", Dumper $self;
     while ( defined( my $result = $self->next ) ) {
 
         # do nothing
@@ -1384,8 +1387,11 @@ sub _iter {
     my $state       = 'INIT';
     my $state_table = $self->_make_state_table;
 
-    $self->start_time( $self->get_time );
-    $self->start_times( $self->get_times );
+    use Data::Dumper;
+    #print STDERR __FILE__, __LINE__, Dumper $self;
+    $self->start_time( $self->get_time ) unless $self->{start_time};
+    $self->start_times( $self->get_times ) unless $self->{start_times};
+    #print STDERR __FILE__, __LINE__, Dumper $self if grep { /podcheck/ } @{$self->_iterator->{command}};
 
     # Make next_state closure
     my $next_state = sub {
@@ -1479,6 +1485,21 @@ sub _finish {
 
     $self->end_time( $self->get_time );
     $self->end_times( $self->get_times );
+    use Data::Dumper;
+    #print STDERR __FILE__, __LINE__, Dumper $self if grep { /podcheck/ } @{$self->_iterator->{command}};
+#        my $usr  = $end_times->[0] - $start_times->[0];
+#        my $sys  = $end_times->[1] - $start_times->[1];
+#        my $cusr = $end_times->[2] - $start_times->[2];
+#        my $csys = $end_times->[3] - $start_times->[3];
+#        my $total = $usr + $sys + $cusr + $csys;
+#            printf STDERR "%d: cpu=%g, wall=%g ", __LINE__, $total, $elapsed if $total > $elapsed;
+#            print STDERR Dumper $self if $total > $elapsed;
+#            $elapsed = $total if $total > $elapsed;
+#            push @time_report,
+#              $self->time_is_hires
+#                ? sprintf( ' %8d ms', $elapsed * 1000 )
+#                : sprintf( ' %8s s', $elapsed || '<1' );
+#        }
 
     # Avoid leaks
     $self->_iterator(undef);

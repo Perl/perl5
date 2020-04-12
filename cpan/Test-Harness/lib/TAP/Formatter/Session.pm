@@ -189,29 +189,36 @@ sub _make_ok_line {
 }
 
 sub time_report {
+    use Data::Dumper;
+    #print STDERR __FILE__, __LINE__, Dumper \@_;
     my ( $self, $formatter, $parser ) = @_;
 
     my @time_report;
     if ( $formatter->timer ) {
         my $start_time = $parser->start_time;
         my $end_time   = $parser->end_time;
-        if ( defined $start_time and defined $end_time ) {
-            my $elapsed = $end_time - $start_time;
-            push @time_report,
-              $self->time_is_hires
-                ? sprintf( ' %8d ms', $elapsed * 1000 )
-                : sprintf( ' %8s s', $elapsed || '<1' );
-        }
         my $start_times = $parser->start_times();
         my $end_times   = $parser->end_times();
         my $usr  = $end_times->[0] - $start_times->[0];
         my $sys  = $end_times->[1] - $start_times->[1];
         my $cusr = $end_times->[2] - $start_times->[2];
         my $csys = $end_times->[3] - $start_times->[3];
+        my $total = $usr + $sys + $cusr + $csys;
+        use Data::Dumper;
+
+        if ( defined $start_time and defined $end_time ) {
+            my $elapsed = $end_time - $start_time;
+            printf STDERR "%d: ratio=%g, cpu=%g, wall=%g %s\n", __LINE__, $total/ $elapsed, $total, $elapsed, $self->{name}, if $total > $elapsed;
+            $elapsed = $total if $total > $elapsed;
+            push @time_report,
+              $self->time_is_hires
+                ? sprintf( ' %8d ms', $elapsed * 1000 )
+                : sprintf( ' %8s s', $elapsed || '<1' );
+        }
         push @time_report,
           sprintf('(%5.2f usr %5.2f sys + %5.2f cusr %5.2f csys = %5.2f CPU)',
                   $usr, $sys, $cusr, $csys,
-                  $usr + $sys + $cusr + $csys);
+                  $total);
     }
 
     return "@time_report";
