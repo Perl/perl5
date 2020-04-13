@@ -2411,7 +2411,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
 	}
     }
-    else  {
+    else {
 	if (isGV_with_GP(sv))
 	    return glob_2number(MUTABLE_GV(sv));
 
@@ -2806,7 +2806,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
 #endif /* NV_PRESERVES_UV */
     }
-    else  {
+    else {
 	if (isGV_with_GP(sv)) {
 	    glob_2number(MUTABLE_GV(sv));
 	    return 0.0;
@@ -16582,7 +16582,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		    negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
 		    FUV_SUBSCRIPT_ARRAY);
 	}
-	else  {
+	else {
 	    /* index is an expression;
 	     * attempt to find a match within the aggregate */
 	    if (obase->op_type == OP_HELEM) {
@@ -16794,7 +16794,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		: varname(agg_gv, '@', agg_targ,
                                 NULL, index_const_iv, FUV_SUBSCRIPT_ARRAY);
 	}
-	else  {
+	else {
 	    /* index is an var */
 	    if (is_hv) {
 		SV * const keysv = find_hash_subscript((const HV*)sv, uninit_sv);

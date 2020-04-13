@@ -3311,7 +3311,7 @@ pipe_tochild1_ast(pPipe p)
             p->shut_on_empty = TRUE;
             b->eof     = TRUE;
             _ckvmssts_noperl(sys$dassgn(p->chan_in));
-        } else  {
+        } else {
             _ckvmssts_noperl(iss);
         }
 

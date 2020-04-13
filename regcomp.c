@@ -6928,7 +6928,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 pRExC_state->code_blocks->count -= n;
             n = 0;
         }
-        else  {
+        else {
             /* ... or failing that, try "" overload */
             while (SvAMAGIC(msv)
                     && (sv = AMG_CALLunary(msv, string_amg))

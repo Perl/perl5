@@ -4259,7 +4259,7 @@ S_scan_const(pTHX_ char *start)
 	    } else if (PL_lex_inpat && SvIVX(PL_linestr) == '\'') {
 		type = "q";
 		typelen = 1;
-	    } else  {
+	    } else {
 		type = "qq";
 		typelen = 2;
 	    }

@@ -774,7 +774,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 			Perl_croak(aTHX_ "More than one argument to '>%c' open",IoTYPE_STD);
 		    }
 		}
-		else  {
+		else {
 		    if (num_svs) {
                         fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
                     }

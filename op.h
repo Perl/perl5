@@ -181,7 +181,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 
 /* things that can be elements of op_aux */
-typedef union  {
+typedef union {
     PADOFFSET pad_offset;
     SV        *sv;
     IV        iv;

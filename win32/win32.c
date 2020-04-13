@@ -3913,7 +3913,7 @@ RETRY:
 	w32_child_pids[w32_num_children] = (DWORD)ret;
 	++w32_num_children;
     }
-    else  {
+    else {
 	DWORD status;
 	win32_msgwait(aTHX_ 1, &ProcessInformation.hProcess, INFINITE, NULL);
 	/* FIXME: if msgwait returned due to message perhaps forward the
