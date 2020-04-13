@@ -1130,7 +1130,7 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 
 /* stuff for OP_ARGCHECK */
 
-struct  op_argcheck_aux {
+struct op_argcheck_aux {
     UV   params;     /* number of positional parameters */
     UV   opt_params; /* number of optional positional parameters */
     char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
