@@ -38,6 +38,8 @@ jobs:
       - uses: actions/checkout@v1
         with:
             fetch-depth: 0
+      - name: fix git remote credential
+        run: git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
