@@ -24670,8 +24670,10 @@ S_parse_uniprop_string(pTHX_
         /* Try again stripping off any initial 'Is'.  This is because we
          * promise that an initial Is is optional.  The same isn't true of
          * names that start with 'In'.  Those can match only blocks, and the
-         * lookup table already has those accounted for. */
-        if (starts_with_Is) {
+         * lookup table already has those accounted for.  The lookup table also
+         * has already accounted for Perl extensions (without and = sign)
+         * starting with 'i's'. */
+        if (starts_with_Is && equals_pos >= 0) {
             lookup_name += 2;
             lookup_len -= 2;
             equals_pos -= 2;
