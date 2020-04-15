@@ -242,7 +242,7 @@ L<C<chroot>|/chroot FILENAME>,
 L<C<fcntl>|/fcntl FILEHANDLE,FUNCTION,SCALAR>, L<C<glob>|/glob EXPR>,
 L<C<ioctl>|/ioctl FILEHANDLE,FUNCTION,SCALAR>,
 L<C<link>|/link OLDFILE,NEWFILE>, L<C<lstat>|/lstat FILEHANDLE>,
-L<C<mkdir>|/mkdir FILENAME,MODE>, L<C<open>|/open FILEHANDLE,EXPR>,
+L<C<mkdir>|/mkdir FILENAME,MODE>, L<C<open>|/open FILEHANDLE,MODE,EXPR>,
 L<C<opendir>|/opendir DIRHANDLE,EXPR>, L<C<readlink>|/readlink EXPR>,
 L<C<rename>|/rename OLDNAME,NEWNAME>, L<C<rmdir>|/rmdir FILENAME>,
 L<C<select>|/select FILEHANDLE>, L<C<stat>|/stat FILEHANDLE>,
@@ -471,7 +471,7 @@ L<C<kill>|/kill SIGNAL, LIST>, L<C<link>|/link OLDFILE,NEWFILE>,
 L<C<lstat>|/lstat FILEHANDLE>, L<C<msgctl>|/msgctl ID,CMD,ARG>,
 L<C<msgget>|/msgget KEY,FLAGS>,
 L<C<msgrcv>|/msgrcv ID,VAR,SIZE,TYPE,FLAGS>,
-L<C<msgsnd>|/msgsnd ID,MSG,FLAGS>, L<C<open>|/open FILEHANDLE,EXPR>,
+L<C<msgsnd>|/msgsnd ID,MSG,FLAGS>, L<C<open>|/open FILEHANDLE,MODE,EXPR>,
 L<C<pipe>|/pipe READHANDLE,WRITEHANDLE>, L<C<readlink>|/readlink EXPR>,
 L<C<rename>|/rename OLDNAME,NEWNAME>,
 L<C<select>|/select RBITS,WBITS,EBITS,TIMEOUT>,
@@ -839,7 +839,7 @@ while C<:encoding(UTF-8)> checks the data for actually being valid
 UTF-8.  More details can be found in L<PerlIO::encoding>.
 
 In general, L<C<binmode>|/binmode FILEHANDLE, LAYER> should be called
-after L<C<open>|/open FILEHANDLE,EXPR> but before any I/O is done on the
+after L<C<open>|/open FILEHANDLE,MODE,EXPR> but before any I/O is done on the
 filehandle.  Calling L<C<binmode>|/binmode FILEHANDLE, LAYER> normally
 flushes any pending buffered output data (and perhaps pending input
 data) on the handle.  An exception to this is the C<:encoding> layer
@@ -1253,12 +1253,12 @@ layer.  Closes the currently selected filehandle if the argument is
 omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
-another L<C<open>|/open FILEHANDLE,EXPR> on it, because
-L<C<open>|/open FILEHANDLE,EXPR> closes it for you.  (See
-L<C<open>|/open FILEHANDLE,EXPR>.) However, an explicit
+another L<C<open>|/open FILEHANDLE,MODE,EXPR> on it, because
+L<C<open>|/open FILEHANDLE,MODE,EXPR> closes it for you.  (See
+L<C<open>|/open FILEHANDLE,MODE,EXPR>.) However, an explicit
 L<C<close>|/close FILEHANDLE> on an input file resets the line counter
 (L<C<$.>|perlvar/$.>), while the implicit close done by
-L<C<open>|/open FILEHANDLE,EXPR> does not.
+L<C<open>|/open FILEHANDLE,MODE,EXPR> does not.
 
 If the filehandle came from a piped open, L<C<close>|/close FILEHANDLE>
 returns false if one of the other syscalls involved fails or if its
@@ -1481,7 +1481,7 @@ L<C<tie>|/tie VARIABLE,CLASSNAME,LIST> function.]
 
 This binds a L<dbm(3)>, L<ndbm(3)>, L<sdbm(3)>, L<gdbm(3)>, or Berkeley
 DB file to a hash.  HASH is the name of the hash.  (Unlike normal
-L<C<open>|/open FILEHANDLE,EXPR>, the first argument is I<not> a
+L<C<open>|/open FILEHANDLE,MODE,EXPR>, the first argument is I<not> a
 filehandle, even though it looks like one).  DBNAME is the name of the
 database (without the F<.dir> or F<.pag> extension if any).  If the
 database does not exist, it is created with protection specified by MASK
@@ -2719,7 +2719,7 @@ Returns the file descriptor for a filehandle or directory handle,
 or undefined if the
 filehandle is not open.  If there is no real file descriptor at the OS
 level, as can happen with filehandles connected to memory objects via
-L<C<open>|/open FILEHANDLE,EXPR> with a reference for the third
+L<C<open>|/open FILEHANDLE,MODE,EXPR> with a reference for the third
 argument, -1 is returned.
 
 This is mainly useful for constructing bitmaps for
@@ -4553,11 +4553,11 @@ More examples of different modes in action:
 =item Checking the return value
 
 Open returns nonzero on success, the undefined value otherwise.  If
-the L<C<open>|/open FILEHANDLE,EXPR> involved a pipe, the return value
+the L<C<open>|/open FILEHANDLE,MODE,EXPR> involved a pipe, the return value
 happens to be the pid of the subprocess.
 
 When opening a file, it's seldom a good idea to continue
-if the request failed, so L<C<open>|/open FILEHANDLE,EXPR> is frequently
+if the request failed, so L<C<open>|/open FILEHANDLE,MODE,EXPR> is frequently
 used with L<C<die>|/die LIST>. Even if you want your code to do
 something other than C<die> on a failed open, you should still always
 check
@@ -4643,7 +4643,7 @@ is C<-|>, the filename is interpreted as a command that pipes
 output to us.  In the two-argument (and one-argument) form, one should
 replace dash (C<->) with the command.
 See L<perlipc/"Using open() for IPC"> for more examples of this.
-(You are not allowed to L<C<open>|/open FILEHANDLE,EXPR> to a command
+(You are not allowed to L<C<open>|/open FILEHANDLE,MODE,EXPR> to a command
 that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>, and
 L<perlipc/"Bidirectional Communication with Another Process"> for
 alternatives.)
@@ -4663,14 +4663,14 @@ alternatives.)
 In the form of pipe opens taking three or more arguments, if LIST is specified
 (extra arguments after the command name) then LIST becomes arguments
 to the command invoked if the platform supports it.  The meaning of
-L<C<open>|/open FILEHANDLE,EXPR> with more than three arguments for
+L<C<open>|/open FILEHANDLE,MODE,EXPR> with more than three arguments for
 non-pipe modes is not yet defined, but experimental "layers" may give
 extra LIST arguments meaning.
 
 If you open a pipe on the command C<-> (that is, specify either C<|-> or C<-|>
 with the one- or two-argument forms of
-L<C<open>|/open FILEHANDLE,EXPR>), an implicit L<C<fork>|/fork> is done,
-so L<C<open>|/open FILEHANDLE,EXPR> returns twice: in the parent process
+L<C<open>|/open FILEHANDLE,MODE,EXPR>), an implicit L<C<fork>|/fork> is done,
+so L<C<open>|/open FILEHANDLE,MODE,EXPR> returns twice: in the parent process
 it returns the pid
 of the child process, and in the child process it returns (a defined) C<0>.
 Use C<defined($pid)> or C<//> to determine whether the open was successful.
@@ -4811,7 +4811,7 @@ In the one- and two-argument forms of the call, the mode and filename
 should be concatenated (in that order), preferably separated by white
 space.  You can--but shouldn't--omit the mode in these forms when that mode
 is C<< < >>.  It is safe to use the two-argument form of
-L<C<open>|/open FILEHANDLE,EXPR> if the filename argument is a known literal.
+L<C<open>|/open FILEHANDLE,MODE,EXPR> if the filename argument is a known literal.
 
  open(my $dbase, "+<dbase.mine")          # ditto
      or die "Can't open 'dbase.mine' for update: $!";
@@ -4892,7 +4892,7 @@ symbolic reference, so C<use strict "refs"> should I<not> be in effect.)
 =item Whitespace and special characters in the filename argument
 
 The filename passed to the one- and two-argument forms of
-L<C<open>|/open FILEHANDLE,EXPR> will
+L<C<open>|/open FILEHANDLE,MODE,EXPR> will
 have leading and trailing whitespace deleted and normal
 redirection characters honored.  This property, known as "magic open",
 can often be used to good effect.  A user could specify a filename of
@@ -4914,7 +4914,7 @@ otherwise it's necessary to protect any leading and trailing whitespace:
 
 (this may not work on some bizarre filesystems).  One should
 conscientiously choose between the I<magic> and I<three-argument> form
-of L<C<open>|/open FILEHANDLE,EXPR>:
+of L<C<open>|/open FILEHANDLE,MODE,EXPR>:
 
     open(my $in, $ARGV[0]) || die "Can't open $ARGV[0]: $!";
 
@@ -4933,7 +4933,7 @@ produces a filename that can be opened normally.)
 If you want a "real" C L<open(2)>, then you should use the
 L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE> function, which involves
 no such magic (but uses different filemodes than Perl
-L<C<open>|/open FILEHANDLE,EXPR>, which corresponds to C L<fopen(3)>).
+L<C<open>|/open FILEHANDLE,MODE,EXPR>, which corresponds to C L<fopen(3)>).
 This is another way to protect your filenames from interpretation.  For
 example:
 
@@ -6250,7 +6250,7 @@ Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default, all
 filehandles operate on bytes, but for example if the filehandle has
 been opened with the C<:utf8> I/O layer (see
-L<C<open>|/open FILEHANDLE,EXPR>, and the L<open>
+L<C<open>|/open FILEHANDLE,MODE,EXPR>, and the L<open>
 pragma), the I/O will operate on UTF8-encoded Unicode
 characters, not bytes.  Similarly for the C<:encoding> layer:
 in that case pretty much any characters can be read.
@@ -8743,7 +8743,7 @@ parameters FILENAME, MODE, and PERMS.
 Returns true on success and L<C<undef>|/undef EXPR> otherwise.
 
 L<PerlIO> layers will be applied to the handle the same way they would in an
-L<C<open>|/open FILEHANDLE,EXPR> call that does not specify layers. That is,
+L<C<open>|/open FILEHANDLE,MODE,EXPR> call that does not specify layers. That is,
 the current value of L<C<${^OPEN}>|perlvar/${^OPEN}> as set by the L<open>
 pragma in a lexical scope, or the C<-C> commandline option or C<PERL_UNICODE>
 environment variable in the main program scope, falling back to the platform
@@ -8770,7 +8770,7 @@ OS/390 and on the Macintosh; you probably don't want to
 use them in new code.
 
 If the file named by FILENAME does not exist and the
-L<C<open>|/open FILEHANDLE,EXPR> call creates
+L<C<open>|/open FILEHANDLE,MODE,EXPR> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
 PERMS specifies the permissions of the newly created file.  If you omit
 the PERMS argument to L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE>,
@@ -8805,7 +8805,7 @@ L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET>,
 L<C<syswrite>|/syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET>,
 or L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>.  A handle opened with
 this function can be used with buffered IO just as one opened with
-L<C<open>|/open FILEHANDLE,EXPR> can be used with unbuffered IO.
+L<C<open>|/open FILEHANDLE,MODE,EXPR> can be used with unbuffered IO.
 
 Note that under Perls older than 5.8.0,
 L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE> depends on the
@@ -8857,7 +8857,7 @@ Note that if the filehandle has been marked as C<:utf8>, C<sysread> will
 throw an exception.  The C<:encoding(...)> layer implicitly
 introduces the C<:utf8> layer.  See
 L<C<binmode>|/binmode FILEHANDLE, LAYER>,
-L<C<open>|/open FILEHANDLE,EXPR>, and the L<open> pragma.
+L<C<open>|/open FILEHANDLE,MODE,EXPR>, and the L<open> pragma.
 
 =item sysseek FILEHANDLE,POSITION,WHENCE
 X<sysseek> X<lseek>
@@ -9022,7 +9022,7 @@ The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 Alternately, if the handle is not marked with an encoding but you
 attempt to write characters with code points over 255, raises an exception.
 See L<C<binmode>|/binmode FILEHANDLE, LAYER>,
-L<C<open>|/open FILEHANDLE,EXPR>, and the L<open> pragma.
+L<C<open>|/open FILEHANDLE,MODE,EXPR>, and the L<open> pragma.
 
 =item tell FILEHANDLE
 X<tell>
