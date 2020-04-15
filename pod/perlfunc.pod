@@ -4844,7 +4844,7 @@ An older style is to use a bareword as the filehandle, as
 
 Then you can use C<FH> as the filehandle, in C<< close FH >> and C<<
 <FH> >> and so on.  Note that it's a global variable, so this form is
-not recommended in new code.
+not recommended when dealing with filehandles other than Perl's built-in ones (e.g. STDOUT and STDIN).
 
 =back
 
