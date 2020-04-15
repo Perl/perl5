@@ -400,11 +400,17 @@ sub list_dynamic {
         $^O !~ m!^(VMS|aix)$! ? ([ 'subdirscomplex', '', '' ]) : (),
     ) : (), # DynaLoader different
     [ 'subdirs', '', '' ],
-    [ 'subdirsstatic', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
-    [ 'subdirsstatic', ' dynamic', '_dynamic' ],
+    # https://github.com/Perl/perl5/issues/17601
+    # https://rt.cpan.org/Ticket/Display.html?id=115321
+    $^O ne 'MSWin32' ? (
+        [ 'subdirsstatic', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
+        [ 'subdirsstatic', ' dynamic', '_dynamic' ],
+    ) : (),
     [ 'multi', '', '' ],
-    [ 'staticmulti', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
-    [ 'staticmulti', ' dynamic', '_dynamic' ],
+    $^O ne 'MSWin32' ? (
+        [ 'staticmulti', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
+        [ 'staticmulti', ' dynamic', '_dynamic' ],
+    ) : (),
     [ 'xsbuild', '', '' ],
     [ 'subdirsskip', '', '' ],
   );
