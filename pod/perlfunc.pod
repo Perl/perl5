@@ -4469,8 +4469,8 @@ A thorough reference to C<open> follows. For a gentler introduction to
 the basics of C<open>, see also the L<perlopentut> manual page.
 
 =over
- 
-=item Common usage: working with files
+
+=item Working with files
 
 Most often, C<open> gets invoked with three arguments: the required
 FILEHANDLE (usually an empty scalar variable), followed by MODE (usually
@@ -4484,8 +4484,8 @@ filename  that the new filehandle will refer to.
 Reading from a file:
 
     open(my $fh, "<", "input.txt")
-    	or die "Can't open < input.txt: $!";
-	
+        or die "Can't open < input.txt: $!";
+
     # Process every line in input.txt
     while (my $line = <$fh>) {
         #
@@ -4497,7 +4497,7 @@ or writing to one:
 
     open(my $fh, ">", "output.txt")
         or die "Can't open > output.txt: $!";
-	
+
     print $fh "This line gets printed directly into output.txt.\n";
 
 For a summary of common filehandle operations such as these, see
@@ -4552,9 +4552,9 @@ More examples of different modes in action:
 
 =item Checking the return value
 
-Open returns nonzero on success, the undefined value otherwise.  If
-the L<C<open>|/open FILEHANDLE,MODE,EXPR> involved a pipe, the return value
-happens to be the pid of the subprocess.
+Open returns nonzero on success, the undefined value otherwise.  If the
+C<open> involved a pipe, the return value happens to be the pid of the
+subprocess.
 
 When opening a file, it's seldom a good idea to continue
 if the request failed, so L<C<open>|/open FILEHANDLE,MODE,EXPR> is frequently
@@ -4569,7 +4569,7 @@ the return value from opening a file.
 
 You can use the three-argument form of open to specify
 I/O layers (sometimes referred to as "disciplines") to apply to the new
-filehanle. These affect how the input and output are processed (see
+filehandle. These affect how the input and output are processed (see
 L<open> and
 L<PerlIO> for more details).  For example:
 
@@ -4654,7 +4654,7 @@ alternatives.)
  open(my $article_fh, "-|", "caesar <$article")  # decrypt
                                                  # article
      or die "Can't start caesar: $!";
-     
+
  open(my $article_fh, "caesar <$article |")      # ditto
      or die "Can't start caesar: $!";
 
