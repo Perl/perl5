@@ -4629,10 +4629,11 @@ Opening in-memory files I<can> fail for a variety of reasons.  As with
 any other C<open>, check the return value for success.
 
 I<Technical note>: This feature works only when Perl is built with
-PerlIO -- the default, unless you've changed this (such as building Perl
-with C<Configure -Uuseperlio>). You can see whether your Perl was built
-with PerlIO by running C<perl -V:useperlio>.  If it says C<'define'>,
-you have PerlIO; otherwise you don't.
+PerlIO -- the default, except with older (pre-5.16) Perl installations
+specifically built without it (e.g. via C<Configure -Uuseperlio>). You
+can see whether your Perl was built with PerlIO by running C<perl
+-V:useperlio>.  If it says C<'define'>, you have PerlIO; otherwise you
+don't.
 
 See L<perliol> for detailed info on PerlIO.
 
