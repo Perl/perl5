@@ -1874,7 +1874,7 @@ sub _DB__trim_command_and_return_first_component {
     # A single-character debugger command can be immediately followed by its
     # argument if they aren't both alphanumeric; otherwise require space
     # between commands and arguments:
-    my ($verb, $args) = $cmd =~ m{\A(.\b|\S*)\s*(.*)}s;
+    my ($verb, $args) = $cmd =~ m{\A([^\.-]\b|\S*)\s*(.*)}s;
 
     $obj->cmd_verb($verb);
     $obj->cmd_args($args);
