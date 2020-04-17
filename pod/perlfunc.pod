@@ -4608,8 +4608,8 @@ L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> to do the reading.
 =item Opening a filehandle into an in-memory scalar
 
 You can open filehandles directly to Perl scalars instead of a file or
-other resource external to the program. Accomplish this by providing a
-reference to that scalar as the third argument to C<open>, like so:
+other resource external to the program. To do so, provide a reference to
+that scalar as the third argument to C<open>, like so:
 
  open(my $memory, ">", \$var)
      or die "Can't open memory file: $!";
@@ -4718,14 +4718,15 @@ The following blocks are more or less equivalent:
     open(my $fh, "-|") || exec "cat", "-n", $file;
     open(my $fh, "-|", "cat", "-n", $file);
 
-The last two examples in each block show the pipe as "list form", which is
-not yet supported on all platforms.  A good rule of thumb is that if
-your platform has a real L<C<fork>|/fork> (in other words, if your platform is
-Unix, including Linux and MacOS X), you can use the list form.  You would
-want to use the list form of the pipe so you can pass literal arguments
-to the command without risk of the shell interpreting any shell metacharacters
-in them.  However, this also bars you from opening pipes to commands
-that intentionally contain shell metacharacters, such as:
+The last two examples in each block show the pipe as "list form", which
+is not yet supported on all platforms.  A good rule of thumb is that if
+your platform has a real L<C<fork>|/fork> (e.g. your platform is Unix,
+including Linux and macOS, or you're using Perl 5.22 or later with
+Windows), you can use the list form.  You would want to use the list
+form of the pipe so you can pass literal arguments to the command
+without risk of the shell interpreting any shell metacharacters in them.
+However, this also bars you from opening pipes to commands that
+intentionally contain shell metacharacters, such as:
 
     open(my $fh, "|cat -n | expand -4 | lpr")
 	|| die "Can't open pipeline to lpr: $!";
@@ -4855,12 +4856,11 @@ not recommended when dealing with filehandles other than Perl's built-in ones (e
 
 =item Automatic filehandle closure
 
-The filehandle will be closed when its reference count reaches zero.
-If it is a lexically scoped variable declared with L<C<my>|/my VARLIST>,
-that usually
-means the end of the enclosing scope.  However, this automatic close
-does not check for errors, so it is better to explicitly close
-filehandles, especially those used for writing:
+The filehandle will be closed when its reference count reaches zero. If
+it is a lexically scoped variable declared with L<C<my>|/my VARLIST>,
+that usually means the end of the enclosing scope.  However, this
+automatic close does not check for errors, so it is better to explicitly
+close filehandles, especially those used for writing:
 
     close($handle)
        || warn "close failed: $!";
