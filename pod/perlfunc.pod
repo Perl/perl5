@@ -4498,7 +4498,7 @@ or writing to one:
     open(my $fh, ">", "output.txt")
         or die "Can't open > output.txt: $!";
 
-    print $fh "This line gets printed directly into output.txt.\n";
+    print $fh "This line gets printed into output.txt.\n";
 
 For a summary of common filehandle operations such as these, see
 L<perlintro/Files and I/O>.
@@ -4544,7 +4544,7 @@ More examples of different modes in action:
 
  # Open a file for concatenation
  open(my $log, ">>", "/usr/spool/news/twitlog")
-     or warn "Couldn't open log file; input will be discarded";
+     or warn "Couldn't open log file; discarding input";
 
  # Open a file for reading and writing
  open(my $dbase, "+<", "dbase.mine")
@@ -4556,12 +4556,10 @@ Open returns nonzero on success, the undefined value otherwise.  If the
 C<open> involved a pipe, the return value happens to be the pid of the
 subprocess.
 
-When opening a file, it's seldom a good idea to continue
-if the request failed, so L<C<open>|/open FILEHANDLE,MODE,EXPR> is frequently
-used with L<C<die>|/die LIST>. Even if you want your code to do
-something other than C<die> on a failed open, you should still always
-check
-the return value from opening a file.
+When opening a file, it's seldom a good idea to continue if the request
+failed, so C<open> is frequently used with L<C<die>|/die LIST>. Even if
+you want your code to do something other than C<die> on a failed open,
+you should still always check the return value from opening a file.
 
 =back
 
@@ -4573,8 +4571,8 @@ filehandle. These affect how the input and output are processed (see
 L<open> and
 L<PerlIO> for more details).  For example:
 
-  open(my $fh, "<:encoding(UTF-8)", $filename)
-    || die "Can't open UTF-8 encoded $filename: $!";
+    open(my $fh, "<:encoding(UTF-8)", $filename)
+        || die "Can't open UTF-8 encoded $filename: $!";
 
 This opens the UTF8-encoded file containing Unicode characters;
 see L<perluniintro>.  Note that if layers are specified in the
@@ -4613,7 +4611,7 @@ that scalar as the third argument to C<open>, like so:
 
  open(my $memory, ">", \$var)
      or die "Can't open memory file: $!";
- print $memory "foo!\n";              # output will appear in $var
+ print $memory "foo!\n";    # output will appear in $var
 
 To (re)open C<STDOUT> or C<STDERR> as an in-memory file, close it first:
 
@@ -4630,10 +4628,10 @@ any other C<open>, check the return value for success.
 
 I<Technical note>: This feature works only when Perl is built with
 PerlIO -- the default, except with older (pre-5.16) Perl installations
-specifically built without it (e.g. via C<Configure -Uuseperlio>). You
-can see whether your Perl was built with PerlIO by running C<perl
--V:useperlio>.  If it says C<'define'>, you have PerlIO; otherwise you
-don't.
+that were configured to not include it (e.g. via C<Configure
+-Uuseperlio>). You can see whether your Perl was built with PerlIO by
+running C<perl -V:useperlio>.  If it says C<'define'>, you have PerlIO;
+otherwise you don't.
 
 See L<perliol> for detailed info on PerlIO.
 
@@ -4679,11 +4677,13 @@ Use C<defined($pid)> or C<//> to determine whether the open was successful.
 
 For example, use either
 
-   my $child_pid = open(my $from_kid, "-|") // die "Can't fork: $!";
+   my $child_pid = open(my $from_kid, "-|")
+        // die "Can't fork: $!";
 
 or
 
-   my $child_pid = open(my $to_kid,   "|-") // die "Can't fork: $!";
+   my $child_pid = open(my $to_kid,   "|-")
+        // die "Can't fork: $!";
 
 followed by
 
@@ -4729,7 +4729,7 @@ However, this also bars you from opening pipes to commands that
 intentionally contain shell metacharacters, such as:
 
     open(my $fh, "|cat -n | expand -4 | lpr")
-	|| die "Can't open pipeline to lpr: $!";
+    	|| die "Can't open pipeline to lpr: $!";
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
@@ -4750,11 +4750,15 @@ Here is a script that saves, redirects, and restores C<STDOUT> and
 C<STDERR> using various methods:
 
     #!/usr/bin/perl
-    open(my $oldout, ">&STDOUT")     or die "Can't dup STDOUT: $!";
-    open(OLDERR,     ">&", \*STDERR) or die "Can't dup STDERR: $!";
+    open(my $oldout, ">&STDOUT")
+        or die "Can't dup STDOUT: $!";
+    open(OLDERR,     ">&", \*STDERR)
+        or die "Can't dup STDERR: $!";
 
-    open(STDOUT, '>', "foo.out") or die "Can't redirect STDOUT: $!";
-    open(STDERR, ">&STDOUT")     or die "Can't dup STDOUT: $!";
+    open(STDOUT, '>', "foo.out")
+        or die "Can't redirect STDOUT: $!";
+    open(STDERR, ">&STDOUT")
+        or die "Can't dup STDOUT: $!";
 
     select STDERR; $| = 1;  # make unbuffered
     select STDOUT; $| = 1;  # make unbuffered
@@ -4762,8 +4766,10 @@ C<STDERR> using various methods:
     print STDOUT "stdout 1\n";  # this works for
     print STDERR "stderr 1\n";  # subprocesses too
 
-    open(STDOUT, ">&", $oldout) or die "Can't dup \$oldout: $!";
-    open(STDERR, ">&OLDERR")    or die "Can't dup OLDERR: $!";
+    open(STDOUT, ">&", $oldout)
+        or die "Can't dup \$oldout: $!";
+    open(STDERR, ">&OLDERR")
+        or die "Can't dup OLDERR: $!";
 
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
@@ -4832,7 +4838,8 @@ As a shortcut, a one-argument call takes the filename from the global
 scalar variable of the same name as the filehandle:
 
     $ARTICLE = 100;
-    open(ARTICLE) or die "Can't find article $ARTICLE: $!\n";
+    open(ARTICLE)
+        or die "Can't find article $ARTICLE: $!\n";
 
 Here C<$ARTICLE> must be a global (package) scalar variable - not one
 declared with L<C<my>|/my VARLIST> or L<C<state>|/state VARLIST>.
@@ -4901,18 +4908,19 @@ can often be used to good effect.  A user could specify a filename of
 F<"rsh cat file |">, or you could change certain filenames as needed:
 
     $filename =~ s/(.*\.gz)\s*$/gzip -dc < $1|/;
-    open(my $fh, $filename) or die "Can't open $filename: $!";
+    open(my $fh, $filename)
+        or die "Can't open $filename: $!";
 
 Use the three-argument form to open a file with arbitrary weird characters in it,
 
     open(my $fh, "<", $file)
-	|| die "Can't open $file: $!";
+    	|| die "Can't open $file: $!";
 
 otherwise it's necessary to protect any leading and trailing whitespace:
 
     $file =~ s#^(\s)#./$1#;
     open(my $fh, "< $file\0")
-	|| die "Can't open $file: $!";
+    	|| die "Can't open $file: $!";
 
 (this may not work on some bizarre filesystems).  One should
 conscientiously choose between the I<magic> and I<three-argument> form
@@ -4924,7 +4932,7 @@ will allow the user to specify an argument of the form C<"rsh cat file |">,
 but will not work on a filename that happens to have a trailing space, while
 
     open(my $in, "<", $ARGV[0])
-	|| die "Can't open $ARGV[0]: $!";
+    	|| die "Can't open $ARGV[0]: $!";
 
 will have exactly the opposite restrictions. (However, some shells
 support the syntax C<< perl your_program.pl <( rsh cat file ) >>, which
