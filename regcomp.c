@@ -163,6 +163,7 @@ typedef struct scan_frame {
     regnode *next_regnode;      /* next node to process when last is reached */
     U32 prev_recursed_depth;
     I32 stopparen;              /* what stopparen do we use */
+    bool in_gosub;              /* this or an outer frame is for GOSUB */
 
     struct scan_frame *this_prev_frame; /* this previous frame */
     struct scan_frame *prev_frame;      /* previous frame */
@@ -4606,6 +4607,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
 	bool unfolded_multi_char = FALSE;
+        bool mutate_ok = (frame && frame->in_gosub) ? 0 : 1;
 	/* Peephole optimizer: */
         DEBUG_STUDYDATA("Peep", data, depth, is_inf);
         DEBUG_PEEP("Peep", scan, depth, flags);
@@ -4619,7 +4621,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         if (PL_regkind[OP(scan)] == EXACT
             && OP(scan) != LEXACT
             && OP(scan) != LEXACT_REQ8
-            && !frame
+            && mutate_ok
         ) {
             join_exact(pRExC_state, scan, &min_subtract, &unfolded_multi_char,
                     0, NULL, depth + 1);
@@ -4810,7 +4812,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                 if (PERL_ENABLE_TRIE_OPTIMISATION
                     && OP(startbranch) == BRANCH
-                    && !frame
+                    && mutate_ok
                 ) {
 		/* demq.
 
@@ -5264,6 +5266,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 newframe->stopparen = stopparen;
                 newframe->prev_recursed_depth = recursed_depth;
                 newframe->this_prev_frame= frame;
+                newframe->in_gosub = (
+                    (frame && frame->in_gosub) || OP(scan) == GOSUB
+                );
 
                 DEBUG_STUDYDATA("frame-new", data, depth, is_inf);
                 DEBUG_PEEP("fnew", scan, depth, flags);
@@ -5349,7 +5354,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 &&  (         OP(scan) == EXACTFAA
                      || (     OP(scan) == EXACTFU
                          && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(*s)))
-                &&   !frame
+                &&   mutate_ok
             ) {
                 U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
 
@@ -5443,7 +5448,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                 /* This temporary node can now be turned into EXACTFU, and
                  * must, as regexec.c doesn't handle it */
-                if (OP(next) == EXACTFU_S_EDGE && !frame) {
+                if (OP(next) == EXACTFU_S_EDGE && mutate_ok) {
                     OP(next) = EXACTFU;
                 }
 
@@ -5452,7 +5457,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     && (         OP(next) == EXACTFAA
                         || (     OP(next) == EXACTFU
                             && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(* STRING(next))))
-                    &&   !frame
+                    &&   mutate_ok
                 ) {
                     /* These differ in just one bit */
                     U8 mask = ~ ('A' ^ 'a');
@@ -5601,7 +5606,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		      && data->flags & SF_IN_PAR
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext && minnext == 1
-                      && !frame
+                      && mutate_ok
                 ) {
 		    /* Try to optimize to CURLYN.  */
 		    regnode *nxt = NEXTOPER(oscan) + EXTRA_STEP_2ARGS;
@@ -5655,7 +5660,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                          /* Nor characters whose fold at run-time may be
                           * multi-character */
                       && ! (RExC_seen & REG_UNFOLDED_MULTI_SEEN)
-                      && !frame
+                      && mutate_ok
 		) {
 		    /* XXXX How to optimize if data == 0? */
 		    /* Optimize to a simpler form.  */
