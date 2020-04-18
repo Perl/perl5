@@ -24,7 +24,7 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
-plan tests => 1018;  # Update this when adding/deleting tests.
+plan tests => 1019;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2252,11 +2252,16 @@ SKIP:
         ok($result, "regexp correctly matched");
     }
 
-    # gh16947: test regexp corruption
+    # gh16947: test regexp corruption (GOSUB)
     {
         fresh_perl_is(q{
             'xy' =~ /x(?0)|x(?|y|y)/ && print 'ok'
-        }, 'ok', {}, 'gh16947: test regexp corruption');
+        }, 'ok', {}, 'gh16947: test regexp corruption (GOSUB)');
+    }
+    # gh16947: test fix doesn't break SUSPEND
+    {
+        fresh_perl_is(q{ 'sx' =~ m{ss++}i; print 'ok' },
+                'ok', {}, "gh16947: test fix doesn't break SUSPEND");
     }
 
 } # End of sub run_tests
