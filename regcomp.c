@@ -25068,7 +25068,6 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
     /* Compile the subpattern consisting of the name being looked for */
     subpattern_re = compile_wildcard(wname, wname_len, FALSE /* /-i */ );
-    must = re_intuit_string(subpattern_re);
     prog = ReANY(subpattern_re);
 
     /* If only nothing is matched, skip to where empty names are looked for */
@@ -25078,7 +25077,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
     /* And match against the string of all names /gc.  Don't even try if it
      * must match a character not found in any name. */
-    if ( ! must
+    if ( ! ( must = re_intuit_string(subpattern_re) )
         || SvCUR(must) == 0
         || strspn(SvPVX(must), "\n -0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ()")
                                                               == SvCUR(must))
@@ -25221,7 +25220,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * one of the characters in that isn't in any Hangul syllable. */
     if (    prog->minlen <= (SSize_t) syl_max_len
         &&  prog->maxlen > 0
-        && ( ! must
+        && ( ! ( must = re_intuit_string(subpattern_re) )
             || SvCUR(must) == 0
             || strspn(SvPVX(must), "\n ABCDEGHIJKLMNOPRSTUWY") == SvCUR(must)))
     {
@@ -25318,7 +25317,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
          * series */
         if (    prog->minlen <= (SSize_t) SvCUR(algo_name)
             &&  prog->maxlen > 0
-            && ( ! must
+            && ( ! ( must = re_intuit_string(subpattern_re) )
                 || SvCUR(must) == 0
                 || strspn(SvPVX(must), legal) == SvCUR(must)))
         {
