@@ -358,19 +358,22 @@ elements, rather than combining them into a single string as in the
 examples above. For instance, we could have phrased the C<open> call in
 the first example like this:
 
-    open(my $sort_fh, '-|', 'sort', '-u', 'unsorted/*.txt')
+    open(my $sort_fh, '-|', 'sort', '-u', glob('unsorted/*.txt'))
         or die "Couldn't open a pipe into sort: $!";
 
-When you call C<open> this way, Perl takes care of escaping any
-characters within that list of arguments that the shell might interpret
-as metacharacters with special meaning, which may otherwise cause
-unwanted behavior. This can make for safer, less error-prone C<open>
-calls, especially when passing in variables as arguments.
+When you call C<open> this way, Perl invokes the given command directly,
+bypassing the shell. As such, the shell won't try to interpret any
+special characters within the command's argument list, which might
+overwise have unwanted effects. This can make for safer, less
+error-prone C<open> calls, useful in cases such as passing in variables
+as arguments, or even just referring to filenames with spaces in them.
 
-Note the side-effect this implies, though: If you I<really do> want to
-pass a meaningful metacharacter to the shell, as we do in the write-pipe
-example with our C<cat -n > numbered.txt> argument, then we can't take
-advantage of this alternate syntax.
+However, when you I<do> want to pass a meaningful metacharacter to the
+shell, such with the C<"*"> inside that final C<unsorted/*.txt> argument
+here, you can't use this alternate syntax. In this case, we have worked
+around it via Perl's handy C<glob> built-in function, which evaluates
+its argument into a list of filenames — and we can safely pass that
+resulting list right into C<open>, as shown above.
 
 Note also that representing piped-command arguments in list form like
 this doesn't work on every platform. It will work on any Unix-based OS
