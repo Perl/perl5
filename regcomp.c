@@ -16508,6 +16508,10 @@ redo_curchar:
                     goto regclass_failed;
                 }
 
+                if (! current) {
+                    break;
+                }
+
                 /* regclass() will return with parsing just the \ sequence,
                  * leaving the parse pointer at the next thing to parse */
                 RExC_parse--;
