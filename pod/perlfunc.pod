@@ -4719,13 +4719,12 @@ The following blocks are more or less equivalent:
     open(my $fh, "-|", "cat", "-n", $file);
 
 The last two examples in each block show the pipe as "list form", which
-is not yet supported on all platforms.  A good rule of thumb is that if
-your platform has a real L<C<fork>|/fork> (e.g. your platform is Unix,
-including Linux and macOS, or you're using Perl 5.22 or later with
-Windows), you can use the list form.  You would want to use the list
-form of the pipe so you can pass literal arguments to the command
-without risk of the shell interpreting any shell metacharacters in them.
-However, this also bars you from opening pipes to commands that
+is not yet supported on all platforms. (If your platform has a real
+L<C<fork>|/fork>, such as Linux and macOS, you can use the list form; it
+also works on Windows with Perl 5.22 or later.) You would want to use
+the list form of the pipe so you can pass literal arguments to the
+command without risk of the shell interpreting any shell metacharacters
+in them. However, this also bars you from opening pipes to commands that
 intentionally contain shell metacharacters, such as:
 
     open(my $fh, "|cat -n | expand -4 | lpr")
