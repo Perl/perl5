@@ -11,13 +11,23 @@ esac
 archobjs='cygwin.o'
 
 # mandatory (overrides incorrect defaults)
-test -z "$cc" && cc='gcc'
-if test -z "$plibpth"
-then
-    plibpth=`gcc -print-file-name=libc.a`
-    plibpth=`dirname $plibpth`
-    plibpth=`cd $plibpth && pwd`
+if [ -x /usr/bin/gcc ] ; then
+    gcc=/usr/bin/gcc
+# clang also provides -print-search-dirs
+elif ${cc:-cc} --version 2>/dev/null | grep -q '^clang ' ; then
+    gcc=${cc:-cc}
+else
+    gcc=gcc
 fi
+
+case "$plibpth" in
+'') plibpth=`LANG=C LC_ALL=C $gcc $ccflags $ldflags -print-search-dirs | grep libraries |
+	cut -f2- -d= | tr ':' $trnl | sed -e 's:/$::'`
+    set X $plibpth # Collapse all entries on one line
+    shift
+    plibpth="$*"
+    ;;
+esac
 so='dll'
 # - eliminate -lc, implied by gcc and a symlink to libcygwin.a
 libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
