@@ -10857,10 +10857,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         /* If is within the range [+0 .. +9] of the script's zero, it also is a
          * digit in that script.  We can skip the rest of this code for this
          * character. */
-        if (UNLIKELY(   zero_of_run
-                     && cp >= zero_of_run
-                     && cp - zero_of_run <= 9))
-        {
+        if (UNLIKELY(zero_of_run && withinCOUNT(cp, zero_of_run, 9))) {
             continue;
         }
 
@@ -11093,9 +11090,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         if (   script_of_char >= 0
             && (zero_of_char = script_zeros[script_of_char]))
         {
-            if (   cp < zero_of_char
-                || cp > zero_of_char + 9)
-            {
+            if (! withinCOUNT(cp, zero_of_char, 9)) {
                 continue;   /* Not a digit; this character is part of the run
                              */
             }
