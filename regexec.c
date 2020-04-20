@@ -11081,7 +11081,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          * several scripts, and the intersection is not empty.  However, if the
          * character is a decimal digit, it could still mean failure if it is
          * from the wrong sequence of 10.  So, we need to look at if it's a
-         * digit.  We've already handled the 10 decimal digits, and the next
+         * digit.  We've already handled the 10 digits [0-9], and the next
          * lowest one is this one: */
         if (cp < FIRST_NON_ASCII_DECIMAL_DIGIT) {
             continue;   /* Not a digit; this character is part of the run */
