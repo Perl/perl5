@@ -25013,8 +25013,10 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                                    where we are now */
     bool found_matches = FALSE; /* Did any name match so far? */
     SV * empty;                 /* For matching zero length names */
-    SV * must;                  /* What substring, if any, must be in a name
-                                   for the subpattern to match */
+    SV * must_sv;               /* Contains the substring, if any, that must be
+                                   in a name for the subpattern to match */
+    char * must;                /* The PV of 'must' */
+    STRLEN must_len;            /* And its length */
     SV * syllable_name = NULL;  /* For Hangul syllables */
     const char hangul_prefix[] = "HANGUL SYLLABLE ";
     const STRLEN hangul_prefix_len = sizeof(hangul_prefix) - 1;
@@ -25079,7 +25081,17 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
     /* Compile the subpattern consisting of the name being looked for */
     subpattern_re = compile_wildcard(wname, wname_len, FALSE /* /-i */ );
-    must = re_intuit_string(subpattern_re);
+
+    must_sv = re_intuit_string(subpattern_re);
+    if (must_sv) {
+        /* regexec.c can free the re_intuit_string() return. GH #17734 */
+        must_sv = sv_2mortal(newSVsv(must_sv));
+        must = SvPV(must_sv, must_len);
+    }
+    else {
+        must = "";
+        must_len = 0;
+    }
 
     /* (Note: 'must' could contain a NUL.  And yet we use strspn() below on it.
      * This works because the NUL causes the function to return early, thus
@@ -25095,10 +25107,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
     /* And match against the string of all names /gc.  Don't even try if it
      * must match a character not found in any name. */
-    if ( ! must
-        || SvCUR(must) == 0
-        || strspn(SvPVX(must), "\n -0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ()")
-                                                              == SvCUR(must))
+    if (strspn(must, "\n -0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ()") == must_len)
     {
         while (execute_wildcard(subpattern_re,
                                 cur_pos,
@@ -25238,9 +25247,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * one of the characters in that isn't in any Hangul syllable. */
     if (    prog->minlen <= (SSize_t) syl_max_len
         &&  prog->maxlen > 0
-        && ( ! must
-            || SvCUR(must) == 0
-            || strspn(SvPVX(must), "\n ABCDEGHIJKLMNOPRSTUWY") == SvCUR(must)))
+        && (strspn(must, "\n ABCDEGHIJKLMNOPRSTUWY") == must_len))
     {
         /* These constants, names, values, and algorithm are adapted from the
          * Unicode standard, version 5.1, section 3.12, and should never
@@ -25335,9 +25342,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
          * series */
         if (    prog->minlen <= (SSize_t) SvCUR(algo_name)
             &&  prog->maxlen > 0
-            && ( ! must
-                || SvCUR(must) == 0
-                || strspn(SvPVX(must), legal) == SvCUR(must)))
+            && (strspn(must, legal) == must_len))
         {
             for (j = low; j <= high; j++) { /* For each code point in the series */
 
