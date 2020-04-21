@@ -12624,9 +12624,17 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         FAIL2("panic: regatom returned failure, flags=%#" UVxf, (UV) flags);
     }
 
+    if (! ISMULT2(RExC_parse)) {
+	*flagp = flags;
+	return(ret);
+    }
+
+    /* Here we know the input is a legal quantifier, including {m,n} */
+
     op = *RExC_parse;
 
-    if (op == '{' && regcurly(RExC_parse)) {
+    if (op == '{') {
+        const char* endptr;
 	maxpos = NULL;
 #ifdef RE_TRACK_PATTERN_OFFSETS
         parse_start = RExC_parse; /* MJD */
@@ -12641,8 +12649,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    }
 	    next++;
 	}
-	if (*next == '}') {		/* got one */
-            const char* endptr;
+
+	assert(*next == '}');
+
 	    if (!maxpos)
 		maxpos = next;
 	    RExC_parse++;
@@ -12764,12 +12773,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
 
 	    goto nest_check;
-	}
-    }
-
-    if (!ISMULT1(op)) {
-	*flagp = flags;
-	return(ret);
     }
 
 #if 0				/* Now runtime fix should be reliable. */
