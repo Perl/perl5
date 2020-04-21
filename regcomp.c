@@ -377,12 +377,8 @@ struct RExC_state_t {
  */
 #define	HASWIDTH	0x01	/* Known to not match null strings, could match
                                    non-null ones. */
-
-/* Simple enough to be STAR/PLUS operand; in an EXACTish node must be a single
- * character.  (There needs to be a case: in the switch statement in regexec.c
- * for any node marked SIMPLE.)  Note that this is not the same thing as
- * REGNODE_SIMPLE */
-#define	SIMPLE		0x02
+#define	SIMPLE		0x02    /* Exactly one character wide */
+                                /* (or LNBREAK as a special case) */
 #define POSTPONED	0x08    /* (?1),(?&name), (??{...}) or similar */
 #define TRYAGAIN	0x10	/* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
@@ -5467,6 +5463,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 		if (flags & SCF_DO_SUBSTR)
 		    data->pos_min++;
+                /* This will bypass the formal 'min += minnext * mincount'
+                 * calculation in the do_curly path, so assumes min width
+                 * of the PLUS payload is exactly one. */
 		min++;
 		/* FALLTHROUGH */
 	    case STAR:
@@ -13600,13 +13599,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
 	    ret = reg_node(pRExC_state, GPOS);
             RExC_seen |= REG_GPOS_SEEN;
-	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'K':
             if (!RExC_in_lookbehind && !RExC_in_lookahead) {
                 RExC_seen_zerolen++;
                 ret = reg_node(pRExC_state, KEEPS);
-                *flagp |= SIMPLE;
                 /* XXX:dmq : disabling in-place substitution seems to
                  * be necessary here to avoid cases of memory corruption, as
                  * with: C<$_="x" x 80; s/x\K/y/> -- rgs
@@ -13759,8 +13756,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	    ret = reg_node(pRExC_state, op);
             FLAGS(REGNODE_p(ret)) = flags;
-
-	    *flagp |= SIMPLE;
 
 	    goto finish_meta_pat;
           }
