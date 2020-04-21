@@ -9999,25 +9999,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
 
-    case BOUNDL:
-    case NBOUNDL:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        /* FALLTHROUGH */
-    case BOUND:
-    case BOUNDA:
-    case BOUNDU:
-    case EOS:
-    case GPOS:
-    case KEEPS:
-    case NBOUND:
-    case NBOUNDA:
-    case NBOUNDU:
-    case OPFAIL:
-    case SBOL:
-    case SEOL:
-        /* These are all 0 width, so match right here or not at all. */
-        break;
-
     default:
         Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized node type %d='%s'", OP(p), PL_reg_name[OP(p)]);
         NOT_REACHED; /* NOTREACHED */
