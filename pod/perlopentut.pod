@@ -388,7 +388,7 @@ basics covered here.
 
 =head1 AUTHOR and COPYRIGHT
 
-Copyright 2013 Tom Christiansen.
+Copyright 2013 Tom Christiansen; now maintained by Perl5 Porters
 
 This documentation is free; you can redistribute it and/or modify it under
 the same terms as Perl itself.
