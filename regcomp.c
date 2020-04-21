@@ -12626,8 +12626,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     if (! ISMULT2(RExC_parse)) {
-	*flagp = flags;
-	return(ret);
+        *flagp = flags;
+        return(ret);
     }
 
     /* Here we know the input is a legal quantifier, including {m,n} */
@@ -12656,19 +12656,19 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     else {  /* is '{' */
         const char* endptr;
 
-	maxpos = NULL;
-	next = RExC_parse + 1;
-	while (isDIGIT(*next) || *next == ',') {
-	    if (*next == ',') {
-		if (maxpos)
-		    break;
-		else
-		    maxpos = next;
-	    }
-	    next++;
-	}
+        maxpos = NULL;
+        next = RExC_parse + 1;
+        while (isDIGIT(*next) || *next == ',') {
+            if (*next == ',') {
+                if (maxpos)
+                    break;
+                else
+                    maxpos = next;
+            }
+            next++;
+        }
 
-	assert(*next == '}');
+        assert(*next == '}');
 
         if (!maxpos)
             maxpos = next;
@@ -12695,7 +12695,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
             max = (I32)uv;
         } else {
-            max = REG_INFTY;		/* meaning "infinity" */
+            max = REG_INFTY;            /* meaning "infinity" */
         }
         RExC_parse = next;
         nextchar(pRExC_state);
@@ -12715,82 +12715,82 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         }
     }
 
-        if ((flags&SIMPLE)) {
-            if (min == 0 && max == REG_INFTY) {
+    if ((flags&SIMPLE)) {
+        if (min == 0 && max == REG_INFTY) {
 
-                /* Going from 0..inf is currently forbidden in wildcard
-                 * subpatterns.  The only reason is to make it harder to
-                 * write patterns that take a long long time to halt, and
-                 * because the use of this construct isn't necessary in
-                 * matching Unicode property values */
-                if (RExC_pm_flags & PMf_WILDCARD) {
-                    RExC_parse++;
-                    /* diag_listed_as: Use of %s is not allowed in Unicode
-                       property wildcard subpatterns in regex; marked by
-                       <-- HERE in m/%s/ */
-                    vFAIL("Use of quantifier '*' is not allowed in"
-                          " Unicode property wildcard subpatterns");
-                    /* Note, don't need to worry about {0,}, as a '}' isn't
-                     * legal at all in wildcards, so wouldn't get this far
-                     * */
-                }
-                reginsert(pRExC_state, STAR, ret, depth+1);
-                MARK_NAUGHTY(4);
-                RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-                goto nest_check;
+            /* Going from 0..inf is currently forbidden in wildcard
+             * subpatterns.  The only reason is to make it harder to
+             * write patterns that take a long long time to halt, and
+             * because the use of this construct isn't necessary in
+             * matching Unicode property values */
+            if (RExC_pm_flags & PMf_WILDCARD) {
+                RExC_parse++;
+                /* diag_listed_as: Use of %s is not allowed in Unicode
+                   property wildcard subpatterns in regex; marked by
+                   <-- HERE in m/%s/ */
+                vFAIL("Use of quantifier '*' is not allowed in"
+                      " Unicode property wildcard subpatterns");
+                /* Note, don't need to worry about {0,}, as a '}' isn't
+                 * legal at all in wildcards, so wouldn't get this far
+                 * */
             }
-            if (min == 1 && max == REG_INFTY) {
-                reginsert(pRExC_state, PLUS, ret, depth+1);
-                MARK_NAUGHTY(3);
-                RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-                goto nest_check;
-            }
-            MARK_NAUGHTY_EXP(2, 2);
-            reginsert(pRExC_state, CURLY, ret, depth+1);
-            Set_Node_Offset(REGNODE_p(ret), parse_start+1); /* MJD */
-            Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
-        }
-        else {
-            const regnode_offset w = reg_node(pRExC_state, WHILEM);
-
-            FLAGS(REGNODE_p(w)) = 0;
-            if (!  REGTAIL(pRExC_state, ret, w)) {
-                REQUIRE_BRANCHJ(flagp, 0);
-            }
-            if (RExC_use_BRANCHJ) {
-                reginsert(pRExC_state, LONGJMP, ret, depth+1);
-                reginsert(pRExC_state, NOTHING, ret, depth+1);
-                NEXT_OFF(REGNODE_p(ret)) = 3;	/* Go over LONGJMP. */
-            }
-            reginsert(pRExC_state, CURLYX, ret, depth+1);
-                            /* MJD hk */
-            Set_Node_Offset(REGNODE_p(ret), parse_start+1);
-            Set_Node_Length(REGNODE_p(ret),
-                            op == '{' ? (RExC_parse - parse_start) : 1);
-
-            if (RExC_use_BRANCHJ)
-                NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
-                                                   LONGJMP. */
-            if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
-                                                      NOTHING)))
-            {
-                REQUIRE_BRANCHJ(flagp, 0);
-            }
-            RExC_whilem_seen++;
-            MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
-        }
-        FLAGS(REGNODE_p(ret)) = 0;
-
-        if (min > 0)
-            *flagp = 0;
-        if (max > 0)
-            *flagp |= HASWIDTH;
-        ARG1_SET(REGNODE_p(ret), (U16)min);
-        ARG2_SET(REGNODE_p(ret), (U16)max);
-        if (max == REG_INFTY)
+            reginsert(pRExC_state, STAR, ret, depth+1);
+            MARK_NAUGHTY(4);
             RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+            goto nest_check;
+        }
+        if (min == 1 && max == REG_INFTY) {
+            reginsert(pRExC_state, PLUS, ret, depth+1);
+            MARK_NAUGHTY(3);
+            RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+            goto nest_check;
+        }
+        MARK_NAUGHTY_EXP(2, 2);
+        reginsert(pRExC_state, CURLY, ret, depth+1);
+        Set_Node_Offset(REGNODE_p(ret), parse_start+1); /* MJD */
+        Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
+    }
+    else {
+        const regnode_offset w = reg_node(pRExC_state, WHILEM);
 
-        goto nest_check;
+        FLAGS(REGNODE_p(w)) = 0;
+        if (!  REGTAIL(pRExC_state, ret, w)) {
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
+        if (RExC_use_BRANCHJ) {
+            reginsert(pRExC_state, LONGJMP, ret, depth+1);
+            reginsert(pRExC_state, NOTHING, ret, depth+1);
+            NEXT_OFF(REGNODE_p(ret)) = 3;        /* Go over LONGJMP. */
+        }
+        reginsert(pRExC_state, CURLYX, ret, depth+1);
+                        /* MJD hk */
+        Set_Node_Offset(REGNODE_p(ret), parse_start+1);
+        Set_Node_Length(REGNODE_p(ret),
+                        op == '{' ? (RExC_parse - parse_start) : 1);
+
+        if (RExC_use_BRANCHJ)
+            NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
+                                               LONGJMP. */
+        if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
+                                                  NOTHING)))
+        {
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
+        RExC_whilem_seen++;
+        MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
+    }
+    FLAGS(REGNODE_p(ret)) = 0;
+
+    if (min > 0)
+        *flagp = 0;
+    if (max > 0)
+        *flagp |= HASWIDTH;
+    ARG1_SET(REGNODE_p(ret), (U16)min);
+    ARG2_SET(REGNODE_p(ret), (U16)max);
+    if (max == REG_INFTY)
+        RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+
+    goto nest_check;
 
 #if 0				/* Now runtime fix should be reliable. */
 
@@ -12828,8 +12828,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     if (*RExC_parse == '?') {
-	nextchar(pRExC_state);
-	reginsert(pRExC_state, MINMOD, ret, depth+1);
+        nextchar(pRExC_state);
+        reginsert(pRExC_state, MINMOD, ret, depth+1);
         if (! REGTAIL(pRExC_state, ret, ret + NODE_STEP_REGNODE)) {
             REQUIRE_BRANCHJ(flagp, 0);
         }
@@ -12849,8 +12849,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     if (ISMULT2(RExC_parse)) {
-	RExC_parse++;
-	vFAIL("Nested quantifiers");
+        RExC_parse++;
+        vFAIL("Nested quantifiers");
     }
 
     return(ret);
