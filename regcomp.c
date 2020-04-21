@@ -12653,127 +12653,127 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	assert(*next == '}');
 
-	    if (!maxpos)
-		maxpos = next;
-	    RExC_parse++;
-            if (isDIGIT(*RExC_parse)) {
-                endptr = RExC_end;
-                if (!grok_atoUV(RExC_parse, &uv, &endptr))
-                    vFAIL("Invalid quantifier in {,}");
-                if (uv >= REG_INFTY)
-                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-                min = (I32)uv;
-            } else {
-                min = 0;
-            }
-	    if (*maxpos == ',')
-		maxpos++;
-	    else
-		maxpos = RExC_parse;
-            if (isDIGIT(*maxpos)) {
-                endptr = RExC_end;
-                if (!grok_atoUV(maxpos, &uv, &endptr))
-                    vFAIL("Invalid quantifier in {,}");
-                if (uv >= REG_INFTY)
-                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-                max = (I32)uv;
-            } else {
-		max = REG_INFTY;		/* meaning "infinity" */
-            }
-	    RExC_parse = next;
-	    nextchar(pRExC_state);
-            if (max < min) {    /* If can't match, warn and optimize to fail
-                                   unconditionally */
-                reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
-                ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
-                NEXT_OFF(REGNODE_p(orig_emit)) =
-                                    regarglen[OPFAIL] + NODE_STEP_REGNODE;
-                return ret;
-            }
-            else if (min == max && *RExC_parse == '?')
-            {
-                ckWARN2reg(RExC_parse + 1,
-                           "Useless use of greediness modifier '%c'",
-                           *RExC_parse);
-            }
+        if (!maxpos)
+            maxpos = next;
+        RExC_parse++;
+        if (isDIGIT(*RExC_parse)) {
+            endptr = RExC_end;
+            if (!grok_atoUV(RExC_parse, &uv, &endptr))
+                vFAIL("Invalid quantifier in {,}");
+            if (uv >= REG_INFTY)
+                vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+            min = (I32)uv;
+        } else {
+            min = 0;
+        }
+        if (*maxpos == ',')
+            maxpos++;
+        else
+            maxpos = RExC_parse;
+        if (isDIGIT(*maxpos)) {
+            endptr = RExC_end;
+            if (!grok_atoUV(maxpos, &uv, &endptr))
+                vFAIL("Invalid quantifier in {,}");
+            if (uv >= REG_INFTY)
+                vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+            max = (I32)uv;
+        } else {
+            max = REG_INFTY;		/* meaning "infinity" */
+        }
+        RExC_parse = next;
+        nextchar(pRExC_state);
+        if (max < min) {    /* If can't match, warn and optimize to fail
+                               unconditionally */
+            reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
+            ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
+            NEXT_OFF(REGNODE_p(orig_emit)) =
+                                regarglen[OPFAIL] + NODE_STEP_REGNODE;
+            return ret;
+        }
+        else if (min == max && *RExC_parse == '?')
+        {
+            ckWARN2reg(RExC_parse + 1,
+                       "Useless use of greediness modifier '%c'",
+                       *RExC_parse);
+        }
 
-	  do_curly:
-	    if ((flags&SIMPLE)) {
-                if (min == 0 && max == REG_INFTY) {
+      do_curly:
+        if ((flags&SIMPLE)) {
+            if (min == 0 && max == REG_INFTY) {
 
-                    /* Going from 0..inf is currently forbidden in wildcard
-                     * subpatterns.  The only reason is to make it harder to
-                     * write patterns that take a long long time to halt, and
-                     * because the use of this construct isn't necessary in
-                     * matching Unicode property values */
-                    if (RExC_pm_flags & PMf_WILDCARD) {
-                        RExC_parse++;
-                        /* diag_listed_as: Use of %s is not allowed in Unicode
-                           property wildcard subpatterns in regex; marked by
-                           <-- HERE in m/%s/ */
-                        vFAIL("Use of quantifier '*' is not allowed in"
-                              " Unicode property wildcard subpatterns");
-                        /* Note, don't need to worry about {0,}, as a '}' isn't
-                         * legal at all in wildcards, so wouldn't get this far
-                         * */
-                    }
-                    reginsert(pRExC_state, STAR, ret, depth+1);
-                    MARK_NAUGHTY(4);
-                    RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-                    goto nest_check;
+                /* Going from 0..inf is currently forbidden in wildcard
+                 * subpatterns.  The only reason is to make it harder to
+                 * write patterns that take a long long time to halt, and
+                 * because the use of this construct isn't necessary in
+                 * matching Unicode property values */
+                if (RExC_pm_flags & PMf_WILDCARD) {
+                    RExC_parse++;
+                    /* diag_listed_as: Use of %s is not allowed in Unicode
+                       property wildcard subpatterns in regex; marked by
+                       <-- HERE in m/%s/ */
+                    vFAIL("Use of quantifier '*' is not allowed in"
+                          " Unicode property wildcard subpatterns");
+                    /* Note, don't need to worry about {0,}, as a '}' isn't
+                     * legal at all in wildcards, so wouldn't get this far
+                     * */
                 }
-                if (min == 1 && max == REG_INFTY) {
-                    reginsert(pRExC_state, PLUS, ret, depth+1);
-                    MARK_NAUGHTY(3);
-                    RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-                    goto nest_check;
-                }
-                MARK_NAUGHTY_EXP(2, 2);
-		reginsert(pRExC_state, CURLY, ret, depth+1);
-                Set_Node_Offset(REGNODE_p(ret), parse_start+1); /* MJD */
-                Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
-	    }
-	    else {
-		const regnode_offset w = reg_node(pRExC_state, WHILEM);
-
-		FLAGS(REGNODE_p(w)) = 0;
-                if (!  REGTAIL(pRExC_state, ret, w)) {
-                    REQUIRE_BRANCHJ(flagp, 0);
-                }
-		if (RExC_use_BRANCHJ) {
-		    reginsert(pRExC_state, LONGJMP, ret, depth+1);
-		    reginsert(pRExC_state, NOTHING, ret, depth+1);
-		    NEXT_OFF(REGNODE_p(ret)) = 3;	/* Go over LONGJMP. */
-		}
-		reginsert(pRExC_state, CURLYX, ret, depth+1);
-                                /* MJD hk */
-                Set_Node_Offset(REGNODE_p(ret), parse_start+1);
-                Set_Node_Length(REGNODE_p(ret),
-                                op == '{' ? (RExC_parse - parse_start) : 1);
-
-		if (RExC_use_BRANCHJ)
-                    NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
-                                                       LONGJMP. */
-                if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
-                                                          NOTHING)))
-                {
-                    REQUIRE_BRANCHJ(flagp, 0);
-                }
-                RExC_whilem_seen++;
-                MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
-	    }
-	    FLAGS(REGNODE_p(ret)) = 0;
-
-	    if (min > 0)
-		*flagp = 0;
-	    if (max > 0)
-		*flagp |= HASWIDTH;
-            ARG1_SET(REGNODE_p(ret), (U16)min);
-            ARG2_SET(REGNODE_p(ret), (U16)max);
-            if (max == REG_INFTY)
+                reginsert(pRExC_state, STAR, ret, depth+1);
+                MARK_NAUGHTY(4);
                 RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+                goto nest_check;
+            }
+            if (min == 1 && max == REG_INFTY) {
+                reginsert(pRExC_state, PLUS, ret, depth+1);
+                MARK_NAUGHTY(3);
+                RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+                goto nest_check;
+            }
+            MARK_NAUGHTY_EXP(2, 2);
+            reginsert(pRExC_state, CURLY, ret, depth+1);
+            Set_Node_Offset(REGNODE_p(ret), parse_start+1); /* MJD */
+            Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
+        }
+        else {
+            const regnode_offset w = reg_node(pRExC_state, WHILEM);
 
-	    goto nest_check;
+            FLAGS(REGNODE_p(w)) = 0;
+            if (!  REGTAIL(pRExC_state, ret, w)) {
+                REQUIRE_BRANCHJ(flagp, 0);
+            }
+            if (RExC_use_BRANCHJ) {
+                reginsert(pRExC_state, LONGJMP, ret, depth+1);
+                reginsert(pRExC_state, NOTHING, ret, depth+1);
+                NEXT_OFF(REGNODE_p(ret)) = 3;	/* Go over LONGJMP. */
+            }
+            reginsert(pRExC_state, CURLYX, ret, depth+1);
+                            /* MJD hk */
+            Set_Node_Offset(REGNODE_p(ret), parse_start+1);
+            Set_Node_Length(REGNODE_p(ret),
+                            op == '{' ? (RExC_parse - parse_start) : 1);
+
+            if (RExC_use_BRANCHJ)
+                NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
+                                                   LONGJMP. */
+            if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
+                                                      NOTHING)))
+            {
+                REQUIRE_BRANCHJ(flagp, 0);
+            }
+            RExC_whilem_seen++;
+            MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
+        }
+        FLAGS(REGNODE_p(ret)) = 0;
+
+        if (min > 0)
+            *flagp = 0;
+        if (max > 0)
+            *flagp |= HASWIDTH;
+        ARG1_SET(REGNODE_p(ret), (U16)min);
+        ARG2_SET(REGNODE_p(ret), (U16)max);
+        if (max == REG_INFTY)
+            RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+
+        goto nest_check;
     }
 
 #if 0				/* Now runtime fix should be reliable. */
