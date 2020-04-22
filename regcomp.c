@@ -5306,8 +5306,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		   offset, later match for variable offset.  */
 		if (data->last_end == -1) { /* Update the start info. */
 		    data->last_start_min = data->pos_min;
- 		    data->last_start_max = is_inf
-                        ? OPTIMIZE_INFTY : data->pos_min + data->pos_delta;
+                    data->last_start_max =
+                        is_inf ? OPTIMIZE_INFTY
+                        : (data->pos_delta > OPTIMIZE_INFTY - data->pos_min)
+                            ? OPTIMIZE_INFTY : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), bytelen);
 		if (UTF)

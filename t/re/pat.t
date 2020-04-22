@@ -24,7 +24,7 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
-plan tests => 1019;  # Update this when adding/deleting tests.
+plan tests => 1020;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2262,6 +2262,13 @@ SKIP:
     {
         fresh_perl_is(q{ 'sx' =~ m{ss++}i; print 'ok' },
                 'ok', {}, "gh16947: test fix doesn't break SUSPEND");
+    }
+
+    # gh17730: should not crash
+    {
+        fresh_perl_is(q{
+            "q00" =~ m{(((*ACCEPT)0)*00)?0(?1)}; print "ok"
+        }, 'ok', {}, 'gh17730: should not crash');
     }
 
 } # End of sub run_tests
