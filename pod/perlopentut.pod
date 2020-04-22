@@ -281,7 +281,7 @@ program instead.
 
 =head2 Opening a pipe for reading
 
-Let's say you'd like your Perl program to process data stored a nearby
+Let's say you'd like your Perl program to process data stored in a nearby
 directory called C<unsorted>, which contains a number of textfiles.
 You'd also like your program to sort all the contents from these files
 into a single, alphabetically sorted list of unique lines before it
@@ -314,7 +314,7 @@ Note that the third argument to C<open> is a string containing the
 program name (C<sort>) plus all its arguments: in this case, C<-u> to
 specify unqiue sort, and then a fileglob specifying the files to sort.
 The resulting filehandle C<$sort_fh> works just like a read-only (C<<
-"<" >>) filehandle, and your your program can subsequently read data
+"<" >>) filehandle, and your program can subsequently read data
 from it as if it were opened onto an ordinary, single file.
 
 =head2 Opening a pipe for writing
@@ -344,7 +344,7 @@ basic function of C<print>-ing data to it.
 Note that the third argument, specifying the command that we wish to
 pipe to, sets up C<cat> to redirect its output via that C<< ">" >>
 symbol into the file C<numbered.txt>. This can start to look a little
-tricky, because that that same symbol would have meant something
+tricky, because that same symbol would have meant something
 entirely different had it showed it in the second argument to C<open>!
 But here in the third argument, it's simply part of the shell command that
 Perl will open the pipe into, and Perl itself doesn't invest any special
