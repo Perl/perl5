@@ -16517,6 +16517,8 @@ redo_curchar:
                     goto regclass_failed;
                 }
 
+                assert(current);
+
                 /* regclass() will return with parsing just the \ sequence,
                  * leaving the parse pointer at the next thing to parse */
                 RExC_parse--;
@@ -16554,9 +16556,7 @@ redo_curchar:
                     goto regclass_failed;
                 }
 
-                if (! current) {
-                    break;
-                }
+                assert(current);
 
                 /* function call leaves parse pointing to the ']', except if we
                  * faked it */
@@ -17740,7 +17740,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     assert(prop_definition || strings);
 
                     if (strings) {
-                        if (! RExC_in_multi_char_class) {
+                        if (ret_invlist) {
+                            if (! prop_definition) {
+                                RExC_parse = e + 1;
+                                vFAIL("Unicode string properties are not implemented in (?[...])");
+                            }
+                            else {
+                                ckWARNreg(e + 1,
+                                    "Using just the single character results"
+                                    " returned by \\p{} in (?[...])");
+                            }
+                        }
+                        else if (! RExC_in_multi_char_class) {
                             if (invert ^ (value == 'P')) {
                                 RExC_parse = e + 1;
                                 vFAIL("Inverting a character class which contains"
@@ -18969,7 +18980,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (ret_invlist) {
         *ret_invlist = cp_list;
 
-        return RExC_emit;
+        return (cp_list) ? RExC_emit : 0;
     }
 
     if (anyof_flags & ANYOF_LOCALE_FLAGS) {
