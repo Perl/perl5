@@ -1651,14 +1651,8 @@ Perl_re_intuit_start(pTHX_
 	    /* If flags & SOMETHING - do not do it many times on the same match */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "  ... Disabling check substring...\n"));
 	    /* XXX Does the destruction order has to change with utf8_target? */
-	    SvREFCNT_dec(utf8_target ? prog->check_utf8 : prog->check_substr);
-	    SvREFCNT_dec(utf8_target ? prog->check_substr : prog->check_utf8);
-	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
-	    /* XXXX This is a remnant of the old implementation.  It
-	            looks wasteful, since now INTUIT can use many
-	            other heuristics. */
 	    prog->extflags &= ~RXf_USE_INTUIT;
 	}
     }
@@ -1670,7 +1664,7 @@ Perl_re_intuit_start(pTHX_
     return rx_origin;
 
   fail_finish:				/* Substring not found */
-    if (prog->check_substr || prog->check_utf8)		/* could be removed already */
+    if (prog->extflags & RXf_USE_INTUIT)
 	BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr) += 5; /* hooray */
   fail:
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%sMatch rejected by optimizer%s\n",
@@ -3570,7 +3564,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             /* NB: newlines are the same in unicode as they are in latin */
             if (*s++ != '\n')
                 continue;
-            if (prog->check_substr || prog->check_utf8) {
+            if (prog->extflags & RXf_USE_INTUIT) {
             /* note that with PREGf_IMPLICIT, intuit can only fail
              * or return the start position, so it's of limited utility.
              * Nevertheless, I made the decision that the potential for
