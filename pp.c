@@ -5898,6 +5898,7 @@ PP(pp_reverse)
 	    sv_setsv(TARG, DEFSV);
 	    XPUSHs(TARG);
 	}
+        SvSETMAGIC(TARG); /* remove any utf8 length magic */
 
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
