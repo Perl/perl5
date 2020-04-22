@@ -6683,6 +6683,15 @@ The closing delimtter to match the opening one was not found.  If the
 opening one is escaped by preceding it with a backslash, the closing one
 must also be so escaped.
 
+=item Unicode string properties are not implemented in (?[...]) in
+regex; marked by <-- HERE in m/%s/
+
+(F) A Unicode string property is one which expands to a sequence of
+multiple characters.  An example is C<\p{name=KATAKANA LETTER AINU P}>,
+which is comprised of the sequence C<\N{KATAKANA LETTER SMALL H}>
+followed by C<\N{COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK}>.
+Extended character classes, C<(?[...])> currently cannot handle these.
+
 =item Unicode surrogate U+%X is illegal in UTF-8
 
 (S surrogate) You had a UTF-16 surrogate in a context where they are
@@ -7405,6 +7414,22 @@ the whole thing correctly, except when the class is inverted
 a range.  For these, what should happen isn't clear at all.  In
 these circumstances, Perl discards all but the first character
 of the returned sequence, which is not likely what you want.
+
+=item Using just the single character results returned by \p{} in
+(?[...]) in regex; marked by S<<-- HERE> in m/%s/
+
+(W regexp) Extended character classes currently cannot handle operands
+that evaluate to more than one character.  These are removed from the
+results of the expansion of the C<\p{}>.
+
+This situation can happen, for example, in
+
+ (?[ \p{name=/KATAKANA/} ])
+
+"KATAKANA LETTER AINU P" is a legal Unicode name (technically a "named
+sequence"), but it is actually two characters.  The above expression
+with match only the Unicode names containing KATAKANA that represent
+single characters.
 
 =item Using /u for '%s' instead of /%s in regex; marked by S<<-- HERE> in m/%s/
 

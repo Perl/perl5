@@ -331,6 +331,7 @@ my @death =
  '/\p{gc=:\PS:}/' => 'Use of \'\\PS\' is not allowed in Unicode property wildcard subpatterns {#} m/\\PS{#}/',
  '/\p{gc=:[\pS]:}/' => 'Use of \'\\pS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\pS{#}]/',
  '/\p{gc=:[\PS]:}/' => 'Use of \'\\PS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\PS{#}]/',
+ '/(?[\p{name=KATAKANA LETTER AINU P}])/' => 'Unicode string properties are not implemented in (?[...]) {#} m/(?[\p{name=KATAKANA LETTER AINU P}{#}])/',
 );
 
 # These are messages that are death under 'use re "strict"', and may or may
@@ -708,6 +709,15 @@ my @experimental_regex_sets = (
     '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
+my @wildcard = (
+    'm!(?[\p{name=/KATAKANA/}])$!' =>
+    [
+     'The regex_sets feature is experimental {#} m/(?[{#}\p{name=/KATAKANA/}])$/',
+     'The Unicode property wildcards feature is experimental',
+     'Using just the single character results returned by \p{} in (?[...]) {#} m/(?[\p{name=/KATAKANA/}{#}])$/'
+    ], # [GH #17732] Null pointer deref
+);
+
 my @deprecated = (
  '/^{/'          => "",
  '/foo|{/'       => "",
@@ -797,6 +807,7 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
 
     foreach my $ref (\@warning_tests,
                      \@experimental_regex_sets,
+                     \@wildcard,
                      \@deprecated)
     {
         my $warning_type;
@@ -813,6 +824,10 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
         elsif ($ref == \@experimental_regex_sets) {
             $warning_type = 'experimental::regex_sets';
+            $default_on = 1;
+        }
+        elsif ($ref == \@wildcard) {
+            $warning_type = 'experimental::regex_sets, experimental::uniprop_wildcards';
             $default_on = 1;
         }
         else {
