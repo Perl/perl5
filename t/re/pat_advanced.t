@@ -2553,15 +2553,6 @@ EOF
                       {}, "Too large negative relative group number");
     }
 
-    {   # GH #17734, ASAN use after free
-        fresh_perl_like('no warnings "experimental::uniprop_wildcards";
-                         my $re = q<[[\p{name=/[Y-]+Z/}]]>;
-                         eval { "\N{BYZANTINE MUSICAL SYMBOL PSILI}"
-                                =~ /$re/ }; print $@ if $@; print "Done\n";',
-                         qr/Done/,
-                         {}, "GH #17734");
-    }
-
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like

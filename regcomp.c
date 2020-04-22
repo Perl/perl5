@@ -21490,8 +21490,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 SV *
 Perl_re_intuit_string(pTHX_ REGEXP * const r)
 {				/* Assume that RE_INTUIT is set */
-    /* Returns an SV (and ownership of one ref count) containing a string that
-     * must appear in the target for it to match */
+    /* Returns an SV containing a string that must appear in the target for it
+     * to match */
 
     struct regexp *const prog = ReANY(r);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
@@ -21517,11 +21517,8 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
             }
 	} );
 
-    /* use UTF8 check substring if regexp pattern itself is in UTF8.  ref count
-     * incremented because the regex code decrements it. GH #17734 */
-    return SvREFCNT_inc(RX_UTF8(r)
-                        ? prog->check_utf8
-                        : prog->check_substr);
+    /* use UTF8 check substring if regexp pattern itself is in UTF8 */
+    return RX_UTF8(r) ? prog->check_utf8 : prog->check_substr;
 }
 
 /*
@@ -25414,7 +25411,6 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 #endif
 
     SvREFCNT_dec_NN(subpattern_re);
-    SvREFCNT_dec(must);
     return found_matches;
 }
 
