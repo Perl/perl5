@@ -3520,11 +3520,16 @@ PP(pp_index)
   push_result:
     /* OPpTRUEBOOL indicates an '== -1' has been optimised away */
     if (PL_op->op_private & OPpTRUEBOOL) {
-        PUSHs( ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
-                    ? &PL_sv_yes : &PL_sv_no);
-        if (PL_op->op_private & OPpTARGET_MY)
+        SV *result = ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
+            ? &PL_sv_yes : &PL_sv_no;
+        if (PL_op->op_private & OPpTARGET_MY) {
             /* $lex = (index() == -1) */
-            sv_setsv(TARG, TOPs);
+            sv_setsv_mg(TARG, result);
+            PUSHs(TARG);
+        }
+        else {
+            PUSHs(result);
+        }
     }
     else
         PUSHi(retval);
