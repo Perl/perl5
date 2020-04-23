@@ -1498,6 +1498,8 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
                        ? OPTIMIZE_INFTY
                        : (l
                           ? data->last_start_max
+                          /* temporary underflow guard for 5.32 */
+                          : data->pos_delta < 0 ? OPTIMIZE_INFTY
                           : (data->pos_delta > OPTIMIZE_INFTY - data->pos_min
 					 ? OPTIMIZE_INFTY
 					 : data->pos_min + data->pos_delta));
