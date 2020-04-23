@@ -157,10 +157,6 @@ sub test_vianame ($$$) {
 
     $wildcard_count++;
 
-    # XXX temporary to see if the failure we are occasionally seeing is
-    # confined to this code point.  GH #17671
-    next if $i == 0;
-
     # Because wildcard name matching is so real-time intensive, do it less
     # frequently than the others
     if ($wildcard_count >= 10) {
