@@ -5441,7 +5441,7 @@ PP(pp_gpwent)
      * it is only included in special cases.
      *
      * In Digital UNIX/Tru64 if using the getespw*() (which seems to be
-     * be preferred interface, even though also the getprpw*() interface
+     * the preferred interface, even though also the getprpw*() interface
      * is available) one needs to link with -lsecurity -ldb -laud -lm.
      * One also needs to call set_auth_parameters() in main() before
      * doing anything else, whether one is using getespw*() or getprpw*().

@@ -504,7 +504,7 @@ based on the underlying C library functions):
   length may be unknown, but can be calculated by C<strlen()>, since it is
   terminated by a NUL, which isn't included in its length.
 
-  The optional 'n' following 'str' means that that there is a third parameter,
+  The optional 'n' following 'str' means that there is a third parameter,
   giving the maximum number of bytes to look at in each string.  Even if both
   strings are longer than the length parameter, those extra bytes will be
   unexamined.

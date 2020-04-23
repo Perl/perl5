@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.39";
+our $VERSION     = "0.40";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -423,7 +423,7 @@ equivalent to
  qr/\x{AB}C/
 
 that is, the character whose code point value is C<0xAB>, followed by the
-letter C<C>.  But since C<C> is a a hex digit, there is a reasonable chance
+letter C<C>.  But since C<C> is a hex digit, there is a reasonable chance
 that the intent was
 
  qr/\x{ABC}/

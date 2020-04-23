@@ -539,7 +539,7 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
      *  Isolate the lsb;
      * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
      *
-     * The word will look this this, with a rightmost set bit in position 's':
+     * The word will look like this, with a rightmost set bit in position 's':
      * ('x's are don't cares)
      *      s
      *  x..x100..0
@@ -2528,7 +2528,7 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 The C library C<strnlen> if available, or a Perl implementation of it.
 
 C<my_strnlen()> computes the length of the string, up to C<maxlen>
-characters.  It will will never attempt to address more than C<maxlen>
+characters.  It will never attempt to address more than C<maxlen>
 characters, making it suitable for use with strings that are not
 guaranteed to be NUL-terminated.
 

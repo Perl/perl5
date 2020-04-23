@@ -699,8 +699,6 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const OP *o, const OP *kid)
 		 (int)n, PL_op_desc[(o)->op_type], t, OP_DESC(kid)), 0);
 }
 
-/* remove flags var, its unused in all callers, move to to right end since gv
-  and kid are always the same */
 STATIC void
 S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
 {
@@ -1434,7 +1432,7 @@ op_sibling nodes.  By analogy with the perl-level C<splice()> function, allows
 you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
 housekeeping on the parent node and op_sibling manipulation on the
-children.  The last deleted node will be marked as as the last node by
+children.  The last deleted node will be marked as the last node by
 updating the op_sibling/op_sibparent or op_moresib field as appropriate.
 
 Note that op_next is not manipulated, and nodes are not freed; that is the
@@ -2991,7 +2989,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
     }
 
     if (targetop) {
-        /* Can targetop (the LHS) if it's a padsv, be be optimised
+        /* Can targetop (the LHS) if it's a padsv, be optimised
          * away and use OPpTARGET_MY instead?
          */
         if (    (targetop->op_type == OP_PADSV)
@@ -3239,7 +3237,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
      *  X .= Y
      *
      * otherwise we could be doing something like $x = "foo", which
-     * if treated as as a concat, would fail to COW.
+     * if treated as a concat, would fail to COW.
      */
     if (nargs + nconst + cBOOL(private_flags & OPpMULTICONCAT_APPEND) < 2)
         return;
@@ -6970,7 +6968,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * One of the important characteristics to know about the input is whether
      * the transliteration may be done in place, or does a temporary need to be
      * allocated, then copied.  If the replacement for every character in every
-     * possible string takes up no more bytes than the the character it
+     * possible string takes up no more bytes than the character it
      * replaces, then it can be edited in place.  Otherwise the replacement
      * could overwrite a byte we are about to read, depending on the strings
      * being processed.  The comments and variable names here refer to this as
@@ -15110,7 +15108,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	if (CvISXSUB(cv) || !CvROOT(cv))
 	    S_entersub_alloc_targ(aTHX_ o);
 	if (!namegv) {
-	    /* The original call checker API guarantees that a GV will be
+	    /* The original call checker API guarantees that a GV will
 	       be provided with the right name.  So, if the old API was
 	       used (or the REQUIRE_GV flag was passed), we have to reify
 	       the CV’s GV, unless this is an anonymous sub.  This is not
@@ -15749,7 +15747,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
         }
 
         /* if its an unrecognised, non-dangerous op, assume that it
-         * it the cause of at least one safe scalar */
+         * is the cause of at least one safe scalar */
         (*scalars_p)++;
         flags = AAS_SAFE_SCALAR;
         break;

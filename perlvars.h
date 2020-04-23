@@ -309,7 +309,7 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
  * matching */
 PERLVAR(G, utf8_foldclosures, SV *)
 
-/* these record the best way to to perform certain IO operations while
+/* these record the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
  * and the result recorded for use by subsequent calls.
  * In theory these variables aren't thread-safe, but the worst that can

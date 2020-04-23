@@ -4005,7 +4005,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      character folded sequences.  Since a single character can fold into
  *      such a sequence, the minimum match length for this node is less than
  *      the number of characters in the node.  This routine returns in
- *      *min_subtract how many characters to subtract from the the actual
+ *      *min_subtract how many characters to subtract from the actual
  *      length of the string to get a real minimum match length; it is 0 if
  *      there are no multi-char foldeds.  This delta is used by the caller to
  *      adjust the min length of the match, and the delta between min and max,
@@ -4475,7 +4475,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     /* EXACTF nodes need to know that the minimum length
                      * changed so that a sharp s in the string can match this
                      * ss in the pattern, but they remain EXACTF nodes, as they
-                     * won't match this unless the target string is is UTF-8,
+                     * won't match this unless the target string is in UTF-8,
                      * which we don't know until runtime.  EXACTFL nodes can't
                      * transform into EXACTFU nodes */
                     if (OP(scan) != EXACTF && OP(scan) != EXACTFL) {
@@ -6895,7 +6895,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
         /* we make the assumption here that each op in the list of
          * op_siblings maps to one SV pushed onto the stack,
          * except for code blocks, with have both an OP_NULL and
-         * and OP_CONST.
+         * an OP_CONST.
          * This allows us to match up the list of SVs against the
          * list of OPs to find the next code block.
          *
@@ -7482,7 +7482,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
  * length of the pattern.  Patches welcome to improve that guess.  That amount
  * of space is malloc'd and then immediately freed, and then clawed back node
  * by node.  This design is to minimze, to the extent possible, memory churn
- * when doing the the reallocs.
+ * when doing the reallocs.
  *
  * A separate parentheses counting pass may be needed in some cases.
  * (Previously the sizing pass did this.)  Patches welcome to reduce the number
@@ -9719,7 +9719,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
      * one of them */
     while (i_a < len_a && i_b < len_b) {
 	UV cp;	    /* The element to potentially add to the union's array */
-	bool cp_in_set;   /* is it in the the input list's set or not */
+	bool cp_in_set;   /* is it in the input list's set or not */
 
 	/* We need to take one or the other of the two inputs for the union.
 	 * Since we are merging two sorted lists, we take the smaller of the
@@ -10677,7 +10677,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         fc = uc = utf8_to_uvchr_buf(s, s + bytelen, NULL);
 
         /* The only code points that aren't folded in a UTF EXACTFish
-         * node are are the problematic ones in EXACTFL nodes */
+         * node are the problematic ones in EXACTFL nodes */
         if (OP(node) == EXACTFL && is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(uc)) {
             /* We need to check for the possibility that this EXACTFL
              * node begins with a multi-char fold.  Therefore we fold
@@ -18323,7 +18323,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * printable should have each end point be a portable value
                      * for it (preferably like 'A', but we don't warn if it is
                      * a (portable) Unicode name or code point), and the range
-                     * must be be all digits or all letters of the same case.
+                     * must be all digits or all letters of the same case.
                      * Otherwise, the range is non-portable and unclear as to
                      * what it contains */
                     if (             (isPRINT_A(prevvalue) || isPRINT_A(value))
@@ -19322,7 +19322,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * points) in the ASCII range, so we can't use it here to
                      * artificially restrict the fold domain, so we check if
                      * the class does or does not match some EXACTFish node.
-                     * Further, if we aren't under /i, and and the folded-to
+                     * Further, if we aren't under /i, and the folded-to
                      * character is part of a multi-character fold, we can't do
                      * this optimization, as the sequence around it could be
                      * that multi-character fold, and we don't here know the
@@ -22698,7 +22698,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
         int inverted_bias, as_is_bias;
 
-        /* We will apply our bias to whichever of the the results doesn't have
+        /* We will apply our bias to whichever of the results doesn't have
          * the '^' */
         if (invert) {
             invert = FALSE;

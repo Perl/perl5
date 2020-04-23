@@ -5913,7 +5913,7 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  * drops out immediately for that.  In the dfa, classes 3 and 4 are used to
  * distinguish EF vs the rest.  Then special code is used to deal with ED,
  * that's executed only when the dfa drops out.  The code points started by ED
- * are half surrogates, and half hangul syllables.  This means that 2048 of the
+ * are half surrogates, and half hangul syllables.  This means that 2048 of
  * the hangul syllables (about 18%) take longer than all other non-problematic
  * code points to handle.
  *
@@ -6148,7 +6148,7 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[];
    compilers aren't smart enough to eliminate unused static inline
    functions, so including this file in source code can cause link errors
    even if the source code uses none of the functions. Hence including these
-   can be be suppressed by setting PERL_NO_INLINE_FUNCTIONS. Doing this will
+   can be suppressed by setting PERL_NO_INLINE_FUNCTIONS. Doing this will
    (obviously) result in unworkable XS code, but allows simple probing code
    to continue to work, because it permits tests to include the perl headers
    for definitions without creating a link dependency on the perl library
@@ -6573,7 +6573,7 @@ any executable statements.
 
 =for apidoc Am|void|STORE_LC_NUMERIC_FORCE_TO_UNDERLYING
 
-This is used by XS code that that is C<LC_NUMERIC> locale-aware to force the
+This is used by XS code that is C<LC_NUMERIC> locale-aware to force the
 locale for category C<LC_NUMERIC> to be what perl thinks is the current
 underlying locale.  (The perl interpreter could be wrong about what the
 underlying locale actually is if some C or XS code has called the C library

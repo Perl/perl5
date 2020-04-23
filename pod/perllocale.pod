@@ -1025,7 +1025,7 @@ should use C<\w> with the C</a> regular expression modifier.  See L</"SECURITY">
 
 =head2 Category C<LC_NUMERIC>: Numeric Formatting
 
-After a proper C<POSIX::setlocale()> call, and within the scope of
+After a proper C<POSIX::setlocale()> call, and within the scope
 of a C<use locale> form that includes numerics, Perl obeys the
 C<LC_NUMERIC> locale information, which controls an application's idea
 of how numbers should be formatted for human readability.

@@ -826,7 +826,7 @@ typedef struct regmatch_state {
 	} keeper;
 
         /* quantifiers - these members are used for storing state for
-           for the regops used to implement quantifiers */
+           the regops used to implement quantifiers */
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;

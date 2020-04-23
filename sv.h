@@ -432,7 +432,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
-/* SVf_AMAGIC means that the stash *may* have have overload methods. It's
+/* SVf_AMAGIC means that the stash *may* have overload methods. It's
  * set each time a function is compiled into a stash, and is reset by the
  * overload code when called for the first time and finds that there are
  * no overload methods. Note that this used to be set on the object; but
@@ -702,12 +702,12 @@ Tells an SV that it is an unsigned integer and disables all other C<OK> bits.
 =for apidoc Am|bool|SvIOK_UV|SV* sv
 Returns a boolean indicating whether the SV contains an integer that must be
 interpreted as unsigned.  A non-negative integer whose value is within the
-range of both an IV and a UV may be be flagged as either C<SvUOK> or C<SvIOK>.
+range of both an IV and a UV may be flagged as either C<SvUOK> or C<SvIOK>.
 
 =for apidoc Am|bool|SvUOK|SV* sv
 Returns a boolean indicating whether the SV contains an integer that must be
 interpreted as unsigned.  A non-negative integer whose value is within the
-range of both an IV and a UV may be be flagged as either C<SvUOK> or C<SvIOK>.
+range of both an IV and a UV may be flagged as either C<SvUOK> or C<SvIOK>.
 
 =for apidoc Am|bool|SvIOK_notUV|SV* sv
 Returns a boolean indicating whether the SV contains a signed integer.
@@ -1098,7 +1098,7 @@ C<sv_force_normal> does nothing.
 /*
 =for apidoc Am|U32|SvREADONLY|SV* sv
 Returns true if the argument is readonly, otherwise returns false.
-Exposed to to perl code via Internals::SvREADONLY().
+Exposed to perl code via Internals::SvREADONLY().
 
 =for apidoc Am|U32|SvREADONLY_on|SV* sv
 Mark an object as readonly. Exactly what this means depends on the object

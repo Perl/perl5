@@ -422,7 +422,7 @@ Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
      * Ideally this could be replaced by a just an array of function pointers
      * to the C library functions that implement the macros this calls.
      * However, to compile, the precise function signatures are required, and
-     * these may vary from platform to to platform.  To avoid having to figure
+     * these may vary from platform to platform.  To avoid having to figure
      * out what those all are on each platform, I (khw) am using this method,
      * which adds an extra layer of function call overhead (unless the C
      * optimizer strips it away).  But we don't particularly care about
@@ -5650,7 +5650,7 @@ the subpattern to be matched possibly multiple times, while B is the entire
 rest of the pattern. Variable and state names reflect this convention.
 
 The states in the main switch are the union of ops and failure/success of
-substates associated with with that op.  For example, IFMATCH is the op
+substates associated with that op.  For example, IFMATCH is the op
 that does lookahead assertions /(?=A)B/ and so the IFMATCH state means
 'execute IFMATCH'; while IFMATCH_A is a state saying that we have just
 successfully matched A and IFMATCH_A_fail is a state saying that we have

@@ -563,11 +563,11 @@ is $^A, "123", '~v0 clears vstring magic on retval';
         is(-1 << 1, 0xFFFF_FFFF_FFFF_FFFE,
            "neg UV (sic) left shift  = 0xFF..E");
         is(-1 >> 1, 0x7FFF_FFFF_FFFF_FFFF,
-           "neg UV (sic) right right = 0x7F..F");
+           "neg UV (sic) right shift = 0x7F..F");
     } elsif ($w == 32) {
         no warnings "portable";
         is(-1 << 1, 0xFFFF_FFFE, "neg left shift  == 0xFF..E");
-        is(-1 >> 1, 0x7FFF_FFFF, "neg right right == 0x7F..F");
+        is(-1 >> 1, 0x7FFF_FFFF, "neg right shift == 0x7F..F");
     }
 
     {

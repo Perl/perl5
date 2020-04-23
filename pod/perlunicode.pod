@@ -979,7 +979,7 @@ C<\p{...}> property.
 
 =head2 Wildcards in Property Values
 
-Starting in Perl 5.30, it is possible to do do something like this:
+Starting in Perl 5.30, it is possible to do something like this:
 
  qr!\p{numeric_value=/\A[0-5]\z/}!
 
@@ -1013,7 +1013,7 @@ delimits the end of the enclosing C<\p{}>.  Like any pattern, certain
 other delimiters are terminated by their mirror images.  These are
 C<"(">, C<"[>", and C<"E<lt>">.  If the delimiter is any of C<"-">,
 C<"_">, C<"+">, or C<"\">, or is the same delimiter as is used for the
-enclosing pattern, it must be be preceded by a backslash escape, both
+enclosing pattern, it must be preceded by a backslash escape, both
 fore and aft.
 
 Beware of using C<"$"> to indicate to match the end of the string.  It
@@ -2068,7 +2068,7 @@ In L<< C<split>'s special-case whitespace splitting|perlfunc/split >>.
 
 Starting in Perl 5.28.0, the C<split> function with a pattern specified as
 a string containing a single space handles whitespace characters consistently
-within the scope of of C<unicode_strings>. Prior to that, or outside its scope,
+within the scope of C<unicode_strings>. Prior to that, or outside its scope,
 characters that are whitespace according to Unicode rules but not according to
 ASCII rules were treated as field contents rather than field separators when
 they appear in byte-encoded strings.

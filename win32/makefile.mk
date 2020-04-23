@@ -289,7 +289,7 @@ EXTRALIBDIRS	*=
 
 #
 # set this to your email address (perl will guess a value from
-# from your loginname and your hostname, which may not be right)
+# your loginname and your hostname, which may not be right)
 #
 #EMAIL		*=
 
@@ -1454,7 +1454,7 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $(*B).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
-# rules wrapped in .IFs break Win9X build (we end up with unbalanced []s unless
+# rules wrapped in .IFs break Win9X build (we end up with unbalanced []s
 # unless the .IF is true), so instead we use a .ELSE with the default.
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 

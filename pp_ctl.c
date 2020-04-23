@@ -262,7 +262,7 @@ PP(pp_substcont)
 		(void)SvPOK_only_UTF8(targ);
 	    }
 
-	    /* update the taint state of various various variables in
+	    /* update the taint state of various variables in
 	     * preparation for final exit.
 	     * See "how taint works" above pp_subst() */
 	    if (TAINTING_get) {
@@ -349,7 +349,7 @@ PP(pp_substcont)
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
-    /* update the taint state of various various variables in preparation
+    /* update the taint state of various variables in preparation
      * for calling the code block.
      * See "how taint works" above pp_subst() */
     if (TAINTING_get) {
@@ -3976,7 +3976,7 @@ S_require_file(pTHX_ SV *sv)
     }
 
     /* ... but if we fail, still search @INC for code references;
-     * these are applied even on on-searchable paths (except
+     * these are applied even on non-searchable paths (except
      * if we got EACESS).
      *
      * For searchable paths, just search @INC normally

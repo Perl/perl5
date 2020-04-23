@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.53';
+$VERSION = '1.54';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -2335,7 +2335,7 @@ sub keyword {
     }
     # This sub may be called for a program that has no nextstate ops.  In
     # that case we may have a lexical sub named no/use/sub in scope but
-    # but $self->lex_in_scope will return false because it depends on the
+    # $self->lex_in_scope will return false because it depends on the
     # current nextstate op.  So we need this alternate method if there is
     # no current cop.
     if (!$self->{'curcop'}) {

@@ -9442,7 +9442,7 @@ sub join_lines($return) {
     # This causes continuation lines to be joined together into one long line
     # for folding.  A continuation line is any line that doesn't begin with a
     # space or "\b" (the latter is stripped from the output).  This is so
-    # lines can be be in a HERE document so as to fit nicely in the terminal
+    # lines can be in a HERE document so as to fit nicely in the terminal
     # width, but be joined together in one long line, and then folded with
     # indents, '#' prefixes, etc, properly handled.
     # A blank separates the joined lines except if there is a break; an extra
@@ -12952,7 +12952,7 @@ sub filter_blocks_lines($file) {
         # were probably not really official at that time, so should be
         # ignored.  You can easily modify things to skip all of them by
         # changing this function to just set $_ to "", and return; and to skip
-        # certain of them by by simply removing their declarations from
+        # certain of them by simply removing their declarations from
         # get_old_property_aliases().
         #
         # Here is a list of all the ones that are thrown away:
@@ -13304,7 +13304,7 @@ END
 
     );
 
-    # One might think that the the 'Unicode_1_Name' field, could work for most
+    # One might think that the 'Unicode_1_Name' field, could work for most
     # of the above names, but sadly that field varies depending on the
     # release.  Version 1.1.5 had no names for any of the controls; Version
     # 2.0 introduced names for the C0 controls, and 3.0 introduced C1 names.
@@ -13376,7 +13376,7 @@ sub finish_Unicode() {
     #    necessary.
     # 2) Adds the mappings for code points missing from the files which have
     #    defaults specified for them.
-    # 3) At this this point all mappings are known, so it computes the type of
+    # 3) At this point all mappings are known, so it computes the type of
     #    each property whose type hasn't been determined yet.
     # 4) Calculates all the regular expression match tables based on the
     #    mappings.
@@ -14060,7 +14060,7 @@ sub handle_compare_versions () {
                 $default_table = $property->table($default_map);
             }
 
-            # If some code points don't go back to the the grab-bag when they
+            # If some code points don't go back to the grab-bag when they
             # are considered unassigned, exclude them from the list that does
             # that.
             my $this_delta = $delta;
@@ -14885,7 +14885,7 @@ sub compile_perl() {
     # Abbreviations go after everything else, so they are saved temporarily in
     # a hash for later.
     #
-    # Everything else is added added afterwards, which preserves the input
+    # Everything else is added afterwards, which preserves the input
     # ordering
 
     foreach my $range ($alias->ranges) {
@@ -16415,7 +16415,7 @@ sub make_ucd_table_pod_entries($table) {
                                                        && $perl_extension
                                                        && $property != $table;
 
-    # Get the more official name for for perl extensions that aren't
+    # Get the more official name for perl extensions that aren't
     # stand-alone properties
     if ($is_perl_extension_match_table_but_not_dollar_perl) {
         if ($property->type == $BINARY) {

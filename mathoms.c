@@ -24,7 +24,7 @@
  * versions of Perl which we cannot completely remove from the core
  * code. There are two reasons functions should be here:
  *
- * 1) A function has been been replaced by a macro within a minor release,
+ * 1) A function has been replaced by a macro within a minor release,
  *    so XS modules compiled against an older release will expect to
  *    still be able to link against the function
  * 2) A function Perl_foo(...) with #define foo Perl_foo(aTHX_ ...)

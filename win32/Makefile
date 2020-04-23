@@ -252,7 +252,7 @@ EXTRALIBDIRS	=
 
 #
 # set this to your email address (perl will guess a value from
-# from your loginname and your hostname, which may not be right)
+# your loginname and your hostname, which may not be right)
 #
 #EMAIL		=
 
@@ -510,7 +510,7 @@ OPTIMIZE	= -O1 -Zi -GL
 LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
 # in addition to the PDB symbols.  The default Dr. Watson that ships with
-# Windows can use the the former but not latter.  The free WinDbg can be
+# Windows can use the former but not latter.  The free WinDbg can be
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
 #LINK_DBG	= $(LINK_DBG) -debugtype:both

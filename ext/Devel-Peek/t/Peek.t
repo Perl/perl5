@@ -1029,7 +1029,7 @@ use constant {
 
 unless ($Config{useithreads}) {
     # These end up as copies in pads under ithreads, which rather defeats the
-    # the point of what we're trying to test here.
+    # point of what we're trying to test here.
 
     do_test('regular string constant', perl,
 'SV = PV\\($ADDR\\) at $ADDR

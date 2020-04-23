@@ -787,7 +787,7 @@ is($_, 'foobar', 'Verify charnames.pm doesnt clobbers $_');
 # SADAHIRO Tomoyuki's suggestion is to ensure that the UTF-8ness of both
 # arguments are identical before calling index.
 # To do this can take advantage of the fact that unicore/Name.pl is 7 bit
-# (or at least should be). So assert that that it's true here.  EBCDIC
+# (or at least should be). So assert that that is true here.  EBCDIC
 # may be a problem (khw).
 
 my $names = do "unicore/Name.pl";

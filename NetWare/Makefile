@@ -520,7 +520,7 @@ USE_IMP_SYS	= define
 
 #
 # set this to your email address (perl will guess a value from
-# from your loginname and your hostname, which may not be right)
+# your loginname and your hostname, which may not be right)
 #
 #EMAIL		=
 

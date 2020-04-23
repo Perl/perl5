@@ -204,7 +204,7 @@ sub readvar {
     my $file = $ARGS{TARG_DIR} . shift;
     my $hash = shift;
     my $proc = shift;
-    open my $vars, '<', $file or die die "Cannot open $file: $!\n";
+    open my $vars, '<', $file or die "Cannot open $file: $!\n";
 
     while (<$vars>) {
 	# All symbols have a Perl_ prefix because that's what embed.h sticks

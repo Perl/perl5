@@ -812,7 +812,7 @@ code point.  This function returns C<"\xC2\xA0"> on an ASCII platform, and
 C<"\x80\x41"> on an EBCDIC 1047 one.
 
 But easiest is, if the character is specifiable as a literal, like
-C<"A"> or C<"%">, to use that; if not so specificable, you can use use
+C<"A"> or C<"%">, to use that; if not so specificable, you can use
 C<\N{}> , if the side effects aren't troublesome.  Simply specify all
 your characters in hex, using C<\N{U+ZZ}> instead of C<\xZZ>.  C<\N{}>
 is the Unicode name, and so it
