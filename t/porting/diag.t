@@ -164,7 +164,7 @@ foreach my $cur_entry ( keys %entries) {
     if (! exists $entries{$cur_entry}{severity}
 
             # If there is no first line, it was two =items in a row, so the
-            # second one is the one with with text, not this one.
+            # second one is the one with text, not this one.
         && exists $entries{$cur_entry}{first_line}
 
             # If the first line refers to another message, no need for severity

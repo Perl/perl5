@@ -1723,7 +1723,7 @@ wstr_to_str(const wchar_t* wstr)
  * then it will convert the short name instead.
  *
  * The buffer to the ansi pathname must be freed with win32_free() when it
- * it no longer needed.
+ * is no longer needed.
  *
  * The argument to win32_ansipath() must exist before this function is
  * called; otherwise there is no way to determine the short path name.

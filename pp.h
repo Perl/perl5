@@ -356,7 +356,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 /* EXTEND_SKIP(): used for where you would normally call EXTEND(), but
  * you know for sure that a previous op will have already extended the
- * stack sufficiently.  For example pp_enteriter ensures that that there
+ * stack sufficiently.  For example pp_enteriter ensures that there
  * is always at least 1 free slot, so pp_iter can return &PL_sv_yes/no
  * without checking each time. Calling EXTEND_SKIP() defeats the HWM
  * debugging mechanism which would otherwise whine

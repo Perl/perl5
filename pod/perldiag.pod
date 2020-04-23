@@ -6479,7 +6479,7 @@ also be escaped to avoid confusing the parser, for example,
 
 Forcing literal C<"{"> characters to be escaped enables the Perl
 language to be extended in various ways in future releases.  To avoid
-needlessly breaking existing code, the restriction is is not enforced in
+needlessly breaking existing code, the restriction is not enforced in
 contexts where there are unlikely to ever be extensions that could
 conflict with the use there of C<"{"> as a literal.  Those that are
 not potentially ambiguous do not warn; those that are do raise a
@@ -6533,7 +6533,7 @@ also be escaped to avoid confusing the parser, for example,
 
 Forcing literal C<"{"> characters to be escaped enables the Perl
 language to be extended in various ways in future releases.  To avoid
-needlessly breaking existing code, the restriction is is not enforced in
+needlessly breaking existing code, the restriction is not enforced in
 contexts where there are unlikely to ever be extensions that could
 conflict with the use there of C<"{"> as a literal.  Those that are
 not potentially ambiguous do not warn; those that are raise this

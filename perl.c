@@ -5243,7 +5243,7 @@ Perl_my_failure_exit(pTHX)
 	 * success/warning codes to fatal with out changing
 	 * the POSIX status code.  The severity makes VMS native
 	 * status handling work, while UNIX mode programs use the
-	 * the POSIX exit codes.
+	 * POSIX exit codes.
 	 */
 	 if ((STATUS_NATIVE & (STS$K_SEVERE|STS$K_ERROR)) == 0) {
 	    STATUS_NATIVE &= STS$M_COND_ID;

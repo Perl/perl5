@@ -1751,7 +1751,7 @@ allocate_struct(pTHX_ SV *rv, const STRLEN size, const char *packname) {
  * "write through" environment changes to the process environment.
  *
  * (c) Even the primary Perl interpreter won't update the CRT copy of the
- * the environment, only the Win32API copy (it calls win32_putenv()).
+ * environment, only the Win32API copy (it calls win32_putenv()).
  *
  * As with CPerlHost::Getenv() and CPerlHost::Putenv() themselves, it makes
  * sense to only update the process environment when inside the main

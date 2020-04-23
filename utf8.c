@@ -1367,7 +1367,7 @@ describes the situation in all cases.
 
 =item C<UTF8_GOT_CONTINUATION>
 
-The input sequence was malformed in that the first byte was a a UTF-8
+The input sequence was malformed in that the first byte was a UTF-8
 continuation byte.
 
 =item C<UTF8_GOT_EMPTY>
@@ -1621,7 +1621,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * things.  For example, an input could be deliberately designed to
      * overflow, and if this code bailed out immediately upon discovering that,
      * returning to the caller C<*retlen> pointing to the very next byte (one
-     * which is actually part of of the overflowing sequence), that could look
+     * which is actually part of the overflowing sequence), that could look
      * legitimate to the caller, which could discard the initial partial
      * sequence and process the rest, inappropriately.
      *
@@ -3622,7 +3622,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
      * ustrp will contain *lenp bytes
      *
      * Turkic differs only from non-Turkic in that 'i' and LATIN CAPITAL LETTER
-     * I WITH DOT ABOVE form a case pair, as do 'I' and and LATIN SMALL LETTER
+     * I WITH DOT ABOVE form a case pair, as do 'I' and LATIN SMALL LETTER
      * DOTLESS I */
 
     PERL_ARGS_ASSERT_TURKIC_UC;
@@ -3739,7 +3739,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
     return result;
 
 /* Not currently externally documented, and subject to change:
- * <flags> is set iff iff the rules from the current underlying locale are to
+ * <flags> is set iff the rules from the current underlying locale are to
  *         be used. */
 
 UV
@@ -3786,7 +3786,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
 }
 
 /* Not currently externally documented, and subject to change:
- * <flags> is set iff iff the rules from the current underlying locale are to
+ * <flags> is set iff the rules from the current underlying locale are to
  *         be used.
  */
 

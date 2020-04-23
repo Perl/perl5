@@ -2825,7 +2825,7 @@ lib/Config_git.pl:}m;
 
 lib/Config_git.pl: $1}m;
 
-                              # This emulates commits 0f13ebd5d71f8177 and
+                              # This emulates commits 0f13ebd5d71f8177
                               # and a04d4598adc57886. It ensures that
                               # lib/Config_git.pl is built before configpm,
                               # and that configpm is run exactly once.

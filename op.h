@@ -24,7 +24,7 @@
  *                      !op_slabbed.
  *	op_savefree	on savestack via SAVEFREEOP
  *	op_folded	Result/remainder of a constant fold operation.
- *	op_moresib	this op is is not the last sibling
+ *	op_moresib	this op is not the last sibling
  *	op_spare	One spare bit
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,

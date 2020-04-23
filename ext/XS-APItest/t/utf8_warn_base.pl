@@ -584,7 +584,7 @@ sub flags_to_text($$)
 }
 
 # Possible flag returns from utf8n_to_uvchr_error().  These should have G_,
-# instead of A_, D_, but the prefixes will be used in a a later commit, so
+# instead of A_, D_, but the prefixes will be used in a later commit, so
 # minimize churn by having them here.
 my @utf8n_flags_to_text =  ( qw(
         A_EMPTY
@@ -1415,7 +1415,7 @@ foreach my $test (@tests) {
               $allow_flags |= $::UTF8_ALLOW_OVERFLOW if $malformed_allow_type;
           }
 
-          # And we can create the malformation-related text for the the test
+          # And we can create the malformation-related text for the test
           # names we eventually will generate.
           my $malformations_name = "";
           if (@malformation_names) {

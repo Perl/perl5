@@ -12524,7 +12524,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * being allowed for %c (ideally we should warn on e.g. '%hc').
              * Setting a default intsize, along with a positive
              * (which signals unsigned) base, causes, for C-ish use, the
-             * va_arg to be interpreted as as unsigned int, when it's
+             * va_arg to be interpreted as an unsigned int, when it's
              * actually signed, which will convert -ve values to high +ve
              * values. Note that unlike the libc %c, values > 255 will
              * convert to high unicode points rather than being truncated
@@ -14623,7 +14623,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
                 /* XXX should this sv_dup_inc? Or only if CxEVAL_TXT_REFCNTED ???? */
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		ncx->blk_eval.cv = cv_dup(ncx->blk_eval.cv, param);
-                /* XXX what do do with cur_top_env ???? */
+                /* XXX what to do with cur_top_env ???? */
 		break;
 	    case CXt_LOOP_LAZYSV:
 		ncx->blk_loop.state_u.lazysv.end

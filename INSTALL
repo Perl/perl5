@@ -1665,7 +1665,7 @@ If you still have missing routines or undefined symbols, you probably
 need to add some library or other, make a symbolic link like described
 above, or you need to undefine some feature that Configure thought was
 there but is defective or incomplete.  If you used a hint file, see if
-it has any relevant advice.  You can also look through through config.h
+it has any relevant advice.  You can also look through config.h
 for likely suspects.
 
 =item toke.c
@@ -1868,7 +1868,7 @@ The more common one requires some way of transferring and running
 executables in the target system, such as an ssh connection; this is the
 C<./Configure -Dusecrosscompile -Dtargethost=...> route.  The second
 method doesn't need access to the target system, but requires you to
-provide a config.sh, and and a canned Makefile; the rest of this section
+provide a config.sh, and a canned Makefile; the rest of this section
 describes the former.
 
 This cross-compilation setup of Configure has successfully been used in

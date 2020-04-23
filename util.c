@@ -795,7 +795,7 @@ then.
 
 =cut
 
-If SvTAIL(littlestr) is true, a fake "\n" was appended to to the string
+If SvTAIL(littlestr) is true, a fake "\n" was appended to the string
 during FBM compilation due to FBMcf_TAIL in flags. It indicates that
 the littlestr must be anchored to the end of bigstr (or to any \n if
 FBMrf_MULTILINE).
@@ -5121,7 +5121,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 =for apidoc my_vsnprintf
 
 The C library C<vsnprintf> if available and standards-compliant.
-However, if if the C<vsnprintf> is not available, will unfortunately
+However, if the C<vsnprintf> is not available, will unfortunately
 use the unsafe C<vsprintf> which can overrun the buffer (there is an
 overrun check, but that may be too late).  Consider using
 C<sv_vcatpvf> instead, or getting C<vsnprintf>.

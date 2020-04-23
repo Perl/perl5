@@ -313,7 +313,7 @@ If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
 digits may be separated from each other by a single underscore; also a single
 leading underscore is accepted.
 
-The the C<PERL_SCAN_DISALLOW_PREFIX> flag is always treated as being set for
+The C<PERL_SCAN_DISALLOW_PREFIX> flag is always treated as being set for
 this function.
 
 =cut

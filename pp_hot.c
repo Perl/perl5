@@ -640,7 +640,7 @@ PP(pp_multiconcat)
      *   one set of segment lengths.
      *
      * * If the string has different plain and utf8 representations
-     *   (e.g. "\x80"), then then aux[PERL_MULTICONCAT_IX_PLAIN_PV/LEN]]
+     *   (e.g. "\x80"), then aux[PERL_MULTICONCAT_IX_PLAIN_PV/LEN]]
      *   holds the plain rep, while aux[PERL_MULTICONCAT_IX_UTF8_PV/LEN]
      *   holds the utf8 rep, and there are 2 sets of segment lengths,
      *   with the utf8 set following after the plain set.
@@ -687,7 +687,7 @@ PP(pp_multiconcat)
          * calculate how much extra growth is needed for all the chars
          * which will expand to two utf8 bytes.
          * Also, if the growth is non-zero, negate the length to indicate
-         * that this this is a variant string. Conversely, un-negate the
+         * that this is a variant string. Conversely, un-negate the
          * length on utf8 args (which was only needed to flag non-utf8
          * args in this loop */
         for (svpv_p = svpv_buf; svpv_p < svpv_end; svpv_p++) {

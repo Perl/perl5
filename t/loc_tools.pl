@@ -1,4 +1,4 @@
-# Common tools for test files files to find the locales which exist on the
+# Common tools for test files to find the locales which exist on the
 # system.  Caller should have verified that this isn't miniperl before calling
 # the functions.
 

@@ -271,7 +271,7 @@ are in the character. */
 
 /* Surrogates, non-character code points and above-Unicode code points are
  * problematic in some contexts.  This allows code that needs to check for
- * those to to quickly exclude the vast majority of code points it will
+ * those to quickly exclude the vast majority of code points it will
  * encounter */
 #define isUTF8_POSSIBLY_PROBLEMATIC(c) (__ASSERT_(FITS_IN_8_BITS(c))        \
                                         (U8) c >= 0xED)

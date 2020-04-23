@@ -20,7 +20,7 @@
  * to run regen_perly.pl, which re-creates the files perly.h, perly.tab
  * and perly.act which are derived from this.
  *
- * The main job of of this grammar is to call the various newFOO()
+ * The main job of this grammar is to call the various newFOO()
  * functions in op.c to build a syntax tree of OP structs.
  * It relies on the lexer in toke.c to do the tokenizing.
  *

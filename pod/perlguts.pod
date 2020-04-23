@@ -3730,7 +3730,7 @@ Here is a typical example of context popping, as found in C<pp_leavesub>
 
 The steps above are in a very specific order, designed to be the reverse
 order of when the context was pushed. The first thing to do is to copy
-and/or protect any any return arguments and free any temps in the current
+and/or protect any return arguments and free any temps in the current
 scope. Scope exits like an rvalue sub normally return a mortal copy of
 their return args (as opposed to lvalue subs). It is important to make
 this copy before the save stack is popped or variables are restored, or

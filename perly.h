@@ -4,14 +4,15 @@
    Any changes made here will be lost!
  */
 
-#define PERL_BISON_VERSION  30000
+#define PERL_BISON_VERSION  30003
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.3.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,6 +39,9 @@
 
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
+/* Undocumented macros, especially those whose name start with YY_,
+   are private implementation details.  Do not rely on them.  */
 
 /* Debug traces.  */
 #ifndef YYDEBUG
@@ -168,7 +172,7 @@ S_is_opval_token(int type) {
 #endif /* PERL_IN_TOKE_C */
 #endif /* PERL_CORE */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 
@@ -179,6 +183,8 @@ union YYSTYPE
     GV *gvval;
 
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -189,6 +195,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * e762043bfa8c11d38e46b8759b544243dd0b1dee698344186c06df7dd91ec5ed perly.y
+ * e5b801fdebce5c77dd8e644fc5a489cbea6af33db180e771dd9d669b12bbe0cf perly.y
  * 0947213b55d0ed11693554bea04987e886cf285f5c14cf9075fa1e7acc3f4061 regen_perly.pl
  * ex: set ro: */
