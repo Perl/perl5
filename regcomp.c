@@ -370,8 +370,7 @@ struct RExC_state_t {
         RExC_naughty += RExC_naughty / (exp) + (add)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
-#define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
-	((*s) == '{' && regcurly(s)))
+#define	ISMULT2(s)	(ISMULT1(*s) || ((*s) == '{' && regcurly(s)))
 
 /*
  * Flags to be passed up and down.
