@@ -12815,7 +12815,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                      ? RExC_parse - origparse
                                      : 0),
                        origparse));
-            /* NOT-REACHED */
         } else {
             ckWARN2reg(RExC_parse,
                        "%" UTF8f " matches null string many times",
