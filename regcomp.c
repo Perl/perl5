@@ -12757,32 +12757,35 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     if ((flags&SIMPLE)) {
-        if (min == 0 && max == REG_INFTY) {
-
-            /* Going from 0..inf is currently forbidden in wildcard
-             * subpatterns.  The only reason is to make it harder to
-             * write patterns that take a long long time to halt, and
-             * because the use of this construct isn't necessary in
-             * matching Unicode property values */
-            if (RExC_pm_flags & PMf_WILDCARD) {
-                RExC_parse++;
-                /* diag_listed_as: Use of %s is not allowed in Unicode
-                   property wildcard subpatterns in regex; marked by
-                   <-- HERE in m/%s/ */
-                vFAIL("Use of quantifier '*' is not allowed in"
-                      " Unicode property wildcard subpatterns");
-                /* Note, don't need to worry about {0,}, as a '}' isn't
-                 * legal at all in wildcards, so wouldn't get this far
-                 * */
+        if (max == REG_INFTY) {
+            if (min == 1) {
+                reginsert(pRExC_state, PLUS, ret, depth+1);
+                MARK_NAUGHTY(3);
+                goto done_main_op;
             }
-            reginsert(pRExC_state, STAR, ret, depth+1);
-            MARK_NAUGHTY(4);
-            goto done_main_op;
-        }
-        if (min == 1 && max == REG_INFTY) {
-            reginsert(pRExC_state, PLUS, ret, depth+1);
-            MARK_NAUGHTY(3);
-            goto done_main_op;
+            else if (min == 0) {
+
+                /* Going from 0..inf is currently forbidden in wildcard
+                 * subpatterns.  The only reason is to make it harder to
+                 * write patterns that take a long long time to halt, and
+                 * because the use of this construct isn't necessary in
+                 * matching Unicode property values */
+                if (RExC_pm_flags & PMf_WILDCARD) {
+                    RExC_parse++;
+                    /* diag_listed_as: Use of %s is not allowed in Unicode
+                       property wildcard subpatterns in regex; marked by
+                       <-- HERE in m/%s/ */
+                    vFAIL("Use of quantifier '*' is not allowed in"
+                          " Unicode property wildcard subpatterns");
+                    /* Note, don't need to worry about {0,}, as a '}' isn't
+                     * legal at all in wildcards, so wouldn't get this far
+                     * */
+                }
+
+                reginsert(pRExC_state, STAR, ret, depth+1);
+                MARK_NAUGHTY(4);
+                goto done_main_op;
+            }
         }
         MARK_NAUGHTY_EXP(2, 2);
         reginsert(pRExC_state, CURLY, ret, depth+1);
