@@ -12812,21 +12812,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     goto nest_check;
 
-#if 0				/* Now runtime fix should be reliable. */
-
-    /* if this is reinstated, don't forget to put this back into perldiag:
-
-	    =item Regexp *+ operand could be empty at {#} in regex m/%s/
-
-	   (F) The part of the regexp subject to either the * or + quantifier
-           could match an empty string. The {#} shows in the regular
-           expression about where the problem was discovered.
-
-    */
-
-    if (!(flags&HASWIDTH) && op != '?')
-      vFAIL("Regexp *+ operand could be empty");
-#endif
   nest_check:
 
     if (*RExC_parse == '?') {
