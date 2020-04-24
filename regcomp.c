@@ -12749,8 +12749,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* If this is a code block pass it up */
     *flagp |= (flags & POSTPONED);
 
-    if (max > 0)
+    if (max > 0) {
         *flagp |= (flags & HASWIDTH);
+        if (max == REG_INFTY)
+            RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+    }
 
     if ((flags&SIMPLE)) {
         if (min == 0 && max == REG_INFTY) {
@@ -12773,13 +12776,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             reginsert(pRExC_state, STAR, ret, depth+1);
             MARK_NAUGHTY(4);
-            RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
             goto done_main_op;
         }
         if (min == 1 && max == REG_INFTY) {
             reginsert(pRExC_state, PLUS, ret, depth+1);
             MARK_NAUGHTY(3);
-            RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
             goto done_main_op;
         }
         MARK_NAUGHTY_EXP(2, 2);
@@ -12816,12 +12817,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         RExC_whilem_seen++;
         MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
     }
+
     FLAGS(REGNODE_p(ret)) = 0;
 
     ARG1_SET(REGNODE_p(ret), (U16)min);
     ARG2_SET(REGNODE_p(ret), (U16)max);
-    if (max == REG_INFTY)
-        RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
 
   done_main_op:
 
