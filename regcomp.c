@@ -12640,8 +12640,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     if (op != '{') {
         nextchar(pRExC_state);
 
-        *flagp = HASWIDTH;
-
         if (op == '*') {
             min = 0;
         }
@@ -12748,6 +12746,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         }
     }
 
+    if (max > 0)
+        *flagp |= (flags & HASWIDTH);
+
     if ((flags&SIMPLE)) {
         if (min == 0 && max == REG_INFTY) {
 
@@ -12814,10 +12815,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
     FLAGS(REGNODE_p(ret)) = 0;
 
-    if (min > 0)
-        *flagp = 0;
-    if (max > 0)
-        *flagp |= HASWIDTH;
     ARG1_SET(REGNODE_p(ret), (U16)min);
     ARG2_SET(REGNODE_p(ret), (U16)max);
     if (max == REG_INFTY)
