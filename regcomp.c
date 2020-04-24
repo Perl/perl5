@@ -12775,13 +12775,13 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             reginsert(pRExC_state, STAR, ret, depth+1);
             MARK_NAUGHTY(4);
             RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-            goto nest_check;
+            goto done_main_op;
         }
         if (min == 1 && max == REG_INFTY) {
             reginsert(pRExC_state, PLUS, ret, depth+1);
             MARK_NAUGHTY(3);
             RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-            goto nest_check;
+            goto done_main_op;
         }
         MARK_NAUGHTY_EXP(2, 2);
         reginsert(pRExC_state, CURLY, ret, depth+1);
@@ -12824,9 +12824,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     if (max == REG_INFTY)
         RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
 
-    goto nest_check;
-
-  nest_check:
+  done_main_op:
 
     if (*RExC_parse == '?') {
         nextchar(pRExC_state);
