@@ -12715,6 +12715,27 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         }
     }
 
+    if (! (flags & (HASWIDTH|POSTPONED))) {
+        if (max > REG_INFTY/3) {
+            if (origparse[0] == '\\' && origparse[1] == 'K') {
+                vFAIL2utf8f(
+                           "%" UTF8f " is forbidden - matches null string"
+                           " many times",
+                           UTF8fARG(UTF, (RExC_parse >= origparse
+                                         ? RExC_parse - origparse
+                                         : 0),
+                           origparse));
+            } else {
+                ckWARN2reg(RExC_parse,
+                           "%" UTF8f " matches null string many times",
+                           UTF8fARG(UTF, (RExC_parse >= origparse
+                                         ? RExC_parse - origparse
+                                         : 0),
+                           origparse));
+            }
+        }
+    }
+
     if ((flags&SIMPLE)) {
         if (min == 0 && max == REG_INFTY) {
 
@@ -12808,23 +12829,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
       vFAIL("Regexp *+ operand could be empty");
 #endif
   nest_check:
-    if (!(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3) {
-        if (origparse[0] == '\\' && origparse[1] == 'K') {
-            vFAIL2utf8f(
-                       "%" UTF8f " is forbidden - matches null string many times",
-                       UTF8fARG(UTF, (RExC_parse >= origparse
-                                     ? RExC_parse - origparse
-                                     : 0),
-                       origparse));
-        } else {
-            ckWARN2reg(RExC_parse,
-                       "%" UTF8f " matches null string many times",
-                       UTF8fARG(UTF, (RExC_parse >= origparse
-                                     ? RExC_parse - origparse
-                                     : 0),
-                       origparse));
-        }
-    }
 
     if (*RExC_parse == '?') {
         nextchar(pRExC_state);
