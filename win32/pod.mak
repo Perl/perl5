@@ -1,8 +1,7 @@
 HTMLROOT = /	# Change this to fix cross-references in HTML
 POD2HTML_ARGS = --htmlroot=$(HTMLROOT) --podroot=.. --podpath=pod:lib:ext:vms
 POD2HTML = ../ext/Pod-Html/pod2html
-POD2MAN = ../cpan/podlators/pod2man
-POD2TEXT = ../cpan/podlators/pod2text
+POD2MAN = ../cpan/podlators/scripts/pod2man
 PODCHECKER = ../cpan/Pod-Checker/podchecker
 
 all: html
@@ -692,10 +691,10 @@ toc:
 .SUFFIXES: .man
 
 .pm.man:
-	$(PERL) -I../lib $(POD2MAN) $*.pm >$*.man
+	$(REALPERL) -I../lib $(POD2MAN) $*.pm >$*.man
 
 .pod.man:
-	$(PERL) -I../lib $(POD2MAN) $*.pod >$*.man
+	$(REALPERL) -I../lib $(POD2MAN) $*.pod >$*.man
 
 .SUFFIXES: .html
 
