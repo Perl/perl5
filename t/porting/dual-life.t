@@ -32,7 +32,6 @@ my $not_installed = qr{^(?:
 
 my %dist_dir_exe;
 
-$dist_dir_exe{lc "podselect.PL"} = "../cpan/Pod-Parser/podselect";
 $dist_dir_exe{lc "podchecker.PL"} = "../cpan/Pod-Checker/podchecker";
 $dist_dir_exe{lc "pod2usage.PL"} = "../cpan/Pod-Usage/pod2usage";
 

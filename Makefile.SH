@@ -1566,14 +1566,13 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to cpan/Module-Metadata/*
 	$to cpan/Term-Cap/test.pl
 	$to cpan/Pod-Usage/*
-	$to cpan/Pod-Parser/*
+	$to cpan/Pod-Checker/*
 	$to cpan/IO-Compress/*
 	$to cpan/HTTP-Tiny/lib/*
 	$to cpan/Filter-Util-Call/filter-util.pl
 	$to cpan/Digest-MD5/*
 	$to cpan/Digest-SHA/*
 	$to cpan/Test-Simple/*
-	$to cpan/Pod-Parser/lib/*
 	$to cpan/Test-Harness/*
 	$to cpan/Scalar-List-Utils/*
 	$to ext/IPC-Open3/*

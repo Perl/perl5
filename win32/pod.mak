@@ -3,7 +3,7 @@ POD2HTML_ARGS = --htmlroot=$(HTMLROOT) --podroot=.. --podpath=pod:lib:ext:vms
 POD2HTML = ../ext/Pod-Html/pod2html
 POD2MAN = ../cpan/podlators/pod2man
 POD2TEXT = ../cpan/podlators/pod2text
-PODCHECKER = ../cpan/Pod-Parser/podchecker
+PODCHECKER = ../cpan/Pod-Checker/podchecker
 
 all: html
 
@@ -718,4 +718,4 @@ distclean:	realclean
 
 check:	$(PODCHECKER)
 	@echo "checking..."; \
-	$(PERL) -I../lib $(PODCHECKER) $(POD)
+	$(REALPERL) -I../lib $(PODCHECKER) $(POD)

@@ -1806,7 +1806,7 @@ cpan/Pod-Usage/t/pod/usage.pod
 cpan/Pod-Usage/t/pod/usage2.pod
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
-cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
+cpan/podlators/lib/Pod/Text.pm			Convert POD data to formatted ASCII text
 cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 cpan/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
