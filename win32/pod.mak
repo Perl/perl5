@@ -1,6 +1,6 @@
 HTMLROOT = /	# Change this to fix cross-references in HTML
 POD2HTML_ARGS = --htmlroot=$(HTMLROOT) --podroot=.. --podpath=pod:lib:ext:vms
-POD2HTML = ../ext/Pod-Html/pod2html
+POD2HTML = ../ext/Pod-Html/bin/pod2html
 POD2MAN = ../cpan/podlators/scripts/pod2man
 PODCHECKER = ../cpan/Pod-Checker/podchecker
 
