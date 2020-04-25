@@ -15173,9 +15173,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         * have to map that back to the original */
                         if (need_to_fold_loc) {
                             upper_fill = loc_correspondence[s - s_start];
-                            Safefree(locfold_buf);
-                            Safefree(loc_correspondence);
-
                             if (upper_fill == 0) {
                                 FAIL2("panic: loc_correspondence[%d] is 0",
                                       (int) (s - s_start));
@@ -15186,16 +15183,17 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                         goto reparse;
                     }
-                    else if (need_to_fold_loc) {
-                        Safefree(locfold_buf);
-                        Safefree(loc_correspondence);
-                    }
 
                     /* Here the node consists entirely of non-final multi-char
                      * folds.  (Likely it is all 'f's or all 's's.)  There's no
                      * decent place to split it, so give up and just take the
                      * whole thing */
                     len = old_s - s0;
+                }
+
+                if (need_to_fold_loc) {
+                    Safefree(locfold_buf);
+                    Safefree(loc_correspondence);
                 }
 	    }   /* End of verifying node ends with an appropriate char */
 
