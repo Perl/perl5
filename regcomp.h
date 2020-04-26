@@ -1162,10 +1162,10 @@ re.pm, especially to the documentation.
     
 #else /* if not DEBUGGING */
 
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS
-#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS  dNOOP
+#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)  dNOOP
 #define RE_SV_ESCAPE(rpv,isuni,dsv,sv,m)
-#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)
+#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)  dNOOP
 #define RE_SV_DUMPLEN(ItEm)
 #define RE_SV_TAIL(ItEm)
 #define isDEBUG_WILDCARD 0
