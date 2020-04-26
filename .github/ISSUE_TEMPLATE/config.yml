@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a CPAN Module Issue
+    url: https://metacpan.org
+    about: Please report issues with CPAN modules to their preferred bugtracker as indicated on their MetaCPAN page
