@@ -23514,7 +23514,7 @@ S_handle_user_defined_property(pTHX_
 #    define CUR_CONTEXT      aTHX
 #    define ORIGINAL_CONTEXT save_aTHX
 #  else
-#    define DECLARATION_FOR_GLOBAL_CONTEXT
+#    define DECLARATION_FOR_GLOBAL_CONTEXT    dNOOP
 #    define SWITCH_TO_GLOBAL_CONTEXT          NOOP
 #    define RESTORE_CONTEXT                   NOOP
 #    define CUR_CONTEXT                       NULL
