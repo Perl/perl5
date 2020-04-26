@@ -21881,8 +21881,22 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 		ret->check_substr = ret->substrs->data[0].substr;
 		ret->check_utf8   = ret->substrs->data[0].utf8_substr;
 	    } else {
-		assert(r->check_substr == r->substrs->data[1].substr);
-		assert(r->check_utf8   == r->substrs->data[1].utf8_substr);
+		if(r->check_substr != r->substrs->data[1].substr) {
+                    /*
+                    PerlIO_printf(Perl_debug_log, "%s: %d: ", __FILE__, __LINE__);
+                    sv_dump(r->check_substr);
+                    sv_dump(r->substrs->data[1].substr);
+                    */
+                }
+                else assert(r->check_substr == r->substrs->data[1].substr);
+		if (r->check_utf8   != r->substrs->data[1].utf8_substr) {
+                    /*
+                    PerlIO_printf(Perl_debug_log, "%s: %d: ", __FILE__, __LINE__);
+                    sv_dump(r->check_utf8);
+                    sv_dump(r->substrs->data[1].utf8_substr);
+                    */
+                }
+                else assert(r->check_utf8   == r->substrs->data[1].utf8_substr);
 
 		ret->check_substr = ret->substrs->data[1].substr;
 		ret->check_utf8   = ret->substrs->data[1].utf8_substr;
