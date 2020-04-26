@@ -720,32 +720,94 @@ such occurrence.
 char *
 Perl_rninstr(const char *big, const char *bigend, const char *little, const char *lend)
 {
-    const char *bigbeg;
-    const I32 first = *little;
-    const char * const littleend = lend;
+    const Ptrdiff_t little_len = lend - little;
+    const Ptrdiff_t big_len = bigend - big;
 
     PERL_ARGS_ASSERT_RNINSTR;
 
-    if (little >= littleend)
+    /* A non-existent needle trivially matches the rightmost possible position
+     * in the haystack */
+    if (UNLIKELY(little_len <= 0)) {
 	return (char*)bigend;
-    bigbeg = big;
-    big = bigend - (littleend - little++);
-    while (big >= bigbeg) {
-	const char *s, *x;
-	if (*big-- != first)
-	    continue;
-	for (x=big+2,s=little; s < littleend; /**/ ) {
-	    if (*s != *x)
-		break;
-	    else {
-		x++;
-		s++;
-	    }
-	}
-	if (s >= littleend)
-	    return (char*)(big+1);
     }
-    return NULL;
+
+    /* If the needle is larger than the haystack, it can't possibly be in it */
+    if (UNLIKELY(little_len > big_len)) {
+        return NULL;
+    }
+
+    /* Special case length 1 needles.  It's trivial if we have memrchr();
+     * and otherwise we just do a per-byte search backwards.
+     *
+     * XXX In any case, when we don't have memrchr, we could use something like
+     * S_find_next_masked( or S_find_span_end() to do per-word searches */
+    if (little_len == 1) {
+        const char final = *little;
+
+#ifdef HAS_MEMRCHR
+
+        return (char *) memrchr(big, final, big_len);
+#else
+        const char * cur = bigend - 1;
+
+        do {
+            if (*cur == final) {
+                return (char *) cur;
+            }
+        } while (--cur >= big);
+
+        return NULL;
+#endif
+
+    }
+    else {  /* Below, the needle is longer than a single byte */
+
+        /* We search backwards in the haystack for the final character of the
+         * needle.  Each time one is found, we see if the characters just
+         * before it in the haystack match the rest of the needle. */
+        const char final = *(lend - 1);
+
+        /* What matches consists of 'little_len'-1 characters, then the final
+         * one */
+        const Size_t prefix_len = little_len - 1;
+
+        /* If the final character in the needle is any closer than this to the
+         * left edge, there wouldn't be enough room for all of it to fit in the
+         * haystack */
+        const char * const left_fence = big + prefix_len;
+
+        /* Start at the right edge */
+        char * cur = (char *) bigend;
+
+        /* memrchr() makes the search easy (and fast); otherwise, look
+         * backwards byte-by-byte. */
+        do {
+
+#ifdef HAS_MEMRCHR
+
+            cur = (char *) memrchr(left_fence, final, cur - left_fence);
+            if (cur == NULL) {
+                return NULL;
+            }
+#else
+            do {
+                cur--;
+                if (cur < left_fence) {
+                    return NULL;
+                }
+            }
+            while (*cur != final);
+#endif
+
+            /* Here, we know that *cur is 'final'; see if the preceding bytes
+             * of the needle also match the corresponding haystack bytes */
+            if memEQ(cur - prefix_len, little, prefix_len) {
+                return cur - prefix_len;
+            }
+        } while (cur > left_fence);
+
+        return NULL;
+    }
 }
 
 /* As a space optimization, we do not compile tables for strings of length
