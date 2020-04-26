@@ -13565,8 +13565,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 /* SBOL is shared with /^/ so we set the flags so we can tell
                  * /\A/ from /^/ in split. */
                 FLAGS(REGNODE_p(ret)) = 1;
+                *flagp |= SIMPLE;   /* Wrong, but too late to fix for 5.32 */
             }
-	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'G':
             if (RExC_pm_flags & PMf_WILDCARD) {
@@ -13604,8 +13604,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             else {
                 ret = reg_node(pRExC_state, SEOL);
+                *flagp |= SIMPLE;   /* Wrong, but too late to fix for 5.32 */
             }
-	    *flagp |= SIMPLE;
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    goto finish_meta_pat;
 	case 'z':
@@ -13615,8 +13615,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             else {
                 ret = reg_node(pRExC_state, EOS);
+                *flagp |= SIMPLE;   /* Wrong, but too late to fix for 5.32 */
             }
-	    *flagp |= SIMPLE;
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    goto finish_meta_pat;
 	case 'C':
