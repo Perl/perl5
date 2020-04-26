@@ -1650,7 +1650,6 @@ Perl_re_intuit_start(pTHX_
 	{
 	    /* If flags & SOMETHING - do not do it many times on the same match */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "  ... Disabling check substring...\n"));
-	    /* XXX Does the destruction order has to change with utf8_target? */
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
 	    prog->extflags &= ~RXf_USE_INTUIT;

@@ -21674,7 +21674,7 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
             SvREFCNT_inc_void(drx->substrs->data[i].utf8_substr);
         }
 
-	/* check_substr and check_utf8, if non-NULL, point to either their
+	/* XXX check_substr and check_utf8, if non-NULL, point to either their
 	   anchored or float namesakes, and don't hold a second reference.  */
     }
     RX_MATCH_COPIED_off(dsv);
@@ -21873,8 +21873,13 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
 	/* check_substr and check_utf8, if non-NULL, point to either their
 	   anchored or float namesakes, and don't hold a second reference.  */
+	    ;
 
-	if (ret->check_substr) {
+	if (! (ret->extflags & RXf_USE_INTUIT)) {
+            ret->check_substr = NULL;
+            ret->check_utf8 = NULL;
+        }
+        else if (ret->check_substr) {
 	    if (anchored) {
 		assert(r->check_utf8 == r->substrs->data[0].utf8_substr);
 
@@ -21888,7 +21893,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
                     sv_dump(r->substrs->data[1].substr);
                     */
                 }
-                else assert(r->check_substr == r->substrs->data[1].substr);
+                /*else*/ assert(r->check_substr == r->substrs->data[1].substr);
 		if (r->check_utf8   != r->substrs->data[1].utf8_substr) {
                     /*
                     PerlIO_printf(Perl_debug_log, "%s: %d: ", __FILE__, __LINE__);
@@ -21896,7 +21901,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
                     sv_dump(r->substrs->data[1].utf8_substr);
                     */
                 }
-                else assert(r->check_utf8   == r->substrs->data[1].utf8_substr);
+                /*else*/ assert(r->check_utf8   == r->substrs->data[1].utf8_substr);
 
 		ret->check_substr = ret->substrs->data[1].substr;
 		ret->check_utf8   = ret->substrs->data[1].utf8_substr;
