@@ -731,7 +731,8 @@ Perl_rninstr(const char *big, const char *bigend, const char *little, const char
 	return (char*)bigend;
     }
 
-    /* If the needle is larger than the haystack, it can't possibly be in it */
+    /* If the needle is larger than the haystack, the needle can't possibly fit
+     * inside the haystack. */
     if (UNLIKELY(little_len > big_len)) {
         return NULL;
     }
@@ -739,7 +740,7 @@ Perl_rninstr(const char *big, const char *bigend, const char *little, const char
     /* Special case length 1 needles.  It's trivial if we have memrchr();
      * and otherwise we just do a per-byte search backwards.
      *
-     * XXX In any case, when we don't have memrchr, we could use something like
+     * XXX When we don't have memrchr, we could use something like
      * S_find_next_masked( or S_find_span_end() to do per-word searches */
     if (little_len == 1) {
         const char final = *little;
