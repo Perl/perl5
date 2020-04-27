@@ -11739,9 +11739,10 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                  * to PL_compiling, IN_PERL_COMPILETIME/IN_PERL_RUNTIME
                  * will give the wrong answer.
                  */
-                PL_curcop = (COP*)newSTATEOP(PL_compiling.op_flags, NULL, NULL);
-                CopLINE_set(PL_curcop, CopLINE(&PL_compiling));
-                SAVEFREEOP(PL_curcop);
+                Newx(PL_curcop, 1, COP);
+                StructCopy(&PL_compiling, PL_curcop, COP);
+                PL_curcop->op_slabbed = 0;
+                SAVEFREEPV(PL_curcop);
             }
 
             PUSHSTACKi(PERLSI_REQUIRE);
