@@ -52,7 +52,7 @@ changes to the variable that it closes over, add an explicit C<return>:
     my $var;
     $sub = sub () { return $var };
 
-This usage has been deprecated, and will no longer be allowed in Perl 5.32.
+This usage was deprecated and as of Perl 5.32 is no longer allowed.
 
 =head3 Use of strings with code points over 0xFF as arguments to C<vec>
 
@@ -85,8 +85,7 @@ been documented to be called with no arguments.  Historically it has not
 enforced this, and has actually accepted and ignored any arguments.  As a
 result, some users have got the mistaken impression that an argument does
 something useful.  To avoid these bugs, the function is being made strict.
-Passing arguments was deprecated in Perl 5.28, and will become fatal in
-Perl 5.32.
+Passing arguments was deprecated in Perl 5.28 and became fatal in Perl 5.32.
 
 =head3 Unescaped left braces in regular expressions
 
