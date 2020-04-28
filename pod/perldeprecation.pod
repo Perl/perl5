@@ -112,7 +112,7 @@ started to give deprecation warnings since. These cases were made fatal
 in Perl 5.26. Due to an oversight, not all cases of a use of a literal
 C<{> got a deprecation warning.  Some cases started warning in Perl 5.26,
 and were made fatal in Perl 5.30.  Other cases started in Perl 5.28,
-and will be made fatal in 5.32.
+and were made fatal in 5.32.
 
 =head3 In XS code, use of various macros dealing with UTF-8.
 
@@ -162,7 +162,8 @@ corresponds to C<isDIGIT_utf8>, and both now behave identically.  All
 are documented in L<perlapi/Character case changing> and
 L<perlapi/Character classification>.
 
-This change was originally scheduled for 5.30, but was delayed.
+This change was originally scheduled for 5.30, but was delayed until
+5.32.
 
 =head2 Perl 5.30
 
