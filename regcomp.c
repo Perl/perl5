@@ -17371,6 +17371,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     PERL_UNUSED_ARG(depth);
 #endif
 
+    assert(! (ret_invlist && allow_mutiple_chars));
 
     /* If wants an inversion list returned, we can't optimize to something
      * else. */
