@@ -4575,7 +4575,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			I32 stopparen,
                         U32 recursed_depth,
 			regnode_ssc *and_withp,
-			U32 flags, U32 depth)
+			U32 flags, U32 depth, bool was_mutate_ok)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
@@ -4647,7 +4647,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
 	bool unfolded_multi_char = FALSE;
-        bool mutate_ok = (frame && frame->in_gosub) ? 0 : 1;
+        /* avoid mutating ops if we are anywhere within the recursed or
+         * enframed handling for a GOSUB: the outermost level will handle it.
+         */
+        bool mutate_ok = was_mutate_ok && !(frame && frame->in_gosub);
 	/* Peephole optimizer: */
         DEBUG_STUDYDATA("Peep", data, depth, is_inf);
         DEBUG_PEEP("Peep", scan, depth, flags);
@@ -4697,7 +4700,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             /* DEFINEP study_chunk() recursion */
             (void)study_chunk(pRExC_state, &scan, &minlen,
                               &deltanext, next, &data_fake, stopparen,
-                              recursed_depth, NULL, f, depth+1);
+                              recursed_depth, NULL, f, depth+1, mutate_ok);
 
             scan = next;
         } else
@@ -4765,7 +4768,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     /* recurse study_chunk() for each BRANCH in an alternation */
 		    minnext = study_chunk(pRExC_state, &scan, minlenp,
                                       &deltanext, next, &data_fake, stopparen,
-                                      recursed_depth, NULL, f, depth+1);
+                                      recursed_depth, NULL, f, depth+1,
+                                      mutate_ok);
 
 		    if (min1 > minnext)
 			min1 = minnext;
@@ -5569,7 +5573,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                   (mincount == 0
                                    ? (f & ~SCF_DO_SUBSTR)
                                    : f)
-                                  ,depth+1);
+                                  , depth+1, mutate_ok);
 
 		if (flags & SCF_DO_STCLASS)
 		    data->start_class = oclass;
@@ -5743,7 +5747,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         /* recurse study_chunk() on optimised CURLYX => CURLYM */
 			study_chunk(pRExC_state, &nxt1, minlenp, &deltanext, nxt,
                                     NULL, stopparen, recursed_depth, NULL, 0,
-                                    depth+1);
+                                    depth+1, mutate_ok);
 		    }
 		    else
 			oscan->flags = 0;
@@ -6172,7 +6176,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 /* recurse study_chunk() for lookahead body */
                 minnext = study_chunk(pRExC_state, &nscan, minlenp, &deltanext,
                                       last, &data_fake, stopparen,
-                                      recursed_depth, NULL, f, depth+1);
+                                      recursed_depth, NULL, f, depth+1,
+                                      mutate_ok);
                 if (scan->flags) {
                     if (   deltanext < 0
                         || deltanext > (I32) U8_MAX
@@ -6277,7 +6282,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 *minnextp = study_chunk(pRExC_state, &nscan, minnextp,
                                         &deltanext, last, &data_fake,
                                         stopparen, recursed_depth, NULL,
-                                        f, depth+1);
+                                        f, depth+1, mutate_ok);
                 if (scan->flags) {
                     assert(0);  /* This code has never been tested since this
                                    is normally not compiled */
@@ -6444,7 +6449,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                         /* optimise study_chunk() for TRIE */
                         minnext = study_chunk(pRExC_state, &scan, minlenp,
                             &deltanext, (regnode *)nextbranch, &data_fake,
-                            stopparen, recursed_depth, NULL, f, depth+1);
+                            stopparen, recursed_depth, NULL, f, depth+1,
+                            mutate_ok);
                     }
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode*)nextbranch);
@@ -8239,7 +8245,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             &data, -1, 0, NULL,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
                           | (restudied ? SCF_TRIE_DOING_RESTUDY : 0),
-            0);
+            0, TRUE);
 
 
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
@@ -8368,7 +8374,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS|(restudied
                                                       ? SCF_TRIE_DOING_RESTUDY
                                                       : 0),
-            0);
+            0, TRUE);
 
         CHECK_RESTUDY_GOTO_butfirst(NOOP);
 
