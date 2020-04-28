@@ -6464,9 +6464,10 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
-=item Unescaped left brace in regex is passed through in regex; marked by S<<-- HERE> in m/%s/
+=item Unescaped left brace in regex is illegal here in regex;
+marked by S<<-- HERE> in m/%s/
 
-(W regexp)  The simple rule to remember, if you want to
+(F) The simple rule to remember, if you want to
 match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
 regular expression pattern, is to escape each literal instance of it in
 some way.  Generally easiest is to precede it with a backslash, like
@@ -6481,9 +6482,8 @@ language to be extended in various ways in future releases.  To avoid
 needlessly breaking existing code, the restriction is is not enforced in
 contexts where there are unlikely to ever be extensions that could
 conflict with the use there of C<"{"> as a literal.  Those that are
-not potentially ambiguous do not warn; those that are raise this
-warning.  This makes sure that an inadvertent typo doesn't silently
-cause the pattern to compile to something unintended.
+not potentially ambiguous do not warn; those that are do raise a
+non-deprecation warning.
 
 The contexts where no warnings or errors are raised are:
 
@@ -6514,15 +6514,14 @@ as the first character following a quantifier
 =back
 
 =for comment
-The text of the message above is duplicated below to allow splain (and
-'use diagnostics') to work.  Since one is fatal, and one not, they can't
-be combined as one message.  Perhaps perldiag could be enhanced to
-handle this case.
+The text of the message above is mostly duplicated below (with changes)
+to allow splain (and 'use diagnostics') to work.  Since one is fatal,
+and one not, they can't be combined as one message.  Perhaps perldiag
+could be enhanced to handle this case.
 
-=item Unescaped left brace in regex is illegal here in regex;
-marked by S<<-- HERE> in m/%s/
+=item Unescaped left brace in regex is passed through in regex; marked by S<<-- HERE> in m/%s/
 
-(F) The simple rule to remember, if you want to
+(W regexp)  The simple rule to remember, if you want to
 match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
 regular expression pattern, is to escape each literal instance of it in
 some way.  Generally easiest is to precede it with a backslash, like
@@ -6537,8 +6536,9 @@ language to be extended in various ways in future releases.  To avoid
 needlessly breaking existing code, the restriction is is not enforced in
 contexts where there are unlikely to ever be extensions that could
 conflict with the use there of C<"{"> as a literal.  Those that are
-not potentially ambiguous do not warn; those that are do raise a
-non-deprecation warning.
+not potentially ambiguous do not warn; those that are raise this
+warning.  This makes sure that an inadvertent typo doesn't silently
+cause the pattern to compile to something unintended.
 
 The contexts where no warnings or errors are raised are:
 
