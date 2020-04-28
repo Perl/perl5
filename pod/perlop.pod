@@ -99,18 +99,19 @@ a tied scalar, then the expression is evaluated to produce that scalar
 at most once, but the value of that scalar may be fetched up to twice,
 once for each comparison in which it is actually used.
 
-In this example, the subroutine is called only once, and the tied
-scalar it returns is fetched for each comparison that uses it.
+In this example, the expression is evaluated only once, and the tied
+scalar (the result of the expression) is fetched for each comparison that
+uses it.
 
-    if ($x < get_tied_scalar() < $z) { ...
+    if ($x < $tied_scalar < $z) { ...
 
-In the next example, the subroutine is called only once, and the tied
-scalar it returns is fetched once as part of the operation within the
-expression.  The result of that operation is fetched for each comparison,
-which normally doesn't matter unless that expression result is also
-magical due to operator overloading.
+In the next example, the expression is evaluated only once, and the tied
+scalar is fetched once as part of the operation within the expression.
+The result of that operation is fetched for each comparison, which
+normally doesn't matter unless that expression result is also magical due
+to operator overloading.
 
-    if ($x < get_tied_scalar() + 42 < $z) { ...
+    if ($x < $tied_scalar + 42 < $z) { ...
 
 Some operators are instead non-associative, meaning that it is a syntax
 error to use a sequence of those operators of the same precedence.
