@@ -2,7 +2,7 @@ package Test2::Formatter;
 use strict;
 use warnings;
 
-our $VERSION = '1.302173';
+our $VERSION = '1.302175';
 
 
 my %ADDED;
