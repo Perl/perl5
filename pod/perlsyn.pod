@@ -137,7 +137,8 @@ Its truth or falsehood determines how the modifier will behave.
 
 C<if> executes the statement once I<if> and only if the condition is
 true.  C<unless> is the opposite, it executes the statement I<unless>
-the condition is true (that is, if the condition is false).
+the condition is true (that is, if the condition is false).  See
+L<perldata/Scalar values> for definitions of true and false.
 
     print "Basset hounds got long ears" if length $ear >= 10;
     go_outside() and play() unless $is_raining;
