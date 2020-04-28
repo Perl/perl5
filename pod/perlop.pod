@@ -71,7 +71,8 @@ it looks.  The ANDing short-circuits just like C<"&&"> does, stopping
 the sequence of comparisons as soon as one yields false.
 
 In a chained comparison, each argument expression is evaluated at most
-once, even if it takes part in two comparisons.  (It is not evaluated
+once, even if it takes part in two comparisons, but the result of the
+evaluation is fetched for each comparison.  (It is not evaluated
 at all if the short-circuiting means that it's not required for any
 comparisons.)  This matters if the computation of an interior argument
 is expensive or non-deterministic.  For example,
@@ -97,6 +98,19 @@ scalar by other means.  For example, if the argument expression yields
 a tied scalar, then the expression is evaluated to produce that scalar
 at most once, but the value of that scalar may be fetched up to twice,
 once for each comparison in which it is actually used.
+
+In this example, the subroutine is called only once, and the tied
+scalar it returns is fetched for each comparison that uses it.
+
+    if ($x < get_tied_scalar() < $z) { ...
+
+In the next example, the subroutine is called only once, and the tied
+scalar it returns is fetched once as part of the operation within the
+expression.  The result of that operation is fetched for each comparison,
+which normally doesn't matter unless that expression result is also
+magical due to operator overloading.
+
+    if ($x < get_tied_scalar() + 42 < $z) { ...
 
 Some operators are instead non-associative, meaning that it is a syntax
 error to use a sequence of those operators of the same precedence.
