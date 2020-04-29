@@ -21491,7 +21491,9 @@ SV *
 Perl_re_intuit_string(pTHX_ REGEXP * const r)
 {				/* Assume that RE_INTUIT is set */
     /* Returns an SV containing a string that must appear in the target for it
-     * to match */
+     * to match, or NULL if nothing is known that must match.
+     *
+     * CAUTION: the SV can be freed during execution of the regex engine */
 
     struct regexp *const prog = ReANY(r);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
@@ -25078,6 +25080,12 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     /* Compile the subpattern consisting of the name being looked for */
     subpattern_re = compile_wildcard(wname, wname_len, FALSE /* /-i */ );
     must = re_intuit_string(subpattern_re);
+
+    /* (Note: 'must' could contain a NUL.  And yet we use strspn() below on it.
+     * This works because the NUL causes the function to return early, thus
+     * showing that there are characters in it other than the acceptable ones,
+     * which is our desired result.) */
+
     prog = ReANY(subpattern_re);
 
     /* If only nothing is matched, skip to where empty names are looked for */
