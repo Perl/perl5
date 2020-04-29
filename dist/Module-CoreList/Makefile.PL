@@ -8,8 +8,8 @@ push @extra, 'INSTALLDIRS' => 'perl' if $] >= 5.008009 and $] < 5.012;
 
 push @extra, 'META_MERGE' => {
         resources => {
-            repository => 'git://perl5.git.perl.org/perl.git',
-            bugtracker => 'https://rt.perl.org/rt3/',
+            repository => 'git://github.com/Perl/perl5.git',
+            bugtracker => 'https://github.com/Perl/perl5/issues',
             homepage   => "http://dev.perl.org/",
         },
     } unless $ExtUtils::MakeMaker::VERSION < 6.46;
