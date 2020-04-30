@@ -2763,9 +2763,13 @@ PP(pp_getpeername)
     if (!IoIFP(io))
 	goto nuts;
 
-    sv = sv_2mortal(newSV(257));
-    (void)SvPOK_only(sv);
+#ifdef HAS_SOCKADDR_STORAGE
+    len = sizeof(struct sockaddr_storage);
+#else
     len = 256;
+#endif
+    sv = sv_2mortal(newSV(len+1));
+    (void)SvPOK_only(sv);
     SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
     fd = PerlIO_fileno(IoIFP(io));
