@@ -4017,7 +4017,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
                 }
                 scriptname = savepv(s + 1);
                 Safefree(PL_origfilename);
-                PL_origfilename = (char *)scriptname;
+                PL_origfilename = scriptname;
             }
         }
     }
@@ -4025,7 +4025,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     CopFILE_free(PL_curcop);
     CopFILE_set(PL_curcop, PL_origfilename);
     if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
-        scriptname = (char *)"";
+	scriptname = "";
     if (fdscript >= 0) {
         rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
     }
