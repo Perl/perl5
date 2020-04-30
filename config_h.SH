@@ -1950,6 +1950,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates the availability of
  *	struct sockaddr_in6;
  */
+/* HAS_SOCKADDR_STORAGE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct sockaddr_storage;
+ */
 /* HAS_SIN6_SCOPE_ID:
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
@@ -1974,6 +1978,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_sockpair	HAS_SOCKETPAIR	/**/
 #$d_sockaddr_sa_len	HAS_SOCKADDR_SA_LEN	/**/
 #$d_sockaddr_in6	HAS_SOCKADDR_IN6	/**/
+#$d_sockaddr_storage	HAS_SOCKADDR_STORAGE	/**/
 #$d_sin6_scope_id	HAS_SIN6_SCOPE_ID	/**/
 #$d_ip_mreq	HAS_IP_MREQ	/**/
 #$d_ip_mreq_source	HAS_IP_MREQ_SOURCE	/**/

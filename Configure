@@ -833,6 +833,7 @@ d_scm_rights=''
 d_sin6_scope_id=''
 d_sockaddr_in6=''
 d_sockaddr_sa_len=''
+d_sockaddr_storage=''
 d_socket=''
 d_sockpair=''
 sockethdr=''
@@ -11972,6 +11973,24 @@ set try; if eval $compile; then
     val="$define"
 fi
 set d_sockaddr_in6; eval $setvar
+$rm_try
+
+echo " "
+echo "Checking the availability struct sockaddr_storage ..." >&4
+$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+int main() {
+struct sockaddr_storage sastor;
+return (sastor.ss_family);
+}
+EOF
+val="$undef"
+set try; if eval $compile; then
+    val="$define"
+fi
+set d_sockaddr_storage; eval $setvar
 $rm_try
 
 echo " "
@@ -24505,6 +24524,7 @@ d_sitearch='$d_sitearch'
 d_snprintf='$d_snprintf'
 d_sockaddr_in6='$d_sockaddr_in6'
 d_sockaddr_sa_len='$d_sockaddr_sa_len'
+d_sockaddr_storage='$d_sockaddr_storage'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'
