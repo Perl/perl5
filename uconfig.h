@@ -1905,6 +1905,10 @@
  *	This symbol, if defined, indicates the availability of
  *	struct sockaddr_in6;
  */
+/* HAS_SOCKADDR_STORAGE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct sockaddr_storage;
+ */
 /* HAS_SIN6_SCOPE_ID:
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
@@ -1929,6 +1933,7 @@
 /*#define	HAS_SOCKETPAIR	/ **/
 /*#define	HAS_SOCKADDR_SA_LEN	/ **/
 /*#define	HAS_SOCKADDR_IN6	/ **/
+/*#define	HAS_SOCKADDR_STORAGE	/ **/
 /*#define	HAS_SIN6_SCOPE_ID	/ **/
 /*#define	HAS_IP_MREQ	/ **/
 /*#define	HAS_IP_MREQ_SOURCE	/ **/
@@ -5251,6 +5256,6 @@
 #endif
 
 /* Generated from:
- * 8762a3dfdfab48d1fe29cf7b27dfa150e1eec38b0d1f0f441d7cd9f5abef7dc8 config_h.SH
- * 31c25f95118efbf99e358f81091058e6723b4cccb8474dfbc6d06c2b7d46ff17 uconfig.sh
+ * 15acb59ff9e808ff9fbebc95510c0bed8b1de705034bf4b22482bfa431da15b6 config_h.SH
+ * e598046e9da73796e21226371ce26e8f2144852e0f5da7f00e52e1dbe1eaeaa6 uconfig.sh
  * ex: set ro: */
