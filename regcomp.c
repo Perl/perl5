@@ -25101,7 +25101,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
         must = SvPV(must_sv, must_len);
     }
     else {
-        must = "";
+        must = (char *)"";
         must_len = 0;
     }
 
