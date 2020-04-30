@@ -25027,7 +25027,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     SV * empty;                 /* For matching zero length names */
     SV * must_sv;               /* Contains the substring, if any, that must be
                                    in a name for the subpattern to match */
-    char * must;                /* The PV of 'must' */
+    const char * must;          /* The PV of 'must' */
     STRLEN must_len;            /* And its length */
     SV * syllable_name = NULL;  /* For Hangul syllables */
     const char hangul_prefix[] = "HANGUL SYLLABLE ";
@@ -25101,7 +25101,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
         must = SvPV(must_sv, must_len);
     }
     else {
-        must = (char *)"";
+        must = "";
         must_len = 0;
     }
 
