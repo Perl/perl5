@@ -19351,15 +19351,11 @@ S_optimize_regclass(pTHX_
      * any run-time dependencies don't matter */
     if (start[0] == 0 && end[0] == UV_MAX) {
         if (*invert) {
-            op = OPFAIL;
-            *ret = reganode(pRExC_state, op, 0);
+            goto return_OPFAIL;
         }
         else {
-            op = SANY;
-            *ret = reg_node(pRExC_state, op);
-            MARK_NAUGHTY(1);
+            goto return_SANY;
         }
-        return op;
     }
 
     /* Similarly, for /l posix classes, if both a class and its complement
@@ -19371,13 +19367,10 @@ S_optimize_regclass(pTHX_
                 && POSIXL_TEST(posixl, namedclass + 1)) /* its complement */
             {
                 if (*invert) {
-                    op = OPFAIL;
-                    *ret = reganode(pRExC_state, op, 0);
+                    goto return_OPFAIL;
                 }
                 else {
-                    op = SANY;
-                    *ret = reg_node(pRExC_state, op);
-                    MARK_NAUGHTY(1);
+                    goto return_SANY;
                 }
                 return op;
             }
@@ -19452,15 +19445,11 @@ S_optimize_regclass(pTHX_
          * properties). */
         if (partial_cp_count == 0) {
             if (*invert) {
-                op = SANY;
-                *ret = reg_node(pRExC_state, op);
+                goto return_SANY;
             }
             else {
-                op = OPFAIL;
-                *ret = reganode(pRExC_state, op, 0);
+                goto return_OPFAIL;
             }
-
-            return op;
         }
 
         /* If matches everything but \n */
@@ -20176,6 +20165,17 @@ S_optimize_regclass(pTHX_
         }
     }
 
+    return op;
+
+  return_OPFAIL:
+    op = OPFAIL;
+    *ret = reganode(pRExC_state, op, 0);
+    return op;
+
+  return_SANY:
+    op = SANY;
+    *ret = reg_node(pRExC_state, op);
+    MARK_NAUGHTY(1);
     return op;
 }
 
