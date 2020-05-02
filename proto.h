@@ -5847,6 +5847,9 @@ STATIC I32	S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, re
 STATIC void	S_nextchar(pTHX_ RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_NEXTCHAR	\
 	assert(pRExC_state)
+STATIC U8	S_optimize_regclass(pTHX_ RExC_state_t *pRExC_state, SV* cp_list, SV* only_utf8_locale_list, SV* upper_latin1_only_utf8_matches, const U32 has_runtime_dependency, const U32 posixl, U8 * anyof_flags, bool * invert, regnode_offset * ret, I32 *flagp);
+#define PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS	\
+	assert(pRExC_state); assert(anyof_flags); assert(invert); assert(ret); assert(flagp)
 STATIC void	S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings);
 #define PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS	\
 	assert(pRExC_state); assert(posix_warnings)

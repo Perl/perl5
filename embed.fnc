@@ -2038,6 +2038,16 @@ ES	|regnode_offset|regclass|NN RExC_state_t *pRExC_state                 \
 				|const bool strict                            \
 				|bool optimizable			      \
 				|NULLOK SV** ret_invlist
+ES	|U8|optimize_regclass	|NN RExC_state_t *pRExC_state		    \
+				|NULLOK SV* cp_list			    \
+				|NULLOK SV* only_utf8_locale_list	    \
+				|NULLOK SV* upper_latin1_only_utf8_matches  \
+				|const U32 has_runtime_dependency	    \
+				|const U32 posixl			    \
+				|NN U8 * anyof_flags			    \
+				|NN bool * invert			    \
+				|NN regnode_offset * ret		    \
+				|NN I32 *flagp
 ES	|SV *	|parse_uniprop_string|NN const char * const name	    \
 				     |Size_t name_len			    \
 				     |const bool is_utf8		    \

@@ -1065,6 +1065,7 @@
 #define make_exactf_invlist(a,b)	S_make_exactf_invlist(aTHX_ a,b)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define nextchar(a)		S_nextchar(aTHX_ a)
+#define optimize_regclass(a,b,c,d,e,f,g,h,i,j)	S_optimize_regclass(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define output_posix_warnings(a,b)	S_output_posix_warnings(aTHX_ a,b)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
 #define parse_uniprop_string(a,b,c,d,e,f,g,h,i,j)	S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i,j)

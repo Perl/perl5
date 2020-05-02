@@ -17538,8 +17538,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     AV* posix_warnings = NULL;
     const bool do_posix_warnings = ckWARN(WARN_REGEXP);
-    U8 op = END;    /* The returned node-type, initialized to an impossible
-                       one.  */
+    U8 op = ANYOF;    /* The returned node-type, initialized the expected type.
+                       */
     U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
     U32 posixl = 0;       /* bit field of posix classes matched under /l */
 
@@ -19184,17 +19184,129 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_contains_locale = 1;
     }
 
-    /* Some character classes are equivalent to other nodes.  Such nodes take
-     * up less room, and some nodes require fewer operations to execute, than
-     * ANYOF nodes.  EXACTish nodes may be joinable with adjacent nodes to
-     * improve efficiency. */
-
     if (optimizable) {
+
+        /* Some character classes are equivalent to other nodes.  Such nodes
+         * take up less room, and some nodes require fewer operations to
+         * execute, than ANYOF nodes.  EXACTish nodes may be joinable with
+         * adjacent nodes to improve efficiency. */
+        op = optimize_regclass(pRExC_state, cp_list,
+                                            only_utf8_locale_list,
+                                            upper_latin1_only_utf8_matches,
+                                            has_runtime_dependency,
+                                            posixl,
+                                            &anyof_flags, &invert, &ret, flagp);
+        RETURN_FAIL_ON_RESTART_FLAGP(flagp);
+
+        /* If optimized to something else, finish up and return */
+        if (ret >= 0) {
+            Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
+                                                   RExC_parse - orig_parse);;
+            SvREFCNT_dec(cp_list);;
+            SvREFCNT_dec(only_utf8_locale_list);
+            SvREFCNT_dec(upper_latin1_only_utf8_matches);
+            return ret;
+        }
+    }
+
+    /* Here didn't optimize, or optimized to a specialized ANYOF node.  If the
+     * former, set the particular type */
+    if (op == ANYOF) {
+        if (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY) {
+            op = ANYOFD;
+        }
+        else if (posixl) {
+            op = ANYOFPOSIXL;
+        }
+        else if (LOC) {
+            op = ANYOFL;
+        }
+    }
+
+    ret = regnode_guts(pRExC_state, op, regarglen[op], "anyof");
+    FILL_NODE(ret, op);        /* We set the argument later */
+    RExC_emit += 1 + regarglen[op];
+    ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
+
+    /* Here, <cp_list> contains all the code points we can determine at
+     * compile time that match under all conditions.  Go through it, and
+     * for things that belong in the bitmap, put them there, and delete from
+     * <cp_list>.  While we are at it, see if everything above 255 is in the
+     * list, and if so, set a flag to speed up execution */
+
+    populate_ANYOF_from_invlist(REGNODE_p(ret), &cp_list);
+
+    if (posixl) {
+        ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
+    }
+
+    if (invert) {
+        ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_INVERT;
+    }
+
+    /* Here, the bitmap has been populated with all the Latin1 code points that
+     * always match.  Can now add to the overall list those that match only
+     * when the target string is UTF-8 (<upper_latin1_only_utf8_matches>).
+     * */
+    if (upper_latin1_only_utf8_matches) {
+	if (cp_list) {
+	    _invlist_union(cp_list,
+                           upper_latin1_only_utf8_matches,
+                           &cp_list);
+	    SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
+	}
+	else {
+	    cp_list = upper_latin1_only_utf8_matches;
+	}
+        ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
+    }
+
+    set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
+                  (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+                   ? listsv
+                   : NULL,
+                  only_utf8_locale_list);
+
+    SvREFCNT_dec(cp_list);;
+    SvREFCNT_dec(only_utf8_locale_list);
+    return ret;
+}
+
+STATIC U8
+S_optimize_regclass(pTHX_
+                    RExC_state_t *pRExC_state,
+                    SV * cp_list,
+                    SV* only_utf8_locale_list,
+                    SV* upper_latin1_only_utf8_matches,
+                    const U32 has_runtime_dependency,
+                    const U32 posixl,
+                    U8  * anyof_flags,
+                    bool * invert,
+                    regnode_offset * ret,
+                    I32 *flagp
+                  )
+{
+    /* This function exists just to make S_regclass() smaller.  It extracts out
+     * the code that looks for potential optimizations away from a full generic
+     * ANYOF node.  The parameter names are the same as the corresponding
+     * variables in S_regclass.
+     *
+     * It returns the new op (ANYOF if no optimization found) and sets *ret to
+     * any created regnode.  If the new op is sufficiently like plain ANYOF, it
+     * leaves *ret unchanged for allocation in S_regclass.
+     *
+     * Certain of the parameters may be updated as a result of the changes herein */
+
+        U8 op = ANYOF; /* The returned node-type, initialized to the unoptimized
+                        one. */
+        UV value;
         PERL_UINT_FAST8_T i;
         UV partial_cp_count = 0;
         UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
         UV   end[MAX_FOLD_FROMS+1] = { 0 };
         bool single_range = FALSE;
+
+        PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS;
 
         if (cp_list) { /* Count the code points in enough ranges that we would
                           see all the ones possible in any fold in this version
@@ -19217,33 +19329,38 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         /* If we know at compile time that this matches every possible code
          * point, any run-time dependencies don't matter */
         if (start[0] == 0 && end[0] == UV_MAX) {
-            if (invert) {
-                ret = reganode(pRExC_state, OPFAIL, 0);
+            if (*invert) {
+                op = OPFAIL;
+                *ret = reganode(pRExC_state, op, 0);
             }
             else {
-                ret = reg_node(pRExC_state, SANY);
+                op = SANY;
+                *ret = reg_node(pRExC_state, op);
                 MARK_NAUGHTY(1);
             }
-            goto not_anyof;
+            return op;
         }
 
         /* Similarly, for /l posix classes, if both a class and its
          * complement match, any run-time dependencies don't matter */
         if (posixl) {
+            int namedclass;
             for (namedclass = 0; namedclass < ANYOF_POSIXL_MAX;
                                                         namedclass += 2)
             {
                 if (   POSIXL_TEST(posixl, namedclass)      /* class */
                     && POSIXL_TEST(posixl, namedclass + 1)) /* its complement */
                 {
-                    if (invert) {
-                        ret = reganode(pRExC_state, OPFAIL, 0);
+                    if (*invert) {
+                        op = OPFAIL;
+                        *ret = reganode(pRExC_state, op, 0);
                     }
                     else {
-                        ret = reg_node(pRExC_state, SANY);
+                        op = SANY;
+                        *ret = reg_node(pRExC_state, op);
                         MARK_NAUGHTY(1);
                     }
-                    goto not_anyof;
+                    return op;
                 }
             }
 
@@ -19305,12 +19422,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     /* Resolve the run-time inversion flag with this possibly
                      * inverted class */
-                    invert = invert ^ already_inverted;
+                    *invert = *invert ^ already_inverted;
 
-                    ret = reg_node(pRExC_state,
-                                   POSIXL + invert * (NPOSIXL - POSIXL));
-                    FLAGS(REGNODE_p(ret)) = classnum;
-                    goto not_anyof;
+                    op = POSIXL + *invert * (NPOSIXL - POSIXL);
+                    *ret = reg_node(pRExC_state, op);
+                    FLAGS(REGNODE_p(*ret)) = classnum;
+                    return op;
                 }
             }
         }
@@ -19318,7 +19435,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         /* khw can't think of any other possible transformation involving
          * these. */
         if (has_runtime_dependency & HAS_USER_DEFINED_PROPERTY) {
-            goto is_anyof;
+            return op;
         }
 
         if (! has_runtime_dependency) {
@@ -19328,24 +19445,27 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * the only element in the character class (perluniprops.pod notes
              * such properties). */
             if (partial_cp_count == 0) {
-                if (invert) {
-                    ret = reg_node(pRExC_state, SANY);
+                if (*invert) {
+                    op = SANY;
+                    *ret = reg_node(pRExC_state, op);
                 }
                 else {
-                    ret = reganode(pRExC_state, OPFAIL, 0);
+                    op = OPFAIL;
+                    *ret = reganode(pRExC_state, op, 0);
                 }
 
-                goto not_anyof;
+                return op;
             }
 
             /* If matches everything but \n */
             if (   start[0] == 0 && end[0] == '\n' - 1
                 && start[1] == '\n' + 1 && end[1] == UV_MAX)
             {
-                assert (! invert);
-                ret = reg_node(pRExC_state, REG_ANY);
+                assert (! *invert);
+                op = REG_ANY;
+                *ret = reg_node(pRExC_state, op);
                 MARK_NAUGHTY(1);
-                goto not_anyof;
+                return op;
             }
         }
 
@@ -19373,7 +19493,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * it.
          */
         if (   ! posixl
-            && ! invert
+            && ! *invert
 
                 /* Only try if there are no more code points in the class than
                  * in the max possible fold */
@@ -19648,7 +19768,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 }
             }
 
-            if (op != END) {
+            if (op != ANYOF) {
                 U8 len;
 
                 /* Here, we have calculated what EXACTish node to use.  Have to
@@ -19675,17 +19795,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 len = (UTF) ? UVCHR_SKIP(value) : 1;
 
-                ret = regnode_guts(pRExC_state, op, len, "exact");
-                FILL_NODE(ret, op);
+                *ret = regnode_guts(pRExC_state, op, len, "exact");
+                FILL_NODE(*ret, op);
                 RExC_emit += 1 + STR_SZ(len);
-                setSTR_LEN(REGNODE_p(ret), len);
+                setSTR_LEN(REGNODE_p(*ret), len);
                 if (len == 1) {
-                    *STRINGs(REGNODE_p(ret)) = (U8) value;
+                    *STRINGs(REGNODE_p(*ret)) = (U8) value;
                 }
                 else {
-                    uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(ret)), value);
+                    uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(*ret)), value);
                 }
-                goto not_anyof;
+                return op;
             }
         }
 
@@ -19790,8 +19910,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
 
                     /* The argument is the lowest code point */
-                    ret = reganode(pRExC_state, op, lowest_cp);
-                    FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
+                    *ret = reganode(pRExC_state, op, lowest_cp);
+                    FLAGS(REGNODE_p(*ret)) = ANYOFM_mask;
                 }
 
               done_anyofm:
@@ -19802,8 +19922,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 _invlist_invert(cp_list);
             }
 
-            if (op != END) {
-                goto not_anyof;
+            if (op != ANYOF) {
+                return op;
             }
 
             /* XXX We could create an ANYOFR_LOW node here if we saved above if
@@ -19814,7 +19934,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * tradeoff is really worth it */
         }
 
-        if (! (anyof_flags & ANYOF_LOCALE_FLAGS)) {
+        if (! (*anyof_flags & ANYOF_LOCALE_FLAGS)) {
             PERL_UINT_FAST8_T type;
             SV * intersection = NULL;
             SV* d_invlist = NULL;
@@ -19854,7 +19974,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     /* Try both the regular class, and its inversion */
                     for (try_inverted = 0; try_inverted < 2; try_inverted++) {
-                        bool this_inverted = invert ^ try_inverted;
+                        bool this_inverted = *invert ^ try_inverted;
 
                         if (type != POSIXD) {
 
@@ -19893,7 +20013,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         }
                         else {  /* POSIXD, inverted.  If this doesn't have this
                                    flag set, it isn't /d. */
-                            if (! (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+                            if (! (*anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
                             {
                                 continue;
                             }
@@ -19912,14 +20032,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             /* Here, they precisely match.  Optimize this ANYOF
                              * node into its equivalent POSIX one of the
                              * correct type, possibly inverted */
-                            ret = reg_node(pRExC_state, (try_inverted)
-                                                        ? type + NPOSIXA
-                                                                - POSIXA
-                                                        : type);
-                            FLAGS(REGNODE_p(ret)) = posix_class;
+                            op = (try_inverted)
+                                ? type + NPOSIXA - POSIXA
+                                : type;
+                            *ret = reg_node(pRExC_state, op);
+                            FLAGS(REGNODE_p(*ret)) = posix_class;
                             SvREFCNT_dec(d_invlist);
                             SvREFCNT_dec(intersection);
-                            goto not_anyof;
+                            return op;
                         }
                     }
                 }
@@ -19937,7 +20057,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * applications */
         if (     single_range
             && ! has_runtime_dependency
-            &&   anyof_flags == 0
+            &&   *anyof_flags == 0
             &&   start[0] < (1 << ANYOFR_BASE_BITS)
             &&   end[0] - start[0]
                     < ((1U << (sizeof(((struct regnode_1 *)NULL)->arg1)
@@ -19947,7 +20067,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             U8 low_utf8[UTF8_MAXBYTES+1];
             U8 high_utf8[UTF8_MAXBYTES+1];
 
-            ret = reganode(pRExC_state, ANYOFR,
+            op = ANYOFR;
+            *ret = reganode(pRExC_state, op,
                         (start[0] | (end[0] - start[0]) << ANYOFR_BASE_BITS));
 
             /* Place the lowest UTF-8 start byte in the flags field, so as to
@@ -19963,15 +20084,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * not doing that transformation would not rule out nearly so many
              * things */
             if (low_utf8[0] == high_utf8[0]) {
-                OP(REGNODE_p(ret)) = ANYOFRb;
-                ANYOF_FLAGS(REGNODE_p(ret)) = low_utf8[0];
+                op = ANYOFRb;
+                OP(REGNODE_p(*ret)) = op;
+                ANYOF_FLAGS(REGNODE_p(*ret)) = low_utf8[0];
             }
             else {
-                ANYOF_FLAGS(REGNODE_p(ret))
+                ANYOF_FLAGS(REGNODE_p(*ret))
                                     = NATIVE_UTF8_TO_I8(low_utf8[0]);
             }
 
-            goto not_anyof;
+            return op;
         }
 
         /* If didn't find an optimization and there is no need for a bitmap,
@@ -19979,7 +20101,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         if (     start[0] >= NUM_ANYOF_CODE_POINTS
             && ! LOC
             && ! upper_latin1_only_utf8_matches
-            &&   anyof_flags == 0)
+            &&   *anyof_flags == 0)
         {
             U8 low_utf8[UTF8_MAXBYTES+1];
             UV highest_cp = invlist_highest(cp_list);
@@ -19997,7 +20119,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * ruling out of some inputs without having to convert from UTF-8
              * to code point.  For EBCDIC, we use I8, as not doing that
              * transformation would not rule out nearly so many things */
-            anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
+            *anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
 
             op = ANYOFH;
 
@@ -20022,24 +20144,24 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                         /* No need to convert to I8 for EBCDIC as this is an
                          * exact match */
-                        anyof_flags = low_utf8[0];
+                        *anyof_flags = low_utf8[0];
                         op = ANYOFHb;
                     }
                     else {
                         op = ANYOFHs;
-                        ret = regnode_guts(pRExC_state, op,
+                        *ret = regnode_guts(pRExC_state, op,
                                            regarglen[op] + STR_SZ(len),
                                            "anyofhs");
-                        FILL_NODE(ret, op);
-                        ((struct regnode_anyofhs *) REGNODE_p(ret))->str_len
+                        FILL_NODE(*ret, op);
+                        ((struct regnode_anyofhs *) REGNODE_p(*ret))->str_len
                                                                         = len;
                         Copy(low_utf8,  /* Add the common bytes */
-                           ((struct regnode_anyofhs *) REGNODE_p(ret))->string,
+                        ((struct regnode_anyofhs *) REGNODE_p(*ret))->string,
                            len, U8);
-                        RExC_emit += NODE_SZ_STR(REGNODE_p(ret));
-                        set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
+                        RExC_emit += NODE_SZ_STR(REGNODE_p(*ret));
+                        set_ANYOF_arg(pRExC_state, REGNODE_p(*ret), cp_list,
                                                   NULL, only_utf8_locale_list);
-                        goto not_anyof;
+                        return op;
                     }
                 }
                 else if (NATIVE_UTF8_TO_I8(high_utf8[0]) <= MAX_ANYOF_HRx_BYTE)
@@ -20053,9 +20175,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * is the same thing as UTF-8 */
 
                     U8 bits = 0;
-                    U8 max_range_diff = MAX_ANYOF_HRx_BYTE - anyof_flags;
+                    U8 max_range_diff = MAX_ANYOF_HRx_BYTE - *anyof_flags;
                     U8 range_diff = NATIVE_UTF8_TO_I8(high_utf8[0])
-                                  - anyof_flags;
+                                - *anyof_flags;
 
                     if (range_diff <= max_range_diff / 8) {
                         bits = 3;
@@ -20066,84 +20188,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     else if (range_diff <= max_range_diff / 2) {
                         bits = 1;
                     }
-                    anyof_flags = (anyof_flags - 0xC0) << 2 | bits;
+                    *anyof_flags = (*anyof_flags - 0xC0) << 2 | bits;
                     op = ANYOFHr;
                 }
             }
-
-            goto done_finding_op;
-        }
-    }   /* End of seeing if can optimize it into a different node */
-
-  is_anyof: /* It's going to be an ANYOF node. */
-    op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
-         ? ANYOFD
-         : ((posixl)
-            ? ANYOFPOSIXL
-            : ((LOC)
-               ? ANYOFL
-               : ANYOF));
-
-  done_finding_op:
-
-    ret = regnode_guts(pRExC_state, op, regarglen[op], "anyof");
-    FILL_NODE(ret, op);        /* We set the argument later */
-    RExC_emit += 1 + regarglen[op];
-    ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
-
-    /* Here, <cp_list> contains all the code points we can determine at
-     * compile time that match under all conditions.  Go through it, and
-     * for things that belong in the bitmap, put them there, and delete from
-     * <cp_list>.  While we are at it, see if everything above 255 is in the
-     * list, and if so, set a flag to speed up execution */
-
-    populate_ANYOF_from_invlist(REGNODE_p(ret), &cp_list);
-
-    if (posixl) {
-        ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
-    }
-
-    if (invert) {
-        ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_INVERT;
-    }
-
-    /* Here, the bitmap has been populated with all the Latin1 code points that
-     * always match.  Can now add to the overall list those that match only
-     * when the target string is UTF-8 (<upper_latin1_only_utf8_matches>).
-     * */
-    if (upper_latin1_only_utf8_matches) {
-	if (cp_list) {
-	    _invlist_union(cp_list,
-                           upper_latin1_only_utf8_matches,
-                           &cp_list);
-	    SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
 	}
-	else {
-	    cp_list = upper_latin1_only_utf8_matches;
-	}
-        ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
-    }
 
-    set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
-                  (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
-                   ? listsv
-                   : NULL,
-                  only_utf8_locale_list);
-    SvREFCNT_dec(cp_list);;
-    SvREFCNT_dec(only_utf8_locale_list);
-    return ret;
-
-  not_anyof:
-
-    /* Here, the node is getting optimized into something that's not an ANYOF
-     * one.  Finish up. */
-
-    Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
-                                           RExC_parse - orig_parse);;
-    SvREFCNT_dec(cp_list);;
-    SvREFCNT_dec(only_utf8_locale_list);
-    SvREFCNT_dec(upper_latin1_only_utf8_matches);
-    return ret;
+        return op;
 }
 
 #undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
