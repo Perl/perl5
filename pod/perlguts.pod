@@ -2468,7 +2468,7 @@ Perl_warner), or use a context-free version.
 
 The context-free version of Perl_warner is called
 Perl_warner_nocontext, and does not take the extra argument.  Instead
-it does dTHX; to get the context from thread-local storage.  We
+it does C<dTHX;> to get the context from thread-local storage.  We
 C<#define warner Perl_warner_nocontext> so that extensions get source
 compatibility at the expense of performance.  (Passing an arg is
 cheaper than grabbing it from thread-local storage.)
