@@ -88,7 +88,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.50';
+    $VERSION = '1.51';
 }
 
 EOT
@@ -243,6 +243,70 @@ if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
 \@dl_library_path = ($dl_library_path);
 
 EOT
+}
+
+# Filter out PATH elements that do not exist (anymore) and filter duplicates
+#  e.g. /usr/lib64/gcc/x86_64-suse-linux/7/include-fixed might refer to
+#       the compiler path when perl was built and the current installed
+#       copiler updated to version 8 or higher
+{   my %seen;
+    @dl_library_path = grep { -d && !$seen{$_}++} @dl_library_path;
+}
+
+# In a 64bit environment, force 64bit locations *before* 32bit locations.
+# This will move /usr/lib64 in front of /usr/lib and /lib64 in front of
+# /lib.  This is important if a module uses $Config{libpth} to find a
+# library to load, like FFI::CheckLib does. If a library is installed in
+# both locations, it is likely to pick the wrong one if the order is not
+# showing the correct architecture first
+# As this clutch only looks at trailing 64, it will have no impact on
+# locations differing completely, as /usr/lib vs /usr/lib/i386-linux-gnu/
+# like on debian.
+# Example:
+#  $Config{libpth} = join " " => qw(
+#   /usr/local/lib
+#   /usr/lib64/gcc/x86_64-suse-linux/7/include-fixed
+#   /usr/lib64/gcc/x86_64-suse-linux/7/../../../../x86_64-suse-linux/lib
+#   /usr/lib
+#   /pro/local/lib
+#   /lib/../lib64
+#   /usr/lib/../lib64
+#   /lib
+#   /lib64
+#   /usr/lib64
+#   /usr/local/lib64
+#   );
+if ($Config{ptrsize} == 8) {
+    my (@libpth, %p);
+    # Group all libs to the base of with or without trailing 64
+    # --> with above example @libpth becomes qw(
+    #   /usr/local/lib
+    #   /usr/lib64/gcc/x86_64-suse-linux/7/include-fixed
+    #   /usr/lib64/gcc/x86_64-suse-linux/7/../../../../x86_64-suse-linux/lib
+    #   /usr/lib
+    #   /pro/local/lib
+    #   /lib/../lib
+    #   /usr/lib/../lib
+    #   /lib
+    #   /lib
+    #   /usr/lib
+    #   /usr/local/lib
+    # and %p becomes (only first part shown)
+    # {   "/lib"           => [
+    #         "/lib",
+    #         "/lib64"
+    #         ],
+    #     "/lib/../lib"    => [
+    #         "/lib/../lib64"
+    #         ],
+    for (@dl_library_path) {
+	my $p = s/64$//r;
+	push @libpth   => $p;
+	push @{$p{$p}} => $_;
+    }
+    # Then join them back in the original (base) order (preserved in @libpth)
+    # where the trailing sorts after the non-trailing 64, hence reverse sort
+    @dl_library_path = map { reverse sort @{delete $p{$_} || []} } @libpth;
 }
 
 if ( $Config::Config{d_libname_unique} ) {

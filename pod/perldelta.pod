@@ -129,6 +129,17 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
 
+=item *
+
+L<DynaLoader> has been upgraded from version 1.50 to 1.51.
+
+@DynaLoader::dl_library_path will now save only existing PATH elements where
+duplicates are filtered.
+
+If $Conf{ptrsize} == 8 (64bit builds), @dl_library_path will sort 64bit
+locations in front of 32bit locations. This will force-mode /lib64 in
+front of /lib and /usr/lib64 in front of /usr/lib.
+
 =back
 
 =head2 Removed Modules and Pragmata
