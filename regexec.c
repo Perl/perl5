@@ -1862,7 +1862,7 @@ STMT_START {                                                                    
  * 'strend' if there is no such occurrence. */
 #define REXEC_FBC_UTF8_FIND_NEXT_SCAN(f)                    \
     while (s < strend) {                                    \
-        s = (f);                                            \
+        s = (char *) (f);                                   \
         if (s >= strend) {                                  \
             break;                                          \
         }                                                   \
@@ -1874,7 +1874,7 @@ STMT_START {                                                                    
 
 #define REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(f)                \
     while (s < strend) {                                    \
-        s = (f);                                            \
+        s = (char *) (f);                                   \
         if (s >= strend) {                                  \
             break;                                          \
         }                                                   \
@@ -2239,8 +2239,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFM_tb_pb: /* ARG() is the base byte; FLAGS() the mask byte */
       case ANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-                            (char *) find_next_masked((U8 *) s, (U8 *) strend,
-                                                    (U8) ARG(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG(c), FLAGS(c)));
         break;
 
       case ANYOFM_t8_pb:
@@ -2249,15 +2248,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * we do anyway for performance reasons, as otherwise we would have to
          * examine all the continuation characters */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
-                            (char *) find_next_masked((U8 *) s, (U8 *) strend,
-                                                    (U8) ARG(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG(c), FLAGS(c)));
         break;
 
       case NANYOFM_tb_pb:
       case NANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-                        (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
-                                                (U8) ARG(c), FLAGS(c)));
+           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ARG(c), FLAGS(c)));
         break;
 
       case NANYOFM_t8_pb:
