@@ -1884,13 +1884,12 @@ STMT_START {                                                                    
         previous_occurrence_end = s;                        \
     }
 
-/* This differs from the above macros in that it is passed a single byte that
- * is known to begin the next occurrence of the thing being looked for in 's'.
- * It does a memchr to find the next occurrence of 'byte', before trying 'COND'
- * at that position. */
-#define REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(byte, COND)      \
+/* This is like the above macro except the function returns NULL if there is no
+ * occurrence, and there is a further condition that must be matched besides
+ * the function */
+#define REXEC_FBC_FIND_NEXT_UTF8_SCAN_COND(f, COND)         \
     while (s < strend) {                                    \
-        s = (char *) memchr(s, byte, strend -s);            \
+        s = (char *) f;                                     \
         if (s == NULL) {                                    \
             s = (char *) strend;                            \
             break;                                          \
@@ -1905,6 +1904,14 @@ STMT_START {                                                                    
             s += UTF8SKIP(s);                               \
         }                                                   \
     }
+
+/* This differs from the above macros in that it is passed a single byte that
+ * is known to begin the next occurrence of the thing being looked for in 's'.
+ * It does a memchr to find the next occurrence of 'byte', before trying 'COND'
+ * at that position. */
+#define REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(byte, COND)                  \
+    REXEC_FBC_FIND_NEXT_UTF8_SCAN_COND(memchr(s, byte, strend - s),     \
+                                              COND)
 
 /* The four macros below are slightly different versions of the same logic.
  *
