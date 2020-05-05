@@ -72,8 +72,6 @@ static int
 io_blocking(pTHX_ InputStream f, int block)
 {
     int fd = -1;
-#if defined(HAS_FCNTL)
-    int RETVAL;
     if (!f) {
 	errno = EBADF;
 	return -1;
@@ -83,7 +81,8 @@ io_blocking(pTHX_ InputStream f, int block)
       errno = EBADF;
       return -1;
     }
-    RETVAL = fcntl(fd, F_GETFL, 0);
+#if defined(HAS_FCNTL)
+    int RETVAL = fcntl(fd, F_GETFL, 0);
     if (RETVAL >= 0) {
 	int mode = RETVAL;
 	int newmode = mode;
@@ -129,8 +128,8 @@ io_blocking(pTHX_ InputStream f, int block)
     if (block >= 0) {
 	unsigned long flags = !block;
 	/* ioctl claims to take char* but really needs a u_long sized buffer */
-	const int ret = ioctl(fd, FIONBIO, (char*)&flags);
-	if (ret != 0)
+
+	if (ioctl(fd, FIONBIO, (char*)&flags) != 0)
 	    return -1;
 	/* Win32 has no way to get the current blocking status of a socket.
 	 * However, we don't want to just return undef, because there's no way
