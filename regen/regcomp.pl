@@ -296,11 +296,12 @@ EOP
         -$width, REGMATCH_STATE_MAX => $#all;
 
     my %rev_type_alias= reverse %type_alias;
+    my $format = "#define\t%*s\t%d\t/* %#04x %s */\n";
     for my $node (@ops) {
-        printf $out "#define\t%*s\t%d\t/* %#04x %s */\n",
+        printf $out $format,
             -$width, $node->{name}, $node->{id}, $node->{id}, $node->{comment};
         if ( defined( my $alias= $rev_type_alias{ $node->{name} } ) ) {
-            printf $out "#define\t%*s\t%d\t/* %#04x %s */\n",
+            printf $out $format,
                 -$width, $alias, $node->{id}, $node->{id}, "type alias";
         }
     }
