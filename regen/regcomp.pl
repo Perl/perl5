@@ -305,6 +305,27 @@ EOP
                 -$width, $alias, $node->{id}, $node->{id}, "type alias";
         }
     }
+    print $out <<EOT;
+\t/* -- For regexec.c to switch on target being utf8 (t8)
+\t * or not (tb, b='byte'); same with pattern (p8, pb) -- */
+#define with_tp_UTF8ness(op, t_utf8, p_utf8)                        \\
+\t\t(((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
+
+EOT
+    for my $node (@ops) {
+        my $id = 4 * $node->{id};
+        printf $out $format,
+            -$width, "$node->{name}_tb_pb", $id, $id, "";
+        $id++;
+        printf $out $format,
+            -$width, "$node->{name}_tb_p8", $id, $id, "";
+        $id++;
+        printf $out $format,
+            -$width, "$node->{name}_t8_pb", $id, $id, "";
+        $id++;
+        printf $out $format,
+            -$width, "$node->{name}_t8_p8", $id, $id, "";
+    }
 
     print $out "\t/* ------------ States ------------- */\n";
     for my $node (@states) {
