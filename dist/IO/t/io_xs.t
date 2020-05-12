@@ -11,7 +11,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 use IO::File;
 use IO::Seekable;
 
@@ -49,4 +49,21 @@ SKIP:
        or skip "Cannot open t/io_xs.t read-only: $!", 1;
     ok($fh->sync, "sync to a read only handle")
 	or diag "sync(): ", $!;
+}
+
+
+SKIP: {
+    # gh 6799
+    #
+    # This isn't really a Linux/BSD specific test, but /dev/full is (I
+    # hope) reasonably well defined on these.  Patches welcome if your platform
+    # also supports it (or something like it)
+    skip "no /dev/full or not a /dev/full platform", 2
+      unless $^O =~ /^(linux|netbsd|freebsd)$/ && -c "/dev/full";
+    open my $fh, ">", "/dev/full"
+      or skip "Could not open /dev/full: $!", 2;
+    $fh->print("a" x 1024);
+    ok(!$fh->flush, "should fail to flush");
+    ok($fh->error, "stream should be in error");
+    close $fh; # silently ignore the error
 }
