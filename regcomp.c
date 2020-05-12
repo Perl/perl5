@@ -12480,7 +12480,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
  *
  * Implements the concatenation operator.
  *
- * On success, returns the offset at which any next node should be placed into
+ * On success, XXX wrong: returns the offset at which any next node should be placed into
  * the regex engine program being compiled.
  *
  * Returns 0 otherwise, setting flagp to RESTART_PARSE if the parse needs
@@ -16464,7 +16464,10 @@ redo_curchar:
                            /* If more than a single node returned, the nested
                             * parens evaluated to more than just a (?[...]),
                             * which isn't legal */
-                        || node != 1) {
+                        || RExC_emit != orig_emit
+                                      + NODE_STEP_REGNODE
+                                      + regarglen[REGEX_SET])
+                    {
                         vFAIL("Expecting interpolated extended charclass");
                     }
                     resultant_invlist = (SV *) ARGp(REGNODE_p(node));
