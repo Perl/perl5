@@ -264,6 +264,11 @@ sub test_vianame ($$$) {
     cmp_ok($warning_count, '==', scalar @WARN, "Verify vianame doesn't warn on unknown names");
     ok (! defined charnames::string_vianame("MORE NONE SUCH"), "Verify string_vianame returns undef for an undefined name");
     cmp_ok($warning_count, '==', scalar @WARN, "Verify string_vianame doesn't warn on unknown names");
+    ok (! defined charnames::vianame(""), "Verify vianame returns undef for an empty value");
+    cmp_ok($warning_count, '==', scalar @WARN, "... and no warning is generated");
+    ok (! defined charnames::string_vianame(""), "Verify string_vianame returns undef for an empty value");
+    cmp_ok($warning_count, '==', scalar @WARN, "... and no warning is generated");
+
     eval "qr/\\p{name=MORE NONE SUCH}/";
     like($@, qr/Can't find Unicode property definition "name=MORE NONE SUCH"/,
             '\p{name=} returns an appropriate error message on an undefined name');
