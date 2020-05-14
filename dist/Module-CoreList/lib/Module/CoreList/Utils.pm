@@ -1509,10 +1509,11 @@ my %delta = (
         }
     },
     5.031001 => {
-        delta_from => 5.031,
+        delta_from => 5.031000,
         changed => {
         },
         removed => {
+            'podselect'             => 1,
         }
     },
 );
