@@ -348,7 +348,7 @@ sub changes_between {
     5.029009 => '2019-03-20',
     5.028002 => '2019-04-19',
     5.029010 => '2019-04-20',
-    5.030000 => '2019-05-20',
+    5.030000 => '2019-05-22',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16276,13 +16276,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.030000 => {
-        delta_from => 5.029010,
+        delta_from => 5.02901,
         changed => {
             'B::Op_private'         => '5.030000',
             'Config'                => '5.03',
             'Devel::PPPort'         => '3.52',
-            'Module::CoreList'      => '5.20190520',
-            'Module::CoreList::Utils'=> '5.20190520',
+            'Module::CoreList'      => '5.20190522',
+            'Module::CoreList::Utils'=> '5.20190522',
             'XS::Typemap'           => '0.17',
         },
         removed => {
