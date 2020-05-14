@@ -19,6 +19,8 @@ Consult your favorite dictionary for details.
 
 =head2 v5.31.10 - Christina Rossetti, "Remember"
 
+L<Announced on 2020-03-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/03/msg257274.html>
+
     Remember me when I am gone away,
         Gone far away into the silent land;
         When you can no more hold me by the hand,
