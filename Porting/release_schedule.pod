@@ -66,7 +66,7 @@ you should reset the version numbers to the next blead series.
   2019-12-20  5.31.7 ✓       Atoomic
   2020-01-20  5.31.8 ✓       Matthew Horsfall
   2020-02-20  5.31.9 ✓       Renee Bäcker
-  2020-03-20  5.31.10        Sawyer X
+  2020-03-20  5.31.10 ✓      Sawyer X
 
 (RC0 for 5.32.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
