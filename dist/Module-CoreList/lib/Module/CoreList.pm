@@ -349,6 +349,7 @@ sub changes_between {
     5.028002 => '2019-04-19',
     5.029010 => '2019-04-20',
     5.030000 => '2019-05-22',
+    5.031000 => '2019-05-23',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -16288,6 +16289,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.031000 => {
+        delta_from => 5.030000,
+        changed => {
+            'B::Op_private'         => '5.031000',
+            'Config'                => '5.031',
+            'Module::CoreList'      => '5.20190523',
+            'Module::CoreList::Utils'=> '5.20190523',
+            'feature'               => '1.55',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -17285,6 +17298,13 @@ sub is_core
     },
     5.030000 => {
         delta_from => 5.02901,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.031000 => {
+        delta_from => 5.030000,
         changed => {
         },
         removed => {
