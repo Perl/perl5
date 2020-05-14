@@ -679,6 +679,7 @@ the strings?).
  Max M     5.31.4       2019-Sep-20
  Steve     5.31.5       2019-Oct-20
  BinGOs    5.31.6       2019-Nov-20
+ Nicolas R 5.31.7       2019-Dec-20
 
 =head2 SELECTED RELEASE SIZES
 
