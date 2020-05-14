@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.31.11 - John F. Kennedy, National Committee for a Sane Nuclear Policy
+
+L<Announced on 2020-04-28 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/04/msg257385.html>
+
+Mankind must put an end to war, or war will put an end to mankind.
+
 =head2 v5.31.10 - Christina Rossetti, "Remember"
 
 L<Announced on 2020-03-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/03/msg257274.html>
