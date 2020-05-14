@@ -6360,7 +6360,7 @@ Perl_dump_c_backtrace(pTHX_ PerlIO* fp, int depth, int skip)
 
 #endif /* #ifdef USE_C_BACKTRACE */
 
-#ifdef PERL_TSA_ACTIVE
+#if defined(USE_ITHREADS) && defined(I_PTHREAD)
 
 /* pthread_mutex_t and perl_mutex are typedef equivalent
  * so casting the pointers is fine. */
@@ -6381,7 +6381,6 @@ int perl_tsa_mutex_destroy(perl_mutex* mutex)
 }
 
 #endif
-
 
 #ifdef USE_DTRACE
 
