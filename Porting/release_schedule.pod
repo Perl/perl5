@@ -19,7 +19,7 @@ Code freezes (which happen in the 5.31.X series)
   2020-02-20  5.31.9 ✓        User-visible changes to correctly
                               functioning programs freeze
   2020-03-20  5.31.10 ✓       Full code freeze
-  2020-04-20  5.31.11 ✓       Full code freeze (clearing BBCs)
+  2020-04-28  5.31.11 ✓       Full code freeze (clearing BBCs)
   2020-05-20  5.32.0          Stable release! (Hopefully)
 
 =head2 Perl 5.30
@@ -68,7 +68,7 @@ you should reset the version numbers to the next blead series.
   2020-01-20  5.31.8 ✓       Matthew Horsfall
   2020-02-20  5.31.9 ✓       Renee Bäcker
   2020-03-20  5.31.10 ✓      Sawyer X
-  2020-04-20  5.31.11        Sawyer X
+  2020-04-28  5.31.11 ✓      Sawyer X
 
 (RC0 for 5.32.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
