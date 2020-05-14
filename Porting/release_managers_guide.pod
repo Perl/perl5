@@ -143,7 +143,7 @@ Andreas' email address at:
 
 =head3 rt.perl.org update access
 
-Make sure you have permission to close tickets on L<http://rt.perl.org/>
+Make sure you have permission to close tickets on L<https://rt.perl.org/>
 so you can respond to bug reports as necessary during your stint.  If you
 don't, make an account (if you don't have one) and contact the pumpking
 with your username to get ticket-closing permission.
