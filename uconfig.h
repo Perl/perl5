@@ -1456,6 +1456,10 @@
 /* HASATTRIBUTE_WARN_UNUSED_RESULT:
  *	Can we handle GCC attribute for warning on unused results
  */
+/* HASATTRIBUTE_ALWAYS_INLINE:
+ *	Can we handle GCC attribute for functions that should always be
+ *	inlined.
+ */
 /*#define HASATTRIBUTE_DEPRECATED	/ **/
 /*#define HASATTRIBUTE_FORMAT	/ **/
 /*#define PRINTF_FORMAT_NULL_OK	/ **/
@@ -5256,6 +5260,6 @@
 #endif
 
 /* Generated from:
- * cc910600600e832a5ad4789896a093ec8e001c4dec9ee3c7d7a3e6ba880651c7 config_h.SH
+ * 14796a77fb4ae3335f5e589a98445bc6e838b688194f6f112537495f0814f5d5 config_h.SH
  * e598046e9da73796e21226371ce26e8f2144852e0f5da7f00e52e1dbe1eaeaa6 uconfig.sh
  * ex: set ro: */
