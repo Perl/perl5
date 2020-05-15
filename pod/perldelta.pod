@@ -14,16 +14,43 @@ L<perl5302delta>, which describes differences between 5.30.1 and 5.30.2.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-Selected Bug Fixes section.
+=head2 [CVE-2020-10543] Buffer overflow caused by a crafted regular expression
 
-[ List each security issue as a =head2 entry ]
+A signed C<size_t> integer overflow in the storage space calculations for
+nested regular expression quantifiers could cause a heap buffer overflow in
+Perl's regular expression compiler that overwrites memory allocated after the
+regular expression storage space with attacker supplied data.
+
+The target system needs a sufficient amount of memory to allocate partial
+expansions of the nested quantifiers prior to the overflow occurring.  This
+requirement is unlikely to be met on 64-bit systems.
+
+=head2 [CVE-2020-10878] Integer overflow via malformed bytecode produced by a crafted regular expression
+
+Integer overflows in the calculation of offsets between instructions for the
+regular expression engine could cause corruption of the intermediate language
+state of a compiled regular expression.  An attacker could abuse this behaviour
+to insert instructions into the compiled form of a Perl regular expression.
+
+=head2 [CVE-2020-12723] Buffer overflow caused by a crafted regular expression
+
+Recursive calls to C<S_study_chunk()> by Perl's regular expression compiler to
+optimize the intermediate language representation of a regular expression could
+cause corruption of the intermediate language state of a compiled regular
+expression.
+
+=head2 Additional Note
+
+An application written in Perl would only be vulnerable to any of the above
+flaws if it evaluates regular expressions supplied by the attacker.  Evaluating
+regular expressions in this fashion is known to be dangerous since the regular
+expression engine does not protect against denial of service attacks in this
+usage scenario.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.30.2.  If any exist,
-they are bugs, and we request that you submit a report.  See
+There are no changes intentionally incompatible with Perl 5.30.2.  If any
+exist, they are bugs, and we request that you submit a report.  See
 L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
@@ -53,7 +80,7 @@ XXX Generate this with:
 
 If you find what you think is a bug, you might check the perl bug database at
 L<https://github.com/Perl/perl5/issues>.  There may also be information at
-L<http://www.perl.org/>, the Perl Home Page.
+L<https://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please open an issue at
 L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
@@ -66,8 +93,8 @@ report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
