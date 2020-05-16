@@ -28,7 +28,7 @@
 # Porting/pumpkin.pod.
 
 # Generated using [metaconfig 3.5 PL0]
-# (with additional metaconfig patches by perlbug@perl.org)
+# (with additional metaconfig patches by https://github.com/Perl/perl5/issues)
 
 cat >c1$$ <<EOF
 ARGGGHHHH!!!!!
