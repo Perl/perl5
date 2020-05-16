@@ -30,6 +30,10 @@ sub configure {
     $sock->socket(AF_UNIX, $type, 0) or
 	return undef;
 
+    if(exists $arg->{Blocking}) {
+        $sock->blocking($arg->{Blocking}) or
+	    return undef;
+    }
     if(exists $arg->{Local}) {
 	my $addr = sockaddr_un($arg->{Local});
 	$sock->bind($addr) or
