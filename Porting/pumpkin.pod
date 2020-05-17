@@ -316,7 +316,8 @@ changes pre-approved by the metaconfig maintainers
 
 =back
 
-Such changes should also be notified to the metaconfig maintainers.
+Such changes should also be notified to the metaconfig maintainers by
+creating an issue at <https://github.com/Perl/metaconfig/issues>.
 
 Alternatively, do consider if the F<*ish.h> files or the hint files might
 be a better place for your changes.
@@ -328,9 +329,9 @@ and F<README_U> files in the metaconfig repository containing Perl's
 metaconfig units:
 
 	# anonymous clone
-	git clone https://github.com/perl5-metaconfig/metaconfig.git
+	git clone https://github.com/Perl/metaconfig.git
 	# or using a registered github.com identity with ssh
-	git clone github.com:perl5-metaconfig/metaconfig metaconfig
+	git clone github.com:Perl/metaconfig.git
 
 Since metaconfig is hard to change, running correction scripts after
 this generation is sometimes needed. Configure gained complexity over
