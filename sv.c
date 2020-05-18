@@ -15731,6 +15731,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_SCX_invlist            = sv_dup_inc(proto_perl->ISCX_invlist, param);
     PL_UpperLatin1            = sv_dup_inc(proto_perl->IUpperLatin1, param);
     PL_in_some_fold           = sv_dup_inc(proto_perl->Iin_some_fold, param);
+    PL_utf8_foldclosures      = sv_dup_inc(proto_perl->Iutf8_foldclosures, param);
     PL_utf8_idcont            = sv_dup_inc(proto_perl->Iutf8_idcont, param);
     PL_utf8_idstart           = sv_dup_inc(proto_perl->Iutf8_idstart, param);
     PL_utf8_perl_idcont       = sv_dup_inc(proto_perl->Iutf8_perl_idcont, param);

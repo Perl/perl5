@@ -1198,6 +1198,8 @@ perl_destruct(pTHXx)
     PL_UpperLatin1 = NULL;
     SvREFCNT_dec(PL_in_some_fold);
     PL_in_some_fold = NULL;
+    SvREFCNT_dec(PL_utf8_foldclosures);
+    PL_utf8_foldclosures = NULL;
     SvREFCNT_dec(PL_utf8_idcont);
     PL_utf8_idcont = NULL;
     SvREFCNT_dec(PL_utf8_idstart);

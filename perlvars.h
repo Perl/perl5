@@ -305,10 +305,6 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
                                               PL_user_defined_properties */
 #endif
 
-/* Everything that folds to a given character, for case insensitivity regex
- * matching */
-PERLVAR(G, utf8_foldclosures, SV *)
-
 /* these record the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
  * and the result recorded for use by subsequent calls.

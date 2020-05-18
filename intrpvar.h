@@ -915,6 +915,10 @@ PERLVAR(I, UpperLatin1,	SV *)   /* Code points 128 - 255 */
 /* List of characters that participate in any fold defined by Unicode */
 PERLVAR(I, in_some_fold, SV *)
 
+/* Everything that folds to a given character, for case insensitivity regex
+ * matching */
+PERLVAR(I, utf8_foldclosures, SV *)
+
 PERLVAR(I, utf8_idcont,	SV *)
 PERLVAR(I, utf8_idstart, SV *)
 PERLVAR(I, utf8_perl_idcont, SV *)

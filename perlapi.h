@@ -215,8 +215,6 @@ END_EXTERN_C
 #define PL_user_def_props_aTHX	(*Perl_Guser_def_props_aTHX_ptr(NULL))
 #undef  PL_user_prop_mutex
 #define PL_user_prop_mutex	(*Perl_Guser_prop_mutex_ptr(NULL))
-#undef  PL_utf8_foldclosures
-#define PL_utf8_foldclosures	(*Perl_Gutf8_foldclosures_ptr(NULL))
 #undef  PL_veto_cleanup
 #define PL_veto_cleanup		(*Perl_Gveto_cleanup_ptr(NULL))
 #undef  PL_watch_pvx
