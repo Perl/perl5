@@ -49,10 +49,10 @@ my @all_features = sort keys %feature;
 my %feature_bundle = (
      all     => [ @all_features ],
      default =>	[ ],
-    "5.9.5"  =>	[qw(say state switch indirect)],
+    #"5.9.5"  =>	[qw(say state switch indirect)],
     "5.10"   =>	[qw(say state switch indirect)],
-    "5.11"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.13"   =>	[qw(say state switch unicode_strings indirect)],
+    #"5.11"   =>	[qw(say state switch unicode_strings indirect)],
+    #"5.13"   =>	[qw(say state switch unicode_strings indirect)],
     "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc indirect)],
     "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
@@ -71,7 +71,7 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
     "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "7.0"   => [ @all_features ],
+    "7.0"   => [ grep { $_ ne 'unicode_strings' } @all_features ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -146,8 +146,7 @@ while (readline "perl.h") {
 	my $bits_needed =
 	    length sprintf "%b", scalar keys %UniqueBundles;
 	$bits =~ /1{$bits_needed}/
-	    or die "Not enough bits (need $bits_needed)"
-		 . " in $bits (binary for $hex):\n\n$_\n ";
+	    or die "Not enough bits (need $bits_needed) in $bits (binary for $hex):\n\n$_\n";
     }
     if ($Uni8Bit && $HintMask) { last }
 }

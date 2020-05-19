@@ -26,8 +26,8 @@ sub import {
     ${^WARNING_BITS} = pack( "H*", '555555555555555555555555150001500101' );
 
     # use strict; use utf8;
-    # perl  -MData::Dumper -e'my $h; use strict; use utf8; use feature (qw/bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings/); BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); print Dumper \%^H; '
-    $^H |= 0x00800602;
+    # perl  -MData::Dumper -e'my $h; use strict; use utf8; use feature (qw/bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval/); BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); print Dumper \%^H; '
+    $^H |= 0x00000602;
 
     require feature;
     feature->import(':7.0');
