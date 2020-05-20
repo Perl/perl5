@@ -134,8 +134,8 @@ sub changes_between {
   my $left_ver = shift;
   my $right_ver = shift;
 
-  my $left  = $version{ $left_ver };
-  my $right = $version{ $right_ver };
+  my $left  = $version{ $left_ver } || {};
+  my $right = $version{ $right_ver } || {};
 
   my %uniq = (%$left, %$right);
 
