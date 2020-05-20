@@ -132,7 +132,7 @@ sub convert_from_ascii_guts {
 
 *convert_from_ascii = (ord("A") == 65)
                       ? sub { 1; }
-                      : convert_from_ascii_guts;
+                      : \&convert_from_ascii_guts;
 
 $bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
 $ffff  = chr(0xff) x 2;
