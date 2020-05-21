@@ -19344,16 +19344,16 @@ S_optimize_regclass(pTHX_
             single_range = TRUE;
         }
         invlist_iterfinish(cp_list);
-    }
 
-    /* If we know at compile time that this matches every possible code point,
-     * any run-time dependencies don't matter */
-    if (start[0] == 0 && end[0] == UV_MAX) {
-        if (*invert) {
-            goto return_OPFAIL;
-        }
-        else {
-            goto return_SANY;
+        /* If we know at compile time that this matches every possible code
+         * point, any run-time dependencies don't matter */
+        if (start[0] == 0 && end[0] == UV_MAX) {
+            if (*invert) {
+                goto return_OPFAIL;
+            }
+            else {
+                goto return_SANY;
+            }
         }
     }
 
