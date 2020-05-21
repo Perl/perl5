@@ -649,6 +649,11 @@ will be lost.
  NPOSIXU          none       complement of POSIXU, [[:^class:]]
  NPOSIXA          none       complement of POSIXA, [[:^class:]]
 
+ POSIXA1R         none       Like POSIXA for the classes whose code
+                             points form a single range, faster
+                             implementation
+ NPOSIXA1R        none       complement of POSIXA1R, [[:^class:]]
+
  CLUMP            no         Match any extended grapheme cluster
                              sequence
 

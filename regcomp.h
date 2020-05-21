@@ -119,6 +119,37 @@ struct regnode_string {
     char string[1];
 };
 
+/* Low 3 bits are for the 16's count */
+#define POSIXA1R_1x_SHIFT    3
+#define POSIXA1R_1L_SHIFT    4
+#define POSIXA1R_MASK_SHIFT  5   /* Has to be the bit that differs between
+                                    upper and lower-case */
+#define POSIXA1R_16L_SHIFT   6
+#define POSIXA1R_68L_SHIFT   7
+
+#define POSIXA1R_1x_BIT      (1U << POSIXA1R_1x_SHIFT)
+#define POSIXA1R_1L_BIT      (1U << POSIXA1R_1L_SHIFT)
+#define POSIXA1R_16L_BIT     (1U << POSIXA1R_16L_SHIFT)
+#define POSIXA1R_68L_BIT     (1U << POSIXA1R_68L_SHIFT)
+#define POSIXA1R_ALPHA_BIT   (1U << POSIXA1R_MASK_SHIFT)
+
+#define POSIXA1Rbase(n)                                                     \
+            (  '0' - 48                                                     \
+             + (1  * ((n)->flags & POSIXA1R_1x_BIT) >> POSIXA1R_1x_SHIFT)   \
+             + (16 * ((n)->flags & 7)))
+
+#define POSIXA1Rdelta(n)                                                    \
+        (    9                                                              \
+         + ( 1 * (((n)->flags & POSIXA1R_1L_BIT)  >> POSIXA1R_1L_SHIFT))    \
+         + (16 * (((n)->flags & POSIXA1R_16L_BIT) >> POSIXA1R_16L_SHIFT))   \
+         + (68 * (((n)->flags & POSIXA1R_68L_BIT) >> POSIXA1R_68L_SHIFT)))
+/*          __  Summing the above yields:
+ *          94  which is the delta for [:print:], SPACE to TILDE (32 to 126 */
+
+#define POSIXA1Rmasked(n, c)                                                \
+     (((U8) (c)) & (((n)->flags & POSIXA1R_ALPHA_BIT) | ~POSIXA1R_ALPHA_BIT))
+
+
 struct regnode_lstring { /* Constructed this way to keep the string aligned. */
     U8	flags;
     U8  type;

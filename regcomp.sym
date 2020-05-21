@@ -124,6 +124,11 @@ NPOSIXU     NPOSIXD,    none 0 S   ; complement of POSIXU, [[:^class:]]
 NPOSIXA     NPOSIXD,    none 0 S   ; complement of POSIXA, [[:^class:]]
 # End of order is important
 
+# Order of the below is important.
+POSIXA1R     POSIXA1R,    none 0 S   ; Like POSIXA for the classes whose code points form a single range, faster implementation
+NPOSIXA1R    POSIXA1R,    none 0 S   ; complement of POSIXA1R, [[:^class:]]
+# End of order is important
+
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation
