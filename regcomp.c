@@ -19326,7 +19326,7 @@ S_optimize_regclass(pTHX_
     UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
     UV   end[MAX_FOLD_FROMS+1] = { 0 };
     bool single_range = FALSE;
-    UV lowest_cp = 0;
+    UV lowest_cp = 0, highest_cp = 0;
 
     PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS;
 
@@ -19360,6 +19360,8 @@ S_optimize_regclass(pTHX_
 
         /* Use a clearer mnemonic for below */
         lowest_cp = start[0];
+
+        highest_cp = invlist_highest(cp_list);
     }
 
     /* Similarly, for /l posix classes, if both a class and its complement
@@ -19824,7 +19826,7 @@ S_optimize_regclass(pTHX_
         /* If doesn't fit the criteria for ANYOFM, invert and try again.  If
          * that works we will instead later generate an NANYOFM, and invert
          * back when through */
-        if (invlist_highest(cp_list) > max_permissible) {
+        if (highest_cp > max_permissible) {
             _invlist_invert(cp_list);
             inverted = 1;
         }
