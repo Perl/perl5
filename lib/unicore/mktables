@@ -9587,6 +9587,9 @@ sub simple_fold( $line, $prefix="", $hanging_indent=0, $right_margin=0) {
                         (?:                   #  acceptable break:
                             [ \s = ]          # space or equal
                             | - (?! [.0-9] )  # or non-unary minus.
+                            | [^\\[(] (?= \\ )# break before single backslash
+                                              #  not immediately after opening
+                                              #  punctuation
                         )                     # $1 includes the character
                     )/x)
                 {
@@ -9608,7 +9611,7 @@ sub simple_fold( $line, $prefix="", $hanging_indent=0, $right_margin=0) {
                 # access the files that this program is creating.
                 elsif ($segment !~ /\a/
                        && ($segment =~ s/_/_\a/g
-                       || $segment =~ s/ ( [a-z] ) (?= [A-Z] )/$1\a/xg))
+                       || $segment =~ s/ ( (?!\\) [a-z] ) (?= [A-Z] )/$1\a/xg))
                 {
                     # Here were able to find at least one place to insert
                     # our substitute soft hyphen.  Find the right-most one
