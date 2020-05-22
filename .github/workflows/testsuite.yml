@@ -1,0 +1,297 @@
+name: testsuite
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "*"
+  pull_request:
+
+jobs:
+  #  ___            _ _           ___ _           _
+  # / __| __ _ _ _ (_) |_ _  _   / __| |_  ___ __| |__
+  # \__ \/ _` | ' \| |  _| || | | (__| ' \/ -_) _| / /
+  # |___/\__,_|_||_|_|\__|\_, |  \___|_||_\___\__|_\_\
+  #                       |__/
+  # ascii art small font from https://ascii.co.uk/text
+
+  #  _ _
+  # | (_)_ _ _  ___ __
+  # | | | ' \ || \ \ /
+  # |_|_|_||_\_,_/_\_\
+
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+      WORKSPACE: ${{ github.workspace }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # exercise a variety of build options
+        # threads often cause build issues
+        CONFIGURE_ARGS:
+          - "-Uusethreads"
+          - "-Dusethreads"
+          - "-DPERL_GLOBAL_STRUCT_PRIVATE"
+          - "-Duseshrplib -Dusesitecustomize -Duselongdouble PERL_UNICODE='' LANG='en_US.UTF-8'"
+          - "-Duseshrplib -Dusequadmath -Dusecbacktrace -Dusethreads PERL_UNICODE='' LANG='de_DE.UTF-8'"
+          - "-Duserelocatableinc"
+          - "-Dcc='clang'"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Configure
+        run: |
+          ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
+      - name: Build
+        run: |
+          make -j2
+      - name: Run Tests
+        run: |
+          TEST_JOBS=2 make -j2 test
+
+  linux-i386:
+    name: "linux i386/ubuntu"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    # https://hub.docker.com/r/i386/ubuntu/
+    container:
+      image: i386/ubuntu:latest
+      env:
+        PERL_SKIP_TTY_TEST: 1
+        CONTINUOUS_INTEGRATION: 1
+        WORKSPACE: ${{ github.workspace }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        CONFIGURE_ARGS:
+          - "-Dusedevel"
+
+    steps:
+      - name: Install System dependencies
+        run: |
+          apt-get update ||:
+          apt-get -y install build-essential git-core
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
+      - name: fix git remote credential
+        run: git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Configure
+        run: |
+          ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
+      - name: Build
+        run: |
+          make -j2
+      - name: Run Tests
+        run: |
+          TEST_JOBS=2 make -j2 test
+
+  #                 ___  ___
+  #  _ __  __ _ __ / _ \/ __|
+  # | '  \/ _` / _| (_) \__ \
+  # |_|_|_\__,_\__|\___/|___/
+
+  smoke-macos-xcode11:
+    name: "macOS xcode 11"
+    runs-on: macos-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 10
+      - name: Configure
+        run: |
+          export SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk
+          sh ./Configure -des -Dusedevel
+      - name: Build
+        run: |
+          make -j2
+      - name: Run Tests
+        run: |
+          make -j2 test
+
+  #         _         _
+  # __ __ _(_)_ _  __| |_____ __ _____
+  # \ V  V / | ' \/ _` / _ \ V  V (_-<
+  #  \_/\_/|_|_||_\__,_\___/\_/\_//__/
+
+  windows-msvc142:
+    name: "Windows msvc142"
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 10
+      #- name: Install clcache
+      #  shell: cmd
+      #  run: |
+      #    curl -L https://github.com/frerich/clcache/releases/download/v4.2.0/clcache.4.2.0.nupkg --output clcache.4.2.0.nupkg
+      #    choco install clcache --source=.
+      #- name: find home directory
+      #  shell: cmd
+      #  run: |
+      #    set
+      #- name: C compiler cache
+      #  id: clcache
+      #  uses: actions/cache@v1
+      #  with:
+      #    path: $HOME\clcache
+      #    key: ${{ runner.os }}-x64
+      #- name: Set up Perl build environment
+      #  # pushd "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+      #  # for /f "delims=" %%x in ('.\vswhere.exe -latest -property InstallationPath') do set VSPATH=%%x
+      #  # popd
+      #  # call "%VSPATH%\VC\Auxiliary\Build\vcvarsall.bat" x64
+      #  #run: |
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          cd win32
+          nmake CCTYPE=MSVC142
+      - name: Run Tests
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          cd win32
+          nmake CCTYPE=MSVC142 test
+
+  windows-msvc100:
+    name: "Windows msvc100"
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 10
+      - name: Set up MSVC100
+        run: |
+          choco install vcexpress2010
+      - name: Help
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" /help
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
+          cd win32
+          nmake CCTYPE=MSVC100 WIN64=undef
+      - name: Run Tests
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
+          cd win32
+          nmake CCTYPE=MSVC100 WIN64=undef test
+
+  mingw64:
+    name: "Windows mingw64"
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 10
+      - name: Set up Perl build environment
+        run: |
+          choco install strawberryperl
+          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+      - name: Host perl -V
+        run: perl -V
+      - name: gcc --version
+        run: gcc --version
+      - name: Build
+        shell: cmd
+        run: |
+          cd win32
+          gmake -f GNUMakefile -j2
+      - name: Run Tests
+        shell: cmd
+        run: |
+          cd win32
+          set HARNESS_OPTIONS=j2
+          set CCHOME=C:\strawberry\c
+          gmake -f GNUMakefile test
+
+  cygwin:
+    name: "cygwin"
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - name: Set up Cygwin
+        shell: cmd
+        run: |
+          choco install cygwin --params="/InstallDir:%GITHUB_WORKSPACE%\cygwin"
+          choco install cyg-get
+          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
+      - name: Check out using Cygwin git, to ensure correct file permissions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: cmd
+        run: |
+          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+          sh -c "mkdir -p ~; cd ~; echo \"$GITHUB_REPOSITORY\"; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" ; fi ; git checkout \"$GITHUB_SHA\""
+      - name: Configure
+        shell: cmd
+        run: |
+          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+          sh -c "cd ~/work; ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING"
+      - name: Build
+        shell: cmd
+        run: |
+          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+          sh -c "cd ~/work; make -j2"
+      - name: Run Tests
+        shell: cmd
+        run: |
+          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+          sh -c "cd ~/work; make -j2 test"
