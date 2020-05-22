@@ -4,7 +4,7 @@ perlfaq3 - Programming Tools
 
 =head1 VERSION
 
-version 5.20200125
+version 5.20200523
 
 =head1 DESCRIPTION
 
@@ -1098,7 +1098,8 @@ XS support files.
 
 Download the ExtUtils::Embed kit from CPAN and run `make test'. If
 the tests pass, read the pods again and again and again. If they
-fail, see L<perlbug> and send a bug report with the output of
+fail, submit a bug report to L<https://github.com/Perl/perl5/issues>
+with the output of
 C<make test TEST_VERBOSE=1> along with C<perl -V>.
 
 =head2 When I tried to run my script, I got this message. What does it mean?
