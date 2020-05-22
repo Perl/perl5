@@ -16,6 +16,35 @@ jobs:
   #                       |__/
   # ascii art small font from https://ascii.co.uk/text
 
+  sanity_check:
+    name: "Sanity: Linux -Dusethreads"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+      WORKSPACE: ${{ github.workspace }}
+      CONFIGURE_ARGS: "-Dusethreads"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Configure
+        run: |
+          ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
+      - name: Build
+        run: |
+          make -j2
+      - name: Run Tests
+        run: |
+          TEST_JOBS=2 make -j2 test
+
   #  _ _
   # | (_)_ _ _  ___ __
   # | | | ' \ || \ \ /
@@ -24,6 +53,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -37,7 +67,7 @@ jobs:
         # threads often cause build issues
         CONFIGURE_ARGS:
           - "-Uusethreads"
-          - "-Dusethreads"
+          #- "-Dusethreads" # already tested above by sanity_check
           - "-DPERL_GLOBAL_STRUCT_PRIVATE"
           - "-Duseshrplib -Dusesitecustomize -Duselongdouble PERL_UNICODE='' LANG='en_US.UTF-8'"
           - "-Duseshrplib -Dusequadmath -Dusecbacktrace -Dusethreads PERL_UNICODE='' LANG='de_DE.UTF-8'"
@@ -66,6 +96,7 @@ jobs:
     name: "linux i386/ubuntu"
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     # https://hub.docker.com/r/i386/ubuntu/
     container:
@@ -114,6 +145,7 @@ jobs:
     name: "macOS xcode 11"
     runs-on: macos-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -143,6 +175,7 @@ jobs:
     name: "Windows msvc142"
     runs-on: windows-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -191,6 +224,7 @@ jobs:
     name: "Windows msvc100"
     runs-on: windows-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -225,6 +259,7 @@ jobs:
     name: "Windows mingw64"
     runs-on: windows-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -260,6 +295,7 @@ jobs:
     name: "cygwin"
     runs-on: windows-latest
     timeout-minutes: 120
+    needs: sanity_check
 
     env:
       PERL_SKIP_TTY_TEST: 1
