@@ -9,6 +9,36 @@ on:
   pull_request:
 
 jobs:
+
+  #  ___           _         ___       __                    _   _
+  # / __|_ __  ___| |_____  |_ _|_ _  / _|___ _ _ _ __  __ _| |_(_)___ _ _  ___
+  # \__ \ '  \/ _ \ / / -_)  | || ' \|  _/ _ \ '_| '  \/ _` |  _| / _ \ ' \(_-<
+  # |___/_|_|_\___/_\_\___| |___|_||_|_| \___/_| |_|_|_\__,_|\__|_\___/_||_/__/
+
+  authors:
+    runs-on: ubuntu-latest
+    # not from a fork and base_ref defined
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.base_ref != ''
+    continue-on-error: true
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1000
+      - name: Involved authors
+        run: |
+          echo "Pull request authors"
+          echo "# git merge-base origin/${BASE_REF} HEAD"
+          branch_off=$(git merge-base origin/${BASE_REF} HEAD)
+          git log --pretty=format:"Author: %an <%ae>" $branch_off..${SHA}^2 | sort -u
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          SHA: ${{ github.sha }}
+
   #  ___            _ _           ___ _           _
   # / __| __ _ _ _ (_) |_ _  _   / __| |_  ___ __| |__
   # \__ \/ _` | ' \| |  _| || | | (__| ' \/ -_) _| / /
@@ -115,6 +145,8 @@ jobs:
       - name: Run Tests
         run: |
           TEST_JOBS=2 make -j2 test
+
+  #===============================================
 
   linux-i386:
     name: "linux i386/ubuntu"
@@ -244,6 +276,8 @@ jobs:
           cd win32
           nmake CCTYPE=MSVC142 test
 
+  #===============================================
+
   windows-msvc100:
     name: "Windows msvc100"
     runs-on: windows-latest
@@ -278,6 +312,8 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
           cd win32
           nmake CCTYPE=MSVC100 WIN64=undef test
+
+  #===============================================
 
   mingw64:
     name: "Windows mingw64"
@@ -314,6 +350,8 @@ jobs:
           set HARNESS_OPTIONS=j2
           set CCHOME=C:\strawberry\c
           gmake -f GNUMakefile test
+
+  #===============================================
 
   cygwin:
     name: "cygwin"
