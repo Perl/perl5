@@ -45,6 +45,30 @@ jobs:
         run: |
           TEST_JOBS=2 make -j2 test
 
+  # use a dedicated job to check if full testsuite is enabled
+  #   avoid starting VMs if not neeced
+  #   and also provide the same check for all platforms
+  # the job fails when EXTENDED_TESTING is unset
+  # alternatively could upload an artifact file and abort...
+
+  check_extended_testing:
+    name: "EXTENDED_TESTING set?"
+    runs-on: ubuntu-latest
+
+    steps:
+      # --------------------------------------------------------------------------------------------
+      # cannot use secrets earlier as part of 'if:' condition
+      - name: "Runs if EXTENDED_TESTING is set"
+        env:
+          EXTENDED_TESTING: ${{ secrets.EXTENDED_TESTING }}      
+        run: |
+          if [ -z "${EXTENDED_TESTING}" ]; then
+            echo "[Warning] Only run this job when secrets.EXTENDED_TESTING is set. Stopping."
+            exit 78
+          fi
+      - run: echo "Running EXTENDED_TESTING tests"
+      # --------------------------------------------------------------------------------------------
+
   #  _ _
   # | (_)_ _ _  ___ __
   # | | | ' \ || \ \ /
@@ -53,7 +77,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -96,7 +120,7 @@ jobs:
     name: "linux i386/ubuntu"
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     # https://hub.docker.com/r/i386/ubuntu/
     container:
@@ -145,7 +169,7 @@ jobs:
     name: "macOS xcode 11"
     runs-on: macos-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -175,7 +199,7 @@ jobs:
     name: "Windows msvc142"
     runs-on: windows-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -224,7 +248,7 @@ jobs:
     name: "Windows msvc100"
     runs-on: windows-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -259,7 +283,7 @@ jobs:
     name: "Windows mingw64"
     runs-on: windows-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     env:
       PERL_SKIP_TTY_TEST: 1
@@ -295,7 +319,7 @@ jobs:
     name: "cygwin"
     runs-on: windows-latest
     timeout-minutes: 120
-    needs: sanity_check
+    needs: [sanity_check, check_extended_testing]
 
     env:
       PERL_SKIP_TTY_TEST: 1
