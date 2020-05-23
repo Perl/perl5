@@ -2053,6 +2053,7 @@ is no longer available; instead use L<File::Temp>.
 
 =item C<tolower>
 
+This function has been removed as of v5.26.
 This is identical to the C function, except that it can apply to a single
 character or to a whole string, and currently operates as if the locale
 always is "C".  Consider using the C<lc()> function, see L<perlfunc/lc>,
@@ -2061,6 +2062,7 @@ strings.
 
 =item C<toupper>
 
+This function has been removed as of v5.26.
 This is similar to the C function, except that it can apply to a single
 character or to a whole string, and currently operates as if the locale
 always is "C".  Consider using the C<uc()> function, see L<perlfunc/uc>,
