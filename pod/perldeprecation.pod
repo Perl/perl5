@@ -242,7 +242,7 @@ See L<perlfunc/dump>.
 There has been a long-standing bug in Perl that causes a lexical variable
 not to be cleared at scope exit when its declaration includes a false
 conditional.  Some people have exploited this bug to achieve a kind of
-static variable.  Since we intend to fix this bug, we don't want people
+static variable.  To allow us to fix this bug, people should not be
 relying on this behavior.
 
 Instead, it's recommended one uses C<state> variables to achieve the
@@ -256,7 +256,7 @@ same effect:
 C<state> variables were introduced in Perl 5.10.
 
 Alternatively, you can achieve a similar static effect by
-declaring the variable in a separate block outside the function, eg
+declaring the variable in a separate block outside the function, e.g.,
 
     sub f { my $x if 0; return $x++ }
 
@@ -265,7 +265,7 @@ becomes
     { my $x; sub f { return $x++ } }
 
 The use of C<my()> in a false conditional has been deprecated in
-Perl 5.10, and it will become a fatal error in Perl 5.30.
+Perl 5.10, and became a fatal error in Perl 5.30.
 
 
 =head3 Reading/writing bytes from/to :utf8 handles.
