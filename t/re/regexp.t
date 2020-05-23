@@ -91,6 +91,10 @@ no warnings 'experimental::vlb';
 our ($bang, $ffff, $nulnul); # used by the tests
 our ($qr, $skip_amp, $qr_embed, $qr_embed_thr, $regex_sets, $alpha_assertions, $no_null); # set by our callers
 
+if ($no_null && ! eval { require XS::APItest }) {
+    print("1..0 # Skip XS::APItest not available\n"), exit
+}
+
 my $expanded_text = "expanded name from original test number";
 my $expanded_text_re = qr/$expanded_text/;
 
