@@ -165,6 +165,18 @@ L<perlapi/Character classification>.
 This change was originally scheduled for 5.30, but was delayed until
 5.32.
 
+=head3 C<< File::Glob::glob() >> was removed
+
+C<< File::Glob >> has a function called C<< glob >>, which just calls
+C<< bsd_glob >>.
+
+C<< File::Glob::glob() >> was deprecated in Perl 5.8. A deprecation
+message was issued from Perl 5.26 onwards, and the function has now
+disappeared in Perl 5.30.
+
+Code using C<< File::Glob::glob() >> should call
+C<< File::Glob::bsd_glob() >> instead.
+
 =head2 Perl 5.30
 
 =head3 C<< $* >> is no longer supported
