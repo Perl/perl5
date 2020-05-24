@@ -2390,7 +2390,7 @@ EOF
     TODO: {   # Was looping
         todo_skip('Triggers thread clone SEGV. See #86550')
 	  if $::running_as_thread && $::running_as_thread;
-        watchdog(10);   # Use a bigger value for busy systems
+        watchdog(10 * ($ENV{PERL_TEST_TIME_OUT_FACTOR} || 1));
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
     }
 
