@@ -1090,6 +1090,7 @@ Peter.Dintelmann\100Dresdner-Bank.com   peter.dintelmann\100dresdner-bank.com
 # NOTE: There is an intentional trailing space in the line above
 pfeifer\100wait.de                      pfeifer\100charly.informatik.uni-dortmund.de
 +                                       upf\100de.uu.net
+pjacklam\100online.no                   pjacklam\100gmail.com
 ribasushi@cpan.org			rabbit\100rabbit.us
 +					rabbit+bugs\100rabbit.us
 arc\100cpan.org                         perl\100aaroncrane.co.uk
