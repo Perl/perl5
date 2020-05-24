@@ -466,8 +466,9 @@ my @tests = (
     '(?l:[\x{212A}])' => 'EXACTL <\x{212a}>',
     '(?l:[\s\x{212A}])' => 'ANYOFPOSIXL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
     '(?l:[^\S\x{202F}])' => 'ANYOFPOSIXL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
-    '(?li:[a-z])' => 'ANYOFL{i}[a-z{utf8 locale}\x{017F}\x{212A}]',
-
+    '(?li:[a-z])' => (($::IS_ASCII)
+                     ? 'ANYOFL{i}[a-z{utf8 locale}\x{017F}\x{212A}]'
+                     : 'ANYOFL{i}[a-ij-rs-z{utf8 locale}\x{017F}\x{212A}]'),
     '\p{All}' => 'SANY',
     '\P{All}' => 'OPFAIL',
     '[\p{Any}]' => 'ANYOF[\x00-\xFF][0100-10FFFF]',
