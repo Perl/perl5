@@ -436,6 +436,16 @@ sub _tests_from_manifest {
 					      | libnet/
 					      | MIME-Base64/
 					      | podlators/
+					      | Pod-Simple/
+					      | Pod-Checker/
+					      | Digest-MD5/
+					      | Test-Harness/
+					      | IPC-Cmd/
+					      | Encode/
+					      | Socket/
+					      | ExtUtils-Manifest/
+					      | Module-Metadata/
+					      | PerlIO-via-QuotedPrint/
 					    )
 				       !x;
 
