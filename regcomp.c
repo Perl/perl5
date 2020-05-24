@@ -12480,7 +12480,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
  *
  * Implements the concatenation operator.
  *
- * On success, XXX wrong: returns the offset at which any next node should be placed into
+ * On success, returns the offset at which any next node should be placed into
  * the regex engine program being compiled.
  *
  * Returns 0 otherwise, setting flagp to RESTART_PARSE if the parse needs
