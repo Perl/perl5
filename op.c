@@ -7061,12 +7061,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * these up into smaller chunks, but doesn't merge any together.  This
      * makes it easy to find the instances it's looking for.  A second pass is
      * done after this has been determined which merges things together to
-     * shrink the table for runtime.  For ASCII platforms, the table is
-     * trivial, given below, and uses the fundamental characteristics of UTF-8
-     * to construct the values.  For EBCDIC, it isn't so, and we rely on a
-     * table constructed by the perl script that generates these kinds of
-     * things */
-#ifndef EBCDIC
+     * shrink the table for runtime.  The table below is used for both ASCII
+     * and EBCDIC platforms.  On EBCDIC, the byte length is not monotonically
+     * increasing for code points below 256.  To correct for that, the macro
+     * CP_ADJUST defined below converts those code points to ASCII in the first
+     * pass, and we use the ASCII partition values.  That works because the
+     * growth factor will be unaffected, which is all that is calculated during
+     * the first pass. */
     UV PL_partition_by_byte_length[] = {
         0,
         0x80,   /* Below this is 1 byte representations */
@@ -7082,8 +7083,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #  endif
 
     };
-
-#endif
 
     PERL_ARGS_ASSERT_PMTRANS;
 
@@ -7211,6 +7210,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             len = 1;
             t_array = invlist_array(t_invlist);
         }
+
+/* As noted earlier, we convert EBCDIC code points to Unicode in the first pass
+ * so as to get the well-behaved length 1 vs length 2 boundary.  Only code
+ * points below 256 differ between the two character sets in this regard.  For
+ * these, we also can't have any ranges, as they have to be individually
+ * converted. */
+#ifdef EBCDIC
+#  define CP_ADJUST(x)          ((pass2) ? (x) : NATIVE_TO_UNI(x))
+#  define FORCE_RANGE_LEN_1(x)  ((pass2) ? 0 : ((x) < 256))
+#  define CP_SKIP(x)            ((pass2) ? UVCHR_SKIP(x) : OFFUNISKIP(x))
+#else
+#  define CP_ADJUST(x)          (x)
+#  define FORCE_RANGE_LEN_1(x)  0
+#  define CP_SKIP(x)            UVCHR_SKIP(x)
+#endif
 
         /* And the mapping of each of the ranges is initialized.  Initially,
          * everything is TR_UNLISTED. */
@@ -7345,7 +7359,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
                     /* Here, not in the middle of a range, and not UTF-8.  The
                      * next code point is the single byte where we're at */
-                    t_cp = *t;
+                    t_cp = CP_ADJUST(*t);
                     t_range_count = 1;
                     t++;
                 }
@@ -7356,7 +7370,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * next code point is the next UTF-8 char in the input.  We
                      * know the input is valid, because the toker constructed
                      * it */
-                    t_cp = valid_utf8_to_uvchr(t, &t_char_len);
+                    t_cp = CP_ADJUST(valid_utf8_to_uvchr(t, &t_char_len));
                     t += t_char_len;
 
                     /* UTF-8 strings (only) have been parsed in toke.c to have
@@ -7364,7 +7378,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * the first element of a range.  If so, get the final
                      * element and calculate the range size.  If not, the range
                      * size is 1 */
-                    if (t < tend && *t == RANGE_INDICATOR) {
+                    if (   t < tend && *t == RANGE_INDICATOR
+                        && ! FORCE_RANGE_LEN_1(t_cp))
+                    {
                         t++;
                         t_range_count = valid_utf8_to_uvchr(t, &t_char_len)
                                       - t_cp + 1;
@@ -7396,16 +7412,18 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                 }
                 else {
                     if (! rstr_utf8) {
-                        r_cp = *r;
+                        r_cp = CP_ADJUST(*r);
                         r_range_count = 1;
                         r++;
                     }
                     else {
                         Size_t r_char_len;
 
-                        r_cp = valid_utf8_to_uvchr(r, &r_char_len);
+                        r_cp = CP_ADJUST(valid_utf8_to_uvchr(r, &r_char_len));
                         r += r_char_len;
-                        if (r < rend && *r == RANGE_INDICATOR) {
+                        if (   r < rend && *r == RANGE_INDICATOR
+                            && ! FORCE_RANGE_LEN_1(r_cp))
+                        {
                             r++;
                             r_range_count = valid_utf8_to_uvchr(r,
                                                     &r_char_len) - r_cp + 1;
@@ -7537,7 +7555,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                  * code point in the rhs against any code point in the lhs. */
                 if ( ! pass2
                     && r_cp_end != TR_SPECIAL_HANDLING
-                    && UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end))
+                    && CP_SKIP(t_cp_end) < CP_SKIP(r_cp_end))
                 {
                     /* Here, we will need to make a copy of the input string
                      * before doing the transliteration.  The worst possible
@@ -7560,8 +7578,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * string not being UTF-8 */
                     NV t_size = (can_force_utf8 && t_cp < 256)
                                 ? 1
-                                : UVCHR_SKIP(t_cp_end);
-                    NV ratio = UVCHR_SKIP(r_cp_end) / t_size;
+                                : CP_SKIP(t_cp_end);
+                    NV ratio = CP_SKIP(r_cp_end) / t_size;
 
                     o->op_private |= OPpTRANS_GROWS;
 
@@ -7594,8 +7612,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * is if it 'grows'.  But in the 2nd pass, there's no
                      * reason to not merge */
                     if (   (i > 0 && (   pass2
-                                      || UVCHR_SKIP(t_array[i-1])
-                                                        == UVCHR_SKIP(t_cp)))
+                                      || CP_SKIP(t_array[i-1])
+                                                            == CP_SKIP(t_cp)))
                         && (   (   r_cp == TR_SPECIAL_HANDLING
                                 && r_map[i-1] == TR_SPECIAL_HANDLING)
                             || (   r_cp != TR_SPECIAL_HANDLING
@@ -7615,7 +7633,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     adjacent_to_range_above = TRUE;
                     if (i + 1 < len)
                     if (    (   pass2
-                             || UVCHR_SKIP(t_cp) == UVCHR_SKIP(t_array[i+1]))
+                             || CP_SKIP(t_cp) == CP_SKIP(t_array[i+1]))
                         && (   (   r_cp == TR_SPECIAL_HANDLING
                                 && r_map[i+1] == (UV) TR_SPECIAL_HANDLING)
                             || (   r_cp != TR_SPECIAL_HANDLING
