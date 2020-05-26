@@ -2651,6 +2651,25 @@ newCONSTSUB(stash, name, flags, sv)
         PUSHs( CvCONST(mycv) ? &PL_sv_yes : &PL_sv_no );
         PUSHs((SV*)CvGV(mycv));
 
+SV *
+newSVpviv(s, i)
+    const char *s
+    int i
+    CODE:
+        RETVAL = newSVpviv(s, i);
+    OUTPUT:
+        RETVAL
+
+SV *
+newSVpvniv(s, len, i)
+    const char *s
+    STRLEN len
+    int i
+    CODE:
+        RETVAL = newSVpvniv(s, len, i);
+    OUTPUT:
+        RETVAL
+
 void
 gv_init_type(namesv, multi, flags, type)
     SV* namesv

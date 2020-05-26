@@ -2426,6 +2426,10 @@ PERL_CALLCONV SV*	Perl_newSVpvf(pTHX_ const char *const pat, ...)
 #define PERL_ARGS_ASSERT_NEWSVPVF	\
 	assert(pat)
 
+PERL_CALLCONV SV*	Perl_newSVpviv(pTHX_ const char *const s, const IV i)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVPVIV
+
 PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVPVN
@@ -2437,6 +2441,10 @@ PERL_CALLCONV SV*	Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN le
 PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, I32 len, U32 hash)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVPVN_SHARE
+
+PERL_CALLCONV SV*	Perl_newSVpvniv(pTHX_ const char *const s, const STRLEN len, const IV i)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVPVNIV
 
 PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV *const rv, const char *const classname);
 #define PERL_ARGS_ASSERT_NEWSVRV	\

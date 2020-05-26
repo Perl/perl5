@@ -1378,6 +1378,8 @@ ApdR	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
 ApdR	|OP*	|newDEFSVOP
 pR	|SV*	|newSVavdefelem	|NN AV *av|SSize_t ix|bool extendible
 ApdR	|SV*	|newSViv	|const IV i
+ApdR	|SV*	|newSVpviv	|NULLOK const char *const s|const IV i
+ApdR	|SV*	|newSVpvniv	|NULLOK const char *const s|const STRLEN len|const IV i
 ApdR	|SV*	|newSVuv	|const UV u
 ApdR	|SV*	|newSVnv	|const NV n
 ApdR	|SV*	|newSVpv	|NULLOK const char *const s|const STRLEN len
