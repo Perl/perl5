@@ -305,6 +305,10 @@ a string/length pair.
 Like C<newSVpvn_share>, but takes a literal string instead of
 a string/length pair and omits the hash parameter.
 
+=for apidoc Ama|SV*|newSVivpvs|"literal string"
+Like C<newSVivpvn>, but takes a literal string instead of
+a string/length pair.
+
 =for apidoc Am|void|sv_catpvs_flags|SV* sv|"literal string"|I32 flags
 Like C<sv_catpvn_flags>, but takes a literal string instead
 of a string/length pair.
@@ -394,6 +398,8 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
 #define sv_catpvs_flags(sv, str, flags) \
     Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), flags)
+#define newSVivpvs(i,str) \
+    Perl_newSVivpvn(aTHX_ i, STR_WITH_LEN(str))
 #define sv_catpvs_nomg(sv, str) \
     Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), 0)
 #define sv_catpvs(sv, str) \
