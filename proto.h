@@ -2408,6 +2408,14 @@ PERL_CALLCONV SV*	Perl_newSViv(pTHX_ const IV i)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVIV
 
+PERL_CALLCONV SV*	Perl_newSVivpv(pTHX_ const IV i, const char *const s)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVIVPV
+
+PERL_CALLCONV SV*	Perl_newSVivpvn(pTHX_ const IV i, const char *const s, const STRLEN len)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVIVPVN
+
 PERL_CALLCONV SV*	Perl_newSVnv(pTHX_ const NV n)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVNV

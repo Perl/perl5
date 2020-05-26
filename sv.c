@@ -9689,6 +9689,50 @@ Perl_newSViv(pTHX_ const IV i)
 }
 
 /*
+=for apidoc newSVivpv
+
+Creates a new dualvar SV and copies both a signed integer and a
+NUL-terminated string into it.
+The reference count for the new SV is set to 1.
+
+=cut
+*/
+
+SV *
+Perl_newSVivpv(pTHX_ const IV i, const char *const s)
+{
+    SV *sv = newSViv(i);
+    if(s) {
+        SvUPGRADE(sv, SVt_PVNV);
+        sv_setpv(sv, s);
+        SvIOK_on(sv);
+    }
+    return sv;
+}
+
+/*
+=for apidoc newSVivpvn
+
+Creates a new dualvar SV and copies both a signed integer and a string into
+it. The string may contain C<NUL> characters or other binary data.
+The reference count for the new SV is set to 1.
+
+=cut
+*/
+
+SV *
+Perl_newSVivpvn(pTHX_ const IV i, const char *const s, const STRLEN len)
+{
+    SV *sv = newSViv(i);
+    if(s) {
+        SvUPGRADE(sv, SVt_PVNV);
+        sv_setpvn(sv, s, len);
+        SvIOK_on(sv);
+    }
+    return sv;
+}
+
+/*
 =for apidoc newSVuv
 
 Creates a new SV and copies an unsigned integer into it.
