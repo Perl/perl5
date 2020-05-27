@@ -38,6 +38,7 @@ my %feature = (
     signatures      => 'signatures',
     isa             => 'isa',
     indirect        => 'indirect',
+    multidimensional => 'multidimensional',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -47,7 +48,7 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state switch indirect};
+use constant V5_9_5 => sort qw{say state switch indirect multidimensional};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
@@ -55,7 +56,7 @@ use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
 my %feature_bundle = (
     all     => [ sort keys %feature ],
-    default => [ qw{indirect} ],
+    default => [ qw{indirect multidimensional} ],
     # using 5.9.5 features bundle
     "5.9.5" => [ +V5_9_5 ],
     "5.10"  => [ +V5_9_5 ],
@@ -779,6 +780,23 @@ This feature is available under this name from Perl 5.32 onwards. In
 previous versions, it was simply on all the time.  To disallow (or
 warn on) indirect object syntax on older Perls, see the L<indirect>
 CPAN module.
+
+=head2 The 'multidimensional' feature
+
+This feature enables multidimensional array emulation, a perl 4 (or
+earlier) feature that was used to emulate multidimensional arrays with
+hashes.  This works by converting code like C<< $foo{$x, y} >> into
+C<< $foo{join($;, $x, $y} >>.  It is enabled by default, but can be
+turned off to disable multidimensional array emulation.
+
+When this feature is disabled the syntax that is normally replaced
+will report a compilation error.
+
+This feature is available under this name from Perl 5.34 onwards. In
+previous versions, it was simply on all the time.
+
+You can use the L<multidimensional> module on CPAN to disable
+multidimensional array emulation for older versions of Perl.
 
 =head1 FEATURE BUNDLES
 
