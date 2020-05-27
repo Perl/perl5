@@ -598,7 +598,7 @@ Removals, like warnings, are public.
 
 The list of moderators will be public knowledge.  At present, it is:
 Andy Dougherty, Karen Etheridge, Ricardo Signes, Sawyer X,
-Steffen Müller, Todd Rinaldo.
+Steffen Müller, Todd Rinaldo, Aaron Crane.
 
 =head1 CREDITS
 
