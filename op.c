@@ -5967,9 +5967,17 @@ Perl_jmaybe(pTHX_ OP *o)
     PERL_ARGS_ASSERT_JMAYBE;
 
     if (o->op_type == OP_LIST) {
-	OP * const o2
-	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL, SVt_PV)));
-	o = op_convert_list(OP_JOIN, 0, op_prepend_elem(OP_LIST, o2, o));
+        if (FEATURE_MULTIDIMENSIONAL_IS_ENABLED) {
+            OP * const o2
+                = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL, SVt_PV)));
+            o = op_convert_list(OP_JOIN, 0, op_prepend_elem(OP_LIST, o2, o));
+        }
+        else {
+            /* If the user disables this, then a warning might not be enough to alert
+               them to a possible change of behaviour here, so throw an exception.
+            */
+            yyerror("Multidimensional hash lookup is disabled");
+        }
     }
     return o;
 }
