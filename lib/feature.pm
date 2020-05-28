@@ -135,7 +135,7 @@ disable I<all> features (an unusual request!) use C<no feature ':all'>.
 
 =head2 The 'say' feature
 
-C<use feature 'say'> tells the compiler to enable the Perl 6 style
+C<use feature 'say'> tells the compiler to enable the Raku style
 C<say> function.
 
 See L<perlfunc/say> for details.
@@ -159,7 +159,7 @@ explicitly disabled the warning:
 
     no warnings "experimental::smartmatch";
 
-C<use feature 'switch'> tells the compiler to enable the Perl 6
+C<use feature 'switch'> tells the compiler to enable the Raku
 given/when construct.
 
 See L<perlsyn/"Switch Statements"> for details.

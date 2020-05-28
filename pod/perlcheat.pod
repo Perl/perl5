@@ -83,7 +83,7 @@ people had useful suggestions. Thank you, Perl Monks.
 
 A special thanks to Damian Conway, who didn't only suggest important changes,
 but also took the time to count the number of listed features and make a
-Perl 6 version to show that Perl will stay Perl.
+Raku version to show that Perl will stay Perl.
 
 =head1 AUTHOR
 
@@ -99,7 +99,7 @@ L<https://perlmonks.org/?node_id=216602> - the original PM post
 
 =item *
 
-L<https://perlmonks.org/?node_id=238031> - Damian Conway's Perl 6 version
+L<https://perlmonks.org/?node_id=238031> - Damian Conway's Raku version
 
 =item *
 

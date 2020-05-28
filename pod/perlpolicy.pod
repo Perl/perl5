@@ -26,7 +26,7 @@ words, it's your usual mix of technical people.
 
 Over this group of porters presides Larry Wall.  He has the final word
 in what does and does not change in any of the Perl programming languages.
-These days, Larry spends most of his time on Perl 6, while Perl 5 is
+These days, Larry spends most of his time on Raku, while Perl 5 is
 shepherded by a "pumpking", a porter responsible for deciding what
 goes into each release and ensuring that releases happen on a regular
 basis.
