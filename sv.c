@@ -9701,12 +9701,15 @@ The reference count for the new SV is set to 1.
 SV *
 Perl_newSVivpv(pTHX_ const IV i, const char *const s)
 {
-    SV *sv = newSViv(i);
-    if(s) {
-        SvUPGRADE(sv, SVt_PVNV);
-        sv_setpv(sv, s);
-        SvIOK_on(sv);
-    }
+    SV *sv;
+    if(!s) return newSViv(i);
+
+    sv = newSVpv(s, 0);
+
+    SvUPGRADE(sv, SVt_PVIV);
+    SvIV_set(sv, i);
+    SvIOK_on(sv);
+
     return sv;
 }
 
@@ -9724,11 +9727,14 @@ SV *
 Perl_newSVivpvn(pTHX_ const IV i, const char *const s, const STRLEN len)
 {
     SV *sv = newSViv(i);
-    if(s) {
-        SvUPGRADE(sv, SVt_PVNV);
-        sv_setpvn(sv, s, len);
-        SvIOK_on(sv);
-    }
+    if(!sv) return newSViv(i);
+
+    sv = newSVpvn(s, len);
+
+    SvUPGRADE(sv, SVt_PVIV);
+    SvIV_set(sv, i);
+    SvIOK_on(sv);
+
     return sv;
 }
 
