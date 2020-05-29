@@ -182,8 +182,8 @@ is_deeply(\@a, ['TEST', 'a', 'b'], "Got list of 3 elements, including 'TEST'");
 }
 
 # GLOB_ALPHASORT (default) should sort alphabetically regardless of case
-mkdir "pteerslo", 0777;
-chdir "pteerslo";
+mkdir "pteerslo", 0777 or die "mkdir 'pteerslo', 0777:  $!";
+chdir "pteerslo" or die "chdir 'pteerslo' $!";
 
 my @f_names = qw(Ax.pl Bx.pl Cx.pl aY.pl bY.pl cY.pl);
 my @f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
@@ -196,8 +196,8 @@ if ($^O eq 'VMS') { # VMS is happily caseignorant
 }
 
 for (@f_names) {
-    open T, '>', $_;
-    close T;
+    open T, '>', $_ or die "Couldn't write to '$_': $!";
+    close T or die "Couldn't close '$_': $!";
 }
 
 my $pat = "*.pl";
