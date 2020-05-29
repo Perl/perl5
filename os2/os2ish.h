@@ -874,7 +874,7 @@ int os2_do_aspawn(pTHX_ SV *really, SV **vmark, SV **vsp);
  * arguments to setlogmask.
  */
 #  define	LOG_MASK(pri)	(1 << (pri))		/* mask for one priority */
-#  define	LOG_UPTO(pri)	((1 << ((pri)+1)) - 1)	/* all priorities through pri */
+#  define       LOG_UPTO(pri)   nBIT_MASK((pri)+1)      /* all priorities through pri */
 
 /*
  * Option flags for openlog.

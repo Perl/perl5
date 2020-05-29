@@ -857,7 +857,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 	}
     }
     else if (size < 8)
-	retnum = (s[uoffset] >> bitoffs) & ((1 << size) - 1);
+	retnum = (s[uoffset] >> bitoffs) & nBIT_MASK(size);
     else {
 	if (size == 8)
 	    retnum = s[uoffset];
@@ -960,7 +960,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     }
 
     if (size < 8) {
-	mask = (1 << size) - 1;
+	mask = nBIT_MASK(size);
 	lval &= mask;
 	s[offset] &= ~(mask << bitoffs);
 	s[offset] |= lval << bitoffs;

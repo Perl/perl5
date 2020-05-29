@@ -269,6 +269,13 @@ typedef U64TYPE U64;
 #  define isPOWER_OF_2(n) ((n) && ((n) & ((n)-1)) == 0)
 #endif
 
+/* Returns a mask with the lowest n bits set */
+#ifdef HAS_LONG_LONG
+#  define nBIT_MASK(n) ((1ULL << (n)) - 1)
+#else
+#  define nBIT_MASK(n) ((1UL << (n)) - 1)
+#endif
+
 /*
 =for apidoc Am|void|__ASSERT_|bool expr
 

@@ -283,7 +283,7 @@ are in the character. */
 /* 2**UTF_ACCUMULATION_SHIFT - 1.  This masks out all but the bits that carry
  * real information in a continuation byte.  This turns out to be 0x3F in
  * UTF-8, 0x1F in UTF-EBCDIC. */
-#define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+#define UTF_CONTINUATION_MASK  ((U8) (nBIT_MASK(UTF_ACCUMULATION_SHIFT)))
 
 /* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
  * E0 in UTF-EBCDIC */
@@ -417,7 +417,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 /* The largest code point representable by two UTF-8 bytes on any platform that
  * Perl runs on.  This value is constrained by EBCDIC which has 5 bits per
  * continuation byte */
-#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * (1U << 5) - 1)
+#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * nBIT_MAX(5))
 
 /*
 

@@ -596,7 +596,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #  define MAX_PACKED_POW2 6
 #  define MAX_PACKED (MAX_PACKED_POW2 * BUCKETS_PER_POW2 + BUCKET_POW2_SHIFT)
 #  define MAX_POW2_ALGO ((1<<(MAX_PACKED_POW2 + 1)) - M_OVERHEAD)
-#  define TWOK_MASK ((1<<LOG_OF_MIN_ARENA) - 1)
+#  define TWOK_MASK nBITMASK(LOG_OF_MIN_ARENA)
 #  define TWOK_MASKED(x) (PTR2UV(x) & ~TWOK_MASK)
 #  define TWOK_SHIFT(x) (PTR2UV(x) & TWOK_MASK)
 #  define OV_INDEXp(block) (INT2PTR(u_char*,TWOK_MASKED(block)))
@@ -618,7 +618,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #ifdef IGNORE_SMALL_BAD_FREE
 #define FIRST_BUCKET_WITH_CHECK (6 * BUCKETS_PER_POW2) /* 64 */
 #  define N_BLKS(bucket) ( (bucket) < FIRST_BUCKET_WITH_CHECK 		\
-			 ? ((1<<LOG_OF_MIN_ARENA) - 1)/BUCKET_SIZE_NO_SURPLUS(bucket) \
+			 ? nBIT_MASK(LOG_OF_MIN_ARENA)/BUCKET_SIZE_NO_SURPLUS(bucket) \
 			 : n_blks[bucket] )
 #else
 #  define N_BLKS(bucket) n_blks[bucket]

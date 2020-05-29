@@ -359,7 +359,7 @@ struct regnode_ssc {
     } STMT_END
 
 #define ANYOFR_BASE_BITS    20
-#define ANYOFRbase(p)   (ARG(p) & ((1 << ANYOFR_BASE_BITS) - 1))
+#define ANYOFRbase(p)   (ARG(p) & nBIT_MASK(ANYOFR_BASE_BITS))
 #define ANYOFRdelta(p)  (ARG(p) >> ANYOFR_BASE_BITS)
 
 #undef NODE_ALIGN
@@ -697,7 +697,7 @@ struct regnode_ssc {
      } STMT_END
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
-#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
+#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = nBIT_MASK(ANYOF_POSIXL_MAX); } STMT_END
 #define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
 #define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
@@ -711,12 +711,12 @@ struct regnode_ssc {
                             cBOOL(((regnode_ssc*)(p))->classflags)
 #define ANYOF_POSIXL_SSC_TEST_ALL_SET(p) /* Are all bits set? */       \
         (((regnode_ssc*) (p))->classflags                              \
-                        == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
+                                        == nBIT_MASK(ANYOF_POSIXL_MAX))
 
 #define ANYOF_POSIXL_TEST_ALL_SET(p)                                   \
-        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                               \
+        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                       \
          && ((regnode_charclass_posixl*) (p))->classflags              \
-                        == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
+                                    == nBIT_MASK(ANYOF_POSIXL_MAX))
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
