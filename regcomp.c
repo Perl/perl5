@@ -20025,6 +20025,9 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
             av_store(av, INVLIST_INDEX, SvREFCNT_inc_NN(cp_list));
         }
 
+        /* (Note that if any of this changes, the size calculations in
+         * S_optimize_regclass() might need to be updated.) */
+
         if (only_utf8_locale_list) {
             av_store(av, ONLY_LOCALE_MATCHES_INDEX,
                                      SvREFCNT_inc_NN(only_utf8_locale_list));
@@ -20687,7 +20690,8 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
     PERL_UNUSED_ARG(depth);
 #endif
 
-    /* Find last node. */
+    /* The final node in the chain is the first one with a nonzero next pointer
+     * */
     scan = (regnode_offset) p;
     for (;;) {
 	regnode * const temp = regnext(REGNODE_p(scan));
@@ -20705,6 +20709,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         scan = REGNODE_OFFSET(temp);
     }
 
+    /* Populate this node's next pointer */
     assert(val >= scan);
     if (reg_off_by_arg[OP(REGNODE_p(scan))]) {
         assert((UV) (val - scan) <= U32_MAX);
