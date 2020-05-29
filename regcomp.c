@@ -15416,9 +15416,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
                    ? end
                    : NUM_ANYOF_CODE_POINTS - 1;
 	    for (i = start; i <= (int) high; i++) {
-		if (! ANYOF_BITMAP_TEST(node, i)) {
-		    ANYOF_BITMAP_SET(node, i);
-		}
+                ANYOF_BITMAP_SET(node, i);
 	    }
 	}
 	invlist_iterfinish(*invlist_ptr);
