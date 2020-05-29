@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Module::CoreList;
 
-our $VERSION = '5.20200520';
+our $VERSION = '5.20200620';
 our %utilities;
 
 sub utilities {
@@ -1603,6 +1603,13 @@ my %delta = (
     },
     5.031012 => {
         delta_from => 5.031011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.032000 => {
+        delta_from => 5.031012,
         changed => {
         },
         removed => {
