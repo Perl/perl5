@@ -22248,9 +22248,11 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         UV this_end;
         const char * format;
 
-        if (end - start < min_range_count) {
-
-            /* Output chars individually when they occur in short ranges */
+        if (    end - start < min_range_count
+            && (end - start <= 2 || (isPRINT_A(start) && isPRINT_A(end))))
+        {
+            /* Output a range of 1 or 2 chars individually, or longer ranges
+             * when printable */
             for (; start <= end; start++) {
                 put_code_point(sv, start);
             }
