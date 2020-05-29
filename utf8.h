@@ -353,7 +353,9 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * ASCII platforms, everything is representable by 7 bytes */
 #if defined(UV_IS_QUAD) || defined(EBCDIC)
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
-     (UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)) ? 7 : UTF8_MAXBYTES)
+     LIKELY((UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))          \
+     ? 7                                                                    \
+     : UTF8_MAXBYTES)
 #else
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
 #endif
@@ -461,12 +463,14 @@ uppercase/lowercase/titlecase/fold into.
  * UTF-8 encoded character that mark it as a start byte and give the number of
  * bytes that comprise the character. 'len' is the number of bytes in the
  * multi-byte sequence. */
-#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : ((U8) (0xFE << (7-(len)))))
+#define UTF_START_MARK(len) (UNLIKELY((len) >  7)           \
+                            ? 0xFF                          \
+                            : ((U8) (0xFE << (7-(len)))))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
  * Doesn't work on an invariant byte.  'len' is the number of bytes in the
  * multi-byte sequence that comprises the character. */
-#define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
+#define UTF_START_MASK(len) (UNLIKELY((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
 /* Adds a UTF8 continuation byte 'new' of information to a running total code
  * point 'old' of all the continuation bytes so far.  This is designed to be
@@ -584,7 +588,7 @@ L</C<UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 */
 
 #define UTF8_CHK_SKIP(s)                                                       \
-            (s[0] == '\0' ? 1 : MIN(UTF8SKIP(s),                               \
+            (UNLIKELY(s[0] == '\0') ? 1 : MIN(UTF8SKIP(s),                     \
                                     my_strnlen((char *) (s), UTF8SKIP(s))))
 /*
 
@@ -596,7 +600,7 @@ returns beyond C<e>.  On DEBUGGING builds, it asserts that S<C<s E<lt>= e>>.
 =cut
  */
 #define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                \
-                              ((e) - (s)) <= 0                      \
+                              UNLIKELY(((e) - (s)) <= 0)            \
                                ? 0                                  \
                                : MIN(((e) - (s)), UTF8_SKIP(s)))
 
@@ -875,17 +879,18 @@ fit in an IV on the current machine.
  */
 #ifdef EBCDIC
 #   define UTF8_IS_SUPER(s, e)                                              \
-                  ((    LIKELY((e) > (s) + 4)                               \
-                    &&      NATIVE_UTF8_TO_I8(*(s)) >= 0xF9                 \
-                    && (    NATIVE_UTF8_TO_I8(*(s)) >  0xF9                 \
-                        || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2))         \
-                    &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                   \
-                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
+                 ((    ((e) > (s) + 4)                                      \
+                   &&          (NATIVE_UTF8_TO_I8(*(s)) >= 0xF9)            \
+                   &&  UNLIKELY(    NATIVE_UTF8_TO_I8(*(s)) >  0xF9         \
+                                || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2)) \
+                   &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                    \
+                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0
 #else
 #   define UTF8_IS_SUPER(s, e)                                              \
-                   ((    LIKELY((e) > (s) + 3)                              \
+                   ((    ((e) > (s) + 3)                                    \
                      &&  (*(U8*) (s)) >= 0xF4                               \
-                     && ((*(U8*) (s)) >  0xF4 || (*((U8*) (s) + 1) >= 0x90))\
+                     && (UNLIKELY(   ((*(U8*) (s)) >  0xF4)                 \
+                                  || (*((U8*) (s) + 1) >= 0x90)))           \
                      &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
                     ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #endif
@@ -958,28 +963,29 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 
 /* This matches the 2048 code points between UNICODE_SURROGATE_FIRST (0xD800) and
  * UNICODE_SURROGATE_LAST (0xDFFF) */
-#define UNICODE_IS_SURROGATE(uv)        (((UV) (uv) & (~0xFFFF | 0xF800))       \
+#define UNICODE_IS_SURROGATE(uv)  UNLIKELY(((UV) (uv) & (~0xFFFF | 0xF800))     \
                                                                     == 0xD800)
 
-#define UNICODE_IS_REPLACEMENT(uv)	((UV) (uv) == UNICODE_REPLACEMENT)
-#define UNICODE_IS_BYTE_ORDER_MARK(uv)	((UV) (uv) == UNICODE_BYTE_ORDER_MARK)
+#define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
+#define UNICODE_IS_BYTE_ORDER_MARK(uv)	UNLIKELY((UV) (uv)                      \
+                                                    == UNICODE_BYTE_ORDER_MARK)
 
 /* Is 'uv' one of the 32 contiguous-range noncharacters? */
-#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)      ((UV) (uv) >= 0xFDD0         \
-                                                 && (UV) (uv) <= 0xFDEF)
+#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)   UNLIKELY((UV) (uv) >= 0xFDD0    \
+                                                      && (UV) (uv) <= 0xFDEF)
 
 /* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
  * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
  * the Unicode legal max */
 #define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                        \
-                                              (((UV) (uv) & 0xFFFE) == 0xFFFE)
+                                      UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
 
 #define UNICODE_IS_NONCHAR(uv)                                                  \
     (   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                                   \
      || (   LIKELY( ! UNICODE_IS_SUPER(uv))                                     \
          && UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
 
-#define UNICODE_IS_SUPER(uv)    ((UV) (uv) > PERL_UNICODE_MAX)
+#define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \
