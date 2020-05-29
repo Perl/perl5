@@ -25,6 +25,8 @@ The target system needs a sufficient amount of memory to allocate partial
 expansions of the nested quantifiers prior to the overflow occurring.  This
 requirement is unlikely to be met on 64-bit systems.
 
+Discovered by: ManhND of The Tarantula Team, VinCSS (a member of Vingroup).
+
 =head2 [CVE-2020-10878] Integer overflow via malformed bytecode produced by a crafted regular expression
 
 Integer overflows in the calculation of offsets between instructions for the
@@ -32,12 +34,16 @@ regular expression engine could cause corruption of the intermediate language
 state of a compiled regular expression.  An attacker could abuse this behaviour
 to insert instructions into the compiled form of a Perl regular expression.
 
+Discovered by: Hugo van der Sanden and Slaven Rezic.
+
 =head2 [CVE-2020-12723] Buffer overflow caused by a crafted regular expression
 
 Recursive calls to C<S_study_chunk()> by Perl's regular expression compiler to
 optimize the intermediate language representation of a regular expression could
 cause corruption of the intermediate language state of a compiled regular
 expression.
+
+Discovered by: Sergey Aleynikov.
 
 =head2 Additional Note
 
