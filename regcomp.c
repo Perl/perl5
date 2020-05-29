@@ -8110,7 +8110,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     pRExC_state->code_index = 0;
 
     *((char*) RExC_emit_start) = (char) REG_MAGIC;
-    RExC_emit = 1;
+    RExC_emit = NODE_STEP_REGNODE;
 
     /* Do the parse */
     if (reg(pRExC_state, 0, &flags, 1)) {
@@ -12801,7 +12801,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 OP(br)= NOTHING;
                 if (OP(REGNODE_p(ender)) == TAIL) {
                     NEXT_OFF(br)= 0;
-                    RExC_emit= REGNODE_OFFSET(br) + 1;
+                    RExC_emit= REGNODE_OFFSET(br) + NODE_STEP_REGNODE;
                 } else {
                     regnode *opt;
                     for ( opt= br + 1; opt < REGNODE_p(ender) ; opt++ )
@@ -14630,7 +14630,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * change, it works */
             ret = REGNODE_GUTS(pRExC_state, node_type, current_string_nodes);
             FILL_NODE(ret, node_type);
-            RExC_emit++;
+            RExC_emit += NODE_STEP_REGNODE;
 
             s = STRING(REGNODE_p(ret));
 
@@ -19585,7 +19585,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
     FILL_NODE(ret, op);        /* We set the argument later */
-    RExC_emit += 1 + regarglen[op];
+    RExC_emit += NODE_STEP_REGNODE + regarglen[op];
     ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
 
     /* Here, <cp_list> contains all the code points we can determine at
@@ -20122,7 +20122,7 @@ S_optimize_regclass(pTHX_
 
             *ret = REGNODE_GUTS(pRExC_state, op, len);
             FILL_NODE(*ret, op);
-            RExC_emit += 1 + STR_SZ(len);
+            RExC_emit += NODE_STEP_REGNODE + STR_SZ(len);
             setSTR_LEN(REGNODE_p(*ret), len);
             if (len == 1) {
                 *STRINGs(REGNODE_p(*ret)) = (U8) value;
@@ -20130,6 +20130,7 @@ S_optimize_regclass(pTHX_
             else {
                 uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(*ret)), value);
             }
+
             return op;
         }
     }
