@@ -259,7 +259,7 @@ struct regnode_ssc {
 */
 #if SHORTSIZE > 2
 #  ifndef REG_INFTY
-#    define REG_INFTY ((1<<16)-1)
+#    define REG_INFTY  nBIT_UMAX(16)
 #  endif
 #endif
 

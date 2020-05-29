@@ -276,6 +276,9 @@ typedef U64TYPE U64;
 #  define nBIT_MASK(n) ((1UL << (n)) - 1)
 #endif
 
+/* The largest unsigned number that will fit into n bits */
+#define nBIT_UMAX(n)  nBIT_MASK(n)
+
 /*
 =for apidoc Am|void|__ASSERT_|bool expr
 
