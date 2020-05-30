@@ -1329,6 +1329,10 @@ decode it as UTF-8. [L<perl #133981|https://rt.perl.org/Ticket/Display.html?id=1
 F<t/op/magic.t> could fail if environment variables starting with
 C<FOO> already existed.
 
+=item *
+
+MYMALLOC (PERL_MALLOC) build has been fixed.
+
 =back
 
 =item Solaris
@@ -1548,10 +1552,6 @@ reverted as it broke I<List-UtilsBy-XS-0.05> in v5.31.2.
 
 Loading IO is now threadsafe.
 [L<GH #14816|https://github.com/Perl/perl5/issues/14816>]
-
-=item *
-
-Fix MYMALLOC (PERL_MALLOC) build on Windows
 
 =item *
 
