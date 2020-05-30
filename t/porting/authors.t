@@ -25,7 +25,7 @@ if ( $ENV{TRAVIS} && defined $ENV{TRAVIS_COMMIT_RANGE} ) {
 	$revision_range = $ENV{TRAVIS_COMMIT_RANGE};
 }
 elsif( $ENV{GITHUB_ACTIONS} && length $ENV{GITHUB_BASE_REF} ) {
-    # Same as above, except for Github Actions
+    # Same as above, except for GitHub Actions
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
 
     # This hardcoded origin/ isn't great, but I'm not sure how to better fix it

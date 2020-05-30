@@ -116,10 +116,10 @@ to a bit mask check. [L<GH #17229|https://github.com/Perl/perl5/issues/17229>]
 
 =head2 Perl is now developed on GitHub
 
-Perl is now developed on Github. You can find us at
+Perl is now developed on GitHub. You can find us at
 L<https://github.com/Perl/perl5>.
 
-Non-security bugs should now be reported via Github. Security issues should
+Non-security bugs should now be reported via GitHub. Security issues should
 continue to be reported as documented in L<perlsec>.
 
 =head2 Compiled patterns can now be dumped before optimization
