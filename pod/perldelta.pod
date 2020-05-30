@@ -1003,7 +1003,7 @@ it occurred.
 
 =item *
 
-L<Non-hex character '%c' terminates \x early.  Resolved as "%s"|perldiag/"Non-hex character '%c' terminates \x early. Resolved as "%s"">
+L<Non-hex character '%c' terminates \x early.  Resolved as "%s"|perldiag/"Non-hex character '%c' terminates \x early.  Resolved as "%s"">
 
 This replaces a warning that was much less specific, and which gave
 false information. This new warning parallels the similar
