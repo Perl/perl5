@@ -1049,7 +1049,7 @@ it occurred.
 
 =item *
 
-L<Non-octal character '%c' terminates \o early.  Resolved as "%s"|perldiag/"Non-octal character '%c' terminates \o early. Resolved as "%s"">
+L<Non-octal character '%c' terminates \o early.  Resolved as "%s"|perldiag/"Non-octal character '%c' terminates \o early.  Resolved as "%s"">
 
 ...now includes the phrase "terminates \o early", and has extra text added
 at the end, when raised during regular expression pattern compilation,
@@ -1061,7 +1061,7 @@ the text of the resolution has been clarified.
 L<'%s' resolved to '\o{%s}%d'|perldiag/'%s' resolved to '\o{%s}%d'>
 
 As of Perl 5.32, this message is no longer generated. Instead,
-L<perldiag/Non-octal character '%c' terminates \o early. Resolved as "%s">
+L<perldiag/Non-octal character '%c' terminates \o early.  Resolved as "%s">
 is used instead.
 
 =item *
