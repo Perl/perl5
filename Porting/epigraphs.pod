@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.32.0-RC0 - Franz Kafka
+
+Announced on 2020-05-30 by Sawyer X
+
+There are some things one can only achieve by a deliberate leap in the opposite direction.
+
 =head2 v5.31.11 - John F. Kennedy, National Committee for a Sane Nuclear Policy
 
 L<Announced on 2020-04-28 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/04/msg257385.html>
