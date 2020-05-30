@@ -1,3 +1,5 @@
+=pod
+
 =encoding utf8
 
 =head1 NAME
@@ -27,7 +29,7 @@ A comparison of the two methods is given in
 L<perlunicode/Comparison of \N{...} and \p{name=...}>.
 
 The second example above shows that wildcard subpatterns are also usable
-in this property.  See L<perlunicode/Wildcards in Property Values>.
+in this property. See L<perlunicode/Wildcards in Property Values>.
 
 =head2 Chained comparisons capability
 
@@ -46,24 +48,13 @@ behaves exactly like:
 You can read more about this in L<perlop> under
 L<perlop/Operator Precedence and Associativity>.
 
-=head2 Unicode 13.0 (beta) is supported
-
-Using the beta causes us to participate in the soak cycle for
-Unicode.  Final approval for the existing changes has been made by the
-Unicode consortium, and there are few possibilities that this could
-break existing programs, as there are few changes to already existing
-characters.
-
-Information about the changes is at
-L<https://unicode.org/versions/beta-13.0.0.html>.
-
 =head2 New Unicode properties C<Identifier_Status> and C<Identifier_Type> supported
 
 Unicode is in the process of revising its regular expression
 requirements: L<https://www.unicode.org/draft/reports/tr18/tr18.html>.
 As part of that they are wanting more properties to be exposed, ones
-that aren't part of the strict UCD (Unicode character database).  These
-two are used for examining inputs for security purposes.  Details on
+that aren't part of the strict UCD (Unicode character database). These
+two are used for examining inputs for security purposes. Details on
 their usage is at L<https://www.unicode.org/reports/tr39/proposed.html>.
 
 =head2 It is now possible to write C<qr/\p{Name=...}/>, or C<\p{Na=...}>
@@ -81,7 +72,7 @@ length parameters are now optional.
 These functions are always executed under the current C language locale.
 (See L<perllocale>.)  Most locales are stateless, but a few, notably the
 very rarely encountered ISO 2022, maintain a state between calls to
-these functions.  Previously the state was cleared on every call, but
+these functions. Previously the state was cleared on every call, but
 now the state is not reset unless the appropriate parameter is C<undef>.
 
 On threaded perls, the C99 functions L<mbrlen(3)>, L<mbrtowc(3)>, and
@@ -108,40 +99,41 @@ See L<perlre/(*pla:pattern)>, L<perlre/(*plb:pattern)>,
 L<perlre/(*nla:pattern)>>, and L<perlre/(*nlb:pattern)>.
 Use of these no longer generates a warning; existing code that disables
 the warning category C<experimental::script_run> will continue to work
-without any changes needed.  Enabling the category has no effect.
+without any changes needed. Enabling the category has no effect.
 
 =head2 Script runs are no longer experimental
 
-See L<perlre/Script Runs>.  Use of these no longer generates a warning;
+See L<perlre/Script Runs>. Use of these no longer generates a warning;
 existing code that disables the warning category
 C<experimental::alpha_assertions> will continue to work without any
-changes needed.  Enabling the category has no effect.
+changes needed. Enabling the category has no effect.
 
 =head2 Feature checks are now faster
 
 Previously feature checks in the parser required a hash lookup when
 features we set outside of a feature bundle, this has been optimized
-to a bit mask check.  [#17229]
+to a bit mask check. [L<GH #17229|https://github.com/Perl/perl5/issues/17229>]
 
 =head2 Perl is now developed on GitHub
 
-Perl is now developed on Github, you can find us at
+Perl is now developed on Github. You can find us at
 L<https://github.com/Perl/perl5>.
 
-Non-security bugs should now be reported via Github.
+Non-security bugs should now be reported via Github. Security issues should
+continue to be reported as documented in L<perlsec>.
 
-=head2 Now can dump compiled patterns before optimization
+=head2 Compiled patterns can now be dumped before optimization
 
 This is primarily useful for tracking down bugs in the regular
-expression compiler.  This dump happens on C<-DDEBUGGING> perls, if you
+expression compiler. This dump happens on C<-DDEBUGGING> perls, if you
 specify C<-Drv> on the command line; or on any perl if the pattern is
 compiled within the scope of S<C<use re qw(Debug DUMP_PRE_OPTIMIZE)>> or
-S<C<use re qw(Debug COMPILE EXTRA)>>.  (All but the 2nd case display
+S<C<use re qw(Debug COMPILE EXTRA)>>. (All but the second case display
 other information as well.)
 
 =head1 Security
 
-No security-related changes.
+There are no security-related changes.
 
 =head1 Incompatible Changes
 
@@ -149,38 +141,37 @@ No security-related changes.
 Unicode property value wildcard subpatterns
 
 These few features are either inappropriate or interfere with the
-algorithm used to accomplish this task.  The complete list is in
+algorithm used to accomplish this task. The complete list is in
 L<perlunicode/Wildcards in Property Values>.
 
-=head2 Stop pretending C<POSIX::mbstowcs> and C<POSIX::wcstombs> are
-supported
+=head2 Unused functions C<POSIX::mbstowcs> and C<POSIX::wcstombs> are removed
 
 These functions could never have worked due to a defective interface
-specification.  There is clearly no demand for them, given that no one
+specification. There is clearly no demand for them, given that no one
 has ever complained in the many years the functions were claimed to be
 available, hence so-called "support" for them is now dropped.
 
 =head2 A bug fix for C<(?[...])> may have caused some patterns to no
 longer compile
 
-See L</Selected Bug Fixes>.  The heuristics previously used may have let
+See L</Selected Bug Fixes>. The heuristics previously used may have let
 some constructs compile (perhaps not with the programmer's intended
-effect) that should have been errors.  None are known, but it is
+effect) that should have been errors. None are known, but it is
 possible that some erroneous constructs no longer compile.
 
 =head2 C<\p{I<user-defined>}> properties now always override official
 Unicode ones
 
 Previously, if and only if a user-defined property was declared prior to
-the compilation of the regular expression pattern containing it, its
+the compilation of the regular expression pattern that contains it, its
 definition was used instead of any official Unicode property with the
-same name.  Now, it always overrides the official property.  This
+same name. Now, it always overrides the official property. This
 change could break existing code that relied (likely unwittingly) on the
-previous behavior.  Without this fix, if Unicode released a new version
+previous behavior. Without this fix, if Unicode released a new version
 with a new property that happens to have the same name as the one you
 had long been using, your program would break when you upgraded to a
-perl that used that new Unicode version.  See L<perlunicode/User-Defined
-Character Properties>.  [L<GH #17205|https://github.com/Perl/perl5/issues/17205>]
+perl that used that new Unicode version. See L<perlunicode/User-Defined
+Character Properties>. [L<GH #17205|https://github.com/Perl/perl5/issues/17205>]
 
 =head2 Modifiable variables are no longer permitted in constants
 
@@ -197,20 +188,19 @@ This error can be avoided by adding a return to the sub definition:
     $sub = sub () { return $var };
 
 This has been deprecated since Perl 5.22.
-
-L<[perl #131138]|https://rt.perl.org/Ticket/Display.html?id=131138>.
+[L<perl #131138|https://rt.perl.org/Ticket/Display.html?id=131138>]
 
 =head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code points above 0xFF is forbidden
 
 Such strings are represented internally in UTF-8, and C<vec> is a
 bit-oriented operation that will likely give unexpected results on those
-strings.  This was deprecated in perl 5.28.0.
+strings. This was deprecated in perl 5.28.0.
 
 =head2 Use of code points over 0xFF in string bitwise operators
 
 Some uses of these were already illegal after a previous deprecation
-cycle.  The remaining uses are now prohibited, having been deprecated in perl
-5.28.0.  See L<perldeprecation>.
+cycle. The remaining uses are now prohibited, having been deprecated in perl
+5.28.0. See L<perldeprecation>.
 
 =head2 C<Sys::Hostname::hostname()> does not accept arguments
 
@@ -226,15 +216,13 @@ list of integers, where previously it would produce a list of strings.
 This was due to a special case that treated strings starting with "0"
 as strings so ranges like C<"00" .. "03"> produced C<"00", "01", "02", "03">,
 but didn't specially handle the string C<"0">.
-
-L<[perl #133695]|https://rt.perl.org/Ticket/Display.html?id=133695>
+[L<perl #133695|https://rt.perl.org/Ticket/Display.html?id=133695>]
 
 =head2 C<\K> now disallowed in look-ahead and look-behind assertions
 
 This was disallowed because it causes unexpected behaviour, and no-one
-could define what the desired behaviour was.
-
-L<[perl #124256]|https://rt.perl.org/Ticket/Display.html?id=124256>
+could define what the desired behaviour should be.
+[L<perl #124256|https://rt.perl.org/Ticket/Display.html?id=124256>]
 
 =head1 Deprecations
 
@@ -246,11 +234,11 @@ Distributions on CPAN which require these modules will need to list them as
 prerequisites.
 
 The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
+warnings to alert you to this fact. To silence these deprecation warnings,
 install the modules in question from CPAN.
 
 Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
+to continue to use. Their disinclusion from core primarily hinges on their
 necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
 not usually on concerns over their design.
 
@@ -258,7 +246,7 @@ not usually on concerns over their design.
 
 =item B::Debug
 
-C<B::Debug> is no longer shipped with Perl, you can still install it from CPAN.
+C<B::Debug> is no longer shipped with Perl. You can still install it from CPAN.
 
 =back
 
@@ -283,12 +271,6 @@ C<grok_number_flags> has been sped up.
 =back
 
 =head1 Modules and Pragmata
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
 
 =head2 Updated Modules and Pragmata
 
@@ -358,7 +340,7 @@ L<Digest::MD5> has been upgraded from version 2.55 to 2.55_01.
 L<Dumpvalue> has been upgraded from version 1.18 to 1.21.
 
 Previously, when dumping elements of an array and encountering an undefined
-value, the string printed would have been C<empty array>.  This has been
+value, the string printed would have been C<empty array>. This has been
 changed to what was apparently originally intended:  C<empty slot>.
 
 =item *
@@ -426,7 +408,6 @@ L<Hash::Util> has been upgraded from version 0.22 to 0.23.
 
 The Synopsis has been updated as the example code stopped working with
 newer perls.
-
 [L<GH #17399|https://github.com/Perl/perl5/issues/17399>]
 
 =item *
@@ -444,12 +425,12 @@ Document the C<IGNORE_WIN32_LOCALE> environment variable.
 L<IO> has been upgraded from version 1.40 to 1.43.
 
 L<IO::Socket> no longer caches a zero protocol value, since this
-indicates that the implementation will select a protocol.  This means
+indicates that the implementation will select a protocol. This means
 that on platforms that don't implement C<SO_PROTOCOL> for a given
 socket type the protocol method may return C<undef>.
 
-The supplied I<TO> is now always honoured on calls to the send()
-method.  L<[perl #133936]|https://rt.perl.org/Ticket/Display.html?id=133936>
+The supplied I<TO> is now always honoured on calls to the C<send()>
+method. [L<perl #133936|https://rt.perl.org/Ticket/Display.html?id=133936>]
 
 =item *
 
@@ -567,15 +548,15 @@ L<Socket> has been upgraded from version 2.027 to 2.029.
 
 L<Storable> has been upgraded from version 3.15 to 3.21.
 
-Use of C<note()> from L<Test::More> is now optional in tests.  This works
+Use of C<note()> from L<Test::More> is now optional in tests. This works
 around a circular dependency with L<Test::More> when installing on very
 old perls from CPAN.
 
-Fix to disallow vstring magic strings over 2GB.
+Vstring magic strings over 2GB are now disallowed.
 
 Regular expressions objects weren't properly counted for object id
-purposes on retrieve.  This would corrupt the resulting structure, or
-cause a runtime error in some cases.  L<[perl #134179]|https://rt.perl.org/Ticket/Display.html?id=134179>
+purposes on retrieve. This would corrupt the resulting structure, or
+cause a runtime error in some cases. [L<perl #134179|https://rt.perl.org/Ticket/Display.html?id=134179>]
 
 =item *
 
@@ -630,7 +611,7 @@ L<Tie::StdHandle> has been upgraded from version 4.5 to 4.6.
 L<Time::HiRes> has been upgraded from version 1.9760 to 1.9764.
 
 Removed obsolete code such as support for pre-5.6 perl and classic
-MacOS.  L<[perl #134288]|https://rt.perl.org/Ticket/Display.html?id=134288>
+MacOS. [L<perl #134288|https://rt.perl.org/Ticket/Display.html?id=134288>]
 
 =item *
 
@@ -673,8 +654,8 @@ L<XS::APItest> has been upgraded from version 1.00 to 1.09.
 =item *
 
 Pod::Parser has been removed from the core distribution.
-It still is available for download from CPAN.  This resolves L<[perl
-#119439]|https://rt.perl.org/Ticket/Display.html?id=119439>.
+It still is available for download from CPAN. This resolves [L<perl
+#119439|https://rt.perl.org/Ticket/Display.html?id=119439>].
 
 =back
 
@@ -683,7 +664,7 @@ It still is available for download from CPAN.  This resolves L<[perl
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
-listed in this document.  If you find any we have missed, open an issue
+listed in this document. If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
 Additionally, the following selected changes have been made:
@@ -692,17 +673,21 @@ Additionally, the following selected changes have been made:
 
 =over 4
 
-=item Simplify a couple regnode definitions
+=item *
 
-Update BOUND and NBOUND definitions.
+Simplify a few regnode definitions
 
-=item Add ANYOFHs regnode
+Update C<BOUND> and C<NBOUND> definitions.
 
-This node is like ANYOFHb, but is used when more than one leading byte
+=item *
+
+Add ANYOFHs regnode
+
+This node is like C<ANYOFHb>, but is used when more than one leading byte
 is the same in all the matched code points.
 
-ANYOFHb is used to avoid having to convert from UTF-8 to code point for
-something that won't match.  It checks that the first byte in the UTF-8
+C<ANYOFHb> is used to avoid having to convert from UTF-8 to code point for
+something that won't match. It checks that the first byte in the UTF-8
 encoded target is the desired one, thus ruling out most of the possible
 code points.
 
@@ -737,7 +722,9 @@ updated and clarified.
 
 =over 4
 
-=item Add documentation for experimental 'isa' operator
+=item *
+
+Add documentation for experimental 'isa' operator
 
 (S experimental::isa) This warning is emitted if you use the (C<isa>)
 operator. This operator is currently experimental and its behaviour may
@@ -767,7 +754,7 @@ L<perlsyn/"Plain Old Comments (Not!)">.
 
 =item C<return>
 
-Mention that you cannot return from do BLOCK
+Now mentions that you cannot return from C<do BLOCK>.
 
 =item C<open>
 
@@ -781,22 +768,22 @@ The C<open()> section had been renovated significantly.
 
 =item *
 
-Don't suggest using perl's C<malloc> anymore. Modern system C<malloc> is
-assumed to be much better than perl's implementation at this point.
+No longer suggesting using perl's C<malloc>. Modern system C<malloc> is
+assumed to be much better than perl's implementation now.
 
 =item *
 
-Documentation about embed.fnc flags has been removed. F<embed.fnc> now has
-sufficient comments within it.  Anyone changing that file will see those
+Documentation about F<embed.fnc> flags has been removed. F<embed.fnc> now has
+sufficient comments within it. Anyone changing that file will see those
 comments first, so entries here are now redundant.
 
 =item *
 
-Update documentation for UTF8f
+Updated documentation for C<UTF8f>
 
 =item *
 
-Add missing '=for apidoc' lines
+Added missing C<=for apidoc> lines
 
 =back
 
@@ -806,7 +793,7 @@ Add missing '=for apidoc' lines
 
 =item *
 
-Perl strings are NOT the same as C strings
+The differences between Perl strings and C strings are now detailed.
 
 =back
 
@@ -816,8 +803,7 @@ Perl strings are NOT the same as C strings
 
 =item *
 
-The docs for the repetition operator C<x> have been clarified
-
+The documentation for the repetition operator C<x> have been clarified.
 [L<GH #17335|https://github.com/Perl/perl5/issues/17335>]
 
 =back
@@ -842,9 +828,11 @@ replacing C<-w> with C<use warnings>.
 
 =over 4
 
-=item 'isa' operator is experimental
+=item *
 
-This is an experimental feature and is available from Perl 5.31.7 when enabled
+'isa' operator is experimental
+
+This is an experimental feature and is available when enabled
 by C<use feature 'isa'>. It emits a warning in the C<experimental::isa>
 category.
 
@@ -871,8 +859,7 @@ Advice has been added regarding the usage of C<< ZE<lt>E<gt> >>.
 
 =item *
 
-Update C<timegm> example to use correct year format I<1970> instead of I<70>.
-
+Update C<timegm> example to use the correct year format I<1970> instead of I<70>.
 [L<GH #16431|https://github.com/Perl/perl5/issues/16431>]
 
 =back
@@ -893,11 +880,7 @@ Fix some typos.
 
 =item *
 
-Recommend stringifying C<$]> and comparing it numerically.
-
-=item *
-
-Remove C<${^FEATURE_BITS}>.
+Now recommends stringifying C<$]> and comparing it numerically.
 
 =back
 
@@ -907,7 +890,7 @@ Remove C<${^FEATURE_BITS}>.
 
 =item *
 
-Documentation has been added for a dozen or two functions that were
+Documentation has been added for several functions that were
 lacking it before.
 
 =back
@@ -918,7 +901,7 @@ lacking it before.
 
 =item *
 
-Suggest using libffi for simple library bindings.
+Suggest using C<libffi> for simple library bindings.
 
 =back
 
@@ -947,29 +930,29 @@ Additionally, the following selected changes have been made:
 =item *
 
 Links to the now defunct L<https://search.cpan.org> site now point at
-the equivalent L<https://metacpan.org> URL.  [L<GH #17393|https://github.com/Perl/perl5/issues/17393>]
+the equivalent L<https://metacpan.org> URL. [L<GH #17393|https://github.com/Perl/perl5/issues/17393>]
 
 =item *
 
 The man page for L<ExtUtils::XSSymSet> is now only installed on VMS,
-which is the only platform the module is installed on.  [L<GH #17424|https://github.com/Perl/perl5/issues/17424>]
+which is the only platform the module is installed on. [L<GH #17424|https://github.com/Perl/perl5/issues/17424>]
 
 =item *
 
-URLs have been changed to https:// and stale links have been updated.
+URLs have been changed to C<https://> and stale links have been updated.
 
 Where applicable, the URLs in the documentation have been moved from using the
-http:// protocol to https:// .  This also affects the location of the bug
+C<http://> protocol to C<https://>. This also affects the location of the bug
 tracker at L<https://rt.perl.org>.
 
 =item *
 
 Some links to OS/2 libraries, Address Sanitizer and other system tools had gone
-stale.  These have been updated with working links.
+stale. These have been updated with working links.
 
 =item *
 
-Some links to old mails on perl5-porters had gone stale.  These have been
+Some links to old email addresses on perl5-porters had gone stale. These have been
 updated with working links.
 
 =back
@@ -977,7 +960,7 @@ updated with working links.
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
+including warnings and fatal error messages. For the complete list of
 diagnostic messages, see L<perldiag>.
 
 =head2 New Diagnostics
@@ -1020,10 +1003,10 @@ it occurred.
 
 =item *
 
-L<Non-hex character '%c' terminates \x early.  Resolved as "%s"|perldiag/"Non-hex character '%c' terminates \x early.  Resolved as "%s"">
+L<Non-hex character '%c' terminates \x early.  Resolved as "%s"|perldiag/"Non-hex character '%c' terminates \x early. Resolved as "%s"">
 
 This replaces a warning that was much less specific, and which gave
-false information.  This new warning parallels the similar
+false information. This new warning parallels the similar
 already-existing one raised for C<\o{}>.
 
 =back
@@ -1036,58 +1019,57 @@ already-existing one raised for C<\o{}>.
 
 L<Character following "\c" must be printable ASCII|perldiag/"Character following "\c" must be printable ASCII">
 
-now has extra text added at the end, when raised during regular
+...now has extra text added at the end, when raised during regular
 expression pattern compilation, marking where precisely in the pattern
-it occured.
+it occurred.
 
 =item *
 
 L<Use "%s" instead of "%s"|perldiag/"Use "%s" instead of "%s"">
 
-now has extra text added at the end, when raised during regular
+...now has extra text added at the end, when raised during regular
 expression pattern compilation, marking where precisely in the pattern
-it occured.
+it occurred.
 
 =item *
 
 L<Sequence "\c{" invalid|perldiag/"Sequence "\c{" invalid">
 
-now has extra text added at the end, when raised during regular
+...now has extra text added at the end, when raised during regular
 expression pattern compilation, marking where precisely in the pattern
-it occured.
+it occurred.
 
 =item *
 
 L<"\c%c" is more clearly written simply as "%s"|perldiag/""\c%c" is more clearly written simply as "%s"">
 
-now has extra text added at the end, when raised during regular
+...now has extra text added at the end, when raised during regular
 expression pattern compilation, marking where precisely in the pattern
-it occured.
+it occurred.
 
 =item *
 
-L<Non-octal character '%c' terminates \o early.  Resolved as "%s"|perldiag/"Non-octal character '%c' terminates \o early.  Resolved as "%s"">
+L<Non-octal character '%c' terminates \o early.  Resolved as "%s"|perldiag/"Non-octal character '%c' terminates \o early. Resolved as "%s"">
 
-now includes the phrase "terminates \o early", and has extra text added
+...now includes the phrase "terminates \o early", and has extra text added
 at the end, when raised during regular expression pattern compilation,
-marking where precisely in the pattern it occured.  In some instances
+marking where precisely in the pattern it occurred. In some instances
 the text of the resolution has been clarified.
 
 =item *
 
 L<'%s' resolved to '\o{%s}%d'|perldiag/'%s' resolved to '\o{%s}%d'>
 
-As of Perl 5.32, this message is no longer generated.  Instead,
-L<perldiag/Non-octal character '%c' terminates \o early.  Resolved as "%s">
-is.
+As of Perl 5.32, this message is no longer generated. Instead,
+L<perldiag/Non-octal character '%c' terminates \o early. Resolved as "%s">
+is used instead.
 
 =item *
-
 
 L<Use of code point 0x%s is not allowed; the permissible max is 0x%X|perldiag/"Use of code point 0x%s is not allowed; the permissible max is 0x%X">
 
 Some instances of this message previously output the hex digits C<A>,
-C<B>, C<C>, C<D>, C<E>, and C<F> in lower case.  Now they are all
+C<B>, C<C>, C<D>, C<E>, and C<F> in lower case. Now they are all
 consistently upper case.
 
 =item *
@@ -1122,9 +1104,9 @@ signature>.
 L<Constants from lexical variables potentially modified elsewhere are no longer permitted|perldiag/"Constants from lexical variables potentially modified elsewhere are no longer permitted">
 
 This error message replaces the former C<Constants from lexical variables
-potentially modified elsewhere are deprecated.  This will not be allowed in Perl
+potentially modified elsewhere are deprecated. This will not be allowed in Perl
 5.32> to reflect the fact that this previously deprecated usage has now been
-transformed into an exception.  The message's classification has also been
+transformed into an exception. The message's classification has also been
 updated from D (deprecated) to F (fatal).
 
 See also L</Incompatible Changes>.
@@ -1146,7 +1128,7 @@ covered by the earlier wording.
 
 =over 4
 
-=item Adjust bug tracker homepage URL to point to GitHub.
+=item * The bug tracker homepage URL now points to GitHub.
 
 =back
 
@@ -1204,14 +1186,14 @@ as gcc-1 and turned on C<-fpcc-struct-return>.
 =item *
 
 Perl now no longer probes for C<d_u32align>, defaulting to C<define> on all
-platforms.  This check was error prone when it was done, which was on 32-bit
+platforms. This check was error-prone when it was done, which was on 32-bit
 platforms only.
-L<[perl #133495]|https://rt.perl.org/Ticket/Display.html?id=133495>.
+[L<perl #133495|https://rt.perl.org/Ticket/Display.html?id=133495>]
 
 =item *
 
 Documentation and hints for building perl on Z/OS (native EBCDIC) have been
-updated.  Still work in progress.
+updated. This is still a work in progress.
 
 =item *
 
@@ -1219,8 +1201,8 @@ A new probe for C<malloc_usable_size> has been added.
 
 =item *
 
-Improvements in F<Configure> to detection in C++ and clang++.  Work ongoing by
-Andy Dougherty. [perl #134171]
+Improvements in F<Configure> to detection in C++ and clang++. Work ongoing by
+Andy Dougherty. [L<perl #134171|https://rt.perl.org/Ticket/Display.html?id=134171>]
 
 =item *
 
@@ -1233,10 +1215,10 @@ entries in code.
 
 =item *
 
-The C<ECHO> macro is now defined.  This is used in a C<dtrace> rule that was
+The C<ECHO> macro is now defined. This is used in a C<dtrace> rule that was
 originally changed for FreeBSD, and the FreeBSD make apparently predefines it.
 The Solaris make does not predefine C<ECHO> which broke this rule on Solaris.
-L<[perl #134218]|https://rt.perl.org/Ticket/Display.html?id=134218>
+[L<perl #134218|https://rt.perl.org/Ticket/Display.html?id=134218>]
 
 =item *
 
@@ -1247,7 +1229,7 @@ Bison versions 3.1 through 3.4 are now supported.
 =head1 Testing
 
 Tests were added and changed to reflect the other additions and
-changes in this release.  Furthermore, these significant changes were
+changes in this release. Furthermore, these significant changes were
 made:
 
 =over 4
@@ -1255,11 +1237,11 @@ made:
 =item *
 
 F<t/run/switches.t> no longer uses (and re-uses) the F<tmpinplace/>
-directory under F<t/>.  This may prevent spurious failures. [L<GH #17424|https://github.com/Perl/perl5/issues/17424>]
+directory under F<t/>. This may prevent spurious failures. [L<GH #17424|https://github.com/Perl/perl5/issues/17424>]
 
 =item *
 
-Various bugs in C<POSIX::mbtowc> were fixed.   Potential races with
+Various bugs in C<POSIX::mbtowc> were fixed. Potential races with
 other threads are now avoided, and previously the returned wide
 character could well be garbage.
 
@@ -1308,12 +1290,11 @@ Support for building perl on Windows CE has now been removed.
 =item Linux
 
 C<cc> will be used to populate C<plibpth> if C<cc> is C<clang>.
-L<[perl #134189]|https://rt.perl.org/Ticket/Display.html?id=134189>
+[L<perl #134189|https://rt.perl.org/Ticket/Display.html?id=134189>]
 
 =item NetBSD 8.0
 
 Fix compilation of Perl on NetBSD 8.0 with g++.
-
 [L<GH #17381|https://github.com/Perl/perl5/issues/17381>]
 
 =item Windows
@@ -1323,7 +1304,7 @@ Fix compilation of Perl on NetBSD 8.0 with g++.
 =item *
 
 The configuration for C<ccflags> and C<optimize> are now separate, as
-with POSIX platforms.  [#17156]
+with POSIX platforms. [L<GH #17156|https://github.com/Perl/perl5/issues/17156>]
 
 =item *
 
@@ -1336,7 +1317,7 @@ separately due to the CRT throwing an exception if the locale name
 wasn't validly encoded in the current code page.
 
 For the second we now decode the locale name ourselves, and always
-decode it as UTF-8.  [perl #133981]
+decode it as UTF-8. [L<perl #133981|https://rt.perl.org/Ticket/Display.html?id=133981>]
 
 =item *
 
@@ -1368,7 +1349,7 @@ Perl to once again compile on certain configurations of Solaris.
 =item *
 
 With the release of the patch kit C99 V2.0, VSI has provided support for a
-number of previously-missing C99 features.  On systems with that patch kit
+number of previously-missing C99 features. On systems with that patch kit
 installed, Perl's configuration process will now detect the presence of the
 header C<stdint.h> and the following functions: C<fpclassify>, C<isblank>, C<isless>,
 C<llrint>, C<llrintl>, C<llround>, C<llroundl>, C<nearbyint>, C<round>, C<scalbn>,
@@ -1413,23 +1394,24 @@ details.
 
 The code that handles C<tr///> has been extensively revised, fixing
 various bugs, especially when the source and/or replacement strings
-contain characters whose code points are above 255.  Some of the bugs
+contain characters whose code points are above 255. Some of the bugs
 were undocumented, one being that under some circumstances (but not all)
 with C</s>, the squeezing was done based on the source, rather than the
-replacement.  A documented bug that got fixed was [perl RT #125493].
+replacement. A documented bug that got fixed was
+[L<perl #125493|https://rt.perl.org/Ticket/Display.html?id=125493>].
 
 =item *
 
 A new macro for XS writers dealing with UTF-8-encoded Unicode strings
 has been created L<perlapi/C<UTF8_CHK_SKIP>> that is safer in the face
 of malformed UTF-8 input than L<perlapi/C<UTF8_SKIP>> (but not as safe
-as L<perlapi/C<UTF8_SAFE_SKIP>>).  It won't read past a NUL character.
+as L<perlapi/C<UTF8_SAFE_SKIP>>). It won't read past a NUL character.
 It has been backported in L<Devel::PPPort> 3.55 and later.
 
 =item *
 
-Added the C<<PL_curstackinfo->si_cxsubix>> field.  This records the stack index
-of the most recently pushed sub/format/eval context.  It is set and restored
+Added the C<<PL_curstackinfo->si_cxsubix>> field. This records the stack index
+of the most recently pushed sub/format/eval context. It is set and restored
 automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would need to be
 manually managed if you do any unusual manipulation of the context stack.
 
@@ -1437,17 +1419,17 @@ manually managed if you do any unusual manipulation of the context stack.
 
 Various macros dealing with character type classification and changing case
 where the input is encoded in UTF-8 now require an extra parameter to prevent
-potential reads beyond the end of the buffer.  Use of these has generated a
-deprecation warning since Perl 5.26.  Details are in
+potential reads beyond the end of the buffer. Use of these has generated a
+deprecation warning since Perl 5.26. Details are in
 L<perldeprecation/In XS code, use of various macros dealing with UTF-8.>
 
 =item *
 
 A new parser function L<parse_subsignature()|perlapi/parse_subsignature>
 allows a keyword plugin to parse a subroutine signature while C<use feature
-'signatures'> is in effect.  This allows custom keywords to implement
+'signatures'> is in effect. This allows custom keywords to implement
 semantics similar to regular C<sub> declarations that include signatures.
-L<[perl #132474]|https://rt.perl.org/Ticket/Display.html?id=132474>
+[L<perl #132474|https://rt.perl.org/Ticket/Display.html?id=132474>]
 
 =item *
 
@@ -1455,7 +1437,7 @@ Since on some platforms we need to hold a mutex when temporarily
 switching locales, new macros (C<STORE_LC_NUMERIC_SET_TO_NEEDED_IN>,
 C<WITH_LC_NUMERIC_SET_TO_NEEDED> and C<WITH_LC_NUMERIC_SET_TO_NEEDED_IN>)
 have been added to make it easier to do this safely and efficiently
-as part of L<[perl #134172]|https://rt.perl.org/Ticket/Display.html?id=134172>.
+as part of [L<perl #134172|https://rt.perl.org/Ticket/Display.html?id=134172>].
 
 =item *
 
@@ -1465,34 +1447,34 @@ reduced by 8 bytes per OP on 64-bit systems.
 =item *
 
 L<eval_pv()|perlapi/eval_pv> no longer stringifies the exception when
-C<croak_on_error> is true.  L<[perl #134175]|https://rt.perl.org/Ticket/Display.html?id=134175>
+C<croak_on_error> is true. [L<perl #134175|https://rt.perl.org/Ticket/Display.html?id=134175>]
 
 =item *
 
 The PERL_DESTRUCT_LEVEL environment variable was formerly only honoured on perl
-binaries built with DEBUGGING support.  It is now checked on all perl builds.
+binaries built with DEBUGGING support. It is now checked on all perl builds.
 Its normal use is to force perl to individually free every block of memory
 which it has allocated before exiting, which is useful when using automated
 leak detection tools such as valgrind.
 
 =item *
 
-The API eval_sv() now accepts a C<G_RETHROW> flag.  If this flag is set and an
+The API eval_sv() now accepts a C<G_RETHROW> flag. If this flag is set and an
 exception is thrown while compiling or executing the supplied code, it will be
 rethrown, and eval_sv() will not return.
-L<[perl #134177]|https://rt.perl.org/Ticket/Display.html?id=134177>
+[L<perl #134177|https://rt.perl.org/Ticket/Display.html?id=134177>]
 
 =item *
 
 As part of the fix for
-L<[perl #2754]|https://rt.perl.org/Ticket/Display.html?id=2754> perl_parse()
+[L<perl #2754|https://rt.perl.org/Ticket/Display.html?id=2754>] perl_parse()
 now returns non-zero if exit(0) is called in a C<BEGIN>, C<UNITCHECK> or
 C<CHECK> block.
 
 =item *
 
 Most functions which recursively walked an op tree during compilation have been
-made non-recursive.  This avoids SEGVs from stack overflow when the op tree is
+made non-recursive. This avoids SEGVs from stack overflow when the op tree is
 deeply nested, such as C<$n == 1 ? "one" : $n == 2 ? "two" : ....> (especially
 in code which is auto-generated).
 
@@ -1510,8 +1492,8 @@ thread, as threads tend to have small stacks by default.
 Previously L<perlfunc/require> would only treat the special built-in
 SV C<&PL_sv_undef> as a value in C<%INC> as if a previous C<require>
 has failed, treating other undefined SVs as if the previous C<require>
-has succeeded.  This could cause unexpected success from C<require>
-e.g., on C<local %INC = %INC;>.  This has been fixed [L<GH #17428|https://github.com/Perl/perl5/issues/17428>]
+has succeeded. This could cause unexpected success from C<require>
+e.g., on C<local %INC = %INC;>. This has been fixed. [L<GH #17428|https://github.com/Perl/perl5/issues/17428>]
 
 =item *
 
@@ -1522,9 +1504,9 @@ trigger "EVAL without pos change exceeded limit in regex" [L<GH #17490|https://g
 
 C<(?[...])> extended bracketed character classes do not wrongly raise an
 error on some cases where a previously-compiled such class is
-interpolated into another.  The heuristics previously used have been
+interpolated into another. The heuristics previously used have been
 replaced by a reliable method, and hence the diagnostics generated have
-changed.  See L</Diagnostics>.
+changed. See L</Diagnostics>.
 
 =item *
 The debug display (say by specifying C<-Dr> or S<C<use re>> (with
@@ -1534,38 +1516,32 @@ longer has extraneous output.
 =item *
 
 A heap-buffer-overflow has been fixed in the regular expression engine.
-
 [L<GH #17384|https://github.com/Perl/perl5/issues/17384>]
 
 =item *
 
 Fix an assertion failure in the regular expression engine.
-
 [L<GH #17372|https://github.com/Perl/perl5/issues/17372>]
 
 =item *
 
 Fix regression in C<tr///> added somewhere in v5.31.6.
-
 [L<GH #17391|https://github.com/Perl/perl5/issues/17391>]
 
 =item *
 
 Fix coredump in pp_hot.c after C<B::UNOP_AUX::aux_list()>.
-
 [L<GH #17301|https://github.com/Perl/perl5/issues/17301>]
 
 =item *
 
-Commit bc62bf8519  ("Add some defensive coding to av_store()" has been
+Commit bc62bf8519 ("Add some defensive coding to av_store()" has been
 reverted as it broke I<List-UtilsBy-XS-0.05> in v5.31.2.
-
 [L<GH #17265|https://github.com/Perl/perl5/issues/17265>]
 
 =item *
 
 Loading IO is now threadsafe.
-
 [L<GH #14816|https://github.com/Perl/perl5/issues/14816>]
 
 =item *
@@ -1576,7 +1552,7 @@ Fix MYMALLOC (PERL_MALLOC) build on Windows
 
 C<\p{user-defined}> overrides official Unicode [L<GH #17025|https://github.com/Perl/perl5/issues/17025>]
 
-Prior to this patch, they only sometimes overrode.
+Prior to this patch, the override was only sometimes in effect.
 
 =item *
 
@@ -1602,20 +1578,22 @@ Workaround glibc bug with C<LC_MESSAGES> [L<GH #17081|https://github.com/Perl/pe
 
 C<printf()> or C<sprintf()> with the C<%n> format could cause a panic on
 debugging builds, or report an incorrectly cached length value when
-producing C<SVfUTF8> flagged strings. [#17221]
+producing C<SVfUTF8> flagged strings. [L<GH #17221|https://github.com/Perl/perl5/issues/17221>]
 
 =item *
 
-The tokenizer has been extensively refactored. [#17241][#17189]
+The tokenizer has been extensively refactored.
+[L<GH #17241|https://github.com/Perl/perl5/issues/17241>]
+[L<GH #17189|https://github.com/Perl/perl5/issues/17189>]
 
 =item *
 
 C<use strict "subs"> is now enforced for bareword constants optimized
-into a C<multiconcat> operator.  [#17254]
+into a C<multiconcat> operator. [L<GH #17254|https://github.com/Perl/perl5/issues/17254>]
 
 =item *
 
-A memory leak in regular expression patterns has been fixed [#17218].
+A memory leak in regular expression patterns has been fixed. [L<GH #17218|https://github.com/Perl/perl5/issues/17218>]
 
 =item *
 
@@ -1623,76 +1601,76 @@ Perl no longer treats strings starting with "0x" or "0b" as hex or
 binary numbers respectively when converting a string to a number.
 This reverts a change in behaviour inadvertently introduced in perl
 5.30.0 intended to improve precision when converting a string to a
-floating point number. [perl #134230]
+floating point number. [L<perl #134230|https://rt.perl.org/Ticket/Display.html?id=134230>]
 
 =item *
 
 Matching a non-C<SVf_UTF8> string against a regular expression
 containing unicode literals could leak a SV on each match attempt.
-[perl #134390]
+[L<perl #134390|https://rt.perl.org/Ticket/Display.html?id=134390>]
 
 =item *
 
 Overloads for octal and binary floating point literals were always
 passed a string with a C<0x> prefix instead of the appropriate C<0> or
-C<0b> prefix.  [perl #125557]
+C<0b> prefix. [L<perl #125557|https://rt.perl.org/Ticket/Display.html?id=125557>]
 
 =item *
 
 C<< $@ = 100; die; >> now correctly propagates the 100 as an exception
-instead of ignoring it.  L<[perl #134291]|https://rt.perl.org/Ticket/Display.html?id=134291>
+instead of ignoring it. [L<perl #134291|https://rt.perl.org/Ticket/Display.html?id=134291>]
 
 =item *
 
-C<< 0 0x@ >> no longer asserts in S_no_op().  L<[perl #134310]|https://rt.perl.org/Ticket/Display.html?id=134310>
+C<< 0 0x@ >> no longer asserts in S_no_op(). [L<perl #134310|https://rt.perl.org/Ticket/Display.html?id=134310>]
 
 =item *
 
 Exceptions thrown while C<$@> is read-only could result in infinite
 recursion as perl tried to update C<$@>, which throws another
-exception, resulting in a stack overflow.  Perl now replaces C<$@>
-with a copy if it's not a simple writable SV.  L<[perl #134266]|https://rt.perl.org/Ticket/Display.html?id=134266>
+exception, resulting in a stack overflow. Perl now replaces C<$@>
+with a copy if it's not a simple writable SV. [L<perl #134266|https://rt.perl.org/Ticket/Display.html?id=134266>]
 
 =item *
 
 Setting C<$)> now properly sets supplementary group ids if you have
-the necessary privileges.  L<[perl #134169]|https://rt.perl.org/Ticket/Display.html?id=134169>
+the necessary privileges. [L<perl #134169|https://rt.perl.org/Ticket/Display.html?id=134169>]
 
 =item *
 
 close() on a pipe now preemptively clears the PerlIO object from the
-IO SV.  This prevents a second attempt to close the already closed
+IO SV. This prevents a second attempt to close the already closed
 PerlIO object if a signal handler calls die() or exit() while close()
-is waiting for the child process to complete.  L<[perl #122112]|https://rt.perl.org/Ticket/Display.html?id=122112>
+is waiting for the child process to complete. [L<perl #122112|https://rt.perl.org/Ticket/Display.html?id=122112>]
 
 =item *
 
 C<< sprintf("%.*a", -10000, $x) >> would cause a buffer overflow due
-to mishandling of the negative precision value.  L<[perl #134008]|https://rt.perl.org/Ticket/Display.html?id=134008>
+to mishandling of the negative precision value. [L<perl #134008|https://rt.perl.org/Ticket/Display.html?id=134008>]
 
 =item *
 
 scalar() on a reference could cause an erroneous assertion failure
-during compilation.  L<[perl #134045]|https://rt.perl.org/Ticket/Display.html?id=134045>
+during compilation. [L<perl #134045|https://rt.perl.org/Ticket/Display.html?id=134045>]
 
 =item *
 
 C<%{^CAPTURE_ALL}> is now an alias to C<%-> as documented, rather than
-incorrectly an alias for C<%+>.  L<[perl #131867]|https://rt.perl.org/Ticket/Display.html?id=131867>
+incorrectly an alias for C<%+>. [L<perl #131867|https://rt.perl.org/Ticket/Display.html?id=131867>]
 
 =item *
 
 C<%{^CAPTURE}> didn't work if C<@{^CAPTURE}> was mentioned first.
 Similarly for C<%{^CAPTURE_ALL}> and C<@{^CAPTURE_ALL}>, though
-C<@{^CAPTURE_ALL}> currently isn't used.  L<[perl #131193]|https://rt.perl.org/Ticket/Display.html?id=131193>
+C<@{^CAPTURE_ALL}> currently isn't used. [L<perl #131193|https://rt.perl.org/Ticket/Display.html?id=131193>]
 
 =item *
 
 Extraordinarily large (over 2GB) floating point format widths could
 cause an integer overflow in the underlying call to snprintf(),
-resulting in an assertion.  Formatted floating point widths are now
-limited to the range of int, the return value of snprintf().  L<[perl
-#133913]|https://rt.perl.org/Ticket/Display.html?id=133913>
+resulting in an assertion. Formatted floating point widths are now
+limited to the range of int, the return value of snprintf(). [L<perl
+#133913|https://rt.perl.org/Ticket/Display.html?id=133913>]
 
 =item *
 
@@ -1718,17 +1696,16 @@ C<@x {"a"}> (with the space) in a sub-parse now properly produces a
 
 =item *
 
-attributes can now be used in a sub-parse.
+Attributes can now be used in a sub-parse.
+[L<perl #133850|https://rt.perl.org/Ticket/Display.html?id=133850>]
 
 =back
-
-L<[perl #133850]|https://rt.perl.org/Ticket/Display.html?id=133850>
 
 =item *
 
 Incomplete hex and binary literals like C<0x> and C<0b> are now
-treated as if the C<x> or C<b> is part of the next token.  L<[perl
-#134125]|https://rt.perl.org/Ticket/Display.html?id=134125>
+treated as if the C<x> or C<b> is part of the next token. [L<perl
+#134125|https://rt.perl.org/Ticket/Display.html?id=134125>]
 
 =item *
 
@@ -1741,56 +1718,56 @@ normal subparse clean up, confusing the parser and possible causing an
 assertion failure.
 
 Such constructs are now surrounded by artificial tokens that can't be
-included in the source.  L<[perl #130585]|https://rt.perl.org/Ticket/Display.html?id=130585>
+included in the source. [L<perl #130585|https://rt.perl.org/Ticket/Display.html?id=130585>]
 
 =item *
 
 Reference assignment of a sub, such as C<\&foo = \&bar;>, silently did
-nothing in the C<main::> package.  L<[perl #134072]|https://rt.perl.org/Ticket/Display.html?id=134072>
+nothing in the C<main::> package. [L<perl #134072|https://rt.perl.org/Ticket/Display.html?id=134072>]
 
 =item *
 
 sv_gets() now recovers better if the target SV is modified by a signal
-handler.  L<[perl #134035]|https://rt.perl.org/Ticket/Display.html?id=134035>
+handler. [L<perl #134035|https://rt.perl.org/Ticket/Display.html?id=134035>]
 
 =item *
 
-C<readline @foo> now evaluates C<@foo> in scalar context.  Previously
+C<readline @foo> now evaluates C<@foo> in scalar context. Previously
 it would be evaluated in list context, and since readline() pops only
 one argument from the stack, the stack could underflow, or be left
-with unexpected values on the stack.  L<[perl #133989]|https://rt.perl.org/Ticket/Display.html?id=133989>
+with unexpected values on the stack. [L<perl #133989|https://rt.perl.org/Ticket/Display.html?id=133989>]
 
 =item *
 
 Parsing incomplete hex or binary literals was changed in 5.31.1 to treat such a
 literal as just the 0, leaving the following C<x> or C<b> to be parsed as part
-of the next token.  This could lead to some silent changes in behaviour, so now
+of the next token. This could lead to some silent changes in behaviour, so now
 incomplete hex or binary literals produce a fatal error.
-L<[perl #134125]|https://rt.perl.org/Ticket/Display.html?id=134125>
+[L<perl #134125|https://rt.perl.org/Ticket/Display.html?id=134125>]
 
 =item *
 
 eval_pv()'s I<croak_on_error> flag will now throw even if the exception is a
 false overloaded value.
-L<[perl #134177]|https://rt.perl.org/Ticket/Display.html?id=134177>
+[L<perl #134177|https://rt.perl.org/Ticket/Display.html?id=134177>]
 
 =item *
 
 C<INIT> blocks and the program itself are no longer run if exit(0) is called
 within a C<BEGIN>, C<UNITCHECK> or C<CHECK> block.
-L<[perl #2754]|https://rt.perl.org/Ticket/Display.html?id=2754>
+[L<perl #2754|https://rt.perl.org/Ticket/Display.html?id=2754>]
 
 =item *
 
-C<<< open my $fh, ">>+", undef >>> now opens the temporary file in append mode
-- writes will seek to the end of file before writing.
-L<[perl #134221]|https://rt.perl.org/Ticket/Display.html?id=134221>
+C<< open my $fh, ">>+", undef >> now opens the temporary file in append mode:
+writes will seek to the end of file before writing.
+[L<perl #134221|https://rt.perl.org/Ticket/Display.html?id=134221>]
 
 =item *
 
 Fixed a SEGV when searching for the source of an uninitialized value warning on
 an op whose subtree includes an OP_MULTIDEREF.
-L<[perl #134275]|https://rt.perl.org/Ticket/Display.html?id=134275>
+[L<perl #134275|https://rt.perl.org/Ticket/Display.html?id=134275>]
 
 =back
 
@@ -1852,11 +1829,11 @@ see the F<AUTHORS> file in the Perl source distribution.
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the perl bug database
-at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
 L<http://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please open an issue at
-L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
 tiny but sufficient test case.
 
 If the bug you are reporting has security implications which make it
