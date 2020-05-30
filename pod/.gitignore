@@ -49,6 +49,7 @@
 /roffitall
 
 # generated
+/perl5320delta.pod
 /perlapi.pod
 /perlintern.pod
 /perlmodlib.pod
