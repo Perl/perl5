@@ -1524,29 +1524,13 @@ longer has extraneous output.
 
 =item *
 
-A heap-buffer-overflow has been fixed in the regular expression engine.
-[L<GH #17384|https://github.com/Perl/perl5/issues/17384>]
-
-=item *
-
 Fix an assertion failure in the regular expression engine.
 [L<GH #17372|https://github.com/Perl/perl5/issues/17372>]
 
 =item *
 
-Fix regression in C<tr///> added somewhere in v5.31.6.
-[L<GH #17391|https://github.com/Perl/perl5/issues/17391>]
-
-=item *
-
 Fix coredump in pp_hot.c after C<B::UNOP_AUX::aux_list()>.
 [L<GH #17301|https://github.com/Perl/perl5/issues/17301>]
-
-=item *
-
-Commit bc62bf8519 ("Add some defensive coding to av_store()" has been
-reverted as it broke I<List-UtilsBy-XS-0.05> in v5.31.2.
-[L<GH #17265|https://github.com/Perl/perl5/issues/17265>]
 
 =item *
 
