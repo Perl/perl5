@@ -244,7 +244,10 @@ typedef U64TYPE U64;
 #endif
 
 /* log(2) (i.e., log base 10 of 2) is pretty close to 0.30103, just in case
- * anyone is grepping for it */
+ * anyone is grepping for it.  So BIT_DIGITS gives the number of decimal digits
+ * required to represent any possible unsigned number containing N bits.
+ * TYPE_DIGITS gives the number of decimal digits required to represent any
+ * possible unsigned number of type T. */
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log10(2) =~ 146/485 */
 #define TYPE_DIGITS(T)  BIT_DIGITS(sizeof(T) * 8)
 #define TYPE_CHARS(T)   (TYPE_DIGITS(T) + 2) /* sign, NUL */
