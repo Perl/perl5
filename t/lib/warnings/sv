@@ -108,7 +108,7 @@ no warnings 'uninitialized' ;
 my $Y = 1 ; 
 $x = 1 | $b[$Y] ;
 EXPECT
-Use of uninitialized value within @a in bitwise or (|) at - line 4.
+Use of uninitialized value $a[1] in bitwise or (|) at - line 4.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -118,7 +118,7 @@ no warnings 'uninitialized' ;
 my $Y = 1 ; 
 $x = 1 & $b[$Y] ;
 EXPECT
-Use of uninitialized value within @a in bitwise and (&) at - line 4.
+Use of uninitialized value $a[1] in bitwise and (&) at - line 4.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -128,7 +128,7 @@ no warnings 'uninitialized' ;
 my $Y = 1 ; 
 $x = ~$b[$Y] ;
 EXPECT
-Use of uninitialized value within @a in 1's complement (~) at - line 4.
+Use of uninitialized value $a[1] in 1's complement (~) at - line 4.
 ########
 # sv.c
 use warnings 'uninitialized' ;
