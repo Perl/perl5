@@ -221,25 +221,13 @@ could define what the desired behaviour should be.
 
 =head2 Module removals
 
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact. To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use. Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
+The following modules have been removed from the core perl distribution:
 
 =over
 
-=item B::Debug
+=item Pod::Parser
 
-C<B::Debug> is no longer shipped with Perl. You can still install it from CPAN.
+C<Pod::Parser> is no longer shipped with Perl. You can still install it from CPAN.
 
 =back
 
