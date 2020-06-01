@@ -8,23 +8,23 @@ use Scalar::Util qw(blessed);
 
 my $t;
 
-ok(!defined blessed(undef),	'undef is not blessed');
-ok(!defined blessed(1),		'Numbers are not blessed');
-ok(!defined blessed('A'),	'Strings are not blessed');
-ok(!defined blessed({}),	'Unblessed HASH-ref');
-ok(!defined blessed([]),	'Unblessed ARRAY-ref');
-ok(!defined blessed(\$t),	'Unblessed SCALAR-ref');
+ok(!defined blessed(undef), 'undef is not blessed');
+ok(!defined blessed(1),     'Numbers are not blessed');
+ok(!defined blessed('A'),   'Strings are not blessed');
+ok(!defined blessed({}),    'Unblessed HASH-ref');
+ok(!defined blessed([]),    'Unblessed ARRAY-ref');
+ok(!defined blessed(\$t),   'Unblessed SCALAR-ref');
 
 my $x;
 
 $x = bless [], "ABC";
-is(blessed($x), "ABC",	'blessed ARRAY-ref');
+is(blessed($x), "ABC", 'blessed ARRAY-ref');
 
 $x = bless {}, "DEF";
-is(blessed($x), "DEF",	'blessed HASH-ref');
+is(blessed($x), "DEF", 'blessed HASH-ref');
 
 $x = bless {}, "0";
-cmp_ok(blessed($x), "eq", "0",	'blessed HASH-ref');
+cmp_ok(blessed($x), "eq", "0", 'blessed HASH-ref');
 
 {
   my $blessed = do {
