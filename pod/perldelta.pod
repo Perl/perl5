@@ -217,32 +217,6 @@ This was disallowed because it causes unexpected behaviour, and no-one
 could define what the desired behaviour should be.
 [L<perl #124256|https://rt.perl.org/Ticket/Display.html?id=124256>]
 
-=head1 Deprecations
-
-=head2 Module removals
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact. To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use. Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item B::Debug
-
-C<B::Debug> is no longer shipped with Perl. You can still install it from CPAN.
-
-=back
-
 =head1 Performance Enhancements
 
 =over 4
