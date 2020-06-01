@@ -539,7 +539,7 @@ L<Safe> has been upgraded from version 2.40 to 2.41.
 
 =item *
 
-L<Scalar::Util> has been upgraded from version 1.50 to 1.53.
+L<Scalar::Util> has been upgraded from version 1.50 to 1.55.
 
 =item *
 

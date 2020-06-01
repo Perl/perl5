@@ -2,6 +2,7 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  */
+
 #define PERL_NO_GET_CONTEXT /* we want efficiency */
 #include <EXTERN.h>
 #include <perl.h>
@@ -14,20 +15,35 @@
 #  include "ppport.h"
 #endif
 
+/* For uniqnum, define ACTUAL_NVSIZE to be the number *
+ * of bytes that are actually used to store the NV    */
+
+#if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 64
+#  define ACTUAL_NVSIZE 10
+#else
+#  define ACTUAL_NVSIZE NVSIZE
+#endif
+
+/* Detect "DoubleDouble" nvtype */
+
+#if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 106
+#  define NV_IS_DOUBLEDOUBLE
+#endif  
+
 #ifndef PERL_VERSION_DECIMAL
 #  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
 #endif
 #ifndef PERL_DECIMAL_VERSION
 #  define PERL_DECIMAL_VERSION \
-	  PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
+        PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
 #endif
 #ifndef PERL_VERSION_GE
 #  define PERL_VERSION_GE(r,v,s) \
-	  (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
+        (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
 #endif
 #ifndef PERL_VERSION_LE
 #  define PERL_VERSION_LE(r,v,s) \
-	  (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
+        (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
 #endif
 
 #if PERL_VERSION_GE(5,6,0)
@@ -70,6 +86,12 @@
 
 #ifndef sv_catpvn_flags
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
+#endif
+
+#if !PERL_VERSION_GE(5,8,0)
+static NV Perl_ceil(NV nv) {
+    return -Perl_floor(-nv);
+}
 #endif
 
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
@@ -174,6 +196,53 @@ static enum slu_accum accum_type(SV *sv) {
 
 /* Magic for set_subname */
 static MGVTBL subname_vtbl;
+
+static void MY_initrand(pTHX)
+{
+#if (PERL_VERSION < 9)
+    struct op dmy_op;
+    struct op *old_op = PL_op;
+
+    /* We call pp_rand here so that Drand01 get initialized if rand()
+       or srand() has not already been called
+    */
+    memzero((char*)(&dmy_op), sizeof(struct op));
+    /* we let pp_rand() borrow the TARG allocated for this XS sub */
+    dmy_op.op_targ = PL_op->op_targ;
+    PL_op = &dmy_op;
+    (void)*(PL_ppaddr[OP_RAND])(aTHX);
+    PL_op = old_op;
+#else
+    /* Initialize Drand01 if rand() or srand() has
+       not already been called
+    */
+    if(!PL_srand_called) {
+        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
+        PL_srand_called = TRUE;
+    }
+#endif
+}
+
+static double MY_callrand(pTHX_ CV *randcv)
+{
+    dSP;
+    double ret, dummy;
+
+    ENTER;
+    PUSHMARK(SP);
+    PUTBACK;
+
+    call_sv((SV *)randcv, G_SCALAR);
+
+    SPAGAIN;
+
+    ret = modf(POPn, &dummy);      /* bound to < 1 */
+    if(ret < 0) ret += 1.0; /* bound to 0 <= ret < 1 */
+
+    LEAVE;
+
+    return ret;
+}
 
 MODULE=List::Util       PACKAGE=List::Util
 
@@ -451,10 +520,14 @@ void
 reduce(block,...)
     SV *block
 PROTOTYPE: &@
+ALIAS:
+    reduce     = 0
+    reductions = 1
 CODE:
 {
     SV *ret = sv_newmortal();
     int index;
+    AV *retvals;
     GV *agv,*bgv,*gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -463,8 +536,12 @@ CODE:
     if(cv == Nullcv)
         croak("Not a subroutine reference");
 
-    if(items <= 1)
-        XSRETURN_UNDEF;
+    if(items <= 1) {
+        if(ix)
+            XSRETURN(0);
+        else
+            XSRETURN_UNDEF;
+    }
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
@@ -472,6 +549,17 @@ CODE:
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
+
+    if(ix) {
+        /* Precreate an AV for return values; -1 for cv, -1 for top index */
+        retvals = newAV();
+        av_extend(retvals, items-1-1);
+
+        /* so if throw an exception they can be reclaimed */
+        SAVEFREESV(retvals);
+
+        av_push(retvals, newSVsv(ret));
+    }
 #ifdef dMULTICALL
     assert(cv);
     if(!CvISXSUB(cv)) {
@@ -484,6 +572,8 @@ CODE:
             GvSV(bgv) = args[index];
             MULTICALL;
             SvSetMagicSV(ret, *PL_stack_sp);
+            if(ix)
+                av_push(retvals, newSVsv(ret));
         }
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
@@ -502,11 +592,26 @@ CODE:
             call_sv((SV*)cv, G_SCALAR);
 
             SvSetMagicSV(ret, *PL_stack_sp);
+            if(ix)
+                av_push(retvals, newSVsv(ret));
         }
     }
 
-    ST(0) = ret;
-    XSRETURN(1);
+    if(ix) {
+        int i;
+        SV **svs = AvARRAY(retvals);
+        /* steal the SVs from retvals */
+        for(i = 0; i < items-1; i++) {
+            ST(i) = sv_2mortal(svs[i]);
+            svs[i] = NULL;
+        }
+
+        XSRETURN(items-1);
+    }
+    else {
+        ST(0) = ret;
+        XSRETURN(1);
+    }
 }
 
 void
@@ -1137,31 +1242,17 @@ PROTOTYPE: @
 CODE:
 {
     int index;
-#if (PERL_VERSION < 9)
-    struct op dmy_op;
-    struct op *old_op = PL_op;
+    SV *randsv = get_sv("List::Util::RAND", 0);
+    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
+        (CV *)SvRV(randsv) : NULL;
 
-    /* We call pp_rand here so that Drand01 get initialized if rand()
-       or srand() has not already been called
-    */
-    memzero((char*)(&dmy_op), sizeof(struct op));
-    /* we let pp_rand() borrow the TARG allocated for this XS sub */
-    dmy_op.op_targ = PL_op->op_targ;
-    PL_op = &dmy_op;
-    (void)*(PL_ppaddr[OP_RAND])(aTHX);
-    PL_op = old_op;
-#else
-    /* Initialize Drand01 if rand() or srand() has
-       not already been called
-    */
-    if(!PL_srand_called) {
-        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
-        PL_srand_called = TRUE;
-    }
-#endif
+    if(!randcv)
+        MY_initrand(aTHX);
 
     for (index = items ; index > 1 ; ) {
-        int swap = (int)(Drand01() * (double)(index--));
+        int swap = (int)(
+            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(index--)
+        );
         SV *tmp = ST(swap);
         ST(swap) = ST(index);
         ST(index) = tmp;
@@ -1170,12 +1261,58 @@ CODE:
     XSRETURN(items);
 }
 
+void
+sample(...)
+PROTOTYPE: $@
+CODE:
+{
+    IV count = items ? SvUV(ST(0)) : 0;
+    IV reti = 0;
+    SV *randsv = get_sv("List::Util::RAND", 0);
+    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
+        (CV *)SvRV(randsv) : NULL;
+
+    if(!count)
+        XSRETURN(0);
+
+    /* Now we've extracted count from ST(0) the rest of this logic will be a
+     * lot neater if we move the topmost item into ST(0) so we can just work
+     * within 0..items-1 */
+    ST(0) = POPs;
+    items--;
+
+    if(count > items)
+        count = items;
+
+    if(!randcv)
+        MY_initrand(aTHX);
+
+    /* Partition the stack into ST(0)..ST(reti-1) containing the sampled results
+     * and ST(reti)..ST(items-1) containing the remaining pending candidates
+     */
+    while(reti < count) {
+        int index = (int)(
+            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(items - reti)
+        );
+
+        SV *selected = ST(reti + index);
+        /* preserve the element we're about to stomp on by putting it back into
+         * the pending partition */
+        ST(reti + index) = ST(reti);
+
+        ST(reti) = selected;
+        reti++;
+    }
+
+    XSRETURN(reti);
+}
+
 
 void
 uniq(...)
 PROTOTYPE: @
 ALIAS:
-    uniqnum = 0
+    uniqint = 0
     uniqstr = 1
     uniq    = 2
 CODE:
@@ -1184,6 +1321,7 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
+    int seen_undef = 0;
 
     if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
         /* Optimise for the case of the empty list or a defined nonmagic
@@ -1194,96 +1332,230 @@ CODE:
 
     sv_2mortal((SV *)(seen = newHV()));
 
-    if(ix == 0) {
-        /* uniqnum */
-        /* A temporary buffer for number stringification */
-        SV *keysv = sv_newmortal();
-
-        for(index = 0 ; index < items ; index++) {
-            SV *arg = args[index];
+    for(index = 0 ; index < items ; index++) {
+        SV *arg = args[index];
 #ifdef HV_FETCH_EMPTY_HE
-            HE* he;
+        HE *he;
 #endif
 
-            if(SvGAMAGIC(arg))
-                /* clone the value so we don't invoke magic again */
-                arg = sv_mortalcopy(arg);
+        if(SvGAMAGIC(arg))
+            /* clone the value so we don't invoke magic again */
+            arg = sv_mortalcopy(arg);
 
-            if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg))) {
+        if(ix == 2 && !SvOK(arg)) {
+            /* special handling of undef for uniq() */
+            if(seen_undef)
+                continue;
+
+            seen_undef++;
+
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = arg;
+            retcount++;
+            continue;
+        }
+        if(ix == 0) {
+            /* uniqint */
+            /* coerce to integer */
 #if PERL_VERSION >= 8
-                SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
-#else
-                SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
-#endif
-            }
-
-            if(!SvOK(arg) || SvUOK(arg))
-                sv_setpvf(keysv, "%" UVuf, SvUV(arg));
-            else if(SvIOK(arg))
-                sv_setpvf(keysv, "%" IVdf, SvIV(arg));
+            /* int_amg only appeared in perl 5.8.0 */
+            if(SvAMAGIC(arg) && (arg = AMG_CALLun(arg, int)))
+                ; /* nothing to do */
             else
-                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
-#ifdef HV_FETCH_EMPTY_HE
-            he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
-            if (HeVAL(he))
-                continue;
-
-            HeVAL(he) = &PL_sv_undef;
-#else
-            if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
-                continue;
-
-            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
 #endif
+            if(!SvOK(arg) || SvNOK(arg) || SvPOK(arg))
+            {
+                /* Convert undef, NVs and PVs into a well-behaved int */
+                NV nv = SvNV(arg);
 
-            if(GIMME_V == G_ARRAY)
-                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
-            retcount++;
-        }
-    }
-    else {
-        /* uniqstr or uniq */
-        int seen_undef = 0;
+                if(nv > (NV)UV_MAX)
+                    /* Too positive for UV - use NV */
+                    arg = newSVnv(Perl_floor(nv));
+                else if(nv < (NV)IV_MIN)
+                    /* Too negative for IV - use NV */
+                    arg = newSVnv(Perl_ceil(nv));
+                else if(nv > 0 && (UV)nv > (UV)IV_MAX)
+                    /* Too positive for IV - use UV */
+                    arg = newSVuv(nv);
+                else
+                    /* Must now fit into IV */
+                    arg = newSViv(nv);
 
-        for(index = 0 ; index < items ; index++) {
-            SV *arg = args[index];
-#ifdef HV_FETCH_EMPTY_HE
-            HE *he;
-#endif
-
-            if(SvGAMAGIC(arg))
-                /* clone the value so we don't invoke magic again */
-                arg = sv_mortalcopy(arg);
-
-            if(ix == 2 && !SvOK(arg)) {
-                /* special handling of undef for uniq() */
-                if(seen_undef)
-                    continue;
-
-                seen_undef++;
-
-                if(GIMME_V == G_ARRAY)
-                    ST(retcount) = arg;
-                retcount++;
-                continue;
+                sv_2mortal(arg);
             }
+        }
 #ifdef HV_FETCH_EMPTY_HE
-            he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
-            if (HeVAL(he))
-                continue;
+        he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+        if (HeVAL(he))
+            continue;
 
-            HeVAL(he) = &PL_sv_undef;
+        HeVAL(he) = &PL_sv_undef;
 #else
-            if (hv_exists_ent(seen, arg, 0))
-                continue;
+        if (hv_exists_ent(seen, arg, 0))
+            continue;
 
-            hv_store_ent(seen, arg, &PL_sv_yes, 0);
+        hv_store_ent(seen, arg, &PL_sv_yes, 0);
 #endif
 
-            if(GIMME_V == G_ARRAY)
-                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
-            retcount++;
+        if(GIMME_V == G_ARRAY)
+            ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
+        retcount++;
+    }
+
+  finish:
+    if(GIMME_V == G_ARRAY)
+        XSRETURN(retcount);
+    else
+        ST(0) = sv_2mortal(newSViv(retcount));
+}
+
+void
+uniqnum(...)
+PROTOTYPE: @
+CODE:
+{
+    int retcount = 0;
+    int index;
+    SV **args = &PL_stack_base[ax];
+    HV *seen;
+    /* A temporary buffer for number stringification */
+    SV *keysv = sv_newmortal();
+
+    if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
+        /* Optimise for the case of the empty list or a defined nonmagic
+         * singleton. Leave a singleton magical||undef for the regular case */
+        retcount = items;
+        goto finish;
+    }
+
+    sv_2mortal((SV *)(seen = newHV()));
+
+    for(index = 0 ; index < items ; index++) {
+        SV *arg = args[index];
+        NV nv_arg;
+#ifdef HV_FETCH_EMPTY_HE
+        HE* he;
+#endif
+
+        if(SvGAMAGIC(arg))
+            /* clone the value so we don't invoke magic again */
+            arg = sv_mortalcopy(arg);
+
+        if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg))) {
+#if PERL_VERSION >= 8
+            SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
+#else
+            SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
+#endif
         }
+#if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
+        /* Avoid altering arg's flags */ 
+        if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
+        else if(SvIOK(arg)) nv_arg = (NV)SvIV(arg);
+        else                nv_arg = SvNV(arg);
+
+        /* use 0 for all zeros */
+        if(nv_arg == 0) sv_setpvs(keysv, "0");
+
+        /* for NaN, use the platform's normal stringification */
+        else if (nv_arg != nv_arg) sv_setpvf(keysv, "%" NVgf, nv_arg);
+#ifdef NV_IS_DOUBLEDOUBLE
+        /* If the least significant double is zero, it could be either 0.0     *
+         * or -0.0. We therefore ignore the least significant double and       *
+         * assign to keysv the bytes of the most significant double only.      */
+        else if(nv_arg == (double)nv_arg) {
+            double double_arg = (double)nv_arg;
+            sv_setpvn(keysv, (char *) &double_arg, 8);
+        }
+#endif
+        else {
+            /* Use the byte structure of the NV.                               *
+             * ACTUAL_NVSIZE == sizeof(NV) minus the number of bytes           *
+             * that are allocated but never used. (It is only the 10-byte      *
+             * extended precision long double that allocates bytes that are    *
+             * never used. For all other NV types ACTUAL_NVSIZE == sizeof(NV). */
+            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);  
+        }
+#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */ 
+        if( SvIOK(arg) || !SvOK(arg) ) {
+
+            /* It doesn't matter if SvUOK(arg) is TRUE */
+            IV iv = SvIV(arg);
+
+            /* use "0" for all zeros */
+            if(iv == 0) sv_setpvs(keysv, "0");
+
+            else {
+                int uok = SvUOK(arg);
+                int sign = ( iv > 0 || uok ) ? 1 : -1;
+
+                /* Set keysv to the bytes of SvNV(arg) if and only if the integer value  *
+                 * held by arg can be represented exactly as a double - ie if there are  *
+                 * no more than 51 bits between its least significant set bit and its    *
+                 * most significant set bit.                                             *
+                 * The neatest approach I could find was provided by roboticus at:       *
+                 *     https://www.perlmonks.org/?node_id=11113490                       *
+                 * First, identify the lowest set bit and assign its value to an IV.     *
+                 * Note that this value will always be > 0, and always a power of 2.     */
+                IV lowest_set = iv & -iv;
+
+                /* Second, shift it left 53 bits to get location of the first bit        *
+                 * beyond arg's highest "allowed" set bit.                                                    *
+                 * NOTE: If lowest set bit is initially far enough left, then this left  *
+                 * shift operation will result in a value of 0, which is fine.           *
+                 * Then subtract 1 so that all of the ("allowed") bits below the set bit *
+                 * are 1 && all other ("disallowed") bits are set to 0.                  *
+                 * (If the value prior to subtraction was 0, then subtracting 1 will set *
+                 * all bits - which is also fine.)                                       */ 
+                UV valid_bits = (lowest_set << 53) - 1;
+
+                /* The value of arg can be exactly represented by a double unless one    *
+                 * or more of its "disallowed" bits are set - ie if iv & (~valid_bits)   *
+                 * is untrue. However, if (iv < 0 && !SvUOK(arg)) we need to multiply iv *
+                 * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
+                if( !((iv * sign) & (~valid_bits)) ) {
+                    /* Avoid altering arg's flags */
+                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg); 
+                    sv_setpvn(keysv, (char *) &nv_arg, 8);
+                }          
+                else {
+                    /* Read in the bytes, rather than the numeric value of the IV/UV as  *
+                     * this is more efficient, despite having to sv_catpvn an extra byte.*/
+                    sv_setpvn(keysv, (char *) &iv, 8);
+                    /* We add an extra byte to distinguish between an IV/UV and an NV.   *
+                     * We also use that byte to distinguish between a -ve IV and a UV.   */
+                    if(uok) sv_catpvn(keysv, "U", 1);
+                    else    sv_catpvn(keysv, "I", 1);
+                }
+            }
+        }
+        else {
+            nv_arg = SvNV(arg);
+
+            /* for NaN, use the platform's normal stringification */
+            if (nv_arg != nv_arg) sv_setpvf(keysv, "%" NVgf, nv_arg);
+
+            /* use "0" for all zeros */
+            else if(nv_arg == 0) sv_setpvs(keysv, "0");
+            else sv_setpvn(keysv, (char *) &nv_arg, 8);
+        }
+#endif
+#ifdef HV_FETCH_EMPTY_HE
+        he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+        if (HeVAL(he))
+            continue;
+
+        HeVAL(he) = &PL_sv_undef;
+#else
+        if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
+            continue;
+
+        hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
+#endif
+
+        if(GIMME_V == G_ARRAY)
+            ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
+        retcount++;
     }
 
   finish:
