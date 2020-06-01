@@ -244,6 +244,17 @@ L<Announced on 2019-05-24 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5
   The secrets inside her mind are like flowers in a garden at
   nighttime, filling the darkness with perfume.
 
+=head2 v5.30.3 - Ben Aaronovitch, "Rivers of London"
+
+L<Announced on 2020-06-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/01/msg257498.html>
+
+Trewsbury Mead [...] According to the Ordnance Survey, this is where the
+Thames first rises 130 straight-line kilometres west of London.  Just to
+the north is the site either of an Iron Age hill fort or a Roman
+encampment, the exact nature of which is awaiting an episode of Time
+Team.  Apparently there is a soggy field, a stone to mark the spot and a
+chance, after a particularly wet winter, that you might see some water.
+
 =head2 v5.30.2 - Francesco Maria Piave, trans. Deutsche Grammophon GmbH, "La traviata", Act II, Scene 2
 
 L<Announced on 2020-03-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/03/msg257227.html>
@@ -634,6 +645,16 @@ L<Announced on 2018-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl
 L<Announced on 2018-06-26 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251297>
 
   Courage is the only antidote for danger.
+
+=head2 v5.28.3 - Ben Aaronovitch, "Rivers of London"
+
+L<Announced on 2020-06-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2020/01/msg257497.html>
+
+The north end of the London Borough of Camden is dominated by two hills,
+Hampstead on the west, Highgate on the east, with the Heath, one of the
+largest parks in London, slung between them like a green saddle.  From
+these heights the land slopes down towards the River Thames and the
+floodplains that lurk below the built-up centre of London.
 
 =head2 v5.28.2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Jumblies
 
