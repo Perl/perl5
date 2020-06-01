@@ -364,6 +364,8 @@ sub changes_between {
     5.031010 => '2020-03-20',
     5.031011 => '2020-04-28',
     5.031012 => '2020-05-20',
+    5.028003 => '2020-06-01',
+    5.030003 => '2020-06-01',
     5.032000 => '2020-06-20',
   );
 
@@ -17473,6 +17475,28 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.028003 => {
+        delta_from => 5.028002,
+        changed => {
+            'B::Op_private'         => '5.028003',
+            'Config'                => '5.028003',
+            'Module::CoreList'      => '5.20200601_28',
+            'Module::CoreList::Utils'=> '5.20200601_28',
+        },
+        removed => {
+        }
+    },
+    5.030003 => {
+        delta_from => 5.030002,
+        changed => {
+            'B::Op_private'         => '5.030003',
+            'Config'                => '5.030003',
+            'Module::CoreList'      => '5.20200601_30',
+            'Module::CoreList::Utils'=> '5.20200601_30',
+        },
+        removed => {
+        }
+    },
     5.032000 => {
         delta_from => 5.031012,
         changed => {
@@ -18601,6 +18625,20 @@ sub is_core
     },
     5.031012 => {
         delta_from => 5.031011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.028003 => {
+        delta_from => 5.028002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.030003 => {
+        delta_from => 5.030002,
         changed => {
         },
         removed => {

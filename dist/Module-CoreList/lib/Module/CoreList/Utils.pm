@@ -1608,6 +1608,20 @@ my %delta = (
         removed => {
         }
     },
+    5.028003 => {
+        delta_from => 5.028002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.030003 => {
+        delta_from => 5.030002,
+        changed => {
+        },
+        removed => {
+        }
+    },
     5.032000 => {
         delta_from => 5.031012,
         changed => {
