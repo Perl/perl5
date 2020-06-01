@@ -16783,6 +16783,34 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		    return varname(agg_gv, '@', agg_targ,
 					NULL, index, FUV_SUBSCRIPT_ARRAY);
 	    }
+            /* look for an element not found */
+            if (!SvMAGICAL(sv)) {
+                SV *index_sv = NULL;
+                if (index_targ) {
+                    index_sv = PL_curpad[index_targ];
+                }
+                else if (index_gv) {
+                    index_sv = GvSV(index_gv);
+                }
+                if (index_sv && !SvMAGICAL(index_sv) && !SvROK(index_sv)) {
+                    if (is_hv) {
+                        HE *he = hv_fetch_ent(MUTABLE_HV(sv), index_sv, 0, 0);
+                        if (!he) {
+                            return varname(agg_gv, '%', agg_targ,
+                                           index_sv, 0, FUV_SUBSCRIPT_HASH);
+                        }
+                    }
+                    else {
+                        SSize_t index = SvIV(index_sv);
+                        SV * const * const svp =
+                            av_fetch(MUTABLE_AV(sv), index, FALSE);
+                        if (!svp) {
+                            return varname(agg_gv, '@', agg_targ,
+                                           NULL, index, FUV_SUBSCRIPT_ARRAY);
+                        }
+                    }
+                }
+            }
 	    if (match)
 		break;
 	    return varname(agg_gv,
