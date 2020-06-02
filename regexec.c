@@ -2133,9 +2133,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     PERL_ARGS_ASSERT_FIND_BYCLASS;
 
     /* We know what class it must start with. */
-    switch (OP(c)) {
-    case ANYOFPOSIXL:
-    case ANYOFL:
+    switch (with_tp_UTF8ness(OP(c), utf8_target, is_utf8_pat)) {
+    case ANYOFPOSIXL_t8_pb: case ANYOFPOSIXL_t8_p8: case ANYOFPOSIXL_tb_pb: case ANYOFPOSIXL_tb_p8:
+    case ANYOFL_t8_pb: case ANYOFL_t8_p8: case ANYOFL_tb_pb: case ANYOFL_tb_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
         if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(c)) && ! IN_UTF8_CTYPE_LOCALE) {
@@ -2143,8 +2143,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
 
         /* FALLTHROUGH */
-    case ANYOFD:
-    case ANYOF:
+    case ANYOFD_t8_pb: case ANYOFD_t8_p8: case ANYOFD_tb_pb: case ANYOFD_tb_p8:
+    case ANYOF_t8_pb: case ANYOF_t8_p8: case ANYOF_tb_pb: case ANYOF_tb_p8:
         if (utf8_target) {
             REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
@@ -2160,7 +2160,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case ANYOFM:    /* ARG() is the base byte; FLAGS() the mask byte */
+    case ANYOFM_t8_pb: case ANYOFM_t8_p8: case ANYOFM_tb_pb: case ANYOFM_tb_p8:    /* ARG() is the base byte; FLAGS() the mask byte */
         /* UTF-8ness doesn't matter because only matches UTF-8 invariants, so
          * use 0 */
         REXEC_FBC_FIND_NEXT_SCAN(0,
@@ -2168,14 +2168,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                    (U8) ARG(c), FLAGS(c)));
         break;
 
-    case NANYOFM:   /* UTF-8ness does matter because can match UTF-8 variants.
+    case NANYOFM_t8_pb: case NANYOFM_t8_p8: case NANYOFM_tb_pb: case NANYOFM_tb_p8:   /* UTF-8ness does matter because can match UTF-8 variants.
                      */
         REXEC_FBC_FIND_NEXT_SCAN(utf8_target,
          (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
                                    (U8) ARG(c), FLAGS(c)));
         break;
 
-    case ANYOFH:
+    case ANYOFH_t8_pb: case ANYOFH_t8_p8: case ANYOFH_tb_pb: case ANYOFH_tb_p8:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
             REXEC_FBC_CLASS_SCAN(TRUE,
                   (   (U8) NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
@@ -2183,7 +2183,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case ANYOFHb:
+    case ANYOFHb_t8_pb: case ANYOFHb_t8_p8: case ANYOFHb_tb_pb: case ANYOFHb_tb_p8:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
 
             /* We know what the first byte of any matched string should be */
@@ -2194,7 +2194,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case ANYOFHr:
+    case ANYOFHr_t8_pb: case ANYOFHr_t8_p8: case ANYOFHr_tb_pb: case ANYOFHr_tb_p8:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
             REXEC_FBC_CLASS_SCAN(TRUE,
                   (   inRANGE(NATIVE_UTF8_TO_I8(*s),
@@ -2204,7 +2204,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case ANYOFHs:
+    case ANYOFHs_t8_pb: case ANYOFHs_t8_p8: case ANYOFHs_tb_pb: case ANYOFHs_tb_p8:
         if (utf8_target) {  /* Can't possibly match a non-UTF-8 target */
             REXEC_FBC_CLASS_SCAN(TRUE,
                   (   strend -s >= FLAGS(c)
@@ -2213,7 +2213,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case ANYOFR:
+    case ANYOFR_t8_pb: case ANYOFR_t8_p8: case ANYOFR_tb_pb: case ANYOFR_tb_p8:
         if (utf8_target) {
             REXEC_FBC_CLASS_SCAN(TRUE,
                   (   NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
@@ -2228,7 +2228,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case ANYOFRb:
+    case ANYOFRb_t8_pb: case ANYOFRb_t8_p8: case ANYOFRb_tb_pb: case ANYOFRb_tb_p8:
         if (utf8_target) {
 
             /* We know what the first byte of any matched string should be */
@@ -2246,10 +2246,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
+    case EXACTFAA_NO_TRIE_t8_pb: case EXACTFAA_NO_TRIE_t8_p8: case EXACTFAA_NO_TRIE_tb_pb: case EXACTFAA_NO_TRIE_tb_p8: /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
 	/* FALLTHROUGH */
-    case EXACTFAA:
+    case EXACTFAA_t8_pb: case EXACTFAA_t8_p8: case EXACTFAA_tb_pb: case EXACTFAA_tb_p8:
         if (is_utf8_pat) {
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII
                              |FOLDEQ_S2_ALREADY_FOLDED|FOLDEQ_S2_FOLDS_SANE;
@@ -2273,7 +2273,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         folder = foldEQ_latin1_s2_folded;
         goto do_exactf_non_utf8;
 
-    case EXACTF:   /* This node only generated for non-utf8 patterns */
+    case EXACTF_t8_pb: case EXACTF_t8_p8: case EXACTF_tb_pb: case EXACTF_tb_p8:   /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
         if (utf8_target) {
             goto do_exactf_utf8;
@@ -2282,7 +2282,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         folder = foldEQ;
         goto do_exactf_non_utf8;
 
-    case EXACTFL:
+    case EXACTFL_t8_pb: case EXACTFL_t8_p8: case EXACTFL_tb_pb: case EXACTFL_tb_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (is_utf8_pat || utf8_target || IN_UTF8_CTYPE_LOCALE) {
             utf8_fold_flags = FOLDEQ_LOCALE;
@@ -2292,13 +2292,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         folder = foldEQ_locale;
         goto do_exactf_non_utf8;
 
-    case EXACTFUP:      /* Problematic even though pattern isn't UTF-8.  Use
+    case EXACTFUP_t8_pb: case EXACTFUP_t8_p8: case EXACTFUP_tb_pb: case EXACTFUP_tb_p8:      /* Problematic even though pattern isn't UTF-8.  Use
                            full functionality normally not done except for
                            UTF-8 */
         assert(! is_utf8_pat);
         goto do_exactf_utf8;
 
-    case EXACTFLU8:
+    case EXACTFLU8_t8_pb: case EXACTFLU8_t8_p8: case EXACTFLU8_tb_pb: case EXACTFLU8_tb_p8:
             if (! utf8_target) {    /* All code points in this node require
                                        UTF-8 to express.  */
                 break;
@@ -2307,7 +2307,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                              | FOLDEQ_S2_FOLDS_SANE;
             goto do_exactf_utf8;
 
-    case EXACTFU_REQ8:
+    case EXACTFU_REQ8_t8_pb: case EXACTFU_REQ8_t8_p8: case EXACTFU_REQ8_tb_pb: case EXACTFU_REQ8_tb_p8:
         if (! utf8_target) {
             break;
         }
@@ -2315,7 +2315,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
         goto do_exactf_utf8;
 
-    case EXACTFU:
+    case EXACTFU_t8_pb: case EXACTFU_t8_p8: case EXACTFU_tb_pb: case EXACTFU_tb_p8:
         if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
             goto do_exactf_utf8;
@@ -2460,7 +2460,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
     }
 
-    case BOUNDL:
+    case BOUNDL_t8_pb: case BOUNDL_t8_p8: case BOUNDL_tb_pb: case BOUNDL_tb_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (FLAGS(c) != TRADITIONAL_BOUND) {
             if (! IN_UTF8_CTYPE_LOCALE) {
@@ -2473,7 +2473,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         FBC_BOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8_safe);
         break;
 
-    case NBOUNDL:
+    case NBOUNDL_t8_pb: case NBOUNDL_t8_p8: case NBOUNDL_tb_pb: case NBOUNDL_tb_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (FLAGS(c) != TRADITIONAL_BOUND) {
             if (! IN_UTF8_CTYPE_LOCALE) {
@@ -2486,35 +2486,35 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         FBC_NBOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8_safe);
         break;
 
-    case BOUND: /* regcomp.c makes sure that this only has the traditional \b
+    case BOUND_t8_pb: case BOUND_t8_p8: case BOUND_tb_pb: case BOUND_tb_p8: /* regcomp.c makes sure that this only has the traditional \b
                    meaning */
         assert(FLAGS(c) == TRADITIONAL_BOUND);
 
         FBC_BOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
         break;
 
-    case BOUNDA: /* regcomp.c makes sure that this only has the traditional \b
+    case BOUNDA_t8_pb: case BOUNDA_t8_p8: case BOUNDA_tb_pb: case BOUNDA_tb_p8: /* regcomp.c makes sure that this only has the traditional \b
                    meaning */
         assert(FLAGS(c) == TRADITIONAL_BOUND);
 
         FBC_BOUND_A(isWORDCHAR_A);
         break;
 
-    case NBOUND: /* regcomp.c makes sure that this only has the traditional \b
+    case NBOUND_t8_pb: case NBOUND_t8_p8: case NBOUND_tb_pb: case NBOUND_tb_p8: /* regcomp.c makes sure that this only has the traditional \b
                    meaning */
         assert(FLAGS(c) == TRADITIONAL_BOUND);
 
         FBC_NBOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
         break;
 
-    case NBOUNDA: /* regcomp.c makes sure that this only has the traditional \b
+    case NBOUNDA_t8_pb: case NBOUNDA_t8_p8: case NBOUNDA_tb_pb: case NBOUNDA_tb_p8: /* regcomp.c makes sure that this only has the traditional \b
                    meaning */
         assert(FLAGS(c) == TRADITIONAL_BOUND);
 
         FBC_NBOUND_A(isWORDCHAR_A);
         break;
 
-    case NBOUNDU:
+    case NBOUNDU_t8_pb: case NBOUNDU_t8_p8: case NBOUNDU_tb_pb: case NBOUNDU_tb_p8:
         if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
             break;
@@ -2525,7 +2525,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         to_complement = 1;
         goto do_boundu;
 
-    case BOUNDU:
+    case BOUNDU_t8_pb: case BOUNDU_t8_p8: case BOUNDU_tb_pb: case BOUNDU_tb_p8:
         if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
             FBC_BOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
             break;
@@ -2740,7 +2740,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 }
         break;
 
-    case LNBREAK:
+    case LNBREAK_t8_pb: case LNBREAK_t8_p8: case LNBREAK_tb_pb: case LNBREAK_tb_p8:
         REXEC_FBC_CSCAN(is_LNBREAK_utf8_safe(s, strend),
                         is_LNBREAK_latin1_safe(s, strend)
         );
@@ -2749,27 +2749,27 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     /* The argument to all the POSIX node types is the class number to pass to
      * _generic_isCC() to build a mask for searching in PL_charclass[] */
 
-    case NPOSIXL:
+    case NPOSIXL_t8_pb: case NPOSIXL_t8_p8: case NPOSIXL_tb_pb: case NPOSIXL_tb_p8:
         to_complement = 1;
         /* FALLTHROUGH */
 
-    case POSIXL:
+    case POSIXL_t8_pb: case POSIXL_t8_p8: case POSIXL_tb_pb: case POSIXL_tb_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         REXEC_FBC_CSCAN(to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s, (U8 *) strend)),
                         to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
         break;
 
-    case NPOSIXD:
+    case NPOSIXD_t8_pb: case NPOSIXD_t8_p8: case NPOSIXD_tb_pb: case NPOSIXD_tb_p8:
         to_complement = 1;
         /* FALLTHROUGH */
 
-    case POSIXD:
+    case POSIXD_t8_pb: case POSIXD_t8_p8: case POSIXD_tb_pb: case POSIXD_tb_p8:
         if (utf8_target) {
             goto posix_utf8;
         }
         goto posixa;
 
-    case NPOSIXA:
+    case NPOSIXA_t8_pb: case NPOSIXA_t8_p8: case NPOSIXA_tb_pb: case NPOSIXA_tb_p8:
         if (utf8_target) {
             /* The complement of something that matches only ASCII matches all
              * non-ASCII, plus everything in ASCII that isn't in the class. */
@@ -2781,7 +2781,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         to_complement = 1;
         goto posixa;
 
-    case POSIXA:
+    case POSIXA_t8_pb: case POSIXA_t8_p8: case POSIXA_tb_pb: case POSIXA_tb_p8:
         /* Don't need to worry about utf8, as it can match only a single
          * byte invariant character.  But we do anyway for performance reasons,
          * as otherwise we would have to examine all the continuation
@@ -2796,11 +2796,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         to_complement ^ cBOOL(_generic_isCC_A(*s, FLAGS(c))));
         break;
 
-    case NPOSIXU:
+    case NPOSIXU_t8_pb: case NPOSIXU_t8_p8: case NPOSIXU_tb_pb: case NPOSIXU_tb_p8:
         to_complement = 1;
         /* FALLTHROUGH */
 
-    case POSIXU:
+    case POSIXU_t8_pb: case POSIXU_t8_p8: case POSIXU_tb_pb: case POSIXU_tb_p8:
         if (! utf8_target) {
             REXEC_FBC_CLASS_SCAN(0, /* 0=>not-utf8 */
                                  to_complement ^ cBOOL(_generic_isCC(*s,
@@ -2847,8 +2847,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    case AHOCORASICKC:
-    case AHOCORASICK:
+    case AHOCORASICKC_t8_pb: case AHOCORASICKC_t8_p8: case AHOCORASICKC_tb_pb: case AHOCORASICKC_tb_p8:
+    case AHOCORASICK_t8_pb: case AHOCORASICK_t8_p8: case AHOCORASICK_tb_pb: case AHOCORASICK_tb_p8:
         {
             DECL_TRIE_TYPE(c);
             /* what trie are we using right now */
