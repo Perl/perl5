@@ -1262,14 +1262,20 @@ PP(pp_eq)
 {
     dSP;
     SV *left, *right;
+    U32 flags_and, flags_or;
 
     tryAMAGICbin_MG(eq_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
+    flags_and = SvFLAGS(left) & SvFLAGS(right);
+    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
     SETs(boolSV(
-	(SvIOK_notUV(left) && SvIOK_notUV(right))
-	? (SvIVX(left) == SvIVX(right))
-	: ( do_ncmp(left, right) == 0)
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) == SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) == SvNVX(right))
+        : ( do_ncmp(left, right) == 0)
     ));
     RETURN;
 }
