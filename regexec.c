@@ -10776,19 +10776,37 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
          * matches */
         if (     UNLIKELY(PL_in_utf8_turkic_locale)
             && ! match
-            &&   (flags & ANYOFL_FOLD)
-            &&   utf8_target)
+            &&   (flags & ANYOFL_FOLD))
         {
-            if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
-                if (ANYOF_BITMAP_TEST(n, 'i')) {
+            if (utf8_target) {
+                if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
+                    if (ANYOF_BITMAP_TEST(n, 'i')) {
+                        match = TRUE;
+                    }
+                }
+                else if (c == LATIN_SMALL_LETTER_DOTLESS_I) {
+                    if (ANYOF_BITMAP_TEST(n, 'I')) {
+                        match = TRUE;
+                    }
+                }
+            }
+
+#if NUM_ANYOF_CODE_POINTS > 256
+            /* Larger bitmap means these special cases aren't handled outside
+             * the bitmap above. */
+            if (*p == 'i') {
+                if (ANYOF_BITMAP_TEST(n,
+                                      LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
+                {
                     match = TRUE;
                 }
             }
-            else if (c == LATIN_SMALL_LETTER_DOTLESS_I) {
-                if (ANYOF_BITMAP_TEST(n, 'I')) {
+            else if (*p == 'I') {
+                if (ANYOF_BITMAP_TEST(n, LATIN_SMALL_LETTER_DOTLESS_I)) {
                     match = TRUE;
                 }
             }
+#endif
         }
 
         if (UNICODE_IS_SUPER(c)
