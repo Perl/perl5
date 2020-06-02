@@ -28,12 +28,18 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1000
-      - name: Involved authors
+      - name: git setup
         run: |
           echo "Pull request authors"
           echo "# git merge-base origin/${BASE_REF} HEAD"
-          branch_off=$(git merge-base origin/${BASE_REF} HEAD)
-          git log --pretty=format:"Author: %an <%ae>" $branch_off..${SHA}^2 | sort -u
+          git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
+          git config diff.renameLimit 999999
+          git fetch --depth=1000 origin ${BASE_REF}
+        env:
+          BASE_REF: ${{ github.base_ref }}
+      - name: Involved authors
+        run: |
+          git log --pretty=format:"Author: %an <%ae>" origin/${BASE_REF}...${SHA}^2 | sort -u
         env:
           BASE_REF: ${{ github.base_ref }}
           SHA: ${{ github.sha }}
@@ -86,7 +92,7 @@ jobs:
   # alternatively could upload an artifact file and abort...
 
   check_extended_testing:
-    name: "EXTENDED_TESTING set?"
+    name: "Run EXTENDED_TESTING"
     runs-on: ubuntu-latest
 
     steps:
