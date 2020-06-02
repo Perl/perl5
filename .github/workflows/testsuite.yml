@@ -16,8 +16,7 @@ jobs:
 
   authors:
     runs-on: ubuntu-latest
-    # not from a fork and base_ref defined
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.base_ref != ''
+    if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' ) && github.base_ref != ''
     continue-on-error: true
 
     steps:
@@ -88,8 +87,8 @@ jobs:
   # use a dedicated job to check if full testsuite is enabled
   #   avoid starting VMs if not neeced
   #   and also provide the same check for all platforms
-  # the job fails when EXTENDED_TESTING is unset
-  # alternatively could upload an artifact file and abort...
+  # the job fails when EXTENDED_TESTING is unset and run on fork repo
+  # note: secrets come from fork repositories
 
   check_extended_testing:
     name: "Run EXTENDED_TESTING"
@@ -100,10 +99,11 @@ jobs:
       # cannot use secrets earlier as part of 'if:' condition
       - name: "Runs if EXTENDED_TESTING is set"
         env:
-          EXTENDED_TESTING: ${{ secrets.EXTENDED_TESTING }}      
+          EXTENDED_TESTING: ${{ secrets.EXTENDED_TESTING }}
+          CURRENT_REPOSITORY: ${{ github.repository }}
         run: |
-          if [ -z "${EXTENDED_TESTING}" ]; then
-            echo "[Warning] Only run this job when secrets.EXTENDED_TESTING is set. Stopping."
+          if [[ -z "${EXTENDED_TESTING}" && "${CURRENT_REPOSITORY}" != 'Perl/perl5' ]]; then
+            echo "[Warning] Only run extended tests on 'Perl/perl5' PRs or when secrets.EXTENDED_TESTING is set. Stopping."
             exit 78
           fi
       - run: echo "Running EXTENDED_TESTING tests"
