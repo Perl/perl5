@@ -1412,7 +1412,7 @@ It has been backported in L<Devel::PPPort> 3.55 and later.
 
 =item *
 
-Added the C<<PL_curstackinfo->si_cxsubix>> field. This records the stack index
+Added the C<< PL_curstackinfo->si_cxsubix >> field. This records the stack index
 of the most recently pushed sub/format/eval context. It is set and restored
 automatically by C<cx_pushsub()>, C<cx_popsub()> etc., but would need to be
 manually managed if you do any unusual manipulation of the context stack.
