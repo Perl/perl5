@@ -1865,12 +1865,19 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     else if (flags & ANYOFL_FOLD) {
         if (new_node_has_latin1) {
 
+            /* These folds are potential in Turkic locales */
+            if (_invlist_contains_cp(invlist, 'i')) {
+                invlist = add_cp_to_invlist(invlist,
+                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+            }
+            if (_invlist_contains_cp(invlist, 'I')) {
+                invlist = add_cp_to_invlist(invlist,
+                                                LATIN_SMALL_LETTER_DOTLESS_I);
+            }
+
             /* Under /li, any 0-255 could fold to any other 0-255, depending on
              * the locale.  We can skip this if there are no 0-255 at all. */
             _invlist_union(invlist, PL_Latin1, &invlist);
-
-            invlist = add_cp_to_invlist(invlist, LATIN_SMALL_LETTER_DOTLESS_I);
-            invlist = add_cp_to_invlist(invlist, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
         }
         else {
             if (_invlist_contains_cp(invlist, LATIN_SMALL_LETTER_DOTLESS_I)) {
@@ -10894,14 +10901,16 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         }
         else {
             /* Any Latin1 range character can potentially match any
-             * other depending on the locale, and in Turkic locales, U+130 and
-             * U+131 */
+             * other depending on the locale, and in Turkic locales, 'I' and
+             * 'i' can match U+130 and U+131 */
             if (OP(node) == EXACTFL) {
                 _invlist_union(invlist, PL_Latin1, &invlist);
-                invlist = add_cp_to_invlist(invlist,
+                if (isALPHA_FOLD_EQ(uc, 'I')) {
+                    invlist = add_cp_to_invlist(invlist,
                                                 LATIN_SMALL_LETTER_DOTLESS_I);
-                invlist = add_cp_to_invlist(invlist,
+                    invlist = add_cp_to_invlist(invlist,
                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                }
             }
             else {
                 /* But otherwise, it matches at least itself.  We can
@@ -19490,8 +19499,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
         }
         if (    only_utf8_locale_list
-            || (cp_list && (   _invlist_contains_cp(cp_list, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE)
-                            || _invlist_contains_cp(cp_list, LATIN_SMALL_LETTER_DOTLESS_I))))
+            || (    cp_list
+                && (   _invlist_contains_cp(cp_list,
+                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE)
+                    || _invlist_contains_cp(cp_list,
+                                            LATIN_SMALL_LETTER_DOTLESS_I))))
         {
             has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
             anyof_flags
