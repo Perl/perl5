@@ -167,6 +167,23 @@ EXACTFU_REQ8 EXACT,    str        ; Like EXACTFU, but only UTF-8 encoded targets
 
 EXACTFU_S_EDGE EXACT,   str       ; /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only)
 
+#*New charclass like patterns
+LNBREAK     LNBREAK,    none      ; generic newline pattern
+
+#*Trie Related
+
+#* Behave the same as A|LIST|OF|WORDS would. The '..C' variants
+#* have inline charclass data (ascii only), the 'C' store it in the
+#* structure.
+# NOTE: the relative order of the TRIE-like regops  is significant
+
+TRIE        TRIE,       trie 1    ; Match many EXACT(F[ALU]?)? at once. flags==type
+TRIEC       TRIE,trie charclass   ; Same as TRIE, but with embedded charclass data
+
+# For start classes, contains an added fail table.
+AHOCORASICK     TRIE,   trie 1    ; Aho Corasick stclass. flags==type
+AHOCORASICKC    TRIE,trie charclass   ; Same as AHOCORASICK, but with embedded charclass data
+
 #*Do nothing types
 
 NOTHING     NOTHING,    no        ; Match empty string.
@@ -239,20 +256,6 @@ LOGICAL     LOGICAL,    no        ; Next opcode should set the flag only.
 #*This is not used yet
 RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 
-#*Trie Related
-
-#* Behave the same as A|LIST|OF|WORDS would. The '..C' variants
-#* have inline charclass data (ascii only), the 'C' store it in the
-#* structure.
-# NOTE: the relative order of the TRIE-like regops  is significant
-
-TRIE        TRIE,       trie 1    ; Match many EXACT(F[ALU]?)? at once. flags==type
-TRIEC       TRIE,trie charclass   ; Same as TRIE, but with embedded charclass data
-
-# For start classes, contains an added fail table.
-AHOCORASICK     TRIE,   trie 1    ; Aho Corasick stclass. flags==type
-AHOCORASICKC    TRIE,trie charclass   ; Same as AHOCORASICK, but with embedded charclass data
-
 #*Regex Subroutines
 GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs arg2
 
@@ -277,10 +280,9 @@ CUTGROUP    VERB,       no-sv 1   ; On failure go to the next alternation in the
 #*Control what to keep in $&.
 KEEPS       KEEPS,      no        ; $& begins here.
 
-#*New charclass like patterns
-LNBREAK     LNBREAK,    none      ; generic newline pattern
-
-# NEW STUFF SOMEWHERE ABOVE THIS LINE
+# NEW STUFF SOMEWHERE ABOVE THIS LINE.  Stuff that regexec.c: find_byclass()
+# and regrepeat() use should go way above, near LNBREAK to allow a more compact
+# jump table to be generated for their switch() statements
 
 ################################################################################
 

@@ -711,6 +711,24 @@ will be lost.
                              except begins and/or ends with [Ss];
                              (string not UTF-8; compile-time only)
 
+ # New charclass like patterns
+ LNBREAK          none       generic newline pattern
+
+ # Trie Related
+
+ # Behave the same as A|LIST|OF|WORDS would. The '..C' variants
+ # have inline charclass data (ascii only), the 'C' store it in the
+ # structure.
+
+ TRIE             trie 1     Match many EXACT(F[ALU]?)? at once.
+                             flags==type
+ TRIEC            trie       Same as TRIE, but with embedded charclass
+                  charclass  data
+
+ AHOCORASICK      trie 1     Aho Corasick stclass. flags==type
+ AHOCORASICKC     trie       Same as AHOCORASICK, but with embedded
+                  charclass  charclass data
+
  # Do nothing types
 
  NOTHING          no         Match empty string.
@@ -797,21 +815,6 @@ will be lost.
  # This is not used yet
  RENUM            off 1 1    Group with independently numbered parens.
 
- # Trie Related
-
- # Behave the same as A|LIST|OF|WORDS would. The '..C' variants
- # have inline charclass data (ascii only), the 'C' store it in the
- # structure.
-
- TRIE             trie 1     Match many EXACT(F[ALU]?)? at once.
-                             flags==type
- TRIEC            trie       Same as TRIE, but with embedded charclass
-                  charclass  data
-
- AHOCORASICK      trie 1     Aho Corasick stclass. flags==type
- AHOCORASICKC     trie       Same as AHOCORASICK, but with embedded
-                  charclass  charclass data
-
  # Regex Subroutines
  GOSUB            num/ofs 2L recurse to paren arg1 at (signed) ofs arg2
 
@@ -841,9 +844,6 @@ will be lost.
 
  # Control what to keep in $&.
  KEEPS            no         $& begins here.
-
- # New charclass like patterns
- LNBREAK          none       generic newline pattern
 
  # SPECIAL  REGOPS
 
