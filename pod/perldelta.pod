@@ -91,14 +91,14 @@ For more detail see L<perlop/Class Instance Operator>.
 See L<perlre/(*pla:pattern)>, L<perlre/(*plb:pattern)>,
 L<perlre/(*nla:pattern)>>, and L<perlre/(*nlb:pattern)>.
 Use of these no longer generates a warning; existing code that disables
-the warning category C<experimental::script_run> will continue to work
+the warning category C<experimental::alpha_assertions> will continue to work
 without any changes needed. Enabling the category has no effect.
 
 =head2 Script runs are no longer experimental
 
 See L<perlre/Script Runs>. Use of these no longer generates a warning;
 existing code that disables the warning category
-C<experimental::alpha_assertions> will continue to work without any
+C<experimental::script_run> will continue to work without any
 changes needed. Enabling the category has no effect.
 
 =head2 Feature checks are now faster
