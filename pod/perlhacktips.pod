@@ -1270,11 +1270,10 @@ To get valgrind and for more information see
 =head2 AddressSanitizer
 
 AddressSanitizer ("ASan") consists of a compiler instrumentation module
-and a run-time C<malloc> library. AddressSanitizer is available for
-Linux, Mac OS X and Windows. Specifically, it has been included in clang
-since v3.1, gcc since v4.8, and Visual Studio 2019 since v16.1. It checks
-for unsafe memory usage, such as use after free and buffer overflow
-conditions, and is fast enough that you can easily compile your
+and a run-time C<malloc> library. ASan is available for a variety of
+architectures, operating systems, and compilers (see project link below).
+It checks for unsafe memory usage, such as use after free and buffer 
+overflow conditions, and is fast enough that you can easily compile your
 debugging or optimized perl with it. Modern versions of ASan check for
 memory leaks by default on most platforms, otherwise (e.g. x86_64 OS X)
 this feature can be enabled via C<ASAN_OPTIONS=detect_leaks=1>.
