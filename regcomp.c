@@ -7882,13 +7882,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         /* We have that number in RExC_npar */
         RExC_total_parens = RExC_npar;
-
-        /* XXX For backporting, use long jumps if there is any possibility of
-         * overflow */
-        if (RExC_size > U16_MAX && ! RExC_use_BRANCHJ) {
-            RExC_use_BRANCHJ = TRUE;
-            flags |= RESTART_PARSE;
-        }
     }
     else if (! MUST_RESTART(flags)) {
 	ReREFCNT_dec(Rx);
