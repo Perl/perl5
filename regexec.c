@@ -2532,200 +2532,201 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
 
       do_boundu:
-                if (s == reginfo->strbeg) {
-                    if (reginfo->intuit || regtry(reginfo, &s))
+        if (s == reginfo->strbeg) {
+            if (reginfo->intuit || regtry(reginfo, &s))
+            {
+                goto got_it;
+            }
+
+            /* Didn't match.  Try at the next position (if there is one) */
+            s += (utf8_target) ? UTF8_SAFE_SKIP(s, reginfo->strend) : 1;
+            if (UNLIKELY(s >= reginfo->strend)) {
+                break;
+            }
+        }
+
+        switch((bound_type) FLAGS(c)) {
+          case TRADITIONAL_BOUND: /* Should have already been handled */
+            assert(0);
+            break;
+
+          case GCB_BOUND:
+            if (utf8_target) {
+                GCB_enum before = getGCB_VAL_UTF8(
+                                           reghop3((U8*)s, -1,
+                                                   (U8*)(reginfo->strbeg)),
+                                           (U8*) reginfo->strend);
+                while (s < strend) {
+                    GCB_enum after = getGCB_VAL_UTF8((U8*) s,
+                                                    (U8*) reginfo->strend);
+                    if (   (to_complement ^ isGCB(before,
+                                                  after,
+                                                  (U8*) reginfo->strbeg,
+                                                  (U8*) s,
+                                                  utf8_target))
+                        && (reginfo->intuit || regtry(reginfo, &s)))
                     {
                         goto got_it;
                     }
+                    before = after;
+                    s += UTF8_SAFE_SKIP(s, reginfo->strend);
+                }
+            }
+            else {  /* Not utf8.  Everything is a GCB except between CR and
+                       LF */
+                while (s < strend) {
+                    if ((to_complement ^ (   UCHARAT(s - 1) != '\r'
+                                          || UCHARAT(s) != '\n'))
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
+                    }
+                    s++;
+                }
+            }
 
-                    /* Didn't match.  Try at the next position (if there is one) */
-                    s += (utf8_target) ? UTF8_SAFE_SKIP(s, reginfo->strend) : 1;
-                    if (UNLIKELY(s >= reginfo->strend)) {
-                        break;
-                    }
-                }
-        switch((bound_type) FLAGS(c)) {
-            case TRADITIONAL_BOUND: /* Should have already been handled */
-                assert(0);
-                break;
+            break;
 
-            case GCB_BOUND:
-                if (utf8_target) {
-                    GCB_enum before = getGCB_VAL_UTF8(
-                                               reghop3((U8*)s, -1,
-                                                       (U8*)(reginfo->strbeg)),
-                                               (U8*) reginfo->strend);
-                    while (s < strend) {
-                        GCB_enum after = getGCB_VAL_UTF8((U8*) s,
-                                                        (U8*) reginfo->strend);
-                        if (   (to_complement ^ isGCB(before,
-                                                      after,
-                                                      (U8*) reginfo->strbeg,
-                                                      (U8*) s,
-                                                      utf8_target))
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        before = after;
-                        s += UTF8_SAFE_SKIP(s, reginfo->strend);
+          case LB_BOUND:
+            if (utf8_target) {
+                LB_enum before = getLB_VAL_UTF8(reghop3((U8*)s,
+                                                           -1,
+                                                           (U8*)(reginfo->strbeg)),
+                                                   (U8*) reginfo->strend);
+                while (s < strend) {
+                    LB_enum after = getLB_VAL_UTF8((U8*) s, (U8*) reginfo->strend);
+                    if (to_complement ^ isLB(before,
+                                             after,
+                                             (U8*) reginfo->strbeg,
+                                             (U8*) s,
+                                             (U8*) reginfo->strend,
+                                             utf8_target)
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
                     }
+                    before = after;
+                    s += UTF8_SAFE_SKIP(s, reginfo->strend);
                 }
-                else {  /* Not utf8.  Everything is a GCB except between CR and
-                           LF */
-                    while (s < strend) {
-                        if ((to_complement ^ (   UCHARAT(s - 1) != '\r'
-                                              || UCHARAT(s) != '\n'))
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        s++;
+            }
+            else {  /* Not utf8. */
+                LB_enum before = getLB_VAL_CP((U8) *(s -1));
+                while (s < strend) {
+                    LB_enum after = getLB_VAL_CP((U8) *s);
+                    if (to_complement ^ isLB(before,
+                                             after,
+                                             (U8*) reginfo->strbeg,
+                                             (U8*) s,
+                                             (U8*) reginfo->strend,
+                                             utf8_target)
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
                     }
+                    before = after;
+                    s++;
                 }
+            }
 
-                break;
+            break;
 
-            case LB_BOUND:
-                if (utf8_target) {
-                    LB_enum before = getLB_VAL_UTF8(reghop3((U8*)s,
-                                                               -1,
-                                                               (U8*)(reginfo->strbeg)),
-                                                       (U8*) reginfo->strend);
-                    while (s < strend) {
-                        LB_enum after = getLB_VAL_UTF8((U8*) s, (U8*) reginfo->strend);
-                        if (to_complement ^ isLB(before,
-                                                 after,
-                                                 (U8*) reginfo->strbeg,
-                                                 (U8*) s,
-                                                 (U8*) reginfo->strend,
-                                                 utf8_target)
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        before = after;
-                        s += UTF8_SAFE_SKIP(s, reginfo->strend);
+          case SB_BOUND:
+            if (utf8_target) {
+                SB_enum before = getSB_VAL_UTF8(reghop3((U8*)s,
+                                                    -1,
+                                                    (U8*)(reginfo->strbeg)),
+                                                  (U8*) reginfo->strend);
+                while (s < strend) {
+                    SB_enum after = getSB_VAL_UTF8((U8*) s,
+                                                     (U8*) reginfo->strend);
+                    if ((to_complement ^ isSB(before,
+                                              after,
+                                              (U8*) reginfo->strbeg,
+                                              (U8*) s,
+                                              (U8*) reginfo->strend,
+                                              utf8_target))
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
                     }
+                    before = after;
+                    s += UTF8_SAFE_SKIP(s, reginfo->strend);
                 }
-                else {  /* Not utf8. */
-                    LB_enum before = getLB_VAL_CP((U8) *(s -1));
-                    while (s < strend) {
-                        LB_enum after = getLB_VAL_CP((U8) *s);
-                        if (to_complement ^ isLB(before,
-                                                 after,
-                                                 (U8*) reginfo->strbeg,
-                                                 (U8*) s,
-                                                 (U8*) reginfo->strend,
-                                                 utf8_target)
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        before = after;
-                        s++;
+            }
+            else {  /* Not utf8. */
+                SB_enum before = getSB_VAL_CP((U8) *(s -1));
+                while (s < strend) {
+                    SB_enum after = getSB_VAL_CP((U8) *s);
+                    if ((to_complement ^ isSB(before,
+                                              after,
+                                              (U8*) reginfo->strbeg,
+                                              (U8*) s,
+                                              (U8*) reginfo->strend,
+                                              utf8_target))
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
                     }
+                    before = after;
+                    s++;
                 }
+            }
 
-                break;
+            break;
 
-            case SB_BOUND:
-                if (utf8_target) {
-                    SB_enum before = getSB_VAL_UTF8(reghop3((U8*)s,
-                                                        -1,
-                                                        (U8*)(reginfo->strbeg)),
-                                                      (U8*) reginfo->strend);
-                    while (s < strend) {
-                        SB_enum after = getSB_VAL_UTF8((U8*) s,
-                                                         (U8*) reginfo->strend);
-                        if ((to_complement ^ isSB(before,
-                                                  after,
-                                                  (U8*) reginfo->strbeg,
-                                                  (U8*) s,
-                                                  (U8*) reginfo->strend,
-                                                  utf8_target))
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        before = after;
-                        s += UTF8_SAFE_SKIP(s, reginfo->strend);
+          case WB_BOUND:
+            if (utf8_target) {
+                /* We are at a boundary between char_sub_0 and char_sub_1.
+                 * We also keep track of the value for char_sub_-1 as we
+                 * loop through the line.   Context may be needed to make a
+                 * determination, and if so, this can save having to
+                 * recalculate it */
+                WB_enum previous = WB_UNKNOWN;
+                WB_enum before = getWB_VAL_UTF8(
+                                          reghop3((U8*)s,
+                                                  -1,
+                                                  (U8*)(reginfo->strbeg)),
+                                          (U8*) reginfo->strend);
+                while (s < strend) {
+                    WB_enum after = getWB_VAL_UTF8((U8*) s,
+                                                    (U8*) reginfo->strend);
+                    if ((to_complement ^ isWB(previous,
+                                              before,
+                                              after,
+                                              (U8*) reginfo->strbeg,
+                                              (U8*) s,
+                                              (U8*) reginfo->strend,
+                                              utf8_target))
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
                     }
+                    previous = before;
+                    before = after;
+                    s += UTF8_SAFE_SKIP(s, reginfo->strend);
                 }
-                else {  /* Not utf8. */
-                    SB_enum before = getSB_VAL_CP((U8) *(s -1));
-                    while (s < strend) {
-                        SB_enum after = getSB_VAL_CP((U8) *s);
-                        if ((to_complement ^ isSB(before,
-                                                  after,
-                                                  (U8*) reginfo->strbeg,
-                                                  (U8*) s,
-                                                  (U8*) reginfo->strend,
-                                                  utf8_target))
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        before = after;
-                        s++;
+            }
+            else {  /* Not utf8. */
+                WB_enum previous = WB_UNKNOWN;
+                WB_enum before = getWB_VAL_CP((U8) *(s -1));
+                while (s < strend) {
+                    WB_enum after = getWB_VAL_CP((U8) *s);
+                    if ((to_complement ^ isWB(previous,
+                                              before,
+                                              after,
+                                              (U8*) reginfo->strbeg,
+                                              (U8*) s,
+                                              (U8*) reginfo->strend,
+                                              utf8_target))
+                        && (reginfo->intuit || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
                     }
+                    previous = before;
+                    before = after;
+                    s++;
                 }
-
-                break;
-
-            case WB_BOUND:
-                if (utf8_target) {
-                    /* We are at a boundary between char_sub_0 and char_sub_1.
-                     * We also keep track of the value for char_sub_-1 as we
-                     * loop through the line.   Context may be needed to make a
-                     * determination, and if so, this can save having to
-                     * recalculate it */
-                    WB_enum previous = WB_UNKNOWN;
-                    WB_enum before = getWB_VAL_UTF8(
-                                              reghop3((U8*)s,
-                                                      -1,
-                                                      (U8*)(reginfo->strbeg)),
-                                              (U8*) reginfo->strend);
-                    while (s < strend) {
-                        WB_enum after = getWB_VAL_UTF8((U8*) s,
-                                                        (U8*) reginfo->strend);
-                        if ((to_complement ^ isWB(previous,
-                                                  before,
-                                                  after,
-                                                  (U8*) reginfo->strbeg,
-                                                  (U8*) s,
-                                                  (U8*) reginfo->strend,
-                                                  utf8_target))
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        previous = before;
-                        before = after;
-                        s += UTF8_SAFE_SKIP(s, reginfo->strend);
-                    }
-                }
-                else {  /* Not utf8. */
-                    WB_enum previous = WB_UNKNOWN;
-                    WB_enum before = getWB_VAL_CP((U8) *(s -1));
-                    while (s < strend) {
-                        WB_enum after = getWB_VAL_CP((U8) *s);
-                        if ((to_complement ^ isWB(previous,
-                                                  before,
-                                                  after,
-                                                  (U8*) reginfo->strbeg,
-                                                  (U8*) s,
-                                                  (U8*) reginfo->strend,
-                                                  utf8_target))
-                            && (reginfo->intuit || regtry(reginfo, &s)))
-                        {
-                            goto got_it;
-                        }
-                        previous = before;
-                        before = after;
-                        s++;
-                    }
-                }
+            }
         }
 
         /* Here are at the final position in the target string, which is a
