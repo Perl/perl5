@@ -2523,15 +2523,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       do_nboundu:
 
         to_complement = 1;
-        /* FALLTHROUGH */
+        goto do_boundu;
 
     case BOUNDU:
+        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+            FBC_BOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
+            break;
+        }
+
       do_boundu:
-        switch((bound_type) FLAGS(c)) {
-            case TRADITIONAL_BOUND:
-                FBC_BOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
-                break;
-            case GCB_BOUND:
                 if (s == reginfo->strbeg) {
                     if (reginfo->intuit || regtry(reginfo, &s))
                     {
@@ -2544,7 +2544,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         break;
                     }
                 }
+        switch((bound_type) FLAGS(c)) {
+            case TRADITIONAL_BOUND: /* Should have already been handled */
+                assert(0);
+                break;
 
+            case GCB_BOUND:
                 if (utf8_target) {
                     GCB_enum before = getGCB_VAL_UTF8(
                                                reghop3((U8*)s, -1,
@@ -2579,26 +2584,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
 
-                /* And, since this is a bound, it can match after the final
-                 * character in the string */
-                if (   reginfo->intuit
-                    || (s <= reginfo->strend && regtry(reginfo, &s)))
-                {
-                    goto got_it;
-                }
                 break;
 
             case LB_BOUND:
-                if (s == reginfo->strbeg) {
-                    if (reginfo->intuit || regtry(reginfo, &s)) {
-                        goto got_it;
-                    }
-                    s += (utf8_target) ? UTF8_SAFE_SKIP(s, reginfo->strend) : 1;
-                    if (UNLIKELY(s >= reginfo->strend)) {
-                        break;
-                    }
-                }
-
                 if (utf8_target) {
                     LB_enum before = getLB_VAL_UTF8(reghop3((U8*)s,
                                                                -1,
@@ -2639,25 +2627,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
 
-                if (   reginfo->intuit
-                    || (s <= reginfo->strend && regtry(reginfo, &s)))
-                {
-                    goto got_it;
-                }
-
                 break;
 
             case SB_BOUND:
-                if (s == reginfo->strbeg) {
-                    if (reginfo->intuit || regtry(reginfo, &s)) {
-                        goto got_it;
-                    }
-                    s += (utf8_target) ? UTF8_SAFE_SKIP(s, reginfo->strend) : 1;
-                    if (UNLIKELY(s >= reginfo->strend)) {
-                        break;
-                    }
-                }
-
                 if (utf8_target) {
                     SB_enum before = getSB_VAL_UTF8(reghop3((U8*)s,
                                                         -1,
@@ -2699,28 +2671,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
 
-                /* Here are at the final position in the target string.  The SB
-                 * value is always true here, so matches, depending on other
-                 * constraints */
-                if (   reginfo->intuit
-                    || (s <= reginfo->strend && regtry(reginfo, &s)))
-                {
-                    goto got_it;
-                }
-
                 break;
 
             case WB_BOUND:
-                if (s == reginfo->strbeg) {
-                    if (reginfo->intuit || regtry(reginfo, &s)) {
-                        goto got_it;
-                    }
-                    s += (utf8_target) ? UTF8_SAFE_SKIP(s, reginfo->strend) : 1;
-                    if (UNLIKELY(s >= reginfo->strend)) {
-                        break;
-                    }
-                }
-
                 if (utf8_target) {
                     /* We are at a boundary between char_sub_0 and char_sub_1.
                      * We also keep track of the value for char_sub_-1 as we
@@ -2773,13 +2726,17 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         s++;
                     }
                 }
+        }
+
+        /* Here are at the final position in the target string, which is a
+         * boundary by definition, so matches, depending on other constraints.
+         * */
 
                 if (   reginfo->intuit
                     || (s <= reginfo->strend && regtry(reginfo, &s)))
                 {
                     goto got_it;
                 }
-        }
         break;
 
     case LNBREAK:
