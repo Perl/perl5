@@ -10699,15 +10699,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                                              &only_utf8_locale, NULL);
 #endif
             if (definition) {
-                U8 utf8_buffer[2];
-                U8 * utf8_p;
-                if (utf8_target) {
-                    utf8_p = (U8 *) p;
-                } else { /* Convert to utf8 */
-                    utf8_p = utf8_buffer;
-                    append_utf8_from_native_byte(*p, &utf8_p);
-                    utf8_p = utf8_buffer;
-                }
 
                 /* Turkish locales have these hard-coded rules overriding
                  * normal ones */
