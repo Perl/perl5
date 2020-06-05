@@ -43,5 +43,25 @@ sub unimport {
 
 1;
 
+__END__
+
+=head1 NAME
+
+p7
+
+=head1 SYNOPSIS
+
+use p5;
+
+=head1 DESCRIPTION
+
+Description for p5.
+
+=head1 AUTHOR
+
+atoomic
+
+=cut
+
 
 # ex: set ro:
