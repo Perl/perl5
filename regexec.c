@@ -10680,9 +10680,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                  && (   c >= NUM_ANYOF_CODE_POINTS
                      || (   (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)
                          && (   UNLIKELY(OP(n) != ANYOFD)
-                             || (utf8_target && ! isASCII_uni(c)
+                             || (utf8_target && ! isASCII_uvchr(c)
 #                               if NUM_ANYOF_CODE_POINTS > 256
-                                                                 && c < 256
+                                                                    && c < 256
 #                               endif
                                 )))
                      || (   ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE(flags)
