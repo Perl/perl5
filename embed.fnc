@@ -2371,7 +2371,7 @@ EXpRT	|SSize_t|_invlist_search	|NN SV* const invlist|const UV cp
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #  ifndef PERL_EXT_RE_BUILD
-Ep	|SV*	|get_regclass_nonbitmap_data				   \
+Ep	|SV*	|get_regclass_aux_data					   \
 				|NULLOK const regexp *prog		   \
 				|NN const struct regnode *node		   \
 				|bool doinit				   \
@@ -2379,7 +2379,7 @@ Ep	|SV*	|get_regclass_nonbitmap_data				   \
 				|NULLOK SV **lonly_utf8_locale		   \
 				|NULLOK SV **output_invlist
 #  else
-Ep	|SV*	|get_re_gclass_nonbitmap_data				   \
+Ep	|SV*	|get_re_gclass_aux_data					   \
 				|NULLOK const regexp *prog		   \
 				|NN const struct regnode *node		   \
 				|bool doinit				   \

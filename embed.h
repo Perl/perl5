@@ -1015,7 +1015,7 @@
 #  endif
 #  if !(!defined(PERL_EXT_RE_BUILD))
 #    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define get_re_gclass_nonbitmap_data(a,b,c,d,e,f)	Perl_get_re_gclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
+#define get_re_gclass_aux_data(a,b,c,d,e,f)	Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
 #  if !defined(PERL_EXT_RE_BUILD)
@@ -1031,7 +1031,7 @@
 #define invlist_trim		S_invlist_trim
 #    endif
 #    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl_get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
+#define get_regclass_aux_data(a,b,c,d,e,f)	Perl_get_regclass_aux_data(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
 #  if defined(DEBUGGING)

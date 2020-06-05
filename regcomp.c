@@ -20587,9 +20587,9 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 SV *
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-Perl_get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
+Perl_get_regclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
 #else
-Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
+Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
 #endif
 
 {
@@ -20627,9 +20627,9 @@ Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node,
     const struct reg_data * const data = prog ? progi->data : NULL;
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-    PERL_ARGS_ASSERT_GET_REGCLASS_NONBITMAP_DATA;
+    PERL_ARGS_ASSERT_GET_REGCLASS_AUX_DATA;
 #else
-    PERL_ARGS_ASSERT_GET_RE_GCLASS_NONBITMAP_DATA;
+    PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA;
 #endif
     assert(! output_invlist || listsvp);
 
@@ -21790,12 +21790,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
             else {
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-                (void) get_regclass_nonbitmap_data(prog, o, FALSE,
+                (void) get_regclass_aux_data(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
 #else
-                (void) get_re_gclass_nonbitmap_data(prog, o, FALSE,
+                (void) get_re_gclass_aux_data(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);

@@ -4369,8 +4369,8 @@ PERL_STATIC_INLINE void *	S_my_memrchr(const char * s, const char c, const STRLE
 #endif
 #if !(!defined(PERL_EXT_RE_BUILD))
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-PERL_CALLCONV SV*	Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
-#define PERL_ARGS_ASSERT_GET_RE_GCLASS_NONBITMAP_DATA	\
+PERL_CALLCONV SV*	Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
+#define PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA	\
 	assert(node)
 #  endif
 #endif
@@ -4550,8 +4550,8 @@ PERL_STATIC_INLINE void	S_invlist_trim(SV* invlist);
 #endif
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-PERL_CALLCONV SV*	Perl_get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
-#define PERL_ARGS_ASSERT_GET_REGCLASS_NONBITMAP_DATA	\
+PERL_CALLCONV SV*	Perl_get_regclass_aux_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
+#define PERL_ARGS_ASSERT_GET_REGCLASS_AUX_DATA	\
 	assert(node)
 #  endif
 #endif
