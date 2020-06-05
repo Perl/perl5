@@ -102,6 +102,7 @@ print "\n";
 print "Creating $relroot/$reldir release directory...\n";
 die "$relroot/$reldir release directory already exists\n"   if -e "$relroot/$reldir";
 die "$relroot/$reldir.tar.gz release file already exists\n" if -e "$relroot/$reldir.tar.gz";
+die "$relroot/$reldir.tar.xz release file already exists\n" if $opts{x} && -e "$relroot/$reldir.tar.xz";
 mkdir("$relroot/$reldir", 0755) or die "mkdir $relroot/$reldir: $!\n";
 print "\n";
 
