@@ -4795,48 +4795,50 @@ lib/overload/numbers.pm		Helper for overloading pragma
 lib/overload64.t		See if operator overloading works with 64-bit ints
 lib/overloading.pm		Pragma to lexically control overloading
 lib/overloading.t		Tests for overloading.pm
-lib/perl5db.pl			Perl debugging routines
-lib/perl5db.t			Tests for the Perl debugger
-lib/perl5db/t/break-on-dot	Test script used by perl5db.t
-lib/perl5db/t/breakpoint-bug	Test script used by perl5db.t
-lib/perl5db/t/disable-breakpoints-1	Test script used by perl5db.t
-lib/perl5db/t/disable-breakpoints-2	Test script used by perl5db.t
-lib/perl5db/t/disable-breakpoints-3	Test script used by perl5db.t
-lib/perl5db/t/EnableModule.pm	Tests for the Perl debugger
-lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
-lib/perl5db/t/fact		Tests for the Perl debugger
-lib/perl5db/t/filename-line-breakpoint		Tests for the Perl debugger
-lib/perl5db/t/gh-17660		Tests for the Perl debugger
-lib/perl5db/t/load-modules	Tests for the Perl debugger
-lib/perl5db/t/lsub-n		Test script used by perl5db.t
-lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
-lib/perl5db/t/MyModule.pm	Tests for the Perl debugger
-lib/perl5db/t/proxy-constants	Tests for the Perl debugger
-lib/perl5db/t/rt-104168		Tests for the Perl debugger
-lib/perl5db/t/rt-120174		Tests for the Perl debugger
-lib/perl5db/t/rt-121509-restart-after-chdir		Tests for the Perl debugger
-lib/perl5db/t/rt-124203		Test threads in the Perl debugger
-lib/perl5db/t/rt-124203b	Test threads in the Perl debugger
-lib/perl5db/t/rt-61222		Tests for the Perl debugger
-lib/perl5db/t/rt-66110		Tests for the Perl debugger
-lib/perl5db/t/source-cmd-test.perldb		Tests for the Perl debugger
-lib/perl5db/t/source-cmd-test-no-q.perldb		Tests for the Perl debugger
-lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
-lib/perl5db/t/taint		Tests for the Perl debugger
-lib/perl5db/t/test-a-statement-1	Tests for the Perl debugger
-lib/perl5db/t/test-a-statement-2	Tests for the Perl debugger
-lib/perl5db/t/test-dieLevel-option-1	Tests for the Perl debugger
-lib/perl5db/t/test-frame-option-1	Tests for the Perl debugger
-lib/perl5db/t/test-l-statement-1	Tests for the Perl debugger
-lib/perl5db/t/test-l-statement-2	Tests for the Perl debugger
-lib/perl5db/t/test-m-statement-1	Tests for the Perl debugger
-lib/perl5db/t/test-passing-at-underscore-to-x-etc	Tests for the Perl debugger
-lib/perl5db/t/test-PrintRet-option-1	Tests for the Perl debugger
-lib/perl5db/t/test-r-statement	Tests for the Perl debugger
-lib/perl5db/t/test-w-statement-1	Tests for the Perl debugger
-lib/perl5db/t/test-warnLevel-option-1	Tests for the Perl debugger
-lib/perl5db/t/uncalled-subroutine	Tests for the Perl debugger
-lib/perl5db/t/with-subroutine		Tests for the Perl debugger
+lib/p5.pm              added for p7
+lib/p7.pm              added for p7
+lib/perl7db.pl			Perl debugging routines
+lib/perl7db.t			Tests for the Perl debugger
+lib/perl7db/t/break-on-dot	Test script used by perl7db.t
+lib/perl7db/t/breakpoint-bug	Test script used by perl7db.t
+lib/perl7db/t/disable-breakpoints-1	Test script used by perl7db.t
+lib/perl7db/t/disable-breakpoints-2	Test script used by perl7db.t
+lib/perl7db/t/disable-breakpoints-3	Test script used by perl7db.t
+lib/perl7db/t/EnableModule.pm	Tests for the Perl debugger
+lib/perl7db/t/eval-line-bug	Tests for the Perl debugger
+lib/perl7db/t/fact		Tests for the Perl debugger
+lib/perl7db/t/filename-line-breakpoint		Tests for the Perl debugger
+lib/perl7db/t/gh-17660		Tests for the Perl debugger
+lib/perl7db/t/load-modules	Tests for the Perl debugger
+lib/perl7db/t/lsub-n		Test script used by perl7db.t
+lib/perl7db/t/lvalue-bug	Tests for the Perl debugger
+lib/perl7db/t/MyModule.pm	Tests for the Perl debugger
+lib/perl7db/t/proxy-constants	Tests for the Perl debugger
+lib/perl7db/t/rt-104168		Tests for the Perl debugger
+lib/perl7db/t/rt-120174		Tests for the Perl debugger
+lib/perl7db/t/rt-121509-restart-after-chdir		Tests for the Perl debugger
+lib/perl7db/t/rt-124203		Test threads in the Perl debugger
+lib/perl7db/t/rt-124203b	Test threads in the Perl debugger
+lib/perl7db/t/rt-61222		Tests for the Perl debugger
+lib/perl7db/t/rt-66110		Tests for the Perl debugger
+lib/perl7db/t/source-cmd-test.perldb		Tests for the Perl debugger
+lib/perl7db/t/source-cmd-test-no-q.perldb		Tests for the Perl debugger
+lib/perl7db/t/symbol-table-bug	Tests for the Perl debugger
+lib/perl7db/t/taint		Tests for the Perl debugger
+lib/perl7db/t/test-a-statement-1	Tests for the Perl debugger
+lib/perl7db/t/test-a-statement-2	Tests for the Perl debugger
+lib/perl7db/t/test-dieLevel-option-1	Tests for the Perl debugger
+lib/perl7db/t/test-frame-option-1	Tests for the Perl debugger
+lib/perl7db/t/test-l-statement-1	Tests for the Perl debugger
+lib/perl7db/t/test-l-statement-2	Tests for the Perl debugger
+lib/perl7db/t/test-m-statement-1	Tests for the Perl debugger
+lib/perl7db/t/test-passing-at-underscore-to-x-etc	Tests for the Perl debugger
+lib/perl7db/t/test-PrintRet-option-1	Tests for the Perl debugger
+lib/perl7db/t/test-r-statement	Tests for the Perl debugger
+lib/perl7db/t/test-w-statement-1	Tests for the Perl debugger
+lib/perl7db/t/test-warnLevel-option-1	Tests for the Perl debugger
+lib/perl7db/t/uncalled-subroutine	Tests for the Perl debugger
+lib/perl7db/t/with-subroutine		Tests for the Perl debugger
 lib/perlbug.t			Tests for the Perl bug reporter
 lib/PerlIO.pm			PerlIO support module
 lib/Pod/t/Usage.t		See if Pod::Usage works
@@ -5193,6 +5195,7 @@ pod/perl5300delta.pod		Perl changes in version 5.30.0
 pod/perl5301delta.pod		Perl changes in version 5.30.1
 pod/perl5302delta.pod		Perl changes in version 5.30.2
 pod/perl5303delta.pod		Perl changes in version 5.30.3
+pod/perl5321delta.pod		added for p7
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5444,6 +5447,7 @@ regen/op_private		Definitions of bits in an OP's op_private field
 regen/opcode.pl			Opcode header generator
 regen/opcodes			Opcode data
 regen/overload.pl		generate overload.h
+regen/pX.pl		added for p7
 regen/reentr.pl			Reentrant interfaces
 regen/regcharclass.pl		Generate regcharclass.h from inline data
 regen/regcharclass_multi_char_folds.pl	Generate input for regcharclass.pl
