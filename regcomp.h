@@ -464,9 +464,8 @@ struct regnode_ssc {
  *      relatively common, and it turns out that it's all or nothing:  if any
  *      one of these code points matches, they all do.  Hence a single bit
  *      suffices.  We use a shared flag that doesn't take up space by itself:
- *      ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER.  This
- *      also means there is an inversion list, with one exception: [:^cntrl:].
- *
+ *      ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII.  This also means there is
+ *      an inversion list, with one exception: [:^cntrl:].
  *  4)  A user-defined \p{} property may not have been defined by the time the
  *      regex is compiled.  In this case, we don't know until runtime what it
  *      will match, so we have to assume it could match anything, including
@@ -601,9 +600,10 @@ struct regnode_ssc {
  *          matching against an above-Unicode code point.
  * (These uses are mutually exclusive because the warning requires a \p{}, and
  * \p{} implies /u which deselects /d).  An SSC node only has this bit set if
- * what is meant is the warning.  The long macro name is to make sure that you
- * are cautioned about its shared nature */
-#define ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER 0x80
+ * what is meant is the warning.  The names are to make sure that you are
+ * cautioned about its shared nature */
+#define ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII 0x80
+#define ANYOF_shared_WARN_SUPER                      0x80
 
 #define ANYOF_FLAGS_ALL		((U8) ~0x10)
 

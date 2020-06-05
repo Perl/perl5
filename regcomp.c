@@ -1848,8 +1848,9 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * as well.  But don't add them if inverting, as when that gets done below,
      * it would exclude all these characters, including the ones it shouldn't
      * that were added just above */
-    if (! (flags & ANYOF_INVERT) && OP(node) == ANYOFD
-        && (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+    if ( ! (flags & ANYOF_INVERT)
+        &&  OP(node) == ANYOFD
+        && (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII))
     {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
@@ -1946,7 +1947,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
          * that should be; while the consequences for having /l bugs is
          * incorrect matches */
         if (ssc_is_anything((regnode_ssc *)and_with)) {
-            anded_flags |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+            anded_flags |= ANYOF_shared_WARN_SUPER;
         }
     }
     else {
@@ -1956,8 +1957,8 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         }
         else {
             anded_flags = and_with_flags
-            &( ANYOF_COMMON_FLAGS
-              |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+            & ( ANYOF_COMMON_FLAGS
+               |ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
               |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
             if (ANYOFL_UTF8_LOCALE_REQD(and_with_flags)) {
                 anded_flags &=
@@ -2121,7 +2122,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         if (OP(or_with) != ANYOFD) {
             ored_flags
             |= or_with_flags
-             & ( ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+             & ( ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
                 |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
             if (ANYOFL_UTF8_LOCALE_REQD(or_with_flags)) {
                 ored_flags |=
@@ -2319,7 +2320,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * by the time we reach here */
     assert(! (ANYOF_FLAGS(ssc)
         & ~( ANYOF_COMMON_FLAGS
-            |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+            |ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
             |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
@@ -19368,7 +19369,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 _invlist_subtract(only_non_utf8_list, cp_list,
                                   &only_non_utf8_list);
                 if (_invlist_len(only_non_utf8_list) != 0) {
-                    anyof_flags |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+                    anyof_flags |= ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII;
                 }
                 SvREFCNT_dec_NN(only_non_utf8_list);
             }
@@ -19453,8 +19454,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         if (warn_super) {
-            anyof_flags
-             |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+            anyof_flags |= ANYOF_shared_WARN_SUPER;
 
             /* Because an ANYOF node is the only one that warns, this node
              * can't be optimized into something else */
@@ -19507,7 +19507,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
     else if (   DEPENDS_SEMANTICS
              && (    upper_latin1_only_utf8_matches
-                 || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
+                 || (  anyof_flags
+                     & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII)))
     {
         RExC_seen_d_op = TRUE;
         has_runtime_dependency |= HAS_D_RUNTIME_DEPENDENCY;
@@ -20337,10 +20338,12 @@ S_optimize_regclass(pTHX_
                     }
                     else {  /* POSIXD, inverted.  If this doesn't have this
                                flag set, it isn't /d. */
-                        if (! (*anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+                        if (! ( *anyof_flags
+                               & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII))
                         {
                             continue;
                         }
+
                         our_code_points = &cp_list;
                     }
 
@@ -23141,8 +23144,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             }
 
             /* And this flag for matching all non-ASCII 0xFF and below */
-            if (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
-            {
+            if (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII) {
                 not_utf8 = invlist_clone(PL_UpperLatin1, NULL);
             }
         }

@@ -10605,8 +10605,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < NUM_ANYOF_CODE_POINTS && ! inRANGE(OP(n), ANYOFH, ANYOFHb)) {
         if (ANYOF_BITMAP_TEST(n, c))
             match = TRUE;
-        else if ((flags
-                & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+        else if (  (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII)
                   && OP(n) == ANYOFD
                   && ! utf8_target
                   && ! isASCII(c))
@@ -10749,8 +10748,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
 
         if (UNICODE_IS_SUPER(c)
-            && (flags
-               & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+            && (flags & ANYOF_shared_WARN_SUPER)
             && OP(n) != ANYOFD
             && ckWARN_d(WARN_NON_UNICODE))
         {
