@@ -21792,17 +21792,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                             ANYOFRbase(o) + ANYOFRdelta(o));
             }
             else {
-#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-                (void) get_regclass_aux_data(prog, o, FALSE,
+                (void) GET_REGCLASS_AUX_DATA(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
-#else
-                (void) get_re_gclass_aux_data(prog, o, FALSE,
-                                                &unresolved,
-                                                &only_utf8_locale_invlist,
-                                                &nonbitmap_invlist);
-#endif
             }
 
             /* The non-bitmap data may contain stuff that could fit in the

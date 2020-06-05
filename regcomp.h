@@ -1215,6 +1215,12 @@ typedef enum {
                                   (LOWEST_ANYOF_HRx_BYTE(b)                 \
           + ((MAX_ANYOF_HRx_BYTE - LOWEST_ANYOF_HRx_BYTE(b)) >> ((b) & 3)))
 
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+#  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_regclass_aux_data(a,b,c,d,e,f)
+#else
+#  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_re_gclass_aux_data(a,b,c,d,e,f)
+#endif
+
 #endif /* PERL_REGCOMP_H_ */
 
 /*
