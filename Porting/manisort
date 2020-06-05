@@ -44,6 +44,8 @@ for (my $ii = 0; $ii < $#manifest; $ii++) {
     last;
 }
 
+$outfile //= $file;
+
 # Output sorted file
 if (defined($outfile)) {
     open(my $OUT, '>', $outfile)
