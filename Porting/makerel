@@ -36,10 +36,11 @@ usage: $0 [ -r rootdir ] [-s suffix ] [ -x ] [ -n ]
 		 in patchlevel.h (or blank, if none)
     -x           make a .xz file in addition to a .gz file
     -n           do not make any tarballs, just the directory
+    -c cleanup   perform a cleanup before building: clean git repo and target directory/tarballs
 EOF
 
 my %opts;
-getopts('xnr:s:', \%opts) or usage;
+getopts('xncr:s:', \%opts) or usage;
 @ARGV && usage;
 
 $relroot = defined $opts{r} ? $opts{r} : "..";
@@ -74,6 +75,8 @@ $reldir .= "-$lpatch_tags" if $lpatch_tags;
 
 print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 
+cleanup($relroot, $reldir) if $opts{c};
+
 print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
 @$missentry
@@ -100,9 +103,9 @@ print "\n";
 # VMS no longer has hardcoded version numbers descrip.mms
 
 print "Creating $relroot/$reldir release directory...\n";
-die "$relroot/$reldir release directory already exists\n"   if -e "$relroot/$reldir";
-die "$relroot/$reldir.tar.gz release file already exists\n" if -e "$relroot/$reldir.tar.gz";
-die "$relroot/$reldir.tar.xz release file already exists\n" if $opts{x} && -e "$relroot/$reldir.tar.xz";
+die "$relroot/$reldir release directory already exists [consider using -c]\n"   if -e "$relroot/$reldir";
+die "$relroot/$reldir.tar.gz release file already exists [consider using -c]\n" if -e "$relroot/$reldir.tar.gz";
+die "$relroot/$reldir.tar.xz release file already exists [consider using -c]\n" if $opts{x} && -e "$relroot/$reldir.tar.xz";
 mkdir("$relroot/$reldir", 0755) or die "mkdir $relroot/$reldir: $!\n";
 print "\n";
 
@@ -222,3 +225,34 @@ for my $sha (qw(sha1 shasum sha1sum)) {
 	last;
     }
 }
+
+sub cleanup {
+    my ( $relroot, $reldir ) = @_;
+
+    require File::Path;
+
+    {
+        my @cmd = qw{git clean -dxf};
+        print join( ' ', "Running:", @cmd, "\n" );
+        system @cmd;
+    }
+
+    if ( -d "$relroot/$reldir" ) {
+        print "Removing directory $relroot/$reldir\n";
+        File::Path::rmtree("$relroot/$reldir");
+    }
+
+    # always clean both
+    my @files = ( "$relroot/$reldir.tar.gz", "$relroot/$reldir.tar.xz" );
+
+    foreach my $f ( @files ) {
+        next unless -f $f;
+        print "Removing file '$f'\n";
+        unlink($f);
+    }
+
+    return;
+
+}
+
+1;
