@@ -92,7 +92,6 @@ while (<DATA>) { # header
     print $p7 $_ ;
 }
 
-# FIXME remove $HintUTF8
 my $hints_v7 = sprintf( "0x%08X", $HintStrict ); # convert back to hex
 
 print {$p7} <<EOV;
