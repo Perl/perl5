@@ -89,6 +89,14 @@
 static const char sets_utf8_locale_required[] =
       "Use of (?[ ]) for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale";
 
+#define CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(n)                     \
+    STMT_START {                                                            \
+        if (! IN_UTF8_CTYPE_LOCALE && ANYOFL_UTF8_LOCALE_REQD(FLAGS(n))) {  \
+          Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                       \
+                                             sets_utf8_locale_required);    \
+        }                                                                   \
+    } STMT_END
+
 #ifdef DEBUGGING
 /* At least one required character in the target string is expressible only in
  * UTF-8. */
@@ -2188,11 +2196,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFL_t8_pb:
       case ANYOFL_t8_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-
-        if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(c)) && ! IN_UTF8_CTYPE_LOCALE) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                           sets_utf8_locale_required);
-        }
+        CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(c);
 
         /* FALLTHROUGH */
 
@@ -2209,11 +2213,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFL_tb_pb:
       case ANYOFL_tb_p8:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-
-        if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(c)) && ! IN_UTF8_CTYPE_LOCALE) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                           sets_utf8_locale_required);
-        }
+        CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(c);
 
         /* FALLTHROUGH */
 
@@ -7069,12 +7069,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFPOSIXL:
 	case ANYOFL:  /*  /[abc]/l      */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(scan);
 
-            if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(scan)) && ! IN_UTF8_CTYPE_LOCALE)
-            {
-              Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                             sets_utf8_locale_required);
-            }
             /* FALLTHROUGH */
 	case ANYOFD:  /*   /[abc]/d       */
 	case ANYOF:  /*   /[abc]/       */
@@ -9950,11 +9946,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     case ANYOFPOSIXL:
     case ANYOFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+         CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(p);
 
-        if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(p)) && ! IN_UTF8_CTYPE_LOCALE) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                           sets_utf8_locale_required);
-        }
         /* FALLTHROUGH */
     case ANYOFD:
     case ANYOF:
