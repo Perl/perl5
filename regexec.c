@@ -86,7 +86,7 @@
 #define B_ON_NON_UTF8_LOCALE_IS_WRONG            \
  "Use of \\b{} or \\B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale"
 
-static const char utf8_locale_required[] =
+static const char sets_utf8_locale_required[] =
       "Use of (?[ ]) for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale";
 
 #ifdef DEBUGGING
@@ -2190,7 +2190,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
         if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(c)) && ! IN_UTF8_CTYPE_LOCALE) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                           sets_utf8_locale_required);
         }
 
         /* FALLTHROUGH */
@@ -2210,7 +2211,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
         if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(c)) && ! IN_UTF8_CTYPE_LOCALE) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                           sets_utf8_locale_required);
         }
 
         /* FALLTHROUGH */
@@ -7070,7 +7072,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(scan)) && ! IN_UTF8_CTYPE_LOCALE)
             {
-              Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+              Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                             sets_utf8_locale_required);
             }
             /* FALLTHROUGH */
 	case ANYOFD:  /*   /[abc]/d       */
@@ -9949,7 +9952,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
         if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(p)) && ! IN_UTF8_CTYPE_LOCALE) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                           sets_utf8_locale_required);
         }
         /* FALLTHROUGH */
     case ANYOFD:
