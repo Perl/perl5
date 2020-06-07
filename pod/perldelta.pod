@@ -16,20 +16,18 @@ L<perl5300delta>, which describes differences between 5.28.0 and 5.30.0.
 
 =head1 Core Enhancements
 
+=head2 The isa Operator
+
+A new experimental infix operator called C<isa> tests whether a given object
+is an instance of a given class or a class derived from it:
+
+    if( $obj isa Package::Name ) { ... }
+
+For more detail see L<perlop/Class Instance Operator>.
+
 =head2 Unicode 13.0 is supported
 
 See L<https://www.unicode.org/versions/Unicode13.0.0/> for details.
-
-=head2 It is now possible to write C<qr/\p{Name=...}/>, or
-C<qr!\p{na=/(SMILING|GRINNING) FACE/}!>
-
-The Unicode Name property is now accessible in regular expression
-patterns, as an alternative to C<\N{...}>.
-A comparison of the two methods is given in
-L<perlunicode/Comparison of \N{...} and \p{name=...}>.
-
-The second example above shows that wildcard subpatterns are also usable
-in this property. See L<perlunicode/Wildcards in Property Values>.
 
 =head2 Chained comparisons capability
 
@@ -57,6 +55,17 @@ that aren't part of the strict UCD (Unicode character database). These
 two are used for examining inputs for security purposes. Details on
 their usage is at L<https://www.unicode.org/reports/tr39/proposed.html>.
 
+=head2 It is now possible to write C<qr/\p{Name=...}/>, or
+C<qr!\p{na=/(SMILING|GRINNING) FACE/}!>
+
+The Unicode Name property is now accessible in regular expression
+patterns, as an alternative to C<\N{...}>.
+A comparison of the two methods is given in
+L<perlunicode/Comparison of \N{...} and \p{name=...}>.
+
+The second example above shows that wildcard subpatterns are also usable
+in this property. See L<perlunicode/Wildcards in Property Values>.
+
 =head2 The C<POSIX::mblen()>, C<mbtowc>, and C<wctomb> functions now
 work on shift state locales and are thread-safe on C99 and above
 compilers when executed on a platform that has locale thread-safety; the
@@ -76,15 +85,6 @@ thread-safe platform.
 The string length parameters in C<mblen> and C<mbtowc> are now optional;
 useful only if you wish to restrict the length parsed in the source
 string to less than the actual length.
-
-=head2 The isa Operator
-
-A new experimental infix operator called C<isa> tests whether a given object
-is an instance of a given class or a class derived from it:
-
-    if( $obj isa Package::Name ) { ... }
-
-For more detail see L<perlop/Class Instance Operator>.
 
 =head2 Alpha assertions are no longer experimental
 
@@ -1825,12 +1825,12 @@ will be sorely missed.
 
 =head1 Acknowledgements
 
-Perl 5.32.0 represents approximately 12 months of development since Perl
+Perl 5.32.0 represents approximately 13 months of development since Perl
 5.30.0 and contains approximately 220,000 lines of changes across 1,800
 files from 86 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 140,000 lines of changes to 860 .pm, .t, .c and .h files.
+approximately 140,000 lines of changes to 880 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant
 community of users and developers. The following people are known to have
