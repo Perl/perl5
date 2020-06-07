@@ -1374,6 +1374,54 @@ C<-Duse64bitint> is now the default on VMS.
 
 =back
 
+=item z/OS
+
+Perl 5.32 has been tested on z/OS 2.4, with the following caveats:
+
+=over 4
+
+=item *
+
+Only static builds (the default) build reliably
+
+=item *
+
+Threaded builds have problems with mutexes during critical sections, so
+use at your own risk
+
+=item *
+
+Some CPAN modules that are shipped with perl fail at least one of their
+self-tests.  These are:
+Archive::Tar,
+Config::Perl::V,
+CPAN::Meta,
+CPAN::Meta::YAML,
+Digest::MD5,
+Digest::SHA,
+Encode,
+ExtUtils::MakeMaker,
+ExtUtils::Manifest,
+HTTP::Tiny,
+IO::Compress,
+IPC::Cmd,
+JSON::PP,
+libnet,
+MIME::Base64,
+Module::Metadata,
+PerlIO::via-QuotedPrint,
+Pod::Checker,
+podlators,
+Pod::Simple,
+Socket,
+and Test::Harness.
+
+The causes of the failures range from the self-test itself is flawed,
+and the module actually works fine, up to the module doesn't work at all
+on EBCDIC platforms.
+
+=back
+
 =back
 
 =head1 Internal Changes
