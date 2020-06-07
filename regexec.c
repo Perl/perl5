@@ -1793,6 +1793,9 @@ STMT_START {                                                                    
     dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
                 startpos, doutf8, depth)
 
+#define GET_ANYOFH_INVLIST(prog, n)                                         \
+                        GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0, NULL, NULL)
+
 #define REXEC_FBC_UTF8_SCAN(CODE)                           \
     STMT_START {                                            \
         while (s < strend) {                                \
@@ -2208,6 +2211,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
      * for it isn't; 'b' stands for byte), and the UTF8ness of the pattern
      * ('p8' and 'pb'. */
     switch (with_tp_UTF8ness(OP(c), utf8_target, is_utf8_pat)) {
+        SV * anyofh_list;
 
       case ANYOFPOSIXL_t8_pb:
       case ANYOFPOSIXL_t8_p8:
@@ -2298,9 +2302,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case ANYOFH_t8_pb:
       case ANYOFH_t8_p8:
+        anyofh_list = GET_ANYOFH_INVLIST(prog, c);
         REXEC_FBC_UTF8_CLASS_SCAN(
               (   (U8) NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
-               && reginclass(prog, c, (U8*)s, (U8*) strend, 1 /* is utf8 */)));
+               && _invlist_contains_cp(anyofh_list,
+                                       utf8_to_uvchr_buf((U8 *) s,
+                                                         (U8 *) strend,
+                                                         NULL))));
         break;
 
       case ANYOFHb_t8_pb:
@@ -2309,29 +2317,39 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             /* We know what the first byte of any matched string should be. */
             U8 first_byte = FLAGS(c);
 
+            anyofh_list = GET_ANYOFH_INVLIST(prog, c);
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
-                    reginclass(prog, c, (U8*)s, (U8*) strend, 1 /* is utf8 */));
+                   _invlist_contains_cp(anyofh_list,
+                                           utf8_to_uvchr_buf((U8 *) s,
+                                                              (U8 *) strend,
+                                                              NULL)));
         }
         break;
 
       case ANYOFHr_t8_pb:
       case ANYOFHr_t8_p8:
+        anyofh_list = GET_ANYOFH_INVLIST(prog, c);
         REXEC_FBC_UTF8_CLASS_SCAN(
                     (   inRANGE(NATIVE_UTF8_TO_I8(*s),
                                 LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)),
                                 HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)))
-                    && reginclass(prog, c, (U8*)s, (U8*) strend,
-                                                           1 /* is utf8 */)));
+                   && _invlist_contains_cp(anyofh_list,
+                                           utf8_to_uvchr_buf((U8 *) s,
+                                                              (U8 *) strend,
+                                                              NULL))));
         break;
 
       case ANYOFHs_t8_pb:
       case ANYOFHs_t8_p8:
+        anyofh_list = GET_ANYOFH_INVLIST(prog, c);
         REXEC_FBC_FIND_NEXT_UTF8_STRING_SCAN(
                         ((struct regnode_anyofhs *) c)->string,
                         /* Note FLAGS is the string length in this regnode */
                         ((struct regnode_anyofhs *) c)->string + FLAGS(c),
-                        reginclass(prog, c, (U8*)s, (U8*) strend,
-                                   1 /* is utf8 */));
+                        _invlist_contains_cp(anyofh_list,
+                                             utf8_to_uvchr_buf((U8 *) s,
+                                                               (U8 *) strend,
+                                                               NULL)));
         break;
 
       case ANYOFR_tb_pb:
@@ -6427,6 +6445,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         assert(nextbyte < 256 && (nextbyte >= 0 || nextbyte == NEXTCHR_EOS));
 
         switch (state_num) {
+            SV * anyofh_list;
+
         case SBOL: /*  /^../ and /\A../  */
             if (locinput == reginfo->strbeg)
                 break;
@@ -7409,8 +7429,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
                 ||   ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8(*locinput)
-                || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
-                                                                   utf8_target))
+                || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
+                || ! _invlist_contains_cp(anyofh_list,
+                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                                            (U8 *) loceol,
+                                                            NULL)))
             {
                 sayNO;
             }
@@ -7421,8 +7444,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
                 ||   ANYOF_FLAGS(scan) != (U8) *locinput
-                || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
-                                                                  utf8_target))
+                || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
+                || ! _invlist_contains_cp(anyofh_list,
+                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                                            (U8 *) loceol,
+                                                            NULL)))
             {
                 sayNO;
             }
@@ -7435,8 +7461,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 || ! inRANGE((U8) NATIVE_UTF8_TO_I8(*locinput),
                              LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(scan)),
                              HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(scan)))
-                || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
-                                                                   utf8_target))
+                || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
+                || ! _invlist_contains_cp(anyofh_list,
+                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                                            (U8 *) loceol,
+                                                            NULL)))
             {
                 sayNO;
             }
@@ -7448,8 +7477,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   NEXTCHR_IS_EOS
                 ||   loceol - locinput < FLAGS(scan)
                 ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, FLAGS(scan))
-                || ! reginclass(rex, scan, (U8*)locinput, (U8*) loceol,
-                                                                   utf8_target))
+                || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
+                || ! _invlist_contains_cp(anyofh_list,
+                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                                            (U8 *) loceol,
+                                                            NULL)))
             {
                 sayNO;
             }
@@ -9973,6 +10005,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
      * count doesn't exceed the maximum permissible */
 
     switch (with_t_UTF8ness(OP(p), utf8_target)) {
+        SV * anyofh_list;
+
       case REG_ANY_t8:
         while (scan < this_eol && hardcount < max && *scan != '\n') {
             scan += UTF8SKIP(scan);
@@ -10249,10 +10283,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         break;
 
       case ANYOFH_t8:
+        anyofh_list = GET_ANYOFH_INVLIST(prog, p);
         while (  hardcount < max
                && scan < this_eol
                && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+               && _invlist_contains_cp(anyofh_list,
+                                             utf8_to_uvchr_buf((U8 *) scan,
+                                                               (U8 *) this_eol,
+                                                               NULL)))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -10261,10 +10299,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFHb_t8:
         /* we know the first byte must be the FLAGS field */
+        anyofh_list = GET_ANYOFH_INVLIST(prog, p);
         while (   hardcount < max
                && scan < this_eol
                && (U8) *scan == ANYOF_FLAGS(p)
-               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+               && _invlist_contains_cp(anyofh_list,
+                                             utf8_to_uvchr_buf((U8 *) scan,
+                                                               (U8 *) this_eol,
+                                                               NULL)))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -10272,13 +10314,17 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         break;
 
       case ANYOFHr_t8:
+        anyofh_list = GET_ANYOFH_INVLIST(prog, p);
         while (  hardcount < max
                && scan < this_eol
                && inRANGE(NATIVE_UTF8_TO_I8(*scan),
                           LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)),
                           HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)))
                && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+               && _invlist_contains_cp(anyofh_list,
+                                             utf8_to_uvchr_buf((U8 *) scan,
+                                                               (U8 *) this_eol,
+                                                               NULL)))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -10286,10 +10332,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         break;
 
       case ANYOFHs_t8:
+        anyofh_list = GET_ANYOFH_INVLIST(prog, p);
         while (   hardcount < max
                && scan + FLAGS(p) < this_eol
                && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
-               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+               && _invlist_contains_cp(anyofh_list,
+                                             utf8_to_uvchr_buf((U8 *) scan,
+                                                               (U8 *) this_eol,
+                                                               NULL)))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
