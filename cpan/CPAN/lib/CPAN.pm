@@ -1,6 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 # vim: ts=4 sts=4 sw=4:
 use strict;
+use p5;
 package CPAN;
 $CPAN::VERSION = '2.27';
 $CPAN::VERSION =~ s/_//;
