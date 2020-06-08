@@ -17,7 +17,7 @@ sub _warn_once {
     local $^W = 0;
     *_warn_once = sub{};
 
-    warn("# This code is being run using Perl $]. It should be updated or may break in Perl 8. See YYY for more information.");
+    #warn("# This code is being run using Perl $]. It should be updated or may break in Perl 8. See YYY for more information.");
 }
 
 BEGIN {
@@ -28,10 +28,13 @@ BEGIN {
 sub import {
     # no warnings;
     ${^WARNING_BITS} = 0;
+    $^W = 0;
 
     # perl  -e'my $h; BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); '
     $^H = 0x0; # FIXME only reset the features...
     %^H = ();
+
+    return;
 }
 
 sub unimport {
@@ -39,6 +42,8 @@ sub unimport {
     # we want to restore p7 behavior..
     require p7;
     p7->import;
+
+    return;
 }
 
 1;
