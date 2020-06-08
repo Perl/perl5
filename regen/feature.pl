@@ -39,6 +39,7 @@ my %feature = (
     isa             => 'isa',
     indirect        => 'indirect',
     multidimensional => 'multidimensional',
+    bareword_filehandles => 'bareword_filehandles',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -48,7 +49,7 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state switch indirect multidimensional};
+use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
@@ -56,7 +57,7 @@ use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
 my %feature_bundle = (
     all     => [ sort keys %feature ],
-    default => [ qw{indirect multidimensional} ],
+    default => [ qw{indirect multidimensional bareword_filehandles} ],
     # using 5.9.5 features bundle
     "5.9.5" => [ +V5_9_5 ],
     "5.10"  => [ +V5_9_5 ],
@@ -476,7 +477,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.61';
+our $VERSION = '1.62';
 
 FEATURES
 
@@ -797,6 +798,22 @@ previous versions, it was simply on all the time.
 
 You can use the L<multidimensional> module on CPAN to disable
 multidimensional array emulation for older versions of Perl.
+
+=head2 The 'bareword_filehandles' feature.
+
+This feature enables bareword filehandles for builtin functions
+operations, a generally discouraged practice.  It is enabled by
+default, but can be turned off to disable bareword filehandles, except
+for the exceptions listed below.
+
+The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
+C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
+
+This feature is enabled under this name from Perl 5.34 onwards.  In
+previous versions it was simply on all the time.
+
+You can use the L<bareword::filehandles> module on CPAN to disable
+bareword filehandles for older versions of perl.
 
 =head1 FEATURE BUNDLES
 

@@ -415,4 +415,5 @@ porting/release_managers_guide.pod	Verbatim line length including indents exceed
 porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 78 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
+lib/feature.pm	Apparent broken link	1
 lib/perl5db.pl	? Should you be using L<...> instead of	1

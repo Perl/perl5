@@ -5,35 +5,36 @@
 
 package feature;
 
-our $VERSION = '1.61';
+our $VERSION = '1.62';
 
 our %feature = (
-    fc               => 'feature_fc',
-    isa              => 'feature_isa',
-    say              => 'feature_say',
-    state            => 'feature_state',
-    switch           => 'feature_switch',
-    bitwise          => 'feature_bitwise',
-    indirect         => 'feature_indirect',
-    evalbytes        => 'feature_evalbytes',
-    signatures       => 'feature_signatures',
-    current_sub      => 'feature___SUB__',
-    refaliasing      => 'feature_refaliasing',
-    postderef_qq     => 'feature_postderef_qq',
-    unicode_eval     => 'feature_unieval',
-    declared_refs    => 'feature_myref',
-    unicode_strings  => 'feature_unicode',
-    multidimensional => 'feature_multidimensional',
+    fc                   => 'feature_fc',
+    isa                  => 'feature_isa',
+    say                  => 'feature_say',
+    state                => 'feature_state',
+    switch               => 'feature_switch',
+    bitwise              => 'feature_bitwise',
+    indirect             => 'feature_indirect',
+    evalbytes            => 'feature_evalbytes',
+    signatures           => 'feature_signatures',
+    current_sub          => 'feature___SUB__',
+    refaliasing          => 'feature_refaliasing',
+    postderef_qq         => 'feature_postderef_qq',
+    unicode_eval         => 'feature_unieval',
+    declared_refs        => 'feature_myref',
+    unicode_strings      => 'feature_unicode',
+    multidimensional     => 'feature_multidimensional',
+    bareword_filehandles => 'feature_bareword_filehandles',
 );
 
 our %feature_bundle = (
-    "5.10"    => [qw(indirect multidimensional say state switch)],
-    "5.11"    => [qw(indirect multidimensional say state switch unicode_strings)],
-    "5.15"    => [qw(current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
-    "5.23"    => [qw(current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.27"    => [qw(bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
-    "default" => [qw(indirect multidimensional)],
+    "5.10"    => [qw(bareword_filehandles indirect multidimensional say state switch)],
+    "5.11"    => [qw(bareword_filehandles indirect multidimensional say state switch unicode_strings)],
+    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
+    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
+    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
 $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
@@ -392,6 +393,22 @@ previous versions, it was simply on all the time.
 You can use the L<multidimensional> module on CPAN to disable
 multidimensional array emulation for older versions of Perl.
 
+=head2 The 'bareword_filehandles' feature.
+
+This feature enables bareword filehandles for builtin functions
+operations, a generally discouraged practice.  It is enabled by
+default, but can be turned off to disable bareword filehandles, except
+for the exceptions listed below.
+
+The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
+C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
+
+This feature is enabled under this name from Perl 5.34 onwards.  In
+previous versions it was simply on all the time.
+
+You can use the L<bareword::filehandles> module on CPAN to disable
+bareword filehandles for older versions of perl.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -405,54 +422,64 @@ The following feature bundles are available:
   bundle    features included
   --------- -----------------
   :default  indirect multidimensional
+            bareword_filehandles
 
-  :5.10     indirect multidimensional say state switch
+  :5.10     bareword_filehandles indirect
+            multidimensional say state switch
 
-  :5.12     indirect multidimensional say state switch
+  :5.12     bareword_filehandles indirect
+            multidimensional say state switch
             unicode_strings
 
-  :5.14     indirect multidimensional say state switch
+  :5.14     bareword_filehandles indirect
+            multidimensional say state switch
             unicode_strings
 
-  :5.16     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.18     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.20     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.22     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.24     current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.16     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.26     current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.18     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.28     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.20     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.30     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.22     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.32     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
-            switch unicode_eval unicode_strings
+  :5.24     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional postderef_qq
+            say state switch unicode_eval
+            unicode_strings
 
-  :5.34     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
-            switch unicode_eval unicode_strings
+  :5.26     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional postderef_qq
+            say state switch unicode_eval
+            unicode_strings
+
+  :5.28     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.30     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.32     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.34     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

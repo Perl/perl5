@@ -7482,6 +7482,11 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
         }
         s = SvPVX(PL_linestr) + s_off;
 
+        if (((PL_opargs[PL_last_lop_op] >> OASHIFT) & 7) == OA_FILEREF
+            && !FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
+            no_bareword_filehandle(PL_tokenbuf);
+        }
+
         /* If not a declared subroutine, it's an indirect object. */
         /* (But it's an indir obj regardless for sort.) */
         /* Also, if "_" follows a filetest operator, it's a bareword */
@@ -11096,6 +11101,11 @@ S_scan_inputsymbol(pTHX_ char *start)
 			    newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
                 : newUNOP(OP_READLINE, nomagicopen ? OPf_SPECIAL : 0, newGVOP(OP_GV, 0, gv));
 	    pl_yylval.ival = OP_NULL;
+
+            /* leave the token generation above to avoid confusing the parser */
+            if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
+                no_bareword_filehandle(d);
+            }
 	}
     }
 

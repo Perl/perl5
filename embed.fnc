@@ -2896,6 +2896,7 @@ S	|bool	|process_special_blocks	|I32 floor \
 S	|void	|clear_special_blocks	|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv
 #endif
+p	|void   |no_bareword_filehandle|NN const char *fhname
 XpR	|void*	|Slab_Alloc	|size_t sz
 Xp	|void	|Slab_Free	|NN void *op
 #if defined(PERL_DEBUG_READONLY_OPS)

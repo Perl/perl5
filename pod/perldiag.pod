@@ -563,6 +563,15 @@ symbol.  Perhaps you need to predeclare a subroutine?
 compiler saw no other uses of that namespace before that point.  Perhaps
 you need to predeclare a package?
 
+=item Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'
+
+(F) You attempted to use a bareword filehandle with the
+C<bareword_filehandles> feature disabled.
+
+Only the built-in handles C<STDIN>, C<STDOUT>, C<STDERR>, C<ARGV>,
+C<ARGVOUT> and C<DATA> can be used with the C<bareword_filehandles>
+feature disabled.
+
 =item BEGIN failed--compilation aborted
 
 (F) An untrapped exception was raised while executing a BEGIN
