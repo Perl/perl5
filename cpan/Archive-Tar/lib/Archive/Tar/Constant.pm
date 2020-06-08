@@ -1,6 +1,9 @@
 package Archive::Tar::Constant;
 
-our ($VERSION, @ISA);
+use strict;
+use warnings;
+
+use vars qw[$VERSION @ISA @EXPORT];
 
 BEGIN {
     require Exporter;
@@ -11,10 +14,7 @@ BEGIN {
     require Time::Local if $^O eq "MacOS";
 }
 
-our @EXPORT = Archive::Tar::Constant->_list_consts( __PACKAGE__ );
-
-use strict;
-use warnings;
+@EXPORT = Archive::Tar::Constant->_list_consts( __PACKAGE__ );
 
 use constant FILE           => 0;
 use constant HARDLINK       => 1;
