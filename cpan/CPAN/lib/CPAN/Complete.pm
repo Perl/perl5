@@ -1,6 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 # vim: ts=4 sts=4 sw=4:
 package CPAN::Complete;
+use p5;
 use strict;
 @CPAN::Complete::ISA = qw(CPAN::Debug);
 # Q: where is the "How do I add a new command" HOWTO?
