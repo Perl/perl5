@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.54';
+our $VERSION = '1.55';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -825,6 +825,7 @@ sub new {
     # Mask out the bits that L<warnings::register> uses
     my $WARN_MASK;
     BEGIN {
+        no warnings; # umeric in numeric bitwise
 	$WARN_MASK = $warnings::Bits{all} | $warnings::DeadBits{all};
     }
     sub WARN_MASK () {
@@ -2418,7 +2419,7 @@ sub pp_i_predec { pfixop(@_, "--", 23) }
 sub pp_i_postinc { maybe_targmy(@_, \&pfixop, "++", 23, POSTFIX) }
 sub pp_i_postdec { maybe_targmy(@_, \&pfixop, "--", 23, POSTFIX) }
 sub pp_complement { maybe_targmy(@_, \&pfixop, "~", 21) }
-*pp_ncomplement = *pp_complement;
+*pp_ncomplement = *pp_ncomplement = *pp_complement;
 sub pp_scomplement { maybe_targmy(@_, \&pfixop, "~.", 21) }
 
 sub pp_negate { maybe_targmy(@_, \&real_negate) }
@@ -2429,7 +2430,7 @@ sub real_negate {
 	# avoid --$x
 	$self->pfixop($op, $cx, "-", 21.5);
     } else {
-	$self->pfixop($op, $cx, "-", 21);	
+	$self->pfixop($op, $cx, "-", 21);
     }
 }
 sub pp_i_negate { pp_negate(@_) }
@@ -2440,7 +2441,7 @@ sub pp_not {
     if ($cx <= 4) {
 	$self->listop($op, $cx, "not", $op->first);
     } else {
-	$self->pfixop($op, $cx, "!", 21);	
+	$self->pfixop($op, $cx, "!", 21);
     }
 }
 
@@ -2471,7 +2472,7 @@ sub unop {
 	    return $self->maybe_parens(
 			$self->keyword($name) . " $kid", $cx, 16
 		   );
-	}   
+	}
 	return $self->maybe_parens_unop($name, $kid, $cx);
     } else {
 	return $self->maybe_parens(
@@ -2511,7 +2512,7 @@ sub pp_each { unop(@_, "each") }
 sub pp_values { unop(@_, "values") }
 sub pp_keys { unop(@_, "keys") }
 { no strict 'refs'; *{"pp_r$_"} = *{"pp_$_"} for qw< keys each values >; }
-sub pp_boolkeys { 
+sub pp_boolkeys {
     # no name because its an optimisation op that has no keyword
     unop(@_,"");
 }
@@ -2742,10 +2743,14 @@ sub pp_anonlist {
     return 'XXX';
 }
 
-*pp_anonhash = \&pp_anonlist;
+{
+    no warnings 'once';
+    *pp_anonhash = \&pp_anonlist;
+}
+
 
 sub pp_refgen {
-    my $self = shift;	
+    my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first;
     if ($kid->name eq "null") {
@@ -2947,7 +2952,7 @@ sub deparse_binop_left {
     {
 	return $self->deparse($left, $prec - .00001);
     } else {
-	return $self->deparse($left, $prec);	
+	return $self->deparse($left, $prec);
     }
 }
 
@@ -2981,7 +2986,7 @@ sub deparse_binop_right {
     {
 	return $self->deparse($right, $prec - .00001);
     } else {
-	return $self->deparse($right, $prec);	
+	return $self->deparse($right, $prec);
     }
 }
 
@@ -3030,9 +3035,12 @@ sub pp_right_shift { maybe_targmy(@_, \&binop, ">>", 17, ASSIGN) }
 sub pp_bit_and { maybe_targmy(@_, \&binop, "&", 13, ASSIGN) }
 sub pp_bit_or { maybe_targmy(@_, \&binop, "|", 12, ASSIGN) }
 sub pp_bit_xor { maybe_targmy(@_, \&binop, "^", 12, ASSIGN) }
-*pp_nbit_and = *pp_bit_and;
-*pp_nbit_or  = *pp_bit_or;
-*pp_nbit_xor = *pp_bit_xor;
+{
+    no warnings q{once};
+    *pp_nbit_and = *pp_bit_and;
+    *pp_nbit_or  = *pp_bit_or;
+    *pp_nbit_xor = *pp_bit_xor;
+}
 sub pp_sbit_and { maybe_targmy(@_, \&binop, "&.", 13, ASSIGN) }
 sub pp_sbit_or { maybe_targmy(@_, \&binop, "|.", 12, ASSIGN) }
 sub pp_sbit_xor { maybe_targmy(@_, \&binop, "^.", 12, ASSIGN) }
@@ -3849,7 +3857,7 @@ sub pp_list {
         }
 	return "$local(" . join(", ", @exprs) . ")";
     } else {
-	return $self->maybe_parens( join(", ", @exprs), $cx, 6);	
+	return $self->maybe_parens( join(", ", @exprs), $cx, 6);
     }
 }
 
@@ -4350,7 +4358,7 @@ sub is_subscriptable {
 	$kid = $kid->first;
 	return 0 if $kid->name eq "gv" || $kid->name eq "padcv";
 	return 0 if is_scalar($kid);
-	return is_subscriptable($kid);	
+	return is_subscriptable($kid);
     } else {
 	return 0;
     }
@@ -4427,7 +4435,7 @@ sub elem {
 
     $idx = $self->elem_or_slice_single_index($idx);
 
-    unless ($array->name eq $padname) { # Maybe this has been fixed	
+    unless ($array->name eq $padname) { # Maybe this has been fixed
 	$array = $array->first; # skip rv2av (or ex-rv2av in _53+)
     }
     if (my $array_name=$self->elem_or_slice_array_name
@@ -5473,7 +5481,7 @@ sub const {
 		}
 	    }
 	}
-	
+
 	my $const = $self->const($ref, 20);
 	if ($self->{in_subst_repl} && $const =~ /^[0-9]/) {
 	    $const = "($const)";
@@ -5651,7 +5659,7 @@ sub double_delim {
 	}
 	$from =~ s[/][\\/]g;
 	$to =~ s[/][\\/]g;
-	return "/$from/$to/";	
+	return "/$from/$to/";
     }
 }
 
@@ -6324,7 +6332,7 @@ sub pp_subst {
 	if ($pmflags & PMf_EVAL) {
 	    $repl = $self->deparse($repl->first, 0);
 	} else {
-	    $repl = $self->dq($repl);	
+	    $repl = $self->dq($repl);
 	}
     }
     if (not null my $code_list = $op->code_list) {
@@ -6345,7 +6353,7 @@ sub pp_subst {
 				   . double_delim($re, $repl) . $flags,
 				   $cx, 20);
     } else {
-	return "$core_s". double_delim($re, $repl) . $flags;	
+	return "$core_s". double_delim($re, $repl) . $flags;
     }
 }
 
@@ -6360,7 +6368,8 @@ sub is_lexical_subs {
 # Pretend these two ops do not exist.  The perl parser adds them to the
 # beginning of any block containing my-sub declarations, whereas we handle
 # the subs in pad_subs and next_todo.
-*pp_clonecv = *pp_introcv;
+*pp_clonecv = *pp_clonecv = *pp_introcv;
+
 sub pp_introcv {
     my $self = shift;
     my($op, $cx) = @_;
