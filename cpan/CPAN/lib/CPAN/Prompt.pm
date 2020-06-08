@@ -1,6 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 # vim: ts=4 sts=4 sw=4:
 package CPAN::Prompt;
+use p5;
 use overload '""' => "as_string";
 use vars qw($prompt);
 use vars qw(

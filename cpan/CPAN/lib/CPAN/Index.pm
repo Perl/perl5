@@ -1,4 +1,5 @@
 package CPAN::Index;
+use p5;
 use strict;
 use vars qw($LAST_TIME $DATE_OF_02 $DATE_OF_03 $HAVE_REANIMATED $VERSION);
 $VERSION = "2.12";

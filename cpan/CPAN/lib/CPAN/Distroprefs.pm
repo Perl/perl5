@@ -2,6 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 
 use 5.006;
+use p5;
 use strict;
 package CPAN::Distroprefs;
 
