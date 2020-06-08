@@ -7625,10 +7625,10 @@ sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 $cat > getverlist <<EOPL
 #!$perl7 -w
 use File::Basename;
-\$api_versionstring = "$api_versionstring";
-\$version = "$version";
-\$stem = "$sitelib_stem";
-\$archname = "$archname";
+my \$api_versionstring = "$api_versionstring";
+my \$version = "$version";
+my \$stem = "$sitelib_stem";
+my \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
 # The list found is store twice for each entry: the original name, and
@@ -7639,7 +7639,8 @@ EOPL
 #					-- H.Merijn Brand (m)'06 23-10-2006
 
 # Can't have leading @ because metaconfig interprets it as a command!
-;@inc_version_list=();
+my @inc_version_list;
+my @candidates;
 # XXX Redo to do opendir/readdir?
 if (-d $stem) {
     chdir($stem);
@@ -7651,7 +7652,7 @@ else {
     ;@candidates = ();
 }
 
-($pversion, $aversion, $vsn5005) = map {
+my ($pversion, $aversion, $vsn5005) = map {
     pack "sss", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
 foreach $d (@candidates) {
     if ($d->[1] lt $pversion) {
