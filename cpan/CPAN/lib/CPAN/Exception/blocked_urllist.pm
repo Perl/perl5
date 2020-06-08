@@ -17,7 +17,7 @@ sub new {
 
 sub as_string {
     my($self) = shift;
-    if ($CPAN::Config->{connect_to_internet_ok}) {
+    if ($CPAN::Config && $CPAN::Config->{connect_to_internet_ok}) {
         return qq{
 
 You have not configured a urllist for CPAN mirrors. Configure it with
