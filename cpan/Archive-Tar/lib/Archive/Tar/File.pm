@@ -7,8 +7,6 @@ use File::Spec::Unix    ();
 use File::Spec          ();
 use File::Basename      ();
 
-### avoid circular use, so only require;
-require Archive::Tar;
 use Archive::Tar::Constant;
 
 use vars qw[@ISA $VERSION];
@@ -469,6 +467,8 @@ sub extract {
 
     local $Carp::CarpLevel += 1;
 
+    ### avoid circular use, so only require;
+    require Archive::Tar;
     return Archive::Tar->_extract_file( $self, @_ );
 }
 
