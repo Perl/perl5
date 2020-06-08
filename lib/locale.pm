@@ -1,8 +1,9 @@
 package locale;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 use Config;
 
+no warnings 'once';
 $Carp::Internal{ (__PACKAGE__) } = 1;
 
 =head1 NAME
