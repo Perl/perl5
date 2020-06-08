@@ -5116,6 +5116,7 @@ perl.c				main()
 perl.h				Global declarations
 perl_inc_macro.h		macro used to set \@INC using S_incpush_use_sep
 perl_langinfo.h			Perl's version of <langinfo.h>
+perl_siphash.h			Implementation of SipHash
 perlapi.h			Empty backwards-compat include
 perldtrace.d			D script for Perl probes
 perlio.c			C code for PerlIO abstraction
