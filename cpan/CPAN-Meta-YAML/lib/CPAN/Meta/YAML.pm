@@ -815,6 +815,7 @@ sub _can_flock {
     }
     else {
         require Config;
+        no warnings q{once};
         my $c = \%Config::Config;
         $HAS_FLOCK = grep { $c->{$_} } qw/d_flock d_fcntl_can_lock d_lockf/;
         require Fcntl if $HAS_FLOCK;
