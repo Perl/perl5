@@ -5,7 +5,7 @@ our $VERSION = 0.04;
 
 # our %Config can ignore %Config::Config, e.g. for testing
 our %Config;
-unless (%Config) { require Config; *Config = \%Config::Config; }
+unless (%Config) { no warnings 'once'; require Config; *Config = \%Config::Config; }
 
 # This isn't a public API. It's internal to code maintained by the perl-porters
 # If you would like it to be a public API, please send a patch with
