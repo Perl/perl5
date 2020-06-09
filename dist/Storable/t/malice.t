@@ -13,6 +13,7 @@
 # error traps in Storable as possible
 # It also acts as a test for read_header
 
+use p5;
 sub BEGIN {
     # This lets us distribute Test::More in t/
     unshift @INC, 't';

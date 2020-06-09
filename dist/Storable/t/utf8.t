@@ -6,6 +6,8 @@
 #  in the README file that comes with the distribution.
 #
 
+use p5;
+
 sub BEGIN {
     if ($] < 5.006) {
 	print "1..0 # Skip: no utf8 support\n";

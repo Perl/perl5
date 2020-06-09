@@ -16,6 +16,7 @@
 # Storable::init_perinterp() to create a new context for each new
 # thread when it starts
 
+use p5;
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;

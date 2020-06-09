@@ -9,6 +9,7 @@
 # Tests freezing/thawing structures containing Singleton objects,
 # which should see both structs pointing to the same object.
 
+use p5;
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;

@@ -2,6 +2,7 @@
 #
 # This file tests that Storable correctly uses STORABLE_attach hooks
 
+use p5;
 sub BEGIN {
 	unshift @INC, 't';
 	unshift @INC, 't/compat' if $] < 5.006002;

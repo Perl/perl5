@@ -10,6 +10,7 @@
 # Tests ref to items in tied hash/array structures.
 #
 
+use p5;
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;

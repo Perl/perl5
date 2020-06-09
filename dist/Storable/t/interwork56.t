@@ -12,6 +12,7 @@
 # This test checks whether the kludge to interwork with 5.6 Storables compiled
 # on Unix systems with IV as long long works.
 
+use p5;
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;

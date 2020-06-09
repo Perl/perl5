@@ -6,6 +6,8 @@
 #  in the README file that comes with the distribution.
 #
 
+use p5;
+
 BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;

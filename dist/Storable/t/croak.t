@@ -5,6 +5,7 @@
 # with 5.005_03. This test shows it up, whereas malice.t does not.
 # In particular, don't use Test; as this covers up the problem.
 
+use p5;
 sub BEGIN {
     if ($ENV{PERL_CORE}) {
 	require Config; import Config;
