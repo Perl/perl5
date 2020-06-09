@@ -19,7 +19,11 @@ sub INHERITED  () { 2**2  }
 sub PROTECTED  () { 2**3  }
 
 
-my $Fattr = \%fields::attr;
+my $Fattr;
+{
+    no warnings 'once';
+    $Fattr = \%fields::attr;
+}
 
 sub has_fields {
     my($base) = shift;
