@@ -1,5 +1,7 @@
 package Symbol;
 
+use p5;
+
 =head1 NAME
 
 Symbol - manipulate Perl symbols and their names
