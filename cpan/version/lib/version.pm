@@ -1,6 +1,6 @@
 #!perl -w
 package version;
-
+use p5;
 use 5.006002;
 use strict;
 use warnings::register;
