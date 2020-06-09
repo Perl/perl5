@@ -11,6 +11,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
+use p5;
 $VERSION = "0.30"; # remember to update version in POD!
 
 #use strict;
