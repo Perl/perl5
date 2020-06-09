@@ -12,6 +12,7 @@
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 
+use p5;
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;

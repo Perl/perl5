@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 sub BEGIN {
     if ($] < 5.007) {
 	print "1..0 # Skip: no utf8 hash key support\n";

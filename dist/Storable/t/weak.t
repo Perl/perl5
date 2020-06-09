@@ -6,6 +6,8 @@
 #  in the README file that comes with the distribution.
 #
 
+use p5;
+
 sub BEGIN {
   # This lets us distribute Test::More in t/
   unshift @INC, 't';

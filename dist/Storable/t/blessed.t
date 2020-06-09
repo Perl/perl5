@@ -19,6 +19,7 @@ BEGIN {
     );
 }
 
+use p5;
 sub BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir 'dist/Storable' if -d 'dist/Storable';

@@ -12,6 +12,7 @@
 # This file tests several known-error cases relating to STORABLE_attach, in
 # which Storable should (correctly) throw errors.
 
+use p5;
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
