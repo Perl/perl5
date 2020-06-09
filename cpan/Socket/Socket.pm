@@ -885,8 +885,11 @@ if( defined &getaddrinfo ) {
 } else {
     require Scalar::Util;
 
-    *getaddrinfo = \&fake_getaddrinfo;
-    *getnameinfo = \&fake_getnameinfo;
+    {
+    	no warnings 'once';
+	    *getaddrinfo = \&fake_getaddrinfo;
+	    *getnameinfo = \&fake_getnameinfo;    	
+    }
 
     # These numbers borrowed from GNU libc's implementation, but since
     # they're only used by our emulation, it doesn't matter if the real
