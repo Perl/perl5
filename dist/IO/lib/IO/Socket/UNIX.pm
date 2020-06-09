@@ -5,7 +5,7 @@
 # modify it under the same terms as Perl itself.
 
 package IO::Socket::UNIX;
-
+use p5;
 use strict;
 use IO::Socket;
 use Carp;

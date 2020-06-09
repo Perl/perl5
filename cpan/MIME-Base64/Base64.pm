@@ -1,5 +1,6 @@
 package MIME::Base64;
 
+use p5;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 

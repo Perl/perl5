@@ -3,6 +3,7 @@
 #
 package Encode::GSM0338;
 
+use p5;
 use strict;
 use warnings;
 use Carp;

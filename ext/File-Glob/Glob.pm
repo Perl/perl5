@@ -49,7 +49,7 @@ sub import {
             $DEFAULT_FLAGS |= GLOB_NOCASE();
         }
         elsif ($_ eq ':globally') {
-	    no warnings 'redefine';
+	    no warnings qw{redefine once};
 	    *CORE::GLOBAL::glob = \&File::Glob::csh_glob;
 	}
         elsif ($_ eq ':bsd_glob') {

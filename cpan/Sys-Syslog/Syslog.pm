@@ -1,4 +1,5 @@
 package Sys::Syslog;
+use p5;
 use strict;
 use warnings;
 use warnings::register;
@@ -10,9 +11,10 @@ use POSIX           qw< strftime setlocale LC_TIME >;
 use Socket          qw< :all >;
 require 5.005;
 
-
-*import = \&Exporter::import;
-
+{
+    no warnings 'once';
+    *import = \&Exporter::import;
+}
 
 {   no strict 'vars';
     $VERSION = '0.36';
@@ -925,7 +927,7 @@ sub can_load_sys_syslog_win32 {
 }
 
 
-"Eighth Rule: read the documentation."
+1;
 
 __END__
 

@@ -1,5 +1,6 @@
 package Encode::CN::HZ;
 
+use p5;
 use strict;
 use warnings;
 use utf8 ();

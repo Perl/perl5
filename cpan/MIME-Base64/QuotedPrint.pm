@@ -1,5 +1,6 @@
 package MIME::QuotedPrint;
 
+use p5;
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
 

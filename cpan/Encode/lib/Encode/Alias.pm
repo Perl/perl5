@@ -1,4 +1,7 @@
 package Encode::Alias;
+
+use p5;
+
 use strict;
 use warnings;
 our $VERSION = do { my @r = ( q$Revision: 2.24 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
@@ -6,6 +9,7 @@ use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 use Exporter 'import';
 
+no warnings 'redefine';
 # Public, encouraged API is exported by default
 
 our @EXPORT =
@@ -54,6 +58,7 @@ sub find_alias {
         # RT ticket #7835
         unless ( $Alias{$find} ) {
             my $lcfind = lc($find);
+            no warnings 'once';
             for my $name ( keys %Encode::Encoding, keys %Encode::ExtModule )
             {
                 $lcfind eq lc($name) or next;

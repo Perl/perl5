@@ -1,4 +1,6 @@
 package Encode::MIME::Header;
+
+use p5;
 use strict;
 use warnings;
 
