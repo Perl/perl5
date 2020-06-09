@@ -1,5 +1,6 @@
 package Safe;
 
+use p5;
 use 5.003_11;
 use Scalar::Util qw(reftype refaddr);
 
