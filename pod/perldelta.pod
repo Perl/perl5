@@ -218,7 +218,7 @@ This error can be avoided by adding a return to the sub definition:
     $sub = sub () { return $var };
 
 This has been deprecated since Perl 5.22.
-[L<perl #131138|https://rt.perl.org/Ticket/Display.html?id=131138>]
+[L<perl #134138|https://rt.perl.org/Ticket/Display.html?id=134138>]
 
 =head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code points above 0xFF is forbidden
 
@@ -1703,7 +1703,7 @@ incorrectly an alias for C<%+>. [L<perl #131867|https://rt.perl.org/Ticket/Displ
 
 C<%{^CAPTURE}> didn't work if C<@{^CAPTURE}> was mentioned first.
 Similarly for C<%{^CAPTURE_ALL}> and C<@{^CAPTURE_ALL}>, though
-C<@{^CAPTURE_ALL}> currently isn't used. [L<perl #131193|https://rt.perl.org/Ticket/Display.html?id=131193>]
+C<@{^CAPTURE_ALL}> currently isn't used. [L<perl #134193|https://rt.perl.org/Ticket/Display.html?id=134193>]
 
 =item *
 
