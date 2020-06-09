@@ -1,5 +1,7 @@
 package utf8;
 
+use p5;
+
 $utf8::hint_bits = 0x00800000;
 
 our $VERSION = '1.22';
