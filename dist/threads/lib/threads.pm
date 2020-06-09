@@ -1,9 +1,12 @@
 package threads;
 
+use p5;
 use 5.008;
 
 use strict;
 use warnings;
+
+no warnings 'once';
 
 our $VERSION = '2.25';      # remember to update version in POD!
 my $XS_VERSION = $VERSION;
