@@ -2,6 +2,7 @@
 
 # test caching timeout
 
+use p5;
 use lib '..';
 use Memoize;
 

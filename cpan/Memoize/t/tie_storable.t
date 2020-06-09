@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # -*- mode: perl; perl-indent-level: 2 -*-
 
+use p5;
 use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
 # $Memoize::Storable::Verbose = 0;

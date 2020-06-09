@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+use p5;
 use lib 'blib/lib';
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;
