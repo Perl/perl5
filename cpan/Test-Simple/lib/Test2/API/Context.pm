@@ -2,6 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
+no warnings 'redefine';
 our $VERSION = '1.302175';
 
 

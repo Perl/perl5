@@ -1,4 +1,5 @@
 package Test2::Util::Trace;
+use p5;
 require Test2::EventFacet::Trace;
 @ISA = ('Test2::EventFacet::Trace');
 

@@ -4,6 +4,7 @@
 
 package Net::FTP::A;
 
+use p5;
 use 5.008001;
 
 use strict;

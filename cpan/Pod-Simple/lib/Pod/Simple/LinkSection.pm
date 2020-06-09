@@ -1,5 +1,6 @@
 
 require 5;
+use p5;
 package Pod::Simple::LinkSection;
   # Based somewhat dimly on Array::Autojoin
 

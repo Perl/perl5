@@ -1,5 +1,7 @@
 package Memoize::SDBM_File;
 
+use p5;
+
 =head1 NAME
 
 Memoize::SDBM_File - glue to provide EXISTS for SDBM_File for Storable use

@@ -4,6 +4,7 @@ package Text::Balanced;
 # FOR FULL DOCUMENTATION SEE Balanced.pod
 
 use 5.005;
+use p5;
 use strict;
 use Exporter ();
 use SelfLoader;

@@ -1,5 +1,7 @@
 package Module::Load;
 
+use p5;
+
 $VERSION = '0.34';
 
 use strict;

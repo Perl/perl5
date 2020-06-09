@@ -18,6 +18,7 @@ package Pod::Simple::BlackBox;
 #
 # Every node in a treelet is a ['name', {attrhash}, ...children...]
 
+use p5;
 use integer; # vroom!
 use strict;
 use Carp ();

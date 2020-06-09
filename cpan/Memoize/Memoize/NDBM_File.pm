@@ -1,5 +1,7 @@
 package Memoize::NDBM_File;
 
+use p5;
+
 =head1 NAME
 
 Memoize::NDBM_File - glue to provide EXISTS for NDBM_File for Storable use

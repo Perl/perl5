@@ -37,10 +37,13 @@ Version 3.42
 
 our $VERSION = '3.42';
 
-# Backwards compatibility for exportable variable names.
-*verbose  = *Verbose;
-*switches = *Switches;
-*debug    = *Debug;
+{
+    no warnings 'once';
+    # Backwards compatibility for exportable variable names.
+    *verbose  = *Verbose;
+    *switches = *Switches;
+    *debug    = *Debug;
+}
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;

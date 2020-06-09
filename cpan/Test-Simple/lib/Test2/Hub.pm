@@ -217,7 +217,6 @@ sub follow_up {
     push @{$self->{+_FOLLOW_UPS}} => $sub;
 }
 
-*add_context_aquire = \&add_context_acquire;
 sub add_context_acquire {
     my $self = shift;
     my ($sub) = @_;
@@ -230,11 +229,16 @@ sub add_context_acquire {
     $sub; # Intentional return.
 }
 
-*remove_context_aquire = \&remove_context_acquire;
 sub remove_context_acquire {
     my $self = shift;
     my %subs = map {$_ => $_} @_;
     @{$self->{+_CONTEXT_ACQUIRE}} = grep { !$subs{$_} == $_ } @{$self->{+_CONTEXT_ACQUIRE}};
+}
+
+{
+    no warnings 'once';
+    *add_context_aquire = \&add_context_acquire;
+    *remove_context_aquire = \&remove_context_acquire;
 }
 
 sub add_context_init {

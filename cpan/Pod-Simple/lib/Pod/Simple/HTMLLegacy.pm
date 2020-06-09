@@ -1,5 +1,7 @@
 
 require 5;
+use p5;
+
 package Pod::Simple::HTMLLegacy;
 use strict;
 

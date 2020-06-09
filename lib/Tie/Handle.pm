@@ -1,7 +1,8 @@
 package Tie::Handle;
 
+use p5;
 use 5.006_001;
-our $VERSION = '4.2';
+our $VERSION = '4.3';
 
 # Tie::StdHandle used to be inside Tie::Handle.  For backwards compatibility
 # loading Tie::Handle has to make Tie::StdHandle available.

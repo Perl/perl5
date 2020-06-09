@@ -319,7 +319,7 @@ sub check_install {
         local @INC = @INC[0..$#INC-1] if $FORCE_SAFE_INC && $INC[-1] eq '.';
         require Module::CoreList;
         require Config;
-
+        no warnings 'once';
         $href->{uptodate} = 0 if
            exists $Module::CoreList::version{ 0+$] }{ $args->{module} } and
            Module::CoreList::is_deprecated( $args->{module} ) and

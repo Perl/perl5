@@ -1,5 +1,6 @@
 package Text::Tabs;
 
+use p5;
 require Exporter;
 
 @ISA = (Exporter);

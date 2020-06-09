@@ -834,7 +834,11 @@ sub actual_passed {
       if ref $_[0]->{actual_passed};
     return wantarray ? 1 .. $_[0]->{actual_passed} : $_[0]->{actual_passed};
 }
-*actual_ok = \&actual_passed;
+
+{
+    no warnings 'once';
+    *actual_ok = \&actual_passed;
+}
 
 =head3 C<actual_ok>
 

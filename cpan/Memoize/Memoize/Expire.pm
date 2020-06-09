@@ -1,5 +1,8 @@
 
 package Memoize::Expire;
+
+use p5;
+
 # require 5.00556;
 use Carp;
 $DEBUG = 0;

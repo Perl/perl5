@@ -1,4 +1,5 @@
 package Test2::Tools::Tiny;
+use p5;
 use strict;
 use warnings;
 
