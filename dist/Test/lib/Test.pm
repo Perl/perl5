@@ -1,4 +1,4 @@
-
+use p5;
 require 5.004;
 package Test;
 
