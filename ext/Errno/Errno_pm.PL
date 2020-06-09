@@ -397,7 +397,10 @@ sub STORE {
 }
 
 # This is the true return value
-*CLEAR = *DELETE = \*STORE; # Typeglob aliasing uses less space
+{
+	no warnings 'once';
+	*CLEAR = *DELETE = \*STORE; # Typeglob aliasing uses less space	
+}
 
 sub NEXTKEY {
     each %err;
