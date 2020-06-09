@@ -3,16 +3,21 @@
 # subject to change or removal at any time without notice.  Don't use it
 # directly.  Use the public <charnames> module instead.
 
+use p5;
+
 package _charnames;
 use strict;
 use warnings;
-our $VERSION = '1.48';
+our $VERSION = '1.49';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
 use re "/aa";          # Everything in here should be ASCII
 
-$Carp::Internal{ (__PACKAGE__) } = 1;
+{
+  no warnings 'once';
+  $Carp::Internal{ (__PACKAGE__) } = 1;
+}
 
 # Translate between Unicode character names and their code points.  This is a
 # submodule of package <charnames>, used to allow \N{...} to be autoloaded,
