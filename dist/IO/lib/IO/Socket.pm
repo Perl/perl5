@@ -7,6 +7,7 @@
 
 package IO::Socket;
 
+use p5;
 use 5.008_001;
 
 use IO::Handle;

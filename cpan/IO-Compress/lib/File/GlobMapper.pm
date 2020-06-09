@@ -1,5 +1,6 @@
 package File::GlobMapper;
 
+use p5;
 use strict;
 use warnings;
 use Carp;

@@ -723,6 +723,7 @@ sub getExtraParams
 
 sub getInverseClass
 {
+    no warnings 'once';
     return ('IO::Uncompress::Unzip',
                 \$IO::Uncompress::Unzip::UnzipError);
 }

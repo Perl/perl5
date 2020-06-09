@@ -1,5 +1,5 @@
 package ExtUtils::MM_Any;
-
+use p5;
 use strict;
 our $VERSION = '7.44';
 $VERSION =~ tr/_//d;

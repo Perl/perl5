@@ -1,5 +1,6 @@
 package Filter::Simple;
 
+use p5;
 use Text::Balanced ':ALL';
 
 our $VERSION = '0.96';

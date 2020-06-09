@@ -1,5 +1,6 @@
 package ExtUtils::MM_OS2;
 
+use p5;
 use strict;
 
 use ExtUtils::MakeMaker qw(neatvalue);

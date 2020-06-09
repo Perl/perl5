@@ -1,5 +1,6 @@
 package ExtUtils::MM_VMS;
 
+use p5;
 use strict;
 
 use ExtUtils::MakeMaker::Config;

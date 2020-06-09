@@ -11,7 +11,7 @@ BEGIN { *warnif = \&warnings::warnif }
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 our @fields;
 our ( $st_dev, $st_ino, $st_mode,
@@ -124,7 +124,10 @@ else {
 }
 
 # alias for those who don't like objects
-*stat_cando = \&cando;
+{
+    no warnings 'once';
+    *stat_cando = \&cando;
+}
 
 my %op = (
     r => sub { cando($_[0], S_IRUSR, 1) },

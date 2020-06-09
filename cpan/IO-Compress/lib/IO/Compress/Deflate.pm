@@ -1,3 +1,5 @@
+use p5;
+
 package IO::Compress::Deflate ;
 
 require 5.006 ;
@@ -149,6 +151,7 @@ sub getExtraParams
 
 sub getInverseClass
 {
+    no warnings 'once';
     return ('IO::Uncompress::Inflate',
                 \$IO::Uncompress::Inflate::InflateError);
 }

@@ -4,6 +4,7 @@
 #  (C) Paul Evans, 2010-2015 -- leonerd@leonerd.org.uk
 
 package IO::Socket::IP;
+use p5;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
@@ -1155,7 +1156,9 @@ sub join_addr
 
 package # hide from indexer
    IO::Socket::IP::_ForINET;
-use base qw( IO::Socket::IP );
+
+#use base qw( IO::Socket::IP );
+our @ISA = q[IO::Socket::IP];
 
 sub configure
 {
@@ -1169,7 +1172,8 @@ sub configure
 
 package # hide from indexer
    IO::Socket::IP::_ForINET6;
-use base qw( IO::Socket::IP );
+#use base qw( IO::Socket::IP );
+our @ISA = q[IO::Socket::IP];
 
 sub configure
 {
@@ -1246,4 +1250,4 @@ Paul Evans <leonerd@leonerd.org.uk>
 
 =cut
 
-0x55AA;
+1;

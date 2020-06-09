@@ -1,6 +1,7 @@
 # $Id$
 package ExtUtils::MakeMaker;
 
+use p5;
 use strict;
 
 BEGIN {require 5.006;}

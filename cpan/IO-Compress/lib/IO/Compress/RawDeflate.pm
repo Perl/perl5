@@ -135,6 +135,7 @@ sub getZlibParams
 
 sub getInverseClass
 {
+    no warnings 'once';
     return ('IO::Uncompress::RawInflate', 
                 \$IO::Uncompress::RawInflate::RawInflateError);
 }
