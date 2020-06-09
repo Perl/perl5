@@ -14,7 +14,13 @@ our $VERSION = '0.00001';
 
 
 sub _warn_once {
-    local $^W = 0;
+    local $^W;
+    local ${^WARNING_BITS};
+    BEGIN {
+        $^W = 0;
+        ${^WARNING_BITS} = 0;
+    }
+
     *_warn_once = sub{};
 
     #warn("# This code is being run using Perl $]. It should be updated or may break in Perl 8. See YYY for more information.");
