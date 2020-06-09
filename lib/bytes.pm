@@ -1,5 +1,7 @@
 package bytes;
 
+use p5;
+
 our $VERSION = '1.07';
 
 $bytes::hint_bits = 0x00000008;
