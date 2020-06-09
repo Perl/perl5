@@ -1,5 +1,6 @@
 package Digest::MD5;
 
+use p5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 

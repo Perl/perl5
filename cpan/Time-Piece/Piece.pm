@@ -1,5 +1,6 @@
 package Time::Piece;
 
+use p5;
 use strict;
 
 use XSLoader ();

@@ -163,7 +163,10 @@ sub concise_stashref {
 
 # This should have been called concise_subref, but it was exported
 # under this name in versions before 0.56
-*concise_cv = \&concise_subref;
+{
+    no warnings 'once';
+    *concise_cv = \&concise_subref;
+}
 
 sub concise_cv_obj {
     my ($order, $cv, $name) = @_;
@@ -641,7 +644,11 @@ sub hints_flags {
 
 sub private_flags {
     my($name, $x) = @_;
-    my $entry = $B::Op_private::bits{$name};
+    my $entry; 
+    {
+        no warnings 'once';
+        $entry = $B::Op_private::bits{$name};
+    }
     return $x ? "$x" : '' unless $entry;
 
     my @flags;
@@ -680,6 +687,7 @@ sub private_flags {
         }
         else {
             # flag bit
+            no warnings 'once';
             my $label = $B::Op_private::labels{$e};
             next if defined $label && $label eq '-'; # display as raw number
             if ($x & (1<<$bit)) {

@@ -11,6 +11,8 @@ use Carp ();
 use Encode ();
 use Encode::MIME::Name;
 
+no warnings 'redefine';
+
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 sub Define {

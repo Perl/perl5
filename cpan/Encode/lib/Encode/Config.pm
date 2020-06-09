@@ -157,6 +157,7 @@ unless ( ord("A") == 193 ) {
 # Why not export ? to keep ConfigLocal Happy!
 #
 while ( my ( $enc, $mod ) = each %ExtModule ) {
+    no warnings 'once';
     $Encode::ExtModule{$enc} = $mod;
 }
 

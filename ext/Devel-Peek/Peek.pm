@@ -3,6 +3,8 @@
 
 package Devel::Peek;
 
+use p5;
+
 $VERSION = '1.28';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;

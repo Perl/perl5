@@ -1,5 +1,6 @@
 package threads::shared;
 
+use p5;
 use 5.008;
 
 use strict;
@@ -12,8 +13,11 @@ our $VERSION = '1.61'; # Please update the pod, too.
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
-# Declare that we have been loaded
-$threads::shared::threads_shared = 1;
+{
+    no warnings 'once';
+    # Declare that we have been loaded
+    $threads::shared::threads_shared = 1;
+}
 
 # Method of complaint about things we can't clone
 $threads::shared::clone_warn = undef;
