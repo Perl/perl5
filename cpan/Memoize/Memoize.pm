@@ -9,6 +9,9 @@
 # write to mjd-perl-memoize+@plover.com for a license.
 
 package Memoize;
+
+use p5;
+
 $VERSION = '1.03_01';
 
 # Compile-time constants
