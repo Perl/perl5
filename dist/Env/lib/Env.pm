@@ -1,5 +1,6 @@
 package Env;
 
+use p5;
 our $VERSION = '1.04';
 
 =head1 NAME
