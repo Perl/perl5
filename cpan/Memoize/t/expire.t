@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+use p5;
 use lib '..';
 use Memoize;
 use Memoize::ExpireTest;
