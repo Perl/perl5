@@ -1,5 +1,6 @@
 package Unicode::UCD;
 
+use p5;
 use strict;
 use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this

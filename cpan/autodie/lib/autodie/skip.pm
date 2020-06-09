@@ -11,7 +11,7 @@ our $VERSION = '2.32'; # VERSION
 if ($] < 5.010) {
     # Older Perls don't have a native ->DOES.  Let's provide a cheap
     # imitation here.
-
+    no warnings 'once';
     *DOES = sub { return shift->isa(@_); };
 }
 

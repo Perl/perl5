@@ -1,5 +1,6 @@
 package Module::Loaded;
 
+use p5;
 use strict;
 use Carp qw[carp];
 

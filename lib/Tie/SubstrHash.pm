@@ -1,5 +1,6 @@
 package Tie::SubstrHash;
 
+use p5;
 our $VERSION = '1.00';
 
 =head1 NAME

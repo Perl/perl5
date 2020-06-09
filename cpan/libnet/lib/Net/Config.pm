@@ -127,7 +127,10 @@ sub requires_firewall {
   return 0;
 }
 
-*is_external = \&requires_firewall;
+{
+    no warnings 'once';
+    *is_external = \&requires_firewall;
+}
 
 1;
 

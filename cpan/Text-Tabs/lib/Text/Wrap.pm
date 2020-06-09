@@ -1,5 +1,6 @@
 package Text::Wrap;
 
+use p5;
 use warnings::register;
 require Exporter;
 

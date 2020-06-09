@@ -1,4 +1,6 @@
 package Test2::Util;
+
+use p5;
 use strict;
 use warnings;
 

@@ -1373,6 +1373,7 @@ BEGIN {
 
     unless ( defined &utf8::is_utf8 ) {
        require Encode;
+       no warnings 'once';
        *utf8::is_utf8 = *Encode::is_utf8;
     }
 

@@ -1,5 +1,6 @@
 
 require 5;
+use p5;
 package Pod::Simple;
 use strict;
 use Carp ();

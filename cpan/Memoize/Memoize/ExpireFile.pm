@@ -1,5 +1,7 @@
 package Memoize::ExpireFile;
 
+use p5;
+
 =head1 NAME
 
 Memoize::ExpireFile - test for Memoize expiration semantics

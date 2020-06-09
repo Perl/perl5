@@ -1071,6 +1071,7 @@ sub _dataconn {
     if ($conn->connect_SSL) {
       # SSL handshake ok
     } else {
+      no warnings 'once';
       carp("failed to ssl upgrade dataconn: $IO::Socket::SSL::SSL_ERROR");
       return;
     }

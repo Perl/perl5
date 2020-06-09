@@ -92,6 +92,7 @@ sub import {
     );
 
     no strict 'refs';
+    no warnings 'redefine';
     *{"$into\::$_"} = $subs{$_} for keys %subs;
 }
 

@@ -3928,7 +3928,10 @@ sub as_bin {
     return $x->{sign} eq '-' ? "-$bin" : $bin;
 }
 
-*as_bytes = \&to_bytes;
+{
+  no warnings 'once';
+  *as_bytes = \&to_bytes;  
+}
 
 ###############################################################################
 # Other conversion methods

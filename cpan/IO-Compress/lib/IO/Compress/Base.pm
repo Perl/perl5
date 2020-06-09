@@ -984,26 +984,31 @@ sub _notAvailable
     return sub { Carp::croak "$name Not Available: File opened only for output" ; } ;
 }
 
-*read     = _notAvailable('read');
-*READ     = _notAvailable('read');
-*readline = _notAvailable('readline');
-*READLINE = _notAvailable('readline');
-*getc     = _notAvailable('getc');
-*GETC     = _notAvailable('getc');
+{
+    no warnings 'once';
 
-*FILENO   = \&fileno;
-*PRINT    = \&print;
-*PRINTF   = \&printf;
-*WRITE    = \&syswrite;
-*write    = \&syswrite;
-*SEEK     = \&seek;
-*TELL     = \&tell;
-*EOF      = \&eof;
-*CLOSE    = \&close;
-*BINMODE  = \&binmode;
+    *read     = _notAvailable('read');
+    *READ     = _notAvailable('read');
+    *readline = _notAvailable('readline');
+    *READLINE = _notAvailable('readline');
+    *getc     = _notAvailable('getc');
+    *GETC     = _notAvailable('getc');
+
+    *FILENO   = \&fileno;
+    *PRINT    = \&print;
+    *PRINTF   = \&printf;
+    *WRITE    = \&syswrite;
+    *write    = \&syswrite;
+    *SEEK     = \&seek;
+    *TELL     = \&tell;
+    *EOF      = \&eof;
+    *CLOSE    = \&close;
+    *BINMODE  = \&binmode;
 
 #*sysread  = \&_notAvailable;
 #*syswrite = \&_write;
+
+}
 
 1;
 

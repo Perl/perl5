@@ -6,7 +6,7 @@
 #
 
 package Math::Complex;
-
+use p5;
 { use 5.006; }
 use strict;
 

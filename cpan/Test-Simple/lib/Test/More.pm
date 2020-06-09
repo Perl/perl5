@@ -411,8 +411,11 @@ sub isnt ($$;$) {
     return $tb->isnt_eq(@_);
 }
 
-*isn't = \&isnt;
-# ' to unconfuse syntax higlighters
+{
+    no warnings 'once';
+    *isn't = \&isnt;
+    # ' to unconfuse syntax higlighters
+}
 
 =item B<like>
 
