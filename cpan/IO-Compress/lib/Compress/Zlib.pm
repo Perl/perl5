@@ -1,6 +1,6 @@
 
 package Compress::Zlib;
-
+use p5;
 require 5.006 ;
 require Exporter;
 use Carp ;
