@@ -1,5 +1,6 @@
 package attributes;
 
+use p5;
 our $VERSION = 0.33;
 
 @EXPORT_OK = qw(get reftype);
