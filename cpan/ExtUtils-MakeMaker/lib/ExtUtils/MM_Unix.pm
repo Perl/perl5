@@ -1,5 +1,6 @@
 package ExtUtils::MM_Unix;
 
+use p5;
 require 5.006;
 
 use strict;

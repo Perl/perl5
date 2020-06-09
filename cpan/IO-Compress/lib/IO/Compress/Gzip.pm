@@ -167,6 +167,7 @@ sub mkTrailer
 
 sub getInverseClass
 {
+    no warnings 'once';
     return ('IO::Uncompress::Gunzip',
                 \$IO::Uncompress::Gunzip::GunzipError);
 }

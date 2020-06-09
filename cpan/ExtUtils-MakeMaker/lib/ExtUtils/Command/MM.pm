@@ -1,5 +1,6 @@
 package ExtUtils::Command::MM;
 
+use p5;
 require 5.006;
 
 use strict;

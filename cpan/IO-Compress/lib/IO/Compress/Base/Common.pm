@@ -1,3 +1,5 @@
+use p5;
+
 package IO::Compress::Base::Common;
 
 use strict ;

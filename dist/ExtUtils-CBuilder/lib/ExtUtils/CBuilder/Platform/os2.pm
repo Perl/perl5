@@ -56,6 +56,7 @@ sub extra_link_args_after_prelink {
   die "No .def file created by 'prelink' stage"
     unless @DEF or not @{$args{prelink_res}};
 
+  no warnings 'once';
   my @after_libs = ($OS2::is_aout ? ()
       : $self->perl_inc() . "/libperl_override$self->{config}{lib_ext}");
   # , "-L", "-lperl"

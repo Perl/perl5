@@ -2,6 +2,8 @@ package Getopt::Std;
 require 5.000;
 require Exporter;
 
+use p5;
+
 =head1 NAME
 
 Getopt::Std - Process single-character switches with switch clustering
