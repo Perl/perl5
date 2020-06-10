@@ -270,17 +270,17 @@ don't, so that you can portably take advantage of this C99 feature.
 
 =cut
 */
-#  ifdef I_STDINT
+#ifdef I_STDINT
     typedef  int_fast8_t  PERL_INT_FAST8_T;
     typedef uint_fast8_t  PERL_UINT_FAST8_T;
     typedef  int_fast16_t PERL_INT_FAST16_T;
     typedef uint_fast16_t PERL_UINT_FAST16_T;
-#  else
+#else
     typedef int           PERL_INT_FAST8_T;
     typedef unsigned int  PERL_UINT_FAST8_T;
     typedef int           PERL_INT_FAST16_T;
     typedef unsigned int  PERL_UINT_FAST16_T;
-#  endif
+#endif
 
 /* log(2) (i.e., log base 10 of 2) is pretty close to 0.30103, just in case
  * anyone is grepping for it.  So BIT_DIGITS gives the number of decimal digits
