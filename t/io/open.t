@@ -10,6 +10,8 @@ $|  = 1;
 use warnings;
 use Config;
 
+use p5;
+
 plan tests => 188;
 
 sub ok_cloexec {
@@ -17,8 +19,9 @@ sub ok_cloexec {
 	skip "no fcntl", 1 unless $Config{d_fcntl};
 	my $fd = fileno($_[0]);
 	fresh_perl_is(qq(
+        use p5;
 	    print open(F, "+<&=$fd") ? 1 : 0, "\\n";
-	), "0\n", {}, "not inherited across exec");
+	), "0\n", { run_as_five => 1 }, "not inherited across exec");
     }
 }
 
@@ -90,6 +93,9 @@ my $afile = tempfile();
     unlink($afile);
 }
 {
+    local %ENV = %ENV;
+    delete $ENV{PATH};
+
     ok( open(my $f, '-|', <<EOC),     'open -|' );
     $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
@@ -100,6 +106,9 @@ EOC
     ok( close($f),                      '       close' );
 }
 {
+    local %ENV = %ENV;
+    delete $ENV{PATH};
+
     ok( open(my $f, '|-', <<EOC),     'open |-' );
     $Perl -pe "s/^not //"
 EOC
@@ -132,6 +141,7 @@ like( $@, qr/Bad filehandle:\s+some_glob/,          '       right error' );
     like( $@, qr/Bad filehandle:\s+ǡﬁlḛ/u,          '       right error' );
 }
 
+our $f;
 # local $file tests
 {
     unlink($afile) if -f $afile;
@@ -196,6 +206,9 @@ ok( -s $afile < 20,                     '       -s' );
 }
 
 {
+    local %ENV = %ENV;
+    delete $ENV{PATH};
+
     ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
     $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
@@ -231,15 +244,18 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
 
 {
     local *F;
+    local %ENV = %ENV;
+    delete $ENV{PATH};
+
     for (1..2) {
-	ok( open(F, qq{$Perl -le "print 'ok'"|}), 'open to pipe' );
+	ok( open(F, qq{$Perl -l -5 "print 'ok'"|}), 'open to pipe' );
 	ok_cloexec(\*F);
 	is(scalar <F>, "ok\n",  '       readline');
 	ok( close F,            '       close' );
     }
 
     for (1..2) {
-	ok( open(F, "-|", qq{$Perl -le "print 'ok'"}), 'open -|');
+	ok( open(F, "-|", qq{$Perl -l -5 "print 'ok'"}), 'open -|');
 	ok_cloexec(\*F);
 	is( scalar <F>, "ok\n", '       readline');
 	ok( close F,            '       close' );
@@ -295,6 +311,8 @@ SKIP: {
 	return $line;
     }
 
+    my (@fh0, %fh1, @fh2, %fh3);
+
     open($fh0[0], "TEST");
     ok_cloexec($fh0[0]);
     gimme($fh0[0]);
@@ -349,11 +367,11 @@ SKIP: {
 # [perl #28986] "open m" crashes Perl
 
 fresh_perl_like('open m', qr/^Search pattern not terminated at/,
-	{ stderr => 1 }, 'open m test');
+	{ stderr => 1, run_as_five => 1 }, 'open m test');
 
 fresh_perl_is(
     'sub f { open(my $fh, "xxx"); $fh = "f"; } f; f;print "ok"',
-    'ok', { stderr => 1 },
+    'ok', { stderr => 1, run_as_five => 1 },
     '#29102: Crash on assignment to lexical filehandle');
 
 # [perl #31767] Using $1 as a filehandle via open $1, "file" doesn't raise
@@ -389,6 +407,7 @@ is($@, '', 'no "Modification of a read-only value" when closing');
 #               been opened and written to.
 fresh_perl_is(
     '
+      use p5;
       open my $fh, ">", \*STDOUT;
       print $fh "hello";
      "".*STDOUT;
@@ -396,7 +415,7 @@ fresh_perl_is(
       close $fh;
       unlink \*STDOUT;
     ',
-    'ok', { stderr => 1 },
+    'ok', { stderr => 1, run_as_five => 1 },
     '[perl #77492]: open $fh, ">", \*glob causes SEGV');
 
 # [perl #77684] Opening a reference to a glob copy.
@@ -440,6 +459,7 @@ pass("no crash when open autovivifies glob in freed package");
     ok(chmod(0666, $temp), "set mode to a known value");
     my ($final_mode, $final_mtime) = (stat $temp)[2, 9];
 
+    use p7;
     my $fn = "$temp\0.invalid";
     my $fno = bless \(my $fn2 = "$temp\0.overload"), "OverloadTest";
     is(open(I, $fn), undef, "open with nul in pathnames since 5.18 [perl #117265]");
