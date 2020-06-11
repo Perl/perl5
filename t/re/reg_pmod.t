@@ -23,7 +23,7 @@ plan tests => 14 * @tests + 4;
 my $W = "";
 
 $SIG{__WARN__} = sub { $W.=join("",@_); };
-sub _u($$) { "$_[0] is ".(defined $_[1] ? "'$_[1]'" : "undef") }
+sub _u { "$_[0] is ".(defined $_[1] ? "'$_[1]'" : "undef") }
 
 foreach my $test (@tests) {
     my ($p, $pat,$l,$m,$r) = @$test;
