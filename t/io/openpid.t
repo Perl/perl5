@@ -32,6 +32,9 @@ $perl .= qq[ "-I../lib"];
 
 my @perl = ( which_perl(), "-I../lib" );
 
+local %ENV = %ENV;
+delete $ENV{PATH};
+
 #
 # commands run 4 perl programs.  Two of these programs write a
 # short message to STDOUT and exit.  Two of these programs
@@ -47,6 +50,10 @@ my @perl = ( which_perl(), "-I../lib" );
 #
 # VMS does not have the list form of piped open, but it also would
 # not create a separate process for an intermediate shell.
+
+my ($cmd1, $cmd2);
+my (@cmd1, @cmd2);
+
 if ($^O eq 'VMS') {
     $cmd1 = qq/$perl -e "\$|=1; print qq[first process\\n]; sleep 30;"/;
     $cmd2 = qq/$perl -e "\$|=1; print qq[second process\\n]; sleep 30;"/;
@@ -55,12 +62,13 @@ else {
     @cmd1 = ( @perl, "-e", "\$|=1; print qq[first process\\n]; sleep 30;" );
     @cmd2 = ( @perl, "-e", "\$|=1; print qq[second process\\n]; sleep 30;" );
 }
-$cmd3 = qq/$perl -e "print <>;"/; # hangs waiting for end of STDIN
-$cmd4 = qq/$perl -e "print scalar <>;"/;
+my $cmd3 = qq/$perl -e "print <>;"/; # hangs waiting for end of STDIN
+my $cmd4 = qq/$perl -e "print scalar <>;"/;
 
 #warn "#@cmd1\n#@cmd2\n#$cmd3\n#$cmd4\n";
 
 # start the processes
+my ($pid1, $pid2, $pid3, $pid4);
 if ($^O eq 'VMS') {
     ok( $pid1 = open(FH1, "$cmd1 |"), 'first process started');
     ok( $pid2 = open(FH2, "$cmd2 |"), '    second' );
@@ -81,15 +89,15 @@ my $killsig = 'HUP';
 $killsig = 1 unless $Config{sig_name} =~ /\bHUP\b/;
 
 # get message from first process and kill it
-chomp($from_pid1 = scalar(<FH1>));
+chomp(my $from_pid1 = scalar(<FH1>));
 is( $from_pid1, 'first process',    'message from first process' );
 
-$kill_cnt = kill $killsig, $pid1;
+my $kill_cnt = kill $killsig, $pid1;
 is( $kill_cnt, 1,   'first process killed' ) ||
   print "# errno == $!\n";
 
 # get message from second process and kill second process and reader process
-chomp($from_pid2 = scalar(<FH2>));
+chomp(my $from_pid2 = scalar(<FH2>));
 is( $from_pid2, 'second process',   'message from second process' );
 
 $kill_cnt = kill $killsig, $pid2, $pid3;
@@ -103,6 +111,6 @@ select(FH4); $| = 1; select(STDOUT);
 printf FH4 "ok %d - text sent to fourth process\n", curr_test();
 next_test();
 print "# waiting for process $pid4 to exit\n";
-$reap_pid = waitpid $pid4, 0;
+my $reap_pid = waitpid $pid4, 0;
 is( $reap_pid, $pid4, 'fourth process reaped' );
 
