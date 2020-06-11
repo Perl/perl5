@@ -1732,7 +1732,7 @@ sub run_tests {
         $_ = '123';
         is("$1", 'abc', "/g leads to unsafe match vars: $1");
 
-        fresh_perl_is(<<'EOP', ">abc<\n", {}, 'mention $&');
+        fresh_perl_is(<<'EOP', ">abc<\n", { run_as_five => 1 }, 'mention $&');
 $&;
 my $x; 
 ($x='abc')=~/(abc)/g; 
@@ -2255,7 +2255,7 @@ EOP
                 print $ls eq lc $s ? "good\n" : "bad: [$ls]\n";
 EOF
             "good\n",
-            {},
+            { run_as_five => 1 },
             "swash triggered by lc() doesn't corrupt \$1"
         );
     }
@@ -2489,7 +2489,7 @@ EOF
         $Config{uvsize} == 8
 	  or skip("need large code-points for this test", 1);
 
-	fresh_perl_is('/\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
+	fresh_perl_is('/\x{E000000000}|/ and print qq(ok\n)', "ok\n", { run_as_five => 1 },
 		      "buffer overflow in TRIE_STORE_REVCHAR");
     }
 
