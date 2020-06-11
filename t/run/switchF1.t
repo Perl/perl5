@@ -30,8 +30,8 @@ $prog =~ s/QQ/\x01\x80/;
 print F $prog;
 close F or die "Close $file: $!";
 
-$count = 5;
-$result = "ok $count - complete test of alternate delimiters in -F\n";
+my $count = 5;
+my $result = "ok $count - complete test of alternate delimiters in -F\n";
 print system ($^X, $file) ? "not $result" : $result;
 
 unlink $file or die "Unlink $file: $!";
