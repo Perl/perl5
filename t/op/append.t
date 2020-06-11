@@ -9,10 +9,10 @@ BEGIN {
 ##Literal test count since evals below can fail
 plan tests => 13;
 
-$a = 'ab' . 'c';	# compile time
-$b = 'def';
+my $a = 'ab' . 'c';	# compile time
+my $b = 'def';
 
-$c = $a . $b;
+my $c = $a . $b;
 is( $c, 'abcdef', 'compile time concatenation' );
 
 $c .= 'xyz';
