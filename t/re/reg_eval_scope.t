@@ -14,7 +14,7 @@ BEGIN {
 
 plan 49;
 
-fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
+fresh_perl_is <<'CODE', '781745', { run_as_five => 1 }, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
  print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })a/;
  print $x,$a,$b;
@@ -36,10 +36,10 @@ fresh_perl_is <<'CODE',
  }
 CODE
  '1a82a93a104a85a96a101a 1b82b93b104b85b96b101b 1c82c93c104c85c96c101c ',
-  {},
+  { run_as_five => 1 },
  'multiple (?{})s in loop with lexicals';
 
-fresh_perl_is <<'CODE', '781745', {}, 'run-time re-eval has its own scope';
+fresh_perl_is <<'CODE', '781745', { run_as_five => 1 }, 'run-time re-eval has its own scope';
  use re qw(eval);
  my $x = 7;  my $a = 4; my $b = 5;
  my $rest = 'a';
@@ -47,7 +47,7 @@ fresh_perl_is <<'CODE', '781745', {}, 'run-time re-eval has its own scope';
  print $x,$a,$b;
 CODE
 
-fresh_perl_is <<'CODE', '178279371047857967101745', {},
+fresh_perl_is <<'CODE', '178279371047857967101745', { run_as_five => 1 },
  use re "eval";
  my $x = 7; $y = 1;
  my $a = 4; my $b = 5;
@@ -64,7 +64,7 @@ fresh_perl_is <<'CODE', '178279371047857967101745', {},
 CODE
  'multiple (?{})s in "foo" =~ $string';
 
-fresh_perl_is <<'CODE', '178279371047857967101745', {},
+fresh_perl_is <<'CODE', '178279371047857967101745', { run_as_five => 1 },
  use re "eval";
  my $x = 7; $y = 1;
  my $a = 4; my $b = 5;
@@ -81,7 +81,7 @@ fresh_perl_is <<'CODE', '178279371047857967101745', {},
 CODE
  'multiple (?{})s in "foo" =~ /$string/x';
 
-fresh_perl_is <<'CODE', '123123', {},
+fresh_perl_is <<'CODE', '123123', { run_as_five => 1 },
   for my $x(1..3) {
    push @regexps, qr/(?{ print $x })a/;
   }
@@ -90,34 +90,37 @@ fresh_perl_is <<'CODE', '123123', {},
 CODE
  'qr/(?{})/ is a closure';
 
-"a" =~ do { package foo; qr/(?{ $::pack = __PACKAGE__ })a/ };
-is $pack, 'foo', 'qr// inherits package';
-"a" =~ do { use re "/x"; qr/(?{ $::re = qr-- })a/ };
-is $re, '(?^x:)', 'qr// inherits pragmata';
-
-$::pack = '';
-"ba" =~ /b${\do { package baz; qr|(?{ $::pack = __PACKAGE__ })a| }}/;
-is $pack, 'baz', '/text$qr/ inherits package';
-"ba" =~ m+b${\do { use re "/i"; qr|(?{ $::re = qr-- })a| }}+;
-is $re, '(?^i:)', '/text$qr/ inherits pragmata';
-
 {
-  use re 'eval';
-  package bar;
-  "ba" =~ /${\'(?{ $::pack = __PACKAGE__ })a'}/;
-}
-is $pack, 'bar', '/$text/ containing (?{}) inherits package';
-{
-  use re 'eval', "/m";
-  "ba" =~ /${\'(?{ $::re = qr -- })a'}/;
-}
-is $re, '(?^m:)', '/$text/ containing (?{}) inherits pragmata';
+    no strict; no warnings;
+    "a" =~ do { package foo; qr/(?{ $::pack = __PACKAGE__ })a/ };
+    is $pack, 'foo', 'qr// inherits package';
+    "a" =~ do { use re "/x"; qr/(?{ $::re = qr-- })a/ };
+    is $re, '(?^x:)', 'qr// inherits pragmata';
 
-fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{die})';
+    $::pack = '';
+    "ba" =~ /b${\do { package baz; qr|(?{ $::pack = __PACKAGE__ })a| }}/;
+    is $pack, 'baz', '/text$qr/ inherits package';
+    "ba" =~ m+b${\do { use re "/i"; qr|(?{ $::re = qr-- })a| }}+;
+    is $re, '(?^i:)', '/text$qr/ inherits pragmata';    
+
+    {
+      use re 'eval';
+      package bar;
+      "ba" =~ /${\'(?{ $::pack = __PACKAGE__ })a'}/;
+    }
+    is $pack, 'bar', '/$text/ containing (?{}) inherits package';
+    {
+      use re 'eval', "/m";
+      "ba" =~ /${\'(?{ $::re = qr -- })a'}/;
+    }
+    is $re, '(?^m:)', '/$text/ containing (?{}) inherits pragmata';
+}
+
+fresh_perl_is <<'CODE', '45', { stderr => 1, run_as_five => 1 }, '(?{die})';
 my $a=4; my $b=5;  eval { "a" =~ /(?{die})a/ }; print $a,$b;
 CODE
 
-fresh_perl_is <<'CODE', 'Y45', { stderr => 1 }, '(?{eval{die}})';
+fresh_perl_is <<'CODE', 'Y45', { stderr => 1, run_as_five => 1 }, '(?{eval{die}})';
 my $a=4; my $b=5;
 "a" =~ /(?{eval { die; print "X" }; print "Y"; })a/; print $a,$b;
 CODE
@@ -159,7 +162,7 @@ fresh_perl_is <<'CODE',
 my $a=4; my $b=5; "a" =~ /(?{last})a/; print $a,$b
 CODE
     q{Can't "last" outside a loop block at - line 1.},
-    { stderr => 1 }, '(?{last})';
+    { stderr => 1, run_as_five => 1 }, '(?{last})';
 
 
 fresh_perl_is <<'CODE',
@@ -173,21 +176,21 @@ fresh_perl_is <<'CODE',
 for (1) {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
 CODE
     q{Can't "last" outside a loop block at - line 1.},
-    { stderr => 1 }, 'for (1) {(?{last})}';
+    { stderr => 1, run_as_five => 1 }, 'for (1) {(?{last})}';
 
 
 fresh_perl_is <<'CODE',
 my $a=4; my $b=5; eval { "a" =~ /(?{last})a/ }; print $a,$b
 CODE
     '45',
-    { stderr => 1 }, 'eval {(?{last})}';
+    { stderr => 1, run_as_five => 1 }, 'eval {(?{last})}';
 
 
 fresh_perl_is <<'CODE',
 my $a=4; my $b=5; "a" =~ /(?{next})a/; print $a,$b
 CODE
     q{Can't "next" outside a loop block at - line 1.},
-    { stderr => 1 }, '(?{next})';
+    { stderr => 1, run_as_five => 1 }, '(?{next})';
 
 
 fresh_perl_is <<'CODE',
@@ -201,14 +204,14 @@ fresh_perl_is <<'CODE',
 for (1) {  my $a=4; my $b=5; "a" =~ /(?{next})a/ }; print $a,$b
 CODE
     q{Can't "next" outside a loop block at - line 1.},
-    { stderr => 1 }, 'for (1) {(?{next})}';
+    { stderr => 1, run_as_five => 1 }, 'for (1) {(?{next})}';
 
 
 fresh_perl_is <<'CODE',
 my $a=4; my $b=5; eval { "a" =~ /(?{next})a/ }; print $a,$b
 CODE
     '45',
-    { stderr => 1 }, 'eval {(?{next})}';
+    { stderr => 1, run_as_five => 1 }, 'eval {(?{next})}';
 
 
 fresh_perl_is <<'CODE',
@@ -232,11 +235,11 @@ FOO;
 print $a,$b
 CODE
     "YZ45",
-    { stderr => 1 }, '{(?{goto FOO; FOO:})}';
+    { stderr => 1, run_as_five => 1 }, '{(?{goto FOO; FOO:})}';
 }
 
 # [perl #3590]
-fresh_perl_is <<'CODE', '', { stderr => 1 }, '(?{eval{die}})';
+fresh_perl_is <<'CODE', '', { stderr => 1, run_as_five => 1 }, '(?{eval{die}})';
 "$_$_$_"; my $foo; # these consume pad entries and ensure a SEGV on opd perls
 "" =~ m{(?{exit(0)})};
 CODE
