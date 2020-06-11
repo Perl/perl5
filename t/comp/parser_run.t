@@ -53,7 +53,7 @@ SKIP:
     # detected by ASAN
     # Win32 cmd.exe can't handle newlines well
     skip("Need POSIXish", 1) if $^O eq "MSWin32";
-    my $out = runperl(prog => "\@{ 0\n\n}", stderr => 1, non_portable => 1);
+    my $out = runperl(prog => "\@{ 0\n\n}", stderr => 1, non_portable => 1, run_as_five => 1 );
     is($out, "", "check for ASAN use after free");
 }
 
