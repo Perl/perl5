@@ -470,19 +470,24 @@ my_peep (pTHX_ OP *o)
 }
 
 STATIC void
-my_rpeep (pTHX_ OP *o)
+my_rpeep (pTHX_ OP *first)
 {
     dMY_CXT;
 
-    if (!o)
+    if (!first)
 	return;
 
-    MY_CXT.orig_rpeep(aTHX_ o);
+    MY_CXT.orig_rpeep(aTHX_ first);
 
     if (!MY_CXT.peep_recording)
 	return;
 
-    for (; o; o = o->op_next) {
+    for (OP *o = first, *t = first; o; o = o->op_next, t = t->op_next) {
+	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
+	    av_push(MY_CXT.rpeep_recorder, newSVsv(cSVOPx_sv(o)));
+	}
+	o = o->op_next;
+	if (!o || o == t) break;
 	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
 	    av_push(MY_CXT.rpeep_recorder, newSVsv(cSVOPx_sv(o)));
 	}
