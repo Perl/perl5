@@ -23,7 +23,7 @@ EXPECT
 
     #local $TODO = "[perl #60508]";
 
-    fresh_perl_is(<<'CODE', $expect, {});
+    fresh_perl_is(<<'CODE', $expect, { run_as_five => 1 });
 binmode STDOUT, ":utf8";
 sub f { $_[0] =~ s/([>X])//g; }
 
