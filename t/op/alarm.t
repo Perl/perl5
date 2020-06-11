@@ -8,7 +8,7 @@ BEGIN {
 
 
 use Config;
-if ( !$Config{d_alarm} ) {
+if ( !$Config::Config{d_alarm} ) {
     skip_all("alarm() not implemented on this platform");
 }
 
@@ -48,6 +48,7 @@ $diff = $end_time - $start_time;
 # alarm time might be one second less than you said.
 is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
+our $TODO;
 {
     local $TODO = "Why does system() block alarm() on $^O?"
 		if $^O eq 'VMS' || $^O eq 'dos';
