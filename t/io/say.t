@@ -16,6 +16,8 @@ BEGIN {
 use strict 'vars';
 use feature "say";
 
+no strict 'refs';
+
 say "1..13";
 
 my $foo = 'STDOUT';
