@@ -88,7 +88,7 @@ cmp_ok( scalar(@var), '==', 0, '..still nothing pushed (package)' );
 # Broken temporarily by the jumbo re-eval rewrite in 5.17.1; fixed in .6
 {
     use re 'eval';
-    $x = "(?{})";
+    my $x = "(?{})";
     is eval { "a" =~ /a++(?{})+$x/x } || $@, '1', '/a++(?{})+$code_block/'
 }
 
@@ -96,7 +96,7 @@ cmp_ok( scalar(@var), '==', 0, '..still nothing pushed (package)' );
 "$_" =~ /(?{ is \$_, \$_,
                '[perl #78194] \$_ == \$_ when $_ aliases "$x"' })/;
 
-@a = 1..3;
+my @a = (1..3);
 like eval { qr/@a(?{})/ }, qr/1 2 3\(\?\{\}\)/, 'qr/@a(?{})/';
 
 # Not a code block, but looks a bit like one.  (Failed an assertion from
