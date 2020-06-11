@@ -11,7 +11,7 @@ $|=1;
 run_multiple_progs('', \*DATA);
 
 foreach my $code ('sub;', 'sub ($) ;', '{ $x = sub }', 'sub ($) && 1') {
-    eval $code;
+    eval "use p5; $code";
     like($@, qr/^Illegal declaration of anonymous subroutine at/,
 	 "'$code' is illegal");
 }
@@ -24,7 +24,7 @@ foreach my $code ('sub;', 'sub ($) ;', '{ $x = sub }', 'sub ($) && 1') {
     # handle the case "sub ($) : lvalue;" (marked as a TODO test), because
     # it's handled by the lexer in separate tokens, hence more difficult to
     # work out.
-    my $code = 'sub ($) : lvalue;';
+    my $code = 'sub :prototype($) : lvalue;';
     eval $code;
     like($@, qr/^Illegal declaration of anonymous subroutine at/,
 	 "'$code' is illegal");
@@ -87,13 +87,15 @@ EXPECT
 ok 1
 ########
 # [perl #71154] undef &$code makes $code->() die with: Not a CODE reference
+no warnings; no strict;
 sub __ANON__ { print "42\n" }
 undef &{$x=sub{}};
 $x->();
 EXPECT
-Undefined subroutine called at - line 4.
+Undefined subroutine called at - line 5.
 ########
 # NAME anon constant clobbering __ANON__
+no warnings; no strict;
 sub __ANON__ { "42\n" }
 print __ANON__;
 sub(){3};
