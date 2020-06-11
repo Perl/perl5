@@ -12,8 +12,7 @@ BEGIN {
 
 my $test = 1;
 
-sub ok {
-    my($ok, $name) = @_;
+sub ok($ok, $name) {
 
     printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name;
 
@@ -23,8 +22,7 @@ sub ok {
     return $ok;
 }
 
-sub is {
-    my($got, $expected, $name) = @_;
+sub is($got, $expected, $name) {
 
     my $ok = $got eq $expected;
 
@@ -41,7 +39,7 @@ sub is {
 
 print "1..254\n";
 
-($a, $b, $c) = qw(foo bar);
+my ($a, $b, $c) = qw(foo bar);
 
 ok("$a"     eq "foo",    "verifying assign");
 ok("$a$b"   eq "foobar", "basic concatenation");
@@ -51,7 +49,7 @@ ok("$c$a$c" eq "foo",    "concatenate undef, fore and aft");
 
 {
     # bug id 20000819.004 (#3761) 
-
+    my $dx;
     $_ = $dx = "\x{10f2}";
     s/($dx)/$dx$1/;
     {
@@ -97,6 +95,7 @@ ok("$c$a$c" eq "foo",    "concatenate undef, fore and aft");
     eval {"\x{1234}$2"};
     ok(!$@, "bug id 20001020.006 (#4484), right");
 
+    my $pi;
     *pi = \undef;
     # This bug existed earlier than the $2 bug, but is fixed with the same
     # patch. Without the fix this 5.7.0 would also croak:
@@ -199,7 +198,7 @@ sub beq { use bytes; $_[0] eq $_[1]; }
 
 # [perl #124160]
 package o { use overload "." => sub { $_[0] }, fallback => 1 }
-$o = bless [], "o";
+my $o = bless [], "o";
 ok(ref(CORE::state $y = "a $o b") eq 'o',
   'state $y = "foo $bar baz" does not stringify; only concats');
 
@@ -762,7 +761,8 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     $s->($h{foo});
     is($h{foo}, "ab", "PVLV");
 
-    # assigning a string to a typeglob creates an alias
+    # assigning a string to a typeglob creates an alias    
+    no strict;
     $Foo = 'myfoo';
     *Bar = ("F" . $o . $o);
     is($Bar, "myfoo", '*Bar = "Foo"');
@@ -771,6 +771,7 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     # a stringified value
 
     package QPR {
+        no strict 'refs';
         ${'*QPR::Bar*QPR::BarBaz'} = 'myfoobarbaz';
         *Bar = (*Bar  . *Bar . "Baz");
         ::is($Bar, "myfoobarbaz", '*Bar =  (*Bar  . *Bar . "Baz")');
