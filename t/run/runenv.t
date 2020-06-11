@@ -12,7 +12,7 @@ BEGIN {
     skip_all_without_config('d_fork');
 }
 
-plan tests => 106;
+plan tests => 112;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -27,6 +27,7 @@ delete $ENV{PERL_USE_UNSAFE_INC};
 
 # Run perl with specified environment and arguments, return (STDOUT, STDERR)
 sub runperl_and_capture {
+  no warnings 'once';
   local *F;
   my ($env, $args) = @_;
 
@@ -35,6 +36,7 @@ sub runperl_and_capture {
   delete $ENV{PERL5LIB};
   delete $ENV{PERL5OPT};
   delete $ENV{PERL_USE_UNSAFE_INC};
+  delete $ENV{PATH};
   my $pid = fork;
   return (0, "Couldn't fork: $!") unless defined $pid;   # failure
   if ($pid) {                   # parent
@@ -96,7 +98,7 @@ try({PERL5OPT => '-w'}, ['-e', 'print $::x'],
     "", 
     qq{Name "main::x" used only once: possible typo at -e line 1.\nUse of uninitialized value \$x in print at -e line 1.\n});
 
-try({PERL5OPT => '-Mstrict'}, ['-I../lib', '-e', 'print $::x'],
+try({PERL5OPT => '-Mstrict'}, ['-I../lib', '-5', 'print $::x'],
     "", "");
 
 try({PERL5OPT => '-Mstrict'}, ['-I../lib', '-e', 'print $x'],
@@ -166,7 +168,7 @@ try({PERL5OPT => '-t'},
     '');
 
 try({PERL5OPT => '-W'},
-    ['-I../lib','-e', 'local $^W = 0;  no warnings;  print $x'],
+    ['-I../lib','-5', 'local $^W = 0;  no warnings;  print $x'],
     '',
     <<ERROR
 Name "main::x" used only once: possible typo at -e line 1.
