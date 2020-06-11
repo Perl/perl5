@@ -1,6 +1,6 @@
 #!perl -wT
 
-for $file ('re/subst.t', 't/re/subst.t', ':re:subst.t') {
+for my $file ('re/subst.t', 't/re/subst.t', ':re:subst.t') {
   if (-r $file) {
     do "./$file";
     exit;
