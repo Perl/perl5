@@ -29,7 +29,7 @@ $uv_bigi |= 0x0;
 
 my @array = qw(perl rules);
 
-my @raw, @upgraded, @utf8;
+my (@raw, @upgraded, @utf8);
 foreach ("\0", "\x{1F4A9}", chr(163), 'N') {
     push @raw, $_;
     my $temp = $_ . chr 256;
@@ -42,13 +42,13 @@ foreach ("\0", "\x{1F4A9}", chr(163), 'N') {
 }
 
 # Seems one needs to perform the maths on 'Inf' to get the NV correctly primed.
-@FOO = ('s', 'N/A', 'a', 'NaN', -1, undef, 0, 1, 3.14, 1e37, 0.632120558, -.5,
+my @FOO = ('s', 'N/A', 'a', 'NaN', -1, undef, 0, 1, 3.14, 1e37, 0.632120558, -.5,
 	'Inf'+1, '-Inf'-1, 0x0, 0x1, 0x5, 0xFFFFFFFF, $uv_max, $uv_maxm1,
 	$uv_big, $uv_bigi, $iv0, $iv1, $ivm1, $iv_min, $iv_max, $iv_big,
 	$iv_small, \$array[0], \$array[0], \$array[1], \$^X, @raw, @upgraded,
 	@utf8);
 
-$expect = 7 * ($#FOO+2) * ($#FOO+1) + 6 * @raw + 6 * @utf8;
+my $expect = 7 * ($#FOO+2) * ($#FOO+1) + 6 * @raw + 6 * @utf8;
 print "1..$expect\n";
 
 my $bad_NaN = 0;
@@ -60,8 +60,7 @@ my $bad_NaN = 0;
     $bad_NaN = 1 if $ccflags =~ /-ffast-math\b/;
 }
 
-sub nok ($$$$$$$$) {
-  my ($test, $left, $threeway, $right, $result, $i, $j, $boolean) = @_;
+sub nok ($test, $left, $threeway, $right, $result, $i, $j, $boolean) {
   $result = defined $result ? "'$result'" : 'undef';
   if ($bad_NaN && ($left eq 'NaN' || $right eq 'NaN')) {
     print "ok $test # skipping failed NaN test under -ffast-math\n";
