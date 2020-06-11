@@ -27,19 +27,19 @@ sub expected {
 
 # test blessing simple types
 
-$a1 = bless {}, "A";
+our $a1 = bless {}, "A";
 expected($a1, "A", "HASH");
-$b1 = bless [], "B";
+our $b1 = bless [], "B";
 expected($b1, "B", "ARRAY");
-$c1 = bless \(map "$_", "test"), "C";
+my $c1 = bless \(map "$_", "test"), "C";
 expected($c1, "C", "SCALAR");
-our $test = "foo"; $d1 = bless \*test, "D";
+our $test = "foo"; my $d1 = bless \*test, "D";
 expected($d1, "D", "GLOB");
-$e1 = bless sub { 1 }, "E";
+my $e1 = bless sub { 1 }, "E";
 expected($e1, "E", "CODE");
-$f1 = bless \[], "F";
+my $f1 = bless \[], "F";
 expected($f1, "F", "REF");
-$g1 = bless \substr("test", 1, 2), "G";
+my $g1 = bless \substr("test", 1, 2), "G";
 expected($g1, "G", "LVALUE");
 
 # blessing ref to object doesn't modify object
@@ -97,10 +97,11 @@ expected(bless({}, $1), "E", "HASH");
 # no class, or empty string (with a warning), or undef (with two)
 expected(bless([]), 'main', "ARRAY");
 {
+    our @w;
     local $SIG{__WARN__} = sub { push @w, join '', @_ };
     use warnings;
 
-    $m = bless [];
+    my $m = bless [];
     expected($m, 'main', "ARRAY");
     is (scalar @w, 0);
 
@@ -125,8 +126,8 @@ like ($@, qr/^Attempt to bless into a reference at /, "class is a ref");
     package H4;
     use overload '""' => sub { "C4" };
 }
-$h1 = bless {}, "H4";
-$c4 = eval { bless \$test, $h1 };
+my $h1 = bless {}, "H4";
+my $c4 = eval { bless \$test, $h1 };
 is ($@, '', "class is an overloaded ref");
 expected($c4, 'C4', "SCALAR");
 
@@ -158,10 +159,11 @@ for(__PACKAGE__) {
 
 sub TIESCALAR { bless \(my $thing = pop), shift }
 sub FETCH { ${$_[0]} }
-tie $tied, main => $untied = [];
+tie my $tied, main => my $untied = [];
 eval { bless $tied };
 is ref $untied, "main", 'blessing through tied refs' or diag $@;
 
+my $victim;
 bless \$victim, "Food";
 eval 'bless \$Food::bard, "Bard"';
 sub Bard::DESTROY {
@@ -179,6 +181,7 @@ undef *Food::;
        'no warnings when reblessing inside DESTROY triggered by reblessing'
 }
 
+our $TODO;
 TODO: {
     my $ref;
     sub new {
