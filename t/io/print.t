@@ -9,6 +9,7 @@ BEGIN {
 }
 
 use strict 'vars';
+no strict 'refs';
 
 print "1..24\n";
 
