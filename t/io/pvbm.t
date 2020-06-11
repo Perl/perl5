@@ -13,6 +13,9 @@ BEGIN { $| = 1 }
 
 plan(28);
 
+no strict;
+no warnings;
+
 sub PVBM () { 'foo' }
 { my $dummy = index 'foo', PVBM }
 
