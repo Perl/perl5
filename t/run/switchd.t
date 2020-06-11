@@ -14,8 +14,9 @@ my $r;
 
 my $filename = tempfile();
 SKIP: {
+  skip("Need to adjust for Perl 7", 3);
 	open my $f, ">$filename"
-	    or skip( "Can't write temp file $filename: $!" );
+	    or skip( "Can't write temp file $filename: $!", 3 );
 	print $f <<'__SWDTEST__';
 package Bar;
 sub bar { $_[0] * $_[0] }
@@ -31,22 +32,28 @@ __SWDTEST__
     $| = 1; # Unbufferize.
     $r = runperl(
 		 switches => [ '-Ilib', '-f', '-d:switchd' ],
+     run_as_five => 1,
 		 progfile => $filename,
 		 args => ['3'],
+     run_as_five => 1,
 		);
+
     like($r,
 qr/^sub<Devel::switchd::import>;import<Devel::switchd>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
     'Got debugging output: 1');
     $r = runperl(
 		 switches => [ '-Ilib', '-f', '-d:switchd=a,42' ],
+     run_as_five => 1,
 		 progfile => $filename,
 		 args => ['4'],
+     run_as_five => 1,
 		);
     like($r,
 qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
     'Got debugging output: 2');
     $r = runperl(
 		 switches => [ '-Ilib', '-f', '-d:-switchd=a,42' ],
+     run_as_five => 1,
 		 progfile => $filename,
 		 args => ['4'],
 		);
@@ -59,6 +66,7 @@ qr/^sub<Devel::switchd::unimport>;unimport<Devel::switchd a 42>;DB<main,$::tempf
 cmp_ok(
   runperl(       # less is useful for something :-)
    switches => [ '"-Mless ++INC->{q-Devel/_.pm-}"' ],
+   run_as_five => 1,
    progs    => [
     '#!perl -d:_',
     'sub DB::DB{} print scalar @{q/_</.__FILE__}',
@@ -131,6 +139,7 @@ like(
 like(
   runperl(
     switches => [ '-Ilib', '-d:nodb' ],
+    run_as_five => 1,
     prog     => [ '1' ],
     stderr   => 1,
   ),
@@ -161,6 +170,7 @@ is(
 like(
   runperl(
     switches => [ '-Ilib' ],
+    run_as_five => 1,
     progs    => [ split "\n", <<'='
      BEGIN {
       $^P = 0x22;
@@ -188,6 +198,7 @@ like(
 like(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
+   run_as_five => 1,
    prog     => 'print @{q|_<-e|}',
   ),
   qr "use Devel::switchd_empty;(?:BEGIN|\r?\nprint)",
@@ -236,6 +247,7 @@ is(
 is(
   runperl(
    switches => [ '-Ilib', '-d:nodb' ],
+   run_as_five => 1,
    progs => [ split "\n",
     'sub DB::DB {
       $DB::single = 0, return if $DB::single; print qq[ok\n]; exit
@@ -258,6 +270,7 @@ is(
 is(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
+   run_as_five => 1,
    progs => [ split "\n",
     'sub DB::sub{length($DB::sub); goto &$DB::sub}
      ${^UTF8CACHE}=-1;
