@@ -6,6 +6,9 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+no strict;
+no warnings;
+
 plan tests => 22;
 
 my @expect = qw(
@@ -34,7 +37,7 @@ e1
 		);
 my $expect = ":" . join(":", @expect);
 
-fresh_perl_is(<<'SCRIPT', $expect,{switches => [''], stdin => '', stderr => 1 },'Order of execution of special blocks');
+fresh_perl_is(<<'SCRIPT', $expect,{switches => [''], stdin => '', stderr => 1, run_as_five => 1 },'Order of execution of special blocks');
 BEGIN {print ":b1"}
 END {print ":e1"}
 BEGIN {print ":b2"}
@@ -79,7 +82,7 @@ qw( main bar myfoo foo ),
 qw(foo myfoo bar main  ));
 
 $expect = ":" . join(":", @expect);
-fresh_perl_is(<<'SCRIPT2', $expect,{switches => [''], stdin => '', stderr => 1 },'blocks interact with packages/scopes');
+fresh_perl_is(<<'SCRIPT2', $expect,{switches => [''], stdin => '', stderr => 1, run_as_five => 1 },'blocks interact with packages/scopes');
 BEGIN {$f = 'main'; print ":$f"}
 UNITCHECK {print ":$f"}
 CHECK {print ":$f"}
@@ -126,7 +129,7 @@ use constant INIT => 5;
 ::is INIT, 5, 'constant named after a special block';
 
 # [perl #108794] context
-fresh_perl_is(<<'SCRIPT3', <<expEct,{stderr => 1 },'context');
+fresh_perl_is(<<'SCRIPT3', <<expEct,{stderr => 1, run_as_five => 1 },'context');
 sub context {
     print qw[void scalar list][wantarray + defined wantarray], "\n"
 }
@@ -260,7 +263,7 @@ fresh_perl_like(
 
 TODO: {
     local $TODO = 'RT #2917: INIT{} in eval is wrongly considered too late';
-    fresh_perl_is('eval "INIT { print qq(in init); };";', 'in init', {}, 'RT #2917: No constraint on how late INIT blocks can run');
+    fresh_perl_is('eval "INIT { print qq(in init); };";', 'in init', { run_as_five => 1 }, 'RT #2917: No constraint on how late INIT blocks can run');
 }
 
 fresh_perl_is('eval "BEGIN {goto end}"; end:', '', {}, 'RT #113934: goto out of BEGIN causes assertion failure');
