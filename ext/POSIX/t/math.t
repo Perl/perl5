@@ -20,6 +20,12 @@ sub between {
     cmp_ok($have, '<=', $high, $desc);
 }
 
+sub netbsd_longdouble {
+    return 1 if ($^O =~ m/netbsd/i and
+        defined($Config{uselongdouble}) and
+        $Config{uselongdouble} eq 'define');
+}
+
 is(acos(1), 0, "Basic acos(1) test");
 between(3.14, acos(-1), 3.15, 'acos(-1)');
 between(1.57, acos(0), 1.58, 'acos(0)');
@@ -96,8 +102,12 @@ SKIP: {
     near(cbrt(8), 2, "cbrt", 1e-9);
     near(cbrt(-27), -3, "cbrt", 1e-9);
     near(copysign(3.14, -2), -3.14, "copysign", 1e-9);
-    near(expm1(2), 6.38905609893065, "expm1", 1e-9);
-    near(expm1(1e-6), 1.00000050000017e-06, "expm1", 1e-9);
+    TODO: {
+        todo_skip('GH-17853: NetBSD longdouble builds', 2)
+            if netbsd_longdouble();
+        near(expm1(2), 6.38905609893065, "expm1", 1e-9);
+        near(expm1(1e-6), 1.00000050000017e-06, "expm1", 1e-9);
+    }
     is(fdim(12, 34), 0, "fdim 12 34");
     is(fdim(34, 12), 22, "fdim 34 12");
     is(fmax(12, 34), 34, "fmax 12 34");
@@ -122,11 +132,19 @@ SKIP: {
       ok(!isinf(NaN), "isinf NaN");
       ok(isnan(NAN), "isnan NAN");
       ok(isnan(NaN), "isnan NaN");
-      cmp_ok(nan(), '!=', nan(), 'nan');
+        TODO: {
+            todo_skip('GH-17853: NetBSD longdouble builds', 1)
+                if netbsd_longdouble();
+            cmp_ok(nan(), '!=', nan(), 'nan');
+        }
     }
-    near(log1p(2), 1.09861228866811, "log1p", 1e-9);
-    near(log1p(1e-6), 9.99999500000333e-07, "log1p", 1e-9);
-    near(log2(8), 3, "log2", 1e-9);
+    TODO: {
+        todo_skip('GH-17853: NetBSD longdouble builds', 3)
+            if netbsd_longdouble();
+        near(log1p(2), 1.09861228866811, "log1p", 1e-9);
+        near(log1p(1e-6), 9.99999500000333e-07, "log1p", 1e-9);
+        near(log2(8), 3, "log2", 1e-9);
+    }
     is(signbit(2), 0, "signbit 2"); # zero
     ok(signbit(-2), "signbit -2"); # non-zero
     is(signbit(0), 0, "signbit 0"); # zero
@@ -170,12 +188,16 @@ SKIP: {
 
     # tgamma(n) = (n - 1)!
     # lgamma(n) = log(tgamma(n))
-    near(tgamma(5), 24, "tgamma 5", 1.5e-7);
-    near(tgamma(5.5), 52.3427777845535, "tgamma 5.5", 1.5e-7);
-    near(tgamma(9), 40320, "tgamma 9", 1.5e-7);
-    near(lgamma(5), 3.17805383034795, "lgamma 4", 1.5e-7);
-    near(lgamma(5.5), 3.95781396761872, "lgamma 5.5", 1.5e-7);
-    near(lgamma(9), 10.6046029027452, "lgamma 9", 1.5e-7);
+    TODO: {
+        todo_skip('GH-17853: NetBSD longdouble builds', 6)
+            if netbsd_longdouble();
+        near(tgamma(5), 24, "tgamma 5", 1.5e-7);
+        near(tgamma(5.5), 52.3427777845535, "tgamma 5.5", 1.5e-7);
+        near(tgamma(9), 40320, "tgamma 9", 1.5e-7);
+        near(lgamma(5), 3.17805383034795, "lgamma 4", 1.5e-7);
+        near(lgamma(5.5), 3.95781396761872, "lgamma 5.5", 1.5e-7);
+        near(lgamma(9), 10.6046029027452, "lgamma 9", 1.5e-7);
+    }
 
   SKIP: {
       skip("no inf/nan", 19) unless $Config{d_double_has_inf} && $Config{d_double_has_nan};
