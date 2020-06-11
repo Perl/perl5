@@ -26,8 +26,8 @@ sub TIESCALAR { my $x; bless \$x }
 sub FETCH { ${$_[0]} }
 sub STORE { ${$_[0]} = $_[1] }
 
-sub test_op {
-    my ($tie, $int, $op_seq, $warn) = @_;
+sub test_op($tie, $int, $op_seq, $warn) {
+
     my $code = "sub {\n";
     $code .= "use integer;" if $int;
     $code .= "my \$x;\n";
@@ -37,8 +37,18 @@ sub test_op {
     my $sub = eval $code;
     is($@, '', "Can eval code for $op_seq");
     if ($warn) {
-	warning_like($sub, qr/^Use of uninitialized value/,
-		     "$op_seq$tie$int warns");
+        if ( $warn == 1 ) {
+            warning_like($sub, qr/^Use of uninitialized value/,
+                     "$op_seq$tie$int warns");
+        } elsif ( $warn == 2 )  {
+            warnings_like($sub, [
+                        qr/^Use of uninitialized value/m,
+                        qr/^Argument "x" isn't numeric in numeric bitwise/m,
+                    ],
+                    "$op_seq$tie$int multiple warns $warn");
+        } else {
+            die "unknown number of warnings to check: $warn";
+        }
     } else {
 	warning_is($sub, undef, "$op_seq$tie$int does not warn");
     }
@@ -56,8 +66,13 @@ for my $tie ("", ", tied") {
 	test_op($tie, ', int', "\$x $_= 1", $should_warn{$_});
     }
 
-    foreach (qw(| ^ &)) {
-	test_op($tie, '', "\$x $_= 'x'", $should_warn{$_});
+    foreach (qw(| ^)) {
+	test_op($tie, '', "no strict; no warnings; \$x $_= 'x'", $should_warn{$_});
+    }
+
+    foreach (qw(&)) {
+        my $warn = 2;
+        test_op($tie, '', "\$x $_= 'x'", $warn);
     }
 }
 
