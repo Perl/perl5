@@ -5,8 +5,9 @@
 # and calls regexp.t which will run through its test suite, modifiying the
 # tests to use (?[...]) instead wherever the test uses [].
 
+our $regex_sets;
 BEGIN { $regex_sets = 1; }
-for $file ('./re/regexp.t', './t/re/regexp.t', ':re:regexp.t') {
+foreach my $file ('./re/regexp.t', './t/re/regexp.t', ':re:regexp.t') {
     if (-r $file) {
 	do $file or die $@;
 	exit;
