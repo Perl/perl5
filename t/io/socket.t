@@ -11,11 +11,11 @@ BEGIN {
 
     skip_all_if_miniperl();
     for my $needed (qw(d_socket d_getpbyname)) {
-	if ($Config{$needed} ne 'define') {
+	if ($Config::Config{$needed} ne 'define') {
 	    skip_all("-- \$Config{$needed} undefined");
 	}
     }
-    unless ($Config{extensions} =~ /\bSocket\b/) {
+    unless ($Config::Config{extensions} =~ /\bSocket\b/) {
 	skip_all('-- Socket not available');
     }
 }
@@ -90,7 +90,7 @@ SKIP: {
 		my $acceptfd = fileno($accept);
 		fresh_perl_is(qq(
 		    print open(F, "+<&=$acceptfd") ? 1 : 0, "\\n";
-		), "0\n", {}, "accepted socket not inherited across exec");
+		), "0\n", { run_as_five => 1 }, "accepted socket not inherited across exec");
 	    }
 	    my $sent_total = 0;
 	    while ($sent_total < length $send_data) {
@@ -278,7 +278,7 @@ SKIP: {
     my $sockfd = fileno($sock);
     fresh_perl_is(qq(
 	print open(F, "+<&=$sockfd") ? 1 : 0, "\\n";
-    ), "0\n", {}, "fresh socket not inherited across exec");
+    ), "0\n", { run_as_five => 1 }, "fresh socket not inherited across exec");
 }
 
 done_testing();
