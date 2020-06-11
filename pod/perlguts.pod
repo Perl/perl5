@@ -2195,11 +2195,14 @@ per-subroutine or recursive stage, like this:
         PL_peepp = my_peep;
 
     static peep_t prev_rpeepp;
-    static void my_rpeep(pTHX_ OP *o)
+    static void my_rpeep(pTHX_ OP *first)
     {
-        OP *orig_o = o;
-        for(; o; o = o->op_next) {
+        OP *o = first, *t = first;
+        for(; o = o->op_next, t = t->op_next) {
             /* custom per-op optimisation goes here */
+            o = o->op_next;
+            if (!o || o == t) break;
+            /* custom per-op optimisation goes AND here */
         }
         prev_rpeepp(aTHX_ orig_o);
     }
