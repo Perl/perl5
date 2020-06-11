@@ -35,7 +35,7 @@ is(chr(-3.0), "\x{FFFD}");
 sub TIESCALAR {bless[]}
 sub STORE { $_[0][0] = $_[1] }
 sub FETCH { $_[0][0] }
-tie $t, "";
+tie my $t, "";
 $t = -1; is chr $t, chr -1, 'chr $tied when $tied is -1';
 $t = -2; is chr $t, chr -2, 'chr $tied when $tied is -2';
 $t = -1.1; is chr $t, chr -1.1, 'chr $tied when $tied is -1.1';
