@@ -12,6 +12,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+use p5;
 use Config;
 
 my $i = 1;
@@ -245,15 +246,37 @@ require './test.pl';
 curr_test($test);
 
 # some of the variables which the closure will access
-\$global_scalar = 1000;
-\@global_array = (2000, 2100, 2200, 2300);
-%global_hash = 3000..3009;
+my \$global_scalar = 1000;
+my \@global_array = (2000, 2100, 2200, 2300);
+my %global_hash = 3000..3009;
 
 my \$fs_scalar = 4000;
 my \@fs_array = (5000, 5100, 5200, 5300);
 my %fs_hash = 6000..6009;
 
 END_MARK_THREE
+
+{ # to cleanup and simplify
+	my $sub_test = $test;
+	@inners = ( qw!global_scalar global_array global_hash! ,
+		qw!fs_scalar fs_array fs_hash! );
+	 push @inners, 'foreach' if $within eq 'foreach';
+	 if ($where_declared ne 'filescope') {
+	    push @inners, qw!sub_scalar sub_array sub_hash!;
+	 }
+
+	for $inner_sub_test (@inners) {
+		    if ($inner_type eq 'named') {
+		      1;
+		    } elsif ($inner_type eq 'anon') {
+		      $code .= "our \$anon_$sub_test;"
+		    } else {
+		      die "What was $inner_type?"
+		    }
+		    ++$sub_test;
+	}
+}
+
 
 	  if ($where_declared eq 'filescope') {
 	    # Nothing here
@@ -267,7 +290,7 @@ END
     # }
 	  } elsif ($where_declared eq 'in_anon') {
 	    $code .= <<'END';
-$outer = sub {
+my $outer = sub {
   my $sub_scalar = 7000;
   my @sub_array = (8000, 8100, 8200, 8300);
   my %sub_hash = 9000..9009;
@@ -410,7 +433,7 @@ END
 	    # (This is so we can catch spurious warnings.)
 	    $| = 1; print ""; $| = 0; # flush output before forking
 	    pipe READ, WRITE or die "Can't make pipe: $!";
-	    pipe READ2, WRITE2 or die "Can't make second pipe: $!";
+	    pipe READ2, WRITE2 or die "Can't make second pipe: $!";	  
 	    die "Can't fork: $!" unless defined($pid = open PERL, "|-");
 	    unless ($pid) {
 	      # Child process here. We're going to send errors back
@@ -419,7 +442,7 @@ END
 	      close READ2;
 	      open STDOUT, ">&WRITE"  or die "Can't redirect STDOUT: $!";
 	      open STDERR, ">&WRITE2" or die "Can't redirect STDERR: $!";
-	      exec which_perl(), '-w', '-'
+	      exec which_perl(), qw{-I../lib -Mp5}, '-w', '-'
 		or die "Can't exec perl: $!";
 	    } else {
 	      # Parent process here.
@@ -437,9 +460,9 @@ END
 	    # No fork().  Do it the hard way.
 	    my $cmdfile = tempfile();
 	    my $errfile = tempfile();
-	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
+	    open CMD, ">$cmdfile"; print CMD "no strict; no warnings; $code"; close CMD;
 	    my $cmd = which_perl();
-	    $cmd .= " -w $cmdfile 2>$errfile";
+	    $cmd .= " -I../lib -Mp5 -w $cmdfile 2>$errfile";
 	    if ($^O eq 'VMS' or $^O eq 'MSWin32' or $^O eq 'NetWare') {
 	      # Use pipe instead of system so we don't inherit STD* from
 	      # this process, and then foul our pipe back to parent by
@@ -614,7 +637,7 @@ f16302();
    # bugid #23265 - this used to coredump during destruction of PL_main_cv
    # and its children
 
-    fresh_perl_is(<< '__EOF__', "yxx\n", {stderr => 1}, 'RT #23265');
+    fresh_perl_is(<< '__EOF__', "yxx\n", {stderr => 1, run_as_five => 1}, 'RT #23265');
         print
             sub {$_[0]->(@_)} -> (
                 sub {
@@ -783,7 +806,7 @@ staleval;
 # tion scope.
 SKIP: {
     skip_if_miniperl("no XS on miniperl (for source filters)");
-    fresh_perl_is <<'    [perl #114888]', "ok\n", {stderr=>1},
+    fresh_perl_is <<'    [perl #114888]', "ok\n", {stderr=>1, run_as_five => 1},
 	use strict;
 	BEGIN {
 	    package Foo;
