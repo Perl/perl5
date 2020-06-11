@@ -9,6 +9,8 @@ BEGIN {
 	eval 'require Config'; # assume defaults if this fails
 }
 
+use p5;
+
 skip_all_without_unicode_tables();
 
 use strict;
@@ -23,7 +25,7 @@ my $only_strict_marker = ':expected_only_under_strict';
 ## arrays below. The {#} is a meta-marker -- it marks where the marker should
 ## go.
 
-sub fixup_expect ($$) {
+sub fixup_expect {
 
     # Fixes up the expected results by inserting the boiler plate text.
     # Returns empty string if that is what is expected.  Otherwise, handles
@@ -751,9 +753,7 @@ for my $strict ("", "use re 'strict';") {
             fail("$0: Internal error: '$death[$i]' should have an error message");
         }
         else {
-            no warnings 'experimental::regex_sets';
-            no warnings 'experimental::re_strict';
-            no warnings 'experimental::uniprop_wildcards';
+            no warnings;
 
             warning_is(sub {
                     my $meaning_of_life;
@@ -774,7 +774,7 @@ for my $strict ("", "use re 'strict';") {
     }
 }
 
-for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") {
+for my $strict ("",  "no warnings; use re 'strict';") {
     my @warning_tests = @warning;
 
     # Build the tests for @warning.  Use the strict/non-strict versions
@@ -806,7 +806,7 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
     }
 
     foreach my $ref (\@warning_tests,
-                     \@experimental_regex_sets,
+                     #\@experimental_regex_sets,
                      \@wildcard,
                      \@deprecated)
     {
