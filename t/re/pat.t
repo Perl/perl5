@@ -1932,7 +1932,7 @@ EOP
             ok( $str =~ m{^(a|a\x{b6})$}, "fix [perl #129950] - utf8 case" );
         }
         {
-            my $got= run_perl( switches => [ '-l' ], prog => <<'EOF_CODE' );
+            my $got= run_perl( switches => [ '-l' ], run_as_five => 1, prog => <<'EOF_CODE' );
             my $died= !eval {
                 $_=qq(ab);
                 print;
@@ -1986,7 +1986,7 @@ EOF_CODE
         # [perl #130495] /x comment skipping stopped a byte short, leading
         # to assertion failure or 'malformed utf-8 character" warning
         fresh_perl_is(
-            "use utf8; m{a#\x{124}}x", '', {wide_chars => 1},
+            "use utf8; m{a#\x{124}}x", '', {wide_chars => 1, run_as_five => 1},
             '[perl #130495] utf-8 character at end of /x comment should not misparse',
         );
     }
@@ -2031,11 +2031,11 @@ EOP
 
         fresh_perl_is("BEGIN{\$^H=0x200000}\ns/[(?{//xx",
                       "Unmatched [ in regex; marked by <-- HERE in m/[ <-- HERE (?{/ at (eval 1) line 1.\n",
-                      {}, "buffer overflow for regexp component");
+                      {run_as_five => 1}, "buffer overflow for regexp component");
     }
     {
         # [perl #129281] buffer write overflow, detected by ASAN, valgrind
-        fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {}, "don't bump whilem_c too much");
+        fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', { run_as_five => 1 }, "don't bump whilem_c too much");
     }
     {
         # RT #131893 - fails with ASAN -fsanitize=undefined
@@ -2046,13 +2046,13 @@ EOP
         # RT #131575 intuit skipping back from the end to find the highest
         # possible start point, was potentially hopping back beyond pos()
         # and crashing by calling fbm_instr with a negative length
-
+        use p5;
         my $text = "=t=\x{5000}";
         pos($text) = 3;
         ok(scalar($text !~ m{(~*=[a-z]=)}g), "RT #131575");
     }
     {
-        fresh_perl_is('"AA" =~ m/AA{1,0}/','',{},"handle OPFAIL insert properly");
+        fresh_perl_is('"AA" =~ m/AA{1,0}/','',{ run_as_five => 1 },"handle OPFAIL insert properly");
     }
     {
         fresh_perl_is('$_="0\x{1000000}";/^000?\0000/','',{},"dont throw assert errors trying to fbm past end of string");
@@ -2064,11 +2064,11 @@ EOP
         fresh_perl_is("'0bssa' =~ m/0B" . $sharp_s . "\\N{U+41}" . '/i and print "1\n"',  1,{},"Use of sharp s under /di that changes to /ui");
     }
     {   # [perl $132164]
-        fresh_perl_is('m m0*0+\Rm', "",{},"Undefined behavior in address sanitizer");
+        fresh_perl_is('m m0*0+\Rm', "",{ run_as_five => 1 },"Undefined behavior in address sanitizer");
     }
     {   # [perl #133642]
         fresh_perl_is('no warnings "experimental::vlb";
-                      m/((?<=(0?)))/', "",{},"Was getting 'Double free'");
+                      m/((?<=(0?)))/', "",{ run_as_five => 1 },"Was getting 'Double free'");
     }
     {   # [perl #133782]
         # this would panic on DEBUGGING builds
@@ -2122,7 +2122,8 @@ fresh_perl_is('s|ß+W0ü0f0\Qx0\Qx0x0c0G0xgive0000000000000O0h000x0 \xòÿÿ�
 
 
 
-x{0c!}\;\;çÿ  q0/i0/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!}e;   ù\Q`\Qx`\x{0c!}\;ÿÿÿÿ!}\;îçÿù\Q\x ÿÿÿÿ  >=\Qx`\Qx`  ù\ò`ÿ  >=\Qx`\Qx`  ù\ò`\Qx`\x{0c!};\;îçÿ  u00000F 000t0 p  d?    ù  ç  !00000000000000000000000m/0000000000000000000000000000000m/0 \   } )|i', "", {}, "[perl #133921]");
+x{0c!}\;\;çÿ  q0/i0/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!}e;   ù\Q`\Qx`\x{0c!}\;ÿÿÿÿ!}\;îçÿù\Q\x ÿÿÿÿ  >=\Qx`\Qx`  ù\ò`ÿ  >=\Qx`\Qx`  ù\ò`\Qx`\x{0c!};\;îçÿ  u00000F 000t0 p  d?    ù  ç  !00000000000000000000000m/0000000000000000000000000000000m/0 \   } )|i', 
+"", {run_as_five => 1}, "[perl #133921]");
 
         fresh_perl_is('a aú  úv sWtrt \ó||ß+Wüef ù\Qx`\Qx`\x{1c!gGnuc given1111111111111O1111each111\jx` \x òÿÿÿ   ù\Qx`\Q
 
@@ -2146,7 +2147,8 @@ x{0c!}\;\;çÿ  q0/i0/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!}e;   ù\
 
 
 
-x{1c!}\;\;îçÿp  qr/elsif/! eF  /;îçÿù\Q   xÿÿÿÿ   ùHQx   `Lx{1c!}e;   ù\Qx`\Qx`\x{1c!}\;ÿÿÿÿc!}\;îçÿù\Qx\x ÿÿÿÿ  >=\Qx`\Qx`  ù\òx`ÿ  >=\Qx`\Qx`  ù\òx`\Qx`\x{1c!}8;\;îçÿp  unshifteF normat0 cmp  d?not    ùp  ç  !0000000000000000000000000m/00000000000000000000000000000000m/0R \   } )|\aï||K??p¿ÿÿfúd{\{gri{\x{1x/}  ð¹NuntiÀh', "", {}, "[perl #133921]");
+x{1c!}\;\;îçÿp  qr/elsif/! eF  /;îçÿù\Q   xÿÿÿÿ   ùHQx   `Lx{1c!}e;   ù\Qx`\Qx`\x{1c!}\;ÿÿÿÿc!}\;îçÿù\Qx\x ÿÿÿÿ  >=\Qx`\Qx`  ù\òx`ÿ  >=\Qx`\Qx`  ù\òx`\Qx`\x{1c!}8;\;îçÿp  unshifteF normat0 cmp  d?not    ùp  ç  !0000000000000000000000000m/00000000000000000000000000000000m/0R \   } )|\aï||K??p¿ÿÿfúd{\{gri{\x{1x/}  ð¹NuntiÀh', 
+"", {run_as_five => 1}, "[perl #133921]");
 
     fresh_perl_is('s|ß+W0ü0f0\Qx0\Qx0x0c0g0c 000n0000000000000O0h000x0 \xòÿÿÿ  ù\Q`\Q
 
@@ -2170,7 +2172,8 @@ x{1c!}\;\;îçÿp  qr/elsif/! eF  /;îçÿù\Q   xÿÿÿÿ   ùHQx   `Lx{1c
 
 
 
-x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q`\Qx`\x{0c!}\;ÿÿÿÿ!}\;îçÿù\Q\x ÿÿÿÿ  >=\Qx`\Qx`  ù\ò`ÿ  >=\Qx`\Qx`  ù\ò`\Qx`\x{0c!};\;îçÿ  000t0F 000t0 p  d?n    ù  ç  !00000000000000000000000m/0000000000000000000000000000000m/ \   } )|i', "", {}, "[perl #133933]");
+x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q`\Qx`\x{0c!}\;ÿÿÿÿ!}\;îçÿù\Q\x ÿÿÿÿ  >=\Qx`\Qx`  ù\ò`ÿ  >=\Qx`\Qx`  ù\ò`\Qx`\x{0c!};\;îçÿ  000t0F 000t0 p  d?n    ù  ç  !00000000000000000000000m/0000000000000000000000000000000m/ \   } )|i', 
+    "", {run_as_five => 1}, "[perl #133933]");
     }
 
     {   # perl #133998]
@@ -2181,7 +2184,7 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
     {   # perl #133995]
         use utf8;
         fresh_perl_is('"έδωσαν ελληνικήვე" =~ m/[^0](?=0)0?/', "",
-                      {wide_chars => 1},
+                      {wide_chars => 1, run_as_five => 1},
                       '[^0] doesnt crash on UTF-8 target string');
     }
 
@@ -2192,7 +2195,7 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
                         };
                         $z .= 'è(?#';
                         $z .= "'";
-                        eval $z;:, "", {}, 'foo');
+                        eval $z;:, "", {run_as_five => 1}, 'foo');
     }
 
     {   # [perl #134325]
@@ -2203,7 +2206,7 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
                         $quote x 8 . $back x 69,
                         $quote x 5 . $back x 4,
                         $ff x 48;
-        like(fresh_perl("$s", { stderr => 1, }), qr/Unmatched \(/);
+        like(fresh_perl("$s", { stderr => 1, run_as_five => 1 }), qr/Unmatched \(/);
    }
 
    {    # GitHub #17196, caused assertion failure
