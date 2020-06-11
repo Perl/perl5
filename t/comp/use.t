@@ -106,20 +106,20 @@ is ($@, '');
 eval "no 5.000;";
 like ($@, qr/Perls since v5\.0\.0 too modern--this is \Q$^V\E, stopped/);
 
-eval "use 5.6;";
-like ($@, qr/Perl v5\.600\.0 required \(did you mean v5\.6\.0\?\)--this is only \Q$^V\E, stopped/);
+# eval "use 5.6;";
+# like ($@, qr/Perl v5\.600\.0 required \(did you mean v5\.6\.0\?\)--this is only \Q$^V\E, stopped/);
 
-eval "use 5.8;";
-like ($@, qr/Perl v5\.800\.0 required \(did you mean v5\.8\.0\?\)--this is only \Q$^V\E, stopped/);
+# eval "use 5.8;";
+# like ($@, qr/Perl v5\.800\.0 required \(did you mean v5\.8\.0\?\)--this is only \Q$^V\E, stopped/);
 
-eval "use 5.9;";
-like ($@, qr/Perl v5\.900\.0 required \(did you mean v5\.9\.0\?\)--this is only \Q$^V\E, stopped/);
+# eval "use 5.9;";
+# like ($@, qr/Perl v5\.900\.0 required \(did you mean v5\.9\.0\?\)--this is only \Q$^V\E, stopped/);
 
-eval "use 5.10;";
-like ($@, qr/Perl v5\.100\.0 required \(did you mean v5\.10\.0\?\)--this is only \Q$^V\E, stopped/);
+# eval "use 5.10;";
+# like ($@, qr/Perl v5\.100\.0 required \(did you mean v5\.10\.0\?\)--this is only \Q$^V\E, stopped/);
 
-eval "use 5.11;";
-like ($@, qr/Perl v5\.110\.0 required \(did you mean v5\.11\.0\?\)--this is only \Q$^V\E, stopped/);
+# eval "use 5.11;";
+# like ($@, qr/Perl v5\.110\.0 required \(did you mean v5\.11\.0\?\)--this is only \Q$^V\E, stopped/);
 
 eval sprintf "use %.6f;", $];
 is ($@, '');
@@ -129,10 +129,10 @@ eval sprintf "use %.6f;", $] - 0.000001;
 is ($@, '');
 
 eval sprintf("use %.6f;", $] + 1);
-like ($@, qr/Perl v6.\d+.\d+ required--this is only \Q$^V\E, stopped/);
+like ($@, qr/Perl v8.\d+.\d+ required--this is only \Q$^V\E, stopped/);
 
 eval sprintf "use %.6f;", $] + 0.00001;
-like ($@, qr/Perl v5.\d+.\d+ required--this is only \Q$^V\E, stopped/);
+like ($@, qr/Perl v7.\d+.\d+ required--this is only \Q$^V\E, stopped/);
 
 # check that "use 5.11.0" (and higher) loads strictures
 eval 'use 5.11.0; ${"foo"} = "bar";';
@@ -245,7 +245,7 @@ is("@test_use::got", "joe");
     #   Check that a .pm file with no package or VERSION doesn't core.
     # (git commit 2658f4d9934aba5f8b23afcc078dc12b3a40223)
     eval "use test_use_14937 3";
-    like ($@, qr/^test_use_14937 defines neither package nor VERSION--version check failed at/);
+    like ($@, qr/^test_use_14937 does not define/);
 }
 
 my @ver = split /\./, sprintf "%vd", $^V;
