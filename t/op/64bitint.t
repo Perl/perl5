@@ -157,7 +157,7 @@ SKIP: {
     # The following 12 tests adapted from op/inc.
 
     $a = 9223372036854775807;
-    $c = $a++;
+    my $c = $a++;
     cmp_ok($a, '==', 9223372036854775808);
 
     $a = 9223372036854775807;
