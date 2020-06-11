@@ -12,11 +12,12 @@ plan 8;
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
     eval '+sub : const {}';
-    like $w, qr/^:const is experimental at /, 'experimental warning';
+    is $w, undef, 'no experimental warnings';
 }
 
 no warnings 'experimental::const_attr';
 
+my @subs;
 push @subs, sub :const{$_} for 1..10;
 is join(" ", map &$_, @subs), "1 2 3 4 5 6 7 8 9 10",
   ':const capturing global $_';
@@ -31,7 +32,7 @@ $sub = sub : const { $x+5 };
 $x++;
 is &$sub, 8, ':const capturing expression';
 
-is &{sub () : const { 42 }}, 42, ':const with truly constant sub';
+is &{sub :prototype() : const { 42 }}, 42, ':const with truly constant sub';
 
 *foo = $sub;
 {
