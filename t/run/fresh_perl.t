@@ -15,6 +15,7 @@ BEGIN {
 }
 
 use strict;
+no warnings;
 
 my $Perl = which_perl();
 
@@ -52,7 +53,7 @@ foreach my $prog (@prgs) {
 
     $expected =~ s/\n+$//;
 
-    fresh_perl_is($prog, $expected, { switches => [$switch || ''] }, $name);
+    fresh_perl_is($prog, $expected, { switches => [$switch || ''], run_as_five => 1 }, $name);
 }
 
 __END__
@@ -326,6 +327,7 @@ EXPECT
 inner peace
 ########
 -w
+use warnings;
 $| = 1;
 sub foo {
     print "In foo1\n";
@@ -504,12 +506,13 @@ EXPECT
 ZZZ
 ########
 -w
+use warnings;
 if (@ARGV) { print "" }
 else {
   if ($x == 0) { print "" } else { print $x }
 }
 EXPECT
-Use of uninitialized value $x in numeric eq (==) at - line 3.
+Use of uninitialized value $x in numeric eq (==) at - line 4.
 ########
 $x = sub {};
 foo();
@@ -730,6 +733,7 @@ $eval = eval 'sub { eval "sub { %S }" }';
 $eval->({});
 ######## [perl #17951] Strange UTF error
 -W
+no warnings;
 # From: "John Kodis" <kodis@mail630.gsfc.nasa.gov>
 # Newsgroups: comp.lang.perl.moderated
 # Subject: Strange UTF error

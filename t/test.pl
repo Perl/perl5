@@ -994,7 +994,7 @@ sub fresh_perl {
 
     open TEST, '>', $tmpfile or die "Cannot open $tmpfile: $!";
     binmode TEST, ':utf8' if $runperl_args->{wide_chars};
-    print TEST qq[use p5;\n] if $runperl_args->{run_as_five};
+    print TEST qq[use p5; ] if $runperl_args->{run_as_five}; # no newline to avoid offset
     print TEST $prog;
     close TEST or die "Cannot close $tmpfile: $!";
 
