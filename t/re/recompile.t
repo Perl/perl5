@@ -201,6 +201,7 @@ comp_n(2, <<'CODE', '(??{"folded"."constant"})');
 CODE
 
 comp_n(2, <<'CODE', '(??{$preused_scalar})');
+no strict; no warnings;
 $s = "abc";
 "bb" =~ /(??{$s})/;
 CODE
