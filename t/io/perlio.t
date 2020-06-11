@@ -172,6 +172,7 @@ SKIP: {
     is( scalar <$x>, "ok\n",    '       readline' );
     ok( tell($x) >= 3,          '       tell' );
 
+our $TODO;
   TODO: {
         local $TODO = "broken";
 
