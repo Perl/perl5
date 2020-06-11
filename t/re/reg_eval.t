@@ -9,17 +9,17 @@ BEGIN {
     require './test.pl';
 }
 
-fresh_perl_is(<<'CODE', 'ok', {});
+fresh_perl_is(<<'CODE', 'ok', { run_as_five => 1 });
 '42' =~ /4(?{ 'foo' =~ m{(foo)} })2/
     and print 'ok';
 CODE
 
-fresh_perl_is(<<'CODE', 'ok', {}, 'RT#33936');
+fresh_perl_is(<<'CODE', 'ok', { run_as_five => 1 }, 'RT#33936');
 'aba' =~ /(??{join('',split(qr{(?=)},'aba'))})/
     and print 'ok';
 CODE
 
-fresh_perl_is(<<'CODE', 'ok', {}, 'match vars are localized');
+fresh_perl_is(<<'CODE', 'ok', { run_as_five => 1 }, 'match vars are localized');
 my $x = 'aba';
 $x =~ s/(a)(?{ 'moo' =~ m{(o)} })/uc($1)/e;
 print 'ok' if $x eq 'Aba';
@@ -66,25 +66,25 @@ sub match {
 }
 CODE
 
-fresh_perl_is($preamble . <<'CODE', 'match Foo:John Smith:42:36', {}, 'regex distillation 1');
+fresh_perl_is($preamble . <<'CODE', 'match Foo:John Smith:42:36', { run_as_five => 1 }, 'regex distillation 1');
 match("John Smith, 42 years old, secret number 36.");
 CODE
 
-fresh_perl_is($preamble . <<'CODE', 'match Foo:John Smith:42:36', {}, 'regex distillation 2');
+fresh_perl_is($preamble . <<'CODE', 'match Foo:John Smith:42:36', { run_as_five => 1 }, 'regex distillation 2');
 match("Jim Jones, 35 years old, secret wombat 007."
   ." John Smith, 42 years old, secret number 36.");
 CODE
 
-fresh_perl_is($preamble . <<'CODE', 'match squareness error:::', {}, 'regex distillation 3');
+fresh_perl_is($preamble . <<'CODE', 'match squareness error:::', { run_as_five => 1 }, 'regex distillation 3');
 match("John Smith, 54 years old, secret number 7.");
 CODE
 
-fresh_perl_is($preamble . <<'CODE', 'no match ::', {}, 'regex distillation 4');
+fresh_perl_is($preamble . <<'CODE', 'no match ::', { run_as_five => 1 }, 'regex distillation 4');
 match("Jim Jones, 35 years old, secret wombat 007.");
 CODE
 
 # RT #129199: this is mainly for ASAN etc's benefit
-fresh_perl_is(<<'CODE', '', {}, "RT #129199:");
+fresh_perl_is(<<'CODE', '', { run_as_five => 1 }, "RT #129199:");
 /(?{<<""})/
 0
 CODE
