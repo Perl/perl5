@@ -20,6 +20,8 @@ BEGIN {
 # (Just-in-time test naming)
 plan tests => 501;
 
+use p5;
+
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
 ok ((0xdead | 0xbeef) == 0xfeef);
@@ -616,7 +618,7 @@ is $byte, "\0", "utf8 &. appends null byte";
 # only visible under sanitize
 fresh_perl_is('$x = "UUUUUUUV"; $y = "xxxxxxx"; $x |= $y; print $x',
               ( $::IS_EBCDIC) ? 'XXXXXXXV' : '}}}}}}}V',
-              {}, "[perl #129995] access to freed memory");
+              { run_as_five => 1 }, "[perl #129995] access to freed memory");
 
 
 #
