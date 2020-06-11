@@ -9,6 +9,9 @@ BEGIN {
     }
 }
 
+no strict;
+no warnings;
+
 # WARNING: Do not directly use any modules as part of this test code.
 # We could get action at a distance that would invalidate the tests.
 
