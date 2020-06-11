@@ -15,17 +15,17 @@
 ################################################################################
 
 BEGIN {
-  chdir 't' if -d 't' && $ENV{'PERL_CORE'};
+  chdir 't' if -d 't';# && $ENV{'PERL_CORE'};
   require "./test.pl";
   set_up_inc('../lib') if $ENV{'PERL_CORE'} && -d '../lib' && -d '../ext';
 
   require Config; import Config;
 
-  if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
+  if ($ENV{'PERL_CORE'} && $Config::Config{'extensions'} !~ m[\bIPC/SysV\b]) {
     skip_all('-- IPC::SysV was not built');
   }
   skip_all_if_miniperl();
-  if ($Config{'d_shm'} ne 'define') {
+  if ($Config::Config{'d_shm'} ne 'define') {
     skip_all('-- $Config{d_shm} undefined');
   }
 }
@@ -84,6 +84,7 @@ my ($fetch, $store) = (0, 0);
   sub TIESCALAR { bless [undef] }
   sub FETCH     { ++$fetch; $_[0][0] }
   sub STORE     { ++$store; $_[0][0] = $_[1] } }
+my $ct;
 tie $ct, 'Counted';
 shmread $key, $ct, 0, 1;
 is($fetch, 1, "shmread FETCH once");
