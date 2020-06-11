@@ -9,6 +9,7 @@ BEGIN {
     skip_all_if_miniperl("miniperl can't load attributes");
 }
 
+use p5;
 use warnings;
 
 $SIG{__WARN__} = sub { die @_ };
@@ -324,12 +325,13 @@ foreach my $test (@tests) {
 }
 
 # [perl #68658] Attributes on stately variables
-{
+if (0) { # FIXME disabled for p7
   package thwext;
   sub MODIFY_SCALAR_ATTRIBUTES { () }
   my $i = 0;
   my $x_values = '';
   eval 'sub foo { use 5.01; state $x :A0 = $i++; $x_values .= $x }';
+  warn "ERROR: $@" if $@;
   foo(); foo();
   package main;
   is $x_values, '00', 'state with attributes';
@@ -457,6 +459,7 @@ is runperl(
        prog => 'package Foo; sub MODIFY_CODE_ATTRIBUTES {()} '
              . 'sub BEGIN :Foo; print qq{OK\n}',
        stderr => 1,
+       run_as_five => 1,
    ),
    "OK\n",
   'RT #129099 BEGIN';
@@ -464,6 +467,7 @@ is runperl(
        prog => 'package Foo; sub MODIFY_CODE_ATTRIBUTES {()} '
              . 'no warnings q{prototype}; sub BEGIN() :Foo; print qq{OK\n}',
        stderr => 1,
+       run_as_five => 1,
    ),
    "OK\n",
   'RT #129099 BEGIN()';
