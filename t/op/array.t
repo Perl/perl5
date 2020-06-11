@@ -12,16 +12,16 @@ plan (194);
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
 #
 
-@ary = (1,2,3,4,5);
+my @ary = (1,2,3,4,5);
 is(join('',@ary), '12345');
 
-$tmp = $ary[$#ary]; --$#ary;
+my $tmp = $ary[$#ary]; --$#ary;
 is($tmp, 5);
 is($#ary, 3);
 is(join('',@ary), '1234');
 
-@foo = ();
-$r = join(',', $#foo, @foo);
+my @foo = ();
+my $r = join(',', $#foo, @foo);
 is($r, "-1");
 $foo[0] = '0';
 $r = join(',', $#foo, @foo);
@@ -29,7 +29,7 @@ is($r, "0,0");
 $foo[2] = '2';
 $r = join(',', $#foo, @foo);
 is($r, "2,0,,2");
-@bar = ();
+my @bar = ();
 $bar[0] = '0';
 $bar[1] = '1';
 $r = join(',', $#bar, @bar);
@@ -52,18 +52,20 @@ $bar[2] = '2';
 $r = join(',', $#bar, @bar);
 is($r, "2,0,,2");
 
-$foo = 'now is the time';
+my $foo = 'now is the time';
+my ($F1,$F2,$Etc);
 ok(scalar (($F1,$F2,$Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/)));
 is($F1, 'now');
 is($F2, 'is');
 is($Etc, 'the time');
 
 $foo = 'lskjdf';
+my $cnt;
 ok(!($cnt = (($F1,$F2,$Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/))))
    or diag("$cnt $F1:$F2:$Etc");
 
-%foo = ('blurfl','dyick','foo','bar','etc.','etc.');
-%bar = %foo;
+my %foo = ('blurfl','dyick','foo','bar','etc.','etc.');
+my %bar = %foo;
 is($bar{'foo'}, 'bar');
 %bar = ();
 is($bar{'foo'}, undef);
@@ -106,29 +108,34 @@ is($foo, 'b');
 
 #curr_test(37);
 
-@foo = @foo;
-is("@foo", "foo bar burbl blah");				# 37
+{
+    no warnings;
 
-(undef,@foo) = @foo;
-is("@foo", "bar burbl blah");					# 38
+    @foo = @foo;
+    is("@foo", "foo bar burbl blah");				# 37
 
-@foo = ('XXX',@foo, 'YYY');
-is("@foo", "XXX bar burbl blah YYY");				# 39
+    (undef,@foo) = @foo;
+    is("@foo", "bar burbl blah");					# 38
 
-@foo = @foo = qw(foo b\a\r bu\\rbl blah);
-is("@foo", 'foo b\a\r bu\\rbl blah');				# 40
+    @foo = ('XXX',@foo, 'YYY');
+    is("@foo", "XXX bar burbl blah YYY");				# 39
 
-@bar = @foo = qw(foo bar);					# 41
-is("@foo", "foo bar");
-is("@bar", "foo bar");						# 42
+    @foo = @foo = qw(foo b\a\r bu\\rbl blah);
+    is("@foo", 'foo b\a\r bu\\rbl blah');				# 40
 
+    @bar = @foo = qw(foo bar);					# 41
+    is("@foo", "foo bar");
+    is("@bar", "foo bar");						# 42
+
+}
 # try the same with local
 # XXX tie-stdarray fails the tests involving local, so we use
 # different variable names to escape the 'tie'
 
+no strict;
 @bee = ( 'foo', 'bar', 'burbl', 'blah');
 {
-
+    no warnings;
     local @bee = @bee;
     is("@bee", "foo bar burbl blah");				# 43
     {
@@ -235,7 +242,8 @@ my $got = runperl (
 		    @a = (bless {}, q{X});
 		    @a = ();
 		},
-	stderr => 1
+	stderr => 1,
+    run_as_five => 1,
     );
 
 $got =~ s/\n/ /g;
