@@ -1771,7 +1771,6 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
-    unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
     const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFRb))
@@ -1830,7 +1829,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Add in the points from the bit map */
     if (! inRANGE(OP(node), ANYOFH, ANYOFRb)) {
-        for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
+        for (unsigned i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
 
