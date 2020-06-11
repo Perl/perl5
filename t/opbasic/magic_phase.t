@@ -11,10 +11,10 @@ use warnings;
 
 BEGIN { print "1..7\n" }
 
-sub ok ($$) {
-    print "not " if !$_[0];
+sub ok ($test, $msg=undef) {
+    print "not " unless $test;
     print "ok";
-    print " - $_[1]" if defined $_[1];
+    print " - $msg" if defined $msg;
     print "\n";
 }
 
