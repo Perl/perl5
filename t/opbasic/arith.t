@@ -12,31 +12,31 @@ BEGIN {
 
 print "1..186\n";
 
-sub try ($$$) {
-   print +($_[1] ? "ok" : "not ok") . " $_[0] - $_[2]\n";
+sub try ($id, $test, $msg) {
+   print +($test ? "ok" : "not ok") . " $id - $msg\n";
 }
-sub tryeq ($$$$) {
+sub tryeq ($txt, $got, $expect, $msg) {
   my $status;
-  if ($_[1] == $_[2]) {
-    $status = "ok $_[0]";
+  if ($got == $expect) {
+    $status = "ok $txt";
   } else {
-    $status = "not ok $_[0] # $_[1] != $_[2]";
+    $status = "not ok $txt # $got != $expect";
   }
-  print "$status - $_[3]\n";
+  print "$status - $msg\n";
 }
-sub tryeq_sloppy ($$$$) {
+sub tryeq_sloppy ($txt, $got, $expect, $msg) {
   my $status;
-  if ($_[1] == $_[2]) {
-    $status = "ok $_[0]";
+  if ($got == $expect) {
+    $status = "ok $txt";
   } else {
-    my $error = abs (($_[1] - $_[2]) / $_[1]);
+    my $error = abs (($got - $expect) / $got);
     if ($error < 1e-9) {
-      $status = "ok $_[0] # $_[1] is close to $_[2], \$^O eq $^O";
+      $status = "ok $txt # $got is close to $expect, \$^O eq $^O";
     } else {
-      $status = "not ok $_[0] # $_[1] != $_[2]";
+      $status = "not ok $txt # $got != $expect";
     }
   }
-  print "$status - $_[3]\n";
+  print "$status - $msg\n";
 }
 
 my $T = 1;
@@ -432,7 +432,7 @@ if ($^O eq 'VMS') {
 if ($^O eq 'vos') {
   print "not ok ", $T++, " # TODO VOS raises SIGFPE instead of producing infinity.\n";
 }
-elsif ($vms_no_ieee || !$Config{d_double_has_inf}) {
+elsif ($vms_no_ieee || !$Config::Config{d_double_has_inf}) {
  print "ok ", $T++, " # SKIP -- the IEEE infinity model is unavailable in this configuration.\n"
 }
 elsif ($^O eq 'ultrix') {
@@ -462,7 +462,7 @@ else {
 # [perl #120426]
 # small numbers shouldn't round to zero if they have extra floating digits
 
-unless ($Config{d_double_style_ieee}) {
+unless ($Config::Config{d_double_style_ieee}) {
 for (1..8) { print "ok ", $T++, " # SKIP -- not IEEE\n" }
 } else {
 try $T++,  0.153e-305 != 0.0,              '0.153e-305';
