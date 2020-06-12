@@ -6,6 +6,8 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+use p5;
+
 plan(tests => 140);
 
 eval 'pass();';
@@ -381,7 +383,7 @@ our $x = 1;
 
 # [perl #19022] used to end up with shared hash warnings
 # The program should generate no output, so anything we see is on stderr
-my $got = runperl (prog => '$h{a}=1; foreach my $k (keys %h) {eval qq{\$k}}',
+my $got = runperl (prog => 'my %h; $h{a}=1; foreach my $k (keys %h) {eval qq{\$k}}',
 		   stderr => 1);
 is ($got, '');
 
@@ -423,7 +425,7 @@ pass('#20798 (used to dump core)');
 $got = runperl (
     prog => 
     'sub A::TIEARRAY { L: { eval { last L } } } tie @a, A; warn qq(ok\n)',
-stderr => 1);
+stderr => 1, run_as_five => 1);
 
 is($got, "ok\n", 'eval and last');
 
@@ -509,7 +511,7 @@ END_EVAL_TEST
 # Test that "use feature" and other hint transmission in evals and s///ee
 # don't leak memory
 {
-    use feature qw(:5.10);
+    use feature qw(:5.20);
     my $count_expected = ($^H & 0x20000) ? 2 : 1;
     my $t;
     my $s = "a";
@@ -522,7 +524,7 @@ END_EVAL_TEST
 {
     local $_ = "21+12";
     is(eval, 33, 'argless eval without hints');
-    use feature qw(:5.10);
+    use feature qw(:5.20);
     local $_ = "42+24";
     is(eval, 66, 'argless eval with hints');
 }
