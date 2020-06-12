@@ -10,6 +10,7 @@ plan( tests => 56 );
 
 # delete() on hash elements
 
+my %foo;
 $foo{1} = 'a';
 $foo{2} = 'b';
 $foo{3} = 'c';
@@ -18,7 +19,7 @@ $foo{5} = 'e';
 $foo{6} = 'f';
 $foo{7} = 'g';
 
-$foo = delete $foo{2};
+my $foo = delete $foo{2};
 
 cmp_ok($foo,'eq','b','delete 2');
 ok(!(exists $foo{2}),'b absent');
@@ -27,7 +28,7 @@ cmp_ok($foo{3},'eq','c','c exists');
 cmp_ok($foo{4},'eq','d','d exists');
 cmp_ok($foo{5},'eq','e','e exists');
 
-@foo = delete @foo{4, 5};
+my @foo = delete @foo{4, 5};
 
 cmp_ok(scalar(@foo),'==',2,'deleted slice');
 cmp_ok($foo[0],'eq','d','slice 1');
@@ -52,7 +53,7 @@ cmp_ok($foo{3},'eq','c','c still exists');
 $foo = join('',values(%foo));
 ok($foo eq 'ac' || $foo eq 'ca','remaining keys');
 
-foreach $key (keys %foo) {
+foreach my $key (keys %foo) {
     delete $foo{$key};
 }
 
@@ -62,11 +63,12 @@ $foo{'bar'} = 'y';
 $foo = join('',values(%foo));
 ok($foo eq 'xy' || $foo eq 'yx','fresh keys');
 
+my %refhash;
 $refhash{"top"}->{"foo"} = "FOO";
 $refhash{"top"}->{"bar"} = "BAR";
 
 delete $refhash{"top"}->{"bar"};
-@list = keys %{$refhash{"top"}};
+my @list = keys %{$refhash{"top"}};
 
 cmp_ok("@list",'eq',"foo", 'autoviv and delete hashref');
 
@@ -99,7 +101,7 @@ cmp_ok($foo[3],'eq','c','ary c exists');
 cmp_ok($foo[4],'eq','d','ary d exists');
 cmp_ok($foo[5],'eq','e','ary e exists');
 
-@bar = delete @foo[4,5];
+my @bar = delete @foo[4,5];
 
 cmp_ok(scalar(@bar),'==',2,'ary deleted slice');
 cmp_ok($bar[0],'eq','d','ary slice 1');
@@ -125,7 +127,7 @@ $foo = join('',@foo);
 cmp_ok($foo,'eq','ac','ary elems');
 cmp_ok(scalar(@foo),'==',4,'four is the number thou shalt count');
 
-foreach $key (0 .. $#foo) {
+foreach my $key (0 .. $#foo) {
     delete $foo[$key];
 }
 
@@ -137,6 +139,7 @@ $foo[1] = 'y';
 $foo = "@foo";
 cmp_ok($foo,'eq','x y','two fresh');
 
+my @refary;
 $refary[0]->[0] = "FOO";
 $refary[0]->[3] = "BAR";
 
@@ -148,6 +151,7 @@ cmp_ok( scalar(@{$refary[0]}),'==',1,'one down');
     my @a = 33;
     my($a) = \(@a);
     my $b = \$a[0];
+    no strict 'subs';
     my $c = \delete $a[bar];
 
     ok($a == $b && $b == $c,'a b c also equivalent');
