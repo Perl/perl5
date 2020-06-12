@@ -17,7 +17,7 @@ use strict;
 {
     package End;
     sub DESTROY { $_[0]->() }
-    sub main::end(&) {
+    sub main::end :prototype(&) {
 	my($cleanup) = @_;
 	return bless(sub { $cleanup->() }, "End");
     }
