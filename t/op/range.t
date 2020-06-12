@@ -13,18 +13,21 @@ plan (162);
 
 is(join(':',1..5), '1:2:3:4:5');
 
-@foo = (1,2,3,4,5,6,7,8,9);
+my @foo = (1,2,3,4,5,6,7,8,9);
 @foo[2..4] = ('c','d','e');
 
 is(join(':',@foo[$foo[0]..5]), '2:c:d:e:6');
 
+my @bar;
 @bar[2..4] = ('c','d','e');
 is(join(':',@bar[1..5]), ':c:d:e:');
 
+my @bcd;
+my $e;
 ($a,@bcd[0..2],$e) = ('a','b','c','d','e');
 is(join(':',$a,@bcd[0..2],$e), 'a:b:c:d:e');
 
-$x = 0;
+my $x = 0;
 for (1..100) {
     $x += $_;
 }
@@ -39,17 +42,17 @@ is($x, 5050);
 $x = join('','a'..'z');
 is($x, 'abcdefghijklmnopqrstuvwxyz');
 
-@x = 'A'..'ZZ';
+my @x = 'A'..'ZZ';
 is (scalar @x, 27 * 26);
 
 foreach (0, 1) {
     use feature 'unicode_strings';
-    $s = "a";
+    my $s = "a";
     $e = "\xFF";
     utf8::upgrade($e) if $_;
     @x = $s .. $e;
     is (scalar @x, 26, "list-context range with rhs 0xFF, utf8=$_");
-    @y = ();
+    my @y = ();
     foreach ($s .. $e) {
         push @y, $_;
     }
@@ -60,13 +63,14 @@ foreach (0, 1) {
 is(join(",", @x), join(",", map {sprintf "%02d",$_} 9..99));
 
 # same test with foreach (which is a separate implementation)
-@y = ();
+my @y = ();
 foreach ('09'..'08') {
     push(@y, $_);
 }
 is(join(",", @y), join(",", @x));
 
 # check bounds
+my (@a, $a, @b, $b);
 if ($Config{ivsize} == 8) {
   @a = eval "0x7ffffffffffffffe..0x7fffffffffffffff";
   $a = "9223372036854775806 9223372036854775807";
@@ -256,7 +260,7 @@ foreach my $ii (-3 .. 3) {
             if (! defined($first)) {
                 $first = $_;
             }
-            $last = $_;
+            my $last = $_;
             last if ($lim++ > 100);
         }
     };
@@ -337,7 +341,7 @@ foreach my $ii (-3 .. 3) {
             if (! defined($first)) {
                 $first = $_;
             }
-            $last = $_;
+            my $last = $_;
             last if ($lim++ > 100);
         }
     };
@@ -386,7 +390,6 @@ sub fetches { delete(tied($_[0])->{fetch}) || 0 }
     
 tie $x, "main", 6;
 
-my @foo;
 @foo = 4 .. $x;
 is(scalar @foo, 3);
 is("@foo", "4 5 6");
@@ -427,7 +430,7 @@ is( ( join ' ', map { join '', map ++$_, ($x=1)..4 } 1..2 ), '2345 2345',
     'modifiable variable num range' );
 is( ( join ' ', map { join '', map ++$_, 1..4      } 1..2 ), '2345 2345',
     'modifiable const num range' );  # RT#3105
-$s = ''; for (1..2) { for (1..4) { $s .= ++$_ } $s.=' ' if $_==1; }
+my $s = ''; for (1..2) { for (1..4) { $s .= ++$_ } $s.=' ' if $_==1; }
 is( $s, '2345 2345','modifiable num counting loop counter' );
 
 
