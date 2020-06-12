@@ -9,6 +9,8 @@ BEGIN {
 }
 plan 150;
 
+use p5;
+
 # -------------------- our -------------------- #
 
 {
@@ -63,11 +65,11 @@ sub bar::c { 43 }
   is eval ::d, 'd42', 'our sub foo; applies to subsequent sub foo {}';
 }
 {
-  our sub e ($);
+  our sub e :prototype($);
   is prototype "::e", '$', 'our sub with proto';
 }
 {
-  our sub if() { 42 }
+  our sub if :prototype() { 42 }
   my $x = if if if;
   is $x, 42, 'lexical subs (even our) override all keywords';
   package bar;
@@ -192,12 +194,12 @@ sub sc { 43 }
 }
 package main;
 {
-  state sub se ($);
+  state sub se :prototype($);
   is prototype eval{\&se}, '$', 'state sub with proto';
   is prototype "se", undef, 'prototype "..." ignores state subs';
 }
 {
-  state sub if() { 44 }
+  state sub if :prototype() { 44 }
   my $x = if if if;
   is $x, 44, 'state subs override all keywords';
   package bar;
@@ -226,8 +228,8 @@ sub make_closure {
     foo
   }
 }
-$sub1 = make_closure 48;
-$sub2 = make_closure 49;
+my $sub1 = make_closure 48;
+my $sub2 = make_closure 49;
 is &$sub1, 48, 'state sub in closure (1)';
 is &$sub2, 49, 'state sub in closure (2)';
 # But we need to test that state subs actually do persist from one invoca-
@@ -317,6 +319,7 @@ sub make_anon_with_state_sub{
       "unavailability warning when state closure is defined in anon sub";
 }
 {
+  no strict 'subs';
   state sub BEGIN { exit };
   pass 'state subs are never special blocks';
   state sub END { shift }
@@ -336,7 +339,7 @@ sub make_anon_with_state_sub{
          "sub redefinition warnings from state subs";
 }
 {
-  state sub p (\@) {
+  state sub p :prototype(\@) {
     is ref $_[0], 'ARRAY', 'state sub with proto';
   }
   p(my @a);
@@ -406,7 +409,7 @@ like runperl(
        foo();
       '
      ],
-     stderr => 1
+     stderr => 1, run_as_five => 1
     ),
     "4\n2\n",
     'state subs and DB::sub under -d'
@@ -424,7 +427,7 @@ like runperl(
        print $_ == \&foo ? qq|ok\n| : qq|$_\n|;
       '
      ],
-     stderr => 1
+     stderr => 1, run_as_five => 1
     ),
     "4\n2\nok\n",
     'state subs and DB::goto under -d'
@@ -433,7 +436,7 @@ like runperl(
 # This used to fail an assertion, but only as a standalone script
 is runperl(switches => ['-lXMfeature=:all'],
            prog     => 'state sub x {}; undef &x; print defined &x',
-           stderr   => 1), "\n", 'undefining state sub';
+           stderr   => 1, run_as_five => 1), "\n", 'undefining state sub';
 {
   state sub x { is +(caller 0)[3], 'x', 'state sub name in caller' }
   x
@@ -466,6 +469,7 @@ is runperl(switches => ['-lXMfeature=:all'],
                           x()
                         }
                         x()',
+           run_as_five => 1,
            stderr   => 1), "42\n",
   'closure behaviour of state sub in predeclared package sub';
 
@@ -554,7 +558,7 @@ sub mc { 43 }
 }
 package main;
 {
-  my sub me ($);
+  my sub me :prototype($);
   is prototype eval{\&me}, '$', 'my sub with proto';
   is prototype "me", undef, 'prototype "..." ignores my subs';
 
@@ -657,6 +661,7 @@ sub make_anon_with_my_sub{
   isnt &$s(0), &$s(0), 'at each invocation of the enclosing sub';
 }
 {
+  no strict 'subs';
   my sub BEGIN { exit };
   pass 'my subs are never special blocks';
   my sub END { shift }
@@ -727,7 +732,7 @@ sub not_lexical10 {
 }
 not_lexical11();
 {
-  my sub p (\@) {
+  my sub p :prototype(\@) {
     is ref $_[0], 'ARRAY', 'my sub with proto';
   }
   p(my @a);
@@ -812,7 +817,8 @@ pass "pad taking ownership once more of packagified my-sub";
        foo();
       '
      ],
-     stderr => 1
+     stderr => 1,
+     run_as_five => 1,
     ),
     "4\n2\n",
     'my subs and DB::sub under -d'
@@ -928,7 +934,8 @@ eval 'sub not_lexical7 { my @x }';
 like runperl(
       switches => [ '-Mfeature=lexical_subs,state', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
       prog     => 'my sub foo; sub foo { foo } foo',
-      stderr   => 1
+      stderr   => 1,
+      run_as_five => 1,
      ),
      qr/Deep recursion on subroutine "foo"/,
     'deep recursion warnings for lexical subs do not crash';
@@ -936,7 +943,8 @@ like runperl(
 like runperl(
       switches => [ '-Mfeature=lexical_subs,state', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
       prog     => 'my sub foo() { 42 } undef &foo',
-      stderr   => 1
+      stderr   => 1,
+      run_as_five => 1,
      ),
      qr/Constant subroutine foo undefined at /,
     'constant undefinition warnings for lexical subs do not crash';
