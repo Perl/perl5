@@ -35,7 +35,7 @@ BEGIN {
 
 BEGIN { @warnings = () }
 
-$sub = sub (x) { };
+$sub = sub :prototype(x) { };
 
 BEGIN {
     one_warning_ok;
@@ -43,7 +43,7 @@ BEGIN {
 
 {
     no warnings 'syntax';
-    $sub = sub (x) { };
+    $sub = sub :prototype(x) { };
 }
 
 BEGIN {
@@ -52,7 +52,7 @@ BEGIN {
 
 {
     no warnings 'illegalproto';
-    $sub = sub (x) { };
+    $sub = sub :prototype(x) { };
 }
 
 BEGIN {
@@ -62,7 +62,7 @@ BEGIN {
 {
     no warnings 'syntax';
     use warnings 'illegalproto';
-    $sub = sub (x) { };
+    $sub = sub :prototype(x) { };
 }
 
 BEGIN {
@@ -73,7 +73,7 @@ BEGIN {
     $warn = q{Prototype after '@' for};
 }
 
-$sub = sub (@$) { };
+$sub = sub :prototype(@$) { };
 
 BEGIN {
     one_warning_ok;
@@ -81,7 +81,7 @@ BEGIN {
 
 {
     no warnings 'syntax';
-    $sub = sub (@$) { };
+    $sub = sub :prototype(@$) { };
 }
 
 BEGIN {
@@ -90,7 +90,7 @@ BEGIN {
 
 {
     no warnings 'illegalproto';
-    $sub = sub (@$) { };
+    $sub = sub :prototype(@$) { };
 }
 
 BEGIN {
@@ -100,7 +100,7 @@ BEGIN {
 {
     no warnings 'syntax';
     use warnings 'illegalproto';
-    $sub = sub (@$) { };
+    $sub = sub :prototype(@$) { };
 }
 
 BEGIN {
