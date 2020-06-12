@@ -6,7 +6,10 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+use p5;
 use strict;
+
+skip_all("Need to fix ExtUtil::MakeMaker then Hash::Util");
 
 # This will crash perl if it fails
 
@@ -76,7 +79,7 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
 sub guard::DESTROY {
    ${$_[0]}->();
 };
-*guard = sub (&) {
+*guard = sub :prototype(&) {
    my $callback = shift;
    return bless \$callback, "guard"
 };
@@ -135,7 +138,7 @@ sub validate_hash {
   is($scalar, $count, "$desc scalar() should be the same as 0+keys() as of perl 5.25");
 
   require Hash::Util;
-  sub Hash::Util::bucket_ratio (\%);
+  sub Hash::Util::bucket_ratio :prototype(\%);
 
   # back compat tests, via Hash::Util::bucket_ratio();
   my $ratio = Hash::Util::bucket_ratio(%$h);
