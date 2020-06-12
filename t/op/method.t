@@ -394,7 +394,7 @@ package Xyz;
 package main; Foo->$meth->[0]();
 EOT
 	"Foo $meth->[1]",
-	{ switches => [ '-w' ] },
+	{ switches => [ '-w' ], run_as_five => 1 },
 	"check if UNIVERSAL::AUTOLOAD works",
     );
 }
@@ -406,7 +406,7 @@ EOT
 sub M::DESTROY; bless {}, "M" ; print "survived\n";
 EOT
     "survived",
-    {},
+    { run_as_five => 1 },
 	"no crash with a declared but missing DESTROY method"
     );
 }
@@ -441,7 +441,7 @@ is $kalled, 1, 'calling a class method via a magic variable';
     fresh_perl_is(
     q! sub T::DESTROY { $x = $_[0]; } bless [], "T";!,
     "DESTROY created new reference to dead object 'T' during global destruction.",
-    {},
+    { run_as_five => 1 },
 	"DESTROY creating a new reference to the object generates a warning."
     );
 }
@@ -719,7 +719,7 @@ SKIP: {
 # on an unblessed reference
 fresh_perl_is('eval { {}->$x }; print $@;',
               "Can't call method \"\" on unblessed reference at - line 1.",
-              {},
+              { run_as_five => 1 },
               "no crash with undef method name on unblessed ref");
 
 __END__
