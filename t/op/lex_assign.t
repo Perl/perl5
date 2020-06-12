@@ -9,25 +9,27 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+use p5;
+
 $| = 1;
 umask 0;
-$xref = \ "";
-$runme = $^X;
-@a = (1..5);
-%h = (1..6);
-$aref = \@a;
-$href = \%h;
+my $xref = \ "";
+my $runme = "$^X -I../lib";
+my @a = (1..5);
+my %h = (1..6);
+my $aref = \@a;
+my $href = \%h;
 open OP, qq{$runme -le "print 'aaa Ok ok' for 1..100"|};
-$chopit = 'aaaaaa';
-@chopar = (113 .. 119);
-$posstr = '123456';
-$cstr = 'aBcD.eF';
+my $chopit = 'aaaaaa';
+my @chopar = (113 .. 119);
+my $posstr = '123456';
+my $cstr = 'aBcD.eF';
 pos $posstr = 3;
-$nn = $n = 2;
+my $nn = my $n = 2;
 sub subb {"in s"}
 
-@INPUT = <DATA>;
-@simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
+my @INPUT = <DATA>;
+my @simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
 
 sub wrn {"@_"}
 
@@ -40,7 +42,7 @@ is( $b, 'Ab', 'Check correct optimization of ucfirst, etc');
 my $dc = 0;
 sub A::DESTROY {$dc += 1}
 $a=8;
-my $b;
+undef $b;
 { my $c = 6; $b = bless \$c, "A"}
 
 is($dc, 0, 'No destruction yet');
@@ -57,6 +59,7 @@ is( $xxx, 'cb', 'variables can be read before being overwritten');
 
 my ($l1, $l2, $l3, $l4);
 my $zzzz = 12;
+my ($zzz1, $zzz2 );
 $zzz1 = $l1 = $l2 = $zzz2 = $l3 = $l4 = 1 + $zzzz;
 
 is($zzz1, 13, 'chain assignment, part1');
@@ -67,14 +70,15 @@ is($l3,   13, 'chain assignment, part5');
 is($l4,   13, 'chain assignment, part6');
 
 for (@INPUT) {
-  ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
+  my ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
   chomp;
   $op = "$op==$op" unless $op =~ /==/;
+  my $expectop;
   ($op, $expectop) = $op =~ /(.*)==(.*)/;
   
-  $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
-  $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
+  my $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
+  my $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
   if ($skip) {
     SKIP: {
         skip $comment, 1;
@@ -90,8 +94,7 @@ for (@INPUT) {
   \$b = $expectop;
   is (\$a, \$b, \$comment);
 EOE
-  if ($@) {
-    $warning = $@;
+  if (my $warning = $@) {
     chomp $warning;
     if ($@ !~ /(?:is un|not )implemented/) {
       fail($_ . ' ' . $warning);
@@ -125,23 +128,24 @@ EOE
   is( $m,  89, 'checking the tied variable result' );
 
   for (@INPUT) {
-    ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
+    #no strict;
+    my ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
     $comment = $op unless defined $comment;
     next if ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
     $op =~ s/==.*//;
     
     $sc = 0;
     local $SIG{__WARN__} = \&wrn;
-    eval "\$m = $op";
-    is $sc, $@ ? 0 : 1, "STORE count for $comment";
+    eval "\$m = $op; 1" or warn $@;
+    is $sc, $@ ? 0 : 1, "STORE count for $comment - $op";
   }
 }
 
 for (@simple_input) {
-  ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
+  my ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
   chomp;
-  ($operator, $variable) = /^\s*(\w+)\s*\$(\w+)/ or warn "misprocessed '$_'\n";
+  my ($operator, $variable) = /^\s*(\w+)\s*\$(\w+)/ or warn "misprocessed '$_'\n";
   eval <<EOE;
   local \$SIG{__WARN__} = \\&wrn;
   my \$$variable = "Ac# Ca\\nxxx";
@@ -150,8 +154,7 @@ for (@simple_input) {
   \$direct = $operator "Ac# Ca\\nxxx";
   is(\$toself, \$direct);
 EOE
-  if ($@) {
-    $warning = $@;
+  if (my $warning = $@) {
     chomp $warning;
     if ($@ =~ /(?:is un|not )implemented/) {
       SKIP: {
@@ -174,6 +177,7 @@ EOE
 # These used to die or crash.
 # Once the bug is fixed for all ops, we can combine this with the tests
 # above that use <DATA>.
+my ($y, $z);
 for my $glob (*__) {
   $glob = $y x $z;
   { use integer; $glob = $y <=> $z; }
