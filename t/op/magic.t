@@ -1,5 +1,7 @@
 #!./perl
 
+use p5;
+
 BEGIN {
     $| = 1;
     chdir 't' if -d 't';
@@ -128,9 +130,10 @@ SKIP: {
     sub FETCH { $next_test + pop }
     tie my @tn, __PACKAGE__;
 
+    local $ENV{PERL5LIB} = '../lib';
     open( CMDPIPE, "|-", $PERL);
 
-    print CMDPIPE "\$t1 = $tn[1]; \$t2 = $tn[2];\n", <<'END';
+    print CMDPIPE "use p5; \$t1 = $tn[1]; \$t2 = $tn[2];\n", <<'END';
 
     $| = 1;		# command buffering
 
@@ -152,7 +155,7 @@ END
     close CMDPIPE;
 
     open( CMDPIPE, "|-", $PERL);
-    print CMDPIPE "\$t3 = $tn[3];\n", <<'END';
+    print CMDPIPE "use p5; \$t3 = $tn[3];\n", <<'END';
 
     { package X;
 	sub DESTROY {
@@ -222,7 +225,7 @@ is $+, 'a';
 for (qw < ` & ' >) {
  fresh_perl_is
   qq < \@$_; q "fff" =~ /(?!^)./; print "[\$$_]\\n" >,
-  "[f]\n", {},
+  "[f]\n", { run_as_five => 1 },
   "referencing \@$_ before \$$_ etc. still saws off ampersands";
 }
 
@@ -314,7 +317,7 @@ $$ = $pid; # Tests below use $$
 	$headmaybe = <<EOH ;
 \@rem ='
 \@echo off
-$perl -x \%0
+$perl -I../lib -x \%0
 goto endofperl
 \@rem ';
 EOH
@@ -338,25 +341,26 @@ EOX
     }
     if ($^O eq 'os390' or $^O eq 'posix-bc') {  # no shebang
 	$headmaybe = <<EOH ;
-    eval 'exec ./perl -S \$0 \${1+"\$\@"}'
+    eval 'exec ./perl -I../lib -S \$0 \${1+"\$\@"}'
         if 0;
 EOH
     }
     $s1 = "\$^X is $perl, \$0 is $script\n";
-    ok open(SCRIPT, ">$script") or diag "Can't write to $script: $!";
-    ok print(SCRIPT $headmaybe . <<EOB . $middlemaybe . <<'EOF' . $tailmaybe) or diag $!;
+    ok open(SCRIPT, ">$script"), "open" or diag "Can't write to $script: $!";
+    ok print(SCRIPT $headmaybe . <<EOB . $middlemaybe . <<'EOF' . $tailmaybe), "print" or diag $!;
 #!$perl
 EOB
 print "\$^X is $^X, \$0 is $0\n";
 EOF
-    ok close(SCRIPT) or diag $!;
-    ok chmod(0755, $script) or diag $!;
-    $_ = $Is_VMS ? `$perl $script` : `$script`;
+    ok close(SCRIPT), "close" or diag $!;
+    ok chmod(0755, $script), "chmod" or diag $!;
+    #$_ = $Is_VMS ? `$perl -I../lib $script` : `$script`;
+    $_ = `$perl -I../lib $script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
-	is uc $_, uc $s1;
+	is uc $_, uc $s1, "uc";
     } else {
   SKIP:
      {
@@ -364,7 +368,7 @@ EOF
 	  is $_, $s1;
      }
     }
-    $_ = `$perl $script`;
+    $_ = `$perl -I../lib $script`;
     s/\.exe//i if $Is_Dos or $Is_os2 or $Is_Cygwin;
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
@@ -394,7 +398,7 @@ $^O = $orig_osname;
 {
     #RT #72422
     foreach my $p (0, 1) {
-	fresh_perl_is(<<"EOP", '2 4 8', undef, "test \$^P = $p");
+	fresh_perl_is(<<"EOP", '2 4 8', {run_as_five => 1}, "test \$^P = $p");
 \$DB::single = 2;
 \$DB::trace = 4;
 \$DB::signal = 8;
@@ -494,7 +498,7 @@ foreach (['powie::!', 'Errno']) {
 	    $desc .= qq{ after mentioning \${"$symbol"}} if $scalar_first;
 	    $desc .= " doesn't load $package";
 
-	    fresh_perl_is(<<"EOP", 0, {}, $desc);
+	    fresh_perl_is(<<"EOP", 0, {run_as_five => 1}, $desc);
 use strict qw(vars subs);
 my \$symbol = '$symbol';
 $scalar_first;
@@ -600,12 +604,14 @@ SKIP: {
     is
       runperl(
 	prog => 'BEGIN { defined *{q-+-} } print qq-ok\n- if tied %+',
+    run_as_five => 1,
       ),
      "ok\n",
      'defined *{"+"} does not stop %+ from working';
     is
       runperl(
 	prog => 'BEGIN { defined *{q=-=} } print qq-ok\n- if tied %-',
+    run_as_five => 1,
       ),
      "ok\n",
      'defined *{"-"} does not stop %- from working';
@@ -623,7 +629,7 @@ SKIP: {
 	       $var;
 	       print "ok\\n" if \$INC{"$modfile"}',
 	  "ok\n",
-	   { switches => [ '-X' ] },
+	   { switches => [ '-X' ], run_as_five => 1, },
 	  "$var still loads $mod when stash and UNIVERSAL::AUTOLOAD exist";
     }
 }
@@ -647,14 +653,14 @@ is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
 # to check each op.
 for my $code ('tell $0', 'sysseek $0, 0, 0', 'seek $0, 0, 0', 'eof $0') {
     fresh_perl_is("$code; print defined \${^LAST_FH} ? qq(not ok\n) : qq(ok\n)", "ok\n",
-                  undef, "check $code doesn't define \${^LAST_FH}");
+                  {run_as_five => 1,}, "check $code doesn't define \${^LAST_FH}");
 }
 
 # $|
-fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']},
+fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l'], run_as_five => 1,},
  '[perl #4760] print $| = ~$|';
 fresh_perl_is
- 'select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {},
+ 'select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {run_as_five => 1,},
  '[perl #115206] no crash when vivifying $| while *{+select}{IO} is undef';
 
 # ${^OPEN} and $^H interaction
@@ -670,7 +676,7 @@ eval '
 is $stuff[0], $stuff[1], '$^H modifies ${^OPEN} consistently';
 
 # deleting $::{"\cH"}
-is runperl(prog => 'delete $::{qq-\cH-}; ${^OPEN}=foo; print qq-ok\n-'),
+is runperl(prog => 'delete $::{qq-\cH-}; ${^OPEN}=foo; print qq-ok\n-', run_as_five => 1,),    
   "ok\n",
   'deleting $::{"\cH"}';
 
