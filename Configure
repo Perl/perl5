@@ -5506,23 +5506,24 @@ default|recommended)
 	# is to add the flag to the flags passed to the compiler at link time,
 	# as that way the compiler can do the right implementation dependant
 	# thing. (NWC)
-	case "$osname" in
-	amigaos) ;; # -fstack-protector builds but doesn't work
-	*)	case "$gccversion" in
-		?*)	set stack-protector-strong -fstack-protector-strong
-			eval $checkccflag
-			case "$dflt" in
-			*-fstack-protector-strong*) ;; # It got added.
-			*) # Try the plain/older -fstack-protector.
-			   set stack-protector -fstack-protector
-			   eval $checkccflag
-			   ;;
-			esac
-			;;
+	case "$ccflags" in
+	*-fno-stack-protector*)
+	    echo "Do not add -fstack-protector nor -fstack-protector-strong" 2>&1
+	    ;;
+	*) case "$gccversion" in
+	   ?*)	set stack-protector-strong -fstack-protector-strong
+		eval $checkccflag
+		case "$dflt" in
+		*-fstack-protector-strong*) ;; # It got added.
+		*) # Try the plain/older -fstack-protector.
+		   set stack-protector -fstack-protector
+		   eval $checkccflag
+		   ;;
 		esac
 		;;
+	    esac
+	    ;;
 	esac
-	;;
 esac
 
 case "$mips_type" in
