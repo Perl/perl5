@@ -15,18 +15,20 @@ sub foo {
     cmp_ok($1,'eq','a','context ' . curr_test());
 }
 
-$a=foo;
-@a=foo;
+my $a=foo;
+my @a=foo;
 foo;
 foo(foo);
 
 my $before = curr_test();
+my %h;
 $h{foo} = foo;
 my $after = curr_test();
 
 cmp_ok($after-$before,'==',1,'foo called once')
 	or diag("nr tests: before=$before, after=$after");
 
+my $cx;
 sub context {
     $cx = qw[void scalar list][wantarray + defined wantarray];
 }
