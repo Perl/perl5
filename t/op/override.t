@@ -20,7 +20,7 @@ BEGIN { package Foo; *main::getlogin = sub { "kilroy"; } }
 is( getlogin, "kilroy" );
 
 my $t = 42;
-BEGIN { *CORE::GLOBAL::time = sub () { $t; } }
+BEGIN { *CORE::GLOBAL::time = sub :prototype() { $t; } }
 
 is( 45, time + 3 );
 
@@ -77,7 +77,8 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 #
 
 $r = 11;
-BEGIN { *CORE::GLOBAL::readline = sub (;*) { ++$r }; }
+BEGIN { *CORE::GLOBAL::readline = sub :prototype(;*) { ++$r }; }
+my $fh;
 is( <FH>	, 12 );
 is( <$fh>	, 13 );
 my $pad_fh;
@@ -88,7 +89,7 @@ is( <$pad_fh>	, 14 );
 }
 
 # Non-global readline() override
-BEGIN { *Rgs::readline = sub (;*) { --$r }; }
+BEGIN { *Rgs::readline = sub :prototype(;*) { --$r }; }
 {
     package Rgs;
     ::is( <FH>	, 14 );
@@ -99,12 +100,12 @@ BEGIN { *Rgs::readline = sub (;*) { --$r }; }
 }
 
 # Global readpipe() override
-BEGIN { *CORE::GLOBAL::readpipe = sub ($) { "$_[0] " . --$r }; }
+BEGIN { *CORE::GLOBAL::readpipe = sub :prototype($) { "$_[0] " . --$r }; }
 is( `rm`,	    "rm 10", '``' );
 is( qx/cp/,	    "cp 9", 'qx' );
 
 # Non-global readpipe() override
-BEGIN { *Rgs::readpipe = sub ($) { ++$r . " $_[0]" }; }
+BEGIN { *Rgs::readpipe = sub :prototype($) { ++$r . " $_[0]" }; }
 {
     package Rgs;
     ::is( `rm`,		  "10 rm", '``' );
@@ -148,25 +149,27 @@ sub caller() { 42 }
 caller; # inline the constant
 is caller, 42, 'constant inlining does not undo "use subs" on keywords';
 
-is runperl(prog => 'sub CORE::GLOBAL::do; do file; print qq-ok\n-'),
+is runperl(prog => 'sub CORE::GLOBAL::do; do file; print qq-ok\n-', run_as_five => 1),
   "ok\n",
   'no crash with CORE::GLOBAL::do stub';
-is runperl(prog => 'sub CORE::GLOBAL::glob; glob; print qq-ok\n-'),
+is runperl(prog => 'sub CORE::GLOBAL::glob; glob; print qq-ok\n-', run_as_five => 1),
   "ok\n",
   'no crash with CORE::GLOBAL::glob stub';
-is runperl(prog => 'sub CORE::GLOBAL::require; require re; print qq-o\n-'),
+is runperl(prog => 'sub CORE::GLOBAL::require; require re; print qq-o\n-', run_as_five => 1),
   "o\n",
   'no crash with CORE::GLOBAL::require stub';
 
 like runperl(prog => 'use constant foo=>1; '
                     .'BEGIN { *{q|CORE::GLOBAL::readpipe|} = \&{q|foo|};1}'
                     .'warn ``',
+             run_as_five => 1,
              stderr => 1),
      qr/Too many arguments/,
     '`` does not ignore &CORE::GLOBAL::readpipe aliased to a constant';
 like runperl(prog => 'use constant foo=>1; '
                     .'BEGIN { *{q|CORE::GLOBAL::readline|} = \&{q|foo|};1}'
                     .'warn <a>',
+             run_as_five => 1,
              stderr => 1),
      qr/Too many arguments/,
     '<> does not ignore &CORE::GLOBAL::readline aliased to a constant';
@@ -174,6 +177,7 @@ like runperl(prog => 'use constant foo=>1; '
 is runperl(prog => 'use constant t=>42; '
                   .'BEGIN { *{q|CORE::GLOBAL::time|} = \&{q|t|};1}'
                   .'print time, chr utf8::unicode_to_native(10)',
+          run_as_five => 1,
           stderr => 1),
    "42\n",
    'keywords respect global constant overrides';
