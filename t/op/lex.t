@@ -53,7 +53,7 @@ curr_test(3);
   'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"} } "\N{a}"',
   'Constant(\N{a}) unknown at - line 1, within string' . "\n"
  ."Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   'correct output (and no crash) when charnames cannot load for \N{...}'
  );
 }
@@ -63,7 +63,7 @@ fresh_perl_is(
   "Undefined subroutine &main::foo called at - line 2.\n"
  ."Propagated at - line 2, within string\n"
  ."Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   'no crash when charnames cannot load and %^H holds string'
 );
 fresh_perl_is(
@@ -72,7 +72,7 @@ fresh_perl_is(
   "Not a CODE reference at - line 2.\n"
  ."Propagated at - line 2, within string\n"
  ."Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   'no crash when charnames cannot load and %^H holds string reference'
 );
 
@@ -85,6 +85,7 @@ is runperl(
       '}'
     ],
     stderr => 1,
+    run_as_five => 1,
    ),
   "Undefined subroutine &XS::APItest::gv_fetchmeth_type called at -e line "
  ."2.\n",
@@ -100,31 +101,31 @@ is join("", map{no strict; "rhu$_" } "barb"), 'rhubarb',
 fresh_perl_is(
   '$eq = "ok\n"; print $' . "\0eq\n",
   "ok\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1},
   '$ <null> ident'
 );
 fresh_perl_is(
   '@eq = "ok\n"; print @' . "\0eq\n",
   "ok\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '@ <null> ident'
 );
 fresh_perl_is(
   '%eq = ("o"=>"k\n"); print %' . "\0eq\n",
   "ok\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '% <null> ident'
 );
 fresh_perl_is(
   'sub eq { "ok\n" } print &' . "\0eq\n",
   "ok\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '& <null> ident'
 );
 fresh_perl_is(
   '$eq = "ok\n"; print ${*' . "\0eq{SCALAR}}\n",
   "ok\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '* <null> ident'
 );
 SKIP: {
@@ -134,9 +135,9 @@ SKIP: {
 Bareword found where operator expected at - line 1, near ""ab}"ax"
 	(Missing operator before ax?)
 syntax error at - line 1, near ""ab}"ax"
-Unrecognized character \\x8A; marked by <-- HERE after ab}"ax;&\0z<-- HERE near column 12 at - line 1.
+Unrecognized character \\x8A; marked by <-- HERE after ab}"ax;&\0z<-- HERE near column 20 at - line 1.
 gibberish
-       { stderr => 1 },
+       { stderr => 1, run_as_five => 1 },
       'gibberish containing &\0z - used to crash [perl #123753]'
     );
     fresh_perl_is(
@@ -144,16 +145,16 @@ gibberish
 Bareword found where operator expected at - line 1, near ""ab}"ax"
 	(Missing operator before ax?)
 syntax error at - line 1, near ""ab}"ax"
-Unrecognized character \\x8A; marked by <-- HERE after }"ax;&{+z}<-- HERE near column 14 at - line 1.
+Unrecognized character \\x8A; marked by <-- HERE after }"ax;&{+z}<-- HERE near column 22 at - line 1.
 gibberish
-       { stderr => 1 },
+       { stderr => 1, run_as_five => 1 },
       'gibberish containing &{+z} - used to crash [perl #123753]'
     );
     fresh_perl_is(
       "\@{\327\n", <<\gibberisi,
 Unrecognized character \xD7; marked by <-- HERE after @{<-- HERE near column 3 at - line 1.
 gibberisi
-       { stderr => 1 },
+       { stderr => 1, run_as_five => 0 },
       '@ { \327 \n - used to garble output (or fail asan) [perl #128951]'
     );
 }
@@ -163,7 +164,7 @@ fresh_perl_is(
   "Missing right curly or square bracket at - line 1, within pattern\n" .
   "syntax error at - line 1, at EOF\n" .
   "Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '/$a[/<<a with no newline [perl #123712]'
 );
 fresh_perl_is(
@@ -171,7 +172,7 @@ fresh_perl_is(
   "Missing right curly or square bracket at - line 1, within pattern\n" .
   "syntax error at - line 1, at EOF\n" .
   "Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '/$a[m||/<<a with no newline [perl #123712]'
 );
 
@@ -180,7 +181,7 @@ fresh_perl_is(
   "Missing right curly or square bracket at - line 1, within string\n" .
   "syntax error at - line 1, at EOF\n" .
   "Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '"@{" [perl #123712]'
 );
 
@@ -188,21 +189,21 @@ fresh_perl_is(
   '/$0{}/',
   'syntax error at - line 1, near "{}"' . "\n" .
   "Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '/$0{}/ with no newline [perl #123802]'
 );
 fresh_perl_is(
   '"\L\L"',
   'syntax error at - line 1, near "\L\L"' . "\n" .
   "Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '"\L\L" with no newline [perl #123802]'
 );
 fresh_perl_is(
   '<\L\L>',
   'syntax error at - line 1, near "\L\L"' . "\n" .
   "Execution of - aborted due to compilation errors.\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1 },
   '<\L\L> with no newline [perl #123802]'
 );
 
@@ -224,7 +225,7 @@ fresh_perl_is(
   'foo ? require : bar [perl #128307]'
 );
 
-like runperl(prog => 'sub ub(){0} ub ub', stderr=>1), qr/Bareword found/,
+like runperl(prog => 'sub ub(){0} ub ub', stderr=>1, run_as_five => 1), qr/Bareword found/,
  '[perl #126482] Assert failure when mentioning a constant twice in a row';
 
 fresh_perl_is(
@@ -256,7 +257,7 @@ SKIP:
         "Integer overflow in hexadecimal number at - line 1.\n"
       . "Malformed UTF-8 character: \\xf3 (too short; 1 byte available, need 4) at - line 1.\n"
       . "Malformed UTF-8 character (fatal) at - line 1.",
-        {},
+        {run_as_five => 1},
         '[perl #128996] - use of PL_op after op is freed'
     );
     fresh_perl_like(
