@@ -40,6 +40,7 @@ my %desc = (
   #pos => 'match position',
 );
 
+my $tests = 0;
 use File::Spec::Functions;
 my $keywords_file = catfile(updir,'regen','keywords.pl');
 open my $kh, $keywords_file
@@ -57,7 +58,10 @@ while(<$kh>) {
       ok defined &{"CORE::$word"}, "defined &{'CORE::$word'}";
 
       my $proto = prototype "CORE::$word";
-      *{"my$word"} = \&{"CORE::$word"};
+      {
+        no strict 'refs';
+        *{"my$word"} = \&{"CORE::$word"};
+      }      
       is prototype \&{"my$word"}, $proto, "prototype of &CORE::$word";
 
       CORE::state $protochar = qr/([^\\]|\\(?:[^[]|\[[^]]+\]))/;
@@ -82,8 +86,8 @@ while(<$kh>) {
          # __FILE__ won’t fold with warnings on, and then we get
          # ‘(eval 21)’ vs ‘(eval 22)’.
          no warnings 'numeric';
-         $core = op_list(eval $hpcode =~ s/my/CORE::/r or die);
-         $my   = op_list(eval $hpcode or die);
+         my $core = op_list(eval $hpcode =~ s/my/CORE::/r or die);
+         my $my   = op_list(eval $hpcode or die);
          is $my, $core, "precedence of CORE::$word without parens";
       }
 
@@ -95,7 +99,7 @@ while(<$kh>) {
                            |reset|system|values|l?stat)|evalbytes/x;
 
       $tests ++;
-      $code =
+      my $code =
          "sub { () = (my$word("
              . (
                 $args_for{$word}
@@ -107,7 +111,10 @@ while(<$kh>) {
                    )
                )
        . "))}";
-      eval $code;
+      {
+        no strict 'refs';
+        eval $code;
+      }
       my $desc = $desc{$word} || $word;
       like $@, qr/^Too many arguments for $desc/,
           "inlined CORE::$word with too many args"
@@ -117,6 +124,7 @@ while(<$kh>) {
   }
 }
 
+our @op_names;
 sub B::OP::pushname { push @op_names, shift->name }
 
 sub op_list {
@@ -151,14 +159,14 @@ $SIG{__WARN__} = sub { like shift, qr\^Use of uninitialized\ };
 foo(undef);
 
 $tests+=2;
-is runperl(prog => 'print CORE->lc, qq-\n-'), "core\n",
+is runperl(prog => 'print CORE->lc, qq-\n-', run_as_five => 1), "core\n",
  'methods calls autovivify coresubs';
-is runperl(prog => '@ISA=CORE; print main->uc, qq-\n-'), "MAIN\n",
+is runperl(prog => '@ISA=CORE; print main->uc, qq-\n-', run_as_five => 1), "MAIN\n",
  'inherted method calls autovivify coresubs';
 
 { # RT #117607
   $tests++;
-  like runperl(prog => '$foo/; \&CORE::lc', stderr => 1),
+  like runperl(prog => '$foo/; \&CORE::lc', stderr => 1, run_as_five => 1),
     qr/^syntax error/, "RT #117607: \\&CORE::foo doesn't crash in error context";
 }
 
@@ -169,7 +177,11 @@ ok eval { *CORE::exit = \42 },
 inlinable_ok($_, '$_{k}', 'on hash')
     for qw<delete exists>;
 
-@UNIVERSAL::ISA = CORE;
+{
+  no strict 'subs';
+  @UNIVERSAL::ISA = CORE;  
+}
+
 is "just another "->ucfirst . "perl hacker,\n"->ucfirst,
    "Just another Perl hacker,\n", 'coresubs do not return TARG';
 ++$tests;
