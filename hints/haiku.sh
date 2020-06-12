@@ -6,7 +6,6 @@ case "$prefix" in
 *) ;; # pass the user supplied value through
 esac
 
-
 libpth="$(finddir B_USER_DEVELOP_DIRECTORY)/lib $(finddir B_SYSTEM_DEVELOP_DIRECTORY)/lib $(finddir B_COMMON_DIRECTORY)/lib /system/lib"
 usrinc="$(finddir B_SYSTEM_DEVELOP_DIRECTORY)/headers/posix"
 locinc="$(finddir B_USER_CONFIG_DIRECTORY)/develop/headers $(finddir B_COMMON_DIRECTORY)/headers $(finddir B_SYSTEM_DEVELOP_DIRECTORY)/headers"
@@ -31,6 +30,8 @@ d_syserrlst='undef'
 # Haiku uses gcc.
 cc="gcc"
 ld='gcc'
+
+ccflags="$ccflags -fno-stack-protector"
 
 # The runtime loader library path variable is LIBRARY_PATH.
 case "$ldlibpthname" in
