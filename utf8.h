@@ -1024,13 +1024,6 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 /* Character classes could also allow \b, but not patterns in general */
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
-#define ANYOF_FOLD_SHARP_S(node, input, end)	\
-	(ANYOF_BITMAP_TEST(node, LATIN_SMALL_LETTER_SHARP_S) && \
-	 (ANYOF_NONBITMAP(node)) && \
-	 (ANYOF_FLAGS(node) & ANYOF_LOC_NONBITMAP_FOLD) && \
-	 ((end) > (input) + 1) && \
-	 isALPHA_FOLD_EQ((input)[0], 's'))
-
 #define SHARP_S_SKIP 2
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
