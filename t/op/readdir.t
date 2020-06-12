@@ -60,6 +60,7 @@ isnt("$fh", "$fh{abc}");
 # See that perl does not segfault upon readdir($x=".");
 # https://github.com/Perl/perl5/issues/9813
 fresh_perl_like(<<'EOP', qr/^no crash/, {}, 'GH #9813');
+  no warnings;
   eval {
     my $x = ".";
     my @files = readdir($x);
