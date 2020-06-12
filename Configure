@@ -5508,6 +5508,7 @@ default|recommended)
 	# thing. (NWC)
 	case "$osname" in
 	amigaos) ;; # -fstack-protector builds but doesn't work
+	haiku) ;;   #
 	*)	case "$gccversion" in
 		?*)	set stack-protector-strong -fstack-protector-strong
 			eval $checkccflag
