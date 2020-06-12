@@ -36,7 +36,7 @@ is(-" -10foo", 10,
     "Negation of a whitespace-lead sting starting with a numeric");
 is(-"-e1", "+e1", "Negation of e1");
 
-$x = "dogs";
+my $x = "dogs";
 ()=0+$x;
 is -$x, '-dogs', 'cached numeric value does not sabotage string negation';
 
@@ -44,7 +44,8 @@ is(-"97656250000000000", -97656250000000000, '-bigint vs -"bigint"');
 "9765625000000000" =~ /(\d+)/;
 is -$1, -"$1", '-$1 vs -"$1" with big int';
 
-$a = "%apples";
+my $a = "%apples";
+my $au;
 chop($au = "%apples\x{100}");
 is(-$au, -$a, 'utf8 flag makes no difference for string negation');
 is -"\x{100}", 0, '-(non-ASCII) is equivalent to -(punct)';
@@ -53,7 +54,7 @@ sub TIESCALAR { bless[] }
 sub STORE { $_[0][0] = $_[1] }
 sub FETCH { $_[0][0] }
 
-tie $t, "";
+tie my $t, "";
 $a = "97656250000000000";
 () = 0+$a;
 $t = $a;
