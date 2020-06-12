@@ -15,6 +15,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
+use p5;
 use warnings;
 use strict;
 
@@ -242,5 +243,5 @@ sub defer {}
     ::pass("S_maybe_multideref() shouldn't leak on croak");
 }
 
-fresh_perl_is('0for%{scalar local$0[0]}', '', {},
+fresh_perl_is('0for%{scalar local$0[0]}', '', { run_as_five => 1 },
               "RT #134045 assertion on the OP_SCALAR");
