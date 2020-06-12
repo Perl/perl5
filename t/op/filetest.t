@@ -27,7 +27,8 @@ is(-r 'TEST', 1, "-r: file readable by effective uid/gid not found");
 my $ro_empty_file = tempfile();
 
 {
-    open my $fh, '>', $ro_empty_file or die "open $fh: $!";
+    my $fh;
+    open $fh, '>', $ro_empty_file or die "open $fh: $!";
     close $fh or die "close $fh: $!";
 }
 
@@ -114,7 +115,7 @@ SKIP: {
  if ( $^O =~ /android/ ) {
      # Even the most basic toolbox in android provides ln,
      # but not which.
-     $ln = "ln";
+     1;#$ln = "ln";
  }
  else {
      chomp(my $ln = `which ln`);
@@ -139,6 +140,7 @@ SKIP: {
 # More -l $handle warning tests
 {
  local $^W = 1;
+ no strict;
  my @warnings;
  local $SIG{__WARN__} = sub { push @warnings, @_ };
  () = -l \*{"\x{3c6}oo"};
@@ -256,15 +258,19 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 
 # -l stack corruption: this bug occurred from 5.8 to 5.14
 {
+ no strict;
  push my @foo, "bar", -l baz;
  is $foo[0], "bar", '-l bareword does not corrupt the stack';
 }
 
 # -l and fatal warnings
-stat "test.pl";
-eval { use warnings FATAL => io; -l cradd };
-isnt(stat _, 1,
-     'fatal warnings do not prevent -l HANDLE from setting stat status');
+{
+    no strict;
+    stat "test.pl";
+    eval { use warnings FATAL => io; -l cradd };
+    isnt(stat _, 1,
+         'fatal warnings do not prevent -l HANDLE from setting stat status');
+}
 
 # File test ops should not call get-magic on the topmost SV on the stack if
 # it belongs to another op.
@@ -293,7 +299,7 @@ SKIP: {
 
     # statgv should be cleared when freed
     fresh_perl_is
-	'open my $fh, "test.pl"; -r $fh; undef $fh; open my $fh2, '
+	'no warnings; open my $fh, "test.pl"; -r $fh; undef $fh; open my $fh2, '
 	. "q\0$Perl\0; print -B _",
 	'',
 	{ switches => ['-l'] },
@@ -301,7 +307,7 @@ SKIP: {
 
     # or coerced into a non-glob
     fresh_perl_is
-	'open Fh, "test.pl"; -r($h{i} = *Fh); $h{i} = 3; undef %h;'
+	'no warnings; my %h; open Fh, "test.pl"; -r($h{i} = *Fh); $h{i} = 3; undef %h;'
 	. 'open my $fh2, ' . "q\0" . which_perl() . "\0; print -B _",
 	'',
 	{ switches => ['-l'] },
@@ -334,7 +340,7 @@ SKIP: {
     -T cradd;
     my $errno = $!;
     $! = 7;
-    eval { use warnings FATAL => unopened; -T cradd };
+    eval { no strict; use warnings FATAL => unopened; -T cradd };
     my $errno2 = $!;
     is $errno2, $errno,
 	'fatal warnings do not affect errno after -T BADHADNLE';
@@ -360,7 +366,7 @@ SKIP: {
     my $failed_stat1 = stat _;
 
     stat "test.pl";
-    eval { use warnings FATAL => unopened; -r *phlon };
+    eval { no strict; use warnings FATAL => unopened; -r *phlon };
     my $failed_stat2 = stat _;
 
     is $failed_stat2, $failed_stat1,
@@ -371,7 +377,7 @@ SKIP: {
     $failed_stat1 = stat _;
 
     stat "test.pl";
-    eval { use warnings FATAL => unopened; -r cength };
+    eval { no strict; use warnings FATAL => unopened; -r cength };
     $failed_stat2 = stat _;
     
     is $failed_stat2, $failed_stat1,
