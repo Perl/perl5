@@ -45,7 +45,7 @@ plan tests => 38;
     local $SIG{__WARN__} = sub {push @warn, "@_"};
 
     my @a = 'a'..'z';
-    is eval'scalar %a[4,5,6]', 'g', 'last element in scalar context';
+    is eval'scalar %a[4,5,6]', 'g', 'last element in scalar context'; # ' fix for poor editors
 
     like ($warn[0],
      qr/^\%a\[\.\.\.\] in scalar context better written as \$a\[\.\.\.\]/);
@@ -187,7 +187,7 @@ plan tests => 38;
 }
 
 # \% prototype expects hash deref
-sub nowt_but_hash(\%) {}
+sub nowt_but_hash :prototype(\%) {}
 eval 'nowt_but_hash %_[0]';
 like $@, qr`^Type of arg 1 to main::nowt_but_hash must be hash \(not(?x:
            ) index/value array slice\) at `,
