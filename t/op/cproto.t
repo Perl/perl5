@@ -9,6 +9,7 @@ BEGIN {
 
 plan tests => 254;
 
+our $TODO;
 while (<DATA>) {
     chomp;
     (my $keyword, my $proto, local $TODO) = split " ", $_, 3;
