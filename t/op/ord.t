@@ -19,7 +19,7 @@ is(ord(chr(500)), 500, "compile time chr 500");
 
 # run time evaluation
 
-$x = 'ABC';
+my $x = 'ABC';
 
 ok(ord($x) == 65 || ord($x) == 193, "ord('$x') is ".ord($x));
 
