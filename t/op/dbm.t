@@ -42,8 +42,8 @@ EOC
 
 $prog =~ s/\@\@\@\@/$filename/;
 
-fresh_perl_is("require AnyDBM_File;\n$prog", 'ok', {}, 'explicit require');
-fresh_perl_is($prog, 'ok', {}, 'implicit require');
+fresh_perl_is("require AnyDBM_File;\n$prog", 'ok', {run_as_five => 1}, 'explicit require');
+fresh_perl_is($prog, 'ok', {run_as_five => 1}, 'implicit require');
 
 $prog = <<'EOC';
 @INC = ();
@@ -53,17 +53,19 @@ dbmopen(%LT, $filename, 0666);
 die "Failed to fail!";
 EOC
 
-fresh_perl_like($prog, qr/No dbm on this machine/, {},
+fresh_perl_like($prog, qr/No dbm on this machine/, {run_as_five => 1},
 		'implicit require fails');
 fresh_perl_like('delete $::{"AnyDBM_File::"}; ' . $prog,
-		qr/No dbm on this machine/, {},
+		qr/No dbm on this machine/, {run_as_five => 1},
 		'implicit require and no stash fails');
 
 { # undef 3rd arg
+    my $w;
     local $^W = 1;
     local $SIG{__WARN__} = sub { ++$w };
     # Files may get created as a side effect of dbmopen, so ensure cleanup.
     my $leaf = 'pleaseletthisfilenotexist';
+    my %truffe;
     dbmopen(%truffe, $leaf, undef);
     is $w, 1, '1 warning from dbmopen with undef third arg';
     unlink $leaf
