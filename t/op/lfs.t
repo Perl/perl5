@@ -118,7 +118,7 @@ print "# we seem to have sparse files...\n";
 
 $ENV{LC_ALL} = "C";
 
-my $r = system '../perl', '-e', <<"EOF";
+my $r = system '../perl', '-I../lib', '-e', <<"EOF";
 open my \$big, '>', q{$big0} or die qq{open $big0: $!};
 seek \$big, 5_000_000_000, 0 or die qq{seek $big0: $!};
 print \$big "big" or die qq{print $big0: $!};
@@ -157,9 +157,8 @@ unless ($s[7] == 5_000_000_003) {
     explain("kernel/fs not configured to use large files?");
 }
 
-sub offset ($$) {
+sub offset ($offset_will_be, $offset_want) {
     local $::Level = $::Level + 1;
-    my ($offset_will_be, $offset_want) = @_;
     my $offset_is = eval $offset_will_be;
     unless ($offset_is == $offset_want) {
         print "# bad offset $offset_is, want $offset_want\n";
