@@ -64,6 +64,8 @@ is( $i, 11, 'negation precedence with &&, multiple operands' );
 {
     $x = 42;
 
+    no strict 'subs';
+
     $i = !Bare || !$x;
     is( $i, '', 'neg-bareword on lhs of || with non-foldable neg-true on rhs' );
 
