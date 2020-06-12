@@ -14,6 +14,8 @@ BEGIN {
     set_up_inc( qw(. ../lib ../dist/if) );
 }
 
+use p5;
+
 no warnings 'experimental::smartmatch';
 
 sub lis($$;$) {
