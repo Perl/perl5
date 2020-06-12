@@ -5,6 +5,9 @@ BEGIN {
     require './test.pl';
     set_up_inc(  qw(. ../lib) );
 }
+
+use p5;
+
 plan tests => 319;
 
 my $list_assignment_supported = 1;
@@ -794,6 +797,7 @@ is($@, "");
 }
 
 like( runperl(stderr => 1,
+              run_as_five => 1,
               prog => 'use constant foo => q(a);' .
                       'index(q(a), foo);' .
                       'local *g=${::}{foo};print q(ok);'), qr/^ok$/, "[perl #52740]");
