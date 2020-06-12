@@ -31,9 +31,9 @@ for (qw(Nope Nope:: NoClass)) {
 #    print $@ if $@;
 }
 
-is runperl(prog => 'my main $r; sub FIELDS; $$r{foo}; print qq-ok\n-'),
+is runperl(prog => 'my main $r; sub FIELDS; $$r{foo}; print qq-ok\n-', run_as_five => 1),
   "ok\n",
   'no crash with hash element when FIELDS sub stub exists';
-is runperl(prog => 'my main $r; sub FIELDS; @$r{f,b}; print qq-ok\n-'),
+is runperl(prog => 'my main $r; sub FIELDS; @$r{f,b}; print qq-ok\n-', run_as_five => 1),
   "ok\n",
   'no crash with hash slice when FIELDS sub stub exists';
