@@ -7,10 +7,12 @@ BEGIN {
     require './charset_tools.pl';
 }
 
+use p5;
 plan(tests => 9);
 
 {
     local $SIG{__WARN__} = sub {};
+    no feature 'evalbytes';
     eval "evalbytes 'foo'";
     like $@, qr/syntax error/, 'evalbytes outside feature scope';
 }
