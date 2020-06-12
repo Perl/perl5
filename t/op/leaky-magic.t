@@ -12,11 +12,16 @@ BEGIN {
 
 # Hack to allow test counts to be specified piecemeal
 BEGIN { ++$INC{'tests.pm'} }
+
+my $tests = 0;
 sub tests::VERSION { $tests += pop };
 plan (tests => $tests);
 
 
 use tests 2; # First make sure that %! %- %+ do not load extra modules.
+
+no strict 'refs';
+
 map %{"foo::$_"}, qw< ! - + >;
 ok !exists $INC{'Errno.pm'}, '$swext::! does not load Errno';
 
@@ -27,7 +32,7 @@ use tests 1; # ARGV
 fresh_perl_is
  '$count=0; ++$count while(<foo::ARGV>); print $count',
  '0',
-  { stdin => 'swext\n' },
+  { stdin => 'swext\n', run_as_five => 1 },
  '<foo::ARGV> does not iterate through STDIN';
 
 use tests 1; # %SIG
