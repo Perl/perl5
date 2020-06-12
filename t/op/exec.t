@@ -39,19 +39,20 @@ my $Is_Win32 = $^O eq 'MSWin32';
 plan(tests => 41);
 
 my $Perl = which_perl();
+my $run_perl = qq[$Perl -I../lib];
 
 my $exit;
 SKIP: {
     skip("bug/feature of pdksh", 2) if $^O eq 'os2';
 
     my $tnum = curr_test();
-    $exit = system qq{$Perl -le "print q{ok $tnum - interp system(EXPR)"}};
+    $exit = system qq{$run_perl -le "print q{ok $tnum - interp system(EXPR)"}};
     next_test();
     is( $exit, 0, '  exited 0' );
 }
 
 my $tnum = curr_test();
-$exit = system qq{$Perl -le "print q{ok $tnum - split & direct system(EXPR)"}};
+$exit = system qq{$run_perl -le "print q{ok $tnum - split & direct system(EXPR)"}};
 next_test();
 is( $exit, 0, '  exited 0' );
 
@@ -59,7 +60,7 @@ is( $exit, 0, '  exited 0' );
 # On Unix its the opposite.
 my $quote = $Is_VMS || $Is_Win32 ? '"' : '';
 $tnum = curr_test();
-$exit = system $Perl, '-le', 
+$exit = system $Perl, '-I../lib', '-le', 
                "${quote}print q{ok $tnum - system(PROG, LIST)}${quote}";
 next_test();
 is( $exit, 0, '  exited 0' );
@@ -68,45 +69,46 @@ is( $exit, 0, '  exited 0' );
 # Some basic piped commands.  Some OS's have trouble with "helpfully"
 # putting newlines on the end of piped output.  So we split this into
 # newline insensitive and newline sensitive tests.
-my $echo_out = `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`;
+my $echo_out = `$run_perl -e "print 'ok'" | $run_perl -le "print <STDIN>"`;
 $echo_out =~ s/\n\n/\n/g;
 is( $echo_out, "ok\n", 'piped echo emulation');
 
+our $TODO;
 {
     # here we check if extra newlines are going to be slapped on
     # piped output.
     local $TODO = 'VMS sticks newlines on everything' if $Is_VMS;
 
-    is( scalar `$Perl -e "print 'ok'"`,
+    is( scalar `$run_perl -e "print 'ok'"`,
         "ok", 'no extra newlines on ``' );
 
-    is( scalar `$Perl -e "print 'ok'" | $Perl -e "print <STDIN>"`, 
+    is( scalar `$run_perl -e "print 'ok'" | $run_perl -e "print <STDIN>"`, 
         "ok", 'no extra newlines on pipes');
 
-    is( scalar `$Perl -le "print 'ok'" | $Perl -le "print <STDIN>"`, 
+    is( scalar `$run_perl -le "print 'ok'" | $run_perl -le "print <STDIN>"`, 
         "ok\n\n", 'doubled up newlines');
 
-    is( scalar `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`, 
+    is( scalar `$run_perl -e "print 'ok'" | $run_perl -le "print <STDIN>"`, 
         "ok\n", 'extra newlines on inside pipes');
 
-    is( scalar `$Perl -le "print 'ok'" | $Perl -e "print <STDIN>"`, 
+    is( scalar `$run_perl -le "print 'ok'" | $run_perl -e "print <STDIN>"`, 
         "ok\n", 'extra newlines on outgoing pipes');
 
     {
-	local($/) = \2;       
-	$out = runperl(prog => 'print q{1234}');
-	is($out, "1234", 'ignore $/ when capturing output in scalar context');
+    	local($/) = \2;
+    	my $out = runperl(prog => 'print q{1234}', run_as_five => 1 );
+    	is($out, "1234", 'ignore $/ when capturing output in scalar context');
     }
 }
 
 
-is( system(qq{$Perl -e "exit 0"}), 0,     'Explicit exit of 0' );
+is( system(qq{$run_perl -e "exit 0"}), 0,     'Explicit exit of 0' );
 
 my $exit_one = $vms_exit_mode ? 4 << 8 : 1 << 8;
-is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
+is( system(qq{$run_perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
     'Explicit exit of 1' );
 
-$rc = system { "lskdfj" } "lskdfj";
+my $rc = system { "lskdfj" } "lskdfj";
 unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
     print "# \$rc == $rc\n";
 }
@@ -120,17 +122,17 @@ unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or
 }
 
 
-is( `$Perl -le "print 'ok'"`,   "ok\n",     'basic ``' );
+is( `$run_perl -le "print 'ok'"`,   "ok\n",     'basic ``' );
 is( <<`END`,                    "ok\n",     '<<`HEREDOC`' );
-$Perl -le "print 'ok'"
+$run_perl -le "print 'ok'"
 END
 
 is( <<~`END`,                   "ok\n",     '<<~`HEREDOC`' );
-  $Perl -le "print 'ok'"
+  $run_perl -le "print 'ok'"
   END
 
 {
-    sub rpecho { qq($Perl -le "print '$_[0]'") }
+    sub rpecho { qq($run_perl -le "print '$_[0]'") }
     is scalar(readpipe(rpecho("b"))), "b\n",
 	"readpipe with one argument in scalar context";
     is join(",", "a", readpipe(rpecho("b")), "c"), "a,b\n,c",
@@ -202,15 +204,15 @@ my $cr;
 tie $cr, "CountRead";
 my $exit_statement = "exit(\$ARGV[0] eq '1' ? 0 : 1)";
 $exit_statement = qq/"$exit_statement"/ if $^O eq 'VMS';
-is system($^X, "-e", $exit_statement, $cr), 0,
+is system($^X, '-I../lib', "-e", $exit_statement, $cr), 0,
     "system args have magic processed exactly once";
 is tied($cr)->{n}, 1, "system args have magic processed before fork";
 
 $exit_statement = "exit(\$ARGV[0] eq \$ARGV[1] ? 0 : 1)";
 $exit_statement = qq/"$exit_statement"/ if $^O eq 'VMS';
-is system($^X, "-e", $exit_statement, "$$", $$), 0,
+is system($^X, '-I../lib', "-e", $exit_statement, "$$", $$), 0,
     "system args have magic processed before fork";
 
 my $test = curr_test();
-exec $Perl, '-le', qq{${quote}print 'ok $test - exec PROG, LIST'${quote}};
+exec $Perl, '-I../lib', '-le', qq{${quote}print 'ok $test - exec PROG, LIST'${quote}};
 fail("This should never be reached if the exec() worked");
