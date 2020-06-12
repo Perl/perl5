@@ -471,7 +471,7 @@ SKIP: {
 # not enough elements on rhs
 # ($x,$y,$z,...) = (1);
 {
-    my ($x,$y,$z,@a,%h);
+    my ($x,$y,$z,@a,%h,@h);
     is( join(':', map $_ // 'undef', (($x, $y, %h) = (1))), '1:undef',
         'only assigned elements are returned in list context');
     is( join(':', ($x, $y, %h) = (1,1)), '1:1',
