@@ -12,6 +12,9 @@ BEGIN {
 
 plan( tests => 67 );
 
+use p5;
+
+my $test = 0;
 {
     my @lol = ([qw(a b c)], [], [qw(1 2 3)]);
     my @mapped = map  {scalar @$_} @lol;
