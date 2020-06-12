@@ -3,13 +3,15 @@
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
+    set_up_inc('../lib');
 }
 
 plan(126);
 
 # A lot of tests to check that reversed for works.
 
-@array = ('A', 'B', 'C');
+my @array = ('A', 'B', 'C');
+my $r = '';
 for (@array) {
     $r .= $_;
 }
@@ -550,9 +552,12 @@ is ($r, '1CBA', 'Reverse for array and value via map with var');
 
 is do {17; foreach (1, 2) { 1; } }, '', "RT #1085: what should be output of perl -we 'print do { foreach (1, 2) { 1; } }'";
 
+our $TODO;
 TODO: {
     local $TODO = "RT #2166: foreach spuriously autovivifies";
     my %h;
+    no strict 'subs';
+    no warnings;
     foreach (@h{a, b}) {}
     is keys(%h), 0, 'RT #2166: foreach spuriously autovivifies';
 }
@@ -574,10 +579,14 @@ SKIP: {
     is $@, "", 'vivify_defelem does not croak on &PL_sv_undef elements';
 }
 
-for $x ($y) {
-    $x = 3;
-    ($x, my $z) = (1, $y);
-    is $z, 3, 'list assignment after aliasing via foreach';
+{
+    no warnings;
+    no strict;
+    for $x ($y) {
+        $x = 3;
+        ($x, my $z) = (1, $y);
+        is $z, 3, 'list assignment after aliasing via foreach';
+    }
 }
 
 for my $x (my $y) {
@@ -604,7 +613,7 @@ sub fscope {
 is(fscope(), 1, 'return via loop in sub');
 
 # make sure a NULL GvSV is restored at the end of the loop
-
+our $foo;
 {
     local $foo = "boo";
     {
