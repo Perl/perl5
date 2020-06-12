@@ -62,12 +62,14 @@ is($c, 2,       '   $tied = $var');
 
 $c = $a || $b;
 
+our $TODO;
 {
     local $TODO = 'Double FETCH';
     is($c, 1,   '   $tied || $var');
 }
 
-$y = " ";
+my $y = " ";
+my $x;
 for (pos $x || pos $y) {
     eval { $_++ };
 }
@@ -80,13 +82,14 @@ for (pos $x || pos $y) {
 }
 is(pos($x) || $@, 2, "|| propagates lvaluish context to its lhs");
 
+my %h;
 for ($h{k} || $h{l}) {}
 ok(!exists $h{k},
   "|| does not propagate lvaluish cx to a subscript on its lhs");
 ok(!exists $h{l},
   "|| does not propagate lvaluish cx to a subscript on its rhs");
 
-my $aa, $bb, $cc;
+my ($aa, $bb, $cc);
 $bb = 1;
 
 my $res = 0;
