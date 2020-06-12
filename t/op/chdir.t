@@ -1,6 +1,7 @@
 #!./perl -w
 
 BEGIN {
+    chdir 't' if -d 't';
     # We really want to know if chdir is working, as the build process will
     # all go wrong if it is not.  So avoid clearing @INC under miniperl.
     @INC = () if defined &DynaLoader::boot_DynaLoader;
@@ -144,7 +145,7 @@ sub check_env {
 }
 
 fresh_perl_is(<<'EOP', '', { stderr => 1 }, "check stack handling");
-for $x (map $_+1, 1 .. 100) {
+for my $x (map $_+1, 1 .. 100) {
   map chdir, 1 .. $x;
 }
 EOP
