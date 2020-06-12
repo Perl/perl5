@@ -36,6 +36,7 @@ BEGIN {
     set_up_inc(qw(. ../lib));
 }
 
+use p5;
 plan( tests => 67 );
 
 my $ok;
