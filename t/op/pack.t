@@ -70,8 +70,7 @@ sub encode_list {
 }
 
 
-sub list_eq ($$) {
-  my ($l, $r) = @_;
+sub list_eq ($l, $r) {
   return 0 unless @$l == @$r;
   for my $i (0..$#$l) {
     if (defined $l->[$i]) {
@@ -2081,6 +2080,6 @@ SKIP:
 {
     # [perl #132655] heap-buffer-overflow READ of size 11
     # only expect failure under ASAN (and maybe valgrind)
-    fresh_perl_is('0.0 + unpack("u", "ab")', "", { stderr => 1 },
+    fresh_perl_is('0.0 + unpack("u", "ab")', "", { stderr => 1, run_as_five => 1 },
                   "ensure unpack u of invalid data nul terminates result");
 }
