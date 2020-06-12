@@ -16,8 +16,12 @@ plan 4;
 
 # This test is in the file because overload.pm uses concatenation.
 { package o; use overload '""' => sub { $_[0][0] } }
-$x = bless[chr 256],o::;
-"$x";
+my $x = bless[chr 256],o::;
+{
+    no warnings;
+    "$x";
+}
+
 $x->[0] = "\xff";
 $x.= chr 257;
 $x.= chr 257;
