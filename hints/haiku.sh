@@ -7,7 +7,7 @@ case "$prefix" in
 esac
 
 libpth='/boot/home/config/lib /boot/common/lib /system/lib'
-usrinc='/boot/develop/headers/posix'
+usrinc='/boot/system/develop/headers/posix'
 locinc='/boot/home/config/include /boot/common/include /boot/develop/headers'
 
 libc='/system/lib/libroot.so'
