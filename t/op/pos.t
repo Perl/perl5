@@ -8,7 +8,7 @@ BEGIN {
 
 plan tests => 33;
 
-$x='banana';
+our $x='banana';
 $x=~/.a/g;
 is(pos($x), 2, "matching, pos() leaves off at offset 2");
 
@@ -50,10 +50,10 @@ $destroyed = 0;
 }
 is($destroyed, 1, 'Timely scalar destruction with lvalue pos');
 
-eval 'pos @a = 1';
+eval 'our @a; pos @a = 1';
 like $@, qr/^Can't modify array dereference in match position at /,
   'pos refuses @arrays';
-eval 'pos %a = 1';
+eval 'our %a; pos %a = 1';
 like $@, qr/^Can't modify hash dereference in match position at /,
   'pos refuses %hashes';
 eval 'pos *a = 1';
@@ -66,6 +66,7 @@ pos($1) = 2;		# set pos; was ignoring UTF8-ness
 "$1";			# turn on UTF8 flag
 is pos($1), 2, 'pos is not confused about changing UTF8-ness';
 
+our %h;
 sub {
     $_[0] = "hello";
     pos $_[0] = 3;
@@ -92,10 +93,14 @@ sub {
     ok $_[3] =~ /\Ge/, '\G works with defelem scalars';
 }->($h{k}, $h{l}, $h{m}, $h{n});
 
-$x = bless [], chr 256;
-pos $x=1;
-bless $x, a;
-is pos($x), 1, 'pos is not affected by reference stringification changing';
+{
+    no strict 'subs';
+    $x = bless [], chr 256;
+    pos $x=1;
+    bless $x, a;
+    is pos($x), 1, 'pos is not affected by reference stringification changing';
+}
+
 {
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
@@ -107,10 +112,13 @@ is pos($x), 1, 'pos is not affected by reference stringification changing';
     is $w, undef, 'and no malformed utf8 warning';
 }
 $x = bless [], chr 256;
-$x =~ /.(?{
-     bless $x, a;
-     is pos($x), 1, 'pos unaffected by ref str changing (in re-eval)';
-})/;
+{
+    no strict 'subs';
+    $x =~ /.(?{
+         bless $x, a;
+         is pos($x), 1, 'pos unaffected by ref str changing (in re-eval)';
+    })/;
+}
 {
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
