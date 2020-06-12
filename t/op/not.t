@@ -82,6 +82,7 @@ is not(${qr//}), "", 'dereferenced regexps are true';
 
 # not’s return value should be read-only, as it is the same global scalar
 # each time (and test that it is, too).
+no strict;
 *yes = \not 0;
 *no  = \not 1;
 for (!0) { eval { $_ = 43 } }
