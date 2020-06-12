@@ -29,7 +29,7 @@ SKIP: {
 	unless $probe eq 'good';
 
     my $out = qx{
-        $shell -c 'ulimit -u 1; exec $^X -e "
+        $shell -c 'ulimit -u 1; exec $^X -I../lib -e "
             print((() = fork) == 1 ? q[ok] : q[not ok])
         "'
     };
@@ -43,9 +43,9 @@ done_testing();
 
 __END__
 $| = 1;
-if ($cid = fork) {
+if (my $cid = fork) {
     sleep 1;
-    if ($result = (kill 9, $cid)) {
+    if (my $result = (kill 9, $cid)) {
 	print "ok 2\n";
     }
     else {
@@ -63,7 +63,7 @@ ok 1
 ok 2
 ########
 $| = 1;
-if ($cid = fork) {
+if (my $cid = fork) {
     sleep 1;
     print "not " unless kill 'INT', $cid;
     print "ok 2\n";
@@ -82,6 +82,7 @@ ok 1
 ok 2
 ########
 $| = 1;
+my $i = 0;
 sub forkit {
     print "iteration $i start\n";
     my $x = fork;
@@ -141,7 +142,7 @@ parent
 child
 ########
 $| = 1;
-@a = (1..3);
+my @a = (1..3);
 for (@a) {
     if (fork) {
 	print "parent $_\n";
@@ -152,6 +153,7 @@ for (@a) {
 	$_ = "-$_-";
     }
 }
+no warnings;
 print "@a\n";
 EXPECT
 OPTION random
@@ -253,10 +255,10 @@ $| = 1;
 $\ = "\n";
 my $getenv;
 if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
-    $getenv = qq[$^X -e "print \$ENV{TST}"];
+    $getenv = qq[$^X -I../lib -e "print \$ENV{TST}"];
 }
 else {
-    $getenv = qq[$^X -e 'print \$ENV{TST}'];
+    $getenv = qq[$^X -I../lib -e 'print \$ENV{TST}'];
 }
 $ENV{TST} = 'foo';
 if (fork) {
@@ -279,7 +281,7 @@ parent after: bar
 ########
 $| = 1;
 $\ = "\n";
-if ($pid = fork) {
+if (my $pid = fork) {
     waitpid($pid,0);
     print "parent got $?"
 }
@@ -296,7 +298,7 @@ my $echo = 'echo';
 if ($^O =~ /android/) {
     $echo = q{sh -c 'echo $@' -- };
 }
-if ($pid = fork) {
+if (my $pid = fork) {
     waitpid($pid,0);
     print "parent got $?"
 }
