@@ -14,6 +14,7 @@ BEGIN {
     set_up_inc(qw(. ../lib));
 }
 
+use p5;
 use strict qw(refs subs);
 
 plan(128);
