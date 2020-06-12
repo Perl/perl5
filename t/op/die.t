@@ -23,7 +23,7 @@ like($@, qr/\.{3}propagated at/, '... and appends a phrase');
 {
     local $SIG{__DIE__} = sub { is( $_[0], "[\000]\n", 'Embedded null passed to signal handler' )};
 
-    $err = "[\000]\n";
+    my $err = "[\000]\n";
     eval {
         die $err;
     };
@@ -35,7 +35,7 @@ like($@, qr/\.{3}propagated at/, '... and appends a phrase');
 	isa_ok( $_[0], 'ARRAY', 'pass an array ref as an argument' );
 	$_[0]->[0]++;
     };
-    $x = [3];
+    my $x = [3];
     eval { die $x; };
 
     is( $x->[0], 4, 'actual array, not a copy, passed to signal handler' );
@@ -102,6 +102,7 @@ like($@, qr/\.{3}propagated at/, '... and appends a phrase');
          'check non-PVs in $@ are propagated');
 }
 
+our $TODO;
 TODO: {
     local $TODO = 'RT #4821: die qr{x} does not check termination';
     my $out = runperl(prog => 'die qr{x}', stderr => 1);
