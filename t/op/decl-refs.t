@@ -6,6 +6,8 @@ BEGIN {
 
 plan 402;
 
+use p5;
+
 for my $decl (qw< my CORE::state our local >) {
     for my $funny (qw< $ @ % >) {
         # Test three syntaxes with each declarator/funny char combination:
