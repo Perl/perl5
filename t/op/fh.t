@@ -22,6 +22,7 @@ $a++;
 ok(!close $a, 'close does not succeed with incremented file handle');
 ok(!defined *{$a}, 'typeglob of file handle not defined after increment');
 
+no strict 'refs';
 ok(open($a, ">&STDOUT"), 'file handle used with open of standard output');
 ok(defined *{$a}, 'typeglob of file handle defined after opening standard output');
 
