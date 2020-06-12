@@ -6,6 +6,7 @@ BEGIN {
     set_up_inc( qw(. ../lib) );
 }
 
+use p5;
 use strict qw(refs subs);
 
 plan(254);
@@ -405,13 +406,15 @@ curr_test($test + 2);
 
 is(
   runperl(
-   stderr => 1, prog => 'sub DESTROY { print qq-aaa\n- } bless \$a[0]'
+   stderr => 1, prog => 'sub DESTROY { print qq-aaa\n- } bless \$a[0]',
+   run_as_five => 1,
   ),
  "aaa\n", 'DESTROY called on array elem'
 );
 is(
   runperl(
    stderr => 1,
+   run_as_five => 1,
    prog => '{ bless \my@x; *a=sub{@x}}sub DESTROY { print qq-aaa\n- }'
   ),
  "aaa\n",
@@ -422,7 +425,7 @@ is(
 # This caused "Attempt to free unreferenced scalar" in 5.16.
 fresh_perl_is(
   'bless \%foo::, bar::; bless \%bar::, foo::; print "ok\n"', "ok\n",
-   { stderr => 1 },
+   { stderr => 1, run_as_five => 1, },
   'no double free when stashes are blessed into each other');
 
 
@@ -478,7 +481,7 @@ is (runperl (switches=>['-l'],
 runperl(prog => 'sub UNIVERSAL::AUTOLOAD { qr// } a->p' );
 is ($?, 0, 'UNIVERSAL::AUTOLOAD called when freeing qr//');
 
-runperl(prog => 'sub UNIVERSAL::DESTROY { warn } bless \$a, A', stderr => 1);
+runperl(prog => 'sub UNIVERSAL::DESTROY { warn } bless \$a, A', stderr => 1, run_as_five => 1);
 is ($?, 0, 'warn called inside UNIVERSAL::DESTROY');
 
 
@@ -492,7 +495,8 @@ is ($?, 0, 'coredump on typeglob = (SvRV && !SvROK)');
 
 is (runperl(
     prog => 'use Symbol;my $x=bless \gensym,q{t}; print;*$$x=$x',
-    stderr => 1
+    stderr => 1,
+    run_as_five => 1,
 ), '', 'freeing self-referential typeglob');
 
 # using a regex in the destructor for STDOUT segfaulted because the
@@ -503,7 +507,8 @@ TODO: {
     local $TODO = "works but output through pipe is mangled" if $^O eq 'VMS';
     like (runperl(
         prog => '$x=bless[]; sub IO::Handle::DESTROY{$_=q{bad};s/bad/ok/;print}',
-        stderr => 1
+        stderr => 1,
+        run_as_five => 1,
           ), qr/^(ok)+$/, 'STDOUT destructor');
 }
 
@@ -678,7 +683,7 @@ is( runperl(stderr => 1, prog => 'for (125) { map { exit } (213)}'), "");
 my $hushed = $^O eq 'VMS' ? 'use vmsish qw(hushed);' : '';
 is( runperl(stderr => 1, prog => $hushed . 'map die,4 for 3'), "Died at -e line 1.\n");
 is( runperl(stderr => 1, prog => $hushed . 'grep die,4 for 3'), "Died at -e line 1.\n");
-is( runperl(stderr => 1, prog => $hushed . 'for $a (3) {@b=sort {die} 4,5}'), "Died at -e line 1.\n");
+is( runperl(stderr => 1, prog => $hushed . 'for $a (3) {@b=sort {die} 4,5}', run_as_five => 1,), "Died at -e line 1.\n");
 
 # bug 57564
 is( runperl(stderr => 1, prog => 'my $i;for $i (1) { for $i (2) { } }'), "");
@@ -889,7 +894,7 @@ print "@a\n";
 EOF
     $code =~ s/NNN/$n/g;
     my @exp = ("0") x $n;
-    fresh_perl_is($code, "@exp", { stderr => 1 },
+    fresh_perl_is($code, "@exp", { stderr => 1, run_as_five => 1, },
                     'rt#130861: heap uaf in pp_rv2sv');
 }
 
