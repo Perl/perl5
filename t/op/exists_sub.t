@@ -8,14 +8,14 @@ BEGIN {
 
 sub t1;
 sub t2 : lvalue;
-sub t3 ();
-sub t4 ($);
+sub t3 :prototype();
+sub t4 :prototype($);
 sub t5 {1;}
 {
     package P1;
     sub tmc {1;}
     package P2;
-    @ISA = 'P1';
+    our @ISA = 'P1';
 }
 
 my $has_t1 = ok( exists &t1, 't1 sub declared' );
