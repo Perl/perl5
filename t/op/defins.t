@@ -4,6 +4,7 @@
 # test auto defined() test insertion
 #
 
+my $warns;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
@@ -31,6 +32,7 @@ if ($^O eq 'VMS') {
         my $drop_dot_notype = $ENV{'DECC$READDIR_DROPDOTNOTYPE'} || '';
         $drop_dot = $drop_dot_notype =~ /^[ET1]/i;
     }
+    no strict 'subs';
     $unix_mode = 1 if $drop_dot && unix_rpt;
 }
 
@@ -43,8 +45,8 @@ if ($^O eq 'VMS') {
 # In the case of VMS, '0' isn't always the filename that you get.
 # Which makes those particular tests pointless.
 
-$wanted_filename = $unix_mode ? '0' : '0.';
-$saved_filename = './0';
+my $wanted_filename = $unix_mode ? '0' : '0.';
+my $saved_filename = './0';
 
 cmp_ok($warns,'==',0,'no warns at start');
 
@@ -54,7 +56,10 @@ print FILE "1\n";
 close(FILE);
 
 open(FILE,"<$saved_filename");
-ok(defined(FILE),'opened work file');
+{
+  no strict 'subs';
+  ok(defined(FILE),'opened work file');
+}
 my $seen = 0;
 my $dummy;
 while (my $name = <FILE>)
@@ -76,6 +81,7 @@ cmp_ok($seen,'==',1,'seen in do/while');
 
 seek(FILE,0,0);
 $seen = 0;
+my $name;
 while (($seen ? $dummy : $name) = <FILE> )
  {
   chomp($name);
@@ -95,7 +101,10 @@ cmp_ok($seen,'==',1,'seen in hash while()');
 close FILE;
 
 opendir(DIR,'.');
-ok(defined(DIR),'opened current directory');
+{
+  no strict 'subs';
+  ok(defined(DIR),'opened current directory');
+}
 $seen = 0;
 while (my $name = readdir(DIR))
  {
