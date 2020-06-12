@@ -20,6 +20,7 @@ print "ok 3\n";
 
 # Okay, so that wasn't very challenging.  Let's go Unicode.
 
+my $test = 0;
 {
     my $a = "\x{41}";
 
@@ -154,7 +155,7 @@ curr_test(21);
 
 require Tie::Scalar;
 
-$u = "ASCII";
+my $u = "ASCII";
 
 tie $u, 'Tie::StdScalar', chr 256;
 
@@ -173,7 +174,6 @@ $SIG{__WARN__} = sub {
 is(length(undef), undef, "Length of literal undef");
 
 my $u;
-
 is(length($u), undef, "Length of regular scalar");
 
 $u = "Gotcha!";
