@@ -3,13 +3,14 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc( qw(. ../lib) );
 }
 
 plan(24);
 
 sub End::DESTROY { $_[0]->() }
 
-sub end(&) {
+sub end :prototype(&) {
     my($c) = @_;
     return bless(sub { $c->() }, "End");
 }
