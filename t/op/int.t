@@ -19,7 +19,7 @@ if (int(-1.234) == -1) {pass($test2_descr)} else {fail($test2_descr)}
 
 # run time evaluation
 
-$x = 1.234;
+my $x = 1.234;
 cmp_ok(int($x), '==', 1, 'run time evaluation 1');
 cmp_ok(int(-$x), '==', -1, 'run time evaluation -1');
 
@@ -29,8 +29,8 @@ cmp_ok($x, '==', -7, 'subtract from string length');
 {
     my $fail;
     use integer;
-    $x = length("abc") % -10;
-    $y = (3/-10)*-10;
+    my $x = length("abc") % -10;
+    my $y = (3/-10)*-10;
     ok($x+$y == 3, 'x+y equals 3') or ++$fail;
     ok(abs($x) < 10, 'abs(x) < 10') or ++$fail;
     if ($fail) {
@@ -38,13 +38,13 @@ cmp_ok($x, '==', -7, 'subtract from string length');
     }
 }
 
-@x = ( 6, 8, 10);
+my @x = ( 6, 8, 10);
 cmp_ok($x["1foo"], '==', 8, 'check bad strings still get converted');
 
 # 4,294,967,295 is largest unsigned 32 bit integer
 
 $x = 4294967303.15;
-$y = int ($x);
+my $y = int ($x);
 is($y, "4294967303", 'check values > 32 bits work');
 
 $y = int (-$x);
