@@ -7,6 +7,8 @@ BEGIN {
     plan (tests => 22); # some tests are run in BEGIN block
 }
 
+use p5;
+
 is __SUB__, "__SUB__", '__SUB__ is a bareword outside of use feature';
 
 {
@@ -89,6 +91,7 @@ is &$f, $f, 'anonymous sub(){eval ""; __SUB__} returns self ref';
     is runperl(
         switches => [ '-d' ],
         prog => '$f = sub(){CORE::__SUB__}; print qq-ok\n- if $f == &$f;',
+        run_as_five => 1,
        ),
       "ok\n",
       'sub(){__SUB__} under -d';
