@@ -3,12 +3,14 @@
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
+    set_up_inc(qw{../lib});
 }
 
 plan(14);
 
-@a = (1,2,3,4,5,6,7,8,9,10,11,12);
-@b = ();
+my @a = (1,2,3,4,5,6,7,8,9,10,11,12);
+my @b = ();
+my ($x, $y, $z);
 while ($_ = shift(@a)) {
     if ($x = /4/../8/) { $z = $x; push @b, $x + 0; }
     $y .= /1/../2/;
@@ -21,6 +23,7 @@ is($y, '12E0123E0');
 
 @a = ('a','b','c','d','e','f','g');
 
+my $foo;
 {
 local $.;
 
@@ -104,6 +107,7 @@ EOT
 
 # Void context gives parenthesized lhs scalar context
 no warnings 'void';
+my $context;
 sub c { $context = qw[ void scalar list ][wantarray + defined wantarray] }
 (c())x34;
 is $context, 'scalar', '(...)x... in void context';
