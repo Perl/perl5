@@ -8,7 +8,7 @@ esac
 
 libpth='/boot/home/config/lib /boot/common/lib /system/lib'
 usrinc='/boot/system/develop/headers/posix'
-locinc='/boot/home/config/include /boot/common/include /boot/develop/headers'
+locinc='/boot/home/config/include /boot/common/include /boot/system/develop/headers'
 
 libc='/system/lib/libroot.so'
 libs='-lnetwork'
