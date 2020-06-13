@@ -922,6 +922,12 @@ out of them.
 #   if !defined(NO_LOCALE_TELEPHONE) && defined(LC_TELEPHONE)
 #	define USE_LOCALE_TELEPHONE
 #   endif
+#   if !defined(NO_LOCALE_SYNTAX) && defined(LC_SYNTAX)
+#	define USE_LOCALE_SYNTAX
+#   endif
+#   if !defined(NO_LOCALE_TOD) && defined(LC_TOD)
+#	define USE_LOCALE_TOD
+#   endif
 
 /* XXX The next few defines are unfortunately duplicated in makedef.pl, and
  * changes here MUST also be made there */

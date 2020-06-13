@@ -200,6 +200,12 @@ const int categories[] = {
 #    ifdef USE_LOCALE_TELEPHONE
                              LC_TELEPHONE,
 #    endif
+#    ifdef USE_LOCALE_SYNTAX
+                             LC_SYNTAX,
+#    endif
+#    ifdef USE_LOCALE_TOD
+                             LC_TOD,
+#    endif
 #    ifdef LC_ALL
                              LC_ALL,
 #    endif
@@ -244,6 +250,12 @@ const char * const category_names[] = {
 #    endif
 #    ifdef USE_LOCALE_TELEPHONE
                                  "LC_TELEPHONE",
+#    endif
+#    ifdef USE_LOCALE_SYNTAX
+                                 "LC_SYNTAX",
+#    endif
+#    ifdef USE_LOCALE_TOD
+                                 "LC_TOD",
 #    endif
 #    ifdef LC_ALL
                                  "LC_ALL",
@@ -384,8 +396,20 @@ S_category_name(const int category)
 #  else
 #    define _DUMMY_TELEPHONE            _DUMMY_PAPER
 #  endif
+#  ifdef USE_LOCALE_SYNTAX
+#    define LC_SYNTAX_INDEX             _DUMMY_TELEPHONE + 1
+#    define _DUMMY_SYNTAX               LC_SYNTAX_INDEX
+#  else
+#    define _DUMMY_SYNTAX               _DUMMY_TELEPHONE
+#  endif
+#  ifdef USE_LOCALE_TOD
+#    define LC_TOD_INDEX                _DUMMY_SYNTAX + 1
+#    define _DUMMY_TOD                  LC_TOD_INDEX
+#  else
+#    define _DUMMY_TOD                  _DUMMY_SYNTAX
+#  endif
 #  ifdef LC_ALL
-#    define LC_ALL_INDEX                _DUMMY_TELEPHONE + 1
+#    define LC_ALL_INDEX                _DUMMY_TOD + 1
 #  endif
 #endif /* ifdef USE_LOCALE */
 
@@ -467,6 +491,12 @@ const int category_masks[] = {
 #  endif
 #  ifdef USE_LOCALE_TELEPHONE
                                 LC_TELEPHONE_MASK,
+#  endif
+#  ifdef USE_LOCALE_SYNTAX
+                                LC_SYNTAX_MASK,
+#  endif
+#  ifdef USE_LOCALE_TOD
+                                LC_TOD_MASK,
 #  endif
                                 /* LC_ALL can't be turned off by a Configure
                                  * option, and in Posix 2008, should always be
@@ -3436,6 +3466,20 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     assert(strEQ(category_names[LC_TELEPHONE_INDEX], "LC_TELEPHONE"));
 #      ifdef USE_POSIX_2008_LOCALE
     assert(category_masks[LC_TELEPHONE_INDEX] == LC_TELEPHONE_MASK);
+#      endif
+#    endif
+#    ifdef USE_LOCALE_SYNTAX
+    assert(categories[LC_SYNTAX_INDEX] == LC_SYNTAX);
+    assert(strEQ(category_names[LC_SYNTAX_INDEX], "LC_SYNTAX"));
+#      ifdef USE_POSIX_2008_LOCALE
+    assert(category_masks[LC_SYNTAX_INDEX] == LC_SYNTAX_MASK);
+#      endif
+#    endif
+#    ifdef USE_LOCALE_TOD
+    assert(categories[LC_TOD_INDEX] == LC_TOD);
+    assert(strEQ(category_names[LC_TOD_INDEX], "LC_TOD"));
+#      ifdef USE_POSIX_2008_LOCALE
+    assert(category_masks[LC_TOD_INDEX] == LC_TOD_MASK);
 #      endif
 #    endif
 #    ifdef LC_ALL

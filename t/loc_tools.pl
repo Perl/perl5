@@ -18,7 +18,8 @@ my $has_locale_h = ! $@;
 
 my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
                             LC_NUMERIC LC_TIME LC_ADDRESS LC_IDENTIFICATION
-                            LC_MEASUREMENT LC_PAPER LC_TELEPHONE));
+                            LC_MEASUREMENT LC_PAPER LC_TELEPHONE LC_SYNTAX
+                            LC_TOD));
 my @platform_categories;
 
 # LC_ALL can be -1 on some platforms.  And, in fact the implementors could
