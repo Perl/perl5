@@ -6,11 +6,12 @@ case "$prefix" in
 *) ;; # pass the user supplied value through
 esac
 
-libpth='/boot/home/config/lib /boot/common/lib /system/lib'
-usrinc='/boot/develop/headers/posix'
-locinc='/boot/home/config/include /boot/common/include /boot/develop/headers'
 
-libc='/system/lib/libroot.so'
+libpth="$(finddir B_USER_DEVELOP_DIRECTORY)/lib $(finddir B_SYSTEM_DEVELOP_DIRECTORY)/lib $(finddir B_COMMON_DIRECTORY)/lib /system/lib"
+usrinc="$(finddir B_SYSTEM_DEVELOP_DIRECTORY)/headers/posix"
+locinc="$(finddir B_USER_CONFIG_DIRECTORY)/develop/headers $(finddir B_COMMON_DIRECTORY)/headers $(finddir B_SYSTEM_DEVELOP_DIRECTORY)/headers"
+
+libc="$(finddir B_SYSTEM_LIB_DIRECTORY)/libroot.so"
 libs='-lnetwork'
 
 # Use Haiku's malloc() by default.
