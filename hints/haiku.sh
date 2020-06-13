@@ -2,7 +2,7 @@
 # $Id$
 
 case "$prefix" in
-'') prefix="/boot/common" ;;
+'') prefix="$(finddir B_COMMON_DIRECTORY)" ;;
 *) ;; # pass the user supplied value through
 esac
 
