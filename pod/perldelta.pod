@@ -66,7 +66,9 @@ L<perlunicode/Comparison of \N{...} and \p{name=...}>.
 The second example above shows that wildcard subpatterns are also usable
 in this property. See L<perlunicode/Wildcards in Property Values>.
 
-=head2 The C<POSIX::mblen()>, C<mbtowc>, and C<wctomb> functions now
+=head2 Improvement of C<POSIX::mblen()>, C<mbtowc>, and C<wctomb>
+
+The C<POSIX::mblen()>, C<mbtowc>, and C<wctomb> functions now
 work on shift state locales and are thread-safe on C99 and above
 compilers when executed on a platform that has locale thread-safety; the
 length parameters are now optional.
