@@ -282,7 +282,7 @@ Perl_my_mkostemp_cloexec(char *templte, int flags)
 
 #ifdef HAS_PIPE
 int
-Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
+Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd, int flags)
 {
     dVAR;
     PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC;
@@ -293,9 +293,11 @@ Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
      */
 #  if !defined(PERL_IMPLICIT_SYS) && defined(HAS_PIPE2) && defined(O_CLOEXEC)
     DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy_pipe, pipefd,
-	pipe2(pipefd, O_CLOEXEC),
+	pipe2(pipefd, O_CLOEXEC | flags),
 	PerlProc_pipe(pipefd));
 #  else
+    if (flags) DIE(aTHX_ PL_no_func, "pipe with flags");
+
     DO_PIPEOPEN_THEN_CLOEXEC(pipefd, PerlProc_pipe(pipefd));
 #  endif
 }

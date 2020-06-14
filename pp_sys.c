@@ -674,7 +674,7 @@ PP(pp_close)
 PP(pp_pipe_op)
 {
 #ifdef HAS_PIPE
-    dSP;
+    dSP; dMARK;
     IO *rstio;
     IO *wstio;
     int fd[2];
