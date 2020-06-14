@@ -296,7 +296,7 @@ Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd, int flags)
 	pipe2(pipefd, O_CLOEXEC | flags),
 	PerlProc_pipe(pipefd));
 #  else
-    if (flags) DIE(aTHX_ PL_no_func, "pipe with flags");
+    if (flags) DIE(aTHX_ PL_no_func, "pipe with flags redux");
 
     DO_PIPEOPEN_THEN_CLOEXEC(pipefd, PerlProc_pipe(pipefd));
 #  endif
