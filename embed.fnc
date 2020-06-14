@@ -2802,6 +2802,12 @@ Aipd	|bool	|SvTRUE		|NULLOK SV *sv
 Aipd	|bool	|SvTRUE_nomg	|NULLOK SV *sv
 Aipd	|bool	|SvTRUE_NN	|NN SV *sv
 Cip	|bool	|SvTRUE_common	|NN SV *sv|const bool sv_2bool_is_fallback
+Aipd	|IV	|SvIV		|NN SV *sv
+Aipd	|UV	|SvUV		|NN SV *sv
+Aipd	|NV	|SvNV		|NN SV *sv
+Aipd	|IV	|SvIV_nomg	|NN SV *sv
+Aipd	|UV	|SvUV_nomg	|NN SV *sv
+Aipd	|NV	|SvNV_nomg	|NN SV *sv
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
