@@ -1716,45 +1716,45 @@ Like C<sv_catsv> but doesn't process magic.
 
 /* ----*/
 
-#define SvPV(sv, lp)         SvPV_flags(sv, lp, SV_GMAGIC)
-#define SvPV_const(sv, lp)   SvPV_flags_const(sv, lp, SV_GMAGIC)
-#define SvPV_mutable(sv, lp) SvPV_flags_mutable(sv, lp, SV_GMAGIC)
+#define SvPV(sv, len)         SvPV_flags(sv, len, SV_GMAGIC)
+#define SvPV_const(sv, len)   SvPV_flags_const(sv, len, SV_GMAGIC)
+#define SvPV_mutable(sv, len) SvPV_flags_mutable(sv, len, SV_GMAGIC)
 
-#define SvPV_flags(sv, lp, flags) \
+#define SvPV_flags(sv, len, flags) \
     (SvPOK_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &lp, flags))
-#define SvPV_flags_const(sv, lp, flags) \
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &len, flags))
+#define SvPV_flags_const(sv, len, flags) \
     (SvPOK_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX_const(sv)) : \
-     (const char*) sv_2pv_flags(sv, &lp, (flags|SV_CONST_RETURN)))
+     ? ((len = SvCUR(sv)), SvPVX_const(sv)) : \
+     (const char*) sv_2pv_flags(sv, &len, (flags|SV_CONST_RETURN)))
 #define SvPV_flags_const_nolen(sv, flags) \
     (SvPOK_nog(sv) \
      ? SvPVX_const(sv) : \
      (const char*) sv_2pv_flags(sv, 0, (flags|SV_CONST_RETURN)))
-#define SvPV_flags_mutable(sv, lp, flags) \
+#define SvPV_flags_mutable(sv, len, flags) \
     (SvPOK_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) : \
-     sv_2pv_flags(sv, &lp, (flags|SV_MUTABLE_RETURN)))
+     ? ((len = SvCUR(sv)), SvPVX_mutable(sv)) : \
+     sv_2pv_flags(sv, &len, (flags|SV_MUTABLE_RETURN)))
 
-#define SvPV_force(sv, lp) SvPV_force_flags(sv, lp, SV_GMAGIC)
+#define SvPV_force(sv, len) SvPV_force_flags(sv, len, SV_GMAGIC)
 #define SvPV_force_nolen(sv) SvPV_force_flags_nolen(sv, SV_GMAGIC)
-#define SvPV_force_mutable(sv, lp) SvPV_force_flags_mutable(sv, lp, SV_GMAGIC)
+#define SvPV_force_mutable(sv, len) SvPV_force_flags_mutable(sv, len, SV_GMAGIC)
 
-#define SvPV_force_nomg(sv, lp) SvPV_force_flags(sv, lp, 0)
+#define SvPV_force_nomg(sv, len) SvPV_force_flags(sv, len, 0)
 #define SvPV_force_nomg_nolen(sv) SvPV_force_flags_nolen(sv, 0)
 
-#define SvPV_force_flags(sv, lp, flags) \
+#define SvPV_force_flags(sv, len, flags) \
     (SvPOK_pure_nogthink(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &len, flags))
 
 #define SvPV_force_flags_nolen(sv, flags) \
     (SvPOK_pure_nogthink(sv) \
      ? SvPVX(sv) : sv_pvn_force_flags(sv, 0, flags))
 
-#define SvPV_force_flags_mutable(sv, lp, flags) \
+#define SvPV_force_flags_mutable(sv, len, flags) \
     (SvPOK_pure_nogthink(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) \
-     : sv_pvn_force_flags(sv, &lp, flags|SV_MUTABLE_RETURN))
+     ? ((len = SvCUR(sv)), SvPVX_mutable(sv)) \
+     : sv_pvn_force_flags(sv, &len, flags|SV_MUTABLE_RETURN))
 
 #define SvPV_nolen(sv) \
     (SvPOK_nog(sv) \
@@ -1769,33 +1769,33 @@ Like C<sv_catsv> but doesn't process magic.
     (SvPOK_nog(sv) \
      ? SvPVX_const(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC|SV_CONST_RETURN))
 
-#define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
-#define SvPV_nomg_const(sv, lp) SvPV_flags_const(sv, lp, 0)
+#define SvPV_nomg(sv, len) SvPV_flags(sv, len, 0)
+#define SvPV_nomg_const(sv, len) SvPV_flags_const(sv, len, 0)
 #define SvPV_nomg_const_nolen(sv) SvPV_flags_const_nolen(sv, 0)
 
 /* ----*/
 
-#define SvPVutf8(sv, lp) \
+#define SvPVutf8(sv, len) \
     (SvPOK_utf8_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &len))
 
-#define SvPVutf8_or_null(sv, lp) \
+#define SvPVutf8_or_null(sv, len) \
     (SvPOK_utf8_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
-     ? sv_2pvutf8_flags(sv, &lp, 0) : ((lp = 0), NULL))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
+     ? sv_2pvutf8_flags(sv, &len, 0) : ((len = 0), NULL))
 
-#define SvPVutf8_nomg(sv, lp) \
+#define SvPVutf8_nomg(sv, len) \
     (SvPOK_utf8_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8_flags(sv, &lp, 0))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8_flags(sv, &len, 0))
 
-#define SvPVutf8_or_null_nomg(sv, lp) \
+#define SvPVutf8_or_null_nomg(sv, len) \
     (SvPOK_utf8_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
-     ? sv_2pvutf8_flags(sv, &lp, 0) : ((lp = 0), NULL))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
+     ? sv_2pvutf8_flags(sv, &len, 0) : ((len = 0), NULL))
 
-#define SvPVutf8_force(sv, lp) \
+#define SvPVutf8_force(sv, len) \
     (SvPOK_utf8_pure_nogthink(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &len))
 
 #define SvPVutf8_nolen(sv) \
     (SvPOK_utf8_nog(sv) \
@@ -1803,27 +1803,27 @@ Like C<sv_catsv> but doesn't process magic.
 
 /* ----*/
 
-#define SvPVbyte(sv, lp) \
+#define SvPVbyte(sv, len) \
     (SvPOK_byte_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &len))
 
-#define SvPVbyte_or_null(sv, lp) \
+#define SvPVbyte_or_null(sv, len) \
     (SvPOK_byte_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
-     ? sv_2pvbyte_flags(sv, &lp, 0) : ((lp = 0), NULL))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
+     ? sv_2pvbyte_flags(sv, &len, 0) : ((len = 0), NULL))
 
-#define SvPVbyte_nomg(sv, lp) \
+#define SvPVbyte_nomg(sv, len) \
     (SvPOK_byte_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte_flags(sv, &lp, 0))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte_flags(sv, &len, 0))
 
-#define SvPVbyte_or_null_nomg(sv, lp) \
+#define SvPVbyte_or_null_nomg(sv, len) \
     (SvPOK_utf8_nog(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
-     ? sv_2pvbyte_flags(sv, &lp, 0) : ((lp = 0), NULL))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
+     ? sv_2pvbyte_flags(sv, &len, 0) : ((len = 0), NULL))
 
-#define SvPVbyte_force(sv, lp) \
+#define SvPVbyte_force(sv, len) \
     (SvPOK_byte_pure_nogthink(sv) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvbyten_force(sv, &lp))
+     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_pvbyten_force(sv, &len))
 
 #define SvPVbyte_nolen(sv) \
     (SvPOK_byte_nog(sv) \
@@ -1835,9 +1835,9 @@ Like C<sv_catsv> but doesn't process magic.
  * failing that, call a function to do the work
  */
 
-#define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
-#define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
-#define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
+#define SvPVx_force(sv, len) sv_pvn_force(sv, &len)
+#define SvPVutf8x_force(sv, len) sv_pvutf8n_force(sv, &len)
+#define SvPVbytex_force(sv, len) sv_pvbyten_force(sv, &len)
 
 #define SvTRUE(sv)         Perl_SvTRUE(aTHX_ sv)
 #define SvTRUE_nomg(sv)    (LIKELY(sv) && SvTRUE_nomg_NN(sv))
@@ -1863,12 +1863,12 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvIVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvIV(_sv); })
 #  define SvUVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvUV(_sv); })
 #  define SvNVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvNV(_sv); })
-#  define SvPVx(sv, lp) ({SV *_sv = (sv); SvPV(_sv, lp); })
-#  define SvPVx_const(sv, lp) ({SV *_sv = (sv); SvPV_const(_sv, lp); })
+#  define SvPVx(sv, len) ({SV *_sv = (sv); SvPV(_sv, len); })
+#  define SvPVx_const(sv, len) ({SV *_sv = (sv); SvPV_const(_sv, len); })
 #  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })
 #  define SvPVx_nolen_const(sv) ({SV *_sv = (sv); SvPV_nolen_const(_sv); })
-#  define SvPVutf8x(sv, lp) ({SV *_sv = (sv); SvPVutf8(_sv, lp); })
-#  define SvPVbytex(sv, lp) ({SV *_sv = (sv); SvPVbyte(_sv, lp); })
+#  define SvPVutf8x(sv, len) ({SV *_sv = (sv); SvPVutf8(_sv, len); })
+#  define SvPVbytex(sv, len) ({SV *_sv = (sv); SvPVbyte(_sv, len); })
 #  define SvPVbytex_nolen(sv) ({SV *_sv = (sv); SvPVbyte_nolen(_sv); })
 #  define SvTRUEx(sv)      ({SV *_sv = (sv); SvTRUE(_sv); })
 #  define SvTRUEx_nomg(sv) ({SV *_sv = (sv); SvTRUE_nomg(_sv); })
@@ -1881,12 +1881,12 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
 #  define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
 #  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
-#  define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
-#  define SvPVx_const(sv, lp) ((PL_Sv = (sv)), SvPV_const(PL_Sv, lp))
+#  define SvPVx(sv, len) ((PL_Sv = (sv)), SvPV(PL_Sv, len))
+#  define SvPVx_const(sv, len) ((PL_Sv = (sv)), SvPV_const(PL_Sv, len))
 #  define SvPVx_nolen(sv) ((PL_Sv = (sv)), SvPV_nolen(PL_Sv))
 #  define SvPVx_nolen_const(sv) ((PL_Sv = (sv)), SvPV_nolen_const(PL_Sv))
-#  define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
-#  define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
+#  define SvPVutf8x(sv, len) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, len))
+#  define SvPVbytex(sv, len) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, len))
 #  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
 #  define SvTRUEx(sv)      ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #  define SvTRUEx_nomg(sv) ((PL_Sv = (sv)), SvTRUE_nomg(PL_Sv))
