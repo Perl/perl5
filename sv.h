@@ -1607,7 +1607,8 @@ false.  See C<L</SvOK>> for a defined/undefined test.  Handles 'get' magic
 unless the scalar is already C<SvPOK>, C<SvIOK> or C<SvNOK> (the public, not the
 private flags).
 
-See C<L</SvTRUEx>> for a version which guarantees to evaluate C<sv> only once.
+As of Perl 5.32, this is guaranteed to evaluate C<sv> only once.  Prior to that
+release, use C<L</SvTRUEx>> for single evaluation.
 
 =for apidoc Am|bool|SvTRUE_nomg|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
