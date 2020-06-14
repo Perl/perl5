@@ -1811,51 +1811,6 @@ their respective forms without.
 C<SvPVbyte_or_null> doesn't have a corresponding non-C<byte> form.  Instead it
 is like C<SvPVbyte>, but when C<sv> is undef, it returns C<NULL>.
 
-=for apidoc Am|IV|SvIV|SV* sv
-=for apidoc_item SvIVx
-=for apidoc_item SvIV_nomg
-
-These coerce the given SV to IV and return it.  The returned value in many
-circumstances will get stored in C<sv>'s IV slot, but not in all cases.  (Use
-C<L</sv_setiv>> to make sure it does).
-
-C<SvIVx> is different from the others in that it is guaranteed to evaluate
-C<sv> exactly once; the others may evaluate it multiple times.  Only use this
-form if C<sv> is an expression with side effects, otherwise use the more
-efficient C<SvIV>.
-
-C<SvIV_nomg> is the same as C<SvIV>, but does not perform 'get' magic.
-
-=for apidoc Am|NV|SvNV|SV* sv
-=for apidoc_item SvNVx
-=for apidoc_item SvNV_nomg
-
-These coerce the given SV to NV and return it.  The returned value in many
-circumstances will get stored in C<sv>'s NV slot, but not in all cases.  (Use
-C<L</sv_setnv>> to make sure it does).
-
-C<SvNVx> is different from the others in that it is guaranteed to evaluate
-C<sv> exactly once; the others may evaluate it multiple times.  Only use this
-form if C<sv> is an expression with side effects, otherwise use the more
-efficient C<SvNV>.
-
-C<SvNV_nomg> is the same as C<SvNV>, but does not perform 'get' magic.
-
-=for apidoc Am|UV|SvUV|SV* sv
-=for apidoc_item SvUVx
-=for apidoc_item SvUV_nomg
-
-These coerce the given SV to UV and return it.  The returned value in many
-circumstances will get stored in C<sv>'s UV slot, but not in all cases.  (Use
-C<L</sv_setuv>> to make sure it does).
-
-C<SvUVx> is different from the others in that it is guaranteed to evaluate
-C<sv> exactly once; the others may evaluate it multiple times.  Only use this
-form if C<sv> is an expression with side effects, otherwise use the more
-efficient C<SvUV>.
-
-C<SvUV_nomg> is the same as C<SvUV>, but does not perform 'get' magic.
-
 =for apidoc SvTRUE
 =for apidoc_item SvTRUEx
 =for apidoc_item SvTRUE_nomg
@@ -1892,17 +1847,6 @@ scalar.
 
 =cut
 */
-
-/* Let us hope that bitmaps for UV and IV are the same */
-#define SvIV(sv) (SvIOK_nog(sv) ? SvIVX(sv) : sv_2iv(sv))
-#define SvUV(sv) (SvUOK_nog(sv) ? SvUVX(sv) : sv_2uv(sv))
-#define SvNV(sv) (SvNOK_nog(sv) ? SvNVX(sv) : sv_2nv(sv))
-
-#define SvIV_nomg(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv_flags(sv, 0))
-#define SvUV_nomg(sv) (SvUOK(sv) ? SvUVX(sv) : sv_2uv_flags(sv, 0))
-#define SvNV_nomg(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv_flags(sv, 0))
-
-/* ----*/
 
 #define SvPV(sv, len)         SvPV_flags(sv, len, SV_GMAGIC)
 #define SvPV_const(sv, len)   SvPV_flags_const(sv, len, SV_GMAGIC)
@@ -2042,11 +1986,12 @@ scalar.
 #define SvTRUEx_nomg(sv)   SvTRUE_nomg(sv)
 #define SvTRUE_nomg_NN(sv) SvTRUE_common(sv, TRUE)
 
+#  define SvIVx(sv) SvIV(sv)
+#  define SvUVx(sv) SvUV(sv)
+#  define SvNVx(sv) SvNV(sv)
+
 #if defined(PERL_USE_GCC_BRACE_GROUPS)
 
-#  define SvIVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvIV(_sv); })
-#  define SvUVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvUV(_sv); })
-#  define SvNVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvNV(_sv); })
 #  define SvPVx(sv, len) ({SV *_sv = (sv); SvPV(_sv, len); })
 #  define SvPVx_const(sv, len) ({SV *_sv = (sv); SvPV_const(_sv, len); })
 #  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })
@@ -2060,9 +2005,6 @@ scalar.
 /* These inlined macros use globals, which will require a thread
  * declaration in user code, so we avoid them under threads */
 
-#  define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
-#  define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
-#  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
 #  define SvPVx(sv, len) ((PL_Sv = (sv)), SvPV(PL_Sv, len))
 #  define SvPVx_const(sv, len) ((PL_Sv = (sv)), SvPV_const(PL_Sv, len))
 #  define SvPVx_nolen(sv) ((PL_Sv = (sv)), SvPV_nolen(PL_Sv))

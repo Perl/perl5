@@ -95,6 +95,26 @@ PERL_STATIC_INLINE void	Perl_SvAMAGIC_on(SV *sv);
 	assert(sv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE IV	Perl_SvIV(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVIV	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE IV	Perl_SvIV_nomg(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVIV_NOMG	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE NV	Perl_SvNV(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVNV	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE NV	Perl_SvNV_nomg(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVNV_NOMG	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_FORCE_INLINE bool	Perl_SvPVXtrue(pTHX_ SV *sv)
 			__attribute__always_inline__;
 #define PERL_ARGS_ASSERT_SVPVXTRUE	\
@@ -140,6 +160,16 @@ PERL_STATIC_INLINE bool	Perl_SvTRUE_common(pTHX_ SV *sv, const bool sv_2bool_is_
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	Perl_SvTRUE_nomg(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SVTRUE_NOMG
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE UV	Perl_SvUV(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVUV	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE UV	Perl_SvUV_nomg(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVUV_NOMG	\
+	assert(sv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE I32	Perl_TOPMARK(pTHX);

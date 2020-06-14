@@ -500,6 +500,109 @@ Perl_SvPADSTALE_off(SV *sv)
     assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
 }
+
+/*
+=for apidoc_section $SV
+=for apidoc SvIV
+=for apidoc_item SvIVx
+=for apidoc_item SvIV_nomg
+
+These each coerce the given SV to IV and return it.  The returned value in many
+circumstances will get stored in C<sv>'s IV slot, but not in all cases.  (Use
+C<L</sv_setiv>> to make sure it does).
+
+As of 5.37.1, all are guaranteed to evaluate C<sv> only once.
+
+C<SvIVx> is now identical to C<SvIV>, but prior to 5.37.1, it was the only form
+guaranteed to evaluate C<sv> only once.
+
+C<SvIV_nomg> is the same as C<SvIV>, but does not perform 'get' magic.
+
+=for apidoc SvNV
+=for apidoc_item SvNVx
+=for apidoc_item SvNV_nomg
+
+These each coerce the given SV to NV and return it.  The returned value in many
+circumstances will get stored in C<sv>'s NV slot, but not in all cases.  (Use
+C<L</sv_setnv>> to make sure it does).
+
+As of 5.37.1, all are guaranteed to evaluate C<sv> only once.
+
+C<SvNVx> is now identical to C<SvNV>, but prior to 5.37.1, it was the only form
+guaranteed to evaluate C<sv> only once.
+
+C<SvNV_nomg> is the same as C<SvNV>, but does not perform 'get' magic.
+
+=for apidoc SvUV
+=for apidoc_item SvUVx
+=for apidoc_item SvUV_nomg
+
+These each coerce the given SV to UV and return it.  The returned value in many
+circumstances will get stored in C<sv>'s UV slot, but not in all cases.  (Use
+C<L</sv_setuv>> to make sure it does).
+
+As of 5.37.1, all are guaranteed to evaluate C<sv> only once.
+
+C<SvUVx> is now identical to C<SvUV>, but prior to 5.37.1, it was the only form
+guaranteed to evaluate C<sv> only once.
+
+=cut
+*/
+
+PERL_STATIC_INLINE IV
+Perl_SvIV(pTHX_ SV *sv) {
+    PERL_ARGS_ASSERT_SVIV;
+
+    if (SvIOK_nog(sv))
+        return SvIVX(sv);
+    return sv_2iv(sv);
+}
+
+PERL_STATIC_INLINE UV
+Perl_SvUV(pTHX_ SV *sv) {
+    PERL_ARGS_ASSERT_SVUV;
+
+    if (SvUOK_nog(sv))
+        return SvUVX(sv);
+    return sv_2uv(sv);
+}
+
+PERL_STATIC_INLINE NV
+Perl_SvNV(pTHX_ SV *sv) {
+    PERL_ARGS_ASSERT_SVNV;
+
+    if (SvNOK_nog(sv))
+        return SvNVX(sv);
+    return sv_2nv(sv);
+}
+
+PERL_STATIC_INLINE IV
+Perl_SvIV_nomg(pTHX_ SV *sv) {
+    PERL_ARGS_ASSERT_SVIV_NOMG;
+
+    if (SvIOK(sv))
+        return SvIVX(sv);
+    return sv_2iv_flags(sv, 0);
+}
+
+PERL_STATIC_INLINE UV
+Perl_SvUV_nomg(pTHX_ SV *sv) {
+    PERL_ARGS_ASSERT_SVUV_NOMG;
+
+    if (SvIOK_nog(sv))
+        return SvUVX(sv);
+    return sv_2uv_flags(sv, 0);
+}
+
+PERL_STATIC_INLINE NV
+Perl_SvNV_nomg(pTHX_ SV *sv) {
+    PERL_ARGS_ASSERT_SVNV_NOMG;
+
+    if (SvNOK_nog(sv))
+        return SvNVX(sv);
+    return sv_2nv_flags(sv, 0);
+}
+
 #if defined(PERL_CORE) || defined (PERL_EXT)
 PERL_STATIC_INLINE STRLEN
 S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)

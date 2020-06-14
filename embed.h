@@ -31,11 +31,17 @@
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
 #define SvAMAGIC_off		Perl_SvAMAGIC_off
 #define SvAMAGIC_on		Perl_SvAMAGIC_on
+#define SvIV(a)			Perl_SvIV(aTHX_ a)
+#define SvIV_nomg(a)		Perl_SvIV_nomg(aTHX_ a)
+#define SvNV(a)			Perl_SvNV(aTHX_ a)
+#define SvNV_nomg(a)		Perl_SvNV_nomg(aTHX_ a)
 #define SvPVXtrue(a)		Perl_SvPVXtrue(aTHX_ a)
 #define SvTRUE(a)		Perl_SvTRUE(aTHX_ a)
 #define SvTRUE_NN(a)		Perl_SvTRUE_NN(aTHX_ a)
 #define SvTRUE_common(a,b)	Perl_SvTRUE_common(aTHX_ a,b)
 #define SvTRUE_nomg(a)		Perl_SvTRUE_nomg(aTHX_ a)
+#define SvUV(a)			Perl_SvUV(aTHX_ a)
+#define SvUV_nomg(a)		Perl_SvUV_nomg(aTHX_ a)
 #define _force_out_malformed_utf8_message(a,b,c,d)	Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
 #define _is_in_locale_category(a,b)	Perl__is_in_locale_category(aTHX_ a,b)
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
