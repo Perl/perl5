@@ -1615,13 +1615,10 @@ Returns a boolean indicating whether Perl would evaluate the SV as true or
 false.  See C<L</SvOK>> for a defined/undefined test.  Does not handle 'get' magic.
 
 =for apidoc Am|bool|SvTRUEx|SV* sv
-Returns a boolean indicating whether Perl would evaluate the SV as true or
-false.  See C<L</SvOK>> for a defined/undefined test.  Handles 'get' magic
-unless the scalar is already C<SvPOK>, C<SvIOK> or C<SvNOK> (the public, not the
-private flags).
-
-This form guarantees to evaluate C<sv> only once.  Only use this if C<sv> is an
-expression with side effects, otherwise use the more efficient C<SvTRUE>.
+Identical to C<L</SvTRUE>>.  Prior to 5.32, they differed in that only this one
+was guaranteed to evaluate C<sv> only once; in 5.32 they both evaluated it
+once, but C<SvTRUEx> was slightly slower on some platforms; now they are
+identical.
 
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
@@ -1841,6 +1838,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define SvPVbytex_force(sv, len) sv_pvbyten_force(sv, &len)
 
 #define SvTRUE(sv)         Perl_SvTRUE(aTHX_ sv)
+#define SvTRUEx(sv)        SvTRUE(sv)
 #define SvTRUE_nomg(sv)    (LIKELY(sv) && SvTRUE_nomg_NN(sv))
 #define SvTRUE_NN(sv)      (SvGETMAGIC(sv), SvTRUE_nomg_NN(sv))
 #define SvTRUE_nomg_NN(sv) (SvTRUE_common(sv, sv_2bool_nomg(sv)))
@@ -1871,7 +1869,6 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvPVutf8x(sv, len) ({SV *_sv = (sv); SvPVutf8(_sv, len); })
 #  define SvPVbytex(sv, len) ({SV *_sv = (sv); SvPVbyte(_sv, len); })
 #  define SvPVbytex_nolen(sv) ({SV *_sv = (sv); SvPVbyte_nolen(_sv); })
-#  define SvTRUEx(sv)      ({SV *_sv = (sv); SvTRUE(_sv); })
 #  define SvTRUEx_nomg(sv) ({SV *_sv = (sv); SvTRUE_nomg(_sv); })
 
 #else /* __GNUC__ */
@@ -1889,7 +1886,6 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvPVutf8x(sv, len) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, len))
 #  define SvPVbytex(sv, len) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, len))
 #  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
-#  define SvTRUEx(sv)      ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #  define SvTRUEx_nomg(sv) ((PL_Sv = (sv)), SvTRUE_nomg(PL_Sv))
 #endif /* __GNU__ */
 
