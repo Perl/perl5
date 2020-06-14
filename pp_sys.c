@@ -679,14 +679,14 @@ PP(pp_pipe_op)
     IO *wstio;
     int fd[2];
 
-    GV * const wgv = MUTABLE_GV(POPs);
-    GV * const rgv = MUTABLE_GV(POPs);
+    GV * const rgv = MUTABLE_GV(*++MARK);
+    GV * const wgv = MUTABLE_GV(*++MARK);
 
     int flags = 0;
 
     if (SP > MARK) {
         #ifdef HAS_PIPE2
-            flags = SvIVx(POPs);
+            flags = SvIVx(*++MARK);
         #else
             DIE(aTHX_ PL_no_func, "pipe with flags");
         #endif
