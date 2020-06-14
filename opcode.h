@@ -2027,7 +2027,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000000,	/* continue */
 	0x0029640d,	/* open */
 	0x0000eb04,	/* close */
-	0x00066404,	/* pipe_op */
+	0x00966404,	/* pipe_op */
 	0x00006b0c,	/* fileno */
 	0x00009b0c,	/* umask */
 	0x00096404,	/* binmode */
