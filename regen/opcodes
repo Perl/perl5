@@ -337,7 +337,7 @@ continue	continue		ck_null		0
 
 open		open			ck_open		ismt@	F S? L
 close		close			ck_fun		is%	F?
-pipe_op		pipe			ck_fun		is@	F F
+pipe_op		pipe			ck_fun		is@	F F S?
 
 fileno		fileno			ck_fun		ist%	F
 umask		umask			ck_fun		ist%	S?

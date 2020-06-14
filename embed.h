@@ -1589,7 +1589,7 @@
 #    endif
 #  endif
 #  if defined(HAS_PIPE)
-#define PerlProc_pipe_cloexec(a)	Perl_PerlProc_pipe_cloexec(aTHX_ a)
+#define PerlProc_pipe_cloexec(a,b)	Perl_PerlProc_pipe_cloexec(aTHX_ a,b)
 #  endif
 #  if defined(HAS_SOCKET)
 #define PerlSock_accept_cloexec(a,b,c)	Perl_PerlSock_accept_cloexec(aTHX_ a,b,c)

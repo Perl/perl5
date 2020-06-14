@@ -4652,7 +4652,7 @@ PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);
 #define PERL_ARGS_ASSERT_PERL_LANGINFO
 #endif
 #if defined(HAS_PIPE)
-PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
+PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd, int flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC	\
 	assert(pipefd)

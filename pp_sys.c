@@ -682,6 +682,16 @@ PP(pp_pipe_op)
     GV * const wgv = MUTABLE_GV(POPs);
     GV * const rgv = MUTABLE_GV(POPs);
 
+    int flags = 0;
+
+    if (SP > MARK) {
+        #ifdef HAS_PIPE2
+            flags = SvIVx(POPs);
+        #else
+            DIE(aTHX_ PL_no_func, "pipe with flags");
+        #endif
+    }
+
     rstio = GvIOn(rgv);
     if (IoIFP(rstio))
 	do_close(rgv, FALSE);
@@ -690,7 +700,7 @@ PP(pp_pipe_op)
     if (IoIFP(wstio))
 	do_close(wgv, FALSE);
 
-    if (PerlProc_pipe_cloexec(fd) < 0)
+    if (PerlProc_pipe_cloexec(fd, flags) < 0)
 	goto badexit;
 
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r" PIPE_OPEN_MODE);
@@ -4378,7 +4388,7 @@ PP(pp_system)
 	sigset_t newset, oldset;
 #endif
 
-	if (PerlProc_pipe_cloexec(pp) >= 0)
+	if (PerlProc_pipe_cloexec(pp, 0) >= 0)
 	    did_pipes = 1;
 #ifdef __amigaos4__
         amigaos_fork_set_userdata(aTHX_
