@@ -215,6 +215,10 @@ sub locales_enabled(;$) {
     # normally would be available
     return 0 if ! defined &DynaLoader::boot_DynaLoader;
 
+    # Don't test locales where they aren't safe.
+    return 0 unless  ${^SAFE_LOCALES};
+
+    # If no setlocale, we need the POSIX 2008 alternatives
     if (! $Config{d_setlocale}) {
         return 0 if $Config{ccflags} =~ /\bD?NO_POSIX_2008_LOCALE\b/;
         return 0 unless $Config{d_newlocale};
