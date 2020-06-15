@@ -25,7 +25,7 @@ foreach my $t (@tests) {
     fresh_perl_is(
         qq[sub $sub { print qq[ok\n]} &{"$sub"}; my \$d = defined *{"foo$sub"} ],
         q[ok],
-        { switches => ['-w'] },
+        { switches => ['-w'], run_as_five => 1 },
         $name
     );
 }
