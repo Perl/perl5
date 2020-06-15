@@ -9,37 +9,37 @@ BEGIN {
 plan(26);
 
 my $tmpfile = tempfile();
-open (tmp,'>', $tmpfile) || die "Can't create Cmd_while.tmp.";
-print tmp "tvi925\n";
-print tmp "tvi920\n";
-print tmp "vt100\n";
-print tmp "Amiga\n";
-print tmp "paper\n";
-close tmp or die "Could not close: $!";
+open (my $tmp,'>', $tmpfile) || die "Can't create Cmd_while.tmp.";
+print {$tmp} "tvi925\n";
+print {$tmp} "tvi920\n";
+print {$tmp} "vt100\n";
+print {$tmp} "Amiga\n";
+print {$tmp} "paper\n";
+close $tmp or die "Could not close: $!";
 
 # test "last" command
 
-open(fh, $tmpfile) || die "Can't open Cmd_while.tmp.";
-while (<fh>) {
+open(my $fh, $tmpfile) || die "Can't open Cmd_while.tmp.";
+while (<$fh>) {
     last if /vt100/;
 }
 ok(!eof && /vt100/);
 
 # test "next" command
 
-$bad = '';
-open(fh, $tmpfile) || die "Can't open Cmd_while.tmp.";
-while (<fh>) {
+my $bad = '';
+open($fh, $tmpfile) || die "Can't open Cmd_while.tmp.";
+while (<$fh>) {
     next if /vt100/;
     $bad = 1 if /vt100/;
 }
-ok(eof && !/vt100/ && !$bad);
+ok(eof && (!defined $_ || !/vt100/) && !$bad);
 
 # test "redo" command
 
 $bad = '';
-open(fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
-while (<fh>) {
+open($fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
+while (<$fh>) {
     if (s/vt100/VT100/g) {
 	s/VT100/Vt100/g;
 	redo;
@@ -53,9 +53,9 @@ ok(eof && !$bad);
 
 # test "last" command
 
-$badcont = '';
-open(fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
-line: while (<fh>) {
+my $badcont = '';
+open($fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
+line: while (<$fh>) {
     if (/vt100/) {last line;}
 } continue {
     $badcont = 1 if /vt100/;
@@ -67,22 +67,22 @@ ok(!$badcont);
 
 $bad = '';
 $badcont = 1;
-open(fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
-entry: while (<fh>) {
+open($fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
+entry: while (<$fh>) {
     next entry if /vt100/;
     $bad = 1 if /vt100/;
 } continue {
     $badcont = '' if /vt100/;
 }
-ok(eof && !/vt100/ && !$bad);
+ok(eof && (!defined $_ || !/vt100/) && !$bad);
 ok(!$badcont);
 
 # test "redo" command
 
 $bad = '';
 $badcont = '';
-open(fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
-loop: while (<fh>) {
+open($fh,$tmpfile) || die "Can't open Cmd_while.tmp.";
+loop: while (<$fh>) {
     if (s/vt100/VT100/g) {
 	s/VT100/Vt100/g;
 	redo loop;
@@ -95,9 +95,9 @@ loop: while (<fh>) {
 ok(eof && !$bad);
 ok(!$badcont);
 
-close(fh) || die "Can't close Cmd_while.tmp.";
+close($fh) || die "Can't close Cmd_while.tmp.";
 
-$i = 9;
+my $i = 9;
 {
     $i++;
 }
@@ -123,7 +123,7 @@ is($` . $& . $', "abc");
 # check that scope cleanup happens right when there's a continue block
 {
     my $var = 16;
-    my (@got_var, @got_i);
+    my ($got_var, $got_i);
     while (my $i = ++$var) {
 	next if $i == 17;
 	last if $i > 17;
@@ -136,6 +136,7 @@ is($` . $& . $', "abc");
     is($got_i, 17);
 }
 
+our $l;
 {
     my $got_l;
     local $l = 18;
@@ -215,7 +216,7 @@ sub save_context { $_[0] = wantarray; $_[1] }
     ok($a[0] ne $a[1]);
 }
 
-fresh_perl_is <<'72406', "foobar\n", {},
+fresh_perl_is <<'72406', "foobar\n", { run_as_five => 1 },
 { package o; use overload bool => sub { die unless $::ok++; return 1 } }
 use constant OK => bless [], o::;
 do{print("foobar\n");}until OK;
