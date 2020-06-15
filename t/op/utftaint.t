@@ -12,7 +12,7 @@ use Config;
 
 # How to identify taint when you see it
 sub any_tainted (@) {
-    not eval { join("",@_), kill 0; 1 };
+    not eval { my $void = join("",@_), kill 0; 1 };
 }
 sub tainted ($) {
     any_tainted @_;
@@ -76,7 +76,7 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"], [utf8 => "\x{100}"]) {
 
     is(tainted($taint), tainted($arg), "tainted: $encode, encode utf8");
 
-    my $taint = $arg; substr($taint, 0) = $byte;
+    $taint = $arg; substr($taint, 0) = $byte;
     utf8::decode($taint);
 
     is($taint, $utf8, "compare: $encode, decode byte");
@@ -106,7 +106,7 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
 
     is(tainted($taint), tainted($arg), "tainted: $encode, upgrade up");
 
-    my $taint = $arg; substr($taint, 0) = $down;
+    $taint = $arg; substr($taint, 0) = $down;
     utf8::upgrade($taint);
 
     is($taint, $up, "compare: $encode, upgrade down");
@@ -117,7 +117,7 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
 
     is(tainted($taint), tainted($arg), "tainted: $encode, upgrade down");
 
-    my $taint = $arg; substr($taint, 0) = $up;
+    $taint = $arg; substr($taint, 0) = $up;
     utf8::downgrade($taint);
 
     is($taint, $down, "compare: $encode, downgrade up");
@@ -128,7 +128,7 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
 
     is(tainted($taint), tainted($arg), "tainted: $encode, downgrade up");
 
-    my $taint = $arg; substr($taint, 0) = $down;
+    $taint = $arg; substr($taint, 0) = $down;
     utf8::downgrade($taint);
 
     is($taint, $down, "compare: $encode, downgrade down");
@@ -146,11 +146,11 @@ SKIP: {
             unless eval 'require "unicore/UCD.pl"';
     }
     fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
-		  'ok', {switches => ["-T", "-l"]},
+		  'ok', {switches => ["-T", "-l"], run_as_five => 1 },
 		  "matching a regexp is taint agnostic");
 
     fresh_perl_is('$a = substr $^X, 0, 0; /$a\x{100}/i || print q,ok,',
-		  'ok', {switches => ["-T", "-l"]},
+		  'ok', {switches => ["-T", "-l"], run_as_five => 1 },
 		  "therefore swash_init should be taint agnostic");
 }
 
