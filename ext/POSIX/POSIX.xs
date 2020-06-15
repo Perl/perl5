@@ -422,6 +422,22 @@ static int not_here(const char *s);
 #  undef c99_trunc
 #endif
 
+/* The cc with NetBSD 8.0 and 9.0 claims to be a C11 hosted compiler,
+ * but doesn't define several functions required by C99, let alone C11.
+ * http://gnats.netbsd.org/53234
+ */
+#if defined(USE_LONG_DOUBLE) && defined(__NetBSD__) \
+  && !defined(NETBSD_HAVE_FIXED_LONG_DOUBLE_MATH)
+#  undef c99_expm1
+#  undef c99_lgamma
+#  undef c99_log1p
+#  undef c99_log2
+#  undef c99_nexttoward
+#  undef c99_remainder
+#  undef c99_remquo
+#  undef c99_tgamma
+#endif
+
 #ifndef isunordered
 #  ifdef Perl_isnan
 #    define isunordered(x, y) (Perl_isnan(x) || Perl_isnan(y))
