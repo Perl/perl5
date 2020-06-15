@@ -129,9 +129,9 @@ sub gorch {42}
 sub fatal {die "fatal sub\n"}
 
 # to test constant folding
-sub FALSE() { 0 }
-sub TRUE() { 1 }
-sub NOT_DEF() { undef }
+sub FALSE :prototype() { 0 }
+sub TRUE :prototype() { 1 }
+sub NOT_DEF :prototype() { undef }
 
 {
   # [perl #123860]
@@ -145,8 +145,8 @@ sub NOT_DEF() { undef }
   # This isn't guaranteed to crash, but if the stack issue is
   # re-introduced it will probably crash in one of the many smoke
   # builds.
-  fresh_perl_is('print (q(x) ~~ q(x)) | (/x/ ~~ %!)', "1",
-		{ switches => [ "-MErrno", "-M-warnings=experimental::smartmatch" ] },
+  fresh_perl_is('my $oo = print (q(x) ~~ q(x)) | (/x/ ~~ %!)', "1",
+		{ switches => [ "-MErrno" ], run_as_five => 0 },
 		 "don't fill the stack with rubbish");
 }
 
@@ -193,11 +193,11 @@ sub NOT_DEF() { undef }
     # Either caused an assertion failure in the context of warn (or print)
     # if there was some other operator's arguments left on the stack, as with
     # the test cases.
-    fresh_perl_is('print(0->[0 =~ qr/1/ ~~ 0])', '',
-                  { switches => [ "-M-warnings=experimental::smartmatch" ] },
+    fresh_perl_is('print(0->[0 =~ qr/1/ ~~ 0]//"")', '',
+                  { switches => [ "-M-warnings=experimental::smartmatch" ], run_as_five => 0 },
                   "don't qr-ify left-side match against a stacked argument");
-    fresh_perl_is('print(0->[0 ~~ (0 =~ qr/1/)])', '',
-                  { switches => [ "-M-warnings=experimental::smartmatch" ] },
+    fresh_perl_is('print(0->[0 ~~ (0 =~ qr/1/)]//"")', '',
+                  { switches => [ "-M-warnings=experimental::smartmatch" ], run_as_five => 0 },
                   "don't qr-ify right-side match against a stacked argument");
 }
 
