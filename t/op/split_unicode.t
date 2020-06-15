@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc('../lib');
 }
 
 skip_all_if_miniperl("no dynamic loading on miniperl, no File::Spec (used by charnames)");
@@ -66,9 +67,9 @@ plan(tests => 145);
     { # RT #114808
         warning_is(
             sub {
-                $p=chr(0x100);
+                my $p=chr(0x100);
                 for (".","ab\x{101}def") {
-                    @q = split /$p/
+                    my @q = split /$p/
                 }
             },
             undef,
