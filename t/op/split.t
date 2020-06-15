@@ -9,16 +9,16 @@ BEGIN {
 
 plan tests => 176;
 
-$FS = ':';
+my $FS = ':';
 
 $_ = 'a:b:c';
 
-($a,$b,$c) = split($FS,$_);
+our ($a,$b,$c) = split($FS,$_);
 
 is(join(';',$a,$b,$c), 'a;b;c', 'Split a simple string into scalars.');
 
-@ary = split(/:b:/);
-$cnt = split(/:b:/);
+my @ary = split(/:b:/);
+my $cnt = split(/:b:/);
 is(join("$_",@ary), 'aa:b:cc');
 is($cnt, scalar(@ary));
 
@@ -60,7 +60,7 @@ $cnt = split(' ','1 2 3 4 5 6', 3);
 is($cnt, scalar(@ary), "Check element count from previous test");
 
 # Can we do it as a variable?
-$x = 4;
+my $x = 4;
 $_ = join(':', split(' ','1 2 3 4 5 6', $x));
 is($_, '1:2:3:4 5 6', "Split into a specified number of fields, defined by a scalar variable");
 @ary = split(' ','1 2 3 4 5 6', $x);
@@ -80,7 +80,7 @@ $_ = join(':', split);
 is($_ , '1:2:3:4', "Split and join without specifying a split pattern");
 
 # Does assignment to a list imply split to one more field than that?
-$foo = runperl( switches => ['-Dt'], stderr => 1, prog => '($a,$b)=split;' );
+my $foo = runperl( switches => ['-Dt'], stderr => 1, prog => '($a,$b)=split;', run_as_five => 1 );
 ok($foo =~ /DEBUGGING/ || $foo =~ /const\n?\Q(IV(3))\E/);
 
 # Can we say how many fields to split to when assigning to a list?
@@ -170,6 +170,7 @@ is($cnt, scalar(@ary));
 $_ = "a : b :c: d";
 @ary = split(/\s*:\s*/);
 $cnt = split(/\s*:\s*/);
+my $res;
 is(($res = join(".",@ary)), "a.b.c.d", $res);
 is($cnt, scalar(@ary));
 
@@ -187,7 +188,7 @@ $_ = join ':', split /\A/, "ab\ncd\nef\n";
 is($_, "ab\ncd\nef\n","check that split /\A/ is NOT treated as split /^/m");
 
 # see if @a = @b = split(...) optimization works
-@list1 = @list2 = split ('p',"a p b c p");
+my @list1 = my @list2 = split ('p',"a p b c p");
 ok(@list1 == @list2 &&
    "@list1" eq "@list2" &&
    @list1 == 2 &&
@@ -263,6 +264,7 @@ is($cnt, scalar(@ary));
 }
 
 {
+    no warnings;
     my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
 
   {
@@ -358,8 +360,9 @@ is($cnt, scalar(@ary));
 }
 
 {
-    $p="a,b";
+    my $p="a,b";
     utf8::upgrade $p;
+    my (@a, @b);
     eval { @a=split(/[, ]+/,$p) };
     eval { $b=split(/[, ]+/,$p) };
     is($b, scalar(@a));
@@ -372,7 +375,7 @@ is($cnt, scalar(@ary));
         utf8::upgrade $pattern;
         my @res;
         for my $str ("a${pattern}b", "axb", "a${pattern}b") {
-            @split = split /$pattern/, $str;
+            my @split = split /$pattern/, $str;
             push @res, scalar(@split);
         }
         is($res[0], 2);
@@ -381,10 +384,12 @@ is($cnt, scalar(@ary));
     }
 }
 
+our @a;
 {
+    no strict 'refs';
     is (\@a, \@{"a"}, '@a must be global for following test');
-    $p="";
-    $n = @a = split /,/,$p;
+    my $p="";
+    my $n = @a = split /,/,$p;
     is ($n, 0, '#21765 - pmreplroot hack used to return undef for 0 iters');
 }
 
@@ -477,7 +482,7 @@ is($cnt, scalar(@ary));
         push @seq, scalar(@results) . ":" . $results[-1];
     }
     is join(" ", @seq), "1:foo 3:foo 1:foo 3:foo 1:foo",
-        qq{split(\$cond ? qr/ / : " ", "$exp") behaves as expected over repeated similar patterns};
+        qq{split(\$cond ? qr/ / : " ", "\$expr") behaves as expected over repeated similar patterns};
 }
 
 SKIP: {
@@ -522,12 +527,15 @@ use constant nought => 0;
 ($a,$b,$c) = split //, $foo, nought;
 is nought, 0, 'split does not mangle 0 constants';
 
-*aaa = *bbb;
-$aaa[1] = "foobarbaz";
-$aaa[1] .= "";
-@aaa = split //, $bbb[1];
-is "@aaa", "f o o b a r b a z",
-   'split-to-array does not free its own argument';
+{
+    no strict; no warnings;
+    *aaa = *bbb;
+    $aaa[1] = "foobarbaz";
+    $aaa[1] .= "";
+    @aaa = split //, $bbb[1];
+    is "@aaa", "f o o b a r b a z",
+       'split-to-array does not free its own argument';    
+}
 
 () = @a = split //, "abc";
 is "@a", "a b c", '() = split-to-array';
@@ -648,7 +656,7 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     is (+@a, 0, "empty utf8 string");
 }
 
-fresh_perl_is(<<'CODE', '', {}, "scalar split stack overflow");
+fresh_perl_is(<<'CODE', '', { run_as_five => 1 }, "scalar split stack overflow");
 map{int"";split//.0>60for"0000000000000000"}split// for"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 CODE
 
