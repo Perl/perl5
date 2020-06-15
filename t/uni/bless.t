@@ -28,19 +28,24 @@ sub expected {
 
 # test blessing simple types
 
-$a1 = bless {}, "ዐ";
+our $a1 = bless {}, "ዐ";
 expected($a1, "ዐ", "HASH");
-$b1 = bless [], "Ｂ";
+our $b1 = bless [], "Ｂ";
 expected($b1, "Ｂ", "ARRAY");
-$c1 = bless \(map "$_", "test"), "ᶜ";
+my $c1 = bless \(map "$_", "test"), "ᶜ";
 expected($c1, "ᶜ", "SCALAR");
-$tèst = "foo"; $d1 = bless \*tèst, "ɖ";
+my $tèst = "foo"; 
+my $d1;
+{
+    no warnings 'once';
+    $d1 = bless \*tèst, "ɖ";
+}
 expected($d1, "ɖ", "GLOB");
-$e1 = bless sub { 1 }, "ಎ";
+my $e1 = bless sub { 1 }, "ಎ";
 expected($e1, "ಎ", "CODE");
-$f1 = bless \[], "ḟ";
+my $f1 = bless \[], "ḟ";
 expected($f1, "ḟ", "REF");
-$g1 = bless \substr("test", 1, 2), "ㄍ";
+my $g1 = bless \substr("test", 1, 2), "ㄍ";
 expected($g1, "ㄍ", "LVALUE");
 
 # blessing ref to object doesn't modify object
