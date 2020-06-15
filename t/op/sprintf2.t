@@ -9,9 +9,12 @@ BEGIN {
     set_up_inc('../lib');
 }   
 
+use Config;
+
 # We'll run 12 extra tests (see below) if $Q is false.
 eval { my $q = pack "q", 0 };
 my $Q = $@ eq '';
+
 
 my $doubledouble;
 
@@ -265,7 +268,6 @@ if ($Config{nvsize} == 8 &&
 }
 
 use strict;
-use Config;
 
 is(
     sprintf("%.40g ",0.01),
