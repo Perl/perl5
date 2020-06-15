@@ -8,6 +8,8 @@ BEGIN {
 
 plan tests => 32;
 
+no warnings 'once';
+
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
 use constant roref => \2;
@@ -27,7 +29,7 @@ like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
 # do_readline (80)
 foreach my $k (1, 82) {
   my $result
-    = runperl (stdin => '', stderr => 1,
+    = runperl (stdin => '', stderr => 1, run_as_five => 1,
               prog => "\$x = q(k) x $k; \$a{\$x} = qw(v); \$_ = <> foreach keys %a; print qw(end)",
 	      );
   $result =~ s/\n\z// if $^O eq 'VMS';
@@ -37,7 +39,7 @@ foreach my $k (1, 82) {
 
 foreach my $k (1, 21) {
   my $result
-    = runperl (stdin => ' rules', stderr => 1,
+    = runperl (stdin => ' rules', stderr => 1, run_as_five => 1,
               prog => "\$x = q(perl) x $k; \$a{\$x} = q(v); foreach (keys %a) {\$_ .= <>; print}",
 	      );
   $result =~ s/\n\z// if $^O eq 'VMS';
@@ -88,7 +90,7 @@ fresh_perl_is('BEGIN{<>}', '',
               'No ARGVOUT used only once warning');
 
 fresh_perl_is('print readline', 'foo',
-              { switches => ['-w'], stdin => 'foo', stderr => 1 },
+              { switches => ['-w'], stdin => 'foo', stderr => 1, run_as_five => 1 },
               'readline() defaults to *ARGV');
 
 # [perl #72720] Test that sv_gets clears any variables that should be
