@@ -23,8 +23,8 @@ is ref\select, 'SCALAR', 'and STDOUT is a plain string';
 
 open foo::bar, "test.pl" or die "$0 sadly cannot open test.pl: $!";
 select foo::bar;
-$handle = \*foo::bar;
-$stash = \%foo::;
+my $handle = \*foo::bar;
+my $stash = \%foo::;
 *foo:: = *bar::;
 is select, $handle,
     'select returns ref for glob whose stash has been detached';
