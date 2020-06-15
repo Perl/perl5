@@ -25,11 +25,12 @@ fresh_perl_is(
 );
 
 # Used to segfault, too
+our $TODO;
 SKIP: {
  skip_if_miniperl('requires XS');
   fresh_perl_like(
-    'sub foo::bar{}; $mro::{get_mro}=*foo::bar; undef %foo::; require mro',
-     qr/^Subroutine mro::get_mro redefined at /,
+    'sub foo::bar{}; $mro::{get_mro}=*foo::bar; undef %foo::; require mro; print 1',
+     qr/1/,
     { switches => [ '-w' ] },
     q(Defining an XSUB over an existing sub with no stash under warnings),
   );
@@ -43,7 +44,7 @@ SKIP: {
     fresh_perl_is(
 		  'package A::B; sub a { // }; %A::=""',
 		  '',
-		  {},
+		  { run_as_five => 1 },
 		  );
     # Variant of the above which creates an object that persists until global
     # destruction, and triggers an assertion failure prior to change
@@ -51,7 +52,7 @@ SKIP: {
     fresh_perl_is(
 		  'use Exporter; package A; sub a { // }; delete $::{$_} for keys %::',
 		  '',
-		  {},
+		  { run_as_five => 1 },
 		  );
 }
 
@@ -104,19 +105,19 @@ SKIP: {
     is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
     is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");
 
-    my $sub = do {
+    $sub = do {
 	package four;
 	sub { 1 };
     };
     %four:: = ();
 
-    my $gv = B::svref_2object($sub)->GV;
+    $gv = B::svref_2object($sub)->GV;
     ok($gv->isa(q/B::GV/), "cleared stash leaves anon CV with valid GV");
 
     my $st = eval { $gv->STASH->NAME };
     is($st, q/four/, "...but leaves the stash intact");
 
-    my $sub = do {
+    $sub = do {
 	package five;
 	sub { 1 };
     };
@@ -130,7 +131,7 @@ SKIP: {
 	is($st, q/__ANON__/, "...and an __ANON__ stash");
     }
 
-    my $sub = do {
+    $sub = do {
 	package six;
 	\&{"six"}
     };
@@ -249,6 +250,7 @@ fresh_perl_is(
 {
     package rile;
 
+    no warnings 'once';
     use Config;
 
     my $obj  = bless [];
@@ -283,6 +285,7 @@ fresh_perl_is(
 
 # Setting the name during undef %stash:: should have no effect.
 {
+    no warnings 'once';
     my $glob = \*Phoo::glob;
     sub o::DESTROY { eval '++$Phoo::bar' }
     no strict 'refs';
@@ -300,10 +303,13 @@ fresh_perl_is(
     ok eval { Bear::::baz() },
      'packages ending with :: are self-consistent';
 }
-
-# [perl #88138] ' not equivalent to :: before a null
-${"a'\0b"} = "c";
-is ${"a::\0b"}, "c", "' is equivalent to :: before a null";
+{
+  no strict 'refs';
+  
+  # [perl #88138] ' not equivalent to :: before a null
+  ${"a'\0b"} = "c";
+  is ${"a::\0b"}, "c", "' is equivalent to :: before a null";
+}
 
 # [perl #101486] Clobbering the current package
 ok eval '
@@ -318,6 +324,7 @@ is runperl(
     prog =>
       'sub foo { print shift, qq-\n- } SUPER::foo bar if 0; foo SUPER',
     stderr => 1,
+    run_as_five => 1,
    ),
    "SUPER\n",
    'bareword lookup does not vivify stashes';
@@ -325,6 +332,7 @@ is runperl(
 is runperl(
     prog => '%0; *bar::=*foo::=0; print qq|ok\n|',
     stderr => 1,
+    run_as_five => 1,
    ),
    "ok\n",
    '[perl #123847] no crash from *foo::=*bar::=*glob_with_hash';
@@ -332,6 +340,7 @@ is runperl(
 is runperl(
     prog => '%h; *::::::=*h; delete $::{q|::|}; print qq|ok\n|',
     stderr => 1,
+    run_as_five => 1,
    ),
    "ok\n",
    '[perl #128086] no crash from assigning hash to *:::::: & deleting it';
@@ -339,6 +348,7 @@ is runperl(
 is runperl(
     prog => 'BEGIN { %: = 0; $^W=1}; print qq|ok\n|',
     stderr => 1,
+    run_as_five => 1,
    ),
    "ok\n",
    "[perl #128238] don't treat %: as a stash (needs 2 colons)";
@@ -353,6 +363,7 @@ is runperl(
 is runperl(
     prog => '%:: = (); print *{q|::|}, qq|\n|',
     stderr => 1,
+    run_as_five => 1,
    ),
    "*main::main::\n",
    "[perl #129869] lookup %:: by name after clearing %::";
