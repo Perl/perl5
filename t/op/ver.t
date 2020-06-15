@@ -1,5 +1,6 @@
 #!./perl
 
+my $DOWARN = 1; # enable run-time warnings now
 BEGIN {
     chdir 't' if -d 't';
     $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN };
@@ -7,8 +8,6 @@ BEGIN {
     set_up_inc( qw(. ../lib) );
     require "./charset_tools.pl";
 }
-
-$DOWARN = 1; # enable run-time warnings now
 
 use Config;
 
@@ -20,6 +19,7 @@ is( $@, '', "use v5.5.640; $@");
 require_ok('v5.5.640');
 
 # printing characters should work
+my %h;
 if ($::IS_ASCII) { # ASCII
     is('ok ',v111.107.32,'ASCII printing characters');
 
@@ -37,7 +37,7 @@ else { # EBCDIC
 
 # poetry optimization should also
 sub v77 { "ok" }
-$x = v77;
+my $x = v77;
 is('ok',$x,'poetry optimization');
 
 # but not when dots are involved
@@ -263,9 +263,12 @@ sub { $_[0] = v3;
 # interpreted by the tokeniser when it's in a XTERMORDORDOR
 # state (fittingly, the only tokeniser state to contain the
 # word MORDOR).
+{
+    no strict 'refs';
+    *{"\3"} = *DATA;
+    is( (readline v3), "This is what we expect to see!\n", "v-strings even work in Mordor" );
 
-*{"\3"} = *DATA;
-is( (readline v3), "This is what we expect to see!\n", "v-strings even work in Mordor" );
+}
 
 __DATA__
 This is what we expect to see!
