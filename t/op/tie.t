@@ -21,16 +21,19 @@ done_testing();
 
 __END__
 
-# standard behaviour, without any extra references
+# NAME standard behaviour, without any extra references
 use Tie::Hash ;
-tie %h, Tie::StdHash;
+no strict 'subs';
+no warnings;
+tie my %h, Tie::StdHash;
 untie %h;
 EXPECT
 ########
 # SKIP ?!defined &DynaLoader::boot_DynaLoader && !eval 'require base'
 # (skip under miniperl if base.pm is not in lib/ yet)
 
-# standard behaviour, without any extra references
+# NAME standard behaviour, without any extra references
+no strict 'subs';
 use Tie::Hash ;
 {package Tie::HashUntie;
  use base 'Tie::StdHash';
@@ -39,126 +42,141 @@ use Tie::Hash ;
    warn "Untied\n";
   }
 }
-tie %h, Tie::HashUntie;
+tie my %h, Tie::HashUntie;
 untie %h;
 EXPECT
 Untied
 ########
 
-# standard behaviour, with 1 extra reference
+# NAME standard behaviour, with 1 extra reference
+no strict 'subs';
+no warnings;
 use Tie::Hash ;
-$a = tie %h, Tie::StdHash;
+$a = tie my %h, Tie::StdHash;
 untie %h;
 EXPECT
 ########
 
-# standard behaviour, with 1 extra reference via tied
+# NAME standard behaviour, with 1 extra reference via tied
+no strict 'subs';
+no warnings;
 use Tie::Hash ;
-tie %h, Tie::StdHash;
+tie my %h, Tie::StdHash;
 $a = tied %h;
 untie %h;
 EXPECT
 ########
 
-# standard behaviour, with 1 extra reference which is destroyed
+# NAME standard behaviour, with 1 extra reference which is destroyed
+no strict 'subs';
 use Tie::Hash ;
-$a = tie %h, Tie::StdHash;
+$a = tie my %h, Tie::StdHash;
 $a = 0 ;
 untie %h;
 EXPECT
 ########
 
-# standard behaviour, with 1 extra reference via tied which is destroyed
+# NAME standard behaviour, with 1 extra reference via tied which is destroyed
+no strict 'subs';
 use Tie::Hash ;
-tie %h, Tie::StdHash;
+tie my %h, Tie::StdHash;
 $a = tied %h;
 $a = 0 ;
 untie %h;
 EXPECT
 ########
 
-# strict behaviour, without any extra references
+# NAME strict behaviour, without any extra references
+no strict 'subs';
 use warnings 'untie';
 use Tie::Hash ;
-tie %h, Tie::StdHash;
+tie my %h, Tie::StdHash;
 untie %h;
 EXPECT
 ########
 
-# strict behaviour, with 1 extra references generating an error
+# NAME strict behaviour, with 1 extra references generating an error
+no strict 'subs';
 use warnings 'untie';
 use Tie::Hash ;
-$a = tie %h, Tie::StdHash;
+$a = tie my %h, Tie::StdHash;
 untie %h;
 EXPECT
 untie attempted while 1 inner references still exist at - line 6.
 ########
 
-# strict behaviour, with 1 extra references via tied generating an error
+# NAME strict behaviour, with 1 extra references via tied generating an error
+no strict 'subs';
 use warnings 'untie';
 use Tie::Hash ;
-tie %h, Tie::StdHash;
+tie my %h, Tie::StdHash;
 $a = tied %h;
 untie %h;
 EXPECT
 untie attempted while 1 inner references still exist at - line 7.
 ########
 
-# strict behaviour, with 1 extra references which are destroyed
+# NAME strict behaviour, with 1 extra references which are destroyed
+no strict 'subs';
 use warnings 'untie';
 use Tie::Hash ;
-$a = tie %h, Tie::StdHash;
+$a = tie my %h, Tie::StdHash;
 $a = 0 ;
 untie %h;
 EXPECT
 ########
 
-# strict behaviour, with extra 1 references via tied which are destroyed
+# NAME strict behaviour, with extra 1 references via tied which are destroyed
+no strict 'subs';
 use warnings 'untie';
 use Tie::Hash ;
-tie %h, Tie::StdHash;
+tie my %h, Tie::StdHash;
 $a = tied %h;
 $a = 0 ;
 untie %h;
 EXPECT
 ########
 
-# strict error behaviour, with 2 extra references
+# NAME strict error behaviour, with 2 extra references
+no strict 'subs';
 use warnings 'untie';
 use Tie::Hash ;
-$a = tie %h, Tie::StdHash;
-$b = tied %h ;
+my %h;
+my $a = tie %h, Tie::StdHash;
+my $b = tied %h ;
 untie %h;
 EXPECT
-untie attempted while 2 inner references still exist at - line 7.
+untie attempted while 2 inner references still exist at - line 8.
 ########
 
-# strict behaviour, check scope of strictness.
+# NAME strict behaviour, check scope of strictness.
+no strict 'subs';
 no warnings 'untie';
 use Tie::Hash ;
+my ($A, $B, $C, %H, );
 $A = tie %H, Tie::StdHash;
 $C = $B = tied %H ;
 {
     use warnings 'untie';
     use Tie::Hash ;
-    tie %h, Tie::StdHash;
+    tie my %h, Tie::StdHash;
     untie %h;
 }
 untie %H;
 EXPECT
 ########
 
-# Forbidden aggregate self-ties
+# NAME Forbidden aggregate self-ties
 sub Self::TIEHASH { bless $_[1], $_[0] }
 {
     my %c;
     tie %c, 'Self', \%c;
 }
 EXPECT
-Self-ties of arrays and hashes are not supported at - line 6.
+Self-ties of arrays and hashes are not supported at - line 5.
 ########
 
-# Allowed scalar self-ties
+# NAME Allowed scalar self-ties
 my $destroyed = 0;
 sub Self::TIESCALAR { bless $_[1], $_[0] }
 sub Self::DESTROY   { $destroyed = 1; }
@@ -170,7 +188,7 @@ die "self-tied scalar not DESTROYed" unless $destroyed == 1;
 EXPECT
 ########
 
-# Allowed glob self-ties
+# NAME Allowed glob self-ties
 my $destroyed = 0;
 my $printed   = 0;
 sub Self2::TIEHANDLE { bless $_[1], $_[0] }
@@ -187,8 +205,9 @@ die "self-tied glob not DESTROYed" unless $destroyed == 1;
 EXPECT
 ########
 
-# Allowed IO self-ties
+# NAME Allowed IO self-ties
 my $destroyed = 0;
+my $printed;
 sub Self3::TIEHANDLE { bless $_[1], $_[0] }
 sub Self3::DESTROY   { $destroyed = 1; }
 sub Self3::PRINT     { $printed = 1; }
@@ -204,6 +223,8 @@ EXPECT
 ########
 
 # TODO IO "self-tie" via TEMP glob
+# NAME IO "self-tie" via TEMP glob
+my $printed;
 my $destroyed = 0;
 sub Self3::TIEHANDLE { bless $_[1], $_[0] }
 sub Self3::DESTROY   { $destroyed = 1; }
@@ -219,8 +240,9 @@ die "IO tied to TEMP glob not DESTROYed" unless $destroyed == 1;
 EXPECT
 ########
 
-# Interaction of tie and vec
+# NAME Interaction of tie and vec
 
+no strict;
 my ($a, $b);
 use Tie::Scalar;
 tie $a,Tie::StdScalar or die;
@@ -232,23 +254,26 @@ die unless $a eq $b;
 EXPECT
 ########
 
-# correct unlocalisation of tied hashes (patch #16431)
+# NAME correct unlocalisation of tied hashes (patch #16431)
+no strict 'subs';
 use Tie::Hash ;
-tie %tied, Tie::StdHash;
+our %hash;
+tie our %tied, Tie::StdHash;;
 { local $hash{'foo'} } warn "plain hash bad unlocalize" if exists $hash{'foo'};
 { local $tied{'foo'} } warn "tied hash bad unlocalize" if exists $tied{'foo'};
 { local $ENV{'foo'}  } warn "%ENV bad unlocalize" if exists $ENV{'foo'};
 EXPECT
 ########
 
-# An attempt at lvalueable barewords broke this
+# NAME An attempt at lvalueable barewords broke this
+no strict 'subs';
 tie FH, 'main';
 EXPECT
 Can't modify constant item in tie at - line 3, near "'main';"
 Execution of - aborted due to compilation errors.
 ########
 
-# localizing tied hash slices
+# NAME localizing tied hash slices
 $ENV{FooA} = 1;
 $ENV{FooB} = 2;
 print exists $ENV{FooA} ? 1 : 0, "\n";
@@ -275,7 +300,7 @@ EXPECT
 0
 ########
 #
-# FETCH freeing tie'd SV still works
+# NAME FETCH freeing tie'd SV still works
 sub TIESCALAR { bless [] }
 sub FETCH { *a = \1; 2 }
 tie $a, 'main';
@@ -284,7 +309,7 @@ EXPECT
 2
 ########
 
-#  [20020716.007 (#10080)] - nested FETCHES
+# NAME [20020716.007 (#10080)] - nested FETCHES
 
 sub F1::TIEARRAY { bless [], 'F1' }
 sub F1::FETCH { 1 }
@@ -314,7 +339,7 @@ EXPECT
 2
 3
 ########
-# test untie() from within FETCH
+# NAME test untie() from within FETCH
 package Foo;
 sub TIESCALAR { my $pkg = shift; return bless [@_], $pkg; }
 sub FETCH {
@@ -331,7 +356,7 @@ print defined tied $a->{foo} ? "not ok" : "ok";
 EXPECT
 ok
 ########
-# the tmps returned by FETCH should appear to be SCALAR
+# NAME the tmps returned by FETCH should appear to be SCALAR
 # (even though they are now implemented using PVLVs.)
 package X;
 sub TIEHASH { bless {} }
@@ -348,14 +373,15 @@ print $s, "\n";
 EXPECT
 SCALAR SCALAR SCALAR SCALAR
 ########
-# [perl #23287] segfault in untie
+# NAME [perl #23287] segfault in untie
+no warnings;
 sub TIESCALAR { bless $_[1], $_[0] }
 my $var;
 tie $var, 'main', \$var;
 untie $var;
 EXPECT
 ########
-# Test case from perlmonks by runrig
+# NAME Test case from perlmonks by runrig
 # http://www.perlmonks.org/index.pl?node_id=273490
 # "Here is what I tried. I think its similar to what you've tried
 #  above. Its odd but convenient that after untie'ing you are left with
@@ -393,7 +419,8 @@ Two
 Three
 4
 ########
-# [perl #22297] cannot untie scalar from within tied FETCH
+
+# NAME [perl #22297] cannot untie scalar from within tied FETCH
 my $counter = 0;
 my $x = 7;
 my $ref = \$x;
@@ -435,9 +462,9 @@ EXPECT
 ok
 ########
 
-# [perl #948] cannot meaningfully tie $,
+# NAME [perl #948] cannot meaningfully tie $,
 package TieDollarComma;
-
+no warnings;
 sub TIESCALAR {
      my $pkg = shift;
      return bless \my $x, $pkg;
@@ -464,7 +491,7 @@ STORE set 'BOBBINS'
 join<FETCH>BOBBINSthings<FETCH>BOBBINSup
 ########
 
-# test SCALAR method
+# NAME test SCALAR method
 package TieScalar;
 
 sub TIEHASH {
@@ -564,14 +591,14 @@ empty
 ########
 sub TIESCALAR { bless {} }
 sub FETCH { my $x = 3.3; 1 if 0+$x; $x }
-tie $h, "main";
+tie my $h, "main";
 print $h,"\n";
 EXPECT
 3.3
 ########
 sub TIESCALAR { bless {} }
 sub FETCH { shift()->{i} ++ }
-tie $h, "main";
+tie my $h, "main";
 print $h.$h;
 EXPECT
 01
@@ -579,8 +606,8 @@ EXPECT
 # SKIP ? $IS_EBCDIC
 # skipped on EBCDIC because "2" | "8" is 0xFA (not COLON as it is on ASCII),
 # which isn't representable in this file's UTF-8 encoding.
-# Bug 53482 (and maybe others)
-
+# NAME Bug 53482 (and maybe others)
+use p5;
 sub TIESCALAR { my $foo = $_[1]; bless \$foo, $_[0] }
 sub FETCH { ${$_[0]} }
 tie my $x1, "main", 2;
@@ -594,17 +621,19 @@ print $x2 | $y2;
 EXPECT
 1010::
 ########
-# Bug 36267
+# NAME Bug 36267
 sub TIEHASH  { bless {}, $_[0] }
 sub STORE    { $_[0]->{$_[1]} = $_[2] }
 sub FIRSTKEY { my $a = scalar keys %{$_[0]}; each %{$_[0]} }
 sub NEXTKEY  { each %{$_[0]} }
 sub DELETE   { delete $_[0]->{$_[1]} }
 sub CLEAR    { %{$_[0]} = () }
+my %h;
 $h{b}=1;
 delete $h{b};
 print scalar keys %h, "\n";
 tie %h, 'main';
+my %i;
 $i{a}=1;
 %h = %i;
 untie %h;
@@ -613,7 +642,7 @@ EXPECT
 0
 0
 ########
-# Bug 37731
+# NAME Bug 37731
 sub foo::TIESCALAR { bless {value => $_[1]}, $_[0] }
 sub foo::FETCH { $_[0]->{value} }
 tie my $VAR, 'foo', '42';
@@ -623,6 +652,8 @@ foreach my $var ($VAR) {
 EXPECT
 yes
 ########
+# NAME tie @a
+our @a;
 sub TIEARRAY { bless [], 'main' }
 {
     local @a;
@@ -631,6 +662,8 @@ sub TIEARRAY { bless [], 'main' }
 print "tied\n" if tied @a;
 EXPECT
 ########
+# NAME tie %h
+our %h;
 sub TIEHASH { bless [], 'main' }
 {
     local %h;
@@ -639,7 +672,7 @@ sub TIEHASH { bless [], 'main' }
 print "tied\n" if tied %h;
 EXPECT
 ########
-# RT 20727: PL_defoutgv is left as a tied element
+# NAME RT 20727: PL_defoutgv is left as a tied element
 sub TIESCALAR { return bless {}, 'main' }
 
 sub STORE {
@@ -647,12 +680,13 @@ sub STORE {
     $_[1] = 1;
     select(); # this used to coredump or assert fail
 }
-tie $SELECT, 'main';
+tie my $SELECT, 'main';
 $SELECT = *STDERR;
 EXPECT
 ########
-# RT 23810: eval in die in FETCH can corrupt context stack
+# NAME RT 23810: eval in die in FETCH can corrupt context stack
 
+no strict; no warnings;
 my $file = 'rt23810.pm';
 
 my $e;
@@ -740,8 +774,10 @@ require: s1=REQUIRE-0-RQ
 require: s2=REQUIRE-0-ERQ-ENDRQ-1-ERQ-ENDRQ-2-ERQ-ENDRQ-3-ERQ-ENDRQ-R
 require: s3=REQUIRE-0-RQ
 ########
-# RT 8857: STORE incorrectly invoked for local($_) on aliased tied array
+# NAME RT 8857: STORE incorrectly invoked for local($_) on aliased tied array
 #          element
+
+no warnings;
 
 sub TIEARRAY { bless [], $_[0] }
 sub TIEHASH  { bless [], $_[0] }
@@ -752,8 +788,8 @@ sub STORE { $_[0]->[$_[1]] = $_[2] }
 sub f {
     local $_[0];
 }
-tie @a, 'main';
-tie %h, 'main';
+tie my @a, 'main';
+tie my %h, 'main';
 
 foreach ($a[0], $h{a}) {
     f($_);
@@ -761,7 +797,7 @@ foreach ($a[0], $h{a}) {
 # on failure, chucks up 'premature free' etc messages
 EXPECT
 ########
-# RT 5475:
+# NAME RT 5475:
 # the initial fix for this bug caused tied scalar FETCH to be called
 # multiple times when that scalar was an element in an array. Check it
 # only gets called once now.
@@ -828,7 +864,8 @@ fetching... >=  1
 fetching... !=  1
 fetching... <=> 1
 ########
-# Ties returning overloaded objects
+# NAME Ties returning overloaded objects
+no strict 'subs'; no warnings;
 {
  package overloaded;
  use overload
@@ -841,13 +878,13 @@ fetching... <=> 1
    $_ => sub { print "$op"; 100 }
   } qw< 0+ "" + ** * / % - neg int abs == < > <= >= != <=> <> >
 }
-$o = bless [], overloaded;
+my $o = bless [], overloaded;
 
 sub TIESCALAR { bless {}, "" }
 sub FETCH { print "fetching... "; $o }
 sub STORE{}
-tie $ghew, "";
-
+tie my $ghew, "";
+my (@spled, %frit, $drile);
 $ghew=undef; 1+$ghew; print "\n";
 $ghew=undef; $ghew**1; print "\n";
 $ghew=undef; $ghew*1; print "\n";
@@ -892,7 +929,7 @@ fetching... @{}
 fetching... %{}
 fetching... ${}
 ########
-# RT 51636: segmentation fault with array ties
+# NAME RT 51636: segmentation fault with array ties
 
 tie my @a, 'T';
 @a = (1);
@@ -908,7 +945,7 @@ sub EXTEND   { }
 EXPECT
 ok
 ########
-# RT 8438: Tied scalars don't call FETCH when subref is dereferenced
+# NAME RT 8438: Tied scalars don't call FETCH when subref is dereferenced
 
 sub TIESCALAR { bless {} }
 
@@ -924,44 +961,50 @@ EXPECT
 fetch=2
 called=2
 ########
-# tie mustn't attempt to call methods on bareword filehandles.
+# NAME tie mustn't attempt to call methods on bareword filehandles.
+no warnings qw{ once uninitialized };
 sub IO::File::TIEARRAY {
     die "Did not want to invoke IO::File::TIEARRAY";
 }
-fileno FOO; tie @a, "FOO"
+my $x = fileno FOO; tie my @a, "FOO"
 EXPECT
 Can't locate object method "TIEARRAY" via package "FOO" (perhaps you forgot to load "FOO"?) at - line 5.
 ########
-# tie into empty package name
-tie $foo, "";
+# NAME tie into empty package name
+tie my $foo, "";
+EXPECT
+Can't locate object method "TIESCALAR" via package "main" at - line 1.
+########
+# NAME tie into undef package name
+no warnings "uninitialized";
+tie my $foo, undef;
 EXPECT
 Can't locate object method "TIESCALAR" via package "main" at - line 2.
 ########
-# tie into undef package name
-tie $foo, undef;
-EXPECT
-Can't locate object method "TIESCALAR" via package "main" at - line 2.
-########
-# tie into nonexistent glob [RT#130623 assertion failure]
-tie $foo, *FOO;
+# NAME tie into nonexistent glob [RT#130623 assertion failure]
+no warnings 'once';
+tie my $foo, *FOO;
 EXPECT
 Can't locate object method "TIESCALAR" via package "FOO" at - line 2.
 ########
-# tie into glob when package exists but not method: no "*", no "main::"
+# NAME tie into glob when package exists but not method: no "*", no "main::"
+no warnings 'once';
 { package PackageWithoutTIESCALAR }
-tie $foo, *PackageWithoutTIESCALAR;
+tie my $foo, *PackageWithoutTIESCALAR;
 EXPECT
 Can't locate object method "TIESCALAR" via package "PackageWithoutTIESCALAR" at - line 3.
 ########
-# tie into reference [RT#130623 assertion failure]
-eval { tie $foo, \"nope" };
+# NAME tie into reference [RT#130623 assertion failure]
+eval { tie my $foo, \"nope" };
 my $exn = $@ // "";
 print $exn =~ s/0x\w+/0xNNN/rg;
 EXPECT
-Can't locate object method "TIESCALAR" via package "SCALAR(0xNNN)" at - line 2.
+Can't locate object method "TIESCALAR" via package "SCALAR(0xNNN)" at - line 1.
 ########
 #
-# STORE freeing tie'd AV
+# NAME STORE freeing tie'd AV
+no warnings 'once';
+my @a;
 sub TIEARRAY  { bless [] }
 sub STORE     { *a = []; 1 }
 sub STORESIZE { }
@@ -971,7 +1014,9 @@ $a[0] = 1;
 EXPECT
 ########
 #
-# CLEAR freeing tie'd AV
+# NAME CLEAR freeing tie'd AV
+no warnings 'once';
+my @a;
 sub TIEARRAY  { bless [] }
 sub CLEAR     { *a = []; 1 }
 sub STORESIZE { }
@@ -982,7 +1027,9 @@ tie @a, 'main';
 EXPECT
 ########
 #
-# FETCHSIZE freeing tie'd AV
+# NAME FETCHSIZE freeing tie'd AV
+no warnings 'once';
+my @a;
 sub TIEARRAY  { bless [] }
 sub FETCHSIZE { *a = []; 100 }
 sub STORESIZE { }
@@ -994,8 +1041,8 @@ EXPECT
 99
 ########
 #
-# [perl #86328] Crash when freeing tie magic that can increment the refcnt
-
+# NAME [perl #86328] Crash when freeing tie magic that can increment the refcnt
+no warnings 'once';
 eval { require Scalar::Util } or print("ok\n"), exit;
 
 sub TIEHASH {
@@ -1028,13 +1075,13 @@ EXPECT
 ok
 ########
 #
-# Localising a tied COW scalar should not make it read-only.
+# NAME Localising a tied COW scalar should not make it read-only.
 
 sub TIESCALAR { bless [] }
 sub FETCH { __PACKAGE__ }
 sub STORE {}
-tie $x, "";
-"$x";
+tie our $x, "";
+my $void = "$x";
 {
     local $x;
     $x = 3;
@@ -1044,10 +1091,10 @@ EXPECT
 ok
 ########
 #
-# Nor should it be impossible to tie COW scalars that are already PVMGs.
+# NAME Nor should it be impossible to tie COW scalars that are already PVMGs.
 
 sub TIESCALAR { bless [] }
-$x = *foo;        # PVGV
+my $x = *foo;        # PVGV
 undef $x;         # downgrade to PVMG
 $x = __PACKAGE__; # PVMG + COW
 tie $x, "";       # bang!
@@ -1056,38 +1103,38 @@ print STDERR "ok\n";
 
 # However, one should not be able to tie read-only glob copies, which look
 # a bit like kine internally (FAKE + READONLY).
-$y = *foo;
+my $y = *foo;
 Internals::SvREADONLY($y,1);
 tie $y, "";
 
 EXPECT
 ok
-Modification of a read-only value attempted at - line 16.
+Modification of a read-only value attempted at - line 15.
 ########
 #
-# And one should not be able to tie read-only COWs
+# NAME And one should not be able to tie read-only COWs
 for(__PACKAGE__) { tie $_, "" }
 sub TIESCALAR {bless []}
 EXPECT
-Modification of a read-only value attempted at - line 3.
+Modification of a read-only value attempted at - line 2.
 ########
 
-# Similarly, read-only regexps cannot be tied.
+# NAME Similarly, read-only regexps cannot be tied.
 sub TIESCALAR { bless [] }
-$y = ${qr//};
+my $y = ${qr//};
 Internals::SvREADONLY($y,1);
 tie $y, "";
 
 EXPECT
-Modification of a read-only value attempted at - line 6.
+Modification of a read-only value attempted at - line 5.
 ########
-
-# tied() should still work on tied scalars after glob assignment
+no strict 'subs'; no warnings;
+# NAME tied() should still work on tied scalars after glob assignment
 sub TIESCALAR {bless[]}
 sub FETCH {*foo}
 sub f::TIEHANDLE{bless[],f}
 tie *foo, "f";
-tie $rin, "";
+tie my $rin, "";
 [$rin]; # call FETCH
 print ref tied $rin, "\n";
 print ref tied *$rin, "\n";
@@ -1096,11 +1143,11 @@ main
 f
 ########
 
-# (un)tie $glob_copy vs (un)tie *$glob_copy
+# NAME (un)tie $glob_copy vs (un)tie *$glob_copy
 sub TIESCALAR { print "TIESCALAR\n"; bless [] }
 sub TIEHANDLE{ print "TIEHANDLE\n"; bless [] }
 sub FETCH { print "never called\n" }
-$f = *foo;
+my $f = *foo;
 tie *$f, "";
 tie $f, "";
 untie $f;
@@ -1115,10 +1162,11 @@ ok 1
 ok 2
 ########
 
-# RT #8611 mustn't goto outside the magic stack
+# NAME RT #8611 mustn't goto outside the magic stack - a
+#
 sub TIESCALAR { warn "tiescalar\n"; bless [] }
 sub FETCH { warn "fetch()\n"; goto FOO; }
-tie $f, "";
+tie my $f, "";
 warn "before fetch\n";
 my $a = "$f";
 warn "before FOO\n";
@@ -1131,7 +1179,7 @@ fetch()
 Can't find label FOO at - line 4.
 ########
 
-# RT #8611 mustn't goto outside the magic stack
+# NAME RT #8611 mustn't goto outside the magic stack - b
 sub TIEHANDLE { warn "tiehandle\n"; bless [] }
 sub PRINT { warn "print()\n"; goto FOO; }
 tie *F, "";
@@ -1144,14 +1192,16 @@ EXPECT
 tiehandle
 before print
 print()
-Can't find label FOO at - line 4.
+Can't find label FOO at - line 3.
 ########
 
-# \&$tied with $tied holding a reference before the fetch (but not after)
+# NAME \&$tied with $tied holding a reference before the fetch (but not after)
+no warnings;
 sub ::72 { 73 };
 sub TIESCALAR {bless[]}
 sub STORE{}
 sub FETCH { 72 }
+my $y;
 tie my $x, "main";
 $x = \$y;
 \&$x;
@@ -1160,7 +1210,9 @@ EXPECT
 ok
 ########
 
+# NAME tied with tied holding a PVLV glob before the fetch (but not after)
 # \&$tied with $tied holding a PVLV glob before the fetch (but not after)
+no warnings 'once';
 sub ::72 { 73 };
 sub TIEARRAY {bless[]}
 sub STORE{}
@@ -1173,7 +1225,9 @@ EXPECT
 73
 ########
 
+# NAME tied with tied holding a PVGV glob before the fetch (but not after) 
 # \&$tied with $tied holding a PVGV glob before the fetch (but not after)
+no warnings 'once';
 local *72 = sub { 73 };
 sub TIESCALAR {bless[]}
 sub STORE{}
@@ -1185,17 +1239,20 @@ EXPECT
 73
 ########
 
-# Lexicals should not be visible to magic methods on scope exit
+# NAME Lexicals should not be visible to magic methods on scope exit
 BEGIN { unless (defined &DynaLoader::boot_DynaLoader) {
     print "HASH\nHASH\nARRAY\nARRAY\n"; exit;
 }}
 use Scalar::Util 'weaken';
 { package xoufghd;
   sub TIEHASH { Scalar::Util::weaken($_[1]); bless \$_[1], xoufghd:: }
+  no warnings 'once';
   *TIEARRAY = *TIEHASH;
   DESTROY {
      bless ${$_[0]} || return, 0;
 } }
+no warnings 'once';
+our $ref;
 for my $sub (
     # hashes: ties before backrefs
     sub {
@@ -1239,24 +1296,27 @@ ARRAY
 ARRAY
 ########
 
-# Localising a tied variable with a typeglob in it should copy magic
+# NAME Localising a tied variable with a typeglob in it should copy magic
+no warnings 'once';
 sub TIESCALAR{bless[]}
 sub FETCH{warn "fetching\n"; *foo}
 sub STORE{}
+our $x;
 tie $x, "";
 local $x;
 warn "before";
-"$x";
+my $void = "$x";
 warn "after";
 EXPECT
 fetching
-before at - line 8.
+before at - line 9.
 fetching
-after at - line 10.
+after at - line 11.
 ########
 
-# tied returns same value as tie
+# NAME tied returns same value as tie
 sub TIESCALAR{bless[]}
+my ($tyre, $tied);
 $tyre = \tie $tied, "";
 print "ok\n" if \tied $tied == $tyre;
 EXPECT
@@ -1303,6 +1363,7 @@ EXPECT
 k
 ########
 
+# NAME [perl #8931]
 # [perl #8931] FETCH for tied $" called an odd number of times.
 use strict;
 my $i = 0;
@@ -1311,19 +1372,20 @@ sub A::FETCH {print ++ $i, "\n"}
 my @a = ("", "", "");
 
 tie $" => 'A';
-"@a";
+my $xx = "@a";
 
 $i = 0;
 tie my $a => 'A';
-join $a, 1..10;
+my $void = join $a, 1..10;
 EXPECT
 1
 1
 ########
 
+# NAME [perl #9391]
 # [perl #9391] return value from 'tied' not discarded soon enough
 use warnings;
-tie @a, 'T';
+tie my @a, 'T';
 if (tied @a) {
 untie @a;
 }
@@ -1338,18 +1400,18 @@ EXPECT
 package l {
     sub TIEHASH{bless[]}
 }
-$h = {foo=>0};
+my $h = {foo=>0};
 each %$h;
 delete $$h{foo};
 tie %$h, 'l';
 EXPECT
 ########
-
+no strict; no warnings;
 # NAME EXISTS on arrays
 sub TIEARRAY{bless[]};
 sub FETCHSIZE { 50 }
 sub EXISTS { print "does $_[1] exist?\n" }
-tie @a, "";
+tie my @a, "";
 exists $a[1];
 exists $a[-1];
 $NEGATIVE_INDICES=1;
@@ -1362,7 +1424,7 @@ does -1 exist?
 
 # Crash when using negative index on array tied to non-object
 sub TIEARRAY{bless[]};
-${\tie @a, ""} = undef;
+my @a; ${\tie @a, ""} = undef;
 eval { $_ = $a[-1] }; print $@;
 eval { $a[-1] = '' }; print $@;
 eval { delete $a[-1] }; print $@;
@@ -1379,6 +1441,8 @@ Can't call method "FETCHSIZE" on an undefined value at - line 8.
 sub NEGATIVE_INDICES;
 sub TIEARRAY{bless[]};
 sub FETCHSIZE{}
+my @a;
+no warnings "uninitialized";
 tie @a, "";
 print "ok\n" if ! defined $a[-1];
 EXPECT
@@ -1388,7 +1452,7 @@ ok
 # Assigning vstrings to tied scalars
 sub TIESCALAR{bless[]};
 sub STORE { print ref \$_[1], "\n" }
-tie $x, ""; $x = v3;
+tie my $x, ""; $x = v3;
 EXPECT
 VSTRING
 ########
@@ -1396,6 +1460,7 @@ VSTRING
 # [perl #27010] Tying deferred elements
 $\="\n";
 sub TIESCALAR{bless[]};
+my %h;
 sub {
     tie $_[0], "";
     print ref tied $h{k};
@@ -1420,18 +1485,19 @@ undef
 no
 no
 ########
-
+no warnings "uninitialized";
 # [perl #78194] Passing op return values to tie constructors
 sub TIEARRAY{
     print \$_[1] == \$_[1] ? "ok\n" : "not ok\n";
 };
-tie @a, "", "$a$b";
+tie my @a, "", "$a$b";
 EXPECT
 ok
 ########
-
+no strict 'subs';
 # Scalar-tied locked hash keys and copy-on-write
 use Tie::Scalar;
+my %h;
 tie $h{foo}, Tie::StdScalar;
 tie $h{bar}, Tie::StdScalar;
 $h{foo} = __PACKAGE__; # COW
@@ -1455,6 +1521,7 @@ ok
 
 # &xsub and goto &xsub with tied @_
 use Tie::Array;
+no strict 'subs';
 tie @_, Tie::StdArray;
 @_ = "\xff";
 &utf8::encode;
@@ -1476,6 +1543,7 @@ bf
 use Tie::Array;
 # This sub is called with a deferred element.  Inside the sub, $_[0] pros-
 # pectively points to element 10000 of @a.
+my @a;
 sub {
   tie @a, "Tie::StdArray";  # now @a is tied
   $#a = 20000;  # and FETCHSIZE/AvFILL will now return a big number
@@ -1487,13 +1555,13 @@ print
 EXPECT
 crumpets
 ########
-
+no warnings;
 # tied() in list assignment
 
 sub TIESCALAR : lvalue {
     ${+pop} = bless [], shift;
 }
-tie $t, "", \$a;
+tie my $t, "", \$a;
 $a = 7;
 ($a, $b) = (3, tied $t);
 print "a is $a\n";
@@ -1524,7 +1592,7 @@ my %inner = (a =>1, b => 2, c => 3);
 sub TIEHASH  { bless \%inner, $_[0] }
 sub FIRSTKEY { $f++; my $a = scalar keys %{$_[0]}; each %{$_[0]} }
 sub NEXTKEY  { $n++; each %{$_[0]} }
-tie %h, 'main';
+tie my %h, 'main';
 my $x = !keys %h;
 print "[$x][$f][$n]\n";
 %inner = ();
@@ -1541,7 +1609,7 @@ sub TIEHASH  { bless \%inner, $_[0] }
 sub FIRSTKEY { $f++; my $a = scalar keys %{$_[0]}; each %{$_[0]} }
 sub NEXTKEY  { $n++; each %{$_[0]} }
 sub SCALAR   { $s++; scalar %{$_[0]} }
-tie %h, 'main';
+tie my %h, 'main';
 my $x = !keys %h;
 print "[$x][$f][$n][$s]\n";
 %inner = ();
@@ -1557,7 +1625,7 @@ my %inner = (a =>1, b => 2, c => 3);
 sub TIEHASH  { bless \%inner, $_[0] }
 sub FIRSTKEY { $f++; my $a = scalar keys %{$_[0]}; each %{$_[0]} }
 sub NEXTKEY  { $n++; each %{$_[0]} }
-tie %h, 'main';
+tie my %h, 'main';
 my $x = keys %h;
 print "[$x][$f][$n]\n";
 %inner = ();
@@ -1576,7 +1644,7 @@ sub TIEHASH  { bless \%inner, $_[0] }
 sub FIRSTKEY { $f++; my $a = scalar keys %{$_[0]}; each %{$_[0]} }
 sub NEXTKEY  { $n++; each %{$_[0]} }
 sub SCALAR   { $s++; scalar %{$_[0]} }
-tie %h, 'main';
+tie my %h, 'main';
 my $x = keys %h;
 print "[$x][$f][$n][$s]\n";
 %inner = ();
