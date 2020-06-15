@@ -13,6 +13,7 @@ use Tie::Array; # we need to test sorting tied arrays
 # these shouldn't hang
 {
     no warnings;
+    my @a;
     sort { for ($_ = 0;; $_++) {} } @a;
     sort { while(1) {}            } @a;
     sort { while(1) { last; }     } @a;
@@ -23,7 +24,7 @@ use Tie::Array; # we need to test sorting tied arrays
 }
 
 sub Backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
-sub Backwards_stacked($$) { my($a,$b) = @_; $a lt $b ? 1 : $a gt $b ? -1 : 0 }
+sub Backwards_stacked :prototype($$) { my ($a, $b) = @_; $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 sub Backwards_other { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
 my $upperfirst = 'A' lt 'a';
@@ -42,11 +43,11 @@ my $upperfirst = 'A' lt 'a';
 # That said, EBCDIC sorts all small letters first, as opposed
 # to ASCII which sorts all big letters first.
 
-@harry = ('dog','cat','x','Cain','Abel');
-@george = ('gone','chased','yz','punished','Axed');
+my @harry = ('dog','cat','x','Cain','Abel');
+my @george = ('gone','chased','yz','punished','Axed');
 
-$x = join('', sort @harry);
-$expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
+my $x = join('', sort @harry);
+my $expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
 
 cmp_ok($x,'eq',$expected,'upper first 1');
 
@@ -145,8 +146,8 @@ if (! is(@wrongly_non_utf8, 0,
 
 cmp_ok($x,'eq',$expected,'upper first 4');
 $" = ' ';
-@a = ();
-@b = reverse @a;
+my @a = ();
+my @b = reverse @a;
 cmp_ok("@b",'eq',"",'reverse 1');
 
 @a = (1);
@@ -169,7 +170,7 @@ cmp_ok("@b",'eq',"4 3 2 1",'reverse 5');
 @b = sort {$a <=> $b;} @a;
 cmp_ok("@b",'eq',"2 3 4 10",'sort numeric');
 
-$sub = 'Backwards';
+my $sub = 'Backwards';
 $x = join('', sort $sub @harry);
 $expected = $upperfirst ? 'xdogcatCainAbel' : 'CainAbelxdogcat';
 
@@ -277,6 +278,7 @@ cmp_ok($@,'eq','',q(one is not a sub));
   cmp_ok("@b",'eq','4 3 2 1','sortname 8');
 }
 
+our ($sortsub, $sortglob, $sortglobr, $sortname);
 {
   local $sortsub = \&Backwards;
   local $sortglob = *Backwards;
@@ -379,7 +381,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 
     $m = \&test_if_scalar;
     sub cxt_four { sort $m 1,2 }
-    @x = cxt_four();
+    my @x = cxt_four();
     sub cxt_five { sort { test_if_scalar($a,$b); } 1,2 }
     @x = cxt_five();
     sub cxt_six { sort test_if_scalar 1,2 }
@@ -795,7 +797,7 @@ is "@output", "0 C B A", 'reversed sort with trailing argument';
 is "@output", "C B A 0", 'reversed sort with leading argument';
 
 eval { @output = sort {goto sub {}} 1,2; };
-$fail_msg = q(Can't goto subroutine outside a subroutine);
+my $fail_msg = q(Can't goto subroutine outside a subroutine);
 cmp_ok(substr($@,0,length($fail_msg)),'eq',$fail_msg,'goto subr outside subr');
 
 
@@ -931,7 +933,7 @@ sub ret_with_stacked { $_ = ($a<=>$b) + do {return $b <=> $a} }
 is("@b", "10 9 8 7 6 5 4 3 2 1", "return with SVs on stack");
 
 # Comparison code should be able to give result in non-integer representation.
-sub cmp_as_string($$) { $_[0] < $_[1] ? "-1" : $_[0] == $_[1] ? "0" : "+1" }
+sub cmp_as_string :prototype($$) { $_[0] < $_[1] ? "-1" : $_[0] == $_[1] ? "0" : "+1" }
 @b = sort { cmp_as_string($a, $b) } (1,5,4,7,3,2,3);
 is("@b", "1 2 3 3 4 5 7", "comparison result as string");
 @b = sort cmp_as_string (1,5,4,7,3,2,3);
@@ -968,12 +970,12 @@ is("@b", "1 2 3 3 4 5 7", "comparison result as string");
 
 fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
              '0 1 2 3',
-             {stderr => 1, switches => ['-w']},
+             {stderr => 1, switches => ['-w'], run_as_five => 1},
              'RT #72334');
 
 fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; @_ = 0..2; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
              '0 1 2 3',
-             {stderr => 1, switches => ['-w']},
+             {stderr => 1, switches => ['-w'], run_as_five => 1},
              'RT #72334');
 
 {
@@ -991,8 +993,7 @@ fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; @_ = 0..2; $
 	}
     }
 
-    sub sorter ($$) {
-	my ($l, $r) = @_;
+    sub sorter ($l=0, $r=0) {
 	my $q = \@_;
 	$l <=> $r;
     }
@@ -1027,7 +1028,7 @@ fresh_perl_is
    print "ok"
  ',
  'ok',
-  {},
+  { run_as_five => 1 },
  '[perl #77930] cx_stack reallocation during sort'
 ;
 
@@ -1040,7 +1041,7 @@ fresh_perl_is
     "Leakage" =~ /(.*)/;
     1
   }
-  sub soarterdd($$) {
+  sub soarterdd :prototype($$) {
     $output .= $1;
     "Leakage" =~ /(.*)/;
     1
@@ -1073,6 +1074,7 @@ is join("", sort $stubref split//, '04381091'), '98431100',
     'AUTOLOAD with stubref';
 
 # [perl #90030] sort without arguments
+my @x;
 eval '@x = (sort); 1';
 is $@, '', '(sort) does not die';
 is @x, 0, '(sort) returns empty list';
@@ -1108,11 +1110,11 @@ is $@, "",
 eval { eval { use warnings FATAL => 'all'; () = sort { "no thin" } 1,2 } };
 is $@, "",
   'no panic/crash with fatal warnings when sort sub returns string';
-sub notdef($$) { undef }
+sub notdef :prototype($$) { undef }
 eval { eval { use warnings FATAL => 'all'; () = sort notdef 1,2 } };
 is $@, "",
   'no panic/crash with fatal warnings when sort sub($$) returns undef';
-sub yarn($$) { "no thinking aloud" }
+sub yarn :prototype($$) { "no thinking aloud" }
 eval { eval { use warnings FATAL => 'all'; () = sort yarn 1,2 } };
 is $@, "",
   'no panic/crash with fatal warnings when sort sub($$) returns string';
