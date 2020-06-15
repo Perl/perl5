@@ -11,13 +11,13 @@ plan tests => 45;
 open(I, 'op/sysio.t') || die "sysio.t: cannot find myself: $!";
 binmode I;
 
-$reopen = ($^O eq 'VMS' ||
+my $reopen = ($^O eq 'VMS' ||
            $^O eq 'os2' ||
            $^O eq 'MSWin32' ||
            $^O eq 'NetWare' ||
            $^O eq 'dos');
 
-$x = 'abc';
+my $x = 'abc';
 
 # should not be able to do negative lengths
 eval { sysread(I, $x, -1) };
@@ -53,7 +53,7 @@ is(sysread(I, $a, 3, -2), 3);
 # the last two characters of $a should have changed (into three)
 is($a, "#!.\0\0erl");
 
-$outfile = tempfile();
+my $outfile = tempfile();
 
 open(O, ">$outfile") || die "sysio.t: cannot write $outfile: $!";
 binmode O;
