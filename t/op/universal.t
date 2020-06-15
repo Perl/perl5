@@ -13,7 +13,7 @@ BEGIN {
 
 plan tests => 143;
 
-$a = {};
+my $a = {};
 bless $a, "Bob";
 ok $a->isa("Bob");
 
@@ -21,10 +21,10 @@ package Human;
 sub eat {}
 
 package Female;
-@ISA=qw(Human);
+our @ISA=qw(Human);
 
 package Alice;
-@ISA=qw(Bob Female);
+our @ISA=qw(Bob Female);
 sub sing;
 sub drink { return "drinking " . $_[1]  }
 sub new { bless {} }
@@ -102,14 +102,18 @@ ok (!Cedric->isa('Programmer'));
 my $b = 'abc';
 my @refs = qw(SCALAR SCALAR     LVALUE      GLOB ARRAY HASH CODE);
 my @vals = (  \$b,   \3.14, \substr($b,1,1), \*b,  [],  {}, sub {} );
-for ($p=0; $p < @refs; $p++) {
-    for ($q=0; $q < @vals; $q++) {
+for (my $p=0; $p < @refs; $p++) {
+    for (my $q=0; $q < @vals; $q++) {
         is UNIVERSAL::isa($vals[$p], $refs[$q]), ($p==$q or $p+$q==1);
     };
 };
 
 ok UNIVERSAL::can(23, "can");
-++${"23::foo"};
+{
+    no strict 'refs';
+    ++${"23::foo"};    
+}
+
 ok UNIVERSAL::can("23", "can"), '"23" can can when the pack exists';
 ok UNIVERSAL::can(23, "can"), '23 can can when the pack exists';
 sub IO::Handle::turn {}
@@ -208,7 +212,7 @@ is $@, '';
 fresh_perl_is('package Foo; Foo->VERSION;  print "ok"', 'ok');
 
 # So did this.
-fresh_perl_is('$:; UNIVERSAL::isa(":","Unicode::String");print "ok"','ok');
+fresh_perl_is('$:; UNIVERSAL::isa(":","Unicode::String");print "ok"','ok', {run_as_five => 1});
 
 package Foo;
 
@@ -283,6 +287,7 @@ use warnings "deprecated";
 
     package RT66112::B;
 
+    our @ISA;
     sub isa {
 	my $self = shift;
 	@ISA = qw/RT66112::A/;
