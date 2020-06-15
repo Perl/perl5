@@ -55,6 +55,8 @@ my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.exe' :
                                  './perl'               ;
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
+$Invoke_Perl .= ' -I../lib';
+
 if ($Is_VMS) {
     my (%old, $x);
     for $x ('DCL$PATH', @MoreEnv) {
@@ -94,12 +96,12 @@ my $TAINT0;
 
 # This taints each argument passed. All must be lvalues.
 # Side effect: It also stringifies them. :-(
-sub taint_these (@) {
+sub taint_these :prototype(@) {
     for (@_) { $_ .= $TAINT }
 }
 
 # How to identify taint when you see it
-sub tainted ($) {
+sub tainted :prototype($) {
     local $@;   # Don't pollute caller's value.
     not eval { join("",@_), kill 0; 1 };
 }
@@ -1751,11 +1753,11 @@ SKIP: {
     while (my ($k, $v) = each %ENV) {
 	if (!tainted($v) &&
 	    # These we have explicitly untainted or set earlier.
-	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|PERL_CORE|TEMP|TERM|TMP)$/) {
+	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|PERL_CORE|TEMP|TERM|TMP|PERL5LIB)$/) {
 	    push @untainted, "# '$k' = '$v'\n";
 	}
     }
-    is("@untainted", "");
+    is("@untainted", "", "untainted");
 }
 
 
@@ -2167,7 +2169,7 @@ foreach my $ord (78, 163, 256) {
 
     is_tainted($string, "still tainted data");
 
-    my @got = split /[!,]/, $string;
+    @got = split /[!,]/, $string;
 
     # each @got would be useful here, but I want the test for earlier perls
     for my $i (0 .. $#data) {
@@ -2177,7 +2179,7 @@ foreach my $ord (78, 163, 256) {
 
     is_tainted($string, "still tainted data");
 
-    my @got = split /!/, $string;
+    @got = split /!/, $string;
 
     # each @got would be useful here, but I want the test for earlier perls
     for my $i (0 .. $#data) {
@@ -2286,7 +2288,7 @@ foreach my $ord (78, 163, 256) {
     local $ENV{PATH} = $ENV{PATH};
     $ENV{PATH} = $old_env_path if $Is_MSWin32;
 
-    fresh_perl_is(<<'end', "ok", { switches => [ '-T' ] },
+    fresh_perl_is(<<'end', "ok", { switches => [ '-T' ], run_as_five => 1, },
     $TAINT = substr($^X, 0, 0);
     formline('@'.('<'x("2000".$TAINT)).' | @*', 'hallo', 'welt');
     print "ok";
@@ -2397,7 +2399,7 @@ end
             "B" =~ $re
 EOF
         qr/Insecure user-defined property \\p\{main::IsB\}/,
-        { switches => [ "-T" ] },
+        { switches => [ "-T" ], run_as_five => 1, },
         "user-defined property; defn not known until runtime, tainted case");
     }
 }
