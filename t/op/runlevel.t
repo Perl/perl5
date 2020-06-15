@@ -17,12 +17,13 @@ run_multiple_progs('', \*DATA);
 done_testing();
 
 __END__
-@a = (1, 2, 3);
+no warnings;
+my @a = (1, 2, 3);
 {
   @a = sort { last ; } @a;
 }
 EXPECT
-Can't "last" outside a loop block at - line 3.
+Can't "last" outside a loop block at - line 4.
 ########
 package TEST;
  
@@ -36,8 +37,8 @@ sub FETCH {
   return ">$@<";
 }
 package main;
- 
-tie $bar, TEST;
+no strict;
+tie my $bar, TEST;
 print "- $bar\n";
 EXPECT
 still in fetch
@@ -57,8 +58,8 @@ sub FETCH {
 }
  
 package main;
- 
-tie $bar, TEST;
+ no strict;
+tie my $bar, TEST;
 print "- $bar\n";
 print "OK\n";
 EXPECT
@@ -74,12 +75,12 @@ sub TIEHANDLE {
 }
 sub PRINT {
 print STDERR "PRINT CALLED\n";
-(split(/./, 'x'x10000))[0];
+my $void = (split(/./, 'x'x10000))[0];
 eval('die("test\n")');
 }
  
 package main;
- 
+no strict;
 open FH, ">&STDOUT";
 tie *FH, TEST;
 print FH "OK\n";
@@ -111,8 +112,8 @@ sub str {
 }
  
 package main;
- 
-$bar = bless {}, TEST;
+no strict;
+my $bar = bless {}, TEST;
 print "$bar\n";
 print "OK\n";
 EXPECT
@@ -122,7 +123,7 @@ OK
 sub foo {
   $a <=> $b unless eval('$a == 0 ? bless undef : ($a <=> $b)');
 }
-@a = (3, 2, 0, 1);
+my @a = (3, 2, 0, 1);
 @a = sort foo @a;
 print join(', ', @a)."\n";
 EXPECT
@@ -132,7 +133,7 @@ sub foo {
   goto bar if $a == 0 || $b == 0;
   $a <=> $b;
 }
-@a = (3, 2, 0, 1);
+my @a = (3, 2, 0, 1);
 @a = sort foo @a;
 print join(', ', @a)."\n";
 exit;
@@ -141,31 +142,31 @@ print "bar reached\n";
 EXPECT
 Can't "goto" out of a pseudo block at - line 2.
 ########
-%seen = ();
+my %seen = ();
 sub sortfn {
-  (split(/./, 'x'x10000))[0];
+  my $void = (split(/./, 'x'x10000))[0];
   my (@y) = ( 4, 6, 5);
   @y = sort { $a <=> $b } @y;
   my $t = "sortfn ".join(', ', @y)."\n";
   print $t if ($seen{$t}++ == 0);
   return $_[0] <=> $_[1];
 }
-@x = ( 3, 2, 1 );
+my @x = ( 3, 2, 1 );
 @x = sort { &sortfn($a, $b) } @x;
 print "---- ".join(', ', @x)."\n";
 EXPECT
 sortfn 4, 5, 6
 ---- 1, 2, 3
 ########
-@a = (3, 2, 1);
+my @a = (3, 2, 1);
 @a = sort { eval('die("no way")') ,  $a <=> $b} @a;
 print join(", ", @a)."\n";
 EXPECT
 1, 2, 3
 ########
-@a = (1, 2, 3);
+my @a = (1, 2, 3);
 foo:
-{
+{ no warnings;
   @a = sort { last foo; } @a;
 }
 EXPECT
@@ -185,13 +186,14 @@ sub STORE {
 }
  
 package main;
- 
-tie $bar, TEST;
+no strict;
+tie my $bar, TEST;
 {
   print "- $bar\n";
 }
 print "OK\n";
 EXPECT
+Exiting subroutine via next at - line 8.
 Can't "next" outside a loop block at - line 8.
 ########
 package TEST;
@@ -206,8 +208,8 @@ sub FETCH {
 }
  
 package main;
- 
-tie $bar, TEST;
+no strict;
+tie my $bar, TEST;
 print "- $bar\n";
 exit;
 bbb:
@@ -218,13 +220,13 @@ Can't find label bbb at - line 8.
 sub foo {
   $a <=> $b unless eval('$a == 0 ? die("foo\n") : ($a <=> $b)');
 }
-@a = (3, 2, 0, 1);
+my @a = (3, 2, 0, 1);
 @a = sort foo @a;
 print join(', ', @a)."\n";
 EXPECT
 0, 1, 2, 3
 ########
-package TEST;
+package TEST; no strict; no warnings;
 sub TIESCALAR {
   my $foo;
   return bless \$foo;
@@ -235,8 +237,8 @@ sub FETCH {
 sub STORE {
 (split(/./, 'x'x10000))[0];
 }
-package main;
-tie $bar, TEST;
+package main; no strict; no warnings;
+tie my $bar, TEST;
 $bar = "x";
 ########
 package TEST;
@@ -245,14 +247,15 @@ sub TIESCALAR {
   next;
   return bless \$foo;
 }
-package main;
+package main; no strict;
 {
-tie $bar, TEST;
+tie my $bar, TEST;
 }
 EXPECT
+Exiting subroutine via next at - line 4.
 Can't "next" outside a loop block at - line 4.
 ########
-@a = (1, 2, 3);
+my @a = (1, 2, 3);
 foo:
 {
   @a = sort { exit(0) } @a;
@@ -263,8 +266,8 @@ foobar
 ########
 $SIG{__DIE__} = sub {
     print "In DIE\n";
-    $i = 0;
-    while (($p,$f,$l,$s) = caller(++$i)) {
+    my $i = 0;
+    while (my ($p,$f,$l,$s) = caller(++$i)) {
         print "$p|$f|$l|$s\n";
     }
 };
@@ -306,6 +309,7 @@ EXPECT
 foo|fee|fie|foe
 ########
 package TH;
+no strict;
 sub TIEHASH { bless {}, TH }
 sub STORE { eval { print "@_[1,2]\n" }; die "bar\n" }
 tie %h, TH;
@@ -341,6 +345,7 @@ tie *STDERR, '';
 { map ++$_, 1 }
 
 EXPECT
+Exiting subroutine via next at - line 2.
 Can't "next" outside a loop block at - line 2.
 ########
 sub TIEHANDLE { bless {} }
@@ -352,6 +357,7 @@ die "DIE\n";
 EXPECT
 [TIE] DIE
 ########
+no warnings;
 sub TIEHANDLE { bless {} }
 sub PRINT { 
     (split(/./, 'x'x10000))[0];
@@ -365,4 +371,4 @@ use warnings FATAL => qw(uninitialized);
 print undef;
 
 EXPECT
-[TIE] Use of uninitialized value in print at - line 11.
+[TIE] Use of uninitialized value in print at - line 12.
