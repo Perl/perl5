@@ -9,7 +9,8 @@ BEGIN {
 }
 use warnings ;
 
-$a = 'abcdefxyz';
+my $a = 'abcdefxyz';
+my $w;
 $SIG{__WARN__} = sub {
      if ($_[0] =~ /^substr outside of string/) {
           $w++;
@@ -30,7 +31,7 @@ my $krunch = "a";
 
 sub run_tests {
 
-$FATAL_MSG = qr/^substr outside of string/;
+my $FATAL_MSG = qr/^substr outside of string/;
 
 is(substr($a,0,3), 'abc');   # P=Q R S
 is(substr($a,3,3), 'def');   # P Q R S
@@ -317,7 +318,7 @@ is($data{'a'}, "last");
 
 # The following two originally from Ignasi Roca.
 
-$x = "\xF1\xF2\xF3";
+my $x = "\xF1\xF2\xF3";
 substr($x, 0, 1) = "\x{100}"; # Ignasi had \x{FF}
 is(length($x), 3);
 is($x, "\x{100}\xF2\xF3");
@@ -829,6 +830,7 @@ ${\substr $refee, 0} = bless ["\x{100}"], o::;
 is $o::count, 1, 'assigning utf8 overload to substr lvalue calls ovld 1ce';
 
 # [perl #7678] core dump with substr reference and localisation
+our $k;
 {$b="abcde"; local $k; *k=\substr($b, 2, 1);}
 
 # [perl #128260] assertion failure with \substr %h, \substr @h
