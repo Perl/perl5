@@ -143,7 +143,7 @@ for our $z (*_) {
 package _128106 {
     # Crash on non-globs in the stash.
     sub u;    # stub without proto
-    sub v($); # proto stub
+    sub v :prototype($); # proto stub
     sub w{};  # as of 5.22, $::{w} == \&w
     $::{x} = undef;
     reset 'u-x';
