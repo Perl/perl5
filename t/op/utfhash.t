@@ -176,10 +176,12 @@ foreach ("\x7f","\xff")
 
 {
     local $/; # Slurp.
+    no feature 'unicode_eval';
     my $data = <DATA>;
     my ($utf8, $utf1047ebcdic) = split /__SPLIT__/, $data;
     $utf8 = $utf1047ebcdic if $::IS_EBCDIC;
     eval $utf8;
+    warn $@ if $@;
 }
 __END__
 {
