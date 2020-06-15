@@ -36,7 +36,7 @@ sub A::B::Intersection {
 END
 }
 
-sub test_regexp ($$) {
+sub test_regexp :prototype($$) {
   # test that given string consists of N-1 chars matching $qr1, and 1
   # char matching $qr2
   my ($str, $blk) = @_;
