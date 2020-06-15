@@ -120,6 +120,7 @@ is(takeuchi($x, $y, $z), $z + 1, "takeuchi($x, $y, $z) == $z + 1");
 	$r = runperl(
 		     nolib => 1,
 		     stderr => 1,
+             run_as_five => 1,
 		     prog => q{$d=0; $e=1; sub c { ++$d; if ($d > 66000) { $e=0 } else { c(); c() unless $d % 32768 } --$d } c(); exit $e});
     };
   SKIP: {
