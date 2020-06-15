@@ -50,7 +50,7 @@ is($a, 'xyzxyz',        'x=1');
 $a x= 0;
 is($a, '',              'x=0');
 
-@x = (1,2,3);
+my @x = (1,2,3);
 
 is(join('', @x x 4),        '3333',                 '@x x Y');
 is(join('', (@x) x 4),      '123123123123',         '(@x) x Y');
@@ -168,6 +168,7 @@ sub {
 }
  ->(("${\''}")x2);
 
+my @that_array;
 $#that_array = 7;
 for(($#that_array)x2) {
     $_ *= 2;
@@ -180,7 +181,7 @@ is($#that_array, 28, 'list repetition propagates lvalue cx to its lhs');
 fresh_perl_like(
  '@a = (1) x ~1',
   qr/Out of memory/,
-  {  },
+  { run_as_five => 1 },
  '(1) x ~1',
 );
 
@@ -194,7 +195,7 @@ eval q{() = (() or ((0) x 0)); 1};
 is($@, "", "RT #130247");
 
 # yes, the newlines matter
-fresh_perl_is(<<'PERL', "", { stderr => 1 }, "(perl #133778) MARK mishandling");
+fresh_perl_is(<<'PERL', "", { stderr => 1, run_as_five => 1 }, "(perl #133778) MARK mishandling");
 map{s[][];eval;0}<DATA>__END__
 
 
