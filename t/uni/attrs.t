@@ -16,7 +16,7 @@ use feature 'unicode_strings';
 
 $SIG{__WARN__} = sub { die @_ };
 
-sub eval_ok ($;$) {
+sub eval_ok :prototype($;$) {
     eval shift;
     is( $@, '', @_);
 }
@@ -24,10 +24,10 @@ sub eval_ok ($;$) {
 fresh_perl_is 'use attributes; print "ok"', 'ok', {},
    'attributes.pm can load without warnings.pm already loaded';
 
-eval 'sub è1 ($) : plùgh ;';
+eval 'sub è1 :prototype($) : plùgh ;';
 like $@, qr/^Invalid CODE attributes?: ["']?plùgh["']? at/;
 
-eval 'sub ɛ2 ($) : plǖgh(0,0) xyzzy ;';
+eval 'sub ɛ2 :prototype($) : plǖgh(0,0) xyzzy ;';
 like $@, qr/^Invalid CODE attributes: ["']?plǖgh\(0,0\)["']? /;
 
 eval 'my ($x,$y) : plǖgh;';
@@ -104,7 +104,7 @@ like $@, qr/Can't declare scalar dereference in "my"/;
 
 
 # this will segfault if it fails
-sub PVBM () { 'ᕘ' }
+sub PVBM :prototype() { 'ᕘ' }
 { my $dummy = index 'ᕘ', PVBM }
 
 ok !defined(eval 'attributes::get(\PVBM)'), 
@@ -175,11 +175,11 @@ ok !defined(eval 'attributes::get(\PVBM)'),
   package thwext;
   sub MODIFY_SCALAR_ATTRIBUTES { () }
   my $i = 0;
-  my $x_values = '';
-  eval 'sub ᕘ { use 5.01; state $x :A0 = $i++; $x_values .= $x }';
+  eval 'sub ᕘ { state $x :A0 = $i++; $::x_values .= $x }; 1' or warn $@;
   ᕘ(); ᕘ();
   package main;
-  is $x_values, '00', 'state with attributes';
+  no warnings 'once';
+  is $::x_values, '00', 'state with attributes';
 }
 
 {
