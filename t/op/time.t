@@ -14,17 +14,19 @@ plan tests => 72;
 # the tests are triggering the failing behavior
 watchdog(25);
 
-($beguser,$begsys) = times;
+my ($beguser,$begsys) = times;
 
-$beg = time;
+my $beg = time;
 
+my $now;
 while (($now = time) == $beg) { sleep 1 }
 
 ok($now > $beg && $now - $beg < 10,             'very basic time test');
 my $x = "aaaa";
+my $i;
 for ($i = 0; $i < 1_000_000; $i++) {
     for my $j (1..1000) { ++$x; }; # burn some user cycles
-    ($nowuser, $nowsys) = times;
+    my ($nowuser, $nowsys) = times;
     $i = 2_000_000 if $nowuser > $beguser && ( $nowsys >= $begsys ||
                                             (!$nowsys && !$begsys));
     last if time - $beg > 20;
@@ -32,9 +34,9 @@ for ($i = 0; $i < 1_000_000; $i++) {
 
 ok($i >= 2_000_000, 'very basic times test');
 
-($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
-($xsec,$foo) = localtime($now);
-$localyday = $yday;
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
+my ($xsec,$foo) = localtime($now);
+my $localyday = $yday;
 
 isnt($sec, $xsec,      'localtime() list context');
 ok $mday,              '  month day';
@@ -56,6 +58,7 @@ SKIP: {
 
 # check that localtime respects changes to $ENV{TZ}
 $ENV{TZ} = "GMT-5";
+my ($hour2);
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
 $ENV{TZ} = "GMT+5";
 ($sec,$min,$hour2,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
