@@ -6,6 +6,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc( qw(../lib) );
     require './charset_tools.pl';
     skip_all_without_unicode_tables();
 }
@@ -14,6 +15,7 @@ plan (tests => 58);
 
 use utf8;
 use open qw( :utf8 :std );
+no warnings 'once';
 
 is *tèst, "*main::tèst", "sanity check.";
 ok $::{"tèst"}, "gets the right glob in the stash.";
@@ -38,13 +40,16 @@ is "" . $a, "*main::下郎";
 *{gimme_glob("下郎")} = sub {};
 
 {
+    no strict 'refs';
     ok defined *{"下郎"}{CODE};
     ok !defined *{"\344\270\213\351\203\216"}{CODE};
 }
-
-$Lèon = 1;
-is ${*Lèon{SCALAR}}, 1, "scalar define in the right glob,";
-ok !${*{"L\303\250on"}{SCALAR}}, "..and nothing in the wrong one.";
+{
+    no strict 'refs';
+    our $Lèon = 1;
+    is ${*Lèon{SCALAR}}, 1, "scalar define in the right glob,";
+    ok !${*{"L\303\250on"}{SCALAR}}, "..and nothing in the wrong one.";
+}
 
 my $a = "foo" . chr(190);
 my $b = $a    . chr(256);
@@ -52,7 +57,10 @@ chop $b; # $b is $a with utf8 on
 
 is $a, $b, '$a equals $b';
 
-*$b = sub { 5 };
+{
+    no strict 'refs';
+    *$b = sub { 5 };
+}
 
 is eval { main->$a }, 5, q!$a can call $b's sub!;
 ok !$@, "..and there's no error.";
@@ -64,17 +72,23 @@ eval { main->$c };
 ok $@, q!$c can't call $b's sub.!;
 
 # Now define another sub under the downgraded name:
-*$a = sub { 6 };
+{
+    no strict 'refs';
+    *$a = sub { 6 };
+}
 # Call it:
 is eval { main->$a }, 6, "Adding a new sub to *a and calling it works,";
 ok !$@, "..without errors.";
 eval { main->$c };
 ok $@, "but it's still unreachable through *c";
 
-*$b = \10;
-is ${*$a{SCALAR}}, 10;
-is ${*$b{SCALAR}}, 10;
-is ${*$c{SCALAR}}, undef;
+{
+    no strict 'refs';
+    *$b = \10;
+    is ${*$a{SCALAR}}, 10;
+    is ${*$b{SCALAR}}, 10;
+    is ${*$c{SCALAR}}, undef;
+}
 
 opendir FÒÒ, ".";
 closedir FÒÒ;
@@ -92,16 +106,20 @@ is grep({ $_ eq "\x{539f}"     } keys %::), 1, "Constant subs generate the right
 is grep({ $_ eq "\345\216\237" } keys %::), 0;
 
 #These should probably go elsewhere.
-eval q{ sub wròng1 (_$); wròng1(1,2) };
+eval q{ sub wròng1 :prototype(_$); wròng1(1,2) };
 like( $@, qr/Malformed prototype for main::wròng1/, 'Malformed prototype croak is clean.' );
 
-eval q{ sub ча::ики ($__); ча::ики(1,2) };
+eval q{ sub ча::ики :prototype($__); ча::ики(1,2) };
 like( $@, qr/Malformed prototype for ча::ики/ );
 
 our $問 = 10;
 is $問, 10, "our works";
 is $main::問, 10, "...as does getting the same variable through the fully qualified name";
-is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
+{
+    no strict 'refs';
+    is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
+}
+
 
 {
     use charnames qw( :full );
@@ -133,7 +151,7 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
 
         $f = qq{(?{q\0foobar\0 \x{FFFF}+1 })};
         eval { "a" =~ /^a$f/ };
-        my $e = $@;
+        $e = $@;
         $e =~ s/eval \d+/eval 11/;
         is(
             $e,
@@ -141,7 +159,7 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
            "...and nul-clean"
         );
     }
-    
+
     {
         eval qq{\$ネ+ 1; \x{1F42A}};
         $@ =~ s/eval \d+/eval 11/;
@@ -158,7 +176,7 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
     use feature 'state';
     for ( qw( my state our ) ) {
         local $@;
-        eval "$_ Ｆｏｏ $x = 1;";
+        eval "$_ Ｆｏｏ our \$x = 1;";
         like $@, qr/No such class Ｆｏｏ/u, "'No such class' warning for $_ is UTF-8 clean";
     }
 }
@@ -242,6 +260,7 @@ SKIP: {
         my $a;
         my $b;
 
+        no feature  (qw/unicode_eval/);
         # This caused a memory fault [perl #128738]
         $b = byte_utf8a_to_utf8n("\xFE\x82\x80\x80\x80\x80\x80"); # 0x80000000
         eval "\$a = q ${b}abc${b}";
@@ -260,8 +279,8 @@ SKIP: {
             . " delimiter";
     }
 }
-
-fresh_perl_is(<<'EOS', <<'EXPECT', {}, 'no panic in pad_findmy_pvn (#134061)');
+no strict 'refs';
+fresh_perl_is(<<'EOS', <<'EXPECT', { run_as_five => 1 }, 'no panic in pad_findmy_pvn (#134061)');
 use utf8;
 eval "sort \x{100}%";
 die $@;
