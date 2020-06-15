@@ -374,12 +374,16 @@ package t {
     sub TIEHASH { bless [] }
     sub FIRSTKEY { 0 }
 }
-leak(2, 0, sub {
-    my $h = {};
-    tie %$h, t;
-    each %$h;
-    undef $h;
-}, 'tied hash iteration does not leak');
+{
+    no strict 'subs';
+
+    leak(2, 0, sub {
+        my $h = {};
+        tie %$h, t;
+        each %$h;
+        undef $h;
+    }, 'tied hash iteration does not leak');
+}
 
 package explosive_scalar {
     sub TIESCALAR { my $self = shift; bless [undef, {@_}], $self  }
@@ -391,12 +395,15 @@ tie my $die_on_fetch, 'explosive_scalar', FETCH => 1;
 # List assignment was leaking when assigning explosive scalars to
 # aggregates.
 leak(2, 0, sub {
+    my %a;
     eval {%a = ($die_on_fetch, 0)}; # key
     eval {%a = (0, $die_on_fetch)}; # value
     eval {%a = ($die_on_fetch, $die_on_fetch)}; # both
     eval {%a = ($die_on_fetch)}; # key, odd elements
 }, 'hash assignment does not leak');
 leak(2, 0, sub {
+    my @a;
+    my ($die_on_fetch, $b);
     eval {@a = ($die_on_fetch)};
     eval {($die_on_fetch, $b) = ($b, $die_on_fetch)};
     # restore
@@ -405,6 +412,7 @@ leak(2, 0, sub {
 
 # [perl #107000]
 package hhtie {
+    our $explosive;
     sub TIEHASH { bless [] }
     sub STORE    { $_[0][0]{$_[1]} = $_[2] }
     sub FETCH    { die if $explosive; $_[0][0]{$_[1]} }
@@ -530,6 +538,7 @@ EOF
     my $do_die = 0;
     sub STORE { die if $do_die; }
 
+    our $s;
     sub f {
         local $s;
         tie $s, 'MG_SET';
@@ -628,7 +637,7 @@ SKIP: {
 
 {
     # perl #133660
-    fresh_perl_is(<<'PERL', "ok", {}, "check goto core sub doesn't leak");
+    fresh_perl_is(<<'PERL', "ok", { run_as_five => 1 }, "check goto core sub doesn't leak");
 # done this way to avoid overloads for all of svleak.t
 use B;
 BEGIN {
