@@ -13,22 +13,23 @@ our $a = 123;
 our $z;
 
 {
-    no warnings "illegalproto";
+    no feature "signatures";
+    no warnings "illegalproto";    
+
     sub t000 ($a) { $a || "z" }
     is prototype(\&t000), "\$a", "(\$a) interpreted as protoype when not enabled";
     is &t000(456), 123, "(\$a) not signature when not enabled";
     is $a, 123;
 }
+{
+	no feature "signatures";
 
-eval "#line 8 foo\nsub t004 :method (\$a) { }";
-like $@, qr{syntax error at foo line 8}, "error when not enabled 1";
+	eval "#line 8 foo\nsub t004 :method (\$a) { }";
+	like $@, qr{syntax error at foo line 8}, "error when not enabled 1";
 
-eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
-like $@, qr{syntax error at foo line 8}, "error when not enabled 2";
-
-
-no warnings "experimental::signatures";
-use feature "signatures";
+	eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
+	like $@, qr{syntax error at foo line 8}, "error when not enabled 2";	
+}
 
 sub t001 { $a || "z" }
 is prototype(\&t001), undef;
