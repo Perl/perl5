@@ -29,7 +29,10 @@ sub { @c = caller(0) } -> ();
 sub ｆｏｏ { @c = caller(0) }
 # The subroutine only gets anonymised if it is relying on a real GV
 # for its name.
-() = *{"ｆｏｏ"}; # with quotes so that the op tree doesn’t reference the GV
+{
+	no strict 'refs';
+	() = *{"ｆｏｏ"}; # with quotes so that the op tree doesn’t reference the GV	
+}
 my $fooref = delete $ｍａｉｎ::{ｆｏｏ};
 $fooref -> ();
 ::is( $c[3], "ｍａｉｎ::__ANON__", "deleted subroutine name" );
@@ -59,7 +62,10 @@ sub { ｆ() } -> ();
 ::ok( $c[4], "hasargs true with anon sub" );
 
 sub ｆｏｏ2 { ｆ() }
-() = *{"ｆｏｏ2"}; # see ｆｏｏ notes above
+{
+	no strict 'refs';
+	() = *{"ｆｏｏ2"}; # see ｆｏｏ notes above
+}
 my $fooref2 = delete $ｍａｉｎ::{ｆｏｏ2};
 $fooref2 -> ();
 ::is( $c[3], "ｍａｉｎ::__ANON__", "deleted subroutine name" );
