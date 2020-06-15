@@ -12,6 +12,7 @@ my @data = ();
 
 plan(tests => 67);
 
+our $Level;
 sub compare {
     local $Level = $Level + 1;
 
@@ -89,7 +90,7 @@ is(ref($ob),  'Implement');
 is(tied(*$fh), $ob);
 
 @expect = (PRINT => $ob,"some","text");
-$r = print $fh @expect[2,3];
+my $r = print $fh @expect[2,3];
 is($r, 1);
 
 @expect = (PRINTF => $ob,"%s","text");
@@ -100,26 +101,26 @@ is($r, 2);
 @expect = (EOF => $ob, 1);
 is(eof($fh), '');
 
-$text = $data[0];
+my $text = $data[0];
 @expect = (READLINE => $ob);
-$ln = <$fh>;
+my $ln = <$fh>;
 is($ln, $text);
 
 @expect = (EOF => $ob, 0);
 is(eof, 1);
 
 @expect = ();
-@in = @data = qw(a line at a time);
-@line = <$fh>;
+my @in = @data = qw(a line at a time);
+my @line = <$fh>;
 @expect = @in;
 compare(@line);
 
 @expect = (GETC => $ob);
 $data = "abc";
-$ch = getc $fh;
+my $ch = getc $fh;
 is($ch, "a");
 
-$buf = "xyz";
+my $buf = "xyz";
 @expect = (READ => $ob, $buf, 3);
 $data = "abc";
 $r = read $fh,$buf,3;
@@ -231,6 +232,7 @@ is($r, 1);
 
 
 {
+    our ( %foo, @bar );
     # test for change 11639: Can't localize *FH, then tie it
     {
 	local *foo;
