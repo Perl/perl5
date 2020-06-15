@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 33;
+plan 42;
 
 my @warnings;
 my $wa = []; my $ea = [];
@@ -26,24 +26,27 @@ ok @warnings==1 && $warnings[0] eq "foobar\n";
 @warnings = ();
 $@ = "";
 warn "foo";
-ok @warnings==1 && $warnings[0] eq "foo at warn.t line 28.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^\Qfoo at warn.t line\E}, "foo at warn.t line";
 
 @warnings = ();
 $@ = "";
 warn $wa;
-ok @warnings==1 && ref($warnings[0]) eq "ARRAY" && $warnings[0] == $wa;
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+is ref $warnings[0], 'ARRAY', 'ARRAY';
+is $warnings[0], $wa, '$warnings[0]';
 
 @warnings = ();
 $@ = "";
 warn "";
-ok @warnings==1 &&
-    $warnings[0] eq "Warning: something's wrong at warn.t line 38.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^\QWarning: something's wrong at warn.t\E}, 'warnings';
 
 @warnings = ();
 $@ = "";
 warn;
-ok @warnings==1 &&
-    $warnings[0] eq "Warning: something's wrong at warn.t line 44.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^\QWarning: something's wrong at warn.t\E}, 'warnings';
 
 @warnings = ();
 $@ = "ERR\n";
@@ -58,7 +61,8 @@ ok @warnings==1 && $warnings[0] eq "foobar\n";
 @warnings = ();
 $@ = "ERR\n";
 warn "foo";
-ok @warnings==1 && $warnings[0] eq "foo at warn.t line 60.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^\Qfoo at warn.t line\E}, 'warnings';
 
 @warnings = ();
 $@ = "ERR\n";
@@ -68,14 +72,14 @@ ok @warnings==1 && ref($warnings[0]) eq "ARRAY" && $warnings[0] == $wa;
 @warnings = ();
 $@ = "ERR\n";
 warn "";
-ok @warnings==1 &&
-    $warnings[0] eq "ERR\n\t...caught at warn.t line 70.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^ERR\n\t\Q...caught at warn.t line \E}, 'warnings';
 
 @warnings = ();
 $@ = "ERR\n";
 warn;
-ok @warnings==1 &&
-    $warnings[0] eq "ERR\n\t...caught at warn.t line 76.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^ERR\n\t\Q...caught at warn.t line \E}, 'warnings';
 
 @warnings = ();
 $@ = $ea;
@@ -90,7 +94,8 @@ ok @warnings==1 && $warnings[0] eq "foobar\n";
 @warnings = ();
 $@ = $ea;
 warn "foo";
-ok @warnings==1 && $warnings[0] eq "foo at warn.t line 92.\n";
+is scalar @warnings, 1, "got a single warnings" or warn(join "\n", @warnings);
+like  $warnings[0], qr{^\Qfoo at warn.t line \E}, 'warnings';
 
 @warnings = ();
 $@ = $ea;
@@ -121,8 +126,8 @@ fresh_perl_like(
 
 SKIP: {
     skip_if_miniperl('miniperl ignores -C', 1);
-   $ee = uni_to_native("\xee");
-   $bytes = byte_utf8a_to_utf8n("\xc3\xae");
+   my $ee = uni_to_native("\xee");
+   my $bytes = byte_utf8a_to_utf8n("\xc3\xae");
 fresh_perl_like(
  "
    \$a = \"$ee\n\";
@@ -136,7 +141,7 @@ fresh_perl_like(
 );
 }
 
-$bytes = byte_utf8a_to_utf8n("\xc4\xac");
+my $bytes = byte_utf8a_to_utf8n("\xc4\xac");
 fresh_perl_like(
  'warn chr 300',
   qr/^Wide character in warn .*\n$bytes at /,
@@ -164,6 +169,8 @@ like $warnings[0], qr/^foo\n\t\.\.\.caught at warn\.t /,
 $@ = \$_;
 @warnings = ();
 {
+  no strict 'refs';
+  no warnings 'redefine';
   local *{ref(tied $@) . "::STORE"} = sub {};
   undef $@;
 }
@@ -178,9 +185,13 @@ untie $@;
   package o;
   use overload '""' => sub { "" };
 }
-tie $t, Tie::StdScalar;
-$t = bless [], o;
+my $t;
 {
+  no strict qw{subs refs};
+  no warnings 'redefine';
+  tie $t, Tie::StdScalar;
+  $t = bless [], o;
+
   local *{ref(tied $t) . "::STORE"} = sub {};
   undef $t;
 }
@@ -195,7 +206,7 @@ eval "#line 42 Cholmondeley\n \$\@ = 3; warn";
 is @warnings, 2;
 is $warnings[1], $warnings[0], 'warn treats $@=3 and $@="3" the same way';
 
-fresh_perl_is(<<'EOF', "should be line 4 at - line 4.\n", {stderr => 1}, "");
+fresh_perl_is(<<'EOF', "should be line 4 at - line 4.\n", {stderr => 1, run_as_five => 1}, "");
 ${
     foo
 } = "should be line 4";
@@ -210,7 +221,7 @@ line 4 at - line 3.
 also line 4 at - line 4.
 line 5 at - line 5.
 EOF
-    fresh_perl_is(<<'EOF', $expected, {stderr => 1}, "");
+    fresh_perl_is(<<'EOF', $expected, {stderr => 1, run_as_five => 1}, "");
 warn "line 1";
 (${
     foo
@@ -223,7 +234,7 @@ EOF
 # RT #132602 pp_warn in scalar context was extending the stack then
 # setting SP back to the old, freed stack frame
 
-fresh_perl_is(<<'EOF', "OK\n", {stderr => 1}, "RT #132602");
+fresh_perl_is(<<'EOF', "OK\n", {stderr => 1, run_as_five => 1}, "RT #132602");
 $SIG{__WARN__} = sub {};
 
 my (@a, @b);
