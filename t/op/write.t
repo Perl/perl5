@@ -1671,7 +1671,7 @@ EOP
 # [perl #129125] - detected by -fsanitize=address or valgrind
 # the compiled format would be freed when the format string was modified
 # by the chop operator
-fresh_perl_is(<<'EOP', "^", { stderr => 1 }, '#129125 - chop on format');
+fresh_perl_is(<<'EOP', "^", { stderr => 1, run_as_five => 1 }, '#129125 - chop on format');
 my $x = '^@';
 formline$x=>$x;
 print $^A;
@@ -1993,7 +1993,7 @@ write;
 EOP
 dd|
 EXPECT
-	      { stderr => 1 }, '#123245 panic in sv_chop');
+	      { stderr => 1, run_as_five => 1}, '#123245 panic in sv_chop');
 
 fresh_perl_is(<<'EOP', <<'EXPECT',
 use warnings 'syntax' ;
