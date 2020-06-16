@@ -206,7 +206,7 @@ Perl_ReANY(const REGEXP * const re)
 
 PERL_STATIC_INLINE bool
 Perl_SvTRUE(pTHX_ SV *sv) {
-    if (!LIKELY(sv))
+    if (UNLIKELY(sv == NULL))
         return FALSE;
     SvGETMAGIC(sv);
     return SvTRUE_nomg_NN(sv);
