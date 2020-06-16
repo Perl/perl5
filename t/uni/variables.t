@@ -238,7 +238,7 @@ for ( 0x0 .. 0xff ) {
             }
         }
         my $message = "  ... and doesn't generate any warnings";
-        $message = "  TODO $message" if    $ord == 0
+        $message = "  # TODO $message" if    $ord == 0
                                         || $chr =~ /\s/a;
 
         if (! ok(@warnings == 0, $message)) {
