@@ -15,7 +15,7 @@ use open qw( :utf8 :std );
 
 plan tests => 90;
 
-$a = {};
+my $a = {};
 bless $a, "Bòb";
 ok $a->isa("Bòb");
 
@@ -23,10 +23,10 @@ package Hùmàn;
 sub èàt {}
 
 package Fèmàlè;
-@ISA=qw(Hùmàn);
+our @ISA=qw(Hùmàn);
 
 package Àlìcè;
-@ISA=qw(Bòb Fèmàlè);
+our @ISA=qw(Bòb Fèmàlè);
 sub sìng;
 sub drìnk { return "drinking " . $_[1]  }
 sub nèw { bless {} }
@@ -103,8 +103,8 @@ ok (!Cèdrìc->isa('Prògràmmèr'));
 my $b = 'abc';
 my @refs = qw(SCALAR SCALAR     LVALUE      GLOB ARRAY HASH CODE);
 my @vals = (  \$b,   \3.14, \substr($b,1,1), \*b,  [],  {}, sub {} );
-for ($p=0; $p < @refs; $p++) {
-    for ($q=0; $q < @vals; $q++) {
+for (my $p=0; $p < @refs; $p++) {
+    for (my $q=0; $q < @vals; $q++) {
         is UNIVERSAL::isa($vals[$p], $refs[$q]), ($p==$q or $p+$q==1);
     };
 };
