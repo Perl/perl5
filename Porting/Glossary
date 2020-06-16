@@ -5268,7 +5268,7 @@ startperl (startperl.U):
 	shell. Of course, that leading line must be followed by the classical
 	perl idiom:
 	eval 'exec perl -S $0 ${1+"$@"}'
-	if $running_under_some_shell;
+	if 0; # ^ Run only under a shell
 	to guarantee perl startup should the shell execute the script. Note
 	that this magic incantation is not understood by csh.
 
