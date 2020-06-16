@@ -2,9 +2,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
+    $^W = 0;
+    ${^WARNING_BITS} = 0;
 }
-
-use p5;
 
 print "1..7\n";
 
