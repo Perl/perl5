@@ -75,6 +75,7 @@ my %T = (
    },
    'dumper' => sub {
       require Data::Dumper;
+      no warnings 'once';
       local $Data::Dumper::Terse     = 1;
       local $Data::Dumper::Indent    = 1;
       local $Data::Dumper::Useqq     = 1;
