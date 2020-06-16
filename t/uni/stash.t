@@ -13,6 +13,8 @@ BEGIN {
 use utf8;
 use open qw( :utf8 :std );
 
+no warnings 'once';
+
 plan( tests => 49 );
 
 #These come from op/my_stash.t
@@ -37,6 +39,7 @@ plan( tests => 49 );
     }
 }
 
+our $TODO;
 #op/stash.t
 {
     package ᛐⲞɲe::Šꇇᚽṙᆂṗ;
@@ -93,13 +96,13 @@ plan( tests => 49 );
         is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
         is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");
     
-        my $sub = do {
+        $sub = do {
             package ꃖᚢ;
             sub { 1 };
         };
         %ꃖᚢ:: = ();
     
-        my $gv = B::svref_2object($sub)->GV;
+        $gv = B::svref_2object($sub)->GV;
         ok($gv->isa(q/B::GV/), "cleared stash leaves anon CV with valid GV");
     
         my $st = eval { $gv->STASH->NAME };
@@ -284,7 +287,10 @@ plan( tests => 49 );
         'packages ending with :: are self-consistent';
     }
     
-    # [perl #88138] ' not equivalent to :: before a null
-    ${"à'\0b"} = "c";
-    is ${"à::\0b"}, "c", "' is equivalent to :: before a null";
+    {
+        no strict 'refs';
+        # [perl #88138] ' not equivalent to :: before a null    
+        ${"à'\0b"} = "c";
+        is ${"à::\0b"}, "c", "' is equivalent to :: before a null";        
+    }
 }
