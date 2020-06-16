@@ -11,7 +11,19 @@
 #define H_PERL_7 1
 
 /* this is used by toke.c to setup a Perl7 flavor */
-#define P7_TOKE_SETUP "use p7;"
+/* #define P7_TOKE_SETUP "use p7;" */
+
+#define P7_TOKE_SETUP "BEGIN { "\
+                      "   ${^WARNING_BITS} = pack( 'H*', '555555555555555555555555150001500101' );"\
+                      "   $^H |= 0x00000602;"\
+                      "   require feature;"\
+                      "   feature->import(':7.0');"\
+                      "}"
+
+/*
+
+bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval
+*/
 
 #endif /* Include guard */
 
