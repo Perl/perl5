@@ -16,13 +16,14 @@ use open qw( :utf8 :std );
 plan( tests => 5 );
 
 open DÙP, ">&", *STDERR;
-open $dùp, ">&", *STDOUT;
+open my $dùp, ">&", *STDOUT;
 open 둪,  ">&", *STDERR;
-open $ᛞ웊, ">&", *STDOUT;
+open my $ᛞ웊, ">&", *STDOUT;
 
 is select(DÙP), "main::STDOUT";
 is select($dùp), "main::DÙP";
 
+our $TODO;
 TODO: {
     local $TODO = "Scalar filehandles not yet clean";
     is select(둪), "main::dùp";
