@@ -374,7 +374,7 @@ struct TM *Perl_gmtime64_r (const Time64_T *in_time, struct TM *p)
     p->tm_isdst  = 0;
 
 #ifdef HAS_TM_TM_ZONE
-    p->tm_zone   = (char *)"UTC";
+    p->tm_zone   = "UTC";
 #endif
 
     v_tm_sec  = (int)Perl_fmod(time, 60.0);
