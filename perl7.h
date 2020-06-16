@@ -20,11 +20,14 @@
 /* this is used by toke.c to setup a Perl7 flavor */
 /* #define P7_TOKE_SETUP "use p7;" */
 
+/*
+*   GENERATED using lib/feature.pm: FIXME
+*/
+
 #define P7_TOKE_SETUP "BEGIN { "\
                       "   ${^WARNING_BITS} = pack( 'H*', '555555555555555555555555150001500101' );"\
                       "   $^H |= 0x00000602;"\
-                      "   require feature;"\
-                      "   feature->import(':7.0');"\
+                      "   $^H{feature_switch} = 1;$^H{feature_evalbytes} = 1; $^H{feature_bitwise} = 1; $^H{feature_postderef_qq} = 1; $^H{feature_myref} = 1; $^H{feature_fc} = 1; $^H{feature_refaliasing} = 1; $^H{feature_unieval} = 1; $^H{feature_say} = 1; $^H{feature_signatures} = 1; $^H{feature_switch} = 1; $^H{feature___SUB__} = 1; $^H{feature_state} = 1;"\
                       "}"
 
 /*
