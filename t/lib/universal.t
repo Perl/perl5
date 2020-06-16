@@ -24,7 +24,7 @@ Usage: Internals::hv_clear_placeholders(hv) at (eval 3) line 1.
 
 # Various conundrums with SvREADONLY
 
-$x = *foo;
+my $x = *foo;
 Internals::SvREADONLY $x, 1;
 ok Internals::SvREADONLY($x),
          'read-only glob copies are read-only acc. to Internals::';
@@ -47,6 +47,7 @@ Internals::SvREADONLY($x,0);
 $x = 42;
 is $x, 42, 'Internals::SvREADONLY can turn off readonliness on regexps';
 
+my %h;
 $h{a} = __PACKAGE__;
 Internals::SvREADONLY $h{a}, 1;
 eval { $h{a} = 3 };
