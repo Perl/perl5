@@ -36,14 +36,10 @@ END_FIELDS
 
 die $@ if $@;
 
-our $TODO;
 for (
         [ element => 'my ＦŌŌ $bàr = ＦŌŌ->new; $bàr->{クラス};' ],
         [ slice => 'my ＦŌŌ $bàr = ＦŌŌ->new; @{$bàr}{ qw( a クラス ) };' ]
     ) {
-
-    local $TODO;
-    $TODO = q[Need to adjust with Perl 7] if $_->[0] eq 'slice';
 
     eval $_->[1];    
     warn "## Error: $@" if $@;
