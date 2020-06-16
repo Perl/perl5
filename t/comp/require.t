@@ -1,12 +1,12 @@
 #!./perl
 
-use p5;
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '.';
     push @INC, '../lib', '../ext/re';
 }
+
+use p5;
 
 sub do_require {
     %INC = ();
