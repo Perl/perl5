@@ -38,7 +38,7 @@ Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME (Missing operator before @foo) [perl #123737]
-0@foo
+use p5; 0@foo
 EXPECT
 Array found where operator expected at - line 1, near "0@foo"
 	(Missing operator before @foo?)
@@ -133,7 +133,7 @@ EXPECT
 Missing name in "our sub" at - line 1.
 ########
 # NAME Missing name in "state sub"
-use 5.01;
+use 5.30;
 state sub;
 EXPECT
 Missing name in "state sub" at - line 2.
@@ -178,7 +178,7 @@ Constant(0x1) unknown at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME String constant overloading returning undef
-use overload;
+use overload; no warnings; no strict;
 BEGIN { overload::constant q => sub {}; undef *^H }
 '1', "1$_", tr"a"", s""a"
 EXPECT
@@ -206,7 +206,7 @@ Execution of - aborted due to compilation errors.
 ########
 # NAME \N{...} when charnames fails to load but without an error
 # SKIP ? exists $ENV{PERL_UNICODE} ? "Unreliable under some PERL_UNICODE settings" : 0
-BEGIN { ++$_ for @INC{"charnames.pm","_charnames.pm"} }
+use p5; BEGIN { ++$_ for @INC{"charnames.pm","_charnames.pm"} }
 "\N{a}"
 EXPECT
 Constant(\N{a}) unknown at - line 2, within string
@@ -237,7 +237,7 @@ Constant(0x1): Call to &{$^H{binary}} did not return a defined value at - line 3
 Execution of - aborted due to compilation errors.
 ########
 # NAME String constant overloading returning undef
-use overload;
+use overload; no warnings; no strict;
 BEGIN { overload::constant q => sub {} }
 '1', "1$_", tr"a"", s""a"
 EXPECT
@@ -359,13 +359,13 @@ Can't redeclare "state" in "our" at - line 2, near "(state"
 Execution of - aborted due to compilation errors.
 ########
 # NAME my (my $x) errors
-my (my $x, $y, $z);
+no strict; no warnings; my (my $x, $y, $z);
 EXPECT
 Can't redeclare "my" in "my" at - line 1, near "(my"
 Execution of - aborted due to compilation errors.
 ########
 # NAME our (our $x) errors
-our ($x, our($y), $z);
+no strict; no warnings; our ($x, our($y), $z);
 EXPECT
 Can't redeclare "our" in "our" at - line 1, near ", our"
 Execution of - aborted due to compilation errors.
@@ -460,6 +460,7 @@ Execution of - aborted due to compilation errors.
 # NAME tr/// range with empty \N{} at the start
 tr//\N{}-0/;
 EXPECT
+Replacement list is longer than search list at - line 1.
 Unknown charname '' at - line 1, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -489,10 +490,11 @@ EXPECT
 dump() must be written as CORE::dump() as of Perl 5.30 at - line 2.
 ########
 # NAME check Prototype not terminated includes line number (133524)
+use p5;
 sub t1 {}
 sub t2 (}
 EXPECT
-Prototype not terminated at - line 2.
+Prototype not terminated at - line 3.
 ########
 # NAME [perl #132158] format with syntax errors
 format=

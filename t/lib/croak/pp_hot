@@ -1,35 +1,35 @@
 __END__
 # NAME local %$ref on last line of lvalue sub in lv cx
-   sub foo :lvalue { local %{\%foo} }
+   no strict; no warnings; sub foo :lvalue { local %{\%foo} }
    (foo) = 3;
 EXPECT
 Can't localize through a reference at - line 1.
 ########
 # NAME local @$ref on last line of lvalue sub in lv cx
-   sub foo :lvalue { local @{\@foo} }
+   no strict; no warnings; sub foo :lvalue { local @{\@foo} }
    (foo) = 3;
 EXPECT
 Can't localize through a reference at - line 1.
 ########
 # NAME local %$ref on last line of lvalue sub in non-lv cx
-   sub foo :lvalue { local %{\%foo} }
+   no strict; no warnings; sub foo :lvalue { local %{\%foo} }
    foo;
 EXPECT
 Can't localize through a reference at - line 1.
 ########
 # NAME local @$ref on last line of lvalue sub in non-lv cx
-   sub foo :lvalue { local @{\@foo} }
+   no strict; no warnings; sub foo :lvalue { local @{\@foo} }
    foo;
 EXPECT
 Can't localize through a reference at - line 1.
 ########
 # NAME \local %$ref
-   \local %{\%hash}
+   no strict; no warnings; \local %{\%hash}
 EXPECT
 Can't localize through a reference at - line 1.
 ########
 # NAME \local @$ref
-   \local @{\@hash}
+   no strict; no warnings; \local @{\@hash}
 EXPECT
 Can't localize through a reference at - line 1.
 ########
@@ -52,9 +52,10 @@ EXPECT
 Can't use an undefined value as a subroutine reference at - line 1.
 ########
 # NAME calling undef magical scalar
+no strict; no warnings;
    sub TIESCALAR {bless[]}
    sub FETCH {}
    tie $tied, "";
    &$tied;
 EXPECT
-Can't use an undefined value as a subroutine reference at - line 4.
+Can't use an undefined value as a subroutine reference at - line 5.

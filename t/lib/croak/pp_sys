@@ -2,14 +2,14 @@ __END__
 # pp_sys.c
 # NAME pipe() croaks on bad left side [perl #126480]
 # SKIP ? use Config; !$Config{d_pipe} && "No pipe() available"
-my $fh;
+no strict; no warnings; my $fh;
 pipe($$5, $fh)
 EXPECT
 Bad symbol for filehandle at - line 3.
 ########
 # NAME pipe() croaks on bad right side [perl #126480]
 # SKIP ? use Config; !$Config{d_pipe} && "No pipe() available"
-my $fh;
+no strict; no warnings; my $fh;
 pipe($fh, $$5)
 EXPECT
 Bad symbol for filehandle at - line 2.
@@ -96,6 +96,6 @@ syswrite() isn't allowed on :utf8 handles at - line 5.
 ########
 # NAME readline() didn't scalar() its argument
 # this would assert rather than failing on the method call
-E{0;readline@0}
+no strict; no warnings; E{0;readline@0}
 EXPECT
 Can't call method "E" without a package or object reference at - line 2.
