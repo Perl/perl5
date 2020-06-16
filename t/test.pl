@@ -19,7 +19,11 @@
 # In this file, we use the latter "Baby Perl" approach, and increment
 # will be worked over by t/op/inc.t
 
-use p5;
+BEGIN {
+    local @INC = qw( ./lib ../lib ../../lib );
+    require p5;
+    p5->import;
+}
 
 BEGIN {
     $ENV{PERL5LIB} = join(':', @INC );

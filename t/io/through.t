@@ -9,6 +9,7 @@ BEGIN {
 }
 
 use strict;
+use v7.0;
 
 ++$|;
 
