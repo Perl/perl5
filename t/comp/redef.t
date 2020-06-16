@@ -2,6 +2,11 @@
 #
 # Contributed by Graham Barr <Graham.Barr@tiuk.ti.com>
 
+BEGIN {
+	chdir 't' if -d 't';
+	unshift @INC, '../lib'; # ideally we should not try to load any modules..
+}
+
 use p5;
 use warnings;
 
