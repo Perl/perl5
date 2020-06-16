@@ -13,6 +13,14 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
+
+
+my $startperl = <<"!GROK!THIS!";
+$Config{startperl}
+    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
+	if 0 && q[Running Under Some Perl];
+!GROK!THIS!
+
 my $origdir = cwd;
 chdir dirname($0);
 my $file = basename($0, '.PL');
@@ -25,11 +33,7 @@ print "Extracting $file (with variable substitutions)\n";
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
-print OUT <<"!GROK!THIS!";
-$Config{startperl}
-    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
-	if 0 && q[Running Under Some Perl];
-!GROK!THIS!
+print OUT $startperl;
 
 use File::Spec;
 
