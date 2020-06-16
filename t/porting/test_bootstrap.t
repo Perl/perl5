@@ -51,7 +51,9 @@ while (my $file = <$fh>) {
     }
 
     # All uses of use are allowed in t/comp/use.t
-    unlike($contents, qr/^\s*use\s+/m, "$file doesn't use use")
+    my $check_use = $contents;
+    $check_use =~ s{$\s*use\s+p5;}{}g; # accept use p5
+    unlike($check_use, qr/^\s*use\s+/m, "$file doesn't use use")
 	unless $file eq 'comp/use.t';
     # All uses of require are allowed in t/comp/require.t
     unlike($contents, qr/^\s*require\s+/m, "$file doesn't use require")
