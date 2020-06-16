@@ -9,9 +9,7 @@ package p7;
 # use p7 enables perl 5 code to function in a perl 7-ish way as much as possible compared to the version you are running.
 # it also is a hint to both tools and the compiler what the level of compatibility is with future versions of the language.
 
-
 our $VERSION = '0.00001';
-
 
 BEGIN {
     # This code is a proof of concept provided against 5.30. In order for this code to work on other versions of perl
