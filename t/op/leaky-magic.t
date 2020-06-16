@@ -13,7 +13,9 @@ BEGIN {
 # Hack to allow test counts to be specified piecemeal
 BEGIN { ++$INC{'tests.pm'} }
 
-my $tests = 0;
+no warnings;
+
+our $tests;
 sub tests::VERSION { $tests += pop };
 plan (tests => $tests);
 
