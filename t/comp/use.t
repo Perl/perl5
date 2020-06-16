@@ -1,11 +1,18 @@
 #!./perl
 
-use p5;
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib', 'lib');
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
+}
+
+# use p5; # without loading p5 itself...
+BEGIN {
+    ${^WARNING_BITS} = 0;
+    $^W = 0;
+
+    $^H = 0x0;
+    %^H = ();
 }
 
 print "1..84\n";
