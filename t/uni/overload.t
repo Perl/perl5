@@ -2,11 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require Config; import Config;
     require './test.pl';
+    set_up_inc( '../lib' );
+
+    require Config; import Config;
     require './charset_tools.pl';
     require './loc_tools.pl';
-    set_up_inc( '../lib' );
 }
 
 plan(tests => 193);
@@ -249,15 +250,19 @@ foreach my $b ($big, UTF8Toggle->new($big)) {
     }
 }
 
-my $bits = $E_acute;
-foreach my $pieces ($bits, UTF8Toggle->new($bits)) {
-    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
-    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
-    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+{
+	no feature 'bitwise';
 
-    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
-    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
-    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+	my $bits = $E_acute;
+	foreach my $pieces ($bits, UTF8Toggle->new($bits)) {
+	    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+	    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+	    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+
+	    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+	    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+	    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+	}
 }
 
 foreach my $value ("\243", UTF8Toggle->new("\243")) {
@@ -303,7 +308,7 @@ EOP
 
 TODO: {
     local $::TODO = 'RT #3270: Overloaded operators can not be treated as lvalues';
-    fresh_perl_is(<<'EOP', '', {stderr => 1}, 'RT #3270: Overloaded operator that returns an lvalue can be used as an lvalue');
+    fresh_perl_is(<<'EOP', '', {stderr => 1 }, 'RT #3270: Overloaded operator that returns an lvalue can be used as an lvalue');
     use overload '.' => \&dot;
     sub dot : lvalue {my ($obj, $method) = @_; $obj -> {$method};}
     my $o  = bless {} => "main";
