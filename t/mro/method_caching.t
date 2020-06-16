@@ -28,8 +28,8 @@ no warnings 'prototype'; # we do a lot of this
 my @testsubs = (
     sub { is(MCTest::Derived->foo(0), 1); },
     sub { eval 'sub MCTest::Base::foo { return $_[1]+2 }'; is(MCTest::Derived->foo(0), 2); },
-    sub { eval 'sub MCTest::Base::foo($) { return $_[1]+3 }'; is(MCTest::Derived->foo(0), 3); },
-    sub { eval 'sub MCTest::Base::foo($) { 4 }'; is(MCTest::Derived->foo(0), 4); },
+    sub { eval 'sub MCTest::Base::foo :prototype($) { return $_[1]+3 }'; is(MCTest::Derived->foo(0), 3); },
+    sub { eval 'sub MCTest::Base::foo :prototype($) { 4 }'; is(MCTest::Derived->foo(0), 4); },
     sub { *MCTest::Base::foo = sub { $_[1]+5 }; is(MCTest::Derived->foo(0), 5); },
     sub { local *MCTest::Base::foo = sub { $_[1]+6 }; is(MCTest::Derived->foo(0), 6); },
     sub { is(MCTest::Derived->foo(0), 5); },
