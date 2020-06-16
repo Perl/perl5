@@ -1,5 +1,10 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift( @INC, '../lib' );
+}
+
 print "1..53\n";
 
 no warnings 'void'; # use string in void context
