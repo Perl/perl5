@@ -11,7 +11,7 @@ use feature 'unicode_strings';
 
 is(uc("\x{3B1}\x{345}\x{301}"), "\x{391}\x{301}\x{399}",
                                                    'Verify moves YPOGEGRAMMENI');
-fresh_perl_is('use 5.026;m.\U00ÿÿ0000.', "", {}, "[perl #133876]  This caused valgrind and asan errors");
+fresh_perl_is('use 5.026;m.\U00ÿÿ0000.', "", { run_as_five => 1 }, "[perl #133876]  This caused valgrind and asan errors");
 
 casetest( 2,	# extra tests already run
 	"Uppercase_Mapping",
