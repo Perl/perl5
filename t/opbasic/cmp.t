@@ -6,6 +6,9 @@
 
 # 2s complement assumption. Will not break test, just makes the internals of
 # the SVs less interesting if were not on 2s complement system.
+
+no warnings; # too many warnings...
+
 my $uv_max = ~0;
 my $uv_maxm1 = ~0 ^ 1;
 my $uv_big = $uv_max;
