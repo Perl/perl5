@@ -2,13 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc('../lib');
+    use Config;
 }
 
 plan( tests => 1);
-
-require Config; import Config;
 
 if (($Config{'extensions'} !~ /\bFcntl\b/) ){
   BAIL_OUT("Perl configured without Fcntl module");
