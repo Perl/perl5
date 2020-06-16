@@ -165,13 +165,13 @@ our $TODO;
 
 my $test = curr_test();
 # test *glob{THING} syntax
-my $Ẋ = "ok $test\n";
+our $Ẋ = "ok $test - one\n";
 ++$test;
-my @Ẋ = ("ok $test\n");
+our @Ẋ = ("ok $test - two\n");
 ++$test;
-my %Ẋ = ("ok $test" => "\n");
+our %Ẋ = ("ok $test - three" => "\n");
 ++$test;
-sub Ẋ { "ok $test\n" }
+sub Ẋ { "ok $test - four\n" }
 {
     no strict; no warnings;
     print ${*Ẋ{SCALAR}}, @{*Ẋ{ARRAY}}, %{*Ẋ{HASH}}, &{*Ẋ{CODE}};
