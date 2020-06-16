@@ -1,6 +1,8 @@
 #!./perl
 
-use p5; # too many craziness there
+no strict;
+no warnings;
+no feature 'signatures';
 
 print "1..120\n";
 
