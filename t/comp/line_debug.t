@@ -1,8 +1,9 @@
 #!./perl
 
-BEGIN { unshift @INC, '.' }
-
-chdir 't' if -d 't';
+BEGIN { 
+	chdir 't' if -d 't';
+	unshift @INC, '.', '../lib'; # no strict 
+}
 
 sub ok {
     my($test,$ok) = @_;
