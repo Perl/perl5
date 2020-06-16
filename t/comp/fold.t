@@ -4,6 +4,11 @@
 # we've not yet verified that use works.
 # use strict;
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift( @INC, '../lib' ); # 'no strict' is used later...
+}
+
 print "1..35\n";
 my $test = 0;
 
