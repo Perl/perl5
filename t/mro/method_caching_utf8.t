@@ -29,8 +29,8 @@ no warnings 'prototype'; # we do a lot of this
 my @testsubs = (
     sub { is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 1); },
     sub { eval 'sub MC텟ᵀ::Bࡎᶓ::ᕘ { return $_[1]+2 }'; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 2); },
-    sub { eval 'sub MC텟ᵀ::Bࡎᶓ::ᕘ($) { return $_[1]+3 }'; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 3); },
-    sub { eval 'sub MC텟ᵀ::Bࡎᶓ::ᕘ($) { 4 }'; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 4); },
+    sub { eval 'sub MC텟ᵀ::Bࡎᶓ::ᕘ :prototype($) { return $_[1]+3 }'; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 3); },
+    sub { eval 'sub MC텟ᵀ::Bࡎᶓ::ᕘ :prototype($) { 4 }'; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 4); },
     sub { *MC텟ᵀ::Bࡎᶓ::ᕘ = sub { $_[1]+5 }; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 5); },
     sub { local *MC텟ᵀ::Bࡎᶓ::ᕘ = sub { $_[1]+6 }; is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 6); },
     sub { is(MC텟ᵀ::ድ리ᭉᛞ->ᕘ(0), 5); },
