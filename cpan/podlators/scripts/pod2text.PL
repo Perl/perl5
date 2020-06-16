@@ -38,7 +38,7 @@ print "Extracting $file (with variable substitutions)\n";
 print {$out} <<"PREAMBLE" or die "Cannot write to $file: $!\n";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
-        if \$running_under_some_shell;
+        if 0 && q[Running Under Some Perl];
 PREAMBLE
 
 # In the following, Perl variables are not expanded during extraction.
