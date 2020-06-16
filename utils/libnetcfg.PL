@@ -11,6 +11,13 @@ use Cwd;
 #  $startperl
 # to ensure Configure will look for $Config{startperl}.
 
+# make sure we load Config_heavy.pl before changing directory
+my $startperl = <<"!GROK!THIS!";
+$Config{startperl}
+    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
+  if 0 && q[Running Under Some Perl];
+!GROK!THIS!
+
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
 my $origdir = cwd;
@@ -25,11 +32,7 @@ print "Extracting $file (with variable substitutions)\n";
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
-print OUT <<"!GROK!THIS!";
-$Config{startperl}
-    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
-	if 0 && q[Running Under Some Perl];
-!GROK!THIS!
+print OUT $startperl;
 
 # In the following, perl variables are not expanded during extraction.
 
@@ -104,6 +107,8 @@ use Getopt::Std;
 use ExtUtils::MakeMaker qw(prompt);
 use File::Spec;
 
+no warnings;
+
 use vars qw($opt_d $opt_c $opt_h $opt_o $opt_i);
 
 ##
@@ -130,7 +135,7 @@ sub valid_host
 ##
 ##
 
-sub test_hostnames (\@)
+sub test_hostnames :prototype(\@)
 {
  my $hlist = shift;
  my @h = ();
@@ -234,7 +239,7 @@ EDQ
 ##
 ##
 
-sub get_bool ($$)
+sub get_bool :prototype($$)
 {
  my($prompt,$def) = @_;
 
@@ -249,7 +254,7 @@ sub get_bool ($$)
 ##
 ##
 
-sub get_netmask ($$)
+sub get_netmask :prototype($$)
 {
  my($prompt,$def) = @_;
 
