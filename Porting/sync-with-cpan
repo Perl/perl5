@@ -129,7 +129,7 @@ to be available.
 
 package Maintainers;
 
-use 5.010;
+use 5.030;
 
 use strict;
 use warnings;
