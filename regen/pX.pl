@@ -53,9 +53,9 @@ die q[Fail to generate $WARNINGS_P7] unless $? == 0;
 ###########################################################################
 # Open files to be generated
 
-my ($p5, $p7) = map {
+my ($p5, $p7, $p7_h ) = map {
     open_new($_, '>', { by => 'regen/pX.pl' });
-} 'lib/p5.pm', 'lib/p7.pm';
+} 'lib/p5.pm', 'lib/p7.pm', 'perl7.h';
 
 
 ###########################################################################
@@ -106,12 +106,22 @@ my %VARS = (
 );
 
 while (<DATA>) {
+    last if /^# START P7_H$/ ;
     s{~(\w+)~}{$VARS{$1}}g;
     print {$p7} $_;
 }
 
 read_only_bottom_close_and_rename($p7);
 
+###########################################################################
+# Generate p7.h
+
+while (<DATA>) {
+    s{~(\w+)~}{$VARS{$1}}g;
+    print {$p7_h} $_;
+}
+
+read_only_bottom_close_and_rename($p7_h);
 
 ###########################################################################
 # Template for p7.pm
@@ -237,3 +247,34 @@ Description for p7.
 atoomic
 
 =cut
+
+# START P7_H
+
+/*    perl7.h
+ *
+ *    Copyright (C) 2020 by Larry Wall and others
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
+#ifndef H_PERL_7
+#define H_PERL_7 1
+
+/* this is used by toke.c to setup a Perl7 flavor */
+/* #define P7_TOKE_SETUP "use p7;" */
+
+#define P7_TOKE_SETUP "BEGIN { "\
+                      "   ${^WARNING_BITS} = pack( 'H*', '555555555555555555555555150001500101' );"\
+                      "   $^H |= ~P7_HINTS~;"\
+                      "   require feature;"\
+                      "   feature->import(':7.0');"\
+                      "}"
+
+/*
+
+bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval
+*/
+
+#endif /* Include guard */
