@@ -398,7 +398,7 @@ undef *UNIVERSAL::DESTROY;
 }
 
 { # 123788
-    fresh_perl_is(<<'PROG', "ok", {}, "don't crash when deleting ISA");
+    fresh_perl_is(<<'PROG', "ok", { run_as_five => 1 }, "don't crash when deleting ISA");
 $x = \@{q(Foo::ISA)};
 delete $Foo::{ISA};
 @$x = "Bar";
@@ -408,7 +408,7 @@ PROG
     # when there are multiple references to an ISA array, the mg_obj
     # turns into an AV of globs, which is a different code path
     # this test only crashes on -DDEBUGGING builds
-    fresh_perl_is(<<'PROG', "ok", {}, "a case with multiple refs to ISA");
+    fresh_perl_is(<<'PROG', "ok", { run_as_five => 1 }, "a case with multiple refs to ISA");
 @Foo::ISA = qw(Abc Def);
 $x = \@{q(Foo::ISA)};
 *Bar::ISA = $x;
@@ -423,7 +423,7 @@ PROG
     # reverse order of delete to exercise removing from the other end
     # of the array
     # again, may only crash on -DDEBUGGING builds
-    fresh_perl_is(<<'PROG', "ok", {}, "a case with multiple refs to ISA");
+    fresh_perl_is(<<'PROG', "ok", { run_as_five => 1 }, "a case with multiple refs to ISA");
 $x = \@{q(Foo::ISA)};
 *Bar::ISA = $x;
 delete $Foo::{ISA};
@@ -442,7 +442,7 @@ PROG
 
     #  a) assignment to those elements didn't update the cache
 
-    fresh_perl_is(<<'PROG', "foo\nother", {}, "magical *ISA = arrayref elements");
+    fresh_perl_is(<<'PROG', "foo\nother", { run_as_five => 1 }, "magical *ISA = arrayref elements");
 *My::Parent::foo = sub { "foo" };
 *My::OtherParent::foo = sub { "other" };
 my $x = [ "My::Parent" ];
@@ -455,7 +455,7 @@ PROG
     #  b) code that attempted to remove the magic when @some_array
     #     was no longer an @ISA asserted/crashed
 
-    fresh_perl_is(<<'PROG', "foo", {}, "unmagicalize *ISA elements");
+    fresh_perl_is(<<'PROG', "foo", { run_as_five => 1 }, "unmagicalize *ISA elements");
 {
     local *My::Parent::foo = sub { "foo" };
     my $x = [ "My::Parent" ];
