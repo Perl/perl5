@@ -1,6 +1,13 @@
 #!./perl
 
-use p5;
+# use p5; # without loading p5 itself...
+BEGIN {
+    ${^WARNING_BITS} = 0;
+    $^W = 0;
+
+    $^H = 0x0;
+    %^H = ();
+}
 
 print "1..14\n";
 
