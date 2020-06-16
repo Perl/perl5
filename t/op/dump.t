@@ -11,7 +11,7 @@ BEGIN {
 
 use Config;
 use File::Temp qw(tempdir);
-use Cwd qw(getcwd);
+use Cwd qw(getcwd abs_path);
 use File::Spec;
 
 skip_all("only tested on devel builds")
@@ -32,6 +32,9 @@ skip_all("avoid coredump under ASan")
 my $tmp = tempdir(CLEANUP => 1);
 
 my $start = getcwd;
+
+my $lib = abs_path( "$start/../lib" );
+die qq[Cannot find lib path $lib] unless -d $lib;
 
 # on systems which don't make $^X absolute which_perl() in test.pl won't
 # return an absolute path, so once we change directories it can't
@@ -68,7 +71,7 @@ plan(2);
 # chdirred to /tmp, a 'no' won't find the pragma. Hence the fiddling with
 # $SIG{__WARN__}.
 
-fresh_perl_like(<<'PROG', qr/\AA(?!B\z)/, { switches => [ '-I../../lib' ], run_as_five => 1 }, "plain dump quits");
+fresh_perl_like(<<'PROG', qr/\AA(?!B\z)/, { switches => [ "-I$lib" ], run_as_five => 1 }, "plain dump quits");
 BEGIN {$SIG {__WARN__} = sub {1;}}
 ++$|;
 my $pid = fork;
@@ -85,7 +88,7 @@ else {
 }
 PROG
 
-fresh_perl_like(<<'PROG', qr/A(?!B\z)/, { switches => [ '-I../../lib' ], run_as_five => 1 }, "CORE::dump with label quits"); BEGIN {$SIG {__WARN__} = sub {1;}}
+fresh_perl_like(<<'PROG', qr/A(?!B\z)/, { switches => [ "-I$lib" ], run_as_five => 1 }, "CORE::dump with label quits"); BEGIN {$SIG {__WARN__} = sub {1;}}
 ++$|;
 my $pid = fork;
 die "fork: $!\n" unless defined $pid;
