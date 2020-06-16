@@ -9,9 +9,7 @@ package p5;
 # This helps hint to perl 7+ what level of compatibility this code has with future versions of perl.
 # use p5 should be the first thing in your code. Especially before use strict, warnings, v5.XXX, or feature.
 
-
 our $VERSION = '0.00001';
-
 
 sub _warn_once {
     local $^W;
@@ -43,7 +41,7 @@ sub import {
 }
 
 sub unimport {
-    # maybe restore? p7 warnings... and co... 
+    # maybe restore? p7 warnings... and co...
     # we want to restore p7 behavior..
     require p7;
     p7->import;

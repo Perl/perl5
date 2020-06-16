@@ -20,12 +20,14 @@ my $HintUTF8;
 
 {
     open my $perl_h, "<", "perl.h" or die "$0 cannot open perl.h: $!";
-    while (readline $perl_h) {
-        if ( m/#\s*define\s+HINT_UTF8\s/ ) {
+    while ( readline $perl_h ) {
+        if (m/#\s*define\s+HINT_UTF8\s/) {
             /(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
             $HintUTF8 = oct $1;
         }
-        elsif ( m/#\s*define\s+(HINT_STRICT_REFS|HINT_STRICT_SUBS|HINT_STRICT_VARS)\s/ ) {
+        elsif (
+            m/#\s*define\s+(HINT_STRICT_REFS|HINT_STRICT_SUBS|HINT_STRICT_VARS)\s/
+        ) {
             /(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
             $HintStrict |= oct $1;
         }
@@ -34,14 +36,16 @@ my $HintUTF8;
 
     }
 }
-die "No HintUTF8 defined in perl.h"          unless $HintUTF8;
-die "No HintStrict defined in perl.h"        unless $HintStrict;
+die "No HintUTF8 defined in perl.h"   unless $HintUTF8;
+die "No HintStrict defined in perl.h" unless $HintStrict;
 
 my $miniperl = q[./miniperl];
 
-my $oneliner = q[use warnings; no warnings qw/experimental/; our $w; BEGIN {$w = ${^WARNING_BITS} } print unpack("H*", $w)];
+my $oneliner
+    = q[use warnings; no warnings qw/experimental/; our $w; BEGIN {$w = ${^WARNING_BITS} } print unpack("H*", $w)];
 -x $miniperl or die "miniperl is required to run $0";
-my $WARNINGS_P7 = qx|$miniperl -Ilib -e '$oneliner'|; # force to use current miniperl
+my $WARNINGS_P7
+    = qx|$miniperl -Ilib -e '$oneliner'|;    # force to use current miniperl
 die q[Fail to generate $WARNINGS_P7] unless $? == 0;
 
 # {
@@ -55,65 +59,67 @@ die q[Fail to generate $WARNINGS_P7] unless $? == 0;
 ###########################################################################
 # Open files to be generated
 
-my ($p5, $p7, $p7_h ) = map {
-    open_new($_, '>', { by => 'regen/pX.pl' });
-} 'lib/p5.pm', 'lib/p7.pm', 'perl7.h';
-
-
-###########################################################################
-# Generate lib/p5.pm
-
-while (<DATA>) { # header
-    last if /^# START P5$/;
-}
-
-while (<DATA>) { # variables
-    last if /^__VARS__$/;
-    print {$p5} $_;
-}
-
-print {$p5} <<EOV;
-
-our \$VERSION = '$VERSION';
-
-EOV
-
-while (<DATA>) { # footer
-    last if /^# START P7$/ ;
-    print $p5 $_ ;
-}
-
-read_only_bottom_close_and_rename($p5);
-
-###########################################################################
-# Generate lib/p7.pm
-
-# print the header
-while (<DATA>) { # header
-    last if /^__VARS__$/;
-    print $p7 $_ ;
-}
-
-my $hints_v7 = sprintf( "0x%08X", $HintStrict ); # convert back to hex
-
-print {$p7} <<EOV;
-
-our \$VERSION = '$VERSION';
-
-EOV
+my ( $p5, $p7, $p7_h )
+    = map { open_new( $_, '>', { by => 'regen/pX.pl' } ); } 'lib/p5.pm',
+    'lib/p7.pm', 'perl7.h';
 
 my %VARS = (
     P7_WARNINGS => $WARNINGS_P7,
-    P7_HINTS    => $hints_v7,
+    VERSION     => qq[our \$VERSION = '$VERSION';],
 );
 
-while (<DATA>) {
-    last if /^# START P7_H$/ ;
-    s{~(\w+)~}{$VARS{$1}}g;
-    print {$p7} $_;
+###########################################################################
+# Generate lib/p5.pm
+{
+    while (<DATA>) {    # header
+        last if /^# START P5$/;
+    }
+
+    while (<DATA>) {    # footer
+        last if /^# START P7$/;
+        s{~(\w+)~}{$VARS{$1}}g;
+        print $p5 $_;
+    }
+
+    read_only_bottom_close_and_rename($p5);
 }
 
-read_only_bottom_close_and_rename($p7);
+###########################################################################
+# Generate lib/p7.pm
+{
+
+    my $hints_strict = sprintf( "0x%08X", $HintStrict );    # convert back to hex
+    $VARS{P7_HINTS_STRICT} = $hints_strict;
+
+    my $oneliner = <<'EOS';
+my ( $a, $b );
+BEGIN { $a = $^H }
+use strict;
+use feature ":7.0";
+BEGIN { $b = $^H };
+my $hints = $b - $a;
+printf( "0x%08X", $hints );
+EOS
+    $oneliner =~ s{\n+}{ }g;
+
+    my $hints_v7
+        = qx|$miniperl -Ilib -5 '$oneliner'|;  # force to use current miniperl
+    die q[Fail to generate hints for 7.0] unless $? == 0;
+
+    chomp $hints_v7;
+
+# ./perl -Ilib -5 'my $a; BEGIN { print "a:$^H\n"; $a = $^H } use strict; use feature ":7.0"; BEGIN { print "b:$^H\n"; $b = $^H }; print "b-a: " .($b - $a)."\n"'
+
+    $VARS{P7_HINTS} = $hints_v7;
+
+    while (<DATA>) {
+        last if /^# START P7_H$/;
+        s{~(\w+)~}{$VARS{$1}}g;
+        print {$p7} $_;
+    }
+
+    read_only_bottom_close_and_rename($p7);
+}
 
 ###########################################################################
 # Generate p7.h
@@ -121,23 +127,22 @@ read_only_bottom_close_and_rename($p7);
 #╰─> ./miniperl -Ilib -5 'print( "$^H\n"); BEGIN { require feature; feature->import(":7.0"); print "$^H\n"; map { print "$_ $^H{$_}\n"; } keys %^H; }'
 {
     my $oneliner = <<'EOS';
-BEGIN { require feature; feature->import(":7.0"); map { print "$_\n" if $^H{$_} } keys %^H; }
+BEGIN { require feature; feature->import(":7.0"); map { print "$_\n" if $^H{$_} } sort keys %^H; }
 EOS
-
     $oneliner =~ s{\n+}{ }g;
 
-    my $features = qx|$miniperl -Ilib -5 '$oneliner'|; # force to use current miniperl
+    my $features
+        = qx|$miniperl -Ilib -5 '$oneliner'|;  # force to use current miniperl
     die q[Fail to generate features list for 7.0] unless $? == 0;
 
-    $VARS{SHA_FEATURE_PM} = 'FIXME'; # add a test to check sanity of file
-    $VARS{FEATURES} = '$^H{feature_switch} = 1;';
+    $VARS{SHA_FEATURE_PM} = 'FIXME';    # add a test to check sanity of file
+    $VARS{FEATURES} = '';
 
-    warn $features;
     my @feature_list = split( "\n", $features );
-    foreach my $name ( @feature_list ) {
+    foreach my $name (@feature_list) {
         $name =~ s{^\s+}{};
         $name =~ s{\s+$}{};
-        $VARS{FEATURES} .= '$^H{'.$name.'} = 1; ';
+        $VARS{FEATURES} .= '$^H{' . $name . '} = 1; ';
     }
 
     chop $VARS{FEATURES};
@@ -149,7 +154,6 @@ EOS
 
     read_only_bottom_close_and_rename($p7_h);
 }
-
 
 ###########################################################################
 # Template for p7.pm
@@ -163,7 +167,7 @@ package p5;
 # This helps hint to perl 7+ what level of compatibility this code has with future versions of perl.
 # use p5 should be the first thing in your code. Especially before use strict, warnings, v5.XXX, or feature.
 
-__VARS__
+~VERSION~
 
 sub _warn_once {
     local $^W;
@@ -232,7 +236,7 @@ package p7;
 # use p7 enables perl 5 code to function in a perl 7-ish way as much as possible compared to the version you are running.
 # it also is a hint to both tools and the compiler what the level of compatibility is with future versions of the language.
 
-__VARS__
+~VERSION~
 
 BEGIN {
     # This code is a proof of concept provided against 5.30. In order for this code to work on other versions of perl
@@ -248,7 +252,7 @@ sub import {
 
     # use strict; use utf8;
     # perl  -MData::Dumper -e'my $h; use strict; use utf8; use feature (qw/bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval/); BEGIN {  $h = $^H } printf("\$^H = 0x%08X\n", $h); print Dumper \%^H; '
-    $^H |= ~P7_HINTS~;
+    $^H |= ~P7_HINTS_STRICT~;
 
     require feature;
     feature->import(':7.0');
