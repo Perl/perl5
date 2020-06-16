@@ -37,15 +37,17 @@ my $HintUTF8;
 die "No HintUTF8 defined in perl.h"          unless $HintUTF8;
 die "No HintStrict defined in perl.h"        unless $HintStrict;
 
+my $miniperl = q[./miniperl];
+
 my $oneliner = q[use warnings; no warnings qw/experimental/; our $w; BEGIN {$w = ${^WARNING_BITS} } print unpack("H*", $w)];
--x "./miniperl" or die "miniperl is required to run $0";
-my $WARNINGS_P7 = qx|./miniperl -Ilib -e '$oneliner'|; # force to use current miniperl
+-x $miniperl or die "miniperl is required to run $0";
+my $WARNINGS_P7 = qx|$miniperl -Ilib -e '$oneliner'|; # force to use current miniperl
 die q[Fail to generate $WARNINGS_P7] unless $? == 0;
 
 # {
 #     open my $warnings_h, '<', 'warnings.h' or die "$0 cannot open warnings.h: $!";
 #     while (readline $warnings_h) {
-#         next unless m{^#define WARN_EXPERIMENTAL};        
+#         next unless m{^#define WARN_EXPERIMENTAL};
 #         print $_;
 #     }
 # }
@@ -116,12 +118,38 @@ read_only_bottom_close_and_rename($p7);
 ###########################################################################
 # Generate p7.h
 
-while (<DATA>) {
-    s{~(\w+)~}{$VARS{$1}}g;
-    print {$p7_h} $_;
+#╰─> ./miniperl -Ilib -5 'print( "$^H\n"); BEGIN { require feature; feature->import(":7.0"); print "$^H\n"; map { print "$_ $^H{$_}\n"; } keys %^H; }'
+{
+    my $oneliner = <<'EOS';
+BEGIN { require feature; feature->import(":7.0"); map { print "$_\n" if $^H{$_} } keys %^H; }
+EOS
+
+    $oneliner =~ s{\n+}{ }g;
+
+    my $features = qx|$miniperl -Ilib -5 '$oneliner'|; # force to use current miniperl
+    die q[Fail to generate features list for 7.0] unless $? == 0;
+
+    $VARS{SHA_FEATURE_PM} = 'FIXME'; # add a test to check sanity of file
+    $VARS{FEATURES} = '$^H{feature_switch} = 1;';
+
+    warn $features;
+    my @feature_list = split( "\n", $features );
+    foreach my $name ( @feature_list ) {
+        $name =~ s{^\s+}{};
+        $name =~ s{\s+$}{};
+        $VARS{FEATURES} .= '$^H{'.$name.'} = 1; ';
+    }
+
+    chop $VARS{FEATURES};
+
+    while (<DATA>) {
+        s{~(\w+)~}{$VARS{$1}}g;
+        print {$p7_h} $_;
+    }
+
+    read_only_bottom_close_and_rename($p7_h);
 }
 
-read_only_bottom_close_and_rename($p7_h);
 
 ###########################################################################
 # Template for p7.pm
@@ -167,7 +195,7 @@ sub import {
 }
 
 sub unimport {
-    # maybe restore? p7 warnings... and co... 
+    # maybe restore? p7 warnings... and co...
     # we want to restore p7 behavior..
     require p7;
     p7->import;
@@ -265,11 +293,14 @@ atoomic
 /* this is used by toke.c to setup a Perl7 flavor */
 /* #define P7_TOKE_SETUP "use p7;" */
 
+/*
+*   GENERATED using lib/feature.pm: ~SHA_FEATURE_PM~
+*/
+
 #define P7_TOKE_SETUP "BEGIN { "\
                       "   ${^WARNING_BITS} = pack( 'H*', '555555555555555555555555150001500101' );"\
                       "   $^H |= ~P7_HINTS~;"\
-                      "   require feature;"\
-                      "   feature->import(':7.0');"\
+                      "   ~FEATURES~"\
                       "}"
 
 /*
