@@ -122,8 +122,7 @@ is ($@, '', 'no error');
 # [perl #78064] or print
 package other { # hide the "ok" sub 
  no strict 'subs';
- use p5;
- BEGIN { $^W = 0 }
+ BEGIN { $^W = 0; ${^WARNING_BITS} = 0; }
  print 0 ? not_ok : ok;
  print " ", ++$test, " - print followed by const ? BEAR : BEAR\n";
  print 1 ? ok : not_ok;
