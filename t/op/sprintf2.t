@@ -684,6 +684,13 @@ for my $t (@hexfloat) {
             }
         }
     }
+    if (!$ok && $^O eq "netbsd" && $t->[1] eq "exp(1)") {
+      SKIP:
+        {
+            skip "NetBSD's expl() is just exp() in disguise", 1;
+        }
+        next;
+    }
     ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
 }
 
