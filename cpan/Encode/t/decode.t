@@ -1,6 +1,7 @@
 #
 # $Id: decode.t,v 1.5 2019/01/31 04:26:40 dankogai Exp $
 #
+use p5;
 use strict;
 use Encode qw(decode_utf8 FB_CROAK find_encoding decode);
 use Test::More tests => 17;
