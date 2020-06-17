@@ -15,7 +15,7 @@ BEGIN { use_ok('File::Temp') };
 # its man page ( perldoc Test::More ) for help writing this test script.
 
 # make sure we can create a tmp file...
-$tmp = File::Temp->new;
+my $tmp = File::Temp->new;
 isa_ok( $tmp, 'File::Temp' );
 isa_ok( $tmp, 'IO::Handle' );
 SKIP: {
@@ -34,8 +34,8 @@ SKIP: {
 ok( File::Temp->can('print'), 'tmp can print' );
 
 # let's see what we're exporting...
-$c = scalar @File::Temp::EXPORT;
-$l = join ' ', @File::Temp::EXPORT;
+my $c = scalar @File::Temp::EXPORT;
+my $l = join ' ', @File::Temp::EXPORT;
 ok( $c == 9, "really exporting $c: $l" );
 
 ok(defined eval { SEEK_SET() }, 'SEEK_SET defined by File::Temp') or diag $@;
