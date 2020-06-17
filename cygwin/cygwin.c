@@ -302,7 +302,7 @@ XS(XS_Cygwin_win_to_posix_path)
      */
     if (isutf8) {
 	int what = absolute_flag ? CCP_WIN_W_TO_POSIX : CCP_WIN_W_TO_POSIX | CCP_RELATIVE;
-	int wlen = sizeof(wchar_t)*(len + 260 + 1001);
+	STRLEN wlen = sizeof(wchar_t)*(len + 260 + 1001);
 	wchar_t *wpath = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
 	wchar_t *wbuf = (wchar_t *) safemalloc(wlen);
 	if (!IN_BYTES) {
@@ -333,7 +333,7 @@ XS(XS_Cygwin_win_to_posix_path)
 	}
 	/* utf16_to_utf8(*p, *d, bytlen, *newlen) */
 	posix_path = (char *) safemalloc(wlen*3);
-	Perl_utf16_to_utf8(aTHX_ (U8*)&wpath, (U8*)posix_path, (I32)wlen*2, (I32*)&len);
+	Perl_utf16_to_utf8(aTHX_ (U8*)&wpath, (U8*)posix_path, wlen*2, &len);
 	/*
 	wlen = wcsrtombs(NULL, (const wchar_t **)&wbuf, wlen, NULL);
 	posix_path = (char *) safemalloc(wlen+1);
