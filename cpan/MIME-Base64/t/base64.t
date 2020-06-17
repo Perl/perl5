@@ -1,7 +1,10 @@
 BEGIN {
     if ($ENV{'PERL_CORE'}){
         chdir 't' if -d 't';
-        @INC = '../lib';
+        #@INC = '../lib';
+        my $lib = $^X;
+        $lib =~ s{(\b)perl[^/]*$}{$1lib};
+        @INC = ( '../lib', $lib );
     }
 }
 
