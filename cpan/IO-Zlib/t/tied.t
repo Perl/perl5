@@ -1,5 +1,8 @@
 use IO::Zlib;
 
+use strict;
+use warnings;
+
 sub ok
 {
     my ($no, $ok) = @_ ;
@@ -11,11 +14,11 @@ sub ok
     print "not ok $no\n" unless $ok ;
 }
 
-$name="test.gz";
+my $name="test.gz";
 
 print "1..11\n";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
@@ -28,6 +31,8 @@ ok(4, untie *OUT);
 ok(5, tie *IN, "IO::Zlib", $name, "rb");
 ok(6, !eof IN);
 ok(7, <IN> eq "hello - 123\n");
+
+my $uncomp;
 ok(8, read(IN, $uncomp, 1024) == length($hello));
 ok(9, eof IN);
 ok(10, untie *IN);

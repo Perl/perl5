@@ -1,5 +1,8 @@
 use IO::Zlib;
 
+use strict;
+use warnings;
+
 sub ok
 {
     my ($no, $ok) = @_ ;
@@ -11,21 +14,23 @@ sub ok
     print "not ok $no\n" unless $ok ;
 }
 
-$name="test.gz";
+my $name="test.gz";
 
 print "1..7\n";
 
-$contents = "";
+my $contents = "";
 
 foreach (1 .. 5000)
 {
      $contents .= chr(int(rand(255)));
 }
 
+my $file;
 ok(1, $file = IO::Zlib->new($name, "wb"));
 ok(2, $file->print($contents));
 ok(3, $file->close());
 
+my $uncomp;
 ok(4, $file = IO::Zlib->new($name, "rb"));
 ok(5, $file->read($uncomp, 8192) == length($contents));
 ok(6, $file->close());

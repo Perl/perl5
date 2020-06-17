@@ -1,5 +1,8 @@
 use IO::Zlib;
 
+use strict;
+use warnings;
+
 sub ok
 {
     my ($no, $ok) = @_ ;
@@ -13,12 +16,12 @@ sub ok
 
 print "1..10\n";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
 
-$name = "test$$";
+my $name = "test$$";
 
 if (open(FH, ">$name")) {
     binmode FH;
@@ -28,6 +31,7 @@ if (open(FH, ">$name")) {
     die "$name: $!";
 }
 
+my ($file, $uncomp);
 ok(1, $file = IO::Zlib->new());
 ok(2, $file->open($name, "rb"));
 ok(3, !$file->eof());
