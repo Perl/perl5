@@ -8,6 +8,10 @@
 #
 ################################################################################
 
+use strict;
+use warnings;
+
+our %Config;
 BEGIN {
   if ($ENV{'PERL_CORE'}) {
     chdir 't' if -d 't';
@@ -29,7 +33,6 @@ if ($Config{'d_sem'} ne 'define') {
 }
 
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_NOWAIT IPC_STAT S_IRWXU S_IRWXG S_IRWXO);
-use strict;
 
 use IPC::Msg;
 #Creating a message queue
