@@ -35,7 +35,7 @@ ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
 is ($sig, $md5, "MD5");
 
 __END__
-Summary of my perl7 (revision 5 version 10 subversion 0) configuration:
+Summary of my perl5 (revision 5 version 10 subversion 0) configuration:
   Platform:
     osname=linux, osvers=2.6.22.13-0.3-default, archname=i686-linux-64int
     uname='linux nb09 2.6.22.13-0.3-default #1 smp 20071119 15:02:58 utc i686 i686 i386 gnulinux '

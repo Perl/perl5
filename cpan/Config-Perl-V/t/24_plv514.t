@@ -46,7 +46,7 @@ ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
 is ($sig, $md5, "MD5");
 
 __END__
-Summary of my perl7 (revision 5 version 14 subversion 2) configuration:
+Summary of my perl5 (revision 5 version 14 subversion 2) configuration:
 
   Platform:
     osname=aix, osvers=5.3.0.0, archname=aix-64all
@@ -74,7 +74,7 @@ Summary of my perl7 (revision 5 version 14 subversion 2) configuration:
     libc=/lib/libc.a, so=a, useshrplib=false, libperl=libperl.a
     gnulibc_version=''
   Dynamic Linking:
-    dlsrc=dl_aix.xs, dlext=so, d_dlsymun=undef, ccdlflags='  -bE:/pro/lib/perl7/5.14.2/aix-64all/CORE/perl.exp'
+    dlsrc=dl_aix.xs, dlext=so, d_dlsymun=undef, ccdlflags='  -bE:/pro/lib/perl5/5.14.2/aix-64all/CORE/perl.exp'
     cccdlflags=' ', lddlflags='-b64  -bhalt:4 -G -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -bnoentry -lc -lm -L/usr/local/ppc64/lib64 -L/pro/local/lib'
 
 
@@ -86,8 +86,8 @@ Characteristics of this binary (from libperl):
   Built under aix
   Compiled at May 11 2012 16:36:53
   @INC:
-    /pro/lib/perl7/site_perl/5.14.2/aix-64all
-    /pro/lib/perl7/site_perl/5.14.2
-    /pro/lib/perl7/5.14.2/aix-64all
-    /pro/lib/perl7/5.14.2
+    /pro/lib/perl5/site_perl/5.14.2/aix-64all
+    /pro/lib/perl5/site_perl/5.14.2
+    /pro/lib/perl5/5.14.2/aix-64all
+    /pro/lib/perl5/5.14.2
     .

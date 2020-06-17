@@ -80,7 +80,7 @@ ok (exists $info->{$_}, "Summary has $_") for qw( cc config_args usemymalloc def
 is ($info->{default_inc_excludes_dot}, "define", "This build does not have . in INC");
 
 __END__
-Summary of my perl7 (revision 5 version 27 subversion 11) configuration:
+Summary of my perl5 (revision 5 version 27 subversion 11) configuration:
   Snapshot of: 5f6af817add6d2df3603e0e94b6eb27ba5fb3970
   Platform:
     osname=linux
@@ -177,7 +177,7 @@ Characteristics of this binary (from libperl):
   Compiled at Apr 12 2018 13:37:01
   @INC:
     lib
-    /pro/lib/perl7/site_perl/5.27.11/x86_64-linux-thread-multi-ld
-    /pro/lib/perl7/site_perl/5.27.11
-    /pro/lib/perl7/5.27.11/x86_64-linux-thread-multi-ld
-    /pro/lib/perl7/5.27.11
+    /pro/lib/perl5/site_perl/5.27.11/x86_64-linux-thread-multi-ld
+    /pro/lib/perl5/site_perl/5.27.11
+    /pro/lib/perl5/5.27.11/x86_64-linux-thread-multi-ld
+    /pro/lib/perl5/5.27.11

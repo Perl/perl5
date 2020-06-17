@@ -75,7 +75,7 @@ my %check = (
 is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys %check;
 
 __END__
-Summary of my perl7 (revision 5 version 22 subversion 0) configuration:
+Summary of my perl5 (revision 5 version 22 subversion 0) configuration:
 
   Platform:
     osname=MSWin32, osvers=6.3, archname=MSWin32-x64-multi-thread
@@ -101,7 +101,7 @@ Summary of my perl7 (revision 5 version 22 subversion 0) configuration:
  -lcomctl32
     perllibs=-lmoldname -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -lnetapi32 -luuid -lws2_32 -lmpr -lwinmm -lversion -lodbc32 -lodbc
 cp32 -lcomctl32
-    libc=, so=dll, useshrplib=true, libperl=libperl722.a
+    libc=, so=dll, useshrplib=true, libperl=libperl522.a
     gnulibc_version=''
   Dynamic Linking:
     dlsrc=dl_win32.xs, dlext=xs.dll, d_dlsymun=undef, ccdlflags=' '

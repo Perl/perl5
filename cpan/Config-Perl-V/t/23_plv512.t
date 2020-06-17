@@ -45,7 +45,7 @@ ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
 is ($sig, $md5, "MD5");
 
 __END__
-Summary of my perl7 (revision 5 version 12 subversion 2) configuration:
+Summary of my perl5 (revision 5 version 12 subversion 2) configuration:
 
   Platform:
     osname=hpux, osvers=11.31, archname=IA64.ARCHREV_0-LP64-ld
@@ -84,8 +84,8 @@ Characteristics of this binary (from libperl):
   Built under hpux
   Compiled at Dec 20 2010 12:46:00
   @INC:
-    /pro/lib/perl7/site_perl/5.12.2/IA64.ARCHREV_0-LP64-ld
-    /pro/lib/perl7/site_perl/5.12.2
-    /pro/lib/perl7/5.12.2/IA64.ARCHREV_0-LP64-ld
-    /pro/lib/perl7/5.12.2
+    /pro/lib/perl5/site_perl/5.12.2/IA64.ARCHREV_0-LP64-ld
+    /pro/lib/perl5/site_perl/5.12.2
+    /pro/lib/perl5/5.12.2/IA64.ARCHREV_0-LP64-ld
+    /pro/lib/perl5/5.12.2
     .

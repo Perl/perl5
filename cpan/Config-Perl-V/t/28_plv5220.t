@@ -75,7 +75,7 @@ my %check = (
 is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys %check;
 
 __END__
-Summary of my perl7 (revision 5 version 22 subversion 0) configuration:
+Summary of my perl5 (revision 5 version 22 subversion 0) configuration:
    
   Platform:
     osname=linux, osvers=3.16.7-21-desktop, archname=x86_64-linux-thread-multi-ld
@@ -120,8 +120,8 @@ Characteristics of this binary (from libperl):
   Built under linux
   Compiled at Jun  4 2015 17:51:24
   @INC:
-    /pro/lib/perl7/site_perl/5.22.0/x86_64-linux-thread-multi-ld
-    /pro/lib/perl7/site_perl/5.22.0
-    /pro/lib/perl7/5.22.0/x86_64-linux-thread-multi-ld
-    /pro/lib/perl7/5.22.0
+    /pro/lib/perl5/site_perl/5.22.0/x86_64-linux-thread-multi-ld
+    /pro/lib/perl5/site_perl/5.22.0
+    /pro/lib/perl5/5.22.0/x86_64-linux-thread-multi-ld
+    /pro/lib/perl5/5.22.0
     .

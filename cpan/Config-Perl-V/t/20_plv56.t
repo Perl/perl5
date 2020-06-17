@@ -22,7 +22,7 @@ ok (exists $conf->{$_}, "Has $_ entry") for qw( build environment config inc );
 
 is ($conf->{build}{osname}, $conf->{config}{osname}, "osname");
 is ($conf->{build}{stamp}, "Mar 23 2010 17:34:56", "Build time");
-is ($conf->{config}{"package"}, "perl7", "reconstructed \%Config{package}");
+is ($conf->{config}{"package"}, "perl5", "reconstructed \%Config{package}");
 is ($conf->{config}{version}, "5.6.2", "reconstructed \%Config{version}");
 
 my $opt = Config::Perl::V::plv2hash ("")->{build}{options};
@@ -42,7 +42,7 @@ ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
 is ($sig, $md5, "MD5");
 
 __END__
-Summary of my perl7 (revision 5.0 version 6 subversion 2) configuration:
+Summary of my perl5 (revision 5.0 version 6 subversion 2) configuration:
   Platform:
     osname=linux, osvers=2.6.31.12-0.2-default, archname=i686-linux-64int-perlio
     uname='linux nb09 2.6.31.12-0.2-default #1 smp 2010-03-16 21:25:39 +0100 i686 i686 i386 gnulinux '

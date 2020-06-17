@@ -46,7 +46,7 @@ ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
 is ($sig, $md5, "MD5");
 
 __END__
-Summary of my perl7 (revision 5 version 16 subversion 3) configuration:
+Summary of my perl5 (revision 5 version 16 subversion 3) configuration:
    
   Platform:
     osname=linux, osvers=3.4.33-2.24-desktop, archname=i686-linux-64int
@@ -87,8 +87,8 @@ Characteristics of this binary (from libperl):
   Built under linux
   Compiled at Mar 12 2013 08:36:17
   @INC:
-    /pro/lib/perl7/site_perl/5.16.3/i686-linux-64int
-    /pro/lib/perl7/site_perl/5.16.3
-    /pro/lib/perl7/5.16.3/i686-linux-64int
-    /pro/lib/perl7/5.16.3
+    /pro/lib/perl5/site_perl/5.16.3/i686-linux-64int
+    /pro/lib/perl5/site_perl/5.16.3
+    /pro/lib/perl5/5.16.3/i686-linux-64int
+    /pro/lib/perl5/5.16.3
     .
