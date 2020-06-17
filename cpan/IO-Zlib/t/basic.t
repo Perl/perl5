@@ -1,5 +1,8 @@
 use IO::Zlib;
 
+use strict;
+use warnings;
+
 sub ok
 {
     my ($no, $ok) = @_ ;
@@ -11,14 +14,16 @@ sub ok
     print "not ok $no\n" unless $ok ;
 }
 
-$name="test.gz";
+my $name="test.gz";
 
 print "1..17\n";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
+
+my $file;
 
 ok(1, $file = IO::Zlib->new($name, "wb"));
 ok(2, $file->print($hello));
@@ -29,6 +34,8 @@ ok(5, !$file->opened());
 ok(6, $file = IO::Zlib->new());
 ok(7, $file->open($name, "rb"));
 ok(8, !$file->eof());
+
+my $uncomp;
 ok(9, $file->read($uncomp, 1024) == length($hello));
 ok(10, $uncomp eq $hello);
 ok(11, $file->eof());

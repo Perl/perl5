@@ -4,6 +4,9 @@
 # This limits the testing to UNIX-like
 # systems but that should be enough.
 
+use strict;
+use warnings;
+
 my $gzip = "/usr/bin/gzip";
 
 unless( -x $gzip &&
@@ -86,12 +89,14 @@ ok(14, $@ =~ /^IO::Zlib::gzopen_external: mode 'xyz' is illegal /);
 # The following is a copy of the basic.t, shifted up by 14 tests,
 # the difference being that now we should be using the external gzip.
 
-$name="test.gz";
+my $name="test.gz";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
+
+my $file;
 
 ok(15, $file = IO::Zlib->new($name, "wb"));
 ok(16, $file->print($hello));
@@ -102,6 +107,8 @@ ok(19, !$file->opened());
 ok(20, $file = IO::Zlib->new());
 ok(21, $file->open($name, "rb"));
 ok(22, !$file->eof());
+
+my $uncomp;
 ok(23, $file->read($uncomp, 1024) == length($hello));
 ok(24, $file->eof());
 ok(25, $file->opened());
