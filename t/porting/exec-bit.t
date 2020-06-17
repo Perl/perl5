@@ -1,4 +1,11 @@
 #!/perl -w
+
+BEGIN {
+  chdir 't' if -d 't';
+  require './test.pl';
+  set_up_inc( qw{../lib} );
+}
+
 use 5.010;
 use strict;
 use Config;
@@ -17,7 +24,6 @@ sub has_shebang {
   return $line =~ /^\#!\s*([A-Za-z0-9_\-\/\.])+\s?/ ? 1 : 0;
 }
 
-require './test.pl';
 if ( $^O eq "MSWin32" ) {
   skip_all( "-x on MSWin32 only indicates file has executable suffix. Try Cygwin?" );
 }
