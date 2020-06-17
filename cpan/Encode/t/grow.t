@@ -1,9 +1,10 @@
 #!../perl
+our %Config;
 our $POWER;
 BEGIN {
      if ($ENV{'PERL_CORE'}){
          chdir 't';
-         unshift @INC, '../lib';
+         unshift @INC, '../lib', '../../../lib';
      }
      require Config; import Config;
      if ($Config{'extensions'} !~ /\bEncode\b/) {

@@ -1,7 +1,10 @@
+our %Config;
 BEGIN {
     if ($ENV{'PERL_CORE'}) {
         chdir 't';
-        unshift @INC, '../lib';
+        my $lib = $^X;
+        $lib =~ s{(\b)perl[^/]*$}{$1lib};
+        unshift @INC, $lib;
     }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {

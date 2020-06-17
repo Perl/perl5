@@ -1,6 +1,6 @@
 # $Id: enc_utf8.t,v 2.6 2019/12/25 09:23:21 dankogai Exp $
 # This is the twin of enc_eucjp.t .
-
+our %Config;
 BEGIN {
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {

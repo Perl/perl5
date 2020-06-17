@@ -1,3 +1,5 @@
+
+our %Config;
 BEGIN {
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {

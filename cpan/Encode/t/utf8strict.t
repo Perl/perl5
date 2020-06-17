@@ -1,10 +1,12 @@
 #!../perl
 our $DEBUG = @ARGV;
-our (%ORD, %SEQ, $NTESTS);
+our (%ORD, %SEQ, $NTESTS, %Config);
 BEGIN {
-     if ($ENV{'PERL_CORE'}){
+     if ($ENV{'PERL_CORE'}) {
          chdir 't';
-         unshift @INC, '../lib';
+         my $lib = $^X;
+         $lib =~ s{(\b)perl[^/]*$}{$1lib};
+         unshift @INC, $lib;
      }
      require Config; import Config;
      if ($Config{'extensions'} !~ /\bEncode\b/) {

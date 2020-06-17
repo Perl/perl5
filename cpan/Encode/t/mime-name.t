@@ -2,10 +2,13 @@
 # $Id: mime-name.t,v 1.3 2017/10/06 22:21:53 dankogai Exp $
 # This script is written in utf8
 #
+our %Config;
 BEGIN {
-    if ($ENV{'PERL_CORE'}){
+    if ($ENV{'PERL_CORE'}) {
         chdir 't';
-        unshift @INC, '../lib';
+        my $lib = $^X;
+        $lib =~ s{(\b)perl[^/]*$}{$1lib};
+        unshift @INC, $lib;
     }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {

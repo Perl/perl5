@@ -2,7 +2,7 @@
 # $Id: piconv.t,v 0.4 2013/02/18 02:23:56 dankogai Exp $
 #
 
-BEGIN {
+BEGIN {    
     if ( $ENV{'PERL_CORE'} && $] >= 5.011) {
         print "1..0 # Skip: Don't know how to test this within perl's core\n";
         exit 0;
