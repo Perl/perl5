@@ -15,7 +15,7 @@ BEGIN {
     %^H = ();
 }
 
-print "1..84\n";
+print "1..79\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -306,4 +306,6 @@ foreach my $index (-3..+3) {
 	}
     }
 }
+
+print "# Done\n";
 
