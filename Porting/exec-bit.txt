@@ -27,6 +27,7 @@ regen/embed.pl
 regen/feature.pl
 regen/keywords.pl
 regen/opcode.pl
+regen/pX.pl
 regen/regcharclass.pl
 regen/uconfig_h.pl
 runtests.SH
