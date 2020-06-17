@@ -6,12 +6,16 @@
 # -- Jarkko Hietaniemi	since Mar 1997
 # -- Daniel S. Lewart	since Sep 1997
 
+use strict;
+use warnings;
+
 use Math::Complex 1.54;
 
 our $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
 our $has_inf   = !$vax_float;
 
 my ($args, $op, $target, $test, $test_set, $try, $val, $zvalue, @set, @val);
+my ($bad, $z);
 
 $test = 0;
 $| = 1;
