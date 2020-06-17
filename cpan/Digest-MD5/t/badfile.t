@@ -2,7 +2,7 @@ print "1..2\n";
 
 use Digest::MD5 ();
 
-$md5 = Digest::MD5->new;
+my $md5 = Digest::MD5->new;
 
 eval {
    use vars qw(*FOO);
