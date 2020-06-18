@@ -1572,6 +1572,7 @@ replaced by a reliable method, and hence the diagnostics generated have
 changed. See L</Diagnostics>.
 
 =item *
+
 The debug display (say by specifying C<-Dr> or S<C<use re>> (with
 appropriate options) of compiled Unicode property wildcard subpatterns no
 longer has extraneous output.
