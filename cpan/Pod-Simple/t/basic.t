@@ -26,7 +26,7 @@ require Pod::Simple::DumpAsXML; ok 1;
 
 require Pod::Simple::XMLOutStream; ok 1;
 
-sub e ($$) { Pod::Simple::DumpAsXML->_duo(@_) }
+sub e :prototype($$) { Pod::Simple::DumpAsXML->_duo(@_) }
 
 print "# Simple identity tests...\n";
 
