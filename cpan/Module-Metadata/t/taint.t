@@ -9,7 +9,7 @@ use Module::Metadata;
 use Carp 'croak';
 
 # stolen liberally from Class-Tiny/t/lib/TestUtils.pm - thanks xdg!
-sub exception(&) {
+sub exception :prototype(&) {
     my $code = shift;
     my $success = eval { $code->(); 1 };
     my $err = $@;
