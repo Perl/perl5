@@ -16,7 +16,7 @@ ok 1;
 use Pod::Simple::DumpAsXML;
 use Pod::Simple::XMLOutStream;
 print "# Pod::Simple version $Pod::Simple::VERSION\n";
-sub e ($$) { Pod::Simple::DumpAsXML->_duo(@_) }
+sub e :prototype($$) { Pod::Simple::DumpAsXML->_duo(@_) }
 
 
 print "# Simple tests for head1 - head4...\n";

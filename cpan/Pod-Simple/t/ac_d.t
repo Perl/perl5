@@ -18,7 +18,7 @@ print "# Pod::Simple version $Pod::Simple::VERSION\n";
 $Pod::Simple::XMLOutStream::ATTR_PAD   = ' ';
 $Pod::Simple::XMLOutStream::SORT_ATTRS = 1; # for predictably testable output
 
-#sub e ($$) { Pod::Simple::DumpAsXML->_duo(@_) }
+#sub e :prototype($$) { Pod::Simple::DumpAsXML->_duo(@_) }
 
 $Pod::Simple::XMLOutStream::ATTR_PAD   = ' ';
 $Pod::Simple::XMLOutStream::SORT_ATTRS = 1; # for predictably testable output

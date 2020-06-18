@@ -15,7 +15,7 @@ BEGIN { plan tests => 14 };
 
 use Pod::Simple::HTML;
 
-sub x ($;&) {
+sub x :prototype($;&) {
   my $code = $_[1];
   Pod::Simple::HTML->_out(
   sub{  $_[0]->bare_output(1); $code->($_[0]) if $code  },

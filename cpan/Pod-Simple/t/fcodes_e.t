@@ -24,7 +24,7 @@ print "# Pod::Escapes version $Pod::Escapes::VERSION\n",
 # Presumably that's the library being used
 
 
-sub e ($$) { Pod::Simple::DumpAsXML->_duo(@_) }
+sub e :prototype($$) { Pod::Simple::DumpAsXML->_duo(@_) }
 
 &ok( e "", "" );
 &ok( e "\n", "", );
