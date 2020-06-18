@@ -39,7 +39,7 @@ use Pod::Escapes ();
     next if $this eq 'main'; # %main:: is %::
 
     #print "Peeking at $this => ${$this . '::VERSION'}\n";
-    
+    no strict 'refs';
     if(defined ${$this . '::VERSION'} ) {
       $v{$this} = ${$this . '::VERSION'}
     } elsif(
@@ -61,7 +61,7 @@ use Pod::Escapes ();
   push @out, " Modules in memory:\n";
   delete @v{'', '[none]'};
   foreach my $p (sort {lc($a) cmp lc($b)} keys %v) {
-    $indent = ' ' x (2 + ($p =~ tr/:/:/));
+    my $indent = ' ' x (2 + ($p =~ tr/:/:/));
     push @out,  '  ', $indent, $p, defined($v{$p}) ? " v$v{$p};\n" : ";\n";
   }
   push @out, sprintf "[at %s (local) / %s (GMT)]\n",
