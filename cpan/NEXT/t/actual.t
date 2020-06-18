@@ -4,16 +4,16 @@ BEGIN { use_ok('NEXT') };
 my $order = 0;
 
 package A;
-@ISA = qw/B C D/;
+our @ISA = qw/B C D/;
 
 sub test { ++$order; ::ok($order==1,"test A"); $_[0]->NEXT::ACTUAL::test;}
 
 package B;
-@ISA = qw/D C/;
+our @ISA = qw/D C/;
 sub test { ++$order; ::ok($order==2,"test B"); $_[0]->NEXT::ACTUAL::test;}
 
 package C;
-@ISA = qw/D/;
+our @ISA = qw/D/;
 sub test {
 	++$order; ::ok($order==4||$order==6,"test C");
 	$_[0]->NEXT::ACTUAL::test;
