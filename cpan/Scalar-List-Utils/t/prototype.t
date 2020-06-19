@@ -1,5 +1,6 @@
 #!./perl
 
+no feature 'signatures';
 use strict;
 use warnings;
 
@@ -33,7 +34,7 @@ is( prototype('stub'), undef, 'non existing sub');
 set_prototype('$$$', \&stub);
 is( prototype('stub'), '$$$', 'change non existing sub');
 
-sub f_decl ($$$$);
+sub f_decl :prototype($$$$);
 is( prototype('f_decl'), '$$$$', 'forward declaration');
 
 set_prototype('\%', \&f_decl);
