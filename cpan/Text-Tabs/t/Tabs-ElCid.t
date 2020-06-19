@@ -90,7 +90,7 @@ sub table_ok {
     return $bad;
 }
 
-sub check($$$$) {
+sub check :prototype($$$$) {
     die "expected 4 arguments" unless @_ == 4;
     my ($found, $index, $version, $item) = @_;
     my $expected = $DATA[$index]{$version}{$item};
