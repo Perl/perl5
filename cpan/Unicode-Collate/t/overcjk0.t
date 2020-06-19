@@ -18,7 +18,7 @@ use strict;
 use warnings;
 BEGIN { $| = 1; print "1..696\n"; } # 6 + 46 x @Versions
 my $count = 0;
-sub ok ($;$) {
+sub ok :prototype($;$) {
     my $p = my $r = shift;
     if (@_) {
 	my $x = shift;
