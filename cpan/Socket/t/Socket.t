@@ -1,5 +1,7 @@
 #!./perl
 
+our %Config;
+my $has_alarm;
 BEGIN {
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
@@ -13,8 +15,8 @@ BEGIN {
 use Socket qw(:all);
 use Test::More tests => 6;
 
-$has_echo = $^O ne 'MSWin32';
-$alarmed = 0;
+my $has_echo = $^O ne 'MSWin32';
+my $alarmed = 0;
 sub arm      { $alarmed = 0; alarm(shift) if $has_alarm }
 sub alarmed  { $alarmed = 1 }
 $SIG{ALRM} = 'alarmed'                    if $has_alarm;
@@ -48,7 +50,8 @@ SKIP: {
 	arm(0);
 
 	arm(5);
-	$read = sysread(T,$buff,10);	# Connection may be granted, then closed!
+	my $buff;
+	my $read = sysread(T,$buff,10);	# Connection may be granted, then closed!
 	arm(0);
 
 	while ($read > 0 && length($buff) < 5) {
@@ -87,7 +90,8 @@ SKIP: {
 	arm(0);
 
 	arm(5);
-	$read = sysread(S,$buff,10);	# Connection may be granted, then closed!
+	my $buff;
+	my $read = sysread(S,$buff,10);	# Connection may be granted, then closed!
 	arm(0);
 
 	while ($read > 0 && length($buff) < 5) {
