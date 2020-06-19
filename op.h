@@ -713,6 +713,9 @@ struct opslab {
                                            units) */
 # ifdef PERL_DEBUG_READONLY_OPS
     bool	opslab_readonly;
+    U8          opslab_padding;         /* padding to ensure that opslab_slots is always */
+# else
+    U16         opslab_padding;         /* located at an offset with 32-bit alignment */
 # endif
     OPSLOT	opslab_slots;		/* slots begin here */
 };
