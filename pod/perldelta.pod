@@ -1388,8 +1388,18 @@ Only static builds (the default) build reliably
 
 =item *
 
-Threaded builds have problems with mutexes during critical sections, so
-use at your own risk
+When using locales, z/OS does not handle the C<LC_MESSAGES> category
+properly, so when compiling perl, you should add the following to your
+F<Configure> options
+
+ ./Configure <other options> -Accflags=-DNO_LOCALE_MESSAGES
+
+=item *
+
+z/OS does not support locales with threads, so when compiling a threaded
+perl, you should add the following to your F<Configure> options
+
+ ./Configure <other Configure options> -Accflags=-DNO_LOCALE
 
 =item *
 
