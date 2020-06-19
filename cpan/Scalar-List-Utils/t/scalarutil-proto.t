@@ -1,5 +1,6 @@
 #!./perl
 
+no feature 'signatures';
 use strict;
 use warnings;
 
