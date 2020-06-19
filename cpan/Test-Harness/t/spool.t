@@ -23,7 +23,7 @@ BEGIN {
 
     *CORE::GLOBAL::open = \&my_open;
 
-    sub my_open (*@) {
+    sub my_open :prototype(*@) {
         if ($useOrigOpen) {
             if ( defined( $_[0] ) ) {
                 use Symbol qw();
@@ -45,7 +45,7 @@ BEGIN {
         }
     }
 
-    *CORE::GLOBAL::close = sub (*) {
+    *CORE::GLOBAL::close = sub :prototype(*) {
         if   ($useOrigClose) { return CORE::close(shift) }
         else                 {return}
     };

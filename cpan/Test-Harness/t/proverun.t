@@ -141,7 +141,7 @@ sub _slacken {
     }
 }
 
-sub is_slackly($$$) {
+sub is_slackly :prototype($$$) {
     my ( $got, $want, $msg ) = @_;
     return is_deeply _slacken($got), _slacken($want), $msg;
 }

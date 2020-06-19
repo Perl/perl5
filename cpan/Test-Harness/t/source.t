@@ -14,7 +14,7 @@ my $dir = 't/source_tests';
 
 use_ok('TAP::Parser::Source');
 
-sub ct($) {
+sub ct :prototype($) {
     my $hash = shift;
     if ( $ENV{PERL_CORE} ) {
         delete $hash->{is_symlink};
@@ -138,15 +138,15 @@ sub ct($) {
     # separate meta->file to break up the test
     my $file = delete $meta->{file};
     is_deeply(
-        ct $meta,
-        ct {is_scalar    => 1,
+        ct( $meta ),
+        ct( {is_scalar    => 1,
             has_newlines => 0,
             length       => length($test),
             is_object    => 0,
             is_file      => 1,
             is_dir       => 0,
             is_symlink   => 0,
-        },
+        } ),
         'assemble_meta for file'
     );
 
@@ -159,8 +159,8 @@ sub ct($) {
     isnt( delete $file->{write},   undef, '... file->write set' );
     isnt( delete $file->{execute}, undef, '... file->execute set' );
     is_deeply(
-        ct $file,
-        ct {basename   => 'source.t',
+        ct( $file ),
+        ct( {basename   => 'source.t',
             ext        => '.t',
             lc_ext     => '.t',
             shebang    => '#!/usr/bin/perl',
@@ -176,7 +176,7 @@ sub ct($) {
             sticky => ( -k $test )[-1] ? 1 : 0,
             setgid => -g $test         ? 1 : 0,
             setuid => -u $test         ? 1 : 0,
-        },
+        } ),
         '... file->* set'
     );
 }
@@ -192,15 +192,15 @@ sub ct($) {
     # separate meta->file to break up the test
     my $file = delete $meta->{file};
     is_deeply(
-        ct $meta,
-        ct {is_scalar    => 1,
+        ct( $meta),
+        ct( {is_scalar    => 1,
             has_newlines => 0,
             length       => length($test),
             is_object    => 0,
             is_file      => 0,
             is_dir       => 1,
             is_symlink   => 0,
-        },
+        } ),
         'assemble_meta for directory'
     );
 
@@ -215,8 +215,8 @@ sub ct($) {
     isnt( delete $file->{write},   undef, '... file->write set' );
     isnt( delete $file->{execute}, undef, '... file->execute set' );
     is_deeply(
-        ct $file,
-        ct {basename   => 'source_tests',
+        ct( $file ),
+        ct( {basename   => 'source_tests',
             ext        => '',
             lc_ext     => '',
             text       => 0,
@@ -227,7 +227,7 @@ sub ct($) {
             sticky     => ( -k $test )[-1] ? 1 : 0,
             setgid     => -g $test ? 1 : 0,
             setuid     => -u $test ? 1 : 0,
-        },
+        } ),
         '... file->* set'
     );
 }
@@ -254,15 +254,15 @@ SKIP: {
     # separate meta->file to break up the test
     my $file = delete $meta->{file};
     is_deeply(
-        ct $meta,
-        ct {is_scalar    => 1,
+        ct( $meta ),
+        ct( {is_scalar    => 1,
             has_newlines => 0,
             length       => length($symlink),
             is_object    => 0,
             is_file      => 1,
             is_dir       => 0,
             is_symlink   => 1,
-        },
+        } ),
         'assemble_meta for symlink'
     );
 
@@ -277,8 +277,8 @@ SKIP: {
     isnt( delete $file->{write},   undef, '... file->write set' );
     isnt( delete $file->{execute}, undef, '... file->execute set' );
     is_deeply(
-        ct $file,
-        ct {basename   => 'source_link.T',
+        ct( $file ),
+        ct( {basename   => 'source_link.T',
             ext        => '.T',
             lc_ext     => '.t',
             shebang    => '#!/usr/bin/perl',
@@ -292,7 +292,7 @@ SKIP: {
             sticky     => ( -k $symlink )[-1] ? 1 : 0,
             setgid     => -g $symlink ? 1 : 0,
             setuid     => -u $symlink ? 1 : 0,
-        },
+        } ),
         '... file->* set'
     );
 
