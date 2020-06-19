@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 
 
-sub warnings(&) {
+sub warnings :prototype(&) {
     my $code = shift;
     my @warnings;
     local $SIG{__WARN__} = sub { push @warnings => @_ };
@@ -12,7 +12,7 @@ sub warnings(&) {
     return \@warnings;
 }
 
-sub exception(&) {
+sub exception :prototype(&) {
     my $code = shift;
     local ($@, $!, $SIG{__DIE__});
     my $ok = eval { $code->(); 1 };
