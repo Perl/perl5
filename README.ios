@@ -121,58 +121,58 @@ The architecture of the perl binaries. Only one can be built at a time
   x86-64:             3.0.0 - current
   simulators
 
-  Must be one of: arm64, armv7 for iOS builds arm64 for Apple TV builds armv7k
-  for Apple Watch builds x86_64 for iOS simulator, Apple TV simulator or Apple
-  Watch builds
+Must be one of: arm64, armv7 for iOS builds arm64 for Apple TV builds armv7k
+for Apple Watch builds x86_64 for iOS simulator, Apple TV simulator or Apple
+Watch builds
 
-    On iOS and Apple TV device builds the default is arm64 On Apple Watch
-    device builds the default is armv7k On all simulator builds default is
-    x86_64
+On iOS and Apple TV device builds the default is arm64 On Apple Watch
+device builds the default is armv7k On all simulator builds default is
+x86_64
 
   PERL_ARCH=arm64 # for iOS or tvOS
 
 =item BITCODE
 
-  Build bitcode information into the binary. Does not apply to simulator
-  builds. Default for device builds is 1 BITCODE=1
+Build bitcode information into the binary. Does not apply to simulator
+builds. Default for device builds is 1 BITCODE=1
 
 =item IPHONE_MIN_VERSION
 
-  Minimum iPhoneOS or AppleTVOS version compatible with built perl binaries.
-  Default for device builds is 8.0 IPHONE_MIN_VERSION=8.0
+Minimum iPhoneOS or AppleTVOS version compatible with built perl binaries.
+Default for device builds is 8.0 IPHONE_MIN_VERSION=8.0
 
 =item DEBUG
 
-  Set to 1 if you want to produce a debug build. Debugging symbols will be put
-  into 'libperl.dylib.dSYM' file for source code debugging. DEBUG=1
+Set to 1 if you want to produce a debug build. Debugging symbols will be put
+into 'libperl.dylib.dSYM' file for source code debugging. DEBUG=1
 
 =item INSTALL_DIR
 
-  Set to the name of the subdirectory within your working directory (the one
-  you are on when you call the build.sh script) where your device or simulator
-  perl will be installed INSTALL_DIR='local'
+Set to the name of the subdirectory within your working directory (the one
+you are on when you call the build.sh script) where your device or simulator
+perl will be installed INSTALL_DIR='local'
 
-  $INSTALL_DIR allows the build to find other libraries for the target platform
-  and arch if you want to build XS modules by using 'lib' and 'include'
-  directories within
+$INSTALL_DIR allows the build to find other libraries for the target platform
+and arch if you want to build XS modules by using 'lib' and 'include'
+directories within
 
 =item PERL_APPLETV
 
-  Set to 1 if you want to build for Apple TV instead of the default (iOS)
-  PERL_APPLETV=1
+Set to 1 if you want to build for Apple TV instead of the default (iOS)
+PERL_APPLETV=1
 
 =item PERL_APPLEWATCH
 
-  Set to 1 if you want to build for Apple Watch instead of the default (iOS)
-  PERL_APPLEWATCH=1
+Set to 1 if you want to build for Apple Watch instead of the default (iOS)
+PERL_APPLEWATCH=1
 
 =item DEVICE_SDK_PATH, SIMULATOR_SDK_PATH
 
-  Use these if you want to use non default SDK location with your build
-  SIMULATOR_SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/
-  iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
-  DEVICE_SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/
-  AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk"
+Use these if you want to use non default SDK location with your build
+SIMULATOR_SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/
+iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
+DEVICE_SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/
+AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk"
 
 =back
 
@@ -181,13 +181,13 @@ The architecture of the perl binaries. Only one can be built at a time
 It should be possible to build extensions with the build by placing the tar.gz
 distributions in an ext directory besides.
 
-  Not all modules will work, this is being investigated
+Not all modules will work, this is being investigated
 
-  All extensions that have associated *.bundle objects will need to be
-  installed at compile time because they need to be signed to run in the device
+All extensions that have associated *.bundle objects will need to be
+installed at compile time because they need to be signed to run in the device
 
-  It should also be possible to install pure perl modules from an app running
-  the embedded perl
+It should also be possible to install pure perl modules from an app running
+the embedded perl
 
 =head2 Universal Binary support
 
