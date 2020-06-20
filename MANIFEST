@@ -4531,8 +4531,6 @@ INTERN.h			Included before domestic .h files
 intrpvar.h			Variables held in each interpreter instance
 invlist_inline.h		Inline functions for handling inversion lists
 ios/build.sh		iOS build script
-ios/config/watch/armv7k/config.h
-ios/config/watch/armv7k/config.sh
 ios/config/appletv/arm64/config.h		tvOS arm64 config.h template
 ios/config/appletv/arm64/config.sh		tvOS arm64 config.sh template
 ios/config/appletv/x86_64/config.h		tvOS x86_64 config.h template
