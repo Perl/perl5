@@ -772,9 +772,10 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 
     s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
     for (i = 0; i < len; i++) {
-	if (PL_freq[s[i]] < frequency) {
+        U32 this_frequency = PL_freq[NATIVE_TO_LATIN1(s[i])];
+	if (this_frequency < frequency) {
 	    PERL_DEB( rarest = i );
-	    frequency = PL_freq[s[i]];
+	    frequency = this_frequency;
 	}
     }
     BmUSEFUL(sv) = 100;			/* Initial value */
