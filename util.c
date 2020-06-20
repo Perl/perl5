@@ -716,9 +716,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     const U8 *s;
     STRLEN i;
     STRLEN len;
-    U32 frequency = 256;
     MAGIC *mg;
-    PERL_DEB( STRLEN rarest = 0 );
 
     PERL_ARGS_ASSERT_FBM_COMPILE;
 
@@ -770,18 +768,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	}
     }
 
-    s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
-    for (i = 0; i < len; i++) {
-        U32 this_frequency = PL_freq[NATIVE_TO_LATIN1(s[i])];
-	if (this_frequency < frequency) {
-	    PERL_DEB( rarest = i );
-	    frequency = this_frequency;
-	}
-    }
     BmUSEFUL(sv) = 100;			/* Initial value */
     ((XPVNV*)SvANY(sv))->xnv_u.xnv_bm_tail = cBOOL(flags & FBMcf_TAIL);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %" UVuf "\n",
-			  s[rarest], (UV)rarest));
 }
 
 
