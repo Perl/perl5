@@ -1840,7 +1840,7 @@ will be sorely missed.
 
 Perl 5.32.0 represents approximately 13 months of development since Perl
 5.30.0 and contains approximately 220,000 lines of changes across 1,800
-files from 86 authors.
+files from 89 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
 approximately 140,000 lines of changes to 880 .pm, .t, .c and .h files.
@@ -1857,16 +1857,16 @@ Dragan, Dan Kogai, Dave Cross, Dave Rolsky, David Cantrell, David Mitchell,
 Dominic Hargreaves, E. Choroba, Felipe Gasper, Florian Weimer, Graham Knop,
 Håkon Hægland, Hauke D, H.Merijn Brand, Hugo van der Sanden, Ichinose
 Shogo, James E Keenan, Jason McIntosh, Jerome Duval, Johan Vromans, John
-Lightsey, Kang-min Liu, Karen Etheridge, Karl Williamson, Leon Timmermans,
-Manuel Mausz, Marc Green, Matthew Horsfall, Matt Turner, Max Maischein,
-Michael Haardt, Nicholas Clark, Nicolas R., Niko Tyni, Pali, Paul Evans,
-Paul Johnson, Paul Marquess, Peter Eisentraut, Peter John Acklam, Peter
-Oliver, Petr Písař, Renee Baecker, Ricardo Signes, Richard Leach, Russ
-Allbery, Samuel Smith, Santtu Ojanperä, Sawyer X, Sergey Aleynikov, Sergiy
-Borodych, Shlomi Fish, Sisyphus, Slaven Rezic, Smylers, Stefan Seifert,
-Steve Hay, Steve Peters, Svyatoslav, Todd Rinaldo, Tomasz Konojacki, Tom
-Hukins, Tony Cook, Unicode Consortium, VanL, Vickenty Fesunov, Vitali Peil,
-Yves Orton, Zefram.
+Lightsey, John Paul Adrian Glaubitz, Kang-min Liu, Karen Etheridge, Karl
+Williamson, Leon Timmermans, Manuel Mausz, Marc Green, Matthew Horsfall,
+Matt Turner, Max Maischein, Michael Haardt, Nicholas Clark, Nicolas R., Niko
+Tyni, Pali, Paul Evans, Paul Johnson, Paul Marquess, Peter Eisentraut, Peter
+John Acklam, Peter Oliver, Petr Písař, Renee Baecker, Ricardo Signes,
+Richard Leach, Russ Allbery, Samuel Smith, Santtu Ojanperä, Sawyer X,
+Sergey Aleynikov, Sergiy Borodych, Shirakata Kentaro, Shlomi Fish, Sisyphus,
+Slaven Rezic, Smylers, Stefan Seifert, Steve Hay, Steve Peters, Svyatoslav,
+Thibault Duponchelle, Todd Rinaldo, Tomasz Konojacki, Tom Hukins, Tony Cook,
+Unicode Consortium, VanL, Vickenty Fesunov, Vitali Peil, Yves Orton, Zefram.
 
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
