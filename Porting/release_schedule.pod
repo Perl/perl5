@@ -20,7 +20,7 @@ Code freezes (which happen in the 5.31.X series)
                               functioning programs freeze
   2020-03-20  5.31.10 ✓       Full code freeze
   2020-04-28  5.31.11 ✓       Full code freeze (clearing BBCs)
-  2020-05-20  5.32.0          Stable release! (Hopefully)
+  2020-05-20  5.32.0  ✓       Stable release! (Hopefully)
 
 =head2 Perl 5.30
 
