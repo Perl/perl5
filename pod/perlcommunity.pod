@@ -143,26 +143,39 @@ because someone will forget.
 Perl had two major annual conventions: The Perl Conference (now part of OSCON),
 put on by O'Reilly, and Yet Another Perl Conference or YAPC (pronounced
 yap-see), which is localized into several regional YAPCs (North America,
-Europe, Asia) in a stunning grassroots display by the Perl community. For more
-information about either conference, check out their respective web pages:
-OSCON L<https://www.oreilly.com/conferences/>; YAPC L<https://www.yapc.org>.
+Europe, Asia) in a stunning grassroots display by the Perl community.
 
 In 2016, YAPC was rebranded as The Perl Conference again. It is now referred
 to as The Perl and Raku Conference.
 
-A relatively new conference franchise with a large Perl portion is the
-Open Source Developers Conference or OSDC. First held in Australia it has
-recently also spread to Israel and France. More information can be found at:
+OSCON had been discontinued.
+
+For more information about either conference, check out their respective web
+pages:
+
+=over 4
+
+=item * The Perl Conference
+
+L<http://perlconference.us/>.
+
+=item * OSCON
+
+L<https://www.oreilly.com/conferences/>
+
+=back
+
+An additional conference franchise with a large Perl portion was the
+Open Source Developers Conference or OSDC. First held in Australia, it
+also spread to Israel and France. More information can be found at:
 L<http://www.osdc.org.il> for Israel, and L<http://www.osdc.fr/> for France.
 
 =head2 Calendar of Perl Events
 
 The Perl Review, L<http://www.theperlreview.com> maintains a website
-and Google calendar
-(L<https://www.theperlreview.com/community_calendar>) for tracking
-workshops, hackathons, Perl Mongers meetings, and other events. Views
-of this calendar are at L<https://www.perl.org/events.html> and
-L<https://www.yapc.org>.
+and Google calendar for tracking
+workshops, hackathons, Perl Mongers meetings, and other events. A view
+of this calendar is available at L<https://www.perl.org/events.html>.
 
 Not every event or Perl Mongers group is on that calendar, so don't lose
 heart if you don't see yours posted. To have your event or group listed,
