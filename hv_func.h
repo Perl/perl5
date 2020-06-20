@@ -105,14 +105,6 @@
 
 #endif
 
-PERL_STATIC_INLINE
-U32 S_perl_hash_with_seed(const U8 * const seed, const U8 * const str, const STRLEN len)
-{
-    U8 state[_PERL_HASH_STATE_BYTES];
-    _PERL_HASH_SEED_STATE(seed,state);
-    return _PERL_HASH_WITH_STATE(state,str,len);
-}
-
 #define PERL_HASH_WITH_SEED(seed,hash,str,len) \
     (hash) = S_perl_hash_with_seed((const U8 *) seed, (const U8 *) str,len)
 #define PERL_HASH_WITH_STATE(state,hash,str,len) \
@@ -159,6 +151,13 @@ U32 S_perl_hash_with_seed(const U8 * const seed, const U8 * const str, const STR
 #ifdef PERL_HASH_INTERNAL_ACCESS
 #define PERL_HASH_INTERNAL(hash,str,len) PERL_HASH(hash,str,len)
 #endif
+
+PERL_STATIC_INLINE U32
+S_perl_hash_with_seed(const U8 * seed, const U8 *str, STRLEN len) {
+    U8 state[_PERL_HASH_STATE_BYTES];
+    _PERL_HASH_SEED_STATE(seed,state);
+    return _PERL_HASH_WITH_STATE(state,str,len);
+}
 
 #endif /*compile once*/
 
