@@ -4800,7 +4800,7 @@ EXTCONST int         PL_sig_num[];
  * folds such as outside the range or to multiple characters. */
 
 #ifdef DOINIT
-#ifndef EBCDIC
+#  ifndef EBCDIC
 
 /* The EBCDIC fold table depends on the code page, and hence is found in
  * utfebcdic.h */
@@ -4951,19 +4951,19 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
 	200,	201,	202,	203,	204,	205,	206,	207,
 	208,	209,	210,	211,	212,	213,	214,	215,
 	216,	217,	218,	219,	220,	221,	222,
-#if    UNICODE_MAJOR_VERSION > 2                                        \
-   || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1		\
-                                  && UNICODE_DOT_DOT_VERSION >= 8)
+#    if    UNICODE_MAJOR_VERSION > 2                                        \
+       || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1           \
+                                      && UNICODE_DOT_DOT_VERSION >= 8)
 	                                                        255 /*sharp s*/,
-#else   /* uc(sharp s) is 'sharp s' itself in early unicode */
+#    else   /* uc(sharp s) is 'sharp s' itself in early unicode */
 	                                                        223,
-#endif
+#    endif
 	224-32,	225-32,	226-32,	227-32,	228-32,	229-32,	230-32,	231-32,
 	232-32,	233-32,	234-32,	235-32,	236-32,	237-32,	238-32,	239-32,
 	240-32,	241-32,	242-32,	243-32,	244-32,	245-32,	246-32,	247,
 	248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,	255
 };
-#endif  /* !EBCDIC, but still in DOINIT */
+#  endif  /* !EBCDIC, but still in DOINIT */
 #else	/* ! DOINIT */
 #   ifndef EBCDIC
 EXTCONST unsigned char PL_fold[];
@@ -4974,7 +4974,7 @@ EXTCONST unsigned char PL_latin1_lc[];
 #endif
 
 #ifndef PERL_GLOBAL_STRUCT /* or perlvars.h */
-#ifdef DOINIT
+#  ifdef DOINIT
 EXT unsigned char PL_fold_locale[256] = { /* Unfortunately not EXTCONST. */
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
@@ -5009,13 +5009,13 @@ EXT unsigned char PL_fold_locale[256] = { /* Unfortunately not EXTCONST. */
 	240,	241,	242,	243,	244,	245,	246,	247,
 	248,	249,	250,	251,	252,	253,	254,	255
 };
-#else
+#  else
 EXT unsigned char PL_fold_locale[256]; /* Unfortunately not EXTCONST. */
-#endif
+#  endif
 #endif /* !PERL_GLOBAL_STRUCT */
 
 #ifdef DOINIT
-#ifdef EBCDIC
+#  ifdef EBCDIC
 EXTCONST unsigned char PL_freq[] = {/* EBCDIC frequencies for mixed English/C */
     1,      2,      84,     151,    154,    155,    156,    157,
     165,    246,    250,    3,      158,    7,      18,     29,
@@ -5050,7 +5050,7 @@ EXTCONST unsigned char PL_freq[] = {/* EBCDIC frequencies for mixed English/C */
     222,    219,    211,    195,    188,    193,    185,    184,
     191,    183,    141,    142,    143,    144,    145,    146
 };
-#else  /* ascii rather than ebcdic */
+#  else  /* ascii rather than ebcdic */
 EXTCONST unsigned char PL_freq[] = {	/* letter frequencies for mixed English/C */
 	1,	2,	84,	151,	154,	155,	156,	157,
 	165,	246,	250,	3,	158,	7,	18,	29,
@@ -5085,7 +5085,7 @@ EXTCONST unsigned char PL_freq[] = {	/* letter frequencies for mixed English/C *
 	130,	131,	132,	133,	134,	135,	136,	137,
 	138,	139,	141,	142,	143,	144,	145,	146
 };
-#endif
+#  endif
 #else
 EXTCONST unsigned char PL_freq[];
 #endif
