@@ -169,6 +169,7 @@ build_perl() {
   # patch perl and os version
   os_version=$(uname -r)
   perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" "config.sh"
+  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" "config.sh"
   perl -0777 -i.bak.2 -pe "s|15\.6\.0|$os_version|g" "config.sh"
 
   # patch Makefile.SH #
@@ -208,7 +209,8 @@ build_perl() {
 
   # patch prefix
   perl -i.bak.0 -pe "s|/opt/local|$PREFIX|g" "config.h"
-
+  perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" "config.h"
+  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" "config.h"
 
   if [ $PLATFORM_TAG != "iphone" ] ; then
     # patch fork
