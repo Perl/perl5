@@ -202,6 +202,10 @@ build_perl() {
   # do not 'make depend' yet
   perl -0777 -i.bak.4 -pe 's|rp="Run \$make depend now\?"\n\t. UU\/myread|ans=n\n\trp="Run $make depend now\?"|' Configure
 
+  # deployment target
+  min_ver_replace="-m""$PLATFORM_TAG""os-version-min=8.0"
+  perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" "config.sh"
+
   ./Configure -f config.sh -d
 
   # accept all defaults of our arch config
@@ -211,6 +215,7 @@ build_perl() {
   perl -i.bak.0 -pe "s|/opt/local|$PREFIX|g" "config.h"
   perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" "config.h"
   perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" "config.h"
+  perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" "config.h"
 
   if [ $PLATFORM_TAG != "iphone" ] ; then
     # patch fork
