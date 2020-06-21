@@ -36,7 +36,7 @@ want to build installed via perlbrew, as miniperl and generate_uudmap will be
 copied from the corresponding version's 'build' directory. This is a temporary
 solution, you might as well modify the script to use your own build
 
-  perlbrew install perl-5.30.3
+  perlbrew install perl-5.32.0
 
 =head1 BUILD
 
@@ -46,9 +46,9 @@ This will require a test app running on the device or simulator to execute the
 tests and report the results. If the build succeeds it will then execute 'make
 install' in ./$INSTALL_DIR choice.
 
-  curl -O http://www.cpan.org/src/perl-5.30.3.tar.gz tar -xzf
-  perl-5.30.3.tar.gz [VAR1=VALUE VAR2=VALUE] sh
-  perl-5.30.3/ios/build.sh/build.sh
+  curl -O http://www.cpan.org/src/perl-5.32.0.tar.gz tar -xzf
+  perl-5.32.0.tar.gz [VAR1=VALUE VAR2=VALUE] sh
+  perl-5.32.0/ios/build.sh/build.sh
 
 =head1 QUICK INTRO
 
@@ -59,37 +59,37 @@ OPTIONS The ios/build.sh script will create and populate directories 'bin',
 After the build is completed several artifacts should be created similar to
 this:
 # bin dir
-perl-5.30.3-watch-armv7k-20200619-140059.bin.tar.bz2
+perl-5.32.0-watch-armv7k-20200619-140059.bin.tar.bz2
 # share dir
-perl-5.30.3-watch-armv7k-20200619-140059.share.tar.bz2
+perl-5.32.0-watch-armv7k-20200619-140059.share.tar.bz2
 # lib/perl5
-perl-5.30.3-watch-armv7k-20200619-140059.lib.tar.bz2
+perl-5.32.0-watch-armv7k-20200619-140059.lib.tar.bz2
 # complete build dir, including t
-perl-5.30.3-watch-armv7k-20200619-140059.build.tar.bz2
+perl-5.32.0-watch-armv7k-20200619-140059.build.tar.bz2
 
 To build a release version of perl for iOS arm64 in 'local' dir: sh -x
-"perl-5.30.3/ios/build.sh"
+"perl-5.32.0/ios/build.sh"
 
 To build a release version of perl for iOS x86_64 simulator in './local' dir:
-PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.30.3/ios/build.sh"
+PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
 
 To build a debug version of perl for iOS armv7 in './another' dir:
-PERL_ARCH=armv7 DEBUG=1 INSTALL_DIR='another' sh -x "perl-5.30.3/ios/build.sh"
+PERL_ARCH=armv7 DEBUG=1 INSTALL_DIR='another' sh -x "perl-5.32.0/ios/build.sh"
 
 To build a release version of perl for Apple TV arm64: PERL_APPLETV=1
-MIN_VERSION=9.0 sh -x "perl-5.30.3/ios/build.sh"
+MIN_VERSION=9.0 sh -x "perl-5.32.0/ios/build.sh"
 
 To build a debug version perl for Apple TV: PERL_APPLETV=1 MIN_VERSION=9.0
-DEBUG=1 sh -x "perl-5.30.3/ios/build.sh"
+DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
 
 To build a debug version of perl for Apple TV Simulator: PERL_APPLETV=1
-MIN_VERSION=9.0 PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.30.3/ios/build.sh"
+MIN_VERSION=9.0 PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
 
 To build a debug version of perl for Apple Watch: PERL_APPLEWATCH=1 DEBUG=1
-MIN_VERSION=3.0 sh -x "perl-5.30.3/ios/build.sh"
+MIN_VERSION=3.0 sh -x "perl-5.32.0/ios/build.sh"
 
 To build a debug version of perl for Apple Watch Simulator: PERL_ARCH=x86_64
-PERL_APPLEWATCH=1 MIN_VERSION=3.0 DEBUG=1 sh -x "perl-5.30.3/ios/build.sh"
+PERL_APPLEWATCH=1 MIN_VERSION=3.0 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
 
 =head1 BUILD OPTIONS
 
