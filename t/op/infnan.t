@@ -243,7 +243,7 @@ TODO: {
     local $::TODO;
     my $here = "$^O $Config{osvers}";
     $::TODO = "$here: pow (9**9**9) doesn't give Inf"
-        if $here =~ /^(?:hpux 10|os390)/;
+        if $here =~ /^(?:hpux 10)/;
     is(9**9**9, $PInf, "9**9**9 is Inf");
 }
 
@@ -394,7 +394,7 @@ TODO: {
     local $::TODO;
     my $here = "$^O $Config{osvers}";
     $::TODO = "$here: pow (9**9**9) doesn't give Inf"
-        if $here =~ /^(?:hpux 10|os390)/;
+        if $here =~ /^(?:hpux 10)/;
     is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
 }
 
