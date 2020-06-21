@@ -4775,7 +4775,7 @@ ios/config/iphone/armv7/config.h		iOS armv7 config.h template
 ios/config/iphone/armv7/config.sh		iOS armv7 config.h template
 ios/config/iphone/x86_64/config.h		iOS x86_64 config.h template
 ios/config/iphone/x86_64/config.sh		iOS x86_64 config.h template
-ios/config/Policy.sh
+ios/config/Policy.sh		iOS x86_64 Policy.sh template
 ios/config/watch/armv7k/config.h		watchOS armv7 config.h template
 ios/config/watch/armv7k/config.sh		watchOS armv7 config.h template
 ios/config/watch/x86_64/config.h		watchOS x86_64 config.h template
