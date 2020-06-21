@@ -281,6 +281,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlhaiku		Perl notes for Haiku
     perlhpux		Perl notes for HP-UX
     perlhurd		Perl notes for Hurd
+    perlios		Perl notes for iOS, Apple TV and Apple Watch
     perlirix		Perl notes for Irix
     perllinux		Perl notes for Linux
     perlmacos		Perl notes for Mac OS (Classic)
