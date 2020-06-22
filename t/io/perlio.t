@@ -1,10 +1,12 @@
 BEGIN {
-	chdir 't' if -d 't';
-	require Config; Config->import;
+	chdir 't' if -d 't';	
     require './test.pl';
     set_up_inc('../lib');
+    require Config; Config->import;
 	skip_all_without_perlio();
 }
+
+no warnings 'once';
 
 plan tests => 48;
 
@@ -157,7 +159,7 @@ sub find_filename {
 # in-memory open
 SKIP: {
     eval { require PerlIO::scalar };
-    unless (find PerlIO::Layer 'scalar') {
+    unless (PerlIO::Layer->find( 'scalar' ) ) {
 	skip("PerlIO::scalar not found", 11);
     }
     my $var;
