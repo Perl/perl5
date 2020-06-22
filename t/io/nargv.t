@@ -134,7 +134,7 @@ sub mkfiles {
 	$files[$_] ||= tempfile();
     }
     my @results = @files[@_];
-    return wantarray ? @results : @results[-1];
+    return wantarray ? @results : $results[-1];
 }
 
 END { unlink_all map { ($_, "$_.bak") } grep {defined $_ } @files }
