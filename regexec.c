@@ -10158,7 +10158,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 	else if (flags & ANYOF_LOCALE_FLAGS) {
 	    if (  (flags & ANYOFL_FOLD)
-                && c < sizeof(PL_fold_locale)
+                && c < 256
 		&& ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
             {
                 match = TRUE;
