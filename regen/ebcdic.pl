@@ -76,6 +76,8 @@ sub output_table ($$;$) {
     my $table_ref = shift;
     my $name = shift;
 
+    my $size = @$table_ref;
+
     # 0 => print in decimal
     # 1 => print in hex (translates code point to code point)
     # >= 2 => is a dfa table, like https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
@@ -145,7 +147,7 @@ EOF
     my $TYPE = 'U8';
     $TYPE = 'U16' if grep { $_ > 255 } @$table_ref;
 
-    output_table_start $out_fh, $TYPE, $name;
+    output_table_start $out_fh, $TYPE, $name, $size;
 
     # First the headers for the columns
     print $out_fh get_column_headers($row_hdr_length, $field_width);
