@@ -1394,7 +1394,7 @@ sub run_multiple_progs {
 	    unlink $_ if $_;
 	}
 	foreach (@temp_path) {
-	    File::Path::rmtree $_ if -d $_;
+	    File::Path::rmtree($_) if -d $_;
 	}
     }
 }
