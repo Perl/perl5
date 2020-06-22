@@ -10,7 +10,7 @@ BEGIN {
         $lib =~ s{(\b)perl[^/]*$}{$1lib};
         unshift @INC, $lib;
     }
-    require Config; import Config;
+    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;

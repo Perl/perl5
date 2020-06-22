@@ -8,7 +8,7 @@ BEGIN {
 use Test::More;
 
 BEGIN {
-    require Config; import Config;
+    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) 
     {

@@ -6,7 +6,7 @@ my $has_perlio;
 
 our %Config;
 BEGIN {
-    require Config; import Config;
+    require Config; Config->import;
     $can_fork = $Config{'d_fork'} || $Config{'d_pseudofork'};
 
     if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ &&

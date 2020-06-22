@@ -3,7 +3,7 @@
 our %Config;
 my $has_alarm;
 BEGIN {
-    require Config; import Config;
+    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";

@@ -1,5 +1,5 @@
 BEGIN {
-  require Config; import Config;
+  require Config; Config->import;
   if ($Config{usequadmath}) {
      print "1..0 # Skip: usequadmath\n";
      exit(0);
