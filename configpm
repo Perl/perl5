@@ -1142,7 +1142,7 @@ if ($orig_config_txt ne $config_txt or $orig_heavy_txt ne $heavy_txt) {
 unshift(@INC,'lib');
 require $Config_PM;
 require $Config_heavy;
-import Config;
+Config->import;
 
 die "$0: $Config_PM not valid"
 	unless $Config{'PERL_CONFIG_SH'} eq 'true';
