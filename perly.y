@@ -798,11 +798,6 @@ subsigguts:
 			        Perl_croak(aTHX_ "Experimental "
                                     "subroutine signatures not enabled");
 
-                            /* We shouldn't get here otherwise */
-                            Perl_ck_warner_d(aTHX_
-                                packWARN(WARN_EXPERIMENTAL__SIGNATURES),
-                                "The signatures feature is experimental");
-
                             aux = (struct op_argcheck_aux*)
                                     PerlMemShared_malloc(
                                         sizeof(struct op_argcheck_aux));
