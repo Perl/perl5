@@ -18,7 +18,7 @@ BEGIN {
     );
 }
 
-bootstrap Haiku;
+__PACKAGE__->bootstrap;
 
 1;
 
