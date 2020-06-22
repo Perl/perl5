@@ -675,7 +675,9 @@ is join(' ', sub {
 # the non-existence of a function, should not cause a stash entry to be
 # created for the non-existent function.
 {
-	package RT72740a;
+    package RT72740a;
+    use feature 'indirect';
+
 	my $f = bless({}, RT72740b);
 	sub s1 { s2 $f; }
 	our $s4;
