@@ -260,7 +260,7 @@ SKIP: {
     my $prog = <<PROG;
 \$SIG{ALRM}=sub{die};
 alarm 1;
-\$Perl = "$Perl";
+my \$Perl = "$Perl";
 my \$cmd = qq(\$Perl -e "sleep 3");
 my \$pid = open my \$fh, "|\$cmd" or die "\$!\n";
 close \$fh;
