@@ -30,7 +30,7 @@ my ($pid, $ppid) = ($$, getppid());
 my $pid2 : shared = 0;
 my $ppid2 : shared = 0;
 
-new threads( sub { ($pid2, $ppid2) = ($$, getppid()); } ) -> join();
+threads->new( sub { ($pid2, $ppid2) = ($$, getppid()); } ) -> join();
 
 # If this breaks you're either running under LinuxThreads (and we
 # haven't detected it) or your system doesn't have POSIX thread
