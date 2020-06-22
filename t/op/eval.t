@@ -600,7 +600,7 @@ EOP
 
 # [perl #70151]
 {
-    BEGIN { eval 'require re; import re "/x"' }
+    BEGIN { eval 'require re; re->import("/x")' }
     ok "ab" =~ /a b/, 'eval does not localise %^H at run time';
 }
 
