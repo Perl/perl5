@@ -100,7 +100,7 @@ chop($file = <DATA>);
 ########
 package N;
 sub new {my ($obj,$n)=@_; bless \$n}  
-$aa=new N 1;
+$aa=N->new(1);
 $aa=12345;
 print $aa;
 EXPECT
@@ -127,7 +127,7 @@ Modification of a read-only value attempted at - line 3.
 package FOO;sub new {bless {FOO => BAR}};
 package main;
 use strict vars;   
-my $self = new FOO;
+my $self = FOO->new;
 print $$self{FOO};
 EXPECT
 BAR
@@ -390,7 +390,7 @@ package X;
 sub ascalar { my $r; bless \$r }
 sub DESTROY { print "destroyed\n" };
 package main;
-*s = ascalar X;
+*s = X->ascalar;
 EXPECT
 destroyed
 ########
@@ -398,7 +398,7 @@ package X;
 sub anarray { bless [] }
 sub DESTROY { print "destroyed\n" };
 package main;
-*a = anarray X;
+*a = X->anarray;
 EXPECT
 destroyed
 ########
@@ -406,7 +406,7 @@ package X;
 sub ahash { bless {} }
 sub DESTROY { print "destroyed\n" };
 package main;
-*h = ahash X;
+*h = X->ahash;
 EXPECT
 destroyed
 ########
@@ -414,7 +414,7 @@ package X;
 sub aclosure { my $x; bless sub { ++$x } }
 sub DESTROY { print "destroyed\n" };
 package main;
-*c = aclosure X;
+*c = X->aclosure;
 EXPECT
 destroyed
 ########
@@ -424,8 +424,8 @@ my $f = "FH000"; # just to thwart any future optimisations
 sub afh { select select ++$f; my $r = *{$f}{IO}; delete $X::{$f}; bless $r }
 sub DESTROY { print "destroyed\n" }
 package main;
-$x = any X; # to bump sv_objcount. IO objs aren't counted??
-*f = afh X;
+$x = X->any; # to bump sv_objcount. IO objs aren't counted??
+*f = X->afh;
 EXPECT
 destroyed
 destroyed
@@ -798,7 +798,7 @@ EOC
 };
 
 eval {
-    my $credit = new Credit;
+    my $credit = Credit->new;
 };
 
 print "If you get here, you didn't crash\n";
