@@ -47,7 +47,7 @@ BEGIN {
 	exit;
     }
     $| = 1;
-    require Config; import Config;
+    require Config; Config->import;
 }
 
 use strict;

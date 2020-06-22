@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require Config; import Config;
+    require Config; Config->import;
     require './test.pl';
     set_up_inc('../lib');
     skip_all_if_miniperl();

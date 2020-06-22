@@ -3,7 +3,7 @@ BEGIN {
     # @INC poking  no longer needed w/ new MakeMaker and Makefile.PL's
     # with $ENV{PERL_CORE} set
     # In case we need it in future...
-    require Config; import Config;
+    require Config; Config->import;
     pop @INC if $INC[-1] eq '.';
 }
 use strict;

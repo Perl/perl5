@@ -16,7 +16,7 @@ $| = 1;
 
 BEGIN {
     chdir 't' if -d 't';
-    require Config; import Config;
+    require Config; Config->import;
     require './test.pl'; require './charset_tools.pl';
     require './loc_tools.pl';
     set_up_inc('../lib', '.', '../ext/re');

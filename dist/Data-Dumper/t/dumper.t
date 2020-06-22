@@ -4,7 +4,7 @@
 #
 
 BEGIN {
-    require Config; import Config;
+    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
 	print "1..0 # Skip: Data::Dumper was not built\n";
 	exit 0;
