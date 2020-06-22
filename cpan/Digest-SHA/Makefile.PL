@@ -16,7 +16,7 @@ my($use_warnings, @EDITs);
 my $warn_1 = 'BEGIN { $^W = 1 }';
 my $warn_0 = 'BEGIN { $^W = 0 }';
 {
-	eval "require warnings; import warnings";
+	eval { require warnings; warnings->import };
 	$use_warnings = $@ ? 0 : 1;
 
 	local(@ARGV) = ($PM, $SHASUM);
