@@ -160,7 +160,7 @@ my $FFFFFFFF   = $_64BITINT ? 0xFFFFFFFF : Math::BigInt->new(0xFFFFFFFF);
 }
 $EXPORT_TAGS{ALL}= \@EXPORT_OK;
 
-bootstrap Win32API::File $VERSION;
+Win32API::File->bootstrap( $VERSION );
 
 # Preloaded methods go here.
 

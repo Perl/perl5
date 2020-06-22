@@ -25,7 +25,7 @@ our %EXPORT_TAGS = ( CONSTANTS => [ qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY
                                     &setdef &sync &tmpnam &vmsopen &vmssysopen
                                     &waitfh &writeof ) ] );
 
-bootstrap VMS::Stdio $VERSION;
+__PACKAGE__->bootstrap;
 
 sub AUTOLOAD {
     my($constname) = $AUTOLOAD;

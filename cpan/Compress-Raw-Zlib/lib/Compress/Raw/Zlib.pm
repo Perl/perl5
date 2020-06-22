@@ -129,7 +129,7 @@ eval {
 or do {
     require DynaLoader;
     local @ISA = qw(DynaLoader);
-    bootstrap Compress::Raw::Zlib $XS_VERSION ; 
+    Compress::Raw::Zlib->bootstrap($XS_VERSION);
 };
  
 

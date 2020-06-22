@@ -486,7 +486,7 @@ The following four files sum up all the details discussed so far.
 
   our @ISA = qw(DynaLoader);
   our $VERSION = '0.01';
-  bootstrap Cool::Foo $VERSION;
+  Cool::Foo->bootstrap( $VERSION );
 
   1;
 

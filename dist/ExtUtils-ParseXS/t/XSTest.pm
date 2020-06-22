@@ -3,6 +3,7 @@ package XSTest;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 $VERSION = '0.01';
-bootstrap XSTest $VERSION;
+
+__PACKAGE__->bootstrap;
 
 1;

@@ -647,7 +647,7 @@ sub _GetOSName {
 
 # "no warnings 'redefine';" doesn't work for 5.8.7 and earlier
 local $^W = 0;
-bootstrap Win32;
+Win32->bootstrap;
 
 1;
 

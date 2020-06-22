@@ -142,7 +142,7 @@ sub EXISTS { defined($_[0]->FETCH(@_)) ? 1 : 0 }
 sub CLEAR { }
 
 
-bootstrap VMS::DCLsym;
+__PACKAGE__->bootstrap;
 
 1;
 

@@ -154,7 +154,7 @@ more detail later in this document.
      @ISA = qw(Exporter DynaLoader);
      @EXPORT = qw( rpcb_gettime );
 
-     bootstrap RPC;
+     RPC->bootstrap;
      1;
 
 Throughout this document a variety of interfaces to the rpcb_gettime()
@@ -2146,7 +2146,7 @@ File C<RPC.pm>: Perl module for the RPC extension.
      @ISA = qw(Exporter DynaLoader);
      @EXPORT = qw(rpcb_gettime getnetconfigent);
 
-     bootstrap RPC;
+     RPC->bootstrap;
      1;
 
 File C<rpctest.pl>: Perl test program for the RPC extension.

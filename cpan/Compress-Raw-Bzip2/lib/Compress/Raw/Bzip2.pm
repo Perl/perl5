@@ -65,7 +65,7 @@ eval {
 or do {
     require DynaLoader;
     local @ISA = qw(DynaLoader);
-    bootstrap Compress::Raw::Bzip2 $XS_VERSION ; 
+    Compress::Raw::Bzip2->bootstrap($XS_VERSION);
 };
 
 #sub Compress::Raw::Bzip2::new
