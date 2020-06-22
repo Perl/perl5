@@ -35,6 +35,9 @@ if (join(' ',@y) eq '0 2 4 6 8 10 12 14 16 18 20') {
 }
 
 # Well this is fragile...
+no warnings;
+# Unquoted string "foo" may clash with future reserved word
+# Useless use of a constant ("foo") in void context
 open(foo,'./TEST') || open(foo,'TEST') || open(foo,'t/TEST');
 $x = 0;
 $x++ while <foo>;
