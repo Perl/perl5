@@ -212,7 +212,7 @@ use Exporter;
 BEGIN {
    if ($] < 5.006) {
       require Symbol;
-      import Symbol;
+      Symbol->import;
    }
 }
 @ISA = qw(Exporter);
