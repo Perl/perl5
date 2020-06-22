@@ -13,7 +13,7 @@
 use Config;
 use strict;
 
-eval { require POSIX; import POSIX 'locale_h'; };
+eval { require POSIX; POSIX->import( 'locale_h' ); };
 my $has_locale_h = ! $@;
 
 my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
