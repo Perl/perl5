@@ -108,7 +108,7 @@ sub import {
 
             $arg =~ s/^://;
 
-            eval { require POSIX; import POSIX 'locale_h'; };
+            eval { require POSIX; POSIX->import('locale_h'); };
 
             # Map our names to the ones defined by POSIX
             my $LC = "LC_" . uc($arg);
