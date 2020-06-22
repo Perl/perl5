@@ -157,7 +157,7 @@ sub ParseParameters
 
     my $sub = (caller($level + 1))[3] ;
     #local $Carp::CarpLevel = 1 ;
-    my $p = new Compress::Raw::Zlib::Parameters() ;
+    my $p = Compress::Raw::Zlib::Parameters->new();
     $p->parse(@_)
         or croak "$sub: $p->{Error}" ;
 
