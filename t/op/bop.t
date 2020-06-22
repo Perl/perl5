@@ -525,11 +525,14 @@ eval { $obj |= "Q" };
 $strval = "z";
 is("$obj", "z", "|= doesn't break string overload");
 
-# [perl #29070]
-$^A .= new version ~$_ for eval sprintf('"\\x%02x"', 0xff - ord("1")),
-                           $::IS_EBCDIC ? v13 : v205, # 255 - ord('2')
-                           eval sprintf('"\\x%02x"', 0xff - ord("3"));
-is $^A, "123", '~v0 clears vstring magic on retval';
+{
+  use feature 'indirect';
+  # [perl #29070]
+  $^A .= new version ~$_ for eval sprintf('"\\x%02x"', 0xff - ord("1")),
+                             $::IS_EBCDIC ? v13 : v205, # 255 - ord('2')
+                             eval sprintf('"\\x%02x"', 0xff - ord("3"));
+  is $^A, "123", '~v0 clears vstring magic on retval';
+}
 
 {
     my $w = $Config::Config{ivsize} * 8;
