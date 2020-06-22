@@ -35,7 +35,7 @@ like($@, qr{:lexical must be used as first}, ":lexical must come first");
 	    local $SIG{'__WARN__'} = sub {
 	        push(@warnings, @_) unless $_[0] =~ m/Fatal qw\(:lexical/;
 	    };
-	    import Fatal qw(:lexical chdir);
+	    Fatal->import( qw(:lexical chdir) );
 	};
 	warn($_) while shift @warnings;
 	eval { chdir(NO_SUCH_FILE); };
