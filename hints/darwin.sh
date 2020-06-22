@@ -7,16 +7,6 @@
 # Paths
 ##
 
-set_optimizer () {
-  if [ $debug_build -eq 0 ]; then
-    optimize='-O3'
-    echo "Setting optimize to -O3" >&4
-  else
-    optimize='-O0'
-    echo "Setting optimize to -O0" >&4
-  fi
-}
-
 # Configure hasn't figured out the version number yet.  Bummer.
 perl_revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $src/patchlevel.h`
 perl_version=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
@@ -87,46 +77,6 @@ archname='darwin';
 # problems.
 usenm='false';
 
-# -fno-common because common symbols are not allowed in MH_DYLIB
-# -DPERL_DARWIN: apparently the __APPLE__ is not sanctioned by Apple
-# as the way to differentiate Mac OS X.  (The official line is that
-# *no* cpp symbol does differentiate Mac OS X.)
-ccflags="${ccflags} -fno-common -DPERL_DARWIN"
-
-debug_build=0
-echo "$ccflags" | grep -e '\-g '
-if [ !"$?" ]; then
-  debug_build=1
-  echo "Building with debug symbols..." >&4
-fi
-
-ios_build=0
-echo "$ccflags" | grep -e 'PERL_IOS'
-if [ !"$?" ]; then
-  ios_build=1
-  echo "Building for iOS..." >&4
-fi
-
-tv_build=0
-echo "$ccflags" | grep -e 'PERL_APPLETV'
-if [ !"$?" ]; then
-  tv_build=1
-  echo "Building for tvOS..." >&4
-fi
-
-watch_build=0
-echo "$ccflags" | grep -e 'PERL_APPLEWATCH'
-if [ !"$?" ]; then
-  watch_build=1
-  echo "Building for watchOS..." >&4
-fi
-
-mac_build=0
-if [ $ios_build -ne 1 ] && [ $tv_build -ne 1 ] && [ $watch_build -ne 1 ]; then
-  mac_build=1
-  echo "Building for OS X / macOS..." >&4
-fi
-
 case "$optimize" in
 '')
 #    Optimizing for size also mean less resident memory usage on the part
@@ -137,14 +87,19 @@ case "$optimize" in
 if [ -z "${optimize}" ]; then
   case "`${cc:-gcc} -v 2>&1`" in
     *"gcc version 3."*) optimize='-Os' ;;
-    *) set_optimizer
-      ;;
+    *) optimize='-O3' ;;
   esac
 else
-  set_optimizer
+  optimize='-O3'
 fi
 ;;
 esac
+
+# -fno-common because common symbols are not allowed in MH_DYLIB
+# -DPERL_DARWIN: apparently the __APPLE__ is not sanctioned by Apple
+# as the way to differentiate Mac OS X.  (The official line is that
+# *no* cpp symbol does differentiate Mac OS X.)
+ccflags="${ccflags} -fno-common -DPERL_DARWIN"
 
 # At least on Darwin 1.3.x:
 #
@@ -245,8 +200,6 @@ esac
 # (__clang_major__, __clang_minor__) and in addition the preprocessor
 # symbol __apple_build_version__ was 6020049.
 #
-# Mac OS X, OS X, macOS
-#
 # Codename        OS      Kernel  Xcode
 #
 # Cheetah         10.0.x  1.3.1
@@ -288,37 +241,23 @@ esac
 #                                 7.3   (clang 3.8 as 7.3.0/703.0.29)
 # Sierra          10.12.x 16.x.y  8.0.0 (clang 3.8 as 8.0/800.0.38)
 #
+
 # Processors Supported
 #
-# Mac OS X, macOS
 # PowerPC (PPC):       10.0.x - 10.5.8 (final 10.5.x)
 # PowerPC via Rosetta: 10.4.4 - 10.6.8 (final 10.6.x)
 # IA-32:               10.4.4 - 10.6.8 (though still supported on x86-64)
 # x86-64:              10.4.7 - current
-#
-# iOS (iphone, ipad)
-# armv7:               7.1.2 - 10.3.4
-# arm64:               7.1.2 - current
-# x86-64:              8.0 - current simulators
-#
-# tvOS 64 bit (Apple TV 4th and 5th generation)
-# arm64:               9.0 - current
-# x86-64:              9.0 - current simulators
-#
-# watchOS
-# armv7k:              3.0 - current
-# x86-64:              3.0 - current simulators
 
-# MACOSX_DEPLOYMENT_TARGET or IPHONEOS_DEPLOYMENT_TARGET or APPLETV_DEPLOYMENT_TARGET or WATCHOS_DEPLOYMENT_TARGET
-# select the minimum OS level we want to support
+# MACOSX_DEPLOYMENT_TARGET selects the minimum OS level we want to support
 #
 # It is needed for OS releases before 10.6.
 #
 # https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html
 #
 # If it is set, we also propagate its value to ccflags and ldflags
-# using the -mmacosx-version-min or -miphoneos-version-min or -mappletvos-version-min or -mwatchos-version-min flags.  If it is not set,
-# we use the OS X release as the min value for the flag.
+# using the -mmacosx-version-min flag.  If it is not set, we use
+# the OS X release as the min value for the flag.
 
 # Adds "-mmacosx-version-min=$2" to "$1" unless it already is there.
 add_macosx_version_min () {
@@ -330,48 +269,6 @@ add_macosx_version_min () {
      ;;
   *) echo "Adding -mmacosx-version-min=$2 to $1" >&4
      eval "$1='$v -mmacosx-version-min=$2'"
-     ;;
-  esac
-}
-
-# Adds "-miphoneos-version-min=$2" to "$1" unless it already is there.
-add_iphone_version_min () {
-  local v
-  eval "v=\$$1"
-  case " $v " in
-  *"-miphoneos-version-min"*)
-     echo "NOT adding -miphoneos-version-min=$2 to $1 ($v)" >&4
-     ;;
-  *) echo "Adding -miphoneos-version-min=$2 to $1" >&4
-     eval "$1='$v -miphoneos-version-min=$2'"
-     ;;
-  esac
-}
-
-# Adds "-mappletvos-version-min=$2" to "$1" unless it already is there.
-add_tv_version_min () {
-  local v
-  eval "v=\$$1"
-  case " $v " in
-  *"-mappletvos-version-min"*)
-     echo "NOT adding -mappletvos-version-min=$2 to $1 ($v)" >&4
-     ;;
-  *) echo "Adding -mappletvos-version-min=$2 to $1" >&4
-     eval "$1='$v -mappletvos-version-min=$2'"
-     ;;
-  esac
-}
-
-# Adds "-mwatchos-version-min=$2" to "$1" unless it already is there.
-add_watch_version_min () {
-  local v
-  eval "v=\$$1"
-  case " $v " in
-  *"-mwatchos-version-min"*)
-     echo "NOT adding -mwatchos-version-min=$2 to $1 ($v)" >&4
-     ;;
-  *) echo "Adding -mwatchos-version-min=$2 to $1" >&4
-     eval "$1='$v -mwatchos-version-min=$2'"
      ;;
   esac
 }
@@ -403,189 +300,47 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
 
    # We now use MACOSX_DEPLOYMENT_TARGET, if set, as an override by
    # capturing its value and adding it to the flags.
-   if [ $mac_build -eq 1 ]; then
-     case "$MACOSX_DEPLOYMENT_TARGET" in
-      10.*)
-        add_macosx_version_min ccflags $MACOSX_DEPLOYMENT_TARGET
-        add_macosx_version_min ldflags $MACOSX_DEPLOYMENT_TARGET
-        ;;
-      '')
-        # Empty MACOSX_DEPLOYMENT_TARGET is okay.
-        ;;
-      *)
-        cat <<EOM >&4
+    case "$MACOSX_DEPLOYMENT_TARGET" in
+    10.*)
+      add_macosx_version_min ccflags $MACOSX_DEPLOYMENT_TARGET
+      add_macosx_version_min ldflags $MACOSX_DEPLOYMENT_TARGET
+      ;;
+    '')
+      # Empty MACOSX_DEPLOYMENT_TARGET is okay.
+      ;;
+    *)
+      cat <<EOM >&4
 
 *** Unexpected MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET
 ***
 *** Please either set it to a valid macOS version number (e.g., 10.15) or to empty.
 
 EOM
-        exit 1
-        ;;
-      esac
-    fi
-
-    if [ $ios_build -eq 1 ]; then
-      case "$IPHONEOS_DEPLOYMENT_TARGET" in
-      7.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      8.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      9.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      10.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      11.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      12.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      13.*)
-        add_iphone_version_min ccflags $IPHONEOS_DEPLOYMENT_TARGET
-        add_iphone_version_min ldflags $IPHONEOS_DEPLOYMENT_TARGET
-        ;;
-      '')
-        # Empty IPHONEOS_DEPLOYMENT_TARGET is okay.
-        ;;
-      *)
-        cat <<EOM >&4
-
-*** Unexpected IPHONEOS_DEPLOYMENT_TARGET=$IPHONEOS_DEPLOYMENT_TARGET
-***
-*** Please either set it to 10.something, or to empty.
-
-EOM
-        exit 1
-        ;;
-      esac
-    fi
-
-    if [ $tv_build -eq 1 ]; then
-      case "$TVOS_DEPLOYMENT_TARGET" in
-      7.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      8.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      9.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      10.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      11.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      12.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      13.*)
-        add_tv_version_min ccflags $TVOS_DEPLOYMENT_TARGET
-        add_tv_version_min ldflags $TVOS_DEPLOYMENT_TARGET
-        ;;
-      '')
-        # Empty TVOS_DEPLOYMENT_TARGET is okay.
-        ;;
-      *)
-        cat <<EOM >&4
-
-*** Unexpected TVOS_DEPLOYMENT_TARGET=$TVOS_DEPLOYMENT_TARGET
-***
-*** Please either set it to 10.something, or to empty.
-
-EOM
-        exit 1
-        ;;
-      esac
-    fi
-
-    if [ $watch_build -eq 1 ]; then
-      case "$WATCHOS_DEPLOYMENT_TARGET" in
-      7.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      8.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      9.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      10.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      11.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      12.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      13.*)
-        add_watch_version_min ccflags $WATCHOS_DEPLOYMENT_TARGET
-        add_watch_version_min ldflags $WATCHOS_DEPLOYMENT_TARGET
-        ;;
-      '')
-        # Empty WATCHOS_DEPLOYMENT_TARGET is okay.
-        ;;
-      *)
-        cat <<EOM >&4
-
-*** Unexpected WATCHOS_DEPLOYMENT_TARGET=$WATCHOS_DEPLOYMENT_TARGET
-***
-*** Please either set it to 10.something, or to empty.
-
-EOM
-        exit 1
-        ;;
-      esac
-    fi
+      exit 1
+      ;;
+    esac
 
     # Keep the prodvers leading whitespace (Configure magic).
     # Cannot use $osvers here since that is the kernel version.
     # sw_vers output                 what we want
     # "ProductVersion:    10.10.5"   "10.10"
     # "ProductVersion:    10.11"     "10.11"
-    prodvers=`sw_vers|awk '/^ProductVersion:/{print $2}'|awk -F. '{print $1"."$2}'`
-    if [ $mac_build -eq 1 ]; then
-      case "$prodvers" in
-      10.*)
-        add_macosx_version_min ccflags $prodvers
-        add_macosx_version_min ldflags $prodvers
-        ;;
-      *)
-        cat <<EOM >&4
+        prodvers=`sw_vers|awk '/^ProductVersion:/{print $2}'|awk -F. '{print $1"."$2}'`
+    case "$prodvers" in
+    10.*)
+      add_macosx_version_min ccflags $prodvers
+      add_macosx_version_min ldflags $prodvers
+      ;;
+    *)
+      cat <<EOM >&4
 
 *** Unexpected product version $prodvers.
 ***
 *** Try running sw_vers and see what its ProductVersion says.
 
 EOM
-        exit 1
-      esac
-    fi
+      exit 1
+    esac
 
     darwin_major=$(echo $osvers|awk -F. '{print $1}')
 
@@ -662,7 +417,6 @@ EOM
     case `uname -p` in 
     powerpc) arch=ppc64 ;;
     i386) arch=x86_64 ;;
-    arm64) arch=arm64 ;;
     *) cat <<EOM >&4
 
 *** Don't recognize processor, can't specify 64 bit compilation.
@@ -768,20 +522,16 @@ EOOVER
 # if you use a newer toolchain before OS X 10.9 these functions may be
 # incorrectly detected, so disable them
 # OS X 10.10.x corresponds to kernel 14.x
-
-echo "osvers is... $osvers" >&4
 case "$osvers" in
-  1[4-9]\.[0-9]*\.[0-9]*)
-  d_linkat=undef
-  d_openat=undef
-  d_renameat=undef
-  d_unlinkat=undef
-  d_fchmodat=undef
-  ;;
+    [1-9].*|1[0-3].*)
+	d_linkat=undef
+	d_openat=undef
+	d_renameat=undef
+	d_unlinkat=undef
+	d_fchmodat=undef
+	;;
 esac
 
-if [ $mac_build -eq 1 ]; then
 # mkostemp() was autodetected as present but found to not be linkable
 # on 15.6.0.  Unknown what other OS versions are affected.
-  d_mkostemp=undef
-fi
+d_mkostemp=undef
