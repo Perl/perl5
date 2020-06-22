@@ -18,8 +18,8 @@ BEGIN {
     @INC = '../lib' if -d '../lib' && -d '../ext';
   }
 
-  require Test::More; import Test::More;
-  require Config; import Config;
+  require Test::More; Test::More->import;
+  require Config; Config->import;
 
   if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
     plan(skip_all => 'IPC::SysV was not built');
