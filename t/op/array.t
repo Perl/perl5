@@ -465,7 +465,7 @@ package peen {
 
     sub Sphare::pling { 'pling' }
 
-    ::is eval { pling peen }, 'pling',
+    ::is eval { peen->pling }, 'pling',
 	'arylen_p magic does not stop isa magic from being copied';
 }
 
