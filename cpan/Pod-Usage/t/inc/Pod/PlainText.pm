@@ -34,7 +34,7 @@ $VERSION = '2.06';
 BEGIN {
    if ($] < 5.006) {
       require Symbol;
-      import Symbol;
+      Symbol->import;
    }
 }
 
