@@ -6,6 +6,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
+use p5;
 use feature "isa";
 no warnings qw(experimental::smartmatch experimental::isa);
 
