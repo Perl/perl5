@@ -1190,7 +1190,7 @@ like $@, qr'^Undefined format "STDOUT" called',
 {
   last if is_miniperl;
   require Cwd;
-  Cwd->import
+  Cwd->import;
   $tests += 3;
   require File::Temp ;
   my $dir = File::Temp::tempdir(uc cleanup => 1);
