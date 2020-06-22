@@ -47,7 +47,7 @@ sub _catname {
     my($from, $to) = @_;
     if (not defined &basename) {
 	require File::Basename;
-	import  File::Basename 'basename';
+	File::Basename->import( 'basename' );
     }
 
     return File::Spec->catfile($to, basename($from));

@@ -36,10 +36,11 @@ my %reflags = (
 );
 
 sub setcolor {
+ no warnings; # FIXME indirect usage??
  eval {				# Ignore errors
   require Term::Cap;
 
-  my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+  my $terminal = Term::Cap->Tgetent({OSPEED => 9600}); # Avoid warning.
   my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
   my @props = split /,/, $props;
   my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
