@@ -14,7 +14,7 @@ plan(tests => 9);
 ok( binmode(STDERR),            'STDERR made binary' );
 SKIP: {
     skip('skip unix discipline without PerlIO layers', 1)
-	unless find PerlIO::Layer 'perlio';
+	unless PerlIO::Layer->find( 'perlio' );
     ok( binmode(STDERR, ":unix"),   '  with unix discipline' );
 }
 ok( binmode(STDERR, ":raw"),    '  raw' );
@@ -24,7 +24,7 @@ ok( binmode(STDERR, ":crlf"),   '  and crlf' );
 ok( binmode(STDOUT),            'STDOUT made binary' )      || exit(1);
 SKIP: {
     skip('skip unix discipline without PerlIO layers', 1)
-	unless find PerlIO::Layer 'perlio';
+	unless PerlIO::Layer->find( 'perlio' );
     ok( binmode(STDOUT, ":unix"),   '  with unix discipline' );
 }
 ok( binmode(STDOUT, ":raw"),    '  raw' );
