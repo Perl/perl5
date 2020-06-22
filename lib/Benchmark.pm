@@ -494,7 +494,7 @@ init();
 
 sub BEGIN {
     if (eval 'require Time::HiRes') {
-	import Time::HiRes qw(time);
+	Time::HiRes->import( 'time' );
 	$hirestime = \&Time::HiRes::time;
     }
 }
