@@ -1,3 +1,7 @@
+BEGIN {
+    chdir 't' if -d 't';
+}
+
 use strict;
 use warnings;
 no warnings 'once';

@@ -20090,6 +20090,7 @@ exit(0);
 # TRAILING CODE IS USED BY make_property_test_script()
 __DATA__
 
+use p7;
 use strict;
 use warnings;
 
