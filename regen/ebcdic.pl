@@ -55,7 +55,11 @@ sub output_table_start($$$;$) {
     my ($out_fh, $TYPE, $name, $size) = @_;
 
     $size = "" unless defined $size;
-    my $declaration = "EXTCONST $TYPE $name\[$size\]";
+
+    # Anything locale related will be written on
+    my $const = ($name !~ /locale/i) ? 'CONST' : "";
+
+    my $declaration = "EXT$const $TYPE $name\[$size\]";
     print $out_fh <<EOF;
 #  ifndef DOINIT
     $declaration;
