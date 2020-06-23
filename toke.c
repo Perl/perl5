@@ -7199,9 +7199,11 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
                 else
                     newargv = PL_origargv;
                 newargv[0] = ipath;
+#if !TARGET_OS_IPHONE
                 PERL_FPU_PRE_EXEC
                 PerlProc_execv(ipath, EXEC_ARGV_CAST(newargv));
                 PERL_FPU_POST_EXEC
+#endif
                 Perl_croak(aTHX_ "Can't exec %s", ipath);
             }
             if (d) {
