@@ -96,6 +96,6 @@ syswrite() isn't allowed on :utf8 handles at - line 5.
 ########
 # NAME readline() didn't scalar() its argument
 # this would assert rather than failing on the method call
-no strict; no warnings; E{0;readline@0}
+no strict; no warnings; use feature 'indirect'; E{0;readline@0}
 EXPECT
 Can't call method "E" without a package or object reference at - line 2.

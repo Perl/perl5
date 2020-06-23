@@ -1,10 +1,11 @@
 __END__
 # NAME \N{U+too large} on 64-bit machine
 # SKIP ? use Config; $Config{uvsize} < 8 && "Not 64 bit"
+no warnings;
 qr/\N{U+7FFFFFFFFFFFFFFF}/;
 qr/\N{U+1_0000_0000_0000_0000}/;
 EXPECT
-Use of code point 0x1_0000_0000_0000_0000 is not allowed; the permissible max is 0x7FFFFFFFFFFFFFFF in regex; marked by <-- HERE in m/\N{U+1_0000_0000_0000_0000 <-- HERE }/ at - line 2.
+Use of code point 0x1_0000_0000_0000_0000 is not allowed; the permissible max is 0x7FFFFFFFFFFFFFFF in regex; marked by <-- HERE in m/\N{U+1_0000_0000_0000_0000 <-- HERE }/ at - line 3.
 ########
 # NAME \N{U+too large} on 32-bit machine
 # SKIP ? use Config; $Config{uvsize} > 4 && "Not 32 bit"
@@ -15,10 +16,11 @@ Use of code point 0x1_0000_0000 is not allowed; the permissible max is 0x7FFFFFF
 ########
 # NAME \N{U+100.too large} on 64-bit machine
 # SKIP ? use Config; $Config{uvsize} < 8 && "Not 64 bit"
+no warnings;
 qr/\N{U+100.7FFFFFFFFFFFFFFF}/;
 qr/\N{U+100.1_0000_0000_0000_0000}/;
 EXPECT
-Use of code point 0x1_0000_0000_0000_0000 is not allowed; the permissible max is 0x7FFFFFFFFFFFFFFF in regex; marked by <-- HERE in m/\N{U+100.1_0000_0000_0000_0000 <-- HERE }/ at - line 2.
+Use of code point 0x1_0000_0000_0000_0000 is not allowed; the permissible max is 0x7FFFFFFFFFFFFFFF in regex; marked by <-- HERE in m/\N{U+100.1_0000_0000_0000_0000 <-- HERE }/ at - line 3.
 ########
 # NAME \N{U+100.too large} on 32-bit machine
 # SKIP ? use Config; $Config{uvsize} > 4 && "Not 32 bit"
@@ -77,12 +79,12 @@ EXPECT
 Too many nested open parens in regex; marked by <-- HERE in m/(( <-- HERE a))/ at - line 3.
 ########
 # NAME \K not permitted in lookahead
-$x =~ /(?=a\Ka)a/;
+my $x =~ /(?=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=a\K <-- HERE a)a/ at - line 1.
 ########
 # NAME \K not permitted in lookbehind
-$x =~ /(?<=a\Ka)a/;
+my $x =~ /(?<=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=a\K <-- HERE a)a/ at - line 1.
 ########
