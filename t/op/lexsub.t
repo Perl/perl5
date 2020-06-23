@@ -87,6 +87,7 @@ sub bar::c { 43 }
 # our sub and method confusion
 sub F::h { 4242 }
 {
+  use feature 'indirect';
   my $called;
   our sub h { ++$called; 4343 };
   is((h F),4242, 'our sub symbol translation does not affect meth names');
