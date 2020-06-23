@@ -1117,10 +1117,12 @@ struct IPerlProcInfo
 #define PerlProc_crypt(c,s)	crypt((c), (s))
 #define PerlProc_exit(s)	exit((s))
 #define PerlProc__exit(s)	_exit((s))
+#if !TARGET_OS_IPHONE
 #define PerlProc_execl(c,w,x,y,z)					\
         execl((c), (w), (x), (y), (z))
 #define PerlProc_execv(c, a)	execv((c), (a))
 #define PerlProc_execvp(c, a)	execvp((c), (a))
+#endif
 #define PerlProc_getuid()	getuid()
 #define PerlProc_geteuid()	geteuid()
 #define PerlProc_getgid()	getgid()
