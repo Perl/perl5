@@ -9,6 +9,7 @@ BEGIN {
 use warnings;
 plan(tests => 203);
 use Tie::Array; # we need to test sorting tied arrays
+use feature 'indirect';
 
 # these shouldn't hang
 {
