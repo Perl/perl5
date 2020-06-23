@@ -10,6 +10,8 @@ BEGIN {
     set_up_inc( qw(. ../lib lib ../dist/base/lib) );
 }
 
+use feature 'indirect';
+
 use strict;
 no warnings 'once';
 
