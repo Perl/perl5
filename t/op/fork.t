@@ -321,7 +321,7 @@ OPTION random
 parent died at - line 2.
 child died at - line 5.
 ########
-if ($pid = fork) {
+if (my $pid = fork) {
     eval { die "parent died" };
     print $@;
 }
@@ -334,6 +334,7 @@ OPTION random
 parent died at - line 2.
 child died at - line 6.
 ########
+my $pid;
 if (eval q{$pid = fork}) {
     eval q{ die "parent died" };
     print $@;
@@ -361,9 +362,8 @@ EXPECT
 OPTION random
 inner
 ########
-sub pipe_to_fork ($$) {
-    my $parent = shift;
-    my $child = shift;
+no strict 'refs';
+sub pipe_to_fork ($parent, $child) {
     pipe($child, $parent) or die;
     my $pid = fork();
     die "fork() failed: $!" unless defined $pid;
@@ -383,9 +383,7 @@ else {
     exit;
 }
 
-sub pipe_from_fork ($$) {
-    my $parent = shift;
-    my $child = shift;
+sub pipe_from_fork ($parent, $child) {
     pipe($parent, $child) or die;
     my $pid = fork();
     die "fork() failed: $!" unless defined $pid;
@@ -410,7 +408,7 @@ pipe_from_fork
 pipe_to_fork
 ########
 $|=1;
-if ($pid = fork()) {
+if (my $pid = fork()) {
     print "forked first kid\n";
     print "waitpid() returned ok\n" if waitpid($pid,0) == $pid;
 }
@@ -418,7 +416,7 @@ else {
     print "first child\n";
     exit(0);
 }
-if ($pid = fork()) {
+if (my $pid = fork()) {
     print "forked second kid\n";
     print "wait() returned ok\n" if wait() == $pid;
 }
@@ -435,6 +433,7 @@ forked second kid
 second child
 wait() returned ok
 ########
+no strict 'refs';
 pipe(RDR,WTR) or die $!;
 my $pid = fork;
 die "fork: $!" if !defined $pid;
@@ -462,7 +461,7 @@ OPTION random
 # [perl #72604] @DB::args stops working across Win32 fork
 $|=1;
 sub f {
-    if ($pid = fork()) {
+    if (my $pid = fork()) {
 	print "waitpid() returned ok\n" if waitpid($pid,0) == $pid;
     }
     else {
@@ -479,13 +478,13 @@ child: called as [main::f(foo,bar)]
 waitpid() returned ok
 ########
 # Windows 2000: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
-system $^X,  "-e", "if (\$pid=fork){sleep 1;kill(9, \$pid)} else {sleep 5}";
+system $^X,  "-e", "if (my \$pid=fork){sleep 1;kill(9, \$pid)} else {sleep 5}";
 print $?>>8, "\n";
 EXPECT
 0
 ########
 # Windows 7: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
-system $^X,  "-e", "if (\$pid=fork){kill(9, \$pid)} else {sleep 5}";
+system $^X,  "-e", "if (my \$pid=fork){kill(9, \$pid)} else {sleep 5}";
 print $?>>8, "\n";
 EXPECT
 0
