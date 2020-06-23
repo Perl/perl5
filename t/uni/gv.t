@@ -15,6 +15,8 @@ use utf8;
 use open qw( :utf8 :std );
 use warnings;
 
+use feature 'indirect';
+
 plan( tests => 206 );
 
 # type coersion on assignment

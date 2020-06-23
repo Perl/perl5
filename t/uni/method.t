@@ -15,6 +15,8 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings 'once';
 
+use feature 'indirect';
+
 plan(tests => 62);
 
 #Can't use bless yet, as it might not be clean

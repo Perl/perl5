@@ -13,6 +13,8 @@ BEGIN {
 use utf8;
 use open qw( :utf8 :std );
 
+use feature 'indirect';
+
 plan tests => 90;
 
 my $a = {};
