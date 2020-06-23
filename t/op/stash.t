@@ -322,7 +322,7 @@ ok eval '
 # Bareword lookup should not vivify stashes
 is runperl(
     prog =>
-      'sub foo { print shift, qq-\n- } SUPER::foo bar if 0; foo SUPER',
+      'use feature "indirect"; sub foo { print shift, qq-\n- } SUPER::foo bar if 0; foo SUPER',
     stderr => 1,
     run_as_five => 1,
    ),
