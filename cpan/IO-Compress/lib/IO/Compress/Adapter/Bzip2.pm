@@ -21,7 +21,7 @@ sub mkCompObject
     $WorkFactor    = 0 if ! defined $WorkFactor ;
     $Verbosity     = 0 if ! defined $Verbosity ;
 
-    my ($def, $status) = new Compress::Raw::Bzip2(1, $BlockSize100K,
+    my ($def, $status) = Compress::Raw::Bzip2->new(1, $BlockSize100K,
                                                  $WorkFactor, $Verbosity);
 
     return (undef, "Could not create Deflate object: $status", $status)
@@ -96,7 +96,7 @@ sub reset
 
     my $outer = $self->{Outer};
 
-    my ($def, $status) = new Compress::Raw::Bzip2();
+    my ($def, $status) = Compress::Raw::Bzip2->new();
     $self->{ErrorNo} = ($status == BZ_OK) ? 0 : $status ;
 
     if ($status != BZ_OK)

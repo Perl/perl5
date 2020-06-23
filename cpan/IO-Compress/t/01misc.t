@@ -208,7 +208,7 @@ My::testParseParameters();
 {
     title "whatIsInput" ;
 
-    my $lex = new LexFile my $out_file ;
+    my $lex = LexFile->new( my $out_file );
     open FH, ">$out_file" ;
     is whatIsInput(*FH), 'handle', "Match filehandle" ;
     close FH ;
@@ -227,7 +227,7 @@ My::testParseParameters();
 {
     title "whatIsOutput" ;
 
-    my $lex = new LexFile my $out_file ;
+    my $lex = LexFile->new( my $out_file );
     open FH, ">$out_file" ;
     is whatIsOutput(*FH), 'handle', "Match filehandle" ;
     close FH ;
@@ -248,34 +248,34 @@ My::testParseParameters();
 {
     title "U64" ;
 
-    my $x = new U64();
+    my $x = U64->new();
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 0, "  getLow is 0";
     ok ! $x->is64bit(), " ! is64bit";
 
-    $x = new U64(1,2);
+    $x = U64->new(1,2);
     is $x->getHigh, 1, "  getHigh is 1";
     is $x->getLow, 2, "  getLow is 2";
     ok $x->is64bit(), " is64bit";
 
-    $x = new U64(0xFFFFFFFF,2);
+    $x = U64->new(0xFFFFFFFF,2);
     is $x->getHigh, 0xFFFFFFFF, "  getHigh is 0xFFFFFFFF";
     is $x->getLow, 2, "  getLow is 2";
     ok $x->is64bit(), " is64bit";
 
-    $x = new U64(7, 0xFFFFFFFF);
+    $x = U64->new(7, 0xFFFFFFFF);
     is $x->getHigh, 7, "  getHigh is 7";
     is $x->getLow, 0xFFFFFFFF, "  getLow is 0xFFFFFFFF";
     ok $x->is64bit(), " is64bit";
 
-    $x = new U64(666);
+    $x = U64->new(666);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 666, "  getLow is 666";
     ok ! $x->is64bit(), " ! is64bit";
 
     title "U64 - add" ;
 
-    $x = new U64(0, 1);
+    $x = U64->new(0, 1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 1, "  getLow is 1";
     ok ! $x->is64bit(), " ! is64bit";
@@ -285,7 +285,7 @@ My::testParseParameters();
     is $x->getLow, 2, "  getLow is 2";
     ok ! $x->is64bit(), " ! is64bit";
 
-    $x = new U64(0, 0xFFFFFFFE);
+    $x = U64->new(0, 0xFFFFFFFE);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 0xFFFFFFFE, "  getLow is 0xFFFFFFFE";
     is $x->get32bit(),  0xFFFFFFFE, "  get32bit is 0xFFFFFFFE";
@@ -320,8 +320,8 @@ My::testParseParameters();
     is $x->get64bit(),  0xFFFFFFFF+3, "  get64bit is 0x100000002";
     ok $x->is64bit(), " is64bit";
 
-    $x = new U64(1, 0xFFFFFFFE);
-    my $y = new U64(2, 3);
+    $x = U64->new(1, 0xFFFFFFFE);
+    my $y = U64->new(2, 3);
 
     $x->add($y);
     is $x->getHigh, 4, "  getHigh is 4";
@@ -330,7 +330,7 @@ My::testParseParameters();
 
     title "U64 - subtract" ;
 
-    $x = new U64(0, 1);
+    $x = U64->new(0, 1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 1, "  getLow is 1";
     ok ! $x->is64bit(), " ! is64bit";
@@ -340,7 +340,7 @@ My::testParseParameters();
     is $x->getLow, 0, "  getLow is 0";
     ok ! $x->is64bit(), " ! is64bit";
 
-    $x = new U64(1, 0);
+    $x = U64->new(1, 0);
     is $x->getHigh, 1, "  getHigh is 1";
     is $x->getLow, 0, "  getLow is 0";
     is $x->get32bit(),  0, "  get32bit is 0xFFFFFFFE";
@@ -354,16 +354,16 @@ My::testParseParameters();
     is $x->get64bit(),  0xFFFFFFFF, "  get64bit is 0xFFFFFFFF";
     ok ! $x->is64bit(), " ! is64bit";
 
-    $x = new U64(2, 2);
-    $y = new U64(1, 3);
+    $x = U64->new(2, 2);
+    $y = U64->new(1, 3);
 
     $x->subtract($y);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 0xFFFFFFFF, "  getLow is 1";
     ok ! $x->is64bit(), " ! is64bit";
 
-    $x = new U64(0x01CADCE2, 0x4E815983);
-    $y = new U64(0x19DB1DE, 0xD53E8000); # NTFS to Unix time delta
+    $x = U64->new(0x01CADCE2, 0x4E815983);
+    $y = U64->new(0x19DB1DE, 0xD53E8000); # NTFS to Unix time delta
 
     $x->subtract($y);
     is $x->getHigh, 0x2D2B03, "  getHigh is 2D2B03";
@@ -372,17 +372,17 @@ My::testParseParameters();
 
     title "U64 - equal" ;
 
-    $x = new U64(0, 1);
+    $x = U64->new(0, 1);
     is $x->getHigh, 0, "  getHigh is 0";
     is $x->getLow, 1, "  getLow is 1";
     ok ! $x->is64bit(), " ! is64bit";
 
-    $y = new U64(0, 1);
+    $y = U64->new(0, 1);
     is $y->getHigh, 0, "  getHigh is 0";
     is $y->getLow, 1, "  getLow is 1";
     ok ! $y->is64bit(), " ! is64bit";
 
-    my $z = new U64(0, 2);
+    my $z = U64->new(0, 2);
     is $z->getHigh, 0, "  getHigh is 0";
     is $z->getLow, 2, "  getLow is 2";
     ok ! $z->is64bit(), " ! is64bit";
@@ -391,14 +391,14 @@ My::testParseParameters();
     ok !$x->equal($z), "  ! equal";
 
     title "U64 - clone" ;
-    $x = new U64(21, 77);
+    $x = U64->new(21, 77);
     $z =  U64::clone($x);
     is $z->getHigh, 21, "  getHigh is 21";
     is $z->getLow, 77, "  getLow is 77";
 
     title "U64 - cmp.gt" ;
-    $x = new U64 1;
-    $y = new U64 0;
+    $x = U64->new( 1 );
+    $y = U64->new( 0 );
     cmp_ok $x->cmp($y), '>', 0, "  cmp > 0";
     is $x->gt($y), 1, "  gt";
     cmp_ok $y->cmp($x), '<', 0, "  cmp < 0";

@@ -151,7 +151,7 @@ IO::Compress::Bzip2 - Write bzip2 files/buffers
     my $status = bzip2 $input => $output [,OPTS]
         or die "bzip2 failed: $Bzip2Error\n";
 
-    my $z = new IO::Compress::Bzip2 $output [,OPTS]
+    my $z = IO::Compress::Bzip2->new(  $output [,OPTS] )
         or die "bzip2 failed: $Bzip2Error\n";
 
     $z->print($string);
@@ -426,7 +426,7 @@ compressed data to a buffer, C<$buffer>.
     use IO::Compress::Bzip2 qw(bzip2 $Bzip2Error) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt"
+    my $input = IO::File->new( "<file1.txt" )
         or die "Cannot open 'file1.txt': $!\n" ;
     my $buffer ;
     bzip2 $input => \$buffer
@@ -463,7 +463,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for C<IO::Compress::Bzip2> is shown below
 
-    my $z = new IO::Compress::Bzip2 $output [,OPTS]
+    my $z = IO::Compress::Bzip2->new( $output [,OPTS] )
         or die "IO::Compress::Bzip2 failed: $Bzip2Error\n";
 
 It returns an C<IO::Compress::Bzip2> object on success and undef on failure.

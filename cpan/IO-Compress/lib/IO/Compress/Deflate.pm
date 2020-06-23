@@ -181,7 +181,7 @@ IO::Compress::Deflate - Write RFC 1950 files/buffers
     my $status = deflate $input => $output [,OPTS]
         or die "deflate failed: $DeflateError\n";
 
-    my $z = new IO::Compress::Deflate $output [,OPTS]
+    my $z = IO::Compress::Deflate->new( $output [,OPTS] )
         or die "deflate failed: $DeflateError\n";
 
     $z->print($string);
@@ -458,7 +458,7 @@ compressed data to a buffer, C<$buffer>.
     use IO::Compress::Deflate qw(deflate $DeflateError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt"
+    my $input = IO::File->new( "<file1.txt" )
         or die "Cannot open 'file1.txt': $!\n" ;
     my $buffer ;
     deflate $input => \$buffer
@@ -495,7 +495,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for C<IO::Compress::Deflate> is shown below
 
-    my $z = new IO::Compress::Deflate $output [,OPTS]
+    my $z = IO::Compress::Deflate->new( $output [,OPTS] )
         or die "IO::Compress::Deflate failed: $DeflateError\n";
 
 It returns an C<IO::Compress::Deflate> object on success and undef on failure.

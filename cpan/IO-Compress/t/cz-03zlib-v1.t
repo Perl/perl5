@@ -337,7 +337,7 @@ title 'inflate - check remaining buffer after Z_STREAM_END';
 title 'memGzip & memGunzip';
 {
     my ($name, $name1, $name2, $name3);
-    my $lex = new LexFile $name, $name1, $name2, $name3 ;
+    my $lex = LexFile->new( $name, $name1, $name2, $name3 );
     my $buffer = <<EOM;
 some sample 
 text
@@ -520,7 +520,7 @@ EOM
 {
     title "Check all bytes can be handled";
 
-    my $lex = new LexFile my $name ;
+    my $lex = LexFile->new( my $name );
     my $data = join '', map { chr } 0x00 .. 0xFF;
     $data .= "\r\nabd\r\n";
 
@@ -946,7 +946,7 @@ some text
 EOM
 
     my $good ;
-    ok my $x = new IO::Compress::Gzip \$good, Append => 1, -HeaderCRC => 1 ;
+    ok my $x = IO::Compress::Gzip->new( \$good, Append => 1, -HeaderCRC => 1 );
     ok $x->write($string) ;
     ok  $x->close ;
 
@@ -996,8 +996,8 @@ some text
 EOM
 
     my $truncated ;
-    ok  my $x = new IO::Compress::Gzip \$truncated, Append => 1, -HeaderCRC => 1, Strict => 0,
-				-ExtraField => "hello" x 10  ;
+    ok  my $x = IO::Compress::Gzip->new( \$truncated, Append => 1, -HeaderCRC => 1, Strict => 0,
+				-ExtraField => "hello" x 10 );
     ok  $x->write($string) ;
     ok  $x->close ;
 
@@ -1018,7 +1018,7 @@ some text
 EOM
 
     my $truncated ;
-    ok  my $x = new IO::Compress::Gzip \$truncated, Append => 1, -Name => $Name;
+    ok  my $x = IO::Compress::Gzip->new( \$truncated, Append => 1, -Name => $Name );
     ok  $x->write($string) ;
     ok  $x->close ;
 
@@ -1037,7 +1037,7 @@ some text
 EOM
 
     my $truncated ;
-    ok  my $x = new IO::Compress::Gzip \$truncated, -Comment => $Comment;
+    ok  my $x = IO::Compress::Gzip->new( \$truncated, -Comment => $Comment );
     ok  $x->write($string) ;
     ok  $x->close ;
 
@@ -1054,7 +1054,7 @@ some text
 EOM
 
     my $truncated ;
-    ok  my $x = new IO::Compress::Gzip \$truncated, -HeaderCRC => 1;
+    ok  my $x = IO::Compress::Gzip->new( \$truncated, -HeaderCRC => 1 );
     ok  $x->write($string) ;
     ok  $x->close ;
 
@@ -1071,13 +1071,13 @@ some text
 EOM
 
     my $buffer ;
-    ok  my $x = new IO::Compress::Gzip \$buffer, 
+    ok  my $x = IO::Compress::Gzip->new( \$buffer, 
                              -Append     => 1,
                              -Strict     => 0,
                              -HeaderCRC  => 1,
                              -Name       => "Fred",
                              -ExtraField => "Extra",
-                             -Comment    => 'Comment';
+                             -Comment    => 'Comment' );
     ok  $x->write($string) ;
     ok  $x->close ;
 
@@ -1098,7 +1098,7 @@ some text
 EOM
 
     my $good ;
-    ok  my $x = new IO::Compress::Gzip \$good, Append => 1 ;
+    ok  my $x = IO::Compress::Gzip->new( \$good, Append => 1 );
     ok  $x->write($string) ;
     ok  $x->close ;
 
@@ -1176,7 +1176,7 @@ sub trickle
     title "Append & MultiStream Tests";
     # rt.24041
 
-    my $lex = new LexFile my $name ;
+    my $lex = LexFile->new( my $name );
     my $data1 = "the is the first";
     my $data2 = "and this is the second";
     my $trailing = "some trailing data";
@@ -1214,7 +1214,7 @@ sub trickle
     title "gzclose & gzflush return codes";
     # rt.29215
 
-    my $lex = new LexFile my $name ;
+    my $lex = LexFile->new( my $name );
     my $data1 = "the is some text";
     my $status;
 

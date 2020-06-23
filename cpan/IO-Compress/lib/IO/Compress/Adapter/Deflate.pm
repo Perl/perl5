@@ -24,13 +24,13 @@ sub mkCompObject
     my $level    = shift ;
     my $strategy = shift ;
 
-    my ($def, $status) = new Compress::Raw::Zlib::Deflate
+    my ($def, $status) = Compress::Raw::Zlib::Deflate->new(
                                 -AppendOutput   => 1,
                                 -CRC32          => $crc32,
                                 -ADLER32        => $adler32,
                                 -Level          => $level,
                                 -Strategy       => $strategy,
-                                -WindowBits     => - MAX_WBITS;
+                                -WindowBits     => - MAX_WBITS);
 
     return (undef, "Cannot create Deflate object: $status", $status) 
         if $status != Z_OK;    

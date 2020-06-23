@@ -162,7 +162,7 @@ sub whatIsInput($;$)
         #use IO::File;
         $got = 'handle';
         $_[0] = *STDIN;
-        #$_[0] = new IO::File("<-");
+        #$_[0] = IO::File->new("<-");
     }
 
     return $got;
@@ -176,7 +176,7 @@ sub whatIsOutput($;$)
     {
         $got = 'handle';
         $_[0] = *STDOUT;
-        #$_[0] = new IO::File(">-");
+        #$_[0] = IO::File->new(">-");
     }
 
     return $got;
@@ -269,7 +269,7 @@ sub IO::Compress::Base::Validator::new
     {
         $data{GlobMap} = 1 ;
         $data{inType} = $data{outType} = 'filename';
-        my $mapper = new File::GlobMapper($_[0], $_[1]);
+        my $mapper = File::GlobMapper->new($_[0], $_[1]);
         if ( ! $mapper )
         {
             return $obj->saveErrorString($File::GlobMapper::Error) ;
@@ -511,7 +511,7 @@ sub ParseParameters
     return $_[1]
         if @_ == 2 && defined $_[1] && UNIVERSAL::isa($_[1], "IO::Compress::Base::Parameters");
 
-    my $p = new IO::Compress::Base::Parameters() ;
+    my $p = IO::Compress::Base::Parameters->new();
     $p->parse(@_)
         or croak "$sub: $p->[IxError]" ;
 

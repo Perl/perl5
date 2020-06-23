@@ -356,7 +356,7 @@ IO::Uncompress::RawInflate - Read RFC 1951 files/buffers
     my $status = rawinflate $input => $output [,OPTS]
         or die "rawinflate failed: $RawInflateError\n";
 
-    my $z = new IO::Uncompress::RawInflate $input [OPTS]
+    my $z = IO::Uncompress::RawInflate->new( $input [OPTS] )
         or die "rawinflate failed: $RawInflateError\n";
 
     $status = $z->read($buffer)
@@ -646,7 +646,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::RawInflate qw(rawinflate $RawInflateError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.1951"
+    my $input = IO::File->new( "<file1.txt.1951" )
         or die "Cannot open 'file1.txt.1951': $!\n" ;
     my $buffer ;
     rawinflate $input => \$buffer
@@ -681,7 +681,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for IO::Uncompress::RawInflate is shown below
 
-    my $z = new IO::Uncompress::RawInflate $input [OPTS]
+    my $z = IO::Uncompress::RawInflate->new( $input [OPTS] )
         or die "IO::Uncompress::RawInflate failed: $RawInflateError\n";
 
 Returns an C<IO::Uncompress::RawInflate> object on success and undef on failure.

@@ -37,12 +37,12 @@ sub run
             my $string = "some text" x 100 ;
 
             my $buffer ;
-            my $x = new $CompressClass(\$buffer) ;
+            my $x = $CompressClass->can('new')->( $CompressClass, \$buffer) ;
             ok $x, "  create $CompressClass object" ;
             ok $x->write($string), "  write to object" ;
             ok $x->close, "  close ok" ;
 
-            my $lex = new LexFile my $output;
+            my $lex = LexFile->new( my $output );
             my $input ;
 
             if ($file) {
@@ -54,8 +54,8 @@ sub run
             }
 
             {
-                my $unc = new $AnyConstruct $input, Transparent => $trans
-                                                    Append => 1  ;
+                my $unc = $AnyConstruct->can('new')->( $AnyConstruct, $input, Transparent => $trans
+                                                    Append => 1 );
 
                 ok $unc, "  Created $AnyClass object" 
                     or print "# $$AnyError\n";
@@ -72,8 +72,8 @@ sub run
             }
 
             {
-                my $unc = new $AnyConstruct $input, Transparent => $trans,
-                                                     Append =>1  ;
+                my $unc = $AnyConstruct->can('new')->( $AnyConstruct, $input, Transparent => $trans,
+                                                     Append =>1 );
 
                 ok $unc, "  Created $AnyClass object" 
                     or print "# $$AnyError\n";

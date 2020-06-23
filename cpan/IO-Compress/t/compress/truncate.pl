@@ -52,7 +52,7 @@ sub run
 
             foreach my $i (1 .. $fingerprint_size-1)
             {
-                my $lex = new LexFile my $name ;
+                my $lex = LexFile->new( my $name );
                 my $input;
             
                 title "Fingerprint Truncation - length $i, Transparent $trans";
@@ -68,9 +68,9 @@ sub run
                     $input = \$part;
                 }
 
-                my $gz = new $UncompressClass $input,
+                my $gz = $UncompressClass->can('new')->( $UncompressClass, $input,
                                               -BlockSize   => $blocksize,
-                                              -Transparent => $trans;
+                                              -Transparent => $trans );
                 if ($trans) {
                     ok $gz;
                     ok ! $gz->error() ;
@@ -92,7 +92,7 @@ sub run
             #
             foreach my $i ($fingerprint_size .. $header_size -1)
             {
-                my $lex = new LexFile my $name ;
+                my $lex = LexFile->new( my $name );
                 my $input;
             
                 title "Header Truncation - length $i, Source $fb, Transparent $trans";
@@ -108,9 +108,9 @@ sub run
                     $input = \$part;
                 }
                 
-                ok ! defined new $UncompressClass $input,
+                ok ! defined $UncompressClass->can('new')->( $UncompressClass, $input,
                                                   -BlockSize   => $blocksize,
-                                                  -Transparent => $trans;
+                                                  -Transparent => $trans );
                 #ok $gz->eof() ;
             }
 
@@ -124,7 +124,7 @@ sub run
 
                     title "Corruption after header - Mode $mode, Source $fb, Transparent $trans";
                     
-                    my $lex = new LexFile my $name ;
+                    my $lex = LexFile->new( my $name );
                     my $input;
                 
                     my $part = substr($compressed, 0, $header_size);
@@ -140,10 +140,10 @@ sub run
                         $input = \$part;
                     }
                     
-                    ok my $gz = new $UncompressClass $input,
+                    ok my $gz = $UncompressClass->can('new')->( $UncompressClass, $input,
                                                      -Strict      => 1,
                                                      -BlockSize   => $blocksize,
-                                                     -Transparent => $trans
+                                                     -Transparent => $trans )
                          or diag $$UnError;
 
                     my $un ;
@@ -194,7 +194,7 @@ sub run
 
                     title "Compressed Data Truncation - length $i, MOde $mode, Source $fb, Transparent $trans";
 
-                    my $lex = new LexFile my $name ;
+                    my $lex = LexFile->new( my $name );
                     my $input;
                 
                     my $part = substr($compressed, 0, $i);
@@ -208,10 +208,10 @@ sub run
                         $input = \$part;
                     }
                     
-                    ok my $gz = new $UncompressClass $input,
+                    ok my $gz = $UncompressClass->can('new')->( $UncompressClass, $input,
                                                      -Strict      => 1,
                                                      -BlockSize   => $blocksize,
-                                                     -Transparent => $trans
+                                                     -Transparent => $trans )
                          or diag $$UnError;
 
                     my $un ;
@@ -242,7 +242,7 @@ sub run
             {
                 foreach my $lax (0, 1)
                 {
-                    my $lex = new LexFile my $name ;
+                    my $lex = LexFile->new( my $name );
                     my $input;
                 
                     ok 1, "Compressed Trailer Truncation - Length $i, Lax $lax, Transparent $trans" ;
@@ -257,11 +257,11 @@ sub run
                         $input = \$part;
                     }
                     
-                    ok my $gz = new $UncompressClass $input,
+                    ok my $gz = $UncompressClass->can('new')->( $UncompressClass, $input,
                                                      -BlockSize   => $blocksize,
                                                      -Strict      => !$lax,
                                                      -Append      => 1,   
-                                                     -Transparent => $trans;
+                                                     -Transparent => $trans );
                     my $un = '';
                     my $status = 1 ;
                     $status = $gz->read($un) while $status > 0 ;

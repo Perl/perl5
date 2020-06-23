@@ -40,7 +40,7 @@ BEGIN {
 {
     title "EFS set in zip: Create a simple zip - language encoding flag set";
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     my @names = ( 'alpha \N{GREEK SMALL LETTER ALPHA}',
                   'beta \N{GREEK SMALL LETTER BETA}',
@@ -52,8 +52,8 @@ BEGIN {
 
     my @n = @names;
 
-    my $zip = new IO::Compress::Zip $file1,
-                    Name =>  $names[0], Efs => 1;
+    my $zip = IO::Compress::Zip->new( $file1,
+                    Name =>  $names[0], Efs => 1 );
 
     my $content = 'Hello, world!';
     ok $zip->print($content), "print";
@@ -66,7 +66,7 @@ BEGIN {
     ok $zip->close(), "closed";
 
     {
-        my $u = new IO::Uncompress::Unzip $file1, Efs => 1
+        my $u = IO::Uncompress::Unzip->new( $file1, Efs => 1 )
             or die "Cannot open $file1: $UnzipError";
 
         my $status;
@@ -88,7 +88,7 @@ BEGIN {
     }
 
     {
-        my $u = new IO::Uncompress::Unzip $file1, Efs => 0
+        my $u = IO::Uncompress::Unzip->new( $file1, Efs => 0 )
             or die "Cannot open $file1: $UnzipError";
 
         my $status;
@@ -114,7 +114,7 @@ BEGIN {
 {
     title "Create a simple zip - language encoding flag not set";
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     my @names = ( 'alpha \N{GREEK SMALL LETTER ALPHA}',
                   'beta \N{GREEK SMALL LETTER BETA}',
@@ -124,8 +124,8 @@ BEGIN {
 
     my @n = @names;
 
-    my $zip = new IO::Compress::Zip $file1,
-                    Name =>  $names[0], Efs => 0;
+    my $zip = IO::Compress::Zip->new( $file1,
+                    Name =>  $names[0], Efs => 0 );
 
     my $content = 'Hello, world!';
     ok $zip->print($content), "print";
@@ -137,7 +137,7 @@ BEGIN {
     ok $zip->print($content), "print";
     ok $zip->close(), "closed";
 
-    my $u = new IO::Uncompress::Unzip $file1, Efs => 0
+    my $u = IO::Uncompress::Unzip->new( $file1, Efs => 0 )
         or die "Cannot open $file1: $UnzipError";
 
     my $status;
@@ -161,18 +161,18 @@ BEGIN {
 {
     title "zip: EFS => 0 filename not valid utf8 - language encoding flag not set";
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     # Invalid UTF8
     my $name = "a\xFF\x{100}";
     
-    my $zip = new IO::Compress::Zip $file1,
-                    Name =>  $name, Efs => 0  ;
+    my $zip = IO::Compress::Zip->new( $file1,
+                    Name =>  $name, Efs => 0 );
 
     ok $zip->print("abcd"), "print";
     ok $zip->close(), "closed";
 
-    my $u = new IO::Uncompress::Unzip $file1
+    my $u = IO::Uncompress::Unzip->new( $file1 )
         or die "Cannot open $file1: $UnzipError";  
 
     ok $u->getHeaderInfo()->{Name} eq $name, "got bad filename";
@@ -184,7 +184,7 @@ BEGIN {
     my $filename = "t/files/bad-efs.zip" ;
     my $name = "\xF0\xA4\xAD";
 
-    my $u = new IO::Uncompress::Unzip $filename, efs => 0
+    my $u = IO::Uncompress::Unzip->new( $filename, efs => 0 )
         or die "Cannot open $filename: $UnzipError";  
 
     ok $u->getHeaderInfo()->{Name} eq $name, "got bad filename";
@@ -196,7 +196,7 @@ BEGIN {
     my $filename = "t/files/bad-efs.zip" ;
     my $name = "\xF0\xA4\xAD";
    
-    eval { my $u = new IO::Uncompress::Unzip $filename, efs => 1
+    eval { my $u = IO::Uncompress::Unzip->new( $filename, efs => 1 )
         or die "Cannot open $filename: $UnzipError" };
 
     like $@, qr/Zip Filename not UTF-8/,
@@ -207,13 +207,13 @@ BEGIN {
 {
     title "EFS => 1 - filename not valid utf8 - catch bad content writing to zip";
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     # Invalid UTF8
     my $name = "a\xFF\x{100}";
     
-    eval { my $zip = new IO::Compress::Zip $file1,
-                    Name =>  $name, Efs => 1 } ;
+    eval { my $zip = IO::Compress::Zip->new( $file1,
+                    Name =>  $name, Efs => 1 ) } ;
 
     like $@,  qr/Wide character in zip filename/, 
                  "  wide characters in zip filename";

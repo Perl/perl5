@@ -98,7 +98,7 @@ SKIP: {
     my $byte_len = length( Encode::encode_utf8($s) );
     my ($uncomp) ;
 
-    my $lex = new LexFile my $name ;
+    my $lex = LexFile->new( my $name );
     ok my $fil = gzopen($name, "wb"), "  gzopen for write ok" ;
 
     is $fil->gzwrite(Encode::encode_utf8($s)), $byte_len, "  wrote $byte_len bytes" ;
@@ -131,7 +131,7 @@ SKIP: {
     eval { uncompress($a) };
     like($@, qr/Wide character in uncompress/, "  wide characters in uncompress");
 
-    my $lex = new LexFile my $name ;
+    my $lex = LexFile->new( my $name );
     ok my $fil = gzopen($name, "wb"), "  gzopen for write ok" ;
 
     eval { $fil->gzwrite($a); } ;

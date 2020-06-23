@@ -60,7 +60,7 @@ SKIP: {
 
     my ($input, $err, $answer, $X, $status, $Answer);
      
-    my $lex = new LexFile my $name ;
+    my $lex = LexFile->new( my $name );
     ok my $x = gzopen($name, "wb");
 
     $input .= $hello;
@@ -116,7 +116,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
     #my ($input, $err, $answer, $X, $status, $Answer);
     my $compressed;
 
-    ok my $x = new $CompressClass(\$compressed) ;
+    ok my $x = $CompressClass->can('new')->( $CompressClass, \$compressed) ;
 
     my $input .= $hello;
     is $x->write($hello), $len_hello, "wrote $len_hello bytes" ;
@@ -129,7 +129,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
     
     ok $x->close, "closed  $CompressClass object" ;
 
-    my $k = new $UncompressClass(\$compressed);
+    my $k = $UncompressClass->can('new')->( $UncompressClass, \$compressed);
     isa_ok $k, $UncompressClass;
      
     my $len = length $input ;

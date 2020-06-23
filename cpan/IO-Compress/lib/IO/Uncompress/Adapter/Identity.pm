@@ -21,7 +21,7 @@ sub mkUncompObject
     my $crc32 = 1; #shift ;
     my $adler32 = shift;
 
-    bless { 'CompSize'   => new U64 , # 0,
+    bless { 'CompSize'   => U64->new(), # 0,
             'UnCompSize' => 0,
             'wantCRC32'  => $crc32,
             'CRC32'      => Compress::Raw::Zlib::crc32(''),

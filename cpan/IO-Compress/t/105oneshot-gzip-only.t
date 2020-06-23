@@ -46,7 +46,7 @@ sub gzipGetHeader
         or diag $GunzipError ;
     is $got, $content, "  got expected content" ;
 
-    my $gunz = new IO::Uncompress::Gunzip \$out, Strict => 0
+    my $gunz = IO::Uncompress::Gunzip->new( \$out, Strict => 0 )
         or diag "GunzipError is $IO::Uncompress::Gunzip::GunzipError" ;
     ok $gunz, "  Created IO::Uncompress::Gunzip object";
     my $hdr = $gunz->getHeaderInfo();
@@ -63,7 +63,7 @@ sub gzipGetHeader
 {
     title "Check gzip header default NAME & MTIME settings" ;
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     my $content = "hello ";
     my $hdr ;
@@ -106,7 +106,7 @@ sub gzipGetHeader
     is $hdr->{Time}, 4321, "  Time is 4321";
 
     title "Filehandle doesn't have default Name or Time" ;
-    my $fh = new IO::File "< $file1"
+    my $fh = IO::File->new( "< $file1" )
         or diag "Cannot open '$file1': $!\n" ;
     sleep 3 ; 
     my $before = time ;

@@ -138,7 +138,7 @@ IO::Uncompress::AnyInflate - Uncompress zlib-based (zip, gzip) file/buffer
     my $status = anyinflate $input => $output [,OPTS]
         or die "anyinflate failed: $AnyInflateError\n";
 
-    my $z = new IO::Uncompress::AnyInflate $input [OPTS]
+    my $z = IO::Uncompress::AnyInflate->new( $input [OPTS] )
         or die "anyinflate failed: $AnyInflateError\n";
 
     $status = $z->read($buffer)
@@ -447,7 +447,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::AnyInflate qw(anyinflate $AnyInflateError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.Compressed"
+    my $input = IO::File->new( "<file1.txt.Compressed" )
         or die "Cannot open 'file1.txt.Compressed': $!\n" ;
     my $buffer ;
     anyinflate $input => \$buffer
@@ -482,7 +482,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for IO::Uncompress::AnyInflate is shown below
 
-    my $z = new IO::Uncompress::AnyInflate $input [OPTS]
+    my $z = IO::Uncompress::AnyInflate->new( $input [OPTS] )
         or die "IO::Uncompress::AnyInflate failed: $AnyInflateError\n";
 
 Returns an C<IO::Uncompress::AnyInflate> object on success and undef on failure.

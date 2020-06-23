@@ -149,7 +149,7 @@ IO::Uncompress::Bunzip2 - Read bzip2 files/buffers
     my $status = bunzip2 $input => $output [,OPTS]
         or die "bunzip2 failed: $Bunzip2Error\n";
 
-    my $z = new IO::Uncompress::Bunzip2 $input [OPTS]
+    my $z = IO::Uncompress::Bunzip2->new( $input [OPTS] )
         or die "bunzip2 failed: $Bunzip2Error\n";
 
     $status = $z->read($buffer)
@@ -440,7 +440,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::Bunzip2 qw(bunzip2 $Bunzip2Error) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.bz2"
+    my $input = IO::File->new( "<file1.txt.bz2" )
         or die "Cannot open 'file1.txt.bz2': $!\n" ;
     my $buffer ;
     bunzip2 $input => \$buffer
@@ -475,7 +475,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for IO::Uncompress::Bunzip2 is shown below
 
-    my $z = new IO::Uncompress::Bunzip2 $input [OPTS]
+    my $z = IO::Uncompress::Bunzip2->new( $input [OPTS] )
         or die "IO::Uncompress::Bunzip2 failed: $Bunzip2Error\n";
 
 Returns an C<IO::Uncompress::Bunzip2> object on success and undef on failure.

@@ -19,15 +19,15 @@ use Compress::Raw::Zlib  2.093 ();
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.093 ; 
+           IO::Compress::Adapter::Bzip2->import( 2.093 );
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.093 ; 
+           IO::Compress::Bzip2->import( 2.093 );
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.093 ; 
+           IO::Compress::Adapter::Lzma->import( 2.093 );
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.093 ; 
+           IO::Compress::Lzma->import( 2.093 ); 
          } ;
 }
 
@@ -147,7 +147,7 @@ sub mkComp
 
     if (! defined *$self->{ZipData}{SizesOffset}) {
         *$self->{ZipData}{SizesOffset} = 0;
-        *$self->{ZipData}{Offset} = new U64 ;
+        *$self->{ZipData}{Offset} = U64->new();
     }
 
     *$self->{ZipData}{AnyZip64} = 0
@@ -847,18 +847,18 @@ sub mkUnixNExtra
 # from Archive::Zip
 sub _unixToDosTime    # Archive::Zip::Member
 {
-	my $time_t = shift;
+    my $time_t = shift;
     
     # TODO - add something to cope with unix time < 1980 
-	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime($time_t);
-	my $dt = 0;
-	$dt += ( $sec >> 1 );
-	$dt += ( $min << 5 );
-	$dt += ( $hour << 11 );
-	$dt += ( $mday << 16 );
-	$dt += ( ( $mon + 1 ) << 21 );
-	$dt += ( ( $year - 80 ) << 25 );
-	return $dt;
+    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime($time_t);
+    my $dt = 0;
+    $dt += ( $sec >> 1 );
+    $dt += ( $min << 5 );
+    $dt += ( $hour << 11 );
+    $dt += ( $mday << 16 );
+    $dt += ( ( $mon + 1 ) << 21 );
+    $dt += ( ( $year - 80 ) << 25 );
+    return $dt;
 }
 
 1;
@@ -876,7 +876,7 @@ IO::Compress::Zip - Write zip files/buffers
     my $status = zip $input => $output [,OPTS]
         or die "zip failed: $ZipError\n";
 
-    my $z = new IO::Compress::Zip $output [,OPTS]
+    my $z = IO::Compress::Zip->new( $output [,OPTS] )
         or die "zip failed: $ZipError\n";
 
     $z->print($string);
@@ -1206,7 +1206,7 @@ compressed data to a buffer, C<$buffer>.
     use IO::Compress::Zip qw(zip $ZipError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt"
+    my $input = IO::File->new( "<file1.txt" )
         or die "Cannot open 'file1.txt': $!\n" ;
     my $buffer ;
     zip $input => \$buffer
@@ -1247,7 +1247,7 @@ or more succinctly
 
 The format of the constructor for C<IO::Compress::Zip> is shown below
 
-    my $z = new IO::Compress::Zip $output [,OPTS]
+    my $z = IO::Compress::Zip->new( $output [,OPTS] )
         or die "IO::Compress::Zip failed: $ZipError\n";
 
 It returns an C<IO::Compress::Zip> object on success and undef on failure.

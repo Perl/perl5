@@ -286,7 +286,7 @@ IO::Compress::Gzip - Write RFC 1952 files/buffers
     my $status = gzip $input => $output [,OPTS]
         or die "gzip failed: $GzipError\n";
 
-    my $z = new IO::Compress::Gzip $output [,OPTS]
+    my $z = IO::Compress::Gzip->new( $output [,OPTS] )
         or die "gzip failed: $GzipError\n";
 
     $z->print($string);
@@ -574,7 +574,7 @@ compressed data to a buffer, C<$buffer>.
     use IO::Compress::Gzip qw(gzip $GzipError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt"
+    my $input = IO::File->new( "<file1.txt" )
         or die "Cannot open 'file1.txt': $!\n" ;
     my $buffer ;
     gzip $input => \$buffer
@@ -611,7 +611,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for C<IO::Compress::Gzip> is shown below
 
-    my $z = new IO::Compress::Gzip $output [,OPTS]
+    my $z = IO::Compress::Gzip->new( $output [,OPTS] )
         or die "IO::Compress::Gzip failed: $GzipError\n";
 
 It returns an C<IO::Compress::Gzip> object on success and undef on failure.
