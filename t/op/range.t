@@ -260,7 +260,7 @@ foreach my $ii (-3 .. 3) {
             if (! defined($first)) {
                 $first = $_;
             }
-            my $last = $_;
+            $last = $_;
             last if ($lim++ > 100);
         }
     };
@@ -274,7 +274,7 @@ foreach my $ii (-3 .. 3) {
 }
 
 {
-    my $first;
+    my ($first, $last);
     eval {
         my $lim=0;
         for ($MAX_INT .. $MAX_INT-1) {
@@ -341,7 +341,7 @@ foreach my $ii (-3 .. 3) {
             if (! defined($first)) {
                 $first = $_;
             }
-            my $last = $_;
+            $last = $_;
             last if ($lim++ > 100);
         }
     };
@@ -355,7 +355,7 @@ foreach my $ii (-3 .. 3) {
 }
 
 {
-    my $first;
+    my ($first, $last);
     eval {
         my $lim=0;
         for ($MIN_INT+1 .. $MIN_INT) {
