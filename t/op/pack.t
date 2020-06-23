@@ -2049,7 +2049,7 @@ SKIP:
     # buffer, only detected by ASAN, not by valgrind
     $Config{ivsize} >= 8
       or skip "[perl #129149] need 64-bit for this test", 1;
-    fresh_perl_is(<<'EOS', "ok\n", { stderr => 1 }, "pack W overflow");
+    fresh_perl_is(<<'EOS', "ok\n", { stderr => 1, run_as_five => 1 }, "pack W overflow");
 print pack("ucW", "0000", 0, 140737488355327) eq "\$,#`P,```\n\0\x{7fffffffffff}"
  ? "ok\n" : "not ok\n";
 EOS
