@@ -238,7 +238,7 @@ sub check_install {
                 $filename = File::Spec->catfile($dir, $file);
                 next unless -e $filename;
 
-                $fh = new FileHandle;
+                $fh = FileHandle->new();
                 if (!$fh->open($filename)) {
                     warn loc(q[Cannot open file '%1': %2], $file, $!)
                             if $args->{verbose};
