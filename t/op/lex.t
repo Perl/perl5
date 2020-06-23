@@ -274,14 +274,12 @@ SKIP:
     );
 }
 # probably only failed under ASAN
-fresh_perl_is(
+fresh_perl_like(
     "stat\tt\$#0",
-    <<'EOM',
-$# is no longer supported as of Perl 5.30 at - line 1.
-EOM
-    {},
+    qr{\$\Q# is no longer supported as of Perl 5.30 at - line 1.\E},
+    {run_as_five => 1},
     "[perl #129273] heap use after free or overflow"
 );
 
-fresh_perl_like('flock  _$', qr/Not enough arguments for flock/, {stderr => 1},
+fresh_perl_like('flock  _$', qr/Missing comma after first argument to flock function/, {stderr => 1, run_as_five => 1},
                 "[perl #129190] intuit_method() invalidates PL_bufptr");
