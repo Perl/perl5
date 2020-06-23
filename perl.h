@@ -4890,7 +4890,7 @@ typedef OP* (*PPADDR_t[]) (pTHX);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
-#if defined(__DYNAMIC__) && defined(PERL_DARWIN) && defined(PERL_CORE)
+#if defined(__DYNAMIC__) && defined(PERL_DARWIN) && defined(PERL_CORE) && !TARGET_OS_IPHONE
 #  include <crt_externs.h>	/* for the env array */
 #  define environ (*_NSGetEnviron())
 #elif defined(USE_ENVIRON_ARRAY) && !defined(environ)
