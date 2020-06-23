@@ -1657,7 +1657,7 @@ SKIP: {
 
     our $has_fcntl;
     BEGIN {
-	eval { require Fcntl; import Fcntl; };
+	eval { require Fcntl; Fcntl->import; };
 	unless ($@) {
 	    $has_fcntl = 1;
 	}
