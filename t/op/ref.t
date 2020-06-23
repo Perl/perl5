@@ -8,6 +8,7 @@ BEGIN {
 
 use p5;
 use strict qw(refs subs);
+use feature 'indirect';
 
 plan(254);
 
