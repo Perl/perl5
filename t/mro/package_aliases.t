@@ -10,6 +10,8 @@ BEGIN {
 
 use strict;
 use warnings;
+use feature 'indirect';
+
 plan(tests => 54);
 
 {

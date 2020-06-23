@@ -14,6 +14,8 @@ use warnings;
 use utf8;
 use open qw( :utf8 :std );
 
+use feature 'indirect';
+
 plan(tests => 52);
 
 {
