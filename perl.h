@@ -1294,7 +1294,7 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !TARGET_OS_IPHONE
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -3952,6 +3952,11 @@ intrinsic function, see its documents for more details.
 
 #ifdef __CYGWIN__
 void init_os_extras(void);
+#endif
+
+#if TARGET_OS_IPHONE
+bool Perl_do_exec_iphone(pTHX_ const char *cmd);
+bool Perl_do_exec3_iphone(pTHX_ const char *cmd, int fd, int flag);
 #endif
 
 #ifdef UNION_ANY_DEFINITION
