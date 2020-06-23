@@ -48,7 +48,7 @@ BEGIN {
     ### switch between perlio and IO::String
     $HAS_IO_STRING = eval {
         require IO::String;
-        import IO::String;
+        IO::String->import;
         1;
     } || 0;
 }
