@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 our @ISA = qw(IO::Handle);
 
-our $VERSION = "1.43";
+our $VERSION = "1.44";
 
 our @EXPORT_OK = qw(sockatmark);
 
@@ -120,7 +120,7 @@ sub connect {
 	if (defined $timeout && ($!{EINPROGRESS} || $!{EWOULDBLOCK})) {
 	    require IO::Select;
 
-	    my $sel = new IO::Select $sock;
+	    my $sel = IO::Select->new( $sock );
 
 	    undef $!;
 	    my($r,$w,$e) = IO::Select::select(undef,$sel,$sel,$timeout);
@@ -243,7 +243,7 @@ sub accept {
     if(defined $timeout) {
 	require IO::Select;
 
-	my $sel = new IO::Select $sock;
+	my $sel = IO::Select->new( $sock );
 
 	unless ($sel->can_read($timeout)) {
 	    $@ = 'accept: timeout';
