@@ -54,7 +54,7 @@ EOM
             for my $useBuf (0 .. 1)
             {
                 print "#\n# BlockSize $blocksize, Length $i, Buffer $useBuf\n#\n" ;
-                my $lex = new LexFile my $name ;
+                my $lex = LexFile->new( my $name );
         
                 my $prime = substr($compressed, 0, $i);
                 my $rest = substr($compressed, $i);
@@ -68,8 +68,8 @@ EOM
                     writeFile($name, $rest);
                 }
 
-                #my $gz = new $UncompressClass $name,
-                my $gz = new $UncompressClass $start,
+                #my $gz = $UncompressClass->can('new')->( $UncompressClass, $name,
+                my $gz = $UncompressClass->can('new')->( $UncompressClass, $start,
                                               -Append      => 1,
                                               -BlockSize   => $blocksize,
                                               -Prime       => $prime,

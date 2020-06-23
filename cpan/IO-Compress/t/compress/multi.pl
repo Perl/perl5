@@ -75,7 +75,7 @@ EOM
 
                 }
 
-                my $lex = new LexFile my $name ;
+                my $lex = LexFile->new( my $name );
                 my $output ;
                 if ($fb eq 'buffer')
                 {
@@ -84,14 +84,14 @@ EOM
                 }
                 elsif ($fb eq 'filehandle')
                 {
-                    $output = new IO::File ">$name" ;
+                    $output = IO::File->new( ">$name" );
                 }
                 else
                 {
                     $output = $name ;
                 }
 
-                my $x = new $CompressClass($output, AutoClose => 1, %headers);
+                my $x = $CompressClass->can('new')->($CompressClass, $output, AutoClose => 1, %headers);
                 isa_ok $x, $CompressClass, '  $x' ;
 
                 foreach my $buffer (@buffs) {
@@ -106,12 +106,12 @@ EOM
                     $cc = $output ;
                     if ($fb eq 'filehandle')
                     {
-                        $cc = new IO::File "<$name" ;
+                        $cc = IO::File->new( "<$name" );
                     }
                     my @opts = $unc ne $UncompressClass 
                                     ? (RawInflate => 1)
                                     : ();
-                    my $gz = new $unc($cc,
+                    my $gz = $unc->can('new')->($unc, $cc,
                                    @opts,
                                    Strict      => 1,
                                    AutoClose   => 1,
@@ -142,12 +142,12 @@ EOM
                     $cc = $output ;
                     if ($fb eq 'filehandle')
                     {
-                        $cc = new IO::File "<$name" ;
+                        $cc = IO::File->new( "<$name" );
                     }
                     my @opts = $unc ne $UncompressClass 
                                     ? (RawInflate => 1)
                                     : ();
-                    my $gz = new $unc($cc,
+                    my $gz = $unc->can('new')->( $unc, $cc,
                                    @opts,
                                    Strict      => 1,
                                    AutoClose   => 1,
@@ -183,12 +183,12 @@ EOM
                     $cc = $output ;
                     if ($fb eq 'filehandle')
                     {
-                        $cc = new IO::File "<$name" ;
+                        $cc = IO::File->new( "<$name" );
                     }
                     my @opts = $unc ne $UncompressClass 
                                     ? (RawInflate => 1)
                                     : ();
-                    my $gz = new $unc($cc,
+                    my $gz = $unc->can('new')->( $unc, $cc,
                                    @opts,
                                    Strict      => 1,
                                    AutoClose   => 1,

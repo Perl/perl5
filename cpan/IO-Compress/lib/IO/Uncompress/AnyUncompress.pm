@@ -282,7 +282,7 @@ IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2, xz, lzma, lzip, lzf
     my $status = anyuncompress $input => $output [,OPTS]
         or die "anyuncompress failed: $AnyUncompressError\n";
 
-    my $z = new IO::Uncompress::AnyUncompress $input [OPTS]
+    my $z = IO::Uncompress::AnyUncompress->new( $input [OPTS] )
         or die "anyuncompress failed: $AnyUncompressError\n";
 
     $status = $z->read($buffer)
@@ -601,7 +601,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.Compressed"
+    my $input = IO::File->new( "<file1.txt.Compressed" )
         or die "Cannot open 'file1.txt.Compressed': $!\n" ;
     my $buffer ;
     anyuncompress $input => \$buffer
@@ -636,7 +636,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for IO::Uncompress::AnyUncompress is shown below
 
-    my $z = new IO::Uncompress::AnyUncompress $input [OPTS]
+    my $z = IO::Uncompress::AnyUncompress->new( $input [OPTS] )
         or die "IO::Uncompress::AnyUncompress failed: $AnyUncompressError\n";
 
 Returns an C<IO::Uncompress::AnyUncompress> object on success and undef on failure.

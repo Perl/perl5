@@ -286,7 +286,7 @@ IO::Uncompress::Gunzip - Read RFC 1952 files/buffers
     my $status = gunzip $input => $output [,OPTS]
         or die "gunzip failed: $GunzipError\n";
 
-    my $z = new IO::Uncompress::Gunzip $input [OPTS]
+    my $z = IO::Uncompress::Gunzip->new( $input [OPTS] )
         or die "gunzip failed: $GunzipError\n";
 
     $status = $z->read($buffer)
@@ -579,7 +579,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::Gunzip qw(gunzip $GunzipError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.gz"
+    my $input = IO::File->new( "<file1.txt.gz" )
         or die "Cannot open 'file1.txt.gz': $!\n" ;
     my $buffer ;
     gunzip $input => \$buffer
@@ -614,7 +614,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for IO::Uncompress::Gunzip is shown below
 
-    my $z = new IO::Uncompress::Gunzip $input [OPTS]
+    my $z = IO::Uncompress::Gunzip->new( $input [OPTS] )
         or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
 
 Returns an C<IO::Uncompress::Gunzip> object on success and undef on failure.

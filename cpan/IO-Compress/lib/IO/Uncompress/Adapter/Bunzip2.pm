@@ -16,7 +16,7 @@ sub mkUncompObject
     my $small     = shift || 0;
     my $verbosity = shift || 0;
 
-    my ($inflate, $status) = new Compress::Raw::Bunzip2(1, 1, $small, $verbosity, 1);
+    my ($inflate, $status) = Compress::Raw::Bunzip2->new(1, 1, $small, $verbosity, 1);
 
     return (undef, "Could not create Inflation object: $status", $status)
         if $status != BZ_OK ;
@@ -59,7 +59,7 @@ sub reset
 {
     my $self = shift ;
 
-    my ($inf, $status) = new Compress::Raw::Bunzip2();
+    my ($inf, $status) = Compress::Raw::Bunzip2->new();
     $self->{ErrorNo} = ($status == BZ_OK) ? 0 : $status ;
 
     if ($status != BZ_OK)

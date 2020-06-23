@@ -52,7 +52,7 @@ sub zipGetHeader
         or diag $UnzipError ;
     is $got, $content, "  got expected content" ;
 
-    my $gunz = new IO::Uncompress::Unzip \$out, Strict => 0
+    my $gunz = IO::Uncompress::Unzip->new( \$out, Strict => 0 )
         or diag "UnzipError is $IO::Uncompress::Unzip::UnzipError" ;
     ok $gunz, "  Created IO::Uncompress::Unzip object";
     my $hdr = $gunz->getHeaderInfo();
@@ -79,8 +79,8 @@ for my $input (0, 1)
             {
                 title "Input $input, Stream $stream, Zip64 $zip64, Method $method";
 
-                my $lex1 = new LexFile my $file1;
-                my $lex2 = new LexFile my $file2;
+                my $lex1 = LexFile->new( my $file1 );
+                my $lex2 = LexFile->new( my $file2 );
                 my $content = "hello ";
                 my $in ;
 
@@ -106,7 +106,7 @@ for my $input (0, 1)
 
                 is $got, $content, "  content ok";
 
-                my $u = new IO::Uncompress::Unzip $file1
+                my $u = IO::Uncompress::Unzip->new( $file1 )
                     or diag $ZipError ;
 
                 my $hdr = $u->getHeaderInfo();
@@ -133,7 +133,7 @@ for my $stream (0, 1)
             my $file1;
             my $file2;
             my $zipfile;
-            my $lex = new LexFile $file1, $file2, $zipfile;
+            my $lex = LexFile->new( $file1, $file2, $zipfile );
 
             my $content1 = "hello ";
             writeFile($file1, $content1);

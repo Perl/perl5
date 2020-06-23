@@ -54,7 +54,7 @@ EOM
 
 
 
-my $lex = new LexFile my $stderr ;
+my $lex = LexFile->new( my $stderr );
 
 
 sub check
@@ -62,7 +62,7 @@ sub check
     my $command = shift ;
     my $expected = shift ;
 
-    my $lex = new LexFile my $stderr ;
+    my $lex = LexFile->new( my $stderr );
 
     my $cmd = "$command 2>$stderr";
     my $stdout = `$cmd` ;
@@ -93,7 +93,7 @@ sub check
     title "streamzip" ;
 
     my ($infile, $outfile);
-    my $lex = new LexFile $infile, $outfile ;
+    my $lex = LexFile->new( $infile, $outfile );
 
     writeFile($infile, $hello1) ;
     check "$Perl ${binDir}/streamzip <$infile >$outfile";
@@ -107,7 +107,7 @@ sub check
     title "streamzip" ;
 
     my ($infile, $outfile);
-    my $lex = new LexFile $infile, $outfile ;
+    my $lex = LexFile->new( $infile, $outfile );
 
     writeFile($infile, $hello1) ;
     check "$Perl ${binDir}/streamzip -zipfile=$outfile <$infile";

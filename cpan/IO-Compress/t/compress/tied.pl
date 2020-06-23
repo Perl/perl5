@@ -44,10 +44,10 @@ sub myGZreadFile
     my $init = shift ;
 
 
-    my $fil = new $UncompressClass $filename,
+    my $fil = $UncompressClass->can('new')->( $UncompressClass, $filename,
                                     -Strict   => 1,
                                     -Append   => 1
-                                    ;
+                                    );
 
     my $data ;
     $data = $init if defined $init ;
@@ -73,7 +73,7 @@ sub run
 
             
         my $x ;
-        my $gz = new $CompressClass(\$x); 
+        my $gz = $CompressClass->can('new')->( $CompressClass, \$x); 
 
         my $buff ;
 
@@ -95,12 +95,12 @@ sub run
         title "Testing $UncompressClass";
 
         my $gc ;
-        my $guz = new $CompressClass(\$gc); 
+        my $guz = $CompressClass->can('new')->( $CompressClass, \$gc); 
         $guz->write("abc") ;
         $guz->close();
 
         my $x ;
-        my $gz = new $UncompressClass(\$gc); 
+        my $gz = $UncompressClass->can('new')->( $UncompressClass, \$gc); 
 
         my $buff ;
 
@@ -125,7 +125,7 @@ sub run
             # Write
             # these tests come almost 100% from IO::String
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
             my $io = $CompressClass->new($name);
 
@@ -188,16 +188,16 @@ and a single line.
 
 EOT
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
-            my $iow = new $CompressClass $name ;
+            my $iow = $CompressClass->can('new')->( $CompressClass, $name );
             print $iow $str ;
             close $iow;
 
             my @tmp;
             my $buf;
             {
-                my $io = new $UncompressClass $name ;
+                my $io = $UncompressClass->can('new')->( $UncompressClass, $name );
             
                 ok ! $io->eof, "  Not EOF";
                 is $io->tell(), 0, "  Tell is 0" ;
@@ -319,13 +319,13 @@ and a single line.
 
 EOT
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
             writeFile($name, $str);
             my @tmp;
             my $buf;
             {
-                my $io = new $UncompressClass $name, -Transparent => 1 ;
+                my $io = $UncompressClass->can('new')->( $UncompressClass, $name, -Transparent => 1 );
             
                 ok defined $io;
                 ok ! $io->eof;
@@ -450,13 +450,13 @@ EOT
                     {
                         title "Read Tests - buf length $bufsize, Transparent $trans, Append $append" ;
 
-                        my $lex = new LexFile my $name ;
+                        my $lex = LexFile->new( my $name );
 
                         if ($trans) {
                             writeFile($name, $str) ;
                         }
                         else {
-                            my $iow = new $CompressClass $name ;
+                            my $iow = $CompressClass->can('new')->( $CompressClass, $name );
                             print $iow $str ;
                             close $iow;
                         }

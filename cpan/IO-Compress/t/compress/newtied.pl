@@ -44,10 +44,10 @@ sub myGZreadFile
     my $init = shift ;
 
 
-    my $fil = new $UncompressClass $filename,
+    my $fil = $UncompressClass->can('new')->( $UncompressClass, $filename,
                                     -Strict   => 1,
                                     -Append   => 1
-                                    ;
+                                    );
 
     my $data ;
     $data = $init if defined $init ;
@@ -75,7 +75,7 @@ sub run
             # Write
             # these tests come almost 100% from IO::String
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
             my $io = $CompressClass->new($name);
 
@@ -142,16 +142,16 @@ and a single line.
 
 EOT
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
-            my $iow = new $CompressClass $name ;
+            my $iow = $CompressClass->can('new')->( $CompressClass, $name );
             print $iow $str ;
             close $iow;
 
             my @tmp;
             my $buf;
             {
-                my $io = new $UncompressClass $name ;
+                my $io = $UncompressClass->can('new')->( $UncompressClass, $name );
             
                 ok ! $io->eof;
                 ok ! eof $io;
@@ -273,11 +273,11 @@ EOT
         {
             title "seek tests" ;
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
             my $first = "beginning" ;
             my $last  = "the end" ;
-            my $iow = new $CompressClass $name ;
+            my $iow = $CompressClass->can('new')->( $CompressClass, $name );
             print $iow $first ;
             ok seek $iow, 10, SEEK_CUR ;
             is tell($iow), length($first)+10;
@@ -305,7 +305,7 @@ EOT
         {
             # seek error cases
             my $b ;
-            my $a = new $CompressClass(\$b)  ;
+            my $a = $CompressClass->can('new')->( $CompressClass, \$b)  ;
 
             ok ! $a->error() ;
             eval { seek($a, -1, 10) ; };
@@ -318,7 +318,7 @@ EOT
             close $a ;
 
 
-            my $u = new $UncompressClass(\$b)  ;
+            my $u = $UncompressClass->can('new')->( $UncompressClass, \$b)  ;
 
             eval { seek($u, -1, 10) ; };
             like $@, mkErr("seek: unknown value, 10, for whence parameter");
@@ -333,7 +333,7 @@ EOT
         {
             title 'fileno' ;
 
-            my $lex = new LexFile my $name ;
+            my $lex = LexFile->new( my $name );
 
             my $hello = <<EOM ;
 hello world
@@ -342,9 +342,9 @@ EOM
 
             {
               my $fh ;
-              ok $fh = new IO::File ">$name" ;
+              ok $fh = IO::File->new( ">$name" );
               my $x ;
-              ok $x = new $CompressClass $fh  ;
+              ok $x = $CompressClass->can('new')->( $CompressClass, $fh );
 
               ok $x->fileno() == fileno($fh) ;
               ok $x->fileno() == fileno($x) ;
@@ -356,8 +356,8 @@ EOM
             my $uncomp;
             {
               my $x ;
-              ok my $fh1 = new IO::File "<$name" ;
-              ok $x = new $UncompressClass $fh1, -Append => 1  ;
+              ok my $fh1 = IO::File->new( "<$name" );
+              ok $x = $UncompressClass->can('new')->( $UncompressClass, $fh1, -Append => 1 );
               ok $x->fileno() == fileno $fh1 ;
               ok $x->fileno() == fileno $x ;
 

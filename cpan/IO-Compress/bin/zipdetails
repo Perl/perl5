@@ -190,10 +190,10 @@ my $LocalHeaderCount = 0;
 my $CentralHeaderCount = 0;
 
 my $START;
-my $OFFSET = new U64 0;
+my $OFFSET = U64->new( 0 );
 my $TRAILING = 0 ;
-my $PAYLOADLIMIT = 256; #new U64 256;
-my $ZERO = new U64 0 ;
+my $PAYLOADLIMIT = 256; # U64->new( 256 );
+my $ZERO = U64->new( 0 );
 
 sub prOff
 {
@@ -587,7 +587,7 @@ sub read_U64
     myRead($b, 8);    
     my ($lo, $hi) = unpack ("V V" , $b);
     no warnings 'uninitialized';
-    return ($b, new U64 $hi, $lo);
+    return ($b, U64->new( $hi, $lo) );
 }
 
 sub read_VV
@@ -651,7 +651,7 @@ die "$filename does not exist\n"
 die "$filename not a standard file\n"
     unless -f $filename ;
 
-$FH = new IO::File "<$filename"
+$FH = IO::File->new( "<$filename" )
     or die "Cannot open $filename: $!\n";
 
 
@@ -778,7 +778,7 @@ sub LocalHeader
     myRead($filename, $filenameLength);
     out $filename, "Filename",  "'". $filename . "'";
 
-    my $cl64 = new U64 $compressedLength ;
+    my $cl64 = U64->new( $compressedLength );
     my %ExtraContext = ();
     if ($extraLength)
     {
@@ -1217,7 +1217,7 @@ sub Ntfs2Unix
     # NTFS offset is 19DB1DED53E8000
 
     my $hex = Value_U64($u64) ;
-    my $NTFS_OFFSET = new U64 0x19DB1DE, 0xD53E8000 ;
+    my $NTFS_OFFSET = U64->new( 0x19DB1DE, 0xD53E8000 );
     $u64->subtract($NTFS_OFFSET);
     my $elapse = $u64->get64bit();
     my $ns = ($elapse % 10000000) * 100;
@@ -1605,8 +1605,8 @@ sub scanCentralDirectory
 
         my $got = [$locHeaderOffset, $compressedLength] ;
 
-        # my $v64 = new U64 $compressedLength ;
-        # my $loc64 = new U64 $locHeaderOffset ;
+        # my $v64 = U64->new( $compressedLength );
+        # my $loc64 = U64->new( $locHeaderOffset );
         # my $got = [$loc64, $v64] ;
 
         # if (full32 $compressedLength || full32  $locHeaderOffset) {

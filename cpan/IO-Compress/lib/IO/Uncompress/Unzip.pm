@@ -24,9 +24,9 @@ BEGIN
    local $SIG{__DIE__};
        
     eval{ require IO::Uncompress::Adapter::Bunzip2 ;
-          import  IO::Uncompress::Adapter::Bunzip2 } ;
+          IO::Uncompress::Adapter::Bunzip2->import() } ;
     eval{ require IO::Uncompress::Adapter::UnLzma ;
-          import  IO::Uncompress::Adapter::UnLzma } ;
+          IO::Uncompress::Adapter::UnLzma->import() } ;
 }
 
 
@@ -899,7 +899,7 @@ sub scanCentralDirectory
 
         $self->skip($filename_length ) ;
 
-        my $v64 = new U64 $compressedLength ;
+        my $v64 = U64->new( $compressedLength );
 
         if (U64::full32 $compressedLength ) {
             $self->smartReadExact(\$buffer, $extra_length) ;
@@ -1060,7 +1060,7 @@ IO::Uncompress::Unzip - Read zip files/buffers
     my $status = unzip $input => $output [,OPTS]
         or die "unzip failed: $UnzipError\n";
 
-    my $z = new IO::Uncompress::Unzip $input [OPTS]
+    my $z = IO::Uncompress::Unzip->new( $input [OPTS] )
         or die "unzip failed: $UnzipError\n";
 
     $status = $z->read($buffer)
@@ -1379,7 +1379,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.zip"
+    my $input = IO::File->new( "<file1.zip" )
         or die "Cannot open 'file1.zip': $!\n" ;
     my $buffer ;
     unzip $input => \$buffer
@@ -1391,7 +1391,7 @@ uncompressed data to a buffer, C<$buffer>.
 
 The format of the constructor for IO::Uncompress::Unzip is shown below
 
-    my $z = new IO::Uncompress::Unzip $input [OPTS]
+    my $z = IO::Uncompress::Unzip->new( $input [OPTS] )
         or die "IO::Uncompress::Unzip failed: $UnzipError\n";
 
 Returns an C<IO::Uncompress::Unzip> object on success and undef on failure.
@@ -1824,7 +1824,7 @@ stream at a time.
     use IO::Uncompress::Unzip qw($UnzipError);
 
     my $zipfile = "somefile.zip";
-    my $u = new IO::Uncompress::Unzip $zipfile
+    my $u = IO::Uncompress::Unzip->new( $zipfile )
         or die "Cannot open $zipfile: $UnzipError";
 
     my $status;

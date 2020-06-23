@@ -41,7 +41,7 @@ sub run
     #for my $from ( qw(filename filehandle buffer) )
     {
 #        my $input ;
-#        my $lex = new LexFile my $name ;
+#        my $lex = LexFile->new( my $name );
 #
 #        
 #        if ($from eq 'buffer')
@@ -53,14 +53,14 @@ sub run
 #        }
 #        elsif ($from eq 'filehandle')
 #        {
-#            $input = new IO::File "<$name" ;
+#            $input = IO::File->new( "<$name" );
 #        }
 
         for my $to ( qw(filehandle buffer))
         {
             title "OO Mode: To $to, Encode by hand";
 
-            my $lex2 = new LexFile my $name2 ;
+            my $lex2 = LexFile->new( my $name2 );
             my $output;
             my $buffer;
 
@@ -72,12 +72,12 @@ sub run
             }
             elsif ($to eq 'filehandle')
             {
-                $output = new IO::File ">$name2" ;
+                $output = IO::File->new( ">$name2" );
             }
 
 
             my $out ;
-            my $cs = new $CompressClass($output, AutoClose =>1);
+            my $cs = $CompressClass->can('new')->( $CompressClass, $output, AutoClose =>1);
             $cs->print($encString);
             $cs->close();
 
@@ -89,7 +89,7 @@ sub run
                 $input = $name2 ;
             }
 
-            my $ucs = new $UncompressClass($input, Append => 1);
+            my $ucs = $UncompressClass->can('new')->( $UncompressClass, $input, Append => 1);
             my $got;
             1 while $ucs->read($got) > 0 ;
             
@@ -108,7 +108,7 @@ sub run
         title "Catch wide characters";
 
         my $out;
-        my $cs = new $CompressClass(\$out);
+        my $cs = $CompressClass->can('new')->( $CompressClass, \$out);
         my $a = "a\xFF\x{100}";
         eval { $cs->syswrite($a) };
         like($@, qr/Wide character in ${CompressClass}::write/, 
@@ -119,7 +119,7 @@ sub run
     {
         title "Unknown encoding";
         my $output;
-        eval { my $cs = new $CompressClass(\$output, Encode => 'fred'); } ;
+        eval { my $cs = $CompressClass->can('new')->( $CompressClass, \$output, Encode => 'fred'); } ;
         like($@, qr/${CompressClass}: Encoding 'fred' is not available/, 
                  "  Encoding 'fred' is not available");
     }
@@ -131,7 +131,7 @@ sub run
         {
             title "Encode: To $to, Encode option";
 
-            my $lex2 = new LexFile my $name2 ;
+            my $lex2 = LexFile->new( my $name2 );
             my $output;
             my $buffer;
 
@@ -145,11 +145,11 @@ sub run
             }
             elsif ($to eq 'filehandle')
             {
-                $output = new IO::File ">$name2" ;
+                $output = IO::File->new( ">$name2" );
             }
 
             my $out ;
-            my $cs = new $CompressClass($output, AutoClose =>1, Encode => 'utf8');
+            my $cs = $CompressClass->can('new')->( $CompressClass, $output, AutoClose =>1, Encode => 'utf8');
             ok $cs->print($string);
             ok $cs->close();
 
@@ -164,11 +164,11 @@ sub run
             }
             else
             {
-                $input = new IO::File "<$name2" ;
+                $input = IO::File->new( "<$name2" );
             }
             
             {
-                my $ucs = new $UncompressClass($input, AutoClose =>1, Append => 1);
+                my $ucs = $UncompressClass->can('new')->( $UncompressClass, $input, AutoClose =>1, Append => 1);
                 my $got;
                 1 while $ucs->read($got) > 0 ;
                 ok length($got) > 0;
@@ -181,7 +181,7 @@ sub run
             
      
 #            {
-#                my $ucs = new $UncompressClass($input, Append => 1, Decode => 'utf8');
+#                my $ucs = $UncompressClass->can('new')->( $UncompressClass, $input, Append => 1, Decode => 'utf8');
 #                my $got;
 #                1 while $ucs->read($got) > 0 ;
 #                ok length($got) > 0;    

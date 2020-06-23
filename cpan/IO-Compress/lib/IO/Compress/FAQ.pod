@@ -79,7 +79,7 @@ write a C<.tar.Z> file
     use Archive::Tar;
     use IO::File;
 
-    my $fh = new IO::File "| compress -c >$filename";
+    my $fh = IO::File->new( "| compress -c >$filename" );
     my $tar = Archive::Tar->new();
     ...
     $tar->write($fh);
@@ -101,7 +101,7 @@ recompression.
     my $gzipFile = "somefile.gz";
     my $bzipFile = "somefile.bz2";
 
-    my $gunzip = new IO::Uncompress::Gunzip $gzipFile
+    my $gunzip = IO::Uncompress::Gunzip->new( $gzipFile )
         or die "Cannot gunzip $gzipFile: $GunzipError\n" ;
 
     bzip2 $gunzip => $bzipFile
@@ -167,7 +167,7 @@ by including the C<Zip64> option.
 If you want to create a zip64 zip file with the OO interface you must
 specify the C<Zip64> option.
 
-    my $zip = new IO::Compress::Zip "whatever", Zip64 => 1;
+    my $zip = IO::Compress::Zip->new( "whatever", Zip64 => 1 );
 	
 When uncompressing with C<IO-Uncompress-Unzip>, it will automatically
 detect if the zip file is zip64.
@@ -416,7 +416,7 @@ filehandle code can be removed. Here is the rewritten code.
       $r->send_http_header;
       return OK if $r->header_only;
 
-      my $gz = new IO::Compress::Gzip '-', Minimal => 1
+      my $gz = IO::Compress::Gzip->new( '-', Minimal => 1 )
           or return DECLINED ;
 
       print $gz $_ while <$fh>;
@@ -468,7 +468,7 @@ read from the FTP Server.
     use Net::FTP;
     use IO::Uncompress::Gunzip qw(:all);
 
-    my $ftp = new Net::FTP ...
+    my $ftp = Net::FTP->new( ... )
 
     my $retr_fh = $ftp->retr($compressed_filename);
     gunzip $retr_fh => $outFilename, AutoClose => 1
@@ -518,7 +518,7 @@ the other C<IO::Uncompress::*> modules.
 
     my $file = $ARGV[0] ;
 
-    my $fh = new IO::File "<$file"
+    my $fh = IO::File->new( "<$file" )
                 or die "Cannot open '$file': $!\n";
 
     while (1)
@@ -566,9 +566,9 @@ the other C<IO::Uncompress::*> modules.
 
         # Done reading the Local Header
 
-        my $inf = new IO::Uncompress::RawInflate $fh,
+        my $inf = IO::Uncompress::RawInflate->new( $fh,
                             Transparent => 1,
-                            InputLength => $compressedLength
+                            InputLength => $compressedLength )
           or die "Cannot uncompress $file [$filename]: $RawInflateError\n"  ;
 
         my $line_count = 0;
@@ -590,9 +590,9 @@ header data. The code that I want to focus on is at the bottom.
         # get $filename
         # get $compressedLength
 
-        my $inf = new IO::Uncompress::RawInflate $fh,
+        my $inf = IO::Uncompress::RawInflate->new( $fh,
                             Transparent => 1,
-                            InputLength => $compressedLength
+                            InputLength => $compressedLength )
           or die "Cannot uncompress $file [$filename]: $RawInflateError\n"  ;
 
         my $line_count = 0;
@@ -626,8 +626,8 @@ Now consider what the code looks like without C<InputLength>
         # read all the compressed data into $data
         read($fh, $data, $compressedLength);
 
-        my $inf = new IO::Uncompress::RawInflate \$data,
-                            Transparent => 1,
+        my $inf = IO::Uncompress::RawInflate->new( \$data,
+                            Transparent => 1 )
           or die "Cannot uncompress $file [$filename]: $RawInflateError\n"  ;
 
         my $line_count = 0;

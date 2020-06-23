@@ -430,7 +430,7 @@ sub _create
             my $mode = '<';
             $mode = '+<' if $got->getValue('scan');
             *$obj->{StdIO} = ($inValue eq '-');
-            *$obj->{FH} = new IO::File "$mode $inValue"
+            *$obj->{FH} = IO::File->new( "$mode $inValue" )
                 or return $obj->saveErrorString(undef, "cannot open file '$inValue': $!", $!) ;
         }
         
@@ -473,8 +473,8 @@ sub _create
     *$obj->{Plain}             = 0;
     *$obj->{PlainBytesRead}    = 0;
     *$obj->{InflatedBytesRead} = 0;
-    *$obj->{UnCompSize}        = new U64;
-    *$obj->{CompSize}          = new U64;
+    *$obj->{UnCompSize}        = U64->new;
+    *$obj->{CompSize}          = U64->new;
     *$obj->{TotalInflatedBytesRead} = 0;
     *$obj->{NewStream}         = 0 ;
     *$obj->{EventEof}          = 0 ;
@@ -573,7 +573,7 @@ sub _inf
     my $output = shift ;
 
 
-    my $x = new IO::Compress::Base::Validator($class, *$obj->{Error}, $name, $input, $output)
+    my $x = IO::Compress::Base::Validator->new($class, *$obj->{Error}, $name, $input, $output)
         or return undef ;
     
     push @_, $output if $haveOut && $x->{Hash};
@@ -693,7 +693,7 @@ sub _singleTarget
         my $mode = '>' ;
         $mode = '>>'
             if $x->{Got}->getValue('append') ;
-        $x->{fh} = new IO::File "$mode $output" 
+        $x->{fh} = IO::File->new( "$mode $output" )
             or return retErr($x, "cannot open file '$output': $!") ;
         binmode $x->{fh} ;
 

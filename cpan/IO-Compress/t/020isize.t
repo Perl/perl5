@@ -113,16 +113,16 @@ for my $wrap (0 .. 2)
                 };
         }
 
-        my $gzip = new IO::Compress::Gzip \$compressed,
+        my $gzip = IO::Compress::Gzip->new( \$compressed,
                                 -Append     => 0,
-                                -HeaderCRC  => 1;
+                                -HeaderCRC  => 1 );
 
         ok $gzip, "  Created IO::Compress::Gzip object";
 
-        my $gunzip = new IO::Uncompress::Gunzip gzipClosure($gzip, $size),
+        my $gunzip = IO::Uncompress::Gunzip->new( gzipClosure($gzip, $size),
                                     -BlockSize  => 1024 * 500 ,
                                     -Append => 0,
-                                    -Strict => 1;
+                                    -Strict => 1 );
 
         ok $gunzip, "  Created IO::Uncompress::Gunzip object";
 
