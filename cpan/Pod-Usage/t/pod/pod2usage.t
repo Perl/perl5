@@ -3,7 +3,7 @@ BEGIN {
    my $THISDIR = dirname $0;
    unshift @INC, $THISDIR;
    require "testp2pt.pl";
-   import TestPodIncPlainText;
+   TestPodIncPlainText->import;
 }
 
 my %options = map { $_ => 1 } @ARGV;  ## convert cmdline to options-hash
