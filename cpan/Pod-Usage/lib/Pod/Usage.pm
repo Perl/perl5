@@ -109,7 +109,7 @@ sub pod2usage {
     }
 
     ## Now create a pod reader and constrain it to the desired sections.
-    my $parser = new Pod::Usage(USAGE_OPTIONS => \%opts);
+    my $parser = Pod::Usage->new(USAGE_OPTIONS => \%opts);
     if ($opts{'-verbose'} == 0) {
         $parser->select('(?:SYNOPSIS|USAGE)\s*');
     }
