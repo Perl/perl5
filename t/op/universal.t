@@ -46,9 +46,9 @@ $Alice::VERSION = 2.718;
 
 package main;
 
+no warnings 'once';
 
-
-$a = new Alice;
+$a = Alice->new;
 
 ok $a->isa("Alice");
 ok $a->isa("main::Alice");    # check that alternate class names work
