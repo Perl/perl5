@@ -4304,6 +4304,11 @@ PP(pp_system)
     PL_statusvalue = -1;
     SP = ORIGMARK;
     XPUSHi(-1);
+#elif TARGET_OS_IPHONE
+    PL_statusvalue = -1;
+    SP = ORIGMARK;
+    XPUSHi(-1);
+    RETURN;
 #else
     I32 value;
 # ifdef __amigaos4__
