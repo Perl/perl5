@@ -511,6 +511,7 @@ Execution of - aborted due to compilation errors.
 0x_;
 0b;
 EXPECT
+Misplaced _ in number at - line 3.
 No digits found for hexadecimal literal at - line 1, near "0x "
 No digits found for hexadecimal literal at - line 2, near "0xx"
 No digits found for hexadecimal literal at - line 3, near "0x_;"
@@ -518,13 +519,13 @@ No digits found for binary literal at - line 4, near "0b;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME [perl #130585] close paren in subparse
-qr!@{s{0})(?{!;
+use p5; qr!@{s{0})(?{!;
 EXPECT
 syntax error at - line 1, near "})"
 Execution of - aborted due to compilation errors.
 ########
 # NAME [perl #130585] close paren in subparse - a few more tests
-my ($x, %y, @z);
+use p5; my ($x, %y, @z);
 qq!$x\U $z[0] $y{a}\E $z[1]!;
 qq!$x\U@{s{0})(?{!;
 EXPECT
@@ -553,10 +554,12 @@ else {
 }
 EXPECT
 OPTIONS regex
+Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable at - line \d+.
 Use of code point 0x80000000(00000000)? is not allowed; the permissible max is 0x7FFFFFFF(FFFFFFFF)? at - line \d+.
 ########
 # NAME Forbid illegal \o{} code points
 use Config;
+no warnings;
 if ($Config{uvsize} < 8) {
     my $b = "\o{20_000_000_000}";
 }

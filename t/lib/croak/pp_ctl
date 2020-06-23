@@ -22,7 +22,7 @@ given is experimental at - line 2.
 Can't "goto" into a "given" block at - line 2.
 ########
 # NAME goto into expression
-use p5; no warnings 'deprecated';
+use p5; no warnings 'deprecated'; use feature 'indirect';
 eval { goto a; 1 + do { a: } }; warn $@;
 eval { goto b; meth { b: }   }; warn $@;
 eval { goto c; map { c: } () }; warn $@;
@@ -53,7 +53,7 @@ EXPECT
 Can't "default" outside a topicalizer at - line 2.
 ########
 # NAME croak with read only $@
-eval '"a" =~ /${*@=\_})/';
+use p5; eval '"a" =~ /${*@=\_})/';
 die;
 # this would previously recurse infinitely in the eval
 EXPECT
