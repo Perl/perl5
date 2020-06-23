@@ -139,11 +139,6 @@ build_perl() {
   export SDKROOT="$SDK_PATH"
   export CC=/usr/bin/clang
 
-  # missing on ios but present on tv and watch ?
-  if [ "$PERL_PLATFORM_TAG"="PERL_IOS" ]; then
-    perl -0777 -i.bak.0 -pe "s|#if defined\(__DYNAMIC__\) && defined\(PERL_DARWIN\) && defined\(PERL_CORE\)|#if defined\(__DYNAMIC__\) && defined\(PERL_DARWIN\) && defined\(PERL_CORE\) && \!TARGET_OS_IPHONE|" perl.h
-  fi
-
   # do not strip if -g in ccflags
   if [ $DEBUG -eq 1 ]; then
     perl -0777 -i.bak.0 -pe "s|(\\$\\^O eq \'darwin\');|\(\1 && \\\$Config\{\"ccflags\"\} \!\~ /-g\\\s/);|" installperl
