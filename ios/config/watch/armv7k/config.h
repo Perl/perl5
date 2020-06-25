@@ -1417,9 +1417,9 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#define CPPSTDIN "/usr/bin/clang  -no-cpp-precomp -arch armv7k -DTARGET_OS_WATCH -I/opt/local/include -I/Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/usr/include -arch armv7k -mwatchos-version-min=8.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk -DPERL_USE_SAFE_PUTENV -fno-common -DPERL_DARWIN -DTARGET_OS_IPHONE -pipe -O0 -g -fno-strict-aliasing -fstack-protector-strong -E"
+#define CPPSTDIN "/usr/bin/clang  -no-cpp-precomp -arch armv7k -DTARGET_OS_WATCH -I/opt/local/include -I/Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/usr/include -arch armv7k -mwatchos-version-min=8.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk -DPERL_USE_SAFE_PUTENV -fno-common -fPIC -DPERL_DARWIN -DTARGET_OS_IPHONE -pipe -O0 -g -fno-strict-aliasing -fstack-protector-strong -E"
 #define CPPMINUS "-"
-#define CPPRUN "/usr/bin/clang  -no-cpp-precomp -arch armv7k -DTARGET_OS_WATCH -I/opt/local/include -I/Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/usr/include -arch armv7k -mwatchosos-version-min=8.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk -DPERL_USE_SAFE_PUTENV -fno-common -DPERL_DARWIN -DTARGET_OS_IPHONE -pipe -O0 -g -fno-strict-aliasing -fstack-protector-strong -E"
+#define CPPRUN "/usr/bin/clang  -no-cpp-precomp -arch armv7k -DTARGET_OS_WATCH -I/opt/local/include -I/Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/usr/include -arch armv7k -mwatchosos-version-min=8.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk -DPERL_USE_SAFE_PUTENV -fno-common -fPIC -DPERL_DARWIN -DTARGET_OS_IPHONE -pipe -O0 -g -fno-strict-aliasing -fstack-protector-strong -E"
 #define CPPLAST "-"
 
 /* HAS_ACCESS:
