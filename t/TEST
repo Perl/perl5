@@ -117,9 +117,12 @@ my %skip = (
 	    '.svn' => 1,
 	   );
 
-
+{
+no warnings qw(once);
+# this variable is set in t/harness
 if ($::do_nothing) {
     return 1;
+}
 }
 
 $| = 1;
@@ -188,7 +191,7 @@ sub _find_files {
 	    next if $skip{$f};
 
 	    my $fullpath = "$dir/$f";
-	    
+
 	    if (-d $fullpath) {
 		_find_files($patt, $fullpath);
 	    } elsif ($f =~ /$patt/) {
@@ -482,7 +485,7 @@ unless (@ARGV) {
     }
     unless ($::core) {
 	_find_tests('porting');
-	_find_tests("lib"); 
+	_find_tests("lib");
     }
     # Config.pm may be broken for make minitest. And this is only a refinement
     # for skipping tests on non-default builds, so it is allowed to fail.
