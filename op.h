@@ -718,13 +718,18 @@ struct opslab {
 };
 
 # define OPSLOT_HEADER		STRUCT_OFFSET(OPSLOT, opslot_op)
-# define OPSLOT_HEADER_P	(OPSLOT_HEADER/sizeof(I32 *))
 # define OpSLOT(o)		(assert_(o->op_slabbed) \
 				 (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
 
+/* the slab that owns this op */
+# define OpMySLAB(o) \
+    ((OPSLAB*)((char *)((I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset)-STRUCT_OFFSET(struct opslab, opslab_slots)))
 /* the first (head) opslab of the chain in which this op is allocated */
 # define OpSLAB(o) \
-    (((OPSLAB*)( (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset))->opslab_head)
+    (OpMySLAB(o)->opslab_head)
+/* calculate the slot given the owner slab and an offset */
+#define OpSLOToff(slab, offset) \
+    ((OPSLOT*)(((I32 **)&(slab)->opslab_slots)+(offset)))
 
 # define OpslabREFCNT_dec(slab)      \
 	(((slab)->opslab_refcnt == 1) \

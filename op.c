@@ -207,7 +207,10 @@ S_prune_chain_head(OP** op_p)
 
 /* rounds up to nearest pointer */
 #define SIZE_TO_PSIZE(x)	(((x) + sizeof(I32 *) - 1)/sizeof(I32 *))
-#define DIFF(o,p)		((size_t)((I32 **)(p) - (I32**)(o)))
+
+#define DIFF(o,p)	\
+    (assert(((char *)(p) - (char *)(o)) % sizeof(I32**) == 0), \
+      ((size_t)((I32 **)(p) - (I32**)(o))))
 
 /* requires double parens and aTHX_ */
 #define DEBUG_S_warn(args)					       \
@@ -215,20 +218,29 @@ S_prune_chain_head(OP** op_p)
 	PerlIO_printf(Perl_debug_log, "%s", SvPVx_nolen(Perl_mess args)) \
     )
 
+/* opslot_size includes the size of the slot header, and an op can't be smaller than BASEOP */
+#define OPSLOT_SIZE_BASE (SIZE_TO_PSIZE(sizeof(OPSLOT)))
+
+/* the number of bytes to allocate for a slab with sz * sizeof(I32 **) space for op */
+#define OpSLABSizeBytes(sz) \
+    ((sz) * sizeof(I32 *) + STRUCT_OFFSET(OPSLAB, opslab_slots))
 
 /* malloc a new op slab (suitable for attaching to PL_compcv).
- * sz is in units of pointers */
+ * sz is in units of pointers from the beginning of opslab_opslots */
 
 static OPSLAB *
 S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 {
     OPSLAB *slab;
+    size_t sz_bytes = OpSLABSizeBytes(sz);
 
     /* opslot_offset is only U16 */
-    assert(sz  < U16_MAX);
+    assert(sz < U16_MAX);
+    /* room for at least one op */
+    assert(sz >= OPSLOT_SIZE_BASE);
 
 #ifdef PERL_DEBUG_READONLY_OPS
-    slab = (OPSLAB *) mmap(0, sz * sizeof(I32 *),
+    slab = (OPSLAB *) mmap(0, sz_bytes,
 				   PROT_READ|PROT_WRITE,
 				   MAP_ANON|MAP_PRIVATE, -1, 0);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "mapped %lu at %p\n",
@@ -238,7 +250,8 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 	abort();
     }
 #else
-    slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
+    slab = (OPSLAB *)PerlMemShared_malloc(sz_bytes);
+    Zero(slab, sz_bytes, char);
 #endif
     slab->opslab_size = (U16)sz;
 
@@ -246,7 +259,7 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
     /* The context is unused in non-Windows */
     PERL_UNUSED_CONTEXT;
 #endif
-    slab->opslab_free_space = sz - DIFF(slab, &slab->opslab_slots);
+    slab->opslab_free_space = sz;
     slab->opslab_head = head ? head : slab;
     DEBUG_S_warn((aTHX_ "allocated new op slab sz 0x%x, %p, head slab %p",
         (unsigned int)slab->opslab_size, (void*)slab,
@@ -254,8 +267,6 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
     return slab;
 }
 
-/* opslot_size includes the size of the slot header, and an op can't be smaller than BASEOP */
-#define OPSLOT_SIZE_BASE (SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P)
 #define OPSLOT_SIZE_TO_INDEX(sz) ((sz) - OPSLOT_SIZE_BASE)
 
 #define link_freed_op(slab, o) S_link_freed_op(aTHX_ slab, o)
@@ -308,7 +319,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     OPSLAB *slab2;
     OPSLOT *slot;
     OP *o;
-    size_t opsz;
+    size_t sz_in_p; /* size in pointer units, including the OPSLOT header */
 
     /* We only allocate ops from the slab during subroutine compilation.
        We find the slab via PL_compcv, hence that must be non-NULL. It could
@@ -337,18 +348,17 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     }
     else ++(head_slab = (OPSLAB *)CvSTART(PL_compcv))->opslab_refcnt;
 
-    opsz = SIZE_TO_PSIZE(sz);
-    sz = opsz + OPSLOT_HEADER_P;
+    sz_in_p = SIZE_TO_PSIZE(sz + OPSLOT_HEADER);
 
     /* The head slab for each CV maintains a free list of OPs. In particular, constant folding
        will free up OPs, so it makes sense to re-use them where possible. A
        freed up slot is used in preference to a new allocation.  */
     if (head_slab->opslab_freed &&
-        OPSLOT_SIZE_TO_INDEX(sz) < head_slab->opslab_freed_size) {
+        OPSLOT_SIZE_TO_INDEX(sz_in_p) < head_slab->opslab_freed_size) {
         U16 base_index;
 
         /* look for a large enough size with any freed ops */
-        for (base_index = OPSLOT_SIZE_TO_INDEX(sz);
+        for (base_index = OPSLOT_SIZE_TO_INDEX(sz_in_p);
              base_index < head_slab->opslab_freed_size && !head_slab->opslab_freed[base_index];
              ++base_index) {
         }
@@ -358,18 +368,16 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
             o = head_slab->opslab_freed[base_index];
 
             DEBUG_S_warn((aTHX_ "realloced  op at %p, slab %p, head slab %p",
-                (void*)o,
-                (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
-                (void*)head_slab));
+                          (void *)o, (void *)OpMySLAB(o), (void *)head_slab));
 	    head_slab->opslab_freed[base_index] = o->op_next;
-	    Zero(o, opsz, I32 *);
+	    Zero(o, sz, char);
 	    o->op_slabbed = 1;
 	    goto gotit;
 	}
     }
 
 #define INIT_OPSLOT(s) \
-	    slot->opslot_offset = DIFF(slab2, slot) ;	\
+	    slot->opslot_offset = DIFF(&slab2->opslab_slots, slot) ;	\
 	    slot->opslot_size = s;                      \
 	    slab2->opslab_free_space -= s;		\
 	    o = &slot->opslot_op;			\
@@ -377,14 +385,16 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 
     /* The partially-filled slab is next in the chain. */
     slab2 = head_slab->opslab_next ? head_slab->opslab_next : head_slab;
-    if (slab2->opslab_free_space  < sz) {
+    if (slab2->opslab_free_space < sz_in_p) {
 	/* Remaining space is too small. */
 	/* If we can fit a BASEOP, add it to the free chain, so as not
 	   to waste it. */
-	if (slab2->opslab_free_space >= SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P) {
+	if (slab2->opslab_free_space >= OPSLOT_SIZE_BASE) {
 	    slot = &slab2->opslab_slots;
 	    INIT_OPSLOT(slab2->opslab_free_space);
 	    o->op_type = OP_FREED;
+            DEBUG_S_warn((aTHX_ "linked unused op space at %p, slab %p, head slab %p",
+                          (void *)o, (void *)slab2, (void *)head_slab));
             link_freed_op(head_slab, o);
 	}
 
@@ -396,14 +406,12 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	slab2->opslab_next = head_slab->opslab_next;
 	head_slab->opslab_next = slab2;
     }
-    assert(slab2->opslab_size >= sz);
+    assert(slab2->opslab_size >= sz_in_p);
 
     /* Create a new op slot */
-    slot = (OPSLOT *)
-                ((I32 **)&slab2->opslab_slots
-                                + slab2->opslab_free_space - sz);
+    slot = OpSLOToff(slab2, slab2->opslab_free_space - sz_in_p);
     assert(slot >= &slab2->opslab_slots);
-    INIT_OPSLOT(sz);
+    INIT_OPSLOT(sz_in_p);
     DEBUG_S_warn((aTHX_ "allocating op at %p, slab %p, head slab %p",
         (void*)o, (void*)slab2, (void*)head_slab));
 
@@ -427,9 +435,9 @@ Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
     slab->opslab_readonly = 1;
     for (; slab; slab = slab->opslab_next) {
 	/*DEBUG_U(PerlIO_printf(Perl_debug_log,"mprotect ->ro %lu at %p\n",
-			      (unsigned long) slab->opslab_size, slab));*/
-	if (mprotect(slab, slab->opslab_size * sizeof(I32 *), PROT_READ))
-	    Perl_warn(aTHX_ "mprotect for %p %lu failed with %d", slab,
+			      (unsigned long) slab->opslab_size, (void *)slab));*/
+	if (mprotect(slab, OpSLABSizeBytes(slab->opslab_size), PROT_READ))
+	    Perl_warn(aTHX_ "mprotect for %p %lu failed with %d", (void *)slab,
 			     (unsigned long)slab->opslab_size, errno);
     }
 }
@@ -445,10 +453,10 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
     slab2 = slab;
     for (; slab2; slab2 = slab2->opslab_next) {
 	/*DEBUG_U(PerlIO_printf(Perl_debug_log,"mprotect ->rw %lu at %p\n",
-			      (unsigned long) size, slab2));*/
-	if (mprotect((void *)slab2, slab2->opslab_size * sizeof(I32 *),
+			      (unsigned long) size, (void *)slab2));*/
+	if (mprotect((void *)slab2, OpSLABSizeBytes(slab2->opslab_size),
 		     PROT_READ|PROT_WRITE)) {
-	    Perl_warn(aTHX_ "mprotect RW for %p %lu failed with %d", slab,
+	    Perl_warn(aTHX_ "mprotect RW for %p %lu failed with %d", (void *)slab,
 			     (unsigned long)slab2->opslab_size, errno);
 	}
     }
@@ -504,9 +512,7 @@ Perl_Slab_Free(pTHX_ void *op)
     o->op_type = OP_FREED;
     link_freed_op(slab, o);
     DEBUG_S_warn((aTHX_ "freeing    op at %p, slab %p, head slab %p",
-        (void*)o,
-        (I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset,
-        (void*)slab));
+        (void*)o, (void *)OpMySLAB(o), (void*)slab));
     OpslabREFCNT_dec_padok(slab);
 }
 
@@ -550,7 +556,7 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
 #ifdef PERL_DEBUG_READONLY_OPS
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "Deallocate slab at %p\n",
 					       (void*)slab));
-	if (munmap(slab, slab->opslab_size * sizeof(I32 *))) {
+	if (munmap(slab, OpSLABSizeBytes(slab->opslab_size))) {
 	    perror("munmap failed");
 	    abort();
 	}
@@ -575,10 +581,8 @@ Perl_opslab_force_free(pTHX_ OPSLAB *slab)
     PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE;
     slab2 = slab;
     do {
-        OPSLOT *slot = (OPSLOT*)
-                    ((I32**)&slab2->opslab_slots + slab2->opslab_free_space);
-        OPSLOT *end  = (OPSLOT*)
-                        ((I32**)slab2 + slab2->opslab_size);
+        OPSLOT *slot = OpSLOToff(slab2, slab2->opslab_free_space);
+        OPSLOT *end  = OpSLOToff(slab2, slab2->opslab_size);
 	for (; slot < end;
                 slot = (OPSLOT*) ((I32**)slot + slot->opslot_size) )
         {
@@ -10198,7 +10202,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
      * keep it in-place if there's space */
     if (loop->op_slabbed
         &&    OpSLOT(loop)->opslot_size
-            < SIZE_TO_PSIZE(sizeof(LOOP)) + OPSLOT_HEADER_P)
+            < SIZE_TO_PSIZE(sizeof(LOOP) + OPSLOT_HEADER))
     {
         /* no space; allocate new op */
 	LOOP *tmp;
