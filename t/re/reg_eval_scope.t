@@ -101,7 +101,7 @@ CODE
     "ba" =~ /b${\do { package baz; qr|(?{ $::pack = __PACKAGE__ })a| }}/;
     is $pack, 'baz', '/text$qr/ inherits package';
     "ba" =~ m+b${\do { use re "/i"; qr|(?{ $::re = qr-- })a| }}+;
-    is $re, '(?^i:)', '/text$qr/ inherits pragmata';    
+    is $re, '(?^i:)', '/text$qr/ inherits pragmata';
 
     {
       use re 'eval';
@@ -226,7 +226,7 @@ CODE
 
 
 {
-    local $::TODO = "goto doesn't yet work in pseduo blocks";
+    local $::TODO = "goto doesn't yet work in pseudo blocks";
 fresh_perl_is <<'CODE',
 my $a=4; my $b=5;
 "a" =~ /(?{ goto FOO; print "X"; FOO: print "Y"; })a/;
@@ -355,7 +355,7 @@ SKIP: {
 # [perl #113928] caller behaving unexpectedly in re-evals
 #
 # make sure __SUB__ within a code block returns something safe.
-# NB waht it actually returns is subject to change
+# NB what it actually returns is subject to change
 
 {
 
