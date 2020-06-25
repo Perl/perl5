@@ -93,17 +93,17 @@ elif [ $PERL_APPLEWATCH -ne 0 ]; then
 fi
 
 BITCODE_BUILD_FLAGS=""
-if [ "$BITCODE" -ne 0 ]; then
-  BITCODE_BUILD_FLAGS="-fembed-bitcode -Wc,-fembed-bitcode"
+if [ $BITCODE -ne 0 ]; then
+  BITCODE_BUILD_FLAGS="-fembed-bitcode"
 fi
 
 ARCH_FLAGS="-arch $PERL_ARCH"
 
-SIMULATOR_BUILD_FLAGS="-DTARGET_OS_IPHONE -I$PREFIX/include -I$SIMULATOR_SDK_PATH/usr/include $ARCH_FLAGS $MIN_VERSION_TAG -isysroot $SIMULATOR_SDK_PATH $BITCODE_BUILD_FLAGS"
+SIMULATOR_BUILD_FLAGS="-DTARGET_OS_IPHONE -I$PREFIX/include -I$SIMULATOR_SDK_PATH/usr/include $ARCH_FLAGS $MIN_VERSION_TAG -isysroot $SIMULATOR_SDK_PATH"
 SIMULATOR_LINK_FLAGS="-DTARGET_OS_IPHONE $ARCH_FLAGS -L$PREFIX/lib -L$SIMULATOR_SDK_PATH/usr/lib"
 
 DEVICE_BUILD_FLAGS="-DTARGET_OS_IPHONE -I$PREFIX/include -I$DEVICE_SDK_PATH/usr/include $ARCH_FLAGS $MIN_VERSION_TAG -isysroot $DEVICE_SDK_PATH $BITCODE_BUILD_FLAGS"
-DEVICE_LINK_FLAGS="-DTARGET_OS_IPHONE $ARCH_FLAGS -L$PREFIX/include -L$DEVICE_SDK_PATH/usr/lib $BITCODE_LINK_FLAGS"
+DEVICE_LINK_FLAGS="-DTARGET_OS_IPHONE $ARCH_FLAGS -L$PREFIX/include -L$DEVICE_SDK_PATH/usr/lib"
 
 if [ $SIMULATOR_BUILD -ne 0 ]; then
   BUILD_FLAGS="$SIMULATOR_BUILD_FLAGS"
@@ -158,14 +158,14 @@ build_perl() {
   cp "ios/config/Policy.sh" .
 
   # patch the hardcoded build prefix in config
-  perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" "config.sh"
-  perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" "Policy.sh"
+  perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" config.sh
+  perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" Policy.sh
 
   # patch perl and os version
   os_version=$(uname -r)
-  perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" "config.sh"
-  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" "config.sh"
-  perl -0777 -i.bak.2 -pe "s|15\.6\.0|$os_version|g" "config.sh"
+  perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" config.sh
+  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" config.sh
+  perl -0777 -i.bak.2 -pe "s|15\.6\.0|$os_version|g" config.sh
 
   # patch Makefile.SH #
 
@@ -187,7 +187,6 @@ build_perl() {
   # use available extensions minus DB_File
   perl -0777 -i.bak.1 -pe 's|rp="What extensions do you wish to load dynamically\?"\n\t\. \.\/myread|rp="What extensions do you wish to load dynamically\?"\n\tavail_ext=\$\(echo "\$avail_ext" \| sed "s/ DB_File / /g"\)\n\tans="\$avail_ext"|' Configure
 
-
   # Binaries not executable in host arch. Do not abort on try tests
   perl -0777 -i.bak.2 -pe 's/Shall I abort Configure"\n\t\t*dflt=y/Shall I abort Configure"\n\t\tdflt=n/g' Configure
 
@@ -199,7 +198,13 @@ build_perl() {
 
   # deployment target
   min_ver_replace="-m""$PLATFORM_TAG""os-version-min=8.0"
-  perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" "config.sh"
+  perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" config.sh
+
+  if [ $BITCODE -eq 1 ]; then
+    perl -0777 -i.bak.5 -pe "s|\-fPIC|\-fPIC $BITCODE_BUILD_FLAGS|g" config.sh
+    perl -0777 -i.bak.6 -pe "s|\-undefined dynamic_lookup||g" config.sh
+    perl -0777 -i.bak.7 -pe "s|\-bundle|\-Xlinker \-bitcode_bundle|g" config.sh
+  fi
 
   ./Configure -f config.sh -d
 
@@ -207,31 +212,31 @@ build_perl() {
   cp "ios/config/$PLATFORM_TAG/$PERL_ARCH/config.h" .
 
   # patch prefix
-  perl -i.bak.0 -pe "s|/opt/local|$PREFIX|g" "config.h"
-  perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" "config.h"
-  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" "config.h"
-  perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" "config.h"
+  perl -i.bak.0 -pe "s|/opt/local|$PREFIX|g" config.h
+  perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" config.h
+  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" config.h
+  perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" config.h
 
   if [ $PLATFORM_TAG != "iphone" ] ; then
     # patch fork
-    perl -0777 -i.bak.0 -pe "s|d_fork='define'|d_fork='undef'|g" "config.sh"
-    perl -0777 -i.bak.1 -pe "s|d_vfork='define'|d_vfork='undef'|g" "config.sh"
-    perl -0777 -i.bak.2 -pe "s|usevfork='true'|usevfork='false'|g" "config.sh"
-    perl -0777 -i.bak.0 -pe "s|#define HAS_FORK\t\t/\*\*/|/*#define HAS_FORK\t\t/ \*\*/|g" "config.h"
+    perl -0777 -i.bak.0 -pe "s|d_fork='define'|d_fork='undef'|g" config.sh
+    perl -0777 -i.bak.1 -pe "s|d_vfork='define'|d_vfork='undef'|g" config.sh
+    perl -0777 -i.bak.2 -pe "s|usevfork='true'|usevfork='false'|g" config.sh
+    perl -0777 -i.bak.0 -pe "s|#define HAS_FORK\t\t/\*\*/|/*#define HAS_FORK\t\t/ \*\*/|g" config.h
 
     # patch syscall
-    perl -0777 -i.bak.3 -pe "s|d_syscall='define'|d_syscall='undef'|g" "config.sh"
-    perl -0777 -i.bak.4 -pe "s|d_syscallproto='define'|d_syscallproto='undef'|g" "config.sh"
-    perl -0777 -i.bak.1 -pe "s|#define HAS_SYSCALL\t/\*\*/|/*#define HAS_SYSCALL\t/ \*\*/|g" "config.h"
-    perl -0777 -i.bak.2 -pe "s|#define	HAS_SYSCALL_PROTO\t/\*\*/|/*#define\tHAS_SYSCALL_PROTO\t/ \*\*/|g" "config.h"
+    perl -0777 -i.bak.3 -pe "s|d_syscall='define'|d_syscall='undef'|g" config.sh
+    perl -0777 -i.bak.4 -pe "s|d_syscallproto='define'|d_syscallproto='undef'|g" config.sh
+    perl -0777 -i.bak.1 -pe "s|#define HAS_SYSCALL\t/\*\*/|/*#define HAS_SYSCALL\t/ \*\*/|g" config.h
+    perl -0777 -i.bak.2 -pe "s|#define	HAS_SYSCALL_PROTO\t/\*\*/|/*#define\tHAS_SYSCALL_PROTO\t/ \*\*/|g" config.h
   fi
 
   # remove DB_File
-  perl -0777 -i.bak.4 -pe "s|DB_File||g" "config.sh"
+  perl -0777 -i.bak.4 -pe "s|DB_File||g" config.sh
 
   # patch perl version
-  perl -0777 -i.bak.3 -pe "s|5\.30\.2|$PERL_VERSION|g" "config.h"
-  perl -0777 -i.bak.4 -pe "s|15\.6\.0|$os_version|g" "config.h"
+  perl -0777 -i.bak.3 -pe "s|5\.30\.2|$PERL_VERSION|g" config.h
+  perl -0777 -i.bak.4 -pe "s|15\.6\.0|$os_version|g" config.h
 
   make depend
   check_exit_code
