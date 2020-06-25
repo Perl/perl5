@@ -23,6 +23,9 @@ installman
 makedepend.SH
 metaconfig.SH
 myconfig.SH
+plan9/fndvers
+plan9/setup.rc
+plan9/uninstall.rc
 regen/embed.pl
 regen/feature.pl
 regen/keywords.pl

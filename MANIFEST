@@ -5127,20 +5127,23 @@ perly.c				parser code (NOT derived from perly.y)
 perly.h				header file for perly.c; derived from perly.y
 perly.tab			parser state tables; derived from perly.y
 perly.y				Yacc grammar for perl
-plan9/aperl			Shell to make Perl error messages Acme-friendly
+plan9/9front.patch		Plan9 port: patch for 9front-specific flavor of Plan 9
+plan9/aperl			Plan9 port: shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
 plan9/config.plan9		Plan9 port: config.h template
-plan9/config_h.sample		Plan9 port: 5.8.0 sample config.h
-plan9/config_sh.sample		Plan9 port: 5.8.0 sample config.sh
+plan9/config_h.sample		Plan9 port: 5.32.0 sample config.h
+plan9/config_sh.sample		Plan9 port: 5.32.0 sample config.sh
 plan9/exclude			Plan9 port: tests to skip
 plan9/fndvers			Plan9 port: update Perl version in config.plan9
 plan9/genconfig.pl		Plan9 port: generate config.sh
+plan9/math.h			Plan9 port: Plan9-specific math.h
 plan9/mkfile			Plan9 port: Mk driver for build
 plan9/myconfig.plan9		Plan9 port: script to print config summary
 plan9/plan9.c			Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h		Plan9 port: Plan9-specific C header file
 plan9/setup.rc			Plan9 port: script for easy build+install
+plan9/uninstall.rc		Plan9 port: uninstall script
 plan9/versnum			Plan9 port: script to print version number
 pod/buildtoc			Generate pod/perltoc.pod and pod/roffitall
 pod/Makefile.SH			generate Makefile which makes pods into something else

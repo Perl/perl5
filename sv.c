@@ -3060,8 +3060,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
  
 		return RX_WRAPPED(re);
 	    } else {
-		const char *const typestr = sv_reftype(referent, 0);
-		const STRLEN typelen = strlen(typestr);
+		const char *const typestring = sv_reftype(referent, 0);
+		const STRLEN typelen = strlen(typestring);
 		UV addr = PTR2UV(referent);
 		const char *stashname = NULL;
 		STRLEN stashnamelen = 0; /* hush, gcc */
@@ -3104,7 +3104,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 		*--retval = '(';
 
 		retval -= typelen;
-		memcpy(retval, typestr, typelen);
+		memcpy(retval, typestring, typelen);
 
 		if (stashname) {
 		    *--retval = '=';
