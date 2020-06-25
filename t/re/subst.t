@@ -585,7 +585,7 @@ is("<$_> <$s>", "<> <4>", "[perl #7806]");
 
 # [perl #19048] Coredump in silly replacement
 {
-    local $^W = 0;
+    no warnings qw(uninitialized);
     $_="abcdef\n";
     s!.!!eg;
     is($_, "\n", "[perl #19048]");
