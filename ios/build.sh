@@ -4,7 +4,7 @@
 
 # perl binaries
 : "${PERL_ARCH:=arm64}"
-: "${BITCODE:=1}"
+: "${BITCODE:=0}"
 : "${DEBUG:=0}"
 : "${INSTALL_DIR:=local}"
 : "${MIN_VERSION:=8.0}"
