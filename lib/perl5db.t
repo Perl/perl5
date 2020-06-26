@@ -2800,6 +2800,28 @@ SKIP:
 }
 
 {
+    # GitHub #17901
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'a 4 $s++',
+                ('s') x 5,
+                'x $s',
+                'q'
+            ],
+            prog => '../lib/perl5db/t/test-a-statement-3',
+            switches => [ '-d' ],
+            stderr => 0,
+        }
+    );
+    $wrapper->contents_like(
+        qr/^0 +2$/m,
+        'Test that the a command runs only on the given lines.',
+    );
+}
+
+{
     # perl 5 RT #126735 regression bug.
     local $ENV{PERLDB_OPTS} = "NonStop=0 RemotePort=non-existent-host.tld:9001";
     my $output = runperl( stdin => "q\n", stderr => 1, switches => [ '-d' ], prog => '../lib/perl5db/t/fact' );
