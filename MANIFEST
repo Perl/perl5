@@ -3018,7 +3018,7 @@ dist/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
 dist/Devel-PPPort/Changes			Devel::PPPort Changes file
 dist/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
 dist/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
-dist/Devel-PPPort/devel/mkapidoc.pl	Devel::PPPort apidoc collector 
+dist/Devel-PPPort/devel/mkapidoc.pl	Devel::PPPort apidoc collector
 dist/Devel-PPPort/devel/mkppport_fnc.pl	Devel::PPPort
 dist/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
 dist/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
@@ -5208,8 +5208,8 @@ pod/perl58delta.pod		Perl changes in version 5.8.0
 pod/perlapio.pod		Perl internal IO abstraction interface
 pod/perlartistic.pod		Perl Artistic License
 pod/perlbook.pod		Perl book information
-pod/perlboot.pod		
-pod/perlbot.pod			
+pod/perlboot.pod
+pod/perlbot.pod
 pod/perlcall.pod		Perl calling conventions from C
 pod/perlcheat.pod		Perl cheat sheet
 pod/perlclib.pod		Internal replacements for standard C library functions
@@ -5271,7 +5271,7 @@ pod/perlrecharclass.pod		Perl regular expression character classes
 pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlreguts.pod		Perl regular expression engine internals
-pod/perlrepository.pod		
+pod/perlrepository.pod
 pod/perlrequick.pod		Perl regular expressions quick start
 pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
@@ -5283,9 +5283,9 @@ pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax
 pod/perlthrtut.pod		Perl threads tutorial
 pod/perltie.pod			Perl objects hidden behind simple variables
-pod/perltodo.pod		
-pod/perltooc.pod		
-pod/perltoot.pod		
+pod/perltodo.pod
+pod/perltooc.pod
+pod/perltoot.pod
 pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
 pod/perlunicook.pod		Perl Unicode cookbook
@@ -5386,40 +5386,40 @@ qnx/ar				QNX implementation of "ar" utility
 qnx/cpp				QNX implementation of preprocessor filter
 qnx/qnx.c			QNX silent matherr callback
 README				The Instructions
-README.aix			Perl notes for AIX
-README.amiga			Perl notes for AmigaOS
-README.android			Perl notes for Android
-README.bs2000			Perl notes for POSIX-BC BS2000
-README.cn			Perl for Simplified Chinese (in EUC-CN)
-README.cygwin			Perl notes for Cygwin
-README.dos			Perl notes for DOS
-README.freebsd			Perl notes for FreeBSD
-README.haiku			Perl notes for Haiku
-README.hpux			Perl notes for HP-UX
-README.hurd			Perl notes for Hurd
-README.irix			Perl notes for Irix
-README.jp			Perl for Japanese (in EUC-JP)
-README.ko			Perl for Korean (in EUC-KR)
-README.linux			Perl notes for Linux
-README.macos			Perl notes for Mac OS (Classic)
-README.macosx			Perl notes for Mac OS X
-README.micro			Notes about microperl
-README.netware			Perl notes for NetWare
-README.openbsd			Perl notes for OpenBSD
-README.os2			Perl notes for OS/2
-README.os390			Perl notes for OS/390
-README.os400			Perl notes for OS/400
-README.plan9			Perl notes for Plan 9
-README.qnx			Perl notes for QNX
-README.riscos			Perl notes for RISC OS
-README.solaris			Perl notes for Solaris
-README.symbian			Perl notes for Symbian
-README.synology			Perl notes for Synology
-README.tru64			Perl notes for Tru64
-README.tw			Perl for Traditional Chinese (in Big5)
-README.vms			Notes about installing the VMS port
-README.vos			Perl notes for Stratus VOS
-README.win32			Perl notes for Windows
+README/README.aix			Perl notes for AIX
+README/README.amiga			Perl notes for AmigaOS
+README/README.android		Perl notes for Android
+README/README.bs2000		Perl notes for POSIX-BC BS2000
+README/README.cn			Perl for Simplified Chinese (in EUC-CN)
+README/README.cygwin		Perl notes for Cygwin
+README/README.dos			Perl notes for DOS
+README/README.freebsd		Perl notes for FreeBSD
+README/README.haiku			Perl notes for Haiku
+README/README.hpux			Perl notes for HP-UX
+README/README.hurd			Perl notes for Hurd
+README/README.irix			Perl notes for Irix
+README/README.jp			Perl for Japanese (in EUC-JP)
+README/README.ko			Perl for Korean (in EUC-KR)
+README/README.linux			Perl notes for Linux
+README/README.macos			Perl notes for Mac OS (Classic)
+README/README.macosx		Perl notes for Mac OS X
+README/README.micro			Notes about microperl
+README/README.netware		Perl notes for NetWare
+README/README.openbsd		Perl notes for OpenBSD
+README/README.os2			Perl notes for OS/2
+README/README.os390			Perl notes for OS/390
+README/README.os400			Perl notes for OS/400
+README/README.plan9			Perl notes for Plan 9
+README/README.qnx			Perl notes for QNX
+README/README.riscos		Perl notes for RISC OS
+README/README.solaris		Perl notes for Solaris
+README/README.symbian		Perl notes for Symbian
+README/README.synology		Perl notes for Synology
+README/README.tru64			Perl notes for Tru64
+README/README.tw			Perl for Traditional Chinese (in Big5)
+README/README.vms			Notes about installing the VMS port
+README/README.vos			Perl notes for Stratus VOS
+README/README.win32			Perl notes for Windows
 reentr.c			Reentrant interfaces
 reentr.h			Reentrant interfaces
 regcharclass.h			Generated by regen/regcharclass.pl
@@ -6149,7 +6149,7 @@ t/run/switchx2.aux		Data for switchx.t
 t/run/switchx3.aux		Data for switchx.t
 t/TEST				The regression tester
 t/test.pl			Simple testing library
-t/test_pl/_num_to_alpha.t	Tests for the simple testing library 
+t/test_pl/_num_to_alpha.t	Tests for the simple testing library
 t/test_pl/can_isa_ok.t		Tests for the simple testing library
 t/test_pl/plan_skip_all.t	Tests for the simple testing library
 t/test_pl/tempfile.t		Tests for the simple testing library
