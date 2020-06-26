@@ -529,7 +529,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.57';
+$VERSION = '1.58';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -2708,6 +2708,7 @@ If there are any preprompt actions, execute those as well.
         # The &-call is here to ascertain the mutability of @_.
         &DB::eval;
     }
+    undef $action;
 
     # Are we nested another level (e.g., did we evaluate a function
     # that had a breakpoint in it at the debugger prompt)?
