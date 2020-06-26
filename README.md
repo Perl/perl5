@@ -14,19 +14,20 @@ system administration, web development, network programming, GUI
 development, and more.
 
 The language is intended to be practical (easy to use, efficient,
-complete) rather than beautiful (tiny, elegant, minimal).  Its major
+complete) rather than beautiful (tiny, elegant, minimal). Its major
 features are that it's easy to use, supports both procedural and
 object-oriented (OO) programming, has powerful built-in support for text
 processing, and has one of the world's most impressive collections of
 third-party modules.
 
-For an introduction to the language's features, see pod/perlintro.pod.
+For an introduction to the language's features, see
+[perlintro](pod/perlintro.pod).
 
 For a discussion of the important changes in this release, see
-pod/perldelta.pod.
+[perldelta](pod/perldelta.pod).
 
 There are also many Perl books available, covering a wide variety of topics,
-from various publishers.  See pod/perlbook.pod for more information.
+from various publishers. See [perlbook](pod/perlbook.pod) for more information.
 
 
 INSTALLATION
@@ -35,49 +36,49 @@ INSTALLATION
 If you're using a relatively modern operating system and want to
 install this version of Perl locally, run the following commands:
 
-  ./Configure -des -Dprefix=$HOME/localperl
-  make test
-  make install
+    ./Configure -des -Dprefix=$HOME/localperl
+    make test
+    make install
 
 This will configure and compile perl for your platform, run the regression
-tests, and install perl in a subdirectory "localperl" of your home directory.
+tests, and install perl in a subdirectory `localperl` of your home directory.
 
 If you run into any trouble whatsoever or you need to install a customized
-version of Perl, you should read the detailed instructions in the "INSTALL"
-file that came with this distribution.  Additionally, there are a number of
-"README" files with hints and tips about building and using Perl on a wide
+version of Perl, you should read the detailed instructions in the [INSTALL](INSTALL)
+file that came with this distribution. Additionally, there are a number of
+[README](README/) files with hints and tips about building and using Perl on a wide
 variety of platforms, some more common than others.
 
 Once you have Perl installed, a wealth of documentation is available to you
-through the 'perldoc' tool.  To get started, run this command:
+through the `perldoc` tool. To get started, run this command:
 
-  perldoc perl
+    perldoc perl
 
 
 IF YOU RUN INTO TROUBLE
 =======================
 
 Perl is a large and complex system that's used for everything from
-knitting to rocket science.  If you run into trouble, it's quite
+knitting to rocket science. If you run into trouble, it's quite
 likely that someone else has already solved the problem you're
 facing. Once you've exhausted the documentation, please report bugs to us
-at the GitHub issue tracker at https://github.com/Perl/perl5/issues
+at the [GitHub issue tracker](https://github.com/Perl/perl5/issues).
 
 While it was current when we made it available, Perl is constantly evolving
 and there may be a more recent version that fixes bugs you've run into or
 adds new features that you might find useful.
 
-You can always find the latest version of perl on a CPAN (Comprehensive Perl
-Archive Network) site near you at https://www.cpan.org/src/
+You can always find the latest version of perl on a [CPAN (Comprehensive Perl
+Archive Network) site near you](https://www.cpan.org/src/).
 
-If you want to submit a simple patch to the perl source, see the "SUPER
-QUICK PATCH GUIDE" in pod/perlhack.pod.
+If you want to submit a simple patch to the perl source, see the [SUPER
+QUICK PATCH GUIDE](pod/perlhack.pod).
 
-Just a personal note:  I want you to know that I create nice things like this
-because it pleases the Author of my story.  If this bothers you, then your
-notion of Authorship needs some revision.  But you can use perl anyway. :-)
+Just a personal note: I want you to know that I create nice things like this
+because it pleases the Author of my story. If this bothers you, then your
+notion of Authorship needs some revision. But you can use perl anyway. :-)
 
-							The author.
+The author.
 
 
 LICENSING
@@ -86,11 +87,11 @@ LICENSING
 This program is free software; you can redistribute it and/or modify
 it under the terms of either:
 
-	a) the GNU General Public License as published by the Free
-	Software Foundation; either version 1, or (at your option) any
-	later version, or
+a) the GNU General Public License as published by the Free
+Software Foundation; either version 1, or (at your option) any
+later version, or
 
-	b) the "Artistic License" which comes with this Kit.
+b) the "Artistic License" which comes with this Kit.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -104,7 +105,7 @@ You should also have received a copy of the GNU General Public License
 along with this program in the file named "Copying". If not, write to the
 Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA or visit their web page on the internet at
-https://www.gnu.org/copyleft/gpl.html.
+[https://www.gnu.org/copyleft/gpl.html](https://www.gnu.org/copyleft/gpl.html).
 
 For those of you that choose to use the GNU General Public License,
 my interpretation of the GNU General Public License is that no Perl
