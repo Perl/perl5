@@ -117,7 +117,7 @@
          "vxs.inc"
       ]
    },
-   "release_status" : "stable",
+   "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/Perl/perl5/issues"
@@ -130,6 +130,6 @@
          "url" : "https://github.com/Perl/perl5"
       }
    },
-   "version" : "5.032000",
+   "version" : "5.033000",
    "x_serialization_backend" : "JSON::PP version 4.04"
 }
