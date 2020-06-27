@@ -1348,7 +1348,12 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 
 	case SAVEt_HINTS:
+        {
+	    HV *was_hinthv;
             a0 = ap[0]; a1 = ap[1];
+            if (a0.any_i32 & HINT_LOCALIZE_HH) {
+                was_hinthv = MUTABLE_HV(SSPOPPTR);
+            }
 	    if ((PL_hints & HINT_LOCALIZE_HH)) {
 	      while (GvHV(PL_hintgv)) {
 		HV *hv = GvHV(PL_hintgv);
@@ -1361,7 +1366,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    *(I32*)&PL_hints = a0.any_i32;
 	    if (PL_hints & HINT_LOCALIZE_HH) {
 		SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));
-		GvHV(PL_hintgv) = MUTABLE_HV(SSPOPPTR);
+                GvHV(PL_hintgv) = was_hinthv;
 	    }
 	    if (!GvHV(PL_hintgv)) {
 		/* Need to add a new one manually, else rv2hv can
@@ -1372,6 +1377,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    }
 	    assert(GvHV(PL_hintgv));
 	    break;
+        }
 
 	case SAVEt_COMPPAD:
             a0 = ap[0];
