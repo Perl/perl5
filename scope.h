@@ -38,43 +38,44 @@
 #define SAVEt_STACK_POS		20
 #define SAVEt_READONLY_OFF	21
 #define SAVEt_FREEPADNAME	22
+#define SAVEt_STRLEN_SMALL      23
 
 /* two args */
 
-#define SAVEt_AV		23
-#define SAVEt_DESTRUCTOR	24
-#define SAVEt_DESTRUCTOR_X	25
-#define SAVEt_GENERIC_PVREF	26
-#define SAVEt_GENERIC_SVREF	27
-#define SAVEt_GP		28
-#define SAVEt_GVSV		29
-#define SAVEt_HINTS		30
-#define SAVEt_HPTR		31
-#define SAVEt_HV		32
-#define SAVEt_I32		33
-#define SAVEt_INT		34
-#define SAVEt_ITEM		35
-#define SAVEt_IV		36
-#define SAVEt_LONG		37
-#define SAVEt_PPTR		38
-#define SAVEt_SAVESWITCHSTACK	39
-#define SAVEt_SHARED_PVREF	40
-#define SAVEt_SPTR		41
-#define SAVEt_STRLEN		42
-#define SAVEt_SV		43
-#define SAVEt_SVREF		44
-#define SAVEt_VPTR		45
-#define SAVEt_ADELETE		46
-#define SAVEt_APTR		47
+#define SAVEt_AV		24
+#define SAVEt_DESTRUCTOR	25
+#define SAVEt_DESTRUCTOR_X	26
+#define SAVEt_GENERIC_PVREF	27
+#define SAVEt_GENERIC_SVREF	28
+#define SAVEt_GP		29
+#define SAVEt_GVSV		30
+#define SAVEt_HINTS		31
+#define SAVEt_HPTR		32
+#define SAVEt_HV		33
+#define SAVEt_I32		34
+#define SAVEt_INT		35
+#define SAVEt_ITEM		36
+#define SAVEt_IV		37
+#define SAVEt_LONG		38
+#define SAVEt_PPTR		39
+#define SAVEt_SAVESWITCHSTACK	40
+#define SAVEt_SHARED_PVREF	41
+#define SAVEt_SPTR		42
+#define SAVEt_STRLEN		43
+#define SAVEt_SV		44
+#define SAVEt_SVREF		45
+#define SAVEt_VPTR		46
+#define SAVEt_ADELETE		47
+#define SAVEt_APTR		48
 
 /* three args */
 
-#define SAVEt_HELEM		48
-#define SAVEt_PADSV_AND_MORTALIZE 49
-#define SAVEt_SET_SVFLAGS	50
-#define SAVEt_GVSLOT		51
-#define SAVEt_AELEM		52
-#define SAVEt_DELETE		53
+#define SAVEt_HELEM		49
+#define SAVEt_PADSV_AND_MORTALIZE 50
+#define SAVEt_SET_SVFLAGS	51
+#define SAVEt_GVSLOT		52
+#define SAVEt_AELEM		53
+#define SAVEt_DELETE		54
 
 
 #define SAVEf_SETMAGIC		1
