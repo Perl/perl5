@@ -512,14 +512,22 @@ Perl_save_I32(pTHX_ I32 *intp)
 void
 Perl_save_strlen(pTHX_ STRLEN *ptr)
 {
+    const IV i = *ptr;
+    UV type = ((I32)((U32)i << SAVE_TIGHT_SHIFT) | SAVEt_STRLEN_SMALL);
+    int size = 2;
     dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_STRLEN;
 
-    SS_ADD_IV(*ptr);
+    if (UNLIKELY((I32)(type >> SAVE_TIGHT_SHIFT) != i)) {
+        SS_ADD_IV(*ptr);
+        type = SAVEt_STRLEN;
+        size++;
+    }
+
     SS_ADD_PTR(ptr);
-    SS_ADD_UV(SAVEt_STRLEN);
-    SS_ADD_END(3);
+    SS_ADD_UV(type);
+    SS_ADD_END(size);
 }
 
 void
@@ -840,6 +848,7 @@ static const U8 arg_counts[] = {
     1, /* SAVEt_STACK_POS          */
     1, /* SAVEt_READONLY_OFF       */
     1, /* SAVEt_FREEPADNAME        */
+    1, /* SAVEt_STRLEN_SMALL       */
     2, /* SAVEt_AV                 */
     2, /* SAVEt_DESTRUCTOR         */
     2, /* SAVEt_DESTRUCTOR_X       */
@@ -1044,6 +1053,11 @@ Perl_leave_scope(pTHX_ I32 base)
             a0 = ap[0]; a1 = ap[1];
 	    *(int*)a1.any_ptr = (int)a0.any_i32;
 	    break;
+
+        case SAVEt_STRLEN_SMALL:
+	    a0 = ap[0];
+	    *(STRLEN*)a0.any_ptr = (STRLEN)(uv >> SAVE_TIGHT_SHIFT);
+            break;
 
 	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
             a0 = ap[0]; a1 = ap[1];
