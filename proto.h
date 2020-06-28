@@ -79,6 +79,11 @@ PERL_STATIC_INLINE void	Perl_SvAMAGIC_on(SV *sv);
 	assert(sv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_SvGETMAGIC(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVGETMAGIC	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE IV	Perl_SvIV(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SVIV	\
 	assert(sv)

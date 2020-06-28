@@ -565,6 +565,25 @@ Perl_SvPVXtrue(pTHX_ SV *sv)
     return *sv->sv_u.svu_pv != '0';
 }
 
+/*
+=for apidoc SvGETMAGIC
+Invokes C<L</mg_get>> on an SV if it has 'get' magic.  For example, this
+will call C<FETCH> on a tied variable.  As of 5.37.1, this function is
+guaranteed to evaluate its argument exactly once.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_SvGETMAGIC(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVGETMAGIC;
+
+    if (UNLIKELY(SvGMAGICAL(sv))) {
+        mg_get(sv);
+    }
+}
+
 PERL_STATIC_INLINE bool
 Perl_SvTRUE(pTHX_ SV *sv)
 {
