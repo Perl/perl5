@@ -2224,11 +2224,6 @@ for the original SV is incremented.
 /*
 =for apidoc_section $SV
 
-=for apidoc Am|void|SvGETMAGIC|SV* sv
-Invokes C<L</mg_get>> on an SV if it has 'get' magic.  For example, this
-will call C<FETCH> on a tied variable.  This macro evaluates its
-argument more than once.
-
 =for apidoc Am|void|SvSETMAGIC|SV* sv
 Invokes C<L</mg_set>> on an SV if it has 'set' magic.  This is necessary
 after modifying a scalar, in case it is a magical variable like C<$|>
@@ -2290,7 +2285,6 @@ properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)
 #define SvDESTROYABLE(sv) PL_destroyhook(aTHX_ sv)
 
-#define SvGETMAGIC(x) ((void)(UNLIKELY(SvGMAGICAL(x)) && mg_get(x)))
 #define SvSETMAGIC(x) STMT_START { if (UNLIKELY(SvSMAGICAL(x))) mg_set(x); } STMT_END
 
 #define SvSetSV_and(dst,src,finally) \

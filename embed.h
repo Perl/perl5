@@ -31,6 +31,7 @@
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
 #define SvAMAGIC_off		Perl_SvAMAGIC_off
 #define SvAMAGIC_on		Perl_SvAMAGIC_on
+#define SvGETMAGIC(a)		Perl_SvGETMAGIC(aTHX_ a)
 #define SvIV(a)			Perl_SvIV(aTHX_ a)
 #define SvIV_nomg(a)		Perl_SvIV_nomg(aTHX_ a)
 #define SvNV(a)			Perl_SvNV(aTHX_ a)
