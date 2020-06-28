@@ -237,7 +237,7 @@ Parse::Keyword
 passwd(1)
 perl(1)
 Perl4::CoreLibs
-perl7198delta
+perl5198delta
 Perl::Unsafe::Signals
 perlbug(1)
 PerlIO::locale
