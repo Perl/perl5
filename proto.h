@@ -3248,7 +3248,7 @@ PERL_CALLCONV char*	Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp);
 #define PERL_ARGS_ASSERT_SV_2PV	\
 	assert(sv)
 #endif
-PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags);
+PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_2PV_FLAGS	\
 	assert(sv)
 #ifndef NO_MATHOMS
@@ -3596,7 +3596,7 @@ PERL_CALLCONV char*	Perl_sv_pvn_force(pTHX_ SV* sv, STRLEN* lp);
 #define PERL_ARGS_ASSERT_SV_PVN_FORCE	\
 	assert(sv)
 #endif
-PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags);
+PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS	\
 	assert(sv)
 #ifndef NO_MATHOMS

@@ -2989,7 +2989,7 @@ C<sv_2pv()> and C<sv_2pv_nomg> usually end up here too.
 */
 
 char *
-Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
+Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 {
     char *s;
 
@@ -10101,7 +10101,7 @@ C<L</SvPV_force>> and C<L</SvPV_force_nomg>>.
 */
 
 char *
-Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
+Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS;
 
