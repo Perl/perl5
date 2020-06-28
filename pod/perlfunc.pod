@@ -6295,6 +6295,8 @@ value, not for its regular truth value.
     while (readdir $dh) {
         print "$some_dir/$_\n";
     }
+    die "Got error while reading '$some_dir': $!"
+        if $!;
     closedir $dh;
 
 To avoid confusing would-be users of your code who are running earlier
@@ -6303,6 +6305,8 @@ top of your file to signal that your code will work I<only> on Perls of a
 recent vintage:
 
     use 5.012; # so readdir assigns to $_ in a lone while test
+
+In the case of an error, C<undef> will be returned and $! will be non-zero.
 
 =item readline EXPR
 
