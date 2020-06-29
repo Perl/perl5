@@ -22,6 +22,7 @@ my %exceptions = (
     parser => 'use DieDieDie',
     parser_run => "require './test.pl'",
     proto => 'use strict',
+    redef => 'use p5',
  );
 
 while (my $file = <$fh>) {
@@ -52,9 +53,10 @@ while (my $file = <$fh>) {
 
     # All uses of use are allowed in t/comp/use.t
     my $check_use = $contents;
-    $check_use =~ s{$\s*use\s+p5;}{}g; # accept use p5
+    my $ORS = $\ || '';
+    $check_use =~ s{${ORS}s*use\s+p5;}{}g; # accept use p5
     unlike($check_use, qr/^\s*use\s+/m, "$file doesn't use use")
-	unless $file eq 'comp/use.t';
+	    unless ($file eq 'comp/use.t' or $file eq 'comp/redef.t');
     # All uses of require are allowed in t/comp/require.t
     unlike($contents, qr/^\s*require\s+/m, "$file doesn't use require")
 	unless $file eq 'comp/require.t'
