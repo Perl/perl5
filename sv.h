@@ -2298,15 +2298,23 @@ properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 
 #define SvSetSV_and(dst,src,finally) \
         STMT_START {					\
-            if (LIKELY((dst) != (src))) {		\
-                sv_setsv(dst, src);			\
+            SV * src_ = src;                            \
+            SV * dst_ = dst;                            \
+            if (LIKELY((dst_) != (src_))) {             \
+                sv_setsv(dst_, src_);                   \
                 finally;				\
             }						\
         } STMT_END
+
 #define SvSetSV_nosteal_and(dst,src,finally) \
         STMT_START {					\
-            if (LIKELY((dst) != (src))) {			\
-                sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL | SV_DO_COW_SVSETSV);	\
+            SV * src_ = src;                            \
+            SV * dst_ = dst;                            \
+            if (LIKELY((dst_) != (src_))) {             \
+                sv_setsv_flags(dst_, src_,              \
+                        SV_GMAGIC                       \
+                      | SV_NOSTEAL                      \
+                      | SV_DO_COW_SVSETSV);             \
                 finally;				\
             }						\
         } STMT_END
