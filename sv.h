@@ -1429,35 +1429,50 @@ object type. Exposed to perl code via Internals::SvREADONLY().
         (!(SvFLAGS(sv) & (SVf_IOK|SVp_IOK)) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK)) \
             ? (sv_2iv_flags(sv, 0), SvIOK(sv))	  \
             : SvIOK(sv))
+
 #define SvIV_set(sv, val) \
         STMT_START { \
-                assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
-                assert(!isGV_with_GP(sv));		\
-                (((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
+                SV * sv_ = MUTABLE_SV(sv);                                  \
+                assert(PL_valid_types_IV_set[SvTYPE(sv_) & SVt_MASK]);      \
+                assert(!isGV_with_GP(sv_));                                 \
+                (((XPVIV*)  SvANY(sv_))->xiv_iv = (val));                   \
+        } STMT_END
+
 #define SvNV_set(sv, val) \
         STMT_START { \
-                assert(PL_valid_types_NV_set[SvTYPE(sv) & SVt_MASK]);	\
-                assert(!isGV_with_GP(sv));		\
-                (((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
+                SV * sv_ = MUTABLE_SV(sv);                                  \
+                assert(PL_valid_types_NV_set[SvTYPE(sv_) & SVt_MASK]);      \
+                assert(!isGV_with_GP(sv_));                                 \
+                (((XPVNV*)SvANY(sv_))->xnv_u.xnv_nv = (val));               \
+        } STMT_END
+
 #define SvPV_set(sv, val) \
         STMT_START { \
-                assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
-                assert(!isGV_with_GP(sv));		\
-                assert(!(SvTYPE(sv) == SVt_PVIO		\
-                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-                ((sv)->sv_u.svu_pv = (val)); } STMT_END
+                SV * sv_ = MUTABLE_SV(sv);                                  \
+                assert(PL_valid_types_PVX[SvTYPE(sv_) & SVt_MASK]);         \
+                assert(!isGV_with_GP(sv_));		                    \
+                assert(!(SvTYPE(sv_) == SVt_PVIO		            \
+                     && !(IoFLAGS(sv_) & IOf_FAKE_DIRP)));                  \
+                ((sv_)->sv_u.svu_pv = (val));                               \
+        } STMT_END
+
 #define SvUV_set(sv, val) \
         STMT_START { \
-                assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
-                assert(!isGV_with_GP(sv));		\
-                (((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
+                SV * sv_ = MUTABLE_SV(sv);                                  \
+                assert(PL_valid_types_IV_set[SvTYPE(sv_) & SVt_MASK]);	    \
+                assert(!isGV_with_GP(sv_));		                    \
+                (((XPVUV*)SvANY(sv_))->xuv_uv = (val));                     \
+        } STMT_END
+
 #define SvRV_set(sv, val) \
         STMT_START { \
-                assert(PL_valid_types_RV[SvTYPE(sv) & SVt_MASK]);	\
-                assert(!isGV_with_GP(sv));		\
-                assert(!(SvTYPE(sv) == SVt_PVIO		\
-                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-                ((sv)->sv_u.svu_rv = (val)); } STMT_END
+                SV * sv_ = MUTABLE_SV(sv);                                  \
+                assert(PL_valid_types_RV[SvTYPE(sv_) & SVt_MASK]);	    \
+                assert(!isGV_with_GP(sv_));		                    \
+                assert(!(SvTYPE(sv_) == SVt_PVIO		            \
+                     && !(IoFLAGS(sv_) & IOf_FAKE_DIRP)));                  \
+                ((sv_)->sv_u.svu_rv = (val));                               \
+        } STMT_END
 #define SvMAGIC_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
                 (((XPVMG*)SvANY(sv))->xmg_u.xmg_magic = (val)); } STMT_END
