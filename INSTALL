@@ -2096,7 +2096,7 @@ different.
 
 On some systems, particularly those with smaller amounts of RAM, some
 of the tests in t/op/pat.t may fail with an "Out of memory" message.
-For example, on my SparcStation IPC with 12 MB of RAM, in perl7.5.670,
+For example, on my SparcStation IPC with 12 MB of RAM, in perl5.5.670,
 test 85 will fail if run under either t/TEST or t/harness.
 
 Try stopping other jobs on the system and then running the test by itself:
@@ -2582,7 +2582,7 @@ i386 version.  Omitting the lib/unicore/* files for brevity, the
 remaining files are:
 
   /usr/bin/perl
-  /usr/bin/perl7.10.1
+  /usr/bin/perl5.10.1
   /usr/lib/perl/5.10.1/Config.pm
   /usr/lib/perl/5.10.1/Config_git.pl
   /usr/lib/perl/5.10.1/Config_heavy.pl
@@ -2629,7 +2629,7 @@ remaining files are:
   /usr/share/doc/perl/copyright
   /usr/share/lintian/overrides/perl-base
   /usr/share/man/man1/perl.1.gz
-  /usr/share/man/man1/perl7.10.1.1.gz
+  /usr/share/man/man1/perl5.10.1.1.gz
   /usr/share/perl/5.10.1/AutoLoader.pm
   /usr/share/perl/5.10.1/Carp.pm
   /usr/share/perl/5.10.1/Carp/Heavy.pm

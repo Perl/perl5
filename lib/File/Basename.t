@@ -113,15 +113,15 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 ### extra tests for a few specific bugs
 {
     fileparse_set_fstype 'DOS';
-    # perl7.003_18 gives C:/perl/.\
+    # perl5.003_18 gives C:/perl/.\
     is((fileparse 'C:/perl/lib')[1], 'C:/perl/');
-    # perl7.003_18 gives C:\perl\
+    # perl5.003_18 gives C:\perl\
     is(dirname('C:\\perl\\lib\\'), 'C:\\perl');
 
     fileparse_set_fstype 'UNIX';
-    # perl7.003_18 gives '.'
+    # perl5.003_18 gives '.'
     is(dirname('/perl/'), '/');
-    # perl7.003_18 gives '/perl/lib'
+    # perl5.003_18 gives '/perl/lib'
     is(dirname('/perl/lib//'), '/perl');
 }
 

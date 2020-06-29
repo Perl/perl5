@@ -578,7 +578,7 @@ you want to be sure your license's wording will stand up in court.
 
 Malcolm Beattie has written a multifunction backend compiler,
 available from CPAN, that can do both these things.  It is included
-in the perl7.005 release, but is still considered experimental.
+in the perl5.005 release, but is still considered experimental.
 This means it's fun to play with if you're a programmer but not
 really for people looking for turn-key solutions.
 

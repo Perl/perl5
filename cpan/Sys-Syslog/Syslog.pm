@@ -1776,7 +1776,7 @@ does a
 
 but also has this strange piece of code:
 
-    # work around perl7.003 bug
+    # work around perl5.003 bug
     sub Sys::Syslog::hostname {}
 
 I don't know what bug the author referred to.

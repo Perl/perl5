@@ -272,7 +272,7 @@ http://www.perl.come/
 # these are used as an example
 http://example.com/
 http://something.here/
-http://users.perl7.git.perl.org/~yourlogin/
+http://users.perl5.git.perl.org/~yourlogin/
 http://github.com/USERNAME/perl/tree/orange
 http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi
 http://the.good.ship.lollypop.com:8080/cgi-bin/foo.cgi/somewhere/else?game=chess;game=checkers;weather=dull;foo=bar
@@ -335,7 +335,7 @@ http://www.fh-wedel.de/elvis/
 ftp://ftp.blarg.net/users/amol/zsh/
 ftp://ftp.funet.fi/pub/languages/perl/CPAN
 http://search.cpan.org/CPAN/authors/id/S/SH/SHAY/dmake-4.5-20060619-SHAY.zip
-http://users.perl7.git.perl.org/~USERNAME
+http://users.perl5.git.perl.org/~USERNAME
 http://foo/x//y/script.cgi/a//b
 http://xxx/script.cgi/http://foo
 http://foo/./x//z/script.cgi/a/../b//c
