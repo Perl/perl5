@@ -1416,6 +1416,8 @@ use File::Glob qw(:case);
                 lib/overload/numbers.pm
                 lib/overloading.{pm,t}
                 lib/overload{.pm,.t,64.t}
+                lib/p5.pm
+                lib/p7.pm
                 lib/perl7db.{pl,t}
                 lib/perl7db/
                 lib/perlbug.t
