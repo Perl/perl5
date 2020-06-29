@@ -46,7 +46,7 @@ sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
     $error_count++;
 }
 
-sub full_name ($$) { # Returns the function name with potentially the
+sub full_name { # Returns the function name with potentially the
 		     # prefixes 'S_' or 'Perl_'
     my ($func, $flags) = @_;
 
@@ -306,7 +306,7 @@ sub hide {
     "#${indent}define $from" . "\t" x ($t < 3 ? 3 - $t : 1) . "$to\n";
 }
 
-sub multon ($$$) {
+sub multon {
     my ($sym,$pre,$ptr) = @_;
     hide("PL_$sym", "($ptr$pre$sym)");
 }
