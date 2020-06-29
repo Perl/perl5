@@ -46,7 +46,7 @@ sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
     $error_count++;
 }
 
-sub full_name { # Returns the function name with potentially the
+sub full_name :prototype($$) { # Returns the function name with potentially the
 		     # prefixes 'S_' or 'Perl_'
     my ($func, $flags) = @_;
 
