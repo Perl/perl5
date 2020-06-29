@@ -11,7 +11,7 @@ use utf8;
 
 #########################
 my ($js,$obj);
-my $pc = new JSON::PP;
+my $pc = JSON::PP->new;
 
 $js  = '{"foo":0}';
 $obj = $pc->decode($js);
