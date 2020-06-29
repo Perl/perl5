@@ -59,6 +59,7 @@ like(
 # Now, try with the utf8 option set.  We should then get a warning that we're
 # falling back to non-utf8 output.
 {
+    local $ENV{PERL_CORE} = 0; # make sure to get the warning
     local $SIG{__WARN__} = sub {
         like(
             $_[0],
