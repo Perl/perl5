@@ -68,7 +68,7 @@ WriteMakefile(
         resources       => {
             repository  => {
                 type        => 'git',
-                url         => 'git://perl7.git.perl.org/perl.git',
+                url         => 'git://perl5.git.perl.org/perl.git',
             },
             homepage    => 'https://metacpan.org/module/XSLoader',
             x_IRC       => 'irc://irc.perl.org/#p5p',
