@@ -1420,8 +1420,11 @@ object type. Exposed to perl code via Internals::SvREADONLY().
    Not guaranteed to stay returning void */
 /* Macro won't actually call sv_2iv if already IOK */
 #define SvIV_please(sv) \
-        STMT_START {if (!SvIOKp(sv) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK))) \
-                (void) SvIV(sv); } STMT_END
+        STMT_START {                                                        \
+            SV * sv_ = MUTABLE_SV(sv);                                      \
+            if (!SvIOKp(sv_) && (SvFLAGS(sv_) & (SVf_NOK|SVf_POK)))         \
+                (void) SvIV(sv_);                                           \
+        } STMT_END
 #define SvIV_please_nomg(sv) \
         (!(SvFLAGS(sv) & (SVf_IOK|SVp_IOK)) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK)) \
             ? (sv_2iv_flags(sv, 0), SvIOK(sv))	  \
