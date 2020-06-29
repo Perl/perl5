@@ -5112,6 +5112,7 @@ parser.h			parser object header
 patchlevel.h			The current patch level of perl
 perl.c				main()
 perl.h				Global declarations
+perl7.h				Global declarations for Perl 7
 perl_inc_macro.h		macro used to set \@INC using S_incpush_use_sep
 perl_langinfo.h			Perl's version of <langinfo.h>
 perlapi.c			Perl API functions
