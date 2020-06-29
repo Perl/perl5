@@ -97,7 +97,7 @@ umask(0);
 
 # Check the interface to HASHINFO
 
-my $dbh = new DB_File::HASHINFO ;
+my $dbh = DB_File::HASHINFO->new();
 
 ok(1, ! defined $dbh->{bsize}) ;
 ok(2, ! defined $dbh->{ffactor}) ;
@@ -383,7 +383,7 @@ untie %h ;
     # check ability to override the default hashing
     my %x ;
     my $filename = "xyz" ;
-    my $hi = new DB_File::HASHINFO ;
+    my $hi = DB_File::HASHINFO->new();
     $::count = 0 ;
     $hi->{hash} = sub { ++$::count ; length $_[0] } ;
     ok(49, tie %x, 'DB_File', $filename, O_RDWR|O_CREAT, 0640, $hi ) ;
@@ -723,7 +723,7 @@ EOM
 
   my $file = "xyzt" ;
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     use warnings FATAL => qw(all);
     use strict ;
@@ -849,7 +849,7 @@ EOM
 
 {
     # now an error to pass 'hash' a non-code reference
-    my $dbh = new DB_File::HASHINFO ;
+    my $dbh = DB_File::HASHINFO->new();
 
     eval { $dbh->{hash} = 2 };
     ok(126, $@ =~ /^Key 'hash' not associated with a code reference at/);
@@ -862,7 +862,7 @@ EOM
 #    my %hash ;
 #    my $Dfile = "xxx.db";
 #    unlink $Dfile;
-#    my $dbh = new DB_File::HASHINFO ;
+#    my $dbh = DB_File::HASHINFO->new();
 #    $dbh->{hash} = sub { $hash{3} = 4 ; length $_[0] } ;
 # 
 # 
@@ -890,10 +890,10 @@ EOM
     my $h1_count = 0;
     my $h2_count = 0;
     unlink $Dfile, $Dfile2;
-    my $dbh1 = new DB_File::HASHINFO ;
+    my $dbh1 = DB_File::HASHINFO->new();
     $dbh1->{hash} = sub { ++ $h1_count ; length $_[0] } ;
 
-    my $dbh2 = new DB_File::HASHINFO ;
+    my $dbh2 = DB_File::HASHINFO->new();
     $dbh2->{hash} = sub { ++ $h2_count ; length $_[0] } ;
  
  

@@ -136,7 +136,7 @@ umask(0);
 
 # Check the interface to BTREEINFO
 
-my $dbh = new DB_File::BTREEINFO ;
+my $dbh = DB_File::BTREEINFO->new();
 ok(1, ! defined $dbh->{flags}) ;
 ok(2, ! defined $dbh->{cachesize}) ;
 ok(3, ! defined $dbh->{psize}) ;
@@ -480,7 +480,7 @@ undef $Y ;
 untie %h ;
 
 # Duplicate keys
-my $bt = new DB_File::BTREEINFO ;
+my $bt = DB_File::BTREEINFO->new();
 $bt->{flags} = R_DUP ;
 my ($YY, %hh);
 ok(74, $YY = tie(%hh, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $bt )) ;
@@ -532,15 +532,15 @@ my $Dfile1 = "btree1" ;
 my $Dfile2 = "btree2" ;
 my $Dfile3 = "btree3" ;
  
-my $dbh1 = new DB_File::BTREEINFO ;
+my $dbh1 = DB_File::BTREEINFO->new();
 $dbh1->{compare} = sub { 
         no warnings 'numeric' ;
         $_[0] <=> $_[1] } ; 
  
-my $dbh2 = new DB_File::BTREEINFO ;
+my $dbh2 = DB_File::BTREEINFO->new();
 $dbh2->{compare} = sub { $_[0] cmp $_[1] } ;
  
-my $dbh3 = new DB_File::BTREEINFO ;
+my $dbh3 = DB_File::BTREEINFO->new();
 $dbh3->{compare} = sub { length $_[0] <=> length $_[1] } ;
  
  
@@ -915,7 +915,7 @@ EOM
 
   my $file = "xyzt" ;
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 1
     ###
@@ -968,7 +968,7 @@ Wall
 EOM
    
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 2
     ###
@@ -1020,7 +1020,7 @@ mouse -> mickey
 EOM
 
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 3
     ###
@@ -1076,7 +1076,7 @@ EOM
 
 
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 4
     ###
@@ -1125,7 +1125,7 @@ Dog => []
 EOM
 
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 5
     ###
@@ -1160,7 +1160,7 @@ Harry Wall is not there
 EOM
 
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 6
     ###
@@ -1195,7 +1195,7 @@ Larry Wall is not there
 EOM
 
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     # BTREE example 7
     ###
@@ -1351,7 +1351,7 @@ EOM
 
 {
     # now an error to pass 'compare' a non-code reference
-    my $dbh = new DB_File::BTREEINFO ;
+    my $dbh = DB_File::BTREEINFO->new();
 
     eval { $dbh->{compare} = 2 };
     ok(162, $@ =~ /^Key 'compare' not associated with a code reference at/);
@@ -1366,7 +1366,7 @@ EOM
 #    # recursion detection in btree
 #    my %hash ;
 #    unlink $Dfile;
-#    my $dbh = new DB_File::BTREEINFO ;
+#    my $dbh = DB_File::BTREEINFO->new();
 #    $dbh->{compare} = sub { $hash{3} = 4 ; length $_[0] } ;
 # 
 # 
@@ -1394,10 +1394,10 @@ ok(165,1);
     my $h1_count = 0;
     my $h2_count = 0;
     unlink $Dfile, $Dfile2;
-    my $dbh1 = new DB_File::BTREEINFO ;
+    my $dbh1 = DB_File::BTREEINFO->new();
     $dbh1->{compare} = sub { ++ $h1_count ; $_[0] cmp $_[1] } ; 
 
-    my $dbh2 = new DB_File::BTREEINFO ;
+    my $dbh2 = DB_File::BTREEINFO->new();
     $dbh2->{compare} = sub { ;++ $h2_count ; $_[0] cmp $_[1] } ; 
  
  
