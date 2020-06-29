@@ -49,7 +49,7 @@ sub new {
     # Get data from Term::Cap if possible.
     my ($bold, $undl, $norm, $width);
     eval {
-        my $term = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed };
+        my $term = Term::Cap->Tgetent( { TERM => undef, OSPEED => $ospeed } );
         $bold = $term->Tputs('md');
         $undl = $term->Tputs('us');
         $norm = $term->Tputs('me');
