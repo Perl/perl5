@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - "**"
+      - "!core-p7"
+      - "!p7"
     tags-ignore:
       - "*"
   pull_request:
+    branches:
+      - "!core-p7"
+      - "!p7"
 
 jobs:
   #  ___           _         ___       __                    _   _
