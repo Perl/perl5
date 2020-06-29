@@ -5196,7 +5196,6 @@ pod/perl5300delta.pod		Perl changes in version 5.30.0
 pod/perl5301delta.pod		Perl changes in version 5.30.1
 pod/perl5302delta.pod		Perl changes in version 5.30.2
 pod/perl5303delta.pod		Perl changes in version 5.30.3
-pod/perl5321delta.pod		added for p7
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
