@@ -1476,7 +1476,7 @@ unless ($do_deltas) {
 { # Closure
     my $first_time = 1;
 
-    sub output_thanks ($$$$) {  # Called when an issue has been fixed
+    sub output_thanks {  # Called when an issue has been fixed
         my $filename = shift;
         my $original_count = shift;
         my $current_count = shift;

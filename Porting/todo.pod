@@ -608,7 +608,7 @@ called when the parser is finished building an C<entersub> op which calls
 them.
 
 Registration is done with C<Perl_cv_set_call_checker>, is documented at the
-API level in L<perlapi>, and L<perl7140delta/Custom per-subroutine check hooks>
+API level in L<perlapi>, and L<perl5140delta/Custom per-subroutine check hooks>
 notes that it can be used to inline a subroutine, by replacing it with a
 custom op. However there is no further detail of the code needed to do this.
 It would be useful to add one or more annotated examples of how to create
