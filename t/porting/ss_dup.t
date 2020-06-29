@@ -1,6 +1,7 @@
 #!perl
 
-@TODO = qw [ SAVEt_SAVESWITCHSTACK ];
+my @TODO = qw [ SAVEt_SAVESWITCHSTACK ];
+my %TODO;
 @TODO{@TODO} = ();
 
 BEGIN { chdir 't'; @INC = "../lib"; require './test.pl' }
