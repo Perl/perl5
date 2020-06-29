@@ -45,6 +45,10 @@
 #  define PERL_VERSION_LE(r,v,s) \
         (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
 #endif
+#ifndef PERL_VERSION_LT
+#  define PERL_VERSION_LT(r,v,s) \
+        (PERL_DECIMAL_VERSION < PERL_VERSION_DECIMAL(r,v,s))
+#endif
 
 #if PERL_VERSION_GE(5,6,0)
 #  include "multicall.h"
@@ -134,11 +138,11 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define slu_sv_value(sv) (SvIOK(sv)) ? (NV)(SvIVX(sv)) : (SvNV(sv))
 #endif
 
-#if PERL_REVISION == 5 && (PERL_VERSION < 13 || (PERL_VERSION == 13 && PERL_SUBVERSION < 9))
+#if PERL_VERSION_LE(5,13,8)
 #  define PERL_HAS_BAD_MULTICALL_REFCOUNT
 #endif
 
-#if PERL_REVISION == 5 && PERL_VERSION < 14
+#if PERL_VERSION_LT(5,13,14)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
@@ -199,7 +203,7 @@ static MGVTBL subname_vtbl;
 
 static void MY_initrand(pTHX)
 {
-#if (PERL_REVISION == 5 && PERL_VERSION < 9)
+#if PERL_VERSION_LT(5,9,0)
     struct op dmy_op;
     struct op *old_op = PL_op;
 
@@ -1357,7 +1361,7 @@ CODE:
         if(ix == 0) {
             /* uniqint */
             /* coerce to integer */
-#if PERL_VERSION >= 8
+#if PERL_VERSION_GE(5,8,0)
             /* int_amg only appeared in perl 5.8.0 */
             if(SvAMAGIC(arg) && (arg = AMG_CALLun(arg, int)))
                 ; /* nothing to do */
@@ -1442,7 +1446,7 @@ CODE:
             arg = sv_mortalcopy(arg);
 
         if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg))) {
-#if PERL_VERSION >= 8
+#if PERL_VERSION_GE(5,8,0)
             SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
 #else
             SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
@@ -1699,7 +1703,7 @@ CODE:
     else if (SvREADONLY(sv)) croak_no_modify();
 
     tsv = SvRV(sv);
-#if PERL_REVISION > 5 || (PERL_REVISION == 5 && PERL_VERSION >= 14)
+#if PERL_VERSION_GE(5,14,0)
     SvWEAKREF_off(sv); SvROK_on(sv);
     SvREFCNT_inc_NN(tsv);
     Perl_sv_del_backref(aTHX_ tsv, sv);
