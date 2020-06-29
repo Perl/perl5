@@ -349,7 +349,13 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvREFCNT_inc_void(sv)		Perl_SvREFCNT_inc_void(MUTABLE_SV(sv))
 
 /* These guys don't need the curly blocks */
-#define SvREFCNT_inc_simple_void(sv)	STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END
+#define SvREFCNT_inc_simple_void(sv)	                                \
+        STMT_START {                                                    \
+            SV * sv_ = MUTABLE_SV(sv);                                  \
+            if (sv_)                                                    \
+                SvREFCNT(sv_)++;                                        \
+        } STMT_END
+
 #define SvREFCNT_inc_simple_NN(sv)	(++(SvREFCNT(sv)),MUTABLE_SV(sv))
 #define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
