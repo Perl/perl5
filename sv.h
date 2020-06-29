@@ -2633,12 +2633,18 @@ Create a new IO, setting the reference count to 1.
  * trick and store them in SvANY for SvIV() (and friends) to use. */
 
 #  define SET_SVANY_FOR_BODYLESS_IV(sv) \
-        SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
-                    - STRUCT_OFFSET(XPVIV, xiv_iv))
+    STMT_START {                                            \
+        SV * sv_ = MUTABLE_SV(sv);                          \
+        SvANY(sv_) =   (XPVIV*)((char*)&(sv_->sv_u.svu_iv)  \
+                    - STRUCT_OFFSET(XPVIV, xiv_iv));        \
+    } STMT_END
 
 #  define SET_SVANY_FOR_BODYLESS_NV(sv) \
-        SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
-                    - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
+    STMT_START {                                            \
+        SV * sv_ = MUTABLE_SV(sv);                          \
+        SvANY(sv_) =   (XPVNV*)((char*)&(sv_->sv_u.svu_nv)  \
+                    - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv));  \
+    } STMT_END
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
