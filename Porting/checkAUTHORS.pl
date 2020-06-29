@@ -681,6 +681,7 @@ demerphq                                demerphq\100gmail.com
 +                                       demerphq\100gemini.(none)
 +                                       demerphq\100camel.booking.com
 +                                       demerphq\100hotmail.com
++                                       bugs-perl5\100bugs6.perl.org
 doughera                                doughera\100lafayette.edu
 +                                       doughera\100lafcol.lafayette.edu
 +                                       doughera\100fractal.phys.lafayette.edu
