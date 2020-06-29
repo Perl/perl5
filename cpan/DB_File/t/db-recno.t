@@ -135,8 +135,8 @@ sub normalise
 BEGIN 
 { 
     { 
-        local $SIG{__DIE__} ; 
-        eval { require Data::Dumper ; import Data::Dumper } ; 
+        local $SIG{__DIE__} ;
+        eval { require Data::Dumper; Data::Dumper->import(); } ;
     }
  
     if ($@) {
@@ -159,7 +159,7 @@ umask(0);
 
 # Check the interface to RECNOINFO
 
-$dbh = new DB_File::RECNOINFO ;
+$dbh = DB_File::RECNOINFO->new();
 ok(1, ! defined $dbh->{bval}) ;
 ok(2, ! defined $dbh->{cachesize}) ;
 ok(3, ! defined $dbh->{psize}) ;
@@ -328,7 +328,7 @@ unlink $Dfile;
     # Check bval defaults to \n
 
     my @h = () ;
-    my $dbh = new DB_File::RECNOINFO ;
+    my $dbh = DB_File::RECNOINFO->new();
     ok(59, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
     $h[0] = "abc" ;
     $h[1] = "def" ;
@@ -343,7 +343,7 @@ unlink $Dfile;
     # Change bval
 
     my @h = () ;
-    my $dbh = new DB_File::RECNOINFO ;
+    my $dbh = DB_File::RECNOINFO->new();
     $dbh->{bval} = "-" ;
     ok(62, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
     $h[0] = "abc" ;
@@ -361,7 +361,7 @@ unlink $Dfile;
     # Check R_FIXEDLEN with default bval (space)
 
     my @h = () ;
-    my $dbh = new DB_File::RECNOINFO ;
+    my $dbh = DB_File::RECNOINFO->new();
     $dbh->{flags} = R_FIXEDLEN ;
     $dbh->{reclen} = 5 ;
     ok(65, tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $dbh ) ;
@@ -380,7 +380,7 @@ unlink $Dfile;
     # Check R_FIXEDLEN with user-defined bval
 
     my @h = () ;
-    my $dbh = new DB_File::RECNOINFO ;
+    my $dbh = DB_File::RECNOINFO->new();
     $dbh->{flags} = R_FIXEDLEN ;
     $dbh->{bval} = "-" ;
     $dbh->{reclen} = 5 ;
@@ -768,7 +768,7 @@ EOM
 
   my $file = "xyzt" ;
   {
-    my $redirect = new Redirect $file ;
+    my $redirect = Redirect->new( $file );
 
     use warnings FATAL => qw(all);
     use strict ;
@@ -824,7 +824,7 @@ EOM
 
   my $save_output = "xyzt" ;
   {
-    my $redirect = new Redirect $save_output ;
+    my $redirect = Redirect->new( $save_output );
 
     use warnings FATAL => qw(all);
     use strict ;
