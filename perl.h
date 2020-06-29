@@ -2968,6 +2968,9 @@ typedef struct padname PADNAME;
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     typedef siginfo_t Siginfo_t;
 #else
+#ifdef si_signo /* minix */
+#undef si_signo
+#endif
     typedef struct {
         int si_signo;
     } Siginfo_t;
