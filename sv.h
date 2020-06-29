@@ -2413,18 +2413,25 @@ Returns a boolean as to whether or not C<sv> is a GV with a pointer to a GP
 #define isGV_with_GP(pwadak) \
         (((SvFLAGS(pwadak) & (SVp_POK|SVpgv_GP)) == SVpgv_GP)	\
         && (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
-#define isGV_with_GP_on(sv)	STMT_START {			       \
-        assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
-        assert (!SvPOKp(sv));					       \
-        assert (!SvIOKp(sv));					       \
-        (SvFLAGS(sv) |= SVpgv_GP);				       \
+
+#define isGV_with_GP_on(sv)                                            \
+    STMT_START {			                               \
+        SV * sv_ = MUTABLE_SV(sv);                                     \
+        assert (SvTYPE(sv_) == SVt_PVGV || SvTYPE(sv_) == SVt_PVLV);   \
+        assert (!SvPOKp(sv_));					       \
+        assert (!SvIOKp(sv_));					       \
+        (SvFLAGS(sv_) |= SVpgv_GP);				       \
     } STMT_END
-#define isGV_with_GP_off(sv)	STMT_START {			       \
-        assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
-        assert (!SvPOKp(sv));					       \
-        assert (!SvIOKp(sv));					       \
-        (SvFLAGS(sv) &= ~SVpgv_GP);				       \
+
+#define isGV_with_GP_off(sv)                                           \
+    STMT_START {                                                       \
+        SV * sv_ = MUTABLE_SV(sv);                                     \
+        assert (SvTYPE(sv_) == SVt_PVGV || SvTYPE(sv_) == SVt_PVLV);   \
+        assert (!SvPOKp(sv_));                                         \
+        assert (!SvIOKp(sv_));					       \
+        (SvFLAGS(sv_) &= ~SVpgv_GP);				       \
     } STMT_END
+
 #ifdef PERL_CORE
 # define isGV_or_RVCV(kadawp) \
     (isGV(kadawp) || (SvROK(kadawp) && SvTYPE(SvRV(kadawp)) == SVt_PVCV))
