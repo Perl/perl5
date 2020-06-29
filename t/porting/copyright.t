@@ -27,6 +27,7 @@ if ( $Config{usecrosscompile} ) {
 }
 
 my ($opt) = @ARGV;
+$opt ||= '';
 
 my $readme_year = readme_year();
 my $v_year = v_year();
