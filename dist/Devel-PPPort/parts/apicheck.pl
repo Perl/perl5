@@ -339,7 +339,7 @@ HEAD
   # #ifdef out if marked as todo (not known in) this version
   if (exists $todo{$f->{'name'}}) {
     my($five, $ver,$sub) = parse_version($todo{$f->{'name'}}{'version'});
-    print OUT "#if PERL_VERSION > $ver || (PERL_VERSION == $ver && PERL_SUBVERSION >= $sub) /* TODO */\n";
+    print OUT "#if PERL_VERSION_GE(5,$ver,$sub) /* TODO */\n";
   }
 
   my $final = $varargs

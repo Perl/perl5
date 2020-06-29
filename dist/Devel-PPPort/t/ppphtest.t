@@ -655,8 +655,8 @@ ok($o !~ /Uses SvPVutf8_force/m);
 $o = ppport(qw(--nochanges --compat-version=5.999.999));
 ok($o !~ /Uses SvPVutf8_force/m);
 
-$o = ppport(qw(--nochanges --compat-version=6.0.0));
-ok($o =~ /Only Perl 5 is supported/m);
+$o = ppport(qw(--nochanges --compat-version=8.0.0));
+ok($o =~ /Only Perl 5 and 7 are supported/m);
 
 $o = ppport(qw(--nochanges --compat-version=5.1000.999));
 ok($o =~ /Invalid version number: 5.1000.999/m);
