@@ -17516,6 +17516,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    7.000000 => {
+        delta_from => 5.032000,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
