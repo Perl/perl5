@@ -917,7 +917,7 @@ to apply to the current source of perl.
 
 Extract it like this
 
-  tar vzxf perl7.00409.tar.gz
+  tar vzxf perl5.00409.tar.gz
 
 You may see a message about errors while extracting F<Configure>. This is
 because there is a conflict with a similarly-named file F<configure>.
@@ -1119,7 +1119,7 @@ runs fine.
 =item 2.
 
 Fully install Perl, including C<installcmd> target.  Copy the generated DLLs
-to C<LIBPATH>; copy the numbered Perl executables (as in F<perl7.8.2.exe>)
+to C<LIBPATH>; copy the numbered Perl executables (as in F<perl5.8.2.exe>)
 to C<PATH>; copy C<perl_.exe> to C<PATH> as C<perl_5.8.2.exe>.  Think whether
 you need backward-compatibility DLLs.  In most cases you do not need to install
 them yet; but sometime this may simplify the following steps.
@@ -1133,15 +1133,15 @@ to manually install C<Net::FTP>.
 
 Install the bundle C<Bundle::OS2_default>
 
- perl7.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_1
+ perl5.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_1
 
 This may take a couple of hours on 1GHz processor (when run the first time).
 And this should not be necessarily a smooth procedure.  Some modules may not
 specify required dependencies, so one may need to repeat this procedure several
 times until the results stabilize.
 
- perl7.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_2
- perl7.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_3
+ perl5.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_2
+ perl5.8.2 -MCPAN -e "install Bundle::OS2_default" < nul |& tee 00cpan_i_3
 
 Even after they stabilize, some tests may fail.
 
@@ -1173,7 +1173,7 @@ Reset back to the default value C<1> when you are finished.
 =item 5.
 
 When satisfied with the results, rerun the C<installcmd> target.  Now you
-can copy C<perl7.8.2.exe> to C<perl.exe>, and install the other OMF-build
+can copy C<perl5.8.2.exe> to C<perl.exe>, and install the other OMF-build
 executables: C<perl__.exe> etc.  They are ready to be used.
 
 =item 6.
@@ -1634,7 +1634,7 @@ necessary type.  Call via C<OS2::Process> to disable this magic.
 
 B<WARNING>.  Due to the described logic, you need to explicitly
 specify F<.com> extension if needed.  Moreover, if the executable
-F<perl7.6.1> is requested, Perl will not look for F<perl7.6.1.exe>.
+F<perl5.6.1> is requested, Perl will not look for F<perl5.6.1.exe>.
 [This may change in the future.]
 
 =head2 C<extproc> on the first line

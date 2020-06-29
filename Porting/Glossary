@@ -3997,7 +3997,7 @@ installstyle (installstyle.U):
 	This may later be extended to include other information, so
 	be careful with pattern-matching on the results.
 
-	For compatibility with perl7.005 and earlier, the default
+	For compatibility with perl5.005 and earlier, the default
 	setting is based on whether or not $prefix contains the string
 	"perl".
 
@@ -4591,7 +4591,7 @@ perl (Loc.U):
 
 perl7 (perl7.U):
 	This variable contains the full path (if any) to a previously
-	installed perl7.005 or later suitable for running the script
+	installed perl5.005 or later suitable for running the script
 	to determine inc_version_list.
 
 PERL_API_REVISION (patchlevel.h):

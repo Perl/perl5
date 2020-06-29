@@ -940,7 +940,7 @@ especially as regards version numbers, patch and/or RC levels, and @INC
 paths. Note that as they have been built from a git working
 directory, they will still identify themselves using git tags and
 commits. (Note that for an odd-numbered version, perl will install
-itself as C<perl7.x.y>). C<perl -v> will identify itself as:
+itself as C<perl5.x.y>). C<perl -v> will identify itself as:
 
  This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
 

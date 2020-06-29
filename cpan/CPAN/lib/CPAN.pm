@@ -3444,7 +3444,7 @@ or
 you will find the shell more convenient than the bare shell before.
 
 If you have a local mirror of CPAN and can access all files with
-"file:" URLs, then you only need a perl later than perl7.003 to run
+"file:" URLs, then you only need a perl later than perl5.003 to run
 this module. Otherwise Net::FTP is strongly recommended. LWP may be
 required for non-UNIX systems, or if your nearest CPAN site is
 associated with a URL that is not C<ftp:>.

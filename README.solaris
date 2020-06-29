@@ -15,7 +15,7 @@ also discussed, though they may be out of date.
 
 For the most part, everything should just work.
 
-Starting with Solaris 8, perl7.00503 (or higher) is supplied with the
+Starting with Solaris 8, perl5.00503 (or higher) is supplied with the
 operating system, so you might not even need to build a newer version
 of perl at all.  The Sun-supplied version is installed in /usr/perl7
 with F</usr/bin/perl> pointing to F</usr/perl7/bin/perl>.  Do not disturb
@@ -579,7 +579,7 @@ L<http://www.cpan.org/modules/by-module/Sun/>.
 
 =head2 Proc::ProcessTable on Solaris
 
-Proc::ProcessTable does not compile on Solaris with perl7.6.0 and higher
+Proc::ProcessTable does not compile on Solaris with perl5.6.0 and higher
 if you have LARGEFILES defined.  Since largefile support is the
 default in 5.6.0 and later, you have to take special steps to use this
 module.

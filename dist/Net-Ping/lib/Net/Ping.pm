@@ -2523,7 +2523,7 @@ The tarball can be created as follows:
 
   perl Makefile.PL ; make ; make dist
 
-The latest Net::Ping releases are included in cperl and perl7.
+The latest Net::Ping releases are included in cperl and perl5.
 
 =head1 BUGS
 

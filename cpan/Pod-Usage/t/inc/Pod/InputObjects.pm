@@ -27,7 +27,7 @@ Pod::InputObjects - objects representing POD input paragraphs, commands, etc.
 
 =head1 REQUIRES
 
-perl7.004, Carp
+perl5.004, Carp
 
 =head1 EXPORTS
 

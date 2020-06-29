@@ -455,7 +455,7 @@ Tue 24 Dec 1996 <bodg@tiuk.ti.com> Graham Barr
 Thu 19 Sep 1996 <bodg@tiuk.ti.com> Graham Barr
 
 	o Modified IO.xs so that it will compile with pre perlio version
-	  of perl (ie pre perl7.003_02)
+	  of perl (ie pre perl5.003_02)
 	o Modified IO::Socket::send so not to pass 4 arguments to send
 	  if the socket is connected
 

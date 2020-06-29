@@ -100,12 +100,12 @@ WriteMakefile(
 
         my @perls = ($orig_perl);
         push @perls, qw(bleadperl 
-                        perl7.6.1
-                        perl7.6.0
-                        perl7.005_03 
-                        perl7.004_05 
-                        perl7.004_04
-                        perl7.004)
+                        perl5.6.1
+                        perl5.6.0
+                        perl5.005_03 
+                        perl5.004_05 
+                        perl5.004_04
+                        perl5.004)
           if $ENV{PERL_TEST_ALL};
 
         my $out;

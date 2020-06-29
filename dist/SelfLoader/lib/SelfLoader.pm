@@ -390,7 +390,7 @@ Maintainer of the CPAN release: Steffen Mueller <smueller@cpan.org>
 =head1 COPYRIGHT AND LICENSE
 
 This package has been part of the perl core since the first release
-of perl7. It has been released separately to CPAN so older installations
+of perl5. It has been released separately to CPAN so older installations
 can benefit from bug fixes.
 
 This package has the same copyright and license as the perl core:

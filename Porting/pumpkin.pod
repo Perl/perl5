@@ -76,7 +76,7 @@ or using the new syntax available only from v5.6 onward:
 At some point in the future, we may need to decide what to call the
 next big revision.  In the .package file used by metaconfig to
 generate Configure, there are two variables that might be relevant:
-$baserev=5 and $package=perl7.
+$baserev=5 and $package=perl5.
 
 Perl releases produced by the members of perl5-porters are usually
 available on CPAN in the F<src/5.0/maint> and F<src/5.0/devel>
@@ -542,11 +542,11 @@ work with more POSIX conformant patch programs.
 Here's how I generate a new patch.  I'll use the hypothetical
 5.004_07 to 5.004_08 patch as an example.
 
-	# unpack perl7.004_07/
-	gzip -d -c perl7.004_07.tar.gz | tar -xof -
-	# unpack perl7.004_08/
-	gzip -d -c perl7.004_08.tar.gz | tar -xof -
-	makepatch perl7.004_07 perl7.004_08 > perl7.004_08.pat
+	# unpack perl5.004_07/
+	gzip -d -c perl5.004_07.tar.gz | tar -xof -
+	# unpack perl5.004_08/
+	gzip -d -c perl5.004_08.tar.gz | tar -xof -
+	makepatch perl5.004_07 perl5.004_08 > perl5.004_08.pat
 
 Makepatch will automatically generate appropriate B<rm> commands to remove
 deleted files.  Unfortunately, it will not correctly set permissions
@@ -564,13 +564,13 @@ was going to do that command, and it patched against /dev/null.
 So, what I do is sort out all such shell commands that need to be in the
 patch (including possible mv-ing of files, if needed) and put that in the
 shell commands at the top of the patch.  Next, I delete all the patch parts
-of perl7.004_08.pat, leaving just the shell commands.  Then, I do the
+of perl5.004_08.pat, leaving just the shell commands.  Then, I do the
 following:
 
-	cd perl7.004_07
-	sh ../perl7.004_08.pat
+	cd perl5.004_07
+	sh ../perl5.004_08.pat
 	cd ..
-	makepatch perl7.004_07 perl7.004_08 >> perl7.004_08.pat
+	makepatch perl5.004_07 perl5.004_08 >> perl5.004_08.pat
 
 (Note the append to preserve my shell commands.)
 Now, my patch will line up with what the end users are going to do.
@@ -580,13 +580,13 @@ Now, my patch will line up with what the end users are going to do.
 It seems obvious, but be sure to test your patch.  That is, verify that
 it produces exactly the same thing as your full distribution.
 
-	rm -rf perl7.004_07
-	gzip -d -c perl7.004_07.tar.gz | tar -xf -
-	cd perl7.004_07
-	sh ../perl7.004_08.pat
-	patch -p1 -N < ../perl7.004_08.pat
+	rm -rf perl5.004_07
+	gzip -d -c perl5.004_07.tar.gz | tar -xf -
+	cd perl5.004_07
+	sh ../perl5.004_08.pat
+	patch -p1 -N < ../perl5.004_08.pat
 	cd ..
-	gdiff -r perl7.004_07 perl7.004_08
+	gdiff -r perl5.004_07 perl5.004_08
 
 where B<gdiff> is GNU diff.  Other diff's may also do recursive checking.
 
@@ -1073,7 +1073,7 @@ by having looking in the appropriate $archlib directories.
 
 =item 2.
 
-Suppose you have perl7.004_04 installed and you want to try to compile
+Suppose you have perl5.004_04 installed and you want to try to compile
 it again, perhaps with different options or after applying a patch.
 If you already have libperl.so installed in /usr/lib/, then it may be
 either difficult or impossible to get ld.so to find the new libperl.so
@@ -1086,12 +1086,12 @@ you're trying to build so that ld.so won't find your old libperl.so.
 
 The shared perl library is not a "well-behaved" shared library with
 proper major and minor version numbers, so you can't necessarily
-have perl7.004_04 and perl7.004_05 installed simultaneously.  Suppose
-perl7.004_04 were to install /usr/lib/libperl.so.4.4, and perl7.004_05
+have perl5.004_04 and perl5.004_05 installed simultaneously.  Suppose
+perl5.004_04 were to install /usr/lib/libperl.so.4.4, and perl5.004_05
 were to install /usr/lib/libperl.so.4.5.  Now, when you try to run
-perl7.004_04, ld.so might try to load libperl.so.4.5, since it has
+perl5.004_04, ld.so might try to load libperl.so.4.5, since it has
 the right "major version" number.  If this works at all, it almost
-certainly defeats the reason for keeping perl7.004_04 around.  Worse,
+certainly defeats the reason for keeping perl5.004_04 around.  Worse,
 with development subversions, you certainly can't guarantee that
 libperl.so.4.4 and libperl.so.4.55 will be compatible.
 
@@ -1122,8 +1122,8 @@ You can upload your work to CPAN if you have a CPAN id.  Check out
 L<http://www.cpan.org/modules/04pause.html> for information on
 _PAUSE_, the Perl Author's Upload Server.
 
-I typically upload both the patch file, e.g. F<perl7.004_08.pat.gz>
-and the full tar file, e.g. F<perl7.004_08.tar.gz>.
+I typically upload both the patch file, e.g. F<perl5.004_08.pat.gz>
+and the full tar file, e.g. F<perl5.004_08.tar.gz>.
 
 If you want your patch to appear in the F<src/5.0/unsupported>
 directory on CPAN, send e-mail to the CPAN master librarian.  (Check

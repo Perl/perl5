@@ -7533,8 +7533,8 @@ EOH
     d_dosuid=undef
 fi
 
-: Find perl7.005 or later.
-echo "Looking for a previously installed perl7.005 or later... "
+: Find perl5.005 or later.
+echo "Looking for a previously installed perl5.005 or later... "
 case "$perl7" in
 '')	for tdir in `echo "$binexp$path_sep$PATH" | $sed "s/$path_sep/ /g"`; do
 		: Check if this perl is recent and can load a simple module

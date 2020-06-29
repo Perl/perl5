@@ -37,7 +37,7 @@ B<NOTE:> At this point, minimal effort has been made to provide
 compatibility with old (beta) Cygwin releases.  The focus has been to
 provide a high quality release and not worry about working around old
 bugs.  If you wish to use Perl with Cygwin B20.1 or earlier, consider
-using perl7.005_03, which is available in source and binary form at
+using perl5.005_03, which is available in source and binary form at
 C<http://cygutils.netpedia.net/>.  If there is significant demand,
 a patch kit can be developed to port back to earlier Cygwin versions.
 

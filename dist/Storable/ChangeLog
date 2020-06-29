@@ -142,7 +142,7 @@ Wed Mar  8 21:03:43 CET 2017 Reini Urban <rurban@cpan.org>
     Version 3.05_08
 
         * finetune the max stack limit, for C++, DEBUGGING and 32bit.
-        * fix t/blessed.t for cperl7.22
+        * fix t/blessed.t for cperl5.22
 
 Sun Mar 5 13:36:47 2017 +0100 Reini Urban <rurban@cpan.org>
     Version 3.05_07
@@ -892,7 +892,7 @@ Mon Jun 22 11:00:48 METDST 1998   Raphael Manfredi <Raphael_Manfredi@grenoble.hp
 
 Fri Jun 12 11:50:04 METDST 1998   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
 
-        Added workaround for persistent LVALUE-ness in perl7.004. All
+        Added workaround for persistent LVALUE-ness in perl5.004. All
         scalars tagged as being an lvalue are handled as if they were
         not an lvalue at all.  Added test for that LVALUE bug workaround.
 
@@ -1035,7 +1035,7 @@ Thu Feb 27 16:32:44 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.co
 
         Fixed a typo in the PerlIO_putc remapping.
         PerlIO_read and perlIO_write inverted size/nb_items.
-        (only relevant for pre-perl7.004 versions)
+        (only relevant for pre-perl5.004 versions)
 
 Thu Feb 27 15:58:31 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
 
@@ -1043,7 +1043,7 @@ Thu Feb 27 15:58:31 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.co
 
         Added VERSION identification
 
-        Allow build with perl7.003, which is ante perlIO time
+        Allow build with perl5.003, which is ante perlIO time
 
 Mon Jan 13 17:53:18 MET 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
 
