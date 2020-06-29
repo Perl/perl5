@@ -28,7 +28,7 @@ sub parse_version
 
   my($r,$v,$s);
 
-  if (   ($r, $v, $s) = $ver =~ /^(5)(\d{3})(\d{3})$/ # 5029010, from the file
+  if (   ($r, $v, $s) = $ver =~ /^(\d)(\d{3})(\d{3})$/ # 5029010, from the file
                                                       # names in our
                                                       # parts/base/ and
                                                       # parts/todo directories
@@ -41,9 +41,9 @@ sub parse_version
 
     $s = 0 unless $s;
 
-    die "Only Perl 5 is supported '$ver'\n" if $r != 5;
+    die "Only Perl 5 and 7 are supported '$ver'\n" if $r != 5 && $r != 7;
     die "Invalid version number: $ver\n" if $v >= 1000 || $s >= 1000;
-    return (5, 0 + $v, 0 + $s);
+    return ($r, 0 + $v, 0 + $s);
   }
 
   # For some safety, don't assume something is a version number if it has a
@@ -55,8 +55,8 @@ sub parse_version
     $v = ord $v;
     $s = ord $s;
 
-    die "Only Perl 5 is supported '$ver'\n" if $r != 5;
-    return (5, $v, $s);
+    die "Only Perl 5 and 7 are supported '$ver'\n" if $r != 5 && $r != 7;
+    return ($r, $v, $s);
   }
 
   my $mesg = "";
