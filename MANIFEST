@@ -4795,8 +4795,8 @@ lib/overload/numbers.pm		Helper for overloading pragma
 lib/overload64.t		See if operator overloading works with 64-bit ints
 lib/overloading.pm		Pragma to lexically control overloading
 lib/overloading.t		Tests for overloading.pm
-lib/p5.pm              added for p7
-lib/p7.pm              added for p7
+lib/p5.pm			added for p7
+lib/p7.pm			added for p7
 lib/perl7db.pl			Perl debugging routines
 lib/perl7db.t			Tests for the Perl debugger
 lib/perl7db/t/break-on-dot	Test script used by perl7db.t
