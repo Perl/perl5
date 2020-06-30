@@ -10,7 +10,7 @@ skip_all_without_perlio();
 no utf8; # needed for use utf8 not griping about the raw octets
 
 
-plan(tests => 62);
+plan(tests => 58);
 
 $| = 1;
 
@@ -83,21 +83,21 @@ close(F);
   }
 
     { # Check byte length of $b
-	use bytes; my $y = length($b);
-	cmp_ok( $y, '==', 1 );
+    use bytes; my $y = length($b);
+    cmp_ok( $y, '==', 1 );
     }
 
     print F $b,"\n"; # Don't upgrade $b
 
     { # Check byte length of $b
-	use bytes; my $y = length($b);
-	cmp_ok( $y, '==', 1 );
+    use bytes; my $y = length($b);
+    cmp_ok( $y, '==', 1 );
     }
 
     {
-	my $x = tell(F);
-	{ use bytes; if ($::IS_EBCDIC){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
-	cmp_ok( $x, '==', $y );
+    my $x = tell(F);
+    { use bytes; if ($::IS_EBCDIC){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
+    cmp_ok( $x, '==', $y );
     }
 
     close F;
@@ -122,11 +122,10 @@ close(F);
     # Now let's make it suffer.
     my $w;
     {
-	use warnings 'utf8';
-	local $SIG{__WARN__} = sub { $w = $_[0] };
-	print F $a;
+    local $SIG{__WARN__} = sub { $w = $_[0] };
+    print F $a;
         ok( (!$@));
-	like($w, qr/Wide character in print/i );
+    like($w, qr/Wide character in print/i );
     }
 }
 
@@ -159,7 +158,7 @@ $x = <F>; chomp $x;
 our $UTF8_OUTPUT;
 SKIP: {
     skip("Defaulting to UTF-8 output means that we can't generate a mangled file")
-	if $UTF8_OUTPUT;
+    if $UTF8_OUTPUT;
     is( $x, $chr );
 }
 
@@ -167,17 +166,30 @@ SKIP: {
 
 SKIP: {
     if ($::IS_EBCDIC) {
-	skip("EBCDIC The file isn't deformed in UTF-EBCDIC", 2);
-    } else {
-	my @warnings;
-	open F, "<:utf8", $a_file or die $!;
-	$x = <F>; chomp $x;
-	local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
-	eval { sprintf "%vd\n", $x };
-	is (scalar @warnings, 1);
-	like ($warnings[0], qr/Malformed UTF-8 character: \\x82 \(unexpected continuation byte 0x82, with no preceding start byte/);
+        skip("EBCDIC The file isn't deformed in UTF-EBCDIC", 2);
     }
-}
+    else {
+        open F, "<:utf8", $a_file or die $!;
+        my $x;
+        {
+            my @warnings;
+            local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
+            $x = <F>;
+            is (scalar @warnings, 1, "Got one warning, as expected");
+            like ($warnings[0], qr/utf8.*?does not map to Unicode/,
+                "Got expected warning");
+        }
+        chomp $x;
+        {
+            my @warnings;
+            local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
+            eval { my $str = sprintf "%vd\n", $x };
+            is (scalar @warnings, 1, "Got one warning, as expected");
+            like ($warnings[0], qr/Malformed UTF-8 character: \\x82 \(unexpected continuation byte 0x82, with no preceding start byte/,
+                "Got expected warning");
+        }
+    }
+} # END skip if EBCDIC
 
 close F;
 unlink($a_file);
@@ -206,7 +218,7 @@ for (@a) {
         print '# tell(F)           == ', tell(F), "\n";
         print '# $a                == ', $a, "\n";
         print '# $c                == ', $c, "\n";
-	$failed++;
+    $failed++;
         last;
     }
 }
@@ -276,38 +288,107 @@ is($failed, undef);
 
     open F, "<:utf8", $a_file;
     my $b = "\xde";
-    $b .= <F>;
-    is( $b, chr(0xde).chr(0x100), "21395 '.= <>' bytes vs. utf8" );
+    {
+        my @warnings;
+        local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
+        $b .= <F>;
+        is (scalar @warnings, 1, "Got one warning, as expected");
+        like ($warnings[0], qr/utf8.*?does not map to Unicode/,
+            "Got expected warning");
+        is( $b, chr(0xde).chr(0x100), "21395 '.= <>' bytes vs. utf8" );
+    }
     close F;
 }
 
 {
-    my @a = ( [ 0x007F, "bytes" ],
-	      [ 0x0080, "bytes" ],
-	      [ 0x0080, "utf8"  ],
-	      [ 0x0100, "utf8"  ] );
-    my $t = 34;
+    my @a = (
+        [ 0x007F, "bytes" ],
+        [ 0x0100, "utf8"  ],
+    );
     for my $u (@a) {
-	for my $v (@a) {
-	    # print "# @$u - @$v\n";
-	    open F, ">$a_file";
-	    binmode(F, ":" . $u->[1]);
-	    print F chr($u->[0]);
-	    close F;
+        for my $v (@a) {
+            # print "# @$u - @$v\n";
+            open F, ">$a_file";
+            binmode(F, ":" . $u->[1]);
+            print F chr($u->[0]);
+            close F;
 
-	    open F, "<$a_file";
-	    binmode(F, ":" . $u->[1]);
+            open F, "<$a_file";
+            binmode(F, ":" . $u->[1]);
 
-	    my $s = chr($v->[0]);
-	    utf8::upgrade($s) if $v->[1] eq "utf8";
+            my $s = chr($v->[0]);
+            utf8::upgrade($s) if $v->[1] eq "utf8";
 
-	    $s .= <F>;
-	    is( $s, chr($v->[0]) . chr($u->[0]), 'rcatline utf8' );
-	    close F;
-	    $t++;
-	}
+            {
+                $s .= <F>;
+                is( $s, chr($v->[0]) . chr($u->[0]), 'rcatline utf8' );
+            }
+            close F;
+        }
     }
     # last test here 49
+}
+
+{
+    my $b_file = tempfile();
+    my @a = (
+        [ 0x0080, "utf8"  ],
+    );
+    for my $u (@a) {
+        for my $v (@a) {
+            # print "# @$u - @$v\n";
+            open F, ">$b_file";
+            binmode(F, ":" . $u->[1]);
+            print F chr($u->[0]);
+            close F;
+
+            open F, "<$b_file";
+            binmode(F, ":" . $u->[1]);
+
+            my $s = chr($v->[0]);
+            utf8::upgrade($s) if $v->[1] eq "utf8";
+
+            {
+                my @warnings;
+                local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
+                $s .= <F>;
+                is (scalar @warnings, 0, "Got zero warnings, as expected");
+                is( $s, chr($v->[0]) . chr($u->[0]), 'rcatline utf8' );
+            }
+            close F;
+        }
+    }
+}
+
+{
+    my $c_file = tempfile();
+    my @a = (
+        [ 0x0080, "bytes" ],
+    );
+    for my $u (@a) {
+        for my $v (@a) {
+            # print "# @$u - @$v\n";
+            open F, ">$c_file";
+            binmode(F, ":" . $u->[1]);
+            print F chr($u->[0]);
+            close F;
+
+            open F, "<$c_file";
+            binmode(F, ":" . $u->[1]);
+
+            my $s = chr($v->[0]);
+            utf8::upgrade($s) if $v->[1] eq "utf8";
+
+            {
+                my @warnings;
+                local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
+                $s .= <F>;
+                is (scalar @warnings, 0, "Got zero warnings, as expected");
+                is( $s, chr($v->[0]) . chr($u->[0]), 'rcatline utf8' );
+            }
+            close F;
+        }
+    }
 }
 
 {
@@ -324,13 +405,12 @@ is($failed, undef);
 {
     # <FH> on a :utf8 stream should complain immediately with -w
     # if it finds bad UTF-8 (:encoding(utf8) works this way)
-    use warnings 'utf8';
     undef $@;
     local $SIG{__WARN__} = sub { $@ = shift };
     open F, ">$a_file";
     binmode F;
     my ($chrE4, $chrF6) = (chr(0xE4), chr(0xF6));
-    if ($::IS_EBCDIC)	# EBCDIC
+    if ($::IS_EBCDIC)    # EBCDIC
     { ($chrE4, $chrF6) = (chr(0x43), chr(0xEC)); }
     print F "foo", $chrE4, "\n";
     print F "foo", $chrF6, "\n";
@@ -341,11 +421,11 @@ is($failed, undef);
     ($chrE4, $chrF6) = ("E4", "F6");
     if ($::IS_EBCDIC) { ($chrE4, $chrF6) = ("43", "EC"); } # EBCDIC
     like( $@, qr/utf8 "\\x$chrE4" does not map to Unicode .+ <F> line 1/,
-	  "<:utf8 readline must warn about bad utf8");
+      "<:utf8 readline must warn about bad utf8");
     undef $@;
     $line .= <F>;
     like( $@, qr/utf8 "\\x$chrF6" does not map to Unicode .+ <F> line 2/,
-	  "<:utf8 rcatline must warn about bad utf8");
+      "<:utf8 rcatline must warn about bad utf8");
     close F;
 }
 
@@ -377,14 +457,13 @@ is($failed, undef);
     print F "foo\xEF\xAC"; # truncated \x{FB04} small ligature ffl
     close F;
 
-    use warnings 'utf8';
     open F, "<:utf8", $a_file;
     undef $@;
     local $SIG{__WARN__} = sub { $@ = shift };
     $line = <F>;
 
     like( $@, qr/utf8 "\\xEF" does not map to Unicode .+ <F> chunk 1/,
-	  "<:utf8 readline (fixed) must warn about bad utf8");
+      "<:utf8 readline (fixed) must warn about bad utf8");
     close F;
 }
 
@@ -396,7 +475,7 @@ SKIP: {
     open my $fh, "<:raw",  \($buf = chr 255);
     open my $uh, "<:utf8", \($uuf = $U_100);
     for([$uh,chr 256], [$fh,chr 255]) {
-	is getc $$_[0], $$_[1],
-	  'getc returning non-utf8 after utf8';
+    is getc $$_[0], $$_[1],
+      'getc returning non-utf8 after utf8';
     }
 }
