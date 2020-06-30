@@ -129,7 +129,9 @@ open STDIN, 'tmpIo_argv1.tmp' or die $!;
 @ARGV = ();
 ok( !eof(),     'STDIN has something' );
 
-is( <>, "ok 11\n" );
+my $stdin = <>;
+my $expect = "ok 11\n";
+is( $stdin, $expect, "Got what was expected from STDIN" );
 
 SKIP: {
     skip_if_miniperl($no_devnull, 4);
@@ -138,10 +140,10 @@ SKIP: {
     ok( eof(),      'eof() true with empty @ARGV' );
 
     @ARGV = ('tmpIo_argv1.tmp');
-    ok( !eof() );
+    ok( !eof(), 'one file in @ARGV' );
 
     @ARGV = ($devnull, $devnull);
-    ok( !eof() );
+    ok( !eof(), 'nothing but /dev/null in @ARGV' );
 
     close ARGV or die $!;
     ok( eof(),      'eof() true after closing ARGV' );
@@ -151,19 +153,19 @@ SKIP: {
     local $/;
     open my $fh, 'tmpIo_argv1.tmp' or die "Could not open tmpIo_argv1.tmp: $!";
     <$fh>;	# set $. = 1
-    is( <$fh>, undef );
+    is( <$fh>, undef, 'read from tempfile exhausted' );
 
     skip_if_miniperl($no_devnull, 5);
 
     open $fh, $devnull or die;
-    ok( defined(<$fh>) );
+    ok( defined(<$fh>), 'read from /dev/null defined' );
 
-    is( <$fh>, undef );
-    is( <$fh>, undef );
+    is( <$fh>, undef, 'read from tempfile exhausted' );
+    is( <$fh>, undef, 'read from tempfile still exhausted' );
 
     open $fh, $devnull or die;	# restart cycle again
-    ok( defined(<$fh>) );
-    is( <$fh>, undef );
+    ok( defined(<$fh>), 'read from /dev/null defined'  );
+    is( <$fh>, undef, 'read from tempfile again exhausted' );
     close $fh or die "Could not close: $!";
 }
 
