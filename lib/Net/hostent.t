@@ -7,6 +7,7 @@ BEGIN {
 
 use Test::More;
 
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 

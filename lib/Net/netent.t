@@ -15,8 +15,9 @@ BEGIN {
     unless ($hasne) { print "1..0 # Skip: no netdb.h\n"; exit 0 }
 }
 
+our @netent;
 BEGIN {
-    our @netent = getnetbyname "loopback"; # This is the function getnetbyname.
+    @netent = getnetbyname "loopback"; # This is the function getnetbyname.
     unless (@netent) { print "1..0 # Skip: no loopback net\n"; exit 0 }
 }
 
@@ -28,7 +29,7 @@ print "ok 1\n";
 
 my $netent = getnetbyname "loopback"; # This is the OO getnetbyname.
 
-print "not " unless $netent->name   eq $netent[0];
+print "not " unless $netent->name eq $netent[0];
 print "ok 2\n";
 
 # Testing pretty much anything else is unportable;

@@ -15,8 +15,9 @@ BEGIN {
     unless ($hasse) { print "1..0 # Skip: no netdb.h\n"; exit 0 }
 }
 
+our @servent;
 BEGIN {
-    our @servent = getservbyname "echo", "tcp"; # This is the function getservbyname.
+    @servent = getservbyname "echo", "tcp"; # This is the function getservbyname.
     unless (@servent) { print "1..0 # Skip: no echo service\n"; exit 0 }
 }
 
