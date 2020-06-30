@@ -15,9 +15,9 @@ my $r;
 my $filename = tempfile();
 SKIP: {
   skip("Need to adjust for Perl 7", 3);
-	open my $f, ">$filename"
-	    or skip( "Can't write temp file $filename: $!", 3 );
-	print $f <<'__SWDTEST__';
+  open my $f, ">$filename"
+      or skip( "Can't write temp file $filename: $!", 3 );
+  print $f <<'__SWDTEST__';
 package Bar;
 sub bar { $_[0] * $_[0] }
 package Foo;
@@ -31,32 +31,32 @@ __SWDTEST__
     close $f;
     $| = 1; # Unbufferize.
     $r = runperl(
-		 switches => [ '-Ilib', '-f', '-d:switchd' ],
+     switches => [ '-Ilib', '-f', '-d:switchd' ],
      run_as_five => 1,
-		 progfile => $filename,
-		 args => ['3'],
+     progfile => $filename,
+     args => ['3'],
      run_as_five => 1,
-		);
+    );
 
     like($r,
 qr/^sub<Devel::switchd::import>;import<Devel::switchd>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
     'Got debugging output: 1');
     $r = runperl(
-		 switches => [ '-Ilib', '-f', '-d:switchd=a,42' ],
+     switches => [ '-Ilib', '-f', '-d:switchd=a,42' ],
      run_as_five => 1,
-		 progfile => $filename,
-		 args => ['4'],
+     progfile => $filename,
+     args => ['4'],
      run_as_five => 1,
-		);
+    );
     like($r,
 qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
     'Got debugging output: 2');
     $r = runperl(
-		 switches => [ '-Ilib', '-f', '-d:-switchd=a,42' ],
+     switches => [ '-Ilib', '-f', '-d:-switchd=a,42' ],
      run_as_five => 1,
-		 progfile => $filename,
-		 args => ['4'],
-		);
+     progfile => $filename,
+     args => ['4'],
+    );
     like($r,
 qr/^sub<Devel::switchd::unimport>;unimport<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
     'Got debugging output: 3');
@@ -93,7 +93,7 @@ like(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
    progs    => [
-    'sub foo { print qq _1\n_ }',
+    'no warnings q|redefine|; sub foo { print qq _1\n_ }',
     '*old_foo = \&foo;',
     '*foo = sub { print qq _2\n_ };',
     'old_foo(); foo();',
@@ -127,7 +127,7 @@ like(
     'sub DB::sub { goto &$DB::sub }',
     'sub foo { goto &bar::baz; }',
     'sub bar::baz { print qq _ok\n_ }',
-    'delete $::{bar::::};',
+    'no warnings q|bareword|; delete $::{bar::::};',
     'foo();',
    ],
   ),
@@ -236,8 +236,11 @@ is(
 is(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
-   progs => ['sub DB::sub {} sub foo : lvalue {} foo();',
-             'print qq-ok\n- unless defined *DB::lsub{HASH}'],
+   progs => [
+       'no warnings q|once|;',
+       'sub DB::sub {} sub foo : lvalue {} foo();',
+       'print qq-ok\n- unless defined *DB::lsub{HASH}'
+   ],
   ),
   "ok\n",
   "%DB::lsub is not vivified"
@@ -292,7 +295,7 @@ is(
 is(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
-   prog => 'BEGIN { $^P &= ~0x4 } sort { $$b <=> $$a } (); print qq-42\n-',
+   prog => 'BEGIN { $^P &= ~0x4 } my @something = sort { $$b <=> $$a } (); print qq-42\n-',
   ),
   "42\n",
   '-d does not conflict with sort optimisations'
