@@ -52,7 +52,7 @@ When using perl from this branch you are going to have the following defaults ou
 * unicode_eval
 * unicode_strings
 
-Note that due to the limitation of features bundles wich can be stored in `HINT_FEATURE_MASK`, some cleanup was made by 401cba074e7458c7f5d4f31dce6334799f4f88ba.
+Note that due to the limitation of features bundles wich can be stored in `HINT_FEATURE_MASK`, some cleanup was made by [401cba074e7](https://github.com/Perl/perl5/commit/401cba074e7458c7f5d4f31dce6334799f4f88ba).
 
 ### Features not enabled by default
 
