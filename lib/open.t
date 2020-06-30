@@ -62,7 +62,7 @@ is( ${^OPEN}, ":raw :crlf\0:raw :crlf",
 is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 
 SKIP: {
-    skip("no perlio", 1) unless (find PerlIO::Layer 'perlio');
+    skip("no perlio", 1) unless (PerlIO::Layer->find('perlio'));
     skip("no Encode", 1) unless $Config{extensions} =~ m{\bEncode\b};
     skip("EBCDIC platform doesnt have 'use encoding' used by open ':locale'", 1)
                                                                 if $::IS_EBCDIC;
@@ -71,6 +71,7 @@ SKIP: {
     is($@, '', 'can use :std and :locale');
 }
 
+our $TODO;
 {
     local $ENV{PERL_UNICODE};
     delete $ENV{PERL_UNICODE};
