@@ -9,7 +9,7 @@ BEGIN {
 {
  package Basic;
  use Tie::Array;
- @ISA = qw(Tie::Array);
+ our @ISA = qw(Tie::Array);
 
  sub TIEARRAY  { return bless [], shift }
  sub FETCH     { $_[0]->[$_[1]] }
@@ -18,8 +18,8 @@ BEGIN {
  sub STORESIZE { $#{$_[0]} = $_[1]-1 }
 }
 
-tie @x,Basic;
-tie @get,Basic;
-tie @got,Basic;
-tie @tests,Basic;
+tie my @x, 'Basic';
+tie my @get, 'Basic';
+tie my @got, 'Basic';
+tie my @tests, 'Basic';
 require "op/push.t"
