@@ -1,4 +1,6 @@
 #!perl -w
+
+our %Config;
 BEGIN {
     $::IS_ASCII = (ord("A") == 65) ? 1 : 0;
     $::IS_EBCDIC = (ord("A") == 193) ? 1 : 0;
@@ -1424,9 +1426,8 @@ if ($v_unicode_version gt v3.1.0) {
     }
 }
 
-sub fail_with_diff ($$$$) {
+sub fail_with_diff ($prop, $official, $constructed, $tested_function_name) {
     # For use below to output better messages
-    my ($prop, $official, $constructed, $tested_function_name) = @_;
 
     if (! $ENV{PERL_TEST_DIFF}) {
 
