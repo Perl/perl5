@@ -10,22 +10,25 @@ BEGIN {
 
 use strict;
 
-plan tests => 2;
+plan tests => 4;
 
 my $tmpfile = tempfile();
 
 open(A,"+>$tmpfile");
 print A "_";
-seek(A,0,0);
+my $rv = seek(A,0,0);
+ok($rv, "seek() succeeded");
 
 my $b = "abcd"; 
 $b = "";
 
-read(A,$b,1,4);
+my $length = 1;
+$rv = read(A,$b,$length,4);
+is($rv, $length, "Read $length character into scalar, as expected");
 
 close(A);
 
-is($b,"\000\000\000\000_"); # otherwise probably "\000bcd_"
+is($b,"\000\000\000\000_", "scalar modified as expected"); # otherwise probably "\000bcd_"
 
 SKIP: {
     skip "no EBADF", 1 if (!exists &Errno::EBADF);
@@ -34,5 +37,5 @@ SKIP: {
     no warnings 'unopened';
     no warnings 'once';
     read(B,$b,1);
-    ok($! == &Errno::EBADF);
+    ok($! == &Errno::EBADF, "Errno::EBADF works");
 }
