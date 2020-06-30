@@ -9,7 +9,7 @@ BEGIN {
 
     plan tests => (@times * (@methods + 1)) + 1;
 
-    use_ok Time::gmtime;
+    use_ok 'Time::gmtime';
 }
 
 for my $time (@times) {
