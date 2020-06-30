@@ -234,6 +234,10 @@ build_perl() {
   # remove DB_File
   perl -0777 -i.bak.4 -pe "s|DB_File||g" config.sh
 
+  #patch arch
+  perl -0777 -i.bak.6 -pe "s|myarchname='i386-darwin'|myarchname='$PERL_ARCH-darwin'|g" config.sh
+  perl -0777 -i.bak.5 -pe "s|archname='i386\-darwin\-thread\-multi'|archname='$PERL_ARCH-darwin-ios-$PLATFORM_TAG-thread-multi'|" config.sh
+
   # patch perl version
   perl -0777 -i.bak.3 -pe "s|5\.30\.2|$PERL_VERSION|g" config.h
   perl -0777 -i.bak.4 -pe "s|15\.6\.0|$os_version|g" config.h
