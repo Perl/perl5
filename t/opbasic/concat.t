@@ -24,6 +24,8 @@ sub ok($ok, $name) {
 
 sub is($got, $expected, $name) {
 
+    $got //= '';
+    $expected //= '';
     my $ok = $got eq $expected;
 
     printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name;
