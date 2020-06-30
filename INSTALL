@@ -506,7 +506,7 @@ You can elect to build a shared libperl by
 To build a shared libperl, the environment variable controlling shared
 library search (LD_LIBRARY_PATH in most systems, DYLD_LIBRARY_PATH for
 Darwin, LD_LIBRARY_PATH/SHLIB_PATH
-for HP-UX, LIBPATH for AIX, PATH for Cygwin) must be set up to include
+for HP-UX, LIBPATH for AIX and z/OS, PATH for Cygwin) must be set up to include
 the Perl build directory because that's where the shared libperl will
 be created.  Configure arranges makefile to have the correct shared
 library search settings.  You can find the name of the environment
@@ -1545,10 +1545,11 @@ retesting with the various PERL variables unset.
 =item LD_LIBRARY_PATH
 
 If you run into dynamic loading problems, check your setting of
-the LD_LIBRARY_PATH environment variable.  If you're creating a static
-Perl library (libperl.a rather than libperl.so) it should build
-fine with LD_LIBRARY_PATH unset, though that may depend on details
-of your local setup.
+the LD_LIBRARY_PATH environment variable (or on some systems the equivalent
+with a different name, see L</Building a shared Perl library>).  If you're
+creating a static Perl library (libperl.a rather than libperl.so) it should
+build fine with LD_LIBRARY_PATH unset, though that may depend on details of
+your local setup.
 
 =item nm extraction
 
