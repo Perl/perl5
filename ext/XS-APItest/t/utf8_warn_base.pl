@@ -486,7 +486,6 @@ my @tests;
               : I8_to_native(
                 "\xff\xa7\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"),
               0x7FFFFFFFFFFFFFFF,
-              (isASCII) ? 1 : 2,
             ],
             [ "first 64 bit code point",
               (isASCII)
@@ -525,7 +524,6 @@ my @tests;
                     I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x800000000,
-                      40000000
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
