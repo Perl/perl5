@@ -2,7 +2,9 @@ Check strict refs functionality
 
 __END__
 
-# no strict, should build & run ok.
+# NAME no strict, should build & run ok.
+
+no strict; no warnings;
 my $fred ;
 $b = "fred" ;
 $a = $$b ;
@@ -17,38 +19,43 @@ EXPECT
 
 ########
 
-# strict refs - error
-use strict ;
+# NAME strict refs - error - 1
+
+use strict; no warnings;
 my $str="A::Really::Big::Package::Name::To::Use"; 
 $str->{foo}= 1;
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a HASH ref while "strict refs" in use at - line 5.
 ########
 
-# strict refs - error
-use strict ;
+# NAME strict refs - error - 2
+
+use strict; no warnings;
 "A::Really::Big::Package::Name::To::Use" =~ /(.*)/; 
 ${$1};
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a SCALAR ref while "strict refs" in use at - line 5.
 ########
 
-# strict refs - error
-use strict ;
+# NAME strict refs - error - 3
+
+use strict; no warnings;
 *{"A::Really::Big::Package::Name::To::Use"; }
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a symbol ref while "strict refs" in use at - line 4.
 ########
 
-# strict refs - error
-use strict ;
+# NAME strict refs - error - 4
+
+use strict; no warnings;
 "A::Really::Big::Package::Name::To::Use" =~ /(.*)/;
 *{$1}
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a symbol ref while "strict refs" in use at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 5
+
 use strict ;
 my $fred ;
 my $a = ${"fred"} ;
@@ -56,7 +63,8 @@ EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 6
+
 use strict 'refs' ;
 my $fred ;
 my $a = ${"fred"} ;
@@ -64,7 +72,8 @@ EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 7
+
 use strict 'refs' ;
 my $fred ;
 my $b = "fred" ;
@@ -73,7 +82,8 @@ EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 6.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 8
+
 use strict 'refs' ;
 my $b ;
 my $a = $$b ;
@@ -81,7 +91,8 @@ EXPECT
 Can't use an undefined value as a SCALAR reference at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 1
+
 use strict 'refs' ;
 my $b ;
 my $a = @$b ;
@@ -89,7 +100,8 @@ EXPECT
 Can't use an undefined value as an ARRAY reference at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 2
+
 use strict 'refs' ;
 my $b ;
 my $a = %$b ;
@@ -97,7 +109,8 @@ EXPECT
 Can't use an undefined value as a HASH reference at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 3
+
 use strict 'refs' ;
 my $b ;
 my $a = *$b ;
@@ -105,21 +118,24 @@ EXPECT
 Can't use an undefined value as a symbol reference at - line 5.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 4
+
 use strict 'refs' ;
 my $a = fred->[0] ;
 EXPECT
 Can't use bareword ("fred") as an ARRAY ref while "strict refs" in use at - line 4.
 ########
 
-# strict refs - error
+# NAME strict refs - error - 5
+
 use strict 'refs' ;
 my $a = fred->{barney} ;
 EXPECT
 Can't use bareword ("fred") as a HASH ref while "strict refs" in use at - line 4.
 ########
 
-# strict refs - no error
+# NAME strict refs - no error - 1
+
 use strict ;
 no strict 'refs' ;
 my $fred ;
@@ -130,8 +146,9 @@ EXPECT
 
 ########
 
-# strict refs - no error
-use strict qw(subs vars) ;
+# NAME strict refs - no error - 2
+
+no strict qw{refs}; use strict qw(subs vars) ;
 my $fred ;
 my $b = "fred" ;
 my $a = $$b ;
@@ -140,7 +157,8 @@ EXPECT
 
 ########
 
-# strict refs - no error
+# NAME strict refs - no error - 3
+no strict;
 my $fred ;
 my $b = "fred" ;
 my $a = $$b ;
@@ -149,7 +167,8 @@ EXPECT
 
 ########
 
-# strict refs - no error
+# NAME strict refs - no error - 4
+
 use strict 'refs' ;
 my $fred ;
 my $b = \$fred ;
@@ -158,20 +177,22 @@ EXPECT
 
 ########
 
-# Check runtime scope of strict refs pragma
+# NAME Check runtime scope of strict refs pragma - 1
+
 use strict 'refs';
 my $fred ;
 my $b = "fred" ;
 {
-    no strict ;
+    no strict;
     my $a = $$b ;
 }
 my $a = $$b ;
 EXPECT
-Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 10.
+OPTIONS regex
+Can't use string \("fred"\) as a SCALAR ref while "strict refs" in use at - line \d+.
 ########
 
-# Check runtime scope of strict refs pragma
+# NAME Check runtime scope of strict refs pragma - 2
 no strict ;
 my $fred ;
 my $b = "fred" ;
@@ -181,10 +202,12 @@ my $b = "fred" ;
 }
 my $a = $$b ;
 EXPECT
-Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 8.
+OPTIONS regex
+Can't use string \("fred"\) as a SCALAR ref while "strict refs" in use at - line \d+.
 ########
 
-# Check runtime scope of strict refs pragma
+# NAME Check runtime scope of strict refs pragma - 3
+
 no strict ;
 my $fred ;
 my $b = "fred" ;
@@ -197,6 +220,7 @@ EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 8.
 ########
 
+# NAME require "./abc" - 1
 
 --FILE-- abc
 my $a = ${"Fred"} ;
@@ -208,27 +232,34 @@ EXPECT
 
 ########
 
+# NAME require "./abc" - 2
+
 --FILE-- abc
 use strict 'refs' ;
 1;
 --FILE-- 
-require "./abc";
+no strict 'refs'; require "./abc";
 my $a = ${"Fred"} ;
 EXPECT
 
 ########
 
+# NAME require "./abc" - 3
+
 --FILE-- abc
 use strict 'refs' ;
 my $a = ${"Fred"} ;
 1;
 --FILE-- 
+no strict 'refs'; no warnings;
 ${"Fred"} ;
 require "./abc";
 EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at ./abc line 2.
-Compilation failed in require at - line 2.
+Compilation failed in require at - line 3.
 ########
+
+# NAME require "./abc" - 4
 
 --FILE-- abc.pm
 use strict 'refs' ;
@@ -243,7 +274,8 @@ Compilation failed in require at - line 2.
 BEGIN failed--compilation aborted at - line 2.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 1
+
 no strict ;
 eval {
     my $a = ${"Fred"} ;
@@ -254,7 +286,8 @@ EXPECT
 
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 2
+
 no strict ;
 eval {
     use strict 'refs' ;
@@ -266,7 +299,8 @@ EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at - line 6.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 3
+
 use strict 'refs' ;
 eval {
     my $a = ${"Fred"} ;
@@ -276,7 +310,8 @@ EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at - line 5.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 4
+
 use strict 'refs' ;
 eval {
     no strict ;
@@ -288,7 +323,8 @@ EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at - line 9.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 5
+
 no strict ;
 eval '
     my $a = ${"Fred"} ;
@@ -298,7 +334,8 @@ EXPECT
 
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 6
+
 no strict ;
 eval q[ 
     use strict 'refs' ;
@@ -308,7 +345,8 @@ EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at (eval 1) line 3.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 7
+
 use strict 'refs' ;
 eval '
     my $a = ${"Fred"} ;
@@ -317,7 +355,8 @@ EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at (eval 1) line 2.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 8
+
 use strict 'refs' ;
 eval '
     no strict ;
@@ -327,29 +366,37 @@ my $a = ${"Fred"} ;
 EXPECT
 Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at - line 8.
 ########
-# [perl #26910] hints not propagated into (?{...})
-use strict 'refs';
+
+# NAME [perl #26910] hints not propagated into (?{...})
+
+no warnings; use strict 'refs';
 /(?{${"foo"}++})/;
-EXPECT
-Can't use string ("foo") as a SCALAR ref while "strict refs" in use at - line 3.
-########
-# [perl #37886] strict 'refs' doesn't apply inside defined
-use strict 'refs';
-my $x = "foo";
-defined $$x;
 EXPECT
 Can't use string ("foo") as a SCALAR ref while "strict refs" in use at - line 4.
 ########
-# [perl #74168] Assertion failed: (SvTYPE(_svcur) >= SVt_PV), function Perl_softref2xv, file pp.c, line 240.
-use strict 'refs';
+
+# NAME [perl #37886] strict 'refs' doesn't apply inside defined
+
+no warnings; use strict 'refs';
+my $x = "foo";
+defined $$x;
+EXPECT
+Can't use string ("foo") as a SCALAR ref while "strict refs" in use at - line 5.
+########
+
+# NAME [perl #74168] Assertion failed: (SvTYPE(_svcur) >= SVt_PV), function Perl_softref2xv, file pp.c, line 240.
+
+no warnings; use strict 'refs';
 my $o = 1 ; $o->{1} ;
 EXPECT
-Can't use string ("1") as a HASH ref while "strict refs" in use at - line 3.
+Can't use string ("1") as a HASH ref while "strict refs" in use at - line 4.
 ########
-# pp_hot.c [pp_entersub]
-use strict 'refs';
+
+# NAME pp_hot.c [pp_entersub]
+
+no warnings; use strict 'refs';
 use utf8;
 use open qw( :utf8 :std );
 &{"Ｆ"};
 EXPECT
-Can't use string ("Ｆ") as a subroutine ref while "strict refs" in use at - line 5.
+Can't use string ("Ｆ") as a subroutine ref while "strict refs" in use at - line 6.
