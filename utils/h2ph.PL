@@ -283,6 +283,7 @@ while (defined (my $file = next_file())) {
 	    foreach my $enum (@enum_subs) {
 		my ($enum_name, $enum_value) = $enum =~ /^([a-zA-Z_]\w*)(=.+)?$/;
 		$enum_name or next;
+		$enum_value //= '';
 		$enum_value =~ s/^=//;
 		$enum_val = (length($enum_value) ? $enum_value : $enum_val + 1);
 		if ($opt_h) {
@@ -641,7 +642,7 @@ sub next_line
             }
         }
 
-        last READ if $out =~ /\S/;
+        last READ if defined $out && $out =~ /\S/;
     }
 
     return $out;
