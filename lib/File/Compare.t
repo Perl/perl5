@@ -62,7 +62,7 @@ is(compare_text($TEST,$README,sub {$_[0] ne $_[1]}), 1,
 
 my @donetests;
 eval {
-  require File::Temp; import File::Temp qw/ tempfile unlink0 /;
+  require File::Temp; File::Temp->import( qw/ tempfile unlink0 / );
 
   my($tfh,$filename) = tempfile('fcmpXXXX', TMPDIR => 1);
   # NB. The trailing space is intentional (see [perl #37716])
@@ -105,7 +105,7 @@ SKIP: {
     TODO: {
         my $why = "spaces after filename silently truncated";
         my $how_many = 1;
-        my $condition = ($^O eq "cygwin") or ($^O eq "vos");
+        my $condition = ($^O eq "cygwin") || ($^O eq "vos");
         todo_skip $why, $how_many if $condition;
         is($donetests[2], 0, "file/fileCR [$donetests[2]]");
     }
