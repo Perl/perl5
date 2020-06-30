@@ -1,6 +1,6 @@
 #!perl
 BEGIN {
-    unless (find PerlIO::Layer 'perlio') {
+    unless (PerlIO::Layer->find('perlio')) {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
