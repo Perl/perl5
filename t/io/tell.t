@@ -8,15 +8,14 @@ BEGIN {
 
 plan(36);
 
-no strict 'refs';
-
-my $TST = 'TST';
-
 my $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
               $^O eq 'os2' or $^O eq 'cygwin' or
               $^O =~ /^uwin/);
 
+my $TST = 'TST';
+no strict 'refs';
 open($TST, 'harness') || (die "Can't open harness");
+use strict 'refs';
 binmode $TST if $Is_Dosish;
 ok(!eof(TST), "eof is false after open() non-empty file");
 
@@ -64,7 +63,9 @@ binmode OTHER if (($^O eq 'MSWin32') || ($^O eq 'NetWare'));
 
     ok($., "open() doesn't change filehandler for \$.");
 
+    no warnings 'void';
     tell OTHER;
+    use warnings 'void';
     ok(!$., "tell() does change filehandler for \$.");
 
     $. = 5;
@@ -86,7 +87,9 @@ is($., $curline, "the 'local' correctly restores old value of filehandler for \$
 {
     local($.);
 
+    no warnings 'void';
     tell OTHER;
+    use warnings 'void';
     is($., 7, "tell() inside 'local' change filehandler for \$.");
 }
 
@@ -97,6 +100,7 @@ close(OTHER);
 }
 {
     no warnings 'unopened';
+    no warnings 'once';
     # this must be a handle that has never been opened
     is(tell(UNOPENED), -1, "tell() for unopened file returns -1");
 }
@@ -179,11 +183,14 @@ open FH, "test.pl";
 my $fh = *FH; # coercible glob
 is(tell($fh), 0, "tell on coercible glob");
 is(tell, 0, "argless tell after tell \$coercible");
-tell *$fh;
-is(tell, 0, "argless tell after tell *\$coercible");
-eof $fh;
-is(tell, 0, "argless tell after eof \$coercible");
-eof *$fh;
+{
+    no warnings 'void';
+    tell *$fh;
+    is(tell, 0, "argless tell after tell *\$coercible");
+    eof $fh;
+    is(tell, 0, "argless tell after eof \$coercible");
+    eof *$fh;
+}
 is(tell, 0, "argless tell after eof *\$coercible");
 seek $fh,0,0;
 is(tell, 0, "argless tell after seek \$coercible...");
