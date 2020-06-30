@@ -5,13 +5,16 @@ BEGIN {
     @INC = '../lib';
 }
 
+no strict 'refs';
+no warnings 'once';
+
 use Test::More tests => 29;
 
 use_ok('Tie::StdHandle');
 
-tie *tst,Tie::StdHandle;
+tie *tst, 'Tie::StdHandle';
 
-$f = 'tst';
+my $f = 'tst';
 
 unlink("afile") if -f "afile";
 

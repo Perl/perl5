@@ -11,7 +11,7 @@ use Tie::Handle;
 
 {
     package Foo;
-    @ISA = qw(Tie::StdHandle);
+    our @ISA = qw(Tie::StdHandle);
 }
 
 # For backwards compatibility with 5.8.x
