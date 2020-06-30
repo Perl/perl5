@@ -17,23 +17,40 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.32.0 - Bob Dylan, "The Times They Are A Changing"
+
+L<Announced on 2020-06-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/06/msg257547.html>
+
+    Come gather 'round, people
+    Wherever you roam
+    And admit that the waters
+    Around you have grown
+    And accept it that soon
+    You'll be drenched to the bone
+    If your time to you is worth savin'
+    And you better start swimmin'
+    Or you'll sink like a stone
+    For the times they are a-changin'
+
 =head2 v5.32.0-RC1 - Coretta Scott King
 
-Announced on 2020-06-08 by Sawyer X
+L<Announced on 2020-06-08 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/06/msg257521.html>
 
-Struggle is a never ending process. Freedom is never really won, you earn it and win it in every generation.
+    Struggle is a never ending process. Freedom is never really won,
+    you earn it and win it in every generation.
 
 =head2 v5.32.0-RC0 - Franz Kafka
 
-Announced on 2020-05-30 by Sawyer X
+L<Announced on 2020-05-30 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/05/msg257486.html>
 
-There are some things one can only achieve by a deliberate leap in the opposite direction.
+    There are some things one can only achieve by a deliberate leap
+    in the opposite direction.
 
 =head2 v5.31.11 - John F. Kennedy, National Committee for a Sane Nuclear Policy
 
 L<Announced on 2020-04-28 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/04/msg257385.html>
 
-Mankind must put an end to war, or war will put an end to mankind.
+    Mankind must put an end to war, or war will put an end to mankind.
 
 =head2 v5.31.10 - Christina Rossetti, "Remember"
 
