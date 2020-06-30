@@ -1,7 +1,7 @@
 #!./perl -w
 
 BEGIN {
-    unless (find PerlIO::Layer 'perlio') {
+    unless (PerlIO::Layer->find('perlio')) {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
@@ -63,6 +63,7 @@ if (open(GRK, '<', $grk)) {
     close GRK;
 }
 
+my $warn;
 $SIG{__WARN__} = sub {$warn .= $_[0]};
 
 is (open(FAIL, ">:encoding(NoneSuch)", $fail1), undef, 'Open should fail');
@@ -129,9 +130,9 @@ if (ord('A') == 193) { # EBCDIC
 # things with the buffer.
 use Encode::Encoding;
 package Extensive {
- @ISA = Encode::Encoding;
+ our @ISA = ( 'Encode::Encoding' );
  __PACKAGE__->Define('extensive');
- sub encode($$;$) {
+ sub encode :prototype($$;$) {
   my ($self,$buf,$chk) = @_;
   my $leftovers = '';
   if ($buf =~ /(.*\n)(?!\z)/) {
@@ -148,6 +149,7 @@ package Extensive {
  no warnings 'once'; 
  *decode = *encode;
 }
+my $buf;
 open my $fh, ">:encoding(extensive)", \$buf;
 $fh->autoflush;
 print $fh "doughnut\n";
@@ -163,9 +165,9 @@ is join("", <$fh>), "Sheila surely shod Sean\nin shoddy shoes.\n",
    'buffer realloc during decoding';
 
 package Cower {
- @ISA = Encode::Encoding;
+ our @ISA = ( 'Encode::Encoding' );
  __PACKAGE__->Define('cower');
- sub encode($$;$) {
+ sub encode :prototype($$;$) {
   my ($self,$buf,$chk) = @_;
   my $leftovers = '';
   if ($buf =~ /(.*\n)(?!\z)/) {
@@ -193,9 +195,9 @@ is join("", <$fh>), "pumping\nplum\npits\n",
 
 package Globber {
  no warnings 'once';
- @ISA = Encode::Encoding;
+ our @ISA = ( 'Encode::Encoding' );
  __PACKAGE__->Define('globber');
- sub encode($$;$) {
+ sub encode :prototype($$;$) {
   my ($self,$buf,$chk) = @_;
   $_[1] = *foo if $chk;
   $buf;
@@ -211,7 +213,7 @@ package Globber {
 # test, as it triggers bug #115692, resulting in string table warnings.
 SKIP: {
 skip "produces string table warnings", 2 if $ENV{PERL_DESTRUCT_LEVEL};
-
+my $e;
 eval { eval {
     open my $fh, ">:encoding(globber)", \$buf;
     print $fh "Agathopous Goodfoot\n";

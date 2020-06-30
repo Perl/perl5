@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    unless (find PerlIO::Layer 'perlio') {
+    unless (PerlIO::Layer->find('perlio')) {
 	print "1..0 # No perlio\n";
 	exit 0;
     }
@@ -13,7 +13,7 @@ BEGIN {
 	print "1..0 # Skip: No Encode\n";
 	exit 0;
     }
-    import Encode qw(:fallback_all);
+    Encode->import( qw(:fallback_all) );
 }
 
 use Test::More tests => 10;
@@ -34,20 +34,20 @@ my $file = "fallback$$.txt";
     like($message, qr/does not map to iso-8859-1/o, "FB_WARN message");
 }
 
-open($fh,'<',$file) || die "File cannot be re-opened";
+open(my $fh,'<',$file) || die "File cannot be re-opened";
 my $line = <$fh>;
 is($line,"\\x{20ac}0.02\n","perlqq escapes");
 close($fh);
 
 $PerlIO::encoding::fallback = Encode::HTMLCREF;
 
-ok(open(my $fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
+ok(open($fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
 my $str = "\x{20AC}";
 print $fh $str,"0.02\n";
 close($fh);
 
 open($fh,'<',$file) || die "File cannot be re-opened";
-my $line = <$fh>;
+$line = <$fh>;
 is($line,"&#8364;0.02\n","HTML escapes");
 close($fh);
 
@@ -60,7 +60,7 @@ close($fh);
 }
 
 ok(open($fh,"<encoding(US-ASCII)",$file),"Opened as ASCII");
-my $line = <$fh>;
+$line = <$fh>;
 printf "# %x\n",ord($line);
 is($line,"\\xA30.02\n","Escaped non-mapped char");
 close($fh);
