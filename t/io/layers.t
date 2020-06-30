@@ -35,7 +35,7 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 60 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
+my $NTEST = 63 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
     + $UTF8_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
@@ -235,17 +235,29 @@ EOT
     sub STORE { $_[0][0] }
     tie my $t, "";
     $t = *f;
-    $f = 0; PerlIO::get_layers $t;
-    is $f, 1, '1 fetch on tied glob';
+    ok(! defined $t, "tie object is undefined" );
+    {
+        no warnings 'uninitialized';
+        $f = 0; PerlIO::get_layers $t;
+        is $f, 1, '1 fetch on tied glob';
+    }
     $t = \*f;
-    $f = 0; PerlIO::get_layers $t;
-    is $f, 1, '1 fetch on tied globref';
+    ok(! defined $t, "tie object is undefined" );
+    {
+        no warnings 'uninitialized';
+        $f = 0; PerlIO::get_layers $t;
+        is $f, 1, '1 fetch on tied globref';
+    }
     $t = *f;
     $f = 0; PerlIO::get_layers \$t;
     is $f, 1, '1 fetch on referenced tied glob';
     $t = '';
-    $f = 0; PerlIO::get_layers $t;
-    is $f, 1, '1 fetch on tied string';
+    ok(! defined $t, "tie object is undefined" );
+    {
+        no warnings 'uninitialized';
+        $f = 0; PerlIO::get_layers $t;
+        is $f, 1, '1 fetch on tied string';
+    }
 
     # No distinction between nums and strings
     open "12", "<:crlf", "test.pl" or die "$0 cannot open test.pl: $!";
