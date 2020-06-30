@@ -10,7 +10,7 @@ BEGIN {
 # -dlc 20001021
 
 use Tie::Array;
-tie @a,Tie::StdArray;
+tie my @a, 'Tie::StdArray';
 undef *Tie::StdArray::SPLICE;
 require "op/splice.t"
 

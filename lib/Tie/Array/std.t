@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use Tie::Array;
-tie @foo,Tie::StdArray;
-tie @ary,Tie::StdArray;
-tie @bar,Tie::StdArray;
+tie my @foo, 'Tie::StdArray';
+tie my @ary, 'Tie::StdArray';
+tie my @bar, 'Tie::StdArray';
 require "op/array.t"
