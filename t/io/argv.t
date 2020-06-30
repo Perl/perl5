@@ -79,7 +79,7 @@ TODO: {
 {
     # 5.10 stopped autovivifying scalars in globs leading to a
     # segfault when $ARGV is written to.
-    runperl( prog => 'eof()', stdin => "nothing\n" );
+    runperl( prog => 'no warnings q|void|; eof()', stdin => "nothing\n" );
     is( 0+$?, 0, q(eof() doesn't segfault) );
 }
 
@@ -260,7 +260,7 @@ unlink "tmpIo_argv3.tmp";
 # ++$x vivifies it, reusing the just-deleted GV that PL_argvgv still points
 # to.  The BEGIN block ensures it is freed late enough that nothing else
 # has reused it yet.
-is runperl(prog => 'my $x; undef *x; delete $::{ARGV}; $x++;'
+is runperl(prog => 'my $x; no warnings q|once|; undef *x; delete $::{ARGV}; $x++;'
                   .'eval q-BEGIN{undef *x} readline-; print qq-ok\n-'),
   "ok\n", 'deleting $::{ARGV}';
 
