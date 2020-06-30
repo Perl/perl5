@@ -1,8 +1,10 @@
 #!./perl
 
+my $Startup_Hints;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib'; 
+    $Startup_Hints = $^H;
 }
 
 my $perl = $^X;
@@ -12,15 +14,15 @@ my $Invoke_Perl = qq(MCR $perl "-I[-.lib]");
 
 use Test::More tests => 29;
 
-my $Orig_Bits;
 SKIP: {
     skip("tests for non-VMS only", 1) if $^O eq 'VMS';
 
     no utf8;
+    my $Orig_Bits;
     BEGIN { $Orig_Bits = $^H }
 
     # make sure that all those 'use vmsish' calls didn't do anything.
-    is( $Orig_Bits, $^H,    'use vmsish a no-op' );
+    is( $Orig_Bits, $Startup_Hints, "use vmsish a no-op $Orig_Bits" );
 }
 
 SKIP: {
