@@ -32,6 +32,7 @@ SKIP: {
 
     $! = 0;
     no warnings 'unopened';
+    no warnings 'once';
     read(B,$b,1);
     ok($! == &Errno::EBADF);
 }
