@@ -19,8 +19,13 @@ print $foo "ok 1\n";
 print "ok 2\n","ok 3\n","ok 4\n";
 print STDOUT "ok 5\n";
 
-open(foo,">-");
-print foo "ok 6\n";
+{
+    # Suppress twice:
+    # Unquoted string "foo" may clash with future reserved word at t/io/print.t
+    no warnings;
+    open(foo,">-");
+    print foo "ok 6\n";
+}
 
 printf "ok %d\n",7;
 printf("ok %d\n",8);
@@ -51,6 +56,7 @@ if (!exists &Errno::EBADF) {
 } else {
     $! = 0;
     no warnings 'unopened';
+    no warnings 'once';
     print NONEXISTENT "foo";
     print "not " if ($! != &Errno::EBADF);
     print "ok 19\n";
