@@ -14,11 +14,14 @@ print "1..28\n";
 my @warns;
 BEGIN { $SIG{__WARN__} = sub { push @warns, @_ }; $^W = 1 };
 
+no strict 'vars';
+
 %x = ();
 $y = 3;
 @z = ();
 $X::x = 13;
 
+no strict 'refs';
 use vars qw($p @q %r *s &t $X::p);
 
 my $e = !(grep /^Name "X::x" used only once: possible typo/, @warns) && 'not ';
@@ -63,9 +66,12 @@ $e = $@ !~ /^Can't declare individual elements of hash or array/ && 'not ';
 print "${e}ok 16\n";
 
 { local $^W;
-  eval 'use vars qw($!)';
-  ($e, @warns) = ($@ || @warns) ? 'not ' : '';
-  print "${e}ok 17\n";
+  @warns = ();
+  eval 'use vars qw($!)'; #  No need to declare built-in vars
+  my $err = ($@ || $warns[0]) // '';
+  chomp $err;
+  $e = ($@ || @warns) ? '' : 'not ';
+  print "${e}ok 17 $err\n";
 };
 
 # NB the next test only works because vars.pm has already been loaded
