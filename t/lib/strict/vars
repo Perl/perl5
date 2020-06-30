@@ -2,7 +2,8 @@ Check strict vars functionality
 
 __END__
 
-# no strict, should build & run ok.
+# NAME no strict, should build & run ok.
+no strict; no warnings;
 Fred ;
 my $fred ;
 $b = "fred" ;
@@ -11,12 +12,16 @@ EXPECT
 
 ########
 
+# NAME test 2
+no strict; no warnings;
 use strict qw(subs refs) ;
 $fred ;
 EXPECT
 
 ########
 
+# NAME test 3
+no warnings;
 use strict ;
 no strict 'vars' ;
 $fred ;
@@ -24,7 +29,8 @@ EXPECT
 
 ########
 
-# strict vars - no error
+# NAME strict vars - no error
+no strict; no warnings;
 use strict 'vars' ;
 use vars qw( $freddy) ;
 BEGIN { *freddy = \$joe::shmoe; }
@@ -33,7 +39,8 @@ EXPECT
 
 ########
 
-# strict vars - no error
+# NAME strict vars - no error
+no strict; no warnings;
 use strict 'vars' ;
 use vars qw( $freddy) ;
 local $abc::joe ;
@@ -45,15 +52,17 @@ EXPECT
 
 ########
 
-# strict vars - error
-use strict ;
+# NAME strict vars - error
+
+use strict ; no warnings;
 $fred ;
 EXPECT
 Global symbol "$fred" requires explicit package name (did you forget to declare "my $fred"?) at - line 4.
 Execution of - aborted due to compilation errors.
 ########
 
-# strict vars - error
+# NAME strict vars - error
+
 use strict 'vars' ;
 <$fred> ;
 EXPECT
@@ -61,7 +70,8 @@ Global symbol "$fred" requires explicit package name (did you forget to declare 
 Execution of - aborted due to compilation errors.
 ########
 
-# strict vars - error
+# NAME strict vars - error
+
 use strict 'vars' ;
 local $fred ;
 EXPECT
@@ -69,7 +79,8 @@ Global symbol "$fred" requires explicit package name (did you forget to declare 
 Execution of - aborted due to compilation errors.
 ########
 
-# Check compile time scope of strict vars pragma
+# NAME Check compile time scope of strict vars pragma
+
 use strict 'vars' ;
 {
     no strict ;
@@ -82,7 +93,8 @@ Global symbol "$joe" requires explicit package name (did you forget to declare "
 Execution of - aborted due to compilation errors.
 ########
 
-# Check compile time scope of strict vars pragma
+# NAME Check compile time scope of strict vars pragma
+
 use strict 'vars' ;
 use utf8;
 use open qw( :utf8 :std );
@@ -97,7 +109,8 @@ Global symbol "$jòè" requires explicit package name (did you forget to declare
 Execution of - aborted due to compilation errors.
 ########
 
-# Check compile time scope of strict vars pragma
+# NAME Check compile time scope of strict vars pragma
+
 no strict;
 {
     use strict 'vars' ;
@@ -109,6 +122,8 @@ Global symbol "$joe" requires explicit package name (did you forget to declare "
 Execution of - aborted due to compilation errors.
 ########
 
+# NAME require "./abc" - 1
+ 
 --FILE-- abc
 $joe = 1 ;
 1;
@@ -119,28 +134,34 @@ EXPECT
 
 ########
 
+# NAME require "./abc" - 2
+
 --FILE-- abc
 use strict 'vars' ;
 1;
 --FILE-- 
-require "./abc";
+no strict; no warnings; require "./abc";
 $joe = 1 ;
 EXPECT
 
 ########
 
+# NAME require "./abc" - 3
+
 --FILE-- abc
 use strict 'vars' ;
 $joe = 1 ;
 1;
 --FILE-- 
-$joe = 1 ;
+no strict; no warnings; $joe = 1 ;
 require "./abc";
 EXPECT
 Variable "$joe" is not imported at ./abc line 2.
 Global symbol "$joe" requires explicit package name (did you forget to declare "my $joe"?) at ./abc line 2.
 Compilation failed in require at - line 2.
 ########
+
+# NAME require "./abc" - 4
 
 --FILE-- abc
 use strict 'vars' ;
@@ -149,7 +170,7 @@ use open qw( :utf8 :std );
 $jòè = 1 ;
 1;
 --FILE-- 
-use utf8;
+use utf8; no strict; no warnings; 
 use open qw( :utf8 :std );
 $jòè = 1 ;
 require "./abc";
@@ -159,12 +180,14 @@ Global symbol "$jòè" requires explicit package name (did you forget to declare
 Compilation failed in require at - line 4.
 ########
 
+# NAME require "./abc" - 5
+
 --FILE-- abc.pm
 use strict 'vars' ;
 $joe = 1 ;
 1;
 --FILE-- 
-$joe = 1 ;
+no strict; no warnings; $joe = 1 ;
 use abc;
 EXPECT
 Variable "$joe" is not imported at abc.pm line 2.
@@ -173,6 +196,8 @@ Compilation failed in require at - line 2.
 BEGIN failed--compilation aborted at - line 2.
 ########
 
+# NAME require "./abc" - 6
+
 --FILE-- abc.pm
 use strict 'vars' ;
 use utf8;
@@ -180,7 +205,7 @@ use open qw( :utf8 :std );
 $jòè = 1 ;
 1;
 --FILE-- 
-use utf8;
+use utf8; no strict; no warnings; use feature 'indirect';
 use open qw( :utf8 :std );
 $jòè = 1 ;
 use abc;
@@ -191,9 +216,11 @@ Compilation failed in require at - line 4.
 BEGIN failed--compilation aborted at - line 4.
 ########
 
+# NAME require "./abc" - 7
+
 --FILE-- abc.pm
 package Burp;
-use strict;
+no warnings; use strict;
 $a = 1;$f = 1;$k = 1; # just to get beyond the limit...
 $b = 1;$g = 1;$l = 1;
 $c = 1;$h = 1;$m = 1;
@@ -201,7 +228,7 @@ $d = 1;$i = 1;$n = 1;
 $e = 1;$j = 1;$o = 1;
 $p = 0b12;
 --FILE-- 
-use abc;
+no strict; no warnings; use abc;
 EXPECT
 Global symbol "$f" requires explicit package name (did you forget to declare "my $f"?) at abc.pm line 3.
 Global symbol "$k" requires explicit package name (did you forget to declare "my $k"?) at abc.pm line 3.
@@ -223,7 +250,8 @@ Compilation failed in require at - line 1.
 BEGIN failed--compilation aborted at - line 1.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 1
+
 no strict ;
 eval {
     $joe = 1 ;
@@ -234,7 +262,8 @@ EXPECT
 
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 2
+
 no strict ;
 eval {
     use strict 'vars' ;
@@ -247,7 +276,8 @@ Global symbol "$joe" requires explicit package name (did you forget to declare "
 Execution of - aborted due to compilation errors.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 3
+
 use strict 'vars' ;
 eval {
     $joe = 1 ;
@@ -260,7 +290,8 @@ Global symbol "$joe" requires explicit package name (did you forget to declare "
 Execution of - aborted due to compilation errors.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 4
+
 use strict 'vars' ;
 eval {
     no strict ;
@@ -274,7 +305,8 @@ Global symbol "$joe" requires explicit package name (did you forget to declare "
 Execution of - aborted due to compilation errors.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 5
+
 use strict 'vars' ;
 use utf8;
 use open qw( :utf8 :std );
@@ -290,8 +322,9 @@ Global symbol "$jòè" requires explicit package name (did you forget to declare
 Execution of - aborted due to compilation errors.
 ########
 
-# Check scope of pragma with eval
-no strict ;
+# NAME Check scope of pragma with eval - 6
+
+no strict ; no warnings 'once';
 eval '
     $joe = 1 ;
 '; print STDERR $@ ;
@@ -300,8 +333,9 @@ EXPECT
 
 ########
 
-# Check scope of pragma with eval
-no strict ;
+# NAME Check scope of pragma with eval - 7
+
+no strict ; no warnings 'once';
 eval q[ 
     use strict 'vars' ;
     $joe = 1 ;
@@ -310,7 +344,8 @@ EXPECT
 Global symbol "$joe" requires explicit package name (did you forget to declare "my $joe"?) at (eval 1) line 3.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 8
+
 use strict 'vars' ;
 eval '
     $joe = 1 ;
@@ -319,7 +354,8 @@ EXPECT
 Global symbol "$joe" requires explicit package name (did you forget to declare "my $joe"?) at (eval 1) line 2.
 ########
 
-# Check scope of pragma with eval
+# NAME Check scope of pragma with eval - 9
+
 use strict 'vars' ;
 eval '
     no strict ;
@@ -331,7 +367,8 @@ Global symbol "$joe" requires explicit package name (did you forget to declare "
 Execution of - aborted due to compilation errors.
 ########
 
-# Check if multiple evals produce same errors
+# NAME Check if multiple evals produce same errors
+
 use strict 'vars';
 my $ret = eval q{ print $x; };
 print $@;
@@ -346,8 +383,9 @@ Global symbol "$x" requires explicit package name (did you forget to declare "my
 ok 2
 ########
 
-# strict vars with outer our - no error
-use strict 'vars' ;
+# NAME strict vars with outer our - no error - 1
+
+use strict 'vars' ; no warnings;
 our $freddy;
 local $abc::joe ;
 my $fred ;
@@ -358,7 +396,8 @@ EXPECT
 
 ########
 
-# strict vars with inner our - no error
+# NAME strict vars with inner our - no error - 2
+
 use strict 'vars' ;
 sub foo {
     our $fred;
@@ -368,7 +407,8 @@ EXPECT
 
 ########
 
-# strict vars with outer our, inner use - no error
+# NAME strict vars with outer our, inner use - no error
+
 use strict 'vars' ;
 our $fred;
 sub foo {
@@ -378,8 +418,9 @@ EXPECT
 
 ########
 
-# strict vars with nested our - no error
-use strict 'vars' ;
+# NAME strict vars with nested our - no error
+
+use strict 'vars' ; no warnings;
 our $fred;
 sub foo {
     our $fred;
@@ -390,7 +431,8 @@ EXPECT
 
 ########
 
-# strict vars with elapsed our - error
+# NAME strict vars with elapsed our - error - 1
+
 use strict 'vars' ;
 sub foo {
     our $fred;
@@ -403,7 +445,8 @@ Global symbol "$fred" requires explicit package name (did you forget to declare 
 Execution of - aborted due to compilation errors.
 ########
 
-# strict vars with elapsed our - error
+# NAME strict vars with elapsed our - error - 2
+
 use strict 'vars' ;
 use utf8;
 use open qw( :utf8 :std );
@@ -418,7 +461,9 @@ Global symbol "$frèd" requires explicit package name (did you forget to declare
 Execution of - aborted due to compilation errors.
 ########
 
-# nested our with local - no error
+# NAME nested our with local - no error
+
+no strict; no warnings;
 $fred = 1;
 use strict 'vars';
 {
@@ -431,7 +476,8 @@ EXPECT
 1
 ########
 
-# "nailed" our declaration visibility across package boundaries
+# NAME "nailed" our declaration visibility across package boundaries
+
 use strict 'vars';
 our $foo;
 $foo = 20;
@@ -441,7 +487,8 @@ EXPECT
 20
 ########
 
-# multiple our declarations in same scope, different packages, no warning
+# NAME multiple our declarations in same scope, different packages, no warning
+
 use strict 'vars';
 use warnings;
 our $foo;
@@ -453,7 +500,8 @@ EXPECT
 20
 ########
 
-# multiple our declarations in same scope, same package, warning
+# NAME multiple our declarations in same scope, same package, warning
+
 use strict 'vars';
 use warnings;
 our $foo;
@@ -463,7 +511,8 @@ EXPECT
 "our" variable $foo redeclared at - line 7.
 ########
 
-# multiple our declarations in same scope, same package, warning
+# NAME multiple our declarations in same scope, same package, warning
+
 use strict 'vars';
 use warnings;
 { our $x = 1 }
@@ -484,7 +533,9 @@ EXPECT
 --FILE-- abc
 ok
 --FILE-- 
-# check if our variables are introduced correctly in readline()
+
+# NAME check if our variables are introduced correctly in readline()
+
 package Foo;
 use strict 'vars';
 our $FH;
@@ -495,7 +546,8 @@ EXPECT
 ok
 ########
 
-# Make sure the strict vars failure still occurs
+# NAME Make sure the strict vars failure still occurs
+
 # now that the '@i should be written as \@i' failure does not occur
 # 20000522 mjd@plover.com (MJD)
 use strict 'vars';
@@ -506,7 +558,8 @@ Global symbol "@i_like_crackers" requires explicit package name (did you forget 
 Execution of - aborted due to compilation errors.
 ########
 
-# [perl #21914] New bug > 5.8.0. Used to dump core.
+# NAME [perl #21914] New bug > 5.8.0. Used to dump core.
+
 use strict 'vars';
 @k = <$k>;
 EXPECT
@@ -514,30 +567,40 @@ Global symbol "@k" requires explicit package name (did you forget to declare "my
 Global symbol "$k" requires explicit package name (did you forget to declare "my $k"?) at - line 4.
 Execution of - aborted due to compilation errors.
 ########
-# [perl #26910] hints not propagated into (?{...})
-use strict 'vars';
+
+# NAME [perl #26910] hints not propagated into (?{...})
+
+no strict; no warnings; use strict 'vars';
 qr/(?{$foo++})/;
 EXPECT
-Global symbol "$foo" requires explicit package name (did you forget to declare "my $foo"?) at - line 3.
+Global symbol "$foo" requires explicit package name (did you forget to declare "my $foo"?) at - line 4.
 Execution of - aborted due to compilation errors.
 ########
-# Regex compilation errors weren't UTF-8 clean.
+
+# NAME Regex compilation errors weren't UTF-8 clean.
+
 use strict 'vars';
 use utf8;
 use open qw( :utf8 :std );
 qr/(?{$fòò++})/;
 EXPECT
-Global symbol "$fòò" requires explicit package name (did you forget to declare "my $fòò"?) at - line 5.
+Global symbol "$fòò" requires explicit package name (did you forget to declare "my $fòò"?) at - line 6.
 Execution of - aborted due to compilation errors.
 ########
-# [perl #73712] 'Variable is not imported' should be suppressible
+
+# NAME [perl #73712] 'Variable is not imported' should be suppressible
+
+no strict; no warnings;
 $dweck;
 use strict 'vars';
 no warnings;
 eval q/$dweck/;
 EXPECT
 ########
-# [perl #112316] strict vars getting confused by nulls
+
+# NAME [perl #112316] strict vars getting confused by nulls - 1
+
+no strict; no warnings;
 # Assigning to a package whose name contains a null
 BEGIN { *Foo:: = *{"foo\0bar::"} }
 package foo;
@@ -546,7 +609,10 @@ use strict;
 eval 'package Foo; @bar = 1' or die;
 EXPECT
 ########
-# [perl #112316] strict vars getting confused by nulls
+
+# NAME [perl #112316] strict vars getting confused by nulls - 2
+
+no strict; no warnings;
 # Assigning from within a package whose name contains a null
 BEGIN { *Foo:: = *{"foo\0bar::"} }
 package Foo;
@@ -555,7 +621,10 @@ use strict;
 eval 'package foo; @bar = 1' or die;
 EXPECT
 ########
-# [perl #112316] strict vars getting confused by nulls
+
+# NAME [perl #112316] strict vars getting confused by nulls - 3
+
+no strict; no warnings;
 # Assigning from one null package to another, with a common prefix
 BEGIN { *Foo:: = *{"foo\0foo::"};
         *Bar:: = *{"foo\0bar::"} }
@@ -565,7 +634,10 @@ use strict;
 eval 'package Bar; @bar = 1' or die;
 EXPECT
 ########
-# UTF8 and Latin1 package names equivalent at the byte level
+
+# NAME UTF8 and Latin1 package names equivalent at the byte level
+
+no strict; no warnings;
 use utf8;
 # ĵ in UTF-8 is the same as Äµ in Latin-1
 package ĵ;
