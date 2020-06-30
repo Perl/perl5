@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    unless (find PerlIO::Layer 'perlio') {
+    unless (PerlIO::Layer->find('perlio')) {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
@@ -86,7 +86,7 @@ is($var, "foo");
 $var = '';
 open $fh, "+>", \$var;
 print $fh "xxx\n";
-open $dup,'+<&',$fh;
+open my $dup,'+<&',$fh;
 print $dup "yyy\n";
 seek($dup,0,SEEK_SET);
 is(<$dup>, "xxx\n");
@@ -99,8 +99,11 @@ is(<$fh>, "42", "reading from non-string scalars");
 close $fh;
 
 { package P; sub TIESCALAR {bless{}} sub FETCH { "shazam" } sub STORE {} }
-tie $p, P; open $fh, '<', \$p;
-is(<$fh>, "shazam", "reading from magic scalars");
+{
+    no strict 'subs';
+    tie my $p, P; open $fh, '<', \$p;
+    is(<$fh>, "shazam", "reading from magic scalars");
+}
 
 {
     use warnings;
@@ -138,8 +141,9 @@ is(<$fh>, "shazam", "reading from magic scalars");
         package MgUndef;
         sub TIESCALAR { bless [] }
         sub FETCH { $fetch++; return undef }
-	sub STORE {}
+        sub STORE {}
     }
+    no strict 'subs';
     tie my $scalar, MgUndef;
 
     open my $fh, '<', \$scalar;
@@ -244,7 +248,7 @@ EOF
     my $s;
     sub TIESCALAR { bless \my $x }
     sub FETCH { $s .= ':F'; ${$_[0]} }
-    sub STORE { $s .= ":S($_[1])"; ${$_[0]} = $_[1] }
+    sub STORE { my $v = $_[1] // ''; $s .= ":S($v)"; ${$_[0]} = $_[1] }
 
     package main;
 
@@ -319,14 +323,18 @@ EOF
 
 # [perl #92706]
 {
-    open my $fh, "<", \(my $f=*f); seek $fh, 2,1;
-    pass 'seeking on a glob copy';
-    open my $fh, "<", \(my $f=*f); seek $fh, -2,2;
-    pass 'seeking on a glob copy from the end';
+    {
+        open my $fh, "<", \(my $f=*f); seek $fh, 2,1;
+        pass 'seeking on a glob copy';
+    }
+    {
+        open my $fh, "<", \(my $f=*f); seek $fh, -2,2;
+        pass 'seeking on a glob copy from the end';
+    }
 }
 
 # [perl #108398]
-sub has_trailing_nul(\$) {
+sub has_trailing_nul :prototype(\$) {
     my ($ref) = @_;
     my $sv = B::svref_2object($ref);
     return undef if !$sv->isa('B::PV');
@@ -404,19 +412,20 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     local $SIG{__WARN__} = sub { push @warnings, "@_" };
     my $content = "12\x{101}";
     $! = 0;
+    no warnings "utf8";
     ok(!open(my $fh, "<", \$content), "non-byte open should fail");
     is(0+$!, EINVAL, "check \$! is updated");
     is_deeply(\@warnings, [], "should be no warnings (yet)");
     use warnings "utf8";
     $! = 0;
-    ok(!open(my $fh, "<", \$content), "non byte open should fail (and warn)");
+    ok(!open($fh, "<", \$content), "non byte open should fail (and warn)");
     is(0+$!, EINVAL, "check \$! is updated even when we warn");
     is_deeply(\@warnings, [ $byte_warning ], "should have warned");
 
     @warnings = ();
     $content = "12\xA1";
     utf8::upgrade($content);
-    ok(open(my $fh, "<", \$content), "open upgraded scalar");
+    ok(open($fh, "<", \$content), "open upgraded scalar");
     binmode $fh;
     my $tmp;
     is(read($fh, $tmp, 4), 3, "read should get the downgraded bytes");
@@ -442,6 +451,7 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     local $SIG{__WARN__} = sub { push @warnings, "@_" };
 
     $! = 0;
+    no warnings "utf8";
     is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
     is(0+$!, EINVAL, "check errno set correctly");
     is_deeply(\@warnings, [], "should be no warning (yet)");
