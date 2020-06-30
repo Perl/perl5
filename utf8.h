@@ -950,10 +950,9 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 #define UNICODE_ALLOW_SUPER	0
 #define UNICODE_ALLOW_ANY	0
 
-/* This matches the 2048 code points between UNICODE_SURROGATE_FIRST (0xD800) and
- * UNICODE_SURROGATE_LAST (0xDFFF) */
-#define UNICODE_IS_SURROGATE(uv)  UNLIKELY(((UV) (uv) & (~0xFFFF | 0xF800))     \
-                                                                    == 0xD800)
+/* This matches the 2048 code points between these */
+#define UNICODE_IS_SURROGATE(uv) UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,  \
+                                                      UNICODE_SURROGATE_LAST))
 
 #define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
 #define UNICODE_IS_BYTE_ORDER_MARK(uv)	UNLIKELY((UV) (uv)                      \
