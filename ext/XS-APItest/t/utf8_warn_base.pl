@@ -36,8 +36,9 @@ my $known_start_byte = I8_to_native("\xC5");
 sub requires_extended_utf8($) {
 
     # Returns a boolean as to whether or not the code point parameter fits
-    # into 31 bits, subject to the convention that a negative code point
-    # stands for one that overflows the word size, so won't fit in 31 bits.
+    # into 31 bits (30 on EBCDIC), subject to the convention that a negative
+    # code point stands for one that overflows the word size, so won't fit in
+    # 31 bits.
 
     return shift > $highest_non_extended_utf8_cp;
 }
