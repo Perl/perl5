@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl'; require './charset_tools.pl';
-    unless ($has_perlio = find PerlIO::Layer 'perlio') {
+    unless ($has_perlio = PerlIO::Layer->find('perlio')) {
 	print <<EOF;
 # Since you don't have perlio you might get failures with UTF-8 locales.
 EOF
