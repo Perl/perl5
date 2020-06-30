@@ -40,23 +40,27 @@ sub is {
 
 is ("\x53", chr 83);
 is ("\x4EE", chr (78) . 'E');
+no warnings 'digit';
 is ("\x4i", chr (4) . 'i');	# This will warn
 is ("\xh", chr (0) . 'h');	# This will warn
 is ("\xx", chr (0) . 'x');	# This will warn
 is ("\xx9", chr (0) . 'x9');	# This will warn. \x9 is tab in EBCDIC too?
 is ("\x9_E", chr (9) . '_E');	# This will warn
+use warnings 'digit';
 
 is ("\x{4E}", chr 78);
 is ("\x{6_9}", chr 105);
 is ("\x{_6_3}", chr 99);
 is ("\x{_6B}", chr 107);
 
-is ("\x{9__0}", chr 9);		# multiple underscores not allowed.
+no warnings 'digit';
+is ("\x{9__0}", chr 9);		# multiple underscores not allowed; warns.
 is ("\x{77_}", chr 119);	# trailing underscore warns.
-is ("\x{6FQ}z", chr (111) . 'z');
+is ("\x{6FQ}z", chr (111) . 'z'); # warns
 
-is ("\x{0x4E}", chr 0);
-is ("\x{x4E}", chr 0);
+is ("\x{0x4E}", chr 0); # warns
+is ("\x{x4E}", chr 0);  # warns
+use warnings 'digit';
 
 is ("\x{0065}", chr 101);
 is ("\x{000000000000000000000000000000000000000000000000000000000000000072}",
