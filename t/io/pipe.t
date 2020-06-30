@@ -240,7 +240,10 @@ $? = 0;
 # check that child is reaped if the piped program can't be executed
 SKIP: {
   skip "/no_such_process exists", 1 if -e "/no_such_process";
+  # Suppress: Can't exec "/no_such_process": No such file or directory at io/pipe.t line NNN
+  no warnings 'exec';
   open NIL, '/no_such_process |';
+  use warnings;
   close NIL;
 
   my $child = 0;
