@@ -3585,6 +3585,20 @@ respectively.  POSITION and the return value are based at zero.
 If the substring is not found, L<C<index>|/index STR,SUBSTR,POSITION>
 returns -1.
 
+Find characters or strings:
+
+    index("Perl is great", "P");     # Returns 0
+    index("Perl is great", "g");     # Returns 8
+    index("Perl is great", "great"); # Also returns 8
+
+Attempting to find something not there:
+
+    index("Perl is great", "Z");     # Returns -1 (not found)
+
+Using an offset to find the I<second> occurrence:
+
+    index("Perl is great", "e", 5);  # Returns 10
+
 =item int EXPR
 X<int> X<integer> X<truncate> X<trunc> X<floor>
 
