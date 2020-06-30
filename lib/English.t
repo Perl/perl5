@@ -12,6 +12,8 @@ use English qw( -no_match_vars ) ;
 use Config;
 use Errno;
 
+our ($PREMATCH, $MATCH, $POSTMATCH, $threads);
+
 is( $PID, $$, '$PID' );
 
 $_ = 1;
@@ -68,14 +70,14 @@ is( $ACCUMULATOR, $^A, '$ACCUMULATOR' );
 undef $OUTPUT_FIELD_SEPARATOR;
 
 if ($threads) { $" = "\n" } else { $LIST_SEPARATOR = "\n" };
-@foo = (8, 9);
+my @foo = (8, 9);
 @foo = split(/\n/, "@foo");
 is( $foo[0], 8, '$"' );
 is( $foo[1], 9, '$LIST_SEPARATOR' );
 
 undef $OUTPUT_RECORD_SEPARATOR;
 
-eval 'NO SUCH FUNCTION';
+eval 'no strict; use feature "indirect"; NO SUCH FUNCTION';
 like( $EVAL_ERROR, qr/method/, '$EVAL_ERROR' );
 
 is( $UID, $<, '$UID' );
@@ -118,7 +120,7 @@ is( $INPUT_LINE_NUMBER, 2, '$INPUT_LINE_NUMBER' );
 
 my %hash;
 $SUBSCRIPT_SEPARATOR = '|';
-$hash{d,e,f} = 1;
+$hash{qw{d e f}} = 1;
 $SUBSEP = ',';
 $hash{'a', 'b', 'c'} = 1;
 my @keys = sort keys %hash;
@@ -137,6 +139,8 @@ package B;
 
 use English;
 
+our ($PREMATCH, $MATCH, $POSTMATCH);
+
 "abc" =~ /b/;
 
 main::is( $PREMATCH, 'a', '$PREMATCH defined' );
@@ -152,6 +156,8 @@ main::is( $POSTMATCH, 'c', '$POSTMATCH defined' );
 package C;
 
 use English qw( -no_match_vars ) ;
+
+our ($PREMATCH, $MATCH, $POSTMATCH);
 
 "abc" =~ /b/;
 
