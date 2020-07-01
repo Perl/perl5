@@ -36,6 +36,11 @@ our $TODO;
         $ㄅĽuṞfⳐ = 5;
     }
     
+    {
+        no warnings 'once';
+        $압Ƈ'd읯ⱪ = 6;        #'
+    }
+
     my $ꑭʑ = 2;
     
     $ꑭʑ = join(':', sort(keys %ꑭʑ::));
