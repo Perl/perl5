@@ -40,7 +40,7 @@ sub cmp_delta {
     return $max/$min <= (1+$delta);
 }
 
-my $t0 = new Benchmark;
+my $t0 = Benchmark->new();
 isa_ok ($t0, 'Benchmark', "Ensure we can create a benchmark object");
 
 # We use the benchmark object once we've done some work:
@@ -105,7 +105,7 @@ print "# $in_again iterations\n";
 cmp_ok($in_again, '>', 0, "iters returned positive iterations");
 
 
-my $t1 = new Benchmark;
+my $t1 = Benchmark->new();
 isa_ok ($t1, 'Benchmark', "Create another benchmark object now we're finished");
 
 my $diff = timediff ($t1, $t0);
