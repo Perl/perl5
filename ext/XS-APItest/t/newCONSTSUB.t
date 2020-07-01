@@ -9,6 +9,7 @@ use XS::APItest;
 
 # This test must happen outside of any warnings scope
 {
+ use p5;
  local $^W;
  my $w;
  local $SIG{__WARN__} = sub { $w .= shift };
@@ -25,6 +26,7 @@ use XS::APItest;
  is $w, undef, '...or the const SVs have the same value';
 }
 
+use p7;
 use warnings;
 
 my ($const, $glob) =

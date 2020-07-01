@@ -23,8 +23,8 @@ is pad_scalar(1, "bar"), "wobble";
 is pad_scalar(2, "bar"), "wobble";
 is pad_scalar(3, "bar"), "wobble";
 
-sub aa($);
-sub aa($) {
+sub aa :prototype($);
+sub aa :prototype($) {
     my $xyz;
     ok \pad_scalar(1, "xyz") == \$xyz;
     ok \pad_scalar(2, "xyz") == \$xyz;
@@ -39,7 +39,7 @@ sub aa($) {
 }
 aa(1);
 
-sub bb() {
+sub bb :prototype() {
     my $counter = 0;
     my $foo = \$counter;
     return sub {

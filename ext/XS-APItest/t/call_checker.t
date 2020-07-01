@@ -18,9 +18,9 @@ my @b = qw(a b);
 my @c = qw(a b c);
 
 my($foo_got, $foo_ret);
-sub foo($@) { $foo_got = [ @_ ]; return "z"; }
+sub foo :prototype($@) { $foo_got = [ @_ ]; return "z"; }
 
-sub bar (\@$) { }
+sub bar :prototype(\@$) { }
 sub baz { }
 
 $foo_got = undef;
@@ -165,9 +165,9 @@ is $foo_ret, 9;
 
 sub MODIFY_CODE_ATTRIBUTES { cv_set_call_checker_lists($_[1]); () }
 BEGIN {
-  *foo2 = sub($$) :Attr { $foo_got = [ @_ ]; return "z"; };
+  *foo2 = sub :prototype($$) :Attr { $foo_got = [ @_ ]; return "z"; };
   my $foo = 3;
-  *foo3 = sub() :Attr { $foo };
+  *foo3 = sub :prototype() :Attr { $foo };
 }
 
 $foo_got = undef;
@@ -183,7 +183,7 @@ is $foo_ret, 3;
 cv_set_call_checker_lists(\&foo);
 undef &foo;
 $foo_got = undef;
-eval 'sub foo($@) { $foo_got = [ @_ ]; return "z"; }
+eval 'sub foo :prototype($@) { $foo_got = [ @_ ]; return "z"; }
       $foo_ret = foo(@b, @c);';
 is $@, "";
 is_deeply $foo_got, [ 2, qw(a b c) ], 'undef clears call checkers';
@@ -193,7 +193,7 @@ my %got;
 
 sub g {
     my $name = shift;
-    my $sub = sub ($\@) {
+    my $sub = sub :prototype($\@) {
 	$got{$name} = [ @_ ];
 	return $name;
     };

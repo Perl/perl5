@@ -13,4 +13,4 @@ mro::set_mro(AA => 'justisa');
 sub BB::fromp { "bb" }
 sub CC::fromp { "cc" }
 
-is fromp AA, 'bb', 'first elem of linearisation is not ignored';
+is AA->fromp, 'bb', 'first elem of linearisation is not ignored';

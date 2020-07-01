@@ -3,7 +3,18 @@
 use strict;
 use warnings;
 
-require "test.pl";
+BEGIN {
+    chdir 't' if -d 't';
+    
+    my $lib = $^X;
+    $lib =~ s{(\b)perl[^/]*$}{${1}lib};
+
+    my $t = $^X;
+    $t =~ s{(\b)perl[^/]*$}{${1}t};
+    local @INC = ( $lib, $t );
+
+    require 'test.pl';
+}
 
 plan(4);
 

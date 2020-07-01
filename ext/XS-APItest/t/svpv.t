@@ -1,14 +1,24 @@
 #!perl -w
 
-BEGIN { require 'charset_tools.pl'; }
+BEGIN {
+    my $lib = $^X;
+    $lib =~ s{(\b)perl[^/]*$}{${1}lib};
+
+    my $t = $^X;
+    $t =~ s{(\b)perl[^/]*$}{${1}t};
+    local @INC = ( $lib, $t );
+
+    require 'charset_tools.pl';
+}
 
 use Test::More tests => 35;
 
 use XS::APItest;
 
 for my $func ('SvPVbyte', 'SvPVutf8') {
- $g = *glob;
- $r = \1;
+ no strict 'refs';
+ my $g = *glob;
+ my $r = \1;
  is &$func($g), '*main::glob', "$func(\$glob_copy)";
  is ref\$g, 'GLOB', "$func(\$glob_copy) does not flatten the glob";
  is &$func($r), "$r", "$func(\$ref)";
@@ -50,15 +60,19 @@ is SvPVutf8_nomg($scalar_uni), $individual_B6_utf8_bytes;
 is tied($scalar_uni)->{fetch}, 1;
 is tied($scalar_uni)->{store}, 0;
 
-eval 'SvPVbyte(*{chr 256})';
-like $@, qr/^Wide character/, 'SvPVbyte fails on Unicode glob';
+{
+  no strict 'refs';
+  eval 'SvPVbyte(*{chr 256})';
+  like $@, qr/^Wide character/, 'SvPVbyte fails on Unicode glob';
+}
+
 package r { use overload '""' => sub { substr "\x{100}\xff", -1 } }
 is SvPVbyte(bless [], r::), "\xff",
   'SvPVbyte on ref returning downgradable utf8 string';
 
 sub TIESCALAR { bless \(my $thing = pop), shift }
 sub FETCH { ${ +shift } }
-tie $tyre, main => bless [], r::;
+tie my $tyre, main => bless [], r::;
 is SvPVbyte($tyre), "\xff",
   'SvPVbyte on tie returning ref that returns downgradable utf8 string';
 

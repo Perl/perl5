@@ -3,12 +3,14 @@ use strict;
 
 use Test::More tests => 2*10;
 
+use feature 'indirect';
+
 BEGIN { $^H |= 0x20000; }
 
 my @t;
 
-sub mymap(&@) { my $sub = shift; return map { $sub->($_) } @_; }
-sub myneg(@) { return map { -$_ } @_; }
+sub mymap :prototype(&@) { my $sub = shift; return map { $sub->($_) } @_; }
+sub myneg :prototype(@) { return map { -$_ } @_; }
 package AA { sub listmeth { shift; return map { -$_ } @_; } }
 
 @t = ();
@@ -41,7 +43,7 @@ eval q{
 	push @t, arrayfullexpr myneg 1, 2, 3;
 	push @t, arrayfullexpr map { -$_ } 1, 2, 3;
 	push @t, arrayfullexpr mymap { -$_[0] } 1, 2, 3;
-	push @t, arrayfullexpr AA->listmeth(1, 2), 3;
+	push @t, arrayfullexpr AA->listmeth(1, 2), 3;	
 	push @t, arrayfullexpr listmeth AA (1, 2), 3;
 	push @t, arrayfullexpr listmeth AA 1, 2, 3;
 	push @t, arrayfullexpr not 1, 2;

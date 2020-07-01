@@ -4,6 +4,8 @@ use strict;
 use Test::More tests => 5;
 use XS::APItest;
 
+use p5;
+
 {
     use feature "unicode_eval";
     my $unfiltered_foo = "foo";

@@ -4,6 +4,7 @@
 # DAPM Dec 2005
 
 my $threads;
+our %Config;
 BEGIN {
     require Config; Config->import;
     $threads = $Config{'useithreads'};

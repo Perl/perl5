@@ -55,7 +55,7 @@ is join(" ", eval 'a "b", "c"'), '$',
 {
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
-    eval 'sub a($){}';
+    eval 'sub a :prototype($){}';
     like $w, qr/^Prototype mismatch: sub main::a \(\*\$\) vs \(\$\)/m,
         'proto warnings respect AUTOLOAD prototypes';
     undef $w;
