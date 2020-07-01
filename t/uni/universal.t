@@ -141,6 +141,10 @@ package Pìg;
 package Bòdìnè;
 Bòdìnè->isa('Pìg');
 
+package zlòpp;
+
+package plòp;
+
 package main;
 eval { UNIVERSAL::DOES([], "fòò") };
 like( $@, qr/Can't call method "DOES" on unblessed reference/,
