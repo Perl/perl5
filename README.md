@@ -4,9 +4,9 @@ You can read more about [the Proposal for Perl 7](https://github.com/Perl/perl5/
 
 # About this 'core-p7' branch
 
-The branch `core-p7` is *experimental* and based on top of [v5.32.0](https://github.com/Perl/perl5/tree/v5.32.0). It tries to show what could looks like a `perl` binary compiled with `strict, warnings` and several features like `signature, no indirect...` as described in [the Proposal for Perl 7](https://github.com/Perl/perl5/wiki/The-Proposal-for-Perl-7).
+The branch `core-p7` is **experimental** and based on top of [v5.32.0](https://github.com/Perl/perl5/tree/v5.32.0). It tries to show what could looks like a `perl` binary compiled with `strict, warnings` and several features like `signature, no indirect...` as described in [the Proposal for Perl 7](https://github.com/Perl/perl5/wiki/The-Proposal-for-Perl-7).
 
-The goal is to identify issues with the proposal and provides a `proof of concept`.
+The goal is to identify issues with the proposal and to provide a **proof of concept**.
 
 # What to expect?
 
@@ -25,6 +25,11 @@ Several fixes are still required to adjust some core or dual life modules. Patch
 You can run the test suite using for example this command:
 ```
 TEST_JOBS=8 make -j8 test_harness
+```
+
+You can run tests in specific directories (relative to `t/`) with a command like this:
+```
+make test TEST_FILES="io/*.t"
 ```
 
 ## New defaults implemented in core-p7
@@ -75,7 +80,7 @@ Note: `p5` needs to be patched to authorize `use feature "indirect"`.
 
 ## New flags
 
-This could change overtime and we could come with a better solution, but right now this is what has been implemented in the `core-p7` branch.
+This could change over time and we could come with a better solution, but right now this is what has been implemented in the `core-p7` branch.
 
 ### -e promotes v7.0 standard
 
@@ -115,7 +120,7 @@ You can submit fixes as `Pull Request` by targeting the `core-p7` using the [git
 
 ## Is this branch going to be released?
 
-No, this branch should not be released as it. It's a primer to give the opportunity to experience what could feels like `Perl 7`.
+No, this branch should not be released as it. It's a primer to give the Perl community the opportunity to experience what could feels like `Perl 7`.
 
 ## Is it going to be merged to blead?
 
