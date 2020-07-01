@@ -12,7 +12,6 @@ BEGIN {
 
 use utf8;
 use open qw( :utf8 :std );
-use warnings;
 
 plan( tests => 5 );
 
@@ -42,7 +41,6 @@ for (
     ) {
 
     eval $_->[1];    
-    warn "## Error: $@" if $@;
     
     like $@, qr/No such class field "クラス" in variable \$bàr of type ＦŌŌ/, "$_->[0]: no such field error is UTF-8 clean";
 }
