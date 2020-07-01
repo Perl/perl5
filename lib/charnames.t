@@ -92,10 +92,10 @@ sub to_bytes {
     unpack"U0a*", shift;
 }
 
-sub get_loose_name ($) { # Modify name to stress the loose tests.
+sub get_loose_name ($lname) { # Modify name to stress the loose tests.
 
     # First, all lower case,
-    my $loose_name = lc shift;
+    my $loose_name = lc $lname;
 
     # Then squeeze out all the blanks not adjacent to hyphens, but make the
     # spaces that are adjacent to hypens into two, to make sure the code isn't
@@ -113,16 +113,14 @@ sub get_loose_name ($) { # Modify name to stress the loose tests.
     return $loose_name
 }
 
-sub test_vianame ($$$) {
+# $i is the code point in decimal; $hex in hexadecimal; $name is
+# character name to test
+sub test_vianame ($i, $hex, $name) {
     CORE::state $wildcard_count = 0;
 
     # Run the vianame tests on a code point, both loose and full
 
     my $all_pass = 1;
-
-    # $i is the code point in decimal; $hex in hexadecimal; $name is
-    # character name to test
-    my ($i, $hex, $name) = @_;
 
     # Get a copy of the name modified to stress the loose tests.
     my $loose_name = get_loose_name($name);
