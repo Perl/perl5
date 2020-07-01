@@ -37,7 +37,6 @@ use constant roref=>\2;
   open Ạ,'+>',$file; $a = 3;
   is($a .= <Ạ>, 3, '#21628 - $a .= <A> , A eof');
   close Ạ; $a = 4;
-  #no warnings 'closed';
   my $thiswarn = '';
   local $SIG{__WARN__} = sub { $thiswarn .= $_[0]; };
   is($a .= <Ạ>, 4, '#21628 - $a .= <A> , A closed');
