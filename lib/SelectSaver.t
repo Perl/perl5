@@ -13,13 +13,14 @@ open(FOO, ">", "foo-$$") || die;
 
 print "ok 1\n";
 {
-    my $saver = new SelectSaver(FOO);
+    no strict 'subs';
+    my $saver = SelectSaver->new(FOO);
     print "foo\n";
 }
 
 # Get data written to file
 open(FOO, "<", "foo-$$") || die;
-chomp($foo = <FOO>);
+chomp(my $foo = <FOO>);
 close FOO;
 unlink "foo-$$";
 
