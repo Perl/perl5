@@ -284,6 +284,7 @@ SKIP: {
     }
 }
 no strict 'refs';
+no warnings 'uninitialized';
 fresh_perl_is(<<'EOS', <<'EXPECT', { run_as_five => 1 }, 'no panic in pad_findmy_pvn (#134061)');
 use utf8;
 eval "sort \x{100}%";
@@ -303,5 +304,6 @@ ${
 qq ϟϟ }
 END
 is __LINE__, 59, '#line directive and qq with uni delims inside heredoc';
+use warnings;
 
 # Put new tests above the line number tests.
