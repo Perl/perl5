@@ -15,7 +15,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66880);
+plan (tests => 66881);
 
 # ${single:colon} should not be treated as a simple variable, but as a
 # block with a label inside.
@@ -30,10 +30,11 @@ plan (tests => 66880);
     local $@;
     no utf8;
     evalbytes '${single:colon} = "block/label, not var"';
+    no warnings 'once';
     is($::colon,
          'block/label, not var',
          '...same with ${single:colon}'
-        );
+    );
 }
 
 # ${yadda'etc} and ${yadda::etc} should both work under strict
@@ -169,7 +170,7 @@ for ( 0x0 .. 0xff ) {
                 local $@;
                 eval "no strict; use utf8; \$$chr = 1";
                 like $@,
-                    qr/\QUnrecognized character \x{\E\L$esc/,
+                    qr/\QUnrecognized character \x{\E\L$esc/, # } (fix syntax highlighting)
                     "  ... but is illegal as a length-1 variable under 'use utf8'";
                 $tests++;
             }
@@ -237,7 +238,7 @@ for ( 0x0 .. 0xff ) {
                 splice @warnings, $i, 1 if $warnings[$i] =~ /is no longer supported/;
             }
         }
-        my $message = "  ... and doesn't generate any warnings";
+        my $message = "  ... and ord '$ord' doesn't generate any warnings";
         $message = "  # TODO $message" if    $ord == 0
                                         || $chr =~ /\s/a;
 
@@ -260,7 +261,7 @@ for ( 0x0 .. 0xff ) {
         die "Wrong max count for tests" if $tests > $max_tests;
         skip("untaken tests", $max_tests - $tests) if $max_tests > $tests;
     }
-}
+} # END latin-1 range 'for' loop
 
 {
     use utf8;
@@ -320,7 +321,7 @@ for my $i (0x100..0xffff) {
 EOP
     is($@, '', q{$$1 parses correctly});
 
-    for my $chr ( q{@}, "\N{U+FF10}", "\N{U+0300}" ) {
+    for my $chr ( "\N{U+FF10}", "\N{U+0300}" ) {
         my $esc = sprintf("\\x{%x}", ord $chr);
         local $@;
         eval <<"    EOP";
@@ -333,9 +334,30 @@ EOP
              qq{\$\$$esc is a syntax error}
         );
     }
+
+    {
+        my $thiswarn = '';
+        local $SIG{__WARN__} = sub { $thiswarn .= $_[0]; };
+
+        for my $chr ( q{@} ) {
+            my $esc = sprintf("\\x{%x}", ord $chr);
+            local $@;
+            eval <<"    EOP";
+                \$$chr = q{\$};
+                \$\$$chr;
+    EOP
+
+            like($@,
+                 qr/syntax error|Unrecognized character/,
+                 qq{\$\$$esc is a syntax error}
+            );
+            like($thiswarn, qr/Array found where operator expected/,
+                "Got 'Array found where operator expected' warning");
+        }
+    }
 }
 
-{    
+{
     # bleadperl v5.17.9-109-g3283393 breaks JEREMY/File-Signature-1.009.tar.gz
     # https://github.com/Perl/perl5/issues/12849
     local $@;
@@ -378,8 +400,8 @@ EOP
         "*main::OIN",
         "Newlines at the start of an identifier should be skipped over"
     );
-    
-    
+
+
     SKIP: {
         skip('Is $^U on EBCDIC 1047, BC; nothing works on 0037', 1)
                                                                 if $::IS_EBCDIC;
@@ -389,7 +411,7 @@ EOP
             "  ... but \$^J is still legal"
         );
     }
-    
+
     my $ret = eval "\${\cT\n}";
     like($@, qr/\QUnrecognized character/, '${\n\cT\n} gives an error message');
 }
@@ -399,12 +421,14 @@ EOP
     # on the presence of the newline after '@{'.
     sub foo (&) { [1] }
     my %foo = (a=>2);
+    no warnings 'syntax';
     my $ret = @{ foo { "a" } };
     is($ret, $foo{a}, '@{ foo { "a" } } is parsed as @foo{a}');
-    
+
     $ret = @{
             foo { "a" }
         };
+    use warnings 'syntax';
     is($ret, $foo{a}, '@{\nfoo { "a" } } is still parsed as @foo{a}');
 
 }
