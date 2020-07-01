@@ -158,6 +158,7 @@ our $TODO;
                 package ＦŌŌ௨;
                 sub Ƒ{};
                 $r = \&Ƒ;
+                no warnings 'redefine';
                 *Ƒ = sub {};
             ];
             delete $ＦŌŌ௨::{Ƒ};
