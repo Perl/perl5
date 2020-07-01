@@ -107,11 +107,14 @@ is grep({ $_ eq "\x{539f}"     } keys %::), 1, "Constant subs generate the right
 is grep({ $_ eq "\345\216\237" } keys %::), 0;
 
 #These should probably go elsewhere.
-eval q{ sub wròng1 :prototype(_$); wròng1(1,2) };
-like( $@, qr/Malformed prototype for main::wròng1/, 'Malformed prototype croak is clean.' );
+{
+    no warnings 'illegalproto';
+    eval q{ sub wròng1 :prototype(_$); wròng1(1,2) };
+    like( $@, qr/Malformed prototype for main::wròng1/, 'Malformed prototype croak is clean.' );
 
-eval q{ sub ча::ики :prototype($__); ча::ики(1,2) };
-like( $@, qr/Malformed prototype for ча::ики/ );
+    eval q{ sub ча::ики :prototype($__); ча::ики(1,2) };
+    like( $@, qr/Malformed prototype for ча::ики/ );
+}
 
 our $問 = 10;
 is $問, 10, "our works";
