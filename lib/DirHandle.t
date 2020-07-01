@@ -1,5 +1,6 @@
 #!./perl
 
+our %Config;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -23,22 +24,23 @@ if ($ENV{PERL_CORE} && -d 'uni') {
   $chdir++;
 };
 
-$dot = DirHandle->new('.');
+my $dot = DirHandle->new('.');
 
 ok(defined $dot, "DirHandle->new returns defined value");
 isa_ok($dot, 'DirHandle');
 
-@a = sort <*>;
+my @a = sort <*>;
+my $first;
 do { $first = $dot->read } while defined($first) && $first =~ /^\./;
 ok(+(grep { $_ eq $first } @a),
     "Scalar context: First non-dot entry returned by 'read' is found in glob");
 
-@b = sort($first, (grep {/^[^.]/} $dot->read));
+my @b = sort($first, (grep {/^[^.]/} $dot->read));
 ok(+(join("\0", @a) eq join("\0", @b)),
     "List context: Remaining entries returned by 'read' match glob");
 
 ok($dot->rewind, "'rewind' method returns true value");
-@c = sort grep {/^[^.]/} $dot->read;
+my @c = sort grep {/^[^.]/} $dot->read;
 cmp_ok(join("\0", @b), 'eq', join("\0", @c),
     "After 'rewind', directory re-read as expected");
 
@@ -47,6 +49,7 @@ $dot->rewind;
 ok(! defined $dot->read,
     "Having closed the directory handle -- and notwithstanding invocation of 'rewind' -- 'read' returns undefined value");
 
+my $redot;
 {
     local $@;
     eval { $redot = DirHandle->new( '.', '..' ); };
@@ -78,13 +81,13 @@ $redot->rewind;
 ok(! defined $redot->read,
     "Having closed the directory handle -- and notwithstanding invocation of 'rewind' -- 'read' returns undefined value");
 
-$undot = DirHandle->new('foobar');
+my $undot = DirHandle->new('foobar');
 ok(! defined $undot,
     "Constructor called with non-existent directory returns undefined value");
 
 # Test error conditions for various methods
 
-$aadot = DirHandle->new();
+my $aadot = DirHandle->new();
 ok(defined $aadot, "DirHandle->new returns defined value even without provided argument");
 isa_ok($aadot, 'DirHandle');
 {
@@ -113,6 +116,7 @@ ok($aadot->open('.'), "Explicit call of 'open' method returns true value");
         "'rewind' called with argument fails as expected");
 }
 
+my $bbdot;
 {
     local $@;
     eval { $bbdot = DirHandle::new(); };
