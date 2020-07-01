@@ -89,7 +89,7 @@ is( $$fake_out, $vbl_1, 'Verbose level 1' );
 $$fake_out = '';
 require Pod::Text; # Pod::Usage->isa( 'Pod::Text' )
 
-( my $p2tp = new Pod::Text )->parse_from_file( $0, \*FAKEOUT );
+( my $p2tp = Pod::Text->new() )->parse_from_file( $0, \*FAKEOUT );
 my $pod2text = $$fake_out;
 
 $$fake_out = '';
