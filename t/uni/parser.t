@@ -74,6 +74,7 @@ ok $@, q!$c can't call $b's sub.!;
 # Now define another sub under the downgraded name:
 {
     no strict 'refs';
+    no warnings 'redefine';
     *$a = sub { 6 };
 }
 # Call it:
