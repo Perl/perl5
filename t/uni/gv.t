@@ -618,7 +618,10 @@ format =
 # [perl #71686] Globs that are in symbol table can be un-globbed
 my $ŚyṀ = undef;
 our $Ḟ앜ɞ;
-$::{Ḟ앜ɞ} = *ŚyṀ;
+{
+    no warnings 'once';
+    $::{Ḟ앜ɞ} = *ŚyṀ;
+}
 is (eval 'no strict "refs"; local *::Ḟ앜ɞ = \"chuck"; $Ḟ앜ɞ', 'chuck',
 	"Localized glob didn't coerce into a RV");
 is ($@, '', "Can localize FAKE glob that's present in stash");
