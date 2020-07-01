@@ -20,7 +20,10 @@
 # will be worked over by t/op/inc.t
 
 BEGIN {
-    local @INC = qw( ./lib ../lib ../../lib );
+    my $lib = $^X;
+    $lib =~ s{(\b)perl[^/]*$}{${1}lib};
+
+    local @INC = ( $lib );
     require p5;
     p5->import;
 }
