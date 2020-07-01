@@ -1,5 +1,6 @@
 #!./perl
 
+our %Config;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -12,32 +13,32 @@ BEGIN {
 
 use strict;
 use FileHandle;
-autoflush STDOUT 1;
+STDOUT->autoflush(1);
 use Test::More (tests => 12);
 my $TB = Test::More->builder;
 
-my $mystdout = new_from_fd FileHandle 1,"w";
+my $mystdout = FileHandle->new_from_fd(1,"w");
 $| = 1;
-autoflush $mystdout;
+$mystdout->autoflush;
 
 print $mystdout "ok ".fileno($mystdout),
     " - ", "create new handle from file descriptor", "\n";
 $TB->current_test($TB->current_test + 1);
 
-my $fh = (new FileHandle "./TEST", O_RDONLY
-       or new FileHandle "TEST", O_RDONLY);
+my $fh = (FileHandle->new( "./TEST", O_RDONLY)
+       or FileHandle->new("TEST", O_RDONLY));
 ok(defined($fh), "create new handle O_RDONLY");
 
 my $buffer = <$fh>;
 is($buffer, "#!./perl\n", "Got expected first line via handle");
 
-ungetc $fh ord 'A';
+$fh->ungetc( ord 'A' );
 my $buf;
 CORE::read($fh, $buf,1);
 is($buf, 'A', "Got expected ordinal value via ungetc in handle's input stream");
 close $fh;
 
-$fh = new FileHandle;
+$fh = FileHandle->new;
 ok(($fh->open("< TEST") && <$fh> eq $buffer),
     "FileHandle open() method created handle, which got expected first line");
 
@@ -51,10 +52,10 @@ ok(! (defined($line) || !$fh->eof), "FileHandle seek() and eof() methods");
 ok(($fh->open("TEST","r") && !$fh->tell && $fh->close),
     "FileHandle open(), tell() and close() methods");
 
-autoflush STDOUT 0;
+STDOUT->autoflush(0);
 ok(! $|, "handle not auto-flushing current output channel");
 
-autoflush STDOUT 1;
+STDOUT->autoflush(1);
 ok($|, "handle auto-flushing current output channel");
 
 SKIP: {
