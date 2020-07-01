@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 7;
+plan tests => 9;
 
 use utf8;
 use open qw( :utf8 :std );
@@ -14,8 +14,22 @@ use open qw( :utf8 :std );
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
 use constant roref=>\2;
-eval { for (roref) { $_ = <Fʜ> } };
-like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
+{
+    no warnings 'once';
+    my @these_warnings = ();
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+    eval { for (roref) { $_ = <Fʜ> } };
+    like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
+    my $warnings_count = 0;
+    for my $w (@these_warnings) {
+        chomp $w;
+        if ($w =~ m/^readline\(\) on unopened filehandle/) {
+            $warnings_count++;
+        }
+    }
+    is($warnings_count, 1,
+        "Got expected number of 'unopened' warnings");
+}
 
 # [perl #21628]
 {
@@ -23,7 +37,12 @@ like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
   open Ạ,'+>',$file; $a = 3;
   is($a .= <Ạ>, 3, '#21628 - $a .= <A> , A eof');
   close Ạ; $a = 4;
+  #no warnings 'closed';
+  my $thiswarn = '';
+  local $SIG{__WARN__} = sub { $thiswarn .= $_[0]; };
   is($a .= <Ạ>, 4, '#21628 - $a .= <A> , A closed');
+  like($thiswarn, qr/readline\(\) on closed filehandle Ạ/,
+      "Got expected warning for readline on closed filehandle");
 }
 
 use strict;
