@@ -279,8 +279,7 @@ SKIP: {
 
 
     # Just a sub to get better failure messages.
-    sub __ ($) {
-        my $perm   = shift;
+    sub __ ($perm) {
         my $id     = 07000 & $perm;
            $id   >>= 9;
         $perm     &= 0777;
@@ -368,12 +367,12 @@ SKIP: {
             my $perm4 = (stat $copy4) [2] & 07777;
             my $perm5 = (stat $copy5) [2] & 07777;
             my $perm6 = (stat $copy6) [2] & 07777;
-            is (__$perm1, __$permdef, "Permission bits set correctly");
-            is (__$perm2, __$permdef, "Permission bits set correctly");
-            is (__$perm4, __$c_perm1, "Permission bits set correctly");
-            is (__$perm5, __$c_perm1, "Permission bits set correctly");
-            is (__$perm3, __$c_perm3, "Permission bits not modified");
-            is (__$perm6, __$c_perm3, "Permission bits not modified");
+            is (__($perm1), __($permdef), "Permission bits set correctly");
+            is (__($perm2), __($permdef), "Permission bits set correctly");
+            is (__($perm4), __($c_perm1), "Permission bits set correctly");
+            is (__($perm5), __($c_perm1), "Permission bits set correctly");
+            is (__($perm3), __($c_perm3), "Permission bits not modified");
+            is (__($perm6), __($c_perm3), "Permission bits not modified");
         }
     }
     umask $old_mask or die $!;
