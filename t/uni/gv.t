@@ -321,6 +321,7 @@ is($Ｊ[0], 1);
             sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
             package main;
 
+            no warnings q|once|;
             bless \$Ⱥ::ㄅ, q{ᴹ};
             *Ⱥ:: = \*ㄅ::;
 EOPROG
