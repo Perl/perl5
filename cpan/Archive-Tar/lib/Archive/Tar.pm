@@ -918,7 +918,7 @@ sub _extract_file {
     }
 
     if( $CHOWN && CAN_CHOWN->() and not -l $full ) {
-        CORE::chown( $entry->uid, $entry->gid, $full ) or
+        chown $entry->uid, $entry->gid, $full or
             $self->_error( qq[Could not set uid/gid on '$full'] );
     }
 
@@ -929,7 +929,7 @@ sub _extract_file {
         unless ($SAME_PERMISSIONS) {
             $mode &= ~(oct(7000) | umask);
         }
-        CORE::chmod( $mode, $full ) or
+        chmod $mode, $full or
             $self->_error( qq[Could not chown '$full' to ] . $entry->mode );
     }
 
