@@ -5,8 +5,8 @@ BEGIN {
     @INC = '../lib';
 }
 
-# This file uses a specially crafted is() function rather than that found in
-# t/test.pl or Test::More.  Hence, we place this file in directory t/opbasic.
+# Note that this file uses a specially crafted is() function rather than that
+# found in t/test.pl or Test::More.
 
 print q(1..28
 );

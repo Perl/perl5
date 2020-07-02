@@ -5558,8 +5558,6 @@ t/comp/package.t		See if packages work
 t/comp/package_block.t		See if package block syntax works
 t/comp/parser.t			See if the parser works in edge cases
 t/comp/parser_run.t			See if parser works in additional edge case
-t/comp/proto.t			See if function prototypes work
-t/comp/redef.t			See if we get correct warnings on redefined subs
 t/comp/require.t		See if require works
 t/comp/retainedlines.t		See if the debugger can retain eval's lines
 t/comp/term.t			See if more terms work
@@ -5881,6 +5879,7 @@ t/op/lop.t			See if logical operators work
 t/op/lvref.t			See if aliasing via references works
 t/op/magic.t			See if magic variables work
 t/op/magic-27839.t		Test for #27839, skipped for minitest
+t/op/magic_phase.t		See if ${^GLOBAL_PHASE} works
 t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works
 t/op/multideref.t		See if "$a[0]{foo}[$i]{$k}" etc works
@@ -5901,9 +5900,11 @@ t/op/pos.t			See if pos works
 t/op/postfixderef.t		See if ->$* ->@[ et al work
 t/op/pow.t			See if ** works
 t/op/print.t			See if print works
+t/op/proto.t			See if function prototypes work
 t/op/protowarn.t		See if the illegalproto warnings work
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
+t/op/qq.t			See if qq works
 t/op/qr.t			See if qr works
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
@@ -5912,6 +5913,7 @@ t/op/read.t			See if read() works
 t/op/readdir.t			See if readdir() works
 t/op/readline.t			See if <> / readline / rcatline work
 t/op/recurse.t			See if deep recursion works
+t/op/redef.t			See if we get correct warnings on redefined subs
 t/op/ref.t			See if refs and objects work
 t/op/repeat.t			See if x operator works
 t/op/require_37033.t		See if require always closes rsfp
@@ -5987,8 +5989,6 @@ t/op/yadayada.t			See if ... works
 t/opbasic/arith.t			See if arithmetic works
 t/opbasic/cmp.t			See if the various string and numeric compare work
 t/opbasic/concat.t			See if string concatenation works
-t/opbasic/magic_phase.t		See if ${^GLOBAL_PHASE} works
-t/opbasic/qq.t			See if qq works
 t/perf/benchmarks		snippets of benchmarking/profiling code
 t/perf/benchmarks.t		test t/perf/benchmarks syntax
 t/perf/opcount.t		See if optimised subs have the right op counts
