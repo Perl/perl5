@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 23 );
+plan( tests => 24 );
 
 # test various operations on @_
 
@@ -72,9 +72,15 @@ my $foo = 'foo'; local1($foo); local1($foo);
 is($foo, 'foo',
     "got 'foo' as expected rather than '\$foo': RT \#21542");
 
-sub local2 { local $_[0]; last L }
-L: { local2 }
-pass("last to label");
+{
+    my @these_warnings = ();
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+    sub local2 { local $_[0]; last L }
+    L: { local2 }
+    pass("last to label");
+    like($these_warnings[0], qr/Exiting subroutine via last/,
+        "Got expected warning: exiting sub via last");
+}
 
 # the following test for local(@_) used to be in t/op/nothr5005.t (because it
 # failed with 5005threads)
