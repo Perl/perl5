@@ -171,7 +171,7 @@ $tests+=2;
 is runperl(prog => 'print CORE->lc, qq-\n-', run_as_five => 1), "core\n",
  'methods calls autovivify coresubs';
 is runperl(prog => '@ISA=CORE; print main->uc, qq-\n-', run_as_five => 1), "MAIN\n",
- 'inherted method calls autovivify coresubs';
+ 'inherited method calls autovivify coresubs';
 
 { # RT #117607
   $tests++;
