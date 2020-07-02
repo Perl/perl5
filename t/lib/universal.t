@@ -24,6 +24,7 @@ Usage: Internals::hv_clear_placeholders(hv) at (eval 3) line 1.
 
 # Various conundrums with SvREADONLY
 
+our %foo;
 my $x = *foo;
 Internals::SvREADONLY $x, 1;
 ok Internals::SvREADONLY($x),
