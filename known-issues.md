@@ -106,7 +106,7 @@ SYNOPSIS
 ```
 Shouldn't the Perl `semctl()` built-in `die` rather than `warn` if provided the wrong type for its second argument?
 
-** Filed as https://github.com/Perl/perl5/issues/17926 **
+**Filed as https://github.com/Perl/perl5/issues/17926**
 
 ## t/io/nargv.tt/io/nargv.t
 
