@@ -48,12 +48,12 @@ L<perlop/Operator Precedence and Associativity>.
 
 =head2 New Unicode properties C<Identifier_Status> and C<Identifier_Type> supported
 
-Unicode is in the process of revising its regular expression
-requirements: L<https://www.unicode.org/draft/reports/tr18/tr18.html>.
+Unicode has revised its regular expression requirements:
+L<https://www.unicode.org/reports/tr18/tr18-21.html>.
 As part of that they are wanting more properties to be exposed, ones
 that aren't part of the strict UCD (Unicode character database). These
 two are used for examining inputs for security purposes. Details on
-their usage is at L<https://www.unicode.org/reports/tr39/proposed.html>.
+their usage is at L<https://www.unicode.org/reports/tr39/>.
 
 =head2 It is now possible to write C<qr/\p{Name=...}/>, or
 C<qr!\p{na=/(SMILING|GRINNING) FACE/}!>
