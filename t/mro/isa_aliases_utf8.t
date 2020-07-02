@@ -11,6 +11,11 @@ use open qw( :utf8 :std );
 
 plan 12;
 
+package Ｂᐊㄗ;
+1;
+
+package main;
+
 @ฟ옥ʮ::ISA = "ᶶ";
 *ຜ옥ㄏ::ISA = *ฟ옥ʮ::ISA;
 @ฟ옥ʮ::ISA = "Ｂᐊㄗ";
