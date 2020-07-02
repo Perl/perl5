@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (194);
+plan (197);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -27,8 +27,11 @@ $foo[0] = '0';
 $r = join(',', $#foo, @foo);
 is($r, "0,0");
 $foo[2] = '2';
-$r = join(',', $#foo, @foo);
-is($r, "2,0,,2");
+{
+    no warnings 'uninitialized';
+    $r = join(',', $#foo, @foo);
+    is($r, "2,0,,2");
+}
 my @bar = ();
 $bar[0] = '0';
 $bar[1] = '1';
@@ -41,16 +44,22 @@ $bar[0] = '0';
 $r = join(',', $#bar, @bar);
 is($r, "0,0");
 $bar[2] = '2';
-$r = join(',', $#bar, @bar);
-is($r, "2,0,,2");
+{
+    no warnings 'uninitialized';
+    $r = join(',', $#bar, @bar);
+    is($r, "2,0,,2");
+}
 reset 'b' if $^O ne 'VMS';
 @bar = ();
 $bar[0] = '0';
 $r = join(',', $#bar, @bar);
 is($r, "0,0");
 $bar[2] = '2';
-$r = join(',', $#bar, @bar);
-is($r, "2,0,,2");
+{
+    no warnings 'uninitialized';
+    $r = join(',', $#bar, @bar);
+    is($r, "2,0,,2");
+}
 
 my $foo = 'now is the time';
 my ($F1,$F2,$Etc);
@@ -88,8 +97,11 @@ is($foo, 'abcdef');
 $foo = join('',('a','b','c','d','e','f')[0..1]);
 is($foo, 'ab');
 
-$foo = join('',('a','b','c','d','e','f')[6]);
-is($foo, '');
+{
+    no warnings 'uninitialized';
+    $foo = join('',('a','b','c','d','e','f')[6]);
+    is($foo, '');
+}
 
 @foo = ('a','b','c','d','e','f')[0,2,4];
 @bar = ('a','b','c','d','e','f')[1,3,5];
@@ -164,50 +176,53 @@ no strict;
 # try the same with my
 {
     my @bee = @bee;
-    is("@bee", "foo bar burbl blah");				# 53
+    is("@bee", "foo bar burbl blah");                # 53
     {
-	my (undef,@bee) = @bee;
-	is("@bee", "bar burbl blah");				# 54
-	{
-	    my @bee = ('XXX',@bee,'YYY');
-	    is("@bee", "XXX bar burbl blah YYY");		# 55
-	    {
-		my @bee = my @bee = qw(foo bar burbl blah);
-		is("@bee", "foo bar burbl blah");		# 56
-		{
-		    my (@bim) = my(@bee) = qw(foo bar);
-		    is("@bee", "foo bar");			# 57
-		    is("@bim", "foo bar");			# 58
-		}
-		is("@bee", "foo bar burbl blah");		# 59
-	    }
-	    is("@bee", "XXX bar burbl blah YYY");		# 60
-	}
-	is("@bee", "bar burbl blah");				# 61
+        my (undef,@bee) = @bee;
+        is("@bee", "bar burbl blah");                # 54
+        {
+            my @bee = ('XXX',@bee,'YYY');
+            is("@bee", "XXX bar burbl blah YYY");        # 55
+            {
+                no warnings 'shadow';
+                my @bee = my @bee = qw(foo bar burbl blah);
+                is("@bee", "foo bar burbl blah");        # 56
+                use warnings 'shadow';
+            {
+                my (@bim) = my(@bee) = qw(foo bar);
+                is("@bee", "foo bar");                   # 57
+                is("@bim", "foo bar");                   # 58
+            }
+            is("@bee", "foo bar burbl blah");            # 59
+            }
+            is("@bee", "XXX bar burbl blah YYY");        # 60
+        }
+        is("@bee", "bar burbl blah");                    # 61
     }
-    is("@bee", "foo bar burbl blah");				# 62
+    is("@bee", "foo bar burbl blah");                    # 62
 }
 
 # try the same with our (except that previous values aren't restored)
 {
+    no warnings 'shadow';
     our @bee = @bee;
     is("@bee", "foo bar burbl blah");
     {
-	our (undef,@bee) = @bee;
-	is("@bee", "bar burbl blah");
-	{
-	    our @bee = ('XXX',@bee,'YYY');
-	    is("@bee", "XXX bar burbl blah YYY");
-	    {
-		our @bee = our @bee = qw(foo bar burbl blah);
-		is("@bee", "foo bar burbl blah");
-		{
-		    our (@bim) = our(@bee) = qw(foo bar);
-		    is("@bee", "foo bar");
-		    is("@bim", "foo bar");
-		}
-	    }
-	}
+        our (undef,@bee) = @bee;
+        is("@bee", "bar burbl blah");
+        {
+            our @bee = ('XXX',@bee,'YYY');
+            is("@bee", "XXX bar burbl blah YYY");
+            {
+                our @bee = our @bee = qw(foo bar burbl blah);
+                is("@bee", "foo bar burbl blah");
+                {
+                    our (@bim) = our(@bee) = qw(foo bar);
+                    is("@bee", "foo bar");
+                    is("@bim", "foo bar");
+                }
+            }
+        }
     }
 }
 
@@ -261,8 +276,14 @@ is ($got, '');
 
     is($a[2.1]  , 2);
     is($a[2.9]  , 2);
-    is($a[undef], 0);
-    is($a["3rd"], 3);
+    {
+        no warnings 'uninitialized';
+        is($a[undef], 0);
+    }
+    {
+        no warnings 'numeric';
+        is($a["3rd"], 3);
+    }
 }
 
 
@@ -328,12 +349,22 @@ sub test_arylen {
     is (scalar @array, 7);
     is ($$outer, 6);
 
-    $$inner = 1;
+    {
+        my @warn;
+        local $SIG{__WARN__} = sub {push @warn, "@_"};
+        $$inner = 1;
+        like ($warn[0], qr/^Attempt to set length of freed array/);
+    }
 
     is (scalar @array, 7);
     is ($$outer, 6);
 
-    $$inner = 503; # Bang!
+    {
+        my @warn;
+        local $SIG{__WARN__} = sub {push @warn, "@_"};
+        $$inner = 503; # Bang!
+        like ($warn[0], qr/^Attempt to set length of freed array/);
+    }
 
     is (scalar @array, 7);
     is ($$outer, 6);
@@ -383,11 +414,13 @@ sub test_arylen {
 
 {
     our($x,$y,$z) = (1..3);
+    no warnings 'shadow';
     our($y,$z) = ($x,$y);
     is("$x $y $z", "1 1 2");
 }
 {
     our($x,$y,$z) = (1..3);
+    no warnings 'shadow';
     (our $y, our $z) = ($x,$y);
     is("$x $y $z", "1 1 2");
 }
@@ -395,6 +428,7 @@ sub test_arylen {
     # AASSIGN_COMMON detection with logical operators
     my $true = 1;
     our($x,$y,$z) = (1..3);
+    no warnings 'shadow';
     (our $y, our $z) = $true && ($x,$y);
     is("$x $y $z", "1 1 2");
 }
@@ -417,8 +451,10 @@ sub test_arylen {
 {
     my ($i, $ra, $rh);
   again:
+    no warnings 'uninitialized';
     my @a = @$ra; # common assignment on 2nd attempt
     my %h = %$rh; # common assignment on 2nd attempt
+    use warnings 'uninitialized';
     @a = qw(1 2 3 4);
     %h = qw(a 1 b 2 c 3 d 4);
     $ra = \@a;
@@ -435,7 +471,13 @@ sub test_arylen {
 }
 
 
-*trit = *scile;  $trit[0];
+{
+    no warnings 'once';
+    *trit = *scile;
+    use warnings 'once';
+    no warnings 'void';
+    $trit[0];
+}
 ok(1, 'aelem_fast on a nonexistent array does not crash');
 
 # [perl #107440]
@@ -501,8 +543,17 @@ sub {
 }->($plink[0], $plink[-2], $plink[-5], $plunk[-1]);
 
 $_ = \$#{[]};
-$$_ = \1;
-"$$_";
+{
+    my @warn;
+    local $SIG{__WARN__} = sub {push @warn, "@_"};
+    $$_ = \1;
+    like ($warn[0], qr/^Attempt to set length of freed array/);
+}
+{
+    no warnings 'void';
+    no warnings 'uninitialized';
+    "$$_";
+}
 pass "no assertion failure after assigning ref to arylen when ary is gone";
 
 
@@ -570,19 +621,22 @@ sub { undef *_; pop   }->();
 # splice() with null array entries
 # These used to crash.
 $#a = -1; $#a++;
-() = 0-splice @a; # subtract
-$#a = -1; $#a++;
-() =  -splice @a; # negate
-$#a = -1; $#a++;
-() = 0+splice @a; # add
-# And with array expansion, too
-$#a = -1; $#a++;
-() = 0-splice @a, 0, 1, 1, 1;
-$#a = -1; $#a++;
-() =  -splice @a, 0, 1, 1, 1;
-$#a = -1; $#a++;
-() = 0+splice @a, 0, 1, 1, 1;
-
+{
+    no warnings 'uninitialized';
+    () = 0-splice @a; # subtract
+    $#a = -1; $#a++;
+    () =  -splice @a; # negate
+    $#a = -1; $#a++;
+    () = 0+splice @a; # add
+    # And with array expansion, too
+    $#a = -1; $#a++;
+    () = 0-splice @a, 0, 1, 1, 1;
+    $#a = -1; $#a++;
+    () =  -splice @a, 0, 1, 1, 1;
+    $#a = -1; $#a++;
+    () = 0+splice @a, 0, 1, 1, 1;
+}
+    
 # [perl #8910] lazy creation of array elements used to leak out
 {
     sub t8910 { $_[1] = 5; $_[2] = 7; }
@@ -619,14 +673,17 @@ $#a = -1; $#a++;
     is @a, 0,'unwinding localization of elem past end of array shrinks it';
 
     # Again, but with a package array
+    no warnings 'shadow';
     package tmp; (\our @a)->$#*++; package main;
     my @b = @a;
+    use warnings 'shadow';
     ok !exists $a[0], 'copying an array via = does not vivify elements';
     delete $a[0];
     @a[1..5] = 1..5;
     $#a++;
-    my $count;
-    my @existing_elements = map { exists $a[$count++] ? $_ : () } @a;
+    $count = undef;
+
+    @existing_elements = map { exists $a[$count++] ? $_ : () } @a;
     is join(",", @existing_elements), "1,2,3,4,5",
        'map {} @a does not vivify elements';
     $#a = -1;
@@ -696,4 +753,5 @@ $#a = -1; $#a++;
        'holes passed to sub do not lose their position (aelem, mg)';
 }
 
+no warnings 'void';
 "We're included by lib/Tie/Array/std.t so we need to return something true";
