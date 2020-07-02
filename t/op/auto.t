@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw(. ../lib));
 }
 
-plan( tests => 47 );
+plan( tests => 51 );
 
 my $x = 10000;
 cmp_ok(0 + ++$x - 1,'==',10000,'scalar ++x - 1');
@@ -49,8 +49,11 @@ cmp_ok($x{0},          '==',10000,'helem x final');
 # test magical autoincrement
 my $foo;
 cmp_ok(++($foo = '99'), 'eq','100','99 incr 100');
-cmp_ok(++($foo = "99a"), 'eq','100','99a incr 100');
-cmp_ok(++($foo = "99\0a"), 'eq','100','99\0a incr 100');
+{
+    no warnings 'numeric';
+    cmp_ok(++($foo = "99a"), 'eq','100','99a incr 100');
+    cmp_ok(++($foo = "99\0a"), 'eq','100','99\0a incr 100');
+}
 cmp_ok(++($foo = 'a0'), 'eq','a1','a0 incr a1');
 cmp_ok(++($foo = 'Az'), 'eq','Ba','Az incr Ba');
 cmp_ok(++($foo = 'zz'), 'eq','aaa','zzz incr aaa');
@@ -60,8 +63,22 @@ cmp_ok(++($foo = 'zr'), 'eq','zs','zr incr zs (EBCDIC r,s non-contiguous check)'
 
 # test with glob copies
 
-for(qw '$x++ ++$x $x-- --$x') {
-  my $x = *foo;
-  ok eval "$_; 1", "$_ does not die on a glob copy";
-  is $x, /-/ ? -1 : 1, "result of $_ on a glob copy";
+# Note that from up above $x = 10000.
+# Need to test preincrement and postincrement cases separately
+# per https://github.com/Perl/perl5/issues/17931
+for(qw '$x-- --$x') {
+    my $x = *foo;
+    ok eval "$_; 1", "$_ does not die on a glob copy";
+    is $x, /-/ ? -1 : 1, "result of $_ on a glob copy";
+}
+for(qw '$x++ ++$x') {
+    my @these_warnings = ();
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+    my $x = *foo;
+    ok eval "$_; 1", "$_ does not die on a glob copy";
+    is $x, /-/ ? -1 : 1, "result of $_ on a glob copy";
+    is (scalar @these_warnings, 1, "Got only 1 warning, as expected");
+    like ($these_warnings[0],
+        qr/\QArgument "*main::foo" isn't numeric in preincrement (++)\E/,
+        "Got expected warning: non-numeric argument");
 }
