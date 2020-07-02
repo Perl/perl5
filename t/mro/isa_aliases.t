@@ -8,6 +8,11 @@ BEGIN {
 
 plan 13;
 
+package Baz;
+1;
+
+package main;
+
 @Foogh::ISA = "Bar";
 *Phoogh::ISA = *Foogh::ISA;
 @Foogh::ISA = "Baz";
