@@ -56,6 +56,7 @@ cmp_ok($i,'==',2,'remove File::Glob stash');
 
 # a more sinister version of the same test (crashes from 5.8 to 5.13.1)
 {
+    no warnings 'uninitialized';
     local %File::Glob::;
     local %CORE::GLOBAL::;
     eval "<.>";
