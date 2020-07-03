@@ -12,19 +12,28 @@ BEGIN {
 
 my @ops = split //, 'rwxoRWXOezsfdlpSbctugkTMBAC';
 
-plan( tests => @ops * 5 + 1 );
+plan( tests => @ops * 6 + 1 );
 
 package o { use overload '-X' => sub { 1 } }
 my $o = bless [], 'o';
 
 for my $op (@ops) {
+    no warnings 'unopened';
+    my @these_warnings = ();
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
     ok( 1 == @{ [ eval "-$op 'TEST'" ] }, "-$op returns single value" );
     ok( 1 == @{ [ eval "-$op *TEST" ] }, "-$op *gv returns single value" );
+    use warnings 'unopened';
+    # -l generates a warning of category 'io'
+    is(@these_warnings, ($op eq 'l') ? 1 : 0,
+        "-$op got expected number of warnings: " . scalar(@these_warnings));
+    @these_warnings = ();
 
     my $count = 0;
     my $t;
     for my $m ("a", "b") {
 	if ($count == 0) {
+        no warnings 'unopened';
 	    $t = eval "-$op _" ? 0 : "foo";
 	}
 	elsif ($count == 1) {
@@ -50,6 +59,8 @@ for my $op (@ops) {
 
 {
     # [perl #129347] cope with stacked filetests where PL_op->op_next is null
+    no warnings 'once';
+    no warnings 'uninitialized';
     () = sort { -d -d } \*TEST0, \*TEST1;
     ok 1, "survived stacked filetests with null op_next";
 }
