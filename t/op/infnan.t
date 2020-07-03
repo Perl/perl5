@@ -252,16 +252,16 @@ SKIP: {
     if ($Config{usequadmath}) {
         skip "quadmath strtoflt128() accepts false infinities", scalar @FInf;
     }
+    no warnings 'numeric';
     for my $i (@FInf) {
         # Silence "isn't numeric in addition", that's kind of the point.
-        local $^W = 0;
         cmp_ok("$i" + 0, '==', $PInf, "false infinity $i");
     }
 }
 
 {
     # Silence "Non-finite repeat count", that is tested elsewhere.
-    local $^W = 0;
+    no warnings 'numeric';
     is("a" x $PInf, "", "x +Inf");
     is("a" x $NInf, "", "x -Inf");
 }
@@ -401,7 +401,7 @@ TODO: {
 SKIP: {
     my @FNaN = qw(NaX XNAN Ind Inx);
     # Silence "isn't numeric in addition", that's kind of the point.
-    local $^W = 0;
+    no warnings 'numeric';
     for my $i (@FNaN) {
         cmp_ok("$i" + 0, '==', 0, "false nan $i");
     }
@@ -409,7 +409,7 @@ SKIP: {
 
 {
     # Silence "Non-finite repeat count", that is tested elsewhere.
-    local $^W = 0;
+    no warnings 'numeric';
     is("a" x $NaN, "", "x NaN");
 }
 
