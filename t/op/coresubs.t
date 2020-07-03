@@ -154,9 +154,26 @@ sub inlinable_ok {
        "#line 1 This-line-makes-__FILE__-easier-to-test.
         sub { () = (CORE::$word$full_args) }";
     my $my_code = $core_code =~ s/CORE::$word/my$word/r;
+    my @these_warnings = ();
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
     my $core = op_list(eval $core_code or die);
     my $my   = op_list(eval   $my_code or die);
     is $my, $core, "inlinability of CORE::$word $preposition parens $desc_suffix";
+    if ($word =~ m/^push|unshift$/) {
+        my $expect = 2;
+        is(@these_warnings, $expect, "Got $expect warnings for $word");
+        $tests++;
+        for my $w (@these_warnings) {
+            like($w, qr/Useless use of $word with no values/,
+                "Got expected useless use of '$word' warning");
+            $tests++;
+        }
+    }
+    else {
+        my $expect = 0;
+        is(@these_warnings, $expect, "Got $expect warnings for $word");
+        $tests++;
+    }
   }
 }
 
