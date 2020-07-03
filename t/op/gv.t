@@ -324,6 +324,7 @@ $| = 1;
 sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
 package main;
 
+no warnings q|once|;
 bless \$A::B, q{M};
 *A:: = \*B::;
 EOPROG
@@ -1171,7 +1172,7 @@ pass "No crash due to CvGV pointing to glob copy in the stash";
 # being NULL.
 SKIP: {
     skip_if_miniperl("No PerlIO::scalar on miniperl", 1);
-    runperl(prog => 'open my $fh, q|>|, \$buf;'
+    runperl(prog => 'my $buf; open my $fh, q|>|, \$buf;'
                    .'my $sub = eval q|sub {exit 0}|; $sub->()');
     is ($? & 127, 0,"[perl #128597] No crash when gp_free calls ckWARN_d");
 }
