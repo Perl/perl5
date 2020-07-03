@@ -149,7 +149,8 @@ SKIP: {
  () = -l *foo;
  like($warnings[1], qr/-l on filehandle foo/,
   '-l $handle warning occurs for globs, not just globrefs');
- tell foo; # vivify the IO slot
+ no warnings 'reserved';
+ my $position = tell foo; # vivify the IO slot
  () = -l *foo{IO};
     # (element [3] because tell also warns)
  like($warnings[3], qr/-l on filehandle at/,
@@ -234,7 +235,9 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     ($exp, $is) = $op eq "l" ? (1, "is") : (0, "not");
 
     $over = 0;
+    no warnings 'io';
     eval "-$op \$gv";
+    use warnings 'io';
     is( $over,      $exp,   "string overload $is called for -$op on GLOB" );
 
     # IO refs always get string overload called. This might be a bug.
@@ -242,7 +245,9 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
         and ($exp, $is) = (1, "is");
 
     $over = 0;
+    no warnings 'io';
     eval "-$op \$io";
+    use warnings 'io';
     is( $over,      $exp,   "string overload $is called for -$op on IO");
 
     $rv = eval "-$op \$both";
@@ -259,6 +264,9 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 # -l stack corruption: this bug occurred from 5.8 to 5.14
 {
  no strict;
+ no warnings 'reserved';
+ no warnings 'once';
+ no warnings 'io';
  push my @foo, "bar", -l baz;
  is $foo[0], "bar", '-l bareword does not corrupt the stack';
 }
@@ -267,6 +275,7 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 {
     no strict;
     stat "test.pl";
+    no warnings 'reserved';
     eval { use warnings FATAL => io; -l cradd };
     isnt(stat _, 1,
          'fatal warnings do not prevent -l HANDLE from setting stat status');
@@ -326,18 +335,25 @@ SKIP: {
     # -T _ on closed filehandle should still reset stat info
     stat $fh;
     close $fh;
+    no warnings 'io';
     -T _;
+    use warnings 'io';
     isnt(stat _, 1, '-T _ on closed filehandle resets stat info');
 
     lstat "test.pl";
+    no warnings 'io';
     -T $fh; # closed
+    use warnings 'io';
     eval { lstat _ };
     like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
 	'-T on closed handle resets last stat type';
 
     # Fatal warnings should not affect the setting of errno.
     $! = 7;
+    no warnings 'reserved';
+    no warnings 'io';
     -T cradd;
+    use warnings 'io';
     my $errno = $!;
     $! = 7;
     eval { no strict; use warnings FATAL => unopened; -T cradd };
@@ -362,10 +378,13 @@ SKIP: {
 {
     stat "test.pl";
     # This GV has no IO
+    no warnings 'unopened';
     -r *phlon;
+    use warnings 'unopened';
     my $failed_stat1 = stat _;
 
     stat "test.pl";
+    no warnings 'reserved';
     eval { no strict; use warnings FATAL => unopened; -r *phlon };
     my $failed_stat2 = stat _;
 
@@ -373,7 +392,9 @@ SKIP: {
 	'failed -r($gv_without_io) with and w/out fatal warnings';
 
     stat "test.pl";
+    no warnings 'unopened';
     -r cength;  # at compile time autovivifies IO, but with no fp
+    use warnings 'unopened';
     $failed_stat1 = stat _;
 
     stat "test.pl";
@@ -386,6 +407,7 @@ SKIP: {
 
 {
     # [perl #131895] stat() doesn't fail on filenames containing \0 / NUL
+    no warnings 'syscalls';
     ok(!-T "TEST\0-", '-T on name with \0');
     ok(!-B "TEST\0-", '-B on name with \0');
     ok(!-f "TEST\0-", '-f on name with \0');
