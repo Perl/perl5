@@ -189,7 +189,7 @@ END
     print CMDPIPE <<'END';
 
     sub PVBM () { 'foo' }
-    index 'foo', PVBM;
+    my $position = index 'foo', PVBM;
     my $pvbm = PVBM;
 
     sub foo { exit 0 }
