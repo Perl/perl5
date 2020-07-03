@@ -19,14 +19,20 @@ use feature qw( fc );
 
 plan tests => 139 + 2 * (4 * 256) + 15;
 
-is(lc(undef),	   "", "lc(undef) is ''");
-is(lcfirst(undef), "", "lcfirst(undef) is ''");
-is(uc(undef),	   "", "uc(undef) is ''");
-is(ucfirst(undef), "", "ucfirst(undef) is ''");
+{
+    no warnings 'uninitialized';
+    is(lc(undef),	   "", "lc(undef) is ''");
+    is(lcfirst(undef), "", "lcfirst(undef) is ''");
+    is(uc(undef),	   "", "uc(undef) is ''");
+    is(ucfirst(undef), "", "ucfirst(undef) is ''");
+}
 
 {
     no feature 'fc';
-    is(CORE::fc(undef), "", "fc(undef) is ''");
+    {
+        no warnings 'uninitialized';
+        is(CORE::fc(undef), "", "fc(undef) is ''");
+    }
     is(CORE::fc(''),    "", "fc('') is ''");
 
     local $@;
@@ -36,7 +42,7 @@ is(ucfirst(undef), "", "ucfirst(undef) is ''");
     {
         use feature 'fc';
         local $@;
-        eval { fc("eeyup") };
+        eval { my $fced_string = fc("eeyup") };
         ok(!$@, "...but works after requesting the feature");
     }
 }
@@ -264,24 +270,25 @@ for (1, 4, 9, 16, 25) {
 
 # bug #43207
 my $temp = "HellO";
+my $converted_string = '';
 for ("$temp") {
-    lc $_;
+    $converted_string = lc $_;
     is($_, "HellO", '[perl #43207] lc($_) modifying $_');
 }
 for ("$temp") {
-    fc $_;
+    $converted_string = fc $_;
     is($_, "HellO", '[perl #43207] fc($_) modifying $_');
 }
 for ("$temp") {
-    uc $_;
+    $converted_string = uc $_;
     is($_, "HellO", '[perl #43207] uc($_) modifying $_');
 }
 for ("$temp") {
-    ucfirst $_;
+    $converted_string = ucfirst $_;
     is($_, "HellO", '[perl #43207] ucfirst($_) modifying $_');
 }
 for ("$temp") {
-    lcfirst $_;
+    $converted_string = lcfirst $_;
     is($_, "HellO", '[perl #43207] lcfirst($_) modifying $_');
 }
 
