@@ -123,7 +123,10 @@ ok(!(exists $bar[6]),'g absent');
 cmp_ok($foo[1],'eq','a','a still exists');
 cmp_ok($foo[3],'eq','c','c still exists');
 
-$foo = join('',@foo);
+{
+    no warnings 'uninitialized';
+    $foo = join('',@foo);
+}
 cmp_ok($foo,'eq','ac','ary elems');
 cmp_ok(scalar(@foo),'==',4,'four is the number thou shalt count');
 
@@ -151,8 +154,13 @@ cmp_ok( scalar(@{$refary[0]}),'==',1,'one down');
     my @a = 33;
     my($a) = \(@a);
     my $b = \$a[0];
-    no strict 'subs';
-    my $c = \delete $a[bar];
+    my $c;
+    {
+        no strict 'subs';
+        no warnings 'numeric';
+        no warnings 'reserved';
+        $c = \delete $a[bar];
+    }
 
     ok($a == $b && $b == $c,'a b c also equivalent');
 }
