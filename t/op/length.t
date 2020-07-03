@@ -172,8 +172,8 @@ $SIG{__WARN__} = sub {
 };
 
 is(length(undef), undef, "Length of literal undef");
+undef $u;
 
-my $u;
 is(length($u), undef, "Length of regular scalar");
 
 $u = "Gotcha!";
