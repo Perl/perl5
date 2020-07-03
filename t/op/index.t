@@ -335,6 +335,7 @@ sub run_tests {
     }
 
     {
+        no warnings 'closure';
         my $store = 100;
         package MyTie {
             require Tie::Scalar;
