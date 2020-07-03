@@ -55,11 +55,17 @@ for (qw(getc pos readline readlink undef umask <> <FOO> <$foo> -f)) {
 
 # Test for some ambiguous syntaxes
 
-eval q# sub f :prototype($) { } f $x / 2; #;
-is( $@, '', "'/' correctly parsed as arithmetic operator" );
-eval q# sub f :prototype($):lvalue { my $y } f $x /= 2; #;
-is( $@, '', "'/=' correctly parsed as assignment operator" );
-eval q# sub f :prototype($) { } f $x /2; #;
+{
+    no warnings 'numeric';
+    eval q# sub f :prototype($) { } f $x / 2; #;
+    is( $@, '', "'/' correctly parsed as arithmetic operator" );
+}
+{
+    no warnings 'uninitialized';
+    eval q# sub g :prototype($):lvalue { my $y } g $x /= 2; #;
+    is( $@, '', "'/=' correctly parsed as assignment operator" );
+}
+eval q# sub h :prototype($) { } h $x /2; #;
 like( $@, qr/^Search pattern not terminated/,
     "Caught unterminated search pattern error message: empty subroutine" );
 eval q# sub { my $fh; print $fh / 2 } #;
@@ -78,7 +84,7 @@ is(undef // 2, 2, 	'	// : left-hand operand optimized away');
 # Test that OP_DORs other branch isn't run when arg is defined
 # // returns the value if its defined, and we must test its
 # truthness after
-my $x = 0;
+$x = 0;
 my $y = 0;
 
 $x // 1 and $y = 1;
