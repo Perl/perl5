@@ -247,7 +247,7 @@ my $has_nan = !$is_vax;
 
 SKIP: {
     skip("No NaN", 2) unless $has_nan;
-    local $^W;
+    no warnings 'overflow';
     is scalar gmtime("NaN"), undef, '[perl #123495] gmtime(NaN)';
     is scalar localtime("NaN"), undef, 'localtime(NaN)';
 }
