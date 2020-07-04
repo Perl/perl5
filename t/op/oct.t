@@ -4,7 +4,7 @@
 
 chdir 't' if -d 't';
 require './test.pl';
-use strict;
+no warnings; # TODO Needs much work
 
 plan(tests => 77);
 
