@@ -13,7 +13,7 @@ BEGIN {
 skip_all("Win32 miniperl has no socket select")
   if $^O eq "MSWin32" && is_miniperl();
 
-plan (16);
+plan (18);
 
 my $blank = "";
 eval {select undef, $blank, $blank, 0};
@@ -102,5 +102,12 @@ package _131645{
     sub STORE     {          }
 }
 tie my $tie, _131645::;
-select ($tie, undef, undef, $tie);
-pass(q[no crash from select $numeric_tie, undef, undef, $numeric_tie])
+{
+    my @these_warnings;
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+    select ($tie, undef, undef, $tie);
+    pass(q[no crash from select $numeric_tie, undef, undef, $numeric_tie]);
+    is(@these_warnings, 1, "Got one warning, as expected");
+    like($these_warnings[0], qr/Non-string passed as bitmask/,
+        "Got expected non-string passed as bitmark warning");
+}
