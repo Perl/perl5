@@ -10,7 +10,7 @@ BEGIN {
     set_up_inc(qw(. ../lib));
 }
 
-plan(tests => 28);
+plan(tests => 30);
 
 use strict;
 
@@ -104,13 +104,15 @@ is(takeuchi($x, $y, $z), $z + 1, "takeuchi($x, $y, $z) == $z + 1");
 }
 
 {
-    local $^W = 0; # We do not need recursion depth warning.
-
+    my @these_warnings;
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
     sub sillysum {
-	return $_[0] + ($_[0] > 0 ? sillysum($_[0] - 1) : 0);
+	    return $_[0] + ($_[0] > 0 ? sillysum($_[0] - 1) : 0);
     }
-
     is(sillysum(1000), 1000*1001/2, "recursive sum of 1..1000");
+    is(@these_warnings, 1, "Got one warning, as expected");
+    like($these_warnings[0], qr/Deep recursion on subroutine.*?sillysum/,
+        "Got expected deep recursion warning");
 }
 
 # check ok for recursion depth > 65536
