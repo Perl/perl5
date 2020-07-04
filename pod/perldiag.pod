@@ -5302,6 +5302,11 @@ a dirhandle.  Check your control flow.
 (W closed) The filehandle you're reading from got itself closed sometime
 before now.  Check your control flow.
 
+=item readline() on unopened filehandle %s
+
+(W unopened) The filehandle you're reading from was never opened.  Check your
+control flow.
+
 =item read() on closed filehandle %s
 
 (W closed) You tried to read from a closed filehandle.
