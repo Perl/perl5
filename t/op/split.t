@@ -89,15 +89,21 @@ $_ = join(':',$a,$b);
 is($_, '1:2 3 4 5 6', "Storing split output into list of scalars");
 
 # do subpatterns generate additional fields (without trailing nulls)?
-$_ = join '|', split(/,|(-)/, "1-10,20,,,");
-is($_, "1|-|10||20");
+{
+    no warnings 'uninitialized';
+    $_ = join '|', split(/,|(-)/, "1-10,20,,,");
+    is($_, "1|-|10||20");
+}
 @ary = split(/,|(-)/, "1-10,20,,,");
 $cnt = split(/,|(-)/, "1-10,20,,,");
 is($cnt, scalar(@ary));
 
 # do subpatterns generate additional fields (with a limit)?
-$_ = join '|', split(/,|(-)/, "1-10,20,,,", 10);
-is($_, "1|-|10||20||||||");
+{
+    no warnings 'uninitialized';
+    $_ = join '|', split(/,|(-)/, "1-10,20,,,", 10);
+    is($_, "1|-|10||20||||||");
+}
 @ary = split(/,|(-)/, "1-10,20,,,", 10);
 $cnt = split(/,|(-)/, "1-10,20,,,", 10);
 is($cnt, scalar(@ary));
@@ -184,8 +190,12 @@ is($cnt, scalar(@ary));
 $_ = join ':', split /^/, "ab\ncd\nef\n";
 is($_, "ab\n:cd\n:ef\n","check that split /^/ is treated as split /^/m");
 
-$_ = join ':', split /\A/, "ab\ncd\nef\n";
-is($_, "ab\ncd\nef\n","check that split /\A/ is NOT treated as split /^/m");
+{
+    no warnings 'misc';
+    # Unrecognized escape \A passed through
+    $_ = join ':', split /\A/, "ab\ncd\nef\n";
+    is($_, "ab\ncd\nef\n","check that split /\A/ is NOT treated as split /^/m");
+}
 
 # see if @a = @b = split(...) optimization works
 my @list1 = my @list2 = split ('p',"a p b c p");
