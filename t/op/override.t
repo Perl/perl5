@@ -53,6 +53,7 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 
 {
     my @r;
+    no warnings 'redefine';
     local *CORE::GLOBAL::require = sub { push @r, shift; 1; };
     eval "use 5.006";
     like( " @r ", qr " 5\.006 " );
@@ -134,6 +135,7 @@ BEGIN { *OverridenPop::pop = sub { ::is( $_[0][0], "ok" ) }; }
 
 {
     eval {
+        no warnings 'redefine';
         local *CORE::GLOBAL::require = sub {
             CORE::require($_[0]);
         };
