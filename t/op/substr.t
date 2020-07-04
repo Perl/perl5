@@ -605,8 +605,9 @@ is($x, "\x{100}\x{200}\xFFb");
 # [perl #23207]
 {
     sub ss {
-	substr($_[0],0,1) ^= substr($_[0],1,1) ^=
-	substr($_[0],0,1) ^= substr($_[0],1,1);
+        no warnings 'numeric';
+	    substr($_[0],0,1) ^= substr($_[0],1,1) ^=
+	    substr($_[0],0,1) ^= substr($_[0],1,1);
     }
     my $x = my $y = 'AB'; ss $x; ss $y;
     is($x, $y);
