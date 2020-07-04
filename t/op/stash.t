@@ -165,6 +165,7 @@ SKIP: {
 	    package FOO2;
 	    sub f{};
 	    $r = \&f;
+	    no warnings q|redefine|;
 	    *f = sub {};
 	];
 	delete $FOO2::{f};
@@ -322,7 +323,7 @@ ok eval '
 # Bareword lookup should not vivify stashes
 is runperl(
     prog =>
-      'use feature "indirect"; sub foo { print shift, qq-\n- } SUPER::foo bar if 0; foo SUPER',
+      'use feature q|indirect|; sub foo { print shift, qq-\n- } SUPER::foo bar if 0; foo SUPER',
     stderr => 1,
     run_as_five => 1,
    ),
