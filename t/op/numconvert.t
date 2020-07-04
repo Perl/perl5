@@ -159,8 +159,10 @@ for my $num_chain (1..$max_chain) {
 	      if ($curop < 5) {
 		if ($curop < 3) {
 		  if ($curop == 0) {
+            no warnings 'imprecision';
 		    --$inpt;	# - 0
 		  } elsif ($curop == 1) {
+            no warnings 'imprecision';
 		    ++$inpt;	# + 1
 		  } else {
 		    $inpt = $max_uv & $inpt; # U 2
