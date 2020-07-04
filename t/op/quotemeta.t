@@ -10,7 +10,7 @@ BEGIN {
 
 plan tests => 60;
 
-if ($Config{ebcdic} eq 'define') {
+if (defined($Config{ebcdic}) and $Config{ebcdic} eq 'define') {
     $_ = join "", map chr($_), 129..233;
 
     # 105 characters - 52 letters = 53 backslashes
@@ -42,8 +42,12 @@ is("\u\LpE\Q#X#\ER\EL", "Pe\\#x\\#rL", '\u\LpE\Q#X#\ER\EL');
 is("\l\UPe\Q!x!\Er\El", "pE\\!X\\!Rl", '\l\UPe\Q!x!\Er\El');
 is("\Q\u\LpE.X.R\EL\E.", "Pe\\.x\\.rL.", '\Q\u\LpE.X.R\EL\E.');
 is("\Q\l\UPe*x*r\El\E*", "pE\\*X\\*Rl*", '\Q\l\UPe*x*r\El\E*');
-is("\U\lPerl\E\E\E\E", "pERL", '\U\lPerl\E\E\E\E');
-is("\l\UPerl\E\E\E\E", "pERL", '\l\UPerl\E\E\E\E');
+{
+    no warnings 'misc';
+    # Avoid "Useless use of \E at" warning
+    is("\U\lPerl\E\E\E\E", "pERL", '\U\lPerl\E\E\E\E');
+    is("\l\UPerl\E\E\E\E", "pERL", '\l\UPerl\E\E\E\E');
+}
 
 is(quotemeta("\x{263a}"), "\\\x{263a}", "quotemeta Unicode quoted");
 is(length(quotemeta("\x{263a}")), 2, "quotemeta Unicode quoted length");
@@ -60,7 +64,7 @@ utf8::upgrade($char);
 is(quotemeta($char), "$char", "quotemeta '$char' in UTF-8");
 is(length(quotemeta($char)), 1, "quotemeta '$char'  in UTF-8 length");
 
-my $char = "\N{U+D7}";
+$char = "\N{U+D7}";
 utf8::upgrade($char);
 is(quotemeta($char), "\\$char", "quotemeta '\\N{U+D7}' in UTF-8");
 is(length(quotemeta($char)), 2, "quotemeta '\\N{U+D7}'  in UTF-8 length");
@@ -93,7 +97,7 @@ is(length(quotemeta($char)), 1, "quotemeta '\\N{U+DF}'  in UTF-8 length");
     is(quotemeta($char), "$char", "quotemeta '$char' locale");
     is(length(quotemeta($char)), 1, "quotemeta '$char' locale");
 
-    my $char = "\x{BF}";
+    $char = "\x{BF}";
     is(quotemeta($char), "\\$char", "quotemeta '\\x{BF}' locale");
     is(length(quotemeta($char)), 2, "quotemeta '\\x{BF}' locale length");
 
@@ -123,7 +127,7 @@ is(length(quotemeta($char)), 1, "quotemeta '\\N{U+DF}'  in UTF-8 length");
     is(quotemeta($char), "$char", "quotemeta '$char' locale in UTF-8");
     is(length(quotemeta($char)), 1, "quotemeta '$char' locale in UTF-8 length");
 
-    my $char = "\N{U+D7}";
+    $char = "\N{U+D7}";
     utf8::upgrade($char);
     is(quotemeta($char), "\\$char", "quotemeta '\\N{U+D7}' locale in UTF-8");
     is(length(quotemeta($char)), 2, "quotemeta '\\N{U+D7}' locale in UTF-8 length");
