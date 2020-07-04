@@ -19,7 +19,7 @@ use strict;
 use vars qw($VERSION $VMS_TERMCAP);
 use vars qw($termpat $state $first $entry);
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # TODO:
 # support Berkeley DB termcaps
@@ -91,7 +91,7 @@ sub termcap_path
     {
 
         # Add the users $TERMPATH
-        push( @termcap_path, split( /(:|\s+)/, $ENV{TERMPATH} ) );
+        push( @termcap_path, split( /:|\s+/, $ENV{TERMPATH} ) );
     }
     else
     {
