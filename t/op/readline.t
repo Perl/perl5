@@ -8,12 +8,10 @@ BEGIN {
 
 plan tests => 32;
 
-no warnings 'once';
-
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
 use constant roref => \2;
-eval { for (roref) { $_ = <FH> } };
+eval { no warnings 'once'; no warnings 'unopened'; for (roref) { $_ = <FH> } };
 like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
 
 # [perl #21628]
@@ -22,6 +20,7 @@ like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
   open A,'+>',$file; $a = 3;
   is($a .= <A>, 3, '#21628 - $a .= <A> , A eof');
   close A; $a = 4;
+  no warnings 'closed';
   is($a .= <A>, 4, '#21628 - $a .= <A> , A closed');
 }
 
@@ -259,10 +258,13 @@ my $yunk = "brumbo";
 if (exists $::{$yunk}) {
      die "Name $yunk already used. Please adjust this test."
 }
-<$yunk>;
-ok !defined *$yunk, '<> does not autovivify';
-readline($yunk);
-ok !defined *$yunk, "readline does not autovivify";
+{
+    no warnings 'unopened';
+    <$yunk>;
+    ok !defined *$yunk, '<> does not autovivify';
+    readline($yunk);
+    ok !defined *$yunk, "readline does not autovivify";
+}
 
 # [perl #97988] PL_last_in_gv could end up pointing to junk.
 #               Now glob copies set PL_last_in_gv to null when unglobbed.
@@ -277,14 +279,19 @@ is tell, -1, 'unglobbery of last gv nullifies PL_last_in_gv';
 readline *{$f{g}};
 is tell, tell *foom, 'readline *$glob_copy sets PL_last_in_gv';
 
-# PL_last_in_gv should not point to &PL_sv_undef, either.
-# This used to fail an assertion or return a scalar ref.
-readline undef;
-is ${^LAST_FH}, undef, '${^LAST_FH} after readline undef';
+{
+    no warnings 'unopened';
+    no warnings 'uninitialized';
+    # PL_last_in_gv should not point to &PL_sv_undef, either.
+    # This used to fail an assertion or return a scalar ref.
+    readline undef;
+    is ${^LAST_FH}, undef, '${^LAST_FH} after readline undef';
+}
 
 {
     my $w;
     local($SIG{__WARN__},$^W) = (sub { $w .= shift }, 1);
+    no warnings 'once';
     *x=<y>;
     like $w, qr/^readline\(\) on unopened filehandle y at .*\n(?x:
                 )Undefined value assigned to typeglob at .*\n\z/,
