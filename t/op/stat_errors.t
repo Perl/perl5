@@ -54,5 +54,6 @@ foreach my $op (
 	}
     }
 }
+close(SCALARFILE) or die $!;
 
 1;
