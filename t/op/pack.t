@@ -2002,8 +2002,14 @@ my $U_1FFC_bytes = byte_utf8a_to_utf8n("\341\277\274");
     my $x = runperl( prog => 'print split( /,/, unpack(q(%2H*), q(hello world))), qq(\n)' );
     is($x, "0\n", "split /a/, unpack('%2H*'...) didn't crash");
 
+    TODO: {
+    todo_skip(
+        'Generating Argument "\n" is non-numeric in split warning',
+        1
+        );
     my $y = runperl( prog => 'print split( /,/, unpack(q(%32u*), q(#,3,Q)), qq(\n)), qq(\n)' );
     is($y, "0\n", "split /a/, unpack('%32u*'...) didn't crash");
+    }
 }
 
 #90160
