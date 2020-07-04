@@ -23,7 +23,7 @@
 # calls.  Then we repeat with formats.
 
 BEGIN { chdir 't' if -d 't'; require './test.pl' }
-plan 22;
+plan 24;
 
 sub foo {
     my ($block) = @_;
@@ -44,16 +44,23 @@ eval { foo(sub { my $o = bless {}, 'Foo'; die }) };
 is $_, "ok", 'die triggering DESTROY that calls outer sub';
 
 undef $_;
-{ foo(sub { my $o = bless {}, 'Foo'; last }) }
-is $_, "ok", 'last triggering DESTROY that calls outer sub';
+{
+    my @these_warnings;
+    local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+    { foo(sub { my $o = bless {}, 'Foo'; last }) }
+    is $_, "ok", 'last triggering DESTROY that calls outer sub';
+    is(@these_warnings, 2, "Got two warnings, as expected");
+    like($these_warnings[0], qr/Exiting subroutine via last/,
+        "Got expected exiting via last warning");
+}
 
 undef $_;
-{ foo(sub { my $o = bless {}, 'Foo'; next }) }
+{ no warnings 'exiting'; foo(sub { my $o = bless {}, 'Foo'; next }) }
 is $_, "ok", 'next triggering DESTROY that calls outer sub';
 
 undef $_;
 my $count = 0;
-{ if (!$count++) { foo(sub { my $o = bless {}, 'Foo'; redo }) } }
+{ if (!$count++) { no warnings 'exiting'; foo(sub { my $o = bless {}, 'Foo'; redo }) } }
 is $_, "ok", 'redo triggering DESTROY that calls outer sub';
 
 undef $_;
@@ -89,16 +96,16 @@ eval { bar(sub { die }) };
 is $_, "ok", 'die triggering DESTROY that calls current sub';
 
 undef $_;
-{ bar(sub { last }) }
+{ bar(sub { no warnings 'exiting'; last }) }
 is $_, "ok", 'last triggering DESTROY that calls current sub';
 
 undef $_;
-{ bar(sub { next }) }
+{ bar(sub { no warnings 'exiting'; next }) }
 is $_, "ok", 'next triggering DESTROY that calls current sub';
 
 undef $_;
 undef $count;
-{ if (!$count++) { bar(sub { redo }) } }
+{ if (!$count++) { bar(sub { no warnings 'exiting'; redo }) } }
 is $_, "ok", 'redo triggering DESTROY that calls current sub';
 
 undef $_;
@@ -141,13 +148,16 @@ format inner_die =
 { my $o = bless {}, 'Foomat'; die }
 .
 undef $_;
-study;
-eval { local $inner_format = 'inner_die'; write };
-is $_, "ok", 'die triggering DESTROY that calls outer format';
+{
+    no warnings 'uninitialized';
+    study;
+    eval { local $inner_format = 'inner_die'; write };
+    is $_, "ok", 'die triggering DESTROY that calls outer format';
+}
 
 format inner_last =
 @
-{ my $o = bless {}, 'Foomat'; last LAST }
+{ my $o = bless {}, 'Foomat'; no warnings 'exiting'; last LAST }
 .
 undef $_;
 LAST: { local $inner_format = 'inner_last'; write }
@@ -155,7 +165,7 @@ is $_, "ok", 'last triggering DESTROY that calls outer format';
 
 format inner_next =
 @
-{ my $o = bless {}, 'Foomat'; next NEXT }
+{ my $o = bless {}, 'Foomat'; no warnings 'exiting'; next NEXT }
 .
 undef $_;
 NEXT: { local $inner_format = 'inner_next'; write }
@@ -163,7 +173,7 @@ is $_, "ok", 'next triggering DESTROY that calls outer format';
 
 format inner_redo =
 @
-{ my $o = bless {}, 'Foomat'; redo REDO }
+{ my $o = bless {}, 'Foomat'; no warnings 'exiting'; redo REDO }
 .
 undef $_;
 undef $_;
@@ -219,16 +229,16 @@ eval { local $block = sub { die }; write };
 is $_, "ok", 'die triggering DESTROY directly inside format';
 
 undef $_;
-LAST: { local $block = sub { last LAST }; write }
+LAST: { local $block = sub { no warnings 'exiting'; last LAST }; write }
 is $_, "ok", 'last triggering DESTROY directly inside format';
 
 undef $_;
-NEXT: { local $block = sub { next NEXT }; write }
+NEXT: { local $block = sub { no warnings 'exiting'; next NEXT }; write }
 is $_, "ok", 'next triggering DESTROY directly inside format';
 
 undef $_;
 undef $count;
-REDO: { if (!$count++) { local $block = sub { redo REDO }; write } }
+REDO: { if (!$count++) { local $block = sub { no warnings 'exiting'; redo REDO }; write } }
 is $_, "ok", 'redo triggering DESTROY directly inside format';
 
 #undef $_;
