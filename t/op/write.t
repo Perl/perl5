@@ -157,7 +157,9 @@ now is the time for all good men to come to\n";
 is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 $fox = 'wolfishness';
+no warnings 'shadow';
 my $fox = 'foxiness';		# Test a lexical variable.
+use warnings 'shadow';
 
 format OUT2 =
 the quick brown @<<
@@ -196,6 +198,7 @@ now is the time for all good men to come to\n";
 is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 eval <<'EOFORMAT';
+no warnings 'redefine';
 format OUT2 =
 the brown quick @<<
 $fox
@@ -497,6 +500,8 @@ EOD
 
 {   # test 20: hash accesses; single '}' must not terminate format '}' (WL)
     my %h = ( xkey => 'xval', ykey => 'yval' );
+    no warnings 'syntax';
+    # Not enough format arguments
     format OUT20 =
 @>>>> @<<<< ~~
 each %h
@@ -507,6 +512,7 @@ $h{xkey}, $h{ykey}
 }
 }
 .
+    use warnings 'syntax';
     my $exp = '';
     while( my( $k, $v ) = each( %h ) ){
 	$exp .= sprintf( "%5s %s\n", $k, $v );
@@ -608,10 +614,12 @@ $_
 
 my $u22a = "N" x 8;
 
+no warnings 'uninitialized';
 format OUT22a =
 '^<<<<<<<<'~~
 $u22a
 .
+use warnings 'uninitialized';
 
 is_format_utf8(\*OUT22a,
                "'NNNNNNNN '\n");
@@ -786,7 +794,7 @@ is_format_utf8(\*OUT23f,
 
 
 tie my $u23g, 'Tie::StdScalar';
-my $temp = "N" x 8;
+$temp = "N" x 8;
 utf8::upgrade($temp);
 $u23g = $temp;
 
@@ -921,7 +929,7 @@ is_format_utf8(\*OUT24f,
 
 
 tie my $u24g, 'UTF8Toggle';
-my $temp = "N" x 8;
+$temp = "N" x 8;
 utf8::upgrade($temp);
 $u24g = $temp;
 
@@ -976,7 +984,7 @@ is_format_utf8(\*OUT25a,
                "'NNNNNNNN '\n");
 
 
-my $temp = "N" x 8;
+$temp = "N" x 8;
 utf8::upgrade($temp);
 my $u25b = OS->new($temp);
 
@@ -1432,7 +1440,7 @@ like_format_utf8(\*OUT28f, $qr_hash_m);
   my $exp = ">$ref<";
   is swrite('>^*<', $ref), $exp;
   $ref = [];
-  my $exp = ">$ref<";
+  $exp = ">$ref<";
   is swrite('>@*<', $ref), $exp;
 }
 
@@ -1462,8 +1470,10 @@ $= = 10;
 select $oldfh;
 close STDOUT_DUP;
 
+no warnings 'once';
 *CmT =  *{$::{Comment}}{FORMAT};
 ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
+use warnings 'once';
 
 
 # RT #91032: Check that "non-real" strings like tie and overload work,
@@ -1849,11 +1859,13 @@ return
 
 open(UNDEF, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 select +(select(UNDEF), $~ = "UNDEFFORMAT")[0];
+no warnings 'uninitialized';
 format UNDEFFORMAT =
 @
 undef *UNDEFFORMAT
 .
 write UNDEF;
+use warnings 'uninitialized';
 pass "active format cannot be freed";
 
 select +(select(UNDEF), $~ = "UNDEFFORMAT2")[0];
@@ -1861,7 +1873,9 @@ format UNDEFFORMAT2 =
 @
 close UNDEF or die "Could not close: $!"; undef *UNDEF
 .
+no warnings 'unopened';
 write UNDEF;
+use warnings 'unopened';
 pass "freeing current handle in format";
 undef $^A;
 
@@ -1880,6 +1894,7 @@ format =
 ;1
 |, 'format = ... } is not allowed';
 
+no warnings 'uninitialized';
 open(NEST, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 format NEST =
 @<<<
@@ -1896,16 +1911,19 @@ $birds;
 .
 write NEST;
 close NEST or die "Could not close: $!";
+use warnings 'uninitialized';
 is cat('Op_write.tmp'), "birds\nnest\n", 'nested formats';
 
 # A compilation error should not create a format
+
 eval q|
+no warnings 'misc';
 format ERROR =
 @
 @_ =~ s///
 .
 |;
-eval { write ERROR };
+eval { no warnings 'once'; write ERROR };
 like $@, qr'Undefined format',
     'formats with compilation errors are not created';
 
@@ -2022,7 +2040,11 @@ EXPECT
 
 {
     $^A = "";
-    my $a = *globcopy;
+    my $a;
+    {
+        no warnings 'once';
+        $a = *globcopy;
+    }
     my $r = eval { formline "^<<", $a };
     is $@, "";
     ok $r, "^ format with glob copy";
