@@ -14,7 +14,6 @@ BEGIN {
     $SIG{__WARN__} = sub { die @_ };
 }
 
-use strict;
 use IPC::Open2;
 use Test::More tests => 15;
 

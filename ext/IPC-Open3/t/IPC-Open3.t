@@ -1,7 +1,7 @@
 #!./perl -w
 
 BEGIN {
-    require Config; Config->import;
+    use Config;
     if (!$Config{'d_fork'}
        # open2/3 supported on win32
        && $^O ne 'MSWin32' && $^O ne 'NetWare')
@@ -13,7 +13,6 @@ BEGIN {
     $SIG{__WARN__} = sub { die @_ };
 }
 
-use strict;
 use Test::More tests => 45;
 
 use IO::Handle;
