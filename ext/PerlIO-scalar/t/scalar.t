@@ -17,7 +17,7 @@ use Errno qw(EACCES);
 
 $| = 1;
 
-use Test::More tests => 123;
+use Test::More tests => 129;
 
 my $fh;
 my $var = "aaa\n";
@@ -166,7 +166,11 @@ close $fh;
 my $data = "a non-empty PV";
 $data = undef;
 open(MEM, '<', \$data) or die "Fail: $!\n";
-my $x = join '', <MEM>;
+my $x;
+{
+    no warnings 'uninitialized';
+    $x = join '', <MEM>;
+}
 is($x, '');
 
 {
@@ -185,17 +189,31 @@ EOF
 
 # [perl #40267] PerlIO::scalar doesn't respect readonly-ness
 {
-    ok(!(defined open(F, '>', \undef)), "[perl #40267] - $!");
-    close F;
+    {
+        my @these_warnings;
+        local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+        ok(!(defined open(F, '>', \undef)), "[perl #40267] - $!");
+        close F;
+        is(@these_warnings, 1, "Got one warning, as expected");
+        like($these_warnings[0], qr/Modification of a read-only value attempted/,
+            "Got expected warning for read-only modification");
+    }
 
     my $ro = \43;
-    ok(!(defined open(F, '>', $ro)), $!);
-    is($!+0, EACCES, "check we get a read-onlyish error code");
-    close F;
-    # but we can read from it
-    ok(open(F, '<', $ro), $!);
-    is(<F>, 43);
-    close F;
+    {
+        my @these_warnings;
+        local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+        ok(!(defined open(F, '>', $ro)), $!);
+        is($!+0, EACCES, "check we get a read-onlyish error code");
+        close F;
+        is(@these_warnings, 1, "Got one warning, as expected");
+        like($these_warnings[0], qr/Modification of a read-only value attempted/,
+            "Got expected warning for read-only modification");
+        # but we can read from it
+        ok(open(F, '<', $ro), $!);
+        is(<F>, 43);
+        close F;
+    }
 }
 
 {
@@ -234,11 +252,20 @@ EOF
     is(tell(F), 76);
 
     # Seeking negative should not do funny business.
-
-    ok(!seek(F,  -50, SEEK_SET), $!);
+    {
+        my @these_warnings;
+        local $SIG{__WARN__} = sub { push @these_warnings, $_[0]; };
+        ok(!seek(F,  -50, SEEK_SET), $!);
+        is(@these_warnings, 1, "Got one warning, as expected");
+        like($these_warnings[0], qr/Offset outside string/,
+            "Got expected Offset outside string warning");
+    }
     ok(seek(F, 0, SEEK_SET));
-    ok(!seek(F,  -50, SEEK_CUR), $!);
-    ok(!seek(F, -150, SEEK_END), $!);
+    {
+        no warnings 'layer';
+        ok(!seek(F,  -50, SEEK_CUR), $!);
+        ok(!seek(F, -150, SEEK_END), $!);
+    }
 }
 
 # RT #43789: should respect tied scalar
@@ -519,8 +546,11 @@ SKIP:
 {
     my $buf0 = "hello";
     open my $fh, "<", \$buf0 or die $!;
-    ok(!seek($fh, -10, SEEK_CUR), "seek to negative position");
-    is(tell($fh), 0, "shouldn't change the position");
+    {
+        no warnings 'layer';
+        ok(!seek($fh, -10, SEEK_CUR), "seek to negative position");
+        is(tell($fh), 0, "shouldn't change the position");
+    }
 }
 
 SKIP:
