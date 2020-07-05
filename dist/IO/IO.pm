@@ -7,7 +7,7 @@ use Carp;
 use strict;
 use warnings;
 
-our $VERSION = "1.43";
+our $VERSION = "1.44";
 XSLoader::load 'IO', $VERSION;
 
 sub import {
