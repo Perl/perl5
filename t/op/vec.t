@@ -71,7 +71,7 @@ is(vec($x, 0, 8), 255);
 $@ = undef;
 {
     local $@;
-    eval { vec($foo, 1, 8) };
+    eval { my $v = vec($foo, 1, 8) };
     like($@, qr/$exception_134139/,
         "Caught exception: code point over 0xFF used as argument to vec");
     $@ = undef;
@@ -251,7 +251,7 @@ like($@, qr/^Modification of a read-only value attempted at /,
 
     local $@;
     my $foo = "\x{100}" . "\xff\xfe";
-    eval { vec($foo, 1, 8) };
+    eval { my $v = vec($foo, 1, 8) };
     like($@, qr/$exception_134139/,
         "RT 134139: Use of strings with code points over 0xFF as arguments to 'vec' is now forbidden");
 }
