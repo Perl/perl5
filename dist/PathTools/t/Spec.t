@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 
-use strict;
 use Test::More;
 
 require_ok('File::Spec');
@@ -806,30 +805,29 @@ my @tests = (
 
     # Some funky stuff to override Cwd::getdcwd() for testing purposes,
     # in the limited scope of the rel2abs() method.
-    if ($Cwd::VERSION && $Cwd::VERSION gt '2.17') {  # Avoid a 'used only once' warning
-	local $^W;
-	*rel2abs = sub {
-	    my $self = shift;
-	    local $^W;
-	    local *Cwd::getcwd = sub { 'C:\\one\\two' };
-	    *Cwd::getcwd = *Cwd::getcwd; # Avoid a 'used only once' warning
-	    local *Cwd::getdcwd = sub {
-	      return 'D:\alpha\beta' if $_[0] eq 'D:';
-	      return 'C:\one\two'    if $_[0] eq 'C:';
-	      return;
-	    };
-	    *Cwd::getdcwd = *Cwd::getdcwd; # Avoid a 'used only once' warning
-	    return $self->SUPER::rel2abs(@_);
-	};
-	*rel2abs = *rel2abs; # Avoid a 'used only once' warning
-	*abs2rel = sub {
-	    my $self = shift;
-	    local $^W;
-	    local *Cwd::getcwd = sub { 'C:\\one\\two' };
-	    *Cwd::getcwd = *Cwd::getcwd; # Avoid a 'used only once' warning
-	    return $self->SUPER::abs2rel(@_);
-	};
-	*abs2rel = *abs2rel; # Avoid a 'used only once' warning
+    if ($Cwd::VERSION && $Cwd::VERSION gt '2.17') {
+        *rel2abs = sub {
+            my $self = shift;
+            no warnings 'redefine';
+            local *Cwd::getcwd = sub { 'C:\\one\\two' };
+            *Cwd::getcwd = *Cwd::getcwd;
+            local *Cwd::getdcwd = sub {
+              return 'D:\alpha\beta' if $_[0] eq 'D:';
+              return 'C:\one\two'    if $_[0] eq 'C:';
+              return;
+            };
+            *Cwd::getdcwd = *Cwd::getdcwd;
+            return $self->SUPER::rel2abs(@_);
+        };
+        *rel2abs = *rel2abs; # Avoid a 'used only once' warning
+        *abs2rel = sub {
+            my $self = shift;
+            no warnings 'redefine';
+            local *Cwd::getcwd = sub { 'C:\\one\\two' };
+            *Cwd::getcwd = *Cwd::getcwd; # Avoid a 'used only once' warning
+            return $self->SUPER::abs2rel(@_);
+        };
+        *abs2rel = *abs2rel; # Avoid a 'used only once' warning
     }
 }
 

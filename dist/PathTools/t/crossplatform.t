@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 
-use strict;
 use File::Spec;
 use lib File::Spec->catfile('t', 'lib');
 use Test::More;
@@ -70,11 +69,10 @@ foreach my $platform (@platforms) {
     
     # Fake out the environment on MacOS and Win32
     no strict 'refs';
-    my $save_w = $^W;
-    $^W = 0;
+    no warnings 'redefine';
     local *{"File::Spec::Mac::rootdir"} = sub { "Macintosh HD:" };
     local *{"File::Spec::Win32::_cwd"}  = sub { "C:\\foo" };
-    $^W = $save_w;
+    use warnings 'redefine';
     use strict 'refs';
 
 
