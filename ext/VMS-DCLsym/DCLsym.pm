@@ -6,7 +6,7 @@ use strict;
 
 # Package globals
 our @ISA = ( 'DynaLoader' );
-our $VERSION = '1.09';              # remember to update version in POD!
+our $VERSION = '1.10';              # remember to update version in POD!
 my(%Locsyms) = ( ':ID' => 'LOCAL' );
 my(%Gblsyms) = ( ':ID' => 'GLOBAL');
 my $DoCache = 1;
