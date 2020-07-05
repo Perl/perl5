@@ -17,7 +17,7 @@ plan tests => 315;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
-eval { my $x; die  1..127, $x =~ y/// };
+eval { no warnings 'uninitialized'; my $x; die  1..127, $x =~ y/// };
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -32,8 +32,12 @@ is($_, "abcdefghijklmnopqrstuvwxyz",    'lc');
 tr/b-y/B-Y/;
 is($_, "aBCDEFGHIJKLMNOPQRSTUVWXYz",    'partial uc');
 
-tr/a-a/AB/;
-is($_, "ABCDEFGHIJKLMNOPQRSTUVWXYz",    'single char range a-a');
+{
+    no warnings 'misc';
+    # Replacement list is longer than search list
+    tr/a-a/AB/;
+    is($_, "ABCDEFGHIJKLMNOPQRSTUVWXYz",    'single char range a-a');
+}
 
 eval 'tr/a/\N{KATAKANA LETTER AINU P}/;';
 like $@,
@@ -933,17 +937,16 @@ is($@, '',  '   no error');
 
 
 my @foo = ();
-eval '$foo[-1] =~ tr/N/N/';
+eval 'no warnings q|uninitialized|; $foo[-1] =~ tr/N/N/';
 is( $@, '',         'implicit count outside array bounds, index negative' );
 is( scalar @foo, 0, "    doesn't extend the array");
 
-eval '$foo[1] =~ tr/N/N/';
+eval 'no warnings q|uninitialized|; $foo[1] =~ tr/N/N/';
 is( $@, '',         'implicit count outside array bounds, index positive' );
 is( scalar @foo, 0, "    doesn't extend the array");
 
-
 my %foo = ();
-eval '$foo{bar} =~ tr/N/N/';
+eval 'no warnings q|uninitialized|; $foo{bar} =~ tr/N/N/';
 is( $@, '',         'implicit count outside hash bounds' );
 is( scalar keys %foo, 0,   "    doesn't extend the hash");
 
@@ -951,10 +954,10 @@ $x = \"foo";
 is( $x =~ tr/A/A/, 2, 'non-modifying tr/// on a scalar ref' );
 is( ref $x, 'SCALAR', "    doesn't stringify its argument" );
 
+
 # rt.perl.org 36622.  Perl didn't like a y/// at end of file.  No trailing
 # newline allowed.
 fresh_perl_is(q[$_ = "foo"; y/A-Z/a-z/], '', {}, 'RT #36622 y/// at end of file');
-
 
 { # [perl #38293] chr(65535) should be allowed in regexes
 no warnings 'utf8'; # to allow non-characters
@@ -1089,8 +1092,11 @@ for ("", nullrocow) {
 { # [perl #123759]
 	eval q{ ('a' =~ /./) =~ tr///d };
 	ok(1, "tr///d on PL_Yes does not assert");
-	eval q{ ('a' =~ /./) =~ tr/a-z/a-z/d };
-	ok(1, "tr/a-z/a-z/d on PL_Yes does not assert");
+    {
+        # Useless use of /d modifier in transliteration operator
+        eval q{ no warnings 'misc'; ('a' =~ /./) =~ tr/a-z/a-z/d };
+        ok(1, "tr/a-z/a-z/d on PL_Yes does not assert");
+    }
 	eval q{ ('a' =~ /./) =~ tr///s };
 	ok(1, "tr///s on PL_Yes does not assert");
 	eval q{ *x =~ tr///d };
