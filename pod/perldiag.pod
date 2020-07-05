@@ -2235,7 +2235,7 @@ variable and glob that.
 
 =item exec? I'm not *that* kind of operating system
 
-(F) The C<exec> function is not implemented on some systems, e.g., Symbian
+(F) The C<exec> function is not implemented on the Catamount
 OS.  See L<perlport>.
 
 =item %sExecution of %s aborted due to compilation errors.

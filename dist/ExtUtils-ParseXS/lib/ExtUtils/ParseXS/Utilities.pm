@@ -5,7 +5,7 @@ use Exporter;
 use File::Spec;
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.40';
+our $VERSION = '3.41';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -394,10 +394,6 @@ sub standard_XS_defs {
 #  if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #    define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
 #    define XS_INTERNAL(name) STATIC XSPROTO(name)
-#  endif
-#  if defined(__SYMBIAN32__)
-#    define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
-#    define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
 #  endif
 #  ifndef XS_EXTERNAL
 #    if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)

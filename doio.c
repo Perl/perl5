@@ -2299,7 +2299,7 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 {
     dVAR;
     PERL_ARGS_ASSERT_DO_AEXEC5;
-#if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
+#if defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     assert(sp >= mark);

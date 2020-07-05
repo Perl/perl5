@@ -1814,7 +1814,7 @@ Perl can be cross-compiled.  It is just not trivial, cross-compilation
 rarely is.  Perl is routinely cross-compiled for several platforms: as of
 June 2019, these include Android, Blackberry 10,
 ARM Linux, and Solaris.  Previous versions of
-Perl also provided support for Open Zaurus, Symbian, and
+Perl also provided support for Open Zaurus, and
 the IBM OS/400, but it's unknown if those ports are still functional.
 These platforms are known as the B<target> platforms, while the systems
 where the compilation takes place are the B<host> platforms.

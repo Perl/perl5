@@ -283,7 +283,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlqnx		Perl notes for QNX
     perlriscos		Perl notes for RISC OS
     perlsolaris 	Perl notes for Solaris
-    perlsymbian 	Perl notes for Symbian
     perlsynology 	Perl notes for Synology
     perltru64		Perl notes for Tru64
     perlvms		Perl notes for VMS

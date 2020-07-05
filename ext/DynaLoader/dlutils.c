@@ -135,7 +135,6 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 }
 
 
-#ifndef SYMBIAN
 /* SaveError() takes printf style args and saves the result in dl_last_error */
 static void
 SaveError(pTHX_ const char* pat, ...)
@@ -161,5 +160,4 @@ SaveError(pTHX_ const char* pat, ...)
 	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "DynaLoader: stored error msg '%s'\n",dl_last_error));
     }
 }
-#endif
 

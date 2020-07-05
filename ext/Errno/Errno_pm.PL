@@ -2,14 +2,11 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.30";
+our $VERSION = "1.31";
 
 my %err = ();
 
-# Symbian cross-compiling environment.
-my $IsSymbian = exists $ENV{SDK} && -d "$ENV{SDK}\\epoc32";
-
-my $IsMSWin32 = $^O eq 'MSWin32' && !$IsSymbian;
+my $IsMSWin32 = $^O eq 'MSWin32';
 
 unlink "Errno.pm" if -f "Errno.pm";
 unlink "Errno.tmp" if -f "Errno.tmp";
@@ -148,10 +145,6 @@ sub get_files {
     } elsif ($^O eq 'vos') {
 	# avoid problem where cpp returns non-POSIX pathnames
 	$file{'/system/include_library/errno.h'} = 1;
-    } elsif ($IsSymbian) {
-        my $SDK = $ENV{SDK};
-        $SDK =~ s!\\!/!g;
-	$file{"$SDK/epoc32/include/libc/sys/errno.h"} = 1;
     } else {
 	open(CPPI, '>', 'errno.c') or
 	    die "Cannot open errno.c";
@@ -244,12 +237,7 @@ sub write_errno_pm {
 		$inhibit_linemarkers;
 	    open(CPPO,"$cpp errno.c |") or
 		die "Cannot run '$cpp errno.c'";
-	} elsif ($IsSymbian) {
-            my $cpp = "gcc -E -I$ENV{SDK}\\epoc32\\include\\libc" .
-		$inhibit_linemarkers ." -";
-	    open(CPPO,"$cpp < errno.c |")
-		or die "Cannot exec $cpp";
-        } else {
+	} else {
 	    my $cpp = default_cpp() . $inhibit_linemarkers;
 	    open(CPPO,"$cpp < errno.c |")
 		or die "Cannot exec $cpp";

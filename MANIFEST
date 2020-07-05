@@ -4139,7 +4139,6 @@ ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_freemint.xs	GNU dld style implementation for FreeMINT
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
-ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_win32.xs	Win32 implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
@@ -5414,7 +5413,6 @@ README.plan9			Perl notes for Plan 9
 README.qnx			Perl notes for QNX
 README.riscos			Perl notes for RISC OS
 README.solaris			Perl notes for Solaris
-README.symbian			Perl notes for Symbian
 README.synology			Perl notes for Synology
 README.tru64			Perl notes for Tru64
 README.tw			Perl for Traditional Chinese (in Big5)
@@ -5466,56 +5464,6 @@ SECURITY.md			Add Security Policy for GitHub
 stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
-symbian/bld.inf			Symbian sample app build config
-symbian/config.pl		Configuration script for Symbian
-symbian/config.sh		Configuration data for Symbian
-symbian/cwd.pl			Helper code for config.pl
-symbian/demo_pl			"Archive" of demo code
-symbian/ext/Moped/Msg/bld.inf	Demo extension build configuration
-symbian/ext/Moped/Msg/location.pl	Demo extension script
-symbian/ext/Moped/Msg/Msg.mmp	Demo extension building
-symbian/ext/Moped/Msg/Msg.pkg	Demo extension packaging
-symbian/ext/Moped/Msg/Msg.pm	Demo extension Perl glue
-symbian/ext/Moped/Msg/Msg.xs	Demo extension code
-symbian/ext/Moped/Msg/README	Demo extension documentation
-symbian/find_writeable_data.pl	Development utility
-symbian/hexdump.pl		Helper for sisify.pl updating
-symbian/install.cfg		Installation instructions
-symbian/makesis.pl		Installation file creator
-symbian/PerlApp.cpp		Symbian app launcher code
-symbian/PerlApp.h		Symbian app launcher header
-symbian/PerlApp.hrh		Symbian app launcher resource header
-symbian/PerlAppAif.rss		Symbian app launcher code
-symbian/PerlBase.cpp		Symbian Perl base class
-symbian/PerlBase.h		Symbian Perl base class header
-symbian/PerlBase.pod		Symbian Perl base class documentation
-symbian/PerlRecog.cpp		Symbian recognizer code
-symbian/PerlRecog.mmp		Symbian recognizer build
-symbian/PerlUi.cpp		Symbian Perl UI class
-symbian/PerlUi.h		Symbian Perl UI class header
-symbian/PerlUi.hrh		Symbian Perl UI class resource header
-symbian/PerlUiS60.rss		Symbian app launcher resource definition
-symbian/PerlUiS80.rss		Symbian app launcher resource definition
-symbian/PerlUiS90.rss		Symbian app launcher resource definition
-symbian/PerlUiUIQ.rss		Symbian app launcher resource definition
-symbian/PerlUtil.cpp		Symbian Perl utility class
-symbian/PerlUtil.h		Symbian Perl utility class header
-symbian/PerlUtil.pod		Symbian Perl utility class documentation
-symbian/port.pl			Helper code for config.pl
-symbian/README			ReadMe for the Symbian files
-symbian/sanity.pl		Helper code for config.pl
-symbian/sdk.pl			Helper code for config.pl
-symbian/sisify.pl		Packaging utility
-symbian/symbian_dll.cpp		The DLL stub for Symbian
-symbian/symbian_proto.h		Prototypes for Symbian
-symbian/symbian_stubs.c		Stub routines for Symbian
-symbian/symbian_stubs.h		Stub headers for Symbian
-symbian/symbian_utils.cpp	Helper routines for Symbian
-symbian/symbianish.h		Header for Symbian
-symbian/TODO			Symbian things to do
-symbian/uid.pl			Helper code for config.pl
-symbian/version.pl		Helper code for config.pl
-symbian/xsbuild.pl		Building extensions
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work

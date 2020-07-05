@@ -2705,11 +2705,7 @@ PP(pp_ssockopt)
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT: {
-#if defined(__SYMBIAN32__)
-# define SETSOCKOPT_OPTION_VALUE_T void *
-#else
 # define SETSOCKOPT_OPTION_VALUE_T const char *
-#endif
 	/* XXX TODO: We need to have a proper type (a Configure probe,
 	 * etc.) for what the C headers think of the third argument of
 	 * setsockopt(), the option_value read-only buffer: is it
@@ -4494,14 +4490,14 @@ PP(pp_system)
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
-#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
+#  if defined(WIN32) || defined(OS2) || defined(__VMS)
 	value = (I32)do_aspawn(really, MARK, SP);
 #  else
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
 #  endif
     }
     else if (SP - MARK != 1) {
-#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
+#  if defined(WIN32) || defined(OS2) || defined(__VMS)
 	value = (I32)do_aspawn(NULL, MARK, SP);
 #  else
 	value = (I32)do_aspawn(NULL, (void **)MARK, (void **)SP);

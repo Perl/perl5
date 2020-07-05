@@ -2480,7 +2480,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (xsinit)
 	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(SYMBIAN)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
     init_os_extras();
 #endif
 #endif
@@ -2505,9 +2505,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
      * PL_utf8locale is conditionally turned on by
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
-#if defined(__SYMBIAN32__)
-    PL_unicode = PERL_UNICODE_STD_FLAG; /* See PERL_SYMBIAN_CONSOLE_UTF8. */
-#endif
 #  ifndef PERL_IS_MINIPERL
     if (PL_unicode) {
 	 /* Requires init_predump_symbols(). */
@@ -3861,10 +3858,6 @@ S_minus_v(pTHX)
 	PerlIO_printf(PIO_stdout,
 		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
-#ifdef __SYMBIAN32__
-	PerlIO_printf(PIO_stdout,
-		      "Symbian port by Nokia, 2004-2005\n");
-#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
@@ -4767,7 +4760,7 @@ S_init_perllib(pTHX)
     }
 }
 
-#if defined(DOSISH) || defined(__SYMBIAN32__)
+#if defined(DOSISH)
 #    define PERLLIB_SEP ';'
 #elif defined(__VMS)
 #    define PERLLIB_SEP PL_perllib_sep

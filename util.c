@@ -2094,7 +2094,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
  * For Solaris, setenv() and unsetenv() were introduced in Solaris 9, so
  * testing for HAS UNSETENV is sufficient.
  */
-#  if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
+#  if defined(__CYGWIN__)|| defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
 #    define MY_HAS_SETENV
 #  endif
 
@@ -4349,7 +4349,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 #ifdef ECONNABORTED
   errno = ECONNABORTED;	/* This would be the standard thing to do. */
 #elif defined(ECONNREFUSED)
-  errno = ECONNREFUSED;	/* E.g. Symbian does not have ECONNABORTED. */
+  errno = ECONNREFUSED;	/* E.g. does not have ECONNABORTED. */
 #else
   errno = ETIMEDOUT;	/* Desperation time. */
 #endif

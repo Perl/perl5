@@ -5,7 +5,7 @@ use strict;
 use Cwd ();
 require File::Spec::Unix;
 
-our $VERSION = '3.79';
+our $VERSION = '3.80';
 $VERSION =~ tr/_//d;
 
 our @ISA = qw(File::Spec::Unix);
@@ -59,8 +59,8 @@ from the following list:
     /tmp
     /
 
-The SYS:/temp is preferred in Novell NetWare and the C:\system\temp
-for Symbian (the File::Spec::Win32 is used also for those platforms).
+The SYS:/temp is preferred in Novell NetWare as File::Spec::Win32
+is used also for that platform.
 
 If running under taint mode, and if the environment
 variables are tainted, they are not used.
