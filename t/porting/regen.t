@@ -74,7 +74,7 @@ close $fh
 my @progs = grep {!$skip{$_}} <regen/*.pl>;
 push @progs, 'regen.pl', map {"Porting/makemeta $_"} qw(-j -y);
 
-plan (tests => $tests + @files + @progs);
+plan (tests => $tests + @files + @progs +2);
 
 OUTER: foreach my $file (@files) {
     open my $fh, '<', $file or die "Can't open $file: $!";
