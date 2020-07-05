@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; Config->import;
+    use Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
         exit 0;
@@ -112,7 +112,7 @@ SKIP: {
     TODO: {
         local $TODO = 'directory brackets look like pattern brackets to glob' if $^O eq 'VMS';
         my $home = exists $ENV{HOME} ? $ENV{HOME}
-        : eval { getpwuid($>); 1 } ? (getpwuid($>))[7]
+        : eval { no warnings 'void'; getpwuid($>); 1 } ? (getpwuid($>))[7]
         : $^O eq 'MSWin32' && exists $ENV{USERPROFILE} ? $ENV{USERPROFILE}
         : q{~};
         $tilde_check->($home);
