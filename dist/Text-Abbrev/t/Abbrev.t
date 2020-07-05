@@ -7,7 +7,7 @@ use Text::Abbrev;
 print "ok 1\n";
 
 # old style as reference
-local(%x);
+our %x;
 my @z = qw(list edit send abort gripe listen);
 abbrev(*x, @z);
 my $r = join ':', sort keys %x; 
@@ -48,7 +48,6 @@ print (($r eq $s)?"ok $test\n":"not ok $test\n"); $test++;
 
 # warnings safe with zero arguments
 my $notok;
-$^W = 1;
 $SIG{__WARN__} = sub { $notok++ };
 abbrev();
 print ($notok ? "not ok $test\n" : "ok $test\n"); $test++;
