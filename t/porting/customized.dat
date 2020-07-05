@@ -5,7 +5,7 @@ Config::Perl::V cpan/Config-Perl-V/V.pm 0a0f7207e6505b78ee345a933acb0246a13579f5
 Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
 Digest::MD5 cpan/Digest-MD5/Makefile.PL 3bf781444ee671da63f1c6360e0a31f11d9ba520
 Digest::MD5 cpan/Digest-MD5/MD5.pm ee746fae54b4bbce26b90627e0e01c979e127cf0
-Digest::MD5 cpan/Digest-MD5/MD5.xs 249bed648232192ce018f7f894ad127c3a639831
+Digest::MD5 cpan/Digest-MD5/MD5.xs a85d3a6544639355644d1cb7987caf6c2121a6e3
 Digest::MD5 cpan/Digest-MD5/t/files.t e987329d2411ff60ad9a2bdf93fdf5f6943467e8
 Filter::Util::Call pod/perlfilter.pod e9833bf4ebc51087dfee5c553e0f8a5eef67212d
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
