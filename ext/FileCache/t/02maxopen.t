@@ -10,6 +10,7 @@ use Test::More tests => 5;
 {# Test 2: that we actually adhere to maxopen
   for my $path ( @files ){
     cacheout $path;
+    no strict 'refs';
     print $path "$path 1\n";
   }
   
@@ -17,6 +18,7 @@ use Test::More tests => 5;
   for my $path ( @files ){
     ok(fileno($path) || $path =~ /^(?:foo|bar)$/);
     next unless fileno($path);
+    no strict 'refs';
     print $path "$path 2\n";
     close($path);
     open($path, '<', $path);

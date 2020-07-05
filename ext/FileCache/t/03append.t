@@ -11,13 +11,16 @@ use Test::More tests => 2;
      my @cat;
      for my $path ( @files ){
 	 cacheout $path;
+     no strict 'refs';
 	 print $path "$path 3\n";
      }
      for my $path ( @files ){
 	 cacheout $path;
+     no strict 'refs';
 	 print $path "$path 33\n";
      }
      for my $path ( @files ){
+     no strict 'refs';
 	 open($path, '<', $path);
 	 push @cat, do{ local $/; <$path>};
          close($path);
@@ -28,9 +31,11 @@ use Test::More tests => 2;
      @cat = ();
      for my $path ( @files ){
 	 cacheout $path;
+     no strict 'refs';
 	 print $path "$path 333\n";
      }
      for my $path ( @files ){
+     no strict 'refs';
 	 open($path, '<', $path);
 	 push @cat, do{ local $/; <$path>};
          close($path);

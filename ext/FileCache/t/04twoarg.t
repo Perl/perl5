@@ -8,6 +8,7 @@ use Test::More tests => 1;
 
 {# Test 4: that 2 arg format works, and that we cycle on mode change
      cacheout '>', "foo";
+     no warnings 'reserved';
      print foo "foo 4\n";
      cacheout '+>', "foo";
      print foo "foo 44\n";

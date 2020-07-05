@@ -11,6 +11,7 @@ use Test::More tests => 1;
 {# Test 1: that we can open files
      for my $path ( @files ){
 	 cacheout $path;
+     no strict 'refs';
 	 print $path "$path 1\n";
 	 close $path;
      }
