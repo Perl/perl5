@@ -13,6 +13,13 @@ BEGIN {
 
 plan tests => 143;
 
+package zlopp;
+1;
+package plop;
+1;
+
+package main;
+
 my $a = {};
 bless $a, "Bob";
 ok $a->isa("Bob");
@@ -347,5 +354,6 @@ ok(Undeclared->isa("UNIVERSAL"));
 # @UNIVERSAL::ISA
 @UNIVERSAL::ISA = ('UniversalParent');
 { package UniversalIsaTest1; }
-ok(UniversalIsaTest1->isa('UniversalParent'));
-ok(UniversalIsaTest2->isa('UniversalParent'));
+no warnings 'syntax';
+ok(UniversalIsaTest1->isa('UniversalParent'), 'UniversalIsaTest1');
+ok(UniversalIsaTest2->isa('UniversalParent'), 'UniversalIsaTest2');
