@@ -1,5 +1,4 @@
 #!./perl
-use strict;
 use Cwd;
 
 my $warn_msg;
@@ -19,8 +18,7 @@ BEGIN {
         require File::Spec::Unix;
         @File::Spec::ISA = 'File::Spec::Unix';
     }
-    require File::Find;
-    import File::Find;
+    use File::Find;
 }
 
 my $symlink_exists = eval { symlink("",""); 1 };

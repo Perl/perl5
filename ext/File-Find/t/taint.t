@@ -47,12 +47,16 @@ BEGIN {
 	##
 	## Match the directory taint tests in mg.c::Perl_magic_setenv()
 	##
-	push(@path,$dir) unless (length($dir) >= 256
-				 or
-				 substr($dir,0,1) ne "/"
-				 or
-				 (stat $dir)[2] & 002);
+
+    no warnings 'uninitialized';
+    # Use of uninitialized value in numeric bitwise and (&)
+    push(@path,$dir) unless (length($dir) >= 256
+        or
+        substr($dir,0,1) ne "/"
+        or
+        (stat $dir)[2] & 002);
     }
+    use warnings 'uninitialized';
     $ENV{'PATH'} = join($sep,@path);
 }
 
