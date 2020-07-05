@@ -4,7 +4,7 @@ use p5;
 require 5.005;		# Probably works on earlier versions too.
 require Exporter;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 =head1 NAME
 
