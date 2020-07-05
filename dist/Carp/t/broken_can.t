@@ -10,6 +10,7 @@ package main;
 use Carp;
 
 eval {
+    no strict 'subs';
     sub { confess-sins }->(bless[], Foo);
 };
 like $@, qr/^-sins at /;

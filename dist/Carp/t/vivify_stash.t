@@ -18,7 +18,9 @@ eval { sub { Carp::longmess() }->(\1) };
 print $@ eq '' ? "ok 4 # longmess check1\n" : "not ok 4 # longmess check1\n# $@";
 
 # overload:: glob without hash
+no strict 'refs';
 undef *{"overload::"};
+use strict 'refs';
 eval { sub { Carp::longmess() }->(\1) };
 print $@ eq '' ? "ok 5 # longmess check2\n" : "not ok 5 # longmess check2\n# $@";
 

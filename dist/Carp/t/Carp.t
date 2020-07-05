@@ -480,7 +480,7 @@ SKIP:
     );
 
     package Foo::No::Autovivify;
-    $CARP_NOT = 1;
+    our $CARP_NOT = 1;
     eval { Carp::croak(1) };
     ::ok(
         !defined *{$Foo::No::Autovivify::{CARP_NOT}}{ARRAY},
@@ -494,7 +494,7 @@ SKIP:
 
     package Phou;
     $Phou::{ISA} = \42;
-    eval { Mpar::f };
+    eval { no strict 'subs'; Mpar::f };
 }
 like $@, qr/tun syn/, 'Carp can handle non-glob ISA stash elems';
 
