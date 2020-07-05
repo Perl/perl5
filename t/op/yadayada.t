@@ -83,7 +83,7 @@ foreach my $line (@lines) {
     next if $line =~ /^\s*#/ || $line !~ /\S/;
     my $mess = qq {Parsing '...' in "$line" as a range operator};
     eval qq {
-       {local *STDOUT; no strict "subs"; $line;}
+       {local *STDOUT; no warnings 'unopened'; no strict "subs"; $line;}
         pass \$mess;
         1;
     } or do {
