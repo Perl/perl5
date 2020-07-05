@@ -243,7 +243,9 @@ ok( exists $h{chr(65).chr(66).chr(67)}, "v-stringness is engaged for X.Y.Z" );
 
 {
     local $|;
+    no warnings 'numeric';
     $| = v0;
+    use warnings 'numeric';
     $| = 1;
     --$|; --$|;
     is $|, 1, 'clobbering vstrings does not clobber all magic';
