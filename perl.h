@@ -3076,37 +3076,6 @@ typedef struct padname PADNAME;
 #  define USE_ENVIRON_ARRAY
 #endif
 
-#ifdef USE_ITHREADS
-   /* On some platforms it would be safe to use a read/write mutex with many
-    * readers possible at the same time.  On other platforms, notably IBM ones,
-    * subsequent getenv calls destroy earlier ones.  Those platforms would not
-    * be able to handle simultaneous getenv calls */
-#  define ENV_LOCK            MUTEX_LOCK(&PL_env_mutex)
-#  define ENV_UNLOCK          MUTEX_UNLOCK(&PL_env_mutex)
-#  define ENV_INIT            MUTEX_INIT(&PL_env_mutex);
-#  define ENV_TERM            MUTEX_DESTROY(&PL_env_mutex);
-#else
-#  define ENV_LOCK       NOOP
-#  define ENV_UNLOCK     NOOP
-#  define ENV_INIT       NOOP
-#  define ENV_TERM       NOOP
-#endif
-
-/* Some critical sections need to lock both the locale and the environment.
- * XXX khw intends to change this to lock both mutexes, but that brings up
- * issues of potential deadlock, so should be done at the beginning of a
- * development cycle.  So for now, it just locks the environment.  Note that
- * many modern platforms are locale-thread-safe anyway, so locking the locale
- * mutex is a no-op anyway */
-#define ENV_LOCALE_LOCK     ENV_LOCK
-#define ENV_LOCALE_UNLOCK   ENV_UNLOCK
-
-/* And some critical sections care only that no one else is writing either the
- * locale nor the environment.  XXX Again this is for the future.  This can be
- * simulated with using COND_WAIT in thread.h */
-#define ENV_LOCALE_READ_LOCK     ENV_LOCALE_LOCK
-#define ENV_LOCALE_READ_UNLOCK   ENV_LOCALE_UNLOCK
-
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     /* having sigaction(2) means that the OS supports both 1-arg and 3-arg
      * signal handlers. But the perl core itself only fully supports 1-arg
@@ -6269,22 +6238,6 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[];
 #  endif
 #endif    /* end of isn't EBCDIC */
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-/* Static inline funcs that depend on includes and declarations above.
-   Some of these reference functions in the perl object files, and some
-   compilers aren't smart enough to eliminate unused static inline
-   functions, so including this file in source code can cause link errors
-   even if the source code uses none of the functions. Hence including these
-   can be suppressed by setting PERL_NO_INLINE_FUNCTIONS. Doing this will
-   (obviously) result in unworkable XS code, but allows simple probing code
-   to continue to work, because it permits tests to include the perl headers
-   for definitions without creating a link dependency on the perl library
-   (which may not exist yet).
-*/
-
-#  include "inline.h"
-#endif
-
 #include "overload.h"
 
 END_EXTERN_C
@@ -6976,6 +6929,58 @@ cannot have changed since the precalculation.
     STMT_START { block; } STMT_END
 
 #endif /* !USE_LOCALE_NUMERIC */
+
+#ifdef USE_ITHREADS
+   /* On some platforms it would be safe to use a read/write mutex with many
+    * readers possible at the same time.  On other platforms, notably IBM ones,
+    * subsequent getenv calls destroy earlier ones.  Those platforms would not
+    * be able to handle simultaneous getenv calls */
+#  define ENV_LOCK            MUTEX_LOCK(&PL_env_mutex)
+#  define ENV_UNLOCK          MUTEX_UNLOCK(&PL_env_mutex)
+#  define ENV_INIT            MUTEX_INIT(&PL_env_mutex);
+#  define ENV_TERM            MUTEX_DESTROY(&PL_env_mutex);
+#else
+#  define ENV_LOCK       NOOP
+#  define ENV_UNLOCK     NOOP
+#  define ENV_INIT       NOOP
+#  define ENV_TERM       NOOP
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+/* Static inline funcs that depend on includes and declarations above.
+   Some of these reference functions in the perl object files, and some
+   compilers aren't smart enough to eliminate unused static inline
+   functions, so including this file in source code can cause link errors
+   even if the source code uses none of the functions. Hence including these
+   can be suppressed by setting PERL_NO_INLINE_FUNCTIONS. Doing this will
+   (obviously) result in unworkable XS code, but allows simple probing code
+   to continue to work, because it permits tests to include the perl headers
+   for definitions without creating a link dependency on the perl library
+   (which may not exist yet).
+*/
+
+START_EXTERN_C
+
+#  include "inline.h"
+
+END_EXTERN_C
+
+#endif
+
+/* Some critical sections need to lock both the locale and the environment.
+ * XXX khw intends to change this to lock both mutexes, but that brings up
+ * issues of potential deadlock, so should be done at the beginning of a
+ * development cycle.  So for now, it just locks the environment.  Note that
+ * many modern platforms are locale-thread-safe anyway, so locking the locale
+ * mutex is a no-op anyway */
+#define ENV_LOCALE_LOCK     ENV_LOCK
+#define ENV_LOCALE_UNLOCK   ENV_UNLOCK
+
+/* And some critical sections care only that no one else is writing either the
+ * locale nor the environment.  XXX Again this is for the future.  This can be
+ * simulated with using COND_WAIT in thread.h */
+#define ENV_LOCALE_READ_LOCK     ENV_LOCALE_LOCK
+#define ENV_LOCALE_READ_UNLOCK   ENV_LOCALE_UNLOCK
 
 #define Atof				my_atof
 
