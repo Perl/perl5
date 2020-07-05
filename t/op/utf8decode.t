@@ -28,10 +28,11 @@ my $is64bit = length sprintf("%x", ~0) > 8;
 
 foreach (<DATA>) {
     if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
-	# print "# $_\n";
-    } elsif (my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr)
-	     = /^(\d+\.\d+\.\d+[bu]?)   # ID
-		\s+(y|n|N-?\d+(?:,\d+)?)  # expect to pass or fail
+        # print "# $_\n";
+    }
+    elsif (my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr)
+         = /^(\d+\.\d+\.\d+[bu]?)   # ID
+        \s+(y|n|N-?\d+(?:,\d+)?)  # expect to pass or fail
                                           # 'n' means expect one diagnostic
                                           # 'N\d+'     means expect this
                                           #            number of diagnostics
@@ -46,56 +47,59 @@ foreach (<DATA>) {
                 \s+(\d+|-)              # number of characters
                 (?:\s+(.+))?            # expected error (or comment)
                 $/x) {
-	my @hex = split(/:/, $hex);
-	is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
-	my $octets = join '', map {chr hex $_} @hex;
-	is(length $octets, $byteslen, 'Number of octets tallies with byteslen');
-	if ($okay eq 'y') {
-	    my @chars = map {hex $_} split ',', $Unicode;
-	    is(scalar @chars, $charslen, 'Amount of hex tallies with charslen');
-	    my @got;
-	    warning_is(sub {@got = unpack 'C0U*', $octets}, undef,
-		       "No warnings expected for $id");
-	    is("@got", "@chars", 'Got expected Unicode characters');
-	} elsif ($okay eq 'n') {
-	    isnt($experr, '', "Expected warning for $id provided");
-	    warnings_like(sub {unpack 'C0U*', $octets}, [qr/$experr/],
-			 "Only expected warning for $id");
-	} elsif ($okay !~ /^N-?(\d+)(?:,(\d+))?/) {
-	    is($okay, 'n', "Confused test description for $id");
-	} else {
-	    my $expect32 = $1;
+        my @hex = split(/:/, $hex);
+        is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
+        my $octets = join '', map {chr hex $_} @hex;
+        is(length $octets, $byteslen, 'Number of octets tallies with byteslen');
+        if ($okay eq 'y') {
+            my @chars = map {hex $_} split ',', $Unicode;
+            is(scalar @chars, $charslen, 'Amount of hex tallies with charslen');
+            my @got;
+            warning_is(sub {@got = unpack 'C0U*', $octets}, undef,
+                   "No warnings expected for $id");
+            is("@got", "@chars", 'Got expected Unicode characters');
+        }
+        elsif ($okay eq 'n') {
+            isnt($experr, '', "Expected warning for $id provided");
+            warnings_like(sub {unpack 'C0U*', $octets}, [qr/$experr/],
+                 "Only expected warning for $id");
+        }
+        elsif ($okay !~ /^N-?(\d+)(?:,(\d+))?/) {
+            is($okay, 'n', "Confused test description for $id");
+        }
+        else {
+            my $expect32 = $1;
             my $expect64 = $2 // $expect32;
             my $expect = ($is64bit) ? $expect64 : $expect32;
-	    my @warnings;
-
-	    {
-		local $SIG{__WARN__} = sub {
-		    print "# $id: @_";
-		    push @warnings, "@_";
-		};
-		unpack 'C0U*', $octets;
-	    }
-
-	    unless (is(scalar @warnings, $expect, "Expected number of warnings for $id seen")) {
-                note(join "", "Got:\n", @warnings);
+            my @warnings;
+            {
+                local $SIG{__WARN__} = sub {
+                    print "# $id: @_";
+                    push @warnings, "@_";
+                };
+                no warnings 'void';
+                unpack 'C0U*', $octets;
             }
-	    isnt($experr, '', "Expected first warning for $id provided");
+
+            unless (is(scalar @warnings, $expect, "Expected number of warnings for $id seen")) {
+                    note(join "", "Got:\n", @warnings);
+            }
+            isnt($experr, '', "Expected first warning for $id provided");
 
             my $message;
             my $after = "";
             if ($expect64 < $expect32 && ! $is64bit) {
-                # This is needed for code points above IV_MAX
-                #if (       substr($octets, 0, 1) gt "\xfe"
-                #    || (   substr($octets, 0, 1) eq "\xfe"
-                #        && length $octets > 1
-                #        && substr($octets, 1, 1) le "\xbf"
-                #        && substr($octets, 1, 1) ge "\x80"))
-                #{
-                    like($warnings[0], qr/overflow/, "overflow warning for $id seen");
-                    shift @warnings;
-                    $after .= "overflow";
-                #}
+                    # This is needed for code points above IV_MAX
+                    #if (       substr($octets, 0, 1) gt "\xfe"
+                    #    || (   substr($octets, 0, 1) eq "\xfe"
+                    #        && length $octets > 1
+                    #        && substr($octets, 1, 1) le "\xbf"
+                    #        && substr($octets, 1, 1) ge "\x80"))
+                    #{
+                        like($warnings[0], qr/overflow/, "overflow warning for $id seen");
+                        shift @warnings;
+                        $after .= "overflow";
+                    #}
             }
 
             # The data below assumes that if there is both a 'short' and
@@ -112,16 +116,16 @@ foreach (<DATA>) {
             }
             $after = "after $after " if $after;
 
-	    like($warnings[0], qr/$experr/, "Expected first warning ${after}for $id seen");
-	    local $::TODO;
-	    if ($expect < 0) {
-		$expect = -$expect;
-		$::TODO = "Markus Kuhn states that $expect invalid sequences should be signalled";
-	    }
-
-	}
-    } else {
-	fail("unknown format '$_'");
+            like($warnings[0], qr/$experr/, "Expected first warning ${after}for $id seen");
+            local $::TODO;
+            if ($expect < 0) {
+                $expect = -$expect;
+                $::TODO = "Markus Kuhn states that $expect invalid sequences should be signalled";
+            }
+        }
+    }
+    else {
+        fail("unknown format '$_'");
     }
 }
 
