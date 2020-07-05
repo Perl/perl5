@@ -1,5 +1,4 @@
 #!perl -w
-use strict;
 use IO::Handle; # ungetc()
 
 use Test::More tests => 20;

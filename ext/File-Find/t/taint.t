@@ -1,5 +1,4 @@
 #!./perl -T
-use strict;
 use Test::More;
 BEGIN {
     plan(

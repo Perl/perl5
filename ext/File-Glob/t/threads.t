@@ -9,8 +9,6 @@ BEGIN {
         exit 0;
     }
 }
-use strict;
-use warnings;
 # Test::More needs threads pre-loaded
 use if $Config{useithreads}, 'threads';
 use Test::More;

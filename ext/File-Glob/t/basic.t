@@ -9,7 +9,6 @@ BEGIN {
         exit 0;
     }
 }
-use strict;
 use Test::More tests => 49;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();

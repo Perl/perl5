@@ -3,8 +3,6 @@
 # non-matching glob("a*a*a*...") went exponential time on number of a*'s
 
 
-use strict;
-use warnings;
 use v5.16.0;
 use File::Temp 'tempdir';
 use File::Spec::Functions;
