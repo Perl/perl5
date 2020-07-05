@@ -1,5 +1,6 @@
 #!./perl -w
 
+our @OrigINC;
 BEGIN {
     @OrigINC = @INC;
 }
@@ -27,14 +28,14 @@ BEGIN {
 
     mkpath [$Auto_Dir];
 
-    open(MOD, '>', $Module) || DIE $!;
-    print MOD <<'MODULE';
+    open(my $MOD, '>', $Module) || die $!;
+    print $MOD <<'MODULE';
 package Yup;
 $Plan = 9;
 return '42';
 MODULE
 
-    close MOD;
+    close $MOD;
 }
 
 END {
