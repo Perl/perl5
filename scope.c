@@ -972,11 +972,7 @@ Perl_leave_scope(pTHX_ I32 base)
         case SAVEt_SHARED_PVREF:		/* shared pv */
             a0 = ap[0]; a1 = ap[1];
             if (*a0.any_pvp != a1.any_pv) {
-#ifdef NETWARE
-                PerlMem_free(*a0.any_pvp);
-#else
                 PerlMemShared_free(*a0.any_pvp);
-#endif
                 *a0.any_pvp = a1.any_pv;
             }
             break;

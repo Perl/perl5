@@ -95,11 +95,7 @@ typedef int		(*LPSetVBuf)(struct IPerlStdIO*, FILE*, char*, int,
                             Size_t);
 typedef void		(*LPSetCnt)(struct IPerlStdIO*, FILE*, int);
 
-#ifndef NETWARE
 typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, STDCHAR*);
-#elif defined(NETWARE)
-typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, STDCHAR*, int);
-#endif
 
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPPrintf)(struct IPerlStdIO*, FILE*, const char*,
@@ -641,11 +637,7 @@ typedef int		(*LPLIOOpen3)(struct IPerlLIO*, const char*, int, int);
 typedef int		(*LPLIORead)(struct IPerlLIO*, int, void*, unsigned int);
 typedef int		(*LPLIORename)(struct IPerlLIO*, const char*,
                             const char*);
-#ifdef NETWARE
-typedef int		(*LPLIOSetmode)(struct IPerlLIO*, FILE*, int);
-#else
 typedef int		(*LPLIOSetmode)(struct IPerlLIO*, int, int);
-#endif	/* NETWARE */
 typedef int		(*LPLIONameStat)(struct IPerlLIO*, const char*,
                             Stat_t*);
 typedef char*		(*LPLIOTmpnam)(struct IPerlLIO*, char*);
@@ -848,25 +840,6 @@ struct IPerlMemInfo
         (*PL_Mem->pIsLocked)(PL_Mem)
 
 /* Shared memory macros */
-#ifdef NETWARE
-
-#define PerlMemShared_malloc(size)			    \
-        (*PL_Mem->pMalloc)(PL_Mem, (size))
-#define PerlMemShared_realloc(buf, size)		    \
-        (*PL_Mem->pRealloc)(PL_Mem, (buf), (size))
-#define PerlMemShared_free(buf)				    \
-        (*PL_Mem->pFree)(PL_Mem, (buf))
-#define PerlMemShared_calloc(num, size)			    \
-        (*PL_Mem->pCalloc)(PL_Mem, (num), (size))
-#define PerlMemShared_get_lock()			    \
-        (*PL_Mem->pGetLock)(PL_Mem)
-#define PerlMemShared_free_lock()			    \
-        (*PL_Mem->pFreeLock)(PL_Mem)
-#define PerlMemShared_is_locked()			    \
-        (*PL_Mem->pIsLocked)(PL_Mem)
-
-#else
-
 #define PerlMemShared_malloc(size)			    \
         (*PL_MemShared->pMalloc)(PL_MemShared, (size))
 #define PerlMemShared_realloc(buf, size)		    \
@@ -881,8 +854,6 @@ struct IPerlMemInfo
         (*PL_MemShared->pFreeLock)(PL_MemShared)
 #define PerlMemShared_is_locked()			    \
         (*PL_MemShared->pIsLocked)(PL_MemShared)
-
-#endif
 
 /* Parse tree memory macros */
 #define PerlMemParse_malloc(size)			    \

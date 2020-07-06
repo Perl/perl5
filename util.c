@@ -2466,7 +2466,7 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 #  endif
 
 
-#  if !defined(WIN32) && !defined(NETWARE)
+#  if !defined(WIN32)
 
 /*
 =for apidoc_section $utility
@@ -2606,7 +2606,7 @@ my_setenv_out:
 #    endif
 }
 
-#  else /* WIN32 || NETWARE */
+#  else /* WIN32 */
 
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
@@ -2625,7 +2625,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     safesysfree(envstr);
 }
 
-#  endif /* WIN32 || NETWARE */
+#  endif /* WIN32 */
 
 #endif /* USE_ENVIRON_ARRAY */
 
@@ -2649,7 +2649,7 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
+#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -3269,7 +3269,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(__LIBCATAMOUNT__)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -3358,7 +3358,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     }
     return result;
 }
-#endif /* !DOSISH || OS2 || WIN32 || NETWARE */
+#endif /* !DOSISH || OS2 || WIN32 */
 
 #ifdef PERL_USES_PL_PIDSTATUS
 void

@@ -209,7 +209,7 @@ print "#\n# Comparing against $tag_to_compare ....\n#\n" if $tap;
 
 my $count;
 my $diff_cmd = "git --no-pager diff $tag_to_compare ";
-my $q = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? '"' : "'";
+my $q = ($^O eq 'MSWin32' || $^O eq 'VMS') ? '"' : "'";
 my (@diff);
 
 foreach my $pm_file (sort keys %module_diffs) {

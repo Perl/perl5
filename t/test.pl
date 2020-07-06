@@ -629,7 +629,6 @@ USE_OK
 #   verbose  => print the command line
 
 my $is_mswin    = $^O eq 'MSWin32';
-my $is_netware  = $^O eq 'NetWare';
 my $is_vms      = $^O eq 'VMS';
 my $is_cygwin   = $^O eq 'cygwin';
 
@@ -684,7 +683,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 		    warn "Trailing & in prog >>$prog<< is not portable";
 		}
 	    }
-            if ($is_mswin || $is_netware || $is_vms) {
+            if ($is_mswin || $is_vms) {
                 $runperl = $runperl . qq ( -e "$prog" );
             }
             else {
@@ -706,7 +705,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	$args{stdin} =~ s/\n/\\n/g;
 	$args{stdin} =~ s/\r/\\r/g;
 
-	if ($is_mswin || $is_netware || $is_vms) {
+	if ($is_mswin || $is_vms) {
 	    $runperl = qq{$Perl -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
 	}

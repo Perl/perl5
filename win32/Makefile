@@ -1225,7 +1225,6 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\README.linux    ..\pod\perllinux.pod
 	copy ..\README.macos    ..\pod\perlmacos.pod
 	copy ..\README.macosx   ..\pod\perlmacosx.pod
-	copy ..\README.netware  ..\pod\perlnetware.pod
 	copy ..\README.openbsd  ..\pod\perlopenbsd.pod
 	copy ..\README.os2      ..\pod\perlos2.pod
 	copy ..\README.os390    ..\pod\perlos390.pod
@@ -1344,10 +1343,10 @@ distclean: realclean
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \
-	    perlnetware.pod perlopenbsd.pod perlos2.pod perlos390.pod \
-	    perlos400.pod perlplan9.pod perlqnx.pod perlriscos.pod \
-	    perlsolaris.pod perlsynology.pod perltoc.pod perltru64.pod \
-	    perltw.pod perluniprops.pod perlvos.pod perlwin32.pod
+	    perlopenbsd.pod perlos2.pod perlos390.pod perlos400.pod \
+	    perlplan9.pod perlqnx.pod perlriscos.pod perlsolaris.pod \
+	    perlsynology.pod perltoc.pod perltru64.pod perltw.pod \
+	    perluniprops.pod perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm h2xs \
 	    perldoc perlivp libnetcfg enc2xs encguess piconv cpan streamzip *.bat \
 	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep shasum corelist zipdetails

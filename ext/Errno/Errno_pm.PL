@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.34";
+our $VERSION = "1.35";
 
 my %err = ();
 
@@ -156,19 +156,15 @@ sub get_files {
 	open(CPPI, '>', 'errno.c') or
 	    die "Cannot open errno.c";
 
-	if ($^O eq 'NetWare') {
-	    print CPPI "#include <nwerrno.h>\n";
-	} else {
-	    print CPPI "#include <errno.h>\n";
-	    if ($IsMSWin32) {
-		print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
-	    }
-	}
+        print CPPI "#include <errno.h>\n";
+        if ($IsMSWin32) {
+            print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
+        }
 
 	close(CPPI);
 
 	# invoke CPP and read the output
-	if ($IsMSWin32 || $^O eq 'NetWare') {
+	if ($IsMSWin32) {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} else {
@@ -179,7 +175,7 @@ sub get_files {
 
 	my $pat = '^#\s*(?:line)?\s*\d+\s+"([^"]+)"';
 	while(<CPPO>) {
-	    if ($^O eq 'os2' or $IsMSWin32 or $^O eq 'NetWare') {
+	    if ($^O eq 'os2' or $IsMSWin32) {
 		if (/$pat/o) {
 		   my $f = $1;
 		   $f =~ s,\\\\,/,g;
@@ -207,12 +203,8 @@ sub write_errno_pm {
     open(CPPI, '>', 'errno.c') or
 	die "Cannot open errno.c";
 
-    if ($^O eq 'NetWare') {
-	print CPPI "#include <nwerrno.h>\n";
-	} 
-    else {
-	print CPPI "#include <errno.h>\n";
-    }
+    print CPPI "#include <errno.h>\n";
+
     if ($IsMSWin32) {
 	print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
     }
@@ -239,7 +231,7 @@ sub write_errno_pm {
 	    $cpp =~ s/sys\$input//i;
 	    open(CPPO,"$cpp  errno.c |") or
 		die "Cannot exec $Config{cppstdin}";
-	} elsif ($IsMSWin32 || $^O eq 'NetWare') {
+	} elsif ($IsMSWin32) {
 	    my $cpp = "$Config{cpprun} $Config{cppflags}" .
 		$inhibit_linemarkers;
 	    open(CPPO,"$cpp errno.c |") or

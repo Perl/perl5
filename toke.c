@@ -6789,12 +6789,6 @@ yyl_backslash(pTHX_ char *s)
     OPERATOR(REFGEN);
 }
 
-#ifdef NETWARE
-#define RSFP_FILENO (PL_rsfp)
-#else
-#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
-#endif
-
 static void
 yyl_data_handle(pTHX)
 {
@@ -6830,7 +6824,7 @@ yyl_data_handle(pTHX)
             loc = PerlIO_tell(PL_rsfp);
             (void)PerlIO_seek(PL_rsfp, 0L, 0);
         }
-        if (PerlLIO_setmode(RSFP_FILENO, O_TEXT) != -1) {
+        if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
             if (loc > 0)
                 PerlIO_seek(PL_rsfp, loc, 0);
         }
@@ -12421,37 +12415,18 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
                  && PL_oldoldbufptr != PL_oldbufptr
                  && PL_oldbufptr != PL_bufptr)
         {
-            /*
-                    Only for NetWare:
-                    The code below is removed for NetWare because it
-                    abends/crashes on NetWare when the script has error such as
-                    not having the closing quotes like:
-                        if ($var eq "value)
-                    Checking of white spaces is anyway done in NetWare code.
-            */
-#ifndef NETWARE
             while (isSPACE(*PL_oldoldbufptr))
                 PL_oldoldbufptr++;
-#endif
             context = PL_oldoldbufptr;
             contlen = PL_bufptr - PL_oldoldbufptr;
         }
         else if (  PL_oldbufptr
                 && PL_bufptr > PL_oldbufptr
                 && PL_bufptr - PL_oldbufptr < 200
-                && PL_oldbufptr != PL_bufptr) {
-            /*
-                    Only for NetWare:
-                    The code below is removed for NetWare because it
-                    abends/crashes on NetWare when the script has error such as
-                    not having the closing quotes like:
-                        if ($var eq "value)
-                    Checking of white spaces is anyway done in NetWare code.
-            */
-#ifndef NETWARE
+                && PL_oldbufptr != PL_bufptr)
+        {
             while (isSPACE(*PL_oldbufptr))
                 PL_oldbufptr++;
-#endif
             context = PL_oldbufptr;
             contlen = PL_bufptr - PL_oldbufptr;
         }

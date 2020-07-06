@@ -5063,61 +5063,6 @@ mkppport.lst			List of extensions that need a ppport.h
 mro_core.c				Method Resolution Order code
 myconfig.SH			Prints summary of the current configuration
 mydtrace.h			Support for optional DTrace probes
-NetWare/bat/Buildtype.bat	NetWare port
-NetWare/bat/SetCodeWar.bat	NetWare port
-NetWare/bat/Setnlmsdk.bat	NetWare port
-NetWare/bat/SetNWBld.bat	NetWare port
-NetWare/bat/ToggleD2.bat	NetWare port
-NetWare/CLIBsdio.h		NetWare port
-NetWare/CLIBstr.h		NetWare port
-NetWare/CLIBstuf.c		NetWare port
-NetWare/CLIBstuf.h		NetWare port
-NetWare/config.wc		NetWare port
-NetWare/config_h.PL		NetWare port
-NetWare/config_H.wc		NetWare port
-NetWare/config_sh.PL		NetWare port
-NetWare/deb.h			NetWare port
-NetWare/dl_netware.xs		NetWare port
-NetWare/intdef.h		NetWare port
-NetWare/interface.c		NetWare port
-NetWare/interface.cpp		NetWare port
-NetWare/interface.h		NetWare port
-NetWare/iperlhost.h		NetWare port
-NetWare/Main.c			NetWare port
-NetWare/Makefile		NetWare port
-NetWare/MP.imp			NetWare port
-NetWare/netware.h		NetWare port
-NetWare/nw5.c			NetWare port
-NetWare/nw5iop.h		NetWare port
-NetWare/nw5sck.c		NetWare port
-NetWare/nw5sck.h		NetWare port
-NetWare/nw5thread.c		NetWare port
-NetWare/nw5thread.h		NetWare port
-NetWare/nwhashcls.cpp		NetWare port
-NetWare/nwhashcls.h		NetWare port
-NetWare/Nwmain.c		NetWare port
-NetWare/nwperlhost.h		NetWare port
-NetWare/nwperlsys.c		NetWare port
-NetWare/nwperlsys.h		NetWare port
-NetWare/Nwpipe.c		NetWare port
-NetWare/nwpipe.h		NetWare port
-NetWare/nwplglob.c		NetWare port
-NetWare/nwplglob.h		NetWare port
-NetWare/nwstdio.h		NetWare port
-NetWare/NWTInfo.c		NetWare port
-NetWare/nwtinfo.h		NetWare port
-NetWare/NWUtil.c		NetWare port
-NetWare/nwutil.h		NetWare port
-NetWare/nwvmem.h		NetWare port
-NetWare/perllib.cpp		NetWare port
-NetWare/splittree.pl		NetWare port
-NetWare/sv_nw.c			NetWare port
-NetWare/t/NWModify.pl		NetWare port
-NetWare/t/NWScripts.pl		NetWare port
-NetWare/t/Readme.txt		NetWare port
-NetWare/testnlm/echo/echo.c	NetWare port
-NetWare/testnlm/type/type.c	NetWare port
-NetWare/win32ish.h		NetWare port
 nostdio.h			Cause compile error on stdio calls
 numeric.c			Miscellaneous numeric conversion routines
 op.c				Opcode syntax tree code
@@ -5505,7 +5450,6 @@ README.linux			Perl notes for Linux
 README.macos			Perl notes for Mac OS (Classic)
 README.macosx			Perl notes for Mac OS X
 README.micro			Notes about microperl
-README.netware			Perl notes for NetWare
 README.openbsd			Perl notes for OpenBSD
 README.os2			Perl notes for OS/2
 README.os390			Perl notes for OS/390
