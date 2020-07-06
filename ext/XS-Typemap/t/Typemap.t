@@ -1,4 +1,4 @@
-our %Config;
+use Config;
 BEGIN {
     if ($Config{'extensions'} !~ /\bXS\/Typemap\b/) {
         print "1..0 # Skip: XS::Typemap was not built\n";
