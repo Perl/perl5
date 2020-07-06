@@ -12,9 +12,11 @@ BEGIN {
 BAIL_OUT("No errno's are exported") unless @Errno::EXPORT_OK;
 
 my $err = $Errno::EXPORT_OK[0];
+no strict 'refs';
 my $num = &{"Errno::$err"};
 
 is($num, &{"Errno::$err"});
+use strict 'refs';
 
 $! = $num;
 ok(exists $!{$err});
