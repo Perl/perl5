@@ -10,6 +10,8 @@
 
 use strict;
 use warnings;
+no if $] >= 5.018004, "feature", "signatures";
+
 use Test::More tests => 153;
 
 use Math::Trig 1.18;
@@ -30,7 +32,7 @@ if ($^O eq 'unicos') { # See lib/Math/Complex.pm and t/lib/complex.t.
     $eps = 1e-10;
 }
 
-sub near :prototype($$;$) {
+sub near ($$;$) {
     my $e = defined $_[2] ? $_[2] : $eps;
     my $d = $_[1] ? abs($_[0]/$_[1] - 1) : abs($_[0]);
     print "# near? $_[0] $_[1] : $d : $e\n";
