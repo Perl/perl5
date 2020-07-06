@@ -52,10 +52,6 @@
 # include <sys/resource.h>
 #endif
 
-#ifdef NETWARE
-NETDB_DEFINE_CONTEXT
-#endif
-
 #ifdef HAS_SELECT
 # ifdef I_SYS_SELECT
 #  include <sys/select.h>

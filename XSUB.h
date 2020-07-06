@@ -493,15 +493,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 
 #if defined(PERL_IMPLICIT_SYS) && !defined(PERL_CORE)
 #  ifndef NO_XSLOCKS
-# if defined (NETWARE) && defined (USE_STDIO)
-#    define times		PerlProc_times
-#    define setuid		PerlProc_setuid
-#    define setgid		PerlProc_setgid
-#    define getpid		PerlProc_getpid
-#    define pause		PerlProc_pause
-#    define exit		PerlProc_exit
-#    define _exit		PerlProc__exit
-# else
 #    undef closedir
 #    undef opendir
 #    undef stdin
@@ -516,35 +507,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #    undef getc
 #    undef ungetc
 #    undef fileno
-
-/* Following symbols were giving redefinition errors while building extensions - sgp 17th Oct 2000 */
-#ifdef NETWARE
-#	undef readdir
-#	undef fstat
-#	undef stat
-#	undef longjmp
-#	undef endhostent
-#	undef endnetent
-#	undef endprotoent
-#	undef endservent
-#	undef gethostbyaddr
-#	undef gethostbyname
-#	undef gethostent
-#	undef getnetbyaddr
-#	undef getnetbyname
-#	undef getnetent
-#	undef getprotobyname
-#	undef getprotobynumber
-#	undef getprotoent
-#	undef getservbyname
-#	undef getservbyport
-#	undef getservent
-#	undef inet_ntoa
-#	undef sethostent
-#	undef setnetent
-#	undef setprotoent
-#	undef setservent
-#endif	/* NETWARE */
 
 /* to avoid warnings: "xyz" redefined */
 #ifdef WIN32
@@ -694,7 +656,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #    define shutdown		PerlSock_shutdown
 #    define socket		PerlSock_socket
 #    define socketpair		PerlSock_socketpair
-#	endif	/* NETWARE && USE_STDIO */
 
 #    undef fd_set
 #    undef FD_SET

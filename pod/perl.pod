@@ -286,7 +286,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perllinux		Perl notes for Linux
     perlmacos		Perl notes for Mac OS (Classic)
     perlmacosx		Perl notes for Mac OS X
-    perlnetware 	Perl notes for NetWare
     perlopenbsd 	Perl notes for OpenBSD
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390

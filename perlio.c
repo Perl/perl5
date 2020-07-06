@@ -123,11 +123,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 #ifdef DOSISH
     dTHX;
     PERL_UNUSED_ARG(iotype);
-#  ifdef NETWARE
-    if (PerlLIO_setmode(fp, mode) != -1) {
-#  else
     if (PerlLIO_setmode(fileno(fp), mode) != -1) {
-#  endif
         return 1;
     }
     else

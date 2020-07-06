@@ -467,13 +467,6 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
 #  define Slab_to_rw(op)    NOOP
 #endif
 
-/* This cannot possibly be right, but it was copied from the old slab
-   allocator, to which it was originally added, without explanation, in
-   commit 083fcd5. */
-#ifdef NETWARE
-#    define PerlMemShared PerlMem
-#endif
-
 /* make freed ops die if they're inadvertently executed */
 #ifdef DEBUGGING
 static OP *

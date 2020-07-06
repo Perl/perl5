@@ -11,7 +11,7 @@ BEGIN {
 }
 
 use strict;
-our ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $Is_Darwin, $Is_NetWare, $Is_AmigaOS,
+our ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $Is_Darwin, $Is_AmigaOS,
 	    %opts, $packlist);
 my $versiononly;
 
@@ -38,11 +38,6 @@ use Cwd;
 use Getopt::Long qw(:config nogetopt_compat no_auto_abbrev noignorecase);
 
 require './Porting/pod_lib.pl';
-
-if ($Is_NetWare) {
-    $Is_W32 = 0;
-    $scr_ext = '.pl';
-}
 
 my $mainperldir = "/usr/bin";
 my $exe_ext = $Config{exe_ext};
@@ -77,7 +72,7 @@ $opts{destdir} = '';
     my $usage = 0;
     if (!GetOptions(\%opts, 'notify|n', 'strip|s', 'silent|S',
                     'skip-otherperls|o', 'force|f', 'verbose|V', 'archname|A',
-                    'netware', 'nopods|p', 'destdir:s', 'help|h|?',
+                    'nopods|p', 'destdir:s', 'help|h|?',
                     'versiononly|v' => \$versiononly, '<>' => sub {
                         if ($_[0] eq '+v') {
                             $versiononly = 0;
@@ -107,7 +102,6 @@ Usage $0: [switches]
   -A        Also install perl with the architecture's name in the perl binary's
             name.
   -p        Don't install the pod files. [This will break use diagnostics;]
-  -netware  Install correctly on a Netware server.
   -destdir  Prefix installation directories by this string.
   -h        Display this help message.
 EOT
@@ -216,14 +210,6 @@ if ($^O eq 'os390') {
     }
 }
 
-if ($opts{netware}) {
-    # This is required only if we are installing on a NetWare server
-    $installscript = $Config{installnwscripts};
-    $installprivlib = $Config{installnwlib};
-    $installarchlib = $Config{installnwlib};
-    $installsitelib = $Config{installnwlib};
-}
-
 my $binexp = $Config{binexp};
 
 if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
@@ -242,7 +228,6 @@ if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
 -w $installbin		|| $opts{notify} || die "$installbin is not writable by you\n"
 	unless $installbin =~ m#^/afs/# || $opts{notify};
 
-if (!$Is_NetWare) {
 if (!$Is_VMS) {
 -x 'perl' . $exe_ext	|| die "perl isn't executable!\n";
 }
@@ -256,12 +241,11 @@ else {
 -f 't/rantests'		|| $Is_W32
 			|| warn "WARNING: You've never run 'make test' or",
 				" some tests failed! (Installing anyway.)\n";
-} #if (!$Is_NetWare)
 
 # This will be used to store the packlist
 $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 
-if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
+if ($Is_W32 or $Is_Cygwin) {
     my $perldll;
 
     if ($Is_Cygwin) {
@@ -279,7 +263,7 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
     copy("$perldll", "$installbin/$perldll");
     chmod(0755, "$installbin/$perldll");
     $packlist->{"$Config{installbin}/$perldll"} = { type => 'file' };
-} # if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin)
+} # if ($Is_W32 or $Is_Cygwin)
 
 # First we install the version-numbered executables.
 
@@ -300,26 +284,11 @@ if ($Is_VMS) {
     }
 }
 elsif ($^O ne 'dos') {
-    if (!$Is_NetWare) {
-	safe_unlink("$installbin/$perl_verbase$ver$exe_ext");
-	copy("perl$exe_ext", "$installbin/$perl_verbase$ver$exe_ext");
-	strip("$installbin/$perl_verbase$ver$exe_ext");
-	fix_dep_names("$installbin/$perl_verbase$ver$exe_ext");
-	chmod(0755, "$installbin/$perl_verbase$ver$exe_ext");
-    }
-    else {
-	# If installing onto a NetWare server
-        if ($opts{netware}) {
-	    # Copy perl.nlm, echo.nlm, type.nlm & cgi2perl.nlm
-            mkpath($Config{installnwsystem});
-	    copy("netware\\".$ENV{'MAKE_TYPE'}."\\perl.nlm", $Config{installnwsystem});
-	    copy("netware\\testnlm\\echo\\echo.nlm", $Config{installnwsystem});
-	    copy("netware\\testnlm\\type\\type.nlm", $Config{installnwsystem});
-	    chmod(0755, "$Config{installnwsystem}\\perl.nlm");
-            mkpath($Config{installnwlcgi});
-	    copy("lib\\auto\\cgi2perl\\cgi2perl.nlm", $Config{installnwlcgi});
-	}
-    } #if (!$Is_NetWare)
+    safe_unlink("$installbin/$perl_verbase$ver$exe_ext");
+    copy("perl$exe_ext", "$installbin/$perl_verbase$ver$exe_ext");
+    strip("$installbin/$perl_verbase$ver$exe_ext");
+    fix_dep_names("$installbin/$perl_verbase$ver$exe_ext");
+    chmod(0755, "$installbin/$perl_verbase$ver$exe_ext");
 }
 else {
     safe_unlink("$installbin/$perl.exe");
@@ -407,7 +376,7 @@ if ($Is_W32) { #linking lib isn't made in root but in CORE on Win32
 # Install main perl executables
 # Make links to ordinary names if installbin directory isn't current directory.
 
-if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS && ! $Is_NetWare) {
+if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
     safe_unlink("$installbin/$perl$exe_ext", "$installbin/suid$perl$exe_ext");
     if ($^O eq 'vos') {
 	# VOS doesn't support hard links, so use a symlink.
@@ -438,7 +407,7 @@ if ($opts{archname} && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_V
 my $mainperl_is_instperl = 0;
 
 if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
-    !$versiononly && !$opts{notify} && !$Is_W32 && !$Is_NetWare && !$Is_VMS && -t STDIN && -t STDERR
+    !$versiononly && !$opts{notify} && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
     my($instperl)	= "$installbin/$perl$exe_ext";
@@ -569,7 +538,7 @@ sub safe_unlink {
     my @names = @_;
     foreach my $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_NetWare);
+	chmod 0777, $name if ($Is_OS2 || $Is_W32);
 	print "  unlink $name\n" if $opts{verbose};
 	next if CORE::unlink($name);
 	warn "Couldn't unlink $name: $!\n";
@@ -689,21 +658,13 @@ sub installlib {
     my $installlib = $installprivlib;
     if ($dir =~ /^auto\// ||
 	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||
-	  ($name =~ /^(.*)\.(?:h|lib)$/i && ($Is_W32 || $Is_NetWare)) ||
+	  ($name =~ /^(.*)\.(?:h|lib)$/i && $Is_W32) ||
 	  $name=~/^Config_(heavy|git)\.pl\z/
        ) {
 	$installlib = $installarchlib;
 	return unless $do_installarchlib;
     } else {
 	return unless $do_installprivlib;
-    }
-
-    if ($Is_NetWare && !$opts{netware} && /\.(?:nlp|nlm|bs)$/) {
-        # Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
-        # if copied will give problems when building new extensions.
-        # Has to be copied if we are installing on a NetWare server and
-        # hence the check !$opts{netware}
-        return;
     }
 
     if (-f $_) {

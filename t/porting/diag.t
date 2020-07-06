@@ -670,11 +670,6 @@ switching effective gid is not implemented
 switching effective uid is not implemented
 System V IPC is not implemented on this machine
 Terminating on signal SIG%s(%d)
-The crypt() function is not implemented on NetWare
-The flock() function is not implemented on NetWare
-The rewinddir() function is not implemented on NetWare
-The seekdir() function is not implemented on NetWare
-The telldir() function is not implemented on NetWare
 This perl was compiled without taint support. Cowardly refusing to run with -t or -T flags
 This version of OS/2 does not support %s.%s
 Too deeply nested ()-groups in %s

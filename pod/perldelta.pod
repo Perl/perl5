@@ -315,9 +315,14 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item NetWare
 
-XXX
+Support code for Novell NetWare has been removed.  NetWare was a
+server operating system by Novell.  The port was last updated in July
+2002, and the platform itself in May 2009.
+
+Unrelated changes accidentally broke the build for the NetWare port in
+September 2009, and in years 12 no-one has reported this.
 
 =back
 

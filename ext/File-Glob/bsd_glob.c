@@ -187,11 +187,7 @@ static Direntry_t *	my_readdir(DIR*);
 static Direntry_t *
 my_readdir(DIR *d)
 {
-#ifndef NETWARE
     return PerlDir_read(d);
-#else
-    return (DIR *)PerlDir_read(d);
-#endif
 }
 #else
 

@@ -25,7 +25,7 @@ skip_all('getgrgid() not implemented')
     unless eval { my($foo) = getgrgid(0); 1 };
 
 skip_all("No 'id' or 'groups'") if
-    $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS' || $^O =~ /lynxos/i;
+    $^O eq 'MSWin32' || $^O eq 'VMS' || $^O =~ /lynxos/i;
 
 Test();
 exit;

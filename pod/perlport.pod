@@ -1466,12 +1466,6 @@ See also:
 
 Amiga, F<README.amiga> (installed as L<perlamiga>).
 
-=item *
-
-A free perl5-based PERL.NLM for Novell Netware is available in
-precompiled binary and source code form from L<http://www.novell.com/>
-as well as from CPAN.
-
 =item  *
 
 S<Plan 9>, F<README.plan9>
@@ -2545,7 +2539,7 @@ L<perlaix>, L<perlamiga>, L<perlbs2000>,
 L<perlcygwin>, L<perldos>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
 L<perlmacos>, L<perlmacosx>,
-L<perlnetware>, L<perlos2>, L<perlos390>, L<perlos400>,
+L<perlos2>, L<perlos390>, L<perlos400>,
 L<perlplan9>, L<perlqnx>, L<perlsolaris>, L<perltru64>,
 L<perlunicode>, L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
 

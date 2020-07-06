@@ -1584,18 +1584,12 @@ We then determine what the console should be on various systems:
 =back
 
 Several other systems don't use a specific console. We C<undef $console>
-for those (Windows using a slave editor/graphical debugger, NetWare, OS/2
+for those (Windows using a slave editor/graphical debugger, OS/2
 with a slave editor).
 
 =cut
 
     if ( ( $^O eq 'MSWin32' ) and ( $slave_editor or defined $ENV{EMACS} ) ) {
-
-        # /dev/tty is binary. use stdin for textmode
-        $console = undef;
-    }
-
-    if ( $^O eq 'NetWare' ) {
 
         # /dev/tty is binary. use stdin for textmode
         $console = undef;
@@ -8975,7 +8969,7 @@ Just checks the contents of C<$^O> and sets the C<$doccmd> global accordingly.
 =cut
 
 sub setman {
-    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos|NetWare)\z/s
+    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos)\z/s
       ? "man"         # O Happy Day!
       : "perldoc";    # Alas, poor unfortunates
 } ## end sub setman
