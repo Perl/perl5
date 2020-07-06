@@ -13,7 +13,7 @@ my $oct_called;
 
 # For testing that existing CORE::GLOBAL overrides are not clobbered
 BEGIN {
-    if ($] >= 7) {
+    if ($] >= 5.018004) {
         no warnings 'syntax';
         eval q[
         *CORE::GLOBAL::hex = sub :prototype(_) { ++$hex_called; CORE::hex(@_?$_[0]:$_) };
@@ -28,7 +28,7 @@ BEGIN {
     } else {
         eval q[
         *CORE::GLOBAL::hex = sub(;$) { ++$hex_called; CORE::hex(@_?$_[0]:$_) };
-        *CORE::GLOBAL::oct = sub(;$) { ++$oct_called; CORE::oct(@_?$_[0]:$_) };        
+        *CORE::GLOBAL::oct = sub(;$) { ++$oct_called; CORE::oct(@_?$_[0]:$_) };
         ] or die $@;
     }
 }
