@@ -1,6 +1,5 @@
 use ExtUtils::MakeMaker;
 use Config;
-use strict;
 
 our $VERSION = "1.31";
 
