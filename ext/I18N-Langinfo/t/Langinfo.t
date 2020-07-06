@@ -1,5 +1,5 @@
 #!perl -T
-use Config;
+our %Config;
 use Test::More;
 require "../../t/loc_tools.pl";
 

@@ -1,9 +1,9 @@
 #!./perl
 
+our %Config;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    use Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
         exit 0;

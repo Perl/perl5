@@ -1,7 +1,7 @@
 #!./perl -w
 
+our %Config;
 BEGIN {
-    use Config;
     if (!$Config{'d_fork'}
        # open2/3 supported on win32
        && $^O ne 'MSWin32' && $^O ne 'NetWare')
