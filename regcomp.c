@@ -7416,7 +7416,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
     PERL_ARGS_ASSERT_SET_REGEX_PV;
 
     /* make sure PL_bitcount bounds not exceeded */
-    assert(sizeof(STD_PAT_MODS) <= 8);
+    STATIC_ASSERT_STMT(sizeof(STD_PAT_MODS) <= 8);
 
     p = sv_grow(MUTABLE_SV(Rx), wraplen + 1); /* +1 for the ending NUL */
     SvPOK_on(Rx);

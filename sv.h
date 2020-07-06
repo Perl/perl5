@@ -2302,7 +2302,7 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 10:28 <+meta> Nicholas: crash
 */
 #  define SvOOK_offset(sv, offset) STMT_START {				\
-	assert(sizeof(offset) == sizeof(STRLEN));			\
+	STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
 	if (SvOOK(sv)) {						\
 	    const U8 *_crash = (U8*)SvPVX_const(sv);			\
 	    (offset) = *--_crash;					\
@@ -2326,7 +2326,7 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #else
     /* This is the same code, but avoids using any temporary variables:  */
 #  define SvOOK_offset(sv, offset) STMT_START {				\
-	assert(sizeof(offset) == sizeof(STRLEN));			\
+	STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
 	if (SvOOK(sv)) {						\
 	    (offset) = ((U8*)SvPVX_const(sv))[-1];			\
 	    if (!(offset)) {						\

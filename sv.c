@@ -12824,7 +12824,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                          (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
                         && !IN_BYTES)
                     {
-                        assert(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
+                        STATIC_ASSERT_STMT(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
                         eptr = ebuf;
                         elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
                         is_utf8 = TRUE;
