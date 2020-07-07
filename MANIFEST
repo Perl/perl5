@@ -5572,6 +5572,7 @@ t/comp/utf.t			See if UTFs work
 t/harness			Finer diagnostics from test suite
 t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works
+t/io/binmode-u.dat			Data for t/io/binmode.t
 t/io/bom.t			See if scripts can start with a byte order mark
 t/io/closepid.t			See if close works for subprocesses
 t/io/crlf.t			See if :crlf works
