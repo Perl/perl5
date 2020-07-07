@@ -11,7 +11,7 @@ Filter::Util::Call pod/perlfilter.pod e9833bf4ebc51087dfee5c553e0f8a5eef67212d
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 7f4c98a38a6c0033ff74f4b87c1581e7f52d644a
 Math::Complex cpan/Math-Complex/t/Complex.t 17039e03ee798539e770ea9a0d19a99364278306
-Math::Complex cpan/Math-Complex/t/Trig.t 2ac44c4fc9275d5e896e7d0c494bddfda80744bb
+Math::Complex cpan/Math-Complex/t/Trig.t 0312e9de6bf08b54d43200d3e2fb8246ba3f8c9f
 Memoize cpan/Memoize/Memoize.pm 60609b036959b98deb9550aff9c5d06e003a82d8
 NEXT cpan/NEXT/lib/NEXT.pm 2c83d03ee361816e53ccb931137d314ab878d19f
 NEXT cpan/NEXT/t/next.t d2bb812f5fbef2ed0201bf7f03ba1c304c0b29f3
