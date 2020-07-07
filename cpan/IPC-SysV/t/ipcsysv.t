@@ -8,6 +8,10 @@
 #
 ################################################################################
 
+use strict;
+use warnings;
+
+our %Config;
 BEGIN {
   require Test::More; import Test::More;
   require Config; import Config;
@@ -30,7 +34,6 @@ plan(tests => 39);
 # Later the sem* tests will import more for themselves.
 
 use IPC::SysV qw(IPC_PRIVATE IPC_NOWAIT IPC_STAT IPC_RMID S_IRWXU);
-use strict;
 
 {
   my $did_diag = 0;
