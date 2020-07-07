@@ -265,6 +265,10 @@ sub process {
     my $new = $callback->($desc, $orig);
 
     if (defined $test) {
+        # Two files should not be considered different if they only differ by
+        # a trailing newline.
+        chomp($orig);
+        chomp($new);
         printf "%s%s # $filename is up to date\n",
             ($new eq $orig ? 'ok' : 'not ok'), ($test ? " $test" : '');
         return;

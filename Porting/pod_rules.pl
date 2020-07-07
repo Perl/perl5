@@ -102,6 +102,7 @@ sub generate_manifest_pod {
 sub generate_manifest_readme {
     generate_manifest sort {$a->[0] cmp $b->[0]}
         ["README.vms", "Notes about installing the VMS port"],
+        ["README.md", "Instructions for the core-p7 branch"],
             map {["README.$_", $state->{readmes}{$_}]} keys %{$state->{readmes}};
 }
 
@@ -143,13 +144,12 @@ sub do_manifest {
             grep {! m!^README\.(\S+)! || $state->{ignore}{$1}} split "\n", $prev;
     # NOTE - the sort code here is shared with Porting/manisort currently.
     # If you change one, change the other. Or refactor them. :-)
-    join "\n",  sort_manifest(
-                    @manifest,
-                    &generate_manifest_pod(),
-                    &generate_manifest_readme()
-                ),
-                '', # elegant way to add a newline to the end
-    ;
+    my @lines = (
+        @manifest,
+        &generate_manifest_pod(),
+        &generate_manifest_readme()
+    );
+    return join "\n" => sort_manifest(@lines);
 }
 
 sub do_nmake {
