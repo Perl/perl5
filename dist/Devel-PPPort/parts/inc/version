@@ -36,7 +36,7 @@ PERL_PATCHLEVEL_H_IMPLICIT
 #    include <could_not_find_Perl_patchlevel.h>
 #  endif
 #  ifndef PERL_REVISION
-#    define PERL_REVISION       (7)
+#    define PERL_REVISION       (5)
      /* Replace: 1 */
 #    define PERL_VERSION        PATCHLEVEL
 #    define PERL_SUBVERSION     SUBVERSION
