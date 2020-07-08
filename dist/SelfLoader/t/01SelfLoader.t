@@ -1,3 +1,6 @@
+
+my ($dir, $sep);
+
 BEGIN {
     $dir = "self-$$";
     $sep = "/";
@@ -82,7 +85,7 @@ package main;
 use Foo;
 use Bar;
 
-$foo = new Foo;
+my $foo = Foo->new();
 
 print "not " unless $foo->foo eq 'foo';  # selfloaded first time
 print "ok 1\n";
@@ -102,7 +105,7 @@ if ($@ =~ /^Undefined subroutine/) {
 
 # Used to be trouble with this
 eval {
-    my $foo = new Foo;
+    my $foo = Foo->new();
     die "oops";
 };
 if ($@ =~ /oops/) {
@@ -136,7 +139,7 @@ print "ok 10\n";
 
 # Now check inheritance:
 
-$bar = new Bar;
+my $bar = Bar->new;
 
 # Before anything is SelfLoaded there is no declaration of Foo::b so we should
 # get Baz::b
