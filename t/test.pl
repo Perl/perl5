@@ -22,8 +22,10 @@
 BEGIN {
     my $lib = $^X;
     $lib =~ s{(\b)perl[^/]*$}{${1}lib};
+    ($lib) = $lib =~ /(.*)/; # untaint
 
     local @INC = ( $lib );
+
     require p5;
     p5->import;
 }
@@ -811,7 +813,7 @@ sub runperl {
 	$runperl =~ /(.*)/s;
 	$runperl = $1;
 	$result = `$runperl`;
-    } else {        
+    } else {
 	$result = `$runperl`;
     }
     $result =~ s/\n\n/\n/g if $is_vms; # XXX pipes sometimes double these
