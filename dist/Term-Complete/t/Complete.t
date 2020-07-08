@@ -1,7 +1,10 @@
 #!./perl
 
+use strict;
 use warnings;
 use Test::More tests => 8;
+
+no strict 'vars';
 use vars qw( $Term::Complete::complete $complete $Term::Complete::stty );
 
 SKIP: {
