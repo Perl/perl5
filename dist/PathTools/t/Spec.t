@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+use strict;
 use Test::More;
 
 require_ok('File::Spec');
