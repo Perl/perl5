@@ -1,6 +1,7 @@
 #!./perl -w
 # t/bless.t - Test Bless()
 
+our %Config;
 BEGIN {
     if ($ENV{PERL_CORE}){
         require Config; Config->import;

@@ -2,6 +2,7 @@
 #
 # regression tests for old bugs that do not fit other categories
 
+our %Config;
 BEGIN {
     require Config; Config->import;
     no warnings 'once';
