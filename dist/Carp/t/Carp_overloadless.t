@@ -1,5 +1,7 @@
 use Test::More tests => 1;
 
+use strict;
+use warnings;
 use Carp;
 
 # test that enabling overload without loading overload.pm does not trigger infinite recursion
