@@ -1,5 +1,7 @@
 #!./perl -w
 $|=1;
+
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bOpcode\b/ && $Config{'osname'} ne 'VMS') {
@@ -28,10 +30,10 @@ $Root::foo .= "";
 
 my $cpt;
 # create and destroy a couple of automatic Safe compartments first
-$cpt = new Safe or die;
-$cpt = new Safe or die;
+$cpt = Safe->new() or die;
+$cpt = Safe->new() or die;
 
-$cpt = new Safe "Root";
+$cpt = Safe->new("Root");
 
 $cpt->permit(qw(:base_io));
 
@@ -48,11 +50,11 @@ $cpt->reval(q{
 $TB->current_test(6);
 is($@, '');
 
-$foo = "ok 8\n";
-%bar = (key => "ok 9\n");
-@baz = (); push(@baz, "o", "10");
-$glob = "ok 11\n";
-@glob = qw(not ok 16);
+our $foo = "ok 8\n";
+our %bar = (key => "ok 9\n");
+our @baz = (); push(@baz, "o", "10");
+our $glob = "ok 11\n";
+our @glob = qw(not ok 16);
 
 sub sayok { print "ok @_\n" }
 

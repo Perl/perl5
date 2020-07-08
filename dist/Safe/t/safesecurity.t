@@ -1,5 +1,6 @@
 #!perl
 
+our %Config;
 BEGIN {
     require Config;
     Config->import;
@@ -15,7 +16,7 @@ use Test::More;
 use Safe;
 plan(tests => 1);
 
-my $c = new Safe;
+my $c = Safe->new;
 
 {
     package My::Controller;

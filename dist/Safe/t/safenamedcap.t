@@ -1,3 +1,4 @@
+our %Config;
 BEGIN {
     if ($] < 5.010) {
 	print "1..0\n";

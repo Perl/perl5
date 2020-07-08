@@ -1,5 +1,6 @@
 #!perl
 
+our %Config;
 BEGIN {
     require Config;
     Config->import;
@@ -20,7 +21,7 @@ use Test::More;
 use Safe;
 plan(tests => 3);
 
-my $c = new Safe;
+my $c = Safe->new();
 $c->permit(qw(require caller entereval unpack));
 my $r = $c->reval(q{ use version; 1 });
 ok( defined $r, "Can load version.pm in a Safe compartment" ) or diag $@;

@@ -1,5 +1,6 @@
 #!perl
 
+our %Config;
 BEGIN {
     require Config;
     Config->import;
@@ -15,7 +16,7 @@ use Test::More;
 use Safe;
 plan(tests => 6);
 
-my $c = new Safe;
+my $c = Safe->new();
 $c->permit(qw(require caller));
 
 my $no_warn_redef = ($] != 5.008009)

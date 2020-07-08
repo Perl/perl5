@@ -1,5 +1,7 @@
 #!perl -w
 $|=1;
+
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bOpcode\b/ && $Config{'osname'} ne 'VMS') {

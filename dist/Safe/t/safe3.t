@@ -1,5 +1,6 @@
 #!perl -w
 
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bOpcode\b/
@@ -17,7 +18,7 @@ use POSIX qw(ceil);
 use Test::More tests => 2;
 use Safe;
 
-my $safe = new Safe;
+my $safe = Safe->new();
 $safe->deny('add');
 
 my $masksize = ceil( Opcode::opcodes / 8 );
@@ -30,7 +31,7 @@ $safe->reval( q{$x + $y} );
 ok( $@ =~ /^'?addition \(\+\)'? trapped by operation mask/,
 	    'opmask still in place with reval' );
 
-my $safe2 = new Safe;
+my $safe2 = Safe->new();
 $safe2->deny('add');
 
 open my $fh, '>nasty.pl' or die "Can't write nasty.pl: $!\n";

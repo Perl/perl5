@@ -1,5 +1,6 @@
 #!perl -w
 
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bOpcode\b/) {
@@ -16,7 +17,7 @@ my $snippet = q{
     my $foo = qr/foo/;
     ref $foo;
 };
-$c = new Safe;
+$c = Safe->new();
 $r = $c->reval($snippet);
 is( $r, "Safe::Root0::Regexp" );
 $r or diag $@;
@@ -28,7 +29,7 @@ is( $r, "Safe::Root0::Regexp" );
 $r or diag $@;
 
 # try with a new compartment
-$c = new Safe;
+$c = Safe->new();
 $r = $c->reval($snippet);
 is( $r, "Safe::Root1::Regexp" );
 $r or diag $@;
