@@ -55,7 +55,7 @@ if ( 0 && !Net::Ping::_isroot()) { # disable in blead via 7bfdd8260c
 SKIP: {
   skip "icmp ping requires root privileges.", 2
     if !Net::Ping::_isroot() or $^O eq 'MSWin32';
-  my $p = new Net::Ping "icmp";
+  my $p = Net::Ping->new( "icmp" );
   is($p->message_type(), 'echo', "default icmp message type is 'echo'");
   # message_type fails on wrong message type
   eval {

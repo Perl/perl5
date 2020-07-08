@@ -21,6 +21,6 @@ BEGIN {use_ok('Net::Ping')};
 SKIP: {
   skip "icmp ping requires root privileges.", 1
     unless &Net::Ping::_isroot;
-  my $p = new Net::Ping "icmp";
+  my $p = Net::Ping->new( "icmp" );
   isa_ok($p, 'Net::Ping', 'object can be instantiated for icmp protocol');
 }

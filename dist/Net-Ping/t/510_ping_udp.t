@@ -21,7 +21,7 @@ SKIP: {
     skip "udp ping blocked by Window's default settings", 2 if isWindowsVista();
     skip "No getprotobyname", 2 unless $Config{d_getpbyname};
     skip "Not allowed on $^O", 2 if $^O =~ /^(hpux|irix|aix|freebsd)$/;
-    my $p = new Net::Ping "udp";
+    my $p = Net::Ping->new( "udp" );
     # message_type can't be used
     eval {
         $p->message_type();

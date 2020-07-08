@@ -25,21 +25,21 @@ BEGIN {use_ok('Net::Ping')};
 # for the TCP Server stuff instead of doing
 # all that direct socket() junk manually.
 
-my $sock1 = new IO::Socket::INET
+my $sock1 = IO::Socket::INET->new(
   LocalAddr => "127.0.0.1",
   Proto => "tcp",
   Listen => 8,
-  or warn "bind: $!";
+  ) or warn "bind: $!";
 
 isa_ok($sock1, 'IO::Socket::INET',
        'Start a TCP listen server on ephemeral port');
 
 # Start listening on another ephemeral port
-my $sock2 = new IO::Socket::INET
+my $sock2 = IO::Socket::INET->new(
   LocalAddr => "127.0.0.1",
   Proto => "tcp",
   Listen => 8,
-  or warn "bind: $!";
+  ) or warn "bind: $!";
 
 isa_ok($sock2, 'IO::Socket::INET',
        'Start a second TCP listen server on ephemeral port');
@@ -62,7 +62,7 @@ $sock2->close;
 #####
 # First, we test using the "tcp" protocol.
 # (2 seconds should be long enough to connect to loopback.)
-my $p = new Net::Ping "tcp", 2;
+my $p = Net::Ping->new( "tcp", 2 );
 
 isa_ok($p, 'Net::Ping', 'new() worked');
 
@@ -99,7 +99,7 @@ isnt($p->ping("127.0.0.1"), 2, 'second service is off');
 
 #####
 # Lastly, we test using the "syn" protocol.
-$p = new Net::Ping "syn", 2;
+$p = Net::Ping->new( "syn", 2 );
 
 isa_ok($p, 'Net::Ping', 'new() worked');
 
@@ -116,7 +116,7 @@ is($p->ack(), undef, 'No more sockets');
 
 ###
 # Get a fresh object
-$p = new Net::Ping "syn", 2;
+$p = Net::Ping->new( "syn", 2 );
 
 isa_ok($p, 'Net::Ping', 'new() worked');
 
@@ -142,7 +142,7 @@ is($p->ack(), undef, 'No more sockets');
 
 ###
 # Get a fresh object
-$p = new Net::Ping "syn", 2;
+$p = Net::Ping->new( "syn", 2 );
 
 isa_ok($p, 'Net::Ping', 'new() worked');
 
@@ -160,7 +160,7 @@ is($p->ack(), undef, 'No more sockets');
 
 ###
 # Get a fresh object
-$p = new Net::Ping "syn", 2;
+$p = Net::Ping->new( "syn", 2 );
 
 isa_ok($p, 'Net::Ping', 'new() worked');
 

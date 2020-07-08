@@ -21,5 +21,5 @@ BEGIN {
 use Test::More tests => 2;
 BEGIN {use_ok 'Net::Ping'};
 
-my $p = new Net::Ping "stream";
+my $p = Net::Ping->new( "stream" );
 isa_ok($p, 'Net::Ping', 'object can be instantiated for stream protocol');
