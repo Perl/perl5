@@ -376,7 +376,7 @@ sub LoadTermCap {
   return if defined $terminal;
   
   require Term::Cap;
-  $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+  $terminal = Term::Cap->Tgetent({OSPEED => 9600}); # Avoid warning.
 }
 
 sub ornaments {

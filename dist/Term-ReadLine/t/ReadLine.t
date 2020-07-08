@@ -16,7 +16,7 @@ BEGIN {
     use_ok('Term::ReadLine');
 }
 
-my $t = new Term::ReadLine 'test term::readline';
+my $t = Term::ReadLine->new( 'test term::readline' );
 
 ok($t, "made something");
 
