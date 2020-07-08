@@ -47,7 +47,9 @@ else {
 }
 
 { # [perl #120635] 64 bit big-endian semctl SETVAL bug
-    ok(semctl($id, "ignore", SETALL, pack("s!*",(0)x$nsem)),
+  # [GH #17926]
+    my $ignored = 0;
+    ok(semctl($id, $ignored, SETALL, pack("s!*",(0)x$nsem)),
        "Initialize all $nsem semaphores to zero");
 
     my $sem2set = 3;
@@ -56,7 +58,7 @@ else {
        "Set semaphore $sem2set to $semval");
 
     my $semvals;
-    ok(semctl($id, "ignore", GETALL, $semvals),
+    ok(semctl($id, $ignored, GETALL, $semvals),
        'Get current semaphore values');
 
     my @semvals = unpack("s!*", $semvals);
@@ -66,7 +68,7 @@ else {
     is($semvals[$sem2set], $semval, 
        "Checking value of semaphore $sem2set");
 
-    is(semctl($id, $sem2set, GETVAL, "ignored"), $semval,
+    is(semctl($id, $sem2set, GETVAL, 'ignore'), $semval,
        "Check value via GETVAL");
 }
 
