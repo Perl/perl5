@@ -36,7 +36,7 @@ SKIP: {
     $i = 5;
     my $oldaction;
     if ($use_sigaction) {
-        $oldaction = new POSIX::SigAction;
+        $oldaction = POSIX::SigAction->new;
         printf("# sigaction tick, ALRM = %d\n", &POSIX::SIGALRM);
 
         # Perl's deferred signals may be too wimpy to break through
