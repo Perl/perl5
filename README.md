@@ -112,16 +112,36 @@ Execution of -e aborted due to compilation errors.
 
 Currently behaves like `-e` but could overtime enable new features enabled during the `7.x` development cycle.
 
-# How to contribute?
-
-You can submit fixes as `Pull Request` by targeting the `core-p7` using the [github.com/Perl/perl](https://github.com/Perl/perl5) repoository.
-
 # FAQ
 
 ## Is this branch going to be released?
 
-No, this branch should not be released as it. It's a primer to give the Perl community the opportunity to experience what could feels like `Perl 7`.
+No, this branch will not be released as is. It's a primer to give the Perl community the opportunity to experience what `Perl 7` might feel like.
 
 ## Is it going to be merged to blead?
 
 No. The goal is to not break blead and submit small mergeable/reviewable chunks to blead later once the global direction for the project is validated.
+
+## How can I contribute to the work on the `core-p7` branch?
+
+Working on the `core-p7` branch is very similar to working on `blead`, with two differences to be discussed below.
+
+### Work cycle:
+
+* Fork the [Perl 5 core repository](https://github.com/Perl/perl5) to your own
+  GitHub site, then clone that repository to your local machine.
+* `git checkout core-p7`
+* `git checkout -b my-core-p7-contribution`
+* Regular configure-build-test cycle
+* `git add` then `git commit`
+* In the output from `git commit` you will be provided a github URL to create a pull request.  When you arrive at that URL, be sure to **change the target branch for that pull request** from `blead` to `core-p7`.  (This is Difference #1).
+
+### Filing issues (bug tickets)
+
+Because we will encounter **many** bugs in the course of working on the `core-p7` branch, and because the overwhelming majority of those bug reports will not be relevant to ongoing development in blead, we are using a different location for issues for this branch.  (This is Difference #2).  We are creating Issues in this location:
+
+[core-p7 branch bug tracker](https://github.com/atoomic/perl/issues)
+
+Apart from avoiding flooding the regular Perl 5 issue tracker, this will enable you to establish a mail filter directing `core-p7`-related messages to a separate folder in your email client.
+
+Please don't use this issue tracker to discuss the future direction of Perl.  Those discussions should stay on the perl5-porters mailing list/newsgroup.
