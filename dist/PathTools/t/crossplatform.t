@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+use strict;
 use File::Spec;
 use lib File::Spec->catfile('t', 'lib');
 use Test::More;
