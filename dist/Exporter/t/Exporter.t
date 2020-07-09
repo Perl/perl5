@@ -18,7 +18,7 @@ sub ok ($;$) {
 
 BEGIN {
     $test = 1;
-    print "1..33\n";
+    print "1..34\n";
     require Exporter;
     ok( 1, 'Exporter compiled' );
 }
@@ -253,3 +253,8 @@ sub TIESCALAR{bless[]}
  }
 }
 ::ok(1, 'import with tied $_');
+
+# this should be loaded, but make sure
+require Exporter::Heavy;
+::ok(Exporter->VERSION eq Exporter::Heavy->VERSION,
+    'Exporter and Exporter::Heavy have matching versions');
