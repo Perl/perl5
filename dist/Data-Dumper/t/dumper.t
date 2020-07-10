@@ -3,6 +3,7 @@
 # testsuite for Data::Dumper
 #
 
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
@@ -97,6 +98,7 @@ sub TEST {
   my $string = shift;
   my $name = shift;
   my $t = eval $string;
+  warn __LINE__ . " - $@" if $@;
   ++$TNUM;
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
     if ($WANT =~ /deadbeef/);
@@ -145,10 +147,10 @@ print "1..$TMAX\n";
 #############
 #############
 
-@c = ('c');
-$c = \@c;
-$b = {};
-$a = [1, $b, $c];
+our @c = ('c');
+our $c = \@c;
+our $b = {};
+our $a = [1, $b, $c];
 $b->{a} = $a;
 $b->{b} = $a->[1];
 $b->{c} = $a->[2];
@@ -269,6 +271,7 @@ $WANT = <<'EOT';
 EOT
 
 $Data::Dumper::Indent = 1;
+my $d;
 TEST (q(
        $d = Data::Dumper->new([$a,$b], [qw(a b)]);
        $d->Seen({'*c' => $c});
@@ -374,7 +377,7 @@ $WANT = <<'EOT';
 #};
 EOT
 
-$foo = { "abc\000\'\efg" => "mno\000",
+my $foo = { "abc\000\'\efg" => "mno\000",
          "reftest" => \\1,
        };
 {
@@ -391,9 +394,9 @@ $foo = { "abc\000\'\efg" => "mno\000",
 {
   package main;
   use Data::Dumper;
-  $foo = 5;
-  @foo = (-10,\*foo);
-  %foo = (a=>1,b=>\$foo,c=>\@foo);
+  our $foo = 5;
+  our @foo = (-10,\*foo);
+  our %foo = (a=>1,b=>\$foo,c=>\@foo);
   $foo{d} = \%foo;
   $foo[2] = \%foo;
 
@@ -577,13 +580,13 @@ EOT
 #############
 {
   package main;
-  @dogs = ( 'Fido', 'Wags' );
-  %kennel = (
+  my @dogs = ( 'Fido', 'Wags' );
+  my %kennel = (
             First => \$dogs[0],
             Second =>  \$dogs[1],
            );
   $dogs[2] = \%kennel;
-  $mutts = \%kennel;
+  my $mutts = \%kennel;
   $mutts = $mutts;         # avoid warning
 
 #############
@@ -872,12 +875,12 @@ TEST (q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Purity(1)->Dumpxs;),
 }
 
 {
-    $f = "pearl";
-    $e = [        $f ];
-    $d = { 'e' => $e };
-    $c = [        $d ];
-    $b = { 'c' => $c };
-    $a = { 'b' => $b };
+    my $f = "pearl";
+    my $e = [        $f ];
+    my $d = { 'e' => $e };
+    my $c = [        $d ];
+    my $b = { 'c' => $c };
+    my $a = { 'b' => $b };
 
 #############
 ##
@@ -973,8 +976,8 @@ EOT
 }
 
 {
-  $i = 0;
-  $a = { map { ("$_$_$_", ++$i) } 'I'..'Q' };
+  my $i = 0;
+  my $a = { map { ("$_$_$_", ++$i) } 'I'..'Q' };
 
 #############
 ##
@@ -1000,8 +1003,8 @@ TEST (q(Data::Dumper->new([$a])->Dumpxs;),
 }
 
 {
-  $i = 5;
-  $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
+  my $i = 5;
+  my $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
   local $Data::Dumper::Sortkeys = \&sort199;
   sub sort199 {
     my $hash = shift;
@@ -1030,9 +1033,11 @@ TEST q(Data::Dumper->new([$c])->Dumpxs;), "sortkeys sub (XS)"
 }
 
 {
-  $i = 5;
-  $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
-  $d = { reverse %$c };
+  #package Test;
+
+  my $i = 5;
+  my $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
+  my $d = { reverse %$c };
   local $Data::Dumper::Sortkeys = \&sort205;
   sub sort205 {
     my $hash = shift;
@@ -1122,20 +1127,20 @@ EOT
 # wrong, but I can't see an easy, reliable way to code that knowledge)
 
 # Numbers (seen by the tokeniser as numbers, stored as numbers.
-  @numbers =
+  my @numbers =
   (
    0, +1, -2, 3.0, +4.0, -5.0, 6.5, +7.5, -8.5,
     9,  +10,  -11,  12.0,  +13.0,  -14.0,  15.5,  +16.25,  -17.75,
   );
 # Strings
-  @strings =
+  my @strings =
   (
    "0", "+1", "-2", "3.0", "+4.0", "-5.0", "6.5", "+7.5", "-8.5", " 9",
    " +10", " -11", " 12.0", " +13.0", " -14.0", " 15.5", " +16.25", " -17.75",
   );
 
 # The perl code always does things the same way for numbers.
-  $WANT_PL_N = <<'EOT';
+  my $WANT_PL_N = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1157,7 +1162,7 @@ EOT
 EOT
 # The perl code knows that 0 and -2 stringify exactly back to the strings,
 # so it dumps them as numbers, not strings.
-  $WANT_PL_S = <<'EOT';
+  my $WANT_PL_S = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = '+1';
 #$VAR3 = -2;
@@ -1183,7 +1188,7 @@ EOT
 # (which makes IVs where possible) so values the tokeniser thought were
 # floating point are stored as NVs. The XS code outputs these as strings,
 # but as it has converted them from NVs, leading + signs will not be there.
-  $WANT_XS_N = <<'EOT';
+  my $WANT_XS_N = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1206,7 +1211,7 @@ EOT
 
 # These are the strings as seen by the tokeniser. The XS code will output
 # these for all cases except where the scalar has been used in integer context
-  $WANT_XS_S = <<'EOT';
+  my $WANT_XS_S = <<'EOT';
 #$VAR1 = '0';
 #$VAR2 = '+1';
 #$VAR3 = '-2';
@@ -1231,7 +1236,7 @@ EOT
 # These will differ from WANT_XS_N because now IV flags will be set on all
 # values that were actually integer, and the XS code will then output these
 # as numbers not strings.
-  $WANT_XS_I = <<'EOT';
+  my $WANT_XS_I = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1253,10 +1258,10 @@ EOT
 EOT
 
 # Some of these tests will be redundant.
-@numbers_s = @numbers_i = @numbers_is = @numbers_n = @numbers_ns = @numbers_ni
-  = @numbers_nis = @numbers;
-@strings_s = @strings_i = @strings_is = @strings_n = @strings_ns = @strings_ni
-  = @strings_nis = @strings;
+my @numbers_s = my @numbers_i = my @numbers_is = my @numbers_n = my @numbers_ns = my @numbers_ni
+  = my @numbers_nis = @numbers;
+my @strings_s = my @strings_i = my @strings_is = my @strings_n = my @strings_ns = my @strings_ni
+  = my @strings_nis = @strings;
 # Use them in an integer context
 foreach (@numbers_i, @numbers_ni, @numbers_nis, @numbers_is,
          @strings_i, @strings_ni, @strings_nis, @strings_is) {
@@ -1341,7 +1346,7 @@ if ($XS) {
 }
 
 {
-  $a = "1\n";
+  my $a = "1\n";
 #############
 ## Perl code was using /...$/ and hence missing the \n.
   $WANT = <<'EOT';
@@ -1357,7 +1362,7 @@ EOT
 }
 
 {
-  @a = (
+  my @a = (
         999999999,
         1000000000,
         9999999999,
@@ -1429,7 +1434,7 @@ EOT
 }
 
 {
-	$b = "Bad. XS didn't escape dollar sign";
+	my $b = "Bad. XS didn't escape dollar sign";
 #############
     # B6 is chosen because it is UTF-8 variant on ASCII and all 3 EBCDIC
     # platforms that Perl currently purports to work on.  It also is the only
@@ -1492,8 +1497,8 @@ EOT
 EOT
   local $Data::Dumper::Purity = 1;
   local $Data::Dumper::Sortkeys;
-  $ping = 5;
-  %ping = (chr (0xDECAF) x 4  =>\$ping);
+  my $ping = 5;
+  my %ping = (chr (0xDECAF) x 4  =>\$ping);
   for $Data::Dumper::Sortkeys (0, 1) {
     if($] >= 5.007) {
       TEST (q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong'])),
@@ -1520,7 +1525,7 @@ EOT
   local $Data::Dumper::Quotekeys = 0;
   my $k = 'perl' . chr 256;
   chop $k;
-  %foo = ($k => 'rocks');
+  my %foo = ($k => 'rocks');
 
   TEST q(Data::Dumper->Dump([\\%foo])), "quotekeys == 0 for utf8 flagged ASCII";
   TEST q(Data::Dumper->Dumpxs([\\%foo])),
@@ -1535,7 +1540,7 @@ EOT
 #  1
 #];
 EOT
-    @foo = ();
+    my @foo = ();
     $foo[2] = 1;
     TEST q(Data::Dumper->Dump([\@foo])), 'Richard Clamp, Message-Id: <20030104005247.GA27685@mirth.demon.co.uk>: Dump()';
     TEST q(Data::Dumper->Dumpxs([\@foo])), 'Richard Clamp, Message-Id: <20030104005247.GA27685@mirth.demon.co.uk>: Dumpxs()'if $XS;
@@ -1561,7 +1566,7 @@ TEST q(join " ", new Data::Dumper [[]],[] =>->Dumpxs),
 #];
 EOT
 
-  $foo = [ join "", map chr, 0..255 ];
+  my $foo = [ join "", map chr, 0..255 ];
   local $Data::Dumper::Useqq = 1;
   TEST (q(Dumper($foo)), 'All latin1 characters: Dumper');
   TEST (q(Data::Dumper::DumperX($foo)), 'All latin1 characters: DumperX') if $XS;
@@ -1577,7 +1582,7 @@ EOT
 #];
 EOT
 
-  $foo = [ join "", map chr, 0..255, 0x20ac ];
+  my $foo = [ join "", map chr, 0..255, 0x20ac ];
   local $Data::Dumper::Useqq = 1;
   if ($] < 5.007) {
     print "not ok " . (++$TNUM) . " # TODO - fails under 5.6\n" for 1..3;
