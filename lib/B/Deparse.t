@@ -64,7 +64,7 @@ while (<DATA>) {
     # parse options if necessary
     my $deparse = $meta{options}
 	? $deparse{$meta{options}} ||=
-	    new B::Deparse split /,/, $meta{options}
+	    B::Deparse->new( split /,/, $meta{options} )
 	: $deparse;
 
     my $code = "$meta{context};\n" . <<'EOC' . "sub {$input\n}";
