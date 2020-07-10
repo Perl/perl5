@@ -1,3 +1,4 @@
+our %Config;
 BEGIN {
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bXS\/Typemap\b/) {
