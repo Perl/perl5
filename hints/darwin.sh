@@ -342,11 +342,11 @@ EOM
       exit 1
     esac
 
-    # The X in 10.X
+    prodvers_major=$(echo $prodvers|awk -F. '{print $1}')
     prodvers_minor=$(echo $prodvers|awk -F. '{print $2}')
 
     # macOS (10.12) deprecated syscall().
-    if [ "$prodvers_minor" -ge 12 ]; then
+    if [[ ( "$prodvers_minor" -ge 12 && "$prodvers_major" -eq 10 ) || "$prodvers_major" -ge 11 ]]; then
         d_syscall='undef'
         # If deploying to pre-10.12, suppress Time::HiRes's detection of the system clock_gettime()
         case "$MACOSX_DEPLOYMENT_TARGET" in
