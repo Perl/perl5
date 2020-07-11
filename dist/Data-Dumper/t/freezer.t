@@ -4,6 +4,7 @@
 # test suite yet
 
 BEGIN {
+    no strict 'vars';
     require Config; Config->import;
     no warnings 'once';
     if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {

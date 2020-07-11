@@ -2,6 +2,7 @@
 # t/dumpperl.t - test all branches of, and modes of triggering, Dumpperl()
 BEGIN {
     if ($ENV{PERL_CORE}){
+        no strict 'vars';
         require Config; Config->import;
         no warnings 'once';
         if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
