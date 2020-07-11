@@ -64,7 +64,7 @@ Note that due to the limitation of features bundles wich can be stored in `HINT_
 * utf8 *not a feature*
 * unicode_strings
 
-### lib/p5.pm, lib/p7.pm and regen/pX.pm
+### lib/p5.pm, lib/p7.pm and regen/pX.pl
 
 Right now you could change the defaults by using `use p5` in a filename to avoid enabling `v7.0` standards.
 
