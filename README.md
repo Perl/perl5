@@ -70,7 +70,7 @@ Right now you could change the defaults by using `use p5` in a file to avoid ena
 
 [regen/pX.pl](https://github.com/Perl/perl5/blob/core-p7/regen/pX.pl) provides a mechanism to generate `lib/p5.pm` and `lib/p7.pm`.
 
-The final name could change and we could prefer alternate like `use v7` and `use v5` or `use compat::p5` and `use compat::p7`. Right now by using `p5` and `p7` this allows to avoid some technical details and a global replace could be performed later in the development cycle.
+The final name could change and we could prefer alternates like `use v7` and `use v5` or `use compat::p5` and `use compat::p7`. Right now by using `p5` and `p7` this allows to avoid some technical details and a global replace could be performed later in the development cycle.
 
 * [regen/pX.pl](https://github.com/Perl/perl5/blob/core-p7/regen/pX.pl)
 * [lib/p7.pm](https://github.com/Perl/perl5/blob/core-p7/lib/p7.pm)
