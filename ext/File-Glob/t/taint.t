@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    no strict 'vars';
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
@@ -23,6 +24,6 @@ BEGIN {
     use_ok('File::Glob');
 }
 
-@a = File::Glob::bsd_glob("*");
+my @a = File::Glob::bsd_glob("*");
 eval { $a = join("",@a), kill 0; 1 };
 like($@, qr/Insecure dependency/, 'all filenames should be tainted');
