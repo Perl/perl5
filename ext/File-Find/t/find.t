@@ -20,7 +20,7 @@ BEGIN {
         @File::Spec::ISA = 'File::Spec::Unix';
     }
     require File::Find;
-    import File::Find;
+    File::Find->import();
 }
 
 my $symlink_exists = eval { symlink("",""); 1 };

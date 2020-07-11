@@ -1,11 +1,10 @@
 #!./perl -T
-use strict;
 use Test::More;
 BEGIN {
     plan(
         ${^TAINT}
         ? (tests => 45)
-        : (skip_all => "A perl without taint support") 
+        : (skip_all => "A perl without taint support")
     );
 }
 use lib qw( ./t/lib );
@@ -47,6 +46,12 @@ BEGIN {
 	##
 	## Match the directory taint tests in mg.c::Perl_magic_setenv()
 	##
+    # When running with warnings on by default, you may get this warning:
+    #   Use of uninitialized value in numeric bitwise and (&)
+    # at "(stat $dir)[2] & 002);" below.
+    # Since this probably refers to a transitory situation in one of the
+    # directories on your system being scanned, we'll suppress this warning.
+    no warnings 'uninitialized';
 	push(@path,$dir) unless (length($dir) >= 256
 				 or
 				 substr($dir,0,1) ne "/"
