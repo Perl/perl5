@@ -66,7 +66,7 @@ Note that due to the limitation of features bundles wich can be stored in `HINT_
 
 ### lib/p5.pm, lib/p7.pm and regen/pX.pl
 
-Right now you could change the defaults by using `use p5` in a filename to avoid enabling `v7.0` standards.
+Right now you could change the defaults by using `use p5` in a file to avoid enabling `v7.0` standards.
 
 [regen/pX.pl](https://github.com/Perl/perl5/blob/core-p7/regen/pX.pl) provides a mechanism to generate `lib/p5.pm` and `lib/p7.pm`.
 
