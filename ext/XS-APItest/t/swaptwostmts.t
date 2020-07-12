@@ -8,15 +8,18 @@ BEGIN { $^H |= 0x20000; }
 my $t;
 
 $t = "";
-eval q{
-	use XS::APItest ();
-	$t .= "a";
-	swaptwostmts
-	$t .= "b";
-	$t .= "c";
-	$t .= "d";
-};
-isnt $@, "";
+{
+    no warnings 'syntax';
+    eval q{
+        use XS::APItest ();
+        $t .= "a";
+        swaptwostmts
+        $t .= "b";
+        $t .= "c";
+        $t .= "d";
+    };
+    isnt $@, "";
+}
 
 $t = "";
 eval q{
