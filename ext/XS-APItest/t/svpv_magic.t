@@ -48,6 +48,7 @@ is $f, 1, 'SvPVutf8 calls get-magic once';
 
 package t {
   our @ISA = 'main';
+  no warnings 'once';
   sub FETCH { ++$::f; chr utf8::unicode_to_native(255) }
   sub STORE { }
 }
