@@ -1,6 +1,7 @@
 #!./perl -w
 
 BEGIN {
+    no strict 'vars';
     require Config; Config->import;
     if (!$Config{'d_fork'}
        # open2/3 supported on win32
