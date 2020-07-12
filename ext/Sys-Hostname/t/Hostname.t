@@ -1,6 +1,7 @@
 #!./perl
 
 BEGIN {
+    no strict 'vars';
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bSys\/Hostname\b/) {
       print "1..0 # Skip: Sys::Hostname was not built\n";
@@ -12,6 +13,7 @@ use Sys::Hostname;
 
 use Test::More tests => 2;
 
+my $host = '';
 SKIP:
 {
     eval {
