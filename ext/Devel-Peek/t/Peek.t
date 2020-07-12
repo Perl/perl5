@@ -1,6 +1,7 @@
 #!./perl -T
 
 BEGIN {
+    no strict 'vars';
     require Config; Config->import;
     if ($Config{'extensions'} !~ /\bDevel\/Peek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
@@ -18,17 +19,21 @@ use Test::More;
 use Devel::Peek;
 
 our $DEBUG = 0;
+no warnings 'once';
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
+use warnings 'once';
 
 # If I reference any lexicals in this, I get the entire outer subroutine (or
 # MAIN) dumped too, which isn't really what I want, as it's a lot of faff to
 # maintain that.
+no warnings 'once';
 format PIE =
 Pie     @<<<<<
 $::type
 Good    @>>>>>
 $::mmmm
 .
+use warnings 'once';
 
 use constant thr => $Config{useithreads};
 
@@ -116,6 +121,7 @@ sub do_test {
 our   $a;
 our   $b;
 my    $c;
+our   $d;
 local $d = 0;
 
 END {
@@ -840,7 +846,7 @@ do_test('ENAMEs on a stash with no NAME',
 ');
 
 my %small = ("Perl", "Rules", "Beer", "Foamy");
-my $b = %small;
+$b = %small;
 do_test('small hash',
         \%small,
 'SV = $RV\\($ADDR\\) at $ADDR
@@ -926,7 +932,7 @@ do_test('small hash after keys and scalar',
 ){2}');
 
 # Dump with arrays, hashes, and operator return values
-@array = 1..3;
+our @array = 1..3;
 do_test('Dump @array', '@array', <<'ARRAY', '', undef, 1);
 SV = PVAV\($ADDR\) at $ADDR
   REFCNT = 1
@@ -967,7 +973,7 @@ SV = PVAV\($ADDR\) at $ADDR
     IV = 1
 ARRAY
 
-%hash = 1..2;
+our %hash = 1..2;
 do_test('Dump %hash', '%hash', <<'HASH', '', undef, 1);
 SV = PVHV\($ADDR\) at $ADDR
   REFCNT = 1
@@ -1375,7 +1381,7 @@ sub test_utf8_stashes {
    $dump = _dump(\%{"${stash_name}::"});
 
    my $format = utf8::is_utf8($stash_name) ? '\x{%2x}' : '\x%2x';
-   $escaped_stash_name = join "", map {
+   my $escaped_stash_name = join "", map {
          $_ eq ':' ? $_ : sprintf $format, ord $_
    } split //, $stash_name;
 
