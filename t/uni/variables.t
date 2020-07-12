@@ -242,6 +242,14 @@ for ( 0x0 .. 0xff ) {
         $message = "  # TODO $message" if    $ord == 0
                                         || $chr =~ /\s/a;
 
+        # next block is inserted temporarily for debugging
+        # https://github.com/atoomic/perl/issues/57
+        if (@warnings) {
+            for my $w (@warnings) {
+                chomp $w;
+                say STDERR "YYY: $w";
+            }
+        }
         if (! ok(@warnings == 0, $message)) {
             note join "\n", @warnings;
         }
