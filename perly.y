@@ -956,7 +956,7 @@ method	:	METHOD
 packagemodule	:	PACKAGE
 			{ $$ = 0; }
 		|	MODULE
-			{ $$ = PACKAGE_USE_STRICT|PACKAGE_USE_WARNINGS; }
+			{ $$ = PACKAGE_USE_STRICT|PACKAGE_USE_WARNINGS|PACKAGE_USE_FEATURES; }
 		;
 
 /* Some kind of subscripted expression */

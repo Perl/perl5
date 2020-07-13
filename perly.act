@@ -1229,7 +1229,7 @@ case 2:
 
   case 146:
 #line 959 "perly.y" /* yacc.c:1652  */
-    { (yyval.ival) = PACKAGE_USE_STRICT|PACKAGE_USE_WARNINGS; }
+    { (yyval.ival) = PACKAGE_USE_STRICT|PACKAGE_USE_WARNINGS|PACKAGE_USE_FEATURES; }
 
     break;
 
@@ -2141,6 +2141,6 @@ case 2:
     
 
 /* Generated from:
- * 8997a1081b0c562c36c0ab1f469d79a271146dbe63ab4f8514fc1b4339737512 perly.y
+ * 062dc90fd9895efc88d1c18bec844545d665e4dadaeedd2d4d58da9be1a62124 perly.y
  * 0947213b55d0ed11693554bea04987e886cf285f5c14cf9075fa1e7acc3f4061 regen_perly.pl
  * ex: set ro: */

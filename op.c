@@ -8771,6 +8771,40 @@ Perl_package_flags(pTHX_ OP *o, const U32 flags)
     if(flags & PACKAGE_USE_WARNINGS) {
         free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
     }
+
+    if(flags & PACKAGE_USE_FEATURES) {
+        /* Enable all the currently-defined features except:
+         *   indirect signatures switch */
+
+        /* TODO: There isn't a pre-packed bundle for this so we'll have to
+         * use the CUSTOM one. It would be a good idea, if this code becomes
+         * commonly used, to make a bundle for this in particular */
+        PL_hints = (PL_hints & ~HINT_FEATURE_MASK) |
+                   (FEATURE_BUNDLE_CUSTOM << HINT_FEATURE_SHIFT);
+
+        PL_compiling.cop_features =
+            /* reference from feature.h */
+            FEATURE_BITWISE_BIT |
+            FEATURE___SUB___BIT |
+            FEATURE_MYREF_BIT |
+            FEATURE_EVALBYTES_BIT |
+            FEATURE_FC_BIT |
+            /* no FEATURE_INDIRECT_BIT */
+            FEATURE_ISA_BIT |
+            FEATURE_POSTDEREF_QQ_BIT |
+            FEATURE_REFALIASING_BIT |
+            FEATURE_SAY_BIT |
+            /* no FEATURE_SIGNATURES_BIT -- 
+             *   TODO: This one is hugely contentious, because it will break
+             *   any prototype-using function. It could be added but we should
+             *   experiment with safety of it in small cases first. */
+            FEATURE_STATE_BIT |
+            /* no FEATURE_SWITCH_BIT */
+            FEATURE_UNIEVAL_BIT |
+            FEATURE_UNICODE_BIT;
+
+        PL_hints |= HINT_LOCALIZE_HH;
+    }
 }
 
 void
