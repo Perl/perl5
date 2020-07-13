@@ -8738,9 +8738,17 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 void
 Perl_package(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_PACKAGE;
+
+    package_flags(o, 0);
+}
+
+void
+Perl_package_flags(pTHX_ OP *o, const U32 flags)
+{
     SV *const sv = cSVOPo->op_sv;
 
-    PERL_ARGS_ASSERT_PACKAGE;
+    PERL_ARGS_ASSERT_PACKAGE_FLAGS;
 
     SAVEGENERICSV(PL_curstash);
     save_item(PL_curstname);
@@ -8753,6 +8761,10 @@ Perl_package(pTHX_ OP *o)
     PL_parser->copline = NOLINE;
 
     op_free(o);
+
+    if(flags & PACKAGE_MODULE) {
+        warn("TODO: implement module semantics\n");
+    }
 }
 
 void

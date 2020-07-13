@@ -1444,6 +1444,8 @@ p	|void	|opslab_force_free|NN OPSLAB *slab
 : Used in perly.y
 p	|void	|package	|NN OP* o
 : Used in perly.y
+p	|void	|package_flags	|NN OP* o|const U32 flags
+: Used in perly.y
 p	|void	|package_version|NN OP* v
 : Used in toke.c and perly.y
 p	|PADOFFSET|allocmy	|NN const char *const name|const STRLEN len\

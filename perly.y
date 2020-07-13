@@ -64,6 +64,7 @@
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
+%type <ival>  packagemodule
 
 %type <ival> mintro
 
@@ -334,7 +335,7 @@ barestmt:	PLUGSTMT
 			}
 	|	packagemodule BAREWORD BAREWORD ';'
 			{
-			  package($3);
+			  package_flags($3, $1);
 			  if ($2)
 			      package_version($2);
 			  $$ = NULL;
@@ -451,7 +452,7 @@ barestmt:	PLUGSTMT
 			}
 	|	packagemodule BAREWORD BAREWORD '{' remember
 			{
-			  package($3);
+			  package_flags($3, $1);
 			  if ($2) {
 			      package_version($2);
 			  }
@@ -953,7 +954,9 @@ method	:	METHOD
 
 /* Ways to introduce a package */
 packagemodule	:	PACKAGE
+			{ $$ = 0; }
 		|	MODULE
+			{ $$ = PACKAGE_MODULE; }
 		;
 
 /* Some kind of subscripted expression */

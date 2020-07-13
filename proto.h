@@ -2586,6 +2586,9 @@ PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *pat
 PERL_CALLCONV void	Perl_package(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_PACKAGE	\
 	assert(o)
+PERL_CALLCONV void	Perl_package_flags(pTHX_ OP* o, const U32 flags);
+#define PERL_ARGS_ASSERT_PACKAGE_FLAGS	\
+	assert(o)
 PERL_CALLCONV void	Perl_package_version(pTHX_ OP* v);
 #define PERL_ARGS_ASSERT_PACKAGE_VERSION	\
 	assert(v)

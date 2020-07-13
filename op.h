@@ -1139,6 +1139,8 @@ struct op_argcheck_aux {
     char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
 };
 
+/* Flags for package_flags() */
+#define PACKAGE_MODULE  0x0001
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

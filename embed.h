@@ -1406,6 +1406,7 @@
 #define op_unscope(a)		Perl_op_unscope(aTHX_ a)
 #define optimize_optree(a)	Perl_optimize_optree(aTHX_ a)
 #define package(a)		Perl_package(aTHX_ a)
+#define package_flags(a,b)	Perl_package_flags(aTHX_ a,b)
 #define package_version(a)	Perl_package_version(aTHX_ a)
 #define pad_add_weakref(a)	Perl_pad_add_weakref(aTHX_ a)
 #define pad_block_start(a)	Perl_pad_block_start(aTHX_ a)
