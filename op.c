@@ -8769,7 +8769,7 @@ Perl_package_flags(pTHX_ OP *o, const U32 flags)
     }
 
     if(flags & PACKAGE_USE_WARNINGS) {
-        load_module(0, newSVpvs("warnings"), NULL, NULL);
+        free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
     }
 }
 
