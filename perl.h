@@ -5181,7 +5181,7 @@ typedef enum {
 
 #define HINT_RE_FLAGS		0x02000000 /* re '/xism' pragma */
 
-#define HINT_FEATURE_MASK	0x1c000000 /* 3 bits for feature bundles */
+#define HINT_FEATURE_MASK	0x3c000000 /* 4 bits for feature bundles */
 
 				/* Note: Used for HINT_M_VMSISH_*,
 				   currently defined by vms/vmsish.h:
