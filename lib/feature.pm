@@ -65,7 +65,7 @@ my %removed = (
 );
 
 our $hint_shift   = 26;
-our $hint_mask    = 0x1c000000;
+our $hint_mask    = 0x3c000000;
 our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 );
 
 # This gets set (for now) in $^H as well as in %^H,
