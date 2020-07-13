@@ -374,6 +374,7 @@ static struct debug_tokens {
     { LSTOPSUB,		TOKENTYPE_OPVAL,	"LSTOPSUB" },
     { MATCHOP,		TOKENTYPE_OPNUM,	"MATCHOP" },
     { METHOD,		TOKENTYPE_OPVAL,	"METHOD" },
+    { MODULE,		TOKENTYPE_NONE,		"MODULE" },
     { MULOP,		TOKENTYPE_OPNUM,	"MULOP" },
     { MY,		TOKENTYPE_IVAL,		"MY" },
     { NCEQOP,		TOKENTYPE_OPNUM,	"NCEQOP" },
@@ -8012,6 +8013,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_mkdir:
         LOP(OP_MKDIR,XTERM);
+
+    case KEY_module:
+        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = skipspace(s);
+        s = force_strict_version(s);
+        PREBLOCK(MODULE);
 
     case KEY_msgctl:
         LOP(OP_MSGCTL,XTERM);

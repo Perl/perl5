@@ -238,6 +238,7 @@ __END__
 +m
 +map
 -mkdir
++module
 -msgctl
 -msgget
 -msgrcv

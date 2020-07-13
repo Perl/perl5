@@ -5551,6 +5551,7 @@ t/comp/hints.aux		Auxiliary file for %^H test
 t/comp/hints.t			See if %^H works
 t/comp/line_debug.t		See if @{"_<$file"} works
 t/comp/line_debug_0.aux		Auxiliary file for @{"_<$file"} test
+t/comp/module.t			See if the module keyword works
 t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions
 t/comp/our.t			Tests for our declaration

@@ -51,7 +51,7 @@
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
 %token <opval> LABEL
-%token <ival> FORMAT SUB SIGSUB ANONSUB ANON_SIGSUB PACKAGE USE
+%token <ival> FORMAT SUB SIGSUB ANONSUB ANON_SIGSUB PACKAGE MODULE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> GIVEN WHEN DEFAULT
 %token <ival> LOOPEX DOTDOT YADAYADA
@@ -332,7 +332,7 @@ barestmt:	PLUGSTMT
 			  intro_my();
 			  parser->parsed_sub = 1;
 			}
-	|	PACKAGE BAREWORD BAREWORD ';'
+	|	packagemodule BAREWORD BAREWORD ';'
 			{
 			  package($3);
 			  if ($2)
@@ -449,7 +449,7 @@ barestmt:	PLUGSTMT
 			  $$ = newWHILEOP(0, 1, NULL,
 				  NULL, $1, $2, 0);
 			}
-	|	PACKAGE BAREWORD BAREWORD '{' remember
+	|	packagemodule BAREWORD BAREWORD '{' remember
 			{
 			  package($3);
 			  if ($2) {
@@ -950,6 +950,11 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 method	:	METHOD
 	|	scalar
 	;
+
+/* Ways to introduce a package */
+packagemodule	:	PACKAGE
+		|	MODULE
+		;
 
 /* Some kind of subscripted expression */
 subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */

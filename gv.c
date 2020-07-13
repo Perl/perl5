@@ -530,7 +530,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_given   : case KEY_goto   : case KEY_grep  : case KEY_gt     :
     case KEY_if      : case KEY_isa    : case KEY_INIT  : case KEY_last   :
     case KEY_le      : case KEY_local  : case KEY_lt    : case KEY_m      :
-    case KEY_map     : case KEY_my:
+    case KEY_map     : case KEY_module : case KEY_my:
     case KEY_ne   : case KEY_next : case KEY_no: case KEY_or: case KEY_our:
     case KEY_package: case KEY_print: case KEY_printf:
     case KEY_q    : case KEY_qq   : case KEY_qr     : case KEY_qw    :

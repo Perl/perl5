@@ -370,6 +370,7 @@ my %not_tested = map { $_ => 1} qw(
     given
     if
     m
+    module
     no
     package
     q
