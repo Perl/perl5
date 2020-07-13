@@ -31,6 +31,7 @@ our %feature_bundle = (
     "5.15"    => [qw(current_sub evalbytes fc indirect say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bitwise current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
+    "5.33"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
     "all"     => [qw(bitwise current_sub declared_refs evalbytes fc indirect isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(indirect)],
 );
@@ -53,8 +54,7 @@ $feature_bundle{"5.29"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.30"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.31"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.32"} = $feature_bundle{"5.27"};
-$feature_bundle{"5.33"} = $feature_bundle{"5.27"};
-$feature_bundle{"5.34"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.34"} = $feature_bundle{"5.33"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -66,7 +66,7 @@ my %removed = (
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x3c000000;
-our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 );
+our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 5.33 );
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
@@ -166,7 +166,8 @@ given/when construct.
 
 See L<perlsyn/"Switch Statements"> for details.
 
-This feature is available starting with Perl 5.10.
+This feature is available starting with Perl 5.10, but is disabled in
+the C<:5.34> and later feature bundles.
 
 =head2 The 'unicode_strings' feature
 
@@ -365,9 +366,9 @@ This feature is available from Perl 5.32 onwards.
 =head2 The 'indirect' feature
 
 This feature allows the use of L<indirect object
-syntax|perlobj/Indirect Object Syntax> for method calls, e.g.  C<new
-Foo 1, 2;>. It is enabled by default, but can be turned off to
-disallow indirect object syntax.
+syntax|perlobj/Indirect Object Syntax> for method calls, e.g. C<new
+Foo 1, 2;>. It is enabled by default but disabled under C<use 5.34>
+and later.
 
 This feature is available under this name from Perl 5.32 onwards. In
 previous versions, it was simply on all the time.  To disallow (or
@@ -430,9 +431,9 @@ The following feature bundles are available:
             unicode_eval evalbytes current_sub fc
             postderef_qq bitwise indirect
 
-  :5.34     say state switch unicode_strings
-            unicode_eval evalbytes current_sub fc
-            postderef_qq bitwise indirect
+  :5.34     say state unicode_strings unicode_eval
+            evalbytes current_sub fc postderef_qq
+            bitwise
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

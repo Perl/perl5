@@ -69,8 +69,8 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
     "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.33"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
+    "5.33"   =>	[qw(say state unicode_strings unicode_eval
+		    evalbytes current_sub fc postderef_qq bitwise)],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -568,7 +568,8 @@ given/when construct.
 
 See L<perlsyn/"Switch Statements"> for details.
 
-This feature is available starting with Perl 5.10.
+This feature is available starting with Perl 5.10, but is disabled in
+the C<:5.34> and later feature bundles.
 
 =head2 The 'unicode_strings' feature
 
@@ -767,9 +768,9 @@ This feature is available from Perl 5.32 onwards.
 =head2 The 'indirect' feature
 
 This feature allows the use of L<indirect object
-syntax|perlobj/Indirect Object Syntax> for method calls, e.g.  C<new
-Foo 1, 2;>. It is enabled by default, but can be turned off to
-disallow indirect object syntax.
+syntax|perlobj/Indirect Object Syntax> for method calls, e.g. C<new
+Foo 1, 2;>. It is enabled by default but disabled under C<use 5.34>
+and later.
 
 This feature is available under this name from Perl 5.32 onwards. In
 previous versions, it was simply on all the time.  To disallow (or

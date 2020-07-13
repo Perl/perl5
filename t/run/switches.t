@@ -694,9 +694,10 @@ $r = runperl(
 is( $r, "Hello, world!\n", "-E ~~" );
 
 $r = runperl(
-    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; given(undef) {when(undef) { say q(Hello, world!)"}}']
+    switches    => [ '-E', '"given(undef) {when(undef) { say q(Hello, world!)}}"'],
+    stderr      => 1,
 );
-is( $r, "Hello, world!\n", "-E given" );
+like( $r, qr/^syntax error at -e line 1, near "\) \{"/, "-E no given" );
 
 $r = runperl(
     switches    => [ '-nE', q("} END { say q/affe/") ],
