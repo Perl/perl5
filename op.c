@@ -8763,7 +8763,9 @@ Perl_package_flags(pTHX_ OP *o, const U32 flags)
     op_free(o);
 
     if(flags & PACKAGE_USE_STRICT) {
-        load_module(0, newSVpvs("strict"), NULL, NULL);
+        PL_hints |= HINT_STRICT_REFS|HINT_EXPLICIT_STRICT_REFS |
+                    HINT_STRICT_SUBS|HINT_EXPLICIT_STRICT_SUBS |
+                    HINT_STRICT_VARS|HINT_EXPLICIT_STRICT_VARS;
     }
 
     if(flags & PACKAGE_USE_WARNINGS) {
