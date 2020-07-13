@@ -8762,8 +8762,12 @@ Perl_package_flags(pTHX_ OP *o, const U32 flags)
 
     op_free(o);
 
-    if(flags & PACKAGE_MODULE) {
-        warn("TODO: implement module semantics\n");
+    if(flags & PACKAGE_USE_STRICT) {
+        load_module(0, newSVpvs("strict"), NULL, NULL);
+    }
+
+    if(flags & PACKAGE_USE_WARNINGS) {
+        load_module(0, newSVpvs("warnings"), NULL, NULL);
     }
 }
 

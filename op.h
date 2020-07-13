@@ -1140,7 +1140,8 @@ struct op_argcheck_aux {
 };
 
 /* Flags for package_flags() */
-#define PACKAGE_MODULE  0x0001
+#define PACKAGE_USE_STRICT   0x0001
+#define PACKAGE_USE_WARNINGS 0x0002
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
