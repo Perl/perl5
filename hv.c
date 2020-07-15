@@ -39,7 +39,6 @@ holds the key and hash value.
  * you MUST change the logic in hv_ksplit()
  */
 #define DO_HSPLIT(xhv) ( ((xhv)->xhv_keys + ((xhv)->xhv_keys >> 1))  > (xhv)->xhv_max )
-#define HV_FILL_THRESHOLD 31
 
 static const char S_strtab_error[]
     = "Cannot modify shared string table in hv_%s";

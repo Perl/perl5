@@ -152,7 +152,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	abort();
     }
 #else
-    ptr = (Malloc_t)PerlMem_malloc(size?size:1);
+    ptr = (Malloc_t)PerlMem_malloc(size);
 #endif
     PERL_ALLOC_CHECK(ptr);
     if (ptr != NULL) {
