@@ -384,7 +384,6 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 =cut
 */
 
-
 #define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
 
 /* STR_WITH_LEN() shortcuts */
@@ -420,6 +419,45 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 
 #define get_cvs(str, flags)					\
 	Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
+
+/* internal helpers */
+#define PERL_RVS_TO_DECIMAL_(r,v,s) (((r)*1000000)+((v)*1000)+(s))
+#define PERL_DECIMAL_VERSION_                                               \
+        PERL_RVS_TO_DECIMAL_(PERL_REVISION, PERL_VERSION, PERL_SUBVERSION)
+
+/*
+=for apidoc AmR|bool|PERL_VERSION_EQ|const int r|const int v|const int s
+
+Returns whether or not the perl currently executing has the specified
+relationship to the perl given by the parameters.  For example,
+
+ #if PERL_VERSION_GT(5,24,2)
+   code that will only be compiled on perls after v5.24.2
+ #else
+   fallback code
+ #endif
+
+Note that this is usable in making compile-time decisions
+
+The possible comparisons are C<PERL_VERSION_EQ>, C<PERL_VERSION_NE>,
+C<PERL_VERSION_GE>, C<PERL_VERSION_GT>, C<PERL_VERSION_LE>, and
+C<PERL_VERSION_LT>.
+
+=for apidoc AmRh|bool|PERL_VERSION_NE|const int r|const int v|const int s
+=for apidoc AmRh|bool|PERL_VERSION_GE|const int r|const int v|const int s
+=for apidoc AmRh|bool|PERL_VERSION_GT|const int r|const int v|const int s
+=for apidoc AmRh|bool|PERL_VERSION_LE|const int r|const int v|const int s
+=for apidoc AmRh|bool|PERL_VERSION_LT|const int r|const int v|const int s
+
+=cut
+*/
+
+# define PERL_VERSION_EQ(r,v,s) (PERL_DECIMAL_VERSION_ == PERL_RVS_TO_DECIMAL_(r,v,s))
+# define PERL_VERSION_NE(r,v,s) (! PERL_VERSION_EQ(r,v,s))
+# define PERL_VERSION_LT(r,v,s) (PERL_DECIMAL_VERSION_ < PERL_RVS_TO_DECIMAL_(r,v,s))
+# define PERL_VERSION_LE(r,v,s) (PERL_DECIMAL_VERSION_ <= PERL_RVS_TO_DECIMAL_(r,v,s))
+# define PERL_VERSION_GT(r,v,s) (! PERL_VERSION_LE(r,v,s))
+# define PERL_VERSION_GE(r,v,s) (! PERL_VERSION_LT(r,v,s))
 
 /*
 =head1 Miscellaneous Functions
