@@ -5325,10 +5325,6 @@ control flow.
 
 (W unopened) You tried to read from a filehandle that was never opened.
 
-=item Reallocation too large: %x
-
-(F) You can't allocate more than 64K on an MS-DOS machine.
-
 =item realloc() of freed memory ignored
 
 (S malloc) An internal routine called realloc() on something that had

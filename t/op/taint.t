@@ -45,7 +45,6 @@ BEGIN {
 
 my $Is_VMS      = $^O eq 'VMS';
 my $Is_MSWin32  = $^O eq 'MSWin32';
-my $Is_Dos      = $^O eq 'dos';
 my $Is_Cygwin   = $^O eq 'cygwin';
 my $Is_OpenBSD  = $^O eq 'openbsd';
 my $Is_MirBSD   = $^O eq 'mirbsd';
@@ -147,7 +146,7 @@ my $TEST = 'TEST';
 
     SKIP: {
         skip "Environment tainting tests skipped", 4
-          if $Is_MSWin32 || $Is_VMS || $Is_Dos;
+          if $Is_MSWin32 || $Is_VMS;
 
 	my @vars = ('PATH', @MoreEnv);
 	while (my $v = $vars[0]) {
@@ -168,7 +167,7 @@ my $TEST = 'TEST';
     }
 
     my $tmp;
-    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_Dos) {
+    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32) {
 	print "# all directories are writeable\n";
     }
     else {
@@ -1305,8 +1304,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     # We do not want the whole taint.t to fail
     # just because Errno possibly failing.
     ok(eval('$!{ENOENT}') ||
-	$! == 2 || # File not found
-	($Is_Dos && $! == 22));
+	$! == 2); # File not found
 
     violates_taint(sub { open FOO, "> $foo" }, 'open', 'open for write');
     violates_taint(sub { open my $fh, '>', $foo }, 'open', 'open for write');
@@ -2393,7 +2391,7 @@ end
 {
     SKIP: {
         skip "Environment tainting tests skipped", 1
-          if $Is_MSWin32 || $Is_VMS || $Is_Dos;
+          if $Is_MSWin32 || $Is_VMS;
 
         local $ENV{XX} = '\p{IsB}';   # Making it an environment variable taints it
 

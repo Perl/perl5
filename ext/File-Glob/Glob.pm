@@ -33,7 +33,7 @@ $EXPORT_TAGS{bsd_glob} = [@{$EXPORT_TAGS{glob}}];
 
 our @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-our $VERSION = '1.36';
+our $VERSION = '1.37';
 
 sub import {
     require Exporter;
@@ -64,7 +64,7 @@ sub import {
 XSLoader::load();
 
 $DEFAULT_FLAGS = GLOB_CSH();
-if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
+if ($^O =~ /^(?:MSWin32|VMS|os2|riscos)$/) {
     $DEFAULT_FLAGS |= GLOB_NOCASE();
 }
 

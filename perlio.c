@@ -244,11 +244,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
         const int fd = PerlLIO_dup_cloexec(PerlIO_fileno(f));
         if (fd >= 0) {
             char mode[8];
-#      ifdef DJGPP
-            const int omode = djgpp_get_stream_mode(f);
-#      else
             const int omode = fcntl(fd, F_GETFL);
-#      endif
             PerlIO_intmode2str(omode,mode,NULL);
             /* the r+ is a hack */
             return PerlIO_fdopen(fd, mode);

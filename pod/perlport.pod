@@ -486,7 +486,7 @@ executable code for that command or program.
 First, many systems have "internal" commands that are built-in to the
 shell or OS and while these commands can be invoked, there is no
 corresponding file.  Second, some operating systems (e.g., Cygwin,
-DJGPP, OS/2, and VOS) have required suffixes for executable files;
+OS/2, and VOS) have required suffixes for executable files;
 these suffixes are generally permitted on the command name but are not
 required.  Thus, a command like C<perl> might exist in a file named
 F<perl>, F<perl.exe>, or F<perl.pm>, depending on the operating system.
@@ -1010,11 +1010,6 @@ avoid any possible confusion over which error variable to check.
 Also see:
 
 =over 4
-
-=item *
-
-The djgpp environment for DOS, L<http://www.delorie.com/djgpp/>
-and L<perldos>.
 
 =item *
 
@@ -2365,6 +2360,8 @@ as of 5.36:
 
 =item NetWare
 
+=item DOS/DJGPP
+
 =back
 
 =head2 (Perl 5.20)
@@ -2548,7 +2545,7 @@ L<http://www.cpan.org/ports/index.html> for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlamiga>, L<perlbs2000>,
-L<perlcygwin>, L<perldos>,
+L<perlcygwin>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
 L<perlmacos>, L<perlmacosx>,
 L<perlos2>, L<perlos390>, L<perlos400>,

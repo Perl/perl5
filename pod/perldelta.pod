@@ -315,9 +315,11 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item DOS/DJGPP
 
-XXX
+DJGPP is a port of the GNU toolchain to 32-bit x86 systems running
+DOS.  The last known attempt to build Perl on it was on 5.20, which
+only got as far as building miniperl.
 
 =back
 
