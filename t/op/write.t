@@ -2054,7 +2054,7 @@ fresh_perl_is('for(1..2){formline*0}', '', { stderr => 1 } , "#130722 - assertio
 # Just a complete test for format, including top-, left- and bottom marging
 # and format detection through glob entries
 
-if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' ||
+if ($^O eq 'VMS' || $^O eq 'MSWin32' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
   $test = curr_test();
  SKIP: {

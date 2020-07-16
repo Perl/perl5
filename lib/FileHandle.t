@@ -57,9 +57,7 @@ ok(! $|, "handle not auto-flushing current output channel");
 autoflush STDOUT 1;
 ok($|, "handle auto-flushing current output channel");
 
-SKIP: {
-    skip "No fork or pipe on DOS", 1 if ($^O eq 'dos');
-
+{
     my ($rd,$wr) = FileHandle::pipe;
     my $non_forking = (
         $^O eq 'VMS' || $^O eq 'os2' || $^O eq 'amigaos' ||
@@ -90,7 +88,6 @@ SKIP: {
             die "fork failed: $!";
         }
     }
-
-} # END: SKIP for dos
+}
 
 ok(!FileHandle->new('', 'r'), "Can't open empty filename");

@@ -32,11 +32,6 @@
 #    define PERL_SET_CONTEXT(t)	Perl_set_context((void*)t)
 
 #    define PTHREAD_GETSPECIFIC_INT
-#    ifdef DJGPP
-#      define pthread_addr_t any_t
-#      define NEED_PTHREAD_INIT
-#      define PTHREAD_CREATE_JOINABLE (1)
-#    endif
 #    ifdef OEMVS
 #      define pthread_addr_t void *
 #      define pthread_create(t,a,s,d)        pthread_create(t,&(a),s,d)
@@ -59,7 +54,7 @@
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
-#    if defined(DJGPP) || defined(OEMVS)
+#    if defined(OEMVS)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
 #      define YIELD pthread_yield(NULL)
 #    endif

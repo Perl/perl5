@@ -37,7 +37,7 @@ die "Can't get current working directory" if(!$wd);
 my $has_link            = $Config{d_link};
 my $accurate_timestamps =
     !($^O eq 'MSWin32' ||
-      $^O eq 'dos'     || $^O eq 'os2'     ||
+      $^O eq 'os2'     ||
       $^O eq 'cygwin'  || $^O eq 'amigaos' ||
 	  $wd =~ m#$Config{afsroot}/#
      );
@@ -53,9 +53,8 @@ if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
 }
 
 my $needs_fh_reopen =
-    $^O eq 'dos'
     # Not needed on HPFS, but needed on HPFS386 ?!
-    || $^O eq 'os2';
+    $^O eq 'os2';
 
 $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 
