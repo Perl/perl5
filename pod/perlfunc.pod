@@ -126,7 +126,8 @@ L<C<qqE<sol>E<sol>>|/qqE<sol>STRINGE<sol>>, L<C<reverse>|/reverse LIST>,
 L<C<rindex>|/rindex STR,SUBSTR,POSITION>,
 L<C<sprintf>|/sprintf FORMAT, LIST>,
 L<C<substr>|/substr EXPR,OFFSET,LENGTH,REPLACEMENT>,
-L<C<trE<sol>E<sol>E<sol>>|/trE<sol>E<sol>E<sol>>, L<C<uc>|/uc EXPR>,
+L<C<trE<sol>E<sol>E<sol>>|/trE<sol>E<sol>E<sol>>,
+L<C<trim>|/trim EXPR>, L<C<uc>|/uc EXPR>,
 L<C<ucfirst>|/ucfirst EXPR>,
 L<C<yE<sol>E<sol>E<sol>>|/yE<sol>E<sol>E<sol>>
 
@@ -210,6 +211,7 @@ L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET>,
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>,
 L<C<syswrite>|/syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET>,
 L<C<tell>|/tell FILEHANDLE>, L<C<telldir>|/telldir DIRHANDLE>,
+L<C<trim>|/trim EXPR>,
 L<C<truncate>|/truncate FILEHANDLE,LENGTH>, L<C<warn>|/warn LIST>,
 L<C<write>|/write FILEHANDLE>
 
@@ -9296,6 +9298,40 @@ Portability issues: L<perlport/times>.
 The transliteration operator.  Same as
 L<C<yE<sol>E<sol>E<sol>>|/yE<sol>E<sol>E<sol>>.  See
 L<perlop/"Quote-Like Operators">.
+
+=item trim EXPR
+X<trim> X<remove_whitespace>
+
+=item trim
+
+=for Pod::Functions Strip whitespace from the beginning and end of a string.
+
+This function returns a string with whitespace stripped from the beginning
+and end of string. trim() will remove these characters:
+
+" ", an ordinary space.
+
+"\t", a tab.
+
+"\n", a new line (line feed).
+
+"\r", a carriage return.
+
+and other unicode characters that are flagged as whitespace.
+
+  $var = "  Hello world   ";  # "Hello world"
+  $var = "\t\t\tHello world"; # "Hello world"
+  $var = "Hello world\n";     # "Hello world"
+
+Trim is equivalent to:
+
+  $str =~ s/\A\s+|\s+\z//urg;
+
+L<C<trim>|/trim EXPR> is available only if the
+L<C<trim> feature|feature/The 'trim' feature> is enabled or
+if it is prefixed with C<CORE::>.  The trim function is enabled
+automatically with a C<use v7> (or higher) declaration in the current
+scope.
 
 =item truncate FILEHANDLE,LENGTH
 X<truncate>
