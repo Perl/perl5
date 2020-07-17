@@ -244,7 +244,8 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     }
 
     # Is Perl_, but no #define foo # Perl_foo
-    my $p = $flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/;
+    my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
+          || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
 
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
          if $flags =~ /O/;
