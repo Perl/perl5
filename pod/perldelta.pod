@@ -39,7 +39,7 @@ approximately 69 lines of changes to 9 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant
 community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.32.1:
+contributed the improvements that became Perl 5.33.0:
 
 Andy Dougherty, Dagfinn Ilmari Mannsåker, Eric Herman, Karen Etheridge,
 Leon Timmermans, Sawyer X.
