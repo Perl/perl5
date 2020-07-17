@@ -529,7 +529,9 @@ place before the bracketed class is parsed:
  $, = "\t| ";
  $a =~ m'[$,]';        # single-quotish: matches '$' or ','
  $a =~ q{[$,]}'        # same
- $a =~ m/[$,]/;        # double-quotish: matches "\t", "|", or " "
+ $a =~ m/[$,]/;        # double-quotish: Because we made an
+                       #   assignment to $, above, this now
+                       #   matches "\t", "|", or " "
 
 Characters that may carry a special meaning inside a character class are:
 C<\>, C<^>, C<->, C<[> and C<]>, and are discussed below. They can be
