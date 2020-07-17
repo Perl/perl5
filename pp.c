@@ -4957,6 +4957,9 @@ PP(pp_trim)
             SvUTF8_on(dest);
         else
             SvUTF8_off(dest);
+
+        if (SvTAINTED(source))
+            SvTAINT(dest);
     }
 
     SvSETMAGIC(dest);
