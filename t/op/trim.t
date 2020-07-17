@@ -9,6 +9,9 @@ BEGIN {
 use strict;
 use warnings;
 
+use feature 'trim';
+no warnings 'experimental::trim';
+
 # Vanilla trim tests
 {
 	is( trim("    Hello world!   ")      , "Hello world!"  , 'Trim spaces' );
