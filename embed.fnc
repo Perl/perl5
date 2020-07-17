@@ -3533,28 +3533,28 @@ Apx	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 Aixp	|U8	|gimme_V         |
-Aixp	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
-Aixp	|void	|cx_popblock|NN PERL_CONTEXT *cx
-Aixp	|void	|cx_topblock|NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pushsub      |NN PERL_CONTEXT *cx|NN CV *cv \
+Cixp	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
+Cixp	|void	|cx_popblock|NN PERL_CONTEXT *cx
+Cixp	|void	|cx_topblock|NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pushsub      |NN PERL_CONTEXT *cx|NN CV *cv \
 				 |NULLOK OP *retop|bool hasargs
-Aixp	|void	|cx_popsub_common|NN PERL_CONTEXT *cx
-Aixp	|void	|cx_popsub_args  |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_popsub       |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
+Cixp	|void	|cx_popsub_common|NN PERL_CONTEXT *cx
+Cixp	|void	|cx_popsub_args  |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_popsub       |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
 				 |NULLOK OP *retop|NULLOK GV *gv
-Aixp	|void	|cx_popformat    |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pusheval     |NN PERL_CONTEXT *cx \
+Cixp	|void	|cx_popformat    |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pusheval     |NN PERL_CONTEXT *cx \
 				 |NULLOK OP *retop|NULLOK SV *namesv
-Aixp	|void	|cx_popeval      |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
+Cixp	|void	|cx_popeval      |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
 				 |NN void *itervarp|NULLOK SV *itersave
-Aixp	|void	|cx_poploop      |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pushwhen     |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_popwhen      |NN PERL_CONTEXT *cx
-Aixp	|void	|cx_pushgiven    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
-Aixp	|void	|cx_popgiven     |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_poploop      |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pushwhen     |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_popwhen      |NN PERL_CONTEXT *cx
+Cixp	|void	|cx_pushgiven    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
+Cixp	|void	|cx_popgiven     |NN PERL_CONTEXT *cx
 #endif
 
 #ifdef USE_DTRACE
