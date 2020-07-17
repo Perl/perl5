@@ -9,6 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
+# Vanilla trim tests
 is( trim("    Hello world!   ")       , "Hello world!"  , 'Trim spaces' );
 is( trim("\tHello world!\t")          , "Hello world!"  , 'Trim tabs' );
 is( trim("\n\n\nHello\nworld!\n")     , "Hello\nworld!" , 'Trim \n' );
@@ -17,9 +18,22 @@ is( trim("Perl")                      , "Perl"          , 'Trim nothing' );
 is( trim(undef)                       , ""              , 'Trim undef' );
 is( trim('')                          , ""              , 'Trim empty string' );
 
+# Fancier trim tests against a regexp and unicode
 is( trim("    Hello world!    "), trim_regexp_compare("    Hello world!    "), 'Trim compared to regexp' );
 is( trim("\n\nHello world!    "), trim_regexp_compare("\n\nHello world!    "), 'Trim compared to regexp' );
 is( trim("    Hello world!\t\t"), trim_regexp_compare("    Hello world!\t\t"), 'Trim compared to regexp' );
+is( trim("   \N{U+2603}       "), "\N{U+2603}"                               , 'Trim with unicode content');
+is( trim("\N{U+2029}foobar    "), "foobar"                                   , 'Trim with unicode whitespace');
+
+# Tests against special variable types and scopes
+my  $str1 = "   Hello world!\t";
+is( trim($str1), "Hello world!", "trim on a my \$var");
+our $str2 = "\t\nHello world!\t  ";
+is( trim($str2), "Hello world!", "trim on an our \$var");
+
+# Test on a magical fetching variable
+$str1 =~ m/(.+Hello)/;
+is( trim($1), "Hello", "trim on a magical variable");
 
 sub trim_regexp_compare {
 	my $s = shift();
