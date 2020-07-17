@@ -285,13 +285,6 @@
 :      pod, such as perlguts or warnings.h.  This flag is useful for downstream
 :      programs, such as Devel::PPPort.
 :
-:   I  This flag works exactly the same as 'i' but it also adds
-:      __attribute__((always_inline)) or __forceinline if either of them is
-:      supported by the compiler.
-:
-:         proto.h: function is declared as PERL_STATIC_FORCE_INLINE and
-:                  __attribute__always_inline__ is added
-:
 :   i  inline static.  This is used for functions that the compiler is being
 :      requested to inline.  If the function is in a header file its
 :      definition will be visible (unless guarded by #if..#endif) to all
@@ -302,6 +295,13 @@
 :      the 'S' flag is not also specified.
 :
 :         proto.h: function is declared as PERL_STATIC_INLINE
+:
+:   I  This flag works exactly the same as 'i' but it also adds
+:      __attribute__((always_inline)) or __forceinline if either of them is
+:      supported by the compiler.
+:
+:         proto.h: function is declared as PERL_STATIC_FORCE_INLINE and
+:                  __attribute__always_inline__ is added
 :
 :   m  Implemented as a macro; there is no function associated with this name,
 :      and hence no long Perl_ or S_ name.  However, if the macro name itself
