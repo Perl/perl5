@@ -41,6 +41,7 @@ my %feature = (
     multidimensional => 'multidimensional',
     bareword_filehandles => 'bareword_filehandles',
     try             => 'try',
+    trim            => 'trim',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl

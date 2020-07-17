@@ -4880,6 +4880,26 @@ PP(pp_fc)
     RETURN;
 }
 
+PP(pp_trim)
+{
+    dTARGET;
+    dSP;
+    SV *source = TOPs;
+    SV *dest;
+
+    SvGETMAGIC(source);
+
+    dest = TARG;
+
+    SvUPGRADE(dest, SVt_PV);
+
+    /* TODO */
+    SvSetSV(dest, source);
+
+    SvSETMAGIC(dest);
+    RETURN;
+}
+
 /* Arrays. */
 
 PP(pp_aslice)

@@ -8439,6 +8439,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_times:
         FUN0(OP_TMS);
 
+    case KEY_trim:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__TRIM), "trim is experimental");
+        UNI(OP_TRIM);
+
     case KEY_truncate:
         LOP(OP_TRUNCATE,XTERM);
 

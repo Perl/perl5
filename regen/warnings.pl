@@ -121,6 +121,8 @@ my $tree = {
                                     [ 5.031, DEFAULT_ON ],
                                 'experimental::try' =>
                                     [ 5.033, DEFAULT_ON ],
+                                'experimental::trim' =>
+                                    [ 5.033, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],

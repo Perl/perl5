@@ -516,7 +516,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 4: /* 40 tokens of length 4 */
+    case 4: /* 41 tokens of length 4 */
       switch (name[0])
       {
         case 'I':
@@ -930,6 +930,15 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
                 default:
                   goto unknown;
               }
+
+            case 'r':
+              if (name[2] == 'i' &&
+                  name[3] == 'm')
+              {                                   /* trim             */
+                return (all_keywords || FEATURE_TRIM_IS_ENABLED ? KEY_trim : 0);
+              }
+
+              goto unknown;
 
             default:
               goto unknown;
@@ -3475,5 +3484,5 @@ unknown:
 }
 
 /* Generated from:
- * 3a4f2004642b00b871c01cbdc018f6ca5ead6b4e0b2b184120c60b0b62a229dd regen/keywords.pl
+ * a1eeaec09eba6e56ad261436aee86fc0d624eea06dbeac70bfcebb91a8c7c862 regen/keywords.pl
  * ex: set ro: */

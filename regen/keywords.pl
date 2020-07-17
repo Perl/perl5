@@ -49,6 +49,7 @@ my %feature_kw = (
     isa       => 'isa',
     try       => 'try',
     catch     => 'try',
+    trim      => 'trim',
 );
 
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
@@ -343,6 +344,7 @@ __END__
 -times
 +tr
 +try
++trim
 -truncate
 -uc
 -ucfirst
