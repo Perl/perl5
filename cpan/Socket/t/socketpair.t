@@ -1,9 +1,14 @@
 #!./perl -w
 
+use v5.6.1;
+use strict;
+use warnings;
+
 my $child;
 my $can_fork;
 my $has_perlio;
 
+our %Config;
 BEGIN {
     require Config; import Config;
     $can_fork = $Config{'d_fork'} || $Config{'d_pseudofork'};

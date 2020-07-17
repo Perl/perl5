@@ -136,7 +136,7 @@ sub Test {
         endgrent;
         skip "No group found we could add as a supplementary group", 1
             if (!@sup_group);
-        $) = "$) @sup_group[2]";
+        $) = "$) $sup_group[2]";
         my $ok = grep { $_ == $sup_group[2] } split ' ', $);
         ok $ok, "Group `$sup_group[0]' added as supplementary group";
     }

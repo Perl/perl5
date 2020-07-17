@@ -8,6 +8,10 @@
 #
 ################################################################################
 
+use strict;
+use warnings;
+
+our %Config;
 BEGIN {
   if ($ENV{'PERL_CORE'}) {
     chdir 't' if -d 't';
@@ -21,8 +25,6 @@ BEGIN {
     plan(skip_all => 'IPC::SysV was not built');
   }
 }
-
-use strict;
 
 my @pods;
 

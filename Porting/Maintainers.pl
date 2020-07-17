@@ -660,7 +660,7 @@ use File::Glob qw(:case);
     },
 
     'IPC::SysV' => {
-        'DISTRIBUTION' => 'MHX/IPC-SysV-2.07.tar.gz',
+        'DISTRIBUTION' => 'MHX/IPC-SysV-2.08.tar.gz',
         'FILES'        => q[cpan/IPC-SysV],
         'EXCLUDED'     => [
             qw( const-c.inc
@@ -670,7 +670,7 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.04.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.05.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
     },
 
@@ -976,7 +976,7 @@ use File::Glob qw(:case);
     },
 
     'Socket' => {
-        'DISTRIBUTION' => 'PEVANS/Socket-2.029.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.030.tar.gz',
         'FILES'        => q[cpan/Socket],
     },
 
