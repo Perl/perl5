@@ -385,7 +385,8 @@
 :
 :	gcc has a bug (which they claim is a feature) in which casting the
 :       result of one of these to (void) doesn't silence the warning that the
-:	result is ignored.
+:	result is ignored.  (Perl has a workaround for this bug, see
+:       PERL_UNUSED_RESULT docs)
 :
 :        proto.h: add __attribute__warn_unused_result__
 :
