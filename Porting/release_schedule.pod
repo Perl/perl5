@@ -11,16 +11,20 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Pumpking.
 
-=head2 Perl 5.32
+=head2 Perl 5.33.x series
 
-Code freezes (which happen in the 5.31.X series)
+  2020-08-20  5.33.1
+  2020-09-20  5.33.2
+  2020-10-20  5.33.3
+
+=head2 Perl 5.32
 
   2020-01-20  5.31.8 ✓        Contentious changes freeze
   2020-02-20  5.31.9 ✓        User-visible changes to correctly
                               functioning programs freeze
   2020-03-20  5.31.10 ✓       Full code freeze
   2020-04-28  5.31.11 ✓       Full code freeze (clearing BBCs)
-  2020-05-20  5.32.0  ✓       Stable release! (Hopefully)
+  2020-05-20  5.32.0  ✓       Stable release!
 
 =head2 Perl 5.30
 
@@ -35,13 +39,6 @@ Code freezes (which happen in the 5.31.X series)
   2018-11-29  5.28.1 ✓        Steve Hay
   2019-04-19  5.28.2 ✓        Steve Hay
   2020-06-01  5.28.3 ✓        Steve Hay
-
-=head2 Perl 5.26
-
-  2017-05-30  5.26.0 ✓        Sawyer X
-  2017-09-22  5.26.1 ✓        Steve Hay
-  2018-04-14  5.26.2 ✓        Steve Hay
-  2018-11-29  5.26.3 ✓        Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
@@ -59,21 +56,10 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.31
 
-  2019-05-23  5.31.0 ✓       Sawyer X
-  2019-06-20  5.31.1 ✓       Karen Etheridge
-  2019-07-20  5.31.2 ✓       Steve Hay
-  2019-08-20  5.31.3 ✓       Tom Hukins
-  2019-09-20  5.31.4 ✓       Max Maischein
-  2019-10-20  5.31.5 ✓       Steve Hay
-  2019-11-20  5.31.6 ✓       BinGOs
-  2019-12-20  5.31.7 ✓       Atoomic
-  2020-01-20  5.31.8 ✓       Matthew Horsfall
-  2020-02-20  5.31.9 ✓       Renee Bäcker
-  2020-03-20  5.31.10 ✓      Sawyer X
-  2020-04-28  5.31.11 ✓      Sawyer X
-
-(RC0 for 5.32.0 will be released once we think that all the blockers have been
-addressed.  This typically means some time in April or May.)
+  2020-07-17  5.33.0 ✓       Sawyer X
+  2020-08-20  5.33.1
+  2020-09-20  5.33.2
+  2020-10-20  5.33.3
 
 =head1 VICTIMS
 
