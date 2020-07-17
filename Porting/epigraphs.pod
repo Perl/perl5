@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.0 - Confucius, "Confucius: The Analects"
+
+Announed on 2020-07-17 by Sawyer X
+
+  The man who moves a mountain begins by carrying away small stones.
+
 =head2 v5.32.0 - Bob Dylan, "The Times They Are A Changing"
 
 L<Announced on 2020-06-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/06/msg257547.html>
