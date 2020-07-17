@@ -4940,8 +4940,9 @@ PP(pp_trim)
 
     dest = TARG;
 
-    if(dest == source) {
-        warn("TODO: inplace edit");
+    if(SvPOK(dest) && (dest == source)) {
+        sv_chop(dest, (const char *)start);
+        SvCUR_set(dest, len);
     }
     else {
         SvUPGRADE(dest, SVt_PV);
