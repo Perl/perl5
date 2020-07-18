@@ -3394,8 +3394,8 @@ ApbM	|GV*	|gv_SVadd	|NULLOK GV *gv
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
 #endif
-ApoP	|bool	|ckwarn		|U32 w
-ApoP	|bool	|ckwarn_d	|U32 w
+CpoP	|bool	|ckwarn		|U32 w
+CpoP	|bool	|ckwarn_d	|U32 w
 : FIXME - exported for ByteLoader - public or private?
 XEopxR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
