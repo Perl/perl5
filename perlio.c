@@ -2739,10 +2739,6 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
     fd = PerlIOSelf(f, PerlIOUnix)->fd;
-#ifdef PERLIO_STD_SPECIAL
-    if (fd == 0)
-        return PERLIO_STD_IN(fd, vbuf, count);
-#endif
     if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) ||
          PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
 	return 0;
@@ -2776,10 +2772,6 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
     fd = PerlIOSelf(f, PerlIOUnix)->fd;
-#ifdef PERLIO_STD_SPECIAL
-    if (fd == 1 || fd == 2)
-        return PERLIO_STD_OUT(fd, vbuf, count);
-#endif
     while (1) {
 	const SSize_t len = PerlLIO_write(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
