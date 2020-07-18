@@ -173,14 +173,6 @@ destruction. (Use of C<PL_dirty> is discouraged since 5.14.)
 PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 #endif
 
-#ifdef PERL_NEED_APPCTX
-PERLVAR(G, appctx,	void*)		/* the application context */
-#endif
-
-#if defined(HAS_TIMES) && defined(PERL_NEED_TIMESBASE)
-PERLVAR(G, timesbase,	struct tms)
-#endif
-
 /* allocate a unique index to every module that calls MY_CXT_INIT */
 
 #ifdef PERL_IMPLICIT_CONTEXT

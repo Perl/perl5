@@ -416,13 +416,6 @@ perl_construct(pTHXx)
     }
 #endif /* HAS_MMAP */
 
-#if defined(HAS_TIMES) && defined(PERL_NEED_TIMESBASE)
-    PL_timesbase.tms_utime  = 0;
-    PL_timesbase.tms_stime  = 0;
-    PL_timesbase.tms_cutime = 0;
-    PL_timesbase.tms_cstime = 0;
-#endif
-
     PL_osname = Perl_savepvn(aTHX_ STR_WITH_LEN(OSNAME));
 
     PL_registered_mros = newHV();

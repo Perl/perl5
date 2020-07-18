@@ -470,14 +470,6 @@ unless ($define{'USE_DTRACE'}) {
                 );
 }
 
-unless ($define{'PERL_NEED_APPCTX'}) {
-    ++$skip{PL_appctx};
-}
-
-unless ($define{'PERL_NEED_TIMESBASE'}) {
-    ++$skip{PL_timesbase};
-}
-
 unless ($define{'DEBUG_LEAKING_SCALARS'}) {
     ++$skip{PL_sv_serial};
 }

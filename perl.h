@@ -4989,12 +4989,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_MICRO
 			     " PERL_MICRO"
 #  endif
-#  ifdef PERL_NEED_APPCTX
-			     " PERL_NEED_APPCTX"
-#  endif
-#  ifdef PERL_NEED_TIMESBASE
-			     " PERL_NEED_TIMESBASE"
-#  endif
 #  ifdef PERL_POISON
 			     " PERL_POISON"
 #  endif
