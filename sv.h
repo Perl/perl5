@@ -949,7 +949,13 @@ in gv.h: */
 
 #define SvVOK(sv)		(SvMAGICAL(sv)				\
 				 && mg_find(sv,PERL_MAGIC_vstring))
-/* returns the vstring magic, if any */
+/*
+=for apidoc Am|MAGIC*|SvVSTRING_mg|SV * sv
+
+Returns the vstring magic, or NULL if none
+
+=cut
+*/
 #define SvVSTRING_mg(sv)	(SvMAGICAL(sv) \
 				 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 
