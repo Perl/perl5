@@ -1174,7 +1174,7 @@ string which is a duplicate of C<pv>.  The size of the string is
 determined by C<strlen()>, which means it may not contain embedded C<NUL>
 characters and must have a trailing C<NUL>.  To prevent memory leaks, the
 memory allocated for the new string needs to be freed when no longer needed.
-This can be done with the L</C<Safefree>> function, or
+This can be done with the C<L</Safefree>> function, or
 L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
@@ -1389,6 +1389,11 @@ Uses a single private buffer so if you want to format several strings you
 must explicitly copy the earlier strings away (and free the copies when you
 are done).
 
+=for apidoc form_nocontext
+Like C<L</form>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut
 */
 
@@ -1424,6 +1429,11 @@ in the code, as described for L</mess_sv>.
 Normally, the resulting message is returned in a new mortal SV.
 During global destruction a single SV may be shared between uses of
 this function.
+
+=for apidoc mess_nocontext
+Like C<L</mess>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
 
 =cut
 */
@@ -1716,6 +1726,11 @@ Behaves the same as L</croak_sv>, except for the return type.
 It should be used only where the C<OP *> return type is required.
 The function never actually returns.
 
+=for apidoc die_nocontext
+Like C<L</die>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut
 */
 
@@ -1825,6 +1840,11 @@ For historical reasons, if C<pat> is null then the contents of C<ERRSV>
 error message from arguments.  If you want to throw a non-string object,
 or build an error message in an SV yourself, it is preferable to use
 the L</croak_sv> function, which does not involve clobbering C<ERRSV>.
+
+=for apidoc croak_nocontext
+Like C<L</croak>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
 
 =cut
 */
@@ -1969,7 +1989,7 @@ Perl_warn_sv(pTHX_ SV *baseex)
 
 This is an XS interface to Perl's C<warn> function.
 
-This is like L</C<warn>>, but C<args> are an encapsulated
+This is like C<L</warn>>, but C<args> are an encapsulated
 argument list.
 
 Unlike with L</vcroak>, C<pat> is not permitted to be null.
@@ -2000,6 +2020,11 @@ The error message or object will by default be written to standard error,
 but this is subject to modification by a C<$SIG{__WARN__}> handler.
 
 Unlike with L</croak>, C<pat> is not permitted to be null.
+
+=for apidoc warn_nocontext
+Like C<L</warn>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
 
 =cut
 */

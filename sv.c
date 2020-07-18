@@ -9586,6 +9586,11 @@ Perl_newSVpvf_nocontext(const char *const pat, ...)
 Creates a new SV and initializes it with the string formatted like
 C<sv_catpvf>.
 
+=for apidoc newSVpvf_nocontext
+Like C<L</newSVpvf>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut
 */
 
@@ -10801,6 +10806,11 @@ Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 Works like C<sv_catpvf> but copies the text into the SV instead of
 appending it.  Does not handle 'set' magic.  See C<L</sv_setpvf_mg>>.
 
+=for apidoc sv_setpvf_nocontext
+Like C<L</sv_setpvf>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut
 */
 
@@ -10839,6 +10849,11 @@ Perl_sv_vsetpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 =for apidoc sv_setpvf_mg
 
 Like C<sv_setpvf>, but also handles 'set' magic.
+
+=for apidoc sv_setpvf_mg_nocontext
+Like C<L</sv_setpvf_mg>>, but does not take a thread context (C<aTHX>)
+parameter, so is used in situations where the caller doesn't already have the
+thread context.
 
 =cut
 */
@@ -10927,6 +10942,11 @@ upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
 C<L</sv_catpvf_mg>>.  If the original SV was UTF-8, the pattern should be
 valid UTF-8; if the original SV was bytes, the pattern should be too.
 
+=for apidoc sv_catpvf_nocontext
+Like C<L</sv_catpvf>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut */
 
 void
@@ -10965,6 +10985,11 @@ Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 =for apidoc sv_catpvf_mg
 
 Like C<sv_catpvf>, but also handles 'set' magic.
+
+=for apidoc sv_catpvf_mg_nocontext
+Like C<L</sv_catpvf_mg>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
 
 =cut
 */
