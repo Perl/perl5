@@ -648,6 +648,15 @@ out of them.
 
 =for apidoc AmnUhu|void|STMT_END
 
+=for apidoc AmnuU|bool|PERL_USE_GCC_BRACE_GROUPS
+
+This C pre-processor value, if defined, indicates that it is permissible to use
+the GCC brace groups extension.  This extension is of the form C<({
+I<STATEMENTS> })>, and turns the block consisting of I<STATEMENTS> into an
+expression with a value, unlike plain C language blocks.  This can present
+optimization possibilities, but there always needs to be an alternative in case
+this ability doesn't exist or has otherwise been forbidden.
+
 =cut
 
  Trying to select a version that gives no warnings...
