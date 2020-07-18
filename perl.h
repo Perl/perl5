@@ -2611,6 +2611,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 =for apidoc AmnUh||PERL_UCHAR_MAX
 =for apidoc AmnUh||PERL_UCHAR_MIN
 =for apidoc AmnUh||PERL_UINT_MAX
+=for apidoc AmnUh||PERL_UINT_MIN
 =for apidoc AmnUh||PERL_ULONG_MAX
 =for apidoc AmnUh||PERL_ULONG_MIN
 =for apidoc AmnUh||PERL_UQUAD_MAX
@@ -2629,6 +2630,7 @@ C<PERL_SHORT_MIN>,
 C<PERL_UCHAR_MAX>,
 C<PERL_UCHAR_MIN>,
 C<PERL_UINT_MAX>,
+C<PERL_UINT_MIN>,
 C<PERL_ULONG_MAX>,
 C<PERL_ULONG_MIN>,
 C<PERL_UQUAD_MAX>,
