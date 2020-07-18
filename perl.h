@@ -1902,6 +1902,8 @@ typedef UVTYPE UV;
  *  For int conversions we do not need two casts if pointers are
  *  the same size as IV and UV.   Otherwise we need an explicit
  *  cast (PTRV) to avoid compiler warnings.
+ *
+ *  These are mentioned in perlguts
  */
 #if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
 #  define PTRV			UV
