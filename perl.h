@@ -381,6 +381,26 @@
  * for silencing unused variables that are actually used most of the time,
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs,
  * or variables/arguments that are used only in certain configurations.
+
+=head1 Miscellaneous Functions
+
+=for apidoc Am||PERL_UNUSED_ARG|void x
+This is used to suppress compiler warnings that a parameter to a function is
+not used.  This situation can arise, for example, when a parameter is needed
+under some configuration conditions, but not others, so that C preprocessor
+conditional compilation causes it be used just some times.
+
+=for apidoc Amn||PERL_UNUSED_CONTEXT
+This is used to suppress compiler warnings that the thread context parameter to
+a function is not used.  This situation can arise, for example, when a
+C preprocessor conditional compilation causes it be used just some times.
+
+=for apidoc Am||PERL_UNUSED_VAR|void x
+This is used to suppress compiler warnings that the variable I<x> is not used.
+This situation can arise, for example, when a C preprocessor conditional
+compilation causes it be used just some times.
+
+=cut
  */
 #ifndef PERL_UNUSED_ARG
 #  define PERL_UNUSED_ARG(x) ((void)sizeof(x))
@@ -408,31 +428,40 @@
 #  endif
 #endif
 
-/* Use PERL_UNUSED_RESULT() to suppress the warnings about unused results
- * of function calls, e.g. PERL_UNUSED_RESULT(foo(a, b)).
- *
- * The main reason for this is that the combination of gcc -Wunused-result
- * (part of -Wall) and the __attribute__((warn_unused_result)) cannot
- * be silenced with casting to void.  This causes trouble when the system
- * header files use the attribute.
- *
- * Use PERL_UNUSED_RESULT sparingly, though, since usually the warning
- * is there for a good reason: you might lose success/failure information,
- * or leak resources, or changes in resources.
- *
- * But sometimes you just want to ignore the return value, e.g. on
- * codepaths soon ending up in abort, or in "best effort" attempts,
- * or in situations where there is no good way to handle failures.
- *
- * Sometimes PERL_UNUSED_RESULT might not be the most natural way:
- * another possibility is that you can capture the return value
- * and use PERL_UNUSED_VAR on that.
- *
- * The __typeof__() is used instead of typeof() since typeof() is not
- * available under strict C89, and because of compilers masquerading
- * as gcc (clang and icc), we want exactly the gcc extension
- * __typeof__ and nothing else.
- */
+/*
+
+=for apidoc Am||PERL_UNUSED_RESULT|void x
+
+This macro indicates to discard the return value of the function call inside
+it, I<e.g.>,
+
+ PERL_UNUSED_RESULT(foo(a, b))
+
+The main reason for this is that the combination of C<gcc -Wunused-result>
+(part of C<-Wall>) and the C<__attribute__((warn_unused_result))> cannot
+be silenced with casting to C<void>.  This causes trouble when the system
+header files use the attribute.
+
+Use C<PERL_UNUSED_RESULT> sparingly, though, since usually the warning
+is there for a good reason: you might lose success/failure information,
+or leak resources, or changes in resources.
+
+But sometimes you just want to ignore the return value, I<e.g.>, on
+codepaths soon ending up in abort, or in "best effort" attempts,
+or in situations where there is no good way to handle failures.
+
+Sometimes C<PERL_UNUSED_RESULT> might not be the most natural way:
+another possibility is that you can capture the return value
+and use C<L</PERL_UNUSED_VAR>> on that.
+
+=cut
+
+The __typeof__() is used instead of typeof() since typeof() is not
+available under strict C89, and because of compilers masquerading
+as gcc (clang and icc), we want exactly the gcc extension
+__typeof__ and nothing else.
+
+*/
 #ifndef PERL_UNUSED_RESULT
 #  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
 #    define PERL_UNUSED_RESULT(v) STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
