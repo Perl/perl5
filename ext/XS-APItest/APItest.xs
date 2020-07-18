@@ -6911,6 +6911,7 @@ u8_to_u16_le(SV *sv, STRLEN ofs)
                 u64= U8TO64_LE(pv+ofs);
                 RETVAL= (UV)u64;
 #else
+                PERL_UNUSED_VAR(u64);
                 croak("not a 64 bit perl IVSIZE=%d",IVSIZE);
 #endif
                 break;
