@@ -204,7 +204,17 @@ PERLVARA(I, sv_immortals, 4, SV)
 
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
-PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */
+
+/*
+=for apidoc Amn||PL_Sv
+
+A scratch pad SV for whatever temporary use you need.  Chiefly used by macros
+which have an SV as input, and otherwise would evaluate it more than once
+
+=cut
+*/
+PERLVAR(I, Sv,		SV *)
+
 PERLVAR(I, parser,	yy_parser *)	/* current parser state */
 
 PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
