@@ -961,6 +961,16 @@ Returns the vstring magic, or NULL if none
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvFLAGS(sv) |= SVf_OOK)
+
+
+/*
+=for apidoc Am|void|SvOOK_off|SV * sv
+
+Remove any string offset.
+
+=cut
+*/
+
 #define SvOOK_off(sv)		((void)(SvOOK(sv) && (sv_backoff(sv),0)))
 
 #define SvFAKE(sv)		(SvFLAGS(sv) & SVf_FAKE)
