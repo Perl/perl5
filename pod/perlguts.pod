@@ -2794,6 +2794,19 @@ and
         AV *av = ...;
         UV  uv = PTR2UV(av);
 
+There are also
+
+ PTR2nat(pointer)   /* pointer to integer of PTRSIZE */
+ PTR2ul(pointer)    /* pointer to unsigned long */
+
+=for apidoc Amh|IV|PTR2nat|void *
+=for apidoc Amh|unsigned long|PTR2ul|void *
+
+And C<PTRV> which gives the native type for an integer the same size as
+pointers, such as C<unsigned> or C<unsigned long>.
+
+=for apidoc AmhuU|type|PTRV
+
 =head2 Exception Handling
 
 There are a couple of macros to do very basic exception handling in XS
