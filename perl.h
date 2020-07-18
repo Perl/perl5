@@ -4732,6 +4732,22 @@ EXTCONST char PL_No[]
   INIT("");
 EXTCONST char PL_Zero[]
   INIT("0");
+
+/*
+=for apidoc_section Numeric Functions
+=for apidoc AmTuU|const char *|PL_hexdigit|U8 value
+
+This array, indexed by an integer, converts that value into the character that
+represents it.  For example, if the input is 8, the return will be a string
+whose first character is '8'.  What is actually returned is a pointer into a
+string.  All you are interested in is the first character of that string.  To
+get uppercase letters (for the values 10..15), add 16 to the index.  Hence,
+C<PL_hexdigit[11]> is C<'b'>, and C<PL_hexdigit[11+16]> is C<'B'>.  Adding 16
+to an index whose representation is '0'..'9' yields the same as not adding 16.
+Indices outside the range 0..31 result in (bad) undedefined behavior.
+
+=cut
+*/
 EXTCONST char PL_hexdigit[]
   INIT("0123456789abcdef0123456789ABCDEF");
 
