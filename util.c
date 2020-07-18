@@ -1969,14 +1969,8 @@ Perl_warn_sv(pTHX_ SV *baseex)
 
 This is an XS interface to Perl's C<warn> function.
 
-C<pat> and C<args> are a sprintf-style format pattern and encapsulated
-argument list.  These are used to generate a string message.  If the
-message does not end with a newline, then it will be extended with
-some indication of the current location in the code, as described for
-L</mess_sv>.
-
-The error message or object will by default be written to standard error,
-but this is subject to modification by a C<$SIG{__WARN__}> handler.
+This is like L</C<warn>>, but C<args> are an encapsulated
+argument list.
 
 Unlike with L</vcroak>, C<pat> is not permitted to be null.
 
