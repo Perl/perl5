@@ -86,9 +86,6 @@ the string is invariant.
 #define FOLDEQ_S1_FOLDS_SANE      (1 << 4)
 #define FOLDEQ_S2_FOLDS_SANE      (1 << 5)
 
-#define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
-		    cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
-
 #ifdef EBCDIC
 /* The equivalent of these macros but implementing UTF-EBCDIC
    are in the following header file:

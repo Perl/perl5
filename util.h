@@ -47,10 +47,16 @@ This is a synonym for S<C<(! foldEQ())>>
 
 This is a synonym for S<C<(! foldEQ_locale())>>
 
+=for apidoc ibcmp_utf8
+
+This is a synonym for S<C<(! foldEQ_utf8())>>
+
 =cut
 */
 #define ibcmp(s1, s2, len)         cBOOL(! foldEQ(s1, s2, len))
 #define ibcmp_locale(s1, s2, len)  cBOOL(! foldEQ_locale(s1, s2, len))
+#define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
+		    cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of

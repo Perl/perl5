@@ -974,7 +974,7 @@ AdmP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
 AdiTp	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
 AdmP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
 AiTpd	|I32	|foldEQ_locale	|NN const char* a|NN const char* b|I32 len
-Am	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
+Adm	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2
 Amd	|I32	|foldEQ_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
