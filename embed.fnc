@@ -920,10 +920,10 @@ AbMdRp	|bool	|hv_exists_ent	|NULLOK HV *hv|NN SV *keysv|U32 hash
 AbMdp	|SV**	|hv_fetch	|NULLOK HV *hv|NN const char *key|I32 klen \
 				|I32 lval
 AbMdp	|HE*	|hv_fetch_ent	|NULLOK HV *hv|NN SV *keysv|I32 lval|U32 hash
-Ap	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
+Cp	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
 				|NULLOK const char* key|STRLEN klen|int flags \
 				|int action|NULLOK SV *val|U32 hash
-Ap	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
+Cp	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
 				|I32 klen_i32|const int action|NULLOK SV *val \
 				|const U32 hash
 Apod	|STRLEN	|hv_fill	|NN HV *const hv
