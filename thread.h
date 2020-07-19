@@ -144,11 +144,7 @@
 	*c = 0;							\
     } STMT_END
 
-#define THREAD_CREATE(thr, f)	(thr->self = cthread_fork(f, thr), 0)
-#define THREAD_POST_CREATE(thr)	NOOP
-
 #define THREAD_RET_TYPE		any_t
-#define THREAD_RET_CAST(x)	((any_t) x)
 
 #define DETACH(t)		cthread_detach(t->self)
 #define JOIN(t, avp)		(*(avp) = MUTABLE_AV(cthread_join(t->self)))
@@ -363,7 +359,6 @@
 
 #ifndef THREAD_RET_TYPE
 #  define THREAD_RET_TYPE	void *
-#  define THREAD_RET_CAST(p)	((void *)(p))
 #endif /* THREAD_RET */
 
 #  define LOCK_DOLLARZERO_MUTEX		MUTEX_LOCK(&PL_dollarzero_mutex)

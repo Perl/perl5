@@ -363,34 +363,6 @@ unless ($define{'USE_ITHREADS'}) {
     ++$skip{PL_user_def_props_aTHX};
 }
 
-# USE_5005THREADS symbols. Kept as reference for easier removal
-++$skip{$_} foreach qw(
-		    PL_sv_mutex
-		    PL_strtab_mutex
-		    PL_svref_mutex
-		    PL_cred_mutex
-		    PL_eval_mutex
-		    PL_fdpid_mutex
-		    PL_sv_lock_mutex
-		    PL_eval_cond
-		    PL_eval_owner
-		    PL_threads_mutex
-		    PL_nthreads
-		    PL_nthreads_cond
-		    PL_threadnum
-		    PL_threadsv_names
-		    PL_thrsv
-		    PL_vtbl_mutex
-		    Perl_condpair_magic
-		    Perl_new_struct_thread
-		    Perl_per_thread_magicals
-		    Perl_thread_create
-		    Perl_find_threadsv
-		    Perl_unlock_condpair
-		    Perl_magic_mutexfree
-		    Perl_sv_lock
-		     );
-
 unless ($define{'USE_ITHREADS'}) {
     ++$skip{$_} foreach qw(
                     PL_keyword_plugin_mutex
@@ -831,7 +803,6 @@ if ($ARGS{PLATFORM} eq 'win32') {
 		    win32_get_childenv
 		    win32_spawnvp
 		    Perl_init_os_extras
-		    Perl_thread_create
 		    Perl_win32_init
 		    Perl_win32_term
 		    RunPerl
@@ -1143,7 +1114,6 @@ elsif ($ARGS{PLATFORM} eq 'os2') {
 elsif ($ARGS{PLATFORM} eq 'netware') {
     try_symbols(qw(
 			Perl_init_os_extras
-			Perl_thread_create
 			Perl_nw5_init
 			RunPerl
 			AllocStdPerl

@@ -3090,12 +3090,6 @@ freeing any remaining Perl interpreters.
 #  endif
 #endif
 
-/* USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
- * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
- * this results in many functions being undeclared which bothers C++
- * May make sense to have threads after "*ish.h" anyway
- */
-
 /* clang Thread Safety Analysis/Annotations/Attributes
  * http://clang.llvm.org/docs/ThreadSafetyAnalysis.html
  *
