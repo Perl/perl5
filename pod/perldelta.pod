@@ -342,13 +342,13 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The C<PERL_GLOBAL_STRUCT> compilation option has been removed, and
+with it the need or the C<dVAR> macro.  C<dVAR> remains defined as a
+no-op outside C<PERL_CORE> for backwards compatiblity with XS modules.
 
 =back
 
