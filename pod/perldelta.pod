@@ -311,13 +311,13 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item Symbian
 
-XXX
+Support code relating to Symbian has been removed.  Symbian was an
+operating system for mobile devices.  The port was last updated in July
+2009, and the platform itself in October 2012.
 
 =back
 
