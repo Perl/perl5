@@ -104,9 +104,6 @@ typedef HANDLE perl_mutex;
     } STMT_END
 
 
-#define THREAD_CREATE(t, f)	Perl_thread_create(t, f)
-#define THREAD_POST_CREATE(t)	NOOP
-
 /* XXX Docs mention that the RTL versions of thread creation routines
  * should be used, but that advice only seems applicable when the RTL
  * is not in a DLL.  RTL DLLs seem to do all of the init/deinit required
@@ -124,15 +121,12 @@ typedef HANDLE perl_mutex;
 #  include <process.h>
 #  if defined (_MSC_VER)
 #    define THREAD_RET_TYPE	unsigned __stdcall
-#    define THREAD_RET_CAST(p)	((unsigned)(p))
 #  else
      /* CRTDLL.DLL doesn't allow a return value from thread function! */
 #    define THREAD_RET_TYPE	void __cdecl
-#    define THREAD_RET_CAST(p)	((void)(thr->i.retv = (void *)(p)))
 #  endif
 #else	/* !USE_RTL_THREAD_API */
 #  define THREAD_RET_TYPE	DWORD WINAPI
-#  define THREAD_RET_CAST(p)	((DWORD)(p))
 #endif	/* !USE_RTL_THREAD_API */
 
 typedef THREAD_RET_TYPE thread_func_t(void *);

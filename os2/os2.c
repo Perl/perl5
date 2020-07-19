@@ -215,7 +215,7 @@ static struct perlos2_state_t {
 
 const Perl_PFN * const pExtFCN = (Perl_po2()->po2_ExtFCN);
 
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 
 typedef void (*emx_startroutine)(void *);
 typedef void* (*pthreads_startroutine)(void *);
@@ -5362,7 +5362,7 @@ gcvt_os2 (double value, int digits, char *buffer)
 #undef fork
 int fork_with_resources()
 {
-#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(USE_SLOW_THREAD_SPECIFIC)
+#if defined(USE_ITHREADS) && !defined(USE_SLOW_THREAD_SPECIFIC)
   dTHX;
   void *ctx = PERL_GET_CONTEXT;
 #endif
@@ -5370,7 +5370,7 @@ int fork_with_resources()
   int rc = fork();
 
   if (rc == 0) {			/* child */
-#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(USE_SLOW_THREAD_SPECIFIC)
+#if defined(USE_ITHREADS) && !defined(USE_SLOW_THREAD_SPECIFIC)
     ALLOC_THREAD_KEY;			/* Acquire the thread-local memory */
     PERL_SET_CONTEXT(ctx);		/* Reinit the thread-local memory */
 #endif
