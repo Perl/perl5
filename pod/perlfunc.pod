@@ -9300,7 +9300,7 @@ L<C<yE<sol>E<sol>E<sol>>|/yE<sol>E<sol>E<sol>>.  See
 L<perlop/"Quote-Like Operators">.
 
 =item trim EXPR
-X<trim> X<remove_whitespace>
+X<trim> X<remove_whitespace> (Perl 7+)
 
 =item trim
 
@@ -9317,7 +9317,7 @@ and end of string. trim() will remove these characters:
 
 "\r", a carriage return.
 
-and other unicode characters that are flagged as whitespace.
+and other Unicode characters that are flagged as whitespace.
 
   $var = "  Hello world   ";  # "Hello world"
   $var = "\t\t\tHello world"; # "Hello world"
@@ -9327,11 +9327,13 @@ Trim is equivalent to:
 
   $str =~ s/\A\s+|\s+\z//urg;
 
-L<C<trim>|/trim EXPR> is available only if the
-L<C<trim> feature|feature/The 'trim' feature> is enabled or
-if it is prefixed with C<CORE::>.  The trim function is enabled
+L<C<trim>|/trim EXPR> is available only if the trim feature> is enabled
+or if it is prefixed with C<CORE::>.  The trim function is enabled
 automatically with a C<use v7> (or higher) declaration in the current
 scope.
+
+Trim is only available on Perl v7.0 and newer. For older Perl versions
+look at the String::Util module for a comprable implementation.
 
 =item truncate FILEHANDLE,LENGTH
 X<truncate>
