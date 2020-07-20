@@ -14996,16 +14996,16 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = ptr;
 	    break;
+        case SAVEt_HINTS_HH:
+            hv = (const HV *)POPPTR(ss,ix);
+            TOPPTR(nss,ix) = hv_dup_inc(hv, param);
+            /* FALLTHROUGH */
 	case SAVEt_HINTS:
 	    ptr = POPPTR(ss,ix);
 	    ptr = cophh_copy((COPHH*)ptr);
 	    TOPPTR(nss,ix) = ptr;
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
-	    if (i & HINT_LOCALIZE_HH) {
-		hv = (const HV *)POPPTR(ss,ix);
-		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
-	    }
 	    break;
 	case SAVEt_PADSV_AND_MORTALIZE:
 	    longval = (long)POPLONG(ss,ix);

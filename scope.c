@@ -686,7 +686,14 @@ Perl_save_hints(pTHX)
     COPHH *save_cophh = cophh_copy(CopHINTHASH_get(&PL_compiling));
     if (PL_hints & HINT_LOCALIZE_HH) {
 	HV *oldhh = GvHV(PL_hintgv);
-	save_pushptri32ptr(oldhh, PL_hints, save_cophh, SAVEt_HINTS);
+        {
+            dSS_ADD;
+            SS_ADD_INT(PL_hints);
+            SS_ADD_PTR(save_cophh);
+            SS_ADD_PTR(oldhh);
+            SS_ADD_UV(SAVEt_HINTS_HH);
+            SS_ADD_END(4);
+        }
 	GvHV(PL_hintgv) = NULL; /* in case copying dies */
 	GvHV(PL_hintgv) = hv_copy_hints_hv(oldhh);
         SAVEFEATUREBITS();
@@ -863,7 +870,8 @@ static const U8 arg_counts[] = {
     3, /* SAVEt_SET_SVFLAGS        */
     3, /* SAVEt_GVSLOT             */
     3, /* SAVEt_AELEM              */
-    3  /* SAVEt_DELETE             */
+    3, /* SAVEt_DELETE             */
+    3  /* SAVEt_HINTS_HH           */
 };
 
 
@@ -1347,13 +1355,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    PL_op = (OP*)a0.any_ptr;
 	    break;
 
-	case SAVEt_HINTS:
-        {
-	    HV *was_hinthv;
+        case SAVEt_HINTS_HH:
+            a2 = ap[2];
+            /* FALLTHROUGH */
+        case SAVEt_HINTS:
             a0 = ap[0]; a1 = ap[1];
-            if (a0.any_i32 & HINT_LOCALIZE_HH) {
-                was_hinthv = MUTABLE_HV(SSPOPPTR);
-            }
 	    if ((PL_hints & HINT_LOCALIZE_HH)) {
 	      while (GvHV(PL_hintgv)) {
 		HV *hv = GvHV(PL_hintgv);
@@ -1364,9 +1370,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    cophh_free(CopHINTHASH_get(&PL_compiling));
 	    CopHINTHASH_set(&PL_compiling, (COPHH*)a1.any_ptr);
 	    *(I32*)&PL_hints = a0.any_i32;
-	    if (PL_hints & HINT_LOCALIZE_HH) {
+	    if (type == SAVEt_HINTS_HH) {
 		SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));
-                GvHV(PL_hintgv) = was_hinthv;
+                GvHV(PL_hintgv) = MUTABLE_HV(a2.any_ptr);
 	    }
 	    if (!GvHV(PL_hintgv)) {
 		/* Need to add a new one manually, else rv2hv can
@@ -1377,7 +1383,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    }
 	    assert(GvHV(PL_hintgv));
 	    break;
-        }
 
 	case SAVEt_COMPPAD:
             a0 = ap[0];
