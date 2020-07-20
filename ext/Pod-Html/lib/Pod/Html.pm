@@ -857,6 +857,13 @@ $block);
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+		<style>
+			body      { font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+			pre, code { font-family: Menlo, Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace; }
+			a:link    { color: #0062cc; }
+			a:visited { color: #1398ae; }
+		</style>
+
 		<title>$title</title>$csslink
 	</head>
 
