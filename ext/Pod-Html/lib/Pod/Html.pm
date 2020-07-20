@@ -95,7 +95,7 @@ Displays the usage message.
 
 Sets the directory to which all cross references in the resulting
 html file will be relative. Not passing this causes all links to be
-absolute since this is the value that tells Pod::Html the root of the 
+absolute since this is the value that tells Pod::Html the root of the
 documentation tree.
 
 Do not use this and --htmlroot in the same call to pod2html; they are
@@ -140,7 +140,7 @@ is specified.
     --poderrors
     --nopoderrors
 
-Include a "POD ERRORS" section in the outfile if there were any POD 
+Include a "POD ERRORS" section in the outfile if there were any POD
 errors in the infile. This section is included by default.
 
 =item podpath
@@ -209,7 +209,7 @@ Uses C<$Config{pod2html}> to setup default options.
 
 =head1 AUTHOR
 
-Marc Green, E<lt>marcgreen@cpan.orgE<gt>. 
+Marc Green, E<lt>marcgreen@cpan.orgE<gt>.
 
 Original version by Tom Christiansen, E<lt>tchrist@perl.comE<gt>.
 
@@ -236,7 +236,7 @@ sub feed_tree_to_parser {
     }
 }
 
-my $Cachedir; 
+my $Cachedir;
 my $Dircache;
 my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
 my($Podfile, @Podpath, $Podroot);
@@ -245,6 +245,7 @@ my $Css;
 
 my $Recurse;
 my $Quiet;
+my $OutputMode;
 my $Verbose;
 my $Doindex;
 
@@ -288,6 +289,7 @@ sub init_globals {
     $Backlink = 0;              # no backlinks added by default
     $Header = 0;                # produce block header/footer
     $Title = undef;             # title to give the pod(s)
+	$OutputMode = "html"        # OutputMode is either HTML or XHTML
 }
 
 sub pod2html {
@@ -320,7 +322,7 @@ sub pod2html {
     unless (get_cache($Dircache, \@Podpath, $Podroot, $Recurse)) {
         # generate %Pages
         my $pwd = getcwd();
-        chdir($Podroot) || 
+        chdir($Podroot) ||
             die "$0: error changing to directory $Podroot: $!\n";
 
         # find all pod modules/pages in podpath, store in %Pages
@@ -432,26 +434,11 @@ sub pod2html {
 END_OF_BLOCK
 
     # create own header/footer because of --header
-    $parser->html_header(<<"HTMLHEAD");
-<?xml version="1.0" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>$Title</title>$csslink
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:$Config{perladmin}" />
-</head>
+	my $head = get_header($OutputMode, $Title, $csslink, $bodyid, $block);
+    $parser->html_header($head);
 
-<body$bodyid>
-$block
-HTMLHEAD
-
-    $parser->html_footer(<<"HTMLFOOT");
-$block
-</body>
-
-</html>
-HTMLFOOT
+	my $foot = get_footer($OutputMode, $Title, $csslink, $bodyid, $block);
+    $parser->html_footer($foot);
 
     feed_tree_to_parser($parser, $podtree);
 
@@ -501,7 +488,7 @@ Usage:  $0 --help --htmldir=<name> --htmlroot=<URL>
                       by default).
   --outfile       - filename for the resulting html file (output sent to
                       stdout by default).
-  --[no]poderrors - include a POD ERRORS section in the output if there were 
+  --[no]poderrors - include a POD ERRORS section in the output if there were
                       any POD errors in the input (default behavior).
   --podpath       - colon-separated list of directories containing library
                       pods (empty by default).
@@ -521,7 +508,7 @@ sub parse_command_line {
     my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,
         $opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
         $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
-        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
+        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose,$opt_xhtml);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
@@ -543,6 +530,7 @@ sub parse_command_line {
                        'recurse!'   => \$opt_recurse,
                        'title=s'    => \$opt_title,
                        'verbose!'   => \$opt_verbose,
+                       'xhtml'      => \$opt_xhtml,
     );
     usage("-", "invalid parameters") if not $result;
 
@@ -566,6 +554,10 @@ sub parse_command_line {
     $Recurse   =          $opt_recurse    if defined $opt_recurse;
     $Title     =          $opt_title      if defined $opt_title;
     $Verbose   =          $opt_verbose    if defined $opt_verbose;
+
+	if ($opt_xhtml) {
+		$OutputMode = "xhtml";
+	}
 
     warn "Flushing directory caches\n"
         if $opt_verbose && defined $opt_flush;
@@ -770,7 +762,7 @@ sub resolve_pod_page_link {
         my $modloc = File::Spec->catfile(split(/::/, $to));
 
         if ($#matches == -1) {
-            warn "Cannot find file \"$modloc.*\" directly under podpath, " . 
+            warn "Cannot find file \"$modloc.*\" directly under podpath, " .
                  "cannot find suitable replacement: link remains unresolved.\n"
                  if $self->verbose;
             return '';
@@ -840,6 +832,55 @@ sub relativize_url {
     }
 
     return $rel_path;
+}
+
+sub get_header {
+	my $mode = shift() // "html";
+	my ($title, $csslink, $bodyid, $block) = @_;
+
+	my $ret = "";
+
+	if ($mode eq "xhtml") {
+		$ret = qq(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>$title</title>$csslink
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	</head>
+
+<body$bodyid>
+$block);
+	} elsif ($mode eq 'html') {
+		$ret = qq(<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>$title</title>$csslink
+	</head>
+
+<body$bodyid>
+$block);
+	}
+
+	return $ret;
+}
+
+sub get_footer {
+	my $mode = shift() // "html";
+	my ($title, $csslink, $bodyid, $block) = @_;
+
+	my $ret = "";
+
+	# Modes are the same (for now) for footer stuff
+	if ($mode eq "xhtml") {
+		$ret = "$block\n</body>\n\n</html>";
+	} elsif ($mode eq 'html') {
+		$ret = "$block\n</body>\n\n</html>";
+	}
+
+	return $ret;
 }
 
 1;
