@@ -228,11 +228,11 @@ This program is distributed under the Artistic License.
 sub feed_tree_to_parser {
     my($parser, $tree) = @_;
     if(ref($tree) eq "") {
-	$parser->_handle_text($tree);
+    $parser->_handle_text($tree);
     } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
-	$parser->_handle_element_start($tree->[0], $tree->[1]);
-	feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
-	$parser->_handle_element_end($tree->[0]);
+    $parser->_handle_element_start($tree->[0], $tree->[1]);
+    feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
+    $parser->_handle_element_end($tree->[0]);
     }
 }
 
@@ -289,7 +289,7 @@ sub init_globals {
     $Backlink = 0;              # no backlinks added by default
     $Header = 0;                # produce block header/footer
     $Title = undef;             # title to give the pod(s)
-	$OutputMode = "html"        # OutputMode is either HTML or XHTML
+    $OutputMode = "html"        # OutputMode is either HTML or XHTML
 }
 
 sub pod2html {
@@ -377,18 +377,18 @@ sub pod2html {
     my $podtree = $parser->parse_file($input)->root;
 
     unless(defined $Title) {
-	if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
-		$podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
-		ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
-		ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
-		@{$podtree->[3]} >= 3 &&
-		!(grep { ref($_) ne "" }
-		    @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
-		(@$podtree == 4 ||
-		    (ref($podtree->[4]) eq "ARRAY" &&
-			$podtree->[4]->[0] eq "head1"))) {
-	    $Title = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
-	}
+    if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
+        $podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
+        ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
+        ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
+        @{$podtree->[3]} >= 3 &&
+        !(grep { ref($_) ne "" }
+            @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
+        (@$podtree == 4 ||
+            (ref($podtree->[4]) eq "ARRAY" &&
+            $podtree->[4]->[0] eq "head1"))) {
+        $Title = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+    }
     }
 
     $Title //= "";
@@ -434,10 +434,10 @@ sub pod2html {
 END_OF_BLOCK
 
     # create own header/footer because of --header
-	my $head = get_header($OutputMode, $Title, $csslink, $bodyid, $block);
+    my $head = get_header($OutputMode, $Title, $csslink, $bodyid, $block);
     $parser->html_header($head);
 
-	my $foot = get_footer($OutputMode, $Title, $csslink, $bodyid, $block);
+    my $foot = get_footer($OutputMode, $Title, $csslink, $bodyid, $block);
     $parser->html_footer($foot);
 
     feed_tree_to_parser($parser, $podtree);
@@ -555,9 +555,9 @@ sub parse_command_line {
     $Title     =          $opt_title      if defined $opt_title;
     $Verbose   =          $opt_verbose    if defined $opt_verbose;
 
-	if ($opt_xhtml) {
-		$OutputMode = "xhtml";
-	}
+    if ($opt_xhtml) {
+        $OutputMode = "xhtml";
+    }
 
     warn "Flushing directory caches\n"
         if $opt_verbose && defined $opt_flush;
@@ -835,59 +835,61 @@ sub relativize_url {
 }
 
 sub get_header {
-	my $mode = shift() // "html";
-	my ($title, $csslink, $bodyid, $block) = @_;
+    my $mode = shift() // "html";
+    my ($title, $csslink, $bodyid, $block) = @_;
 
-	my $ret = "";
+    my $ret = "";
 
-	if ($mode eq "xhtml") {
-		$ret = qq(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    if ($mode eq "xhtml") {
+        $ret = qq(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<title>$title</title>$csslink
-		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	</head>
+    <head>
+        <title>$title</title>$csslink
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    </head>
 
 <body$bodyid>
 $block);
-	} elsif ($mode eq 'html') {
-		$ret = qq(<!doctype html>
+    } elsif ($mode eq 'html') {
+        $ret = qq(<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-		<style>
-			body      { font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; }
-			pre, code { font-family: Menlo, Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace; }
-			a:link    { color: #0062cc; }
-			a:visited { color: #1398ae; }
-		</style>
+        <style>
+            body      { font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+            pre, code { font-family: Menlo, Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace; }
+            a:link    { color: #0062cc; }
+            a:visited { color: #1398ae; }
+        </style>
 
-		<title>$title</title>$csslink
-	</head>
+        <title>$title</title>$csslink
+    </head>
 
 <body$bodyid>
 $block);
-	}
+    }
 
-	return $ret;
+    return $ret;
 }
 
 sub get_footer {
-	my $mode = shift() // "html";
-	my ($title, $csslink, $bodyid, $block) = @_;
+    my $mode = shift() // "html";
+    my ($title, $csslink, $bodyid, $block) = @_;
 
-	my $ret = "";
+    my $ret = "";
 
-	# Modes are the same (for now) for footer stuff
-	if ($mode eq "xhtml") {
-		$ret = "$block\n</body>\n\n</html>";
-	} elsif ($mode eq 'html') {
-		$ret = "$block\n</body>\n\n</html>";
-	}
+    # Modes are the same (for now) for footer stuff
+    if ($mode eq "xhtml") {
+        $ret = "$block\n</body>\n\n</html>";
+    } elsif ($mode eq 'html') {
+        $ret = "$block\n</body>\n\n</html>";
+    }
 
-	return $ret;
+    return $ret;
 }
 
 1;
+
+# vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
