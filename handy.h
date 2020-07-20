@@ -273,11 +273,7 @@ typedef U64TYPE U64;
 #endif
 
 /* Returns a mask with the lowest n bits set */
-#ifdef HAS_LONG_LONG
-#  define nBIT_MASK(n) ((1ULL << (n)) - 1)
-#else
-#  define nBIT_MASK(n) ((1UL << (n)) - 1)
-#endif
+#define nBIT_MASK(n) ((UINTMAX_C(1) << (n)) - 1)
 
 /* The largest unsigned number that will fit into n bits */
 #define nBIT_UMAX(n)  nBIT_MASK(n)
