@@ -30,6 +30,7 @@ no warnings 'experimental::trim';
 	is( trim("    Hello world!\t\t"), trim_regexp_compare("    Hello world!\t\t"), 'Trim compared to regexp' );
 	is( trim("   \N{U+2603}       "), "\N{U+2603}"                               , 'Trim with unicode content');
 	is( trim("\N{U+2029}foobar    "), "foobar"                                   , 'Trim with unicode whitespace');
+	is( trim("\xa0foobar          "), "foobar"                                   , 'Trim with latin1 whitespace');
 }
 
 # Tests against special variable types and scopes
