@@ -629,7 +629,7 @@ For example, consider the code below:
 
 The code in the enclosing block has warnings enabled, but the inner
 block has them disabled.  In this case that means the assignment to the
-scalar C<$c> will trip the C<"Scalar value @x[0] better written as $x[0]">
+scalar C<$z> will trip the C<"Scalar value @x[0] better written as $x[0]">
 warning, but the assignment to the scalar C<$y> will not.
 
 =head2 Default Warnings and Optional Warnings
