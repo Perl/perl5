@@ -727,7 +727,7 @@ warnings are (or aren't) produced:
 X<-w>
 
 This is  the existing flag.  If the lexical warnings pragma is B<not>
-used in any of you code, or any of the modules that you use, this flag
+used in any of your code, or any of the modules that you use, this flag
 will enable warnings everywhere.  See L</Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
