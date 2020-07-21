@@ -4925,14 +4925,14 @@ PP(pp_trim)
     }
     else if(len) {
         while(len) {
-            if(!isSPACE(*start))
+            if(!isSPACE_L1(*start))
                 break;
             start++;
             len--;
         }
 
         while(len) {
-            if(!isSPACE(start[len-1]))
+            if(!isSPACE_L1(start[len-1]))
                 break;
             len--;
         }
