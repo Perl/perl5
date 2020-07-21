@@ -342,7 +342,6 @@ void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	       int flags, int action, SV *val, U32 hash)
 {
-    dVAR;
     XPVHV* xhv;
     HE *entry;
     HE **oentry;
@@ -1105,7 +1104,6 @@ STATIC SV *
 S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
 {
-    dVAR;
     XPVHV* xhv;
     HE *entry;
     HE **oentry;
@@ -1589,7 +1587,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
-    dVAR;
     HV * const hv = newHV();
     STRLEN hv_max;
 
@@ -1790,7 +1787,6 @@ return.
 void
 Perl_hv_clear(pTHX_ HV *hv)
 {
-    dVAR;
     SSize_t orig_ix;
 
     XPVHV* xhv;
@@ -1879,7 +1875,6 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 static void
 S_clear_placeholders(pTHX_ HV *hv, U32 items)
 {
-    dVAR;
     I32 i;
 
     PERL_ARGS_ASSERT_CLEAR_PLACEHOLDERS;
@@ -2380,7 +2375,6 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 void
 Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
-    dVAR;
     struct xpvhv_aux *iter;
     U32 hash;
     HEK **spot;
@@ -2488,7 +2482,6 @@ table.
 void
 Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
-    dVAR;
     struct xpvhv_aux *aux = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     U32 hash;
 
@@ -2679,7 +2672,6 @@ insufficiently abstracted for any change to be tidy.
 HE *
 Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 {
-    dVAR;
     XPVHV* xhv;
     HE *entry;
     HE *oldentry;
@@ -3065,7 +3057,6 @@ Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash)
          we should flag that it needs upgrading on keys or each.  Also flag
          that we need share_hek_flags to free the string.  */
       if (str != save) {
-          dVAR;
           PERL_HASH(hash, str, len);
           flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
       }
@@ -3210,7 +3201,6 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
 STATIC SV *
 S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 {
-    dVAR;
     SV *value;
 
     PERL_ARGS_ASSERT_REFCOUNTED_HE_VALUE;
@@ -3261,7 +3251,6 @@ C<flags> is currently unused and must be zero.
 HV *
 Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 {
-    dVAR;
     HV *hv;
     U32 placeholders, max;
 
@@ -3375,7 +3364,6 @@ SV *
 Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
 			 const char *keypv, STRLEN keylen, U32 hash, U32 flags)
 {
-    dVAR;
     U8 utf8_flag;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN;
 
@@ -3528,7 +3516,6 @@ struct refcounted_he *
 Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
 	const char *keypv, STRLEN keylen, U32 hash, SV *value, U32 flags)
 {
-    dVAR;
     STRLEN value_len = 0;
     const char *value_p = NULL;
     bool is_pv;
@@ -3694,7 +3681,6 @@ no action occurs in this case.
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
 
@@ -3733,7 +3719,6 @@ struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
     if (he) {
@@ -3836,7 +3821,6 @@ Check that a hash is in an internally consistent state.
 void
 Perl_hv_assert(pTHX_ HV *hv)
 {
-    dVAR;
     HE* entry;
     int withflags = 0;
     int placeholders = 0;

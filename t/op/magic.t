@@ -541,7 +541,7 @@ is "@+", "10 1 6 10";
 }
 
 # Test for bug [perl #36434]
-# Can not do this test on VMS, and SYMBIAN according to comments
+# Can not do this test on VMS according to comments
 # in mg.c/Perl_magic_clear_all_env()
 SKIP: {
     skip('Can\'t make assignment to \%ENV on this system', 3) if $Is_VMS;

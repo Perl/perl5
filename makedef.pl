@@ -221,7 +221,6 @@ if ($ARGS{PLATFORM} ne 'os2') {
     ++$skip{$_} foreach qw(
 		     PL_cryptseen
 		     PL_opsave
-		     Perl_GetVars
 		     Perl_dump_fds
 		     Perl_my_bcopy
 		     Perl_my_bzero
@@ -471,14 +470,6 @@ unless ($define{'USE_DTRACE'}) {
                 );
 }
 
-unless ($define{'PERL_NEED_APPCTX'}) {
-    ++$skip{PL_appctx};
-}
-
-unless ($define{'PERL_NEED_TIMESBASE'}) {
-    ++$skip{PL_timesbase};
-}
-
 unless ($define{'DEBUG_LEAKING_SCALARS'}) {
     ++$skip{PL_sv_serial};
 }
@@ -507,18 +498,6 @@ unless ($define{'MULTIPLICITY'}) {
                     PL_sv_undef
                     PL_sv_no
                     PL_sv_zero
-			 );
-}
-
-unless ($define{'PERL_GLOBAL_STRUCT'}) {
-    ++$skip{PL_global_struct_size};
-}
-
-unless ($define{'PERL_GLOBAL_STRUCT_PRIVATE'}) {
-    ++$skip{$_} foreach qw(
-		    PL_my_cxt_keys
-		    PL_my_cxt_keys_size
-		    Perl_my_cxt_index
 			 );
 }
 
@@ -593,18 +572,6 @@ unless ($define{HAVE_INTERP_INTERN}) {
 
 if ($define{HAS_SIGNBIT}) {
     ++$skip{Perl_signbit};
-}
-
-if ($define{'PERL_GLOBAL_STRUCT'}) {
-    readvar('perlvars.h', \%skip);
-    # This seems like the least ugly way to cope with the fact that PL_sh_path
-    # is mentioned in perlvar.h and globvar.sym, and always exported.
-    delete $skip{PL_sh_path};
-    ++$export{Perl_GetVars};
-    try_symbols(qw(PL_Vars PL_VarsPtr))
-      unless $ARGS{CCTYPE} eq 'GCC' || $define{PERL_GLOBAL_STRUCT_PRIVATE};
-} else {
-    ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
 }
 
 ++$skip{PL_op_exec_cnt}
@@ -768,20 +735,9 @@ foreach (@syms) {
 
 # variables
 
-if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
-    readvar('perlvars.h', \%export, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
-    # XXX AIX seems to want the perlvars.h symbols, for some reason
-    if ($ARGS{PLATFORM} eq 'aix' or $ARGS{PLATFORM} eq 'os2') {	# OS/2 needs PL_thr_key
-	readvar('perlvars.h', \%export);
-    }
-}
-else {
-    unless ($define{'PERL_GLOBAL_STRUCT'}) {
-	readvar('perlvars.h', \%export);
-    }
-    unless ($define{MULTIPLICITY}) {
-	readvar('intrpvar.h', \%export);
-    }
+readvar('perlvars.h', \%export);
+unless ($define{MULTIPLICITY}) {
+    readvar('intrpvar.h', \%export);
 }
 
 # Oddities from PerlIO

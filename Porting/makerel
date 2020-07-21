@@ -143,8 +143,6 @@ my @writables = qw(
     overload.inc
     overload.h
     mg_vtable.h
-    perlapi.h
-    perlapi.c
     dist/Devel-PPPort/module2.c
     dist/Devel-PPPort/module3.c
     cpan/autodie/t/touch_me

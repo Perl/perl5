@@ -175,18 +175,6 @@ RunPerl(int argc, char **argv, char **env)
     PerlInterpreter *my_perl, *new_perl = NULL;
     bool use_environ = (env == environ);
 
-#ifdef PERL_GLOBAL_STRUCT
-#define PERLVAR(prefix,var,type) /**/
-#define PERLVARA(prefix,var,type) /**/
-#define PERLVARI(prefix,var,type,init) PL_Vars.prefix##var = init;
-#define PERLVARIC(prefix,var,type,init) PL_Vars.prefix##var = init;
-#include "perlvars.h"
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-#endif
-
     PERL_SYS_INIT(&argc,&argv);
 
     if (!(my_perl = perl_alloc()))

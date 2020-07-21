@@ -20,7 +20,7 @@ sub import {
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.80';
+    $B::VERSION = '1.81';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.

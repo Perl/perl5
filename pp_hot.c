@@ -2072,7 +2072,6 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 #endif
 )
 {
-    dVAR;
     SV **relem;
     SV **lelem;
     SSize_t lcount = lastlelem - firstlelem + 1;
@@ -2200,7 +2199,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
 PP(pp_aassign)
 {
-    dVAR; dSP;
+    dSP;
     SV **lastlelem = PL_stack_sp;
     SV **lastrelem = PL_stack_base + POPMARK;
     SV **firstrelem = PL_stack_base + POPMARK + 1;
@@ -4659,7 +4658,6 @@ PP(pp_grepwhile)
 void
 Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 {
-    dVAR;
     dSP;
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;

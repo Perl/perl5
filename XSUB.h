@@ -127,9 +127,6 @@ is a lexical C<$_> in scope.
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
 #  define XS_INTERNAL(name) STATIC XSPROTO(name)
-#elif defined(__SYMBIAN32__)
-#  define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
-#  define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
 #elif defined(__cplusplus)
 #  define XS_EXTERNAL(name) extern "C" XSPROTO(name)
 #  define XS_INTERNAL(name) static XSPROTO(name)
@@ -473,8 +470,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  define VTBL_amagic		&PL_vtbl_amagic
 #  define VTBL_amagicelem	&PL_vtbl_amagicelem
 #endif
-
-#include "perlapi.h"
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX

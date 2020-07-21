@@ -486,7 +486,6 @@ typedef PADNAME	*B__PADNAME;
 static XSPROTO(intrpvar_sv_common); /* prototype to pass -Wmissing-prototypes */
 static XSPROTO(intrpvar_sv_common)
 {
-    dVAR;
     dXSARGS;
     SV *ret;
     if (items != 0)

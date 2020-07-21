@@ -1630,7 +1630,6 @@ the kind of subroutine:
 void
 Perl_pad_tidy(pTHX_ padtidy_type type)
 {
-    dVAR;
 
     ASSERT_CURPAD_ACTIVE("pad_tidy");
 
@@ -2006,7 +2005,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
 			/* my sub */
 			/* Just provide a stub, but name it.  It will be
 			   upgraded to the real thing on scope entry. */
-                        dVAR;
 			U32 hash;
 			PERL_HASH(hash, PadnamePV(namesv)+1,
 				  PadnameLEN(namesv) - 1);
@@ -2189,7 +2187,6 @@ static CV *
 S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     const bool newcv = !cv;
 

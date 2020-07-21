@@ -247,7 +247,6 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 int
 Perl_yyparse (pTHX_ int gramtype)
 {
-    dVAR;
     int yystate;
     int yyn;
     int yyresult;

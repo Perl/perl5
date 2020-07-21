@@ -1667,7 +1667,6 @@ Perl_despatch_signals(pTHX)
 int
 Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR;
     I32 i;
     SV** svp = NULL;
     /* Need to be careful with SvREFCNT_dec(), because that can have side
@@ -2722,7 +2721,6 @@ S_set_dollarzero(pTHX_ SV *sv)
     PERL_TSA_REQUIRES(PL_dollarzero_mutex)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     const char *s;
     STRLEN len;
@@ -2801,7 +2799,6 @@ int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     I32 paren;
     const REGEXP * rx;

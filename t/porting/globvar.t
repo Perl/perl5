@@ -13,7 +13,7 @@ skip_all("Code to read symbols not ported to $^O")
 # received any bug reports about it causing problems:
 my %skip = map { ("PL_$_", 1) }
     qw(
-	  DBcv bitcount cshname force_link_funcs generation lastgotoprobe
+	  DBcv bitcount cshname generation lastgotoprobe
 	  mod_latin1_uc modcount no_symref_sv uudmap
 	  watchaddr watchok warn_uninit_sv hash_chars
      );

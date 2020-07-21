@@ -62,18 +62,6 @@
 #  endif
 #endif
 
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#  ifndef PERL_GLOBAL_STRUCT
-#    define PERL_GLOBAL_STRUCT
-#  endif
-#endif
-
-#ifdef PERL_GLOBAL_STRUCT
-#  ifndef MULTIPLICITY
-#    define MULTIPLICITY
-#  endif
-#endif
-
 #ifdef MULTIPLICITY
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -84,27 +72,6 @@
 #ifdef __CYGWIN__
 #   undef WIN32
 #   undef _WIN32
-#endif
-
-#if defined(__SYMBIAN32__) || (defined(__VC32__) && defined(WINS))
-#   ifndef SYMBIAN
-#       define SYMBIAN
-#   endif
-#endif
-
-#ifdef __SYMBIAN32__
-#  include "symbian/symbian_proto.h"
-#endif
-
-/* Any stack-challenged places.  The limit varies (and often
- * is configurable), but using more than a kilobyte of stack
- * is usually dubious in these systems. */
-#if defined(__SYMBIAN32__)
-/* Symbian: need to work around the SDK features. *
- * On WINS: MS VC5 generates calls to _chkstk,         *
- * if a "large" stack frame is allocated.              *
- * gcc on MARM does not generate calls like these.     */
-#   define USE_HEAP_INSTEAD_OF_STACK
 #endif
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
@@ -141,25 +108,8 @@
 #  endif
 #endif
 
-#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GET_VARS)
-#    ifdef PERL_GLOBAL_STRUCT_PRIVATE
-       EXTERN_C struct perl_vars* Perl_GetVarsPrivate();
-#      define PERL_GET_VARS() Perl_GetVarsPrivate() /* see miniperlmain.c */
-#    else
-#      define PERL_GET_VARS() PL_VarsPtr
-#    endif
-#endif
-
 /* this used to be off by default, now its on, see perlio.h */
 #define PERLIO_FUNCS_CONST
-
-#define pVAR    struct perl_vars* my_vars PERL_UNUSED_DECL
-
-#ifdef PERL_GLOBAL_STRUCT
-#  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
-#else
-#  define dVAR		dNOOP
-#endif
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
@@ -169,16 +119,8 @@
 #  define pTHX  tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  define aTHXa(a) aTHX = (tTHX)a
-#  ifdef PERL_GLOBAL_STRUCT
-#    define dTHXa(a)	dVAR; pTHX = (tTHX)a
-#  else
-#    define dTHXa(a)	pTHX = (tTHX)a
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT
-#    define dTHX		dVAR; pTHX = PERL_GET_THX
-#  else
-#    define dTHX		pTHX = PERL_GET_THX
-#  endif
+#  define dTHXa(a)	pTHX = (tTHX)a
+#  define dTHX		pTHX = PERL_GET_THX
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
 #  define pTHX_1	2
@@ -447,7 +389,7 @@
 #  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
 #endif
 
-#if defined(USE_ITHREADS) || defined(PERL_GLOBAL_STRUCT)
+#if defined(USE_ITHREADS)
 #  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
 #else
 #  define PERL_UNUSED_CONTEXT
@@ -596,7 +538,9 @@
 #  define pTHX_12	12
 #endif
 
-#ifndef dVAR
+#ifndef PERL_CORE
+/* Backwards compatibility macro for XS code. It used to be part of
+ * the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
 #  define dVAR		dNOOP
 #endif
 
@@ -622,17 +566,9 @@
  * PerlIO_foo() expands to PL_StdIO->pFOO(PL_StdIO, ...).
  * dTHXs is therefore needed for all functions using PerlIO_foo(). */
 #ifdef PERL_IMPLICIT_SYS
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#    define dTHXs		dVAR; dTHX
-#  else
 #    define dTHXs		dTHX
-#  endif
 #else
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#    define dTHXs		dVAR
-#  else
 #    define dTHXs		dNOOP
-#  endif
 #endif
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
@@ -999,10 +935,6 @@ extern char **myenviron;
 #   include <sys/wait.h>
 #endif
 
-#ifdef __SYMBIAN32__
-#   undef _SC_ARG_MAX /* Symbian has _SC_ARG_MAX but no sysconf() */
-#endif
-
 #if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO)
 EXTERN_C int syscall(int, ...);
 #endif
@@ -1176,7 +1108,7 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(__SYMBIAN32__)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -1221,9 +1153,7 @@ EXTERN_C int usleep(unsigned int);
 #  define Ptrdiff_t SSize_t
 #endif
 
-#ifndef __SYMBIAN32__
 #  include <string.h>
-#endif
 
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own in proto.h instead. */
@@ -2869,8 +2799,6 @@ typedef struct padname PADNAME;
 #   else
 #     include "vos/vosish.h"
 #   endif
-#elif defined(__SYMBIAN32__)
-#   include "symbian/symbianish.h"
 #elif defined(__HAIKU__)
 #   include "haiku/haikuish.h"
 #else
@@ -3100,8 +3028,6 @@ freeing any remaining Perl interpreters.
  */
 #if defined(USE_ITHREADS) && defined(I_PTHREAD) && \
     defined(__clang__) && \
-    !defined(PERL_GLOBAL_STRUCT) && \
-    !defined(PERL_GLOBAL_STRUCT_PRIVATE) && \
     !defined(SWIG) && \
   ((!defined(__apple_build_version__) &&               \
     ((__clang_major__ == 3 && __clang_minor__ >= 6) || \
@@ -4121,7 +4047,7 @@ my_swap16(const U16 x) {
 #endif
 
 #ifndef __cplusplus
-#if !(defined(WIN32) || defined(SYMBIAN))
+#if !defined(WIN32)
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
@@ -4824,7 +4750,6 @@ EXTCONST  unsigned char PL_fold[] = {
 	248,	249,	250,	251,	252,	253,	254,	255
 };
 
-#    ifndef PERL_GLOBAL_STRUCT /* or perlvars.h */
 EXT unsigned char PL_fold_locale[] = { /* Unfortunately not EXTCONST. */
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
@@ -4859,7 +4784,6 @@ EXT unsigned char PL_fold_locale[] = { /* Unfortunately not EXTCONST. */
 	240,	241,	242,	243,	244,	245,	246,	247,
 	248,	249,	250,	251,	252,	253,	254,	255
 };
-#    endif
 
 EXTCONST  unsigned char PL_fold_latin1[] = {
     /* Full latin1 complement folding, except for three problematic code points:
@@ -5056,12 +4980,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_DEBUG_READONLY_OPS
 			     " PERL_DEBUG_READONLY_OPS"
 #  endif
-#  ifdef PERL_GLOBAL_STRUCT
-			     " PERL_GLOBAL_STRUCT"
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-			     " PERL_GLOBAL_STRUCT_PRIVATE"
-#  endif
 #  ifdef PERL_IMPLICIT_CONTEXT
 			     " PERL_IMPLICIT_CONTEXT"
 #  endif
@@ -5070,12 +4988,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_MICRO
 			     " PERL_MICRO"
-#  endif
-#  ifdef PERL_NEED_APPCTX
-			     " PERL_NEED_APPCTX"
-#  endif
-#  ifdef PERL_NEED_TIMESBASE
-			     " PERL_NEED_TIMESBASE"
 #  endif
 #  ifdef PERL_POISON
 			     " PERL_POISON"
@@ -5417,34 +5329,6 @@ EXTCONST U16 PL_interp_size_5_18_0
   INIT(PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_18_0_INTERP_MEMBER));
 
 
-#  ifdef PERL_GLOBAL_STRUCT
-/* MULTIPLICITY is automatically defined when PERL_GLOBAL_STRUCT is defined,
-   hence it's safe and sane to nest this within #ifdef MULTIPLICITY  */
-
-struct perl_vars {
-#    include "perlvars.h"
-};
-
-EXTCONST U16 PL_global_struct_size
-  INIT(sizeof(struct perl_vars));
-
-#    ifdef PERL_CORE
-#      ifndef PERL_GLOBAL_STRUCT_PRIVATE
-EXT struct perl_vars PL_Vars;
-EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
-#        undef PERL_GET_VARS
-#        define PERL_GET_VARS() PL_VarsPtr
-#      endif /* !PERL_GLOBAL_STRUCT_PRIVATE */
-#    else /* PERL_CORE */
-#      if !defined(__GNUC__) || !defined(WIN32)
-EXT
-#      endif /* WIN32 */
-struct perl_vars *PL_VarsPtr;
-#      define PL_Vars (*((PL_VarsPtr) \
-		       ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
-#    endif /* PERL_CORE */
-#  endif /* PERL_GLOBAL_STRUCT */
-
 /* Done with PERLVAR macros for now ... */
 #  undef PERLVAR
 #  undef PERLVARA
@@ -5517,13 +5401,11 @@ END_EXTERN_C
    define HAVE_INTERP_INTERN  */
 #include "embed.h"
 
-#ifndef PERL_GLOBAL_STRUCT
 START_EXTERN_C
 
 #  include "perlvars.h"
 
 END_EXTERN_C
-#endif
 
 #undef PERLVAR
 #undef PERLVARA
@@ -6961,15 +6843,9 @@ C<strtoul>.
 /* START_MY_CXT must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
  * case below uses it to declare the data as static. */
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#    define START_MY_CXT
-#    define MY_CXT_INDEX Perl_my_cxt_index(aTHX_ MY_CXT_KEY)
-#    define MY_CXT_INIT_ARG MY_CXT_KEY
-#  else
 #    define START_MY_CXT static int my_cxt_index = -1;
 #    define MY_CXT_INDEX my_cxt_index
 #    define MY_CXT_INIT_ARG &my_cxt_index
-#  endif /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when

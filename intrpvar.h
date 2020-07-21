@@ -957,6 +957,4 @@ PERLVAR(I, wcrtomb_ps, mbstate_t)
  * this comment, for binary compatibility (the offsets of the old members must
  *  not change).
  * (Don't forget to add your variable also to perl_clone()!)
- * XSUB.h provides wrapper functions via perlapi.h that make this
- * irrelevant, but not all code may be expected to #include XSUB.h.
  */

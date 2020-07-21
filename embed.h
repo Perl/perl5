@@ -828,11 +828,6 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(PERL_GLOBAL_STRUCT)
-#define GetVars()		Perl_GetVars(aTHX)
-#define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
-#define init_global_struct()	Perl_init_global_struct(aTHX)
-#endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
 #define deb_nocontext		Perl_deb_nocontext
@@ -914,7 +909,7 @@
 #define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
 #define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
 #endif
-#if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
+#if defined(WIN32) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
