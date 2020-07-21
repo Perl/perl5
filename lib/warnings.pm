@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.47";
+our $VERSION = "1.48";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -289,10 +289,10 @@ sub _expand_bits {
 	} elsif ($len > $want_len) {
 	    substr $bits, $want_len, $len-$want_len, "";
 	} else {
-	    my $a = vec($bits, $Offsets{all} >> 1, 2);
-	    $a |= $a << 2;
-	    $a |= $a << 4;
-	    $bits .= chr($a) x ($want_len - $len);
+	    my $x = vec($bits, $Offsets{all} >> 1, 2);
+	    $x |= $x << 2;
+	    $x |= $x << 4;
+	    $bits .= chr($x) x ($want_len - $len);
 	}
     }
     return $bits;
@@ -620,17 +620,17 @@ Similarly all warnings are disabled in a block by either of these:
 For example, consider the code below:
 
     use warnings;
-    my @a;
+    my @x;
     {
         no warnings;
-	my $b = @a[0];
+	my $y = @x[0];
     }
-    my $c = @a[0];
+    my $z = @x[0];
 
 The code in the enclosing block has warnings enabled, but the inner
 block has them disabled.  In this case that means the assignment to the
-scalar C<$c> will trip the C<"Scalar value @a[0] better written as $a[0]">
-warning, but the assignment to the scalar C<$b> will not.
+scalar C<$c> will trip the C<"Scalar value @x[0] better written as $x[0]">
+warning, but the assignment to the scalar C<$y> will not.
 
 =head2 Default Warnings and Optional Warnings
 
@@ -642,18 +642,18 @@ would get a warning whether you wanted it or not.
 For example, the code below would always produce an C<"isn't numeric">
 warning about the "2:".
 
-    my $a = "2:" + 3;
+    my $x = "2:" + 3;
 
 With the introduction of lexical warnings, mandatory warnings now become
 I<default> warnings.  The difference is that although the previously
 mandatory warnings are still enabled by default, they can then be
 subsequently enabled or disabled with the lexical warning pragma.  For
 example, in the code below, an C<"isn't numeric"> warning will only
-be reported for the C<$a> variable.
+be reported for the C<$x> variable.
 
-    my $a = "2:" + 3;
+    my $x = "2:" + 3;
     no warnings;
-    my $b = "2:" + 3;
+    my $y = "2:" + 3;
 
 Note that neither the B<-w> flag or the C<$^W> can be used to
 disable/enable default warnings.  They are still mandatory in this case.
@@ -673,20 +673,20 @@ a block of code.  You might expect this to be enough to do the trick:
 
      {
          local ($^W) = 0;
-	 my $a =+ 2;
-	 my $b; chop $b;
+	 my $x =+ 2;
+	 my $y; chop $y;
      }
 
 When this code is run with the B<-w> flag, a warning will be produced
-for the C<$a> line:  C<"Reversed += operator">.
+for the C<$x> line:  C<"Reversed += operator">.
 
 The problem is that Perl has both compile-time and run-time warnings.  To
 disable compile-time warnings you need to rewrite the code like this:
 
      {
          BEGIN { $^W = 0 }
-	 my $a =+ 2;
-	 my $b; chop $b;
+	 my $x =+ 2;
+	 my $y; chop $y;
      }
 
 And note that unlike the first example, this will permanently set C<$^W>
@@ -701,7 +701,7 @@ the first will not.
 
     sub doit
     {
-        my $b; chop $b;
+        my $y; chop $y;
     }
 
     doit();
@@ -1215,12 +1215,12 @@ C<Derived>.
     use Original;
     use Derived;
     use warnings 'Derived';
-    my $a = Original->new();
-    $a->doit(1);
-    my $b = Derived->new();
-    $a->doit(1);
+    my $x = Original->new();
+    $x->doit(1);
+    my $y = Derived->new();
+    $x->doit(1);
 
-When this code is run only the C<Derived> object, C<$b>, will generate
+When this code is run only the C<Derived> object, C<$y>, will generate
 a warning.
 
     Odd numbers are unsafe at main.pl line 7
