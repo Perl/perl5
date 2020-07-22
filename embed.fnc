@@ -1560,17 +1560,17 @@ Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Apdh	|void	|save_aptr	|NN AV** aptr
 Apdh	|AV*	|save_ary	|NN GV* gv
-Ap	|void	|save_bool	|NN bool* boolp
-Ap	|void	|save_clearsv	|NN SV** svp
-Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
+Cp	|void	|save_bool	|NN bool* boolp
+Cp	|void	|save_clearsv	|NN SV** svp
+Cp	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
 Ap	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
 Ap	|void	|save_adelete	|NN AV *av|SSize_t key
-Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
-Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
-ApMb	|void	|save_freesv	|NULLOK SV* sv
+Cp	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
+Cp	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
+CpMb	|void	|save_freesv	|NULLOK SV* sv
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
-ApMb	|void	|save_freeop	|NULLOK OP* o
-ApMb	|void	|save_freepv	|NULLOK char* pv
+CpMb	|void	|save_freeop	|NULLOK OP* o
+CpMb	|void	|save_freepv	|NULLOK char* pv
 Ap	|void	|save_generic_svref|NN SV** sptr
 Ap	|void	|save_generic_pvref|NN char** str
 Ap	|void	|save_shared_pvref|NN char** str
@@ -1580,24 +1580,24 @@ Ap	|void	|save_hints
 Am	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
 Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
 Apdh	|void	|save_hptr	|NN HV** hptr
-Ap	|void	|save_I16	|NN I16* intp
-Ap	|void	|save_I32	|NN I32* intp
-Ap	|void	|save_I8	|NN I8* bytep
-Ap	|void	|save_int	|NN int* intp
+Cp	|void	|save_I16	|NN I16* intp
+Cp	|void	|save_I32	|NN I32* intp
+Cp	|void	|save_I8	|NN I8* bytep
+Cp	|void	|save_int	|NN int* intp
 Apdh	|void	|save_item	|NN SV* item
-Ap	|void	|save_iv	|NN IV *ivp
+Cp	|void	|save_iv	|NN IV *ivp
 AbpDdh	|void	|save_list	|NN SV** sarg|I32 maxsarg
-AbpD	|void	|save_long	|NN long* longp
-ApMb	|void	|save_mortalizesv|NN SV* sv
+CbpD	|void	|save_long	|NN long* longp
+CpMb	|void	|save_mortalizesv|NN SV* sv
 AbpD	|void	|save_nogv	|NN GV* gv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
 ApMb	|void	|save_op
 Apdh	|SV*	|save_scalar	|NN GV* gv
-Ap	|void	|save_pptr	|NN char** pptr
+Cp	|void	|save_pptr	|NN char** pptr
 Ap	|void	|save_vptr	|NN void *ptr
-Ap	|void	|save_re_context
+Cp	|void	|save_re_context
 Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
-Ap	|void	|save_sptr	|NN SV** sptr
+Cp	|void	|save_sptr	|NN SV** sptr
 Xp	|void	|save_strlen	|NN STRLEN* ptr
 Apdh	|SV*	|save_svref	|NN SV** sptr
 Axpo	|void	|savetmps
