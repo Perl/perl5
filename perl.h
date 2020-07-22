@@ -7086,6 +7086,14 @@ extern void moncontrol(int);
 #define PERL_UNICODE_WIDESYSCALLS		'W'
 #define PERL_UNICODE_UTF8CACHEASSERT		'a'
 
+/*
+=for apidoc Amn|U32|PERL_SIGNALS_UNSAFE_FLAG
+If this bit in L</C<PL_signals>> is set, the system is uing the pre-Perl 5.8
+unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
+(Safe Signals)>.
+
+=cut
+*/
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
 /*
