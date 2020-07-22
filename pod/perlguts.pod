@@ -1664,6 +1664,12 @@ Inside such a I<pseudo-block> the following service is available:
 
 =item C<SAVELONG(long i)>
 
+=item C<SAVEI8(I8 i)>
+
+=item C<SAVEI16(I16 i)>
+
+=item C<SAVEBOOL(int i)>
+
 These macros arrange things to restore the value of integer variable
 C<i> at the end of enclosing I<pseudo-block>.
 
