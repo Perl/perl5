@@ -8910,6 +8910,9 @@ than C<use>.
 =for apidoc Amnh||PERL_LOADMOD_NOIMPORT
 =for apidoc Amnh||PERL_LOADMOD_IMPORT_OPS
 
+=for apidoc vload_module
+Like C<L</load_module>> but the arguments are an encapsulated argument list.
+
 =for apidoc load_module_nocontext
 Like C<L</load_module>> but does not take a thread context (C<aTHX>) parameter,
 so is used in situations where the caller doesn't already have the thread

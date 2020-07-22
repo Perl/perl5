@@ -1245,7 +1245,7 @@ S	|OP*	|listkids	|NULLOK OP* o
 #endif
 p	|OP*	|list		|NULLOK OP* o
 AFpd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
-Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
+Adp	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 : Used in perly.y
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
