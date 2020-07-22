@@ -21866,7 +21866,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
    After all of the core data stored in struct regexp is duplicated
    the regexp_engine.dupe method is used to copy any private data
    stored in the *pprivate pointer. This allows extensions to handle
-   any duplication it needs to do.
+   any duplication they need to do.
 
    See pregfree() and regfree_internal() if you change anything here.
 */
