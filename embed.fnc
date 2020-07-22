@@ -1923,12 +1923,12 @@ Apdh	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \
 				|SSize_t minend |NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK REGEXP* r
-Ap	|void	|pregfree2	|NN REGEXP *rx
+Cp	|void	|pregfree2	|NN REGEXP *rx
 : FIXME - is anything in re using this now?
 EXp	|REGEXP*|reg_temp_copy	|NULLOK REGEXP* dsv|NN REGEXP* ssv
-Ap	|void	|regfree_internal|NN REGEXP *const rx
+Cp	|void	|regfree_internal|NN REGEXP *const rx
 #if defined(USE_ITHREADS)
-Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
+Cp	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
 #endif
 EXp	|regexp_engine const *|current_re_engine
 Apdh	|REGEXP*|pregcomp	|NN SV * const pattern|const U32 flags
