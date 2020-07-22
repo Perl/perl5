@@ -1075,6 +1075,24 @@ EXTERN_C int usleep(unsigned int);
 #    define UINT64_C(c) PeRl_UINT64_C(c)
 #  endif
 
+/*
+=for apidoc Am||INTMAX_C|number
+Returns a token the C compiler recognizes for the constant C<number> of the
+widest integer type on the machine.  For example, if the machine has C<long
+long>s, C<INTMAX_C(-1)> would yield
+
+ -1LL
+
+=for apidoc Am||UINTMAX_C|number
+Returns a token the C compiler recognizes for the constant C<number> of the
+widest unsigned integer type on the machine.  For example, if the machine has
+C<long>s, C<UINTMAX_C(1)> would yield
+
+ 1UL
+
+=cut
+*/
+
 #  ifndef I_STDINT
     typedef I64TYPE PERL_INTMAX_T;
     typedef U64TYPE PERL_UINTMAX_T;
