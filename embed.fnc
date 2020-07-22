@@ -663,10 +663,10 @@ Apd	|const PERL_CONTEXT *	|caller_cx|I32 level \
 				|NULLOK const PERL_CONTEXT **dbcxp
 : Used in several source files
 pR	|bool	|cando		|Mode_t mode|bool effective|NN const Stat_t* statbufp
-ApRT	|U32	|cast_ulong	|NV f
-ApRT	|I32	|cast_i32	|NV f
-ApRT	|IV	|cast_iv	|NV f
-ApRT	|UV	|cast_uv	|NV f
+CpRT	|U32	|cast_ulong	|NV f
+CpRT	|I32	|cast_i32	|NV f
+CpRT	|IV	|cast_iv	|NV f
+CpRT	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 ApR	|I32	|my_chsize	|int fd|Off_t length
 #endif
