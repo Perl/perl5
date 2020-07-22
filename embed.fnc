@@ -647,8 +647,8 @@ AmdR	|SSize_t|av_tindex	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
 Apdoex	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV *av|SSize_t num
-Apo	|SV**	|av_arylen_p	|NN AV *av
-Apo	|IV*	|av_iter_p	|NN AV *av
+Cpo	|SV**	|av_arylen_p	|NN AV *av
+Cpo	|IV*	|av_iter_p	|NN AV *av
 #if defined(PERL_IN_AV_C)
 S	|MAGIC*	|get_aux_mg	|NN AV *av
 #endif
