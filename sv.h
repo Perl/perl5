@@ -1911,6 +1911,13 @@ Like C<sv_catsv> but doesn't process magic.
 
 /* flag values for sv_*_flags functions */
 #define SV_UTF8_NO_ENCODING	0       /* No longer used */
+
+/*
+=for apidoc AmnhD||SV_UTF8_NO_ENCODING
+
+=cut
+*/
+
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
 #define SV_COW_DROP_PV		4
