@@ -21859,15 +21859,18 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 #define SAVEPVN(p, n)	((p) ? savepvn(p, n) : NULL)
 
 /*
-   re_dup_guts - duplicate a regexp.
+=for apidoc re_dup_guts
+Duplicate a regexp.
 
-   This routine is expected to clone a given regexp structure. It is only
-   compiled under USE_ITHREADS.
+This routine is expected to clone a given regexp structure. It is only
+compiled under USE_ITHREADS.
 
-   After all of the core data stored in struct regexp is duplicated
-   the regexp_engine.dupe method is used to copy any private data
-   stored in the *pprivate pointer. This allows extensions to handle
-   any duplication they need to do.
+After all of the core data stored in struct regexp is duplicated
+the regexp_engine.dupe method is used to copy any private data
+stored in the *pprivate pointer. This allows extensions to handle
+any duplication they need to do.
+
+=cut
 
    See pregfree() and regfree_internal() if you change anything here.
 */
