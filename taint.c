@@ -23,6 +23,14 @@
 #define PERL_IN_TAINT_C
 #include "perl.h"
 
+/*
+=forapidoc taint_proper
+
+Implements the L</TAINT_PROPER> macro, which you should generally use instead.
+
+=cut
+*/
+
 void
 Perl_taint_proper(pTHX_ const char *f, const char *const s)
 {
@@ -78,7 +86,8 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
 }
 
 void
-Perl_taint_env(pTHX)
+Perl_taint_env(pTHX)     /* Generally, don't use directly; instead use
+                            TAINT_ENV */
 {
     SV** svp;
     const char* const *e;

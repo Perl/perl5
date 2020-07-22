@@ -2494,8 +2494,8 @@ EFp	|int	|re_exec_indentf|NN const char *fmt|U32 depth|...
 ESR	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
 
-Ap	|void	|taint_env
-Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
+Cp	|void	|taint_env
+Cp	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
 EXp	|char *	|_byte_dump_string					\
 				|NN const U8 * const start		\
 				|const STRLEN len			\
