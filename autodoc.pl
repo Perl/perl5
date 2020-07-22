@@ -154,7 +154,7 @@ Expected:
   =for apidoc name
 EOS
             die "flag $1 is not legal (for function $name (from $file))"
-                        if $flags =~ / ( [^AabCDdEefhiMmNnTOoPpRrSsUuWXx] ) /x;
+                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
             next FUNC if $flags =~ /h/;
 
             die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
