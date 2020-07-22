@@ -2242,6 +2242,13 @@ See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 /* If I give every macro argument a different name, then there won't be bugs
    where nested macros get confused. Been there, done that.  */
+/*
+=for apidoc Am|bool|isGV_with_GP|SV * sv
+Returns a boolean as to whether or not C<sv> is a GV with a pointer to a GP
+(glob pointer).
+
+=cut
+*/
 #define isGV_with_GP(pwadak) \
 	(((SvFLAGS(pwadak) & (SVp_POK|SVpgv_GP)) == SVpgv_GP)	\
 	&& (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
