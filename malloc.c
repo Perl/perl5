@@ -596,7 +596,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #  define MAX_PACKED_POW2 6
 #  define MAX_PACKED (MAX_PACKED_POW2 * BUCKETS_PER_POW2 + BUCKET_POW2_SHIFT)
 #  define MAX_POW2_ALGO ((1<<(MAX_PACKED_POW2 + 1)) - M_OVERHEAD)
-#  define TWOK_MASK nBITMASK(LOG_OF_MIN_ARENA)
+#  define TWOK_MASK nBIT_MASK(LOG_OF_MIN_ARENA)
 #  define TWOK_MASKED(x) (PTR2UV(x) & ~TWOK_MASK)
 #  define TWOK_SHIFT(x) (PTR2UV(x) & TWOK_MASK)
 #  define OV_INDEXp(block) (INT2PTR(u_char*,TWOK_MASKED(block)))
