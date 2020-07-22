@@ -1467,7 +1467,18 @@ S_mulexp10(NV value, I32 exponent)
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
-    /* 's' must be NUL terminated */
+
+/*
+=for apidoc my_atof
+
+L<C<atof>(3)>, but properly works with Perl locale handling, accepting a dot
+radix character always, but also the current locale's radix character if and
+only if called from within the lexical scope of a Perl C<use locale> statement.
+
+N.B. C<s> must be NUL terminated.
+
+=cut
+*/
 
     NV x = 0.0;
 
