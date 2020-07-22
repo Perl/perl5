@@ -9591,6 +9591,9 @@ Like C<L</newSVpvf>> but does not take a thread context (C<aTHX>) parameter,
 so is used in situations where the caller doesn't already have the thread
 context.
 
+=for apidoc vnewSVpvf
+Like C<L</newSVpvf>> but but the arguments are an encapsulated argument list.
+
 =cut
 */
 
