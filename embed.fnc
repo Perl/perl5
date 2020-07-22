@@ -2393,7 +2393,7 @@ pT	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 					 |NN STRLEN *lenp
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
-Ap	|I32	|unlnk		|NN const char* f
+Cp	|I32	|unlnk		|NN const char* f
 #endif
 AbpdD	|SSize_t|unpack_str	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NULLOK const char *strbeg|NN const char *strend|NULLOK char **new_s \
