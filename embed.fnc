@@ -740,7 +740,7 @@ p	|void	|cv_undef_flags	|NN CV* cv|U32 flags
 pd	|void	|cv_forget_slab	|NULLOK CV *cv
 Cp	|void	|cx_dump	|NN PERL_CONTEXT* cx
 AiMpd	|GV *	|CvGV		|NN CV *sv
-AiMTp	|I32 *	|CvDEPTH	|NN const CV * const sv
+AdiMTp	|I32 *	|CvDEPTH	|NN const CV * const sv
 Aphd	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Ap	|void	|filter_del	|NN filter_t funcp
 ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
