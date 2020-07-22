@@ -592,6 +592,18 @@ __typeof__ and nothing else.
 #define MSVC_DIAG_IGNORE_STMT(x) MSVC_DIAG_IGNORE(x) NOOP
 #define MSVC_DIAG_RESTORE_STMT MSVC_DIAG_RESTORE NOOP
 
+/*
+=for apidoc Amns||NOOP
+Do nothing; typically used as a placeholder to replace something that used to
+do something.
+
+=for apidoc Amns||dNOOP
+Declare nothing; typically used as a placeholder to replace something that used
+to declare something.  Works on compilers that require declarations before any
+code.
+
+=cut
+*/
 #define NOOP /*EMPTY*/(void)0
 #define dNOOP struct Perl___notused_struct
 
@@ -618,20 +630,29 @@ __typeof__ and nothing else.
 #  define pTHX_12	12
 #endif
 
-#ifndef PERL_CORE
-/* Backwards compatibility macro for XS code. It used to be part of
- * the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
-#  define dVAR		dNOOP
-#endif
+/*
+=for apidoc_section Concurrency
+=for apidoc AmnU||dVAR
+This is now a synonym for dNOOP: declare nothing
 
-/* these are only defined for compatibility; should not be used internally */
-#if !defined(pTHXo) && !defined(PERL_CORE)
-#  define pTHXo		pTHX
-#  define pTHXo_	pTHX_
-#  define aTHXo		aTHX
-#  define aTHXo_	aTHX_
-#  define dTHXo		dTHX
-#  define dTHXoa(x)	dTHXa(x)
+=cut
+*/
+
+#ifndef PERL_CORE
+    /* Backwards compatibility macro for XS code. It used to be part of the
+     * PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
+#  define dVAR		dNOOP
+
+    /* these are only defined for compatibility; should not be used internally.
+     * */
+#  ifndef pTHXo
+#    define pTHXo		pTHX
+#    define pTHXo_	pTHX_
+#    define aTHXo		aTHX
+#    define aTHXo_	aTHX_
+#    define dTHXo		dTHX
+#    define dTHXoa(x)	dTHXa(x)
+#  endif
 #endif
 
 #ifndef pTHXx
