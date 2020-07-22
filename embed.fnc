@@ -2653,8 +2653,8 @@ ATpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 ATpR	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 ATp	|Free_t	|safesysfree	|Malloc_t where
 CrTp	|void	|croak_memory_wrap
-Ap	|int	|runops_standard
-Ap	|int	|runops_debug
+Cp	|int	|runops_standard
+Cp	|int	|runops_debug
 Afpd	|void	|sv_catpvf_mg	|NN SV *const sv|NN const char *const pat|...
 Apd	|void	|sv_vcatpvf_mg	|NN SV *const sv|NN const char *const pat \
 				|NULLOK va_list *const args
