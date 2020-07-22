@@ -344,8 +344,8 @@ EOM
 
     darwin_major=$(echo $osvers|awk -F. '{print $1}')
 
-    # macOS 10.12 (darwin 6.0.0) deprecated syscall().
-    if [ "$darwin_major" -ge 6 ]; then
+    # macOS 10.12 (darwin 16.0.0) deprecated syscall().
+    if [ "$darwin_major" -ge 16 ]; then
         d_syscall='undef'
         # If deploying to pre-10.12, suppress Time::HiRes's detection of the system clock_gettime()
         case "$MACOSX_DEPLOYMENT_TARGET" in
