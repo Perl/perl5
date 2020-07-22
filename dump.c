@@ -143,6 +143,13 @@ Returns a pointer to the escaped text as held by C<dsv>.
 =for apidoc Amnh||PERL_PV_ESCAPE_UNI_DETECT
 
 =cut
+
+Unused or not for public use
+=for apidoc Cmnh||PERL_PV_PRETTY_REGPROP
+=for apidoc Cmnh||PERL_PV_PRETTY_DUMP
+=for apidoc Cmnh||PERL_PV_PRETTY_NOCLEAR
+
+=cut
 */
 #define PV_ESCAPE_OCTBUFSIZE 32
 
