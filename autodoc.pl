@@ -409,6 +409,10 @@ open my $fh, '<', 'MANIFEST'
 while (my $line = <$fh>) {
     next unless my ($file) = $line =~ /^(\S+\.(?:[ch]|pod))\t/;
 
+    # Don't pick up pods from these.  (We may pick up generated stuff from
+    # /lib though)
+    next if $file =~ m! ^ ( cpan | dist | ext ) / !x;
+
     open F, '<', $file or die "Cannot open $file for docs: $!\n";
     $curheader = "Functions in file $file\n";
     autodoc(\*F,$file);
