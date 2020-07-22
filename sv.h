@@ -1400,6 +1400,15 @@ why not just use C<SvGROW> if you're not sure about the provenance?
 				(char*)saferealloc((Malloc_t)SvPVX(sv), \
 						   (MEM_SIZE)((n)))));  \
 		 } STMT_END
+/*
+=for apidoc Am|void|SvPV_shrink_to_cur|SV* sv
+Trim any trailing unused memory in the PV of C<sv>, which needs to have a real
+C<PV> that is unencumbered by things like COW.  Using
+C<SV_CHECK_THINKFIRST> or C<SV_CHECK_THINKFIRST_COW_DROP> before
+calling this should clean it up.
+
+=cut
+*/
 
 #define SvPV_shrink_to_cur(sv) STMT_START { \
 		   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
