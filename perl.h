@@ -643,6 +643,10 @@ code.
 =for apidoc AmnU||dVAR
 This is now a synonym for dNOOP: declare nothing
 
+=for apidoc_section $XS
+=for apidoc Amns||dMY_CXT_SV
+Now a placeholder that declares nothing
+
 =cut
 */
 
@@ -653,6 +657,7 @@ This is now a synonym for dNOOP: declare nothing
 
     /* these are only defined for compatibility; should not be used internally.
      * */
+#  define dMY_CXT_SV    dNOOP
 #  ifndef pTHXo
 #    define pTHXo		pTHX
 #    define pTHXo_	pTHX_
@@ -7214,9 +7219,7 @@ C<strtoul>.
 #  define _aMY_CXT	,aMY_CXT
 
 #else /* PERL_IMPLICIT_CONTEXT */
-
 #  define START_MY_CXT		static my_cxt_t my_cxt;
-#  define dMY_CXT_SV	    	dNOOP
 #  define dMY_CXT		dNOOP
 #  define dMY_CXT_INTERP(my_perl) dNOOP
 #  define MY_CXT_INIT		NOOP
