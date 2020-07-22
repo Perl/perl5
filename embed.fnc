@@ -1310,7 +1310,7 @@ Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 ApMb	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
-Afp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Adfp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 : Used in pp_ctl.c
 p	|void	|my_unexec
 CbDTPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
