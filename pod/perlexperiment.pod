@@ -127,6 +127,16 @@ C<experimental::vlb>.
 See also: L<perlre/(*positive_lookbehind:I<pattern>)> and
 L<perlre/(*negative_lookbehind:I<pattern>)>
 
+=item isa infix operator
+
+Introduced in Perl 5.32.0.
+
+Using this feature triggers warnings in the category
+C<experimental::isa>.
+
+The ticket for this feature is
+L<[perl #17200]|https://github.com/Perl/perl5/issues/17200>
+
 =back
 
 =head2 Accepted features
