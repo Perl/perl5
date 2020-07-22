@@ -1762,20 +1762,20 @@ Apd	|IO*	|sv_2io		|NN SV *const sv
 #if defined(PERL_IN_SV_C)
 S	|bool	|glob_2number	|NN GV* const gv
 #endif
-ApMb	|IV	|sv_2iv		|NN SV *sv
+CpMb	|IV	|sv_2iv		|NN SV *sv
 Apd	|IV	|sv_2iv_flags	|NN SV *const sv|const I32 flags
 Apd	|SV*	|sv_2mortal	|NULLOK SV *const sv
 Apd	|NV	|sv_2nv_flags	|NN SV *const sv|const I32 flags
 : Used in pp.c, pp_hot.c, sv.c
 pxd	|SV*	|sv_2num	|NN SV *const sv
-ApMb	|char*	|sv_2pv		|NN SV *sv|NULLOK STRLEN *lp
-Apd	|char*	|sv_2pv_flags	|NN SV *const sv|NULLOK STRLEN *const lp|const U32 flags
+CpMb	|char*	|sv_2pv		|NN SV *sv|NULLOK STRLEN *lp
+Cpd	|char*	|sv_2pv_flags	|NN SV *const sv|NULLOK STRLEN *const lp|const U32 flags
 ApdMb	|char*	|sv_2pvutf8	|NN SV *sv|NULLOK STRLEN *const lp
 Ap	|char*	|sv_2pvutf8_flags	|NN SV *sv|NULLOK STRLEN *const lp|const U32 flags
 ApdMb	|char*	|sv_2pvbyte	|NN SV *sv|NULLOK STRLEN *const lp
 Ap	|char*	|sv_2pvbyte_flags	|NN SV *sv|NULLOK STRLEN *const lp|const U32 flags
 AbpD	|char*	|sv_pvn_nomg	|NN SV* sv|NULLOK STRLEN* lp
-ApMb	|UV	|sv_2uv		|NN SV *sv
+CpMb	|UV	|sv_2uv		|NN SV *sv
 Apd	|UV	|sv_2uv_flags	|NN SV *const sv|const I32 flags
 CbpdD	|IV	|sv_iv		|NN SV* sv
 CbpdD	|UV	|sv_uv		|NN SV* sv

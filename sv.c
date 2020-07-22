@@ -3271,8 +3271,8 @@ These copy a stringified representation of the source SV into the
 destination SV.  They automatically perform coercion of numeric values into
 strings.  Guaranteed to preserve the C<UTF8> flag even from overloaded objects.
 Similar in nature to C<sv_2pv[_flags]> but they operate directly on an SV
-instead of just the string.  Mostly they use C<L</sv_2pv_flags>> to do the
-work, except when that would lose the UTF-8'ness of the PV.
+instead of just the string.  Mostly they use L<perlintern/C<sv_2pv_flags>> to
+do the work, except when that would lose the UTF-8'ness of the PV.
 
 The three forms differ only in whether or not they perform 'get magic' on
 C<sv>.  C<sv_copypv_nomg> skips 'get magic'; C<sv_copypv> performs it; and
