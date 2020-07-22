@@ -159,6 +159,13 @@ Perl_CvGV(pTHX_ CV *sv)
         : ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
 }
 
+/*
+=for apidoc CvDEPTH
+Returns the recursion level of the CV C<sv>.  Hence >= 2 indicates we are in a
+recursive call.
+
+=cut
+*/
 PERL_STATIC_INLINE I32 *
 Perl_CvDEPTH(const CV * const sv)
 {
