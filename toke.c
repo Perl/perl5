@@ -11340,7 +11340,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* if we allocated too much space, give some back */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
 	SvLEN_set(sv, SvCUR(sv) + 1);
-	SvPV_renew(sv, SvLEN(sv));
+	SvPV_shrink_to_cur(sv);
     }
 
     /* decide whether this is the first or second quoted string we've read
