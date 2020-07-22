@@ -1557,6 +1557,19 @@ any magic.
 # define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif
 
+/*
+=for apidoc Amn|SV *|DEFSV
+Returns the SV associated with C<$_>
+
+=for apidoc Am|void|DEFSV_set|SV * sv
+Associate C<sv> with C<$_>
+
+=for apidoc Amn|void|SAVE_DEFSV
+Localize C<$_>.  See L<perlguts/Localizing changes>.
+
+=cut
+*/
+
 #ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr.
 			       * For example in multithreaded environments
