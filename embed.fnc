@@ -1862,12 +1862,12 @@ EXp	|SV*|reg_named_buff          |NN REGEXP * const rx|NULLOK SV * const key \
                                  |NULLOK SV * const value|const U32 flags
 EXp	|SV*|reg_named_buff_iter     |NN REGEXP * const rx|NULLOK const SV * const lastkey \
                                  |const U32 flags
-Ap	|SV*|reg_named_buff_fetch    |NN REGEXP * const rx|NN SV * const namesv|const U32 flags
-Ap	|bool|reg_named_buff_exists  |NN REGEXP * const rx|NN SV * const key|const U32 flags
-Ap	|SV*|reg_named_buff_firstkey |NN REGEXP * const rx|const U32 flags
-Ap	|SV*|reg_named_buff_nextkey  |NN REGEXP * const rx|const U32 flags
-Ap	|SV*|reg_named_buff_scalar   |NN REGEXP * const rx|const U32 flags
-Ap	|SV*|reg_named_buff_all      |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_fetch    |NN REGEXP * const rx|NN SV * const namesv|const U32 flags
+Cp	|bool|reg_named_buff_exists  |NN REGEXP * const rx|NN SV * const key|const U32 flags
+Cp	|SV*|reg_named_buff_firstkey |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_nextkey  |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_scalar   |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_all      |NN REGEXP * const rx|const U32 flags
 
 : FIXME - is anything in re using this now?
 EXp	|void|reg_numbered_buff_fetch|NN REGEXP * const rx|const I32 paren|NULLOK SV * const sv
