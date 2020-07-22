@@ -823,7 +823,7 @@ S	|OP*	|fold_constants	|NN OP * const o
 Sd	|OP*	|traverse_op_tree|NN OP* top|NN OP* o
 #endif
 Afpd	|char*	|form		|NN const char* pat|...
-Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
+Adp	|char*	|vform		|NN const char* pat|NULLOK va_list* args
 Cp	|void	|free_tmps
 #if defined(PERL_IN_OP_C)
 S	|void	|gen_constant_list|NULLOK OP* o

@@ -1394,6 +1394,9 @@ Like C<L</form>> but does not take a thread context (C<aTHX>) parameter,
 so is used in situations where the caller doesn't already have the thread
 context.
 
+=for apidoc vform
+Like C<L</form>> but but the arguments are an encapsulated argument list.
+
 =cut
 */
 
