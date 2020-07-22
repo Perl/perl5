@@ -1673,6 +1673,15 @@ Inside such a I<pseudo-block> the following service is available:
 These macros arrange things to restore the value of integer variable
 C<i> at the end of enclosing I<pseudo-block>.
 
+=for apidoc_section Stack Manipulation Macros
+=for apidoc Amh||SAVEINT|int i
+=for apidoc Amh||SAVEIV|IV i
+=for apidoc Amh||SAVEI32|I32 i
+=for apidoc Amh||SAVELONG|long i
+=for apidoc Amh||SAVEI8|I8 i
+=for apidoc Amh||SAVEI16|I16 i
+=for apidoc Amh||SAVEBOOL|int i
+
 =item C<SAVESPTR(s)>
 
 =item C<SAVEPPTR(p)>
@@ -1681,6 +1690,9 @@ These macros arrange things to restore the value of pointers C<s> and
 C<p>.  C<s> must be a pointer of a type which survives conversion to
 C<SV*> and back, C<p> should be able to survive conversion to C<char*>
 and back.
+
+=for apidoc Amh||SAVESPTR|SV * s
+=for apidoc Amh||SAVEPPTR|char * p
 
 =item C<SAVEFREESV(SV *sv)>
 
@@ -1693,6 +1705,8 @@ lifetimes can be wildly different.
 
 Also compare C<SAVEMORTALIZESV>.
 
+=for apidoc Amh||SAVEFREESV|SV* sv
+
 =item C<SAVEMORTALIZESV(SV *sv)>
 
 Just like C<SAVEFREESV>, but mortalizes C<sv> at the end of the current
@@ -1700,14 +1714,20 @@ scope instead of decrementing its reference count.  This usually has the
 effect of keeping C<sv> alive until the statement that called the currently
 live scope has finished executing.
 
+=for apidoc Amh||SAVEMORTALIZESV|SV* sv
+
 =item C<SAVEFREEOP(OP *op)>
 
 The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+
+=for apidoc Amh||SAVEFREEOP|OP *op
 
 =item C<SAVEFREEPV(p)>
 
 The chunk of memory which is pointed to by C<p> is Safefree()ed at the
 end of I<pseudo-block>.
+
+=for apidoc Amh||SAVEFREEPV|void * p
 
 =item C<SAVECLEARSV(SV *sv)>
 
@@ -1723,20 +1743,28 @@ this:
 
   SAVEDELETE(PL_defstash, savepv(tmpbuf), strlen(tmpbuf));
 
+=for apidoc Amh||SAVEDELETE|HV * hv|char * key|I32 length
+
 =item C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
 only argument C<p>.
+
+=for apidoc Amh||SAVEDESTRUCTOR|DESTRUCTORFUNC_NOCONTEXT_t f|void *p
 
 =item C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
 implicit context argument (if any), and C<p>.
 
+for foo AMh||SAVEDESTRUCTOR_X|DESTRUCTORFUNC_t f|void *p
+
 =item C<SAVESTACK_POS()>
 
 The current offset on the Perl internal stack (cf. C<SP>) is restored
 at the end of I<pseudo-block>.
+
+=for apidoc Amh||SAVESTACK_POS
 
 =back
 
@@ -1744,6 +1772,9 @@ The following API list contains functions, thus one needs to
 provide pointers to the modifiable data explicitly (either C pointers,
 or Perlish C<GV *>s).  Where the above macros take C<int>, a similar
 function takes C<int *>.
+
+Other macros above have functions implementing them, but its probably
+best to just use the macro, and not those or the ones below.
 
 =over 4
 
