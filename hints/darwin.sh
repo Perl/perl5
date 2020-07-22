@@ -342,11 +342,10 @@ EOM
       exit 1
     esac
 
-    prodvers_major=$(echo $prodvers|awk -F. '{print $1}')
-    prodvers_minor=$(echo $prodvers|awk -F. '{print $2}')
+    darwin_major=$(echo $osvers|awk -F. '{print $1}')
 
-    # macOS (10.12) deprecated syscall().
-    if [[ ( "$prodvers_minor" -ge 12 && "$prodvers_major" -eq 10 ) || "$prodvers_major" -ge 11 ]]; then
+    # macOS 10.12 (darwin 6.0.0) deprecated syscall().
+    if [ "$darwin_major" -ge 6 ]; then
         d_syscall='undef'
         # If deploying to pre-10.12, suppress Time::HiRes's detection of the system clock_gettime()
         case "$MACOSX_DEPLOYMENT_TARGET" in
