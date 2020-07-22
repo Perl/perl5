@@ -574,7 +574,7 @@ ATod	|void	|perl_free	|NN PerlInterpreter *my_perl
 ATod	|int	|perl_run	|NN PerlInterpreter *my_perl
 ATod	|int	|perl_parse	|NN PerlInterpreter *my_perl|XSINIT_t xsinit \
 				|int argc|NULLOK char** argv|NULLOK char** env
-ATpR	|bool	|doing_taint	|int argc|NULLOK char** argv|NULLOK char** env
+CTpR	|bool	|doing_taint	|int argc|NULLOK char** argv|NULLOK char** env
 #if defined(USE_ITHREADS)
 ATod	|PerlInterpreter*|perl_clone|NN PerlInterpreter *proto_perl|UV flags
 #  if defined(PERL_IMPLICIT_SYS)
