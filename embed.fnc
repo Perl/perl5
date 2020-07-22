@@ -1496,7 +1496,7 @@ ApRd	|SV*	|vnewSVpvf	|NN const char *const pat|NULLOK va_list *const args
 Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
 ApMbdR	|SV*	|newSVsv	|NULLOK SV *const old
 AmdR	|SV*	|newSVsv_nomg	|NULLOK SV *const old
-ApR	|SV*	|newSVsv_flags	|NULLOK SV *const old|I32 flags
+CpR	|SV*	|newSVsv_flags	|NULLOK SV *const old|I32 flags
 ApdR	|SV*	|newSV_type	|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 ApdR	|OP*	|newUNOP_AUX	|I32 type|I32 flags|NULLOK OP* first \
