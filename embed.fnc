@@ -1739,16 +1739,16 @@ Ap	|HEK*	|share_hek	|NN const char* str|SSize_t len|U32 hash
 #ifdef PERL_USE_3ARG_SIGHANDLER
 : Used in perl.c
 Tp	|Signal_t |sighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
-ATp	|Signal_t |csighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
+CTp	|Signal_t |csighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
 #else
 Tp	|Signal_t |sighandler	|int sig
-ATp	|Signal_t |csighandler	|int sig
+CTp	|Signal_t |csighandler	|int sig
 #endif
 Tp	|Signal_t |sighandler1	|int sig
-ATp	|Signal_t |csighandler1	|int sig
+CTp	|Signal_t |csighandler1	|int sig
 Tp	|Signal_t |sighandler3	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
-ATp	|Signal_t |csighandler3	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
-ATp	|Signal_t |perly_sighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap|bool safe
+CTp	|Signal_t |csighandler3	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
+CTp	|Signal_t |perly_sighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap|bool safe
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|SSize_t n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 Xp	|void	|init_named_cv	|NN CV *cv|NN OP *nameop
