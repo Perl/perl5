@@ -421,7 +421,9 @@
 :      characters, and a warning is raised otherwise.  This flag suppresses
 :      that warning, so that weird things can be documented
 :
-:   n  Has no arguments.  (used only in =for apidoc entries)
+:   n  Has no arguments.  Perhaps a better name would have been '0'. (used only
+:      in =for apidoc entries)
+:
 :      The macro (it can't be a function) is used without any parameters nor
 :      empty parentheses.
 :
