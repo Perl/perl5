@@ -248,11 +248,11 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
           || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
 
-    $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
+    $docs .= "NOTE: the C<perl_> form of this function is deprecated.\n\n"
          if $flags =~ /O/;
     if ($p) {
-        $docs .= "NOTE: this function must be explicitly called as Perl_$name";
-        $docs .= " with an aTHX_ parameter" if $flags !~ /T/;
+        $docs .= "NOTE: this function must be explicitly called as C<Perl_$name>";
+        $docs .= " with an C<aTHX_> parameter" if $flags !~ /T/;
         $docs .= ".\n\n"
     }
 
@@ -381,7 +381,7 @@ _EOB_
     print $fh "\n=over\n\n";
 
     for my $missing (sort @$missing) {
-        print $fh "=item $missing\nX<$missing>\n\n";
+        print $fh "=item C<$missing>\nX<$missing>\n\n";
     }
     print $fh "=back\n\n";
 }
