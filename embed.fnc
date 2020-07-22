@@ -3486,9 +3486,9 @@ Apd	|void	|mro_method_changed_in	|NN HV* stash
 pde	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK HV * const oldstash|NN const GV * const gv|U32 flags
 : Only used in perl.c
 p	|void   |boot_core_mro
-ApoT	|void	|sys_init	|NN int* argc|NN char*** argv
-ApoT	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
-ApoT	|void	|sys_term
+CpoT	|void	|sys_init	|NN int* argc|NN char*** argv
+CpoT	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
+CpoT	|void	|sys_term
 Apxd	|const char *|cop_fetch_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c and the perl compiler
