@@ -2684,20 +2684,20 @@ Apd	|char*  |pv_pretty      |NN SV *dsv|NN char const * const str\
                                 |NULLOK char const * const start_color\
                                 |NULLOK char const * const end_color\
                                 |const U32 flags
-Afp	|void	|dump_indent	|I32 level|NN PerlIO *file|NN const char* pat|...
-Ap	|void	|dump_vindent	|I32 level|NN PerlIO *file|NN const char* pat \
+Cfp	|void	|dump_indent	|I32 level|NN PerlIO *file|NN const char* pat|...
+Cp	|void	|dump_vindent	|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args
-Ap	|void	|do_gv_dump	|I32 level|NN PerlIO *file|NN const char *name\
+Cp	|void	|do_gv_dump	|I32 level|NN PerlIO *file|NN const char *name\
 				|NULLOK GV *sv
-Ap	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN const char *name\
+Cp	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN const char *name\
 				|NULLOK GV *sv
-Ap	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NN const char *name\
+Cp	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NN const char *name\
 				|NULLOK HV *sv
-Ap	|void	|do_magic_dump	|I32 level|NN PerlIO *file|NULLOK const MAGIC *mg|I32 nest \
+Cp	|void	|do_magic_dump	|I32 level|NN PerlIO *file|NULLOK const MAGIC *mg|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
-Ap	|void	|do_op_dump	|I32 level|NN PerlIO *file|NULLOK const OP *o
-Ap	|void	|do_pmop_dump	|I32 level|NN PerlIO *file|NULLOK const PMOP *pm
-Ap	|void	|do_sv_dump	|I32 level|NN PerlIO *file|NULLOK SV *sv|I32 nest \
+Cp	|void	|do_op_dump	|I32 level|NN PerlIO *file|NULLOK const OP *o
+Cp	|void	|do_pmop_dump	|I32 level|NN PerlIO *file|NULLOK const PMOP *pm
+Cp	|void	|do_sv_dump	|I32 level|NN PerlIO *file|NULLOK SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|magic_dump	|NULLOK const MAGIC *mg
 Cp	|void	|reginitcolors
