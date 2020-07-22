@@ -1729,7 +1729,7 @@ S	|OP*	|scalarseq	|NULLOK OP* o
 p	|OP*	|scalarvoid	|NN OP* o
 Apd	|NV	|scan_bin	|NN const char* start|STRLEN len|NN STRLEN* retlen
 Apd	|NV	|scan_hex	|NN const char* start|STRLEN len|NN STRLEN* retlen
-Ap	|char*	|scan_num	|NN const char* s|NN YYSTYPE *lvalp
+Cp	|char*	|scan_num	|NN const char* s|NN YYSTYPE *lvalp
 Apd	|NV	|scan_oct	|NN const char* start|STRLEN len|NN STRLEN* retlen
 Axpd	|OP*	|op_scope	|NULLOK OP* o
 : Only used by perl.c/miniperl.c, but defined in caretx.c
