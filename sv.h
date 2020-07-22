@@ -1383,6 +1383,17 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
 
+/*
+=for apidoc Am|void|SvPV_renew|SV* sv|STRLEN len
+Low level micro optimization of C<L</SvGROW>>.  It is generally better to use
+C<SvGROW> instead.  This is because C<SvPV_renew> ignores potential issues that
+C<SvGROW> handles.  C<sv> needs to have a real C<PV> that is unencombered by
+things like COW.  Using C<L</SV_CHECK_THINKFIRST>> or
+C<L</SV_CHECK_THINKFIRST_COW_DROP>> before calling this should clean it up, but
+why not just use C<SvGROW> if you're not sure about the provenance?
+
+=cut
+*/
 #define SvPV_renew(sv,n) \
 	STMT_START { SvLEN_set(sv, n); \
 		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
