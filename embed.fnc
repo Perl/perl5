@@ -2700,7 +2700,7 @@ Ap	|void	|do_pmop_dump	|I32 level|NN PerlIO *file|NULLOK const PMOP *pm
 Ap	|void	|do_sv_dump	|I32 level|NN PerlIO *file|NULLOK SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|magic_dump	|NULLOK const MAGIC *mg
-Ap	|void	|reginitcolors
+Cp	|void	|reginitcolors
 CpdRMb	|char*	|sv_2pv_nolen	|NN SV* sv
 CpdRMb	|char*	|sv_2pvutf8_nolen|NN SV* sv
 CpdRMb	|char*	|sv_2pvbyte_nolen|NN SV* sv
