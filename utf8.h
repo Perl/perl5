@@ -419,7 +419,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 /* The largest code point representable by two UTF-8 bytes on any platform that
  * Perl runs on.  This value is constrained by EBCDIC which has 5 bits per
  * continuation byte */
-#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * nBIT_MAX(5))
+#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * nBIT_UMAX(5))
 
 /*
 
