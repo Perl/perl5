@@ -2831,17 +2831,24 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 /*
 =for apidoc_section $CV
 
-=for apidoc get_cvn_flags
+=for apidoc get_cv
+=for apidoc_item |CV *|get_cvs|"string"|I32 flags
+=for apidoc_item get_cvn_flags
 
-Returns the CV of the specified Perl subroutine.  C<flags> are passed to
+These return the CV of the specified Perl subroutine.  C<flags> are passed to
 C<gv_fetchpvn_flags>.  If C<GV_ADD> is set and the Perl subroutine does not
 exist then it will be declared (which has the same effect as saying
-C<sub name;>).  If C<GV_ADD> is not set and the subroutine does not exist
+C<sub name;>).  If C<GV_ADD> is not set and the subroutine does not exist,
 then NULL is returned.
 
-=for apidoc get_cv
+The forms differ only in how the subroutine is specified..  With C<get_cvs>,
+the name is a literal C string, enclosed in double quotes.  With C<get_cv>, the
+name is given by the C<name> parameter, which must be a NUL-terminated C
+string.  With C<get_cvn_flags>, the name is also given by the C<name>
+parameter, but it is a Perl string (possibly containing embedded NUL bytes),
+and its length in bytes is contained in the C<len> parameter.
 
-Uses C<strlen> to get the length of C<name>, then calls C<get_cvn_flags>.
+=for apidoc Amnh||GV_ADD
 
 =cut
 */
