@@ -937,35 +937,6 @@ struct context {
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-/*
-=for apidoc AmnU||G_SCALAR
-Used to indicate scalar context.  See C<L</GIMME_V>>, C<L</GIMME>>, and
-L<perlcall>.
-
-=for apidoc AmnU||G_ARRAY
-Used to indicate list context.  See C<L</GIMME_V>>, C<L</GIMME>> and
-L<perlcall>.
-
-=for apidoc AmnU||G_VOID
-Used to indicate void context.  See C<L</GIMME_V>> and L<perlcall>.
-
-=for apidoc AmnU||G_DISCARD
-Indicates that arguments returned from a callback should be discarded.  See
-L<perlcall>.
-
-=for apidoc AmnU||G_EVAL
-
-Used to force a Perl C<eval> wrapper around a callback.  See
-L<perlcall>.
-
-=for apidoc AmnU||G_NOARGS
-
-Indicates that no arguments are being sent to a callback.  See
-L<perlcall>.
-
-=cut
-*/
-
 #define G_SCALAR	2
 #define G_ARRAY		3
 #define G_VOID		1
