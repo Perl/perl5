@@ -1,5 +1,11 @@
 CHANGES
 -------
+2.73  Thu Feb 27 14:32:25 CET 2020 (rurban)
+      Bugfixes
+       - Fix shadowing of hash options in constructor (Patrick Heesom, RT #131919)
+       - Fix icmp v4 length with given bytes/data_size option (Patrick Heesom, RT #131919)
+       - Call _resolv as class method (Marc Reissner, GH #16)
+
 2.72  Thu 28 Mar 2019 09:01:39 AM CET (rurban)
       Features
       - add .cirrus.yml smoker https://cirrus-ci.com/github/rurban/Net-Ping
