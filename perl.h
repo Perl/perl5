@@ -135,9 +135,6 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 #  endif
 #endif
 
-/* this used to be off by default, now its on, see perlio.h */
-#define PERLIO_FUNCS_CONST
-
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY

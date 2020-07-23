@@ -63,15 +63,8 @@ typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
 #define PERLIO_LAYERS 1
 
-/* PERLIO_FUNCS_CONST is now on by default for efficiency, PERLIO_FUNCS_CONST
-   can be removed 1 day once stable & then PerlIO vtables are permanently RO */
-#ifdef PERLIO_FUNCS_CONST
 #define PERLIO_FUNCS_DECL(funcs) const PerlIO_funcs funcs
 #define PERLIO_FUNCS_CAST(funcs) (PerlIO_funcs*)(funcs)
-#else
-#define PERLIO_FUNCS_DECL(funcs) PerlIO_funcs funcs
-#define PERLIO_FUNCS_CAST(funcs) (funcs)
-#endif
 
 PERL_CALLCONV void PerlIO_define_layer(pTHX_ PerlIO_funcs *tab);
 PERL_CALLCONV PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name,
