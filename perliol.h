@@ -106,23 +106,16 @@ struct _PerlIO {
 #define PerlIOValid(f)     ((f) && *(f))
 
 /*--------------------------------------------------------------------------------------*/
-/* Data exports - EXTCONST rather than extern is needed for Cygwin */
-#undef EXTPERLIO 
-#ifdef PERLIO_FUNCS_CONST
-#define EXTPERLIO EXTCONST
-#else
-#define EXTPERLIO EXT
-#endif
-EXTPERLIO PerlIO_funcs PerlIO_unix;
-EXTPERLIO PerlIO_funcs PerlIO_perlio;
-EXTPERLIO PerlIO_funcs PerlIO_stdio;
-EXTPERLIO PerlIO_funcs PerlIO_crlf;
-EXTPERLIO PerlIO_funcs PerlIO_utf8;
-EXTPERLIO PerlIO_funcs PerlIO_byte;
-EXTPERLIO PerlIO_funcs PerlIO_raw;
-EXTPERLIO PerlIO_funcs PerlIO_pending;
+EXTCONST PerlIO_funcs PerlIO_unix;
+EXTCONST PerlIO_funcs PerlIO_perlio;
+EXTCONST PerlIO_funcs PerlIO_stdio;
+EXTCONST PerlIO_funcs PerlIO_crlf;
+EXTCONST PerlIO_funcs PerlIO_utf8;
+EXTCONST PerlIO_funcs PerlIO_byte;
+EXTCONST PerlIO_funcs PerlIO_raw;
+EXTCONST PerlIO_funcs PerlIO_pending;
 #ifdef WIN32
-EXTPERLIO PerlIO_funcs PerlIO_win32;
+EXTCONST PerlIO_funcs PerlIO_win32;
 #endif
 PERL_CALLCONV PerlIO *PerlIO_allocate(pTHX);
 PERL_CALLCONV SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
