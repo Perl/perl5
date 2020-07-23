@@ -5507,7 +5507,6 @@ in terms of this function.
 
 =for apidoc Amnh||SV_CATUTF8
 =for apidoc Amnh||SV_CATBYTES
-=for apidoc Amnh||SV_SMAGIC
 
 =cut
 */
@@ -9318,7 +9317,6 @@ C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
     #define newSVpvn_utf8(s, len, u)			\
 	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
 
-=for apidoc Amnh||SVf_UTF8
 =for apidoc Amnh||SVs_TEMP
 
 =cut
