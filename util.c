@@ -572,20 +572,20 @@ S_delimcpy_intern(char *to, const char *toend, const char *from,
 }
 
 char *
-Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend, int delim, I32 *retlen)
-{
-    PERL_ARGS_ASSERT_DELIMCPY;
-
-    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 1);
-}
-
-char *
 Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
 			const char *fromend, int delim, I32 *retlen)
 {
     PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE;
 
     return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 0);
+}
+
+char *
+Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend, int delim, I32 *retlen)
+{
+    PERL_ARGS_ASSERT_DELIMCPY;
+
+    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 1);
 }
 
 /*
