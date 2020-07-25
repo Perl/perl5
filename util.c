@@ -571,13 +571,59 @@ S_delimcpy_intern(char *to, const char *toend, const char *from,
     return (char *)from;
 }
 
+
+/*
+=for apidoc delimcpy_no_escape
+
+Copy a source buffer to a destination buffer, stopping at (but not including)
+the first occurrence of the delimiter byte C<delim>, in the source.  The source
+is the bytes between C<from> and C<fromend> inclusive.  The dest is C<to>
+through C<toend>.
+
+Nothing is copied beyond what fits between C<to> through C<toend>.  If C<delim>
+doesn't occur in the source buffer, as much of the source as will fit is copied
+to the destination.
+
+The actual number of bytes copied is written to C<*retlen>.
+
+If there is room in the destination available after the copy, an extra
+terminating safety NUL byte is written (not included in the returned length).
+
+=cut
+*/
 char *
 Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
 			const char *fromend, int delim, I32 *retlen)
 {
+    const char * delim_pos;
+    Ptrdiff_t to_len = toend - to;
+
+    /* Only use the minimum of the available source/dest */
+    Ptrdiff_t copy_len = MIN(fromend - from, to_len);
+
     PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE;
 
-    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 0);
+    assert(copy_len >= 0);
+
+    /* Look for the first delimiter in the portion of the source we are allowed
+     * to look at (determined by the input bounds). */
+    delim_pos = (const char *) memchr(from, delim, copy_len);
+    if (delim_pos) {
+        copy_len = delim_pos - from;
+    } /* else didn't find it: copy all of the source permitted */
+
+    Copy(from, to, copy_len, char);
+
+    if (retlen) {
+        *retlen = copy_len;
+    }
+
+    /* If there is extra space available, add a trailing NUL */
+    if (copy_len < to_len) {
+        to[copy_len] = '\0';
+    }
+
+    return (char *) from + copy_len;
 }
 
 char *
