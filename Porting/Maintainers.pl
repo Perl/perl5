@@ -505,7 +505,7 @@ use File::Glob qw(:case);
     },
 
     'File::Path' => {
-        'DISTRIBUTION' => 'JKEENAN/File-Path-2.16.tar.gz',
+        'DISTRIBUTION' => 'JKEENAN/File-Path-2.17.tar.gz',
         'FILES'        => q[cpan/File-Path],
         'EXCLUDED'     => [
             qw(t/Path-Class.t),
