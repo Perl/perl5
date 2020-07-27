@@ -27,7 +27,6 @@ $| = 1;
 $Is_W32     = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
 $Is_OS2     = $^O eq 'os2';
-$Is_UWin    = $^O eq 'uwin';
 $Is_OS390   = $^O eq 'os390';
 
 my $vms_unix_rpt = 0;
@@ -468,7 +467,7 @@ if ($^O eq 'vos') {
 } else {
  $| = 0;
  # The following line assumes buffered output, which may be not true:
- print '@#!*$@(!@#$' unless ($Is_OS2 || $Is_UWin || $Is_OS390 ||
+ print '@#!*$@(!@#$' unless ($Is_OS2 || $Is_OS390 ||
                             $Is_VMS ||
 			    (defined $ENV{PERLIO} &&
 			     $ENV{PERLIO} eq 'unix' &&

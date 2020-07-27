@@ -4752,7 +4752,6 @@ hints/unicos.sh			Hints for named architecture
 hints/unicosmk.sh		Hints for named architecture
 hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
-hints/uwin.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header

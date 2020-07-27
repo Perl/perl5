@@ -321,6 +321,11 @@ DJGPP is a port of the GNU toolchain to 32-bit x86 systems running
 DOS.  The last known attempt to build Perl on it was on 5.20, which
 only got as far as building miniperl.
 
+=item AT&T UWIN
+
+UWIN is a UNIX compatibility layer for Windows.  It was last released
+in 2012 and has been superseded by Cygwin these days.
+
 =back
 
 =head2 Platform-Specific Notes
