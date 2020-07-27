@@ -76,10 +76,10 @@ EOF
 
 # Don't change this to add new bison versions without testing that the generated
 # files actually work :-) Win32 in particular may not like them. :-(
-unless ($version =~ /\b(2\.[4567]|3\.[0-4])\b/) { die <<EOF; }
+unless ($version =~ /\b(2\.[4567]|3\.[0-7])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently versions
-2.4-2.7 or 3.0-3.4 are known to work.  Try installing
+2.4-2.7 or 3.0-3.7 are known to work.  Try installing
     http://ftp.gnu.org/gnu/bison/bison-3.3.tar.gz
 or similar.  Your bison identifies itself as:
 
@@ -187,12 +187,24 @@ foreach ($act_fh, $tab_fh, $h_fh) {
 exit 0;
 
 
-# extract the tables and actions from the generated .c file
+# extract the symbol kinds, tables and actions from the generated .c file
 
 sub extract {
     my $clines = shift;
     my $tablines;
     my $actlines;
+
+    # extract the symbol kind table if it exists
+    $clines =~ m@
+        (?:
+            ^/\* \s* Symbol \s+ kind\. \s* \*/\n
+        )?
+        enum \s+ yysymbol_kind_t \s* \{
+        .*?
+        \} \s* ;\n
+        typedef \s+ enum \s+ \w+ \s+ \w+ ; \n+
+    @xms
+        and $tablines .= $&;
 
     my $last_table = $version >= 3 ? 'yyr2' : 'yystos';
     $clines =~ m@
@@ -206,7 +218,7 @@ sub extract {
 	}\s*;				# end of last table
     @xms
 	or die "Can't extract tables from $tmpc_file\n";
-    $tablines = $&;
+    $tablines .= $&;
 
 
     # extract all the cases in the big action switch statement
@@ -307,7 +319,7 @@ sub make_type_tab {
 	    /xsm
 	or die "Can't extract yytname[] from table string\n";
     my $fields = $1;
-    $fields =~ s{"([^"]+)"}
+    $fields =~ s{"((?:[^"\\]|\\.)+)"}
 		{ "toketype_" .
 		    (defined $tokens{$1} ? $tokens{$1} : $default_token)
 		}ge;
