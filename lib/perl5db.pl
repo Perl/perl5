@@ -3347,10 +3347,6 @@ use B<o> I<inhibit_exit> to avoid stopping after program termination,
 B<h q>, B<h R> or B<h o> to get additional info.
 EOP
 
-        # Set the DB::eval context appropriately.
-        # At program termination disable any user actions.
-        $DB::action = undef;
-
         $DB::package     = 'main';
         $DB::usercontext = DB::_calc_usercontext($DB::package);
     } ## end elsif ($package eq 'DB::fake')
