@@ -11,8 +11,7 @@ plan(36);
 $TST = 'TST';
 
 $Is_Dosish = ($^O eq 'MSWin32' or
-              $^O eq 'os2' or $^O eq 'cygwin' or
-              $^O =~ /^uwin/);
+              $^O eq 'os2' or $^O eq 'cygwin');
 
 open($TST, 'harness') || (die "Can't open harness");
 binmode $TST if $Is_Dosish;
