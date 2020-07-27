@@ -254,7 +254,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Bison versions 3.5 through 3.7 are now supported.
 
 =back
 
