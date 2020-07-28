@@ -254,7 +254,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The minimum supported Bison version is now 2.4.
 
 =back
 
