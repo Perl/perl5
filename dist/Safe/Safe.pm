@@ -67,7 +67,7 @@ require utf8;
 # particular code points don't cause it to load.
 # (Swashes are cached internally by perl in PL_utf8_* variables
 # independent of being inside/outside of Safe. So once loaded they can be)
-do { my $a = pack('U',0x100); require 'utf8_heavy.pl' if "$]" < 5.031006; $a =~ m/\x{1234}/; $a =~ tr/\x{1234}//; };
+do { my $a = pack('U',0x100); $a =~ m/\x{1234}/; $a =~ tr/\x{1234}//; };
 # now we can safely include utf8::SWASHNEW in $default_share defined below.
 
 my $default_root  = 0;
