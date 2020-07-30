@@ -22,7 +22,7 @@ $safe->deny_only();
 # Fails with "Undefined subroutine PLPerl::utf8::SWASHNEW called"
 # if SWASHNEW is not shared, else returns true if unicode logic is working.
 # (For early Perls we don't take into account EBCDIC, so will fail there
-my $trigger = q{ my $a = pack('U',0xC4); $a =~ tr/\x{1234}//d; 1 };
+my $trigger = q{ my $a = pack('U',0xC4); $a =~ tr/\x{1234}//rd };
 
 ok $safe->reval( $trigger ), 'trigger expression should return true';
 is $@, '', 'trigger expression should not die';
