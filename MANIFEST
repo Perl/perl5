@@ -4826,6 +4826,7 @@ lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
 lib/perl5db/t/taint		Tests for the Perl debugger
 lib/perl5db/t/test-a-statement-1	Tests for the Perl debugger
 lib/perl5db/t/test-a-statement-2	Tests for the Perl debugger
+lib/perl5db/t/test-a-statement-3	Tests for the Perl debugger
 lib/perl5db/t/test-dieLevel-option-1	Tests for the Perl debugger
 lib/perl5db/t/test-frame-option-1	Tests for the Perl debugger
 lib/perl5db/t/test-l-statement-1	Tests for the Perl debugger
