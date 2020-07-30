@@ -1,0 +1,13 @@
+on:
+  push:
+    branches:
+      - blead
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
+    steps:
+      - uses: mschilde/auto-label-merge-conflicts@master
+        with:
+          CONFLICT_LABEL_NAME: "has conflicts"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
