@@ -53,7 +53,7 @@ sub _ok {
         }
     }
     $test = $test + 1;
-    $result;
+    return !!$result;
 }
 
 sub like ($$;$) {
@@ -67,6 +67,50 @@ sub isnt ($$;$) {
 }
 sub ok($;$) {
     _ok ('ok', shift, undef, @_);
+}
+
+my @bad = (
+    'use v8', # not sure - need decision
+    'use v6',
+    'use v6.1',
+    'use v6.0.1',
+    'use 6.001',
+    'no 6',
+    'no v6',
+    'use 66',
+    'no 66',
+    # use v7.*; # index('v7.')
+    'use 7',
+    'use 7.0',
+    'use 7.42', # index('7')
+    'use 5.10', # => 5.100
+    'use 5.6', #  => 5.600
+    'no v5',
+    'use 5.34',
+    'use v5.34',
+    'use 5.33',
+    'use v5.33',
+);
+
+my @good = (
+    'use v7',
+    'no v7',
+    'use v5',
+    'use v5.10',
+    'use 5.010',
+    'use v5.8.5',
+    'use v5.14',
+    'use v5.32',
+);
+
+foreach my $v ( @good ) {
+    eval qq[ $v; ];
+    is( $@, '', "'$v;' is valid" . ( $@ ? "# $@" : '' ) );
+}
+
+foreach my $v ( @bad ) {
+    eval qq[ $v; ];
+    isnt( $@, '', "'$v;' is invalid");
 }
 
 eval "use 5";
@@ -87,8 +131,8 @@ eval q{ use v5.5.630; };
 is ($@, '', "3-part version number");
 
 eval q{ use 10.0.2; };
-like ($@, qr/^Perl v10\.0\.2 required/,
-    "Got expected error message: insufficient Perl version");
+like ($@, qr/^\QPerl v10.0.2 required--this is only \E$^V/,
+    "Got expected error message: use 10.0.2;");
 
 eval "use 5.000";
 is ($@, '', "implicit semicolon - decimal version number");
@@ -96,55 +140,58 @@ is ($@, '', "implicit semicolon - decimal version number");
 eval "use 5.000;";
 is ($@, '', "explicit semicolon - decimal version number");
 
-eval "use 666.000;";
-like ($@, qr/Perl v666\.0\.0 required--this is only \Q$^V\E, stopped/,
-    "Got expected error message: insufficient Perl version - decimal version number");
+eval "use 6.000;";
+like ($@, qr/\Q'use 6' is not supported by Perl 7\E/,
+    "Got expected error message: use 6.000");
 
 eval "no 8.000;";
-is ($@, '', "No error for 'no 8.000'");
+like ($@, qr{\QUnknown behavior for 'use 8'\E}, "No error for 'no 8.000'");
 
 eval "no 5.000;";
 like ($@, qr/Perls since v5\.0\.0 too modern--this is \Q$^V\E, stopped/,
     "Got expected error message: 'no 5.000'");
 
-eval "use 7.6;";
-like ($@, qr/Perl v7\.600\.0 required \(did you mean v7\.6\.0\?\)--this is only \Q$^V\E, stopped/,
-    "Got expected error message: 'use 7.6;'");
+eval "use 5.6;";
+like ($@, qr/Perl v5\.600\.0 required \(did you mean v5\.6\.0\?\)--this is only \Q$^V\E, stopped/,
+    "Got expected error message: 'use 5.6;'");
 
-eval "use 7.8;";
-like ($@, qr/Perl v7\.800\.0 required \(did you mean v7\.8\.0\?\)--this is only \Q$^V\E, stopped/,
-    "Got expected error message: 'use 7.8;'");
+eval "use 5.8;";
+like ($@, qr/Perl v5\.800\.0 required \(did you mean v5\.8\.0\?\)--this is only \Q$^V\E, stopped/,
+    "Got expected error message: 'use 5.8;'");
 
-eval "use 7.9;";
-like ($@, qr/Perl v7\.900\.0 required \(did you mean v7\.9\.0\?\)--this is only \Q$^V\E, stopped/,
-    "Got expected error message: 'use 7.9;'");
+eval "use 5.9;";
+like ($@, qr/Perl v5\.900\.0 required \(did you mean v5\.9\.0\?\)--this is only \Q$^V\E, stopped/,
+    "Got expected error message: 'use 5.9;'");
 
-eval "use 7.10;";
-like ($@, qr/Perl v7\.100\.0 required \(did you mean v7\.10\.0\?\)--this is only \Q$^V\E, stopped/,
-    "Got expected error message: 'use 7.10;'");
+eval "use 5.10;";
+like ($@, qr/Perl v5\.100\.0 required \(did you mean v5\.10\.0\?\)--this is only \Q$^V\E, stopped/,
+    "Got expected error message: 'use 5.10;'");
 
-{
-    local $::TODO = "patch pp_ctl.c S_require_version for use 5.x";
-    eval "use 5.8;";
-    like ($@, qr/Perl v5\.800\.0 required \(did you mean v5\.8\.0\?\)--this is only \Q$^V\E, stopped/,
-        "Got expected error message: 'use 5.8;' # TODO $::TODO");
-}
+eval "use 5.8;";
+like ($@, qr/Perl v5\.800\.0 required \(did you mean v5\.8\.0\?\)--this is only \Q$^V\E, stopped/,
+    "Got expected error message: 'use 5.8;'");
 
+my $fiveV = q[5.032000];
 
-eval sprintf "use %.6f;", $];
-is ($@, '', "No error message on: 'use %.6f;'");
+my $str;
 
+eval( $str = sprintf "use %.6f;", $fiveV );
+is ($@, '', "No error message on: '$str'");
 
-eval sprintf "use %.6f;", $] - 0.000001;
-is ($@, '', "No error message on: 'use %.6f;'");
+eval( $str = sprintf "use %.6f;", $fiveV - 0.000001 );
+is ($@, '', "No error message on: $str'");
 
-eval sprintf("use %.6f;", $] + 1);
-like ($@, qr/Perl v8.\d+.\d+ required--this is only \Q$^V\E, stopped/,
-    "Got expected error message: 'use %.6f;'");
+eval( $str = sprintf("use %.6f;", $fiveV + 1) );
+like ($@, qr/\Q'use 6.032' is not supported by Perl 7\E/,
+    "Got expected error message: '$str'");
 
-eval sprintf "use %.6f;", $] + 0.00001;
-like ($@, qr/Perl v7.\d+.\d+ required--this is only \Q$^V\E, stopped/a,
-    "Got expected error message: 'use %.6f;'");
+eval( $str = sprintf "use %.6f;", $fiveV + 0.00001 );
+is( $@, '', "No error message on: '$str'");
+
+eval( $str = sprintf "use %.6f;", $fiveV + 0.001001 );
+like ($@, qr/Perl v5.\d+.\d+ required--this is only \Q$^V\E, stopped/a,
+    "Got expected error message: '$str'");
+
 
 # check that "use 5.11.0" (and higher) loads strictures
 eval 'use 5.11.0; ${"foo"} = "bar";';
@@ -266,56 +313,5 @@ is("@test_use::got", "joe", 'got joe');
     # (git commit 2658f4d9934aba5f8b23afcc078dc12b3a40223)
     eval "use test_use_14937 3";
     like ($@, qr/^test_use_14937 defines neither package nor VERSION--version check failed at/, "test_use_14937");
-}
-
-my @ver = split /\./, sprintf "%vd", $^V;
-
-foreach my $index (-3..+3) {
-    foreach my $v (0, 1) {
-        my @parts = @ver;
-        if ($index) {
-            if ($index < 0) {
-                # Jiggle one of the parts down
-                --$parts[-$index - 1] if $parts[-$index - 1] > 1;
-                if ($parts[-$index - 1] < 0) {
-                    # perl's version number ends with '.0'
-                    $parts[-$index - 1] = 0;
-                    $parts[-$index - 2] -= 2 if $parts[-$index - 2] > 2;
-                }
-            } else {
-                # Jiggle one of the parts up
-                ++$parts[$index - 1];
-            }
-        }
-        my $v_version = sprintf "v%d.%d.%d", @parts;
-        my $version;
-        if ($v) {
-            $version = $v_version;
-        } else {
-            $version = $parts[0] + $parts[1] / 1000 + $parts[2] / 1000000;
-        }
-
-        eval "use $version";
-        if ($index > 0) {
-            # The future
-            like ($@,
-              qr/Perl $v_version required--this is only \Q$^V\E, stopped/,
-              "use $version");
-        } else {
-            # The present or past
-            is ($@, '', "use $version");
-        }
-
-        eval "no $version";
-        if ($index <= 0) {
-            # The present or past
-            like ($@,
-              qr/Perls since $v_version too modern--this is \Q$^V\E, stopped/,
-              "no $version");
-        } else {
-            # future
-            is ($@, '', "no $version");
-        }
-    }
 }
 

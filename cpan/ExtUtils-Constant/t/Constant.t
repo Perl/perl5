@@ -409,7 +409,11 @@ EOT
   push @files, $pm;
   open FH, ">$pm" or die "open >$pm: $!\n";
   print FH "package $package;\n";
-  print FH "use $];\n";
+  if ( "$]" < 7 ) {
+    print FH "use $];\n";
+  } else {
+    print FH "use v".int($]).";\n";
+  }
 
   print FH <<'EOT';
 

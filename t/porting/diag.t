@@ -718,6 +718,9 @@ Wrong size of loadOrdinals array: expected %d, actual %d
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
+'use %s' is not supported by Perl 7
+Unknown behavior for 'use %s'
+use v7; is the only supported syntax for Perl 7.
 
 __CATEGORIES__
 

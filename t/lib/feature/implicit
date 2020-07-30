@@ -58,6 +58,8 @@ Helloworld
 # no implicit features with 'no'
 eval "no " . ($]+1); print $@;
 EXPECT
+OPTIONS regex
+Unknown behavior for .*
 ########
 # lower version after higher version
 sub evalbytes { print "evalbytes sub\n" }
