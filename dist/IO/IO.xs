@@ -389,13 +389,17 @@ ungetc(handle, c)
 
 int
 ferror(handle)
-	InputStream	handle
+	SV *	handle
+    PREINIT:
+        IO *io = sv_2io(handle);
+        InputStream in = IoIFP(io);
+        OutputStream out = IoOFP(io);
     CODE:
-	if (handle)
+	if (in)
 #ifdef PerlIO
-	    RETVAL = PerlIO_error(handle);
+	    RETVAL = PerlIO_error(in) || (in != out && PerlIO_error(out));
 #else
-	    RETVAL = ferror(handle);
+	    RETVAL = ferror(in) || (in != out && ferror(out));
 #endif
 	else {
 	    RETVAL = -1;
@@ -406,13 +410,21 @@ ferror(handle)
 
 int
 clearerr(handle)
-	InputStream	handle
+	SV *	handle
+    PREINIT:
+        IO *io = sv_2io(handle);
+        InputStream in = IoIFP(io);
+        OutputStream out = IoOFP(io);
     CODE:
 	if (handle) {
 #ifdef PerlIO
-	    PerlIO_clearerr(handle);
+	    PerlIO_clearerr(in);
+            if (in != out)
+                PerlIO_clearerr(out);
 #else
-	    clearerr(handle);
+	    clearerr(in);
+            if (in != out)
+                clearerr(out);
 #endif
 	    RETVAL = 0;
 	}

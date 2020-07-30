@@ -1998,9 +1998,9 @@ static IV S_iv_shift(IV iv, int shift, bool left)
 
     /* For left shifts, perl 5 has chosen to treat the value as unsigned for
      * the * purposes of shifting, then cast back to signed.  This is very
-     * different from perl 6:
+     * different from Raku:
      *
-     * $ perl6 -e 'say -2 +< 5'
+     * $ raku -e 'say -2 +< 5'
      * -64
      *
      * $ ./perl -le 'print -2 << 5'
@@ -2062,14 +2062,20 @@ PP(pp_lt)
 {
     dSP;
     SV *left, *right;
+    U32 flags_and, flags_or;
 
     tryAMAGICbin_MG(lt_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
+    flags_and = SvFLAGS(left) & SvFLAGS(right);
+    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
     SETs(boolSV(
-	(SvIOK_notUV(left) && SvIOK_notUV(right))
-	? (SvIVX(left) < SvIVX(right))
-	: (do_ncmp(left, right) == -1)
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) < SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) < SvNVX(right))
+        : (do_ncmp(left, right) == -1)
     ));
     RETURN;
 }
@@ -2078,14 +2084,20 @@ PP(pp_gt)
 {
     dSP;
     SV *left, *right;
+    U32 flags_and, flags_or;
 
     tryAMAGICbin_MG(gt_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
+    flags_and = SvFLAGS(left) & SvFLAGS(right);
+    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
     SETs(boolSV(
-	(SvIOK_notUV(left) && SvIOK_notUV(right))
-	? (SvIVX(left) > SvIVX(right))
-	: (do_ncmp(left, right) == 1)
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) > SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) > SvNVX(right))
+        : (do_ncmp(left, right) == 1)
     ));
     RETURN;
 }
@@ -2094,14 +2106,20 @@ PP(pp_le)
 {
     dSP;
     SV *left, *right;
+    U32 flags_and, flags_or;
 
     tryAMAGICbin_MG(le_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
+    flags_and = SvFLAGS(left) & SvFLAGS(right);
+    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
     SETs(boolSV(
-	(SvIOK_notUV(left) && SvIOK_notUV(right))
-	? (SvIVX(left) <= SvIVX(right))
-	: (do_ncmp(left, right) <= 0)
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) <= SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) <= SvNVX(right))
+        : (do_ncmp(left, right) <= 0)
     ));
     RETURN;
 }
@@ -2110,14 +2128,20 @@ PP(pp_ge)
 {
     dSP;
     SV *left, *right;
+    U32 flags_and, flags_or;
 
     tryAMAGICbin_MG(ge_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
+    flags_and = SvFLAGS(left) & SvFLAGS(right);
+    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
     SETs(boolSV(
-	(SvIOK_notUV(left) && SvIOK_notUV(right))
-	? (SvIVX(left) >= SvIVX(right))
-	: ( (do_ncmp(left, right) & 2) == 0)
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) >= SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) >= SvNVX(right))
+        : ( (do_ncmp(left, right) & 2) == 0)
     ));
     RETURN;
 }
@@ -2126,14 +2150,20 @@ PP(pp_ne)
 {
     dSP;
     SV *left, *right;
+    U32 flags_and, flags_or;
 
     tryAMAGICbin_MG(ne_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
+    flags_and = SvFLAGS(left) & SvFLAGS(right);
+    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
     SETs(boolSV(
-	(SvIOK_notUV(left) && SvIOK_notUV(right))
-	? (SvIVX(left) != SvIVX(right))
-	: (do_ncmp(left, right) != 0)
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) != SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) != SvNVX(right))
+        : (do_ncmp(left, right) != 0)
     ));
     RETURN;
 }
@@ -3520,11 +3550,16 @@ PP(pp_index)
   push_result:
     /* OPpTRUEBOOL indicates an '== -1' has been optimised away */
     if (PL_op->op_private & OPpTRUEBOOL) {
-        PUSHs( ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
-                    ? &PL_sv_yes : &PL_sv_no);
-        if (PL_op->op_private & OPpTARGET_MY)
+        SV *result = ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
+            ? &PL_sv_yes : &PL_sv_no;
+        if (PL_op->op_private & OPpTARGET_MY) {
             /* $lex = (index() == -1) */
-            sv_setsv(TARG, TOPs);
+            sv_setsv_mg(TARG, result);
+            PUSHs(TARG);
+        }
+        else {
+            PUSHs(result);
+        }
     }
     else
         PUSHi(retval);
@@ -4016,7 +4051,6 @@ PP(pp_ucfirst)
 
 PP(pp_uc)
 {
-    dVAR;
     dSP;
     SV *source = TOPs;
     STRLEN len;
@@ -5895,6 +5929,7 @@ PP(pp_reverse)
 	    sv_setsv(TARG, DEFSV);
 	    XPUSHs(TARG);
 	}
+        SvSETMAGIC(TARG); /* remove any utf8 length magic */
 
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
@@ -6429,11 +6464,11 @@ PP(unimplemented_op)
        Secondly, as the three ops we "panic" on are padmy, mapstart and custom,
        if we get here for a custom op then that means that the custom op didn't
        have an implementation. Given that OP_NAME() looks up the custom op
-       by its pp_addr, likely it will return NULL, unless someone (unhelpfully)
-       registers &PL_unimplemented_op as the address of their custom op.
+       by its op_ppaddr, likely it will return NULL, unless someone (unhelpfully)
+       registers &Perl_unimplemented_op as the address of their custom op.
        NULL doesn't generate a useful error message. "custom" does. */
     const char *const name = op_type >= OP_max
-	? "[out of range]" : PL_op_name[PL_op->op_type];
+	? "[out of range]" : PL_op_name[op_type];
     if(OP_IS_SOCKET(op_type))
 	DIE(aTHX_ PL_no_sock_func, name);
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
@@ -6629,7 +6664,7 @@ PP(pp_coreargs)
 
 PP(pp_avhvswitch)
 {
-    dVAR; dSP;
+    dSP;
     return PL_ppaddr[
 		(SvTYPE(TOPs) == SVt_PVAV ? OP_AEACH : OP_EACH)
 		    + (PL_op->op_private & OPpAVHVSWITCH_MASK)
@@ -7124,6 +7159,30 @@ PP(pp_isa)
     left  = TOPs;
 
     SETs(boolSV(sv_isa_sv(left, right)));
+    RETURN;
+}
+
+PP(pp_cmpchain_and)
+{
+    dSP;
+    SV *result = POPs;
+    PUTBACK;
+    if (SvTRUE_NN(result)) {
+	return cLOGOP->op_other;
+    } else {
+	TOPs = result;
+	return NORMAL;
+    }
+}
+
+PP(pp_cmpchain_dup)
+{
+    dSP;
+    SV *right = TOPs;
+    SV *left = TOPm1s;
+    TOPm1s = right;
+    TOPs = left;
+    XPUSHs(right);
     RETURN;
 }
 

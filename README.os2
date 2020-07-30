@@ -619,7 +619,7 @@ C<set PERLLIB_PREFIX> in F<Config.sys>, see L</"C<PERLLIB_PREFIX>">.
 
 =item Additional Perl modules
 
-  unzip perl_ste.zip -d f:/perllib/lib/site_perl/5.31.10/
+  unzip perl_ste.zip -d f:/perllib/lib/site_perl/5.33.1/
 
 Same remark as above applies.  Additionally, if this directory is not
 one of directories on @INC (and @INC is influenced by C<PERLLIB_PREFIX>), you
@@ -1225,7 +1225,7 @@ necessary external C libraries from F<.lib> format to F<.a> format: run one of
   emximp -o foo.a foo.lib
 
 whichever is appropriate.)  Also, make sure that the DLLs for external
-libraries are usable with with executables compiled without C<-Zmtd> options.
+libraries are usable with executables compiled without C<-Zmtd> options.
 
 When you are sure that only a few subdirectories
 lead to failures, you may want to add C<-j4> option to C<make> to speed up

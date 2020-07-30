@@ -57,19 +57,14 @@ POD = perl.pod	\
 	perl5280delta.pod	\
 	perl5281delta.pod	\
 	perl5282delta.pod	\
+	perl5283delta.pod	\
 	perl5300delta.pod	\
 	perl5301delta.pod	\
-	perl5310delta.pod	\
-	perl53110delta.pod	\
-	perl5311delta.pod	\
-	perl5312delta.pod	\
-	perl5313delta.pod	\
-	perl5314delta.pod	\
-	perl5315delta.pod	\
-	perl5316delta.pod	\
-	perl5317delta.pod	\
-	perl5318delta.pod	\
-	perl5319delta.pod	\
+	perl5302delta.pod	\
+	perl5303delta.pod	\
+	perl5320delta.pod	\
+	perl5330delta.pod	\
+	perl5331delta.pod	\
 	perl561delta.pod	\
 	perl56delta.pod	\
 	perl581delta.pod	\
@@ -222,19 +217,14 @@ MAN = perl.man	\
 	perl5280delta.man	\
 	perl5281delta.man	\
 	perl5282delta.man	\
+	perl5283delta.man	\
 	perl5300delta.man	\
 	perl5301delta.man	\
-	perl5310delta.man	\
-	perl53110delta.man	\
-	perl5311delta.man	\
-	perl5312delta.man	\
-	perl5313delta.man	\
-	perl5314delta.man	\
-	perl5315delta.man	\
-	perl5316delta.man	\
-	perl5317delta.man	\
-	perl5318delta.man	\
-	perl5319delta.man	\
+	perl5302delta.man	\
+	perl5303delta.man	\
+	perl5320delta.man	\
+	perl5330delta.man	\
+	perl5331delta.man	\
 	perl561delta.man	\
 	perl56delta.man	\
 	perl581delta.man	\
@@ -387,19 +377,14 @@ HTML = perl.html	\
 	perl5280delta.html	\
 	perl5281delta.html	\
 	perl5282delta.html	\
+	perl5283delta.html	\
 	perl5300delta.html	\
 	perl5301delta.html	\
-	perl5310delta.html	\
-	perl53110delta.html	\
-	perl5311delta.html	\
-	perl5312delta.html	\
-	perl5313delta.html	\
-	perl5314delta.html	\
-	perl5315delta.html	\
-	perl5316delta.html	\
-	perl5317delta.html	\
-	perl5318delta.html	\
-	perl5319delta.html	\
+	perl5302delta.html	\
+	perl5303delta.html	\
+	perl5320delta.html	\
+	perl5330delta.html	\
+	perl5331delta.html	\
 	perl561delta.html	\
 	perl56delta.html	\
 	perl581delta.html	\
@@ -552,19 +537,14 @@ TEX = perl.tex	\
 	perl5280delta.tex	\
 	perl5281delta.tex	\
 	perl5282delta.tex	\
+	perl5283delta.tex	\
 	perl5300delta.tex	\
 	perl5301delta.tex	\
-	perl5310delta.tex	\
-	perl53110delta.tex	\
-	perl5311delta.tex	\
-	perl5312delta.tex	\
-	perl5313delta.tex	\
-	perl5314delta.tex	\
-	perl5315delta.tex	\
-	perl5316delta.tex	\
-	perl5317delta.tex	\
-	perl5318delta.tex	\
-	perl5319delta.tex	\
+	perl5302delta.tex	\
+	perl5303delta.tex	\
+	perl5320delta.tex	\
+	perl5330delta.tex	\
+	perl5331delta.tex	\
 	perl561delta.tex	\
 	perl56delta.tex	\
 	perl581delta.tex	\

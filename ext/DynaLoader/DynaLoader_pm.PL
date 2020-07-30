@@ -1,5 +1,8 @@
 use Config;
 
+use strict;
+use warnings;
+
 sub to_string {
     my ($value) = @_;
     $value =~ s/\\/\\\\/g;
@@ -85,7 +88,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.46';
+    $VERSION = '1.48';
 }
 
 EOT
@@ -126,6 +129,8 @@ else {
 ($dl_dlext, $dl_so, $dlsrc) = @Config::Config{qw(dlext so dlsrc)};
 EOT
 }
+
+my @dl_library_path;
 
 print OUT expand_os_specific(<<'EOT');
 
@@ -481,14 +486,6 @@ sub dl_findfile {
             push(@names, $_);
         }
 	my $dirsep = '/';
-	<<$^O-eq-symbian>>
-	$dirsep = '\\';
-	if ($0 =~ /^([a-z]):/i) {
-	    my $drive = $1;
-	    @dirs = map { "$drive:$_" } @dirs;
-	    @dl_library_path = map { "$drive:$_" } @dl_library_path;
-	}
-	<</$^O-eq-symbian>>
         foreach $dir (@dirs, @dl_library_path) {
             next unless -d $dir;
 	    <<$^O-eq-VMS>>

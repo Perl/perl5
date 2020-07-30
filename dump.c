@@ -367,7 +367,6 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
 char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
-    dVAR;
     SV * const t = sv_newmortal();
     int unref = 0;
     U32 type;
@@ -929,7 +928,6 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
 STATIC UV
 S_sequence_num(pTHX_ const OP *o)
 {
-    dVAR;
     SV     *op,
           **seq;
     const char *key;
@@ -1733,7 +1731,6 @@ const struct flag_to_name regexp_core_intflags_names[] = {
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
-    dVAR;
     SV *d;
     const char *s;
     U32 flags;

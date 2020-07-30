@@ -151,14 +151,13 @@ struct regnode_1 {
     U32 arg1;
 };
 
-/* Node whose argument is 'void *', a pointer to void.  This needs to be used
- * very carefully in situations where pointers won't become invalid because of,
- * say re-mallocs */
+/* Node whose argument is 'SV *'.  This needs to be used very carefully in
+ * situations where pointers won't become invalid because of, say re-mallocs */
 struct regnode_p {
     U8	flags;
     U8  type;
     U16 next_off;
-    void * arg1;
+    SV * arg1;
 };
 
 /* Similar to a regnode_1 but with an extra signed argument */
@@ -260,7 +259,7 @@ struct regnode_ssc {
 */
 #if SHORTSIZE > 2
 #  ifndef REG_INFTY
-#    define REG_INFTY ((1<<16)-1)
+#    define REG_INFTY  nBIT_UMAX(16)
 #  endif
 #endif
 
@@ -360,7 +359,7 @@ struct regnode_ssc {
     } STMT_END
 
 #define ANYOFR_BASE_BITS    20
-#define ANYOFRbase(p)   (ARG(p) & ((1 << ANYOFR_BASE_BITS) - 1))
+#define ANYOFRbase(p)   (ARG(p) & nBIT_MASK(ANYOFR_BASE_BITS))
 #define ANYOFRdelta(p)  (ARG(p) >> ANYOFR_BASE_BITS)
 
 #undef NODE_ALIGN
@@ -698,7 +697,7 @@ struct regnode_ssc {
      } STMT_END
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
-#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
+#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = nBIT_MASK(ANYOF_POSIXL_MAX); } STMT_END
 #define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
 #define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
@@ -712,12 +711,12 @@ struct regnode_ssc {
                             cBOOL(((regnode_ssc*)(p))->classflags)
 #define ANYOF_POSIXL_SSC_TEST_ALL_SET(p) /* Are all bits set? */       \
         (((regnode_ssc*) (p))->classflags                              \
-                        == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
+                                        == nBIT_MASK(ANYOF_POSIXL_MAX))
 
 #define ANYOF_POSIXL_TEST_ALL_SET(p)                                   \
-        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                               \
+        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                       \
          && ((regnode_charclass_posixl*) (p))->classflags              \
-                        == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
+                                    == nBIT_MASK(ANYOF_POSIXL_MAX))
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
@@ -1101,21 +1100,38 @@ re.pm, especially to the documentation.
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
-/* get_sv() can return NULL during global destruction. */
-#define GET_RE_DEBUG_FLAGS DEBUG_r({ \
-        SV * re_debug_flags_sv = NULL; \
+/* Get the debug flags for code not in regcomp.c nor regexec.c.  This doesn't
+ * initialize the variable if it isn't already there, instead it just assumes
+ * the flags are 0 */
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX                               \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
+    STMT_START {                                                               \
+        SV * re_debug_flags_sv = NULL;                                         \
+                     /* get_sv() can return NULL during global destruction. */ \
         re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
-        if (re_debug_flags_sv) { \
-            if (!SvIOK(re_debug_flags_sv)) \
-                sv_setuv(re_debug_flags_sv, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
-            re_debug_flags=SvIV(re_debug_flags_sv); \
-        }\
-})
+        if (re_debug_flags_sv && SvIOK(re_debug_flags_sv))                     \
+            re_debug_flags=SvIV(re_debug_flags_sv);                            \
+    } STMT_END
+
 
 #ifdef DEBUGGING
 
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS volatile IV re_debug_flags = 0; \
-        PERL_UNUSED_VAR(re_debug_flags); GET_RE_DEBUG_FLAGS;
+/* For use in regcomp.c and regexec.c,  Get the debug flags, and initialize to
+ * the defaults if not done already */
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS                                         \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
+    STMT_START {                                                               \
+        SV * re_debug_flags_sv = NULL;                                         \
+                     /* get_sv() can return NULL during global destruction. */ \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
+        if (re_debug_flags_sv) {                                               \
+            if (!SvIOK(re_debug_flags_sv)) /* If doesnt exist set to default */\
+                sv_setuv(re_debug_flags_sv,                                    \
+                        /* These defaults should be kept in sync with re.pm */ \
+                            RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );   \
+            re_debug_flags=SvIV(re_debug_flags_sv);                            \
+        }                                                                      \
+    } STMT_END
 
 #define isDEBUG_WILDCARD (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_WILDCARD))
 
@@ -1146,10 +1162,10 @@ re.pm, especially to the documentation.
     
 #else /* if not DEBUGGING */
 
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS
-#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS  dNOOP
+#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)  dNOOP
 #define RE_SV_ESCAPE(rpv,isuni,dsv,sv,m)
-#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)
+#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)  dNOOP
 #define RE_SV_DUMPLEN(ItEm)
 #define RE_SV_TAIL(ItEm)
 #define isDEBUG_WILDCARD 0

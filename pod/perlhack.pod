@@ -812,7 +812,7 @@ code point.  This function returns C<"\xC2\xA0"> on an ASCII platform, and
 C<"\x80\x41"> on an EBCDIC 1047 one.
 
 But easiest is, if the character is specifiable as a literal, like
-C<"A"> or C<"%">, to use that; if not so specificable, you can use use
+C<"A"> or C<"%">, to use that; if not so specificable, you can use
 C<\N{}> , if the side effects aren't troublesome.  Simply specify all
 your characters in hex, using C<\N{U+ZZ}> instead of C<\xZZ>.  C<\N{}>
 is the Unicode name, and so it
@@ -1080,7 +1080,7 @@ C<make>, however, failed with output (excerpted) like this:
       mg.o reentr.o mro.o hv.o av.o run.o pp_hot.o sv.o \
       pp.o scope.o pp_ctl.o pp_sys.o doop.o doio.o regexec.o \
       utf8.o taint.o deb.o universal.o globals.o perlio.o \
-      perlapi.o numeric.o mathoms.o locale.o pp_pack.o pp_sort.o  \
+      numeric.o mathoms.o locale.o pp_pack.o pp_sort.o  \
       miniperlmain.o opmini.o perlmini.o
     pp.o: In function `Perl_pp_pow':
     pp.c:(.text+0x2db9): undefined reference to `pow'

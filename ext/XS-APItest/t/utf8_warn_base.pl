@@ -36,8 +36,9 @@ my $known_start_byte = I8_to_native("\xC5");
 sub requires_extended_utf8($) {
 
     # Returns a boolean as to whether or not the code point parameter fits
-    # into 31 bits, subject to the convention that a negative code point
-    # stands for one that overflows the word size, so won't fit in 31 bits.
+    # into 31 bits (30 on EBCDIC), subject to the convention that a negative
+    # code point stands for one that overflows the word size, so won't fit in
+    # 31 bits.
 
     return shift > $highest_non_extended_utf8_cp;
 }
@@ -485,7 +486,6 @@ my @tests;
               : I8_to_native(
                 "\xff\xa7\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"),
               0x7FFFFFFFFFFFFFFF,
-              (isASCII) ? 1 : 2,
             ],
             [ "first 64 bit code point",
               (isASCII)
@@ -524,7 +524,6 @@ my @tests;
                     I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x800000000,
-                      40000000
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
@@ -584,7 +583,7 @@ sub flags_to_text($$)
 }
 
 # Possible flag returns from utf8n_to_uvchr_error().  These should have G_,
-# instead of A_, D_, but the prefixes will be used in a a later commit, so
+# instead of A_, D_, but the prefixes will be used in a later commit, so
 # minimize churn by having them here.
 my @utf8n_flags_to_text =  ( qw(
         A_EMPTY
@@ -1415,7 +1414,7 @@ foreach my $test (@tests) {
               $allow_flags |= $::UTF8_ALLOW_OVERFLOW if $malformed_allow_type;
           }
 
-          # And we can create the malformation-related text for the the test
+          # And we can create the malformation-related text for the test
           # names we eventually will generate.
           my $malformations_name = "";
           if (@malformation_names) {

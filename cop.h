@@ -1016,6 +1016,8 @@ L<perlcall>.
 
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.
+ * Which one to use (or add) is mostly, but not completely arbitrary:  See
+ * http://nntp.perl.org/group/perl.perl5.porters/257169
  */
 
 #define PERLSI_UNKNOWN		-1
@@ -1030,6 +1032,7 @@ L<perlcall>.
 #define PERLSI_DIEHOOK		8
 #define PERLSI_REQUIRE		9
 #define PERLSI_MULTICALL       10
+#define PERLSI_REGCOMP         11
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */

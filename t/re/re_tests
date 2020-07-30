@@ -1838,7 +1838,7 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 # [ perl #114272]
 \Vn	\xFFn/	y	$&	\xFFn
 
-# These mostly exercize various paths in the optimizer
+# These mostly exercise various paths in the optimizer
 /(?l:a?\w)/	b	y	$&	b
 /(?l:a?\D)/	b	y	$&	b
 ^_?[^\S_0-9]\w*\z	\t	y	$&	\t

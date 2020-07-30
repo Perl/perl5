@@ -43,7 +43,7 @@ esac
 # Turning on optimization breaks perl.
 # You can override this with Configure -Doptimize='-O' or somesuch.
 case "$optimize" in
-'') optimize='none' ;;
+'') optimize=' ' ;;
 esac
 
 # To link via definition side decks we need the dll option
@@ -231,7 +231,7 @@ d_gethostbyaddr_r='undef'
 d_gethostbyname_r='undef'
 d_gethostent_r='undef'
 
-# The z/OS C compiler compiler supports the attribute keyword, but in a
+# The z/OS C compiler supports the attribute keyword, but in a
 # limited manner.
 #
 # Ideally, Configure's tests should test the attributes as they are expected

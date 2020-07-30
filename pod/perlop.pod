@@ -36,7 +36,8 @@ C<(2 + 4) * 5>. So the expression yields C<2 + 20 == 22>, rather than
 C<6 * 5 == 30>.
 
 I<Operator associativity> defines what happens if a sequence of the same
-operators is used one after another: whether they will be grouped at the left
+operators is used one after another:
+usually that they will be grouped at the left
 or the right. For example, in C<9 - 3 - 2>, subtraction is left associative,
 so C<9 - 3> is grouped together as the left-hand operand of the second
 subtraction, rather than C<3 - 2> being grouped together as the right-hand
@@ -59,6 +60,63 @@ special evaluation rules that can result in an operand not being evaluated at
 all; in general, the top-level operator in an expression has control of
 operand evaluation.
 
+Some comparison operators, as their associativity, I<chain> with some
+operators of the same precedence (but never with operators of different
+precedence).  This chaining means that each comparison is performed
+on the two arguments surrounding it, with each interior argument taking
+part in two comparisons, and the comparison results are implicitly ANDed.
+Thus S<C<"$x E<lt> $y E<lt>= $z">> behaves exactly like S<C<"$x E<lt>
+$y && $y E<lt>= $z">>, assuming that C<"$y"> is as simple a scalar as
+it looks.  The ANDing short-circuits just like C<"&&"> does, stopping
+the sequence of comparisons as soon as one yields false.
+
+In a chained comparison, each argument expression is evaluated at most
+once, even if it takes part in two comparisons, but the result of the
+evaluation is fetched for each comparison.  (It is not evaluated
+at all if the short-circuiting means that it's not required for any
+comparisons.)  This matters if the computation of an interior argument
+is expensive or non-deterministic.  For example,
+
+    if($x < expensive_sub() <= $z) { ...
+
+is not entirely like
+
+    if($x < expensive_sub() && expensive_sub() <= $z) { ...
+
+but instead closer to
+
+    my $tmp = expensive_sub();
+    if($x < $tmp && $tmp <= $z) { ...
+
+in that the subroutine is only called once.  However, it's not exactly
+like this latter code either, because the chained comparison doesn't
+actually involve any temporary variable (named or otherwise): there is
+no assignment.  This doesn't make much difference where the expression
+is a call to an ordinary subroutine, but matters more with an lvalue
+subroutine, or if the argument expression yields some unusual kind of
+scalar by other means.  For example, if the argument expression yields
+a tied scalar, then the expression is evaluated to produce that scalar
+at most once, but the value of that scalar may be fetched up to twice,
+once for each comparison in which it is actually used.
+
+In this example, the expression is evaluated only once, and the tied
+scalar (the result of the expression) is fetched for each comparison that
+uses it.
+
+    if ($x < $tied_scalar < $z) { ...
+
+In the next example, the expression is evaluated only once, and the tied
+scalar is fetched once as part of the operation within the expression.
+The result of that operation is fetched for each comparison, which
+normally doesn't matter unless that expression result is also magical due
+to operator overloading.
+
+    if ($x < $tied_scalar + 42 < $z) { ...
+
+Some operators are instead non-associative, meaning that it is a syntax
+error to use a sequence of those operators of the same precedence.
+For example, S<C<"$x .. $y .. $z">> is an error.
+
 Perl operators have the following associativity and precedence,
 listed from highest precedence to lowest.  Operators borrowed from
 C keep the same precedence relationship with each other, even where
@@ -76,8 +134,8 @@ values only, not array values.
     left	+ - .
     left	<< >>
     nonassoc	named unary operators
-    nonassoc	< > <= >= lt gt le ge
-    nonassoc	== != <=> eq ne cmp ~~
+    chained 	< > <= >= lt gt le ge
+    chain/na	== != eq ne <=> cmp ~~
     nonassoc    isa
     left	&
     left	| ^
@@ -517,6 +575,12 @@ Binary C<"ge"> returns true if the left argument is stringwise greater
 than or equal to the right argument.
 X<< ge >>
 
+A sequence of relational operators, such as S<C<"$x E<lt> $y E<lt>=
+$z">>, performs chained comparisons, in the manner described above in
+the section L</"Operator Precedence and Associativity">.
+Beware that they do not chain with equality operators, which have lower
+precedence.
+
 =head2 Equality Operators
 X<equality> X<equal> X<equals> X<operator, equality>
 
@@ -527,6 +591,20 @@ X<==>
 Binary C<< "!=" >> returns true if the left argument is numerically not equal
 to the right argument.
 X<!=>
+
+Binary C<"eq"> returns true if the left argument is stringwise equal to
+the right argument.
+X<eq>
+
+Binary C<"ne"> returns true if the left argument is stringwise not equal
+to the right argument.
+X<ne>
+
+A sequence of the above equality operators, such as S<C<"$x == $y ==
+$z">>, performs chained comparisons, in the manner described above in
+the section L</"Operator Precedence and Associativity">.
+Beware that they do not chain with relational operators, which have
+higher precedence.
 
 Binary C<< "<=>" >> returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
@@ -545,14 +623,6 @@ X<spaceship>
 (Note that the L<bigint>, L<bigrat>, and L<bignum> pragmas all
 support C<"NaN">.)
 
-Binary C<"eq"> returns true if the left argument is stringwise equal to
-the right argument.
-X<eq>
-
-Binary C<"ne"> returns true if the left argument is stringwise not equal
-to the right argument.
-X<ne>
-
 Binary C<"cmp"> returns -1, 0, or 1 depending on whether the left
 argument is stringwise less than, equal to, or greater than the right
 argument.
@@ -561,6 +631,10 @@ X<cmp>
 Binary C<"~~"> does a smartmatch between its arguments.  Smart matching
 is described in the next section.
 X<~~>
+
+The two-sided ordering operators C<"E<lt>=E<gt>"> and C<"cmp">, and the
+smartmatch operator C<"~~">, are non-associative with respect to each
+other and with respect to the equality operators of the same precedence.
 
 C<"lt">, C<"le">, C<"ge">, C<"gt"> and C<"cmp"> use the collation (sort)
 order specified by the current C<LC_COLLATE> locale if a S<C<use
@@ -2337,13 +2411,16 @@ X<qx> X<`> X<``> X<backtick>
 =item C<`I<STRING>`>
 
 A string which is (possibly) interpolated and then executed as a
-system command with F</bin/sh> or its equivalent.  Shell wildcards,
-pipes, and redirections will be honored.  The collected standard
-output of the command is returned; standard error is unaffected.  In
-scalar context, it comes back as a single (potentially multi-line)
-string, or C<undef> if the command failed.  In list context, returns a
+system command, via F</bin/sh> or its equivalent if required.  Shell
+wildcards, pipes, and redirections will be honored.  Similarly to
+C<system>, if the string contains no shell metacharacters then it will
+executed directly.  The collected standard output of the command is
+returned; standard error is unaffected.  In scalar context, it comes
+back as a single (potentially multi-line) string, or C<undef> if the
+shell (or command) could not be started.  In list context, returns a
 list of lines (however you've defined lines with C<$/> or
-C<$INPUT_RECORD_SEPARATOR>), or an empty list if the command failed.
+C<$INPUT_RECORD_SEPARATOR>), or an empty list if the shell (or command)
+could not be started.
 
 Because backticks do not affect standard error, use shell file descriptor
 syntax (assuming the shell supports this) if you care to address this.

@@ -147,6 +147,15 @@ static const char* const ident_var_zero_multi_digit = "Numeric variables with mo
 #define LEX_INTERPCONST		 2 /* NOT USED */
 #define LEX_FORMLINE		 1 /* expecting a format line               */
 
+/* returned to yyl_try() to request it to retry the parse loop, expected to only
+   be returned directly by yyl_fake_eof(), but functions that call yyl_fake_eof()
+   can also return it.
+
+   yylex (aka Perl_yylex) returns 0 on EOF rather than returning -1,
+   other token values are 258 or higher (see perly.h), so -1 should be
+   a safe value here.
+*/
+#define YYL_RETRY (-1)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -196,8 +205,10 @@ static const char* const lex_state_names[] = {
  * Aop          : addition-level operator
  * AopNOASSIGN  : addition-level operator that is never part of .=
  * Mop          : multiplication-level operator
- * Eop          : equality-testing operator
- * Rop          : relational operator <= != gt
+ * ChEop        : chaining equality-testing operator
+ * NCEop        : non-chaining comparison operator at equality precedence
+ * ChRop        : chaining relational operator <= != gt
+ * NCRop        : non-chaining relational operator isa
  *
  * Also see LOP and lop() below.
  */
@@ -234,8 +245,10 @@ static const char* const lex_state_names[] = {
 #define Aop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)ADDOP))
 #define AopNOASSIGN(f) return (pl_yylval.ival=f, PL_bufptr=s, REPORT((int)ADDOP))
 #define Mop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)MULOP))
-#define Eop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
-#define Rop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
+#define ChEop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)CHEQOP))
+#define NCEop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)NCEQOP))
+#define ChRop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)CHRELOP))
+#define NCRop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)NCRELOP))
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
@@ -303,7 +316,6 @@ struct code {
 
 static const struct code no_code = { NULL, NULL, NULL, NULL, NULL, 0, FALSE };
 
-
 #ifdef DEBUGGING
 
 /* how to interpret the pl_yylval associated with the token */
@@ -330,6 +342,8 @@ static struct debug_tokens {
     { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
     { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
+    { CHEQOP,		TOKENTYPE_OPNUM,	"CHEQOP" },
+    { CHRELOP,		TOKENTYPE_OPNUM,	"CHRELOP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
     { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
     { DEFAULT,		TOKENTYPE_NONE,		"DEFAULT" },
@@ -340,7 +354,6 @@ static struct debug_tokens {
     { DOTDOT,		TOKENTYPE_IVAL,		"DOTDOT" },
     { ELSE,		TOKENTYPE_NONE,		"ELSE" },
     { ELSIF,		TOKENTYPE_IVAL,		"ELSIF" },
-    { EQOP,		TOKENTYPE_OPNUM,	"EQOP" },
     { FOR,		TOKENTYPE_IVAL,		"FOR" },
     { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
     { FORMLBRACK,	TOKENTYPE_NONE,		"FORMLBRACK" },
@@ -363,6 +376,8 @@ static struct debug_tokens {
     { METHOD,		TOKENTYPE_OPVAL,	"METHOD" },
     { MULOP,		TOKENTYPE_OPNUM,	"MULOP" },
     { MY,		TOKENTYPE_IVAL,		"MY" },
+    { NCEQOP,		TOKENTYPE_OPNUM,	"NCEQOP" },
+    { NCRELOP,		TOKENTYPE_OPNUM,	"NCRELOP" },
     { NOAMP,		TOKENTYPE_NONE,		"NOAMP" },
     { NOTOP,		TOKENTYPE_NONE,		"NOTOP" },
     { OROP,		TOKENTYPE_IVAL,		"OROP" },
@@ -380,7 +395,6 @@ static struct debug_tokens {
     { PRIVATEREF,	TOKENTYPE_OPVAL,	"PRIVATEREF" },
     { QWLIST,		TOKENTYPE_OPVAL,	"QWLIST" },
     { REFGEN,		TOKENTYPE_NONE,		"REFGEN" },
-    { RELOP,		TOKENTYPE_OPNUM,	"RELOP" },
     { REQUIRE,		TOKENTYPE_NONE,		"REQUIRE" },
     { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
     { SIGSUB,		TOKENTYPE_NONE,		"SIGSUB" },
@@ -1011,7 +1025,6 @@ function is more convenient.
 void
 Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 {
-    dVAR;
     char *bufptr;
     PERL_ARGS_ASSERT_LEX_STUFF_PVN;
     if (flags & ~(LEX_STUFF_UTF8))
@@ -1443,7 +1456,6 @@ is encountered, an exception is generated.
 I32
 Perl_lex_peek_unichar(pTHX_ U32 flags)
 {
-    dVAR;
     char *s, *bufend;
     if (flags & ~(LEX_KEEP_PREVIOUS))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_peek_unichar");
@@ -2695,7 +2707,6 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     const char* context = s - 3;
     STRLEN context_len = e - context + 1; /* include all of \N{...} */
 
-    dVAR;
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
@@ -4253,7 +4264,7 @@ S_scan_const(pTHX_ char *start)
 	    } else if (PL_lex_inpat && SvIVX(PL_linestr) == '\'') {
 		type = "q";
 		typelen = 1;
-	    } else  {
+	    } else {
 		type = "qq";
 		typelen = 2;
 	    }
@@ -6327,7 +6338,7 @@ yyl_bang(pTHX_ char *s)
             TOKEN(0);
         }
 
-        Eop(OP_NE);
+        ChEop(OP_NE);
     }
 
     if (tmp == '~')
@@ -6456,7 +6467,7 @@ yyl_tilde(pTHX_ char *s)
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
             "Smartmatch is experimental");
-        Eop(OP_SMARTMATCH);
+        NCEop(OP_SMARTMATCH);
     }
     s++;
     if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.') {
@@ -6524,14 +6535,14 @@ yyl_leftpointy(pTHX_ char *s)
                 s -= 3;
                 TOKEN(0);
             }
-            Eop(OP_NCMP);
+            NCEop(OP_NCMP);
         }
         s--;
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
             s -= 2;
             TOKEN(0);
         }
-        Rop(OP_LE);
+        ChRop(OP_LE);
     }
 
     s--;
@@ -6540,7 +6551,7 @@ yyl_leftpointy(pTHX_ char *s)
         TOKEN(0);
     }
 
-    Rop(OP_LT);
+    ChRop(OP_LT);
 }
 
 static int
@@ -6560,7 +6571,7 @@ yyl_rightpointy(pTHX_ char *s)
             s -= 2;
             TOKEN(0);
         }
-        Rop(OP_GE);
+        ChRop(OP_GE);
     }
 
     s--;
@@ -6569,7 +6580,7 @@ yyl_rightpointy(pTHX_ char *s)
         TOKEN(0);
     }
 
-    Rop(OP_GT);
+    ChRop(OP_GT);
 }
 
 static int
@@ -6588,9 +6599,10 @@ yyl_sglquote(pTHX_ char *s)
 }
 
 static int
-yyl_dblquote(pTHX_ char *s, STRLEN len)
+yyl_dblquote(pTHX_ char *s)
 {
     char *d;
+    STRLEN len;
     s = scan_str(s,FALSE,FALSE,FALSE,NULL);
     DEBUG_T( {
         if (s)
@@ -6884,7 +6896,7 @@ yyl_my(pTHX_ char *s, I32 my)
     OPERATOR(MY);
 }
 
-static int yyl_try(pTHX_ char*, STRLEN);
+static int yyl_try(pTHX_ char*);
 
 static bool
 yyl_eol_needs_semicolon(pTHX_ char **ps)
@@ -6934,7 +6946,7 @@ yyl_eol_needs_semicolon(pTHX_ char **ps)
 }
 
 static int
-yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
+yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
 {
     char *d;
 
@@ -7109,7 +7121,6 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
                 && !instr(s,"indir")
                 && instr(PL_origargv[0],"perl"))
             {
-                dVAR;
                 char **newargv;
 
                 *ipathend = '\0';
@@ -7176,13 +7187,13 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
                              we must not do it again */
                     {
                         SvPVCLEAR(PL_linestr);
-                        PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
+                        PL_bufptr = PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
                         PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
                         PL_last_lop = PL_last_uni = NULL;
                         PL_preambled = FALSE;
                         if (PERLDB_LINE_OR_SAVESRC)
                             (void)gv_fetchfile(PL_origfilename);
-                        return yyl_try(aTHX_ s, len);
+                        return YYL_RETRY;
                     }
                 }
             }
@@ -7195,7 +7206,8 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s, STRLEN len)
         TOKEN(';');
     }
 
-    return yyl_try(aTHX_ s, len);
+    PL_bufptr = s;
+    return YYL_RETRY;
 }
 
 static int
@@ -7581,7 +7593,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY___END__:
         if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D'))
             yyl_data_handle(aTHX);
-        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s, len);
+        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s);
 
     case KEY___SUB__:
         FUN0OP(CvCLONE(PL_compcv)
@@ -7657,7 +7669,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_cmp:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Eop(OP_SCMP);
+        NCEop(OP_SCMP);
 
     case KEY_caller:
         UNI(OP_CALLER);
@@ -7726,7 +7738,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_eq:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Eop(OP_SEQ);
+        ChEop(OP_SEQ);
 
     case KEY_exists:
         UNI(OP_EXISTS);
@@ -7804,12 +7816,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_gt:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SGT);
+        ChRop(OP_SGT);
 
     case KEY_ge:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SGE);
+        ChRop(OP_SGE);
 
     case KEY_grep:
         LOP(OP_GREPSTART, XREF);
@@ -7928,7 +7940,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_isa:
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__ISA), "isa is experimental");
-        Rop(OP_ISA);
+        NCRop(OP_ISA);
 
     case KEY_join:
         LOP(OP_JOIN,XTERM);
@@ -7957,12 +7969,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_lt:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SLT);
+        ChRop(OP_SLT);
 
     case KEY_le:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Rop(OP_SLE);
+        ChRop(OP_SLE);
 
     case KEY_localtime:
         UNI(OP_LOCALTIME);
@@ -8015,7 +8027,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_ne:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
-        Eop(OP_SNE);
+        ChEop(OP_SNE);
 
     case KEY_no:
         s = tokenize_use(0, s);
@@ -8494,7 +8506,6 @@ yyl_key_core(pTHX_ char *s, STRLEN len, struct code c)
 static int
 yyl_keylookup(pTHX_ char *s, GV *gv)
 {
-    dVAR;
     STRLEN len;
     bool anydelim;
     I32 key;
@@ -8623,22 +8634,30 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
 }
 
 static int
-yyl_try(pTHX_ char *s, STRLEN len)
+yyl_try(pTHX_ char *s)
 {
     char *d;
     GV *gv = NULL;
+    int tok;
 
   retry:
     switch (*s) {
     default:
-        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s))
-            return yyl_keylookup(aTHX_ s, gv);
+        if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s)) {
+            if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+                return tok;
+            goto retry_bufptr;
+        }
         yyl_croak_unrecognised(aTHX_ s);
 
     case 4:
     case 26:
         /* emulate EOF on ^D or ^Z */
-        return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s, len);
+        if ((tok = yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s)) != YYL_RETRY)
+            return tok;
+    retry_bufptr:
+        s = PL_bufptr;
+        goto retry;
 
     case 0:
 	if ((!PL_rsfp || PL_lex_inwhat)
@@ -8739,7 +8758,9 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		update_debugger_info(PL_linestr, NULL, 0);
 	    goto retry;
 	}
-        return yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s, len);
+        if ((tok = yyl_fake_eof(aTHX_ 0, cBOOL(PL_rsfp), s)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
 
     case '\r':
 #ifdef PERL_STRICT_CR
@@ -8824,7 +8845,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 
     case '=':
         if (s[1] == '=' && (s == PL_linestart || s[-1] == '\n')
-            && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), "====="))
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - (s + 2)), "====="))
         {
             s = vcs_conflict_marker(s + 7);
             goto retry;
@@ -8840,7 +8861,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		    s -= 2;
 		    TOKEN(0);
 		}
-		Eop(OP_EQ);
+		ChEop(OP_EQ);
 	    }
 	    if (tmp == '>') {
 		if (!PL_lex_allbrackets
@@ -8918,7 +8939,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 
     case '<':
         if (s[1] == '<' && (s == PL_linestart || s[-1] == '\n')
-            && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - (s + 2)), "<<<<<"))
         {
             s = vcs_conflict_marker(s + 7);
             goto retry;
@@ -8927,7 +8948,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
 
     case '>':
         if (s[1] == '>' && (s == PL_linestart || s[-1] == '\n')
-            && memBEGINs(s + 2, (STRLEN) (PL_bufend - s + 2), ">>>>>"))
+            && memBEGINs(s + 2, (STRLEN) (PL_bufend - (s + 2)), ">>>>>"))
         {
             s = vcs_conflict_marker(s + 7);
             goto retry;
@@ -9010,7 +9031,7 @@ yyl_try(pTHX_ char *s, STRLEN len)
         return yyl_sglquote(aTHX_ s);
 
     case '"':
-        return yyl_dblquote(aTHX_ s, len);
+        return yyl_dblquote(aTHX_ s);
 
     case '`':
         return yyl_backtick(aTHX_ s);
@@ -9028,13 +9049,19 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		TERM(THING);
 	    }
 	    else if ((*start == ':' && start[1] == ':')
-		  || (PL_expect == XSTATE && *start == ':'))
-                return yyl_keylookup(aTHX_ s, gv);
+                     || (PL_expect == XSTATE && *start == ':')) {
+                if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+                    return tok;
+                goto retry_bufptr;
+            }
 	    else if (PL_expect == XSTATE) {
 		d = start;
 		while (d < PL_bufend && isSPACE(*d)) d++;
-		if (*d == ':')
-                    return yyl_keylookup(aTHX_ s, gv);
+		if (*d == ':') {
+                    if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+                        return tok;
+                    goto retry_bufptr;
+                }
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    if (!isALPHA(*start) && (PL_expect == XTERM
@@ -9048,14 +9075,18 @@ yyl_try(pTHX_ char *s, STRLEN len)
 		}
 	    }
 	}
-        return yyl_keylookup(aTHX_ s, gv);
+        if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
 
     case 'x':
 	if (isDIGIT(s[1]) && PL_expect == XOPERATOR) {
 	    s++;
 	    Mop(OP_REPEAT);
 	}
-        return yyl_keylookup(aTHX_ s, gv);
+        if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
 
     case '_':
     case 'a': case 'A':
@@ -9084,7 +9115,9 @@ yyl_try(pTHX_ char *s, STRLEN len)
 	      case 'X':
     case 'y': case 'Y':
     case 'z': case 'Z':
-        return yyl_keylookup(aTHX_ s, gv);
+        if ((tok = yyl_keylookup(aTHX_ s, gv)) != YYL_RETRY)
+            return tok;
+        goto retry_bufptr;
     }
 }
 
@@ -9143,7 +9176,6 @@ yyl_try(pTHX_ char *s, STRLEN len)
 int
 Perl_yylex(pTHX)
 {
-    dVAR;
     char *s = PL_bufptr;
 
     if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
@@ -9392,7 +9424,7 @@ Perl_yylex(pTHX)
            expecting an operator) have been a sigil.
         */
         bool expected_operator = (PL_expect == XOPERATOR);
-        int ret = yyl_try(aTHX_ s, 0);
+        int ret = yyl_try(aTHX_ s);
         switch (pl_yylval.ival) {
         case OP_BIT_AND:
         case OP_MODULO:
@@ -12747,7 +12779,6 @@ void
 Perl_wrap_keyword_plugin(pTHX_
     Perl_keyword_plugin_t new_plugin, Perl_keyword_plugin_t *old_plugin_p)
 {
-    dVAR;
 
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_KEYWORD_PLUGIN;

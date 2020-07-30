@@ -29,7 +29,10 @@ use File::Path;
 use File::Spec;
 use Text::Tabs;
 use re "/aa";
+
 use feature 'state';
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
@@ -1474,24 +1477,22 @@ my $idt;        # Identifier_Type property
 my $has_In_conflicts = 0;
 my $has_Is_conflicts = 0;
 
-sub internal_file_to_platform ($) {
+sub internal_file_to_platform ($file=undef) {
     # Convert our file paths which have '/' separators to those of the
     # platform.
 
-    my $file = shift;
     return undef unless defined $file;
 
     return File::Spec->join(split '/', $file);
 }
 
-sub file_exists ($) {   # platform independent '-e'.  This program internally
+sub file_exists ($file=undef) {   # platform independent '-e'.  This program internally
                         # uses slash as a path separator.
-    my $file = shift;
-    return 0 if ! defined $file;
+    return 0 unless defined $file;
     return -e internal_file_to_platform($file);
 }
 
-sub objaddr($) {
+sub objaddr($addr) {
     # Returns the address of the blessed input object.
     # It doesn't check for blessedness because that would do a string eval
     # every call, and the program is structured so that this is never called
@@ -1500,7 +1501,7 @@ sub objaddr($) {
     no overloading; # If overloaded, numifying below won't work.
 
     # Numifying a ref gives its address.
-    return pack 'J', $_[0];
+    return pack 'J', $addr;
 }
 
 # These are used only if $annotate is true.
@@ -1533,14 +1534,11 @@ my $CONTROL_TYPE = -5;
 my $ABOVE_UNICODE_TYPE = -6;
 my $UNKNOWN_TYPE = -7;  # Used only if there is a bug in this program
 
-sub populate_char_info ($) {
+sub populate_char_info ($i) {
     # Used only with the $annotate option.  Populates the arrays with the
     # input code point's info that are needed for outputting more detailed
     # comments.  If calling context wants a return, it is the end point of
     # any contiguous range of characters that share essentially the same info
-
-    my $i = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     $viacode[$i] = $perl_charname->value_of($i) || "";
     $age[$i] = (defined $age)
@@ -1689,55 +1687,19 @@ sub populate_char_info ($) {
     return $end;
 }
 
-# Commented code below should work on Perl 5.8.
-## This 'require' doesn't necessarily work in miniperl, and even if it does,
-## the native perl version of it (which is what would operate under miniperl)
-## is extremely slow, as it does a string eval every call.
-#my $has_fast_scalar_util = $^X !~ /miniperl/
-#                            && defined eval "require Scalar::Util";
-#
-#sub objaddr($) {
-#    # Returns the address of the blessed input object.  Uses the XS version if
-#    # available.  It doesn't check for blessedness because that would do a
-#    # string eval every call, and the program is structured so that this is
-#    # never called for a non-blessed object.
-#
-#    return Scalar::Util::refaddr($_[0]) if $has_fast_scalar_util;
-#
-#    # Check at least that is a ref.
-#    my $pkg = ref($_[0]) or return undef;
-#
-#    # Change to a fake package to defeat any overloaded stringify
-#    bless $_[0], 'main::Fake';
-#
-#    # Numifying a ref gives its address.
-#    my $addr = pack 'J', $_[0];
-#
-#    # Return to original class
-#    bless $_[0], $pkg;
-#    return $addr;
-#}
-
-sub max ($$) {
-    my $a = shift;
-    my $b = shift;
-    return $a if $a >= $b;
-    return $b;
+sub max($a, $b) {
+    return $a >= $b ? $a : $b;
 }
 
-sub min ($$) {
-    my $a = shift;
-    my $b = shift;
-    return $a if $a <= $b;
-    return $b;
+sub min($a, $b) {
+    return $a <= $b ? $a : $b;
 }
 
-sub clarify_number ($) {
+sub clarify_number ($number) {
     # This returns the input number with underscores inserted every 3 digits
     # in large (5 digits or more) numbers.  Input must be entirely digits, not
     # checked.
 
-    my $number = shift;
     my $pos = length($number) - 3;
     return $number if $pos <= 1;
     while ($pos > 0) {
@@ -1747,13 +1709,12 @@ sub clarify_number ($) {
     return $number;
 }
 
-sub clarify_code_point_count ($) {
+sub clarify_code_point_count ($number) {
     # This is like clarify_number(), but the input is assumed to be a count of
     # code points, rather than a generic number.
 
     my $append = "";
 
-    my $number = shift;
     if ($number > $MAX_UNICODE_CODEPOINTS) {
         $number -= ($MAX_WORKING_CODEPOINTS - $MAX_UNICODE_CODEPOINTS);
         return "All above-Unicode code points" if $number == 0;
@@ -1776,9 +1737,7 @@ our $Verbose = 1 if main::DEBUG;  # Useful info when debugging
 # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-11/msg01057.html
 undef $overload::VERSION;
 
-sub my_carp {
-    my $message = shift || "";
-    my $nofold = shift || 0;
+sub my_carp($message="", $nofold=0) {
 
     if ($message) {
         $message = main::join_lines($message);
@@ -1800,26 +1759,16 @@ sub my_carp {
     return;
 }
 
-sub my_carp_bug {
+sub my_carp_bug($message="") {
     # This is called when it is clear that the problem is caused by a bug in
     # this program.
-
-    my $message = shift;
     $message =~ s/^$0: *//;
     $message = my_carp("Bug in $0.  Please report it by running perlbug or if that is unavailable, by sending email to perbug\@perl.org:\n$message");
     carp $message;
     return;
 }
 
-sub carp_too_few_args {
-    if (@_ != 2) {
-        my_carp_bug("Wrong number of arguments: to 'carp_too_few_arguments'.  No action taken.");
-        return;
-    }
-
-    my $args_ref = shift;
-    my $count = shift;
-
+sub carp_too_few_args($args_ref, $count) {
     my_carp_bug("Need at least $count arguments to "
         . (caller 1)[3]
         . ".  Instead got: '"
@@ -1828,10 +1777,7 @@ sub carp_too_few_args {
     return;
 }
 
-sub carp_extra_args {
-    my $args_ref = shift;
-    my_carp_bug("Too many arguments to 'carp_extra_args': (" . join(', ', @_) . ");  Extras ignored.") if @_;
-
+sub carp_extra_args($args_ref) {
     unless (ref $args_ref) {
         my_carp_bug("Argument to 'carp_extra_args' ($args_ref) must be a ref.  Not checking arguments.");
         return;
@@ -1938,7 +1884,7 @@ package main;
         return;
     }
 
-    sub set_access {
+    sub set_access($name, $field, @accessors) {
         # Arrange for the input field to be garbage collected when no longer
         # needed.  Also, creates standard accessor functions for the field
         # based on the optional parameters-- none if none of these parameters:
@@ -1969,9 +1915,9 @@ package main;
         # We create anonymous subroutines as the accessors and then use
         # typeglobs to assign them to the proper package and name
 
-        my $name = shift;   # Name of the field
-        my $field = shift;  # Reference to the inside-out hash containing the
-                            # field
+        # $name 	Name of the field
+        # $field 	Reference to the inside-out hash containing the
+		# 			field
 
         my $package = (caller)[0];
 
@@ -1983,7 +1929,7 @@ package main;
         $package_fields{$package}{$name} = $field;
 
         # Remaining arguments are the accessors.  For each...
-        foreach my $access (@_) {
+        foreach my $access (@accessors) {
             my $access = lc $access;
 
             my $protected = "";
@@ -2010,13 +1956,9 @@ package main;
 
                 # add_ accessor.  Don't add if already there, which we
                 # determine using 'eq' for scalars and '==' otherwise.
-                *$subname = sub {
+                *$subname = sub ($self, $value) {
                     use strict "refs";
-                    return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
-                    my $self = shift;
-                    my $value = shift;
                     my $addr = do { no overloading; pack 'J', $self; };
-                    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
                     if (ref $value) {
                         return if grep { $value == $_ } @{$field->{$addr}};
                     }
@@ -2046,10 +1988,9 @@ package main;
                     or length($access) > length('readable_'))
                 {
                     no strict "refs";
-                    *$subname = sub {
+                    *$subname = sub ($_addr) {
                         use strict "refs";
-                        Carp::carp_extra_args(\@_) if main::DEBUG && @_ > 1;
-                        my $addr = do { no overloading; pack 'J', $_[0]; };
+                        my $addr = do { no overloading; pack 'J', $_addr; };
                         if (ref $field->{$addr} ne 'ARRAY') {
                             my $type = ref $field->{$addr};
                             $type = 'scalar' unless $type;
@@ -2068,26 +2009,21 @@ package main;
 
                     # Here not an array value, a simpler function.
                     no strict "refs";
-                    *$subname = sub {
+                    *$subname = sub ($addr) {
                         use strict "refs";
-                        Carp::carp_extra_args(\@_) if main::DEBUG && @_ > 1;
                         no overloading;
-                        return $field->{pack 'J', $_[0]};
+                        return $field->{pack 'J', $addr};
                     }
                 }
             }
             elsif (substr('settable', 0, length $access) eq $access) {
                 my $subname = "${package}::${protected}set_$name";
                 no strict "refs";
-                *$subname = sub {
+                *$subname = sub ($self, $value) {
                     use strict "refs";
-                    if (main::DEBUG) {
-                        return Carp::carp_too_few_args(\@_, 2) if @_ < 2;
-                        Carp::carp_extra_args(\@_) if @_ > 2;
-                    }
                     # $self is $_[0]; $value is $_[1]
                     no overloading;
-                    $field->{pack 'J', $_[0]} = $_[1];
+                    $field->{pack 'J', $self} = $value;
                     return;
                 }
             }
@@ -2662,7 +2598,6 @@ END
                  sub {
                     my $file = shift;
                     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
                     my @fields = split /\s*;\s*/, $_, -1;
 
                     if (@fields - 1 > @{$properties{$addr}}) {
@@ -2709,22 +2644,17 @@ END
         ".=" => \&main::_operator_dot_equal,
     ;
 
-    sub _operator_stringify {
-        my $self = shift;
-
+    sub _operator_stringify($self) {
         return __PACKAGE__ . " object for " . $self->file;
     }
 
-    sub run {
+    sub run($self) {
         # Process the input object $self.  This opens and closes the file and
         # calls all the handlers for it.  Currently,  this can only be called
         # once per file, as it destroy's the EOF handlers
 
         # flag to make sure extracted files are processed early
         state $seen_non_extracted = 0;
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -2967,14 +2897,11 @@ END
         return;
     }
 
-    sub _next_line {
+    sub _next_line($self) {
         # Sets $_ to be the next logical input line, if any.  Returns non-zero
         # if such a line exists.  'logical' means that any lines that have
         # been added via insert_lines() will be returned in $_ before the file
         # is read again.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -3136,10 +3063,7 @@ END
 
     }
 
-    sub _next_line_with_remapped_range {
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub _next_line_with_remapped_range($self) {
         # like _next_line(), but for use on non-ASCII platforms.  It sets $_
         # to be the next logical input line, if any.  Returns non-zero if such
         # a line exists.  'logical' means that any lines that have been added
@@ -3265,23 +3189,21 @@ END
 #    }
 
 
-    sub insert_lines {
+    sub insert_lines($self, @lines) {
         # Lines can be inserted so that it looks like they were in the input
         # file at the place it was when this routine is called.  See also
         # insert_adjusted_lines().  Lines inserted via this routine go through
         # any each_line_handler()
 
-        my $self = shift;
-
         # Each inserted line is an array, with the first element being 0 to
         # indicate that this line hasn't been adjusted, and needs to be
         # processed.
         no overloading;
-        push @{$added_lines{pack 'J', $self}}, map { [ 0, $_ ] } @_;
+        push @{$added_lines{pack 'J', $self}}, map { [ 0, $_ ] } @lines;
         return;
     }
 
-    sub insert_adjusted_lines {
+    sub insert_adjusted_lines($self, @lines) {
         # Lines can be inserted so that it looks like they were in the input
         # file at the place it was when this routine is called.  See also
         # insert_lines().  Lines inserted via this routine are already fully
@@ -3295,24 +3217,20 @@ END
         # use that to call only those handlers whose index is after it on the
         # stack.  But this is overkill for what is needed now.
 
-        my $self = shift;
         trace $_[0] if main::DEBUG && $to_trace;
 
         # Each inserted line is an array, with the first element being 1 to
         # indicate that this line has been adjusted
         no overloading;
-        push @{$added_lines{pack 'J', $self}}, map { [ 1, $_ ] } @_;
+        push @{$added_lines{pack 'J', $self}}, map { [ 1, $_ ] } @lines;
         return;
     }
 
-    sub get_missings {
+    sub get_missings($self) {
         # Returns the stored up @missings lines' values, and clears the list.
         # The values are in an array, consisting of the default in the first
         # element, and the property in the 2nd.  However, since these lines
         # can be stacked up, the return is an array of all these arrays.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -3324,7 +3242,7 @@ END
         return @return;
     }
 
-    sub _exclude_unassigned {
+    sub _exclude_unassigned($self) {
 
         # Takes the range in $_ and excludes code points that aren't assigned
         # in this release
@@ -3340,9 +3258,7 @@ END
         # Find what code points are assigned in this release
         main::calculate_Assigned() if ! defined $Assigned;
 
-        my $self = shift;
         my $addr = do { no overloading; pack 'J', $self; };
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my ($range, @remainder)
             = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
@@ -3383,16 +3299,14 @@ END
         return;
     }
 
-    sub _fixup_obsolete_hanguls {
+    sub _fixup_obsolete_hanguls($self) {
 
         # This is called only when compiling Unicode version 1.  All Unicode
         # data for subsequent releases assumes that the code points that were
         # Hangul syllables in this release only are something else, so if
         # using such data, we have to override it
 
-        my $self = shift;
         my $addr = do { no overloading; pack 'J', $self; };
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $object = main::property_ref($property{$addr});
         $object->add_map($FIRST_REMOVED_HANGUL_SYLLABLE,
@@ -3401,28 +3315,22 @@ END
                          Replace => $UNCONDITIONALLY);
     }
 
-    sub _insert_property_into_line {
+    sub _insert_property_into_line($self) {
         # Add a property field to $_, if this file requires it.
 
-        my $self = shift;
         my $addr = do { no overloading; pack 'J', $self; };
         my $property = $property{$addr};
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         $_ =~ s/(;|$)/; $property$1/;
         return;
     }
 
-    sub carp_bad_line {
+    sub carp_bad_line($self, $message="") {
         # Output consistent error messages, using either a generic one, or the
         # one given by the optional parameter.  To avoid gazillions of the
         # same message in case the syntax of a  file is way off, this routine
         # only outputs the first instance of each message, incrementing a
         # count so the totals can be output at the end of the file.
-
-        my $self = shift;
-        my $message = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -3460,6 +3368,11 @@ package Multi_Default;
 # defaults, and for all but that final default, an eval string that generates
 # the class that it applies to.
 
+use strict;
+use warnings;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 {   # Closure
 
@@ -3504,10 +3417,8 @@ package Multi_Default;
         return $self;
     }
 
-    sub get_next_defaults {
+    sub get_next_defaults($self) {
         # Iterates and returns the next class of defaults.
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -3520,6 +3431,12 @@ package Alias;
 # An alias is one of the names that a table goes by.  This class defines them
 # including some attributes.  Everything is currently setup in the
 # constructor.
+
+use strict;
+use warnings;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 
 {   # Closure
@@ -3592,6 +3509,12 @@ package Range;
 # map to.  Type 0 values have the standardized version of the value stored as
 # well, so as to not have to recalculate it a lot.
 
+use strict;
+use warnings;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
+
 sub trace { return main::trace(@_); }
 
 {   # Closure
@@ -3616,17 +3539,14 @@ sub trace { return main::trace(@_); }
 
     # Note that if these fields change, the dump() method should as well
 
-    sub new {
-        return Carp::carp_too_few_args(\@_, 3) if main::DEBUG && @_ < 3;
-        my $class = shift;
-
+    sub new($class, $_addr, $_end, @_args) {
         my $self = bless \do { my $anonymous_scalar }, $class;
         my $addr = do { no overloading; pack 'J', $self; };
 
-        $start{$addr} = shift;
-        $end{$addr} = shift;
+        $start{$addr} = $_addr;
+        $end{$addr}   = $_end;
 
-        my %args = @_;
+        my %args = @_args;
 
         my $value = delete $args{'Value'};  # Can be 0
         $value = "" unless defined $value;
@@ -3646,8 +3566,7 @@ sub trace { return main::trace(@_); }
         ".=" => \&main::_operator_dot_equal,
     ;
 
-    sub _operator_stringify {
-        my $self = shift;
+    sub _operator_stringify($self) {
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Output it like '0041..0065 (value)'
@@ -3664,15 +3583,12 @@ sub trace { return main::trace(@_); }
         return $return;
     }
 
-    sub standard_form {
+    sub standard_form($self) {
         # Calculate the standard form only if needed, and cache the result.
         # The standard form is the value itself if the type is special.
         # This represents a considerable CPU and memory saving - at the time
         # of writing there are 368676 non-special objects, but the standard
         # form is only requested for 22047 of them - ie about 6%.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -3683,13 +3599,9 @@ sub trace { return main::trace(@_); }
         return $standard_form{$addr} = main::standardize($value);
     }
 
-    sub dump {
+    sub dump($self, $indent) {
         # Human, not machine readable.  For machine readable, comment out this
         # entire routine and let the standard one take effect.
-        my $self = shift;
-        my $indent = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         my $return = $indent
@@ -3708,6 +3620,12 @@ sub trace { return main::trace(@_); }
 } # End closure
 
 package _Range_List_Base;
+
+use strict;
+use warnings;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 # Base class for range lists.  A range list is simply an ordered list of
 # ranges, so that the ranges with the lowest starting numbers are first in it.
@@ -3805,8 +3723,7 @@ sub trace { return main::trace(@_); }
         ".=" => \&main::_operator_dot_equal,
     ;
 
-    sub _operator_stringify {
-        my $self = shift;
+    sub _operator_stringify($self) {
         my $addr = do { no overloading; pack 'J', $self; };
 
         return "Range_List attached to '$owner_name_of{$addr}'"
@@ -3945,23 +3862,17 @@ sub trace { return main::trace(@_); }
         return $new;
     }
 
-    sub range_count {        # Return the number of ranges in the range list
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub range_count($self) {        # Return the number of ranges in the range list
         no overloading;
         return scalar @{$ranges{pack 'J', $self}};
     }
 
-    sub min {
+    sub min($self) {
         # Returns the minimum code point currently in the range list, or if
         # the range list is empty, 2 beyond the max possible.  This is a
         # method because used so rarely, that not worth saving between calls,
         # and having to worry about changing it as ranges are added and
         # deleted.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -3971,14 +3882,11 @@ sub trace { return main::trace(@_); }
         return $ranges{$addr}->[0]->start;
     }
 
-    sub contains {
+    sub contains($self, $codepoint) {
         # Boolean: Is argument in the range list?  If so returns $i such that:
         #   range[$i]->end < $codepoint <= range[$i+1]->end
         # which is one beyond what you want; this is so that the 0th range
         # doesn't return false
-        my $self = shift;
-        my $codepoint = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $i = $self->_search_ranges($codepoint);
         return 0 unless defined $i;
@@ -3992,13 +3900,8 @@ sub trace { return main::trace(@_); }
         return $i + 1;
     }
 
-    sub containing_range {
+    sub containing_range($self, $codepoint) {
         # Returns the range object that contains the code point, undef if none
-
-        my $self = shift;
-        my $codepoint = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $i = $self->contains($codepoint);
         return unless $i;
 
@@ -4007,44 +3910,29 @@ sub trace { return main::trace(@_); }
         return $ranges{pack 'J', $self}->[$i-1];
     }
 
-    sub value_of {
+    sub value_of($self, $codepoint) {
         # Returns the value associated with the code point, undef if none
-
-        my $self = shift;
-        my $codepoint = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $range = $self->containing_range($codepoint);
         return unless defined $range;
 
         return $range->value;
     }
 
-    sub type_of {
+    sub type_of($self, $codepoint) {
         # Returns the type of the range containing the code point, undef if
         # the code point is not in the table
-
-        my $self = shift;
-        my $codepoint = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $range = $self->containing_range($codepoint);
         return unless defined $range;
 
         return $range->type;
     }
 
-    sub _search_ranges {
+    sub _search_ranges($self, $code_point) {
         # Find the range in the list which contains a code point, or where it
         # should go if were to add it.  That is, it returns $i, such that:
         #   range[$i-1]->end < $codepoint <= range[$i]->end
         # Returns undef if no such $i is possible (e.g. at end of table), or
         # if there is an error.
-
-        my $self = shift;
-        my $code_point = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         return if $code_point > $max{$addr};
@@ -4877,22 +4765,15 @@ sub trace { return main::trace(@_); }
         return @return;
     }
 
-    sub reset_each_range {  # reset the iterator for each_range();
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub reset_each_range($self) {  # reset the iterator for each_range();
         no overloading;
         undef $each_range_iterator{pack 'J', $self};
         return;
     }
 
-    sub each_range {
+    sub each_range($self) {
         # Iterate over each range in a range list.  Results are undefined if
         # the range list is changed during the iteration.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         return if $self->is_empty;
@@ -4906,10 +4787,7 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub count {        # Returns count of code points in range list
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub count($self) {        # Returns count of code points in range list
         my $addr = do { no overloading; pack 'J', $self; };
 
         my $count = 0;
@@ -4919,32 +4797,19 @@ sub trace { return main::trace(@_); }
         return $count;
     }
 
-    sub delete_range {    # Delete a range
-        my $self = shift;
-        my $start = shift;
-        my $end = shift;
-
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub delete_range($self, $start, $end) {    # Delete a range
         return $self->_add_delete('-', $start, $end, "");
     }
 
-    sub is_empty { # Returns boolean as to if a range list is empty
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub is_empty($self) { # Returns boolean as to if a range list is empty
         no overloading;
         return scalar @{$ranges{pack 'J', $self}} == 0;
     }
 
-    sub hash {
+    sub hash($self) {
         # Quickly returns a scalar suitable for separating tables into
         # buckets, i.e. it is a hash function of the contents of a table, so
         # there are relatively few conflicts.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         # These are quickly computable.  Return looks like 'min..max;count'
@@ -4954,6 +4819,12 @@ sub trace { return main::trace(@_); }
 
 package Range_List;
 use parent '-norequire', '_Range_List_Base';
+
+use warnings;
+use strict;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 # A Range_List is a range list for match tables; i.e. the range values are
 # not significant.  Thus a number of operations can be safely added to it,
@@ -5015,11 +4886,8 @@ sub trace { return main::trace(@_); }
         '-' => "_subtract",
     ;
 
-    sub _invert {
+    sub _invert($self, @) {
         # Returns a new Range_List that gives all code points not in $self.
-
-        my $self = shift;
-
         my $new = Range_List->new;
 
         # Go through each range in the table, finding the gaps between them
@@ -5044,15 +4912,10 @@ sub trace { return main::trace(@_); }
         return $new;
     }
 
-    sub _subtract {
+    sub _subtract($self, $other, $reversed=0) {
         # Returns a new Range_List with the argument deleted from it.  The
         # argument can be a single code point, a range, or something that has
         # a range, with the _range_list() method on it returning them
-
-        my $self = shift;
-        my $other = shift;
-        my $reversed = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if ($reversed) {
             Carp::my_carp_bug("Bad news.  Can't cope with '"
@@ -5087,17 +4950,11 @@ sub trace { return main::trace(@_); }
         return $new;
     }
 
-    sub _intersect {
+    sub _intersect($a_object, $b_object, $check_if_overlapping=0) {
         # Returns either a boolean giving whether the two inputs' range lists
         # intersect (overlap), or a new Range_List containing the intersection
         # of the two lists.  The optional final parameter being true indicates
         # to do the check instead of the intersection.
-
-        my $a_object = shift;
-        my $b_object = shift;
-        my $check_if_overlapping = shift;
-        $check_if_overlapping = 0 unless defined $check_if_overlapping;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if (! defined $b_object) {
             my $message = "";
@@ -5228,35 +5085,19 @@ sub trace { return main::trace(@_); }
         return $check_if_overlapping ? 0 : $new;
     }
 
-    sub overlaps {
+    sub overlaps($self, $other) {
         # Returns boolean giving whether the two arguments overlap somewhere
-
-        my $self = shift;
-        my $other = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         return $self->_intersect($other, 1);
     }
 
-    sub add_range {
+    sub add_range($self, $start, $end) {
         # Add a range to the list.
-
-        my $self = shift;
-        my $start = shift;
-        my $end = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         return $self->_add_delete('+', $start, $end, "");
     }
 
-    sub matches_identically_to {
+    sub matches_identically_to($self, $other) {
         # Return a boolean as to whether or not two Range_Lists match identical
         # sets of code points.
-
-        my $self = shift;
-        my $other = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         # These are ordered in increasing real time to figure out (at least
         # until a patch changes that and doesn't change this)
         return 0 if $self->max != $other->max;
@@ -5281,16 +5122,11 @@ sub trace { return main::trace(@_); }
         return 1;
     }
 
-    sub is_code_point_usable {
+    sub is_code_point_usable($code, $try_hard) {
         # This used only for making the test script.  See if the input
         # proposed trial code point is one that Perl will handle.  If second
         # parameter is 0, it won't select some code points for various
         # reasons, noted below.
-
-        my $code = shift;
-        my $try_hard = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         return 0 if $code < 0;                # Never use a negative
 
         # shun null.  I'm (khw) not sure why this was done, but NULL would be
@@ -5307,14 +5143,10 @@ sub trace { return main::trace(@_); }
         return 1;
     }
 
-    sub get_valid_code_point {
+    sub get_valid_code_point($self) {
         # Return a code point that's part of the range list.  Returns nothing
         # if the table is empty or we can't find a suitable code point.  This
         # used only for making the test script.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         # On first pass, don't choose less desirable code points; if no good
@@ -5340,13 +5172,10 @@ sub trace { return main::trace(@_); }
         return ();  # If none found, give up.
     }
 
-    sub get_invalid_code_point {
+    sub get_invalid_code_point($self) {
         # Return a code point that's not part of the table.  Returns nothing
         # if the table covers all code points or a suitable code point can't
         # be found.  This used only for making the test script.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # Just find a valid code point of the inverse, if any.
         return Range_List->new(Initialize => ~ $self)->get_valid_code_point;
@@ -5355,6 +5184,12 @@ sub trace { return main::trace(@_); }
 
 package Range_Map;
 use parent '-norequire', '_Range_List_Base';
+
+use strict;
+use warnings;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 # A Range_Map is a range list in which the range values (called maps) are
 # significant, and hence shouldn't be manipulated by our other code, which
@@ -5367,21 +5202,14 @@ use parent '-norequire', '_Range_List_Base';
 
 { # Closure
 
-    sub add_map {
+    sub add_map($self, @add) {
         # Add a range containing a mapping value to the list
-
-        my $self = shift;
-        # Rest of parameters passed on
-
-        return $self->_add_delete('+', @_);
+        return $self->_add_delete('+', @add);
     }
 
-    sub replace_map {
+    sub replace_map($self, @list) {
         # Replace a range
-
-        my $self = shift;
-
-        return $self->_add_delete('+', @_, Replace => $UNCONDITIONALLY);
+        return $self->_add_delete('+', @list, Replace => $UNCONDITIONALLY);
     }
 
     sub add_duplicate {
@@ -5400,6 +5228,12 @@ use parent '-norequire', '_Range_List_Base';
 } # End of closure for package Range_Map
 
 package _Base_Table;
+
+use strict;
+use warnings;
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 # A table is the basic data structure that gets written out into a file for
 # use by the Perl core.  This is the abstract base class implementing the
@@ -5837,7 +5671,7 @@ END
         return;
     }
 
-    sub short_name {
+    sub short_name($self, $nominal_length_ptr=undef) {
         # Returns a name suitable for use as the base part of a file name.
         # That is, shorter wins.  It can return undef if there is no suitable
         # name.  The name has all non-essential underscores removed.
@@ -5851,10 +5685,6 @@ END
         # that does that should clear this one's cache.
         # Any name with alphabetics is preferred over an all numeric one, even
         # if longer.
-
-        my $self = shift;
-        my $nominal_length_ptr = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -5946,14 +5776,11 @@ END
         return $short_name{$addr};
     }
 
-    sub external_name {
+    sub external_name($self) {
         # Returns the external name that this table should be known by.  This
         # is usually the short_name, but not if the short_name is undefined,
         # in which case the external_name is arbitrarily set to the
         # underscore.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $short = $self->short_name;
         return $short if defined $short;
@@ -5961,39 +5788,23 @@ END
         return '_';
     }
 
-    sub add_description { # Adds the parameter as a short description.
-
-        my $self = shift;
-        my $description = shift;
-        chomp $description;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub add_description($self, $description) { # Adds the parameter as a short description.
         no overloading;
         push @{$description{pack 'J', $self}}, $description;
 
         return;
     }
 
-    sub add_note { # Adds the parameter as a short note.
-
-        my $self = shift;
-        my $note = shift;
-        chomp $note;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub add_note($self, $note) { # Adds the parameter as a short note.
         no overloading;
         push @{$note{pack 'J', $self}}, $note;
 
         return;
     }
 
-    sub add_comment { # Adds the parameter as a comment.
+    sub add_comment($self, $comment) { # Adds the parameter as a comment.
 
         return unless $debugging_build;
-
-        my $self = shift;
-        my $comment = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         chomp $comment;
 
@@ -6003,13 +5814,10 @@ END
         return;
     }
 
-    sub comment {
+    sub comment($self) {
         # Return the current comment for this table.  If called in list
         # context, returns the array of comments.  In scalar, returns a string
         # of each element joined together with a period ending each.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
         my @list = @{$comment{$addr}};
@@ -6024,14 +5832,11 @@ END
         return $return;
     }
 
-    sub initialize {
+    sub initialize($self, $initialization) {
         # Initialize the table with the argument which is any valid
         # initialization for range lists.
 
-        my $self = shift;
         my $addr = do { no overloading; pack 'J', $self; };
-        my $initialization = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # Replace the current range list with a new one of the same exact
         # type.
@@ -6042,21 +5847,16 @@ END
 
     }
 
-    sub header {
+    sub header($self) {
         # The header that is output for the table in the file it is written
         # in.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $return = "";
         $return .= $DEVELOPMENT_ONLY if $compare_versions;
         $return .= $HEADER;
         return $return;
     }
 
-    sub merge_single_annotation_line ($$$) {
-        my ($output, $annotation, $annotation_column) = @_;
+    sub merge_single_annotation_line ($output, $annotation, $annotation_column) {
 
         # This appends an annotation comment, $annotation, to $output,
         # starting in or after column $annotation_column, removing any
@@ -6077,19 +5877,18 @@ END
         return Text::Tabs::unexpand $output;
     }
 
-    sub write {
+    sub write($self, $use_adjustments=0, $suppress_value=0) {
         # Write a representation of the table to its file.  It calls several
         # functions furnished by sub-classes of this abstract base class to
         # handle non-normal ranges, to add stuff before the table, and at its
         # end.  If the table is to be written so that adjustments are
         # required, this does that conversion.
 
-        my $self = shift;
-        my $use_adjustments = shift; # ? output in adjusted format or not
-        my $suppress_value = shift;  # Optional, if the value associated with
-                                     # a range equals this one, don't write
-                                     # the range
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        # $use_adjustments ? output in adjusted format or not
+        # $suppress_value Optional, if the value associated with
+        # a range equals this one, don't write
+        # the range
 
         my $addr = do { no overloading; pack 'J', $self; };
         my $write_as_invlist = $write_as_invlist{$addr};
@@ -6744,12 +6543,9 @@ END
         return;
     }
 
-    sub set_status {    # Set the table's status
-        my $self = shift;
-        my $status = shift; # The status enum value
-        my $info = shift;   # Any message associated with it.
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub set_status($self, $status, $info) {    # Set the table's status
+        # status The status enum value
+        # info Any message associated with it.
         my $addr = do { no overloading; pack 'J', $self; };
 
         $status{$addr} = $status;
@@ -6757,12 +6553,7 @@ END
         return;
     }
 
-    sub set_fate {  # Set the fate of a table
-        my $self = shift;
-        my $fate = shift;
-        my $reason = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub set_fate($self, $fate, $reason=undef) {  # Set the fate of a table
         my $addr = do { no overloading; pack 'J', $self; };
 
         return if $fate{$addr} == $fate;    # If no-op
@@ -6793,14 +6584,10 @@ END
         return;
     }
 
-    sub lock {
+    sub lock($self) {
         # Don't allow changes to the table from now on.  This stores a stack
         # trace of where it was called, so that later attempts to modify it
         # can immediately show where it got locked.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         $locked{$addr} = "";
@@ -6822,13 +6609,9 @@ END
         return;
     }
 
-    sub carp_if_locked {
+    sub carp_if_locked($self) {
         # Return whether a table is locked or not, and, by the way, complain
         # if is locked
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         return 0 if ! $locked{$addr};
@@ -6836,12 +6619,9 @@ END
         return 1;
     }
 
-    sub set_file_path { # Set the final directory path for this table
-        my $self = shift;
-        # Rest of parameters passed on
-
+    sub set_file_path($self, @path) { # Set the final directory path for this table
         no overloading;
-        @{$file_path{pack 'J', $self}} = @_;
+        @{$file_path{pack 'J', $self}} = @path;
         return
     }
 
@@ -7064,29 +6844,20 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub append_to_body {
+    sub append_to_body($self) {
         # Adds to the written HERE document of the table's body any anomalous
         # entries in the table..
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         return "" unless @{$anomalous_entries{$addr}};
         return join("\n", @{$anomalous_entries{$addr}}) . "\n";
     }
 
-    sub map_add_or_replace_non_nulls {
+    sub map_add_or_replace_non_nulls($self, $other) {
         # This adds the mappings in the table $other to $self.  Non-null
         # mappings from $other override those in $self.  It essentially merges
         # the two tables, with the second having priority except for null
         # mappings.
-
-        my $self = shift;
-        my $other = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         return if $self->carp_if_locked;
 
         if (! $other->isa(__PACKAGE__)) {
@@ -7119,16 +6890,10 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub set_default_map {
+    sub set_default_map($self, $map, $use_full_name=0) {
         # Define what code points that are missing from the input files should
         # map to.  The optional second parameter 'full_name' indicates to
         # force using the full name of the map instead of its standard name.
-
-        my $self = shift;
-        my $map = shift;
-        my $use_full_name = shift // 0;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         if ($use_full_name && $use_full_name ne 'full_name') {
             Carp::my_carp_bug("Second parameter to set_default_map() if"
                             . " present, must be 'full_name'");
@@ -7177,12 +6942,8 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub to_output_map {
+    sub to_output_map($self) {
         # Returns boolean: should we write this map table?
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         # If overridden, use that
@@ -7218,22 +6979,15 @@ sub trace { return main::trace(@_); }
         return $INTERNAL_MAP;
     }
 
-    sub inverse_list {
+    sub inverse_list($self) {
         # Returns a Range_List that is gaps of the current table.  That is,
         # the inversion
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $current = Range_List->new(Initialize => $self->_range_list,
                                 Owner => $self->property);
         return ~ $current;
     }
 
-    sub header {
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub header($self) {
         my $return = $self->SUPER::header();
 
         if ($self->to_output_map >= $INTERNAL_MAP) {
@@ -7263,14 +7017,11 @@ END
         return $return;
     }
 
-    sub set_final_comment {
+    sub set_final_comment($self) {
         # Just before output, create the comment that heads the file
         # containing this table.
 
         return unless $debugging_build;
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # No sense generating a comment if aren't going to write it out.
         return if ! $self->to_output_map;
@@ -7450,13 +7201,9 @@ END
     # to output special ranges.
     my @multi_code_point_maps;  # Map is to more than one code point.
 
-    sub handle_special_range {
+    sub handle_special_range($self, $range) {
         # Called in the middle of write when it finds a range it doesn't know
         # how to handle.
-
-        my $self = shift;
-        my $range = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -7505,9 +7252,23 @@ END
                 push @{$loose_names_ending_in_code_point{$squeezed}->{'high'}},
                                                                          $high;
 
+                # Calculate the set of legal characters in names of this
+                # series.  It includes every character in the name prefix.
+                my %legal;
+                $legal{$_} = 1 for split //, $map;
+
+                # Plus the hex code point chars, blank, and minus.  Also \n
+                # can show up as being required due to anchoring
+                for my $i ('0' .. '9', 'A' .. 'F', '-', ' ', "\n") {
+                    $legal{$i} = 1;
+                }
+                my $legal = join "", sort { $a cmp $b } keys %legal;
+
+                # The legal chars can be used in match optimizations
                 push @code_points_ending_in_code_point, { low => $low,
                                                         high => $high,
-                                                        name => $map
+                                                        name => $map,
+                                                        legal => $legal,
                                                         };
             }
         }
@@ -7578,16 +7339,13 @@ END
         return;
     }
 
-    sub pre_body {
+    sub pre_body($self) {
         # Returns the string that should be output in the file before the main
         # body of this table.  It isn't called until the main body is
         # calculated, saving a pass.  The string includes some hash entries
         # identifying the format of the body, and what the single value should
         # be for all ranges missing from it.  It also includes any code points
         # which have map_types that don't go in the main table.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -7685,11 +7443,8 @@ END
         return $return;
     }
 
-    sub write {
+    sub write($self) {
         # Write the table to the file.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -8154,13 +7909,9 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub is_set_equivalent_to {
+    sub is_set_equivalent_to($self, $other=undef) {
         # Return boolean of whether or not the other object is a table of this
         # type and has been marked equivalent to this one.
-
-        my $self = shift;
-        my $other = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         return 0 if ! defined $other; # Can happen for incomplete early
                                       # releases
@@ -8292,15 +8043,9 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub set_complement {
+    sub set_complement($self, $other) {
         # Set $self to be the complement of the parameter table.  $self is
         # locked, as what it contains should all come from the other table.
-
-        my $self = shift;
-        my $other = shift;
-
-        my %args = @_;
-        Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
         if ($other->complement != 0) {
             Carp::my_carp_bug("Can't set $self to be the complement of $other, which itself is the complement of " . $other->complement);
@@ -8321,18 +8066,14 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub add_range { # Add a range to the list for this table.
-        my $self = shift;
+    sub add_range($self, @range) { # Add a range to the list for this table.
         # Rest of parameters passed on
 
         return if $self->carp_if_locked;
-        return $self->_range_list->add_range(@_);
+        return $self->_range_list->add_range(@range);
     }
 
-    sub header {
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub header($self) {
         # All match tables are to be used only by the Perl core.
         return $self->SUPER::header() . $INTERNAL_ONLY_HEADER;
     }
@@ -8345,12 +8086,7 @@ sub trace { return main::trace(@_); }
         return
     }
 
-    sub set_fate {
-        my $self = shift;
-        my $fate = shift;
-        my $reason = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub set_fate($self, $fate, $reason=undef) {
         $self->SUPER::set_fate($fate, $reason);
 
         # All children share this fate
@@ -8589,14 +8325,12 @@ sub trace { return main::trace(@_); }
         return $definition;
     }
 
-    sub write {
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    sub write($self) {
         return $self->SUPER::write(0); # No adjustments
     }
 
-    sub set_final_comment {
+    # $leader - Should only be called on the leader table of an equivalent group
+    sub set_final_comment($leader) {
         # This creates a comment for the file that is to hold the match table
         # $self.  It is somewhat convoluted to make the English read nicely,
         # but, heh, it's just a comment.
@@ -8605,10 +8339,6 @@ sub trace { return main::trace(@_); }
         # that related ones are together.
 
         return unless $debugging_build;
-
-        my $leader = shift;   # Should only be called on the leader table of
-                              # an equivalent group
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $leader; };
 
@@ -9034,7 +8764,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return;
     }
 
-    sub property_ref {
+    sub property_ref($name) {
         # This is a package subroutine, not called as a method.
         # If the single parameter is a literal '*' it returns a list of all
         # defined properties.
@@ -9048,10 +8778,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # standardized form of the input name.  If found, besides returning the
         # result, the input name is added to the list so future calls won't
         # have to do the conversion again.
-
-        my $name = shift;
-
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if (! defined $name) {
             Carp::my_carp_bug("Undefined input property.  No action taken.");
@@ -9216,14 +8942,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return "Property '" .  shift->full_name . "'";
     }
 
-    sub _minus_and_equal {
+    sub _minus_and_equal($self, $other, $reversed=0) {
         # Remove a single code point from the map table of a property.
-
-        my $self = shift;
-        my $other = shift;
-        my $reversed = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         if (ref $other) {
             Carp::my_carp_bug("Bad news.  Can't cope with a "
                         . ref($other)
@@ -9323,13 +9043,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return $table;
     }
 
-    sub delete_match_table {
+    sub delete_match_table($self, $table_to_remove) {
         # Delete the table referred to by $2 from the property $1.
-
-        my $self = shift;
-        my $table_to_remove = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Remove all names that refer to it.
@@ -9342,14 +9057,9 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return;
     }
 
-    sub table {
+    sub table($self, $name) {
         # Return a pointer to the match table (with name given by the
         # parameter) associated with this property; undef if none.
-
-        my $self = shift;
-        my $name = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         return $table_ref{$addr}{$name} if defined $table_ref{$addr}{$name};
@@ -9385,7 +9095,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return $map_directory;
     }
 
-    sub swash_name {
+    sub swash_name($self) {
         # Return the name that is used to both:
         #   1)  Name the file that the map table is written to.
         #   2)  The name of swash related stuff inside that file.
@@ -9395,10 +9105,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # but otherwise the standard name is used.  This is different from the
         # external_name, so that the rest of the files, like in lib can use
         # the standard name always, without regard to historical precedent.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Swash names are used only on either
@@ -9416,12 +9122,9 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return $map{$addr}->external_name;
     }
 
-    sub to_create_match_tables {
+    sub to_create_match_tables($self) {
         # Returns a boolean as to whether or not match tables should be
         # created for this property.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # The whole point of this pseudo property is match tables.
         return 1 if $self == $perl;
@@ -9438,15 +9141,11 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return 1;
     }
 
-    sub property_add_or_replace_non_nulls {
+    sub property_add_or_replace_non_nulls($self, $other) {
         # This adds the mappings in the property $other to $self.  Non-null
         # mappings from $other override those in $self.  It essentially merges
         # the two properties, with the second having priority except for null
         # mappings.
-
-        my $self = shift;
-        my $other = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if (! $other->isa(__PACKAGE__)) {
             Carp::my_carp_bug("$other should be a "
@@ -9478,16 +9177,12 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         }
     }
 
-    sub set_type {
+    sub set_type($self, $type) {
         # Set the type of the property.  Mostly this is figured out by the
         # data in the table.  But this is used to set it explicitly.  The
         # reason it is not a standard accessor is that when setting a binary
         # property, we need to make sure that all the true/false aliases are
         # present, as they were omitted in early Unicode releases.
-
-        my $self = shift;
-        my $type = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if ($type != $ENUM
             && $type != $BINARY
@@ -9580,14 +9275,11 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return $map{$addr}->add_map($start, $end, $map, @_);
     }
 
-    sub compute_type {
+    sub compute_type($self) {
         # Compute the type of the property: $ENUM, $STRING, or $BINARY.  This
         # should be called after the property is mostly filled with its maps.
         # We have been keeping track of what the property values have been,
         # and now have the necessary information to figure out the type.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -9643,12 +9335,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return;
     }
 
-    sub set_fate {
-        my $self = shift;
-        my $fate = shift;
-        my $reason = shift;  # Ignored unless suppressing
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
+    # $reaons - Ignored unless suppressing
+    sub set_fate($self, $fate, $reason=undef) {
         my $addr = do { no overloading; pack 'J', $self; };
         if ($fate >= $SUPPRESSED) {
             $why_suppressed{$self->complete_name} = $reason;
@@ -9748,20 +9436,20 @@ sub display_chr {
     return "\x{25CC}$chr";
 }
 
-sub join_lines($) {
+sub join_lines($return) {
     # Returns lines of the input joined together, so that they can be folded
     # properly.
     # This causes continuation lines to be joined together into one long line
     # for folding.  A continuation line is any line that doesn't begin with a
     # space or "\b" (the latter is stripped from the output).  This is so
-    # lines can be be in a HERE document so as to fit nicely in the terminal
+    # lines can be in a HERE document so as to fit nicely in the terminal
     # width, but be joined together in one long line, and then folded with
     # indents, '#' prefixes, etc, properly handled.
     # A blank separates the joined lines except if there is a break; an extra
     # blank is inserted after a period ending a line.
 
     # Initialize the return with the first line.
-    my ($return, @lines) = split "\n", shift;
+    my ( @lines ) = split "\n", $return;
 
     # If the first line is null, it was an empty line, add the \n back in
     $return = "\n" if $return eq "";
@@ -9811,7 +9499,7 @@ sub join_lines($) {
     return $return;
 }
 
-sub simple_fold($;$$$) {
+sub simple_fold( $line, $prefix="", $hanging_indent=0, $right_margin=0) {
     # Returns a string of the input (string or an array of strings) folded
     # into multiple-lines each of no more than $MAX_LINE_WIDTH characters plus
     # a \n
@@ -9824,22 +9512,11 @@ sub simple_fold($;$$$) {
 
     local $to_trace = 0 if main::DEBUG;
 
-    my $line = shift;
-    my $prefix = shift;     # Optional string to prepend to each output
-                            # line
-    $prefix = "" unless defined $prefix;
-
-    my $hanging_indent = shift; # Optional number of spaces to indent
-                                # continuation lines
-    $hanging_indent = 0 unless $hanging_indent;
-
-    my $right_margin = shift;   # Optional number of spaces to narrow the
-                                # total width by.
-    $right_margin = 0 unless defined $right_margin;
-
-    # Call carp with the 'nofold' option to avoid it from trying to call us
-    # recursively
-    Carp::carp_extra_args(\@_, 'nofold') if main::DEBUG && @_;
+    # $prefix Optional string to prepend to each output line
+    # $hanging_indent Optional number of spaces to indent
+	# continuation lines
+    # $right_margin  Optional number of spaces to narrow the
+    # total width by.
 
     # The space available doesn't include what's automatically prepended
     # to each line, or what's reserved on the right.
@@ -9910,6 +9587,9 @@ sub simple_fold($;$$$) {
                         (?:                   #  acceptable break:
                             [ \s = ]          # space or equal
                             | - (?! [.0-9] )  # or non-unary minus.
+                            | [^\\[(] (?= \\ )# break before single backslash
+                                              #  not immediately after opening
+                                              #  punctuation
                         )                     # $1 includes the character
                     )/x)
                 {
@@ -9931,7 +9611,7 @@ sub simple_fold($;$$$) {
                 # access the files that this program is creating.
                 elsif ($segment !~ /\a/
                        && ($segment =~ s/_/_\a/g
-                       || $segment =~ s/ ( [a-z] ) (?= [A-Z] )/$1\a/xg))
+                       || $segment =~ s/ ( (?!\\) [a-z] ) (?= [A-Z] )/$1\a/xg))
                 {
                     # Here were able to find at least one place to insert
                     # our substitute soft hyphen.  Find the right-most one
@@ -9991,8 +9671,7 @@ sub property_ref {  # Returns a reference to a property object.
     return Property::property_ref(@_);
 }
 
-sub force_unlink ($) {
-    my $filename = shift;
+sub force_unlink ($filename) {
     return unless file_exists($filename);
     return if CORE::unlink($filename);
 
@@ -10002,15 +9681,10 @@ sub force_unlink ($) {
     return;
 }
 
-sub write ($$@) {
+sub write ($file, $use_utf8, @lines) {
     # Given a filename and references to arrays of lines, write the lines of
     # each array to the file
     # Filename can be given as an arrayref of directory names
-
-    return Carp::carp_too_few_args(\@_, 3) if main::DEBUG && @_ < 3;
-
-    my $file  = shift;
-    my $use_utf8 = shift;
 
     # Get into a single string if an array, and get rid of, in Unix terms, any
     # leading '.'
@@ -10033,7 +9707,7 @@ sub write ($$@) {
 
     binmode $OUT, ":utf8" if $use_utf8;
 
-    while (defined (my $lines_ref = shift)) {
+    foreach my $lines_ref (@lines) {
         unless (@$lines_ref) {
             Carp::my_carp("An array of lines for writing to file '$file' is empty; writing it anyway;");
         }
@@ -10048,11 +9722,10 @@ sub write ($$@) {
 }
 
 
-sub Standardize($) {
+sub Standardize($name=undef) {
     # This converts the input name string into a standardized equivalent to
     # use internally.
 
-    my $name = shift;
     unless (defined $name) {
       Carp::my_carp_bug("Standardize() called with undef.  Returning undef.");
       return;
@@ -10074,7 +9747,7 @@ sub Standardize($) {
     return $name;
 }
 
-sub standardize ($) {
+sub standardize ($str=undef) {
     # Returns a lower-cased standardized name, without underscores.  This form
     # is chosen so that it can distinguish between any real versus superficial
     # Unicode name differences.  It relies on the fact that Unicode doesn't
@@ -10083,22 +9756,18 @@ sub standardize ($) {
     # names (the Name property), as they mostly, but not always follow these
     # rules.
 
-    my $name = Standardize(shift);
+    my $name = Standardize($str);
     return if !defined $name;
 
     $name =~ s/ (?<= .) _ (?= . ) //xg;
     return lc $name;
 }
 
-sub UCD_name ($$) {
+sub UCD_name ($table, $alias) {
     # Returns the name that Unicode::UCD will use to find a table.  XXX
     # perhaps this function should be placed somewhere, like UCD.pm so that
     # Unicode::UCD can use it directly without duplicating code that can get
     # out-of sync.
-
-    my $table = shift;
-    my $alias = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     my $property = $table->property;
     $property = ($property == $perl)
@@ -10116,23 +9785,19 @@ sub UCD_name ($$) {
 
 {   # Closure
 
-    my $indent_increment = " " x (($debugging_build) ? 2 : 0);
+    my $indent_increment = " " x ( $debugging_build ? 2 : 0);
     %main::already_output = ();
 
     $main::simple_dumper_nesting = 0;
 
-    sub simple_dumper {
+    sub simple_dumper( $item, $indent = "" ) {
         # Like Simple Data::Dumper. Good enough for our needs. We can't use
         # the real thing as we have to run under miniperl.
 
         # It is designed so that on input it is at the beginning of a line,
         # and the final thing output in any call is a trailing ",\n".
 
-        my $item = shift;
-        my $indent = shift;
-        $indent = "" if ! $debugging_build || ! defined $indent;
-
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+        $indent = "" if ! $debugging_build;
 
         # nesting level is localized, so that as the call stack pops, it goes
         # back to the prior value.
@@ -10140,8 +9805,6 @@ sub UCD_name ($$) {
         local %main::already_output = %main::already_output;
         $main::simple_dumper_nesting++;
         #print STDERR __LINE__, ": $main::simple_dumper_nesting: $indent$item\n";
-
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # Determine the indent for recursive calls.
         my $next_indent = $indent . $indent_increment;
@@ -10281,12 +9944,9 @@ sub UCD_name ($$) {
     }
 }
 
-sub dump_inside_out {
+sub dump_inside_out( $object, $fields_ref ) {
     # Dump inside-out hashes in an object's state by converting them to a
     # regular hash and then calling simple_dumper on that.
-
-    my $object = shift;
-    my $fields_ref = shift;
 
     my $addr = do { no overloading; pack 'J', $object; };
 
@@ -10298,16 +9958,9 @@ sub dump_inside_out {
     return simple_dumper(\%hash, @_);
 }
 
-sub _operator_dot {
+sub _operator_dot($self, $other="", $reversed=0) {
     # Overloaded '.' method that is common to all packages.  It uses the
     # package's stringify method.
-
-    my $self = shift;
-    my $other = shift;
-    my $reversed = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-    $other = "" unless defined $other;
 
     foreach my $which (\$self, \$other) {
         next unless ref $$which;
@@ -10325,15 +9978,8 @@ sub _operator_dot {
             : "$self$other";
 }
 
-sub _operator_dot_equal {
+sub _operator_dot_equal($self, $other="", $reversed=0) {
     # Overloaded '.=' method that is common to all packages.
-
-    my $self = shift;
-    my $other = shift;
-    my $reversed = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-    $other = "" unless defined $other;
 
     if ($reversed) {
         return $other .= "$self";
@@ -10343,12 +9989,9 @@ sub _operator_dot_equal {
     }
 }
 
-sub _operator_equal {
+sub _operator_equal($self, $other, @) {
     # Generic overloaded '==' routine.  To be equal, they must be the exact
     # same object
-
-    my $self = shift;
-    my $other = shift;
 
     return 0 unless defined $other;
     return 0 unless ref $other;
@@ -10356,25 +9999,21 @@ sub _operator_equal {
     return $self == $other;
 }
 
-sub _operator_not_equal {
-    my $self = shift;
-    my $other = shift;
-
+sub _operator_not_equal($self, $other, @) {
     return ! _operator_equal($self, $other);
 }
 
-sub substitute_PropertyAliases($) {
+sub substitute_PropertyAliases($file_object) {
     # Deal with early releases that don't have the crucial PropertyAliases.txt
     # file.
 
-    my $file_object = shift;
     $file_object->insert_lines(get_old_property_aliases());
 
     process_PropertyAliases($file_object);
 }
 
 
-sub process_PropertyAliases($) {
+sub process_PropertyAliases($file) {
     # This reads in the PropertyAliases.txt file, which contains almost all
     # the character properties in Unicode and their equivalent aliases:
     # scf       ; Simple_Case_Folding         ; sfc
@@ -10382,9 +10021,6 @@ sub process_PropertyAliases($) {
     # Field 0 is the preferred short name for the property.
     # Field 1 is the full name.
     # Any succeeding ones are other accepted names.
-
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # Add any cjk properties that may have been defined.
     $file->insert_lines(@cjk_properties);
@@ -10420,11 +10056,8 @@ sub process_PropertyAliases($) {
     return;
 }
 
-sub finish_property_setup {
+sub finish_property_setup($file) {
     # Finishes setting up after PropertyAliases.
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # This entry was missing from this file in earlier Unicode versions
     if (-e 'Jamo.txt' && ! defined property_ref('JSN')) {
@@ -10714,17 +10347,16 @@ END
     return @return;
 }
 
-sub substitute_PropValueAliases($) {
+sub substitute_PropValueAliases($file_object) {
     # Deal with early releases that don't have the crucial
     # PropValueAliases.txt file.
 
-    my $file_object = shift;
     $file_object->insert_lines(get_old_property_value_aliases());
 
     process_PropValueAliases($file_object);
 }
 
-sub process_PropValueAliases {
+sub process_PropValueAliases($file) {
     # This file contains values that properties look like:
     # bc ; AL        ; Arabic_Letter
     # blk; n/a       ; Greek_And_Coptic                 ; Greek
@@ -10745,9 +10377,6 @@ sub process_PropValueAliases {
     # There are comment entries for values missing from this file:
     # # @missing: 0000..10FFFF; ISO_Comment; <none>
     # # @missing: 0000..10FFFF; Lowercase_Mapping; <code point>
-
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     if ($v_version lt 4.0.0) {
         $file->insert_lines(split /\n/, <<'END'
@@ -11198,15 +10827,12 @@ END
     return @return;
 }
 
-sub process_NormalizationsTest {
+sub process_NormalizationsTest($file) {
 
     # Each line looks like:
     #      source code point; NFC; NFD; NFKC; NFKD
     # e.g.
     #       1E0A;1E0A;0044 0307;1E0A;0044 0307;
-
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # Process each line of the file ...
     while ($file->next_line) {
@@ -11225,7 +10851,7 @@ sub process_NormalizationsTest {
     } # End of looping through the file
 }
 
-sub output_perl_charnames_line ($$) {
+sub output_perl_charnames_line ($a, $b) {
 
     # Output the entries in Perl_charnames specially, using 5 digits instead
     # of four.  This makes the entries a constant length, and simplifies
@@ -11233,7 +10859,7 @@ sub output_perl_charnames_line ($$) {
     # ordinals, but they are all private use or noncharacters which do not
     # have names, so won't be in this table.
 
-    return sprintf "%05X\t%s\n", $_[0], $_[1];
+    return sprintf "%05X\n%s\n\n", $_[0], $_[1];
 }
 
 { # Closure
@@ -11246,7 +10872,7 @@ sub output_perl_charnames_line ($$) {
     my $PSEUDO_MAP_TYPE = 'pseudo_map_type';
     my $MISSINGS = 'missings';
 
-    sub process_generic_property_file {
+    sub process_generic_property_file($file) {
         # This processes a file containing property mappings and puts them
         # into internal map tables.  It should be used to handle any property
         # files that have mappings from a code point or range thereof to
@@ -11283,9 +10909,6 @@ sub output_perl_charnames_line ($$) {
         # caches it for quick retrieval later.  It also normalizes the maps
         # so that only one of many synonyms is stored.  The Unicode input
         # files do use some multiple synonyms.
-
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my %property_info;               # To keep track of what properties
                                          # have already had entries in the
@@ -11742,9 +11365,7 @@ END
     # A similar mechanism is used to tell it that the map is of a non-default
     # type.
 
-    sub setup_UnicodeData { # Called before any lines of the input are read
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+    sub setup_UnicodeData($file) { # Called before any lines of the input are read
 
         # Create a new property specially located that is a combination of
         # various Name properties: Name, Unicode_1_Name, Named Sequences, and
@@ -11842,7 +11463,7 @@ END
     my @fields;                         # The input fields;
     my @previous_fields;                # And those from the previous call
 
-    sub filter_UnicodeData_line {
+    sub filter_UnicodeData_line($file) {
         # Handle a single input line from UnicodeData.txt; see comments above
         # Conceptually this takes a single line from the file containing N
         # properties, and converts it into N lines with one property per line,
@@ -11851,9 +11472,6 @@ END
         # time, it accumulates ranges where the property values don't change
         # and only emits lines when necessary.  This is about an order of
         # magnitude fewer lines emitted.
-
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # $_ contains the input line.
         # -1 in split means retain trailing null fields
@@ -12187,12 +11805,9 @@ END
         return;
     }
 
-    sub EOF_UnicodeData {
+    sub EOF_UnicodeData($file) {
         # Called upon EOF to flush the buffers, and create the Hangul
         # decomposition mappings if needed.
-
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # Flush the buffers.
         foreach my $i (0 .. $last_field) {
@@ -12237,7 +11852,7 @@ END
         return;
     }
 
-    sub filter_v1_ucd {
+    sub filter_v1_ucd($file) {
         # Fix UCD lines in version 1.  This is probably overkill, but this
         # fixes some glaring errors in Version 1 UnicodeData.txt.  That file:
         # 1)    had many Hangul (U+3400 - U+4DFF) code points that were later
@@ -12273,9 +11888,6 @@ F8FF;<Private Use, Last>;Co;0;L;;;;;N;;;;;
 F900;<CJK Compatibility Ideograph, First>;Lo;0;L;;;;;N;;;;;
 FA2D;<CJK Compatibility Ideograph, Last>;Lo;0;L;;;;;N;;;;;
 END
-
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         #local $to_trace = 1 if main::DEBUG;
         trace $_ if main::DEBUG && $to_trace;
@@ -12503,10 +12115,7 @@ END
     }
 } # End closure for UnicodeData
 
-sub process_GCB_test {
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+sub process_GCB_test($file) {
 
     while ($file->next_line) {
         push @backslash_X_tests, $_;
@@ -12515,10 +12124,7 @@ sub process_GCB_test {
     return;
 }
 
-sub process_LB_test {
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+sub process_LB_test($file) {
 
     while ($file->next_line) {
         push @LB_tests, $_;
@@ -12527,10 +12133,7 @@ sub process_LB_test {
     return;
 }
 
-sub process_SB_test {
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+sub process_SB_test($file) {
 
     while ($file->next_line) {
         push @SB_tests, $_;
@@ -12539,10 +12142,7 @@ sub process_SB_test {
     return;
 }
 
-sub process_WB_test {
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+sub process_WB_test($file) {
 
     while ($file->next_line) {
         push @WB_tests, $_;
@@ -12551,16 +12151,13 @@ sub process_WB_test {
     return;
 }
 
-sub process_NamedSequences {
+sub process_NamedSequences($file) {
     # NamedSequences.txt entries are just added to an array.  Because these
     # don't look like the other tables, they have their own handler.
     # An example:
     # LATIN CAPITAL LETTER A WITH MACRON AND GRAVE;0100 0300
     #
     # This just adds the sequence to an array for later handling
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     while ($file->next_line) {
         my ($name, $sequence, @remainder) = split /\s*;\s*/, $_, -1;
@@ -12570,16 +12167,13 @@ sub process_NamedSequences {
             next;
         }
 
-        # Code points below 0x0100 need to be converted to native
-        $sequence =~ s{ \b 00 ( [0-9A-F]{2} ) \b }
-                      { sprintf("%04X", utf8::unicode_to_native(hex $1)) }gxe
-                                                        if NON_ASCII_PLATFORM;
-
-        # Note single \t in keeping with special output format of
-        # Perl_charnames.  But it turns out that the code points don't have to
-        # be 5 digits long, like the rest, based on the internal workings of
-        # charnames.pm.  This could be easily changed for consistency.
-        push @named_sequences, "$sequence\t$name";
+        # Code points need to be 5 digits long like the other entries in
+        # Name.pl, for regcomp.c parsing; and the ones below 0x0100 need to be
+        # converted to native
+        $sequence = join " ", map { sprintf("%05X",
+                                    utf8::unicode_to_native(hex $_))
+                                  } split / /, $sequence;
+        push @named_sequences, "$sequence\n$name\n";
     }
     return;
 }
@@ -12651,7 +12245,7 @@ sub filter_old_style_arabic_shaping {
     my $uc;
     my %special_casing_code_points;
 
-    sub setup_special_casing {
+    sub setup_special_casing($file) {
         # SpecialCasing.txt contains the non-simple case change mappings.  The
         # simple ones are in UnicodeData.txt, which should already have been
         # read in to the full property data structures, so as to initialize
@@ -12667,9 +12261,6 @@ sub filter_old_style_arabic_shaping {
         # full tables with the simple mappings, and then overwrite those
         # relatively few entries in them that have different full mappings,
         # and thus skip the simple mapping tables altogether.
-
-        my $file= shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         $lc = property_ref('lc');
         $tc = property_ref('tc');
@@ -12737,7 +12328,7 @@ END
         filter_special_casing_line(@_);
     }
 
-    sub filter_special_casing_line {
+    sub filter_special_casing_line($file) {
         # Change the format of $_ from SpecialCasing.txt into something that
         # the generic handler understands.  Each input line contains three
         # case mappings.  This will generate three lines to pass to the
@@ -12751,9 +12342,6 @@ END
         # 0307; ; 0307; 0307; tr After_I; # COMBINING DOT ABOVE
         # Note the trailing semi-colon, unlike many of the input files.  That
         # means that there will be an extra null field generated by the split
-
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my @fields = split /\s*;\s*/, $_, -1; # -1 => retain trailing null
                                               # fields
@@ -12848,12 +12436,9 @@ END
     }
 }
 
-sub filter_old_style_case_folding {
+sub filter_old_style_case_folding($file) {
     # This transforms $_ containing the case folding style of 3.0.1, to 3.1
     # and later style.  Different letters were used in the earlier.
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     my @fields = split /\s*;\s*/;
 
@@ -12883,7 +12468,7 @@ sub filter_old_style_case_folding {
     # it takes no part in anything we do.
     my $to_output_simple;
 
-    sub setup_case_folding($) {
+    sub setup_case_folding {
         # Read in the case foldings in CaseFolding.txt.  This handles both
         # simple and full case folding.
 
@@ -12905,7 +12490,7 @@ END
         return;
     }
 
-    sub filter_case_folding_line {
+    sub filter_case_folding_line($file) {
         # Called for each line in CaseFolding.txt
         # Input lines look like:
         # 0041; C; 0061; # LATIN CAPITAL LETTER A
@@ -12920,9 +12505,6 @@ END
         # Note the trailing semi-colon, unlike many of the input files.  That
         # means that there will be an extra null field generated by the split
         # below, which we ignore and hence is not an error.
-
-        my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my ($range, $type, $map, @remainder) = split /\s*;\s*/, $_, -1;
         if (@remainder > 1 || (@remainder == 1 && $remainder[0] ne "" )) {
@@ -13011,11 +12593,9 @@ sub filter_jamo_line {
     return;
 }
 
-sub register_fraction($) {
+sub register_fraction($rational) {
     # This registers the input rational number so that it can be passed on to
     # Unicode::UCD, both in rational and floating forms.
-
-    my $rational = shift;
 
     my $floating = eval $rational;
 
@@ -13059,10 +12639,8 @@ sub register_fraction($) {
     return;
 }
 
-sub gcd($$) {   # Greatest-common-divisor; from
+sub gcd($a, $b) {   # Greatest-common-divisor; from
                 # http://en.wikipedia.org/wiki/Euclidean_algorithm
-    my ($a, $b) = @_;
-
     use integer;
 
     while ($b != 0) {
@@ -13073,9 +12651,7 @@ sub gcd($$) {   # Greatest-common-divisor; from
     return $a;
 }
 
-sub reduce_fraction($) {
-    my $fraction_ref = shift;
-
+sub reduce_fraction($fraction_ref) {
     # Reduce a fraction to lowest terms.  The Unicode data may be reducible,
     # hence this is needed.  The argument is a reference to the
     # string denoting the fraction, which must be of the form:
@@ -13103,7 +12679,7 @@ sub reduce_fraction($) {
     return;
 }
 
-sub filter_numeric_value_line {
+sub filter_numeric_value_line($file) {
     # DNumValues contains lines of a different syntax than the typical
     # property file:
     # 0F33          ; -0.5 ; ; -1/2 # No       TIBETAN DIGIT HALF ZERO
@@ -13111,9 +12687,6 @@ sub filter_numeric_value_line {
     # This routine transforms $_ containing the anomalous syntax to the
     # typical, by filtering out the extra columns, and convert early version
     # decimal numbers to strings that look like rational numbers.
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # Starting in 5.1, there is a rational field.  Just use that, omitting the
     # extra columns.  Otherwise convert the decimal number in the second field
@@ -13202,9 +12775,7 @@ sub filter_numeric_value_line {
 { # Closure
     my %unihan_properties;
 
-    sub construct_unihan {
-
-        my $file_object = shift;
+    sub construct_unihan($file_object) {
 
         return unless file_exists($file_object->file);
 
@@ -13334,16 +12905,13 @@ END
     }
 }
 
-sub filter_blocks_lines {
+sub filter_blocks_lines($file) {
     # In the Blocks.txt file, the names of the blocks don't quite match the
     # names given in PropertyValueAliases.txt, so this changes them so they
     # do match:  Blanks and hyphens are changed into underscores.  Also makes
     # early release versions look like later ones
     #
     # $_ is transformed to the correct value.
-
-    my $file = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     if ($v_version lt v3.2.0) {
         if (/FEFF.*Specials/) { # Bug in old versions: line wrongly inserted
@@ -13387,7 +12955,7 @@ sub filter_blocks_lines {
         # were probably not really official at that time, so should be
         # ignored.  You can easily modify things to skip all of them by
         # changing this function to just set $_ to "", and return; and to skip
-        # certain of them by by simply removing their declarations from
+        # certain of them by simply removing their declarations from
         # get_old_property_aliases().
         #
         # Here is a list of all the ones that are thrown away:
@@ -13614,12 +13182,9 @@ sub  filter_IdType_line {
     return;
 }
 
-sub generate_hst {
+sub generate_hst($file) {
 
     # Populates the Hangul Syllable Type property from first principles
-
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # These few ranges are hard-coded in.
     $file->insert_lines(split /\n/, <<'END'
@@ -13665,12 +13230,9 @@ END
     return;
 }
 
-sub generate_GCB {
+sub generate_GCB($file) {
 
     # Populates the Grapheme Cluster Break property from first principles
-
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # All these definitions are from
     # http://www.unicode.org/reports/tr29/tr29-3.html with confirmation
@@ -13723,15 +13285,11 @@ sub generate_GCB {
 }
 
 
-sub fixup_early_perl_name_alias {
+sub fixup_early_perl_name_alias($file) {
 
     # Different versions of Unicode have varying support for the name synonyms
     # below.  Just include everything.  As of 6.1, all these are correct in
     # the Unicode-supplied file.
-
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
 
     # ALERT did not come along until 6.0, at which point it became preferred
     # over BELL.  By inserting it last in early releases, BELL is preferred
@@ -13749,7 +13307,7 @@ END
 
     );
 
-    # One might think that the the 'Unicode_1_Name' field, could work for most
+    # One might think that the 'Unicode_1_Name' field, could work for most
     # of the above names, but sadly that field varies depending on the
     # release.  Version 1.1.5 had no names for any of the controls; Version
     # 2.0 introduced names for the C0 controls, and 3.0 introduced C1 names.
@@ -13821,7 +13379,7 @@ sub finish_Unicode() {
     #    necessary.
     # 2) Adds the mappings for code points missing from the files which have
     #    defaults specified for them.
-    # 3) At this this point all mappings are known, so it computes the type of
+    # 3) At this point all mappings are known, so it computes the type of
     #    each property whose type hasn't been determined yet.
     # 4) Calculates all the regular expression match tables based on the
     #    mappings.
@@ -14505,7 +14063,7 @@ sub handle_compare_versions () {
                 $default_table = $property->table($default_map);
             }
 
-            # If some code points don't go back to the the grab-bag when they
+            # If some code points don't go back to the grab-bag when they
             # are considered unassigned, exclude them from the list that does
             # that.
             my $this_delta = $delta;
@@ -15330,7 +14888,7 @@ sub compile_perl() {
     # Abbreviations go after everything else, so they are saved temporarily in
     # a hash for later.
     #
-    # Everything else is added added afterwards, which preserves the input
+    # Everything else is added afterwards, which preserves the input
     # ordering
 
     foreach my $range ($alias->ranges) {
@@ -16113,14 +15671,12 @@ END
     return;
 }
 
-sub register_file_for_name($$$) {
+sub register_file_for_name($table, $directory_ref, $file) {
     # Given info about a table and a datafile that it should be associated
     # with, register that association
 
-    my $table = shift;
-    my $directory_ref = shift;   # Array of the directory path for the file
-    my $file = shift;            # The file name in the final directory.
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+    # $directory_ref    # Array of the directory path for the file
+    # $file             # The file name in the final directory.
 
     trace "table=$table, file=$file, directory=@$directory_ref, fate=", $table->fate if main::DEBUG && $to_trace;
 
@@ -16307,22 +15863,21 @@ sub register_file_for_name($$$) {
                      # conflicts
     my %full_dir_name_of;   # Full length names of directories used.
 
-    sub construct_filename($$$) {
+    sub construct_filename($name, $mutable, $directories_ref) {
         # Return a file name for a table, based on the table name, but perhaps
         # changed to get rid of non-portable characters in it, and to make
         # sure that it is unique on a file system that allows the names before
         # any period to be at most 8 characters (DOS).  While we're at it
         # check and complain if there are any directory conflicts.
 
-        my $name = shift;       # The name to start with
-        my $mutable = shift;    # Boolean: can it be changed?  If no, but
+        # $name                 # The name to start with
+        # $mutable              # Boolean: can it be changed?  If no, but
                                 # yet it must be to work properly, a warning
                                 # is given
-        my $directories_ref = shift;  # A reference to an array containing the
+        # $directories_ref      # A reference to an array containing the
                                 # path to the file, with each element one path
                                 # component.  This is used because the same
                                 # name can be used in different directories.
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $warn = ! defined wantarray;  # If true, then if the name is
                                 # changed, a warning is issued as well.
@@ -16449,19 +16004,11 @@ my $FILLER = 3;     # Length of initial boiler-plate columns in a pod line
                     #   1   for the flag
                     #   1   for the space between the flag and the main data
 
-sub format_pod_line ($$$;$$) {
+sub format_pod_line($first_column_width, $entry, $info, $status = "", $loose_match = 1 ) {
     # Take a pod line and return it, formatted properly
 
-    my $first_column_width = shift;
-    my $entry = shift;  # Contents of left column
-    my $info = shift;   # Contents of right column
-
-    my $status = shift || "";   # Any flag
-
-    my $loose_match = shift;    # Boolean.
-    $loose_match = 1 unless defined $loose_match;
-
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+    # $entry Contents of left column
+    # $info Contents of right column
 
     my $flags = "";
     $flags .= $STRICTER if ! $loose_match;
@@ -16492,13 +16039,10 @@ sub format_pod_line ($$$;$$) {
 
 my @zero_match_tables;  # List of tables that have no matches in this release
 
-sub make_re_pod_entries($) {
+sub make_re_pod_entries($input_table) {
     # This generates the entries for the pod file for a given table.
     # Also done at this time are any children tables.  The output looks like:
     # \p{Common}              \p{Script=Common} (Short: \p{Zyyy}) (5178)
-
-    my $input_table = shift;        # Table the entry is for
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # Generate parent and all its children at the same time.
     return if $input_table->parent != $input_table;
@@ -16849,9 +16393,7 @@ sub make_re_pod_entries($) {
     return;
 }
 
-sub make_ucd_table_pod_entries {
-    my $table = shift;
-
+sub make_ucd_table_pod_entries($table) {
     # Generate the entries for the UCD section of the pod for $table.  This
     # also calculates if names are ambiguous, so has to be called even if the
     # pod is not being output
@@ -16876,7 +16418,7 @@ sub make_ucd_table_pod_entries {
                                                        && $perl_extension
                                                        && $property != $table;
 
-    # Get the more official name for for perl extensions that aren't
+    # Get the more official name for perl extensions that aren't
     # stand-alone properties
     if ($is_perl_extension_match_table_but_not_dollar_perl) {
         if ($property->type == $BINARY) {
@@ -17883,9 +17425,12 @@ $loose_names
 
     # And the following array gives the inverse mapping from code points to
     # names.  Lowest code points are first
-    my \@code_points_ending_in_code_point = (
+    \@code_points_ending_in_code_point = (
 $code_points_ending_in_code_point
     );
+
+    # Is exportable, make read-only
+    Internals::SvREADONLY(\@code_points_ending_in_code_point, 1);
 END
     # Earlier releases didn't have Jamos.  No sense outputting
     # them unless will be used.
@@ -18943,12 +18488,10 @@ my @white_space_separators = ( # This used only for making the test script.
                             '   '
                         );
 
-sub generate_separator($) {
+sub generate_separator($lhs) {
     # This used only for making the test script.  It generates the colon or
     # equal separator between the property and property value, with random
     # white space surrounding the separator
-
-    my $lhs = shift;
 
     return "" if $lhs eq "";  # No separator if there's only one (the r) side
 
@@ -18963,20 +18506,20 @@ sub generate_separator($) {
             . $spaces_after;
 }
 
-sub generate_tests($$$$$) {
+sub generate_tests($lhs, $rhs, $valid_code, $invalid_code, $warning) {
     # This used only for making the test script.  It generates test cases that
     # are expected to compile successfully in perl.  Note that the LHS and
     # RHS are assumed to already be as randomized as the caller wants.
 
-    my $lhs = shift;           # The property: what's to the left of the colon
-                               #  or equals separator
-    my $rhs = shift;           # The property value; what's to the right
-    my $valid_code = shift;    # A code point that's known to be in the
-                               # table given by LHS=RHS; undef if table is
-                               # empty
-    my $invalid_code = shift;  # A code point known to not be in the table;
-                               # undef if the table is all code points
-    my $warning = shift;
+    # $lhs          # The property: what's to the left of the colon
+                    #  or equals separator
+    # $rhs          # The property value; what's to the right
+    # $valid_code   # A code point that's known to be in the
+                        # table given by LHS=RHS; undef if table is
+                        # empty
+    # $invalid_code # A code point known to not be in the table;
+                    # undef if the table is all code points
+    # $warning
 
     # Get the colon or equal
     my $separator = generate_separator($lhs);
@@ -19005,19 +18548,19 @@ EOC
     return @output;
 }
 
-sub generate_wildcard_tests($$$$$) {
+sub generate_wildcard_tests($lhs, $rhs, $valid_code, $invalid_code, $warning) {
     # This used only for making the test script.  It generates wildcardl
     # matching test cases that are expected to compile successfully in perl.
 
-    my $lhs = shift;           # The property: what's to the left of the
-                               # or equals separator
-    my $rhs = shift;           # The property value; what's to the right
-    my $valid_code = shift;    # A code point that's known to be in the
-                               # table given by LHS=RHS; undef if table is
-                               # empty
-    my $invalid_code = shift;  # A code point known to not be in the table;
-                               # undef if the table is all code points
-    my $warning = shift;
+    # $lhs           # The property: what's to the left of the
+                     # or equals separator
+    # $rhs           # The property value; what's to the right
+    # $valid_code    # A code point that's known to be in the
+                     # table given by LHS=RHS; undef if table is
+                     # empty
+    # $invalid_code  # A code point known to not be in the table;
+                     # undef if the table is all code points
+    # $warning
 
     return if $lhs eq "";
     return if $lhs =~ / ^ Is_ /x;   # These are not currently supported
@@ -19033,16 +18576,16 @@ sub generate_wildcard_tests($$$$$) {
     return @output;
 }
 
-sub generate_error($$$) {
+sub generate_error($lhs, $rhs, $already_in_error=0) {
     # This used only for making the test script.  It generates test cases that
     # are expected to not only not match, but to be syntax or similar errors
 
-    my $lhs = shift;                # The property: what's to the left of the
-                                    # colon or equals separator
-    my $rhs = shift;                # The property value; what's to the right
-    my $already_in_error = shift;   # Boolean; if true it's known that the
-                                # unmodified LHS and RHS will cause an error.
-                                # This routine should not force another one
+    # $lhs                # The property: what's to the left of the
+                          # colon or equals separator
+    # $rhs                # The property value; what's to the right
+    # $already_in_error   # Boolean; if true it's known that the
+                          # unmodified LHS and RHS will cause an error.
+                          # This routine should not force another one
     # Get the colon or equal
     my $separator = generate_separator($lhs);
 
@@ -19074,13 +18617,10 @@ my @bad_loose_seps = (
            ':=',
           );
 
-sub randomize_stricter_name {
+sub randomize_stricter_name($name) {
     # This used only for making the test script.  Take the input name and
     # return a randomized, but valid version of it under the stricter matching
     # rules.
-
-    my $name = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # If the name looks like a number (integer, floating, or rational), do
     # some extra work
@@ -19169,12 +18709,8 @@ sub randomize_stricter_name {
     return join "", @sections;
 }
 
-sub randomize_loose_name($;$) {
+sub randomize_loose_name($name, $want_error=0) {
     # This used only for making the test script
-
-    my $name = shift;
-    my $want_error = shift;  # if true, make an error
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     $name = randomize_stricter_name($name);
 
@@ -20573,6 +20109,10 @@ __DATA__
 
 use strict;
 use warnings;
+
+use feature 'signatures';
+
+no warnings 'experimental::signatures';
 no warnings 'experimental::uniprop_wildcards';
 
 # Test qr/\X/ and the \p{} regular expression constructs.  This file is
@@ -20588,8 +20128,7 @@ my $Tests = 0;
 my $Fails = 0;
 
 # loc_tools.pl requires this function to be defined
-sub ok($@) {
-    my ($pass, @msg) = @_;
+sub ok($pass, @msg) {
     print "not " unless $pass;
     print "ok ";
     print ++$Tests;
@@ -20597,12 +20136,7 @@ sub ok($@) {
     print "\n";
 }
 
-sub Expect($$$$) {
-    my $expected = shift;
-    my $ord = shift;
-    my $regex  = shift;
-    my $warning_type = shift;   # Type of warning message, like 'deprecated'
-                                # or empty if none
+sub Expect($expected, $ord, $regex, $warning_type='') {
     my $line   = (caller)[2];
 
     # Convert the code point to hex form
@@ -20656,8 +20190,7 @@ sub Expect($$$$) {
     return;
 }
 
-sub Error($) {
-    my $regex  = shift;
+sub Error($regex) {
     $Tests++;
     if (eval { 'x' =~ qr/$regex/; 1 }) {
         $Fails++;
@@ -20697,7 +20230,7 @@ if (! defined $WB_Extend_or_Format_re) {
     $WB_Extend_or_Format_re = eval 'qr/[\p{WB=Extend}\p{WB=Format}]/';
 }
 
-sub _test_break($$) {
+sub _test_break($template, $break_type) {
     # Test various break property matches.  The 2nd parameter gives the
     # property name.  The input is a line from auxiliary/*Test.txt for the
     # given property.  Each such line is a sequence of Unicode (not native)
@@ -20712,9 +20245,6 @@ sub _test_break($$) {
     # there.  This is all converted by this routine into a match: $string =~
     # /(\X)/, Each \X should match the next cluster; and that is what is
     # checked.
-
-    my $template = shift;
-    my $break_type = shift;
 
     my $line   = (caller 1)[2];   # Line number
     my $comment = "";
@@ -20942,20 +20472,20 @@ sub _test_break($$) {
     return;
 }
 
-sub Test_GCB($) {
-    _test_break(shift, 'gcb');
+sub Test_GCB($t) {
+    _test_break($t, 'gcb');
 }
 
-sub Test_LB($) {
-    _test_break(shift, 'lb');
+sub Test_LB($t) {
+    _test_break($t, 'lb');
 }
 
-sub Test_SB($) {
-    _test_break(shift, 'sb');
+sub Test_SB($t) {
+    _test_break($t, 'sb');
 }
 
-sub Test_WB($) {
-    _test_break(shift, 'wb');
+sub Test_WB($t) {
+    _test_break($t, 'wb');
 }
 
 sub Finished() {

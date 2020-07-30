@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.45";
+$VERSION = "1.47";
 
 use Carp;
 use Exporter ();
@@ -344,6 +344,8 @@ invert_opset function.
     entersub leavesub leavesublv return method method_named
     method_super method_redir method_redir_super
      -- XXX loops via recursion?
+
+    cmpchain_and cmpchain_dup
 
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval

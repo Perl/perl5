@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.74';
+our $VERSION = '0.75';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -2350,9 +2350,18 @@ sub _namedseq {
         local $_;
         local $/ = "\n";
         while (<$namedseqfh>) {
-            if (/^ [0-9A-F]+ \  /x) {
-                chomp;
-                my ($sequence, $name) = split /\t/;
+            next if m/ ^ \s* \# /x;
+
+            # Each entry is currently two lines.  The first contains the code
+            # points in the sequence separated by spaces.  If this entry
+            # doesn't have spaces, it isn't a named sequence.
+            if (/^ [0-9A-F]{4,5} (?: \  [0-9A-F]{4,5} )+ $ /x) {
+                my $sequence = $_;
+                chomp $sequence;
+
+                # And the second is the name
+                my $name = <$namedseqfh>;
+                chomp $name;
                 my @s = map { chr(hex($_)) } split(' ', $sequence);
                 $NAMEDSEQ{$name} = join("", @s);
             }
@@ -3753,17 +3762,9 @@ them.
 
 Instead of reading the Unicode Database directly from files, as you were able
 to do for a long time, you are encouraged to use the supplied functions. So,
-instead of reading C<Name.pl> - which may disappear without notice in the
-future - directly, as with
-
-  my (%name, %cp);
-  for (split m/\s*\n/ => do "unicore/Name.pl") {
-      my ($cp, $name) = split m/\t/ => $_;
-      $cp{$name} = $cp;
-      $name{$cp} = $name unless $cp =~ m/ /;
-  }
-
-You ought to use L</prop_invmap()> like this:
+instead of reading C<Name.pl> directly, which changed formats in 5.32, and may
+do so again without notice in the future or even disappear, you ought to use
+L</prop_invmap()> like this:
 
   my (%name, %cp, %cps, $n);
   # All codepoints
@@ -3906,6 +3907,14 @@ RETRY:
             my %names;
             $names{'LIST'} = "";
             my $original = do "unicore/Name.pl";
+
+            # Change the double \n format of the file back to single lines
+            # with a tab
+            $original =~ s/\n\n/\e/g;   # Use a control that shouldn't occur
+                                        #in the file
+            $original =~ s/\n/\t/g;
+            $original =~ s/\e/\n/g;
+
             my $algorithm_names = \@algorithmic_named_code_points;
 
             # We need to remove the names from it that are aliases.  For that
@@ -3934,7 +3943,7 @@ RETRY:
             foreach my $line (split "\n", $original) {
                 my ($hex_code_point, $name) = split "\t", $line;
 
-                # Weeds out all comments, blank lines, and named sequences
+                # Weeds out any comments, blank lines, and named sequences
                 next if $hex_code_point =~ /[^[:xdigit:]]/a;
 
                 my $code_point = hex $hex_code_point;

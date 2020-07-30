@@ -56,9 +56,9 @@ looks like C<(eval 34)>.
 
 =item *
 
-Each scalar C<${"_<$filename"}> contains C<"_<$filename">.  This is
+Each scalar C<${"_<$filename"}> contains C<$filename>.  This is
 also the case for evaluated strings that contain subroutines, or
-which are currently being executed.  The $filename for C<eval>ed
+which are currently being executed.  The C<$filename> for C<eval>ed
 strings looks like C<(eval 34)>.
 
 =item *

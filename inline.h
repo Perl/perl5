@@ -292,17 +292,6 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 }
 #endif
 
-/* ------------------------------- handy.h ------------------------------- */
-
-/* saves machine code for a common noreturn idiom typically used in Newx*() */
-GCC_DIAG_IGNORE_DECL(-Wunused-function);
-static void
-Perl_croak_memory_wrap(void)
-{
-    Perl_croak_nocontext("%s",PL_memory_wrap);
-}
-GCC_DIAG_RESTORE_DECL;
-
 /* ------------------------------- utf8.h ------------------------------- */
 
 /*
@@ -550,7 +539,7 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
      *  Isolate the lsb;
      * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
      *
-     * The word will look this this, with a rightmost set bit in position 's':
+     * The word will look like this, with a rightmost set bit in position 's':
      * ('x's are don't cares)
      *      s
      *  x..x100..0
@@ -2517,7 +2506,6 @@ same case-insensitively in the current locale; false otherwise.
 PERL_STATIC_INLINE I32
 Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 {
-    dVAR;
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
 
@@ -2539,7 +2527,7 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 The C library C<strnlen> if available, or a Perl implementation of it.
 
 C<my_strnlen()> computes the length of the string, up to C<maxlen>
-characters.  It will will never attempt to address more than C<maxlen>
+characters.  It will never attempt to address more than C<maxlen>
 characters, making it suitable for use with strings that are not
 guaranteed to be NUL-terminated.
 
@@ -2585,6 +2573,59 @@ S_my_memrchr(const char * s, const char c, const STRLEN len)
 }
 
 #endif
+
+PERL_STATIC_INLINE char *
+Perl_mortal_getenv(const char * str)
+{
+    /* This implements a (mostly) thread-safe, sequential-call-safe getenv().
+     *
+     * It's (mostly) thread-safe because it uses a mutex to prevent
+     * simultaneous access from other threads that use the same mutex, and
+     * makes a copy of the result before releasing that mutex.  All of the Perl
+     * core uses that mutex, but, like all mutexes, everything has to cooperate
+     * for it to completely work.  It is possible for code from, say XS, to not
+     * use this mutex, defeating the safety.
+     *
+     * On some platforms, getenv() is not sequential-call-safe, because
+     * subsequent calls destroy the static storage inside the C library
+     * returned by an earlier call.  The result must be copied or completely
+     * acted upon before a subsequent getenv call.  Those calls could come from
+     * another thread.  Again, making a copy while controlling the mutex
+     * prevents these problems..
+     *
+     * To prevent leaks, the copy is made by creating a new SV containing it,
+     * mortalizing the SV, and returning the SV's string (the copy).  Thus this
+     * is a drop-in replacement for getenv().
+     *
+     * A complication is that this can be called during phases where the
+     * mortalization process isn't available.  These are in interpreter
+     * destruction or early in construction.  khw believes that at these times
+     * there shouldn't be anything else going on, so plain getenv is safe AS
+     * LONG AS the caller acts on the return before calling it again. */
+
+    char * ret;
+    dTHX;
+
+    PERL_ARGS_ASSERT_MORTAL_GETENV;
+
+    /* Can't mortalize without stacks.  khw believes that no other threads
+     * should be running, so no need to lock things, and this may be during a
+     * phase when locking isn't even available */
+    if (UNLIKELY(PL_scopestack_ix == 0)) {
+        return getenv(str);
+    }
+
+    ENV_LOCK;
+
+    ret = getenv(str);
+
+    if (ret != NULL) {
+        ret = SvPVX(sv_2mortal(newSVpv(ret, 0)));
+    }
+
+    ENV_UNLOCK;
+    return ret;
+}
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

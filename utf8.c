@@ -55,9 +55,7 @@ within non-zero characters.
 static void
 S_restore_cop_warnings(pTHX_ void *p)
 {
-    if (!specialWARN(PL_curcop->cop_warnings))
-        PerlMemShared_free(PL_curcop->cop_warnings);
-    PL_curcop->cop_warnings = (STRLEN*)p;
+    free_and_set_cop_warnings(PL_curcop, (STRLEN*) p);
 }
 
 
@@ -1369,7 +1367,7 @@ describes the situation in all cases.
 
 =item C<UTF8_GOT_CONTINUATION>
 
-The input sequence was malformed in that the first byte was a a UTF-8
+The input sequence was malformed in that the first byte was a UTF-8
 continuation byte.
 
 =item C<UTF8_GOT_EMPTY>
@@ -1623,7 +1621,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * things.  For example, an input could be deliberately designed to
      * overflow, and if this code bailed out immediately upon discovering that,
      * returning to the caller C<*retlen> pointing to the very next byte (one
-     * which is actually part of of the overflowing sequence), that could look
+     * which is actually part of the overflowing sequence), that could look
      * legitimate to the caller, which could discard the initial partial
      * sequence and process the rest, inappropriately.
      *
@@ -2813,21 +2811,18 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
 bool
 Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 {
-    dVAR;
     return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
 }
 
 bool
 Perl__is_uni_perl_idcont(pTHX_ UV c)
 {
-    dVAR;
     return _invlist_contains_cp(PL_utf8_perl_idcont, c);
 }
 
 bool
 Perl__is_uni_perl_idstart(pTHX_ UV c)
 {
-    dVAR;
     return _invlist_contains_cp(PL_utf8_perl_idstart, c);
 }
 
@@ -2967,7 +2962,6 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
      * The ordinal of the first character of the changed version is returned
      * (but note, as explained above, that there may be more.) */
 
-    dVAR;
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
     if (c < 256) {
@@ -2980,7 +2974,6 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    dVAR;
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
     if (c < 256) {
@@ -3020,7 +3013,6 @@ S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp, const char dummy)
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    dVAR;
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
     if (c < 256) {
@@ -3102,7 +3094,6 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      */
 
-    dVAR;
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
     if (flags & FOLD_FLAGS_LOCALE) {
@@ -3207,7 +3198,6 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 bool
 Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
-    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
     return is_utf8_common(p, e, PL_XPosix_ptrs[classnum]);
@@ -3216,7 +3206,6 @@ Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 bool
 Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 {
-    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
 
     return is_utf8_common(p, e, PL_utf8_perl_idstart);
@@ -3225,7 +3214,6 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 bool
 Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 {
-    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
 
     return is_utf8_common(p, e, PL_utf8_perl_idcont);
@@ -3431,7 +3419,6 @@ Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
      * constructed with this size (to save space and memory), and we return
      * pointers, so they must be this size */
 
-    dVAR;
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [perl #133365] */
     SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
@@ -3577,7 +3564,6 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
      * sequence, and the entire sequence will be stored in *ustrp.  ustrp will
      * contain *lenp bytes */
 
-    dVAR;
     PERL_ARGS_ASSERT_TURKIC_LC;
     assert(e > p0);
 
@@ -3624,7 +3610,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
      * ustrp will contain *lenp bytes
      *
      * Turkic differs only from non-Turkic in that 'i' and LATIN CAPITAL LETTER
-     * I WITH DOT ABOVE form a case pair, as do 'I' and and LATIN SMALL LETTER
+     * I WITH DOT ABOVE form a case pair, as do 'I' and LATIN SMALL LETTER
      * DOTLESS I */
 
     PERL_ARGS_ASSERT_TURKIC_UC;
@@ -3741,7 +3727,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
     return result;
 
 /* Not currently externally documented, and subject to change:
- * <flags> is set iff iff the rules from the current underlying locale are to
+ * <flags> is set iff the rules from the current underlying locale are to
  *         be used. */
 
 UV
@@ -3751,7 +3737,6 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    dVAR;
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
@@ -3776,7 +3761,6 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    dVAR;
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
@@ -3788,7 +3772,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
 }
 
 /* Not currently externally documented, and subject to change:
- * <flags> is set iff iff the rules from the current underlying locale are to
+ * <flags> is set iff the rules from the current underlying locale are to
  *         be used.
  */
 
@@ -3799,7 +3783,6 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    dVAR;
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
@@ -3826,7 +3809,6 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
                                STRLEN *lenp,
                                U8 flags)
 {
-    dVAR;
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;

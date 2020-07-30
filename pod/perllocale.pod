@@ -484,7 +484,7 @@ be noticed, depending on your system's C library.
 Note that when a form of C<use locale> that doesn't include all
 categories is specified, Perl ignores the excluded categories.
 
-If C<set_locale()> fails for some reason (for example, an attempt to set
+If C<setlocale()> fails for some reason (for example, an attempt to set
 to a locale unknown to the system), the locale for the category is not
 changed, and the function returns C<undef>.
 
@@ -1025,7 +1025,7 @@ should use C<\w> with the C</a> regular expression modifier.  See L</"SECURITY">
 
 =head2 Category C<LC_NUMERIC>: Numeric Formatting
 
-After a proper C<POSIX::setlocale()> call, and within the scope of
+After a proper C<POSIX::setlocale()> call, and within the scope
 of a C<use locale> form that includes numerics, Perl obeys the
 C<LC_NUMERIC> locale information, which controls an application's idea
 of how numbers should be formatted for human readability.

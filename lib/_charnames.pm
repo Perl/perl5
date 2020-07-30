@@ -6,7 +6,7 @@
 package _charnames;
 use strict;
 use warnings;
-our $VERSION = '1.46';
+our $VERSION = '1.48';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -21,22 +21,22 @@ $Carp::Internal{ (__PACKAGE__) } = 1;
 #
 # The official names with their code points are stored in a table in
 # lib/unicore/Name.pl which is read in as a large string (almost 3/4 Mb in
-# Unicode 6.0).  Each code point/name combination is separated by a \n in the
-# string.  (Some of the CJK and the Hangul syllable names are instead
-# determined algorithmically via subroutines stored instead in
-# lib/unicore/Name.pm).  Because of the large size of this table, it isn't
-# converted into hashes for faster lookup.
+# Unicode 6.0).  Each code point sequence appears on a line by itself, with
+# its corresponding name occupying the next line in the string.  (Some of the
+# CJK and the Hangul syllable names are instead determined algorithmically via
+# subroutines stored instead in lib/unicore/Name.pm).  Because of the large
+# size of this table, it isn't converted into hashes for faster lookup.
 #
 # But, user defined aliases are stored in their own hashes, as are Perl
 # extensions to the official names.  These are checked first before looking at
 # the official table.
 #
 # Basically, the table is grepped for the input code point (viacode()) or
-# name (the other functions), and the corresponding value on the same line is
-# returned.  The grepping is done by turning the input into a regular
-# expression.  Thus, the same table does double duty, used by both name and
-# code point lookup.  (If we were to have hashes, we would need two, one for
-# each lookup direction.)
+# name (the other functions), and the corresponding value on the next or
+# previous line is returned.  The grepping is done by turning the input into a
+# regular expression.  Thus, the same table does double duty, used by both
+# name and code point lookup.  (If we were to have hashes, we would need two,
+# one for each lookup direction.)
 #
 # For loose name matching, the logical thing would be to have a table
 # with all the ignorable characters squeezed out, and then grep it with the
@@ -48,9 +48,9 @@ $Carp::Internal{ (__PACKAGE__) } = 1;
 # regular expression of the input name is modified to have optional spaces and
 # dashes between characters.  For example, in strict matching, the regular
 # expression would be:
-#   qr/\tDIGIT ONE$/m
+#   qr/^DIGIT ONE$/m
 # Under loose matching, the blank would be squeezed out, and the re would be:
-#   qr/\tD[- ]?I[- ]?G[- ]?I[- ]?T[- ]?O[- ]?N[- ]?E$/m
+#   qr/^D[- ]?I[- ]?G[- ]?I[- ]?T[- ]?O[- ]?N[- ]?E$/m
 # which matches a blank or dash between any characters in the official table.
 #
 # This is also how script lookup is done.  Basically the re looks like
@@ -139,6 +139,14 @@ sub carp
 {
   require Carp; goto &Carp::carp;
 } # carp
+
+sub populate_txt()
+{
+  return if $txt;
+
+  $txt = do "unicore/Name.pl";
+  Internals::SvREADONLY($txt, 1);
+}
 
 sub alias (@) # Set up a single alias
 {
@@ -404,11 +412,11 @@ sub lookup_name ($$$;$) {
       my $cache_ref;
 
       ## Suck in the code/name list as a big string.
-      ## Lines look like:
-      ##     "00052\tLATIN CAPITAL LETTER R\n"
+      ## Entries look like:
+      ##     "00052\nLATIN CAPITAL LETTER R\n\n"
       # or
-      #      "0052 0303\tLATIN CAPITAL LETTER R WITH TILDE\n"
-      $txt = do "unicore/Name.pl" unless $txt;
+      #      "0052 0303\nLATIN CAPITAL LETTER R WITH TILDE\n\n"
+      populate_txt() unless $txt;
 
       ## @off will hold the index into the code/name string of the start and
       ## end of the name as we find it.
@@ -461,8 +469,8 @@ sub lookup_name ($$$;$) {
 
         # Do the lookup in the full table if asked for, and if succeeds
         # save the offsets and set where to cache the result.
-        if (($loose || $^H{charnames_full}) && $txt =~ /\t$lookup_name$/m) {
-          @off = ($-[0] + 1, $+[0]);    # The 1 is for the tab
+        if (($loose || $^H{charnames_full}) && $txt =~ /^$lookup_name$/m) {
+          @off = ($-[0], $+[0]);
           $cache_ref = ($loose) ? \%loose_names_cache : \%full_names_cache;
         }
         elsif ($regex_loose) {
@@ -506,18 +514,18 @@ sub lookup_name ($$$;$) {
 
           my $case = $name_has_uppercase ? "CAPITAL" : "SMALL";
           return if (! $scripts_trie || $txt !~
-             /\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm);
+             /^ (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm);
 
           # Here have found the input name in the table.
-          @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
+          @off = ($-[0], $+[0]);
         }
 
         # Here, the input name has been found; we haven't set up the output,
         # but we know where in the string
         # the name starts.  The string is set up so that for single characters
-        # (and not named sequences), the name is preceded immediately by a
-        # tab and 5 hex digits for its code, with a \n before those.  Named
-        # sequences won't have the 7th preceding character be a \n.
+        # (and not named sequences), the name is on a line by itself, and the
+        # previous line contains precisely 5 hex digits for its code point.
+        # Named sequences won't have the 7th preceding character be a \n.
         # (Actually, for the very first entry in the table this isn't strictly
         # true: subtracting 7 will yield -1, and the substr below will
         # therefore yield the very last character in the table, which should
@@ -633,6 +641,14 @@ sub _loose_regcomp_lookup {
                     );
 }
 
+sub _get_names_info {
+  # For use only by regcomp.c to compile \p{name=/.../}
+  populate_txt() unless $txt;
+
+
+  return ( \$txt, \@charnames::code_points_ending_in_code_point );
+}
+
 sub import
 {
   shift; ## ignore class name
@@ -695,10 +711,10 @@ sub import
   ## see if at least we can find one letter from each script.
   ##
   if (warnings::enabled('utf8') && @scripts) {
-    $txt = do "unicore/Name.pl" unless $txt;
+    populate_txt() unless $txt;
 
     for my $script (@scripts) {
-      if (not $txt =~ m/\t$script (?:CAPITAL |SMALL )?LETTER /) {
+      if (not $txt =~ m/^$script (?:CAPITAL |SMALL )?LETTER /m) {
         warnings::warn('utf8',  "No such script: '$script'");
         $script = quotemeta $script;  # Escape it, for use in the re.
       }
@@ -773,7 +789,7 @@ sub viacode {
   # If the code point is above the max in the table, there's no point
   # looking through it.  Checking the length first is slightly faster
   if (length($hex) <= 5 || CORE::hex($hex) <= 0x10FFFF) {
-    $txt = do "unicore/Name.pl" unless $txt;
+    populate_txt() unless $txt;
 
     # See if the name is algorithmically determinable.
     my $algorithmic = charnames::code_point_to_name_special(CORE::hex $hex);
@@ -785,7 +801,7 @@ sub viacode {
     # Return the official name, if exists.  It's unclear to me (khw) at
     # this juncture if it is better to return a user-defined override, so
     # leaving it as is for now.
-    if ($txt =~ m/^$hex\t/m) {
+    if ($txt =~ m/^$hex\n/m) {
 
         # The name starts with the next character and goes up to the
         # next new-line.  Using capturing parentheses above instead of

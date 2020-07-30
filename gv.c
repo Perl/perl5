@@ -168,7 +168,6 @@ Perl_newGP(pTHX_ GV *const gv)
 #ifndef USE_ITHREADS
     GV *filegv;
 #endif
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWGP;
     Newxz(gp, 1, GP);
@@ -3144,7 +3143,6 @@ Perl_amagic_is_enabled(pTHX_ int method)
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
-  dVAR;
   MAGIC *mg;
   CV *cv=NULL;
   CV **cvp=NULL, **ocvp=NULL;
@@ -3642,7 +3640,6 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 void
 Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
 {
-    dVAR;
     U32 hash;
 
     PERL_ARGS_ASSERT_GV_NAME_SET;

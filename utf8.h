@@ -271,7 +271,7 @@ are in the character. */
 
 /* Surrogates, non-character code points and above-Unicode code points are
  * problematic in some contexts.  This allows code that needs to check for
- * those to to quickly exclude the vast majority of code points it will
+ * those to quickly exclude the vast majority of code points it will
  * encounter */
 #define isUTF8_POSSIBLY_PROBLEMATIC(c) (__ASSERT_(FITS_IN_8_BITS(c))        \
                                         (U8) c >= 0xED)
@@ -283,7 +283,7 @@ are in the character. */
 /* 2**UTF_ACCUMULATION_SHIFT - 1.  This masks out all but the bits that carry
  * real information in a continuation byte.  This turns out to be 0x3F in
  * UTF-8, 0x1F in UTF-EBCDIC. */
-#define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+#define UTF_CONTINUATION_MASK  ((U8) (nBIT_MASK(UTF_ACCUMULATION_SHIFT)))
 
 /* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
  * E0 in UTF-EBCDIC */
@@ -353,7 +353,9 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * ASCII platforms, everything is representable by 7 bytes */
 #if defined(UV_IS_QUAD) || defined(EBCDIC)
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
-     (UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)) ? 7 : UTF8_MAXBYTES)
+     LIKELY((UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))          \
+     ? 7                                                                    \
+     : UTF8_MAXBYTES)
 #else
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
 #endif
@@ -417,7 +419,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 /* The largest code point representable by two UTF-8 bytes on any platform that
  * Perl runs on.  This value is constrained by EBCDIC which has 5 bits per
  * continuation byte */
-#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * (1U << 5) - 1)
+#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * nBIT_UMAX(5))
 
 /*
 
@@ -461,12 +463,14 @@ uppercase/lowercase/titlecase/fold into.
  * UTF-8 encoded character that mark it as a start byte and give the number of
  * bytes that comprise the character. 'len' is the number of bytes in the
  * multi-byte sequence. */
-#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : ((U8) (0xFE << (7-(len)))))
+#define UTF_START_MARK(len) (UNLIKELY((len) >  7)           \
+                            ? 0xFF                          \
+                            : ((U8) (0xFE << (7-(len)))))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
  * Doesn't work on an invariant byte.  'len' is the number of bytes in the
  * multi-byte sequence that comprises the character. */
-#define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
+#define UTF_START_MASK(len) (UNLIKELY((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
 /* Adds a UTF8 continuation byte 'new' of information to a running total code
  * point 'old' of all the continuation bytes so far.  This is designed to be
@@ -584,7 +588,7 @@ L</C<UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 */
 
 #define UTF8_CHK_SKIP(s)                                                       \
-            (s[0] == '\0' ? 1 : MIN(UTF8SKIP(s),                               \
+            (UNLIKELY(s[0] == '\0') ? 1 : MIN(UTF8SKIP(s),                     \
                                     my_strnlen((char *) (s), UTF8SKIP(s))))
 /*
 
@@ -596,7 +600,7 @@ returns beyond C<e>.  On DEBUGGING builds, it asserts that S<C<s E<lt>= e>>.
 =cut
  */
 #define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                \
-                              ((e) - (s)) <= 0                      \
+                              UNLIKELY(((e) - (s)) <= 0)            \
                                ? 0                                  \
                                : MIN(((e) - (s)), UTF8_SKIP(s)))
 
@@ -875,17 +879,18 @@ fit in an IV on the current machine.
  */
 #ifdef EBCDIC
 #   define UTF8_IS_SUPER(s, e)                                              \
-                  ((    LIKELY((e) > (s) + 4)                               \
-                    &&      NATIVE_UTF8_TO_I8(*(s)) >= 0xF9                 \
-                    && (    NATIVE_UTF8_TO_I8(*(s)) >  0xF9                 \
-                        || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2))         \
-                    &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                   \
-                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
+                 ((    ((e) > (s) + 4)                                      \
+                   &&          (NATIVE_UTF8_TO_I8(*(s)) >= 0xF9)            \
+                   &&  UNLIKELY(    NATIVE_UTF8_TO_I8(*(s)) >  0xF9         \
+                                || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2)) \
+                   &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                    \
+                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0
 #else
 #   define UTF8_IS_SUPER(s, e)                                              \
-                   ((    LIKELY((e) > (s) + 3)                              \
+                   ((    ((e) > (s) + 3)                                    \
                      &&  (*(U8*) (s)) >= 0xF4                               \
-                     && ((*(U8*) (s)) >  0xF4 || (*((U8*) (s) + 1) >= 0x90))\
+                     && (UNLIKELY(   ((*(U8*) (s)) >  0xF4)                 \
+                                  || (*((U8*) (s) + 1) >= 0x90)))           \
                      &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
                     ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #endif
@@ -958,28 +963,29 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 
 /* This matches the 2048 code points between UNICODE_SURROGATE_FIRST (0xD800) and
  * UNICODE_SURROGATE_LAST (0xDFFF) */
-#define UNICODE_IS_SURROGATE(uv)        (((UV) (uv) & (~0xFFFF | 0xF800))       \
+#define UNICODE_IS_SURROGATE(uv)  UNLIKELY(((UV) (uv) & (~0xFFFF | 0xF800))     \
                                                                     == 0xD800)
 
-#define UNICODE_IS_REPLACEMENT(uv)	((UV) (uv) == UNICODE_REPLACEMENT)
-#define UNICODE_IS_BYTE_ORDER_MARK(uv)	((UV) (uv) == UNICODE_BYTE_ORDER_MARK)
+#define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
+#define UNICODE_IS_BYTE_ORDER_MARK(uv)	UNLIKELY((UV) (uv)                      \
+                                                    == UNICODE_BYTE_ORDER_MARK)
 
 /* Is 'uv' one of the 32 contiguous-range noncharacters? */
-#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)      ((UV) (uv) >= 0xFDD0         \
-                                                 && (UV) (uv) <= 0xFDEF)
+#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)   UNLIKELY((UV) (uv) >= 0xFDD0    \
+                                                      && (UV) (uv) <= 0xFDEF)
 
 /* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
  * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
  * the Unicode legal max */
 #define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                        \
-                                              (((UV) (uv) & 0xFFFE) == 0xFFFE)
+                                      UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
 
 #define UNICODE_IS_NONCHAR(uv)                                                  \
     (   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                                   \
      || (   LIKELY( ! UNICODE_IS_SUPER(uv))                                     \
          && UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
 
-#define UNICODE_IS_SUPER(uv)    ((UV) (uv) > PERL_UNICODE_MAX)
+#define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \

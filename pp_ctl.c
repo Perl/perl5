@@ -262,7 +262,7 @@ PP(pp_substcont)
 		(void)SvPOK_only_UTF8(targ);
 	    }
 
-	    /* update the taint state of various various variables in
+	    /* update the taint state of various variables in
 	     * preparation for final exit.
 	     * See "how taint works" above pp_subst() */
 	    if (TAINTING_get) {
@@ -349,7 +349,7 @@ PP(pp_substcont)
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
-    /* update the taint state of various various variables in preparation
+    /* update the taint state of various variables in preparation
      * for calling the code block.
      * See "how taint works" above pp_subst() */
     if (TAINTING_get) {
@@ -2794,7 +2794,7 @@ S_check_op_type(pTHX_ OP * const o)
 
 PP(pp_goto)
 {
-    dVAR; dSP;
+    dSP;
     OP *retop = NULL;
     I32 ix;
     PERL_CONTEXT *cx;
@@ -3752,7 +3752,7 @@ S_path_is_searchable(const char *name)
 static OP *
 S_require_version(pTHX_ SV *sv)
 {
-    dVAR; dSP;
+    dSP;
 
     sv = sv_2mortal(new_version(sv));
     if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
@@ -3818,7 +3818,7 @@ S_require_version(pTHX_ SV *sv)
 static OP *
 S_require_file(pTHX_ SV *sv)
 {
-    dVAR; dSP;
+    dSP;
 
     PERL_CONTEXT *cx;
     const char *name;
@@ -3976,7 +3976,7 @@ S_require_file(pTHX_ SV *sv)
     }
 
     /* ... but if we fail, still search @INC for code references;
-     * these are applied even on on-searchable paths (except
+     * these are applied even on non-searchable paths (except
      * if we got EACESS).
      *
      * For searchable paths, just search @INC normally
@@ -4145,18 +4145,6 @@ S_require_file(pTHX_ SV *sv)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
-#elif defined(__SYMBIAN32__)
-		    if (PL_origfilename[0] &&
-			PL_origfilename[1] == ':' &&
-			!(dir[0] && dir[1] == ':'))
-		        Perl_sv_setpvf(aTHX_ namesv,
-				       "%c:%s\\%s",
-				       PL_origfilename[0],
-				       dir, name);
-		    else
-		        Perl_sv_setpvf(aTHX_ namesv,
-				       "%s\\%s",
-				       dir, name);
 #else
 		    /* The equivalent of		    
 		       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);

@@ -26,7 +26,7 @@ if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );
 }
 
-my $tests = 27; # I can't see a clean way to calculate this automatically.
+my $tests = 25; # I can't see a clean way to calculate this automatically.
 
 my %skip = ("regen_perly.pl"    => [qw(perly.act perly.h perly.tab)],
             "regen/keywords.pl" => [qw(keywords.c keywords.h)],

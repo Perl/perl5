@@ -313,6 +313,7 @@
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
 #define mini_mktime		Perl_mini_mktime
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
+#define mortal_getenv		Perl_mortal_getenv
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
 #define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
@@ -827,11 +828,6 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(PERL_GLOBAL_STRUCT)
-#define GetVars()		Perl_GetVars(aTHX)
-#define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
-#define init_global_struct()	Perl_init_global_struct(aTHX)
-#endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
 #define deb_nocontext		Perl_deb_nocontext
@@ -913,7 +909,7 @@
 #define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
 #define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
 #endif
-#if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
+#if defined(WIN32) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
@@ -959,6 +955,11 @@
 #  if ! defined(HAS_MEMRCHR) && (defined(PERL_CORE) || defined(PERL_EXT))
 #define my_memrchr		S_my_memrchr
 #  endif
+#  if !(!defined(PERL_EXT_RE_BUILD))
+#    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define get_re_gclass_nonbitmap_data(a,b,c,d,e,f)	Perl_get_re_gclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
+#    endif
+#  endif
 #  if !defined(PERL_EXT_RE_BUILD)
 #    if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
@@ -970,6 +971,9 @@
 #define invlist_replace_list_destroys_src(a,b)	S_invlist_replace_list_destroys_src(aTHX_ a,b)
 #define invlist_set_previous_index	S_invlist_set_previous_index
 #define invlist_trim		S_invlist_trim
+#    endif
+#    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl_get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
 #  if defined(DEBUGGING)
@@ -1032,6 +1036,7 @@
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define grok_bslash_N(a,b,c,d,e,f,g)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f,g)
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
+#define handle_names_wildcard(a,b,c,d)	S_handle_names_wildcard(aTHX_ a,b,c,d)
 #define handle_possible_posix(a,b,c,d,e)	S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
 #define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	S_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
@@ -1046,9 +1051,9 @@
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #define output_posix_warnings(a,b)	S_output_posix_warnings(aTHX_ a,b)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
-#define parse_uniprop_string(a,b,c,d,e,f,g,h,i)	S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i)
+#define parse_uniprop_string(a,b,c,d,e,f,g,h,i,j)	S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define populate_ANYOF_from_invlist(a,b)	S_populate_ANYOF_from_invlist(aTHX_ a,b)
-#define re_op_compile_wrapper(a,b,c)	S_re_op_compile_wrapper(aTHX_ a,b,c)
+#define rck_elide_nothing(a)	S_rck_elide_nothing(aTHX_ a)
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reg2Lanode(a,b,c,d)	S_reg2Lanode(aTHX_ a,b,c,d)
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
@@ -1080,7 +1085,7 @@
 #define ssc_is_cp_posixl_init	S_ssc_is_cp_posixl_init
 #define ssc_or(a,b,c)		S_ssc_or(aTHX_ a,b,c)
 #define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
-#define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
+#define study_chunk(a,b,c,d,e,f,g,h,i,j,k,l)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 #define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
@@ -1122,7 +1127,6 @@
 #define get_regex_charset_name	S_get_regex_charset_name
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define re_printf		Perl_re_printf
 #endif
@@ -1254,6 +1258,9 @@
 #define ck_tell(a)		Perl_ck_tell(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define closest_cop(a,b,c,d)	Perl_closest_cop(aTHX_ a,b,c,d)
+#define cmpchain_extend(a,b,c)	Perl_cmpchain_extend(aTHX_ a,b,c)
+#define cmpchain_finish(a)	Perl_cmpchain_finish(aTHX_ a)
+#define cmpchain_start(a,b,c)	Perl_cmpchain_start(aTHX_ a,b,c)
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a,b)	Perl_create_eval_scope(aTHX_ a,b)
@@ -1824,6 +1831,7 @@
 #  if defined(PERL_IN_PP_HOT_C)
 #define do_oddball(a,b)		S_do_oddball(aTHX_ a,b)
 #define opmethod_stash(a)	S_opmethod_stash(aTHX_ a)
+#define should_we_output_Debug_r(a)	S_should_we_output_Debug_r(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_PACK_C)
 #define div128(a,b)		S_div128(aTHX_ a,b)
@@ -1842,15 +1850,24 @@
 #  endif
 #  if defined(PERL_IN_PP_SORT_C)
 #define amagic_cmp(a,b)		S_amagic_cmp(aTHX_ a,b)
+#define amagic_cmp_desc(a,b)	S_amagic_cmp_desc(aTHX_ a,b)
 #define amagic_i_ncmp(a,b)	S_amagic_i_ncmp(aTHX_ a,b)
+#define amagic_i_ncmp_desc(a,b)	S_amagic_i_ncmp_desc(aTHX_ a,b)
 #define amagic_ncmp(a,b)	S_amagic_ncmp(aTHX_ a,b)
+#define amagic_ncmp_desc(a,b)	S_amagic_ncmp_desc(aTHX_ a,b)
+#define cmp_desc(a,b)		S_cmp_desc(aTHX_ a,b)
 #define sortcv(a,b)		S_sortcv(aTHX_ a,b)
 #define sortcv_stacked(a,b)	S_sortcv_stacked(aTHX_ a,b)
 #define sortcv_xsub(a,b)	S_sortcv_xsub(aTHX_ a,b)
+#define sortsv_flags_impl(a,b,c,d)	S_sortsv_flags_impl(aTHX_ a,b,c,d)
 #define sv_i_ncmp(a,b)		S_sv_i_ncmp(aTHX_ a,b)
+#define sv_i_ncmp_desc(a,b)	S_sv_i_ncmp_desc(aTHX_ a,b)
 #define sv_ncmp(a,b)		S_sv_ncmp(aTHX_ a,b)
+#define sv_ncmp_desc(a,b)	S_sv_ncmp_desc(aTHX_ a,b)
 #    if defined(USE_LOCALE_COLLATE)
 #define amagic_cmp_locale(a,b)	S_amagic_cmp_locale(aTHX_ a,b)
+#define amagic_cmp_locale_desc(a,b)	S_amagic_cmp_locale_desc(aTHX_ a,b)
+#define cmp_locale_desc(a,b)	S_cmp_locale_desc(aTHX_ a,b)
 #    endif
 #  endif
 #  if defined(PERL_IN_PP_SYS_C)

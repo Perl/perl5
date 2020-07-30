@@ -596,7 +596,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #  define MAX_PACKED_POW2 6
 #  define MAX_PACKED (MAX_PACKED_POW2 * BUCKETS_PER_POW2 + BUCKET_POW2_SHIFT)
 #  define MAX_POW2_ALGO ((1<<(MAX_PACKED_POW2 + 1)) - M_OVERHEAD)
-#  define TWOK_MASK ((1<<LOG_OF_MIN_ARENA) - 1)
+#  define TWOK_MASK nBIT_MASK(LOG_OF_MIN_ARENA)
 #  define TWOK_MASKED(x) (PTR2UV(x) & ~TWOK_MASK)
 #  define TWOK_SHIFT(x) (PTR2UV(x) & TWOK_MASK)
 #  define OV_INDEXp(block) (INT2PTR(u_char*,TWOK_MASKED(block)))
@@ -618,7 +618,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #ifdef IGNORE_SMALL_BAD_FREE
 #define FIRST_BUCKET_WITH_CHECK (6 * BUCKETS_PER_POW2) /* 64 */
 #  define N_BLKS(bucket) ( (bucket) < FIRST_BUCKET_WITH_CHECK 		\
-			 ? ((1<<LOG_OF_MIN_ARENA) - 1)/BUCKET_SIZE_NO_SURPLUS(bucket) \
+			 ? nBIT_MASK(LOG_OF_MIN_ARENA)/BUCKET_SIZE_NO_SURPLUS(bucket) \
 			 : n_blks[bucket] )
 #else
 #  define N_BLKS(bucket) n_blks[bucket]
@@ -1064,7 +1064,6 @@ emergency_sbrk(MEM_SIZE size)
 static void
 botch(const char *diag, const char *s, const char *file, int line)
 {
-    dVAR;
     dTHX;
     if (!(PERL_MAYBE_ALIVE && PERL_GET_THX))
 	goto do_write;
@@ -1235,7 +1234,6 @@ These have the same interfaces as the C lib ones, so are considered documented
 Malloc_t
 Perl_malloc(size_t nbytes)
 {
-        dVAR;
   	union overhead *p;
   	int bucket;
 #if defined(DEBUGGING) || defined(RCHECK)
@@ -1330,8 +1328,9 @@ Perl_malloc(size_t nbytes)
 	MALLOC_UNLOCK;
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log,
-			      "0x% "UVxf ": (%05lu) malloc %ld bytes\n",
-			      PTR2UV((Malloc_t)(p + CHUNK_SHIFT)), (unsigned long)(PL_an++),
+			      "%p: (%05lu) malloc %ld bytes\n",
+			      (Malloc_t)(p + CHUNK_SHIFT),
+                              (unsigned long)(PL_an++),
 			      (long)size));
 
 	FILLCHECK_DEADBEEF((unsigned char*)(p + CHUNK_SHIFT),
@@ -1470,7 +1469,6 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
 static union overhead *
 getpages(MEM_SIZE needed, int *nblksp, int bucket)
 {
-    dVAR;
     /* Need to do (possibly expensive) system call. Try to
        optimize it for rare calling. */
     MEM_SIZE require = needed - sbrked_remains;
@@ -1665,7 +1663,6 @@ getpages_adjacent(MEM_SIZE require)
 static void
 morecore(int bucket)
 {
-        dVAR;
   	union overhead *ovp;
   	int rnu;       /* 2^rnu bytes will be requested */
   	int nblks;		/* become nblks blocks of the desired size */
@@ -1679,7 +1676,8 @@ morecore(int bucket)
 	    /* It's our first time.  Initialize ourselves */
 	    were_called = 1;	/* Avoid a loop */
 	    if (!MallocCfg[MallocCfg_skip_cfg_env]) {
-		char *s = getenv("PERL_MALLOC_OPT"), *t = s, *off;
+		char *s = getenv("PERL_MALLOC_OPT"), *t = s;
+                const char *off;
 		const char *opts = PERL_MALLOC_OPT_CHARS;
 		int changed = 0;
 
@@ -1801,7 +1799,6 @@ morecore(int bucket)
 Free_t
 Perl_mfree(Malloc_t where)
 {
-        dVAR;
   	MEM_SIZE size;
 	union overhead *ovp;
 	char *cp = (char*)where;
@@ -1897,7 +1894,6 @@ Perl_mfree(Malloc_t where)
 Malloc_t
 Perl_realloc(void *mp, size_t nbytes)
 {
-        dVAR;
   	MEM_SIZE onb;
 	union overhead *ovp;
   	char *res;
@@ -2260,8 +2256,9 @@ Perl_dump_mstats(pTHX_ const char *s)
   	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
-			       ? " %5"UVuf 
-			       : ((i < 12*BUCKETS_PER_POW2) ? " %3"UVuf : " %"UVuf)),
+			       ? " %5" UVuf
+			       : ((i < 12*BUCKETS_PER_POW2) ? " %3" UVuf
+                                                            : " %" UVuf)),
 			      buffer.nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
@@ -2279,8 +2276,8 @@ Perl_dump_mstats(pTHX_ const char *s)
   	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
-			       ? " %5"IVdf
-			       : ((i < 12*BUCKETS_PER_POW2) ? " %3"IVdf : " %"IVdf)), 
+			       ? " %5" IVdf
+			       : ((i < 12*BUCKETS_PER_POW2) ? " %3" IVdf : " %" IVdf)),
 			      buffer.ntotal[i] - buffer.nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2

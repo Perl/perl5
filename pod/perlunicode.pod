@@ -938,7 +938,7 @@ summarizes the differences between these two:
  can interpolate    only with eval       yes            [1]
  custom names            yes             no             [2]
  name aliases            yes             yes            [3]
- named sequences         yes           not yet          [4]
+ named sequences         yes             yes            [4]
  name value parsing     exact       Unicode loose       [5]
 
 =over
@@ -965,10 +965,6 @@ Some characters have multiple names (synonyms).
 Some particular sequences of characters are given a single name, in
 addition to their individual ones.
 
-It is planned to add support for named sequences to the C<\p{...}> form
-before 5.32; in the meantime, an accurate but not fully informative
-message is generated if use of one of these is attempted.
-
 =item [5]
 
 Exact name value matching means you have to specify case, hyphens,
@@ -983,7 +979,7 @@ C<\p{...}> property.
 
 =head2 Wildcards in Property Values
 
-Starting in Perl 5.30, it is possible to do do something like this:
+Starting in Perl 5.30, it is possible to do something like this:
 
  qr!\p{numeric_value=/\A[0-5]\z/}!
 
@@ -1017,7 +1013,7 @@ delimits the end of the enclosing C<\p{}>.  Like any pattern, certain
 other delimiters are terminated by their mirror images.  These are
 C<"(">, C<"[>", and C<"E<lt>">.  If the delimiter is any of C<"-">,
 C<"_">, C<"+">, or C<"\">, or is the same delimiter as is used for the
-enclosing pattern, it must be be preceded by a backslash escape, both
+enclosing pattern, it must be preceded by a backslash escape, both
 fore and aft.
 
 Beware of using C<"$"> to indicate to match the end of the string.  It
@@ -1066,30 +1062,58 @@ example,
 
 would match the same things.
 
-A warning is issued if none of the legal values for a property are
-matched by your pattern.  It's likely that a future release will raise a
-warning if your pattern ends up causing every possible code point to
-match.
-
 Another example that shows that within C<\p{...}>, C</x> isn't needed to
 have spaces:
 
  qr!\p{scx= /Hebrew|Greek/ }!
 
 To be safe, we should have anchored the above example, to prevent
-matches for something like C<Hebrew_Braile>, but there aren't
-any script names like that.
+matches for something like C<Hebrew_Braille>, but there aren't
+any script names like that, so far.
+A warning is issued if none of the legal values for a property are
+matched by your pattern.  It's likely that a future release will raise a
+warning if your pattern ends up causing every possible code point to
+match.
 
-There are certain properties that it doesn't currently work with.  These
-are:
+Starting in 5.32, the Name, Name Aliases, and Named Sequences properties
+are allowed to be matched.  They are considered to be a single
+combination property, just as has long been the case for C<\N{}>.  Loose
+matching doesn't work in exactly the same way for these as it does for
+the values of other properties.  The rules are given in
+L<https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2>.  As a
+result, Perl doesn't try loose matching for you, like it does in other
+properties.  All letters in names are uppercase, but you can add C<(?i)>
+to your subpattern to ignore case.  If you're uncertain where a blank
+is, you can use C< ?> in your subpattern.  No character name contains an
+underscore, so don't bother trying to match one.  The use of hyphens is
+particularly problematic; refer to the above link.  But note that, as of
+Unicode 13.0, the only script in modern usage which has weirdnesses with
+these is Tibetan; also the two Korean characters U+116C HANGUL JUNGSEONG
+OE and U+1180 HANGUL JUNGSEONG O-E.  Unicode makes no promises to not
+add hyphen-problematic names in the future.
+
+Using wildcards on these is resource intensive, given the hundreds of
+thousands of legal names that must be checked against.
+
+An example of using Name property wildcards is
+
+ qr!\p{name=/(SMILING|GRINNING) FACE/}!
+
+Another is
+
+ qr/(?[ \p{name=\/CJK\/} - \p{ideographic} ])/
+
+which is the 200-ish (as of Unicode 13.0) CJK characters that aren't
+ideographs.
+
+There are certain properties that wildcard subpatterns don't currently
+work with.  These are:
 
  Bidi Mirroring Glyph
  Bidi Paired Bracket
  Case Folding
  Decomposition Mapping
  Equivalent Unified Ideograph
- Name
- Name Alias
  Lowercase Mapping
  NFKC Case Fold
  Titlecase Mapping
@@ -2044,7 +2068,7 @@ In L<< C<split>'s special-case whitespace splitting|perlfunc/split >>.
 
 Starting in Perl 5.28.0, the C<split> function with a pattern specified as
 a string containing a single space handles whitespace characters consistently
-within the scope of of C<unicode_strings>. Prior to that, or outside its scope,
+within the scope of C<unicode_strings>. Prior to that, or outside its scope,
 characters that are whitespace according to Unicode rules but not according to
 ASCII rules were treated as field contents rather than field separators when
 they appear in byte-encoded strings.

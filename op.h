@@ -24,7 +24,7 @@
  *                      !op_slabbed.
  *	op_savefree	on savestack via SAVEFREEOP
  *	op_folded	Result/remainder of a constant fold operation.
- *	op_moresib	this op is is not the last sibling
+ *	op_moresib	this op is not the last sibling
  *	op_spare	One spare bit
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
@@ -181,7 +181,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 
 /* things that can be elements of op_aux */
-typedef union  {
+typedef union {
     PADOFFSET pad_offset;
     SV        *sv;
     IV        iv;
@@ -713,6 +713,9 @@ struct opslab {
                                            units) */
 # ifdef PERL_DEBUG_READONLY_OPS
     bool	opslab_readonly;
+    U8          opslab_padding;         /* padding to ensure that opslab_slots is always */
+# else
+    U16         opslab_padding;         /* located at an offset with 32-bit alignment */
 # endif
     OPSLOT	opslab_slots;		/* slots begin here */
 };
@@ -1130,7 +1133,7 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 
 /* stuff for OP_ARGCHECK */
 
-struct  op_argcheck_aux {
+struct op_argcheck_aux {
     UV   params;     /* number of positional parameters */
     UV   opt_params; /* number of optional positional parameters */
     char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */

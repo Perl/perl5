@@ -1436,7 +1436,8 @@ use warnings;
 my $a = "\c{ack}";
 EXPECT
 OPTION fatal
-Sequence "\c{" invalid at - line 9.
+Sequence "\c{" invalid at - line 9, within string
+Execution of - aborted due to compilation errors.
 ########
 # toke.c
 my $a = "\câ";

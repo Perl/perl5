@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.31.10
+perldelta - what is new for perl v5.33.1
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.31.9 release and the 5.31.10
+This document describes differences between the 5.33.0 release and the 5.33.1
 release.
 
-If you are upgrading from an earlier release such as 5.31.8, first read
-L<perl5319delta>, which describes differences between 5.31.8 and 5.31.9.
+If you are upgrading from an earlier release such as 5.32.0, first read
+L<perl5330delta>, which describes differences between 5.32.0 and 5.33.0.
 
 =head1 Notice
 
@@ -311,13 +311,13 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item Symbian
 
-XXX
+Support code relating to Symbian has been removed.  Symbian was an
+operating system for mobile devices.  The port was last updated in July
+2009, and the platform itself in October 2012.
 
 =back
 
@@ -342,13 +342,13 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The C<PERL_GLOBAL_STRUCT> compilation option has been removed, and
+with it the need or the C<dVAR> macro.  C<dVAR> remains defined as a
+no-op outside C<PERL_CORE> for backwards compatiblity with XS modules.
 
 =back
 
@@ -363,11 +363,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Regular expression debugging information available through the C<re>
-module now works when compiling Unicode property wildcard subpatterns.
-See L<perlunicode/Wildcards in Property Values>.  Some potentially
-voluminous output requires a new option, WILDCARD, to be specified to
-enable.  See L<re/WILDCARD>.
+XXX
 
 =back
 
@@ -407,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.31.9..HEAD
+  perl Porting/acknowledgements.pl v5.33.0..HEAD
 
 =head1 Reporting Bugs
 

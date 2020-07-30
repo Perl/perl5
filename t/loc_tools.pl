@@ -1,4 +1,4 @@
-# Common tools for test files files to find the locales which exist on the
+# Common tools for test files to find the locales which exist on the
 # system.  Caller should have verified that this isn't miniperl before calling
 # the functions.
 
@@ -18,7 +18,8 @@ my $has_locale_h = ! $@;
 
 my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
                             LC_NUMERIC LC_TIME LC_ADDRESS LC_IDENTIFICATION
-                            LC_MEASUREMENT LC_PAPER LC_TELEPHONE));
+                            LC_MEASUREMENT LC_PAPER LC_TELEPHONE LC_SYNTAX
+                            LC_TOD));
 my @platform_categories;
 
 # LC_ALL can be -1 on some platforms.  And, in fact the implementors could
@@ -214,6 +215,10 @@ sub locales_enabled(;$) {
     # normally would be available
     return 0 if ! defined &DynaLoader::boot_DynaLoader;
 
+    # Don't test locales where they aren't safe.
+    return 0 unless  ${^SAFE_LOCALES};
+
+    # If no setlocale, we need the POSIX 2008 alternatives
     if (! $Config{d_setlocale}) {
         return 0 if $Config{ccflags} =~ /\bD?NO_POSIX_2008_LOCALE\b/;
         return 0 unless $Config{d_newlocale};

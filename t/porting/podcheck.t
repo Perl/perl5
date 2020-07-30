@@ -140,7 +140,7 @@ After inspecting them and
 deciding that they aren't real problems, it is possible to shut up this program
 about them, unlike base Pod::Checker.  For a valid link to an outside module
 or man page, call podcheck.t with the C<--add_link> option to add it to the
-the database of known links; for other causes, call podcheck.t with the C<--regen>
+database of known links; for other causes, call podcheck.t with the C<--regen>
 option to regenerate the entire database.  This tells it that all existing
 issues are to not be mentioned again.
 
@@ -285,7 +285,7 @@ L<Pod::Checker>
 my $vms_re = qr/ \. (?: com )? /x;
 
 # Some filenames in the MANIFEST match $vms_re, and so must not be handled the
-# same way that that the special vms ones are.  This hash lists those.
+# same way that the special vms ones are.  This hash lists those.
 my %special_vms_files;
 
 # This is to get this to work across multiple file systems, including those
@@ -681,7 +681,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
     my %command_count;      # Number of commands seen
     my %seen_pod_cmd;       # true if have =pod earlier
     my %skip;               # is SKIP set for this pod
-    my %start_line;         # the first input line number in the the thing
+    my %start_line;         # the first input line number in the thing
                             # currently being worked on
 
     sub DESTROY {
@@ -1165,7 +1165,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
         # Warn if looks like a file or link enclosed instead by this C<>
         if ($C_text{$addr} =~ qr/^ $C_path_re $/x) {
-            # Here it does look like it could be be a file path or a link.
+            # Here it does look like it could be a file path or a link.
             # But some varieties of regex patterns could also fit with what we
             # have so far.  Weed those out as best we can.  '/foo/' is almost
             # certainly meant to be a pattern, as is '/foo/g'.
@@ -1209,7 +1209,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         # link would be lost, as the L<> would be gone.
         $CFL_text{$addr} = "C<$CFL_text{$addr}>";
 
-        # Add this text to the the whole running total only if popping this
+        # Add this text to the whole running total only if popping this
         # directive off the stack leaves it empty.  As long as something is on
         # the stack, it gets added to $CFL_text (just above).  It is only
         # entirely constructed when the stack is empty.

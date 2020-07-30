@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302171';
+our $VERSION = '1.302175';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -1848,7 +1848,7 @@ might get a "Wide character in print" warning.  Using
 C<< binmode STDOUT, ":utf8" >> will not fix it.
 L<Test::Builder> (which powers
 Test::More) duplicates STDOUT and STDERR.  So any changes to them,
-including changing their output disciplines, will not be seem by
+including changing their output disciplines, will not be seen by
 Test::More.
 
 One work around is to apply encodings to STDOUT and STDERR as early

@@ -2390,7 +2390,7 @@ EOF
     TODO: {   # Was looping
         todo_skip('Triggers thread clone SEGV. See #86550')
 	  if $::running_as_thread && $::running_as_thread;
-        watchdog(10);   # Use a bigger value for busy systems
+        watchdog(10 * ($ENV{PERL_TEST_TIME_OUT_FACTOR} || 1));
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
     }
 
@@ -2525,6 +2525,41 @@ EOF
     {   # [perl #134034]    Previously assertion failure
         fresh_perl_is('use utf8; q!Ȧिम한글💣΢ყაოსაა!=~/(?li)\b{wb}\B(*COMMIT)0/;',
                       "", {}, "*COMMIT caused positioning beyond EOS");
+    }
+
+    {   # [GH #17486]    Previously assertion failure
+        fresh_perl_is('0=~/(?iaa)ss\337(?0)|/',
+                      "", {}, "EXACTFUP node isn't changed into something else");
+    }
+
+    {   # [GH #17593]
+        fresh_perl_is('qr/((?+2147483647))/',
+                      "Invalid reference to group in regex; marked by <--"
+                    . " HERE in m/((?+2147483647) <-- HERE )/ at - line 1.",
+                      {}, "integer overflow, undefined behavior in ASAN");
+        fresh_perl_is('qr/((?-2147483647))/',
+                      "Reference to nonexistent group in regex; marked by <--"
+                    . " HERE in m/((?-2147483647) <-- HERE )/ at - line 1.",
+                      {}, "Large negative relative capture group");
+        fresh_perl_is('qr/((?+18446744073709551615))/',
+                      "Invalid reference to group in regex; marked by <--"
+                    . " HERE in m/((?+18446744073709551615 <-- HERE ))/ at -"
+                    . " line 1.",
+                      {}, "Too large relative group number");
+        fresh_perl_is('qr/((?-18446744073709551615))/',
+                      "Invalid reference to group in regex; marked by <--"
+                    . " HERE in m/((?-18446744073709551615 <-- HERE ))/ at -"
+                    . " line 1.",
+                      {}, "Too large negative relative group number");
+    }
+
+    {   # GH #17734, ASAN use after free
+        fresh_perl_like('no warnings "experimental::uniprop_wildcards";
+                         my $re = q<[[\p{name=/[Y-]+Z/}]]>;
+                         eval { "\N{BYZANTINE MUSICAL SYMBOL PSILI}"
+                                =~ /$re/ }; print $@ if $@; print "Done\n";',
+                         qr/Done/,
+                         {}, "GH #17734");
     }
 
 

@@ -3091,7 +3091,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
             len = HEK_LEN(hek);
             if (len == HEf_SVKEY) {
                 /* This is somewhat sick, but the internal APIs are
-                 * such that XS code could put one of these in in
+                 * such that XS code could put one of these in
                  * a regular hash.
                  * Maybe we should be capable of storing one if
                  * found.

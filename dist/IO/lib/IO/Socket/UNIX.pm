@@ -11,7 +11,7 @@ use IO::Socket;
 use Carp;
 
 our @ISA = qw(IO::Socket);
-our $VERSION = "1.41";
+our $VERSION = "1.42";
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
 
@@ -30,6 +30,10 @@ sub configure {
     $sock->socket(AF_UNIX, $type, 0) or
 	return undef;
 
+    if(exists $arg->{Blocking}) {
+        $sock->blocking($arg->{Blocking}) or
+	    return undef;
+    }
     if(exists $arg->{Local}) {
 	my $addr = sockaddr_un($arg->{Local});
 	$sock->bind($addr) or

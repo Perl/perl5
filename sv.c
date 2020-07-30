@@ -883,6 +883,23 @@ struct body_details {
     U32 arena_size;                 /* Size of arena to allocate */
 };
 
+#define ALIGNED_TYPE_NAME(name) name##_aligned
+#define ALIGNED_TYPE(name) 		\
+    typedef union { 	\
+        name align_me;				\
+        NV nv;				\
+        IV iv;				\
+    } ALIGNED_TYPE_NAME(name);
+
+ALIGNED_TYPE(regexp);
+ALIGNED_TYPE(XPVGV);
+ALIGNED_TYPE(XPVLV);
+ALIGNED_TYPE(XPVAV);
+ALIGNED_TYPE(XPVHV);
+ALIGNED_TYPE(XPVCV);
+ALIGNED_TYPE(XPVFM);
+ALIGNED_TYPE(XPVIO);
+
 #define HADNV FALSE
 #define NONV TRUE
 
@@ -971,48 +988,48 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
-    { sizeof(regexp),
+    { sizeof(ALIGNED_TYPE_NAME(regexp)),
       sizeof(regexp),
       0,
       SVt_REGEXP, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(regexp))
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
     },
 
-    { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVGV)) },
+    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
     
-    { sizeof(XPVLV), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
+    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
 
-    { sizeof(XPVAV),
+    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
       copy_length(XPVAV, xav_alloc),
       0,
       SVt_PVAV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVAV)) },
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
 
-    { sizeof(XPVHV),
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
       copy_length(XPVHV, xhv_max),
       0,
       SVt_PVHV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVHV)) },
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
 
-    { sizeof(XPVCV),
+    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
       sizeof(XPVCV),
       0,
       SVt_PVCV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVCV)) },
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
 
-    { sizeof(XPVFM),
+    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
       sizeof(XPVFM),
       0,
       SVt_PVFM, TRUE, NONV, NOARENA,
-      FIT_ARENA(20, sizeof(XPVFM)) },
+      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
 
-    { sizeof(XPVIO),
+    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
       sizeof(XPVIO),
       0,
       SVt_PVIO, TRUE, NONV, HASARENA,
-      FIT_ARENA(24, sizeof(XPVIO)) },
+      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
 };
 
 #define new_body_allocated(sv_type)		\
@@ -1068,14 +1085,9 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
     char *start;
     const char *end;
     const size_t good_arena_size = Perl_malloc_good_size(arena_size);
-#if defined(DEBUGGING) && defined(PERL_GLOBAL_STRUCT)
-    dVAR;
-#endif
-#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT)
+#if defined(DEBUGGING)
     static bool done_sanity_check;
 
-    /* PERL_GLOBAL_STRUCT cannot coexist with global
-     * variables like done_sanity_check. */
     if (!done_sanity_check) {
 	unsigned int i = SVt_LAST;
 
@@ -2394,7 +2406,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
 	}
     }
-    else  {
+    else {
 	if (isGV_with_GP(sv))
 	    return glob_2number(MUTABLE_GV(sv));
 
@@ -2789,7 +2801,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
 #endif /* NV_PRESERVES_UV */
     }
-    else  {
+    else {
 	if (isGV_with_GP(sv)) {
 	    glob_2number(MUTABLE_GV(sv));
 	    return 0.0;
@@ -6568,7 +6580,6 @@ instead.
 void
 Perl_sv_clear(pTHX_ SV *const orig_sv)
 {
-    dVAR;
     HV *stash;
     U32 type;
     const struct body_details *sv_type_details;
@@ -7091,7 +7102,6 @@ Perl_sv_free(pTHX_ SV *const sv)
 void
 Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_SV_FREE2;
 
@@ -8837,13 +8847,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
    else
     {
        /*The big, slow, and stupid way. */
-#ifdef USE_HEAP_INSTEAD_OF_STACK	/* Even slower way. */
-	STDCHAR *buf = NULL;
-	Newx(buf, 8192, STDCHAR);
-	assert(buf);
-#else
 	STDCHAR buf[8192];
-#endif
 
       screamer2:
 	if (rslen) {
@@ -8892,9 +8896,6 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		goto screamer2;
 	}
 
-#ifdef USE_HEAP_INSTEAD_OF_STACK
-	Safefree(buf);
-#endif
     }
 
     if (rspara) {		/* have to do this both before and after */
@@ -9366,7 +9367,6 @@ C<L</sv_newmortal>> and C<L</sv_mortalcopy>>.
 SV *
 Perl_sv_2mortal(pTHX_ SV *const sv)
 {
-    dVAR;
     if (!sv)
 	return sv;
     if (SvIMMORTAL(sv))
@@ -9513,7 +9513,6 @@ C<SvPVX_const == HeKEY> and hash lookup will avoid string compare.
 SV *
 Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
-    dVAR;
     SV *sv;
     bool is_utf8 = FALSE;
     const char *const orig_src = src;
@@ -12507,7 +12506,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * being allowed for %c (ideally we should warn on e.g. '%hc').
              * Setting a default intsize, along with a positive
              * (which signals unsigned) base, causes, for C-ish use, the
-             * va_arg to be interpreted as as unsigned int, when it's
+             * va_arg to be interpreted as an unsigned int, when it's
              * actually signed, which will convert -ve values to high +ve
              * values. Note that unlike the libc %c, values > 255 will
              * convert to high unicode points rather than being truncated
@@ -12807,7 +12806,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                          (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
                         && !IN_BYTES)
                     {
-                        assert(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
+                        STATIC_ASSERT_STMT(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
                         eptr = ebuf;
                         elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
                         is_utf8 = TRUE;
@@ -14108,7 +14107,6 @@ S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest,
 static SV *
 S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 {
-    dVAR;
     SV *dstr;
 
     PERL_ARGS_ASSERT_SV_DUP_COMMON;
@@ -14606,7 +14604,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
                 /* XXX should this sv_dup_inc? Or only if CxEVAL_TXT_REFCNTED ???? */
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		ncx->blk_eval.cv = cv_dup(ncx->blk_eval.cv, param);
-                /* XXX what do do with cur_top_env ???? */
+                /* XXX what to do with cur_top_env ???? */
 		break;
 	    case CXt_LOOP_LAZYSV:
 		ncx->blk_loop.state_u.lazysv.end
@@ -14766,7 +14764,6 @@ Perl_any_dup(pTHX_ void *v, const PerlInterpreter *proto_perl)
 ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
-    dVAR;
     ANY * const ss	= proto_perl->Isavestack;
     const I32 max	= proto_perl->Isavestack_max + SS_MAXPUSH;
     I32 ix		= proto_perl->Isavestack_ix;
@@ -14999,16 +14996,16 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = ptr;
 	    break;
+        case SAVEt_HINTS_HH:
+            hv = (const HV *)POPPTR(ss,ix);
+            TOPPTR(nss,ix) = hv_dup_inc(hv, param);
+            /* FALLTHROUGH */
 	case SAVEt_HINTS:
 	    ptr = POPPTR(ss,ix);
 	    ptr = cophh_copy((COPHH*)ptr);
 	    TOPPTR(nss,ix) = ptr;
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
-	    if (i & HINT_LOCALIZE_HH) {
-		hv = (const HV *)POPPTR(ss,ix);
-		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
-	    }
 	    break;
 	case SAVEt_PADSV_AND_MORTALIZE:
 	    longval = (long)POPLONG(ss,ix);
@@ -15121,7 +15118,6 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags);
 PerlInterpreter *
 perl_clone(PerlInterpreter *proto_perl, UV flags)
 {
-   dVAR;
 #ifdef PERL_IMPLICIT_SYS
 
     PERL_ARGS_ASSERT_PERL_CLONE;
@@ -15371,9 +15367,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Recursion stopper for PerlIO_find_layer */
     PL_in_load_module	= proto_perl->Iin_load_module;
-
-    /* sort() routine */
-    PL_sort_RealCmp	= proto_perl->Isort_RealCmp;
 
     /* Not really needed/useful since the reenrant_retint is "volatile",
      * but do it for consistency's sake. */
@@ -15713,6 +15706,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_SCX_invlist            = sv_dup_inc(proto_perl->ISCX_invlist, param);
     PL_UpperLatin1            = sv_dup_inc(proto_perl->IUpperLatin1, param);
     PL_in_some_fold           = sv_dup_inc(proto_perl->Iin_some_fold, param);
+    PL_utf8_foldclosures      = sv_dup_inc(proto_perl->Iutf8_foldclosures, param);
     PL_utf8_idcont            = sv_dup_inc(proto_perl->Iutf8_idcont, param);
     PL_utf8_idstart           = sv_dup_inc(proto_perl->Iutf8_idstart, param);
     PL_utf8_perl_idcont       = sv_dup_inc(proto_perl->Iutf8_perl_idcont, param);
@@ -15930,11 +15924,9 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 void
 Perl_clone_params_del(CLONE_PARAMS *param)
 {
-    /* This seemingly funky ordering keeps the build with PERL_GLOBAL_STRUCT
-       happy: */
+    PerlInterpreter *const was = PERL_GET_THX;
     PerlInterpreter *const to = param->new_perl;
     dTHXa(to);
-    PerlInterpreter *const was = PERL_GET_THX;
 
     PERL_ARGS_ASSERT_CLONE_PARAMS_DEL;
 
@@ -15956,7 +15948,6 @@ Perl_clone_params_del(CLONE_PARAMS *param)
 CLONE_PARAMS *
 Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 {
-    dVAR;
     /* Need to play this game, as newAV() can call safesysmalloc(), and that
        does a dTHX; to get the context from thread local storage.
        FIXME - under PERL_CORE Newx(), Safefree() and friends should expand to
@@ -15991,7 +15982,6 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 void
 Perl_init_constants(pTHX)
 {
-    dVAR;
 
     SvREFCNT(&PL_sv_undef)	= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVf_PROTECT|SVt_NULL;
@@ -16204,7 +16194,6 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 STATIC SV*
 S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 {
-    dVAR;
     HE **array;
     I32 i;
 
@@ -16355,7 +16344,6 @@ STATIC SV *
 S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		  bool match, const char **desc_p)
 {
-    dVAR;
     SV *sv;
     const GV *gv;
     const OP *o, *o2, *kid;
@@ -16564,7 +16552,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		    negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
 		    FUV_SUBSCRIPT_ARRAY);
 	}
-	else  {
+	else {
 	    /* index is an expression;
 	     * attempt to find a match within the aggregate */
 	    if (obase->op_type == OP_HELEM) {
@@ -16776,7 +16764,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		: varname(agg_gv, '@', agg_targ,
                                 NULL, index_const_iv, FUV_SUBSCRIPT_ARRAY);
 	}
-	else  {
+	else {
 	    /* index is an var */
 	    if (is_hv) {
 		SV * const keysv = find_hash_subscript((const HV*)sv, uninit_sv);

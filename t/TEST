@@ -90,7 +90,7 @@ my %temp_needs_dot  = map { $_ => 1 } qw(
 # but allow override via *_TEST env var if wanted
 # (e.g. PERL5OPT_TEST=-d:NYTProf)
 my @bad_env_vars = qw(
-    PERL5LIB PERLLIB PERL5OPT
+    PERL5LIB PERLLIB PERL5OPT PERL_UNICODE
     PERL_YAML_BACKEND PERL_JSON_BACKEND
 );
 
@@ -436,6 +436,16 @@ sub _tests_from_manifest {
 					      | libnet/
 					      | MIME-Base64/
 					      | podlators/
+					      | Pod-Simple/
+					      | Pod-Checker/
+					      | Digest-MD5/
+					      | Test-Harness/
+					      | IPC-Cmd/
+					      | Encode/
+					      | Socket/
+					      | ExtUtils-Manifest/
+					      | Module-Metadata/
+					      | PerlIO-via-QuotedPrint/
 					    )
 				       !x;
 
@@ -475,7 +485,7 @@ unless (@ARGV) {
     }
     # Config.pm may be broken for make minitest. And this is only a refinement
     # for skipping tests on non-default builds, so it is allowed to fail.
-    # What we want to to is make a list of extensions which we did not build.
+    # What we want to do is make a list of extensions which we did not build.
     my $configsh = '../config.sh';
     my ($extensions, $known_extensions);
     if (-f $configsh) {

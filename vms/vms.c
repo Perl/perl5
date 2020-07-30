@@ -3311,7 +3311,7 @@ pipe_tochild1_ast(pPipe p)
             p->shut_on_empty = TRUE;
             b->eof     = TRUE;
             _ckvmssts_noperl(sys$dassgn(p->chan_in));
-        } else  {
+        } else {
             _ckvmssts_noperl(iss);
         }
 
@@ -5013,7 +5013,7 @@ vms_rename_with_acl(pTHX_ const struct dsc$descriptor_s * vms_src_dsc,
 		    const struct dsc$descriptor_s * vms_dst_dsc,
 		    unsigned long flags)
 {
-    /*  VMS and UNIX handle file permissions differently and the
+    /* VMS and UNIX handle file permissions differently and
      * the same ACL trick may be needed for renaming files,
      * especially if they are directories.
      */
@@ -5276,7 +5276,7 @@ Perl_rename(pTHX_ const char *src, const char * dst)
 
     /* Originally the idea was to call the CRTL rename() and only
      * try the lib$rename_file if it failed.
-     * It turns out that there are too many variants in what the
+     * It turns out that there are too many variants in what
      * the CRTL rename might do, so only use lib$rename_file
      */
     retval = -1;

@@ -5,13 +5,6 @@
 #
 # See Porting/config_h.pl
 
-#!/bin/sh
-#
-# THIS IS A GENERATED FILE
-# DO NOT HAND-EDIT
-#
-# See Porting/config_h.pl
-
 : Set up for generating config_h.SH
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh;;
@@ -35,9 +28,6 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
-case "$CONFIG_H" in
-already-done) echo "Not re-extracting config.h" ;;
-*)
 case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
@@ -1501,6 +1491,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HASATTRIBUTE_WARN_UNUSED_RESULT:
  *	Can we handle GCC attribute for warning on unused results
  */
+/* HASATTRIBUTE_ALWAYS_INLINE:
+ *	Can we handle GCC attribute for functions that should always be
+ *	inlined.
+ */
 #$d_attribute_deprecated HASATTRIBUTE_DEPRECATED	/**/
 #$d_attribute_format HASATTRIBUTE_FORMAT	/**/
 #$d_printf_format_null PRINTF_FORMAT_NULL_OK	/**/
@@ -1950,6 +1944,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates the availability of
  *	struct sockaddr_in6;
  */
+/* HAS_SOCKADDR_STORAGE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct sockaddr_storage;
+ */
 /* HAS_SIN6_SCOPE_ID:
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
@@ -1974,6 +1972,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_sockpair	HAS_SOCKETPAIR	/**/
 #$d_sockaddr_sa_len	HAS_SOCKADDR_SA_LEN	/**/
 #$d_sockaddr_in6	HAS_SOCKADDR_IN6	/**/
+#$d_sockaddr_storage	HAS_SOCKADDR_STORAGE	/**/
 #$d_sin6_scope_id	HAS_SIN6_SCOPE_ID	/**/
 #$d_ip_mreq	HAS_IP_MREQ	/**/
 #$d_ip_mreq_source	HAS_IP_MREQ_SOURCE	/**/
@@ -5295,7 +5294,5 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 #endif
 !GROK!THIS!
-;;
-esac
 ;;
 esac

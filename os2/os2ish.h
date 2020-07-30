@@ -77,7 +77,7 @@
  *	as the first line of a Perl program designed to be executed directly
  *	by name, instead of the standard Unix #!.  If ALTERNATE_SHEBANG
  *	begins with a character other then #, then Perl will only treat
- *	it as a command line if if finds the string "perl" in the first
+ *	it as a command line if it finds the string "perl" in the first
  *	word; otherwise it's treated as the first line of code in the script.
  *	(IOW, Perl won't hand off to another interpreter via an alternate
  *	shebang sequence that might be legal Perl code.)
@@ -874,7 +874,7 @@ int os2_do_aspawn(pTHX_ SV *really, SV **vmark, SV **vsp);
  * arguments to setlogmask.
  */
 #  define	LOG_MASK(pri)	(1 << (pri))		/* mask for one priority */
-#  define	LOG_UPTO(pri)	((1 << ((pri)+1)) - 1)	/* all priorities through pri */
+#  define       LOG_UPTO(pri)   nBIT_MASK((pri)+1)      /* all priorities through pri */
 
 /*
  * Option flags for openlog.

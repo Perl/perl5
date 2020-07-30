@@ -181,18 +181,13 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
-    perl5319delta	Perl changes in version 5.31.9
-    perl5318delta	Perl changes in version 5.31.8
-    perl5317delta	Perl changes in version 5.31.7
-    perl5316delta	Perl changes in version 5.31.6
-    perl5315delta	Perl changes in version 5.31.5
-    perl5314delta	Perl changes in version 5.31.4
-    perl5313delta	Perl changes in version 5.31.3
-    perl5312delta	Perl changes in version 5.31.2
-    perl5311delta	Perl changes in version 5.31.1
-    perl5310delta	Perl changes in version 5.31.0
+    perl5330delta	Perl changes in version 5.33.0
+    perl5320delta	Perl changes in version 5.32.0
+    perl5303delta	Perl changes in version 5.30.3
+    perl5302delta	Perl changes in version 5.30.2
     perl5301delta	Perl changes in version 5.30.1
     perl5300delta	Perl changes in version 5.30.0
+    perl5283delta	Perl changes in version 5.28.3
     perl5282delta	Perl changes in version 5.28.2
     perl5281delta	Perl changes in version 5.28.1
     perl5280delta	Perl changes in version 5.28.0
@@ -289,7 +284,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlqnx		Perl notes for QNX
     perlriscos		Perl notes for RISC OS
     perlsolaris 	Perl notes for Solaris
-    perlsymbian 	Perl notes for Symbian
     perlsynology 	Perl notes for Synology
     perltru64		Perl notes for Tru64
     perlvms		Perl notes for VMS

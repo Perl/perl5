@@ -1031,7 +1031,6 @@ win32_closedir(DIR *dirp)
 DllExport DIR *
 win32_dirp_dup(DIR *const dirp, CLONE_PARAMS *const param)
 {
-    dVAR;
     PerlInterpreter *const from = param->proto_perl;
     PerlInterpreter *const to   = (PerlInterpreter *)PERL_GET_THX;
 
@@ -1685,7 +1684,6 @@ win32_longpath(char *path)
 static void
 out_of_memory(void)
 {
-    dVAR;
 
     if (PL_curinterp)
 	croak_no_mem();
@@ -1723,7 +1721,7 @@ wstr_to_str(const wchar_t* wstr)
  * then it will convert the short name instead.
  *
  * The buffer to the ansi pathname must be freed with win32_free() when it
- * it no longer needed.
+ * is no longer needed.
  *
  * The argument to win32_ansipath() must exist before this function is
  * called; otherwise there is no way to determine the short path name.
@@ -2241,7 +2239,6 @@ win32_async_check(pTHX)
 DllExport DWORD
 win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
 {
-    int retry = 0;
     /* We may need several goes at this - so compute when we stop */
     FT_t ticks = {0};
     unsigned __int64 endtime = timeout;
@@ -2264,13 +2261,12 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
      * from another process (msctf.dll doing IPC among its instances, VS debugger
      * causes msctf.dll to be loaded into Perl by kernel), see [perl #33096].
      */
-    while (ticks.ft_i64 <= endtime || retry) {
+    while (ticks.ft_i64 <= endtime) {
 	/* if timeout's type is lengthened, remember to split 64b timeout
 	 * into multiple non-infinity runs of MWFMO */
 	DWORD result = MsgWaitForMultipleObjects(count, handles, FALSE,
 						(DWORD)(endtime - ticks.ft_i64),
 						QS_POSTMESSAGE|QS_TIMER|QS_SENDMESSAGE);
-        retry = 0;
 	if (resultp)
 	   *resultp = result;
 	if (result == WAIT_TIMEOUT) {
@@ -2286,7 +2282,12 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
 	if (result == WAIT_OBJECT_0 + count) {
 	    /* Message has arrived - check it */
 	    (void)win32_async_check(aTHX);
-            retry = 1;
+
+            /* retry */
+            if (ticks.ft_i64 > endtime)
+                endtime = ticks.ft_i64;
+
+            continue;
 	}
 	else {
 	   /* Not timeout or message - one of handles is ready */
@@ -3913,7 +3914,7 @@ RETRY:
 	w32_child_pids[w32_num_children] = (DWORD)ret;
 	++w32_num_children;
     }
-    else  {
+    else {
 	DWORD status;
 	win32_msgwait(aTHX_ 1, &ProcessInformation.hProcess, INFINITE, NULL);
 	/* FIXME: if msgwait returned due to message perhaps forward the
@@ -4553,6 +4554,7 @@ Perl_win32_term(void)
     PERLIO_TERM;
     MALLOC_TERM;
     LOCALE_TERM;
+    ENV_TERM;
 #ifndef WIN32_NO_REGISTRY
     /* handles might be NULL, RegCloseKey then returns ERROR_INVALID_HANDLE
        but no point of checking and we can't die() at this point */
@@ -4725,7 +4727,6 @@ win32_csighandler(int sig)
 void
 Perl_sys_intern_init(pTHX)
 {
-    dVAR;
     int i;
 
     w32_perlshell_tokens	= NULL;
@@ -4775,7 +4776,6 @@ Perl_sys_intern_init(pTHX)
 void
 Perl_sys_intern_clear(pTHX)
 {
-    dVAR;
 
     Safefree(w32_perlshell_tokens);
     Safefree(w32_perlshell_vec);

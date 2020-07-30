@@ -10,7 +10,7 @@ BEGIN {
     set_up_inc( qw(. ../lib ) );
 }
 
-plan(6);
+plan(7);
 
 # [perl #130814] can reallocate lineptr while looking ahead for
 # "Missing $ on loop variable" diagnostic.
@@ -60,6 +60,16 @@ Warning: Use of "-C-" without parentheses is ambiguous at - line 1.
 syntax error at - line 1, at EOF
 Execution of - aborted due to compilation errors.
 EXPECTED
+
+{
+    my $work = tempfile;
+    open my $fh, ">", $work or die;
+    binmode $fh;
+    print $fh +("\n" x 50_000), "1;\n";
+    close $fh;
+    fresh_perl_is('require "./' . $work .'"; print "ok\n";', "ok\n",
+                  {}, "many blank lines doesn't crash");
+}
 
 __END__
 # ex: set ts=8 sts=4 sw=4 et:

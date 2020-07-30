@@ -85,7 +85,7 @@ uname_minus_m="${uname_minus_m:-"$targetarch"}"
 
 # Check if we're about to use Intel's ICC compiler
 case "`${cc:-cc} -V 2>&1`" in
-*"Intel(R) C++ Compiler"*|*"Intel(R) C Compiler"*)
+*"Intel(R) C"*" Compiler"*)
     # record the version, formats:
     # icc (ICC) 10.1 20080801
     # icpc (ICC) 10.1 20080801

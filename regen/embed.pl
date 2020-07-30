@@ -1,11 +1,9 @@
 #!/usr/bin/perl -w
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    embed.h
 #    embedvar.h
-#    perlapi.c
-#    perlapi.h
 #    proto.h
 #
 # from information stored in
@@ -51,7 +49,7 @@ sub full_name ($$) { # Returns the function name with potentially the
     my ($func, $flags) = @_;
 
     return "Perl_$func" if $flags =~ /p/;
-    return "S_$func" if $flags =~ /[Si]/;
+    return "S_$func" if $flags =~ /[SIi]/;
     return $func;
 }
 
@@ -81,7 +79,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 
 	my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabCDdEefFGhiMmNnOoPpRrSsTUuWXx] ) /x) {
+        if ($flags =~ / ( [^AabCDdEefFGhIiMmNnOoPpRrSsTUuWXx] ) /x) {
 	    die_at_end "flag $1 is not legal (for function $plain_func)";
 	}
 	my @nonnull;
@@ -109,17 +107,25 @@ my ($embed, $core, $ext, $api) = setup_embed();
 							    && $flags !~ /m/;
 
 	my $static_inline = 0;
-	if ($flags =~ /([Si])/) {
+	if ($flags =~ /([SIi])/) {
 	    my $type;
 	    if ($never_returns) {
-		$type = $1 eq 'S' ? "PERL_STATIC_NO_RET" : "PERL_STATIC_INLINE_NO_RET";
+		$type = {
+		    'S' => 'PERL_STATIC_NO_RET',
+		    'i' => 'PERL_STATIC_INLINE_NO_RET',
+		    'I' => 'PERL_STATIC_FORCE_INLINE_NO_RET'
+		}->{$1};
 	    }
 	    else {
-		$type = $1 eq 'S' ? "STATIC" : "PERL_STATIC_INLINE";
+		$type = {
+		    'S' => 'STATIC',
+		    'i' => 'PERL_STATIC_INLINE',
+		    'I' => 'PERL_STATIC_FORCE_INLINE'
+		}->{$1};
 	    }
 	    $retval = "$type $retval";
 	    die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
-	    $static_inline = $type eq 'PERL_STATIC_INLINE';
+	    $static_inline = $type =~ /^PERL_STATIC(?:_FORCE)?_INLINE/;
 	}
 	else {
 	    if ($never_returns) {
@@ -132,18 +138,20 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	die_at_end "For '$plain_func', M flag requires p flag"
 					    if $flags =~ /M/ && $flags !~ /p/;
-	die_at_end "For '$plain_func', C flag requires one of [pim] flag"
-					    if $flags =~ /C/ && $flags !~ /[ibmp]/;
-	die_at_end "For '$plain_func', X flag requires p or i flag"
-					    if $flags =~ /X/ && $flags !~ /[ip]/;
+	die_at_end "For '$plain_func', C flag requires one of [pIimb] flags"
+					    if $flags =~ /C/ && $flags !~ /[Iibmp]/;
+	die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
+					    if $flags =~ /X/ && $flags !~ /[Iip]/;
 	die_at_end "For '$plain_func', X and m flags are mutually exclusive"
 					    if $flags =~ /X/ && $flags =~ /m/;
-	die_at_end "For '$plain_func', i with [ACX] requires p flag"
-			if $flags =~ /i/ && $flags =~ /[ACX]/ && $flags !~ /p/;
+	die_at_end "For '$plain_func', [Ii] with [ACX] requires p flag"
+			if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
 	die_at_end "For '$plain_func', b and m flags are mutually exclusive"
 	         . " (try M flag)" if $flags =~ /b/ && $flags =~ /m/;
 	die_at_end "For '$plain_func', b flag without M flag requires D flag"
 			    if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
+	die_at_end "For '$plain_func', I and i flags are mutually exclusive"
+					    if $flags =~ /I/ && $flags =~ /i/;
 
 	$func = full_name($plain_func, $flags);
 	$ret = "";
@@ -201,6 +209,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	}
 	if ( $flags =~ /P/ ) {
 	    push @attrs, "__attribute__pure__";
+	}
+	if ( $flags =~ /I/ ) {
+	    push @attrs, "__attribute__always_inline__";
 	}
 	if( $flags =~ /f/ ) {
 	    my $prefix	= $has_context ? 'pTHX_' : '';
@@ -513,178 +524,9 @@ for $sym (@intrp) {
 print $em <<'END';
 
 #endif	/* MULTIPLICITY */
-
-#if defined(PERL_GLOBAL_STRUCT)
-
-END
-
-for $sym (@globvar) {
-    print $em "#ifdef OS2\n" if $sym eq 'sh_path';
-    print $em "#ifdef __VMS\n" if $sym eq 'perllib_sep';
-    print $em multon($sym,   'G','my_vars->');
-    print $em multon("G$sym",'', 'my_vars->');
-    print $em "#endif\n" if $sym eq 'sh_path';
-    print $em "#endif\n" if $sym eq 'perllib_sep';
-}
-
-print $em <<'END';
-
-#endif /* PERL_GLOBAL_STRUCT */
 END
 
 read_only_bottom_close_and_rename($em) if ! $error_count;
-
-my $capih = open_print_header('perlapi.h');
-
-print $capih <<'EOT';
-/* declare accessor functions for Perl variables */
-#ifndef __perlapi_h__
-#define __perlapi_h__
-
-#if defined (MULTIPLICITY) && defined (PERL_GLOBAL_STRUCT)
-
-START_EXTERN_C
-
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-#define PERLVAR(p,v,t)	EXTERN_C t* Perl_##p##v##_ptr(pTHX);
-#define PERLVARA(p,v,n,t)	typedef t PL_##v##_t[n];		\
-			EXTERN_C PL_##v##_t* Perl_##p##v##_ptr(pTHX);
-#define PERLVARI(p,v,t,i)	PERLVAR(p,v,t)
-#define PERLVARIC(p,v,t,i) PERLVAR(p,v, const t)
-
-#include "perlvars.h"
-
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-
-END_EXTERN_C
-
-#if defined(PERL_CORE)
-
-/* accessor functions for Perl "global" variables */
-
-/* these need to be mentioned here, or most linkers won't put them in
-   the perl executable */
-
-#ifndef PERL_NO_FORCE_LINK
-
-START_EXTERN_C
-
-#ifndef DOINIT
-EXTCONST void * const PL_force_link_funcs[];
-#else
-EXTCONST void * const PL_force_link_funcs[] = {
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-#define PERLVAR(p,v,t)		(void*)Perl_##p##v##_ptr,
-#define PERLVARA(p,v,n,t)	PERLVAR(p,v,t)
-#define PERLVARI(p,v,t,i)	PERLVAR(p,v,t)
-#define PERLVARIC(p,v,t,i)	PERLVAR(p,v,t)
-
-/* In Tru64 (__DEC && __osf__) the cc option -std1 causes that one
- * cannot cast between void pointers and function pointers without
- * info level warnings.  The PL_force_link_funcs[] would cause a few
- * hundred of those warnings.  In code one can circumnavigate this by using
- * unions that overlay the different pointers, but in declarations one
- * cannot use this trick.  Therefore we just disable the warning here
- * for the duration of the PL_force_link_funcs[] declaration. */
-
-#if defined(__DECC) && defined(__osf__)
-#pragma message save
-#pragma message disable (nonstandcast)
-#endif
-
-#include "perlvars.h"
-
-#if defined(__DECC) && defined(__osf__)
-#pragma message restore
-#endif
-
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-};
-#endif	/* DOINIT */
-
-END_EXTERN_C
-
-#endif	/* PERL_NO_FORCE_LINK */
-
-#else	/* !PERL_CORE */
-
-EOT
-
-foreach $sym (@globvar) {
-    print $capih
-	"#undef  PL_$sym\n" . hide("PL_$sym", "(*Perl_G${sym}_ptr(NULL))");
-}
-
-print $capih <<'EOT';
-
-#endif /* !PERL_CORE */
-#endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
-
-#endif /* __perlapi_h__ */
-EOT
-
-read_only_bottom_close_and_rename($capih) if ! $error_count;
-
-my $capi = open_print_header('perlapi.c', <<'EOQ');
- *
- *
- * Up to the threshold of the door there mounted a flight of twenty-seven
- * broad stairs, hewn by some unknown art of the same black stone.  This
- * was the only entrance to the tower; ...
- *
- *     [p.577 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
- *
- */
-EOQ
-
-print $capi <<'EOT';
-#include "EXTERN.h"
-#include "perl.h"
-#include "perlapi.h"
-
-#if defined (MULTIPLICITY) && defined (PERL_GLOBAL_STRUCT)
-
-/* accessor functions for Perl "global" variables */
-START_EXTERN_C
-
-#undef PERLVARI
-#define PERLVARI(p,v,t,i) PERLVAR(p,v,t)
-
-#undef PERLVAR
-#undef PERLVARA
-#define PERLVAR(p,v,t)		t* Perl_##p##v##_ptr(pTHX)		\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
-#define PERLVARA(p,v,n,t)	PL_##v##_t* Perl_##p##v##_ptr(pTHX)	\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
-#undef PERLVARIC
-#define PERLVARIC(p,v,t,i)	\
-			const t* Perl_##p##v##_ptr(pTHX)		\
-			{ PERL_UNUSED_CONTEXT; return (const t *)&(PL_##v); }
-#include "perlvars.h"
-
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-
-END_EXTERN_C
-
-#endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
-EOT
-
-read_only_bottom_close_and_rename($capi) if ! $error_count;
 
 die "$error_count errors found" if $error_count;
 

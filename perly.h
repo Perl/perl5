@@ -4,14 +4,15 @@
    Any changes made here will be lost!
  */
 
-#define PERL_BISON_VERSION  30000
+#define PERL_BISON_VERSION  30003
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.0.5.  */
+/* A Bison parser, made by GNU Bison 3.3.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,6 +39,9 @@
 
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
+/* Undocumented macros, especially those whose name start with YY_,
+   are private implementation details.  Do not rely on them.  */
 
 /* Debug traces.  */
 #ifndef YYDEBUG
@@ -99,44 +103,46 @@ extern int yydebug;
     FUNC = 302,
     UNIOP = 303,
     LSTOP = 304,
-    RELOP = 305,
-    EQOP = 306,
-    MULOP = 307,
-    ADDOP = 308,
-    DOLSHARP = 309,
-    DO = 310,
-    HASHBRACK = 311,
-    NOAMP = 312,
-    LOCAL = 313,
-    MY = 314,
-    REQUIRE = 315,
-    COLONATTR = 316,
-    FORMLBRACK = 317,
-    FORMRBRACK = 318,
-    SUBLEXSTART = 319,
-    SUBLEXEND = 320,
-    PREC_LOW = 321,
-    OROP = 322,
-    DOROP = 323,
-    ANDOP = 324,
-    NOTOP = 325,
-    ASSIGNOP = 326,
-    OROR = 327,
-    DORDOR = 328,
-    ANDAND = 329,
-    BITOROP = 330,
-    BITANDOP = 331,
-    SHIFTOP = 332,
-    MATCHOP = 333,
-    UMINUS = 334,
-    REFGEN = 335,
-    POWOP = 336,
-    PREINC = 337,
-    PREDEC = 338,
-    POSTINC = 339,
-    POSTDEC = 340,
-    POSTJOIN = 341,
-    ARROW = 342
+    MULOP = 305,
+    ADDOP = 306,
+    DOLSHARP = 307,
+    DO = 308,
+    HASHBRACK = 309,
+    NOAMP = 310,
+    LOCAL = 311,
+    MY = 312,
+    REQUIRE = 313,
+    COLONATTR = 314,
+    FORMLBRACK = 315,
+    FORMRBRACK = 316,
+    SUBLEXSTART = 317,
+    SUBLEXEND = 318,
+    PREC_LOW = 319,
+    OROP = 320,
+    DOROP = 321,
+    ANDOP = 322,
+    NOTOP = 323,
+    ASSIGNOP = 324,
+    OROR = 325,
+    DORDOR = 326,
+    ANDAND = 327,
+    BITOROP = 328,
+    BITANDOP = 329,
+    CHEQOP = 330,
+    NCEQOP = 331,
+    CHRELOP = 332,
+    NCRELOP = 333,
+    SHIFTOP = 334,
+    MATCHOP = 335,
+    UMINUS = 336,
+    REFGEN = 337,
+    POWOP = 338,
+    PREINC = 339,
+    PREDEC = 340,
+    POSTINC = 341,
+    POSTDEC = 342,
+    POSTJOIN = 343,
+    ARROW = 344
   };
 #endif
 
@@ -189,6 +195,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * c522864236e07231c0a218cecf8cdcd82b74ce082b72f10199de4deeff580100 perly.y
+ * e5b801fdebce5c77dd8e644fc5a489cbea6af33db180e771dd9d669b12bbe0cf perly.y
  * 0947213b55d0ed11693554bea04987e886cf285f5c14cf9075fa1e7acc3f4061 regen_perly.pl
  * ex: set ro: */

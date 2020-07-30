@@ -2048,6 +2048,7 @@ SKIP:
 {
     # [perl #129149] the code below would write one past the end of the output
     # buffer, only detected by ASAN, not by valgrind
+    skip "ASCII-centric test",1 if $::IS_EBCDIC;
     $Config{ivsize} >= 8
       or skip "[perl #129149] need 64-bit for this test", 1;
     fresh_perl_is(<<'EOS', "ok\n", { stderr => 1 }, "pack W overflow");

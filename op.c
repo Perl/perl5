@@ -699,8 +699,6 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const OP *o, const OP *kid)
 		 (int)n, PL_op_desc[(o)->op_type], t, OP_DESC(kid)), 0);
 }
 
-/* remove flags var, its unused in all callers, move to to right end since gv
-  and kid are always the same */
 STATIC void
 S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
 {
@@ -848,7 +846,6 @@ to from any optree.
 void
 Perl_op_free(pTHX_ OP *o)
 {
-    dVAR;
     OPCODE type;
     OP *top_op = o;
     OP *next_op = o;
@@ -1022,7 +1019,6 @@ void
 Perl_op_clear(pTHX_ OP *o)
 {
 
-    dVAR;
 
     PERL_ARGS_ASSERT_OP_CLEAR;
 
@@ -1392,7 +1388,6 @@ other ops.
 void
 Perl_op_null(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_OP_NULL;
 
@@ -1408,7 +1403,6 @@ Perl_op_refcnt_lock(pTHX)
   PERL_TSA_ACQUIRE(PL_op_mutex)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_LOCK;
@@ -1419,7 +1413,6 @@ Perl_op_refcnt_unlock(pTHX)
   PERL_TSA_RELEASE(PL_op_mutex)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_UNLOCK;
@@ -1434,7 +1427,7 @@ op_sibling nodes.  By analogy with the perl-level C<splice()> function, allows
 you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
 housekeeping on the parent node and op_sibling manipulation on the
-children.  The last deleted node will be marked as as the last node by
+children.  The last deleted node will be marked as the last node by
 updating the op_sibling/op_sibparent or op_moresib field as appropriate.
 
 Note that op_next is not manipulated, and nodes are not freed; that is the
@@ -1631,7 +1624,6 @@ S_op_sibling_newUNOP(pTHX_ OP *parent, OP *start, I32 type, I32 flags)
 LOGOP *
 Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 {
-    dVAR;
     LOGOP *logop;
     OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
@@ -2070,7 +2062,6 @@ Perl_scalar(pTHX_ OP *o)
 OP *
 Perl_scalarvoid(pTHX_ OP *arg)
 {
-    dVAR;
     OP *kid;
     SV* sv;
     OP *o = arg;
@@ -2876,7 +2867,6 @@ S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
 STATIC void
 S_maybe_multiconcat(pTHX_ OP *o)
 {
-    dVAR;
     OP *lastkidop;   /* the right-most of any kids unshifted onto o */
     OP *topop;       /* the top-most op in the concat tree (often equals o,
                         unless there are assign/stringify ops above it */
@@ -2991,7 +2981,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
     }
 
     if (targetop) {
-        /* Can targetop (the LHS) if it's a padsv, be be optimised
+        /* Can targetop (the LHS) if it's a padsv, be optimised
          * away and use OPpTARGET_MY instead?
          */
         if (    (targetop->op_type == OP_PADSV)
@@ -3239,7 +3229,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
      *  X .= Y
      *
      * otherwise we could be doing something like $x = "foo", which
-     * if treated as as a concat, would fail to COW.
+     * if treated as a concat, would fail to COW.
      */
     if (nargs + nconst + cBOOL(private_flags & OPpMULTICONCAT_APPEND) < 2)
         return;
@@ -4081,7 +4071,6 @@ S_vivifies(const OPCODE type)
 static void
 S_lvref(pTHX_ OP *o, I32 type)
 {
-    dVAR;
     OP *kid;
     OP * top_op = o;
 
@@ -4259,7 +4248,6 @@ op_lvalue().  The flags param has these bits:
 OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
-    dVAR;
     OP *top_op = o;
 
     if (!o || (PL_parser && PL_parser->error_count))
@@ -4877,7 +4865,6 @@ S_refkids(pTHX_ OP *o, I32 type)
 OP *
 Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 {
-    dVAR;
     OP * top_op = o;
 
     PERL_ARGS_ASSERT_DOREF;
@@ -5499,6 +5486,121 @@ Perl_invert(pTHX_ OP *o)
     return newUNOP(OP_NOT, OPf_SPECIAL, scalar(o));
 }
 
+OP *
+Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
+{
+    BINOP *bop;
+    OP *op;
+
+    if (!left)
+	left = newOP(OP_NULL, 0);
+    if (!right)
+	right = newOP(OP_NULL, 0);
+    scalar(left);
+    scalar(right);
+    NewOp(0, bop, 1, BINOP);
+    op = (OP*)bop;
+    ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP);
+    OpTYPE_set(op, type);
+    cBINOPx(op)->op_flags = OPf_KIDS;
+    cBINOPx(op)->op_private = 2;
+    cBINOPx(op)->op_first = left;
+    cBINOPx(op)->op_last = right;
+    OpMORESIB_set(left, right);
+    OpLASTSIB_set(right, op);
+    return op;
+}
+
+OP *
+Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
+{
+    BINOP *bop;
+    OP *op;
+
+    PERL_ARGS_ASSERT_CMPCHAIN_EXTEND;
+    if (!right)
+	right = newOP(OP_NULL, 0);
+    scalar(right);
+    NewOp(0, bop, 1, BINOP);
+    op = (OP*)bop;
+    ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP);
+    OpTYPE_set(op, type);
+    if (ch->op_type != OP_NULL) {
+	UNOP *lch;
+	OP *nch, *cleft, *cright;
+	NewOp(0, lch, 1, UNOP);
+	nch = (OP*)lch;
+	OpTYPE_set(nch, OP_NULL);
+	nch->op_flags = OPf_KIDS;
+	cleft = cBINOPx(ch)->op_first;
+	cright = cBINOPx(ch)->op_last;
+	cBINOPx(ch)->op_first = NULL;
+	cBINOPx(ch)->op_last = NULL;
+	cBINOPx(ch)->op_private = 0;
+	cBINOPx(ch)->op_flags = 0;
+	cUNOPx(nch)->op_first = cright;
+	OpMORESIB_set(cright, ch);
+	OpMORESIB_set(ch, cleft);
+	OpLASTSIB_set(cleft, nch);
+	ch = nch;
+    }
+    OpMORESIB_set(right, op);
+    OpMORESIB_set(op, cUNOPx(ch)->op_first);
+    cUNOPx(ch)->op_first = right;
+    return ch;
+}
+
+OP *
+Perl_cmpchain_finish(pTHX_ OP *ch)
+{
+
+    PERL_ARGS_ASSERT_CMPCHAIN_FINISH;
+    if (ch->op_type != OP_NULL) {
+	OPCODE cmpoptype = ch->op_type;
+	ch = CHECKOP(cmpoptype, ch);
+	if(!ch->op_next && ch->op_type == cmpoptype)
+	    ch = fold_constants(op_integerize(op_std_init(ch)));
+	return ch;
+    } else {
+	OP *condop = NULL;
+	OP *rightarg = cUNOPx(ch)->op_first;
+	cUNOPx(ch)->op_first = OpSIBLING(rightarg);
+	OpLASTSIB_set(rightarg, NULL);
+	while (1) {
+	    OP *cmpop = cUNOPx(ch)->op_first;
+	    OP *leftarg = OpSIBLING(cmpop);
+	    OPCODE cmpoptype = cmpop->op_type;
+	    OP *nextrightarg;
+	    bool is_last;
+	    is_last = !(cUNOPx(ch)->op_first = OpSIBLING(leftarg));
+	    OpLASTSIB_set(cmpop, NULL);
+	    OpLASTSIB_set(leftarg, NULL);
+	    if (is_last) {
+		ch->op_flags = 0;
+		op_free(ch);
+		nextrightarg = NULL;
+	    } else {
+		nextrightarg = newUNOP(OP_CMPCHAIN_DUP, 0, leftarg);
+		leftarg = newOP(OP_NULL, 0);
+	    }
+	    cBINOPx(cmpop)->op_first = leftarg;
+	    cBINOPx(cmpop)->op_last = rightarg;
+	    OpMORESIB_set(leftarg, rightarg);
+	    OpLASTSIB_set(rightarg, cmpop);
+	    cmpop->op_flags = OPf_KIDS;
+	    cmpop->op_private = 2;
+	    cmpop = CHECKOP(cmpoptype, cmpop);
+	    if(!cmpop->op_next && cmpop->op_type == cmpoptype)
+		cmpop = fold_constants(op_integerize(op_std_init(cmpop)));
+	    condop = condop ? newLOGOP(OP_CMPCHAIN_AND, 0, cmpop, condop) :
+			cmpop;
+	    if (!nextrightarg)
+		return condop;
+	    rightarg = nextrightarg;
+	}
+    }
+}
+
 /*
 =for apidoc op_scope
 
@@ -5516,7 +5618,6 @@ structure.
 OP *
 Perl_op_scope(pTHX_ OP *o)
 {
-    dVAR;
     if (o) {
 	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
 	    o = op_prepend_elem(OP_LINESEQ,
@@ -5894,7 +5995,6 @@ S_op_integerize(pTHX_ OP *o)
     /* integerize op. */
     if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
     {
-	dVAR;
 	o->op_ppaddr = PL_ppaddr[++(o->op_type)];
     }
 
@@ -5906,9 +6006,10 @@ S_op_integerize(pTHX_ OP *o)
 }
 
 /* This function exists solely to provide a scope to limit
-   setjmp/longjmp() messing with auto variables.
+   setjmp/longjmp() messing with auto variables.  It cannot be inlined because
+   it uses setjmp
  */
-PERL_STATIC_INLINE int
+STATIC int
 S_fold_constants_eval(pTHX) {
     int ret = 0;
     dJMPENV;
@@ -5927,7 +6028,6 @@ S_fold_constants_eval(pTHX) {
 static OP *
 S_fold_constants(pTHX_ OP *const o)
 {
-    dVAR;
     OP *curop;
     OP *newop;
     I32 type = o->op_type;
@@ -6117,7 +6217,6 @@ S_fold_constants(pTHX_ OP *const o)
 static void
 S_gen_constant_list(pTHX_ OP *o)
 {
-    dVAR;
     OP *curop, *old_next;
     SV * const oldwarnhook = PL_warnhook;
     SV * const olddiehook  = PL_diehook;
@@ -6356,7 +6455,6 @@ C<op_convert_list> to make it the right type.
 OP *
 Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 {
-    dVAR;
     if (type < 0) type = -type, flags |= OPf_SPECIAL;
     if (!o || o->op_type != OP_LIST)
         o = force_list(o, 0);
@@ -6468,7 +6566,6 @@ See L</op_convert_list> for more information.
 OP *
 Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 {
-    dVAR;
     LISTOP *listop;
     /* Note that allocating an OP_PUSHMARK can die under Safe.pm if
      * pushmark is banned. So do it now while existing ops are in a
@@ -6520,7 +6617,6 @@ of C<op_private>.
 OP *
 Perl_newOP(pTHX_ I32 type, I32 flags)
 {
-    dVAR;
     OP *o;
 
     if (type == -OP_ENTEREVAL) {
@@ -6565,7 +6661,6 @@ of the constructed op tree.
 OP *
 Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 {
-    dVAR;
     UNOP *unop;
 
     if (type == -OP_ENTEREVAL) {
@@ -6615,7 +6710,6 @@ initialised to C<aux>
 OP *
 Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
 {
-    dVAR;
     UNOP_AUX *unop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP_AUX
@@ -6654,7 +6748,6 @@ Supported optypes: C<OP_METHOD>.
 
 static OP*
 S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth) {
-    dVAR;
     METHOP *methop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_METHOP
@@ -6730,7 +6823,6 @@ by this function and become part of the constructed op tree.
 OP *
 Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 {
-    dVAR;
     BINOP *binop;
 
     ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP
@@ -6851,18 +6943,19 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * One of the important characteristics to know about the input is whether
      * the transliteration may be done in place, or does a temporary need to be
      * allocated, then copied.  If the replacement for every character in every
-     * possible string takes up no more bytes than the the character it
+     * possible string takes up no more bytes than the character it
      * replaces, then it can be edited in place.  Otherwise the replacement
-     * could "grow", depending on the strings being processed.  Some inputs
-     * won't grow, and might even shrink under /d, but some inputs could grow,
-     * so we have to assume any given one might grow.  On very long inputs, the
-     * temporary could eat up a lot of memory, so we want to avoid it if
-     * possible.  For non-UTF-8 inputs, everything is single-byte, so can be
-     * edited in place, unless there is something in the pattern that could
-     * force it into UTF-8.  The inversion map makes it feasible to determine
-     * this.  Previous versions of this code pretty much punted on determining
-     * if UTF-8 could be edited in place.  Now, this code is rigorous in making
-     * that determination.
+     * could overwrite a byte we are about to read, depending on the strings
+     * being processed.  The comments and variable names here refer to this as
+     * "growing".  Some inputs won't grow, and might even shrink under /d, but
+     * some inputs could grow, so we have to assume any given one might grow.
+     * On very long inputs, the temporary could eat up a lot of memory, so we
+     * want to avoid it if possible.  For non-UTF-8 inputs, everything is
+     * single-byte, so can be edited in place, unless there is something in the
+     * pattern that could force it into UTF-8.  The inversion map makes it
+     * feasible to determine this.  Previous versions of this code pretty much
+     * punted on determining if UTF-8 could be edited in place.  Now, this code
+     * is rigorous in making that determination.
      *
      * Another characteristic we need to know is whether the lhs and rhs are
      * identical.  If so, and no other flags are present, the only effect of
@@ -6899,9 +6992,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     const bool squash     = cBOOL(o->op_private & OPpTRANS_SQUASH);
     const bool del        = cBOOL(o->op_private & OPpTRANS_DELETE);
 
-    /* Set to true if there is some character < 256 in the lhs that maps to >
-     * 255.  If so, a non-UTF-8 match string can be forced into requiring to be
-     * in UTF-8 by a tr/// operation. */
+    /* Set to true if there is some character < 256 in the lhs that maps to
+     * above 255.  If so, a non-UTF-8 match string can be forced into being in
+     * UTF-8 by a tr/// operation. */
     bool can_force_utf8 = FALSE;
 
     /* What is the maximum expansion factor in UTF-8 transliterations.  If a
@@ -6909,7 +7002,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * expansion factor is 1.5.  This number is used at runtime to calculate
      * how much space to allocate for non-inplace transliterations.  Without
      * this number, the worst case is 14, which is extremely unlikely to happen
-     * in real life, and would require significant memory overhead. */
+     * in real life, and could require significant memory overhead. */
     NV max_expansion = 1.;
 
     UV t_range_count, r_range_count, min_range_count;
@@ -6943,29 +7036,28 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * these up into smaller chunks, but doesn't merge any together.  This
      * makes it easy to find the instances it's looking for.  A second pass is
      * done after this has been determined which merges things together to
-     * shrink the table for runtime.  For ASCII platforms, the table is
-     * trivial, given below, and uses the fundamental characteristics of UTF-8
-     * to construct the values.  For EBCDIC, it isn't so, and we rely on a
-     * table constructed by the perl script that generates these kinds of
-     * things */
-#ifndef EBCDIC
+     * shrink the table for runtime.  The table below is used for both ASCII
+     * and EBCDIC platforms.  On EBCDIC, the byte length is not monotonically
+     * increasing for code points below 256.  To correct for that, the macro
+     * CP_ADJUST defined below converts those code points to ASCII in the first
+     * pass, and we use the ASCII partition values.  That works because the
+     * growth factor will be unaffected, which is all that is calculated during
+     * the first pass. */
     UV PL_partition_by_byte_length[] = {
         0,
-        0x80,
-        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),
-        (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),
-        ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),
-        ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),
-        ( 2 * (1UL << (5 * UTF_ACCUMULATION_SHIFT)))
+        0x80,   /* Below this is 1 byte representations */
+        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),   /* 2 bytes below this */
+        (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),   /* 3 bytes below this */
+        ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),   /* 4 bytes below this */
+        ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),   /* 5 bytes below this */
+        ( 2 * (1UL << (5 * UTF_ACCUMULATION_SHIFT)))    /* 6 bytes below this */
 
 #  ifdef UV_IS_QUAD
                                                     ,
-        ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))
+        ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))    /* 7 bytes below this */
 #  endif
 
     };
-
-#endif
 
     PERL_ARGS_ASSERT_PMTRANS;
 
@@ -7093,6 +7185,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             len = 1;
             t_array = invlist_array(t_invlist);
         }
+
+/* As noted earlier, we convert EBCDIC code points to Unicode in the first pass
+ * so as to get the well-behaved length 1 vs length 2 boundary.  Only code
+ * points below 256 differ between the two character sets in this regard.  For
+ * these, we also can't have any ranges, as they have to be individually
+ * converted. */
+#ifdef EBCDIC
+#  define CP_ADJUST(x)          ((pass2) ? (x) : NATIVE_TO_UNI(x))
+#  define FORCE_RANGE_LEN_1(x)  ((pass2) ? 0 : ((x) < 256))
+#  define CP_SKIP(x)            ((pass2) ? UVCHR_SKIP(x) : OFFUNISKIP(x))
+#else
+#  define CP_ADJUST(x)          (x)
+#  define FORCE_RANGE_LEN_1(x)  0
+#  define CP_SKIP(x)            UVCHR_SKIP(x)
+#endif
 
         /* And the mapping of each of the ranges is initialized.  Initially,
          * everything is TR_UNLISTED. */
@@ -7227,7 +7334,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
                     /* Here, not in the middle of a range, and not UTF-8.  The
                      * next code point is the single byte where we're at */
-                    t_cp = *t;
+                    t_cp = CP_ADJUST(*t);
                     t_range_count = 1;
                     t++;
                 }
@@ -7238,7 +7345,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * next code point is the next UTF-8 char in the input.  We
                      * know the input is valid, because the toker constructed
                      * it */
-                    t_cp = valid_utf8_to_uvchr(t, &t_char_len);
+                    t_cp = CP_ADJUST(valid_utf8_to_uvchr(t, &t_char_len));
                     t += t_char_len;
 
                     /* UTF-8 strings (only) have been parsed in toke.c to have
@@ -7246,7 +7353,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * the first element of a range.  If so, get the final
                      * element and calculate the range size.  If not, the range
                      * size is 1 */
-                    if (t < tend && *t == RANGE_INDICATOR) {
+                    if (   t < tend && *t == RANGE_INDICATOR
+                        && ! FORCE_RANGE_LEN_1(t_cp))
+                    {
                         t++;
                         t_range_count = valid_utf8_to_uvchr(t, &t_char_len)
                                       - t_cp + 1;
@@ -7278,16 +7387,18 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                 }
                 else {
                     if (! rstr_utf8) {
-                        r_cp = *r;
+                        r_cp = CP_ADJUST(*r);
                         r_range_count = 1;
                         r++;
                     }
                     else {
                         Size_t r_char_len;
 
-                        r_cp = valid_utf8_to_uvchr(r, &r_char_len);
+                        r_cp = CP_ADJUST(valid_utf8_to_uvchr(r, &r_char_len));
                         r += r_char_len;
-                        if (r < rend && *r == RANGE_INDICATOR) {
+                        if (   r < rend && *r == RANGE_INDICATOR
+                            && ! FORCE_RANGE_LEN_1(r_cp))
+                        {
                             r++;
                             r_range_count = valid_utf8_to_uvchr(r,
                                                     &r_char_len) - r_cp + 1;
@@ -7356,7 +7467,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             t_cp_end = MIN(IV_MAX, t_cp + span - 1);
 
             if (r_cp == TR_SPECIAL_HANDLING) {
-                r_cp_end = TR_SPECIAL_HANDLING;
+
+                /* If unmatched lhs code points map to the final map, use that
+                 * value.  This being set to TR_SPECIAL_HANDLING indicates that
+                 * we don't have a final map: unmatched lhs code points are
+                 * simply deleted */
+                r_cp_end = (del) ? TR_SPECIAL_HANDLING : final_map;
             }
             else {
                 r_cp_end = MIN(IV_MAX, r_cp + span - 1);
@@ -7386,6 +7502,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                  * we use the above sample data.  The t_cp chunk must be any
                  * contiguous subset of M, N, O, P, and/or Q.
                  *
+                 * In the first pass, calculate if there is any possible input
+                 * string that has a character whose transliteration will be
+                 * longer than it.  If none, the transliteration may be done
+                 * in-place, as it can't write over a so-far unread byte.
+                 * Otherwise, a copy must first be made.  This could be
+                 * expensive for long inputs.
+                 *
                  * In the first pass, the t_invlist has been partitioned so
                  * that all elements in any single range have the same number
                  * of bytes in their UTF-8 representations.  And the r space is
@@ -7407,21 +7530,31 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                  * code point in the rhs against any code point in the lhs. */
                 if ( ! pass2
                     && r_cp_end != TR_SPECIAL_HANDLING
-                    && UVCHR_SKIP(t_cp_end) < UVCHR_SKIP(r_cp_end))
+                    && CP_SKIP(t_cp_end) < CP_SKIP(r_cp_end))
                 {
-                    /* Consider tr/\xCB/\X{E000}/.  The maximum expansion
-                     * factor is 1 byte going to 3 if the lhs is not UTF-8, but
-                     * 2 bytes going to 3 if it is in UTF-8.  We could pass two
-                     * different values so doop could choose based on the
-                     * UTF-8ness of the target.  But khw thinks (perhaps
-                     * wrongly) that is overkill.  It is used only to make sure
-                     * we malloc enough space.  If no target string can force
-                     * the result to be UTF-8, then we don't have to worry
-                     * about this */
+                    /* Here, we will need to make a copy of the input string
+                     * before doing the transliteration.  The worst possible
+                     * case is an expansion ratio of 14:1. This is rare, and
+                     * we'd rather allocate only the necessary amount of extra
+                     * memory for that copy.  We can calculate the worst case
+                     * for this particular transliteration is by keeping track
+                     * of the expansion factor for each range.
+                     *
+                     * Consider tr/\xCB/\X{E000}/.  The maximum expansion
+                     * factor is 1 byte going to 3 if the target string is not
+                     * UTF-8, but 2 bytes going to 3 if it is in UTF-8.  We
+                     * could pass two different values so doop could choose
+                     * based on the UTF-8ness of the target.  But khw thinks
+                     * (perhaps wrongly) that is overkill.  It is used only to
+                     * make sure we malloc enough space.
+                     *
+                     * If no target string can force the result to be UTF-8,
+                     * then we don't have to worry about the case of the target
+                     * string not being UTF-8 */
                     NV t_size = (can_force_utf8 && t_cp < 256)
                                 ? 1
-                                : UVCHR_SKIP(t_cp_end);
-                    NV ratio = UVCHR_SKIP(r_cp_end) / t_size;
+                                : CP_SKIP(t_cp_end);
+                    NV ratio = CP_SKIP(r_cp_end) / t_size;
 
                     o->op_private |= OPpTRANS_GROWS;
 
@@ -7454,8 +7587,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * is if it 'grows'.  But in the 2nd pass, there's no
                      * reason to not merge */
                     if (   (i > 0 && (   pass2
-                                      || UVCHR_SKIP(t_array[i-1])
-                                                        == UVCHR_SKIP(t_cp)))
+                                      || CP_SKIP(t_array[i-1])
+                                                            == CP_SKIP(t_cp)))
                         && (   (   r_cp == TR_SPECIAL_HANDLING
                                 && r_map[i-1] == TR_SPECIAL_HANDLING)
                             || (   r_cp != TR_SPECIAL_HANDLING
@@ -7475,7 +7608,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     adjacent_to_range_above = TRUE;
                     if (i + 1 < len)
                     if (    (   pass2
-                             || UVCHR_SKIP(t_cp) == UVCHR_SKIP(t_array[i+1]))
+                             || CP_SKIP(t_cp) == CP_SKIP(t_array[i+1]))
                         && (   (   r_cp == TR_SPECIAL_HANDLING
                                 && r_map[i+1] == (UV) TR_SPECIAL_HANDLING)
                             || (   r_cp != TR_SPECIAL_HANDLING
@@ -7943,7 +8076,6 @@ and, shifted up eight bits, the eight bits of C<op_private>.
 OP *
 Perl_newPMOP(pTHX_ I32 type, I32 flags)
 {
-    dVAR;
     PMOP *pmop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PMOP
@@ -8430,7 +8562,6 @@ takes ownership of one reference to it.
 OP *
 Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
-    dVAR;
     SVOP *svop;
 
     PERL_ARGS_ASSERT_NEWSVOP;
@@ -8486,7 +8617,6 @@ This function only exists if Perl has been compiled to use ithreads.
 OP *
 Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
-    dVAR;
     PADOP *padop;
 
     PERL_ARGS_ASSERT_NEWPADOP;
@@ -8554,7 +8684,6 @@ have been allocated using C<PerlMemShared_malloc>.
 OP *
 Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 {
-    dVAR;
     const bool utf8 = cBOOL(flags & SVf_UTF8);
     PVOP *pvop;
 
@@ -8972,7 +9101,6 @@ S_assignment_type(pTHX_ const OP *o)
 static OP *
 S_newONCEOP(pTHX_ OP *initop, OP *padop)
 {
-    dVAR;
     const PADOFFSET target = padop->op_targ;
     OP *const other = newOP(OP_PADSV,
 			    padop->op_flags
@@ -9236,7 +9364,6 @@ is consumed by this function and becomes part of the returned op tree.
 OP *
 Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 {
-    dVAR;
     const U32 seq = intro_my();
     const U32 utf8 = flags & SVf_UTF8;
     COP *cop;
@@ -9387,7 +9514,6 @@ S_search_const(pTHX_ OP *o)
 STATIC OP *
 S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 {
-    dVAR;
     LOGOP *logop;
     OP *o;
     OP *first;
@@ -9599,7 +9725,6 @@ this function and become part of the constructed op tree.
 OP *
 Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 {
-    dVAR;
     LOGOP *logop;
     OP *start;
     OP *o;
@@ -9853,7 +9978,6 @@ OP *
 Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
 	OP *expr, OP *block, OP *cont, I32 has_my)
 {
-    dVAR;
     OP *redo;
     OP *next = NULL;
     OP *listop;
@@ -9977,7 +10101,6 @@ automatically.
 OP *
 Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 {
-    dVAR;
     LOOP *loop;
     OP *wop;
     PADOFFSET padoff = 0;
@@ -10200,7 +10323,6 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
 		   I32 enter_opcode, I32 leave_opcode,
 		   PADOFFSET entertarg)
 {
-    dVAR;
     LOGOP *enterop;
     OP *o;
 
@@ -10696,7 +10818,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
 	else {
-            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    CvNAME_HEK_set(*spot, hek =
@@ -10856,7 +10977,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!CvNAME_HEK(cv)) {
 	if (hek) (void)share_hek_hek(hek);
 	else {
-            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    hek = share_hek(PadnamePV(name)+1,
@@ -11363,7 +11483,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		assert(CvGV(cv) == gv);
 	    }
 	    else {
-		dVAR;
 		U32 hash;
 		PERL_HASH(hash, name, namlen);
 		CvNAME_HEK_set(cv,
@@ -11434,7 +11553,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	if (isGV(gv))
             CvGV_set(cv, gv);
 	else {
-            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, name, namlen);
 	    CvNAME_HEK_set(cv, share_hek(name,
@@ -11580,32 +11698,10 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             (void)CvGV(cv);
 	    if (floor) LEAVE_SCOPE(floor);
 	    ENTER;
-
-            SAVEVPTR(PL_curcop);
-            if (PL_curcop == &PL_compiling) {
-                /* Avoid pushing the "global" &PL_compiling onto the
-                 * context stack. For example, a stack trace inside
-                 * nested use's would show all calls coming from whoever
-                 * most recently updated PL_compiling.cop_file and
-                 * cop_line.  So instead, temporarily set PL_curcop to a
-                 * private copy of &PL_compiling. PL_curcop will soon be
-                 * set to point back to &PL_compiling anyway but only
-                 * after the temp value has been pushed onto the context
-                 * stack as blk_oldcop.
-                 * This is slightly hacky, but necessary. Note also
-                 * that in the brief window before PL_curcop is set back
-                 * to PL_compiling, IN_PERL_COMPILETIME/IN_PERL_RUNTIME
-                 * will give the wrong answer.
-                 */
-                Newx(PL_curcop, 1, COP);
-                StructCopy(&PL_compiling, PL_curcop, COP);
-                PL_curcop->op_slabbed = 0;
-                SAVEFREEPV(PL_curcop);
-            }
-
             PUSHSTACKi(PERLSI_REQUIRE);
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
+	    SAVEVPTR(PL_curcop);
 
 	    DEBUG_x( dump_sub(gv) );
 	    Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
@@ -12124,7 +12220,6 @@ Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 OP *
 Perl_oopsAV(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_OOPSAV;
 
@@ -12150,7 +12245,6 @@ Perl_oopsAV(pTHX_ OP *o)
 OP *
 Perl_oopsHV(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_OOPSHV;
 
@@ -12178,7 +12272,6 @@ Perl_oopsHV(pTHX_ OP *o)
 OP *
 Perl_newAVREF(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWAVREF;
 
@@ -12203,7 +12296,6 @@ Perl_newGVREF(pTHX_ I32 type, OP *o)
 OP *
 Perl_newHVREF(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWHVREF;
 
@@ -12221,7 +12313,6 @@ OP *
 Perl_newCVREF(pTHX_ I32 flags, OP *o)
 {
     if (o->op_type == OP_PADANY) {
-	dVAR;
         OpTYPE_set(o, OP_PADCV);
     }
     return newUNOP(OP_RV2CV, flags, scalar(o));
@@ -12230,7 +12321,6 @@ Perl_newCVREF(pTHX_ I32 flags, OP *o)
 OP *
 Perl_newSVREF(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_NEWSVREF;
 
@@ -12505,7 +12595,6 @@ Perl_ck_concat(pTHX_ OP *o)
 OP *
 Perl_ck_spair(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_CK_SPAIR;
 
@@ -12604,7 +12693,6 @@ Perl_ck_eof(pTHX_ OP *o)
 OP *
 Perl_ck_eval(pTHX_ OP *o)
 {
-    dVAR;
 
     PERL_ARGS_ASSERT_CK_EVAL;
 
@@ -12710,7 +12798,6 @@ Perl_ck_exists(pTHX_ OP *o)
 OP *
 Perl_ck_rvconst(pTHX_ OP *o)
 {
-    dVAR;
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_RVCONST;
@@ -12805,7 +12892,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
 OP *
 Perl_ck_ftst(pTHX_ OP *o)
 {
-    dVAR;
     const I32 type = o->op_type;
 
     PERL_ARGS_ASSERT_CK_FTST;
@@ -13347,7 +13433,6 @@ Perl_ck_listiob(pTHX_ OP *o)
 OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
-    dVAR;
     PERL_ARGS_ASSERT_CK_SMARTMATCH;
     if (0 == (o->op_flags & OPf_SPECIAL)) {
 	OP *first  = cBINOPo->op_first;
@@ -13412,7 +13497,6 @@ S_maybe_targlex(pTHX_ OP *o)
 OP *
 Perl_ck_sassign(pTHX_ OP *o)
 {
-    dVAR;
     OP * const kid = cBINOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_SASSIGN;
@@ -13694,7 +13778,6 @@ Perl_ck_require(pTHX_ OP *o)
 	  SV * const sv = kid->op_sv;
 	  U32 const was_readonly = SvREADONLY(sv);
 	  if (kid->op_private & OPpCONST_BARE) {
-            dVAR;
 	    const char *end;
             HEK *hek;
 
@@ -13739,7 +13822,6 @@ Perl_ck_require(pTHX_ OP *o)
 		SvREFCNT_dec_NN(sv);
 	    }
 	    else {
-                dVAR;
                 HEK *hek;
 		if (was_readonly) SvREADONLY_off(sv);
 		PERL_HASH(hash, s, len);
@@ -13792,7 +13874,6 @@ Perl_ck_return(pTHX_ OP *o)
 OP *
 Perl_ck_select(pTHX_ OP *o)
 {
-    dVAR;
     OP* kid;
 
     PERL_ARGS_ASSERT_CK_SELECT;
@@ -14034,7 +14115,6 @@ S_simplify_sort(pTHX_ OP *o)
 OP *
 Perl_ck_split(pTHX_ OP *o)
 {
-    dVAR;
     OP *kid;
     OP *sibs;
 
@@ -14990,7 +15070,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	if (CvISXSUB(cv) || !CvROOT(cv))
 	    S_entersub_alloc_targ(aTHX_ o);
 	if (!namegv) {
-	    /* The original call checker API guarantees that a GV will be
+	    /* The original call checker API guarantees that a GV will
 	       be provided with the right name.  So, if the old API was
 	       used (or the REQUIRE_GV flag was passed), we have to reify
 	       the CV’s GV, unless this is an anonymous sub.  This is not
@@ -15092,7 +15172,6 @@ Perl_ck_tell(pTHX_ OP *o)
 OP *
 Perl_ck_each(pTHX_ OP *o)
 {
-    dVAR;
     OP *kid = o->op_flags & OPf_KIDS ? cUNOPo->op_first : NULL;
     const unsigned orig_type  = o->op_type;
 
@@ -15629,7 +15708,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
         }
 
         /* if its an unrecognised, non-dangerous op, assume that it
-         * it the cause of at least one safe scalar */
+         * is the cause of at least one safe scalar */
         (*scalars_p)++;
         flags = AAS_SAFE_SCALAR;
         break;
@@ -15783,7 +15862,6 @@ S_inplace_aassign(pTHX_ OP *o) {
 STATIC void
 S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 {
-    dVAR;
     int pass;
     UNOP_AUX_item *arg_buf = NULL;
     bool reset_start_targ  = FALSE; /* start->op_targ needs zeroing */
@@ -16578,7 +16656,6 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
 void
 Perl_rpeep(pTHX_ OP *o)
 {
-    dVAR;
     OP* oldop = NULL;
     OP* oldoldop = NULL;
     OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
@@ -17431,6 +17508,7 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_AND:
 	case OP_OR:
 	case OP_DOR:
+	case OP_CMPCHAIN_AND:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    while (o->op_next && (   o->op_type == o->op_next->op_type
@@ -18352,7 +18430,6 @@ void
 Perl_wrap_op_checker(pTHX_ Optype opcode,
     Perl_check_t new_checker, Perl_check_t *old_checker_p)
 {
-    dVAR;
 
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_OP_CHECKER;

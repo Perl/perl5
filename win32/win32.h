@@ -60,9 +60,6 @@
 #  define prime_env_iter()
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
-#  ifdef PERL_GLOBAL_STRUCT
-#    error PERL_GLOBAL_STRUCT cannot be defined with PERL_IMPLICIT_SYS
-#  endif
 #endif
 
 #ifdef __GNUC__
@@ -139,6 +136,8 @@
 #ifdef _MSC_VER
 #  define PERL_STATIC_NO_RET __declspec(noreturn) static
 #  define PERL_STATIC_INLINE_NO_RET __declspec(noreturn) PERL_STATIC_INLINE
+#  define PERL_STATIC_FORCE_INLINE __forceinline static
+#  define PERL_STATIC_FORCE_INLINE_NO_RET __declspec(noreturn) __forceinline static
 #endif
 
 #define  WIN32_LEAN_AND_MEAN
@@ -228,8 +227,6 @@ struct utsname {
 #else
 #  define WIN32_NO_REGISTRY_M_(x) x,
 #endif
-
-#define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 
 #define ENV_IS_CASELESS
 

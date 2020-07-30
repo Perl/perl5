@@ -234,7 +234,8 @@ sub docout ($$$) { # output the docs for one function
     $name =~ s/\s*$//;
 
     if ($flags =~ /D/) {
-        $docs = "\n\nDEPRECATED!  It is planned to remove this function from a
+        my $function = $flags =~ /n/ ? 'definition' : 'function';
+        $docs = "\n\nDEPRECATED!  It is planned to remove this $function from a
 future release of Perl.  Do not use it for new code; remove it from
 existing code.\n\n$docs";
     }
@@ -244,7 +245,8 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     }
 
     # Is Perl_, but no #define foo # Perl_foo
-    my $p = $flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/;
+    my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
+          || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
 
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
          if $flags =~ /O/;

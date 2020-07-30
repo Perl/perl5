@@ -7,7 +7,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl531.dll).  Also makes individual DLLs for the XS extensions.
+# (perl533.dll).  Also makes individual DLLs for the XS extensions.
 #
 # The easiest way to customize the build process is to use parameters like this:
 #
@@ -64,7 +64,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \5.31.10
+#INST_VER	:= \5.33.1
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -230,7 +230,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl531s.lib will also be created.
+# variables below. A static library perl533s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	:= define
@@ -285,7 +285,7 @@ EXTRALIBDIRS	:=
 
 #
 # set this to your email address (perl will guess a value from
-# from your loginname and your hostname, which may not be right)
+# your loginname and your hostname, which may not be right)
 #
 #EMAIL		:=
 
@@ -726,7 +726,7 @@ OPTIMIZE	= -O1 -Zi -GL
 LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
 # in addition to the PDB symbols.  The default Dr. Watson that ships with
-# Windows can use the the former but not latter.  The free WinDbg can be
+# Windows can use the former but not latter.  The free WinDbg can be
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
 #LINK_DBG	+= -debugtype:both
@@ -1004,9 +1004,9 @@ ifeq ($(CCTYPE),GCC)
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl531$(a)
-PERLIMPLIBBASE	= libperl531$(a)
-PERLSTATICLIB	= ..\libperl531s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl533$(a)
+PERLIMPLIBBASE	= libperl533$(a)
+PERLSTATICLIB	= ..\libperl533s$(a)
 INT64		= long long
 
 else
@@ -1019,12 +1019,12 @@ endif
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	?= $(COREDIR)\perl531$(a)
-PERLIMPLIBBASE	?= perl531$(a)
-PERLEXPLIB	?= $(COREDIR)\perl531.exp
-PERLSTATICLIB	?= ..\perl531s$(a)
-PERLDLL		= ..\perl531.dll
-PERLDLLBASE	= perl531.dll
+PERLIMPLIB	?= $(COREDIR)\perl533$(a)
+PERLIMPLIBBASE	?= perl533$(a)
+PERLEXPLIB	?= $(COREDIR)\perl533.exp
+PERLSTATICLIB	?= ..\perl533s$(a)
+PERLDLL		= ..\perl533.dll
+PERLDLLBASE	= perl533.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake
@@ -1065,7 +1065,6 @@ MICROCORE_SRC	=		\
 		..\mg.c		\
 		..\numeric.c	\
 		..\pad.c	\
-		..\perlapi.c	\
 		..\perly.c	\
 		..\pp_sort.c	\
 		..\reentr.c	\
@@ -1526,7 +1525,7 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $(*F).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
-# rules wrapped in .IFs break Win9X build (we end up with unbalanced []s unless
+# rules wrapped in .IFs break Win9X build (we end up with unbalanced []s
 # unless the .IF is true), so instead we use a .ELSE with the default.
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 
@@ -1739,13 +1738,12 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.qnx      ..\pod\perlqnx.pod
 	copy ..\README.riscos   ..\pod\perlriscos.pod
 	copy ..\README.solaris  ..\pod\perlsolaris.pod
-	copy ..\README.symbian  ..\pod\perlsymbian.pod
 	copy ..\README.synology ..\pod\perlsynology.pod
 	copy ..\README.tru64    ..\pod\perltru64.pod
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl53110delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5331delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1843,16 +1841,15 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl53110delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5331delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \
 	    perlnetware.pod perlopenbsd.pod perlos2.pod perlos390.pod \
 	    perlos400.pod perlplan9.pod perlqnx.pod perlriscos.pod \
-	    perlsolaris.pod perlsymbian.pod perlsynology.pod perltoc.pod \
-	    perltru64.pod perltw.pod perluniprops.pod perlvos.pod \
-	    perlwin32.pod
+	    perlsolaris.pod perlsynology.pod perltoc.pod perltru64.pod \
+	    perltw.pod perluniprops.pod perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm h2xs \
 	    perldoc perlivp libnetcfg enc2xs encguess piconv cpan *.bat \
 	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep shasum corelist zipdetails

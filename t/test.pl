@@ -175,6 +175,15 @@ sub skip_all_without_unicode_tables { # (but only under miniperl)
 
 sub find_git_or_skip {
     my ($source_dir, $reason);
+
+    if ( $ENV{CONTINUOUS_INTEGRATION} && $ENV{WORKSPACE} ) {
+        $source_dir = $ENV{WORKSPACE};
+        if ( -d "${source_dir}/.git" ) {
+            $ENV{GIT_DIR} = "${source_dir}/.git";
+            return $source_dir;
+        }
+    }
+
     if (-d '.git') {
 	$source_dir = '.';
     } elsif (-l 'MANIFEST' && -l 'AUTHORS') {
@@ -295,7 +304,7 @@ eval 'sub re::is_regexp { ref($_[0]) eq "Regexp" }'
 
 # keys are the codes \n etc map to, values are 2 char strings such as \n
 my %backslash_escape;
-foreach my $x (split //, 'nrtfa\\\'"') {
+foreach my $x (split //, 'enrtfa\\\'"') {
     $backslash_escape{ord eval "\"\\$x\""} = "\\$x";
 }
 # A way to display scalars containing control characters and Unicode.

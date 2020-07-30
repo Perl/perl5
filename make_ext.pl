@@ -168,7 +168,7 @@ if (IS_WIN32) {
     $ENV{PATH} = "$topdir;$topdir\\win32\\bin;$ENV{PATH}";
     my $pl2bat = "$topdir\\win32\\bin\\pl2bat";
     unless (-f "$pl2bat.bat") {
-	my @args = ($perl, "-I$topdir\\lib", ("$pl2bat.pl") x 2);
+	my @args = ($perl, "-I$topdir\\lib", "-I$topdir\\cpan\\ExtUtils-PL2Bat\\lib", ("$pl2bat.pl") x 2);
 	print "@args\n" if $verbose;
 	system(@args) unless IS_CROSS;
     }
@@ -523,6 +523,7 @@ EOM
 		'INSTALLMAN3DIR=none';
 	}
 	push @args, @$pass_through;
+	push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
 	_quote_args(\@args) if IS_VMS;
 	print join(' ', $perl, @args), "\n" if $verbose;
 	my $code = do {

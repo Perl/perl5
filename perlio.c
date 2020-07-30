@@ -236,7 +236,7 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
-#if defined(PERL_MICRO) || defined(__SYMBIAN32__)
+#if defined(PERL_MICRO)
     return NULL;
 #elif defined(PERL_IMPLICIT_SYS)
     return PerlSIO_fdupopen(f);
@@ -2256,7 +2256,6 @@ static void
 S_more_refcounted_fds(pTHX_ const int new_fd)
   PERL_TSA_REQUIRES(PL_perlio_mutex)
 {
-    dVAR;
     const int old_max = PL_perlio_fd_refcnt_size;
     const int new_max = 16 + (new_fd & ~15);
     int *new_array;
@@ -2306,7 +2305,6 @@ PerlIOUnix_refcnt_inc(int fd)
 {
     dTHX;
     if (fd >= 0) {
-	dVAR;
 
 	MUTEX_LOCK(&PL_perlio_mutex);
 	if (fd >= PL_perlio_fd_refcnt_size)
@@ -2336,7 +2334,6 @@ PerlIOUnix_refcnt_dec(int fd)
 #ifdef DEBUGGING
         dTHX;
 #else
-	dVAR;
 #endif
 	MUTEX_LOCK(&PL_perlio_mutex);
 	if (fd >= PL_perlio_fd_refcnt_size) {
@@ -2365,7 +2362,6 @@ PerlIOUnix_refcnt(int fd)
     dTHX;
     int cnt = 0;
     if (fd >= 0) {
-	dVAR;
 	MUTEX_LOCK(&PL_perlio_mutex);
 	if (fd >= PL_perlio_fd_refcnt_size) {
 	    /* diag_listed_as: refcnt: fd %d%s */
@@ -2416,7 +2412,6 @@ PerlIO_cleanup(pTHX)
 
 void PerlIO_teardown(void) /* Call only from PERL_SYS_TERM(). */
 {
-    dVAR;
 #if 0
 /* XXX we can't rely on an interpreter being present at this late stage,
    XXX so we can't use a function like PerlLIO_write that relies on one
@@ -2744,10 +2739,6 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
     fd = PerlIOSelf(f, PerlIOUnix)->fd;
-#ifdef PERLIO_STD_SPECIAL
-    if (fd == 0)
-        return PERLIO_STD_IN(fd, vbuf, count);
-#endif
     if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) ||
          PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
 	return 0;
@@ -2781,10 +2772,6 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
     fd = PerlIOSelf(f, PerlIOUnix)->fd;
-#ifdef PERLIO_STD_SPECIAL
-    if (fd == 1 || fd == 2)
-        return PERLIO_STD_OUT(fd, vbuf, count);
-#endif
     while (1) {
 	const SSize_t len = PerlLIO_write(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
@@ -3263,7 +3250,6 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	int dupfd = -1;
 	dSAVEDERRNO;
 #ifdef USE_ITHREADS
-	dVAR;
 #endif
 #ifdef SOCKS5_VERSION_NAME
     	/* Socks lib overrides close() but stdio isn't linked to

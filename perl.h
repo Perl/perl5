@@ -62,18 +62,6 @@
 #  endif
 #endif
 
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#  ifndef PERL_GLOBAL_STRUCT
-#    define PERL_GLOBAL_STRUCT
-#  endif
-#endif
-
-#ifdef PERL_GLOBAL_STRUCT
-#  ifndef MULTIPLICITY
-#    define MULTIPLICITY
-#  endif
-#endif
-
 #ifdef MULTIPLICITY
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -84,27 +72,6 @@
 #ifdef __CYGWIN__
 #   undef WIN32
 #   undef _WIN32
-#endif
-
-#if defined(__SYMBIAN32__) || (defined(__VC32__) && defined(WINS))
-#   ifndef SYMBIAN
-#       define SYMBIAN
-#   endif
-#endif
-
-#ifdef __SYMBIAN32__
-#  include "symbian/symbian_proto.h"
-#endif
-
-/* Any stack-challenged places.  The limit varies (and often
- * is configurable), but using more than a kilobyte of stack
- * is usually dubious in these systems. */
-#if defined(__SYMBIAN32__)
-/* Symbian: need to work around the SDK features. *
- * On WINS: MS VC5 generates calls to _chkstk,         *
- * if a "large" stack frame is allocated.              *
- * gcc on MARM does not generate calls like these.     */
-#   define USE_HEAP_INSTEAD_OF_STACK
 #endif
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
@@ -141,25 +108,8 @@
 #  endif
 #endif
 
-#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GET_VARS)
-#    ifdef PERL_GLOBAL_STRUCT_PRIVATE
-       EXTERN_C struct perl_vars* Perl_GetVarsPrivate();
-#      define PERL_GET_VARS() Perl_GetVarsPrivate() /* see miniperlmain.c */
-#    else
-#      define PERL_GET_VARS() PL_VarsPtr
-#    endif
-#endif
-
 /* this used to be off by default, now its on, see perlio.h */
 #define PERLIO_FUNCS_CONST
-
-#define pVAR    struct perl_vars* my_vars PERL_UNUSED_DECL
-
-#ifdef PERL_GLOBAL_STRUCT
-#  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
-#else
-#  define dVAR		dNOOP
-#endif
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
@@ -169,16 +119,8 @@
 #  define pTHX  tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  define aTHXa(a) aTHX = (tTHX)a
-#  ifdef PERL_GLOBAL_STRUCT
-#    define dTHXa(a)	dVAR; pTHX = (tTHX)a
-#  else
-#    define dTHXa(a)	pTHX = (tTHX)a
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT
-#    define dTHX		dVAR; pTHX = PERL_GET_THX
-#  else
-#    define dTHX		pTHX = PERL_GET_THX
-#  endif
+#  define dTHXa(a)	pTHX = (tTHX)a
+#  define dTHX		pTHX = PERL_GET_THX
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
 #  define pTHX_1	2
@@ -294,6 +236,11 @@
           : (REGEXP *)NULL)
 #endif
 
+/* some compilers impersonate gcc */
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#  define PERL_IS_GCC 1
+#endif
+
 /* In case Configure was not used (we are using a "canned config"
  * such as Win32, or a cross-compilation setup, for example) try going
  * by the gcc major and minor versions.  One useful URL is
@@ -340,6 +287,10 @@
 #  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
 #    define HASATTRIBUTE_WARN_UNUSED_RESULT
 #  endif
+/* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
+#  if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4 /* 4.7 -> */
+#    define HASATTRIBUTE_ALWAYS_INLINE
+#  endif
 #endif
 #endif /* #ifndef PERL_MICRO */
 
@@ -367,6 +318,12 @@
 #ifdef HASATTRIBUTE_WARN_UNUSED_RESULT
 #  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
 #endif
+#ifdef HASATTRIBUTE_ALWAYS_INLINE
+/* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
+#  if !defined(PERL_IS_GCC) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4)
+#    define __attribute__always_inline__      __attribute__((always_inline))
+#  endif
+#endif
 
 /* If we haven't defined the attributes yet, define them to blank. */
 #ifndef __attribute__deprecated__
@@ -392,6 +349,9 @@
 #endif
 #ifndef __attribute__warn_unused_result__
 #  define __attribute__warn_unused_result__
+#endif
+#ifndef __attribute__always_inline__
+#  define __attribute__always_inline__
 #endif
 
 /* Some OS warn on NULL format to printf */
@@ -429,7 +389,7 @@
 #  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
 #endif
 
-#if defined(USE_ITHREADS) || defined(PERL_GLOBAL_STRUCT)
+#if defined(USE_ITHREADS)
 #  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
 #else
 #  define PERL_UNUSED_CONTEXT
@@ -578,7 +538,9 @@
 #  define pTHX_12	12
 #endif
 
-#ifndef dVAR
+#ifndef PERL_CORE
+/* Backwards compatibility macro for XS code. It used to be part of
+ * the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
 #  define dVAR		dNOOP
 #endif
 
@@ -604,17 +566,9 @@
  * PerlIO_foo() expands to PL_StdIO->pFOO(PL_StdIO, ...).
  * dTHXs is therefore needed for all functions using PerlIO_foo(). */
 #ifdef PERL_IMPLICIT_SYS
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#    define dTHXs		dVAR; dTHX
-#  else
 #    define dTHXs		dTHX
-#  endif
 #else
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#    define dTHXs		dVAR
-#  else
 #    define dTHXs		dNOOP
-#  endif
 #endif
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
@@ -803,16 +757,6 @@ out of them.
 
 #include <sys/types.h>
 
-/* EVC 4 SDK headers includes a bad definition of MB_CUR_MAX in stdlib.h
-  which is included from stdarg.h. Bad definition not present in SD 2008
-  SDK headers. wince.h is not yet included, so we cant fix this from there
-  since by then MB_CUR_MAX will be defined from stdlib.h.
-  cewchar.h includes a correct definition of MB_CUR_MAX and it is copied here
-  since cewchar.h can't be included this early */
-#if defined(UNDER_CE) && (_MSC_VER < 1300)
-#  define MB_CUR_MAX 1uL
-#endif
-
 #  ifdef I_WCHAR
 #    include <wchar.h>
 #  endif
@@ -904,6 +848,12 @@ out of them.
 #   if !defined(NO_LOCALE_TELEPHONE) && defined(LC_TELEPHONE)
 #	define USE_LOCALE_TELEPHONE
 #   endif
+#   if !defined(NO_LOCALE_SYNTAX) && defined(LC_SYNTAX)
+#	define USE_LOCALE_SYNTAX
+#   endif
+#   if !defined(NO_LOCALE_TOD) && defined(LC_TOD)
+#	define USE_LOCALE_TOD
+#   endif
 
 /* XXX The next few defines are unfortunately duplicated in makedef.pl, and
  * changes here MUST also be made there */
@@ -983,10 +933,6 @@ extern char **myenviron;
 /* for WCOREDUMP */
 #ifdef I_SYS_WAIT
 #   include <sys/wait.h>
-#endif
-
-#ifdef __SYMBIAN32__
-#   undef _SC_ARG_MAX /* Symbian has _SC_ARG_MAX but no sysconf() */
 #endif
 
 #if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO)
@@ -1162,7 +1108,7 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(__SYMBIAN32__)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -1207,9 +1153,7 @@ EXTERN_C int usleep(unsigned int);
 #  define Ptrdiff_t SSize_t
 #endif
 
-#ifndef __SYMBIAN32__
 #  include <string.h>
-#endif
 
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own in proto.h instead. */
@@ -2855,8 +2799,6 @@ typedef struct padname PADNAME;
 #   else
 #     include "vos/vosish.h"
 #   endif
-#elif defined(__SYMBIAN32__)
-#   include "symbian/symbianish.h"
 #elif defined(__HAIKU__)
 #   include "haiku/haikuish.h"
 #else
@@ -2898,6 +2840,36 @@ typedef struct padname PADNAME;
 #  define USE_ENVIRON_ARRAY
 #endif
 
+#ifdef USE_ITHREADS
+   /* On some platforms it would be safe to use a read/write mutex with many
+    * readers possible at the same time.  On other platforms, notably IBM ones,
+    * subsequent getenv calls destroy earlier ones.  Those platforms would not
+    * be able to handle simultaneous getenv calls */
+#  define ENV_LOCK            MUTEX_LOCK(&PL_env_mutex)
+#  define ENV_UNLOCK          MUTEX_UNLOCK(&PL_env_mutex)
+#  define ENV_INIT            MUTEX_INIT(&PL_env_mutex);
+#  define ENV_TERM            MUTEX_DESTROY(&PL_env_mutex);
+#else
+#  define ENV_LOCK       NOOP;
+#  define ENV_UNLOCK     NOOP;
+#  define ENV_INIT       NOOP;
+#  define ENV_TERM       NOOP;
+#endif
+
+/* Some critical sections need to lock both the locale and the environment.
+ * XXX khw intends to change this to lock both mutexes, but that brings up
+ * issues of potential deadlock, so should be done at the beginning of a
+ * development cycle.  So for now, it just locks the environment.  Note that
+ * many modern platforms are locale-thread-safe anyway, so locking the locale
+ * mutex is a no-op anyway */
+#define ENV_LOCALE_LOCK     ENV_LOCK
+#define ENV_LOCALE_UNLOCK   ENV_UNLOCK
+
+/* And some critical sections care only that no one else is writing either the
+ * locale nor the environment.  XXX Again this is for the future.  This can be
+ * simulated with using COND_WAIT in thread.h */
+#define ENV_LOCALE_READ_LOCK     ENV_LOCALE_LOCK
+#define ENV_LOCALE_READ_UNLOCK   ENV_LOCALE_UNLOCK
 
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     /* having sigaction(2) means that the OS supports both 1-arg and 3-arg
@@ -2920,6 +2892,9 @@ typedef struct padname PADNAME;
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
     typedef siginfo_t Siginfo_t;
 #else
+#ifdef si_signo /* minix */
+#undef si_signo
+#endif
     typedef struct {
         int si_signo;
     } Siginfo_t;
@@ -3043,12 +3018,6 @@ freeing any remaining Perl interpreters.
 #  endif
 #endif
 
-/* USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
- * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
- * this results in many functions being undeclared which bothers C++
- * May make sense to have threads after "*ish.h" anyway
- */
-
 /* clang Thread Safety Analysis/Annotations/Attributes
  * http://clang.llvm.org/docs/ThreadSafetyAnalysis.html
  *
@@ -3059,8 +3028,6 @@ freeing any remaining Perl interpreters.
  */
 #if defined(USE_ITHREADS) && defined(I_PTHREAD) && \
     defined(__clang__) && \
-    !defined(PERL_GLOBAL_STRUCT) && \
-    !defined(PERL_GLOBAL_STRUCT_PRIVATE) && \
     !defined(SWIG) && \
   ((!defined(__apple_build_version__) &&               \
     ((__clang_major__ == 3 && __clang_minor__ >= 6) || \
@@ -3816,6 +3783,14 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
 #endif
 
+#ifndef PERL_STATIC_FORCE_INLINE
+#  define PERL_STATIC_FORCE_INLINE PERL_STATIC_INLINE
+#endif
+
+#ifndef PERL_STATIC_FORCE_INLINE_NO_RET
+#  define PERL_STATIC_FORCE_INLINE_NO_RET PERL_STATIC_INLINE
+#endif
+
 #if !defined(OS2)
 #  include "iperlsys.h"
 #endif
@@ -4072,7 +4047,7 @@ my_swap16(const U16 x) {
 #endif
 
 #ifndef __cplusplus
-#if !(defined(WIN32) || defined(SYMBIAN))
+#if !defined(WIN32)
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
@@ -4735,7 +4710,7 @@ EXTCONST int         PL_sig_num[];
  * folds such as outside the range or to multiple characters. */
 
 #ifdef DOINIT
-#ifndef EBCDIC
+#  ifndef EBCDIC
 
 /* The EBCDIC fold table depends on the code page, and hence is found in
  * utfebcdic.h */
@@ -4774,6 +4749,42 @@ EXTCONST  unsigned char PL_fold[] = {
 	240,	241,	242,	243,	244,	245,	246,	247,
 	248,	249,	250,	251,	252,	253,	254,	255
 };
+
+EXT unsigned char PL_fold_locale[] = { /* Unfortunately not EXTCONST. */
+	0,	1,	2,	3,	4,	5,	6,	7,
+	8,	9,	10,	11,	12,	13,	14,	15,
+	16,	17,	18,	19,	20,	21,	22,	23,
+	24,	25,	26,	27,	28,	29,	30,	31,
+	32,	33,	34,	35,	36,	37,	38,	39,
+	40,	41,	42,	43,	44,	45,	46,	47,
+	48,	49,	50,	51,	52,	53,	54,	55,
+	56,	57,	58,	59,	60,	61,	62,	63,
+	64,	'a',	'b',	'c',	'd',	'e',	'f',	'g',
+	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
+	'p',	'q',	'r',	's',	't',	'u',	'v',	'w',
+	'x',	'y',	'z',	91,	92,	93,	94,	95,
+	96,	'A',	'B',	'C',	'D',	'E',	'F',	'G',
+	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
+	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
+	'X',	'Y',	'Z',	123,	124,	125,	126,	127,
+	128,	129,	130,	131,	132,	133,	134,	135,
+	136,	137,	138,	139,	140,	141,	142,	143,
+	144,	145,	146,	147,	148,	149,	150,	151,
+	152,	153,	154,	155,	156,	157,	158,	159,
+	160,	161,	162,	163,	164,	165,	166,	167,
+	168,	169,	170,	171,	172,	173,	174,	175,
+	176,	177,	178,	179,	180,	181,	182,	183,
+	184,	185,	186,	187,	188,	189,	190,	191,
+	192,	193,	194,	195,	196,	197,	198,	199,
+	200,	201,	202,	203,	204,	205,	206,	207,
+	208,	209,	210,	211,	212,	213,	214,	215,
+	216,	217,	218,	219,	220,	221,	222,	223,
+	224,	225,	226,	227,	228,	229,	230,	231,
+	232,	233,	234,	235,	236,	237,	238,	239,
+	240,	241,	242,	243,	244,	245,	246,	247,
+	248,	249,	250,	251,	252,	253,	254,	255
+};
+
 EXTCONST  unsigned char PL_fold_latin1[] = {
     /* Full latin1 complement folding, except for three problematic code points:
      *	Micro sign (181 = 0xB5) and y with diearesis (255 = 0xFF) have their
@@ -4886,143 +4897,27 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
 	200,	201,	202,	203,	204,	205,	206,	207,
 	208,	209,	210,	211,	212,	213,	214,	215,
 	216,	217,	218,	219,	220,	221,	222,
-#if    UNICODE_MAJOR_VERSION > 2                                        \
-   || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1		\
-                                  && UNICODE_DOT_DOT_VERSION >= 8)
+#    if    UNICODE_MAJOR_VERSION > 2                                        \
+       || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1           \
+                                      && UNICODE_DOT_DOT_VERSION >= 8)
 	                                                        255 /*sharp s*/,
-#else   /* uc(sharp s) is 'sharp s' itself in early unicode */
+#    else   /* uc(sharp s) is 'sharp s' itself in early unicode */
 	                                                        223,
-#endif
+#    endif
 	224-32,	225-32,	226-32,	227-32,	228-32,	229-32,	230-32,	231-32,
 	232-32,	233-32,	234-32,	235-32,	236-32,	237-32,	238-32,	239-32,
 	240-32,	241-32,	242-32,	243-32,	244-32,	245-32,	246-32,	247,
 	248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,	255
 };
-#endif  /* !EBCDIC, but still in DOINIT */
+#  endif  /* !EBCDIC, but still in DOINIT */
 #else	/* ! DOINIT */
-#   ifndef EBCDIC
+#  ifndef EBCDIC
 EXTCONST unsigned char PL_fold[];
 EXTCONST unsigned char PL_fold_latin1[];
 EXTCONST unsigned char PL_mod_latin1_uc[];
 EXTCONST unsigned char PL_latin1_lc[];
+EXT      unsigned char PL_fold_locale[]; /* Unfortunately not EXTCONST. */
 #   endif
-#endif
-
-#ifndef PERL_GLOBAL_STRUCT /* or perlvars.h */
-#ifdef DOINIT
-EXT unsigned char PL_fold_locale[256] = { /* Unfortunately not EXTCONST. */
-	0,	1,	2,	3,	4,	5,	6,	7,
-	8,	9,	10,	11,	12,	13,	14,	15,
-	16,	17,	18,	19,	20,	21,	22,	23,
-	24,	25,	26,	27,	28,	29,	30,	31,
-	32,	33,	34,	35,	36,	37,	38,	39,
-	40,	41,	42,	43,	44,	45,	46,	47,
-	48,	49,	50,	51,	52,	53,	54,	55,
-	56,	57,	58,	59,	60,	61,	62,	63,
-	64,	'a',	'b',	'c',	'd',	'e',	'f',	'g',
-	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
-	'p',	'q',	'r',	's',	't',	'u',	'v',	'w',
-	'x',	'y',	'z',	91,	92,	93,	94,	95,
-	96,	'A',	'B',	'C',	'D',	'E',	'F',	'G',
-	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
-	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
-	'X',	'Y',	'Z',	123,	124,	125,	126,	127,
-	128,	129,	130,	131,	132,	133,	134,	135,
-	136,	137,	138,	139,	140,	141,	142,	143,
-	144,	145,	146,	147,	148,	149,	150,	151,
-	152,	153,	154,	155,	156,	157,	158,	159,
-	160,	161,	162,	163,	164,	165,	166,	167,
-	168,	169,	170,	171,	172,	173,	174,	175,
-	176,	177,	178,	179,	180,	181,	182,	183,
-	184,	185,	186,	187,	188,	189,	190,	191,
-	192,	193,	194,	195,	196,	197,	198,	199,
-	200,	201,	202,	203,	204,	205,	206,	207,
-	208,	209,	210,	211,	212,	213,	214,	215,
-	216,	217,	218,	219,	220,	221,	222,	223,	
-	224,	225,	226,	227,	228,	229,	230,	231,
-	232,	233,	234,	235,	236,	237,	238,	239,
-	240,	241,	242,	243,	244,	245,	246,	247,
-	248,	249,	250,	251,	252,	253,	254,	255
-};
-#else
-EXT unsigned char PL_fold_locale[256]; /* Unfortunately not EXTCONST. */
-#endif
-#endif /* !PERL_GLOBAL_STRUCT */
-
-#ifdef DOINIT
-#ifdef EBCDIC
-EXTCONST unsigned char PL_freq[] = {/* EBCDIC frequencies for mixed English/C */
-    1,      2,      84,     151,    154,    155,    156,    157,
-    165,    246,    250,    3,      158,    7,      18,     29,
-    40,     51,     62,     73,     85,     96,     107,    118,
-    129,    140,    147,    148,    149,    150,    152,    153,
-    255,      6,      8,      9,     10,     11,     12,     13,
-     14,     15,     24,     25,     26,     27,     28,    226,
-     29,     30,     31,     32,     33,     43,     44,     45,
-     46,     47,     48,     49,     50,     76,     77,     78,
-     79,     80,     81,     82,     83,     84,     85,     86,
-     87,     94,     95,    234,    181,    233,    187,    190,
-    180,     96,     97,     98,     99,    100,    101,    102,
-    104,    112,    182,    174,    236,    232,    229,    103,
-    228,    226,    114,    115,    116,    117,    118,    119,
-    120,    121,    122,    235,    176,    230,    194,    162,
-    130,    131,    132,    133,    134,    135,    136,    137,
-    138,    139,    201,    205,    163,    217,    220,    224,
-    5,      248,    227,    244,    242,    255,    241,    231,
-    240,    253,    16,     197,    19,     20,     21,     187,
-    23,     169,    210,    245,    237,    249,    247,    239,
-    168,    252,    34,     196,    36,     37,     38,     39,
-    41,     42,     251,    254,    238,    223,    221,    213,
-    225,    177,    52,     53,     54,     55,     56,     57,
-    58,     59,     60,     61,     63,     64,     65,     66,
-    67,     68,     69,     70,     71,     72,     74,     75,
-    205,    208,    186,    202,    200,    218,    198,    179,
-    178,    214,    88,     89,     90,     91,     92,     93,
-    217,    166,    170,    207,    199,    209,    206,    204,
-    160,    212,    105,    106,    108,    109,    110,    111,
-    203,    113,    216,    215,    192,    175,    193,    243,
-    172,    161,    123,    124,    125,    126,    127,    128,
-    222,    219,    211,    195,    188,    193,    185,    184,
-    191,    183,    141,    142,    143,    144,    145,    146
-};
-#else  /* ascii rather than ebcdic */
-EXTCONST unsigned char PL_freq[] = {	/* letter frequencies for mixed English/C */
-	1,	2,	84,	151,	154,	155,	156,	157,
-	165,	246,	250,	3,	158,	7,	18,	29,
-	40,	51,	62,	73,	85,	96,	107,	118,
-	129,	140,	147,	148,	149,	150,	152,	153,
-	255,	182,	224,	205,	174,	176,	180,	217,
-	233,	232,	236,	187,	235,	228,	234,	226,
-	222,	219,	211,	195,	188,	193,	185,	184,
-	191,	183,	201,	229,	181,	220,	194,	162,
-	163,	208,	186,	202,	200,	218,	198,	179,
-	178,	214,	166,	170,	207,	199,	209,	206,
-	204,	160,	212,	216,	215,	192,	175,	173,
-	243,	172,	161,	190,	203,	189,	164,	230,
-	167,	248,	227,	244,	242,	255,	241,	231,
-	240,	253,	169,	210,	245,	237,	249,	247,
-	239,	168,	252,	251,	254,	238,	223,	221,
-	213,	225,	177,	197,	171,	196,	159,	4,
-	5,	6,	8,	9,	10,	11,	12,	13,
-	14,	15,	16,	17,	19,	20,	21,	22,
-	23,	24,	25,	26,	27,	28,	30,	31,
-	32,	33,	34,	35,	36,	37,	38,	39,
-	41,	42,	43,	44,	45,	46,	47,	48,
-	49,	50,	52,	53,	54,	55,	56,	57,
-	58,	59,	60,	61,	63,	64,	65,	66,
-	67,	68,	69,	70,	71,	72,	74,	75,
-	76,	77,	78,	79,	80,	81,	82,	83,
-	86,	87,	88,	89,	90,	91,	92,	93,
-	94,	95,	97,	98,	99,	100,	101,	102,
-	103,	104,	105,	106,	108,	109,	110,	111,
-	112,	113,	114,	115,	116,	117,	119,	120,
-	121,	122,	123,	124,	125,	126,	127,	128,
-	130,	131,	132,	133,	134,	135,	136,	137,
-	138,	139,	141,	142,	143,	144,	145,	146
-};
-#endif
-#else
-EXTCONST unsigned char PL_freq[];
 #endif
 
 /* Although only used for debugging, these constants must be available in
@@ -5082,12 +4977,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_DEBUG_READONLY_OPS
 			     " PERL_DEBUG_READONLY_OPS"
 #  endif
-#  ifdef PERL_GLOBAL_STRUCT
-			     " PERL_GLOBAL_STRUCT"
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-			     " PERL_GLOBAL_STRUCT_PRIVATE"
-#  endif
 #  ifdef PERL_IMPLICIT_CONTEXT
 			     " PERL_IMPLICIT_CONTEXT"
 #  endif
@@ -5096,12 +4985,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_MICRO
 			     " PERL_MICRO"
-#  endif
-#  ifdef PERL_NEED_APPCTX
-			     " PERL_NEED_APPCTX"
-#  endif
-#  ifdef PERL_NEED_TIMESBASE
-			     " PERL_NEED_TIMESBASE"
 #  endif
 #  ifdef PERL_POISON
 			     " PERL_POISON"
@@ -5443,34 +5326,6 @@ EXTCONST U16 PL_interp_size_5_18_0
   INIT(PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_18_0_INTERP_MEMBER));
 
 
-#  ifdef PERL_GLOBAL_STRUCT
-/* MULTIPLICITY is automatically defined when PERL_GLOBAL_STRUCT is defined,
-   hence it's safe and sane to nest this within #ifdef MULTIPLICITY  */
-
-struct perl_vars {
-#    include "perlvars.h"
-};
-
-EXTCONST U16 PL_global_struct_size
-  INIT(sizeof(struct perl_vars));
-
-#    ifdef PERL_CORE
-#      ifndef PERL_GLOBAL_STRUCT_PRIVATE
-EXT struct perl_vars PL_Vars;
-EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
-#        undef PERL_GET_VARS
-#        define PERL_GET_VARS() PL_VarsPtr
-#      endif /* !PERL_GLOBAL_STRUCT_PRIVATE */
-#    else /* PERL_CORE */
-#      if !defined(__GNUC__) || !defined(WIN32)
-EXT
-#      endif /* WIN32 */
-struct perl_vars *PL_VarsPtr;
-#      define PL_Vars (*((PL_VarsPtr) \
-		       ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
-#    endif /* PERL_CORE */
-#  endif /* PERL_GLOBAL_STRUCT */
-
 /* Done with PERLVAR macros for now ... */
 #  undef PERLVAR
 #  undef PERLVARA
@@ -5543,13 +5398,11 @@ END_EXTERN_C
    define HAVE_INTERP_INTERN  */
 #include "embed.h"
 
-#ifndef PERL_GLOBAL_STRUCT
 START_EXTERN_C
 
 #  include "perlvars.h"
 
 END_EXTERN_C
-#endif
 
 #undef PERLVAR
 #undef PERLVARA
@@ -5854,7 +5707,7 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  * drops out immediately for that.  In the dfa, classes 3 and 4 are used to
  * distinguish EF vs the rest.  Then special code is used to deal with ED,
  * that's executed only when the dfa drops out.  The code points started by ED
- * are half surrogates, and half hangul syllables.  This means that 2048 of the
+ * are half surrogates, and half hangul syllables.  This means that 2048 of
  * the hangul syllables (about 18%) take longer than all other non-problematic
  * code points to handle.
  *
@@ -6089,7 +5942,7 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[];
    compilers aren't smart enough to eliminate unused static inline
    functions, so including this file in source code can cause link errors
    even if the source code uses none of the functions. Hence including these
-   can be be suppressed by setting PERL_NO_INLINE_FUNCTIONS. Doing this will
+   can be suppressed by setting PERL_NO_INLINE_FUNCTIONS. Doing this will
    (obviously) result in unworkable XS code, but allows simple probing code
    to continue to work, because it permits tests to include the perl headers
    for definitions without creating a link dependency on the perl library
@@ -6514,7 +6367,7 @@ any executable statements.
 
 =for apidoc Am|void|STORE_LC_NUMERIC_FORCE_TO_UNDERLYING
 
-This is used by XS code that that is C<LC_NUMERIC> locale-aware to force the
+This is used by XS code that is C<LC_NUMERIC> locale-aware to force the
 locale for category C<LC_NUMERIC> to be what perl thinks is the current
 underlying locale.  (The perl interpreter could be wrong about what the
 underlying locale actually is if some C or XS code has called the C library
@@ -6776,7 +6629,7 @@ cannot have changed since the precalculation.
 #  define SET_NUMERIC_STANDARD()
 #  define SET_NUMERIC_UNDERLYING()
 #  define IS_NUMERIC_RADIX(a, b)		(0)
-#  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION
+#  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION  dNOOP
 #  define STORE_LC_NUMERIC_SET_STANDARD()
 #  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric)
@@ -6987,15 +6840,9 @@ C<strtoul>.
 /* START_MY_CXT must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
  * case below uses it to declare the data as static. */
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#    define START_MY_CXT
-#    define MY_CXT_INDEX Perl_my_cxt_index(aTHX_ MY_CXT_KEY)
-#    define MY_CXT_INIT_ARG MY_CXT_KEY
-#  else
 #    define START_MY_CXT static int my_cxt_index = -1;
 #    define MY_CXT_INDEX my_cxt_index
 #    define MY_CXT_INIT_ARG &my_cxt_index
-#  endif /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when

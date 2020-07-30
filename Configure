@@ -833,6 +833,7 @@ d_scm_rights=''
 d_sin6_scope_id=''
 d_sockaddr_in6=''
 d_sockaddr_sa_len=''
+d_sockaddr_storage=''
 d_socket=''
 d_sockpair=''
 sockethdr=''
@@ -1537,7 +1538,7 @@ case "$sh" in
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.
 
 Usually it's in /bin/sh.  How did you even get this far?
-Please contact me (Perl Maintainers) at https://github.com/Perl/perl5/issues
+Please report this issue at https://github.com/Perl/perl5/issues
 and we'll try to straighten this all out.
 EOM
 	exit 1
@@ -11939,7 +11940,6 @@ set socketpair d_sockpair
 eval $inlibc
 
 
-echo " "
 echo "Checking the availability sa_len in the sock struct ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -11956,7 +11956,6 @@ fi
 set d_sockaddr_sa_len; eval $setvar
 $rm_try
 
-echo " "
 echo "Checking the availability struct sockaddr_in6 ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -11974,7 +11973,23 @@ fi
 set d_sockaddr_in6; eval $setvar
 $rm_try
 
-echo " "
+echo "Checking the availability struct sockaddr_storage ..." >&4
+$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+int main() {
+struct sockaddr_storage sastor;
+return (sastor.ss_family);
+}
+EOF
+val="$undef"
+set try; if eval $compile; then
+    val="$define"
+fi
+set d_sockaddr_storage; eval $setvar
+$rm_try
+
 echo "Checking the availability sin6_scope_id in struct sockaddr_in6 ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -11992,7 +12007,6 @@ fi
 set d_sin6_scope_id; eval $setvar
 $rm_try
 
-echo " "
 echo "Checking the availability struct ip_mreq ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -12010,7 +12024,6 @@ fi
 set d_ip_mreq; eval $setvar
 $rm_try
 
-echo " "
 echo "Checking the availability struct ip_mreq_source ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -12028,7 +12041,6 @@ fi
 set d_ip_mreq_source; eval $setvar
 $rm_try
 
-echo " "
 echo "Checking the availability struct ipv6_mreq ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -12046,7 +12058,6 @@ fi
 set d_ipv6_mreq; eval $setvar
 $rm_try
 
-echo " "
 echo "Checking the availability struct ipv6_mreq_source ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -12064,7 +12075,6 @@ fi
 set d_ipv6_mreq_source; eval $setvar
 $rm_try
 
-echo " "
 echo "Checking the availability of certain socket constants..." >&4
 for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
     enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
@@ -24505,6 +24515,7 @@ d_sitearch='$d_sitearch'
 d_snprintf='$d_snprintf'
 d_sockaddr_in6='$d_sockaddr_in6'
 d_sockaddr_sa_len='$d_sockaddr_sa_len'
+d_sockaddr_storage='$d_sockaddr_storage'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'

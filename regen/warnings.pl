@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.46';
+$VERSION = '1.48';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -205,15 +205,15 @@ sub walk
 
 sub mkRange
 {
-    my @a = @_ ;
-    my @out = @a ;
+    my @in = @_ ;
+    my @out = @in ;
 
-    for my $i (1 .. @a - 1) {
+    for my $i (1 .. @in - 1) {
       	$out[$i] = ".."
-          if $a[$i] == $a[$i - 1] + 1
-             && ($i >= @a  - 1 || $a[$i] + 1 == $a[$i + 1] );
+          if $in[$i] == $in[$i - 1] + 1
+             && ($i >= @in  - 1 || $in[$i] + 1 == $in[$i + 1] );
     }
-    $out[-1] = $a[-1] if $out[-1] eq "..";
+    $out[-1] = $in[-1] if $out[-1] eq "..";
 
     my $out = join(",",@out);
 
@@ -267,11 +267,11 @@ sub warningsTree
 
 sub mkHexOct
 {
-    my ($f, $max, @a) = @_ ;
+    my ($f, $max, @bits) = @_ ;
     my $mask = "\x00" x $max ;
     my $string = "" ;
 
-    foreach (@a) {
+    foreach (@bits) {
 	vec($mask, $_, 1) = 1 ;
     }
 
@@ -288,14 +288,14 @@ sub mkHexOct
 
 sub mkHex
 {
-    my($max, @a) = @_;
-    return mkHexOct("x", $max, @a);
+    my($max, @bits) = @_;
+    return mkHexOct("x", $max, @bits);
 }
 
 sub mkOct
 {
-    my($max, @a) = @_;
-    return mkHexOct("o", $max, @a);
+    my($max, @bits) = @_;
+    return mkHexOct("o", $max, @bits);
 }
 
 ###########################################################################
@@ -391,6 +391,11 @@ EOM
 #define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
 
 #define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
+
+#define free_and_set_cop_warnings(cmp,w) STMT_START { \
+  if (!specialWARN((cmp)->cop_warnings)) PerlMemShared_free((cmp)->cop_warnings); \
+  (cmp)->cop_warnings = w; \
+} STMT_END
 
 /*
 
@@ -561,7 +566,7 @@ print $pm ");\n\n" ;
 print $pm "# These are used by various things, including our own tests\n";
 print $pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
 print $pm tab(6, 'our $DEFAULT'), '=  "', mkHex($warn_size, map $_ * 2, @def),
-			   '", # [', mkRange(sort { $a <=> $b } @def), "]\n" ;
+			   '"; # [', mkRange(sort { $a <=> $b } @def), "]\n" ;
 print $pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
 print $pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
 while (<DATA>) {
@@ -607,10 +612,10 @@ sub _expand_bits {
 	} elsif ($len > $want_len) {
 	    substr $bits, $want_len, $len-$want_len, "";
 	} else {
-	    my $a = vec($bits, $Offsets{all} >> 1, 2);
-	    $a |= $a << 2;
-	    $a |= $a << 4;
-	    $bits .= chr($a) x ($want_len - $len);
+	    my $x = vec($bits, $Offsets{all} >> 1, 2);
+	    $x |= $x << 2;
+	    $x |= $x << 4;
+	    $bits .= chr($x) x ($want_len - $len);
 	}
     }
     return $bits;
@@ -938,17 +943,17 @@ Similarly all warnings are disabled in a block by either of these:
 For example, consider the code below:
 
     use warnings;
-    my @a;
+    my @x;
     {
         no warnings;
-	my $b = @a[0];
+	my $y = @x[0];
     }
-    my $c = @a[0];
+    my $z = @x[0];
 
 The code in the enclosing block has warnings enabled, but the inner
 block has them disabled.  In this case that means the assignment to the
-scalar C<$c> will trip the C<"Scalar value @a[0] better written as $a[0]">
-warning, but the assignment to the scalar C<$b> will not.
+scalar C<$z> will trip the C<"Scalar value @x[0] better written as $x[0]">
+warning, but the assignment to the scalar C<$y> will not.
 
 =head2 Default Warnings and Optional Warnings
 
@@ -960,18 +965,18 @@ would get a warning whether you wanted it or not.
 For example, the code below would always produce an C<"isn't numeric">
 warning about the "2:".
 
-    my $a = "2:" + 3;
+    my $x = "2:" + 3;
 
 With the introduction of lexical warnings, mandatory warnings now become
 I<default> warnings.  The difference is that although the previously
 mandatory warnings are still enabled by default, they can then be
 subsequently enabled or disabled with the lexical warning pragma.  For
 example, in the code below, an C<"isn't numeric"> warning will only
-be reported for the C<$a> variable.
+be reported for the C<$x> variable.
 
-    my $a = "2:" + 3;
+    my $x = "2:" + 3;
     no warnings;
-    my $b = "2:" + 3;
+    my $y = "2:" + 3;
 
 Note that neither the B<-w> flag or the C<$^W> can be used to
 disable/enable default warnings.  They are still mandatory in this case.
@@ -991,21 +996,25 @@ a block of code.  You might expect this to be enough to do the trick:
 
      {
          local ($^W) = 0;
-	 my $a =+ 2;
-	 my $b; chop $b;
+	 my $x =+ 2;
+	 my $y; chop $y;
      }
 
 When this code is run with the B<-w> flag, a warning will be produced
-for the C<$a> line:  C<"Reversed += operator">.
+for the C<$x> line:  C<"Reversed += operator">.
 
 The problem is that Perl has both compile-time and run-time warnings.  To
 disable compile-time warnings you need to rewrite the code like this:
 
      {
          BEGIN { $^W = 0 }
-	 my $a =+ 2;
-	 my $b; chop $b;
+	 my $x =+ 2;
+	 my $y; chop $y;
      }
+
+And note that unlike the first example, this will permanently set C<$^W>
+since it cannot both run during compile-time and be localized to a
+run-time block.
 
 The other big problem with C<$^W> is the way you can inadvertently
 change the warning setting in unexpected places in your code.  For example,
@@ -1015,7 +1024,7 @@ the first will not.
 
     sub doit
     {
-        my $b; chop $b;
+        my $y; chop $y;
     }
 
     doit();
@@ -1041,7 +1050,7 @@ warnings are (or aren't) produced:
 X<-w>
 
 This is  the existing flag.  If the lexical warnings pragma is B<not>
-used in any of you code, or any of the modules that you use, this flag
+used in any of your code, or any of the modules that you use, this flag
 will enable warnings everywhere.  See L</Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
@@ -1383,12 +1392,12 @@ C<Derived>.
     use Original;
     use Derived;
     use warnings 'Derived';
-    my $a = Original->new();
-    $a->doit(1);
-    my $b = Derived->new();
-    $a->doit(1);
+    my $x = Original->new();
+    $x->doit(1);
+    my $y = Derived->new();
+    $x->doit(1);
 
-When this code is run only the C<Derived> object, C<$b>, will generate
+When this code is run only the C<Derived> object, C<$y>, will generate
 a warning.
 
     Odd numbers are unsafe at main.pl line 7

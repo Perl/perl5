@@ -44,14 +44,13 @@ if (opendir(D, ".")) {
    @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
-{
-    local $@;
-    my $expect =
-        qr/File::Glob::glob\(\) was removed in perl 5\.30\. Use File::Glob::bsd_glob\(\) instead/;
-    eval { File::Glob::glob("*", 0); };
-    like $@, $expect,
-        "Got expected error message for removal of File::Glob::glob()";
-}
+
+is(
+    File::Glob->can('glob'),
+    undef,
+    'Did not find glob() function in File::Glob',
+);
+
 chdir '..' or die "chdir .. $!";
 
 # look up the user's home directory
@@ -183,8 +182,8 @@ is_deeply(\@a, ['TEST', 'a', 'b'], "Got list of 3 elements, including 'TEST'");
 }
 
 # GLOB_ALPHASORT (default) should sort alphabetically regardless of case
-mkdir "pteerslo", 0777;
-chdir "pteerslo";
+mkdir "pteerslo", 0777 or die "mkdir 'pteerslo', 0777:  $!";
+chdir "pteerslo" or die "chdir 'pteerslo' $!";
 
 my @f_names = qw(Ax.pl Bx.pl Cx.pl aY.pl bY.pl cY.pl);
 my @f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
@@ -197,8 +196,8 @@ if ($^O eq 'VMS') { # VMS is happily caseignorant
 }
 
 for (@f_names) {
-    open T, '>', $_;
-    close T;
+    open T, '>', $_ or die "Couldn't write to '$_': $!";
+    close T or die "Couldn't close '$_': $!";
 }
 
 my $pat = "*.pl";

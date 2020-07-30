@@ -422,7 +422,7 @@ Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
      * Ideally this could be replaced by a just an array of function pointers
      * to the C library functions that implement the macros this calls.
      * However, to compile, the precise function signatures are required, and
-     * these may vary from platform to to platform.  To avoid having to figure
+     * these may vary from platform to platform.  To avoid having to figure
      * out what those all are on each platform, I (khw) am using this method,
      * which adds an extra layer of function call overhead (unless the C
      * optimizer strips it away).  But we don't particularly care about
@@ -496,7 +496,6 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
      * rules, ignoring any locale.  So use the Unicode function if this class
      * requires an inversion list, and use the Unicode macro otherwise. */
 
-    dVAR;
 
     PERL_ARGS_ASSERT_ISFOO_UTF8_LC;
 
@@ -1920,7 +1919,8 @@ STMT_START {                                                                    
 
 /* Like FBC_UTF8_A, but TEST_UV is a macro which takes a UV as its input, and
  * TEST_UTF8 is a macro that for the same input code points returns identically
- * to TEST_UV, but takes a pointer to a UTF-8 encoded string instead */
+ * to TEST_UV, but takes a pointer to a UTF-8 encoded string instead (and an
+ * end pointer as well) */
 #define FBC_UTF8(TEST_UV, TEST_UTF8, IF_SUCCESS, IF_FAIL)                      \
     if (s == reginfo->strbeg) {                                                \
         tmp = '\n';                                                            \
@@ -2098,7 +2098,6 @@ STATIC char *
 S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, 
     const char *strend, regmatch_info *reginfo)
 {
-    dVAR;
 
     /* TRUE if x+ need not match at just the 1st pos of run of x's */
     const I32 doevery = (prog->intflags & PREGf_SKIP) == 0;
@@ -4273,7 +4272,6 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
      * to/from code points */
     bool utf8_has_been_setup = FALSE;
 
-    dVAR;
 
     U8 *pat = (U8*)STRING(text_node);
     U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
@@ -4606,7 +4604,6 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
 STATIC GCB_enum
 S_backup_one_GCB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 {
-    dVAR;
     GCB_enum gcb;
 
     PERL_ARGS_ASSERT_BACKUP_ONE_GCB;
@@ -4884,7 +4881,6 @@ S_isLB(pTHX_ LB_enum before,
 STATIC LB_enum
 S_advance_one_LB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
 {
-    dVAR;
 
     LB_enum lb;
 
@@ -4915,7 +4911,6 @@ S_advance_one_LB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_ta
 STATIC LB_enum
 S_backup_one_LB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 {
-    dVAR;
     LB_enum lb;
 
     PERL_ARGS_ASSERT_BACKUP_ONE_LB;
@@ -5152,7 +5147,6 @@ S_isSB(pTHX_ SB_enum before,
 STATIC SB_enum
 S_advance_one_SB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
 {
-    dVAR;
     SB_enum sb;
 
     PERL_ARGS_ASSERT_ADVANCE_ONE_SB;
@@ -5186,7 +5180,6 @@ S_advance_one_SB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_ta
 STATIC SB_enum
 S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 {
-    dVAR;
     SB_enum sb;
 
     PERL_ARGS_ASSERT_BACKUP_ONE_SB;
@@ -5423,7 +5416,6 @@ S_advance_one_WB(pTHX_ U8 ** curpos,
                        const bool utf8_target,
                        const bool skip_Extend_Format)
 {
-    dVAR;
     WB_enum wb;
 
     PERL_ARGS_ASSERT_ADVANCE_ONE_WB;
@@ -5461,7 +5453,6 @@ S_advance_one_WB(pTHX_ U8 ** curpos,
 STATIC WB_enum
 S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 {
-    dVAR;
     WB_enum wb;
 
     PERL_ARGS_ASSERT_BACKUP_ONE_WB;
@@ -5650,7 +5641,7 @@ the subpattern to be matched possibly multiple times, while B is the entire
 rest of the pattern. Variable and state names reflect this convention.
 
 The states in the main switch are the union of ops and failure/success of
-substates associated with with that op.  For example, IFMATCH is the op
+substates associated with that op.  For example, IFMATCH is the op
 that does lookahead assertions /(?=A)B/ and so the IFMATCH state means
 'execute IFMATCH'; while IFMATCH_A is a state saying that we have just
 successfully matched A and IFMATCH_A_fail is a state saying that we have
@@ -5760,7 +5751,6 @@ bounds of our window into the string.
 STATIC SSize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 {
-    dVAR;
     const bool utf8_target = reginfo->is_utf8_target;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
     REGEXP *rex_sv = reginfo->prog;
@@ -9212,8 +9202,10 @@ NULL
 	/* push a new regex state, then continue at scan  */
 	{
 	    regmatch_state *newst;
+            DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-	    DEBUG_STACK_r({
+            DEBUG_r( /* DEBUG_STACK_r */
+              if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STACK)) {
 	        regmatch_state *cur = st;
 	        regmatch_state *curyes = yes_state;
 	        U32 i;
@@ -9232,9 +9224,9 @@ NULL
                     if (curyes == cur)
 	                curyes = cur->u.yes.prev_yes_state;
                 }
-            } else 
+            } else {
                 DEBUG_STATE_pp("push")
-            );
+            });
 	    depth++;
 	    st->locinput = locinput;
 	    st->loceol = loceol;
@@ -9420,7 +9412,6 @@ STATIC I32
 S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             char * loceol, regmatch_info *const reginfo, I32 max _pDEPTH)
 {
-    dVAR;
     char *scan;     /* Pointer to current position in target string */
     I32 c;
     char *this_eol = loceol;   /* potentially adjusted version. */
@@ -10113,7 +10104,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 STATIC bool
 S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const p, const U8* const p_end, const bool utf8_target)
 {
-    dVAR;
     const char flags = (inRANGE(OP(n), ANYOFH, ANYOFHs))
                         ? 0
                         : ANYOF_FLAGS(n);
@@ -10156,7 +10146,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 	else if (flags & ANYOF_LOCALE_FLAGS) {
 	    if (  (flags & ANYOFL_FOLD)
-                && c < sizeof(PL_fold_locale)
+                && c < 256
 		&& ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
             {
                 match = TRUE;
@@ -10244,8 +10234,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                          && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
-	    SV * const definition = _get_regclass_nonbitmap_data(prog, n, TRUE,
-                                                   0, &only_utf8_locale, NULL);
+	    SV * const definition =
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+                get_regclass_nonbitmap_data(prog, n, TRUE, 0,
+                                            &only_utf8_locale, NULL);
+#else
+                get_re_gclass_nonbitmap_data(prog, n, TRUE, 0,
+                                             &only_utf8_locale, NULL);
+#endif
 	    if (definition) {
                 U8 utf8_buffer[2];
 		U8 * utf8_p;
@@ -10652,7 +10648,6 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
      * so code using it would then break), and there has to be a GCB break
      * before and after the character. */
 
-    dVAR;
 
     GCB_enum cp_gcb_val, prev_cp_gcb_val, next_cp_gcb_val;
     const U8 * prev_cp_start;
@@ -10774,7 +10769,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
      * characters for at least one language in the Unicode Common Locale Data
      * Repository [CLDR]. */
 
-    dVAR;
 
     /* Things that match /\d/u */
     SV * decimals_invlist = PL_XPosix_ptrs[_CC_DIGIT];

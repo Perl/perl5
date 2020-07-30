@@ -165,7 +165,6 @@ extern __declspec(thread) void *PL_current_context;
 
 //Check the following, will be used in Thread extension - CHKSGP
 #define THREAD_RET_TYPE	unsigned __stdcall
-#define THREAD_RET_CAST(p)	((unsigned)(p))
 
 #define INIT_THREADS		NOOP
 

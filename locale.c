@@ -60,7 +60,7 @@
 /* If the environment says to, we can output debugging information during
  * initialization.  This is done before option parsing, and before any thread
  * creation, so can be a file-level static */
-#if ! defined(DEBUGGING) || defined(PERL_GLOBAL_STRUCT)
+#if ! defined(DEBUGGING)
 #  define debug_initialization 0
 #  define DEBUG_INITIALIZATION_set(v)
 #else
@@ -200,6 +200,12 @@ const int categories[] = {
 #    ifdef USE_LOCALE_TELEPHONE
                              LC_TELEPHONE,
 #    endif
+#    ifdef USE_LOCALE_SYNTAX
+                             LC_SYNTAX,
+#    endif
+#    ifdef USE_LOCALE_TOD
+                             LC_TOD,
+#    endif
 #    ifdef LC_ALL
                              LC_ALL,
 #    endif
@@ -244,6 +250,12 @@ const char * const category_names[] = {
 #    endif
 #    ifdef USE_LOCALE_TELEPHONE
                                  "LC_TELEPHONE",
+#    endif
+#    ifdef USE_LOCALE_SYNTAX
+                                 "LC_SYNTAX",
+#    endif
+#    ifdef USE_LOCALE_TOD
+                                 "LC_TOD",
 #    endif
 #    ifdef LC_ALL
                                  "LC_ALL",
@@ -384,8 +396,20 @@ S_category_name(const int category)
 #  else
 #    define _DUMMY_TELEPHONE            _DUMMY_PAPER
 #  endif
+#  ifdef USE_LOCALE_SYNTAX
+#    define LC_SYNTAX_INDEX             _DUMMY_TELEPHONE + 1
+#    define _DUMMY_SYNTAX               LC_SYNTAX_INDEX
+#  else
+#    define _DUMMY_SYNTAX               _DUMMY_TELEPHONE
+#  endif
+#  ifdef USE_LOCALE_TOD
+#    define LC_TOD_INDEX                _DUMMY_SYNTAX + 1
+#    define _DUMMY_TOD                  LC_TOD_INDEX
+#  else
+#    define _DUMMY_TOD                  _DUMMY_SYNTAX
+#  endif
 #  ifdef LC_ALL
-#    define LC_ALL_INDEX                _DUMMY_TELEPHONE + 1
+#    define LC_ALL_INDEX                _DUMMY_TOD + 1
 #  endif
 #endif /* ifdef USE_LOCALE */
 
@@ -467,6 +491,12 @@ const int category_masks[] = {
 #  endif
 #  ifdef USE_LOCALE_TELEPHONE
                                 LC_TELEPHONE_MASK,
+#  endif
+#  ifdef USE_LOCALE_SYNTAX
+                                LC_SYNTAX_MASK,
+#  endif
+#  ifdef USE_LOCALE_TOD
+                                LC_TOD_MASK,
 #  endif
                                 /* LC_ALL can't be turned off by a Configure
                                  * option, and in Posix 2008, should always be
@@ -791,16 +821,6 @@ S_emulate_setlocale(const int category,
             if (! default_name || strEQ(default_name, "")) {
                 default_name = "C";
             }
-            else if (PL_scopestack_ix != 0) {
-                /* To minimize other threads messing with the environment,
-                 * we copy the variable, making it a temporary.  But this
-                 * doesn't work upon program initialization before any
-                 * scopes are created, and at this time, there's nothing
-                 * else going on that would interfere.  So skip the copy
-                 * in that case */
-                default_name = savepv(default_name);
-                SAVEFREEPV(default_name);
-            }
 
             if (category != LC_ALL) {
                 const char * const name = PerlEnv_getenv(category_names[index]);
@@ -835,22 +855,19 @@ S_emulate_setlocale(const int category,
 
                 for (i = 0; i < LC_ALL_INDEX; i++) {
                     const char * const env_override
-                                    = savepv(PerlEnv_getenv(category_names[i]));
+                                            = PerlEnv_getenv(category_names[i]);
                     const char * this_locale = (   env_override
                                                 && strNE(env_override, ""))
                                                ? env_override
                                                : default_name;
                     if (! emulate_setlocale(categories[i], this_locale, i, TRUE))
                     {
-                        Safefree(env_override);
                         return NULL;
                     }
 
                     if (strNE(this_locale, default_name)) {
                         did_override = TRUE;
                     }
-
-                    Safefree(env_override);
                 }
 
                 /* If all the categories are the same, we can set LC_ALL to
@@ -1571,7 +1588,6 @@ S_new_ctype(pTHX_ const char *newctype)
      * this function should be called directly only from this file and from
      * POSIX::setlocale() */
 
-    dVAR;
     unsigned int i;
 
     /* Don't check for problems if we are suppressing the warnings */
@@ -3299,7 +3315,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * values for our db, instead of trying to change them.
      * */
 
-    dVAR;
 
     int ok = 1;
 
@@ -3310,7 +3325,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #else  /* USE_LOCALE */
 #  ifdef __GLIBC__
 
-    const char * const language   = savepv(PerlEnv_getenv("LANGUAGE"));
+    const char * const language = PerlEnv_getenv("LANGUAGE");
 
 #  endif
 
@@ -3320,8 +3335,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                         : "";
     const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
-    const char * const lc_all     = savepv(PerlEnv_getenv("LC_ALL"));
-    const char * const lang       = savepv(PerlEnv_getenv("LANG"));
+    const char * const lc_all     = PerlEnv_getenv("LC_ALL");
+    const char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
     unsigned int i;
 
@@ -3449,6 +3464,20 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     assert(strEQ(category_names[LC_TELEPHONE_INDEX], "LC_TELEPHONE"));
 #      ifdef USE_POSIX_2008_LOCALE
     assert(category_masks[LC_TELEPHONE_INDEX] == LC_TELEPHONE_MASK);
+#      endif
+#    endif
+#    ifdef USE_LOCALE_SYNTAX
+    assert(categories[LC_SYNTAX_INDEX] == LC_SYNTAX);
+    assert(strEQ(category_names[LC_SYNTAX_INDEX], "LC_SYNTAX"));
+#      ifdef USE_POSIX_2008_LOCALE
+    assert(category_masks[LC_SYNTAX_INDEX] == LC_SYNTAX_MASK);
+#      endif
+#    endif
+#    ifdef USE_LOCALE_TOD
+    assert(categories[LC_TOD_INDEX] == LC_TOD);
+    assert(strEQ(category_names[LC_TOD_INDEX], "LC_TOD"));
+#      ifdef USE_POSIX_2008_LOCALE
+    assert(category_masks[LC_TOD_INDEX] == LC_TOD_MASK);
 #      endif
 #    endif
 #    ifdef LC_ALL
@@ -3909,15 +3938,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     }
 
 #  endif
-#  ifdef __GLIBC__
-
-    Safefree(language);
-
-#  endif
-
-    Safefree(lc_all);
-    Safefree(lang);
-
 #endif /* USE_LOCALE */
 #ifdef DEBUGGING
 
@@ -4570,7 +4590,7 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category, const int 
         Safefree(restore_to_locale);
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
-                            category_name(switch_category), restore_to_locale));
+                            category_name(switch_category), template_locale));
 
         return NULL;
     }
@@ -5227,7 +5247,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 bool
 Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 {
-    dVAR;
     /* Internal function which returns if we are in the scope of a pragma that
      * enables the locale category 'category'.  'compiling' should indicate if
      * this is during the compilation phase (TRUE) or not (FALSE). */
@@ -5258,7 +5277,6 @@ Perl_my_strerror(pTHX_ const int errnum)
      * to the C locale */
 
     char *errstr;
-    dVAR;
 
 #ifndef USE_LOCALE_MESSAGES
 
@@ -5620,11 +5638,7 @@ S_setlocale_debug_string(const int category,        /* category number,
      * be overwritten by the next call, so this should be used just to
      * formulate a string to immediately print or savepv() on. */
 
-    /* initialise to a non-null value to keep it out of BSS and so keep
-     * -DPERL_GLOBAL_STRUCT_PRIVATE happy */
-    static char ret[256] = "If you can read this, thank your buggy C"
-                           " library strlcpy(), and change your hints file"
-                           " to undef it";
+    static char ret[256];
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
     my_strlcat(ret, category_name(category), sizeof(ret));
@@ -5699,7 +5713,6 @@ Perl_thread_locale_term()
 #  ifndef WIN32
 
     {   /* Free up */
-        dVAR;
         locale_t cur_obj = uselocale(LC_GLOBAL_LOCALE);
         if (cur_obj != LC_GLOBAL_LOCALE && cur_obj != PL_C_locale_obj) {
             freelocale(cur_obj);

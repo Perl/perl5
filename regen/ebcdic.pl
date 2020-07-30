@@ -55,7 +55,11 @@ sub output_table_start($$$;$) {
     my ($out_fh, $TYPE, $name, $size) = @_;
 
     $size = "" unless defined $size;
-    my $declaration = "EXTCONST $TYPE $name\[$size\]";
+
+    # Anything locale related will be written on
+    my $const = ($name !~ /locale/i) ? 'CONST' : "";
+
+    my $declaration = "EXT$const $TYPE $name\[$size\]";
     print $out_fh <<EOF;
 #  ifndef DOINIT
     $declaration;
@@ -71,6 +75,8 @@ sub output_table_end($) {
 sub output_table ($$;$) {
     my $table_ref = shift;
     my $name = shift;
+
+    my $size = @$table_ref;
 
     # 0 => print in decimal
     # 1 => print in hex (translates code point to code point)
@@ -141,7 +147,7 @@ EOF
     my $TYPE = 'U8';
     $TYPE = 'U16' if grep { $_ > 255 } @$table_ref;
 
-    output_table_start $out_fh, $TYPE, $name;
+    output_table_start $out_fh, $TYPE, $name, $size;
 
     # First the headers for the columns
     print $out_fh get_column_headers($row_hdr_length, $field_width);
@@ -378,6 +384,9 @@ END
  * is A-Z; all other code points map to themselves */
 END
         output_table(\@ascii_fold, "PL_fold");
+
+        # This table is also the correct folding for the default C locale
+        output_table(\@ascii_fold, "PL_fold_locale");
     }
 
     {
@@ -777,56 +786,6 @@ END
             1,1,  1,  1,  1,  1,  1,  1,  1,$N3,   1,   1,   1,   1, # N7
         );
         output_table(\@C9_utf8_dfa, "PL_c9_utf8_dfa_tab", $NUM_CLASSES);
-    }
-
-    {
-        print $out_fh <<EOF;
-/* This table partitions all the code points of the platform into ranges which
- * have the property that all the code points in each range have the same
- * number of bytes in their UTF-EBCDIC representations, and the adjacent
- * ranges have a different number of bytes.
- *
- * Each number in the table begins such a range, which extends up to just
- * before the following table entry, except the final entry is understood to
- * extend to the platform's infinity
- */
-EOF
-        # The lengths of the characters between 0 and 255 are either 1 or 2,
-        # with those whose ASCII platform equivalents below 160 being 1, and
-        # the rest being 2.
-        my @list;
-        push @list, 0;
-        my $pushed_range_is_length_1 = 1;
-
-        for my $i (1 .. 0xFF) {
-            my $this_code_point_is_length_1 = ($e2a[$i] < 160);
-            if ($pushed_range_is_length_1 != $this_code_point_is_length_1) {
-                push @list, $i;
-                $pushed_range_is_length_1 = $this_code_point_is_length_1;
-            }
-        }
-
-        # Starting at 256, the length is 2.
-        push @list, 0x100 if $pushed_range_is_length_1;
-
-        # These are based on the fundamental properties of UTF-EBCDIC.  Each
-        # continuation byte has 5 bits of information.  Comments in utf8.h
-        # explain the rest.
-        my $UTF_ACCUMULATION_SHIFT = 5;
-        push @list, (32 * (1 << (    $UTF_ACCUMULATION_SHIFT)));
-        push @list, (16 * (1 << (2 * $UTF_ACCUMULATION_SHIFT)));
-        push @list, ( 8 * (1 << (3 * $UTF_ACCUMULATION_SHIFT)));
-        push @list, ( 4 * (1 << (4 * $UTF_ACCUMULATION_SHIFT)));
-        push @list, ( 2 * (1 << (5 * $UTF_ACCUMULATION_SHIFT)));
-        push @list, (     (1 << (6 * $UTF_ACCUMULATION_SHIFT)));
-
-        output_table_start($out_fh, "UV", "PL_partition_by_byte_length", scalar @list);
-        print $out_fh "\t";
-
-        print $out_fh join ",\n\t", map { sprintf "0x%02x", $_ } @list;
-        print $out_fh "\n";
-
-        output_table_end($out_fh);
     }
 
     print $out_fh get_conditional_compile_line_end();

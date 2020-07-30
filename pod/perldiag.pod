@@ -2235,8 +2235,8 @@ variable and glob that.
 
 =item exec? I'm not *that* kind of operating system
 
-(F) The C<exec> function is not implemented on some systems, e.g., Symbian
-OS.  See L<perlport>.
+(F) The C<exec> function is not implemented on some systems, e.g.
+Catamount. See L<perlport>.
 
 =item %sExecution of %s aborted due to compilation errors.
 
@@ -3098,6 +3098,12 @@ problem was discovered.  See L<perlre>.
 (F) The range specified in the tr/// or y/// operator had a minimum
 character greater than the maximum character.  See L<perlop>.
 
+=item Invalid reference to group in regex; marked by S<<-- HERE> in m/%s/
+
+(F) The capture group you specified can't possibly exist because the
+number you used is not within the legal range of possible values for
+this machine.
+
 =item Invalid separator character %s in attribute list
 
 (F) Something other than a colon or whitespace was seen between the
@@ -3150,6 +3156,20 @@ an arbitrary reference was blessed into the "version" class.
 
 =item In '(*VERB...)', the '(' and '*' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
+
+=item Inverting a character class which contains a multi-character
+sequence is illegal in regex; marked by <-- HERE in m/%s/
+
+(F) You wrote something like
+
+ qr/\P{name=KATAKANA LETTER AINU P}/
+ qr/[^\p{name=KATAKANA LETTER AINU P}]/
+
+This name actually evaluates to a sequence of two Katakana characters,
+not just a single one, and it is illegal to try to take the complement
+of a sequence.  (Mathematically it would mean any sequence of characters
+from 0 to infinity in length that weren't these two in a row, and that
+is likely not of any real use.)
 
 (F) The two-character sequence C<"(*"> in this context in a regular
 expression pattern should be an indivisible token, with nothing
@@ -6444,127 +6464,6 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
-=item Unescaped left brace in regex is passed through in regex; marked by S<<-- HERE> in m/%s/
-
-(W regexp)  The simple rule to remember, if you want to
-match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
-regular expression pattern, is to escape each literal instance of it in
-some way.  Generally easiest is to precede it with a backslash, like
-C<"\{"> or enclose it in square brackets (C<"[{]">).  If the pattern
-delimiters are also braces, any matching right brace (C<"}">) should
-also be escaped to avoid confusing the parser, for example,
-
- qr{abc\{def\}ghi}
-
-Forcing literal C<"{"> characters to be escaped will enable the Perl
-language to be extended in various ways in future releases.  To avoid
-needlessly breaking existing code, the restriction is is not enforced in
-contexts where there are unlikely to ever be extensions that could
-conflict with the use there of C<"{"> as a literal.  Those that are
-not potentially ambiguous do not warn; those that are do raise a
-non-deprecation warning.
-
-In this release of Perl, some literal uses of C<"{"> are fatal, and some
-still just deprecated.  This is because of an oversight:  some uses of a
-literal C<"{"> that should have raised a deprecation warning starting in
-v5.20 did not warn until v5.26.  By making the already-warned uses fatal
-now, some of the planned extensions can be made to the language sooner.
-The cases which are still allowed will be fatal in Perl 5.32.
-
-The contexts where no warnings or errors are raised are:
-
-=over 4
-
-=item *
-
-as the first character in a pattern, or following C<"^"> indicating to
-anchor the match to the beginning of a line.
-
-=item *
-
-as the first character following a C<"|"> indicating alternation.
-
-=item *
-
-as the first character in a parenthesized grouping like
-
- /foo({bar)/
- /foo(?:{bar)/
-
-=item *
-
-as the first character following a quantifier
-
- /\s*{/
-
-=back
-
-=for comment
-The text of the message above is duplicated below to allow splain (and
-'use diagnostics') to work.  Since one is deprecated, and one not, khw
-thinks they can't be combined as one message.
-
-=item Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.32), passed through in regex; marked by S<<-- HERE> in m/%s/
-
-(D deprecated, regexp)  The simple rule to remember, if you want to
-match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
-regular expression pattern, is to escape each literal instance of it in
-some way.  Generally easiest is to precede it with a backslash, like
-C<"\{"> or enclose it in square brackets (C<"[{]">).  If the pattern
-delimiters are also braces, any matching right brace (C<"}">) should
-also be escaped to avoid confusing the parser, for example,
-
- qr{abc\{def\}ghi}
-
-Forcing literal C<"{"> characters to be escaped will enable the Perl
-language to be extended in various ways in future releases.  To avoid
-needlessly breaking existing code, the restriction is is not enforced in
-contexts where there are unlikely to ever be extensions that could
-conflict with the use there of C<"{"> as a literal.  Those that are
-not potentially ambiguous do not warn; those that are do raise a
-non-deprecation warning.
-
-In this release of Perl, some literal uses of C<"{"> are fatal, and some
-still just deprecated.  This is because of an oversight:  some uses of a
-literal C<"{"> that should have raised a deprecation warning starting in
-v5.20 did not warn until v5.26.  By making the already-warned uses fatal
-now, some of the planned extensions can be made to the language sooner.
-The cases which are still allowed will be fatal in Perl 5.32.
-
-The contexts where no warnings or errors are raised are:
-
-=over 4
-
-=item *
-
-as the first character in a pattern, or following C<"^"> indicating to
-anchor the match to the beginning of a line.
-
-=item *
-
-as the first character following a C<"|"> indicating alternation.
-
-=item *
-
-as the first character in a parenthesized grouping like
-
- /foo({bar)/
- /foo(?:{bar)/
-
-=item *
-
-as the first character following a quantifier
-
- /\s*{/
-
-=back
-
-=for comment
-The text of the message above is duplicated below to allow splain (and
-'use diagnostics') to work.  Since one is fatal, and one not, they can't
-be combined as one message.  Perhaps perldiag could be enhanced to
-handle this case.
-
 =item Unescaped left brace in regex is illegal here in regex;
 marked by S<<-- HERE> in m/%s/
 
@@ -6578,20 +6477,68 @@ also be escaped to avoid confusing the parser, for example,
 
  qr{abc\{def\}ghi}
 
-Forcing literal C<"{"> characters to be escaped will enable the Perl
+Forcing literal C<"{"> characters to be escaped enables the Perl
 language to be extended in various ways in future releases.  To avoid
-needlessly breaking existing code, the restriction is is not enforced in
+needlessly breaking existing code, the restriction is not enforced in
 contexts where there are unlikely to ever be extensions that could
 conflict with the use there of C<"{"> as a literal.  Those that are
 not potentially ambiguous do not warn; those that are do raise a
 non-deprecation warning.
 
-In this release of Perl, some literal uses of C<"{"> are fatal, and some
-still just deprecated.  This is because of an oversight:  some uses of a
-literal C<"{"> that should have raised a deprecation warning starting in
-v5.20 did not warn until v5.26.  By making the already-warned uses fatal
-now, some of the planned extensions can be made to the language sooner.
-The cases which are still allowed will be fatal in Perl 5.32.
+The contexts where no warnings or errors are raised are:
+
+=over 4
+
+=item *
+
+as the first character in a pattern, or following C<"^"> indicating to
+anchor the match to the beginning of a line.
+
+=item *
+
+as the first character following a C<"|"> indicating alternation.
+
+=item *
+
+as the first character in a parenthesized grouping like
+
+ /foo({bar)/
+ /foo(?:{bar)/
+
+=item *
+
+as the first character following a quantifier
+
+ /\s*{/
+
+=back
+
+=for comment
+The text of the message above is mostly duplicated below (with changes)
+to allow splain (and 'use diagnostics') to work.  Since one is fatal,
+and one not, they can't be combined as one message.  Perhaps perldiag
+could be enhanced to handle this case.
+
+=item Unescaped left brace in regex is passed through in regex; marked by S<<-- HERE> in m/%s/
+
+(W regexp)  The simple rule to remember, if you want to
+match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
+regular expression pattern, is to escape each literal instance of it in
+some way.  Generally easiest is to precede it with a backslash, like
+C<"\{"> or enclose it in square brackets (C<"[{]">).  If the pattern
+delimiters are also braces, any matching right brace (C<"}">) should
+also be escaped to avoid confusing the parser, for example,
+
+ qr{abc\{def\}ghi}
+
+Forcing literal C<"{"> characters to be escaped enables the Perl
+language to be extended in various ways in future releases.  To avoid
+needlessly breaking existing code, the restriction is not enforced in
+contexts where there are unlikely to ever be extensions that could
+conflict with the use there of C<"{"> as a literal.  Those that are
+not potentially ambiguous do not warn; those that are raise this
+warning.  This makes sure that an inadvertent typo doesn't silently
+cause the pattern to compile to something unintended.
 
 The contexts where no warnings or errors are raised are:
 
@@ -6735,6 +6682,15 @@ expression pattern (all within the braces of the enclosing C<\p{...}>.
 The closing delimtter to match the opening one was not found.  If the
 opening one is escaped by preceding it with a backslash, the closing one
 must also be so escaped.
+
+=item Unicode string properties are not implemented in (?[...]) in
+regex; marked by <-- HERE in m/%s/
+
+(F) A Unicode string property is one which expands to a sequence of
+multiple characters.  An example is C<\p{name=KATAKANA LETTER AINU P}>,
+which is comprised of the sequence C<\N{KATAKANA LETTER SMALL H}>
+followed by C<\N{COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK}>.
+Extended character classes, C<(?[...])> currently cannot handle these.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
@@ -7458,6 +7414,22 @@ the whole thing correctly, except when the class is inverted
 a range.  For these, what should happen isn't clear at all.  In
 these circumstances, Perl discards all but the first character
 of the returned sequence, which is not likely what you want.
+
+=item Using just the single character results returned by \p{} in
+(?[...]) in regex; marked by S<<-- HERE> in m/%s/
+
+(W regexp) Extended character classes currently cannot handle operands
+that evaluate to more than one character.  These are removed from the
+results of the expansion of the C<\p{}>.
+
+This situation can happen, for example, in
+
+ (?[ \p{name=/KATAKANA/} ])
+
+"KATAKANA LETTER AINU P" is a legal Unicode name (technically a "named
+sequence"), but it is actually two characters.  The above expression
+with match only the Unicode names containing KATAKANA that represent
+single characters.
 
 =item Using /u for '%s' instead of /%s in regex; marked by S<<-- HERE> in m/%s/
 

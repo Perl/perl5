@@ -31,7 +31,6 @@
 
 #ifndef U8TO16_LE
   #define _shifted_octet(type,ptr,idx,shift) (((type)(((U8*)(ptr))[(idx)]))<<(shift))
-  #if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
     #ifdef USE_UNALIGNED_PTR_DEREF
         #define U8TO16_LE(ptr)   (*((const U16*)(ptr)))
         #define U8TO32_LE(ptr)   (*((const U32*)(ptr)))
@@ -54,24 +53,6 @@
                                   _shifted_octet(U64,(ptr),6,48)|\
                                   _shifted_octet(U64,(ptr),7,56))
     #endif
-  #elif (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
-        #define U8TO16_LE(ptr)   (_shifted_octet(U16,(ptr),1, 0)|\
-                                  _shifted_octet(U16,(ptr),0, 8))
-
-        #define U8TO32_LE(ptr)   (_shifted_octet(U32,(ptr),3, 0)|\
-                                  _shifted_octet(U32,(ptr),2, 8)|\
-                                  _shifted_octet(U32,(ptr),1,16)|\
-                                  _shifted_octet(U32,(ptr),0,24))
-
-        #define U8TO64_LE(ptr)   (_shifted_octet(U64,(ptr),7, 0)|\
-                                  _shifted_octet(U64,(ptr),6, 8)|\
-                                  _shifted_octet(U64,(ptr),5,16)|\
-                                  _shifted_octet(U64,(ptr),4,24)|\
-                                  _shifted_octet(U64,(ptr),3,32)|\
-                                  _shifted_octet(U64,(ptr),2,40)|\
-                                  _shifted_octet(U64,(ptr),1,48)|\
-                                  _shifted_octet(U64,(ptr),0,56))
-  #endif
 #endif
 
 /* Find best way to ROTL32/ROTL64 */

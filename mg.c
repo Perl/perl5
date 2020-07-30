@@ -1667,7 +1667,6 @@ Perl_despatch_signals(pTHX)
 int
 Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR;
     I32 i;
     SV** svp = NULL;
     /* Need to be careful with SvREFCNT_dec(), because that can have side
@@ -2722,7 +2721,6 @@ S_set_dollarzero(pTHX_ SV *sv)
     PERL_TSA_REQUIRES(PL_dollarzero_mutex)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     const char *s;
     STRLEN len;
@@ -2801,7 +2799,6 @@ int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     I32 paren;
     const REGEXP * rx;
@@ -2966,9 +2963,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 		if (!SvPOK(sv)) {
-                    if (!specialWARN(PL_compiling.cop_warnings))
-                        PerlMemShared_free(PL_compiling.cop_warnings);
-	            PL_compiling.cop_warnings = pWARN_STD;
+            free_and_set_cop_warnings(&PL_compiling, pWARN_STD);
 		    break;
 		}
 		{
@@ -2980,26 +2975,22 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 			not_all |= ptr[i] ^ 0x55;
 		    }
 		    if (!not_none) {
-		        if (!specialWARN(PL_compiling.cop_warnings))
-			    PerlMemShared_free(PL_compiling.cop_warnings);
-			PL_compiling.cop_warnings = pWARN_NONE;
+                free_and_set_cop_warnings(&PL_compiling, pWARN_NONE);
 		    } else if (len >= WARNsize && !not_all) {
-		        if (!specialWARN(PL_compiling.cop_warnings))
-			    PerlMemShared_free(PL_compiling.cop_warnings);
-	                PL_compiling.cop_warnings = pWARN_ALL;
-	                PL_dowarn |= G_WARN_ONCE ;
-	            }
-                    else {
-			STRLEN len;
-			const char *const p = SvPV_const(sv, len);
+                free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
+	            PL_dowarn |= G_WARN_ONCE ;
+	        }
+            else {
+			     STRLEN len;
+			     const char *const p = SvPV_const(sv, len);
 
-			PL_compiling.cop_warnings
-			    = Perl_new_warnings_bitfield(aTHX_ PL_compiling.cop_warnings,
+			     PL_compiling.cop_warnings
+			         = Perl_new_warnings_bitfield(aTHX_ PL_compiling.cop_warnings,
 							 p, len);
 
-	                if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
+	             if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
 	                    PL_dowarn |= G_WARN_ONCE ;
-	            }
+	       }
 
 		}
 	    }

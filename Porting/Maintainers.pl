@@ -391,7 +391,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.02.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.06.tar.gz',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -485,6 +485,14 @@ use File::Glob qw(:case);
         ],
     },
 
+	'ExtUtils::PL2Bat' => {
+		'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.002.tar.gz',
+		'FILES'        => q[cpan/ExtUtils-PL2Bat],
+		'EXCLUDED'     => [
+			't/00-compile.t',
+		],
+	},
+
     'ExtUtils::Manifest' => {
         'DISTRIBUTION' => 'ETHER/ExtUtils-Manifest-1.72.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Manifest],
@@ -505,7 +513,7 @@ use File::Glob qw(:case);
     },
 
     'File::Path' => {
-        'DISTRIBUTION' => 'JKEENAN/File-Path-2.16.tar.gz',
+        'DISTRIBUTION' => 'JKEENAN/File-Path-2.17.tar.gz',
         'FILES'        => q[cpan/File-Path],
         'EXCLUDED'     => [
             qw(t/Path-Class.t),
@@ -660,7 +668,7 @@ use File::Glob qw(:case);
     },
 
     'IPC::SysV' => {
-        'DISTRIBUTION' => 'MHX/IPC-SysV-2.07.tar.gz',
+        'DISTRIBUTION' => 'MHX/IPC-SysV-2.08.tar.gz',
         'FILES'        => q[cpan/IPC-SysV],
         'EXCLUDED'     => [
             qw( const-c.inc
@@ -670,7 +678,7 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.04.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.05.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
     },
 
@@ -800,7 +808,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20200220.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20200428.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -877,7 +885,7 @@ use File::Glob qw(:case);
     },
 
     'perlfaq' => {
-        'DISTRIBUTION' => 'ETHER/perlfaq-5.20200125.tar.gz',
+        'DISTRIBUTION' => 'ETHER/perlfaq-5.20200523.tar.gz',
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [ qr/^inc/, qr/^xt/, qr{^t/00-} ],
     },
@@ -960,7 +968,7 @@ use File::Glob qw(:case);
     },
 
     'Scalar::Util' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.53.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.55.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 
@@ -976,7 +984,7 @@ use File::Glob qw(:case);
     },
 
     'Socket' => {
-        'DISTRIBUTION' => 'PEVANS/Socket-2.029.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.030.tar.gz',
         'FILES'        => q[cpan/Socket],
     },
 
@@ -1057,7 +1065,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302171.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302175.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -1189,7 +1197,7 @@ use File::Glob qw(:case);
     },
 
     'Time::Piece' => {
-        'DISTRIBUTION' => 'ESAYM/Time-Piece-1.33.tar.gz',
+        'DISTRIBUTION' => 'ESAYM/Time-Piece-1.3401.tar.gz',
         'FILES'        => q[cpan/Time-Piece],
         'EXCLUDED'     => [ qw[reverse_deps.txt] ],
     },

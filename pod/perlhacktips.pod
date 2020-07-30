@@ -43,7 +43,7 @@ APIs, for example:
 The first one explicitly passes in the context, which is needed for
 e.g. threaded builds.  The second one does that implicitly; do not get
 them mixed.  If you are not passing in a aTHX_, you will need to do a
-dTHX (or a dVAR) as the first thing in the function.
+dTHX as the first thing in the function.
 
 See L<perlguts/"How multiple interpreters and concurrency are
 supported"> for further discussion about context.
@@ -79,12 +79,6 @@ right combination of C<const>s:
 
     static const char * const yippee[] =
         {"hi", "ho", "silver"};
-
-There is a way to completely hide any modifiable globals (they are all
-moved to heap), the compilation setting
-C<-DPERL_GLOBAL_STRUCT_PRIVATE>.  It is not normally used, but can be
-used for testing, read more about it in L<perlguts/"Background and
-PERL_IMPLICIT_CONTEXT">.
 
 =item *
 
@@ -1269,19 +1263,23 @@ To get valgrind and for more information see
 
 =head2 AddressSanitizer
 
-AddressSanitizer is a clang and gcc extension, included in clang since
-v3.1 and gcc since v4.8.  It checks illegal heap pointers, global
-pointers, stack pointers and use after free errors, and is fast enough
-that you can easily compile your debugging or optimized perl with it.
-It does not check memory leaks though.  AddressSanitizer is available
-for Linux, Mac OS X and soon on Windows.
+AddressSanitizer ("ASan") consists of a compiler instrumentation module
+and a run-time C<malloc> library. ASan is available for a variety of
+architectures, operating systems, and compilers (see project link below).
+It checks for unsafe memory usage, such as use after free and buffer 
+overflow conditions, and is fast enough that you can easily compile your
+debugging or optimized perl with it. Modern versions of ASan check for
+memory leaks by default on most platforms, otherwise (e.g. x86_64 OS X)
+this feature can be enabled via C<ASAN_OPTIONS=detect_leaks=1>.
+
 
 To build perl with AddressSanitizer, your Configure invocation should
 look like:
 
     sh Configure -des -Dcc=clang \
-       -Accflags=-faddress-sanitizer -Aldflags=-faddress-sanitizer \
-       -Alddlflags=-shared\ -faddress-sanitizer
+       -Accflags=-fsanitize=address -Aldflags=-fsanitize=address \
+       -Alddlflags=-shared\ -fsanitize=address \
+       -fsanitize-blacklist=`pwd`/asan_ignore
 
 where these arguments mean:
 
@@ -1292,20 +1290,26 @@ where these arguments mean:
 This should be replaced by the full path to your clang executable if it
 is not in your path.
 
-=item * -Accflags=-faddress-sanitizer
+=item * -Accflags=-fsanitize=address
 
 Compile perl and extensions sources with AddressSanitizer.
 
-=item * -Aldflags=-faddress-sanitizer
+=item * -Aldflags=-fsanitize=address
 
 Link the perl executable with AddressSanitizer.
 
-=item * -Alddlflags=-shared\ -faddress-sanitizer
+=item * -Alddlflags=-shared\ -fsanitize=address
 
 Link dynamic extensions with AddressSanitizer.  You must manually
 specify C<-shared> because using C<-Alddlflags=-shared> will prevent
 Configure from setting a default value for C<lddlflags>, which usually
 contains C<-shared> (at least on Linux).
+
+=item * -fsanitize-blacklist=`pwd`/asan_ignore
+
+AddressSanitizer will ignore functions listed in the C<asan_ignore>
+file. (This file should contain a short explanation of why each of
+the functions is listed.)
 
 =back
 

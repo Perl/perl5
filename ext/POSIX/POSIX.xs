@@ -422,6 +422,22 @@ static int not_here(const char *s);
 #  undef c99_trunc
 #endif
 
+/* The cc with NetBSD 8.0 and 9.0 claims to be a C11 hosted compiler,
+ * but doesn't define several functions required by C99, let alone C11.
+ * http://gnats.netbsd.org/53234
+ */
+#if defined(USE_LONG_DOUBLE) && defined(__NetBSD__) \
+  && !defined(NETBSD_HAVE_FIXED_LONG_DOUBLE_MATH)
+#  undef c99_expm1
+#  undef c99_lgamma
+#  undef c99_log1p
+#  undef c99_log2
+#  undef c99_nexttoward
+#  undef c99_remainder
+#  undef c99_remquo
+#  undef c99_tgamma
+#endif
+
 #ifndef isunordered
 #  ifdef Perl_isnan
 #    define isunordered(x, y) (Perl_isnan(x) || Perl_isnan(y))
@@ -1751,7 +1767,7 @@ allocate_struct(pTHX_ SV *rv, const STRLEN size, const char *packname) {
  * "write through" environment changes to the process environment.
  *
  * (c) Even the primary Perl interpreter won't update the CRT copy of the
- * the environment, only the Win32API copy (it calls win32_putenv()).
+ * environment, only the Win32API copy (it calls win32_putenv()).
  *
  * As with CPerlHost::Getenv() and CPerlHost::Putenv() themselves, it makes
  * sense to only update the process environment when inside the main
@@ -2975,7 +2991,6 @@ sigaction(sig, optaction, oldaction = 0)
 # interface look beautiful, which is hard.
 
 	{
-	    dVAR;
 	    POSIX__SigAction action;
 	    GV *siggv = gv_fetchpvs("SIG", GV_ADD, SVt_PVHV);
 	    struct sigaction act;
@@ -3820,14 +3835,16 @@ char *
 ctermid(s = 0)
 	char *          s = 0;
     CODE:
-#ifdef HAS_CTERMID_R
+#ifdef I_TERMIOS
+        /* On some systems L_ctermid is a #define; but not all; this code works
+         * for all cases (so far...) */
 	s = (char *) safemalloc((size_t) L_ctermid);
 #endif
 	RETVAL = ctermid(s);
     OUTPUT:
 	RETVAL
     CLEANUP:
-#ifdef HAS_CTERMID_R
+#ifdef I_TERMIOS
 	Safefree(s);
 #endif
 

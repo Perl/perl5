@@ -24,7 +24,7 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
-plan tests => 1017;  # Update this when adding/deleting tests.
+plan tests => 1022;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2250,6 +2250,37 @@ SKIP:
         my $result = eval qq{"foo" =~ /$re/};
         is($@ // '', '', "many evals did not die");
         ok($result, "regexp correctly matched");
+    }
+
+    # gh16947: test regexp corruption (GOSUB)
+    {
+        fresh_perl_is(q{
+            'xy' =~ /x(?0)|x(?|y|y)/ && print 'ok'
+        }, 'ok', {}, 'gh16947: test regexp corruption (GOSUB)');
+    }
+    # gh16947: test fix doesn't break SUSPEND
+    {
+        fresh_perl_is(q{ 'sx' =~ m{ss++}i; print 'ok' },
+                'ok', {}, "gh16947: test fix doesn't break SUSPEND");
+    }
+
+    # gh17730: should not crash
+    {
+        fresh_perl_is(q{
+            "q00" =~ m{(((*ACCEPT)0)*00)?0(?1)}; print "ok"
+        }, 'ok', {}, 'gh17730: should not crash');
+    }
+
+    # gh17743: more regexp corruption via GOSUB
+    {
+        fresh_perl_is(q{
+            "0" =~ /((0(?0)|000(?|0000|0000)(?0))|)/; print "ok"
+        }, 'ok', {}, 'gh17743: test regexp corruption (1)');
+
+        fresh_perl_is(q{
+            "000000000000" =~ /(0(())(0((?0)())|000(?|\x{ef}\x{bf}\x{bd}|\x{ef}\x{bf}\x{bd}))|)/;
+            print "ok"
+        }, 'ok', {}, 'gh17743: test regexp corruption (2)');
     }
 
 } # End of sub run_tests

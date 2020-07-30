@@ -1229,8 +1229,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/5.31/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.31/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl5/5.33/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.33/unknown"		/ **/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1283,8 +1283,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/5.31"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/5.31"		/**/
+#define PRIVLIB "/usr/local/lib/perl5/5.33"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5/5.33"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1301,8 +1301,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define SITEARCH "/usr/local/lib/perl5/5.31/unknown"		/ **/
-/*#define SITEARCH_EXP "/usr/local/lib/perl5/5.31/unknown"		/ **/
+/*#define SITEARCH "/usr/local/lib/perl5/5.33/unknown"		/ **/
+/*#define SITEARCH_EXP "/usr/local/lib/perl5/5.33/unknown"		/ **/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1324,8 +1324,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/usr/local/lib/perl5/5.31"		/**/
-#define SITELIB_EXP "/usr/local/lib/perl5/5.31"		/**/
+#define SITELIB "/usr/local/lib/perl5/5.33"		/**/
+#define SITELIB_EXP "/usr/local/lib/perl5/5.33"		/**/
 #define SITELIB_STEM "/usr/local/lib/perl5"		/**/
 
 /* PERL_VENDORARCH:
@@ -1455,6 +1455,10 @@
  */
 /* HASATTRIBUTE_WARN_UNUSED_RESULT:
  *	Can we handle GCC attribute for warning on unused results
+ */
+/* HASATTRIBUTE_ALWAYS_INLINE:
+ *	Can we handle GCC attribute for functions that should always be
+ *	inlined.
  */
 /*#define HASATTRIBUTE_DEPRECATED	/ **/
 /*#define HASATTRIBUTE_FORMAT	/ **/
@@ -1905,6 +1909,10 @@
  *	This symbol, if defined, indicates the availability of
  *	struct sockaddr_in6;
  */
+/* HAS_SOCKADDR_STORAGE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct sockaddr_storage;
+ */
 /* HAS_SIN6_SCOPE_ID:
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
@@ -1929,6 +1937,7 @@
 /*#define	HAS_SOCKETPAIR	/ **/
 /*#define	HAS_SOCKADDR_SA_LEN	/ **/
 /*#define	HAS_SOCKADDR_IN6	/ **/
+/*#define	HAS_SOCKADDR_STORAGE	/ **/
 /*#define	HAS_SIN6_SCOPE_ID	/ **/
 /*#define	HAS_IP_MREQ	/ **/
 /*#define	HAS_IP_MREQ_SOURCE	/ **/
@@ -5251,6 +5260,6 @@
 #endif
 
 /* Generated from:
- * 8762a3dfdfab48d1fe29cf7b27dfa150e1eec38b0d1f0f441d7cd9f5abef7dc8 config_h.SH
- * 31c25f95118efbf99e358f81091058e6723b4cccb8474dfbc6d06c2b7d46ff17 uconfig.sh
+ * 14796a77fb4ae3335f5e589a98445bc6e838b688194f6f112537495f0814f5d5 config_h.SH
+ * 36943454dd4cff2f1fd6a87074c461192a18b540d34c4d348707cc8cf7b8fcfc uconfig.sh
  * ex: set ro: */

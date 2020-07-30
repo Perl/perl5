@@ -118,7 +118,7 @@ package B::Op_private;
 our %bits;
 
 
-our $VERSION = "5.031010";
+our $VERSION = "5.033001";
 
 $bits{$_}{3} = 'OPpENTERSUB_AMPER' for qw(entersub rv2cv);
 $bits{$_}{6} = 'OPpENTERSUB_DB' for qw(entersub rv2cv);
@@ -284,6 +284,8 @@ $bits{chr}{0} = $bf[0];
 $bits{chroot}{0} = $bf[0];
 @{$bits{close}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{closedir}{0} = $bf[0];
+$bits{cmpchain_and}{0} = $bf[0];
+$bits{cmpchain_dup}{0} = $bf[0];
 $bits{complement}{0} = $bf[0];
 @{$bits{concat}}{6,1,0} = ('OPpCONCAT_NESTED', $bf[1], $bf[1]);
 $bits{cond_expr}{0} = $bf[0];

@@ -104,6 +104,7 @@ PERLVARI(G, mmap_page_size, IV, 0)
 
 #if defined(USE_ITHREADS)
 PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
+PERLVAR(G, env_mutex, perl_mutex)      /* Mutex for accessing ENV */
 #  if ! defined(USE_THREAD_SAFE_LOCALE) || defined(TS_W32_BROKEN_LOCALECONV)
 PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex for setlocale() changing */
 #  endif
@@ -170,19 +171,6 @@ destruction. (Use of C<PL_dirty> is discouraged since 5.14.)
 
 #if defined(USE_ITHREADS)
 PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
-#endif
-#ifdef PERL_GLOBAL_STRUCT 
-PERLVAR(G, ppaddr,	Perl_ppaddr_t *) /* or opcode.h */
-PERLVAR(G, check,	Perl_check_t *) /* or opcode.h */
-PERLVARA(G, fold_locale, 256, unsigned char) /* or perl.h */
-#endif
-
-#ifdef PERL_NEED_APPCTX
-PERLVAR(G, appctx,	void*)		/* the application context */
-#endif
-
-#if defined(HAS_TIMES) && defined(PERL_NEED_TIMESBASE)
-PERLVAR(G, timesbase,	struct tms)
 #endif
 
 /* allocate a unique index to every module that calls MY_CXT_INIT */
@@ -304,11 +292,7 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
                                               PL_user_defined_properties */
 #endif
 
-/* Everything that folds to a given character, for case insensitivity regex
- * matching */
-PERLVAR(G, utf8_foldclosures, SV *)
-
-/* these record the best way to to perform certain IO operations while
+/* these record the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
  * and the result recorded for use by subsequent calls.
  * In theory these variables aren't thread-safe, but the worst that can
@@ -325,11 +309,4 @@ PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
 PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-/* per-module array of pointers to MY_CXT_KEY constants.
- * It simulates each module having a static my_cxt_index var on builds
- * which don't allow static vars */
-PERLVARI(G, my_cxt_keys, const char **, NULL)
-PERLVARI(G, my_cxt_keys_size, int,	0)	/* size of PL_my_cxt_keys */
-#  endif
 #endif

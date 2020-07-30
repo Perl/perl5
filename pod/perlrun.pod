@@ -310,11 +310,12 @@ STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
 nor toggling.
 
 The C<io> options mean that any subsequent open() (or similar I/O
-operations) in the current file scope will have the C<:utf8> PerlIO layer
+operations) in main program scope will have the C<:utf8> PerlIO layer
 implicitly applied to them, in other words, UTF-8 is expected from any
 input stream, and UTF-8 is produced to any output stream.  This is just
-the default, with explicit layers in open() and with binmode() one can
-manipulate streams as usual.
+the default set via L<C<${^OPEN}>|perlvar/${^OPEN}>,
+with explicit layers in open() and with binmode() one can
+manipulate streams as usual.  This has no effect on code run in modules.
 
 B<-C> on its own (not followed by any number or option list), or the
 empty string C<""> for the L</PERL_UNICODE> environment variable, has the
@@ -1069,27 +1070,12 @@ variable are briefly summarized below. For more details see L<PerlIO>.
 
 =over 8
 
-=item :bytes
-X<:bytes>
-
-A pseudolayer that turns the C<:utf8> flag I<off> for the layer below;
-unlikely to be useful on its own in the global PERLIO environment variable.
-You perhaps were thinking of C<:crlf:bytes> or C<:perlio:bytes>.
-
 =item :crlf
 X<:crlf>
 
 A layer which does CRLF to C<"\n"> translation distinguishing "text" and
-"binary" files in the manner of MS-DOS and similar operating systems.
-(It currently does I<not> mimic MS-DOS as far as treating of Control-Z
-as being an end-of-file marker.)
-
-=item :mmap
-X<:mmap>
-
-A layer that implements "reading" of files by using I<mmap>(2) to
-make an entire file appear in the process's address space, and then
-using that as PerlIO's "buffer".
+"binary" files in the manner of MS-DOS and similar operating systems,
+and also provides buffering similar to C<:perlio> on these architectures.
 
 =item :perlio
 X<:perlio>
@@ -1097,24 +1083,6 @@ X<:perlio>
 This is a re-implementation of stdio-like buffering written as a
 PerlIO layer.  As such it will call whatever layer is below it for
 its operations, typically C<:unix>.
-
-=item :pop
-X<:pop>
-
-An experimental pseudolayer that removes the topmost layer.
-Use with the same care as is reserved for nitroglycerine.
-
-=item :raw
-X<:raw>
-
-A pseudolayer that manipulates other layers.  Applying the C<:raw>
-layer is equivalent to calling C<binmode($fh)>.  It makes the stream
-pass each byte as-is without translation.  In particular, both CRLF
-translation and intuiting C<:utf8> from the locale are disabled.
-
-Unlike in earlier versions of Perl, C<:raw> is I<not>
-just the inverse of C<:crlf>: other layers which would affect the
-binary nature of the stream are also removed or disabled.
 
 =item :stdio
 X<:stdio>
@@ -1130,42 +1098,31 @@ X<:unix>
 
 Low-level layer that calls C<read>, C<write>, C<lseek>, etc.
 
-=item :utf8
-X<:utf8>
-
-A pseudolayer that enables a flag in the layer below to tell Perl
-that output should be in utf8 and that input should be regarded as
-already in valid utf8 form. B<WARNING: It does not check for validity and as such
-should be handled with extreme caution for input, because security violations
-can occur with non-shortest UTF-8 encodings, etc.> Generally C<:encoding(UTF-8)> is
-the best option when reading UTF-8 encoded data.
-
 =item :win32
 X<:win32>
 
 On Win32 platforms this I<experimental> layer uses native "handle" IO
 rather than a Unix-like numeric file descriptor layer. Known to be
-buggy in this release (5.14).
+buggy in this release (5.30).
 
 =back
 
-The default set of layers should give acceptable results on all platforms
+The default set of layers should give acceptable results on all platforms.
 
-For Unix platforms that will be the equivalent of "unix perlio" or "stdio".
-Configure is set up to prefer the "stdio" implementation if the system's library
-provides for fast access to the buffer; otherwise, it uses the "unix perlio"
-implementation.
+For Unix platforms that will be the equivalent of ":unix:perlio" or ":stdio".
+Configure is set up to prefer the ":stdio" implementation if the system's library
+provides for fast access to the buffer (not common on modern architectures);
+otherwise, it uses the ":unix:perlio" implementation.
 
-On Win32 the default in this release (5.14) is "unix crlf". Win32's "stdio"
+On Win32 the default in this release (5.30) is ":unix:crlf". Win32's ":stdio"
 has a number of bugs/mis-features for Perl IO which are somewhat depending
-on the version and vendor of the C compiler. Using our own C<crlf> layer as
-the buffer avoids those issues and makes things more uniform.  The C<crlf>
-layer provides CRLF conversion as well as buffering.
+on the version and vendor of the C compiler. Using our own C<:crlf> layer as
+the buffer avoids those issues and makes things more uniform.
 
-This release (5.14) uses C<unix> as the bottom layer on Win32, and so still
+This release (5.30) uses C<:unix> as the bottom layer on Win32, and so still
 uses the C compiler's numeric file descriptor routines. There is an
-experimental native C<win32> layer, which is expected to be enhanced and
-should eventually become the default under Win32.
+experimental native C<:win32> layer, which is expected to be enhanced and
+may eventually become the default under Win32.
 
 The PERLIO environment variable is completely ignored when Perl
 is run in taint mode.
@@ -1440,3 +1397,116 @@ lines before doing anything else, just to keep people honest:
     $ENV{PATH}  = "/bin:/usr/bin";    # or whatever you need
     $ENV{SHELL} = "/bin/sh" if exists $ENV{SHELL};
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+
+=head1 ORDER OF APPLICATION
+
+Some options, in particular C<-I>, C<-M>, C<PERL5LIB> and C<PERL5OPT> can
+interact, and the order in which they are applied is important.
+
+Note that this section does not document what I<actually> happens inside the
+perl interpreter, it documents what I<effectively> happens.
+
+=over
+
+=item -I
+
+The effect of multiple C<-I> options is to C<unshift> them onto C<@INC>
+from right to left. So for example:
+
+    perl -I 1 -I 2 -I 3
+
+will first prepend C<3> onto the front of C<@INC>, then prepend C<2>, and
+then prepend C<1>. The result is that C<@INC> begins with:
+
+    qw(1 2 3)
+
+=item -M
+
+Multiple C<-M> options are processed from left to right. So this:
+
+    perl -Mlib=1 -Mlib=2 -Mlib=3
+
+will first use the L<lib> pragma to prepend C<1> to C<@INC>, then
+it will prepend C<2>, then it will prepend C<3>, resulting in an C<@INC>
+that begins with:
+
+    qw(3 2 1)
+
+=item the PERL5LIB environment variable
+
+This contains a list of directories, separated by colons. The entire list
+is prepended to C<@INC> in one go. This:
+
+    PERL5LIB=1:2:3 perl
+
+will result in an C<@INC> that begins with:
+
+    qw(1 2 3)
+
+=item combinations of -I, -M and PERL5LIB
+
+C<PERL5LIB> is applied first, then all the C<-I> arguments, then all the
+C<-M> arguments. This:
+
+    PERL5LIB=e1:e2 perl -I i1 -Mlib=m1 -I i2 -Mlib=m2
+
+will result in an C<@INC> that begins with:
+
+    qw(m2 m1 i1 i2 e1 e2)
+
+=item the PERL5OPT environment variable
+
+This contains a space separated list of switches. We only consider the
+effects of C<-M> and C<-I> in this section.
+
+After normal processing of C<-I> switches from the command line, all
+the C<-I> switches in C<PERL5OPT> are extracted. They are processed from
+left to right instead of from right to left. Also note that while
+whitespace is allowed between a C<-I> and its directory on the command
+line, it is not allowed in C<PERL5OPT>.
+
+After normal processing of C<-M> switches from the command line, all
+the C<-M> switches in C<PERL5OPT> are extracted. They are processed from
+left to right, I<i.e.> the same as those on the command line.
+
+An example may make this clearer:
+
+    export PERL5OPT="-Mlib=optm1 -Iopti1 -Mlib=optm2 -Iopti2"
+    export PERL5LIB=e1:e2
+    perl -I i1 -Mlib=m1 -I i2 -Mlib=m2
+
+will result in an C<@INC> that begins with:
+
+    qw(
+        optm2
+        optm1
+
+        m2
+        m1
+
+        opti2
+        opti1
+
+        i1
+        i2
+
+        e1
+        e2
+    )
+
+=item Other complications
+
+There are some complications that are ignored in the examples above:
+
+=over
+
+=item arch and version subdirs
+
+All of C<-I>, C<PERL5LIB> and C<use lib> will also prepend arch and version
+subdirs if they are present
+
+=item sitecustomize.pl
+
+=back
+
+=back

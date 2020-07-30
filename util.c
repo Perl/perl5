@@ -152,7 +152,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	abort();
     }
 #else
-    ptr = (Malloc_t)PerlMem_malloc(size?size:1);
+    ptr = (Malloc_t)PerlMem_malloc(size);
 #endif
     PERL_ALLOC_CHECK(ptr);
     if (ptr != NULL) {
@@ -716,9 +716,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     const U8 *s;
     STRLEN i;
     STRLEN len;
-    U32 frequency = 256;
     MAGIC *mg;
-    PERL_DEB( STRLEN rarest = 0 );
 
     PERL_ARGS_ASSERT_FBM_COMPILE;
 
@@ -770,17 +768,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	}
     }
 
-    s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
-    for (i = 0; i < len; i++) {
-	if (PL_freq[s[i]] < frequency) {
-	    PERL_DEB( rarest = i );
-	    frequency = PL_freq[s[i]];
-	}
-    }
     BmUSEFUL(sv) = 100;			/* Initial value */
     ((XPVNV*)SvANY(sv))->xnv_u.xnv_bm_tail = cBOOL(flags & FBMcf_TAIL);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %" UVuf "\n",
-			  s[rarest], (UV)rarest));
 }
 
 
@@ -795,7 +784,7 @@ then.
 
 =cut
 
-If SvTAIL(littlestr) is true, a fake "\n" was appended to to the string
+If SvTAIL(littlestr) is true, a fake "\n" was appended to the string
 during FBM compilation due to FBMcf_TAIL in flags. It indicates that
 the littlestr must be anchored to the end of bigstr (or to any \n if
 FBMrf_MULTILINE).
@@ -1065,8 +1054,10 @@ Perl_cntrl_to_mnemonic(const U8 c)
 Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
 string which is a duplicate of C<pv>.  The size of the string is
 determined by C<strlen()>, which means it may not contain embedded C<NUL>
-characters and must have a trailing C<NUL>.  The memory allocated for the new
-string can be freed with the C<Safefree()> function.
+characters and must have a trailing C<NUL>.  To prevent memory leaks, the
+memory allocated for the new string needs to be freed when no longer needed.
+This can be done with the L</C<Safefree>> function, or
+L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
 is deallocated when that thread ends.  So if you need that not to happen, you
@@ -1559,7 +1550,6 @@ S_with_queued_errors(pTHX_ SV *ex)
 STATIC bool
 S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 {
-    dVAR;
     HV *stash;
     GV *gv;
     CV *cv;
@@ -1766,6 +1756,15 @@ Perl_croak_nocontext(const char *pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+/* saves machine code for a common noreturn idiom typically used in Newx*() */
+GCC_DIAG_IGNORE_DECL(-Wunused-function);
+void
+Perl_croak_memory_wrap(void)
+{
+    Perl_croak_nocontext("%s",PL_memory_wrap);
+}
+GCC_DIAG_RESTORE_DECL;
+
 void
 Perl_croak(pTHX_ const char *pat, ...)
 {
@@ -1968,7 +1967,6 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
 void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
-    dVAR;
     PERL_ARGS_ASSERT_VWARNER;
     if (
         (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) &&
@@ -2083,7 +2081,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
  * For Solaris, setenv() and unsetenv() were introduced in Solaris 9, so
  * testing for HAS UNSETENV is sufficient.
  */
-#  if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
+#  if defined(__CYGWIN__)|| defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
 #    define MY_HAS_SETENV
 #  endif
 
@@ -2133,13 +2131,13 @@ version has desirable safeguards
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
-  dVAR;
 #    ifdef __amigaos4__
   amigaos4_obtain_environ(__FUNCTION__);
 #    endif
 
 #    ifdef USE_ITHREADS
-  /* only parent thread can modify process environment */
+  /* only parent thread can modify process environment, so no need to use a
+   * mutex */
   if (PL_curinterp == aTHX)
 #    endif
   {
@@ -2263,7 +2261,6 @@ my_setenv_out:
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
-    dVAR;
     char *envstr;
     const Size_t nlen = strlen(nam);
     Size_t vlen;
@@ -2611,7 +2608,6 @@ Perl_atfork_lock(void)
 #endif
 {
 #if defined(USE_ITHREADS)
-    dVAR;
     /* locks must be held in locking order (if any) */
 #  ifdef USE_PERLIO
     MUTEX_LOCK(&PL_perlio_mutex);
@@ -2637,7 +2633,6 @@ Perl_atfork_unlock(void)
 #endif
 {
 #if defined(USE_ITHREADS)
-    dVAR;
     /* locks must be released in same order as in atfork_lock() */
 #  ifdef USE_PERLIO
     MUTEX_UNLOCK(&PL_perlio_mutex);
@@ -2725,7 +2720,6 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     struct sigaction act, oact;
 
 #ifdef USE_ITHREADS
-    dVAR;
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
 	return (Sighandler_t) SIG_ERR;
@@ -2764,7 +2758,6 @@ int
 Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     struct sigaction act;
 
@@ -2794,7 +2787,6 @@ int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
 #ifdef USE_ITHREADS
-    dVAR;
 #endif
     PERL_UNUSED_CONTEXT;
 #ifdef USE_ITHREADS
@@ -2823,14 +2815,12 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 static Signal_t
 sig_trap(int signo)
 {
-    dVAR;
     PL_sig_trapped++;
 }
 
 Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
 {
-    dVAR;
     Sighandler_t oldsig;
 
 #if defined(USE_ITHREADS) && !defined(WIN32)
@@ -3375,7 +3365,6 @@ void *
 Perl_get_context(void)
 {
 #if defined(USE_ITHREADS)
-    dVAR;
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
     int error = pthread_getspecific(PL_thr_key, &t);
@@ -3396,7 +3385,6 @@ void
 Perl_set_context(void *t)
 {
 #if defined(USE_ITHREADS)
-    dVAR;
 #endif
     PERL_ARGS_ASSERT_SET_CONTEXT;
 #if defined(USE_ITHREADS)
@@ -3415,15 +3403,6 @@ Perl_set_context(void *t)
 }
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
-
-#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
-struct perl_vars *
-Perl_GetVars(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-    return &PL_Vars;
-}
-#endif
 
 char **
 Perl_get_op_names(pTHX)
@@ -3456,7 +3435,6 @@ Perl_get_opargs(pTHX)
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
-    dVAR;
     PERL_UNUSED_CONTEXT;
     return (PPADDR_t*)PL_ppaddr;
 }
@@ -3625,9 +3603,11 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
     (void)time(&now);
+    ENV_LOCALE_READ_LOCK;
     my_tm = localtime(&now);
     if (my_tm)
         Copy(my_tm, ptm, 1, struct tm);
+    ENV_LOCALE_READ_UNLOCK;
 #else
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
@@ -4334,7 +4314,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 #ifdef ECONNABORTED
   errno = ECONNABORTED;	/* This would be the standard thing to do. */
 #elif defined(ECONNREFUSED)
-  errno = ECONNREFUSED;	/* E.g. Symbian does not have ECONNABORTED. */
+  errno = ECONNREFUSED;	/* some OSes might not have ECONNABORTED. */
 #else
   errno = ETIMEDOUT;	/* Desperation time. */
 #endif
@@ -4636,93 +4616,6 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 #  endif
 #endif
 }
-
-#ifdef PERL_GLOBAL_STRUCT
-
-#define PERL_GLOBAL_STRUCT_INIT
-#include "opcode.h" /* the ppaddr and check */
-
-struct perl_vars *
-Perl_init_global_struct(pTHX)
-{
-    struct perl_vars *plvarsp = NULL;
-# ifdef PERL_GLOBAL_STRUCT
-    const IV nppaddr = C_ARRAY_LENGTH(Gppaddr);
-    const IV ncheck  = C_ARRAY_LENGTH(Gcheck);
-    PERL_UNUSED_CONTEXT;
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    /* PerlMem_malloc() because can't use even safesysmalloc() this early. */
-    plvarsp = (struct perl_vars*)PerlMem_malloc(sizeof(struct perl_vars));
-    if (!plvarsp)
-        exit(1);
-#  else
-    plvarsp = PL_VarsPtr;
-#  endif /* PERL_GLOBAL_STRUCT_PRIVATE */
-#  undef PERLVAR
-#  undef PERLVARA
-#  undef PERLVARI
-#  undef PERLVARIC
-#  define PERLVAR(prefix,var,type) /**/
-#  define PERLVARA(prefix,var,n,type) /**/
-#  define PERLVARI(prefix,var,type,init) plvarsp->prefix##var = init;
-#  define PERLVARIC(prefix,var,type,init) plvarsp->prefix##var = init;
-#  include "perlvars.h"
-#  undef PERLVAR
-#  undef PERLVARA
-#  undef PERLVARI
-#  undef PERLVARIC
-#  ifdef PERL_GLOBAL_STRUCT
-    plvarsp->Gppaddr =
-	(Perl_ppaddr_t*)
-	PerlMem_malloc(nppaddr * sizeof(Perl_ppaddr_t));
-    if (!plvarsp->Gppaddr)
-        exit(1);
-    plvarsp->Gcheck  =
-	(Perl_check_t*)
-	PerlMem_malloc(ncheck  * sizeof(Perl_check_t));
-    if (!plvarsp->Gcheck)
-        exit(1);
-    Copy(Gppaddr, plvarsp->Gppaddr, nppaddr, Perl_ppaddr_t); 
-    Copy(Gcheck,  plvarsp->Gcheck,  ncheck,  Perl_check_t); 
-#  endif
-#  ifdef PERL_SET_VARS
-    PERL_SET_VARS(plvarsp);
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    plvarsp->Gsv_placeholder.sv_flags = 0;
-    memset(plvarsp->Ghash_seed, 0, sizeof(plvarsp->Ghash_seed));
-#  endif
-# undef PERL_GLOBAL_STRUCT_INIT
-# endif
-    return plvarsp;
-}
-
-#endif /* PERL_GLOBAL_STRUCT */
-
-#ifdef PERL_GLOBAL_STRUCT
-
-void
-Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
-{
-    int veto = plvarsp->Gveto_cleanup;
-
-    PERL_ARGS_ASSERT_FREE_GLOBAL_STRUCT;
-    PERL_UNUSED_CONTEXT;
-# ifdef PERL_GLOBAL_STRUCT
-#  ifdef PERL_UNSET_VARS
-    PERL_UNSET_VARS(plvarsp);
-#  endif
-    if (veto)
-        return;
-    free(plvarsp->Gppaddr);
-    free(plvarsp->Gcheck);
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    free(plvarsp);
-#  endif
-# endif
-}
-
-#endif /* PERL_GLOBAL_STRUCT */
 
 #ifdef PERL_MEM_LOG
 
@@ -5106,7 +4999,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 =for apidoc my_vsnprintf
 
 The C library C<vsnprintf> if available and standards-compliant.
-However, if if the C<vsnprintf> is not available, will unfortunately
+However, if the C<vsnprintf> is not available, will unfortunately
 use the unsafe C<vsprintf> which can overrun the buffer (there is an
 overrun check, but that may be too late).  Consider using
 C<sv_vcatpvf> instead, or getting C<vsnprintf>.
@@ -5162,14 +5055,14 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
 void
 Perl_my_clearenv(pTHX)
 {
-    dVAR;
 #if ! defined(PERL_MICRO)
 #  if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
     PerlEnv_clearenv();
 #  else /* ! (PERL_IMPLICIT_SYS || WIN32) */
 #    if defined(USE_ENVIRON_ARRAY)
 #      if defined(USE_ITHREADS)
-    /* only the parent thread can clobber the process environment */
+    /* only the parent thread can clobber the process environment, so no need
+     * to use a mutex */
     if (PL_curinterp == aTHX)
 #      endif /* USE_ITHREADS */
     {
@@ -5216,32 +5109,6 @@ Perl_my_clearenv(pTHX)
 #ifdef PERL_IMPLICIT_CONTEXT
 
 
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-
-/* rather than each module having a static var holding its index,
- * use a global array of name to index mappings
- */
-int
-Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
-{
-    dVAR;
-    int index;
-
-    PERL_ARGS_ASSERT_MY_CXT_INDEX;
-
-    for (index = 0; index < PL_my_cxt_index; index++) {
-	const char *key = PL_my_cxt_keys[index];
-	/* try direct pointer compare first - there are chances to success,
-	 * and it's much faster.
-	 */
-	if ((key == my_cxt_key) || strEQ(key, my_cxt_key))
-	    return index;
-    }
-    return -1;
-}
-#  endif
-
-
 /* Implements the MY_CXT_INIT macro. The first time a module is loaded,
 the global PL_my_cxt_index is incremented, and that value is assigned to
 that module's static my_cxt_index (who's address is passed as an arg).
@@ -5250,23 +5117,14 @@ void* slot is available to hang the static data off, by allocating or
 extending the interpreter's PL_my_cxt_list array */
 
 void *
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
-#  else
 Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
-#  endif
 {
-    dVAR;
     void *p;
     int index;
 
     PERL_ARGS_ASSERT_MY_CXT_INIT;
 
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    index = Perl_my_cxt_index(aTHX_ my_cxt_key);
-#  else
     index = *indexp;
-#  endif
     /* do initial check without locking.
      * -1:    not allocated or another thread currently allocating
      *  other: already allocated by another thread
@@ -5274,45 +5132,11 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
     if (index == -1) {
 	MUTEX_LOCK(&PL_my_ctx_mutex);
         /*now a stricter check with locking */
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-        index = Perl_my_cxt_index(aTHX_ my_cxt_key);
-#  else
         index = *indexp;
-#  endif
         if (index == -1)
             /* this module hasn't been allocated an index yet */
-#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-            index = PL_my_cxt_index++;
-
-        /* Store the index in a global MY_CXT_KEY string to index mapping
-         * table. This emulates the perl-module static my_cxt_index var on
-         * builds which don't allow static vars */
-        if (PL_my_cxt_keys_size <= index) {
-            int old_size = PL_my_cxt_keys_size;
-            int i;
-            if (PL_my_cxt_keys_size) {
-                IV new_size = PL_my_cxt_keys_size;
-                while (new_size <= index)
-                    new_size *= 2;
-                PL_my_cxt_keys = (const char **)PerlMemShared_realloc(
-                                        PL_my_cxt_keys,
-                                        new_size * sizeof(const char *));
-                PL_my_cxt_keys_size = new_size;
-            }
-            else {
-                PL_my_cxt_keys_size = 16;
-                PL_my_cxt_keys = (const char **)PerlMemShared_malloc(
-                            PL_my_cxt_keys_size * sizeof(const char *));
-            }
-            for (i = old_size; i < PL_my_cxt_keys_size; i++) {
-                PL_my_cxt_keys[i] = 0;
-            }
-        }
-        PL_my_cxt_keys[index] = my_cxt_key;
-#  else
             *indexp = PL_my_cxt_index++;
         index = *indexp;
-#  endif
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
 

@@ -876,6 +876,8 @@ cpan/ExtUtils-MakeMaker/t/writemakefile_args.t			See if WriteMakefile works
 cpan/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
 cpan/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 cpan/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
+cpan/ExtUtils-PL2Bat/lib/ExtUtils/PL2Bat.pm	Implement pl2bat
+cpan/ExtUtils-PL2Bat/t/make_executable.t	Tests if ExtUtils::PL2Bat makes bat files that are executable
 cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 cpan/File-Fetch/t/null_subclass.t
@@ -1967,9 +1969,11 @@ cpan/Scalar-List-Utils/t/product.t		List::Util
 cpan/Scalar-List-Utils/t/prototype.t
 cpan/Scalar-List-Utils/t/readonly.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reduce.t		List::Util
+cpan/Scalar-List-Utils/t/reductions.t
 cpan/Scalar-List-Utils/t/refaddr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reftype.t		Scalar::Util
 cpan/Scalar-List-Utils/t/rt-96343.t		Scalar::Util
+cpan/Scalar-List-Utils/t/sample.t
 cpan/Scalar-List-Utils/t/scalarutil-proto.t
 cpan/Scalar-List-Utils/t/shuffle.t		List::Util
 cpan/Scalar-List-Utils/t/stack-corruption.t	List::Util
@@ -1978,6 +1982,7 @@ cpan/Scalar-List-Utils/t/sum.t			List::Util
 cpan/Scalar-List-Utils/t/sum0.t
 cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
 cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
+cpan/Scalar-List-Utils/t/uniqnum.t
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
@@ -2598,8 +2603,13 @@ cpan/Time-Piece/t/02core_dst.t
 cpan/Time-Piece/t/03compare.t	Test for Time::Piece
 cpan/Time-Piece/t/04mjd.t	Test for Time::Piece
 cpan/Time-Piece/t/05overload.t	Test for Time::Piece
+cpan/Time-Piece/t/06large.t
 cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
 cpan/Time-Piece/t/07arith.t	Test for Time::Piece
+cpan/Time-Piece/t/08truncate.t
+cpan/Time-Piece/t/09locales.t
+cpan/Time-Piece/t/10overload.t
+cpan/Time-Piece/t/99legacy.t
 cpan/Time-Piece/t/lib/Time/Piece/Twin.pm
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate.xs			Unicode::Collate
@@ -4131,7 +4141,6 @@ ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_freemint.xs	GNU dld style implementation for FreeMINT
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
-ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_win32.xs	Win32 implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
@@ -4798,6 +4807,7 @@ lib/perl5db/t/EnableModule.pm	Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
 lib/perl5db/t/fact		Tests for the Perl debugger
 lib/perl5db/t/filename-line-breakpoint		Tests for the Perl debugger
+lib/perl5db/t/gh-17660		Tests for the Perl debugger
 lib/perl5db/t/load-modules	Tests for the Perl debugger
 lib/perl5db/t/lsub-n		Test script used by perl5db.t
 lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
@@ -5103,8 +5113,7 @@ perl.c				main()
 perl.h				Global declarations
 perl_inc_macro.h		macro used to set \@INC using S_incpush_use_sep
 perl_langinfo.h			Perl's version of <langinfo.h>
-perlapi.c			Perl API functions
-perlapi.h			Perl API function declarations
+perlapi.h			Empty backwards-compat include
 perldtrace.d			D script for Perl probes
 perlio.c			C code for PerlIO abstraction
 perlio.h			PerlIO abstraction
@@ -5179,18 +5188,13 @@ pod/perl5263delta.pod		Perl changes in version 5.26.3
 pod/perl5280delta.pod		Perl changes in version 5.28.0
 pod/perl5281delta.pod		Perl changes in version 5.28.1
 pod/perl5282delta.pod		Perl changes in version 5.28.2
+pod/perl5283delta.pod		Perl changes in version 5.28.3
 pod/perl5300delta.pod		Perl changes in version 5.30.0
 pod/perl5301delta.pod		Perl changes in version 5.30.1
-pod/perl5310delta.pod		Perl changes in version 5.31.0
-pod/perl5311delta.pod		Perl changes in version 5.31.1
-pod/perl5312delta.pod		Perl changes in version 5.31.2
-pod/perl5313delta.pod		Perl changes in version 5.31.3
-pod/perl5314delta.pod		Perl changes in version 5.31.4
-pod/perl5315delta.pod		Perl changes in version 5.31.5
-pod/perl5316delta.pod		Perl changes in version 5.31.6
-pod/perl5317delta.pod		Perl changes in version 5.31.7
-pod/perl5318delta.pod		Perl changes in version 5.31.8
-pod/perl5319delta.pod		Perl changes in version 5.31.9
+pod/perl5302delta.pod		Perl changes in version 5.30.2
+pod/perl5303delta.pod		Perl changes in version 5.30.3
+pod/perl5320delta.pod		Perl changes in version 5.32.0
+pod/perl5330delta.pod		Perl changes in version 5.33.0
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5411,7 +5415,6 @@ README.plan9			Perl notes for Plan 9
 README.qnx			Perl notes for QNX
 README.riscos			Perl notes for RISC OS
 README.solaris			Perl notes for Solaris
-README.symbian			Perl notes for Symbian
 README.synology			Perl notes for Synology
 README.tru64			Perl notes for Tru64
 README.tw			Perl for Traditional Chinese (in Big5)
@@ -5463,56 +5466,6 @@ SECURITY.md			Add Security Policy for GitHub
 stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
-symbian/bld.inf			Symbian sample app build config
-symbian/config.pl		Configuration script for Symbian
-symbian/config.sh		Configuration data for Symbian
-symbian/cwd.pl			Helper code for config.pl
-symbian/demo_pl			"Archive" of demo code
-symbian/ext/Moped/Msg/bld.inf	Demo extension build configuration
-symbian/ext/Moped/Msg/location.pl	Demo extension script
-symbian/ext/Moped/Msg/Msg.mmp	Demo extension building
-symbian/ext/Moped/Msg/Msg.pkg	Demo extension packaging
-symbian/ext/Moped/Msg/Msg.pm	Demo extension Perl glue
-symbian/ext/Moped/Msg/Msg.xs	Demo extension code
-symbian/ext/Moped/Msg/README	Demo extension documentation
-symbian/find_writeable_data.pl	Development utility
-symbian/hexdump.pl		Helper for sisify.pl updating
-symbian/install.cfg		Installation instructions
-symbian/makesis.pl		Installation file creator
-symbian/PerlApp.cpp		Symbian app launcher code
-symbian/PerlApp.h		Symbian app launcher header
-symbian/PerlApp.hrh		Symbian app launcher resource header
-symbian/PerlAppAif.rss		Symbian app launcher code
-symbian/PerlBase.cpp		Symbian Perl base class
-symbian/PerlBase.h		Symbian Perl base class header
-symbian/PerlBase.pod		Symbian Perl base class documentation
-symbian/PerlRecog.cpp		Symbian recognizer code
-symbian/PerlRecog.mmp		Symbian recognizer build
-symbian/PerlUi.cpp		Symbian Perl UI class
-symbian/PerlUi.h		Symbian Perl UI class header
-symbian/PerlUi.hrh		Symbian Perl UI class resource header
-symbian/PerlUiS60.rss		Symbian app launcher resource definition
-symbian/PerlUiS80.rss		Symbian app launcher resource definition
-symbian/PerlUiS90.rss		Symbian app launcher resource definition
-symbian/PerlUiUIQ.rss		Symbian app launcher resource definition
-symbian/PerlUtil.cpp		Symbian Perl utility class
-symbian/PerlUtil.h		Symbian Perl utility class header
-symbian/PerlUtil.pod		Symbian Perl utility class documentation
-symbian/port.pl			Helper code for config.pl
-symbian/README			ReadMe for the Symbian files
-symbian/sanity.pl		Helper code for config.pl
-symbian/sdk.pl			Helper code for config.pl
-symbian/sisify.pl		Packaging utility
-symbian/symbian_dll.cpp		The DLL stub for Symbian
-symbian/symbian_proto.h		Prototypes for Symbian
-symbian/symbian_stubs.c		Stub routines for Symbian
-symbian/symbian_stubs.h		Stub headers for Symbian
-symbian/symbian_utils.cpp	Helper routines for Symbian
-symbian/symbianish.h		Header for Symbian
-symbian/TODO			Symbian things to do
-symbian/uid.pl			Helper code for config.pl
-symbian/version.pl		Helper code for config.pl
-symbian/xsbuild.pl		Building extensions
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work
@@ -5640,9 +5593,6 @@ t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
-t/lib/GH_15109/Apack.pm		test Module for caller.t
-t/lib/GH_15109/Bpack.pm		test Module for caller.t
-t/lib/GH_15109/Cpack.pm		test Module for caller.t
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
@@ -5796,6 +5746,7 @@ t/op/chop.t			See if chop works
 t/op/chr.t			See if chr works
 t/op/closure.t			See if closures work
 t/op/closure_test.pl		Extra file for closure.t
+t/op/cmpchain.t			See if comparison chaining works
 t/op/concat2.t			Tests too complex for concat.t
 t/op/cond.t			See if conditional expressions work
 t/op/const-optree.t		Tests for sub(){...} becoming constant
