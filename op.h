@@ -546,9 +546,10 @@ typedef enum {
 #define OA_OTHERINT 32
 #define OA_DANGEROUS 64
 #define OA_DEFGV 128
+#define OA_OTHERFLOAT 256
 
-/* The next 4 bits (8..11) encode op class information */
-#define OCSHIFT 8
+/* The next 4 bits (9..12) encode op class information */
+#define OCSHIFT 9
 
 #define OA_CLASS_MASK (15 << OCSHIFT)
 
@@ -569,9 +570,9 @@ typedef enum {
 #define OA_METHOP (14 << OCSHIFT)
 #define OA_UNOP_AUX (15 << OCSHIFT)
 
-/* Each remaining nybble of PL_opargs (i.e. bits 12..15, 16..19 etc)
+/* Each remaining nybble of PL_opargs (i.e. bits 13..16, 17..20 etc)
  * encode the type for each arg */
-#define OASHIFT 12
+#define OASHIFT 13
 
 #define OA_SCALAR 1
 #define OA_LIST 2

@@ -2789,6 +2789,54 @@ PP(pp_i_negate)
     }
 }
 
+/* pure floating point versions of some of the above */
+PP(pp_f_multiply)
+{
+    dSP; dATARGET;
+    tryAMAGICbin_MG(mult_amg, AMGf_assign);
+    {
+      dPOPTOPnnrl_nomg;
+      SETn( left * right );
+      RETURN;
+    }
+}
+
+PP(pp_f_divide)
+{
+    dSP; dATARGET;
+    tryAMAGICbin_MG(div_amg, AMGf_assign);
+    {
+      dPOPTOPnnrl_nomg;
+      if (left == 0)
+          DIE(aTHX_ "Illegal division by zero");
+
+      SETn( left / right );
+      RETURN;
+    }
+}
+
+PP(pp_f_add)
+{
+    dSP; dATARGET;
+    tryAMAGICbin_MG(add_amg, AMGf_assign);
+    {
+      dPOPTOPnnrl_nomg;
+      SETn( left + right );
+      RETURN;
+    }
+}
+
+PP(pp_f_subtract)
+{
+    dSP; dATARGET;
+    tryAMAGICbin_MG(subtr_amg, AMGf_assign);
+    {
+      dPOPTOPnnrl_nomg;
+      SETn( left - right );
+      RETURN;
+    }
+}
+
 /* High falutin' math. */
 
 PP(pp_atan2)

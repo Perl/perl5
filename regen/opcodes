@@ -24,6 +24,7 @@
 #   needs a target                      - t  (OA_TARGET)
 #   target can be in a pad              - T  (OA_TARGET|OA_TARGLEX)
 #   has a corresponding integer version - I  (OA_OTHERINT)
+#   has a corresponding float version   - F  (OA_OTHERFLOAT)
 #   make temp copy in list assignment   - d  (OA_DANGEROUS)
 #   uses $_ if no argument given        - u  (OA_DEFGV)
 
@@ -118,18 +119,22 @@ i_postdec	integer postdecrement (--)	ck_lfun		ist1	S
 
 pow		exponentiation (**)	ck_null		fsT2	S S
 
-multiply	multiplication (*)	ck_null		IfsT2	S S
+multiply	multiplication (*)	ck_null		IFfsT2	S S
 i_multiply	integer multiplication (*)	ck_null		ifsT2	S S
-divide		division (/)		ck_null		IfsT2	S S
+f_multiply	float multiplication (*)	ck_null		fsT2	S S
+divide		division (/)		ck_null		IFfsT2	S S
 i_divide	integer division (/)	ck_null		ifsT2	S S
+f_divide	float division (/)	ck_null		fsT2	S S
 modulo		modulus (%)		ck_null		IifsT2	S S
 i_modulo	integer modulus (%)	ck_null		ifsT2	S S
 repeat		repeat (x)		ck_repeat	fmt2	L S
 
-add		addition (+)		ck_null		IfsT2	S S
+add		addition (+)		ck_null		IFfsT2	S S
 i_add		integer addition (+)	ck_null		ifsT2	S S
-subtract	subtraction (-)		ck_null		IfsT2	S S
+f_add		float addition (+)	ck_null		fsT2	S S
+subtract	subtraction (-)		ck_null		IFfsT2	S S
 i_subtract	integer subtraction (-)	ck_null		ifsT2	S S
+f_subtract	float subtraction (-)	ck_null		fsT2	S S
 concat		concatenation (.) or string	ck_concat	fsT2	S S
 multiconcat	concatenation (.) or string	ck_null	sT+
 stringify	string			ck_stringify	fsT@	S

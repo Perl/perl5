@@ -201,15 +201,19 @@ EXTCONST char* const PL_op_name[] = {
 	"pow",
 	"multiply",
 	"i_multiply",
+	"f_multiply",
 	"divide",
 	"i_divide",
+	"f_divide",
 	"modulo",
 	"i_modulo",
 	"repeat",
 	"add",
 	"i_add",
+	"f_add",
 	"subtract",
 	"i_subtract",
+	"f_subtract",
 	"concat",
 	"multiconcat",
 	"stringify",
@@ -609,15 +613,19 @@ EXTCONST char* const PL_op_desc[] = {
 	"exponentiation (**)",
 	"multiplication (*)",
 	"integer multiplication (*)",
+	"float multiplication (*)",
 	"division (/)",
 	"integer division (/)",
+	"float division (/)",
 	"modulus (%)",
 	"integer modulus (%)",
 	"repeat (x)",
 	"addition (+)",
 	"integer addition (+)",
+	"float addition (+)",
 	"subtraction (-)",
 	"integer subtraction (-)",
+	"float subtraction (-)",
 	"concatenation (.) or string",
 	"concatenation (.) or string",
 	"string",
@@ -1020,15 +1028,19 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_pow,
 	Perl_pp_multiply,
 	Perl_pp_i_multiply,
+	Perl_pp_f_multiply,
 	Perl_pp_divide,
 	Perl_pp_i_divide,
+	Perl_pp_f_divide,
 	Perl_pp_modulo,
 	Perl_pp_i_modulo,
 	Perl_pp_repeat,
 	Perl_pp_add,
 	Perl_pp_i_add,
+	Perl_pp_f_add,
 	Perl_pp_subtract,
 	Perl_pp_i_subtract,
+	Perl_pp_f_subtract,
 	Perl_pp_concat,
 	Perl_pp_multiconcat,
 	Perl_pp_stringify,
@@ -1427,15 +1439,19 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* pow */
 	Perl_ck_null,		/* multiply */
 	Perl_ck_null,		/* i_multiply */
+	Perl_ck_null,		/* f_multiply */
 	Perl_ck_null,		/* divide */
 	Perl_ck_null,		/* i_divide */
+	Perl_ck_null,		/* f_divide */
 	Perl_ck_null,		/* modulo */
 	Perl_ck_null,		/* i_modulo */
 	Perl_ck_repeat,		/* repeat */
 	Perl_ck_null,		/* add */
 	Perl_ck_null,		/* i_add */
+	Perl_ck_null,		/* f_add */
 	Perl_ck_null,		/* subtract */
 	Perl_ck_null,		/* i_subtract */
+	Perl_ck_null,		/* f_subtract */
 	Perl_ck_concat,		/* concat */
 	Perl_ck_null,		/* multiconcat */
 	Perl_ck_stringify,	/* stringify */
@@ -1780,404 +1796,408 @@ EXTCONST U32 PL_opargs[];
 EXTCONST U32 PL_opargs[] = {
 	0x00000000,	/* null */
 	0x00000000,	/* stub */
-	0x00001b04,	/* scalar */
+	0x00003604,	/* scalar */
 	0x00000004,	/* pushmark */
 	0x00000004,	/* wantarray */
-	0x00000604,	/* const */
-	0x00000644,	/* gvsv */
-	0x00000644,	/* gv */
-	0x00011244,	/* gelem */
+	0x00000c04,	/* const */
+	0x00000c44,	/* gvsv */
+	0x00000c44,	/* gv */
+	0x00022444,	/* gelem */
 	0x00000044,	/* padsv */
 	0x00000040,	/* padav */
 	0x00000040,	/* padhv */
 	0x00000040,	/* padany */
-	0x00000144,	/* rv2gv */
-	0x00000144,	/* rv2sv */
-	0x00000104,	/* av2arylen */
-	0x00000140,	/* rv2cv */
-	0x00000604,	/* anoncode */
-	0x00009b84,	/* prototype */
-	0x00002101,	/* refgen */
-	0x00001106,	/* srefgen */
-	0x00009b8c,	/* ref */
-	0x00091404,	/* bless */
-	0x00009b88,	/* backtick */
-	0x00009408,	/* glob */
-	0x0000eb08,	/* readline */
-	0x00000608,	/* rcatline */
-	0x00001104,	/* regcmaybe */
-	0x00001104,	/* regcreset */
-	0x00001304,	/* regcomp */
-	0x00000500,	/* match */
-	0x00000504,	/* qr */
-	0x00001504,	/* subst */
-	0x00000304,	/* substcont */
-	0x00001804,	/* trans */
-	0x00001804,	/* transr */
-	0x00011204,	/* sassign */
-	0x00022208,	/* aassign */
-	0x00002b0d,	/* chop */
-	0x00009b8c,	/* schop */
-	0x00002b1d,	/* chomp */
-	0x00009b9c,	/* schomp */
-	0x00009b84,	/* defined */
-	0x0000fb04,	/* undef */
-	0x00009b84,	/* study */
-	0x0000fb8c,	/* pos */
-	0x00001164,	/* preinc */
-	0x00001144,	/* i_preinc */
-	0x00001164,	/* predec */
-	0x00001144,	/* i_predec */
-	0x0000112c,	/* postinc */
-	0x0000110c,	/* i_postinc */
-	0x0000112c,	/* postdec */
-	0x0000110c,	/* i_postdec */
-	0x0001121e,	/* pow */
-	0x0001123e,	/* multiply */
-	0x0001121e,	/* i_multiply */
-	0x0001123e,	/* divide */
-	0x0001121e,	/* i_divide */
-	0x0001123e,	/* modulo */
-	0x0001121e,	/* i_modulo */
-	0x0001220b,	/* repeat */
-	0x0001123e,	/* add */
-	0x0001121e,	/* i_add */
-	0x0001123e,	/* subtract */
-	0x0001121e,	/* i_subtract */
-	0x0001121e,	/* concat */
-	0x00000f1c,	/* multiconcat */
-	0x0000141e,	/* stringify */
-	0x0001121e,	/* left_shift */
-	0x0001121e,	/* right_shift */
-	0x00011226,	/* lt */
-	0x00011206,	/* i_lt */
-	0x00011226,	/* gt */
-	0x00011206,	/* i_gt */
-	0x00011226,	/* le */
-	0x00011206,	/* i_le */
-	0x00011226,	/* ge */
-	0x00011206,	/* i_ge */
-	0x00011226,	/* eq */
-	0x00011206,	/* i_eq */
-	0x00011226,	/* ne */
-	0x00011206,	/* i_ne */
-	0x0001122e,	/* ncmp */
-	0x0001120e,	/* i_ncmp */
-	0x00011206,	/* slt */
-	0x00011206,	/* sgt */
-	0x00011206,	/* sle */
-	0x00011206,	/* sge */
-	0x00011206,	/* seq */
-	0x00011206,	/* sne */
-	0x0001120e,	/* scmp */
-	0x0001120e,	/* bit_and */
-	0x0001120e,	/* bit_xor */
-	0x0001120e,	/* bit_or */
-	0x0001121e,	/* nbit_and */
-	0x0001121e,	/* nbit_xor */
-	0x0001121e,	/* nbit_or */
-	0x0001120e,	/* sbit_and */
-	0x0001120e,	/* sbit_xor */
-	0x0001120e,	/* sbit_or */
-	0x0000112e,	/* negate */
-	0x0000110e,	/* i_negate */
-	0x00001106,	/* not */
-	0x0000110e,	/* complement */
-	0x0000111e,	/* ncomplement */
-	0x0000111e,	/* scomplement */
-	0x00000204,	/* smartmatch */
-	0x0001141e,	/* atan2 */
-	0x00009b9e,	/* sin */
-	0x00009b9e,	/* cos */
-	0x00009b1c,	/* rand */
-	0x00009b1c,	/* srand */
-	0x00009b9e,	/* exp */
-	0x00009b9e,	/* log */
-	0x00009b9e,	/* sqrt */
-	0x00009b9e,	/* int */
-	0x00009b9e,	/* hex */
-	0x00009b9e,	/* oct */
-	0x00009b9e,	/* abs */
-	0x00009b9e,	/* length */
-	0x0991140c,	/* substr */
-	0x0011140c,	/* vec */
-	0x0091141c,	/* index */
-	0x0091141c,	/* rindex */
-	0x0002140f,	/* sprintf */
-	0x00021405,	/* formline */
-	0x00009b9e,	/* ord */
-	0x00009b9e,	/* chr */
-	0x0001141e,	/* crypt */
-	0x00009b8e,	/* ucfirst */
-	0x00009b8e,	/* lcfirst */
-	0x00009b8e,	/* uc */
-	0x00009b8e,	/* lc */
-	0x00009b8e,	/* quotemeta */
-	0x00000148,	/* rv2av */
-	0x00013644,	/* aelemfast */
-	0x00013040,	/* aelemfast_lex */
-	0x00013204,	/* aelem */
-	0x00023401,	/* aslice */
-	0x00023401,	/* kvaslice */
-	0x00003b40,	/* aeach */
-	0x00003b48,	/* avalues */
-	0x00003b08,	/* akeys */
-	0x00004b40,	/* each */
-	0x00004b48,	/* values */
-	0x00004b08,	/* keys */
-	0x00001b00,	/* delete */
-	0x00001b04,	/* exists */
-	0x00000148,	/* rv2hv */
-	0x00014204,	/* helem */
-	0x00024401,	/* hslice */
-	0x00024401,	/* kvhslice */
-	0x00000f44,	/* multideref */
-	0x00091480,	/* unpack */
-	0x0002140f,	/* pack */
-	0x00111508,	/* split */
-	0x0002140f,	/* join */
-	0x00002401,	/* list */
-	0x00224200,	/* lslice */
-	0x00002405,	/* anonlist */
-	0x00002405,	/* anonhash */
-	0x02993401,	/* splice */
-	0x0002341d,	/* push */
-	0x0000bb04,	/* pop */
-	0x0000bb04,	/* shift */
-	0x0002341d,	/* unshift */
-	0x0002d401,	/* sort */
-	0x00002409,	/* reverse */
-	0x00025401,	/* grepstart */
-	0x00000308,	/* grepwhile */
-	0x00025401,	/* mapstart */
-	0x00000308,	/* mapwhile */
-	0x00011300,	/* range */
-	0x00011100,	/* flip */
-	0x00000100,	/* flop */
-	0x00000300,	/* and */
-	0x00000300,	/* or */
-	0x00011206,	/* xor */
-	0x00000300,	/* dor */
-	0x00000300,	/* cond_expr */
-	0x00000304,	/* andassign */
-	0x00000304,	/* orassign */
-	0x00000304,	/* dorassign */
-	0x00002141,	/* entersub */
-	0x00000100,	/* leavesub */
-	0x00000100,	/* leavesublv */
-	0x00000f00,	/* argcheck */
-	0x00000f00,	/* argelem */
-	0x00000300,	/* argdefelem */
-	0x00009b08,	/* caller */
-	0x0000240d,	/* warn */
-	0x0000240d,	/* die */
-	0x00009b04,	/* reset */
-	0x00000400,	/* lineseq */
-	0x00000a04,	/* nextstate */
-	0x00000a04,	/* dbstate */
+	0x00000244,	/* rv2gv */
+	0x00000244,	/* rv2sv */
+	0x00000204,	/* av2arylen */
+	0x00000240,	/* rv2cv */
+	0x00000c04,	/* anoncode */
+	0x00013684,	/* prototype */
+	0x00004201,	/* refgen */
+	0x00002206,	/* srefgen */
+	0x0001368c,	/* ref */
+	0x00122804,	/* bless */
+	0x00013688,	/* backtick */
+	0x00012808,	/* glob */
+	0x0001d608,	/* readline */
+	0x00000c08,	/* rcatline */
+	0x00002204,	/* regcmaybe */
+	0x00002204,	/* regcreset */
+	0x00002604,	/* regcomp */
+	0x00000a00,	/* match */
+	0x00000a04,	/* qr */
+	0x00002a04,	/* subst */
+	0x00000604,	/* substcont */
+	0x00003004,	/* trans */
+	0x00003004,	/* transr */
+	0x00022404,	/* sassign */
+	0x00044408,	/* aassign */
+	0x0000560d,	/* chop */
+	0x0001368c,	/* schop */
+	0x0000561d,	/* chomp */
+	0x0001369c,	/* schomp */
+	0x00013684,	/* defined */
+	0x0001f604,	/* undef */
+	0x00013684,	/* study */
+	0x0001f68c,	/* pos */
+	0x00002264,	/* preinc */
+	0x00002244,	/* i_preinc */
+	0x00002264,	/* predec */
+	0x00002244,	/* i_predec */
+	0x0000222c,	/* postinc */
+	0x0000220c,	/* i_postinc */
+	0x0000222c,	/* postdec */
+	0x0000220c,	/* i_postdec */
+	0x0002241e,	/* pow */
+	0x0002253e,	/* multiply */
+	0x0002241e,	/* i_multiply */
+	0x0002241e,	/* f_multiply */
+	0x0002253e,	/* divide */
+	0x0002241e,	/* i_divide */
+	0x0002241e,	/* f_divide */
+	0x0002243e,	/* modulo */
+	0x0002241e,	/* i_modulo */
+	0x0002440b,	/* repeat */
+	0x0002253e,	/* add */
+	0x0002241e,	/* i_add */
+	0x0002241e,	/* f_add */
+	0x0002253e,	/* subtract */
+	0x0002241e,	/* i_subtract */
+	0x0002241e,	/* f_subtract */
+	0x0002241e,	/* concat */
+	0x00001e1c,	/* multiconcat */
+	0x0000281e,	/* stringify */
+	0x0002241e,	/* left_shift */
+	0x0002241e,	/* right_shift */
+	0x00022426,	/* lt */
+	0x00022406,	/* i_lt */
+	0x00022426,	/* gt */
+	0x00022406,	/* i_gt */
+	0x00022426,	/* le */
+	0x00022406,	/* i_le */
+	0x00022426,	/* ge */
+	0x00022406,	/* i_ge */
+	0x00022426,	/* eq */
+	0x00022406,	/* i_eq */
+	0x00022426,	/* ne */
+	0x00022406,	/* i_ne */
+	0x0002242e,	/* ncmp */
+	0x0002240e,	/* i_ncmp */
+	0x00022406,	/* slt */
+	0x00022406,	/* sgt */
+	0x00022406,	/* sle */
+	0x00022406,	/* sge */
+	0x00022406,	/* seq */
+	0x00022406,	/* sne */
+	0x0002240e,	/* scmp */
+	0x0002240e,	/* bit_and */
+	0x0002240e,	/* bit_xor */
+	0x0002240e,	/* bit_or */
+	0x0002241e,	/* nbit_and */
+	0x0002241e,	/* nbit_xor */
+	0x0002241e,	/* nbit_or */
+	0x0002240e,	/* sbit_and */
+	0x0002240e,	/* sbit_xor */
+	0x0002240e,	/* sbit_or */
+	0x0000222e,	/* negate */
+	0x0000220e,	/* i_negate */
+	0x00002206,	/* not */
+	0x0000220e,	/* complement */
+	0x0000221e,	/* ncomplement */
+	0x0000221e,	/* scomplement */
+	0x00000404,	/* smartmatch */
+	0x0002281e,	/* atan2 */
+	0x0001369e,	/* sin */
+	0x0001369e,	/* cos */
+	0x0001361c,	/* rand */
+	0x0001361c,	/* srand */
+	0x0001369e,	/* exp */
+	0x0001369e,	/* log */
+	0x0001369e,	/* sqrt */
+	0x0001369e,	/* int */
+	0x0001369e,	/* hex */
+	0x0001369e,	/* oct */
+	0x0001369e,	/* abs */
+	0x0001369e,	/* length */
+	0x1322280c,	/* substr */
+	0x0022280c,	/* vec */
+	0x0122281c,	/* index */
+	0x0122281c,	/* rindex */
+	0x0004280f,	/* sprintf */
+	0x00042805,	/* formline */
+	0x0001369e,	/* ord */
+	0x0001369e,	/* chr */
+	0x0002281e,	/* crypt */
+	0x0001368e,	/* ucfirst */
+	0x0001368e,	/* lcfirst */
+	0x0001368e,	/* uc */
+	0x0001368e,	/* lc */
+	0x0001368e,	/* quotemeta */
+	0x00000248,	/* rv2av */
+	0x00026c44,	/* aelemfast */
+	0x00026040,	/* aelemfast_lex */
+	0x00026404,	/* aelem */
+	0x00046801,	/* aslice */
+	0x00046801,	/* kvaslice */
+	0x00007640,	/* aeach */
+	0x00007648,	/* avalues */
+	0x00007608,	/* akeys */
+	0x00009640,	/* each */
+	0x00009648,	/* values */
+	0x00009608,	/* keys */
+	0x00003600,	/* delete */
+	0x00003604,	/* exists */
+	0x00000248,	/* rv2hv */
+	0x00028404,	/* helem */
+	0x00048801,	/* hslice */
+	0x00048801,	/* kvhslice */
+	0x00001e44,	/* multideref */
+	0x00122880,	/* unpack */
+	0x0004280f,	/* pack */
+	0x00222a08,	/* split */
+	0x0004280f,	/* join */
+	0x00004801,	/* list */
+	0x00448400,	/* lslice */
+	0x00004805,	/* anonlist */
+	0x00004805,	/* anonhash */
+	0x05326801,	/* splice */
+	0x0004681d,	/* push */
+	0x00017604,	/* pop */
+	0x00017604,	/* shift */
+	0x0004681d,	/* unshift */
+	0x0005a801,	/* sort */
+	0x00004809,	/* reverse */
+	0x0004a801,	/* grepstart */
+	0x00000608,	/* grepwhile */
+	0x0004a801,	/* mapstart */
+	0x00000608,	/* mapwhile */
+	0x00022600,	/* range */
+	0x00022200,	/* flip */
+	0x00000200,	/* flop */
+	0x00000600,	/* and */
+	0x00000600,	/* or */
+	0x00022406,	/* xor */
+	0x00000600,	/* dor */
+	0x00000600,	/* cond_expr */
+	0x00000604,	/* andassign */
+	0x00000604,	/* orassign */
+	0x00000604,	/* dorassign */
+	0x00004241,	/* entersub */
+	0x00000200,	/* leavesub */
+	0x00000200,	/* leavesublv */
+	0x00001e00,	/* argcheck */
+	0x00001e00,	/* argelem */
+	0x00000600,	/* argdefelem */
+	0x00013608,	/* caller */
+	0x0000480d,	/* warn */
+	0x0000480d,	/* die */
+	0x00013604,	/* reset */
+	0x00000800,	/* lineseq */
+	0x00001404,	/* nextstate */
+	0x00001404,	/* dbstate */
 	0x00000004,	/* unstack */
 	0x00000000,	/* enter */
-	0x00000400,	/* leave */
-	0x00000400,	/* scope */
-	0x00000940,	/* enteriter */
+	0x00000800,	/* leave */
+	0x00000800,	/* scope */
+	0x00001240,	/* enteriter */
 	0x00000000,	/* iter */
-	0x00000940,	/* enterloop */
-	0x00000200,	/* leaveloop */
-	0x00002401,	/* return */
-	0x00000d04,	/* last */
-	0x00000d04,	/* next */
-	0x00000d04,	/* redo */
-	0x00000d44,	/* dump */
-	0x00000d04,	/* goto */
-	0x00009b04,	/* exit */
-	0x00000e40,	/* method */
-	0x00000e40,	/* method_named */
-	0x00000e40,	/* method_super */
-	0x00000e40,	/* method_redir */
-	0x00000e40,	/* method_redir_super */
-	0x00000340,	/* entergiven */
-	0x00000100,	/* leavegiven */
-	0x00000340,	/* enterwhen */
-	0x00000100,	/* leavewhen */
+	0x00001240,	/* enterloop */
+	0x00000400,	/* leaveloop */
+	0x00004801,	/* return */
+	0x00001a04,	/* last */
+	0x00001a04,	/* next */
+	0x00001a04,	/* redo */
+	0x00001a44,	/* dump */
+	0x00001a04,	/* goto */
+	0x00013604,	/* exit */
+	0x00001c40,	/* method */
+	0x00001c40,	/* method_named */
+	0x00001c40,	/* method_super */
+	0x00001c40,	/* method_redir */
+	0x00001c40,	/* method_redir_super */
+	0x00000640,	/* entergiven */
+	0x00000200,	/* leavegiven */
+	0x00000640,	/* enterwhen */
+	0x00000200,	/* leavewhen */
 	0x00000000,	/* break */
 	0x00000000,	/* continue */
-	0x0029640d,	/* open */
-	0x0000eb04,	/* close */
-	0x00066404,	/* pipe_op */
-	0x00006b0c,	/* fileno */
-	0x00009b0c,	/* umask */
-	0x00096404,	/* binmode */
-	0x00217445,	/* tie */
-	0x00007b04,	/* untie */
-	0x00007b44,	/* tied */
-	0x00114404,	/* dbmopen */
-	0x00004b04,	/* dbmclose */
-	0x01111408,	/* sselect */
-	0x0000e40c,	/* select */
-	0x0000eb0c,	/* getc */
-	0x0917640d,	/* read */
-	0x0000eb04,	/* enterwrite */
-	0x00000100,	/* leavewrite */
-	0x0002e405,	/* prtf */
-	0x0002e405,	/* print */
-	0x0002e405,	/* say */
-	0x09116404,	/* sysopen */
-	0x00116404,	/* sysseek */
-	0x0917640d,	/* sysread */
-	0x0991640d,	/* syswrite */
-	0x0000eb04,	/* eof */
-	0x0000eb0c,	/* tell */
-	0x00116404,	/* seek */
-	0x00011404,	/* truncate */
-	0x0011640c,	/* fcntl */
-	0x0011640c,	/* ioctl */
-	0x0001641c,	/* flock */
-	0x0911640d,	/* send */
-	0x0117640d,	/* recv */
-	0x01116404,	/* socket */
-	0x11166404,	/* sockpair */
-	0x00016404,	/* bind */
-	0x00016404,	/* connect */
-	0x00016404,	/* listen */
-	0x0006640c,	/* accept */
-	0x0001640c,	/* shutdown */
-	0x00116404,	/* gsockopt */
-	0x01116404,	/* ssockopt */
-	0x00006b04,	/* getsockname */
-	0x00006b04,	/* getpeername */
-	0x0000ec80,	/* lstat */
-	0x0000ec80,	/* stat */
-	0x00006c84,	/* ftrread */
-	0x00006c84,	/* ftrwrite */
-	0x00006c84,	/* ftrexec */
-	0x00006c84,	/* fteread */
-	0x00006c84,	/* ftewrite */
-	0x00006c84,	/* fteexec */
-	0x00006c84,	/* ftis */
-	0x00006c8c,	/* ftsize */
-	0x00006c8c,	/* ftmtime */
-	0x00006c8c,	/* ftatime */
-	0x00006c8c,	/* ftctime */
-	0x00006c84,	/* ftrowned */
-	0x00006c84,	/* fteowned */
-	0x00006c84,	/* ftzero */
-	0x00006c84,	/* ftsock */
-	0x00006c84,	/* ftchr */
-	0x00006c84,	/* ftblk */
-	0x00006c84,	/* ftfile */
-	0x00006c84,	/* ftdir */
-	0x00006c84,	/* ftpipe */
-	0x00006c84,	/* ftsuid */
-	0x00006c84,	/* ftsgid */
-	0x00006c84,	/* ftsvtx */
-	0x00006c84,	/* ftlink */
-	0x00006c04,	/* fttty */
-	0x00006c84,	/* fttext */
-	0x00006c84,	/* ftbinary */
-	0x00009b1c,	/* chdir */
-	0x0000241d,	/* chown */
-	0x00009b9c,	/* chroot */
-	0x0000249d,	/* unlink */
-	0x0000241d,	/* chmod */
-	0x0000241d,	/* utime */
-	0x0001141c,	/* rename */
-	0x0001141c,	/* link */
-	0x0001141c,	/* symlink */
-	0x00009b8c,	/* readlink */
-	0x0009949c,	/* mkdir */
-	0x00009b9c,	/* rmdir */
-	0x00016404,	/* open_dir */
-	0x00006b00,	/* readdir */
-	0x00006b0c,	/* telldir */
-	0x00016404,	/* seekdir */
-	0x00006b04,	/* rewinddir */
-	0x00006b04,	/* closedir */
+	0x0052c80d,	/* open */
+	0x0001d604,	/* close */
+	0x000cc804,	/* pipe_op */
+	0x0000d60c,	/* fileno */
+	0x0001360c,	/* umask */
+	0x0012c804,	/* binmode */
+	0x0042e845,	/* tie */
+	0x0000f604,	/* untie */
+	0x0000f644,	/* tied */
+	0x00228804,	/* dbmopen */
+	0x00009604,	/* dbmclose */
+	0x02222808,	/* sselect */
+	0x0001c80c,	/* select */
+	0x0001d60c,	/* getc */
+	0x122ec80d,	/* read */
+	0x0001d604,	/* enterwrite */
+	0x00000200,	/* leavewrite */
+	0x0005c805,	/* prtf */
+	0x0005c805,	/* print */
+	0x0005c805,	/* say */
+	0x1222c804,	/* sysopen */
+	0x0022c804,	/* sysseek */
+	0x122ec80d,	/* sysread */
+	0x1322c80d,	/* syswrite */
+	0x0001d604,	/* eof */
+	0x0001d60c,	/* tell */
+	0x0022c804,	/* seek */
+	0x00022804,	/* truncate */
+	0x0022c80c,	/* fcntl */
+	0x0022c80c,	/* ioctl */
+	0x0002c81c,	/* flock */
+	0x1222c80d,	/* send */
+	0x022ec80d,	/* recv */
+	0x0222c804,	/* socket */
+	0x222cc804,	/* sockpair */
+	0x0002c804,	/* bind */
+	0x0002c804,	/* connect */
+	0x0002c804,	/* listen */
+	0x000cc80c,	/* accept */
+	0x0002c80c,	/* shutdown */
+	0x0022c804,	/* gsockopt */
+	0x0222c804,	/* ssockopt */
+	0x0000d604,	/* getsockname */
+	0x0000d604,	/* getpeername */
+	0x0001d880,	/* lstat */
+	0x0001d880,	/* stat */
+	0x0000d884,	/* ftrread */
+	0x0000d884,	/* ftrwrite */
+	0x0000d884,	/* ftrexec */
+	0x0000d884,	/* fteread */
+	0x0000d884,	/* ftewrite */
+	0x0000d884,	/* fteexec */
+	0x0000d884,	/* ftis */
+	0x0000d88c,	/* ftsize */
+	0x0000d88c,	/* ftmtime */
+	0x0000d88c,	/* ftatime */
+	0x0000d88c,	/* ftctime */
+	0x0000d884,	/* ftrowned */
+	0x0000d884,	/* fteowned */
+	0x0000d884,	/* ftzero */
+	0x0000d884,	/* ftsock */
+	0x0000d884,	/* ftchr */
+	0x0000d884,	/* ftblk */
+	0x0000d884,	/* ftfile */
+	0x0000d884,	/* ftdir */
+	0x0000d884,	/* ftpipe */
+	0x0000d884,	/* ftsuid */
+	0x0000d884,	/* ftsgid */
+	0x0000d884,	/* ftsvtx */
+	0x0000d884,	/* ftlink */
+	0x0000d804,	/* fttty */
+	0x0000d884,	/* fttext */
+	0x0000d884,	/* ftbinary */
+	0x0001361c,	/* chdir */
+	0x0000481d,	/* chown */
+	0x0001369c,	/* chroot */
+	0x0000489d,	/* unlink */
+	0x0000481d,	/* chmod */
+	0x0000481d,	/* utime */
+	0x0002281c,	/* rename */
+	0x0002281c,	/* link */
+	0x0002281c,	/* symlink */
+	0x0001368c,	/* readlink */
+	0x0013289c,	/* mkdir */
+	0x0001369c,	/* rmdir */
+	0x0002c804,	/* open_dir */
+	0x0000d600,	/* readdir */
+	0x0000d60c,	/* telldir */
+	0x0002c804,	/* seekdir */
+	0x0000d604,	/* rewinddir */
+	0x0000d604,	/* closedir */
 	0x0000000c,	/* fork */
 	0x0000001c,	/* wait */
-	0x0001141c,	/* waitpid */
-	0x0002941d,	/* system */
-	0x0002941d,	/* exec */
-	0x0000241d,	/* kill */
+	0x0002281c,	/* waitpid */
+	0x0005281d,	/* system */
+	0x0005281d,	/* exec */
+	0x0000481d,	/* kill */
 	0x0000001c,	/* getppid */
-	0x00009b1c,	/* getpgrp */
-	0x0009941c,	/* setpgrp */
-	0x0001141c,	/* getpriority */
-	0x0011141c,	/* setpriority */
+	0x0001361c,	/* getpgrp */
+	0x0013281c,	/* setpgrp */
+	0x0002281c,	/* getpriority */
+	0x0022281c,	/* setpriority */
 	0x0000001c,	/* time */
 	0x00000000,	/* tms */
-	0x00009b08,	/* localtime */
-	0x00009b08,	/* gmtime */
-	0x00009b8c,	/* alarm */
-	0x00009b1c,	/* sleep */
-	0x0011140d,	/* shmget */
-	0x0011140d,	/* shmctl */
-	0x0111140d,	/* shmread */
-	0x0111140d,	/* shmwrite */
-	0x0001140d,	/* msgget */
-	0x0011140d,	/* msgctl */
-	0x0011140d,	/* msgsnd */
-	0x1111140d,	/* msgrcv */
-	0x0001140d,	/* semop */
-	0x0011140d,	/* semget */
-	0x0111140d,	/* semctl */
-	0x00009bc4,	/* require */
-	0x00001140,	/* dofile */
-	0x00000604,	/* hintseval */
-	0x00009bc0,	/* entereval */
-	0x00001100,	/* leaveeval */
-	0x00000340,	/* entertry */
-	0x00000400,	/* leavetry */
-	0x00001b00,	/* ghbyname */
-	0x00011400,	/* ghbyaddr */
+	0x00013608,	/* localtime */
+	0x00013608,	/* gmtime */
+	0x0001368c,	/* alarm */
+	0x0001361c,	/* sleep */
+	0x0022280d,	/* shmget */
+	0x0022280d,	/* shmctl */
+	0x0222280d,	/* shmread */
+	0x0222280d,	/* shmwrite */
+	0x0002280d,	/* msgget */
+	0x0022280d,	/* msgctl */
+	0x0022280d,	/* msgsnd */
+	0x2222280d,	/* msgrcv */
+	0x0002280d,	/* semop */
+	0x0022280d,	/* semget */
+	0x0222280d,	/* semctl */
+	0x000136c4,	/* require */
+	0x00002240,	/* dofile */
+	0x00000c04,	/* hintseval */
+	0x000136c0,	/* entereval */
+	0x00002200,	/* leaveeval */
+	0x00000640,	/* entertry */
+	0x00000800,	/* leavetry */
+	0x00003600,	/* ghbyname */
+	0x00022800,	/* ghbyaddr */
 	0x00000000,	/* ghostent */
-	0x00001b00,	/* gnbyname */
-	0x00011400,	/* gnbyaddr */
+	0x00003600,	/* gnbyname */
+	0x00022800,	/* gnbyaddr */
 	0x00000000,	/* gnetent */
-	0x00001b00,	/* gpbyname */
-	0x00001400,	/* gpbynumber */
+	0x00003600,	/* gpbyname */
+	0x00002800,	/* gpbynumber */
 	0x00000000,	/* gprotoent */
-	0x00011400,	/* gsbyname */
-	0x00011400,	/* gsbyport */
+	0x00022800,	/* gsbyname */
+	0x00022800,	/* gsbyport */
 	0x00000000,	/* gservent */
-	0x00001b04,	/* shostent */
-	0x00001b04,	/* snetent */
-	0x00001b04,	/* sprotoent */
-	0x00001b04,	/* sservent */
+	0x00003604,	/* shostent */
+	0x00003604,	/* snetent */
+	0x00003604,	/* sprotoent */
+	0x00003604,	/* sservent */
 	0x00000004,	/* ehostent */
 	0x00000004,	/* enetent */
 	0x00000004,	/* eprotoent */
 	0x00000004,	/* eservent */
-	0x00001b00,	/* gpwnam */
-	0x00001b00,	/* gpwuid */
+	0x00003600,	/* gpwnam */
+	0x00003600,	/* gpwuid */
 	0x00000000,	/* gpwent */
 	0x00000004,	/* spwent */
 	0x00000004,	/* epwent */
-	0x00001b00,	/* ggrnam */
-	0x00001b00,	/* ggrgid */
+	0x00003600,	/* ggrnam */
+	0x00003600,	/* ggrgid */
 	0x00000000,	/* ggrent */
 	0x00000004,	/* sgrent */
 	0x00000004,	/* egrent */
 	0x0000000c,	/* getlogin */
-	0x0002140d,	/* syscall */
-	0x00007b04,	/* lock */
-	0x00000300,	/* once */
+	0x0004280d,	/* syscall */
+	0x0000f604,	/* lock */
+	0x00000600,	/* once */
 	0x00000000,	/* custom */
-	0x00000600,	/* coreargs */
-	0x00000108,	/* avhvswitch */
+	0x00000c00,	/* coreargs */
+	0x00000208,	/* avhvswitch */
 	0x00000004,	/* runcv */
-	0x00009b8e,	/* fc */
+	0x0001368e,	/* fc */
 	0x00000040,	/* padcv */
 	0x00000040,	/* introcv */
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
-	0x00000244,	/* refassign */
-	0x00000b40,	/* lvref */
-	0x00000440,	/* lvrefslice */
-	0x00000b40,	/* lvavref */
-	0x00000144,	/* anonconst */
-	0x00000204,	/* isa */
-	0x00000300,	/* cmpchain_and */
-	0x00000100,	/* cmpchain_dup */
+	0x00000444,	/* refassign */
+	0x00001640,	/* lvref */
+	0x00000840,	/* lvrefslice */
+	0x00001640,	/* lvavref */
+	0x00000244,	/* anonconst */
+	0x00000404,	/* isa */
+	0x00000600,	/* cmpchain_and */
+	0x00000200,	/* cmpchain_dup */
 };
 #endif
 
@@ -2502,15 +2522,19 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       80, /* pow */
       80, /* multiply */
       80, /* i_multiply */
+      80, /* f_multiply */
       80, /* divide */
       80, /* i_divide */
+      80, /* f_divide */
       80, /* modulo */
       80, /* i_modulo */
       82, /* repeat */
       80, /* add */
       80, /* i_add */
+      80, /* f_add */
       80, /* subtract */
       80, /* i_subtract */
+      80, /* f_subtract */
       84, /* concat */
       87, /* multiconcat */
       93, /* stringify */
@@ -2886,7 +2910,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x0c78, 0x0b74, 0x0a70, 0x30cc, 0x05a8, 0x0067, /* aassign */
     0x4610, 0x0003, /* chomp, schomp, ncomplement, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir */
     0x05b4, 0x30cc, 0x0003, /* pos */
-    0x4610, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract, left_shift, right_shift, nbit_and, nbit_xor, nbit_or */
+    0x4610, 0x0067, /* pow, multiply, i_multiply, f_multiply, divide, i_divide, f_divide, modulo, i_modulo, add, i_add, f_add, subtract, i_subtract, f_subtract, left_shift, right_shift, nbit_and, nbit_xor, nbit_or */
     0x1538, 0x0067, /* repeat */
     0x32b8, 0x4610, 0x0067, /* concat */
     0x2fdc, 0x0218, 0x1c34, 0x4610, 0x434c, 0x0003, /* multiconcat */
@@ -2998,15 +3022,19 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* POW        */ (OPpARG2_MASK|OPpTARGET_MY),
     /* MULTIPLY   */ (OPpARG2_MASK|OPpTARGET_MY),
     /* I_MULTIPLY */ (OPpARG2_MASK|OPpTARGET_MY),
+    /* F_MULTIPLY */ (OPpARG2_MASK|OPpTARGET_MY),
     /* DIVIDE     */ (OPpARG2_MASK|OPpTARGET_MY),
     /* I_DIVIDE   */ (OPpARG2_MASK|OPpTARGET_MY),
+    /* F_DIVIDE   */ (OPpARG2_MASK|OPpTARGET_MY),
     /* MODULO     */ (OPpARG2_MASK|OPpTARGET_MY),
     /* I_MODULO   */ (OPpARG2_MASK|OPpTARGET_MY),
     /* REPEAT     */ (OPpARG2_MASK|OPpREPEAT_DOLIST),
     /* ADD        */ (OPpARG2_MASK|OPpTARGET_MY),
     /* I_ADD      */ (OPpARG2_MASK|OPpTARGET_MY),
+    /* F_ADD      */ (OPpARG2_MASK|OPpTARGET_MY),
     /* SUBTRACT   */ (OPpARG2_MASK|OPpTARGET_MY),
     /* I_SUBTRACT */ (OPpARG2_MASK|OPpTARGET_MY),
+    /* F_SUBTRACT */ (OPpARG2_MASK|OPpTARGET_MY),
     /* CONCAT     */ (OPpARG2_MASK|OPpTARGET_MY|OPpCONCAT_NESTED),
     /* MULTICONCAT */ (OPpARG1_MASK|OPpMULTICONCAT_STRINGIFY|OPpTARGET_MY|OPpMULTICONCAT_FAKE|OPpMULTICONCAT_APPEND|OPpLVAL_INTRO),
     /* STRINGIFY  */ (OPpARG4_MASK|OPpTARGET_MY),

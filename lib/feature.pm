@@ -11,6 +11,7 @@ our %feature = (
     fc              => 'feature_fc',
     isa             => 'feature_isa',
     say             => 'feature_say',
+    float           => 'feature_float',
     state           => 'feature_state',
     switch          => 'feature_switch',
     bitwise         => 'feature_bitwise',
@@ -31,7 +32,7 @@ our %feature_bundle = (
     "5.15"    => [qw(current_sub evalbytes fc indirect say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bitwise current_sub evalbytes fc indirect postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc indirect isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc float indirect isa postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(indirect)],
 );
 
