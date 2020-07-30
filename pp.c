@@ -3684,11 +3684,8 @@ PP(pp_crypt)
 #    endif /* HAS_CRYPT_R */
 #  endif /* USE_ITHREADS */
 
-#  ifdef FCRYPT
-    sv_setpv(TARG, fcrypt(tmps, SvPV_nolen_const(right)));
-#  else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV_nolen_const(right)));
-#  endif
+
     SvUTF8_off(TARG);
     SETTARG;
     RETURN;

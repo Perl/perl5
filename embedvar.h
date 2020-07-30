@@ -107,7 +107,6 @@
 #define PL_comppad_name_floor	(vTHX->Icomppad_name_floor)
 #define PL_constpadix		(vTHX->Iconstpadix)
 #define PL_cop_seqmax		(vTHX->Icop_seqmax)
-#define PL_cryptseen		(vTHX->Icryptseen)
 #define PL_curcop		(vTHX->Icurcop)
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curlocales		(vTHX->Icurlocales)

@@ -4956,9 +4956,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
 #  endif
-#  ifdef FCRYPT
-			     " FCRYPT"
-#  endif
 #  ifdef HAS_TIMES
 			     " HAS_TIMES"
 #  endif

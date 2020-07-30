@@ -7675,12 +7675,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         UNI(OP_CALLER);
 
     case KEY_crypt:
-#ifdef FCRYPT
-        if (!PL_cryptseen) {
-            PL_cryptseen = TRUE;
-            init_des();
-        }
-#endif
+
         LOP(OP_CRYPT,XTERM);
 
     case KEY_chmod:

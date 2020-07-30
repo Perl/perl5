@@ -743,6 +743,9 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
+PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
+PERLVAR(I, srand_called, bool)
+
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
 PERLVAR(I, psig_ptr,	SV **)
