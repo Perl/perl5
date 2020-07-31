@@ -24041,7 +24041,7 @@ S_parse_uniprop_string(pTHX_
                 goto append_name_to_msg;
             }
 
-            lookup_loose = get_cv("_charnames::_loose_regcomp_lookup", 0);
+            lookup_loose = get_cvs("_charnames::_loose_regcomp_lookup", 0);
             if (! lookup_loose) {
                 Perl_croak(aTHX_
                        "panic: Can't find '_charnames::_loose_regcomp_lookup");
