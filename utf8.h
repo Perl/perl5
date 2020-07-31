@@ -1024,6 +1024,7 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 /* Character classes could also allow \b, but not patterns in general */
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
+/* Should be removed; maybe deprecated, but not used in CPAN */
 #define SHARP_S_SKIP 2
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
