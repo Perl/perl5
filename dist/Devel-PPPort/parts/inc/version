@@ -15,6 +15,7 @@ PERL_REVISION
 PERL_VERSION
 PERL_SUBVERSION
 PERL_BCDVERSION
+__UNDEFINED__
 
 =dontwarn
 
@@ -41,11 +42,12 @@ PERL_PATCHLEVEL_H_IMPLICIT
 #endif
 
 #define D_PPP_DEC2BCD(dec) ((((dec)/100)<<8)|((((dec)%100)/10)<<4)|((dec)%10))
-#define PERL_BCDVERSION ((D_PPP_DEC2BCD(PERL_REVISION)<<24)|(D_PPP_DEC2BCD(PERL_VERSION)<<12)|D_PPP_DEC2BCD(PERL_SUBVERSION))
+#define D_PPP_RVS_TO_BCD(r,v,s) ((D_PPP_DEC2BCD(r)<<24)|(D_PPP_DEC2BCD(v)<<12)|D_PPP_DEC2BCD(s))
+#define PERL_BCDVERSION D_PPP_RVS_TO_BCD(PERL_REVISION, PERL_VERSION, PERL_SUBVERSION)
 
-/* It is very unlikely that anyone will try to use this with Perl 6
-   (or greater), but who knows.
- */
-#if PERL_REVISION != 5
-#  error ppport.h only works with Perl version 5
-#endif /* PERL_REVISION != 5 */
+__UNDEFINED__ PERL_VERSION_EQ(r,v,s) (PERL_BCDVERSION == D_PPP_RVS_TO_BCD(r,v,s))
+__UNDEFINED__ PERL_VERSION_NE(r,v,s) (! PERL_VERSION_EQ(r,v,s))
+__UNDEFINED__ PERL_VERSION_LT(r,v,s) (PERL_BCDVERSION < D_PPP_RVS_TO_BCD(r,v,s))
+__UNDEFINED__ PERL_VERSION_LE(r,v,s) (PERL_BCDVERSION <= D_PPP_RVS_TO_BCD(r,v,s))
+__UNDEFINED__ PERL_VERSION_GT(r,v,s) (! PERL_VERSION_LE(r,v,s))
+__UNDEFINED__ PERL_VERSION_GE(r,v,s) (! PERL_VERSION_LT(r,v,s))

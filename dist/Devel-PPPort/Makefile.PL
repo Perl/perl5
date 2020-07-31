@@ -219,6 +219,8 @@ sub MY::dist_core
     if ( $rule =~ m{^\s*^dist\s+:}m ) {
         $rule =~ s{:}{: PPPort.pm manifest}; # make sure we update PPPort.pm
         $rule .= qq[\t].q[$(NOECHO) $(ECHO) "Warning: Please check '__MAX_PERL__' value in PPPort_pm.PL"].qq[\n];
+        # checking that the tarball has no Pax Header - avoid false positives by using [P]axHEader
+        $rule .= qq[\t].q[$(NOECHO) zgrep -a -e '[P]axHeader' $(DISTVNAME).tar$(SUFFIX) && ( $(ECHO) "ERROR: Pax Header detected in tarball"; rm -f $(DISTVNAME).tar$(SUFFIX) ) ||:].qq[\n];
     }
     $updated .= $rule;
   }

@@ -50,6 +50,18 @@ __UNDEFINED__ __ASSERT_(statement)  assert(statement),
 __UNDEFINED__ __ASSERT_(statement)
 #endif
 
+#ifndef WIDEST_UTYPE
+# ifdef QUADKIND
+#  ifdef U64TYPE
+#   define WIDEST_UTYPE U64TYPE
+#  else
+#   define WIDEST_UTYPE unsigned Quad_t
+#  endif
+# else
+#  define WIDEST_UTYPE U32
+# endif
+#endif
+
 /* These could become provided if/when they become part of the public API */
 __UNDEF_NOT_PROVIDED__ withinCOUNT(c, l, n)                                    \
    (((WIDEST_UTYPE) (((c)) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0))))
@@ -346,18 +358,6 @@ typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
 
 typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
 
-#endif
-
-#ifndef WIDEST_UTYPE
-# ifdef QUADKIND
-#  ifdef U64TYPE
-#   define WIDEST_UTYPE U64TYPE
-#  else
-#   define WIDEST_UTYPE Quad_t
-#  endif
-# else
-#  define WIDEST_UTYPE U32
-# endif
 #endif
 
 /* On versions without NATIVE_TO_ASCII, only ASCII is supported */

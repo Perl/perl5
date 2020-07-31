@@ -117,7 +117,7 @@ my($hint, $define, $function);
 
 sub find_api
 {
-  BEGIN { 'warnings'->unimport('uninitialized') if "$]" > '5.006' }
+  BEGIN { 'warnings'->unimport('uninitialized') if "$]" > 5.006 }
   my $code = shift;
   $code =~ s{
     / (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* / | /[^\r\n]*)
@@ -594,7 +594,7 @@ for $filename (@files) {
         diag("Uses $func");
       }
     }
-    $warnings += hint($func);
+    $warnings += (hint($func) || 0);
   }
 
   unless ($opt{quiet}) {
@@ -882,7 +882,7 @@ sub hint
     $hint =~ s/^/   /mg;
     print "   --- hint for $func ---\n", $hint;
   }
-  $rv;
+  $rv || 0;
 }
 
 sub usage

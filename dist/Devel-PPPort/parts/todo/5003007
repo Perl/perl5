@@ -39,7 +39,6 @@ CopyD                          # T
 CPPMINUS                       # T
 CPPSTDIN                       # T
 croak                          # T
-croak_memory_wrap              # T
 croak_no_modify                # T
 croak_sv                       # T
 croak_xs_usage                 # T
@@ -480,6 +479,12 @@ PERL_UQUAD_MIN                 # T
 PERL_USHORT_MAX                # T
 PERL_USHORT_MIN                # T
 PERL_VERSION                   # T
+PERL_VERSION_EQ                # T
+PERL_VERSION_GE                # T
+PERL_VERSION_GT                # T
+PERL_VERSION_LE                # T
+PERL_VERSION_LT                # T
+PERL_VERSION_NE                # T
 PL_bufend                      # T
 PL_bufptr                      # T
 PL_compiling                   # T
