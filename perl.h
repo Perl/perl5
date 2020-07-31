@@ -4713,7 +4713,7 @@ EXTCONST int         PL_sig_num[];
 #  ifndef EBCDIC
 
 /* The EBCDIC fold table depends on the code page, and hence is found in
- * utfebcdic.h */
+ * ebcdic_tables.h */
 
 EXTCONST  unsigned char PL_fold[] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
