@@ -1,0 +1,77 @@
+name: "Push Notification"
+on: [push, pull_request]
+# add create for tracking tags
+
+# IRC colors: https://modern.ircdocs.horse/formatting.html
+# yaml formating: https://www.yaml.info/learn/quote.html
+
+jobs:
+  notify-irc:
+    runs-on: ubuntu-latest
+    # only on main repo
+    if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
+
+    env:
+      server: ssl.irc.perl.org
+      port: 7062
+      channel: "#p5p-commits"
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: irc push
+        uses: rectalogic/notify-irc@v1
+        if: github.event_name == 'push'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel }}
+          nickname: Push
+          message:
+            "\x037${{ github.actor }}\x0F pushed \x033${{ github.event.ref }}\x0F\n\
+            ${{ github.event.compare }}\n\
+            ${{ join(github.event.commits.*.message) }}"
+
+      - name: irc push
+        uses: rectalogic/notify-irc@v1
+        # need extra logic to blead
+        if: github.event_name == 'push'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel }}
+          nickname: inBlead
+          message:
+            "\x037${{ github.actor }}\x0F pushed \x033${{ github.event.ref }}\x0F\n\
+            ${{ github.event.compare }}\n\
+            ${{ join(github.event.commits.*.message) }}"
+
+      - name: irc pull request
+        uses: rectalogic/notify-irc@v1
+        if: github.event_name == 'pull_request'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel }}
+          nickname: new-PR
+          message:
+            "\x037${{ github.actor }}\x0F opened PR #${{ github.event.pull_request.number }}\n\
+            ${{ github.event.pull_request.title }}\n\
+            \x0313${{ github.event.html_url }}\x0F"
+      # steps:
+      # - name: Pull request merged
+      #   if: github.action == 'closed' && github.pull_request.merged == 'true'
+      #   run: echo merged
+      # - name: irc tag created
+      #   uses: rectalogic/notify-irc@v1
+      #   if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      #   with:
+      #     server: ssl.irc.perl.org
+      #     port: 7062
+      #     channel: "#p5p-commits"
+      #     nickname: new-Tag
+      #     message: |
+      #       ${{ github.actor }} tagged ${{ github.repository }} ${{ github.event.ref }}
