@@ -89,6 +89,11 @@ typedef char HVNAME;
 #  define HEKf		"s"
 #endif
 
+/* we should have some meta in Devel-PPPort to check IS_PERL_VERSION_X_Y */
+#ifndef IS_PERL_VERSION_5_5
+#   define IS_PERL_VERSION_5_5 PERL_VERSION_GE(5,5,0) && PERL_VERSION_LT(5,6,0)
+#endif
+
 VXS(universal_version)
 {
     dXSARGS;
@@ -133,7 +138,7 @@ VXS(universal_version)
 	if (undef) {
 	    if (pkg) {
 		const HVNAME* const name = HvNAME_HEK(pkg);
-#if PERL_VERSION == 5
+#if IS_PERL_VERSION_5_5
 		Perl_croak(aTHX_ "%s version %s required--this is only version ",
 			    name, SvPVx_nolen_const(req));
 #else
@@ -144,7 +149,7 @@ VXS(universal_version)
 #endif
 	    }
 	    else {
-#if PERL_VERSION >= 8
+#if PERL_VERSION_GE(5,8,0)
 		Perl_croak(aTHX_
 			     "%" SVf " defines neither package nor VERSION--"
                              "version check failed",
@@ -206,7 +211,7 @@ VXS(version_new)
         SV * svarg2;
         vs = sv_newmortal();
         svarg2 = ST(2);
-#if PERL_VERSION == 5
+#if IS_PERL_VERSION_5_5
         sv_setpvf(vs,"v%s",SvPV_nolen_const(svarg2));
 #else
         Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen_const(svarg2));
@@ -249,7 +254,7 @@ VXS(version_new)
     rv = NEW_VERSION(vs);
     if ( len != sizeof(VXS_CLASS)-1
       || strcmp(classname,VXS_CLASS) != 0 ) /* inherited new() */
-#if PERL_VERSION == 5
+#if IS_PERL_VERSION_5_5
         sv_bless(rv, gv_stashpv((char *)classname, GV_ADD));
 #else
         sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
@@ -445,7 +450,7 @@ VXS(version_qv)
 	}
 	if ( items == 2 && (len != 7
                 || strcmp(classname,"version")) ) { /* inherited new() */
-#if PERL_VERSION == 5
+#if IS_PERL_VERSION_5_5
 	    sv_bless(rv, gv_stashpv((char *)classname, GV_ADD));
 #else
 	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
