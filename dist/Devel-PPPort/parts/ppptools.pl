@@ -80,7 +80,7 @@ sub expand_version
 {
   my($op, $ver) = @_;
   my($r, $v, $s) = parse_version($ver);
-  $r == 5 or die "only Perl revision 5 is supported\n";
+  $r =~ / ^ [57] $ /x  or die "only Perl revisions [57] are supported\n";
   my $bcdver = sprintf "0x%d%03d%03d", $r, $v, $s;
   return "(PERL_BCDVERSION $op $bcdver)";
 }

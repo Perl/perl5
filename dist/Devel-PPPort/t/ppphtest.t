@@ -16,7 +16,7 @@ BEGIN {
   if ($ENV{'PERL_CORE'}) {
     chdir 't' if -d 't';
     unshift @INC, '../lib' if -d '../lib' && -d '../ext';
-    require Config; import Config;
+    require Config; Config->import;
     use vars '%Config';
     if (" $Config{'extensions'} " !~ m[ Devel/PPPort ]) {
       print "1..0 # Skip -- Perl configured without Devel::PPPort module\n";
@@ -48,7 +48,7 @@ package Devel::PPPort;
 use vars '@ISA';
 require DynaLoader;
 @ISA = qw(DynaLoader);
-bootstrap Devel::PPPort;
+Devel::PPPort->bootstrap;
 
 package main;
 
@@ -655,8 +655,8 @@ ok($o !~ /Uses SvPVutf8_force/m);
 $o = ppport(qw(--nochanges --compat-version=5.999.999));
 ok($o !~ /Uses SvPVutf8_force/m);
 
-$o = ppport(qw(--nochanges --compat-version=6.0.0));
-ok($o =~ /Only Perl 5 is supported/m);
+$o = ppport(qw(--nochanges --compat-version=8.0.0));
+ok($o =~ /Only Perl \[57\] are supported/m);
 
 $o = ppport(qw(--nochanges --compat-version=5.1000.999));
 ok($o =~ /Invalid version number: 5.1000.999/m);
@@ -721,7 +721,7 @@ my %p;
 my $fail = 0;
 for (@o) {
   my($name, $flags) = /^(\w+)(?:\s+\[(\w+(?:,\s+\w+)*)\])?$/ or $fail++;
-  exists $p{$name} and $fail++;
+  { exists $p{$name} and $fail++; }
   $p{$name} = defined $flags ? { map { ($_ => 1) } $flags =~ /(\w+)/g } : '';
 }
 ok(@o > 100);
@@ -762,7 +762,7 @@ my %p;
 my $fail = 0;
 for (@o) {
   my($name, $ver) = /^(\w+)\s*\.+\s*([\d._]+)$/ or $fail++;
-  exists $p{$name} and $fail++;
+  { exists $p{$name} and $fail++; }
   $p{$name} = $ver;
 }
 ok(@o > 100);

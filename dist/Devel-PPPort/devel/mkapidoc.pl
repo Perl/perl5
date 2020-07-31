@@ -23,7 +23,10 @@ use warnings;
 use strict;
 
 my $PERLROOT = $ARGV[0];
-$PERLROOT = '../..' unless $PERLROOT;
+unless ($PERLROOT) {
+    $PERLROOT = '../..';
+    print STDERR "$0: perl directory root argument not specified. Assuming '$PERLROOT'\n";
+}
 
 die "'$PERLROOT' is invalid, or you haven't successfully run 'make' in it"
                                                 unless -e "$PERLROOT/warnings.h";

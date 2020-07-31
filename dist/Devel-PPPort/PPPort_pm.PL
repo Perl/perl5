@@ -711,7 +711,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = '3.57';
+$VERSION = '3.58';
 
 sub _init_data
 {
@@ -747,7 +747,7 @@ sub WriteFile
 
 __DATA__
 #if 0
-<<'SKIP';
+my $void = <<'SKIP';
 #endif
 /*
 ----------------------------------------------------------------------

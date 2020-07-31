@@ -127,17 +127,14 @@ __UNDEFINED__ UTF8_IS_INVARIANT(c)  (isASCII(c) || isCNTRL_L1(c))
 __UNDEFINED__ UVCHR_IS_INVARIANT(c)  UTF8_IS_INVARIANT(c)
 
 #ifdef UVCHR_IS_INVARIANT
-#  if 'A' == 65
-#    ifdef QUADKIND
-#      define D_PPP_UVCHR_SKIP_UPPER(c)                                         \
-          (WIDEST_UTYPE) (c) <                                                  \
-        (((WIDEST_UTYPE) 1) << (6 * D_PPP_BYTE_INFO_BITS)) ? 7 : 13
-#    else
-#      define D_PPP_UVCHR_SKIP_UPPER(c) 7  /* 32 bit platform */
-#    endif
-#  else
-     /* In the releases this is backported to, UTF-EBCDIC had a max of 2**31-1 */
+#  if 'A' != 65 || UVSIZE < 8
+     /* 32 bit platform, which includes UTF-EBCDIC on the releases this is
+      * backported to */
 #    define D_PPP_UVCHR_SKIP_UPPER(c) 7
+#  else
+#    define D_PPP_UVCHR_SKIP_UPPER(c)                                       \
+        (((WIDEST_UTYPE) (c)) <                                             \
+         (((WIDEST_UTYPE) 1) << (6 * D_PPP_BYTE_INFO_BITS)) ? 7 : 13)
 #  endif
 
 __UNDEFINED__ UVCHR_SKIP(c)                                                     \
@@ -821,7 +818,7 @@ else {
 
     # An empty input is an assertion failure on debugging builds.  It is
     # deliberately the first test.
-    require Config; import Config;
+    require Config; Config->import;
     use vars '%Config';
 
     # VMS doesn't put DEBUGGING in ccflags, and Windows doesn't have
