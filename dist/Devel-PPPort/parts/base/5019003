@@ -2,6 +2,7 @@
 PERL_EXIT_ABORT                # E
 PERL_EXIT_WARN                 # E
 sv_pos_b2u_flags               # U
+croak_memory_wrap              # M added by devel/scanprov
 adjust_size_and_find_bucket    # F added by devel/scanprov
 cv_const_sv_or_av              # F added by devel/scanprov
 _invlist_dump                  # F added by devel/scanprov

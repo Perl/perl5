@@ -1,5 +1,4 @@
 5.017006
-croak_memory_wrap              # U
 READ_XDIGIT                    # U
 croak_no_mem                   # F added by devel/scanprov
 get_and_check_backslash_N_name # F added by devel/scanprov

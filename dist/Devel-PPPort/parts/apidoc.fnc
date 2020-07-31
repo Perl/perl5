@@ -20,6 +20,7 @@ Amd|void|__ASSERT_|bool expr
 Amnhd||aTHX
 Amnhd||aTHX_
 Amd|int|AvFILL|AV* av
+md|int|AvFILLp|AV* av
 Amnd|I32|ax
 Amxud|void|BhkDISABLE|BHK *hk|which
 Amxud|void|BhkENABLE|BHK *hk|which
@@ -583,13 +584,23 @@ AmnUhd||PERL_UQUAD_MIN
 AmnUhd||PERL_USHORT_MAX
 AmnUhd||PERL_USHORT_MIN
 hAmnd|int|PERL_VERSION
+AmdR|bool|PERL_VERSION_EQ|const int r|const int v|const int s
+AmdR|bool|PERL_VERSION_GE|const int r|const int v|const int s
+AmdR|bool|PERL_VERSION_GT|const int r|const int v|const int s
+AmdR|bool|PERL_VERSION_LE|const int r|const int v|const int s
+AmdR|bool|PERL_VERSION_LT|const int r|const int v|const int s
+AmdR|bool|PERL_VERSION_NE|const int r|const int v|const int s
 AmnUd|Perl_check_t *|PL_check
 AmnxUd|PAD *|PL_comppad
 AmnxUd|PADNAMELIST *|PL_comppad_name
 Amnd|COP*|PL_curcop
 AmnxUd|SV **|PL_curpad
 Amnd|HV*|PL_curstash
+mnd|SV *|PL_DBsingle
+mnd|GV *|PL_DBsub
+mnd|SV *|PL_DBtrace
 Amnd|GV *|PL_defgv
+mnd|U8|PL_dowarn
 Amnhd|GV *|PL_errgv
 Amnd|U8|PL_exit_flags
 AmnUxd|Perl_keyword_plugin_t|PL_keyword_plugin

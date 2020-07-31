@@ -204,20 +204,24 @@ Perl public API.
 
 =item Version numbers
 
-Version checking can be tricky to get correct (besides being buggy in some perl
-versions).
-C<ivers()> is used in the C<=tests> section to overcome this, and constructs
+Version checking used to be tricky to get correct (besides being buggy in some
+perl versions).
+C<ivers()> is used in the C<=tests> section to overcome this. and constructs
 like the following in the C language sections.
+
+  #if PERL_VERSION_EQ(5,9,3)
+  #if PERL_VERSION_NE(5,9,3)
+  #if PERL_VERSION_LT(5,9,3)
+  #if PERL_VERSION_GT(5,9,3)
+  #if PERL_VERSION_LE(5,9,3)
+  #if PERL_VERSION_GE(5,9,3)
+
+An alternative way of saying things like these is
 
   #if { VERSION < 5.9.3 }
 
-instead of
-
-  #if ((PERL_VERSION < 9) \
-    || (PERL_VERSION == 9 && PERL_SUBVERSION < 3))
-
-The version number can be either of the new form C<5.x.x> or the older
-form C<5.00x_yy>. Both are translated into the correct preprocessor
+In this form, the version number can be either of the new form C<5.x.x> or the
+older form C<5.00x_yy>. Both are translated into the correct preprocessor
 statements. It is also possible to combine this with other statements:
 
   #if { VERSION >= 5.004 } && !defined(sv_vcatpvf)
@@ -399,7 +403,7 @@ collect the remaining information in F<parts/apidoc.fnc>.
 =item *
 
 The final step before regenerating everything is to run
-F</devel/mkppport_fnc.pl> to update the F</parts/ppport.fnc> file.
+F<devel/mkppport_fnc.pl> to update the F</parts/ppport.fnc> file.
 
 =back
 

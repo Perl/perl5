@@ -1,5 +1,11 @@
 Revision history for Devel-PPPort
 
+ 3.58 - 2020-03-09
+
+ * Safer definition of UVCHR_SKIP
+ * Make sure WIDEST_UTYPE is unsigned
+ * Avoid Pax Header in tarballs
+
  3.57 - 2020-01-31
 
  * Fix eval_sv for Perl versions prior to 5.6.0 (Pali)
