@@ -24,7 +24,7 @@ jobs:
 
       - name: irc push
         uses: rectalogic/notify-irc@v1
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref != 'refs/heads/blead'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -35,17 +35,16 @@ jobs:
             ${{ github.event.compare }}\n\
             ${{ join(github.event.commits.*.message) }}"
 
-      - name: irc push
+      - name: irc push to blead
         uses: rectalogic/notify-irc@v1
-        # need extra logic to blead
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/blead'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
           channel: ${{ env.channel }}
           nickname: inBlead
           message:
-            "\x037${{ github.actor }}\x0F pushed \x033${{ github.event.ref }}\x0F\n\
+            "\x0313[blead]\x0F \x037${{ github.actor }}\x0F pushed to blead\n\
             ${{ github.event.compare }}\n\
             ${{ join(github.event.commits.*.message) }}"
 
