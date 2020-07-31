@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.33.1
+perldelta - what is new for perl v7.0.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.33.0 release and the 5.33.1
+This document describes differences between the 5.32.0 release and the 7.0.0
 release.
 
-If you are upgrading from an earlier release such as 5.32.0, first read
-L<perl5330delta>, which describes differences between 5.32.0 and 5.33.0.
+If you are upgrading from an earlier release such as 5.30.0, first read
+L<perl5320delta>, which describes differences between 5.30.0 and 5.32.0.
 
 =head1 Notice
 
@@ -311,13 +311,13 @@ XXX
 
 =head2 Discontinued Platforms
 
+XXX List any platforms that this version of perl no longer compiles on.
+
 =over 4
 
-=item Symbian
+=item XXX-some-platform
 
-Support code relating to Symbian has been removed.  Symbian was an
-operating system for mobile devices.  The port was last updated in July
-2009, and the platform itself in October 2012.
+XXX
 
 =back
 
@@ -342,13 +342,13 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
+[ List each change as an =item entry ]
+
 =over 4
 
 =item *
 
-The C<PERL_GLOBAL_STRUCT> compilation option has been removed, and
-with it the need or the C<dVAR> macro.  C<dVAR> remains defined as a
-no-op outside C<PERL_CORE> for backwards compatiblity with XS modules.
+XXX
 
 =back
 
@@ -403,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.33.0..HEAD
+  perl Porting/acknowledgements.pl v7.0.0..HEAD
 
 =head1 Reporting Bugs
 

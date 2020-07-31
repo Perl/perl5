@@ -22,8 +22,8 @@ $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
 my $patchlevel = substr($],3,2);
 die "Patchlevel of perl ($patchlevel)",
-    "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
-	if $patchlevel != $Config{'PERL_VERSION'};
+    "and patchlevel of config.sh ($Config{'PERL_VERSION_MINOR'}) don't match\n"
+	if $patchlevel != $Config{'PERL_VERSION_MINOR'};
 
 my $usage =
 "Usage:  installman --man1dir=/usr/wherever --man1ext=1

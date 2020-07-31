@@ -189,8 +189,8 @@ my $ver = $Config{version};
 my $release = substr($],0,3);   # Not used currently.
 my $patchlevel = substr($],3,2);
 die "Patchlevel of perl ($patchlevel)",
-    "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
-	if $patchlevel != $Config{'PERL_VERSION'};
+    "and patchlevel of config.sh ($Config{'PERL_VERSION_MINOR'}) don't match\n"
+	if $patchlevel != $Config{'PERL_VERSION_MINOR'};
 
 # Fetch some frequently-used items from %Config
 my $installbin = "$opts{destdir}$Config{installbin}";
@@ -267,7 +267,7 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
     if ($Is_Cygwin) {
 	$perldll = $libperl;
     } else {
-	$perldll = 'perl5'.$Config{patchlevel}.'.'.$so;
+	$perldll = 'perl7'.$Config{patchlevel}.'.'.$so;
     }
 
     if ($dlsrc ne "dl_none.xs") {
@@ -729,7 +729,7 @@ sub installlib {
 # Also preserve modification times for .a libraries.
 # On some systems, if you do
 #   ranlib libperl.a
-#   cp libperl.a /usr/local/lib/perl5/archlib/CORE/libperl.a
+#   cp libperl.a /usr/local/lib/perl/archlib/CORE/libperl.a
 # and then try to link against the installed libperl.a, you might
 # get an error message to the effect that the symbol table is older
 # than the library.

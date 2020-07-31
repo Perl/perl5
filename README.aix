@@ -245,7 +245,7 @@ following option:
     -Dcc='gcc -maix64'
 
 
-=head2 Compiling Perl 5 on AIX 7.1.0
+=head2 Compiling Perl 5 on AIX 7.0.0
 
 A regression in AIX 7 causes a failure in make test in Time::Piece during
 daylight savings time.  APAR IV16514 provides the fix for this.  A quick

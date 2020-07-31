@@ -4578,7 +4578,7 @@ patchlevel (patchlevel.U):
 	The patchlevel level of this package.
 	The value of patchlevel comes from the patchlevel.h file.
 	In a version number such as 5.6.1, this is the "6".
-	In patchlevel.h, this is referred to as "PERL_VERSION".
+	In patchlevel.h, this is referred to as "PERL_VERSION_MINOR".
 
 path_sep (Unix.U):
 	This is an old synonym for p_ in Head.U, the character
@@ -4595,21 +4595,21 @@ perl5 (perl5.U):
 	to determine inc_version_list.
 
 PERL_API_REVISION (patchlevel.h):
-	This number describes the earliest compatible PERL_REVISION of
+	This number describes the earliest compatible PERL_VERSION_MAJOR of
 	Perl ("compatibility" here being defined as sufficient binary/API
 	compatibility to run XS code built with the older version).
 	Normally this does not change across maintenance releases.
 	Please read the comment in patchlevel.h.
 
 PERL_API_SUBVERSION (patchlevel.h):
-	This number describes the earliest compatible PERL_SUBVERSION of
+	This number describes the earliest compatible PERL_VERSION_PATCH of
 	Perl ("compatibility" here being defined as sufficient binary/API
 	compatibility to run XS code built with the older version).
 	Normally this does not change across maintenance releases.
 	Please read the comment in patchlevel.h.
 
 PERL_API_VERSION (patchlevel.h):
-	This number describes the earliest compatible PERL_VERSION of
+	This number describes the earliest compatible PERL_VERSION_MINOR of
 	Perl ("compatibility" here being defined as sufficient binary/API
 	compatibility to run XS code built with the older version).
 	Normally this does not change across maintenance releases.
@@ -4632,7 +4632,7 @@ perl_patchlevel (patchlevel.U):
 	the maintenance versus development dichotomy except
 	by also being increasing.
 
-PERL_REVISION (Oldsyms.U):
+PERL_VERSION_MAJOR (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 5.
 	This value is manually set in patchlevel.h
 
@@ -4646,13 +4646,13 @@ perl_static_inline (d_static_inline.U):
 	static _inline      (older MSVC)
 	static              (c89 compilers)
 
-PERL_SUBVERSION (Oldsyms.U):
+PERL_VERSION_PATCH (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 2.
 	Values greater than 50 represent potentially unstable
 	development subversions.
 	This value is manually set in patchlevel.h
 
-PERL_VERSION (Oldsyms.U):
+PERL_VERSION_MINOR (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 6.
 	This value is manually set in patchlevel.h
 
@@ -4785,7 +4785,7 @@ readdir_r_proto (d_readdir_r.U):
 revision (patchlevel.U):
 	The value of revision comes from the patchlevel.h file.
 	In a version number such as 5.6.1, this is the "5".
-	In patchlevel.h, this is referred to as "PERL_REVISION".
+	In patchlevel.h, this is referred to as "PERL_VERSION_MAJOR".
 
 rm (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -5329,7 +5329,7 @@ subversion (patchlevel.U):
 	The subversion level of this package.
 	The value of subversion comes from the patchlevel.h file.
 	In a version number such as 5.6.1, this is the "1".
-	In patchlevel.h, this is referred to as "PERL_SUBVERSION".
+	In patchlevel.h, this is referred to as "PERL_VERSION_PATCH".
 	This is unique to perl.
 
 sysman (sysman.U):

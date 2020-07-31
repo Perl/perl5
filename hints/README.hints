@@ -6,7 +6,7 @@ README.hints - hint files used by Configure
 
 These files are used by Configure to set things which Configure either
 can't or doesn't guess properly.  Most of these hint files have been
-tested with at least some version of perl5, but some are still left
+tested with at least some version of Perl, but some are still left
 over from perl4.
 
 Please report any problems or suggested changes at

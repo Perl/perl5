@@ -1,5 +1,5 @@
 # This is a hints file for Stratus OpenVOS, using the POSIX environment
-# found in VOS 17.1.0 and higher.
+# found in VOS 17.0.0 and higher.
 #
 # OpenVOS POSIX is based on POSIX.1-1996 and contains elements of
 # POSIX.1-2001.  It ships with gcc as the standard compiler.
@@ -15,11 +15,11 @@ make=${MAKE-"/system/gnu_library/bin/gmake"}
 # indented to not put it into config.sh
   _make=${MAKE-"/system/gnu_library/bin/gmake"}
 
-# Check for the minimum acceptable release of OpenVOS (17.1.0).
-if test `uname -r | sed -e 's/OpenVOS Release //' -e 's/VOS Release //'` \< "17.1.0"; then
+# Check for the minimum acceptable release of OpenVOS (17.0.0).
+if test `uname -r | sed -e 's/OpenVOS Release //' -e 's/VOS Release //'` \< "17.0.0"; then
 cat >&4 <<EOF
 ***
-*** This version of Perl 5 must be built on OpenVOS Release 17.1.0 or later.
+*** This version of Perl 5 must be built on OpenVOS Release 17.0.0 or later.
 ***
 EOF
 exit 1

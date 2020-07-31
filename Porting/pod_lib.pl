@@ -15,7 +15,7 @@ Porting/pod_lib.pl - functions for building and installing POD
 
 =head1 DESCRIPTION
 
-This program, when C<require>d into other programs in the Perl 5 core
+This program, when C<require>d into other programs in the Perl core
 distribution, provides functions useful during building and, secondarily,
 testing.
 

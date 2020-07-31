@@ -128,8 +128,7 @@ customized.t - Test that CUSTOMIZED files in Maintainers.pl have not been overwr
 
 =head1 SYNOPSIS
 
- cd t
- ./perl -I../lib porting/customized.t --regen
+    cd t; ./perl -I../lib porting/customized.t --regen; cd -
 
 =head1 DESCRIPTION
 

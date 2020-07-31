@@ -1331,10 +1331,10 @@ startup. This information is used by perl when it's in
 adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
 switch); see L<perlrun> for more info on this.
 
-=item $PERL_VERSION
+=item $PERL_VERSION_MINOR
 
 =item $^V
-X<$^V> X<$PERL_VERSION>
+X<$^V> X<$PERL_VERSION_MINOR>
 
 The revision, version, and subversion of the Perl interpreter, represented
 as a C<version> object.

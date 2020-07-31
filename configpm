@@ -225,6 +225,20 @@ i_time='define'
 prototype='define'
 EOT
 
+# Don't lie about PATCHLEVEL and SUBVERSION in %Config
+my ($vstring) = ( $^V =~ m{^v(.+)$} );
+my ($ver_major, $ver_minor, $ver_patch) = split m/\./, $vstring;
+
+my @hardcoded = qw{ PATCHLEVEL SUBVERSION PERL_REVISION PERL_VERSION PERL_SUBVERSION };
+
+# grand-grand father variables
+push @v_others, "PATCHLEVEL='$ver_minor'\n";
+push @v_others, "SUBVERSION='$ver_patch'\n";
+
+# grand father variables
+push @v_others, "PERL_REVISION='$ver_major'\n";
+push @v_others, "PERL_VERSION='$ver_minor'\n";
+push @v_others, "PERL_SUBVERSION='$ver_patch'\n";
 
 my %seen_quotes;
 {
@@ -233,22 +247,14 @@ my %seen_quotes;
   while (<CONFIG_SH>) {
     next if m:^#!/bin/sh:;
 
-    # Catch PERL_CONFIG_SH=true and PERL_VERSION=n line from Configure.
+    # Catch PERL_CONFIG_SH=true and PERL_VERSION_MINOR=n line from Configure.
     s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/ or m/^(\w+)='(.*)'$/;
     my($k, $v) = ($1, $2);
 
-    # grandfather PATCHLEVEL and SUBVERSION and CONFIG
-    if ($k) {
-	if ($k eq 'PERL_VERSION') {
-	    push @v_others, "PATCHLEVEL='$v'\n";
-	}
-	elsif ($k eq 'PERL_SUBVERSION') {
-	    push @v_others, "SUBVERSION='$v'\n";
-	}
-	elsif ($k eq 'PERL_CONFIG_SH') {
+    # grandfather CONFIG
+	if (defined $k && $k eq 'PERL_CONFIG_SH') {
 	    push @v_others, "CONFIG='$v'\n";
 	}
-    }
 
     # We can delimit things in config.sh with either ' or ". 
     unless ($in_v or m/^(\w+)=(['"])(.*\n)/){
@@ -271,6 +277,9 @@ my %seen_quotes;
     s,/,::,g if $Extensions{$name};
 
     $val =~ s/$quote\n?\z//;
+
+    # Don't lie about PERL_VERSION variables in %Config
+    next if defined $k && grep { $_ eq $k } @hardcoded;
 
     my $line = "$name=$quote$val$quote\n";
     push(@v_others, $line);
