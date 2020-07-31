@@ -7,7 +7,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl70.dll).  Also makes individual DLLs for the XS extensions.
+# (perl71.dll).  Also makes individual DLLs for the XS extensions.
 #
 # The easiest way to customize the build process is to use parameters like this:
 #
@@ -64,7 +64,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \7.0.0
+#INST_VER	:= \7.1.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -230,7 +230,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl70s.lib will also be created.
+# variables below. A static library perl71s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	:= define
@@ -1004,9 +1004,9 @@ ifeq ($(CCTYPE),GCC)
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl70$(a)
-PERLIMPLIBBASE	= libperl70$(a)
-PERLSTATICLIB	= ..\libperl70s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl71$(a)
+PERLIMPLIBBASE	= libperl71$(a)
+PERLSTATICLIB	= ..\libperl71s$(a)
 INT64		= long long
 
 else
@@ -1019,12 +1019,12 @@ endif
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	?= $(COREDIR)\perl70$(a)
-PERLIMPLIBBASE	?= perl70$(a)
-PERLEXPLIB	?= $(COREDIR)\perl70.exp
-PERLSTATICLIB	?= ..\perl70s$(a)
-PERLDLL		= ..\perl70.dll
-PERLDLLBASE	= perl70.dll
+PERLIMPLIB	?= $(COREDIR)\perl71$(a)
+PERLIMPLIBBASE	?= perl71$(a)
+PERLEXPLIB	?= $(COREDIR)\perl71.exp
+PERLSTATICLIB	?= ..\perl71s$(a)
+PERLDLL		= ..\perl71.dll
+PERLDLLBASE	= perl71.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake

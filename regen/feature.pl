@@ -76,6 +76,7 @@ my %feature_bundle = (
     "5.29"  => [ +V5_27 ],
     "5.31"  => [ +V5_27 ],
     "7.0"   => [ +V5_27 ],
+    "7.1"   => [ +V5_27 ],
 );
 
 my @noops = qw( postderef lexical_subs );

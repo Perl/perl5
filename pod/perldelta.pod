@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v7.0.0
+perldelta - what is new for perl v7.1.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.32.0 release and the 7.0.0
+This document describes differences between the 7.0.0 release and the 7.1.0
 release.
 
-If you are upgrading from an earlier release such as 5.30.0, first read
-L<perl5320delta>, which describes differences between 5.30.0 and 5.32.0.
+If you are upgrading from an earlier release such as 5.32.0, first read
+L<perl5320delta>, which describes differences between 5.32.0 and 7.0.0.
 
 =head1 Notice
 
@@ -403,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v7.0.0..HEAD
+  perl Porting/acknowledgements.pl v7.1.0..HEAD
 
 =head1 Reporting Bugs
 

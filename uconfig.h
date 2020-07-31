@@ -1229,8 +1229,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl/7.0/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl/7.0/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl/7.1/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl/7.1/unknown"		/ **/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1283,8 +1283,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl/7.0"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl/7.0"		/**/
+#define PRIVLIB "/usr/local/lib/perl/7.1"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl/7.1"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1301,8 +1301,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define SITEARCH "/usr/local/lib/perl/7.0/unknown"		/ **/
-/*#define SITEARCH_EXP "/usr/local/lib/perl/7.0/unknown"		/ **/
+/*#define SITEARCH "/usr/local/lib/perl/7.1/unknown"		/ **/
+/*#define SITEARCH_EXP "/usr/local/lib/perl/7.1/unknown"		/ **/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1324,8 +1324,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/usr/local/lib/perl/7.0"		/**/
-#define SITELIB_EXP "/usr/local/lib/perl/7.0"		/**/
+#define SITELIB "/usr/local/lib/perl/7.1"		/**/
+#define SITELIB_EXP "/usr/local/lib/perl/7.1"		/**/
 #define SITELIB_STEM "/usr/local/lib/perl"		/**/
 
 /* PERL_VENDORARCH:
@@ -5261,5 +5261,5 @@
 
 /* Generated from:
  * 14796a77fb4ae3335f5e589a98445bc6e838b688194f6f112537495f0814f5d5 config_h.SH
- * 6ddb94822db60f61426edbe5c3d02fe10ec1696e714067e20b5e1d5dd22d803a uconfig.sh
+ * 4547efe84174008b81e99895b5c8202fa7783a4d42bbe7239eff079e4e723584 uconfig.sh
  * ex: set ro: */

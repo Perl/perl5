@@ -49,9 +49,9 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
        - PERL_VERSION_LE
        - PERL_VERSION_GE
 */
-#define PERL_VERSION_MAJOR	      7
-#define PERL_VERSION_MINOR	      0
-#define PERL_VERSION_PATCH	      0
+#define PERL_VERSION_MAJOR        7
+#define PERL_VERSION_MINOR        1
+#define PERL_VERSION_PATCH        0
 #define PERL_VERSION_RELEASE      0 /* for future usage */
 #define PERL_VERSION_BUILD        0 /* for future usage */
 
@@ -60,10 +60,9 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
    This fixes two XS Perl5 modules issues:
     - modules using an old version of ppport.h
     - incomplete version checks when only using PERL_VERSION for example
-   view define GCC_DIAG_PRAGMA(x) _Pragma (#x)
 */
-#define PERL_REVISION  	          5
-#define PERL_VERSION   	        255
+#define PERL_REVISION             5
+#define PERL_VERSION            255
 #define PERL_SUBVERSION         255
 
 /* The following numbers describe the earliest compatible version of
@@ -84,7 +83,7 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
    changing them should not be necessary.
 */
 #define PERL_API_REVISION	7
-#define PERL_API_VERSION	0
+#define PERL_API_VERSION	1
 #define PERL_API_SUBVERSION	0
 /*
    XXX Note:  The selection of non-default Configure options, such
