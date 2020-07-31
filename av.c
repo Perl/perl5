@@ -169,12 +169,6 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
             to_null += newmax - *maxp;
             *maxp = newmax;
 
-            /* See GH#18014 for discussion of when this might be needed: */
-            if (av == PL_curstack) { /* Oops, grew stack (via av_store()?) */
-                PL_stack_sp = *allocp + (PL_stack_sp - PL_stack_base);
-                PL_stack_base = *allocp;
-                PL_stack_max = PL_stack_base + newmax;
-            }
         } else { /* there is no SV* array yet */
             *maxp = key < 3 ? 3 : key;
             {

@@ -56,6 +56,11 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
         Perl_croak(aTHX_ "Out of memory during stack extend");
 
     av_extend(PL_curstack, current + n + extra);
+
+    PL_stack_sp = AvALLOC(PL_curstack) + (PL_stack_sp - PL_stack_base);
+    PL_stack_base = AvALLOC(PL_curstack);
+    PL_stack_max = PL_stack_base + AvMAX(PL_curstack);
+
 #ifdef DEBUGGING
         PL_curstackinfo->si_stack_hwm = current + n + extra;
 #endif
