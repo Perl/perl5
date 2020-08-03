@@ -857,12 +857,22 @@ $block);
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <style>
-            body      { font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; }
-            pre, code { font-family: Menlo, Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace; }
-            a:link    { color: #0062cc; }
-            a:visited { color: #1398ae; }
-        </style>
+		<style>
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+				font-size: 11pt;
+			}
+			a:link    { color: #0062cc; }
+			a:visited { color: #1398ae; }
+
+			pre, p > code {
+				font-family : Menlo, Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace;
+				border      : 1px solid #cccccc;;
+				background  : #f5f5f5;
+				padding     : 5px;
+				display     : inline-block;
+			}
+		</style>
 
         <title>$title</title>$csslink
     </head>
