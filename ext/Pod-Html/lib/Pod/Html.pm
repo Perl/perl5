@@ -852,8 +852,7 @@ sub trim_leading_whitespace {
     my ($para) = @_;
 
     # Start by converting tabs to spaces
-	$tabstop = 4;
-	@$para   = Text::Tabs::expand(@$para);
+    @$para = Text::Tabs::expand(@$para);
 
     # Find the line with the least amount of indent, as that's our "base"
     my @indent_levels = (sort(map { $_ =~ /^( *)./mg } @$para));
