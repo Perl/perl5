@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.31";
+our $VERSION = "1.32";
 
 my %err = ();
 
@@ -18,11 +18,18 @@ if ($Config{gccversion} ne '' && $^O eq 'MSWin32') {
     # MinGW complains "warning: #pragma system_header ignored outside include
     # file" if the header files are processed individually, so include them
     # all in .c file and process that instead.
+    my %seen;
     open INCS, '>', 'includes.c' or
 	die "Cannot open includes.c";
     foreach $file (@files) {
 	next if $file eq 'errno.c';
 	next unless -f $file;
+	if ( $file eq 'avx512vpopcntdqvlintrin.h' || $file eq 'avx512bwintrin.h' ) {
+		# "Never use <avx512bwintrin.h> directly; include <immintrin.h> instead."
+		# "Never use <avx512vpopcntdqvlintrin.h> directly; include <immintrin.h> instead."
+		$file = 'immintrin.h';
+	}
+	next if ++$seen{$file} > 1;
 	print INCS qq[#include "$file"\n];
     }
     close INCS;
