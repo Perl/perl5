@@ -452,7 +452,9 @@ Updated 12 March    2001 to mention //'SYS1.TCPPARMS(TCPDATA)'.
 
 Updated 28 November 2001 for broken URLs.
 
-Updated 03 October  2019 for perl-5.32.0+
+Updated 03 October  2019 for perl-5.31.5+
+
+Updated 28 July     2020 for perl-7.0.0+
 
 =cut
 

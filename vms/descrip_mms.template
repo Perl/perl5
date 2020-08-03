@@ -70,7 +70,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 .endif
 
-PERL_VERSION = ~PV~
+PERL_VERSION_MINOR = ~PV~
 
 .ifdef MALLOC
 MALLOC_O = malloc$(O)
@@ -81,9 +81,9 @@ MALLOC_C = malloc$(C)
 SOCKET=1
 .endif
 
-ARCHDIR =  [.lib.$(ARCHNAME).$(PERL_VERSION)]
-ARCHCORE = [.lib.$(ARCHNAME).$(PERL_VERSION).CORE]
-ARCHAUTO = [.lib.$(ARCHNAME).$(PERL_VERSION).auto]
+ARCHDIR =  [.lib.$(ARCHNAME).$(PERL_VERSION_MINOR)]
+ARCHCORE = [.lib.$(ARCHNAME).$(PERL_VERSION_MINOR).CORE]
+ARCHAUTO = [.lib.$(ARCHNAME).$(PERL_VERSION_MINOR).auto]
 
 #: >>>>>Compiler-specific options <<<<<
 .ifdef GNUC
@@ -313,7 +313,7 @@ utils : $(utils1) $(utils2) $(utils3) $(utils4) $(utils5)
 extra.pods : miniperl
 	@ @extra_pods.com
 
-PERLDELTA_CURRENT = [.pod]perl5320delta.pod
+PERLDELTA_CURRENT = [.pod]perl700delta.pod
 
 $(PERLDELTA_CURRENT) : [.pod]perldelta.pod
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(PERLDELTA_CURRENT)

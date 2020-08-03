@@ -3775,7 +3775,7 @@ S_require_version(pTHX_ SV *sv)
             lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
 
             first  = SvIV(*av_fetch(lav,0,0));
-            if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
+            if (   first > (int)PERL_VERSION_MAJOR    /* probably 'use 6.0' */
                 || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
                 || av_tindex(lav) > 1            /* FP with > 3 digits */
                 || strstr(SvPVX(pv),".0")        /* FP with leading 0 */

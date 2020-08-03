@@ -52,15 +52,15 @@ case "$bsdos_distribution" in
 	d_dosuid='define'
 	d_portable='undef'
 	prefix='/usr/contrib'
-	perlpath='/usr/bin/perl5'
-	startperl='#!/usr/bin/perl5'
+	perlpath='/usr/bin/perl'
+	startperl='#!/usr/bin/perl'
 	scriptdir='/usr/contrib/bin'
-	privlib='/usr/libdata/perl5'
+	privlib='/usr/libdata/perl'
 	man1dir='/usr/contrib/man/man1'
 	man3dir='/usr/contrib/man/man3'
 	# phlib added by BSDI -- we share the *.ph include dir with perl4
-	phlib="/usr/libdata/perl5/site_perl/$(arch)-$osname/include"
-	phlibexp="/usr/libdata/perl5/site_perl/$(arch)-$osname/include"
+	phlib="/usr/libdata/perl/site_perl/$(arch)-$osname/include"
+	phlibexp="/usr/libdata/perl/site_perl/$(arch)-$osname/include"
 	;;
 esac
 

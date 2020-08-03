@@ -8723,7 +8723,7 @@ yyl_try(pTHX_ char *s)
 	    }
 	    if (PL_minus_E)
 		sv_catpvs(PL_linestr,
-			  "use feature ':5." STRINGIFY(PERL_VERSION) "';");
+			  "use feature ':" STRINGIFY(PERL_VERSION_MAJOR) "." STRINGIFY(PERL_VERSION_MINOR) "';");
 	    if (PL_minus_n || PL_minus_p) {
 		sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
 		if (PL_minus_l)

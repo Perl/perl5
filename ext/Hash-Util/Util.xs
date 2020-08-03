@@ -284,7 +284,7 @@ bucket_ratio(rhv)
     if (SvROK(rhv)) {
         rhv= SvRV(rhv);
         if ( SvTYPE(rhv)==SVt_PVHV ) {
-#if PERL_VERSION < 25
+#if PERL_VERSION_LT(5,25,0)
             SV *ret= Perl_hv_scalar(aTHX_ (HV*)rhv);
 #else
             SV *ret= Perl_hv_bucket_ratio(aTHX_ (HV*)rhv);

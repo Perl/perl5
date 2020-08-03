@@ -1495,10 +1495,11 @@ my $case_insensitive;
         if defined $dev_c && $dev_C == $dev_c && $ino_C == $ino_c;
 }
 
-# This changes to PERL_VERSION in 4d8076ea25903dcb in 1999
+# PERL_VERSION was introduced in 1999 for perl-5.6.0 via 4d8076ea25903dcb
+# PERL_VERSION_MINOR was introduced in 2020 for perl-7.0.0
 my $major
     = extract_from_file('patchlevel.h',
-			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
+			qr/^#define\s+(?:PERL_VERSION_MINOR|PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
 			0);
 
 my $unfixable_db_file;

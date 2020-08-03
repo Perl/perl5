@@ -764,7 +764,7 @@ VER_PV:
 	version = savepvn(SvPV(ver,len), SvCUR(ver));
 	SAVEFREEPV(version);
 #ifndef SvVOK
-#  if PERL_VERSION > 5
+#  if PERL_VERSION_GT(5,5,0)
 	/* This will only be executed for 5.6.0 - 5.8.0 inclusive */
 	if ( len >= 3 && !instr(version,".") && !instr(version,"_")) {
 	    /* may be a v-string */

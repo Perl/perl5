@@ -29,9 +29,9 @@
 #  ifndef PERL_CORE
 #    define PERL_FS_VER_FMT	"%d_%d_%d"
 #  endif
-#  define PERL_FS_VERSION	STRINGIFY(PERL_REVISION) "_" \
-				STRINGIFY(PERL_VERSION) "_" \
-				STRINGIFY(PERL_SUBVERSION)
+#  define PERL_FS_VERSION	STRINGIFY(PERL_VERSION_MAJOR) "_" \
+				STRINGIFY(PERL_VERSION_MINOR) "_" \
+				STRINGIFY(PERL_VERSION_PATCH)
 #elif defined(WIN32)
 #  define PERL_SYS_INIT_BODY(c,v)					\
       MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v); PERLIO_INIT

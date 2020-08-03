@@ -404,7 +404,7 @@ $! Unfortunately Configure.COM in DCL is not yet set up to do this -
 $! maybe someday
 $!
 $!: set package name
-$ package = "perl5"
+$ package = "perl7"
 $ packageup = F$EDIT((package - "5"),"UPCASE")
 $!
 $!: Eunice requires " " instead of "", can you believe it
@@ -735,7 +735,7 @@ $ IF F$TYPE(usedevel) .EQS. "" THEN usedevel = "undef"
 $ patchlevel_h = F$SEARCH("[-]patchlevel.h")
 $ IF (patchlevel_h.NES."")
 $ THEN
-$   SEARCH 'patchlevel_h' "define","PERL_VERSION","epoch"/match=and/out=[]ver.out
+$   SEARCH 'patchlevel_h' "define","PERL_VERSION_MINOR","epoch"/match=and/out=[]ver.out
 $   IF .NOT. usedevel .AND. usedevel .NES. "define"
 $   THEN
 $     OPEN/READ CONFIG []ver.out
@@ -812,7 +812,7 @@ $   TYPE SYS$INPUT:
 $   DECK
 
 This installation shell script will examine your system and ask you questions
-to determine how the perl5 package should be installed. If you get
+to determine how the perl7 package should be installed. If you get
 stuck on a question, you may use a ^C or ^Y shell escape to STOP this
 process, edit something, then restart this process as you just did.
 Many of the questions will have default answers in square
@@ -1207,13 +1207,13 @@ $   got_perl_patchlevel= "false"
 $   OPEN/READONLY CONFIG 'patchlevel_h' 
 $Patchlevel_h_loop:
 $   READ/END_Of_File=Close_patch/ERROR=Close_patch CONFIG line
-$   IF ((F$LOCATE("#define PERL_VERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
+$   IF ((F$LOCATE("#define PERL_VERSION_MINOR",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     patchlevel = F$ELEMENT(2," ",line)
 $     got_patch = "true"
 $   ENDIF
-$   IF ((F$LOCATE("#define PERL_SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
+$   IF ((F$LOCATE("#define PERL_VERSION_PATCH",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     subversion = F$ELEMENT(2," ",line)
@@ -2467,14 +2467,14 @@ $!
 $!: set the prefixit variable, to compute a suitable default value
 $!
 $!: determine where private library files go
-$!: Usual default is /usr/local/lib/perl5.  Also allow things like 
-$!: /opt/perl/lib, since /opt/perl/lib/perl5 would be redundant.
+$!: Usual default is /usr/local/lib/perl7.  Also allow things like
+$!: /opt/perl/lib, since /opt/perl/lib/perl7 would be redundant.
 $   IF .NOT.silent 
 $   THEN
 $     TYPE SYS$INPUT:
 $     DECK
 
-There are some auxiliary files for perl5 that need to be put into a
+There are some auxiliary files for perl7 that need to be put into a
 private library directory that is accessible by everyone.
 $     EOD
 $   ENDIF
@@ -6026,11 +6026,11 @@ $ WC "# Target system     : " + myuname
 $ WC ""
 $ WC "Makefile_SH='" + Makefile_SH + "'"
 $ WC "Mcc='" + Mcc + "'"
-$ WC "PERL_REVISION='" + revision + "'"
-$ WC "PERL_VERSION='" + patchlevel + "'" 
-$ WC "PERL_SUBVERSION='" + subversion + "'" 
+$ WC "PERL_VERSION_MAJOR='" + revision + "'"
+$ WC "PERL_VERSION_MINOR='" + patchlevel + "'"
+$ WC "PERL_VERSION_PATCH='" + subversion + "'"
 $ WC "PERL_API_REVISION='" + api_revision + "'"
-$ WC "PERL_API_VERSION='" + api_version + "'" 
+$ WC "PERL_API_VERSION='" + api_version + "'"
 $ WC "PERL_API_SUBVERSION='" + api_subversion + "'"
 $ WC "PERL_PATCHLEVEL='" + perl_patchlevel + "'"
 $ WC "perl_patchlevel='" + perl_patchlevel + "'"

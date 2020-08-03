@@ -239,13 +239,13 @@ sub perl_version {
     open my $fh, "<", $plh or die "can't open '$plh': $!\n";
     my ($v1,$v2,$v3);
     while (<$fh>) {
-        $v1 = $1 if /PERL_REVISION\s+(\d+)/;
-        $v2 = $1 if /PERL_VERSION\s+(\d+)/;
-        $v3 = $1 if /PERL_SUBVERSION\s+(\d+)/;
+        $v1 = $1 if /PERL_VERSION_MAJOR\s+(\d+)/;
+        $v2 = $1 if /PERL_VERSION_MINOR\s+(\d+)/;
+        $v3 = $1 if /PERL_VERSION_PATCH\s+(\d+)/;
     }
-    die "can't locate PERL_REVISION in '$plh'"   unless defined $v1;
-    die "can't locate PERL_VERSION in '$plh'"    unless defined $v2;
-    die "can't locate PERL_SUBVERSION in '$plh'" unless defined $v3;
+    die "can't locate PERL_VERSION_MAJOR in '$plh'"   unless defined $v1;
+    die "can't locate PERL_VERSION_MINOR in '$plh'"    unless defined $v2;
+    die "can't locate PERL_VERSION_PATCH in '$plh'" unless defined $v3;
     return ($v1,$v2,$v3, sprintf("%d.%03d%03d", $v1, $v2, $v3));
 }
 

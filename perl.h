@@ -4659,9 +4659,17 @@ EXTERN_C char **environ;  /* environment variables supplied via exec */
 #include "patchlevel.h"
 #undef PERL_PATCHLEVEL_H_IMPLICIT
 
-#define PERL_VERSION_STRING	STRINGIFY(PERL_REVISION) "." \
-				STRINGIFY(PERL_VERSION) "." \
-				STRINGIFY(PERL_SUBVERSION)
+/* Version as a single 4-byte hex number
+   Use this for numeric comparisons */
+#define PERL_VERSION_HEX ((PERL_VERSION_MAJOR << 24) | \
+                         (PERL_VERSION_MINOR  << 16) | \
+                         (PERL_VERSION_PATCH  <<  8) | \
+                         (PERL_VERSION_RELEASE  <<  4) | \
+                         (PERL_VERSION_BUILD  << 0))
+
+#define PERL_VERSION_STRING	STRINGIFY(PERL_VERSION_MAJOR) "." \
+				STRINGIFY(PERL_VERSION_MINOR) "." \
+				STRINGIFY(PERL_VERSION_PATCH)
 
 #define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_REVISION) "." \
 				STRINGIFY(PERL_API_VERSION) "." \
@@ -4747,11 +4755,11 @@ EXTCONST char PL_cshname[]
    library we're linking against.  */
 
 EXTCONST U8 PL_revision
-  INIT(PERL_REVISION);
+  INIT(PERL_VERSION_MAJOR);
 EXTCONST U8 PL_version
-  INIT(PERL_VERSION);
+  INIT(PERL_VERSION_MINOR);
 EXTCONST U8 PL_subversion
-  INIT(PERL_SUBVERSION);
+  INIT(PERL_VERSION_PATCH);
 
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");

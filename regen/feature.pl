@@ -44,31 +44,37 @@ my %feature = (
 #       be changed to account.
 
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
+my @all_features = sort keys %feature;
+
+# features bundles
+use constant V5_9_5 => sort qw{say state switch indirect};
+use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
+use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
+use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
+use constant V5_27  => sort ( +V5_23, qw{bitwise} );
+
 my %feature_bundle = (
-     all     => [ keys %feature ],
-     default =>	[qw(indirect)],
-    "5.9.5"  =>	[qw(say state switch indirect)],
-    "5.10"   =>	[qw(say state switch indirect)],
-    "5.11"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.13"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.19"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.21"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.23"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq indirect)],
-    "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq indirect)],
-    "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.29"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
+    all     => [ @all_features ],
+    default => [ qw{indirect} ],
+    # using 5.9.5 features bundle
+    "5.9.5" => [ +V5_9_5 ],
+    "5.10"  => [ +V5_9_5 ],
+    # using 5.11 features bundle
+    "5.11"  => [ +V5_11 ],
+    "5.13"  => [ +V5_11 ],
+    # using 5.15 features bundle
+    "5.15"  => [ +V5_15 ],
+    "5.17"  => [ +V5_15 ],
+    "5.19"  => [ +V5_15 ],
+    "5.21"  => [ +V5_15 ],
+    # using 5.23 features bundle
+    "5.23"  => [ +V5_23 ],
+    "5.25"  => [ +V5_23 ],
+    # using 5.27 features bundle
+    "5.27"  => [ +V5_27 ],
+    "5.29"  => [ +V5_27 ],
+    "5.31"  => [ +V5_27 ],
+    "7.0"   => [ +V5_27 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -90,8 +96,8 @@ for my $feature (sort keys %feature) {
 }
 
 for (keys %feature_bundle) {
-    next unless /^5\.(\d*[13579])\z/;
-    $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
+    next unless /^(\d+)\.(\d*[13579])\z/a;
+    $feature_bundle{"$1.".($2+1)} ||= $feature_bundle{$_};
 }
 
 my %UniqueBundles; # "say state switch" => 5.10
@@ -111,7 +117,7 @@ for my $bund (
     sort { $a eq 'default' ? -1 : $b eq 'default' ? 1 : $a cmp $b }
          values %UniqueBundles
 ) {
-    next if $bund =~ /[^\d.]/ and $bund ne 'default';
+    next if $bund =~ /[^\d.]/a and $bund ne 'default';
     for (@{$feature_bundle{$bund}}) {
 	if (@{$BundleRanges{$_} ||= []} == 2) {
 	    $BundleRanges{$_}[1] = $bund
@@ -143,8 +149,7 @@ while (readline "perl.h") {
 	my $bits_needed =
 	    length sprintf "%b", scalar keys %UniqueBundles;
 	$bits =~ /1{$bits_needed}/
-	    or die "Not enough bits (need $bits_needed)"
-		 . " in $bits (binary for $hex):\n\n$_\n ";
+	    or die "Not enough bits (need $bits_needed) in $bits (binary for $hex):\n\n$_\n";
     }
     if ($Uni8Bit && $HintMask) { last }
 }
@@ -154,7 +159,7 @@ die "No HINT_UNI_8_BIT defined in perl.h"    unless $Uni8Bit;
 close "perl.h";
 
 my @HintedBundles =
-    ('default', grep !/[^\d.]/, sort values %UniqueBundles);
+    ('default', grep !/[^\d.]/a, sort values %UniqueBundles);
 
 
 ###########################################################################
@@ -238,9 +243,9 @@ format PODTURES =
 $::bundle, $::feature
 .
 
-for ('default', sort grep /\.\d[02468]/, keys %feature_bundle) {
-    $::bundle = ":$_";
-    $::feature = join ' ', @{$feature_bundle{$_}};
+foreach my $bundle ('default', sort grep /\.\d*[02468]\z/a, keys %feature_bundle) {
+    $::bundle = ":$bundle";
+    $::feature = join ' ', @{$feature_bundle{$bundle}};
     write $pm;
     print $pm "\n";
 }
@@ -469,7 +474,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.58';
+our $VERSION = '1.59';
 
 FEATURES
 

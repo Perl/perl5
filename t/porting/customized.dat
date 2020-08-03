@@ -25,4 +25,4 @@ Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b9
 Win32API::File cpan/Win32API-File/File.xs beb870fed4490d2faa547b4a8576b8d64d1d27c5
 experimental cpan/experimental/t/basic.t cb9da8dd05b854375809872a05dd32637508d5da
 version cpan/version/lib/version.pm 7ef9219d1d5f1d71f08a79f3b0577df138b21b12
-version vutil.c 601cc57bbc0070ae33eab7fd2d667f20efbe15f8
+version vutil.c 8b6af97faadfad5404e2482dbba762946718c69b

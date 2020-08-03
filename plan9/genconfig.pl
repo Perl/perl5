@@ -66,7 +66,7 @@ print OUT <<EndOfIntro;
 #     $0
 # Time: $time
 
-package='perl5'
+package='perl7'
 CONFIG='true'
 cf_time='$time'
 cf_by='$cf_by'
@@ -269,18 +269,18 @@ foreach (sort keys %val_vars) {
 
 if (open(PL,'<',"${outdir}patchlevel.h")) {
   while (<PL>) {
-    if    (/^#define PERL_VERSION\s+(\S+)/) {
-      print OUT "PERL_VERSION='$1'\n";
+    if    (/^#define PERL_VERSION_MINOR\s+(\S+)/) {
+      print OUT "PERL_VERSION_MINOR='$1'\n";
       print OUT "PATCHLEVEL='$1'\n";		# XXX compat
     }
-    elsif (/^#define PERL_SUBVERSION\s+(\S+)/) {
-      print OUT "PERL_SUBVERSION='$1'\n";
+    elsif (/^#define PERL_VERSION_PATCH\s+(\S+)/) {
+      print OUT "PERL_VERSION_PATCH='$1'\n";
       print OUT "SUBVERSION='$1'\n";		# XXX compat
     }
   }
   close PL;
 }
-else { warn "Can't read ${outdir}patchlevel.h - skipping 'PERL_VERSION'"; }
+else { warn "Can't read ${outdir}patchlevel.h - skipping 'PERL_VERSION_MINOR'"; }
 
 print OUT "pager='/bin/p'\n";
 

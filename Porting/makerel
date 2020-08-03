@@ -52,9 +52,9 @@ my @patchlevel_h = <PATCHLEVEL>;
 close PATCHLEVEL;
 my $patchlevel_h = join "", grep { /^#\s*define/ } @patchlevel_h;
 print $patchlevel_h;
-$revision = $1 if $patchlevel_h =~ /PERL_REVISION\s+(\d+)/;
-$patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION\s+(\d+)/;
-$subversion = $1 if $patchlevel_h =~ /PERL_SUBVERSION\s+(\d+)/;
+$revision = $1 if $patchlevel_h =~ /PERL_VERSION_MAJOR\s+(\d+)/;
+$patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION_MINOR\s+(\d+)/;
+$subversion = $1 if $patchlevel_h =~ /PERL_VERSION_PATCH\s+(\d+)/;
 die "Unable to parse patchlevel.h" unless $subversion >= 0;
 $vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
 
