@@ -16,6 +16,7 @@ use File::Spec::Unix;
 use Getopt::Long;
 use Pod::Simple::Search;
 use Pod::Simple::SimpleTree ();
+use Text::Tabs;
 use locale; # make \w work right in non-ASCII lands
 
 =head1 NAME
@@ -848,19 +849,11 @@ sub relativize_url {
 # Remove any level of indentation (spaces or tabs) from each code block consistently
 # Adapted from: https://metacpan.org/source/HAARG/MetaCPAN-Pod-XHTML-0.002001/lib/Pod/Simple/Role/StripVerbatimIndent.pm
 sub trim_leading_whitespace {
-    my ($para)    = @_;
-    my $tab_width = 4;
+    my ($para) = @_;
 
     # Start by converting tabs to spaces
-    for my $line (@$para) {
-        # Count how many tabs on the beginnging of the line
-        my ($tabs)    = $line =~ /^(\t*)/;
-        my $tab_count = length($tabs);
-
-        # Remove all the tabs, and add them back as spaces
-        $line =~ s/^\t+//g;
-        $line = (" " x ($tab_count * $tab_width)) . $line;
-    }
+	$tabstop = 4;
+	@$para   = Text::Tabs::expand(@$para);
 
     # Find the line with the least amount of indent, as that's our "base"
     my @indent_levels = (sort(map { $_ =~ /^( *)./mg } @$para));
