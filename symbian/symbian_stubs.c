@@ -37,11 +37,7 @@ _sig_func_ptr signal(int signum, _sig_func_ptr handler) { return (_sig_func_ptr)
 int   kill(pid_t pid, int signum) { return setENOSYS(); }
 pid_t wait(int *status) { return setENOSYS(); }
 
-#if PERL_VERSION <= 8
-void Perl_my_setenv(pTHX_ char *var, char *val) { }
-#else
 void Perl_my_setenv(pTHX_ const char *var, const char *val) { }
-#endif
 
 bool Perl_do_exec(pTHX_ const char *cmd) { return FALSE; }
 bool Perl_do_exec3(pTHX_ const char *cmd, int fd, int flag) { return FALSE; }

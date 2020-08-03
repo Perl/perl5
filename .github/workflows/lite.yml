@@ -1,0 +1,55 @@
+name: lite
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "*"
+  pull_request:
+
+jobs:
+
+## -------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------
+
+  linux:
+    name: "linux ${{ matrix.configure }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configure:
+          [
+            "",
+            "-Dusethreads",
+          ]
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+      WORKSPACE: ${{ github.workspace }}
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Configure
+        run: |
+          ./Configure -des -Dusedevel ${{ matrix.configure }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
+      - name: Build
+        run: |
+          make -j2
+      - name: Run Tests
+        run: |
+          TEST_JOBS=2 make -j2 test
+
