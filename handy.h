@@ -431,18 +431,18 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 
 /* internal helpers */
 /* Transitional */
-#ifndef PERL_MAJOR_VERSION
-#  define PERL_MAJOR_VERSION  PERL_REVISION
+#ifndef PERL_VERSION_MAJOR
+#  define PERL_VERSION_MAJOR  PERL_REVISION
 #else
 #  undef  PERL_REVISION     /* We don't want code to be using these */
 #endif
-#ifndef PERL_MINOR_VERSION
-#  define PERL_MINOR_VERSION  PERL_VERSION
+#ifndef PERL_VERSION_MINOR
+#  define PERL_VERSION_MINOR  PERL_VERSION
 #else
 #  undef  PERL_VERSION
 #endif
-#ifndef PERL_MICRO_VERSION
-#  define PERL_MICRO_VERSION  PERL_SUBVERSION
+#ifndef PERL_VERSION_PATCH
+#  define PERL_VERSION_PATCH  PERL_SUBVERSION
 #else
 #  undef  PERL_SUBVERSION
 #endif
@@ -451,8 +451,8 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
             /* '10*' leaves room for things like alpha, beta, releases */   \
                     (10 * ((maJor) * 1000000) + ((miNor) * 1000) + (Patch))
 #define PERL_DECIMAL_VERSION_                                               \
-        PERL_JNP_TO_DECIMAL_(PERL_MAJOR_VERSION, PERL_MINOR_VERSION,        \
-                                                        PERL_MICRO_VERSION)
+        PERL_JNP_TO_DECIMAL_(PERL_VERSION_MAJOR, PERL_VERSION_MINOR,        \
+                                                        PERL_VERSION_PATCH)
 
 /*
 =for apidoc AmR|bool|PERL_VERSION_EQ|const U8 major|const U8 minor|const U8 patch
@@ -511,8 +511,8 @@ becomes
  * '*' is in ASCII and EBCDIC respectively */
 # define PERL_VERSION_EQ(j,n,p)                                             \
               (((p) == '*')                                                 \
-               ? (   (j) == PERL_MAJOR_VERSION                              \
-                  && (n) == PERL_MINOR_VERSION)                             \
+               ? (   (j) == PERL_VERSION_MAJOR                              \
+                  && (n) == PERL_VERSION_MINOR)                             \
                : (PERL_DECIMAL_VERSION_ == PERL_JNP_TO_DECIMAL_(j,n,p)))
 # define PERL_VERSION_NE(j,n,p) (! PERL_VERSION_EQ(j,n,p))
 
