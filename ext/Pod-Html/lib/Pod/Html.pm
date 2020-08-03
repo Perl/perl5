@@ -846,7 +846,7 @@ sub relativize_url {
 }
 
 # Remove any level of indentation (spaces or tabs) from each code block consistently
-# Borrowed from: https://metacpan.org/source/HAARG/MetaCPAN-Pod-XHTML-0.002001/lib/Pod/Simple/Role/StripVerbatimIndent.pm
+# Adapted from: https://metacpan.org/source/HAARG/MetaCPAN-Pod-XHTML-0.002001/lib/Pod/Simple/Role/StripVerbatimIndent.pm
 sub trim_leading_whitespace {
     my ($para)    = @_;
     my $tab_width = 4;
