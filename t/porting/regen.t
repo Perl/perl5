@@ -105,7 +105,12 @@ OUTER: foreach my $file (@files) {
 }
 
 foreach (@progs) {
-    my $command = "$^X -I. $_ --tap";
+    my $args = qq[-Ilib $_ --tap];
+    diag("./perl $args");
+    my $command = "$^X $args";
     system $command
-        and die "Failed to run $command: $?";
+        and die <<~"HINT";
+    Hint:  A failure in this file can often be corrected by running:
+     ./perl -Ilib $_
+HINT
 }
