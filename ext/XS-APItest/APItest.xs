@@ -2014,7 +2014,7 @@ test_share_unshare_pvn(input)
 	OUTPUT:
 	RETVAL
 
-#if PERL_VERSION >= 9
+#if PERL_VERSION_GE(5,9,0)
 
 bool
 refcounted_he_exists(key, level=0)
