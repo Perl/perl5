@@ -28,13 +28,13 @@ ok(exists($Config{$first_each}), "First key exists");
 ok(!exists($Config{"\n$first"}),
    "Check that first key with prepended newline isn't falsely existing");
 
-is($Config{PERL_REVISION}, 5, "PERL_REVISION is 5");
+is($Config{PERL_VERSION_MAJOR}, 5, "PERL_VERSION_MAJOR is 5");
 
 # Check that old config variable names are aliased to their new ones.
 my %legacy = (
-    PERL_VERSION       => 'PATCHLEVEL',
-    PERL_SUBVERSION    => 'SUBVERSION',
-    PERL_CONFIG_SH     => 'CONFIG'
+    PERL_VERSION_MINOR  => 'PATCHLEVEL',
+    PERL_VERSION_PATCH  => 'SUBVERSION',
+    PERL_CONFIG_SH      => 'CONFIG'
 );
 while( my($new, $old) = each %legacy ) {
     isnt($Config{$new}, undef,       "$new is defined");
