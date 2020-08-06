@@ -11,7 +11,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 use IO::File;
 use IO::Seekable;
 
@@ -68,4 +68,12 @@ SKIP: {
     $fh->clearerr;
     ok(!$fh->error, "check clearerr removed the error");
     close $fh; # silently ignore the error
+}
+
+{
+    # [GH #18019] IO::Handle->error misreported an error after successully
+    # opening a regular file for reading. It was a regression in GH #6799 fix.
+    ok(open(my $fh, '<', __FILE__), "a regular file opened for reading");
+    ok(!$fh->error, "no spurious error reported by error()");
+    close $fh;
 }
