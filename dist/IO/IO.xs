@@ -397,9 +397,9 @@ ferror(handle)
     CODE:
 	if (in)
 #ifdef PerlIO
-	    RETVAL = PerlIO_error(in) || (in != out && PerlIO_error(out));
+	    RETVAL = PerlIO_error(in) || (out && in != out && PerlIO_error(out));
 #else
-	    RETVAL = ferror(in) || (in != out && ferror(out));
+	    RETVAL = ferror(in) || (out && in != out && ferror(out));
 #endif
 	else {
 	    RETVAL = -1;
