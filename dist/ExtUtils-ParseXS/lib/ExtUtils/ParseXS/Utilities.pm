@@ -5,7 +5,7 @@ use Exporter;
 use File::Spec;
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.40';
+our $VERSION = '3.41';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -327,6 +327,51 @@ sub map_type {
   return $type;
 }
 
+=head2 C<standard_XS_version_cmp()>
+
+=over 4
+
+=item * Purpose
+
+Provides the definition for PERL_VERSION_* compare macros.
+
+=item * Arguments
+
+None.
+
+=item * Return Value
+
+Returns a string to define PERL_VERSION.
+
+=back
+
+=cut
+
+sub standard_XS_version_cmp {
+    # these macros are now part of the API since 5.33.1
+    return if $] >= 5.033001; # provided by handy.h / perl.h
+
+    # note ppport.h also provides these helpers
+    return <<"EOS";
+/* This stuff is not part of the API before 5.33.1 */
+#ifndef PERL_VERSION_DECIMAL
+#  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
+#endif
+#ifndef PERL_DECIMAL_VERSION
+#  define PERL_DECIMAL_VERSION \\
+      PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
+#endif
+#ifndef PERL_VERSION_GE
+#  define PERL_VERSION_GE(r,v,s) \\
+      (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
+#endif
+#ifndef PERL_VERSION_LE
+#  define PERL_VERSION_LE(r,v,s) \\
+      (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
+#endif
+EOS
+}
+
 =head2 C<standard_XS_defs()>
 
 =over 4
@@ -349,6 +394,9 @@ Returns true.
 =cut
 
 sub standard_XS_defs {
+
+  my $perl_version_cmp_macro = standard_XS_version_cmp();
+
   print <<"EOF";
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
@@ -358,23 +406,7 @@ sub standard_XS_defs {
 #  define dVAR		dNOOP
 #endif
 
-
-/* This stuff is not part of the API! You have been warned. */
-#ifndef PERL_VERSION_DECIMAL
-#  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
-#endif
-#ifndef PERL_DECIMAL_VERSION
-#  define PERL_DECIMAL_VERSION \\
-	  PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
-#endif
-#ifndef PERL_VERSION_GE
-#  define PERL_VERSION_GE(r,v,s) \\
-	  (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
-#endif
-#ifndef PERL_VERSION_LE
-#  define PERL_VERSION_LE(r,v,s) \\
-	  (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
-#endif
+${perl_version_cmp_macro}
 
 /* XS_INTERNAL is the explicit static-linkage variant of the default
  * XS macro.
