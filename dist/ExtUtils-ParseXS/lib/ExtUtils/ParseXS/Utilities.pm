@@ -5,7 +5,7 @@ use Exporter;
 use File::Spec;
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.40';
+our $VERSION = '3.41';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -447,6 +447,7 @@ sub standard_XS_defs {
 EOF
 
   print <<"EOF";
+#ifndef croak_xs_usage
 #ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
 
@@ -478,6 +479,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #undef  PERL_ARGS_ASSERT_CROAK_XS_USAGE
 
 #define croak_xs_usage        S_croak_xs_usage
+#endif /* !defined(croak_xs_usage) */
 
 #endif
 
