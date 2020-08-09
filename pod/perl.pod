@@ -254,7 +254,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
 =for buildtoc flag +r
 
-    perlcn		Perl for Simplified Chinese (in EUC-CN)
+    perlcn		Perl for Simplified Chinese (in UTF-8)
     perljp		Perl for Japanese (in EUC-JP)
     perlko		Perl for Korean (in EUC-KR)
     perltw		Perl for Traditional Chinese (in Big5)
