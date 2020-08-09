@@ -5396,7 +5396,7 @@ README.aix			Perl notes for AIX
 README.amiga			Perl notes for AmigaOS
 README.android			Perl notes for Android
 README.bs2000			Perl notes for POSIX-BC BS2000
-README.cn			Perl for Simplified Chinese (in EUC-CN)
+README.cn			Perl for Simplified Chinese (in UTF-8)
 README.cygwin			Perl notes for Cygwin
 README.dos			Perl notes for DOS
 README.freebsd			Perl notes for FreeBSD
