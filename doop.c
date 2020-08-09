@@ -728,7 +728,6 @@ Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 	SvTAINTED_on(sv);
 }
 
-/* currently converts input to bytes if possible, but doesn't sweat failure */
 UV
 Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 {
@@ -754,7 +753,8 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
             s = (unsigned char *) SvPV_flags(sv, srclen, svpv_flags);
         }
         else {
-	        Perl_croak(aTHX_ "Use of strings with code points over 0xFF as arguments to vec is forbidden");
+            Perl_croak(aTHX_ "Use of strings with code points over 0xFF"
+                             " as arguments to vec is forbidden");
         }
     }
 
