@@ -36,9 +36,9 @@ parse_block                    # U
 parse_label                    # U
 PARSE_OPTIONAL                 # E
 PL_phase                       # E
-XopFLAGS                       # E
 XopDISABLE                     # X added by devel/scanprov
 XopENABLE                      # X added by devel/scanprov
 XopENTRY                       # X added by devel/scanprov
 XopENTRYCUSTOM                 # X added by devel/scanprov
 XopENTRY_set                   # X added by devel/scanprov
+XopFLAGS                       # E

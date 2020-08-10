@@ -1,0 +1,11 @@
+5.033000
+PERL_GIT_UNCOMMITTED_CHANGES   # Z added by devel/scanprov
+PERL_INC_VERSION_LIST          # K added by devel/scanprov
+PERL_RVS_TO_DECIMAL            # Z added by devel/scanprov
+PERL_VERSION_EQ                # U
+PERL_VERSION_GE                # U
+PERL_VERSION_GT                # U
+PERL_VERSION_LE                # U
+PERL_VERSION_LT                # U
+PERL_VERSION_NE                # U
+USE_C_BACKTRACE                # K added by devel/scanprov

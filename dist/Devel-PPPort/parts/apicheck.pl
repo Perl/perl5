@@ -55,6 +55,7 @@ my %amap = (
   type => 'int',
   cast => 'int',
   block => '{1;}',
+  number => '1',
 );
 
 # Certain return types are instead considered void
@@ -121,6 +122,7 @@ my %stack = (
   STORE_LC_NUMERIC_FORCE_TO_UNDERLYING => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
   STORE_LC_NUMERIC_SET_TO_NEEDED => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
   STORE_LC_NUMERIC_SET_TO_NEEDED_IN => ['DECLARATION_FOR_LC_NUMERIC_MANIPULATION;'],
+  TARG           => ['dTARG;'],
   UNDERBAR       => ['dUNDERBAR;'],
   XCPT_CATCH     => ['dXCPT;'],
   XCPT_RETHROW   => ['dXCPT;'],
@@ -181,10 +183,25 @@ static int    VARarg1;
 static char  *VARarg2;
 static double VARarg3;
 
-#if defined(PERL_BCDVERSION) && (PERL_BCDVERSION < 0x5009005)
+#if defined(D_PPP_BCDVERSION) && (D_PPP_BCDVERSION < 0x5009005)
 /* needed to make PL_parser apicheck work */
 typedef void yy_parser;
 #endif
+
+/* Handle both 5.x.y and 7.x.y and up
+#ifndef PERL_VERSION_MAJOR
+#  define PERL_VERSION_MAJOR PERL_REVISION
+#endif
+#ifndef PERL_VERSION_MINOR
+#  define PERL_VERSION_MINOR PERL_VERSION
+#endif
+#ifndef PERL_VERSION_PATCH
+#  define PERL_VERSION_PATCH PERL_SUBVERSION
+#endif
+
+/* This causes some functions to compile that otherwise wouldn't, so we can
+ * get their info; and doesn't seem to harm anything */
+#define PERL_IMPLICIT_CONTEXT
 
 HEAD
 
@@ -338,13 +355,13 @@ HEAD
 
   # #ifdef out if marked as todo (not known in) this version
   if (exists $todo{$f->{'name'}}) {
-    my($five, $ver,$sub) = parse_version($todo{$f->{'name'}}{'version'});
+    my($rev, $ver,$sub) = parse_version($todo{$f->{'name'}}{'version'});
     print OUT <<EOT;
-#if       PERL_REVISION > $five                             \\
-   || (   PERL_REVISION == $five                            \\
-       && (   PERL_VERSION > $ver                           \\
-           || (   PERL_VERSION == $ver                      \\
-               && PERL_SUBVERSION >= $sub))) /* TODO */
+#if       PERL_VERSION_MAJOR > $rev                         \\
+   || (   PERL_VERSION_MAJOR == $rev                        \\
+       && (   PERL_VERSION_MINOR > $ver                     \\
+           || (   PERL_VERSION_MINOR == $ver                \\
+               && PERL_VERSION_PATCH >= $sub))) /* TODO */
 EOT
   }
 

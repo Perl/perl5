@@ -182,7 +182,7 @@ print "# $file\n";
 ok($file =~ /cop/i);
 
 BEGIN {
-  if ("$]" < 5.006000) {
+  if (ivers($]) < ivers('5.006000')) {
     skip("Perl version too early", 8);
     exit;
   }

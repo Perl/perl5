@@ -15,56 +15,49 @@
 :
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :
-: This file lists all API functions/macros that are provided purely
-: by Devel::PPPort, or that are not public.  It is in the same format as the
-: F<embed.fnc> that ships with the Perl source code.
+: This file lists all functions/macros that are provided by Devel::PPPort that
+: would not be tested otherwise; because either they are not public, or they
+: exist only in D:P.  It is in the same format as the F<embed.fnc> that ships
+: with the Perl source code.
 :
 : Since these are used only to provide the argument types, it's ok to have the
-: return value be void for some where it's an issues
+: return value be void for some where it's a potential issue.
 
 Amn|void|aTHXR
 Amn|void|aTHXR_
-md|int|AvFILLp|AV* av
-Amn|void|DEFSV
-Amn|void|dMY_CXT_SV
-Amn|void|dNOOP
+dm|int|AvFILLp|AV * av
+CprT|void|croak_memory_wrap|
 Amn|void|dTHXR
 Amn|void|dXSTARG
-Amn|void|END_EXTERN_C
-Amn|void|EXTERN_C
-Amn|void|GV_NOADD_MASK
-Amn|void|IN_PERL_COMPILETIME
-Amn|void|NOOP
-Amn|void|PERL_BCDVERSION
+Cdhm|char *|HvNAME_get|HV * stash
+Amn|void|IVSIZE
+CpR|SV *|newSVsv_flags|SV * const old|I32 flags
+Cdhm|void *|NUM2PTR|type|int value
+Amn|void|NVTYPE
 Amn|void|Perl_eval_pv
 Amn|void|Perl_eval_sv
 Amn|void|PERL_MAGIC_glob
 Amn|void|PERL_MAGIC_mutex
 Amn|void|PERL_MAGIC_overload
 Amn|void|PERL_MAGIC_overload_elem
-Amn|void|PERL_PV_PRETTY_DUMP
-Amn|void|PERL_PV_PRETTY_NOCLEAR
-Amn|void|PERL_PV_PRETTY_REGPROP
-Amn|void|PERL_SIGNALS_UNSAFE_FLAG
-Amn|void|PERL_UINT_MIN
-Amn|void|PERL_UNUSED_CONTEXT
-Amn|void|PERL_UNUSED_DECL
-Amn|void|PERL_USE_GCC_BRACE_GROUPS
+Cdhmn||PERL_PV_PRETTY_DUMP
+Cdhmn||PERL_PV_PRETTY_NOCLEAR
+Cdhmn||PERL_PV_PRETTY_REGPROP
+Amn|void|Perl_warner_nocontext
 Amn|void|PL_bufend
 Amn|void|PL_bufptr
 Amn|void|PL_compiling
 Amn|void|PL_copline
 Amn|void|PL_DBsignal
-mnd|SV *|PL_DBsingle
-mnd|GV *|PL_DBsub
-mnd|SV *|PL_DBtrace
+dmn|SV *|PL_DBsingle
+dmn|GV *|PL_DBsub
+dmn|SV *|PL_DBtrace
 Amn|void|PL_debstash
 Amn|void|PL_diehook
 Amn|void|PL_dirty
-mnd|U8|PL_dowarn
+dmn|U8|PL_dowarn
 Amn|void|PL_error_count
 Amn|void|PL_expect
-Amn|void|PL_hexdigit
 Amn|void|PL_hints
 Amn|void|PL_in_my
 Amn|void|PL_in_my_stash
@@ -78,23 +71,28 @@ Amn|void|PL_perldb
 Amn|void|PL_ppaddr
 Amn|void|PL_rsfp
 Amn|void|PL_rsfp_filters
+Amn|void|PL_signals
 Amn|void|PL_stack_base
 Amn|void|PL_stack_sp
 Amn|void|PL_statcache
 Amn|void|PL_stdingv
-Amn|void|PL_Sv
 Amn|void|PL_sv_arenaroot
 Amn|void|PL_tainted
 Amn|void|PL_tainting
 Amn|void|PL_tokenbuf
 Amn|void|PL_Xpv
-Amn|void|PTRV
-Amn|void|SAVE_DEFSV
-Amn|void|START_EXTERN_C
+bCdMmpR|char *|sv_2pvbyte_nolen|SV * sv
+Cdp|char *|sv_2pv_flags|SV * const sv|STRLEN * const lp|const U32 flags
+bCdMmpR|char *|sv_2pv_nolen|SV * sv
+bCMmp|UV|sv_2uv|SV * sv
 Amn|void|SV_CONST_RETURN
 Amn|void|SV_COW_SHARED_HASH_KEYS
+p|STRLEN|sv_len_utf8_nomg|SV * const sv
 Am|void|sv_magic_portable|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name|I32 namlen
 Amn|void|SV_MUTABLE_RETURN
-Amn|void|SV_UTF8_NO_ENCODING
+bCDdp|UV|sv_uv|SV * sv
+Amn|void|UVSIZE
+Amn|void|UVTYPE
+Amn|void|UVXf
 Amn|void|WARN_ASSERTIONS
 Amn|void|XSprePUSH

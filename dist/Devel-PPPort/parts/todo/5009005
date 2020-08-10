@@ -16,13 +16,6 @@ ptr_table_new                  # U
 ptr_table_split                # U
 ptr_table_store                # U
 re_compile                     # U
-regfree_internal               # U
-reg_named_buff_all             # U
-reg_named_buff_exists          # U
-reg_named_buff_fetch           # U
-reg_named_buff_firstkey        # U
-reg_named_buff_nextkey         # U
-reg_named_buff_scalar          # U
 savesharedpvn                  # U
 scan_vstring                   # E (Perl_scan_vstring)
 upg_version                    # E (Perl_upg_version)

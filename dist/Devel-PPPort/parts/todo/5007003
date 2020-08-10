@@ -5,7 +5,6 @@ ckWARN4                        # U
 ckWARN4_d                      # U
 custom_op_desc                 # U
 custom_op_name                 # U
-cx_dup                         # E (Perl_cx_dup)
 deb                            # U
 deb_nocontext                  # U
 debstack                       # U
@@ -21,6 +20,10 @@ my_fork                        # U
 my_socketpair                  # U
 OP_DESC                        # U
 OP_NAME                        # U
+pack_cat                       # U
+packWARN2                      # U
+packWARN3                      # U
+packWARN4                      # U
 perl_destruct                  # E (perl_destruct)
 PERL_EXIT_DESTRUCT_END         # E
 PerlIO_clearerr                # U (PerlIO_clearerr)
