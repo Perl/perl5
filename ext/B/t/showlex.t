@@ -20,18 +20,11 @@ plan tests => 15;
 
 my $verbose = @ARGV; # set if ANY ARGS
 
-my $a;
-
 my $path = join " ", map { qq["-I$_"] } @INC;
-my $is_thread = $Config{use5005threads} && $Config{use5005threads} eq 'define';
 
-if ($is_thread) {
-    ok "# use5005threads: test skipped\n";
-} else {
-    $a = `$^X $path "-MO=Showlex" -e "my \@one" 2>&1`;
-    like ($a, qr/undef.*: \([^)]*\) \@one.*Nullsv.*AV/s,
-	  "canonical usage works");
-}
+my $o = `$^X $path "-MO=Showlex" -e "my \@one" 2>&1`;
+like ($o, qr/undef.*: \([^)]*\) \@one.*Nullsv.*AV/s,
+      "canonical usage works");
 
 # v1.01 tests
 
