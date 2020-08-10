@@ -1541,7 +1541,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    seenhv = NULL;
 	    name = sv_newmortal();
 	
-	    retval = newSVpvs("");
+	    retval = newSVpvs_flags("", SVs_TEMP);
 	    if (SvROK(href)
 		&& (hv = (HV*)SvRV((SV*)href))
 		&& SvTYPE(hv) == SVt_PVHV)		{
@@ -1714,9 +1714,9 @@ Data_Dumper_Dumpxs(href, ...)
 		    }
 		    SvPVCLEAR(valstr);
 		    if (gimme == G_ARRAY) {
-			XPUSHs(sv_2mortal(retval));
+			XPUSHs(retval);
 			if (i < imax)	/* not the last time thro ? */
-			    retval = newSVpvs("");
+			    retval = newSVpvs_flags("", SVs_TEMP);
 		    }
 		}
 		SvREFCNT_dec(postav);
@@ -1732,7 +1732,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    else
 		croak("Call to new() method failed to return HASH ref");
 	    if (gimme != G_ARRAY)
-		XPUSHs(sv_2mortal(retval));
+		XPUSHs(retval);
 	}
 
 SV *
