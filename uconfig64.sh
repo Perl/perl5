@@ -874,7 +874,6 @@ uidsign='1'
 uidsize='4'
 uidtype=int
 uquadtype='unsigned long'
-use5005threads='undef'
 use64bitall='define'
 use64bitint='define'
 usecbacktrace='undef'

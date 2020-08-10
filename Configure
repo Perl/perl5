@@ -16,7 +16,7 @@
 # you should use metaconfig. Perl uses a modified version of this
 # tool, and this, together with the metaconfig units, are available
 # in the git repository:
-#    $ git clone https://github.com/perl5-metaconfig/metaconfig metaconfig
+#    $ git clone https://github.com/Perl/metaconfig metaconfig
 # The original dist package (including metaconfig) is available on github:
 #    $ git clone https://github.com/rmanfredi/dist.git dist-git
 #
@@ -1354,7 +1354,6 @@ useperlio=''
 usequadmath=''
 usesocks=''
 d_oldpthreads=''
-use5005threads=''
 useithreads=''
 usereentrant=''
 usethreads=''
@@ -4391,9 +4390,9 @@ fi
 : Do we want threads support and if so, what type
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
-*)     # Catch case where user specified ithreads or 5005threads but
+*)     # Catch case where user specified ithreads but
        # forgot -Dusethreads (A.D. 4/2002)
-       case "$useithreads$use5005threads" in
+       case "$useithreads" in
        *$define*)	dflt='y';;
        *)		dflt='n';;
        esac
@@ -4418,74 +4417,7 @@ esac
 set usethreads
 eval $setvar
 
-if $test $patchlevel -lt 9; then
-    case "$usethreads" in
-    $define)
-	: Default to ithreads unless overridden on command line or with
-	: old config.sh
-	dflt='y'
-	case "$use5005threads" in
-		$define|true|[yY]*)
-			echo "5.005 threads are no longer supported"
-			exit 1
-		;;
-	esac
-	case "$useithreads" in
-		$undef|false|[nN]*) dflt='n';;
-	esac
-	rp='Use the newer interpreter-based ithreads?'
-	. ./myread
-	case "$ans" in
-	y|Y)    val="$define" ;;
-	*)      val="$undef" ;;
-	esac
-	set useithreads
-	eval $setvar
-	: Now set use5005threads to the opposite value.
-	case "$useithreads" in
-	$define) val="$undef" ;;
-	*) val="$define" ;;
-	esac
-	set use5005threads
-	eval $setvar
-	;;
-    *)
-	useithreads="$undef"
-	use5005threads="$undef"
-	;;
-    esac
-
-    case "$useithreads$use5005threads" in
-    "$define$define")
-	$cat >&4 <<EOM
-
-You cannot have both the ithreads and the 5.005 threads enabled
-at the same time.  Disabling the 5.005 threads since they are
-much less stable than the ithreads.
-
-EOM
-	use5005threads="$undef"
-	;;
-    esac
-
-else
-: perl-5.9.x and later
-
-    if test X"$usethreads" = "X$define"; then
-	case "$use5005threads" in
-	    $define|true|[yY]*)
-		$cat >&4 <<EOM
-
-5.005 threads has been removed for 5.10.  Perl will be built using ithreads.
-
-EOM
-	    ;;
-	esac
-    fi
-
-    use5005threads="$undef"
-    useithreads="$usethreads"
-fi
+useithreads="$usethreads"
 
 case "$d_oldpthreads" in
 '')	: Configure tests would be welcome here.  For now, assume undef.
@@ -23631,14 +23563,6 @@ for xxx in $xs_extensions ; do
 			;;
 		esac
 		;;
-	Thread|thread)
-                case "$usethreads" in
-                true|$define|y)
-                        case "$use5005threads" in
-                        $define|true|[yY]*) avail_ext="$avail_ext $xxx" ;;
-                        esac
-		esac
-		;;
 	threads|threads/shared)
 		# threads and threads::shared are special cases.
 		# To stop people from asking "Perl 5.8.0 was supposed
@@ -25110,7 +25034,6 @@ uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'
 uquadtype='$uquadtype'
-use5005threads='$use5005threads'
 use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecbacktrace='$usecbacktrace'

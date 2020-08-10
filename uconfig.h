@@ -5119,10 +5119,11 @@
  *	This symbol, if defined, indicates that Perl should be built to
  *	use the interpreter-based threading implementation.
  */
-/* USE_5005THREADS:
- *	This symbol, if defined, indicates that Perl should be built to
- *	use the 5.005-based threading implementation.
- *	Only valid up to 5.8.x.
+/* USE_THREADS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use threads.  At present, it is a synonym for
+ *	and USE_ITHREADS, but eventually the source ought to be
+ *	changed to use this to mean _any_ threading implementation.
  */
 /* OLD_PTHREADS_API:
  *	This symbol, if defined, indicates that Perl should
@@ -5133,11 +5134,8 @@
  *	try to use the various _r versions of library functions.
  *	This is extremely experimental.
  */
-/*#define	USE_5005THREADS		/ **/
 /*#define	USE_ITHREADS		/ **/
-#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_THREADS		/* until src is revised*/
-#endif
+/*#define		USE_THREADS		/ **/
 /*#define	OLD_PTHREADS_API		/ **/
 /*#define	USE_REENTRANT_API	/ **/
 
@@ -5260,6 +5258,6 @@
 #endif
 
 /* Generated from:
- * 14796a77fb4ae3335f5e589a98445bc6e838b688194f6f112537495f0814f5d5 config_h.SH
- * 36943454dd4cff2f1fd6a87074c461192a18b540d34c4d348707cc8cf7b8fcfc uconfig.sh
+ * 6dd4e24d96ab9010e60456eabf099b26980d900fb937af5b501d45017e4f8ed0 config_h.SH
+ * 0328fd317c240be96131cf63f152ee17113e74b68e3dc0000e2876b9a0023713 uconfig.sh
  * ex: set ro: */
