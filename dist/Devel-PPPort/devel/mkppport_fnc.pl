@@ -1,5 +1,3 @@
-use Data::Dumper;
-$Data::Dumper::Sortkeys=1;
 ################################################################################
 #
 #  mkppport_fnc.pl -- generate ppport.fnc
@@ -16,14 +14,14 @@ $Data::Dumper::Sortkeys=1;
 # figures out aren't tested by the other two functions.
 #
 # These otherwise-untested items are those:
-#   1) which D:P provides and are not found in embed.fnc nor apidoc.fnc, or
-#      aren't listed as public API in those files
+#   1) for which D:P provides and are not found in embed.fnc nor apidoc.fnc,
+#      or aren't listed as public API in those files
 #   2) and for which tests can be automatically generated that they at least
 #      compile.
 #
 # The reason that an item isn't in those two files is that it is an
 # undocumented macro.  (If it's not a macro, it has to be in embed.fnc, and if
-# it's documented, mkapidoc.sh would find it and place it in apidoc.fnc.)
+# it's documented, mkapidoc.pl would find it and place it in apidoc.fnc.)
 #
 # And, the reason we can't generate tests for undocumented macros is we don't
 # readily know the types of the parameters, which we need to get a C program
@@ -44,10 +42,8 @@ $Data::Dumper::Sortkeys=1;
 # found therein with the item, and to include the code as the test for the
 # item, but again, it would be better to just document them.
 #
-# Later it was discovered that ppport provides support for non-public items.
-# We can list those here too, so that tests can be generated.  (An alternative
-# would be to invent a new flag that means non-public, but test and use that
-# in apidoc.fnc.)
+# scanprov, run as part of regeneration, will find when all functions, API or
+# not, became defined; but not macros.
 ################################################################################
 #
 #  This program is free software; you can redistribute it and/or
@@ -56,11 +52,10 @@ $Data::Dumper::Sortkeys=1;
 ################################################################################
 
 use strict;
-    use Data::Dumper;
-    $Data::Dumper::Sortkeys=1;
 use warnings;
 
 my $main_dir = $0;
+die "Need base directory as argument" unless $main_dir;
 
 # Up one level
 $main_dir =~ s;[^/]*$;;;
@@ -75,24 +70,39 @@ require "$main_dir/parts/ppptools.pl";
 
 
 my @provided = map { /^(\w+)/ ? $1 : () } `$^X ppport.h --list-provided`;
+die "Nothing provided" unless @provided;
 
-# First, we look for non-API macros that are documented and furnished by us in
-# spite of not being public
-my @non_public_provided;
 my $api_fnc = "$main_dir/parts/apidoc.fnc";
-open F, "<",  $api_fnc or die "Can't open $api_fnc: $!";
-while (<F>) {
-    my $line = $_;
-    next if $line =~ / ^ [^|]* A /x;    # Skip API
-    chomp $line;
-    push @non_public_provided, $line
-        # Look for the name in the third '|' separated field
-        if grep { $line =~ / ^ [^|]* \| [^|]* \| \s* $_ \s* (?: $ |\| ) /x }
-                                                                    @provided;
+my $embed_fnc = "$main_dir/parts/embed.fnc";
+
+# One of the outputs is a known element provided only by us.
+my @out = 'Am|void|sv_magic_portable|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name|I32 namlen';
+
+# First, get the known macros and functions
+my @embeds = parse_embed($api_fnc, $embed_fnc);
+
+# Then look for 1) non-API functions that are furnished by us.
+#               2) documented non-API macros that are furnished by us
+# We want to test for everything furnished by us.  The non-API elements
+# otherwise wouldn't be.  In both these cases, we know the signature of the
+# element, so can create a test for it.
+foreach my $element (@embeds) {
+    my $flags = join "", sort { lc $a cmp lc $b or $a cmp $b }
+                                                    keys %{$element->{'flags'}};
+    next if $flags =~ /A/;   # Skip public; they'll get tested anyway
+    my $name = $element->{'name'};
+    next unless grep { $name eq $_ } @provided;  # Skip unprovided, as that's
+                                                 # not what this program is for
+    my $entry = "$flags|$element->{'ret'}|$name";
+    if ($flags !~ /n/) {
+        $entry .= '|';
+        $entry .= join '|', map { join ' ', @$_ } $element->{'args'}->@*
+    }
+    push @out, $entry;
 }
 
-my @embeds = parse_embed('parts/embed.fnc', $api_fnc);
-
+# Now that we have the things we know the signatures for, we add the
+# no-parameter elements, as the signatures for those are trivial.
 # Look for %include lines in the ppport.h generator
 my $PPPort = "$main_dir/PPPort_pm.PL";
 open F, "<", $PPPort or die "Can't open $PPPort: $!";
@@ -100,31 +110,30 @@ open F, "<", $PPPort or die "Can't open $PPPort: $!";
 my @no_parameters;
 while (<F>) {
     next unless/^%include (\w+)/;
-    my $implementation = parse_partspec("$main_dir/parts/inc/$1")->{'implementation'};
+    my @implementation = split /\n/,
+                parse_partspec("$main_dir/parts/inc/$1")->{'implementation'};
+    while (defined (my $line = shift @implementation)) {
+        #my $type;
+        my $var;
+        if ($line =~ /^ __UNDEFINED__ \s+ (\w+) \s /x) {
+            $var = $1;
+        }
+        elsif ($line =~ /^ __NEED_VAR__ \s+ (\w+) \s+ (\w+) /x) {
+           #$type = $1;     # Another mechanism to create a variable
+            $var = $2;
+        }
+        elsif ($line =~ / ^ \# \s* define \s+ ( \w+ ) \s /x) {
+            $var = $1;
+        }
 
-    # Find no-parameter entries using __UNDEFINED__ that aren't in the other.
-    # We know these are provided.
-    while ($implementation =~ /^__UNDEFINED__\s+(\w+)\s/mg) {
-        push @no_parameters, $1 unless grep { $1 eq $_->{'name'} } @embeds;
+        next unless defined $var;
+        next if $var =~ / ^ D_PPP_ /x;                  # Skip internal only
+        next if grep { $1 eq $_->{'name'} } @embeds;    # Skip known elements
+        next if grep { $1 eq $_ } @no_parameters;   # Skip if already have it
+        push @no_parameters, $var;
     }
 }
 
-# Repeat, but look for ones that are 'provided' that don't use __UNDEFINED__
-seek F, 0, 0;
-while (<F>) {
-    next unless/^%include (\w+)/;
-    my $implementation = parse_partspec("$main_dir/parts/inc/$1")->{'implementation'};
-
-    while ($implementation =~ /^#\s*define\s+(\w+)\s/mg) {
-        next if grep { $1 eq $_ } @no_parameters;
-        next if grep { $1 eq $_->{'name'} } @embeds;
-        next unless grep { $1 eq $_ } @provided;
-        push @no_parameters, $1;
-    }
-}
-
-my @out = 'Am|void|sv_magic_portable|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name|I32 namlen';
-push @out, @non_public_provided;
 push @out, map { "Amn|void|$_" } @no_parameters;
 
 @out = sort sort_api_lines @out;
@@ -150,16 +159,18 @@ print OUT <<EOF;
 :
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :
-: This file lists all API functions/macros that are provided purely
-: by Devel::PPPort, or that are not public.  It is in the same format as the
-: F<embed.fnc> that ships with the Perl source code.
+: This file lists all functions/macros that are provided by Devel::PPPort that
+: would not be tested otherwise; because either they are not public, or they
+: exist only in D:P.  It is in the same format as the F<embed.fnc> that ships
+: with the Perl source code.
 :
 : Since these are used only to provide the argument types, it's ok to have the
-: return value be void for some where it's an issues
+: return value be void for some where it's a potential issue.
 
 EOF
 
 print OUT join "\n", @out;
 print OUT "\n";
+print "$out regenerated\n";
 
 close OUT;

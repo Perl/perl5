@@ -1,6 +1,5 @@
 5.007001
 bytes_from_utf8                # U
-despatch_signals               # U
 do_openn                       # U
 gv_handler                     # U
 isALNUM_LC_uvchr               # U
@@ -19,10 +18,10 @@ my_popen_list                  # U
 PerlIO_apply_layers            # U
 PerlIO_binmode                 # U
 PerlIO_debug                   # U
+PERLIO_FUNCS_CAST              # E
 POPpbytex                      # E
 printf_nocontext               # U
-save_mortalizesv               # U
-scan_num                       # A
+SAVEMORTALIZESV                # U
 sv_force_normal_flags          # U
 sv_setref_uv                   # U
 sv_unref_flags                 # U

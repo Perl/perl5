@@ -1,12 +1,10 @@
 5.011000
-av_iter_p                      # U
 gv_add_by_type                 # U
 Gv_AMupdate                    # A
 is_ascii_string                # U
 is_invariant_string            # U
 is_utf8_invariant_string       # U
 PL_opfreehook                  # E
-pregfree2                      # U
 PUSH_MULTICALL                 # U
 re_dup_guts                    # U
 save_adelete                   # U

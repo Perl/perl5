@@ -4,6 +4,7 @@ ck_entersub_args_proto         # U
 ck_entersub_args_proto_or_list # U
 cv_get_call_checker            # E
 cv_set_call_checker            # E
+gv_fetchpvn                    # U
 lex_stuff_pv                   # U
 LINKLIST                       # U
 mg_free_type                   # U
@@ -20,7 +21,6 @@ RV2CVOPCV_MARK_EARLY           # E
 RV2CVOPCV_RETURN_NAME_GV       # E
 savesharedpvs                  # U
 savesharedsvpv                 # U
-sv_2bool_flags                 # U
 sv_catpv_flags                 # U
 sv_catpv_nomg                  # U
 sv_catpvs_flags                # U

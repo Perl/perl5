@@ -1,5 +1,4 @@
 5.004000
-ARCHNAME                       # E
 block_end                      # E (Perl_block_end)
 block_gimme                    # U
 block_start                    # E (Perl_block_start)
@@ -31,18 +30,19 @@ isSPACE_LC                     # U
 isUPPER_LC                     # U
 isWORDCHAR_LC                  # U
 mess                           # E (Perl_mess)
+mess_nocontext                 # U
 mess_sv                        # U
 my_failure_exit                # U
 newSVpvf                       # U
-PERL_USE_GCC_BRACE_GROUPS      # E
+Perl_warner_nocontext          # E
 PL_mess_sv                     # E
 POPu                           # E
 rsignal                        # E
 rsignal_state                  # E
 save_gp                        # U
-save_I16                       # U
+SAVEI16                        # U
+SAVESTACK_POS                  # U
 share_hek                      # E
-SHORTSIZE                      # E
 sv_catpvf                      # U
 sv_catpvf_mg                   # U
 sv_cmp_locale                  # U
@@ -53,12 +53,9 @@ SvSetMagicSV_nosteal           # U
 sv_setpvf                      # U
 sv_setpvf_mg                   # U
 SvSetSV_nosteal                # U
-sv_taint                       # U
-sv_tainted                     # U
 SvTAINTED                      # U
 SvTAINTED_off                  # U
 SvTAINTED_on                   # U
-sv_untaint                     # U
 sv_vcatpvf                     # U
 sv_vcatpvf_mg                  # U
 sv_vcatpvfn                    # U
@@ -69,3 +66,4 @@ toLOWER_LC                     # U
 vmess                          # U
 vnewSVpvf                      # U
 warner                         # U
+warner_nocontext               # U

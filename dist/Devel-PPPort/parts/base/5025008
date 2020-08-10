@@ -1,2 +1,10 @@
 5.025008
+is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks_part0 # Z added by devel/scanprov
+is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks_part1 # Z added by devel/scanprov
+is_MULTI_CHAR_FOLD_utf8_safe_part2 # Z added by devel/scanprov
+is_MULTI_CHAR_FOLD_utf8_safe_part3 # Z added by devel/scanprov
+is_STRICT_UTF8_CHAR_utf8_no_length_checks_part2 # Z added by devel/scanprov
+is_STRICT_UTF8_CHAR_utf8_no_length_checks_part3 # Z added by devel/scanprov
+PERL_SIPHASH_FNC               # Z added by devel/scanprov
+PL_strxfrm_NUL_replacement     # Z added by devel/scanprov
 sv_set_undef                   # U
