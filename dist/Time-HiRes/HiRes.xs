@@ -901,7 +901,7 @@ nsec_without_unslept(struct timespec *sleepfor,
 /* In case Perl and/or Devel::PPPort are too old, minimally emulate
  * IS_SAFE_PATHNAME() (which looks for zero bytes in the pathname). */
 #ifndef IS_SAFE_PATHNAME
-#  if PERL_VERSION >= 12 /* Perl_ck_warner is 5.10.0 -> */
+#  if PERL_VERSION_GE(5,12,0) /* Perl_ck_warner is 5.10.0 -> */
 #    ifdef WARN_SYSCALLS
 #      define WARNEMUCAT WARN_SYSCALLS /* 5.22.0 -> */
 #    else
