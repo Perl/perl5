@@ -912,9 +912,9 @@ sub doMakefile {
         push @makefileopts, (
             META_MERGE => {
                 resources => {
-                    repository => 'git://perl5.git.perl.org/perl.git',
-                    bugtracker => 'https://rt.perl.org/rt3/',
-                    homepage   => "http://dev.perl.org/",
+                    repository => 'https://github.com/Perl/perl5.git',
+                    bugtracker => 'https://github.com/Perl/perl5/issues',
+                    homepage   => "https://github.com/Perl/perl5",
                 },
             },
         )
