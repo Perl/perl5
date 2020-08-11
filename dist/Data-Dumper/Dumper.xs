@@ -1613,12 +1613,13 @@ Data_Dumper_Dumpxs(href, ...)
                         style.sortkeys = &PL_sv_yes;
 		}
 		postav = newAV();
+                sv_2mortal((SV*)postav);
 
 		if (todumpav)
 		    imax = av_len(todumpav);
 		else
 		    imax = -1;
-		valstr = newSVpvs("");
+		valstr = newSVpvs_flags("", SVs_TEMP);
 		for (i = 0; i <= imax; ++i) {
 		    SV *newapad;
 		
@@ -1719,8 +1720,6 @@ Data_Dumper_Dumpxs(href, ...)
 			    retval = newSVpvs_flags("", SVs_TEMP);
 		    }
 		}
-		SvREFCNT_dec(postav);
-		SvREFCNT_dec(valstr);
 
                 /* we defer croaking until here so that temporary SVs and
                  * buffers won't be leaked */
