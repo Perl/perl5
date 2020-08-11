@@ -72,7 +72,7 @@ __DATA__
 
 <h1 id="LINKS">LINKS</h1>
 
-<pre><code>  Verbatim B&lt;means&gt; verbatim.</code></pre>
+<pre><code>Verbatim B&lt;means&gt; verbatim.</code></pre>
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
