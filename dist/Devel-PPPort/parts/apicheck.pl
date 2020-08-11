@@ -183,7 +183,7 @@ static int    VARarg1;
 static char  *VARarg2;
 static double VARarg3;
 
-#if defined(D_PPP_BCDVERSION) && (D_PPP_BCDVERSION < 0x5009005)
+#if defined(PERL_BCDVERSION) && (PERL_BCDVERSION < 0x5009005)
 /* needed to make PL_parser apicheck work */
 typedef void yy_parser;
 #endif

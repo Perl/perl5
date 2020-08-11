@@ -255,5 +255,5 @@ UTF_START_MASK                 # Z added by devel/scanprov
 UTF_TO_NATIVE                  # Z added by devel/scanprov
 uvchr_to_utf8                  # U
 UVf                            # Z added by devel/scanprov
-UVXf                           # M added by devel/scanprov
+UVXf                           # K added by devel/scanprov
 WIN32SCK_IS_STDSCK             # Z added by devel/scanprov

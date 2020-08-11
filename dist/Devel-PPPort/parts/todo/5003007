@@ -256,13 +256,17 @@ isXDIGIT_L1                    # T
 isXDIGIT_LC                    # T
 items                          # X added by devel/scanprov
 IVdf                           # T
+IV_MAX                         # T
+IV_MIN                         # T
 IVSIZE                         # T
+IVTYPE                         # T
 ix                             # X added by devel/scanprov
 LATIN1_TO_NATIVE               # T
 LEAVE                          # T
 leave_scope                    # T
 LIKELY                         # T
 load_module                    # T
+LONGSIZE                       # T
 looks_like_number              # T
 MARK                           # T
 memCHRs                        # T
@@ -853,6 +857,8 @@ UTF8_IS_INVARIANT              # T
 UTF8_MAXBYTES_CASE             # T
 UVCHR_IS_INVARIANT             # T
 UVCHR_SKIP                     # T
+UV_MAX                         # T
+UV_MIN                         # T
 UVof                           # T
 UVSIZE                         # T
 UVTYPE                         # T

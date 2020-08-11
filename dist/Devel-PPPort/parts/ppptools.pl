@@ -82,7 +82,7 @@ sub expand_version
   my($r, $v, $s) = parse_version($ver);
   $r =~ / ^ [57] $ /x  or die "only Perl revisions [57] are supported\n";
   my $bcdver = sprintf "0x%d%03d%03d", $r, $v, $s;
-  return "(D_PPP_BCDVERSION $op $bcdver)";
+  return "(PERL_BCDVERSION $op $bcdver)";
 }
 
 sub parse_partspec
@@ -445,10 +445,14 @@ sub known_but_hard_to_test_for
 
     my %return;
 
-    for (qw(CLASS dXSI32 items ix pTHX_ RETVAL StructCopy svtype
-            STMT_START STMT_END STR_WITH_LEN THIS XS PTRV
-            PERL_USE_GCC_BRACE_GROUPS CPERLscope XSPROTO
-            EXTERN_C START_EXTERN_C END_EXTERN_C PL_hexdigit))
+
+
+
+
+for (qw(CLASS CPERLscope dMY_CXT_SV dXSI32 END_EXTERN_C EXTERN_C items
+        ix PERL_USE_GCC_BRACE_GROUPS PL_hexdigit pTHX_ PTRV
+        RETVAL START_EXTERN_C STMT_END STMT_START StructCopy
+        STR_WITH_LEN svtype THIS XS XSPROTO))
     {
         # __MIN_PERL__ is this at the time of this commit.  This is the
         # earliest these have been tested to at the time of the commit, but

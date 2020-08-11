@@ -339,13 +339,17 @@ sub find_first_mentions
                     # config.h symbols are documented; the rest aren't, so use
                     # different flags so downstream processing knows which are
                     # which.
-                    my $new_code = ($is_config_h) ? 'K' : 'Z';
-
-                    foreach my $define (keys %defines) {
-
-                        # Don't override input 'M' symbols, or duplicates.
-                        next if defined $remaining{$define};
-                        $remaining{$define} = $new_code;
+                    if ($is_config_h) {
+                        foreach my $define (keys %defines) {
+                            $remaining{$define} = 'K';
+                        }
+                    }
+                    else {
+                        foreach my $define (keys %defines) {
+                            # Don't override input 'M' symbols.
+                            $remaining{$define} = $new_code
+                                            unless defined $remaining{$define};
+                        }
                     }
                 }
             }

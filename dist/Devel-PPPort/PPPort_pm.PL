@@ -87,18 +87,20 @@ my %raw_todo = %{&parse_todo('parts/todo')};
 
 # The items defined by config.h are found instead by scanprov which currently
 # doesn't write them to the todo files.  Instead add them here.  All such have
-# the K code.
+# the K code, and we know certain things about them, so set their flags
+# accordingly.
 for (keys %raw_base) {
-    next if exists $raw_todo{$_};   # Don't override any existing
-    next unless exists $raw_base{$_}{code};
-    next unless $raw_base{$_}{code} eq 'K';
-    $raw_todo{$_} = $raw_base{$_};
-
-    next if exists $embed{$_};      # Don't override any existing
-    $embed{$_}->{flags}{'A'} = 1;
-    $embed{$_}->{flags}{'m'} = 1;
-    $embed{$_}->{flags}{'d'} = 1;
-    $embed{$_}->{flags}{'T'} = 1;
+    if (   exists $raw_base{$_}{code}
+        && $raw_base{$_}{code} eq 'K')
+    {
+        $embed{$_}->{flags}{'A'} = 1;
+        $embed{$_}->{flags}{'m'} = 1;
+        $embed{$_}->{flags}{'d'} = 1;
+        $embed{$_}->{flags}{'T'} = 1;
+        #
+        # Don't override any existing
+        $raw_todo{$_} = $raw_base{$_} unless exists $raw_todo{$_};
+    }
 }
 
 # Invert so each key is the 7 digit version number, and its value is an array
@@ -754,7 +756,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = '3.59';
+$VERSION = '3.60';
 
 sub _init_data
 {

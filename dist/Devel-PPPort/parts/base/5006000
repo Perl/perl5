@@ -288,8 +288,8 @@ I_SYSUTSNAME                   # K added by devel/scanprov
 IVdf                           # E
 IV_DIG                         # Z added by devel/scanprov
 IV_IS_QUAD                     # Z added by devel/scanprov
-IVSIZE                         # M added by devel/scanprov
-IVTYPE                         # M added by devel/scanprov
+IVSIZE                         # K added by devel/scanprov
+IVTYPE                         # K added by devel/scanprov
 JMPENV_BOOTSTRAP               # Z added by devel/scanprov
 KEY_CHECK                      # Z added by devel/scanprov
 KEY_our                        # Z added by devel/scanprov
@@ -334,7 +334,7 @@ newXSproto                     # E
 NODE_SZ_STR                    # Z added by devel/scanprov
 NUM2PTR                        # M added by devel/scanprov
 NV_DIG                         # Z added by devel/scanprov
-NVTYPE                         # M added by devel/scanprov
+NVTYPE                         # K added by devel/scanprov
 NV_WITHIN_IV                   # Z added by devel/scanprov
 NV_WITHIN_UV                   # Z added by devel/scanprov
 OA_PADOP                       # Z added by devel/scanprov
@@ -716,8 +716,8 @@ UTF8SKIP                       # E
 UV_DIG                         # Z added by devel/scanprov
 UV_IS_QUAD                     # Z added by devel/scanprov
 UVof                           # E
-UVSIZE                         # M added by devel/scanprov
-UVTYPE                         # M added by devel/scanprov
+UVSIZE                         # K added by devel/scanprov
+UVTYPE                         # K added by devel/scanprov
 UVuf                           # E
 UVxf                           # E
 vcroak                         # E
