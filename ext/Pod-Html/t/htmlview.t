@@ -47,7 +47,7 @@ __DATA__
 
 <pre><code>use My::Module;
 
-    my $module = My::Module-&gt;new();</code></pre>
+my $module = My::Module-&gt;new();</code></pre>
 
 <h1 id="DESCRIPTION">DESCRIPTION</h1>
 
