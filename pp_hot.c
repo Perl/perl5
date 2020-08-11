@@ -2738,8 +2738,8 @@ PP(pp_aassign)
 	    if (!SvIMMORTAL(lsv)) {
                 sv_set_undef(lsv);
                 SvSETMAGIC(lsv);
-                *relem++ = lsv;
             }
+            *relem++ = lsv;
 	    break;
         } /* switch */
     } /* while */
