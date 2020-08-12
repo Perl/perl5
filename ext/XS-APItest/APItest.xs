@@ -6795,6 +6795,29 @@ test_toTITLE_utf8(SV * p, int type)
     OUTPUT:
         RETVAL
 
+AV *
+test_delimcpy(SV * from_sv, char delim, STRLEN to_len)
+    PREINIT:
+        char * from;
+        STRLEN from_len;
+        AV *av;
+        I32 retlen;
+        char * from_pos_after_copy;
+        char * to;
+    CODE:
+        Newx(to, to_len, char);
+        from = SvPV(from_sv, from_len);
+        from_pos_after_copy = delimcpy(to, to + to_len,
+                                       from, SvEND(from_sv), delim, &retlen);
+        av = newAV();
+        av_push(av, newSVpvn(to, retlen));
+        av_push(av, newSVuv(retlen));
+        av_push(av, newSVuv(from_pos_after_copy - from));
+        Safefree(to);
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
 SV *
 test_Gconvert(SV * number, SV * num_digits)
     PREINIT:
