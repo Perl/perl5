@@ -106,7 +106,7 @@ OUTER: foreach my $file (@files) {
 
 foreach (@progs) {
     my $args = qq[-Ilib $_ --tap];
-    diag("./perl $args");
+    note("./perl $args");
     my $command = "$^X $args";
     system $command
         and die <<~"HINT";
