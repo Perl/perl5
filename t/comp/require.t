@@ -80,7 +80,7 @@ print "# $@\nnot " if $@;
 print "ok ",$i++," - require v5 ignores sub named v5\n";
 
 eval { require 10.0.2; };
-print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.2 required/;
+print "# $@\nnot " unless $@ =~ /^\QPerl v10.0.2 required\E/;
 print "ok ",$i++," - require 10.0.2\n";
 
 my $ver = 5.005_63;
@@ -91,12 +91,12 @@ print "ok ",$i++," - require 5.005_63\n";
 # check inaccurate fp
 $ver = 10.2;
 eval { require $ver; };
-print "# $@\nnot " unless $@ =~ /^Perl v10\.200.0 required/;
+print "# $@\nnot " unless $@ =~ /^\QPerl v10.200.0 required\E/;
 print "ok ",$i++," - require 10.2\n";
 
 $ver = 10.000_02;
 eval { require $ver; };
-print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.20 required/;
+print "# $@\nnot " unless $@ =~ /^\QPerl v10.0.20 required\E/;
 print "ok ",$i++," - require 10.000_02\n";
 
 print "not " unless 5.5.1 gt v5.5;
@@ -155,7 +155,7 @@ for my $expected_compile (1,0) {
 do_require "1)\n";
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
-print "# $@\nnot " unless $@ =~ /(syntax|parse) error/mi;
+print "# $@\nnot " unless $@ =~ /(?:syntax|parse) error/mi;
 print "ok ",$i++," - syntax error\n";
 
 # previous failure cached in %INC
