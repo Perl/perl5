@@ -125,9 +125,18 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<feature> has been upgraded from version 1.58 to 1.60.
 
-If there was something important to note about this change, include that here.
+A new C<multidimensional> feature has been added, which is enabled by
+default but allows turning off L<multi-dimensional array
+emulation|perldata/Multi-dimensional array emulation>.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.57 to 1.58.
+
+The C<i $var> and C<l $var> commands work again with lexical
+variables.
 
 =back
 
