@@ -1183,7 +1183,7 @@ sharedsv_array_mg_free(pTHX_ SV *sv, MAGIC *mg)
  * This is called when perl is about to access an element of
  * the array -
  */
-#if PERL_VERSION >= 11
+#if PERL_VERSION_GE(5,11,0)
 static int
 sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
                        SV *nsv, const char *name, I32 namlen)
