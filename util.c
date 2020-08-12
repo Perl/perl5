@@ -533,6 +533,45 @@ Free_t   Perl_mfree (Malloc_t where)
 
 #endif
 
+/* copy a string up to some (non-backslashed) delimiter, if any.
+ * With allow_escape, converts \<delimiter> to <delimiter>, while leaves
+ * \<non-delimiter> as-is.
+ * Returns the position in the src string of the closing delimiter, if
+ * any, or returns fromend otherwise.
+ * This is the internal implementation for Perl_delimcpy and
+ * Perl_delimcpy_no_escape.
+ */
+
+static char *
+S_delimcpy_intern(char *to, const char *toend, const char *from,
+	   const char *fromend, int delim, I32 *retlen,
+	   const bool allow_escape)
+{
+    I32 tolen;
+
+    PERL_ARGS_ASSERT_DELIMCPY;
+
+    for (tolen = 0; from < fromend; from++, tolen++) {
+	if (allow_escape && *from == '\\' && from + 1 < fromend) {
+	    if (from[1] != delim) {
+		if (to < toend)
+		    *to++ = *from;
+		tolen++;
+	    }
+	    from++;
+	}
+	else if (*from == delim)
+	    break;
+	if (to < toend)
+	    *to++ = *from;
+    }
+    if (to < toend)
+	*to = '\0';
+    *retlen = tolen;
+    return (char *)from;
+}
+
+
 /*
 =for apidoc delimcpy_no_escape
 
@@ -587,95 +626,12 @@ Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
     return (char *) from + copy_len;
 }
 
-/*
-=for apidoc delimcpy
-
-Copy a source buffer to a destination buffer, stopping at (but not including)
-the first occurrence in the source of an unescaped delimiter byte, C<delim>, in
-the source.  By "unescaped", we mean not immediately preceded by a backslash.
-This function does not consider the possibility of the backslash itself being
-escaped.  That is, there is no difference between having an even or odd number
-of backslashes preceding the delimiter  (That may actually be unintended by the
-original authors of this function, and be a bug.)  The distinction is between
-having zero, and non-zero.
-
-The source is the bytes between C<from> and C<fromend> inclusive.  The dest is
-C<to> through C<toend>.
-
-Nothing is copied beyond what fits between C<to> through C<toend>.  If an
-unescaped C<delim> doesn't occur in the source buffer, as much of the source as
-will fit is copied to the destination.
-
-B<The copy strips the escaping backslash from any escaped delimiter>.
-
-The actual number of bytes copied is written to C<*retlen>.  T
-
-If there is room in the destination available after the copy, an extra
-terminating safety NUL byte is written (not included in the returned length).
-
-=cut
-*/
 char *
 Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend, int delim, I32 *retlen)
 {
-    Ptrdiff_t from_len = fromend - from;
-    Ptrdiff_t to_len = toend - to;
-    char * const orig_to = to;
-
-    /* Only use the minimum of the available source/dest */
-    Ptrdiff_t copy_len = MIN(from_len, to_len);
-
     PERL_ARGS_ASSERT_DELIMCPY;
 
-    assert(copy_len >= 0);
-
-    while (copy_len > 0) {
-        const char * delim_pos;
-        Size_t segment_len;
-
-        /* Look for the next delimiter in the remaining portion of the source
-         * we are allowed to look at (determined by the input bounds). */
-        delim_pos = (const char *) memchr(from, delim, copy_len);
-
-        /* If didn't find it, done looking */
-        if (! delim_pos) {
-            break;
-        }
-
-        /* If the delimiter is not preceeded by a backslash; have found an
-         * unescaped one that ends the copy */
-        if (delim_pos == from || *(delim_pos - 1) != '\\') {
-            copy_len = delim_pos - from;
-            break;
-        }
-
-        /* Copy up to but not including the backslash, then the delimiter.
-         * This has the effect of stripping off the backslash in the copy */
-        segment_len = delim_pos - from;
-
-        Copy(from, to, segment_len, char);
-
-        to += segment_len;
-        *to++ = delim;
-
-        /* Adjust for next iteration */
-        from += segment_len + 1;
-        copy_len -= segment_len;
-    }
-
-    /* Copy anything remaining */
-    Copy(from, to, copy_len, char);
-
-    if (retlen) {
-        *retlen = to + copy_len - orig_to;
-    }
-
-    /* If there is extra space available, add a trailing NUL */
-    if (copy_len < to_len) {
-        to[copy_len] = '\0';
-    }
-
-    return (char *) from + copy_len;
+    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 1);
 }
 
 /*
