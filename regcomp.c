@@ -15212,6 +15212,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 FAIL2("panic: loc_correspondence[%d] is 0",
                                       (int) (s - s_start));
                             }
+                            Safefree(locfold_buf);
+                            Safefree(loc_correspondence);
                         }
                         else {
                             upper_fill = s - s0;
