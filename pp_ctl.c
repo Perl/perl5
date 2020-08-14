@@ -1716,7 +1716,11 @@ Perl_die_unwind(pTHX_ SV *msv)
          * when unlocalising a tied var). So we do a dance with
          * mortalising and SAVEFREEing.
          */
-        sv_2mortal(SvREFCNT_inc_simple_NN(exceptsv));
+        if (PL_phase == PERL_PHASE_DESTRUCT) {
+            exceptsv = sv_mortalcopy(exceptsv);
+        } else {
+            exceptsv = sv_2mortal(SvREFCNT_inc_simple_NN(exceptsv));
+        }
 
 	/*
 	 * Historically, perl used to set ERRSV ($@) early in the die
