@@ -657,9 +657,9 @@ Ap	|I32	|debstackptrs
 pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
 ATp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
-Tp	|char*	|delimcpy_no_escape|NN char* to|NN const char* toend \
-				   |NN const char* from \
-				   |NN const char* fromend|int delim \
+Tpd	|char*	|delimcpy_no_escape|NN char* to|NN const char* toend	\
+				   |NN const char* from			\
+				   |NN const char* fromend|int delim	\
 				   |NN I32* retlen
 : Used in op.c, perl.c
 px	|void	|delete_eval_scope
