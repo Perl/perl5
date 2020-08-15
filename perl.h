@@ -7088,7 +7088,7 @@ extern void moncontrol(int);
 
 /*
 =for apidoc Amn|U32|PERL_SIGNALS_UNSAFE_FLAG
-If this bit in L</C<PL_signals>> is set, the system is uing the pre-Perl 5.8
+If this bit in C<PL_signals> is set, the system is uing the pre-Perl 5.8
 unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
 (Safe Signals)>.
 
