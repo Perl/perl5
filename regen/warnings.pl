@@ -422,13 +422,22 @@ The categories must be completely independent, one may not be subclassed from
 the other.
 
 =for apidoc Am|bool|ckWARN_d|U32 w
-=for apidoc_item ckWARN2_d|U32 w1|U32 w2
-=for apidoc_item ckWARN3_d|U32 w1|U32 w2|U32 w3
-=for apidoc_item ckWARN4_d|U32 w1|U32 w2|U32 w3|U32 w4
+=for apidoc_item ||ckWARN2_d|U32 w1|U32 w2
+=for apidoc_item ||ckWARN3_d|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||ckWARN4_d|U32 w1|U32 w2|U32 w3|U32 w4
 
 Like C<L</ckWARN>>, but for use if and only if the warning category(ies) is by
 default enabled even if not within the scope of S<C<use warnings>>.
 
+=for apidoc Am|U32|packWARN|U32 w1
+=for apidoc_item ||packWARN2|U32 w1|U32 w2
+=for apidoc_item ||packWARN3|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||packWARN4|U32 w1|U32 w2|U32 w3|U32 w4
+
+These macros are used to pack warning categories into a single U32 to pass to
+macros and functions that take a warning category parameter.  The number of
+categories to pack is given by the name, with a corresponding number of
+category parameters passed.
 
 =cut
 
