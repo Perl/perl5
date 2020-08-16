@@ -715,10 +715,6 @@ X<$^V> X<$PERL_VERSION>
 These are documented in the generated file lib/Config.pod.  This looks
 like as good a place as any to give notice that they are documented.
 
-=for apidoc hAmn|int|PERL_VERSION
-=for apidoc hAmn|int|PERL_REVISION
-=for apidoc hAmn|int|PERL_SUBVERSION
-
 The revision, version, and subversion of the Perl interpreter,
 represented as a L<version> object.
 
