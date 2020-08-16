@@ -371,10 +371,6 @@ EOM
       push @names, $name;
       $last_ver = $version ;
   }
-  print $warn "\n\n/*\n" ;
-
-  print $warn map { "=for apidoc Amnh||$_\n" } @names;
-  print $warn "\n=cut\n*/\n\n" ;
 
   print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
   print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
@@ -484,8 +480,12 @@ category parameters passed.
 	      (unpackWARN4(x) &&                                        \
 		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
 
-/* end of file warnings.h */
 EOM
+
+  print $warn "\n\n/*\n" ;
+  print $warn map { "=for apidoc Amnh||$_\n" } @names;
+  print $warn "\n=cut\n*/\n\n" ;
+  print $warn "/* end of file warnings.h */\n";
 
   read_only_bottom_close_and_rename($warn);
 }
