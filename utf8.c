@@ -493,7 +493,7 @@ different extension.  For these reasons, there is a separate set of flags that
 can warn and/or disallow these extremely high code points, even if other
 above-Unicode ones are accepted.  They are the C<UNICODE_WARN_PERL_EXTENDED>
 and C<UNICODE_DISALLOW_PERL_EXTENDED> flags.  For more information see
-L</C<UTF8_GOT_PERL_EXTENDED>>.  Of course C<UNICODE_DISALLOW_SUPER> will
+C<L</UTF8_GOT_PERL_EXTENDED>>.  Of course C<UNICODE_DISALLOW_SUPER> will
 treat all above-Unicode code points, including these, as malformations.  (Note
 that the Unicode standard considers anything above 0x10FFFF to be illegal, but
 there are standards predating it that allow up to 0x7FFF_FFFF (2**31 -1))
@@ -1260,7 +1260,7 @@ different extension.  For these reasons, there is a separate set of flags that
 can warn and/or disallow these extremely high code points, even if other
 above-Unicode ones are accepted.  They are the C<UTF8_WARN_PERL_EXTENDED> and
 C<UTF8_DISALLOW_PERL_EXTENDED> flags.  For more information see
-L</C<UTF8_GOT_PERL_EXTENDED>>.  Of course C<UTF8_DISALLOW_SUPER> will treat all
+C<L</UTF8_GOT_PERL_EXTENDED>>.  Of course C<UTF8_DISALLOW_SUPER> will treat all
 above-Unicode code points, including these, as malformations.
 (Note that the Unicode standard considers anything above 0x10FFFF to be
 illegal, but there are standards predating it that allow up to 0x7FFF_FFFF
@@ -1393,7 +1393,7 @@ C<UTF8_DISALLOW_NONCHAR> or the C<UTF8_WARN_NONCHAR> flags.
 
 The input sequence was malformed in that a non-continuation type byte was found
 in a position where only a continuation type one should be.  See also
-L</C<UTF8_GOT_SHORT>>.
+C<L</UTF8_GOT_SHORT>>.
 
 =item C<UTF8_GOT_OVERFLOW>
 

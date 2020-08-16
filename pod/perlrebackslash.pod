@@ -576,7 +576,7 @@ The boundary types are:
 
 This matches a Unicode "Grapheme Cluster Boundary".  (Actually Perl
 always uses the improved "extended" grapheme cluster").  These are
-explained below under L</C<\X>>.  In fact, C<\X> is another way to get
+explained below under C<L</\X>>.  In fact, C<\X> is another way to get
 the same functionality.  It is equivalent to C</.+?\b{gcb}/>.  Use
 whichever is most convenient for your situation.
 

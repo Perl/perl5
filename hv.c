@@ -3737,10 +3737,10 @@ Returns the label attached to a cop, and stores its length in bytes into
 C<*len>.
 Upon return, C<*flags> will be set to either C<SVf_UTF8> or 0.
 
-Alternatively, use the macro L</C<CopLABEL_len_flags>>;
+Alternatively, use the macro C<L</CopLABEL_len_flags>>;
 or if you don't need to know if the label is UTF-8 or not, the macro
-L</C<CopLABEL_len>>;
-or if you additionally dont need to know the length, L</C<CopLABEL>>.
+C<L</CopLABEL_len>>;
+or if you additionally dont need to know the length, C<L</CopLABEL>>.
 
 =cut
 */

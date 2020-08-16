@@ -957,7 +957,7 @@ X<-X>
 Disables all warnings regardless of C<use warnings> or C<$^W>.
 See L<warnings>.
 
-Forbidden in L</C<PERL5OPT>>.
+Forbidden in C<L</PERL5OPT>>.
 
 =item B<-x>
 X<-x>
