@@ -22,6 +22,14 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
+      - name: setup branch env name
+        run: |
+          ref="${github_ref/refs\/heads\//}"
+          echo "setenv ref=$ref"
+          echo "::set-env name=ref::$ref"
+        env:
+          github_ref: ${{ github.event.ref }}
+
       - name: irc push
         uses: rectalogic/notify-irc@v1
         if: github.event_name == 'push' && github.ref != 'refs/heads/blead'
@@ -29,11 +37,11 @@ jobs:
           server: ${{ env.server }}
           port: ${{ env.port }}
           channel: ${{ env.channel }}
-          nickname: Push
+          nickname: Commit
           message:
-            "\x037${{ github.actor }}\x0F pushed \x033${{ github.event.ref }}\x0F\n\
-            ${{ github.event.compare }}\n\
-            ${{ join(github.event.commits.*.message) }}"
+            "\x037${{ github.actor }}\x0F pushed to branch \x033${{ env.ref }}\x0F\n\
+            ${{ join(github.event.commits.*.message, '\n') }}\n\
+            ${{ github.event.compare }}"
 
       - name: irc push to blead
         uses: rectalogic/notify-irc@v1
@@ -45,8 +53,8 @@ jobs:
           nickname: inBlead
           message:
             "\x0313[blead]\x0F \x037${{ github.actor }}\x0F pushed to blead\n\
-            ${{ github.event.compare }}\n\
-            ${{ join(github.event.commits.*.message) }}"
+            ${{ join(github.event.commits.*.message, '\n') }}\n\
+            ${{ github.event.compare }}"
 
       - name: irc pull request
         uses: rectalogic/notify-irc@v1
@@ -55,11 +63,12 @@ jobs:
           server: ${{ env.server }}
           port: ${{ env.port }}
           channel: ${{ env.channel }}
-          nickname: new-PR
+          nickname: Pull-Request
           message:
-            "\x037${{ github.actor }}\x0F opened PR #${{ github.event.pull_request.number }}\n\
+            "\x037${{ github.actor }}\x0F opened/updated PR #${{ github.event.pull_request.number }}\n\
             ${{ github.event.pull_request.title }}\n\
-            \x0313${{ github.event.html_url }}\x0F"
+            ${{ github.event.pull_request.body }}\n\
+            \x0313${{ github.event.pull_request.html.href }}\x0F"
       # steps:
       # - name: Pull request merged
       #   if: github.action == 'closed' && github.pull_request.merged == 'true'
