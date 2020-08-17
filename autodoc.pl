@@ -396,7 +396,7 @@ it.
 _EOB_
     print $fh "\n=over\n\n";
 
-    for my $missing (sort @$missing) {
+    for my $missing (sort sort_helper @$missing) {
         print $fh "=item C<$missing>\nX<$missing>\n\n";
     }
     print $fh "=back\n\n";
