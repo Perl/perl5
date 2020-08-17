@@ -234,6 +234,9 @@ sub extract {
     # Remove extraneous comments from bison 2.4
     $actlines =~ s!\s* /\* \s* Line \s* \d+ \s* of \s* yacc\.c \s* \*/!!gx;
 
+    # Remove extraneous comments from bison 3.x
+    $actlines =~ s!\s* /\* \s* yacc\.c : \d+ \s* \*/!!gx;
+
     # C<#line 188 "perlytmp.c"> gets picked up by make depend, so remove them.
     $actlines =~ s/^#line \d+ "\Q$tmpc_file\E".*$//gm;
 
