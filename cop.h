@@ -403,10 +403,10 @@ struct cop {
 #ifdef USE_ITHREADS
     PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
 				   package the line was compiled in */
-    char *	cop_file;	/* file name the following line # is from */
+    char *	cop_file;	/* name of file this command is from */
 #else
     HV *	cop_stash;	/* package line was compiled in */
-    GV *	cop_filegv;	/* file the following line # is from */
+    GV *	cop_filegv;	/* name of GV file this command is from */
 #endif
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
@@ -452,7 +452,7 @@ struct cop {
 #  else
 #    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
 #  endif
-#else
+#else /* Above: no threads; Below yes threads */
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
 #  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
@@ -464,7 +464,7 @@ struct cop {
 #  else
 #    define CopFILEAVx(c)	(GvAV(CopFILEGV(c)))
 # endif
-#  define CopFILE(c)		(CopFILEGV(c) \
+#  define CopFILE(c)		(CopFILEGV(c) /* +2 for '_<' */         \
 				    ? GvNAME(CopFILEGV(c))+2 : NULL)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
