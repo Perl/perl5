@@ -50,7 +50,7 @@ my %seen;
 my %funcflags;
 my %missing;
 
-my $curheader = "Unknown section";
+my $section = "Unknown section";
 # Somewhat loose match for an apidoc line so we can catch minor typos.
 # Parentheses are used to capture portions so that below we verify
 # that things are the actual correct syntax.
@@ -95,24 +95,24 @@ EOS
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($in, $doc, $line, $header_doc);
+    my($in, $doc, $line_num, $header);
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 
     # Count lines easier
-    my $get_next_line = sub { $line++; return <$fh> };
+    my $get_next_line = sub { $line_num++; return <$fh> };
 
 FUNC:
     while (defined($in = $get_next_line->())) {
 
         if ($in=~ /^=for apidoc_section\s*(.*)/) {
-            $curheader = $1;
+            $section = $1;
             next FUNC;
         }
         elsif ($file_is_C && $in=~ /^=head1 (.*)/) {
             # =head1 lines only have effect in C files
 
-            $curheader = $1;
+            $section = $1;
 
             # If the next non-space line begins with a word char, then it is
             # the start of heading-level documentation.
@@ -128,7 +128,7 @@ FUNC:
                     $in = $doc;
                     redo FUNC;
                 }
-                $header_doc = $doc;
+                $header = $doc;
 
                 # Continue getting the heading-level documentation until read
                 # in any pod directive (or as a fail-safe, find a closing
@@ -141,10 +141,10 @@ HDR_DOC:
                     }
 
                     if ($file_is_C && $doc =~ m:^\s*\*/$:) {
-                        warn "=cut missing? $file:$line:$doc";;
+                        warn "=cut missing? $file:$line_num:$doc";;
                         last HDR_DOC;
                     }
-                    $header_doc .= $doc;
+                    $header .= $doc;
                 }
             }
             next FUNC;
@@ -160,40 +160,40 @@ HDR_DOC:
             next FUNC;
         }
 
-        my ($name, $flags, $ret, $is_item, $proto_in_file, @args)
+        my ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
                                             = check_api_doc_line($file, $in);
-        next unless defined $name;
+        next unless defined $element_name;
         die "Unexpected apidoc_item '$in' in $file near line $." if $is_item;
 
         # If the entry is also in embed.fnc, it should be defined completely
         # there, but not here
-        my $embed_docref = delete $funcflags{$name};
+        my $embed_docref = delete $funcflags{$element_name};
         if ($embed_docref and %$embed_docref) {
             warn "embed.fnc entry overrides redundant information in"
-                . " '$proto_in_file' in $file" if $flags || $ret || @args;
+                . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
             $flags = $embed_docref->{'flags'};
-            warn "embed.fnc entry '$name' missing 'd' flag"
+            warn "embed.fnc entry '$element_name' missing 'd' flag"
                                                         unless $flags =~ /d/;
-            $ret = $embed_docref->{'retval'};
+            $ret_type = $embed_docref->{'ret_type'};
             @args = @{$embed_docref->{args}};
         } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
                                     # macro
-            $missing{$name} = $file;
+            $missing{$element_name} = $file;
         }
 
-        die "flag $1 is not legal (for function $name (from $file))"
+        die "flag $1 is not legal (for function $element_name (from $file))"
                     if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
 
 
-        die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
-        warn ("'$name' not \\w+ in '$proto_in_file' in $file")
-                    if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
+        die "'u' flag must also have 'm' flag' for $element_name" if $flags =~ /u/ && $flags !~ /m/;
+        warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
+                    if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
 
-        if (exists $seen{$name} && $flags !~ /h/) {
-            die ("'$name' in $file was already documented in $seen{$name}");
+        if (exists $seen{$element_name} && $flags !~ /h/) {
+            die ("'$element_name' in $file was already documented in $seen{$element_name}");
         }
         else {
-            $seen{$name} = $file;
+            $seen{$element_name} = $file;
         }
 
         my $docs = "";
@@ -207,7 +207,7 @@ HDR_DOC:
             # it harder is that it that might be a duplicate, like '=item *';
             # so that is a future enhancement XXX.  Another complication is
             # there might be more than one deserving candidates.)
-            undef $header_doc;
+            undef $header;
             my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
             $podname =~ s/\.pod//;
             $docs .= "Described in L<$podname>.\n\n";
@@ -223,7 +223,7 @@ HDR_DOC:
                 # function's docs, so can have lists, etc.
                 last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
                 if ($doc =~ m:^\*/$:) {
-                    warn "=cut missing? $file:$line:$doc";;
+                    warn "=cut missing? $file:$line_num:$doc";;
                     last DOC;
                 }
                 $docs .= $doc;
@@ -233,18 +233,18 @@ HDR_DOC:
 
         my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
 
-        if (exists $docs{$inline_where}{$curheader}{$name}) {
-            warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
+        if (exists $docs{$inline_where}{$section}{$element_name}) {
+            warn "$0: duplicate API entry for '$element_name' in $inline_where/$section\n";
             next;
         }
-        $docs{$inline_where}{$curheader}{$name}
-            = [$flags, $docs, $ret, $file, @args];
+        $docs{$inline_where}{$section}{$element_name}
+            = [$flags, $docs, $ret_type, $file, @args];
 
         # Create a special entry with an empty-string name for the
         # heading-level documentation.
-        if (defined $header_doc) {
-            $docs{$inline_where}{$curheader}{""} = $header_doc;
-            undef $header_doc;
+        if (defined $header) {
+            $docs{$inline_where}{$section}{""} = $header;
+            undef $header;
         }
 
         if (defined $doc) {
@@ -253,17 +253,17 @@ HDR_DOC:
                 redo FUNC;
             }
         } elsif (! $is_link_only) {
-            warn "No doc for $file:$line:$in";
+            warn "No doc for $file:$line_num:$in";
         }
     }
 }
 
 sub docout ($$$) { # output the docs for one function
-    my($fh, $name, $docref) = @_;
-    my($flags, $docs, $ret, $file, @args) = @$docref;
-    $name =~ s/\s*$//;
+    my($fh, $element_name, $docref) = @_;
+    my($flags, $docs, $ret_type, $file, @args) = @$docref;
+    $element_name =~ s/\s*$//;
 
-    warn("Empty pod for $name (from $file)") unless $docs =~ /\S/;
+    warn("Empty pod for $element_name (from $file)") unless $docs =~ /\S/;
 
     if ($flags =~ /D/) {
         my $function = $flags =~ /n/ ? 'definition' : 'function';
@@ -283,16 +283,16 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     $docs .= "NOTE: the C<perl_> form of this function is deprecated.\n\n"
          if $flags =~ /O/;
     if ($p) {
-        $docs .= "NOTE: this function must be explicitly called as C<Perl_$name>";
+        $docs .= "NOTE: this function must be explicitly called as C<Perl_$element_name>";
         $docs .= " with an C<aTHX_> parameter" if $flags !~ /T/;
         $docs .= ".\n\n"
     }
 
-    print $fh "=item $name\n";
+    print $fh "=item $element_name\n";
 
     # If we're printing only a link to an element, this isn't the major entry,
     # so no X<> here.
-    print $fh "X<$name>\n" unless $flags =~ /h/;
+    print $fh "X<$element_name>\n" unless $flags =~ /h/;
 
     print $fh $docs;
 
@@ -301,17 +301,17 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
         # nothing
     } else {
         if ($flags =~ /n/) { # no args
-            warn("$file: $name: n flag without m") unless $flags =~ /m/;
-            warn("$file: $name: n flag but apparently has args") if @args;
-            print $fh "\t$ret\t$name";
+            warn("$file: $element_name: n flag without m") unless $flags =~ /m/;
+            warn("$file: $element_name: n flag but apparently has args") if @args;
+            print $fh "\t$ret_type\t$element_name";
         } else { # full usage
-            my $n            = "Perl_"x$p . $name;
-            my $large_ret    = length $ret > 7;
+            my $n            = "Perl_"x$p . $element_name;
+            my $large_ret    = length $ret_type > 7;
             my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
-                            +8+($large_ret ? 1 + length $ret : 8)
+                            +8+($large_ret ? 1 + length $ret_type : 8)
                             +length($n) + 1;
             my $indent;
-            print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
+            print $fh "\t$ret_type" . ($large_ret ? ' ' : "\t") . "$n(";
             my $long_args;
             for (@args) {
                 if ($indent_size + 2 + length > 79) {
@@ -321,7 +321,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
                 }
             }
             my $args = '';
-            if ($flags !~ /T/ && ($p || ($flags =~ /m/ && $name =~ /^Perl_/))) {
+            if ($flags !~ /T/ && ($p || ($flags =~ /m/ && $element_name =~ /^Perl_/))) {
                 $args = @args ? "pTHX_ " : "pTHX";
                 if ($long_args) { print $fh $args; $args = '' }
             }
@@ -335,7 +335,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
                     print $fh
                     $first ? '' : (
                         $indent //=
-                        "\t".($large_ret ? " " x (1+length $ret) : "\t")
+                        "\t".($large_ret ? " " x (1+length $ret_type) : "\t")
                         ." "x($long_args ? 4 : 1 + length $n)
                     ),
                     $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
@@ -432,12 +432,12 @@ _EOB_
 
 foreach (@{(setup_embed())[0]}) {
     next if @$_ < 2;
-    my ($flags, $retval, $func, @args) = @$_;
+    my ($flags, $ret_type, $func, @args) = @$_;
     s/\b(?:NN|NULLOK)\b\s+//g for @args;
 
     $funcflags{$func} = {
                          flags => $flags,
-                         retval => $retval,
+                         ret_type => $ret_type,
                          args => \@args,
                         };
 }
@@ -454,7 +454,7 @@ while (my $line = <$fh>) {
     next if $file =~ m! ^ ( cpan | dist | ext ) / !x;
 
     open F, '<', $file or die "Cannot open $file for docs: $!\n";
-    $curheader = "Functions in file $file\n";
+    $section = "Functions in file $file\n";
     autodoc(\*F,$file);
     close F or die "Error closing $file: $!\n";
 }
