@@ -109,7 +109,7 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
  * length parameter.  This wrongly allowed reading beyond the end of buffer
  * given malformed input */
 
-#if PERL_VERSION_LE(5,6,'*') /* Perl 5.6 and earlier */
+#if PERL_VERSION_LT(5,7,0) /* Perl 5.6 and earlier */
 
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
@@ -125,10 +125,10 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 #  define utf8_to_uvchr_buf(a,b,c) Perl_utf8_to_uvchr_buf(aTHX_ a,b,c)
 # endif
 
-#endif /* PERL_VERSION_LE(5,6,'*') */
+#endif /* PERL_VERSION_LT(5,7,0) */
 
 /* Perl 5.7 through part of 5.15 */
-#if PERL_VERSION_GE(5,7,0) && PERL_VERSION_LE(5,15,'*') && ! defined(utf8_to_uvchr_buf)
+#if PERL_VERSION_GE(5,7,0) && PERL_VERSION_LT(5,16,0) && ! defined(utf8_to_uvchr_buf)
 
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)

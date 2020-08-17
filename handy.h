@@ -472,32 +472,6 @@ The possible comparisons are C<PERL_VERSION_EQ>, C<PERL_VERSION_NE>,
 C<PERL_VERSION_GE>, C<PERL_VERSION_GT>, C<PERL_VERSION_LE>, and
 C<PERL_VERSION_LT>.
 
-You may use the special value '*' for the final number to mean ALL possible
-values for it.  Thus,
-
- #if PERL_VERSION_EQ(5,31,'*')
-
-means all perls in the 5.31 series.  And
-
- #if PERL_VERSION_NE(5,24,'*')
-
-means all perls EXCEPT 5.24 ones.  And
-
- #if PERL_VERSION_LE(5,9,'*')
-
-is effectively
-
- #if PERL_VERSION_LT(5,10,0)
-
-This means you don't have to think so much when converting from the existing
-deprecated C<PERL_VERSION> to using this macro:
-
- #if PERL_VERSION <= 9
-
-becomes
-
- #if PERL_VERSION_LE(5,9,'*')
-
 =for apidoc AmRh|bool|PERL_VERSION_NE|const U8 major|const U8 minor|const U8 patch
 =for apidoc AmRh|bool|PERL_VERSION_GE|const U8 major|const U8 minor|const U8 patch
 =for apidoc AmRh|bool|PERL_VERSION_GT|const U8 major|const U8 minor|const U8 patch
@@ -507,25 +481,16 @@ becomes
 =cut
 */
 
-/* N.B. These don't work if the patch version is 42 or 92, as those are what
- * '*' is in ASCII and EBCDIC respectively */
 # define PERL_VERSION_EQ(j,n,p)                                             \
-              (((p) == '*')                                                 \
-               ? (   (j) == PERL_VERSION_MAJOR                              \
-                  && (n) == PERL_VERSION_MINOR)                             \
-               : (PERL_DECIMAL_VERSION_ == PERL_JNP_TO_DECIMAL_(j,n,p)))
+    (PERL_DECIMAL_VERSION_ == PERL_JNP_TO_DECIMAL_(j,n,p))
 # define PERL_VERSION_NE(j,n,p) (! PERL_VERSION_EQ(j,n,p))
 
-# define PERL_VERSION_LT(j,n,p) /* < '*' effectively means < 0 */           \
-    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_( (j),                     \
-                                                   (n),                     \
-                                                 (((p) == '*') ? 0 : p)))
+# define PERL_VERSION_LT(j,n,p)                                             \
+    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_(j,n,p))
 # define PERL_VERSION_GE(j,n,p)  (! PERL_VERSION_LT(j,n,p))
 
-# define PERL_VERSION_LE(j,n,p)  /* <= '*' effectively means < n+1 */       \
-    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_(                  (j),    \
-                                          (((p) == '*') ? ((n)+1) : (n)),   \
-                                          (((p) == '*') ? 0 : p)))
+# define PERL_VERSION_LE(j,n,p)                                             \
+    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_(j,n,p))
 # define PERL_VERSION_GT(j,n,p) (! PERL_VERSION_LE(j,n,p))
 
 /*
