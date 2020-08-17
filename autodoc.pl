@@ -51,6 +51,47 @@ my %funcflags;
 my %missing;
 
 my $curheader = "Unknown section";
+# Somewhat loose match for an apidoc line so we can catch minor typos.
+# Parentheses are used to capture portions so that below we verify
+# that things are the actual correct syntax.
+my $apidoc_re = qr/ ^ (\s*)            # $1
+                      (=?)             # $2
+                      (\s*)            # $3
+                      for (\s*)        # $4
+                      apidoc (_item)?  # $5
+                      (\s*)            # $6
+                      (.*?)            # $7
+                      \s* \n /x;
+
+sub check_api_doc_line ($$) {
+    my ($file, $in) = @_;
+
+    return unless $in =~ $apidoc_re;
+
+    my $is_item = defined $5;
+    my $is_in_proper_form = length $1 == 0
+                         && length $2 > 0
+                         && length $3 == 0
+                         && length $4 > 0
+                         && length $6 > 0
+                         && length $7 > 0;
+    my $proto_in_file = $7;
+    my $proto = $proto_in_file;
+    $proto = "||$proto" if $proto !~ /\|/;
+    my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
+
+    $name && $is_in_proper_form or die <<EOS;
+Bad apidoc at $file line $.:
+  $in
+Expected:
+  =for apidoc flags|returntype|name|arg|arg|...
+  =for apidoc flags|returntype|name
+  =for apidoc name
+(or 'apidoc_item')
+EOS
+
+    return ($name, $flags, $ret_type, $is_item, $proto_in_file, @args);
+}
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
@@ -109,10 +150,6 @@ HDR_DOC:
             next FUNC;
         }
 
-        # Parentheses are used to accept anything that looks like 'for
-        # apidoc', and later verify that things are the actual correct syntax.
-        my $apidoc_re = qr/^(\s*)(=?)(\s*)for(\s*)apidoc(\s*)(.*?)\s*\n/;
-
         if ($in =~ /^=for comment/) {
             $in = $get_next_line->();
             if ($in =~ /skip apidoc/) {   # Skips the next apidoc-like line
@@ -123,25 +160,10 @@ HDR_DOC:
             next FUNC;
         }
 
-        if ($in =~ $apidoc_re) {
-            my $is_in_proper_form = length $1 == 0
-                                 && length $2 > 0
-                                 && length $3 == 0
-                                 && length $4 > 0
-                                 && length $5 > 0
-                                 && length $6 > 0;
-            my $proto_in_file = $6;
-            my $proto = $proto_in_file;
-            $proto = "||$proto" unless $proto =~ /\|/;
-            my($flags, $ret, $name, @args) = split /\s*\|\s*/, $proto;
-            $name && $is_in_proper_form or die <<EOS;
-Bad apidoc at $file line $.:
-  $in
-Expected:
-  =for apidoc flags|returntype|name|arg|arg|...
-  =for apidoc flags|returntype|name
-  =for apidoc name
-EOS
+        my ($name, $flags, $ret, $is_item, $proto_in_file, @args)
+                                            = check_api_doc_line($file, $in);
+        next unless defined $name;
+        die "Unexpected apidoc_item '$in' in $file near line $." if $is_item;
 
             # If the entry is also in embed.fnc, it should be defined
             # completely there, but not here
@@ -234,7 +256,6 @@ EOS
             } elsif (! $is_link_only) {
                 warn "No doc for $file:$line:$in";
             }
-        }
     }
 }
 
