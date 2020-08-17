@@ -97,7 +97,7 @@ Perl_av_extend(pTHX_ AV *av, SSize_t key)
 /* The guts of av_extend.  *Not* for general use! */
 void
 Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
-			  SV ***arrayp)
+                      SV ***arrayp)
 {
     PERL_ARGS_ASSERT_AV_EXTEND_GUTS;
 
@@ -106,102 +106,98 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
             "panic: av_extend_guts() negative count (%" IVdf ")", (IV)key);
 
     if (key > *maxp) {
-	SV** ary;
-	SSize_t tmp;
-	SSize_t newmax;
+        SV** ary;
+        SSize_t tmp;
+        SSize_t newmax;
 
-	if (av && *allocp != *arrayp) {
-	    ary = *allocp + AvFILLp(av) + 1;
-	    tmp = *arrayp - *allocp;
-	    Move(*arrayp, *allocp, AvFILLp(av)+1, SV*);
-	    *maxp += tmp;
-	    *arrayp = *allocp;
-	    if (AvREAL(av)) {
-		while (tmp)
-		    ary[--tmp] = NULL;
-	    }
-	    if (key > *maxp - 10) {
-		newmax = key + *maxp;
-		goto resize;
-	    }
-	}
-	else {
-	    if (*allocp) {
+        if (av && *allocp != *arrayp) {
+            ary = *allocp + AvFILLp(av) + 1;
+            tmp = *arrayp - *allocp;
+            Move(*arrayp, *allocp, AvFILLp(av)+1, SV*);
+            *maxp += tmp;
+            *arrayp = *allocp;
+            if (AvREAL(av)) {
+                while (tmp)
+                    ary[--tmp] = NULL;
+            }
+            if (key > *maxp - 10) {
+                newmax = key + *maxp;
+                goto resize;
+            }
+        } else if (*allocp) {
 
 #ifdef Perl_safesysmalloc_size
-		/* Whilst it would be quite possible to move this logic around
-		   (as I did in the SV code), so as to set AvMAX(av) early,
-		   based on calling Perl_safesysmalloc_size() immediately after
-		   allocation, I'm not convinced that it is a great idea here.
-		   In an array we have to loop round setting everything to
-		   NULL, which means writing to memory, potentially lots
-		   of it, whereas for the SV buffer case we don't touch the
-		   "bonus" memory. So there there is no cost in telling the
-		   world about it, whereas here we have to do work before we can
-		   tell the world about it, and that work involves writing to
-		   memory that might never be read. So, I feel, better to keep
-		   the current lazy system of only writing to it if our caller
-		   has a need for more space. NWC  */
-		newmax = Perl_safesysmalloc_size((void*)*allocp) /
-		    sizeof(const SV *) - 1;
+            /* Whilst it would be quite possible to move this logic around
+               (as I did in the SV code), so as to set AvMAX(av) early,
+               based on calling Perl_safesysmalloc_size() immediately after
+               allocation, I'm not convinced that it is a great idea here.
+               In an array we have to loop round setting everything to
+               NULL, which means writing to memory, potentially lots
+               of it, whereas for the SV buffer case we don't touch the
+               "bonus" memory. So there there is no cost in telling the
+               world about it, whereas here we have to do work before we can
+               tell the world about it, and that work involves writing to
+               memory that might never be read. So, I feel, better to keep
+               the current lazy system of only writing to it if our caller
+               has a need for more space. NWC  */
+            newmax = Perl_safesysmalloc_size((void*)*allocp) /
+                sizeof(const SV *) - 1;
 
-		if (key <= newmax) 
-		    goto resized;
+            if (key <= newmax)
+                goto resized;
 #endif 
-                /* overflow-safe version of newmax = key + *maxp/5 */
-		newmax = *maxp / 5;
-                newmax = (key > SSize_t_MAX - newmax)
-                            ? SSize_t_MAX : key + newmax;
-	      resize:
-		{
-                    /* it should really be newmax+1 here, but if newmax
-                     * happens to equal SSize_t_MAX, then newmax+1 is
-                     * undefined. This means technically we croak one
-                     * index lower than we should in theory; in practice
-                     * its unlikely the system has SSize_t_MAX/sizeof(SV*)
-                     * bytes to spare! */
-		    MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
-		}
+            /* overflow-safe version of newmax = key + *maxp/5 */
+            newmax = *maxp / 5;
+            newmax = (key > SSize_t_MAX - newmax)
+                        ? SSize_t_MAX : key + newmax;
+          resize:
+            {
+                /* it should really be newmax+1 here, but if newmax
+                 * happens to equal SSize_t_MAX, then newmax+1 is
+                 * undefined. This means technically we croak one
+                 * index lower than we should in theory; in practice
+                 * its unlikely the system has SSize_t_MAX/sizeof(SV*)
+                 * bytes to spare! */
+                MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
+            }
 #ifdef STRESS_REALLOC
-		{
-		    SV ** const old_alloc = *allocp;
-		    Newx(*allocp, newmax+1, SV*);
-		    Copy(old_alloc, *allocp, *maxp + 1, SV*);
-		    Safefree(old_alloc);
-		}
+            {
+                SV ** const old_alloc = *allocp;
+                Newx(*allocp, newmax+1, SV*);
+                Copy(old_alloc, *allocp, *maxp + 1, SV*);
+                Safefree(old_alloc);
+            }
 #else
-		Renew(*allocp,newmax+1, SV*);
+            Renew(*allocp,newmax+1, SV*);
 #endif
 #ifdef Perl_safesysmalloc_size
-	      resized:
+          resized:
 #endif
-		ary = *allocp + *maxp + 1;
-		tmp = newmax - *maxp;
-		if (av == PL_curstack) {	/* Oops, grew stack (via av_store()?) */
-		    PL_stack_sp = *allocp + (PL_stack_sp - PL_stack_base);
-		    PL_stack_base = *allocp;
-		    PL_stack_max = PL_stack_base + newmax;
-		}
-	    }
-	    else {
-		newmax = key < 3 ? 3 : key;
-		{
-                    /* see comment above about newmax+1*/
-		    MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
-		}
-		Newx(*allocp, newmax+1, SV*);
-		ary = *allocp + 1;
-		tmp = newmax;
-		*allocp[0] = NULL;	/* For the stacks */
-	    }
-	    if (av && AvREAL(av)) {
-		while (tmp)
-		    ary[--tmp] = NULL;
-	    }
-	    
-	    *arrayp = *allocp;
-	    *maxp = newmax;
-	}
+            ary = *allocp + *maxp + 1;
+            tmp = newmax - *maxp;
+            if (av == PL_curstack) {  /* Oops, grew stack (via av_store()?) */
+                PL_stack_sp = *allocp + (PL_stack_sp - PL_stack_base);
+                PL_stack_base = *allocp;
+                PL_stack_max = PL_stack_base + newmax;
+            }
+        } else {
+            newmax = key < 3 ? 3 : key;
+            {
+                /* see comment above about newmax+1*/
+                MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
+            }
+            Newx(*allocp, newmax+1, SV*);
+            ary = *allocp + 1;
+            tmp = newmax;
+            *allocp[0] = NULL;  /* For the stacks */
+        }
+        if (av && AvREAL(av)) {
+            while (tmp)
+               ary[--tmp] = NULL;
+        }
+
+        *arrayp = *allocp;
+        *maxp = newmax;
     }
 }
 
