@@ -95,7 +95,7 @@ EOS
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($in, $doc, $line_num, $header);
+    my($in, $line_num, $header);
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 
@@ -116,35 +116,33 @@ FUNC:
 
             # If the next non-space line begins with a word char, then it is
             # the start of heading-level documentation.
-            if (defined($doc = $get_next_line->())) {
+            if (defined($in = $get_next_line->())) {
                 # Skip over empty lines
-                while ($doc =~ /^\s+$/) {
-                    if (! defined($doc = $get_next_line->())) {
+                while ($in =~ /^\s+$/) {
+                    if (! defined($in = $get_next_line->())) {
                         next FUNC;
                     }
                 }
 
-                if ($doc !~ /^\w/) {
-                    $in = $doc;
+                if ($in !~ /^\w/) {
                     redo FUNC;
                 }
-                $header = $doc;
+                $header = $in;
 
                 # Continue getting the heading-level documentation until read
                 # in any pod directive (or as a fail-safe, find a closing
                 # comment to this pod in a C language file
 HDR_DOC:
-                while (defined($doc = $get_next_line->())) {
-                    if ($doc =~ /^=\w/) {
-                        $in = $doc;
+                while (defined($in = $get_next_line->())) {
+                    if ($in =~ /^=\w/) {
                         redo FUNC;
                     }
 
-                    if ($file_is_C && $doc =~ m:^\s*\*/$:) {
-                        warn "=cut missing? $file:$line_num:$doc";;
+                    if ($file_is_C && $in =~ m:^\s*\*/$:) {
+                        warn "=cut missing? $file:$line_num:$in";;
                         last HDR_DOC;
                     }
-                    $header .= $doc;
+                    $header .= $in;
                 }
             }
             next FUNC;
@@ -190,7 +188,8 @@ HDR_DOC:
                     if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
 
         if (exists $seen{$element_name} && $flags !~ /h/) {
-            die ("'$element_name' in $file was already documented in $seen{$element_name}");
+            # Temporarily ignore
+            #die ("'$element_name' in $file was already documented in $seen{$element_name}");
         }
         else {
             $seen{$element_name} = $file;
@@ -217,16 +216,16 @@ HDR_DOC:
         }
         else {
             DOC:
-            while (defined($doc = $get_next_line->())) {
+            while (defined($in = $get_next_line->())) {
 
                 # Other pod commands are considered part of the current
                 # function's docs, so can have lists, etc.
-                last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
-                if ($doc =~ m:^\*/$:) {
-                    warn "=cut missing? $file:$line_num:$doc";;
+                last DOC if $in =~ /^=(cut|for\s+apidoc|head)/;
+                if ($in =~ m:^\*/$:) {
+                    warn "=cut missing? $file:$line_num:$in";;
                     last DOC;
                 }
-                $docs .= $doc;
+                $docs .= $in;
             }
         }
         $docs = "\n$docs" if $docs and $docs !~ /^\n/;
@@ -247,9 +246,8 @@ HDR_DOC:
             undef $header;
         }
 
-        if (defined $doc) {
-            if ($doc =~ /^=(?:for|head)/) {
-                $in = $doc;
+        if (defined $in) {
+            if ($in =~ /^=(?:for|head)/) {
                 redo FUNC;
             }
         } elsif (! $is_link_only) {
