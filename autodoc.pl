@@ -195,7 +195,7 @@ HDR_DOC:
             $seen{$element_name} = $file;
         }
 
-        my $docs = "";
+        my $text = "";
         my $is_link_only = ($flags =~ /h/);
         if ($is_link_only) {    # Don't put meat of entry in perlapi
             next FUNC if $file_is_C;    # Don't put anything if C source
@@ -209,7 +209,7 @@ HDR_DOC:
             undef $header;
             my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
             $podname =~ s/\.pod//;
-            $docs .= "Described in L<$podname>.\n\n";
+            $text .= "Described in L<$podname>.\n\n";
 
             # Keep track of all the pod files that we refer to.
             push $described_elsewhere{$podname}->@*, $podname;
@@ -225,24 +225,24 @@ HDR_DOC:
                     warn "=cut missing? $file:$line_num:$in";;
                     last DOC;
                 }
-                $docs .= $in;
+                $text .= $in;
             }
         }
-        $docs = "\n$docs" if $docs and $docs !~ /^\n/;
+        $text = "\n$text" if $text and $text !~ /^\n/;
 
-        my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
+        my $where = $flags =~ /A/ ? 'api' : 'guts';
 
-        if (exists $docs{$inline_where}{$section}{$element_name}) {
-            warn "$0: duplicate API entry for '$element_name' in $inline_where/$section\n";
+        if (exists $docs{$where}{$section}{$element_name}) {
+            warn "$0: duplicate API entry for '$element_name' in $where/$section\n";
             next;
         }
-        $docs{$inline_where}{$section}{$element_name}
-            = [$flags, $docs, $ret_type, $file, @args];
+        $docs{$where}{$section}{$element_name}
+            = [$flags, $text, $ret_type, $file, @args];
 
         # Create a special entry with an empty-string name for the
         # heading-level documentation.
         if (defined $header) {
-            $docs{$inline_where}{$section}{""} = $header;
+            $docs{$where}{$section}{""} = $header;
             undef $header;
         }
 
@@ -258,32 +258,32 @@ HDR_DOC:
 
 sub docout ($$$) { # output the docs for one function
     my($fh, $element_name, $docref) = @_;
-    my($flags, $docs, $ret_type, $file, @args) = @$docref;
+    my($flags, $pod, $ret_type, $file, @args) = @$docref;
     $element_name =~ s/\s*$//;
 
-    warn("Empty pod for $element_name (from $file)") unless $docs =~ /\S/;
+    warn("Empty pod for $element_name (from $file)") unless $pod =~ /\S/;
 
     if ($flags =~ /D/) {
         my $function = $flags =~ /n/ ? 'definition' : 'function';
-        $docs = "\n\nDEPRECATED!  It is planned to remove this $function from a
+        $pod = "\n\nDEPRECATED!  It is planned to remove this $function from a
 future release of Perl.  Do not use it for new code; remove it from
-existing code.\n\n$docs";
+existing code.\n\n$pod";
     }
     else {
-        $docs = "\n\nNOTE: this function is experimental and may change or be
-removed without notice.\n\n$docs" if $flags =~ /x/;
+        $pod = "\n\nNOTE: this function is experimental and may change or be
+removed without notice.\n\n$pod" if $flags =~ /x/;
     }
 
     # Is Perl_, but no #define foo # Perl_foo
     my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
           || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
 
-    $docs .= "NOTE: the C<perl_> form of this function is deprecated.\n\n"
+    $pod .= "NOTE: the C<perl_> form of this function is deprecated.\n\n"
          if $flags =~ /O/;
     if ($p) {
-        $docs .= "NOTE: this function must be explicitly called as C<Perl_$element_name>";
-        $docs .= " with an C<aTHX_> parameter" if $flags !~ /T/;
-        $docs .= ".\n\n"
+        $pod .= "NOTE: this function must be explicitly called as C<Perl_$element_name>";
+        $pod .= " with an C<aTHX_> parameter" if $flags !~ /T/;
+        $pod .= ".\n\n"
     }
 
     print $fh "=item $element_name\n";
@@ -292,7 +292,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     # so no X<> here.
     print $fh "X<$element_name>\n" unless $flags =~ /h/;
 
-    print $fh $docs;
+    print $fh $pod;
 
     if ($flags =~ /U/) { # no usage
         warn("U and s flags are incompatible") if $flags =~ /s/;
@@ -373,23 +373,22 @@ sub output {
 
     print $fh $header;
 
-    my $key;
-    for $key (sort sort_helper keys %$dochash) {
-        my $section = $dochash->{$key};
-        next unless keys %$section;     # Skip empty
-        print $fh "\n=head1 $key\n\n";
+    for my $section_name (sort sort_helper keys %$dochash) {
+        my $section_info = $dochash->{$section_name};
+        next unless keys %$section_info;     # Skip empty
+        print $fh "\n=head1 $section_name\n\n";
 
         # Output any heading-level documentation and delete so won't get in
         # the way later
-        if (exists $section->{""}) {
-            print $fh $section->{""} . "\n";
-            delete $section->{""};
+        if (exists $section_info->{""}) {
+            print $fh $section_info->{""} . "\n";
+            delete $section_info->{""};
         }
-        next unless keys %$section;     # Skip empty
+        next unless keys %$section_info;     # Skip empty
         print $fh "=over 8\n\n";
 
-        for my $key (sort sort_helper keys %$section) {
-            docout($fh, $key, $section->{$key});
+        for my $function_name (sort sort_helper keys %$section_info) {
+            docout($fh, $function_name, $section_info->{$function_name});
         }
         print $fh "\n=back\n";
     }
