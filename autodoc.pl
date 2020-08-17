@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# 
+#
 # Unconditionally regenerate:
 #
 #    pod/perlintern.pod
@@ -165,97 +165,96 @@ HDR_DOC:
         next unless defined $name;
         die "Unexpected apidoc_item '$in' in $file near line $." if $is_item;
 
-            # If the entry is also in embed.fnc, it should be defined
-            # completely there, but not here
-            my $embed_docref = delete $funcflags{$name};
-            if ($embed_docref and %$embed_docref) {
-                warn "embed.fnc entry overrides redundant information in"
-                   . " '$proto_in_file' in $file" if $flags || $ret || @args;
-                $flags = $embed_docref->{'flags'};
-                warn "embed.fnc entry '$name' missing 'd' flag"
-                                                            unless $flags =~ /d/;
-                $ret = $embed_docref->{'retval'};
-                @args = @{$embed_docref->{args}};
-            } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
-                                       # macro
-                $missing{$name} = $file;
-            }
+        # If the entry is also in embed.fnc, it should be defined completely
+        # there, but not here
+        my $embed_docref = delete $funcflags{$name};
+        if ($embed_docref and %$embed_docref) {
+            warn "embed.fnc entry overrides redundant information in"
+                . " '$proto_in_file' in $file" if $flags || $ret || @args;
+            $flags = $embed_docref->{'flags'};
+            warn "embed.fnc entry '$name' missing 'd' flag"
+                                                        unless $flags =~ /d/;
+            $ret = $embed_docref->{'retval'};
+            @args = @{$embed_docref->{args}};
+        } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
+                                    # macro
+            $missing{$name} = $file;
+        }
 
-            die "flag $1 is not legal (for function $name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
+        die "flag $1 is not legal (for function $name (from $file))"
+                    if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
 
 
-            die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
-            warn ("'$name' not \\w+ in '$proto_in_file' in $file")
-                        if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
+        die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
+        warn ("'$name' not \\w+ in '$proto_in_file' in $file")
+                    if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
 
-            if (exists $seen{$name} && $flags !~ /h/) {
-                die ("'$name' in $file was already documented in $seen{$name}");
-            }
-            else {
-                $seen{$name} = $file;
-            }
+        if (exists $seen{$name} && $flags !~ /h/) {
+            die ("'$name' in $file was already documented in $seen{$name}");
+        }
+        else {
+            $seen{$name} = $file;
+        }
 
-            my $docs = "";
-            my $is_link_only = ($flags =~ /h/);
-            if ($is_link_only) {    # Don't put meat of entry in perlapi
-                next FUNC if $file_is_C;    # Don't put anything if C source
+        my $docs = "";
+        my $is_link_only = ($flags =~ /h/);
+        if ($is_link_only) {    # Don't put meat of entry in perlapi
+            next FUNC if $file_is_C;    # Don't put anything if C source
 
-                # Here, is an 'h' flag in pod.  We add a reference to the pod
-                # (and nothing else) to perlapi/intern.  (It would be better
-                # to add a reference to the correct =item,=header, but
-                # something that makes it harder is that it that might be a
-                # duplicate, like '=item *'; so that is a future enhancement
-                # XXX.  Another complication is there might be more than one
-                # deserving candidates.)
-                undef $header_doc;
-                my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
-                $podname =~ s/\.pod//;
-                $docs .= "Described in L<$podname>.\n\n";
+            # Here, is an 'h' flag in pod.  We add a reference to the pod (and
+            # nothing else) to perlapi/intern.  (It would be better to add a
+            # reference to the correct =item,=header, but something that makes
+            # it harder is that it that might be a duplicate, like '=item *';
+            # so that is a future enhancement XXX.  Another complication is
+            # there might be more than one deserving candidates.)
+            undef $header_doc;
+            my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
+            $podname =~ s/\.pod//;
+            $docs .= "Described in L<$podname>.\n\n";
 
-                # Keep track of all the pod files that we refer to.
-                push $described_elsewhere{$podname}->@*, $podname;
-            }
-            else {
-              DOC:
-                while (defined($doc = $get_next_line->())) {
+            # Keep track of all the pod files that we refer to.
+            push $described_elsewhere{$podname}->@*, $podname;
+        }
+        else {
+            DOC:
+            while (defined($doc = $get_next_line->())) {
 
-                    # Other pod commands are considered part of the current
-                    # function's docs, so can have lists, etc.
-                    last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
-                    if ($doc =~ m:^\*/$:) {
-                        warn "=cut missing? $file:$line:$doc";;
-                        last DOC;
-                    }
-                    $docs .= $doc;
+                # Other pod commands are considered part of the current
+                # function's docs, so can have lists, etc.
+                last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
+                if ($doc =~ m:^\*/$:) {
+                    warn "=cut missing? $file:$line:$doc";;
+                    last DOC;
                 }
+                $docs .= $doc;
             }
-            $docs = "\n$docs" if $docs and $docs !~ /^\n/;
+        }
+        $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 
-            my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
+        my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
 
-            if (exists $docs{$inline_where}{$curheader}{$name}) {
-                warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
-                next;
+        if (exists $docs{$inline_where}{$curheader}{$name}) {
+            warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
+            next;
+        }
+        $docs{$inline_where}{$curheader}{$name}
+            = [$flags, $docs, $ret, $file, @args];
+
+        # Create a special entry with an empty-string name for the
+        # heading-level documentation.
+        if (defined $header_doc) {
+            $docs{$inline_where}{$curheader}{""} = $header_doc;
+            undef $header_doc;
+        }
+
+        if (defined $doc) {
+            if ($doc =~ /^=(?:for|head)/) {
+                $in = $doc;
+                redo FUNC;
             }
-            $docs{$inline_where}{$curheader}{$name}
-                = [$flags, $docs, $ret, $file, @args];
-
-            # Create a special entry with an empty-string name for the
-            # heading-level documentation.
-            if (defined $header_doc) {
-                $docs{$inline_where}{$curheader}{""} = $header_doc;
-                undef $header_doc;
-            }
-
-            if (defined $doc) {
-                if ($doc =~ /^=(?:for|head)/) {
-                    $in = $doc;
-                    redo FUNC;
-                }
-            } elsif (! $is_link_only) {
-                warn "No doc for $file:$line:$in";
-            }
+        } elsif (! $is_link_only) {
+            warn "No doc for $file:$line:$in";
+        }
     }
 }
 
@@ -376,7 +375,7 @@ sub output {
 
     my $key;
     for $key (sort sort_helper keys %$dochash) {
-        my $section = $dochash->{$key}; 
+        my $section = $dochash->{$key};
         next unless keys %$section;     # Skip empty
         print $fh "\n=head1 $key\n\n";
 
