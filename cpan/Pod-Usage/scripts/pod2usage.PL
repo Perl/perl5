@@ -120,7 +120,9 @@ This option assumes that the formatter (see above) understands the option
 =item I<file>
 
 The pathname of a file containing pod documentation to be output in
-usage message format (defaults to standard input).
+usage message format. If omitted, standard input is read - but the
+output is then formatted with L<Pod::Text> only - unless a specific
+formatter has been specified with B<-formatter>.
 
 =back
 
@@ -135,7 +137,8 @@ module. Please see L<Pod::Usage/pod2usage()>.
 
 =head1 SEE ALSO
 
-L<Pod::Usage>, L<pod2text(1)>
+L<Pod::Usage>, L<pod2text>, L<Pod::Text>, L<Pod::Text::Termcap>,
+L<perldoc>
 
 =head1 AUTHOR
 
@@ -174,14 +177,13 @@ pod2usage(VERBOSE => 2)  if ($options{man});
 ## Dont default to STDIN if connected to a terminal
 pod2usage(2) if ((@ARGV == 0) && (-t STDIN));
 
-@ARGV = ('-')  unless (@ARGV);
 if (@ARGV > 1) {
     print STDERR "pod2usage: Too many filenames given\n\n";
     pod2usage(2);
 }
 
 my %usage = ();
-$usage{-input}    = shift(@ARGV);
+$usage{-input}    = shift(@ARGV) || \*STDIN;
 $usage{-exitval}  = $options{'exit'}      if (defined $options{'exit'});
 $usage{-output}   = $options{'output'}    if (defined $options{'output'});
 $usage{-verbose}  = $options{'verbose'}   if (defined $options{'verbose'});
