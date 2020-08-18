@@ -433,20 +433,20 @@ compilation causes it be used just some times.
 =for apidoc Am||PERL_UNUSED_RESULT|void x
 
 This macro indicates to discard the return value of the function call inside
-it, e.g.
+it, I<e.g.>,
 
  PERL_UNUSED_RESULT(foo(a, b))
 
-The main reason for this is that the combination of gcc -Wunused-result
-(part of -Wall) and the __attribute__((warn_unused_result)) cannot
-be silenced with casting to void.  This causes trouble when the system
+The main reason for this is that the combination of C<gcc -Wunused-result>
+(part of C<-Wall>) and the C<__attribute__((warn_unused_result))> cannot
+be silenced with casting to C<void>.  This causes trouble when the system
 header files use the attribute.
 
 Use C<PERL_UNUSED_RESULT> sparingly, though, since usually the warning
 is there for a good reason: you might lose success/failure information,
 or leak resources, or changes in resources.
 
-But sometimes you just want to ignore the return value, e.g. on
+But sometimes you just want to ignore the return value, I<e.g.>, on
 codepaths soon ending up in abort, or in "best effort" attempts,
 or in situations where there is no good way to handle failures.
 
