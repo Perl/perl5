@@ -95,6 +95,7 @@ Perl_av_extend(pTHX_ AV *av, SSize_t key)
 }    
 
 /* The guts of av_extend.  *Not* for general use! */
+/* Also called directly from pp_assign, padlist_store, padnamelist_store */
 void
 Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
                       SV ***arrayp)
@@ -106,25 +107,21 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
             "panic: av_extend_guts() negative count (%" IVdf ")", (IV)key);
 
     if (key > *maxp) {
-        SV** ary;
-        SSize_t tmp;
-        SSize_t newmax;
+        SSize_t ary_offset = *maxp + 1;
+        SSize_t to_null = 0;
+        SSize_t newmax  = 0;
 
-        if (av && *allocp != *arrayp) {
-            ary = *allocp + AvFILLp(av) + 1;
-            tmp = *arrayp - *allocp;
+        if (av && *allocp != *arrayp) { /* a shifted SV* array exists */
+            to_null = *arrayp - *allocp;
+            *maxp += to_null;
+
             Move(*arrayp, *allocp, AvFILLp(av)+1, SV*);
-            *maxp += tmp;
-            *arrayp = *allocp;
-            if (AvREAL(av)) {
-                while (tmp)
-                    ary[--tmp] = NULL;
-            }
+
             if (key > *maxp - 10) {
                 newmax = key + *maxp;
                 goto resize;
             }
-        } else if (*allocp) {
+        } else if (*allocp) { /* a full SV* array exists */
 
 #ifdef Perl_safesysmalloc_size
             /* Whilst it would be quite possible to move this logic around
@@ -151,15 +148,15 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
             newmax = (key > SSize_t_MAX - newmax)
                         ? SSize_t_MAX : key + newmax;
           resize:
-            {
-                /* it should really be newmax+1 here, but if newmax
-                 * happens to equal SSize_t_MAX, then newmax+1 is
-                 * undefined. This means technically we croak one
-                 * index lower than we should in theory; in practice
-                 * its unlikely the system has SSize_t_MAX/sizeof(SV*)
-                 * bytes to spare! */
-                MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
-            }
+        {
+          /* it should really be newmax+1 here, but if newmax
+           * happens to equal SSize_t_MAX, then newmax+1 is
+           * undefined. This means technically we croak one
+           * index lower than we should in theory; in practice
+           * its unlikely the system has SSize_t_MAX/sizeof(SV*)
+           * bytes to spare! */
+          MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
+        }
 #ifdef STRESS_REALLOC
             {
                 SV ** const old_alloc = *allocp;
@@ -173,31 +170,41 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 #ifdef Perl_safesysmalloc_size
           resized:
 #endif
-            ary = *allocp + *maxp + 1;
-            tmp = newmax - *maxp;
-            if (av == PL_curstack) {  /* Oops, grew stack (via av_store()?) */
+            to_null += newmax - *maxp;
+            *maxp = newmax;
+
+            /* See GH#18014 for discussion of when this might be needed: */
+            if (av == PL_curstack) { /* Oops, grew stack (via av_store()?) */
                 PL_stack_sp = *allocp + (PL_stack_sp - PL_stack_base);
                 PL_stack_base = *allocp;
                 PL_stack_max = PL_stack_base + newmax;
             }
-        } else {
-            newmax = key < 3 ? 3 : key;
+        } else { /* there is no SV* array yet */
+            *maxp = key < 3 ? 3 : key;
             {
                 /* see comment above about newmax+1*/
-                MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
+                MEM_WRAP_CHECK_s(*maxp, SV*,
+                                 "Out of memory during array extend");
             }
-            Newx(*allocp, newmax+1, SV*);
-            ary = *allocp + 1;
-            tmp = newmax;
-            *allocp[0] = NULL;  /* For the stacks */
+            /* Newxz isn't used below because testing showed it to be slower
+             * than Newx+Zero (also slower than Newx + the previous while
+             * loop) for small arrays, which are very common in perl. */
+            Newx(*allocp, *maxp+1, SV*);
+            /* Stacks require only the first element to be &PL_sv_undef
+             * (set elsewhere). However, since non-stack AVs are likely
+             * to dominate in modern production applications, stacks
+             * don't get any special treatment here. */
+            ary_offset = 0;
+            to_null = *maxp+1;
+            goto zero;
         }
+
         if (av && AvREAL(av)) {
-            while (tmp)
-               ary[--tmp] = NULL;
+          zero:
+            Zero(*allocp + ary_offset,to_null,SV*);
         }
 
         *arrayp = *allocp;
-        *maxp = newmax;
     }
 }
 
