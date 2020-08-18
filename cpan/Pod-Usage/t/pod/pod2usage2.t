@@ -226,7 +226,7 @@ $text =~ s{#Using.*/blib.*\n}{}; # older blib's emit something to STDERR
 is ($exit, 0,                 "Exit status pod2usage with self");
 ok (compare ($text, <<'EOT'), "Output test pod2usage with self") or diag "Got:\n$text\n";
 #Usage:
-#      use Pod::Usage
+#      use Pod::Usage;
 #
 #      my $message_text  = "This text precedes the usage message.";
 #      my $exit_status   = 2;          ## The exit status to use

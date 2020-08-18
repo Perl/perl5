@@ -12,7 +12,7 @@ package Pod::Usage;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.69';  ## Current version of this package
+$VERSION = '1.70';  ## Current version of this package
 require  5.006;    ## requires this Perl version or later
 
 #use diagnostics;
@@ -130,8 +130,8 @@ sub pod2usage {
 
     ## Check for perldoc
     my $progpath = $opts{'-perldoc'} ? $opts{'-perldoc'} :
-        File::Spec->catfile($Config{scriptdirexp} 
-	|| $Config{scriptdir}, 'perldoc');
+        File::Spec->catfile($Config{scriptdirexp} || $Config{scriptdir},
+            'perldoc');
 
     my $version = sprintf("%vd",$^V);
     if ($Config{versiononly} and $Config{startperl} =~ /\Q$version\E$/ ) {
@@ -159,9 +159,17 @@ sub pod2usage {
 	 push @perldoc_cmd, ('-F', $f);
          unshift @perldoc_cmd, $opts{'-perlcmd'} if $opts{'-perlcmd'};
          system(@perldoc_cmd);
+         # RT16091: fall back to more if perldoc failed
          if($?) {
-           # RT16091: fall back to more if perldoc failed
-           system(($Config{pager} || $ENV{PAGER} || '/bin/more'), $1);
+           # RT131844: prefer PAGER env
+           my $pager = $ENV{PAGER} || $Config{pager};
+           if(defined($pager) && length($pager)) {
+             my $cmd = $pager . ' ' . ($^O =~ /win/i ? qq("$f") : quotemeta($f));
+             system($cmd);
+           } else {
+             # the most humble fallback; should work (at least) on *nix and Win
+             system('more', $f);
+           }
          }
        } else {
          croak "Unspecified input file or insecure argument.\n";
@@ -275,7 +283,12 @@ sub select {
 sub seq_i { return $_[1] }
 # Override Pod::Text->cmd_i to return just "arg", not "*arg*".
 # newer version based on Pod::Simple
-sub cmd_i { return $_[2] }
+sub cmd_i {
+ my $self = shift;
+ # RT121489: highlighting should be there with Termcap
+ return $self->SUPER::cmd_i(@_) if $self->isa('Pod::Text::Termcap');
+ return $_[1];
+}
 
 # This overrides the Pod::Text method to do something very akin to what
 # Pod::Select did as well as the work done below by preprocess_paragraph.
@@ -379,7 +392,7 @@ Pod::Usage - print a usage message from embedded pod documentation
 
 =head1 SYNOPSIS
 
-  use Pod::Usage
+  use Pod::Usage;
 
   my $message_text  = "This text precedes the usage message.";
   my $exit_status   = 2;          ## The exit status to use
@@ -484,7 +497,7 @@ This will output only the C<=head2 Algorithm> heading and content within
 the C<=head1 DESCRIPTION> section. The regexp binding is stronger than the
 section separator, such that e.g.:
 
-  "DESCRIPTION|OPTIONS|ENVIORNMENT/Caveats"
+  "DESCRIPTION|OPTIONS|ENVIRONMENT/Caveats"
 
 will print any C<=head2 Caveats> section (only) within any of the three
 C<=head1> sections.
@@ -875,6 +888,10 @@ Brad Appleton E<lt>bradapp@enteract.comE<gt>
 
 Based on code for B<Pod::Text::pod2text()> written by
 Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>
+
+=head1 LICENSE
+
+Pod::Usage (the distribution) is licensed under the same terms as Perl.
 
 =head1 ACKNOWLEDGMENTS
 

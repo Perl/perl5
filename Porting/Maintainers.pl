@@ -951,11 +951,8 @@ use File::Glob qw(:case);
     },
 
     'Pod::Usage' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.69.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.70.tar.gz',
         'FILES'        => q[cpan/Pod-Usage],
-        'CUSTOMIZED'   => [
-            't/pod/testp2pt.pl',
-        ],
     },
 
     'podlators' => {
