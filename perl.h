@@ -83,6 +83,31 @@
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
+/*
+=for apidoc AmnUu|void|EXTERN_C
+When not compiling using C++, expands to nothing.
+Otherwise is used in a declaration of a function to indicate the function
+should have external C linkage.  This is required for things to work for just
+about all functions with external linkage compiled into perl.
+Often, you can use C<L</START_EXTERN_C>> ... C<L</END_EXTERN_C>> blocks
+surrounding all your code.
+
+Example usage:
+
+ EXTERN_C int flock(int fd, int op);
+
+=for apidoc Amnu||START_EXTERN_C
+When not compiling using C++, expands to nothing.
+Otherwise begins a section of code in which every function will be declared to
+have external C linkage.  The section is ended by a C<L</END_EXTERN_C>>.
+
+=for apidoc Amnu||END_EXTERN_C
+When not compiling using C++, expands to nothing.
+Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
+
+=cut
+*/
+
 #undef START_EXTERN_C
 #undef END_EXTERN_C
 #undef EXTERN_C
