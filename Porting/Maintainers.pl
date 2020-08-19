@@ -448,6 +448,10 @@ use File::Glob qw(:case);
 
         'DISTRIBUTION' => 'NWCLARK/ExtUtils-Constant-0.25.tar.gz',
         'FILES'    => q[cpan/ExtUtils-Constant],
+        'CUSTOMIZED' => [
+            # https://rt.cpan.org/Public/Bug/Display.html?id=132995
+            't/Constant.t',
+        ],
         'EXCLUDED' => [
             qw( lib/ExtUtils/Constant/Aaargh56Hash.pm
                 examples/perl_keyword.pl
