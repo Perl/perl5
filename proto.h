@@ -219,6 +219,13 @@ PERL_CALLCONV SV**	Perl_av_arylen_p(pTHX_ AV *av);
 PERL_CALLCONV void	Perl_av_clear(pTHX_ AV *av);
 #define PERL_ARGS_ASSERT_AV_CLEAR	\
 	assert(av)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE Size_t	Perl_av_count(pTHX_ AV *av)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_AV_COUNT	\
+	assert(av)
+#endif
+
 PERL_CALLCONV void	Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val);
 #define PERL_ARGS_ASSERT_AV_CREATE_AND_PUSH	\
 	assert(avp); assert(val)
@@ -284,12 +291,10 @@ PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val);
 			__attribute__warn_unused_result__; */
 #define PERL_ARGS_ASSERT_AV_TINDEX
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE SSize_t	Perl_av_top_index(pTHX_ AV *av)
+PERL_CALLCONV SSize_t	Perl_av_top_index(pTHX_ AV *av)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
 	assert(av)
-#endif
 
 PERL_CALLCONV void	Perl_av_undef(pTHX_ AV *av);
 #define PERL_ARGS_ASSERT_AV_UNDEF	\

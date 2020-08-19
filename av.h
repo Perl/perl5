@@ -81,7 +81,8 @@ Same as C<av_top_index()>.
                                           
 #define AvFILL(av)	((SvRMAGICAL((const SV *) (av))) \
 			 ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
-#define av_tindex(av)   av_top_index(av)
+#define av_top_index(av) AvFILL(av)
+#define av_tindex(av)    av_top_index(av)
 
 /* Note that it doesn't make sense to do this:
  *      SvGETMAGIC(av); IV x = av_tindex_nomg(av);

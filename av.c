@@ -814,9 +814,10 @@ The Perl equivalent for this is C<$#myarray>.
 =for apidoc av_len
 
 Same as L</av_top_index>.  Note that, unlike what the name implies, it returns
-the highest index in the array, so to get the size of the array you need to use
-S<C<av_len(av) + 1>>.  This is unlike L</sv_len>, which returns what you would
-expect.
+the highest index in the array.  This is unlike L</sv_len>, which returns what
+you would expect.
+
+B<To get the true number of elements in the array, instead use C<L</av_count>>>.
 
 =cut
 */
@@ -1088,6 +1089,16 @@ Perl_av_nonelem(pTHX_ AV *av, SSize_t ix) {
     sv_magic(sv, NULL, PERL_MAGIC_nonelem, NULL, 0);
     return sv;
 }
+
+SSize_t
+Perl_av_top_index(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_AV_TOP_INDEX;
+    assert(SvTYPE(av) == SVt_PVAV);
+
+    return AvFILL(av);
+}
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

@@ -372,6 +372,11 @@ C<HINT_LOCALIZE_HH> bit, which complicates external code that inspects the
 save stack. The new version uses a different savestack type to indicate the
 difference.
 
+=item *
+
+A new API function L<perlapi/av_count> has been added which gives a
+clearly named way to find how many elements are in an array.
+
 =back
 
 =head1 Selected Bug Fixes

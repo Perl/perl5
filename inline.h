@@ -39,13 +39,21 @@ SOFTWARE.
 
 /* ------------------------------- av.h ------------------------------- */
 
-PERL_STATIC_INLINE SSize_t
-Perl_av_top_index(pTHX_ AV *av)
+/*
+=for apidoc av_count
+Returns the number of elements in the array C<av>.  This is the true length of
+the array, including any undefined elements.  It is always the same as
+S<C<av_top_index(av) + 1>>.
+
+=cut
+*/
+PERL_STATIC_INLINE Size_t
+Perl_av_count(pTHX_ AV *av)
 {
-    PERL_ARGS_ASSERT_AV_TOP_INDEX;
+    PERL_ARGS_ASSERT_AV_COUNT;
     assert(SvTYPE(av) == SVt_PVAV);
 
-    return AvFILL(av);
+    return AvFILL(av) + 1;
 }
 
 /* ------------------------------- cv.h ------------------------------- */
