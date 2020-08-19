@@ -300,23 +300,23 @@ XXX
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
-
 =head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item 9front
 
-XXX
+Allow building Perl on i386 9front systems (fork of plan9).
+
+=back
+
+=head2 Updated Platforms
+
+=over 4
+
+=item Plan9
+
+Improve support for Plan9 on i386 platforms.
 
 =back
 
