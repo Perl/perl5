@@ -113,9 +113,11 @@ release manager will have to investigate the situation carefully.)
 
 =over 4
 
-=item *
+=item * ExtUtils::PL2Bat
 
-XXX Remove this section if not applicable.
+This module is a generalization of the pl2bat script. It being a script has lead
+to at least two forks of this code, this modules will unify them under one
+implemention with tests.
 
 =back
 
