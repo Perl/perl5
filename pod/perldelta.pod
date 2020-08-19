@@ -180,6 +180,27 @@ Incorrect variables used in an example have been fixed. Thanks to Deji Adegbite.
 
 =back
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Better explain what happens when C<sleep> is called with a zero or
+negative value
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+The C<< <> >> and C<<< <<>> >>> operators are commonly referred to as
+the diamond and double diamond operators respectively, but that wasn't
+mentioned previously in their documentation.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
