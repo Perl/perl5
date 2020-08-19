@@ -411,7 +411,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+IO::Handle: Fix a spurious error reported for regular file handles.  GH #18019
 
 =back
 
