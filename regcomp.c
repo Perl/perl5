@@ -8714,9 +8714,9 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
         } else if (flags & RXapif_ONE) {
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
             av = MUTABLE_AV(SvRV(ret));
-            length = av_tindex(av);
+            length = av_count(av);
 	    SvREFCNT_dec_NN(ret);
-            return newSViv(length + 1);
+            return newSViv(length);
         } else {
             Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff_scalar",
                                                 (int)flags);
@@ -16225,7 +16225,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
 
             if (   posix_warnings
                 && RExC_warn_text
-                && av_top_index(RExC_warn_text) > -1)
+                && av_count(RExC_warn_text) > 0)
             {
                 *posix_warnings = RExC_warn_text;
             }
@@ -17773,16 +17773,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             }
 
                             /* For each multi-character string ... */
-                            while (av_tindex(strings) >= 0) {
+                            while (av_count(strings) > 0) {
                                 /* ... Each entry is itself an array of code
                                 * points. */
                                 AV * this_string = (AV *) av_shift( strings);
-                                STRLEN cp_count = av_tindex(this_string) + 1;
+                                STRLEN cp_count = av_count(this_string);
                                 SV * final = newSV(cp_count * 4);
                                 SvPVCLEAR(final);
 
                                 /* Create another string of sequences of \x{...} */
-                                while (av_tindex(this_string) >= 0) {
+                                while (av_count(this_string) > 0) {
                                     SV * character = av_shift(this_string);
                                     UV cp = SvUV(character);
 
@@ -25344,7 +25344,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * "PREFIX-code_point".  The prefixes and the code point limits of each
      * were returned to us in the array 'algorithmic_names' from data in
      * lib/unicore/Name.pm.  'code_point' in the name is expressed in hex. */
-    for (i = 0; i <= av_top_index((AV *) algorithmic_names); i++) {
+    for (i = 0; i < av_count((AV *) algorithmic_names); i++) {
         IV j;
 
         /* Each element of the array is a hash, giving the details for the
