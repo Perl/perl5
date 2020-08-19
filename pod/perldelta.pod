@@ -283,16 +283,6 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<perlpacktut>
-
-=over 4
-
-=item *
-
-Incorrect variables used in an example have been fixed. Thanks to Deji Adegbite.
-
-=back
-
 =head3 L<perlfunc>
 
 =over 4
@@ -325,6 +315,16 @@ mentioned previously in their documentation.
 =over 4
 
 Document range op behavior change.
+
+=back
+
+=head3 L<perlpacktut>
+
+=over 4
+
+=item *
+
+Incorrect variables used in an example have been fixed. Thanks to Deji Adegbite.
 
 =back
 
