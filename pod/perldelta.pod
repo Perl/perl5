@@ -256,6 +256,11 @@ L</Platform Support> section, instead.
 
 XXX
 
+=item *
+
+Newer 64-bit versions of the Intel C/C++ compiler are now recognised
+and have the correct flags set.
+
 =back
 
 =head1 Testing
