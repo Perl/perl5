@@ -1230,10 +1230,12 @@ sub run_multiple_progs {
 	    }
 	}
 
-	my $name = '';
-	if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
-	    $name = $1;
-	}
+    my $name = '';
+    if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
+        $name = $1;
+    } elsif (defined $file) {
+        $name = "test from $file at line $line";
+    }
 
 	if ($reason{skip}) {
 	SKIP:
