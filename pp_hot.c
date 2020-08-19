@@ -3181,7 +3181,7 @@ Perl_do_readline(pTHX)
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		if (IoFLAGS(io) & IOf_START) {
 		    IoLINES(io) = 0;
-		    if (av_tindex(GvAVn(PL_last_in_gv)) < 0) {
+		    if (av_count(GvAVn(PL_last_in_gv)) == 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open6(PL_last_in_gv, "-", 1, NULL, NULL, 0);
 			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
