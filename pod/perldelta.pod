@@ -250,6 +250,13 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 XXX
 
+=item *
+
+perl5db.pl, the debugger, has gained the option HistItemMinLength, to control
+the minimum length a command must be to get stored in history.  Traditionally,
+this has been fixed at 2.  Changes to the debugger are often perilous, and new
+bugs should be reported so the debugger can be debugged.
+
 =back
 
 =head1 Configuration and Compilation
