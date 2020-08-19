@@ -304,6 +304,16 @@ negative value
 
 =back
 
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Correct C<my_rpeep> example in perlguts.
+
+=back
+
 =head3 L<perlop>
 
 =over 4
@@ -311,6 +321,10 @@ negative value
 The C<< <> >> and C<<< <<>> >>> operators are commonly referred to as
 the diamond and double diamond operators respectively, but that wasn't
 mentioned previously in their documentation.
+
+=over 4
+
+Document range op behavior change.
 
 =back
 
