@@ -133,13 +133,6 @@ A new C<multidimensional> feature has been added, which is enabled by
 default but allows turning off L<multi-dimensional array
 emulation|perldata/Multi-dimensional array emulation>.
 
-=item *
-
-L<perl5db.pl> has been upgraded from version 1.57 to 1.58.
-
-The C<i $var> and C<l $var> commands work again with lexical
-variables.
-
 =back
 
 =head2 Removed Modules and Pragmata
@@ -242,20 +235,20 @@ Most of these are built within the directory F<utils>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head2 L<XXX>
+=head2 L<perl5db.pl> (the debugger)
 
 =over 4
 
-=item *
+=item * New option: C<HistItemMinLength>
 
-XXX
+This option controls the minimum length a command must be to get stored in
+history.  Traditionally, this has been fixed at 2.  Changes to the debugger
+are often perilous, and new bugs should be reported so the debugger can be
+debugged.
 
-=item *
+=item * Fix to C<i> and C<l> commands
 
-perl5db.pl, the debugger, has gained the option HistItemMinLength, to control
-the minimum length a command must be to get stored in history.  Traditionally,
-this has been fixed at 2.  Changes to the debugger are often perilous, and new
-bugs should be reported so the debugger can be debugged.
+The C<i $var> and C<l $var> commands work again with lexical variables.
 
 =back
 
