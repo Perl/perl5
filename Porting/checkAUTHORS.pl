@@ -1133,6 +1133,7 @@ rick\100consumercontact.com             rick\100bort.ca
 rjbs\100cpan.org                        rjbs-perl-p5p\100lists.manxome.org
 +                                       perl.p5p\100rjbs.manxome.org
 +                                       rjbs\100semiotic.systems
++                                       rjbs\100users.noreply.github.com
 rjk\100linguist.dartmouth.edu           rjk\100linguist.thayer.dartmouth.edu
 +                                       rjk-perl-p5p\100tamias.net
 +                                       rjk\100tamias.net
