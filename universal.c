@@ -956,10 +956,10 @@ XS(XS_re_regnames)
         XSRETURN_UNDEF;
 
     av = MUTABLE_AV(SvRV(ret));
-    length = av_tindex(av);
+    length = av_count(av);
 
-    EXTEND(SP, length+1); /* better extend stack just once */
-    for (i = 0; i <= length; i++) {
+    EXTEND(SP, length); /* better extend stack just once */
+    for (i = 0; i < length; i++) {
         entry = av_fetch(av, i, FALSE);
         
         if (!entry)
