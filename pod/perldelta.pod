@@ -125,126 +125,192 @@ implemention with tests.
 
 =over 4
 
-=item *
-
-L<feature> has been upgraded from version 1.58 to 1.60.
+=item * L<feature> has been upgraded from version 1.58 to 1.60.
 
 A new C<multidimensional> feature has been added, which is enabled by
 default but allows turning off L<multi-dimensional array
 emulation|perldata/Multi-dimensional array emulation>.
 
-L<IPC-SysV> has been upgraded from version 2.07 to 2.08.
+=item * L<IPC-SysV> has been upgraded from version 2.07 to 2.08.
 
-- RT #129387: IPC::SysV memory operations limited to 31-bit offsets
-- Add strict and warnings to the test suite
-- Switch IPC::SysV to use XSLoader
-- Dont require ppport.h to build when inside perl core
+=over 4
 
-L<JSON-PP> has been upgraded from version 4.04 to 4.05.
+=item - RT #129387: IPC::SysV memory operations limited to 31-bit offsets
 
-- enforce strict and warnings in test suite
+=item - Add strict and warnings to the test suite
 
-L<Math-Complex> has been upgraded from version 1.59_01 to 1.59_02.
+=item - Switch IPC::SysV to use XSLoader
 
-- enable strict and warnings in test suite
-- fix a unit issue from t/Complex.t
+=item - Dont require ppport.h to build when inside perl core
 
-L<Pod-Usage> has been upgraded from version 1.69 to 1.70.
+=back
 
-- CPAN#115847: pod2usage exits with error when using "-verbose 3" with STDIN
+=item * L<JSON-PP> has been upgraded from version 4.04 to 4.05.
+
+Enforce strict and warnings in test suite
+
+=item * L<Math-Complex> has been upgraded from version 1.59_01 to 1.59_02.
+
+=over 4
+
+=item - enable strict and warnings in test suite
+
+=item - fix a unit issue from t/Complex.t
+
+=back
+
+=item * L<Pod-Usage> has been upgraded from version 1.69 to 1.70.
+
+=over 4
+
+=item - CPAN#115847: pod2usage exits with error when using "-verbose 3" with STDIN
   Addressed in pod2usage script, and updated POD
-- CPAN#122941: Pod::Usage::pod2usage() problem with $Config{scriptdir}
+
+=item - CPAN#122941: Pod::Usage::pod2usage() problem with $Config{scriptdir}
   Should be fixed by 1.69 already; reviewed code
-- CPAN#121489: I<> not emphasized when used with Pod::Text::Termcap
+
+=item - CPAN#121489: I<> not emphasized when used with Pod::Text::Termcap
   Added specific support of ::Termcap
-- CPAN#114697: Sample code syntax error in documentation for Pod-Usage
+
+=item - CPAN#114697: Sample code syntax error in documentation for Pod-Usage
   Fixed. Well spotted!
-- CPAN#125337: Typo in pod
+
+=item - CPAN#125337: Typo in pod
   Fixed. Well spotted, too!
-- CPAN#130418: Fix parent directory in pod2usage auxiliary script
+
+=item - CPAN#130418: Fix parent directory in pod2usage auxiliary script
   Patch accepted, thanks!
-- CPAN#131845: $Config{pager} string can have arguments
+
+=item - CPAN#131845: $Config{pager} string can have arguments
   fixed by changing the system() command from using the array form to
   string form, and escape/quote the file path to protect any metacharacters
   in the file path
-- CPAN#131844: preferring PAGER to $Config{pager}
+
+=item - CPAN#131844: preferring PAGER to $Config{pager}
   Fixed with the above CPAN#131845
 
-L<Socket> has been upgraded from version 2.029 to 2.030.
+=back
+
+=item * L<Socket> has been upgraded from version 2.029 to 2.030.
 
 Prepare for a stricter perl:
-- use strict; use warnings in all unit tests
-- declare use v5.6.1 in all perl files
 
-L<Data-Dumper> has been upgraded from version 2.174 to 2.175.
+=over 4
+
+=item - use strict; use warnings in all unit tests
+
+=item - declare use v5.6.1 in all perl files
+
+=back
+
+=item * L<Data-Dumper> has been upgraded from version 2.174 to 2.175.
 
 Use PERL_VERSION_* compare macro instead of incomplete PERL_VERSION checks.
 Fix some leaks issues
 
-L<Devel-PPPort> has been upgraded from version 3.57 to 3.60.
+=item * L<Devel-PPPort> has been upgraded from version 3.57 to 3.60.
 
--  Provide PERL_VERSION_* compare macro
--  Add PERL_VERSION_* compare macros
--  Stop versioning generated test files
--  Enforce strict & warnings
--  Avoid indirect calls
--  scanprov: multiple improvements
--  Use ivers() in tests
--  Update POD documentation and HACKERS file
--  Change ppport.h --api-info to not output non-API info unless that is the
+=over 4
+
+=item - Provide PERL_VERSION_* compare macro
+
+=item - Add PERL_VERSION_* compare macros
+
+=item - Stop versioning generated test files
+
+=item - Enforce strict & warnings
+
+=item - Avoid indirect calls
+
+=item - scanprov: multiple improvements
+
+=item - Use ivers() in tests
+
+=item - Update POD documentation and HACKERS file
+
+=item - Change ppport.h --api-info to not output non-API info unless that is the
    only match
--  Find more elements to be listed in the --api-info option (and similar) to
-   ppport.h
--  Safer definition of UVCHR_SKIP
--  Make sure WIDEST_UTYPE is unsigned
--  Avoid Pax Header in tarballs
 
-L<Exporter> has been upgraded from 5.74 version to 5.75.
+=item - Find more elements to be listed in the --api-info option (and similar) to
+   ppport.h
+
+=item - Safer definition of UVCHR_SKIP
+
+=item - Make sure WIDEST_UTYPE is unsigned
+
+=item - Avoid Pax Header in tarballs
+
+=back
+
+=item * L<Exporter> has been upgraded from 5.74 version to 5.75.
 
 Store version directly in Exporter::Heavy
 
-L<ExtUtils-ParseXS> has been upgraded from 3.40 version to 3.41.
+=item * L<ExtUtils-ParseXS> has been upgraded from 3.40 version to 3.41.
 
-- use PERL_VERSION compare macro
-- use absolute paths in tests on all platforms
+=over 4
 
-L<IO> has been upgraded from version 1.43 to 1.44.
+=item - use PERL_VERSION compare macro
 
-- Fix a spurious error reported for regular file handles
-- Enforce strict and warnings.
-- Avoid using indirect.
-- Fix a flapping test on Windows.
+=item - use absolute paths in tests on all platforms
 
-L<Net-Ping> has been upgraded from version 2.72 to 2.73_01.
+=back
 
-- Fix shadowing of hash options in constructor (Patrick Heesom, RT #131919)
-- Fix icmp v4 length with given bytes/data_size option (Patrick Heesom, RT #131919)
-- Call _resolv as class method (Marc Reissner, GH #16)
+=item * L<IO> has been upgraded from version 1.43 to 1.44.
 
-L<Safe> has been upgraded from version 2.41 to 2.42.
+=over 4
 
-- Do not load utf8_heavy.pl in Safe.pm
+=item - Fix a spurious error reported for regular file handles
 
-L<Storable> has been upgraded from version 3.21 to 3.22.
+=item - Enforce strict and warnings.
 
-- use PERL_COMPARE macros
+=item - Avoid using indirect.
 
-L<Time-HiRes> has been upgraded from version 1.9764 to 1.9765.
+=item - Fix a flapping test on Windows.
 
-- Use PERL_VERSION compare macro
-- Remove obsolete vms code
+=back
 
-L<Unicode-Normalize> has been upgraded from 1.27 version to 1.28.
+=item * L<Net-Ping> has been upgraded from version 2.72 to 2.73_01.
 
-- Use PERL_VERSION compare macro
+=over 4
 
-L<threads-shared> has been upgraded from version 1.61 to 1.62.
+=item - Fix shadowing of hash options in constructor (Patrick Heesom, RT #131919)
 
-- Use PERL_VERSION compare macro
+=item - Fix icmp v4 length with given bytes/data_size option (Patrick Heesom, RT #131919)
 
-L<threads> has been upgraded from version 2.25 to 2.26.
+=item - Call _resolv as class method (Marc Reissner, GH #16)
 
-- Use PERL_VERSION compare macro
+=back
+
+=item * L<Safe> has been upgraded from version 2.41 to 2.42.
+
+Do not load utf8_heavy.pl in Safe.pm
+
+=item * L<Storable> has been upgraded from version 3.21 to 3.22.
+
+use PERL_COMPARE macros
+
+=item * L<Time-HiRes> has been upgraded from version 1.9764 to 1.9765.
+
+=over 4
+
+=item - Use PERL_VERSION compare macro
+
+=item - Remove obsolete vms code
+
+=back
+
+=item * L<Unicode-Normalize> has been upgraded from 1.27 version to 1.28.
+
+Use PERL_VERSION compare macro
+
+=item * L<threads-shared> has been upgraded from version 1.61 to 1.62.
+
+Use PERL_VERSION compare macro
+
+=item * L<threads> has been upgraded from version 2.25 to 2.26.
+
+Use PERL_VERSION compare macro
 
 =back
 
