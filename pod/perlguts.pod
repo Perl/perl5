@@ -2764,6 +2764,11 @@ clutter to use the C<%z> length modifier (for I<siZe>):
 This modifier is not portable, so its use should be restricted to
 C<PerlIO_printf()>.
 
+=head2 Formatted Printing of C<Ptrdiff_t>, C<intmax_t>, C<short> and other special sizes
+
+There are modifiers for these special situations if you are using
+C<PerlIO_printf()>.  See L<perlfunc/size>.
+
 =head2 Pointer-To-Integer and Integer-To-Pointer
 
 Because pointer size does not necessarily equal integer size,
