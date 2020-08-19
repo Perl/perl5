@@ -359,6 +359,15 @@ The C<PERL_GLOBAL_STRUCT> compilation option has been removed, and
 with it the need or the C<dVAR> macro.  C<dVAR> remains defined as a
 no-op outside C<PERL_CORE> for backwards compatiblity with XS modules.
 
+=item *
+
+A new savestack type C<SAVEt_HINTS_HH> has been added, which neatens the
+previous behaviour of C<SAVEt_HINTS>.  On previous versions the types and
+values pushed to the save stack would depend on whether the hints included the
+C<HINT_LOCALIZE_HH> bit, which complicates external code that inspects the
+save stack. The new version uses a different savestack type to indicate the
+difference.
+
 =back
 
 =head1 Selected Bug Fixes
