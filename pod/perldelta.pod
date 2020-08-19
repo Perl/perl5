@@ -370,6 +370,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large
+timeout.  GH #16529
+
 =back
 
 =head1 Known Problems
