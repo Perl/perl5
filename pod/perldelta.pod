@@ -348,9 +348,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item z/OS
 
-XXX
+The locale categories C<LC_SYNTAX> and C<LC_TOD> are now recognized.
+Perl doesn't do anything with these, except it now allows you to specify
+them.  They are included in C<LC_ALL>.
 
 =back
 
