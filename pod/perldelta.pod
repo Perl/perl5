@@ -170,13 +170,13 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlpacktut>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Incorrect variables used in an example have been fixed. Thanks to Deji Adegbite.
 
 =back
 
