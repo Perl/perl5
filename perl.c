@@ -4988,7 +4988,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #ifdef PERL_IS_MINIPERL
 	    const Size_t extra = 0;
 #else
-	    Size_t extra = av_tindex(av) + 1;
+	    Size_t extra = av_count(av);
 #endif
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)
@@ -5074,7 +5074,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     PERL_ARGS_ASSERT_CALL_LIST;
 
-    while (av_tindex(paramList) >= 0) {
+    while (av_count(paramList) > 0) {
 	cv = MUTABLE_CV(av_shift(paramList));
 	if (PL_savebegin) {
 	    if (paramList == PL_beginav) {
