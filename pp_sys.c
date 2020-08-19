@@ -2129,7 +2129,7 @@ PP(pp_eof)
 
     if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
 	if (io && !IoIFP(io)) {
-	    if ((IoFLAGS(io) & IOf_START) && av_tindex(GvAVn(gv)) < 0) {
+	    if ((IoFLAGS(io) & IOf_START) && av_count(GvAVn(gv)) == 0) {
 		SV ** svp;
 		IoLINES(io) = 0;
 		IoFLAGS(io) &= ~IOf_START;
