@@ -283,6 +283,11 @@ section.
 
 Additionally, the following selected changes have been made:
 
+=head3 L<perldebguts>
+
+Correct the description of the scalar C<< ${"_<$filename"} >>
+variables.
+
 =head3 L<perlfunc>
 
 =over 4
