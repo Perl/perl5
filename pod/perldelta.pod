@@ -616,6 +616,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 IO::Handle: Fix a spurious error reported for regular file handles.  GH #18019
 
+=item *
+
+On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large
+timeout.  GH #16529
+
 =back
 
 =head1 Known Problems
