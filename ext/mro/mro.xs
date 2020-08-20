@@ -259,7 +259,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                            "Inconsistent hierarchy during C3 merge of class '%" HEKf "':\n\t"
                             "current merge results [\n",
                             HEKfARG(stashhek));
-                for (i = 0; i <= av_tindex(retval); i++) {
+                for (i = 0; i < av_count(retval); i++) {
                     SV **elem = av_fetch(retval, i, 0);
                     sv_catpvf(errmsg, "\t\t%" SVf ",\n", SVfARG(*elem));
                 }
