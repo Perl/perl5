@@ -2025,8 +2025,8 @@ mod2fname(pTHX_ SV *sv)
     if (SvTYPE(sv) != SVt_PVAV) 
       Perl_croak_nocontext("Not array reference given to mod2fname");
 
-    avlen = av_tindex((AV*)sv);
-    if (avlen < 0) 
+    avlen = av_count((AV*)sv);
+    if (avlen == 0)
       Perl_croak_nocontext("Empty array reference given to mod2fname");
 
     s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), n_a);
@@ -2037,8 +2037,7 @@ mod2fname(pTHX_ SV *sv)
 	sum = 33 * sum + *(s++);	/* Checksumming first chars to
 					 * get the capitalization into c.s. */
     }
-    avlen --;
-    while (avlen >= 0) {
+    while (avlen > 0) {
 	s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), n_a);
 	while (*s) {
 	    sum = 33 * sum + *(s++);	/* 7 is primitive mod 13. */
