@@ -5016,7 +5016,7 @@ PP(pp_akeys)
 
     if (gimme == G_SCALAR) {
 	dTARGET;
-	PUSHi(av_tindex(array) + 1);
+	PUSHi(av_count(array));
     }
     else if (gimme == G_ARRAY) {
       if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
