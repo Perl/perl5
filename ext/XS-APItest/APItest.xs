@@ -377,7 +377,7 @@ blockhook_csc_start(pTHX_ int full)
         I32 i;
         AV *const new_av = newAV();
 
-        for (i = 0; i <= av_tindex(cur); i++) {
+        for (i = 0; i < av_count(cur); i++) {
             av_store(new_av, i, newSVsv(*av_fetch(cur, i, 0)));
         }
 
