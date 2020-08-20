@@ -25344,7 +25344,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * "PREFIX-code_point".  The prefixes and the code point limits of each
      * were returned to us in the array 'algorithmic_names' from data in
      * lib/unicore/Name.pm.  'code_point' in the name is expressed in hex. */
-    for (i = 0; i < av_count((AV *) algorithmic_names); i++) {
+    for (i = 0; i <= av_top_index((AV *) algorithmic_names); i++) {
         IV j;
 
         /* Each element of the array is a hash, giving the details for the
