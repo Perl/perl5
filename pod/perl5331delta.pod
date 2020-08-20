@@ -1,0 +1,507 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5331delta - what is new for perl v5.33.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.33.0 release and the 5.33.1
+release.
+
+If you are upgrading from an earlier release such as 5.32.0, first read
+L<perl5330delta>, which describes differences between 5.32.0 and 5.33.0.
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<ExtUtils::PL2Bat> 0.002 has been added to the Perl core.
+
+This module is a generalization of the C<pl2bat> script. It being a script has led
+to at least two forks of this code, this modules will unify them under one
+implementation with tests.
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.80 to 1.81.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.174 to 2.175.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.28 to 1.29.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.57 to 3.60.
+
+New C<PERL_VERSION_*> comparison macros are now available.
+
+C<ppport.h --api-info> no longer includes non-API info unless that is the only match
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
+L<Errno> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<Exporter> has been upgraded from version 5.74 to 5.75.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.40 to 3.41.
+
+=item *
+
+L<Fcntl> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<feature> has been upgraded from version 1.59 to 1.60.
+
+A new L<multidimensional|feature/"The 'multidimensional' feature">
+feature has been added, which is enabled by
+default but allows turning off L<multi-dimensional array
+emulation|perldata/Multi-dimensional array emulation>.
+
+=item *
+
+L<File::Path> has been upgraded from version 2.16 to 2.17.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<IO> has been upgraded from version 1.43 to 1.44.
+
+The C<error> method now reports the error state for both the input and
+output streams for sockets and character devices.  Similarly
+C<clearerr> now clears the error state for both streams.
+
+A spurious error reported for regular file handles has been
+fixed in L<IO::Handle>.  L<GH #18019|https://github.com/Perl/perl5/issues/18019>
+
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.07 to 2.08.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.04 to 4.05.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.5901 to 1.5902.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20200717 to 5.20200820.
+
+=item *
+
+L<mro> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.72 to 2.73_01.
+
+=item *
+
+L<PerlIO::mmap> has been upgraded from version 0.016 to 0.017.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.69 to 1.70.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.94 to 1.95.
+
+=item *
+
+L<Safe> has been upgraded from version 2.41 to 2.42.
+
+=item *
+
+L<Socket> has been upgraded from version 2.029 to 2.030.
+
+=item *
+
+L<Storable> has been upgraded from version 3.21 to 3.22.
+
+=item *
+
+L<strict> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<threads> has been upgraded from version 2.25 to 2.26.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.61 to 1.62.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9764 to 1.9765.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+L<warnings> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.09 to 1.11.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.17 to 0.18.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perldebguts>
+
+=over 4
+
+=item *
+
+Corrected the description of the scalar C<< ${"_<$filename"} >>
+variables.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Better explanation of what happens when C<sleep> is called with a zero or
+negative value.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Corrected C<my_rpeep> example in perlguts.
+
+=item *
+
+A section has been added on the formatted printing of special sizes.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The C<< <> >> and C<<< <<>> >>> operators are commonly referred to as
+the diamond and double diamond operators respectively, but that wasn't
+mentioned previously in their documentation.
+
+=item *
+
+Document range op behavior change.
+
+=back
+
+=head3 L<perlpacktut>
+
+=over 4
+
+=item *
+
+Incorrect variables used in an example have been fixed.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Multidimensional hash lookup is disabled|perldiag/"Multidimensional hash lookup is disabled">
+
+This accompanies the new L<multidimensional|feature/"The 'multidimensional' feature"> feature.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+This warning may now include the array or hash index when the
+uninitialized value is the result of an element not found.  This will
+only happen if the index is a simple non-magical variable.
+
+=back
+
+=head1 Utility Changes
+
+=head2 L<perl5db.pl> (the debugger)
+
+=over 4
+
+=item * New option: C<HistItemMinLength>
+
+This option controls the minimum length a command must be to get stored in
+history.  Traditionally, this has been fixed at 2.  Changes to the debugger
+are often perilous, and new bugs should be reported so the debugger can be
+debugged.
+
+=item * Fix to C<i> and C<l> commands
+
+The C<i $var> and C<l $var> commands work again with lexical variables.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+The minimum supported Bison version is now 2.4, and the maxiumm is 3.7.
+
+=item *
+
+Newer 64-bit versions of the Intel C/C++ compiler are now recognised
+and have the correct flags set.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Platform Support
+
+=head2 New Platforms
+
+=over 4
+
+=item 9front
+
+Allow building Perl on i386 9front systems (fork of plan9).
+
+=back
+
+=head2 Updated Platforms
+
+=over 4
+
+=item Plan9
+
+Improve support for Plan9 on i386 platforms.
+
+=item MacOS (Darwin)
+
+The hints file for darwin has been updated to handle future MacOS versions
+beyond 10. L<GH #17946|https://github.com/Perl/perl5/issues/17946>
+
+=back
+
+=head2 Discontinued Platforms
+
+=over 4
+
+=item Symbian
+
+Support code relating to Symbian has been removed.  Symbian was an
+operating system for mobile devices.  The port was last updated in July
+2009, and the platform itself in October 2012.
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item z/OS
+
+The locale categories C<LC_SYNTAX> and C<LC_TOD> are now recognized.
+Perl doesn't do anything with these, except it now allows you to specify
+them.  They are included in C<LC_ALL>.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The C<PERL_GLOBAL_STRUCT> compilation option has been removed, and
+with it the need or the C<dVAR> macro.  C<dVAR> remains defined as a
+no-op outside C<PERL_CORE> for backwards compatiblity with XS modules.
+
+=item *
+
+A new savestack type C<SAVEt_HINTS_HH> has been added, which neatens the
+previous behaviour of C<SAVEt_HINTS>.  On previous versions the types and
+values pushed to the save stack would depend on whether the hints included the
+C<HINT_LOCALIZE_HH> bit, which complicates external code that inspects the
+save stack. The new version uses a different savestack type to indicate the
+difference.
+
+=item *
+
+A new API function L<perlapi/av_count> has been added which gives a
+clearly named way to find how many elements are in an array.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large
+timeout.  L<GH #16529|https://github.com/Perl/perl5/issues/16529>
+
+=item *
+
+C<MARK> and hence C<items> are now correctly initialized in BOOT XSUBs.
+
+=item *
+
+Some list assignments involving C<undef> on the left-hand side were
+over-optimized and produced incorrect results. L<GH #16685|https://github.com/Perl/perl5/issues/16685>, L<GH #17816|https://github.com/Perl/perl5/issues/17816>
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.33.1 represents approximately 5 weeks of development since Perl
+5.33.0 and contains approximately 37,000 lines of changes across 740 files
+from 34 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 11,000 lines of changes to 290 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.33.1:
+
+Adam Hartley, Christian Walde (Mithaldu), Dagfinn Ilmari Mannsåker, Dan
+Book, David Mitchell, E. Choroba, Graham Knop, Graham Ollis, Hauke D, Ivan
+Baidakou, James E Keenan, John Lightsey, Karen Etheridge, Karl Williamson,
+Leon Timmermans, Nicolas R., Paul Evans, Petr Písař, raiph, Renee Baecker,
+Ricardo Signes, Richard Leach, Romano, Ryan Voots, Samuel Thibault, Sawyer
+X, Scott Baker, Sizhe Zhao, Thibault Duponchelle, Todd Rinaldo, Tomasz
+Konojacki, Tom Stellard, Tony Cook, vividsnow.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
