@@ -368,6 +368,7 @@ sub changes_between {
     5.032000 => '2020-06-20',
     5.033000 => '2020-07-17',
     5.033001 => '2020-08-20',
+    5.033002 => '2020-09-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -17588,6 +17589,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Moped::Msg'            => 1,
         }
     },
+    5.033002 => {
+        delta_from => 5.033001,
+        changed => {
+            'B::Op_private'         => '5.033002',
+            'Config'                => '5.033002',
+            'Module::CoreList'      => '5.20200920',
+            'Module::CoreList::Utils'=> '5.20200920',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -18718,6 +18730,13 @@ sub is_core
     },
     5.033001 => {
         delta_from => 5.033000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.033002 => {
+        delta_from => 5.033001,
         changed => {
         },
         removed => {
