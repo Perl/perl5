@@ -157,7 +157,7 @@ XS_unpack_anotherstructPtrPtr(SV *in)
     else
         Perl_croak(aTHX_ "Argument is not an ARRAY reference");
 
-    nitems = av_tindex(inary) + 1;
+    nitems = av_count(inary);
 
     /* FIXME dunno if supposed to use perl mallocs here */
     /* N+1 elements so we know the last one is NULL */
