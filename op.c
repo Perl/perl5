@@ -8143,7 +8143,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     } else {
 	SV * const repointer = &PL_sv_undef;
 	av_push(PL_regex_padav, repointer);
-	pmop->op_pmoffset = av_tindex(PL_regex_padav);
+	pmop->op_pmoffset = av_top_index(PL_regex_padav);
 	PL_regex_pad = AvARRAY(PL_regex_padav);
     }
 #endif

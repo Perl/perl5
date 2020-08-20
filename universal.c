@@ -789,7 +789,7 @@ XS(XS_PerlIO_get_layers)
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
 	     SSize_t i;
-	     const SSize_t last = av_tindex(av);
+	     const SSize_t last = av_top_index(av);
 	     SSize_t nitem = 0;
 	     
 	     for (i = last; i >= 0; i -= 3) {

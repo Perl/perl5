@@ -816,7 +816,7 @@ preprocessing token; the type of C<arg> depends on C<which>.
     STMT_START { \
 	if (PL_blockhooks) { \
 	    SSize_t i; \
-	    for (i = av_tindex(PL_blockhooks); i >= 0; i--) { \
+	    for (i = av_top_index(PL_blockhooks); i >= 0; i--) { \
 		SV *sv = AvARRAY(PL_blockhooks)[i]; \
 		BHK *hk; \
 		\

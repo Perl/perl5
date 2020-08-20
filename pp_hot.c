@@ -3640,7 +3640,7 @@ PP(pp_multideref)
                             IV len;
                             if (!defer)
                                 DIE(aTHX_ PL_no_aelem, elem);
-                            len = av_tindex(av);
+                            len = av_top_index(av);
                             /* Resolve a negative index that falls within
                              * the array.  Leave it negative it if falls
                              * outside the array.  */
@@ -5392,7 +5392,7 @@ PP(pp_aelem)
 	    IV len;
 	    if (!defer)
 		DIE(aTHX_ PL_no_aelem, elem);
-	    len = av_tindex(av);
+	    len = av_top_index(av);
 	    /* Resolve a negative index that falls within the array.  Leave
 	       it negative it if falls outside the array.  */
 	    if (elem < 0 && len + elem >= 0)
