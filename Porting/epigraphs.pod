@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.1 - Aleksandr Solzhenitsyn, The Gulag Archipelago 1918-1956 (1973)
+
+Announced on 2020-08-20 by Karen Etheridge
+
+  If only there were evil people somewhere insidiously committing evil deeds,
+  and it were necessary only to separate them from the rest of us and destroy
+  them. But the line dividing good and evil cuts through the heart of every
+  human being. And who is willing to destroy a piece of his own heart?
+
 =head2 v5.33.0 - Confucius, "Confucius: The Analects"
 
 Announed on 2020-07-17 by Sawyer X
