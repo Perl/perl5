@@ -131,6 +131,14 @@ A new C<multidimensional> feature has been added, which is enabled by
 default but allows turning off L<multi-dimensional array
 emulation|perldata/Multi-dimensional array emulation>.
 
+=item *
+
+L<IO> has been upgraded from version 1.43 to 1.44.
+
+The C<error> method now reports the error state for both the input and
+output streams for sockets and character devices.  Similarly
+C<clearerr> now clears the error state for both streams.
+
 =item * L<IPC-SysV> has been upgraded from version 2.07 to 2.08.
 
 =over 4
@@ -443,7 +451,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+This warning may now include the array or hash index when the
+uninitialized value is the result of an element not found.  This will
+only happen if the index is a simple non-magical variable.
 
 =back
 
@@ -622,6 +634,10 @@ IO::Handle: Fix a spurious error reported for regular file handles.  GH #18019
 
 On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large
 timeout.  GH #16529
+
+=item *
+
+C<MARK> and hence C<items> are now correctly initialized in BOOT XSUBs.
 
 =back
 
