@@ -39,9 +39,26 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
 /* do not adjust the whitespace! Configure expects the numbers to be
  * exactly on the third column */
 
-#define PERL_REVISION	5		/* age */
-#define PERL_VERSION	33		/* epoch */
-#define PERL_SUBVERSION	1		/* generation */
+/* 
+   You should avoid using these variables directly
+   and prefer using the compare functions.
+       - PERL_VERSION_EQ
+       - PERL_VERSION_NE
+       - PERL_VERSION_LT
+       - PERL_VERSION_GT
+       - PERL_VERSION_LE
+       - PERL_VERSION_GE
+*/
+#define PERL_VERSION_MAJOR        5
+#define PERL_VERSION_MINOR       33
+#define PERL_VERSION_PATCH        1
+#define PERL_VERSION_RELEASE      0 /* for future usage */
+#define PERL_VERSION_BUILD        0 /* for future usage */
+
+/* Legacy Perl5 VERSION macro */
+#define PERL_REVISION           PERL_VERSION_MAJOR
+#define PERL_VERSION            PERL_VERSION_MINOR
+#define PERL_SUBVERSION         PERL_VERSION_PATCH
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
@@ -60,9 +77,9 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
    to be released for blead releases, and to 5.X.0 for maint releases. Manually
    changing them should not be necessary.
 */
-#define PERL_API_REVISION	5
+#define PERL_API_REVISION	 5
 #define PERL_API_VERSION	33
-#define PERL_API_SUBVERSION	1
+#define PERL_API_SUBVERSION	 1
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure

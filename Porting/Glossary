@@ -4674,6 +4674,18 @@ PERL_VERSION (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 6.
 	This value is manually set in patchlevel.h
 
+PERL_VERSION_MAJOR (Oldsyms.U):
+	In a Perl version number such as X.Y.Z, this is the X.
+	This value is manually set in patchlevel.h
+
+PERL_VERSION_MINOR (Oldsyms.U):
+	In a Perl version number such as X.Y.Z, this is the Y.
+	This value is manually set in patchlevel.h
+
+PERL_VERSION_RELEASE (Oldsyms.U):
+	In a Perl version number such as X.Y.Z, this is the Z.
+	This value is manually set in patchlevel.h
+
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
 

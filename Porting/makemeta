@@ -131,9 +131,9 @@ sub _determine_status {
       }
     }
     unless ( $status ) {
-      $status = $defines{PERL_VERSION} % 2 ? 'unstable' : 'stable';
+      $status = $defines{PERL_VERSION_MINOR} % 2 ? 'unstable' : 'stable';
     }
-    if ( my @wotsits = grep { defined $defines{$_} } qw(PERL_REVISION PERL_VERSION PERL_SUBVERSION) ) {
+    if ( my @wotsits = grep { defined $defines{$_} } qw(PERL_VERSION_MAJOR PERL_VERSION_MINOR PERL_VERSION_PATCH) ) {
       $version = sprintf '%d.%03d%03d', map { $defines{$_} } @wotsits;
     }
     else {

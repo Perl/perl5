@@ -429,24 +429,6 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define get_cvs(str, flags)					\
 	Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
-/* internal helpers */
-/* Transitional */
-#ifndef PERL_VERSION_MAJOR
-#  define PERL_VERSION_MAJOR  PERL_REVISION
-#else
-#  undef  PERL_REVISION     /* We don't want code to be using these */
-#endif
-#ifndef PERL_VERSION_MINOR
-#  define PERL_VERSION_MINOR  PERL_VERSION
-#else
-#  undef  PERL_VERSION
-#endif
-#ifndef PERL_VERSION_PATCH
-#  define PERL_VERSION_PATCH  PERL_SUBVERSION
-#else
-#  undef  PERL_SUBVERSION
-#endif
-
 #define PERL_JNP_TO_DECIMAL_(maJor,miNor,Patch)                             \
             /* '10*' leaves room for things like alpha, beta, releases */   \
                     (10 * ((maJor) * 1000000) + ((miNor) * 1000) + (Patch))

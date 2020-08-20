@@ -31,7 +31,7 @@
 # all of the changes at once and then edit the results via git).
 
 # This utility 'knows' about certain files and formats, and so can spot
-# 'hidden' version numbers, like PERL_SUBVERSION=9.
+# 'hidden' version numbers, like PERL_VERSION_PATCH=9.
 #
 # A third variant makes use of this knowledge to check that all the things
 # it knows about are at the current version:
@@ -63,7 +63,7 @@ usage: $0 -c <C.C.C>
 	  -i <C.C.C> <N.N.N>
 
     -c check files and warn if any known string values (eg
-	PERL_SUBVERSION) don't match the specified version
+	PERL_VERSION_PATCH) don't match the specified version
 
     -s scan files and produce list of possible change lines to stdout
 
@@ -91,9 +91,9 @@ else {
 }
 usage('only one of -c, -s, -u and -i') if keys %opts > 1;
 
-my ($oldx, $oldy, $oldz) = $ARGV[0] =~ /^(\d+)\.(\d+)\.(\d+)$/
+my ($oldx, $oldy, $oldz) = $ARGV[0] =~ /^(\d+)\.(\d+)\.(\d+)$/a
 	or usage("bad version: $ARGV[0]");
-my ($newx, $newy, $newz) = $ARGV[1] =~ /^(\d+)\.(\d+)\.(\d+)$/
+my ($newx, $newy, $newz) = $ARGV[1] =~ /^(\d+)\.(\d+)\.(\d+)$/a
 	or usage("bad version: $ARGV[1]");
 
 my $old_decimal = sprintf "%d.%03d%03d", $oldx, $oldy, $oldz; # 5.011001
@@ -112,53 +112,73 @@ my $old_decimal = sprintf "%d.%03d%03d", $oldx, $oldy, $oldz; # 5.011001
 
 my @maps =  (
     [
-	qr{^((?:api_)?version(?:=|\s+)'?) (\d+) ('?) (?!\.)}x,
+	qr{^((?:api_)?version(?:=|\s+)'?) (\d+) ('?) (?!\.)}ax,
 	sub { $2, "$1$newy$3" },
 	$oldy,
 	qr/config/,
     ],
     [
-	qr{^(subversion(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
+	qr{^(subversion(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
 	sub { $2, "$1$newz$3" },
 	$oldz,
 	qr/config/,
     ],
     [
-	qr{^(api_subversion(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
+	qr{^(api_subversion(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
 	sub { $2, ($newy % 2) ? "$1$newz$3" : "${1}0$3" },
 	($oldy % 2) ? $oldz : 0,
 	qr/config/,
     ],
     [
-	qr{^(api_versionstring(?:=|\s+)'?) ([\d\.]+) ('?) (?!\.)}x,
+	qr{^(api_versionstring(?:=|\s+)'?) ([\d\.]+) ('?) (?!\.)}ax,
 	sub { $2, ($newy % 2) ? "$1$newx.$newy.$newz$3": "$1$newx.$newy.0$3" },
 	($oldy % 2) ? "$oldx.$oldy.$oldz" : "$oldx.$oldy.0",
 	qr/config/,
     ],
     [
-	qr{(version\s+'?) (\d+) ('?\s+subversion\s+'?) (\d+) ('?)  (?!\.)}x,
+	qr{(version\s+'?) (\d+) ('?\s+subversion\s+'?) (\d+) ('?)  (?!\.)}ax,
 	sub { "$2-$4", "$1$newy$3$newz$5" },
 	"$oldy-$oldz",
 	qr/config/,
     ],
     [
-	qr{\b (PERL_(?:API_)?VERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
+	qr{\b (PERL_API_VERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
 	sub { $2, "$1$newy$3"},
 	$oldy,
     ],
     [
-	qr{\b (PERL_SUBVERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
+	qr{\b (PERL_VERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
+	sub { $2, "$1$newy$3"},
+	$oldy,
+    ],
+    [
+	qr{\b (PERL_SUBVERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
 	sub { $2, "$1$newz$3"},
 	($oldy % 2) ? $oldz : 0,
     ],
     [
-	qr{\b (PERL_API_SUBVERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
+	qr{\b (PERL_VERSION_MAJOR(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
+	sub { $2, "$1$newx$3"},
+	$oldy,
+    ],
+	[
+	qr{\b (PERL_VERSION_MINOR(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
+	sub { $2, "$1$newy$3"},
+	$oldy,
+    ],
+    [
+	qr{\b (PERL_VERSION_PATCH(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
+	sub { $2, "$1$newz$3"},
+	($oldy % 2) ? $oldz : 0,
+    ],
+    [
+	qr{\b (PERL_API_SUBVERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}ax,
 	sub { $2, ($newy % 2) ? "$1$newz$3" : "${1}0$3" },
 	$oldz,
     ],
     # these two formats are in README.vms
     [
-	qr{\b perl-(\d+\^\.\d+\^\.\d+) \b}x,
+	qr{\b perl-(\d+\^\.\d+\^\.\d+) \b}ax,
 	sub { $1, "perl-$newx^.$newy^.$newz"},
 	undef,
     ],
@@ -183,7 +203,7 @@ my @maps =  (
 
     # perl511, perl511.dll, perl511.lib, perl511s.lib, libperl511.a
     [
-	qr{\b ((?:lib)?) perl (\d\d\d) (s?) \b }x,
+	qr{\b ((?:lib)?) perl (\d\d\d) (s?) \b }ax,
 	sub {$2, "$1perl$newx$newy$3" },
 	"$oldx$oldy",
 	qr/win32|hints/,      # README.win32, win32/*, hints/*
