@@ -359,8 +359,14 @@ Additionally, the following selected changes have been made:
 
 =head3 L<perldebguts>
 
+=over 4
+
+=item *
+
 Correct the description of the scalar C<< ${"_<$filename"} >>
 variables.
+
+=back
 
 =head3 L<perlfunc>
 
