@@ -139,7 +139,7 @@ The C<error> method now reports the error state for both the input and
 output streams for sockets and character devices.  Similarly
 C<clearerr> now clears the error state for both streams.
 
-=item * L<IPC-SysV> has been upgraded from version 2.07 to 2.08.
+=item * L<IPC::SysV> has been upgraded from version 2.07 to 2.08.
 
 =over 4
 
@@ -153,11 +153,11 @@ C<clearerr> now clears the error state for both streams.
 
 =back
 
-=item * L<JSON-PP> has been upgraded from version 4.04 to 4.05.
+=item * L<JSON::PP> has been upgraded from version 4.04 to 4.05.
 
 Enforce strict and warnings in test suite
 
-=item * L<Math-Complex> has been upgraded from version 1.59_01 to 1.59_02.
+=item * L<Math::Complex> has been upgraded from version 1.59_01 to 1.59_02.
 
 =over 4
 
@@ -167,7 +167,7 @@ Enforce strict and warnings in test suite
 
 =back
 
-=item * L<Pod-Usage> has been upgraded from version 1.69 to 1.70.
+=item * L<Pod::Usage> has been upgraded from version 1.69 to 1.70.
 
 =over 4
 
@@ -211,12 +211,12 @@ Prepare for a stricter perl:
 
 =back
 
-=item * L<Data-Dumper> has been upgraded from version 2.174 to 2.175.
+=item * L<Data::Dumper> has been upgraded from version 2.174 to 2.175.
 
 Use PERL_VERSION_* compare macro instead of incomplete PERL_VERSION checks.
 Fix some leaks issues
 
-=item * L<Devel-PPPort> has been upgraded from version 3.57 to 3.60.
+=item * L<Devel::PPPort> has been upgraded from version 3.57 to 3.60.
 
 =over 4
 
@@ -254,7 +254,7 @@ Fix some leaks issues
 
 Store version directly in Exporter::Heavy
 
-=item * L<ExtUtils-ParseXS> has been upgraded from 3.40 version to 3.41.
+=item * L<ExtUtils::ParseXS> has been upgraded from 3.40 version to 3.41.
 
 =over 4
 
@@ -278,7 +278,7 @@ Store version directly in Exporter::Heavy
 
 =back
 
-=item * L<Net-Ping> has been upgraded from version 2.72 to 2.73_01.
+=item * L<Net::Ping> has been upgraded from version 2.72 to 2.73_01.
 
 =over 4
 
@@ -298,7 +298,7 @@ Do not load utf8_heavy.pl in Safe.pm
 
 use PERL_COMPARE macros
 
-=item * L<Time-HiRes> has been upgraded from version 1.9764 to 1.9765.
+=item * L<Time::HiRes> has been upgraded from version 1.9764 to 1.9765.
 
 =over 4
 
@@ -308,11 +308,11 @@ use PERL_COMPARE macros
 
 =back
 
-=item * L<Unicode-Normalize> has been upgraded from 1.27 version to 1.28.
+=item * L<Unicode::Normalize> has been upgraded from 1.27 version to 1.28.
 
 Use PERL_VERSION compare macro
 
-=item * L<threads-shared> has been upgraded from version 1.61 to 1.62.
+=item * L<threads::shared> has been upgraded from version 1.61 to 1.62.
 
 Use PERL_VERSION compare macro
 
