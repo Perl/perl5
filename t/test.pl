@@ -1197,6 +1197,7 @@ sub run_multiple_progs {
 
     my $tmpfile = tempfile();
 
+    my $count_failures = 0;
     my ($file, $line);
   PROGRAM:
     while (defined ($line = shift @prgs)) {
@@ -1368,6 +1369,9 @@ sub run_multiple_progs {
         }
         else {
             print STDERR $err_line;
+            ++$count_failures;
+            die "PERL_TEST_ABORT_FIRST_FAILURE set Test Failure"
+                if $ENV{PERL_TEST_ABORT_FIRST_FAILURE};
         }
     }
 
@@ -1387,6 +1391,20 @@ sub run_multiple_progs {
 	    File::Path::rmtree $_ if -d $_;
 	}
     }
+
+    if ( $count_failures ) {
+        print STDERR <<'EOS';
+#
+# Note: 'run_multiple_progs' run has one or more failures
+#        you can consider setting the environment variable
+#        PERL_TEST_ABORT_FIRST_FAILURE=1 before running the test
+#        to stop on the first error.
+#
+EOS
+    }
+
+
+    return;
 }
 
 sub can_ok ($@) {
