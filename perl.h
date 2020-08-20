@@ -3772,7 +3772,7 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 		&& idx >= AvFILLp(PL_parser->rsfp_filters))
 #define PERL_FILTER_EXISTS(i) \
 	    (PL_parser && PL_parser->rsfp_filters \
-		&& (i) <= av_tindex(PL_parser->rsfp_filters))
+		&& (i) < av_count(PL_parser->rsfp_filters))
 
 #if defined(_AIX) && !defined(_AIX43)
 #if defined(USE_REENTRANT) || defined(_REENTRANT) || defined(_THREAD_SAFE)
