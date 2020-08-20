@@ -784,7 +784,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                 s++; if (s == send || isALPHA_FOLD_NE(*s, 'Y')) return fail;
                 s++;
             } else if (odh) {
-                while (*s == '0') { /* 1.#INF00 */
+                while (s < send && *s == '0') { /* 1.#INF00 */
                     s++;
                 }
             }
@@ -798,10 +798,10 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
         else if (isALPHA_FOLD_EQ(*s, 'D') && odh) { /* 1.#IND */
             s++;
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
-            while (*s == '0') { /* 1.#IND00 */
+            while (s < send && *s == '0') { /* 1.#IND00 */
                 s++;
             }
-            if (*s) {
+            if (s < send && *s) {
                 flags |= IS_NUMBER_TRAILING;
             }
         } else
