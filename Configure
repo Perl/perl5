@@ -7555,37 +7555,39 @@ sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 
 : Determine list of previous versions to include in @INC
 $cat > getverlist <<EOPL
-#!$perl5 -w
+#!$perl5
+use strict;
+use warnings;
 use File::Basename;
-\$api_versionstring = "$api_versionstring";
-\$version = "$version";
-\$stem = "$sitelib_stem";
-\$archname = "$archname";
+my \$api_versionstring = "$api_versionstring";
+my \$version = "$version";
+my \$stem = "$sitelib_stem";
+my \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
-# The list found is store twice for each entry: the original name, and
-# the binary broken down version as pack "sss", so sorting is easy and
-# unambiguous. This will work for all versions that have a maximum of
-# three digit groups, separate by '.'s or '_'s. Names are extended with
-# ".0.0" to ensure at least three elements for the pack.
-#					-- H.Merijn Brand (m)'06 23-10-2006
+# The list found is stored twice for each entry: the original name, and
+# the binary broken down version into pack "s>s>s>", so sorting is easy
+# and unambiguous.  This will work for all versions that have a maximum
+# of three digit per group separate by '.'s or '_'s. Names are extended
+# with ".0.0" to ensure at least three elements for the pack.
+#                                   -- H.Merijn Brand (m)'06 23-10-2006
 
-# Can't have leading @ because metaconfig interprets it as a command!
-;@inc_version_list=();
+my @inc_version_list;
+my @candidates;
 # XXX Redo to do opendir/readdir?
 if (-d $stem) {
     chdir($stem);
     ;@candidates = map {
-	[ $_, pack "sss", split m/[._]/, "$_.0.0" ] } glob("5.*");
+	[ $_, pack "s>s>s>", split m/[._]/, "$_.0.0" ] } glob("5.*");
     ;@candidates = sort { $a->[1] cmp $b->[1]} @candidates;
 }
 else {
     ;@candidates = ();
 }
 
-($pversion, $aversion, $vsn5005) = map {
-    pack "sss", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
-foreach $d (@candidates) {
+my ($pversion, $aversion, $vsn5005) = map {
+    pack "s>s>s>", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
+foreach my $d (@candidates) {
     if ($d->[1] lt $pversion) {
 	if ($d->[1] ge $aversion) {
 	    unshift(@inc_version_list, grep { -d } $d->[0]."/$archname", $d->[0]);
