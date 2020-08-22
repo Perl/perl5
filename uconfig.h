@@ -1732,6 +1732,8 @@
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
  *	LONG_DOUBLE_IS_VAX_H_FLOAT
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
@@ -1969,11 +1971,11 @@
  *	This symbol, if defined, indicates that the union semun is
  *	defined by including <sys/sem.h>.  If not, the user code
  *	probably needs to define it as:
- *	union semun {
+ *	 union semun {
  *	    int val;
  *	    struct semid_ds *buf;
  *	    unsigned short *array;
- *	}
+ *	 }
  */
 /* USE_SEMCTL_SEMUN:
  *	This symbol, if defined, indicates that union semun is
@@ -5258,6 +5260,6 @@
 #endif
 
 /* Generated from:
- * 6dd4e24d96ab9010e60456eabf099b26980d900fb937af5b501d45017e4f8ed0 config_h.SH
+ * deb46e947e3b9d6e9da9e44f21ed8b93cd4ff6feef333bd963f11c54d7850c98 config_h.SH
  * 0328fd317c240be96131cf63f152ee17113e74b68e3dc0000e2876b9a0023713 uconfig.sh
  * ex: set ro: */

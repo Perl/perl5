@@ -276,6 +276,10 @@ comm (Loc.U):
 	full pathname (if any) of the comm program.  After Configure runs,
 	the value is reset to a plain "comm" and is not useful.
 
+compiler_warning (compiler_warning.U):
+	This variable holds the command to check if the file specified as a
+	parameter contains a compiler warning
+
 compress (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
@@ -5286,7 +5290,7 @@ startperl (startperl.U):
 	shell. Of course, that leading line must be followed by the classical
 	perl idiom:
 	eval 'exec perl -S $0 ${1+"$@"}'
-	if 0; # ^ Run only under a shell
+	if $running_under_some_shell;
 	to guarantee perl startup should the shell execute the script. Note
 	that this magic incantation is not understood by csh.
 
