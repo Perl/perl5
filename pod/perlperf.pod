@@ -318,7 +318,7 @@ report on the contents.
      my %rep;
 
      foreach my $line ( keys %report ) {
-         foreach my $key ( keys %{ $report{$line} } ) {
+         foreach my $key ( keys $report{$line}->%* ) {
              $rep{$key} += $report{$line}{$key};
          }
      }
