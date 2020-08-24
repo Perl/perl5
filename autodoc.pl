@@ -236,8 +236,11 @@ HDR_DOC:
             warn "$0: duplicate API entry for '$element_name' in $where/$section\n";
             next;
         }
-        $docs{$where}{$section}{$element_name}
-            = [$flags, $text, $ret_type, $file, @args];
+            $docs{$where}{$section}{$element_name}{flags} = $flags;
+            $docs{$where}{$section}{$element_name}{pod} = $text;
+            $docs{$where}{$section}{$element_name}{file} = $file;
+            $docs{$where}{$section}{$element_name}{ret_type} = $ret_type;
+            push $docs{$where}{$section}{$element_name}{args}->@*, @args;
 
         # Create a special entry with an empty-string name for the
         # heading-level documentation.
@@ -258,7 +261,13 @@ HDR_DOC:
 
 sub docout ($$$) { # output the docs for one function
     my($fh, $element_name, $docref) = @_;
-    my($flags, $pod, $ret_type, $file, @args) = @$docref;
+
+    my $flags = $docref->{flags};
+    my $pod = $docref->{pod};
+    my $ret_type = $docref->{ret_type};
+    my $file = $docref->{file};
+    my @args = $docref->{args}->@*;
+
     $element_name =~ s/\s*$//;
 
     warn("Empty pod for $element_name (from $file)") unless $pod =~ /\S/;
