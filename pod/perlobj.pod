@@ -1013,7 +1013,7 @@ Here's an example of a module as a blessed scalar:
 
   sub epoch {
       my $self = shift;
-      return ${ $self };
+      return $$self;
   }
 
   my $time = Time->new();
