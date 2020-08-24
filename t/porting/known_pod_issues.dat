@@ -395,7 +395,6 @@ pod/perlhack.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlhist.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhpux.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlintern.pod	 outside of any	1
 pod/perlinterp.pod	? Should you be using L<...> instead of	1
 pod/perlirix.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlmacosx.pod	Verbatim line length including indents exceeds 79 by	3

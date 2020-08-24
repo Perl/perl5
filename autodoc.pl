@@ -49,8 +49,8 @@ my %docs;
 my %seen;
 my %funcflags;
 my %missing;
+my %valid_sections;
 
-my $section = "Unknown section";
 # Somewhat loose match for an apidoc line so we can catch minor typos.
 # Parentheses are used to capture portions so that below we verify
 # that things are the actual correct syntax.
@@ -95,175 +95,177 @@ EOS
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($in, $line_num, $header);
+    my($in, $line_num, $header, $section);
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 
     # Count lines easier
     my $get_next_line = sub { $line_num++; return <$fh> };
 
-FUNC:
-    while (defined($in = $get_next_line->())) {
+    # Read the file
+    while ($in = $get_next_line->()) {
+        last unless defined $in;
 
-        if ($in=~ /^=for apidoc_section\s*(.*)/) {
+        next unless (    $in =~ / ^ =for [ ]+ apidoc /x
+                                      # =head1 lines only have effect in C files
+                     || ($file_is_C && $in =~ /^=head1/));
+
+        # Here, the line introduces a portion of the input that we care about.
+        # Either it is for an API element, or heading text which we expect
+        # will be used for elements later in the file
+
+        my ($text, $element_name, $flags, $ret_type, $is_item, $proto_in_file);
+        my (@args);
+
+        # If the line starts a new section ...
+        if ($in=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
             $section = $1;
-            next FUNC;
         }
-        elsif ($file_is_C && $in=~ /^=head1 (.*)/) {
-            # =head1 lines only have effect in C files
-
-            $section = $1;
-
-            # If the next non-space line begins with a word char, then it is
-            # the start of heading-level documentation.
-            if (defined($in = $get_next_line->())) {
-                # Skip over empty lines
-                while ($in =~ /^\s+$/) {
-                    if (! defined($in = $get_next_line->())) {
-                        next FUNC;
-                    }
-                }
-
-                if ($in !~ /^\w/) {
-                    redo FUNC;
-                }
-                $header = $in;
-
-                # Continue getting the heading-level documentation until read
-                # in any pod directive (or as a fail-safe, find a closing
-                # comment to this pod in a C language file
-HDR_DOC:
-                while (defined($in = $get_next_line->())) {
-                    if ($in =~ /^=\w/) {
-                        redo FUNC;
-                    }
-
-                    if ($file_is_C && $in =~ m:^\s*\*/$:) {
-                        warn "=cut missing? $file:$line_num:$in";;
-                        last HDR_DOC;
-                    }
-                    $header .= $in;
-                }
-            }
-            next FUNC;
+        elsif ($in=~ /^ =for [ ]+ apidoc \B /x) {   # Otherwise better be a
+                                                    # plain apidoc line
+            die "Unkown apidoc-type line '$in'";
         }
+        else {  # Plain apidoc
 
-        if ($in =~ /^=for comment/) {
-            $in = $get_next_line->();
-            if ($in =~ /skip apidoc/) {   # Skips the next apidoc-like line
-                while (defined($in = $get_next_line->())) {
-                    last if $in =~ $apidoc_re;
-                }
-            }
-            next FUNC;
-        }
-
-        my ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
-                                            = check_api_doc_line($file, $in);
-        next unless defined $element_name;
-        die "Unexpected apidoc_item '$in' in $file near line $." if $is_item;
-
-        # If the entry is also in embed.fnc, it should be defined completely
-        # there, but not here
-        my $embed_docref = delete $funcflags{$element_name};
-        if ($embed_docref and %$embed_docref) {
-            warn "embed.fnc entry overrides redundant information in"
-                . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
-            $flags = $embed_docref->{'flags'};
-            warn "embed.fnc entry '$element_name' missing 'd' flag"
+            ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
+                                                = check_api_doc_line($file, $in);
+            # Do some checking
+            # If the entry is also in embed.fnc, it should be defined
+            # completely there, but not here
+            my $embed_docref = delete $funcflags{$element_name};
+            if ($embed_docref and %$embed_docref) {
+                warn "embed.fnc entry overrides redundant information in"
+                    . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
+                $flags = $embed_docref->{'flags'};
+                warn "embed.fnc entry '$element_name' missing 'd' flag"
                                                         unless $flags =~ /d/;
-            $ret_type = $embed_docref->{'ret_type'};
-            @args = @{$embed_docref->{args}};
-        } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
-                                    # macro
-            $missing{$element_name} = $file;
-        }
+                $ret_type = $embed_docref->{'ret_type'};
+                @args = @{$embed_docref->{args}};
+            } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
+                                       # macro
+                $missing{$element_name} = $file;
+            }
 
-        die "flag $1 is not legal (for function $element_name (from $file))"
-                    if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
+            die "flag $1 is not legal (for function $element_name (from $file))"
+                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
 
+            die "'u' flag must also have 'm' flag' for $element_name"
+                                            if $flags =~ /u/ && $flags !~ /m/;
+            warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
+                        if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
 
-        die "'u' flag must also have 'm' flag' for $element_name" if $flags =~ /u/ && $flags !~ /m/;
-        warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
-                    if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
-
-        if (exists $seen{$element_name} && $flags !~ /h/) {
-            # Temporarily ignore
-            #die ("'$element_name' in $file was already documented in $seen{$element_name}");
-        }
-        else {
-            $seen{$element_name} = $file;
-        }
-
-        my $text = "";
-        my $is_link_only = ($flags =~ /h/);
-        if ($is_link_only) {    # Don't put meat of entry in perlapi
-            next FUNC if $file_is_C;    # Don't put anything if C source
-
-            # Here, is an 'h' flag in pod.  We add a reference to the pod (and
-            # nothing else) to perlapi/intern.  (It would be better to add a
-            # reference to the correct =item,=header, but something that makes
-            # it harder is that it that might be a duplicate, like '=item *';
-            # so that is a future enhancement XXX.  Another complication is
-            # there might be more than one deserving candidates.)
-            undef $header;
-            my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
-            $podname =~ s/\.pod//;
-            $text .= "Described in L<$podname>.\n\n";
-
-            # Keep track of all the pod files that we refer to.
-            push $described_elsewhere{$podname}->@*, $podname;
-        }
-        else {
-            DOC:
-            while (defined($in = $get_next_line->())) {
-
-                # Other pod commands are considered part of the current
-                # function's docs, so can have lists, etc.
-                last DOC if $in =~ /^=(cut|for\s+apidoc|head)/;
-                if ($in =~ m:^\*/$:) {
-                    warn "=cut missing? $file:$line_num:$in";;
-                    last DOC;
-                }
-                $text .= $in;
+            if (exists $seen{$element_name} && $flags !~ /h/) {
+                die ("'$element_name' in $file was already documented in $seen{$element_name}");
+            }
+            else {
+                $seen{$element_name} = $file;
             }
         }
-        $text = "\n$text" if $text and $text !~ /^\n/;
 
-        my $where = $flags =~ /A/ ? 'api' : 'guts';
+        # Here we have processed the initial line in the heading text or API
+        # element, and have saved the important information from it into the
+        # corresponding variables.  Now accumulate the text that applies to it
+        # up to a terminating line, which is one of:
+        # 1) =cut
+        # 2) =head (in a C file only =head1)
+        # 3) an end comment line in a C file: m:^\s*\*/:
+        # 4) =for apidoc...
+        $text = "";
+        my $head_ender_num = ($file_is_C) ? 1 : "";
+        while (defined($in = $get_next_line->())) {
 
-        if (exists $docs{$where}{$section}{$element_name}) {
-            warn "$0: duplicate API entry for '$element_name' in $where/$section\n";
-            next;
+            last if $in =~ /^=cut/x;
+            last if $in =~ /^=head$head_ender_num/;
+
+            if ($file_is_C && $in =~ m: ^ \s* \* / $ :x) {
+
+                # End of comment line in C files is a fall-back terminator,
+                # but warn only if there actually is some accumulated text
+                warn "=cut missing? $file:$line_num:$in" if $text =~ /\S/;
+                last;
+            }
+
+            if ($in !~ / ^ =for [ ]+ apidoc /x) {
+                $text .= $in;
+                next;
+            }
+
+            # Here, the line is an apidoc line.  All terminate
+            # the text being accumulated.
+            last if $in =~ / ^ =for [ ]+ apidoc /x;
         }
+
+        # Here, are done accumulating the text for this item.  Trim it
+        $text =~ s/ ^ \s* //x;
+        $text =~ s/ \s* $ //x;
+        $text .= "\n" if $text ne "";
+
+        # And treat all-spaces as nothing at all
+        undef $text unless $text =~ /\S/;
+
+        if ($element_name) {
+
+            # Here, we have accumulated into $text, the pod for $element_name
+            my $where = $flags =~ /A/ ? 'api' : 'guts';
+
+            $section = "Functions in file $file" unless defined $section;
+            die "No =for apidoc_section nor =head1 in $file for '$element_name'\n"
+                                                    unless defined $section;
+            if (exists $docs{$where}{$section}{$element_name}) {
+                warn "$0: duplicate API entry for '$element_name' in"
+                    . " $where/$section\n";
+                next;
+            }
+
+            # Override the text with just a link if the flags call for that
+            my $is_link_only = ($flags =~ /h/);
+            if ($is_link_only) {
+                if ($file_is_C) {
+                    redo;    # Don't put anything if C source
+                }
+
+                # Here, is an 'h' flag in pod.  We add a reference to the pod (and
+                # nothing else) to perlapi/intern.  (It would be better to add a
+                # reference to the correct =item,=header, but something that makes
+                # it harder is that it that might be a duplicate, like '=item *';
+                # so that is a future enhancement XXX.  Another complication is
+                # there might be more than one deserving candidates.)
+                my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
+                $podname =~ s/\.pod//;
+                $text = "Described in L<$podname>.\n";
+
+                # Don't output a usage example for linked to documentation if
+                # it is trivial (has no arguments) and we aren't to add a
+                # semicolon
+                $flags .= 'U' if $flags =~ /n/ && $flags !~ /[Us]/;
+
+                # Keep track of all the pod files that we refer to.
+                push $described_elsewhere{$podname}->@*, $podname;
+            }
+
             $docs{$where}{$section}{$element_name}{flags} = $flags;
             $docs{$where}{$section}{$element_name}{pod} = $text;
             $docs{$where}{$section}{$element_name}{file} = $file;
             $docs{$where}{$section}{$element_name}{ret_type} = $ret_type;
             push $docs{$where}{$section}{$element_name}{args}->@*, @args;
-
-        # Create a special entry with an empty-string name for the
-        # heading-level documentation.
-        if (defined $header) {
-            $docs{$where}{$section}{""} = $header;
-            undef $header;
+        }
+        elsif ($text) {
+            $valid_sections{$section}{header} = "" unless
+                                    defined $valid_sections{$section}{header};
+            $valid_sections{$section}{header} .= "\n$text";
         }
 
-        if (defined $in) {
-            if ($in =~ /^=(?:for|head)/) {
-                redo FUNC;
-            }
-        } elsif (! $is_link_only) {
-            warn "No doc for $file:$line_num:$in";
-        }
-    }
+        # We already have the first line of what's to come in $in
+        redo;
+
+    } # End of loop through input
 }
 
 sub docout ($$$) { # output the docs for one function
     my($fh, $element_name, $docref) = @_;
 
     my $flags = $docref->{flags};
-    my $pod = $docref->{pod};
+    my $pod = $docref->{pod} // "";
     my $ret_type = $docref->{ret_type};
     my $file = $docref->{file};
     my @args = $docref->{args}->@*;
@@ -274,34 +276,42 @@ sub docout ($$$) { # output the docs for one function
 
     if ($flags =~ /D/) {
         my $function = $flags =~ /n/ ? 'definition' : 'function';
-        $pod = "\n\nC<B<DEPRECATED!>>  It is planned to remove this $function from a
-future release of Perl.  Do not use it for new code; remove it from
-existing code.\n\n$pod";
+        $pod = <<~"EOT";
+            C<B<DEPRECATED!>>  It is planned to remove this $function from a
+            future release of Perl.  Do not use it for new code; remove it from
+            existing code.
+
+            $pod
+            EOT
     }
-    else {
-        $pod = "\n\nNOTE: this function is B<experimental> and may change or be
-removed without notice.\n\n$pod" if $flags =~ /x/;
+    elsif ($flags =~ /x/) {
+        $pod = <<~"EOT";
+            NOTE: this function is B<experimental> and may change or be
+            removed without notice.
+
+            $pod
+            EOT
     }
 
     # Is Perl_, but no #define foo # Perl_foo
     my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
           || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
 
-    $pod .= "NOTE: the C<perl_> form of this function is B<deprecated>.\n\n"
+    $pod .= "\nNOTE: the C<perl_> form of this function is B<deprecated>.\n"
          if $flags =~ /O/;
     if ($p) {
-        $pod .= "NOTE: this function must be explicitly called as C<Perl_$element_name>";
-        $pod .= " with an C<aTHX_> parameter" if $flags !~ /T/;
-        $pod .= ".\n\n"
+        $pod .= "\nNOTE: this function must be explicitly called as C<Perl_$element_name>\n";
+        $pod .= "with an C<aTHX_> parameter.\n" if $flags !~ /T/;
     }
 
-    print $fh "=item $element_name\n";
+    print $fh "\n=item $element_name\n";
 
-    # If we're printing only a link to an element, this isn't the major entry,
-    # so no X<> here.
-    print $fh "X<$element_name>\n" unless $flags =~ /h/;
+        # If we're printing only a link to an element, this isn't the major entry,
+        # so no X<> here.
+        print $fh "X<$element_name>\n" unless $flags =~ /h/;
 
-    print $fh $pod;
+    chomp $pod;     # Make sure prints pod with a single trailing \n
+    print $fh "\n$pod\n";
 
     if ($flags =~ /U/) { # no usage
         warn("U and s flags are incompatible") if $flags =~ /s/;
@@ -310,7 +320,7 @@ removed without notice.\n\n$pod" if $flags =~ /x/;
         if ($flags =~ /n/) { # no args
             warn("$file: $element_name: n flag without m") unless $flags =~ /m/;
             warn("$file: $element_name: n flag but apparently has args") if @args;
-            print $fh "\t$ret_type\t$element_name";
+            print $fh "\n\t$ret_type\t$element_name";
         } else { # full usage
             my $n            = "Perl_"x$p . $element_name;
             my $large_ret    = length $ret_type > 7;
@@ -318,7 +328,7 @@ removed without notice.\n\n$pod" if $flags =~ /x/;
                             +8+($large_ret ? 1 + length $ret_type : 8)
                             +length($n) + 1;
             my $indent;
-            print $fh "\t$ret_type" . ($large_ret ? ' ' : "\t") . "$n(";
+            print $fh "\n\t$ret_type" . ($large_ret ? ' ' : "\t") . "$n(";
             my $long_args;
             for (@args) {
                 if ($indent_size + 2 + length > 79) {
@@ -356,9 +366,9 @@ removed without notice.\n\n$pod" if $flags =~ /x/;
             print $fh ")";
         }
         print $fh ";" if $flags =~ /s/; # semicolon "dTHR;"
-        print $fh "\n\n";
+        print $fh "\n";
     }
-    print $fh "=for hackers\nFound in file $file\n\n";
+    print $fh "\n=for hackers\nFound in file $file\n";
 }
 
 sub sort_helper {
@@ -380,21 +390,25 @@ sub output {
                       {by => "$0 extracting documentation",
                        from => 'the C source files'}, 1);
 
-    print $fh $header;
+    print $fh $header, "\n";
 
     for my $section_name (sort sort_helper keys %$dochash) {
         my $section_info = $dochash->{$section_name};
         next unless keys %$section_info;     # Skip empty
-        print $fh "\n=head1 $section_name\n\n";
+        print $fh "\n=head1 $section_name\n";
+
+        print $fh "\n", $valid_sections{$section_name}{header}, "\n"
+                            if $podname eq 'perlapi'
+                            && defined $valid_sections{$section_name}{header};
 
         # Output any heading-level documentation and delete so won't get in
         # the way later
         if (exists $section_info->{""}) {
-            print $fh $section_info->{""} . "\n";
+            print $fh "\n", $section_info->{""}, "\n";
             delete $section_info->{""};
         }
         next unless keys %$section_info;     # Skip empty
-        print $fh "=over 8\n\n";
+        print $fh "\n=over 8\n";
 
         for my $function_name (sort sort_helper keys %$section_info) {
             docout($fh, $function_name, $section_info->{$function_name});
@@ -403,8 +417,9 @@ sub output {
     }
 
     if (@$missing) {
-        print $fh "\n=head1 Undocumented functions\n\n";
-    print $fh $podname eq 'perlapi' ? <<'_EOB_' : <<'_EOB_';
+        print $fh "\n=head1 Undocumented functions\n";
+        print $fh $podname eq 'perlapi' ? <<'_EOB_' : <<'_EOB_';
+
 The following functions have been flagged as part of the public API,
 but are currently undocumented.  Use them at your own risk, as the
 interfaces are subject to change.  Functions that are not listed in this
@@ -419,19 +434,22 @@ around to documenting it.  In the latter case, you will be asked to submit a
 patch to document the function.  Once your patch is accepted, it will indicate
 that the interface is stable (unless it is explicitly marked otherwise) and
 usable by you.
+
 _EOB_
 The following functions are currently undocumented.  If you use one of
 them, you may wish to consider creating and submitting documentation for
 it.
-_EOB_
-    print $fh "\n=over\n\n";
 
-    for my $missing (sort sort_helper @$missing) {
-        print $fh "=item C<$missing>\nX<$missing>\n\n";
+_EOB_
+        print $fh "\n=over\n";
+
+        for my $missing (sort sort_helper @$missing) {
+            print $fh "\n=item C<$missing>\nX<$missing>\n";
+        }
+        print $fh "\n=back\n";
     }
-    print $fh "=back\n\n";
-}
-    print $fh $footer, "=cut\n";
+
+    print $fh "\n$footer\n=cut\n";
 
     read_only_bottom_close_and_rename($fh);
 }
@@ -460,7 +478,6 @@ while (my $line = <$fh>) {
     next if $file =~ m! ^ ( cpan | dist | ext ) / !x;
 
     open F, '<', $file or die "Cannot open $file for docs: $!\n";
-    $section = "Functions in file $file\n";
     autodoc(\*F,$file);
     close F or die "Error closing $file: $!\n";
 }
@@ -551,9 +568,7 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |number of bytes than in UTF-8.
 |
 |The listing below is alphabetical, case insensitive.
-|
 _EOB_
-|
 |=head1 AUTHORS
 |
 |Until May 1997, this document was maintained by Jeff Okamoto
