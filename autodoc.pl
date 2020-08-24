@@ -265,12 +265,12 @@ sub docout ($$$) { # output the docs for one function
 
     if ($flags =~ /D/) {
         my $function = $flags =~ /n/ ? 'definition' : 'function';
-        $pod = "\n\nDEPRECATED!  It is planned to remove this $function from a
+        $pod = "\n\nC<B<DEPRECATED!>>  It is planned to remove this $function from a
 future release of Perl.  Do not use it for new code; remove it from
 existing code.\n\n$pod";
     }
     else {
-        $pod = "\n\nNOTE: this function is experimental and may change or be
+        $pod = "\n\nNOTE: this function is B<experimental> and may change or be
 removed without notice.\n\n$pod" if $flags =~ /x/;
     }
 
@@ -278,7 +278,7 @@ removed without notice.\n\n$pod" if $flags =~ /x/;
     my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
           || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
 
-    $pod .= "NOTE: the C<perl_> form of this function is deprecated.\n\n"
+    $pod .= "NOTE: the C<perl_> form of this function is B<deprecated>.\n\n"
          if $flags =~ /O/;
     if ($p) {
         $pod .= "NOTE: this function must be explicitly called as C<Perl_$element_name>";
