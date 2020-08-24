@@ -2000,12 +2000,12 @@ such as:
 or a hash or array slice, such as:
 
     @foo[$bar, $baz, $xyzzy]
-    @{$ref->[12]}{"susie", "queue"}
+    $ref->[12]->@{"susie", "queue"}
 
 or a hash key/value or array index/value slice, such as:
 
     %foo[$bar, $baz, $xyzzy]
-    %{$ref->[12]}{"susie", "queue"}
+    $ref->[12]->%{"susie", "queue"}
 
 =item Delimiter for here document is too long
 
