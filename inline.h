@@ -2086,7 +2086,7 @@ Perl_gimme_V(pTHX)
         return gimme;
     cxix = PL_curstackinfo->si_cxsubix;
     if (cxix < 0)
-        return G_VOID;
+        return PL_curstackinfo->si_type == PERLSI_SORT ? G_SCALAR: G_VOID;
     assert(cxstack[cxix].blk_gimme & G_WANT);
     return (cxstack[cxix].blk_gimme & G_WANT);
 }
