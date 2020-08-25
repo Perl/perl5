@@ -129,6 +129,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlebcdic		Considerations for running Perl on EBCDIC platforms
 
     perlsec		Perl security
+    perlsecpolicy	Perl security report handling policy
 
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use

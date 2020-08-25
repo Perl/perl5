@@ -150,6 +150,7 @@ POD = perl.pod	\
 	perlretut.pod	\
 	perlrun.pod	\
 	perlsec.pod	\
+	perlsecpolicy.pod	\
 	perlsource.pod	\
 	perlstyle.pod	\
 	perlsub.pod	\
@@ -309,6 +310,7 @@ MAN = perl.man	\
 	perlretut.man	\
 	perlrun.man	\
 	perlsec.man	\
+	perlsecpolicy.man	\
 	perlsource.man	\
 	perlstyle.man	\
 	perlsub.man	\
@@ -468,6 +470,7 @@ HTML = perl.html	\
 	perlretut.html	\
 	perlrun.html	\
 	perlsec.html	\
+	perlsecpolicy.html	\
 	perlsource.html	\
 	perlstyle.html	\
 	perlsub.html	\
@@ -627,6 +630,7 @@ TEX = perl.tex	\
 	perlretut.tex	\
 	perlrun.tex	\
 	perlsec.tex	\
+	perlsecpolicy.tex	\
 	perlsource.tex	\
 	perlstyle.tex	\
 	perlsub.tex	\

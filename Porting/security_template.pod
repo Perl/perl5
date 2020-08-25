@@ -64,8 +64,8 @@ The current version of perl is available from https://www.perl.org/get.html .
 FIXME or use the following:
 
 Specifics about the vulnerability were first disclosed to
-C<perl5-security-report>, a closed subscriber mailing list that has a
-subset of the perl 5 committers subcribed to it.
+C<perl-security>, a closed subscriber mailing list that has a
+subset of the perl committers subcribed to it.
 
 =head2 When was the vulnerability discovered?
 
@@ -78,6 +78,6 @@ FIXME
 =head2 How was the vulnerability reported?
 
 FIXME: something like "So-and-so sent email to
-perl5-security-report@perl.org"
+perl-security@perl.org"
 
 =cut
