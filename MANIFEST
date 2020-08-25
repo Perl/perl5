@@ -5277,6 +5277,7 @@ pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
 pod/perlrun.pod			Perl execution and options
 pod/perlsec.pod			Perl security
+pod/perlsecpolicy.pod		Perl security report handling policy
 pod/perlsource.pod		Guide to the Perl source tree
 pod/perlstyle.pod		Perl style guide
 pod/perlsub.pod			Perl subroutines
