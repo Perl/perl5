@@ -62,6 +62,8 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (\s*)            # $6
                       (.*?)            # $7
                       \s* \n /x;
+# Only certain flags, dealing with display, are acceptable for apidoc_item
+my $display_flags = "fFnDopsT";
 
 sub check_api_doc_line ($$) {
     my ($file, $in) = @_;
@@ -115,15 +117,17 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # will be used for elements later in the file
 
         my ($text, $element_name, $flags, $ret_type, $is_item, $proto_in_file);
-        my (@args);
+        my (@args, @items);
 
         # If the line starts a new section ...
         if ($in=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
+
             $section = $1;
         }
         elsif ($in=~ /^ =for [ ]+ apidoc \B /x) {   # Otherwise better be a
                                                     # plain apidoc line
-            die "Unkown apidoc-type line '$in'";
+            die "Unkown apidoc-type line '$in'" unless $in=~ /^=for apidoc_item/;
+            die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
         }
         else {  # Plain apidoc
 
@@ -169,7 +173,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # 1) =cut
         # 2) =head (in a C file only =head1)
         # 3) an end comment line in a C file: m:^\s*\*/:
-        # 4) =for apidoc...
+        # 4) =for apidoc... (except apidoc_item lines)
         $text = "";
         my $head_ender_num = ($file_is_C) ? 1 : "";
         while (defined($in = $get_next_line->())) {
@@ -190,9 +194,40 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 next;
             }
 
-            # Here, the line is an apidoc line.  All terminate
+            # Here, the line is an apidoc line.  All but apidoc_item terminate
             # the text being accumulated.
-            last if $in =~ / ^ =for [ ]+ apidoc /x;
+            last if $in =~ / ^ =for [ ]+ apidoc_section /x;
+
+            my ($item_name, $item_flags, $item_ret_type, $is_item,
+                            undef, @item_args) = check_api_doc_line($file, $in);
+            last unless $is_item;
+
+            # Here, is an apidoc_item_line; They can only come within apidoc
+            # paragraphs.
+            die "Unexpected api_doc_item line '$in'" unless $element_name;
+
+            # We accept blank lines between these, but nothing else;
+            die "apidoc_item lines must immediately follow apidoc lines"
+                                                            if $text =~ /\S/;
+
+            # Use the base entry flags if none for this item; otherwise add in
+            # any non-display base entry flags.
+            if ($item_flags) {
+                $item_flags .= $flags =~ s/[$display_flags]//rg;
+            }
+            else {
+                $item_flags = $flags;
+            }
+            $item_ret_type = $ret_type unless $item_ret_type;
+            @item_args = @args unless @item_args;
+            push @items, { name     => $item_name,
+                           ret_type => $item_ret_type,
+                           flags    => $item_flags,
+                           args     => [ @item_args ],
+                         };
+
+            # This line shows that this element is documented.
+            delete $funcflags{$item_name};
         }
 
         # Here, are done accumulating the text for this item.  Trim it
@@ -221,6 +256,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             my $is_link_only = ($flags =~ /h/);
             if ($is_link_only) {
                 if ($file_is_C) {
+                    die "Can't currently handle link with items to it" if @items;
                     redo;    # Don't put anything if C source
                 }
 
@@ -248,6 +284,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             $docs{$where}{$section}{$element_name}{file} = $file;
             $docs{$where}{$section}{$element_name}{ret_type} = $ret_type;
             push $docs{$where}{$section}{$element_name}{args}->@*, @args;
+            push $docs{$where}{$section}{$element_name}{items}->@*, @items;
         }
         elsif ($text) {
             $valid_sections{$section}{header} = "" unless
@@ -269,6 +306,7 @@ sub docout ($$$) { # output the docs for one function
     my $ret_type = $docref->{ret_type};
     my $file = $docref->{file};
     my @args = $docref->{args}->@*;
+    my @items = $docref->{items}->@*;
 
     $element_name =~ s/\s*$//;
 
@@ -304,11 +342,13 @@ sub docout ($$$) { # output the docs for one function
         $pod .= "with an C<aTHX_> parameter.\n" if $flags !~ /T/;
     }
 
-    print $fh "\n=item $element_name\n";
+    for my $item ($element_name, @items) {
+        print $fh "\n=item $item\n";
 
         # If we're printing only a link to an element, this isn't the major entry,
         # so no X<> here.
         print $fh "X<$element_name>\n" unless $flags =~ /h/;
+    }
 
     chomp $pod;     # Make sure prints pod with a single trailing \n
     print $fh "\n$pod\n";
