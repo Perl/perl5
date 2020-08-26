@@ -1266,6 +1266,8 @@ $valid_sections{'General Configuration'}{footer} =~ s/__HAS_R_LIST__/$has_r_defs
 my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @include_defs;
 $valid_sections{'General Configuration'}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
 
+my $section_list = join "\n\n", map { "=item L</$_>" } sort sort_helper keys %valid_sections;
+
 output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |=encoding UTF-8
 |
@@ -1285,6 +1287,14 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |L<At the end|/Undocumented functions> is a list of functions which have yet
 |to be documented.  Patches welcome!  The interfaces of these are subject to
 |change without notice.
+|
+|The sections in this document are
+|
+|=over
+
+|$section_list
+|
+|=back
 |
 |Anything not listed here or in the other mentioned pods is not part of the
 |public API, and should not be used by extension writers at all.  For these
