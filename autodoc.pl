@@ -263,6 +263,8 @@ sub docout ($$$) { # output the docs for one function
     my($flags, $docs, $ret, $file, @args) = @$docref;
     $name =~ s/\s*$//;
 
+    warn("Empty pod for $name (from $file)") unless $docs =~ /\S/;
+
     if ($flags =~ /D/) {
         my $function = $flags =~ /n/ ? 'definition' : 'function';
         $docs = "\n\nDEPRECATED!  It is planned to remove this $function from a
