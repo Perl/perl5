@@ -1139,7 +1139,13 @@ sub output {
 
     for my $section_name (sort sort_helper keys %$dochash) {
         my $section_info = $dochash->{$section_name};
-        next unless keys %$section_info;     # Skip empty
+
+        if (! %$section_info) {
+            warn "Empty section '$section_name'; skipped";
+            delete $valid_sections{$section_name};
+            next;
+        }
+
         print $fh "\n=head1 $section_name\n";
 
         print $fh "\n", $valid_sections{$section_name}{header}, "\n"
