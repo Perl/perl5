@@ -72,7 +72,7 @@ struct gp {
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)
 
 /*
-=head1 GV Functions
+=for apidoc_section GV Handling
 
 =for apidoc Am|SV*|GvSV|GV* gv
 

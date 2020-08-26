@@ -8877,7 +8877,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 }
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc load_module
 

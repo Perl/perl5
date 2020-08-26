@@ -2281,7 +2281,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
 /*
 
-=head1 Locale-related functions and macros
+=for apidoc_section Locales
 
 =for apidoc Perl_setlocale
 

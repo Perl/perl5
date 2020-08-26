@@ -671,7 +671,7 @@ library functions instead.  In this case C<memchr> can be used to see if
 C<c> is in C<"list"> and works even if C<c> is C<NUL>.  These functions
 need an additional parameter to give the string length.
 In the case of literal string parameters, perl has defined macros that
-calculate the length for you.  See L<perlapi/Miscellaneous Functions>.
+calculate the length for you.  See L<perlapi/String Handling>.
 
 =item *
 

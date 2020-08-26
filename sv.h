@@ -269,7 +269,7 @@ struct p5rx {
 #undef _SV_HEAD_UNION		/* ensure no pollution */
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc Am|U32|SvREFCNT|SV* sv
 Returns the value of the object's reference count. Exposed
@@ -2095,7 +2095,7 @@ incremented.
 /* the following macros update any magic values this C<sv> is associated with */
 
 /*
-=head1 Magical Functions
+=head1 Magic
 
 =for apidoc Am|void|SvGETMAGIC|SV* sv
 Invokes C<mg_get> on an SV if it has 'get' magic.  For example, this
@@ -2134,7 +2134,7 @@ has been loaded.
 Releases a mutual exclusion lock on C<sv> if a suitable module
 has been loaded.
 
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the

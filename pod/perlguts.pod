@@ -548,6 +548,7 @@ is only valid for the duration of a single perl process.
 See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the hash access functions on tied hashes.
 
+=for apidoc_section HV Handling
 =for apidoc Amh|void|PERL_HASH|U32 hash|char *key|STRLEN klen
 
 =head2 Hash API Extensions
@@ -2408,6 +2409,7 @@ The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
 or 'd' for B<d>eclaration, so we have C<pTHX>, C<aTHX> and C<dTHX>, and
 their variants.
 
+=for apidoc_section Concurrency
 =for apidoc Amnh||aTHX
 =for apidoc Amnh||aTHX_
 =for apidoc Amnh||dTHX
@@ -2663,6 +2665,7 @@ following macros for portability
         NVff            NV %f-like
         NVgf            NV %g-like
 
+=for apidoc_section Formats
 =for apidoc Amnh||IVdf
 =for apidoc Amnh||UVuf
 =for apidoc Amnh||UVof
@@ -2750,6 +2753,9 @@ UTF-8 in order to get good results and avoid Wide-character warnings.
 One way to do this for typical filehandles is to invoke perl with the
 C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
+=for apidoc_section Formats
+=cut
+
 =head2 Formatted Printing of C<Size_t> and C<SSize_t>
 
 The most general way to do this is to cast them to a UV or IV, and
@@ -2779,6 +2785,7 @@ use the follow macros to do it right.
         PTR2NV(pointer)
         INT2PTR(pointertotype, integer)
 
+=for apidoc_section Casting
 =for apidoc Amh|void *|INT2PTR|type|int value
 =for apidoc Amh|UV|PTR2UV|void *
 =for apidoc Amh|IV|PTR2IV|void *

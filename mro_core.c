@@ -19,7 +19,7 @@
  */
 
 /*
-=head1 MRO Functions
+=head1 MRO
 These functions are related to the method resolution order of perl classes
 Also see L<perlmroapi>.
 

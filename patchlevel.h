@@ -9,7 +9,7 @@
  */
 
 /*
-=head1 Handy Values
+=for apidoc_section Versioning
 
 =for apidoc AmDnU|U8|PERL_REVISION
 The major number component of the perl interpreter currently being compiled or

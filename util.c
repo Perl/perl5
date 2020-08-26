@@ -573,6 +573,7 @@ S_delimcpy_intern(char *to, const char *toend, const char *from,
 
 
 /*
+=for apidoc_section String Handling
 =for apidoc delimcpy_no_escape
 
 Copy a source buffer to a destination buffer, stopping at (but not including)
@@ -635,8 +636,6 @@ Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend
 }
 
 /*
-=head1 Miscellaneous Functions
-
 =for apidoc ninstr
 
 Find the first (leftmost) occurrence of a sequence of bytes within another
@@ -705,8 +704,6 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
 }
 
 /*
-=head1 Miscellaneous Functions
-
 =for apidoc rninstr
 
 Like C<L</ninstr>>, but instead finds the final (rightmost) occurrence of a
@@ -818,7 +815,6 @@ Perl_rninstr(const char *big, const char *bigend, const char *little, const char
    If FBMcf_TAIL, the table is created as if the string has a trailing \n. */
 
 /*
-=head1 Miscellaneous Functions
 
 =for apidoc fbm_compile
 
@@ -1165,8 +1161,7 @@ Perl_cntrl_to_mnemonic(const U8 c)
 /* copy a string to a safe spot */
 
 /*
-=head1 Memory Management
-
+=for apidoc_section String Handling
 =for apidoc savepv
 
 Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
@@ -1373,7 +1368,7 @@ Perl_form_nocontext(const char* pat, ...)
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Display and Dump functions
 =for apidoc form
 
 Takes a sprintf-style format pattern and conventional
@@ -1661,7 +1656,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 }
 
 /*
-=head1 Warning and Dieing
+=for apidoc_section Warning and Dieing
 */
 
 /* Common code used in dieing and warning */
@@ -2260,6 +2255,7 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 #  if !defined(WIN32) && !defined(NETWARE)
 
 /*
+=for apidoc_section Utility Functions
 =for apidoc my_setenv
 
 A wrapper for the C library L<setenv(3)>.  Don't use the latter, as the perl
@@ -2846,6 +2842,7 @@ dup2(int oldfd, int newfd)
 #ifdef HAS_SIGACTION
 
 /*
+=for apidoc_section Signals
 =for apidoc rsignal
 
 A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
@@ -3952,6 +3949,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 #ifdef HAS_STRFTIME
 
 /*
+=for apidoc_section Time
 =for apidoc my_strftime
 strftime(), but with a different API so that the return value is a pointer
 to the formatted result (which MUST be arranged to be FREED BY THE
@@ -4060,7 +4058,7 @@ mini_mktime() overwrites them
 	(dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Utility Functions
 
 =for apidoc getcwd_sv
 
@@ -4968,6 +4966,7 @@ Perl_mem_log_del_sv(const SV *sv,
 #endif /* PERL_MEM_LOG */
 
 /*
+=for apidoc_section String Handling
 =for apidoc quadmath_format_valid
 
 C<quadmath_snprintf()> is very strict about its C<format> string and will
@@ -6144,6 +6143,7 @@ static void atos_symbolize(atos_context* ctx,
 #endif /* #ifdef PERL_DARWIN */
 
 /*
+=for apidoc_section Display and Dump functions
 =for apidoc get_c_backtrace
 
 Collects the backtrace (aka "stacktrace") into a single linear
@@ -6395,6 +6395,7 @@ Deallocates a backtrace received from get_c_bracktrace.
 */
 
 /*
+=for apidoc_section Display and Dump functions
 =for apidoc get_c_backtrace_dump
 
 Returns a SV containing a dump of C<depth> frames of the call stack, skipping

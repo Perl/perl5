@@ -37,7 +37,7 @@
 #endif
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section String Handling
 
 =for apidoc ibcmp
 

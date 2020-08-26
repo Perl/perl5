@@ -14,7 +14,7 @@
 /* first, some documentation for xsubpp-generated items */
 
 /*
-=head1 C<xsubpp> variables and internal functions
+=for apidoc_section XS
 
 =for apidoc Amn|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
@@ -257,8 +257,6 @@ Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 
 =for apidoc Amns||XSRETURN_EMPTY
 Return an empty list from an XSUB immediately.
-
-=head1 Variables created by C<xsubpp> and C<xsubpp> internal functions
 
 =for apidoc AmU||newXSproto|char* name|XSUBADDR_t f|char* filename|const char *proto
 Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to

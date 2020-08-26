@@ -18,14 +18,38 @@
 #  define Null(type) ((type)NULL)
 
 /*
-=head1 Handy Values
-
+=for apidoc_section String Handling
 =for apidoc AmnU||Nullch
 Null character pointer.  (No longer available when C<PERL_CORE> is
 defined.)
 
+=for apidoc_section SV Handling
 =for apidoc AmnU||Nullsv
 Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
+
+=cut
+
+Below are signatures of functions from config.h which can't easily be gleaned
+from it, and are very unlikely to change
+
+=for apidoc_section Signals
+=for apidoc Am|int|Sigsetjmp|jmp_buf env|int savesigs
+=for apidoc Am|void|Siglongjmp|jmp_buf env|int val
+
+=for apidoc_section Filesystem configuration values
+=for apidoc Am|void *|FILE_ptr|FILE * f
+=for apidoc Am|Size_t|FILE_cnt|FILE * f
+=for apidoc Am|void *|FILE_base|FILE * f
+=for apidoc Am|Size_t|FILE_bufsiz
+
+=for apidoc_section String Handling
+=for apidoc Am|token|CAT2|token x|token y
+=for apidoc Am|string|STRINGIFY|token x
+
+=for apidoc_section Numeric Functions
+=for apidoc Am|double|Drand01|double x
+=for apidoc Am|void|seedDrand01|Rand_seed_t x
+=for apidoc Am|char *|Gconvert|double x|Size_t n|bool t|char * b
 
 =cut
 */
@@ -98,6 +122,7 @@ Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 #endif
 
 /*
+=for apidoc_section Casting
 =for apidoc Am|bool|cBOOL|bool expr
 
 Cast-to-bool.  A simple S<C<(bool) I<expr>>> cast may not do the right thing:
@@ -279,6 +304,7 @@ typedef U64TYPE U64;
 #define nBIT_UMAX(n)  nBIT_MASK(n)
 
 /*
+=for apidoc_section Compiler directives
 =for apidoc Am|void|__ASSERT_|bool expr
 
 This is a helper macro to avoid preprocessor issues, replaced by nothing
@@ -300,7 +326,7 @@ detects that and gets all excited. */
 #endif
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc Ama|SV*|newSVpvs|"literal string"
 Like C<newSVpvn>, but takes a literal string instead of a
@@ -342,7 +368,7 @@ string/length pair.
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
 
-=head1 Memory Management
+=for apidoc_section String Handling
 
 =for apidoc Ama|char*|savepvs|"literal string"
 Like C<savepvn>, but takes a literal string instead of a
@@ -352,13 +378,13 @@ string/length pair.
 A version of C<savepvs()> which allocates the duplicate string in memory
 which is shared between threads.
 
-=head1 GV Functions
+=for apidoc_section GV Handling
 
 =for apidoc Am|HV*|gv_stashpvs|"name"|I32 create
 Like C<gv_stashpvn>, but takes a literal string instead of a
 string/length pair.
 
-=head1 Hash Manipulation Functions
+=for apidoc_section HV Handling
 
 =for apidoc Am|SV**|hv_fetchs|HV* tb|"key"|I32 lval
 Like C<hv_fetch>, but takes a literal string instead of a
@@ -380,7 +406,7 @@ a string/length pair.
 */
 
 /*
-=head1 Handy Values
+=for apidoc_section String Handling
 
 =for apidoc Amu|pair|STR_WITH_LEN|"literal string"
 
@@ -455,6 +481,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
                                                         PERL_VERSION_PATCH)
 
 /*
+=for apidoc_section Versioning
 =for apidoc AmR|bool|PERL_VERSION_EQ|const U8 major|const U8 minor|const U8 patch
 
 Returns whether or not the perl currently being compiled has the specified
@@ -529,7 +556,7 @@ becomes
 # define PERL_VERSION_GT(j,n,p) (! PERL_VERSION_LE(j,n,p))
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section String Handling
 
 =for apidoc Am|bool|strNE|char* s1|char* s2
 Test two C<NUL>-terminated strings to see if they are different.  Returns true
@@ -1153,7 +1180,7 @@ C<isIDCONT_LC_utf8>, and C<isIDCONT_LC_utf8_safe>.
 =for apidoc Amh|bool|isIDCONT_LC_uvchr|int ch
 =for apidoc Amh|bool|isIDCONT_LC_utf8_safe|U8 * s| U8 *end
 
-=head1 Miscellaneous Functions
+=for apidoc_section Numeric Functions
 
 =for apidoc Am|U8|READ_XDIGIT|char str*
 Returns the value of an ASCII-range hex digit and advances the string pointer.
@@ -1340,6 +1367,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /*
    void below because that's the best fit, and works for Devel::PPPort
+=for apidoc_section Integer configuration values
 =for apidoc AmnU|void|WIDEST_UTYPE
 
 Yields the widest unsigned integer type on the platform, currently either
@@ -2485,6 +2513,7 @@ The XSUB-writer's interface to the C C<free> function.
 
 This should B<ONLY> be used on memory obtained using L</"Newx"> and friends.
 
+=for apidoc_section String Handling
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
 source, C<dest> is the destination, C<nitems> is the number of items, and
@@ -2517,6 +2546,7 @@ Like C<Zero> but returns dest.  Useful
 for encouraging compilers to tail-call
 optimise.
 
+=for apidoc_section Utility Functions
 =for apidoc Am|void|StructCopy|type *src|type *dest|type
 This is an architecture-independent macro to copy one structure to another.
 
@@ -2731,7 +2761,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
 
 /*
-=head1 Handy Values
+=for apidoc_section Utility Functions
 
 =for apidoc Am|STRLEN|C_ARRAY_LENGTH|void *a
 

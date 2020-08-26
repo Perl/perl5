@@ -481,10 +481,6 @@ struct cop {
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
 
 /*
-=head1 COP Hint Reading
-*/
-
-/*
 =for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
 Look up the hint entry in the cop C<cop> with the key specified by
@@ -940,10 +936,6 @@ struct context {
                          && CxTYPE(cx) <= CXt_LOOP_LIST)
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
-
-/*
-=head1 "Gimme" Values
-*/
 
 /*
 =for apidoc AmnU||G_SCALAR

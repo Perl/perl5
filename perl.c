@@ -177,7 +177,7 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #else
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc perl_alloc
 
@@ -2742,7 +2742,7 @@ S_run_body(pTHX_ I32 oldscope)
 }
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc get_sv
 
@@ -2768,7 +2768,7 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=head1 Array Manipulation Functions
+=for apidoc_section AV Handling
 
 =for apidoc get_av
 
@@ -2798,7 +2798,7 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=head1 Hash Manipulation Functions
+=for apidoc_section HV Handling
 
 =for apidoc get_hv
 
@@ -2825,7 +2825,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=head1 CV Manipulation Functions
+=for apidoc_section CV Handling
 
 =for apidoc get_cvn_flags
 
@@ -3271,7 +3271,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 /* Require a module. */
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc require_pv
 

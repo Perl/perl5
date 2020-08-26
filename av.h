@@ -44,8 +44,6 @@ Null AV pointer.
 
 (deprecated - use C<(AV *)NULL> instead)
 
-=head1 Array Manipulation Functions
-
 =for apidoc Am|int|AvFILL|AV* av
 Same as C<av_top_index()> or C<av_tindex()>.
 

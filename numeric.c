@@ -16,7 +16,7 @@
  */
 
 /*
-=head1 Numeric functions
+=for apidoc_section Numeric Functions
 
 =cut
 

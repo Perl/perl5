@@ -17,7 +17,7 @@
  */
 
 /* 
-=head1 Hash Manipulation Functions
+=head1 HV Handling
 A HV structure represents a Perl hash.  It consists mainly of an array
 of pointers, each of which points to a linked list of HE structures.  The
 array is indexed by the hash function of the key, so each linked list
@@ -3731,6 +3731,7 @@ Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 }
 
 /*
+=for apidoc_section COP Hint Hashes
 =for apidoc cop_fetch_label
 
 Returns the label attached to a cop, and stores its length in bytes into
@@ -3810,6 +3811,7 @@ Perl_cop_store_label(pTHX_ COP *const cop, const char *label, STRLEN len,
 }
 
 /*
+=for apidoc_section HV Handling
 =for apidoc hv_assert
 
 Check that a hash is in an internally consistent state.

@@ -528,10 +528,6 @@ Perl_sv_peek(pTHX_ SV *sv)
     return SvPV_nolen(t);
 }
 
-/*
-=head1 Debugging Utilities
-*/
-
 void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {

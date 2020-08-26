@@ -40,6 +40,7 @@ SOFTWARE.
 /* ------------------------------- av.h ------------------------------- */
 
 /*
+=for apidoc_section AV Handling
 =for apidoc av_count
 Returns the number of elements in the array C<av>.  This is the true length of
 the array, including any undefined elements.  It is always the same as
@@ -1876,7 +1877,7 @@ Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Utility Functions
 
 =for apidoc is_safe_syscall
 
@@ -2449,7 +2450,7 @@ Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
 /* ------------------ util.h ------------------------------------------- */
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section String Handling
 
 =for apidoc foldEQ
 
@@ -2505,6 +2506,7 @@ Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
 }
 
 /*
+=for apidoc_section Locales
 =for apidoc foldEQ_locale
 
 Returns true if the leading C<len> bytes of the strings C<s1> and C<s2> are the
@@ -2532,6 +2534,7 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 }
 
 /*
+=for apidoc_section String Handling
 =for apidoc my_strnlen
 
 The C library C<strnlen> if available, or a Perl implementation of it.

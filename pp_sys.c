@@ -1293,7 +1293,7 @@ PP(pp_sselect)
 
 /*
 
-=head1 GV Functions
+=for apidoc_section GV Handling
 
 =for apidoc setdefout
 

@@ -70,7 +70,7 @@ typedef PERL_BITFIELD16 Optype;
 #define OP_GIMME_REVERSE(flags)	((flags) & G_WANT)
 
 /*
-=head1 "Gimme" Values
+=for apidoc_section Callback Functions
 
 =for apidoc Amn|U32|GIMME_V
 The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
