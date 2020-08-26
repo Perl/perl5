@@ -1367,7 +1367,7 @@ to find Perl DLL relatively to the location of the EXE file; or one may want
 to ignore the environment when setting the Perl-library search patch, etc.
 
 If you fill comfortable with I<embedding> interface (see L<perlembed>), such
-things are easy to do repeating the steps outlined in L/<Making
+things are easy to do repeating the steps outlined in L</Making
 executables with a custom collection of statically loaded extensions>, and
 doing more comprehensive edits to main() of F<perlmain.c>.  The people with
 little desire to understand Perl can just rename main(), and do necessary
