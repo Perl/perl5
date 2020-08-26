@@ -5995,12 +5995,14 @@ PP(pp_split)
     I32 trailing_empty = 0;
     const char *orig;
     const IV origlimit = limit;
+    AV *tmp4ary;
     I32 realarray = 0;
     I32 base;
     const U8 gimme = GIMME_V;
     bool gimme_scalar;
     I32 oldsave = PL_savestack_ix;
     U32 make_mortal = SVs_TEMP;
+    bool switchstack = 0;
     bool multiline = 0;
     MAGIC *mg = NULL;
 
@@ -6052,8 +6054,14 @@ PP(pp_split)
 		    AvARRAY(ary)[i] = &PL_sv_undef; /* don't free mere refs */
 	    }
 	    /* temporarily switch stacks */
-	    SAVESWITCHSTACK(PL_curstack, ary);
 	    make_mortal = 0;
+            switchstack = 1;
+            /* tmp4ary is used as a placeholder, in case ary is modified  */
+            /* during the split, which could otherwise result in segfault */
+            /* or panic. */
+            tmp4ary = newAV();
+            av_extend(tmp4ary, 0);
+            SAVESWITCHSTACK(PL_curstack, tmp4ary);
 	}
     }
 
@@ -6384,6 +6392,31 @@ PP(pp_split)
     LEAVE_SCOPE(oldsave); /* may undo an earlier SWITCHSTACK */
     SPAGAIN;
     if (realarray) {
+        if (switchstack) {
+            /* The in-place optimization was triggered.                   */
+            /* tmp4ary contains the *SV array resulting from the split.   */
+            /* The *SV arrays of tmp4ary and ary must now be swapped over.*/
+
+             SV** tmp1 = AvARRAY(ary);
+             SV** tmp2 = AvALLOC(ary);
+             SSize_t tmp3 = AvMAX(ary);
+             SSize_t tmp4 = AvFILLp(ary);
+
+             AvARRAY(ary) = AvARRAY(tmp4ary);
+             AvARRAY(tmp4ary) = tmp1;
+
+             AvALLOC(ary) = AvALLOC(tmp4ary);
+             AvALLOC(tmp4ary) = tmp2;
+
+             AvMAX(ary) = AvMAX(tmp4ary);
+             AvMAX(tmp4ary) = tmp3;
+
+             AvFILLp(ary) = AvFILLp(tmp4ary);
+             AvFILLp(tmp4ary) = tmp4;
+
+            (void)sv_2mortal((SV*)tmp4ary);
+        }
+
 	if (!mg) {
 	    if (SvSMAGICAL(ary)) {
 		PUTBACK;

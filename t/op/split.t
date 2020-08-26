@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 176;
+plan tests => 178;
 
 $FS = ':';
 
@@ -667,3 +667,10 @@ CODE
         ok(eq_array(\@result,['a','b']), "Resulting in ('a','b')");
     }
 }
+
+# check that the (@ary = split) optimisation survives @ary being modified
+
+fresh_perl_is('my @ary; @ary = split(/\w(?{ @ary[1000] = 1 })/, "abc");',
+        '',{},'(@ary = split ...) survives @ary being Renew()ed');
+fresh_perl_is('my @ary; @ary = split(/\w(?{ undef @ary })/, "abc");',
+        '',{},'(@ary = split ...) survives an (undef @ary)');
