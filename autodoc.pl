@@ -343,7 +343,7 @@ sub docout ($$$) { # output the docs for one function
     }
 
     for my $item ($element_name, @items) {
-        print $fh "\n=item $item\n";
+        print $fh "\n=item C<$item>\n";
 
         # If we're printing only a link to an element, this isn't the major entry,
         # so no X<> here.
