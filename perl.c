@@ -2877,7 +2877,7 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 
 /*
 
-=head1 Callback Functions
+=for apidoc_section Callback Functions
 
 =for apidoc call_argv
 

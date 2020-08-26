@@ -252,7 +252,7 @@ typedef struct regexp_engine {
 #define RXapif_REGNAMES_COUNT  0x1000
 
 /*
-=head1 REGEXP Functions
+=for apidoc_section REGEXP Functions
 
 =for apidoc Am|REGEXP *|SvRX|SV *sv
 

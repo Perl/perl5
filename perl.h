@@ -1404,7 +1404,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 /*
-=head1 Errno
+=for apidoc_section Errno
 
 =for apidoc m|void|SETERRNO|int errcode|int vmserrcode
 
@@ -1507,7 +1507,7 @@ was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
 #endif
 
 /*
-=head1 Warning and Dieing
+=for apidoc_section Warning and Dieing
 
 =for apidoc Amn|SV *|ERRSV
 

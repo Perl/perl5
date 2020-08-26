@@ -303,7 +303,7 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 /* ------------------------------- utf8.h ------------------------------- */
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 */
 
 PERL_STATIC_INLINE void

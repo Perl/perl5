@@ -19,7 +19,7 @@
  */
 
 /*
-=head1 Pad Data Structures
+=for apidoc_section Pad Data Structures
 
 =for apidoc Amx|PADLIST *|CvPADLIST|CV *cv
 

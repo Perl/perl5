@@ -10700,7 +10700,7 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
 }
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 
 =for apidoc isSCRIPT_RUN
 

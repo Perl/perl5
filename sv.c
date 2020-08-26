@@ -16074,7 +16074,7 @@ Perl_init_constants(pTHX)
 }
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 
 =for apidoc sv_recode_to_utf8
 

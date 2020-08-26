@@ -166,7 +166,7 @@ typedef struct jmpenv JMPENV;
     } STMT_END
 
 /*
-=head1 COP Hint Hashes
+=for apidoc_section COP Hint Hashes
 */
 
 typedef struct refcounted_he COPHH;
@@ -1126,7 +1126,7 @@ typedef struct stackinfo PERL_SI;
 
 
 /*
-=head1 Multicall Functions
+=for apidoc_section Multicall Functions
 
 =for apidoc Amns||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.

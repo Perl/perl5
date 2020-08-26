@@ -37,7 +37,7 @@ struct xpvav {
  */
 
 /*
-=head1 Handy Values
+=for apidoc_section AV Handling
 
 =for apidoc ADmnU||Nullav
 Null AV pointer.

@@ -11,7 +11,7 @@
 #include "handy.h"
 
 /*
-=head1 Per-Interpreter Variables
+=for apidoc_section Per-Interpreter Variables
 */
 
 /* These variables are per-interpreter in threaded/multiplicity builds,

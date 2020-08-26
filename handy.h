@@ -369,7 +369,7 @@ Like C<hv_store>, but takes a literal string instead of a
 string/length pair
 and omits the hash parameter.
 
-=head1 Lexer interface
+=for apidoc_section Lexer interface
 
 =for apidoc Amx|void|lex_stuff_pvs|"pv"|U32 flags
 
@@ -2444,7 +2444,7 @@ typedef U32 line_t;
 #define isALPHA_FOLD_NE(c1, c2) (! isALPHA_FOLD_EQ((c1), (c2)))
 
 /*
-=head1 Memory Management
+=for apidoc_section Memory Management
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.

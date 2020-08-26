@@ -200,7 +200,7 @@ is a lexical C<$_> in scope.
 /* Typically used to return values from XS functions.       */
 
 /*
-=head1 Stack Manipulation Macros
+=for apidoc_section Stack Manipulation Macros
 
 =for apidoc Am|void|XST_mIV|int pos|IV iv
 Place an integer into the specified position C<pos> on the stack.  The
@@ -278,7 +278,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 Macro to verify that the perl api version an XS module has been compiled against
 matches the api version of the perl interpreter it's being loaded into.
 
-=head1 Exception Handling (simple) Macros
+=for apidoc_section Exception Handling (simple) Macros
 
 =for apidoc Amns||dXCPT
 Set up necessary local variables for exception handling.

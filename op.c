@@ -789,7 +789,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 }
 
 /*
-=head1 Optree Manipulation Functions
+=for apidoc_section Optree Manipulation Functions
 
 =for apidoc alloccopstash
 
@@ -5789,7 +5789,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
-=head1 Compile-time scope hooks
+=for apidoc_section Compile-time scope hooks
 
 =for apidoc blockhook_register
 
@@ -6336,7 +6336,7 @@ S_gen_constant_list(pTHX_ OP *o)
 }
 
 /*
-=head1 Optree Manipulation Functions
+=for apidoc_section Optree Manipulation Functions
 */
 
 /* List constructors */
@@ -6508,7 +6508,7 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 
 
 /*
-=head1 Optree construction
+=for apidoc_section Optree construction
 
 =for apidoc newNULLLIST
 
@@ -9022,7 +9022,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 }
 
 /*
-=head1 Optree construction
+=for apidoc_section Optree construction
 
 =for apidoc newSLICEOP
 
@@ -10610,7 +10610,7 @@ static void const_av_xsub(pTHX_ CV* cv);
 
 /*
 
-=head1 Optree Manipulation Functions
+=for apidoc_section Optree Manipulation Functions
 
 =for apidoc cv_const_sv
 
@@ -17982,7 +17982,7 @@ Perl_peep(pTHX_ OP *o)
 }
 
 /*
-=head1 Custom Operators
+=for apidoc_section Custom Operators
 
 =for apidoc Perl_custom_op_xop
 Return the XOP structure for a given custom op.  This macro should be
@@ -18386,7 +18386,7 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
 }
 
 /*
-=head1 Hook manipulation
+=for apidoc_section Hook manipulation
 
 These functions provide convenient and thread-safe means of manipulating
 hook variables.

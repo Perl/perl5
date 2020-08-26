@@ -13,7 +13,7 @@
 #endif
 
 /*
-=head1 SV Flags
+=for apidoc_section SV Flags
 
 =for apidoc AmnU||svtype
 An enum of flags for Perl types.  These are found in the file F<sv.h>

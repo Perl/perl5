@@ -21,7 +21,7 @@
  *
  * It also holds the debugging version of the  runops function.
 
-=head1 Display and Dump functions
+=for apidoc_section Display and Dump functions
  */
 
 #include "EXTERN.h"
