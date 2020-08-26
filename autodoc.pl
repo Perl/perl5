@@ -454,6 +454,9 @@ sub output {
             docout($fh, $function_name, $section_info->{$function_name});
         }
         print $fh "\n=back\n";
+
+        print $fh "\n", $valid_sections{$section_name}{footer}, "\n"
+                            if defined $valid_sections{$section_name}{footer};
     }
 
     if (@$missing) {
