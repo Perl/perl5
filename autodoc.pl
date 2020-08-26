@@ -26,6 +26,7 @@
 # documented at the top of embed.fnc.
 
 use strict;
+use warnings;
 
 if (@ARGV) {
     my $workdir = shift;
