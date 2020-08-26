@@ -6402,10 +6402,10 @@ the C<skip> innermost ones.  C<depth> of 20 is usually enough.
 
 The appended output looks like:
 
-...
-1   10e004812:0082   Perl_croak   util.c:1716    /usr/bin/perl
-2   10df8d6d2:1d72   perl_parse   perl.c:3975    /usr/bin/perl
-...
+ ...
+ 1   10e004812:0082   Perl_croak   util.c:1716    /usr/bin/perl
+ 2   10df8d6d2:1d72   perl_parse   perl.c:3975    /usr/bin/perl
+ ...
 
 The fields are tab-separated.  The first column is the depth (zero
 being the innermost non-skipped frame).  In the hex:offset, the hex is
