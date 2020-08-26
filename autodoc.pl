@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+
+use Text::Tabs;
 #
 # Unconditionally regenerate:
 #
@@ -49,7 +51,83 @@ my %docs;
 my %seen;
 my %funcflags;
 my %missing;
-my %valid_sections;
+my %missing_macros;
+
+my $link_text = "Described in";
+
+my %valid_sections = (
+    'Floating point configuration values' => {
+        header => <<~'EOT',
+            There are a few symbols defined in this section that tell you if a
+            given mathematical library function is available on this platform.
+            But there are many more that are mentioned in
+            L</List of capability C<HAS_I<foo>> symbols>.  For example
+            C<HAS_ASINH>, for the hyperbolic sine function.
+            EOT
+      },
+    'General Configuration' => {
+        header => <<~'EOT',
+            This section contains configuration information not otherwise
+            found in the more specialized sections of this document.  At the
+            end is a list of C<#defines> whose name should be enough to tell
+            you what they do, and a list of #defines which tell you if you
+            need to C<#include> files to get the corresponding functionality.
+            EOT
+
+        footer => <<~'EOT',
+
+            =head2 List of capability C<HAS_I<foo>> symbols
+
+            This is a list of those symbols that indicate if the current
+            platform has a certain capability.  Their names all begin with
+            C<HAS_>.  Only those symbols whose capability is directly derived
+            from the name are listed here.  All others have their meaning
+            expanded out elsewhere in this document.  This (relatively)
+            compact list is because the expansion would add little or no value
+            and take up a lot of space (because there are so many).  Some
+            symbols with easy to derive meanings are instead in the specialized
+            sections of this document to which they belong.
+
+            Each symbol here will be C<#define>d if and only if the platform
+            has the capability.  If you need more detail, see the
+            corresponding entry in F<config.h>.
+
+            __HAS_LIST__
+
+            Example usage:
+
+            =over
+
+             #ifdef HAS_STRNLEN
+               use strnlen()
+             #else
+               use an alternative implementation
+             #endif
+
+            =back
+
+            =head2 List of C<#include> needed symbols
+
+            This list contains symbols that indicate if certain C<#include>
+            files are present on the platform.  If your code accesses the
+            functionality that one of these is for, you will need to
+            C<#include> it if the symbol on this list is C<#define>d.  For
+            more detail, see the corresponding entry in F<config.h>.
+
+            __INCLUDE_LIST__
+
+            Example usage:
+
+            =over
+
+             #ifdef I_WCHAR
+               #include <wchar.h>
+             #endif
+
+            =back
+            EOT
+      },
+);
 
 # Somewhat loose match for an apidoc line so we can catch minor typos.
 # Parentheses are used to capture portions so that below we verify
@@ -298,6 +376,493 @@ sub autodoc ($$) { # parse a file and extract documentation info
     } # End of loop through input
 }
 
+my %configs;
+my @has_defs;
+my @has_r_defs;     # Reentrant symbols
+my @include_defs;
+sub parse_config_h {
+    use re '/aa';   # Everthing is ASCII in this file
+
+    # Process config.h
+    open my $fh, '<', 'config.h' or die "Can't open config.h: $!";
+    while (<$fh>) {
+
+        # Look for lines like /* FOO_BAR:
+        # By convention all config.h descriptions begin like that
+        if (m[ ^ /\* [ ] ( [[:alpha:]] \w+ ) : \s* $ ]ax) {
+            my $name = $1;
+
+            # Here we are starting the description for $name in config.h.  We
+            # accumulate the entire description for it into @description.
+            # Flowing text from one input line to another is appended into the
+            # same array element to make a single flowing line element, but
+            # verbatim lines are kept as separate elements in @description.
+            # This will facilitate later doing pattern matching without regard
+            # to line boundaries on non-verbatim text.
+
+            die "Multiple config.h entries for '$name'"
+                                        if defined $configs{$name}{description};
+
+            # Get first line of description
+            $_ = <$fh>;
+
+            # Each line in the description begins with blanks followed by '/*'
+            # and some spaces.
+            die "Unexpected config.h initial line for $name: '$_'"
+                                            unless s/ ^ ( \s* \* \s* ) //x;
+            my $initial_text = $1;
+
+            # Initialize the description with this first line (after having
+            # stripped the prefix text)
+            my @description = $_;
+
+            # The first line is used as a template for how much indentation
+            # each normal succeeding line has.  Lines indented further
+            # will be considered as intended to be verbatim.  But, empty lines
+            # likely won't have trailing blanks, so just strip the whole thing
+            # for them.
+            my $strip_initial_qr = qr!   \s* \* \s* $
+                                    | \Q$initial_text\E
+                                    !x;
+            $configs{$name}{verbatim} = 0;
+
+            # Read in the remainder of the description
+            while (<$fh>) {
+                last if s| ^ \s* \* / ||x;  # A '*/' ends it
+
+                die "Unexpected config.h description line for $name: '$_'"
+                                                unless s/$strip_initial_qr//;
+
+                # Fix up the few flawed lines in config.h wherein a new
+                # sentence begins with a tab (and maybe a space after that).
+                # Although none of them currently do, let it recognize
+                # something like
+                #
+                #   "... text").  The next sentence ...
+                #
+                s/ ( \w "? \)? \. ) \t \s* ( [[:alpha:]] ) /$1  $2/xg;
+
+                # If this line has extra indentation or looks to have columns,
+                # it should be treated as verbatim.  Columns are indicated by
+                # use of interior: tabs, 3 spaces in a row, or even 2 spaces
+                # not preceded by punctuation.
+                if ($_ !~ m/  ^ \s
+                              | \S (?:                    \t
+                                    |                     \s{3}
+                                    |  (*nlb:[[:punct:]]) \s{2}
+                                   )
+                           /x)
+                {
+                    # But here, is not a verbatim line.  Add an empty line if
+                    # this is the first non-verbatim after a run of verbatims
+                    if ($description[-1] =~ /^\s/) {
+                        push @description, "\n", $_;
+                    }
+                    else {  # Otherwise, append this flowing line to the
+                            # current flowing line
+                        $description[-1] .= $_;
+                    }
+                }
+                else {
+                    $configs{$name}{verbatim} = 1;
+
+                    # The first verbatim line in a run of them is separated by an
+                    # empty line from the flowing lines above it
+                    push @description, "\n" if $description[-1] =~ /^\S/;
+
+                    $_ = Text::Tabs::expand($_);
+
+                    # Only a single space so less likely to wrap
+                    s/ ^ \s* / /x;
+
+                    push @description, $_;
+                }
+            }
+
+            push $configs{$name}{description}->@*, @description
+
+        }   # Not a description; see if it is a macro definition.
+        elsif (m! ^
+                  (?: / \* )?                   # Optional commented-out
+                                                # indication
+                      \# \s* define \s+ ( \w+ ) # $1 is the name
+                  (   \s* )                     # $2 indicates if args or not
+                  (   .*? )                     # $3 is any definition
+                  (?: / \s* \* \* / )?          # Optional trailing /**/ or / **/
+                  $
+                !x)
+        {
+            my $name = $1;
+
+            # There can be multiple definitions for a name.  We want to know
+            # if any of them has arguments, and if any has a body.
+            $configs{$name}{has_args} //= $2 eq "";
+            $configs{$name}{has_args} ||= $2 eq "";
+            $configs{$name}{has_defn} //= $3 ne "";
+            $configs{$name}{has_defn} ||= $3 ne "";
+        }
+    }
+
+    # We now have stored the description and information about every #define
+    # in the file.  The description is in a form convenient to operate on to
+    # convert to pod.  Do that now.
+    foreach my $name (keys %configs) {
+        next unless defined $configs{$name}{description};
+
+        # All adjacent non-verbatim lines of the description are appended
+        # together in a single element in the array.  This allows the patterns
+        # to work across input line boundaries.
+
+        my $pod = "";
+        while (defined ($_ = shift $configs{$name}{description}->@*)) {
+            chomp;
+
+            if (/ ^ \S /x) {  # Don't edit verbatim lines
+
+                # Enclose known file/path names not already so enclosed
+                # with <...>.  (Some entries in config.h are already
+                # '<path/to/file>')
+                my $file_name_qr = qr! [ \w / ]+ \.
+                                    (?: c | h | xs | p [lm] | pmc | PL
+                                        | sh | SH | exe ) \b
+                                    !xx;
+                my $path_name_qr = qr! (?: / \w+ )+ !x;
+                for my $re ($file_name_qr, $path_name_qr) {
+                    s! (*nlb:[ < \w / ]) ( $re ) !<$1>!gxx;
+                }
+
+                # Enclose <... file/path names with F<...> (but no double
+                # angle brackets)
+                for my $re ($file_name_qr, $path_name_qr) {
+                    s! < ( $re ) > !F<$1>!gxx;
+                }
+
+                # Explain metaconfig units
+                s/ ( \w+ \. U \b ) /$1 (part of metaconfig)/gx;
+
+                # Convert "See foo" to "See C<L</foo>>" if foo is described in
+                # this file.  Also create a link to the known file INSTALL.
+                # And, to be more general, handle "See also foo and bar", and
+                # "See also foo, bar, and baz"
+                while (m/ \b [Ss]ee \s+
+                         (?: also \s+ )?    ( \w+ )
+                         (?: ,  \s+         ( \w+ ) )?
+                         (?: ,? \s+ and \s+ ( \w+ ) )? /xg) {
+                    my @links = $1;
+                    push @links, $2 if defined $2;
+                    push @links, $3 if defined $3;
+                    foreach my $link (@links) {
+                        if ($link eq 'INSTALL') {
+                            s/ \b INSTALL \b /C<L<INSTALL>>/xg;
+                        }
+                        elsif (grep { $link =~ / \b $_ \b /x } keys %configs) {
+                            s| \b $link \b |C<L</$link>>|xg;
+                            $configs{$link}{linked} = 1;
+                            $configs{$name}{linked} = 1;
+                        }
+                    }
+                }
+
+                # Enclose what we think are symbols with C<...>.
+                no warnings 'experimental::vlb';
+                s/ (*nlb:<)
+                   (
+                        # Any word followed immediately with parens or
+                        # brackets
+                        \b \w+ (?: \( [^)]* \)    # parameter list
+                                 | \[ [^]]* \]    # or array reference
+                               )
+                    | (*plb: ^ | \s ) -D \w+    # Also -Dsymbols.
+                    | \b (?: struct | union ) \s \w+
+
+                        # Words that contain underscores (which are
+                        # definitely not text) or three uppercase letters in
+                        # a row.  Length two ones, like IV, aren't enclosed,
+                        # because they often don't look as nice.
+                    | \b \w* (?: _ | [[:upper:]]{3,} ) \w* \b
+                   )
+                    (*nla:>)
+                 /C<$1>/xg;
+
+                # These include foo when the name is HAS_foo.  This is a
+                # heuristic which works in most cases.
+                if ($name =~ / ^ HAS_ (.*) /x) {
+                    my $symbol = lc $1;
+
+                    # Don't include path components, nor things already in
+                    # <>, or with trailing '(', '['
+                    s! \b (*nlb:[/<]) $symbol (*nla:[[/>(]) \b !C<$symbol>!xg;
+                }
+            }
+
+            $pod .=  "$_\n";
+        }
+        delete $configs{$name}{description};
+
+        $configs{$name}{pod} = $pod;
+    }
+
+    # Now have converted the description to pod.  We also now have enough
+    # information that we can do cross checking to find definitions without
+    # corresponding pod, and see if they are mentioned in some description;
+    # otherwise they aren't documented.
+  NAME:
+    foreach my $name (keys %configs) {
+
+        # A definition without pod
+        if (! defined $configs{$name}{pod}) {
+
+            # Leading/trailing underscore means internal to config.h, e.g.,
+            # _GNU_SOURCE
+            next if $name =~ / ^ _ /x;
+            next if $name =~ / _ $ /x;
+
+            # MiXeD case names are internal to config.h; the first 4
+            # characters are sufficient to determine this
+            next if $name =~ / ^ [[:upper:]] [[:lower:]]
+                                 [[:upper:]] [[:lower:]]
+                            /x;
+
+            # Here, not internal to config.h.  Look to see if this symbol is
+            # mentioned in the pod of some other.  If so, assume it is
+            # documented.
+            foreach my $check_name (keys %configs) {
+                my $this_element = $configs{$check_name};
+                my $this_pod = $this_element->{pod};
+                if (defined $this_pod) {
+                    next NAME if $this_pod =~ / \b $name \b /x;
+                }
+            }
+
+            warn "$name has no documentation\n";
+            $missing_macros{$name} = 'config.h';
+
+            next;
+        }
+
+        my $has_defn = $configs{$name}{has_defn};
+        my $has_args = $configs{$name}{has_args};
+
+        # Check if any section already has an entry for this element.
+        # If so, it better be a placeholder, in which case we replace it
+        # with this entry.
+        foreach my $section (keys $docs{'api'}->%*) {
+            if (exists $docs{'api'}{$section}{$name}) {
+                my $was = $docs{'api'}{$section}{$name}->{pod};
+                $was = "" unless $was;
+                chomp $was;
+                if ($was ne "" && $was !~ m/$link_text/) {
+                    die "Multiple descriptions for $name\n"
+                        . "$section contained '$was'";
+                }
+                $docs{'api'}{$section}{$name}->{pod} = $configs{$name}{pod};
+                $configs{$name}{section} = $section;
+                last;
+            }
+        }
+
+        my $handled = 0;    # Haven't handled this yet
+
+        if (defined $configs{$name}{'section'}) {
+            # This has been taken care of elsewhere.
+            $handled = 1;
+        }
+        else {
+            if ($has_defn && ! $has_args) {
+                $configs{$name}{args} = 1;
+            }
+
+            # Symbols of the form I_FOO are for #include files.  They have
+            # special usage information
+            if ($name =~ / ^ I_ ( .* ) /x) {
+                my $file = lc $1 . '.h';
+                $configs{$name}{usage} = <<~"EOT";
+                    #ifdef $name
+                        #include <$file>
+                    #endif
+                    EOT
+            }
+
+            # Compute what section this variable should go into.  This
+            # heuristic was determined by manually inspecting the current
+            # things in config.h, and should be adjusted as necessary as
+            # deficiencies are found.
+            #
+            # This is the default section for macros with a definiton but
+            # no arguments, meaning it is replaced unconditionally
+            #
+            my $sb = qr/ _ | \b /x; # segment boundary
+            my $dash_or_spaces = qr/ - | \s+ /x;
+            my $pod = $configs{$name}{pod};
+            if ($name =~ / ^ USE_ /x) {
+                $configs{$name}{'section'} = 'Site configuration';
+            }
+            elsif ($name =~ / SLEEP | (*nlb:SYS_) TIME | TZ | $sb TM $sb /x)
+            {
+                $configs{$name}{'section'} = 'Time';
+            }
+            elsif ($name =~ /  DOUBLE | FLOAT | LONGDBL | LDBL | ^ NV
+                            | $sb CASTFLAGS $sb
+                            | QUADMATH
+                            | $sb (?: IS )? NAN
+                            | $sb (?: IS )? FINITE
+                            /x)
+            {
+                $configs{$name}{'section'} =
+                                    'Floating point configuration values';
+            }
+            elsif ($name =~ / (?: POS | OFF | DIR ) 64 /x) {
+                $configs{$name}{'section'} = 'Filesystem configuration values';
+            }
+            elsif (   $name =~ / $sb (?: BUILTIN | CPP ) $sb | ^ CPP /x
+                   || $configs{$name}{pod} =~ m/ \b align /x)
+            {
+                $configs{$name}{'section'} = 'Compiler and Preprocessor information';
+            }
+            elsif ($name =~ / ^ [IU] [ \d V ]
+                            | ^ INT | SHORT | LONG | QUAD | 64 | 32 /xx)
+            {
+                $configs{$name}{'section'} = 'Integer configuration values';
+            }
+            elsif ($name =~ / $sb t $sb /x) {
+                $configs{$name}{'section'} = 'Typedef names';
+            }
+            elsif (   $name =~ / ^ PERL_ ( PRI | SCN ) | $sb FORMAT $sb /x
+                    && $configs{$name}{pod} =~ m/ \b format \b /ix)
+            {
+                $configs{$name}{'section'} = 'Formats';
+            }
+            elsif ($name =~ / BACKTRACE /x) {
+                $configs{$name}{'section'} = 'Display and Dump functions';
+            }
+            elsif ($name =~ / ALLOC $sb /x) {
+                $configs{$name}{'section'} = 'Memory Management';
+            }
+            elsif (   $name =~ /   STDIO | FCNTL | EOF | FFLUSH
+                                | $sb FILE $sb
+                                | $sb DIR $sb
+                                | $sb LSEEK
+                                | $sb INO $sb
+                                | $sb OPEN
+                                | $sb CLOSE
+                                | ^ DIR
+                                | ^ INO $sb
+                                | DIR $
+                                | FILENAMES
+                                /x
+                    || $configs{$name}{pod} =~ m!  I/O | stdio
+                                                | file \s+ descriptor
+                                                | file \s* system
+                                                | statfs
+                                                !x)
+            {
+                $configs{$name}{'section'} = 'Filesystem configuration values';
+            }
+            elsif ($name =~ / ^ SIG | SIGINFO | signal /ix) {
+                $configs{$name}{'section'} = 'Signals';
+            }
+            elsif ($name =~ / $sb ( PROTO (?: TYPE)? S? ) $sb /x) {
+                $configs{$name}{'section'} = 'Prototype information';
+            }
+            elsif (   $name =~ / ^ LOC_ /x
+                    || $configs{$name}{pod} =~ /full path/i)
+            {
+                $configs{$name}{'section'} = 'Paths to system commands';
+            }
+            elsif ($name =~ / $sb LC_ | LOCALE | langinfo /xi) {
+                $configs{$name}{'section'} = 'Locales';
+            }
+            elsif ($configs{$name}{pod} =~ /  GCC | C99 | C\+\+ /xi) {
+                $configs{$name}{'section'} = 'Compiler and Preprocessor information';
+            }
+            elsif ($name =~ / PASSW (OR)? D | ^ PW | ( PW | GR ) ENT /x)
+            {
+                $configs{$name}{'section'} = 'Password and Group access';
+            }
+            elsif ($name =~ /  SOCKET | $sb SOCK /x) {
+                $configs{$name}{'section'} = 'Sockets configuration values';
+            }
+            elsif (   $name =~ / THREAD | MULTIPLICITY /x
+                    || $configs{$name}{pod} =~ m/ \b pthread /ix)
+            {
+                $configs{$name}{'section'} = 'Concurrency';
+            }
+            elsif ($name =~ /  PERL | ^ PRIV | SITE | ARCH | BIN
+                                | VENDOR | ^ USE
+                            /x)
+            {
+                $configs{$name}{'section'} = 'Site configuration';
+            }
+            elsif (   $pod =~ / \b floating $dash_or_spaces point \b /ix
+                    || $pod =~ / \b (double | single) $dash_or_spaces precision \b /ix
+                    || $pod =~ / \b doubles \b /ix
+                    || $pod =~ / \b (?: a | the | long ) \s+ (?: double | NV ) \b /ix)
+            {
+                $configs{$name}{'section'} =
+                                    'Floating point configuration values';
+            }
+            else {
+                # Above are the specific sections.  The rest go into a
+                # grab-bag of general configuration values.  However, we put
+                # two classes of them into lists of their names, without their
+                # descriptions, when we think that the description doesn't add
+                # any real value.  One list contains the #include variables:
+                # the description is basically boiler plate for each of these.
+                # The other list contains the very many things that are of the
+                # form HAS_foo, and \bfoo\b is contained in its description,
+                # and there is no verbatim text in the pod or links to/from it
+                # (which would add value).  That means that it is likely the
+                # intent of the variable can be gleaned from just its name,
+                # and unlikely the description adds signficant value, so just
+                # listing them suffices.  Giving their descriptions would
+                # expand this pod significantly with little added value.
+                if (   ! $has_defn
+                    && ! $configs{$name}{verbatim}
+                    && ! $configs{$name}{linked})
+                {
+                    if ($name =~ / ^ I_ ( .* ) /x) {
+                        push @include_defs, $name;
+                        next;
+                    }
+                    elsif ($name =~ / ^ HAS_ ( .* ) /x) {
+                        my $canonical_name = $1;
+                        $canonical_name =~ s/_//g;
+
+                        my $canonical_pod = $configs{$name}{pod};
+                        $canonical_pod =~ s/_//g;
+
+                        if ($canonical_pod =~ / \b $canonical_name \b /xi) {
+                            if ($name =~ / $sb R $sb /x) {
+                                push @has_r_defs, $name;
+                            }
+                            else {
+                                push @has_defs, $name;
+                            }
+                            next;
+                        }
+                    }
+                }
+
+                $configs{$name}{'section'} = 'General Configuration';
+            }
+
+            my $section = $configs{$name}{'section'};
+            #die "Internal error: '$section' not in \%valid_sections"
+                            #unless grep { $_ eq $section } keys %valid_sections;
+            my $flags = 'AdmnT';
+            $flags .= 'U' unless defined $configs{$name}{usage};
+            $docs{'api'}{$section}{$name}{flags} = $flags;
+            $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
+            $docs{'api'}{$section}{$name}{ret_type} = "";
+            $docs{'api'}{$section}{$name}{file} = 'config.h';
+            $docs{'api'}{$section}{$name}{usage}
+                = $configs{$name}{usage} if defined $configs{$name}{usage};
+            push $docs{'api'}{$section}{$name}{args}->@*, ();
+            push $docs{'api'}{$section}{$name}{items}->@*, ();
+        }
+    }
+}
+
 sub docout ($$$) { # output the docs for one function
     my($fh, $element_name, $docref) = @_;
 
@@ -357,7 +922,10 @@ sub docout ($$$) { # output the docs for one function
         warn("U and s flags are incompatible") if $flags =~ /s/;
         # nothing
     } else {
-        if ($flags =~ /n/) { # no args
+        if (defined $docref->{usage}) {     # An override of the usage section
+            print $fh "\n", ($docref->{usage} =~ s/^/ /mrg), "\n";
+        }
+        elsif ($flags =~ /n/) { # no args
             warn("$file: $element_name: n flag without m") unless $flags =~ /m/;
             warn("$file: $element_name: n flag but apparently has args") if @args;
             print $fh "\n\t$ret_type\t$element_name";
@@ -526,6 +1094,8 @@ while (my $line = <$fh>) {
 }
 close $fh or die "Error whilst reading MANIFEST: $!";
 
+parse_config_h();
+
 for (sort keys %funcflags) {
     next unless $funcflags{$_}{flags} =~ /d/;
     next if $funcflags{$_}{flags} =~ /h/;
@@ -536,17 +1106,24 @@ foreach (sort keys %missing) {
     warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc";
 }
 
-# walk table providing an array of components in each line to
-# subroutine, printing the result
-
 # List of funcs in the public API that aren't also marked as core-only,
 # experimental nor deprecated.
 my @missing_api = grep $funcflags{$_}{flags} =~ /A/
                     && $funcflags{$_}{flags} !~ /[xD]/
                     && !$docs{api}{$_}, keys %funcflags;
+push @missing_api, keys %missing_macros;
 
 my $other_places = join ", ", map { "L<$_>" } sort sort_helper qw( perlclib perlxs),
                                                                keys %described_elsewhere;
+
+# The S< > makes things less densely packed, hence more readable
+my $has_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @has_defs;
+my $has_r_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @has_r_defs;
+$valid_sections{'General Configuration'}{footer} =~ s/__HAS_LIST__/$has_defs_text/;
+$valid_sections{'General Configuration'}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
+
+my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @include_defs;
+$valid_sections{'General Configuration'}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
 
 output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |=encoding UTF-8
