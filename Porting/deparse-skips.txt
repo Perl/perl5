@@ -121,6 +121,7 @@ uni/variables.t
 ../cpan/autodie/t/kill.t
 ../cpan/autodie/t/lethal.t
 ../cpan/autodie/t/mkdir.t
+../cpan/autodie/t/no-default.t
 ../cpan/autodie/t/open.t
 ../cpan/autodie/t/read.t
 ../cpan/autodie/t/recv.t
