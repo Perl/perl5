@@ -59,13 +59,47 @@ my $description_indent = 4;
 my $usage_indent = 3;   # + initial blank yields 4 total
 
 my %valid_sections = (
+    'AV Handling' => {},
+    'Callback Functions' => {},
+    'Casting' => {},
+    'Character case changing' => {},
+    'Character classification' => {},
+    'Compile-time scope hooks' => {},
+    'Compiler and Preprocessor information' => {},
+    'Compiler directives' => {},
+    'Concurrency' => {},
+    'COP Hint Hashes' => {},
+    'CV Handling' => {},
+    'Custom Operators' => {},
+    'Display and Dump functions' => {},
+    'Embedding and Interpreter Cloning' => {},
+    'Errno' => {},
+    'Exception Handling (simple) Macros' => {},
+    'Filesystem configuration values' => {
+        header => <<~'EOT',
+            Also see L</List of capability HAS_foo symbols>.
+            EOT
+        },
     'Floating point configuration values' => {
         header => <<~'EOT',
-            There are a few symbols defined in this section that tell you if a
-            given mathematical library function is available on this platform.
-            But there are many more that are mentioned in
-            L</List of capability C<HAS_I<foo>> symbols>.  For example
-            C<HAS_ASINH>, for the hyperbolic sine function.
+            Also L</List of capability HAS_foo symbols> lists capabilities
+            that arent in this section.  For example C<HAS_ASINH>, for the
+            hyperbolic sine function.
+            EOT
+        },
+    'Formats' => {
+        header => <<~'EOT',
+            These are used for formatting the corresponding type For example,
+            instead of saying
+
+             Perl_newSVpvf(pTHX_ "Create an SV with a %d in it\n", iv);
+
+            use
+
+             Perl_newSVpvf(pTHX_ "Create an SV with a " IVdf " in it\n", iv);
+
+            This keeps you from having to know if, say an IV, needs to be
+            printed as C<%d>, C<%ld>, or something else.
             EOT
       },
     'General Configuration' => {
@@ -81,21 +115,28 @@ my %valid_sections = (
 
             =head2 List of capability C<HAS_I<foo>> symbols
 
-            This is a list of those symbols that indicate if the current
-            platform has a certain capability.  Their names all begin with
-            C<HAS_>.  Only those symbols whose capability is directly derived
-            from the name are listed here.  All others have their meaning
-            expanded out elsewhere in this document.  This (relatively)
-            compact list is because the expansion would add little or no value
-            and take up a lot of space (because there are so many).  Some
-            symbols with easy to derive meanings are instead in the specialized
-            sections of this document to which they belong.
+            This is a list of those symbols that dont appear elsewhere in ths
+            document that indicate if the current platform has a certain
+            capability.  Their names all begin with C<HAS_>.  Only those
+            symbols whose capability is directly derived from the name are
+            listed here.  All others have their meaning expanded out elsewhere
+            in this document.  This (relatively) compact list is because we
+            think that the expansion would add little or no value and take up
+            a lot of space (because there are so many).  If you think certain
+            ones should be expanded, send email to
+            L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
 
             Each symbol here will be C<#define>d if and only if the platform
             has the capability.  If you need more detail, see the
-            corresponding entry in F<config.h>.
+            corresponding entry in F<config.h>.  For convenience, the list is
+            split so that the ones that indicate there is a reentrant version
+            of a capability are listed separately
 
             __HAS_LIST__
+
+            And, the reentrant capabilities:
+
+            __HAS_R_LIST__
 
             Example usage:
 
@@ -130,6 +171,53 @@ my %valid_sections = (
             =back
             EOT
       },
+    'Global Variables' => {},
+    'GV Handling' => {},
+    'Hook manipulation' => {},
+    'HV Handling' => {},
+    'Input/Output' => {},
+    'Integer configuration values' => {},
+    'Lexer interface' => {},
+    'Locales' => {},
+    'Magic' => {},
+    'Memory Management' => {},
+    'MRO' => {},
+    'Multicall Functions' => {},
+    'Numeric Functions' => {},
+    'Optree construction' => {},
+    'Optree Manipulation Functions' => {},
+    'Pack and Unpack' => {},
+    'Pad Data Structures' => {},
+    'Password and Group access' => {},
+    'Paths to system commands' => {},
+    'Per-Interpreter Variables' => {},
+    'Prototype information' => {},
+    'REGEXP Functions' => {},
+    'Signals' => {},
+    'Site configuration' => {
+        header => <<~'EOT',
+            These variables give details as to where various libraries,
+            installation destinations, I<etc.>, go, as well as what various
+            installation options were selected
+            EOT
+      },
+    'Sockets configuration values' => {},
+    'Source Filters' => {},
+    'Stack Manipulation Macros' => {},
+    'String Handling' => {
+        header => <<~'EOT',
+            See also C<L</Unicode Support>>.
+            EOT
+      },
+    'SV Flags' => {},
+    'SV Handling' => {},
+    'Time' => {},
+    'Typedef names' => {},
+    'Unicode Support' => {},
+    'Utility Functions' => {},
+    'Versioning' => {},
+    'Warning and Dieing' => {},
+    'XS' => {},
 );
 
 # Somewhat loose match for an apidoc line so we can catch minor typos.
@@ -207,6 +295,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
         if ($in=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
 
             $section = $1;
+            die "Unknown section name '$section' in $file near line $.\n"
+                                    unless defined $valid_sections{$section};
+
         }
         elsif ($in=~ /^ =for [ ]+ apidoc \B /x) {   # Otherwise better be a
                                                     # plain apidoc line
@@ -853,8 +944,8 @@ sub parse_config_h {
             }
 
             my $section = $configs{$name}{'section'};
-            #die "Internal error: '$section' not in \%valid_sections"
-                            #unless grep { $_ eq $section } keys %valid_sections;
+            die "Internal error: '$section' not in \%valid_sections"
+                            unless grep { $_ eq $section } keys %valid_sections;
             my $flags = 'AdmnT';
             $flags .= 'U' unless defined $configs{$name}{usage};
             $docs{'api'}{$section}{$name}{flags} = $flags;
@@ -1288,13 +1379,14 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |to be documented.  Patches welcome!  The interfaces of these are subject to
 |change without notice.
 |
-|The sections in this document are
-|
-|=over
-
-|$section_list
-|
-|=back
+|Some of the functions documented here are consolidated so that a single entry
+|serves for multiple functions which all do basically the same thing, but have
+|some slight differences.  For example, one form might process magic, while
+|another doesn't.  The name of each variation is listed at the top of the
+|single entry.  But if all have the same signature (arguments and return type)
+|except for their names, only the usage for the base form is shown.  If any
+|one of the forms has a different signature (such as returning C<const> or
+|not) every function's signature is explicitly displayed.
 |
 |Anything not listed here or in the other mentioned pods is not part of the
 |public API, and should not be used by extension writers at all.  For these
@@ -1337,6 +1429,18 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |But the ordinals of characters differ between ASCII, EBCDIC, and
 |the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy a different
 |number of bytes than in UTF-8.
+|
+|The organization of this document is tentative and subject to change.
+|Suggestions and patches welcome
+|L<perl5-porters\@perl.org|mailto:perl5-porters\@perl.org>.
+|
+|The sections in this document currently are
+|
+|=over
+
+|$section_list
+|
+|=back
 |
 |The listing below is alphabetical, case insensitive.
 _EOB_
