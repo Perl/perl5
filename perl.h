@@ -405,7 +405,25 @@ Now a no-op.
  * marking unused variables (they need e.g. a #pragma) and therefore
  * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
  * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
- *
+
+=for apidoc_section Compiler directives
+=for apidoc AmnU||PERL_UNUSED_DECL
+Tells the compiler that the parameter in the function prototype just before it
+is not necessarily expected to be used in the function.  Not that many
+compilers understand this, so this should only be used in cases where
+C<L</PERL_UNUSED_ARG>> can't conveniently be used.
+
+Example usage:
+
+=over
+
+ Signal_t
+ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
+                       void *uap PERL_UNUSED_DECL, bool safe)
+
+=back
+
+=cut
  */
 
 #ifndef PERL_UNUSED_DECL
