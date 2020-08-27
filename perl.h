@@ -2109,6 +2109,14 @@ typedef UVTYPE UV;
 #  define PTR2ul(p)	INT2PTR(unsigned long,p)	
 #endif
 
+/*
+=for apidoc_section Casting
+=for apidoc Cyh|type|NUM2PTR|type|int value
+You probably want to be using L<C</INT2PTR>> instead.
+
+=cut
+*/
+
 #define NUM2PTR(any,d)	(any)(PTRV)(d)
 #define PTR2IV(p)	INT2PTR(IV,p)
 #define PTR2UV(p)	INT2PTR(UV,p)
