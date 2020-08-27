@@ -1314,7 +1314,7 @@ PERL_CALLCONV GV*	Perl_gv_fetchmethod_pvn_flags(pTHX_ HV* stash, const char* nam
 PERL_CALLCONV GV*	Perl_gv_fetchmethod_sv_flags(pTHX_ HV* stash, SV* namesv, U32 flags);
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_FLAGS	\
 	assert(stash); assert(namesv)
-PERL_CALLCONV GV*	Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type);
+PERL_CALLCONV GV*	Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 flags, const svtype sv_type);
 #define PERL_ARGS_ASSERT_GV_FETCHPV	\
 	assert(nambeg)
 PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, const svtype sv_type);

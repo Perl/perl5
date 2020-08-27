@@ -1607,9 +1607,9 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
 
 
 GV *
-Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type) {
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 flags, const svtype sv_type) {
     PERL_ARGS_ASSERT_GV_FETCHPV;
-    return gv_fetchpvn_flags(nambeg, strlen(nambeg), add, sv_type);
+    return gv_fetchpvn_flags(nambeg, strlen(nambeg), flags, sv_type);
 }
 
 GV *

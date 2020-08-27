@@ -442,10 +442,11 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define savesharedpvs(str) Perl_savesharedpvn(aTHX_ STR_WITH_LEN(str))
 #define gv_stashpvs(str, create) \
     Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
-#define gv_fetchpvs(namebeg, add, sv_type) \
-    Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), add, sv_type)
-#define gv_fetchpvn(namebeg, len, add, sv_type) \
-    Perl_gv_fetchpvn_flags(aTHX_ namebeg, len, add, sv_type)
+
+#define gv_fetchpvs(namebeg, flags, sv_type) \
+    Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), flags, sv_type)
+#define gv_fetchpvn(namebeg, len, flags, sv_type) \
+    Perl_gv_fetchpvn_flags(aTHX_ namebeg, len, flags, sv_type)
 #define sv_catxmlpvs(dsv, str, utf8) \
     Perl_sv_catxmlpvn(aTHX_ dsv, STR_WITH_LEN(str), utf8)
 

@@ -970,7 +970,7 @@ Apx	|GV*	|gv_fetchmethod_pv_flags|NN HV* stash|NN const char* name \
 				|U32 flags
 Apx	|GV*	|gv_fetchmethod_pvn_flags|NN HV* stash|NN const char* name \
 				|const STRLEN len|U32 flags
-Ap	|GV*	|gv_fetchpv	|NN const char *nambeg|I32 add|const svtype sv_type
+Ap	|GV*	|gv_fetchpv	|NN const char *nambeg|I32 flags|const svtype sv_type
 AbpD	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
 ApMb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
