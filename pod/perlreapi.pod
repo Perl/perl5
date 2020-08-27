@@ -821,7 +821,7 @@ purposes when embedding compiled regexes into larger patterns with C<qr//>.
 
 The number of times the structure is referenced.  When
 this falls to 0, the regexp is automatically freed
-by a call to pregfree.  This should be set to 1 in
+by a call to C<pregfree>.  This should be set to 1 in
 each engine's L</comp> routine.
 
 =head1 HISTORY
