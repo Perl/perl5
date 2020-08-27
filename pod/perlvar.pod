@@ -1905,8 +1905,9 @@ corresponding to C<errno>.
 
 Many system or library calls set C<errno> if they fail,
 to indicate the cause of failure.  They usually do B<not>
-set C<errno> to zero if they succeed.  This means C<errno>,
-hence C<$!>, is meaningful only I<immediately> after a B<failure>:
+set C<errno> to zero if they succeed and may set C<errno> to a
+non-zero value on success.  This means C<errno>, hence C<$!>, is
+meaningful only I<immediately> after a B<failure>:
 
     if (open my $fh, "<", $filename) {
 		# Here $! is meaningless.
