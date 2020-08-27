@@ -435,18 +435,18 @@ Example usage:
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs,
  * or variables/arguments that are used only in certain configurations.
 
-=for apidoc Am||PERL_UNUSED_ARG|void x
+=for apidoc Ams||PERL_UNUSED_ARG|void x
 This is used to suppress compiler warnings that a parameter to a function is
 not used.  This situation can arise, for example, when a parameter is needed
 under some configuration conditions, but not others, so that C preprocessor
 conditional compilation causes it be used just some times.
 
-=for apidoc Amn||PERL_UNUSED_CONTEXT
+=for apidoc Amns||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
 a function is not used.  This situation can arise, for example, when a
 C preprocessor conditional compilation causes it be used just some times.
 
-=for apidoc Am||PERL_UNUSED_VAR|void x
+=for apidoc Ams||PERL_UNUSED_VAR|void x
 This is used to suppress compiler warnings that the variable I<x> is not used.
 This situation can arise, for example, when a C preprocessor conditional
 compilation causes it be used just some times.
