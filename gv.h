@@ -78,6 +78,13 @@ struct gp {
 
 Return the SV from the GV.
 
+Prior to Perl v5.9.3, this would add a scalar if none existed.  Nowadays, use
+C<L</GvSVn>> for that, or compile perl with S<C<-DPERL_CREATE_GVSV>>.  See
+L<perl5100delta>.
+
+=for apidoc Am|SV*|GvSVn|GV* gv
+Like C<L</GvSV>>, but creates an empty scalar if none already exists.
+
 =for apidoc Am|AV*|GvAV|GV* gv
 
 Return the AV from the GV.
