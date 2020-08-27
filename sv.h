@@ -1915,6 +1915,12 @@ scalar.
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
 	((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
+/*
+=for apidoc Am|struct hek*|SvSHARED_HASH|SV * sv
+Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
+
+=cut
+*/
 #define SvSHARED_HASH(sv) (0 + SvSHARED_HEK_FROM_PV(SvPVX_const(sv))->hek_hash)
 
 /* flag values for sv_*_flags functions */
