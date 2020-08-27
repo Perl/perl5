@@ -9457,7 +9457,7 @@ created first.  Turns on the C<SvIsCOW> flag (or C<READONLY>
 and C<FAKE> in 5.16 and earlier).  If the C<hash> parameter
 is non-zero, that value is used; otherwise the hash is computed.
 The string's hash can later be retrieved from the SV
-with the C<SvSHARED_HASH()> macro.  The idea here is
+with the C<L</SvSHARED_HASH>> macro.  The idea here is
 that as the string table is used for shared hash keys these strings will have
 C<SvPVX_const == HeKEY> and hash lookup will avoid string compare.
 
