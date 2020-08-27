@@ -1044,9 +1044,31 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
-/* macros for correct constant construction.  These are in C99 <stdint.h>
+/* Macros for correct constant construction.  These are in C99 <stdint.h>
  * (so they will not be available in strict C89 mode), but they are nice, so
- * let's define them if necessary. */
+ * let's define them if necessary.
+=for apidoc_section Integer configuration values
+=for apidoc    Am|I16|INT16_C|number
+=for apidoc_item |I32|INT32_C|number
+=for apidoc_item |I64|INT64_C|number
+
+Returns a token the C compiler recognizes for the constant C<number> of the
+corresponding integer type on the machine.
+
+If the machine does not have a 64-bit type, C<INT64_C> is undefined.
+
+=for apidoc    Am|U16|UINT16_C|number
+=for apidoc_item |U32|UINT32_C|number
+=for apidoc_item |U64|UINT64_C|number
+
+Returns a token the C compiler recognizes for the constant C<number> of the
+corresponding unsigned integer type on the machine.
+
+If the machine does not have a 64-bit type, C<UINT64_C> is undefined.
+
+
+=cut
+*/
 #ifndef UINT16_C
 #  if INTSIZE >= 2
 #    define UINT16_C(x) ((U16_TYPE)x##U)
