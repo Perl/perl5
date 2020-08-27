@@ -1371,7 +1371,7 @@ ApdD	|U32	|mg_length	|NN SV* sv
 ApdT	|void	|mg_magical	|NN SV* sv
 Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
-ApT	|void	|mini_mktime	|NN struct tm *ptm
+AdpT	|void	|mini_mktime	|NN struct tm *ptm
 Axmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
 poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 pd	|void	|finalize_optree		|NN OP* o

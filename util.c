@@ -3802,8 +3802,12 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 }
 
 /*
- * mini_mktime - normalise struct tm values without the localtime()
- * semantics (and overhead) of mktime().
+=for apidoc_section Time
+=for apidoc mini_mktime
+normalise S<C<struct tm>> values without the localtime() semantics (and
+overhead) of mktime().
+
+=cut
  */
 void
 Perl_mini_mktime(struct tm *ptm)
