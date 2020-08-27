@@ -21,7 +21,7 @@
 
 /*
 =head1 GV Handling and Stashes
-A GV is a structure which corresponds to a Perl typeglob, ie *foo.
+A GV is a structure which corresponds to a Perl typeglob, I<i.e.>, *foo.
 It is a structure that holds a pointer to a scalar, an array, a hash etc,
 corresponding to $foo, @foo, %foo.
 

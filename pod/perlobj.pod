@@ -163,7 +163,7 @@ object.
 You will sometimes see older books or documentation mention "blessing a
 reference" or describe an object as a "blessed reference", but this is
 incorrect. It isn't the reference that is blessed as an object; it's
-the thing the reference refers to (i.e. the referent).
+the thing the reference refers to (I<i.e.>, the referent).
 
 =head2 A Class is Simply a Package
 X<class> X<package> X<@ISA> X<inheritance>
@@ -364,7 +364,7 @@ In this example, we will get the following output:
 This demonstrates how C<SUPER> is resolved. Even though the object is
 blessed into the C<C> class, the C<speak()> method in the C<B> class
 can still call C<SUPER::speak()> and expect it to correctly look in the
-parent class of C<B> (i.e the class the method call is in), not in the
+parent class of C<B> (I<i.e.>, the class the method call is in), not in the
 parent class of C<C> (i.e. the class the object belongs to).
 
 There are rare cases where this package-based resolution can be a
