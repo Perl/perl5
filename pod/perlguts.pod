@@ -2795,6 +2795,7 @@ following macros for portability
 =for apidoc Amnh||UVuf
 =for apidoc Amnh||UVof
 =for apidoc Amnh||UVxf
+=for apidoc Amnh||UVXf
 =for apidoc Amnh||NVef
 =for apidoc Amnh||NVff
 =for apidoc Amnh||NVgf
