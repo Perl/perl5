@@ -500,6 +500,11 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 /*
 =for apidoc_section Versioning
 =for apidoc AmR|bool|PERL_VERSION_EQ|const U8 major|const U8 minor|const U8 patch
+=for apidoc_item PERL_VERSION_NE
+=for apidoc_item PERL_VERSION_LT
+=for apidoc_item PERL_VERSION_LE
+=for apidoc_item PERL_VERSION_GT
+=for apidoc_item PERL_VERSION_GE
 
 Returns whether or not the perl currently being compiled has the specified
 relationship to the perl given by the parameters.  For example,
@@ -511,10 +516,6 @@ relationship to the perl given by the parameters.  For example,
  #endif
 
 Note that this is usable in making compile-time decisions
-
-The possible comparisons are C<PERL_VERSION_EQ>, C<PERL_VERSION_NE>,
-C<PERL_VERSION_GE>, C<PERL_VERSION_GT>, C<PERL_VERSION_LE>, and
-C<PERL_VERSION_LT>.
 
 You may use the special value '*' for the final number to mean ALL possible
 values for it.  Thus,
@@ -541,12 +542,6 @@ deprecated C<PERL_VERSION> to using this macro:
 becomes
 
  #if PERL_VERSION_LE(5,9,'*')
-
-=for apidoc AmRh|bool|PERL_VERSION_NE|const U8 major|const U8 minor|const U8 patch
-=for apidoc AmRh|bool|PERL_VERSION_GE|const U8 major|const U8 minor|const U8 patch
-=for apidoc AmRh|bool|PERL_VERSION_GT|const U8 major|const U8 minor|const U8 patch
-=for apidoc AmRh|bool|PERL_VERSION_LE|const U8 major|const U8 minor|const U8 patch
-=for apidoc AmRh|bool|PERL_VERSION_LT|const U8 major|const U8 minor|const U8 patch
 
 =cut
 */
