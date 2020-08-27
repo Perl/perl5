@@ -123,7 +123,13 @@ S_maybe_protect_ro(pTHX_ struct perl_memory_debug_header *header)
 # endif
 #endif
 
-/* paranoid version of system's malloc() */
+/*
+=for apidoc_section $memory
+=for apidoc safesysmalloc
+Paranoid version of system's malloc()
+
+=cut
+*/
 
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
@@ -207,7 +213,12 @@ Perl_safesysmalloc(MEM_SIZE size)
     return ptr;
 }
 
-/* paranoid version of system's realloc() */
+/*
+=for apidoc safesysrealloc
+Paranoid version of system's realloc()
+
+=cut
+*/
 
 Malloc_t
 Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
@@ -336,7 +347,12 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     return ptr;
 }
 
-/* safe version of system's free() */
+/*
+=for apidoc safesysfree
+Safe version of system's free()
+
+=cut
+*/
 
 Free_t
 Perl_safesysfree(Malloc_t where)
@@ -401,7 +417,12 @@ Perl_safesysfree(Malloc_t where)
     }
 }
 
-/* safe version of system's calloc() */
+/*
+=for apidoc safesyscalloc
+Safe version of system's calloc()
+
+=cut
+*/
 
 Malloc_t
 Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
