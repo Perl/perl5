@@ -3681,12 +3681,12 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 /*
 =for apidoc_section Compiler directives
 
-=for apidoc AmU|bool|LIKELY|const bool expr
+=for apidoc Am||LIKELY|bool expr
 
 Returns the input unchanged, but at the same time it gives a branch prediction
 hint to the compiler that this condition is likely to be true.
 
-=for apidoc AmU|bool|UNLIKELY|const bool expr
+=for apidoc Am||UNLIKELY|bool expr
 
 Returns the input unchanged, but at the same time it gives a branch prediction
 hint to the compiler that this condition is likely to be false.
