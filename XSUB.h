@@ -60,6 +60,10 @@ symbols unnecessarily.
 =for apidoc AmU||XS_EXTERNAL
 Macro to declare an XSUB and its C parameter list explicitly exporting the symbols.
 
+=for apidoc AmU||XSPROTO
+Macro used by C<L</XS_INTERNAL>> and C<L</XS_EXTERNAL>> to declare a function
+prototype.  You probably shouldn't be using this directly yourself.
+
 =for apidoc Amns||dAX
 Sets up the C<ax> variable.
 This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
