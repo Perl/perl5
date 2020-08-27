@@ -2524,12 +2524,12 @@ match takes a long time to finish.
 
 A powerful tool for optimizing such beasts is what is known as an
 "independent group",
-which does not backtrack (see L</C<< (?>pattern) >>>).  Note also that
+which does not backtrack (see C<L</(?E<gt>pattern)>>).  Note also that
 zero-length lookahead/lookbehind assertions will not backtrack to make
 the tail match, since they are in "logical" context: only
 whether they match is considered relevant.  For an example
 where side-effects of lookahead I<might> have influenced the
-following match, see L</C<< (?>pattern) >>>.
+following match, see C<L</(?E<gt>pattern)>>.
 
 =head2 Script Runs
 X<(*script_run:...)> X<(sr:...)>
