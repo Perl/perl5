@@ -305,7 +305,7 @@ typedef U64TYPE U64;
 
 /*
 =for apidoc_section Compiler directives
-=for apidoc Am|void|__ASSERT_|bool expr
+=for apidoc Am||__ASSERT_|bool expr
 
 This is a helper macro to avoid preprocessor issues, replaced by nothing
 unless under DEBUGGING, where it expands to an assert of its argument,
