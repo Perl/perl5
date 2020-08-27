@@ -3418,7 +3418,7 @@ Apd	|CV*	|cv_clone	|NN CV* proto
 p	|CV*	|cv_clone_into	|NN CV* proto|NN CV *target
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
-ApbdRM	|HV*	|pad_compname_type|const PADOFFSET po
+ApbdDR	|HV*	|pad_compname_type|const PADOFFSET po
 AxpdRT	|PADNAME *|padnamelist_fetch|NN PADNAMELIST *pnl|SSize_t key
 Xop	|void	|padnamelist_free|NN PADNAMELIST *pnl
 Axpd	|PADNAME **|padnamelist_store|NN PADNAMELIST *pnl|SSize_t key \

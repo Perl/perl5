@@ -2625,6 +2625,7 @@ PERL_CALLCONV void	Perl_pad_block_start(pTHX_ int full);
 #define PERL_ARGS_ASSERT_PAD_BLOCK_START
 #ifndef NO_MATHOMS
 PERL_CALLCONV HV*	Perl_pad_compname_type(pTHX_ const PADOFFSET po)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_PAD_COMPNAME_TYPE
 #endif

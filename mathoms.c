@@ -1261,6 +1261,8 @@ Looks up the type of the lexical variable at position C<po> in the
 currently-compiling pad.  If the variable is typed, the stash of the
 class to which it is typed is returned.  If not, C<NULL> is returned.
 
+Use L<perlintern/C<PAD_COMPNAME_TYPE>> instead.
+
 =cut
 */
 
