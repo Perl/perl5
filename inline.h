@@ -59,6 +59,13 @@ Perl_av_count(pTHX_ AV *av)
 
 /* ------------------------------- cv.h ------------------------------- */
 
+/*
+=for apidoc_section CV Handling
+=for apidoc CvGV
+Returns the GV associated with the CV C<sv>, reifying it if necessary.
+
+=cut
+*/
 PERL_STATIC_INLINE GV *
 Perl_CvGV(pTHX_ CV *sv)
 {
