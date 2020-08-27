@@ -1215,6 +1215,7 @@ The first code point of the uppercased version is returned
 changing>, that there may be more.)
 
 =for apidoc Am|UV|toUPPER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
+=for apidoc_item toUPPER_utf8_safe
 Converts the first UTF-8 encoded character in the sequence starting at C<p> and
 extending no further than S<C<e - 1>> to its uppercase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
@@ -1231,8 +1232,7 @@ the UTF-8 for the input character is malformed in some way, the program may
 croak, or the function may return the REPLACEMENT CHARACTER, at the discretion
 of the implementation, and subject to change in future releases.
 
-=for apidoc Am|UV|toUPPER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
-Same as L</toUPPER_utf8>.
+C<toUPPER_utf8_safe> is now just a different spelling of plain C<toUPPER_utf8>
 
 =for apidoc Am|U8|toFOLD|U8 ch
 Converts the specified character to foldcase.  If the input is anything but an
@@ -1252,6 +1252,7 @@ The first code point of the foldcased version is returned
 changing>, that there may be more).
 
 =for apidoc Am|UV|toFOLD_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
+=for apidoc_item toFOLD_utf8_safe
 Converts the first UTF-8 encoded character in the sequence starting at C<p> and
 extending no further than S<C<e - 1>> to its foldcase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
@@ -1269,8 +1270,7 @@ input character is malformed in some way, the program may croak, or the
 function may return the REPLACEMENT CHARACTER, at the discretion of the
 implementation, and subject to change in future releases.
 
-=for apidoc Am|UV|toFOLD_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
-Same as L</toFOLD_utf8>.
+C<toFOLD_utf8_safe> is now just a different spelling of plain C<toFOLD_utf8>
 
 =for apidoc Am|U8|toLOWER|U8 ch
 Converts the specified character to lowercase.  If the input is anything but an
@@ -1297,6 +1297,7 @@ The first code point of the lowercased version is returned
 changing>, that there may be more).
 
 =for apidoc Am|UV|toLOWER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
+=for apidoc_item toLOWER_utf8_safe
 Converts the first UTF-8 encoded character in the sequence starting at C<p> and
 extending no further than S<C<e - 1>> to its lowercase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
@@ -1312,8 +1313,7 @@ the UTF-8 for the input character is malformed in some way, the program may
 croak, or the function may return the REPLACEMENT CHARACTER, at the discretion
 of the implementation, and subject to change in future releases.
 
-=for apidoc Am|UV|toLOWER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
-Same as L</toLOWER_utf8>.
+C<toLOWER_utf8_safe> is now just a different spelling of plain C<toLOWER_utf8>
 
 =for apidoc Am|U8|toTITLE|U8 ch
 Converts the specified character to titlecase.  If the input is anything but an
@@ -1334,7 +1334,8 @@ The first code point of the titlecased version is returned
 changing>, that there may be more).
 
 =for apidoc Am|UV|toTITLE_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
-Converts the first UTF-8 encoded character in the sequence starting at C<p> and
+=for apidoc_item toTITLE_utf8_safe
+Convert the first UTF-8 encoded character in the sequence starting at C<p> and
 extending no further than S<C<e - 1>> to its titlecase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
@@ -1351,8 +1352,7 @@ input character is malformed in some way, the program may croak, or the
 function may return the REPLACEMENT CHARACTER, at the discretion of the
 implementation, and subject to change in future releases.
 
-=for apidoc Am|UV|toTITLE_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
-Same as L</toTITLE_utf8>.
+C<toTITLE_utf8_safe> is now just a different spelling of plain C<toTITLE_utf8>
 
 =cut
 
