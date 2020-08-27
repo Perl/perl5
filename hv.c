@@ -842,7 +842,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
      * reset the iterator randomizer if there is one.
      */
     in_collision = *oentry != NULL;
-    if ( *oentry && PL_HASH_RAND_BITS_ENABLED) {
+    if ( *oentry && PL_HASH_RAND_BITS_ENABLED == 1 ) {
         PL_hash_rand_bits++;
         PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
         if ( PL_hash_rand_bits & 1 ) {

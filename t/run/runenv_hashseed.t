@@ -19,7 +19,6 @@ skip_all("NO_PERL_HASH_ENV or NO_PERL_HASH_SEED_DEBUG set")
 
 plan tests => 12;
 
-our $TODO;
 # Test that PERL_PERTURB_KEYS works as expected.  We check that we get the same
 # results if we use PERL_PERTURB_KEYS = 0 or 2 and we reuse the seed from previous run.
 my @print_keys = ( '-e', 'my %h; @h{"A".."Z", "a".."z"}=(); print keys %h' );
@@ -41,13 +40,7 @@ for my $mode (qw{NO RANDOM DETERMINISTIC}) {    # 0, 1 and 2 respectively
                     "PERL_PERTURB_KEYS = $mode results in different key order with the same key"
                 );
             }
-            elsif ( $mode eq 'NO' ) {
-                is( $out, $out2,
-                    "PERL_PERTURB_KEYS = $mode allows one to recreate a random hash"
-                );
-            }
-            elsif ( $mode eq 'DETERMINISTIC' ) {
-                local $TODO = q[This test is flapping when using PERL_PERTURB_KEYS=DETERMINISTIC];
+            else {
                 is( $out, $out2,
                     "PERL_PERTURB_KEYS = $mode allows one to recreate a random hash"
                 );
