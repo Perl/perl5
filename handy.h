@@ -68,13 +68,29 @@ from it, and are very unlikely to change
 #define TRUE (1)
 #define FALSE (0)
 
-/* The MUTABLE_*() macros cast pointers to the types shown, in such a way
- * (compiler permitting) that casting away const-ness will give a warning;
- * e.g.:
- *
- * const SV *sv = ...;
- * AV *av1 = (AV*)sv;        <== BAD:  the const has been silently cast away
- * AV *av2 = MUTABLE_AV(sv); <== GOOD: it may warn
+/*
+=for apidoc_section SV Handling
+=for apidoc Am|void *|MUTABLE_PTR|void * p
+=for apidoc_item |AV *|MUTABLE_AV|AV * p
+=for apidoc_item |CV *|MUTABLE_CV|CV * p
+=for apidoc_item |GV *|MUTABLE_GV|GV * p
+=for apidoc_item |HV *|MUTABLE_HV|HV * p
+=for apidoc_item |IO *|MUTABLE_IO|IO * p
+=for apidoc_item |SV *|MUTABLE_SV|SV * p
+
+The C<MUTABLE_I<*>>() macros cast pointers to the types shown, in such a way
+(compiler permitting) that casting away const-ness will give a warning;
+e.g.:
+
+ const SV *sv = ...;
+ AV *av1 = (AV*)sv;        <== BAD:  the const has been silently
+                                     cast away
+ AV *av2 = MUTABLE_AV(sv); <== GOOD: it may warn
+
+C<MUTABLE_PTR> is the base macro used to derive new casts.  The other ones already
+built in return pointers to what their names indicate.
+
+=cut
  */
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
