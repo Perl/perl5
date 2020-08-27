@@ -634,26 +634,39 @@ __typeof__ and nothing else.
 /*
 =for apidoc_section Compiler directives
 =for apidoc AmnUu|void|STMT_START
+=for apidoc_item ||STMT_END
 
- STMT_START { statements; } STMT_END;
+This allows a series of statements in a macro to be used as a single statement,
+as in
 
-can be used as a single statement, as in
+ if (x) STMT_START { ... } STMT_END else ...
 
- if (x) STMT_START { ... } STMT_END; else ...
-
-These are often used in macro definitions.  Note that you can't return a value
-out of them.
-
-=for apidoc AmnUhu|void|STMT_END
+Note that you can't return a value out of them, which limits their utility.
+But see C<L</PERL_USE_GCC_BRACE_GROUPS>>.
 
 =for apidoc AmnuU|bool|PERL_USE_GCC_BRACE_GROUPS
 
 This C pre-processor value, if defined, indicates that it is permissible to use
-the GCC brace groups extension.  This extension is of the form C<({
-I<STATEMENTS> })>, and turns the block consisting of I<STATEMENTS> into an
-expression with a value, unlike plain C language blocks.  This can present
-optimization possibilities, but there always needs to be an alternative in case
-this ability doesn't exist or has otherwise been forbidden.
+the GCC brace groups extension.  This extension, of the form
+
+ ({ statement ... })
+
+turns the block consisting of I<statements ...> into an expression with a
+value, unlike plain C language blocks.  This can present optimization
+possibilities, B<BUT> you generally need to specify an alternative in case this
+ability doesn't exist or has otherwise been forbidden.
+
+Example usage:
+
+=over
+
+ #ifdef PERL_USE_GCC_BRACE_GROUPS
+   ...
+ #else
+   ...
+ #endif
+
+=back
 
 =cut
 
