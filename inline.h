@@ -1962,15 +1962,17 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 
     PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV;
 
-#  if  defined(Perl_isnan)
-
+#  if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+    /* Normally any comparison with a NaN returns false; if we can't rely
+     * on that behaviour, check explicitly */
     if (UNLIKELY(Perl_isnan(nv))) {
         return FALSE;
     }
-
 #  endif
 
-    if (UNLIKELY(nv < IV_MIN) || UNLIKELY(nv > IV_MAX)) {
+    /* Written this way so that with an always-false NaN comparison we
+     * return false */
+    if (!(LIKELY(nv >= IV_MIN) && LIKELY(nv <= IV_MAX))) {
         return FALSE;
     }
 
