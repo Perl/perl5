@@ -4142,6 +4142,21 @@ my_swap16(const U16 x) {
 /* This may look like unnecessary jumping through hoops, but converting
    out of range floating point values to integers *is* undefined behaviour,
    and it is starting to bite.
+
+=for apidoc_section Casting
+=for apidoc Am|I32|I_32|NV what
+Cast an NV to I32 while avoiding undefined C behavior
+
+=for apidoc Am|U32|U_32|NV what
+Cast an NV to U32 while avoiding undefined C behavior
+
+=for apidoc Am|IV|I_V|NV what
+Cast an NV to IV while avoiding undefined C behavior
+
+=for apidoc Am|UV|U_V|NV what
+Cast an NV to UV while avoiding undefined C behavior
+
+=cut
 */
 #ifndef CAST_INLINE
 #define I_32(what) (cast_i32((NV)(what)))
