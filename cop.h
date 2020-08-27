@@ -1111,11 +1111,20 @@ typedef struct stackinfo PERL_SI;
 	}								\
     } STMT_END
 
-#define IN_PERL_COMPILETIME	cBOOL(PL_curcop == &PL_compiling)
-#define IN_PERL_RUNTIME		cBOOL(PL_curcop != &PL_compiling)
+/*
+=for apidoc_section Utility Functions
+=for apidoc Amn|bool|IN_PERL_COMPILETIME
+Returns 1 if this macro is being called during the compilation phase of the
+program; otherwise 0;
 
+=for apidoc Amn|bool|IN_PERL_RUNTIME
+Returns 1 if this macro is being called during the execution phase of the
+program; otherwise 0;
 
-
+=cut
+*/
+#define IN_PERL_COMPILETIME     cBOOL(PL_curcop == &PL_compiling)
+#define IN_PERL_RUNTIME         cBOOL(PL_curcop != &PL_compiling)
 
 /*
 =for apidoc_section Multicall Functions
