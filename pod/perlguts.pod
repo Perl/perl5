@@ -2879,6 +2879,9 @@ One way to do this for typical filehandles is to invoke perl with the
 C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
 =for apidoc_section Formats
+=for apidoc Amnh||UTF8f
+=for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
+
 =cut
 
 =head2 Formatted Printing of C<Size_t> and C<SSize_t>
