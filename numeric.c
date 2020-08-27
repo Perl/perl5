@@ -726,12 +726,12 @@ If an infinity or a not-a-number is recognized, C<*sp> will point to
 one byte past the end of the recognized string.  If the recognition fails,
 zero is returned, and C<*sp> will not move.
 
-=for apidoc Amn|bool|IS_NUMBER_GREATER_THAN_UV_MAX
-=for apidoc Amn|bool|IS_NUMBER_INFINITY
-=for apidoc Amn|bool|IS_NUMBER_IN_UV
-=for apidoc Amn|bool|IS_NUMBER_NAN
-=for apidoc Amn|bool|IS_NUMBER_NEG
-=for apidoc Amn|bool|IS_NUMBER_NOT_INT
+=for apidoc Amnh|bool|IS_NUMBER_GREATER_THAN_UV_MAX
+=for apidoc Amnh|bool|IS_NUMBER_INFINITY
+=for apidoc Amnh|bool|IS_NUMBER_IN_UV
+=for apidoc Amnh|bool|IS_NUMBER_NAN
+=for apidoc Amnh|bool|IS_NUMBER_NEG
+=for apidoc Amnh|bool|IS_NUMBER_NOT_INT
 
 =cut
 */
