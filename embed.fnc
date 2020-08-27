@@ -2648,10 +2648,10 @@ S	|int	|yywarn		|NN const char *const s|U32 flags
 Ap	|void	|dump_mstats	|NN const char* s
 Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 #endif
-ATpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
-ATpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
-ATpR	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
-ATp	|Free_t	|safesysfree	|Malloc_t where
+ATdpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
+ATdpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
+ATdpR	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
+AdTp	|Free_t	|safesysfree	|Malloc_t where
 CrTp	|void	|croak_memory_wrap
 Cp	|int	|runops_standard
 Cp	|int	|runops_debug
