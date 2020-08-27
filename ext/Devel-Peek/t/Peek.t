@@ -38,9 +38,11 @@ sub do_test {
     my $pattern = $_[2];
     my $do_eval = $_[5];
     if (open(OUT,'>', "peek$$")) {
-	open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
+        my $setup_stderr = sub { open(STDERR, ">&OUT") or die "Can't dup OUT: $!" };
         if ($do_eval) {
             my $sub = eval "sub { Dump $_[1] }";
+            die $@ if $@;
+            $setup_stderr->();
             $sub->();
             print STDERR "*****\n";
             # second dump to compare with the first to make sure nothing
@@ -48,6 +50,7 @@ sub do_test {
             $sub->();
         }
         else {
+            $setup_stderr->();
             Dump($_[1]);
             print STDERR "*****\n";
             # second dump to compare with the first to make sure nothing
@@ -342,6 +345,8 @@ do_test('reference to named subroutine without prototype',
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$repeat_todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$do_eval"
+\s+\\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$setup_stderr"
+\s+\\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "&"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$sub"
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
