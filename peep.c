@@ -601,7 +601,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
 
     /* Benchmarking seems to indicate that we gain if:
      * * we optimise at least two actions into a single multiconcat
-     *    (e.g concat+concat, sassign+concat);
+     *    (e.g., concat+concat, sassign+concat);
      * * or if we can eliminate at least 1 OP_CONST;
      * * or if we can eliminate a padsv via OPpTARGET_MY
      */
