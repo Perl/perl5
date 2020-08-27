@@ -2645,45 +2645,26 @@ extern long double Perl_my_frexpl(long double x, int *e);
 /*
 =for apidoc_section Integer configuration values
 
-=for apidoc AmnUh||PERL_INT_MIN
-=for apidoc AmnUh||PERL_LONG_MAX
-=for apidoc AmnUh||PERL_LONG_MIN
-=for apidoc AmnUh||PERL_QUAD_MAX
-=for apidoc AmnUh||PERL_SHORT_MAX
-=for apidoc AmnUh||PERL_SHORT_MIN
-=for apidoc AmnUh||PERL_UCHAR_MAX
-=for apidoc AmnUh||PERL_UCHAR_MIN
-=for apidoc AmnUh||PERL_UINT_MAX
-=for apidoc AmnUh||PERL_UINT_MIN
-=for apidoc AmnUh||PERL_ULONG_MAX
-=for apidoc AmnUh||PERL_ULONG_MIN
-=for apidoc AmnUh||PERL_UQUAD_MAX
-=for apidoc AmnUh||PERL_UQUAD_MIN
-=for apidoc AmnUh||PERL_USHORT_MAX
-=for apidoc AmnUh||PERL_USHORT_MIN
-=for apidoc AmnUh||PERL_QUAD_MIN
-=for apidoc_section Floating point configuration values
-
 =for apidoc AmnU||PERL_INT_MAX
-This and
-C<PERL_INT_MIN>,
-C<PERL_LONG_MAX>,
-C<PERL_LONG_MIN>,
-C<PERL_QUAD_MAX>,
-C<PERL_SHORT_MAX>,
-C<PERL_SHORT_MIN>,
-C<PERL_UCHAR_MAX>,
-C<PERL_UCHAR_MIN>,
-C<PERL_UINT_MAX>,
-C<PERL_UINT_MIN>,
-C<PERL_ULONG_MAX>,
-C<PERL_ULONG_MIN>,
-C<PERL_UQUAD_MAX>,
-C<PERL_UQUAD_MIN>,
-C<PERL_USHORT_MAX>,
-C<PERL_USHORT_MIN>,
-C<PERL_QUAD_MIN>
-give the largest and smallest number representable in the current
+=for apidoc_item ||PERL_INT_MIN
+=for apidoc_item ||PERL_LONG_MAX
+=for apidoc_item ||PERL_LONG_MIN
+=for apidoc_item ||PERL_SHORT_MAX
+=for apidoc_item ||PERL_SHORT_MIN
+=for apidoc_item ||PERL_UCHAR_MAX
+=for apidoc_item ||PERL_UCHAR_MIN
+=for apidoc_item ||PERL_UINT_MAX
+=for apidoc_item ||PERL_UINT_MIN
+=for apidoc_item ||PERL_ULONG_MAX
+=for apidoc_item ||PERL_ULONG_MIN
+=for apidoc_item ||PERL_USHORT_MAX
+=for apidoc_item ||PERL_USHORT_MIN
+=for apidoc_item ||PERL_QUAD_MAX
+=for apidoc_item ||PERL_QUAD_MIN
+=for apidoc_item ||PERL_UQUAD_MAX
+=for apidoc_item ||PERL_UQUAD_MIN
+
+These give the largest and smallest number representable in the current
 platform in variables of the corresponding types.
 
 For signed types, the smallest representable number is the most negative
