@@ -11191,6 +11191,17 @@ time this function returns, making it erroneous for the caller to make
 any use of the returned pointer.  It is the caller's responsibility to
 ensure that it knows which of these situations applies.
 
+=for apidoc newATTRSUB
+Construct a Perl subroutine, also performing some surrounding jobs.
+
+This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter set to
+FALSE.  This means that if C<o> is null, the new sub will be anonymous; otherwise
+the name will be derived from C<o> in the way described (as with all other
+details) in L<perlintern/C<newATTRSUB_x>>.
+
+=for apidoc newSUB
+Like C<L</newATTRSUB>>, but without attributes.
+
 =cut
 */
 
