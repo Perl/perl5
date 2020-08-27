@@ -180,6 +180,14 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
  * implementation of multiplicity using C++ objects. They have been left
  * here solely for the sake of XS code which has incorrectly
  * cargo-culted them.
+ *
+ * The only one Devel::PPPort handles is this; list it as deprecated
+
+=for apidoc_section Concurrency
+=for apidoc AmD|void|CPERLscope|void x
+Now a no-op.
+
+=cut
  */
 #define CPERLscope(x) x
 #define CPERLarg void
