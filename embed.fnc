@@ -940,7 +940,7 @@ Ap	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
 ApMb	|GV*	|gv_AVadd	|NULLOK GV *gv
 ApMb	|GV*	|gv_HVadd	|NULLOK GV *gv
 ApMb	|GV*	|gv_IOadd	|NULLOK GV* gv
-AmR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name \
+AdmR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 method
 ApR	|GV*	|gv_autoload_sv	|NULLOK HV* stash|NN SV* namesv|U32 flags
 ApR	|GV*	|gv_autoload_pv	|NULLOK HV* stash|NN const char* namepv \

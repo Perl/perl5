@@ -269,6 +269,13 @@ Return the CV from the GV.
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
+
+/*
+=for apidoc gv_autoload4
+Equivalent to C<L</gv_autoload_pvn>>.
+
+=cut
+*/
 #define gv_autoload4(stash, name, len, autoload) \
 	gv_autoload_pvn(stash, name, len, !!(autoload))
 #define newGVgen(pack)  newGVgen_flags(pack, 0)
