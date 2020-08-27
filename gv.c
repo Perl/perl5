@@ -92,6 +92,27 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     return gv;
 }
 
+/*
+=for apidoc gv_fetchfile
+=for apidoc_item gv_fetchfile_flags
+
+These return the debugger glob for the file (compiled by Perl) whose name is
+given by the C<name> parameter.
+
+There are currently exactly two differences between these functions.
+
+The C<name> parameter to C<gv_fetchfile> is a C string, meaning it is
+C<NUL>-terminated; whereas the C<name> parameter to C<gv_fetchfile_flags> is a
+Perl string, whose length (in bytes) is passed in via the C<namelen> parameter
+This means the name may contain embedded C<NUL> characters.
+C<namelen> doesn't exist in plain C<gv_fetchfile>).
+
+The other difference is that C<gv_fetchfile_flags> has an extra C<flags>
+parameter, which is currently completely ignored, but allows for possible
+future extensions.
+
+=cut
+*/
 GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
