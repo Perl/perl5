@@ -264,8 +264,8 @@ Return the CV from the GV.
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
-#define gv_autoload4(stash, name, len, method) \
-	gv_autoload_pvn(stash, name, len, !!(method))
+#define gv_autoload4(stash, name, len, autoload) \
+	gv_autoload_pvn(stash, name, len, !!(autoload))
 #define newGVgen(pack)  newGVgen_flags(pack, 0)
 #define gv_method_changed(gv)		    \
     (					     \
