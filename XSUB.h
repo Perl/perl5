@@ -47,7 +47,7 @@ XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 =for apidoc Am|SV*|ST|int ix
 Used to access elements on the XSUB's stack.
 
-=for apidoc AmnU||XS
+=for apidoc AmU||XS
 Macro to declare an XSUB and its C parameter list.  This is handled by
 C<xsubpp>.  It is the same as using the more explicit C<XS_EXTERNAL> macro.
 
@@ -56,7 +56,7 @@ Macro to declare an XSUB and its C parameter list without exporting the symbols.
 This is handled by C<xsubpp> and generally preferable over exporting the XSUB
 symbols unnecessarily.
 
-=for apidoc AmnU||XS_EXTERNAL
+=for apidoc AmU||XS_EXTERNAL
 Macro to declare an XSUB and its C parameter list explicitly exporting the symbols.
 
 =for apidoc Amns||dAX
