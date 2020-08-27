@@ -996,7 +996,7 @@ C<ERRSV> is a macro that calls a function, and C<SvTRUE(ERRSV)> would
 end up calling that function multiple times.
 
 =for apidoc_section Callback Functions
-=for apidoc Amnh|GV *|PL_errgv
+=for apidoc AmnUh|GV *|PL_errgv
 
 =item 3.
 
