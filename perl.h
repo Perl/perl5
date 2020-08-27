@@ -31,11 +31,11 @@
 /* this is used for functions which take a depth trailing
  * argument under debugging */
 #ifdef DEBUGGING
-#define _pDEPTH ,U32 depth
-#define _aDEPTH ,depth
+#  define _pDEPTH ,U32 depth
+#  define _aDEPTH ,depth
 #else
-#define _pDEPTH
-#define _aDEPTH
+#  define _pDEPTH
+#  define _aDEPTH
 #endif
 
 /* NOTE 1: that with gcc -std=c89 the __STDC_VERSION__ is *not* defined
@@ -197,15 +197,15 @@ Now a no-op.
 
 =cut
  */
-#define CPERLscope(x) x
-#define CPERLarg void
-#define CPERLarg_
-#define _CPERLarg
-#define PERL_OBJECT_THIS
-#define _PERL_OBJECT_THIS
-#define PERL_OBJECT_THIS_
-#define CALL_FPTR(fptr) (*fptr)
-#define MEMBER_TO_FPTR(name) name
+#  define CPERLscope(x) x
+#  define CPERLarg void
+#  define CPERLarg_
+#  define _CPERLarg
+#  define PERL_OBJECT_THIS
+#  define _PERL_OBJECT_THIS
+#  define PERL_OBJECT_THIS_
+#  define CALL_FPTR(fptr) (*fptr)
+#  define MEMBER_TO_FPTR(name) name
 #endif /* !PERL_CORE */
 
 #define CALLRUNOPS  PL_runops
@@ -271,10 +271,10 @@ Now a no-op.
     RX_ENGINE(rx)->qr_package(aTHX_ (rx))
 
 #if defined(USE_ITHREADS)
-#define CALLREGDUPE(prog,param) \
+#  define CALLREGDUPE(prog,param) \
     Perl_re_dup(aTHX_ (prog),(param))
 
-#define CALLREGDUPE_PVT(prog,param) \
+#  define CALLREGDUPE_PVT(prog,param) \
     (prog ? RX_ENGINE(prog)->dupe(aTHX_ (prog),(param)) \
           : (REGEXP *)NULL)
 #endif
@@ -299,42 +299,42 @@ Now a no-op.
  */
 
 #ifndef PERL_MICRO
-#if defined __GNUC__ && !defined(__INTEL_COMPILER)
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
-#    define HASATTRIBUTE_DEPRECATED
-#  endif
-#  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
-#    define HASATTRIBUTE_FORMAT
-#    if defined __MINGW32__
-#      define PRINTF_FORMAT_NULL_OK
+#  if defined __GNUC__ && !defined(__INTEL_COMPILER)
+#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
+#      define HASATTRIBUTE_DEPRECATED
+#    endif
+#    if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
+#      define HASATTRIBUTE_FORMAT
+#      if defined __MINGW32__
+#        define PRINTF_FORMAT_NULL_OK
+#      endif
+#    endif
+#    if __GNUC__ >= 3 /* 3.0 -> */
+#      define HASATTRIBUTE_MALLOC
+#    endif
+#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
+#      define HASATTRIBUTE_NONNULL
+#    endif
+#    if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
+#      define HASATTRIBUTE_NORETURN
+#    endif
+#    if __GNUC__ >= 3 /* gcc 3.0 -> */
+#      define HASATTRIBUTE_PURE
+#    endif
+#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#      define HASATTRIBUTE_UNUSED
+#    endif
+#    if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
+#      define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
+#    endif
+#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#      define HASATTRIBUTE_WARN_UNUSED_RESULT
+#    endif
+     /* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
+#    if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4 /* 4.7 -> */
+#      define HASATTRIBUTE_ALWAYS_INLINE
 #    endif
 #  endif
-#  if __GNUC__ >= 3 /* 3.0 -> */
-#    define HASATTRIBUTE_MALLOC
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
-#    define HASATTRIBUTE_NONNULL
-#  endif
-#  if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
-#    define HASATTRIBUTE_NORETURN
-#  endif
-#  if __GNUC__ >= 3 /* gcc 3.0 -> */
-#    define HASATTRIBUTE_PURE
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
-#    define HASATTRIBUTE_UNUSED
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
-#    define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
-#    define HASATTRIBUTE_WARN_UNUSED_RESULT
-#  endif
-/* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
-#  if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4 /* 4.7 -> */
-#    define HASATTRIBUTE_ALWAYS_INLINE
-#  endif
-#endif
 #endif /* #ifndef PERL_MICRO */
 
 #ifdef HASATTRIBUTE_DEPRECATED
@@ -531,7 +531,7 @@ __typeof__ and nothing else.
 
 #if defined(_MSC_VER) && _MSC_VER < 1400
 /* XXX older MSVC versions have a smallish macro buffer */
-#define PERL_SMALL_MACRO_BUFFER
+#  define PERL_SMALL_MACRO_BUFFER
 #endif
 
 /* on gcc (and clang), specify that a warning should be temporarily
