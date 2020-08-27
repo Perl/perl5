@@ -49,7 +49,8 @@ Used to access elements on the XSUB's stack.
 
 =for apidoc AmU||XS
 Macro to declare an XSUB and its C parameter list.  This is handled by
-C<xsubpp>.  It is the same as using the more explicit C<XS_EXTERNAL> macro.
+C<xsubpp>.  It is the same as using the more explicit C<XS_EXTERNAL> macro; the
+latter is preferred.
 
 =for apidoc AmU||XS_INTERNAL
 Macro to declare an XSUB and its C parameter list without exporting the symbols.
