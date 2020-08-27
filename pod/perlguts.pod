@@ -1671,7 +1671,7 @@ Inside such a I<pseudo-block> the following service is available:
 =item C<SAVEBOOL(int i)>
 
 These macros arrange things to restore the value of integer variable
-C<i> at the end of enclosing I<pseudo-block>.
+C<i> at the end of the enclosing I<pseudo-block>.
 
 =for apidoc_section Stack Manipulation Macros
 =for apidoc Amh||SAVEINT|int i
