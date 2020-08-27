@@ -1927,6 +1927,9 @@ It can be used immediately before invoking the C<die()> operator,
 to set the exit value, or to inspect the system error string
 corresponding to error I<n>, or to restore C<$!> to a meaningful state.
 
+Perl itself may set C<errno> to a non-zero on failure even if no
+system call is performed.
+
 Mnemonic: What just went bang?
 
 =item %OS_ERROR
