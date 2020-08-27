@@ -11157,7 +11157,7 @@ this function.
 
 If C<o_is_gv> is false and C<o> is null, then the subroutine will
 be anonymous.  If C<o_is_gv> is false and C<o> is non-null, then C<o>
-must point to a C<const> op, which will be consumed by this function,
+must point to a C<const> OP, which will be consumed by this function,
 and its string value supplies a name for the subroutine.  The name may
 be qualified or unqualified, and if it is unqualified then a default
 stash will be selected in some manner.  If C<o_is_gv> is true, then C<o>
