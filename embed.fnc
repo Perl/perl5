@@ -951,8 +951,8 @@ Cp	|void	|gv_check	|NN HV* stash
 AbpD	|void	|gv_efullname	|NN SV* sv|NN const GV* gv
 ApMb	|void	|gv_efullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
-Ap	|GV*	|gv_fetchfile	|NN const char* name
-Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
+Adp	|GV*	|gv_fetchfile	|NN const char* name
+Adp	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
 Amd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 level
