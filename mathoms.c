@@ -850,7 +850,7 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 
 The engine implementing C<pack()> Perl function.  Note: parameters
 C<next_in_list> and C<flags> are not used.  This call should not be used; use
-C<packlist> instead.
+C<L</packlist>> instead.
 
 =cut
 */
