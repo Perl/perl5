@@ -417,7 +417,7 @@ PP(pp_multiconcat)
                                 for ease of testing and setting) */
     /* for each arg, holds the result of an SvPV() call */
     struct multiconcat_svpv {
-        char          *pv;
+        const char   *pv;
         SSize_t       len;
     }
         *targ_chain,         /* chain of slots where targ has appeared on RHS */
@@ -533,7 +533,7 @@ PP(pp_multiconcat)
                 /* an undef value in the presence of warnings may trigger
                  * side affects */
                 goto do_magical;
-            svpv_end->pv = (char*)"";
+            svpv_end->pv = "";
             len = 0;
         }
         else
