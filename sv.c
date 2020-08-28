@@ -3280,7 +3280,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 =for apidoc sv_copypv
 
 Copies a stringified representation of the source SV into the
-destination SV.  Automatically performs any necessary C<mg_get> and
+destination SV.  Automatically performs any necessary C<L</mg_get>> and
 coercion of numeric values into strings.  Guaranteed to preserve
 C<UTF8> flag even from overloaded objects.  Similar in nature to
 C<sv_2pv[_flags]> but operates directly on an SV instead of just the
@@ -3447,7 +3447,7 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
 
 Converts the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
-Will C<mg_get> on C<sv> if appropriate.
+Will C<L</mg_get>> on C<sv> if appropriate.
 Always sets the C<SvUTF8> flag to avoid future validity checks even
 if the whole string is the same in UTF-8 as not.
 Returns the number of bytes in the converted string
@@ -3466,7 +3466,7 @@ Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes are invariant in UTF-8.
 If C<flags> has C<SV_GMAGIC> bit set,
-will C<mg_get> on C<sv> if appropriate, else not.
+will C<L</mg_get>> on C<sv> if appropriate, else not.
 
 The C<SV_FORCE_UTF8_UPGRADE> flag is now ignored.
 
@@ -3820,7 +3820,7 @@ C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
 function if the source SV needs to be reused.  Does not handle 'set' magic.
 Loosely speaking, it performs a copy-by-value, obliterating any previous
 content of the destination.
-If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<mg_get> on
+If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<L</mg_get>> on
 C<ssv> if appropriate, else not.  If the C<flags>
 parameter has the C<SV_NOSTEAL> bit set then the
 buffers of temps will not be stolen.  C<sv_setsv>
@@ -5500,7 +5500,7 @@ flag, and as bytes by supplying the C<SV_CATBYTES> flag; the SV or the
 string appended will be upgraded to UTF-8 if necessary.
 
 If C<flags> has the C<SV_SMAGIC> bit set, will
-C<mg_set> on C<dsv> afterwards if appropriate.
+C<L</mg_set>> on C<dsv> afterwards if appropriate.
 C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
 
@@ -5568,8 +5568,8 @@ and C<L</sv_catsv_nomg>>.
 
 Concatenates the string from SV C<ssv> onto the end of the string in SV
 C<dsv>.  If C<ssv> is null, does nothing; otherwise modifies only C<dsv>.
-If C<flags> has the C<SV_GMAGIC> bit set, will call C<mg_get> on both SVs if
-appropriate.  If C<flags> has the C<SV_SMAGIC> bit set, C<mg_set> will be called on
+If C<flags> has the C<SV_GMAGIC> bit set, will call C<L</mg_get>> on both SVs if
+appropriate.  If C<flags> has the C<SV_SMAGIC> bit set, C<L</mg_set>> will be called on
 the modified SV afterward, if appropriate.  C<sv_catsv>, C<sv_catsv_nomg>,
 and C<sv_catsv_mg> are implemented in terms of this function.
 
@@ -5631,7 +5631,7 @@ Perl_sv_catpv(pTHX_ SV *const sv, const char *ptr)
 Concatenates the C<NUL>-terminated string onto the end of the string which is
 in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should
-be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<mg_set>
+be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<L</mg_set>>
 on the modified SV if appropriate.
 
 =cut
@@ -10091,7 +10091,7 @@ can't cope with complex macro expressions.  Always use the macro instead.
 =for apidoc sv_pvn_force_flags
 
 Get a sensible string out of the SV somehow.
-If C<flags> has the C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
+If C<flags> has the C<SV_GMAGIC> bit set, will C<L</mg_get>> on C<sv> if
 appropriate, else not.  C<sv_pvn_force> and C<sv_pvn_force_nomg> are
 implemented in terms of this function.
 You normally want to use the various wrapper macros instead: see

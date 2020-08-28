@@ -2098,12 +2098,12 @@ incremented.
 =head1 Magic
 
 =for apidoc Am|void|SvGETMAGIC|SV* sv
-Invokes C<mg_get> on an SV if it has 'get' magic.  For example, this
+Invokes C<L</mg_get>> on an SV if it has 'get' magic.  For example, this
 will call C<FETCH> on a tied variable.  This macro evaluates its
 argument more than once.
 
 =for apidoc Am|void|SvSETMAGIC|SV* sv
-Invokes C<mg_set> on an SV if it has 'set' magic.  This is necessary
+Invokes C<L</mg_set>> on an SV if it has 'set' magic.  This is necessary
 after modifying a scalar, in case it is a magical variable like C<$|>
 or a tied variable (it calls C<STORE>).  This macro evaluates its
 argument more than once.
