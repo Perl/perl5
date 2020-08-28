@@ -636,12 +636,6 @@ struct block_format {
 #  define CX_POP(cx) cxstack_ix--;
 #endif
 
-
-/* base for the next two macros. Don't use directly.
- * The context frame holds a reference to the CV so that it can't be
- * freed while we're executing it */
-
-
 #define CX_PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
 	/* flags that the caller also has are applicable.        */	\
