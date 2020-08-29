@@ -50,7 +50,11 @@ Same as C<av_top_index()> or C<av_tindex()>.
 =for apidoc av_tindex
 Same as C<av_top_index()>.
 
-=for apidoc m|int|AvFILLp|AV* av
+=for apidoc Cm|int|AvFILLp|AV* av
+
+If the array C<a> is empty, this returns -1; otherwise it returns the maximum
+value of the indices of all the array elements currently defined in C<a>.
+It does not handle magic, hence the C<p> private indication in its name.
 
 =cut
 */
