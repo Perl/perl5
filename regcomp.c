@@ -17228,10 +17228,10 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN c
  *
  * There is a line below that uses the same white space criteria but is outside
  * this macro.  Both here and there must use the same definition */
-#define SKIP_BRACKETED_WHITE_SPACE(do_skip, p)                          \
+#define SKIP_BRACKETED_WHITE_SPACE(do_skip, p, stop_p)                  \
     STMT_START {                                                        \
         if (do_skip) {                                                  \
-            while (isBLANK_A(UCHARAT(p)))                               \
+            while (p < stop_p && isBLANK_A(UCHARAT(p)))                 \
             {                                                           \
                 p++;                                                    \
             }                                                           \
@@ -17406,7 +17406,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     initial_listsv_len = SvCUR(listsv);
     SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
 
-    SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
+    SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse, RExC_end);
 
     assert(RExC_parse <= RExC_end);
 
@@ -17415,7 +17415,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         invert = TRUE;
         allow_mutiple_chars = FALSE;
         MARK_NAUGHTY(1);
-        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
+        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse, RExC_end);
     }
 
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
@@ -17462,11 +17462,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             output_posix_warnings(pRExC_state, posix_warnings);
         }
 
+        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse, RExC_end);
+
         if  (RExC_parse >= stop_ptr) {
             break;
         }
-
-        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
 
         if  (UCHARAT(RExC_parse) == ']') {
             break;
@@ -18156,7 +18156,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    }
 	} /* end of namedclass \blah */
 
-        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
+        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse, RExC_end);
 
         /* If 'range' is set, 'value' is the ending of a range--check its
          * validity.  (If value isn't a single code point in the case of a
@@ -18199,7 +18199,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 char* next_char_ptr = RExC_parse + 1;
 
                 /* Get the next real char after the '-' */
-                SKIP_BRACKETED_WHITE_SPACE(skip_white, next_char_ptr);
+                SKIP_BRACKETED_WHITE_SPACE(skip_white, next_char_ptr, RExC_end);
 
                 /* If the '-' is at the end of the class (just before the ']',
                  * it is a literal minus; otherwise it is a range */
