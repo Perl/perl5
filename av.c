@@ -802,19 +802,24 @@ Perl_av_shift(pTHX_ AV *av)
 }
 
 /*
-=for apidoc av_top_index
+=for apidoc av_tindex
+=for apidoc_item av_top_index
 
-Returns the highest index in the array.  The number of elements in the
-array is S<C<av_top_index(av) + 1>>.  Returns -1 if the array is empty.
+These behave identically.
+If the array C<av> is empty, these return -1; otherwise they return the maximum
+value of the indices of all the array elements which are currently defined in
+C<av>.
 
-The Perl equivalent for this is C<$#myarray>.
+They process 'get' magic.
 
-(A slightly shorter form is C<av_tindex>.)
+The Perl equivalent for these is C<$#av>.
+
+Use C<L</av_count>> to get the number of elements in an array.
 
 =for apidoc av_len
 
 Same as L</av_top_index>.  Note that, unlike what the name implies, it returns
-the highest index in the array.  This is unlike L</sv_len>, which returns what
+the maximum index in the array.  This is unlike L</sv_len>, which returns what
 you would expect.
 
 B<To get the true number of elements in the array, instead use C<L</av_count>>>.
