@@ -446,6 +446,23 @@ Returns the GV associated with the C<COP> C<c>
 Available only on unthreaded perls.  Makes C<pv> the name of the file
 associated with the C<COP> C<c>
 
+=for apidoc Am|HV *|CopSTASH|const COP * c
+Returns the stash associated with C<c>.
+
+=for apidoc Am|bool|CopSTASH_eq|const COP * c|const HV * hv
+Returns a boolean as to whether or not C<hv> is the stash associated with C<c>.
+
+=for apidoc Am|bool|CopSTASH_set|COP * c|HV * hv
+Set the stash associated with C<c> to C<hv>.
+
+=for apidoc Am|char *|CopSTASHPV|const COP * c
+Returns the package name of the stash associated with C<c>, or C<NULL> if no
+associated stash
+
+=for apidoc Am|void|CopSTASHPV_set|COP * c|const char * pv
+Set the package name of the stash associated with C<c>, to the NUL-terminated C
+string C<p>, creating the package if necessary.
+
 =cut
 */
 
