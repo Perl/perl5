@@ -1947,7 +1947,7 @@ Cp	|char*	|re_intuit_start|NN REGEXP * const rx \
 				|const U32 flags \
 				|NULLOK re_scream_pos_data *data
 Cp	|SV*	|re_intuit_string|NN REGEXP  *const r
-Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
+Cp	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg \
 				|SSize_t minend|NN SV *sv \
 				|NULLOK void *data|U32 flags
