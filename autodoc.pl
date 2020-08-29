@@ -1331,7 +1331,7 @@ parse_config_h();
 for (sort keys %funcflags) {
     next unless $funcflags{$_}{flags} =~ /d/;
     next if $funcflags{$_}{flags} =~ /h/;
-    warn "no docs for $_\n"
+    warn "no docs for $_\n";
 }
 
 foreach (sort keys %missing) {
