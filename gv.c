@@ -2409,7 +2409,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* By this point we should have a stash and a name */
     gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
-	if (addmg) gv = (GV *)newSV(0);
+	if (addmg) gv = (GV *)newSV(0);     /* tentatively */
 	else return NULL;
     }
     else gv = *gvp, addmg = 0;
