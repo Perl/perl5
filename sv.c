@@ -3304,10 +3304,12 @@ Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 /*
 =for apidoc sv_2pvbyte
 
-Return a pointer to the byte-encoded representation of the SV, and set C<*lp>
+Returns a pointer to the byte-encoded representation of the SV, and set C<*lp>
 to its length.  If the SV is marked as being encoded as UTF-8, it will
 downgrade it to a byte string as a side-effect, if possible.  If the SV cannot
 be downgraded, this croaks.
+
+Processes 'get' magic.
 
 Usually accessed via the C<SvPVbyte> macro.
 
