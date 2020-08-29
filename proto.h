@@ -2138,10 +2138,8 @@ PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
 #define PERL_ARGS_ASSERT_MY_FFLUSH_ALL
 PERL_CALLCONV Pid_t	Perl_my_fork(void);
 #define PERL_ARGS_ASSERT_MY_FORK
-#ifndef NO_MATHOMS
-PERL_CALLCONV I32	Perl_my_lstat(pTHX);
+/* PERL_CALLCONV I32	my_lstat(pTHX); */
 #define PERL_ARGS_ASSERT_MY_LSTAT
-#endif
 PERL_CALLCONV I32	Perl_my_lstat_flags(pTHX_ const U32 flags);
 #define PERL_ARGS_ASSERT_MY_LSTAT_FLAGS
 PERL_CALLCONV int	Perl_my_mkostemp_cloexec(char *templte, int flags)
@@ -2166,10 +2164,8 @@ PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *f
 
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 #define PERL_ARGS_ASSERT_MY_SOCKETPAIR
-#ifndef NO_MATHOMS
-PERL_CALLCONV I32	Perl_my_stat(pTHX);
+/* PERL_CALLCONV I32	my_stat(pTHX); */
 #define PERL_ARGS_ASSERT_MY_STAT
-#endif
 PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
 #define PERL_ARGS_ASSERT_MY_STAT_FLAGS
 PERL_CALLCONV char*	Perl_my_strerror(pTHX_ const int errnum);
