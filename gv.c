@@ -1542,19 +1542,24 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
 }
 
 /*
-gv_stashsvpvn_cached
+=for apidoc gv_stashsvpvn_cached
 
 Returns a pointer to the stash for a specified package, possibly
 cached.  Implements both C<L</gv_stashpvn>> and C<L</gv_stashsv>>.
 
 Requires one of either C<namesv> or C<namepv> to be non-null.
 
-See C<L</gv_stashpvn>> for details on C<flags>.
+If the flag C<GV_CACHE_ONLY> is set, return the stash only if found in the
+cache; see C<L</gv_stashpvn>> for details on the other C<flags>.
 
 Note the sv interface is strongly preferred for performance reasons.
 
+=for apidoc Emnh||GV_CACHE_ONLY
+
+=cut
 */
 
+#undef PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED
 #define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED \
     assert(namesv || name)
 
