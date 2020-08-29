@@ -3386,7 +3386,7 @@ Sd	|PADOFFSET|pad_findlex	|NN const char *namepv|STRLEN namelen|U32 flags \
 #endif
 #ifdef DEBUGGING
 Cpd	|SV*	|pad_sv		|PADOFFSET po
-Apd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
+Cpd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
 #endif
 pd	|void	|pad_block_start|int full
 Apd	|U32	|intro_my
