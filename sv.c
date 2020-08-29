@@ -3142,16 +3142,22 @@ Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 }
 
 /*
-=for apidoc sv_2pvbyte
+=for apidoc      sv_2pvbyte
+=for apidoc_item sv_2pvbyte_flags
 
-Returns a pointer to the byte-encoded representation of the SV, and set C<*lp>
-to its length.  If the SV is marked as being encoded as UTF-8, it will
-downgrade it to a byte string as a side-effect, if possible.  If the SV cannot
-be downgraded, this croaks.
+These implement the various forms of the L<perlapi/C<SvPVbyte>> macros.
+The macros are the preferred interface.
 
-Processes 'get' magic.
+These return a pointer to the byte-encoded representation of the SV, and set
+C<*lp> to its length.  If the SV is marked as being encoded as UTF-8, it will
+be downgraded, if possible, to a byte string.  If the SV cannot be downgraded,
+they croak.
 
-Usually accessed via the C<SvPVbyte> macro.
+The forms differ in that plain C<sv_2pvbyte> always processes 'get' magic; and
+C<sv_2pvbyte_flags> processes 'get' magic if and only if C<flags> contains
+C<SV_GMAGIC>.
+
+=for apidoc Amnh||SV_GMAGIC
 
 =cut
 */
@@ -3174,12 +3180,19 @@ Perl_sv_2pvbyte_flags(pTHX_ SV *sv, STRLEN *const lp, const U32 flags)
 }
 
 /*
-=for apidoc sv_2pvutf8
+=for apidoc      sv_2pvutf8
+=for apidoc_item sv_2pvutf8_flags
 
-Return a pointer to the UTF-8-encoded representation of the SV, and set C<*lp>
-to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
+These implement the various forms of the L<perlapi/C<SvPVutf8>> macros.
+The macros are the preferred interface.
 
-Usually accessed via the C<SvPVutf8> macro.
+These return a pointer to the UTF-8-encoded representation of the SV, and set
+C<*lp> to its length in bytes.  They may cause the SV to be upgraded to UTF-8
+as a side-effect.
+
+The forms differ in that plain C<sv_2pvutf8> always processes 'get' magic; and
+C<sv_2pvutf8_flags> processes 'get' magic if and only if C<flags> contains
+C<SV_GMAGIC>.
 
 =cut
 */
