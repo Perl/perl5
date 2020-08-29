@@ -1473,12 +1473,13 @@ is returned.
 
 Flags may be one of:
 
-    GV_ADD
-    SVf_UTF8
-    GV_NOADD_NOINIT
-    GV_NOINIT
-    GV_NOEXPAND
-    GV_ADDMG
+ GV_ADD           Create and initialize the package if doesn't
+                  already exist
+ GV_NOADD_NOINIT  Don't create the package,
+ GV_ADDMG         GV_ADD iff the GV is magical
+ GV_NOINIT        GV_ADD, but don't initialize
+ GV_NOEXPAND      Don't expand SvOK() entries to PVGV
+ SVf_UTF8         The name is in UTF-8
 
 The most important of which are probably C<GV_ADD> and C<SVf_UTF8>.
 
