@@ -2541,11 +2541,6 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 }
 
 /*
-=for comment
-skip apidoc
-This is not currently externally documented because we don't want people to use
-it for now.  XXX Perhaps that is too paranoid, and it should be documented?
-
 =for apidoc bytes_from_utf8_loc
 
 Like C<L</bytes_from_utf8>()>, but takes an extra parameter, a pointer to where
@@ -2564,7 +2559,7 @@ C<"s">.  C<*lenp> is set to its length, not including the terminating C<NUL>.
 If the entire input string was converted, C<*is_utf8p> is set to a FALSE value,
 and C<*first_non_downgradable> is set to C<NULL>.
 
-Otherwise, C<*first_non_downgradable> set to point to the first byte of the
+Otherwise, C<*first_non_downgradable> is set to point to the first byte of the
 first character in the original string that wasn't converted.  C<*is_utf8p> is
 unchanged.  Note that the new string may have length 0.
 
