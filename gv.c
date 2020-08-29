@@ -1522,11 +1522,11 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
 gv_stashsvpvn_cached
 
 Returns a pointer to the stash for a specified package, possibly
-cached.  Implements both C<gv_stashpvn> and C<gv_stashsv>.
+cached.  Implements both C<L</gv_stashpvn>> and C<L</gv_stashsv>>.
 
-Requires one of either namesv or namepv to be non-null.
+Requires one of either C<namesv> or C<namepv> to be non-null.
 
-See C<L</gv_stashpvn>> for details on "flags".
+See C<L</gv_stashpvn>> for details on C<flags>.
 
 Note the sv interface is strongly preferred for performance reasons.
 
