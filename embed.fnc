@@ -3660,4 +3660,8 @@ XEop	|void   |dtrace_probe_phase|enum perl_phase phase
 
 XEop	|STRLEN*|dup_warnings	|NULLOK STRLEN* warnings
 
+#ifndef USE_ITHREADS
+Amd	|void	|CopFILEGV_set	|NN COP * c|NN GV * gv
+#endif
+
 : ex: set ts=8 sts=4 sw=4 noet:
