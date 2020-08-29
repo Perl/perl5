@@ -1612,7 +1612,7 @@ p	|void	|invmap_dump	|NN SV* invlist|NN UV * map
 Ap	|void	|pop_scope
 Ap	|void	|push_scope
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
-ApMb	|OP*	|ref		|NULLOK OP* o|I32 type
+pMb	|OP*	|ref		|NULLOK OP* o|I32 type
 #endif
 #if defined(PERL_IN_OP_C)
 S	|OP*	|refkids	|NULLOK OP* o|I32 type
