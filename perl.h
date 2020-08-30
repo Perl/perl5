@@ -5543,8 +5543,14 @@ EXTCONST runops_proc_t PL_runops_dbg
 #define PERL_MAGIC_READONLY_ACCEPTABLE 0x40
 #define PERL_MAGIC_VALUE_MAGIC 0x80
 #define PERL_MAGIC_VTABLE_MASK 0x3F
+
+/* can this type of magic be attached to a readonly SV? */
 #define PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(t) \
     (PL_magic_data[(U8)(t)] & PERL_MAGIC_READONLY_ACCEPTABLE)
+
+/* Is this type of magic container magic (%ENV, $1 etc),
+ * or value magic (pos, taint etc)?
+ */
 #define PERL_MAGIC_TYPE_IS_VALUE_MAGIC(t) \
     (PL_magic_data[(U8)(t)] & PERL_MAGIC_VALUE_MAGIC)
 
