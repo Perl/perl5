@@ -5027,7 +5027,7 @@ PP(pp_akeys)
                       "Can't modify keys on array in list assignment");
       }
       {
-        IV n = Perl_av_len(aTHX_ array);
+        IV n = av_top_index(array);
         IV i;
 
         EXTEND(SP, n + 1);
