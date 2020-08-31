@@ -19,9 +19,11 @@ close $out;
 
 pl2bat(in => $filename);
 
+my $tmp_path = join $Config{path_sep}, cwd(), $ENV{PATH};
+note $^X;
+note $tmp_path;
 foreach my $i (42, 51, 0) {
-	my $cwd = cwd;
-	local $ENV{PATH} = join $Config{path_sep}, $cwd, $ENV{PATH};
+	local $ENV{PATH} = $tmp_path;
 	my $ret = system $filename, $i;
 	is $ret & 0xff, 0, 'test_exec executed successfully';
 	is $ret >> 8, $i, "test_exec $i return value ok";
