@@ -11,7 +11,7 @@ BEGIN {
     skip_all_if_miniperl("No XS under miniperl");
 }
 
-use strict;
+
 use warnings;
 
 use Config;

@@ -8,7 +8,7 @@ BEGIN {
     skip_all_without_dynamic_extension('Fcntl'); # how did you get this far?
 }
 
-use strict;
+
 use warnings;
 
 plan tests => 10;

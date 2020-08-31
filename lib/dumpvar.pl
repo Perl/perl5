@@ -1,5 +1,6 @@
 require 5.014;			# For more reliable $@ after eval
 package dumpvar;
+no strict;
 
 # Needed for PrettyPrinter only:
 

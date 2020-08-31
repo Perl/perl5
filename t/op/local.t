@@ -13,6 +13,8 @@ my $list_assignment_supported = 1;
 $list_assignment_supported = 0 if ($^O eq 'VMS');
 
 
+our ($a, $b, $c, $d);
+our ($x, $y);
 sub foo {
     local($a, $b) = @_;
     local($c, $d);
@@ -43,6 +45,7 @@ is($y, "c 10");
 
 # same thing, only with arrays and associative arrays
 
+our (@b, @c, %d);
 sub foo2 {
     local($a, @b) = @_;
     local(@c, %d);
@@ -59,7 +62,7 @@ $a = "a 5";
 @c = "c 7";
 $d{''} = "d 8";
 
-@res = &foo2("a 1","b 2");
+my @res = &foo2("a 1","b 2");
 is($res[0], "c 3");
 is($res[1], "d 4");
 
@@ -71,6 +74,7 @@ is($x, "a 19");
 is($y, "c 20");
 
 
+our ($e);
 eval 'local($$e)';
 like($@, qr/Can't localize through a reference/);
 
@@ -82,7 +86,7 @@ like($@, qr/Can't localize through a reference/);
 
 # Array and hash elements
 
-@a = ('a', 'b', 'c');
+our @a = ('a', 'b', 'c');
 {
     local($a[1]) = 'foo';
     local($a[2]) = $a[2];
@@ -200,7 +204,7 @@ ok(!exists($a[5]));
 ok(!exists($a[888]));
 ok(!exists($a[999]));
 
-%h = (a => 1, b => 2, c => 3, d => 4);
+our %h = (a => 1, b => 2, c => 3, d => 4);
 {
     delete local $h{b};
     is(scalar(keys(%h)), 3);
@@ -285,6 +289,7 @@ if (1) { local $a = 'inner' }
 is($a, 'outer');
 
 # see if localization works when scope unwinds
+our $m;
 local $m = 5;
 eval {
     for $m (6) {
@@ -619,7 +624,7 @@ while (/(o.+?),/gc) {
 	"Assignment"  => sub { $_ = "Bad" },			0,
 	"for local"   => sub { for("#ok?\n"){ print } },	1,
     );
-    while ( ($name, $code, $ok) = splice(@tests, 0, 3) ) {
+    while ( my ($name, $code, $ok) = splice(@tests, 0, 3) ) {
 	eval { &$code };
         main::ok(($ok xor $@), "Underscore '$name'");
     }
@@ -632,7 +637,7 @@ while (/(o.+?),/gc) {
     $x{a} = 1;
     { local $x{b} = 1; }
     ok(! exists $x{b});
-    { local @x{c,d,e}; }
+    { local @x{ ( qw| c d e | ) }; }
     ok(! exists $x{c});
 }
 
@@ -801,6 +806,7 @@ like( runperl(stderr => 1,
 # related to perl #112966
 # Magic should not cause elements not to be deleted after scope unwinding
 # when they did not exist before local()
+our @squinch;
 () = \$#squinch; # $#foo in lvalue context makes array magical
 {
     local $squinch[0];
@@ -826,6 +832,7 @@ ok !exists $squinch[1],
     eval {1};
     pass("Can eval with *@ localised");
 
+    no strict 'refs';
     local @{"nugguton"};
     local %{"netgonch"};
     delete $::{$_} for 'nugguton','netgonch';
@@ -834,7 +841,8 @@ pass ('localised arrays and hashes do not crash if glob is deleted');
 
 # [perl #112966] Rmagic can cause delete local to crash
 package Grompits {
-local $SIG{__WARN__};
+    our @ISA;
+    local $SIG{__WARN__};
     delete local $ISA[0];
     delete local @ISA[1..10];
     m??; # makes stash magical

@@ -13,11 +13,19 @@ EXPECT
 $c =+ 3 ;
 EXPECT
 Reversed += operator at - line 3.
+Global symbol "$c" requires explicit package name (did you forget to declare "my $c"?) at - line 3.
+Execution of - aborted due to compilation errors.
+########
+-w
+# warnable code, warnings enabled via command line switch
+$main::c =+ 3 ;
+EXPECT
+Reversed += operator at - line 3.
 Name "main::c" used only once: possible typo at - line 3.
 ########
 #! perl -w
 # warnable code, warnings enabled via #! line
-$c =+ 3 ;
+$main::c =+ 3 ;
 EXPECT
 Reversed += operator at - line 3.
 Name "main::c" used only once: possible typo at - line 3.
@@ -25,7 +33,7 @@ Name "main::c" used only once: possible typo at - line 3.
 
 # warnable code, warnings enabled via compile time $^W
 BEGIN { $^W = 1 }
-$c =+ 3 ;
+$main::c =+ 3 ;
 EXPECT
 Reversed += operator at - line 4.
 Name "main::c" used only once: possible typo at - line 4.
@@ -34,7 +42,7 @@ Name "main::c" used only once: possible typo at - line 4.
 # warnable code, warnings enabled via command line switch
 use utf8;
 use open qw( :utf8 :std );
-$Ằ =+ 3 ;
+$main::Ằ =+ 3 ;
 EXPECT
 Reversed += operator at - line 5.
 Name "main::Ằ" used only once: possible typo at - line 5.
@@ -43,7 +51,7 @@ Name "main::Ằ" used only once: possible typo at - line 5.
 # warnable code, warnings enabled via #! line
 use utf8;
 use open qw( :utf8 :std );
-$Ằ =+ 3 ;
+$main::Ằ =+ 3 ;
 EXPECT
 Reversed += operator at - line 5.
 Name "main::Ằ" used only once: possible typo at - line 5.
@@ -53,7 +61,7 @@ Name "main::Ằ" used only once: possible typo at - line 5.
 BEGIN { $^W = 1 }
 use utf8;
 use open qw( :utf8 :std );
-$Ằ =+ 3 ;
+$main::Ằ =+ 3 ;
 EXPECT
 Reversed += operator at - line 6.
 Name "main::Ằ" used only once: possible typo at - line 6.

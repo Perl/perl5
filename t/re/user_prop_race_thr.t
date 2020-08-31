@@ -1,8 +1,8 @@
 #!perl
-use strict;
 use warnings;
 
 require './test.pl';
+set_up_inc('../lib');
 skip_all_without_config('useithreads');
 skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 

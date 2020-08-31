@@ -11,12 +11,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = '../lib'; # needed to locate strict for instances of 'no strict'
 }
-
-# We need this, as in places we're testing the interaction of prototypes with
-# strict
-use strict;
 
 print "1..215\n";
 

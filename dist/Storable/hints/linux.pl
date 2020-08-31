@@ -5,6 +5,7 @@
 # malloc'd or free'd).  Observed in Debian 3.0 x86, with gccs 2.95.4
 # 20011002 and 3.3, and in Redhat 7.1 with gcc 3.3.1. The failures
 # happen only for unthreaded builds, threaded builds work okay.
+no strict 'vars';
 use Config;
 if ($Config{gccversion} and !$Config{usethreads}) {
     my $optimize = $Config{optimize};

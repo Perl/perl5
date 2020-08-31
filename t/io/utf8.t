@@ -45,8 +45,8 @@ seek(F,0,0);
 binmode(F,":utf8");
 is( scalar(<F>), "\x{100}£\n" );
 seek(F,0,0);
-$buf = chr(0x200);
-$count = read(F,$buf,2,1);
+my $buf = chr(0x200);
+my $count = read(F,$buf,2,1);
 cmp_ok( $count, '==', 2 );
 is( $buf, "\x{200}\x{100}£" );
 close(F);
@@ -60,7 +60,7 @@ close(F);
     close F;
 
     open F, "<:utf8", $a_file or die $!;
-    $x = <F>;
+    my $x = <F>;
     chomp($x);
     is( $x, chr(300) );
 
@@ -139,7 +139,7 @@ close F;
 
 open F, "<", $a_file or die $!;
 binmode(F, ":bytes");
-$x = <F>; chomp $x;
+my $x = <F>; chomp $x;
 $chr = v196.172.130;
 if ($::IS_EBCDIC) { $chr = v141.83.130; } # EBCDIC
 is( $x, $chr );
@@ -156,6 +156,7 @@ close F;
 open F, "<", $a_file or die $!;
 binmode(F, ":bytes");
 $x = <F>; chomp $x;
+my $UTF8_OUTPUT;
 SKIP: {
     skip("Defaulting to UTF-8 output means that we can't generate a mangled file")
 	if $UTF8_OUTPUT;
@@ -182,7 +183,7 @@ close F;
 unlink($a_file);
 
 open F, ">:utf8", $a_file;
-@a = map { chr(1 << ($_ << 2)) } 0..5; # 0x1, 0x10, .., 0x100000
+my @a = map { chr(1 << ($_ << 2)) } 0..5; # 0x1, 0x10, .., 0x100000
 unshift @a, chr(0); # ... and a null byte in front just for fun
 print F @a;
 close F;
@@ -391,6 +392,7 @@ is($failed, undef);
 # return values
 SKIP: {
     skip "no PerlIO::scalar on miniperl", 2, if is_miniperl();
+    my $uuf;
     open my $fh, "<:raw",  \($buf = chr 255);
     open my $uh, "<:utf8", \($uuf = $U_100);
     for([$uh,chr 256], [$fh,chr 255]) {

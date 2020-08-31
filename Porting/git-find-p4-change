@@ -10,6 +10,7 @@ my $checkout = 0;
 
 my $before = '--before=2008-12-18'; # only changes made under perforce
 
+my $change;
 for (@ARGV) {
 	m{^\d+$} && (($change,$_) = ($_,undef));
 	m{^-\d+$} && (($num,$_) = (-$_,undef));

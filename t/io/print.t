@@ -13,7 +13,7 @@ use strict 'vars';
 print "1..24\n";
 
 my $foo = 'STDOUT';
-print $foo "ok 1\n";
+{ no strict 'refs'; print $foo "ok 1\n"; }
 
 print "ok 2\n","ok 3\n","ok 4\n";
 print STDOUT "ok 5\n";

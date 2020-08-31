@@ -77,12 +77,12 @@ EXPECT
 Too many nested open parens in regex; marked by <-- HERE in m/(( <-- HERE a))/ at - line 3.
 ########
 # NAME \K not permitted in lookahead
-$x =~ /(?=a\Ka)a/;
+my $x =~ /(?=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=a\K <-- HERE a)a/ at - line 1.
 ########
 # NAME \K not permitted in lookbehind
-$x =~ /(?<=a\Ka)a/;
+my $x =~ /(?<=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=a\K <-- HERE a)a/ at - line 1.
 ########

@@ -1419,7 +1419,7 @@ my %loose_names_ending_in_code_point;   # Same as above, but has blanks, dashes
 # Inverse mapping.  The list of ranges that have these kinds of
 # names.  Each element contains the low, high, and base names in an
 # anonymous hash.
-my @code_points_ending_in_code_point;
+my @code_points_ending_in_code_point = ();
 
 # To hold Unicode's normalization test suite
 my @normalization_tests;
@@ -17425,6 +17425,7 @@ $loose_names
 
     # And the following array gives the inverse mapping from code points to
     # names.  Lowest code points are first
+    no strict 'vars';
     \@code_points_ending_in_code_point = (
 $code_points_ending_in_code_point
     );
@@ -17556,7 +17557,7 @@ END
             my $L = $LBase + $SIndex / $NCount;
             my $V = $VBase + ($SIndex % $NCount) / $TCount;
             my $T = $TBase + $SIndex % $TCount;
-            $name = "$HANGUL_SYLLABLE$Jamo{$L}$Jamo{$V}";
+            my $name = "$HANGUL_SYLLABLE$Jamo{$L}$Jamo{$V}";
             $name .= $Jamo{$T} if $T != $TBase;
             return $name;
         }

@@ -1,5 +1,7 @@
 #! /usr/local/perl -w
 package main;
+
+use strict;
 require Test::Harness;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
@@ -25,7 +27,7 @@ sub BaseTests {
     # its man page ( perldoc Test ) for help writing this test script.
 
     # Test bare number processing
-    $version = $CLASS->$method(5.005_03);
+    my $version = $CLASS->$method(5.005_03);
     is ( "$version" , "5.00503" , '5.005_03 eq 5.00503' );
     $version = $CLASS->$method(1.23);
     is ( "$version" , "1.23" , '1.23 eq "1.23"' );
@@ -97,7 +99,7 @@ sub BaseTests {
     # Test Numeric Comparison operators
     # test first with non-object
     $version = $CLASS->$method("5.006.001");
-    $new_version = "5.8.0";
+    my $new_version = "5.8.0";
     ok ( $version == $version, '$version == $version' );
     ok ( $version < $new_version, '$version < $new_version' );
     ok ( $new_version > $version, '$new_version > $version' );
@@ -303,7 +305,7 @@ SKIP: {
     { # dummy up some variously broken modules for testing
 	my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
 	(my $package = basename($filename)) =~ s/\.pm$//;
-	print $fh "package $package;\n\@VERSION = ();\n1;\n";
+	print $fh "package $package;\nour \@VERSION = ();\n1;\n";
 	close $fh;
 	eval "use lib '.'; use $package 3;";
 	like ($@, qr/$error_regex/,
@@ -318,7 +320,7 @@ SKIP:    { # https://rt.perl.org/rt3/Ticket/Display.html?id=95544
 	    unless defined $qv_declare;
 	my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
 	(my $package = basename($filename)) =~ s/\.pm$//;
-	print $fh "package $package;\n\$VERSION = '3alpha';\n1;\n";
+	print $fh "package $package;\nour \$VERSION = '3alpha';\n1;\n";
 	close $fh;
 	eval "use lib '.'; use $package; print $package->VERSION";
 	like ($@, qr/Invalid version format \(non-numeric data\)/,
@@ -338,7 +340,8 @@ SKIP: 	{
 	ok($version == $new_version, '$version == $new_version');
 	skip "version require'd instead of use'd, cannot test declare", 1
 	    unless defined $qv_declare;
-	$version = &$qv_declare(1.2.3);
+
+    $version = main->can($qv_declare)->(1.2.3);
 	ok("$version" eq "v1.2.3", 'v-string initialized $qv_declare()');
     }
 
@@ -400,7 +403,7 @@ SKIP: {
 	(my $package = basename($filename)) =~ s/\.pm$//;
 	print $fh <<"EOF";
 package $package;
-use $CLASS; \$VERSION = ${CLASS}->new('0.0.4');
+use $CLASS; our \$VERSION = ${CLASS}->new('0.0.4');
 1;
 EOF
 	close $fh;
@@ -430,21 +433,27 @@ EOF
 
 SKIP: {
     skip "Cannot test \"use parent $CLASS\"  when require is used", 3
-	unless defined $qv_declare;
+	   unless defined $qv_declare;
     my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
     (my $package = basename($filename)) =~ s/\.pm$//;
+    note "package $package; use parent $CLASS";
+    #delete $INC{$CLASS.'.pm'};
     print $fh <<"EOF";
 package $package;
-use parent $CLASS;
+use parent '$CLASS';
 1;
 EOF
     close $fh;
     # need to eliminate any other $qv_declare()'s
-    undef *{"main\::$qv_declare"};
-    ok(!defined(&{"main\::$qv_declare"}), "make sure we cleared $qv_declare() properly");
+    {
+        no strict 'refs';
+        undef *{"main\::$qv_declare"};
+    }
+    ok(!main->can($qv_declare), "make sure we cleared $qv_declare() properly");
     eval "use lib '.'; use $package qw/declare qv/;";
-    ok(defined(&{"main\::$qv_declare"}), "make sure we exported $qv_declare() properly");
-    isa_ok( &$qv_declare(1.2), $package);
+    die "Error: $@" if $@;
+    ok(main->can($qv_declare), "make sure we exported $qv_declare() properly");
+    isa_ok( main->can($qv_declare)->(1.2), $package);
     unlink $filename;
 }
 
@@ -456,7 +465,7 @@ SKIP: {
 	(my $package = basename($filename)) =~ s/\.pm$//;
 	print $fh <<"EOF";
 package $package;
-\$VERSION = 1.0;
+our \$VERSION = 1.0;
 1;
 EOF
 	close $fh;
@@ -614,23 +623,23 @@ SKIP: {
     }
     {
 	# now as a number
-	$two31 = 2**31;
-	$v = $CLASS->new($two31);
+	my $two31 = 2**31;
+	my $v = $CLASS->new($two31);
 	is "$v", 'v.Inf', 'Element Exceeds VERSION_MAX';
 	like $warning, qr/Integer overflow in version/, 'Overflow warning';
     }
     { # https://rt.cpan.org/Ticket/Display.html?id=101628
 	undef $warning;
-	$v = $CLASS->new('1.1.00000000010');
+	my $v = $CLASS->new('1.1.00000000010');
 	is $v->normal, "v1.1.10", 'Ignore leading zeros';
 	unlike $warning, qr/Integer overflow in version/, 'No overflow warning';
     }
     { # https://rt.cpan.org/Ticket/Display.html?id=93340
-	$v = $CLASS->parse(q[2.6_01]);
+	my $v = $CLASS->parse(q[2.6_01]);
 	is $v->normal, 'v2.601.0', 'Normal strips underscores from alphas'
     }
     { # https://rt.cpan.org/Ticket/Display.html?id=98744
-	$v = $CLASS->new("1.02_003");
+	my $v = $CLASS->new("1.02_003");
 	is $v->numify, '1.020030', 'Ignore underscores for numify';
     }
 }

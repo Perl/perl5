@@ -12,7 +12,7 @@ BEGIN {
 require Tie::Array;
 
 package Tie::BasicArray;
-@ISA = 'Tie::Array';
+our @ISA = 'Tie::Array';
 sub TIEARRAY  { bless [], $_[0] }
 sub STORE     { $_[0]->[$_[1]] = $_[2] }
 sub FETCH     { $_[0]->[$_[1]] }
@@ -36,14 +36,14 @@ my $foo = 42;
 sub no_op { $foo++ }
 
 
-$sch = {
+my $sch = {
     'abc' => 1,
     'def' => 2,
     'jkl' => 3,
 };
 
 # basic normal array
-$a = [];
+my $a = [];
 $a->[0] = $sch;
 
 eval {
@@ -62,12 +62,12 @@ eval {
 not_hash($@);
 
 eval {
-    @keys = keys %$a;
+    my @keys = keys %$a;
 };
 not_hash($@);
 
 eval {
-    @values = values %$a;
+    my @values = values %$a;
 };
 not_hash($@);
 
@@ -80,6 +80,7 @@ not_hash($@);
 
 
 # quick check with tied array
+my @fake;
 tie @fake, 'Tie::StdArray';
 $a = \@fake;
 $a->[0] = $sch;
@@ -110,8 +111,9 @@ eval {
 not_hash($@);
 
 # quick check with tied array & tied hash
+my %fake;
 require Tie::Hash;
-tie %fake, Tie::StdHash;
+{ no strict 'subs'; tie %fake, Tie::StdHash; }
 %fake = %$sch;
 $a->[0] = \%fake;
 
@@ -202,7 +204,7 @@ eval {
 not_hash($@);
 
 eval {
-    $v = delete $avhv->{bar};
+    my $v = delete $avhv->{bar};
 };
 not_hash($@);
 
@@ -224,7 +226,7 @@ eval {
 };
 not_hash($@);
 eval {
-    @x = delete @{$avhv}{'foo','pants'};
+    my @x = delete @{$avhv}{'foo','pants'};
 };
 not_hash($@);
 eval {
@@ -239,7 +241,7 @@ eval {
 not_hash($@);
 
 eval {
-    %hv = %$avhv;
+    my %hv = %$avhv;
 };
 not_hash($@);
 

@@ -2,7 +2,7 @@
 
 $|=1;
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bOpcode\b/ && $Config{'osname'} ne 'VMS') {
         print "1..0\n";
         exit 0;
@@ -40,8 +40,8 @@ like $@, qr/eval .* trapped by operation mask/;
 
 # Avoid infinite recursion when looking for coderefs
 my $r = $safe->reval(<<'END');
-%a = ();
-%b = (a => \%a);
+my %a = ();
+my %b = (a => \%a);
 $a{b} = \%b;
 42;
 END

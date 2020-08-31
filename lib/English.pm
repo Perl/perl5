@@ -1,9 +1,9 @@
 package English;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 require Exporter;
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
 =head1 NAME
 
@@ -54,6 +54,7 @@ no warnings;
 
 my $globbed_match ;
 
+our (@COMPLETE_EXPORT, @MINIMAL_EXPORT, @MATCH_EXPORT);
 # Grandfather $NAME import
 sub import {
     my $this = shift;

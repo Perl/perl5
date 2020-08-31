@@ -1,9 +1,11 @@
+#!perl
+
 BEGIN {
-	chdir 't' if -d 't';
-	require Config; import Config;
+    chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-	skip_all_without_perlio();
+    require Config; Config->import;
+    skip_all_without_perlio();
 }
 
 plan tests => 48;
@@ -155,6 +157,7 @@ sub find_filename {
 }
 
 # in-memory open
+our $TODO;
 SKIP: {
     eval { require PerlIO::scalar };
     unless (find PerlIO::Layer 'scalar') {

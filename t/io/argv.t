@@ -24,7 +24,7 @@ open(TRY, '>tmpIo_argv2.tmp') || (die "Can't open temp file: $!");
 print TRY "another line\n";
 close TRY or die "Could not close: $!";
 
-$x = runperl(
+my $x = runperl(
     prog	=> 'while (<>) { print $., $_; }',
     args	=> [ 'tmpIo_argv1.tmp', 'tmpIo_argv1.tmp' ],
 );
@@ -83,6 +83,8 @@ TODO: {
     is( 0+$?, 0, q(eof() doesn't segfault) );
 }
 
+my $y = '';
+
 @ARGV = is_miniperl() ? ('tmpIo_argv1.tmp', 'tmpIo_argv1.tmp', 'tmpIo_argv1.tmp')
     : ('tmpIo_argv1.tmp', 'tmpIo_argv1.tmp', $devnull, 'tmpIo_argv1.tmp');
 while (<>) {
@@ -119,7 +121,6 @@ undef $^I;
 ok( eof TRY );
 
 {
-    no warnings 'once';
     ok( eof NEVEROPENED,    'eof() true on unopened filehandle' );
 }
 
@@ -127,7 +128,9 @@ open STDIN, 'tmpIo_argv1.tmp' or die $!;
 @ARGV = ();
 ok( !eof(),     'STDIN has something' );
 
-is( <>, "ok 11\n" );
+my $stdin = <>;
+my $expect = "ok 11\n";
+is( $stdin, $expect, "Got what was expected from STDIN" );
 
 SKIP: {
     skip_if_miniperl($no_devnull, 4);
@@ -136,10 +139,10 @@ SKIP: {
     ok( eof(),      'eof() true with empty @ARGV' );
 
     @ARGV = ('tmpIo_argv1.tmp');
-    ok( !eof() );
+    ok( !eof(), 'one file in @ARGV' );
 
     @ARGV = ($devnull, $devnull);
-    ok( !eof() );
+    ok( !eof(), 'nothing but /dev/null in @ARGV' );
 
     close ARGV or die $!;
     ok( eof(),      'eof() true after closing ARGV' );
@@ -149,19 +152,19 @@ SKIP: {
     local $/;
     open my $fh, 'tmpIo_argv1.tmp' or die "Could not open tmpIo_argv1.tmp: $!";
     <$fh>;	# set $. = 1
-    is( <$fh>, undef );
+    is( <$fh>, undef, 'read from tempfile exhausted' );
 
     skip_if_miniperl($no_devnull, 5);
 
     open $fh, $devnull or die;
-    ok( defined(<$fh>) );
+    ok( defined(<$fh>), 'read from /dev/null defined' );
 
-    is( <$fh>, undef );
-    is( <$fh>, undef );
+    is( <$fh>, undef, 'read from tempfile exhausted' );
+    is( <$fh>, undef, 'read from tempfile still exhausted' );
 
     open $fh, $devnull or die;	# restart cycle again
-    ok( defined(<$fh>) );
-    is( <$fh>, undef );
+    ok( defined(<$fh>), 'read from /dev/null defined'  );
+    is( <$fh>, undef, 'read from tempfile again exhausted' );
     close $fh or die "Could not close: $!";
 }
 
@@ -176,7 +179,7 @@ $x = runperl(
 is($x, "1tmpIo_argv1.tmpone\n2tmpIo_argv1.tmp\n3tmpIo_argv1.tmpthree\n", '<<>>');
 
 $x = runperl(
-    prog	=> '$w=q/b/;$w.=<<>>;print $w',
+    prog	=> 'my $w=q/b/;$w.=<<>>;print $w',
     args	=> [ 'tmpIo_argv1.tmp' ],
 );
 is($x, "bone\n", '<<>> and rcatline');
@@ -258,7 +261,7 @@ unlink "tmpIo_argv3.tmp";
 # ++$x vivifies it, reusing the just-deleted GV that PL_argvgv still points
 # to.  The BEGIN block ensures it is freed late enough that nothing else
 # has reused it yet.
-is runperl(prog => 'undef *x; delete $::{ARGV}; $x++;'
+is runperl(prog => 'my $x; undef *x; delete $::{ARGV}; $x++;'
                   .'eval q-BEGIN{undef *x} readline-; print qq-ok\n-'),
   "ok\n", 'deleting $::{ARGV}';
 

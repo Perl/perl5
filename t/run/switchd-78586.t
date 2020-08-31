@@ -7,8 +7,6 @@ BEGIN {
     require './test.pl';
 }
 
-use strict;
-use warnings;
 no warnings 'redefine';
 
 plan 2;

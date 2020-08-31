@@ -29,7 +29,7 @@ our ($canonical, $forgive_me);
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.22';
+  $VERSION = '3.22_001';
 }
 
 our $recursion_limit;
@@ -335,8 +335,11 @@ sub _store_fd {
     # Call C routine nstore or pstore, depending on network order
     eval { $ret = &$xsptr($file, $self) };
     logcroak $@ if $@ =~ s/\.?\n$/,/;
-    local $\; print $file '';	# Autoflush the file if wanted
-    $@ = $da;
+    {
+        no strict 'refs';
+        local $\; print $file '';	# Autoflush the file if wanted
+        $@ = $da;
+    }
     return $ret;
 }
 

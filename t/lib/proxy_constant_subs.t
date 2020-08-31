@@ -2,13 +2,13 @@ my @symbols;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc('../lib');
     skip_all_without_dynamic_extension($_) foreach qw(B Fcntl);
     # S_IFMT is a real subroutine, and acts as control
     # SEEK_SET is a proxy constant subroutine.
     @symbols = qw(S_IFMT SEEK_SET);
 }
 
-use strict;
 use warnings;
 plan(4 * @symbols);
 use B qw(svref_2object GVf_IMPORTED_CV);

@@ -8,6 +8,7 @@ BEGIN {
 
 use feature "isa";
 no warnings qw(experimental::smartmatch experimental::isa);
+#no strict 'vars';
 
 my @cheqop = qw(== != eq ne);
 my @nceqop = qw(<=> cmp ~~);
@@ -23,22 +24,22 @@ plan tests => @nceqop*@nceqop + 2*@cheqop*@nceqop + 2*@cheqop*@cheqop*@nceqop +
 
 foreach my $c0 (@nceqop) {
     foreach my $c1 (@nceqop) {
-	is eval("sub { \$a $c0 \$b $c1 \$c }"), undef,
+	is eval("sub { no strict 'vars'; \$a $c0 \$b $c1 \$c }"), undef,
 	    "$c0 $c1 non-associative";
     }
 }
 foreach my $c (@nceqop) {
     foreach my $e (@cheqop) {
-	is eval("sub { \$a $c \$b $e \$c }"), undef, "$c $e non-associative";
-	is eval("sub { \$a $e \$b $c \$c }"), undef, "$e $c non-associative";
+	is eval("sub { no strict 'vars'; \$a $c \$b $e \$c }"), undef, "$c $e non-associative";
+	is eval("sub { no strict 'vars'; \$a $e \$b $c \$c }"), undef, "$e $c non-associative";
     }
 }
 foreach my $c (@nceqop) {
     foreach my $e0 (@cheqop) {
 	foreach my $e1 (@cheqop) {
-	    is eval("sub { \$a $c \$b $e0 \$c $e1 \$d }"), undef,
+	    is eval("sub { no strict 'vars'; \$a $c \$b $e0 \$c $e1 \$d }"), undef,
 		"$c $e0 $e1 non-associative";
-	    is eval("sub { \$a $e0 \$b $e1 \$c $c \$d }"), undef,
+	    is eval("sub { no strict 'vars'; \$a $e0 \$b $e1 \$c $c \$d }"), undef,
 		"$e0 $e1 $c non-associative";
 	}
     }
@@ -46,22 +47,22 @@ foreach my $c (@nceqop) {
 
 foreach my $c0 (@ncrelop) {
     foreach my $c1 (@ncrelop) {
-	is eval("sub { \$a $c0 \$b $c1 \$c }"), undef,
+	is eval("sub { no strict 'vars'; \$a $c0 \$b $c1 \$c }"), undef,
 	    "$c0 $c1 non-associative";
     }
 }
 foreach my $c (@ncrelop) {
     foreach my $e (@chrelop) {
-	is eval("sub { \$a $c \$b $e \$c }"), undef, "$c $e non-associative";
-	is eval("sub { \$a $e \$b $c \$c }"), undef, "$e $c non-associative";
+	is eval("sub { no strict 'vars'; \$a $c \$b $e \$c }"), undef, "$c $e non-associative";
+	is eval("sub { no strict 'vars'; \$a $e \$b $c \$c }"), undef, "$e $c non-associative";
     }
 }
 foreach my $c (@ncrelop) {
     foreach my $e0 (@chrelop) {
 	foreach my $e1 (@chrelop) {
-	    is eval("sub { \$a $c \$b $e0 \$c $e1 \$d }"), undef,
+	    is eval("sub { no strict 'vars'; \$a $c \$b $e0 \$c $e1 \$d }"), undef,
 		"$c $e0 $e1 non-associative";
-	    is eval("sub { \$a $e0 \$b $e1 \$c $c \$d }"), undef,
+	    is eval("sub { no strict 'vars'; \$a $e0 \$b $e1 \$c $c \$d }"), undef,
 		"$e0 $e1 $c non-associative";
 	}
     }
@@ -69,18 +70,18 @@ foreach my $c (@ncrelop) {
 
 foreach my $e0 (@cheqop) {
     foreach my $e1 (@cheqop) {
-	isnt eval("sub { \$a $e0 \$b $e1 \$c }"), undef, "$e0 $e1 legal";
+	isnt eval("sub { no strict 'vars'; \$a $e0 \$b $e1 \$c }"), undef, "$e0 $e1 legal";
     }
 }
 foreach my $r0 (@chrelop) {
     foreach my $r1 (@chrelop) {
-	isnt eval("sub { \$a $r0 \$b $r1 \$c }"), undef, "$r0 $r1 legal";
+	isnt eval("sub { no strict 'vars'; \$a $r0 \$b $r1 \$c }"), undef, "$r0 $r1 legal";
     }
 }
 foreach my $e0 (@cheqop) {
     foreach my $e1 (@cheqop) {
 	foreach my $e2 (@cheqop) {
-	    isnt eval("sub { \$a $e0 \$b $e1 \$c $e2 \$d }"), undef,
+	    isnt eval("sub { no strict 'vars'; \$a $e0 \$b $e1 \$c $e2 \$d }"), undef,
 		"$e0 $e1 $e2 legal";
 	}
     }
@@ -88,7 +89,7 @@ foreach my $e0 (@cheqop) {
 foreach my $r0 (@chrelop) {
     foreach my $r1 (@chrelop) {
 	foreach my $r2 (@chrelop) {
-	    isnt eval("sub { \$a $r0 \$b $r1 \$c $r2 \$d }"), undef,
+	    isnt eval("sub { no strict 'vars'; \$a $r0 \$b $r1 \$c $r2 \$d }"), undef,
 		"$r0 $r1 $r2 legal";
 	}
     }

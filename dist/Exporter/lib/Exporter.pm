@@ -9,7 +9,7 @@ require 5.006;
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.74';
+our $VERSION = '5.75';
 our (%Cache);
 
 sub as_heavy {
@@ -29,6 +29,7 @@ sub import {
   my $pkg = shift;
   my $callpkg = caller($ExportLevel);
 
+  no strict 'refs';
   if ($pkg eq "Exporter" and @_ and $_[0] eq "import") {
     *{$callpkg."::import"} = \&import;
     return;

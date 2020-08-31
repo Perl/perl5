@@ -50,7 +50,7 @@ sub is {
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
-$foo = "FOO";
+my $foo = "FOO";
 my $bar = "BAR";
 $_ = 42;
 
@@ -60,6 +60,7 @@ f("FOO 42", $foo);
 f("BAR 42", $bar);
 f("y 42", substr("xy",1,1));
 f("1 42", ("abcdef" =~ /abc/));
+my $undef;
 f("not undef 42", $undef || "not undef");
 f(" 42", -f "no_such_file");
 f("FOOBAR 42", ($foo . $bar));
@@ -73,6 +74,7 @@ like( $@, qr/Too many arguments for main::f at/ );
 
 &f(""); # no error
 
+my $expected;
 sub g(_) { is(shift, $expected) }
 
 $expected = "foo";

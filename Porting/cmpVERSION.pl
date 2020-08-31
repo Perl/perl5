@@ -90,11 +90,16 @@ my %skip;
     'cpan/Math-BigInt/t/Math/BigInt/Scalar.pm',     # just a test module
     'cpan/Math-BigInt/t/Math/BigInt/Subclass.pm',   # just a test module
     'cpan/Math-BigRat/t/Math/BigRat/Test.pm',       # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/Commented.pm', # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/LoadIt.pm', # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/MustBe/Loaded.pm', # just a test module
+    'cpan/parent/t/lib/Dummy.pm', # just a test module
     'cpan/podlators/t/lib/Test/Podlators.pm',       # just a test module
     'cpan/podlators/t/lib/Test/RRA.pm',             # just a test module
     'cpan/podlators/t/lib/Test/RRA/Config.pm',      # just a test module
     'cpan/version/t/coretests.pm', # just a test module
     'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
+    'dist/base/t/lib/Dummy.pm', # just a test module
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'dist/Module-CoreList/lib/Module/CoreList.pm',
     'dist/Module-CoreList/lib/Module/CoreList/Utils.pm',

@@ -29,9 +29,9 @@ print STDOUT "ok 2\n";
 print STDERR "ok 3\n";
 
 # Since some systems don't have echo, we use Perl.
-$echo = qq{$^X -le "print q(ok %d)"};
+my $echo = qq{$^X -le "print q(ok %d)"};
 
-$cmd = sprintf $echo, 4;
+my $cmd = sprintf $echo, 4;
 print `$cmd`;
 
 $cmd = sprintf "$echo 1>&2", 5;

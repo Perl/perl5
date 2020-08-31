@@ -101,6 +101,7 @@ package _131645{
     sub FETCH     { 0        }
     sub STORE     {          }
 }
+my ($tie, $numeric_tie);
 tie $tie, _131645::;
 select ($tie, undef, undef, $tie);
 ok("no crash from select $numeric_tie, undef, undef, $numeric_tie")

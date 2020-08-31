@@ -1,7 +1,12 @@
 #!/perl -w
+
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config; Config->import;
+}
 use 5.010;
-use strict;
-use Config;
 
 # This test checks that anything with an executable bit is
 # identified in Porting/exec-bit.txt to makerel will set

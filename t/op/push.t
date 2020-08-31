@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-@tests = split(/\n/, <<EOF);
+my @tests = split(/\n/, <<EOF);
 0 3,			0 1 2,		3 4 5 6 7
 0 0 a b c,		,		a b c 0 1 2 3 4 5 6 7
 8 0 a b c,		,		0 1 2 3 4 5 6 7 a b c
@@ -23,13 +23,14 @@ EOF
 plan tests => 10 + @tests*2;
 die "blech" unless @tests;
 
-@x = (1,2,3);
+my @x = (1,2,3);
 push(@x,@x);
 is( join(':',@x), '1:2:3:1:2:3', 'push array onto array');
 push(@x,4);
 is( join(':',@x), '1:2:3:1:2:3:4', 'push integer onto array');
 
 # test autovivification
+my $undef1;
 push @$undef1, 1, 2, 3;
 is( join(':',@$undef1), '1:2:3', 'autovivify array');
 
@@ -37,14 +38,14 @@ is( join(':',@$undef1), '1:2:3', 'autovivify array');
 eval "push 42, 0, 1, 2, 3";
 like ( $@, qr/must be array/, 'push onto a literal integer');
 
-$hashref = { };
+my $hashref = { };
 eval q{ push $hashref, 0, 1, 2, 3 };
 like( $@, qr/Experimental push on scalar is now forbidden/, 'push onto a hashref');
 
 eval q{ push bless([]), 0, 1, 2, 3 };
 like( $@, qr/Experimental push on scalar is now forbidden/, 'push onto a blessed array ref');
 
-$test = 13;
+my $test = 13;
 
 # test context
 {
@@ -55,12 +56,13 @@ $test = 13;
     is( join(':',@$second), '2:3', "\$second = [ @$second ]");
 }
 
-foreach $line (@tests) {
-    ($list,$get,$leave) = split(/,\t*/,$line);
-    ($pos, $len, @list) = split(' ',$list);
-    @get = split(' ',$get);
-    @leave = split(' ',$leave);
-    @x = (0,1,2,3,4,5,6,7);
+foreach my $line (@tests) {
+    my ($list,$get,$leave) = split(/,\t*/,$line);
+    my ($pos, $len, @list) = split(' ',$list);
+    my @get = split(' ',$get);
+    my @leave = split(' ',$leave);
+    my @x = (0,1,2,3,4,5,6,7);
+    my @got;
     if (defined $len) {
 	@got = splice(@x, $pos, $len, @list);
     }

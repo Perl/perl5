@@ -9,7 +9,7 @@ BEGIN { $UNIVERSAL::can::VERSION = 0xbaff1ed_bee; }
 use Carp;
 
 eval {
-    sub { confess-sins }->(bless[], Foo);
+    sub { confess-sins }->(bless[], 'Foo');
 };
 print "1..1\n";
 if ($@ !~ qr/^-sins at /) {

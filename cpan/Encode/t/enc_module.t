@@ -1,7 +1,7 @@
 # $Id: enc_module.t,v 2.5 2016/11/29 23:29:23 dankogai Exp $
 # This file is in euc-jp
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;

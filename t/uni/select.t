@@ -15,6 +15,8 @@ use open qw( :utf8 :std );
 
 plan( tests => 5 );
 
+no strict 'vars';
+
 open DÙP, ">&", *STDERR;
 open $dùp, ">&", *STDOUT;
 open 둪,  ">&", *STDERR;

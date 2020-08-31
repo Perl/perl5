@@ -8,7 +8,7 @@ BEGIN {
 	if $^O eq 'VMS';
 }
 
-use strict;
+
 
 ++$|;
 

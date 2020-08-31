@@ -1,7 +1,8 @@
 #!./perl
 
+my ($has_echo, $alarmed, $has_alarm);
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
@@ -48,6 +49,7 @@ SKIP: {
 	arm(0);
 
 	arm(5);
+	my ($read, $buff);
 	$read = sysread(T,$buff,10);	# Connection may be granted, then closed!
 	arm(0);
 
@@ -87,6 +89,7 @@ SKIP: {
 	arm(0);
 
 	arm(5);
+	my ($read, $buff);
 	$read = sysread(S,$buff,10);	# Connection may be granted, then closed!
 	arm(0);
 

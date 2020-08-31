@@ -3,15 +3,16 @@ Check strict vars functionality
 __END__
 
 # no strict, should build & run ok.
+no strict ;
 Fred ;
 my $fred ;
-$b = "fred" ;
-$a = $$b ;
+$beta = "fred" ;
+$alpha = $$beta ;
 EXPECT
 
 ########
 
-use strict qw(subs refs) ;
+no strict 'vars' ;
 $fred ;
 EXPECT
 
@@ -38,7 +39,7 @@ use strict 'vars' ;
 use vars qw( $freddy) ;
 local $abc::joe ;
 my $fred ;
-my $b = \$fred ;
+my $beta = \$fred ;
 $Fred::ABC = 1 ;
 $freddy = 2 ;
 EXPECT
@@ -110,6 +111,7 @@ Execution of - aborted due to compilation errors.
 ########
 
 --FILE-- abc
+no strict 'vars' ;
 $joe = 1 ;
 1;
 --FILE-- 
@@ -124,6 +126,7 @@ use strict 'vars' ;
 1;
 --FILE-- 
 require "./abc";
+no strict 'vars' ;
 $joe = 1 ;
 EXPECT
 
@@ -134,12 +137,13 @@ use strict 'vars' ;
 $joe = 1 ;
 1;
 --FILE-- 
+no strict 'vars' ;
 $joe = 1 ;
 require "./abc";
 EXPECT
 Variable "$joe" is not imported at ./abc line 2.
 Global symbol "$joe" requires explicit package name (did you forget to declare "my $joe"?) at ./abc line 2.
-Compilation failed in require at - line 2.
+Compilation failed in require at - line 3.
 ########
 
 --FILE-- abc
@@ -149,6 +153,7 @@ use open qw( :utf8 :std );
 $jòè = 1 ;
 1;
 --FILE-- 
+no strict 'vars' ;
 use utf8;
 use open qw( :utf8 :std );
 $jòè = 1 ;
@@ -156,7 +161,7 @@ require "./abc";
 EXPECT
 Variable "$jòè" is not imported at ./abc line 4.
 Global symbol "$jòè" requires explicit package name (did you forget to declare "my $jòè"?) at ./abc line 4.
-Compilation failed in require at - line 4.
+Compilation failed in require at - line 5.
 ########
 
 --FILE-- abc.pm
@@ -164,13 +169,14 @@ use strict 'vars' ;
 $joe = 1 ;
 1;
 --FILE-- 
+no strict 'vars' ;
 $joe = 1 ;
 use abc;
 EXPECT
 Variable "$joe" is not imported at abc.pm line 2.
 Global symbol "$joe" requires explicit package name (did you forget to declare "my $joe"?) at abc.pm line 2.
-Compilation failed in require at - line 2.
-BEGIN failed--compilation aborted at - line 2.
+Compilation failed in require at - line 3.
+BEGIN failed--compilation aborted at - line 3.
 ########
 
 --FILE-- abc.pm
@@ -180,6 +186,7 @@ use open qw( :utf8 :std );
 $jòè = 1 ;
 1;
 --FILE-- 
+no strict 'vars' ;
 use utf8;
 use open qw( :utf8 :std );
 $jòè = 1 ;
@@ -187,15 +194,15 @@ use abc;
 EXPECT
 Variable "$jòè" is not imported at abc.pm line 4.
 Global symbol "$jòè" requires explicit package name (did you forget to declare "my $jòè"?) at abc.pm line 4.
-Compilation failed in require at - line 4.
-BEGIN failed--compilation aborted at - line 4.
+Compilation failed in require at - line 5.
+BEGIN failed--compilation aborted at - line 5.
 ########
 
 --FILE-- abc.pm
 package Burp;
 use strict;
-$a = 1;$f = 1;$k = 1; # just to get beyond the limit...
-$b = 1;$g = 1;$l = 1;
+$alpha = 1;$f = 1;$k = 1; # just to get beyond the limit...
+$beta = 1;$g = 1;$l = 1;
 $c = 1;$h = 1;$m = 1;
 $d = 1;$i = 1;$n = 1;
 $e = 1;$j = 1;$o = 1;
@@ -203,8 +210,10 @@ $p = 0b12;
 --FILE-- 
 use abc;
 EXPECT
+Global symbol "$alpha" requires explicit package name (did you forget to declare "my $alpha"?) at abc.pm line 3.
 Global symbol "$f" requires explicit package name (did you forget to declare "my $f"?) at abc.pm line 3.
 Global symbol "$k" requires explicit package name (did you forget to declare "my $k"?) at abc.pm line 3.
+Global symbol "$beta" requires explicit package name (did you forget to declare "my $beta"?) at abc.pm line 4.
 Global symbol "$g" requires explicit package name (did you forget to declare "my $g"?) at abc.pm line 4.
 Global symbol "$l" requires explicit package name (did you forget to declare "my $l"?) at abc.pm line 4.
 Global symbol "$c" requires explicit package name (did you forget to declare "my $c"?) at abc.pm line 5.
@@ -351,7 +360,7 @@ use strict 'vars' ;
 our $freddy;
 local $abc::joe ;
 my $fred ;
-my $b = \$fred ;
+my $beta = \$fred ;
 $Fred::ABC = 1 ;
 $freddy = 2 ;
 EXPECT
@@ -419,6 +428,7 @@ Execution of - aborted due to compilation errors.
 ########
 
 # nested our with local - no error
+no strict 'vars';
 $fred = 1;
 use strict 'vars';
 {
@@ -530,34 +540,34 @@ EXPECT
 Global symbol "$fòò" requires explicit package name (did you forget to declare "my $fòò"?) at - line 5.
 Execution of - aborted due to compilation errors.
 ########
-# [perl #73712] 'Variable is not imported' should be suppressible
+# [perl #73712] [gh #10245] 'Variable is not imported' should be suppressible
+no strict 'vars';
 $dweck;
-use strict 'vars';
 no warnings;
 eval q/$dweck/;
 EXPECT
 ########
-# [perl #112316] strict vars getting confused by nulls
+# [perl #112316] [gh #12040] strict vars getting confused by nulls
 # Assigning to a package whose name contains a null
-BEGIN { *Foo:: = *{"foo\0bar::"} }
+BEGIN { no strict 'refs'; *Foo:: = *{"foo\0bar::"} }
 package foo;
 *Foo::bar = [];
 use strict;
 eval 'package Foo; @bar = 1' or die;
 EXPECT
 ########
-# [perl #112316] strict vars getting confused by nulls
+# [perl #112316] [gh #12040] strict vars getting confused by nulls
 # Assigning from within a package whose name contains a null
-BEGIN { *Foo:: = *{"foo\0bar::"} }
+BEGIN { no strict 'refs'; *Foo:: = *{"foo\0bar::"} }
 package Foo;
 *foo::bar = [];
 use strict;
 eval 'package foo; @bar = 1' or die;
 EXPECT
 ########
-# [perl #112316] strict vars getting confused by nulls
+# [perl #112316] [gh #12040] strict vars getting confused by nulls
 # Assigning from one null package to another, with a common prefix
-BEGIN { *Foo:: = *{"foo\0foo::"};
+BEGIN { no strict 'refs'; *Foo:: = *{"foo\0foo::"};
         *Bar:: = *{"foo\0bar::"} }
 package Foo;
 *Bar::bar = [];

@@ -2,9 +2,10 @@
 
 # Check that lines from eval are correctly retained by the debugger
 
-# Uncomment this for testing, but don't leave it in for "production", as
-# we've not yet verified that use works.
-# use strict;
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib'; # needed to locate strict for instances of 'no strict'
+}
 
 print "1..75\n";
 my $test = 0;
@@ -16,9 +17,9 @@ sub failed {
     my @caller = caller(1);
     print "# Failed test at $caller[1] line $caller[2]\n";
     if (defined $got) {
-	print "# Got '$got'\n";
+        print "# Got '$got'\n";
     } else {
-	print "# Got undef\n";
+        print "# Got undef\n";
     }
     print "# Expected $expected\n";
     return;
@@ -28,17 +29,17 @@ sub is($$$) {
     my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $expect) {
-	if (defined $got && $got eq $expect) {
-	    print "ok $test - $name\n";
-	    return 1;
-	}
-	failed($got, "'$expect'", $name);
+        if (defined $got && $got eq $expect) {
+            print "ok $test - $name\n";
+            return 1;
+        }
+        failed($got, "'$expect'", $name);
     } else {
-	if (!defined $got) {
-	    print "ok $test - $name\n";
-	    return 1;
-	}
-	failed($got, 'undef', $name);
+        if (!defined $got) {
+            print "ok $test - $name\n";
+            return 1;
+        }
+        failed($got, 'undef', $name);
     }
 }
 
@@ -62,10 +63,10 @@ sub check_retained_lines {
     my @got_lines = @{$::{$keys[0]}};
 
     is ((scalar @got_lines),
-	(scalar @expect_lines), "Right number of lines for $name");
+    (scalar @expect_lines), "Right number of lines for $name");
 
     for (0..$#expect_lines) {
-	is ($got_lines[$_], $expect_lines[$_], "Line $_ is correct");
+        is ($got_lines[$_], $expect_lines[$_], "Line $_ is correct");
     }
     $seen{$keys[0]}++;
 }
@@ -80,7 +81,7 @@ for my $sep (' ', "\0") {
 1;
 ";
 
-    eval $prog or die;
+    eval $prog or die;  # "
     check_retained_lines($prog, ord $sep);
     $name++;
 }
@@ -93,13 +94,13 @@ for my $sep (' ', "\0") {
 1 +
 ";
 
-  eval $prog and die;
+  eval $prog and die;   # "
 
   is (eval "$name()", "This is $name", "Subroutine was compiled, despite error")
     or print STDERR "# $@\n";
 
   check_retained_lines($prog,
-		       'eval that defines subroutine but has syntax error');
+      'eval that defines subroutine but has syntax error');
   $name++;
 }
 
@@ -112,23 +113,23 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
 
     is (eval $prog, 3, 'String eval works');
     if ($flags & 0x800) {
-	check_retained_lines($prog, sprintf "%#X", $^P);
+        check_retained_lines($prog, sprintf "%#X", $^P);
     } else {
-	my @after = grep { /eval/ } keys %::;
+        my @after = grep { /eval/ } keys %::;
 
-	is (scalar @after, 0 + keys %seen,
-	    "evals that don't define subroutines are correctly cleaned up");
+        is (scalar @after, 0 + keys %seen,
+            "evals that don't define subroutines are correctly cleaned up");
     }
 
     is (eval $fail, undef, 'Failed string eval fails');
 
     if ($flags & 0x1000) {
-	check_retained_lines($fail, sprintf "%#X", $^P);
+        check_retained_lines($fail, sprintf "%#X", $^P);
     } else {
-	my @after = grep { /eval/ } keys %::;
+        my @after = grep { /eval/ } keys %::;
 
-	is (scalar @after, 0 + keys %seen,
-	    "evals that fail are correctly cleaned up");
+        is (scalar @after, 0 + keys %seen,
+            "evals that fail are correctly cleaned up");
     }
 }
 
@@ -164,6 +165,7 @@ for (0xA, 0) {
 
 # Modifying ${"_<foo"} should not stop lines from being retained.
 {
+  no strict 'refs';
   local $^P = 0x400|0x100|0x10;
   eval <<'end';
 #line 42 "copfilesv-modification"

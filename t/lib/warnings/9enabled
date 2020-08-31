@@ -1056,8 +1056,8 @@ package def ;
 no warnings ;
 use warnings::register ;
 require Exporter;
-@ISA = qw( Exporter ) ;
-@EXPORT = qw( in1 ) ;
+our @ISA = qw( Exporter ) ;
+our @EXPORT = qw( in1 ) ;
 sub check {
   print "ok1\n" if  warnings::enabled() ;
   print "ok2\n" if !warnings::enabled("io") ;
@@ -1143,7 +1143,7 @@ $| = 1;
 package abc51 ;
 use warnings::register ;
 use def ;
-@ISA = qw(def) ;
+our @ISA = qw(def) ;
 sub new
 {
     my $class = shift ;

@@ -3,6 +3,7 @@ Check strict refs functionality
 __END__
 
 # no strict, should build & run ok.
+no strict;
 my $fred ;
 $b = "fred" ;
 $a = $$b ;
@@ -18,42 +19,37 @@ EXPECT
 ########
 
 # strict refs - error
-use strict ;
 my $str="A::Really::Big::Package::Name::To::Use"; 
 $str->{foo}= 1;
 EXPECT
-Can't use string ("A::Really::Big::Package::Name::T"...) as a HASH ref while "strict refs" in use at - line 5.
+Can't use string ("A::Really::Big::Package::Name::T"...) as a HASH ref while "strict refs" in use at - line 4.
 ########
 
 # strict refs - error
-use strict ;
 "A::Really::Big::Package::Name::To::Use" =~ /(.*)/; 
 ${$1};
 EXPECT
-Can't use string ("A::Really::Big::Package::Name::T"...) as a SCALAR ref while "strict refs" in use at - line 5.
+Can't use string ("A::Really::Big::Package::Name::T"...) as a SCALAR ref while "strict refs" in use at - line 4.
 ########
 
 # strict refs - error
-use strict ;
 *{"A::Really::Big::Package::Name::To::Use"; }
+EXPECT
+Can't use string ("A::Really::Big::Package::Name::T"...) as a symbol ref while "strict refs" in use at - line 3.
+########
+
+# strict refs - error
+"A::Really::Big::Package::Name::To::Use" =~ /(.*)/;
+*{$1}
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a symbol ref while "strict refs" in use at - line 4.
 ########
 
 # strict refs - error
-use strict ;
-"A::Really::Big::Package::Name::To::Use" =~ /(.*)/;
-*{$1}
-EXPECT
-Can't use string ("A::Really::Big::Package::Name::T"...) as a symbol ref while "strict refs" in use at - line 5.
-########
-
-# strict refs - error
-use strict ;
 my $fred ;
 my $a = ${"fred"} ;
 EXPECT
-Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 5.
+Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 4.
 ########
 
 # strict refs - error
@@ -119,8 +115,7 @@ EXPECT
 Can't use bareword ("fred") as a HASH ref while "strict refs" in use at - line 4.
 ########
 
-# strict refs - no error
-use strict ;
+# no strict refs - no error
 no strict 'refs' ;
 my $fred ;
 my $b = "fred" ;
@@ -130,20 +125,20 @@ EXPECT
 
 ########
 
-# strict refs - no error
-use strict qw(subs vars) ;
+# no strict refs - no error
+no strict 'refs' ;
 my $fred ;
-my $b = "fred" ;
-my $a = $$b ;
-use strict 'refs' ;
+my $beta = "fred" ;
+my $alpha = $$beta ;
 EXPECT
 
 ########
 
-# strict refs - no error
+# no strict refs - no error
+no strict 'refs' ;
 my $fred ;
-my $b = "fred" ;
-my $a = $$b ;
+my $beta = "fred" ;
+my $alpha = $$beta ;
 use strict 'refs' ;
 EXPECT
 
@@ -197,9 +192,9 @@ EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 8.
 ########
 
-
 --FILE-- abc
-my $a = ${"Fred"} ;
+no strict 'refs' ;
+my $alpha = ${"Fred"} ;
 1;
 --FILE-- 
 use strict 'refs' ;
@@ -213,21 +208,21 @@ use strict 'refs' ;
 1;
 --FILE-- 
 require "./abc";
-my $a = ${"Fred"} ;
+no strict 'refs' ;
+my $alpha = ${"Fred"} ;
 EXPECT
 
 ########
 
 --FILE-- abc
 use strict 'refs' ;
-my $a = ${"Fred"} ;
+my $alpha = ${"Fred"} ;
 1;
 --FILE-- 
 ${"Fred"} ;
 require "./abc";
 EXPECT
-Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at ./abc line 2.
-Compilation failed in require at - line 2.
+Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at - line 1.
 ########
 
 --FILE-- abc.pm

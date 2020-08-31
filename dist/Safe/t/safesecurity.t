@@ -1,8 +1,7 @@
 #!perl
 
 BEGIN {
-    require Config;
-    import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bOpcode\b/) {
 	print "1..0\n";
 	exit 0;

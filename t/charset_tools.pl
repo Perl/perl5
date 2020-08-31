@@ -82,11 +82,9 @@ if ($::IS_EBCDIC) {
     #diag($string);
     #diag($length);
     my $out = "";
-    for ($i = 0; $i < $length; $i++) {
+    for (my $i = 0; $i < $length; $i++) {
         my $byte = ord substr($string, $i, 1);
         my $byte_count = $utf8_skip[$byte];
-        #diag($byte);
-        #diag($byte_count);
 
         die "Illegal start byte" if $byte_count < 0;
         if ($i + $byte_count > $length) {

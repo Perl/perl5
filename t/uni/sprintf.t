@@ -8,63 +8,64 @@ BEGIN {
 
 plan tests => 52;
 
-$a = "B\x{fc}f";
-$b = "G\x{100}r";
+my ($alpha, $beta, $c);
+$alpha = "B\x{fc}f";
+$beta = "G\x{100}r";
 $c = 0x200;
 
 {
-    my $s = sprintf "%s", $a;
-    is($s, $a, "%s a");
+    my $s = sprintf "%s", $alpha;
+    is($s, $alpha, "%s a");
 }
 
 {
-    my $s = sprintf "%s", $b;
-    is($s, $b, "%s b");
+    my $s = sprintf "%s", $beta;
+    is($s, $beta, "%s b");
 }
 
 {
-    my $s = sprintf "%s%s", $a, $b;
-    is($s, $a.$b, "%s%s a b");
+    my $s = sprintf "%s%s", $alpha, $beta;
+    is($s, $alpha.$beta, "%s%s a b");
 }
 
 {
-    my $s = sprintf "%s%s", $b, $a;
-    is($s, $b.$a, "%s%s b a");
+    my $s = sprintf "%s%s", $beta, $alpha;
+    is($s, $beta.$alpha, "%s%s b a");
 }
 
 {
-    my $s = sprintf "%s%s", $b, $b;
-    is($s, $b.$b, "%s%s b b");
+    my $s = sprintf "%s%s", $beta, $beta;
+    is($s, $beta.$beta, "%s%s b b");
 }
 
 {
-    my $s = sprintf "%s$b", $a;
-    is($s, $a.$b, "%sb a");
+    my $s = sprintf "%s$beta", $alpha;
+    is($s, $alpha.$beta, "%sb a");
 }
 
 {
-    my $s = sprintf "$b%s", $a;
-    is($s, $b.$a, "b%s a");
+    my $s = sprintf "$beta%s", $alpha;
+    is($s, $beta.$alpha, "b%s a");
 }
 
 {
-    my $s = sprintf "%s$a", $b;
-    is($s, $b.$a, "%sa b");
+    my $s = sprintf "%s$alpha", $beta;
+    is($s, $beta.$alpha, "%sa b");
 }
 
 {
-    my $s = sprintf "$a%s", $b;
-    is($s, $a.$b, "a%s b");
+    my $s = sprintf "$alpha%s", $beta;
+    is($s, $alpha.$beta, "a%s b");
 }
 
 {
-    my $s = sprintf "$a%s", $a;
-    is($s, $a.$a, "a%s a");
+    my $s = sprintf "$alpha%s", $alpha;
+    is($s, $alpha.$alpha, "a%s a");
 }
 
 {
-    my $s = sprintf "$b%s", $b;
-    is($s, $b.$b, "a%s b");
+    my $s = sprintf "$beta%s", $beta;
+    is($s, $beta.$beta, "a%s b");
 }
 
 {
@@ -73,55 +74,55 @@ $c = 0x200;
 }
 
 {
-    my $s = sprintf "%s%c", $a, $c;
-    is($s, $a.chr($c), "%s%c a c");
+    my $s = sprintf "%s%c", $alpha, $c;
+    is($s, $alpha.chr($c), "%s%c a c");
 }
 
 {
-    my $s = sprintf "%c%s", $c, $a;
-    is($s, chr($c).$a, "%c%s c a");
+    my $s = sprintf "%c%s", $c, $alpha;
+    is($s, chr($c).$alpha, "%c%s c a");
 }
 
 {
-    my $s = sprintf "%c$b", $c;
-    is($s, chr($c).$b, "%cb c");
+    my $s = sprintf "%c$beta", $c;
+    is($s, chr($c).$beta, "%cb c");
 }
 
 {
-    my $s = sprintf "%s%c$b", $a, $c;
-    is($s, $a.chr($c).$b, "%s%cb a c");
+    my $s = sprintf "%s%c$beta", $alpha, $c;
+    is($s, $alpha.chr($c).$beta, "%s%cb a c");
 }
 
 {
-    my $s = sprintf "%c%s$b", $c, $a;
-    is($s, chr($c).$a.$b, "%c%sb c a");
+    my $s = sprintf "%c%s$beta", $c, $alpha;
+    is($s, chr($c).$alpha.$beta, "%c%sb c a");
 }
 
 {
-    my $s = sprintf "$b%c", $c;
-    is($s, $b.chr($c), "b%c c");
+    my $s = sprintf "$beta%c", $c;
+    is($s, $beta.chr($c), "b%c c");
 }
 
 {
-    my $s = sprintf "$b%s%c", $a, $c;
-    is($s, $b.$a.chr($c), "b%s%c a c");
+    my $s = sprintf "$beta%s%c", $alpha, $c;
+    is($s, $beta.$alpha.chr($c), "b%s%c a c");
 }
 
 {
-    my $s = sprintf "$b%c%s", $c, $a;
-    is($s, $b.chr($c).$a, "b%c%s c a");
+    my $s = sprintf "$beta%c%s", $c, $alpha;
+    is($s, $beta.chr($c).$alpha, "b%c%s c a");
 }
 
 {
     # 20010407.008 (#6769) sprintf removes utf8-ness
-    $a = sprintf "\x{1234}";
-    is((sprintf "%x %d", unpack("U*", $a), length($a)),    "1234 1",
+    $alpha = sprintf "\x{1234}";
+    is((sprintf "%x %d", unpack("U*", $alpha), length($alpha)),    "1234 1",
        '\x{1234}');
-    $a = sprintf "%s", "\x{5678}";
-    is((sprintf "%x %d", unpack("U*", $a), length($a)),    "5678 1",
+    $alpha = sprintf "%s", "\x{5678}";
+    is((sprintf "%x %d", unpack("U*", $alpha), length($alpha)),    "5678 1",
        '%s \x{5678}');
-    $a = sprintf "\x{1234}%s", "\x{5678}";
-    is((sprintf "%x %x %d", unpack("U*", $a), length($a)), "1234 5678 2",
+    $alpha = sprintf "\x{1234}%s", "\x{5678}";
+    is((sprintf "%x %x %d", unpack("U*", $alpha), length($alpha)), "1234 5678 2",
        '\x{1234}%s \x{5678}');
 }
 

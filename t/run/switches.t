@@ -7,14 +7,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
     require Config; Config->import;
+    require "./loc_tools.pl";
 }
 
-BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
-
 plan(tests => 137);
-
-use Config;
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
 # to emulate echo -n (ie. stdin always winds up with a newline), these 
@@ -156,6 +154,7 @@ SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
 #!perl -s
+our ($x,$y);
 BEGIN { print $x,$y; exit }
 SWTEST
     close $f or die "Could not close: $!";
@@ -172,6 +171,7 @@ SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
 #!perl -sn
+our ($x,$y);
 BEGIN { print $x; exit }
 SWTEST
     close $f or die "Could not close: $!";

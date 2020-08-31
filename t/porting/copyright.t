@@ -18,9 +18,12 @@ working on older releases. It should be run before making a new release.
 
 =cut
 
-use strict;
-use Config;
-BEGIN { require './test.pl' }
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config; Config->import;
+}
 
 if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );

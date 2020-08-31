@@ -6,6 +6,7 @@ BEGIN {
 }
 
 plan 167;
+no strict 'vars';
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,

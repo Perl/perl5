@@ -1,4 +1,7 @@
 #!./perl
+
+
+
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  Copyright (c) 2017, cPanel Inc
@@ -7,11 +10,13 @@
 #  in the README file that comes with the distribution.
 #
 
+
 sub BEGIN {
     unshift @INC, 'dist/Storable/t' if $ENV{PERL_CORE} and -d 'dist/Storable/t';
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -23,12 +28,12 @@ sub BEGIN {
 use Storable qw(store retrieve nstore);
 use Test::More tests => 20;
 
-$a = 'toto';
-$b = \$a;
-$c = bless {}, CLASS;
+my $a = 'toto';
+my $b = \$a;
+my $c = bless {}, 'CLASS';
 $c->{attribute} = 'attrval';
-%a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', '', undef, 3, -4, -3.14159, 456, 4.5,
+my %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
+my @a = ('first', '', undef, 3, -4, -3.14159, 456, 4.5,
 	$b, \$a, $a, $c, \$c, \%a);
 
 isnt(store(\@a, "store$$"), undef);
@@ -37,17 +42,17 @@ isnt(nstore(\@a, 'nstore'), undef);
 is(Storable::last_op_in_netorder(), 1);
 is(Storable::last_op_in_netorder(), 1);
 
-$root = retrieve("store$$");
+my $root = retrieve("store$$");
 isnt($root, undef);
 is(Storable::last_op_in_netorder(), '');
 
-$nroot = retrieve('nstore');
+my $nroot = retrieve('nstore');
 isnt($root, undef);
 is(Storable::last_op_in_netorder(), 1);
 
-$d1 = &dump($root);
+my $d1 = &dump($root);
 isnt($d1, undef);
-$d2 = &dump($nroot);
+my $d2 = &dump($nroot);
 isnt($d2, undef);
 
 is($d1, $d2);

@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.47';
+our $VERSION = '1.47';
 
 BEGIN {
     require './regen/regen_lib.pl';

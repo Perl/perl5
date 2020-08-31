@@ -201,7 +201,7 @@ like ($@, qr/Can't use string \("foo"\) as a SCALAR ref while "strict refs" in u
 eval 'use 5.11.0; no strict "refs"; ${"foo"} = "bar";';
 is ($@, "", "... but strictures can be disabled");
 # and they are properly scoped
-eval '{use 5.11.0;} ${"foo"} = "bar";';
+{ no strict 'refs'; eval '{use 5.11.0;} ${"foo"} = "bar";'; }
 is ($@, "", "... and they are properly scoped");
 
 eval 'no strict; use 5.012; ${"foo"} = "bar"';
@@ -212,7 +212,7 @@ like $@, qr/^Can't use string/,
 eval 'use strict "subs"; use 5.012; ${"foo"} = "bar"';
 like $@, qr/^Can't use string/,
     'explicit use strict "subs" does not stop ver decl from enabling refs';
-eval 'use 5.012; use 5.01; ${"foo"} = "bar"';
+{ no strict 'refs'; eval 'use 5.012; use 5.01; ${"foo"} = "bar"'; }
 is $@, "", 'use 5.01 overrides implicit strict from prev ver decl';
 eval 'no strict "subs"; use 5.012; ${"foo"} = "bar"';
 ok $@, 'no strict subs allows ver decl to enable refs';

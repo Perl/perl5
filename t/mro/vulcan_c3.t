@@ -1,9 +1,13 @@
 #!./perl
 
-use strict;
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+}
 use warnings;
 
-require q(./test.pl); plan(tests => 1);
+plan(tests => 1);
 
 =pod
 

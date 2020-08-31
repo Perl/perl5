@@ -8,6 +8,7 @@ use Test::More tests => 35;
 
 BEGIN { use_ok( 'ExtUtils::Packlist' ); }
 
+my $w;
 is( ref(ExtUtils::Packlist::mkfh()), 'GLOB', 'mkfh() should return a FH' );
 
 # new calls tie()

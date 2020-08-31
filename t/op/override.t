@@ -79,7 +79,7 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 $r = 11;
 BEGIN { *CORE::GLOBAL::readline = sub (;*) { ++$r }; }
 is( <FH>	, 12 );
-is( <$fh>	, 13 );
+is( <$main::fh>	, 13 );
 my $pad_fh;
 is( <$pad_fh>	, 14 );
 {
@@ -92,7 +92,7 @@ BEGIN { *Rgs::readline = sub (;*) { --$r }; }
 {
     package Rgs;
     ::is( <FH>	, 14 );
-    ::is( <$fh>	, 13 );
+    ::is( <$main::fh>	, 13 );
     ::is( <$pad_fh>	, 12 );
     my $buf = ''; $buf .= <FH>;
     ::is( $buf, 11, 'rcatline' );

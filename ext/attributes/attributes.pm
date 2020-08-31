@@ -1,12 +1,10 @@
 package attributes;
 
-our $VERSION = 0.33;
+our $VERSION = 0.34;
 
-@EXPORT_OK = qw(get reftype);
-@EXPORT = ();
-%EXPORT_TAGS = (ALL => [@EXPORT, @EXPORT_OK]);
-
-use strict;
+our @EXPORT_OK = qw(get reftype);
+our @EXPORT = ();
+our %EXPORT_TAGS = (ALL => [@EXPORT, @EXPORT_OK]);
 
 sub croak {
     require Carp;

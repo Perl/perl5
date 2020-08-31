@@ -43,7 +43,7 @@ sub open_new {
         CORE::unlink $final_name
                 or die "Couldn't unlink $final_name: $!\n";
     }
-    my $fh = gensym;
+    my $fh = Symbol::gensym();
     if (!defined $mode or $mode eq '>') {
 	if (-f $name) {
 	    unlink $name or die "$name exists but can't unlink: $!";

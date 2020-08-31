@@ -3,13 +3,9 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config;
-    import Config;
-
+    require './test.pl';
+    require Config; Config->import;
 }
-use strict;
-
-require './test.pl';
 
 plan(4);
 

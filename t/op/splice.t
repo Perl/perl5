@@ -8,7 +8,12 @@ BEGIN {
 
 $|  = 1;
 
-@a = (1..10);
+package Bar;
+
+1;
+
+package main;
+my @a = (1..10);
 
 sub j { join(":",@_) }
 
@@ -91,12 +96,18 @@ ok( Foo->isa('Bar'), 'splice @ISA and make Foo a Bar');
 # Test arrays with nonexistent elements (crashes when it fails)
 @a = ();
 $#a++;
-is sprintf("%s", splice @a, 0, 1), "",
-  'splice handles nonexistent elems when shrinking the array';
+{
+    no warnings 'uninitialized';
+    is sprintf("%s", splice @a, 0, 1), "",
+        'splice handles nonexistent elems when shrinking the array';
+}
 @a = ();
 $#a++;
-is sprintf("%s", splice @a, 0, 1, undef), "",
-  'splice handles nonexistent elems when array len stays the same';
+{
+    no warnings 'uninitialized';
+    is sprintf("%s", splice @a, 0, 1, undef), "",
+        'splice handles nonexistent elems when array len stays the same';
+}
 
 # RT#131000
 {

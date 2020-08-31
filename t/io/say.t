@@ -13,13 +13,12 @@ BEGIN {
 # a print opcode, so it's more or less guaranteed to behave
 # the same way as print in any case.
 
-use strict 'vars';
 use feature "say";
 
 say "1..13";
 
 my $foo = 'STDOUT';
-say $foo "ok 1";
+{ no strict 'refs'; say $foo "ok 1"; }
 
 say "ok 2\n","ok 3\n","ok 4";
 say STDOUT "ok 5";
@@ -30,7 +29,7 @@ say FOO "ok 6";
 open(my $bar,">-");
 say $bar "ok 7";
 
-say {"STDOUT"} "ok 8";
+{ no strict 'refs'; say {"STDOUT"} "ok 8"; }
 
 if (!exists &Errno::EBADF) {
     print "ok 9 # skipped: no EBADF\n";

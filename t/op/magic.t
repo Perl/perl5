@@ -49,14 +49,14 @@ use warnings;
 use Config;
 
 
-$Is_MSWin32  = $^O eq 'MSWin32';
-$Is_NetWare  = $^O eq 'NetWare';
-$Is_VMS      = $^O eq 'VMS';
-$Is_Dos      = $^O eq 'dos';
-$Is_os2      = $^O eq 'os2';
-$Is_Cygwin   = $^O eq 'cygwin';
+my $Is_MSWin32  = $^O eq 'MSWin32';
+my $Is_NetWare  = $^O eq 'NetWare';
+my $Is_VMS      = $^O eq 'VMS';
+my $Is_Dos      = $^O eq 'dos';
+my $Is_os2      = $^O eq 'os2';
+my $Is_Cygwin   = $^O eq 'cygwin';
 
-$PERL =
+my $PERL =
    ($Is_NetWare ? 'perl'   :
     $Is_VMS     ? $^X      :
     $Is_MSWin32 ? '.\perl' :
@@ -123,14 +123,14 @@ SKIP: {
   # would overflow with a command that long.
 
     # For easy interpolation of test numbers:
-    $next_test = curr_test() - 1;
+    my $next_test = curr_test() - 1;
     sub TIEARRAY {bless[]}
     sub FETCH { $next_test + pop }
     tie my @tn, __PACKAGE__;
 
     open( CMDPIPE, "|-", $PERL);
 
-    print CMDPIPE "\$t1 = $tn[1]; \$t2 = $tn[2];\n", <<'END';
+    print CMDPIPE "my \$t1 = $tn[1]; my \$t2 = $tn[2];\n", <<'END';
 
     $| = 1;		# command buffering
 
@@ -139,7 +139,7 @@ SKIP: {
     $SIG{"INT"} = "DEFAULT"; kill "INT",$$; sleep 1; print" not ok $t2\n";
 
     sub ok1 {
-	if (($x = pop(@_)) eq "INT") {
+	if ((my $x = pop(@_)) eq "INT") {
 	    print "ok $t1\n";
 	}
 	else {
@@ -152,7 +152,7 @@ END
     close CMDPIPE;
 
     open( CMDPIPE, "|-", $PERL);
-    print CMDPIPE "\$t3 = $tn[3];\n", <<'END';
+    print CMDPIPE "my \$t3 = $tn[3];\n", <<'END';
 
     { package X;
 	sub DESTROY {
@@ -202,8 +202,8 @@ END
 }
 
 # can we slice ENV?
-@val1 = @ENV{keys(%ENV)};
-@val2 = values(%ENV);
+my @val1 = @ENV{keys(%ENV)};
+my @val2 = values(%ENV);
 is join(':',@val1), join(':',@val2);
 cmp_ok @val1, '>', 1;
 
@@ -227,7 +227,7 @@ for (qw < ` & ' >) {
 }
 
 # $"
-@a = qw(foo bar baz);
+my @a = qw(foo bar baz);
 is "@a", "foo bar baz";
 {
     local $" = ',';
@@ -235,7 +235,7 @@ is "@a", "foo bar baz";
 }
 
 # $;
-%h = ();
+my %h = ();
 $h{'foo', 'bar'} = 1;
 is((keys %h)[0], "foo\034bar");
 {
@@ -270,7 +270,7 @@ SKIP: {
     }
     else { # child
 	print $$;
-	$::NO_ENDING = 1; # silence "Looks like you only ran..."
+	$::NO_ENDING = $::NO_ENDING = 1; # silence "Looks like you only ran..."
 	exit;
     }
 }
@@ -280,6 +280,7 @@ $$ = $pid; # Tests below use $$
 {
     my $is_abs = $Config{d_procselfexe} || $Config{usekernprocpathname}
       || $Config{usensgetexecutablepath};
+    my $wd;
     if ($^O eq 'qnx') {
 	chomp($wd = `/usr/bin/fullpath -t`);
     }
@@ -305,7 +306,7 @@ $$ = $pid; # Tests below use $$
     my $headmaybe = '';
     my $middlemaybe = '';
     my $tailmaybe = '';
-    $script = "$wd/show-shebang";
+    my $script = "$wd/show-shebang";
     if ($Is_MSWin32) {
 	chomp($wd = `cd`);
 	$wd =~ s|\\|/|g;
@@ -342,7 +343,7 @@ EOX
         if 0;
 EOH
     }
-    $s1 = "\$^X is $perl, \$0 is $script\n";
+    my $s1 = "\$^X is $perl, \$0 is $script\n";
     ok open(SCRIPT, ">$script") or diag "Can't write to $script: $!";
     ok print(SCRIPT $headmaybe . <<EOB . $middlemaybe . <<'EOF' . $tailmaybe) or diag $!;
 #!$perl
@@ -436,6 +437,7 @@ EOP
   }
 }
 
+our $TODO;
 {
     my $ok = 1;
     my $warn = '';
@@ -470,8 +472,12 @@ SKIP:  {
     delete $::{"!"};
 
     open(FOO, "nonesuch"); # Generate ENOENT
-    my %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time
-    ok ${"!"}{ENOENT};
+    my %errs;
+    {
+        no strict 'refs';
+        %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time
+        ok ${"!"}{ENOENT};
+    }
 
     # Make sure defined(*{"!"}) before %! does not stop %! from working
     is
@@ -490,13 +496,14 @@ foreach (['powie::!', 'Errno']) {
 	skip "$package is statically linked", 2
 	    if $Config{static_ext} =~ m|\b\Q$extension\E\b|;
 	foreach my $scalar_first ('', '$$symbol;') {
+        no strict 'refs';
 	    my $desc = qq{Referencing %{"$symbol"}};
 	    $desc .= qq{ after mentioning \${"$symbol"}} if $scalar_first;
 	    $desc .= " doesn't load $package";
 
 	    fresh_perl_is(<<"EOP", 0, {}, $desc);
-use strict qw(vars subs);
 my \$symbol = '$symbol';
+no strict 'refs';
 $scalar_first;
 1 if %{\$symbol};
 print scalar %${package}::;
@@ -543,6 +550,7 @@ is "@+", "10 1 6 10";
 # Test for bug [perl #36434]
 # Can not do this test on VMS, and SYMBIAN according to comments
 # in mg.c/Perl_magic_clear_all_env()
+our (@ISA, %ENV);
 SKIP: {
     skip('Can\'t make assignment to \%ENV on this system', 3) if $Is_VMS;
 
@@ -654,7 +662,7 @@ for my $code ('tell $0', 'sysseek $0, 0, 0', 'seek $0, 0, 0', 'eof $0') {
 fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']},
  '[perl #4760] print $| = ~$|';
 fresh_perl_is
- 'select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {},
+ 'no strict q|refs|; select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {},
  '[perl #115206] no crash when vivifying $| while *{+select}{IO} is undef';
 
 # ${^OPEN} and $^H interaction
@@ -726,9 +734,9 @@ SKIP: {
 	skip("clearing \%ENV is not safe when running under valgrind or on VMS")
 	    if $ENV{PERL_VALGRIND} || $Is_VMS;
 
-	    $PATH = $ENV{PATH};
-	    $SYSTEMROOT = $ENV{SYSTEMROOT} if exists $ENV{SYSTEMROOT}; # win32
-	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
+	    my $PATH = $ENV{PATH};
+	    my $SYSTEMROOT = $ENV{SYSTEMROOT} if exists $ENV{SYSTEMROOT}; # win32
+	    my $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
 	    $ENV{foo} = "bar";
 	    %ENV = ();
 	    $ENV{PATH} = $PATH;
@@ -759,9 +767,10 @@ SKIP: {
 	env_is(foo => "$ref", 'ENV store of stringified ref');
 
 	# downgrade utf8 when possible
-	$bytes = "eh zero \x{A0}";
+	my $bytes = "eh zero \x{A0}";
+    my $chars;
 	utf8::upgrade($chars = $bytes);
-	$forced = $ENV{foo} = $chars;
+	my $forced = $ENV{foo} = $chars;
 	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store downgrades utf8 in SV');
 	env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
 

@@ -22,10 +22,12 @@
 # Pod::Functions provided by a =for directive.
 
 BEGIN {
-    @INC = ('..', '../lib') if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..', '../lib') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
-
-use Config;
 use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
 
 if ( $Config{usecrosscompile} ) {

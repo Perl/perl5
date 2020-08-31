@@ -17,7 +17,7 @@ eval { my $x; memoize(\$x) };
 print $@ ? "ok 3\n" : "not ok 3 # $@\n";
 
 # 4--8
-$n = 4;
+my $n = 4;
 my $dummyfile = './dummydb';
 use Fcntl;
 my %args = ( DB_File => [],
@@ -26,7 +26,7 @@ my %args = ( DB_File => [],
              NDBM_File => [$dummyfile, O_RDWR|O_CREAT, 0666],
              SDBM_File => [$dummyfile, O_RDWR|O_CREAT, 0666],
            );
-for $mod (qw(DB_File GDBM_File SDBM_File ODBM_File NDBM_File)) {
+for my $mod (qw(DB_File GDBM_File SDBM_File ODBM_File NDBM_File)) {
   eval {
     require "$mod.pm";
     tie my %cache => $mod, @{$args{$mod}};

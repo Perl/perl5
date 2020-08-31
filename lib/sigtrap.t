@@ -64,7 +64,7 @@ fresh_perl_like
     import sigtrap "INT";
     sub { $SIG{INT}->("INT") } -> (3)
   ',
-   qr/\$ = main::__ANON__\(3\) called/,
+   qr/\Q$ = main::__ANON__(3) called\E/,
   { stderr => 1 },
   "stack-trace does not try to modify read-only arguments"
 ;

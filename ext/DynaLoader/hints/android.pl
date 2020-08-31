@@ -7,5 +7,6 @@
 # use My::Module::In::Foo; # calls dlopen() with foo/My/Module/...
 #                          # which will likely fail
 # So we take this route instead.
+no strict 'vars';
 $self->{CCFLAGS} = $Config{ccflags} . ' -DDLOPEN_WONT_DO_RELATIVE_PATHS';
 1;

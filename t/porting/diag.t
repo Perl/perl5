@@ -1,15 +1,15 @@
 #!/usr/bin/perl
 
 BEGIN {
-  @INC = '..' if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
 use TestInit qw(T); # T is chdir to the top level
 
 use warnings;
-use strict;
-use Config;
-
-require './t/test.pl';
 
 if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );

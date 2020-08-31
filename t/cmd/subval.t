@@ -33,6 +33,7 @@ sub foo6 {
 
 print "1..36\n";
 
+my ($foo, $x); 
 if (&foo1(0) eq '0') {print "ok 1\n";} else {print "not ok 1 $foo\n";}
 if (&foo1(1) eq 'true2') {print "ok 2\n";} else {print "not ok 2\n";}
 if (&foo2(0) eq 'true3') {print "ok 3\n";} else {print "not ok 3\n";}
@@ -50,22 +51,24 @@ if (&foo6(1) eq '1') {print "ok 12\n";} else {print "not ok 12 $x\n";}
 
 # Now test to see that recursion works using a Fibonacci number generator
 
+my $level = 0;
 sub fib {
     my($arg) = @_;
     my($foo);
     $level++;
     if ($arg <= 2) {
-	$foo = 1;
+        $foo = 1;
     }
     else {
-	$foo = &fib($arg-1) + &fib($arg-2);
+        $foo = &fib($arg-1) + &fib($arg-2);
     }
     $level--;
     $foo;
 }
 
-@good = (0,1,1,2,3,5,8,13,21,34,55,89);
+my @good = (0,1,1,2,3,5,8,13,21,34,55,89);
 
+my $i;
 for ($i = 1; $i <= 10; $i++) {
     $foo = $i + 12;
     if (&fib($i) == $good[$i]) {
@@ -98,8 +101,8 @@ $x = join(':',&ary2);
 print $x eq '1:2:3' ? "ok 26\n" : "not ok 26 $x\n";
 
 sub somesub {
-    local($num,$P,$F,$L) = @_;
-    ($p,$f,$l) = caller;
+    my ($num,$P,$F,$L) = @_;
+    my ($p,$f,$l) = caller;
     print "$p:$f:$l" eq "$P:$F:$L" ? "ok $num\n" : "not ok $num $p:$f:$l ne $P:$F:$L\n";
 }
 
@@ -128,7 +131,7 @@ sub file_main {
         local(*F) = @_;
 
         open(F, 'Cmd_subval.tmp') || die "can't open: $!\n";
-	$i++;
+        $i++;
         eof F ? print "not ok $i\n" : print "ok $i\n";
 }
 
@@ -136,43 +139,43 @@ sub info_main {
         local(*F);
 
         open(F, 'Cmd_subval.tmp') || die "test: can't open: $!\n";
-	$i++;
+        $i++;
         eof F ? print "not ok $i\n" : print "ok $i\n";
         &iseof(*F);
-	close F or die "Can't close: $!";
+        close F or die "Can't close: $!";
 }
 
 sub iseof {
         local(*UNIQ) = @_;
 
-	$i++;
+        $i++;
         eof UNIQ ? print "(not ok $i)\n" : print "ok $i\n";
 }
 
 {package foo;
 
- sub main'file_package {
+sub main'file_package {
         local(*F) = @_;
 
         open(F, 'Cmd_subval.tmp') || die "can't open: $!\n";
-	$main'i++;
-        eof F ? print "not ok $main'i\n" : print "ok $main'i\n";
+        $i++;
+        eof F ? print "not ok $main'i\n" : print "ok $i\n";
  }
 
- sub main'info_package {
+sub main'info_package {
         local(*F);
 
         open(F, 'Cmd_subval.tmp') || die "can't open: $!\n";
-	$main'i++;
-        eof F ? print "not ok $main'i\n" : print "ok $main'i\n";
+        $i++;
+        eof F ? print "not ok $main'i\n" : print "ok $i\n";
         &iseof(*F);
  }
 
- sub iseof {
+sub iseof {
         local(*UNIQ) = @_;
 
-	$main'i++;
-        eof UNIQ ? print "not ok $main'i\n" : print "ok $main'i\n";
+        $i++;
+        eof UNIQ ? print "not ok $main'i\n" : print "ok $i\n";
  }
 }
 

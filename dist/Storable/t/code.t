@@ -6,10 +6,12 @@
 #  in the README file that comes with the distribution.
 #
 
+
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -204,7 +206,7 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 }
 
 {
-    my $safe = new Safe;
+    my $safe = Safe->new;
     local $Storable::Eval = sub { $safe->reval(shift) };
 
     $freezed = freeze $obj[0]->[0];
@@ -237,7 +239,7 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 }
 
 {
-    my $safe = new Safe;
+    my $safe = Safe->new;
     # because of opcodes used in "use strict":
     $safe->permit(qw(:default require caller));
     local $Storable::Eval = sub { $safe->reval(shift) };
@@ -262,7 +264,7 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	}
     }
 
-    my $safe = new MySafe;
+    my $safe = MySafe->new;
     local $Storable::Eval = sub { $safe->reval($_[0]) };
 
     $freezed = freeze $obj[0];

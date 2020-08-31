@@ -2,7 +2,7 @@
 
 use lib '..';
 use Memoize;
-$EXPECTED_WARNING = '(no warning expected)';
+my $EXPECTED_WARNING = '(no warning expected)';
 
 
 print "1..4\n";
@@ -13,7 +13,7 @@ sub q3     { join "--", @_ }
 
 $SIG{__WARN__} = \&handle_warnings;
 
-$RES = 'ok';
+my $RES = 'ok';
 memoize 'q1';
 print "$RES 1\n";
 
@@ -26,8 +26,8 @@ memoize 'q3';
 print "$RES 3\n";
 
 # Let's see if the prototype is actually honored
-@q = (1..5);
-$r = q1(@q); 
+my @q = (1..5);
+my $r = q1(@q); 
 print (($r == 6) ? '' : 'not ', "ok 4\n");
 
 sub handle_warnings {

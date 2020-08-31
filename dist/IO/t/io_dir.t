@@ -5,7 +5,7 @@ BEGIN {
     plan(16);
 
     use_ok('IO::Dir');
-    IO::Dir->import(DIR_UNLINK);
+    IO::Dir->import('DIR_UNLINK');
 }
 
 use strict;

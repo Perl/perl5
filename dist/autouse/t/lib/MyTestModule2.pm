@@ -1,9 +1,9 @@
 package MyTestModule2;
 use warnings;
 
-@ISA = Exporter;
+our @ISA = ( qw| Exporter | );
 require Exporter;
-@EXPORT_OK = 'test_function2';
+our @EXPORT_OK = 'test_function2';
 
 sub test_function2 {
   return 'works';

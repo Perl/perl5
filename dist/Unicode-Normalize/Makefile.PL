@@ -33,7 +33,7 @@ WriteMakefile(
         constant        => 0,
         DynaLoader      => 0,
         Exporter        => 0,
-        File::Spec      => 0,
+        'File::Spec'    => 0,
         strict          => 0,
         warnings        => 0,
         SelectSaver     => 0,

@@ -8,7 +8,7 @@ BEGIN {
 
 plan tests => 29;
 
-@x = (1, 2, 3);
+my @x = (1, 2, 3);
 is( join(':',@x), '1:2:3', 'join an array with character');
 
 is( join('',1,2,3), '123', 'join list with no separator');
@@ -43,7 +43,7 @@ is( $f, 'baeak', 'join back to self, self is join character');
   local ($^W, $SIG{__WARN__}) = ( 1, sub { $s+=4 } );
   my $r = join ':', 'a', undef, $s, 'b', undef, $s, 'c';
   is( $r, 'a::9:b::13:c', 'multiple read of undef, with separator');
-  my $r = join '', 'a', undef, $s, 'b', undef, $s, 'c';
+  $r = join '', 'a', undef, $s, 'b', undef, $s, 'c';
   is( $r, 'a17b21c', '... and without separator');
 };
 

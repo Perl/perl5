@@ -5,7 +5,7 @@
 
 my $threads;
 BEGIN {
-    require Config; import Config;
+    use Config;
     $threads = $Config{'useithreads'};
     # must 'use threads' before 'use Test::More'
     eval 'use threads' if $threads;

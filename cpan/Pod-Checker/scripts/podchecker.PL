@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-
+use strict; # not needed in core, but include for benefit of dual-life
 use Config;
 use File::Basename qw(&basename &dirname);
 use Cwd;
@@ -13,6 +13,7 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
+my ($origdir, $file);
 $origdir = cwd;
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;

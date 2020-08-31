@@ -4,7 +4,7 @@
 # tests are run via Test::Builder it will blow up.
 
 use Test::Builder;
-$TB = Test::Builder->new;
+my $TB = Test::Builder->new;
 $TB->plan(tests => 2);
 print "ok 1\n";
 print "ok 2\n";

@@ -32,8 +32,11 @@ is($_, "abcdefghijklmnopqrstuvwxyz",    'lc');
 tr/b-y/B-Y/;
 is($_, "aBCDEFGHIJKLMNOPQRSTUVWXYz",    'partial uc');
 
-tr/a-a/AB/;
-is($_, "ABCDEFGHIJKLMNOPQRSTUVWXYz",    'single char range a-a');
+{
+    no warnings 'misc';
+    tr/a-a/AB/;
+    is($_, "ABCDEFGHIJKLMNOPQRSTUVWXYz",    'single char range a-a');
+}
 
 eval 'tr/a/\N{KATAKANA LETTER AINU P}/;';
 like $@,
@@ -590,6 +593,7 @@ SKIP: {   # Test literal range end point special handling
 }
 #
 
+my ($x, $f);
 ($x = 12) =~ tr/1/3/;
 (my $y = 12) =~ tr/1/3/;
 ($f = 1.5) =~ tr/1/3/;
@@ -666,6 +670,7 @@ else {
 
 start:
 {
+    my ($x, $y);
     my $l = chr(300); my $r = chr(400);
     $x = 200.300.400;
     $x =~ tr/\x{12c}/\x{190}/;
@@ -863,7 +868,7 @@ is($a, "X");
 # well as i-j, r-s, I-J, R-S), [\x89-\x91] [\xc9-\xd1] has to match them,
 # from Karsten Sperling.
 
-$c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
+my $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
 is($c, 8);
 is($a, "XXXXXXXX");
 
@@ -904,7 +909,7 @@ is($a, "\x{1ff}\x{1fe}");
 is(hex($a), 1);
 
 # From Inaba Hiroto
-@a = (1,2); map { y/1/./ for $_ } @a;
+my @a = (1,2); map { y/1/./ for $_ } @a;
 is("@a", ". 2");
 
 @a = (1,2); map { y/1/./ for $_.'' } @a;
@@ -917,7 +922,7 @@ is($a, "XZY");
 
 
 # Used to fail with "Modification of a read-only value attempted"
-%a = (N=>1);
+my %a = (N=>1);
 foreach (keys %a) {
   eval 'tr/N/n/';
   is($_, 'n',   'pp_trans needs to unshare shared hash keys');
@@ -957,12 +962,12 @@ fresh_perl_is(q[$_ = "foo"; y/A-Z/a-z/], '', {}, 'RT #36622 y/// at end of file'
 { # [perl #38293] chr(65535) should be allowed in regexes
 no warnings 'utf8'; # to allow non-characters
 
-$s = "\x{d800}\x{ffff}";
+my $s = "\x{d800}\x{ffff}";
 $s =~ tr/\0/A/;
 is($s, "\x{d800}\x{ffff}", "do_trans_simple");
 
 $s = "\x{d800}\x{ffff}";
-$i = $s =~ tr/\0//;
+my $i = $s =~ tr/\0//;
 is($i, 0, "do_trans_count");
 
 $s = "\x{d800}\x{ffff}";
@@ -1032,7 +1037,7 @@ is($s, "AxBC", "utf8, DELETE");
     is($c, "\x20\x30\x40\x50\x60", "tr/\\x00-\\x1f//d");
 }
 
-($s) = keys %{{pie => 3}};
+my ($s) = keys %{{pie => 3}};
 SKIP: {
     if (!eval { require XS::APItest }) { skip "no XS::APItest", 2 }
     my $wasro = XS::APItest::SvIsCOW($s);

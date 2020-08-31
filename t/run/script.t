@@ -11,7 +11,7 @@ my $Perl = which_perl();
 
 my $filename = tempfile();
 
-$x = `$Perl -le "print 'ok';"`;
+my $x = `$Perl -le "print 'ok';"`;
 
 is($x, "ok\n", "Got expected 'perl -le' output");
 

@@ -19,13 +19,14 @@ if (int(-1.234) == -1) {pass($test2_descr)} else {fail($test2_descr)}
 
 # run time evaluation
 
-$x = 1.234;
+my $x = 1.234;
 cmp_ok(int($x), '==', 1, 'run time evaluation 1');
 cmp_ok(int(-$x), '==', -1, 'run time evaluation -1');
 
 $x = length("abc") % -10;
 cmp_ok($x, '==', -7, 'subtract from string length');
 
+my $y;
 {
     my $fail;
     use integer;
@@ -38,7 +39,7 @@ cmp_ok($x, '==', -7, 'subtract from string length');
     }
 }
 
-@x = ( 6, 8, 10);
+my @x = ( 6, 8, 10);
 cmp_ok($x["1foo"], '==', 8, 'check bad strings still get converted');
 
 # 4,294,967,295 is largest unsigned 32 bit integer

@@ -1,6 +1,11 @@
 #!./perl
 
 use FileCache maxopen => 2;
+
+# FileCache is documented to rely upon symbolic references, so all programs
+# that use it must relax strict 'refs'
+no strict 'refs';
+
 our @files;
 BEGIN { @files = qw(foo bar baz quux) }
 END { 1 while unlink @files }

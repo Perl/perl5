@@ -15,6 +15,6 @@ DESTROY {
 
 package main;
 # print "# $^X\n";
-$x = foo->new();
+my $x = foo->new();
 
 ok(1);

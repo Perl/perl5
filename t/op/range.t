@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib', '.');
-}   
+}
 # Avoid using eq_array below as it uses .. internally.
 
 use Config;
@@ -13,18 +13,24 @@ plan (162);
 
 is(join(':',1..5), '1:2:3:4:5');
 
-@foo = (1,2,3,4,5,6,7,8,9);
+my @foo = (1,2,3,4,5,6,7,8,9);
 @foo[2..4] = ('c','d','e');
 
 is(join(':',@foo[$foo[0]..5]), '2:c:d:e:6');
 
+my @bar;
 @bar[2..4] = ('c','d','e');
-is(join(':',@bar[1..5]), ':c:d:e:');
+{
+    no warnings 'uninitialized';
+    is(join(':',@bar[1..5]), ':c:d:e:');
+}
 
+my @bcd;
+my $e;
 ($a,@bcd[0..2],$e) = ('a','b','c','d','e');
 is(join(':',$a,@bcd[0..2],$e), 'a:b:c:d:e');
 
-$x = 0;
+my $x = 0;
 for (1..100) {
     $x += $_;
 }
@@ -39,17 +45,17 @@ is($x, 5050);
 $x = join('','a'..'z');
 is($x, 'abcdefghijklmnopqrstuvwxyz');
 
-@x = 'A'..'ZZ';
+my @x = 'A'..'ZZ';
 is (scalar @x, 27 * 26);
 
 foreach (0, 1) {
     use feature 'unicode_strings';
-    $s = "a";
+    my $s = "a";
     $e = "\xFF";
     utf8::upgrade($e) if $_;
     @x = $s .. $e;
     is (scalar @x, 26, "list-context range with rhs 0xFF, utf8=$_");
-    @y = ();
+    my @y = ();
     foreach ($s .. $e) {
         push @y, $_;
     }
@@ -60,13 +66,15 @@ foreach (0, 1) {
 is(join(",", @x), join(",", map {sprintf "%02d",$_} 9..99));
 
 # same test with foreach (which is a separate implementation)
-@y = ();
+my @y = ();
 foreach ('09'..'08') {
     push(@y, $_);
 }
 is(join(",", @y), join(",", @x));
 
 # check bounds
+my (@a, $a, @b, $b);
+no warnings 'portable';
 if ($Config{ivsize} == 8) {
   @a = eval "0x7ffffffffffffffe..0x7fffffffffffffff";
   $a = "9223372036854775806 9223372036854775807";
@@ -79,6 +87,7 @@ else {
   @b = eval "-0x7fffffff..-0x7ffffffe";
   $b = "-2147483647 -2147483646";
 }
+use warnings 'portable';
 
 is ("@a", $a);
 
@@ -126,80 +135,97 @@ is(join(":","01".."04"),     "01:02:03:04");
 is(join(":","00".."-1"),     "00:01:02:03:04:05:06:07:08:09:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:32:33:34:35:36:37:38:39:40:41:42:43:44:45:46:47:48:49:50:51:52:53:54:55:56:57:58:59:60:61:62:63:64:65:66:67:68:69:70:71:72:73:74:75:76:77:78:79:80:81:82:83:84:85:86:87:88:89:90:91:92:93:94:95:96:97:98:99");
 is(join(":","00".."31"),     "00:01:02:03:04:05:06:07:08:09:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31");
 is(join(":","ax".."az"),     "ax:ay:az");
-is(join(":","*x".."az"),     "*x");
+{
+    no warnings 'numeric';
+    is(join(":","*x".."az"),     "*x");
+}
 is(join(":","A".."Z"),       "A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:R:S:T:U:V:W:X:Y:Z");
 is(join(":", 0..9,"a".."f"), "0:1:2:3:4:5:6:7:8:9:a:b:c:d:e:f");
 is(join(":","a".."--"),      join(":","a".."zz"));
 is(join(":","0".."xx"),      "0:1:2:3:4:5:6:7:8:9:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:32:33:34:35:36:37:38:39:40:41:42:43:44:45:46:47:48:49:50:51:52:53:54:55:56:57:58:59:60:61:62:63:64:65:66:67:68:69:70:71:72:73:74:75:76:77:78:79:80:81:82:83:84:85:86:87:88:89:90:91:92:93:94:95:96:97:98:99");
 is(join(":","aaa".."--"),    "");
 
-# undef should be treated as 0 for numerical range
-is(join(":",undef..2), '0:1:2');
-is(join(":",-2..undef), '-2:-1:0');
-is(join(":",undef..'2'), '0:1:2');
-is(join(":",'-2'..undef), '-2:-1:0');
+{
+    no warnings 'uninitialized';
+    # undef should be treated as 0 for numerical range
+    is(join(":",undef..2), '0:1:2');
+    is(join(":",-2..undef), '-2:-1:0');
+    is(join(":",undef..'2'), '0:1:2');
+    is(join(":",'-2'..undef), '-2:-1:0');
+}
 
 # undef should be treated as "" for magical range
 is(join(":", map "[$_]", "".."B"), '[]');
-is(join(":", map "[$_]", undef.."B"), '[]');
 is(join(":", map "[$_]", "B"..""), '');
-is(join(":", map "[$_]", "B"..undef), '');
+{
+    no warnings 'uninitialized';
+    is(join(":", map "[$_]", undef.."B"), '[]');
+    is(join(":", map "[$_]", "B"..undef), '');
+    # undef..undef used to segfault
+    is(join(":", map "[$_]", undef..undef), '[]');
+}
 
-# undef..undef used to segfault
-is(join(":", map "[$_]", undef..undef), '[]');
 
-# also test undef in foreach loops
-@foo=(); push @foo, $_ for undef..2;
-is(join(":", @foo), '0:1:2');
+{
+    no warnings 'uninitialized';
+    # also test undef in foreach loops
+    @foo=(); push @foo, $_ for undef..2;
+    is(join(":", @foo), '0:1:2');
 
-@foo=(); push @foo, $_ for -2..undef;
-is(join(":", @foo), '-2:-1:0');
+    @foo=(); push @foo, $_ for -2..undef;
+    is(join(":", @foo), '-2:-1:0');
 
-@foo=(); push @foo, $_ for undef..'2';
-is(join(":", @foo), '0:1:2');
+    @foo=(); push @foo, $_ for undef..'2';
+    is(join(":", @foo), '0:1:2');
 
-@foo=(); push @foo, $_ for '-2'..undef;
-is(join(":", @foo), '-2:-1:0');
+    @foo=(); push @foo, $_ for '-2'..undef;
+    is(join(":", @foo), '-2:-1:0');
 
-@foo=(); push @foo, $_ for undef.."B";
-is(join(":", map "[$_]", @foo), '[]');
+    @foo=(); push @foo, $_ for undef.."B";
+    is(join(":", map "[$_]", @foo), '[]');
 
-@foo=(); push @foo, $_ for "".."B";
-is(join(":", map "[$_]", @foo), '[]');
+    @foo=(); push @foo, $_ for "".."B";
+    is(join(":", map "[$_]", @foo), '[]');
 
-@foo=(); push @foo, $_ for "B"..undef;
-is(join(":", map "[$_]", @foo), '');
+    @foo=(); push @foo, $_ for "B"..undef;
+    is(join(":", map "[$_]", @foo), '');
 
-@foo=(); push @foo, $_ for "B".."";
-is(join(":", map "[$_]", @foo), '');
+    @foo=(); push @foo, $_ for "B".."";
+    is(join(":", map "[$_]", @foo), '');
 
-@foo=(); push @foo, $_ for undef..undef;
-is(join(":", map "[$_]", @foo), '[]');
+    @foo=(); push @foo, $_ for undef..undef;
+    is(join(":", map "[$_]", @foo), '[]');
+}
 
 # again with magic
 {
+    no warnings 'uninitialized';
     my @a = (1..3);
     @foo=(); push @foo, $_ for undef..$#a;
     is(join(":", @foo), '0:1:2');
 }
 {
+    no warnings 'uninitialized';
     my @a = ();
     @foo=(); push @foo, $_ for $#a..undef;
     is(join(":", @foo), '-1:0');
 }
 {
+    no warnings 'uninitialized';
     local $1;
     "2" =~ /(.+)/;
     @foo=(); push @foo, $_ for undef..$1;
     is(join(":", @foo), '0:1:2');
 }
 {
+    no warnings 'uninitialized';
     local $1;
     "-2" =~ /(.+)/;
     @foo=(); push @foo, $_ for $1..undef;
     is(join(":", @foo), '-2:-1:0');
 }
 {
+    no warnings 'uninitialized';
     local $1;
     "B" =~ /(.+)/;
     @foo=(); push @foo, $_ for undef..$1;
@@ -212,6 +238,7 @@ is(join(":", map "[$_]", @foo), '[]');
     is(join(":", map "[$_]", @foo), '[]');
 }
 {
+    no warnings 'uninitialized';
     local $1;
     "B" =~ /(.+)/;
     @foo=(); push @foo, $_ for $1..undef;
@@ -227,6 +254,7 @@ is(join(":", map "[$_]", @foo), '[]');
 # Test upper range limit
 my $MAX_INT = ~0>>1;
 
+######################################3333
 foreach my $ii (-3 .. 3) {
     my ($first, $last);
     eval {
@@ -270,7 +298,7 @@ foreach my $ii (-3 .. 3) {
 }
 
 {
-    my $first;
+    my ($first, $last);
     eval {
         my $lim=0;
         for ($MAX_INT .. $MAX_INT-1) {
@@ -351,7 +379,7 @@ foreach my $ii (-3 .. 3) {
 }
 
 {
-    my $first;
+    my ($first, $last);
     eval {
         my $lim=0;
         for ($MIN_INT+1 .. $MIN_INT) {
@@ -383,10 +411,9 @@ sub FETCH { $_[0]{fetch}++; $_[0]{value} }
 sub stores { tied($_[0])->{value} = tied($_[0])->{orig};
              delete(tied($_[0])->{store}) || 0 }
 sub fetches { delete(tied($_[0])->{fetch}) || 0 }
-    
+
 tie $x, "main", 6;
 
-my @foo;
 @foo = 4 .. $x;
 is(scalar @foo, 3);
 is("@foo", "4 5 6");
@@ -427,7 +454,7 @@ is( ( join ' ', map { join '', map ++$_, ($x=1)..4 } 1..2 ), '2345 2345',
     'modifiable variable num range' );
 is( ( join ' ', map { join '', map ++$_, 1..4      } 1..2 ), '2345 2345',
     'modifiable const num range' );  # RT#3105
-$s = ''; for (1..2) { for (1..4) { $s .= ++$_ } $s.=' ' if $_==1; }
+my $s = ''; for (1..2) { for (1..4) { $s .= ++$_ } $s.=' ' if $_==1; }
 is( $s, '2345 2345','modifiable num counting loop counter' );
 
 

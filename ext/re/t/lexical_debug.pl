@@ -2,6 +2,7 @@ use re 'debug';
 
 $_ = 'foo bar baz bop boq bor fip fop';
 
+my $count = 0;
 /foo/ and $count++;
 
 {

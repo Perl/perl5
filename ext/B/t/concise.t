@@ -14,16 +14,16 @@ plan tests => 167;
 
 require_ok("B::Concise");
 
-$out = runperl(switches => ["-MO=Concise"], prog => '$a', stderr => 1);
+my $out = runperl(switches => ["-MO=Concise"], prog => '$a', stderr => 1);
 
 # If either of the next two tests fail, it probably means you need to
 # fix the section labeled 'fragile kludge' in Concise.pm
 
-($op_base) = ($out =~ /^(\d+)\s*<0>\s*enter/m);
+my ($op_base) = ($out =~ /^(\d+)\s*<0>\s*enter/m);
 
 is($op_base, 1, "Smallest OP sequence number");
 
-($op_base_p1, $cop_base)
+my ($op_base_p1, $cop_base)
   = ($out =~ /^(\d+)\s*<;>\s*nextstate\(main (-?\d+) /m);
 
 is($op_base_p1, 2, "Second-smallest OP sequence number");
@@ -83,7 +83,7 @@ SKIP: {
     eval {  walk_output(\my $junk) };
     is ($@, '', "walk_output() accepts ref-to-sprintf target");
 
-    $junk = "non-empty";
+    my $junk = "non-empty";
     eval {  walk_output(\$junk) };
     is ($@, '', "walk_output() accepts ref-to-non-empty-scalar");
 }
@@ -136,11 +136,11 @@ SKIP: {
     
     set_style_standard('concise');  # MUST CALL before output needed
     
-    @options = qw(
+    my @options = qw(
 		  -basic -exec -tree -compact -loose -vt -ascii
 		  -base10 -bigendian -littleendian
 		  );
-    foreach $opt (@options) {
+    foreach my $opt (@options) {
 	($out) = render($opt, $func);
 	isnt($out, '', "got output with option $opt");
     }
@@ -210,7 +210,7 @@ SKIP: {
 	    our $AUTOLOAD = 'garbage';
 	    sub AUTOLOAD { print "# in AUTOLOAD body: $AUTOLOAD\n" }
 	}
-	($res,$err) = render('-basic', Bar::auto_func);
+	($res,$err) = render('-basic', 'Bar::auto_func');
 	like ($res, qr/unknown function \(Bar::auto_func\)/,
 	      "Bar::auto_func seen as unknown function");
 
@@ -222,7 +222,7 @@ SKIP: {
 	like ($res, qr/in AUTOLOAD body: /, "found body of Bar::AUTOLOAD");
 
     }
-    ($res,$err) = render('-basic', Foo::bar);
+    ($res,$err) = render('-basic', 'Foo::bar');
     like ($res, qr/unknown function \(Foo::bar\)/,
 	  "BC::compile detects fn-name as unknown function");
 
@@ -248,8 +248,8 @@ SKIP: {
     my @styles = qw( -concise -debug -linenoise -terse );
 
     # prep samples
-    for $style (@styles) {
-	for $mode (@modes) {
+    for my $style (@styles) {
+	for my $mode (@modes) {
 	    walk_output(\$sample);
 	    reset_sequence();
 	    $walker->($style, $mode);
@@ -257,17 +257,17 @@ SKIP: {
 	}
     }
     # crosscheck that samples are all text-different
-    @list = sort keys %combos;
-    for $i (0..$#list) {
-	for $j ($i+1..$#list) {
+    my @list = sort keys %combos;
+    for my $i (0..$#list) {
+	for my $j ($i+1..$#list) {
 	    isnt ($combos{$list[$i]}, $combos{$list[$j]},
 		  "combos for $list[$i] and $list[$j] are different, as expected");
 	}
     }
     
     # add samples with styles in different order
-    for $mode (@modes) {
-	for $style (@styles) {
+    for my $mode (@modes) {
+	for my $style (@styles) {
 	    reset_sequence();
 	    walk_output(\$sample);
 	    $walker->($mode, $style);
@@ -275,8 +275,8 @@ SKIP: {
 	}
     }
     # test commutativity of flags, ie that AB == BA
-    for $mode (@modes) {
-	for $style (@styles) {
+    for my $mode (@modes) {
+	for my $style (@styles) {
 	    is ( $combos{"$style$mode"},
 		 $combos{"$mode$style"},
 		 "results for $style$mode vs $mode$style are the same" );
@@ -287,11 +287,11 @@ SKIP: {
     %combos = ();	# outputs for $mode=any($order) and any($style)
 
     # add more samples with switching modes & sticky styles
-    for $style (@styles) {
+    for my $style (@styles) {
 	walk_output(\$sample);
 	reset_sequence();
 	$walker->($style);
-	for $mode (@modes) {
+	for my $mode (@modes) {
 	    walk_output(\$sample);
 	    reset_sequence();
 	    $walker->($mode);
@@ -299,20 +299,20 @@ SKIP: {
 	}
     }
     # crosscheck that samples are all text-different
-    @nm = sort keys %combos;
-    for $i (0..$#nm) {
-	for $j ($i+1..$#nm) {
+    my @nm = sort keys %combos;
+    for my $i (0..$#nm) {
+	for my $j ($i+1..$#nm) {
 	    isnt ($combos{$nm[$i]}, $combos{$nm[$j]},
 		  "results for $nm[$i] and $nm[$j] are different, as expected");
 	}
     }
     
     # add samples with switching styles & sticky modes
-    for $mode (@modes) {
+    for my $mode (@modes) {
 	walk_output(\$sample);
 	reset_sequence();
 	$walker->($mode);
-	for $style (@styles) {
+	for my $style (@styles) {
 	    walk_output(\$sample);
 	    reset_sequence();
 	    $walker->($style);
@@ -320,11 +320,11 @@ SKIP: {
 	}
     }
     # test commutativity of flags, ie that AB == BA
-    for $mode (@modes) {
-	for $style (@styles) {
+    for my $mode (@modes) {
+	for my $style (@styles) {
 	    is ( $combos{"$style/$mode"},
 		 $combos{"$mode/$style"},
-		 "results for $style/$mode vs $mode/$style are the same" );
+		 "results for my $style/$mode vs $mode/$style are the same" );
 	}
     }
 
@@ -333,8 +333,8 @@ SKIP: {
     %combos = (%combos, %save);
 
     # test commutativity of flags, ie that AB == BA
-    for $mode (@modes) {
-	for $style (@styles) {
+    for my $mode (@modes) {
+	for my $style (@styles) {
 
 	    is ( $combos{"$style$mode"},
 		 $combos{"$style/$mode"},
@@ -474,7 +474,7 @@ $out = runperl(
 $out =~s/\r\n/\n/g;
 
 # Look for OP_AND
-$end = <<'EOF';
+my $end = <<'EOF';
 LOGOP \(0x\w+\)
 	op_next		0x\w+
 	op_other	(0x\w+)

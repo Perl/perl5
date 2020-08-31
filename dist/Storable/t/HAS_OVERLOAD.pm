@@ -8,7 +8,7 @@ sub make {
   my $value = shift;
   bless \$value, $package;
 }
-
+our $loaded_count;
 ++$loaded_count;
 
 1;

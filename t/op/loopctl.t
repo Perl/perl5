@@ -970,10 +970,11 @@ cmp_ok($ok,'==',1,'dynamically scoped');
 }
 
 {
+    our @a37725;
     $a37725[3] = 1; # use package var
-    $i = 2;
+    my $i = 2;
     for my $x (reverse @a37725) {
-	$x = $i++;
+        $x = $i++;
     }
     cmp_ok("@a37725",'eq',"5 4 3 2",'bug 37725: reverse with empty slots bug');
 }
@@ -982,15 +983,15 @@ cmp_ok($ok,'==',1,'dynamically scoped');
 
 {
     my $i = 1;
-    $x_21469  = 'X';
-    $y1_21469 = 'Y1';
-    $y2_21469 = 'Y2';
-    $y3_21469 = 'Y3';
+    our $x_21469  = 'X';
+    our $y1_21469 = 'Y1';
+    our $y2_21469 = 'Y2';
+    our $y3_21469 = 'Y3';
     for $x_21469 (1,2,3) {
-	is($x_21469, $i, "bug 21469: correct at start of loop $i");
-	*x_21469 = (*y1_21469, *y2_21469, *y3_21469)[$i-1];
-	is($x_21469, "Y$i", "bug 21469: correct at tail of loop $i");
-	$i++;
+        is($x_21469, $i, "bug 21469: correct at start of loop $i");
+        *x_21469 = (*y1_21469, *y2_21469, *y3_21469)[$i-1];
+        is($x_21469, "Y$i", "bug 21469: correct at tail of loop $i");
+        $i++;
     }
     is($x_21469, 'X', "bug 21469: X okay at end of loop");
 }
@@ -1008,6 +1009,7 @@ cmp_ok($ok,'==',1,'dynamically scoped');
 }
 
 # [perl #73618]
+our $TODO;
 {
     sub foo_73618_0 {
         while (0) { }
@@ -1062,9 +1064,10 @@ cmp_ok($ok,'==',1,'dynamically scoped');
        "constant optimization doesn't change return value");
     is(scalar(foo_73618_0string()), scalar(bar_73618_0string()),
        "constant optimization doesn't change return value");
-    { local $TODO = "until is still wrongly optimized";
-    is(scalar(foo_73618_until()), scalar(bar_73618_until()),
-       "constant optimization doesn't change return value");
+    {
+        local $TODO = "until is still wrongly optimized";
+        is(scalar(foo_73618_until()), scalar(bar_73618_until()),
+        "constant optimization doesn't change return value");
     }
 }
 
@@ -1107,7 +1110,7 @@ redo_113684:
 
 # [perl #3112]
 # The original report, which produced a Bizarre copy
-@a  = ();
+our @a  = ();
 eval {
     for (1) {
         push @a, last;

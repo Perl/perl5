@@ -61,14 +61,14 @@ $a = ":="; @_ = split /($a)/o, "a:=b:=c"; print "@_"
 EXPECT
 a := b := c
 ########
-$cusp = ~0 ^ (~0 >> 1);
+my $cusp = ~0 ^ (~0 >> 1);
 use integer;
 $, = " ";
 print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, 8 | (($cusp + 1) % 8 + 7), "!\n";
 EXPECT
 7 0 0 8 !
 ########
-$foo=undef; $foo->go;
+my $foo=undef; $foo->go;
 EXPECT
 Can't call method "go" on an undefined value at - line 1.
 ########
@@ -77,17 +77,17 @@ BEGIN
 	    "foo";
         }
 ########
-$array[128]=1
+my @array; $array[128]=1
 ########
-$x=0x0eabcd; print $x->ref;
+my $x=0x0eabcd; print $x->ref;
 EXPECT
 Can't locate object method "ref" via package "961485" (perhaps you forgot to load "961485"?) at - line 1.
 ########
-chop ($str .= <DATA>);
+chop (my $str .= <DATA>);
 ########
-close ($banana);
+no strict 'refs'; my $banana; close ($banana);
 ########
-$x=2;$y=3;$x<$y ? $x : $y += 23;print $x;
+my ($x, $y); $x=2;$y=3;$x<$y ? $x : $y += 23;print $x;
 EXPECT
 25
 ########
@@ -95,11 +95,11 @@ eval 'sub bar {print "In bar"}';
 ########
 system './perl -ne "print if eof" /dev/null'
 ########
-chop($file = <DATA>);
+chop(my $file = <DATA>);
 ########
 package N;
 sub new {my ($obj,$n)=@_; bless \$n}  
-$aa=new N 1;
+my $aa=new N 1;
 $aa=12345;
 print $aa;
 EXPECT
@@ -110,7 +110,7 @@ printf(STDOUT "%s\n", $_);
 EXPECT
 foo
 ########
-push(@a, 1, 2, 3,)
+my @a; push(@a, 1, 2, 3,)
 ########
 quotemeta ""
 ########
@@ -123,7 +123,7 @@ $_ x 4;}
 EXPECT
 Modification of a read-only value attempted at - line 3.
 ########
-package FOO;sub new {bless {FOO => BAR}};
+package FOO;no strict 'subs'; sub new {bless {FOO => BAR}};
 package main;
 use strict vars;   
 my $self = new FOO;
@@ -142,29 +142,34 @@ EXPECT
 bar
 ########
 sub by_number { $a <=> $b; };# inline function for sort below
-$as_ary{0}="a0";
-@ordered_array=sort by_number keys(%as_ary);
+my %as_ary; $as_ary{0}="a0";
+my @ordered_array=sort by_number keys(%as_ary);
 ########
-sub NewShell
+our $Host; sub NewShell
 {
   local($Host) = @_;
+  my @Shells;
   my($m2) = $#Shells++;
   $Shells[$m2]{HOST} = $Host;
   return $m2;
 }
  
-sub ShowShell
+our $i; sub ShowShell
 {
   local($i) = @_;
 }
  
-&ShowShell(&NewShell(beach,Work,"+0+0"));
-&ShowShell(&NewShell(beach,Work,"+0+0"));
-&ShowShell(&NewShell(beach,Work,"+0+0"));
+{
+    no strict 'subs';
+    &ShowShell(&NewShell(beach,Work,"+0+0"));
+    &ShowShell(&NewShell(beach,Work,"+0+0"));
+    &ShowShell(&NewShell(beach,Work,"+0+0"));
+}
 ########
    {
        package FAKEARRAY;
    
+       my $count = 0;
        sub TIEARRAY
        { print "TIEARRAY @_\n"; 
          die "bomb out\n" unless $count ++ ;
@@ -175,6 +180,8 @@ sub ShowShell
        sub DESTROY { print "DESTROY \n"; undef @{$_[0]}; }
    }
    
+my @h;
+no strict 'subs';
 eval 'tie @h, FAKEARRAY, fred' ;
 tie @h, FAKEARRAY, fred ;
 EXPECT
@@ -187,7 +194,7 @@ EXPECT
 phooey
 BEGIN failed--compilation aborted at - line 1.
 ########
-BEGIN { 1/$zero }
+BEGIN { my $zero; 1/$zero }
 EXPECT
 Illegal division by zero at - line 1.
 BEGIN failed--compilation aborted at - line 1.
@@ -261,7 +268,7 @@ print "ok\n";
 EXPECT
 ok
 ########
-@a = ($a, $b, $c, $d) = (5, 6);
+my @a = my ($a, $b, $c, $d) = (5, 6);
 print "ok\n"
   if ($a[0] == 5 and $a[1] == 6 and !defined $a[2] and !defined $a[3]);
 EXPECT
@@ -286,6 +293,7 @@ print thing(), "\n";
 EXPECT
 nowisthetime
 ########
+no strict 'vars';
 $ren = 'joy';
 $stimpy = 'happy';
 { local $main::{ren} = *stimpy; print $ren, ' ' }
@@ -293,9 +301,13 @@ print $ren, "\n";
 EXPECT
 happy joy
 ########
+no strict 'vars';
 $stimpy = 'happy';
-{ local $main::{ren} = *stimpy; print ${'ren'}, ' ' }
-print +(defined(${'ren'}) ? 'oops' : 'joy'), "\n";
+{
+    no strict 'refs';
+    { local $main::{ren} = *stimpy; print ${'ren'}, ' ' }
+    print +(defined(${'ren'}) ? 'oops' : 'joy'), "\n";
+}
 EXPECT
 happy joy
 ########
@@ -307,15 +319,15 @@ print p::func()->groovy(), "\n"
 EXPECT
 really groovy
 ########
-@list = ([ 'one', 1 ], [ 'two', 2 ]);
-sub func { $num = shift; (grep $_->[1] == $num, @list)[0] }
+my @list = ([ 'one', 1 ], [ 'two', 2 ]);
+sub func { my $num = shift; (grep $_->[1] == $num, @list)[0] }
 print scalar(map &func($_), 1 .. 3), " ",
       scalar(map scalar &func($_), 1 .. 3), "\n";
 EXPECT
 2 3
 ########
-($k, $s)  = qw(x 0);
-@{$h{$k}} = qw(1 2 4);
+my ($k, $s)  = qw(x 0);
+my %h; @{$h{$k}} = qw(1 2 4);
 for (@{$h{$k}}) { $s += $_; delete $h{$k} if ($_ == 2) }
 print "bogus\n" unless $s == 7;
 ########
@@ -340,13 +352,13 @@ Subroutine foo redefined at (eval 1) line 1.
 Exiting foo1
 In foo2
 ########
-$s = 0;
+my $s = 0;
 map {#this newline here tickles the bug
 $s += $_} (1,2,4);
 print "eat flaming death\n" unless ($s == 7);
 ########
 sub foo { local $_ = shift; @_ = split; @_ }
-@x = foo(' x  y  z ');
+my @x = foo(' x  y  z ');
 print "you die joe!\n" unless "@x" eq 'x y z';
 ########
 "A" =~ /(?{"{"})/	# Check it outside of eval too
@@ -419,10 +431,10 @@ destroyed
 package X;
 sub any { bless {} }
 my $f = "FH000"; # just to thwart any future optimisations
-sub afh { select select ++$f; my $r = *{$f}{IO}; delete $X::{$f}; bless $r }
+sub afh {no strict 'refs';  select select ++$f; my $r = *{$f}{IO}; delete $X::{$f}; bless $r }
 sub DESTROY { print "destroyed\n" }
 package main;
-$x = any X; # to bump sv_objcount. IO objs aren't counted??
+my $x = any X; # to bump sv_objcount. IO objs aren't counted??
 *f = afh X;
 EXPECT
 destroyed
@@ -442,7 +454,9 @@ bar
 BEGIN failed--compilation aborted at - line 8.
 ########
 package X;
-@ISA='Y';
+our @ISA='Y';
+our $AUTOLOAD;
+
 sub new {
     my $class = shift;
     my $self = { };
@@ -504,14 +518,14 @@ EXPECT
 ZZZ
 ########
 -w
-if (@ARGV) { print "" }
+my $x; if (@ARGV) { print "" }
 else {
   if ($x == 0) { print "" } else { print $x }
 }
 EXPECT
 Use of uninitialized value $x in numeric eq (==) at - line 3.
 ########
-$x = sub {};
+my $x = sub {};
 foo();
 sub foo { eval { return }; }
 print "ok\n";
@@ -543,7 +557,7 @@ aba\ba\b
 # within it
 sub myeval { eval $_[0] }
 my $foo = "ok 2\n";
-myeval('sub foo { local $foo = "ok 1\n"; print $foo; }');
+myeval('no strict q|vars|; sub foo { local $foo = "ok 1\n"; print $foo; }');
 die $@ if $@;
 foo();
 print $foo;
@@ -579,7 +593,7 @@ BAR
 .
 
 # This loop causes a segv in 5.6.0
-for $lineno (1..61) {
+for my $lineno (1..61) {
    write REMITOUT;
 }
 
@@ -645,6 +659,7 @@ END {
 }
 package Bar;
 sub new {
+    no strict 'subs';
     my Bar $self = bless [], Bar;
     eval '$self';
     return $self;
@@ -656,7 +671,7 @@ EXPECT
 Bar=ARRAY(0x...)
 ######## (?{...}) compilation bounces on PL_rs
 -0
-{
+my $x; {
   /(?{ $x })/;
   # {
 }
@@ -665,7 +680,7 @@ EXPECT
 ok
 ######## scalar ref to file test operator segfaults on 5.6.1 [ID 20011127.155 (#7947)]
 # This only happens if the filename is 11 characters or less.
-$foo = \-f "blah";
+my $foo = \-f "blah";
 print "ok" if ref $foo && !$$foo;
 EXPECT
 ok
@@ -674,6 +689,7 @@ print "ok" if 'X' =~ /\X/;
 EXPECT
 ok
 ######## segfault in 5.6.1 within peep()
+my (@a, @b, @c, @d);
 @a = (1..9);
 @b = sort { @c = sort { @d = sort { 0 } @a; @d; } @a; } @a;
 print join '', @a, "\n";
@@ -700,6 +716,7 @@ EXPECT
 ######## example from Camel 5, ch. 15, pp.406 (with package vars)
 # SKIP: ord "A" == 193 # EBCDIC
 use utf8;
+no strict 'vars';
 $人 = 2; # 0xe4 0xba 0xba: U+4eba, "human" in CJK ideograph
 $人++; # a child is born
 print $人, "\n";
@@ -718,7 +735,8 @@ EXPECT
 ########
 # test that closures generated by eval"" hold on to the CV of the eval""
 # for their entire lifetime
-$code = eval q[
+my $x;
+my $code = eval q[
   sub { eval '$x = "ok 1\n"'; }
 ];
 &{$code}();
@@ -726,7 +744,7 @@ print $x;
 EXPECT
 ok 1
 ######## [ID 20020623.009 (#9728)] nested eval/sub segfaults
-$eval = eval 'sub { eval "sub { %S }" }';
+my $eval = eval 'sub { eval "sub { %S }" }';
 $eval->({});
 ######## [perl #17951] Strange UTF error
 -W
@@ -745,9 +763,9 @@ EXPECT
 ######## [perl #20667] unicode regex vs non-unicode regex
 # SKIP: !defined &DynaLoader::boot_DynaLoader && !eval 'require "unicore/UCD.pl"'
 # (skip under miniperl if Unicode tables are not built yet)
-$toto = 'Hello';
+my $toto = 'Hello';
 $toto =~ /\w/; # this line provokes the problem!
-$name = 'A B';
+my $name = 'A B';
 # utf8::upgrade($name) if @ARGV;
 if ($name =~ /(\p{IsUpper}) (\p{IsUpper})/){
     print "It's good! >$1< >$2<\n";

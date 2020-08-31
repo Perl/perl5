@@ -6,9 +6,12 @@ use Carp;
 
 # test that enabling overload without loading overload.pm does not trigger infinite recursion
 
-my $p = "OverloadedInXS"; 
-*{$p."::(("} = sub{};
-*{$p.q!::(""!} = sub { Carp::cluck "<My Stringify>" }; 
+my $p = "OverloadedInXS";
+{
+    no strict 'refs';
+    *{$p."::(("} = sub{};
+    *{$p.q!::(""!} = sub { Carp::cluck "<My Stringify>" };
+}
 sub { Carp::longmess("longmess:") }->(bless {}, $p);
 ok(1);
 

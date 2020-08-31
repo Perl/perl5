@@ -8,8 +8,9 @@ BEGIN {
 
 plan( tests => 18 );
 
+my ( @oops, @ops );
 @oops = @ops = <op/*>;
-
+my %files;
 if ($^O eq 'MSWin32') {
   map { $files{lc($_)}++ } <op/*>;
   map { delete $files{"op/$_"} } split /[\s\n]/, `dir /b /l op & dir /b /l /ah op 2>nul`,
@@ -26,7 +27,7 @@ ok( !(keys(%files)),'leftover op/* files' ) or diag(join(' ',sort keys %files));
 
 cmp_ok($/,'eq',"\n",'sane input record separator');
 
-$not = '';
+my $not = '';
 while (<jskdfjskdfj* op/* jskdjfjkosvk*>) {
     $not = "not " unless $_ eq shift @ops;
     $not = "not at all " if $/ eq "\0";
@@ -36,7 +37,7 @@ ok(!$not,"glob amid garbage [$not]");
 cmp_ok($/,'eq',"\n",'input record separator still sane');
 
 $_ = "op/*";
-@glops = glob $_;
+my @glops = glob $_;
 cmp_ok("@glops",'eq',"@oops",'glob operator 1');
 
 @glops = glob;
@@ -55,6 +56,7 @@ cmp_ok($i,'==',2,'remove File::Glob stash');
 
 # a more sinister version of the same test (crashes from 5.8 to 5.13.1)
 {
+    no warnings 'uninitialized';
     local %File::Glob::;
     local %CORE::GLOBAL::;
     eval "<.>";
@@ -89,6 +91,7 @@ SKIP: {
 {
     my $f = 0;
     my $ok = 1;
+    my $x;
     $ok = 0, undef $f while $x = $f||$f;
     ok($ok,'test definedness with LOGOP');
 }

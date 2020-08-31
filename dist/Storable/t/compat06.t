@@ -6,10 +6,13 @@
 #  in the README file that comes with the distribution.
 #
 
+
+
 BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -51,9 +54,10 @@ sub make {
 
 package ROOT;
 
+our %hash;
 sub make {
 	my $self = bless {}, shift;
-	my $h = tie %hash, TIED_HASH;
+	my $h = tie %hash, 'TIED_HASH';
 	$self->{h} = $h;
 	$self->{ref} = \%hash;
 	my @pool;
@@ -76,6 +80,7 @@ sub obj { $_[0]->{obj} }
 
 package main;
 
+our $hash_fetch;
 my $is_EBCDIC = (ord('A') == 193) ? 1 : 0;
  
 my $r = ROOT->make;

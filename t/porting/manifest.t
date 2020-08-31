@@ -24,13 +24,14 @@
 # which will output "WARNING: re-sorting MANIFEST" but which will also
 # correct the problem.
 
-use Config;
 BEGIN {
-    @INC = '..' if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
 use TestInit qw(T); # T is chdir to the top level
-
-require './t/test.pl';
 
 skip_all("Cross-compiling, the entire source might not be available")
     if $Config{usecrosscompile};

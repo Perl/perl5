@@ -15,7 +15,8 @@ print "1..6\n";
 my $i = 1;
 foreach (qw(SEEK_SET SEEK_CUR SEEK_END     _IOFBF    _IOLBF    _IONBF)) {
     my $d1 = defined(&{"IO::Handle::" . $_}) ? 1 : 0;
-    my $v1 = $d1 ? &{"IO::Handle::" . $_}() : undef;
+    my $v1;
+    { no strict 'refs'; $v1 = $d1 ? &{"IO::Handle::" . $_}() : undef; }
     my $v2 = IO::Handle::constant($_);
     my $d2 = defined($v2);
 

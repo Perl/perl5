@@ -3,6 +3,8 @@ use Test::More tests => 30;
 use feature "lexical_subs", "state";
 no warnings "experimental::lexical_subs";
 
+no strict 'refs'; # much testing of typeglobs here
+
 is (cv_name(\&foo), 'main::foo', 'cv_name with package sub');
 is (cv_name(*{"foo"}{CODE}), 'main::foo',
    'cv_name with package sub via glob');
@@ -11,6 +13,7 @@ is (cv_name(\"foo"), 'foo', 'cv_name with string');
 state sub lex1;
 is (cv_name(\&lex1), 'lex1', 'cv_name with lexical sub');
 
+my ($name, $ret);
 $ret = \cv_name(\&bar, $name);
 is $ret, \$name, 'cv_name with package sub returns 2nd argument';
 is ($name, 'main::bar', 'retval of cv_name with package sub & 2nd arg');

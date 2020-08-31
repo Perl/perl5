@@ -14,7 +14,7 @@ print "ok 1\n";
 $sel->add([\*STDOUT, 'foo']) == 1 or print "not ";
 print "ok 2\n";
 
-@handles = $sel->handles;
+my @handles = $sel->handles;
 print "not " unless $sel->count == 4 && @handles == 4;
 print "ok 3\n";
 #print $sel->as_string, "\n";
@@ -50,7 +50,7 @@ if ( grep $^O eq $_, qw(MSWin32 NetWare dos VMS riscos beos) ) {
     goto POST_SOCKET;
 }
 
-@a = $sel->can_read();  # should return immediately
+my @a = $sel->can_read();  # should return immediately
 print "not " unless @a == 0;
 print "ok 10\n";
 
@@ -70,7 +70,7 @@ $sel->add(\*STDOUT);  # update
 print "not " unless @a == 3;
 print "ok 13\n";
 
-($r, $w, $e) = @a;
+my ($r, $w, $e) = @a;
 
 print "not " unless @$r == 0 && @$w == 1 && @$e == 0;
 print "ok 14\n";

@@ -1,6 +1,6 @@
 package bytes;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 $bytes::hint_bits = 0x00000008;
 
@@ -12,6 +12,7 @@ sub unimport {
     $^H &= ~$bytes::hint_bits;
 }
 
+our $AUTOLOAD;
 sub AUTOLOAD {
     require "bytes_heavy.pl";
     goto &$AUTOLOAD if defined &$AUTOLOAD;

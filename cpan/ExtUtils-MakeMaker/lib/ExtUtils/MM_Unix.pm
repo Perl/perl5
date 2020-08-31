@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.44';
+$VERSION = '7.44_01';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -1145,6 +1145,10 @@ WARNING
         }
     }
 
+    if ( $ver && $ver eq '7' ) {
+        $ver = 'v7';
+    }
+
     foreach my $name (@$names){
         my ($abs, $use_dir);
         if ($self->file_name_is_absolute($name)) {     # /foo/bar
@@ -1166,7 +1170,9 @@ WARNING
             print "Executing $abs\n" if ($trace >= 2);
 
             my $val;
-            my $version_check = qq{"$abs" -le "require $ver; print qq{VER_OK}"};
+            my $lib = $abs;
+            $lib =~ s{/[^/]+$}{/lib};
+            my $version_check = qq{"$abs" -I$lib -le "require $ver; print qq{VER_OK}"};
 
             # To avoid using the unportable 2>&1 to suppress STDERR,
             # we close it before running the command.
@@ -2080,8 +2086,10 @@ sub init_PERL {
         push @perls, $miniperl;
     }
 
+    my $pv = int($]);
+
     $self->{PERL} ||=
-        $self->find_perl(5.0, \@perls, \@defpath, $Verbose );
+        $self->find_perl($pv, \@perls, \@defpath, $Verbose );
 
     my $perl = $self->{PERL};
     $perl =~ s/^"//;

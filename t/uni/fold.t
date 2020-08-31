@@ -1,4 +1,3 @@
-use strict;
 use warnings;
 
 # re/fold_grind.t has more complex tests, but doesn't test every fold
@@ -10,7 +9,7 @@ BEGIN {
     set_up_inc('../lib');
     skip_all_without_unicode_tables();
     skip_all_if_miniperl("miniperl, no Unicode::Normalize");
-    require Config; import Config;
+    require Config; Config->import;
     require './charset_tools.pl';
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }

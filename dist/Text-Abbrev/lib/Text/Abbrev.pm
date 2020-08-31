@@ -2,7 +2,7 @@ package Text::Abbrev;
 require 5.005;		# Probably works on earlier versions too.
 require Exporter;
 
-our $VERSION = '1.02';
+our $VERSION = '1.02_001';
 
 =head1 NAME
 
@@ -32,8 +32,8 @@ The values are the original list elements.
 
 =cut
 
-@ISA = qw(Exporter);
-@EXPORT = qw(abbrev);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(abbrev);
 
 # Usage:
 #	abbrev \%foo, LIST;

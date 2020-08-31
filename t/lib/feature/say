@@ -3,7 +3,7 @@ Check the lexical scoping of the say keyword.
 
 __END__
 # No say; should be a syntax error.
-use warnings;
+use warnings; no strict;
 say "Hello", "world";
 EXPECT
 Unquoted string "say" may clash with future reserved word at - line 3.
@@ -27,7 +27,7 @@ EXPECT
 Helloworld
 ########
 # feature out of scope; should be a syntax error.
-use warnings;
+use warnings; no strict;
 { use feature 'say'; }
 say "Hello", "world";
 EXPECT
@@ -41,7 +41,7 @@ Execution of - aborted due to compilation errors.
 use warnings;
 use feature 'say';
 say "Hello", "world";
-no feature;
+no feature; no strict;
 say "Hello", "world";
 EXPECT
 Unquoted string "say" may clash with future reserved word at - line 6.
@@ -54,7 +54,7 @@ Execution of - aborted due to compilation errors.
 use warnings;
 use feature 'say';
 say "Hello", "world";
-no feature 'say';
+no feature 'say'; no strict;
 say "Hello", "world";
 EXPECT
 Unquoted string "say" may clash with future reserved word at - line 6.

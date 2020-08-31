@@ -12,6 +12,7 @@ eval 'pass();';
 
 is($@, '');
 
+my $foo;
 eval "\$foo\n    = # this is a comment\n'ok 3';";
 is($foo, 'ok 3');
 
@@ -33,26 +34,28 @@ is +()=eval 'die', 0, 'eval run-time error in list context';
 is(eval '"ok 7\n";', "ok 7\n");
 
 $foo = 5;
-$fact = 'if ($foo <= 1) {1;} else {push(@x,$foo--); (eval $fact) * pop(@x);}';
-$ans = eval $fact;
+my $fact = 'if ($foo <= 1) {1;} else {my @x; push(@x,$foo--); (eval $fact) * pop(@x);}';
+my $ans = eval $fact;
 is($ans, 120, 'calculate a factorial with recursive evals');
 
-$foo = 5;
-$fact = 'local($foo)=$foo; $foo <= 1 ? 1 : $foo-- * (eval $fact);';
-$ans = eval $fact;
-is($ans, 120, 'calculate a factorial with recursive evals');
+{
+    our $foo = 5;
+    $fact = 'local($foo)=$foo; $foo <= 1 ? 1 : $foo-- * (eval $fact);';
+    $ans = eval $fact;
+    is($ans, 120, 'calculate a factorial with recursive evals');
+}
 
 my $curr_test = curr_test();
 my $tempfile = tempfile();
 open(try,'>',$tempfile);
-print try 'print "ok $curr_test\n";',"\n";
+print try qq|print "ok $curr_test\n";|,"\n";
 close try;
 
 do "./$tempfile"; print $@;
 
 # Test the singlequoted eval optimizer
 
-$i = $curr_test + 1;
+my $i = $curr_test + 1;
 for (1..3) {
     eval 'print "ok ", $i++, "\n"';
 }
@@ -86,7 +89,7 @@ curr_test($curr_test + 3);
   is(  $b, 'V');
 
   $b = 'wrong';
-  $x = sub {
+  my $x = sub {
      my $b = "right";
      is(eval('"$b"'), $b);
   };
@@ -182,7 +185,7 @@ is(create_closure("good")->(), "good",
    'closures created within eval bind correctly');
 
 $main::r = "good";
-sub terminal { eval '$r . q{!}' }
+sub terminal { eval '$main::r . q{!}' }
 is(do {
    my $r = "bad";
    eval 'terminal($r)';
@@ -325,7 +328,7 @@ is($r, 120);
 
 my $yyy = 2;
 
-sub fred4 { 
+sub fred4 {
     my $zzz = 3;
     is($zzz, 3);
     is(eval '$zzz', 3);
@@ -348,7 +351,7 @@ fred5();
 eval q{ my $yyy = 888; my $zzz = 999; fred5(); };
 
 {
-   $eval = eval 'sub { eval "sub { %S }" }';
+   my $eval = eval 'sub { eval "sub { %S }" }';
    $eval->({});
    pass('[perl #9728] used to dump core');
 }
@@ -421,7 +424,7 @@ pass('#20798 (used to dump core)');
 # [perl #34682] escaping an eval with last could coredump or dup output
 
 $got = runperl (
-    prog => 
+    prog =>
     'sub A::TIEARRAY { L: { eval { last L } } } tie @a, A; warn qq(ok\n)',
 stderr => 1);
 
@@ -459,7 +462,7 @@ is($got, "ok\n", 'eval and last');
 }
 
 # [perl #51370] eval { die "\x{a10d}" } followed by eval { 1 } did not reset
-# length $@ 
+# length $@
 $@ = "";
 eval { die "\x{a10d}"; };
 $_ = length $@;
@@ -476,7 +479,7 @@ SKIP: {
 	unless $Config::Config{extensions} =~ /\bDevel\/Peek\b/;
 
     my $tempfile = tempfile();
-    open $prog, ">", $tempfile or die "Can't create test file";
+    open my $prog, ">", $tempfile or die "Can't create test file";
     print $prog <<'END_EVAL_TEST';
     use Devel::Peek;
     $! = 0;
@@ -528,7 +531,7 @@ END_EVAL_TEST
 }
 
 {
-    # test that the CV compiled for the eval is freed by checking that no additional 
+    # test that the CV compiled for the eval is freed by checking that no additional
     # reference to outside lexicals are made.
     my $x;
     is(Internals::SvREFCNT($x), 1, "originally only 1 reference");
@@ -630,6 +633,7 @@ EOE
 }
 
 {
+    no strict 'vars';
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
 
@@ -637,7 +641,7 @@ EOE
     is(
         $w =~ s/eval \d+/eval 1/ra,
         "should be line 3 at (eval 1) line 3.\n",
-        'eval qq{\${\nfoo\n}; warn} updates the line number correctly'
+        'eval qq{\${\nfoo\n}; warn}' . " updates the line number correctly"
     );
 }
 

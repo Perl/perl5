@@ -13,7 +13,7 @@ my @tests = (
 	     ['DIR', 'dir', (stat '.')[2]]
 	    );
 
-$devnull = File::Spec->devnull();
+my $devnull = File::Spec->devnull();
 if (-c $devnull) {
     push @tests, ['CHR', $devnull, (stat $devnull)[2]];
 }
@@ -56,7 +56,7 @@ foreach (@tests) {
 	ok(!S_ISBLK($mode), "!S_ISBLK $name");
     }
  SKIP: {
-	skip 'No S_IFFIFO', 1 unless defined eval {S_IFFIFO};
+	skip 'No S_IFFIFO', 1 unless defined eval {'S_IFFIFO'};
 	ok(!S_ISFIFO($mode), "!S_ISFIFO $name");
     }
  SKIP: {

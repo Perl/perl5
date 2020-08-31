@@ -32,7 +32,11 @@ my $exception_134138 = 'Constants from lexical variables potentially modified '
     . 'elsewhere are no longer permitted';
 
 # [perl #63540] Don’t treat sub { if(){.....}; "constant" } as a constant
+
+my $blonk_was_called = 0;
+
 sub blonk { ++$blonk_was_called }
+my @tests = ();
 push @tests, {
   nickname    => 'sub with null+kids (if-block), then constant',
   generator   => sub {
@@ -351,7 +355,7 @@ push @tests, {
 push @tests, {
   nickname    => 'closure after \(my $x=1)',
   generator   => sub {
-    $y = \(my $x = 1);
+    my $y = \(my $x = 1);
     my $ret = sub () { $x };
     $$y += 7;
     $ret;
@@ -479,8 +483,8 @@ pass("No assertion failure when turning on PADSTALE on lexical shared by"
     my $sub = sub {
         my $x = "x"x2000; sub () {$x};
     }->();
-    $y = &$sub;
-    $z = &$sub;
+    my $y = &$sub;
+    my $z = &$sub;
     is $z, $y, 'inlinable sub ret vals are not swipable';
 }
 

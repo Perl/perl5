@@ -3,28 +3,28 @@ Check the lexical scoping of the switch keywords.
 
 __END__
 # No switch; given should be a bareword.
-use warnings; no warnings 'experimental::smartmatch';
+no strict; use warnings; no warnings 'experimental::smartmatch';
 print STDOUT given;
 EXPECT
 Unquoted string "given" may clash with future reserved word at - line 3.
 given
 ########
 # No switch; when should be a bareword.
-use warnings; no warnings 'experimental::smartmatch';
+no strict; use warnings; no warnings 'experimental::smartmatch';
 print STDOUT when;
 EXPECT
 Unquoted string "when" may clash with future reserved word at - line 3.
 when
 ########
 # No switch; default should be a bareword.
-use warnings; no warnings 'experimental::smartmatch';
+no strict; use warnings; no warnings 'experimental::smartmatch';
 print STDOUT default;
 EXPECT
 Unquoted string "default" may clash with future reserved word at - line 3.
 default
 ########
 # No switch; break should be a bareword.
-use warnings; no warnings 'experimental::smartmatch';
+no strict; use warnings; no warnings 'experimental::smartmatch';
 print STDOUT break;
 EXPECT
 Unquoted string "break" may clash with future reserved word at - line 3.
@@ -63,7 +63,7 @@ Can't "break" outside a given block at - line 3.
 use warnings; no warnings 'experimental::smartmatch';
 { use feature 'switch';
   given (1) {print "Okay here\n";}
-}
+} no strict;
 print STDOUT given;
 EXPECT
 Unquoted string "given" may clash with future reserved word at - line 6.
@@ -74,7 +74,7 @@ given
 use warnings; no warnings 'experimental::smartmatch';
 { use feature 'switch';
   given (1) { when(1) {print "Okay here\n";} }
-}
+} no strict;
 print STDOUT when;
 EXPECT
 Unquoted string "when" may clash with future reserved word at - line 6.
@@ -85,7 +85,7 @@ when
 use warnings; no warnings 'experimental::smartmatch';
 { use feature 'switch';
   given (1) { default {print "Okay here\n";} }
-}
+} no strict;
 print STDOUT default;
 EXPECT
 Unquoted string "default" may clash with future reserved word at - line 6.
@@ -96,7 +96,7 @@ default
 use warnings; no warnings 'experimental::smartmatch';
 { use feature 'switch';
   given (1) { break }  
-}
+} no strict;
 print STDOUT break;
 EXPECT
 Unquoted string "break" may clash with future reserved word at - line 6.
@@ -106,7 +106,7 @@ break
 use warnings; no warnings 'experimental::smartmatch';
 use feature 'switch';
 given (1) { when(1) {print "Okay here\n";} }
-no feature 'switch';
+no feature 'switch'; no strict;
 print STDOUT when;
 EXPECT
 Unquoted string "when" may clash with future reserved word at - line 6.
@@ -117,7 +117,7 @@ when
 use warnings; no warnings 'experimental::smartmatch';
 use feature 'switch';
 given (1) { when(1) {print "Okay here\n";} }
-no feature;
+no feature; no strict;
 print STDOUT when;
 EXPECT
 Unquoted string "when" may clash with future reserved word at - line 6.
@@ -126,7 +126,7 @@ when
 ########
 # Without the feature, no 'Unambiguous use of' warning:
 use warnings; no warnings 'experimental::smartmatch';
-@break = ($break = "break");
+my (@break, $break); @break = ($break = "break");
 print ${break}, ${break[0]};
 EXPECT
 breakbreak
@@ -134,7 +134,7 @@ breakbreak
 # With the feature, we get an 'Unambiguous use of' warning:
 use warnings; no warnings 'experimental::smartmatch';
 use feature 'switch';
-@break = ($break = "break");
+my (@break, $break); @break = ($break = "break");
 print ${break}, ${break[0]};
 EXPECT
 Ambiguous use of ${break} resolved to $break at - line 5.

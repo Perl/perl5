@@ -7,5 +7,6 @@ BEGIN {
 }
 
 use Tie::Array;
-tie @x,Tie::StdArray;
+my @x;
+tie @x, 'Tie::StdArray';
 require "op/push.t"

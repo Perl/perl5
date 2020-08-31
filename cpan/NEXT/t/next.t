@@ -10,6 +10,7 @@ sub A::DESTROY  { $_[0]->NEXT::DESTROY() }
 sub A::evaled   { eval { $_[0]->NEXT::evaled(); return 'evaled' } }
 
 package B;
+our $AUTOLOAD;
 use base qw( A );
 sub B::AUTOLOAD { return ( 9, $_[0]->NEXT::AUTOLOAD() )
 			if $AUTOLOAD =~ /.*(missing_method|secondary)/ }
@@ -85,7 +86,7 @@ print "ok 14\n";
 
 # BASE CLASS METHODS ONLY REDISPATCHED WITHIN HIERARCHY (ok 15..16)
 my $ob2 = bless {}, "B";
-@val = $ob2->method();         
+my @val = $ob2->method();
 print "not " unless @val==1 && $val[0]==3;
 print "ok 15\n";
 
@@ -107,7 +108,7 @@ print "ok 22\n";
 # TEST WITH CONSTANTS (23)
 
 package Hay;
-@ISA = 'Bee';
+our @ISA = 'Bee';
 sub foo { return shift->NEXT::foo }
 package Bee;
 use constant foo => 3;

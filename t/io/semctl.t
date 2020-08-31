@@ -6,7 +6,7 @@ BEGIN {
   require Config; import Config;
 }
 
-use strict;
+
 use warnings;
 
 skip_all('no SysV semaphores on this platform') if !$Config{d_sem};

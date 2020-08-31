@@ -14,6 +14,17 @@ use warnings;
 
 plan(tests => 284);
 
+# Note: The original intent of this file is to test typeglobs, which
+# necessarily means testing global variables.  That means that "use strict
+# 'vars'" is inappropriate here and that adding lots of 'my' and 'our'
+# declarators would be missing the point.
+#
+# So we'll run the file with "no strict 'vars'".  We'll also run it with "no
+# strict 'refs'" for similar reasons, but will permit "strict 'subs'" to be on by default and only loosen that stricture when needed.
+
+no strict 'vars';
+no strict 'refs';
+
 # type coercion on assignment
 $foo = 'foo';
 $bar = *main::foo;
@@ -37,11 +48,14 @@ is(ref(\$foo), 'GLOB');
  ${\*$foo} = undef;
  is(ref(\$foo), 'GLOB', 'no type coercion when assigning to *{} retval');
  $::{phake} = *bar;
- is(
-   \$::{phake}, \*{"phake"},
-   'symbolic *{} returns symtab entry when FAKE'
- );
- ${\*{"phake"}} = undef;
+ {
+   is(
+     \$::{phake},
+     \*{"phake"},
+     'symbolic *{} returns symtab entry when FAKE'
+   );
+  ${\*{"phake"}} = undef;
+ }
  is(
    ref(\$::{phake}), 'GLOB',
   'no type coercion when assigning to retval of symbolic *{}'
@@ -675,6 +689,7 @@ is join(' ', sub {
 # created for the non-existent function.
 {
 	package RT72740a;
+    no strict 'subs';
 	my $f = bless({}, RT72740b);
 	sub s1 { s2 $f; }
 	our $s4;

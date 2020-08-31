@@ -40,10 +40,10 @@ ok defined($v), 'Fix for RT #47980';
     eval { version::new() };
     like $@, qr'Usage: version::new\(class, version\)',
 	'No bus err when called as function';
-    eval { $x = 1; print version::new };
+    eval { my $x = 1; print version::new };
     like $@, qr'Usage: version::new\(class, version\)',
 	'No implicit object creation when called as function';
-    eval { $x = "version"; print version::new };
+    eval { my $x = "version"; print version::new };
     like $@, qr'Usage: version::new\(class, version\)',
 	'No implicit object creation when called as function';
 }

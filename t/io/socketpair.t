@@ -2,21 +2,20 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require Config; import Config;
     require './test.pl';
     set_up_inc('../lib');
     skip_all_if_miniperl();
+    require Config; Config->import;
     for my $needed (qw(d_socket)) {
-	if ($Config{$needed} ne 'define') {
-	    skip_all("-- \$Config{$needed} undefined");
-	}
+	    if ($Config::Config{$needed} ne 'define') {
+	        skip_all("-- \$Config{$needed} undefined");
+	    }
     }
-    unless ($Config{extensions} =~ /\bSocket\b/) {
-	skip_all('-- Socket not available');
+    unless ($Config::Config{extensions} =~ /\bSocket\b/) {
+	    skip_all('-- Socket not available');
     }
 }
 
-use strict;
 use IO::Handle;
 use Socket;
 

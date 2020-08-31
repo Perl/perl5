@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use warnings;
-use strict;
+
 use Config;
 
 my $piped;

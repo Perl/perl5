@@ -40,6 +40,7 @@ print "1..6\n";
 # $LONG_RUN is the number of seconds that the function call must last
 # in order for the call to be considered sufficiently long.
 
+my $COUNT = 0;
 
 sub fib {
   my $n = shift;
@@ -52,12 +53,13 @@ sub max { $_[0] > $_[1] ?
           $_[0] : $_[1] 
         }
 
-$N = 1;
+my $N = 1;
 
-$ELAPSED = 0;
+my $ELAPSED = 0;
 
 my $LONG_RUN = 11;
 
+my $RESULT = '';
 while (1) {
   my $start = time;
   $COUNT=0;
@@ -85,9 +87,9 @@ print "# Total calls: $COUNT.\n";
 &memoize('fib');
 
 $COUNT=0;
-$start = time;
-$RESULT2 = fib($N);
-$ELAPSED2 = time - $start + .001; # prevent division by 0 errors
+my $start = time;
+my $RESULT2 = fib($N);
+my $ELAPSED2 = time - $start + .001; # prevent division by 0 errors
 print (($RESULT == $RESULT2) ? "ok 1\n" : "not ok 1\n");
 # If it's not ten times as fast, something is seriously wrong.
 print "# ELAPSED2=$ELAPSED2 seconds.\n";

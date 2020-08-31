@@ -5,14 +5,16 @@
 # with 5.005_03. This test shows it up, whereas malice.t does not.
 # In particular, don't use Test; as this covers up the problem.
 
+
 sub BEGIN {
     if ($ENV{PERL_CORE}) {
-	require Config; import Config;
-	%Config=%Config if 0; # cease -w
-	if ($Config{'extensions'} !~ /\bStorable\b/) {
-	    print "1..0 # Skip: Storable was not built\n";
-	    exit 0;
-	}
+        no strict 'vars';
+        require Config; Config->import;
+        %Config=%Config if 0; # cease -w
+        if ($Config{'extensions'} !~ /\bStorable\b/) {
+            print "1..0 # Skip: Storable was not built\n";
+            exit 0;
+        }
     }
 }
 

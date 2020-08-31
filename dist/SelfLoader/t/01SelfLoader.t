@@ -1,3 +1,4 @@
+my ($dir, $sep);
 BEGIN {
     $dir = "self-$$";
     $sep = "/";
@@ -47,7 +48,7 @@ EOT
 package Bar;
 use SelfLoader;
 
-@ISA = 'Baz';
+our @ISA = 'Baz';
 
 sub new { bless {}, shift }
 sub a;
@@ -82,7 +83,7 @@ package main;
 use Foo;
 use Bar;
 
-$foo = new Foo;
+my $foo = new Foo;
 
 print "not " unless $foo->foo eq 'foo';  # selfloaded first time
 print "ok 1\n";
@@ -136,7 +137,7 @@ print "ok 10\n";
 
 # Now check inheritance:
 
-$bar = new Bar;
+my $bar = new Bar;
 
 # Before anything is SelfLoaded there is no declaration of Foo::b so we should
 # get Baz::b

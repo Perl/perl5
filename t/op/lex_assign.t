@@ -11,23 +11,21 @@ BEGIN {
 
 $| = 1;
 umask 0;
-$xref = \ "";
-$runme = $^X;
-@a = (1..5);
-%h = (1..6);
-$aref = \@a;
-$href = \%h;
+my $xref = \ "";
+my $runme = $^X;
+my @a = (1..5);
+my %h = (1..6);
+my $aref = \@a;
+my $href = \%h;
 open OP, qq{$runme -le "print 'aaa Ok ok' for 1..100"|};
-$chopit = 'aaaaaa';
-@chopar = (113 .. 119);
-$posstr = '123456';
-$cstr = 'aBcD.eF';
+my $chopit = 'aaaaaa';
+my @chopar = (113 .. 119);
+my $posstr = '123456';
+my $cstr = 'aBcD.eF';
 pos $posstr = 3;
+my ($nn, $n);
 $nn = $n = 2;
 sub subb {"in s"}
-
-@INPUT = <DATA>;
-@simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
 
 sub wrn {"@_"}
 
@@ -40,14 +38,13 @@ is( $b, 'Ab', 'Check correct optimization of ucfirst, etc');
 my $dc = 0;
 sub A::DESTROY {$dc += 1}
 $a=8;
-my $b;
 { my $c = 6; $b = bless \$c, "A"}
 
 is($dc, 0, 'No destruction yet');
 
 $b = $a+5;
 
-is($dc, 1, 'object descruction via reassignment to variable');
+is($dc, 1, 'object destruction via reassignment to variable');
 
 my $xxx = 'b';
 $xxx = 'c' . ($xxx || 'e');
@@ -57,6 +54,7 @@ is( $xxx, 'cb', 'variables can be read before being overwritten');
 
 my ($l1, $l2, $l3, $l4);
 my $zzzz = 12;
+my ($zzz1, $zzz2);
 $zzz1 = $l1 = $l2 = $zzz2 = $l3 = $l4 = 1 + $zzzz;
 
 is($zzz1, 13, 'chain assignment, part1');
@@ -66,13 +64,17 @@ is($l2,   13, 'chain assignment, part4');
 is($l3,   13, 'chain assignment, part5');
 is($l4,   13, 'chain assignment, part6');
 
+my @INPUT = <DATA>;
+
 for (@INPUT) {
+  my ($op, $comment, $expectop);
   ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
   chomp;
   $op = "$op==$op" unless $op =~ /==/;
   ($op, $expectop) = $op =~ /(.*)==(.*)/;
   
+  my ($skip, $integer);
   $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
   $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
   if ($skip) {
@@ -82,16 +84,18 @@ for (@INPUT) {
     next;
   }
   
+  my $undefed;
+  my $xundefed = [];
   eval <<EOE;
   local \$SIG{__WARN__} = \\&wrn;
   my \$a = 'fake';
   $integer;
   \$a = $op;
-  \$b = $expectop;
+  my \$b = $expectop;
   is (\$a, \$b, \$comment);
 EOE
   if ($@) {
-    $warning = $@;
+    my $warning = $@;
     chomp $warning;
     if ($@ !~ /(?:is un|not )implemented/) {
       fail($_ . ' ' . $warning);
@@ -125,6 +129,7 @@ EOE
   is( $m,  89, 'checking the tied variable result' );
 
   for (@INPUT) {
+    my ($op, $comment);
     ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
     $comment = $op unless defined $comment;
     next if ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
@@ -137,7 +142,10 @@ EOE
   }
 }
 
+my @simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
 for (@simple_input) {
+  my ($op, $comment, $operator, $variable);
+  my $undefed;
   ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
   chomp;
@@ -146,12 +154,12 @@ for (@simple_input) {
   local \$SIG{__WARN__} = \\&wrn;
   my \$$variable = "Ac# Ca\\nxxx";
   \$$variable = $operator \$$variable;
-  \$toself = \$$variable;
-  \$direct = $operator "Ac# Ca\\nxxx";
+  my \$toself = \$$variable;
+  my \$direct = $operator "Ac# Ca\\nxxx";
   is(\$toself, \$direct);
 EOE
   if ($@) {
-    $warning = $@;
+    my $warning = $@;
     chomp $warning;
     if ($@ =~ /(?:is un|not )implemented/) {
       SKIP: {
@@ -175,6 +183,7 @@ EOE
 # Once the bug is fixed for all ops, we can combine this with the tests
 # above that use <DATA>.
 for my $glob (*__) {
+  my ($y, $z);
   $glob = $y x $z;
   { use integer; $glob = $y <=> $z; }
   $glob = $y cmp $z;
@@ -238,10 +247,10 @@ ref $cstr			# ref nonref
 '???'				# glob  (not currently OA_TARGLEX)
 <OP>				# readline
 'faked'				# rcatline
-(@z = (1 .. 3))			# aassign
-(chop (@x=@chopar))		# chop
+(my @z = (1 .. 3))			# aassign
+(chop (my @x=@chopar))		# chop
 chop $chopit			# schop
-(chomp (@x=@chopar))		# chomp
+(chomp (my @x=@chopar))		# chomp
 chomp $chopit			# schomp
 pos $posstr			# pos
 pos $chopit			# pos returns undef
@@ -305,7 +314,7 @@ uc $cstr			# uc
 lc $cstr			# lc
 quotemeta $cstr			# quotemeta
 @$aref				# rv2av
-@$undefed			# rv2av undef
+@$xundefed			# rv2av undef
 (each %h) % 2 == 1		# each
 values %h			# values
 keys %h				# keys
@@ -314,7 +323,7 @@ pack "C2", $n,$n		# pack
 split /a/, "abad"		# split
 join "a"; @a			# join
 push @a,3==6			# push
-unshift @aaa			# unshift
+my @aaa; unshift @aaa			# unshift
 reverse	@a			# reverse
 reverse	$cstr			# reverse - scal
 grep $_, 1,0,2,0,3		# grepwhile

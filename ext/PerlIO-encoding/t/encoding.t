@@ -63,6 +63,7 @@ if (open(GRK, '<', $grk)) {
     close GRK;
 }
 
+my $warn;
 $SIG{__WARN__} = sub {$warn .= $_[0]};
 
 is (open(FAIL, ">:encoding(NoneSuch)", $fail1), undef, 'Open should fail');
@@ -128,8 +129,9 @@ if (ord('A') == 193) { # EBCDIC
 # Check that PerlIO::encoding can handle custom encodings that do funny
 # things with the buffer.
 use Encode::Encoding;
+my $buf;
 package Extensive {
- @ISA = Encode::Encoding;
+ our @ISA = 'Encode::Encoding';
  __PACKAGE__->Define('extensive');
  sub encode($$;$) {
   my ($self,$buf,$chk) = @_;
@@ -163,7 +165,7 @@ is join("", <$fh>), "Sheila surely shod Sean\nin shoddy shoes.\n",
    'buffer realloc during decoding';
 
 package Cower {
- @ISA = Encode::Encoding;
+ our @ISA = 'Encode::Encoding';
  __PACKAGE__->Define('cower');
  sub encode($$;$) {
   my ($self,$buf,$chk) = @_;
@@ -193,7 +195,7 @@ is join("", <$fh>), "pumping\nplum\npits\n",
 
 package Globber {
  no warnings 'once';
- @ISA = Encode::Encoding;
+ our @ISA = 'Encode::Encoding';
  __PACKAGE__->Define('globber');
  sub encode($$;$) {
   my ($self,$buf,$chk) = @_;
@@ -212,6 +214,7 @@ package Globber {
 SKIP: {
 skip "produces string table warnings", 2 if $ENV{PERL_DESTRUCT_LEVEL};
 
+my $e;
 eval { eval {
     open my $fh, ">:encoding(globber)", \$buf;
     print $fh "Agathopous Goodfoot\n";

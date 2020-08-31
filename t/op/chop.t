@@ -11,7 +11,7 @@ my $tests_count = 148;
 plan tests => $tests_count;
 
 $_ = 'abc';
-$c = foo();
+my $c = foo();
 is ($c . $_, 'cab', 'optimized');
 
 $_ = 'abc';
@@ -22,17 +22,17 @@ sub foo {
     chop;
 }
 
-@foo = ("hi \n","there\n","!\n");
-@bar = @foo;
+my @foo = ("hi \n","there\n","!\n");
+my @bar = @foo;
 chop(@bar);
 is (join('',@bar), 'hi there!', 'chop list of strings');
 
-$foo = "\n";
+my $foo = "\n";
 chop($foo,@foo);
 is (join('',$foo,@foo), 'hi there!', 'chop on list reduces one-character element to an empty string');
 
 $_ = "foo\n\n";
-$got = chomp();
+my $got = chomp();
 is($got, 1, 'check return value when chomp string ending with two newlines; $/ is set to default of one newline');
 is ($_, "foo\n", 'chomp string ending with two newlines while $/ is set to one newline' );
 
@@ -148,10 +148,10 @@ ok (!ref($_), "chomp ref (no modify)");
 
 $/ = "\n";
 
-%chomp = ("One" => "One", "Two\n" => "Two", "" => "");
-%chop = ("One" => "On", "Two\n" => "Two", "" => "");
+my %chomp = ("One" => "One", "Two\n" => "Two", "" => "");
+my %chop = ("One" => "On", "Two\n" => "Two", "" => "");
 
-foreach (keys %chomp) {
+foreach (sort keys %chomp) {
   my $key = $_;
   eval {chomp $_};
   if ($@) {
@@ -163,7 +163,7 @@ foreach (keys %chomp) {
   }
 }
 
-foreach (keys %chop) {
+foreach (sort keys %chop) {
   my $key = $_;
   eval {chop $_};
   if ($@) {
@@ -176,14 +176,14 @@ foreach (keys %chop) {
 }
 
 # chop and chomp can't be lvalues
-eval 'chop($x) = 1;';
-ok($@ =~ /Can\'t modify.*chop.*in.*assignment/);
-eval 'chomp($x) = 1;';
-ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/);
-eval 'chop($x, $y) = (1, 2);';
-ok($@ =~ /Can\'t modify.*chop.*in.*assignment/);
-eval 'chomp($x, $y) = (1, 2);';
-ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/);
+eval 'my $x; chop($x) = 1;';
+ok($@ =~ /Can\'t modify.*chop.*in.*assignment/) or warn "Error: $@";
+eval 'my $x; chomp($x) = 1;';
+ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/) or warn "Error: $@";
+eval 'my ($x, $y); chop($x, $y) = (1, 2);';
+ok($@ =~ /Can\'t modify.*chop.*in.*assignment/) or warn "Error: $@";
+eval 'my ($x, $y); chomp($x, $y) = (1, 2);';
+ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/) or warn "Error: $@";
 
 my @chars = ("N",
              uni_to_native("\xd3"),

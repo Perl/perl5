@@ -480,7 +480,7 @@ SKIP:
     );
 
     package Foo::No::Autovivify;
-    $CARP_NOT = 1;
+    our $CARP_NOT = 1;
     eval { Carp::croak(1) };
     ::ok(
         !defined *{$Foo::No::Autovivify::{CARP_NOT}}{ARRAY},

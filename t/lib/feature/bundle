@@ -73,7 +73,7 @@ BEGIN { *say = *state = *given = sub { print "custom sub\n" }; }
 use feature ":default";
 say "yes";
 state my $foo;
-given a => chance;
+given a => 'chance';
 EXPECT
 custom sub
 custom sub

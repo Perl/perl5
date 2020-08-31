@@ -12,13 +12,14 @@ sub empty_sub {}
 
 is(empty_sub,undef,"Is empty");
 is(empty_sub(1,2,3),undef,"Is still empty");
-@test = empty_sub();
+my @test = empty_sub();
 is(scalar(@test), 0, 'Didnt return anything');
 @test = empty_sub(1,2,3);
 is(scalar(@test), 0, 'Didnt return anything');
 
 # [perl #91844] return should always copy
 {
+    my %foo;
     $foo{bar} = 7;
     for my $x ($foo{bar}) {
 	# Pity test.pl doesnt have isn't.
@@ -153,6 +154,7 @@ ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
 {
     sub re::regmust{}
     bless \&re::regmust;
+    my @str;
     DESTROY {
         no warnings 'redefine', 'prototype';
         my $str1 = "$_[0]";
@@ -169,6 +171,7 @@ ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
     no warnings 'redefine';
     sub foo {}
     bless \&foo, 'newATTRSUBbug';
+    my @str;
     sub newATTRSUBbug::DESTROY {
         my $str1 = "$_[0]";
         *foo = sub{}; # GvSV had no refcount, so this freed it

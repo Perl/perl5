@@ -3,7 +3,7 @@
 # This code is used by lib/perl5db.t !!!
 #
 
-$all_ok = 1;
+my $all_ok = 1;
 *c = sub { };
 
 if ("abcdefghi" =~ m/(abc)(def)(?{ c() })(ghi)/) {

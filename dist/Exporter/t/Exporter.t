@@ -26,6 +26,7 @@ BEGIN {
 
 BEGIN {
     # Methods which Exporter says it implements.
+    use vars ( qw|@Exporter_Methods| );
     @Exporter_Methods = qw(import
                            export_to_level
                            require_version
@@ -36,6 +37,7 @@ BEGIN {
 
 package Testing;
 require Exporter;
+use vars ( qw| @ISA %EXPORT_TAGS @EXPORT @EXPORT_OK $VERSION | );
 @ISA = qw(Exporter);
 
 # Make sure Testing can do everything its supposed to.
@@ -168,6 +170,7 @@ Testing->import('!/e/');
 
 
 package More::Testing;
+use vars ( qw| @ISA $VERSION | );
 @ISA = qw(Exporter);
 $VERSION = 0;
 eval { More::Testing->require_version(0); 1 };
@@ -175,6 +178,7 @@ eval { More::Testing->require_version(0); 1 };
 
 
 package Yet::More::Testing;
+use vars ( qw| @ISA $VERSION | );
 @ISA = qw(Exporter);
 $VERSION = 0;
 eval { Yet::More::Testing->require_version(10); 1 };
@@ -185,6 +189,7 @@ my $warnings;
 BEGIN {
     local $SIG{__WARN__} = sub { $warnings = join '', @_ };
     package Testing::Unused::Vars;
+    use vars ( qw| @ISA @EXPORT | );
     @ISA = qw(Exporter);
     @EXPORT = qw(this $TODO that);
 
@@ -196,6 +201,7 @@ BEGIN {
   print "# $warnings\n";
 
 package Moving::Target;
+use vars ( qw| @ISA @EXPORT_OK | );
 @ISA = qw(Exporter);
 @EXPORT_OK = qw (foo);
 
@@ -215,7 +221,7 @@ Moving::Target->import ('bar');
 ::ok (bar() eq "This is bar", "imported bar after EXPORT_OK changed");
 
 package The::Import;
-
+use vars ( qw| @EXPORT | );
 use Exporter 'import';
 
 ::ok(\&import == \&Exporter::import, "imported the import routine");
@@ -237,6 +243,7 @@ eval { Carp::croak() };
 ::ok($Carp::Internal{'Exporter::Heavy'}, "Carp recognizes Exporter::Heavy");
 
 package Exporter::for::Tied::_;
+use vars ( qw| @ISA @EXPORT | );
 
 @ISA = 'Exporter';
 @EXPORT = 'foo';

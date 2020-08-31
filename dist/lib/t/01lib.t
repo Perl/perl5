@@ -1,5 +1,6 @@
 #!./perl -w
 
+my @OrigINC;
 BEGIN {
     @OrigINC = @INC;
 }
@@ -30,7 +31,7 @@ BEGIN {
     open(MOD, '>', $Module) || DIE $!;
     print MOD <<'MODULE';
 package Yup;
-$Plan = 9;
+my $Plan = 9;
 return '42';
 MODULE
 

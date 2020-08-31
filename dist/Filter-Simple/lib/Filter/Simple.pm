@@ -2,17 +2,21 @@ package Filter::Simple;
 
 use Text::Balanced ':ALL';
 
-our $VERSION = '0.96';
+our $VERSION = '0.96_001';
 
 use Filter::Util::Call;
 use Carp;
 
 our @EXPORT = qw( FILTER FILTER_ONLY );
-
+our @args = ();
+our @components = ();
+our $placeholder = '';
+our @transforms = ();
+our $prev_unimport = '';
 
 sub import {
     if (@_>1) { shift; goto &FILTER }
-    else      { *{caller()."::$_"} = \&$_ foreach @EXPORT }
+    else      { no strict 'refs'; *{caller()."::$_"} = \&$_ foreach @EXPORT }
 }
 
 sub fail {
@@ -138,6 +142,7 @@ sub FILTER (&;$) {
     my $caller = caller;
     my ($filter, $terminator) = @_;
     no warnings 'redefine';
+    no strict 'refs';
     *{"${caller}::import"} = gen_filter_import($caller,$filter,$terminator);
     *{"${caller}::unimport"} = gen_filter_unimport($caller);
 }
@@ -160,6 +165,7 @@ sub FILTER_ONLY {
         }
     };
     no warnings 'redefine';
+    no strict 'refs';
     *{"${caller}::import"} =
         gen_filter_import($caller,$multitransform,$terminator);
     *{"${caller}::unimport"} = gen_filter_unimport($caller);
@@ -170,7 +176,8 @@ my $ows    = qr/(?:[ \t]+|#[^\n]*)*/;
 sub gen_filter_import {
     my ($class, $filter, $terminator) = @_;
     my %terminator;
-    my $prev_import = *{$class."::import"}{CODE};
+    my $prev_import;
+    { no strict 'refs'; $prev_import = *{$class."::import"}{CODE}; }
     return sub {
         my ($imported_class, @args) = @_;
         my $def_terminator =

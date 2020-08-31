@@ -58,12 +58,14 @@ while (@subs_to_test) {
 
     unless ($res) {
 	# Test failed.  Report type that would give success.
+    my $name;
 	for my $m (keys %matchers) {
 	    diag ("$name is of type $m"), last if $buf =~ $matchers{$m};
 	}
     }
 }
 
+my %opts;
 sub render {
     my ($func_name) = @_;
 

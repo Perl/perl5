@@ -31,6 +31,7 @@ my $mm = bless {}, 'ExtUtils::MakeMaker';
 {
     open my $hint_fh, ">", $Hint_File || die "Can't write dummy hints file $Hint_File: $!";
     print $hint_fh <<'CLOO';
+no strict;
 $self->{CCFLAGS} = 'basset hounds got long ears';
 CLOO
 }

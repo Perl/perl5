@@ -20,19 +20,22 @@
 # will be worked over by t/op/inc.t
 
 $| = 1;
-$Level = 1;
+our $Level = 1;
 my $test = 1;
 my $planned;
 my $noplan;
 my $Perl;       # Safer version of $^X set by which_perl()
 
 # This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
-$::IS_ASCII  = ord 'A' ==  65;
-$::IS_EBCDIC = ord 'A' == 193;
+# Avoid "used only once" warning
+$::IS_ASCII  = $::IS_ASCII  = ord 'A' ==  65;
+$::IS_EBCDIC = $::IS_EBCDIC = ord 'A' == 193;
 
-$TODO = 0;
-$NO_ENDING = 0;
-$Tests_Are_Passing = 1;
+# This is 'our' to enable harness to account for TODO-ed tests in
+# overall grade of PASS or FAIL
+our $TODO = 0;
+our $NO_ENDING = 0;
+our $Tests_Are_Passing = 1;
 
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
@@ -48,15 +51,15 @@ sub _print_stderr {
 sub plan {
     my $n;
     if (@_ == 1) {
-	$n = shift;
-	if ($n eq 'no_plan') {
-	  undef $n;
-	  $noplan = 1;
-	}
+        $n = shift;
+        if ($n eq 'no_plan') {
+          undef $n;
+          $noplan = 1;
+        }
     } else {
-	my %plan = @_;
-	$plan{skip_all} and skip_all($plan{skip_all});
-	$n = $plan{tests};
+        my %plan = @_;
+        $plan{skip_all} and skip_all($plan{skip_all});
+        $n = $plan{tests};
     }
     _print "1..$n\n" unless $noplan;
     $planned = $n;
@@ -76,12 +79,12 @@ sub done_testing {
 END {
     my $ran = $test - 1;
     if (!$NO_ENDING) {
-	if (defined $planned && $planned != $ran) {
-	    _print_stderr
-		"# Looks like you planned $planned tests but ran $ran.\n";
-	} elsif ($noplan) {
-	    _print "1..$ran\n";
-	}
+        if (defined $planned && $planned != $ran) {
+            _print_stderr
+            "# Looks like you planned $planned tests but ran $ran.\n";
+        } elsif ($noplan) {
+            _print "1..$ran\n";
+        }
     }
 }
 
@@ -121,8 +124,8 @@ sub _comment {
 sub _have_dynamic_extension {
     my $extension = shift;
     unless (eval {require Config; 1}) {
-	warn "test.pl had problems loading Config: $@";
-	return 1;
+        warn "test.pl had problems loading Config: $@";
+        return 1;
     }
     $extension =~ s!::!/!g;
     return 1 if ($Config::Config{extensions} =~ /\b$extension\b/);
@@ -132,7 +135,7 @@ sub skip_all {
     if (@_) {
         _print "1..0 # Skip @_\n";
     } else {
-	_print "1..0\n";
+        _print "1..0\n";
     }
     exit(0);
 }
@@ -154,15 +157,15 @@ sub skip_all_without_perlio {
 
 sub skip_all_without_config {
     unless (eval {require Config; 1}) {
-	warn "test.pl had problems loading Config: $@";
-	return;
+        warn "test.pl had problems loading Config: $@";
+        return;
     }
     foreach (@_) {
-	next if $Config::Config{$_};
-	my $key = $_; # Need to copy, before trying to modify.
-	$key =~ s/^use//;
-	$key =~ s/^d_//;
-	skip_all("no $key");
+        next if $Config::Config{$_};
+        my $key = $_; # Need to copy, before trying to modify.
+        $key =~ s/^use//;
+        $key =~ s/^d_//;
+        skip_all("no $key");
     }
 }
 
@@ -304,7 +307,7 @@ eval 'sub re::is_regexp { ref($_[0]) eq "Regexp" }'
 
 # keys are the codes \n etc map to, values are 2 char strings such as \n
 my %backslash_escape;
-foreach my $x (split //, 'nrtfa\\\'"') {
+foreach my $x (split //, 'enrtfa\\\'"') {
     $backslash_escape{ord eval "\"\\$x\""} = "\\$x";
 }
 # A way to display scalars containing control characters and Unicode.
@@ -986,6 +989,7 @@ sub fresh_perl {
 
     open TEST, '>', $tmpfile or die "Cannot open $tmpfile: $!";
     binmode TEST, ':utf8' if $runperl_args->{wide_chars};
+    print TEST qq[use v5; ] if $runperl_args->{run_as_five}; # Simulate how perl -e behaves.
     print TEST $prog;
     close TEST or die "Cannot close $tmpfile: $!";
 
@@ -1023,7 +1027,7 @@ sub _fresh_perl {
 
     # Use the first line of the program as a name if none was given
     unless( $name ) {
-        ($first_line, $name) = $prog =~ /^((.{1,50}).*)/;
+        my ($first_line, $name) = $prog =~ /^((.{1,50}).*)/;
         $name = $name . '...' if length $first_line > length $name;
     }
 
@@ -1111,6 +1115,7 @@ sub fresh_perl_like {
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
 
+our $FATAL;
 sub _setup_one_file {
     my $fh = shift;
     # Store the filename as a program that started at line 0.
@@ -1197,6 +1202,7 @@ sub run_multiple_progs {
 
     my $tmpfile = tempfile();
 
+    my $count_failures = 0;
     my ($file, $line);
   PROGRAM:
     while (defined ($line = shift @prgs)) {
@@ -1232,8 +1238,10 @@ sub run_multiple_progs {
 
 	my $name = '';
 	if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
-	    $name = $1;
-	}
+        $name = $1;
+    } elsif (defined $file) {
+        $name = "test from $file at line $line";
+    }
 
 	if ($reason{skip}) {
 	SKIP:
@@ -1350,22 +1358,27 @@ sub run_multiple_progs {
 	    }
 	}
 
-	local $::TODO = $reason{todo};
+        local $::TODO = $reason{todo};
 
-	unless ($ok) {
-	    my $err_line = "PROG: $switch\n$prog\n" .
-			   "EXPECTED:\n$expected\n";
-	    $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
-	    $err_line   .= "GOT:\n$results\n";
-	    $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
-	    if ($::TODO) {
-		$err_line =~ s/^/# /mg;
-		print $err_line;  # Harness can't filter it out from STDERR.
-	    }
-	    else {
-		print STDERR $err_line;
-	    }
-	}
+        unless ($ok) {
+            my $err_line = '';
+            $err_line   .= "FILE: $file ; line $line\n" if defined $file;
+            $err_line   .= "PROG: $switch\n$prog\n" .
+                           "EXPECTED:\n$expected\n";
+            $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
+            $err_line   .= "GOT:\n$results\n";
+            $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
+            if ($::TODO) {
+                $err_line =~ s/^/# /mg;
+                print $err_line;  # Harness can't filter it out from STDERR.
+            }
+            else {
+                print STDERR $err_line;
+                ++$count_failures;
+                die "PERL_TEST_ABORT_FIRST_FAILURE set Test Failure"
+                    if $ENV{PERL_TEST_ABORT_FIRST_FAILURE};
+            }
+        }
 
         if (defined $file) {
             _ok($ok, "at $file line $line", $name);
@@ -1383,6 +1396,20 @@ sub run_multiple_progs {
 	    File::Path::rmtree $_ if -d $_;
 	}
     }
+
+    if ( $count_failures ) {
+        print STDERR <<'EOS';
+#
+# Note: 'run_multiple_progs' run has one or more failures
+#        you can consider setting the environment variable
+#        PERL_TEST_ABORT_FIRST_FAILURE=1 before running the test
+#        to stop on the first error.
+#
+EOS
+    }
+
+
+    return;
 }
 
 sub can_ok ($@) {
@@ -1413,7 +1440,7 @@ sub can_ok ($@) {
 sub new_ok {
     my($class, $args, $obj_name) = @_;
     $args ||= [];
-    $object_name = "The object" unless defined $obj_name;
+    my $object_name = "The object" unless defined $obj_name;
 
     local $Level = $Level + 1;
 

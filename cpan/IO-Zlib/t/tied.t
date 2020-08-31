@@ -11,15 +11,16 @@ sub ok
     print "not ok $no\n" unless $ok ;
 }
 
-$name="test.gz";
+my $name="test.gz";
 
 print "1..11\n";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
 
+my ($uncomp);
 ok(1, tie *OUT, "IO::Zlib", $name, "wb");
 ok(2, printf OUT "%s - %d\n", "hello", 123);
 ok(3, print OUT $hello);

@@ -17,6 +17,7 @@ plan 8;
 
 no warnings 'experimental::const_attr';
 
+my @subs;
 push @subs, sub :const{$_} for 1..10;
 is join(" ", map &$_, @subs), "1 2 3 4 5 6 7 8 9 10",
   ':const capturing global $_';

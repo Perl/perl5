@@ -8,14 +8,14 @@ BEGIN {
 
 plan( tests => 73 );
 
-@foo = (1, 2, 3, 4);
+my @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
 cmp_ok($foo[3], '==', 4, 'last elem');
 
 $_ = join(':',@foo);
 cmp_ok($_, 'eq', '1:2:3:4', 'join list');
 
-($a,$b,$c,$d) = (1,2,3,4);
+my ($a,$b,$c,$d) = (1,2,3,4);
 cmp_ok("$a;$b;$c;$d", 'eq', '1;2;3;4', 'list assign');
 
 ($c,$b,$a) = split(/ /,"111 222 333");
@@ -30,6 +30,7 @@ cmp_ok("$a-$b",'eq','222-111','duo swap');
 ($a, $b) = ($b, $a) = ($a, $b);
 cmp_ok("$a-$b",'eq','222-111','duo swap swap');
 
+my (@b, %c);
 ($a, $b[1], $c{2}, $d) = (1, 2, 3, 4);
 cmp_ok($a,'==',1,'assign scalar in list');
 cmp_ok($b[1],'==',2,'assign aelem in list');
@@ -47,6 +48,7 @@ cmp_ok($b,'==',2,'short list 2 defined');
 ok(!defined($c),'short list 3 undef');
 ok(!defined($d),'short list 4 undef');
 
+my @bar;
 @foo = @bar = (1);
 cmp_ok(join(':',@foo,@bar),'eq','1:1','list reassign');
 
@@ -59,7 +61,7 @@ cmp_ok(join(':',@foo),'eq','6','scalar assign to array');
 
 {
     my ($a, $b, $c);
-    for ($x = 0; $x < 3; $x = $x + 1) {
+    for (my $x = 0; $x < 3; $x = $x + 1) {
         ($a, $b, $c) = 
               $x == 0 ?  ('a','b','c')
             : $x == 1 ?  ('d','e','f')
@@ -85,7 +87,7 @@ cmp_ok(join(':',@foo),'eq','6','scalar assign to array');
 
 {
     my ($a, $b, $c);
-    for ($x = 0; $x < 3; $x = $x + 1) {
+    for (my $x = 0; $x < 3; $x = $x + 1) {
         ($a, $b, $c) = do {
             if ($x == 0) {
                 ('a','b','c');
@@ -115,8 +117,8 @@ cmp_ok(join(':',@foo),'eq','6','scalar assign to array');
     }
 }
 
-$x = 666;
-@a = ($x == 12345 || (1,2,3));
+my $x = 666;
+my @a = ($x == 12345 || (1,2,3));
 cmp_ok(join('*',@a),'eq','1*2*3','logical or f');
 
 @a = ($x == $x || (4,5,6));
@@ -138,11 +140,17 @@ cmp_ok(join('',(1,2),3,(4,5)),'eq','12345','list (..).(..)');
     cmp_ok(scalar(@c),'==',2,'slice len');
 
     @b = (29, scalar @c[()]);
-    cmp_ok(join(':',@b),'eq','29:','slice ary nil');
+    {
+        no warnings 'uninitialized';
+        cmp_ok(join(':',@b),'eq','29:','slice ary nil');
+    }
 
     my %h = (a => 1);
     @b = (30, scalar @h{()});
-    cmp_ok(join(':',@b),'eq','30:','slice hash nil');
+    {
+        no warnings 'uninitialized';
+        cmp_ok(join(':',@b),'eq','30:','slice hash nil');
+    }
 
     my $size = scalar(()[1..1]);
     cmp_ok($size,'==','0','size nil');
@@ -163,7 +171,10 @@ cmp_ok(join('',(1,2),3,(4,5)),'eq','12345','list (..).(..)');
     }
     test_two_args("simple list slice",      (10,11)[2,3]);
     test_two_args("grepped list slice",     grep(1, (10,11)[2,3]));
-    test_two_args("sorted list slice",      sort((10,11)[2,3]));
+    {
+        no warnings 'uninitialized';
+        test_two_args("sorted list slice",      sort((10,11)[2,3]));
+    }
     test_two_args("assigned list slice",    my @tmp = (10,11)[2,3]);
     test_two_args("do-returned list slice", do { (10,11)[2,3]; });
     test_two_args("list literal slice",     qw(a b)[2,3]);
@@ -186,6 +197,7 @@ cmp_ok(join('',(1,2),3,(4,5)),'eq','12345','list (..).(..)');
 {
     # comma operator with lvalue only propagates the lvalue context to
     # the last operand.
+    no warnings 'void';
     ("const", my $x) ||= 1;
     is( $x, 1 );
 }
@@ -214,17 +226,22 @@ sub foo { () = ($a, my $b, ($c, do { while(1) {} })) }
 sub TIESCALAR {bless{}}
 sub FETCH {$_[0]{fetched}++}
 sub empty {}
-tie $t, "";
+tie my $t, "";
 () = (empty(), ($t)x10); # empty() since sub calls usually result in copies
-is(tied($t)->{fetched}, undef, 'assignment to empty list makes no copies');
+is(my $obj = tied($t)->{fetched}, undef, 'assignment to empty list makes no copies');
 
-# this was passing a trash SV at the top of the stack to SvIV()
-ok(($0[()[()]],1), "[perl #126193] list slice with zero indexes");
+{
+    no warnings 'void';
+    no warnings 'uninitialized';
+    # this was passing a trash SV at the top of the stack to SvIV()
+    ok(($0[()[()]],1), "[perl #126193] list slice with zero indexes");
+}
 
 # RT #131732: pp_list must extend stack when empty-array arg and not in list
 # context
 {
     my @x;
+    no warnings 'void';
     @x;
     pass('no panic'); # panics only under DEBUGGING
 }

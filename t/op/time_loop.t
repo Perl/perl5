@@ -4,9 +4,12 @@
 # 2**63 to be handed to gm/localtime() which caused an internal overflow
 # and an excessively long loop.  Test this does not happen.
 
-use strict;
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+}
 
-BEGIN { require './test.pl'; }
 
 plan tests => 2;
 watchdog(2);

@@ -1,6 +1,6 @@
 # HP C-ANSI-C has problems in the optimizer for 5.8.x (not for 5.11.x)
 # So drop to -O1 for Storable
-
+no strict 'vars';
 use Config;
 
 unless ($Config{gccversion}) {

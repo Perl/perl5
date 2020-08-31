@@ -10,6 +10,12 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+# Because this file is testing global variables, "no strict 'vars'" and "no
+# strict 'refs" are inappropriate here.
+
+no strict 'refs';
+no strict 'vars';
+
 # Hack to allow test counts to be specified piecemeal
 BEGIN { ++$INC{'tests.pm'} }
 sub tests::VERSION { $tests += pop };
@@ -25,7 +31,7 @@ ok !exists $INC{'Tie/Hash/NamedCapture.pm'},
 
 use tests 1; # ARGV
 fresh_perl_is
- '$count=0; ++$count while(<foo::ARGV>); print $count',
+ 'my $count=0; ++$count while(<foo::ARGV>); print $count',
  '0',
   { stdin => 'swext\n' },
  '<foo::ARGV> does not iterate through STDIN';

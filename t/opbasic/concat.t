@@ -41,17 +41,18 @@ sub is {
 
 print "1..254\n";
 
-($a, $b, $c) = qw(foo bar);
+my ($alpha, $beta, $c) = qw(foo bar);
 
-ok("$a"     eq "foo",    "verifying assign");
-ok("$a$b"   eq "foobar", "basic concatenation");
-ok("$c$a$c" eq "foo",    "concatenate undef, fore and aft");
+ok("$alpha"     eq "foo",    "verifying assign");
+ok("$alpha$beta"   eq "foobar", "basic concatenation");
+ok("$c$alpha$c" eq "foo",    "concatenate undef, fore and aft");
 
 # Okay, so that wasn't very challenging.  Let's go Unicode.
 
 {
     # bug id 20000819.004 (#3761) 
 
+    my $dx;
     $_ = $dx = "\x{10f2}";
     s/($dx)/$dx$1/;
     {
@@ -76,11 +77,11 @@ ok("$c$a$c" eq "foo",    "concatenate undef, fore and aft");
     # bug id 20000901.092 (#4184)
     # test that undef left and right of utf8 results in a valid string
 
-    my $a;
-    $a .= "\x{1ff}";
-    ok($a eq  "\x{1ff}", "bug id 20000901.092 (#4184), undef left");
-    $a .= undef;
-    ok($a eq  "\x{1ff}", "bug id 20000901.092 (#4184), undef right");
+    my $alpha;
+    $alpha .= "\x{1ff}";
+    ok($alpha eq  "\x{1ff}", "bug id 20000901.092 (#4184), undef left");
+    $alpha .= undef;
+    ok($alpha eq  "\x{1ff}", "bug id 20000901.092 (#4184), undef right");
 }
 
 {
@@ -101,6 +102,7 @@ ok("$c$a$c" eq "foo",    "concatenate undef, fore and aft");
     # This bug existed earlier than the $2 bug, but is fixed with the same
     # patch. Without the fix this 5.7.0 would also croak:
     # Modification of a read-only value attempted at ...
+    my $pi;
     eval{"$pi\x{1234}"};
     ok(!$@, "bug id 20001020.006 (#4484), constant left");
 
@@ -127,8 +129,8 @@ sub beq { use bytes; $_[0] eq $_[1]; }
 }
 
 {
-    my $a; ($a .= 5) . 6;
-    ok($a == 5, '($a .= 5) . 6 - present since 5.000');
+    my $alpha; ($alpha .= 5) . 6;
+    ok($alpha == 5, '($alpha .= 5) . 6 - present since 5.000');
 }
 
 {
@@ -144,7 +146,7 @@ sub beq { use bytes; $_[0] eq $_[1]; }
 
     my $p = "\xB6"; # PILCROW SIGN (ASCII/EBCDIC), 2bytes in UTF-X
     my $u = "\x{100}";
-    my $b = pack 'a*', "\x{100}";
+    my $beta = pack 'a*', "\x{100}";
     my $pu = "\xB6\x{100}";
     my $up = "\x{100}\xB6";
     my $x1 = $p;
@@ -152,8 +154,8 @@ sub beq { use bytes; $_[0] eq $_[1]; }
     my ($x2, $x3, $x4, $y2);
 
     use bytes;
-    ok(beq($p.$u, $p.$b), "perl #26905, left eq bytes");
-    ok(beq($u.$p, $b.$p), "perl #26905, right eq bytes");
+    ok(beq($p.$u, $p.$beta), "perl #26905, left eq bytes");
+    ok(beq($u.$p, $beta.$p), "perl #26905, right eq bytes");
     ok(!beq($p.$u, $pu),  "perl #26905, left ne unicode");
     ok(!beq($u.$p, $up),  "perl #26905, right ne unicode");
 
@@ -189,19 +191,19 @@ sub beq { use bytes; $_[0] eq $_[1]; }
 # non-POK consts
 
 {
-    my $a = "a";
-    my $b;
-    $b = $a . $a . 1;
-    ok($b eq "aa1", "aa1");
-    $b = 2 . $a . $a;
-    ok($b eq "2aa", "2aa");
+    my $alpha = "a";
+    my $beta;
+    $beta = $alpha . $alpha . 1;
+    ok($beta eq "aa1", "aa1");
+    $beta = 2 . $alpha . $alpha;
+    ok($beta eq "2aa", "2aa");
 }
 
 # [perl #124160]
 package o { use overload "." => sub { $_[0] }, fallback => 1 }
-$o = bless [], "o";
+my $o = bless [], "o";
 ok(ref(CORE::state $y = "a $o b") eq 'o',
-  'state $y = "foo $bar baz" does not stringify; only concats');
+  'state $y = "foo $betaar baz" does not stringify; only concats');
 
 
 # multiconcat: utf8 dest with non-utf8 args should grow dest sufficiently.
@@ -217,37 +219,37 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
 # target on RHS
 
 {
-    my $a = "abc";
-    $a .= $a;
-    ok($a eq 'abcabc', 'append self');
+    my $alpha = "abc";
+    $alpha .= $alpha;
+    ok($alpha eq 'abcabc', 'append self');
 
-    $a = "abc";
-    $a = $a . $a;
-    ok($a eq 'abcabc', 'double self');
+    $alpha = "abc";
+    $alpha = $alpha . $alpha;
+    ok($alpha eq 'abcabc', 'double self');
 
-    $a = "abc";
-    $a .= $a . $a;
-    ok($a eq 'abcabcabc', 'append double self');
+    $alpha = "abc";
+    $alpha .= $alpha . $alpha;
+    ok($alpha eq 'abcabcabc', 'append double self');
 
-    $a = "abc";
-    $a = "$a-$a";
-    ok($a eq 'abc-abc', 'double self with const');
+    $alpha = "abc";
+    $alpha = "$alpha-$alpha";
+    ok($alpha eq 'abc-abc', 'double self with const');
 
-    $a = "abc";
-    $a .= "$a-$a";
-    ok($a eq 'abcabc-abc', 'append double self with const');
+    $alpha = "abc";
+    $alpha .= "$alpha-$alpha";
+    ok($alpha eq 'abcabc-abc', 'append double self with const');
 
-    $a = "abc";
-    $a .= $a . $a . $a;
-    ok($a eq 'abcabcabcabc', 'append triple self');
+    $alpha = "abc";
+    $alpha .= $alpha . $alpha . $alpha;
+    ok($alpha eq 'abcabcabcabc', 'append triple self');
 
-    $a = "abc";
-    $a = "$a-$a=$a";
-    ok($a eq 'abc-abc=abc', 'triple self with const');
+    $alpha = "abc";
+    $alpha = "$alpha-$alpha=$alpha";
+    ok($alpha eq 'abc-abc=abc', 'triple self with const');
 
-    $a = "abc";
-    $a .= "$a-$a=$a";
-    ok($a eq 'abcabc-abc=abc', 'append triple self with const');
+    $alpha = "abc";
+    $alpha .= "$alpha-$alpha=$alpha";
+    ok($alpha eq 'abcabc-abc=abc', 'append triple self with const');
 }
 
 # test the sorts of optree which may (or may not) get optimised into
@@ -257,7 +259,7 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
 # which would rather defeat the object.
 
 {
-    my ($a1, $a2, $a3) = qw(1 2 3);
+    my ($alpha1, $alpha2, $alpha3) = qw(1 2 3);
     our $pkg;
     my $lex;
 
@@ -265,34 +267,34 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     is("-", '-', '"-"');
     is("-", '-', '"-"');
     is("-", '-', '"-"');
-    is($a1, '1', '$a1');
-    is("-".$a1, '-1', '"-".$a1');
-    is($a1."-", '1-', '$a1."-"');
-    is("-".$a1."-", '-1-', '"-".$a1."-"');
-    is("$a1", '1', '"$a1"');
-    is("-$a1", '-1', '"-$a1"');
-    is("$a1-", '1-', '"$a1-"');
-    is("-$a1-", '-1-', '"-$a1-"');
-    is($a1.$a2, '12', '$a1.$a2');
-    is($a1."-".$a2, '1-2', '$a1."-".$a2');
-    is("-".$a1."-".$a2, '-1-2', '"-".$a1."-".$a2');
-    is($a1."-".$a2."-", '1-2-', '$a1."-".$a2."-"');
-    is("-".$a1."-".$a2."-", '-1-2-', '"-".$a1."-".$a2."-"');
-    is("$a1$a2", '12', '"$a1$a2"');
-    is("$a1-$a2", '1-2', '"$a1-$a2"');
-    is("-$a1-$a2", '-1-2', '"-$a1-$a2"');
-    is("$a1-$a2-", '1-2-', '"$a1-$a2-"');
-    is("-$a1-$a2-", '-1-2-', '"-$a1-$a2-"');
-    is($a1.$a2.$a3, '123', '$a1.$a2.$a3');
-    is($a1."-".$a2."-".$a3, '1-2-3', '$a1."-".$a2."-".$a3');
-    is("-".$a1."-".$a2."-".$a3, '-1-2-3', '"-".$a1."-".$a2."-".$a3');
-    is($a1."-".$a2."-".$a3."-", '1-2-3-', '$a1."-".$a2."-".$a3."-"');
-    is("-".$a1."-".$a2."-".$a3."-", '-1-2-3-', '"-".$a1."-".$a2."-".$a3."-"');
-    is("$a1$a2$a3", '123', '"$a1$a2$a3"');
-    is("$a1-$a2-$a3", '1-2-3', '"$a1-$a2-$a3"');
-    is("-$a1-$a2-$a3", '-1-2-3', '"-$a1-$a2-$a3"');
-    is("$a1-$a2-$a3-", '1-2-3-', '"$a1-$a2-$a3-"');
-    is("-$a1-$a2-$a3-", '-1-2-3-', '"-$a1-$a2-$a3-"');
+    is($alpha1, '1', '$alpha1');
+    is("-".$alpha1, '-1', '"-".$alpha1');
+    is($alpha1."-", '1-', '$alpha1."-"');
+    is("-".$alpha1."-", '-1-', '"-".$alpha1."-"');
+    is("$alpha1", '1', '"$alpha1"');
+    is("-$alpha1", '-1', '"-$alpha1"');
+    is("$alpha1-", '1-', '"$alpha1-"');
+    is("-$alpha1-", '-1-', '"-$alpha1-"');
+    is($alpha1.$alpha2, '12', '$alpha1.$alpha2');
+    is($alpha1."-".$alpha2, '1-2', '$alpha1."-".$alpha2');
+    is("-".$alpha1."-".$alpha2, '-1-2', '"-".$alpha1."-".$alpha2');
+    is($alpha1."-".$alpha2."-", '1-2-', '$alpha1."-".$alpha2."-"');
+    is("-".$alpha1."-".$alpha2."-", '-1-2-', '"-".$alpha1."-".$alpha2."-"');
+    is("$alpha1$alpha2", '12', '"$alpha1$alpha2"');
+    is("$alpha1-$alpha2", '1-2', '"$alpha1-$alpha2"');
+    is("-$alpha1-$alpha2", '-1-2', '"-$alpha1-$alpha2"');
+    is("$alpha1-$alpha2-", '1-2-', '"$alpha1-$alpha2-"');
+    is("-$alpha1-$alpha2-", '-1-2-', '"-$alpha1-$alpha2-"');
+    is($alpha1.$alpha2.$alpha3, '123', '$alpha1.$alpha2.$alpha3');
+    is($alpha1."-".$alpha2."-".$alpha3, '1-2-3', '$alpha1."-".$alpha2."-".$alpha3');
+    is("-".$alpha1."-".$alpha2."-".$alpha3, '-1-2-3', '"-".$alpha1."-".$alpha2."-".$alpha3');
+    is($alpha1."-".$alpha2."-".$alpha3."-", '1-2-3-', '$alpha1."-".$alpha2."-".$alpha3."-"');
+    is("-".$alpha1."-".$alpha2."-".$alpha3."-", '-1-2-3-', '"-".$alpha1."-".$alpha2."-".$alpha3."-"');
+    is("$alpha1$alpha2$alpha3", '123', '"$alpha1$alpha2$alpha3"');
+    is("$alpha1-$alpha2-$alpha3", '1-2-3', '"$alpha1-$alpha2-$alpha3"');
+    is("-$alpha1-$alpha2-$alpha3", '-1-2-3', '"-$alpha1-$alpha2-$alpha3"');
+    is("$alpha1-$alpha2-$alpha3-", '1-2-3-', '"$alpha1-$alpha2-$alpha3-"');
+    is("-$alpha1-$alpha2-$alpha3-", '-1-2-3-', '"-$alpha1-$alpha2-$alpha3-"');
     $pkg  = "-";
     is($pkg, '-', '$pkg  = "-"');
     $pkg  = "-";
@@ -301,62 +303,62 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     is($pkg, '-', '$pkg  = "-"');
     $pkg  = "-";
     is($pkg, '-', '$pkg  = "-"');
-    $pkg  = $a1;
-    is($pkg, '1', '$pkg  = $a1');
-    $pkg  = "-".$a1;
-    is($pkg, '-1', '$pkg  = "-".$a1');
-    $pkg  = $a1."-";
-    is($pkg, '1-', '$pkg  = $a1."-"');
-    $pkg  = "-".$a1."-";
-    is($pkg, '-1-', '$pkg  = "-".$a1."-"');
-    $pkg  = "$a1";
-    is($pkg, '1', '$pkg  = "$a1"');
-    $pkg  = "-$a1";
-    is($pkg, '-1', '$pkg  = "-$a1"');
-    $pkg  = "$a1-";
-    is($pkg, '1-', '$pkg  = "$a1-"');
-    $pkg  = "-$a1-";
-    is($pkg, '-1-', '$pkg  = "-$a1-"');
-    $pkg  = $a1.$a2;
-    is($pkg, '12', '$pkg  = $a1.$a2');
-    $pkg  = $a1."-".$a2;
-    is($pkg, '1-2', '$pkg  = $a1."-".$a2');
-    $pkg  = "-".$a1."-".$a2;
-    is($pkg, '-1-2', '$pkg  = "-".$a1."-".$a2');
-    $pkg  = $a1."-".$a2."-";
-    is($pkg, '1-2-', '$pkg  = $a1."-".$a2."-"');
-    $pkg  = "-".$a1."-".$a2."-";
-    is($pkg, '-1-2-', '$pkg  = "-".$a1."-".$a2."-"');
-    $pkg  = "$a1$a2";
-    is($pkg, '12', '$pkg  = "$a1$a2"');
-    $pkg  = "$a1-$a2";
-    is($pkg, '1-2', '$pkg  = "$a1-$a2"');
-    $pkg  = "-$a1-$a2";
-    is($pkg, '-1-2', '$pkg  = "-$a1-$a2"');
-    $pkg  = "$a1-$a2-";
-    is($pkg, '1-2-', '$pkg  = "$a1-$a2-"');
-    $pkg  = "-$a1-$a2-";
-    is($pkg, '-1-2-', '$pkg  = "-$a1-$a2-"');
-    $pkg  = $a1.$a2.$a3;
-    is($pkg, '123', '$pkg  = $a1.$a2.$a3');
-    $pkg  = $a1."-".$a2."-".$a3;
-    is($pkg, '1-2-3', '$pkg  = $a1."-".$a2."-".$a3');
-    $pkg  = "-".$a1."-".$a2."-".$a3;
-    is($pkg, '-1-2-3', '$pkg  = "-".$a1."-".$a2."-".$a3');
-    $pkg  = $a1."-".$a2."-".$a3."-";
-    is($pkg, '1-2-3-', '$pkg  = $a1."-".$a2."-".$a3."-"');
-    $pkg  = "-".$a1."-".$a2."-".$a3."-";
-    is($pkg, '-1-2-3-', '$pkg  = "-".$a1."-".$a2."-".$a3."-"');
-    $pkg  = "$a1$a2$a3";
-    is($pkg, '123', '$pkg  = "$a1$a2$a3"');
-    $pkg  = "$a1-$a2-$a3";
-    is($pkg, '1-2-3', '$pkg  = "$a1-$a2-$a3"');
-    $pkg  = "-$a1-$a2-$a3";
-    is($pkg, '-1-2-3', '$pkg  = "-$a1-$a2-$a3"');
-    $pkg  = "$a1-$a2-$a3-";
-    is($pkg, '1-2-3-', '$pkg  = "$a1-$a2-$a3-"');
-    $pkg  = "-$a1-$a2-$a3-";
-    is($pkg, '-1-2-3-', '$pkg  = "-$a1-$a2-$a3-"');
+    $pkg  = $alpha1;
+    is($pkg, '1', '$pkg  = $alpha1');
+    $pkg  = "-".$alpha1;
+    is($pkg, '-1', '$pkg  = "-".$alpha1');
+    $pkg  = $alpha1."-";
+    is($pkg, '1-', '$pkg  = $alpha1."-"');
+    $pkg  = "-".$alpha1."-";
+    is($pkg, '-1-', '$pkg  = "-".$alpha1."-"');
+    $pkg  = "$alpha1";
+    is($pkg, '1', '$pkg  = "$alpha1"');
+    $pkg  = "-$alpha1";
+    is($pkg, '-1', '$pkg  = "-$alpha1"');
+    $pkg  = "$alpha1-";
+    is($pkg, '1-', '$pkg  = "$alpha1-"');
+    $pkg  = "-$alpha1-";
+    is($pkg, '-1-', '$pkg  = "-$alpha1-"');
+    $pkg  = $alpha1.$alpha2;
+    is($pkg, '12', '$pkg  = $alpha1.$alpha2');
+    $pkg  = $alpha1."-".$alpha2;
+    is($pkg, '1-2', '$pkg  = $alpha1."-".$alpha2');
+    $pkg  = "-".$alpha1."-".$alpha2;
+    is($pkg, '-1-2', '$pkg  = "-".$alpha1."-".$alpha2');
+    $pkg  = $alpha1."-".$alpha2."-";
+    is($pkg, '1-2-', '$pkg  = $alpha1."-".$alpha2."-"');
+    $pkg  = "-".$alpha1."-".$alpha2."-";
+    is($pkg, '-1-2-', '$pkg  = "-".$alpha1."-".$alpha2."-"');
+    $pkg  = "$alpha1$alpha2";
+    is($pkg, '12', '$pkg  = "$alpha1$alpha2"');
+    $pkg  = "$alpha1-$alpha2";
+    is($pkg, '1-2', '$pkg  = "$alpha1-$alpha2"');
+    $pkg  = "-$alpha1-$alpha2";
+    is($pkg, '-1-2', '$pkg  = "-$alpha1-$alpha2"');
+    $pkg  = "$alpha1-$alpha2-";
+    is($pkg, '1-2-', '$pkg  = "$alpha1-$alpha2-"');
+    $pkg  = "-$alpha1-$alpha2-";
+    is($pkg, '-1-2-', '$pkg  = "-$alpha1-$alpha2-"');
+    $pkg  = $alpha1.$alpha2.$alpha3;
+    is($pkg, '123', '$pkg  = $alpha1.$alpha2.$alpha3');
+    $pkg  = $alpha1."-".$alpha2."-".$alpha3;
+    is($pkg, '1-2-3', '$pkg  = $alpha1."-".$alpha2."-".$alpha3');
+    $pkg  = "-".$alpha1."-".$alpha2."-".$alpha3;
+    is($pkg, '-1-2-3', '$pkg  = "-".$alpha1."-".$alpha2."-".$alpha3');
+    $pkg  = $alpha1."-".$alpha2."-".$alpha3."-";
+    is($pkg, '1-2-3-', '$pkg  = $alpha1."-".$alpha2."-".$alpha3."-"');
+    $pkg  = "-".$alpha1."-".$alpha2."-".$alpha3."-";
+    is($pkg, '-1-2-3-', '$pkg  = "-".$alpha1."-".$alpha2."-".$alpha3."-"');
+    $pkg  = "$alpha1$alpha2$alpha3";
+    is($pkg, '123', '$pkg  = "$alpha1$alpha2$alpha3"');
+    $pkg  = "$alpha1-$alpha2-$alpha3";
+    is($pkg, '1-2-3', '$pkg  = "$alpha1-$alpha2-$alpha3"');
+    $pkg  = "-$alpha1-$alpha2-$alpha3";
+    is($pkg, '-1-2-3', '$pkg  = "-$alpha1-$alpha2-$alpha3"');
+    $pkg  = "$alpha1-$alpha2-$alpha3-";
+    is($pkg, '1-2-3-', '$pkg  = "$alpha1-$alpha2-$alpha3-"');
+    $pkg  = "-$alpha1-$alpha2-$alpha3-";
+    is($pkg, '-1-2-3-', '$pkg  = "-$alpha1-$alpha2-$alpha3-"');
     $pkg = 'P';
     $pkg .= "-";
     is($pkg, 'P-', '$pkg .= "-"');
@@ -370,89 +372,89 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     $pkg .= "-";
     is($pkg, 'P-', '$pkg .= "-"');
     $pkg = 'P';
-    $pkg .= $a1;
-    is($pkg, 'P1', '$pkg .= $a1');
+    $pkg .= $alpha1;
+    is($pkg, 'P1', '$pkg .= $alpha1');
     $pkg = 'P';
-    $pkg .= "-".$a1;
-    is($pkg, 'P-1', '$pkg .= "-".$a1');
+    $pkg .= "-".$alpha1;
+    is($pkg, 'P-1', '$pkg .= "-".$alpha1');
     $pkg = 'P';
-    $pkg .= $a1."-";
-    is($pkg, 'P1-', '$pkg .= $a1."-"');
+    $pkg .= $alpha1."-";
+    is($pkg, 'P1-', '$pkg .= $alpha1."-"');
     $pkg = 'P';
-    $pkg .= "-".$a1."-";
-    is($pkg, 'P-1-', '$pkg .= "-".$a1."-"');
+    $pkg .= "-".$alpha1."-";
+    is($pkg, 'P-1-', '$pkg .= "-".$alpha1."-"');
     $pkg = 'P';
-    $pkg .= "$a1";
-    is($pkg, 'P1', '$pkg .= "$a1"');
+    $pkg .= "$alpha1";
+    is($pkg, 'P1', '$pkg .= "$alpha1"');
     $pkg = 'P';
-    $pkg .= "-$a1";
-    is($pkg, 'P-1', '$pkg .= "-$a1"');
+    $pkg .= "-$alpha1";
+    is($pkg, 'P-1', '$pkg .= "-$alpha1"');
     $pkg = 'P';
-    $pkg .= "$a1-";
-    is($pkg, 'P1-', '$pkg .= "$a1-"');
+    $pkg .= "$alpha1-";
+    is($pkg, 'P1-', '$pkg .= "$alpha1-"');
     $pkg = 'P';
-    $pkg .= "-$a1-";
-    is($pkg, 'P-1-', '$pkg .= "-$a1-"');
+    $pkg .= "-$alpha1-";
+    is($pkg, 'P-1-', '$pkg .= "-$alpha1-"');
     $pkg = 'P';
-    $pkg .= $a1.$a2;
-    is($pkg, 'P12', '$pkg .= $a1.$a2');
+    $pkg .= $alpha1.$alpha2;
+    is($pkg, 'P12', '$pkg .= $alpha1.$alpha2');
     $pkg = 'P';
-    $pkg .= $a1."-".$a2;
-    is($pkg, 'P1-2', '$pkg .= $a1."-".$a2');
+    $pkg .= $alpha1."-".$alpha2;
+    is($pkg, 'P1-2', '$pkg .= $alpha1."-".$alpha2');
     $pkg = 'P';
-    $pkg .= "-".$a1."-".$a2;
-    is($pkg, 'P-1-2', '$pkg .= "-".$a1."-".$a2');
+    $pkg .= "-".$alpha1."-".$alpha2;
+    is($pkg, 'P-1-2', '$pkg .= "-".$alpha1."-".$alpha2');
     $pkg = 'P';
-    $pkg .= $a1."-".$a2."-";
-    is($pkg, 'P1-2-', '$pkg .= $a1."-".$a2."-"');
+    $pkg .= $alpha1."-".$alpha2."-";
+    is($pkg, 'P1-2-', '$pkg .= $alpha1."-".$alpha2."-"');
     $pkg = 'P';
-    $pkg .= "-".$a1."-".$a2."-";
-    is($pkg, 'P-1-2-', '$pkg .= "-".$a1."-".$a2."-"');
+    $pkg .= "-".$alpha1."-".$alpha2."-";
+    is($pkg, 'P-1-2-', '$pkg .= "-".$alpha1."-".$alpha2."-"');
     $pkg = 'P';
-    $pkg .= "$a1$a2";
-    is($pkg, 'P12', '$pkg .= "$a1$a2"');
+    $pkg .= "$alpha1$alpha2";
+    is($pkg, 'P12', '$pkg .= "$alpha1$alpha2"');
     $pkg = 'P';
-    $pkg .= "$a1-$a2";
-    is($pkg, 'P1-2', '$pkg .= "$a1-$a2"');
+    $pkg .= "$alpha1-$alpha2";
+    is($pkg, 'P1-2', '$pkg .= "$alpha1-$alpha2"');
     $pkg = 'P';
-    $pkg .= "-$a1-$a2";
-    is($pkg, 'P-1-2', '$pkg .= "-$a1-$a2"');
+    $pkg .= "-$alpha1-$alpha2";
+    is($pkg, 'P-1-2', '$pkg .= "-$alpha1-$alpha2"');
     $pkg = 'P';
-    $pkg .= "$a1-$a2-";
-    is($pkg, 'P1-2-', '$pkg .= "$a1-$a2-"');
+    $pkg .= "$alpha1-$alpha2-";
+    is($pkg, 'P1-2-', '$pkg .= "$alpha1-$alpha2-"');
     $pkg = 'P';
-    $pkg .= "-$a1-$a2-";
-    is($pkg, 'P-1-2-', '$pkg .= "-$a1-$a2-"');
+    $pkg .= "-$alpha1-$alpha2-";
+    is($pkg, 'P-1-2-', '$pkg .= "-$alpha1-$alpha2-"');
     $pkg = 'P';
-    $pkg .= $a1.$a2.$a3;
-    is($pkg, 'P123', '$pkg .= $a1.$a2.$a3');
+    $pkg .= $alpha1.$alpha2.$alpha3;
+    is($pkg, 'P123', '$pkg .= $alpha1.$alpha2.$alpha3');
     $pkg = 'P';
-    $pkg .= $a1."-".$a2."-".$a3;
-    is($pkg, 'P1-2-3', '$pkg .= $a1."-".$a2."-".$a3');
+    $pkg .= $alpha1."-".$alpha2."-".$alpha3;
+    is($pkg, 'P1-2-3', '$pkg .= $alpha1."-".$alpha2."-".$alpha3');
     $pkg = 'P';
-    $pkg .= "-".$a1."-".$a2."-".$a3;
-    is($pkg, 'P-1-2-3', '$pkg .= "-".$a1."-".$a2."-".$a3');
+    $pkg .= "-".$alpha1."-".$alpha2."-".$alpha3;
+    is($pkg, 'P-1-2-3', '$pkg .= "-".$alpha1."-".$alpha2."-".$alpha3');
     $pkg = 'P';
-    $pkg .= $a1."-".$a2."-".$a3."-";
-    is($pkg, 'P1-2-3-', '$pkg .= $a1."-".$a2."-".$a3."-"');
+    $pkg .= $alpha1."-".$alpha2."-".$alpha3."-";
+    is($pkg, 'P1-2-3-', '$pkg .= $alpha1."-".$alpha2."-".$alpha3."-"');
     $pkg = 'P';
-    $pkg .= "-".$a1."-".$a2."-".$a3."-";
-    is($pkg, 'P-1-2-3-', '$pkg .= "-".$a1."-".$a2."-".$a3."-"');
+    $pkg .= "-".$alpha1."-".$alpha2."-".$alpha3."-";
+    is($pkg, 'P-1-2-3-', '$pkg .= "-".$alpha1."-".$alpha2."-".$alpha3."-"');
     $pkg = 'P';
-    $pkg .= "$a1$a2$a3";
-    is($pkg, 'P123', '$pkg .= "$a1$a2$a3"');
+    $pkg .= "$alpha1$alpha2$alpha3";
+    is($pkg, 'P123', '$pkg .= "$alpha1$alpha2$alpha3"');
     $pkg = 'P';
-    $pkg .= "$a1-$a2-$a3";
-    is($pkg, 'P1-2-3', '$pkg .= "$a1-$a2-$a3"');
+    $pkg .= "$alpha1-$alpha2-$alpha3";
+    is($pkg, 'P1-2-3', '$pkg .= "$alpha1-$alpha2-$alpha3"');
     $pkg = 'P';
-    $pkg .= "-$a1-$a2-$a3";
-    is($pkg, 'P-1-2-3', '$pkg .= "-$a1-$a2-$a3"');
+    $pkg .= "-$alpha1-$alpha2-$alpha3";
+    is($pkg, 'P-1-2-3', '$pkg .= "-$alpha1-$alpha2-$alpha3"');
     $pkg = 'P';
-    $pkg .= "$a1-$a2-$a3-";
-    is($pkg, 'P1-2-3-', '$pkg .= "$a1-$a2-$a3-"');
+    $pkg .= "$alpha1-$alpha2-$alpha3-";
+    is($pkg, 'P1-2-3-', '$pkg .= "$alpha1-$alpha2-$alpha3-"');
     $pkg = 'P';
-    $pkg .= "-$a1-$a2-$a3-";
-    is($pkg, 'P-1-2-3-', '$pkg .= "-$a1-$a2-$a3-"');
+    $pkg .= "-$alpha1-$alpha2-$alpha3-";
+    is($pkg, 'P-1-2-3-', '$pkg .= "-$alpha1-$alpha2-$alpha3-"');
     $lex  = "-";
     is($lex, '-', '$lex  = "-"');
     $lex  = "-";
@@ -461,62 +463,62 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     is($lex, '-', '$lex  = "-"');
     $lex  = "-";
     is($lex, '-', '$lex  = "-"');
-    $lex  = $a1;
-    is($lex, '1', '$lex  = $a1');
-    $lex  = "-".$a1;
-    is($lex, '-1', '$lex  = "-".$a1');
-    $lex  = $a1."-";
-    is($lex, '1-', '$lex  = $a1."-"');
-    $lex  = "-".$a1."-";
-    is($lex, '-1-', '$lex  = "-".$a1."-"');
-    $lex  = "$a1";
-    is($lex, '1', '$lex  = "$a1"');
-    $lex  = "-$a1";
-    is($lex, '-1', '$lex  = "-$a1"');
-    $lex  = "$a1-";
-    is($lex, '1-', '$lex  = "$a1-"');
-    $lex  = "-$a1-";
-    is($lex, '-1-', '$lex  = "-$a1-"');
-    $lex  = $a1.$a2;
-    is($lex, '12', '$lex  = $a1.$a2');
-    $lex  = $a1."-".$a2;
-    is($lex, '1-2', '$lex  = $a1."-".$a2');
-    $lex  = "-".$a1."-".$a2;
-    is($lex, '-1-2', '$lex  = "-".$a1."-".$a2');
-    $lex  = $a1."-".$a2."-";
-    is($lex, '1-2-', '$lex  = $a1."-".$a2."-"');
-    $lex  = "-".$a1."-".$a2."-";
-    is($lex, '-1-2-', '$lex  = "-".$a1."-".$a2."-"');
-    $lex  = "$a1$a2";
-    is($lex, '12', '$lex  = "$a1$a2"');
-    $lex  = "$a1-$a2";
-    is($lex, '1-2', '$lex  = "$a1-$a2"');
-    $lex  = "-$a1-$a2";
-    is($lex, '-1-2', '$lex  = "-$a1-$a2"');
-    $lex  = "$a1-$a2-";
-    is($lex, '1-2-', '$lex  = "$a1-$a2-"');
-    $lex  = "-$a1-$a2-";
-    is($lex, '-1-2-', '$lex  = "-$a1-$a2-"');
-    $lex  = $a1.$a2.$a3;
-    is($lex, '123', '$lex  = $a1.$a2.$a3');
-    $lex  = $a1."-".$a2."-".$a3;
-    is($lex, '1-2-3', '$lex  = $a1."-".$a2."-".$a3');
-    $lex  = "-".$a1."-".$a2."-".$a3;
-    is($lex, '-1-2-3', '$lex  = "-".$a1."-".$a2."-".$a3');
-    $lex  = $a1."-".$a2."-".$a3."-";
-    is($lex, '1-2-3-', '$lex  = $a1."-".$a2."-".$a3."-"');
-    $lex  = "-".$a1."-".$a2."-".$a3."-";
-    is($lex, '-1-2-3-', '$lex  = "-".$a1."-".$a2."-".$a3."-"');
-    $lex  = "$a1$a2$a3";
-    is($lex, '123', '$lex  = "$a1$a2$a3"');
-    $lex  = "$a1-$a2-$a3";
-    is($lex, '1-2-3', '$lex  = "$a1-$a2-$a3"');
-    $lex  = "-$a1-$a2-$a3";
-    is($lex, '-1-2-3', '$lex  = "-$a1-$a2-$a3"');
-    $lex  = "$a1-$a2-$a3-";
-    is($lex, '1-2-3-', '$lex  = "$a1-$a2-$a3-"');
-    $lex  = "-$a1-$a2-$a3-";
-    is($lex, '-1-2-3-', '$lex  = "-$a1-$a2-$a3-"');
+    $lex  = $alpha1;
+    is($lex, '1', '$lex  = $alpha1');
+    $lex  = "-".$alpha1;
+    is($lex, '-1', '$lex  = "-".$alpha1');
+    $lex  = $alpha1."-";
+    is($lex, '1-', '$lex  = $alpha1."-"');
+    $lex  = "-".$alpha1."-";
+    is($lex, '-1-', '$lex  = "-".$alpha1."-"');
+    $lex  = "$alpha1";
+    is($lex, '1', '$lex  = "$alpha1"');
+    $lex  = "-$alpha1";
+    is($lex, '-1', '$lex  = "-$alpha1"');
+    $lex  = "$alpha1-";
+    is($lex, '1-', '$lex  = "$alpha1-"');
+    $lex  = "-$alpha1-";
+    is($lex, '-1-', '$lex  = "-$alpha1-"');
+    $lex  = $alpha1.$alpha2;
+    is($lex, '12', '$lex  = $alpha1.$alpha2');
+    $lex  = $alpha1."-".$alpha2;
+    is($lex, '1-2', '$lex  = $alpha1."-".$alpha2');
+    $lex  = "-".$alpha1."-".$alpha2;
+    is($lex, '-1-2', '$lex  = "-".$alpha1."-".$alpha2');
+    $lex  = $alpha1."-".$alpha2."-";
+    is($lex, '1-2-', '$lex  = $alpha1."-".$alpha2."-"');
+    $lex  = "-".$alpha1."-".$alpha2."-";
+    is($lex, '-1-2-', '$lex  = "-".$alpha1."-".$alpha2."-"');
+    $lex  = "$alpha1$alpha2";
+    is($lex, '12', '$lex  = "$alpha1$alpha2"');
+    $lex  = "$alpha1-$alpha2";
+    is($lex, '1-2', '$lex  = "$alpha1-$alpha2"');
+    $lex  = "-$alpha1-$alpha2";
+    is($lex, '-1-2', '$lex  = "-$alpha1-$alpha2"');
+    $lex  = "$alpha1-$alpha2-";
+    is($lex, '1-2-', '$lex  = "$alpha1-$alpha2-"');
+    $lex  = "-$alpha1-$alpha2-";
+    is($lex, '-1-2-', '$lex  = "-$alpha1-$alpha2-"');
+    $lex  = $alpha1.$alpha2.$alpha3;
+    is($lex, '123', '$lex  = $alpha1.$alpha2.$alpha3');
+    $lex  = $alpha1."-".$alpha2."-".$alpha3;
+    is($lex, '1-2-3', '$lex  = $alpha1."-".$alpha2."-".$alpha3');
+    $lex  = "-".$alpha1."-".$alpha2."-".$alpha3;
+    is($lex, '-1-2-3', '$lex  = "-".$alpha1."-".$alpha2."-".$alpha3');
+    $lex  = $alpha1."-".$alpha2."-".$alpha3."-";
+    is($lex, '1-2-3-', '$lex  = $alpha1."-".$alpha2."-".$alpha3."-"');
+    $lex  = "-".$alpha1."-".$alpha2."-".$alpha3."-";
+    is($lex, '-1-2-3-', '$lex  = "-".$alpha1."-".$alpha2."-".$alpha3."-"');
+    $lex  = "$alpha1$alpha2$alpha3";
+    is($lex, '123', '$lex  = "$alpha1$alpha2$alpha3"');
+    $lex  = "$alpha1-$alpha2-$alpha3";
+    is($lex, '1-2-3', '$lex  = "$alpha1-$alpha2-$alpha3"');
+    $lex  = "-$alpha1-$alpha2-$alpha3";
+    is($lex, '-1-2-3', '$lex  = "-$alpha1-$alpha2-$alpha3"');
+    $lex  = "$alpha1-$alpha2-$alpha3-";
+    is($lex, '1-2-3-', '$lex  = "$alpha1-$alpha2-$alpha3-"');
+    $lex  = "-$alpha1-$alpha2-$alpha3-";
+    is($lex, '-1-2-3-', '$lex  = "-$alpha1-$alpha2-$alpha3-"');
     $lex = 'L';
     $lex .= "-";
     is($lex, 'L-', '$lex .= "-"');
@@ -530,89 +532,89 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     $lex .= "-";
     is($lex, 'L-', '$lex .= "-"');
     $lex = 'L';
-    $lex .= $a1;
-    is($lex, 'L1', '$lex .= $a1');
+    $lex .= $alpha1;
+    is($lex, 'L1', '$lex .= $alpha1');
     $lex = 'L';
-    $lex .= "-".$a1;
-    is($lex, 'L-1', '$lex .= "-".$a1');
+    $lex .= "-".$alpha1;
+    is($lex, 'L-1', '$lex .= "-".$alpha1');
     $lex = 'L';
-    $lex .= $a1."-";
-    is($lex, 'L1-', '$lex .= $a1."-"');
+    $lex .= $alpha1."-";
+    is($lex, 'L1-', '$lex .= $alpha1."-"');
     $lex = 'L';
-    $lex .= "-".$a1."-";
-    is($lex, 'L-1-', '$lex .= "-".$a1."-"');
+    $lex .= "-".$alpha1."-";
+    is($lex, 'L-1-', '$lex .= "-".$alpha1."-"');
     $lex = 'L';
-    $lex .= "$a1";
-    is($lex, 'L1', '$lex .= "$a1"');
+    $lex .= "$alpha1";
+    is($lex, 'L1', '$lex .= "$alpha1"');
     $lex = 'L';
-    $lex .= "-$a1";
-    is($lex, 'L-1', '$lex .= "-$a1"');
+    $lex .= "-$alpha1";
+    is($lex, 'L-1', '$lex .= "-$alpha1"');
     $lex = 'L';
-    $lex .= "$a1-";
-    is($lex, 'L1-', '$lex .= "$a1-"');
+    $lex .= "$alpha1-";
+    is($lex, 'L1-', '$lex .= "$alpha1-"');
     $lex = 'L';
-    $lex .= "-$a1-";
-    is($lex, 'L-1-', '$lex .= "-$a1-"');
+    $lex .= "-$alpha1-";
+    is($lex, 'L-1-', '$lex .= "-$alpha1-"');
     $lex = 'L';
-    $lex .= $a1.$a2;
-    is($lex, 'L12', '$lex .= $a1.$a2');
+    $lex .= $alpha1.$alpha2;
+    is($lex, 'L12', '$lex .= $alpha1.$alpha2');
     $lex = 'L';
-    $lex .= $a1."-".$a2;
-    is($lex, 'L1-2', '$lex .= $a1."-".$a2');
+    $lex .= $alpha1."-".$alpha2;
+    is($lex, 'L1-2', '$lex .= $alpha1."-".$alpha2');
     $lex = 'L';
-    $lex .= "-".$a1."-".$a2;
-    is($lex, 'L-1-2', '$lex .= "-".$a1."-".$a2');
+    $lex .= "-".$alpha1."-".$alpha2;
+    is($lex, 'L-1-2', '$lex .= "-".$alpha1."-".$alpha2');
     $lex = 'L';
-    $lex .= $a1."-".$a2."-";
-    is($lex, 'L1-2-', '$lex .= $a1."-".$a2."-"');
+    $lex .= $alpha1."-".$alpha2."-";
+    is($lex, 'L1-2-', '$lex .= $alpha1."-".$alpha2."-"');
     $lex = 'L';
-    $lex .= "-".$a1."-".$a2."-";
-    is($lex, 'L-1-2-', '$lex .= "-".$a1."-".$a2."-"');
+    $lex .= "-".$alpha1."-".$alpha2."-";
+    is($lex, 'L-1-2-', '$lex .= "-".$alpha1."-".$alpha2."-"');
     $lex = 'L';
-    $lex .= "$a1$a2";
-    is($lex, 'L12', '$lex .= "$a1$a2"');
+    $lex .= "$alpha1$alpha2";
+    is($lex, 'L12', '$lex .= "$alpha1$alpha2"');
     $lex = 'L';
-    $lex .= "$a1-$a2";
-    is($lex, 'L1-2', '$lex .= "$a1-$a2"');
+    $lex .= "$alpha1-$alpha2";
+    is($lex, 'L1-2', '$lex .= "$alpha1-$alpha2"');
     $lex = 'L';
-    $lex .= "-$a1-$a2";
-    is($lex, 'L-1-2', '$lex .= "-$a1-$a2"');
+    $lex .= "-$alpha1-$alpha2";
+    is($lex, 'L-1-2', '$lex .= "-$alpha1-$alpha2"');
     $lex = 'L';
-    $lex .= "$a1-$a2-";
-    is($lex, 'L1-2-', '$lex .= "$a1-$a2-"');
+    $lex .= "$alpha1-$alpha2-";
+    is($lex, 'L1-2-', '$lex .= "$alpha1-$alpha2-"');
     $lex = 'L';
-    $lex .= "-$a1-$a2-";
-    is($lex, 'L-1-2-', '$lex .= "-$a1-$a2-"');
+    $lex .= "-$alpha1-$alpha2-";
+    is($lex, 'L-1-2-', '$lex .= "-$alpha1-$alpha2-"');
     $lex = 'L';
-    $lex .= $a1.$a2.$a3;
-    is($lex, 'L123', '$lex .= $a1.$a2.$a3');
+    $lex .= $alpha1.$alpha2.$alpha3;
+    is($lex, 'L123', '$lex .= $alpha1.$alpha2.$alpha3');
     $lex = 'L';
-    $lex .= $a1."-".$a2."-".$a3;
-    is($lex, 'L1-2-3', '$lex .= $a1."-".$a2."-".$a3');
+    $lex .= $alpha1."-".$alpha2."-".$alpha3;
+    is($lex, 'L1-2-3', '$lex .= $alpha1."-".$alpha2."-".$alpha3');
     $lex = 'L';
-    $lex .= "-".$a1."-".$a2."-".$a3;
-    is($lex, 'L-1-2-3', '$lex .= "-".$a1."-".$a2."-".$a3');
+    $lex .= "-".$alpha1."-".$alpha2."-".$alpha3;
+    is($lex, 'L-1-2-3', '$lex .= "-".$alpha1."-".$alpha2."-".$alpha3');
     $lex = 'L';
-    $lex .= $a1."-".$a2."-".$a3."-";
-    is($lex, 'L1-2-3-', '$lex .= $a1."-".$a2."-".$a3."-"');
+    $lex .= $alpha1."-".$alpha2."-".$alpha3."-";
+    is($lex, 'L1-2-3-', '$lex .= $alpha1."-".$alpha2."-".$alpha3."-"');
     $lex = 'L';
-    $lex .= "-".$a1."-".$a2."-".$a3."-";
-    is($lex, 'L-1-2-3-', '$lex .= "-".$a1."-".$a2."-".$a3."-"');
+    $lex .= "-".$alpha1."-".$alpha2."-".$alpha3."-";
+    is($lex, 'L-1-2-3-', '$lex .= "-".$alpha1."-".$alpha2."-".$alpha3."-"');
     $lex = 'L';
-    $lex .= "$a1$a2$a3";
-    is($lex, 'L123', '$lex .= "$a1$a2$a3"');
+    $lex .= "$alpha1$alpha2$alpha3";
+    is($lex, 'L123', '$lex .= "$alpha1$alpha2$alpha3"');
     $lex = 'L';
-    $lex .= "$a1-$a2-$a3";
-    is($lex, 'L1-2-3', '$lex .= "$a1-$a2-$a3"');
+    $lex .= "$alpha1-$alpha2-$alpha3";
+    is($lex, 'L1-2-3', '$lex .= "$alpha1-$alpha2-$alpha3"');
     $lex = 'L';
-    $lex .= "-$a1-$a2-$a3";
-    is($lex, 'L-1-2-3', '$lex .= "-$a1-$a2-$a3"');
+    $lex .= "-$alpha1-$alpha2-$alpha3";
+    is($lex, 'L-1-2-3', '$lex .= "-$alpha1-$alpha2-$alpha3"');
     $lex = 'L';
-    $lex .= "$a1-$a2-$a3-";
-    is($lex, 'L1-2-3-', '$lex .= "$a1-$a2-$a3-"');
+    $lex .= "$alpha1-$alpha2-$alpha3-";
+    is($lex, 'L1-2-3-', '$lex .= "$alpha1-$alpha2-$alpha3-"');
     $lex = 'L';
-    $lex .= "-$a1-$a2-$a3-";
-    is($lex, 'L-1-2-3-', '$lex .= "-$a1-$a2-$a3-"');
+    $lex .= "-$alpha1-$alpha2-$alpha3-";
+    is($lex, 'L-1-2-3-', '$lex .= "-$alpha1-$alpha2-$alpha3-"');
     {
         my $l = "-";
         is($l, '-', 'my $l = "-"');
@@ -630,116 +632,116 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
         is($l, '-', 'my $l = "-"');
     }
     {
-        my $l = $a1;
-        is($l, '1', 'my $l = $a1');
+        my $l = $alpha1;
+        is($l, '1', 'my $l = $alpha1');
     }
     {
-        my $l = "-".$a1;
-        is($l, '-1', 'my $l = "-".$a1');
+        my $l = "-".$alpha1;
+        is($l, '-1', 'my $l = "-".$alpha1');
     }
     {
-        my $l = $a1."-";
-        is($l, '1-', 'my $l = $a1."-"');
+        my $l = $alpha1."-";
+        is($l, '1-', 'my $l = $alpha1."-"');
     }
     {
-        my $l = "-".$a1."-";
-        is($l, '-1-', 'my $l = "-".$a1."-"');
+        my $l = "-".$alpha1."-";
+        is($l, '-1-', 'my $l = "-".$alpha1."-"');
     }
     {
-        my $l = "$a1";
-        is($l, '1', 'my $l = "$a1"');
+        my $l = "$alpha1";
+        is($l, '1', 'my $l = "$alpha1"');
     }
     {
-        my $l = "-$a1";
-        is($l, '-1', 'my $l = "-$a1"');
+        my $l = "-$alpha1";
+        is($l, '-1', 'my $l = "-$alpha1"');
     }
     {
-        my $l = "$a1-";
-        is($l, '1-', 'my $l = "$a1-"');
+        my $l = "$alpha1-";
+        is($l, '1-', 'my $l = "$alpha1-"');
     }
     {
-        my $l = "-$a1-";
-        is($l, '-1-', 'my $l = "-$a1-"');
+        my $l = "-$alpha1-";
+        is($l, '-1-', 'my $l = "-$alpha1-"');
     }
     {
-        my $l = $a1.$a2;
-        is($l, '12', 'my $l = $a1.$a2');
+        my $l = $alpha1.$alpha2;
+        is($l, '12', 'my $l = $alpha1.$alpha2');
     }
     {
-        my $l = $a1."-".$a2;
-        is($l, '1-2', 'my $l = $a1."-".$a2');
+        my $l = $alpha1."-".$alpha2;
+        is($l, '1-2', 'my $l = $alpha1."-".$alpha2');
     }
     {
-        my $l = "-".$a1."-".$a2;
-        is($l, '-1-2', 'my $l = "-".$a1."-".$a2');
+        my $l = "-".$alpha1."-".$alpha2;
+        is($l, '-1-2', 'my $l = "-".$alpha1."-".$alpha2');
     }
     {
-        my $l = $a1."-".$a2."-";
-        is($l, '1-2-', 'my $l = $a1."-".$a2."-"');
+        my $l = $alpha1."-".$alpha2."-";
+        is($l, '1-2-', 'my $l = $alpha1."-".$alpha2."-"');
     }
     {
-        my $l = "-".$a1."-".$a2."-";
-        is($l, '-1-2-', 'my $l = "-".$a1."-".$a2."-"');
+        my $l = "-".$alpha1."-".$alpha2."-";
+        is($l, '-1-2-', 'my $l = "-".$alpha1."-".$alpha2."-"');
     }
     {
-        my $l = "$a1$a2";
-        is($l, '12', 'my $l = "$a1$a2"');
+        my $l = "$alpha1$alpha2";
+        is($l, '12', 'my $l = "$alpha1$alpha2"');
     }
     {
-        my $l = "$a1-$a2";
-        is($l, '1-2', 'my $l = "$a1-$a2"');
+        my $l = "$alpha1-$alpha2";
+        is($l, '1-2', 'my $l = "$alpha1-$alpha2"');
     }
     {
-        my $l = "-$a1-$a2";
-        is($l, '-1-2', 'my $l = "-$a1-$a2"');
+        my $l = "-$alpha1-$alpha2";
+        is($l, '-1-2', 'my $l = "-$alpha1-$alpha2"');
     }
     {
-        my $l = "$a1-$a2-";
-        is($l, '1-2-', 'my $l = "$a1-$a2-"');
+        my $l = "$alpha1-$alpha2-";
+        is($l, '1-2-', 'my $l = "$alpha1-$alpha2-"');
     }
     {
-        my $l = "-$a1-$a2-";
-        is($l, '-1-2-', 'my $l = "-$a1-$a2-"');
+        my $l = "-$alpha1-$alpha2-";
+        is($l, '-1-2-', 'my $l = "-$alpha1-$alpha2-"');
     }
     {
-        my $l = $a1.$a2.$a3;
-        is($l, '123', 'my $l = $a1.$a2.$a3');
+        my $l = $alpha1.$alpha2.$alpha3;
+        is($l, '123', 'my $l = $alpha1.$alpha2.$alpha3');
     }
     {
-        my $l = $a1."-".$a2."-".$a3;
-        is($l, '1-2-3', 'my $l = $a1."-".$a2."-".$a3');
+        my $l = $alpha1."-".$alpha2."-".$alpha3;
+        is($l, '1-2-3', 'my $l = $alpha1."-".$alpha2."-".$alpha3');
     }
     {
-        my $l = "-".$a1."-".$a2."-".$a3;
-        is($l, '-1-2-3', 'my $l = "-".$a1."-".$a2."-".$a3');
+        my $l = "-".$alpha1."-".$alpha2."-".$alpha3;
+        is($l, '-1-2-3', 'my $l = "-".$alpha1."-".$alpha2."-".$alpha3');
     }
     {
-        my $l = $a1."-".$a2."-".$a3."-";
-        is($l, '1-2-3-', 'my $l = $a1."-".$a2."-".$a3."-"');
+        my $l = $alpha1."-".$alpha2."-".$alpha3."-";
+        is($l, '1-2-3-', 'my $l = $alpha1."-".$alpha2."-".$alpha3."-"');
     }
     {
-        my $l = "-".$a1."-".$a2."-".$a3."-";
-        is($l, '-1-2-3-', 'my $l = "-".$a1."-".$a2."-".$a3."-"');
+        my $l = "-".$alpha1."-".$alpha2."-".$alpha3."-";
+        is($l, '-1-2-3-', 'my $l = "-".$alpha1."-".$alpha2."-".$alpha3."-"');
     }
     {
-        my $l = "$a1$a2$a3";
-        is($l, '123', 'my $l = "$a1$a2$a3"');
+        my $l = "$alpha1$alpha2$alpha3";
+        is($l, '123', 'my $l = "$alpha1$alpha2$alpha3"');
     }
     {
-        my $l = "$a1-$a2-$a3";
-        is($l, '1-2-3', 'my $l = "$a1-$a2-$a3"');
+        my $l = "$alpha1-$alpha2-$alpha3";
+        is($l, '1-2-3', 'my $l = "$alpha1-$alpha2-$alpha3"');
     }
     {
-        my $l = "-$a1-$a2-$a3";
-        is($l, '-1-2-3', 'my $l = "-$a1-$a2-$a3"');
+        my $l = "-$alpha1-$alpha2-$alpha3";
+        is($l, '-1-2-3', 'my $l = "-$alpha1-$alpha2-$alpha3"');
     }
     {
-        my $l = "$a1-$a2-$a3-";
-        is($l, '1-2-3-', 'my $l = "$a1-$a2-$a3-"');
+        my $l = "$alpha1-$alpha2-$alpha3-";
+        is($l, '1-2-3-', 'my $l = "$alpha1-$alpha2-$alpha3-"');
     }
     {
-        my $l = "-$a1-$a2-$a3-";
-        is($l, '-1-2-3-', 'my $l = "-$a1-$a2-$a3-"');
+        my $l = "-$alpha1-$alpha2-$alpha3-";
+        is($l, '-1-2-3-', 'my $l = "-$alpha1-$alpha2-$alpha3-"');
     }
 }
 
@@ -748,30 +750,34 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
 # make sure it's handled ok
 
 {
-    my $a = 'a';
-    my $b = 'b';
+    my $alpha = 'a';
+    my $beta = 'b';
     my $o = 'o';
 
     my $re = qr/abc/;
-    $$re = $a . $b;
-    is($$re, "ab", '$$re = $a . $b');
+    $$re = $alpha . $beta;
+    is($$re, "ab", '$$re = $alpha . $beta');
 
     #passing a hash elem to a sub creates a PVLV
-    my $s = sub { $_[0] = $a . $b; };
+    my $s = sub { $_[0] = $alpha . $beta; };
     my %h;
     $s->($h{foo});
     is($h{foo}, "ab", "PVLV");
 
     # assigning a string to a typeglob creates an alias
-    $Foo = 'myfoo';
-    *Bar = ("F" . $o . $o);
-    is($Bar, "myfoo", '*Bar = "Foo"');
+    {
+        $::Foo = 'myfoo';
+        *Bar = ("F" . $o . $o);
+        is($::Bar, "myfoo", '*Bar = "Foo"');
+    }
 
     # while that same typeglob also appearing on the RHS returns
     # a stringified value
 
     package QPR {
+        no strict 'refs';
         ${'*QPR::Bar*QPR::BarBaz'} = 'myfoobarbaz';
+        no strict 'vars';
         *Bar = (*Bar  . *Bar . "Baz");
         ::is($Bar, "myfoobarbaz", '*Bar =  (*Bar  . *Bar . "Baz")');
     }
@@ -781,10 +787,10 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
 
 {
     my $foo = "foo";
-    my $a . $foo; # weird but legal
-    is($a, '', 'my $a . $foo');
-    my $b; $b .= $foo;
-    is($b, 'foo', 'my $b; $b .= $foo');
+    my $alpha . $foo; # weird but legal
+    is($alpha, '', 'my $alpha . $foo');
+    my $beta; $beta .= $foo;
+    is($beta, 'foo', 'my $beta; $beta .= $foo');
 }
 
 # distinguish between nested appends and concats; the former is
@@ -792,9 +798,9 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
 # This is why multiconcat shouldn't be used in that case
 
 {
-    my $a = "a";
-    (($a .= $a) .= $a) .= $a;
-    is($a, "aaaaaaaa", '(($a .= $a) .= $a) .= $a;');
+    my $alpha = "a";
+    (($alpha .= $alpha) .= $alpha) .= $alpha;
+    is($alpha, "aaaaaaaa", '(($alpha .= $alpha) .= $alpha) .= $alpha;');
 }
 
 # check everything works ok near the max arg size of a multiconcat
@@ -844,20 +850,20 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
 # RT #132595
 # multiconcat shouldn't affect the order of arg evaluation
 package RT132595 {
-    my $a = "a";
+    my $alpha = "a";
     my $i = 0;
     sub TIESCALAR { bless({}, $_[0]) }
-    sub FETCH { ++$i; $a = "b".$i; "c".$i }
+    sub FETCH { ++$i; $alpha = "b".$i; "c".$i }
     my $t;
     tie $t, "RT132595";
-    my $res = $a.$t.$a.$t;
+    my $res = $alpha.$t.$alpha.$t;
     ::is($res, "b1c1b1c2", "RT #132595");
 }
 
 # RT #133441
 # multiconcat wasn't seeing a mutator as a mutator
 {
-    my ($a, $b)  = qw(a b);
-    ($a = 'A'.$b) .= 'c';
-    is($a, "Abc", "RT #133441");
+    my ($alpha, $beta)  = qw(a b);
+    ($alpha = 'A'.$beta) .= 'c';
+    is($alpha, "Abc", "RT #133441");
 }

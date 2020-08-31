@@ -2,15 +2,14 @@
 
 # Call fold_grind with /l and a UTF-8 locale
 
-use strict;
 use warnings;
 no warnings 'once';
 
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    require './loc_tools.pl';
     set_up_inc('../lib');
+    require './loc_tools.pl';
 }
 
 skip_all "No locales" unless locales_enabled('LC_CTYPE');

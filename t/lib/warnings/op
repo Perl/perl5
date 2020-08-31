@@ -154,7 +154,7 @@ Found = in conditional, should be == at - line 3.
 Found = in conditional, should be == at - line 4.
 ########
 # op.c
-use warnings 'syntax' ;
+use warnings 'syntax' ; my (@a, %a, $x);
 @a[3];
 @a{3};
 @a["]"];
@@ -189,13 +189,14 @@ Scalar value @a{...} better written as $a{...} at - line 14.
 # op.c
 # [perl #132645]
 use warnings 'syntax';
-@inf[3];
+my @inf; @inf[3];
 EXPECT
 Scalar value @inf[3] better written as $inf[3] at - line 4.
 ########
 # op.c
 use utf8;
 use open qw( :utf8 :std );
+my (@à, %à);
 use warnings 'syntax' ;
 @à[3];
 @à{3};
@@ -203,27 +204,28 @@ no warnings 'syntax' ;
 @à[3];
 @à{3};
 EXPECT
-Scalar value @à[3] better written as $à[3] at - line 5.
-Scalar value @à{3} better written as $à{3} at - line 6.
+Scalar value @à[3] better written as $à[3] at - line 6.
+Scalar value @à{3} better written as $à{3} at - line 7.
 ########
 # op.c
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'syntax' ;
+my (@ぁ, %ぁ);
 @ぁ[3];
 @ぁ{3};
 no warnings 'syntax' ;
 @ぁ[3];
 @ぁ{3};
 EXPECT
-Scalar value @ぁ[3] better written as $ぁ[3] at - line 5.
-Scalar value @ぁ{3} better written as $ぁ{3} at - line 6.
+Scalar value @ぁ[3] better written as $ぁ[3] at - line 6.
+Scalar value @ぁ{3} better written as $ぁ{3} at - line 7.
 ########
 # op.c
 # "Scalar value better written as" false positives
 # [perl #28380] and [perl #114024]
 use warnings 'syntax';
-
+my (%h, %X, %f, %a, $re, @h, @X, @f, @a);
 # hashes
 @h{qw"a b c"} = 1..3;
 @h{qw'a b c'} = 1..3;
@@ -302,7 +304,7 @@ EXPECT
 # op.c
 # "Scalar value better written as" should not trigger for syntax errors
 use warnings 'syntax';
-@a[]
+my @a; @a[]
 EXPECT
 syntax error at - line 4, near "[]"
 Execution of - aborted due to compilation errors.
@@ -343,7 +345,7 @@ OPTION fatal
 Can't use a hash as a reference at - line 3.
 ########
 # op.c
-my %foo;
+my ($foo, %foo);
 $foo = {}; %$foo->{"bar"};
 EXPECT
 OPTION fatal
@@ -357,14 +359,14 @@ OPTION fatal
 Can't use an array as a reference at - line 3.
 ########
 # op.c
-my @foo;
+my ( @foo, $foo );
 $foo = []; @$foo->[34];
 EXPECT
 OPTION fatal
 Can't use an array as a reference at - line 3.
 ########
 # op.c
-use warnings 'void' ; no warnings 'experimental::smartmatch'; close STDIN ;
+use warnings 'void' ; no warnings 'experimental::smartmatch'; no strict; close STDIN ;
 #line 2
 1 x 3 ;			# OP_REPEAT (folded)
 (1) x 3 ;		# OP_REPEAT
@@ -485,7 +487,7 @@ EXPECT
 Useless use of sort in scalar context at - line 3.
 ########
 # op.c
-no warnings 'void' ; close STDIN ;
+no warnings 'void' ; no strict; close STDIN ;
 1 x 3 ;			# OP_REPEAT
 			# OP_GVSV
 wantarray ; 		# OP_WANTARRAY
@@ -730,7 +732,7 @@ Useless use of getservbyport in void context at - line 36.
 Useless use of getservent in void context at - line 37.
 ########
 # op.c
-use warnings 'void' ;
+use warnings 'void' ; no strict;
 *a ; # OP_RV2GV
 $a ; # OP_RV2SV
 @a ; # OP_RV2AV
@@ -753,7 +755,7 @@ use warnings 'void' ;
 "x" . "y"; # optimized to OP_CONST
 2 + 2; # optimized to OP_CONST
 use constant U => undef;
-U;
+U; my $foo;
 qq/"	\n/;
 5 || print "bad\n";	# test OPpCONST_SHORTCIRCUIT
 print "boo\n" if U;	# test OPpCONST_SHORTCIRCUIT
@@ -786,7 +788,7 @@ EXPECT
 Useless use of a constant ("\340\x{1e06}c") in void context at - line 11.
 ########
 # op.c
-use utf8;
+use utf8; no strict;
 use open qw( :utf8 :std );
 use warnings 'void' ;
 "Ẋ" . "ƴ"; # optimized to OP_CONST
@@ -805,7 +807,7 @@ Useless use of a constant (undef) in void context at - line 8.
 ########
 # op.c
 #
-use warnings 'misc' ; use utf8;
+use warnings 'misc' ; use utf8; no strict;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;my $d = 'test';
 @a =~ /abc/ ;
 @a2 =~ s/a/b/ ;
@@ -864,7 +866,7 @@ Can't modify array dereference in substitution (s///) at - line 6, near "s/a/b/ 
 BEGIN not safe after errors--compilation aborted at - line 23.
 ########
 # op.c
-use warnings 'parenthesis' ;
+use warnings 'parenthesis' ; no strict;
 my $a, $b = (1,2);
 my @foo,%bar,	$quux; # there's a TAB here
 my $x, $y or print;
@@ -876,7 +878,7 @@ Parentheses missing around "my" list at - line 3.
 Parentheses missing around "my" list at - line 4.
 ########
 # op.c
-use warnings 'parenthesis' ;
+use warnings 'parenthesis' ; no strict;
 our $a, $b = (1,2);
 our $p, *q;
 no warnings 'parenthesis' ;
@@ -885,7 +887,7 @@ EXPECT
 Parentheses missing around "our" list at - line 3.
 ########
 # op.c
-use warnings 'parenthesis' ;
+use warnings 'parenthesis' ; no strict;
 local $a, $b = (1,2);
 local *f, *g;
 local $p, *q;
@@ -897,7 +899,7 @@ Parentheses missing around "local" list at - line 4.
 Parentheses missing around "local" list at - line 5.
 ########
 # op.c
-use warnings 'bareword' ;
+use warnings 'bareword' ; no strict;
 print (ABC || 1) ;
 no warnings 'bareword' ;
 print (ABC || 1) ;
@@ -908,7 +910,7 @@ Bareword found in conditional at - line 3.
 
 --FILE--
 # op.c
-use warnings 'misc' ;
+use warnings 'misc' ; no strict;
 open FH, "<abc" ;
 $x = 1 if $x = <FH> ;
 $x = 1 if $x
@@ -922,7 +924,7 @@ Value of <HANDLE> construct can be "0"; test with defined() at - line 4.
 Value of <HANDLE> construct can be "0"; test with defined() at - line 5.
 ########
 # op.c
-use warnings 'misc' ;
+use warnings 'misc' ; no strict;
 opendir FH, "." ;
 $x = 1 if $x = readdir FH ;
 $x = 1 if $x
@@ -937,7 +939,7 @@ Value of readdir() operator can be "0"; test with defined() at - line 4.
 Value of readdir() operator can be "0"; test with defined() at - line 5.
 ########
 # op.c
-use warnings 'misc' ;
+use warnings 'misc' ; no strict;
 $x = 1 if $x = <*> ;
 $x = 1 if $x
     = <*> ;
@@ -951,7 +953,7 @@ Value of glob construct can be "0"; test with defined() at - line 4.
 ########
 # op.c
 use warnings 'misc' ;
-%a = (1,2,3,4) ;
+my %a = (1,2,3,4) ; my $x;
 $x = 1 if $x = each %a ;
 no warnings 'misc' ;
 $x = 1 if $x = each %a ;
@@ -959,7 +961,7 @@ EXPECT
 Value of each() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warnings 'misc' ;
+use warnings 'misc' ; my $x;
 $x = 1 while $x = <*> and 0 ;
 no warnings 'misc' ;
 $x = 1 while $x = <*> and 0 ;
@@ -968,7 +970,7 @@ Value of glob construct can be "0"; test with defined() at - line 3.
 ########
 # op.c
 use warnings 'misc' ;
-opendir FH, "." ;
+opendir FH, "." ; my $x;
 $x = 1 while $x = readdir FH and 0 ;
 no warnings 'misc' ;
 $x = 1 while $x = readdir FH and 0 ;
@@ -981,7 +983,7 @@ use warnings 'misc';
 open FH, "<abc";
 ($_ = <FH>) // ($_ = 1);
 opendir DH, ".";
-%a = (1,2,3,4) ;
+my %a = (1,2,3,4) ;
 EXPECT
 ########
 # op.c
@@ -1076,7 +1078,7 @@ my $a
 EXPECT
 ########
 # op.c
-defined(@a);
+defined(my @a);
 EXPECT
 OPTION fatal
 Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - line 2.
@@ -1088,11 +1090,11 @@ OPTION fatal
 Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
-defined(@a = (1,2,3));
+defined(my @a = (1,2,3));
 EXPECT
 ########
 # op.c
-defined(%h);
+defined(my %h);
 EXPECT
 OPTION fatal
 Can't use 'defined(%hash)' (Maybe you should just omit the defined()?) at - line 2.
@@ -1111,7 +1113,7 @@ EXPECT
 
 ########
 # op.c
-sub fred();
+no strict; sub fred();
 sub fred($) {}
 use constant foo=>bar; sub foo(@);
 use constant bav=>bar; sub bav(); # no warning
@@ -1159,7 +1161,7 @@ Prototype mismatch: sub main::FRED () vs ($) at - line 14.
 ########
 # op.c [S_simplify_sort]
 # [perl #86136]
-my @tests = split /^/, '
+no strict; my @tests = split /^/, '
   sort {$a <=> $b} @a;
   sort {$a cmp $b} @a;
   { use integer; sort {$a <=> $b} @a}
@@ -1268,7 +1270,7 @@ EXPECT
 "state $a" used in sort comparison at - line 4.
 ########
 # op.c [Perl_ck_cmp]
-use warnings 'syntax' ;
+use warnings 'syntax' ; no strict;
 no warnings 'deprecated';
 @a = $[ < 5;
 @a = $[ > 5;
@@ -1324,7 +1326,7 @@ $[ used in numeric le (<=) (did you mean $] ?) at - line 19.
 $[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
 ########
 # op.c [Perl_ck_length]
-use warnings 'syntax' ;
+use warnings 'syntax' ; no strict;
 length(@a);
 length(%b);
 length(@$c);
@@ -1485,7 +1487,7 @@ $_ ^.= $_;
 EXPECT
 ########
 # op.c
-use warnings 'precedence';
+use warnings 'precedence'; no strict;
 $a = $b & $c == $d;
 $a = $b ^ $c != $d;
 $a = $b | $c > $d;
@@ -1564,7 +1566,7 @@ Possible precedence problem on bitwise |. operator at - line 26.
 Possible precedence problem on bitwise &. operator at - line 27.
 ########
 # op.c
-use integer;
+use integer; no strict;
 use warnings 'precedence';
 $a = $b & $c == $d;
 $a = $b ^ $c != $d;
@@ -1595,7 +1597,7 @@ Possible precedence problem on bitwise & operator at - line 10.
 # ok	=> local() has desired effect;
 # ignore=> local() silently ignored
 
-use warnings 'syntax';
+use warnings 'syntax'; no strict;
 
 local(undef);		# OP_UNDEF		ignore
 sub lval : lvalue {};
@@ -1686,8 +1688,8 @@ EXPECT
 ########
 # op.c
 use warnings 'void';
-@x = split /y/, "z";
-$x = split /y/, "z";
+my @x = split /y/, "z";
+my $x = split /y/, "z";
      split /y/, "z";
 no warnings 'void';
 @x = split /y/, "z";
@@ -1912,8 +1914,8 @@ EXPECT
 use feature "signatures";
 sub aaa { 2 }
 sub bbb ($a) { 4 }
-$aaa = sub { 2 };
-$bbb = sub ($a) { 4 };
+my $aaa = sub { 2 };
+my $bbb = sub ($a) { 4 };
 EXPECT
 The signatures feature is experimental at - line 3.
 The signatures feature is experimental at - line 5.
@@ -1922,8 +1924,8 @@ no warnings "experimental::signatures";
 use feature "signatures";
 sub aaa { 2 }
 sub bbb ($a) { 4 }
-$aaa = sub { 2 };
-$bbb = sub ($a) { 4 };
+my $aaa = sub { 2 };
+my $bbb = sub ($a) { 4 };
 EXPECT
 ########
 use warnings 'numeric';
@@ -1967,7 +1969,7 @@ Non-finite repeat count does nothing at - line 17.
 Non-finite repeat count does nothing at - line 18.
 ########
 # NAME warn on stat @array
-@foo = ("op/stat.t");
+my @foo = ("op/stat.t");
 stat @foo;
 my @bar = @foo;
 stat @bar;
@@ -1984,7 +1986,7 @@ Array passed to stat will be coerced to a scalar at - line 10.
 
 ########
 # NAME barewords and conditionals near constant folding
-use warnings;
+use warnings; no strict;
 my $x1 = !a || !b; # no "in conditional" warnings
 my $x2 = !A || !B; # warning-free, because upper-case won't clash
 EXPECT
@@ -1993,7 +1995,7 @@ Unquoted string "b" may clash with future reserved word at - line 2.
 ########
 # RT #6870: Odd parsing of do...for...
 # This was really more a tokenizer bug, but it manifests as spurious warnings
-use warnings;
+use warnings; no strict;
 no warnings 'reserved';
 $a=do xa for ax;
 do "xa" for ax;
@@ -2015,7 +2017,7 @@ EXPECT
 ########
 # Useless use of concatenation should appear for any number of args
 use warnings;
-($a, $b, $c) = (42)x3;
+my ($a, $b, $c) = (42)x3;
 $a.$b;
 $a.$b.$c;
 EXPECT

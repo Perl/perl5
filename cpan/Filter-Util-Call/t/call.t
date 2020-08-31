@@ -56,9 +56,9 @@ sub import { filter_add(bless []) }
 1 ;
 EOM
 
-my $a = `$Perl "-I." $Inc -e "use ${module} ;"  $redir` ;
+my $alpha = `$Perl "-I." $Inc -e "use ${module} ;"  $redir` ;
 ok(1, (($? >>8) != 0 or (($^O eq 'MSWin32' || $^O eq 'MacOS' || $^O eq 'NetWare' || $^O eq 'mpeix') && $? != 0))) ;
-ok(2, $a =~ /^Can't locate object method "filter" via package "MyTest"/m) ;
+ok(2, $alpha =~ /^Can't locate object method "filter" via package "MyTest"/m) ;
 
 # no reference parameter in filter_add
 ######################################
@@ -73,25 +73,25 @@ sub import { filter_add() }
 1 ;
 EOM
 
-$a = `$Perl "-I." $Inc -e "use ${module} ;"  $redir` ;
-#warn "# $a\n";
+$alpha = `$Perl "-I." $Inc -e "use ${module} ;"  $redir` ;
+#warn "# $alpha\n";
 ok(3, (($? >>8) != 0
        or (($^O eq 'MSWin32' || $^O eq 'MacOS' || $^O eq 'NetWare' || $^O eq 'mpeix')
            && $? != 0))) ;
-#ok(4, $a =~ /^usage: filter_add\(ref\) at ${module}.pm/) ;
+#ok(4, $alpha =~ /^usage: filter_add\(ref\) at ${module}.pm/) ;
 my $errmsg = $Config{usecperl}
   ? qr/^Not enough arguments for subroutine entry Filter::Util::Call::filter_add at ${module}\.pm line/m
   : qr/^Not enough arguments for Filter::Util::Call::filter_add at ${module}\.pm line/m;
-$a =~ s/^(.*?\n).*$/$1/s; # only the first line
+$alpha =~ s/^(.*?\n).*$/$1/s; # only the first line
 if ($] < 5.007) {
-    if ($a =~ $errmsg) {
+    if ($alpha =~ $errmsg) {
         ok(4, 1);
     } else {
         ok(4, 1, "TODO");
     }
 } else {
-    ok(4, $a =~ $errmsg, 'usage error')
-       or diag("The error was: ", $a);
+    ok(4, $alpha =~ $errmsg, 'usage error')
+       or diag("The error was: ", $alpha);
 }
 
 # non-error cases
@@ -128,19 +128,19 @@ use $module ;
 EOM
 
 use Cwd ;
-$here = getcwd ;
+my $here = getcwd ;
 print "I am $here\n" ;
 print "some letters ABC\n" ;
-$y = "ABCDEF" ;
+my $y = "ABCDEF" ;
 print <<EOF ;
 Alphabetti Spagetti ($y)
 EOF
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(5, ($? >>8) == 0) ;
-ok(6, $a eq <<EOM) ;
+ok(6, $alpha eq <<EOM) ;
 I am $here
 some letters DEF
 Alphabetti Spagetti (DEFDEF)
@@ -177,19 +177,19 @@ use $module ;
 EOM
 
 use Cwd ;
-$here = getcwd ;
+my $here = getcwd ;
 print "I am $here\n" ;
 print "some letters ABC\n" ;
-$y = "ABCDEF" ;
+my $y = "ABCDEF" ;
 print <<EOF ;
 Alphabetti Spagetti ($y)
 EOF
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(7, ($? >>8) == 0) ;
-ok(8, $a eq <<EOM) ;
+ok(8, $alpha eq <<EOM) ;
 I am $here
 some letters DEF
 Alphabetti Spagetti (DEFDEF)
@@ -284,7 +284,7 @@ use $module4 ;
 EOM
 
 print "some letters ABCXYZ\n" ;
-$y = "ABCDEFXYZ" ;
+my $y = "ABCDEFXYZ" ;
 print <<EOF ;
 Fred likes Alphabetti Spagetti ($y)
 EOF
@@ -302,9 +302,9 @@ EOF
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(9, ($? >>8) == 0) ;
-ok(10, $a eq <<EOM) ;
+ok(10, $alpha eq <<EOM) ;
 I'm feeling used!
 Fred Joe ABC DEF PQR XYZ
 See you Tomorrow
@@ -357,16 +357,16 @@ use $module2 qw( ABC NMO) ;
 EOM
 
 print "some letters ABCXYZ KLM NMO\n" ;
-$y = "ABCDEFXYZKLMNMO" ;
+my $y = "ABCDEFXYZKLMNMO" ;
 print <<EOF ;
 Alphabetti Spagetti ($y)
 EOF
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(11, ($? >>8) == 0) ;
-ok(12, $a eq <<EOM) ;
+ok(12, $alpha eq <<EOM) ;
 some letters PQRPQR PQR PQR
 Alphabetti Spagetti (PQRDEFPQRPQRPQR)
 EOM
@@ -416,16 +416,16 @@ use $module2 qw( ABC NMO) ;
 EOM
 
 print "some letters ABCXYZ KLM NMO\n" ;
-$y = "ABCDEFXYZKLMNMO" ;
+my $y = "ABCDEFXYZKLMNMO" ;
 print <<EOF ;
 Alphabetti Spagetti ($y)
 EOF
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(13, ($? >>8) == 0) ;
-ok(14, $a eq <<EOM) ;
+ok(14, $alpha eq <<EOM) ;
 some letters PQRPQR PQR PQR
 Alphabetti Spagetti (PQRDEFPQRPQRPQR)
 EOM
@@ -483,13 +483,13 @@ F
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(15, ($? >>8) == 0) ;
-ok(16, $a eq <<EOM) ;
+ok(16, $alpha eq <<EOM) ;
 don't cut me in half
 appended
 EOM
-#print "# $a\n";
+#print "# $alpha\n";
 
 # Block test
 #############
@@ -522,7 +522,7 @@ EOM
 
 my $string = <<'EOM' ;
 print "hello mum\n" ;
-$x = 'me ' x 3 ;
+my $x = 'me ' x 3 ;
 print "Who wants it?\n$x\n" ;
 EOM
 
@@ -531,9 +531,9 @@ writeFile($filename, <<EOM, $string ) ;
 use $block ;
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(17, ($? >>8) == 0) ;
-ok(18, $a eq <<EOM) ;
+ok(18, $alpha eq <<EOM) ;
 hello mum
 Who wants it?
 me me me 
@@ -579,9 +579,9 @@ EOM
 print "We are in DIR\n" ;
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(19, ($? >>8) == 0) ;
-ok(20, $a eq <<EOM) ;
+ok(20, $alpha eq <<EOM) ;
 We are in $here
 EOM
 
@@ -630,9 +630,9 @@ I am HERE
 HERE today gone tomorrow\n" ;
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(21, ($? >>8) == 0) ;
-ok(22, $a eq <<EOM) ;
+ok(22, $alpha eq <<EOM) ;
 
 THERE I am
 I am THERE
@@ -680,9 +680,9 @@ I'm HERE
 HERE today gone tomorrow\n" ;
 EOM
 
-$a = `$Perl "-I." $Inc $filenamebin  $redir` ;
+$alpha = `$Perl "-I." $Inc $filenamebin  $redir` ;
 ok(23, ($? >>8) == 0) ;
-ok(24, $a eq <<EOM) ;
+ok(24, $alpha eq <<EOM) ;
 
 HERE I am
 I'm THERE
@@ -726,7 +726,7 @@ writeFile($filename, <<EOM, <<'EOM') ;
 use $block ;
 EOM
 print "HERE HERE\n";
-@a = <DATA>;
+my @a = <DATA>;
 print @a;
 __DATA__
 HERE I am
@@ -734,9 +734,9 @@ I'm HERE
 HERE today gone tomorrow
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(25, ($? >>8) == 0) ;
-ok(26, $a eq <<EOM) ;
+ok(26, $alpha eq <<EOM) ;
 THERE THERE
 HERE I am
 I'm HERE
@@ -782,7 +782,7 @@ writeFile($filename, <<EOM, <<'EOM') ;
 use $block ;
 EOM
 print "HERE HERE\n";
-@a = <DATA>;
+my @a = <DATA>;
 print @a;
 __END__
 HERE I am
@@ -790,9 +790,9 @@ I'm HERE
 HERE today gone tomorrow
 EOM
 
-$a = `$Perl "-I." $Inc $filename  $redir` ;
+$alpha = `$Perl "-I." $Inc $filename  $redir` ;
 ok(27, ($? >>8) == 0) ;
-ok(28, $a eq <<EOM) ;
+ok(28, $alpha eq <<EOM) ;
 THERE THERE
 HERE I am
 I'm HERE
@@ -823,15 +823,15 @@ print "ok";
 EOM
 
 my $str = $^O eq 'MacOS' ? "'ok'" : "q{ok}";
-my $a = `$Perl "-I." $Inc -e "no ${module6}; print $str"`;
+$alpha = `$Perl "-I." $Inc -e "no ${module6}; print $str"`;
 ok(29, ($? >>8) == 0);
-chomp( $a ) if $^O eq 'VMS';
-ok(30, $a eq 'ok');
+chomp( $alpha ) if $^O eq 'VMS';
+ok(30, $alpha eq 'ok');
 
-$a = `$Perl "-I." $Inc $filename2`;
+$alpha = `$Perl "-I." $Inc $filename2`;
 ok(31, ($? >>8) == 0);
-chomp( $a ) if $^O eq 'VMS';
-ok(32, $a eq 'ok');
+chomp( $alpha ) if $^O eq 'VMS';
+ok(32, $alpha eq 'ok');
 
 }
 
@@ -872,9 +872,9 @@ I'm HERE
 HERE today gone tomorrow\n" ;
 EOM
 
-$a = `$Perl "-I." $Inc $filenamebin  $redir` ;
+$alpha = `$Perl "-I." $Inc $filenamebin  $redir` ;
 ok(33, ($? >>8) != 0) ;
-ok(34, $a =~ /^filter_read_exact: size parameter must be > 0 at block.pm/) ;
+ok(34, $alpha =~ /^filter_read_exact: size parameter must be > 0 at block.pm/) ;
 
 
 END {

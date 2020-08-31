@@ -86,13 +86,13 @@ ok(14, $@ =~ /^IO::Zlib::gzopen_external: mode 'xyz' is illegal /);
 # The following is a copy of the basic.t, shifted up by 14 tests,
 # the difference being that now we should be using the external gzip.
 
-$name="test.gz";
+my $name="test.gz";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
-
+my ($file, $uncomp);
 ok(15, $file = IO::Zlib->new($name, "wb"));
 ok(16, $file->print($hello));
 ok(17, $file->opened());

@@ -3,15 +3,17 @@ Check strict subs functionality
 __END__
 
 # no strict, should build & run ok.
+no strict;
 Fred ;
 my $fred ;
-$b = "fred" ;
-$a = $$b ;
+$beta = "fred" ;
+$alpha = $$beta ;
 EXPECT
 
 ########
 
-use strict qw(refs vars);
+# no strict subs, bareword ok.
+no strict 'subs' ;
 Fred ;
 EXPECT
 
@@ -52,7 +54,7 @@ Execution of - aborted due to compilation errors.
 
 # strict subs - error
 use strict 'subs' ;
-my $a = (B..Y);
+my $alpha = (B..Y);
 EXPECT
 Bareword "B" not allowed while "strict subs" in use at - line 4.
 Bareword "Y" not allowed while "strict subs" in use at - line 4.
@@ -81,7 +83,7 @@ use strict 'subs' ;
     no strict ;
     my $a = Fred ;
 }
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 8.
 Execution of - aborted due to compilation errors.
@@ -93,7 +95,7 @@ no strict;
     use strict 'subs' ;
     my $a = Fred ;
 }
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 6.
 Execution of - aborted due to compilation errors.
@@ -132,7 +134,7 @@ my $b = "fred" ;
     no strict ;
     my $a = $$b ;
 }
-my $a = $$b ;
+my $alpha = $$b ;
 EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 10.
 ########
@@ -145,7 +147,7 @@ my $b = "fred" ;
     use strict 'refs' ;
     my $a = $$b ;
 }
-my $a = $$b ;
+my $alpha = $$b ;
 EXPECT
 Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 8.
 ########
@@ -164,14 +166,15 @@ Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 8
 ########
 
 use strict 'subs' ;
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 3.
 Execution of - aborted due to compilation errors.
 ########
 
 --FILE-- abc
-my $a = Fred ;
+no strict 'subs' ;
+my $alpha = Fred ;
 1;
 --FILE-- 
 use strict 'subs' ;
@@ -185,26 +188,27 @@ use strict 'subs' ;
 1;
 --FILE-- 
 require "./abc";
-my $a = Fred ;
+no strict 'subs' ;
+my $alpha = Fred ;
 EXPECT
 
 ########
 
 --FILE-- abc
 use strict 'subs' ;
-my $a = Fred ;
+my $alpha = Fred ;
 1;
 --FILE-- 
 Fred ;
 require "./abc";
 EXPECT
-Bareword "Fred" not allowed while "strict subs" in use at ./abc line 2.
-Compilation failed in require at - line 2.
+Bareword "Fred" not allowed while "strict subs" in use at - line 1.
+Execution of - aborted due to compilation errors.
 ########
 
 --FILE-- abc.pm
 use strict 'subs' ;
-my $a = Fred ;
+my $alpha = Fred ;
 1;
 --FILE-- 
 Fred ;
@@ -221,7 +225,7 @@ eval {
     my $a = Fred ;
 };
 print STDERR $@;
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 
 ########
@@ -233,7 +237,7 @@ eval {
     my $a = Fred ;
 };
 print STDERR $@;
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 6.
 Execution of - aborted due to compilation errors.
@@ -245,7 +249,7 @@ eval {
     my $a = Fred ;
 };
 print STDERR $@;
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 5.
 Bareword "Fred" not allowed while "strict subs" in use at - line 8.
@@ -259,7 +263,7 @@ eval {
     my $a = Fred ;
 };
 print STDERR $@;
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 9.
 Execution of - aborted due to compilation errors.
@@ -300,7 +304,7 @@ eval '
     no strict ;
     my $a = Fred ;
 '; print STDERR $@;
-my $a = Fred ;
+my $alpha = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 8.
 Execution of - aborted due to compilation errors.
@@ -392,7 +396,7 @@ Execution of - aborted due to compilation errors.
 ########
 #  [perl #27628] strict 'subs' didn't warn on bareword array index
 use strict 'subs';
-my $x=$a[FOO];
+my @a; my $x=$a[FOO];
 EXPECT
 Bareword "FOO" not allowed while "strict subs" in use at - line 3.
 Execution of - aborted due to compilation errors.
@@ -460,7 +464,7 @@ Bareword "FOO" not allowed while "strict subs" in use at - line 3.
 Execution of - aborted due to compilation errors.
 ########
 # [perl #126981] Strict subs vs. multideref
-my $h;
+no strict 'subs'; my $h;
 my $v1 = $h->{+CONST_TYPO};
 use strict 'subs';
 my $v2 = $h->{+CONST_TYPO};
@@ -469,11 +473,12 @@ Bareword "CONST_TYPO" not allowed while "strict subs" in use at - line 5.
 Execution of - aborted due to compilation errors.
 ########
 # NAME constant-folded barewords still trigger stricture
+no strict 'subs' ;
 my $x = !BARE1;
 use strict 'subs';
 my $y = !BARE2;
 EXPECT
-Bareword "BARE2" not allowed while "strict subs" in use at - line 3.
+Bareword "BARE2" not allowed while "strict subs" in use at - line 4.
 Execution of - aborted due to compilation errors.
 ########
 # NAME multiconcat and barewords gh #17254

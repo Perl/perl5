@@ -20,6 +20,7 @@ print "ok 3\n";
 
 # Okay, so that wasn't very challenging.  Let's go Unicode.
 
+my $test = 0;
 {
     my $a = "\x{41}";
 
@@ -154,7 +155,7 @@ curr_test(21);
 
 require Tie::Scalar;
 
-$u = "ASCII";
+my $u = "ASCII";
 
 tie $u, 'Tie::StdScalar', chr 256;
 
@@ -172,17 +173,16 @@ $SIG{__WARN__} = sub {
 
 is(length(undef), undef, "Length of literal undef");
 
-my $u;
+my $q;
+is(length($q), undef, "Length of regular scalar");
 
-is(length($u), undef, "Length of regular scalar");
+$q = "Gotcha!";
 
-$u = "Gotcha!";
+tie $q, 'Tie::StdScalar';
 
-tie $u, 'Tie::StdScalar';
+is(length($q), undef, "Length of tied scalar (MAGIC)");
 
-is(length($u), undef, "Length of tied scalar (MAGIC)");
-
-is($u, undef);
+is($q, undef);
 
 {
     package U;
@@ -204,7 +204,7 @@ is(($ul = length(undef)), undef,
 is($ul, undef, "Assigned length of undef with result in TARG");
 
 $ul = 3;
-is(($ul = length($u)), undef,
+is(($ul = length($q)), undef,
                 "Returned length of tied undef with result in TARG");
 is($ul, undef, "Assigned length of tied undef with result in TARG");
 

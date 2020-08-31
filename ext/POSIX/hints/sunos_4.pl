@@ -3,7 +3,7 @@
 # This state of affairs also persists in glibc2, found
 # on linux systems running libc6.
 #  XXX A Configure test is needed.
-
+no strict 'vars';
 # Although <unistd.h> is inappropriate in general for SunOS, we need it
 # in POSIX.xs to get the correct prototype for ttyname().
 

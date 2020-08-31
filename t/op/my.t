@@ -6,42 +6,47 @@ BEGIN {
 }
 
 sub foo {
-    my($a, $b) = @_;
+    my($alpha, $beta) = @_;
     my $c;
     my $d;
     $c = "ok 3\n";
     $d = "ok 4\n";
-    { my($a, undef, $c) = ("ok 9\n", "not ok 10\n", "ok 10\n");
-      ($x, $y) = ($a, $c); }
-    is($a, "ok 1\n", 'value of sub argument maintained outside of block');
-    is($b, "ok 2\n", 'sub argument maintained');
+    {
+        my($alpha, undef, $c) = ("ok 9\n", "not ok 10\n", "ok 10\n");
+        ($main::x, $main::y) = ($alpha, $c);
+    }
+    is($alpha, "ok 1\n", 'value of sub argument maintained outside of block');
+    is($beta, "ok 2\n", 'sub argument maintained');
     is($c, "ok 3\n", 'variable value maintained outside of block');
     is($d, "ok 4\n", 'variable value maintained');
 }
 
-$a = "ok 5\n";
-$b = "ok 6\n";
-$c = "ok 7\n";
-$d = "ok 8\n";
+$main::alpha = "ok 5\n";
+$main::beta = "ok 6\n";
+$main::c = "ok 7\n";
+$main::d = "ok 8\n";
 
 &foo("ok 1\n","ok 2\n");
 
-is($a, "ok 5\n", 'global was not affected by duplicate names inside subroutine');
-is($b, "ok 6\n", '...');
-is($c, "ok 7\n", '...');
-is($d, "ok 8\n", '...');
-is($x, "ok 9\n", 'globals modified inside of block keeps its value outside of block');
-is($y, "ok 10\n", '...');
+is($main::alpha, "ok 5\n", 'global was not affected by duplicate names inside subroutine');
+is($main::beta, "ok 6\n", '...');
+is($main::c, "ok 7\n", '...');
+is($main::d, "ok 8\n", '...');
+is($main::x, "ok 9\n", 'globals modified inside of block keeps its value outside of block');
+is($main::y, "ok 10\n", '...');
 
 # same thing, only with arrays and associative arrays
 
 sub foo2 {
-    my($a, @b) = @_;
+    my($alpha, @b) = @_;
     my(@c, %d);
     @c = "ok 13\n";
     $d{''} = "ok 14\n";
-    { my($a,@c) = ("ok 19\n", "ok 20\n", "ok 21\n"); ($x, $y) = ($a, @c); }
-    is($a, "ok 11\n", 'value of sub argument maintained outside of block');
+    {
+        my($alpha,@c) = ("ok 19\n", "ok 20\n", "ok 21\n");
+        ($main::x, $main::y) = ($alpha, @c);
+    }
+    is($alpha, "ok 11\n", 'value of sub argument maintained outside of block');
     is(scalar @b, 1, 'did not add any elements to @b');
     is($b[0], "ok 12\n", 'did not alter @b');
     is(scalar @c, 1, 'did not add arguments to @c');
@@ -49,21 +54,21 @@ sub foo2 {
     is($d{''}, "ok 14\n", 'did not touch %d');
 }
 
-$a = "ok 15\n";
-@b = "ok 16\n";
-@c = "ok 17\n";
-$d{''} = "ok 18\n";
+$main::alpha = "ok 15\n";
+@main::b = "ok 16\n";
+@main::c = "ok 17\n";
+$main::d{''} = "ok 18\n";
 
 &foo2("ok 11\n", "ok 12\n");
 
-is($a, "ok 15\n", 'Global was not modifed out of scope');
-is(scalar @b, 1, 'correct number of elements in array');
-is($b[0], "ok 16\n", 'array value was not modified out of scope');
-is(scalar @c, 1, 'correct number of elements in array');
-is($c[0], "ok 17\n", 'array value was not modified out of scope');
-is($d{''}, "ok 18\n", 'hash key/value pair is correct');
-is($x, "ok 19\n", 'global was modified');
-is($y, "ok 20\n", 'this one too');
+is($main::alpha, "ok 15\n", 'Global was not modifed out of scope');
+is(scalar @main::b, 1, 'correct number of elements in array');
+is($main::b[0], "ok 16\n", 'array value was not modified out of scope');
+is(scalar @main::c, 1, 'correct number of elements in array');
+is($main::c[0], "ok 17\n", 'array value was not modified out of scope');
+is($main::d{''}, "ok 18\n", 'hash key/value pair is correct');
+is($main::x, "ok 19\n", 'global was modified');
+is($main::y, "ok 20\n", 'this one too');
 
 my $i = "outer";
 
@@ -91,10 +96,10 @@ $j = 5;
 for (my $i = 0; (my $k = $i) < $j; ++$i) {
     fail(""), last unless $i >= 0 && $i < $j && $i == $k;
 }
-ok( ! defined $k, '$k is only defined in the scope of the previous for loop' );
+ok( ! defined $main::k, '$k is only defined in the scope of the previous for loop' );
 
 curr_test(37);
-$jj = 0;
+my $jj = 0;
 foreach my $i (30, 31) {
     is( $i, $jj+30, 'assignment inside the foreach loop variable definition');
     $jj++;
@@ -151,7 +156,7 @@ is( $@, '', "eval of my() passes");
 
 # RT #126844
 # This triggered a compile-time assert failure in rpeep()
-eval 'my($a,$b),$x,my($c,$d)';
+eval 'my($alpha,$beta),$main::x,my($c,$d)';
 pass("RT #126844");
 
 # RT # 133543

@@ -81,6 +81,7 @@ sub show_bits
     return $out;
 }
 
+our $Level;
 sub check_bits
 {
     local $Level = $Level + 2;
@@ -200,7 +201,7 @@ EOP
     sub fwib::DESTROY { ++$gone }
     package DB;
     sub { () = caller(0) }->(); # initialise PL_dbargs
-    @args = bless[],'fwib';
+    our @args = bless[],'fwib';
     sub { () = caller(0) }->(); # clobber @args without initialisation
     ::is $gone, 1, 'caller does not leak @DB::args elems when AvREAL';
 }
@@ -222,6 +223,7 @@ sub CLEAR    {        }
 sub FETCH    { $_[0][$_[1]] }
 sub STORE    { $_[0][$_[1]] = $_[2] }
 package DB;
+our @args;
 tie @args, 'glelp';
 eval { sub { () = caller 0; } ->(1..3) };
 ::like $@, qr "^Cannot set tied \@DB::args at ",
@@ -309,7 +311,7 @@ fresh_perl_is <<'END', 'main', {},
 $SIG{__DIE__} = \&dbdie;
 eval '/x';
 sub dbdie {
-    @x = caller(1);
+    our @x = caller(1);
     print $x[0];
 }
 END

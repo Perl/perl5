@@ -9,8 +9,9 @@ BEGIN {
 is( 1 ? 1 : 0, 1, 'compile time, true' );
 is( 0 ? 0 : 1, 1, 'compile time, false' );
 
-$x = 1;
-is(  $x ? 1 : 0, 1, 'run time, true');
+my $x = 1;
+is(   $x ? 1 : 0, 1, 'run time, true');
+is( !!$x ? 1 : 0, 1, 'run time, true');
 is( !$x ? 0 : 1, 1, 'run time, false');
 
 # This used to SEGV due to deep recursion in Perl_scalar().
@@ -26,6 +27,5 @@ is( !$x ? 0 : 1, 1, 'run time, false');
     eval $e;
     is $@, "", "SEGV in Perl_scalar";
 }
-
 
 done_testing();

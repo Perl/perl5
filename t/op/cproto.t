@@ -9,6 +9,7 @@ BEGIN {
 
 plan tests => 254;
 
+our $TODO;
 while (<DATA>) {
     chomp;
     (my $keyword, my $proto, local $TODO) = split " ", $_, 3;
@@ -16,7 +17,7 @@ while (<DATA>) {
 	ok( !defined prototype "CORE::".$keyword, $keyword );
     }
     elsif ($proto eq 'unknown') {
-	eval { prototype "CORE::".$keyword };
+	eval { my $proto_str = prototype "CORE::".$keyword };
 	like( $@, qr/Can't find an opnumber for/, $keyword );
     }
     else {

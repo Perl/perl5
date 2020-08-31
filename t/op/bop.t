@@ -46,9 +46,9 @@ ok ((1 << ($bits - 1)) == $cusp &&
 ok (($cusp >> 1) == ($cusp / 2) &&
     do { use integer; abs($cusp >> 1) } == ($cusp / 2));
 
-$Aaz = chr(ord("A") & ord("z"));
-$Aoz = chr(ord("A") | ord("z"));
-$Axz = chr(ord("A") ^ ord("z"));
+my $Aaz = chr(ord("A") & ord("z"));
+my $Aoz = chr(ord("A") | ord("z"));
+my $Axz = chr(ord("A") ^ ord("z"));
 
 # short strings
 is (("AAAAA" & "zzzzz"), ($Aaz x 5));
@@ -56,9 +56,9 @@ is (("AAAAA" | "zzzzz"), ($Aoz x 5));
 is (("AAAAA" ^ "zzzzz"), ($Axz x 5));
 
 # long strings
-$foo = "A" x 150;
-$bar = "z" x 75;
-$zap = "A" x 75;
+my $foo = "A" x 150;
+my $bar = "z" x 75;
+my $zap = "A" x 75;
 # & truncates
 is (($foo & $bar), ($Aaz x 75 ));
 # | does not truncate
@@ -71,12 +71,12 @@ is (($foo ^ $bar), ($Axz x 75 . $zap));
 sub _and($) { $_[0] & native_to_uni("+0") }
 sub _oar($) { $_[0] | native_to_uni("+0") }
 sub _xor($) { $_[0] ^ native_to_uni("+0") }
-is _and native_to_uni("waf"), native_to_uni('# '),  'str var & const str'; # [perl #20661]
-is _and native_to_uni("waf"), native_to_uni('# '),  'str var & const str again'; # [perl #20661]
-is _oar native_to_uni("yit"), native_to_uni('{yt'), 'str var | const str';
-is _oar native_to_uni("yit"), native_to_uni('{yt'), 'str var | const str again';
-is _xor native_to_uni("yit"), native_to_uni('RYt'), 'str var ^ const str';
-is _xor native_to_uni("yit"), native_to_uni('RYt'), 'str var ^ const str again';
+is ( (_and native_to_uni("waf")), native_to_uni('# '),  'str var & const str' ); # [perl #20661]
+is ( (_and native_to_uni("waf")), native_to_uni('# '),  'str var & const str again' ); # [perl #20661]
+is ( (_oar native_to_uni("yit")), native_to_uni('{yt'), 'str var | const str' );
+is ( (_oar native_to_uni("yit")), native_to_uni('{yt'), 'str var | const str again' );
+is ( (_xor native_to_uni("yit")), native_to_uni('RYt'), 'str var ^ const str' );
+is ( (_xor native_to_uni("yit")), native_to_uni('RYt'), 'str var ^ const str again' );
 
 SKIP: {
     skip "Converting a numeric doesn't work with EBCDIC unlike the above tests",
@@ -87,8 +87,8 @@ SKIP: {
 }
 
 # But don’t mistake a COW for a constant when assigning to it
-%h=(150=>1);
-$i=(keys %h)[0];
+my %h=(150=>1);
+my $i=(keys %h)[0];
 $i |= 105;
 is $i, 255, '[perl #108480] $cow |= number';
 $i=(keys %h)[0];
@@ -113,9 +113,9 @@ is ("ok \xFF\x{FF}\n" & "ok 41\n", "ok 41\n");
 is ("ok \x{FF}\xFF\n" & "ok 42\n", "ok 42\n");
 
 # Tests to see if you really can do casts negative floats to unsigned properly
-$neg1 = -1.0;
+my $neg1 = -1.0;
 ok (~ $neg1 == 0);
-$neg7 = -7.0;
+my $neg7 = -7.0;
 ok (~ $neg7 == 6);
 
 
@@ -130,6 +130,7 @@ sub fetches { delete(tied($_[0])->{fetch}) || 0 }
 
 # numeric double magic tests
 
+my ($x, $y);
 tie $x, "main", 1;
 tie $y, "main", 3;
 
@@ -278,9 +279,9 @@ is(fetches($x), 2, "fetches for vec write");
 is(stores($x), 1, "stores for vec write");
 
 {
-    my $a = "a";
-    utf8::upgrade($a);
-    tie $x, "main", $a;
+    my $alpha = "a";
+    utf8::upgrade($alpha);
+    tie $x, "main", $alpha;
     $g = vec($x, 0, 1);
     is($g, (ord("a") & 0x01), "check vec value (utf8)");
     is(fetches($x), 1, "fetches for vec read (utf8)");
@@ -291,31 +292,30 @@ is(stores($x), 1, "stores for vec write");
     is(stores($x), 1, "stores for vec write (utf8)");
 }
 
-$a = "\0\x{100}"; chop($a);
-ok(utf8::is_utf8($a)); # make sure UTF8 flag is still there
-$a = ~$a;
-is($a, "\xFF", "~ works with utf-8");
-ok(! utf8::is_utf8($a), "    and turns off the UTF-8 flag");
+my $alpha = "\0\x{100}"; chop($alpha);
+ok(utf8::is_utf8($alpha)); # make sure UTF8 flag is still there
+$alpha = ~$alpha;
+is($alpha, "\xFF", "~ works with utf-8");
+ok(! utf8::is_utf8($alpha), "    and turns off the UTF-8 flag");
 
-$a = "\0\x{100}"; chop($a);
-undef $b;
-$b = $a | "\xFF";
-ok(utf8::is_utf8($b), "Verify UTF-8 | non-UTF-8 retains UTF-8 flag");
-undef $b;
-$b = "\xFF" | $a;
-ok(utf8::is_utf8($b), "Verify non-UTF-8 | UTF-8 retains UTF-8 flag");
-undef $b;
-$b = $a & "\xFF";
-ok(utf8::is_utf8($b), "Verify UTF-8 & non-UTF-8 retains UTF-8 flag");
-undef $b;
-$b = "\xFF" & $a;
-ok(utf8::is_utf8($b), "Verify non-UTF-8 & UTF-8 retains UTF-8 flag");
-undef $b;
-$b = $a ^ "\xFF";
-ok(utf8::is_utf8($b), "Verify UTF-8 ^ non-UTF-8 retains UTF-8 flag");
-undef $b;
-$b = "\xFF" ^ $a;
-ok(utf8::is_utf8($b), "Verify non-UTF-8 ^ UTF-8 retains UTF-8 flag");
+$alpha = "\0\x{100}"; chop($alpha);
+my $beta = $alpha | "\xFF";
+ok(utf8::is_utf8($beta), "Verify UTF-8 | non-UTF-8 retains UTF-8 flag");
+undef $beta;
+$beta = "\xFF" | $alpha;
+ok(utf8::is_utf8($beta), "Verify non-UTF-8 | UTF-8 retains UTF-8 flag");
+undef $beta;
+$beta = $alpha & "\xFF";
+ok(utf8::is_utf8($beta), "Verify UTF-8 & non-UTF-8 retains UTF-8 flag");
+undef $beta;
+$beta = "\xFF" & $alpha;
+ok(utf8::is_utf8($beta), "Verify non-UTF-8 & UTF-8 retains UTF-8 flag");
+undef $beta;
+$beta = $alpha ^ "\xFF";
+ok(utf8::is_utf8($beta), "Verify UTF-8 ^ non-UTF-8 retains UTF-8 flag");
+undef $beta;
+$beta = "\xFF" ^ $alpha;
+ok(utf8::is_utf8($beta), "Verify non-UTF-8 ^ UTF-8 retains UTF-8 flag");
 
 
 # [rt.perl.org 33003]
@@ -327,14 +327,14 @@ SKIP: {
 
 # [perl #37616] Bug in &= (string) and/or m//
 {
-    $a = "aa";
-    $a &= "a";
-    ok($a =~ /a+$/, 'ASCII "a" is NUL-terminated');
+    $alpha = "aa";
+    $alpha &= "a";
+    ok($alpha =~ /a+$/, 'ASCII "a" is NUL-terminated');
 
-    $b = "bb\x{FF}";
-    utf8::upgrade($b);
-    $b &= "b";
-    ok($b =~ /b+$/, 'Unicode "b" is NUL-terminated');
+    $beta = "bb\x{FF}";
+    utf8::upgrade($beta);
+    $beta &= "b";
+    ok($beta =~ /b+$/, 'Unicode "b" is NUL-terminated');
 }
 
 # New string- and number-specific bitwise ops
@@ -606,6 +606,7 @@ is $^A, "123", '~v0 clears vstring magic on retval';
 # allocated for &’s target contains memory initialised to something other
 # than a null byte.  Uninitialised memory does not make for a reliable
 # test.  So we do &. on a longer non-utf8 string first.
+my $byte;
 for (["aaa","aaa"],[substr ("a\x{100}",0,1), "a"]) {
     use feature "bitwise";
     no warnings "experimental::bitwise", "pack";
@@ -614,7 +615,7 @@ for (["aaa","aaa"],[substr ("a\x{100}",0,1), "a"]) {
 is $byte, "\0", "utf8 &. appends null byte";
 
 # only visible under sanitize
-fresh_perl_is('$x = "UUUUUUUV"; $y = "xxxxxxx"; $x |= $y; print $x',
+fresh_perl_is('my $x = "UUUUUUUV"; my $y = "xxxxxxx"; $x |= $y; print $x',
               ( $::IS_EBCDIC) ? 'XXXXXXXV' : '}}}}}}}V',
               {}, "[perl #129995] access to freed memory");
 

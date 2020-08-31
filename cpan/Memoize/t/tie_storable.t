@@ -33,7 +33,7 @@ if ($@) {
 
 print "1..4\n";
 
-$file = "storable$$";
+my $file = "storable$$";
 1 while unlink $file;
 tryout('Memoize::Storable', $file, 1);  # Test 1..4
 1 while unlink $file;

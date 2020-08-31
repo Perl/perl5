@@ -229,6 +229,7 @@ print "ok 26 - no crash when cloning a tied hint hash\n";
 {
     package Foo;
     my @h = qw(a 1 b 2);
+    my %h;
     BEGIN {
 	$^H{FOO} = bless {};
     }
@@ -247,6 +248,7 @@ print "ok 26 - no crash when cloning a tied hint hash\n";
 # [perl #112444]
 # A destructor called while %^H is freed should not be able to stop %^H
 # from being magical (due to *^H{HASH} being undef).
+our @keez;
 {
     BEGIN {
 	# Make sure %^H is clear and not localised, to begin with

@@ -3481,7 +3481,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 
     SAVEHINTS();
     if (clear_hints) {
-	PL_hints = 0;
+	PL_hints = HINT_DEFAULT;
 	hv_clear(GvHV(PL_hintgv));
         CLEARFEATUREBITS();
     }

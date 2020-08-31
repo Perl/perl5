@@ -5,14 +5,14 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     require Test::More; import Test::More;
-    plan(tests, 12);
+    plan(tests => 12);
 }
 
 require AnyDBM_File;
 use Fcntl;
 
 
-$Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' ||
+my $Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' ||
 	      $^O eq 'NetWare' || $^O eq 'dos' ||
 	      $^O eq 'os2' ||
 	      $^O eq 'cygwin');
@@ -22,9 +22,10 @@ unlink <"$filename*">;
 
 umask(0);
 
-ok( tie(%h,AnyDBM_File,"$filename", O_RDWR|O_CREAT, 0640), "Tie");
+my %h;
+ok( tie(%h, 'AnyDBM_File',"$filename", O_RDWR|O_CREAT, 0640), "Tie");
 
-$Dfile = "$filename.pag";
+my $Dfile = "$filename.pag";
 if (! -e $Dfile) {
 	($Dfile) = <$filename*>;
 }
@@ -33,12 +34,13 @@ SKIP:
 {
     skip( "different file permission semantics",1)
                       if $Is_Dosish;
-    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat($Dfile);
     ok(($mode & 0777) == 0640 , "File permissions");
 }
 
-while (($key,$value) = each(%h)) {
+my $i = 0;
+while (my ($key,$value) = each(%h)) {
     $i++;
 }
 
@@ -64,7 +66,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-ok(tie(%h,AnyDBM_File,"$filename", O_RDWR, 0640),"Re-tie hash");
+ok(tie(%h, 'AnyDBM_File', "$filename", O_RDWR, 0640),"Re-tie hash");
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';
@@ -89,12 +91,12 @@ $h{'goner3'} = 'snork';
 delete $h{'goner1'};
 delete $h{'goner3'};
 
-@keys = keys(%h);
-@values = values(%h);
+my @keys = keys(%h);
+my @values = values(%h);
 
 ok( ($#keys == 29 && $#values == 29),'$#keys == $#values');
 
-while (($key,$value) = each(%h)) {
+while (my ($key,$value) = each(%h)) {
     if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
 	$key =~ y/a-z/A-Z/;
 	$i++ if $key eq $value;
@@ -110,17 +112,17 @@ $h{'foo'} = '';
 $h{''} = 'bar';
 
 # check cache overflow and numeric keys and contents
-$ok = 1;
+my $ok = 1;
 for ($i = 1; $i < 200; $i++) { $h{$i + 0} = $i + 0; }
 for ($i = 1; $i < 200; $i++) { $ok = 0 unless $h{$i} == $i; }
 ok($ok, "cache overflow and numeric keys and contents");
 
-($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
 ok($size > 0, "check file size");
 
 @h{0..200} = 200..400;
-@foo = @h{0..200};
+my @foo = @h{0..200};
 ok( join(':',200..400) eq join(':',@foo), "hash slice");
 
 ok($h{'foo'} eq '', "empty value");
@@ -128,11 +130,11 @@ ok($h{'foo'} eq '', "empty value");
 my $compact = '';
 
 if ($AnyDBM_File::ISA[0] eq 'DB_File' && ($DB_File::db_ver >= 2.004010 && $DB_File::db_ver < 3.001)) {
-     ($major, $minor, $patch) = ($DB_File::db_ver =~ /^(\d+)\.(\d\d\d)(\d\d\d)/) ;
+     my ($major, $minor, $patch) = ($DB_File::db_ver =~ /^(\d+)\.(\d\d\d)(\d\d\d)/) ;
      $major =~ s/^0+// ;
      $minor =~ s/^0+// ;
      $patch =~ s/^0+// ;
-     $compact = "$major.$minor.$patch" ;
+     my $compact = "$major.$minor.$patch" ;
      #
      # anydbm.t test 12 will fail when AnyDBM_File uses the combination of
      # DB_File and Berkeley DB 2.4.10 (or greater). 

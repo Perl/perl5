@@ -49,7 +49,7 @@ is(pop @ARGV   // 7, 3,	'pop @array // ... works');
 # Test that various syntaxes are allowed
 
 for (qw(getc pos readline readlink undef umask <> <FOO> <$foo> -f)) {
-    eval "sub { $_ // 0 }";
+    eval "sub { my \$foo; $_ // 0 }";
     is($@, '', "$_ // ... compiles");
 }
 
@@ -57,15 +57,15 @@ for (qw(getc pos readline readlink undef umask <> <FOO> <$foo> -f)) {
 
 eval q# sub f ($) { } f $x / 2; #;
 is( $@, '', "'/' correctly parsed as arithmetic operator" );
-eval q# sub f ($):lvalue { $y } f $x /= 2; #;
+eval q# sub f ($):lvalue { my $y } f $x /= 2; #;
 is( $@, '', "'/=' correctly parsed as assignment operator" );
 eval q# sub f ($) { } f $x /2; #;
 like( $@, qr/^Search pattern not terminated/,
     "Caught unterminated search pattern error message: empty subroutine" );
-eval q# sub { print $fh / 2 } #;
+eval q# sub { my $fh; print $fh / 2 } #;
 is( $@, '',
     "'/' correctly parsed as arithmetic operator in sub with built-in function" );
-eval q# sub { print $fh /2 } #;
+eval q# sub { my $fh; print $fh /2 } #;
 like( $@, qr/^Search pattern not terminated/,
     "Caught unterminated search pattern error message: sub with built-in function" );
 
@@ -96,5 +96,6 @@ is($y, 0, 'if ($x // 1) exited out early since $x is defined and 0');
 # evaluates false, we should see 'cat'.
 $y = undef;
 
+my $z;
 $y = $x // $z || 'cat';
 is($y, 'cat', 'chained or/dor behaves correctly');

@@ -38,7 +38,7 @@ Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME (Missing operator before @foo) [perl #123737]
-0@foo
+my @foo; 0@foo
 EXPECT
 Array found where operator expected at - line 1, near "0@foo"
 	(Missing operator before @foo?)
@@ -359,13 +359,13 @@ Can't redeclare "state" in "our" at - line 2, near "(state"
 Execution of - aborted due to compilation errors.
 ########
 # NAME my (my $x) errors
-my (my $x, $y, $z);
+our ($y, $z); my (my $x, $y, $z);
 EXPECT
 Can't redeclare "my" in "my" at - line 1, near "(my"
 Execution of - aborted due to compilation errors.
 ########
 # NAME our (our $x) errors
-our ($x, our($y), $z);
+our ($z); our ($x, our($y), $z);
 EXPECT
 Can't redeclare "our" in "our" at - line 1, near ", our"
 Execution of - aborted due to compilation errors.
@@ -516,7 +516,7 @@ No digits found for binary literal at - line 4, near "0b;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME [perl #130585] close paren in subparse
-qr!@{s{0})(?{!;
+my %s; qr!@{s{0})(?{!;
 EXPECT
 syntax error at - line 1, near "})"
 Execution of - aborted due to compilation errors.
@@ -524,7 +524,7 @@ Execution of - aborted due to compilation errors.
 # NAME [perl #130585] close paren in subparse - a few more tests
 my ($x, %y, @z);
 qq!$x\U $z[0] $y{a}\E $z[1]!;
-qq!$x\U@{s{0})(?{!;
+my %s; qq!$x\U@{s{0})(?{!;
 EXPECT
 syntax error at - line 3, near ")("
 Execution of - aborted due to compilation errors.

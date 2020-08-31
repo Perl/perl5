@@ -9,6 +9,8 @@ BEGIN {
     }
 }
 
+my $test = 0;
+
 # WARNING: Do not directly use any modules as part of this test code.
 # We could get action at a distance that would invalidate the tests.
 
@@ -23,4 +25,4 @@ print eval '*X{HASH}{X} || 1' ? "" :"not ","ok ",++$test,"\n";
 # this can't be done until ../lib/Errno.pm is in place, as the
 # glob hits $!, which needs that module.
 *Y = *!;
-print 0<keys(%Y) ? "" :"not ","ok ",++$test,"\n";
+print 0<keys(%main::Y) ? "" :"not ","ok ",++$test,"\n";

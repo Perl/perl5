@@ -761,7 +761,7 @@ BEGIN{
         print "SKIPPED\n# ebcdic platforms generates different Malformed UTF-8 warnings.";
         exit 0;
     }
-    use Config;
+    use Config; my %Double;
     unless ($Double{double_style_ieee}) {
         print "SKIPPED\n# non-IEEE fp range.";
         exit 0;
@@ -777,7 +777,7 @@ BEGIN{
         exit 0;
     }
 }
-no warnings;
+no warnings; no strict;
 use warnings 'utf8';
 for(uc 0..t){0~~pack"UXc",exp}
 EXPECT

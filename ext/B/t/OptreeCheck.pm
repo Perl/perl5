@@ -5,12 +5,13 @@ use warnings;
 our ($TODO, $Level, $using_open);
 require "test.pl";
 
-our $VERSION = '0.16';
+our $VERSION = '0.16_001';
 
 # now export checkOptree, and those test.pl functions used by tests
+our %gOpts;
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
-		  require_ok runperl tempfile);
-
+		  require_ok runperl tempfile
+          %gOpts );
 
 # The hints flags will differ if ${^OPEN} is set.
 # The approach taken is to put the hints-with-open in the golden results, and
@@ -292,7 +293,7 @@ sub import {
 # HELP strings, they MUST BE REPLACED by runtime values before use, as
 # is done by getCmdLine(), via import
 
-our %gOpts = 	# values are replaced at runtime !!
+%gOpts = 	# values are replaced at runtime !!
     (
      # scalar values are help string
      selftest	=> 'self-tests mkCheckRex vs the reference rendering',
@@ -486,10 +487,12 @@ sub getRendering {
     if ($tc->{prog}) {
 	$rendering = runperl( switches => ['-w',join(',',"-MO=Concise",@opts)],
 			      prog => $tc->{prog}, stderr => 1,
+                  run_as_five => 1,
 			      ); # verbose => 1);
     } elsif ($tc->{progfile}) {
 	$rendering = runperl( switches => ['-w',join(',',"-MO=Concise",@opts)],
 			      progfile => $tc->{progfile}, stderr => 1,
+                  run_as_five => 1,
 			      ); # verbose => 1);
     } else {
 	my $code = $tc->{code};
@@ -528,6 +531,7 @@ sub getRendering {
 	    push @errs, $1;
 	}
 	$rendering =~ s/-e syntax OK\n//;
+	$rendering =~ s{t/tmp\S+ syntax OK\n}{};
 	$rendering =~ s/-e had compilation errors\.\n//;
     }
     $tc->{got}	   = $rendering;
@@ -941,6 +945,7 @@ sub OptreeCheck::gentest {
     # run the prog, capture 'reference' concise output
     my $preamble = preamble(1);
     my $got = runperl( prog => "$preamble $testcode", stderr => 1,
+                  run_as_five => 1,
 		       #switches => ["-I../ext/B/t", "-MOptreeCheck"], 
 		       );  #verbose => 1);
     

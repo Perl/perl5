@@ -21,13 +21,15 @@
 # d) add an alias to Porting/checkAUTHORS.pl
 
 BEGIN {
-    @INC = '..' if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
 use TestInit qw(T); # T is chdir to the top level
-use strict;
 use File::Spec;
 
-require './t/test.pl';
 find_git_or_skip('all');
 
 my $devnull = File::Spec->devnull;

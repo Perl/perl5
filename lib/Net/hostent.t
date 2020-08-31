@@ -8,14 +8,14 @@ BEGIN {
 use Test::More;
 
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) 
     {
-	plan skip_all => "Test uses Socket, Socket not built";
+        plan skip_all => "Test uses Socket, Socket not built";
     }
     if ($^O eq 'irix' && $Config{osvers} == 5) {
-	plan skip_all => "Test relies on resolution of localhost, fails on $^O ($Config{osvers})";
+        plan skip_all => "Test relies on resolution of localhost, fails on $^O ($Config{osvers})";
     }
 }
 

@@ -4,16 +4,16 @@ BEGIN { use_ok('NEXT') };
 my $order = 0;
 
 package A;
-@ISA = qw/B C D/;
+our @ISA = qw/B C D/;
 
 sub test { ::ok(++$order==1,"test A"); $_[0]->NEXT::UNSEEN::test; 1}
 
 package B;
-@ISA = qw/D C/;
+our @ISA = qw/D C/;
 sub test { ::ok(++$order==2,"test B"); $_[0]->NEXT::UNSEEN::test; 1}
 
 package C;
-@ISA = qw/D/;
+our @ISA = qw/D/;
 sub test { ::ok(++$order==4,"test C"); $_[0]->NEXT::UNSEEN::test; 1}
 
 package D;
@@ -38,9 +38,9 @@ sub test {
 	shift->NEXT::UNSEEN::test;
 }
 
-package Diamond::Left;  @ISA = qw[Diamond::Base];
-package Diamond::Right; @ISA = qw[Diamond::Base];
-package Diamond::Top;   @ISA = qw[Diamond::Left Diamond::Right];
+package Diamond::Left;  our @ISA = qw[Diamond::Base];
+package Diamond::Right; our @ISA = qw[Diamond::Base];
+package Diamond::Top;   our @ISA = qw[Diamond::Left Diamond::Right];
 
 package main;
 

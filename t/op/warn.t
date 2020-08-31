@@ -121,8 +121,8 @@ fresh_perl_like(
 
 SKIP: {
     skip_if_miniperl('miniperl ignores -C', 1);
-   $ee = uni_to_native("\xee");
-   $bytes = byte_utf8a_to_utf8n("\xc3\xae");
+   my $ee = uni_to_native("\xee");
+   my $bytes = byte_utf8a_to_utf8n("\xc3\xae");
 fresh_perl_like(
  "
    \$a = \"$ee\n\";
@@ -136,7 +136,7 @@ fresh_perl_like(
 );
 }
 
-$bytes = byte_utf8a_to_utf8n("\xc4\xac");
+my $bytes = byte_utf8a_to_utf8n("\xc4\xac");
 fresh_perl_like(
  'warn chr 300',
   qr/^Wide character in warn .*\n$bytes at /,
@@ -164,6 +164,7 @@ like $warnings[0], qr/^foo\n\t\.\.\.caught at warn\.t /,
 $@ = \$_;
 @warnings = ();
 {
+  no strict 'refs';
   local *{ref(tied $@) . "::STORE"} = sub {};
   undef $@;
 }
@@ -178,9 +179,12 @@ untie $@;
   package o;
   use overload '""' => sub { "" };
 }
-tie $t, Tie::StdScalar;
-$t = bless [], o;
+my $t;
 {
+  no strict 'subs';
+  tie $t, Tie::StdScalar;
+  $t = bless [], o;
+  no strict 'refs';
   local *{ref(tied $t) . "::STORE"} = sub {};
   undef $t;
 }
@@ -196,7 +200,7 @@ is @warnings, 2;
 is $warnings[1], $warnings[0], 'warn treats $@=3 and $@="3" the same way';
 
 fresh_perl_is(<<'EOF', "should be line 4 at - line 4.\n", {stderr => 1}, "");
-${
+my $foo; ${
     foo
 } = "should be line 4";
 warn $foo;
@@ -212,7 +216,7 @@ line 5 at - line 5.
 EOF
     fresh_perl_is(<<'EOF', $expected, {stderr => 1}, "");
 warn "line 1";
-(${
+my $foo; (${
     foo
 } = "line 5") && warn("line 4"); warn("also line 4");
 warn $foo;

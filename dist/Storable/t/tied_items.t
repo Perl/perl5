@@ -10,10 +10,12 @@
 # Tests ref to items in tied hash/array structures.
 #
 
+
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -27,26 +29,28 @@ use Test::More tests => 8;
 
 $Storable::flags = Storable::FLAGS_COMPAT;
 
-$h_fetches = 0;
+my $h_fetches = 0;
 
 sub H::TIEHASH { bless \(my $x), "H" }
 sub H::FETCH { $h_fetches++; $_[1] - 70 }
 
+my %h;
 tie %h, "H";
 
-$ref = \$h{77};
-$ref2 = dclone $ref;
+my $ref = \$h{77};
+my $ref2 = dclone $ref;
 
 is($h_fetches, 0);
 is($$ref2, $$ref);
 is($$ref2, 7);
 is($h_fetches, 2);
 
-$a_fetches = 0;
+my $a_fetches = 0;
 
 sub A::TIEARRAY { bless \(my $x), "A" }
 sub A::FETCH { $a_fetches++; $_[1] - 70 }
 
+my @a;
 tie @a, "A";
 
 $ref = \$a[78];

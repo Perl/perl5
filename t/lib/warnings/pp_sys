@@ -111,6 +111,7 @@
 
 __END__
 # pp_sys.c [pp_untie]
+my ($a, $b, $c, $d);
 use warnings 'untie' ;
 sub TIESCALAR { bless [] } ; 
 $b = tie $a, 'main'; 
@@ -119,7 +120,7 @@ no warnings 'untie' ;
 $c = tie $d, 'main'; 
 untie $d ;
 EXPECT
-untie attempted while 1 inner references still exist at - line 5.
+untie attempted while 1 inner references still exist at - line 6.
 ########
 # pp_sys.c [pp_leavewrite]
 use warnings 'io' ;
@@ -204,8 +205,8 @@ EXPECT
 page overflow at - line 13.
 ########
 # pp_sys.c [pp_prtf]
-use warnings 'unopened' ;
-$a = "abc"; 
+use warnings 'unopened' ; no strict 'refs';
+my $a = "abc"; 
 printf $a "fred";
 no warnings 'unopened' ;
 printf $a "fred";
@@ -261,7 +262,7 @@ syswrite() on closed filehandle STDIN at - line 6.
 	(Are you trying to call syswrite() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_flock]
-use Config; 
+use Config; no strict;
 BEGIN { 
   if ( !$Config{d_flock} &&
        !$Config{d_fcntl_can_lock} &&
@@ -704,7 +705,7 @@ getc FOO;
 close STDIN;
 getc STDIN;
 # Create an empty file
-$file = 'getcwarn.tmp';
+my $file = 'getcwarn.tmp';
 open FH1, ">$file" or die "# $!"; close FH1;
 open FH2, $file    or die "# $!";
 getc FH2; # Should not warn at EOF
@@ -722,17 +723,17 @@ getc() on closed filehandle FH2 at - line 12.
 ########
 # pp_sys.c [pp_sselect]
 use warnings 'misc';
-$x = 1;
+my $x = 1;
 select $x, undef, undef, 1;
 sub TIESCALAR{bless[]} sub FETCH {"hello"} sub STORE{}
-tie $y, "";
+tie my $y, "";
 select $y, undef, undef, 1;
 no warnings 'misc';
 select $x, undef, undef, 1;
 EXPECT
 Non-string passed as bitmask at - line 4.
 ########
-use Config;
+use Config; no strict;
 BEGIN {
     if (!$Config{d_fchdir}) {
 	print <<EOM;
@@ -762,7 +763,7 @@ chdir() on unopened filehandle $dh at - line 22.
 chdir() on closed filehandle $fh at - line 23.
 ########
 # pp_sys.c [pp_*dir]
-use Config ;
+use Config ; my $foo;
 BEGIN {
     if ( ! $Config{d_telldir}) {
         print <<EOM ;
@@ -803,7 +804,7 @@ seekdir() attempted on invalid dirhandle $foo at - line 16.
 rewinddir() attempted on invalid dirhandle $foo at - line 17.
 closedir() attempted on invalid dirhandle $foo at - line 18.
 ########
-
+no strict;
 # pp_sys.c [pp_*dir]
 use Config ;
 BEGIN {

@@ -1,16 +1,18 @@
 #!/perl -w
+
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config; Config->import;
+}
 use 5.010;
-use strict;
 
 # This tests properties of dual-life modules:
 #
 # * Are all dual-life programs being generated in utils/?
 # ... or in the module-specific locations where they are built.
 
-chdir 't';
-require './test.pl';
-
-use Config;
 if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );
 }

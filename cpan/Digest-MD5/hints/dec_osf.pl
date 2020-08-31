@@ -1,3 +1,4 @@
+no strict 'vars';
 if ($] < 5.00503 and !$Config{gccversion}) {
   print "
   Because of a bug with the DEC system C compiler, some tests in

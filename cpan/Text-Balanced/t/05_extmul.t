@@ -6,12 +6,13 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
+my $loaded;
 BEGIN { $| = 1; print "1..86\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Text::Balanced qw ( :ALL );
 $loaded = 1;
 print "ok 1\n";
-$count=2;
+my $count=2;
 use vars qw( $DEBUG );
 sub debug { print "\t>>>",@_ if $DEBUG }
 
@@ -61,10 +62,10 @@ sub divide
 }
 
 
-$stdtext1 = q{$var = do {"val" && $val;};};
+my $stdtext1 = q{$var = do {"val" && $val;};};
 
 # TESTS 2-4
-$text = $stdtext1;
+my $text = $stdtext1;
 expect	[ extract_multiple($text,undef,1) ],
 	[ divide $stdtext1 => 4 ];
 
@@ -151,7 +152,7 @@ expect [ $text ], [ substr($stdtext1,4) ];
 
 
 # TESTS 32-34
-$stdtext2 = q{$var = "val" && (1,2,3);};
+my $stdtext2 = q{$var = "val" && (1,2,3);};
 
 $text = $stdtext2;
 expect	[ extract_multiple($text) ],

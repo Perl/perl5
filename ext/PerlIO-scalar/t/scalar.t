@@ -86,6 +86,7 @@ is($var, "foo");
 $var = '';
 open $fh, "+>", \$var;
 print $fh "xxx\n";
+my $dup;
 open $dup,'+<&',$fh;
 print $dup "yyy\n";
 seek($dup,0,SEEK_SET);
@@ -99,7 +100,8 @@ is(<$fh>, "42", "reading from non-string scalars");
 close $fh;
 
 { package P; sub TIESCALAR {bless{}} sub FETCH { "shazam" } sub STORE {} }
-tie $p, P; open $fh, '<', \$p;
+my $p;
+tie $p, 'P'; open $fh, '<', \$p;
 is(<$fh>, "shazam", "reading from magic scalars");
 
 {
@@ -140,7 +142,7 @@ is(<$fh>, "shazam", "reading from magic scalars");
         sub FETCH { $fetch++; return undef }
 	sub STORE {}
     }
-    tie my $scalar, MgUndef;
+    tie my $scalar, 'MgUndef';
 
     open my $fh, '<', \$scalar;
     close $fh;

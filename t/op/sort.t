@@ -10,6 +10,7 @@ use warnings;
 plan(tests => 203);
 use Tie::Array; # we need to test sorting tied arrays
 
+my @a;
 # these shouldn't hang
 {
     no warnings;
@@ -42,11 +43,11 @@ my $upperfirst = 'A' lt 'a';
 # That said, EBCDIC sorts all small letters first, as opposed
 # to ASCII which sorts all big letters first.
 
-@harry = ('dog','cat','x','Cain','Abel');
-@george = ('gone','chased','yz','punished','Axed');
+my @harry = ('dog','cat','x','Cain','Abel');
+my @george = ('gone','chased','yz','punished','Axed');
 
-$x = join('', sort @harry);
-$expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
+my $x = join('', sort @harry);
+my $expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
 
 cmp_ok($x,'eq',$expected,'upper first 1');
 
@@ -146,7 +147,7 @@ if (! is(@wrongly_non_utf8, 0,
 cmp_ok($x,'eq',$expected,'upper first 4');
 $" = ' ';
 @a = ();
-@b = reverse @a;
+my @b = reverse @a;
 cmp_ok("@b",'eq',"",'reverse 1');
 
 @a = (1);
@@ -169,7 +170,7 @@ cmp_ok("@b",'eq',"4 3 2 1",'reverse 5');
 @b = sort {$a <=> $b;} @a;
 cmp_ok("@b",'eq',"2 3 4 10",'sort numeric');
 
-$sub = 'Backwards';
+my $sub = 'Backwards';
 $x = join('', sort $sub @harry);
 $expected = $upperfirst ? 'xdogcatCainAbel' : 'CainAbelxdogcat';
 
@@ -277,6 +278,7 @@ cmp_ok($@,'eq','',q(one is not a sub));
   cmp_ok("@b",'eq','4 3 2 1','sortname 8');
 }
 
+our ($sortsub, $sortglob, $sortglobr, $sortname);
 {
   local $sortsub = \&Backwards;
   local $sortglob = *Backwards;
@@ -349,8 +351,8 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 # test sorting in non-main package
 {
     package Foo;
-    @a = ( 5, 19, 1996, 255, 90 );
-    @b = sort { $b <=> $a } @a;
+    my @a = ( 5, 19, 1996, 255, 90 );
+    my @b = sort { $b <=> $a } @a;
     ::cmp_ok("@b",'eq','1996 255 90 19 5','not in main:: 1');
 
     @b = sort ::Backwards_stacked @a;
@@ -379,7 +381,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 
     $m = \&test_if_scalar;
     sub cxt_four { sort $m 1,2 }
-    @x = cxt_four();
+    my @x = cxt_four();
     sub cxt_five { sort { test_if_scalar($a,$b); } 1,2 }
     @x = cxt_five();
     sub cxt_six { sort test_if_scalar 1,2 }
@@ -395,7 +397,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 }
 {
     my($def, $init) = (0, 0);
-    @b = sort {
+    my @b = sort {
 	$def = 1 if defined $Bar::a;
 	Bar::reenter() unless $init++;
 	$a <=> $b
@@ -408,7 +410,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 
 {
     sub routine { "one", "two" };
-    @a = sort(routine(1));
+    my @a = sort(routine(1));
     cmp_ok("@a",'eq',"one two",'bug id 19991001.003 (#1549)');
 }
 
@@ -795,7 +797,7 @@ is "@output", "0 C B A", 'reversed sort with trailing argument';
 is "@output", "C B A 0", 'reversed sort with leading argument';
 
 eval { @output = sort {goto sub {}} 1,2; };
-$fail_msg = q(Can't goto subroutine outside a subroutine);
+my $fail_msg = q(Can't goto subroutine outside a subroutine);
 cmp_ok(substr($@,0,length($fail_msg)),'eq',$fail_msg,'goto subr outside subr');
 
 
@@ -1018,6 +1020,7 @@ fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; @_ = 0..2; $
 #               from a custom sort subroutine.
 fresh_perl_is
  '
+   no strict q|vars|;
    $sub = sub {
     local $count = $count+1;
     ()->$sub if $count < 1000;
@@ -1073,8 +1076,9 @@ is join("", sort $stubref split//, '04381091'), '98431100',
     'AUTOLOAD with stubref';
 
 # [perl #90030] sort without arguments
-eval '@x = (sort); 1';
+eval 'my @x = (sort); 1';
 is $@, '', '(sort) does not die';
+my @x;
 is @x, 0, '(sort) returns empty list';
 eval '@x = sort; 1';
 is $@, '', 'sort; does not die';

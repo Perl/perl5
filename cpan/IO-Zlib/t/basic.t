@@ -11,15 +11,16 @@ sub ok
     print "not ok $no\n" unless $ok ;
 }
 
-$name="test.gz";
+my $name="test.gz";
 
 print "1..17\n";
 
-$hello = <<EOM ;
+my $hello = <<EOM ;
 hello world
 this is a test
 EOM
 
+my ($file, $uncomp);
 ok(1, $file = IO::Zlib->new($name, "wb"));
 ok(2, $file->print($hello));
 ok(3, $file->opened());

@@ -10,9 +10,9 @@ print "1..22\n";
 
 ++$n; print "ok $n\n";
 
-$RETURN = 1;
+my $RETURN = 1;
 
-%CALLS = ();
+my %CALLS = ();
 sub call {
 #  print "CALL $_[0] => $RETURN\n";
   ++$CALLS{$_[0]};

@@ -20,7 +20,7 @@
 # will be worked over by t/op/inc.t
 
 $| = 1;
-$Level = 1;
+our $Level = 1;
 my $test = 1;
 my $planned;
 my $noplan;
@@ -32,11 +32,15 @@ my $noplan;
 $SIG{__WARN__} = sub { die "Fatalized: $_[0]" } if $] ge "5.6.0";
 
 # This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
-$::IS_ASCII  = ord 'A' ==  65;
+# Avoid "used only once" warning
+$::IS_ASCII  = $::IS_ASCII  = ord 'A' ==  65;
+$::IS_EBCDIC = $::IS_EBCDIC = ord 'A' == 193;
 
-$TODO = 0;
-$NO_ENDING = 0;
-$Tests_Are_Passing = 1;
+# This is 'our' to enable harness to account for TODO-ed tests in
+# overall grade of PASS or FAIL
+our $TODO = 0;
+my $NO_ENDING = 0;
+my $Tests_Are_Passing = 1;
 
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
@@ -52,15 +56,15 @@ sub _print_stderr {
 sub plan {
     my $n;
     if (@_ == 1) {
-	$n = shift;
-	if ($n eq 'no_plan') {
-	  undef $n;
-	  $noplan = 1;
-	}
+        $n = shift;
+        if ($n eq 'no_plan') {
+          undef $n;
+          $noplan = 1;
+        }
     } else {
-	my %plan = @_;
-	$plan{skip_all} and skip_all($plan{skip_all});
-	$n = $plan{tests};
+        my %plan = @_;
+        $plan{skip_all} and skip_all($plan{skip_all});
+        $n = $plan{tests};
     }
     _print "1..$n\n" unless $noplan;
     $planned = $n;
@@ -80,12 +84,12 @@ sub done_testing {
 END {
     my $ran = $test - 1;
     if (!$NO_ENDING) {
-	if (defined $planned && $planned != $ran) {
-	    _print_stderr
-		"# Looks like you planned $planned tests but ran $ran.\n";
-	} elsif ($noplan) {
-	    _print "1..$ran\n";
-	}
+        if (defined $planned && $planned != $ran) {
+            _print_stderr
+            "# Looks like you planned $planned tests but ran $ran.\n";
+        } elsif ($noplan) {
+            _print "1..$ran\n";
+        }
     }
 }
 
@@ -115,8 +119,8 @@ sub _comment {
 sub _have_dynamic_extension {
     my $extension = shift;
     unless (eval {require Config; 1}) {
-	warn "test.pl had problems loading Config: $@";
-	return 1;
+        warn "test.pl had problems loading Config: $@";
+        return 1;
     }
     $extension =~ s!::!/!g;
     return 1 if ($Config::Config{extensions} =~ /\b$extension\b/);
@@ -126,7 +130,7 @@ sub skip_all {
     if (@_) {
         _print "1..0 # Skip @_\n";
     } else {
-	_print "1..0\n";
+        _print "1..0\n";
     }
     exit(0);
 }
@@ -206,20 +210,17 @@ eval 'sub re::is_regexp { ref($_[0]) eq "Regexp" }'
 
 # keys are the codes \n etc map to, values are 2 char strings such as \n
 my %backslash_escape;
-my $x;
-foreach $x (split //, 'nrtfa\\\'"') {
+foreach my $x (split //, 'nrtfa\\\'"') {
     $backslash_escape{ord eval "\"\\$x\""} = "\\$x";
 }
 # A way to display scalars containing control characters and Unicode.
 # Trying to avoid setting $_, or relying on local $_ to work.
 sub display {
     my @result;
-    my $x;
-    foreach $x (@_) {
+    foreach my $x (@_) {
         if (defined $x and not ref $x) {
             my $y = '';
-            my $c;
-            foreach $c (unpack($chars_template, $x)) {
+            foreach my $c (unpack($chars_template, $x)) {
                 if ($c > 255) {
                     $y = $y . sprintf "\\x{%x}", $c;
                 } elsif ($backslash_escape{$c}) {
@@ -411,8 +412,7 @@ sub skip {
 sub eq_array {
     my ($ra, $rb) = @_;
     return 0 unless $#$ra == $#$rb;
-    my $i;
-    for $i (0..$#$ra) {
+    for my $i (0..$#$ra) {
 	next     if !defined $ra->[$i] && !defined $rb->[$i];
 	return 0 if !defined $ra->[$i];
 	return 0 if !defined $rb->[$i];

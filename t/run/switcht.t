@@ -30,7 +30,7 @@ like( $warning, qr/^Insecure .* $Tmsg/, '    taint warn' );
 
 # Get ourselves a tainted variable.
 my $filename = tempfile();
-$file = $0;
+my $file = $0;
 $file =~ s/.*/$filename/;
 ok( open(FILE, ">$file"),   'open >' ) or DIE $!;
 print FILE "Stuff\n";

@@ -1,6 +1,6 @@
 package Tie::SubstrHash;
 
-our $VERSION = '1.00';
+our $VERSION = '1.00_001';
 
 =head1 NAME
 
@@ -41,6 +41,10 @@ The hash does not support exists().
 
 use Carp;
 
+our ($self, $key, $klen, $vlen, $tsize, $rlen);
+our ($offset, $record, $hash, $val, $entries, $iterix);
+our ($hashbase);
+
 sub TIEHASH {
     my $pack = shift;
     my ($klen, $vlen, $tsize) = @_;
@@ -64,8 +68,8 @@ sub FETCH {
     local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
     &hashkey;
     for (;;) {
-	$offset = $hash * $rlen;
-	$record = substr($$self[0], $offset, $rlen);
+	    $offset = $hash * $rlen;
+	    $record = substr($$self[0], $offset, $rlen);
 	if (ord($record) == 0) {
 	    return undef;
 	}
@@ -88,8 +92,8 @@ sub STORE {
 
     &hashkey;
     for (;;) {
-	$offset = $hash * $rlen;
-	$record = substr($$self[0], $offset, $rlen);
+	    $offset = $hash * $rlen;
+	    $record = substr($$self[0], $offset, $rlen);
 	if (ord($record) == 0) {
 	    $record = "\2". $key . $val;
 	    die "panic" unless length($record) == $rlen;

@@ -1,13 +1,15 @@
 #!perl
-use strict;
-use warnings;
 
 # As perlfunc.pod says:
 # Note that the file will not be included twice under the same specified name.
 # So ensure that this, textually, is the same name as all the loaded tests use.
 # Otherwise if we require 'test.pl' and they require './test.pl', it is loaded
 # twice.
-require './test.pl';
+BEGIN {
+    require './test.pl';
+    set_up_inc('../lib', '.');
+    require warnings; warnings->import;
+}
 skip_all_without_config('useithreads');
 skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 

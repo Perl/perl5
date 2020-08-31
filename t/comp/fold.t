@@ -1,8 +1,9 @@
 #!./perl -w
 
-# Uncomment this for testing, but don't leave it in for "production", as
-# we've not yet verified that use works.
-# use strict;
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib'; # needed to locate strict for instances of 'no strict'
+}
 
 print "1..35\n";
 my $test = 0;
@@ -22,9 +23,9 @@ sub failed {
     my @caller = caller(1);
     print "# Failed test at $caller[1] line $caller[2]\n";
     if (defined $got) {
-	print "# Got '$got'\n";
+        print "# Got '$got'\n";
     } else {
-	print "# Got undef\n";
+        print "# Got undef\n";
     }
     print "# Expected $expected\n";
     return;
@@ -34,10 +35,10 @@ sub like {
     my ($got, $pattern, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got =~ $pattern) {
-	print "ok $test - $name\n";
-	# Principle of least surprise - maintain the expected interface, even
-	# though we aren't using it here (yet).
-	return 1;
+        print "ok $test - $name\n";
+        # Principle of least surprise - maintain the expected interface, even
+        # though we aren't using it here (yet).
+        return 1;
     }
     failed($got, $pattern, $name);
 }
@@ -46,8 +47,8 @@ sub is {
     my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got eq $expect) {
-	print "ok $test - $name\n";
-	return 1;
+        print "ok $test - $name\n";
+        return 1;
     }
     failed($got, "'$expect'", $name);
 }
@@ -56,29 +57,29 @@ sub ok {
     my ($got, $name) = @_;
     $test = $test + 1;
     if ($got) {
-	print "ok $test - $name\n";
-	return 1;
+        print "ok $test - $name\n";
+        return 1;
     }
     failed($got, "a true value", $name);
 }
 
-my $a;
-$a = eval '$b = 0/0 if 0; 3';
-is ($a, 3, 'constants in conditionals don\'t affect constant folding');
+my ($alpha, $beta);
+$alpha = eval '$beta = 0/0 if 0; 3';
+is ($alpha, 3, 'constants in conditionals don\'t affect constant folding');
 is ($@, '', 'no error');
 
-my $b = 0;
-$a = eval 'if ($b) {return sqrt -3} 3';
-is ($a, 3, 'variables in conditionals don\'t affect constant folding');
+$beta = 0;
+$alpha = eval 'if ($beta) {return sqrt -3} 3';
+is ($alpha, 3, 'variables in conditionals don\'t affect constant folding');
 is ($@, '', 'no error');
 
-$a = eval q{
-	$b = eval q{if ($b) {return log 0} 4};
- 	is ($b, 4, 'inner eval folds constant');
-	is ($@, '', 'no error');
-	5;
+$alpha = eval q{
+    $beta = eval q{if ($beta) {return log 0} 4};
+     is ($beta, 4, 'inner eval folds constant');
+    is ($@, '', 'no error');
+    5;
 };
-is ($a, 5, 'outer eval folds constant');
+is ($alpha, 5, 'outer eval folds constant');
 is ($@, '', 'no error');
 
 # warn and die hooks should be disabled during constant folding
@@ -88,12 +89,12 @@ is ($@, '', 'no error');
     local $SIG{__WARN__} = sub { $c++   };
     local $SIG{__DIE__}  = sub { $c+= 2 };
     eval q{
-	is($c, 0, "premature warn/die: $c");
-	my $x = "a"+5;
-	is($c, 1, "missing warn hook");
-	is($x, 5, "a+5");
-	$c = 0;
-	$x = 1/0;
+    is($c, 0, "premature warn/die: $c");
+    my $x = "a"+5;
+    is($c, 1, "missing warn hook");
+    is($x, 5, "a+5");
+    $c = 0;
+    $x = 1/0;
     };
     like ($@, qr/division/, "eval caught division");
     is($c, 2, "missing die hook");
@@ -121,6 +122,7 @@ is ($@, '', 'no error');
 
 # [perl #78064] or print
 package other { # hide the "ok" sub
+ no strict 'subs';
  BEGIN { $^W = 0 }
  print 0 ? not_ok : ok;
  print " ", ++$test, " - print followed by const ? BEAR : BEAR\n";
@@ -134,28 +136,36 @@ package other { # hide the "ok" sub
 }
 
 # or stat
-print "not " unless stat(1 ? INSTALL : 0) eq stat("INSTALL");
-print "ok ", ++$test, " - stat(const ? word : ....)\n";
-# in case we are in t/
-print "not " unless stat(1 ? TEST : 0) eq stat("TEST");
-print "ok ", ++$test, " - stat(const ? word : ....)\n";
+{
+    no strict 'subs';
+    print "not " unless stat(1 ? INSTALL : 0) eq stat("INSTALL");
+    print "ok ", ++$test, " - stat(const ? word : ....)\n";
+    # in case we are in t/
+    print "not " unless stat(1 ? TEST : 0) eq stat("TEST");
+    print "ok ", ++$test, " - stat(const ? word : ....)\n";
+}
 
-# or truncate
-my $n = "for_fold_dot_t$$";
-open F, ">$n" or die "open: $!";
-print F "bralh blah blah \n";
-close F or die "close $!";
-eval "truncate 1 ? $n : 0, 0;";
-print "not " unless -z $n;
-print "ok ", ++$test, " - truncate(const ? word : ...)\n";
-unlink $n;
+{
+    # or truncate
+
+    no strict 'subs';
+    # Per analysis by xenu in https://github.com/Perl/perl5/issues/17996
+    my $n = "for_fold_dot_t$$";
+    open F, ">$n" or die "open: $!";
+    print F "bralh blah blah \n";
+    close F or die "close $!";
+    eval "truncate 1 ? $n : 0, 0;";
+    print "not " unless -z $n;
+    print "ok ", ++$test, " - truncate(const ? word : ...)\n";
+    unlink $n;
+}
 
 # Constant folding should not change the mutability of returned values.
 for(1+2) {
     eval { $_++ };
     print "not " unless $_ eq 4;
     print "ok ", ++$test,
-          " - 1+2 returns mutable value, just like \$a+\$b",
+          " - 1+2 returns mutable value, just like \$alpha+\$beta",
           "\n";
 }
 
@@ -181,14 +191,14 @@ is "@values", "4 4",
     BEGIN { $^W = 1 }
 }
 
-$a = eval 'my @z; @z = 0..~0 if 0; 3';
-is ($a, 3, "list constant folding doesn't signal compile-time error");
+$alpha = eval 'my @z; @z = 0..~0 if 0; 3';
+is ($alpha, 3, "list constant folding doesn't signal compile-time error");
 is ($@, '', 'no error');
 
-$b = 0;
-$a = eval 'my @z; @z = 0..~0 if $b; 3';
-is ($a, 3, "list constant folding doesn't signal compile-time error");
+$beta = 0;
+$alpha = eval 'my @z; @z = 0..~0 if $beta; 3';
+is ($alpha, 3, "list constant folding doesn't signal compile-time error");
 is ($@, '', 'no error');
 
-$a = eval 'local $SIG{__WARN__} = sub {}; join("", ":".."~", "z")';
-is ($a, ":z", "aborted list constant folding still executable");
+$alpha = eval 'local $SIG{__WARN__} = sub {}; join("", ":".."~", "z")';
+is ($alpha, ":z", "aborted list constant folding still executable");

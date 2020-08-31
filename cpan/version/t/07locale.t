@@ -4,6 +4,8 @@
 
 #########################
 
+use strict;
+
 use File::Basename;
 use File::Temp qw/tempfile/;
 use POSIX qw/locale_h/;
@@ -44,7 +46,7 @@ SKIP: {
 	setlocale(LC_NUMERIC, $loc);
 	$ver = 1.23;  # has to be floating point number
 	ok ($ver eq "1,23", "Using locale: $loc");
-	$v = version->new($ver);
+	my $v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,
 	    "Process locale-dependent floating point");
 	ok ($v eq "1.23", "Locale doesn't apply to version objects");

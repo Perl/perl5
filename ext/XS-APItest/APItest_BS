@@ -1,6 +1,6 @@
 #
 # test that non-empty .bs files get executed (but only once)
-
+no strict 'vars';
 $bscode = <<'EOF';
 $::bs_file_got_executed++;
 EOF

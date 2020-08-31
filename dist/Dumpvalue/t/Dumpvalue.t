@@ -14,7 +14,7 @@ BEGIN {
 	$^W = 0;
 }
 
-our ( $foo, @bar, %baz );
+our ( $foo, @bar, %baz, @foo, %foo );
 
 use lib ("./t/lib");
 use TieOut;

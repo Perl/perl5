@@ -3,14 +3,13 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bIO\b/ && $^O ne 'VMS') {
 	print "1..0\n";
 	exit 0;
     }
 }
 
-use strict;
 use FileHandle;
 autoflush STDOUT 1;
 use Test::More (tests => 12);

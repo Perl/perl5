@@ -6,20 +6,22 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
+my $loaded;
 BEGIN { $| = 1; print "1..41\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Text::Balanced qw ( extract_codeblock );
 $loaded = 1;
 print "ok 1\n";
-$count=2;
+my $count=2;
 use vars qw( $DEBUG );
 sub debug { print "\t>>>",@_ if $DEBUG }
 
 ######################### End of black magic.
 
 
-$cmd = "print";
-$neg = 0;
+my $cmd = "print";
+my $neg = 0;
+my $str;
 while (defined($str = <DATA>))
 {
 	chomp $str;
@@ -31,7 +33,7 @@ while (defined($str = <DATA>))
 	debug "\t   on: [$str]\n";
 
 	my @res;
-	$var = eval "\@res = $cmd";
+	my $var = eval "\@res = $cmd";
 	debug "\t   Failed: $@ at " . $@+0 .")" if $@;
 	debug "\t list got: [" . join("|", map {defined $_ ? $_ : '<undef>'} @res) . "]\n";
 	debug "\t list left: [$str]\n";

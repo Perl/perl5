@@ -24,33 +24,33 @@ is('ab' x 3, 'ababab',  '  more than one char');
 
 # run time
 
-$a = '-';
-is($a x 5, '-----',     'run time x');
-is($a x 3.1, '---',     '  x 3.1');
-is($a x 3.9, '---',     '  x 3.9');
-is($a x 1, '-',         '  x 1');
-is($a x 0, '',          '  x 0');
-is($a x -3, '',         '  x -3');
-is($a x undef, '',      '  x undef');
-is($a x "foo", '',      '  x "foo"');
-is($a x "3rd", '---',   '  x "3rd"');
+my $alpha = '-';
+is($alpha x 5, '-----',     'run time x');
+is($alpha x 3.1, '---',     '  x 3.1');
+is($alpha x 3.9, '---',     '  x 3.9');
+is($alpha x 1, '-',         '  x 1');
+is($alpha x 0, '',          '  x 0');
+is($alpha x -3, '',         '  x -3');
+is($alpha x undef, '',      '  x undef');
+is($alpha x "foo", '',      '  x "foo"');
+is($alpha x "3rd", '---',   '  x "3rd"');
 
-$a = 'ab';
-is($a x 3, 'ababab',    '  more than one char');
-$a = 'ab';
-is($a x 0, '',          '  more than one char');
-$a = 'ab';
-is($a x -12, '',        '  more than one char');
+$alpha = 'ab';
+is($alpha x 3, 'ababab',    '  more than one char');
+$alpha = 'ab';
+is($alpha x 0, '',          '  more than one char');
+$alpha = 'ab';
+is($alpha x -12, '',        '  more than one char');
 
-$a = 'xyz';
-$a x= 2;
-is($a, 'xyzxyz',        'x=2');
-$a x= 1;
-is($a, 'xyzxyz',        'x=1');
-$a x= 0;
-is($a, '',              'x=0');
+$alpha = 'xyz';
+$alpha x= 2;
+is($alpha, 'xyzxyz',        'x=2');
+$alpha x= 1;
+is($alpha, 'xyzxyz',        'x=1');
+$alpha x= 0;
+is($alpha, '',              'x=0');
 
-@x = (1,2,3);
+my @x = (1,2,3);
 
 is(join('', @x x 4),        '3333',                 '@x x Y');
 is(join('', (@x) x 4),      '123123123123',         '(@x) x Y');
@@ -64,12 +64,13 @@ is(join('', (split(//,"123")) x 2), '123123',       'split and x');
 is(join('', @x x -12),      '',                     '@x x -12');
 is(join('', (@x) x -14),    '',                     '(@x) x -14');
 
-($a, (undef)x5, $b) = 1..10;
-is ("$a $b", "1 7", '(undef)xCONST on lhs of list assignment');
-(($a)x3,$b) = 1..10;
-is ("$a, $b", "3, 4", '($x)xCONST on lhs of list assignment');
-($a, (undef)x${\6}, $b) = "a".."z";
-is ("$a$b", "ah", '(undef)x$foo on lhs of list assignment');
+my $beta;
+($alpha, (undef)x5, $beta) = 1..10;
+is ("$alpha $beta", "1 7", '(undef)xCONST on lhs of list assignment');
+(($alpha)x3,$beta) = 1..10;
+is ("$alpha, $beta", "3, 4", '($x)xCONST on lhs of list assignment');
+($alpha, (undef)x${\6}, $beta) = "a".."z";
+is ("$alpha$beta", "ah", '(undef)x$foo on lhs of list assignment');
 
 
 # This test is actually testing for Digital C compiler optimizer bug,
@@ -168,6 +169,7 @@ sub {
 }
  ->(("${\''}")x2);
 
+my @that_array;
 $#that_array = 7;
 for(($#that_array)x2) {
     $_ *= 2;
@@ -178,7 +180,7 @@ is($#that_array, 28, 'list repetition propagates lvalue cx to its lhs');
 
 
 fresh_perl_like(
- '@a = (1) x ~1',
+ 'my @a = (1) x ~1',
   qr/Out of memory/,
   {  },
  '(1) x ~1',

@@ -7,20 +7,19 @@ BEGIN {
 
     require "./test.pl";
     set_up_inc( '../lib' ) if -d '../lib' && -d '../ext';
-    require Config; import Config;
-
     skip_all_if_miniperl();
+    require Config; Config->import;
+
     for my $needed (qw(d_socket d_getpbyname)) {
-	if ($Config{$needed} ne 'define') {
-	    skip_all("-- \$Config{$needed} undefined");
-	}
+        if ($Config::Config{$needed} ne 'define') {
+            skip_all("-- \$Config{$needed} undefined");
+        }
     }
-    unless ($Config{extensions} =~ /\bSocket\b/) {
-	skip_all('-- Socket not available');
+    unless ($Config::Config{extensions} =~ /\bSocket\b/) {
+        skip_all('-- Socket not available');
     }
 }
 
-use strict;
 use Socket;
 
 our $TODO;

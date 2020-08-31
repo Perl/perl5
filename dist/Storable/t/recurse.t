@@ -7,6 +7,7 @@
 #  
 use Config;
 
+
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
@@ -26,7 +27,7 @@ package OBJ_REAL;
 
 use Storable qw(freeze thaw);
 
-@x = ('a', 1);
+our @x = ('a', 1);
 
 sub make { bless [], shift }
 
@@ -52,7 +53,7 @@ sub STORABLE_thaw {
 
 package OBJ_SYNC;
 
-@x = ('a', 1);
+our @x = ('a', 1);
 
 sub make { bless {}, shift }
 
@@ -106,9 +107,9 @@ package OBJ_REAL2;
 
 use Storable qw(freeze thaw);
 
-$MAX = 20;
-$recursed = 0;
-$hook_called = 0;
+our $MAX = 20;
+our $recursed = 0;
+our $hook_called = 0;
 
 sub make { bless [], shift }
 
@@ -132,51 +133,51 @@ package main;
 
 my $real = OBJ_REAL->make;
 my $x = freeze $real;
-isnt($x, undef);
+isnt($x, undef, 'freeze returned defined value');
 
 my $y = thaw $x;
-is(ref $y, 'OBJ_REAL');
-is($y->[0], 'a');
-is($y->[1], 1);
+is(ref $y, 'OBJ_REAL', 'thaw returned object of OBJ_REAL class');
+is($y->[0], 'a', 'Got expected element');
+is($y->[1], 1, 'Got expected element');
 
 my $sync = OBJ_SYNC->make;
 $x = freeze $sync;
-isnt($x, undef);
+isnt($x, undef, 'freeze returned defined value');
 
 $y = thaw $x;
-is(ref $y, 'OBJ_SYNC');
-is($y->{ok}, $y);
+is(ref $y, 'OBJ_SYNC', 'thaw returned object of OBJ_SYNC class');
+is($y->{ok}, $y, 'Got expected element');
 
 my $ext = [1, 2];
 $sync = OBJ_SYNC2->make($ext);
 $x = freeze [$sync, $ext];
-isnt($x, undef);
+isnt($x, undef, 'freeze returned defined value');
 
 my $z = thaw $x;
 $y = $z->[0];
-is(ref $y, 'OBJ_SYNC2');
-is($y->{ok}, $y);
-is(ref $y->{sync}, 'OBJ_SYNC');
-is($y->{ext}, $z->[1]);
+is(ref $y, 'OBJ_SYNC2', 'thaw returned object of OBJ_SYNC2 class');
+is($y->{ok}, $y, 'Got expected element');
+is(ref $y->{sync}, 'OBJ_SYNC', 'Got expected element');
+is($y->{ext}, $z->[1], 'Got expected element');
 
 $real = OBJ_REAL2->make;
 $x = freeze $real;
-isnt($x, undef);
-is($OBJ_REAL2::recursed, $OBJ_REAL2::MAX);
-is($OBJ_REAL2::hook_called, $OBJ_REAL2::MAX);
+isnt($x, undef, 'freeze returned defined value');
+is($OBJ_REAL2::recursed, $OBJ_REAL2::MAX, 'Got expected element');
+is($OBJ_REAL2::hook_called, $OBJ_REAL2::MAX, 'Got expected element');
 
 $y = thaw $x;
-is(ref $y, 'OBJ_REAL2');
-is($OBJ_REAL2::recursed, 0);
+is(ref $y, 'OBJ_REAL2', 'thaw returned object of OBJ_REAL2 class');
+is($OBJ_REAL2::recursed, 0, 'Got expected element');
 
 $x = dclone $real;
-isnt($x, undef);
-is(ref $x, 'OBJ_REAL2');
-is($OBJ_REAL2::recursed, 0);
-is($OBJ_REAL2::hook_called, 2 * $OBJ_REAL2::MAX);
+isnt($x, undef, 'dclone returned defined value');
+is(ref $x, 'OBJ_REAL2', 'dclone returned object of OBJ_REAL2 class');
+is($OBJ_REAL2::recursed, 0, 'Got expected element');
+is($OBJ_REAL2::hook_called, 2 * $OBJ_REAL2::MAX, 'Got expected element');
 
-is(Storable::is_storing, '');
-is(Storable::is_retrieving, '');
+is(Storable::is_storing, '', 'is_storing returned empty string');
+is(Storable::is_retrieving, '', 'is_retrieving returned empty string');
 
 #
 # The following was a test-case that Salvador Ortiz Garcia <sog@msg.com.mx>
@@ -216,14 +217,14 @@ sub STORABLE_thaw {
 
 package main;
 
-my $bar = new Bar;
+my $bar = Bar->new ;
 my $bar2 = thaw freeze $bar;
 
-is(ref($bar2), 'Bar');
-is(ref($bar->{b}[0]), 'Foo');
-is(ref($bar->{b}[1]), 'Foo');
-is(ref($bar2->{b}[0]), 'Foo');
-is(ref($bar2->{b}[1]), 'Foo');
+is(ref($bar2), 'Bar', 'thaw freeze Bar');
+is(ref($bar->{b}[0]), 'Foo', 'thaw freeze Foo');
+is(ref($bar->{b}[1]), 'Foo', 'thaw freeze Foo');
+is(ref($bar2->{b}[0]), 'Foo', 'thaw freeze Foo');
+is(ref($bar2->{b}[1]), 'Foo', 'thaw freeze Foo');
 
 #
 # The following attempts to make sure blessed objects are blessed ASAP
@@ -256,10 +257,10 @@ sub STORABLE_freeze {
 
 sub STORABLE_thaw {
     my($self, $clonning, $frozen, $c1, $c3, $o) = @_;
-    main::is(ref $self, "CLASS_2");
-    main::is(ref $c1, "CLASS_1");
-    main::is(ref $c3, "CLASS_3");
-    main::is(ref $o, "CLASS_OTHER");
+    main::is(ref $self, "CLASS_2", 'CLASS_2 object');
+    main::is(ref $c1, "CLASS_1", 'CLASS_1 object');
+    main::is(ref $c3, "CLASS_3", 'CLASS_3 object');
+    main::is(ref $o, "CLASS_OTHER", 'CLASS_OTHER object');
     $self->{c1} = $c1;
     $self->{c3} = $c3;
 }
@@ -344,14 +345,17 @@ sub MAX_DEPTH_HASH () { Storable::stack_depth_hash() }
     is $@, '', 'No simple array[5000] stack overflow #257';
 }
 
-eval {
-    my $t;
-    $t = [$t] for 1 .. MAX_DEPTH*2;
-    eval { note('trying catching recursive aref stack overflow') };
-    dclone $t;
-};
-like $@, qr/Max\. recursion depth with nested structures exceeded/,
-      'Caught aref stack overflow '.MAX_DEPTH*2;
+{
+    local $@;
+    eval {
+        my $t;
+        $t = [$t] for 1 .. MAX_DEPTH*2;
+        eval { note('trying catching recursive aref stack overflow') };
+        dclone $t;
+    };
+    like $@, qr/Max\. recursion depth with nested structures exceeded/,
+          'Caught aref stack overflow '.MAX_DEPTH*2;
+}
 
 if ($ENV{APPVEYOR} and length(pack "p", "") >= 8) {
     # TODO: need to repro this fail on a small machine.

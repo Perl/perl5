@@ -121,6 +121,7 @@ EOI
 # Scalars leaked: 1
 fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
     use threads;
+    our $x;
     leak($x);
     sub leak
     {
@@ -197,6 +198,7 @@ EOI
 fresh_perl_is(
  <<'   EOJ', 'ok', {}, 'No del_backref panic [perl #70748] (2)'
    use threads;
+   my @bar;
    push @bar, threads->create(sub{sub{}})->join() for 1...10;
    print "ok";
    EOJ
@@ -217,10 +219,10 @@ EOJ
 # The weak reference $a, however, is visible from the symbol table.
 fresh_perl_is(<<'EOI', 'ok', { }, 'Test for 34394ecd06e704e9');
     use threads;
-    %h = (1, 2);
+    my %h = (1, 2);
     use Scalar::Util 'weaken';
-    $a = \$h{1};
-    weaken($a);
+    my $alpha = \$h{1};
+    weaken($alpha);
     delete $h{1} && threads->create(sub {}, shift)->join();
     print 'ok';
 EOI

@@ -1,6 +1,6 @@
 package Env;
 
-our $VERSION = '1.04';
+our $VERSION = '1.04_001';
 
 =head1 NAME
 
@@ -84,16 +84,17 @@ sub import {
     eval "package $callpack; use vars qw(" . join(' ', @vars) . ")";
     die $@ if $@;
     foreach (@vars) {
-	my ($type, $name) = m/^([\$\@])(.*)$/;
-	if ($type eq '$') {
-	    tie ${"${callpack}::$name"}, Env, $name;
-	} else {
-	    if ($^O eq 'VMS') {
-		tie @{"${callpack}::$name"}, Env::Array::VMS, $name;
-	    } else {
-		tie @{"${callpack}::$name"}, Env::Array, $name;
-	    }
-	}
+        my ($type, $name) = m/^([\$\@])(.*)$/;
+        no strict 'refs';
+        if ($type eq '$') {
+            tie ${"${callpack}::$name"}, 'Env', $name;
+        } else {
+            if ($^O eq 'VMS') {
+                tie @{"${callpack}::$name"}, 'Env::Array::VMS', $name;
+            } else {
+                tie @{"${callpack}::$name"}, 'Env::Array', $name;
+            }
+        }
     }
 }
 
@@ -122,7 +123,7 @@ package Env::Array;
 use Config;
 use Tie::Array;
 
-@ISA = qw(Tie::Array);
+our @ISA = qw(Tie::Array);
 
 my $sep = $Config::Config{path_sep};
 

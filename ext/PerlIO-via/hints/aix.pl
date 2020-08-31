@@ -1,4 +1,5 @@
 # compilation may hang at -O3 level
+no strict 'vars';
 use Config;
 
 my $optimize = $Config{optimize};

@@ -16,9 +16,13 @@
 # * fix Perl_save_re_context() so that it localises more vars, then
 #   update this test script with the new relaxed var list.
 
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+}
 
 use warnings;
-use strict;
 
 # trigger the dependency loading
 
@@ -32,8 +36,6 @@ my @vars =
         sort keys %::;
 
 # load any other modules *after* calculating @vars
-
-require './test.pl';
 
 plan(1);
 

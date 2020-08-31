@@ -15,7 +15,7 @@ plan 1;
 
 TODO: {
     fresh_perl_is(
-        'use B; version->new("v5.22.0"); $s = B::svref_2object(\%version::); $s->SvSTASH; print "ok\n"',
+        'use B; version->new("v5.22.0"); my $s = B::svref_2object(\%version::); $s->SvSTASH; print "ok\n"',
         "ok\n", { stderr => 1 }, 'RT #126410 - SvSTASH against %version::'
     );
 }

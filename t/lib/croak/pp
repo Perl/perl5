@@ -8,7 +8,7 @@ Can't use an undefined value as a HASH reference at - line 2.
 # NAME [perl #119809] Attempt to bless into a reference (tied)
 sub TIESCALAR { bless [] }
 sub FETCH { [] }
-tie $t, "";
+my $t; tie $t, "";
 bless({}, $t);
 EXPECT
 Attempt to bless into a reference at - line 4.

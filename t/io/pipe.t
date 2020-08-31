@@ -2,9 +2,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require Config; import Config;
     require './test.pl';
     set_up_inc('../lib');
+    require Config; Config->import;
 }
 if (!$Config{'d_fork'}) {
     skip_all("fork required to pipe");
@@ -88,6 +88,7 @@ close PIPE;
     # This has to be *outside* the fork
     next_test();
 
+    my $pid;
     SKIP: {
         skip "fork required", 2 unless $Config{d_fork};
 
@@ -165,6 +166,7 @@ SKIP: {
 # VMS doesn't like spawning subprocesses that are still connected to
 # STDOUT.  Someone should modify these tests to work with VMS.
 
+our $NO_ENDING;
 SKIP: {
     skip "doesn't like spawning subprocesses that are still connected", 10
       if $^O eq 'VMS';
@@ -260,7 +262,7 @@ SKIP: {
     my $prog = <<PROG;
 \$SIG{ALRM}=sub{die};
 alarm 1;
-\$Perl = "$Perl";
+my \$Perl = "$Perl";
 my \$cmd = qq(\$Perl -e "sleep 3");
 my \$pid = open my \$fh, "|\$cmd" or die "\$!\n";
 close \$fh;

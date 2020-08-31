@@ -51,6 +51,7 @@ if ($^O eq 'VMS') {
         my $drop_dot_notype = $ENV{'DECC$READDIR_DROPDOTNOTYPE'} || '';
         $drop_dot = $drop_dot_notype =~ /^[ET1]/i;
     }
+    no strict 'subs';
     $Is_VMS_traildot = 0 if $drop_dot && unix_rpt;
 }
 if (!(-e $extracted_program)) {
@@ -181,9 +182,9 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   # 2>&1 dupe:
   # does it run?
   my $prog = "$^X $lib $extracted_program $args $dupe";
-  @result = `$prog`;
+  my @result = `$prog`;
   cmp_ok ($?, "==", 0, "running $prog ");
-  $result = join("",@result);
+  my $result = join("",@result);
 
   #print "# expectation is >$expectation<\n";
   #print "# result is >$result<\n";

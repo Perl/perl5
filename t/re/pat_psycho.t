@@ -198,7 +198,7 @@ sub run_tests {
 
         fresh_perl_is(<<'EOF', "ok\n", {}, 'ascii =~ /(.)/, mention $&');
 $&;
-$x = 'x' x 1_000_000;
+my $x = 'x' x 1_000_000;
 1 while $x =~ /(.)/g;
 print "ok\n";
 EOF
@@ -206,7 +206,7 @@ EOF
         fresh_perl_is(<<'EOF', "ok\n", {}, 'utf8 =~ /(.)/, mention $&');
 $&;
 local ${^UTF8CACHE} = 1; # defeat debugging
-$x = "\x{100}" x 1_000_000;
+my $x = "\x{100}" x 1_000_000;
 1 while $x =~ /(.)/g;
 print "ok\n";
 EOF

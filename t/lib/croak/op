@@ -33,7 +33,7 @@ EXPECT
 No such class field "c" in variable $f of type Foo at - line 8.
 ########
 # NAME "No such field" with block: ${$ref}{key}
-%FIELDS; # empty hash so all keys are invalid
+%main::FIELDS; # empty hash so all keys are invalid
 my main $r;
 ${$r}{key};
 EXPECT
@@ -52,81 +52,81 @@ EXPECT
 No such class field "c" in variable $f of type Foo at - line 8.
 ########
 # NAME Single OP_HSLICE field
-%FIELDS; # vivify it, but leave it empty, so all fields are invalid
+%main::FIELDS; # vivify it, but leave it empty, so all fields are invalid
 my main $f;
 @$f{"a"};
 EXPECT
 No such class field "a" in variable $f of type main at - line 3.
 ########
 # NAME OP_KVHSLICE fields
-BEGIN { %FIELDS = qw(a 1 b 1); }
+BEGIN { %main::FIELDS = qw(a 1 b 1); }
 my main $f;
 %$f{"a","c"};
 EXPECT
 No such class field "c" in variable $f of type main at - line 3.
 ########
 # NAME Num-specific &= on @array
-use feature 'bitwise';
+use feature 'bitwise'; no strict 'vars';
 @a &= 1;
 EXPECT
 Can't modify array dereference in numeric bitwise and (&) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME Num-specific |= on @array
-use feature 'bitwise';
+use feature 'bitwise'; no strict 'vars';
 @a |= 1;
 EXPECT
 Can't modify array dereference in numeric bitwise or (|) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME Num-specific ^= on @array
-use feature 'bitwise';
+use feature 'bitwise'; no strict 'vars';
 @a ^= 1;
 EXPECT
 Can't modify array dereference in numeric bitwise xor (^) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME &.= on @array
-use feature 'bitwise';
+use feature 'bitwise'; no strict 'vars';
 @a &.= 1;
 EXPECT
 Can't modify array dereference in string bitwise and (&.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME |.= on @array
-use feature 'bitwise';
+use feature 'bitwise'; no strict 'vars';
 @a |.= 1;
 EXPECT
 Can't modify array dereference in string bitwise or (|.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME ^.= on @array
-use feature 'bitwise';
+use feature 'bitwise'; no strict 'vars';
 @a ^.= 1;
 EXPECT
 Can't modify array dereference in string bitwise xor (^.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME substr %h in scalar assignment
-substr(%h,0) = 3;
+no strict 'vars'; substr(%h,0) = 3;
 EXPECT
 Can't modify hash dereference in substr at - line 1, near "3;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME substr %h in list assignment
-(substr %h,0) = 3;
+no strict 'vars'; (substr %h,0) = 3;
 EXPECT
 Can't modify hash dereference in substr at - line 1, near "3;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME vec %h in scalar assignment
-vec(%h,1,1) = 3;
+no strict 'vars'; vec(%h,1,1) = 3;
 EXPECT
 Can't modify hash dereference in vec at - line 1, near "3;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME vec %h in list assignment
-(vec %h,1,1) = 3;
+no strict 'vars'; (vec %h,1,1) = 3;
 EXPECT
 Can't modify hash dereference in vec at - line 1, near "3;"
 Execution of - aborted due to compilation errors.
@@ -156,7 +156,7 @@ Initialization of state variables in list currently forbidden at - line 1, near 
 Execution of - aborted due to compilation errors.
 ########
 # NAME delete BAD
-delete $x;
+no strict 'vars'; delete $x;
 EXPECT
 delete argument is not a HASH or ARRAY element or slice at - line 1.
 ########
@@ -167,7 +167,7 @@ EXPECT
 delete argument is not a HASH or ARRAY element or slice at - line 2.
 ########
 # NAME exists BAD
-exists $x;
+no strict 'vars'; exists $x;
 EXPECT
 exists argument is not a HASH or ARRAY element or a subroutine at - line 1.
 ########
@@ -177,49 +177,49 @@ EXPECT
 exists argument is not a subroutine name at - line 1.
 ########
 # NAME push BAREWORD
-push FRED;
+no strict 'subs'; push FRED;
 EXPECT
 Type of arg 1 to push must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME pop BAREWORD
-pop FRED;
+no strict 'subs'; pop FRED;
 EXPECT
 Type of arg 1 to pop must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME shift BAREWORD
-shift FRED;
+no strict 'subs'; shift FRED;
 EXPECT
 Type of arg 1 to shift must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME unshift BAREWORD
-unshift FRED;
+no strict 'subs'; unshift FRED;
 EXPECT
 Type of arg 1 to unshift must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME keys BAREWORD
-@a = keys FRED ;
+no strict 'vars'; no strict 'subs'; @a = keys FRED ;
 EXPECT
 Type of arg 1 to keys must be hash or array (not constant item) at - line 1, near "FRED ;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME values BAREWORD
-@a = values FRED ;
+no strict 'vars'; no strict 'subs'; @a = values FRED ;
 EXPECT
 Type of arg 1 to values must be hash or array (not constant item) at - line 1, near "FRED ;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME each BAREWORD
-@a = each FRED ;
+no strict 'vars'; no strict 'subs'; @a = each FRED ;
 EXPECT
 Type of arg 1 to each must be hash or array (not constant item) at - line 1, near "FRED ;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME better messages for array-ops on non-arrays
-push %a, 1;
+our %a = (); push %a, 1;
 pop %a;
 shift %a;
 unshift %a, 1;

@@ -12,7 +12,7 @@ BEGIN {
 # file should contain "Perl".  We'll see...
 use Config;
 use warnings;
-use strict;
+
 
 # This attempts to mirror the #ifdef forest found in perl.h so that we
 # know when to run these tests.  If that forest ever changes, change

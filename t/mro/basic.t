@@ -399,7 +399,8 @@ undef *UNIVERSAL::DESTROY;
 
 { # 123788
     fresh_perl_is(<<'PROG', "ok", {}, "don't crash when deleting ISA");
-$x = \@{q(Foo::ISA)};
+no strict 'refs';
+my $x = \@{q(Foo::ISA)};
 delete $Foo::{ISA};
 @$x = "Bar";
 print "ok\n";
@@ -409,7 +410,9 @@ PROG
     # turns into an AV of globs, which is a different code path
     # this test only crashes on -DDEBUGGING builds
     fresh_perl_is(<<'PROG', "ok", {}, "a case with multiple refs to ISA");
+my ($x, $y);
 @Foo::ISA = qw(Abc Def);
+no strict 'refs';
 $x = \@{q(Foo::ISA)};
 *Bar::ISA = $x;
 delete $Bar::{ISA};
@@ -424,6 +427,8 @@ PROG
     # of the array
     # again, may only crash on -DDEBUGGING builds
     fresh_perl_is(<<'PROG', "ok", {}, "a case with multiple refs to ISA");
+my ($x, $y);
+no strict 'refs';
 $x = \@{q(Foo::ISA)};
 *Bar::ISA = $x;
 delete $Foo::{ISA};

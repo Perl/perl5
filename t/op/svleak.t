@@ -131,7 +131,7 @@ eleak(2, 0, "$all v111111111111111111111111111111111111111111111111",
 eleak(2, 0, 'sub{<*>}');
 # Use a random number of ops, so that the glob op does not reuse the same
 # address each time, giving us false passes.
-leak(2, 0, sub { eval '$x+'x(1 + rand() * 100) . '<*>'; },
+leak(2, 0, sub { eval '$main::x+'x(1 + rand() * 100) . '<*>'; },
     'freeing partly iterated glob');
 
 eleak(2, 0, 'goto sub {}', 'goto &sub in eval');
@@ -376,6 +376,7 @@ package t {
 }
 leak(2, 0, sub {
     my $h = {};
+    no strict 'subs';
     tie %$h, t;
     each %$h;
     undef $h;
@@ -390,6 +391,7 @@ tie my $die_on_fetch, 'explosive_scalar', FETCH => 1;
 
 # List assignment was leaking when assigning explosive scalars to
 # aggregates.
+my %a;
 leak(2, 0, sub {
     eval {%a = ($die_on_fetch, 0)}; # key
     eval {%a = (0, $die_on_fetch)}; # value
@@ -405,6 +407,7 @@ leak(2, 0, sub {
 
 # [perl #107000]
 package hhtie {
+    our $explosive;
     sub TIEHASH { bless [] }
     sub STORE    { $_[0][0]{$_[1]} = $_[2] }
     sub FETCH    { die if $explosive; $_[0][0]{$_[1]} }
@@ -530,6 +533,7 @@ EOF
     my $do_die = 0;
     sub STORE { die if $do_die; }
 
+    our $s;
     sub f {
         local $s;
         tie $s, 'MG_SET';

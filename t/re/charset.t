@@ -3,16 +3,14 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    require './loc_tools.pl';
     set_up_inc('../lib', '../dist/if');
+    require './loc_tools.pl';
+    require Config; Config->import;
 }
 
-use strict;
 use warnings;
 no warnings 'locale';   # Some /l tests use above-latin1 chars to make sure
                         # they work, even though they warn.
-use Config;
-
 plan('no_plan');
 
 # Each case is a valid element of its hash key.  Choose, where available, an

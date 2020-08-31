@@ -11,6 +11,7 @@
 #  (See hints/svr4.sh for more details.)
 #	A. Dougherty  Tue Oct 30 10:20:07 EST 2001
 #
+no strict 'vars';
 if ($Config{'archname'} =~ /[34]4[0-9][0-9]-svr4/) {
     $self->{LIBS} = ['-lm -posix -lcposix -lmw'];
 }

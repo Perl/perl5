@@ -17,7 +17,7 @@ run_multiple_progs('', \*DATA);
 done_testing();
 
 __END__
-@a = (1, 2, 3);
+my @a = (1, 2, 3);
 {
   @a = sort { last ; } @a;
 }
@@ -36,7 +36,8 @@ sub FETCH {
   return ">$@<";
 }
 package main;
- 
+my $bar = '';
+no strict 'subs';
 tie $bar, TEST;
 print "- $bar\n";
 EXPECT
@@ -57,7 +58,8 @@ sub FETCH {
 }
  
 package main;
- 
+my $bar = '';
+no strict 'subs';
 tie $bar, TEST;
 print "- $bar\n";
 print "OK\n";
@@ -67,7 +69,7 @@ after eval
 OK
 ########
 package TEST;
- 
+my $foo = '';
 sub TIEHANDLE {
   my $foo;
   return bless \$foo;
@@ -81,6 +83,7 @@ eval('die("test\n")');
 package main;
  
 open FH, ">&STDOUT";
+no strict 'subs';
 tie *FH, TEST;
 print FH "OK\n";
 print STDERR "DONE\n";
@@ -112,7 +115,8 @@ sub str {
  
 package main;
  
-$bar = bless {}, TEST;
+no strict 'subs';
+my $bar = bless {}, TEST;
 print "$bar\n";
 print "OK\n";
 EXPECT
@@ -122,7 +126,7 @@ OK
 sub foo {
   $a <=> $b unless eval('$a == 0 ? bless undef : ($a <=> $b)');
 }
-@a = (3, 2, 0, 1);
+my @a = (3, 2, 0, 1);
 @a = sort foo @a;
 print join(', ', @a)."\n";
 EXPECT
@@ -132,7 +136,7 @@ sub foo {
   goto bar if $a == 0 || $b == 0;
   $a <=> $b;
 }
-@a = (3, 2, 0, 1);
+my @a = (3, 2, 0, 1);
 @a = sort foo @a;
 print join(', ', @a)."\n";
 exit;
@@ -141,7 +145,7 @@ print "bar reached\n";
 EXPECT
 Can't "goto" out of a pseudo block at - line 2.
 ########
-%seen = ();
+my %seen = ();
 sub sortfn {
   (split(/./, 'x'x10000))[0];
   my (@y) = ( 4, 6, 5);
@@ -150,20 +154,20 @@ sub sortfn {
   print $t if ($seen{$t}++ == 0);
   return $_[0] <=> $_[1];
 }
-@x = ( 3, 2, 1 );
+my @x = ( 3, 2, 1 );
 @x = sort { &sortfn($a, $b) } @x;
 print "---- ".join(', ', @x)."\n";
 EXPECT
 sortfn 4, 5, 6
 ---- 1, 2, 3
 ########
-@a = (3, 2, 1);
+my @a = (3, 2, 1);
 @a = sort { eval('die("no way")') ,  $a <=> $b} @a;
 print join(", ", @a)."\n";
 EXPECT
 1, 2, 3
 ########
-@a = (1, 2, 3);
+my @a = (1, 2, 3);
 foo:
 {
   @a = sort { last foo; } @a;
@@ -185,7 +189,8 @@ sub STORE {
 }
  
 package main;
- 
+my $bar = '';
+no strict 'subs';
 tie $bar, TEST;
 {
   print "- $bar\n";
@@ -206,7 +211,8 @@ sub FETCH {
 }
  
 package main;
- 
+my $bar = '';
+no strict 'subs';
 tie $bar, TEST;
 print "- $bar\n";
 exit;
@@ -218,7 +224,7 @@ Can't find label bbb at - line 8.
 sub foo {
   $a <=> $b unless eval('$a == 0 ? die("foo\n") : ($a <=> $b)');
 }
-@a = (3, 2, 0, 1);
+my @a = (3, 2, 0, 1);
 @a = sort foo @a;
 print join(', ', @a)."\n";
 EXPECT
@@ -236,6 +242,8 @@ sub STORE {
 (split(/./, 'x'x10000))[0];
 }
 package main;
+my $bar = '';
+no strict 'subs';
 tie $bar, TEST;
 $bar = "x";
 ########
@@ -246,13 +254,15 @@ sub TIESCALAR {
   return bless \$foo;
 }
 package main;
+my $bar = '';
 {
+no strict 'subs';
 tie $bar, TEST;
 }
 EXPECT
 Can't "next" outside a loop block at - line 4.
 ########
-@a = (1, 2, 3);
+my @a = (1, 2, 3);
 foo:
 {
   @a = sort { exit(0) } @a;
@@ -263,8 +273,8 @@ foobar
 ########
 $SIG{__DIE__} = sub {
     print "In DIE\n";
-    $i = 0;
-    while (($p,$f,$l,$s) = caller(++$i)) {
+    my $i = 0;
+    while (my ($p,$f,$l,$s) = caller(++$i)) {
         print "$p|$f|$l|$s\n";
     }
 };
@@ -301,13 +311,15 @@ bbb:
  
 package main;
 tie my @bar, 'TEST';
-print join('|', @bar[0..3]), "\n"; 
+print join('|', @bar[0..3]), "\n";
 EXPECT
 foo|fee|fie|foe
 ########
 package TH;
+no strict 'subs';
 sub TIEHASH { bless {}, TH }
 sub STORE { eval { print "@_[1,2]\n" }; die "bar\n" }
+my %h;
 tie %h, TH;
 eval { $h{A} = 1; print "never\n"; };
 print $@;

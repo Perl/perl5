@@ -77,6 +77,7 @@ under the same terms as Perl itself.
 =cut
 
 package FindBin;
+use strict;
 use Carp;
 require 5.000;
 require Exporter;
@@ -84,11 +85,12 @@ use Cwd qw(getcwd cwd abs_path);
 use File::Basename;
 use File::Spec;
 
-@EXPORT_OK = qw($Bin $Script $RealBin $RealScript $Dir $RealDir);
-%EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
-@ISA = qw(Exporter);
+our ($Bin, $Script, $RealBin, $RealScript, $Dir, $RealDir);
+our @EXPORT_OK = qw($Bin $Script $RealBin $RealScript $Dir $RealDir);
+our %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
+our @ISA = qw(Exporter);
 
-$VERSION = "1.51";
+our $VERSION = "1.52";
 
 
 # needed for VMS-specific filename translation
@@ -107,8 +109,8 @@ sub cwd2 {
 
 sub init
 {
- *Dir = \$Bin;
- *RealDir = \$RealBin;
+ *Dir = \$main::Bin;
+ *RealDir = \$main::RealBin;
 
  if($0 eq '-e' || $0 eq '-')
   {

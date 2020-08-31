@@ -52,6 +52,7 @@ undef $_;
 is $_, "ok", 'next triggering DESTROY that calls outer sub';
 
 undef $_;
+my $count;
 { if (!$count++) { foo(sub { my $o = bless {}, 'Foo'; redo }) } }
 is $_, "ok", 'redo triggering DESTROY that calls outer sub';
 
@@ -109,6 +110,7 @@ sub END { is $_, "ok", 'exit triggering DESTROY that calls current sub' }
 sub END { undef $_; bar(sub { exit }) }
 
 
+our $inner_format;
 format foo =
 @
 {
@@ -187,6 +189,7 @@ END { is $_, "ok", 'exit triggering DESTROY that calls outer format' }
 END { local $inner_format = 'inner_exit'; write }
 
 
+our $block;
 format bar =
 @
 {

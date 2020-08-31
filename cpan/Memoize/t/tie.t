@@ -17,7 +17,7 @@ sub i {
   $_[0];
 }
 
-$ARG = 'Keith Bostic is a pinhead';
+my $ARG = 'Keith Bostic is a pinhead';
 
 sub c119 { 119 }
 sub c7 { 7 }
@@ -29,8 +29,8 @@ sub n {
   $_[0]+1;
 }
 
-$file = "md$$";
-@files = ($file, "$file.db", "$file.dir", "$file.pag");
+my $file = "md$$";
+my @files = ($file, "$file.db", "$file.dir", "$file.pag");
 1 while unlink @files;
 
 
@@ -74,6 +74,7 @@ sub tryout {
 
 { 
   my @present = grep -e, @files;
+  my @failed;
   if (@present && (@failed = grep { not unlink } @present)) {
     warn "Can't unlink @failed!  ($!)";
   }

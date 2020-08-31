@@ -4,6 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
+    require Config; Config->import;
 }
 
 eval {my @n = getgrgid 0};
@@ -11,7 +12,6 @@ if ($@ =~ /(The \w+ function is unimplemented)/) {
     skip_all "getgrgid unimplemented";
 }
 
-eval { require Config; import Config; };
 my $reason;
 if ($Config{'i_grp'} ne 'define') {
 	$reason = '$Config{i_grp} not defined';
@@ -20,6 +20,7 @@ elsif (not -f "/etc/group" ) { # Play safe.
 	$reason = 'no /etc/group file';
 }
 
+my $where;
 if (not defined $where) {	# Try NIS.
     foreach my $ypcat (qw(/usr/bin/ypcat /bin/ypcat /etc/ypcat)) {
         if (-x $ypcat &&
@@ -111,7 +112,7 @@ while (<GR>) {
 	$members_s =~ s/\s*,\s*/,/g;
 	$members_s =~ s/\s+$//;
 	$members_s =~ s/^\s+//;
-	@n = getgrgid($gid_s);
+	my @n = getgrgid($gid_s);
 	# 'nogroup' et al.
 	next unless @n;
 	my ($name,$passwd,$gid,$members) = @n;

@@ -4,13 +4,15 @@
 # vice versa.
 
 BEGIN {
-    @INC = '..' if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..', '../lib') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
-
 use TestInit qw(T); # T is chdir to the top level
-use strict;
+
 use warnings;
-require './t/test.pl';
 
 my @porting_files;
 open my $man, "MANIFEST" or die "Can't open MANIFEST: $!";

@@ -62,6 +62,7 @@ SKIP: {
     ok( !exists $pig::{bodine}, q(referencing a non-existent stash element doesn't produce stricture errors) );
 }
 
+our $TODO;
 SKIP: {
     eval { require B; 1 } or skip "no B", 29;
 
@@ -301,9 +302,12 @@ fresh_perl_is(
      'packages ending with :: are self-consistent';
 }
 
-# [perl #88138] ' not equivalent to :: before a null
-${"a'\0b"} = "c";
-is ${"a::\0b"}, "c", "' is equivalent to :: before a null";
+{
+    no strict 'refs';
+    # [perl #88138] ' not equivalent to :: before a null
+    ${"a'\0b"} = "c";
+    is ${"a::\0b"}, "c", "' is equivalent to :: before a null";
+}
 
 # [perl #101486] Clobbering the current package
 ok eval '

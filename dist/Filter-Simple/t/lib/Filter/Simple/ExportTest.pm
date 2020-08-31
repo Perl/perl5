@@ -3,7 +3,7 @@ package Filter::Simple::ExportTest;
 use Filter::Simple;
 use parent qw(Exporter);
 
-@EXPORT_OK = qw(ok);
+our @EXPORT_OK = qw(ok);
 
 FILTER { s/not// };
 

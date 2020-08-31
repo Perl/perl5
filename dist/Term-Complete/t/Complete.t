@@ -2,7 +2,6 @@
 
 use warnings;
 use Test::More tests => 8;
-use vars qw( $Term::Complete::complete $complete $Term::Complete::stty );
 
 SKIP: {
     skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST};
@@ -17,7 +16,7 @@ SKIP: {
     # also prevent Term::Complete from running stty and messing up the terminal
     undef $Term::Complete::tty_restore;
     undef $Term::Complete::tty_raw_noecho;
-    undef $Term::Complete::stty;
+    { no warnings 'once'; undef $Term::Complete::stty; }
 
     *complete = \$Term::Complete::complete;
 
@@ -53,7 +52,7 @@ SKIP: {
     $out->clear();
 
     # change the completion character
-    $complete = "!";
+    $Term::Complete::complete = "!";
     $in->add('frobn');
     Complete('prompt:', @words);
     $out->scrub();

@@ -2,7 +2,7 @@
 # This is the twin of enc_eucjp.t .
 
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;

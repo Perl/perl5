@@ -7,10 +7,10 @@
 __END__
 # universal.c [S_isa_lookup]
 print("SKIPPED\n# todo fix: overloading triggers spurious warnings\n"),exit;
-use warnings 'misc' ;
-@ISA = qw(Joe) ;
+use warnings 'misc' ; no strict 'refs';
+our @ISA = qw(Joe) ;
 my $a = bless [] ;
-UNIVERSAL::isa $a, Jim ;
+UNIVERSAL::isa $a, 'Jim';
 EXPECT
 Can't locate package Joe for @main::ISA at - line 5.
 ########
@@ -20,8 +20,8 @@ use warnings 'misc' ;
 use utf8;
 use open qw( :utf8 :std );
 package Ｙ;
-@ISA = qw(Joe) ;
+our @ISA = qw(Joe) ;
 my $a = bless [] ;
-UNIVERSAL::isa $a, Jim ;
+UNIVERSAL::isa $a, 'Jim' ;
 EXPECT
 Can't locate package Joe for @Ｙ::ISA at - line 8.

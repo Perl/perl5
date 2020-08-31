@@ -1,9 +1,12 @@
 #!./perl -w
-use strict;
-require './test.pl';
-skip_all("Sorting order differs under EBCDIC") if $::IS_EBCDIC || $::IS_EBCDIC;
 
-use Config;
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config; Config->import;
+}
+skip_all("Sorting order differs under EBCDIC") if $::IS_EBCDIC || $::IS_EBCDIC;
 
 plan(2);
 

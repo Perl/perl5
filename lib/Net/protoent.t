@@ -15,8 +15,9 @@ BEGIN {
     unless ($haspe) { print "1..0 # Skip: no netdb.h\n"; exit 0 }
 }
 
+our @protoent; # This is the function getprotobyname.
 BEGIN {
-    our @protoent = getprotobyname "tcp"; # This is the function getprotobyname.
+    @protoent = getprotobyname "tcp"; # This is the function getprotobyname.
     unless (@protoent) { print "1..0 # Skip: no tcp protocol\n"; exit 0 }
 }
 

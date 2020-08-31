@@ -7,6 +7,7 @@
 
 use Test::More tests => 1;
 
+my $w;
 $SIG{__WARN__} = sub { $w .= shift };
 
 use warnings;

@@ -2287,7 +2287,7 @@ foreach my $ord (78, 163, 256) {
     $ENV{PATH} = $old_env_path if $Is_MSWin32;
 
     fresh_perl_is(<<'end', "ok", { switches => [ '-T' ] },
-    $TAINT = substr($^X, 0, 0);
+    my $TAINT = substr($^X, 0, 0);
     formline('@'.('<'x("2000".$TAINT)).' | @*', 'hallo', 'welt');
     print "ok";
 end
@@ -2391,6 +2391,7 @@ end
         local $ENV{XX} = '\p{IsB}';   # Making it an environment variable taints it
 
         fresh_perl_like(<<'EOF',
+            my $re;
             BEGIN { $re = qr/$ENV{XX}/; }
 
             sub IsB { "42" };

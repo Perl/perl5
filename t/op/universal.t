@@ -21,10 +21,10 @@ package Human;
 sub eat {}
 
 package Female;
-@ISA=qw(Human);
+our @ISA=qw(Human);
 
 package Alice;
-@ISA=qw(Bob Female);
+our @ISA=qw(Bob Female);
 sub sing;
 sub drink { return "drinking " . $_[1]  }
 sub new { bless {} }
@@ -102,14 +102,14 @@ ok (!Cedric->isa('Programmer'));
 my $b = 'abc';
 my @refs = qw(SCALAR SCALAR     LVALUE      GLOB ARRAY HASH CODE);
 my @vals = (  \$b,   \3.14, \substr($b,1,1), \*b,  [],  {}, sub {} );
-for ($p=0; $p < @refs; $p++) {
-    for ($q=0; $q < @vals; $q++) {
+for (my $p=0; $p < @refs; $p++) {
+    for (my $q=0; $q < @vals; $q++) {
         is UNIVERSAL::isa($vals[$p], $refs[$q]), ($p==$q or $p+$q==1);
     };
 };
 
 ok UNIVERSAL::can(23, "can");
-++${"23::foo"};
+{ no strict 'refs'; ++${"23::foo"}; }
 ok UNIVERSAL::can("23", "can"), '"23" can can when the pack exists';
 ok UNIVERSAL::can(23, "can"), '23 can can when the pack exists';
 sub IO::Handle::turn {}
@@ -284,9 +284,9 @@ use warnings "deprecated";
     package RT66112::B;
 
     sub isa {
-	my $self = shift;
-	@ISA = qw/RT66112::A/;
-	return $self->SUPER::isa(@_);
+        my $self = shift;
+        our @ISA = qw/RT66112::A/;
+        return $self->SUPER::isa(@_);
     }
 
     package RT66112::C;
@@ -294,9 +294,9 @@ use warnings "deprecated";
     package RT66112::D;
 
     sub isa {
-	my $self = shift;
-	@RT66112::E::ISA = qw/RT66112::A/;
-	return $self->SUPER::isa(@_);
+        my $self = shift;
+        @RT66112::E::ISA = qw/RT66112::A/;
+        return $self->SUPER::isa(@_);
     }
 
     package RT66112::E;
@@ -316,7 +316,8 @@ use warnings "deprecated";
     @RT66112::B::ISA = qw//;
     @RT66112::C::ISA = qw/RT66112::B/;
     @RT66112::T3::ISA = qw/RT66112::C/;
-    ok(RT66112::T3->isa('RT66112::A'), "modify \@ISA in isa (RT66112::T3 isa RT66112::A)") or require mro, diag "@{mro::get_linear_isa('RT66112::T3')}";
+    ok(RT66112::T3->isa('RT66112::A'), "modify \@ISA in isa (RT66112::T3 isa RT66112::A)")
+        or require mro, diag "@{mro::get_linear_isa('RT66112::T3')}";
 
     @RT66112::E::ISA = qw/RT66112::D/;
     @RT66112::T4::ISA = qw/RT66112::E/;

@@ -5,6 +5,7 @@ BEGIN {
 }
 chdir 't';
 
+our $Testfile;
 BEGIN {
     $Testfile = 'testfile.foo';
 }

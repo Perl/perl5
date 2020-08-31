@@ -4465,6 +4465,11 @@ call, or call a constructor from the FileHandle package.
 (W unopened) You tried to invoke a file test operator on a filehandle
 that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
+=item Only use v5 and use v7 are supported.
+
+(F) For now you can use 'use v5' or 'use v7', but syntax like 'use v6'
+or 'use v8' are not supported.
+
 =item oops: oopsAV
 
 (S internal) An internal warning that the grammar is screwed up.

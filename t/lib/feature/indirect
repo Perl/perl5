@@ -34,7 +34,7 @@ package Foo {
   sub new { bless {}, shift }
 }
 # make sure this works (either way)
-my $st = STDOUT;
+my $st = 'STDOUT';
 print { $st } "Foo\n";
 say { $st } "Foo";
 
@@ -70,7 +70,7 @@ package Foo {
   sub new { bless {}, shift }
 }
 # make sure this works (either way)
-my $st = STDOUT;
+my $st = 'STDOUT';
 print $st "Foo\n";
 say $st "Foo";
 
@@ -108,7 +108,7 @@ package Foo {
   sub new { bless {}, shift }
 }
 # make sure this works (either way)
-my $st = STDOUT;
+my $st = 'STDOUT';
 print $st ("Foo\n");
 say $st ("Foo");
 

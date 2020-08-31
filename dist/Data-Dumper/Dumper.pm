@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.174'; # Don't forget to set version and release
+    our $VERSION = '2.175'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -23,9 +23,10 @@ use constant IS_PRE_516_PERL => $] < 5.016;
 use Carp ();
 
 BEGIN {
-    @ISA = qw(Exporter);
-    @EXPORT = qw(Dumper);
-    @EXPORT_OK = qw(DumperX);
+    our @ISA = qw(Exporter);
+    our @EXPORT = qw(Dumper);
+    our @EXPORT_OK = qw(DumperX);
+    our $Useperl;
 
     # if run under miniperl, or otherwise lacking dynamic loading,
     # XSLoader should be attempted to load, or the pure perl flag
@@ -41,26 +42,26 @@ BEGIN {
 my $IS_ASCII  = ord 'A' ==  65;
 
 # module vars and their defaults
-$Indent     = 2         unless defined $Indent;
-$Trailingcomma = 0      unless defined $Trailingcomma;
-$Purity     = 0         unless defined $Purity;
-$Pad        = ""        unless defined $Pad;
-$Varname    = "VAR"     unless defined $Varname;
-$Useqq      = 0         unless defined $Useqq;
-$Terse      = 0         unless defined $Terse;
-$Freezer    = ""        unless defined $Freezer;
-$Toaster    = ""        unless defined $Toaster;
-$Deepcopy   = 0         unless defined $Deepcopy;
-$Quotekeys  = 1         unless defined $Quotekeys;
-$Bless      = "bless"   unless defined $Bless;
-#$Expdepth   = 0         unless defined $Expdepth;
-$Maxdepth   = 0         unless defined $Maxdepth;
-$Pair       = ' => '    unless defined $Pair;
-$Useperl    = 0         unless defined $Useperl;
-$Sortkeys   = 0         unless defined $Sortkeys;
-$Deparse    = 0         unless defined $Deparse;
-$Sparseseen = 0         unless defined $Sparseseen;
-$Maxrecurse = 1000      unless defined $Maxrecurse;
+our $Indent     = 2         unless defined $Indent;
+our $Trailingcomma = 0      unless defined $Trailingcomma;
+our $Purity     = 0         unless defined $Purity;
+our $Pad        = ""        unless defined $Pad;
+our $Varname    = "VAR"     unless defined $Varname;
+our $Useqq      = 0         unless defined $Useqq;
+our $Terse      = 0         unless defined $Terse;
+our $Freezer    = ""        unless defined $Freezer;
+our $Toaster    = ""        unless defined $Toaster;
+our $Deepcopy   = 0         unless defined $Deepcopy;
+our $Quotekeys  = 1         unless defined $Quotekeys;
+our $Bless      = "bless"   unless defined $Bless;
+# $Expdepth   = 0         unless defined $Expdepth;
+our $Maxdepth   = 0         unless defined $Maxdepth;
+our $Pair       = ' => '    unless defined $Pair;
+our $Useperl    = 0         unless defined $Useperl;
+our $Sortkeys   = 0         unless defined $Sortkeys;
+our $Deparse    = 0         unless defined $Deparse;
+our $Sparseseen = 0         unless defined $Sparseseen;
+our $Maxrecurse = 1000      unless defined $Maxrecurse;
 
 #
 # expects an arrayref of values to be dumped.
@@ -237,6 +238,7 @@ sub Dump {
 # dump the refs in the current dumper object.
 # expects same args as new() if called via package name.
 #
+our @post;
 sub Dumpperl {
   my($s) = shift;
   my(@out, $val, $name);
@@ -485,7 +487,7 @@ sub _dump {
       if ($s->{deparse}) {
         require B::Deparse;
         my $sub =  'sub ' . (B::Deparse->new)->coderef2text($val);
-        $pad    =  $s->{sep} . $s->{pad} . $s->{apad} . $s->{xpad} x ($s->{level} - 1);
+        my $pad =  $s->{sep} . $s->{pad} . $s->{apad} . $s->{xpad} x ($s->{level} - 1);
         $sub    =~ s/\n/$pad/gs;
         $out   .=  $sub;
       }

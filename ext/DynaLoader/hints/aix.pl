@@ -1,4 +1,5 @@
 # See dl_aix.xs for details.
+no strict 'vars';
 use Config;
 if ($Config{libs} =~ /-lC/ && -f '/lib/libC.a') {
     $self->{CCFLAGS} = $Config{ccflags} . ' -DUSE_libC';

@@ -7,6 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc('../lib');
 }
 
 fresh_perl_is(<<'CODE', 'ok', {});
@@ -29,6 +30,7 @@ my $preamble = <<'CODE';
 sub build_obj {
   # In the real world we would die on validation fails, but RT#27838
   # is still unresolved, so don't tempt fate.
+  no strict 'vars';
   $hash->{name} =~ /^[A-Z][a-z]+ [A-Z][a-z]+$/ or return "name error";
   $hash->{age} =~ /^[1-9][0-9]*$/ or return "age error";
 

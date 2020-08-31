@@ -37,7 +37,7 @@ eval {
 
 use IO::Socket;
 
-$listen = IO::Socket::INET->new(LocalAddr => 'localhost',
+my $listen = IO::Socket::INET->new(LocalAddr => 'localhost',
 				Listen => 2,
 				Proto => 'tcp',
 				# some systems seem to need as much as 10,
@@ -54,8 +54,9 @@ if ($^O eq 'os2' and
     exit 0;
 }
 
-$port = $listen->sockport;
+my $port = $listen->sockport;
 
+my ($pid, $sock);
 if($pid = fork()) {
 
     $sock = $listen->accept() or die "accept failed: $!";
@@ -74,7 +75,7 @@ if($pid = fork()) {
 
 } elsif(defined $pid) {
 
-    $sock = IO::Socket::INET->new(PeerPort => $port,
+    my $sock = IO::Socket::INET->new(PeerPort => $port,
 				  Proto => 'tcp',
 				  PeerAddr => 'localhost'
 				 )
@@ -171,7 +172,7 @@ if($pid = fork()) {
 }
 
 # Then test UDP sockets
-$server = IO::Socket->new(Domain => AF_INET,
+my $server = IO::Socket->new(Domain => AF_INET,
                           Proto  => 'udp',
                           LocalAddr => 'localhost')
        || IO::Socket->new(Domain => AF_INET,
@@ -213,8 +214,8 @@ if ( $^O eq 'qnx' ) {
 ### TEST 15
 ### Set up some data to be transferred between the server and
 ### the client. We'll use own source code ...
-#
-local @data;
+
+our @data;
 if( !open( SRC, '<', $0)) {
     print "not ok 15 - $!\n";
 } else {
@@ -226,7 +227,7 @@ if( !open( SRC, '<', $0)) {
 ### TEST 16
 ### Start the server
 #
-my $listen = IO::Socket::INET->new(LocalAddr => 'localhost', Listen => 2, Proto => 'tcp', Timeout => 15) ||
+$listen = IO::Socket::INET->new(LocalAddr => 'localhost', Listen => 2, Proto => 'tcp', Timeout => 15) ||
     print "not ";
 print "ok 16\n";
 die if( !defined( $listen));

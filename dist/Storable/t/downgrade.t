@@ -12,10 +12,12 @@
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 
+
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -116,7 +118,7 @@ sub test_locked_hash {
   my $hash = shift;
   my @keys = keys %$hash;
   my ($key, $value) = each %$hash;
-  eval {$hash->{$key} = reverse $value};
+  eval {no warnings 'uninitialized'; $hash->{$key} = reverse $value};
   like( $@, "/^Modification of a read-only value attempted/",
         'trying to change a locked key' );
   is ($hash->{$key}, $value, "hash should not change?");
@@ -130,14 +132,17 @@ sub test_restricted_hash {
   my $hash = shift;
   my @keys = keys %$hash;
   my ($key, $value) = each %$hash;
-  eval {$hash->{$key} = reverse $value};
+  eval {no warnings 'uninitialized'; $hash->{$key} = reverse $value};
   is( $@, '',
         'trying to change a restricted key' );
-  is ($hash->{$key}, reverse ($value), "hash should change");
-  eval {$hash->{use} = 'perl'};
-  like( $@, "/^Attempt to access disallowed key 'use' in a restricted hash/",
+  {
+    no warnings 'uninitialized';
+    is ($hash->{$key}, reverse ($value), "hash should change");
+    eval {$hash->{use} = 'perl'};
+    like( $@, "/^Attempt to access disallowed key 'use' in a restricted hash/",
         'trying to add another key' );
-  ok (eq_array([keys %$hash], \@keys), "Still the same keys?");
+    ok (eq_array([keys %$hash], \@keys), "Still the same keys?");
+  }
 }
 
 sub test_placeholder {

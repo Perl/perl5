@@ -172,7 +172,7 @@ Unsuccessful stat on filename containing newline at - line 7.
 Unsuccessful stat on filename containing newline at - line 8.
 ########
 # doio.c [Perl_my_stat]
-use warnings 'io';
+use warnings 'io'; my $fh;
 -l STDIN;
 -l $fh;
 open $fh, $0 or die "# $!";

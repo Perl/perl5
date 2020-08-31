@@ -3,11 +3,11 @@
 # regression tests for old bugs that do not fit other categories
 
 BEGIN {
-    require Config; import Config;
+    use Config;
     no warnings 'once';
     if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-	print "1..0 # Skip: Data::Dumper was not built\n";
-	exit 0;
+        print "1..0 # Skip: Data::Dumper was not built\n";
+        exit 0;
     }
 }
 

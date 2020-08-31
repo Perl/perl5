@@ -137,6 +137,7 @@ $x = $q - $r;
 cmp_ok($x, '==', -11111110111);
 cmp_ok(-$x, '>', $f);
 
+my $c;
 SKIP: {
     # Unicos has imprecise doubles (14 decimal digits or so),
     # especially if operating near the UV/IV limits the low-order bits

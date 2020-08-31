@@ -7,11 +7,12 @@ BEGIN {
 
 use MIME::QuotedPrint;
 
-$x70 = "x" x 70;
+my $x70 = "x" x 70;
 
-$IsASCII  = ord('A') == 65;
-$IsEBCDIC = ord('A') == 193;
+my $IsASCII  = ord('A') == 65;
+my $IsEBCDIC = ord('A') == 193;
 
+my @tests = ();
 if ($IsASCII) {
 
 @tests =
@@ -34,7 +35,7 @@ if ($IsASCII) {
    ["=30\n" => "=3D30\n"],
    ["\0\xff0" => "=00=FF0=\n"],
 
-   # Very long lines should be broken (not more than 76 chars
+   # Very long lines should be broken (not more than 76 chars)
    ["The Quoted-Printable encoding is intended to represent data that largly consists of octets that correspond to printable characters in the ASCII character set." =>
     "The Quoted-Printable encoding is intended to represent data that largly con=
 sists of octets that correspond to printable characters in the ASCII charac=
@@ -124,7 +125,7 @@ y. -- H. L. Mencken=\n"],
    ["=30\n" => "=7E30\n"],
    ["\0\xff0" => "=00=FF0=\n"],
 
-   # Very long lines should be broken (not more than 76 chars
+   # Very long lines should be broken (not more than 76 chars)
    ["The Quoted-Printable encoding is intended to represent data that largly consists of octets that correspond to printable characters in the ASCII character set." =>
     "The Quoted-Printable encoding is intended to represent data that largly con=
 sists of octets that correspond to printable characters in the ASCII charac=
@@ -191,18 +192,18 @@ y. -- H. L. Mencken=\n"],
   die sprintf "Unknown character set: ord('A') == %d\n", ord('A');
 }
 
-$notests = @tests + 16;
+my $notests = @tests + 16;
 print "1..$notests\n";
 
-$testno = 0;
+my $testno = 0;
 for (@tests) {
     $testno++;
-    ($plain, $encoded) = @$_;
+    my ($plain, $encoded) = @$_;
     if (ord('A') == 193) {  # EBCDIC 8 bit chars are different
         if ($testno == 2) { $plain =~ s/\xe5/\x47/; $plain =~ s/\xe6/\x9c/g; $plain =~ s/\xf8/\x70/; }
         if ($testno == 7) { $plain =~ s/\xff/\xdf/; }
     }
-    $x = encode_qp($plain);
+    my $x = encode_qp($plain);
     if ($x ne $encoded) {
 	print "Encode test failed\n";
 	print "Got:      '$x'\n";

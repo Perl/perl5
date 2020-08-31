@@ -1,3 +1,4 @@
+no strict 'vars';
 use Config;
 if ($Config{osvers} == 5) {
   $self->{CCFLAGS} = $Config{ccflags};

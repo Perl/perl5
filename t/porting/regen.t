@@ -8,13 +8,15 @@
 # tells you.
 
 BEGIN {
-    @INC = '..' if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..', '../lib') if -f '../TestInit.pm';
+    require Config; Config->import;
+    require '../regen/regen_lib.pl';
 }
 use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
-use strict;
 
-require './regen/regen_lib.pl';
-require './t/test.pl';
 $::NO_ENDING = $::NO_ENDING = 1;
 
 if ( $^O eq "VMS" ) {
@@ -114,3 +116,4 @@ foreach (@progs) {
     system $command
         and die "Failed to run $command: $?";
 }
+

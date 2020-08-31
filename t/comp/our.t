@@ -27,6 +27,7 @@ sub is {
     package TieAll;
     # tie, track, and report what calls are made
     my @calls;
+    our $AUTOLOAD;
     sub AUTOLOAD {
         for ($AUTOLOAD =~ /TieAll::(.*)/) {
             if (/TIE/) { return bless {} }
@@ -41,6 +42,8 @@ sub is {
         }
     }
 }
+
+my ($x, %x, @x);
 
 tie $x, 'TieAll';
 tie @x, 'TieAll';
@@ -65,7 +68,7 @@ is(TieAll->calls, '', 'our @x has no runtime effect');
 is(TieAll->calls, '', 'our (@x) has no runtime effect');
 
 
-$y = 1;
+my $y = 1;
 {
     my $y = 2;
     {

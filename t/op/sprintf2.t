@@ -7,6 +7,7 @@ BEGIN {
     require './test.pl';
     require './charset_tools.pl';
     set_up_inc('../lib');
+    require Config; Config->import;
 }   
 
 # We'll run 12 extra tests (see below) if $Q is false.

@@ -20,7 +20,6 @@ BEGIN {
     $? && skip_all("Apparently can't probe using $dtrace (perhaps you need root?): $result");
 }
 
-use strict;
 use warnings;
 use IPC::Open2;
 

@@ -9,7 +9,7 @@ use Test::More tests => 2;
 use B::Deparse;
 
 package B::Deparse::NameMangler {
-  @ISA = "B::Deparse";
+  our @ISA = "B::Deparse";
   sub padname { SUPER::padname{@_} . '_groovy' }
 }
 

@@ -22,11 +22,11 @@ BEGIN { # If there is a foo symbol, this test will not be testing anything.
     delete $::{foo};
     delete $::{goo};
 }
-is((foo bar), 'bar___');
-$bar = "baz";
+is((foo 'bar'), 'bar___');
+my $bar = "baz";
 is((foo $bar), 'baz___');
 
 # Proto should cause goo() to override Foo->goo interpretation.
 {package Foom}
 sub goo_ (*) { shift . "===" }
-is((goo Foom), "Foom===");
+is((goo 'Foom'), "Foom===");

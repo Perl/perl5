@@ -6,8 +6,6 @@ BEGIN {
     require './loc_tools.pl'; # to find locales
 }
 
-use strict;
-
 ########
 # These tests are here instead of lib/locale.t because
 # some bugs depend on the internal state of the locale

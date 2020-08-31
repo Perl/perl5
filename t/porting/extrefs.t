@@ -13,14 +13,14 @@
 # references some symbol you didn't define, you need to remove it.
 
 BEGIN {
-  require "./test.pl";
-  unshift @INC, ".." if -f "../TestInit.pm";
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    unshift (@INC, '..') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
-
 use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
-use strict;
 use warnings;
-use Config;
 use File::Path 'rmtree';
 use Cwd;
 use IPC::Cmd qw(can_run);

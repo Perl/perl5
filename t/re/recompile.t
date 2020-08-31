@@ -23,10 +23,10 @@ use warnings;
 plan tests => 48;
 
 my $results = runperl(
-			switches => [ '-Dr' ],
-			prog => '1',
-			stderr   => 1,
-		    );
+    switches => [ '-Dr' ],
+    prog => '1',
+    stderr   => 1,
+);
 my $has_Dr = $results !~ /Recompile perl with -DDEBUGGING/;
 
 my $tmpfile = tempfile();
@@ -42,33 +42,33 @@ sub _comp_n {
 
     my $switches = [];
     if ($use_Dr) {
-	push @$switches, '-Dr';
+        push @$switches, '-Dr';
     }
     else {
-	$prog = qq{use re qw(debug);\n$prog};
+        $prog = qq{use re qw(debug);\n$prog};
     }
 
     print $tf $prog;
     close $tf or die "Cannot close $tmpfile: $!";
     my $results = runperl(
-			switches => $switches,
-			progfile => $tmpfile,
-			stderr   => 1,
-		    );
+        switches => $switches,
+        progfile => $tmpfile,
+        stderr   => 1,
+    );
 
     my $status = $?;
 
     my $count = () = $results =~ /Final program:/g;
     if ($count == $n && !$status) {
-	pass($desc);
+        pass($desc);
     }
     else {
-	fail($desc);
+        fail($desc);
         _diag "# COUNT:    $count EXPECTED $n\n";
         _diag "# STATUS:   $status\n";
         _diag "# SWITCHES: @$switches\n";
         _diag "# PROG: \n$prog\n";
-	# this is verbose; uncomment for debugging
+        # this is verbose; uncomment for debugging
         #_diag "# OUTPUT:\n------------------\n $results-------------------\n";
     }
 }
@@ -78,12 +78,12 @@ sub _comp_n {
 sub comp_n {
     my ($n, $prog, $desc) = @_;
     if ($has_Dr) {
-	_comp_n(1, $n, $prog, "$desc -Dr");
+        _comp_n(1, $n, $prog, "$desc -Dr");
     }
     else {
-	SKIP: {
-	    skip("-Dr not compiled in");
-	}
+        SKIP: {
+            skip("-Dr not compiled in");
+        }
     }
     _comp_n(0, @_);
 }
@@ -201,7 +201,7 @@ comp_n(2, <<'CODE', '(??{"folded"."constant"})');
 CODE
 
 comp_n(2, <<'CODE', '(??{$preused_scalar})');
-$s = "abc";
+my $s = "abc";
 "bb" =~ /(??{$s})/;
 CODE
 

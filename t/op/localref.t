@@ -5,14 +5,20 @@ chdir 't' if -d 't';
 require "./test.pl";
 plan( tests => 64 );
 
-$aa = 1;
+# Since what we have to 'local'-ize our global or package-scoped variables
+# we're inevitably going to get a lot of violations of "strict 'refs'".  Relax
+# that stricture.
+
+no strict 'refs';
+
+our $aa = 1;
 { local $aa;     $aa = 2; is($aa,2); }
 is($aa,1);
 { local ${aa};   $aa = 3; is($aa,3); }
 is($aa,1);
 { local ${"aa"}; $aa = 4; is($aa,4); }
 is($aa,1);
-$x = "aa";
+our $x = "aa";
 { local ${$x};   $aa = 5; is($aa,5); undef $x; is($aa,5); }
 is($aa,1);
 $x = "a";
@@ -22,7 +28,7 @@ $x = "aa";
 { local $$x;     $aa = 7; is($aa,7); undef $x; is($aa,7); }
 is($aa,1);
 
-@aa = qw/a b/;
+our @aa = qw/a b/;
 { local @aa;     @aa = qw/c d/; is("@aa","c d"); }
 is("@aa","a b");
 { local @{aa};   @aa = qw/e f/; is("@aa","e f"); }
@@ -39,7 +45,7 @@ $x = "aa";
 { local @$x;     @aa = qw/m n/; is("@aa","m n"); undef $x; is("@aa","m n"); }
 is("@aa","a b");
 
-%aa = qw/a b/;
+our %aa = qw/a b/;
 { local %aa;     %aa = qw/c d/; is($aa{c},"d"); }
 is($aa{a},"b");
 { local %{aa};   %aa = qw/e f/; is($aa{e},"f"); }

@@ -14,7 +14,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000037';
+our $VERSION = '1.000037_01';
 
 use Carp qw/croak/;
 use File::Spec;
@@ -546,7 +546,6 @@ sub _parse_fh {
 
   while (defined( my $line = <$fh> )) {
     my $line_num = $.;
-
     chomp( $line );
 
     # From toke.c : any line that begins by "=X", where X is an alphabetic
@@ -685,14 +684,18 @@ sub _evaluate_version_line {
   my $self = shift;
   my( $sigil, $variable_name, $line ) = @_;
 
+  # It is not legal to do local on a variable in the local name space before it is declared.
+  my $local = ($variable_name =~ m/::/) ? 'local' : 'my';
+
   # We compile into a local sub because 'use version' would cause
   # compiletime/runtime issues with local()
   $pn++; # everybody gets their own package
   my $eval = qq{ my \$dummy = q#  Hide from _packages_inside()
     #; package Module::Metadata::_version::p${pn};
+    no strict 'vars';
     use version;
     sub {
-      local $sigil$variable_name;
+      $local $sigil$variable_name;
       $line;
       return \$$variable_name if defined \$$variable_name;
       return \$Module::Metadata::_version::p${pn}::$variable_name;

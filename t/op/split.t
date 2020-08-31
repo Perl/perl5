@@ -9,16 +9,16 @@ BEGIN {
 
 plan tests => 176;
 
-$FS = ':';
+my $FS = ':';
 
 $_ = 'a:b:c';
 
-($a,$b,$c) = split($FS,$_);
+my ($alpha,$beta,$c) = split($FS,$_);
 
-is(join(';',$a,$b,$c), 'a;b;c', 'Split a simple string into scalars.');
+is(join(';',$alpha,$beta,$c), 'a;b;c', 'Split a simple string into scalars.');
 
-@ary = split(/:b:/);
-$cnt = split(/:b:/);
+my @ary = split(/:b:/);
+my $cnt = split(/:b:/);
 is(join("$_",@ary), 'aa:b:cc');
 is($cnt, scalar(@ary));
 
@@ -60,7 +60,7 @@ $cnt = split(' ','1 2 3 4 5 6', 3);
 is($cnt, scalar(@ary), "Check element count from previous test");
 
 # Can we do it as a variable?
-$x = 4;
+my $x = 4;
 $_ = join(':', split(' ','1 2 3 4 5 6', $x));
 is($_, '1:2:3:4 5 6', "Split into a specified number of fields, defined by a scalar variable");
 @ary = split(' ','1 2 3 4 5 6', $x);
@@ -80,12 +80,12 @@ $_ = join(':', split);
 is($_ , '1:2:3:4', "Split and join without specifying a split pattern");
 
 # Does assignment to a list imply split to one more field than that?
-$foo = runperl( switches => ['-Dt'], stderr => 1, prog => '($a,$b)=split;' );
+my $foo = runperl( switches => ['-Dt'], stderr => 1, prog => '($alpha,$beta)=split;' );
 ok($foo =~ /DEBUGGING/ || $foo =~ /const\n?\Q(IV(3))\E/);
 
 # Can we say how many fields to split to when assigning to a list?
-($a,$b) = split(' ','1 2 3 4 5 6', 2);
-$_ = join(':',$a,$b);
+($alpha,$beta) = split(' ','1 2 3 4 5 6', 2);
+$_ = join(':',$alpha,$beta);
 is($_, '1:2 3 4 5 6', "Storing split output into list of scalars");
 
 # do subpatterns generate additional fields (without trailing nulls)?
@@ -103,13 +103,14 @@ $cnt = split(/,|(-)/, "1-10,20,,,", 10);
 is($cnt, scalar(@ary));
 
 # is the 'two undefs' bug fixed?
-(undef, $a, undef, $b) = qw(1 2 3 4);
-is("$a|$b", "2|4");
+(undef, $alpha, undef, $beta) = qw(1 2 3 4);
+is("$alpha|$beta", "2|4");
 
 # .. even for locals?
 {
-  local(undef, $a, undef, $b) = qw(1 2 3 4);
-  is("$a|$b", "2|4");
+    no strict 'vars';
+    local(undef, $d, undef, $e) = qw(1 2 3 4);
+    is("$d|$e", "2|4");
 }
 
 # check splitting of null string
@@ -170,6 +171,7 @@ is($cnt, scalar(@ary));
 $_ = "a : b :c: d";
 @ary = split(/\s*:\s*/);
 $cnt = split(/\s*:\s*/);
+my $res;
 is(($res = join(".",@ary)), "a.b.c.d", $res);
 is($cnt, scalar(@ary));
 
@@ -187,6 +189,7 @@ $_ = join ':', split /\A/, "ab\ncd\nef\n";
 is($_, "ab\ncd\nef\n","check that split /\A/ is NOT treated as split /^/m");
 
 # see if @a = @b = split(...) optimization works
+my (@list1, @list2);
 @list1 = @list2 = split ('p',"a p b c p");
 ok(@list1 == @list2 &&
    "@list1" eq "@list2" &&
@@ -268,48 +271,48 @@ is($cnt, scalar(@ary));
   {
 	# bug id 20000426.003 (#3166)
 
-	my ($a, $b, $c) = split(/\x40/, $s);
-	ok($a eq "\x20" && $b eq "\x{80}\x{100}\x{80}" && $c eq $a);
+	my ($alpha, $beta, $c) = split(/\x40/, $s);
+	ok($alpha eq "\x20" && $beta eq "\x{80}\x{100}\x{80}" && $c eq $alpha);
   }
 
-    my ($a, $b) = split(/\x{100}/, $s);
-    ok($a eq "\x20\x40\x{80}" && $b eq "\x{80}\x40\x20");
+    my ($alpha, $beta) = split(/\x{100}/, $s);
+    ok($alpha eq "\x20\x40\x{80}" && $beta eq "\x{80}\x40\x20");
 
-    my ($a, $b) = split(/\x{80}\x{100}\x{80}/, $s);
-    ok($a eq "\x20\x40" && $b eq "\x40\x20");
+    my ($alpha, $beta) = split(/\x{80}\x{100}\x{80}/, $s);
+    ok($alpha eq "\x20\x40" && $beta eq "\x40\x20");
 
   {
-	my ($a, $b) = split(/\x40\x{80}/, $s);
-	ok($a eq "\x20" && $b eq "\x{100}\x{80}\x40\x20");
+	my ($alpha, $beta) = split(/\x40\x{80}/, $s);
+	ok($alpha eq "\x20" && $beta eq "\x{100}\x{80}\x40\x20");
   }
 
-    my ($a, $b, $c) = split(/[\x40\x{80}]+/, $s);
-    ok($a eq "\x20" && $b eq "\x{100}" && $c eq "\x20");
+    my ($alpha, $beta, $c) = split(/[\x40\x{80}]+/, $s);
+    ok($alpha eq "\x20" && $beta eq "\x{100}" && $c eq "\x20");
 }
 
 {
     # 20001205.014 (#4844)
 
-    my $a = "ABC\x{263A}";
+    my $alpha = "ABC\x{263A}";
 
-    my @b = split( //, $a );
-    my $c = split( //, $a );
+    my @b = split( //, $alpha );
+    my $c = split( //, $alpha );
     is($c, scalar(@b));
 
     is(scalar @b, 4);
 
     ok(length($b[3]) == 1 && $b[3] eq "\x{263A}");
 
-    $a =~ s/^A/Z/;
-    ok(length($a) == 4 && $a eq "ZBC\x{263A}");
+    $alpha =~ s/^A/Z/;
+    ok(length($alpha) == 4 && $alpha eq "ZBC\x{263A}");
 }
 
 {
     my @a = split(/\xFE/, "\xFF\xFE\xFD");
-    my $b = split(/\xFE/, "\xFF\xFE\xFD");
+    my $beta = split(/\xFE/, "\xFF\xFE\xFD");
 
     ok(@a == 2 && $a[0] eq "\xFF" && $a[1] eq "\xFD");
-    is($b, scalar(@a));
+    is($beta, scalar(@a));
 }
 
 {
@@ -337,15 +340,15 @@ is($cnt, scalar(@ary));
     local $SIG{__WARN__} = sub { $warn = join '', @_; chomp $warn };
     my $char = "\x{10f1ff}";
     my @a = split /\r?\n/, "$char\n";
-    my $b = split /\r?\n/, "$char\n";
-    is($b, scalar(@a));
+    my $beta = split /\r?\n/, "$char\n";
+    is($beta, scalar(@a));
     ok(@a == 1 && $a[0] eq $char && !defined($warn));
 }
 
 {
     # [perl #18195]
     for my $u (0, 1) {
-	for my $a (0, 1) {
+	for my $alpha (0, 1) {
 	    $_ = 'readin,database,readout';
 	    utf8::upgrade $_ if $u;
 	    /(.+)/;
@@ -358,11 +361,12 @@ is($cnt, scalar(@ary));
 }
 
 {
-    $p="a,b";
+    my $p="a,b";
     utf8::upgrade $p;
+    my (@a, $beta);
     eval { @a=split(/[, ]+/,$p) };
-    eval { $b=split(/[, ]+/,$p) };
-    is($b, scalar(@a));
+    eval { $beta=split(/[, ]+/,$p) };
+    is($beta, scalar(@a));
     is ("$@-@a-", '-a b-', '#20912 - split() to array with /[]+/ and utf8');
 }
 
@@ -372,7 +376,7 @@ is($cnt, scalar(@ary));
         utf8::upgrade $pattern;
         my @res;
         for my $str ("a${pattern}b", "axb", "a${pattern}b") {
-            @split = split /$pattern/, $str;
+            my @split = split /$pattern/, $str;
             push @res, scalar(@split);
         }
         is($res[0], 2);
@@ -382,9 +386,11 @@ is($cnt, scalar(@ary));
 }
 
 {
+    no strict 'vars';
+    no strict 'refs';
     is (\@a, \@{"a"}, '@a must be global for following test');
-    $p="";
-    $n = @a = split /,/,$p;
+    my $p="";
+    my $n = @a = split /,/,$p;
     is ($n, 0, '#21765 - pmreplroot hack used to return undef for 0 iters');
 }
 
@@ -394,9 +400,9 @@ is($cnt, scalar(@ary));
     # in the inner elements
 
     my $x;
-    @a = split /,/, ',,,,,';
+    my @a = split /,/, ',,,,,';
     $a[3]=1;
-    $x = \$a[2];
+    my $x = \$a[2];
     is (ref $x, 'SCALAR', '#28938 - garbage after extend');
 }
 
@@ -476,6 +482,7 @@ is($cnt, scalar(@ary));
         @results = split $cond ? qr/ / : " ", $expr;
         push @seq, scalar(@results) . ":" . $results[-1];
     }
+    my $exp;
     is join(" ", @seq), "1:foo 3:foo 1:foo 3:foo 1:foo",
         qq{split(\$cond ? qr/ / : " ", "$exp") behaves as expected over repeated similar patterns};
 }
@@ -519,16 +526,20 @@ SKIP: {
 
 # Nasty interaction between split and use constant
 use constant nought => 0;
-($a,$b,$c) = split //, $foo, nought;
+($alpha,$beta,$c) = split //, $foo, nought;
 is nought, 0, 'split does not mangle 0 constants';
 
-*aaa = *bbb;
-$aaa[1] = "foobarbaz";
-$aaa[1] .= "";
-@aaa = split //, $bbb[1];
-is "@aaa", "f o o b a r b a z",
-   'split-to-array does not free its own argument';
+{
+    no strict 'vars';
+    *aaa = *bbb;
+    $aaa[1] = "foobarbaz";
+    $aaa[1] .= "";
+    @aaa = split //, $bbb[1];
+    is "@aaa", "f o o b a r b a z",
+       'split-to-array does not free its own argument';
+}
 
+my @a;
 () = @a = split //, "abc";
 is "@a", "a b c", '() = split-to-array';
 
@@ -560,26 +571,28 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
 # check that my/local @array = split works
 
 {
+    no strict 'vars';
     my $s = "a:b:c";
 
-    local @a = qw(x y z);
+    local @f = qw(x y z);
     {
-        local @a = split /:/, $s;
-        is "@a", "a b c", "local split inside";
+        local @f = split /:/, $s;
+        is "@f", "a b c", "local split inside";
     }
-    is "@a", "x y z", "local split outside";
+    is "@f", "x y z", "local split outside";
 
-    my @b = qw(x y z);
+    my @g = qw(x y z);
     {
-        my @b = split /:/, $s;
-        is "@b", "a b c", "my split inside";
+        my @g = split /:/, $s;
+        is "@g", "a b c", "my split inside";
     }
-    is "@b", "x y z", "my split outside";
+    is "@g", "x y z", "my split outside";
 }
 
 # check that the (@a = split) optimisation works in scalar/list context
 
 {
+    no strict 'vars';
     my $s = "a:b:c:d:e";
     my @outer;
     my $outer;

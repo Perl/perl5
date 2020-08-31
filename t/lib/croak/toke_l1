@@ -7,7 +7,7 @@ Malformed UTF-8 character: \xc3\x0a (unexpected non-continuation byte 0x0a, imme
 Malformed UTF-8 character (fatal) at - line 1.
 ########
 # NAME [perl #129157]
-BEGIN {$^H {q} = sub {pop and-t          write gmtime     getpwuid  @p }; $^H =-6**4,0*215}
+BEGIN {my @p; $^H {q} = sub {pop and-t          write gmtime     getpwuid  @p }; $^H =-6**4,0*215}
 "@ust we√√√√√√√√√√√tprotobyname"; "9 "Y=n {pop and-p[p };shmr     [A
   G----C
 EXPECT

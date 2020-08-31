@@ -144,7 +144,7 @@ sub check_env {
 }
 
 fresh_perl_is(<<'EOP', '', { stderr => 1 }, "check stack handling");
-for $x (map $_+1, 1 .. 100) {
+for my $x (map $_+1, 1 .. 100) {
   map chdir, 1 .. $x;
 }
 EOP

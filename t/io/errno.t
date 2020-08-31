@@ -4,11 +4,12 @@
 # $! may not be set if EOF was reached without any error.
 # https://github.com/Perl/perl5/issues/8431
 
-use strict;
-use Config;
-
-chdir 't' if -d 't';
-require './test.pl';
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config; Config->import;
+}
 
 plan( tests => 16 );
 

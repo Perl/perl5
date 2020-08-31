@@ -1,11 +1,12 @@
 package O;
 
-our $VERSION = '1.03';
+our $VERSION = '1.03_001';
 
 use B ();
 
 our $BEGIN_output;
 our $saveout_fh;
+our $savebackslash;
 
 sub import {
     my ($class, @options) = @_;
@@ -40,9 +41,9 @@ sub import {
 	    # nice. Thanks. --smcc
 	    use B::].$backend.q[ ();
 
-	    my $compilesub = &{"B::${backend}::compile"}(@options);
+        my $compilesub = B::].$backend.q[::compile(@options);
 	    if (ref($compilesub) ne "CODE") {
-		die $compilesub;
+		    die $compilesub;
 	    }
 
 	    local $savebackslash = $\;

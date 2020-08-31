@@ -37,6 +37,8 @@ my $is_win32=$^O eq 'MSWin32' ? "MSWin32 has broken pipes" : "";
 $| = 1;
 print "1..10\n";
 
+my ($pipe);
+our ($stdin, $stdout);
 if ($is_win32) {
     print "ok $_ # skipped: $is_win32\n" for 1..4;
 } else {
@@ -47,7 +49,7 @@ if ($is_win32) {
     }
     $pipe->close or print "# \$!=$!\nnot ";
     print "ok 2\n";
-    $cmd = 'BEGIN{$SIG{ALRM} = sub {print qq(not ok 4\n); exit}; alarm 10} s/not //';
+    my $cmd = 'BEGIN{$SIG{ALRM} = sub {print qq(not ok 4\n); exit}; alarm 10} s/not //';
     $pipe = new IO::Pipe->writer($perl, '-pe', $cmd);
     print $pipe "not ok 3\n" ;
     $pipe->close or print "# \$!=$!\nnot ";
@@ -63,7 +65,7 @@ if ($^O eq 'os2' and
 
 $pipe = new IO::Pipe;
 
-$pid = fork();
+my $pid = fork();
 
 if($pid)
  {

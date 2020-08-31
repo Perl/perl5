@@ -11,11 +11,11 @@ sub ok
     print "not ok $no\n" unless $ok ;
 }
 
-$name="test.gz";
+my $name="test.gz";
 
 print "1..23\n";
 
-@text = (<<EOM, <<EOM, <<EOM, <<EOM) ;
+my @text = (<<EOM, <<EOM, <<EOM, <<EOM) ;
 this is line 1
 EOM
 the second line
@@ -25,8 +25,8 @@ EOM
 the final line
 EOM
 
-$text = join("", @text) ;
-
+my $text = join("", @text) ;
+my ($file, @lines);
 ok(1, $file = IO::Zlib->new($name, "wb"));
 ok(2, $file->print($text));
 ok(3, $file->close());

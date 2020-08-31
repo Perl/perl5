@@ -7,18 +7,18 @@ BEGIN {
 }
 
 $|  = 1;
-use warnings;
 use Config;
 
 plan tests => 188;
 
+our $f;
 sub ok_cloexec {
     SKIP: {
-	skip "no fcntl", 1 unless $Config{d_fcntl};
-	my $fd = fileno($_[0]);
-	fresh_perl_is(qq(
-	    print open(F, "+<&=$fd") ? 1 : 0, "\\n";
-	), "0\n", {}, "not inherited across exec");
+        skip "no fcntl", 1 unless $Config{d_fcntl};
+        my $fd = fileno($_[0] or '');
+        fresh_perl_is(qq(
+            print open(F, "+<&=$fd") ? 1 : 0, "\\n";
+        ), "0\n", {}, "not inherited across exec");
     }
 }
 
@@ -254,9 +254,8 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
     ok( open(STDOUT,     ">&", $stdout),        'restore dupped STDOUT from lexical fh');
 
     {
-	use strict; # the below should not warn
-	ok( open(my $stdout, ">&", STDOUT),         'dup STDOUT into lexical fh');
-	ok_cloexec($stdout);
+        ok( open(my $stdout, ">&", STDOUT),         'dup STDOUT into lexical fh');
+        ok_cloexec($stdout);
     }
 
     # used to try to open a file [perl #17830]
@@ -290,11 +289,12 @@ SKIP: {
 
     sub gimme {
         my $tmphandle = shift;
-	my $line = scalar <$tmphandle>;
-	warn "gimme";
-	return $line;
+        my $line = scalar <$tmphandle>;
+        warn "gimme";
+        return $line;
     }
 
+    my (@fh0, %fh1, @fh2, @fh2, %fh3);
     open($fh0[0], "TEST");
     ok_cloexec($fh0[0]);
     gimme($fh0[0]);
@@ -305,13 +305,11 @@ SKIP: {
     gimme($fh1{k});
     like($@, qr/<\$fh1\{...}> line 1\./, "autoviv fh package helem");
 
-    my @fh2;
     open($fh2[0], "TEST");
     ok_cloexec($fh2[0]);
     gimme($fh2[0]);
     like($@, qr/<\$fh2\[...\]> line 1\./, "autoviv fh lexical aelem");
 
-    my %fh3;
     open($fh3{k}, "TEST");
     ok_cloexec($fh3{h});
     gimme($fh3{k});
@@ -363,13 +361,17 @@ eval { open $99, "foo" };
 like($@, qr/Modification of a read-only value attempted/, "readonly fh");
 # But we do not want that exception applying to close(), since it does not
 # modify the fh.
-eval {
-   no warnings "uninitialized";
-   # make sure $+ is undefined
-   "a" =~ /(b)?/;
-   close $+
-};
-is($@, '', 'no "Modification of a read-only value" when closing');
+{
+    local $@;
+    eval {
+       no warnings "uninitialized";
+       no strict 'refs';
+       # make sure $+ is undefined
+       "a" =~ /(b)?/;
+       close $+
+    };
+    is($@, '', 'no "Modification of a read-only value" when closing');
+}
 
 # [perl#73626] mg_get wasn't run on the pipe arg
 
@@ -428,6 +430,7 @@ pass("no crash when open autovivifies glob in freed package");
 
 # [perl #117265] check for embedded nul in pathnames, allow ending \0 though
 {
+    use warnings;
     my $WARN;
     local $SIG{__WARN__} = sub { $WARN = shift };
     my $temp = tempfile();

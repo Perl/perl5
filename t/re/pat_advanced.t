@@ -2251,7 +2251,7 @@ EOP
         fresh_perl_is(<<'EOF',
                 my $s = "\x{41c}";
                 $s =~ /(.*)/ or die;
-                $ls = lc $1;
+                my $ls = lc $1;
                 print $ls eq lc $s ? "good\n" : "bad: [$ls]\n";
 EOF
             "good\n",

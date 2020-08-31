@@ -19,6 +19,7 @@ BEGIN {
     );
 }
 
+
 sub BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir 'dist/Storable' if -d 'dist/Storable';
@@ -27,7 +28,8 @@ sub BEGIN {
         unshift @INC, 't';
         unshift @INC, 't/compat' if $] < 5.006002;
     }
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -38,7 +40,7 @@ use Test::More;
 
 use Storable qw(freeze thaw store retrieve fd_retrieve);
 
-%::weird_refs = 
+our %weird_refs =
   (REF            => \(my $aref    = []),
    VSTRING        => \(my $vstring = v1.2.3),
    'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),
@@ -79,14 +81,14 @@ my $longname = "LONG_NAME_" . ('xxxxxxxxxxxxx::' x $m) . "final";
 eval <<EOC;
 package $longname;
 
-\@ISA = ("SHORT_NAME");
+our \@ISA = ("SHORT_NAME");
 EOC
 is($@, '');
 
 eval <<EOC;
 package ${longname}_WITH_HOOK;
 
-\@ISA = ("SHORT_NAME_WITH_HOOK");
+our \@ISA = ("SHORT_NAME_WITH_HOOK");
 EOC
 is($@, '');
 
@@ -183,8 +185,8 @@ foreach $count (1..3) {
 
 package HAS_HOOK;
 
-$loaded_count = 0;
-$thawed_count = 0;
+our $loaded_count = 0;
+our $thawed_count = 0;
 
 sub make {
   bless [];
@@ -220,6 +222,8 @@ is(ref $t, 'HAS_HOOK');
 {
     package STRESS_THE_STACK;
 
+    our $freeze_count = 0;
+    our $thaw_count = 0;
     my $stress;
     sub make {
 	bless [];
@@ -306,9 +310,14 @@ is(ref $t, 'STRESS_THE_STACK');
         if ($weird =~ 'VSTRING') {
             # It is not just Storable that did not support vstrings. :-)
             # See https://rt.cpan.org/Ticket/Display.html?id=78678
-            my $newver = "version"->can("new")
+            my $newver;
+            {
+                # Integer overflow in version (twice)
+                no warnings 'overflow';
+                $newver = "version"->can("new")
                            ? sub { "version"->new(shift) }
                            : sub { "" };
+            }
             if (!ok
                   $$thawn eq $$obj && &$newver($$thawn) eq &$newver($$obj),
                  "get the right value back"

@@ -31,6 +31,7 @@ in(neg("+2"));
 
 is($in, '-2');
 
+my $blah;
 sub get_lex : lvalue { $in }
 sub get_st : lvalue { $blah }
 sub id : lvalue { ${\shift} }
@@ -112,8 +113,9 @@ cmp_ok($blah, '==', 25);
 
 cmp_ok($in, '==', 25);
 
-@a = (1) x 3;
-@b = (undef) x 2;
+my @a = (1) x 3;
+my @b = (undef) x 2;
+my @c;
 $#c = 3;			# These slots are not fillable.
 
 # Explanation: empty slots contain &sv_undef.
@@ -150,7 +152,7 @@ sub a::var : lvalue { $var }
 cmp_ok($var, '==', 45);
 
 my $oo;
-$o = bless \$oo, "a";
+my $o = bless \$oo, "a";
 
 $o->var = 47;
 
@@ -162,6 +164,7 @@ o->var = 49;
 
 cmp_ok($var, '==', 49);
 
+my ($x0, $x1);
 sub nolv () { $x0, $x1 } # Not lvalue
 
 $_ = '';
@@ -192,7 +195,7 @@ EOE
 like($_, qr/Can\'t modify non-lvalue subroutine call of &main::nolv in scalar assignment/);
 
 $x0 = $x1 = $_ = undef;
-$nolv = \&nolv;
+my $nolv = \&nolv;
 
 eval <<'EOE' or $_ = $@;
   $nolv->() = (2,3) if $_;
@@ -290,7 +293,7 @@ EOE
 
 ok(!defined, 'explicitly returning undef in list context');
 
-$x = '1234567';
+my $x = '1234567';
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -324,12 +327,14 @@ like($_, qr/Can\'t return a temporary from lvalue subroutine/,
 # know if this discrepancy changes.
 
 $_ = undef;
-eval <<'EOE' or $_ = $@;
-  sub scalarray : lvalue { @a || $b }
-  @a = 1;
-  (scalarray) = (2,3);
-  1;
+{
+    eval <<'EOE' or $_ = $@;
+        sub scalarray : lvalue { @main::a || $main::b }
+        @main::a = 1;
+        (scalarray) = (2,3);
+        1;
 EOE
+}
 
 like($_, qr/Can\'t return a temporary from lvalue subroutine/,
     'returning a scalar-context array via ||');
@@ -350,7 +355,7 @@ sub lv2t : lvalue { shift }
 (lv2t($_)) = (2,3);
 is($_, 2);
 
-$xxx = 'xxx';
+my $xxx = 'xxx';
 sub xxx () { $xxx }  # Not lvalue
 
 $_ = undef;
@@ -434,6 +439,7 @@ sub lvmya : lvalue { @my }
 is lvmya->${\sub { return $_[0] }}, 3,
   'lvalue->$thing when lvalue returns lexical array';
 
+my ($newvar, $nnewvar);
 sub lv1n : lvalue { $newvar }
 
 $_ = undef;
@@ -464,73 +470,74 @@ is($newvar, "12");
 
 # But autoloading should only be triggered by a call to an undefined
 # subroutine.
-&{"lv1nn"} = 14;
+{ no strict 'refs'; &{"lv1nn"} = 14; }
 is $newvar, 12, 'AUTOLOAD does not take precedence over lvalue sub';
 eval { &{"xxx"} = 14 };
 is $newvar, 12, 'AUTOLOAD does not take precedence over non-lvalue sub';
 
 {
-my %hash; my @array;
-sub alv : lvalue { $array[1] }
-sub alv2 : lvalue { $array[$_[0]] }
-sub hlv : lvalue { $hash{"foo"} }
-sub hlv2 : lvalue { $hash{$_[0]} }
-$array[1] = "not ok 51\n";
-alv() = "ok 50\n";
-is(alv(), "ok 50\n");
+    no strict 'vars';
+    my %hash; my @array;
+    sub alv : lvalue { $array[1] }
+    sub alv2 : lvalue { $array[$_[0]] }
+    sub hlv : lvalue { $hash{"foo"} }
+    sub hlv2 : lvalue { $hash{$_[0]} }
+    $array[1] = "not ok 51\n";
+    alv() = "ok 50\n";
+    is(alv(), "ok 50\n");
 
-alv2(20) = "ok 51\n";
-is($array[20], "ok 51\n");
+    alv2(20) = "ok 51\n";
+    is($array[20], "ok 51\n");
 
-$hash{"foo"} = "not ok 52\n";
-hlv() = "ok 52\n";
-is($hash{foo}, "ok 52\n");
+    $hash{"foo"} = "not ok 52\n";
+    hlv() = "ok 52\n";
+    is($hash{foo}, "ok 52\n");
 
-$hash{bar} = "not ok 53\n";
-hlv("bar") = "ok 53\n";
-is(hlv("bar"), "ok 53\n");
+    $hash{bar} = "not ok 53\n";
+    hlv("bar") = "ok 53\n";
+    is(hlv("bar"), "ok 53\n");
 
-sub array : lvalue  { @array  }
-sub array2 : lvalue { @array2 } # This is a global.
-sub hash : lvalue   { %hash   }
-sub hash2 : lvalue  { %hash2  } # So's this.
-@array2 = qw(foo bar);
-%hash2 = qw(foo bar);
+    sub array : lvalue  { @array  }
+    sub array2 : lvalue { @array2 } # This is a global.
+    sub hash : lvalue   { %hash   }
+    sub hash2 : lvalue  { %hash2  } # So's this.
+    @array2 = qw(foo bar);
+    %hash2 = qw(foo bar);
 
-(array()) = qw(ok 54);
-is("@array", "ok 54");
+    (array()) = qw(ok 54);
+    is("@array", "ok 54");
 
-(array2()) = qw(ok 55);
-is("@array2", "ok 55");
+    (array2()) = qw(ok 55);
+    is("@array2", "ok 55");
 
-(hash()) = qw(ok 56);
-cmp_ok($hash{ok}, '==', 56);
+    (hash()) = qw(ok 56);
+    cmp_ok($hash{ok}, '==', 56);
 
-(hash2()) = qw(ok 57);
-cmp_ok($hash2{ok}, '==', 57);
+    (hash2()) = qw(ok 57);
+    cmp_ok($hash2{ok}, '==', 57);
 
-@array = qw(a b c d);
-sub aslice1 : lvalue { @array[0,2] };
-(aslice1()) = ("ok", "already");
-is("@array", "ok b already d");
+    @array = qw(a b c d);
+    sub aslice1 : lvalue { @array[0,2] };
+    (aslice1()) = ("ok", "already");
+    is("@array", "ok b already d");
 
-@array2 = qw(a B c d);
-sub aslice2 : lvalue { @array2[0,2] };
-(aslice2()) = ("ok", "already");
-is("@array2", "ok B already d");
+    @array2 = qw(a B c d);
+    sub aslice2 : lvalue { @array2[0,2] };
+    (aslice2()) = ("ok", "already");
+    is("@array2", "ok B already d");
 
-%hash = qw(a Alpha b Beta c Gamma);
-sub hslice : lvalue { @hash{"c", "b"} }
-(hslice()) = ("CISC", "BogoMIPS");
-is(join("/",@hash{"c","a","b"}), "CISC/Alpha/BogoMIPS");
+    %hash = qw(a Alpha b Beta c Gamma);
+    sub hslice : lvalue { @hash{"c", "b"} }
+    (hslice()) = ("CISC", "BogoMIPS");
+    is(join("/",@hash{"c","a","b"}), "CISC/Alpha/BogoMIPS");
 }
 
-$str = "Hello, world!";
+my $str = "Hello, world!";
 sub sstr : lvalue { substr($str, 1, 4) }
 sstr() = "i";
 is($str, "Hi, world!");
 
-$str = "Made w/ JavaScript";
+my $str = "Made w/ JavaScript";
 sub veclv : lvalue { vec($str, 2, 32) }
 if ($::IS_ASCII) {
     veclv() = 0x5065726C;
@@ -541,7 +548,7 @@ else { # EBCDIC?
 is($str, "Made w/ PerlScript");
 
 sub position : lvalue { pos }
-@p = ();
+my @p = ();
 $_ = "fee fi fo fum";
 while (/f/g) {
     push @p, position;
@@ -554,6 +561,7 @@ SKIP: {
     require Hash::Util;
     sub Hash::Util::bucket_ratio (\%);
 
+    my %__;
     sub keeze : lvalue { keys %__ }
     %__ = ("a","b");
     keeze = 64;
@@ -568,7 +576,7 @@ SKIP: {
 }
 
 # Bug 20001223.002 (#5005): split thought that the list had only one element
-@ary = qw(4 5 6);
+my @ary = qw(4 5 6);
 sub lval1 : lvalue { $ary[0]; }
 sub lval2 : lvalue { $ary[1]; }
 (lval1(), lval2()) = split ' ', "1 2 3 4";
@@ -617,6 +625,7 @@ is ($Tie_Array::val[0], "value");
 
 
 # Check that tied pad vars that are returned can be assigned to
+my $wheel;
 sub TIESCALAR { bless [] }
 sub STORE {$wheel = $_[1]}
 sub FETCH {$wheel}
@@ -642,6 +651,7 @@ is $wheel, 8, 'tied pad var explicitly returned in list ref context';
 
 # Test explicit return of lvalue expression
 {
+    no strict 'vars';
     # subs are copies from tests 1-~18 with an explicit return added.
     # They used not to work, which is why they are ‘badly’ named.
     sub bad_get_lex : lvalue { return $in };
@@ -798,7 +808,7 @@ is $wheel, 8, 'tied pad var explicitly returned in list ref context';
 
     # Tests for specific ops not tested above
     # rv2av
-    @array2 = qw 'one two free';
+    my @array2 = qw 'one two free';
     is join(',', map $_, sub:lvalue{@array2}->()), 'one,two,free',
       'rv2av in reference context';
     is join(',', map $_, sub:lvalue{@{\@array2}}->()), 'one,two,free',
@@ -808,7 +818,7 @@ is $wheel, 8, 'tied pad var explicitly returned in list ref context';
     like join(',', map $_, sub:lvalue{%hash}->()),
          qr/^(?:a,b,c,d|c,d,a,b)\z/, 'padhv in reference context';
     # rv2hv
-    %hash2 = qw[a b c d];
+    my %hash2 = qw[a b c d];
     like join(',', map $_, sub:lvalue{%hash2}->()),
          qr/^(?:a,b,c,d|c,d,a,b)\z/, 'rv2hv in reference context';
     like join(',', map $_, sub:lvalue{%{\%hash2}}->()),
@@ -817,6 +827,8 @@ is $wheel, 8, 'tied pad var explicitly returned in list ref context';
 
 {
     package Foo;
+    our $AUTOLOAD;
+    no strict 'refs';
     sub AUTOLOAD :lvalue { *{$AUTOLOAD} };
     package main;
     my $foo = bless {},"Foo";
@@ -864,6 +876,7 @@ SKIP: { skip "no attributes.pm", 2 unless eval { require attributes };
    'sub declaration with :lvalue applies it to assigned stub';
 }
 
+my ($pnare);
 sub fleen : lvalue { $pnare }
 $pnare = __PACKAGE__;
 ok eval { fleen = 1 }, "lvalues can return COWs (CATTLE?) [perl #75656]";\
@@ -877,6 +890,7 @@ is $pnare, 1, 'and returning COWs in reference context actually works';
 
 
 # Returning an arbitrary expression, not necessarily lvalue
+my ($ambaga);
 +sub :lvalue { return $ambaga || $ambaga }->() = 73;
 is $ambaga, 73, 'explicit return of arbitrary expression (scalar context)';
 (sub :lvalue { return $ambaga || $ambaga }->()) = 74;
@@ -899,7 +913,7 @@ like $@, qr/Can\'t return a readonly value from lvalue subroutine at/,
       'assignment to num constant implicitly returned (list cx)';
 
 # reference (potential lvalue) context
-$suffix = '';
+my $suffix = '';
 for my $sub (sub :lvalue {$_}, sub :lvalue {return $_}) {
     &$sub()->${\sub { $_[0] = 37 }};
     is $_, '37', 'lvalue->method'.$suffix;
@@ -983,9 +997,9 @@ is \squabble, \$], 'explct. returning ro from nested lv sub in ref cx';
 # [perl #102486] Sub calls as the last statement of an lvalue sub
 package _102486 {
   my $called;
-  my $x = 'nonlv';
-  sub strictlv :lvalue { use strict 'refs'; &$x }
-  sub lv :lvalue { &$x }
+  our $x = 'nonlv';
+  sub strictlv :lvalue { &$x }
+  sub lv :lvalue { no strict 'refs'; &$x }
   sub nonlv { ++$called }
   eval { strictlv };
   ::like $@, qr/^Can't use string \("nonlv"\) as a subroutine ref while/,
@@ -994,6 +1008,7 @@ package _102486 {
   ::ok eval { lv },
       'sub:lvalue{&$x}->() does not die for non-lvalue inner sub call';
   ::is $called, 1, 'The &$x actually called the sub';
+  no strict 'refs';
   eval { +sub :lvalue { &$x }->() = 3 };
   ::like $@, qr/^Can't modify non-lvalue subroutine call of &_102486::nonlv at /,
         'sub:lvalue{&$x}->() dies in true lvalue context';

@@ -6,6 +6,8 @@
 #  in the README file that comes with the distribution.
 #
 
+
+
 sub BEGIN {
     if ($] < 5.006) {
 	print "1..0 # Skip: no utf8 support\n";
@@ -13,7 +15,8 @@ sub BEGIN {
     }
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;

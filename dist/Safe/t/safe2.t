@@ -1,7 +1,7 @@
 #!./perl -w
 $|=1;
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bOpcode\b/ && $Config{'osname'} ne 'VMS') {
         print "1..0\n";
         exit 0;
@@ -48,11 +48,11 @@ $cpt->reval(q{
 $TB->current_test(6);
 is($@, '');
 
-$foo = "ok 8\n";
-%bar = (key => "ok 9\n");
-@baz = (); push(@baz, "o", "10");
-$glob = "ok 11\n";
-@glob = qw(not ok 16);
+our $foo = "ok 8\n";
+our %bar = (key => "ok 9\n");
+our @baz = (); push(@baz, "o", "10");
+our $glob = "ok 11\n";
+our @glob = qw(not ok 16);
 
 sub sayok { print "ok @_\n" }
 

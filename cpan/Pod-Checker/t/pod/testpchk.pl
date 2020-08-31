@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use Pod::Checker;
-use vars qw(@ISA @EXPORT $MYPKG);
+use vars qw(@ISA @EXPORT @EXPORT_OK $MYPKG);
 #use strict;
 #use diagnostics;
 use Carp;

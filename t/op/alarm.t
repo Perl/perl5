@@ -48,6 +48,7 @@ $diff = $end_time - $start_time;
 # alarm time might be one second less than you said.
 is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
+our $TODO;
 {
     local $TODO = "Why does system() block alarm() on $^O?"
 		if $^O eq 'VMS' || $^O eq 'dos';

@@ -4,6 +4,7 @@
 # You need to number them manually. Don't forget to update this line for the
 # next kind hacker.
 
+my $loaded;
 END {print "not ok 1\n" unless $loaded;}
 use v5.6.0;
 use Attribute::Handlers;
@@ -139,10 +140,11 @@ package main;
 
 eval 'sub x7 :ATTR(SCALAR) :ATTR(CODE) {}' and ::ok(0,40) or ::ok(1,40);
 
-use Attribute::Handlers autotie => {      Other::Loud => Tie::Loud,
-				                Noisy => Tie::Noisy,
-				     UNIVERSAL::Rowdy => Tie::Row::dy,
-                                   };
+use Attribute::Handlers autotie => {
+    'Other::Loud'       => 'Tie::Loud',
+    'Noisy'             => 'Tie::Noisy',
+    'UNIVERSAL::Rowdy'  => 'Tie::Row::dy',
+};
 
 my Other $loud : Loud;
 $loud++;

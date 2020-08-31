@@ -1,8 +1,8 @@
 package MakeMaker::Test::Setup::BFD;
 
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 require Exporter;
-@EXPORT = qw(setup_recurs teardown_recurs);
+our @EXPORT = qw(setup_recurs teardown_recurs);
 
 use strict;
 use File::Path;
@@ -15,7 +15,7 @@ my %Files = (
              'Big-Dummy/lib/Big/Dummy.pm'     => <<'END',
 package Big::Dummy;
 
-$VERSION = 0.01;
+our $VERSION = 0.01;
 
 =head1 NAME
 
@@ -80,7 +80,7 @@ END
              'Big-Dummy/Liar/lib/Big/Liar.pm' => <<'END',
 package Big::Liar;
 
-$VERSION = 0.01;
+our $VERSION = 0.01;
 
 1;
 END

@@ -1,6 +1,6 @@
 sub foo : lvalue {
-    $x+=10;
+    $main::x+=10;
 }
-$x++;
+$main::x++;
 foo();
-$x+=100;
+$main::x+=100;

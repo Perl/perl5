@@ -82,6 +82,7 @@ f();
 {
     fresh_perl_is( <<'----', <<'====', undef, "with localised stuff" );
 use XS::APItest;
+our ($s, @a, %h);
 $s = "outer";
 $a[0] = "anterior";
 $h{k} = "hale";

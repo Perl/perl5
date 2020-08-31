@@ -17,6 +17,12 @@ use warnings;
 
 plan( tests => 206 );
 
+# Warning: 2 format declarations in this file
+
+# typeglob tests --> need to relax strictures to test globals
+
+no strict 'vars';
+
 # type coersion on assignment
 $ᕘ = 'ᕘ';
 $ᴮᛅ = *main::ᕘ;
@@ -40,15 +46,18 @@ is(ref(\$ᕘ), 'GLOB');
  ${\*$ᕘ} = undef;
  is(ref(\$ᕘ), 'GLOB', 'no type coersion when assigning to *{} retval');
  $::{ఫｹ} = *ᴮᛅ;
- is(
-   \$::{ఫｹ}, \*{"ఫｹ"},
-   'symbolic *{} returns symtab entry when FAKE'
- );
- ${\*{"ఫｹ"}} = undef;
- is(
-   ref(\$::{ఫｹ}), 'GLOB',
-  'no type coersion when assigning to retval of symbolic *{}'
- );
+ {
+   no strict 'refs';
+   is(
+     \$::{ఫｹ}, \*{"ఫｹ"},
+     'symbolic *{} returns symtab entry when FAKE'
+   );
+   ${\*{"ఫｹ"}} = undef;
+   is(
+     ref(\$::{ఫｹ}), 'GLOB',
+    'no type coersion when assigning to retval of symbolic *{}'
+   );
+ }
  $::{pɥአＱuઍ} = *ᴮᛅ;
  eval '
    is(
@@ -205,6 +214,7 @@ is (*{*Ẋ{GLOB}}, "*main::STDOUT");
     my $a = "Sʎｍ000";
     ok(!defined *{$a});
 
+    no strict 'refs';
     ok(!defined ${$a});
     ok(!defined *{$a});
 
@@ -357,7 +367,7 @@ EOPROG
 delete $::{оઓnḲ};
 $::{оઓnḲ} = \"Value";
 
-*{"ga_ㄕƚo잎"} = \&{"оઓnḲ"};
+{ no strict 'refs'; *{"ga_ㄕƚo잎"} = \&{"оઓnḲ"}; }
 
 is (ref $::{ga_ㄕƚo잎}, 'SCALAR', "Export of proxy constant as is");
 is (ref $::{оઓnḲ}, 'SCALAR', "Export doesn't affect original");
@@ -371,7 +381,7 @@ eval 'sub ga_ㄕƚo잎 (); 1' or die $@;
 is ($::{ga_ㄕƚo잎}, '', "Prototype is stored as an empty string");
 
 # Check that a prototype expands.
-*{"ga_ㄕƚo잎"} = \&{"оઓnḲ"};
+{ no strict 'refs'; *{"ga_ㄕƚo잎"} = \&{"оઓnḲ"}; }
 
 is (ref $::{оઓnḲ}, 'SCALAR', "Export doesn't affect original");
 is (eval 'ga_ㄕƚo잎', "Value", "Constant has correct value");
@@ -384,7 +394,7 @@ is (ref \$::{ga_ㄕƚo잎}, 'GLOB', "Symbol table has full typeglob");
 {
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
-  *{"zᐓｔ"} = \&{"оઓnḲ"};
+  { no strict 'refs'; *{"zᐓｔ"} = \&{"оઓnḲ"}; }
   is($w, '', "Should be no warning");
 }
 
@@ -401,7 +411,7 @@ sub Ṩp맅싵Ş () {
 {
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
-  *{"Ṩp맅싵Ş"} = \&{"оઓnḲ"};
+  { no strict 'refs'; *{"Ṩp맅싵Ş"} = \&{"оઓnḲ"}; }
   like($w, qr/^Constant subroutine main::Ṩp맅싵Ş redefined/,
        "Redefining a constant sub should warn");
 }
@@ -414,8 +424,8 @@ is (ref \$::{Ṩp맅싵Ş}, 'GLOB', "Symbol table has full typeglob");
 {
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
-  *{"plუᒃ"} = [];
-  *{"plუᒃ"} = \&{"оઓnḲ"};
+  { no strict 'refs'; *{"plუᒃ"} = []; }
+  { no strict 'refs'; *{"plუᒃ"} = \&{"оઓnḲ"}; }
   is($w, '', "Should be no warning");
 }
 
@@ -442,7 +452,7 @@ my $result;
 {
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
-  $result = *{"aẈʞƙʞƙʞƙ"} = \&{"оઓnḲ"};
+  { no strict 'refs'; $result = *{"aẈʞƙʞƙʞƙ"} = \&{"оઓnḲ"}; }
   is($w, '', "Should be no warning");
 }
 
@@ -459,7 +469,7 @@ $::{оઓnḲ} = \"Value";
 sub non_dangling {
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
-  *{"z앞"} = \&{"оઓnḲ"};
+  { no strict 'refs'; *{"z앞"} = \&{"оઓnḲ"}; }
   is($w, '', "Should be no warning");
 }
 
@@ -470,7 +480,7 @@ is (ref $::{z앞}, 'SCALAR', "Exported target is also a PCS");
 
 sub dangling {
   local $SIG{__WARN__} = sub { die $_[0] };
-  *{"ビfᶠ"} = \&{"оઓnḲ"};
+  { no strict 'refs'; *{"ビfᶠ"} = \&{"оઓnḲ"}; }
 }
 
 dangling();
@@ -552,7 +562,7 @@ format =
 {
     die if exists $::{본ㄎ};
     $::{본ㄎ} = \"포ヰｅ";
-    *{"본ㄎ"} = \&{"본ㄎ"};
+    { no strict 'refs'; *{"본ㄎ"} = \&{"본ㄎ"}; }
     eval 'is(본ㄎ(), "포ヰｅ",
              "Assignment works when glob created midway (bug 45607)"); 1'
 	or die $@;
@@ -565,6 +575,7 @@ format =
 {
     {
             package RƬ72740a;
+            no strict 'subs';
             my $f = bless({}, RƬ72740b);
             sub s1 { s2 $f; }
             our $s4;
@@ -572,6 +583,7 @@ format =
     }
     {
             package RƬ72740b;
+            no strict 'subs';
             sub s2 { "RƬ72740b::s2" }
             sub s4 { "RƬ72740b::s4" }
     }
@@ -691,10 +703,13 @@ EOF
   # Similar tests to make sure sv_2cv etc. do not stringify.
   *$_ = sub { 1 };
   ok eval { &$_ }, "PVLV glob can be called as a sub" or diag $@;
-  *flèlp = sub { 2 };
-  $_ = 'flèlp';
-  is eval { &$_ }, 2, 'PVLV holding a string can be called as a sub'
-   or diag $@;
+  {
+    no strict 'refs';
+    *flèlp = sub { 2 };
+    $_ = 'flèlp';
+    is eval { &$_ }, 2, 'PVLV holding a string can be called as a sub'
+      or diag $@;
+  }
 
   # Coderef-to-glob assignment when the glob is no longer accessible
   # under its name: These tests are to make sure the OPpASSIGN_CV_TO_GV

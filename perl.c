@@ -37,6 +37,7 @@
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
 #include "XSUB.h"
+#include "feature.h"
 
 #ifdef NETWARE
 #include "nwutil.h"	
@@ -2105,6 +2106,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     char c;
     bool doextract = FALSE;
     const char *cddir = NULL;
+    bool minus_e = FALSE; /* TODO probably convert to a PL_minus_e */
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
@@ -2187,6 +2189,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    /* FALLTHROUGH */
 	case 'e':
 	    forbid_setid('e', FALSE);
+        if (c == 'e') minus_e = TRUE;
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
 		add_read_e_script = TRUE;
@@ -2571,6 +2574,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	filter_add(read_e_script, NULL);
 
     /* now parse the script */
+    if (minus_e == FALSE && PL_minus_E == FALSE)
+        PL_hints |= HINT_DEFAULT; /* after init_main_stash ; need to be after init_predump_symbols */
 
     SETERRNO(0,SS_NORMAL);
     if (yyparse(GRAMPROG) || PL_parser->error_count) {
@@ -4521,7 +4526,9 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
-	for (; argc > 0 && **argv == '-'; argc--,argv++) {
+	   U32 save_hints = PL_hints;
+       PL_hints &= ~HINT_STRICT_VARS; /* temporary disable strict */
+    for (; argc > 0 && **argv == '-'; argc--,argv++) {
 	    char *s;
 	    if (!argv[0][1])
 		break;
@@ -4537,6 +4544,7 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 	    else
 		sv_setiv(GvSV(gv_fetchpv(argv[0]+1, GV_ADD, SVt_PV)),1);
 	}
+        PL_hints = save_hints;
     }
     if ((PL_argvgv = gv_fetchpvs("ARGV", GV_ADD|GV_NOTQUAL, SVt_PVAV))) {
 	SvREFCNT_inc_simple_void_NN(PL_argvgv);

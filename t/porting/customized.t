@@ -76,8 +76,8 @@ if ( $regen ) {
   open $data_fh, '>:raw', $customised or die "Can't open $customised";
   print $data_fh <<'#';
 # Regenerate this file using:
-#     cd t
-#     ./perl -I../lib porting/customized.t --regen
+#
+#     cd t; ./perl -I../lib porting/customized.t --regen; cd -
 #
 }
 else {

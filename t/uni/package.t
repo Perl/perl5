@@ -5,6 +5,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc( '../lib' );
 }
 
 plan (tests => 18);
@@ -22,6 +23,8 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
 
 #The next few come from comp/package.t
 {
+
+    no strict 'vars';
 
     $ㄅĽuṞfⳐ = 123;
     

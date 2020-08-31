@@ -10,7 +10,7 @@ $|=1;
 
 run_multiple_progs('', \*DATA);
 
-foreach my $code ('sub;', 'sub ($) ;', '{ $x = sub }', 'sub ($) && 1') {
+foreach my $code ('sub;', 'sub ($) ;', '{ my $x = sub }', 'sub ($) && 1') {
     eval $code;
     like($@, qr/^Illegal declaration of anonymous subroutine at/,
 	 "'$code' is illegal");
@@ -88,7 +88,7 @@ ok 1
 ########
 # [perl #71154] undef &$code makes $code->() die with: Not a CODE reference
 sub __ANON__ { print "42\n" }
-undef &{$x=sub{}};
+my $x; undef &{$x=sub{}};
 $x->();
 EXPECT
 Undefined subroutine called at - line 4.

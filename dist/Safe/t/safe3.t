@@ -1,7 +1,7 @@
 #!perl -w
 
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bOpcode\b/
 	&& $Config{'extensions'} !~ /\bPOSIX\b/
 	&& $Config{'osname'} ne 'VMS')

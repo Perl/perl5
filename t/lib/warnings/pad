@@ -200,7 +200,7 @@ Variable "$x" is not available at (eval 1) line 1.
 use warnings 'closure' ;
 {
     my $x = 1;
-    $y = \$x; # force abandonment rather than clear-in-place at scope exit
+    my $y = \$x; # force abandonment rather than clear-in-place at scope exit
     sub f2 { eval '$x' }
 }
 f2();
@@ -460,7 +460,7 @@ BEGIN { binmode STDERR, 'utf8'; }
 {
     use utf8;
     my $に = 1;
-    $y = \$に; # force abandonment rather than clear-in-place at scope exit
+    my $y = \$に; # force abandonment rather than clear-in-place at scope exit
     sub f2 { eval '$に' }
 }
 f2();
@@ -561,7 +561,7 @@ BEGIN { binmode STDERR, 'utf8'; }
 {
     use utf8;
     my $è = 1;
-    $y = \$è; # force abandonment rather than clear-in-place at scope exit
+    my $y = \$è; # force abandonment rather than clear-in-place at scope exit
     sub f2 { eval '$è' }
 }
 f2();

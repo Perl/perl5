@@ -78,6 +78,7 @@ defined $x ? "not ok 4 - $x" : "ok 4"
 # Formats inside closures should close over the topmost clone of the outer
 # sub on the call stack.
 # Tests will be out of sequence if the wrong sub is used.
+our $next;
 sub make_closure {
   my $arg = shift;
   sub {
@@ -91,8 +92,8 @@ $x
   }                    # currently-running sub
 }
 *STDOUT = *STDOUT4{FORMAT};
-$clo1 = make_closure 6;
-$clo2 = make_closure 7;
+my $clo1 = make_closure(6);
+my $clo2 = make_closure(7);
 $next = $clo1;
 &$clo2(0);
 $next = $clo2;
@@ -125,7 +126,7 @@ do { my $x = "ok 10 - closure inside format"; sub { $x }->() }
 *STDOUT = *STDOUT7{FORMAT};
 write;
 
-$testn = 12;
+my $testn = 12;
 format STDOUT8 =
 @<<<< - recursive formats
 do { my $t = "ok " . $testn--; write if $t =~ 12; $t}

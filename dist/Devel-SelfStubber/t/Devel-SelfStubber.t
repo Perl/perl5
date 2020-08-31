@@ -230,7 +230,7 @@ __END__
 ################ xChild.pm
 package xChild;
 require xParent;
-@ISA = 'xParent';
+our @ISA = 'xParent';
 use SelfLoader;
 
 1;

@@ -1,4 +1,4 @@
-# This code is used by lib/charnames.t, lib/croak.t, lib/feature.t,
+# This code is used by lib/charnames.t, t/lib/croak.t, lib/feature.t,
 # lib/subs.t, lib/strict.t and lib/warnings.t
 #
 # On input, $::local_tests is the number of tests in the caller; or
@@ -13,11 +13,10 @@ use Config;
 use File::Path;
 use File::Spec::Functions qw(catfile curdir rel2abs);
 
-use strict;
 use warnings;
 my (undef, $file) = caller;
 my ($pragma_name) = $file =~ /([A-Za-z_0-9]+)\.t$/
-    or die "Can't identify pragama to test from file name '$file'";
+    or die "Can't identify pragma to test from file name '$file'";
 
 $| = 1;
 

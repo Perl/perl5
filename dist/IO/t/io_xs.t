@@ -15,7 +15,7 @@ use Test::More tests => 5;
 use IO::File;
 use IO::Seekable;
 
-$x = new_tmpfile IO::File;
+my $x = new_tmpfile IO::File;
 ok($x, "new_tmpfile");
 print $x "ok 2\n";
 $x->seek(0,SEEK_SET);
@@ -24,11 +24,11 @@ is($line, "ok 2\n", "check we can write to the tempfile");
 
 $x->seek(0,SEEK_SET);
 print $x "not ok 3\n";
-$p = $x->getpos;
+my $p = $x->getpos;
 print $x "ok 3\n";
 $x->flush;
 $x->setpos($p);
-$line = <$x>;
+my $line = <$x>;
 is($line, "ok 3\n", "test getpos/setpos");
 
 $! = 0;

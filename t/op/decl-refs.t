@@ -1,3 +1,5 @@
+#!./perl
+
 BEGIN {
     chdir 't';
     require './test.pl';
@@ -11,11 +13,17 @@ for my $decl (qw< my CORE::state our local >) {
         # Test three syntaxes with each declarator/funny char combination:
         #     my \$foo    my(\$foo)    my\($foo)    for my \$foo
 
-        for my $code("$decl \\${funny}x", "$decl\(\\${funny}x\)",
-                     "$decl\\\(${funny}x\)",
-                     "for $decl \\${funny}x (\\${funny}y) {}") {
+        for my $code(
+            "$decl \\${funny}x",
+            "$decl\(\\${funny}x\)",
+            "$decl\\\(${funny}x\)",
+            "for $decl \\${funny}x (\\${funny}y) {}",
+        ) {
           SKIP: {
             skip "for local is illegal", 3 if $code =~ /^for local/;
+            if ($decl eq 'local') {
+                $code = "no strict 'vars'; $code";
+            }
             eval $code;
             like
                 $@,
@@ -38,8 +46,8 @@ for my $decl (qw< my CORE::state our local >) {
 use feature 'declared_refs', 'state';
 no warnings 'experimental::declared_refs';
 
-for $decl ('my', 'state', 'our', 'local') {
-for $sigl ('$', '@', '%') {
+for my $decl ('my', 'state', 'our', 'local') {
+for my $sigl ('$', '@', '%') {
     # The weird code that follows uses ~ as a sigil placeholder and MY
     # as a declarator placeholder.
     my $code = '#line ' . (__LINE__+1) . ' ' . __FILE__ . "\n" . <<'END';
@@ -99,6 +107,9 @@ END
     $code =~ s/~/$sigl/g;
     $code =~ s/MODIFY_\KSCALAR/$sigl eq '@' ? "ARRAY" : "HASH"/eggnog
         if $sigl ne '$';
+    if ($decl eq 'local') {
+        $code = "no strict 'vars'; $code";
+    }
     if ($decl =~ /^(?:our|local)\z/) {
         $code =~ s/is ?no?t/is/g; # tests for package vars
     }
@@ -106,8 +117,8 @@ END
 }}
 
 use feature 'refaliasing'; no warnings "experimental::refaliasing";
-for $decl ('my', 'state', 'our') {
-for $sigl ('$', '@', '%') {
+for my $decl ('my', 'state', 'our') {
+for my $sigl ('$', '@', '%') {
     my $code = '#line ' . (__LINE__+1) . ' ' . __FILE__ . "\n" . <<'ENE';
     for MY \~x (\~::y) {
         is \~x, \~::y, '\~x aliased by for MY \~x';

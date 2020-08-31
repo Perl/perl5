@@ -4,11 +4,12 @@
 # (including weird syntax errors)
 
 BEGIN {
-    @INC = qw(. ../lib);
+    our @INC = qw(. ../lib);
     chdir 't' if -d 't';
 }
 
 print "1..188\n";
+our $test = 0;
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -17,9 +18,9 @@ sub failed {
     my @caller = caller(1);
     print "# Failed test at $caller[1] line $caller[2]\n";
     if (defined $got) {
-	print "# Got '$got'\n";
+        print "# Got '$got'\n";
     } else {
-	print "# Got undef\n";
+        print "# Got undef\n";
     }
     print "# Expected $expected\n";
     return;
@@ -29,10 +30,10 @@ sub like {
     my ($got, $pattern, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got =~ $pattern) {
-	print "ok $test - $name\n";
-	# Principle of least surprise - maintain the expected interface, even
-	# though we aren't using it here (yet).
-	return 1;
+        print "ok $test - $name\n";
+        # Principle of least surprise - maintain the expected interface, even
+        # though we aren't using it here (yet).
+        return 1;
     }
     failed($got, $pattern, $name);
 }
@@ -41,17 +42,17 @@ sub is {
     my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $expect) {
-	if (defined $got && $got eq $expect) {
-	    print "ok $test - $name\n";
-	    return 1;
-	}
-	failed($got, "'$expect'", $name);
+        if (defined $got && $got eq $expect) {
+            print "ok $test - $name\n";
+            return 1;
+        }
+        failed($got, "'$expect'", $name);
     } else {
-	if (!defined $got) {
-	    print "ok $test - $name\n";
-	    return 1;
-	}
-	failed($got, 'undef', $name);
+        if (!defined $got) {
+            print "ok $test - $name\n";
+            return 1;
+        }
+        failed($got, 'undef', $name);
     }
 }
 
@@ -98,7 +99,7 @@ eval 'undef foo';
 like( $@, qr/^Can't modify constant item in undef operator /,
     'undefing constant causes a segfault in 5.6.1 [ID 20010906.019 (#7642)]' );
 
-eval 'read($bla, FILE, 1);';
+eval 'read(my $bla, FILE, 1);';
 like( $@, qr/^Can't modify constant item in read /,
     'read($var, FILE, 1) segfaults on 5.6.1 [ID 20011025.054 (#7847)]' );
 
@@ -129,6 +130,8 @@ eval {
 is( $@, '', 'PL_lex_brackstack' );
 
 {
+    no strict 'vars';
+
     # tests for bug #20716
     undef $a;
     undef @b;
@@ -203,7 +206,7 @@ EOF
 
 # Bug #25824
 {
-    eval q{ sub f { @a=@b=@c;  {use} } };
+    eval q{ sub f { my (@a, @b, @c); @a=@b=@c;  {use} } };
     like( $@, qr/syntax error/, "use without body" );
 }
 
@@ -226,7 +229,7 @@ eval q{ foo''bar };
 like( $@, qr/Bad name after foo'/, 'Bad name after foo\'' );
 
 # test for ?: context error
-eval q{($a ? $x : ($y)) = 5};
+eval q{no strict 'vars'; ($a ? $x : ($y)) = 5};
 like( $@, qr/Assignment to both a list and a scalar/, 'Assignment to both a list and a scalar' );
 
 eval q{ s/x/#/e };
@@ -308,6 +311,8 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   my $xFC = "x" x 252;
   my $xFB = "x" x 251;
 
+  no strict 'vars';
+
   eval qq[ \$#$xFB ];
   is($@, "", "251 character \$# sigil ident ok");
   eval qq[ \$#$xFC ];
@@ -371,29 +376,36 @@ eval q{
 };
 is($@, "", "multiline whitespace inside substitute expression");
 
-eval '@A =~ s/a/b/; # compilation error
-      sub tahi {}
-      sub rua;
-      sub toru ($);
-      sub wha :lvalue;
-      sub rima ($%&*$&*\$%\*&$%*&) :method;
-      sub ono :lvalue { die }
-      sub whitu (_) { die }
-      sub waru ($;) :method { die }
-      sub iwa { die }
-      BEGIN { }';
-is $::{tahi}, undef, 'empty sub decl ignored after compilation error';
-is $::{rua}, undef, 'stub decl ignored after compilation error';
-is $::{toru}, undef, 'stub+proto decl ignored after compilation error';
-is $::{wha}, undef, 'stub+attr decl ignored after compilation error';
-is $::{rima}, undef, 'stub+proto+attr ignored after compilation error';
-is $::{ono}, undef, 'sub decl with attr ignored after compilation error';
-is $::{whitu}, undef, 'sub decl w proto ignored after compilation error';
-is $::{waru}, undef, 'sub w attr+proto ignored after compilation error';
-is $::{iwa}, undef, 'non-empty sub decl ignored after compilation error';
-is *BEGIN{CODE}, undef, 'BEGIN leaves no stub after compilation error';
+{
+    eval '@A =~ s/a/b/; # compilation error
+          sub tahi {}
+          sub rua;
+          sub toru ($);
+          sub wha :lvalue;
+          sub rima ($%&*$&*\$%\*&$%*&) :method;
+          sub ono :lvalue { die }
+          sub whitu (_) { die }
+          sub waru ($;) :method { die }
+          sub iwa { die }
+          BEGIN { }';  # '
+    is $::{tahi}, undef, 'empty sub decl ignored after compilation error';
+    is $::{rua}, undef, 'stub decl ignored after compilation error';
+    is $::{toru}, undef, 'stub+proto decl ignored after compilation error';
+    is $::{wha}, undef, 'stub+attr decl ignored after compilation error';
+    is $::{rima}, undef, 'stub+proto+attr ignored after compilation error';
+    is $::{ono}, undef, 'sub decl with attr ignored after compilation error';
+    is $::{whitu}, undef, 'sub decl w proto ignored after compilation error';
+    is $::{waru}, undef, 'sub w attr+proto ignored after compilation error';
+    is $::{iwa}, undef, 'non-empty sub decl ignored after compilation error';
+    is *BEGIN{CODE}, undef, 'BEGIN leaves no stub after compilation error';
+}
 
 $test = $test + 1;
+{
+    # Because of format declarations and here-docs, code in most of this block
+    # is not indented
+
+    no strict 'refs';
 "ok $test - format inside re-eval" =~ /(?{
     format =
 @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -429,6 +441,7 @@ like "blah blah blah\n", eval q|qr/${\ <<END
 blah blah blah
 END
  }/|, 'here docs in multiline quoted construct in string eval';
+} # END block "no strict 'refs'" starting at "ok $test - format inside re-eval"
 
 # Unterminated here-docs in subst in eval; used to crash
 eval 's/${<<END}//';
@@ -451,9 +464,12 @@ is prototype "Hello::_he_said", '_', 'initial tick in sub declaration';
 eval 'no if $] >= 5.17.4 warnings => "deprecated"';
 is 1,1, ' no crash for "no ... syntax error"';
 
-for my $pkg(()){}
-$pkg = 3;
-is $pkg, 3, '[perl #114942] for my $foo()){} $foo';
+{
+    no strict 'vars';
+    for my $pkg(()){}
+    $pkg = 3;
+    is $pkg, 3, '[perl #114942] for my $foo()){} $foo';
+}
 
 # Check that format 'Foo still works after removing the hack from
 # force_word
@@ -482,10 +498,14 @@ for(__PACKAGE__) {
     is $_, 'main', '__PACKAGE__ is read-only';
 }
 
-$file = __FILE__;
-BEGIN{ ${"_<".__FILE__} = \1 }
-is __FILE__, $file,
-    'no __FILE__ corruption when setting CopFILESV to a ref';
+{
+    no strict 'refs';
+    no strict 'vars';
+    $file = __FILE__;
+    BEGIN{ ${"_<".__FILE__} = \1 }
+    is __FILE__, $file,
+        'no __FILE__ corruption when setting CopFILESV to a ref';
+}
 
 eval 'Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
     .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
@@ -518,11 +538,14 @@ is +(${[{a=>214}]}[0])->{a}, 214, '($array[...])->{...}';
 sub FILE1 () { 1 }
 sub dummy { tell FILE1 }
 
-# More potential multideref assertion failures
-# OPf_PARENS on OP_RV2SV in subscript
-$x[($_)];
-# OPf_SPECIAL on OP_GV in subscript
-$x[FILE1->[0]];
+{
+    no strict 'vars';
+    # More potential multideref assertion failures
+    # OPf_PARENS on OP_RV2SV in subscript
+    $x[($_)];
+    # OPf_SPECIAL on OP_GV in subscript
+    $x[FILE1->[0]];
+}
 
 # Used to crash [perl #123542]
 eval 's /${<>{}) //';
@@ -574,13 +597,16 @@ for my $marker (qw(
     like $@, qr/^Version control conflict marker at \(eval \d+\) line 3, near "$marker"/, "VCS marker '$marker' after operator";
 }
 
-# keys assignments in weird contexts (mentioned in perl #128260)
-eval 'keys(%h) .= "00"';
-is $@, "", 'keys .=';
-eval 'sub { read $fh, keys %h, 0 }';
-is $@, "", 'read into keys';
-eval 'substr keys(%h),0,=3';
-is $@, "", 'substr keys assignment';
+{
+    # keys assignments in weird contexts (mentioned in perl #128260)
+    no strict 'vars';
+    eval 'keys(%h) .= "00"';
+    is $@, "", 'keys .=';
+    eval 'sub { read $fh, keys %h, 0 }';
+    is $@, "", 'read into keys';
+    eval 'substr keys(%h),0,=3';
+    is $@, "", 'substr keys assignment';
+}
 
 { # very large utf8 char in error message was overflowing buffer
     if (length sprintf("%x", ~0) <= 8) {
@@ -603,6 +629,7 @@ is $@, "", 'substr keys assignment';
 
 # RT #130815: crash in ck_return for malformed code
 {
+    no strict 'vars';
     eval 'm(@{if(0){sub d{]]])}return';
     like $@, qr/^syntax error at \(eval \d+\) line 1, near "\{\]"/,
         'RT #130815: null pointer deref';
@@ -617,6 +644,8 @@ is(1,1, '[perl #74022] Parser looping on OtherIDContinue chars');
 
 # More awkward tests for #line. Keep these at the end, as they will screw
 # with sane line reporting for any other test failures
+
+no strict 'refs'; # In force from here to END
 
 sub check ($$$) {
     my ($file, $line, $name) =  @_;
@@ -753,7 +782,6 @@ check_line(627, 'line number after heredoc containing #line');
 ENE
 "bar"};
 check_line(642, 'line number after ${expr} surrounding heredoc body');
-
 
 __END__
 # Don't add new tests HERE. See "Add new tests HERE" above.

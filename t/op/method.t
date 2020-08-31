@@ -388,7 +388,7 @@ for my $meth (['Bar', 'Foo::Bar'],
 	      ['Xyz::SUPER::Bar', 'Xyz::SUPER::Bar'])
 {
     fresh_perl_is(<<EOT,
-package UNIVERSAL; sub AUTOLOAD { my \$c = shift; print "\$c \$AUTOLOAD\\n" }
+package UNIVERSAL; our \$AUTOLOAD; sub AUTOLOAD { my \$c = shift; print "\$c \$AUTOLOAD\\n" }
 sub DESTROY {} # prevent AUTOLOAD being called on DESTROY
 package Xyz;
 package main; Foo->$meth->[0]();
@@ -439,7 +439,7 @@ is $kalled, 1, 'calling a class method via a magic variable';
 
 {
     fresh_perl_is(
-    q! sub T::DESTROY { $x = $_[0]; } bless [], "T";!,
+    q! no strict 'vars'; sub T::DESTROY { $x = $_[0]; } bless [], "T";!,
     "DESTROY created new reference to dead object 'T' during global destruction.",
     {},
 	"DESTROY creating a new reference to the object generates a warning."
@@ -717,7 +717,7 @@ SKIP: {
 
 # RT#130496: assertion failure when looking for a method of undefined name
 # on an unblessed reference
-fresh_perl_is('eval { {}->$x }; print $@;',
+fresh_perl_is('my $x; eval { {}->$x }; print $@;',
               "Can't call method \"\" on unblessed reference at - line 1.",
               {},
               "no crash with undef method name on unblessed ref");

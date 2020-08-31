@@ -1,5 +1,6 @@
 # Many AIX installations seem not to have the right PATH
 # for the C compiler.  Steal the logic from Perl's hints/aix.sh.
+no strict 'vars';
 use Config;
 unless ($Config{gccversion}) {
     my $cc = $Config{cc};

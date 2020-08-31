@@ -7,17 +7,21 @@ use Test::More tests => 35;
 use XS::APItest;
 
 for my $func ('SvPVbyte', 'SvPVutf8') {
+ my ($g, $r);
  $g = *glob;
  $r = \1;
- is &$func($g), '*main::glob', "$func(\$glob_copy)";
- is ref\$g, 'GLOB', "$func(\$glob_copy) does not flatten the glob";
- is &$func($r), "$r", "$func(\$ref)";
- is ref\$r, 'REF', "$func(\$ref) does not flatten the ref";
+ {
+   no strict 'refs';
+   is &$func($g), '*main::glob', "$func(\$glob_copy)";
+   is ref\$g, 'GLOB', "$func(\$glob_copy) does not flatten the glob";
+   is &$func($r), "$r", "$func(\$ref)";
+   is ref\$r, 'REF', "$func(\$ref) does not flatten the ref";
 
- is &$func(*glob), '*main::glob', "$func(*glob)";
- is ref\$::{glob}, 'GLOB', "$func(*glob) does not flatten the glob";
- is &$func($^V), "$^V", "$func(\$ro_ref)";
- is ref\$^V, 'REF', "$func(\$ro_ref) does not flatten the ref";
+   is &$func(*glob), '*main::glob', "$func(*glob)";
+   is ref\$::{glob}, 'GLOB', "$func(*glob) does not flatten the glob";
+   is &$func($^V), "$^V", "$func(\$ro_ref)";
+   is ref\$^V, 'REF', "$func(\$ro_ref) does not flatten the ref";
+ }
 }
 
 my $B6 = byte_utf8a_to_utf8n("\xC2\xB6");
@@ -50,14 +54,18 @@ is SvPVutf8_nomg($scalar_uni), $individual_B6_utf8_bytes;
 is tied($scalar_uni)->{fetch}, 1;
 is tied($scalar_uni)->{store}, 0;
 
-eval 'SvPVbyte(*{chr 256})';
-like $@, qr/^Wide character/, 'SvPVbyte fails on Unicode glob';
-package r { use overload '""' => sub { substr "\x{100}\xff", -1 } }
-is SvPVbyte(bless [], r::), "\xff",
-  'SvPVbyte on ref returning downgradable utf8 string';
+{
+    no strict 'refs';
+    eval 'SvPVbyte(*{chr 256})';
+    like $@, qr/^Wide character/, 'SvPVbyte fails on Unicode glob';
+    package r { use overload '""' => sub { substr "\x{100}\xff", -1 } }
+    is SvPVbyte(bless [], r::), "\xff",
+        'SvPVbyte on ref returning downgradable utf8 string';
+}
 
 sub TIESCALAR { bless \(my $thing = pop), shift }
 sub FETCH { ${ +shift } }
+my $tyre;
 tie $tyre, main => bless [], r::;
 is SvPVbyte($tyre), "\xff",
   'SvPVbyte on tie returning ref that returns downgradable utf8 string';

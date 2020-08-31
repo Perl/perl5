@@ -1,14 +1,13 @@
 #!../miniperl -w
 
 BEGIN {
-    @INC = qw(../win32 ../lib);
+    chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc( qw(../win32 ../lib) );
     skip_all('FindExt not portable')
-	if $^O eq 'VMS';
+        if $^O eq 'VMS';
+    require Config; Config->import;
 }
-use strict;
-use Config;
-
 # Test that Win32/FindExt.pm is consistent with Configure in determining the
 # types of extensions.
 

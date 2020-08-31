@@ -1,7 +1,7 @@
 #!./perl -T
 
 BEGIN {
-    require Config; import Config;
+    use Config;
     if ($Config{'extensions'} !~ /\bDevel\/Peek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
         exit 0;
@@ -18,6 +18,7 @@ use Test::More;
 use Devel::Peek;
 
 our $DEBUG = 0;
+our ( @array, %hash );
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
 
 # If I reference any lexicals in this, I get the entire outer subroutine (or
@@ -38,9 +39,11 @@ sub do_test {
     my $pattern = $_[2];
     my $do_eval = $_[5];
     if (open(OUT,'>', "peek$$")) {
-	open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
+        my $setup_stderr = sub { open(STDERR, ">&OUT") or die "Can't dup OUT: $!" };
         if ($do_eval) {
             my $sub = eval "sub { Dump $_[1] }";
+            die $@ if $@;
+            $setup_stderr->();
             $sub->();
             print STDERR "*****\n";
             # second dump to compare with the first to make sure nothing
@@ -48,6 +51,7 @@ sub do_test {
             $sub->();
         }
         else {
+            $setup_stderr->();
             Dump($_[1]);
             print STDERR "*****\n";
             # second dump to compare with the first to make sure nothing
@@ -116,6 +120,7 @@ sub do_test {
 our   $a;
 our   $b;
 my    $c;
+our $d;
 local $d = 0;
 
 END {
@@ -342,6 +347,8 @@ do_test('reference to named subroutine without prototype',
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$repeat_todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$do_eval"
+\s+\\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$setup_stderr"
+\s+\\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "&"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$sub"
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
@@ -925,6 +932,7 @@ do_test('small hash after keys and scalar',
       COW_REFCNT = 1
 ){2}');
 
+note ('Dump with arrays, hashes, and operator return values');
 # Dump with arrays, hashes, and operator return values
 @array = 1..3;
 do_test('Dump @array', '@array', <<'ARRAY', '', undef, 1);
@@ -1249,6 +1257,7 @@ sub _get_coderef {
    my $x = $_[0];
    utf8::upgrade($x);
    eval "sub $x {}; 1" or die $@;
+   no strict 'refs';
    return *{$x}{CODE};
 }
 
@@ -1282,45 +1291,48 @@ like(
    "GVGV's are correctly escaped for UTF8 :: latin 1 :: UTF8",
 );
 
-my $dump = _dump(*{"\x{30cb}::\x{df}::\x{30dc}"});
+{
+    no strict 'refs';
+    my $dump = _dump(*{"\x{30cb}::\x{df}::\x{30dc}"});
 
-like(
-   $dump,
-   qr/NAME = \Q"\x{30dc}"/,
-   "NAME is correctly escaped for UTF8 globs",
-);
+    like(
+       $dump,
+       qr/NAME = \Q"\x{30dc}"/,
+       "NAME is correctly escaped for UTF8 globs",
+    );
 
-like(
-   $dump,
-   qr/GvSTASH = 0x[[:xdigit:]]+\s+\Q"\x{30cb}::\x{df}"/,
-   "GvSTASH is correctly escaped for UTF8 globs"
-);
+    like(
+       $dump,
+       qr/GvSTASH = 0x[[:xdigit:]]+\s+\Q"\x{30cb}::\x{df}"/,
+       "GvSTASH is correctly escaped for UTF8 globs"
+    );
 
-like(
-   $dump,
-   qr/EGV = 0x[[:xdigit:]]+\s+\Q"\x{30dc}"/,
-   "EGV is correctly escaped for UTF8 globs"
-);
+    like(
+       $dump,
+       qr/EGV = 0x[[:xdigit:]]+\s+\Q"\x{30dc}"/,
+       "EGV is correctly escaped for UTF8 globs"
+    );
 
-$dump = _dump(*{"\x{df}::\x{30cc}"});
+    $dump = _dump(*{"\x{df}::\x{30cc}"});
 
-like(
-   $dump,
-   qr/NAME = \Q"\x{30cc}"/,
-   "NAME is correctly escaped for UTF8 globs with latin1 stashes",
-);
+    like(
+       $dump,
+       qr/NAME = \Q"\x{30cc}"/,
+       "NAME is correctly escaped for UTF8 globs with latin1 stashes",
+    );
 
-like(
-   $dump,
-   qr/GvSTASH = 0x[[:xdigit:]]+\s+\Q"\xdf"/,
-   "GvSTASH is correctly escaped for UTF8 globs with latin1 stashes"
-);
+    like(
+       $dump,
+       qr/GvSTASH = 0x[[:xdigit:]]+\s+\Q"\xdf"/,
+       "GvSTASH is correctly escaped for UTF8 globs with latin1 stashes"
+    );
 
-like(
-   $dump,
-   qr/EGV = 0x[[:xdigit:]]+\s+\Q"\x{30cc}"/,
-   "EGV is correctly escaped for UTF8 globs with latin1 stashes"
-);
+    like(
+       $dump,
+       qr/EGV = 0x[[:xdigit:]]+\s+\Q"\x{30cc}"/,
+       "EGV is correctly escaped for UTF8 globs with latin1 stashes"
+    );
+}
 
 like(
    _dump(bless {}, "\0::\1::\x{30cd}"),
@@ -1372,10 +1384,11 @@ like(
 sub test_utf8_stashes {
    my ($stash_name, $test) = @_;
 
-   $dump = _dump(\%{"${stash_name}::"});
+   no strict 'refs';
+   my $dump = _dump(\%{"${stash_name}::"});
 
    my $format = utf8::is_utf8($stash_name) ? '\x{%2x}' : '\x%2x';
-   $escaped_stash_name = join "", map {
+   my $escaped_stash_name = join "", map {
          $_ eq ':' ? $_ : sprintf $format, ord $_
    } split //, $stash_name;
 
@@ -1415,7 +1428,7 @@ sub test_DumpProg {
     t::curr_test($builder->current_test() + 1);
 
     utf8::encode($prog);
-    
+
     if ( $test eq 'is' ) {
         t::fresh_perl_is($prog . $u, $expected, $runperl_args, $name)
     }

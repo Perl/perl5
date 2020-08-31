@@ -21,11 +21,13 @@
 # then hand-edit configure.com (as that's not automated).
 # If this changes uconfig.sh, you'll also need to run perl regen/uconfig_h.pl
 
-use Config;
 BEGIN {
-    require "./test.pl";
+    chdir 't' if -d 't';
+    require './test.pl';
     skip_all("Won't ship a release from EBCDIC") if $::IS_EBCDIC;
-    @INC = '..' if -f '../TestInit.pm';
+    set_up_inc('../lib');
+    unshift (@INC, '..') if -f '../TestInit.pm';
+    require Config; Config->import;
 }
 use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
 

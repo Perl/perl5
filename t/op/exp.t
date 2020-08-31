@@ -14,6 +14,7 @@ plan tests => 31;
 
 # compile time evaluation
 
+my $s;
 eval { $s = sqrt(-1) }; # Kind of compile time.
 like($@, qr/sqrt of -1/, 'compile time sqrt(-1) fails');
 
@@ -47,9 +48,9 @@ cmp_ok(round(atan2(1, 2)), '==', '0.463647609', "atan2(1, 2)");
 
 # run time evaluation
 
-$x0 = 0;
-$x1 = 1;
-$x2 = 2;
+my $x0 = 0;
+my $x1 = 1;
+my $x2 = 2;
 
 eval { $s = sqrt(-$x1) };
 like($@, qr/sqrt of -1/, 'run time sqrt(-1) fails');

@@ -13,11 +13,13 @@
 # error traps in Storable as possible
 # It also acts as a test for read_header
 
+
 sub BEGIN {
     # This lets us distribute Test::More in t/
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -63,7 +65,7 @@ sub test_hash {
   is (ref $clone, "HASH", "Get hash back");
   is (scalar keys %$clone, 1, "with 1 key");
   is ((keys %$clone)[0], "perl", "which is correct");
-  is ($clone->{perl}, "rules", "Got expected value when looking up key in clone");
+  is ($clone->{perl}, "rules");
 }
 
 sub test_header {
@@ -238,7 +240,7 @@ sub test_things {
   }
 }
 
-ok (defined store(\%hash, $file), "store() returned defined value");
+ok (defined store(\%hash, $file));
 
 my $expected = 20 + length ($file_magic_str) + $other_magic + $fancy;
 my $length = -s $file;
@@ -266,7 +268,7 @@ test_things($stored, \&freeze_and_thaw, 'string');
 # Network order.
 unlink $file or die "Can't unlink '$file': $!";
 
-ok (defined nstore(\%hash, $file), "nstore() returned defined value");
+ok (defined nstore(\%hash, $file));
 
 $expected = 20 + length ($file_magic_str) + $network_magic + $fancy;
 $length = -s $file;

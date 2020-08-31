@@ -199,29 +199,33 @@ EXPECT
 Missing ']' in prototype for bar::foo : [ at (eval 1) line 1.
 ########
 # toke.c
+no strict 'subs';
+my ($a, $foo);
 $a =~ m/$foo/eq;
 $a =~ s/$foo/fool/seq;
 
 EXPECT
 OPTION fatal
-Unknown regexp modifier "/e" at - line 2, near "=~ "
-Unknown regexp modifier "/q" at - line 2, near "=~ "
-Unknown regexp modifier "/q" at - line 3, near "=~ "
+Unknown regexp modifier "/e" at - line 4, near "=~ "
+Unknown regexp modifier "/q" at - line 4, near "=~ "
+Unknown regexp modifier "/q" at - line 5, near "=~ "
 Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use utf8;
 use open qw( :utf8 :std );
+no strict 'subs';
+my ( $a, $foo );
 $a =~ m/$foo/eネq;
 $a =~ s/$foo/fool/seネq;
 
 EXPECT
 OPTION fatal
-Unknown regexp modifier "/e" at - line 4, near "=~ "
-Unknown regexp modifier "/ネ" at - line 4, near "=~ "
-Unknown regexp modifier "/q" at - line 4, near "=~ "
-Unknown regexp modifier "/ネ" at - line 5, near "=~ "
-Unknown regexp modifier "/q" at - line 5, near "=~ "
+Unknown regexp modifier "/e" at - line 6, near "=~ "
+Unknown regexp modifier "/ネ" at - line 6, near "=~ "
+Unknown regexp modifier "/q" at - line 6, near "=~ "
+Unknown regexp modifier "/ネ" at - line 7, near "=~ "
+Unknown regexp modifier "/q" at - line 7, near "=~ "
 Execution of - aborted due to compilation errors.
 ########
 # toke.c
@@ -289,7 +293,7 @@ Unterminated <> operator at - line 11.
 ########
 # toke.c
 use warnings 'syntax' ;
-my $a = $a[1,2] ;
+my @a; my $a = $a[1,2] ;
 no warnings 'syntax' ;
 my $a = $a[1,2] ;
 EXPECT
@@ -337,8 +341,8 @@ EXPECT
 Can't use \1 to mean $1 in expression at - line 4.
 ########
 # toke.c
-use warnings 'reserved' ;
-$a = abc;
+use warnings 'reserved' ; no strict 'subs';
+my $a = abc;
 $a = { def
 
 => 1 };
@@ -349,7 +353,7 @@ Unquoted string "abc" may clash with future reserved word at - line 3.
 ########
 # toke.c
 use warnings 'qw' ;
-@a = qw(a, b, c) ;
+my @a = qw(a, b, c) ;
 no warnings 'qw' ;
 @a = qw(a, b, c) ;
 EXPECT
@@ -357,7 +361,7 @@ Possible attempt to separate words with commas at - line 3.
 ########
 # toke.c
 use warnings 'qw' ;
-@a = qw(a b c # #) ;
+my @a = qw(a b c # #) ;
 no warnings 'qw' ;
 @a = qw(a b c # #) ;
 EXPECT
@@ -365,7 +369,7 @@ Possible attempt to put comments in qw() list at - line 3.
 ########
 # toke.c
 use warnings 'qw' ;
-@a = qw(a, b, c # #) ;
+my @a = qw(a, b, c # #) ;
 no warnings 'qw' ;
 @a = qw(a, b, c # #) ;
 EXPECT
@@ -374,6 +378,7 @@ Possible attempt to put comments in qw() list at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;
+my $x;
 print ("");
 print ("") and $x = 1;
 print ("") or die;
@@ -381,7 +386,7 @@ print ("") // die;
 print (1+2) * 3 if 0; # only this one should warn
 print (1+2) if 0;
 EXPECT
-print (...) interpreted as function at - line 7.
+print (...) interpreted as function at - line 8.
 ########
 # toke.c
 no warnings 'syntax' ;
@@ -450,21 +455,24 @@ Old package separator used in string at - line 5.
 	(Did you mean "$#fooл\'barл" instead?)
 ########
 # toke.c
+my ( $a, @time );
 use warnings 'ambiguous' ;
 $a = ${time[2]};
 no warnings 'ambiguous' ;
 $a = ${time[2]};
 EXPECT
-Ambiguous use of ${time[...]} resolved to $time[...] at - line 3.
+Ambiguous use of ${time[...]} resolved to $time[...] at - line 4.
 ########
 # toke.c
+my ( $a, %time );
 use warnings 'ambiguous' ;
 $a = ${time{2}};
 EXPECT
-Ambiguous use of ${time{...}} resolved to $time{...} at - line 3.
+Ambiguous use of ${time{...}} resolved to $time{...} at - line 4.
 ########
 # toke.c
 use warnings 'ambiguous' ;
+my ($a, %time);
 $a = ${
 
     time
@@ -472,10 +480,11 @@ $a = ${
 };
 warn "after";
 EXPECT
-Ambiguous use of ${time{...}} resolved to $time{...} at - line 5.
-after at - line 8.
+Ambiguous use of ${time{...}} resolved to $time{...} at - line 6.
+after at - line 9.
 ########
 # toke.c
+my ($a, @time);
 use warnings 'ambiguous' ;
 $a = ${
 
@@ -490,11 +499,12 @@ time
 };
 warn "after";
 EXPECT
-Ambiguous use of ${time[...]} resolved to $time[...] at - line 5.
-Ambiguous use of ${time[...]} resolved to $time[...] at - line 10.
-after at - line 14.
+Ambiguous use of ${time[...]} resolved to $time[...] at - line 6.
+Ambiguous use of ${time[...]} resolved to $time[...] at - line 11.
+after at - line 15.
 ########
 # toke.c
+my ($a, %time);
 no warnings 'ambiguous' ;
 $a = ${time{2}};
 EXPECT
@@ -502,6 +512,7 @@ EXPECT
 ########
 # toke.c
 use warnings 'ambiguous' ;
+my ($a, %time, $time, @time);
 $a = ${time} ;
 $a = @{time} ;
 $a = $#{time} ; # This one is special cased in toke.c
@@ -516,15 +527,16 @@ $a = %{time} ;
 $a = *{time} ;
 $a = defined &{time} ; # To avoid calling &::time
 EXPECT
-Ambiguous use of ${time} resolved to $time at - line 3.
-Ambiguous use of @{time} resolved to @time at - line 4.
+Ambiguous use of ${time} resolved to $time at - line 4.
 Ambiguous use of @{time} resolved to @time at - line 5.
-Ambiguous use of %{time} resolved to %time at - line 6.
-Ambiguous use of *{time} resolved to *time at - line 7.
-Ambiguous use of &{time} resolved to &time at - line 8.
+Ambiguous use of @{time} resolved to @time at - line 6.
+Ambiguous use of %{time} resolved to %time at - line 7.
+Ambiguous use of *{time} resolved to *time at - line 8.
+Ambiguous use of &{time} resolved to &time at - line 9.
 ########
 # toke.c
 use warnings 'ambiguous' ;
+my ($a, $time, @time, %time);
 $a = ${
 time
 } ;
@@ -547,16 +559,16 @@ time
 } ;
 warn "last";
 EXPECT
-Ambiguous use of ${time} resolved to $time at - line 4.
-Ambiguous use of @{time} resolved to @time at - line 7.
-Ambiguous use of @{time} resolved to @time at - line 10.
-Ambiguous use of %{time} resolved to %time at - line 13.
-Ambiguous use of *{time} resolved to *time at - line 16.
-Ambiguous use of &{time} resolved to &time at - line 19.
-last at - line 23.
+Ambiguous use of ${time} resolved to $time at - line 5.
+Ambiguous use of @{time} resolved to @time at - line 8.
+Ambiguous use of @{time} resolved to @time at - line 11.
+Ambiguous use of %{time} resolved to %time at - line 14.
+Ambiguous use of *{time} resolved to *time at - line 17.
+Ambiguous use of &{time} resolved to &time at - line 20.
+last at - line 24.
 ########
 # toke.c
-use warnings 'ambiguous' ;
+use warnings 'ambiguous' ; no strict;
 sub fred {}
 $a = ${fred} ;
 no warnings 'ambiguous' ;
@@ -565,7 +577,7 @@ EXPECT
 Ambiguous use of ${fred} resolved to $fred at - line 4.
 ########
 # toke.c
-use warnings 'syntax' ;
+use warnings 'syntax' ; no strict;
 $a = _123; print "$a\n";		#( 3	string)
 $a = 1_23; print "$a\n";
 $a = 12_3; print "$a\n";
@@ -1004,7 +1016,7 @@ Precedence problem: open ᒍÒÒ should be open(ᒍÒÒ) at - line 10.
 Precedence problem: open ᒍÒÒ should be open(ᒍÒÒ) at - line 12.
 ########
 # toke.c
-$^W = 0 ;
+no strict; $^W = 0 ;
 *foo *foo ;
 {
     no warnings 'ambiguous' ;
@@ -1028,7 +1040,7 @@ Ambiguous use of * resolved as operator * at - line 10.
 $* is no longer supported as of Perl 5.30 at - line 14.
 ########
 # toke.c
-$^W = 0 ;
+no strict; $^W = 0 ;
 %foo %foo ;
 {
     no warnings 'ambiguous' ;
@@ -1054,7 +1066,7 @@ Bareword found where operator expected at - line 13, near "$ %foo"
 Illegal modulus zero at - line 3.
 ########
 # toke.c
-$^W = 0 ;
+no strict; $^W = 0 ;
 &foo &foo ;
 {
     no warnings 'ambiguous' ;
@@ -1081,7 +1093,7 @@ Bareword found where operator expected at - line 14, near "$ &foo"
 Undefined subroutine &main::foo called at - line 3.
 ########
 # toke.c
-use utf8;
+no strict; use utf8;
 use open qw( :utf8 :std );
 $^W = 0 ;
 *ｆｏｏ *ｆｏｏ ;
@@ -1117,7 +1129,7 @@ EXPECT
 Useless use of \E at - line 3.
 ########
 # toke.c
-use feature 'postderef_qq';
+use feature 'postderef_qq'; no strict; 
 (\$_)->$*;
 "$_->$*";
 (\$_)->$*;
@@ -1177,25 +1189,27 @@ Integer overflow in hexadecimal number at - line 8.
 Integer overflow in octal number at - line 11.
 ########
 # toke.c
+no strict;
 use warnings 'ambiguous';
 "@mjd_previously_unused_array";        
 no warnings 'ambiguous';
 "@mjd_previously_unused_array2";        
 EXPECT
-Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.
+Possible unintended interpolation of @mjd_previously_unused_array in string at - line 4.
 ########
 # toke.c
 use utf8;
 use open qw( :utf8 :std );
+no strict;
 use warnings 'ambiguous';
-"@mjd_previously_unused_àrray";        
+"@mjd_previously_unused_àrray";
 no warnings 'ambiguous';
 "@mjd_previously_unused_àrray2";        
 EXPECT
-Possible unintended interpolation of @mjd_previously_unused_àrray in string at - line 5.
+Possible unintended interpolation of @mjd_previously_unused_àrray in string at - line 6.
 ########
 # toke.c
-use utf8;
+use utf8; no strict;
 use open qw( :utf8 :std );
 use warnings 'ambiguous';
 "@mjd_previously_unused_ぁrrぁy";        
@@ -1236,14 +1250,14 @@ Use of /c modifier is meaningless in s/// at - line 6.
 -wa
 # toke.c
 # 20020414 mjd-perl-patch+@plover.com # -a flag should suppress these warnings
-print "@F\n";
+no strict; print "@F\n";
 EXPECT
 
 ########
 -w
 # toke.c
 # 20020414 mjd-perl-patch+@plover.com # -a flag should suppress these warnings
-print "@F\n";
+no strict; print "@F\n";
 EXPECT
 Possible unintended interpolation of @F in string at - line 4.
 Name "main::F" used only once: possible typo at - line 4.
@@ -1258,7 +1272,7 @@ EXPECT
 # 20020414 mjd-perl-patch+@plover.com
 # In 5.7.3, this emitted "Possible unintended interpolation" warnings
 use warnings 'ambiguous';
-$s = "(@-)(@+)";
+my $s = "(@-)(@+)";
 EXPECT
 
 ########
@@ -1471,7 +1485,7 @@ EXPECT
 ok
 ########
 # toke.c
-use utf8;
+use utf8; no strict;
 use open qw( :utf8 :std );
 use warnings 'ambiguous' ;
 sub frèd {}
@@ -1482,7 +1496,7 @@ EXPECT
 Ambiguous use of ${frèd} resolved to $frèd at - line 6.
 ########
 # toke.c
-use utf8;
+use utf8; no strict;
 use open qw( :utf8 :std );
 use warnings 'ambiguous' ;
 sub f렏 {}
@@ -1493,7 +1507,7 @@ EXPECT
 Ambiguous use of ${f렏} resolved to $f렏 at - line 6.
 ########
 # toke.c
-use utf8;
+use utf8; no strict;
 use open qw( :utf8 :std );
 use warnings;
 CORE::렏;
@@ -1665,7 +1679,7 @@ BEGIN{$^H=-1};my $l; s $0[$l]  
 EXPECT
 ########
 # NAME  [perl #129036] Assertion failure
-BEGIN{$0="";$^H=hex join""=>A00000}p?
+no strict; BEGIN{$0="";$^H=hex join""=>A00000}p?
 EXPECT
 OPTION fatal
 syntax error at - line 1, at EOF
@@ -1684,7 +1698,7 @@ BEGIN {
     }
 }
 use utf8;
-$foo="m'\302'";
+my $foo="m'\302'";
 eval $foo ;
 print "The eval did not crash the program\n"
 EXPECT
@@ -1716,7 +1730,7 @@ Ambiguous use of ${time} resolved to $time at - line 4.
 ########
 # NAME [perl #133850] another case
 use warnings;
-%x = qw(a b c d);
+my %x = qw(a b c d);
 $_ = "";
 s/^/ @x {a} /e
 EXPECT

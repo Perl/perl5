@@ -49,8 +49,8 @@
 
 __END__
 # pp_hot.c [pp_print]
-use warnings 'unopened' ;
-$f = $a = "abc" ; 
+use warnings 'unopened' ; no strict 'refs';
+my ($a, $f); $f = $a = "abc" ; 
 print $f $a;
 no warnings 'unopened' ;
 print $f $a;
@@ -61,7 +61,7 @@ EXPECT
 print() on unopened filehandle abc at - line 4.
 ########
 # pp_hot.c [pp_print]
-use warnings 'unopened' ;
+use warnings 'unopened' ; no strict 'refs';
 $SIG{__WARN__} = sub { warn $_[0] =~ s/\0/\\0/rug; };
 print {"a\0b"} "anc";
 print {"\0b"} "anc";
@@ -100,7 +100,7 @@ Filehandle FOO opened only for input at - line 20.
 ########
 # pp_hot.c [pp_print]
 $SIG{__WARN__} = sub { warn $_[0] =~ s/\0/\\0/rug; };
-use warnings 'io' ;
+use warnings 'io' ; no strict 'refs';
 my $file = "./xcv" ; unlink $file ;
 open (FH, ">$file") or die $! ;
 close FH or die $! ;
@@ -147,7 +147,7 @@ print() on closed filehandle __ANONIO__ at - line 7.
 ########
 # pp_hot.c [pp_print]
 package foo;
-use warnings 'closed';
+use warnings 'closed'; no strict;
 open my $fh1, "nonexistent";
 print $fh1 42;
 open $fh2, "nonexistent";
@@ -163,7 +163,7 @@ print() on closed filehandle $fh3 at - line 9.
 print() on closed filehandle FH4 at - line 11.
 ########
 # pp_hot.c [pp_rv2av]
-use warnings 'uninitialized' ;
+use warnings 'uninitialized' ; no strict;
 my $a = undef ;
 my @b = @$a;
 no warnings 'uninitialized' ;
@@ -172,7 +172,7 @@ EXPECT
 Use of uninitialized value $a in array dereference at - line 4.
 ########
 # pp_hot.c [pp_rv2hv]
-use warnings 'uninitialized' ;
+use warnings 'uninitialized' ; no strict;
 my $a = undef ;
 my %b = %$a;
 no warnings 'uninitialized' ;
@@ -313,6 +313,7 @@ Use of uninitialized value $y in concatenation (.) or string at - line 7.
 Use of uninitialized value $y in concatenation (.) or string at - line 8.
 ########
 # pp_hot.c [pp_aelem]
+my @x;
 {
 use warnings 'misc';
 print $x[\1];
@@ -324,11 +325,11 @@ print $x[\1];
 
 EXPECT
 OPTION regex
-Use of reference ".*" as array index at - line 4.
+Use of reference ".*" as array index at - line 5.
 ########
 # pp_hot.c [pp_aelem]
-package Foo;use overload q("") => sub {};package main;$a = bless {}, "Foo";
-$b = {};
+package Foo;use overload q("") => sub {};package main; my $a = bless {}, "Foo";
+my $b = {}; my @x;
 {
 use warnings 'misc';
 print $x[$a];

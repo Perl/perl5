@@ -5,10 +5,12 @@
 #  in the README file that comes with the distribution.
 #
 
+our (%dumped, %object, $count, $dumped);
+
 package dump;
 use Carp;
 
-%dump = (
+our %dump = (
 	'SCALAR'	=> 'dump_scalar',
 	'LVALUE'	=> 'dump_scalar',
 	'ARRAY'		=> 'dump_array',
@@ -69,7 +71,7 @@ sub recursive_dump {
 
 	croak "Unknown simple type '$ref'" unless defined $dump{$ref};
 
-	&{$dump{$ref}}($object);	# Dump object
+    { no strict; &{$dump{$ref}}($object); }	# Dump object
 	&bless($bless) if $bless;	# Mark it as blessed, if necessary
 
 	$dumped .= "OBJECT $objcount\n";
@@ -98,7 +100,7 @@ sub dump_array {
 	my ($aref) = @_;
 	my $items = 0 + @{$aref};
 	$dumped .= "ARRAY items=$items\n";
-	foreach $item (@{$aref}) {
+	foreach my $item (@{$aref}) {
 		unless (defined $item) {
 			$dumped .= 'ITEM_UNDEF' . "\n";
 			next;
@@ -113,7 +115,7 @@ sub dump_hash {
 	my ($href) = @_;
 	my $items = scalar(keys %{$href});
 	$dumped .= "HASH items=$items\n";
-	foreach $key (sort keys %{$href}) {
+	foreach my $key (sort keys %{$href}) {
 		$dumped .= 'KEY ';
 		&recursive_dump(\$key, undef);
 		unless (defined $href->{$key}) {

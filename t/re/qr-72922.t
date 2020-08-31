@@ -1,9 +1,10 @@
 #!perl -w
-use strict;
 
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc('../lib', '.', '../ext/re');
+    require Config; Config->import;
     skip_all_if_miniperl("no dynamic loading on miniperl, no Scalar::Util");
 }
 

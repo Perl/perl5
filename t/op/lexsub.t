@@ -56,11 +56,13 @@ sub bar::c { 43 }
   is &c, 42, 'our sub foo; makes lex alias for existing sub (amper)';
 }
 {
+  no strict 'subs';
   our sub d;
   sub bar::d { 'd43' }
   package bar;
   sub d { 'd42' }
-  is eval ::d, 'd42', 'our sub foo; applies to subsequent sub foo {}';
+  my $caution = q|TODO: Use of "strict 'subs'" changes test behavior|;
+  is eval ::d, 'd42', 'our sub foo; applies to subsequent sub foo {}' . " $caution";
 }
 {
   our sub e ($);
@@ -226,8 +228,8 @@ sub make_closure {
     foo
   }
 }
-$sub1 = make_closure 48;
-$sub2 = make_closure 49;
+my $sub1 = make_closure 48;
+my $sub2 = make_closure 49;
 is &$sub1, 48, 'state sub in closure (1)';
 is &$sub2, 49, 'state sub in closure (2)';
 # But we need to test that state subs actually do persist from one invoca-
@@ -320,6 +322,7 @@ sub make_anon_with_state_sub{
   state sub BEGIN { exit };
   pass 'state subs are never special blocks';
   state sub END { shift }
+  no strict 'subs';
   is eval{END('jkqeudth')}, jkqeudth,
     'state sub END {shift} implies @_, not @ARGV';
   state sub CORE { scalar reverse shift }
@@ -660,6 +663,7 @@ sub make_anon_with_my_sub{
   my sub BEGIN { exit };
   pass 'my subs are never special blocks';
   my sub END { shift }
+  no strict 'subs';
   is END('jkqeudth'), jkqeudth,
     'my sub END {shift} implies @_, not @ARGV';
 }

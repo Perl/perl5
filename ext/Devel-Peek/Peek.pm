@@ -3,18 +3,18 @@
 
 package Devel::Peek;
 
-$VERSION = '1.28';
-$XS_VERSION = $VERSION;
+our $VERSION = '1.29';
+our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
 require Exporter;
 require XSLoader;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg
+our @ISA = qw(Exporter);
+our @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg
 	     fill_mstats mstats_fillhash mstats2hash runops_debug debug_flags);
-@EXPORT_OK = qw(SvREFCNT CvGV);
-%EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
+our @EXPORT_OK = qw(SvREFCNT CvGV);
+our %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
 XSLoader::load();
 
@@ -44,7 +44,7 @@ sub DumpWithOP ($;$) {
    Dump($_[0],$depth);
 }
 
-$D_flags = 'psltocPmfrxuLHXDSTR';
+my $D_flags = 'psltocPmfrxuLHXDSTR';
 
 sub debug_flags (;$) {
   my $out = "";

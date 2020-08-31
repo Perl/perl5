@@ -8,26 +8,29 @@ BEGIN {
 
 plan(36);
 
-$TST = 'TST';
+my $TST = 'TST';
 
-$Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
+my $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
               $^O eq 'os2' or $^O eq 'cygwin' or
               $^O =~ /^uwin/);
 
-open($TST, 'harness') || (die "Can't open harness");
-binmode $TST if $Is_Dosish;
-ok(!eof(TST), "eof is false after open() non-empty file");
+{
+    no strict 'refs';
+    open($TST, 'harness') || (die "Can't open harness");
+    binmode $TST if $Is_Dosish;
+    ok(!eof($TST), "eof is false after open() non-empty file");
+}
 
-$firstline = <$TST>;
-$secondpos = tell;
+my $firstline = <$TST>;
+my $secondpos = tell;
 
-$x = 0;
+my $x = 0;
 while (<TST>) {
     if (eof) {$x++;}
 }
 is($x, 1, "only one eof is in the file");
 
-$lastpos = tell;
+my $lastpos = tell;
 
 ok(eof, "tell() doesn't change current state of eof");
 
@@ -53,7 +56,7 @@ ok(eof, "it sets eof flag");
 
 ok($., "current line number \$. is not null");
 
-$curline = $.;
+my $curline = $.;
 open(OTHER, 'harness') || (die "Can't open harness: $!");
 binmode OTHER if (($^O eq 'MSWin32') || ($^O eq 'NetWare'));
 
@@ -106,7 +109,7 @@ close(OTHER);
 my $written = tempfile();
 
 close($TST);
-open($tst,">$written")  || die "Cannot open $written:$!";
+open(my $tst,">$written")  || die "Cannot open $written:$!";
 binmode $tst if $Is_Dosish;
 
 is(tell($tst), 0, "tell() for new file returns 0");
@@ -130,7 +133,7 @@ if (0)
 
 is(tell($tst), 0, 'tell() for open mode "+>>" returns 0');
 
-$line = <$tst>;
+my $line = <$tst>;
 
 is($line, "fred\n", 'check first line in mode "+>>"');
 
@@ -174,7 +177,7 @@ else {
 close $tst;
 
 open FH, "test.pl";
-$fh = *FH; # coercible glob
+my $fh = *FH; # coercible glob
 is(tell($fh), 0, "tell on coercible glob");
 is(tell, 0, "argless tell after tell \$coercible");
 tell *$fh;

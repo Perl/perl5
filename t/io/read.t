@@ -8,7 +8,7 @@ BEGIN {
     die $@ if $@ and !is_miniperl();
 }
 
-use strict;
+
 
 plan tests => 2;
 

@@ -1,5 +1,4 @@
 #!/perl -w
-use strict;
 
 # See "TESTING" in perlhack.pod for the instructions about where test files
 # are located and which constructions should be avoided in the early tests.

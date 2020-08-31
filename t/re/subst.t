@@ -3,95 +3,98 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    require './charset_tools.pl';
     set_up_inc('../lib');
+    require './loc_tools.pl';
     require Config; import Config;
     require constant;
     constant->import(constcow => *Config::{NAME});
-    require './charset_tools.pl';
-    require './loc_tools.pl';
 }
 
 plan(tests => 278);
 
-$_ = 'david';
-$a = s/david/rules/r;
-ok( $_ eq 'david' && $a eq 'rules', 'non-destructive substitute' );
+my ($alpha, $beta);
 
-$a = "david" =~ s/david/rules/r;
-ok( $a eq 'rules', 's///r with constant' );
+$_ = 'david';
+$alpha = s/david/rules/r;
+ok( $_ eq 'david' && $alpha eq 'rules', 'non-destructive substitute' );
+
+$alpha = "david" =~ s/david/rules/r;
+ok( $alpha eq 'rules', 's///r with constant' );
 
 #[perl #127635] failed with -DPERL_NO_COW perl build (George smoker uses flag)
 #Modification of a read-only value attempted at ../t/re/subst.t line 23.
-$a = constcow =~ s/Config/David/r;
-ok( $a eq 'David::', 's///r with COW constant' );
+$alpha = constcow =~ s/Config/David/r;
+ok( $alpha eq 'David::', 's///r with COW constant' );
 
-$a = "david" =~ s/david/"is"."great"/er;
-ok( $a eq 'isgreat', 's///er' );
+$alpha = "david" =~ s/david/"is"."great"/er;
+ok( $alpha eq 'isgreat', 's///er' );
 
-$a = "daviddavid" =~ s/david/cool/gr;
-ok( $a eq 'coolcool', 's///gr' );
+$alpha = "daviddavid" =~ s/david/cool/gr;
+ok( $alpha eq 'coolcool', 's///gr' );
 
-$a = 'david';
-$b = $a =~ s/david/sucks/r =~ s/sucks/rules/r;
-ok( $a eq 'david' && $b eq 'rules', 'chained s///r' );
+$alpha = 'david';
+$beta = $alpha =~ s/david/sucks/r =~ s/sucks/rules/r;
+ok( $alpha eq 'david' && $beta eq 'rules', 'chained s///r' );
 
-$a = 'david';
-$b = $a =~ s/xxx/sucks/r;
-ok( $a eq 'david' && $b eq 'david', 'non matching s///r' );
+$alpha = 'david';
+$beta = $alpha =~ s/xxx/sucks/r;
+ok( $alpha eq 'david' && $beta eq 'david', 'non matching s///r' );
 
-$a = 'david';
+$alpha = 'david';
 for (0..2) {
-    ok( 'david' =~ s/$a/rules/ro eq 'rules', 's///ro '.$_ );
+    ok( 'david' =~ s/$alpha/rules/ro eq 'rules', 's///ro '.$_ );
 }
 
-$a = 'david';
-eval '$b = $a !~ s/david/is great/r';
+$alpha = 'david';
+eval '$beta = $alpha !~ s/david/is great/r';
 like( $@, qr{Using !~ with s///r doesn't make sense}, 's///r !~ operator gives error' );
 
 {
         no warnings 'uninitialized';
-        $a = undef;
-        $b = $a =~ s/left/right/r;
-        ok ( !defined $a && !defined $b, 's///r with undef input' );
+        $alpha = undef;
+        $beta = $alpha =~ s/left/right/r;
+        ok ( !defined $alpha && !defined $beta, 's///r with undef input' );
 
         use warnings;
-        warning_like(sub { $b = $a =~ s/left/right/r },
+        warning_like(sub { $beta = $alpha =~ s/left/right/r },
 		     qr/^Use of uninitialized value/,
 		     's///r Uninitialized warning');
 
-        $a = 'david';
+        $alpha = 'david';
         warning_like(sub {eval 's/david/sucks/r; 1'},
 		     qr/^Useless use of non-destructive substitution/,
 		     's///r void context warning');
 }
 
-$a = '';
-$b = $a =~ s/david/rules/r;
-ok( $a eq '' && $b eq '', 's///r on empty string' );
+$alpha = '';
+$beta = $alpha =~ s/david/rules/r;
+ok( $alpha eq '' && $beta eq '', 's///r on empty string' );
 
 $_ = 'david';
-@b = s/david/rules/r;
+my @b = s/david/rules/r;
 ok( $_ eq 'david' && $b[0] eq 'rules', 's///r in list context' );
 
 # Magic value and s///r
 require Tie::Scalar;
-tie $m, 'Tie::StdScalar';  # makes $a magical
+my $m;
+tie $m, 'Tie::StdScalar';  # makes $alpha magical
 $m = "david";
-$b = $m =~ s/david/rules/r;
-ok( $m eq 'david' && $b eq 'rules', 's///r with magic input' );
+$beta = $m =~ s/david/rules/r;
+ok( $m eq 'david' && $beta eq 'rules', 's///r with magic input' );
 
-$m = $b =~ s/rules/david/r;
+$m = $beta =~ s/rules/david/r;
 ok( defined tied($m), 's///r magic isn\'t lost' );
 
-$b = $m =~ s/xxx/yyy/r;
-ok( ! defined tied($b), 's///r magic isn\'t contagious' );
+$beta = $m =~ s/xxx/yyy/r;
+ok( ! defined tied($beta), 's///r magic isn\'t contagious' );
 
 my $ref = \("aaa" =~ s/aaa/bbb/r);
 is (Internals::SvREFCNT($$ref), 1, 's///r does not leak');
 $ref = \("aaa" =~ s/aaa/bbb/rg);
 is (Internals::SvREFCNT($$ref), 1, 's///rg does not leak');
 
-$x = 'foo';
+my $x = 'foo';
 $_ = "x";
 s/x/\$x/;
 ok( $_ eq '$x', ":$_: eq :\$x:" );
@@ -104,23 +107,23 @@ $_ = "x";
 s/x/\$x $x/;
 ok( $_ eq '$x foo', ":$_: eq :\$x foo:" );
 
-$b = 'cd';
-($a = 'abcdef') =~ s<(b${b}e)>'\n$1';
-ok( $1 eq 'bcde' && $a eq 'a\n$1f', ":$1: eq :bcde: ; :$a: eq :a\\n\$1f:" );
+$beta = 'cd';
+($alpha = 'abcdef') =~ s<(b${beta}e)>'\n$1';
+ok( $1 eq 'bcde' && $alpha eq 'a\n$1f', ":$1: eq :bcde: ; :$alpha: eq :a\\n\$1f:" );
 
-$a = 'abacada';
-ok( ($a =~ s/a/x/g) == 4 && $a eq 'xbxcxdx' );
+$alpha = 'abacada';
+ok( ($alpha =~ s/a/x/g) == 4 && $alpha eq 'xbxcxdx' );
 
-ok( ($a =~ s/a/y/g) == 0 && $a eq 'xbxcxdx' );
+ok( ($alpha =~ s/a/y/g) == 0 && $alpha eq 'xbxcxdx' );
 
-ok( ($a =~ s/b/y/g) == 1 && $a eq 'xyxcxdx' );
+ok( ($alpha =~ s/b/y/g) == 1 && $alpha eq 'xyxcxdx' );
 
 $_ = 'ABACADA';
 ok( /a/i && s///gi && $_ eq 'BCD' );
 
 $_ = '\\' x 4;
 ok( length($_) == 4 );
-$snum = s/\\/\\\\/g;
+my $snum = s/\\/\\\\/g;
 ok( $_ eq '\\' x 8 && $snum == 4 );
 
 $_ = '\/' x 4;
@@ -361,7 +364,7 @@ $_ = <<'EOL';
 EOL
 $^R = 'junk';
 
-$foo = ' $@%#lowercase $@%# lowercase UPPERCASE$@%#UPPERCASE' .
+my $foo = ' $@%#lowercase $@%# lowercase UPPERCASE$@%#UPPERCASE' .
   ' $@%#lowercase$@%#lowercase$@%# lowercase lowercase $@%#lowercase' .
   ' lowercase $@%#MiXeD$@%# ';
 
@@ -394,7 +397,7 @@ $snum = s/(\d*|x)/<$1>/g;
 $foo = '<>' . ('<x><>' x 20) ;
 ok( $_ eq $foo && $snum == 41 );
 
-$t = 'aaaaaaaaa'; 
+my $t = 'aaaaaaaaa';
 
 $_ = $t;
 pos = 6;
@@ -469,114 +472,114 @@ is($pv1, $pv2);
     {   
 	# Gregor Chrupala <gregor.chrupala@star-group.net>
 	use utf8;
-	$a = 'Espa&ntilde;a';
-	$a =~ s/&ntilde;/ñ/;
-	like($a, qr/ñ/, "use utf8 RHS");
+	$alpha = 'Espa&ntilde;a';
+	$alpha =~ s/&ntilde;/ñ/;
+	like($alpha, qr/ñ/, "use utf8 RHS");
     }
 
     {
 	use utf8;
-	$a = 'España España';
-	$a =~ s/ñ/&ntilde;/;
-	like($a, qr/ñ/, "use utf8 LHS");
+	$alpha = 'España España';
+	$alpha =~ s/ñ/&ntilde;/;
+	like($alpha, qr/ñ/, "use utf8 LHS");
     }
 
     {
 	use utf8;
-	$a = 'España';
-	$a =~ s/ñ/ñ/;
-	like($a, qr/ñ/, "use utf8 LHS and RHS");
+	$alpha = 'España';
+	$alpha =~ s/ñ/ñ/;
+	like($alpha, qr/ñ/, "use utf8 LHS and RHS");
     }
 }
 
 {
     # SADAHIRO Tomoyuki <bqw10602@nifty.com>
 
-    $a = "\x{100}\x{101}";
-    $a =~ s/\x{101}/\xFF/;
-    like($a, qr/\xFF/);
-    is(length($a), 2, "SADAHIRO utf8 s///");
+    $alpha = "\x{100}\x{101}";
+    $alpha =~ s/\x{101}/\xFF/;
+    like($alpha, qr/\xFF/);
+    is(length($alpha), 2, "SADAHIRO utf8 s///");
 
-    $a = "\x{100}\x{101}";
-    $a =~ s/\x{101}/"\xFF"/e;
-    like($a, qr/\xFF/);
-    is(length($a), 2);
+    $alpha = "\x{100}\x{101}";
+    $alpha =~ s/\x{101}/"\xFF"/e;
+    like($alpha, qr/\xFF/);
+    is(length($alpha), 2);
 
-    $a = "\x{100}\x{101}";
-    $a =~ s/\x{101}/\xFF\xFF\xFF/;
-    like($a, qr/\xFF\xFF\xFF/);
-    is(length($a), 4);
+    $alpha = "\x{100}\x{101}";
+    $alpha =~ s/\x{101}/\xFF\xFF\xFF/;
+    like($alpha, qr/\xFF\xFF\xFF/);
+    is(length($alpha), 4);
 
-    $a = "\x{100}\x{101}";
-    $a =~ s/\x{101}/"\xFF\xFF\xFF"/e;
-    like($a, qr/\xFF\xFF\xFF/);
-    is(length($a), 4);
+    $alpha = "\x{100}\x{101}";
+    $alpha =~ s/\x{101}/"\xFF\xFF\xFF"/e;
+    like($alpha, qr/\xFF\xFF\xFF/);
+    is(length($alpha), 4);
 
-    $a = "\xFF\x{101}";
-    $a =~ s/\xFF/\x{100}/;
-    like($a, qr/\x{100}/);
-    is(length($a), 2);
+    $alpha = "\xFF\x{101}";
+    $alpha =~ s/\xFF/\x{100}/;
+    like($alpha, qr/\x{100}/);
+    is(length($alpha), 2);
 
-    $a = "\xFF\x{101}";
-    $a =~ s/\xFF/"\x{100}"/e;
-    like($a, qr/\x{100}/);
-    is(length($a), 2);
+    $alpha = "\xFF\x{101}";
+    $alpha =~ s/\xFF/"\x{100}"/e;
+    like($alpha, qr/\x{100}/);
+    is(length($alpha), 2);
 
-    $a = "\xFF";
-    $a =~ s/\xFF/\x{100}/;
-    like($a, qr/\x{100}/);
-    is(length($a), 1);
+    $alpha = "\xFF";
+    $alpha =~ s/\xFF/\x{100}/;
+    like($alpha, qr/\x{100}/);
+    is(length($alpha), 1);
 
-    $a = "\xFF";
-    $a =~ s/\xFF/"\x{100}"/e;
-    like($a, qr/\x{100}/);
-    is(length($a), 1);
+    $alpha = "\xFF";
+    $alpha =~ s/\xFF/"\x{100}"/e;
+    like($alpha, qr/\x{100}/);
+    is(length($alpha), 1);
 }
 
 {
     # subst with mixed utf8/non-utf8 type
     my($ua, $ub, $uc, $ud) = ("\x{101}", "\x{102}", "\x{103}", "\x{104}");
     my($na, $nb) = ("\x{ff}", "\x{fe}");
-    my $a = "$ua--$ub";
-    my $b;
-    ($b = $a) =~ s/--/$na/;
-    is($b, "$ua$na$ub", "s///: replace non-utf8 into utf8");
-    ($b = $a) =~ s/--/--$na--/;
-    is($b, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8");
-    ($b = $a) =~ s/--/$uc/;
-    is($b, "$ua$uc$ub", "s///: replace utf8 into utf8");
-    ($b = $a) =~ s/--/--$uc--/;
-    is($b, "$ua--$uc--$ub", "s///: replace long utf8 into utf8");
-    $a = "$na--$nb";
-    ($b = $a) =~ s/--/$ua/;
-    is($b, "$na$ua$nb", "s///: replace utf8 into non-utf8");
-    ($b = $a) =~ s/--/--$ua--/;
-    is($b, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8");
+    my $alpha = "$ua--$ub";
+    my $beta;
+    ($beta = $alpha) =~ s/--/$na/;
+    is($beta, "$ua$na$ub", "s///: replace non-utf8 into utf8");
+    ($beta = $alpha) =~ s/--/--$na--/;
+    is($beta, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8");
+    ($beta = $alpha) =~ s/--/$uc/;
+    is($beta, "$ua$uc$ub", "s///: replace utf8 into utf8");
+    ($beta = $alpha) =~ s/--/--$uc--/;
+    is($beta, "$ua--$uc--$ub", "s///: replace long utf8 into utf8");
+    $alpha = "$na--$nb";
+    ($beta = $alpha) =~ s/--/$ua/;
+    is($beta, "$na$ua$nb", "s///: replace utf8 into non-utf8");
+    ($beta = $alpha) =~ s/--/--$ua--/;
+    is($beta, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8");
 
     # now with utf8 pattern
-    $a = "$ua--$ub";
-    ($b = $a) =~ s/-($ud)?-/$na/;
-    is($b, "$ua$na$ub", "s///: replace non-utf8 into utf8 (utf8 pattern)");
-    ($b = $a) =~ s/-($ud)?-/--$na--/;
-    is($b, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8 (utf8 pattern)");
-    ($b = $a) =~ s/-($ud)?-/$uc/;
-    is($b, "$ua$uc$ub", "s///: replace utf8 into utf8 (utf8 pattern)");
-    ($b = $a) =~ s/-($ud)?-/--$uc--/;
-    is($b, "$ua--$uc--$ub", "s///: replace long utf8 into utf8 (utf8 pattern)");
-    $a = "$na--$nb";
-    ($b = $a) =~ s/-($ud)?-/$ua/;
-    is($b, "$na$ua$nb", "s///: replace utf8 into non-utf8 (utf8 pattern)");
-    ($b = $a) =~ s/-($ud)?-/--$ua--/;
-    is($b, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8 (utf8 pattern)");
-    ($b = $a) =~ s/-($ud)?-/$na/;
-    is($b, "$na$na$nb", "s///: replace non-utf8 into non-utf8 (utf8 pattern)");
-    ($b = $a) =~ s/-($ud)?-/--$na--/;
-    is($b, "$na--$na--$nb", "s///: replace long non-utf8 into non-utf8 (utf8 pattern)");
+    $alpha = "$ua--$ub";
+    ($beta = $alpha) =~ s/-($ud)?-/$na/;
+    is($beta, "$ua$na$ub", "s///: replace non-utf8 into utf8 (utf8 pattern)");
+    ($beta = $alpha) =~ s/-($ud)?-/--$na--/;
+    is($beta, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8 (utf8 pattern)");
+    ($beta = $alpha) =~ s/-($ud)?-/$uc/;
+    is($beta, "$ua$uc$ub", "s///: replace utf8 into utf8 (utf8 pattern)");
+    ($beta = $alpha) =~ s/-($ud)?-/--$uc--/;
+    is($beta, "$ua--$uc--$ub", "s///: replace long utf8 into utf8 (utf8 pattern)");
+    $alpha = "$na--$nb";
+    ($beta = $alpha) =~ s/-($ud)?-/$ua/;
+    is($beta, "$na$ua$nb", "s///: replace utf8 into non-utf8 (utf8 pattern)");
+    ($beta = $alpha) =~ s/-($ud)?-/--$ua--/;
+    is($beta, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8 (utf8 pattern)");
+    ($beta = $alpha) =~ s/-($ud)?-/$na/;
+    is($beta, "$na$na$nb", "s///: replace non-utf8 into non-utf8 (utf8 pattern)");
+    ($beta = $alpha) =~ s/-($ud)?-/--$na--/;
+    is($beta, "$na--$na--$nb", "s///: replace long non-utf8 into non-utf8 (utf8 pattern)");
 }
 
 $_ = 'aaaa';
-$r = 'x';
-$s = s/a(?{})/$r/g;
+my $r = 'x';
+my $s = s/a(?{})/$r/g;
 is("<$_> <$s>", "<xxxx> <4>", "[perl #7806]");
 
 $_ = 'aaaa';
@@ -939,42 +942,45 @@ pass("s/// on tied var returning a cow");
 # Test problems with constant replacement optimisation
 # [perl #26986] logop in repl resulting in incorrect optimisation
 "g" =~ /(.)/;
+my %l;
 @l{'a'..'z'} = 'A'..':';
 $_ = "hello";
-{ s/(.)/$l{my $a||$1}/g }
+{ s/(.)/$l{my $alpha||$1}/g }
 is $_, "HELLO",
   'logop in s/// repl does not result in "constant" repl optimisation';
 # Aliases to match vars
 "g" =~ /(.)/;
-$_ = "hello";
 {
-    local *a = *1;
-    s/(.)\1/$a/g;
+    no strict 'vars';
+    $_ = "hello";
+    local *gamma = *1;
+    s/(.)\1/$gamma/g;
+    is $_, 'helo', 's/pat/$alias_to_match_var/';
 }
-is $_, 'helo', 's/pat/$alias_to_match_var/';
 "g" =~ /(.)/;
-$_ = "hello";
 {
-    local *a = *1;
-    s/e(.)\1/a$a/g;
+    no strict 'vars';
+    $_ = "hello";
+    local *delta = *1;
+    s/e(.)\1/a$delta/g;
+    is $_, 'halo', 's/pat/foo$alias_to_match_var/';
 }
-is $_, 'halo', 's/pat/foo$alias_to_match_var/';
 # Last-used pattern containing re-evals that modify "constant" rhs
 {
-    local *a;
+    no strict 'vars';
+    local *epsilon;
     $x = "hello";
-    $x =~ /(?{*a = \"a"})./;
-    undef *a;
-    $x =~ s//$a/g;
+    $x =~ /(?{*epsilon = \"a"})./;
+    undef *epsilon;
+    $x =~ s//$epsilon/g;
     is $x, 'aaaaa',
 	'last-used pattern disables constant repl optimisation';
 }
 
-
 $_ = "\xc4\x80";
-$a = "";
-utf8::upgrade $a;
-$_ =~ s/$/$a/;
+$alpha = "";
+utf8::upgrade $alpha;
+$_ =~ s/$/$alpha/;
 is $_, "\xc4\x80", "empty utf8 repl does not result in mangled utf8";
 
 $@ = "\x{30cb}eval 18";
@@ -982,9 +988,10 @@ $@ =~ s/eval \d+/eval 11/;
 is $@, "\x{30cb}eval 11",
   'loading utf8 tables does not interfere with matches against $@';
 
-$reftobe = 3;
+my $reftobe = 3;
 $reftobe =~ s/3/$reftobe=\ 3;4/e;
 is $reftobe, '4', 'clobbering target with ref in s//.../e';
+my %locker;
 $locker{key} = 3;
 SKIP:{
     skip "no Hash::Util under miniperl", 2 if is_miniperl;
@@ -999,7 +1006,7 @@ SKIP:{
     like $@, qr/^Modification of a read-only value/, 'err msg' . ($@ ? ": $@" : "");
 }
 delete $::{does_not_exist}; # just in case
-eval { no warnings; $::{does_not_exist}=~s/(?:)/*{"does_not_exist"}; 4/e };
+eval { no strict 'refs'; no warnings; $::{does_not_exist}=~s/(?:)/*{"does_not_exist"}; 4/e };
 like $@, qr/^Modification of a read-only value/,
     'vivifying stash elem in $that::{elem} =~ s//.../e';
 
@@ -1087,7 +1094,7 @@ SKIP: {
 }
 {
     # RT #126602 double free if the value being modified is freed in the replacement
-    fresh_perl_is('s//*_=0;s|0||;00.y0/e; print qq(ok\n)', "ok\n", { stderr => 1 },
+    fresh_perl_is('no strict q|subs|; s//*_=0;s|0||;00.y0/e; print qq(ok\n)', "ok\n", { stderr => 1 },
                   "[perl #126602] s//*_=0;s|0||/e crashes");
 }
 
@@ -1176,7 +1183,7 @@ __EOF__
 
 {   # [perl #133899], would panic
 
-    fresh_perl_is('my $a = "ha"; $a =~ s!|0?h\x{300}(?{})!!gi', "", {},
+    fresh_perl_is('my $alpha = "ha"; $alpha =~ s!|0?h\x{300}(?{})!!gi', "", {},
                   "[perl #133899] s!|0?h\\x{300}(?{})!!gi panics");
 }
 

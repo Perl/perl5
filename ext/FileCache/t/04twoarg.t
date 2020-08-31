@@ -2,6 +2,10 @@
 
 use FileCache;
 
+# FileCache is documented to rely upon symbolic references, so all programs
+# that use it must relax strict 'refs'
+no strict 'refs';
+
 END { unlink('foo') }
 
 use Test::More tests => 1;

@@ -74,6 +74,7 @@ print OUT <<'EOT';
 # Generated from DynaLoader_pm.PL, this file is unique for every OS
 
 package DynaLoader;
+no strict 'vars';
 
 #   And Gandalf said: 'Many folk like to know beforehand what is to
 #   be set on the table; but those who have laboured to prepare the
@@ -88,7 +89,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.47';
+    $VERSION = '1.48';
 }
 
 EOT
@@ -292,6 +293,7 @@ sub croak   { require Carp; Carp::croak(@_)   }
 
 sub bootstrap_inherit {
     my $module = $_[0];
+    no strict 'refs';
     local *isa = *{"$module\::ISA"};
     local @isa = (@isa, 'DynaLoader');
     # Cannot goto due to delocalization.  Will report errors on a wrong line?

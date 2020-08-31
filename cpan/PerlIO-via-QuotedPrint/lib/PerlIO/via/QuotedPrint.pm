@@ -1,6 +1,6 @@
 package PerlIO::via::QuotedPrint;
 
-$VERSION= '0.08';
+our $VERSION= '0.08_001';
 
 # be as strict as possible
 use strict;

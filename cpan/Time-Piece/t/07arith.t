@@ -58,7 +58,7 @@ is(int($s->weeks),  4);
 is(int($s->months), 1);
 is(int($s->years),  0);
 
-$s2 = $s->copy;
+my $s2 = $s->copy;
 is($s2->minutes, 44640, 'Copy Time::Seconds object');
 $s2 = $s->copy + 60;
 is($s2->minutes, 44641, 'Add integer to Time::Seconds object');

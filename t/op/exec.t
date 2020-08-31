@@ -72,6 +72,7 @@ my $echo_out = `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`;
 $echo_out =~ s/\n\n/\n/g;
 is( $echo_out, "ok\n", 'piped echo emulation');
 
+our $TODO;
 {
     # here we check if extra newlines are going to be slapped on
     # piped output.
@@ -94,7 +95,7 @@ is( $echo_out, "ok\n", 'piped echo emulation');
 
     {
 	local($/) = \2;       
-	$out = runperl(prog => 'print q{1234}');
+	my $out = runperl(prog => 'print q{1234}');
 	is($out, "1234", 'ignore $/ when capturing output in scalar context');
     }
 }
@@ -106,7 +107,7 @@ my $exit_one = $vms_exit_mode ? 4 << 8 : 1 << 8;
 is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
     'Explicit exit of 1' );
 
-$rc = system { "lskdfj" } "lskdfj";
+my $rc = system { "lskdfj" } "lskdfj";
 unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
     print "# \$rc == $rc\n";
 }

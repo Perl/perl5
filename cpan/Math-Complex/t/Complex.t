@@ -136,7 +136,7 @@ sub test_dbz {
 	$test++;
 	push(@script, <<EOT);
 	eval '$op';
-	(\$bad) = (\$@ =~ /(.+)/);
+	(my \$bad) = (\$@ =~ /(.+)/);
 	print "# $test op = $op divbyzero? \$bad...\n";
 	print 'not ' unless (\$@ =~ /Division by zero/);
 EOT
@@ -326,7 +326,7 @@ sub test_remake {
     $test++;
     push @script, <<EOS;
     print "# remake 2+3i\n";
-    \$z = cplx('2+3i');
+    my \$z = cplx('2+3i');
     print "not " unless \$z == Math::Complex->make(2,3);
     print "ok $test\n";
 EOS
@@ -334,7 +334,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# make 3i\n";
-    \$z = Math::Complex->make('3i');
+    my \$z = Math::Complex->make('3i');
     print "not " unless \$z == cplx(0,3);
     print "ok $test\n";
 EOS
@@ -342,7 +342,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# emake [2,3]\n";
-    \$z = Math::Complex->emake('[2,3]');
+    my \$z = Math::Complex->emake('[2,3]');
     print "not " unless \$z == cplxe(2,3);
     print "ok $test\n";
 EOS
@@ -350,7 +350,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# make (2,3)\n";
-    \$z = Math::Complex->make('(2,3)');
+    my \$z = Math::Complex->make('(2,3)');
     print "not " unless \$z == cplx(2,3);
     print "ok $test\n";
 EOS
@@ -358,7 +358,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# emake [2,3pi/8]\n";
-    \$z = Math::Complex->emake('[2,3pi/8]');
+    my \$z = Math::Complex->emake('[2,3pi/8]');
     print "not " unless \$z == cplxe(2,3*\$pi/8);
     print "ok $test\n";
 EOS
@@ -366,7 +366,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# emake [2]\n";
-    \$z = Math::Complex->emake('[2]');
+    my \$z = Math::Complex->emake('[2]');
     print "not " unless \$z == cplxe(2);
     print "ok $test\n";
 EOS

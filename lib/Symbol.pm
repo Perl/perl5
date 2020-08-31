@@ -81,11 +81,11 @@ you reload the C<Foo> module afterwards.
 BEGIN { require 5.005; }
 
 require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(gensym ungensym qualify qualify_to_ref);
-@EXPORT_OK = qw(delete_package geniosym);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
+our @EXPORT_OK = qw(delete_package geniosym);
 
-$VERSION = '1.08';
+our $VERSION = '1.09';
 
 my $genpkg = "Symbol::";
 my $genseq = 0;
@@ -99,6 +99,7 @@ my %global = map {$_ => 1} qw(ARGV ARGVOUT ENV INC SIG STDERR STDIN STDOUT);
 #
 sub gensym () {
     my $name = "GEN" . $genseq++;
+    no strict 'refs';
     my $ref = \*{$genpkg . $name};
     delete $$genpkg{$name};
     $ref;
@@ -132,6 +133,7 @@ sub qualify ($;$) {
 }
 
 sub qualify_to_ref ($;$) {
+    no strict 'refs';
     return \*{ qualify $_[0], @_ > 1 ? $_[1] : caller };
 }
 
@@ -150,6 +152,7 @@ sub delete_package ($) {
     }
 
     my($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
+    no strict 'refs';
     my $stem_symtab = *{$stem}{HASH};
     return unless defined $stem_symtab and exists $stem_symtab->{$leaf};
 
@@ -160,6 +163,7 @@ sub delete_package ($) {
     foreach my $name (keys %$leaf_symtab) {
         undef *{$pkg . $name};
     }
+    use strict 'refs';
 
     # delete the symbol table
 

@@ -53,7 +53,7 @@ EXPECT
 Can't "default" outside a topicalizer at - line 2.
 ########
 # NAME croak with read only $@
-eval '"a" =~ /${*@=\_})/';
+eval q|no strict 'subs'; "a" =~ /${*@=\_})/|;
 die;
 # this would previously recurse infinitely in the eval
 EXPECT

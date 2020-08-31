@@ -52,7 +52,7 @@ Attempt to use reference as lvalue in substr at - line 7.
 ########
 # pp.c
 use warnings 'misc' ;
-@a = qw( a b c );
+my @a = qw( a b c );
 splice(@a, 4, 0, 'e') ;
 @a = qw( a b c );
 splice(@a, 4, 1) ;
@@ -70,7 +70,7 @@ splice() offset past end of array at - line 4.
 splice() offset past end of array at - line 6.
 ########
 # pp.c
-use warnings 'uninitialized';
+use warnings 'uninitialized'; no strict;
 $x = undef; $y = $$x;
 no warnings 'uninitialized' ;
 $u = undef; $v = $$u;
@@ -117,10 +117,10 @@ Constant subroutine ฝᶱ undefined at - line 6.
 ########
 # pp.c
 use warnings 'misc';
-$foo = sub () { 3 };
+my $foo = sub () { 3 };
 undef &$foo;
 no warnings 'misc';
-$bar = sub () { 4 };
+my $bar = sub () { 4 };
 undef &$bar;
 EXPECT
 Constant subroutine (anonymous) undefined at - line 4.

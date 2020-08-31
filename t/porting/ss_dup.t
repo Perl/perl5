@@ -1,10 +1,14 @@
 #!perl
 
-@TODO = qw [ SAVEt_SAVESWITCHSTACK ];
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config; Config->import;
+}
+our @TODO = qw [ SAVEt_SAVESWITCHSTACK ];
+our %TODO;
 @TODO{@TODO} = ();
-
-BEGIN { chdir 't'; @INC = "../lib"; require './test.pl' }
-use Config;
 
 if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );

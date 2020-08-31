@@ -1,19 +1,19 @@
 package Text::Wrap;
+use strict; # though not needed in core, include for dual-life
 
 use warnings::register;
 require Exporter;
 
+our (@ISA, @EXPORT, @EXPORT_OK);
 @ISA = qw(Exporter);
 @EXPORT = qw(wrap fill);
 @EXPORT_OK = qw($columns $break $huge);
 
-$VERSION = 2013.0523;
+use vars qw($VERSION $SUBVERSION $columns $debug $break $huge $unexpand $tabstop $separator $separator2);
+$VERSION = 2013.0523_01;
 $SUBVERSION = 'modern';
 
 use 5.010_000;
-
-use vars qw($VERSION $SUBVERSION $columns $debug $break $huge $unexpand $tabstop $separator $separator2);
-use strict;
 
 BEGIN	{
 	$columns = 76;  # <= screen width

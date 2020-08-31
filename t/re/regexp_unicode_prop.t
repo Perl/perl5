@@ -5,7 +5,6 @@
 # including user-defined properties
 #
 
-use strict;
 use warnings;
 use v5.16;
 use utf8;
@@ -19,6 +18,7 @@ local $SIG {__WARN__} = sub {push @warnings, "@_"};
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    set_up_inc('../lib');
     skip_all_if_miniperl("no dynamic loading on miniperl, no File::Spec (used by charnames)");
 }
 

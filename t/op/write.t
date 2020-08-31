@@ -1984,7 +1984,7 @@ format Potshriggley =
 }
 
 fresh_perl_is(<<'EOP', <<'EXPECT',
-use warnings 'syntax' ;
+no strict 'vars'; use warnings 'syntax' ;
 format STDOUT =
 ^*|^*
 my $x = q/dd/, $x
@@ -2051,7 +2051,7 @@ fresh_perl_is('for(1..2){formline*0}', '', { stderr => 1 } , "#130722 - assertio
 
 # scary format testing from H.Merijn Brand
 
-# Just a complete test for format, including top-, left- and bottom marging
+# Just a complete test for format, including top-, left- and bottom merging
 # and format detection through glob entries
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' ||

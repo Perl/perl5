@@ -1,6 +1,10 @@
 #!./perl
 our (@funcs, $i);
 
+# FileCache is documented to rely upon symbolic references, so all programs
+# that use it must relax strict 'refs'
+no strict 'refs';
+
 BEGIN {
     # Functions exported by FileCache;
     @funcs  = qw[cacheout cacheout_close];

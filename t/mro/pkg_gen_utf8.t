@@ -1,12 +1,15 @@
 #!./perl
 
-use strict;
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+}
 use warnings;
 use utf8;
 use open qw( :utf8 :std );
 
-chdir 't' if -d 't';
-require q(./test.pl); plan(tests => 7);
+plan(tests => 7);
 
 require mro;
 

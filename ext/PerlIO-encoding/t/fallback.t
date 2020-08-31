@@ -22,12 +22,13 @@ use Test::More tests => 10;
 
 my $file = "fallback$$.txt";
 
+my $fh;
 {
     use warnings;
     my $message = '';
     local $SIG{__WARN__} = sub { $message = $_[0] };
     $PerlIO::encoding::fallback = Encode::PERLQQ;
-    ok(open(my $fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
+    ok(open($fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
     my $str = "\x{20AC}";
     print $fh $str,"0.02\n";
     close($fh);

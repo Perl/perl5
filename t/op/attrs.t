@@ -21,7 +21,7 @@ sub eval_ok ($;$) {
 fresh_perl_is 'use attributes; print "ok"', 'ok', {},
    'attributes.pm can load without warnings.pm already loaded';
 
-our $anon1; eval_ok '$anon1 = sub : method { $_[0]++ }';
+our $anon1; eval_ok 'no strict q|vars|; $anon1 = sub : method { $_[0]++ }';
 
 eval 'sub e1 ($) : plugh ;';
 like $@, qr/^Invalid CODE attributes?: ["']?plugh["']? at/;
@@ -96,7 +96,7 @@ sub X::foo { 1 }
 eval 'package Z; sub Y::bar : foo';
 like $@, qr/^X at /;
 
-@attrs = eval 'attributes::get $anon1';
+my @attrs = eval 'attributes::get $anon1';
 is "@attrs", "method";
 
 sub Z::DESTROY { }
@@ -384,6 +384,7 @@ unlike runperl(
       'attribute errors do not cause op trees to leak';
 
 package ProtoTest {
+    our $Proto;
     sub MODIFY_CODE_ATTRIBUTES { $Proto = prototype $_[1]; () }
     sub foo ($) : gelastic {}
 }
@@ -480,6 +481,7 @@ fresh_perl_like(
     'RT #129086 attr(00000'
 );
 
+our $TODO;
 TODO: {
     local $TODO = 'RT #3605: Attribute syntax causes parsing errors near my $var :';
     my $out = runperl(prog => <<'EOP', stderr => 1);

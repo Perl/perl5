@@ -4,7 +4,7 @@ print "1..4\n";
 
 # very basic tests of while
 
-$x = 0;
+my $x = 0;
 while ($x != 3) {
     $x = $x + 1;
 }

@@ -1,8 +1,8 @@
 package MakeMaker::Test::Setup::XS;
 
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 require Exporter;
-@EXPORT = qw(run_tests list_dynamic list_static);
+our @EXPORT = qw(run_tests list_dynamic list_static);
 
 use strict;
 use File::Path;
@@ -27,10 +27,10 @@ my $PM_TEST = <<'END';
 package XS::Test;
 require Exporter;
 require DynaLoader;
-$VERSION = 1.01;
-@ISA    = qw(Exporter DynaLoader);
-@EXPORT = qw(is_even);
-bootstrap XS::Test $VERSION;
+our $VERSION = 1.01;
+our @ISA    = qw(Exporter DynaLoader);
+our @EXPORT = qw(is_even);
+XS::Test->bootstrap( $VERSION );
 1;
 END
 
@@ -82,10 +82,10 @@ my $PM_OTHER = <<'END';
 package XS::Other;
 require Exporter;
 require DynaLoader;
-$VERSION = 1.20;
-@ISA    = qw(Exporter DynaLoader);
-@EXPORT = qw(is_odd);
-bootstrap XS::Other $VERSION;
+our $VERSION = 1.20;
+our @ISA    = qw(Exporter DynaLoader);
+our @EXPORT = qw(is_odd);
+XS::Other->bootstrap( $VERSION );
 1;
 END
 

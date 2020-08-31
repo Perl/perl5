@@ -24,6 +24,7 @@ BEGIN {
 }
 
 package Foo;
+use vars ( qw| @EXPORT_OK | );
 Exporter->import("import");
 @EXPORT_OK = "bar";
 

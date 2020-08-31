@@ -6,10 +6,12 @@
 #  in the README file that comes with the distribution.
 #
 
+
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
+    no strict 'vars';
+    require Config; Config->import;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -22,70 +24,71 @@ use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
 use Test::More tests => 25;
 
-$a = 'toto';
-$b = \$a;
-$c = bless {}, CLASS;
+my $a = 'toto';
+my $b = \$a;
+my $c = bless {}, 'CLASS';
 $c->{attribute} = 'attrval';
-%a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
+my %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
+my @a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
 	$b, \$a, $a, $c, \$c, \%a);
 
-isnt(store(\@a, "store$$"), undef);
+isnt(store(\@a, "store$$"), undef, 'store returned defined value');
 
-$dumped = &dump(\@a);
-isnt($dumped, undef);
+my $dumped = &dump(\@a);
+isnt($dumped, undef, 'dumped value is defined');
 
-$root = retrieve("store$$");
-isnt($root, undef);
+my $root = retrieve("store$$");
+isnt($root, undef, 'retrieve returned defined value');
 
-$got = &dump($root);
-isnt($got, undef);
+my $got = &dump($root);
+isnt($got, undef, 'dumped value is defined');
 
-is($got, $dumped);
+is($got, $dumped, 'got expected value');
 
 1 while unlink "store$$";
 
-package FOO; @ISA = qw(Storable);
+package FOO; our @ISA = qw(Storable);
 
 sub make {
 	my $self = bless {};
+    no warnings 'once';
 	$self->{key} = \%main::a;
 	return $self;
 };
 
 package main;
 
-$foo = FOO->make;
-isnt($foo->store("store$$"), undef);
+my $foo = FOO->make;
+isnt($foo->store("store$$"), undef, 'store returned defined value');
 
-isnt(open(OUT, '>>', "store$$"), undef);
+isnt(open(OUT, '>>', "store$$"), undef, 'open returned defined value');
 binmode OUT;
 
-isnt(store_fd(\@a, ::OUT), undef);
-isnt(nstore_fd($foo, ::OUT), undef);
-isnt(nstore_fd(\%a, ::OUT), undef);
+isnt(store_fd(\@a, '::OUT'), undef, 'store_fd returned defined value');
+isnt(nstore_fd($foo, '::OUT'), undef, 'nstore_fd returned defined value');
+isnt(nstore_fd(\%a, '::OUT'), undef, 'nstore_fd returned defined value');
 
 isnt(close(OUT), undef);
 
 isnt(open(OUT, "store$$"), undef);
 
-$r = fd_retrieve(::OUT);
+my $r = fd_retrieve('::OUT');
 isnt($r, undef);
 is(&dump($r), &dump($foo));
 
-$r = fd_retrieve(::OUT);
+$r = fd_retrieve('::OUT');
 isnt($r, undef);
 is(&dump($r), &dump(\@a));
 
-$r = fd_retrieve(main::OUT);
+$r = fd_retrieve('main::OUT');
 isnt($r, undef);
 is(&dump($r), &dump($foo));
 
-$r = fd_retrieve(::OUT);
+$r = fd_retrieve('::OUT');
 isnt($r, undef);
 is(&dump($r), &dump(\%a));
 
-eval { $r = fd_retrieve(::OUT); };
+eval { $r = fd_retrieve('::OUT'); };
 isnt($@, '');
 
 {

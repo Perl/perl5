@@ -22,7 +22,7 @@ WriteMakefile(
     'clean'             => $clean,
     'PREREQ_PM'         => {
         Carp            => 0,
-        File::Spec      => 0,
+        'File::Spec'    => 0,
         XSLoader        => 0,
         constant        => 0,
         strict          => 0,

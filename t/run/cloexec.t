@@ -39,8 +39,6 @@ BEGIN {
     skip_all_without_config('d_fcntl');
 }
 
-use strict;
-
 $|=1;
 
 # When in doubt, skip.

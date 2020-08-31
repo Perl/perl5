@@ -12,6 +12,7 @@ BEGIN {
 
 plan( tests => 67 );
 
+my $test = 0;
 {
     my @lol = ([qw(a b c)], [], [qw(1 2 3)]);
     my @mapped = map  {scalar @$_} @lol;
@@ -181,9 +182,12 @@ plan( tests => 67 );
 
     my @list = 0..9;
 
-    undef $gimme; gimme for @list;      cmp_ok($gimme, 'eq', 'void',   'gimme a V!');
-    undef $gimme; grep { gimme } @list; cmp_ok($gimme, 'eq', 'scalar', 'gimme an S!');
-    undef $gimme; map { gimme } @list;  cmp_ok($gimme, 'eq', 'list',   'gimme an L!');
+    {
+        no strict 'subs';
+        undef $gimme; gimme for @list;      cmp_ok($gimme, 'eq', 'void',   'gimme a V!');
+        undef $gimme; grep { gimme } @list; cmp_ok($gimme, 'eq', 'scalar', 'gimme an S!');
+        undef $gimme; map { gimme } @list;  cmp_ok($gimme, 'eq', 'list',   'gimme an L!');
+    }
 }
 
 {

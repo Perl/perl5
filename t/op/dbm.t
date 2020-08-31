@@ -17,7 +17,7 @@ my $filename = tempfile();
 
 my $prog = <<'EOC';
 package Foo;
-$filename = '@@@@';
+my $filename = '@@@@';
 sub new {
         my $proto = shift;
         my $class = ref($proto) || $proto;
@@ -25,19 +25,19 @@ sub new {
         bless($self,$class);
         my %LT;
         dbmopen(%LT, $filename, 0666) ||
-	    die "Can't open $filename because of $!\n";
+        die "Can't open $filename because of $!\n";
         $self->{'LT'} = \%LT;
         return $self;
 }
 sub DESTROY {
         my $self = shift;
-	dbmclose(%{$self->{'LT'}});
-	1 while unlink $filename;
-	1 while unlink glob "$filename.*";
-	print "ok\n";
+        dbmclose(%{$self->{'LT'}});
+        1 while unlink $filename;
+        1 while unlink glob "$filename.*";
+        print "ok\n";
 }
 package main;
-$test = Foo->new(); # must be package var
+our $test = Foo->new(); # must be package var
 EOC
 
 $prog =~ s/\@\@\@\@/$filename/;
@@ -47,6 +47,7 @@ fresh_perl_is($prog, 'ok', {}, 'implicit require');
 
 $prog = <<'EOC';
 @INC = ();
+my (%LT, $filename);
 dbmopen(%LT, $filename, 0666);
 1 while unlink $filename;
 1 while unlink glob "$filename.*";
@@ -54,16 +55,18 @@ die "Failed to fail!";
 EOC
 
 fresh_perl_like($prog, qr/No dbm on this machine/, {},
-		'implicit require fails');
+    'implicit require fails');
 fresh_perl_like('delete $::{"AnyDBM_File::"}; ' . $prog,
-		qr/No dbm on this machine/, {},
-		'implicit require and no stash fails');
+    qr/No dbm on this machine/, {},
+    'implicit require and no stash fails');
 
 { # undef 3rd arg
+    my $w;
     local $^W = 1;
     local $SIG{__WARN__} = sub { ++$w };
     # Files may get created as a side effect of dbmopen, so ensure cleanup.
     my $leaf = 'pleaseletthisfilenotexist';
+    my %truffe;
     dbmopen(%truffe, $leaf, undef);
     is $w, 1, '1 warning from dbmopen with undef third arg';
     unlink $leaf

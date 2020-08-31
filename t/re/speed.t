@@ -16,9 +16,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require Config; import Config;
     require './test.pl';
     set_up_inc('../lib','.','../ext/re');
+    require Config; import Config;
 }
 
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;

@@ -1,10 +1,10 @@
 package Devel::SelfStubber;
 use File::Spec;
 require SelfLoader;
-@ISA = qw(SelfLoader);
-@EXPORT = 'AUTOLOAD';
-$JUST_STUBS = 1;
-$VERSION = 1.06;
+our @ISA = qw(SelfLoader);
+our @EXPORT = 'AUTOLOAD';
+our $JUST_STUBS = 1;
+our $VERSION = 1.06_001;
 sub Version {$VERSION}
 
 # Use as
@@ -14,6 +14,8 @@ sub Version {$VERSION}
 # would print out stubs needed if you added a __DATA__ before the subs.
 # Setting $Devel::SelfStubber::JUST_STUBS to 0 will print out the whole
 # module with the stubs entered just before the __DATA__
+
+our (@DATA, $lines, @STUBS);
 
 sub _add_to_cache {
     my($self,$fullname,$pack,$lines, $prototype) = @_;
@@ -39,36 +41,39 @@ sub stub {
     my (@BEFORE_DATA, @AFTER_DATA, @AFTER_END);
     @DATA = @STUBS = ();
 
-    open($fh,'<',$mod_file) || die "Unable to open $mod_file";
-    local $/ = "\n";
-    while(defined ($line = <$fh>) and $line !~ m/^__DATA__/) {
-	push(@BEFORE_DATA,$line);
-	$line =~ /use\s+SelfLoader/ && $found_selfloader++;
+    {
+        no strict 'refs'; # because $fh is symref
+        open($fh,'<',$mod_file) || die "Unable to open $mod_file";
+        local $/ = "\n";
+        while(defined ($line = <$fh>) and $line !~ m/^__DATA__/) {
+            push(@BEFORE_DATA,$line);
+            $line =~ /use\s+SelfLoader/ && $found_selfloader++;
+        }
+        (defined ($line) && $line =~ m/^__DATA__/)
+          || die "$mod_file doesn't contain a __DATA__ token";
+        $found_selfloader ||
+            print 'die "\'use SelfLoader;\' statement NOT FOUND!!\n"',"\n";
+        if ($JUST_STUBS) {
+            $self->_load_stubs($module);
+        } else {
+            $self->_load_stubs($module, \@AFTER_END);
+        }
+        if ( fileno($fh) ) {
+            $end_data = 1;
+            while(defined($line = <$fh>)) {
+                push(@AFTER_DATA,$line);
+            }
+        }
+        close($fh);
     }
-    (defined ($line) && $line =~ m/^__DATA__/)
-      || die "$mod_file doesn't contain a __DATA__ token";
-    $found_selfloader ||
-	print 'die "\'use SelfLoader;\' statement NOT FOUND!!\n"',"\n";
-    if ($JUST_STUBS) {
-        $self->_load_stubs($module);
-    } else {
-        $self->_load_stubs($module, \@AFTER_END);
-    }
-    if ( fileno($fh) ) {
-	$end_data = 1;
-	while(defined($line = <$fh>)) {
-	    push(@AFTER_DATA,$line);
-	}
-    }
-    close($fh);
     unless ($JUST_STUBS) {
-	print @BEFORE_DATA;
+        print @BEFORE_DATA;
     }
     print @STUBS;
     unless ($JUST_STUBS) {
-	print "1;\n__DATA__\n",@DATA;
-	if($end_data) { print "__END__ DATA\n",@AFTER_DATA; }
-	if(@AFTER_END) { print "__END__\n",@AFTER_END; }
+        print "1;\n__DATA__\n",@DATA;
+        if($end_data) { print "__END__ DATA\n",@AFTER_DATA; }
+        if(@AFTER_END) { print "__END__\n",@AFTER_END; }
     }
 }
 
