@@ -55,6 +55,9 @@ my %missing_macros;
 
 my $link_text = "Described in";
 
+my $description_indent = 4;
+my $usage_indent = 3;   # + initial blank yields 4 total
+
 my %valid_sections = (
     'Floating point configuration values' => {
         header => <<~'EOT',
@@ -169,6 +172,9 @@ Expected:
   =for apidoc name
 (or 'apidoc_item')
 EOS
+
+    die "Only [$display_flags] allowed in apidoc_item"
+                            if $is_item && $flags =~ /[^$display_flags]/;
 
     return ($name, $flags, $ret_type, $is_item, $proto_in_file, @args);
 }
@@ -866,116 +872,247 @@ sub parse_config_h {
 sub docout ($$$) { # output the docs for one function
     my($fh, $element_name, $docref) = @_;
 
+    # Trim trailing space
+    $element_name =~ s/\s*$//;
+
     my $flags = $docref->{flags};
     my $pod = $docref->{pod} // "";
-    my $ret_type = $docref->{ret_type};
     my $file = $docref->{file};
-    my @args = $docref->{args}->@*;
+
     my @items = $docref->{items}->@*;
 
-    $element_name =~ s/\s*$//;
+    # Make the main element the first of the items.  This allows uniform
+    # treatment below
+    unshift @items, {   name => $element_name,
+                        flags => $flags,
+                        ret_type => $docref->{ret_type},
+                        args => [ $docref->{args}->@* ],
+                    };
 
     warn("Empty pod for $element_name (from $file)") unless $pod =~ /\S/;
 
-    if ($flags =~ /D/) {
-        my $function = $flags =~ /n/ ? 'definition' : 'function';
-        $pod = <<~"EOT";
-            C<B<DEPRECATED!>>  It is planned to remove this $function from a
-            future release of Perl.  Do not use it for new code; remove it from
-            existing code.
+    print $fh "\n=over $description_indent\n";
+    print $fh "\n=item C<$_->{name}>\n" for @items;
 
-            $pod
-            EOT
-    }
-    elsif ($flags =~ /x/) {
-        $pod = <<~"EOT";
-            NOTE: this function is B<experimental> and may change or be
-            removed without notice.
-
-            $pod
-            EOT
+    # If we're printing only a link to an element, this isn't the major entry,
+    # so no X<> here.
+    if ($flags !~ /h/) {
+        print $fh "X<$_->{name}>" for @items;
+        print $fh "\n";
     }
 
-    # Is Perl_, but no #define foo # Perl_foo
-    my $p = (($flags =~ /p/ && $flags =~ /o/ && $flags !~ /M/)
-          || ($flags =~ /f/ && $flags !~ /T/));  # Can't handle threaded varargs
+    for my $item (@items) {
+        if ($item->{flags} =~ /D/) {
+            print $fh <<~"EOT";
 
-    $pod .= "\nNOTE: the C<perl_> form of this function is B<deprecated>.\n"
-         if $flags =~ /O/;
-    if ($p) {
-        $pod .= "\nNOTE: this function must be explicitly called as C<Perl_$element_name>\n";
-        $pod .= "with an C<aTHX_> parameter.\n" if $flags !~ /T/;
-    }
+                C<B<DEPRECATED!>>  It is planned to remove C<$item->{name}> from a
+                future release of Perl.  Do not use it for new code; remove it from
+                existing code.
+                EOT
+        }
+        elsif ($item->{flags} =~ /x/) {
+            print $fh <<~"EOT";
 
-    for my $item ($element_name, @items) {
-        print $fh "\n=item C<$item>\n";
-
-        # If we're printing only a link to an element, this isn't the major entry,
-        # so no X<> here.
-        print $fh "X<$element_name>\n" unless $flags =~ /h/;
+                NOTE: C<$item->{name}> is B<experimental> and may change or be
+                removed without notice.
+                EOT
+        }
     }
 
     chomp $pod;     # Make sure prints pod with a single trailing \n
-    print $fh "\n$pod\n";
+    print $fh "\n", $pod, "\n";
+
+    for my $item (@items) {
+        my $item_flags = $item->{flags};
+        my $item_name = $item->{name};
+
+        print $fh "\nNOTE: the C<perl_$item_name()> form is B<deprecated>.\n"
+                                                    if $item_flags =~ /O/;
+        # Is Perl_, but no #define foo # Perl_foo
+        if (($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
+
+             # Can't handle threaded varargs
+         || ($item_flags =~ /f/ && $item_flags !~ /T/))
+        {
+            $item->{name} = "Perl_$item_name";
+            print $fh <<~"EOT";
+
+                NOTE: C<$item_name> must be explicitly called as
+                C<$item->{name}>
+                EOT
+            print $fh "with an C<aTHX_> parameter" if $item_flags !~ /T/;
+            print $fh ".\n";
+        }
+    }
 
     if ($flags =~ /U/) { # no usage
         warn("U and s flags are incompatible") if $flags =~ /s/;
         # nothing
     } else {
+
+        print $fh "\n=over $usage_indent\n";
+
         if (defined $docref->{usage}) {     # An override of the usage section
             print $fh "\n", ($docref->{usage} =~ s/^/ /mrg), "\n";
         }
-        elsif ($flags =~ /n/) { # no args
-            warn("$file: $element_name: n flag without m") unless $flags =~ /m/;
-            warn("$file: $element_name: n flag but apparently has args") if @args;
-            print $fh "\n\t$ret_type\t$element_name";
-        } else { # full usage
-            my $n            = "Perl_"x$p . $element_name;
-            my $large_ret    = length $ret_type > 7;
-            my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
-                            +8+($large_ret ? 1 + length $ret_type : 8)
-                            +length($n) + 1;
-            my $indent;
-            print $fh "\n\t$ret_type" . ($large_ret ? ' ' : "\t") . "$n(";
-            my $long_args;
-            for (@args) {
-                if ($indent_size + 2 + length > 79) {
-                    $long_args=1;
-                    $indent_size -= length($n) - 3;
-                    last;
+        else {
+
+            # Look through all the items in this entry.  If all have the same
+            # return type and arguments, only the main entry is displayed.
+            # Also, find the longest return type and longest name so that if
+            # multiple ones are shown, they can be vertically aligned nicely
+            my $longest_ret = 0;
+            my $longest_name_length = 0;
+            my $need_individual_usage = 0;
+            my $base_ret_type = $items[0]->{ret_type};
+            my @base_args = $items[0]->{args}->@*;
+            for my $item (@items) {
+                no warnings 'experimental::smartmatch';
+                $need_individual_usage = 1
+                                    if    $item->{ret_type} ne $base_ret_type
+                                    || ! ($item->{args}->@* ~~ @base_args);
+                my $ret_length = length $item->{ret_type};
+                $longest_ret = $ret_length if $ret_length > $longest_ret;
+                my $name_length = length $item->{name};
+                $longest_name_length = $name_length
+                                        if $name_length > $longest_name_length;
+            }
+
+            # If we're only showing one entry, only its length matters.
+            $longest_name_length = length($items[0]->{name})
+                                                unless $need_individual_usage;
+            print $fh "\n";
+
+            my $indent = 1;     # 1 is sufficient for verbatim; =over is used
+                                # for more
+            my $ret_name_sep_length = 2; # spaces between return type and name
+            my $name_indent = $indent + $longest_ret;
+            $name_indent += $ret_name_sep_length if $longest_ret;
+
+            # 80 column terminal - 1 for pager adding a column; -7 for nroff
+            # indent;
+            my $max_length = 80 - 1 - 7 - $description_indent - $usage_indent;
+
+            for my $item (@items) {
+                my $ret_type = $item->{ret_type};
+                my @args = $item->{args}->@*;
+                my $name = $item->{name};
+                my $item_flags = $item->{flags};
+
+                # Display the thread context formal parameter on an expanded
+                # out name
+                if ($item_flags !~ /T/ && $name =~ /^Perl_/) {
+                    unshift @args, (@args) ? "pTHX_" : "pTHX";
                 }
-            }
-            my $args = '';
-            if ($flags !~ /T/ && ($p || ($flags =~ /m/ && $element_name =~ /^Perl_/))) {
-                $args = @args ? "pTHX_ " : "pTHX";
-                if ($long_args) { print $fh $args; $args = '' }
-            }
-            $long_args and print $fh "\n";
-            my $first = !$long_args;
-            while () {
-                if (!@args or
-                    length $args
-                    && $indent_size + 3 + length($args[0]) + length $args > 79
-                ) {
-                    print $fh
-                    $first ? '' : (
-                        $indent //=
-                        "\t".($large_ret ? " " x (1+length $ret_type) : "\t")
-                        ." "x($long_args ? 4 : 1 + length $n)
-                    ),
-                    $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
-                    $args = $first = '';
+
+                # The return type
+                print $fh (" " x $indent), $ret_type;
+
+                print $fh " " x (  $ret_name_sep_length
+                                 + $longest_ret - length $ret_type);
+                print $fh $name;
+
+                if ($item_flags =~ /n/) { # no args
+                    warn("$file: $element_name: n flag without m")
+                                                    unless $item_flags =~ /m/;
+                    warn("$file: $name: n flag but apparently has args")
+                                                                    if @args;
                 }
-                @args or last;
-                $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
-                    . shift @args;
+                else {
+                    # +1 for the '('
+                    my $arg_indent = $name_indent + $longest_name_length + 1;
+
+                    # Align the argument lists of the items
+                    print $fh " " x ($longest_name_length - length($name));
+                    print $fh "(";
+
+                    # Display as many of the arguments on the same line as
+                    # will fit.
+                    my $total_length = $arg_indent;
+                    my $first_line = 1;
+                    for (my $i = 0; $i < @args; $i++) {
+                        my $arg = $args[$i];
+                        my $arg_length = length($arg);
+
+                        # All but the first arg are preceded by a blank
+                        my $use_blank = $i > 0;
+
+                        # +1 here and below because either the argument has a
+                        # trailing comma or trailing ')'
+                        $total_length += $arg_length + $use_blank + 1;
+
+                        # We want none of the arguments to be positioned so
+                        # they extend too far to the right.  Ideally, they
+                        # should all start in the same column as the arguments
+                        # on the first line of the function display do.  But, if
+                        # necessary, outdent them so that they all start in
+                        # another column, with the longest ending at the right
+                        # margin, like so:
+                        #                   void  function_name(pTHX_ short1,
+                        #                                    short2,
+                        #                                    very_long_argument,
+                        #                                    short3)
+                        if ($total_length > $max_length) {
+
+                            # If this is the first continuation line,
+                            # calculate the longest argument; this will be the
+                            # one we may have to outdent for.
+                            if ($first_line) {
+                                $first_line = 0;
+
+                                # We will need at least as much as the current
+                                # argument
+                                my $longest_arg_length = $arg_length
+                                                       + $use_blank + 1;
+
+                                # Look through the rest of the args to see if
+                                # any are longer than this one.
+                                for (my $j = $i + 1; $j < @args; $j++) {
+
+                                    # Include the trailing ',' or ')' in the
+                                    # length.  No need to concern ourselves
+                                    # with a leading blank, as the argument
+                                    # would be positioned first on the next
+                                    # line
+                                    my $peek_arg_length = length ($args[$j])
+                                                        + 1;
+                                    $longest_arg_length = $peek_arg_length
+                                      if $peek_arg_length > $longest_arg_length;
+                                }
+
+                                # Calculate the new indent if necessary.
+                                $arg_indent = $max_length - $longest_arg_length
+                                        if $arg_indent + $longest_arg_length
+                                                                > $max_length;
+                            }
+
+                            print $fh "\n", (" " x $arg_indent);
+                            $total_length = $arg_indent + $arg_length + 1;
+                            $use_blank = 0;
+                        }
+
+                        # Display this argument
+                        print $fh " " if $use_blank;
+                        print $fh $arg;
+                        print $fh "," if $i < @args - 1 && $args[$i] ne 'pTHX_';
+
+                    } # End of loop through args
+
+                    print $fh ")";
+                }
+
+                print $fh ";" if $item_flags =~ /s/; # semicolon: "dTHR;"
+                print $fh "\n";
+
+                # Only the first entry is normally displayed
+                last unless $need_individual_usage;
             }
-            if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
-            print $fh ")";
         }
-        print $fh ";" if $flags =~ /s/; # semicolon "dTHR;"
-        print $fh "\n";
+
+        print $fh "\n=back\n";
     }
+
+    print $fh "\n=back\n";
     print $fh "\n=for hackers\nFound in file $file\n";
 }
 
@@ -1016,12 +1153,10 @@ sub output {
             delete $section_info->{""};
         }
         next unless keys %$section_info;     # Skip empty
-        print $fh "\n=over 8\n";
 
         for my $function_name (sort sort_helper keys %$section_info) {
             docout($fh, $function_name, $section_info->{$function_name});
         }
-        print $fh "\n=back\n";
 
         print $fh "\n", $valid_sections{$section_name}{footer}, "\n"
                             if defined $valid_sections{$section_name}{footer};
@@ -1052,7 +1187,7 @@ them, you may wish to consider creating and submitting documentation for
 it.
 
 _EOB_
-        print $fh "\n=over\n";
+        print $fh "\n=over $description_indent\n";
 
         for my $missing (sort sort_helper @$missing) {
             print $fh "\n=item C<$missing>\nX<$missing>\n";
