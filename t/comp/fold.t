@@ -122,15 +122,14 @@ is ($@, '', 'no error');
 
 # [perl #78064] or print
 package other { # hide the "ok" sub
- no strict 'subs';
  BEGIN { $^W = 0 }
- print 0 ? not_ok : ok;
+ print 0 ? "not_ok" : "ok";
  print " ", ++$test, " - print followed by const ? BEAR : BEAR\n";
- print 1 ? ok : not_ok;
+ print 1 ? "ok" : "not_ok";
  print " ", ++$test, " - print followed by const ? BEAR : BEAR (again)\n";
- print 1 && ok;
+ print 1 && "ok";
  print " ", ++$test, " - print followed by const && BEAR\n";
- print 0 || ok;
+ print 0 || "ok";
  print " ", ++$test, " - print followed by const || URSINE\n";
  BEGIN { $^W = 1 }
 }
