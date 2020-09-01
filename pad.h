@@ -170,7 +170,10 @@ typedef enum {
 =for apidoc m|void|SAVEPADSV	|PADOFFSET po
 Save a pad slot (used to restore after an iteration)
 
+=cut
+
 XXX DAPM it would make more sense to make the arg a PADOFFSET
+
 =for apidoc m|void|SAVECLEARSV	|SV **svp
 Clear the pointed to pad value on scope exit.  (i.e. the runtime action of
 C<my>)
