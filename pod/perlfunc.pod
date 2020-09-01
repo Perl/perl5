@@ -7866,7 +7866,6 @@ produces the output C<abc>, and this:
 produces the output C<a:bc>, and each of these:
 
     print join(':', split(//, 'abc', 3)), "\n";
-    print join(':', split(//, 'abc', 4)), "\n";
 
 produces the output C<a:b:c>.
 
