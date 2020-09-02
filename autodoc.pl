@@ -77,12 +77,21 @@ sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
     my($in, $doc, $line, $header_doc);
 
+    my $file_is_C = $file =~ / \. [ch] $ /x;
+
     # Count lines easier
     my $get_next_line = sub { $line++; return <$fh> };
 
 FUNC:
     while (defined($in = $get_next_line->())) {
-        if ($in=~ /^=head1 (.*)/) {
+
+        if ($in=~ /^=for apidoc_section\s*(.*)/) {
+            $curheader = $1;
+            next FUNC;
+        }
+        elsif ($file_is_C && $in=~ /^=head1 (.*)/) {
+            # =head1 lines only have effect in C files
+
             $curheader = $1;
 
             # If the next non-space line begins with a word char, then it is
@@ -111,7 +120,7 @@ HDR_DOC:
                         redo FUNC;
                     }
 
-                    if ($doc =~ m:^\s*\*/$:) {
+                    if ($file_is_C && $doc =~ m:^\s*\*/$:) {
                         warn "=cut missing? $file:$line:$doc";;
                         last HDR_DOC;
                     }
@@ -154,35 +163,6 @@ Expected:
   =for apidoc flags|returntype|name
   =for apidoc name
 EOS
-            die "flag $1 is not legal (for function $name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
-            next FUNC if $flags =~ /h/;
-
-            die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
-            warn ("'$name' not \\w+ in '$proto_in_file' in $file")
-                        if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
-
-            if (exists $seen{$name}) {
-                die ("'$name' in $file was already documented in $seen{$name}");
-            }
-            else {
-                $seen{$name} = $file;
-            }
-
-            my $docs = "";
-DOC:
-            while (defined($doc = $get_next_line->())) {
-
-                # Other pod commands are considered part of the current
-                # function's docs, so can have lists, etc.
-                last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
-                if ($doc =~ m:^\*/$:) {
-                    warn "=cut missing? $file:$line:$doc";;
-                    last DOC;
-                }
-                $docs .= $doc;
-            }
-            $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 
             # If the entry is also in embed.fnc, it should be defined
             # completely there, but not here
@@ -193,13 +173,60 @@ DOC:
                 $flags = $embed_docref->{'flags'};
                 warn "embed.fnc entry '$name' missing 'd' flag"
                                                             unless $flags =~ /d/;
-                next FUNC if $flags =~ /h/;
                 $ret = $embed_docref->{'retval'};
                 @args = @{$embed_docref->{args}};
             } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
                                        # macro
                 $missing{$name} = $file;
             }
+
+            die "flag $1 is not legal (for function $name (from $file))"
+                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
+
+
+            die "'u' flag must also have 'm' flag' for $name" if $flags =~ /u/ && $flags !~ /m/;
+            warn ("'$name' not \\w+ in '$proto_in_file' in $file")
+                        if $flags !~ /N/ && $name !~ / ^ [_[:alpha:]] \w* $ /x;
+
+            if (exists $seen{$name} && $flags !~ /h/) {
+                die ("'$name' in $file was already documented in $seen{$name}");
+            }
+            else {
+                $seen{$name} = $file;
+            }
+
+            my $docs = "";
+            my $is_link_only = ($flags =~ /h/);
+            if ($is_link_only) {    # Don't put meat of entry in perlapi
+                next FUNC if $file_is_C;    # Don't put anything if C source
+
+                # Here, is an 'h' flag in pod.  We add a reference to the pod
+                # (and nothing else) to perlapi/intern.  (It would be better
+                # to add a reference to the correct =item,=header, but
+                # something that makes it harder is that it that might be a
+                # duplicate, like '=item *'; so that is a future enhancement
+                # XXX.  Another complication is there might be more than one
+                # deserving candidates.)
+                undef $header_doc;
+                my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
+                $podname =~ s/\.pod//;
+                $docs .= "Described in L<$podname>.\n\n";
+            }
+            else {
+              DOC:
+                while (defined($doc = $get_next_line->())) {
+
+                    # Other pod commands are considered part of the current
+                    # function's docs, so can have lists, etc.
+                    last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
+                    if ($doc =~ m:^\*/$:) {
+                        warn "=cut missing? $file:$line:$doc";;
+                        last DOC;
+                    }
+                    $docs .= $doc;
+                }
+            }
+            $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 
             my $inline_where = $flags =~ /A/ ? 'api' : 'guts';
 
@@ -222,7 +249,7 @@ DOC:
                     $in = $doc;
                     redo FUNC;
                 }
-            } else {
+            } elsif (! $is_link_only) {
                 warn "No doc for $file:$line:$in";
             }
         }
@@ -257,7 +284,13 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
         $docs .= ".\n\n"
     }
 
-    print $fh "=item $name\nX<$name>\n$docs";
+    print $fh "=item $name\n";
+
+    # If we're printing only a link to an element, this isn't the major entry,
+    # so no X<> here.
+    print $fh "X<$name>\n" unless $flags =~ /h/;
+
+    print $fh $docs;
 
     if ($flags =~ /U/) { # no usage
         warn("U and s flags are incompatible") if $flags =~ /s/;
