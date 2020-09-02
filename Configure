@@ -16052,6 +16052,7 @@ REENTRANT_PROTO*)
 #endif
 int main()
 {
+    int result = 0;
     time_t t = time(0L);
     char w_tz[]="TZ" "=GMT+5",
 	 e_tz[]="TZ" "=GMT-5",
@@ -16070,8 +16071,10 @@ int main()
     localtime_r(&t, &tm_w);
 
     if( memcmp(&tm_e, &tm_w, sizeof(struct tm)) == 0 )
-	return 1;
-    return 0;
+	result = 1;
+
+    free(tz_e);free(tz_w);
+    return result;
 }
 EOCP
 	set try
