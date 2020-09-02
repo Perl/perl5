@@ -14,7 +14,7 @@
 : real (full) name, with any appropriate thread context paramaters, thus hiding
 : that detail from the typical code.
 :
-: Most macros listed here are the complete full name.
+: Most macros (as opposed to function) listed here are the complete full name.
 :
 : All non-static functions defined by perl need to be listed in this file.
 : embed.pl uses the entries here to construct:
@@ -22,9 +22,16 @@
 :   2) embed.h to create short name macros
 :
 : Static functions internal to a file need not appear here, but there is
-: benefit to declaring them here, as it generally handles the thread context
-: parameter invisibly, as well as making sure a PERL_ARGS_ASSERT_foo macro is
-: defined, which can save you debugging time.
+: benefit to declaring them here:
+:   1)	It generally handles the thread context parameter invisibly making it
+:	trivial to add or remove needing thread context passed;
+:   2)  It defines a PERL_ARGS_ASSERT_foo macro, which can save you debugging
+:	time;
+:   3)  It is is automatically known to Devel::PPPort, making it quicker to
+:	later find out when it came into existence.  For example
+:	    perl ppport.h --api-info=/edit_distance/
+:	yields
+:		Supported at least since perl-5.23.8, with or without ppport.h.
 :
 : Lines in this file are of the form:
 :    flags|return_type|name|arg1|arg2|...|argN
@@ -106,49 +113,118 @@
 :	     function in its full 'Perl_' form with any necessary thread
 :	     context parameter.
 :
+: Just below is a description of the relevant parts of the automatic
+: documentation generation system which heavily involves this file.  Below that
+: is a description of all the flags used in this file.
+:
 : Scattered around the perl source are lines of the form:
 :
 :   =for apidoc name
+:   =for apidoc_item name
 :
-: followed by pod for that function.  The purpose of these is to tell
-: autodoc.pl where the documentation is for a function listed in this file.  It
-: uses the prototype from here and the pod from there in generating the
-: documentation in perlapi or perlintern.  The entries in this file that have
-: corresponding '=for apidoc' entries should have the 'd' flag set in this
-: file.
+: followed by pod for that function.  The purpose of these lines and the text
+: that immediately follows them is to furnish documentation for functions
+: and macros listed here in embed.fnc.  The lines tend to be placed near the
+: source for the item they describe.  autodoc.pl is run as part of the standard
+: build process to extract this documentation and build perlapi.pod from the
+: elements that are in the API (flagged as A in this file), and perlintern.pod
+: from the other elements.
 :
-: There are also lines of this form scattered around:
+: 'name' in the apidoc line corresponds to an item listed in this file, so that
+: the signature and flags need only be specified once, here, and automatically
+: they get placed into the generated pod.
+:
+: 'apidoc_item' is used for subsidiary entries, which share the same pod as the
+: plain apidoc one does.  Thus the documentation for functions which do
+: essentially the same thing, but with minor differences can all be placed in
+: the same entry.  The apidoc_item lines must all come after the apidoc line
+: and before the pod for the entry.
+:
+: The entries in this file that have corresponding '=for apidoc' entries must
+: have the 'd' flag set in this file.
+:
+: In C files, the apidoc lines are inside comment blocks.  They may also be
+: placed in pod files.  In those, the =for causes lines from there until the
+: next line beginning with an '=' to not be considered part of that pod.
+:
+: The 'h' flag is used to hide (suppress) the pod associated with =apidoc lines
+: from being placed in the generated perlapi or perlintern.  There are several
+: reasons you might want to do this, given in the 'h' flag description below,
+: but one is for the case where the =apidoc occurs in a file that contains
+: regular pod.  Without that flag, the associated pod will be placed in both
+: it, and perlapi or perlintern.  That may be what you want, but it gives you
+: the flexibility to choose that, or instead have just a link to the source pod
+: inserted in perlapi or perlintern.  This allows single-source browsing for
+: someone; they don't have to scan multiple pods trying to find something
+: suitable.
+:
+: There are also lines of this form scattered around the perl
+: source:
+:
+:   =for apidoc_section Section Name
+:   =head1 Section Name
+:
+: These aren't tied to this embed.fnc file, and so are documented in autodoc.pl.
+:
+: What goes into the documentation of a particular function ends with the next
+: line that begins with an '='.  In particular, an '=cut' line ends that
+: documentation without introducing something new.
+:
+: Various macros and other elements aren't listed here in embed.fnc.  They are
+: documented in the same manner, but since they don't have this file to get
+: information from, the defining lines have the syntax and meaning they do in
+: this file, so it can be specified:
 :
 :   =for apidoc flags|return_type|name|arg1|arg2|...|argN
+:   =for apidoc_item flags|return_type|name|arg1|arg2|...|argN
 :
-: and with the same meanings as the lines in this file.  These are for
-: documenting macros.  The 'name' in any such line must not be the same as any
-: in this file (i.e., no redundant definitions), and one of the flags must be
-: 'm', indicating it is a macro.  The lines following these are pod for the
-: respective macro.  Since these are macros, the arguments need not be legal C
-: parameters.  To indicate this to downstream software that inspects these
-: lines, there are a few conventions:
-:  type    should be the entire argument name if it names a type
-:  cast    should be the entire argument name if it is a cast
-:  SP      should be the entire argument name if it is the stack pointer SP
-:  block   should be the entire argument name if it is a C brace-enclosed block
+: The 'name' in any such line must not be the same as any in this file (i.e.,
+: no redundant definitions), and one of the flags on the apidoc lines must be
+: 'm', indicating it is a macro (or similar), and not a function.
 :
-: The letters above are exact.  For example, you have to have 't', 'y', 'p',
-: and 'e' literally.  Here is an example:
+: All but the name field of an apidoc_item line are optional, and if empty,
+: inherits from the controlling plain apidoc line.   The flags field is
+: generally empty, and in fact, the only flags it can have are ones directly
+: related to its display.  For example it might have the T flag to indicate no
+: thread context parameter is used, whereas the apidoc entry does have a thread
+: context.  Here is an example:
+:
+: =for apidoc    Am|char*      |SvPV       |SV* sv|STRLEN len
+: =for apidoc_item |const char*|SvPV_const |SV* sv|STRLEN len
+: =for apidoc_item |char*      |SvPV_nolen |SV* sv
+:
+: Since these are macros, the arguments need not be legal C parameters.  To
+: indicate this to downstream software that inspects these lines, there are a
+: few conventions.  An example would be:
+:
 :   =for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
 :
-: Additionally, an argument can be some word(s) enclosed in double quotes to
-: indicate that it has to be a string, instead of a const char * const, like this
-:   =for apidoc Ama|SV*|newSVpvs|"string"
+: In this example, a real call of Newxc, 'type' would be specified as something
+: like 'int' or 'char', and 'cast' by perhaps 'struct foo'.
 :
-: If any argument or return value is not one of the above, and isn't a legal C
-: language one, the 'u' flag should be specified.
+: The complete list of conventions is:
+:  type     the argument names a type
+:  cast     the argument names a type which the macro casts to
+:  SP       the argument is the stack pointer, SP
+:  block    the argument is a C brace-enclosed block
+:  number   the argument is a C numeric constant, like 3
+:  token    the argument is a generic C preprocessor token, like abc
+:  "string" the argument is a literal C double-quoted string; what's important
+:	    here are the quotes; for clarity, you can say whatever you want
+:	    inside them
 :
-: Again, autodoc uses these lines to construct perlapi. 'return_type' in these
-: lines can be empty, unlike in this file.
+: Unlike other arguments, none of these is of the form 'int name'.  There is no
+: name.
+:
+: If any argument or return value is not one of the above, and isn't legal C
+: language, the entry still can be specified, using the 'u' flag.
+:
+: 'return_type' in these lines can be empty, unlike in this file:
+:
+: =for apidoc Amnu||START_EXTERN_C
 :
 : Devel::PPPort also looks at both this file and the '=for apidoc' lines.  In
-: part it is to construct lists of functions that are or are not backported.
+: part it is to construct lists of elements that are or are not backported.
 :
 : makedef.pl uses this file for constructing the export list which lists the
 : symbols that should be available on all platforms.
@@ -276,14 +352,26 @@
 :         proto.h: PERL_ARGS_ASSERT macro is not defined unless the function
 :		   has NN arguments
 :
-:   h  Hide any documentation.  This is used when the documentation is atypical
-:      of the rest of perlapi and perlintern.  In other words the item is
-:      documented, but just not the standard way.  One reason would be if there
-:      are a bunch of macros which follow a common paradigm in their naming, so
-:      rather than having an entry for each slight variation, there is an
-:      overarchinge one.  It is also used when the documentation is in another
-:      pod, such as perlguts or warnings.h.  This flag is useful for downstream
-:      programs, such as Devel::PPPort.
+:   h  Hide any documentation that would normally go into perlapi or
+:      perlintern.  This is typically used when the documentation is actually
+:      in another pod.  If you don't use the 'h', that documentation is
+:      displayed in both places; with the flag, it stays in the pod, and a
+:      link to that pod is instead placed in perlapi or perlintern.  This
+:      allows one to browse perlapi or perlintern and see all the potentially
+:      relevant elements.  A good example is perlapio.  It has documentation
+:      about PerlIO functions with other text giving context.  There's no point
+:      in writing a second entry for perlapi, but it would be good if someone
+:      browsing perlapi knew about it.  By adding '=for apidoc' lines in
+:      perlapio, the appropriate text could be simply copied into perlapi if
+:      deemed appropriate, or just a link added there when the 'h' flag is
+:      specified.
+:      This flag is useful for symbolic names for flags.  A single =for apidoc
+:      line can be added to the pod where the meaning is discussed, and perlapi
+:      will list the name, with a link to the pod.  Another use would be if
+:      there are a bunch of macros which follow a common paradigm in their
+:      naming, so rather than having an entry for each slight variation, there
+:      is an overarching one.  This flag is useful for downstream programs,
+:      such as Devel::PPPort.
 :
 :   i  inline static.  This is used for functions that the compiler is being
 :      requested to inline.  If the function is in a header file its
@@ -333,10 +421,15 @@
 :      characters, and a warning is raised otherwise.  This flag suppresses
 :      that warning, so that weird things can be documented
 :
-:   n  Has no arguments (used only in =for apidoc entries)
-:
+:   n  Has no arguments.  (used only in =for apidoc entries)
 :      The macro (it can't be a function) is used without any parameters nor
 :      empty parentheses.
+:
+:      Perhaps a better name for this flag would have been '0'.  The reason the
+:      flag was not changed to that from 'n', is if D:P were to be regenerated
+:      on an older perl, it still would use the new embed.fnc shipped with it,
+:      but would be using the flags from the older perl source code.
+:
 :
 :   O  Has a perl_ compatibility macro.
 :
