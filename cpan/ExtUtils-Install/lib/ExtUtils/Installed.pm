@@ -17,7 +17,7 @@ my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 require VMS::Filespec if $Is_VMS;
 
 use vars qw($VERSION);
-$VERSION = '2.14';
+$VERSION = '2.16_001';
 $VERSION = eval $VERSION;
 
 sub _is_prefix {
@@ -309,7 +309,7 @@ sub version {
     return($self->{$module}{version});
 }
 
-sub debug_dump {
+sub _debug_dump {
     my ($self, $module) = @_;
     $self= $self->new(default=>1) if !ref $self;
     local $self->{":private:"}{Config};

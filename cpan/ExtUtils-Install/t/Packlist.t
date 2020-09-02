@@ -8,7 +8,6 @@ use Test::More tests => 35;
 
 BEGIN { use_ok( 'ExtUtils::Packlist' ); }
 
-my $w;
 is( ref(ExtUtils::Packlist::mkfh()), 'GLOB', 'mkfh() should return a FH' );
 
 # new calls tie()
@@ -163,6 +162,7 @@ is( ExtUtils::Packlist::packlist_file({ packfile => 'pl' }), 'pl',
 is( ExtUtils::Packlist::packlist_file($pl), 'eplist',
 	'packlist_file() should fetch packlist from ExtUtils::Packlist object' );
 
+my $w = 0;
 BEGIN {
 	# Call mkfh at BEGIN time, to make sure it does not trigger "Used
 	# once" warnings.
