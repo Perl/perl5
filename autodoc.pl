@@ -10,22 +10,52 @@ use Text::Tabs;
 # from information stored in
 #
 #    embed.fnc
-#    plus all the .c and .h files listed in MANIFEST
+#    plus all the core .c, .h, and .pod files listed in MANIFEST
 #
 # Has an optional arg, which is the directory to chdir to before reading
-# MANIFEST and *.[ch].
+# MANIFEST and the files
 #
 # This script is invoked as part of 'make all'
 #
-# '=head1' are the only headings looked for.  If the first non-blank line after
-# the heading begins with a word character, it is considered to be the first 
-# line of documentation that applies to the heading itself.  That is, it is 
-# output immediately after the heading, before the first function, and not 
-# indented. The next input line that is a pod directive terminates this 
-# heading-level documentation.
-
-# The meanings of the flags fields in embed.fnc and the source code is
-# documented at the top of embed.fnc.
+# The generated pod consists of sections of related elements, functions,
+# macros, and variables.  The keys of %valid_sections give the current legal
+# ones.  Just add a new key to add a section.
+#
+# Throughout the files read by this script are lines like
+#
+# =for apidoc_section Section Name
+#
+# "Section Name" (after having been stripped of leading space) must be one of
+# the legal section names, or an error is thrown.  All API elements defined
+# between this line and the next 'apidoc_section' line will go into the
+# section "Section Name", sorted by dictionary order within it.  perlintern
+# and perlapi are parallel documents, each potentially with a section "Section
+# Name".  Each element is marked as to which document it goes into.  If there
+# are none for a particular section in perlapi, that section is
+# omitted.
+#
+# Also, in .[ch] files, there may be
+#
+# =head1 Section Name
+#
+# lines in comments.  These are also used by this program to switch to section
+# "Section Name".  The difference is that if there are any lines after the
+# =head1, inside the same comment, and before any =for apidoc-ish lines, they
+# are used as a heading for section "Section Name" (in both perlintern and
+# perlapi).  This includes any =head[2-5].  If more than one '=head1 Section
+# Name' line has content, they appear in the generated pod in an undefined
+# order.
+#
+# The next =head1, =for apidoc_section, or file end terminates what goes into
+# the current section
+#
+# The %valid_sections hash below also can have header content, which will
+# appear before any =head1 content.  The hash can also have footer content
+# content, which will appear at the end of the section, after all the
+# elements.
+#
+# The lines that define the actual functions, etc are documented in embed.fnc,
+# because they have flags which must be kept in sync with that file.
 
 use strict;
 use warnings;
