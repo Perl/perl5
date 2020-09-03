@@ -128,7 +128,7 @@ unless (-x "$testdir/$exename.exe") {
     skip_all "can't build test executable";
 }
 
-open my $T, "$^X -I../lib -w win32/system_tests |"
+open my $T, "$^X -I../lib -w -x win32/system_tests |"
     or die "Can't spawn win32/system_tests: $!";
 my $expect;
 my $comment = "";

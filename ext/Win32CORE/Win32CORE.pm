@@ -1,6 +1,6 @@
 package Win32CORE;
 
-$VERSION = '0.04';
+our $VERSION = '0.04_001';
 
 # There is no reason to load this module explicitly.  It will be
 # initialized using xs_init() when the interpreter is constructed.

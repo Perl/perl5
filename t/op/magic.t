@@ -352,26 +352,26 @@ print "\$^X is $^X, \$0 is $0\n";
 EOF
     ok close(SCRIPT) or diag $!;
     ok chmod(0755, $script) or diag $!;
-    $_ = $Is_VMS ? `$perl $script` : `$script`;
+    $_ = $Is_VMS ? `$perl -x $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
-	is uc $_, uc $s1;
+	      is( uc $_, uc $s1, '$0 and $^X for win32/os2 (1)');
     } else {
   SKIP:
      {
-	  skip "# TODO: Hit bug posix-2058; exec does not setup argv[0] correctly." if ($^O eq "vos");
-	  is $_, $s1;
+	      skip "# TODO: Hit bug posix-2058; exec does not setup argv[0] correctly." if ($^O eq "vos");
+	      is( $_, $s1, '$0 and $^X for anything but win32/os2 (1)');
      }
     }
-    $_ = `$perl $script`;
+    $_ = `$perl -x $script`;
     s/\.exe//i if $Is_Dos or $Is_os2 or $Is_Cygwin;
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
-	is uc $_, uc $s1;
+	      is( uc $_, uc $s1, '$0 and $^X for win32/os2 (2)');
     } else {
-	is $_, $s1;
+	      is( $_, $s1, '$0 and $^X for anything but win32/os2 (2)');
     }
     ok unlink($script) or diag $!;
     # CHECK

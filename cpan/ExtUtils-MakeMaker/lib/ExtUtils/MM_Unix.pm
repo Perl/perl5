@@ -1145,7 +1145,7 @@ WARNING
         }
     }
 
-    if ( $ver && $ver eq '7' ) {
+    if ( $ver && $ver =~ m/^7/ ) {
         $ver = 'v7';
     }
 

@@ -4,6 +4,7 @@
 
 ######################### We start with some black magic to print on failure.
 
+my $loaded = 0;
 BEGIN {
     $|= 1;
 
@@ -35,18 +36,18 @@ print "ok 1\n";
 
 ######################### End of black magic.
 
-$test= 1;
+my $test= 1;
 
 use strict qw(subs);
 
-$temp= File::Spec->tmpdir();
-$dir= "W32ApiF.tmp";
+my $temp= File::Spec->tmpdir();
+my $dir= "W32ApiF.tmp";
 
 $ENV{WINDIR} = $ENV{SYSTEMROOT} if not exists $ENV{WINDIR};
 
 chdir( $temp )
   or  die "# Can't cd to temp directory, $temp: $!\n";
-$tempdir = File::Spec->catdir($temp,$dir);
+my $tempdir = File::Spec->catdir($temp,$dir);
 if(  -d $dir  ) {
     print "# deleting ",File::Spec->catdir($temp,$dir,'*'),"\n" if glob "$dir/*";
 
@@ -61,8 +62,8 @@ mkdir( $dir, 0777 )
 print "# chdir $tempdir\n";
 chdir( $dir )
   or  die "# Can't cd to my dir, $tempdir: $!\n";
-$h1= createFile( "ReadOnly.txt", "r", { Attributes=>"r" } );
-$ok=  ! $h1  &&  Win32API::File::_fileLastError() == 2; # could not find the file
+my $h1= createFile( "ReadOnly.txt", "r", { Attributes=>"r" } );
+my $ok=  ! $h1  &&  Win32API::File::_fileLastError() == 2; # could not find the file
 $ok or print "# ","".fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 2
 if(  ! $ok  ) {   CloseHandle($h1);   unlink("ReadOnly.txt");   }
@@ -75,7 +76,7 @@ $ok= WriteFile( $h1, "Original text\n", 0, [], [] );
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 4
 
-$h2= createFile( "ReadOnly.txt", "rcn" );
+my $h2= createFile( "ReadOnly.txt", "rcn" );
 $ok= ! $h2  &&  Win32API::File::_fileLastError() == 80; # file exists
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 5
@@ -95,12 +96,14 @@ $ok= SetFilePointer( $h1, length("Original"), [], FILE_BEGIN );
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 8
 
+my $len;
 $ok= WriteFile( $h1, "ly was other text\n", 0, $len, [] )
   &&  $len == length("ly was other text\n");
 $ok or print "# <$len> should be <",
   length("ly was other text\n"),">: ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 9
 
+my $text;
 $ok= ReadFile( $h2, $text, 80, $len, [] )
  &&  $len == length($text);
 $ok or print "# <$len> should be <",length($text),
@@ -165,7 +168,7 @@ if( !$ok ) {
 }
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 21
 
-$skip = "";
+my $skip = "";
 if ($^O eq 'cygwin') {
     $ok = 1;
     $skip = " # skip cygwin can delete open files";
@@ -258,10 +261,10 @@ $ok= DeleteFile( "Moved.cp" );
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 36
 
-$new= SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX;
-$old= SetErrorMode( $new );
-$renew= SetErrorMode( $old );
-$reold= SetErrorMode( $old );
+my $new= SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX;
+my $old= SetErrorMode( $new );
+my $renew= SetErrorMode( $old );
+my $reold= SetErrorMode( $old );
 
 $ok= $old == $reold;
 $ok or print "# $old != $reold: ",fileLastError(),"\n";
@@ -271,6 +274,7 @@ $ok= ($renew&$new) == $new;
 $ok or print "# $new != $renew: ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 38
 
+my @drives = ();
 $ok= @drives= getLogicalDrives();
 $ok && print "# @drives\n";
 $ok or print "# ",fileLastError(),"\n";
@@ -281,7 +285,7 @@ $ok or print "# ",DRIVE_REMOVABLE," != ",GetDriveType($drives[0]),
   ": ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 40
 
-$drive= substr( $ENV{WINDIR}, 0, 3 );
+my $drive= substr( $ENV{WINDIR}, 0, 3 );
 
 $ok= 1 == grep /^\Q$drive\E/i, @drives;
 $ok or print "# No $drive found in list of drives.\n";
@@ -292,12 +296,14 @@ $ok or print
   "# ",DRIVE_FIXED," != ",GetDriveType($drive),": ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 42
 
+my ($vol, $ser, $max, $flag, $fs);
 $ok=  GetVolumeInformation( $drive, $vol, 64, $ser, $max, $flag, $fs, 16 );
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 43
 $vol= $ser= $max= $flag= $fs= "";	# Prevent warnings.
 
 chop($drive);
+my $dev;
 $ok= QueryDosDevice( $drive, $dev, 80 );
 $ok or print "# $drive: ",fileLastError(),"\n";
 if( $ok ) {
@@ -306,9 +312,9 @@ if( $ok ) {
 }
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 44
 
-$bits= GetLogicalDrives();
-$let= 25;
-$bit= 1<<$let;
+my $bits= GetLogicalDrives();
+my $let= 25;
+my $bit= 1<<$let;
 while(  $bit & $bits  ) {
     $let--;
     $bit >>= 1;
@@ -391,7 +397,7 @@ my( @noargs, %noargs )= qw(
   attrLetsToBits fileLastError getLogicalDrives GetLogicalDrives );
 @noargs{@noargs}= @noargs;
 
-foreach $func ( @{$Win32API::File::EXPORT_TAGS{Func}} ) {
+foreach my $func ( @{$Win32API::File::EXPORT_TAGS{Func}} ) {
     delete $consts{$func};
     if(  defined( $noargs{$func} )  ) {
 	$ok=  ! eval("$func(0,0)")  &&  $@ =~ /(::|\s)_?${func}A?[(:\s]/;
@@ -402,7 +408,7 @@ foreach $func ( @{$Win32API::File::EXPORT_TAGS{Func}} ) {
     print $ok ? "" : "not ", "ok ", ++$test, "\n";
 }
 
-foreach $func ( @{$Win32API::File::EXPORT_TAGS{FuncA}},
+foreach my $func ( @{$Win32API::File::EXPORT_TAGS{FuncA}},
                 @{$Win32API::File::EXPORT_TAGS{FuncW}} ) {
     $ok=  ! eval("$func()")  &&  $@ =~ /::_?${func}\(/;
     delete $consts{$func};
@@ -410,7 +416,7 @@ foreach $func ( @{$Win32API::File::EXPORT_TAGS{FuncA}},
     print $ok ? "" : "not ", "ok ", ++$test, "\n";
 }
 
-foreach $const ( keys(%consts) ) {
+foreach my $const ( keys(%consts) ) {
     $ok= eval("my \$x= $const(); 1");
     $ok or print "# Constant $const: $@\n";
     print $ok ? "" : "not ", "ok ", ++$test, "\n";

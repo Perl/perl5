@@ -62,12 +62,12 @@ my @commands = (
   ".\\$cmdbx",
   "$cwd/$cmdx",
   "$cwdb\\$cmdbx",
-  [$^X, $batx],
-  [$^X, $batbx],
-  [$^X, "./$batx"],
-  [$^X, ".\\$batbx"],
-  [$^X, "$cwd/$batx"],
-  [$^X, "$cwdb\\$batbx"],
+  [$^X, '-x', $batx],
+  [$^X, '-x', $batbx],
+  [$^X, '-x', "./$batx"],
+  [$^X, '-x', ".\\$batbx"],
+  [$^X, '-x', "$cwd/$batx"],
+  [$^X, '-x', "$cwdb\\$batbx"],
 );
 
 my @av = (

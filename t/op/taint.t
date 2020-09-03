@@ -23,9 +23,10 @@ $| = 1;
 
 my $ipcsysv; # did we manage to load IPC::SysV?
 
-my ($old_env_path, $old_env_dcl_path, $old_env_term);
+my ($old_env_path, $old_env_dcl_path, $old_env_term, $untainted_path);
 BEGIN {
    $old_env_path = $ENV{'PATH'};
+   ($untainted_path) = $ENV{'PATH'} =~ m/(.*)/;
    $old_env_dcl_path = $ENV{'DCL$PATH'};
    $old_env_term = $ENV{'TERM'};
   if ($^O eq 'VMS' && !defined($Config{d_setenv})) {
@@ -140,7 +141,7 @@ my $TEST = 'TEST';
 {
     $ENV{'DCL$PATH'} = '' if $Is_VMS;
 
-    $ENV{PATH} = ($Is_Cygwin) ? '/usr/bin' : '';
+    $ENV{PATH} = ($Is_Cygwin) ? '/usr/bin' : $Is_MSWin32 ? $old_env_path : '';
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
 
@@ -1276,6 +1277,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 
 # Operations which affect directories can't use tainted data.
 {
+    local $ENV{'PATH'} =  $untainted_path if $Is_MSWin32;
     violates_taint(sub { mkdir "foo".$TAINT, 0755 . $TAINT0 }, 'mkdir');
     violates_taint(sub { rmdir $TAINT }, 'rmdir');
     violates_taint(sub { chdir "foo".$TAINT }, 'chdir');
@@ -1317,6 +1319,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 {
     my $foo = $TAINT;
 
+    local $ENV{'PATH'} =  $untainted_path if $Is_MSWin32;
     SKIP: {
         skip "open('|') is not available", 8 if $^O eq 'amigaos';
 
@@ -1792,6 +1795,7 @@ TODO: {
     todo_skip 'tainted %ENV warning occludes tainted arguments warning', 22
       if $Is_VMS;
 
+    local $ENV{'PATH'} =  $untainted_path if $Is_MSWin32;
     # bug 20020208.005 (#8465) plus some single arg exec/system extras
     violates_taint(sub { exec $TAINT, $TAINT }, 'exec');
     violates_taint(sub { exec $TAINT $TAINT }, 'exec');
