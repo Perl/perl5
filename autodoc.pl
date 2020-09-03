@@ -1228,35 +1228,42 @@ sub output {
 
     print $fh $header, "\n";
 
-    for my $section_name (sort sort_helper keys %$dochash) {
+    for my $section_name (sort sort_helper keys %valid_sections) {
         my $section_info = $dochash->{$section_name};
 
-        if (! %$section_info) {
+        # We allow empty sections in perlintern.
+        if (! $section_info && $podname eq 'perlapi') {
             warn "Empty section '$section_name'; skipped";
-            delete $valid_sections{$section_name};
             next;
         }
 
         print $fh "\n=head1 $section_name\n";
 
-        print $fh "\n", $valid_sections{$section_name}{header}, "\n"
-                            if $podname eq 'perlapi'
-                            && defined $valid_sections{$section_name}{header};
+        if ($podname eq 'perlapi') {
+            print $fh "\n", $valid_sections{$section_name}{header}, "\n"
+                                if defined $valid_sections{$section_name}{header};
 
-        # Output any heading-level documentation and delete so won't get in
-        # the way later
-        if (exists $section_info->{""}) {
-            print $fh "\n", $section_info->{""}, "\n";
-            delete $section_info->{""};
+            # Output any heading-level documentation and delete so won't get in
+            # the way later
+            if (exists $section_info->{""}) {
+                print $fh "\n", $section_info->{""}, "\n";
+                delete $section_info->{""};
+            }
         }
-        next unless keys %$section_info;     # Skip empty
 
-        for my $function_name (sort sort_helper keys %$section_info) {
-            docout($fh, $function_name, $section_info->{$function_name});
+
+        if ($section_info) {
+            for my $function_name (sort sort_helper keys %$section_info) {
+                docout($fh, $function_name, $section_info->{$function_name});
+            }
+        }
+        else {
+            print $fh "\nThere are only public API items currently in $section_name\n";
         }
 
         print $fh "\n", $valid_sections{$section_name}{footer}, "\n"
-                            if defined $valid_sections{$section_name}{footer};
+                            if $podname eq 'perlapi'
+                            && defined $valid_sections{$section_name}{footer};
     }
 
     if (@$missing) {
@@ -1480,6 +1487,8 @@ output('perlintern', <<'_EOB_', $docs{guts}, \@missing_guts, <<"_EOE_");
 |Perl interpreter that are documented using Perl's internal documentation
 |format but are not marked as part of the Perl API.  In other words,
 |B<they are not for use in extensions>!
+
+|It has the same sections as L<perlapi>, though some may be empty.
 |
 _EOB_
 |
