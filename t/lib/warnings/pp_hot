@@ -147,7 +147,7 @@ print() on closed filehandle __ANONIO__ at - line 7.
 ########
 # pp_hot.c [pp_print]
 package foo;
-use warnings 'closed'; no strict;
+use warnings 'closed'; no strict 'vars';
 open my $fh1, "nonexistent";
 print $fh1 42;
 open $fh2, "nonexistent";
@@ -163,7 +163,7 @@ print() on closed filehandle $fh3 at - line 9.
 print() on closed filehandle FH4 at - line 11.
 ########
 # pp_hot.c [pp_rv2av]
-use warnings 'uninitialized' ; no strict;
+use warnings 'uninitialized' ; no strict 'refs';
 my $a = undef ;
 my @b = @$a;
 no warnings 'uninitialized' ;
@@ -172,7 +172,7 @@ EXPECT
 Use of uninitialized value $a in array dereference at - line 4.
 ########
 # pp_hot.c [pp_rv2hv]
-use warnings 'uninitialized' ; no strict;
+use warnings 'uninitialized' ; no strict 'refs';
 my $a = undef ;
 my %b = %$a;
 no warnings 'uninitialized' ;

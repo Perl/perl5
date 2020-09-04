@@ -120,7 +120,7 @@ EXPECT
 Undefined subroutine &Ｙ::joe called at - line 6.
 ########
 # gv.c
-use warnings; no strict;
+use warnings; no strict 'vars';
 my $x = 1;
 if ($x) {
     print $y;
@@ -134,7 +134,7 @@ Name "main::y" used only once: possible typo at - line 5.
 Use of uninitialized value $y in print at - line 5.
 ########
 # gv.c
-use warnings; no strict;
+use warnings; no strict 'vars';
 $x = 1;
 if ($x) {
     $x++;
@@ -145,7 +145,7 @@ Name "main::y" used only once: possible typo at - line 6.
 Use of uninitialized value $y in print at - line 6.
 ########
 # gv.c
-use warnings; no strict;
+use warnings; no strict 'vars';
 $x = 0;
 if ($x) {
     print "1\n";
@@ -159,7 +159,7 @@ Name "main::y" used only once: possible typo at - line 7.
 Use of uninitialized value $y in print at - line 7.
 ########
 # gv.c
-use warnings; no strict;
+use warnings; no strict 'vars';
 $x = 0;
 if ($x) {
     print "1\n";
@@ -176,7 +176,7 @@ Use of uninitialized value $y in print at - line 8.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 $ㄒ = 1;
 if ($ㄒ) {
     print $ʎ;
@@ -188,7 +188,7 @@ Use of uninitialized value $ʎ in print at - line 7.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 $ㄒ = 1;
 if ($ㄒ) {
     $ㄒ++;
@@ -201,7 +201,7 @@ Use of uninitialized value $ʎ in print at - line 8.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 $ㄒ = 0;
 if ($ㄒ) {
     print "1\n";
@@ -217,7 +217,7 @@ Use of uninitialized value $ʎ in print at - line 9.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 $ㄒ = 0;
 if ($ㄒ) {
     print "1\n";
@@ -234,7 +234,7 @@ Use of uninitialized value $ʎ in print at - line 10.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 package 팣칵ぇ;
 $ㄒ = 1;
 if ($ㄒ) {
@@ -247,7 +247,7 @@ Use of uninitialized value $팣칵ぇ::ʎ in print at - line 8.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 package 팣칵ぇ;
 $ㄒ = 1;
 if ($ㄒ) {
@@ -261,7 +261,7 @@ Use of uninitialized value $팣칵ぇ::ʎ in print at - line 9.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 package 팣칵ぇ;
 $ㄒ = 0;
 if ($ㄒ) {
@@ -278,7 +278,7 @@ Use of uninitialized value $팣칵ぇ::ʎ in print at - line 10.
 # gv.c
 use utf8;
 use open qw( :utf8 :std );
-use warnings; no strict;
+use warnings; no strict 'vars';
 package 팣칵ぇ;
 $ㄒ = 0;
 if ($ㄒ) {

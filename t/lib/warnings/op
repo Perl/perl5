@@ -732,7 +732,7 @@ Useless use of getservbyport in void context at - line 36.
 Useless use of getservent in void context at - line 37.
 ########
 # op.c
-use warnings 'void' ; no strict;
+use warnings 'void' ; no strict 'vars';
 *a ; # OP_RV2GV
 $a ; # OP_RV2SV
 @a ; # OP_RV2AV
@@ -788,7 +788,7 @@ EXPECT
 Useless use of a constant ("\340\x{1e06}c") in void context at - line 11.
 ########
 # op.c
-use utf8; no strict;
+use utf8; no strict 'vars'; no strict 'subs';
 use open qw( :utf8 :std );
 use warnings 'void' ;
 "Ẋ" . "ƴ"; # optimized to OP_CONST
@@ -807,7 +807,7 @@ Useless use of a constant (undef) in void context at - line 8.
 ########
 # op.c
 #
-use warnings 'misc' ; use utf8; no strict;
+use warnings 'misc' ; use utf8; no strict 'vars';
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;my $d = 'test';
 @a =~ /abc/ ;
 @a2 =~ s/a/b/ ;
@@ -866,7 +866,7 @@ Can't modify array dereference in substitution (s///) at - line 6, near "s/a/b/ 
 BEGIN not safe after errors--compilation aborted at - line 23.
 ########
 # op.c
-use warnings 'parenthesis' ; no strict;
+use warnings 'parenthesis' ; no strict 'vars';
 my $a, $b = (1,2);
 my @foo,%bar,	$quux; # there's a TAB here
 my $x, $y or print;
@@ -878,7 +878,7 @@ Parentheses missing around "my" list at - line 3.
 Parentheses missing around "my" list at - line 4.
 ########
 # op.c
-use warnings 'parenthesis' ; no strict;
+use warnings 'parenthesis' ; no strict 'vars';
 our $a, $b = (1,2);
 our $p, *q;
 no warnings 'parenthesis' ;
@@ -887,7 +887,7 @@ EXPECT
 Parentheses missing around "our" list at - line 3.
 ########
 # op.c
-use warnings 'parenthesis' ; no strict;
+use warnings 'parenthesis' ; no strict 'vars';
 local $a, $b = (1,2);
 local *f, *g;
 local $p, *q;
@@ -899,7 +899,7 @@ Parentheses missing around "local" list at - line 4.
 Parentheses missing around "local" list at - line 5.
 ########
 # op.c
-use warnings 'bareword' ; no strict;
+use warnings 'bareword' ; no strict 'subs';
 print (ABC || 1) ;
 no warnings 'bareword' ;
 print (ABC || 1) ;
@@ -910,7 +910,7 @@ Bareword found in conditional at - line 3.
 
 --FILE--
 # op.c
-use warnings 'misc' ; no strict;
+use warnings 'misc' ; no strict 'vars';
 open FH, "<abc" ;
 $x = 1 if $x = <FH> ;
 $x = 1 if $x
@@ -924,7 +924,7 @@ Value of <HANDLE> construct can be "0"; test with defined() at - line 4.
 Value of <HANDLE> construct can be "0"; test with defined() at - line 5.
 ########
 # op.c
-use warnings 'misc' ; no strict;
+use warnings 'misc' ; no strict 'vars';
 opendir FH, "." ;
 $x = 1 if $x = readdir FH ;
 $x = 1 if $x
@@ -939,7 +939,7 @@ Value of readdir() operator can be "0"; test with defined() at - line 4.
 Value of readdir() operator can be "0"; test with defined() at - line 5.
 ########
 # op.c
-use warnings 'misc' ; no strict;
+use warnings 'misc' ; no strict 'vars';
 $x = 1 if $x = <*> ;
 $x = 1 if $x
     = <*> ;
@@ -1270,7 +1270,7 @@ EXPECT
 "state $a" used in sort comparison at - line 4.
 ########
 # op.c [Perl_ck_cmp]
-use warnings 'syntax' ; no strict;
+use warnings 'syntax' ; no strict 'vars';
 no warnings 'deprecated';
 @a = $[ < 5;
 @a = $[ > 5;
@@ -1326,7 +1326,7 @@ $[ used in numeric le (<=) (did you mean $] ?) at - line 19.
 $[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
 ########
 # op.c [Perl_ck_length]
-use warnings 'syntax' ; no strict;
+use warnings 'syntax' ; no strict 'vars'; no strict 'refs';
 length(@a);
 length(%b);
 length(@$c);
@@ -1487,7 +1487,7 @@ $_ ^.= $_;
 EXPECT
 ########
 # op.c
-use warnings 'precedence'; no strict;
+use warnings 'precedence'; no strict 'vars';
 $a = $b & $c == $d;
 $a = $b ^ $c != $d;
 $a = $b | $c > $d;
@@ -1566,7 +1566,7 @@ Possible precedence problem on bitwise |. operator at - line 26.
 Possible precedence problem on bitwise &. operator at - line 27.
 ########
 # op.c
-use integer; no strict;
+use integer; no strict 'vars';
 use warnings 'precedence';
 $a = $b & $c == $d;
 $a = $b ^ $c != $d;
@@ -1597,7 +1597,7 @@ Possible precedence problem on bitwise & operator at - line 10.
 # ok	=> local() has desired effect;
 # ignore=> local() silently ignored
 
-use warnings 'syntax'; no strict;
+use warnings 'syntax'; no strict 'vars'; no strict 'refs';
 
 local(undef);		# OP_UNDEF		ignore
 sub lval : lvalue {};

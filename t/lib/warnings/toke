@@ -568,7 +568,7 @@ Ambiguous use of &{time} resolved to &time at - line 20.
 last at - line 24.
 ########
 # toke.c
-use warnings 'ambiguous' ; no strict;
+use warnings 'ambiguous' ; no strict 'vars';
 sub fred {}
 $a = ${fred} ;
 no warnings 'ambiguous' ;
@@ -577,7 +577,7 @@ EXPECT
 Ambiguous use of ${fred} resolved to $fred at - line 4.
 ########
 # toke.c
-use warnings 'syntax' ; no strict;
+use warnings 'syntax' ; no strict 'vars'; no strict 'subs';
 $a = _123; print "$a\n";		#( 3	string)
 $a = 1_23; print "$a\n";
 $a = 12_3; print "$a\n";
@@ -1189,7 +1189,7 @@ Integer overflow in hexadecimal number at - line 8.
 Integer overflow in octal number at - line 11.
 ########
 # toke.c
-no strict;
+no strict 'vars';
 use warnings 'ambiguous';
 "@mjd_previously_unused_array";        
 no warnings 'ambiguous';
@@ -1200,7 +1200,7 @@ Possible unintended interpolation of @mjd_previously_unused_array in string at -
 # toke.c
 use utf8;
 use open qw( :utf8 :std );
-no strict;
+no strict 'vars';
 use warnings 'ambiguous';
 "@mjd_previously_unused_àrray";
 no warnings 'ambiguous';
@@ -1209,7 +1209,7 @@ EXPECT
 Possible unintended interpolation of @mjd_previously_unused_àrray in string at - line 6.
 ########
 # toke.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 use warnings 'ambiguous';
 "@mjd_previously_unused_ぁrrぁy";        
@@ -1485,7 +1485,7 @@ EXPECT
 ok
 ########
 # toke.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 use warnings 'ambiguous' ;
 sub frèd {}
@@ -1496,7 +1496,7 @@ EXPECT
 Ambiguous use of ${frèd} resolved to $frèd at - line 6.
 ########
 # toke.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 use warnings 'ambiguous' ;
 sub f렏 {}
@@ -1507,7 +1507,7 @@ EXPECT
 Ambiguous use of ${f렏} resolved to $f렏 at - line 6.
 ########
 # toke.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 use warnings;
 CORE::렏;

@@ -16,7 +16,7 @@
 
 __END__
 # perl.c
-no strict;
+no strict 'vars';
 no warnings 'once' ;
 $x = 3 ;
 use warnings 'once' ;
@@ -26,7 +26,7 @@ Name "main::z" used only once: possible typo at - line 6.
 ########
 -w
 # perl.c
-no strict;
+no strict 'vars';
 $x = 3 ;
 no warnings 'once' ;
 $z = 3 
@@ -42,7 +42,7 @@ EXPECT
 Name "main::x" used only once: possible typo at - line 3.
 ########
 # perl.c
-use warnings 'once'; no strict;
+use warnings 'once'; no strict 'vars';
 $\; # test a few
 $:; # punct vars
 $0; # and
@@ -54,7 +54,7 @@ EXPECT
 ########
 -w
 # perl.c
-no strict;
+no strict 'vars';
 print # avoid void warning
 $\, # test a few
 $:, # punct vars
@@ -103,7 +103,7 @@ Name "main::y" used only once: possible typo at - line 6.
 # perl.c
 use utf8;
 use open qw( :utf8 :std );
-no warnings 'once' ; no strict;
+no warnings 'once' ; no strict 'vars';
 $ᛪ = 3 ;
 use warnings 'once' ;
 $ȥ = 3 ;
@@ -113,7 +113,7 @@ Name "main::ȥ" used only once: possible typo at - line 8.
 -w
 # perl.c
 use utf8;
-use open qw( :utf8 :std ); no strict;
+use open qw( :utf8 :std ); no strict 'vars';
 $ᛪ = 3 ;
 no warnings 'once' ;
 $ȥ = 3;
@@ -121,7 +121,7 @@ EXPECT
 Name "main::ᛪ" used only once: possible typo at - line 5.
 ########
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 BEGIN { $^W =1 ; }
 $ᛪ = 3 ;
@@ -132,7 +132,7 @@ Name "main::ᛪ" used only once: possible typo at - line 5.
 ########
 -W
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 no warnings 'once' ;
 $ᛪ = 3 ;
@@ -145,7 +145,7 @@ Name "main::ᛪ" used only once: possible typo at - line 6.
 ########
 -X
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 use warnings 'once' ;
 $ᛪ = 3 ;
@@ -153,7 +153,7 @@ EXPECT
 ########
 
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 { use warnings 'once' ; $ᛪ = 3 ; }
 $ŷ = 3 ;
@@ -162,7 +162,7 @@ Name "main::ᛪ" used only once: possible typo at - line 5.
 ########
 
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 $ȥ = 3 ;
 BEGIN { $^W = 1 }
@@ -174,7 +174,7 @@ Name "main::ŷ" used only once: possible typo at - line 8.
 
 
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 no warnings 'once' ;
@@ -186,7 +186,7 @@ Name "ɕლȃṢȿ::ȥ" used only once: possible typo at - line 10.
 ########
 -w
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 $ᛪ = 3 ;
@@ -196,7 +196,7 @@ EXPECT
 Name "ɕლȃṢȿ::ᛪ" used only once: possible typo at - line 6.
 ########
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 BEGIN { $^W =1 ; }
@@ -208,7 +208,7 @@ Name "ɕლȃṢȿ::ᛪ" used only once: possible typo at - line 6.
 ########
 -W
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 no warnings 'once' ;
@@ -222,7 +222,7 @@ Name "ɕლȃṢȿ::ȥ" used only once: possible typo at - line 9.
 ########
 -X
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 use warnings 'once' ;
 package ɕლȃṢȿ;
@@ -231,7 +231,7 @@ EXPECT
 ########
 
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 { use warnings 'once' ; $ᛪ = 3 ; }
@@ -241,7 +241,7 @@ Name "ɕლȃṢȿ::ᛪ" used only once: possible typo at - line 6.
 ########
 
 # perl.c
-use utf8; no strict;
+use utf8; no strict 'vars';
 use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 $ȥ = 3 ;
@@ -252,19 +252,19 @@ EXPECT
 Name "ɕლȃṢȿ::ŷ" used only once: possible typo at - line 9.
 ########
 
-use warnings 'once'; no strict;
+use warnings 'once'; no strict 'vars';
 $foo++; BEGIN { eval q|@a =~ s///; sub foo;| }
 EXPECT
 Name "main::foo" used only once: possible typo at - line 3.
 ########
 
-use warnings 'once'; no strict;
+use warnings 'once'; no strict 'vars'; no strict 'refs';
 BEGIN { ${"_<".__FILE__} = \1 } # should not affect file name in warning
 $foo++;
 EXPECT
 Name "main::foo" used only once: possible typo at - line 4.
 ########
-no strict;
+no strict 'vars';
 use warnings 'once'; # necessary to trigger the crash
 BEGIN{*MUSHROOMS::mushrooms::MUSHROOMS:: = *MUSHROOMS::} # circularity
 $foo++;

@@ -70,7 +70,7 @@ splice() offset past end of array at - line 4.
 splice() offset past end of array at - line 6.
 ########
 # pp.c
-use warnings 'uninitialized'; no strict;
+use warnings 'uninitialized'; no strict 'vars'; no strict 'refs';
 $x = undef; $y = $$x;
 no warnings 'uninitialized' ;
 $u = undef; $v = $$u;

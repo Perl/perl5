@@ -303,7 +303,7 @@ Use of uninitialized value in print at - line 7.
 Use of uninitialized value $m2 in print at - line 7.
 Use of uninitialized value in print at - line 8.
 ########
-use warnings 'uninitialized'; no strict;
+use warnings 'uninitialized'; no strict 'refs';
 my ($m1);
 our ($g1);
 
@@ -315,7 +315,7 @@ Use of uninitialized value $m1 in ref-to-glob cast at - line 5.
 Use of uninitialized value $g1 in ref-to-glob cast at - line 6.
 Use of uninitialized value in ref-to-glob cast at - line 7.
 ########
-use warnings 'uninitialized'; no strict;
+use warnings 'uninitialized'; no strict 'refs';
 my ($m1, $m2, $v);
 our ($g1, $g2);
 
@@ -1257,7 +1257,7 @@ Use of uninitialized value $m1 in umask at - line 19.
 Use of uninitialized value $g1 in umask at - line 20.
 Use of uninitialized value $m1 in binmode at - line 23.
 ########
-use warnings 'uninitialized'; no strict;
+use warnings 'uninitialized'; no strict 'refs';
 my ($m1);
 our ($g1, $g2);
 
@@ -2007,14 +2007,14 @@ sub foo () {v}
 EXPECT
 ########
 # [perl #72090]
-use warnings 'uninitialized'; no strict;
+use warnings 'uninitialized'; no strict 'refs';
 $a = @$a > 0;
 EXPECT
 Use of uninitialized value $a in array dereference at - line 3.
 Use of uninitialized value in numeric gt (>) at - line 3.
 ########
 # [perl #103766]
-use warnings 'uninitialized'; no strict;
+use warnings 'uninitialized'; no strict 'vars';
 "@{[ $x ]}";
 EXPECT
 Use of uninitialized value in join or string at - line 3.

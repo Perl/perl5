@@ -777,7 +777,7 @@ BEGIN{
         exit 0;
     }
 }
-no warnings; no strict;
+no warnings; no strict 'vars'; no strict 'subs';
 use warnings 'utf8';
 for(uc 0..t){0~~pack"UXc",exp}
 EXPECT

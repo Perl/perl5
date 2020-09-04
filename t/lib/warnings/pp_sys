@@ -262,7 +262,7 @@ syswrite() on closed filehandle STDIN at - line 6.
 	(Are you trying to call syswrite() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_flock]
-use Config; no strict;
+use Config; no strict 'refs';
 BEGIN { 
   if ( !$Config{d_flock} &&
        !$Config{d_fcntl_can_lock} &&
@@ -733,7 +733,7 @@ select $x, undef, undef, 1;
 EXPECT
 Non-string passed as bitmask at - line 4.
 ########
-use Config; no strict;
+use Config; no strict 'vars';
 BEGIN {
     if (!$Config{d_fchdir}) {
 	print <<EOM;
