@@ -356,6 +356,7 @@ sub output {
     my $key;
     for $key (sort sort_helper keys %$dochash) {
         my $section = $dochash->{$key}; 
+        next unless keys %$section;     # Skip empty
         print $fh "\n=head1 $key\n\n";
 
         # Output any heading-level documentation and delete so won't get in
@@ -364,6 +365,7 @@ sub output {
             print $fh $section->{""} . "\n";
             delete $section->{""};
         }
+        next unless keys %$section;     # Skip empty
         print $fh "=over 8\n\n";
 
         for my $key (sort sort_helper keys %$section) {
