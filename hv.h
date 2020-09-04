@@ -140,21 +140,17 @@ struct xpvhv {
 };
 
 /*
-=head1 Hash Manipulation Functions
+=for apidoc_section HV Handling
 
 =for apidoc AmnU||HEf_SVKEY
 This flag, used in the length slot of hash entries and magic structures,
 specifies the structure contains an C<SV*> pointer where a C<char*> pointer
 is to be expected.  (For information only--not to be used).
 
-=head1 Handy Values
-
 =for apidoc ADmnU||Nullhv
 Null HV pointer.
 
 (deprecated - use C<(HV *)NULL> instead)
-
-=head1 Hash Manipulation Functions
 
 =for apidoc Am|char*|HvNAME|HV* stash
 Returns the package name of a stash, or C<NULL> if C<stash> isn't a stash.

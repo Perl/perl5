@@ -19,7 +19,7 @@
  */
 
 /*
-=head1 Pad Data Structures
+=for apidoc_section Pad Data Structures
 
 =for apidoc Amx|PADLIST *|CvPADLIST|CV *cv
 
@@ -272,7 +272,7 @@ Perl_pad_new(pTHX_ int flags)
 
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc cv_undef
 

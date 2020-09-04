@@ -63,6 +63,10 @@ typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
 #define PERLIO_LAYERS 1
 
+/*
+=for apidoc_section Input/Output
+=cut
+*/
 /* PERLIO_FUNCS_CONST is now on by default for efficiency, PERLIO_FUNCS_CONST
    can be removed 1 day once stable & then PerlIO vtables are permanently RO */
 #ifdef PERLIO_FUNCS_CONST

@@ -14,7 +14,7 @@
 /* first, some documentation for xsubpp-generated items */
 
 /*
-=head1 C<xsubpp> variables and internal functions
+=for apidoc_section XS
 
 =for apidoc Amn|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
@@ -200,7 +200,7 @@ is a lexical C<$_> in scope.
 /* Typically used to return values from XS functions.       */
 
 /*
-=head1 Stack Manipulation Macros
+=for apidoc_section Stack Manipulation Macros
 
 =for apidoc Am|void|XST_mIV|int pos|IV iv
 Place an integer into the specified position C<pos> on the stack.  The
@@ -258,8 +258,6 @@ Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 =for apidoc Amns||XSRETURN_EMPTY
 Return an empty list from an XSUB immediately.
 
-=head1 Variables created by C<xsubpp> and C<xsubpp> internal functions
-
 =for apidoc AmU||newXSproto|char* name|XSUBADDR_t f|char* filename|const char *proto
 Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to
 the subs.
@@ -278,7 +276,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 Macro to verify that the perl api version an XS module has been compiled against
 matches the api version of the perl interpreter it's being loaded into.
 
-=head1 Exception Handling (simple) Macros
+=for apidoc_section Exception Handling (simple) Macros
 
 =for apidoc Amns||dXCPT
 Set up necessary local variables for exception handling.

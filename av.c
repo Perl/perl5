@@ -16,7 +16,7 @@
  */
 
 /*
-=head1 Array Manipulation Functions
+=for apidoc_section AV Handling
 */
 
 #include "EXTERN.h"

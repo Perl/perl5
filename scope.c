@@ -316,7 +316,7 @@ Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
 
 /*
 
-=head1 GV Functions
+=for apidoc_section GV Handling
 
 =for apidoc save_gp
 

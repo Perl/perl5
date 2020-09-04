@@ -166,7 +166,7 @@ typedef struct jmpenv JMPENV;
     } STMT_END
 
 /*
-=head1 COP Hint Hashes
+=for apidoc_section COP Hint Hashes
 */
 
 typedef struct refcounted_he COPHH;
@@ -479,10 +479,6 @@ struct cop {
 
 #define CopHINTHASH_get(c)	((COPHH*)((c)->cop_hints_hash))
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
-
-/*
-=head1 COP Hint Reading
-*/
 
 /*
 =for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
@@ -942,10 +938,6 @@ struct context {
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
 /*
-=head1 "Gimme" Values
-*/
-
-/*
 =for apidoc AmnU||G_SCALAR
 Used to indicate scalar context.  See C<L</GIMME_V>>, C<L</GIMME>>, and
 L<perlcall>.
@@ -1126,7 +1118,7 @@ typedef struct stackinfo PERL_SI;
 
 
 /*
-=head1 Multicall Functions
+=for apidoc_section Multicall Functions
 
 =for apidoc Amns||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.

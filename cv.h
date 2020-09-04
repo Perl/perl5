@@ -16,17 +16,15 @@ struct xpvcv {
 };
 
 /*
-=head1 Handy Values
+=head1 CV Handling
+
+This section documents functions to manipulate CVs which are code-values,
+meaning subroutines.  For more information, see L<perlguts>.
 
 =for apidoc ADmnU||Nullcv
 Null CV pointer.
 
 (deprecated - use C<(CV *)NULL> instead)
-
-=head1 CV Manipulation Functions
-
-This section documents functions to manipulate CVs which are code-values,
-or subroutines.  For more information, see L<perlguts>.
 
 =for apidoc Am|HV*|CvSTASH|CV* cv
 Returns the stash of the CV.  A stash is the symbol table hash, containing
@@ -255,7 +253,6 @@ CvNAME_HEK(CV *sv)
     )
 
 /*
-=head1 CV reference counts and CvOUTSIDE
 
 =for apidoc m|bool|CvWEAKOUTSIDE|CV *cv
 

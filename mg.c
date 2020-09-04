@@ -16,7 +16,7 @@
  */
 
 /*
-=head1 Magical Functions
+=head1 Magic
 "Magic" is special data attached to SV structures in order to give them
 "magical" properties.  When any Perl code tries to read from, or assign to,
 an SV marked as magical, it calls the 'get' or 'set' function associated
@@ -846,6 +846,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
 }
 
 /*
+=for apidoc_section Errno
 =for apidoc sv_string_from_errnum
 
 Generates the message string describing an OS error and returns it as
@@ -1909,6 +1910,7 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 }
 
 /*
+=for apidoc_section Magic
 =for apidoc magic_methcall
 
 Invoke a magic method (like FETCH).
@@ -3639,6 +3641,7 @@ S_unwind_handler_stack(pTHX_ const void *p)
 }
 
 /*
+=for apidoc_section Magic
 =for apidoc magic_sethint
 
 Triggered by a store to C<%^H>, records the key/value pair to

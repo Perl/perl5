@@ -21859,6 +21859,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 #define SAVEPVN(p, n)	((p) ? savepvn(p, n) : NULL)
 
 /*
+=for apidoc_section REGEXP Functions
 =for apidoc re_dup_guts
 Duplicate a regexp.
 

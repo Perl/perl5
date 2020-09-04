@@ -120,7 +120,7 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLE
 }
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc sv_derived_from_pvn
 

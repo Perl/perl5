@@ -1846,7 +1846,7 @@ PP(pp_xor)
 
 /*
 
-=head1 CV Manipulation Functions
+=for apidoc_section CV Handling
 
 =for apidoc caller_cx
 

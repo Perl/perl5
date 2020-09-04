@@ -12,7 +12,7 @@
  */
 
 /*
-=head1 Pad Data Structures
+=for apidoc_section Pad Data Structures
 */
 
 

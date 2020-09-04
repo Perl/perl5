@@ -130,8 +130,7 @@ static const char S_destroy[] = "DESTROY";
 
 /* ============================================================================
 
-=head1 Allocation and deallocation of SVs.
-
+=for apidoc_section SV Handling
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
@@ -409,7 +408,7 @@ S_del_sv(pTHX_ SV *p)
 
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc sv_add_arena
 
@@ -5507,7 +5506,6 @@ in terms of this function.
 
 =for apidoc Amnh||SV_CATUTF8
 =for apidoc Amnh||SV_CATBYTES
-=for apidoc Amnh||SV_SMAGIC
 
 =cut
 */
@@ -9318,7 +9316,6 @@ C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
     #define newSVpvn_utf8(s, len, u)			\
 	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
 
-=for apidoc Amnh||SVf_UTF8
 =for apidoc Amnh||SVs_TEMP
 
 =cut
@@ -13488,7 +13485,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 /* =========================================================================
 
-=head1 Cloning an interpreter
+=for apidoc_section Embedding and Interpreter Cloning
 
 =cut
 
@@ -16076,7 +16073,7 @@ Perl_init_constants(pTHX)
 }
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 
 =for apidoc sv_recode_to_utf8
 
@@ -16347,6 +16344,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
 
 /*
+=apidoc_section Warning and Dieing
 =for apidoc find_uninit_var
 
 Find the name of the undefined variable (if any) that caused the operator
