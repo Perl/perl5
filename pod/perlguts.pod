@@ -1288,6 +1288,95 @@ will be lost.
  ~  PERL_MAGIC_ext            (none)         Available for use by
                                              extensions
 
+
+=for apidoc Amnh||PERL_MAGIC_sv
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
+
+
 =for mg_vtable.pl end
 
 =for apidoc_section Magic

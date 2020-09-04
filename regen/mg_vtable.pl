@@ -427,7 +427,10 @@ EOH
 	}
 	print "\n\n";
 
-        print "=for apidoc Amnh||PERL_MAGIC_$_\n" for @names;
+        print "=for apidoc Amnh||PERL_MAGIC_$names[0]\n";
+        for (my $i = 1; $i < @names; $i++) {
+            print "=for apidoc_item ||PERL_MAGIC_$_\n";
+        }
         print "\n";
 
 	while (<$oldguts>) {
