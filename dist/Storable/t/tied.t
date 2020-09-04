@@ -215,15 +215,15 @@ is($FAULT::fault, 2, 'got expected value');
     our ($a, $b);
     $b = "not ok ";
     sub TIESCALAR { bless \$a } sub FETCH { "ok " }
-    no strict 'subs';
-    tie $a, 'P'; my $r = thaw freeze \$a; $b = $$r;
+    tie $a, 'P'; my $r = thaw freeze \$a;
+    $b = $$r;
     main::is($b, "ok ", 'thaw freeze got expected value');
 }
 
 {
     # blessed ref to tied object should be thawed blessed
     my @a;
-    { no strict 'subs'; tie @a, TIED_ARRAY; }
+    tie @a, 'TIED_ARRAY';
     my $r = bless \@a, 'FOO99';
     my $f = freeze($r);
     my $t = thaw($f);
