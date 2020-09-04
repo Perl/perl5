@@ -3755,7 +3755,7 @@ S_require_version(pTHX_ SV *sv)
     dVAR; dSP;
     const char *str_version;
     const char *ptr;
-    SV *sv_last_five_version;
+    SV *sv_atleast_version;
     SV *req;
     SV *pv;
 
@@ -3775,15 +3775,13 @@ S_require_version(pTHX_ SV *sv)
 	        case '3':
 	        case '4':
 	        case '5':
+                sv_atleast_version = sv_2mortal(upg_version(newSVnv(5.032255), FALSE)); /* the last available release version */
 	            break;
 	        case '6':
-	            DIE(aTHX_ "'use %s' is not supported by Perl 7", str_version );
+	            DIE(aTHX_ "'use %s' is not supported.", str_version );
 	            break;
 	        case '7':
-	            /* use 7* is not supported */
-	            if (ptr == str_version || strlen(ptr) != 1)
-                    DIE(aTHX_ "use v7; is the only supported syntax for Perl 7." );
-	            RETPUSHYES;
+                sv_atleast_version = PL_patchlevel;
 	            break;
 	        default:
 	            DIE(aTHX_ "Unknown behavior for 'use %s'", str_version );
@@ -3791,21 +3789,20 @@ S_require_version(pTHX_ SV *sv)
     }
 
     /* catch issues like use 5.6 which converts to 5.600 instead of using 5.006 */
-    sv_last_five_version = sv_2mortal(upg_version(newSVnv(5.033000), FALSE)); /* the last available release version */
 
     if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
         upg_version(PL_patchlevel, TRUE);
 
     if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
         /* no 5.000 logic lives here */
-        if ( vcmp(sv,sv_last_five_version) <= 0 )
+        if ( vcmp(sv,sv_atleast_version) < 0 )
             DIE(aTHX_ "Perls since %" SVf " too modern--this is %" SVf ", stopped",
                 SVfARG(sv_2mortal(vnormal(sv))),
                 SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
             );
     }
     else {
-        if ( vcmp(sv,sv_last_five_version) >= 0 ) {
+        if ( vcmp(sv,sv_atleast_version) > 0 ) {
             I32 first = 0;
             AV *lav;
 
