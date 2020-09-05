@@ -511,7 +511,10 @@ sub parse_config_h {
     use re '/aa';   # Everthing is ASCII in this file
 
     # Process config.h
-    open my $fh, '<', 'config.h' or die "Can't open config.h: $!";
+    my $config_h = 'config.h';
+    $config_h = 'win32/config.h' unless -e $config_h;
+    die "Can't find $config_h" unless -e $config_h;
+    open my $fh, '<', $config_h or die "Can't open $config_h: $!";
     while (<$fh>) {
 
         # Look for lines like /* FOO_BAR:
