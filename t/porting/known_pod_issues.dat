@@ -384,6 +384,7 @@ ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exce
 install	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perl.pod	Verbatim line length including indents exceeds 79 by	8
 pod/perlandroid.pod	Verbatim line length including indents exceeds 79 by	3
+pod/perlapi.pod	Apparent broken link	1
 pod/perlbook.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	-1
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	3
