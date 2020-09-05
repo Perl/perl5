@@ -1919,7 +1919,7 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 ApR	|NV	|str_to_version	|NN SV *sv
 Ap	|void	|regdump	|NN const regexp* r
 CiTop	|struct regexp *|ReANY	|NN const REGEXP * const re
-Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
+Apdh	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \
 				|SSize_t minend |NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK REGEXP* r
@@ -1931,7 +1931,7 @@ Ap	|void	|regfree_internal|NN REGEXP *const rx
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
 #endif
 EXp	|regexp_engine const *|current_re_engine
-Ap	|REGEXP*|pregcomp	|NN SV * const pattern|const U32 flags
+Apdh	|REGEXP*|pregcomp	|NN SV * const pattern|const U32 flags
 p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|int pat_count|NULLOK OP *expr \
 				|NN const regexp_engine* eng \
