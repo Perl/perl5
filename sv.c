@@ -3264,23 +3264,20 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 
 /*
 =for apidoc sv_copypv
+=for apidoc_item sv_copypv_nomg
+=for apidoc_item sv_copypv_flags
 
-Copies a stringified representation of the source SV into the
-destination SV.  Automatically performs any necessary C<L</mg_get>> and
-coercion of numeric values into strings.  Guaranteed to preserve
-C<UTF8> flag even from overloaded objects.  Similar in nature to
-C<sv_2pv[_flags]> but operates directly on an SV instead of just the
-string.  Mostly uses C<sv_2pv_flags> to do its work, except when that
-would lose the UTF-8'ness of the PV.
+These copy a stringified representation of the source SV into the
+destination SV.  They automatically perform coercion of numeric values into
+strings.  Guaranteed to preserve the C<UTF8> flag even from overloaded objects.
+Similar in nature to C<sv_2pv[_flags]> but they operate directly on an SV
+instead of just the string.  Mostly they use C<L</sv_2pv_flags>> to do the
+work, except when that would lose the UTF-8'ness of the PV.
 
-=for apidoc sv_copypv_nomg
-
-Like C<sv_copypv>, but doesn't invoke get magic first.
-
-=for apidoc sv_copypv_flags
-
-Implementation of C<sv_copypv> and C<sv_copypv_nomg>.  Calls get magic iff flags
-has the C<SV_GMAGIC> bit set.
+The three forms differ only in whether or not they perform 'get magic' on
+C<sv>.  C<sv_copypv_nomg> skips 'get magic'; C<sv_copypv> performs it; and
+C<sv_copypv_flags> either performs it (if the C<SV_GMAGIC> bit is set in
+C<flags>) or doesn't (if that bit is cleared).
 
 =cut
 */
