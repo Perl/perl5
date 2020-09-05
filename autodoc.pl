@@ -1108,6 +1108,15 @@ sub docout ($$$) { # output the docs for one function
         }
         else {
 
+            # Add the thread context formal parameter on expanded-out names
+            for my $item (@items) {
+                unshift $item->{args}->@*, (($item->{args}->@*)
+                                            ? "pTHX_"
+                                            : "pTHX")
+                                                   if $item->{flags} !~ /T/
+                                                   && $item->{name} =~ /^Perl_/;
+            }
+
             # Look through all the items in this entry.  If all have the same
             # return type and arguments, only the main entry is displayed.
             # Also, find the longest return type and longest name so that if
@@ -1149,12 +1158,6 @@ sub docout ($$$) { # output the docs for one function
                 my @args = $item->{args}->@*;
                 my $name = $item->{name};
                 my $item_flags = $item->{flags};
-
-                # Display the thread context formal parameter on an expanded
-                # out name
-                if ($item_flags !~ /T/ && $name =~ /^Perl_/) {
-                    unshift @args, (@args) ? "pTHX_" : "pTHX";
-                }
 
                 # The return type
                 print $fh (" " x $indent), $ret_type;
