@@ -3429,48 +3429,36 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
 
 /*
 =for apidoc sv_utf8_upgrade
+=for apidoc_item sv_utf8_upgrade_nomg
+=for apidoc_item sv_utf8_upgrade_flags
+=for apidoc_item sv_utf8_upgrade_flags_grow
 
-Converts the PV of an SV to its UTF-8-encoded form.
-Forces the SV to string form if it is not already.
-Will C<L</mg_get>> on C<sv> if appropriate.
-Always sets the C<SvUTF8> flag to avoid future validity checks even
-if the whole string is the same in UTF-8 as not.
-Returns the number of bytes in the converted string
+These convert the PV of an SV to its UTF-8-encoded form.
+The SV is forced to string form if it is not already.
+They always set the C<SvUTF8> flag to avoid future validity checks even if the
+whole string is the same in UTF-8 as not.
+They return the number of bytes in the converted string
 
-This is not a general purpose byte encoding to Unicode interface:
-use the Encode extension for that.
+The forms differ in just two ways.  The main difference is whether or not they
+perform 'get magic' on C<sv>.  C<sv_utf8_upgrade_nomg> skips 'get magic';
+C<sv_utf8_upgrade> performs it; and C<sv_utf8_upgrade_flags> and
+C<sv_utf8_upgrade_flags_grow> either perform it (if the C<SV_GMAGIC> bit is set
+in C<flags>) or don't (if that bit is cleared).
 
-=for apidoc sv_utf8_upgrade_nomg
+The other difference is that C<sv_utf8_upgrade_flags_grow> has an additional
+parameter, C<extra>, which allows the caller to specify an amount of space to
+be reserved as spare beyond what is needed for the actual conversion.  This is
+used when the caller knows it will soon be needing yet more space, and it is
+more efficient to request space from the system in a single call.
+This form is otherwise identical to C<sv_utf8_upgrade_flags>.
 
-Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
-
-=for apidoc sv_utf8_upgrade_flags
-
-Converts the PV of an SV to its UTF-8-encoded form.
-Forces the SV to string form if it is not already.
-Always sets the SvUTF8 flag to avoid future validity checks even
-if all the bytes are invariant in UTF-8.
-If C<flags> has C<SV_GMAGIC> bit set,
-will C<L</mg_get>> on C<sv> if appropriate, else not.
+These are not a general purpose byte encoding to Unicode interface: use the
+Encode extension for that.
 
 The C<SV_FORCE_UTF8_UPGRADE> flag is now ignored.
 
-Returns the number of bytes in the converted string.
-
-This is not a general purpose byte encoding to Unicode interface:
-use the Encode extension for that.
-
-=for apidoc sv_utf8_upgrade_flags_grow
-
-Like C<sv_utf8_upgrade_flags>, but has an additional parameter C<extra>, which is
-the number of unused bytes the string of C<sv> is guaranteed to have free after
-it upon return.  This allows the caller to reserve extra space that it intends
-to fill, to avoid extra grows.
-
-C<sv_utf8_upgrade>, C<sv_utf8_upgrade_nomg>, and C<sv_utf8_upgrade_flags>
-are implemented in terms of this function.
-
-Returns the number of bytes in the converted string (not including the spares).
+=for apidoc Amnh||SV_GMAGIC|
+=for apidoc Amnh||SV_FORCE_UTF8_UPGRADE|
 
 =cut
 
