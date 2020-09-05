@@ -1370,9 +1370,10 @@ Perl_form_nocontext(const char* pat, ...)
 /*
 =for apidoc_section Display and Dump functions
 =for apidoc form
+=for apidoc_item form_nocontext
 
-Takes a sprintf-style format pattern and conventional
-(non-SV) arguments and returns the formatted string.
+These take a sprintf-style format pattern and conventional
+(non-SV) arguments and return the formatted string.
 
     (char *) Perl_form(pTHX_ const char* pat, ...)
 
@@ -1380,14 +1381,13 @@ can be used any place a string (char *) is required:
 
     char * s = Perl_form("%d.%d",major,minor);
 
-Uses a single private buffer so if you want to format several strings you
+They use a single private buffer so if you want to format several strings you
 must explicitly copy the earlier strings away (and free the copies when you
 are done).
 
-=for apidoc form_nocontext
-Like C<L</form>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
+The two forms differ only in that C<form_nocontext> does not take a thread
+context (C<aTHX>) parameter, so is used in situations where the caller doesn't
+already have the thread context.
 
 =for apidoc vform
 Like C<L</form>> but but the arguments are an encapsulated argument list.
@@ -1418,20 +1418,20 @@ Perl_vform(pTHX_ const char *pat, va_list *args)
 
 /*
 =for apidoc mess
+=for apidoc_item mess_nocontext
 
-Take a sprintf-style format pattern and argument list.  These are used to
-generate a string message.  If the message does not end with a newline,
-then it will be extended with some indication of the current location
-in the code, as described for L</mess_sv>.
+These take a sprintf-style format pattern and argument list, which are used to
+generate a string message.  If the message does not end with a newline, then it
+will be extended with some indication of the current location in the code, as
+described for C<L</mess_sv>>.
 
 Normally, the resulting message is returned in a new mortal SV.
-During global destruction a single SV may be shared between uses of
+But during global destruction a single SV may be shared between uses of
 this function.
 
-=for apidoc mess_nocontext
-Like C<L</mess>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
+The two forms differ only in that C<mess_nocontext> does not take a thread
+context (C<aTHX>) parameter, so is used in situations where the caller doesn't
+already have the thread context.
 
 =cut
 */
@@ -1719,15 +1719,15 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 
 /*
 =for apidoc die_sv
+=for apidoc_item die_nocontext
 
-Behaves the same as L</croak_sv>, except for the return type.
+These ehave the same as L</croak_sv>, except for the return type.
 It should be used only where the C<OP *> return type is required.
-The function never actually returns.
+The functions never actually return.
 
-=for apidoc die_nocontext
-Like C<L</die>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
+The two forms differ only in that C<die_nocontext> does not take a thread
+context (C<aTHX>) parameter, so is used in situations where the caller doesn't
+already have the thread context.
 
 =cut
 */
@@ -1839,11 +1839,6 @@ error message from arguments.  If you want to throw a non-string object,
 or build an error message in an SV yourself, it is preferable to use
 the L</croak_sv> function, which does not involve clobbering C<ERRSV>.
 
-=for apidoc croak_nocontext
-Like C<L</croak>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
-
 =cut
 */
 
@@ -1857,24 +1852,29 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 
 /*
 =for apidoc croak
+=for apidoc_item croak_nocontext
 
-This is an XS interface to Perl's C<die> function.
+These are XS interfaces to Perl's C<die> function.
 
-Take a sprintf-style format pattern and argument list.  These are used to
-generate a string message.  If the message does not end with a newline,
-then it will be extended with some indication of the current location
-in the code, as described for L</mess_sv>.
+They take a sprintf-style format pattern and argument list, which are used to
+generate a string message.  If the message does not end with a newline, then it
+will be extended with some indication of the current location in the code, as
+described for C<L</mess_sv>>.
 
 The error message will be used as an exception, by default
 returning control to the nearest enclosing C<eval>, but subject to
-modification by a C<$SIG{__DIE__}> handler.  In any case, the C<croak>
-function never returns normally.
+modification by a C<$SIG{__DIE__}> handler.  In any case, these croak
+functions never return normally.
 
 For historical reasons, if C<pat> is null then the contents of C<ERRSV>
 (C<$@>) will be used as an error message or object instead of building an
 error message from arguments.  If you want to throw a non-string object,
 or build an error message in an SV yourself, it is preferable to use
-the L</croak_sv> function, which does not involve clobbering C<ERRSV>.
+the C<L</croak_sv>> function, which does not involve clobbering C<ERRSV>.
+
+The two forms differ only in that C<croak_nocontext> does not take a thread
+context (C<aTHX>) parameter, so is used in situations where the caller doesn't
+already have the thread context.
 
 =cut
 */
