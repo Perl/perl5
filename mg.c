@@ -3305,6 +3305,31 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+/*
+=for apidoc_section Signals
+=for apidoc whichsig
+=for apidoc_item whichsig_pv
+=for apidoc_item whichsig_pvn
+=for apidoc_item whichsig_sv
+
+These all convert a signal name into its corresponding signal number;
+returning -1 if no corresponding number was found.
+
+They differ only in the source of the signal name:
+
+C<whichsig_pv> takes the name from the C<NUL>-terminated string starting at
+C<sig>.
+
+C<whichsig> is merely a different spelling, a synonym, of C<whichsig_pv>.
+
+C<whichsig_pvn> takes the name from the string starting at C<sig>, with length
+C<len> bytes.
+
+C<whichsig_sv> takes the name from the PV stored in the SV C<sigsv>.
+
+=cut
+*/
+
 I32
 Perl_whichsig_sv(pTHX_ SV *sigsv)
 {

@@ -2603,10 +2603,10 @@ Apd	|bool	|dump_c_backtrace|NN PerlIO* fp|int max_depth|int skip
 #endif
 : FIXME
 p	|void	|watch		|NN char** addr
-Am	|I32	|whichsig	|NN const char* sig
-Ap	|I32    |whichsig_sv    |NN SV* sigsv
-Ap	|I32    |whichsig_pv    |NN const char* sig
-Ap	|I32    |whichsig_pvn   |NN const char* sig|STRLEN len
+Amd	|I32	|whichsig	|NN const char* sig
+Apd	|I32    |whichsig_sv    |NN SV* sigsv
+Apd	|I32    |whichsig_pv    |NN const char* sig
+Apd	|I32    |whichsig_pvn   |NN const char* sig|STRLEN len
 : used to check for NULs in pathnames and other names
 AiRdp	|bool	|is_safe_syscall|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
 #ifdef PERL_CORE
