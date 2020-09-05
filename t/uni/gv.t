@@ -575,15 +575,13 @@ format =
 {
     {
             package RƬ72740a;
-            no strict 'subs';
-            my $f = bless({}, RƬ72740b);
+            my $f = bless({}, 'RƬ72740b');
             sub s1 { s2 $f; }
             our $s4;
             sub s3 { s4 $f; }
     }
     {
             package RƬ72740b;
-            no strict 'subs';
             sub s2 { "RƬ72740b::s2" }
             sub s4 { "RƬ72740b::s4" }
     }
