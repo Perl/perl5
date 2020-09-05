@@ -11911,29 +11911,30 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     return elen;
 }
 
-
 /*
 =for apidoc sv_vcatpvfn
+=for apidoc_item sv_vcatpvfn_flags
 
-=for apidoc sv_vcatpvfn_flags
-
-Processes its arguments like C<vsprintf> and appends the formatted output
-to an SV.  Uses an array of SVs if the C-style variable argument list is
-missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d>
-or C<%*2$d>) is supported only when using an array of SVs; using a C-style
+These process their arguments like C<L<vsprintf(3)>> and append the formatted output
+to an SV.  They use an array of SVs if the C-style variable argument list is
+missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d> or
+C<%*2$d>) is supported only when using an array of SVs; using a C-style
 C<va_list> argument list with a format string that uses argument reordering
 will yield an exception.
 
-When running with taint checks enabled, indicates via
-C<maybe_tainted> if results are untrustworthy (often due to the use of
-locales).
+When running with taint checks enabled, they indicate via C<maybe_tainted> if
+results are untrustworthy (often due to the use of locales).
 
-If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
-
-It assumes that pat has the same utf8-ness as sv.  It's the caller's
+They assume that C<pat> has the same utf8-ness as C<sv>.  It's the caller's
 responsibility to ensure that this is so.
 
-Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
+They differ in that C<sv_vcatpvfn_flags> has a C<flags> parameter in which you
+can set or clear the C<SV_GMAGIC> and/or S<SV_SMAGIC> flags, to specify which
+magic to handle or not handle; whereas plain C<sv_vcatpvfn> always specifies
+both 'get' and 'set' magic.
+
+They are usually used via one of the frontends C<sv_vcatpvf> and
+C<sv_vcatpvf_mg>.
 
 =cut
 */
