@@ -1627,9 +1627,12 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 
 /*
 =for apidoc sv_setiv
+=for apidoc_item sv_setiv_mg
 
-Copies an integer into the given SV, upgrading first if necessary.
-Does not handle 'set' magic.  See also C<L</sv_setiv_mg>>.
+These copy an integer into the given SV, upgrading first if necessary.
+
+They differ only in that C<sv_setiv_mg> handles 'set' magic; C<sv_setiv> does
+not.
 
 =cut
 */
@@ -1670,14 +1673,6 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
     SvTAINT(sv);
 }
 
-/*
-=for apidoc sv_setiv_mg
-
-Like C<sv_setiv>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_setiv_mg(pTHX_ SV *const sv, const IV i)
 {
@@ -1689,9 +1684,13 @@ Perl_sv_setiv_mg(pTHX_ SV *const sv, const IV i)
 
 /*
 =for apidoc sv_setuv
+=for apidoc_item sv_setuv_mg
 
-Copies an unsigned integer into the given SV, upgrading first if necessary.
-Does not handle 'set' magic.  See also C<L</sv_setuv_mg>>.
+These copy an unsigned integer into the given SV, upgrading first if necessary.
+
+
+They differ only in that C<sv_setuv_mg> handles 'set' magic; C<sv_setuv> does
+not.
 
 =cut
 */
@@ -1721,14 +1720,6 @@ Perl_sv_setuv(pTHX_ SV *const sv, const UV u)
     SvUV_set(sv, u);
 }
 
-/*
-=for apidoc sv_setuv_mg
-
-Like C<sv_setuv>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u)
 {
@@ -1740,9 +1731,12 @@ Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u)
 
 /*
 =for apidoc sv_setnv
+=for apidoc_item sv_setnv_mg
 
-Copies a double into the given SV, upgrading first if necessary.
-Does not handle 'set' magic.  See also C<L</sv_setnv_mg>>.
+These copy a double into the given SV, upgrading first if necessary.
+
+They differ only in that C<sv_setnv_mg> handles 'set' magic; C<sv_setnv> does
+not.
 
 =cut
 */
@@ -1783,14 +1777,6 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
 }
-
-/*
-=for apidoc sv_setnv_mg
-
-Like C<sv_setnv>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_setnv_mg(pTHX_ SV *const sv, const NV num)
