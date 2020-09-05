@@ -2543,8 +2543,8 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 /*
 =for apidoc bytes_from_utf8_loc
 
-Like C<L</bytes_from_utf8>()>, but takes an extra parameter, a pointer to where
-to store the location of the first character in C<"s"> that cannot be
+Like C<L<perlapi/bytes_from_utf8>()>, but takes an extra parameter, a pointer
+to where to store the location of the first character in C<"s"> that cannot be
 converted to non-UTF8.
 
 If that parameter is C<NULL>, this function behaves identically to
