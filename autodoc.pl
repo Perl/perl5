@@ -297,6 +297,22 @@ EOS
     return ($name, $flags, $ret_type, $is_item, $proto_in_file, @args);
 }
 
+sub embed_override($) {
+    my ($element_name) = shift;
+
+    # If the entry is also in embed.fnc, it should be defined
+    # completely there, but not here
+    my $embed_docref = delete $funcflags{$element_name};
+
+    return unless $embed_docref and %$embed_docref;
+
+    my $flags = $embed_docref->{'flags'};
+    warn "embed.fnc entry '$element_name' missing 'd' flag"
+                                            unless $flags =~ /d/;
+
+    return ($flags, $embed_docref->{'ret_type'}, $embed_docref->{args}->@*);
+}
+
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
     my($in, $line_num, $header, $section);
@@ -338,20 +354,18 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
                                                 = check_api_doc_line($file, $in);
-            # Do some checking
-            # If the entry is also in embed.fnc, it should be defined
-            # completely there, but not here
-            my $embed_docref = delete $funcflags{$element_name};
-            if ($embed_docref and %$embed_docref) {
+            # Override this line with any info in embed.fnc
+            my ($embed_flags, $embed_ret_type, @embed_args)
+                                                = embed_override($element_name);
+            if ($embed_ret_type) {
                 warn "embed.fnc entry overrides redundant information in"
-                    . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
-                $flags = $embed_docref->{'flags'};
-                warn "embed.fnc entry '$element_name' missing 'd' flag"
-                                                        unless $flags =~ /d/;
-                $ret_type = $embed_docref->{'ret_type'};
-                @args = @{$embed_docref->{args}};
-            } elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a
-                                       # macro
+                    . " '$proto_in_file' in $file"
+                                               if $flags || $ret_type || @args;
+                $flags = $embed_flags;
+                $ret_type = $embed_ret_type;
+                @args = @embed_args;
+            }
+            elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a macro
                 $missing{$element_name} = $file;
             }
 
@@ -404,16 +418,29 @@ sub autodoc ($$) { # parse a file and extract documentation info
             last if $in =~ / ^ =for [ ]+ apidoc_section /x;
 
             my ($item_name, $item_flags, $item_ret_type, $is_item,
-                            undef, @item_args) = check_api_doc_line($file, $in);
+                    $item_proto, @item_args) = check_api_doc_line($file, $in);
             last unless $is_item;
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
-            die "Unexpected api_doc_item line '$in'" unless $element_name;
+            die "Unexpected api_doc_item line '$item_proto'"
+                                                        unless $element_name;
 
             # We accept blank lines between these, but nothing else;
             die "apidoc_item lines must immediately follow apidoc lines"
                                                             if $text =~ /\S/;
+            # Override this line with any info in embed.fnc
+            my ($embed_flags, $embed_ret_type, @embed_args)
+                                                = embed_override($item_name);
+            if ($embed_ret_type) {
+                warn "embed.fnc entry overrides redundant information in"
+                    . " '$item_proto' in $file"
+                                if $item_flags || $item_ret_type || @item_args;
+
+                $item_flags = $embed_flags;
+                $item_ret_type = $embed_ret_type;
+                @item_args = @embed_args;
+            }
 
             # Use the base entry flags if none for this item; otherwise add in
             # any non-display base entry flags.
