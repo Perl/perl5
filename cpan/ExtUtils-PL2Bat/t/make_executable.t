@@ -19,19 +19,21 @@ close $out;
 
 pl2bat(in => $filename);
 
-print STDERR "make_executable.t $ENV{PATH}\n";
+print STDERR "make_executable.t original path: $ENV{PATH}\n";
 my $tmp_path = do { # keep PATH from going above 1023 chars (incompatible on win2k)
 	my $perl_path = $^X;
-	my $cmd_path = `where cmd`;
-	$_ =~ s/[\\\/][^\\\/]+$// for $perl_path, $cmd_path;
-	join $Config{path_sep}, cwd(), $perl_path, $cmd_path;
+	my $cmd_path = $ENV{ComSpec} ||  `where cmd`; # doesn't seem to work on all windows versions
+	printf STDERR "make_executable.t cmd path: %s\n", ($cmd_path || "undef");
+	my @path_fallbacks = grep /\Q$ENV{SystemRoot}\E|system32|winnt|windows/i, split $Config{path_sep}, $ENV{PATH};
+	$_ =~ s/[\\\/][^\\\/]+$// for $perl_path, $cmd_path; # strip executable name
+	join $Config{path_sep}, @path_fallbacks, $cmd_path, $perl_path, cwd();
 };
-print STDERR "make_executable.t $^X\n";
-print STDERR "make_executable.t $tmp_path\n";
+print STDERR "make_executable.t perl executable: $^X\n";
+print STDERR "make_executable.t temp path: $tmp_path\n";
 
 foreach my $i (42, 51, 0) {
 	local $ENV{PATH} = $tmp_path;
-	print STDERR "make_executable.t $ENV{PATH}\n";
+	print STDERR "make_executable.t set path: $ENV{PATH}\n";
 	my $ret = system $filename, $i;
 	is $ret & 0xff, 0, 'test_exec executed successfully';
 	is $ret >> 8, $i, "test_exec $i return value ok";
