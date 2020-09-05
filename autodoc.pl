@@ -1121,13 +1121,14 @@ sub docout ($$$) { # output the docs for one function
             # return type and arguments, only the main entry is displayed.
             # Also, find the longest return type and longest name so that if
             # multiple ones are shown, they can be vertically aligned nicely
-            my $longest_ret = 0;
-            my $longest_name_length = 0;
             my $need_individual_usage = 0;
+            my $longest_name_length = length $items[0]->{name};
             my $base_ret_type = $items[0]->{ret_type};
+            my $longest_ret = length $base_ret_type;
             my @base_args = $items[0]->{args}->@*;
-            for my $item (@items) {
+            for (my $i = 1; $i < @items; $i++) {
                 no warnings 'experimental::smartmatch';
+                my $item = $items[$i];
                 $need_individual_usage = 1
                                     if    $item->{ret_type} ne $base_ret_type
                                     || ! ($item->{args}->@* ~~ @base_args);
