@@ -4967,10 +4967,14 @@ Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
 
 /*
 =for apidoc sv_setpv
+=for apidoc_item sv_setpv_mg
 
-Copies a string into an SV.  The string must be terminated with a C<NUL>
+These copy a string into an SV.  The string must be terminated with a C<NUL>
 character, and not contain embeded C<NUL>'s.
-Does not handle 'set' magic.  See C<L</sv_setpv_mg>>.
+
+They differ only in that:
+
+C<sv_setpv> does not handle 'set' magic; C<sv_setpv_mg> does.
 
 =cut
 */
@@ -4997,14 +5001,6 @@ Perl_sv_setpv(pTHX_ SV *const sv, const char *const ptr)
     SvTAINT(sv);
     if (SvTYPE(sv) == SVt_PVCV) CvAUTOLOAD_off(sv);
 }
-
-/*
-=for apidoc sv_setpv_mg
-
-Like C<sv_setpv>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_setpv_mg(pTHX_ SV *const sv, const char *const ptr)
