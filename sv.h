@@ -320,12 +320,11 @@ C<SvREFCNT_inc_simple_void_NN> can only be used with expressions without side
 effects, you don't need the return value, and you know C<sv> is not C<NULL>.
 
 =for apidoc SvREFCNT_dec
-Decrements the reference count of the given SV.  C<sv> may be C<NULL>.
+=for apidoc_item SvREFCNT_dec_NN
 
-=for apidoc SvREFCNT_dec_NN
-Same as C<SvREFCNT_dec>, but can only be used if you know C<sv>
-is not C<NULL>.  Since we don't have to check the NULLness, it's faster
-and smaller.
+These decrement the reference count of the given SV.
+
+C<SvREFCNT_dec_NN> may only be used when C<sv> is known to not be C<NULL>.
 
 =for apidoc Am|svtype|SvTYPE|SV* sv
 Returns the type of the SV.  See C<L</svtype>>.
