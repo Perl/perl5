@@ -9078,9 +9078,14 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 
 /*
 =for apidoc sv_dec
+=for apidoc_item sv_dec_nomg
 
-Auto-decrement of the value in the SV, doing string to numeric conversion
-if necessary.  Handles 'get' magic and operator overloading.
+These auto-decrement the value in the SV, doing string to numeric conversion
+if necessary.  They both handle operator overloading.
+
+They differ only in that:
+
+C<sv_dec> handles 'get' magic; C<sv_dec_nomg> skips 'get' magic.
 
 =cut
 */
@@ -9093,15 +9098,6 @@ Perl_sv_dec(pTHX_ SV *const sv)
     SvGETMAGIC(sv);
     sv_dec_nomg(sv);
 }
-
-/*
-=for apidoc sv_dec_nomg
-
-Auto-decrement of the value in the SV, doing string to numeric conversion
-if necessary.  Handles operator overloading.  Skips handling 'get' magic.
-
-=cut
-*/
 
 void
 Perl_sv_dec_nomg(pTHX_ SV *const sv)
