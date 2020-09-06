@@ -1577,58 +1577,49 @@ Like C<SvPV> but doesn't set a length variable.
 Like C<SvPV_nolen> but doesn't process magic.
 
 =for apidoc Am|IV|SvIV|SV* sv
-Coerces the given SV to IV and returns it.  The returned value in many
+=for apidoc_item SvIVx
+=for apidoc_item SvIV_nomg
+
+These coerce the given SV to IV and return it.  The returned value in many
 circumstances will get stored in C<sv>'s IV slot, but not in all cases.  (Use
 C<L</sv_setiv>> to make sure it does).
 
-See C<L</SvIVx>> for a version which guarantees to evaluate C<sv> only once.
+C<SvIVx> is different from the others in that it is guaranteed to evaluate
+C<sv> exactly once; the others may evaluate it multiple times.  Only use this
+form if C<sv> is an expression with side effects, otherwise use the more
+efficient C<SvIV>.
 
-=for apidoc Am|IV|SvIV_nomg|SV* sv
-Like C<SvIV> but doesn't process magic.
-
-=for apidoc Am|IV|SvIVx|SV* sv
-Coerces the given SV to IV and returns it.  The returned value in many
-circumstances will get stored in C<sv>'s IV slot, but not in all cases.  (Use
-C<L</sv_setiv>> to make sure it does).
-
-This form guarantees to evaluate C<sv> only once.  Only use this if C<sv> is an
-expression with side effects, otherwise use the more efficient C<SvIV>.
+C<SvIV_nomg> is the same as C<SvIV>, but does not perform 'get' magic.
 
 =for apidoc Am|NV|SvNV|SV* sv
-Coerces the given SV to NV and returns it.  The returned value in many
+=for apidoc_item SvNVx
+=for apidoc_item SvNV_nomg
+
+These coerce the given SV to NV and return it.  The returned value in many
 circumstances will get stored in C<sv>'s NV slot, but not in all cases.  (Use
 C<L</sv_setnv>> to make sure it does).
 
-See C<L</SvNVx>> for a version which guarantees to evaluate C<sv> only once.
+C<SvNVx> is different from the others in that it is guaranteed to evaluate
+C<sv> exactly once; the others may evaluate it multiple times.  Only use this
+form if C<sv> is an expression with side effects, otherwise use the more
+efficient C<SvNV>.
 
-=for apidoc Am|NV|SvNV_nomg|SV* sv
-Like C<SvNV> but doesn't process magic.
-
-=for apidoc Am|NV|SvNVx|SV* sv
-Coerces the given SV to NV and returns it.  The returned value in many
-circumstances will get stored in C<sv>'s NV slot, but not in all cases.  (Use
-C<L</sv_setnv>> to make sure it does).
-
-This form guarantees to evaluate C<sv> only once.  Only use this if C<sv> is an
-expression with side effects, otherwise use the more efficient C<SvNV>.
+C<SvNV_nomg> is the same as C<SvNV>, but does not perform 'get' magic.
 
 =for apidoc Am|UV|SvUV|SV* sv
-Coerces the given SV to UV and returns it.  The returned value in many
+=for apidoc_item SvUVx
+=for apidoc_item SvUV_nomg
+
+These coerce the given SV to UV and return it.  The returned value in many
 circumstances will get stored in C<sv>'s UV slot, but not in all cases.  (Use
 C<L</sv_setuv>> to make sure it does).
 
-See C<L</SvUVx>> for a version which guarantees to evaluate C<sv> only once.
+C<SvUVx> is different from the others in that it is guaranteed to evaluate
+C<sv> exactly once; the others may evaluate it multiple times.  Only use this
+form if C<sv> is an expression with side effects, otherwise use the more
+efficient C<SvUV>.
 
-=for apidoc Am|UV|SvUV_nomg|SV* sv
-Like C<SvUV> but doesn't process magic.
-
-=for apidoc Am|UV|SvUVx|SV* sv
-Coerces the given SV to UV and returns it.  The returned value in many
-circumstances will get stored in C<sv>'s UV slot, but not in all cases.  (Use
-C<L</sv_setuv>> to make sure it does).
-
-This form guarantees to evaluate C<sv> only once.  Only use this if C<sv> is an
-expression with side effects, otherwise use the more efficient C<SvUV>.
+C<SvUV_nomg> is the same as C<SvUV>, but does not perform 'get' magic.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
