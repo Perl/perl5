@@ -2087,7 +2087,7 @@ incremented.
 /* the following macros update any magic values this C<sv> is associated with */
 
 /*
-=for apidoc_section $magic
+=for apidoc_section $SV
 
 =for apidoc Am|void|SvGETMAGIC|SV* sv
 Invokes C<L</mg_get>> on an SV if it has 'get' magic.  For example, this
@@ -2101,18 +2101,21 @@ or a tied variable (it calls C<STORE>).  This macro evaluates its
 argument more than once.
 
 =for apidoc Am|void|SvSetSV|SV* dsv|SV* ssv
-Calls C<sv_setsv> if C<dsv> is not the same as C<ssv>.  May evaluate arguments
-more than once.  Does not handle 'set' magic on the destination SV.
+=for apidoc_item SvSetMagicSV
+=for apidoc_item SvSetSV_nosteal
+=for apidoc_item SvSetMagicSV_nosteal
 
-=for apidoc Am|void|SvSetSV_nosteal|SV* dsv|SV* ssv
-Calls a non-destructive version of C<sv_setsv> if C<dsv> is not the same as
-C<ssv>.  May evaluate arguments more than once.
+if C<dsv> is the same as C<ssv>, these do nothing.  Otherwise they all call
+some form of C<L</sv_setsv>>.  They may evaluate their arguments more than
+once.
 
-=for apidoc Am|void|SvSetMagicSV|SV* dsv|SV* ssv
-Like C<SvSetSV>, but does any set magic required afterwards.
+The only differences are:
 
-=for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
-Like C<SvSetSV_nosteal>, but does any set magic required afterwards.
+C<SvSetMagicSV> and C<SvSetMagicSV_nosteal> perform any required 'set' magic
+afterwards on the destination SV; C<SvSetSV> and C<SvSetSV_nosteal> do not.
+
+C<SvSetSV_nosteal> C<SvSetMagicSV_nosteal> call a non-destructive version of
+C<sv_setsv>.
 
 =for apidoc Am|void|SvSHARE|SV* sv
 Arranges for C<sv> to be shared between threads if a suitable module
