@@ -10919,12 +10919,18 @@ Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
 
 /*
 =for apidoc sv_vcatpvf
+=for apidoc_item sv_vcatpvf_mg
 
-Processes its arguments like C<sv_vcatpvfn> called with a non-null C-style
-variable argument list, and appends the formatted output
-to an SV.  Does not handle 'set' magic.  See C<L</sv_vcatpvf_mg>>.
+These process their arguments like C<sv_vcatpvfn> called with a non-null
+C-style variable argument list, and append the formatted output to C<sv>.
 
-Usually used via their frontends C<L</sv_catpvf>> and C<L</sv_catpvf_mg>>.
+They differ only in that C<sv_vcatpvf_mg> performs 'set' magic;
+C<sv_vcatpvf> skips 'set' magic.
+
+Both perform 'get' magic.
+
+They are usually accessed via their frontends C<L<sv_catpvf>> and
+C<L</sv_catpvf_mg>>.
 
 =cut
 */
@@ -10949,16 +10955,6 @@ Perl_sv_catpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
     SvSETMAGIC(sv);
     va_end(args);
 }
-
-/*
-=for apidoc sv_vcatpvf_mg
-
-Like C<sv_vcatpvf>, but also handles 'set' magic.
-
-Usually used via its frontend C<sv_catpvf_mg>.
-
-=cut
-*/
 
 void
 Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const args)
