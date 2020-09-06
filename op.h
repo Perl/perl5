@@ -396,7 +396,7 @@ struct pmop {
 #else
 #  define PmopSTASH(o)							\
     (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
-#  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #    define PmopSTASH_set(o,hv)		({				\
 	assert((o)->op_pmflags & PMf_ONCE);				\
 	((o)->op_pmstashstartu.op_pmstash = (hv));			\

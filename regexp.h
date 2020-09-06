@@ -608,7 +608,7 @@ and check for NULL.
                                         the start pos (so s/.\G// would fail
                                         on second iteration */
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define ReREFCNT_inc(re)						\
     ({									\
 	/* This is here to generate a casting warning if incorrect.  */	\

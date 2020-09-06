@@ -93,7 +93,7 @@ already-built-in ones return pointers to what their names indicate.
 =cut
  */
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define MUTABLE_PTR(p) ({ void *p_ = (p); p_; })
 #else
 #  define MUTABLE_PTR(p) ((void *) (p))
