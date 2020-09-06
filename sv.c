@@ -10672,9 +10672,12 @@ Perl_sv_tainted(pTHX_ SV *const sv)
 
 /*
 =for apidoc sv_setpviv
+=for apidoc_item sv_setpviv_mg
 
-Copies an integer into the given SV, also updating its string value.
-Does not handle 'set' magic.  See C<L</sv_setpviv_mg>>.
+These copy an integer into the given SV, also updating its string value.
+
+They differ only in that C<sv_setpviv_mg> performs 'set' magic; C<sv_setpviv>
+skips any magic.
 
 =cut
 */
@@ -10695,14 +10698,6 @@ Perl_sv_setpviv(pTHX_ SV *const sv, const IV iv)
 
     sv_setpvn(sv, ptr, ebuf - ptr);
 }
-
-/*
-=for apidoc sv_setpviv_mg
-
-Like C<sv_setpviv>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
