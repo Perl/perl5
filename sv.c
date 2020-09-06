@@ -10787,11 +10787,16 @@ Perl_sv_setpvf(pTHX_ SV *const sv, const char *const pat, ...)
 
 /*
 =for apidoc sv_vsetpvf
+=for apidoc_item sv_vsetpvf_mg
 
-Works like C<sv_vcatpvf> but copies the text into the SV instead of
-appending it.  Does not handle 'set' magic.  See C<L</sv_vsetpvf_mg>>.
+These work like C<L</sv_vcatpvf>> but copy the text into the SV instead of
+appending it.
 
-Usually used via its frontend C<sv_setpvf>.
+They differ only in that C<sv_vsetpvf_mg> performs 'set' magic;
+C<sv_vsetpvf> skips all magic.
+
+They are usually used via their frontends, C<L</sv_setpvf>> and
+C<L</sv_setpvf_mg>>.
 
 =cut
 */
@@ -10815,16 +10820,6 @@ Perl_sv_setpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
     sv_vsetpvf_mg(sv, pat, &args);
     va_end(args);
 }
-
-/*
-=for apidoc sv_vsetpvf_mg
-
-Like C<sv_vsetpvf>, but also handles 'set' magic.
-
-Usually used via its frontend C<sv_setpvf_mg>.
-
-=cut
-*/
 
 void
 Perl_sv_vsetpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const args)
