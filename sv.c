@@ -8878,9 +8878,13 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 
 /*
 =for apidoc sv_inc
+=for apidoc_item sv_inc_nomg
 
-Auto-increment of the value in the SV, doing string to numeric conversion
-if necessary.  Handles 'get' magic and operator overloading.
+These auto-increment the value in the SV, doing string to numeric conversion
+if necessary.  They both handle operator overloading.
+
+They differ only in that C<sv_inc> performs 'get' magic; C<sv_inc_nomg> skips
+any magic.
 
 =cut
 */
@@ -8893,15 +8897,6 @@ Perl_sv_inc(pTHX_ SV *const sv)
     SvGETMAGIC(sv);
     sv_inc_nomg(sv);
 }
-
-/*
-=for apidoc sv_inc_nomg
-
-Auto-increment of the value in the SV, doing string to numeric conversion
-if necessary.  Handles operator overloading.  Skips handling 'get' magic.
-
-=cut
-*/
 
 void
 Perl_sv_inc_nomg(pTHX_ SV *const sv)
