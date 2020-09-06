@@ -1196,7 +1196,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 #  define SvMAGIC(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #  define SvSTASH(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
-#else
+#else   /* Below is not PERL_DEBUG_COW */
 # ifdef PERL_CORE
 #  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
 # else
@@ -1277,7 +1277,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 	    assert(SvTYPE(_svstash) >= SVt_PVMG);			\
 	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
 	  }))
-#  else
+#  else     /* Below is not DEBUGGING or can't use brace groups */
 #    define SvPVX(sv) ((sv)->sv_u.svu_pv)
 #    define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
