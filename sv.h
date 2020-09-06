@@ -1717,9 +1717,6 @@ COW).
 Returns a boolean indicating whether the SV is Copy-On-Write shared hash key
 scalar.
 
-=for apidoc Am|void|sv_catpv_nomg|SV* sv|const char* ptr
-Like C<sv_catpv> but doesn't process magic.
-
 =cut
 */
 

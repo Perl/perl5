@@ -5561,14 +5561,32 @@ Perl_sv_catsv_flags(pTHX_ SV *const dsv, SV *const sstr, const I32 flags)
 
 /*
 =for apidoc sv_catpv
+=for apidoc_item sv_catpv_flags
+=for apidoc_item sv_catpv_mg
+=for apidoc_item sv_catpv_nomg
 
-Concatenates the C<NUL>-terminated string C<sstr> onto the end of the string which is
-in the SV.
+These concatenate the C<NUL>-terminated string C<sstr> onto the end of the
+string which is in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should be
-valid UTF-8.  Handles 'get' magic, but not 'set' magic.  See
-C<L</sv_catpv_mg>>.
+valid UTF-8.
 
-=cut */
+They differ only in how they handle magic:
+
+C<sv_catpv_mg> performs both 'get' and 'set' magic.
+
+C<sv_catpv> performs only 'get' magic.
+
+C<sv_catpv_nomg> skips all magic.
+
+C<sv_catpv_flags> has an extra C<flags> parameter which allows you to specify
+any combination of magic handling (using C<SV_GMAGIC> and/or C<SV_SMAGIC>), and
+to also override the UTF-8 handling.  By supplying the C<SV_CATUTF8> flag, the
+appended string is forced to be interpreted as UTF-8; by supplying instead the
+C<SV_CATBYTES> flag, it will be interpreted as just bytes.  Either the SV or
+the string appended will be upgraded to UTF-8 if necessary.
+
+=cut
+*/
 
 void
 Perl_sv_catpv(pTHX_ SV *const dsv, const char *sstr)
@@ -5592,32 +5610,12 @@ Perl_sv_catpv(pTHX_ SV *const dsv, const char *sstr)
     SvTAINT(dsv);
 }
 
-/*
-=for apidoc sv_catpv_flags
-
-Concatenates the C<NUL>-terminated string onto the end of the string which is
-in the SV.
-If the SV has the UTF-8 status set, then the bytes appended should
-be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<L</mg_set>>
-on the modified SV if appropriate.
-
-=cut
-*/
-
 void
 Perl_sv_catpv_flags(pTHX_ SV *dsv, const char *sstr, const I32 flags)
 {
     PERL_ARGS_ASSERT_SV_CATPV_FLAGS;
     sv_catpvn_flags(dsv, sstr, strlen(sstr), flags);
 }
-
-/*
-=for apidoc sv_catpv_mg
-
-Like C<sv_catpv>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_catpv_mg(pTHX_ SV *const dsv, const char *const sstr)
