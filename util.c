@@ -1914,9 +1914,12 @@ Perl_croak(pTHX_ const char *pat, ...)
 /*
 =for apidoc croak_no_modify
 
-Exactly equivalent to C<Perl_croak(aTHX_ "%s", PL_no_modify)>, but generates
-terser object code than using C<Perl_croak>.  Less code used on exception code
-paths reduces CPU cache pressure.
+This encapsulates a common reason for dying, generating terser object code than
+using the generic C<Perl_croak>.  It is exactly equivalent to
+C<Perl_croak(aTHX_ "%s", PL_no_modify)> (which expands to something like
+"Modification of a read-only value attempted").
+
+Less code used on exception code paths reduces CPU cache pressure.
 
 =cut
 */
