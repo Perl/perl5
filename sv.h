@@ -1621,24 +1621,30 @@ efficient C<SvUV>.
 
 C<SvUV_nomg> is the same as C<SvUV>, but does not perform 'get' magic.
 
-=for apidoc Am|bool|SvTRUE|SV* sv
-Returns a boolean indicating whether Perl would evaluate the SV as true or
-false.  See C<L</SvOK>> for a defined/undefined test.  Handles 'get' magic
-unless the scalar is already C<SvPOK>, C<SvIOK> or C<SvNOK> (the public, not the
-private flags).
+=for apidoc SvTRUE
+=for apidoc_item SvTRUEx
+=for apidoc_item SvTRUE_nomg
+=for apidoc_item SvTRUE_NN
+=for apidoc_item SvTRUE_nomg_NN
 
-As of Perl 5.32, this is guaranteed to evaluate C<sv> only once.  Prior to that
-release, use C<L</SvTRUEx>> for single evaluation.
+These return a boolean indicating whether Perl would evaluate the SV as true or
+false.  See C<L</SvOK>> for a defined/undefined test.
 
-=for apidoc Am|bool|SvTRUE_nomg|SV* sv
-Returns a boolean indicating whether Perl would evaluate the SV as true or
-false.  See C<L</SvOK>> for a defined/undefined test.  Does not handle 'get' magic.
+As of Perl 5.32, all are guaranteed to evaluate C<sv> only once.  Prior to that
+release, only C<SvTRUEx> guaranteed single evaluation; now C<SvTRUEx> is
+identical to C<SvTRUE>.
 
-=for apidoc Am|bool|SvTRUEx|SV* sv
-Identical to C<L</SvTRUE>>.  Prior to 5.32, they differed in that only this one
-was guaranteed to evaluate C<sv> only once; in 5.32 they both evaluated it
-once, but C<SvTRUEx> was slightly slower on some platforms; now they are
-identical.
+C<SvTRUE_nomg> and C<TRUE_nomg_NN> do not perform 'get' magic; the others do
+unless the scalar is already C<SvPOK>, C<SvIOK>, or C<SvNOK> (the public, not
+the private flags).
+
+C<SvTRUE_NN> is like C<L</SvTRUE>>, but C<sv> is assumed to be
+non-null (NN).  If there is a possibility that it is NULL, use plain
+C<SvTRUE>.
+
+C<SvTRUE_nomg_NN> is like C<L</SvTRUE_nomg>>, but C<sv> is assumed to be
+non-null (NN).  If there is a possibility that it is NULL, use plain
+C<SvTRUE_nomg>.
 
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
