@@ -10756,14 +10756,21 @@ Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 
 /*
 =for apidoc sv_setpvf
+=for apidoc_item sv_setpvf_nocontext
+=for apidoc_item sv_setpvf_mg
+=for apidoc_item sv_setpvf_mg_nocontext
 
-Works like C<sv_catpvf> but copies the text into the SV instead of
-appending it.  Does not handle 'set' magic.  See C<L</sv_setpvf_mg>>.
+These work like C<L</sv_catpvf>> but copy the text into the SV instead of
+appending it.
 
-=for apidoc sv_setpvf_nocontext
-Like C<L</sv_setpvf>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
+The differences between these are:
+
+C<sv_setpvf> and C<sv_setpvf_nocontext> do not handle 'set' magic;
+C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> do.
+
+C<sv_setpvf_nocontext> and C<sv_setpvf_mg_nocontext> do not take a thread
+context (C<aTHX>) parameter, so are used in situations where the caller
+doesn't already have the thread context.
 
 =cut
 */
@@ -10798,19 +10805,6 @@ Perl_sv_vsetpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
 }
-
-/*
-=for apidoc sv_setpvf_mg
-
-Like C<sv_setpvf>, but also handles 'set' magic.
-
-=for apidoc sv_setpvf_mg_nocontext
-Like C<L</sv_setpvf_mg>>, but does not take a thread context (C<aTHX>)
-parameter, so is used in situations where the caller doesn't already have the
-thread context.
-
-=cut
-*/
 
 void
 Perl_sv_setpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
