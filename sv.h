@@ -1696,9 +1696,6 @@ C<SvTRUE_nomg_NN> is like C<L</SvTRUE_nomg>>, but C<sv> is assumed to be
 non-null (NN).  If there is a possibility that it is NULL, use plain
 C<SvTRUE_nomg>.
 
-C<SvTRUE_NN> is like C<SvTRUE>, but C<sv> is assumed to be non-null (NN).  If
-there is a possibility that it is NULL, use plain C<SvTRUE>.
-
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
 
