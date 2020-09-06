@@ -3772,37 +3772,34 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
 
 /*
 =for apidoc sv_setsv
+=for apidoc_item sv_setsv_flags
+=for apidoc_item sv_setsv_mg
+=for apidoc_item sv_setsv_nomg
 
-Copies the contents of the source SV C<ssv> into the destination SV
-C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
-function if the source SV needs to be reused.  Does not handle 'set' magic on
-destination SV.  Calls 'get' magic on source SV.  Loosely speaking, it
-performs a copy-by-value, obliterating any previous content of the
-destination.
-
-You probably want to use one of the assortment of wrappers, such as
-C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
-C<SvSetMagicSV_nosteal>.
-
-=for apidoc sv_setsv_flags
-
-Copies the contents of the source SV C<ssv> into the destination SV
-C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
-function if the source SV needs to be reused.  Does not handle 'set' magic.
-Loosely speaking, it performs a copy-by-value, obliterating any previous
+These copy the contents of the source SV C<ssv> into the destination SV C<dsv>.
+C<ssv> may be destroyed if it is mortal, so don't use these functions if
+the source SV needs to be reused.
+Loosely speaking, they perform a copy-by-value, obliterating any previous
 content of the destination.
-If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<L</mg_get>> on
-C<ssv> if appropriate, else not.  If the C<flags>
-parameter has the C<SV_NOSTEAL> bit set then the
-buffers of temps will not be stolen.  C<sv_setsv>
-and C<sv_setsv_nomg> are implemented in terms of this function.
 
-You probably want to use one of the assortment of wrappers, such as
-C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
-C<SvSetMagicSV_nosteal>.
+They differ only in that:
 
-This is the primary function for copying scalars, and most other
-copy-ish functions and macros use this underneath.
+C<sv_setsv> calls 'get' magic on C<ssv>, but skips 'set' magic on C<dsv>.
+
+C<sv_setsv_mg> calls both 'get' magic on C<ssv> and 'set' magic on C<dsv>.
+
+C<sv_setsv_nomg> skips all magic.
+
+C<sv_setsv_flags> has a C<flags> parameter which you can use to specify any
+combination of magic handling, and also you can specify C<SV_NOSTEAL> so that
+the buffers of temps will not be stolen.
+
+You probably want to instead use one of the assortment of wrappers, such as
+C<L</SvSetSV>>, C<L</SvSetSV_nosteal>>, C<L</SvSetMagicSV>> and
+C<L</SvSetMagicSV_nosteal>>.
+
+C<sv_setsv_flags> is the primary function for copying scalars, and most other
+copy-ish functions and macros use it underneath.
 
 =for apidoc Amnh||SV_NOSTEAL
 
@@ -4793,16 +4790,6 @@ Perl_sv_set_undef(pTHX_ SV *sv)
     else
         SvOK_off(sv);
 }
-
-
-
-/*
-=for apidoc sv_setsv_mg
-
-Like C<sv_setsv>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_setsv_mg(pTHX_ SV *const dsv, SV *const ssv)

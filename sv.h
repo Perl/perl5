@@ -1718,9 +1718,6 @@ Like C<sv_catpvn> but doesn't process magic.
 =for apidoc Am|void|sv_catpv_nomg|SV* sv|const char* ptr
 Like C<sv_catpv> but doesn't process magic.
 
-=for apidoc Am|void|sv_setsv_nomg|SV* dsv|SV* ssv
-Like C<sv_setsv> but doesn't process magic.
-
 =for apidoc Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Like C<sv_catsv> but doesn't process magic.
 
