@@ -10879,23 +10879,31 @@ Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 
 /*
 =for apidoc sv_catpvf
+=for apidoc_item sv_catpvf_nocontext
+=for apidoc_item sv_catpvf_mg
+=for apidoc_item sv_catpvf_mg_nocontext
 
-Processes its arguments like C<sprintf>, and appends the formatted
-output to an SV.  As with C<sv_vcatpvfn> called with a non-null C-style
-variable argument list, argument reordering is not supported.
+These process their arguments like C<sprintf>, and append the formatted
+output to an SV.  As with C<sv_vcatpvfn>, argument reordering is not supporte
+when called with a non-null C-style variable argument list.
+
 If the appended data contains "wide" characters
 (including, but not limited to, SVs with a UTF-8 PV formatted with C<%s>,
 and characters >255 formatted with C<%c>), the original SV might get
-upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
-C<L</sv_catpvf_mg>>.  If the original SV was UTF-8, the pattern should be
+upgraded to UTF-8.
+
+If the original SV was UTF-8, the pattern should be
 valid UTF-8; if the original SV was bytes, the pattern should be too.
 
-=for apidoc sv_catpvf_nocontext
-Like C<L</sv_catpvf>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
+All perform 'get' magic, but only C<sv_catpvf_mg> and C<sv_catpvf_mg_nocontext>
+perform 'set' magic.
 
-=cut */
+C<sv_catpvf_nocontext> and C<sv_catpvf_mg_nocontext> do not take a thread
+context (C<aTHX>) parameter, so are used in situations where the caller
+doesn't already have the thread context.
+
+=cut
+*/
 
 void
 Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
@@ -10916,7 +10924,7 @@ Processes its arguments like C<sv_vcatpvfn> called with a non-null C-style
 variable argument list, and appends the formatted output
 to an SV.  Does not handle 'set' magic.  See C<L</sv_vcatpvf_mg>>.
 
-Usually used via its frontend C<sv_catpvf>.
+Usually used via their frontends C<L</sv_catpvf>> and C<L</sv_catpvf_mg>>.
 
 =cut
 */
@@ -10928,19 +10936,6 @@ Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 
     sv_vcatpvfn_flags(sv, pat, strlen(pat), args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
 }
-
-/*
-=for apidoc sv_catpvf_mg
-
-Like C<sv_catpvf>, but also handles 'set' magic.
-
-=for apidoc sv_catpvf_mg_nocontext
-Like C<L</sv_catpvf_mg>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
-
-=cut
-*/
 
 void
 Perl_sv_catpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
