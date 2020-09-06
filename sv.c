@@ -4907,14 +4907,19 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 
 /*
 =for apidoc sv_setpvn
+=for apidoc_item sv_setpvn_mg
 
-Copies a string (possibly containing embedded C<NUL> characters) into an SV.
-The C<len> parameter indicates the number of
-bytes to be copied.  If the C<ptr> argument is NULL the SV will become
-undefined.  Does not handle 'set' magic.  See C<L</sv_setpvn_mg>>.
+These copy a string (possibly containing embedded C<NUL> characters) into an
+SV.  The C<len> parameter indicates the number of bytes to be copied.  If the
+C<ptr> argument is NULL the SV will become
+undefined.
 
-The UTF-8 flag is not changed by this function.  A terminating NUL byte is
+The UTF-8 flag is not changed by these functions.  A terminating NUL byte is
 guaranteed.
+
+They differ only in that:
+
+C<sv_setpvn> does not handle 'set' magic; C<sv_setpvn_mg> does.
 
 =cut
 */
@@ -4950,14 +4955,6 @@ Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
     SvTAINT(sv);
     if (SvTYPE(sv) == SVt_PVCV) CvAUTOLOAD_off(sv);
 }
-
-/*
-=for apidoc sv_setpvn_mg
-
-Like C<sv_setpvn>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
