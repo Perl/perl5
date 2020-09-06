@@ -87,8 +87,8 @@ e.g.:
                                      cast away
  AV *av2 = MUTABLE_AV(sv); <== GOOD: it may warn
 
-C<MUTABLE_PTR> is the base macro used to derive new casts.  The other ones already
-built in return pointers to what their names indicate.
+C<MUTABLE_PTR> is the base macro used to derive new casts.  The other
+already-built-in ones return pointers to what their names indicate.
 
 =cut
  */
