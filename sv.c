@@ -3638,26 +3638,24 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 
 /*
 =for apidoc sv_utf8_downgrade
+=for apidoc_item sv_utf8_downgrade_flags
+=for apidoc_item sv_utf8_downgrade_nomg
 
-Attempts to convert the PV of an SV from characters to bytes.
-If the PV contains a character that cannot fit
-in a byte, this conversion will fail;
-in this case, either returns false or, if C<fail_ok> is not
-true, croaks.
+These attempt to convert the PV of an SV from characters to bytes.  If the PV
+contains a character that cannot fit in a byte, this conversion will fail; in
+this case, C<FALSE> is returned if C<fail_ok> is true; otherwise they croak.
 
-This is not a general purpose Unicode to byte encoding interface:
+They are not a general purpose Unicode to byte encoding interface:
 use the C<Encode> extension for that.
 
-This function process get magic on C<sv>.
+They differ only in that:
 
-=for apidoc sv_utf8_downgrade_nomg
+C<sv_utf8_downgrade> processes 'get' magic on C<sv>.
 
-Like C<sv_utf8_downgrade>, but does not process get magic on C<sv>.
+C<sv_utf8_downgrade_nomg> does not.
 
-=for apidoc sv_utf8_downgrade_flags
-
-Like C<sv_utf8_downgrade>, but with additional C<flags>.
-If C<flags> has C<SV_GMAGIC> bit set, processes get magic on C<sv>.
+C<sv_utf8_downgrade_flags> has an additional C<flags> parameter in which you can specify
+C<SV_GMAGIC> to process 'get' magic, or leave it cleared to not proccess 'get' magic.
 
 =cut
 */
