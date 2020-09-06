@@ -283,14 +283,6 @@ Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr)
     sv_catsv_flags(dsv, sstr, SV_GMAGIC);
 }
 
-/*
-=for apidoc sv_catsv_mg
-
-Like C<sv_catsv>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *sstr)
 {

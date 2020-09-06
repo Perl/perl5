@@ -5516,20 +5516,29 @@ Perl_sv_catpvn_flags(pTHX_ SV *const dsv, const char *sstr, const STRLEN slen, c
 
 /*
 =for apidoc sv_catsv
+=for apidoc_item sv_catsv_flags
+=for apidoc_item sv_catsv_mg
+=for apidoc_item sv_catsv_nomg
 
-Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  If C<ssv> is null, does nothing; otherwise modifies only C<dsv>.
-Handles 'get' magic on both SVs, but no 'set' magic.  See C<L</sv_catsv_mg>>
-and C<L</sv_catsv_nomg>>.
+These concatenate the string from SV C<sstr> onto the end of the string in SV
+C<dsv>.  If C<sstr> is null, these are no-ops; otherwise only C<dsv> is
+modified.
 
-=for apidoc sv_catsv_flags
+They differ only in what magic they perform:
 
-Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  If C<ssv> is null, does nothing; otherwise modifies only C<dsv>.
-If C<flags> has the C<SV_GMAGIC> bit set, will call C<L</mg_get>> on both SVs if
-appropriate.  If C<flags> has the C<SV_SMAGIC> bit set, C<L</mg_set>> will be called on
-the modified SV afterward, if appropriate.  C<sv_catsv>, C<sv_catsv_nomg>,
-and C<sv_catsv_mg> are implemented in terms of this function.
+C<sv_catsv_mg> performs 'get' magic on both SVs before the copy, and 'set' magic
+on C<dsv> afterwards.
+
+C<sv_catsv> performs just 'get' magic, on both SVs.
+
+C<sv_catsv_nomg> skips all magic.
+
+C<sv_catsv_flags> has an extra C<flags> parameter which allows you to use
+C<SV_GMAGIC> and/or C<SV_SMAGIC> to specify any combination of magic handling
+(although either both or neither SV will have 'get' magic applied to it.)
+
+C<sv_catsv>, C<sv_catsv_mg>, and C<sv_catsv_nomg> are implemented
+in terms of C<sv_catsv_flags>.
 
 =cut */
 
