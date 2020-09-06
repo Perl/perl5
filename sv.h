@@ -782,13 +782,25 @@ Returns the raw value in the SV's NV slot, without checks or conversions.
 Only use when you are sure C<SvNOK> is true.  See also C<L</SvNV>>.
 
 =for apidoc Am|char*|SvPVX|SV* sv
-Returns a pointer to the physical string in the SV.  The SV must contain a
-string.  Prior to 5.9.3 it is not safe
-to execute this macro unless the SV's
+=for apidoc_item |char*|SvPVXx|SV* sv
+=for apidoc_item |const char*|SvPVX_const|SV* sv
+=for apidoc_item |char*|SvPVX_mutable|SV* sv
+
+These return a pointer to the physical string in the SV.  The SV must contain a
+string.  Prior to 5.9.3 it is not safe to execute these unless the SV's
 type >= C<SVt_PV>.
 
-This is also used to store the name of an autoloaded subroutine in an XS
+These are also used to store the name of an autoloaded subroutine in an XS
 AUTOLOAD routine.  See L<perlguts/Autoloading with XSUBs>.
+
+C<SvPVXx> is identical to C<SvPVX>.
+
+C<SvPVX_mutable> is merely a synonym for C<SvPVX>, but its name emphasizes that
+the string is modifiable by the caller.
+
+C<SvPVX_const> differs in that the return value has been cast so that the
+compiler will complain if you were to try to modify the contents of the string,
+(unless you cast away const yourself).
 
 =for apidoc Am|STRLEN|SvCUR|SV* sv
 Returns the length of the string which is in the SV.  See C<L</SvLEN>>.
