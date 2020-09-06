@@ -281,44 +281,43 @@ Returns the value of the object's reference count. Exposed
 to perl code via Internals::SvREFCNT().
 
 =for apidoc SvREFCNT_inc
-Increments the reference count of the given SV, returning the SV.
+=for apidoc_item SvREFCNT_inc_NN
+=for apidoc_item SvREFCNT_inc_void
+=for apidoc_item |void|SvREFCNT_inc_void_NN|SV* sv
+=for apidoc_item |SV*|SvREFCNT_inc_simple|SV* sv
+=for apidoc_item |SV*|SvREFCNT_inc_simple_NN|SV* sv
+=for apidoc_item |void|SvREFCNT_inc_simple_void|SV* sv
+=for apidoc_item |void|SvREFCNT_inc_simple_void_NN|SV* sv
 
-All of the following C<SvREFCNT_inc>* are optimized versions of
-C<SvREFCNT_inc>, and can be replaced with C<SvREFCNT_inc>.
+These all increment the reference count of the given SV.
+The ones without C<void> in their names return the SV.
 
-=for apidoc SvREFCNT_inc_NN
-Same as C<SvREFCNT_inc>, but can only be used if you know C<sv>
-is not C<NULL>.  Since we don't have to check the NULLness, it's faster
-and smaller.
+C<SvREFCNT_inc> is the base operation; the rest are optimizations if various
+input constraints are known to be true; hence, all can be replaced with
+C<SvREFCNT_inc>.
 
-=for apidoc SvREFCNT_inc_void
-Same as C<SvREFCNT_inc>, but can only be used if you don't need the
+C<SvREFCNT_inc_NN> can only be used if you know C<sv> is not C<NULL>.  Since we
+don't have to check the NULLness, it's faster and smaller.
+
+C<SvREFCNT_inc_void> can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
-=for apidoc Am|void|SvREFCNT_inc_void_NN|SV* sv
-Same as C<SvREFCNT_inc>, but can only be used if you don't need the return
-value, and you know that C<sv> is not C<NULL>.  The macro doesn't need
-to return a meaningful value, or check for NULLness, so it's smaller
-and faster.
+C<SvREFCNT_inc_void_NN> can only be used if you both don't need the return
+value, and you know that C<sv> is not C<NULL>.  The macro doesn't need to
+return a meaningful value, or check for NULLness, so it's smaller and faster.
 
-=for apidoc Am|SV*|SvREFCNT_inc_simple|SV* sv
-Same as C<SvREFCNT_inc>, but can only be used with expressions without side
+C<SvREFCNT_inc_simple> can only be used with expressions without side
 effects.  Since we don't have to store a temporary value, it's faster.
 
-=for apidoc Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
-Same as C<SvREFCNT_inc_simple>, but can only be used if you know C<sv>
-is not C<NULL>.  Since we don't have to check the NULLness, it's faster
-and smaller.
+C<SvREFCNT_inc_simple_NN> can only be used with expressions without side
+effects and you know C<sv> is not C<NULL>.  Since we don't have to store a
+temporary value, nor check for NULLness, it's faster and smaller.
 
-=for apidoc Am|void|SvREFCNT_inc_simple_void|SV* sv
-Same as C<SvREFCNT_inc_simple>, but can only be used if you don't need the
-return value.  The macro doesn't need to return a meaningful value.
+C<SvREFCNT_inc_simple_void> can only be used with expressions without side
+effects and you don't need the return value.
 
-=for apidoc Am|void|SvREFCNT_inc_simple_void_NN|SV* sv
-Same as C<SvREFCNT_inc>, but can only be used if you don't need the return
-value, and you know that C<sv> is not C<NULL>.  The macro doesn't need
-to return a meaningful value, or check for NULLness, so it's smaller
-and faster.
+C<SvREFCNT_inc_simple_void_NN> can only be used with expressions without side
+effects, you don't need the return value, and you know C<sv> is not C<NULL>.
 
 =for apidoc SvREFCNT_dec
 Decrements the reference count of the given SV.  C<sv> may be C<NULL>.
