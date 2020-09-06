@@ -263,14 +263,6 @@ Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
     sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
 }
 
-/*
-=for apidoc sv_catpvn_mg
-
-Like C<sv_catpvn>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len)
 {

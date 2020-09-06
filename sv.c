@@ -5433,27 +5433,34 @@ Perl_sv_chop(pTHX_ SV *const sv, const char *const ptr)
 
 /*
 =for apidoc sv_catpvn
+=for apidoc_item sv_catpvn_flags
+=for apidoc_item sv_catpvn_mg
+=for apidoc_item sv_catpvn_nomg
 
-Concatenates the string onto the end of the string which is in the SV.
-C<len> indicates number of bytes to copy.  If the SV has the UTF-8
-status set, then the bytes appended should be valid UTF-8.
-Handles 'get' magic, but not 'set' magic.  See C<L</sv_catpvn_mg>>.
+These concatenate the C<len> bytes of the string beginning at C<ptr> onto the
+end of the string which is in C<dsv>.  The caller must make sure C<ptr>
+contains at least C<len> bytes.
 
-=for apidoc sv_catpvn_flags
+For all but C<sv_catpvn_flags>, the string appended is assumed to be valid
+UTF-8 if the SV has the UTF-8 status set, and a string of bytes otherwise.
 
-Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.
+They differ in that:
 
-By default, the string appended is assumed to be valid UTF-8 if the SV has
-the UTF-8 status set, and a string of bytes otherwise.  One can force the
-appended string to be interpreted as UTF-8 by supplying the C<SV_CATUTF8>
-flag, and as bytes by supplying the C<SV_CATBYTES> flag; the SV or the
-string appended will be upgraded to UTF-8 if necessary.
+C<sv_catpvn_mg> performs both 'get' and 'set' magic on C<dsv>.
 
-If C<flags> has the C<SV_SMAGIC> bit set, will
-C<L</mg_set>> on C<dsv> afterwards if appropriate.
-C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
-in terms of this function.
+C<sv_catpvn> performs only 'get' magic.
+
+C<sv_catpvn_nomg> skips all magic.
+
+C<sv_catpvn_flags> has an extra C<flags> parameter which allows you to specify
+any combination of magic handling (using C<SV_GMAGIC> and/or C<SV_SMAGIC>) and
+to also override the UTF-8 handling.  By supplying the C<SV_CATBYTES> flag, the
+appended string is interpreted as plain bytes; by supplying instead the
+C<SV_CATUTF8> flag, it will be interpreted as UTF-8, and the C<dsv> will be
+upgraded to UTF-8 if necessary.
+
+C<sv_catpvn>, C<sv_catpvn_mg>, and C<sv_catpvn_nomg> are implemented
+in terms of C<sv_catpvn_flags>.
 
 =for apidoc Amnh||SV_CATUTF8
 =for apidoc Amnh||SV_CATBYTES
