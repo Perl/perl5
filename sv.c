@@ -9743,13 +9743,13 @@ Perl_newRV(pTHX_ SV *const sv)
 
 /*
 =for apidoc newSVsv
+=for apidoc_item newSVsv_nomg
 
-Creates a new SV which is an exact duplicate of the original SV.
+These create a new SV which is an exact duplicate of the original SV.
 (Uses C<sv_setsv>.)
 
-=for apidoc newSVsv_nomg
-
-Like C<newSVsv> but does not process get magic.
+They differ only in that C<newSVsv> performs 'get' magic; C<newSVsv_nomg> skips
+any magic.
 
 =cut
 */
