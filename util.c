@@ -1873,8 +1873,9 @@ or build an error message in an SV yourself, it is preferable to use
 the C<L</croak_sv>> function, which does not involve clobbering C<ERRSV>.
 
 The two forms differ only in that C<croak_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+context (C<aTHX>) parameter.  It is usually preferred as it takes up fewer
+bytes of code than plain C<Perl_croak>, and time is rarely a critical resource
+when you are about to throw an exception.
 
 =cut
 */
