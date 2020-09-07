@@ -4865,6 +4865,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define L_R_TZSET
 #endif
 
+/* L_R_TZSET:
+ *	If localtime_r() needs tzset, it is defined in this define
+ */
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
  *	It is zero if d_localtime_r is undef, and one of the
