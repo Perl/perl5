@@ -128,7 +128,7 @@ values only, not array values.
     left	->
     nonassoc	++ --
     right	**
-    right	! ~ \ and unary + and -
+    right	! ~ ~. \ and unary + and -
     left	=~ !~
     left	* / % x
     left	+ - .
@@ -137,8 +137,8 @@ values only, not array values.
     chained 	< > <= >= lt gt le ge
     chain/na	== != eq ne <=> cmp ~~
     nonassoc    isa
-    left	&
-    left	| ^
+    left	& &.
+    left	| |. ^ ^.
     left	&&
     left	|| //
     nonassoc	..  ...
