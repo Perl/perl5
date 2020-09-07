@@ -1289,93 +1289,50 @@ will be lost.
                                              extensions
 
 
-=for apidoc Amnh||PERL_MAGIC_sv
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
-=for apidoc_item ||PERL_MAGIC_=for mg_vtable.pl begin
-
+=for apidoc AmnhU||PERL_MAGIC_arylen
+=for apidoc_item ||PERL_MAGIC_arylen_p
+=for apidoc_item ||PERL_MAGIC_backref
+=for apidoc_item ||PERL_MAGIC_bm
+=for apidoc_item ||PERL_MAGIC_checkcall
+=for apidoc_item ||PERL_MAGIC_collxfrm
+=for apidoc_item ||PERL_MAGIC_dbfile
+=for apidoc_item ||PERL_MAGIC_dbline
+=for apidoc_item ||PERL_MAGIC_debugvar
+=for apidoc_item ||PERL_MAGIC_defelem
+=for apidoc_item ||PERL_MAGIC_env
+=for apidoc_item ||PERL_MAGIC_envelem
+=for apidoc_item ||PERL_MAGIC_ext
+=for apidoc_item ||PERL_MAGIC_fm
+=for apidoc_item ||PERL_MAGIC_hints
+=for apidoc_item ||PERL_MAGIC_hintselem
+=for apidoc_item ||PERL_MAGIC_isa
+=for apidoc_item ||PERL_MAGIC_isaelem
+=for apidoc_item ||PERL_MAGIC_lvref
+=for apidoc_item ||PERL_MAGIC_nkeys
+=for apidoc_item ||PERL_MAGIC_nonelem
+=for apidoc_item ||PERL_MAGIC_overload_table
+=for apidoc_item ||PERL_MAGIC_pos
+=for apidoc_item ||PERL_MAGIC_qr
+=for apidoc_item ||PERL_MAGIC_regdata
+=for apidoc_item ||PERL_MAGIC_regdatum
+=for apidoc_item ||PERL_MAGIC_regex_global
+=for apidoc_item ||PERL_MAGIC_rhash
+=for apidoc_item ||PERL_MAGIC_shared
+=for apidoc_item ||PERL_MAGIC_shared_scalar
+=for apidoc_item ||PERL_MAGIC_sig
+=for apidoc_item ||PERL_MAGIC_sigelem
+=for apidoc_item ||PERL_MAGIC_substr
+=for apidoc_item ||PERL_MAGIC_sv
+=for apidoc_item ||PERL_MAGIC_symtab
+=for apidoc_item ||PERL_MAGIC_taint
+=for apidoc_item ||PERL_MAGIC_tied
+=for apidoc_item ||PERL_MAGIC_tiedelem
+=for apidoc_item ||PERL_MAGIC_tiedscalar
+=for apidoc_item ||PERL_MAGIC_utf8
+=for apidoc_item ||PERL_MAGIC_uvar
+=for apidoc_item ||PERL_MAGIC_uvar_elem
+=for apidoc_item ||PERL_MAGIC_vec
+=for apidoc_item ||PERL_MAGIC_vstring
 
 =for mg_vtable.pl end
 
