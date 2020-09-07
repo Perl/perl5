@@ -395,8 +395,8 @@ X<array of arrays> X<AoA>
 
  # print the whole thing one at a time
  for $i ( 0 .. $#AoA ) {
-     for $j ( 0 .. $#{ $AoA[$i] } ) {
-         print "elt $i $j is $AoA[$i][$j]\n";
+     for $j ( 0 .. $AoA[$i]->$#* ) {
+         print "elem at ($i, $j) is $AoA[$i][$j]\n";
      }
  }
 
@@ -565,8 +565,8 @@ X<array of hashes> X<AoH>
 
  # print the whole thing one at a time
  for $i ( 0 .. $#AoH ) {
-     for $role ( keys %{ $AoH[$i] } ) {
-         print "elt $i $role is $AoH[$i]{$role}\n";
+     for $role ( keys $AoH[$i]->%* ) {
+         print "elem at ($i, $role) is $AoH[$i]{$role}\n";
      }
  }
 
