@@ -666,9 +666,7 @@ X<hash of hashes> X<HoH>
 
 
  # print the whole thing sorted by number of members
- foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$a}} }
-                                                             keys %HoH )
- {
+ foreach $family ( sort { $HoH{$b}->%* <=> $HoH{$a}->%* } keys %HoH ) {
      print "$family: { ";
      for $role ( sort keys $HoH{$family}->%* ) {
          print "$role=$HoH{$family}{$role} ";
@@ -681,9 +679,7 @@ X<hash of hashes> X<HoH>
  for ( qw(lead wife son daughter pal pet) ) { $rank{$_} = ++$i }
 
  # now print the whole thing sorted by number of members
- foreach $family ( sort { keys %{ $HoH{$b} } <=> keys %{ $HoH{$a} } }
-                                                             keys %HoH )
- {
+ foreach $family ( sort { $HoH{$b}->%* <=> $HoH{$a}->%* } keys %HoH ) {
      print "$family: { ";
      # and print these according to rank order
      for $role ( sort { $rank{$a} <=> $rank{$b} }
