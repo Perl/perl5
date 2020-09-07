@@ -288,9 +288,8 @@ reading left to right.
 
 If this is starting to sound scarier than it's worth, relax.  Perl has
 some features to help you avoid its most common pitfalls.  The best
-way to avoid getting confused is to start every program like this:
+way to avoid getting confused is to start every program with:
 
-    #!/usr/bin/perl -w
     use strict;
 
 This way, you'll be forced to declare all your variables with my() and
