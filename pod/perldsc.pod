@@ -340,9 +340,8 @@ For example, given the assignment to $AoA above, here's the debugger output:
 
 =head1 CODE EXAMPLES
 
-Presented with little comment (these will get their own manpages someday)
-here are short code examples illustrating access of various
-types of data structures.
+Presented with little comment here are short code examples illustrating
+access of various types of data structures.
 
 =head1 ARRAYS OF ARRAYS
 X<array of arrays> X<AoA>
