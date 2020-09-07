@@ -4830,6 +4830,9 @@
 #define L_R_TZSET
 #endif
 
+/* L_R_TZSET:
+ *	If localtime_r() needs tzset, it is defined in this define
+ */
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
  *	It is zero if d_localtime_r is undef, and one of the
@@ -5260,6 +5263,6 @@
 #endif
 
 /* Generated from:
- * deb46e947e3b9d6e9da9e44f21ed8b93cd4ff6feef333bd963f11c54d7850c98 config_h.SH
+ * 58be2e8a7742878937c4392bd15fffc7d0b555bedc9d028c791ea9b525806d52 config_h.SH
  * 0328fd317c240be96131cf63f152ee17113e74b68e3dc0000e2876b9a0023713 uconfig.sh
  * ex: set ro: */
