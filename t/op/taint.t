@@ -1565,7 +1565,7 @@ SKIP: {
         }
 
         skip "SysV shared memory operation failed", 1 unless 
-          $rcvd eq $sent;
+          ($rcvd // '') eq $sent;
 
         is_tainted($rcvd, "shmread");
     }
