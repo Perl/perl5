@@ -516,19 +516,14 @@ test_proto 'evalbytes';
 $main::tests += 4;
 {
   my $U_100_bytes = byte_utf8a_to_utf8n("\xc4\x80");
-  chop(my $upgraded = "use utf8; { no strict; $U_100_bytes" . chr 256);
-  $upgraded .= " }";
-  is( &myevalbytes($upgraded), chr 256, '&evalbytes [myevalbytes]' );
-  # Test hints
-  require strict;
-  strict->import; # cannot use strict to check hints
-  my $hint_bit = 0x20000; # use an arbitrary bit
-  $^H |= $hint_bit;
-  my $x = &myevalbytes('my $x; BEGIN { $x = $^H } $x');
-  is( $x & $hint_bit, 0, "run-time hint bits do not leak into &evalbytes" );
-  $^H |= ~$hint_bit; # remove the bit
-
-  use strict;
+  chop(my $upgraded = "use utf8; $U_100_bytes" . chr 256);
+  {
+    no strict 'subs';
+    is &myevalbytes($upgraded), chr 256, '&evalbytes';
+    &myevalbytes('
+      is someone, "someone", "run-time hint bits do not leak into &evalbytes"
+    ');
+  }
   BEGIN { $^H{coreamp} = 42 }
   $^H{coreamp} = 75;
   &myevalbytes('
