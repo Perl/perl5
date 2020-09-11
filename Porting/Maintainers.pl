@@ -344,6 +344,7 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
         ],
+        'CUSTOMIZED'   => [ qw(Makefile.PL) ],
     },
 
     'Devel::SelfStubber' => {
