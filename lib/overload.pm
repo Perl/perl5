@@ -1,8 +1,11 @@
 package overload;
 
-our $VERSION = '1.32';
+use strict;
+no strict 'refs';
 
-%ops = (
+our $VERSION = '1.33';
+
+our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
     assign              => "+= -= *= /= %= **= <<= >>= x= .=",
     num_comparison      => "< <= >  >= == !=",
@@ -26,7 +29,7 @@ my %ops_seen;
 sub nil {}
 
 sub OVERLOAD {
-  $package = shift;
+  my $package = shift;
   my %arg = @_;
   my $sub;
   *{$package . "::(("} = \&nil; # Make it findable via fetchmethod.
@@ -51,14 +54,14 @@ sub OVERLOAD {
 }
 
 sub import {
-  $package = (caller())[0];
+  my $package = (caller())[0];
   # *{$package . "::OVERLOAD"} = \&OVERLOAD;
   shift;
   $package->overload::OVERLOAD(@_);
 }
 
 sub unimport {
-  $package = (caller())[0];
+  my $package = (caller())[0];
   shift;
   *{$package . "::(("} = \&nil;
   for (@_) {
@@ -131,7 +134,7 @@ sub mycan {				# Real can would leave stubs.
   return undef;
 }
 
-%constants = (
+my %constants = (
 	      'integer'	  =>  0x1000, # HINT_NEW_INTEGER
 	      'float'	  =>  0x2000, # HINT_NEW_FLOAT
 	      'binary'	  =>  0x4000, # HINT_NEW_BINARY

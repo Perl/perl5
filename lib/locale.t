@@ -1,5 +1,8 @@
 #!./perl -wT
 
+use strict;
+use warnings;
+
 # This tests plain 'use locale' and adorned 'use locale ":not_characters"'
 # Because these pragmas are compile time, and I (khw) am trying to test
 # without using 'eval' as much as possible, which might cloud the issue,  the
@@ -50,7 +53,6 @@ BEGIN {
     require Config; import Config;
 }
 
-use strict;
 use feature 'fc';
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
