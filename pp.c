@@ -1544,21 +1544,19 @@ PP(pp_modulo)
 	bool left_neg = FALSE;
 	bool right_neg = FALSE;
 	bool use_double = FALSE;
-	bool dright_valid = FALSE;
 	NV dright = 0.0;
 	NV dleft  = 0.0;
-	SV * const svr = TOPs;
-	SV * const svl = TOPm1s;
+	SV * const svr = POPs;
+	SV * const svl = TOPs;
         if (SvIV_please_nomg(svr)) {
-            right_neg = !SvUOK(svr);
-            if (!right_neg) {
+            if (SvUOK(svr)) {
                 right = SvUVX(svr);
             } else {
 		const IV biv = SvIVX(svr);
                 if (biv >= 0) {
-                    right = biv;
-                    right_neg = FALSE; /* effectively it's a UV now */
+                    right = biv; /* effectively it's a UV now */
                 } else {
+                    right_neg = TRUE;
 		    right = (UV) (0 - (UV) biv);
                 }
             }
@@ -1570,7 +1568,6 @@ PP(pp_modulo)
 		dright = -dright;
             if (dright < UV_MAX_P1) {
                 right = U_V(dright);
-                dright_valid = TRUE; /* In case we need to use double below.  */
             } else {
                 use_double = TRUE;
             }
@@ -1580,15 +1577,14 @@ PP(pp_modulo)
            a UV.  In range NV has been rounded down to nearest UV and
            use_double false.  */
 	if (!use_double && SvIV_please_nomg(svl)) {
-                left_neg = !SvUOK(svl);
-                if (!left_neg) {
+                if (SvUOK(svl)) {
                     left = SvUVX(svl);
                 } else {
 		    const IV aiv = SvIVX(svl);
                     if (aiv >= 0) {
-                        left = aiv;
-                        left_neg = FALSE; /* effectively it's a UV now */
+                        left = aiv; /* effectively it's a UV now */
                     } else {
+                        left_neg = TRUE;
                         left = (UV) (0 - (UV) aiv);
                     }
                 }
@@ -1615,14 +1611,11 @@ PP(pp_modulo)
                        inside the #if 1. */
                     dleft = Perl_floor(dleft + 0.5);
                     use_double = TRUE;
-                    if (dright_valid)
-                        dright = Perl_floor(dright + 0.5);
-                    else
-                        dright = right;
+                    dright = Perl_floor(dright + 0.5);
                 }
             }
         }
-	sp -= 2;
+
 	if (use_double) {
 	    NV dans;
 
@@ -1656,7 +1649,7 @@ PP(pp_modulo)
 	    else
 		sv_setuv(TARG, ans);
 	}
-	PUSHTARG;
+	SETTARG;
 	RETURN;
     }
 }
