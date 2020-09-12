@@ -805,7 +805,7 @@ sub slurp_compressed_file {
     ### gzip
     } else {
         require IO::Zlib;
-        $fh = new IO::Zlib;
+        $fh = IO::Zlib->new();
         $fh->open( $file, READ_ONLY->(1) )
             or warn( "Error opening '$file' with IO::Zlib" ), return
     }
