@@ -5346,6 +5346,16 @@ typedef enum {
 #define HINT_SORT_STABLE	0x00000100 /* sort styles */
 #define HINT_SORT_UNSTABLE	0x00000200
 
+#define HINT_ALL_STRICT       HINT_STRICT_REFS \
+                            | HINT_STRICT_SUBS \
+                            | HINT_STRICT_VARS
+
+#ifdef USE_STRICT_BY_DEFAULT
+#define HINTS_DEFAULT            HINT_ALL_STRICT
+#else
+#define HINTS_DEFAULT            0
+#endif
+
 /* flags for PL_sawampersand */
 
 #define SAWAMPERSAND_LEFT       1   /* saw $` */
