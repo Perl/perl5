@@ -90,6 +90,15 @@ my %skip;
     'cpan/Math-BigInt/t/Math/BigInt/Scalar.pm',     # just a test module
     'cpan/Math-BigInt/t/Math/BigInt/Subclass.pm',   # just a test module
     'cpan/Math-BigRat/t/Math/BigRat/Test.pm',       # just a test module
+    'cpan/Module-Load-Conditional/t/test_lib/a/X.pm',          # just a test module
+    'cpan/Module-Load-Conditional/t/test_lib/b/X.pm',          # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/Commented.pm',     # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/HereDoc.pm',       # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/InPod.pm',         # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/LoadIt.pm',        # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/MustBe/Loaded.pm', # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/NotMain.pm',       # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/NotX.pm',          # just a test module
     'cpan/podlators/t/lib/Test/Podlators.pm',       # just a test module
     'cpan/podlators/t/lib/Test/RRA.pm',             # just a test module
     'cpan/podlators/t/lib/Test/RRA/Config.pm',      # just a test module
