@@ -3568,6 +3568,12 @@
  */
 /*#define DEFAULT_INC_EXCLUDES_DOT	/ **/
 
+/* USE_STRICT_BY_DEFAULT
+ *	This symbol, if defined, enables additional defaults.
+ *	At this time it only enables implicit strict by default.
+ */
+/*#define USE_STRICT_BY_DEFAULT	/ * use strict by default */
+
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
@@ -5263,6 +5269,6 @@
 #endif
 
 /* Generated from:
- * 58be2e8a7742878937c4392bd15fffc7d0b555bedc9d028c791ea9b525806d52 config_h.SH
- * 0328fd317c240be96131cf63f152ee17113e74b68e3dc0000e2876b9a0023713 uconfig.sh
+ * 01e063baa480bd3d905cba5dd04b87cd95a1053e64a1cc35884563a66548975e config_h.SH
+ * 4c3159a6a9875b7811c2a920d7936d5199193afdb163473c313b9531ba2c0648 uconfig.sh
  * ex: set ro: */

@@ -6988,6 +6988,7 @@ $ WC "use64bitall='" + use64bitall + "'"
 $ WC "use64bitint='" + use64bitint + "'"
 $ WC "usecasesensitive='" + be_case_sensitive + "'"    ! VMS-specific
 $ WC "usedebugging_perl='"+use_debugging_perl+"'"
+$ WC "usedefaultstrict='undef'"
 $ WC "usedefaulttypes='" + usedefaulttypes + "'"    ! VMS-specific
 $ WC "usecbacktrace='undef'"
 $ WC "usecrosscompile='undef'"

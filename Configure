@@ -234,6 +234,7 @@ useopcode=''
 useposix=''
 extras=''
 d_bsd=''
+usedefaultstrict=''
 d_eunice=''
 d_xenix=''
 eunicefix=''
@@ -20312,6 +20313,34 @@ EOCP
 	;;
 esac
 
+: Ask about strict by default.
+case "$usedefaultstrict" in
+    $define|true|[Yy]*)
+	dflt="y"
+	;;
+    *)
+	dflt="n"
+	;;
+    esac
+
+cat <<EOM
+
+EXPERIMENTAL: Perl can now be built with strict on by default when not
+invoked with -e or -E. This is a diagnostic tool for development.
+
+Unless you are familiar with this feature, you should probably answer 'no'.
+
+EOM
+
+rp='Would you like to build perl with strict enabled by default?'
+. ./myread
+case "$ans" in
+y|Y) val="$define" ;;
+*)   val="$undef"  ;;
+esac
+set usedefaultstrict
+eval $setvar
+
 : Include . in @INC
 $cat <<EOM
 
@@ -24168,6 +24197,7 @@ d_eofnblk='$d_eofnblk'
 d_erf='$d_erf'
 d_erfc='$d_erfc'
 d_eunice='$d_eunice'
+usedefaultstrict='$usedefaultstrict'
 d_exp2='$d_exp2'
 d_expm1='$d_expm1'
 d_faststdio='$d_faststdio'

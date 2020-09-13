@@ -5547,6 +5547,11 @@ usecrosscompile (Cross.U):
 	This variable conditionally defines the USE_CROSS_COMPILE symbol,
 	and indicates that Perl has been cross-compiled.
 
+usedefaultstrict (usedefaultstrict.U):
+	This setting provides a mechanism for perl developers to enable
+	strict by default. These defaults do not apply when perl is run
+    via -e or -E.
+
 usedevel (Devel.U):
 	This variable indicates that Perl was configured with development
 	features enabled.  This should not be done for production builds.
