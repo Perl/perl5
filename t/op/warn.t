@@ -181,9 +181,8 @@ untie $@;
 }
 my $t;
 {
-  no strict 'subs';
-  tie $t, Tie::StdScalar;
-  $t = bless [], o;
+  tie $t, 'Tie::StdScalar';
+  $t = bless [], 'o';
   no strict 'refs';
   local *{ref(tied $t) . "::STORE"} = sub {};
   undef $t;
