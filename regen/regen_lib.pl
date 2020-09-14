@@ -2,7 +2,7 @@
 use strict;
 our (@Changed, $TAP);
 use File::Compare;
-use Symbol;
+use Symbol ();
 use Text::Wrap();
 
 # Common functions needed by the regen scripts
