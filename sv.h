@@ -1542,9 +1542,23 @@ attention to precisely which outputs are influenced by which inputs.
 
 /*
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
-Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
-only a string (C<SvPOK_only>), by hook or by crook.  You need force if you are
-going to update the C<SvPVX> directly.  Processes get magic.
+=for apidoc_item ||SvPV_force_nolen|SV* sv
+=for apidoc_item ||SvPVx_force|SV* sv|STRLEN len
+=for apidoc_item ||SvPV_force_nomg|SV* sv|STRLEN len
+=for apidoc_item ||SvPV_force_nomg_nolen|SV * sv
+=for apidoc_item ||SvPV_force_mutable|SV * sv|STRLEN len
+=for apidoc_item ||SvPV_force_flags|SV * sv|STRLEN len|U32 flags
+=for apidoc_item ||SvPV_force_flags_nolen|SV * sv|U32 flags
+=for apidoc_item ||SvPV_force_flags_mutable|SV * sv|STRLEN len|U32 flags
+=for apidoc_item ||SvPVbyte_force
+=for apidoc_item ||SvPVbytex_force
+=for apidoc_item ||SvPVutf8_force
+=for apidoc_item ||SvPVutf8x_force
+
+These are like C<L</SvPV>> but will force the SV into containing a string
+(C<L</SvPOK>>), and only a string (C<L</SvPOK_only>>), by hook or by crook.
+You need to use one of these C<force> routines if you are going to update the
+C<L</SvPVX>> directly.
 
 Note that coercing an arbitrary scalar into a plain PV will potentially
 strip useful data from it.  For example if the SV was C<SvROK>, then the
@@ -1552,8 +1566,34 @@ referent will have its reference count decremented, and the SV itself may
 be converted to an C<SvPOK> scalar with a string buffer containing a value
 such as C<"ARRAY(0x1234)">.
 
-=for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
-Like C<SvPV_force>, but doesn't process get magic.
+The differences between the forms are:
+
+The forms with C<flags> in their names allow you to use the C<flags> parameter
+to specify to perform 'get' magic (by setting the C<SV_GMAGIC> flag) or to skip
+'get' magic (by clearing it).  The other forms do perform 'get' magic, except
+for the ones with C<nomg> in their names, which skip 'get' magic.
+
+The forms with C<nolen> in their names do not return the length of the string.
+They should be used only when it is known that the PV is a C string, terminated by
+a NUL byte, and without intermediate NUL characters; or when you don't care
+about its length.
+
+The forms with C<mutable> in their names are effectively the same as those without,
+but the name emphasizes that the string is modifiable by the caller, which it is
+in all the forms.
+
+C<SvPVutf8_force> is like C<SvPV_force>, but converts C<sv> to UTF-8 first if
+not already UTF-8.
+
+C<SvPVutf8x_force> is like C<SvPVutf8_force>, but guarantees to evaluate C<sv>
+only once; use the more efficient C<SvPVutf8_force> otherwise.
+
+C<SvPVbyte_force> is like C<SvPV_force>, but converts C<sv> to byte
+representation first if currently encoded as UTF-8.  If the SV cannot be
+downgraded from UTF-8, this croaks.
+
+C<SvPVbytex_force> is like C<SvPVbyte_force>, but guarantees to evaluate C<sv>
+only once; use the more efficient C<SvPVbyte_force> otherwise.
 
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
 Returns a pointer to the string in the SV, or a stringified form of
@@ -1698,20 +1738,11 @@ Like C<SvPVbyte_or_null>, but does not process get magic.
 Like C<SvPV_nolen>, but converts C<sv> to byte representation first if
 necessary.  If the SV cannot be downgraded from UTF-8, this croaks.
 
-=for apidoc Am|char*|SvPVutf8x_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
-Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVutf8_force>
-otherwise.
 
 =for apidoc Am|char*|SvPVutf8x|SV* sv|STRLEN len
 Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVutf8>
 otherwise.
-
-=for apidoc Am|char*|SvPVbytex_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts C<sv> to byte representation first if necessary.
-Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVbyte_force>
-otherwise.  If the SV cannot be downgraded from UTF-8, this croaks.
 
 =for apidoc Am|char*|SvPVbytex|SV* sv|STRLEN len
 Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
