@@ -669,18 +669,56 @@ sub mkCheckRex {
 	      . '\\)'!msgxe;
     # widened for -terse mode
     $str =~ s/(?:next|db)state/(?:next|db)state/msg;
+
     if (!$using_open && $tc->{strip_open_hints}) {
-      $str =~ s[(			# capture
-		 \(\?:next\|db\)state	# the regexp matching next/db state
-		 .*			# all sorts of things follow it
-		 v			# The opening v
-		)
-		(?:(:>,<,%,\\\{)		# hints when open.pm is in force
-		   |(:>,<,%))		# (two variations)
-		(\ ->(?:-|[0-9a-z]+))?
-		$
-	       ]
-        [$1 . ($2 && ':\{') . $4]xegm;	# change to the hints without open.pm
+      # remove the '<,>' from the regexp and convert to a list []
+
+      # we are going to capture a little more
+      my $all_hints = q|[,><%{*$&\\\]+|;
+
+      my $qr = qr[(           # capture
+         \(\?:next\|db\)state   # the regexp matching next/db state
+         .*         # all sorts of things follow it
+         v:         # The opening v
+        )
+        ($all_hints)
+      ]xm;
+
+      if ( $str =~ $qr ) {
+        my $expected_hints = $2;
+        $expected_hints =~ s{\\}{}g; # stip the \ which is added later
+
+        # maybe split on comma: ','
+        my $used_chars = { map { $_ => 1 } split( //, $expected_hints ) };
+        $used_chars->{'\,'} = 1;
+
+        # strip open hints
+        delete $used_chars->{'>'};
+        delete $used_chars->{'<'};
+        delete $used_chars->{'%'};
+
+        delete $used_chars->{'\\'}; # added later
+        my $extra_chars = '\\';
+
+        {
+            delete $used_chars->{'{'};
+            $extra_chars .= '\{';
+        }
+
+        my $chars = join '', sort keys %$used_chars;
+
+        my $hints_without_open = '(:[' . $chars . $extra_chars . ']+)?';
+
+        $str =~ s[(           # capture
+             \(\?:next\|db\)state   # the regexp matching next/db state
+             .*                     # all sorts of things follow it
+             v                      # The opening v
+            )
+            :
+            ($all_hints)
+        ]
+        [$1 . $hints_without_open ]xegm;   # change to the hints without open.pm
+      }
     }
 
 

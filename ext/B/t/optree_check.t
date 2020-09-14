@@ -148,11 +148,11 @@ checkOptree ( name	=> 'fixup nextstate (in reftext)',
 	      code	=> sub {my $a},
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate( NOTE THAT THIS CAN BE ANYTHING ) v:*,&,$
+# 1  <;> nextstate( NOTE THAT THIS CAN BE ANYTHING ) v:>,<,%,*,&,$
 # 2  <0> padsv[$a:54,55] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 54 optree_concise.t:84) v:*,&,$
+# 1  <;> nextstate(main 54 optree_concise.t:84) v:>,<,%,*,&,$
 # 2  <0> padsv[$a:54,55] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
@@ -163,11 +163,11 @@ checkOptree ( name	=> 'fixup opcode args',
 	      code	=> sub {my $a},
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 56 optree_concise.t:96) v:*,&,$
+# 1  <;> nextstate(main 56 optree_concise.t:96) v:>,<,%,*,&,$
 # 2  <0> padsv[$a:56,57] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 56 optree_concise.t:96) v:*,&,$
+# 1  <;> nextstate(main 56 optree_concise.t:96) v:>,<,%,*,&,$
 # 2  <0> padsv[$a:56,57] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
@@ -183,7 +183,7 @@ checkOptree ( name	=> 'canonical example w -basic',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7
-# 1        <;> nextstate(main 380 optree_selftest.t:139) v:*,&,{,$ ->2
+# 1        <;> nextstate(main 380 optree_selftest.t:139) v:>,<,%,*,&,{,$ ->2
 # 6        <2> sassign sKS/2 ->7
 # 4           <2> add[t3] sK/2 ->5
 # -              <1> ex-rv2sv sK/STRICT,1 ->3
@@ -194,7 +194,7 @@ checkOptree ( name	=> 'canonical example w -basic',
 EOT_EOT
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7
-# 1        <;> nextstate(main 60 optree_concise.t:122) v:*,&,{,$ ->2
+# 1        <;> nextstate(main 60 optree_concise.t:122) v:>,<,%,*,&,{,$ ->2
 # 6        <2> sassign sKS/2 ->7
 # 4           <2> add[t1] sK/2 ->5
 # -              <1> ex-rv2sv sK/STRICT,1 ->3

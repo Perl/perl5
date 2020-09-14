@@ -144,7 +144,7 @@ checkOptree ( name	=> 'BEGIN',
 # BEGIN 8:
 # 1z <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->1z
-# 1w       <;> nextstate(main 3 -e:1) v:{ ->1x
+# 1w       <;> nextstate(main 3 -e:1) v:>,<,%,{ ->1x
 # 1y       <1> postinc[t3] sK/1 ->1z
 # -           <1> ex-rv2sv sKRM/1 ->1y
 # 1x             <#> gvsv[*beg] s ->1y
@@ -246,7 +246,7 @@ EOT_EOT
 # BEGIN 8:
 # 1z <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->1z
-# 1w       <;> nextstate(main 3 -e:1) v:{ ->1x
+# 1w       <;> nextstate(main 3 -e:1) v:>,<,%,{ ->1x
 # 1y       <1> postinc[t2] sK/1 ->1z
 # -           <1> ex-rv2sv sKRM/1 ->1y
 # 1x             <$> gvsv(*beg) s ->1y
@@ -420,27 +420,27 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # 1u <1> entersub[t1] KRS*/TARG,STRICT
 # 1v <1> leavesub[1 ref] K/REFC,1
 # BEGIN 8:
-# 1w <;> nextstate(main 3 -e:1) v:{
+# 1w <;> nextstate(main 3 -e:1) v:>,<,%,{
 # 1x <#> gvsv[*beg] s
 # 1y <1> postinc[t3] sK/1
 # 1z <1> leavesub[1 ref] K/REFC,1
 # END 1:
-# 20 <;> nextstate(main 9 -e:1) v:{
+# 20 <;> nextstate(main 9 -e:1) v:>,<,%,{
 # 21 <#> gvsv[*end] s
 # 22 <1> postinc[t3] sK/1
 # 23 <1> leavesub[1 ref] K/REFC,1
 # INIT 1:
-# 24 <;> nextstate(main 7 -e:1) v:{
+# 24 <;> nextstate(main 7 -e:1) v:>,<,%,{
 # 25 <#> gvsv[*init] s
 # 26 <1> postinc[t3] sK/1
 # 27 <1> leavesub[1 ref] K/REFC,1
 # CHECK 1:
-# 28 <;> nextstate(main 5 -e:1) v:{
+# 28 <;> nextstate(main 5 -e:1) v:>,<,%,{
 # 29 <#> gvsv[*chk] s
 # 2a <1> postinc[t3] sK/1
 # 2b <1> leavesub[1 ref] K/REFC,1
 # UNITCHECK 1:
-# 2c <;> nextstate(main 11 -e:1) v:{
+# 2c <;> nextstate(main 11 -e:1) v:>,<,%,{
 # 2d <#> gvsv[*uc] s
 # 2e <1> postinc[t3] sK/1
 # 2f <1> leavesub[1 ref] K/REFC,1
@@ -520,27 +520,27 @@ EOT_EOT
 # 1u <1> entersub[t1] KRS*/TARG,STRICT
 # 1v <1> leavesub[1 ref] K/REFC,1
 # BEGIN 8:
-# 1w <;> nextstate(main 3 -e:1) v:{
+# 1w <;> nextstate(main 3 -e:1) v:>,<,%,{
 # 1x <$> gvsv(*beg) s
 # 1y <1> postinc[t2] sK/1
 # 1z <1> leavesub[1 ref] K/REFC,1
 # END 1:
-# 20 <;> nextstate(main 9 -e:1) v:{
+# 20 <;> nextstate(main 9 -e:1) v:>,<,%,{
 # 21 <$> gvsv(*end) s
 # 22 <1> postinc[t2] sK/1
 # 23 <1> leavesub[1 ref] K/REFC,1
 # INIT 1:
-# 24 <;> nextstate(main 7 -e:1) v:{
+# 24 <;> nextstate(main 7 -e:1) v:>,<,%,{
 # 25 <$> gvsv(*init) s
 # 26 <1> postinc[t2] sK/1
 # 27 <1> leavesub[1 ref] K/REFC,1
 # CHECK 1:
-# 28 <;> nextstate(main 5 -e:1) v:{
+# 28 <;> nextstate(main 5 -e:1) v:>,<,%,{
 # 29 <$> gvsv(*chk) s
 # 2a <1> postinc[t2] sK/1
 # 2b <1> leavesub[1 ref] K/REFC,1
 # UNITCHECK 1:
-# 2c <;> nextstate(main 11 -e:1) v:{
+# 2c <;> nextstate(main 11 -e:1) v:>,<,%,{
 # 2d <$> gvsv(*uc) s
 # 2e <1> postinc[t2] sK/1
 # 2f <1> leavesub[1 ref] K/REFC,1

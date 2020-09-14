@@ -209,7 +209,7 @@ sub printem {
 my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
-# 1        <;> nextstate(main 635 optree_constants.t:163) v:*,&,$ ->2
+# 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,%,*,&,$ ->2
 # 8        <@> prtf sK ->9
 # 2           <0> pushmark sM ->3
 # 3           <$> const[PV "myint %d mystr %s myfl %f pi %f\n"] sM/FOLD ->4
@@ -220,7 +220,7 @@ my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 EOT_EOT
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
-# 1        <;> nextstate(main 635 optree_constants.t:163) v:*,&,$ ->2
+# 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,%,*,&,$ ->2
 # 8        <@> prtf sK ->9
 # 2           <0> pushmark sM ->3
 # 3           <$> const(PV "myint %d mystr %s myfl %f pi %f\n") sM/FOLD ->4
@@ -310,62 +310,62 @@ checkOptree ( name	=> 'lc*,uc*,gt,lt,ge,le,cmp',
 	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # r  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->r
-# 1        <;> nextstate(main 916 optree_constants.t:307) v:*,&,{,$ ->2
+# 1        <;> nextstate(main 916 optree_constants.t:307) v:>,<,%,*,&,{,$ ->2
 # 4        <2> sassign vKS/2 ->5
 # 2           <$> const[PV "FOO.Bar.low.lOW"] s/FOLD ->3
 # -           <1> ex-rv2sv sKRM*/STRICT,1 ->4
 # 3              <#> gvsv[*a] s ->4
-# 5        <;> nextstate(main 916 optree_constants.t:308) v:*,&,{,$ ->6
+# 5        <;> nextstate(main 916 optree_constants.t:308) v:>,<,%,*,&,{,$ ->6
 # 8        <@> print vK/FOLD ->9
 # 6           <0> pushmark s ->7
 # 7           <$> const[PV "a-lt-b"] s ->8
-# 9        <;> nextstate(main 916 optree_constants.t:309) v:*,&,{,$ ->a
+# 9        <;> nextstate(main 916 optree_constants.t:309) v:>,<,%,*,&,{,$ ->a
 # c        <@> print vK/FOLD ->d
 # a           <0> pushmark s ->b
 # b           <$> const[PV "b-gt-a"] s ->c
-# d        <;> nextstate(main 916 optree_constants.t:310) v:*,&,{,$ ->e
+# d        <;> nextstate(main 916 optree_constants.t:310) v:>,<,%,*,&,{,$ ->e
 # g        <@> print vK/FOLD ->h
 # e           <0> pushmark s ->f
 # f           <$> const[PV "a-le-b"] s ->g
-# h        <;> nextstate(main 916 optree_constants.t:311) v:*,&,{,$ ->i
+# h        <;> nextstate(main 916 optree_constants.t:311) v:>,<,%,*,&,{,$ ->i
 # k        <@> print vK/FOLD ->l
 # i           <0> pushmark s ->j
 # j           <$> const[PV "b-ge-a"] s ->k
-# l        <;> nextstate(main 916 optree_constants.t:312) v:*,&,{,$ ->m
+# l        <;> nextstate(main 916 optree_constants.t:312) v:>,<,%,*,&,{,$ ->m
 # o        <@> print vK/FOLD ->p
 # m           <0> pushmark s ->n
 # n           <$> const[PV "b-cmp-a"] s ->o
-# p        <;> nextstate(main 916 optree_constants.t:313) v:*,&,{,$ ->q
+# p        <;> nextstate(main 916 optree_constants.t:313) v:>,<,%,*,&,{,$ ->q
 # q        <$> const[SPECIAL sv_no] s/SHORT,FOLD ->r
 EOT_EOT
 # r  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->r
-# 1        <;> nextstate(main 916 optree_constants.t:307) v:*,&,{,$ ->2
+# 1        <;> nextstate(main 916 optree_constants.t:307) v:>,<,%,*,&,{,$ ->2
 # 4        <2> sassign vKS/2 ->5
 # 2           <$> const(PV "FOO.Bar.low.lOW") s/FOLD ->3
 # -           <1> ex-rv2sv sKRM*/STRICT,1 ->4
 # 3              <$> gvsv(*a) s ->4
-# 5        <;> nextstate(main 916 optree_constants.t:308) v:*,&,{,$ ->6
+# 5        <;> nextstate(main 916 optree_constants.t:308) v:>,<,%,*,&,{,$ ->6
 # 8        <@> print vK/FOLD ->9
 # 6           <0> pushmark s ->7
 # 7           <$> const(PV "a-lt-b") s ->8
-# 9        <;> nextstate(main 916 optree_constants.t:309) v:*,&,{,$ ->a
+# 9        <;> nextstate(main 916 optree_constants.t:309) v:>,<,%,*,&,{,$ ->a
 # c        <@> print vK/FOLD ->d
 # a           <0> pushmark s ->b
 # b           <$> const(PV "b-gt-a") s ->c
-# d        <;> nextstate(main 916 optree_constants.t:310) v:*,&,{,$ ->e
+# d        <;> nextstate(main 916 optree_constants.t:310) v:>,<,%,*,&,{,$ ->e
 # g        <@> print vK/FOLD ->h
 # e           <0> pushmark s ->f
 # f           <$> const(PV "a-le-b") s ->g
-# h        <;> nextstate(main 916 optree_constants.t:311) v:*,&,{,$ ->i
+# h        <;> nextstate(main 916 optree_constants.t:311) v:>,<,%,*,&,{,$ ->i
 # k        <@> print vK/FOLD ->l
 # i           <0> pushmark s ->j
 # j           <$> const(PV "b-ge-a") s ->k
-# l        <;> nextstate(main 916 optree_constants.t:312) v:*,&,{,$ ->m
+# l        <;> nextstate(main 916 optree_constants.t:312) v:>,<,%,*,&,{,$ ->m
 # o        <@> print vK/FOLD ->p
 # m           <0> pushmark s ->n
 # n           <$> const(PV "b-cmp-a") s ->o
-# p        <;> nextstate(main 916 optree_constants.t:313) v:*,&,{,$ ->q
+# p        <;> nextstate(main 916 optree_constants.t:313) v:>,<,%,*,&,{,$ ->q
 # q        <$> const(SPECIAL sv_no) s/SHORT,FOLD ->r
 EONT_EONT
 
