@@ -1322,6 +1322,10 @@ sub run_multiple_progs {
 		elsif ($option eq 'fatal') { # perl should fail
 		    $fatal = 1;
 		}
+                elsif ($option eq 'nonfatal') {
+                    # used to turn off default fatal
+                    $fatal = 0;
+                }
 		else {
 		    die "$0: Unknown OPTION '$option'\n";
 		}
