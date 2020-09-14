@@ -1101,6 +1101,7 @@ sub fresh_perl_like {
 #   regex - the expected output is a regular expression
 #   random - all lines match but in any order
 #   fatal - the code will fail fatally (croak, die)
+#   nonfatal - the code is not expected to fail fatally
 #
 # If the actual output contains a line "SKIPPED" the test will be
 # skipped.
@@ -1305,7 +1306,7 @@ sub run_multiple_progs {
 	my $option_regex = 0;
 	my $option_random = 0;
 	my $fatal = $FATAL;
-	if ($expected =~ s/^OPTIONS? (.+)\n//) {
+	if ($expected =~ s/^OPTIONS? (.+)(?:\n|\Z)//) {
 	    foreach my $option (split(' ', $1)) {
 		if ($option eq 'regex') { # allow regular expressions
 		    $option_regex = 1;
