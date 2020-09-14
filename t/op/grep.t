@@ -183,7 +183,6 @@ my $test = 0;
     my @list = 0..9;
 
     {
-        no strict 'subs';
         undef $gimme; gimme for @list;      cmp_ok($gimme, 'eq', 'void',   'gimme a V!');
         undef $gimme; grep { gimme } @list; cmp_ok($gimme, 'eq', 'scalar', 'gimme an S!');
         undef $gimme; map { gimme } @list;  cmp_ok($gimme, 'eq', 'list',   'gimme an L!');
