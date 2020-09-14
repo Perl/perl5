@@ -113,7 +113,7 @@ not_hash($@);
 # quick check with tied array & tied hash
 my %fake;
 require Tie::Hash;
-{ no strict 'subs'; tie %fake, Tie::StdHash; }
+tie %fake, 'Tie::StdHash';
 %fake = %$sch;
 $a->[0] = \%fake;
 
