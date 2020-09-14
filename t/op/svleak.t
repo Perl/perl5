@@ -508,8 +508,6 @@ leak(5, 0, sub { scalar &const_av_xsub_leaked }, "const_av_sub in scalar context
 # check that OP_MULTIDEREF doesn't leak when compiled and then freed
 
 eleak(2, 0, <<'EOF', 'OP_MULTIDEREF');
-no strict;
-no warnings;
 my ($x, @a, %h, $r, $k, $i);
 $x = $a[0]{foo}{$k}{$i};
 $x = $h[0]{foo}{$k}{$i};
