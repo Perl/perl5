@@ -40,14 +40,14 @@ from it, and are very unlikely to change
 =for apidoc Am|void *|FILE_ptr|FILE * f
 =for apidoc Am|Size_t|FILE_cnt|FILE * f
 =for apidoc Am|void *|FILE_base|FILE * f
-=for apidoc Am|Size_t|FILE_bufsiz
+=for apidoc Am|Size_t|FILE_bufsiz|FILE *f
 
 =for apidoc_section String Handling
-=for apidoc Am|token|CAT2|token x|token y
-=for apidoc Am|string|STRINGIFY|token x
+=for apidoc Amu|token|CAT2|token x|token y
+=for apidoc Amu|string|STRINGIFY|token x
 
 =for apidoc_section Numeric Functions
-=for apidoc Am|double|Drand01|double x
+=for apidoc Am|double|Drand01
 =for apidoc Am|void|seedDrand01|Rand_seed_t x
 =for apidoc Am|char *|Gconvert|double x|Size_t n|bool t|char * b
 
