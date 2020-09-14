@@ -376,8 +376,7 @@ package t {
 }
 leak(2, 0, sub {
     my $h = {};
-    no strict 'subs';
-    tie %$h, t;
+    tie %$h, 't';
     each %$h;
     undef $h;
 }, 'tied hash iteration does not leak');
