@@ -1539,7 +1539,6 @@ SKIP: {
     SKIP: {
         skip "shm*() not available", 1 unless $Config{d_shm};
 
-        no strict 'subs';
         my $sent = "foobar";
         my $rcvd;
         my $size = 2000;
@@ -1576,7 +1575,6 @@ SKIP: {
     SKIP: {
         skip "msg*() not available", 1 unless $Config{d_msg};
 
-	no strict 'subs';
         my $id;
         eval {
             local $SIG{SYS} = sub { die "SIGSYS caught\n" };
