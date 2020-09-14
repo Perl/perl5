@@ -263,7 +263,7 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 
 # -l and fatal warnings
 stat "test.pl";
-{ no strict 'subs'; eval { use warnings FATAL => io; -l cradd }; }
+eval { use warnings FATAL => 'io'; -l 'cradd' };
 isnt(stat _, 1,
      'fatal warnings do not prevent -l HANDLE from setting stat status');
 
@@ -332,10 +332,10 @@ SKIP: {
 
     # Fatal warnings should not affect the setting of errno.
     $! = 7;
-    -T cradd;
+    -T 'cradd';
     my $errno = $!;
     $! = 7;
-    { no strict 'subs'; eval { use warnings FATAL => unopened; -T cradd }; }
+    eval { use warnings FATAL => 'unopened'; -T 'cradd' };
     my $errno2 = $!;
     is $errno2, $errno,
 	'fatal warnings do not affect errno after -T BADHADNLE';
@@ -361,7 +361,7 @@ SKIP: {
     my $failed_stat1 = stat _;
 
     stat "test.pl";
-    { no strict 'subs'; eval { use warnings FATAL => unopened; -r *phlon }; }
+    eval { use warnings FATAL => 'unopened'; -r *phlon };
     my $failed_stat2 = stat _;
 
     is $failed_stat2, $failed_stat1,
@@ -372,7 +372,7 @@ SKIP: {
     $failed_stat1 = stat _;
 
     stat "test.pl";
-    { no strict 'subs'; eval { use warnings FATAL => unopened; -r cength }; }
+    eval { use warnings FATAL => 'unopened'; -r cength };
     $failed_stat2 = stat _;
     
     is $failed_stat2, $failed_stat1,
