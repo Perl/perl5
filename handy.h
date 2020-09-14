@@ -1326,7 +1326,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 =for apidoc AmnU|void|WIDEST_UTYPE
 
 Yields the widest unsigned integer type on the platform, currently either
-C<U32> or C<64>.  This can be used in declarations such as
+C<U32> or C<U64>.  This can be used in declarations such as
 
  WIDEST_UTYPE my_uv;
 
