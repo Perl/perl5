@@ -97,11 +97,10 @@ sub {
 }->($h{k}, $h{l}, $h{m}, $h{n});
 
 {
-    no strict 'subs';
     $x = bless [], chr 256;
     pos $x=1;
     no warnings 'reserved';
-    bless $x, a;
+    bless $x, 'a';
     is pos($x), 1, 'pos is not affected by reference stringification changing';
 }
 
@@ -117,10 +116,9 @@ sub {
 }
 $x = bless [], chr 256;
 {
-    no strict 'subs';
     no warnings 'reserved';
     $x =~ /.(?{
-         bless $x, a;
+         bless $x, 'a';
          is pos($x), 1, 'pos unaffected by ref str changing (in re-eval)';
     })/;
 }
