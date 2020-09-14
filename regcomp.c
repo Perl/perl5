@@ -242,8 +242,7 @@ struct RExC_state_t {
     U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
-    I32		in_lookbehind;
-    I32		in_lookahead;
+    I32		in_lookaround;
     I32		contains_locale;
     I32		override_recoding;
     I32         recode_x_to_native;
@@ -330,8 +329,7 @@ struct RExC_state_t {
 #define RExC_study_chunk_recursed        (pRExC_state->study_chunk_recursed)
 #define RExC_study_chunk_recursed_bytes  \
                                    (pRExC_state->study_chunk_recursed_bytes)
-#define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
-#define RExC_in_lookahead	(pRExC_state->in_lookahead)
+#define RExC_in_lookaround	(pRExC_state->in_lookaround)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
 #define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
 
@@ -7772,8 +7770,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_seen = 0;
     RExC_maxlen = 0;
-    RExC_in_lookbehind = 0;
-    RExC_in_lookahead = 0;
+    RExC_in_lookaround = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_recode_x_to_native = 0;
     RExC_in_multi_char_class = 0;
@@ -11142,6 +11139,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 after_freeze = 0;
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
+    I32 was_in_lookaround = RExC_in_lookaround;
 
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
@@ -11162,13 +11160,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     }
 
     *flagp = 0;				/* Initialize. */
-
-    if (RExC_in_lookbehind) {
-	RExC_in_lookbehind++;
-    }
-    if (RExC_in_lookahead) {
-        RExC_in_lookahead++;
-    }
 
     /* Having this true makes it feasible to have a lot fewer tests for the
      * parse pointer being in scope.  For example, we can write
@@ -11423,11 +11414,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
             lookbehind_alpha_assertions:
                 RExC_seen |= REG_LOOKBEHIND_SEEN;
-                RExC_in_lookbehind++;
                 /*FALLTHROUGH*/
 
             alpha_assertions:
 
+                RExC_in_lookaround++;
                 RExC_seen_zerolen++;
 
                 if (! start_arg) {
@@ -11630,7 +11621,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 		}
 
                 RExC_seen |= REG_LOOKBEHIND_SEEN;
-		RExC_in_lookbehind++;
+		RExC_in_lookaround++;
 		RExC_parse++;
                 if (RExC_parse >= RExC_end) {
                     vFAIL("Sequence (?... not terminated");
@@ -11639,7 +11630,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 break;
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;
-                RExC_in_lookahead++;
+                RExC_in_lookaround++;
                 break;
 	    case '!':           /* (?!...) */
 		RExC_seen_zerolen++;
@@ -11651,6 +11642,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	            nextchar(pRExC_state);
 	            return ret;
 	        }
+                RExC_in_lookaround++;
 	        break;
 	    case '|':           /* (?|...) */
 	        /* branch reset, behave like a (?:...) except that
@@ -12471,14 +12463,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	NOT_REACHED; /* NOTREACHED */
     }
 
-    if (RExC_in_lookbehind) {
-	RExC_in_lookbehind--;
-    }
-    if (RExC_in_lookahead) {
-        RExC_in_lookahead--;
-    }
     if (after_freeze > RExC_npar)
         RExC_npar = after_freeze;
+
+    RExC_in_lookaround = was_in_lookaround;
+    
     return(ret);
 }
 
@@ -13608,7 +13597,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             RExC_seen |= REG_GPOS_SEEN;
 	    goto finish_meta_pat;
 	case 'K':
-            if (!RExC_in_lookbehind && !RExC_in_lookahead) {
+            if (!RExC_in_lookaround) {
                 RExC_seen_zerolen++;
                 ret = reg_node(pRExC_state, KEEPS);
                 /* XXX:dmq : disabling in-place substitution seems to
