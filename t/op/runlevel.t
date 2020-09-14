@@ -37,8 +37,7 @@ sub FETCH {
 }
 package main;
 my $bar = '';
-no strict 'subs';
-tie $bar, TEST;
+tie $bar, 'TEST';
 print "- $bar\n";
 EXPECT
 still in fetch
@@ -59,8 +58,7 @@ sub FETCH {
  
 package main;
 my $bar = '';
-no strict 'subs';
-tie $bar, TEST;
+tie $bar, 'TEST';
 print "- $bar\n";
 print "OK\n";
 EXPECT
@@ -83,8 +81,7 @@ eval('die("test\n")');
 package main;
  
 open FH, ">&STDOUT";
-no strict 'subs';
-tie *FH, TEST;
+tie *FH, 'TEST';
 print FH "OK\n";
 print STDERR "DONE\n";
 EXPECT
@@ -115,8 +112,7 @@ sub str {
  
 package main;
  
-no strict 'subs';
-my $bar = bless {}, TEST;
+my $bar = bless {}, 'TEST';
 print "$bar\n";
 print "OK\n";
 EXPECT
@@ -190,8 +186,7 @@ sub STORE {
  
 package main;
 my $bar = '';
-no strict 'subs';
-tie $bar, TEST;
+tie $bar, 'TEST';
 {
   print "- $bar\n";
 }
@@ -212,8 +207,7 @@ sub FETCH {
  
 package main;
 my $bar = '';
-no strict 'subs';
-tie $bar, TEST;
+tie $bar, 'TEST';
 print "- $bar\n";
 exit;
 bbb:
@@ -243,8 +237,7 @@ sub STORE {
 }
 package main;
 my $bar = '';
-no strict 'subs';
-tie $bar, TEST;
+tie $bar, 'TEST';
 $bar = "x";
 ########
 package TEST;
@@ -256,8 +249,7 @@ sub TIESCALAR {
 package main;
 my $bar = '';
 {
-no strict 'subs';
-tie $bar, TEST;
+tie $bar, 'TEST';
 }
 EXPECT
 Can't "next" outside a loop block at - line 4.
@@ -316,11 +308,10 @@ EXPECT
 foo|fee|fie|foe
 ########
 package TH;
-no strict 'subs';
-sub TIEHASH { bless {}, TH }
+sub TIEHASH { bless {}, 'TH' }
 sub STORE { eval { print "@_[1,2]\n" }; die "bar\n" }
 my %h;
-tie %h, TH;
+tie %h, 'TH';
 eval { $h{A} = 1; print "never\n"; };
 print $@;
 eval { $h{B} = 2; };
