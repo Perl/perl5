@@ -5224,7 +5224,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                      * might result in a minlen of 1 and not of 4,
                      * but this doesn't make us mismatch, just try a bit
                      * harder than we should.
-                     * */
+                     *
+                     * However we must assume this GOSUB is infinite, to
+                     * avoid wrongly applying other optimizations in the
+                     * enclosing scope - see GH 18096, for example.
+                     */
+                    is_inf = is_inf_internal = 1;
                     scan= regnext(scan);
                     continue;
                 }
