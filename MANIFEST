@@ -1148,6 +1148,7 @@ cpan/IO-Compress/t/files/encrypt-standard.zip
 cpan/IO-Compress/t/files/jar.zip
 cpan/IO-Compress/t/files/meta.xml
 cpan/IO-Compress/t/files/test.ods
+cpan/IO-Compress/t/files/testfile1.odt
 cpan/IO-Compress/t/globmapper.t				IO::Compress
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP
 cpan/IO-Socket-IP/t/00use.t				IO::Socket::IP tests
