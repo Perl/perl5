@@ -760,7 +760,7 @@ L</"Virtualize operating system access">.
 Currently the %ENV entries are always byte strings.
 See L</"Virtualize operating system access">.
 
-(See RT ticket #113536 for information on Win32's handling of %ENV,
+(See github issue gh12161 for information on Win32's handling of %ENV,
 which was fixed to work with native ANSI codepage characters in the
 environment, but still doesn't work with other characters outside of
 that codepage present in the environment.)
@@ -943,8 +943,8 @@ This does not:
     $ perl -we 'my $pie = 42'
 
 Logically all lexicals used only once should warn, if the user asks for
-warnings.  An unworked RT ticket (#5087) has been open for almost seven
-years for this discrepancy.
+warnings.  An unworked ticket (gh3073) was open for many years for this
+discrepancy.
 
 =head2 state variable initialization in list context
 
