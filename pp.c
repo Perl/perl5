@@ -1543,7 +1543,6 @@ PP(pp_modulo)
 	UV right = 0;
 	bool left_neg = FALSE;
 	bool right_neg = FALSE;
-	bool use_double = FALSE;
 	NV dright = 0.0;
 	NV dleft  = 0.0;
 	SV * const svr = POPs;
@@ -1563,26 +1562,26 @@ PP(pp_modulo)
         }
         else {
 	    dright = SvNV_nomg(svr);
-	    right_neg = dright < 0;
-	    if (right_neg)
+	    if (dright < 0) {
+                right_neg = TRUE;
 		dright = -dright;
+            }
             if (dright < UV_MAX_P1) {
                 right = U_V(dright);
-            } else {
-                use_double = TRUE;
             }
 	}
 
-        /* At this point use_double is only true if right is out of range for
-           a UV.  In range NV has been rounded down to nearest UV and
-           use_double false.  */
-	if (!use_double && SvIV_please_nomg(svl)) {
+        /* At this point, right is in range for a UV. (A in-range NV has been
+           rounded down to the nearest UV. If right is actually zero, the
+           function will eventually DIE, not return an incorrect result.) */
+	if (right && SvIV_please_nomg(svl)) {
                 if (SvUOK(svl)) {
                     left = SvUVX(svl);
                 } else {
 		    const IV aiv = SvIVX(svl);
                     if (aiv >= 0) {
                         left = aiv; /* effectively it's a UV now */
+
                     } else {
                         left_neg = TRUE;
                         left = (UV) (0 - (UV) aiv);
@@ -1591,17 +1590,20 @@ PP(pp_modulo)
         }
 	else {
 	    dleft = SvNV_nomg(svl);
-	    left_neg = dleft < 0;
-	    if (left_neg)
+	    if (dleft < 0) {
+		left_neg = TRUE;
 		dleft = -dleft;
+            }
 
             /* This should be exactly the 5.6 behaviour - if left and right are
-               both in range for UV then use U_V() rather than floor.  */
-	    if (!use_double) {
+               both in range for UV then use U_V() rather than floor.
+               (If right is zero, the function will shortly DIE.) */
+	    if (right) {
                 if (dleft < UV_MAX_P1) {
-                    /* right was in range, so is dleft, so use UVs not double.
-                     */
+                    /* right was in range, so is dleft, so use UVs not double. */
                     left = U_V(dleft);
+                    /* dright set to zero so it can then be used for branch control */
+                    dright = 0.0;
                 }
                 /* left is out of range for UV, right was in range, so promote
                    right (back) to double.  */
@@ -1610,34 +1612,30 @@ PP(pp_modulo)
                        consistent with the implicit +0 floor in the U_V()
                        inside the #if 1. */
                     dleft = Perl_floor(dleft + 0.5);
-                    use_double = TRUE;
-                    dright = Perl_floor(dright + 0.5);
+                    dright = (dright) ?
+                        Perl_floor(dright + 0.5) :
+                        right;
                 }
             }
         }
 
-	if (use_double) {
+	if (dright) {
 	    NV dans;
 
-	    if (!dright)
-		DIE(aTHX_ "Illegal modulus zero");
-
 	    dans = Perl_fmod(dleft, dright);
-	    if ((left_neg != right_neg) && dans)
+	    if ((left_neg != right_neg) && dans )
 		dans = dright - dans;
 	    if (right_neg)
 		dans = -dans;
 	    sv_setnv(TARG, dans);
 	}
-	else {
+	else if (right) {
 	    UV ans;
-
-	    if (!right)
-		DIE(aTHX_ "Illegal modulus zero");
 
 	    ans = left % right;
 	    if ((left_neg != right_neg) && ans)
 		ans = right - ans;
+
 	    if (right_neg) {
 		/* XXX may warn: unary minus operator applied to unsigned type */
 		/* could change -foo to be (~foo)+1 instead	*/
@@ -1648,7 +1646,9 @@ PP(pp_modulo)
 	    }
 	    else
 		sv_setuv(TARG, ans);
-	}
+	} else {
+	    DIE(aTHX_ "Illegal modulus zero");
+        }
 	SETTARG;
 	RETURN;
     }
