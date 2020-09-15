@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+use strict;
 
 # Test ExtUtils::Installed
 
@@ -9,7 +10,6 @@ BEGIN {
 
 my $Is_VMS = $^O eq 'VMS';
 
-use strict;
 
 use Config;
 use Cwd;
@@ -92,16 +92,17 @@ END { ok(chdir $startdir, "Return to where we started"); }
     my $fakepath = File::Spec->catdir('auto', $fakedir);
     ok( mkpath($fakepath), "Able to create directory $fakepath for testing" );
 
-    ok(open(PACKLIST, '>', File::Spec->catfile($fakepath, '.packlist')));
+    ok(open(PACKLIST, '>', File::Spec->catfile($fakepath, '.packlist')),
+        "Able to open .packlist for writing");
     print PACKLIST 'list';
     close PACKLIST;
 
-    ok(open(FAKEMOD, '>', File::Spec->catfile($fakepath, 'FakeMod.pm')));
+    ok(open(FAKEMOD, '>', File::Spec->catfile($fakepath, 'FakeMod.pm')),
+        "Able to open FakeMod.pm for writing");
 
     print FAKEMOD <<'FAKE';
 package FakeMod;
-use vars qw( $VERSION );
-$VERSION = '1.1.1';
+our $VERSION = '1.1.1';
 1;
 FAKE
 
