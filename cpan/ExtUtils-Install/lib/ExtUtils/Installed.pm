@@ -1,7 +1,6 @@
+use strict;
 package ExtUtils::Installed;
 
-use 5.00503;
-use strict;
 #use warnings; # XXX requires 5.6
 use Carp qw();
 use ExtUtils::Packlist;
@@ -16,8 +15,7 @@ my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 
 require VMS::Filespec if $Is_VMS;
 
-use vars qw($VERSION);
-$VERSION = '2.16';
+our $VERSION = '2.18';
 $VERSION = eval $VERSION;
 
 sub _is_prefix {
