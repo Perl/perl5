@@ -8,16 +8,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.093 ();
-use IO::Compress::Adapter::Deflate 2.093 ;
+use IO::Compress::RawDeflate 2.096 ();
+use IO::Compress::Adapter::Deflate 2.096 ;
 
-use IO::Compress::Zlib::Constants 2.093 ;
-use IO::Compress::Base::Common  2.093 qw();
+use IO::Compress::Zlib::Constants 2.096 ;
+use IO::Compress::Base::Common  2.096 qw();
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.093';
+$VERSION = '2.096';
 $DeflateError = '';
 
 @ISA    = qw(IO::Compress::RawDeflate Exporter);
@@ -914,7 +914,7 @@ See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head1 SUPPORT
 
-General feedback/questions/bug reports should be sent to 
+General feedback/questions/bug reports should be sent to
 L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
 L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
 
@@ -951,7 +951,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2019 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2020 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
