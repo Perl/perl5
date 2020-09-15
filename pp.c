@@ -1539,12 +1539,10 @@ PP(pp_modulo)
     dSP; dATARGET;
     tryAMAGICbin_MG(modulo_amg, AMGf_assign|AMGf_numeric);
     {
-	UV left  = 0;
 	UV right = 0;
 	bool left_neg = FALSE;
 	bool right_neg = FALSE;
 	NV dright = 0.0;
-	NV dleft  = 0.0;
 	SV * const svr = POPs;
 	SV * const svl = TOPs;
         if (SvIV_please_nomg(svr)) {
@@ -1566,15 +1564,15 @@ PP(pp_modulo)
                 right_neg = TRUE;
 		dright = -dright;
             }
-            if (dright < UV_MAX_P1) {
-                right = U_V(dright);
-            }
 	}
 
         /* At this point, right is in range for a UV. (A in-range NV has been
            rounded down to the nearest UV. If right is actually zero, the
            function will eventually DIE, not return an incorrect result.) */
 	if (right && SvIV_please_nomg(svl)) {
+            UV left  = 0;
+	    UV ans;
+
                 if (SvUOK(svl)) {
                     left = SvUVX(svl);
                 } else {
@@ -1587,50 +1585,6 @@ PP(pp_modulo)
                         left = (UV) (0 - (UV) aiv);
                     }
                 }
-        }
-	else {
-	    dleft = SvNV_nomg(svl);
-	    if (dleft < 0) {
-		left_neg = TRUE;
-		dleft = -dleft;
-            }
-
-            /* This should be exactly the 5.6 behaviour - if left and right are
-               both in range for UV then use U_V() rather than floor.
-               (If right is zero, the function will shortly DIE.) */
-	    if (right) {
-                if (dleft < UV_MAX_P1) {
-                    /* right was in range, so is dleft, so use UVs not double. */
-                    left = U_V(dleft);
-                    /* dright set to zero so it can then be used for branch control */
-                    dright = 0.0;
-                }
-                /* left is out of range for UV, right was in range, so promote
-                   right (back) to double.  */
-                else {
-                    /* The +0.5 is used in 5.6 even though it is not strictly
-                       consistent with the implicit +0 floor in the U_V()
-                       inside the #if 1. */
-                    dleft = Perl_floor(dleft + 0.5);
-                    dright = (dright) ?
-                        Perl_floor(dright + 0.5) :
-                        right;
-                }
-            }
-        }
-
-	if (dright) {
-	    NV dans;
-
-	    dans = Perl_fmod(dleft, dright);
-	    if ((left_neg != right_neg) && dans )
-		dans = dright - dans;
-	    if (right_neg)
-		dans = -dans;
-	    sv_setnv(TARG, dans);
-	}
-	else if (right) {
-	    UV ans;
 
 	    ans = left % right;
 	    if ((left_neg != right_neg) && ans)
@@ -1646,9 +1600,44 @@ PP(pp_modulo)
 	    }
 	    else
 		sv_setuv(TARG, ans);
-	} else {
-	    DIE(aTHX_ "Illegal modulus zero");
+
         }
+	else {
+	    NV dleft  = 0.0;
+
+	    dleft = SvNV_nomg(svl);
+	    if (dleft < 0) {
+		left_neg = TRUE;
+		dleft = -dleft;
+            }
+
+            /* This should be exactly the 5.6 behaviour - if left and right are
+               both in range for UV then use U_V() rather than floor.
+               (If right is zero, the function will shortly DIE.) */
+
+	    if (right) {
+                    /* The +0.5 is used in 5.6 even though it is not strictly
+                       consistent with the implicit +0 floor in the U_V()
+                       inside the #if 1. */
+                    dleft = Perl_floor(dleft + 0.5);
+                    dright = right;
+            }
+
+            if (dright) {
+	        NV dans;
+
+	        dans = Perl_fmod(dleft, dright);
+	        if ((left_neg != right_neg) && dans )
+		    dans = dright - dans;
+	        if (right_neg)
+		    dans = -dans;
+	        sv_setnv(TARG, dans);
+	    } else {
+	        DIE(aTHX_ "Illegal modulus zero");
+            }
+
+        }
+
 	SETTARG;
 	RETURN;
     }
