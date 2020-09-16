@@ -4,11 +4,13 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.40";
+our $VERSION     = "0.41";
 our @ISA         = qw(Exporter);
-our @EXPORT_OK   = ('regmust',
-                    qw(is_regexp regexp_pattern
-                       regname regnames regnames_count));
+our @EXPORT_OK   = qw{
+	is_regexp regexp_pattern
+	regname regnames regnames_count
+	regmust optimization
+};
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
 
 my %bitmask = (
@@ -804,6 +806,116 @@ B<NOTE:> This may not necessarily be the definitive longest anchored and
 floating string. This will be what the optimiser of the Perl that you
 are using thinks is the longest. If you believe that the result is wrong
 please report it via the L<perlbug> utility.
+
+=item optimization($ref)
+
+If the argument is a compiled regular expression as returned by C<qr//>,
+then this function returns a hashref of the optimization information
+discovered at compile time, so we can write tests around it. If any
+other argument is given, returns C<undef>.
+
+The hash contents are expected to change from time to time as we develop
+new ways to optimize - no assumption of stability should be made, not
+even between minor versions of perl.
+
+For the current version, the hash will have the following contents:
+
+=over 4
+
+=item minlen
+
+An integer, the least number of characters in any string that can match.
+
+=item minlenret
+
+An integer, the least number of characters that can be in C<$&> after a
+match. (Consider eg C< /ns(?=\d)/ >.)
+
+=item gofs
+
+An integer, the number of characters before C<pos()> to start match at.
+
+=item noscan
+
+A boolean, C<TRUE> to indicate that any anchored/floating substrings
+found should not be used. (CHECKME: apparently this is set for an
+anchored pattern with no floating substring, but never used.)
+
+=item isall
+
+A boolean, C<TRUE> to indicate that the optimizer information is all
+that the regular expression contains, and thus one does not need to
+enter the regexp runtime engine at all.
+
+=item anchor SBOL
+
+A boolean, C<TRUE> if the pattern is anchored to start of string.
+
+=item anchor MBOL
+
+A boolean, C<TRUE> if the pattern is anchored to any start of line
+within the string.
+
+=item anchor GPOS
+
+A boolean, C<TRUE> if the pattern is anchored to the end of the previous
+match.
+
+=item skip
+
+A boolean, C<TRUE> if the start class can match only the first of a run.
+
+=item implicit
+
+A boolean, C<TRUE> if a C</.*/> has been turned implicitly into a C</^.*/>.
+
+=item anchored/floating
+
+A byte string representing an anchored or floating substring respectively
+that any match must contain, or undef if no such substring was found, or
+if the substring would require utf8 to represent.
+
+=item anchored utf8/floating utf8
+
+A utf8 string representing an anchored or floating substring respectively
+that any match must contain, or undef if no such substring was found, or
+if the substring contains only 7-bit ASCII characters.
+
+=item anchored min offset/floating min offset
+
+An integer, the first offset in characters from a match location at which
+we should look for the corresponding substring.
+
+=item anchored max offset/floating max offset
+
+An integer, the last offset in characters from a match location at which
+we should look for the corresponding substring.
+
+Ignored for anchored, so may be 0 or same as min.
+
+=item anchored end shift/floating end shift
+
+FIXME: not sure what this is, something to do with lookbehind. regcomp.c
+says:
+    When the final pattern is compiled and the data is moved from the
+    scan_data_t structure into the regexp structure the information
+    about lookbehind is factored in, with the information that would
+    have been lost precalculated in the end_shift field for the
+    associated string.
+
+=item checking
+
+A constant string, one of "anchored", "floating" or "none" to indicate
+which substring (if any) should be checked for first.
+
+=item stclass
+
+A string representation of a character class ("start class") that must
+be the first character of any match.
+
+TODO: explain the representations.
+
+=back
 
 =back
 
