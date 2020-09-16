@@ -1527,12 +1527,12 @@ SV *   sv ;
         status = (RETVAL->dbp->open)(RETVAL->dbp, name, NULL, RETVAL->type,
                     Flags, mode) ;
 #endif
-        Trace(("open returned %d %s\n", status, db_strerror(status))) ; 
+        Trace(("open returned %d %s\n", status, db_strerror(status))) ;
 
         if (status == 0) {
 
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor, 0) ;
-            Trace(("cursor returned %d %s\n", status, db_strerror(status))) ; 
+            Trace(("cursor returned %d %s\n", status, db_strerror(status))) ;
         }
 
         if (status)
@@ -2066,4 +2066,3 @@ filter_store_value(db, code)
     SV *        RETVAL = &PL_sv_undef ;
     CODE:
         DBM_setFilter(db->filter_store_value, code) ;
-
