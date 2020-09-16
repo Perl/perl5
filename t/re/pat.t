@@ -1904,7 +1904,7 @@ EOP
         {
             fresh_perl_is('
                 BEGIN{require q(test.pl);}
-                watchdog(3);
+                watchdog( $^O eq "cygwin" ? 60 : 3 );
                 $SIG{ALRM} = sub {print "Timeout\n"; exit(1)};
                 alarm 1;
                 $_ = "a" x 1000 . "b" x 1000 . "c" x 1000;
