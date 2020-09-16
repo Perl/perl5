@@ -1,19 +1,25 @@
-package Test::Builder::TodoDiag;
+package Test2::API::InterceptResult::Hub;
 use strict;
 use warnings;
 
 our $VERSION = '1.302181';
 
-BEGIN { require Test2::Event::Diag; our @ISA = qw(Test2::Event::Diag) }
+BEGIN { require Test2::Hub; our @ISA = qw(Test2::Hub) }
+use Test2::Util::HashBase;
 
-sub diagnostics { 0 }
-
-sub facet_data {
+sub init {
     my $self = shift;
-    my $out = $self->SUPER::facet_data();
-    $out->{info}->[0]->{debug} = 0;
-    return $out;
+    $self->SUPER::init();
+    $self->{+NESTED} = 0;
 }
+
+sub inherit {
+    my $self = shift;
+
+    $self->{+NESTED} = 0;
+}
+
+sub terminate { }
 
 1;
 
@@ -25,15 +31,7 @@ __END__
 
 =head1 NAME
 
-Test::Builder::TodoDiag - Test::Builder subclass of Test2::Event::Diag
-
-=head1 DESCRIPTION
-
-This is used to encapsulate diag messages created inside TODO.
-
-=head1 SYNOPSIS
-
-You do not need to use this directly.
+Test2::API::InterceptResult::Hub - Hub used by InterceptResult.
 
 =head1 SOURCE
 
