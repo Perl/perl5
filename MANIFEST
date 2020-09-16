@@ -2255,6 +2255,11 @@ cpan/Test-Simple/lib/Test2/API.pm
 cpan/Test-Simple/lib/Test2/API/Breakage.pm
 cpan/Test-Simple/lib/Test2/API/Context.pm
 cpan/Test-Simple/lib/Test2/API/Instance.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Event.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Facet.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Hub.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Squasher.pm
 cpan/Test-Simple/lib/Test2/API/Stack.pm
 cpan/Test-Simple/lib/Test2/Event.pm
 cpan/Test-Simple/lib/Test2/Event/Bail.pm
@@ -2387,6 +2392,7 @@ cpan/Test-Simple/t/Legacy/Regression/683_thread_todo.t
 cpan/Test-Simple/t/Legacy/Regression/6_cmp_ok.t
 cpan/Test-Simple/t/Legacy/Regression/736_use_ok.t
 cpan/Test-Simple/t/Legacy/Regression/789-read-only.t
+cpan/Test-Simple/t/Legacy/Regression/870-experimental-warnings.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t
@@ -2472,6 +2478,7 @@ cpan/Test-Simple/t/regression/721-nested-streamed-subtest.t
 cpan/Test-Simple/t/regression/757-reset_in_subtest.t
 cpan/Test-Simple/t/regression/812-todo.t
 cpan/Test-Simple/t/regression/817-subtest-todo.t
+cpan/Test-Simple/t/regression/862-intercept_tb_todo.t
 cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t
 cpan/Test-Simple/t/regression/builder_does_not_init.t
 cpan/Test-Simple/t/regression/errors_facet.t
@@ -2513,6 +2520,9 @@ cpan/Test-Simple/t/Test2/modules/API.t
 cpan/Test-Simple/t/Test2/modules/API/Breakage.t
 cpan/Test-Simple/t/Test2/modules/API/Context.t
 cpan/Test-Simple/t/Test2/modules/API/Instance.t
+cpan/Test-Simple/t/Test2/modules/API/InterceptResult.t
+cpan/Test-Simple/t/Test2/modules/API/InterceptResult/Event.t
+cpan/Test-Simple/t/Test2/modules/API/InterceptResult/Squasher.t
 cpan/Test-Simple/t/Test2/modules/API/Stack.t
 cpan/Test-Simple/t/Test2/modules/Event.t
 cpan/Test-Simple/t/Test2/modules/Event/Bail.t
