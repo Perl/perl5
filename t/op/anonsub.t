@@ -4,8 +4,6 @@ chdir 't' if -d 't';
 require './test.pl';
 set_up_inc('../lib');
 
-use strict;
-
 $|=1;
 
 run_multiple_progs('', \*DATA);
