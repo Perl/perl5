@@ -1716,7 +1716,7 @@ sub watchdog ($;$)
 		if ($is_cygwin) {
 		    # sometimes the above isn't enough on cygwin
 		    sleep 1; # wait a little, it might have worked after all
-		    system("/bin/kill -f $pid_to_kill");
+		    system("/bin/kill -f $pid_to_kill") if kill(0, $pid_to_kill);
 		}
             }
 
