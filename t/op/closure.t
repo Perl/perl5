@@ -195,7 +195,7 @@ ok($foo[4]->()->(4));
       # And that, in turn, may be within a foreach loop,
       # a naked block, or another named sub
       for $within (qw!foreach naked other_sub!) {
-    
+
         my $test = curr_test();
         # Here are a number of variables which show what's
         # going on, in a way.
@@ -211,12 +211,12 @@ ok($foo[4]->()->(4));
         $undef_outer = 0+    # $outer is created but unused
           ( ($where_declared eq 'in_anon') &&
           (not $call_outer) ) ;
-    
+
         $code = "# This is a test script built by t/op/closure.t\n\n";
-    
+
         print <<"DEBUG_INFO" if $debugging;
-# inner_type:   $inner_type 
-# where_declared: $where_declared 
+# inner_type:   $inner_type
+# where_declared: $where_declared
 # within:     $within
 # nc_attempt:   $nc_attempt
 # call_inner:   $call_inner
@@ -226,7 +226,7 @@ DEBUG_INFO
 
         $code .= <<"END_MARK_ONE";
 
-BEGIN { \$SIG{__WARN__} = sub { 
+BEGIN { \$SIG{__WARN__} = sub {
   my \$msg = \$_[0];
 END_MARK_ONE
 
@@ -276,7 +276,7 @@ END
         } else {
           die "What was $where_declared?"
         }
-    
+
         if ($within eq 'foreach') {
           $code .= "
           my \$foreach = 12000;
@@ -309,7 +309,7 @@ END
           } else {
             die "What was $inner_type?"
           }
-      
+
           # Now to write the body of the test sub
           if ($inner_sub_test eq 'global_scalar') {
             $code .= '{ ++$global_scalar }'
@@ -334,19 +334,19 @@ END
           } else {
             die "What was $inner_sub_test?"
           }
-          
+
           # Close up
           if ($inner_type eq 'anon') {
             $code .= ';'
           }
           $code .= "\n";
           $sub_test++;  # sub name sequence number
-      
+
         } # End of foreach $inner_sub_test
-    
+
         # Close up $within block
         $code .= "  }\n\n";
-    
+
         # setup anon vars
         if ( @anon_vars ) {
             my $str = join "\n", map { "our \$$_;" } @anon_vars;
@@ -359,7 +359,7 @@ END
         } elsif ($where_declared eq 'in_anon') {
           $code .= "};\n\n";
         }
-    
+
         # We may need to do something with the sub we just made...
         $code .= "undef \$outer;\n" if $undef_outer;
         $code .= "&inner_sub;\n" if $call_inner;
@@ -370,20 +370,20 @@ END
             $code .= "&\$outer;\n\n"
           }
         }
-    
+
         # Now, we can actually prep to run the tests.
         for $inner_sub_test (@inners) {
           $expected = $expected{$inner_sub_test} or
             die "expected $inner_sub_test missing";
-      
+
           # Named closures won't access the expected vars
-          if ( $nc_attempt and 
+          if ( $nc_attempt and
             substr($inner_sub_test, 0, 4) eq "sub_" ) {
               $expected = 1;
           }
-      
+
           # If you make a sub within a foreach loop,
-          # what happens if it tries to access the 
+          # what happens if it tries to access the
           # foreach index variable? If it's a named
           # sub, it gets the var from "outside" the loop,
           # but if it's anon, it gets the value to which
@@ -402,7 +402,7 @@ END
               }
             }
           }
-      
+
           # Here's the test:
           my $desc = "$inner_type $where_declared $within $inner_sub_test";
           if ($inner_type eq 'anon') {
@@ -412,7 +412,7 @@ END
           }
           $test++;
         }
-    
+
         if ($Config{d_fork} and $^O ne 'VMS' and $^O ne 'MSWin32' and $^O ne 'NetWare') {
           # Fork off a new perl to run the tests.
           # (This is so we can catch spurious warnings.)
@@ -482,7 +482,7 @@ END
         }
         is($?, 0, 'exited cleanly') or diag(sprintf "Error code $? = 0x%X", $?);
         print '#', "-" x 30, "\n" if $debugging;
-    
+
       }  # End of foreach $within
     }  # End of foreach $where_declared
   }  # End of foreach $inner_type
@@ -588,10 +588,10 @@ sub linger {
 # bugid 10085
 # obj not freed early enough
 
-sub linger2 { 
+sub linger2 {
   my $obj = Watch->new($_[0], '2');
   sub { sub { $obj } };
-}   
+}
 {
   my $watch = '1';
   linger2(\$watch);
@@ -632,7 +632,7 @@ f16302();
           $_[1]
             ?  $_[0]->($_[0], $_[1] - 1) .  sub {"x"}->()
             : "y"
-        },   
+        },
         2
       )
       , "\n"
@@ -783,7 +783,7 @@ sub staleval {
 
   $x = 3;
   is eval '$x', $x, 'eval closing over stale var in active sub';
-  return # 
+  return #
 }
 staleval 1;
 staleval;
@@ -797,7 +797,6 @@ staleval;
 SKIP: {
   skip_if_miniperl("no XS on miniperl (for source filters)");
   fresh_perl_is <<'  [perl #114888]', "ok\n", {stderr=>1},
-  use strict;
   BEGIN {
     package Foo;
     use Filter::Util::Call;
