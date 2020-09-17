@@ -1578,6 +1578,7 @@ SKIP: {
         my $id;
         eval {
             local $SIG{SYS} = sub { die "SIGSYS caught\n" };
+            no strict 'subs';
             $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
             1;
         } or do { chomp(my $msg = $@); skip "msgget: $msg", 1; };
