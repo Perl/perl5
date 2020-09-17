@@ -315,7 +315,7 @@
 :         into               "#if defined(PERL_CORE) || defined(PERL_EXT)"
 :
 :       To be usable from dynamically loaded extensions, either:
-:	  1) it must be static to its containing file ("i" or "s" flag); or
+:	  1) it must be static to its containing file ("i" or "S" flag); or
 :         2) be combined with the "X" flag.
 :
 :   e  Not exported
