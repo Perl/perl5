@@ -751,6 +751,28 @@ will be warning free regardless of what $ref actually is.
 Like C<is_regexp> this function will not be confused by overloading
 or blessing of the object.
 
+=item regname($name,$all)
+
+Returns the contents of a named buffer of the last successful match. If
+$all is true, then returns an array ref containing one entry per buffer,
+otherwise returns the first defined buffer.
+
+=item regnames($all)
+
+Returns a list of all of the named buffers defined in the last successful
+match. If $all is true, then it returns all names defined, if not it returns
+only names which were involved in the match.
+
+=item regnames_count()
+
+Returns the number of distinct names defined in the pattern used
+for the last successful match.
+
+B<Note:> this result is always the actual number of distinct
+named buffers defined, it may not actually match that which is
+returned by C<regnames()> and related routines when those routines
+have not been called with the $all parameter set.
+
 =item regmust($ref)
 
 If the argument is a compiled regular expression as returned by C<qr//>,
@@ -782,28 +804,6 @@ B<NOTE:> This may not necessarily be the definitive longest anchored and
 floating string. This will be what the optimiser of the Perl that you
 are using thinks is the longest. If you believe that the result is wrong
 please report it via the L<perlbug> utility.
-
-=item regname($name,$all)
-
-Returns the contents of a named buffer of the last successful match. If
-$all is true, then returns an array ref containing one entry per buffer,
-otherwise returns the first defined buffer.
-
-=item regnames($all)
-
-Returns a list of all of the named buffers defined in the last successful
-match. If $all is true, then it returns all names defined, if not it returns
-only names which were involved in the match.
-
-=item regnames_count()
-
-Returns the number of distinct names defined in the pattern used
-for the last successful match.
-
-B<Note:> this result is always the actual number of distinct
-named buffers defined, it may not actually match that which is
-returned by C<regnames()> and related routines when those routines
-have not been called with the $all parameter set.
 
 =back
 
