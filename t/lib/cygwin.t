@@ -65,7 +65,7 @@ is($prefix, $prefix2, 'cygdrive mount prefix2 = ' . $prefix2);
 
 my @mnttbl = Cygwin::mount_table();
 ok(@mnttbl > 0, "non empty mount_table");
-for $i (@mnttbl) {
+for my $i (@mnttbl) {
   if ($i->[0] eq '/') {
     is($i->[2].",".$i->[3], $rootmnt, "same root mount flags");
     last;
