@@ -1545,6 +1545,7 @@ SKIP: {
         my $id;
         eval {
             local $SIG{SYS} = sub { die "SIGSYS caught\n" };
+            no strict 'subs';
             $id = shmget(IPC_PRIVATE, $size, S_IRWXU);
             1;
         } or do { chomp(my $msg = $@); skip "shmget: $msg", 1; };
@@ -1559,6 +1560,7 @@ SKIP: {
             } else {
                 warn "# shmwrite failed: $!\n";
             }
+            no strict 'subs';
             shmctl($id, IPC_RMID, 0) or warn "# shmctl failed: $!\n";
         } else {
             warn "# shmget failed: $!\n";
@@ -1589,6 +1591,7 @@ SKIP: {
 	my $type_rcvd;
 
 	if (defined $id) {
+        no strict 'subs';
 	    if (msgsnd($id, pack("l! a*", $type_sent, $sent), IPC_NOWAIT)) {
 		if (msgrcv($id, $rcvd, 60, 0, IPC_NOWAIT)) {
 		    ($type_rcvd, $rcvd) = unpack("l! a*", $rcvd);
