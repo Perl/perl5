@@ -9,6 +9,7 @@ Digest::MD5 cpan/Digest-MD5/MD5.pm df5f0663f0f755be7eda6e3d2f008f2629246b19
 Digest::MD5 cpan/Digest-MD5/MD5.xs 249bed648232192ce018f7f894ad127c3a639831
 Digest::MD5 cpan/Digest-MD5/t/files.t e987329d2411ff60ad9a2bdf93fdf5f6943467e8
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t d5c75c41d6736a0c5897130f534af0896a7d6f4d
+ExtUtils::PL2Bat cpan/ExtUtils-PL2Bat/t/make_executable.t 6e63dbf43ee7ff5a54e615a576360cb0f1825694
 Filter::Util::Call pod/perlfilter.pod 9b4aec0d8518274ddb0dd37e3b770fe13a44dd1f
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 66f28a17647e2de166909ca66e4ced26f8a0a62e
