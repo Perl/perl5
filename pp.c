@@ -1564,6 +1564,7 @@ PP(pp_modulo)
                 right_neg = TRUE;
 		dright = -dright;
             }
+            assert(dright >= UV_MAX_P1 || dright == 0);
 	}
 
         /* At this point, right is in range for a UV. (A in-range NV has been
@@ -1610,6 +1611,8 @@ PP(pp_modulo)
 		left_neg = TRUE;
 		dleft = -dleft;
             }
+
+            assert(dleft >= UV_MAX_P1 || dleft == 0);
 
             /* This should be exactly the 5.6 behaviour - if left and right are
                both in range for UV then use U_V() rather than floor.
