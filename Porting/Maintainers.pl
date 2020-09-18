@@ -496,6 +496,9 @@ use File::Glob qw(:case);
 		'EXCLUDED'     => [
 			't/00-compile.t',
 		],
+		'CUSTOMIZED'     => [
+			't/make_executable.t',
+		],
 	},
 
     'ExtUtils::Manifest' => {
