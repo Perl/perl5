@@ -41,7 +41,7 @@ you should reset the version numbers to the next blead series.
 
   2020-07-17  5.33.0 ✓       Sawyer X
   2020-08-20  5.33.1 ✓       Karen Etheridge
-  2020-09-20  5.33.2
+  2020-09-20  5.33.2         Sawyer X
   2020-10-20  5.33.3
 
 =head1 VICTIMS
