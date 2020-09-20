@@ -20,13 +20,75 @@ L<perl5331delta>, which describes differences between 5.33.0 and 5.33.1.
 
 =item *
 
+L<Archive::Tar> has been upgraded from version 2.36 to 2.38.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.093 to 2.096.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.093 to 2.096.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.853 to 1.854.
+
+=item *
+
+L<Env> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<Errno> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 2.14 to 2.18.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.59 to 1.60.
+
+=item *
+
+IO-Compress has been upgraded from version 2.093 to 2.096.
+
+=item *
+
+L<IO::Socket::IP> has been upgraded from version 0.39 to 0.41.
+
+=item *
+
+L<IO::Zlib> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20200820 to 5.20200920.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Module::Load::Conditional> has been upgraded from version 0.70 to 0.74.
 
-If there was something important to note about this change, include that here.
+=item *
+
+L<Opcode> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
+L<overload> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.30 to 0.31.
+
+=item *
+
+L<Safe> has been upgraded from version 2.42 to 2.43.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302175 to 1.302181.
 
 =back
 
