@@ -20,6 +20,10 @@ L<perl5331delta>, which describes differences between 5.33.0 and 5.33.1.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20200820 to 5.20200920.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
