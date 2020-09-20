@@ -928,9 +928,8 @@ configuration option C<-Dusedefaultstrict>.
 
 These strict defaults do not apply when C<perl> is run via C<-e> or C<-E>.
 
-This setting provides a diagnostic mechanism for perl developers for
-development and is intended for development purposes only and is thus turned
-on by default.
+This setting provides a diagnostic mechanism intended for development 
+purposes only and is thus undefined by default.
 
 =item *
 
