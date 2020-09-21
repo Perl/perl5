@@ -21,52 +21,52 @@ use open qw( :utf8 :std );
 
     is *tèst, "*main::tèst", "sanity check.";
     ok $::{"tèst"}, "gets the right glob in the stash.";
-    
+
     my $glob_by_sub = sub { *ｍａｉｎ::method }->();
-    
+
     is *ｍａｉｎ::method, "*ｍａｉｎ::method", "glob stringy works";
     is "" . *ｍａｉｎ::method, "*ｍａｉｎ::method", "glob stringify-through-concat works";
     is $glob_by_sub, "*ｍａｉｎ::method", "glob stringy works";
     is "" . $glob_by_sub, "*ｍａｉｎ::method", "";
-    
+
     sub gimme_glob {
         no strict 'refs';
         is *{$_[0]}, "*main::$_[0]";
         *{$_[0]};
     }
-    
+
     is "" . gimme_glob("下郎"), "*main::下郎";
     $a = *下郎;
     is "" . $a, "*main::下郎";
-    
+
     *{gimme_glob("下郎")} = sub {};
-    
+
     {
         no strict 'refs';
         ok defined *{"下郎"}{CODE};
         ok !defined *{"\344\270\213\351\203\216"}{CODE};
-    
+
         $Lèon = 1;
         is ${*Lèon{SCALAR}}, 1, "scalar define in the right glob,";
         ok !${*{"L\303\250on"}{SCALAR}}, "..and nothing in the wrong one.";
-        
+
         my $a = "foo" . chr(190);
         my $b = $a    . chr(256);
         chop $b; # $b is $a with utf8 on
-        
+
         is $a, $b, '$a equals $b';
-        
+
         *$b = sub { 5 };
-        
+
         is eval { main->$a }, 5, q!$a can call $b's sub!;
         ok !$@, "..and there's no error.";
-        
+
         my $c = $b;
         utf8::encode($c);
         ok $b ne $c, '$b unequal $c';
         eval { main->$c };
         ok $@, q!$c can't call $b's sub.!;
-        
+
         # Now define another sub under the downgraded name:
         *$a = sub { 6 };
         # Call it:
@@ -74,34 +74,34 @@ use open qw( :utf8 :std );
         ok !$@, "..without errors.";
         eval { main->$c };
         ok $@, "but it's still unreachable through *c";
-        
+
         *$b = \10;
         is ${*$a{SCALAR}}, 10;
         is ${*$b{SCALAR}}, 10;
         is ${*$c{SCALAR}}, undef;
-        
+
         opendir FÒÒ, ".";
         closedir FÒÒ;
         ::ok($::{"FÒÒ"}, "Bareword generates the right glob.");
         ::ok(!$::{"F\303\222\303\222"});
-        
+
         sub участники { 1 }
-        
+
         ok $::{"участники"}, "non-const sub declarations generate the right glob";
         is $::{"участники"}->(), 1;
-        
+
         sub 原 () { 1 }
-        
+
         is grep({ $_ eq "\x{539f}"     } keys %::), 1, "Constant subs generate the right glob.";
         is grep({ $_ eq "\345\216\237" } keys %::), 0;
-        
+
         #These should probably go elsewhere.
         eval q{ sub wròng1 (_$); wròng1(1,2) };
         like( $@, qr/Malformed prototype for main::wròng1/, 'Malformed prototype croak is clean.' );
-        
+
         eval q{ sub ча::ики ($__); ча::ики(1,2) };
         like( $@, qr/Malformed prototype for ча::ики/ );
-        
+
         our $問 = 10;
         is $問, 10, "our works";
         is $main::問, 10, "...as does getting the same variable through the fully qualified name";
@@ -147,7 +147,7 @@ use open qw( :utf8 :std );
            "...and nul-clean"
         );
     }
-    
+
     {
         eval qq{\$ネ+ 1; \x{1F42A}};
         $@ =~ s/eval \d+/eval 11/;
@@ -290,5 +290,4 @@ qq ϟϟ }
 END
 is __LINE__, 59, '#line directive and qq with uni delims inside heredoc';
 
-use strict;
 # Put new tests above the line number tests.

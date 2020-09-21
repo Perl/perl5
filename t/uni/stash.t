@@ -49,7 +49,6 @@ our $TODO;
     # now tests with strictures
     
     {
-        use strict;
         ok( !exists $piƓ::{bodine}, q(referencing a non-existent stash element doesn't produce stricture errors) );
     }
 
