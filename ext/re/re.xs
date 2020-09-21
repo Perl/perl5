@@ -225,7 +225,7 @@ CODE:
         if (ri->regstclass) {
             SV* sv = newSV(0);
             /* not Perl_regprop, we must have the DEBUGGING version */
-            my_regprop(r, sv, ri->regstclass, NULL, NULL);
+            my_regprop(aTHX_ r, sv, ri->regstclass, NULL, NULL);
             hv_stores(hv, "stclass", sv);
         } else {
             hv_stores(hv, "stclass", &PL_sv_undef);
