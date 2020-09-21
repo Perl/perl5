@@ -1,4 +1,5 @@
 #!./perl -w
+use strict;
 
 BEGIN {
     chdir 't' if -d 't';
