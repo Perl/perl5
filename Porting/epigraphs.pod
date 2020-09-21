@@ -19,14 +19,14 @@ Consult your favorite dictionary for details.
 
 =head2 v5.33.2 - Elizabeth Warren
 
-Announced on 2020-09-20 by Sawyer X
+L<Announced on 2020-09-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/09/msg258369.html>
 
   What I've learned is that real change is very, very hard. But I've
   also learned that change is possible - if you fight for it.
 
 =head2 v5.33.1 - Aleksandr Solzhenitsyn, The Gulag Archipelago 1918-1956 (1973)
 
-Announced on 2020-08-20 by Karen Etheridge
+L<Announced on 2020-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2020/08/msg258282.html>
 
   If only there were evil people somewhere insidiously committing evil deeds,
   and it were necessary only to separate them from the rest of us and destroy
@@ -35,7 +35,7 @@ Announced on 2020-08-20 by Karen Etheridge
 
 =head2 v5.33.0 - Confucius, "Confucius: The Analects"
 
-Announed on 2020-07-17 by Sawyer X
+L<Announed on 2020-07-17 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/07/msg258033.html>
 
   The man who moves a mountain begins by carrying away small stones.
 
