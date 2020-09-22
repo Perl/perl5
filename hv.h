@@ -161,7 +161,7 @@ Returns the length of the stash's name.
 
 Disfavored forms of HvNAME and HvNAMELEN; suppress mention of them
 =for apidoc Cmh|char*|HvNAME_get|HV* stash
-=for apidoc Amh|char*|HvNAMELEN_get|HV* stash
+=for apidoc Amh|I32|HvNAMELEN_get|HV* stash
 
 =for apidoc Am|unsigned char|HvNAMEUTF8|HV *stash
 Returns true if the name is in UTF-8 encoding.
