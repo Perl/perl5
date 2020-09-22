@@ -21511,6 +21511,9 @@ int
 main(int ac, char **av)
 {
   signal(SIGSEGV, exit);
+#ifdef SIGBUS
+  signal(SIGBUS,  exit);
+#endif
 
   myprintf("%s%cs all right, then\n", "that", '\'');
   exit(0);
