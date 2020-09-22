@@ -299,7 +299,7 @@ be stored with referential integrity, but will be coerced to strings.
     Perl_refcounted_he_new_pvn(aTHX_ cophh, keypv, keylen, hash, value, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_store_pvs|const COPHH *cophh|"key"|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pvs|COPHH *cophh|"key"|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a literal string instead
 of a string/length pair, and no precomputed hash.
@@ -311,7 +311,7 @@ of a string/length pair, and no precomputed hash.
     Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, value, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_store_pv|const COPHH *cophh|const char *key|U32 hash|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pv|COPHH *cophh|const char *key|U32 hash|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a nul-terminated string instead of
 a string/length pair.
@@ -323,7 +323,7 @@ a string/length pair.
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, value, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_store_sv|const COPHH *cophh|SV *key|U32 hash|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_sv|COPHH *cophh|SV *key|U32 hash|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a Perl scalar instead of a
 string/length pair.
@@ -356,7 +356,7 @@ hash of the key string, or zero if it has not been precomputed.
 	(SV *)NULL, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_delete_pvs|const COPHH *cophh|"key"|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pvs|COPHH *cophh|"key"|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a literal string instead
 of a string/length pair, and no precomputed hash.
@@ -369,7 +369,7 @@ of a string/length pair, and no precomputed hash.
 	(SV *)NULL, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_delete_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pv|COPHH *cophh|char *key|U32 hash|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a nul-terminated string instead of
 a string/length pair.
@@ -381,7 +381,7 @@ a string/length pair.
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_delete_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_sv|COPHH *cophh|SV *key|U32 hash|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a Perl scalar instead of a
 string/length pair.
