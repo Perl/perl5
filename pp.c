@@ -6045,11 +6045,15 @@ PP(pp_split)
 	}
 	else {
 	    if (!AvREAL(ary)) {
-		I32 i;
 		AvREAL_on(ary);
 		AvREIFY_off(ary);
-		for (i = AvFILLp(ary); i >= 0; i--)
-		    AvARRAY(ary)[i] = &PL_sv_undef; /* don't free mere refs */
+
+		/* Note: the above av_clear(ary) above should */
+		/* have set AvFILLp(ary) = -1, so this Zero() */
+		/* may well be superfluous.                   */
+
+		/* don't free mere refs */
+		Zero(AvARRAY(ary), AvFILLp(ary) + 1, SV*);
 	    }
 	    /* temporarily switch stacks */
 	    SAVESWITCHSTACK(PL_curstack, ary);
