@@ -234,7 +234,6 @@ useopcode=''
 useposix=''
 extras=''
 d_bsd=''
-usedefaultstrict=''
 d_eunice=''
 d_xenix=''
 eunicefix=''
@@ -1336,6 +1335,7 @@ archname64=''
 use64bitall=''
 use64bitint=''
 usecbacktrace=''
+usedefaultstrict=''
 dtrace=''
 usedtrace=''
 usefaststdio=''
@@ -20313,34 +20313,6 @@ EOCP
 	;;
 esac
 
-: Ask about strict by default.
-case "$usedefaultstrict" in
-    $define|true|[Yy]*)
-	dflt="y"
-	;;
-    *)
-	dflt="n"
-	;;
-    esac
-
-cat <<EOM
-
-EXPERIMENTAL: Perl can now be built with strict on by default when not
-invoked with -e or -E. This is a diagnostic tool for development.
-
-Unless you are familiar with this feature, you should probably answer 'no'.
-
-EOM
-
-rp='Would you like to build perl with strict enabled by default?'
-. ./myread
-case "$ans" in
-y|Y) val="$define" ;;
-*)   val="$undef"  ;;
-esac
-set usedefaultstrict
-eval $setvar
-
 : Include . in @INC
 $cat <<EOM
 
@@ -22689,6 +22661,34 @@ case "$uidsign" in
 	;;
 esac
 
+: Ask about strict by default.
+case "$usedefaultstrict" in
+    $define|true|[Yy]*)
+       dflt="y"
+       ;;
+    *)
+       dflt="n"
+       ;;
+    esac
+
+cat <<EOM
+
+EXPERIMENTAL: Perl can now be built with strict on by default when not
+invoked with -e or -E. This is a diagnostic tool for development.
+
+Unless you are familiar with this feature, you should probably answer 'no'.
+
+EOM
+
+rp='Would you like to build perl with strict enabled by default?'
+. ./myread
+case "$ans" in
+y|Y) val="$define" ;;
+*)   val="$undef"  ;;
+esac
+set usedefaultstrict
+eval $setvar
+
 : Determine if we can use sysctl with KERN_PROC_PATHNAME to find executing program
 echo " "
 echo "Determining whether we can use sysctl with KERN_PROC_PATHNAME to find executing program..." >&4
@@ -24200,7 +24200,6 @@ d_eofnblk='$d_eofnblk'
 d_erf='$d_erf'
 d_erfc='$d_erfc'
 d_eunice='$d_eunice'
-usedefaultstrict='$usedefaultstrict'
 d_exp2='$d_exp2'
 d_expm1='$d_expm1'
 d_faststdio='$d_faststdio'
@@ -25145,6 +25144,7 @@ use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecbacktrace='$usecbacktrace'
 usecrosscompile='$usecrosscompile'
+usedefaultstrict='$usedefaultstrict'
 usedevel='$usedevel'
 usedl='$usedl'
 usedtrace='$usedtrace'
