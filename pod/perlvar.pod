@@ -1807,8 +1807,8 @@ X<$^CHILD_ERROR_NATIVE>
 The native status returned by the last pipe close, backtick (C<``>)
 command, successful call to C<wait()> or C<waitpid()>, or from the
 C<system()> operator.  On POSIX-like systems this value can be decoded
-with the WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED,
-WSTOPSIG and WIFCONTINUED functions provided by the L<POSIX> module.
+with the WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED, and
+WSTOPSIG functions provided by the L<POSIX> module.
 
 Under VMS this reflects the actual VMS exit status; i.e. it is the
 same as C<$?> when the pragma C<use vmsish 'status'> is in effect.
