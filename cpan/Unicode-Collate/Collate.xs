@@ -58,6 +58,7 @@
 #define CJK_UidF61    (0x9FCC) /* Unicode 6.1 */
 #define CJK_UidF80    (0x9FD5) /* Unicode 8.0 */
 #define CJK_UidF100   (0x9FEA) /* Unicode 10.0 */
+#define CJK_UidF110   (0x9FEF) /* Unicode 10.0 */
 
 #define CJK_ExtAIni   (0x3400) /* Unicode 3.0 */
 #define CJK_ExtAFin   (0x4DB5) /* Unicode 3.0 */
@@ -80,6 +81,8 @@ static const STDCHAR UnifiedCompat[] = {
 
 #define TangIdeoIni  (0x17000) /* Unicode 9.0 */
 #define TangIdeoFin  (0x187EC) /* Unicode 9.0 */
+#define TangIdeo110  (0x187F1) /* Unicode 11.0 */
+#define TangIdeo120  (0x187F7) /* Unicode 12.0 */
 #define TangCompIni  (0x18800) /* Unicode 9.0 */
 #define TangCompFin  (0x18AF2) /* Unicode 9.0 */
 #define NushuIni     (0x1B170) /* Unicode 10.0 */
@@ -283,6 +286,8 @@ _derivCE_9 (code)
     _derivCE_32 = 6
     _derivCE_34 = 7
     _derivCE_36 = 8
+    _derivCE_38 = 9
+    _derivCE_40 = 10
   PREINIT:
     UV base, aaaa, bbbb;
     U8 a[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
@@ -293,7 +298,8 @@ _derivCE_9 (code)
 	if (codeRange(CJK_CompIni, CJK_CompFin))
 	    basic_unified = (bool)UnifiedCompat[code - CJK_CompIni];
 	else
-	    basic_unified = (ix >= 8 ? (code <= CJK_UidF100) :
+	    basic_unified = (ix >= 9 ? (code <= CJK_UidF110) :
+			     ix >= 8 ? (code <= CJK_UidF100) :
 			     ix >= 6 ? (code <= CJK_UidF80) :
 			     ix == 5 ? (code <= CJK_UidF61) :
 			     ix >= 3 ? (code <= CJK_UidF52) :
@@ -301,9 +307,14 @@ _derivCE_9 (code)
 			     ix == 1 ? (code <= CJK_UidF41) :
 				       (code <= CJK_UidFin));
     } else {
-	if (ix >= 7)
-	    tangut = (codeRange(TangIdeoIni, TangIdeoFin) ||
-		      codeRange(TangCompIni, TangCompFin));
+	if (ix >= 7) {
+	    tangut = (ix >= 10) ? (codeRange(TangIdeoIni, TangIdeo120) ||
+				   codeRange(TangCompIni, TangCompFin)) :
+		     (ix >= 9)  ? (codeRange(TangIdeoIni, TangIdeo110) ||
+				   codeRange(TangCompIni, TangCompFin)) :
+				  (codeRange(TangIdeoIni, TangIdeoFin) ||
+				   codeRange(TangCompIni, TangCompFin));
+	}
 	if (ix >= 8)
 	    nushu = (codeRange(NushuIni, NushuFin));
     }
@@ -389,7 +400,8 @@ _isUIdeo (code, uca_vers)
 	if (codeRange(CJK_CompIni, CJK_CompFin))
 	    basic_unified = (bool)UnifiedCompat[code - CJK_CompIni];
 	else
-	    basic_unified = (uca_vers >= 36 ? (code <= CJK_UidF100) :
+	    basic_unified = (uca_vers >= 38 ? (code <= CJK_UidF110) :
+			     uca_vers >= 36 ? (code <= CJK_UidF100) :
 			     uca_vers >= 32 ? (code <= CJK_UidF80) :
 			     uca_vers >= 24 ? (code <= CJK_UidF61) :
 			     uca_vers >= 20 ? (code <= CJK_UidF52) :
