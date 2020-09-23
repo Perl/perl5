@@ -1,7 +1,7 @@
 +{
-   locale_version => 1.27,
-   entry => <<'ENTRY', # for DUCET v10.0.0
-04D9      ; [.20C1.0020.0002] # CYRILLIC SMALL LETTER SCHWA
-04D8      ; [.20C1.0020.0008] # CYRILLIC CAPITAL LETTER SCHWA
+   locale_version => 1.28,
+   entry => <<'ENTRY', # for DUCET v12.1.0
+04D9      ; [.22A3.0020.0002] # CYRILLIC SMALL LETTER SCHWA
+04D8      ; [.22A3.0020.0008] # CYRILLIC CAPITAL LETTER SCHWA
 ENTRY
 };

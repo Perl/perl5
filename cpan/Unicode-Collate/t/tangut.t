@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..380\n"; } # 5 + 25 x @Versions
+BEGIN { $| = 1; print "1..599\n"; } # 5 + 33 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -33,7 +33,8 @@ ok(1);
 
 #########################
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36);
+my @Versions = ( 8,  9, 11, 14, 16, 18, 20, 22, 24, 26,
+		28, 30, 32, 34, 36, 38, 40, 41);
 
 my $Collator = Unicode::Collate->new(
     table => 'keys.txt',
@@ -53,6 +54,8 @@ ok($Collator->viewSortKey("\x{18AF2}"),
 # Tangut < CJK UI (4E00) < Unassigned.
 
 # 17000..187EC are Tangut Ideographs since UCA_Version 34 (Unicode 9.0).
+# 187ED..187F1 are Tangut Ideographs since UCA_Version 38 (Unicode 11.0).
+# 187F2..187F7 are Tangut Ideographs since UCA_Version 40 (Unicode 12.0).
 # 18800..18AF2 are Tangut Components since UCA_Version 34 (Unicode 9.0).
 
 for my $v (@Versions) {
@@ -65,7 +68,13 @@ for my $v (@Versions) {
     ok($Collator->cmp("\x{18000}", "\x{4E00}") == ($v >= 34 ? -1 : 1));
     ok($Collator->cmp("\x{187EB}", "\x{4E00}") == ($v >= 34 ? -1 : 1));
     ok($Collator->cmp("\x{187EC}", "\x{4E00}") == ($v >= 34 ? -1 : 1));
-    ok($Collator->cmp("\x{187ED}", "\x{4E00}") == 1);
+    ok($Collator->cmp("\x{187ED}", "\x{4E00}") == ($v >= 38 ? -1 : 1));
+    ok($Collator->cmp("\x{187EF}", "\x{4E00}") == ($v >= 38 ? -1 : 1));
+    ok($Collator->cmp("\x{187F1}", "\x{4E00}") == ($v >= 38 ? -1 : 1));
+    ok($Collator->cmp("\x{187F2}", "\x{4E00}") == ($v >= 40 ? -1 : 1));
+    ok($Collator->cmp("\x{187F4}", "\x{4E00}") == ($v >= 40 ? -1 : 1));
+    ok($Collator->cmp("\x{187F7}", "\x{4E00}") == ($v >= 40 ? -1 : 1));
+    ok($Collator->cmp("\x{187F8}", "\x{4E00}") == 1);
     ok($Collator->cmp("\x{187FE}", "\x{4E00}") == 1);
     ok($Collator->cmp("\x{187FF}", "\x{4E00}") == 1);
     ok($Collator->cmp("\x{18800}", "\x{4E00}") == ($v >= 34 ? -1 : 1));
@@ -81,6 +90,8 @@ for my $v (@Versions) {
     ok($Collator->lt("\x{17FFF}", "\x{18000}"));
     ok($Collator->lt("\x{18000}", "\x{187EB}"));
     ok($Collator->lt("\x{187EB}", "\x{187EC}"));
+    ok($Collator->lt("\x{187ED}", "\x{187EE}"));
+    ok($Collator->lt("\x{187F0}", "\x{187F1}"));
 
     ok($Collator->lt("\x{18800}", "\x{18801}"));
     ok($Collator->lt("\x{18801}", "\x{18AF1}"));
