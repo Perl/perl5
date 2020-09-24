@@ -1,0 +1,32 @@
+Changes				Time::HiRes extension
+hints/aix.pl			Hints for Time::HiRes for named architecture
+hints/dec_osf.pl		Hints for Time::HiRes for named architecture
+hints/dynixptx.pl		Hints for Time::HiRes for named architecture
+hints/irix.pl			Hints for Time::HiRes for named architecture
+hints/linux.pl			Hints for Time::HiRes for named architecture
+hints/sco.pl			Hints for Time::HiRes for named architecture
+hints/solaris.pl		Hints for Time::HiRes for named architecture
+hints/svr4.pl			Hints for Time::HiRes for named architecture
+HiRes.pm			Time::HiRes extension
+HiRes.xs			Time::HiRes extension
+Makefile.PL			Time::HiRes extension
+MANIFEST			Time::HiRes extension
+MANIFEST.SKIP
+META.json			Module JSON meta-data (added by MakeMaker)
+META.yml			Module YAML meta-data (added by MakeMaker)
+ppport.h			Devel::PPPort code
+README				Time::HiRes extension
+t/alarm.t			Test for Time::HiRes::alarm
+t/clock.t			Test for Time::HiRes::clock*
+t/gettimeofday.t		Test for Time::HiRes::gettimeofday
+t/itimer.t			Test for Time::HiRes::*itimer
+t/nanosleep.t			Test for Time::HiRes::nanosleep
+t/sleep.t			Test for Time::HiRes::sleep
+t/stat.t			Test for Time::HiRes::stat
+t/time.t			Test for Time::HiRes::time
+t/tv_interval.t			Test for two-arg Time::HiRes::tv_interval
+t/ualarm.t			Test for Time::HiRes::ualarm
+t/usleep.t			Test for Time::HiRes::usleep
+t/utime.t			Test for Time::HiRes::utime
+t/Watchdog.pm			Watchdog for timing tests
+typemap				Time::HiRes extension

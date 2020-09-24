@@ -4031,6 +4031,11 @@ dist/Time-HiRes/hints/svr4.pl		Hints for Time::HiRes for named architecture
 dist/Time-HiRes/HiRes.pm		Time::HiRes extension
 dist/Time-HiRes/HiRes.xs		Time::HiRes extension
 dist/Time-HiRes/Makefile.PL		Time::HiRes extension
+dist/Time-HiRes/MANIFEST			Time::HiRes extension
+dist/Time-HiRes/MANIFEST.SKIP			Time::HiRes extension
+dist/Time-HiRes/META.json			Time::HiRes extension
+dist/Time-HiRes/META.yml			Time::HiRes extension
+dist/Time-HiRes/README			Time::HiRes extension
 dist/Time-HiRes/t/alarm.t		Test for Time::HiRes
 dist/Time-HiRes/t/clock.t		Test for Time::HiRes
 dist/Time-HiRes/t/gettimeofday.t	Test for Time::HiRes

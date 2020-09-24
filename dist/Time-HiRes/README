@@ -1,0 +1,28 @@
+Time::HiRes module: High resolution time, sleep, and alarm.
+
+Implement usleep, ualarm, and gettimeofday for Perl, as well as wrappers
+to implement time, sleep, and alarm that know about non-integral seconds.
+
+Note: the tests of this module are by definition time sensitive: under
+heavy loads the tests may fail.  Reasonable relaxed criteria are being
+used for the tests but sometimes you may still see transient failures.
+Rerun the tests (make test) a couple of times, preferably with less
+load on the testing machine.
+
+Also, older versions of Perl do not support '-nolinenumbers' on the XSUBPP
+command, however, 5.004_03 requires it (on my box, anyway) since the #line
+generating code in XSUBPP appears to have problems with #ifdef'd .xs code.
+If xsubpp complains about usage when you do a make, look at the top of
+the Makefile.PL and comment out the "$XSOPT=" line. Or upgrade to a
+newer version of Perl.
+
+POD documentation is embedded.
+
+Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002 Douglas E. Wegscheid.
+
+Copyright (c) 2002, 2003, 2004, 2005 Jarkko Hietaniemi.  All rights reserved.
+
+Copyright (C) 2011, 2012, 2013 Andrew Main (Zefram) <zefram@fysh.org>
+
+All rights reserved. This program is free software; you can 
+redistribute it and/or modify it under the same terms as Perl itself.
