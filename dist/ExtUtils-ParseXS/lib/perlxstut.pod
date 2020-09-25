@@ -395,11 +395,27 @@ Edit the Makefile.PL file so that the corresponding line looks like this:
 Generate the Makefile and run make.  Change the test number in Mytest.t to
 "9" and add the following tests:
 
-	$i = -1.5; &Mytest::round($i); is( $i, -2.0 );
-	$i = -1.1; &Mytest::round($i); is( $i, -1.0 );
-	$i = 0.0; &Mytest::round($i);  is( $i,  0.0 );
-	$i = 0.5; &Mytest::round($i);  is( $i,  1.0 );
-	$i = 1.2; &Mytest::round($i);  is( $i,  1.0 );
+	my $i;
+
+	$i = -1.5;
+	&Mytest::round($i);
+	is( $i, -2.0, 'Rounding -1.5 to -2.0' );
+
+	$i = -1.1;
+	&Mytest::round($i);
+	is( $i, -1.0, 'Rounding -1.1 to -1.0' );
+
+	$i = 0.0;
+	&Mytest::round($i);
+	is( $i, 0.0, 'Rounding 0.0 to 0.0' );
+
+	$i = 0.5;
+	&Mytest::round($i);
+	is( $i, 1.0, 'Rounding 0.5 to 1.0' );
+
+	$i = 1.2;
+	&Mytest::round($i);
+	is( $i, 1.0, 'Rounding 1.2 to 1.0' );
 
 Running "C<make test>" should now print out that all nine tests are okay.
 
