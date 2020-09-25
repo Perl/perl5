@@ -53,6 +53,12 @@ If the array C<av> is empty, this returns -1; otherwise it returns the maximum
 value of the indices of all the array elements which are currently defined in
 C<av>.  It does not handle magic, hence the C<p> private indication in its name.
 
+=for apidoc Am|SV**|AvARRAY|AV* av
+Returns a pointer to the AV's internal SV* array.
+
+This is useful for doing pointer arithmetic on the array.
+If all you need is to look up an array element, then prefer C<av_fetch>.
+
 =cut
 */
 
