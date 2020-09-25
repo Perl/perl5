@@ -89,8 +89,7 @@ resolution order under multiple inheritance. It was first introduced in
 the language Dylan (see links in the L</"SEE ALSO"> section), and then
 later adopted as the preferred MRO (Method Resolution Order) for the
 new-style classes in Python 2.3. Most recently it has been adopted as the
-"canonical" MRO for Raku classes, and the default MRO for Parrot objects
-as well.
+"canonical" MRO for Raku classes.
 
 =head2 How does C3 work
 
