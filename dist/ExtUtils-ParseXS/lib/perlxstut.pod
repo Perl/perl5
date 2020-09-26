@@ -1401,7 +1401,7 @@ Some systems may have installed Perl version 5 as "perl5".
 =head1 See also
 
 For more information, consult L<perlguts>, L<perlapi>, L<perlxs>, L<perlmod>,
-and L<perlpod>.
+L<perlapio>, and L<perlpod>
 
 =head1 Author
 
