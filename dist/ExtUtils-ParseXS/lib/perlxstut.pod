@@ -550,7 +550,7 @@ In the mylib directory, create a file mylib.h that looks like this:
 Also create a file mylib.c that looks like this:
 
 	#include <stdlib.h>
-	#include "./mylib.h"
+	#include "mylib.h"
 
 	double
 	foo(int a, long b, const char *c)
@@ -592,7 +592,7 @@ on Win32 systems.
 We will now create the main top-level Mytest2 files.  Change to the directory
 above Mytest2 and run the following command:
 
-	% h2xs -O -n Mytest2 ./Mytest2/mylib/mylib.h
+	% h2xs -O -n Mytest2 Mytest2/mylib/mylib.h
 
 This will print out a warning about overwriting Mytest2, but that's okay.
 Our files are stored in Mytest2/mylib, and will be untouched.
