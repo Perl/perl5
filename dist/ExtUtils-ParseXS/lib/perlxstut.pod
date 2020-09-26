@@ -1033,8 +1033,11 @@ after the include of "XSUB.h":
 Also add the following code segment to Mytest.t while incrementing the "9"
 tests to "11":
 
+    my @a;
+
 	@a = &Mytest::statfs("/blech");
 	ok( scalar(@a) == 1 && $a[0] == 2 );
+
 	@a = &Mytest::statfs("/");
 	is( scalar(@a), 7 );
 
@@ -1168,7 +1171,7 @@ Mytest.xs:
 And add the following code to Mytest.t, while incrementing the "11"
 tests to "13":
 
-	$results = Mytest::multi_statfs([ '/', '/blech' ]);
+	my $results = Mytest::multi_statfs([ '/', '/blech' ]);
 	ok( ref $results->[0] );
 	ok( ! ref $results->[1] );
 
