@@ -276,9 +276,9 @@ when the test is correct, "not ok" when it is not.
     # so read its man page ( perldoc Test::More ) for help writing this
     # test script.
 
-    is(&Mytest::is_even(0), 1);
-    is(&Mytest::is_even(1), 0);
-    is(&Mytest::is_even(2), 1);
+    is( Mytest::is_even(0), 1 );
+    is( Mytest::is_even(1), 0 );
+    is( Mytest::is_even(2), 1 );
 
 We will be calling the test script through the command "C<make test>".  You
 should see output that looks something like this:
@@ -398,23 +398,23 @@ Generate the Makefile and run make.  Change the test number in Mytest.t to
 	my $i;
 
 	$i = -1.5;
-	&Mytest::round($i);
+	Mytest::round($i);
 	is( $i, -2.0, 'Rounding -1.5 to -2.0' );
 
 	$i = -1.1;
-	&Mytest::round($i);
+	Mytest::round($i);
 	is( $i, -1.0, 'Rounding -1.1 to -1.0' );
 
 	$i = 0.0;
-	&Mytest::round($i);
+	Mytest::round($i);
 	is( $i, 0.0, 'Rounding 0.0 to 0.0' );
 
 	$i = 0.5;
-	&Mytest::round($i);
+	Mytest::round($i);
 	is( $i, 1.0, 'Rounding 0.5 to 1.0' );
 
 	$i = 1.2;
-	&Mytest::round($i);
+	Mytest::round($i);
 	is( $i, 1.0, 'Rounding 1.2 to 1.0' );
 
 Running "C<make test>" should now print out that all nine tests are okay.
@@ -423,7 +423,7 @@ Notice that in these new test cases, the argument passed to round was a
 scalar variable.  You might be wondering if you can round a constant or
 literal.  To see what happens, temporarily add the following line to Mytest.t:
 
-	&Mytest::round(3);
+	Mytest::round(3);
 
 Run "C<make test>" and notice that Perl dies with a fatal error.  Perl won't
 let you change the value of constants!
@@ -661,9 +661,9 @@ the mylib directory and run make in there as well.
 Now edit the Mytest2.t script and change the number of tests to "4",
 and add the following lines to the end of the script:
 
-	is( &Mytest2::foo(1, 2, "Hello, world!"), 7 );
-	is( &Mytest2::foo(1, 2, "0.0"), 7 );
-	ok( abs(&Mytest2::foo(0, 0, "-3.4") - 0.6) <= 0.01 );
+	is( Mytest2::foo( 1, 2, "Hello, world!" ), 7 );
+	is( Mytest2::foo( 1, 2, "0.0" ),           7 );
+	ok( abs( Mytest2::foo( 0, 0, "-3.4" ) - 0.6 ) <= 0.01 );
 
 (When dealing with floating-point comparisons, it is best to not check for
 equality, but rather that the difference between the expected and actual
@@ -1035,10 +1035,10 @@ tests to "11":
 
     my @a;
 
-	@a = &Mytest::statfs("/blech");
+	@a = Mytest::statfs("/blech");
 	ok( scalar(@a) == 1 && $a[0] == 2 );
 
-	@a = &Mytest::statfs("/");
+	@a = Mytest::statfs("/");
 	is( scalar(@a), 7 );
 
 =head2 New Things in this Example
