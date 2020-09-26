@@ -603,12 +603,12 @@ will be generating a library in it.  Let's add the argument MYEXTLIB to
 the WriteMakefile call so that it looks like this:
 
 	WriteMakefile(
-	    'NAME'      => 'Mytest2',
+	    'NAME'         => 'Mytest2',
 	    'VERSION_FROM' => 'Mytest2.pm', # finds $VERSION
-	    'LIBS'      => [''],   # e.g., '-lm'
-	    'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'
-	    'INC'       => '',     # e.g., '-I/usr/include/other'
-	    'MYEXTLIB' => 'mylib/libmylib$(LIB_EXT)',
+	    'LIBS'         => [''],   # e.g., '-lm'
+	    'DEFINE'       => '',     # e.g., '-DHAVE_SOMETHING'
+	    'INC'          => '',     # e.g., '-I/usr/include/other'
+	    'MYEXTLIB'     => 'mylib/libmylib$(LIB_EXT)',
 	);
 
 and then at the end add a subroutine (which will override the pre-existing
