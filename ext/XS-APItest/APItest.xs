@@ -374,7 +374,7 @@ blockhook_csc_start(pTHX_ int full)
     SAVEGENERICSV(GvAV(MY_CXT.cscgv));
 
     if (cur) {
-        I32 i;
+        Size_t i;
         AV *const new_av = newAV();
 
         for (i = 0; i < av_count(cur); i++) {
