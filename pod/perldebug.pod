@@ -676,9 +676,9 @@ working example of something along the lines of:
 =head2 Configurable Options
 
 The debugger has numerous options settable using the C<o> command,
-either interactively or from the environment or an rc file.
-(./.perldb or ~/.perldb under Unix.)
-
+either interactively or from the environment or an rc file. The file
+is named F<./.perldb> or F<~/.perldb> under Unix with F</dev/tty>,
+F<perldb.ini> otherwise.
 
 =over 12
 
