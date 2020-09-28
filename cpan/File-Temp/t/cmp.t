@@ -7,7 +7,7 @@ use strict;
 BEGIN {use_ok( "File::Temp" ); }
 
 {
-  my $fh = File::Temp->new();
+  my $fh = new File::Temp();
   isa_ok ($fh, 'File::Temp');
 
   ok( "$fh" ne "foo", "compare stringified object with string");

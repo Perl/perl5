@@ -2,7 +2,7 @@
 # Test for File::Temp - tempfile function
 
 use strict;
-use Test::More tests => 30;
+use Test::More tests => 28;
 use File::Spec;
 use Cwd qw/ cwd /;
 
@@ -100,31 +100,13 @@ ok( (-f $tempfile ), "Local tempfile in tempdir exists");
 push(@files, File::Spec->rel2abs($tempfile));
 
 # Test tempfile
-# ..and another with default permissions
+# ..and another with changed permissions (read-only)
 ($fh, $tempfile) = tempfile(
-			    DIR => $tempdir,
-			   );
+                           DIR => $tempdir,
+                          );
+chmod 0444, $tempfile;
 
-ok( (-f $tempfile && -r _ && -w _),
-    "Created tempfile with default permissions" );
-push(@files, File::Spec->rel2abs($tempfile));
-
-# Test tempfile
-# ..and another with changed permissions
-($fh, $tempfile) = tempfile(
-			    DIR => $tempdir,
-			    PERMS => 0400,
-			   );
-
-# From perlport on chmod:
-#
-#     (Win32) Only good for changing "owner" read-write access;
-#     "group" and "other" bits are meaningless.
-#
-# So don't check actual file permissions -- it will be 0444 on Win32
-# instead of 0400.  Instead, just check that no longer writable.
-ok( (-f $tempfile && -r _ && ! -w _),
-    "Created tempfile with changed permissions" );
+ok( (-f $tempfile ), "Local tempfile in tempdir exists read-only");
 push(@files, File::Spec->rel2abs($tempfile));
 
 print "# TEMPFILE: Created $tempfile\n";
