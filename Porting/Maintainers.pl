@@ -816,9 +816,9 @@ use File::Glob qw(:case);
     },
 
     'MIME::Base64' => {
-        'DISTRIBUTION' => 'GAAS/MIME-Base64-3.15.tar.gz',
+        'DISTRIBUTION' => 'CAPOEIRAB/MIME-Base64-3.16.tar.gz',
         'FILES'        => q[cpan/MIME-Base64],
-        'EXCLUDED'     => ['t/bad-sv.t'],
+        'EXCLUDED'     => [ qr{^xt/}, 'benchmark', 'benchmark-qp', qr{^t/00-report-prereqs} ],
     },
 
     'Module::CoreList' => {
