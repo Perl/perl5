@@ -291,10 +291,9 @@ PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val);
 			__attribute__warn_unused_result__; */
 #define PERL_ARGS_ASSERT_AV_TINDEX
 
-PERL_CALLCONV SSize_t	Perl_av_top_index(pTHX_ AV *av)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
-	assert(av)
+/* PERL_CALLCONV SSize_t	av_top_index(pTHX_ AV *av)
+			__attribute__warn_unused_result__; */
+#define PERL_ARGS_ASSERT_AV_TOP_INDEX
 
 PERL_CALLCONV void	Perl_av_undef(pTHX_ AV *av);
 #define PERL_ARGS_ASSERT_AV_UNDEF	\

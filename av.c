@@ -1095,16 +1095,6 @@ Perl_av_nonelem(pTHX_ AV *av, SSize_t ix) {
     return sv;
 }
 
-SSize_t
-Perl_av_top_index(pTHX_ AV *av)
-{
-    PERL_ARGS_ASSERT_AV_TOP_INDEX;
-    assert(SvTYPE(av) == SVt_PVAV);
-
-    return AvFILL(av);
-}
-
-
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

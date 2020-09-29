@@ -637,7 +637,7 @@ Apd	|void	|av_push	|NN AV *av|NN SV *val
 EXp	|void	|av_reify	|NN AV *av
 ApdR	|SV*	|av_shift	|NN AV *av
 Apd	|SV**	|av_store	|NN AV *av|SSize_t key|NULLOK SV *val
-AMdRp	|SSize_t|av_top_index	|NN AV *av
+AmdR	|SSize_t|av_top_index	|NN AV *av
 AidRp	|Size_t	|av_count	|NN AV *av
 AmdR	|SSize_t|av_tindex	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
