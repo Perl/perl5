@@ -9,9 +9,8 @@
 
 package Data::Dumper;
 
-BEGIN {
-    $VERSION = '2.175'; # Don't forget to set version and release
-}               # date in POD below!
+use strict;
+use warnings;
 
 #$| = 1;
 
@@ -22,7 +21,17 @@ use constant IS_PRE_516_PERL => $] < 5.016;
 
 use Carp ();
 
+# Globals people alter.
+our ( $Indent, $Trailingcomma, $Purity, $Pad, $Varname, $Useqq, $Terse, $Freezer,
+      $Toaster, $Deepcopy, $Quotekeys, $Bless, $Maxdepth, $Pair, $Sortkeys,
+      $Deparse, $Sparseseen, $Maxrecurse, $Useperl );
+
+our ( @ISA, @EXPORT, @EXPORT_OK, $VERSION );
+
 BEGIN {
+    $VERSION = '2.176'; # Don't forget to set version and release
+                        # date in POD below!
+
     @ISA = qw(Exporter);
     @EXPORT = qw(Dumper);
     @EXPORT_OK = qw(DumperX);
@@ -237,6 +246,7 @@ sub Dump {
 # dump the refs in the current dumper object.
 # expects same args as new() if called via package name.
 #
+our @post;
 sub Dumpperl {
   my($s) = shift;
   my(@out, $val, $name);
@@ -485,7 +495,7 @@ sub _dump {
       if ($s->{deparse}) {
         require B::Deparse;
         my $sub =  'sub ' . (B::Deparse->new)->coderef2text($val);
-        $pad    =  $s->{sep} . $s->{pad} . $s->{apad} . $s->{xpad} x ($s->{level} - 1);
+        my $pad =  $s->{sep} . $s->{pad} . $s->{apad} . $s->{xpad} x ($s->{level} - 1);
         $sub    =~ s/\n/$pad/gs;
         $out   .=  $sub;
       }
