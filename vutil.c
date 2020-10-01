@@ -8,8 +8,6 @@
 #define VERSION_MAX 0x7FFFFFFF
 
 /*
-=for apidoc_section Versioning
-
 =for apidoc prescan_version
 
 Validate that a given string can be parsed as a version object, but doesn't
@@ -573,11 +571,6 @@ Perl_upg_version2(pTHX_ SV *ver, bool qv)
 Perl_upg_version(pTHX_ SV *ver, bool qv)
 #endif
 {
-
-#ifdef dVAR
-    dVAR;
-#endif
-
     const char *version, *s;
 #ifdef SvVOK
     const MAGIC *mg;
@@ -704,7 +697,7 @@ VER_NV:
 #endif
 
 	if (sv) {
-                Perl_sv_catpvf(aTHX_ sv, "%.9" NVff, SvNVX(ver));
+                Perl_sv_setpvf(aTHX_ sv, "%.9" NVff, SvNVX(ver));
 	    len = SvCUR(sv);
 	    buf = SvPVX(sv);
 	}
@@ -766,7 +759,6 @@ VER_PV:
 	version = savepvn(SvPV(ver,len), SvCUR(ver));
 	SAVEFREEPV(version);
 #ifndef SvVOK
-#  if PERL_VERSION > 5
 	/* This will only be executed for 5.6.0 - 5.8.0 inclusive */
 	if ( len >= 3 && !instr(version,".") && !instr(version,"_")) {
 	    /* may be a v-string */
@@ -799,7 +791,6 @@ VER_PV:
 		}
 	    }
 	}
-#  endif
 #endif
     }
 #if PERL_VERSION_LT(5,17,2)
