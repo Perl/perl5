@@ -6041,6 +6041,7 @@ t/re/fold_grind_T.t		Wrapper for fold_grind.pl for /l testing with a Turkic loca
 t/re/fold_grind_u.t		Wrapper for fold_grind.pl for /u testing
 t/re/keep_tabs.t		Tests where \t can't be expanded.
 t/re/no_utf8_pm.t		Verify utf8.pm doesn't get loaded unless required
+t/re/opt.t				Test regexp optimizations
 t/re/overload.t		Test against string corruption in pattern matches on overloaded objects
 t/re/pat.t			See if esoteric patterns work
 t/re/pat_advanced.t		See if advanced esoteric patterns work
