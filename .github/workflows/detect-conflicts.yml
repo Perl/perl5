@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
     steps:
+      # improve the chance that the mergeable status is computed
+      - run: sleep 300
       - uses: mschilde/auto-label-merge-conflicts@master
         with:
           CONFLICT_LABEL_NAME: "hasConflicts"
