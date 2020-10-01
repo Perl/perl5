@@ -33,7 +33,7 @@ $VAR1 = bless( {}, 'a\'b' );
 PERL
 
 is($dt, $o, "package name in bless is escaped if needed");
-add_my_to_dump( \$dt );
+no strict 'vars';
 is_deeply(scalar eval($dt), $t, "eval reverts dump");
 }
 
@@ -45,7 +45,7 @@ $VAR1 = bless( {}, 'a\\' );
 PERL
 
 is($dt, $o, "package name in bless is escaped if needed");
-add_my_to_dump( \$dt );
+no strict 'vars';
 is_deeply(scalar eval($dt), $t, "eval reverts dump");
 }
 SKIP: {
@@ -65,11 +65,3 @@ is($dt, $o, "We can dump blessed qr//'s properly");
 }
 
 } # END sub run_tests_for_bless()
-
-sub add_my_to_dump {
-    my $s = shift;
-
-    $$s =~ s{^(\s*)(\$VAR)}{$1 my $2}mg;
-
-    return;
-}
