@@ -5,17 +5,6 @@
 use strict;
 use warnings;
 
-use Config;
-
-BEGIN {
-    if ($ENV{PERL_CORE}){
-        if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-            print "1..0 # Skip: Data::Dumper was not built\n";
-            exit 0;
-        }
-    }
-}
-
 use Data::Dumper;
 use Test::More tests => 22;
 use lib qw( ./t/lib );
