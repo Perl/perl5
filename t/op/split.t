@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 176;
+plan tests => 178;
 
 $FS = ':';
 
@@ -65,6 +65,13 @@ $_ = join(':', split(' ','1 2 3 4 5 6', $x));
 is($_, '1:2:3:4 5 6', "Split into a specified number of fields, defined by a scalar variable");
 @ary = split(' ','1 2 3 4 5 6', $x);
 $cnt = split(' ','1 2 3 4 5 6', $x);
+is($cnt, scalar(@ary), "Check element count from previous test");
+
+# Can we do it with the empty pattern?
+$_ = join(':', split(//, '123', 2));
+is($_, '1:23', "Split into specified number of fields with empty pattern");
+@ary = split(//, '123', 2);
+$cnt = split(//, '123', 2);
 is($cnt, scalar(@ary), "Check element count from previous test");
 
 # Does the 999 suppress null field chopping?
