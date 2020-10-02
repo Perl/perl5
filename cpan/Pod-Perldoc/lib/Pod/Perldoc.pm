@@ -91,7 +91,7 @@ $Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
 #
 # Option accessors...
 
-foreach my $subname (map "opt_$_", split '', q{mhlDriFfXqnTdULva}) {
+foreach my $subname (map "opt_$_", split '', q{mhlDriFfXqnTdULvag}) {
   no strict 'refs';
   *$subname = do{ use strict 'refs';  sub () { shift->_elem($subname, @_) } };
 }
@@ -103,6 +103,7 @@ sub opt_q_with { shift->_elem('opt_q', @_) }
 sub opt_d_with { shift->_elem('opt_d', @_) }
 sub opt_L_with { shift->_elem('opt_L', @_) }
 sub opt_v_with { shift->_elem('opt_v', @_) }
+sub opt_g_with { shift->_elem('opt_g', @_) }
 
 sub opt_w_with { # Specify an option for the formatter subclass
   my($self, $value) = @_;
@@ -272,6 +273,7 @@ perldoc [options] PageName|ModuleName|ProgramName|URL...
 perldoc [options] -f BuiltinFunction
 perldoc [options] -q FAQRegex
 perldoc [options] -v PerlVariable
+perldoc [options] -g GlossaryTerm
 
 Options:
     -h   Display this help message
@@ -298,6 +300,7 @@ Options:
     -f   Search Perl built-in functions
     -a   Search Perl API
     -v   Search predefined Perl variables
+    -g   Search the glossary
 
 PageName|ModuleName|ProgramName|URL...
          is the name of a piece of documentation that you want to look at. You
@@ -313,6 +316,9 @@ BuiltinFunction
 FAQRegex
          is a regex. Will search perlfaq[1-9] for and extract any
          questions that match.
+GlossaryTerm
+         is the name of the glossary item. Will extract subtexts out of items
+         from 'perlglossary'
 
 Any switches in the PERLDOC environment variable will be used before the
 command line arguments.  The optional pod index file contains a list of
@@ -404,6 +410,7 @@ Examples:
     $program_name -q FAQKeywords
     $program_name -v PerlVar
     $program_name -a PerlAPI
+    $program_name -g GlossaryTerm
 
 The -h option prints more help.  Also try "$program_name perldoc" to get
 acquainted with the system.                        [Perldoc v$VERSION]
@@ -532,6 +539,7 @@ sub process {
     elsif( $self->opt_q) { @pages = ("perlfaq1" .. "perlfaq9") }
     elsif( $self->opt_v) { @pages = ("perlvar")                }
     elsif( $self->opt_a) { @pages = ("perlapi")                }
+    elsif( $self->opt_g) { @pages = ("perlglossary")           }
     else                 { @pages = @{$self->{'args'}};
                            # @pages = __FILE__
                            #  if @pages == 1 and $pages[0] eq 'perldoc';
@@ -811,12 +819,13 @@ sub options_sanity {
     # Any sanity-checking need doing here?
 
     # But does not make sense to set either -f or -q in $ENV{"PERLDOC"}
-    if( $self->opt_f or $self->opt_q or $self->opt_a) {
+    if( $self->opt_f or $self->opt_q or $self->opt_a or $self->opt_g) {
     my $count;
     $count++ if $self->opt_f;
     $count++ if $self->opt_q;
     $count++ if $self->opt_a;
-    $self->usage("Only one of -f or -q or -a") if $count > 1;
+    $count++ if $self->opt_g;
+    $self->usage("Only one of -f or -q or -a or -g") if $count > 1;
     $self->warn(
         "Perldoc is meant for reading one file at a time.\n",
         "So these parameters are being ignored: ",
@@ -947,12 +956,15 @@ sub maybe_generate_dynamic_pod {
 
     $self->search_perlfaqs($found_things, \@dynamic_pod)  if  $self->opt_q;
 
-    if( ! $self->opt_f and ! $self->opt_q and ! $self->opt_v and ! $self->opt_a) {
+    $self->search_perlglossary($found_things, \@dynamic_pod) if $self->opt_g;
+
+    if( ! $self->opt_f and ! $self->opt_q and ! $self->opt_v and ! $self->opt_a and ! $self->opt_g) {
         DEBUG > 4 and print "That's a non-dynamic pod search.\n";
     } elsif ( @dynamic_pod ) {
         $self->aside("Hm, I found some Pod from that search!\n");
         my ($buffd, $buffer) = $self->new_tempfile('pod', 'dyn');
-        if ( $] >= 5.008 && $self->opt_L ) {
+        if ( $] >= 5.008 && ($self->opt_L || $self->opt_g) ) {
+            # let's make it UTF-8 by default for glossary items too...
             binmode($buffd, ":encoding(UTF-8)");
             print $buffd "=encoding utf8\n\n";
         }
@@ -960,7 +972,7 @@ sub maybe_generate_dynamic_pod {
         push @{ $self->{'temp_file_list'} }, $buffer;
          # I.e., it MIGHT be deleted at the end.
 
-        my $in_list = !$self->not_dynamic && $self->opt_f || $self->opt_v || $self->opt_a;
+        my $in_list = !$self->not_dynamic && $self->opt_f || $self->opt_v || $self->opt_a || $self->opt_g;
 
         print $buffd "=over 8\n\n" if $in_list;
         print $buffd @dynamic_pod  or $self->die( "Can't print $buffer: $!" );
@@ -1056,6 +1068,7 @@ sub set_encoding {
 
     if ( $encoding =~ /utf-?8/i ) {
         $encoding = ":encoding(UTF-8)";
+        DEBUG > 2 and print "Setting a good encoding to UTF-8...\n";
     }
     else {
         $encoding = ":encoding($encoding)";
@@ -1392,6 +1405,90 @@ sub search_perlfunc {
 }
 
 #..........................................................................
+
+## This is largely cargo-culted from search_perlfunc, culling parts that
+## are of no interest to glossary items. For example, adding translators would
+## need this implemented in target callsites (Currently, I know of no such use for
+## this item). Its arguments are not a regex. We just directly search off
+## =item, so a glossary search for 'signal' would expectedly yield both 'signal'
+## and 'signal handler'
+sub search_perlglossary {
+    my($self, $found_things, $pod) = @_;
+
+    DEBUG > 2 and print "Search: @$found_things\n";
+
+    my $pglossary = shift @$found_things;
+    my $fh = $self->open_fh("<", $pglossary);
+
+    my $search_re = quotemeta($self->opt_g);
+
+    DEBUG > 2 and
+     print "Going to perlglossary-scan for $search_re in $pglossary\n";
+
+    my $re = 'DESCRIPTION';
+
+    # Skip introduction
+    local $_;
+    while (<$fh>) {
+        /^=encoding\s+(\S+)/ && $self->set_encoding($fh, $1);
+        last if /^=head1 (?:$re|DESCRIPTION)/;
+    }
+
+    # Look for our glossary item
+    my $found = 0;
+    my $inlist = 0;
+    my @related;
+    my $related_re;
+    while (<$fh>) {  # "The Mothership Connection is here!"
+        if ( /^=over/ and not $found ) {
+            ++$inlist;
+        }
+        elsif ( /^=back/ and not $found and $inlist ) {
+            --$inlist;
+        }
+
+        if ( m/^=item\s+$search_re\b/ and $inlist < 2 )  {
+            $found = 1;
+        }
+        elsif (@related > 1 and /^=item/) {
+            $related_re ||= join "|", @related;
+            if (m/^=item\s+(?:$related_re)\b/) {
+                $found = 1;
+            }
+            else {
+                last if $found > 1 and $inlist < 2;
+            }
+        }
+        elsif (/^=item|^=back/) {
+            last if $found > 1 and $inlist < 2;
+        }
+        elsif ($found and /^X<[^>]+>/) {
+            push @related, m/X<([^>]+)>/g;
+        }
+        next unless $found;
+        if (/^=over/) {
+            ++$inlist;
+        }
+        elsif (/^=back/) {
+            --$inlist;
+        }
+        push @$pod, $_;
+        ++$found if /^\w/;        # found descriptive text
+    }
+
+    if (!@$pod) {
+        CORE::die( sprintf
+          "No documentation for '%s' found in perl glossary\n",
+          $self->opt_g )
+        ;
+    }
+    close $fh                or $self->die( "Can't close $pglossary: $!" );
+
+    return;
+}
+
+#..........................................................................
+
 
 sub search_perlfaqs {
     my( $self, $found_things, $pod) = @_;
