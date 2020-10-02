@@ -837,9 +837,9 @@ PERL_CALLCONV SV *	Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
 
 PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
 #define PERL_ARGS_ASSERT_DELETE_EVAL_SCOPE
-PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* toend, const char* from, const char* fromend, int delim, I32* retlen);
+PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* to_end, const char* from, const char* from_end, const int delim, I32* retlen);
 #define PERL_ARGS_ASSERT_DELIMCPY	\
-	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
+	assert(to); assert(to_end); assert(from); assert(from_end); assert(retlen)
 PERL_CALLCONV char*	Perl_delimcpy_no_escape(char* to, const char* toend, const char* from, const char* fromend, int delim, I32* retlen);
 #define PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE	\
 	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
