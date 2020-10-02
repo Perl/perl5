@@ -6174,62 +6174,52 @@ PP(pp_split)
 	}
     }
     else if (RX_EXTFLAGS(rx) & RXf_NULL && !(s >= strend)) {
-        /*
-          Pre-extend the stack, either the number of bytes or
-          characters in the string or a limited amount, triggered by:
+        /* This case boils down to deciding which is the smaller of:
+         * limit - effectively a number of characters
+         * slen - which already contains the number of characters in s
+         *
+         * The resulting number is the number of iters (for gimme_scalar)
+         * or the number of SVs to create (!gimme_scalar). */
 
-          my ($x, $y) = split //, $str;
-            or
-          split //, $str, $i;
-        */
-	if (!gimme_scalar) {
-	    const IV items = limit - 1;
-            /* setting it to -1 will trigger a panic in EXTEND() */
-            const SSize_t sslen = slen > SSize_t_MAX ?  -1 : (SSize_t)slen;
-	    if (items >=0 && items < sslen)
-		EXTEND(SP, items);
-	    else
-		EXTEND(SP, sslen);
-	}
-
-        if (do_utf8) {
-            while (--limit) {
-                /* keep track of how many bytes we skip over */
-                m = s;
-                s += UTF8SKIP(s);
-		if (gimme_scalar) {
-		    iters++;
-		    if (s-m == 0)
-			trailing_empty++;
-		    else
-			trailing_empty = 0;
-		} else {
-		    dstr = newSVpvn_flags(m, s-m, SVf_UTF8 | make_mortal);
-
-		    PUSHs(dstr);
-		}
-
-                if (s >= strend)
-                    break;
+        /* setting it to -1 will trigger a panic in EXTEND() */
+        const SSize_t sslen = slen > SSize_t_MAX ?  -1 : (SSize_t)slen;
+        const IV items = limit - 1;
+        if (sslen < items || items < 0) {
+            iters = slen -1;
+            limit = slen + 1;
+            /* Note: The same result is returned if the following block
+             * is removed, because of the "keep field after final delim?"
+             * adjustment, but having the following makes the "correct"
+             * behaviour more apparent. */
+            if (gimme_scalar) {
+                s = strend;
+                iters++;
             }
         } else {
-            while (--limit) {
-	        if (gimme_scalar) {
-		    iters++;
-		} else {
-		    dstr = newSVpvn(s, 1);
-
-
-		    if (make_mortal)
-			sv_2mortal(dstr);
-
-		    PUSHs(dstr);
-		}
-
-                s++;
-
-                if (s >= strend)
-                    break;
+            iters = items;
+        }
+        if (!gimme_scalar) {
+            /*
+              Pre-extend the stack, either the number of bytes or
+              characters in the string or a limited amount, triggered by:
+              my ($x, $y) = split //, $str;
+                or
+              split //, $str, $i;
+            */
+            EXTEND(SP, limit);
+            if (do_utf8) {
+                while (--limit) {
+                    m = s;
+                    s += UTF8SKIP(s);
+                    dstr = newSVpvn_flags(m, s-m, SVf_UTF8 | make_mortal);
+                    PUSHs(dstr);
+                }
+            } else {
+                while (--limit) {
+                    dstr = newSVpvn_flags(s, 1, make_mortal);
+                    PUSHs(dstr);
+                    s++;
+                }
             }
         }
     }
