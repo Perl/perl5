@@ -1,6 +1,9 @@
 package vmsish;
 
-our $VERSION = '1.04';
+use strict;
+use warnings;
+
+our $VERSION = '1.05';
 
 =head1 NAME
 
@@ -111,7 +114,8 @@ See L<perlmod/Perl Modules>.
 
 =cut
 
-my $IsVMS = $^O eq 'VMS';
+my $IsVMS;
+BEGIN { $IsVMS = $^O eq 'VMS' }
 
 sub bits {
     my $bits = 0;

@@ -1,5 +1,8 @@
 #!./perl -w
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
@@ -203,12 +206,12 @@ like $warning,
 
 # These tests use a panic under the hope that the description is not likely
 # to change.
-@runperl_args = (
+my @runperl_args = (
         switches => [ '-Ilib', '-Mdiagnostics' ],
         stderr => 1,
         nolib => 1, # -I../lib would go outside the build dir
 );
-$subs =
+my $subs =
  "sub foo{bar()}sub bar{baz()}sub baz{die q _panic: gremlins_}foo()";
 is runperl(@runperl_args, prog => $subs),
    << 'EOT', 'internal error with backtrace';

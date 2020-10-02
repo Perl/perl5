@@ -1,5 +1,8 @@
 package sigtrap;
 
+use strict;
+use warnings;
+
 =head1 NAME
 
 sigtrap - Perl pragma to enable simple signal handling
@@ -8,8 +11,9 @@ sigtrap - Perl pragma to enable simple signal handling
 
 use Carp;
 
-$VERSION = 1.09;
-$Verbose ||= 0;
+our $VERSION = '1.10';
+our $Verbose;
+our $panic;
 
 sub import {
     my $pkg = shift;
@@ -81,8 +85,8 @@ sub handler_die {
 
 sub handler_traceback {
     package DB;		# To get subroutine args.
-    my $use_print;
-    $SIG{'ABRT'} = DEFAULT;
+    my $use_print = 0;
+    { no strict 'subs'; $SIG{'ABRT'} = DEFAULT; }
     kill 'ABRT', $$ if $panic++;
 
     # This function might be called as an unsafe signal handler, so it
@@ -102,7 +106,7 @@ sub handler_traceback {
         ++$use_print;
     }
 
-    ($pack,$file,$line) = caller;
+    my (undef,$file,$line) = caller;
     unless ($use_print) {
         syswrite(STDERR, $file, length($file));
         syswrite(STDERR, ' line ', 6);
@@ -126,29 +130,30 @@ sub handler_traceback {
     }
 
     # Now go for broke.
+    my ($i,$p,$f,$l,$s,$h,$w,$e,$r, $called, @a, %a, $mess);
     for ($i = 1; ($p,$f,$l,$s,$h,$w,$e,$r) = caller($i); $i++) {
         @a = ();
-	for (@{[@args]}) {
-	    s/([\'\\])/\\$1/g;
-	    s/([^\0]*)/'$1'/
-	      unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
+        for (@{[@DB::args]}) {
+            s/([\'\\])/\\$1/g;
+            s/([^\0]*)/'$1'/
+              unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
             require 'meta_notation.pm';
             $_ = _meta_notation($_) if /[[:^print:]]/a;
-	    push(@a, $_);
-	}
-	$w = $w ? '@ = ' : '$ = ';
-	$a = $h ? '(' . join(', ', @a) . ')' : '';
-	$e =~ s/\n\s*\;\s*\Z// if $e;
-	$e =~ s/[\\\']/\\$1/g if $e;
-	if ($r) {
-	    $s = "require '$e'";
-	} elsif (defined $r) {
-	    $s = "eval '$e'";
-	} elsif ($s eq '(eval)') {
-	    $s = "eval {...}";
-	}
-	$f = "file '$f'" unless $f eq '-e';
-	$mess = "$w$s$a called from $f line $l\n";
+            push(@a, $_);
+        }
+        $w = $w ? '@ = ' : '$ = ';
+        $called = $h ? '(' . join(', ', @a) . ')' : '';
+        $e =~ s/\n\s*\;\s*\Z// if $e;
+        $e =~ s/[\\\']/\\$1/g if $e;
+        if ($r) {
+            $s = "require '$e'";
+        } elsif (defined $r) {
+            $s = "eval '$e'";
+        } elsif ($s eq '(eval)') {
+            $s = "eval {...}";
+        }
+        $f = "file '$f'" unless $f eq '-e';
+        $mess = "$w$s$called called from $f line $l\n";
         if ($use_print) {
             print STDERR $mess;
         }

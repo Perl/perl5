@@ -9,14 +9,18 @@
 # We are now checking that the correct use $version; is present in
 # Makefile.PL and $module.pm
 
+use strict;
+use warnings;
+
+use Config;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    # FIXME (or rather FIXh2xs)
-    require Config;
-    if (($Config::Config{'extensions'} !~ m!\bDevel/PPPort\b!) ){
-	print "1..0 # Skip -- Perl configured without Devel::PPPort module\n";
-	exit 0;
+
+    if (($Config{'extensions'} !~ m!\bDevel/PPPort\b!) ){
+        print "1..0 # Skip -- Perl configured without Devel::PPPort module\n";
+        exit 0;
     }
 }
 
@@ -51,6 +55,7 @@ if ($^O eq 'VMS') {
         my $drop_dot_notype = $ENV{'DECC$READDIR_DROPDOTNOTYPE'} || '';
         $drop_dot = $drop_dot_notype =~ /^[ET1]/i;
     }
+    no strict 'subs';
     $Is_VMS_traildot = 0 if $drop_dot && unix_rpt;
 }
 if (!(-e $extracted_program)) {
@@ -181,9 +186,9 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   # 2>&1 dupe:
   # does it run?
   my $prog = "$^X $lib $extracted_program $args $dupe";
-  @result = `$prog`;
+  my @result = `$prog`;
   cmp_ok ($?, "==", 0, "running $prog ");
-  $result = join("",@result);
+  my $result = join("",@result);
 
   #print "# expectation is >$expectation<\n";
   #print "# result is >$result<\n";

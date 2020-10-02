@@ -1,5 +1,8 @@
 #!./perl -Tw
 
+use strict;
+use warnings;
+
 BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib';
@@ -214,6 +217,7 @@ SKIP: {
         my $db = DB->loadfile($file);
         like( $db, qr!$file\z!, '... should find loaded file from partial name');
 
+        no strict 'refs';
         is( *DB::dbline, *{ "_<$db" } , 
                 '... should set *DB::dbline to associated glob');
         is( $DB::filename, $db, '... should set $DB::filename to file name' );
@@ -226,7 +230,9 @@ SKIP: {
         use vars qw( *baz );
 
         local $DB::filename = 'baz';
+        no strict 'refs';
         local *baz = *{ "main::_<baz" };
+        use strict 'refs';
         
         @baz = map { dualvar(1, $_) } qw( one two three four five );
         %baz = (
@@ -310,7 +316,9 @@ SKIP: {
 # test DB::_find_subline()
 {
         my @foo;
+        no strict 'refs';
         local *{ "::_<foo" } = \@foo;
+        use strict 'refs';
 
         local $DB::package;
         local %DB::sub = (
@@ -357,7 +365,9 @@ SKIP: {
         is( $DB::dbline{3}, "\0\0\0abc", '... should remove break, leaving action');
         is( $DB::dbline{4}, "\0\0\0abc", '... should not remove set actions' );
 
+        no strict 'refs';
         local *{ "::_<foo" } = [ 0, 0, 0, 1 ];
+        use strict 'refs';
 
         local $DB::package;
         local %DB::sub = (
@@ -435,7 +445,9 @@ SKIP: {
         is( $DB::dbline{3}, "123", '... should remove action, leaving break');
         is( $DB::dbline{4}, "abc\0", '... should not remove set breaks' );
 
+        no strict 'refs';
         local *{ "::_<foo" } = [ 0, 0, 0, 1 ];
+        use strict 'refs';
 
         local $DB::package;
         local %DB::sub = (

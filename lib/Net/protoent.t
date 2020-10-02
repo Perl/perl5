@@ -1,12 +1,15 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
 
 BEGIN {
-    our $haspe;
+    my $haspe;
     eval { my @n = getprotobyname "tcp" };
     $haspe = 1 unless $@ && $@ =~ /unimplemented|unsupported/i;
     unless ($haspe) { print "1..0 # Skip: no getprotobyname\n"; exit 0 }
@@ -15,8 +18,9 @@ BEGIN {
     unless ($haspe) { print "1..0 # Skip: no netdb.h\n"; exit 0 }
 }
 
+my @protoent; # This is the function getprotobyname.
 BEGIN {
-    our @protoent = getprotobyname "tcp"; # This is the function getprotobyname.
+    @protoent = getprotobyname "tcp"; # This is the function getprotobyname.
     unless (@protoent) { print "1..0 # Skip: no tcp protocol\n"; exit 0 }
 }
 

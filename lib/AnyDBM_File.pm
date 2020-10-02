@@ -3,7 +3,7 @@ use warnings;
 use strict;
 
 use 5.006_001;
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 our @ISA = qw(NDBM_File DB_File GDBM_File SDBM_File ODBM_File) unless @ISA;
 
 my $mod;

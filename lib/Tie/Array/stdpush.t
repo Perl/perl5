@@ -1,11 +1,15 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.'; 
+    @INC = '.';
     push @INC, '../lib';
 }
 
 use Tie::Array;
-tie @x,Tie::StdArray;
+my @x;
+tie @x, 'Tie::StdArray';
 require "op/push.t"

@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -15,8 +18,9 @@ BEGIN {
     unless ($hasne) { print "1..0 # Skip: no netdb.h\n"; exit 0 }
 }
 
+my @netent;
 BEGIN {
-    our @netent = getnetbyname "loopback"; # This is the function getnetbyname.
+    @netent = getnetbyname "loopback"; # This is the function getnetbyname.
     unless (@netent) { print "1..0 # Skip: no loopback net\n"; exit 0 }
 }
 

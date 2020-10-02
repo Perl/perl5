@@ -2,10 +2,11 @@ package vars;
 
 use 5.006;
 
-our $VERSION = '1.05';
-
+use strict;
+use warnings;
 use warnings::register;
-use strict qw(vars subs);
+
+our $VERSION = '1.06';
 
 sub import {
     my $callpack = caller;
@@ -26,12 +27,13 @@ sub import {
 		}
 	    }
 	    $sym = "${callpack}::$sym" unless $sym =~ /::/;
+	    no strict 'refs';
 	    *$sym =
 		(  $ch eq "\$" ? \$$sym
 		 : $ch eq "\@" ? \@$sym
 		 : $ch eq "\%" ? \%$sym
 		 : $ch eq "\*" ? \*$sym
-		 : $ch eq "\&" ? \&$sym 
+		 : $ch eq "\&" ? \&$sym
 		 : do {
 		     require Carp;
 		     Carp::croak("'$_' is not a valid variable name");

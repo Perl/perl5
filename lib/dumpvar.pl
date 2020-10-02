@@ -1,6 +1,8 @@
 require 5.014;			# For more reliable $@ after eval
 package dumpvar;
 
+no strict; # Needs love
+
 # Needed for PrettyPrinter only:
 
 # require 5.001;  # Well, it coredumps anyway undef DB in 5.000 (not now)

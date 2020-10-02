@@ -4,12 +4,15 @@
 # publicise an API for subclassing B::Deparse they can prevent us from
 # gratuitously breaking conventions that CPAN modules already use.
 
+use strict;
+use warnings;
+
 use Test::More tests => 2;
 
 use B::Deparse;
 
 package B::Deparse::NameMangler {
-  @ISA = "B::Deparse";
+  our @ISA = "B::Deparse";
   sub padname { SUPER::padname{@_} . '_groovy' }
 }
 

@@ -1,13 +1,13 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require './test.pl';
 }
-
-use strict;
-use Config;
 
 plan 16;
 
@@ -64,16 +64,17 @@ fresh_perl_like
     import sigtrap "INT";
     sub { $SIG{INT}->("INT") } -> (3)
   ',
-   qr/\$ = main::__ANON__\(3\) called/,
+   qr/\Q$ = main::__ANON__(3) called\E/,
   { stderr => 1 },
   "stack-trace does not try to modify read-only arguments"
 ;
 
 my $out = tie *STDOUT, 'TieOut';
 $SIG{FAKE} = 'DEFAULT';
-$sigtrap::Verbose = 1;
+$sigtrap::Verbose = $sigtrap::Verbose = 1; # No warnings 'once';
 sigtrap->import('any', 'FAKE');
 my $read = $out->read;
+undef $out;
 untie *STDOUT;
 is( $SIG{FAKE}, \&sigtrap::handler_traceback, 'should set default handler' );
 like( $read, qr/^Installing handler/, 'does it talk with $Verbose set?' );
@@ -81,7 +82,7 @@ like( $read, qr/^Installing handler/, 'does it talk with $Verbose set?' );
 # handler_die croaks with first argument
 eval { sigtrap::handler_die('FAKE') };
 like( $@, qr/^Caught a SIGFAKE/, 'does handler_die() croak?' );
- 
+
 package TieOut;
 
 sub TIEHANDLE {

@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -13,12 +16,13 @@ open(FOO, ">", "foo-$$") || die;
 
 print "ok 1\n";
 {
-    my $saver = new SelectSaver(FOO);
+    my $saver = SelectSaver->new('FOO');
     print "foo\n";
 }
 
 # Get data written to file
 open(FOO, "<", "foo-$$") || die;
+my $foo;
 chomp($foo = <FOO>);
 close FOO;
 unlink "foo-$$";

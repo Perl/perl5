@@ -1,28 +1,32 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
 
+use Config;
+
+my ($uid, @pwent);
 BEGIN {
-    our $haspw;
+    my $haspw;
     eval { my @n = getpwuid 0 };
     $haspw = 1 unless $@ && $@ =~ /unimplemented/;
     unless ($haspw) { print "1..0 # Skip: no getpwuid\n"; exit 0 }
-    use Config;
+
     # VMS's pwd.h struct passwd conflicts with the one in vmsish.h
     $haspw = 0 unless ( $Config{'i_pwd'} eq 'define' || $^O eq 'VMS' );
     unless ($haspw) { print "1..0 # Skip: no pwd.h\n"; exit 0 }
-}
 
-BEGIN {
-    our $uid = 0;
+    $uid = 0;
     # On VMS getpwuid(0) may return [$gid,0] UIC info (which may not exist).
     # It is better to use the $< uid for testing on VMS instead.
     if ( $^O eq 'VMS' ) { $uid = $< ; }
     if ( $^O eq 'cygwin' ) { $uid = 500 ; }
-    our @pwent = getpwuid $uid; # This is the function getpwuid.
+    @pwent = getpwuid $uid; # This is the function getpwuid.
     unless (@pwent) { print "1..0 # Skip: no uid $uid\n"; exit 0 }
 }
 

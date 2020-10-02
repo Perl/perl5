@@ -1,8 +1,11 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib'; 
+    @INC = '../lib';
 }
 
 my $perl = $^X;
@@ -10,21 +13,28 @@ $perl = VMS::Filespec::vmsify($perl) if $^O eq 'VMS';
 
 my $Invoke_Perl = qq(MCR $perl "-I[-.lib]");
 
-use Test::More tests => 29;
+use Test::More;
 
-SKIP: {
-    skip("tests for non-VMS only", 1) if $^O eq 'VMS';
+no utf8;
 
-    no utf8;
+# use/no happen at BEGIN time and $^H is only accurate at BEGIN.
+BEGIN {
+    if($^O ne 'VMS') {
+        plan tests => 2;
+        my $Orig_Bits = $^H;
 
-    BEGIN { $Orig_Bits = $^H }
+        use vmsish qw(status);
+        # make sure that all those 'use vmsish' calls didn't do anything.
+        is( $^H, $Orig_Bits, 'use vmsish a no-op' );
 
-    # make sure that all those 'use vmsish' calls didn't do anything.
-    is( $Orig_Bits, $^H,    'use vmsish a no-op' );
+        no vmsish;
+        is( $^H, $Orig_Bits, 'no vmsish a no-op' );
+        exit;
+    }
 }
 
-SKIP: {
-    skip("tests for VMS only", 28) unless $^O eq 'VMS';
+# VMS tests here.
+plan tests => 28;
 
 #========== vmsish status ==========
 `$Invoke_Perl -e 1`;  # Avoid system() from a pipe from harness.  Mutter.
@@ -50,7 +60,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
 {
   use vmsish qw(status);
 
-  $msg = do_a_perl('-e "exit 1"');
+  my $msg = do_a_perl('-e "exit 1"');
     $msg =~ s/\n/\\n/g; # keep output on one line
   like($msg, qr/ABORT/, "POSIX ERR exit, DCL error message check");
   is($?&1,0,"vmsish status check, POSIX ERR exit");
@@ -122,13 +132,13 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
 {
   my($utctime, @utclocal, @utcgmtime, $utcmtime,
      $vmstime, @vmslocal, @vmsgmtime, $vmsmtime,
-     $utcval,  $vmaval, $offset);
+     $utcval,  $vmaval, $offset, $vmsval);
   # Make sure apparent local time isn't GMT
   if (not $ENV{'SYS$TIMEZONE_DIFFERENTIAL'}) {
-    $oldtz = $ENV{'SYS$TIMEZONE_DIFFERENTIAL'};
+    my $oldtz = $ENV{'SYS$TIMEZONE_DIFFERENTIAL'};
     $ENV{'SYS$TIMEZONE_DIFFERENTIAL'} = 3600;
     eval "END { \$ENV{'SYS\$TIMEZONE_DIFFERENTIAL'} = $oldtz; }";
-    gmtime(0); # Force reset of tz offset
+    # gmtime(0); # Force reset of tz offset # Useless use of gmtime in void context
   }
 
   # Unless we are prepared to parse the timezone rules here and figure out
@@ -139,7 +149,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   my $file = 'sys$scratch:vmsish_t_flirble.tmp';
   open TMP, '>', $file or die "Couldn't open file $file";
   close TMP;
-  END { 1 while unlink $file; }
+  END { 1 while $file && unlink $file; }
 
   {
      use_ok('vmsish', 'time');
@@ -180,7 +190,6 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   print "# UTC: @utcgmtime\n# VMS: @vmsgmtime\n";
 
   ok(abs($utcmtime - $vmsmtime + $offset) <= 10,"(stat) UTC: $utcmtime  VMS: $vmsmtime");
-}
 }
 
 #====== need this to make sure error messages come out, even if

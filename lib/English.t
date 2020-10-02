@@ -1,6 +1,8 @@
 #!./perl -i.inplace
 # note the extra switch, for the test below
 
+use strict;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -24,9 +26,12 @@ foo(1);
 
 "abc" =~ /b/;
 
-ok( !$PREMATCH, '$PREMATCH undefined' );
-ok( !$MATCH, '$MATCH undefined' );
-ok( !$POSTMATCH, '$POSTMATCH undefined' );
+{
+    no strict 'vars'; # Test that the import didn't happen.
+    ok( !$PREMATCH, '$PREMATCH undefined' );
+    ok( !$MATCH, '$MATCH undefined' );
+    ok( !$POSTMATCH, '$POSTMATCH undefined' );
+}
 
 $OFS = " ";
 $ORS = "\n";
@@ -67,15 +72,15 @@ is( $ACCUMULATOR, $^A, '$ACCUMULATOR' );
 
 undef $OUTPUT_FIELD_SEPARATOR;
 
-if ($threads) { $" = "\n" } else { $LIST_SEPARATOR = "\n" };
-@foo = (8, 9);
+$LIST_SEPARATOR = "\n"; # This used to be variable for 5.005 threads.
+my @foo = (8, 9);
 @foo = split(/\n/, "@foo");
 is( $foo[0], 8, '$"' );
 is( $foo[1], 9, '$LIST_SEPARATOR' );
 
 undef $OUTPUT_RECORD_SEPARATOR;
 
-eval 'NO SUCH FUNCTION';
+eval 'no strict q|subs|; NO SUCH FUNCTION';
 like( $EVAL_ERROR, qr/method/, '$EVAL_ERROR' );
 
 is( $UID, $<, '$UID' );
@@ -118,7 +123,7 @@ is( $INPUT_LINE_NUMBER, 2, '$INPUT_LINE_NUMBER' );
 
 my %hash;
 $SUBSCRIPT_SEPARATOR = '|';
-$hash{d,e,f} = 1;
+$hash{'d', 'e', 'f'} = 1;
 $SUBSEP = ',';
 $hash{'a', 'b', 'c'} = 1;
 my @keys = sort keys %hash;
@@ -155,9 +160,12 @@ use English qw( -no_match_vars ) ;
 
 "abc" =~ /b/;
 
-main::ok( !$PREMATCH, '$PREMATCH disabled' );
-main::ok( !$MATCH, '$MATCH disabled' );
-main::ok( !$POSTMATCH, '$POSTMATCH disabled' );
+{
+    no strict 'vars';
+    main::ok( !$PREMATCH, '$PREMATCH disabled' );
+    main::ok( !$MATCH, '$MATCH disabled' );
+    main::ok( !$POSTMATCH, '$POSTMATCH disabled' );
+}
 
 
 # Check that both variables change when localized.

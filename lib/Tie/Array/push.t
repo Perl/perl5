@@ -1,15 +1,18 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.'; 
+    @INC = '.';
     push @INC, '../lib';
-}    
+}
 
 {
  package Basic;
  use Tie::Array;
- @ISA = qw(Tie::Array);
+ our @ISA = qw(Tie::Array);
 
  sub TIEARRAY  { return bless [], shift }
  sub FETCH     { $_[0]->[$_[1]] }
@@ -18,8 +21,8 @@ BEGIN {
  sub STORESIZE { $#{$_[0]} = $_[1]-1 }
 }
 
-tie @x,Basic;
-tie @get,Basic;
-tie @got,Basic;
-tie @tests,Basic;
+tie our @x, 'Basic';
+tie our @get, 'Basic';
+tie our @got, 'Basic';
+tie our @tests, 'Basic';
 require "op/push.t"

@@ -1,27 +1,30 @@
 #!./perl -w
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
 
 use Test::More;
+use Config;
 
 BEGIN {
-    require Config; import Config;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) 
     {
-	plan skip_all => "Test uses Socket, Socket not built";
+        plan skip_all => "Test uses Socket, Socket not built";
     }
     if ($^O eq 'irix' && $Config{osvers} == 5) {
-	plan skip_all => "Test relies on resolution of localhost, fails on $^O ($Config{osvers})";
+        plan skip_all => "Test relies on resolution of localhost, fails on $^O ($Config{osvers})";
     }
+
+    plan tests => 7;
+
+    use_ok 'Net::hostent';
 }
-
-use Test::More tests => 7;
-
-BEGIN { use_ok 'Net::hostent' }
 
 # Remind me to add this to Test::More.
 sub DIE {

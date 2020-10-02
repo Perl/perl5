@@ -1,5 +1,7 @@
 #!./perl
+
 use strict;
+use warnings;
 
 # Test charnames.pm.  If $ENV{PERL_RUN_SLOW_TESTS} is unset or 0, a random
 # selection of names is tested, a higher percentage of regular names is tested

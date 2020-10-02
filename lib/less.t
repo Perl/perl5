@@ -1,5 +1,8 @@
 #!./perl -w
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     push @INC, '../lib';
@@ -12,7 +15,7 @@ BEGIN {
 
     package less::again;
     sub stash_name {'less'}
-    @ISA = 'less';
+    our @ISA = 'less';
     $INC{'less/again.pm'} = 1;
 }
 

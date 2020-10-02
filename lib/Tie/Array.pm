@@ -1,9 +1,10 @@
 package Tie::Array;
 
-use 5.006_001;
 use strict;
+use strict;
+
 use Carp;
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 # Pod documentation after __END__ below.
 
@@ -145,7 +146,7 @@ Tie::Array - base class for tied arrays
     package Tie::NewStdArray;
     use Tie::Array;
 
-    @ISA = ('Tie::StdArray');
+    our @ISA = ('Tie::StdArray');
 
     # all methods provided by default
 
