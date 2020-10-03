@@ -683,8 +683,8 @@ C<qr//blahblah> op.
 C<B::PMOP> now provides a C<pmregexp> method returning a C<B::REGEXP> object.
 Two new classes, C<B::PADNAME> and C<B::PADNAMELIST>, have been introduced.
 
-A bug where, after an ithread creation or psuedofork, special/immortal SVs in
-the child ithread/psuedoprocess did not have the correct class of
+A bug where, after an ithread creation or pseudofork, special/immortal SVs in
+the child ithread/pseudoprocess did not have the correct class of
 C<B::SPECIAL>, has been fixed.
 The C<id> and C<outid> PADLIST methods have been added.
 

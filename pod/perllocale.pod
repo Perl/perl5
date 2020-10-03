@@ -377,7 +377,7 @@ example,
  use locale ':!ctype';
  use locale ':not_ctype';
 
-both of which mean to enable locale awarness of all categories but
+both of which mean to enable locale awareness of all categories but
 C<LC_CTYPE>.  Only one category argument may be specified in a
 S<C<use locale>> if it is of the negated form.
 

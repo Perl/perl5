@@ -1481,7 +1481,7 @@ directly.
 This function is for code that needs to know what the precise malformation(s)
 are when an error is found, and wants the corresponding warning and/or error
 messages to be returned to the caller rather than be displayed.  All messages
-that would have been displayed if all lexcial warnings are enabled will be
+that would have been displayed if all lexical warnings are enabled will be
 returned.
 
 It is just like C<L</utf8n_to_uvchr_error>> but it takes an extra parameter

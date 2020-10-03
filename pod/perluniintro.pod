@@ -151,7 +151,7 @@ serious Unicode work.  The maintenance release 5.6.1 fixed many of the
 problems of the initial Unicode implementation, but for example
 regular expressions still do not work with Unicode in 5.6.1.
 Perl v5.14.0 is the first release where Unicode support is
-(almost) seamlessly integrable without some gotchas. (There are a few
+(almost) seamlessly integratable without some gotchas. (There are a few
 exceptions. Firstly, some differences in L<quotemeta|perlfunc/quotemeta>
 were fixed starting in Perl 5.16.0. Secondly, some differences in
 L<the range operator|perlop/Range Operators> were fixed starting in

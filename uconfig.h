@@ -220,7 +220,7 @@
 
 /* HAS_MBLEN:
  *	This symbol, if defined, indicates that the mblen routine is available
- *	to find the number of bytes in a multibye character.
+ *	to find the number of bytes in a multibyte character.
  */
 /*#define HAS_MBLEN		/ **/
 
@@ -2986,7 +2986,7 @@
 
 /* HAS_MEMMEM:
  *	This symbol, if defined, indicates that the memmem routine is
- *	available to return a pointer to the start of the first occurance
+ *	available to return a pointer to the start of the first occurrence
  *	of a substring in a memory area (or NULL if not found).
  *	In glibc, memmem is a GNU extension.  The function is visible in
  *	libc, but the prototype is only visible if _GNU_SOURCE is #defined.

@@ -1610,7 +1610,7 @@ d_long_double_style_ieee_extended (d_longdbl.U):
 	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_EXTENDED
 	if the long double is the 80-bit IEEE 754 extended precision.
 	Note that despite the 'extended' this is less than the 'std',
-	since thisis an extension of the double precision.
+	since this is an extension of the double precision.
 
 d_long_double_style_ieee_std (d_longdbl.U):
 	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_STD
@@ -1679,7 +1679,7 @@ d_malloc_usable_size (d_malloc_size.U):
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available
-	to find the number of bytes in a multibye character.
+	to find the number of bytes in a multibyte character.
 
 d_mbrlen (d_mbrlen.U):
 	This variable conditionally defines the HAS_MBRLEN symbol if the
@@ -1704,7 +1704,7 @@ d_mbtowc (d_mbtowc.U):
 d_memmem (d_memmem.U):
 	This variable conditionally defines the HAS_MEMMEM symbol, which
 	indicates to the C program that the memmem() routine is available
-	to return a pointer to the start of the first occurance of a
+	to return a pointer to the start of the first occurrence of a
 	substring in a memory area (or NULL if not found).
 
 d_memrchr (d_memrchr.U):

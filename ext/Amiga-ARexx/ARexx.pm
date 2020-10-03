@@ -309,7 +309,7 @@ Send the "commandstring" to host "desthost" for execution. Commandstring might b
 
 	$m = $msg->message();
 
-Retreive the message "command" as a string;
+Retrieve the message "command" as a string;
 
 
 =head2 reply

@@ -859,7 +859,7 @@ Return a member of the XOP structure.  C<which> is a cpp token
 indicating which entry to return.  If the member is not set
 this will return a default value.  The return type depends
 on C<which>.  This macro evaluates its arguments more than
-once.  If you are using C<Perl_custom_op_xop> to retreive a
+once.  If you are using C<Perl_custom_op_xop> to retrieve a
 C<XOP *> from a C<OP *>, use the more efficient L</XopENTRYCUSTOM> instead.
 
 =for apidoc Am||XopENTRYCUSTOM|const OP *o|which

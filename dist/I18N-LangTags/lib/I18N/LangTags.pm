@@ -677,7 +677,7 @@ sub alternate_language_tags {
    # And the panic languages for English is, of course, nil!
 
    # My guesses at Slavic intelligibility:
-   ([qw(ru be uk)]) x 2,  # Russian, Belarusian, Ukranian
+   ([qw(ru be uk)]) x 2,  # Russian, Belarusian, Ukrainian
    ([qw(sr hr bs)]) x 2,  # Serbian, Croatian, Bosnian
    'cs' => 'sk', 'sk' => 'cs', # Czech + Slovak
 

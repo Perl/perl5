@@ -2528,7 +2528,7 @@ the other advantages of C<Perl_langinfo()>; not keeping C<LC_NUMERIC> in the C
 =item *
 
 The system function it replaces can have its static return buffer trashed,
-not only by a subesequent call to that function, but by a C<freelocale>,
+not only by a subsequent call to that function, but by a C<freelocale>,
 C<setlocale>, or other locale change.  The returned buffer of this function is
 not changed until the next call to it, so the buffer is never in a trashed
 state.
