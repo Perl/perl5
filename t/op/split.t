@@ -3,8 +3,8 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    require './charset_tools.pl';
     set_up_inc('../lib');
+    require './charset_tools.pl';
 }
 
 plan tests => 178;
