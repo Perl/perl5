@@ -299,6 +299,11 @@ SKIP: {
     $DEV =~ s{^.+?\s\..+?$}{}m;
     @DEV =  grep { ! m{^\..+$} } @DEV;
 
+    # sometimes files cannot be stat'd on cygwin, making inspecting pointless
+    # remove them from both @DEV and $DEV
+    @DEV = grep $DEV =~ s/^.\?{9}.*\s$_(?: -> .*)?$//m ? () : $_, @DEV
+      if $Is_Cygwin;
+
     # Irix ls -l marks sockets with 'S' while 's' is a 'XENIX semaphore'.
     if ($^O eq 'irix') {
         $DEV =~ s{^S(.+?)}{s$1}mg;
@@ -309,7 +314,8 @@ SKIP: {
 	my @c2 = eval qq[grep { $_[1] "/dev/\$_" } \@DEV];
 	my $c1 = scalar @c1;
 	my $c2 = scalar @c2;
-	is($c1, $c2, "ls and $_[1] agreeing on /dev ($c1 $c2)");
+	diag "= before", $DEV, "-", @DEV, "= after", @c1, "-", @c2, "="
+	  unless is($c1, $c2, "ls and $_[1] agreeing on /dev ($c1 $c2)");
     };
 
 {
