@@ -6446,7 +6446,7 @@ Perl_get_c_backtrace(pTHX_ int depth, int skip)
 /*
 =for apidoc free_c_backtrace
 
-Deallocates a backtrace received from get_c_bracktrace.
+Deallocates a backtrace received from get_c_backtrace.
 
 =cut
 */

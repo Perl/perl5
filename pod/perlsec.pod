@@ -608,7 +608,7 @@ take its own security precautions such as turning on taint mode.  Where
 C<sudo> configuration dictates exactly which command can be run, the
 approved command may include a C<-T> option to perl to enable taint mode.
 
-In general, it is necessary to evaluate the suitaility of a script to
+In general, it is necessary to evaluate the suitability of a script to
 run under C<sudo> specifically with that kind of execution environment
 in mind.  It is neither necessary nor sufficient for the same script to
 be suitable to run in a traditional set-id arrangement, though many of

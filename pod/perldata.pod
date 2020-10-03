@@ -126,7 +126,7 @@ rules apply:
 That is, a "start" character followed by any number of "continue"
 characters.  Perl requires every character in an identifier to also
 match C<\w> (this prevents some problematic cases); and Perl
-additionally accepts identfier names beginning with an underscore.
+additionally accepts identifier names beginning with an underscore.
 
 If not under C<use utf8>, the source is treated as ASCII + 128 extra
 generic characters, and identifiers should match

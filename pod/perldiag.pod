@@ -3409,7 +3409,7 @@ The other common cause is for the characters
 
  $ + < = > ^ ` | ~
 
-These are probematic.  The C standard says that these should be
+These are problematic.  The C standard says that these should be
 considered punctuation in the C locale (and the POSIX standard defers to
 the C standard), and Unicode is generally considered a superset of
 the C locale.  But Unicode has added an extra category, "Symbol", and

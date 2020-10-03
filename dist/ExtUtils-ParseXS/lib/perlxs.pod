@@ -2273,7 +2273,7 @@ per-thread locales.  Perl makes this transparent to perl-space code.  It
 continues to use C<POSIX::setlocale()>, and the interpreter translates
 that into the per-thread functions.
 
-All other locale-senstive functions automatically use the per-thread
+All other locale-sensitive functions automatically use the per-thread
 locale, if that is turned on, and failing that, the global locale.  Thus
 calls to C<setlocale> are ineffective on POSIX systems for the current
 thread if that thread is using a per-thread locale.  If perl is compiled

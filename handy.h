@@ -834,7 +834,7 @@ the variants.
 
 =cut
 
-Here and below, we add the protoypes of these macros for downstream programs
+Here and below, we add the prototypes of these macros for downstream programs
 that would be interested in them, such as Devel::PPPort
 
 =for apidoc Am|bool|isALPHANUMERIC|UV ch
@@ -2408,7 +2408,7 @@ typedef U32 line_t;
 #define OCTAL_VALUE(c) (__ASSERT_(isOCTAL(c)) (7 & (c)))
 
 /* Efficiently returns a boolean as to if two native characters are equivalent
- * case-insenstively.  At least one of the characters must be one of [A-Za-z];
+ * case-insensitively.  At least one of the characters must be one of [A-Za-z];
  * the ALPHA in the name is to remind you of that.  This is asserted() in
  * DEBUGGING builds.  Because [A-Za-z] are invariant under UTF-8, this macro
  * works (on valid input) for both non- and UTF-8-encoded bytes.
