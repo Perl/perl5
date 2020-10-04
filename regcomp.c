@@ -12625,33 +12625,31 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         FAIL2("panic: regatom returned failure, flags=%#" UVxf, (UV) flags);
     }
 
-    if (! ISMULT2(RExC_parse)) {
-        *flagp = flags;
-        return(ret);
-    }
-
-    /* Here we know the input is a legal quantifier, including {m,n} */
-
-    op = *RExC_parse;
-
 #ifdef RE_TRACK_PATTERN_OFFSETS
     parse_start = RExC_parse;
 #endif
 
-    if (op != '{') {
-        nextchar(pRExC_state);
+    op = *RExC_parse;
+    switch (op) {
 
-        if (op == '*') {
+      case '*':
+        nextchar(pRExC_state);
             min = 0;
-        }
-        else if (op == '+') {
+        break;
+
+      case '+':
+        nextchar(pRExC_state);
             min = 1;
-        }
-        else if (op == '?') {
+        break;
+
+      case '?':
+        nextchar(pRExC_state);
             min = 0; max = 1;
-        }
-    }
-    else {  /* is '{' */
+        break;
+
+      case '{':  /* A '{' may or may not indicate a quantifier; call regcurly()
+                    to determine which */
+        if (regcurly(RExC_parse)) {
         const char* endptr;
 
             /* Here is a quantifier, parse for min and max values */
@@ -12712,6 +12710,17 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        "Useless use of greediness modifier '%c'",
                        *RExC_parse);
         }
+
+            break;
+        } /* End of is regcurly() */
+
+        /* Here was a '{', but what followed it didn't form a quantifier. */
+        /* FALLTHROUGH */
+
+      default:
+        *flagp = flags;
+        return(ret);
+        NOT_REACHED; /*NOTREACHED*/
     }
 
     /* Here we have a quantifier, and have calculated 'min' and 'max'.
