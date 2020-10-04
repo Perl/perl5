@@ -123,7 +123,7 @@ The file Makefile.PL should look something like this:
         VERSION_FROM => 'Mytest.pm', # finds $VERSION
         LIBS         => [''],        # e.g., '-lm'
         DEFINE       => '',          # e.g., '-DHAVE_SOMETHING'
-        INC          => '',          # e.g., '-I/usr/include/other'
+        INC          => '-I',        # e.g., '-I. -I/usr/include/other'
     );
 
 The file Mytest.pm should start with something like this:
@@ -391,7 +391,7 @@ Add the following to the end of Mytest.xs:
 
 Edit the Makefile.PL file so that the corresponding line looks like this:
 
-	'LIBS'      => ['-lm'],   # e.g., '-lm'
+	LIBS      => ['-lm'],   # e.g., '-lm'
 
 Generate the Makefile and run make.  Change the test number in Mytest.t to
 "9" and add the following tests:
@@ -623,9 +623,7 @@ with "cd"!
 	';
 	}
 
-Let's also fix the MANIFEST file so that it accurately reflects the contents
-of our extension.  The single line that says "mylib" should be replaced by
-the following three lines:
+Let's also fix the MANIFEST file by appending the following three lines:
 
 	mylib/Makefile.PL
 	mylib/mylib.c
@@ -659,7 +657,7 @@ Now run perl on the top-level Makefile.PL.  Notice that it also created a
 Makefile in the mylib directory.  Run make and watch that it does cd into
 the mylib directory and run make in there as well.
 
-Now edit the Mytest2.t script and change the number of tests to "4",
+Now edit the Mytest2.t script and change the number of tests to "5",
 and add the following lines to the end of the script:
 
 	is( Mytest2::foo( 1, 2, "Hello, world!" ), 7 );
@@ -1419,6 +1417,8 @@ by Nick Ing-Simmons.
 
 Changes for h2xs as of Perl 5.8.x by Renee Baecker
 
+This document is now maintained as part of Perl itself.
+
 =head2 Last Changed
 
-2012-01-20
+2020-10-05
