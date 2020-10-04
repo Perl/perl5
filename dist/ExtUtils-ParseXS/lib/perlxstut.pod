@@ -119,11 +119,11 @@ The file Makefile.PL should look something like this:
     # See lib/ExtUtils/MakeMaker.pm for details of how to influence
     # the contents of the Makefile that is written.
     WriteMakefile(
-        'NAME'         => 'Mytest',
-        'VERSION_FROM' => 'Mytest.pm', # finds $VERSION
-        'LIBS'         => [''],        # e.g., '-lm'
-        'DEFINE'       => '',          # e.g., '-DHAVE_SOMETHING'
-        'INC'          => '',          # e.g., '-I/usr/include/other'
+        NAME         => 'Mytest',
+        VERSION_FROM => 'Mytest.pm', # finds $VERSION
+        LIBS         => [''],        # e.g., '-lm'
+        DEFINE       => '',          # e.g., '-DHAVE_SOMETHING'
+        INC          => '',          # e.g., '-I/usr/include/other'
     );
 
 The file Mytest.pm should start with something like this:
@@ -564,9 +564,9 @@ And finally create a file Makefile.PL that looks like this:
 	use ExtUtils::MakeMaker;
 	$Verbose = 1;
 	WriteMakefile(
-	    'NAME'  => 'Mytest2::mylib',
-	    'SKIP'  => [qw(all static static_lib dynamic dynamic_lib)],
-	    'clean' => {'FILES' => 'libmylib$(LIB_EXT)'},
+	    NAME  => 'Mytest2::mylib',
+	    SKIP  => [qw(all static static_lib dynamic dynamic_lib)],
+	    clean => {'FILES' => 'libmylib$(LIB_EXT)'},
 	);
 
 
@@ -604,12 +604,12 @@ will be generating a library in it.  Let's add the argument MYEXTLIB to
 the WriteMakefile call so that it looks like this:
 
 	WriteMakefile(
-	    'NAME'         => 'Mytest2',
-	    'VERSION_FROM' => 'Mytest2.pm', # finds $VERSION
-	    'LIBS'         => [''],   # e.g., '-lm'
-	    'DEFINE'       => '',     # e.g., '-DHAVE_SOMETHING'
-	    'INC'          => '',     # e.g., '-I/usr/include/other'
-	    'MYEXTLIB'     => 'mylib/libmylib$(LIB_EXT)',
+	    NAME         => 'Mytest2',
+	    VERSION_FROM => 'Mytest2.pm', # finds $VERSION
+	    LIBS         => [''],   # e.g., '-lm'
+	    DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
+	    INC          => '',     # e.g., '-I/usr/include/other'
+	    MYEXTLIB     => 'mylib/libmylib$(LIB_EXT)',
 	);
 
 and then at the end add a subroutine (which will override the pre-existing
