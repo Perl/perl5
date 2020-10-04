@@ -12746,6 +12746,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         }
     }
 
+    /* If this is a code block pass it up */
+    *flagp |= (flags & POSTPONED);
+
     if (max > 0)
         *flagp |= (flags & HASWIDTH);
 
