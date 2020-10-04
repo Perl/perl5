@@ -12633,82 +12633,83 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
       case '*':
         nextchar(pRExC_state);
-            min = 0;
+        min = 0;
         break;
 
       case '+':
         nextchar(pRExC_state);
-            min = 1;
+        min = 1;
         break;
 
       case '?':
         nextchar(pRExC_state);
-            min = 0; max = 1;
+        min = 0; max = 1;
         break;
 
       case '{':  /* A '{' may or may not indicate a quantifier; call regcurly()
                     to determine which */
         if (regcurly(RExC_parse)) {
-        const char* endptr;
+            const char* endptr;
 
             /* Here is a quantifier, parse for min and max values */
-        maxpos = NULL;
-        next = RExC_parse + 1;
-        while (isDIGIT(*next) || *next == ',') {
-            if (*next == ',') {
-                if (maxpos)
-                    break;
-                else
-                    maxpos = next;
+            maxpos = NULL;
+            next = RExC_parse + 1;
+            while (isDIGIT(*next) || *next == ',') {
+                if (*next == ',') {
+                    if (maxpos)
+                        break;
+                    else
+                        maxpos = next;
+                }
+                next++;
             }
-            next++;
-        }
 
-        assert(*next == '}');
+            assert(*next == '}');
 
-        if (!maxpos)
-            maxpos = next;
-        RExC_parse++;
-        if (isDIGIT(*RExC_parse)) {
-            endptr = RExC_end;
-            if (!grok_atoUV(RExC_parse, &uv, &endptr))
-                vFAIL("Invalid quantifier in {,}");
-            if (uv >= REG_INFTY)
-                vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-            min = (I32)uv;
-        } else {
-            min = 0;
-        }
-        if (*maxpos == ',')
-            maxpos++;
-        else
-            maxpos = RExC_parse;
-        if (isDIGIT(*maxpos)) {
-            endptr = RExC_end;
-            if (!grok_atoUV(maxpos, &uv, &endptr))
-                vFAIL("Invalid quantifier in {,}");
-            if (uv >= REG_INFTY)
-                vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-            max = (I32)uv;
-        } else {
-            max = REG_INFTY;            /* meaning "infinity" */
-        }
-        RExC_parse = next;
-        nextchar(pRExC_state);
-        if (max < min) {    /* If can't match, warn and optimize to fail
-                               unconditionally */
-            reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
-            ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
-            NEXT_OFF(REGNODE_p(orig_emit)) =
-                                regarglen[OPFAIL] + NODE_STEP_REGNODE;
-            return ret;
-        }
-        else if (min == max && *RExC_parse == '?')
-        {
-            ckWARN2reg(RExC_parse + 1,
-                       "Useless use of greediness modifier '%c'",
-                       *RExC_parse);
-        }
+            if (!maxpos)
+                maxpos = next;
+            RExC_parse++;
+            if (isDIGIT(*RExC_parse)) {
+                endptr = RExC_end;
+                if (!grok_atoUV(RExC_parse, &uv, &endptr))
+                    vFAIL("Invalid quantifier in {,}");
+                if (uv >= REG_INFTY)
+                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+                min = (I32)uv;
+            } else {
+                min = 0;
+            }
+            if (*maxpos == ',')
+                maxpos++;
+            else
+                maxpos = RExC_parse;
+            if (isDIGIT(*maxpos)) {
+                endptr = RExC_end;
+                if (!grok_atoUV(maxpos, &uv, &endptr))
+                    vFAIL("Invalid quantifier in {,}");
+                if (uv >= REG_INFTY)
+                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+                max = (I32)uv;
+            } else {
+                max = REG_INFTY;            /* meaning "infinity" */
+            }
+
+            RExC_parse = next;
+            nextchar(pRExC_state);
+            if (max < min) {    /* If can't match, warn and optimize to fail
+                                   unconditionally */
+                reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
+                ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
+                NEXT_OFF(REGNODE_p(orig_emit)) =
+                                    regarglen[OPFAIL] + NODE_STEP_REGNODE;
+                return ret;
+            }
+            else if (min == max && *RExC_parse == '?')
+            {
+                ckWARN2reg(RExC_parse + 1,
+                           "Useless use of greediness modifier '%c'",
+                           *RExC_parse);
+            }
 
             break;
         } /* End of is regcurly() */
