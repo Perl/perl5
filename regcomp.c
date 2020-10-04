@@ -12715,6 +12715,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         }
     }
 
+    /* Here we have a quantifier, and have calculated 'min' and 'max'.
+     *
+     * Check and possibly adjust a zero width operand */
     if (! (flags & (HASWIDTH|POSTPONED))) {
         if (max > REG_INFTY/3) {
             if (origparse[0] == '\\' && origparse[1] == 'K') {
@@ -12732,6 +12735,16 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                          ? RExC_parse - origparse
                                          : 0),
                            origparse));
+            }
+        }
+
+        /* There's no point in trying to match something 0 length more than
+         * once except for extra side effects, which we don't have here since
+         * not POSTPONED */
+        if (max > 1) {
+            max = 1;
+            if (min > max) {
+                min = max;
             }
         }
     }
