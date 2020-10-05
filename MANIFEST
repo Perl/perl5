@@ -788,6 +788,7 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_DOS.pm			MakeMaker methods for DOS
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_MacOS.pm		MakeMaker methods for MacOS
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_NW5.pm			MakeMaker methods for NetWare
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS2.pm			MakeMaker methods for OS/2
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_QNX.pm			MakeMaker methods for QNX
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm			MakeMaker methods for Unix
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_UWIN.pm			MakeMaker methods for U/WIN
@@ -869,7 +870,6 @@ cpan/ExtUtils-MakeMaker/t/test_boilerplate.t			MakeMaker test
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch1/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch2/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testlib.t				See if ExtUtils::testlib works
-cpan/ExtUtils-MakeMaker/t/testrules.yml
 cpan/ExtUtils-MakeMaker/t/unicode.t
 cpan/ExtUtils-MakeMaker/t/VERSION_FROM.t			See if MakeMaker's VERSION_FROM works
 cpan/ExtUtils-MakeMaker/t/vstrings.t
