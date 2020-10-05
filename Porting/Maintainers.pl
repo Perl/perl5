@@ -364,14 +364,9 @@ use File::Glob qw(:case);
     },
 
     'Digest::MD5' => {
-        'DISTRIBUTION' => 'GAAS/Digest-MD5-2.55.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Digest-MD5-2.58.tar.gz',
         'FILES'        => q[cpan/Digest-MD5],
-        'EXCLUDED'     => ['rfc1321.txt'],
-        'CUSTOMIZED'   => [
-            # RT #133495
-            qw(MD5.xs MD5.pm),
-            qw(Makefile.PL t/files.t)
-         ],
+        'EXCLUDED'     => [ 'rfc1321.txt', 'bin/md5sum.pl' ],
     },
 
     'Digest::SHA' => {
