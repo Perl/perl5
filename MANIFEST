@@ -1551,6 +1551,7 @@ cpan/Pod-Checker/t/pod/podchkenc.xr
 cpan/Pod-Checker/t/pod/podchklink.t
 cpan/Pod-Checker/t/pod/poderrs.t
 cpan/Pod-Checker/t/pod/poderrs.xr
+cpan/Pod-Checker/t/pod/podname.t
 cpan/Pod-Checker/t/pod/selfcheck.t
 cpan/Pod-Checker/t/pod/testcmp.pl
 cpan/Pod-Checker/t/pod/testpchk.pl
