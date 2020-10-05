@@ -8,6 +8,7 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 use Config;
 use Test::More tests => 21;
 use File::Temp qw[tempdir];

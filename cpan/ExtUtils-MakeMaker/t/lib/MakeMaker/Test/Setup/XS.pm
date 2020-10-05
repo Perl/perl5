@@ -5,6 +5,7 @@ require Exporter;
 @EXPORT = qw(run_tests list_dynamic list_static);
 
 use strict;
+use warnings;
 use File::Path;
 use MakeMaker::Test::Utils;
 use Config;
@@ -134,7 +135,7 @@ my %Files = (
   'Makefile.PL' => sprintf($MAKEFILEPL, 'Test', 'lib/XS/Test.pm', qq{'$typemap'}, ''),
 );
 
-my %label2files = (basic => \%Files);
+my %label2files = (basic => \%Files, basic2 => \%Files); # basic2 so no clash
 
 $label2files{bscode} = +{
   %{ $label2files{'basic'} }, # make copy
@@ -381,7 +382,7 @@ sub setup_xs {
 
 sub list_static {
   (
-    ( !$Config{usedl} ? [ 'basic', '', '' ] : ()), # still needs testing on static perl
+    ( !$Config{usedl} ? [ 'basic2', '', '' ] : ()), # still needs testing on static perl
     [ 'static', '', '' ],
     [ 'basic', ' static', '_static' ],
     [ 'multi', ' static', '_static' ],

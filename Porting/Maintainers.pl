@@ -471,7 +471,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.44.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.48.tar.gz',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -482,11 +482,6 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
             'lib/ExtUtils/MakeMaker/version/vpp.pm',
-        ],
-        'CUSTOMIZED' => [
-            # https://github.com/Perl/perl5/issues/17601
-            # https://rt.cpan.org/Ticket/Display.html?id=115321
-            't/lib/MakeMaker/Test/Setup/XS.pm',
         ],
     },
 
