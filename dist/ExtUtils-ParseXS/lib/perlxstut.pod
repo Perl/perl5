@@ -122,7 +122,7 @@ The file Makefile.PL should look something like this:
 	VERSION_FROM => 'Mytest.pm', # finds $VERSION
 	LIBS         => [''],   # e.g., '-lm'
 	DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
-	INC          => '',     # e.g., '-I/usr/include/other'
+	INC          => '-I.', # e.g., '-I. -I/usr/include/other'
     );
 
 The file Mytest.pm should start with something like this:
@@ -390,10 +390,12 @@ Add the following to the end of Mytest.xs:
 
 Edit the Makefile.PL file so that the corresponding line looks like this:
 
-	'LIBS'      => ['-lm'],   # e.g., '-lm'
+	LIBS         => ['-lm'],   # e.g., '-lm'
 
 Generate the Makefile and run make.  Change the test number in Mytest.t to
 "9" and add the following tests:
+
+	my $i;
 
 	$i = -1.5; &Mytest::round($i); is( $i, -2.0 );
 	$i = -1.1; &Mytest::round($i); is( $i, -1.0 );
@@ -534,7 +536,7 @@ In the mylib directory, create a file mylib.h that looks like this:
 Also create a file mylib.c that looks like this:
 
 	#include <stdlib.h>
-	#include "./mylib.h"
+	#include "mylib.h"
 
 	double
 	foo(int a, long b, const char *c)
@@ -576,7 +578,7 @@ on Win32 systems.
 We will now create the main top-level Mytest2 files.  Change to the directory
 above Mytest2 and run the following command:
 
-	% h2xs -O -n Mytest2 ./Mytest2/mylib/mylib.h
+	% h2xs -O -n Mytest2 Mytest2/mylib/mylib.h
 
 This will print out a warning about overwriting Mytest2, but that's okay.
 Our files are stored in Mytest2/mylib, and will be untouched.
@@ -587,12 +589,12 @@ will be generating a library in it.  Let's add the argument MYEXTLIB to
 the WriteMakefile call so that it looks like this:
 
 	WriteMakefile(
-	    'NAME'      => 'Mytest2',
-	    'VERSION_FROM' => 'Mytest2.pm', # finds $VERSION
-	    'LIBS'      => [''],   # e.g., '-lm'
-	    'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'
-	    'INC'       => '',     # e.g., '-I/usr/include/other'
-	    'MYEXTLIB' => 'mylib/libmylib$(LIB_EXT)',
+	    NAME      => 'Mytest2',
+	    VERSION_FROM => 'Mytest2.pm', # finds $VERSION
+	    LIBS      => [''],   # e.g., '-lm'
+	    DEFINE    => '',     # e.g., '-DHAVE_SOMETHING'
+	    INC          => '-I.', # e.g., '-I. -I/usr/include/other'
+	    MYEXTLIB => 'mylib/libmylib$(LIB_EXT)',
 	);
 
 and then at the end add a subroutine (which will override the pre-existing
@@ -606,9 +608,7 @@ with "cd"!
 	';
 	}
 
-Let's also fix the MANIFEST file so that it accurately reflects the contents
-of our extension.  The single line that says "mylib" should be replaced by
-the following three lines:
+Let's also fix the MANIFEST file by appending the following three lines:
 
 	mylib/Makefile.PL
 	mylib/mylib.c
@@ -642,7 +642,7 @@ Now run perl on the top-level Makefile.PL.  Notice that it also created a
 Makefile in the mylib directory.  Run make and watch that it does cd into
 the mylib directory and run make in there as well.
 
-Now edit the Mytest2.t script and change the number of tests to "4",
+Now edit the Mytest2.t script and change the number of tests to "5",
 and add the following lines to the end of the script:
 
 	is( &Mytest2::foo(1, 2, "Hello, world!"), 7 );
@@ -1017,6 +1017,7 @@ after the include of "XSUB.h":
 Also add the following code segment to Mytest.t while incrementing the "9"
 tests to "11":
 
+	my @a;
 	@a = &Mytest::statfs("/blech");
 	ok( scalar(@a) == 1 && $a[0] == 2 );
 	@a = &Mytest::statfs("/");
@@ -1152,7 +1153,7 @@ Mytest.xs:
 And add the following code to Mytest.t, while incrementing the "11"
 tests to "13":
 
-	$results = Mytest::multi_statfs([ '/', '/blech' ]);
+	my $results = Mytest::multi_statfs([ '/', '/blech' ]);
 	ok( ref $results->[0] );
 	ok( ! ref $results->[1] );
 
@@ -1260,6 +1261,8 @@ standard C library function C<fputs()>. This is all we need:
 		FILE *	        stream
 
 The real work is done in the standard typemap.
+
+For more details, see L<perlapio|perlapio/Co-existence with stdio>.
 
 B<But> you lose all the fine stuff done by the perlio layers. This
 calls the stdio function C<fputs()>, which knows nothing about them.
@@ -1382,11 +1385,11 @@ Some systems may have installed Perl version 5 as "perl5".
 =head1 See also
 
 For more information, consult L<perlguts>, L<perlapi>, L<perlxs>, L<perlmod>,
-and L<perlpod>.
+L<perlapio>, and L<perlpod>.
 
 =head1 Author
 
-Jeff Okamoto <F<okamoto@corp.hp.com>>
+Jeff Okamoto
 
 Reviewed and assisted by Dean Roehrich, Ilya Zakharevich, Andreas Koenig,
 and Tim Bunce.
@@ -1394,8 +1397,10 @@ and Tim Bunce.
 PerlIO material contributed by Lupe Christoph, with some clarification
 by Nick Ing-Simmons.
 
-Changes for h2xs as of Perl 5.8.x by Renee Baecker
+Changes for h2xs as of Perl 5.8.x by Renee Baecker.
+
+It is now maintained as part of Perl itself.
 
 =head2 Last Changed
 
-2012-01-20
+2020-10-03
