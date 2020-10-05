@@ -858,8 +858,7 @@ sub trim_leading_whitespace {
 }
 
 sub get_header {
-    my $mode = shift() // "html";
-    my ($title, $csslink, $bodyid, $block) = @_;
+    my ($mode, $title, $csslink, $bodyid, $block) = @_;
 
     my $ret = "";
 
