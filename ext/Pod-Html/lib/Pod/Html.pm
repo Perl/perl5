@@ -913,9 +913,7 @@ sub get_footer {
     my $ret = "";
 
     # Modes are the same (for now) for footer stuff
-    if ($mode eq "xhtml") {
-        $ret = "$block\n</body>\n\n</html>";
-    } elsif ($mode eq 'html') {
+    if ($mode eq "xhtml" || $mode eq 'html') {
         $ret = "$block\n</body>\n\n</html>";
     }
 
