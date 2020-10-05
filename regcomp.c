@@ -12775,22 +12775,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 goto done_main_op;
             }
             else if (min == 0) {
-
-                /* Going from 0..inf is currently forbidden in wildcard
-                 * subpatterns.  The only reason is to make it harder to
-                 * write patterns that take a long long time to halt, and
-                 * because the use of this construct isn't necessary in
-                 * matching Unicode property values */
-                if (RExC_pm_flags & PMf_WILDCARD) {
-                    RExC_parse++;
-                    /* diag_listed_as: Use of %s is not allowed in Unicode
-                       property wildcard subpatterns in regex; marked by
-                       <-- HERE in m/%s/ */
-                    vFAIL("Use of quantifier '*' is not allowed in"
-                          " Unicode property wildcard subpatterns");
-                    /* Note, don't need to worry about {0,}, as a '}' isn't
-                     * legal at all in wildcards, so wouldn't get this far
-                     * */
+                if (UNLIKELY(RExC_pm_flags & PMf_WILDCARD)) {
+                    goto min0_maxINF_wildcard_forbidden;
                 }
 
                 reginsert(pRExC_state, STAR, ret, depth+1);
@@ -12873,6 +12859,25 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     return(ret);
+
+  min0_maxINF_wildcard_forbidden:
+
+    /* Here we are in a wildcard match, and the minimum match length is 0, and
+     * the max could be infinity.  This is currently forbidden.  The only
+     * reason is to make it harder to write patterns that take a long long time
+     * to halt, and because the use of this construct isn't necessary in
+     * matching Unicode property values */
+    RExC_parse++;
+    /* diag_listed_as: Use of %s is not allowed in Unicode property wildcard
+       subpatterns in regex; marked by <-- HERE in m/%s/
+     */
+    vFAIL("Use of quantifier '*' is not allowed in Unicode property wildcard"
+          " subpatterns");
+
+    /* Note, don't need to worry about the input being '{0,}', as a '}' isn't
+     * legal at all in wildcards, so can't get this far */
+
+    NOT_REACHED; /*NOTREACHED*/
 }
 
 STATIC bool
