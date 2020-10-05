@@ -12770,18 +12770,18 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* 'SIMPLE' operands don't require full generality */
     if ((flags&SIMPLE)) {
         if (max == REG_INFTY) {
-            if (min == 1) {
-                reginsert(pRExC_state, PLUS, ret, depth+1);
-                MARK_NAUGHTY(3);
-                goto done_main_op;
-            }
-            else if (min == 0) {
+            if (min == 0) {
                 if (UNLIKELY(RExC_pm_flags & PMf_WILDCARD)) {
                     goto min0_maxINF_wildcard_forbidden;
                 }
 
                 reginsert(pRExC_state, STAR, ret, depth+1);
                 MARK_NAUGHTY(4);
+                goto done_main_op;
+            }
+            else if (min == 1) {
+                reginsert(pRExC_state, PLUS, ret, depth+1);
+                MARK_NAUGHTY(3);
                 goto done_main_op;
             }
         }
