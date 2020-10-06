@@ -731,5 +731,37 @@ DllExport void *win32_signal_context(void);
 #  define O_ACCMODE (O_RDWR | O_WRONLY | O_RDONLY)
 #endif
 
+/* ucrt at least seems to allocate a whole bit per type,
+   just mask off one bit from the mask for our symlink
+   file type.
+*/
+#define _S_IFLNK ((unsigned)(_S_IFMT ^ (_S_IFMT & -_S_IFMT)))
+#undef S_ISLNK
+#define S_ISLNK(mode) (((mode) & _S_IFMT) == _S_IFLNK)
+
+/*
+
+The default CRT struct stat uses unsigned short for st_dev and st_ino
+which obviously isn't enough, so we define our own structure.
+
+ */
+
+typedef DWORD Dev_t;
+typedef unsigned __int64 Ino_t;
+
+struct w32_stat {
+    Dev_t st_dev;
+    Ino_t st_ino;
+    unsigned short st_mode;
+    DWORD st_nlink;
+    short st_uid;
+    short st_gid;
+    Dev_t st_rdev;
+    Off_t st_size;
+    time_t st_atime;
+    time_t st_mtime;
+    time_t st_ctime;
+};
+
 #endif /* _INC_WIN32_PERL5 */
 

@@ -69,6 +69,7 @@ DllExport  FILE*	win32_tmpfile(void);
 DllExport  void		win32_abort(void);
 DllExport  int  	win32_fstat(int fd,Stat_t *sbufptr);
 DllExport  int  	win32_stat(const char *name,Stat_t *sbufptr);
+DllExport  int  	win32_lstat(const char *name,Stat_t *sbufptr);
 DllExport  int		win32_pipe( int *phandles, unsigned int psize, int textmode );
 DllExport  PerlIO*	win32_popen( const char *command, const char *mode );
 DllExport  PerlIO*	win32_popenlist(const char *mode, IV narg, SV **args);
@@ -241,6 +242,7 @@ END_EXTERN_C
 #  undef stat
 #endif
 #define stat(pth,bufptr)   	win32_stat(pth,bufptr)
+#define lstat(pth,bufptr)   	win32_lstat(pth,bufptr)
 #define longpath(pth)   	win32_longpath(pth)
 #define ansipath(pth)   	win32_ansipath(pth)
 #define rename(old,new)		win32_rename(old,new)
