@@ -995,7 +995,7 @@ PerlLIOLseek(struct IPerlLIO* piPerl, int handle, Off_t offset, int origin)
 int
 PerlLIOLstat(struct IPerlLIO* piPerl, const char *path, Stat_t *buffer)
 {
-    return win32_stat(path, buffer);
+    return win32_lstat(path, buffer);
 }
 
 char*

@@ -39,6 +39,7 @@
 #include <tlhelp32.h>
 #include <io.h>
 #include <signal.h>
+#include <winioctl.h>
 
 /* #include "config.h" */
 
@@ -1462,7 +1463,10 @@ win32_stat(const char *path, Stat_t *sbuf)
     dTHX;
     int		res;
     int         nlink = 1;
+    unsigned __int64 ino = 0;
+    DWORD       vol = 0;
     BOOL        expect_dir = FALSE;
+    struct _stati64 st;
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -1508,11 +1512,16 @@ win32_stat(const char *path, Stat_t *sbuf)
         /* We must open & close the file once; otherwise file attribute changes  */
         /* might not yet have propagated to "other" hard links of the same file. */
         /* This also gives us an opportunity to determine the number of links.   */
-        HANDLE handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+        HANDLE handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
         if (handle != INVALID_HANDLE_VALUE) {
             BY_HANDLE_FILE_INFORMATION bhi;
-            if (GetFileInformationByHandle(handle, &bhi))
+            if (GetFileInformationByHandle(handle, &bhi)) {
                 nlink = bhi.nNumberOfLinks;
+                ino = bhi.nFileIndexHigh;
+                ino <<= 32;
+                ino |= bhi.nFileIndexLow;
+                vol = bhi.dwVolumeSerialNumber;
+            }
             CloseHandle(handle);
         }
 	else {
@@ -1527,7 +1536,17 @@ win32_stat(const char *path, Stat_t *sbuf)
 
     /* path will be mapped correctly above */
     res = _stati64(path, sbuf);
+    sbuf->st_dev = vol;
+    sbuf->st_ino = ino;
+    sbuf->st_mode = st.st_mode;
     sbuf->st_nlink = nlink;
+    sbuf->st_uid = st.st_uid;
+    sbuf->st_gid = st.st_gid;
+    sbuf->st_rdev = st.st_rdev;
+    sbuf->st_size = st.st_size;
+    sbuf->st_atime = st.st_atime;
+    sbuf->st_mtime = st.st_mtime;
+    sbuf->st_ctime = st.st_ctime;
 
     if (res < 0) {
 	/* CRT is buggy on sharenames, so make sure it really isn't.
@@ -1573,6 +1592,147 @@ win32_stat(const char *path, Stat_t *sbuf)
 	}
     }
     return res;
+}
+
+static void
+translate_to_errno(void)
+{
+    /* This isn't perfect, eg. Win32 returns ERROR_ACCESS_DENIED for
+       both permissions errors and if the source is a directory, while
+       POSIX wants EACCES and EPERM respectively.
+
+       Determined by experimentation on Windows 7 x64 SP1, since MS
+       don't document what error codes are returned.
+    */
+    switch (GetLastError()) {
+    case ERROR_BAD_NET_NAME:
+    case ERROR_BAD_NETPATH:
+    case ERROR_BAD_PATHNAME:
+    case ERROR_FILE_NOT_FOUND:
+    case ERROR_FILENAME_EXCED_RANGE:
+    case ERROR_INVALID_DRIVE:
+    case ERROR_PATH_NOT_FOUND:
+      errno = ENOENT;
+      break;
+    case ERROR_ALREADY_EXISTS:
+      errno = EEXIST;
+      break;
+    case ERROR_ACCESS_DENIED:
+    case ERROR_PRIVILEGE_NOT_HELD:
+      errno = EACCES;
+      break;
+    case ERROR_NOT_SAME_DEVICE:
+      errno = EXDEV;
+      break;
+    case ERROR_DISK_FULL:
+      errno = ENOSPC;
+      break;
+    case ERROR_NOT_ENOUGH_QUOTA:
+      errno = EDQUOT;
+      break;
+    default:
+      /* ERROR_INVALID_FUNCTION - eg. symlink on a FAT volume */
+      errno = EINVAL;
+      break;
+    }
+}
+
+/* Adapted from:
+
+https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_reparse_data_buffer
+
+Renamed to avoid conflicts, apparently some SDKs define this
+structure.
+
+Hoisted the symlink data into a new type to allow us to make a pointer
+to it, and to avoid C++ scoping issues.
+
+*/
+
+typedef struct {
+    USHORT SubstituteNameOffset;
+    USHORT SubstituteNameLength;
+    USHORT PrintNameOffset;
+    USHORT PrintNameLength;
+    ULONG  Flags;
+    WCHAR  PathBuffer[MAX_PATH*3];
+} MY_SYMLINK_REPARSE_BUFFER, *PMY_SYMLINK_REPARSE_BUFFER;
+
+typedef struct {
+  ULONG  ReparseTag;
+  USHORT ReparseDataLength;
+  USHORT Reserved;
+  union {
+    MY_SYMLINK_REPARSE_BUFFER SymbolicLinkReparseBuffer;
+    struct {
+      USHORT SubstituteNameOffset;
+      USHORT SubstituteNameLength;
+      USHORT PrintNameOffset;
+      USHORT PrintNameLength;
+      WCHAR  PathBuffer[1];
+    } MountPointReparseBuffer;
+    struct {
+      UCHAR DataBuffer[1];
+    } GenericReparseBuffer;
+  } Data;
+} MY_REPARSE_DATA_BUFFER, *PMY_REPARSE_DATA_BUFFER;
+
+static BOOL
+is_symlink(HANDLE h) {
+    MY_REPARSE_DATA_BUFFER linkdata;
+    const MY_SYMLINK_REPARSE_BUFFER * const sd =
+        &linkdata.Data.SymbolicLinkReparseBuffer;
+    DWORD linkdata_returned;
+
+    if (!DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, NULL, 0, &linkdata, sizeof(linkdata), &linkdata_returned, NULL)) {
+        return FALSE;
+    }
+
+    if (linkdata_returned < offsetof(MY_REPARSE_DATA_BUFFER, Data.SymbolicLinkReparseBuffer.PathBuffer)
+        || linkdata.ReparseTag != IO_REPARSE_TAG_SYMLINK) {
+        /* some other type of reparse point */
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+DllExport int
+win32_lstat(const char *path, Stat_t *sbuf)
+{
+    HANDLE f;
+    int fd;
+    int result;
+    DWORD attr = GetFileAttributes(path); /* doesn't follow symlinks */
+
+    if (attr == INVALID_FILE_ATTRIBUTES) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!(attr & FILE_ATTRIBUTE_REPARSE_POINT)) {
+        return win32_stat(path, sbuf);
+    }
+
+    f = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                           FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    if (f == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!is_symlink(f)) {
+        CloseHandle(f);
+        return win32_stat(path, sbuf);
+    }
+
+    fd = win32_open_osfhandle((intptr_t)f, 0);
+    result = win32_fstat(fd, sbuf);
+    if (result != -1){
+        sbuf->st_mode = (sbuf->st_mode & ~_S_IFMT) | _S_IFLNK;
+    }
+    close(fd);
+    return result;
 }
 
 #define isSLASH(c) ((c) == '/' || (c) == '\\')
@@ -1668,7 +1828,6 @@ win32_longpath(char *path)
 	}
 	else {
 	    /* failed a step, just return without side effects */
-	    /*PerlIO_printf(Perl_debug_log, "Failed to find %s\n", path);*/
 	    errno = EINVAL;
 	    return NULL;
 	}
@@ -2955,7 +3114,39 @@ win32_abort(void)
 DllExport int
 win32_fstat(int fd, Stat_t *sbufptr)
 {
-    return _fstati64(fd, sbufptr);
+    int result;
+    struct _stati64 st;
+    dTHX;
+    result = _fstati64(fd, &st);
+    if (result == 0) {
+        sbufptr->st_mode = st.st_mode;
+        sbufptr->st_uid = st.st_uid;
+        sbufptr->st_gid = st.st_gid;
+        sbufptr->st_rdev = st.st_rdev;
+        sbufptr->st_size = st.st_size;
+        sbufptr->st_atime = st.st_atime;
+        sbufptr->st_mtime = st.st_mtime;
+        sbufptr->st_ctime = st.st_ctime;
+
+        if (w32_sloppystat) {
+            sbufptr->st_nlink = st.st_nlink;
+            sbufptr->st_dev = st.st_dev;
+            sbufptr->st_ino = st.st_ino;
+        }
+        else {
+            HANDLE handle = (HANDLE)win32_get_osfhandle(fd);
+            BY_HANDLE_FILE_INFORMATION bhi;
+            if (GetFileInformationByHandle(handle, &bhi)) {
+                sbufptr->st_nlink = bhi.nNumberOfLinks;
+                sbufptr->st_ino = bhi.nFileIndexHigh;
+                sbufptr->st_ino <<= 32;
+                sbufptr->st_ino |= bhi.nFileIndexLow;
+                sbufptr->st_dev = bhi.dwVolumeSerialNumber;
+            }
+        }
+    }
+    
+    return result;
 }
 
 DllExport int
