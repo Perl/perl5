@@ -329,6 +329,7 @@ Test::Inline
 Test::MockObject
 Test::Unit
 Text::Autoformat
+Text::Diff
 Text::Soundex
 Text::Template
 Text::Unidecode
