@@ -1089,8 +1089,9 @@ never touched.
 =head1 SEE ALSO
 
 L<perldebug>,
+L<perl5db.pl>,
 L<perlguts>,
-L<perlrun>
+L<perlrun>,
 L<re>,
 and
 L<Devel::DProf>.

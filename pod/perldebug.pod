@@ -14,6 +14,9 @@ L<perldebtut>, which is a tutorial introduction to the debugger.
 If you're looking for the nitty gritty details of how the debugger is
 I<implemented>, you may prefer to read L<perldebguts>.
 
+For in-depth technical usage details, see L<perl5db.pl>, the documentation
+of the debugger itself.
+
 =head1 The Perl Debugger
 
 If you invoke Perl with the B<-d> switch, your script runs under the
@@ -1206,6 +1209,7 @@ You do have C<use strict> and C<use warnings> enabled, don't you?
 
 L<perldebtut>,
 L<perldebguts>,
+L<perl5db.pl>,
 L<re>,
 L<DB>,
 L<Devel::NYTProf>,
