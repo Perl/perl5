@@ -371,7 +371,7 @@ although from time to time we change which functions we support,
 and which function is default (currently SBOX+STADTX on 64 bit builds
 and SBOX+ZAPHOD32 for 32 bit builds). You can choose a different
 algorithm by defining one of the following symbols during configure.
-Note that there security implications of which hash function you choose
+Note that there are security implications regarding which hash function you choose
 to use. The functions are listed roughly by how secure they are believed
 to be, with the one believed to be most secure at release time being PERL_HASH_FUNC_SIPHASH.
 
@@ -388,10 +388,10 @@ and which has rather expensive setup costs (relatively speaking), both in
 terms of performance and more importantly in terms of memory. SBOX32
 requires 1k of storage per character it can hash, and it must populate that
 storage with 256 32-bit random values as well. In practice the RNG we use
-for seeding the SBOX32 storage is very efficient and populating the table
+for seeding the SBOX32 storage is very efficient, and populating the table
 required for hashing even fairly long keys is negligible as we only do it
-during startup. By default we build with SBOX32 enabled, but you change that
-by setting
+during startup. By default we build with SBOX32 enabled, but you can change
+that by setting
 
    PERL_HASH_USE_SBOX32_ALSO
 
