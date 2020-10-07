@@ -1056,6 +1056,7 @@ Returns a token the C compiler recognizes for the constant C<number> of the
 corresponding integer type on the machine.
 
 If the machine does not have a 64-bit type, C<INT64_C> is undefined.
+Use C<L</INTMAX_C>> to get the largest type available on the platform.
 
 =for apidoc    Am|U16|UINT16_C|number
 =for apidoc_item |U32|UINT32_C|number
@@ -1065,6 +1066,7 @@ Returns a token the C compiler recognizes for the constant C<number> of the
 corresponding unsigned integer type on the machine.
 
 If the machine does not have a 64-bit type, C<UINT64_C> is undefined.
+Use C<L</UINTMAX_C>> to get the largest type available on the platform.
 
 
 =cut
@@ -1143,12 +1145,20 @@ long>s, C<INTMAX_C(-1)> would yield
 
  -1LL
 
+See also, for example, C<L</INT32_C>>.
+
+Use L</IV> to declare variables of the maximum usable size on this platform.
+
 =for apidoc Am||UINTMAX_C|number
 Returns a token the C compiler recognizes for the constant C<number> of the
 widest unsigned integer type on the machine.  For example, if the machine has
 C<long>s, C<UINTMAX_C(1)> would yield
 
  1UL
+
+See also, for example, C<L</UINT32_C>>.
+
+Use L</UV> to declare variables of the maximum usable size on this platform.
 
 =cut
 */
