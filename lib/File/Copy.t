@@ -164,7 +164,10 @@ for my $cross_partition_test (0..1) {
     open(F, ">", "file-$$") or die $!;
     print F "dummy content\n";
     close F;
-    symlink("file-$$", "symlink-$$") or die $!;
+    if (!symlink("file-$$", "symlink-$$")) {
+        unlink "file-$$";
+        skip "Can't create symlink", 3;
+    }
 
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
