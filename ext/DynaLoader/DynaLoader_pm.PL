@@ -73,6 +73,8 @@ print OUT <<'EOT';
 
 # Generated from DynaLoader_pm.PL, this file is unique for every OS
 
+use strict;
+
 package DynaLoader;
 
 #   And Gandalf said: 'Many folk like to know beforehand what is to
@@ -88,8 +90,11 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.50';
+    our $VERSION = '1.50';
 }
+
+our (@dl_library_path, @dl_resolve_using, @dl_require_symbols,
+     $dl_debug, @dl_librefs, @dl_modules, @dl_shared_objects);
 
 EOT
 
@@ -119,14 +124,14 @@ sub dl_load_flags { 0x00 }
 EOT
 
 if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
-    print OUT "(\$dl_dlext, \$dl_so, \$dlsrc) = (",
+    print OUT "our (\$dl_dlext, \$dl_so, \$dlsrc) = (",
               to_string($Config{'dlext'}), ",",
               to_string($Config{'so'}), ",",
               to_string($Config{'dlsrc'}), ")\n;" ;
 }
 else {
     print OUT <<'EOT';
-($dl_dlext, $dl_so, $dlsrc) = @Config::Config{qw(dlext so dlsrc)};
+our ($dl_dlext, $dl_so, $dlsrc) = @Config::Config{qw(dlext so dlsrc)};
 EOT
 }
 
@@ -141,7 +146,7 @@ print OUT expand_os_specific(<<'EOT');
 # inefficient to define on systems that don't need it.
 $Is_VMS    = $^O eq 'VMS';
 <</$^O-eq-VMS>>
-$do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
+my $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 
 @dl_require_symbols = ();       # names of symbols we need<<$^O-eq-freemint>>
 @dl_resolve_using   = ();       # names of files to link with<</$^O-eq-freemint>><<$^O-eq-hpux>>
@@ -292,6 +297,8 @@ sub croak   { require Carp; Carp::croak(@_)   }
 
 sub bootstrap_inherit {
     my $module = $_[0];
+
+    no strict qw/refs vars/;
     local *isa = *{"$module\::ISA"};
     local @isa = (@isa, 'DynaLoader');
     # Cannot goto due to delocalization.  Will report errors on a wrong line?
@@ -300,9 +307,9 @@ sub bootstrap_inherit {
 
 sub bootstrap {
     # use local vars to enable $module.bs script to edit values
-    local(@args) = @_;
-    local($module) = $args[0];
-    local(@dirs, $file);
+    local our (@args) = @_;
+    local our ($module) = $args[0];
+    local our (@dirs, $file);
 
     unless ($module) {
 	require Carp;
@@ -557,6 +564,8 @@ sub dl_find_symbol_anywhere
     }
     return undef;
 }
+
+1;
 
 __END__
 

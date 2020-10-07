@@ -1,6 +1,8 @@
 #!perl -T
 
 use strict;
+use warnings;
+
 use Config;
 
 my $db_file;

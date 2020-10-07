@@ -1,4 +1,6 @@
 use strict;
+use warnings;
+
 use Config;
 # We require DynaLoader to make sure that mod2fname is loaded
 eval { require DynaLoader };
@@ -9,11 +11,12 @@ print OUT <<'EOT';
 # Generated from XSLoader_pm.PL (resolved %Config::Config value)
 # This file is unique for every OS
 
+use strict;
+no strict 'refs';
+
 package XSLoader;
 
-$VERSION = "0.30"; # remember to update version in POD!
-
-#use strict;
+our $VERSION = "0.31"; # remember to update version in POD!
 
 package DynaLoader;
 
@@ -252,7 +255,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.30
+Version 0.31
 
 =head1 SYNOPSIS
 
