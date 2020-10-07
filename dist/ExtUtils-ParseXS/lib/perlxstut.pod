@@ -48,14 +48,14 @@ In MakeMaker-based installations, F<Makefile.PL> provides the earliest
 opportunity to perform version checks.  One can put something like this
 in F<Makefile.PL> for this purpose:
 
-    eval { require 5.007 }
-        or die <<EOD;
-    ############
-    ### This module uses frobnication framework which is not available
-    ### before version 5.007 of Perl.  Upgrade your Perl before
-    ### installing Kara::Mba.
-    ############
-    EOD
+  eval { require 5.007 }
+      or die <<EOD;
+  ############
+  ### This module uses frobnication framework which is not available
+  ### before version 5.007 of Perl.  Upgrade your Perl before
+  ### installing Kara::Mba.
+  ############
+  EOD
 
 =head2 Dynamic Loading versus Static Loading
 
@@ -114,70 +114,70 @@ Mytest directory.
 
 The file Makefile.PL should look something like this:
 
-    use ExtUtils::MakeMaker;
-    # See lib/ExtUtils/MakeMaker.pm for details of how to influence
-    # the contents of the Makefile that is written.
-    WriteMakefile(
-	NAME         => 'Mytest',
-	VERSION_FROM => 'Mytest.pm', # finds $VERSION
-	LIBS         => [''],   # e.g., '-lm'
-	DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
-	INC          => '-I.', # e.g., '-I. -I/usr/include/other'
-    );
+  use ExtUtils::MakeMaker;
+  # See lib/ExtUtils/MakeMaker.pm for details of how to influence
+  # the contents of the Makefile that is written.
+  WriteMakefile(
+      NAME         => 'Mytest',
+      VERSION_FROM => 'Mytest.pm', # finds $VERSION
+      LIBS         => [''],   # e.g., '-lm'
+      DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
+      INC          => '-I.', # e.g., '-I. -I/usr/include/other'
+  );
 
 The file Mytest.pm should start with something like this:
 
-    package Mytest;
+  package Mytest;
 
-    use 5.008008;
-    use strict;
-    use warnings;
+  use 5.008008;
+  use strict;
+  use warnings;
 
-    require Exporter;
+  require Exporter;
 
-    our @ISA = qw(Exporter);
-    our %EXPORT_TAGS = ( 'all' => [ qw(
+  our @ISA = qw(Exporter);
+  our %EXPORT_TAGS = ( 'all' => [ qw(
 
-    ) ] );
+  ) ] );
 
-    our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+  our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-    our @EXPORT = qw(
+  our @EXPORT = qw(
 
-    );
+  );
 
-    our $VERSION = '0.01';
+  our $VERSION = '0.01';
 
-    require XSLoader;
-    XSLoader::load('Mytest', $VERSION);
+  require XSLoader;
+  XSLoader::load('Mytest', $VERSION);
 
-    # Preloaded methods go here.
+  # Preloaded methods go here.
 
-    1;
-    __END__
-    # Below is the stub of documentation for your module. You better
-    # edit it!
+  1;
+  __END__
+  # Below is the stub of documentation for your module. You'd better
+  # edit it!
 
 The rest of the .pm file contains sample code for providing documentation for
 the extension.
 
 Finally, the Mytest.xs file should look something like this:
 
-    #define PERL_NO_GET_CONTEXT
-    #include "EXTERN.h"
-    #include "perl.h"
-    #include "XSUB.h"
+  #define PERL_NO_GET_CONTEXT
+  #include "EXTERN.h"
+  #include "perl.h"
+  #include "XSUB.h"
 
-    #include "ppport.h"
+  #include "ppport.h"
 
-    MODULE = Mytest		PACKAGE = Mytest
+  MODULE = Mytest		PACKAGE = Mytest
 
 Let's edit the .xs file by adding this to the end of the file:
 
-    void
-    hello()
-	CODE:
-	    printf("Hello, world!\n");
+  void
+  hello()
+      CODE:
+          printf("Hello, world!\n");
 
 It is okay for the lines starting at the "CODE:" line to not be indented.
 However, for readability purposes, it is suggested that you indent CODE:
@@ -186,11 +186,11 @@ one level and the lines following one more level.
 Now we'll run "C<perl Makefile.PL>".  This will create a real Makefile,
 which make needs.  Its output looks something like:
 
-    % perl Makefile.PL
-    Checking if your kit is complete...
-    Looks good
-    Writing Makefile for Mytest
-    %
+  % perl Makefile.PL
+  Checking if your kit is complete...
+  Looks good
+  Writing Makefile for Mytest
+  %
 
 Now, running make will produce output that looks something like this (some
 long lines have been shortened for clarity and some extraneous lines have
@@ -220,20 +220,20 @@ Perl has its own special way of easily writing test scripts, but for this
 example only, we'll create our own test script.  Create a file called hello
 that looks like this:
 
-    #! /opt/perl5/bin/perl
+  #! /opt/perl5/bin/perl
 
-    use ExtUtils::testlib;
+  use ExtUtils::testlib;
 
-    use Mytest;
+  use Mytest;
 
-    Mytest::hello();
+  Mytest::hello();
 
 Now we make the script executable (C<chmod +x hello>), run the script
 and we should see the following output:
 
-    % ./hello
-    Hello, world!
-    %
+  % ./hello
+  Hello, world!
+  %
 
 =head2 EXAMPLE 2
 
@@ -243,13 +243,13 @@ is odd.
 
 Add the following to the end of Mytest.xs:
 
-    int
-    is_even(input)
-	    int input
-	CODE:
-	    RETVAL = (input % 2 == 0);
-	OUTPUT:
-	    RETVAL
+  int
+  is_even(input)
+      int input
+      CODE:
+          RETVAL = (input % 2 == 0);
+      OUTPUT:
+          RETVAL
 
 There does not need to be whitespace at the start of the "C<int input>"
 line, but it is useful for improving readability.  Placing a semi-colon at
@@ -267,29 +267,29 @@ structure that Perl itself has.  Within the test script, you perform a
 number of tests to confirm the behavior of the extension, printing "ok"
 when the test is correct, "not ok" when it is not.
 
-    use Test::More tests => 4;
-    BEGIN { use_ok('Mytest') };
+  use Test::More tests => 4;
+  BEGIN { use_ok('Mytest') };
 
-    #########################
+  #########################
 
-    # Insert your test code below, the Test::More module is use()ed here
-    # so read its man page ( perldoc Test::More ) for help writing this
-    # test script.
+  # Insert your test code below, the Test::More module is use()ed here
+  # so read its man page ( perldoc Test::More ) for help writing this
+  # test script.
 
-    is(&Mytest::is_even(0), 1);
-    is(&Mytest::is_even(1), 0);
-    is(&Mytest::is_even(2), 1);
+  is( Mytest::is_even(0), 1 );
+  is( Mytest::is_even(1), 0 );
+  is( Mytest::is_even(2), 1 );
 
 We will be calling the test script through the command "C<make test>".  You
 should see output that looks something like this:
 
- %make test
- PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e"
- "test_harness(0, 'blib/lib', 'blib/arch')" t/*.t
- t/Mytest....ok
- All tests successful.
- Files=1, Tests=4, 0 wallclock secs ( 0.03 cusr + 0.00 csys = 0.03 CPU)
- %
+  %make test
+  PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e"
+  "test_harness(0, 'blib/lib', 'blib/arch')" t/*.t
+  t/Mytest....ok
+  All tests successful.
+  Files=1, Tests=4, 0 wallclock secs ( 0.03 cusr + 0.00 csys = 0.03 CPU)
+  %
 
 =head2 What has gone on?
 
@@ -374,34 +374,48 @@ value, and set the I<argument> to the rounded value.
 
 Add the following to the end of Mytest.xs:
 
-	void
-	round(arg)
-		double  arg
-	    CODE:
-		if (arg > 0.0) {
-			arg = floor(arg + 0.5);
-		} else if (arg < 0.0) {
-			arg = ceil(arg - 0.5);
-		} else {
-			arg = 0.0;
-		}
-	    OUTPUT:
-		arg
+  void
+  round(arg)
+      double  arg
+      CODE:
+          if (arg > 0.0) {
+              arg = floor(arg + 0.5);
+          } else if (arg < 0.0) {
+              arg = ceil(arg - 0.5);
+          } else {
+              arg = 0.0;
+          }
+      OUTPUT:
+          arg
 
 Edit the Makefile.PL file so that the corresponding line looks like this:
 
-	LIBS         => ['-lm'],   # e.g., '-lm'
+  LIBS         => ['-lm'],   # e.g., '-lm'
 
 Generate the Makefile and run make.  Change the test number in Mytest.t to
 "9" and add the following tests:
 
-	my $i;
+  my $i;
 
-	$i = -1.5; &Mytest::round($i); is( $i, -2.0 );
-	$i = -1.1; &Mytest::round($i); is( $i, -1.0 );
-	$i = 0.0; &Mytest::round($i);  is( $i,  0.0 );
-	$i = 0.5; &Mytest::round($i);  is( $i,  1.0 );
-	$i = 1.2; &Mytest::round($i);  is( $i,  1.0 );
+  $i = -1.5;
+  Mytest::round($i);
+  is( $i, -2.0, 'Rounding -1.5 to -2.0' );
+
+  $i = -1.1;
+  Mytest::round($i);
+  is( $i, -1.0, 'Rounding -1.1 to -1.0' );
+
+  $i = 0.0;
+  Mytest::round($i);
+  is( $i,  0.0, 'Rounding 0.0 to 0.0' );
+
+  $i = 0.5;
+  Mytest::round($i);
+  is( $i,  1.0, 'Rounding 0.5 to 1.0' );
+
+  $i = 1.2;
+  Mytest::round($i);
+  is( $i,  1.0, 'Rounding 1.2 to 1.0' );
 
 Running "C<make test>" should now print out that all nine tests are okay.
 
@@ -409,7 +423,7 @@ Notice that in these new test cases, the argument passed to round was a
 scalar variable.  You might be wondering if you can round a constant or
 literal.  To see what happens, temporarily add the following line to Mytest.t:
 
-	&Mytest::round(3);
+  Mytest::round(3);
 
 Run "C<make test>" and notice that Perl dies with a fatal error.  Perl won't
 let you change the value of constants!
@@ -472,26 +486,26 @@ C code which B<xsubpp> uses to handle output parameters.
 Let's take a look at a portion of the .c file created for our extension.
 The file name is Mytest.c:
 
-	XS(XS_Mytest_round)
-	{
-	    dXSARGS;
-	    if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mytest::round(arg)");
-	    PERL_UNUSED_VAR(cv); /* -W */
-	    {
-		double  arg = (double)SvNV(ST(0));	/* XXXXX */
-		if (arg > 0.0) {
-			arg = floor(arg + 0.5);
-		} else if (arg < 0.0) {
-			arg = ceil(arg - 0.5);
-		} else {
-			arg = 0.0;
-		}
-		sv_setnv(ST(0), (double)arg);	/* XXXXX */
-		SvSETMAGIC(ST(0));
-	    }
-	    XSRETURN_EMPTY;
-	}
+  XS(XS_Mytest_round)
+  {
+      dXSARGS;
+      if (items != 1)
+          Perl_croak(aTHX_ "Usage: Mytest::round(arg)");
+      PERL_UNUSED_VAR(cv); /* -W */
+      {
+          double  arg = (double)SvNV(ST(0));  /* XXXXX */
+          if (arg > 0.0) {
+              arg = floor(arg + 0.5);
+          } else if (arg < 0.0) {
+              arg = ceil(arg - 0.5);
+          } else {
+              arg = 0.0;
+          }
+          sv_setnv(ST(0), (double)arg);       /* XXXXX */
+          SvSETMAGIC(ST(0));
+      }
+      XSRETURN_EMPTY;
+  }
 
 Notice the two lines commented with "XXXXX".  If you check the first part
 of the typemap file (or section), you'll see that doubles are of type
@@ -529,46 +543,45 @@ level will automatically run this Makefile.PL file and the resulting Makefile.
 
 In the mylib directory, create a file mylib.h that looks like this:
 
-	#define TESTVAL	4
+  #define TESTVAL 4
 
-	extern double	foo(int, long, const char*);
+  extern double   foo(int, long, const char*);
 
 Also create a file mylib.c that looks like this:
 
-	#include <stdlib.h>
-	#include "mylib.h"
+  #include <stdlib.h>
+  #include "mylib.h"
 
-	double
-	foo(int a, long b, const char *c)
-	{
-		return (a + b + atof(c) + TESTVAL);
-	}
+  double
+  foo(int a, long b, const char *c)
+  {
+      return (a + b + atof(c) + TESTVAL);
+  }
 
 And finally create a file Makefile.PL that looks like this:
 
-	use ExtUtils::MakeMaker;
-	$Verbose = 1;
-	WriteMakefile(
-	    NAME   => 'Mytest2::mylib',
-	    SKIP   => [qw(all static static_lib dynamic dynamic_lib)],
-	    clean  => {'FILES' => 'libmylib$(LIB_EXT)'},
-	);
+  use ExtUtils::MakeMaker;
+  $Verbose = 1;
+  WriteMakefile(
+      NAME   => 'Mytest2::mylib',
+      SKIP   => [qw(all static static_lib dynamic dynamic_lib)],
+      clean  => {'FILES' => 'libmylib$(LIB_EXT)'},
+  );
 
+  sub MY::top_targets {
+  '
+  all :: static
 
-	sub MY::top_targets {
-		'
-	all :: static
+  pure_all :: static
 
-	pure_all :: static
+  static ::       libmylib$(LIB_EXT)
 
-	static ::       libmylib$(LIB_EXT)
+  libmylib$(LIB_EXT): $(O_FILES)
+  	$(AR) cr libmylib$(LIB_EXT) $(O_FILES)
+  	$(RANLIB) libmylib$(LIB_EXT)
 
-	libmylib$(LIB_EXT): $(O_FILES)
-		$(AR) cr libmylib$(LIB_EXT) $(O_FILES)
-		$(RANLIB) libmylib$(LIB_EXT)
-
-	';
-	}
+  ';
+  }
 
 Make sure you use a tab and not spaces on the lines beginning with "$(AR)"
 and "$(RANLIB)".  Make will not function properly if you use spaces.
@@ -578,7 +591,7 @@ on Win32 systems.
 We will now create the main top-level Mytest2 files.  Change to the directory
 above Mytest2 and run the following command:
 
-	% h2xs -O -n Mytest2 Mytest2/mylib/mylib.h
+  % h2xs -O -n Mytest2 Mytest2/mylib/mylib.h
 
 This will print out a warning about overwriting Mytest2, but that's okay.
 Our files are stored in Mytest2/mylib, and will be untouched.
@@ -588,55 +601,55 @@ directory.  We need to tell it that there is a subdirectory and that we
 will be generating a library in it.  Let's add the argument MYEXTLIB to
 the WriteMakefile call so that it looks like this:
 
-	WriteMakefile(
-	    NAME      => 'Mytest2',
-	    VERSION_FROM => 'Mytest2.pm', # finds $VERSION
-	    LIBS      => [''],   # e.g., '-lm'
-	    DEFINE    => '',     # e.g., '-DHAVE_SOMETHING'
-	    INC          => '-I.', # e.g., '-I. -I/usr/include/other'
-	    MYEXTLIB => 'mylib/libmylib$(LIB_EXT)',
-	);
+  WriteMakefile(
+      NAME         => 'Mytest2',
+      VERSION_FROM => 'Mytest2.pm', # finds $VERSION
+      LIBS         => [''],   # e.g., '-lm'
+      DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
+      INC          => '-I.', # e.g., '-I. -I/usr/include/other'
+      MYEXTLIB     => 'mylib/libmylib$(LIB_EXT)',
+  );
 
 and then at the end add a subroutine (which will override the pre-existing
 subroutine).  Remember to use a tab character to indent the line beginning
 with "cd"!
 
-	sub MY::postamble {
-	'
-	$(MYEXTLIB): mylib/Makefile
-		cd mylib && $(MAKE) $(PASSTHRU)
-	';
-	}
+  sub MY::postamble {
+  '
+  $(MYEXTLIB): mylib/Makefile
+  	cd mylib && $(MAKE) $(PASSTHRU)
+  ';
+  }
 
 Let's also fix the MANIFEST file by appending the following three lines:
 
-	mylib/Makefile.PL
-	mylib/mylib.c
-	mylib/mylib.h
+  mylib/Makefile.PL
+  mylib/mylib.c
+  mylib/mylib.h
 
 To keep our namespace nice and unpolluted, edit the .pm file and change
 the variable C<@EXPORT> to C<@EXPORT_OK>.  Finally, in the
 .xs file, edit the #include line to read:
 
-	#include "mylib/mylib.h"
+  #include "mylib/mylib.h"
 
 And also add the following function definition to the end of the .xs file:
 
-	double
-	foo(a,b,c)
-		int             a
-		long            b
-		const char *    c
-	    OUTPUT:
-		RETVAL
+  double
+  foo(a,b,c)
+      int             a
+      long            b
+      const char *    c
+      OUTPUT:
+          RETVAL
 
 Now we also need to create a typemap because the default Perl doesn't
 currently support the C<const char *> type.  Include a new TYPEMAP
 section in your XS code before the above function:
 
-        TYPEMAP: <<END
-	const char *	T_PV
-        END
+  TYPEMAP: <<END
+  const char *		T_PV
+  END
 
 Now run perl on the top-level Makefile.PL.  Notice that it also created a
 Makefile in the mylib directory.  Run make and watch that it does cd into
@@ -645,9 +658,9 @@ the mylib directory and run make in there as well.
 Now edit the Mytest2.t script and change the number of tests to "5",
 and add the following lines to the end of the script:
 
-	is( &Mytest2::foo(1, 2, "Hello, world!"), 7 );
-	is( &Mytest2::foo(1, 2, "0.0"), 7 );
-	ok( abs(&Mytest2::foo(0, 0, "-3.4") - 0.6) <= 0.01 );
+  is( Mytest2::foo(1, 2, "Hello, world!"), 7 );
+  is( Mytest2::foo(1, 2, "0.0"), 7 );
+  ok( abs( Mytest2::foo(0, 0, "-3.4") - 0.6) <= 0.01 );
 
 (When dealing with floating-point comparisons, it is best to not check for
 equality, but rather that the difference between the expected and actual
@@ -710,7 +723,7 @@ commands to build it.
 The .xs file of L</EXAMPLE 4> contained some new elements.  To understand
 the meaning of these elements, pay attention to the line which reads
 
-	MODULE = Mytest2		PACKAGE = Mytest2
+  MODULE = Mytest2		PACKAGE = Mytest2
 
 Anything before this line is plain C code which describes which headers
 to include, and defines some convenience functions.  No translations are
@@ -740,28 +753,28 @@ somewhat of an exception rather than the rule.
 In L</EXAMPLE 4> the second part of .xs file contained the following
 description of an XSUB:
 
-	double
-	foo(a,b,c)
-		int             a
-		long            b
-		const char *    c
-	    OUTPUT:
-		RETVAL
+  double
+  foo(a,b,c)
+      int             a
+      long            b
+      const char *    c
+      OUTPUT:
+          RETVAL
 
 Note that in contrast with L<"EXAMPLE 1">, L<"EXAMPLE 2"> and L<"EXAMPLE 3">,
 this description does not contain the actual I<code> for what is done
 during a call to Perl function foo().  To understand what is going
 on here, one can add a CODE section to this XSUB:
 
-	double
-	foo(a,b,c)
-		int             a
-		long            b
-		const char *    c
-	    CODE:
-		RETVAL = foo(a,b,c);
-	    OUTPUT:
-		RETVAL
+  double
+  foo(a,b,c)
+      int             a
+      long            b
+      const char *    c
+      CODE:
+          RETVAL = foo(a,b,c);
+      OUTPUT:
+          RETVAL
 
 However, these two XSUBs provide almost identical generated C code: B<xsubpp>
 compiler is smart enough to figure out the C<CODE:> section from the first
@@ -772,43 +785,43 @@ specified: B<xsubpp> can see that it needs to generate a function call
 section, and will autogenerate the OUTPUT section too.  Thus one can
 shortcut the XSUB to become:
 
-	double
-	foo(a,b,c)
-		int             a
-		long            b
-		const char *    c
+  double
+  foo(a,b,c)
+      int             a
+      long            b
+      const char *    c
 
 Can we do the same with an XSUB
 
-	int
-	is_even(input)
-		int	input
-	    CODE:
-		RETVAL = (input % 2 == 0);
-	    OUTPUT:
-		RETVAL
+  int
+  is_even(input)
+      int	input
+      CODE:
+          RETVAL = (input % 2 == 0);
+      OUTPUT:
+          RETVAL
 
 of L<"EXAMPLE 2">?  To do this, one needs to define a C function C<int
 is_even(int input)>.  As we saw in L<Anatomy of .xs file>, a proper place
 for this definition is in the first part of .xs file.  In fact a C function
 
-	int
-	is_even(int arg)
-	{
-		return (arg % 2 == 0);
-	}
+  int
+  is_even(int arg)
+  {
+      return (arg % 2 == 0);
+  }
 
 is probably overkill for this.  Something as simple as a C<#define> will
 do too:
 
-	#define is_even(arg)	((arg) % 2 == 0)
+  #define is_even(arg)	((arg) % 2 == 0)
 
 After having this in the first part of .xs file, the "Perl glue" part becomes
 as simple as
 
-	int
-	is_even(input)
-		int	input
+  int
+  is_even(input)
+      int	input
 
 This technique of separation of the glue part from the workhorse part has
 obvious tradeoffs: if you want to change a Perl interface, you need to
@@ -837,8 +850,8 @@ C passes arguments by value; to implement a C function which modifies data
 of one of the "arguments", the actual argument of this C function would be
 a pointer to the data.  Thus two C functions with declarations
 
-	int string_length(char *s);
-	int upper_case_char(char *cp);
+  int string_length(char *s);
+  int upper_case_char(char *cp);
 
 may have completely different semantics: the first one may inspect an array
 of chars pointed by s, and the second one may immediately dereference C<cp>
@@ -850,20 +863,20 @@ One conveys this info to B<xsubpp> by replacing C<*> before the
 argument by C<&>.  C<&> means that the argument should be passed to a library
 function by its address.  The above two function may be XSUB-ified as
 
-	int
-	string_length(s)
-		char *	s
+  int
+  string_length(s)
+      char *	s
 
-	int
-	upper_case_char(cp)
-		char	&cp
+  int
+  upper_case_char(cp)
+      char	&cp
 
 For example, consider:
 
-	int
-	foo(a,b)
-		char	&a
-		char *	b
+  int
+  foo(a,b)
+      char	&a
+      char *	b
 
 The first Perl argument to this function would be treated as a char and
 assigned to the variable a, and its address would be passed into the function
@@ -872,13 +885,13 @@ to the variable b. The I<value> of b would be passed into the function foo.
 The actual call to the function foo that B<xsubpp> generates would look like
 this:
 
-	foo(&a, b);
+  foo(&a, b);
 
 B<xsubpp> will parse the following function argument lists identically:
 
-	char	&a
-	char&a
-	char	& a
+  char	&a
+  char&a
+  char	& a
 
 However, to help ease understanding, it is suggested that you place a "&"
 next to the variable name and away from the variable type), and place a
@@ -910,9 +923,9 @@ value on the stack (i.e., ST(0) if it was the first argument) is changed.
 You can verify this by looking at the C code generated for Example 3.
 The code for the round() XSUB routine contains lines that look like this:
 
-	double  arg = (double)SvNV(ST(0));
-	/* Round the contents of the variable arg */
-	sv_setnv(ST(0), (double)arg);
+  double  arg = (double)SvNV(ST(0));
+  /* Round the contents of the variable arg */
+  sv_setnv(ST(0), (double)arg);
 
 The arg variable is initially set by taking the value from ST(0), then is
 stored back into ST(0) at the end of the routine.
@@ -988,41 +1001,42 @@ change the XSUB, be sure to fix the test cases to match the changes.
 Return to the Mytest directory and add the following code to the end of
 Mytest.xs:
 
-	void
-	statfs(path)
-		char *  path
-	    INIT:
-		int i;
-		struct statfs buf;
+  void
+  statfs(path)
+      char *  path
+      INIT:
+      int i;
+      struct statfs buf;
 
-	    PPCODE:
-		i = statfs(path, &buf);
-		if (i == 0) {
-			XPUSHs(sv_2mortal(newSVnv(buf.f_bavail)));
-			XPUSHs(sv_2mortal(newSVnv(buf.f_bfree)));
-			XPUSHs(sv_2mortal(newSVnv(buf.f_blocks)));
-			XPUSHs(sv_2mortal(newSVnv(buf.f_bsize)));
-			XPUSHs(sv_2mortal(newSVnv(buf.f_ffree)));
-			XPUSHs(sv_2mortal(newSVnv(buf.f_files)));
-			XPUSHs(sv_2mortal(newSVnv(buf.f_type)));
-		} else {
-			XPUSHs(sv_2mortal(newSVnv(errno)));
-		}
+      PPCODE:
+      i = statfs(path, &buf);
+      if (i == 0) {
+          XPUSHs(sv_2mortal(newSVnv(buf.f_bavail)));
+          XPUSHs(sv_2mortal(newSVnv(buf.f_bfree)));
+          XPUSHs(sv_2mortal(newSVnv(buf.f_blocks)));
+          XPUSHs(sv_2mortal(newSVnv(buf.f_bsize)));
+          XPUSHs(sv_2mortal(newSVnv(buf.f_ffree)));
+          XPUSHs(sv_2mortal(newSVnv(buf.f_files)));
+          XPUSHs(sv_2mortal(newSVnv(buf.f_type)));
+      } else {
+          XPUSHs(sv_2mortal(newSVnv(errno)));
+      }
 
 You'll also need to add the following code to the top of the .xs file, just
 after the include of "XSUB.h":
 
-	#include <sys/vfs.h>
+  #include <sys/vfs.h>
 
 Also add the following code segment to Mytest.t while incrementing the "9"
 tests to "11":
 
-	my @a;
+  my @a;
 
-	@a = &Mytest::statfs("/blech");
-	ok( scalar(@a) == 1 && $a[0] == 2 );
-	@a = &Mytest::statfs("/");
-	is( scalar(@a), 7 );
+  @a = Mytest::statfs("/blech");
+  ok( scalar(@a) == 1 && $a[0] == 2 );
+
+  @a = Mytest::statfs("/");
+  is( scalar(@a), 7 );
 
 =head2 New Things in this Example
 
@@ -1079,7 +1093,7 @@ If we were interested in performance, not in code compactness, in the success
 branch we would not use C<XPUSHs> macros, but C<PUSHs> macros, and would
 pre-extend the stack before pushing the return values:
 
-	EXTEND(SP, 7);
+  EXTEND(SP, 7);
 
 The tradeoff is that one needs to calculate the number of return values
 in advance (though overextending the stack will not typically hurt
@@ -1106,57 +1120,57 @@ filesystems.
 Return to the Mytest directory and add the following code to the end of
 Mytest.xs:
 
-    SV *
-    multi_statfs(paths)
-	    SV * paths
-	INIT:
-	    AV * results;
-	    SSize_t numpaths = 0, n;
-	    int i;
-	    struct statfs buf;
+  SV *
+  multi_statfs(paths)
+      SV * paths
+      INIT:
+          AV * results;
+          SSize_t numpaths = 0, n;
+          int i;
+          struct statfs buf;
 
-	    SvGETMAGIC(paths);
-	    if ((!SvROK(paths))
-		|| (SvTYPE(SvRV(paths)) != SVt_PVAV)
-		|| ((numpaths = av_top_index((AV *)SvRV(paths))) < 0))
-	    {
-		XSRETURN_UNDEF;
-	    }
-	    results = (AV *)sv_2mortal((SV *)newAV());
-	CODE:
-	    for (n = 0; n <= numpaths; n++) {
-		HV * rh;
-		STRLEN l;
-		char * fn = SvPV(*av_fetch((AV *)SvRV(paths), n, 0), l);
+          SvGETMAGIC(paths);
+          if ((!SvROK(paths))
+              || (SvTYPE(SvRV(paths)) != SVt_PVAV)
+              || ((numpaths = av_top_index((AV *)SvRV(paths))) < 0))
+          {
+              XSRETURN_UNDEF;
+          }
+          results = (AV *)sv_2mortal((SV *)newAV());
+      CODE:
+          for (n = 0; n <= numpaths; n++) {
+              HV * rh;
+              STRLEN l;
+              char * fn = SvPV(*av_fetch((AV *)SvRV(paths), n, 0), l);
 
-		i = statfs(fn, &buf);
-		if (i != 0) {
-		    av_push(results, newSVnv(errno));
-		    continue;
-		}
+              i = statfs(fn, &buf);
+              if (i != 0) {
+                  av_push(results, newSVnv(errno));
+                  continue;
+              }
 
-		rh = (HV *)sv_2mortal((SV *)newHV());
+              rh = (HV *)sv_2mortal((SV *)newHV());
 
-		hv_store(rh, "f_bavail", 8, newSVnv(buf.f_bavail), 0);
-		hv_store(rh, "f_bfree",  7, newSVnv(buf.f_bfree),  0);
-		hv_store(rh, "f_blocks", 8, newSVnv(buf.f_blocks), 0);
-		hv_store(rh, "f_bsize",  7, newSVnv(buf.f_bsize),  0);
-		hv_store(rh, "f_ffree",  7, newSVnv(buf.f_ffree),  0);
-		hv_store(rh, "f_files",  7, newSVnv(buf.f_files),  0);
-		hv_store(rh, "f_type",   6, newSVnv(buf.f_type),   0);
+              hv_store(rh, "f_bavail", 8, newSVnv(buf.f_bavail), 0);
+              hv_store(rh, "f_bfree",  7, newSVnv(buf.f_bfree),  0);
+              hv_store(rh, "f_blocks", 8, newSVnv(buf.f_blocks), 0);
+              hv_store(rh, "f_bsize",  7, newSVnv(buf.f_bsize),  0);
+              hv_store(rh, "f_ffree",  7, newSVnv(buf.f_ffree),  0);
+              hv_store(rh, "f_files",  7, newSVnv(buf.f_files),  0);
+              hv_store(rh, "f_type",   6, newSVnv(buf.f_type),   0);
 
-		av_push(results, newRV_inc((SV *)rh));
-	    }
-	    RETVAL = newRV_inc((SV *)results);
-	OUTPUT:
-	    RETVAL
+              av_push(results, newRV_inc((SV *)rh));
+          }
+          RETVAL = newRV_inc((SV *)results);
+      OUTPUT:
+          RETVAL
 
 And add the following code to Mytest.t, while incrementing the "11"
 tests to "13":
 
-	my $results = Mytest::multi_statfs([ '/', '/blech' ]);
-	ok( ref $results->[0] );
-	ok( ! ref $results->[1] );
+  my $results = Mytest::multi_statfs([ '/', '/blech' ]);
+  ok( ref $results->[0] );
+  ok( ! ref $results->[1] );
 
 =head2 New Things in this Example
 
@@ -1206,7 +1220,7 @@ As with the return stack, it would be possible (and a small performance win)
 to pre-extend the return array before pushing data into it, since we know
 how many elements we will return:
 
-	av_extend(results, numpaths);
+  av_extend(results, numpaths);
 
 =item *
 
@@ -1248,22 +1262,22 @@ typeglobs and stuff. Well, it isn't.
 Suppose that for some strange reason we need a wrapper around the
 standard C library function C<fputs()>. This is all we need:
 
-	#define PERLIO_NOT_STDIO 0
-	#define PERL_NO_GET_CONTEXT
-	#include "EXTERN.h"
-	#include "perl.h"
-	#include "XSUB.h"
+  #define PERLIO_NOT_STDIO 0  /* For co-existence with stdio only */
+  #define PERL_NO_GET_CONTEXT /* This is more efficient */
+  #include "EXTERN.h"
+  #include "perl.h"
+  #include "XSUB.h"
 
-	#include <stdio.h>
+  #include <stdio.h>
 
-	int
-	fputs(s, stream)
-		char *          s
-		FILE *	        stream
+  int
+  fputs(s, stream)
+      char *          s
+      FILE *	        stream
 
 The real work is done in the standard typemap.
 
-For more details, see L<perlapio|perlapio/Co-existence with stdio>.
+For more details, see L<perlapio/"Co-existence with stdio">.
 
 B<But> you lose all the fine stuff done by the perlio layers. This
 calls the stdio function C<fputs()>, which knows nothing about them.
@@ -1296,21 +1310,20 @@ perlio C<PerlIO_puts()> function as an example.
 In the C part of the XS file (above the first MODULE line) you
 have
 
-	#define OutputStream	PerlIO *
-    or
-	typedef PerlIO *	OutputStream;
-
+      #define OutputStream	PerlIO *
+  or
+      typedef PerlIO *	OutputStream;
 
 And this is the XS code:
 
-	int
-	perlioputs(s, stream)
-		char *          s
-		OutputStream	stream
-	CODE:
-		RETVAL = PerlIO_puts(stream, s);
-	OUTPUT:
-		RETVAL
+  int
+  perlioputs(s, stream)
+      char *          s
+      OutputStream	stream
+  CODE:
+      RETVAL = PerlIO_puts(stream, s);
+  OUTPUT:
+      RETVAL
 
 We have to use a C<CODE> section because C<PerlIO_puts()> has the arguments
 reversed compared to C<fputs()>, and we want to keep the arguments the same.
@@ -1319,20 +1332,20 @@ Wanting to explore this thoroughly, we want to use the stdio C<fputs()>
 on a PerlIO *. This means we have to ask the perlio system for a stdio
 C<FILE *>:
 
-	int
-	perliofputs(s, stream)
-		char *          s
-		OutputStream	stream
-	PREINIT:
-		FILE *fp = PerlIO_findFILE(stream);
-	CODE:
-		if (fp != (FILE*) 0) {
-			RETVAL = fputs(s, fp);
-		} else {
-			RETVAL = -1;
-		}
-	OUTPUT:
-		RETVAL
+  int
+  perliofputs(s, stream)
+      char *          s
+      OutputStream	stream
+  PREINIT:
+      FILE *fp = PerlIO_findFILE(stream);
+  CODE:
+      if (fp != (FILE*) 0) {
+          RETVAL = fputs(s, fp);
+      } else {
+          RETVAL = -1;
+      }
+  OUTPUT:
+      RETVAL
 
 Note: C<PerlIO_findFILE()> will search the layers for a stdio
 layer. If it can't find one, it will call C<PerlIO_exportFILE()> to
@@ -1358,7 +1371,7 @@ In versions of 5.002 prior to the gamma version, the test script in Example
 1 will not function properly.  You need to change the "use lib" line to
 read:
 
-	use lib './blib';
+  use lib './blib';
 
 =item *
 
@@ -1367,14 +1380,14 @@ automatically created by h2xs.  This means that you cannot say "make test"
 to run the test script.  You will need to add the following line before the
 "use extension" statement:
 
-	use lib './blib';
+  use lib './blib';
 
 =item *
 
 In versions 5.000 and 5.001, instead of using the above line, you will need
 to use the following line:
 
-	BEGIN { unshift(@INC, "./blib") }
+  BEGIN { unshift(@INC, "./blib") }
 
 =item *
 
@@ -1404,4 +1417,4 @@ It is now maintained as part of Perl itself.
 
 =head2 Last Changed
 
-2020-10-03
+2020-10-06
