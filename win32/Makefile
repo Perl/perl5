@@ -960,7 +960,7 @@ regen_config_h:
 	-$(MINIPERL) -I..\lib config_h.PL
 	rename config.h $(CFGH_TMPL)
 
-$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
+$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\git_version.h
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
@@ -1100,7 +1100,7 @@ $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
 $(DLL_OBJ)	: $(CORE_H)
 
-perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl
+perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl ..\git_version.h
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
 	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) TARG_DIR=..\ > perldll.def

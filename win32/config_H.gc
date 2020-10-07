@@ -9,7 +9,7 @@
 
 /* Package name      : perl5
  * Source directory  : 
- * Configuration time: Wed Oct  7 16:27:47 2020
+ * Configuration time: Wed Oct  7 16:35:37 2020
  * Configured by     : tony
  * Target system     : 
  */
@@ -342,7 +342,7 @@
  *	This symbol, if defined, indicates that the readlink routine is
  *	available to read the value of a symbolic link.
  */
-/*#define HAS_READLINK		/ **/
+#define HAS_READLINK		/**/
 
 /* HAS_REGCOMP:
  *	This symbol, if defined, indicates that the regcomp() routine is
@@ -500,7 +500,7 @@
  *	This symbol, if defined, indicates that the symlink routine is available
  *	to create symbolic links.
  */
-/*#define HAS_SYMLINK	/ **/
+#define HAS_SYMLINK	/**/
 
 /* HAS_SYSCALL:
  *	This symbol, if defined, indicates that the syscall routine is

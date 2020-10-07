@@ -1697,6 +1697,81 @@ is_symlink(HANDLE h) {
     return TRUE;
 }
 
+static BOOL
+is_symlink_name(const char *name) {
+    HANDLE f = CreateFileA(name, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                           FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    BOOL result;
+
+    if (f == INVALID_HANDLE_VALUE) {
+        return FALSE;
+    }
+    result = is_symlink(f);
+    CloseHandle(f);
+
+    return result;
+}
+
+DllExport int
+win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
+    MY_REPARSE_DATA_BUFFER linkdata;
+    const MY_SYMLINK_REPARSE_BUFFER * const sd =
+        &linkdata.Data.SymbolicLinkReparseBuffer;
+    HANDLE hlink;
+    DWORD fileattr = GetFileAttributes(pathname);
+    DWORD linkdata_returned;
+    int bytes_out;
+    BOOL used_default;
+
+    if (fileattr == INVALID_FILE_ATTRIBUTES) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!(fileattr & FILE_ATTRIBUTE_REPARSE_POINT)) {
+        /* not a symbolic link */
+        errno = EINVAL;
+        return -1;
+    }
+
+    hlink =
+        CreateFileA(pathname, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                    FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    if (hlink == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!DeviceIoControl(hlink, FSCTL_GET_REPARSE_POINT, NULL, 0, &linkdata, sizeof(linkdata), &linkdata_returned, NULL)) {
+        translate_to_errno();
+        CloseHandle(hlink);
+        return -1;
+    }
+    CloseHandle(hlink);
+
+    if (linkdata_returned < offsetof(MY_REPARSE_DATA_BUFFER, Data.SymbolicLinkReparseBuffer.PathBuffer)
+        || linkdata.ReparseTag != IO_REPARSE_TAG_SYMLINK) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    bytes_out = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                    sd->PathBuffer+sd->SubstituteNameOffset/2,
+                                    sd->SubstituteNameLength/2,
+                                    buf, bufsiz, NULL, &used_default);
+    if (bytes_out == 0 || used_default) {
+        /* failed conversion from unicode to ANSI or otherwise failed */
+        errno = EINVAL;
+        return -1;
+    }
+    if ((size_t)bytes_out > bufsiz) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return bytes_out;
+}
+
 DllExport int
 win32_lstat(const char *path, Stat_t *sbuf)
 {
@@ -2129,8 +2204,14 @@ win32_unlink(const char *filename)
         if (ret == -1)
             (void)SetFileAttributesA(filename, attrs);
     }
-    else
+    else if ((attrs & (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DIRECTORY))
+        == (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DIRECTORY)
+             && is_symlink_name(filename)) {
+        ret = rmdir(filename);
+    }
+    else {
         ret = unlink(filename);
+    }
     return ret;
 }
 
@@ -3341,44 +3422,74 @@ win32_link(const char *oldname, const char *newname)
     {
 	return 0;
     }
-    /* This isn't perfect, eg. Win32 returns ERROR_ACCESS_DENIED for
-       both permissions errors and if the source is a directory, while
-       POSIX wants EACCES and EPERM respectively.
-
-       Determined by experimentation on Windows 7 x64 SP1, since MS
-       don't document what error codes are returned.
-    */
-    switch (GetLastError()) {
-    case ERROR_BAD_NET_NAME:
-    case ERROR_BAD_NETPATH:
-    case ERROR_BAD_PATHNAME:
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_FILENAME_EXCED_RANGE:
-    case ERROR_INVALID_DRIVE:
-    case ERROR_PATH_NOT_FOUND:
-      errno = ENOENT;
-      break;
-    case ERROR_ALREADY_EXISTS:
-      errno = EEXIST;
-      break;
-    case ERROR_ACCESS_DENIED:
-      errno = EACCES;
-      break;
-    case ERROR_NOT_SAME_DEVICE:
-      errno = EXDEV;
-      break;
-    case ERROR_DISK_FULL:
-      errno = ENOSPC;
-      break;
-    case ERROR_NOT_ENOUGH_QUOTA:
-      errno = EDQUOT;
-      break;
-    default:
-      /* ERROR_INVALID_FUNCTION - eg. on a FAT volume */
-      errno = EINVAL;
-      break;
-    }
+    translate_to_errno();
     return -1;
+}
+
+#ifndef SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
+#  define SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE 0x2
+#endif
+
+DllExport int
+win32_symlink(const char *oldfile, const char *newfile)
+{
+    dTHX;
+    const char *dest_path = oldfile;
+    char szTargetName[MAX_PATH+1];
+    size_t oldfile_len = strlen(oldfile);
+    DWORD dest_attr;
+    DWORD create_flags = SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
+
+    /* oldfile might be relative and we don't want to change that,
+       so don't map that.
+    */
+    newfile = PerlDir_mapA(newfile);
+
+    /* are we linking to a directory?
+       CreateSymlinkA() needs to know if the target is a directory,
+       if the oldfile is relative we need to make a relative path
+       based on the newfile
+    */
+    if (oldfile_len >= 3 && oldfile[1] == ':' && oldfile[2] != '\\' && oldfile[2] != '/') {
+        /* relative to current directory on a drive */
+        /* dest_path = oldfile; already done */
+    }
+    else if (oldfile[0] != '\\' && oldfile[0] != '/') {
+        size_t newfile_len = strlen(newfile);
+        char *last_slash = strrchr(newfile, '/');
+        char *last_bslash = strrchr(newfile, '\\');
+        char *end_dir = last_slash && last_bslash
+            ? ( last_slash > last_bslash ? last_slash : last_bslash)
+            : last_slash ? last_slash : last_bslash ? last_bslash : NULL;
+
+        if (end_dir) {
+            if ((end_dir - newfile + 1) + oldfile_len > MAX_PATH) {
+                /* too long */
+                errno = EINVAL;
+                return -1;
+            }
+
+            memcpy(szTargetName, newfile, end_dir - newfile + 1);
+            strcpy(szTargetName + (end_dir - newfile + 1), oldfile);
+            dest_path = szTargetName;
+        }
+        else {
+            /* newpath is just a filename */
+            /* dest_path = oldfile; */
+        }
+    }
+
+    dest_attr = GetFileAttributes(dest_path);
+    if (dest_attr != (DWORD)-1 && (dest_attr & FILE_ATTRIBUTE_DIRECTORY)) {
+        create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+    }
+
+    if (!CreateSymbolicLinkA(newfile, oldfile, create_flags)) {
+        translate_to_errno();
+        return -1;
+    }
+
+    return 0;
 }
 
 DllExport int

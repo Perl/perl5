@@ -3774,13 +3774,13 @@ PP(pp_link)
 #  if defined(HAS_LINK) && defined(HAS_SYMLINK)
 	    /* Both present - need to choose which.  */
 	    (op_type == OP_LINK) ?
-	    PerlLIO_link(tmps, tmps2) : symlink(tmps, tmps2);
+	    PerlLIO_link(tmps, tmps2) : PerlLIO_symlink(tmps, tmps2);
 #  elif defined(HAS_LINK)
     /* Only have link, so calls to pp_symlink will have DIE()d above.  */
 	PerlLIO_link(tmps, tmps2);
 #  elif defined(HAS_SYMLINK)
     /* Only have symlink, so calls to pp_link will have DIE()d above.  */
-	symlink(tmps, tmps2);
+	PerlLIO_symlink(tmps, tmps2);
 #  endif
     }
 
@@ -3811,7 +3811,7 @@ PP(pp_readlink)
     tmps = POPpconstx;
     /* NOTE: if the length returned by readlink() is sizeof(buf) - 1,
      * it is impossible to know whether the result was truncated. */
-    len = readlink(tmps, buf, sizeof(buf) - 1);
+    len = PerlLIO_readlink(tmps, buf, sizeof(buf) - 1);
     if (len < 0)
 	RETPUSHUNDEF;
     buf[len] = '\0';
