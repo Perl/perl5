@@ -24,13 +24,8 @@ BEGIN {
 }
 
 my $symlink_exists = eval { symlink("",""); 1 };
-my $test_count = 111;
-$test_count += 127 if $symlink_exists;
-$test_count += 26 if $^O eq 'MSWin32';
-$test_count += 2 if $^O eq 'MSWin32' and $symlink_exists;
 
 use Test::More;
-plan tests => $test_count;
 use lib qw( ./t/lib );
 use Testing qw(
     create_file_ok
@@ -1104,3 +1099,5 @@ if ($^O eq 'MSWin32') {
     like($@, qr/invalid top directory/,
         "find() correctly died due to undefined top directory");
 }
+
+done_testing();
