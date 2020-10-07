@@ -28,6 +28,8 @@ corresponding to $foo, @foo, %foo.
 GVs are usually found as values in stashes (symbol table hashes) where
 Perl stores its global variables.
 
+=for apidoc Ayh||GV
+
 =cut
 */
 
