@@ -34,6 +34,8 @@ plus space for some flags and pointers.  For example, a tied variable has
 a MAGIC structure that contains a pointer to the object associated with the
 tie.
 
+=for apidoc Ayh||MAGIC
+
 =cut
 
 */
