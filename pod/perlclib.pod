@@ -196,7 +196,7 @@ C<isDIGIT_A>, and so on.
 is an C<isASCII_L1>, which is identical to C<isASCII>;  the
 latter name is clearer.  There is no entry in the Latin1 column for
 C<toupper> because the result can be non-Latin1.  You have to use
-C<toUPPER_uni>, as described in L<perlapi/Character case changing>.)
+C<toUPPER_uvchr>, as described in L<perlapi/Character case changing>.)
 
 =head2 F<stdlib.h> functions
 
