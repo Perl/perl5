@@ -3771,38 +3771,52 @@ hint to the compiler that this condition is likely to be false.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
-/* ASSUME is like assert(), but it has a benefit in a release build. It is a
-   hint to a compiler about a statement of fact in a function call free
-   expression, which allows the compiler to generate better machine code.
-   In a debug build, ASSUME(x) is a synonym for assert(x). ASSUME(0) means
-   the control path is unreachable. In a for loop, ASSUME can be used to hint
-   that a loop will run at least X times. ASSUME is based off MSVC's __assume
-   intrinsic function, see its documents for more details.
+/*
+=for apidoc Am||ASSUME|bool expr
+C<ASSUME> is like C<assert()>, but it has a benefit in a release build. It is a
+hint to a compiler about a statement of fact in a function call free
+expression, which allows the compiler to generate better machine code.  In a
+debug build, C<ASSUME(x)> is a synonym for C<assert(x)>. C<ASSUME(0)> means the
+control path is unreachable. In a for loop, C<ASSUME> can be used to hint that
+a loop will run at least X times. C<ASSUME> is based off MSVC's C<__assume>
+intrinsic function, see its documents for more details.
+
+=cut
 */
 
-#ifndef DEBUGGING
-#  if __has_builtin(__builtin_unreachable) \
-     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4) /* 4.5 -> */
+#ifdef DEBUGGING
+#  define ASSUME(x) assert(x)
+#  ifdef __builtin_unreachable
+#    define HAS_BUILTIN_UNREACHABLE_
+#  elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
+                               || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#    define HAS_BUILTIN_UNREACHABLE_
+#  endif
+#endif
+
+#if defined(__sun)
+#  ifndef ASSUME
+#    define ASSUME(x)      /* ASSUME() generates warnings on Solaris */
+#  endif
+#  define NOT_REACHED
+#elif defined(HAS_BUILTIN_UNREACHABLE_)
+#  ifndef ASSUME
 #    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
-#  elif defined(_MSC_VER)
+#  endif
+#  define NOT_REACHED                                                       \
+        STMT_START {                                                        \
+            ASSUME(!"UNREACHABLE"); __builtin_unreachable();                \
+        } STMT_END
+#else
+#  if defined(_MSC_VER)
 #    define ASSUME(x) __assume(x)
 #  elif defined(__ARMCC_VERSION) /* untested */
 #    define ASSUME(x) __promise(x)
 #  else
-/* a random compiler might define assert to its own special optimization token
-   so pass it through to C lib as a last resort */
+    /* a random compiler might define assert to its own special optimization
+     * token so pass it through to C lib as a last resort */
 #    define ASSUME(x) assert(x)
 #  endif
-#else
-#  define ASSUME(x) assert(x)
-#endif
-
-#if defined(__sun)      /* ASSUME() generates warnings on Solaris */
-#  define NOT_REACHED
-#elif defined(DEBUGGING) && (__has_builtin(__builtin_unreachable) \
-     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4)) /* 4.5 -> */
-#  define NOT_REACHED STMT_START { ASSUME(!"UNREACHABLE"); __builtin_unreachable(); } STMT_END
-#else
 #  define NOT_REACHED ASSUME(!"UNREACHABLE")
 #endif
 
