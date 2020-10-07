@@ -27,6 +27,8 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
+my $Errno_loaded = eval { require Errno };
+
 plan tests => 110;
 
 my $Perl = which_perl();
@@ -241,7 +243,10 @@ ok(! -f '.',          '!-f cwd' );
 SKIP: {
     unlink($tmpfile_link);
     my $symlink_rslt = eval { symlink $tmpfile, $tmpfile_link };
+    my $error = 0 + $!;
     skip "symlink not implemented", 3 if $@ =~ /unimplemented/;
+    skip "symlink not available or we can't check", 3
+        if $^O eq "MSWin32" && (!$Errno_loaded || $error == &Errno::ENOSYS || $error == &Errno::EPERM);
 
     is( $@, '',     'symlink() implemented' );
     ok( $symlink_rslt,      'symlink() ok' );
@@ -634,7 +639,6 @@ SKIP:
 {
     skip "There is a file named '2', which invalidates this test", 2 if -e '2';
 
-    my $Errno_loaded = eval { require Errno };
     my @statarg = ($statfile, $statfile);
     no warnings 'syntax';
     ok !stat(@statarg),

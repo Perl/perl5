@@ -986,6 +986,18 @@ PerlLIOLink(struct IPerlLIO* piPerl, const char*oldname, const char *newname)
     return win32_link(oldname, newname);
 }
 
+int
+PerlLIOSymLink(struct IPerlLIO* piPerl, const char*oldname, const char *newname)
+{
+    return win32_symlink(oldname, newname);
+}
+
+int
+PerlLIOReadLink(struct IPerlLIO* piPerl, const char *path, char *buf, size_t bufsiz)
+{
+    return win32_readlink(path, buf, bufsiz);
+}
+
 Off_t
 PerlLIOLseek(struct IPerlLIO* piPerl, int handle, Off_t offset, int origin)
 {
@@ -1098,6 +1110,8 @@ const struct IPerlLIO perlLIO =
     PerlLIOUnlink,
     PerlLIOUtime,
     PerlLIOWrite,
+    PerlLIOSymLink,
+    PerlLIOReadLink
 };
 
 

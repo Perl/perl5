@@ -1571,6 +1571,12 @@ filehandle may be closed, or pointer may be in a different position.
 The value returned by L<C<tell>|perlfunc/tell FILEHANDLE> may be affected
 after the call, and the filehandle may be flushed.
 
+=item chdir
+
+(Win32)
+The current directory reported by the system may include any symbolic
+links specified to chdir().
+
 =item chmod
 
 (Win32)
@@ -2100,8 +2106,16 @@ true value speeds up C<stat> by not performing this operation.
 
 =item symlink
 
-(Win32, S<RISC OS>)
+(S<RISC OS>)
 Not implemented.
+
+(Win32)
+
+Requires either elevated permissions or developer mode and a
+sufficiently recent version of Windows 10.  Since Windows needs to
+know whether the target is a directory or not when creating the link
+the target Perl will only create the link as a directory link when the
+target exists and is a directory.
 
 (VMS)
 Implemented on 64 bit VMS 8.3.  VMS requires the symbolic link to be in Unix

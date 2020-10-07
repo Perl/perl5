@@ -137,6 +137,8 @@ DllExport  char*	win32_longpath(char *path);
 DllExport  char*	win32_ansipath(const WCHAR *path);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int          win32_link(const char *oldname, const char *newname);
+DllExport  int          win32_symlink(const char *oldname, const char *newname);
+DllExport  int          win32_readlink(const char *path, char *buf, size_t bufsiz);
 DllExport  int		win32_unlink(const char *f);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_gettimeofday(struct timeval *tp, void *not_used);
@@ -286,7 +288,8 @@ END_EXTERN_C
 #define putchar			win32_putchar
 #define access(p,m)		win32_access(p,m)
 #define chmod(p,m)		win32_chmod(p,m)
-
+#define symlink(targ,realp)     win32_symlink(targ,realp)
+#define readlink(p,buf,bufsiz)  win32_readlink(p,buf,bufsiz)
 
 #if !defined(MYMALLOC) || !defined(PERL_CORE)
 #undef malloc
@@ -309,6 +312,8 @@ END_EXTERN_C
 #define times			win32_times
 #define ioctl			win32_ioctl
 #define link			win32_link
+#define symlink			win32_symlink
+#define readlink		win32_readlink
 #define unlink			win32_unlink
 #define utime			win32_utime
 #define gettimeofday		win32_gettimeofday
