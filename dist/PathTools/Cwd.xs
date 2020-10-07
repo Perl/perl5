@@ -84,6 +84,9 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	unsigned symlinks;
 	int serrno;
 	char remaining[MAXPATHLEN], next_token[MAXPATHLEN];
+#ifdef PERL_IMPLICIT_SYS
+        dTHX;
+#endif
 
 	serrno = errno;
 	symlinks = 0;
@@ -175,8 +178,8 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
             }
 #if defined(HAS_LSTAT) && defined(HAS_READLINK) && defined(HAS_SYMLINK)
             {
-                struct stat sb;
-                if (lstat(resolved, &sb) != 0) {
+                Stat_t sb;
+                if (PerlLIO_lstat(resolved, &sb) != 0) {
                     if (errno == ENOENT && p == NULL) {
                         errno = serrno;
                         return (resolved);
@@ -191,7 +194,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                         errno = ELOOP;
                         return (NULL);
                     }
-                    slen = readlink(resolved, symlink, sizeof(symlink) - 1);
+                    slen = PerlLIO_readlink(resolved, symlink, sizeof(symlink) - 1);
                     if (slen < 0)
                         return (NULL);
                     symlink[slen] = '\0';
