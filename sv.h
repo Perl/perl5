@@ -2049,9 +2049,9 @@ END_EXTERN_C
 #define SvTRUEx_nomg(sv)   SvTRUE_nomg(sv)
 #define SvTRUE_nomg_NN(sv) SvTRUE_common(sv, TRUE)
 
-#  define SvIVx(sv) SvIV(sv)
-#  define SvUVx(sv) SvUV(sv)
-#  define SvNVx(sv) SvNV(sv)
+#define SvIVx(sv) SvIV(sv)
+#define SvUVx(sv) SvUV(sv)
+#define SvNVx(sv) SvNV(sv)
 
 #if defined(PERL_USE_GCC_BRACE_GROUPS)
 
