@@ -2035,7 +2035,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
 #define sv_catsv_mg(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC|SV_SMAGIC)
 #define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
-#define sv_catpvn_mg(sv, sstr, slen) sv_catpvn_flags(sv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
+#define sv_catpvn_mg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
 #define sv_copypv(dsv, ssv) sv_copypv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_copypv_nomg(dsv, ssv) sv_copypv_flags(dsv, ssv, 0)
 #define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)

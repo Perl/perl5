@@ -244,11 +244,11 @@ Perl_sv_force_normal(pTHX_ SV *sv)
  */
 
 void
-Perl_sv_setsv(pTHX_ SV *dstr, SV *sstr)
+Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv)
 {
     PERL_ARGS_ASSERT_SV_SETSV;
 
-    sv_setsv_flags(dstr, sstr, SV_GMAGIC);
+    sv_setsv_flags(dsv, ssv, SV_GMAGIC);
 }
 
 /* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
@@ -272,11 +272,11 @@ Like C<sv_catpvn>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len)
+Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len)
 {
     PERL_ARGS_ASSERT_SV_CATPVN_MG;
 
-    sv_catpvn_flags(sv,ptr,len,SV_GMAGIC|SV_SMAGIC);
+    sv_catpvn_flags(dsv,sstr,len,SV_GMAGIC|SV_SMAGIC);
 }
 
 /* sv_catsv() is now a macro using Perl_sv_catsv_flags();
@@ -284,11 +284,11 @@ Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len)
  */
 
 void
-Perl_sv_catsv(pTHX_ SV *dstr, SV *sstr)
+Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr)
 {
     PERL_ARGS_ASSERT_SV_CATSV;
 
-    sv_catsv_flags(dstr, sstr, SV_GMAGIC);
+    sv_catsv_flags(dsv, sstr, SV_GMAGIC);
 }
 
 /*
@@ -300,11 +300,11 @@ Like C<sv_catsv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *ssv)
+Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *sstr)
 {
     PERL_ARGS_ASSERT_SV_CATSV_MG;
 
-    sv_catsv_flags(dsv,ssv,SV_GMAGIC|SV_SMAGIC);
+    sv_catsv_flags(dsv,sstr,SV_GMAGIC|SV_SMAGIC);
 }
 
 /*
@@ -1154,9 +1154,9 @@ Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
 }
 
 SV *
-Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
+Perl_sv_mortalcopy(pTHX_ SV *const oldsv)
 {
-    return Perl_sv_mortalcopy_flags(aTHX_ oldstr, SV_GMAGIC);
+    return Perl_sv_mortalcopy_flags(aTHX_ oldsv, SV_GMAGIC);
 }
 
 void

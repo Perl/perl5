@@ -995,7 +995,7 @@ Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
 pe	|GV *	|gv_override	|NN const char * const name \
 				|const STRLEN len
 Xxpd	|void	|gv_try_downgrade|NN GV* gv
-p	|void	|gv_setref	|NN SV *const dstr|NN SV *const sstr
+p	|void	|gv_setref	|NN SV *const dsv|NN SV *const ssv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
@@ -1797,9 +1797,9 @@ S	|void	|sv_buf_to_rw	|NN SV *sv
 Afpd	|void	|sv_catpvf	|NN SV *const sv|NN const char *const pat|...
 Apd	|void	|sv_vcatpvf	|NN SV *const sv|NN const char *const pat \
 				|NULLOK va_list *const args
-Apd	|void	|sv_catpv	|NN SV *const sv|NULLOK const char* ptr
+Apd	|void	|sv_catpv	|NN SV *const dsv|NULLOK const char* sstr
 ApMdb	|void	|sv_catpvn	|NN SV *dsv|NN const char *sstr|STRLEN len
-ApMdb	|void	|sv_catsv	|NN SV *dstr|NULLOK SV *sstr
+ApMdb	|void	|sv_catsv	|NN SV *dsv|NULLOK SV *sstr
 Apd	|void	|sv_chop	|NN SV *const sv|NULLOK const char *const ptr
 : Used only in perl.c
 pd	|I32	|sv_clean_all
@@ -1903,7 +1903,7 @@ Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Apd	|char  *|sv_setpv_bufsize|NN SV *const sv|const STRLEN cur|const STRLEN len
 Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
-ApMdb	|void	|sv_setsv	|NN SV *dstr|NULLOK SV *sstr
+ApMdb	|void	|sv_setsv	|NN SV *dsv|NULLOK SV *ssv
 CpMdb	|void	|sv_taint	|NN SV* sv
 CpdR	|bool	|sv_tainted	|NN SV *const sv
 Apd	|int	|sv_unmagic	|NN SV *const sv|const int type
@@ -2656,9 +2656,9 @@ Ap	|int	|runops_debug
 Afpd	|void	|sv_catpvf_mg	|NN SV *const sv|NN const char *const pat|...
 Apd	|void	|sv_vcatpvf_mg	|NN SV *const sv|NN const char *const pat \
 				|NULLOK va_list *const args
-Apd	|void	|sv_catpv_mg	|NN SV *const sv|NULLOK const char *const ptr
-ApdbM	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
-ApdbM	|void	|sv_catsv_mg	|NN SV *dsv|NULLOK SV *ssv
+Apd	|void	|sv_catpv_mg	|NN SV *const dsv|NULLOK const char *const sstr
+ApdbM	|void	|sv_catpvn_mg	|NN SV *dsv|NN const char *sstr|STRLEN len
+ApdbM	|void	|sv_catsv_mg	|NN SV *dsv|NULLOK SV *sstr
 Afpd	|void	|sv_setpvf_mg	|NN SV *const sv|NN const char *const pat|...
 Apd	|void	|sv_vsetpvf_mg	|NN SV *const sv|NN const char *const pat \
 				|NULLOK va_list *const args
@@ -2668,7 +2668,7 @@ Apd	|void	|sv_setuv_mg	|NN SV *const sv|const UV u
 Apd	|void	|sv_setnv_mg	|NN SV *const sv|const NV num
 Apd	|void	|sv_setpv_mg	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn_mg	|NN SV *const sv|NN const char *const ptr|const STRLEN len
-Apd	|void	|sv_setsv_mg	|NN SV *const dstr|NULLOK SV *const sstr
+Apd	|void	|sv_setsv_mg	|NN SV *const dsv|NULLOK SV *const ssv
 ApdbM	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
 ApR	|MGVTBL*|get_vtbl	|int vtbl_id
 Apd	|char*	|pv_display	|NN SV *dsv|NN const char *pv|STRLEN cur|STRLEN len \
@@ -2753,13 +2753,13 @@ ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC *mg|NN CLONE_PARAMS *const param
 #if defined(PERL_IN_SV_C)
 S	|SV **	|sv_dup_inc_multiple|NN SV *const *source|NN SV **dest \
 				|SSize_t items|NN CLONE_PARAMS *const param
-SR	|SV*	|sv_dup_common	|NN const SV *const sstr \
+SR	|SV*	|sv_dup_common	|NN const SV *const ssv \
 				|NN CLONE_PARAMS *const param
 #endif
-ApR	|SV*	|sv_dup		|NULLOK const SV *const sstr|NN CLONE_PARAMS *const param
-ApR	|SV*	|sv_dup_inc	|NULLOK const SV *const sstr \
+ApR	|SV*	|sv_dup		|NULLOK const SV *const ssv|NN CLONE_PARAMS *const param
+ApR	|SV*	|sv_dup_inc	|NULLOK const SV *const ssv \
 				|NN CLONE_PARAMS *const param
-Ap	|void	|rvpv_dup	|NN SV *const dstr|NN const SV *const sstr|NN CLONE_PARAMS *const param
+Ap	|void	|rvpv_dup	|NN SV *const dsv|NN const SV *const ssv|NN CLONE_PARAMS *const param
 Ap	|yy_parser*|parser_dup	|NULLOK const yy_parser *const proto|NN CLONE_PARAMS *const param
 #endif
 ApR	|PTR_TBL_t*|ptr_table_new
@@ -3100,7 +3100,7 @@ S	|void	|assert_uft8_cache_coherent|NN const char *const func \
 ST	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
 S	|SV *	|more_sv
 S	|bool	|sv_2iuv_common	|NN SV *const sv
-S	|void	|glob_assign_glob|NN SV *const dstr|NN SV *const sstr \
+S	|void	|glob_assign_glob|NN SV *const dsv|NN SV *const ssv \
 		|const int dtype
 SRT	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *const tbl|NULLOK const void *const sv
 S	|void	|anonymise_cv_maybe	|NN GV *gv|NN CV *cv
@@ -3291,12 +3291,12 @@ iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
 EXiTp	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
 
 Apd	|void	|sv_set_undef	|NN SV *sv
-Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
-Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \
+Apd	|void	|sv_setsv_flags	|NN SV *dsv|NULLOK SV *ssv|const I32 flags
+Apd	|void	|sv_catpvn_flags|NN SV *const dsv|NN const char *sstr|const STRLEN len \
 				|const I32 flags
-Apd	|void	|sv_catpv_flags	|NN SV *dstr|NN const char *sstr \
+Apd	|void	|sv_catpv_flags	|NN SV *dsv|NN const char *sstr \
 				|const I32 flags
-Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
+Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const sstr|const I32 flags
 Amd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Adp	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const U32 flags
@@ -3309,7 +3309,7 @@ ApT	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 ApT	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_ANY_COW
 : Used in regexec.c
-pxXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
+pxXE	|SV*	|sv_setsv_cow	|NULLOK SV* dsv|NN SV* ssv
 #endif
 
 Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode
