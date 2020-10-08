@@ -5842,18 +5842,18 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  */
 
 #    if defined(PERL_CORE)
-#    define NUM_CLASSES 18
-#    define N0 0
-#    define N1 ((N0)   + NUM_CLASSES)
-#    define N2 ((N1)   + NUM_CLASSES)
-#    define N3 ((N2)   + NUM_CLASSES)
-#    define N4 ((N3)   + NUM_CLASSES)
-#    define N5 ((N4)   + NUM_CLASSES)
-#    define N6 ((N5)   + NUM_CLASSES)
-#    define N7 ((N6)   + NUM_CLASSES)
-#    define N8 ((N7)   + NUM_CLASSES)
-#    define N9 ((N8)   + NUM_CLASSES)
-#    define N10 ((N9)  + NUM_CLASSES)
+#      define NUM_CLASSES 18
+#      define N0 0
+#      define N1 ((N0)   + NUM_CLASSES)
+#      define N2 ((N1)   + NUM_CLASSES)
+#      define N3 ((N2)   + NUM_CLASSES)
+#      define N4 ((N3)   + NUM_CLASSES)
+#      define N5 ((N4)   + NUM_CLASSES)
+#      define N6 ((N5)   + NUM_CLASSES)
+#      define N7 ((N6)   + NUM_CLASSES)
+#      define N8 ((N7)   + NUM_CLASSES)
+#      define N9 ((N8)   + NUM_CLASSES)
+#      define N10 ((N9)  + NUM_CLASSES)
 
 /*Class: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17  */
 /*N0*/   0, 1,N1,N2,N3,N4,N5, 1, 1, 1, 1, 1, 1,N6,N7,N8,N9,N10,
@@ -5981,30 +5981,30 @@ EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
  *        byte ones (as they are always legal) are to this state.
  */
 
-#    undef N0
-#    undef N1
-#    undef N2
-#    undef N3
-#    undef N4
-#    undef N5
-#    undef N6
-#    undef N7
-#    undef N8
-#    undef N9
-#    undef NUM_CLASSES
-#    define NUM_CLASSES 19
-#    define N0 0
-#    define N1  ((N0)  + NUM_CLASSES)
-#    define N2  ((N1)  + NUM_CLASSES)
-#    define N3  ((N2)  + NUM_CLASSES)
-#    define N4  ((N3)  + NUM_CLASSES)
-#    define N5  ((N4)  + NUM_CLASSES)
-#    define N6  ((N5)  + NUM_CLASSES)
-#    define N7  ((N6)  + NUM_CLASSES)
-#    define N8  ((N7)  + NUM_CLASSES)
-#    define N9  ((N8)  + NUM_CLASSES)
-#    define N10 ((N9)  + NUM_CLASSES)
-#    define N11 ((N10) + NUM_CLASSES)
+#      undef N0
+#      undef N1
+#      undef N2
+#      undef N3
+#      undef N4
+#      undef N5
+#      undef N6
+#      undef N7
+#      undef N8
+#      undef N9
+#      undef NUM_CLASSES
+#      define NUM_CLASSES 19
+#      define N0 0
+#      define N1  ((N0)  + NUM_CLASSES)
+#      define N2  ((N1)  + NUM_CLASSES)
+#      define N3  ((N2)  + NUM_CLASSES)
+#      define N4  ((N3)  + NUM_CLASSES)
+#      define N5  ((N4)  + NUM_CLASSES)
+#      define N6  ((N5)  + NUM_CLASSES)
+#      define N7  ((N6)  + NUM_CLASSES)
+#      define N8  ((N7)  + NUM_CLASSES)
+#      define N9  ((N8)  + NUM_CLASSES)
+#      define N10 ((N9)  + NUM_CLASSES)
+#      define N11 ((N10) + NUM_CLASSES)
 
 /*Class: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18 */
 /*N0*/   0,  1, N1, N2, N4, N7, N6, N3, N5,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
@@ -6084,24 +6084,24 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
  *        byte ones (as they are always legal) are to this state.
  */
 
-#    undef N0
-#    undef N1
-#    undef N2
-#    undef N3
-#    undef N4
-#    undef N5
-#    undef N6
-#    undef N7
-#    undef NUM_CLASSES
-#    define NUM_CLASSES 12
-#    define N0 0
-#    define N1  ((N0)  + NUM_CLASSES)
-#    define N2  ((N1)  + NUM_CLASSES)
-#    define N3  ((N2)  + NUM_CLASSES)
-#    define N4  ((N3)  + NUM_CLASSES)
-#    define N5  ((N4)  + NUM_CLASSES)
-#    define N6  ((N5)  + NUM_CLASSES)
-#    define N7  ((N6)  + NUM_CLASSES)
+#      undef N0
+#      undef N1
+#      undef N2
+#      undef N3
+#      undef N4
+#      undef N5
+#      undef N6
+#      undef N7
+#      undef NUM_CLASSES
+#      define NUM_CLASSES 12
+#      define N0 0
+#      define N1  ((N0)  + NUM_CLASSES)
+#      define N2  ((N1)  + NUM_CLASSES)
+#      define N3  ((N2)  + NUM_CLASSES)
+#      define N4  ((N3)  + NUM_CLASSES)
+#      define N5  ((N4)  + NUM_CLASSES)
+#      define N6  ((N5)  + NUM_CLASSES)
+#      define N7  ((N6)  + NUM_CLASSES)
 
 /*Class: 0   1   2   3   4   5   6   7   8   9  10  11 */
 /*N0*/   0,  1, N1, N2, N5, N7, N3, N4, N6,  1,  1,  1,
