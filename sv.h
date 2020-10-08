@@ -15,7 +15,7 @@
 /*
 =for apidoc_section SV Flags
 
-=for apidoc AmnU||svtype
+=for apidoc Ay||svtype
 An enum of flags for Perl types.  These are found in the file F<sv.h>
 in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
