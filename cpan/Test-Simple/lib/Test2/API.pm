@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302181';
+our $VERSION = '1.302182';
 
 
 my $INST;
