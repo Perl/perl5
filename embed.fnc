@@ -180,7 +180,7 @@
 :
 : The 'name' in any such line must not be the same as any in this file (i.e.,
 : no redundant definitions), and one of the flags on the apidoc lines must be
-: 'm', indicating it is a macro (or similar), and not a function.
+: 'm' or 'y', indicating it is not a function.
 :
 : All but the name field of an apidoc_item line are optional, and if empty,
 : inherits from the controlling plain apidoc line.   The flags field is
@@ -538,6 +538,8 @@
 :
 :         any doc entry is marked that it may change.  Also used to suppress
 :	  making a perlapi doc entry if it would just be a placeholder.
+:
+:   y  Typedef.  The element names a type rather than being a macro
 :
 : In this file, pointer parameters that must not be passed NULLs should be
 : prefixed with NN.

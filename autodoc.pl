@@ -365,15 +365,16 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $ret_type = $embed_ret_type;
                 @args = @embed_args;
             }
-            elsif ($flags !~ /m/)  { # Not in embed.fnc, is missing if not a macro
+            elsif ($flags !~ /[my]/)  { # Not in embed.fnc, is missing if not
+                                        # a macro or typedef
                 $missing{$element_name} = $file;
             }
 
             die "flag $1 is not legal (for function $element_name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXx] ) /x;
+                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXxy] ) /x;
 
-            die "'u' flag must also have 'm' flag' for $element_name"
-                                            if $flags =~ /u/ && $flags !~ /m/;
+            die "'u' flag must also have 'm' or 'y' flags' for $element_name"
+                                            if $flags =~ /u/ && $flags !~ /[my]/;
             warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
 
@@ -825,6 +826,7 @@ sub parse_config_h {
             $handled = 1;
         }
         else {
+            my $flags = "";
             if ($has_defn && ! $has_args) {
                 $configs{$name}{args} = 1;
             }
@@ -883,6 +885,7 @@ sub parse_config_h {
             }
             elsif ($name =~ / $sb t $sb /x) {
                 $configs{$name}{'section'} = 'Typedef names';
+                $flags .= 'y';
             }
             elsif (   $name =~ / ^ PERL_ ( PRI | SCN ) | $sb FORMAT $sb /x
                     && $configs{$name}{pod} =~ m/ \b format \b /ix)
@@ -1006,8 +1009,9 @@ sub parse_config_h {
             my $section = $configs{$name}{'section'};
             die "Internal error: '$section' not in \%valid_sections"
                             unless grep { $_ eq $section } keys %valid_sections;
-            my $flags = 'AdmnT';
+            $flags .= 'AdmnT';
             $flags .= 'U' unless defined $configs{$name}{usage};
+
             $docs{'api'}{$section}{$name}{flags} = $flags;
             $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
             $docs{'api'}{$section}{$name}{ret_type} = "";
@@ -1096,8 +1100,10 @@ sub docout ($$$) { # output the docs for one function
         }
     }
 
-    if ($flags =~ /U/) { # no usage
-        warn("U and s flags are incompatible") if $flags =~ /s/;
+    if ($flags =~ /[Uy]/) { # no usage; typedefs are considered simple enough
+                            # to never warrant a usage line
+        warn("U and s flags are incompatible")
+                                            if $flags =~ /U/ && $flags =~ /s/;
         # nothing
     } else {
 
