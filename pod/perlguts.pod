@@ -21,16 +21,52 @@ Perl has three typedefs that handle Perl's three main data types:
 
 Each typedef has specific routines that manipulate the various data types.
 
+=for apidoc_section AV Handling
+=for apidoc Ayh||AV
+=for apidoc_section HV Handling
+=for apidoc Ayh||HV
+=for apidoc_section SV Handling
+=for apidoc Ayh||SV
+
 =head2 What is an "IV"?
 
 Perl uses a special typedef IV which is a simple signed integer type that is
 guaranteed to be large enough to hold a pointer (as well as an integer).
 Additionally, there is the UV, which is simply an unsigned IV.
 
-Perl also uses two special typedefs, I32 and I16, which will always be at
-least 32-bits and 16-bits long, respectively.  (Again, there are U32 and U16,
-as well.)  They will usually be exactly 32 and 16 bits long, but on Crays
-they will both be 64 bits.
+Perl also uses several special typedefs to declare variables to hold
+integers of (at least) a given size.
+Use I8, I16, I32, and I64 to declare a signed integer variable which has
+at least as many bits as the number in its name.  These all evaluate to
+the native C type that is closest to the given number of bits, but no
+smaller than that number.  For example, on many platforms, a C<short> is
+16 bits long, and if so, I16 will evaluate to a C<short>.  But on
+platforms where a C<short> isn't exactly 16 bits, Perl will use the
+smallest type that contains 16 bits or more.
+
+U8, U16, U32, and U64 are to declare the corresponding unsigned integer
+types.
+
+If the platform doesn't support 64-bit integers, both I64 and U64 will
+be undefined.  Use IV and UV to declare the largest practicable, and
+C<L<perlapi/WIDEST_UTYPE>> for the absolute maximum unsigned, but which
+may not be usable in all circumstances.
+
+A numeric constant can be specified with L<perlapi/C<INT16_C>>,
+L<perlapi/C<UINTMAX_C>>, and similar.
+
+=for apidoc_section Integer configuration values
+=for apidoc Ayh||I8
+=for apidoc_item ||I16
+=for apidoc_item ||I32
+=for apidoc_item ||I64
+=for apidoc_item ||IV
+
+=for apidoc Ayh||U8
+=for apidoc_item ||U16
+=for apidoc_item ||U32
+=for apidoc_item ||U64
+=for apidoc_item ||UV
 
 =head2 Working with SVs
 
@@ -46,6 +82,8 @@ much of the internals is that PVs are just for strings.  Often, for
 example, a trailing C<NUL> is tacked on automatically.  The non-string use
 is documented only in this paragraph.)
 
+=for apidoc Ayh||NV
+
 The seven routines are:
 
     SV*  newSViv(IV);
@@ -59,6 +97,8 @@ The seven routines are:
 C<STRLEN> is an integer type (C<Size_t>, usually defined as C<size_t> in
 F<config.h>) guaranteed to be large enough to represent the size of
 any string that perl can handle.
+
+=for apidoc Ayh||STRLEN
 
 In the unlikely case of a SV requiring more complex initialization, you
 can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
@@ -512,6 +552,8 @@ These contain the actual key and value pointers (plus extra administrative
 overhead).  The key is a string pointer; the value is an C<SV*>.  However,
 once you have an C<HE*>, to get the actual key and value, use the routines
 specified below.
+
+=for apidoc Ayh||HE
 
     I32    hv_iterinit(HV*);
             /* Prepares starting point to traverse hash table */
@@ -1163,6 +1205,8 @@ C<MGVTBL>, which is a structure of function pointers and stands for
 "Magic Virtual Table" to handle the various operations that might be
 applied to that variable.
 
+=for apidoc Ayh||MGVTBL
+
 The C<MGVTBL> has five (or sometimes eight) pointers to the following
 routine types:
 
@@ -1662,6 +1706,7 @@ this:
 At the end of I<pseudo-block> the function C<f> is called with the
 only argument C<p>.
 
+=for apidoc Ayh||DESTRUCTORFUNC_NOCONTEXT_t
 =for apidoc Amh||SAVEDESTRUCTOR|DESTRUCTORFUNC_NOCONTEXT_t f|void *p
 
 =item C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>
@@ -1669,7 +1714,8 @@ only argument C<p>.
 At the end of I<pseudo-block> the function C<f> is called with the
 implicit context argument (if any), and C<p>.
 
-for foo AMh||SAVEDESTRUCTOR_X|DESTRUCTORFUNC_t f|void *p
+=for apidoc Ayh||DESTRUCTORFUNC_t
+=for apidoc Amh||SAVEDESTRUCTOR_X|DESTRUCTORFUNC_t f|void *p
 
 =item C<SAVESTACK_POS()>
 
@@ -2122,12 +2168,20 @@ C<op_last>.  The children in between can be found by iteratively
 following the C<OpSIBLING> pointer from the first child to the last (but
 see below).
 
+=for apidoc Ayh||OP
+=for apidoc Ayh||BINOP
+=for apidoc Ayh||LISTOP
+=for apidoc Ayh||UNOP
+
 There are also some other op types: a C<PMOP> holds a regular expression,
 and has no children, and a C<LOOP> may or may not have children.  If the
 C<op_children> field is non-zero, it behaves like a C<LISTOP>.  To
 complicate matters, if a C<UNOP> is actually a C<null> op after
 optimization (see L</Compile pass 2: context propagation>) it will still
 have children in accordance with its former type.
+
+=for apidoc Ayh||LOOP
+=for apidoc Ayh||PMOP
 
 Finally, there is a C<LOGOP>, or logic op. Like a C<LISTOP>, this has one
 or more children, but it doesn't have an C<op_last> field: so you have to
@@ -2137,6 +2191,8 @@ the C<op_next> field described below, and represents an alternate
 execution path. Operators like C<and>, C<or> and C<?> are C<LOGOP>s. Note
 that in general, C<op_other> may not point to any of the direct children
 of the C<LOGOP>.
+
+=for apidoc Ayh||LOGOP
 
 Starting in version 5.21.2, perls built with the experimental
 define C<-DPERL_OP_PARENT> add an extra boolean flag for each op,
@@ -2248,6 +2304,8 @@ per-subroutine or recursive stage, like this:
         prev_rpeepp = PL_rpeepp;
         PL_rpeepp = my_rpeep;
 
+=for apidoc Ayh||peep_t
+
 =head2 Pluggable runops
 
 The compile tree is executed in a runops function.  There are two runops
@@ -2280,6 +2338,8 @@ this:
 
 This will arrange to have C<my_start_hook> called at the start of
 compiling every lexical scope.  The available hooks are:
+
+=for apidoc Ayh||BHK
 
 =over 4
 
@@ -2432,6 +2492,9 @@ function used within the Perl guts:
 
 STATIC becomes "static" in C, and may be #define'd to nothing in some
 configurations in the future.
+
+=for apidoc_section Compiler directives
+=for apidoc Ayh||STATIC
 
 A public function (i.e. part of the internal API, but not necessarily
 sanctioned for use in extensions) begins like this:
@@ -3246,6 +3309,8 @@ ppaddr you use, set the properties of the custom op with
 C<XopENTRY_set>, and register the structure against the ppaddr using
 C<Perl_custom_op_register>.  A trivial example might look like:
 
+=for apidoc Ayh||XOP
+
     static XOP my_xop;
     static OP *my_pp(pTHX);
 
@@ -3311,6 +3376,8 @@ This member is of type C<Perl_cpeep_t>, which expands to C<void
 will be called from C<Perl_rpeep> when ops of this type are encountered
 by the peephole optimizer.  I<o> is the OP that needs optimizing;
 I<oldop> is the previous OP optimized, whose C<op_next> points to I<o>.
+
+=for apidoc Ayh||Perl_cpeep_t
 
 =back
 
