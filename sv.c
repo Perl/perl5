@@ -8959,9 +8959,10 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	if (SvIsUV(sv)) {
 	    if (SvUVX(sv) == UV_MAX)
 		sv_setnv(sv, UV_MAX_P1);
-	    else
+            else {
 		(void)SvIOK_only_UV(sv);
 		SvUV_set(sv, SvUVX(sv) + 1);
+            }
 	} else {
 	    if (SvIVX(sv) == IV_MAX)
 		sv_setuv(sv, (UV)IV_MAX + 1);
