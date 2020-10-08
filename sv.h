@@ -824,8 +824,8 @@ Remember to free the previous PV buffer. There are many things to check.
 Beware that the existing pointer may be involved in copy-on-write or other
 mischief, so do C<SvOOK_off(sv)> and use C<sv_force_normal> or
 C<SvPV_force> (or check the C<SvIsCOW> flag) first to make sure this
-modification is safe. Then finally, if it is not a COW, call C<SvPV_free> to
-free the previous PV buffer.
+modification is safe. Then finally, if it is not a COW, call
+L<perlintern/C<SvPV_free>> to free the previous PV buffer.
 
 =for apidoc Am|void|SvUV_set|SV* sv|UV val
 Set the value of the UV pointer in C<sv> to val.  See C<L</SvIV_set>>.
@@ -1380,6 +1380,14 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		   SvPV_renew(sv, _lEnGtH); \
 		 } STMT_END
 
+/*
+=for apidoc Cm|void|SvPV_free|SV * sv
+
+Frees the PV buffer in C<sv>, leaving things in a precarious state, so should
+only be used as part of a larger operation
+
+=cut
+*/
 #define SvPV_free(sv)							\
     STMT_START {							\
 		     assert(SvTYPE(sv) >= SVt_PV);			\
