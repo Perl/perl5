@@ -747,7 +747,7 @@ Returns a boolean indicating whether the SV contains a v-string.
 =for apidoc Am|U32|SvOOK|SV* sv
 Returns a U32 indicating whether the pointer to the string buffer is offset.
 This hack is used internally to speed up removal of characters from the
-beginning of a C<SvPV>.  When C<SvOOK> is true, then the start of the
+beginning of a C<L</SvPV>>.  When C<SvOOK> is true, then the start of the
 allocated string buffer is actually C<SvOOK_offset()> bytes before C<SvPVX>.
 This offset used to be stored in C<SvIVX>, but is now stored within the spare
 part of the buffer.
@@ -922,7 +922,7 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 =for apidoc Am|U32|SvUTF8|SV* sv
 Returns a U32 value indicating the UTF-8 status of an SV.  If things are set-up
 properly, this indicates whether or not the SV contains UTF-8 encoded data.
-You should use this I<after> a call to C<SvPV()> or one of its variants, in
+You should use this I<after> a call to C<L</SvPV>> or one of its variants, in
 case any call to string overloading updates the internal flag.
 
 If you want to take into account the L<bytes> pragma, use C<L</DO_UTF8>>
