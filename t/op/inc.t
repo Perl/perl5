@@ -385,4 +385,22 @@ is $store::called, 4, 'STORE called on "my" target';
     like $@, qr/Modification of a read-only value/, 'use int; *GLOB126637--';
 }
 
+# Exercises sv_inc() incrementing UV to UV, UV to NV
+SKIP: {
+    $a = ~1; # assumed to be UV_MAX - 1
+
+    if ($Config{uvsize} eq '4') {
+        cmp_ok(++$a, '==', 4294967295, "preincrement to UV_MAX");
+        cmp_ok(++$a, '==', 4294967296, "preincrement past UV_MAX");
+    }
+    elsif ($Config{uvsize} eq '8') {
+        cmp_ok(++$a, '==', 18446744073709551615, "preincrement to UV_MAX");
+        # assumed that NV can hold 2 ** 64 without rounding.
+        cmp_ok(++$a, '==', 18446744073709551616, "preincrement past UV_MAX");
+    }
+    else {
+        skip "the uvsize $Config{uvsize} is neither 4 nor 8", 2;
+    }
+} # SKIP
+
 done_testing();
