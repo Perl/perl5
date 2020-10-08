@@ -317,9 +317,9 @@ my ($index, $warn_size);
 
   print $warn <<'EOM';
 
-#define Off(x)			((x) / 8)
-#define Bit(x)			(1 << ((x) % 8))
-#define IsSet(a, x)		((a)[Off(x)] & Bit(x))
+#define Perl_Warn_Off_(x)           ((x) / 8)
+#define Perl_Warn_Bit_(x)           (1 << ((x) % 8))
+#define PerlWarnIsSet_(a, x)        ((a)[Perl_Warn_Off_(x)] & Perl_Warn_Bit_(x))
 
 
 #define G_WARN_OFF		0 	/* $^W == 0 */
@@ -383,8 +383,8 @@ EOM
 #define isLEXWARN_off \
 	cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
 #define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
-#define isWARN_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)))
-#define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
+#define isWARN_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)))
+#define isWARNf_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)+1))
 
 #define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
 
