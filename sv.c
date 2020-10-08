@@ -996,7 +996,7 @@ static const struct body_details bodies_by_type[] = {
 
     { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
-    
+
     { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
 
@@ -1114,7 +1114,7 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
     curr = aroot->curr++;
     adesc = &(aroot->set[curr]);
     assert(!adesc->arena);
-    
+
     Newx(adesc->arena, good_arena_size, char);
     adesc->size = good_arena_size;
     adesc->utype = sv_type;
@@ -1345,7 +1345,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     case SVt_PVAV:
 	assert(new_type_details->body_size);
 
-#ifndef PURIFY	
+#ifndef PURIFY
 	assert(new_type_details->arena);
 	assert(new_type_details->arena_size);
 	/* This points to the start of the allocated area.  */
@@ -1440,7 +1440,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 		length -= difference;
 	    }
 	    assert (length >= 0);
-		
+
 	    Copy((char *)old_body + offset, (char *)new_body + offset, length,
 		 char);
 	}
@@ -1522,7 +1522,7 @@ Perl_sv_backoff(SV *const sv)
     assert(SvTYPE(sv) != SVt_PVAV);
 
     SvOOK_offset(sv, delta);
-    
+
     SvLEN_set(sv, SvLEN(sv) + delta);
     SvPV_set(sv, SvPVX(sv) - delta);
     SvFLAGS(sv) &= ~SVf_OOK;
@@ -1807,7 +1807,7 @@ S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
 	  const char * const limit = tmpbuf + tmpbuf_size - 8;
 	  /* each *s can expand to 4 chars + "...\0",
 	     i.e. need room for 8 chars */
-	
+
 	  const char *s = SvPVX_const(sv);
 	  const char * const end = s + SvCUR(sv);
 	  for ( ; s < end && d < limit; s++ ) {
@@ -2231,7 +2231,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	   (eg 123.456 can shortcut to the IV 123 with atol(), but we must
 	   be careful to ensure that the value with the .456 is around if the
 	   NV value is requested in the future).
-	
+
 	   This means that if we cache such an IV/a UV, we need to cache the
 	   NV as well.  Moreover, we trade speed for space, and do not
 	   cache the NV if we are sure it's not needed.
@@ -2296,7 +2296,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	/* For !NV_PRESERVES_UV and IS_NUMBER_IN_UV and IS_NUMBER_NOT_INT we
            will be in the previous block to set the IV slot, and the next
            block to set the NV slot.  So no else here.  */
-	
+
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
@@ -2537,7 +2537,7 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
 
     if (SvVALID(sv) || isREGEXP(sv)) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
-	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  
+	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.
 	   Regexps have no SvIVX and SvNVX fields. */
 	assert(SvPOKp(sv));
 	{
@@ -3032,17 +3032,17 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 		REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
 
 		assert(re);
-			
+
 		/* If the regex is UTF-8 we want the containing scalar to
 		   have an UTF-8 flag too */
 		if (RX_UTF8(re))
 		    SvUTF8_on(sv);
 		else
-		    SvUTF8_off(sv);	
+		    SvUTF8_off(sv);
 
 		if (lp)
 		    *lp = RX_WRAPLEN(re);
- 
+
 		return RX_WRAPPED(re);
 	    } else {
 		const char *const typestring = sv_reftype(referent, 0);
@@ -3249,7 +3249,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 
     {
 	const STRLEN len = s - SvPVX_const(sv);
-	if (lp) 
+	if (lp)
 	    *lp = len;
 	SvCUR_set(sv, len);
     }
@@ -3512,7 +3512,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	 * make the loop as fast as possible. */
 	U8 * s = (U8 *) SvPVX_const(sv);
 	U8 *t = s;
-	
+
         if (is_utf8_invariant_string_loc(s, SvCUR(sv), (const U8 **) &t)) {
 
             /* utf8 conversion not needed because all are invariants.  Mark
@@ -4546,7 +4546,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	 *  1. Swipe
 	 *  2. Copy-on-write
 	 *  3. Actual copy
-	 * 
+	 *
 	 * Which we choose is based on various factors.  The following
 	 * things are listed in order of speed, fastest to slowest:
 	 *  - Swipe
@@ -4554,21 +4554,21 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	 *  - Copy-on-write bookkeeping
 	 *  - malloc
 	 *  - Copying a long string
-	 * 
+	 *
 	 * We swipe the string (steal the string buffer) if the SV on the
 	 * rhs is about to be freed anyway (TEMP and refcnt==1).  This is a
 	 * big win on long strings.  It should be a win on short strings if
-	 * SvPVX_const(dstr) has to be allocated.  If not, it should not 
+	 * SvPVX_const(dstr) has to be allocated.  If not, it should not
 	 * slow things down, as SvPVX_const(sstr) would have been freed
 	 * soon anyway.
-	 * 
+	 *
 	 * We also steal the buffer from a PADTMP (operator target) if it
 	 * is ‘long enough’.  For short strings, a swipe does not help
 	 * here, as it causes more malloc calls the next time the target
 	 * is used.  Benchmarks show that even if SvPVX_const(dstr) has to
 	 * be allocated it is still not worth swiping PADTMPs for short
 	 * strings, as the savings here are small.
-	 * 
+	 *
 	 * If swiping is not an option, then we see whether it is
 	 * worth using copy-on-write.  If the lhs already has a buf-
 	 * fer big enough and the string is short, we skip it and fall back
@@ -4583,8 +4583,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	 * usage by making readline allocate a new large buffer the sec-
 	 * ond time round.  So, if the buffer is too large, again, we use
 	 * method 3 (copy).
-	 * 
-	 * Finally, if there is no buffer on the left, or the buffer is too 
+	 *
+	 * Finally, if there is no buffer on the left, or the buffer is too
 	 * small, then we use copy-on-write and make both SVs share the
 	 * string buffer.
 	 *
@@ -4865,12 +4865,12 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	SvIsCOW_on(sstr);
 	DEBUG_C(PerlIO_printf(Perl_debug_log,
 			      "Fast copy on write: Converting sstr to COW\n"));
-	CowREFCNT(sstr) = 0;	
+	CowREFCNT(sstr) = 0;
     }
 #  ifdef PERL_DEBUG_READONLY_COW
     if (already) sv_buf_to_rw(sstr);
 #  endif
-    CowREFCNT(sstr)++;	
+    CowREFCNT(sstr)++;
     new_pv = SvPVX_mutable(sstr);
     sv_buf_to_ro(sstr);
 
@@ -5131,7 +5131,7 @@ Perl_sv_usepvn_flags(pTHX_ SV *const sv, char *ptr, const STRLEN len, const U32 
 	? len + 1 :
 #ifdef Perl_safesysmalloc_size
 	len + 1;
-#else 
+#else
 	PERL_STRLEN_ROUNDUP(len + 1);
 #endif
     if (flags & SV_HAS_TRAILING_NUL) {
@@ -5679,8 +5679,8 @@ to contain an SV* and is stored as-is with its C<REFCNT> incremented.
 
 =cut
 */
-MAGIC *	
-Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how, 
+MAGIC *
+Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
                 const MGVTBL *const vtable, const char *const name, const I32 namlen)
 {
     MAGIC* mg;
@@ -6484,7 +6484,7 @@ Perl_sv_replace(pTHX_ SV *const sv, SV *const nsv)
     if(SvTYPE(sv) == SVt_IV) {
 	SET_SVANY_FOR_BODYLESS_IV(sv);
     }
-	
+
 
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
@@ -7212,7 +7212,7 @@ Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
 		    ulen = cache[0] + Perl_utf8_length(aTHX_ s + cache[1],
 						       s + len);
 		}
-		
+
 		if (PL_utf8cache < 0) {
 		    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
 		    assert_uft8_cache_coherent("sv_len_utf8", ulen, real, sv);
@@ -7540,7 +7540,7 @@ S_utf8_mg_len_cache_update(pTHX_ SV *const sv, MAGIC **const mgp,
    the code that uses it doesn't need to worry if only 1 entry has actually
    been set to non-zero.  It also makes the "position beyond the end of the
    cache" logic much simpler, as the first slot is always the one to start
-   from.   
+   from.
 */
 static void
 S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN byte,
@@ -7580,7 +7580,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 
     /* Cache is held with the later position first, to simplify the code
        that deals with unbounded ends.  */
-       
+
     ASSERT_UTF8_CACHE(cache);
     if (cache[1] == 0) {
 	/* Cache is totally empty  */
@@ -8317,7 +8317,7 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     const STRLEN recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
       /* Grab the size of the record we're getting */
     char *buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
-    
+
     /* Go yank in */
 #ifdef __VMS
     int fd;
@@ -8392,7 +8392,7 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		    */
 		    if (charstart)
 			readsize = recsize - charcount;
-		    else 
+		    else
 			readsize = skip - (bend - bufp) + recsize - charcount - 1;
 		    buffer = SvGROW(sv, append + bytesread + readsize + 1) + append;
 		    bend = buffer + bytesread;
@@ -8720,7 +8720,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		goto cannot_be_shortbuffered;
 	    }
 	}
-	
+
 	if (shortbuffered) {		/* oh well, must extend */
             /* we didnt have enough room to fit the line into the target buffer
              * so we must extend the target buffer and keep going */
@@ -8954,7 +8954,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	    else {
 		(void)SvIOK_only(sv);
 		SvIV_set(sv, SvIVX(sv) + 1);
-	    }	
+	    }
 	}
 	return;
     }
@@ -9000,7 +9000,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	       so $a="9.22337203685478e+18"; $a+0; $a++
 	       needs to be the same as $a="9.22337203685478e+18"; $a++
 	       or we go insane. */
-	
+
 	    (void) sv_2iv(sv);
 	    if (SvIOK(sv))
 		goto oops_its_int;
@@ -9122,7 +9122,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	    else {
 		(void)SvIOK_only_UV(sv);
 		SvUV_set(sv, SvUVX(sv) - 1);
-	    }	
+	    }
 	} else {
 	    if (SvIVX(sv) == IV_MIN) {
 		sv_setnv(sv, (NV)IV_MIN);
@@ -9131,7 +9131,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	    else {
 		(void)SvIOK_only(sv);
 		SvIV_set(sv, SvIVX(sv) - 1);
-	    }	
+	    }
 	}
 	return;
     }
@@ -9174,7 +9174,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	       so $a="9.22337203685478e+18"; $a+0; $a--
 	       needs to be the same as $a="9.22337203685478e+18"; $a--
 	       or we go insane. */
-	
+
 	    (void) sv_2iv(sv);
 	    if (SvIOK(sv))
 		goto oops_its_int;
@@ -10084,7 +10084,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
     else {
 	char *s;
 	STRLEN len;
- 
+
 	if (SvTYPE(sv) > SVt_PVLV
 	    || isGV_with_GP(sv))
 	    /* diag_listed_as: Can't coerce %s to %s in %s */
@@ -12073,7 +12073,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
 	v|\*(\d+\$)?v      vector with optional (optionally specified) arg
-	0		   flag (as above): repeated to allow "v02" 	
+	0		   flag (as above): repeated to allow "v02"
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
@@ -14072,7 +14072,7 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 	    }
 	    else {
 		/* Some other special case - random pointer */
-		SvPV_set(dstr, (char *) SvPVX_const(sstr));		
+		SvPV_set(dstr, (char *) SvPVX_const(sstr));
 	    }
 	}
     }
@@ -15222,7 +15222,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_body_arenas = NULL;
     Zero(&PL_body_roots, 1, PL_body_roots);
-    
+
     PL_sv_count		= 0;
     PL_sv_root		= NULL;
     PL_sv_arenaroot	= NULL;
@@ -15516,7 +15516,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvPVCLEAR(PERL_DEBUG_PAD(1));        /* ext/re needs these */
     SvPVCLEAR(PERL_DEBUG_PAD(2));        /* even without DEBUGGING. */
 
-   
+
     /* Clone the regex array */
     /* ORANGE FIXME for plugins, probably in the SV dup code.
        newSViv(PTR2IV(CALLREGDUPE(
@@ -15875,7 +15875,7 @@ static void
 S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 {
     PERL_ARGS_ASSERT_UNREFERENCED_TO_TMP_STACK;
-    
+
     if (AvFILLp(unreferenced) > -1) {
 	SV **svp = AvARRAY(unreferenced);
 	SV **const last = svp + AvFILLp(unreferenced);
@@ -16983,7 +16983,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (!(obase->op_flags & OPf_KIDS))
 	    break;
 	o = cUNOPx(obase)->op_first;
-	
+
     do_op2:
 	if (!o)
 	    break;
