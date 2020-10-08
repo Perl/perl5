@@ -5841,6 +5841,7 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  *        byte ones (as they are always legal) are to this state.
  */
 
+#    if defined(PERL_CORE)
 #    define NUM_CLASSES 18
 #    define N0 0
 #    define N1 ((N0)   + NUM_CLASSES)
@@ -6114,6 +6115,7 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
 /*N7*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N2,  1,  1,
 };
 
+#    endif /* defined(PERL_CORE) */
 #  else     /* End of is DOINIT */
 
 EXTCONST U8 PL_extended_utf8_dfa_tab[];
