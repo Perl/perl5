@@ -90,7 +90,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    our $VERSION = '1.50';
+    our $VERSION = '1.51';
 }
 
 our (@dl_library_path, @dl_resolve_using, @dl_require_symbols,

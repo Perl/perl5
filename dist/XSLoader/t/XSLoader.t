@@ -12,8 +12,6 @@ BEGIN {
         die "Test::More not available\n";
     }
 
-    plan(skip_all => "these tests needs Perl 5.5+") if $] < 5.005;
-
     use Config;
     foreach (qw/SDBM_File GDBM_File ODBM_File NDBM_File DB_File/) {
         if ($Config{extensions} =~ /\b$_\b/) {
