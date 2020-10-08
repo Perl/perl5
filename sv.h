@@ -2170,10 +2170,11 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #endif
 
 /*
-=for apidoc Am|SV*|newRV_inc|SV* sv
+=for apidoc newRV
+=for apidoc_item ||newRV_inc|
 
-Creates an RV wrapper for an SV.  The reference count for the original SV is
-incremented.
+These are identical.  They create an RV wrapper for an SV.  The reference count
+for the original SV is incremented.
 
 =cut
 */

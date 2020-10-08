@@ -1475,7 +1475,7 @@ ApdR	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 #endif
 ApdR	|OP*	|newPMOP	|I32 type|I32 flags
 ApdR	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
-ApR	|SV*	|newRV		|NN SV *const sv
+ApdR	|SV*	|newRV		|NN SV *const sv
 ApdR	|SV*	|newRV_noinc	|NN SV *const tmpRef
 ApdR	|SV*	|newSV		|const STRLEN len
 ApR	|OP*	|newSVREF	|NN OP* o
