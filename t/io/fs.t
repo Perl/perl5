@@ -42,14 +42,12 @@ my $accurate_timestamps =
 	  $wd =~ m#$Config{afsroot}/#
      );
 
-if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
-    if (Win32::FsType() eq 'NTFS') {
-        $has_link            = 1;
-        $accurate_timestamps = 1;
-    }
-    else {
-        $has_link            = 0;
-    }
+if ($^O eq 'MSWin32' && Win32::FsType() eq 'NTFS') {
+    $has_link            = 1;
+    $accurate_timestamps = 1;
+}
+else {
+    $has_link            = 0;
 }
 
 my $needs_fh_reopen =

@@ -105,11 +105,9 @@ sleep 2;
 
 my $has_link = 1;
 my $inaccurate_atime = 0;
-if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
-    if (Win32::FsType() ne 'NTFS') {
-        $has_link            = 0;
-	$inaccurate_atime    = 1;
-    }
+if ($Is_MSWin32 && Win32::FsType() ne 'NTFS') {
+    $has_link            = 0;
+    $inaccurate_atime    = 1;
 }
 
 SKIP: {
