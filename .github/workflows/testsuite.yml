@@ -341,7 +341,9 @@ jobs:
       - name: Set up Perl build environment
         run: |
           choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+          echo "C:\strawberry\c\bin" >> "$GITHUB_PATH"
+          echo "C:\strawberry\perl\site\bin" >> "$GITHUB_PATH"
+          echo "C:\strawberry\perl\bin" >> "$GITHUB_PATH"
       - name: Host perl -V
         run: perl -V
       - name: gcc --version
