@@ -1177,7 +1177,7 @@ use File::Glob qw(:case);
     },
 
     'Tie::RefHash' => {
-        'DISTRIBUTION' => 'FLORA/Tie-RefHash-1.39.tar.gz',
+        'DISTRIBUTION' => 'ETHER/Tie-RefHash-1.40.tar.gz',
         'FILES'        => q[cpan/Tie-RefHash],
     },
 
