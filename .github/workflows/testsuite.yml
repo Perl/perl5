@@ -340,8 +340,11 @@ jobs:
           fetch-depth: 10
       - name: Set up Perl build environment
         run: |
-          choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+          # skip installing perl if it is already installed.
+          if (!(Test-Path "C:\strawberry\perl\bin")) {
+            choco install strawberryperl
+          }
+          echo "C:\strawberry\c\bin`nC:\strawberry\perl\site\bin`nC:\strawberry\perl\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Host perl -V
         run: perl -V
       - name: gcc --version
