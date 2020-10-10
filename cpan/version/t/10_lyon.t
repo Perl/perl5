@@ -24,13 +24,19 @@ if ($] >= 5.008_001) {
 cmp_ok('version'->new('1.0203')->numify, '==', '1.0203');
 is('version'->new('1.0203')->normal, 'v1.20.300');
 
-cmp_ok('version'->new('1.02_03')->numify, '==', '1.0203');
-is('version'->new('1.02_03')->normal, 'v1.20.300');
+{
+    no warnings 'numeric';
+    cmp_ok('version'->new('1.02_03')->numify, '==', '1.0203');
+    is('version'->new('1.02_03')->normal, 'v1.20.300');
+}
 
 cmp_ok('version'->new('v1.2.30')->numify, '==', '1.002030');
 is('version'->new('v1.2.30')->normal, 'v1.2.30');
-cmp_ok('version'->new('v1.2.3_0')->numify, '==', '1.002030');
-is('version'->new('v1.2.3_0')->normal, 'v1.2.30');
+{
+    no warnings 'numeric';
+    cmp_ok('version'->new('v1.2.3_0')->numify, '==', '1.002030');
+    is('version'->new('v1.2.3_0')->normal, 'v1.2.30');
+}
 
 is('version'->new("1.0203")->stringify, "1.0203");
 is('version'->new("1.02_03")->stringify, "1.02_03");
