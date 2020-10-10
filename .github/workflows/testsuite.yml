@@ -381,7 +381,8 @@ jobs:
       CONTINUOUS_INTEGRATION: 1
 
     steps:
-      - run: git config --global core.autocrlf false
+      # we use Cygwin git, so no need to configure git here.
+
       - name: Set up Cygwin
         shell: cmd
         run: |
@@ -394,7 +395,7 @@ jobs:
         shell: cmd
         run: |
           path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "mkdir -p ~; cd ~; echo \"$GITHUB_REPOSITORY\"; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
+          sh -c "mkdir -p ~; cd ~; echo \"$GITHUB_REPOSITORY\"; git config --global core.autocrlf false; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
       - name: Configure
         shell: cmd
         run: |
