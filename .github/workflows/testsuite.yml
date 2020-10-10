@@ -31,7 +31,6 @@ jobs:
         run: |
           echo "Pull request authors"
           echo "# git merge-base origin/${BASE_REF} HEAD"
-          git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
           git config diff.renameLimit 999999
           git fetch --depth=1000 origin ${BASE_REF}
         env:
@@ -177,9 +176,9 @@ jobs:
         run: |
           apt-get update ||:
           apt-get -y install build-essential git-core
+
+      # actions/checkout@v2 doesn't work in a container, so we use v1.
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 0
       - name: fix git remote credential
         run: git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
       - name: git cfg + fetch tags
@@ -213,7 +212,7 @@ jobs:
       CONTINUOUS_INTEGRATION: 1
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       - name: Configure
@@ -245,7 +244,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       #- name: Install clcache
@@ -297,7 +296,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       - name: Set up MSVC100
@@ -335,7 +334,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       - name: Set up Perl build environment
