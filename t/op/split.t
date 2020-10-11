@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan tests => 187;
+plan tests => 193;
 
 $FS = ':';
 
@@ -663,6 +663,19 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     is (+@a, 0, "empty utf8 string");
 }
 
+# correct stack adjustments (gh#18232)
+{
+    sub foo { return @_ }
+    my @a = foo(1, scalar split " ", "a b");
+    is(join('', @a), "12", "Scalar split to a sub parameter");
+}
+
+{
+    sub foo { return @_ }
+    my @a = foo(1, scalar(@x = split " ", "a b"));
+    is(join('', @a), "12", "Split to @x then use scalar result as a sub parameter");
+}
+
 fresh_perl_is(<<'CODE', '', {}, "scalar split stack overflow");
 map{int"";split//.0>60for"0000000000000000"}split// for"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 CODE
@@ -682,3 +695,11 @@ CODE
         ok(eq_array(\@result,['a','b']), "Resulting in ('a','b')");
     }
 }
+
+# check that the (@ary = split) optimisation survives @ary being modified
+
+fresh_perl_is('my @ary; @ary = split(/\w(?{ @ary[1000] = 1 })/, "abc");',
+        '',{},'(@ary = split ...) survives @ary being Renew()ed');
+fresh_perl_is('my @ary; @ary = split(/\w(?{ undef @ary })/, "abc");',
+        '',{},'(@ary = split ...) survives an (undef @ary)');
+
