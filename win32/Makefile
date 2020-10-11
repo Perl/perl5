@@ -411,6 +411,11 @@ EMBED_EXE_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputre
 		  if exist $@.manifest del $@.manifest
 EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
 		  if exist $@.manifest del $@.manifest
+# This one is for perl.exe which already has an embedded manifest, so we want to
+# append to it, not replace it.
+APPEND_EXE_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -updateresource:$@;1 && \
+		  if exist $@.manifest del $@.manifest
+
 
 # Set the install location of the compiler headers/libraries.
 # These are saved into $Config{incpath} and $Config{libpth}.
@@ -604,11 +609,7 @@ EXEOUT_FLAG	= -Fe
 
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
-!IF "$(PREMSVC80)" == "undef"
-PRIV_LINK_FLAGS	= $(PRIV_LINK_FLAGS) "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
-!ELSE
-RSC_FLAGS	= -DINCLUDE_MANIFEST
-!ENDIF
+RSC_FLAGS	=
 
 # VS 2017 (VC++ 14.1) requires at minimum Windows 7 SP1 (with latest Windows Updates)
 
@@ -1173,14 +1174,14 @@ perlmainst$(o) : perlmainst.c
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES) $(SETARGV_OBJ)
-	$(EMBED_EXE_MANI)
+	$(APPEND_EXE_MANI)
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 
 $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXEST_OBJ) $(PERLEXE_RES) $(PERLSTATICLIB) $(LIBFILES) $(SETARGV_OBJ)
-	$(EMBED_EXE_MANI)
+	$(APPEND_EXE_MANI)
 
 MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
 	$(MINIPERL) -I..\lib ..\mkppport

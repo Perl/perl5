@@ -652,6 +652,10 @@ EMBED_EXE_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputre
 		  if exist $@.manifest del $@.manifest
 EMBED_DLL_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
 		  if exist $@.manifest del $@.manifest
+# This one is for perl.exe which already has an embedded manifest, so we want to
+# append to it, not replace it.
+APPEND_EXE_MANI	= if exist $@.manifest mt -nologo -manifest $@.manifest -updateresource:$@;1 && \
+		  if exist $@.manifest del $@.manifest
 
 # Most relevant compiler-specific options fall into two groups:
 # either pre-MSVC80 or MSVC80 onwards, so define a macro for this.
@@ -842,11 +846,7 @@ endif
 
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
-ifeq ($(PREMSVC80),undef)
-PRIV_LINK_FLAGS	+= "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
-else
-RSC_FLAGS	= -DINCLUDE_MANIFEST
-endif
+RSC_FLAGS	=
 
 # VS 2017 (VC++ 14.1) requires at minimum Windows 7 SP1 (with latest Windows Updates)
 
@@ -1634,7 +1634,7 @@ ifeq ($(CCTYPE),GCC)
 else
 	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES) $(SETARGV_OBJ)
-	$(EMBED_EXE_MANI)
+	$(APPEND_EXE_MANI)
 endif
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
@@ -1646,7 +1646,7 @@ ifeq ($(CCTYPE),GCC)
 else
 	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXEST_OBJ) $(PERLEXE_RES) $(PERLSTATICLIB) $(LIBFILES) $(SETARGV_OBJ)
-	$(EMBED_EXE_MANI)
+	$(APPEND_EXE_MANI)
 endif
 
 #-------------------------------------------------------------------------------
