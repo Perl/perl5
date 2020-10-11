@@ -6011,6 +6011,7 @@ PP(pp_split)
 
     /* handle @ary = split(...) optimisation */
     if (PL_op->op_private & OPpSPLIT_ASSIGN) {
+	realarray = 1;
         if (!(PL_op->op_flags & OPf_STACKED)) {
             if (PL_op->op_private & OPpSPLIT_LEX) {
                 if (PL_op->op_private & OPpLVAL_INTRO)
@@ -6033,30 +6034,10 @@ PP(pp_split)
             oldsave = PL_savestack_ix;
         }
 
-	realarray = 1;
-	PUTBACK;
-	av_extend(ary,0);
-	(void)sv_2mortal(SvREFCNT_inc_simple_NN(sv));
-	av_clear(ary);
-	SPAGAIN;
 	if ((mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied))) {
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj(MUTABLE_SV(ary), mg));
-	}
-	else {
-	    if (!AvREAL(ary)) {
-		AvREAL_on(ary);
-		AvREIFY_off(ary);
-
-		/* Note: the above av_clear(ary) above should */
-		/* have set AvFILLp(ary) = -1, so this Zero() */
-		/* may well be superfluous.                   */
-
-		/* don't free mere refs */
-		Zero(AvARRAY(ary), AvFILLp(ary) + 1, SV*);
-	    }
-	    /* temporarily switch stacks */
-	    SAVESWITCHSTACK(PL_curstack, ary);
+	} else {
 	    make_mortal = 0;
 	}
     }
@@ -6378,29 +6359,55 @@ PP(pp_split)
     LEAVE_SCOPE(oldsave); /* may undo an earlier SWITCHSTACK */
     SPAGAIN;
     if (realarray) {
-	if (!mg) {
-	    if (SvSMAGICAL(ary)) {
-		PUTBACK;
+        if (!mg) {
+            PUTBACK;
+            if(AvREAL(ary)) {
+                if (av_count(ary) > 0)
+                    av_clear(ary);
+            } else {
+                AvREAL_on(ary);
+                AvREIFY_off(ary);
+
+                if (AvMAX(ary) > -1) {
+                    /* don't free mere refs */
+                    Zero(AvARRAY(ary), AvMAX(ary), SV*);
+                }
+            }
+            if(AvMAX(ary) < iters)
+                av_extend(ary,iters);
+            SPAGAIN;
+
+            /* Need to copy the SV*s from the stack into ary */
+            Copy(SP + 1 - iters, AvARRAY(ary), iters, SV*);
+            AvFILLp(ary) = iters - 1;
+
+            if (SvSMAGICAL(ary)) {
+                PUTBACK;
 		mg_set(MUTABLE_SV(ary));
 		SPAGAIN;
-	    }
-	    if (gimme == G_ARRAY) {
-		EXTEND(SP, iters);
-		Copy(AvARRAY(ary), SP + 1, iters, SV*);
-		SP += iters;
-		RETURN;
-	    }
+            }
+            if (gimme != G_ARRAY) {
+                /* SP points to the final SV* pushed to the stack. But the SV*  */
+                /* are not going to be used from the stack. Point SP to below   */
+                /* the first of these SV*.                                      */
+                SP = SP + 1 - iters;
+                PUTBACK;
+            }
 	}
 	else {
-	    PUTBACK;
-	    ENTER_with_name("call_PUSH");
-	    call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
-	    LEAVE_with_name("call_PUSH");
-	    SPAGAIN;
+            PUTBACK;
+            av_extend(ary,iters);
+            av_clear(ary);
+
+            ENTER_with_name("call_PUSH");
+            call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
+            LEAVE_with_name("call_PUSH");
+            SPAGAIN;
+
 	    if (gimme == G_ARRAY) {
 		SSize_t i;
 		/* EXTEND should not be needed - we just popped them */
-		EXTEND(SP, iters);
+		EXTEND_SKIP(SP, iters);
 		for (i=0; i < iters; i++) {
 		    SV **svp = av_fetch(ary, i, FALSE);
 		    PUSHs((svp) ? *svp : &PL_sv_undef);
@@ -6409,13 +6416,13 @@ PP(pp_split)
 	    }
 	}
     }
-    else {
-	if (gimme == G_ARRAY)
-	    RETURN;
-    }
 
-    GETTARGET;
-    XPUSHi(iters);
+    if (gimme != G_ARRAY) {
+        PUSHMARK(SP);
+        GETTARGET;
+        XPUSHi(iters);
+     }
+
     RETURN;
 }
 
