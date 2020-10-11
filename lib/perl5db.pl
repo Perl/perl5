@@ -1091,7 +1091,6 @@ share($signalLevel);
 share($pre);
 share($post);
 share($pretype);
-share($rl);
 share($CreateTTY);
 share($CommandSet);
 
