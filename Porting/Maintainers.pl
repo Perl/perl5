@@ -246,7 +246,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.27.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.28.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -258,6 +258,7 @@ use File::Glob qw(:case);
                 scripts/cpan-mirrors
                 PAUSE2015.pub
                 PAUSE2019.pub
+                PAUSE2021.pub
                 SlayMakefile
                 t/00signature.t
                 t/04clean_load.t
@@ -387,7 +388,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.06.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.07.tar.gz',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -412,7 +413,7 @@ use File::Glob qw(:case);
     },
 
     'experimental' => {
-        'DISTRIBUTION' => 'LEONT/experimental-0.020.tar.gz',
+        'DISTRIBUTION' => 'LEONT/experimental-0.022.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
         'CUSTOMIZED'   => [
@@ -485,16 +486,17 @@ use File::Glob qw(:case);
         ],
     },
 
-	'ExtUtils::PL2Bat' => {
-		'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.002.tar.gz',
-		'FILES'        => q[cpan/ExtUtils-PL2Bat],
-		'EXCLUDED'     => [
-			't/00-compile.t',
-		],
-		'CUSTOMIZED'     => [
-			't/make_executable.t',
-		],
-	},
+    'ExtUtils::PL2Bat' => {
+        'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.003.tar.gz',
+        'FILES'        => q[cpan/ExtUtils-PL2Bat],
+        'EXCLUDED'     => [
+            't/00-compile.t',
+            'script/pl2bat.pl'
+        ],
+        'CUSTOMIZED'     => [
+            't/make_executable.t',
+        ],
+    },
 
     'ExtUtils::Manifest' => {
         'DISTRIBUTION' => 'ETHER/ExtUtils-Manifest-1.72.tar.gz',

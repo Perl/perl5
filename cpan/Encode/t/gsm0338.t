@@ -13,21 +13,15 @@ BEGIN {
 
 use strict;
 use utf8;
-use Test::More tests => 780;
+use Test::More tests => 776;
 use Encode;
 use Encode::GSM0338;
-
-# The specification of GSM 03.38 is not awfully clear.
-# (http://www.unicode.org/Public/MAPPINGS/ETSI/GSM0338.TXT)
-# The various combinations of 0x00 and 0x1B as leading bytes
-# are unclear, as is the semantics of those bytes as standalone
-# or as final single bytes.
-
 
 my $chk = Encode::LEAVE_SRC();
 
 # escapes
-# see http://www.csoft.co.uk/sms/character_sets/gsm.htm
+# see https://www.3gpp.org/dynareport/23038.htm
+# see https://www.etsi.org/deliver/etsi_ts/123000_123099/123038/15.00.00_60/ts_123038v150000p.pdf (page 22)
 my %esc_seq = (
 	       "\x{20ac}" => "\x1b\x65",
 	       "\x0c"     => "\x1b\x0A",
@@ -51,26 +45,20 @@ sub eu{
 }
 
 for my $c ( map { chr } 0 .. 127 ) {
+    next if $c eq "\x1B"; # escape character, start of multibyte sequence
     my $u = $Encode::GSM0338::GSM2UNI{$c};
 
     # default character set
     is decode( "gsm0338", $c, $chk ), $u,
       sprintf( "decode \\x%02X", ord($c) );
-    eval { decode( "gsm0338", $c . "\xff", $chk ) };
+    eval { decode( "gsm0338", $c . "\xff", $chk | Encode::FB_CROAK ) };
     ok( $@, $@ );
     is encode( "gsm0338", $u, $chk ), $c, sprintf( "encode %s", eu($u) );
-    eval { encode( "gsm0338", $u . "\x{3000}", $chk ) };
+    eval { encode( "gsm0338", $u . "\x{3000}", $chk | Encode::FB_CROAK ) };
     ok( $@, $@ );
 
-    # nasty atmark
-    if ( $c eq "\x00" ) {
-        is decode( "gsm0338", "\x00" . $c, $chk ), "\x00",
-          sprintf( '@@ =>: \x00+\x%02X', ord($c) );
-    }
-    else {
         is decode( "gsm0338", "\x00" . $c ), '@' . decode( "gsm0338", $c ),
           sprintf( '@: decode \x00+\x%02X', ord($c) );
-    }
 
     # escape seq.
     my $ecs = "\x1b" . $c;
@@ -82,7 +70,7 @@ for my $c ( map { chr } 0 .. 127 ) {
     }
     else {
         is decode( "gsm0338", $ecs, $chk ),
-          "\xA0" . decode( "gsm0338", $c ),
+          "\x{FFFD}",
           sprintf( "decode ESC+\\x%02X", ord($c) );
     }
 }
@@ -90,6 +78,10 @@ for my $c ( map { chr } 0 .. 127 ) {
 # https://rt.cpan.org/Ticket/Display.html?id=75670
 is decode("gsm0338", "\x09") => chr(0xC7), 'RT75670: decode';
 is encode("gsm0338", chr(0xC7)) => "\x09", 'RT75670: encode';
+
+# https://rt.cpan.org/Public/Bug/Display.html?id=124571
+is decode("gsm0338", encode('gsm0338', '..@@..')), '..@@..';
+is decode("gsm0338", encode('gsm0338', '..@€..')), '..@€..';
 
 __END__
 for my $c (map { chr } 0..127){

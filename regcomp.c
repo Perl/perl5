@@ -12624,28 +12624,51 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         FAIL2("panic: regatom returned failure, flags=%#" UVxf, (UV) flags);
     }
 
-    op = *RExC_parse;
-
-    if (op == '{' && regcurly(RExC_parse)) {
-	maxpos = NULL;
 #ifdef RE_TRACK_PATTERN_OFFSETS
-        parse_start = RExC_parse; /* MJD */
+    parse_start = RExC_parse;
 #endif
-	next = RExC_parse + 1;
-	while (isDIGIT(*next) || *next == ',') {
-	    if (*next == ',') {
-		if (maxpos)
-		    break;
-		else
-		    maxpos = next;
-	    }
-	    next++;
-	}
-	if (*next == '}') {		/* got one */
+
+    op = *RExC_parse;
+    switch (op) {
+
+      case '*':
+        nextchar(pRExC_state);
+        min = 0;
+        break;
+
+      case '+':
+        nextchar(pRExC_state);
+        min = 1;
+        break;
+
+      case '?':
+        nextchar(pRExC_state);
+        min = 0; max = 1;
+        break;
+
+      case '{':  /* A '{' may or may not indicate a quantifier; call regcurly()
+                    to determine which */
+        if (regcurly(RExC_parse)) {
             const char* endptr;
-	    if (!maxpos)
-		maxpos = next;
-	    RExC_parse++;
+
+            /* Here is a quantifier, parse for min and max values */
+            maxpos = NULL;
+            next = RExC_parse + 1;
+            while (isDIGIT(*next) || *next == ',') {
+                if (*next == ',') {
+                    if (maxpos)
+                        break;
+                    else
+                        maxpos = next;
+                }
+                next++;
+            }
+
+            assert(*next == '}');
+
+            if (!maxpos)
+                maxpos = next;
+            RExC_parse++;
             if (isDIGIT(*RExC_parse)) {
                 endptr = RExC_end;
                 if (!grok_atoUV(RExC_parse, &uv, &endptr))
@@ -12656,10 +12679,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             } else {
                 min = 0;
             }
-	    if (*maxpos == ',')
-		maxpos++;
-	    else
-		maxpos = RExC_parse;
+            if (*maxpos == ',')
+                maxpos++;
+            else
+                maxpos = RExC_parse;
             if (isDIGIT(*maxpos)) {
                 endptr = RExC_end;
                 if (!grok_atoUV(maxpos, &uv, &endptr))
@@ -12668,10 +12691,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
                 max = (I32)uv;
             } else {
-		max = REG_INFTY;		/* meaning "infinity" */
+                max = REG_INFTY;            /* meaning "infinity" */
             }
-	    RExC_parse = next;
-	    nextchar(pRExC_state);
+
+            RExC_parse = next;
+            nextchar(pRExC_state);
             if (max < min) {    /* If can't match, warn and optimize to fail
                                    unconditionally */
                 reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
@@ -12687,149 +12711,129 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                            *RExC_parse);
             }
 
-	  do_curly:
-	    if ((flags&SIMPLE)) {
-                if (min == 0 && max == REG_INFTY) {
+            break;
+        } /* End of is regcurly() */
 
-                    /* Going from 0..inf is currently forbidden in wildcard
-                     * subpatterns.  The only reason is to make it harder to
-                     * write patterns that take a long long time to halt, and
-                     * because the use of this construct isn't necessary in
-                     * matching Unicode property values */
-                    if (RExC_pm_flags & PMf_WILDCARD) {
-                        RExC_parse++;
-                        /* diag_listed_as: Use of %s is not allowed in Unicode
-                           property wildcard subpatterns in regex; marked by
-                           <-- HERE in m/%s/ */
-                        vFAIL("Use of quantifier '*' is not allowed in"
-                              " Unicode property wildcard subpatterns");
-                        /* Note, don't need to worry about {0,}, as a '}' isn't
-                         * legal at all in wildcards, so wouldn't get this far
-                         * */
-                    }
-                    reginsert(pRExC_state, STAR, ret, depth+1);
-                    MARK_NAUGHTY(4);
-                    RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-                    goto nest_check;
-                }
-                if (min == 1 && max == REG_INFTY) {
-                    reginsert(pRExC_state, PLUS, ret, depth+1);
-                    MARK_NAUGHTY(3);
-                    RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-                    goto nest_check;
-                }
-                MARK_NAUGHTY_EXP(2, 2);
-		reginsert(pRExC_state, CURLY, ret, depth+1);
-                Set_Node_Offset(REGNODE_p(ret), parse_start+1); /* MJD */
-                Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
-	    }
-	    else {
-		const regnode_offset w = reg_node(pRExC_state, WHILEM);
+        /* Here was a '{', but what followed it didn't form a quantifier. */
+        /* FALLTHROUGH */
 
-		FLAGS(REGNODE_p(w)) = 0;
-                if (!  REGTAIL(pRExC_state, ret, w)) {
-                    REQUIRE_BRANCHJ(flagp, 0);
-                }
-		if (RExC_use_BRANCHJ) {
-		    reginsert(pRExC_state, LONGJMP, ret, depth+1);
-		    reginsert(pRExC_state, NOTHING, ret, depth+1);
-		    NEXT_OFF(REGNODE_p(ret)) = 3;	/* Go over LONGJMP. */
-		}
-		reginsert(pRExC_state, CURLYX, ret, depth+1);
-                                /* MJD hk */
-                Set_Node_Offset(REGNODE_p(ret), parse_start+1);
-                Set_Node_Length(REGNODE_p(ret),
-                                op == '{' ? (RExC_parse - parse_start) : 1);
-
-		if (RExC_use_BRANCHJ)
-                    NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
-                                                       LONGJMP. */
-                if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
-                                                          NOTHING)))
-                {
-                    REQUIRE_BRANCHJ(flagp, 0);
-                }
-                RExC_whilem_seen++;
-                MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
-	    }
-	    FLAGS(REGNODE_p(ret)) = 0;
-
-	    if (min > 0)
-		*flagp = 0;
-	    if (max > 0)
-		*flagp |= HASWIDTH;
-            ARG1_SET(REGNODE_p(ret), (U16)min);
-            ARG2_SET(REGNODE_p(ret), (U16)max);
-            if (max == REG_INFTY)
-                RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-
-	    goto nest_check;
-	}
+      default:
+        *flagp = flags;
+        return(ret);
+        NOT_REACHED; /*NOTREACHED*/
     }
 
-    if (!ISMULT1(op)) {
-	*flagp = flags;
-	return(ret);
-    }
+    /* Here we have a quantifier, and have calculated 'min' and 'max'.
+     *
+     * Check and possibly adjust a zero width operand */
+    if (! (flags & (HASWIDTH|POSTPONED))) {
+        if (max > REG_INFTY/3) {
+            if (origparse[0] == '\\' && origparse[1] == 'K') {
+                vFAIL2utf8f(
+                           "%" UTF8f " is forbidden - matches null string"
+                           " many times",
+                           UTF8fARG(UTF, (RExC_parse >= origparse
+                                         ? RExC_parse - origparse
+                                         : 0),
+                           origparse));
+            } else {
+                ckWARN2reg(RExC_parse,
+                           "%" UTF8f " matches null string many times",
+                           UTF8fARG(UTF, (RExC_parse >= origparse
+                                         ? RExC_parse - origparse
+                                         : 0),
+                           origparse));
+            }
+        }
 
-#if 0				/* Now runtime fix should be reliable. */
-
-    /* if this is reinstated, don't forget to put this back into perldiag:
-
-	    =item Regexp *+ operand could be empty at {#} in regex m/%s/
-
-	   (F) The part of the regexp subject to either the * or + quantifier
-           could match an empty string. The {#} shows in the regular
-           expression about where the problem was discovered.
-
-    */
-
-    if (!(flags&HASWIDTH) && op != '?')
-      vFAIL("Regexp *+ operand could be empty");
-#endif
-
-#ifdef RE_TRACK_PATTERN_OFFSETS
-    parse_start = RExC_parse;
-#endif
-    nextchar(pRExC_state);
-
-    *flagp = HASWIDTH;
-
-    if (op == '*') {
-	min = 0;
-	goto do_curly;
-    }
-    else if (op == '+') {
-	min = 1;
-	goto do_curly;
-    }
-    else if (op == '?') {
-	min = 0; max = 1;
-	goto do_curly;
-    }
-  nest_check:
-    if (!(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3) {
-        if (origparse[0] == '\\' && origparse[1] == 'K') {
-            vFAIL2utf8f(
-                       "%" UTF8f " is forbidden - matches null string many times",
-                       UTF8fARG(UTF, (RExC_parse >= origparse
-                                     ? RExC_parse - origparse
-                                     : 0),
-                       origparse));
-            /* NOT-REACHED */
-        } else {
-            ckWARN2reg(RExC_parse,
-                       "%" UTF8f " matches null string many times",
-                       UTF8fARG(UTF, (RExC_parse >= origparse
-                                     ? RExC_parse - origparse
-                                     : 0),
-                       origparse));
+        /* There's no point in trying to match something 0 length more than
+         * once except for extra side effects, which we don't have here since
+         * not POSTPONED */
+        if (max > 1) {
+            max = 1;
+            if (min > max) {
+                min = max;
+            }
         }
     }
 
+    /* If this is a code block pass it up */
+    *flagp |= (flags & POSTPONED);
+
+    if (max > 0) {
+        *flagp |= (flags & HASWIDTH);
+        if (max == REG_INFTY)
+            RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+    }
+
+    /* 'SIMPLE' operands don't require full generality */
+    if ((flags&SIMPLE)) {
+        if (max == REG_INFTY) {
+            if (min == 0) {
+                if (UNLIKELY(RExC_pm_flags & PMf_WILDCARD)) {
+                    goto min0_maxINF_wildcard_forbidden;
+                }
+
+                reginsert(pRExC_state, STAR, ret, depth+1);
+                MARK_NAUGHTY(4);
+                goto done_main_op;
+            }
+            else if (min == 1) {
+                reginsert(pRExC_state, PLUS, ret, depth+1);
+                MARK_NAUGHTY(3);
+                goto done_main_op;
+            }
+        }
+
+        /* Here, SIMPLE, but not the '*' and '+' special cases */
+
+        MARK_NAUGHTY_EXP(2, 2);
+        reginsert(pRExC_state, CURLY, ret, depth+1);
+        Set_Node_Offset(REGNODE_p(ret), parse_start+1); /* MJD */
+        Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
+    }
+    else {  /* not SIMPLE */
+        const regnode_offset w = reg_node(pRExC_state, WHILEM);
+
+        FLAGS(REGNODE_p(w)) = 0;
+        if (!  REGTAIL(pRExC_state, ret, w)) {
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
+        if (RExC_use_BRANCHJ) {
+            reginsert(pRExC_state, LONGJMP, ret, depth+1);
+            reginsert(pRExC_state, NOTHING, ret, depth+1);
+            NEXT_OFF(REGNODE_p(ret)) = 3;        /* Go over LONGJMP. */
+        }
+        reginsert(pRExC_state, CURLYX, ret, depth+1);
+                        /* MJD hk */
+        Set_Node_Offset(REGNODE_p(ret), parse_start+1);
+        Set_Node_Length(REGNODE_p(ret),
+                        op == '{' ? (RExC_parse - parse_start) : 1);
+
+        if (RExC_use_BRANCHJ)
+            NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
+                                               LONGJMP. */
+        if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
+                                                  NOTHING)))
+        {
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
+        RExC_whilem_seen++;
+        MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
+    }
+
+    /* Finish up the CURLY/CURLYX case */
+    FLAGS(REGNODE_p(ret)) = 0;
+
+    ARG1_SET(REGNODE_p(ret), (U16)min);
+    ARG2_SET(REGNODE_p(ret), (U16)max);
+
+  done_main_op:
+
+    /* Process any greediness modifiers */
     if (*RExC_parse == '?') {
-	nextchar(pRExC_state);
-	reginsert(pRExC_state, MINMOD, ret, depth+1);
+        nextchar(pRExC_state);
+        reginsert(pRExC_state, MINMOD, ret, depth+1);
         if (! REGTAIL(pRExC_state, ret, ret + NODE_STEP_REGNODE)) {
             REQUIRE_BRANCHJ(flagp, 0);
         }
@@ -12848,12 +12852,32 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         }
     }
 
+    /* Forbid extra quantifiers */
     if (ISMULT2(RExC_parse)) {
-	RExC_parse++;
-	vFAIL("Nested quantifiers");
+        RExC_parse++;
+        vFAIL("Nested quantifiers");
     }
 
     return(ret);
+
+  min0_maxINF_wildcard_forbidden:
+
+    /* Here we are in a wildcard match, and the minimum match length is 0, and
+     * the max could be infinity.  This is currently forbidden.  The only
+     * reason is to make it harder to write patterns that take a long long time
+     * to halt, and because the use of this construct isn't necessary in
+     * matching Unicode property values */
+    RExC_parse++;
+    /* diag_listed_as: Use of %s is not allowed in Unicode property wildcard
+       subpatterns in regex; marked by <-- HERE in m/%s/
+     */
+    vFAIL("Use of quantifier '*' is not allowed in Unicode property wildcard"
+          " subpatterns");
+
+    /* Note, don't need to worry about the input being '{0,}', as a '}' isn't
+     * legal at all in wildcards, so can't get this far */
+
+    NOT_REACHED; /*NOTREACHED*/
 }
 
 STATIC bool

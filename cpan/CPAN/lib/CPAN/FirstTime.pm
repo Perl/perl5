@@ -11,7 +11,7 @@ use File::Spec ();
 use CPAN::Mirrors ();
 use CPAN::Version ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5314";
+$VERSION = "5.5315";
 
 =head1 NAME
 
@@ -59,8 +59,8 @@ higher distro-version number than the current one. It can
 then let the build of this distro fail when it would not represent the
 most up-to-date version of the distro.
 
-Note: choosing anyhing but 'yes' for this option will need
-Devel::DistnameInfo being installed for taking effect.
+Note: choosing anything but 'yes' for this option will need
+CPAN::DistnameInfo being installed for taking effect.
 
 Do you want to allow installing distros that are not indexed as the
 highest distro-version for all contained modules (yes, no, ask/yes,
