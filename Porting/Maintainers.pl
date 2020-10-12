@@ -1188,11 +1188,12 @@ use File::Glob qw(:case);
     },
 
     'Time::Local' => {
-        'DISTRIBUTION' => 'DROLSKY/Time-Local-1.28.tar.gz',
+        'DISTRIBUTION' => 'DROLSKY/Time-Local-1.30.tar.gz',
         'FILES'        => q[cpan/Time-Local],
         'EXCLUDED'     => [
             qr{^xt/},
-            qw( appveyor.yml
+            qw( CODE_OF_CONDUCT.md
+                azure-pipelines.yml
                 perlcriticrc
                 perltidyrc
                 tidyall.ini
