@@ -84,7 +84,7 @@ connecting-to-github-with-ssh>.
 
 If you'd rather use an HTTPS URL for your C<git push> see L<"Cloning with
 HTTPS URLs"|https://docs.github.com/en/free-pro-team@latest/github/using-git/
-which-remote-url-should-i-use#cloning-with-https-urls.
+which-remote-url-should-i-use#cloning-with-https-urls>.
 
   % git remote add fork https://github.com/MyUser/perl5.git
 
