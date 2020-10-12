@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..206\n"; } # 62 + 8 x @Versions
+BEGIN { $| = 1; print "1..214\n"; } # 62 + 8 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -269,7 +269,7 @@ ok($el->viewSortKey("L\x{FF2C}\x{216C}\x{2112}\x{24C1}"),
 ##### 62
 
 my @Versions = ( 8,  9, 11, 14, 16, 18, 20, 22, 24, 26,
-		28, 30, 32, 34, 36, 38, 40, 41);
+		28, 30, 32, 34, 36, 38, 40, 41, 43);
 
 for my $v (@Versions) {
     $Collator->change(UCA_Version => $v);

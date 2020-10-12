@@ -1,4 +1,4 @@
 +{
-   locale_version => 1.28,
+   locale_version => 1.29,
    backwards => 2,
 };

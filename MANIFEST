@@ -2748,6 +2748,7 @@ cpan/Unicode-Collate/t/ignor.t			Unicode::Collate
 cpan/Unicode-Collate/t/illegal.t		Unicode::Collate
 cpan/Unicode-Collate/t/illegalp.t		Unicode::Collate
 cpan/Unicode-Collate/t/index.t			Unicode::Collate
+cpan/Unicode-Collate/t/khitan.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_af.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ar.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_as.t	Unicode::Collate
