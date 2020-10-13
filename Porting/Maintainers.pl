@@ -355,12 +355,10 @@ use File::Glob qw(:case);
     },
 
     'Digest' => {
-        'DISTRIBUTION' => 'GAAS/Digest-1.17.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Digest-1.19.tar.gz',
         'FILES'        => q[cpan/Digest],
         'EXCLUDED'     => ['digest-bench'],
         'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( Digest.pm )
         ],
     },
 

@@ -3,7 +3,6 @@
 #     ./perl -I../lib porting/customized.t --regen
 Config::Perl::V cpan/Config-Perl-V/V.pm 0a0f7207e6505b78ee345a933acb0246a13579f5
 Devel::PPPort dist/Devel-PPPort/Makefile.PL c939c8d33d11994c06f546869df63d4518ece797
-Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t d5c75c41d6736a0c5897130f534af0896a7d6f4d
 ExtUtils::PL2Bat cpan/ExtUtils-PL2Bat/t/make_executable.t 2f58339b567d943712488812f06d99f907af46ab
 Filter::Util::Call pod/perlfilter.pod 9b4aec0d8518274ddb0dd37e3b770fe13a44dd1f

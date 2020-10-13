@@ -471,9 +471,9 @@ cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/t/db-threads.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
-cpan/Digest/Digest.pm		Digest extensions
-cpan/Digest/Digest/base.pm	Digest extensions
-cpan/Digest/Digest/file.pm	Digest extensions
+cpan/Digest/lib/Digest.pm
+cpan/Digest/lib/Digest/base.pm
+cpan/Digest/lib/Digest/file.pm
 cpan/Digest/t/base.t		See if Digest extensions work
 cpan/Digest/t/digest.t		See if Digest extensions work
 cpan/Digest/t/file.t		See if Digest extensions work
