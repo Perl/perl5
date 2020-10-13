@@ -22,7 +22,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.40';
+$VERSION = '3.41';
 #use constant DEBUG => 7;
 
 sub my_qr ($$) {
@@ -64,7 +64,7 @@ my $non_ascii_re = my_qr('[[:^ascii:]]', "\xB6");
 $non_ascii_re = qr/[\x80-\xFF]/ unless $non_ascii_re;
 
 # Use patterns understandable by Perl 5.6, if possible
-my $cs_re = my_qr('\p{IsCs}', "\x{D800}");
+my $cs_re = do { no warnings; my_qr('\p{IsCs}', "\x{D800}") };
 my $cn_re = my_qr('\p{IsCn}', "\x{09E4}");  # <reserved> code point unlikely
                                             # to get assigned
 my $rare_blocks_re = my_qr('[\p{InIPAExtensions}\p{InSpacingModifierLetters}]',

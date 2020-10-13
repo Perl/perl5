@@ -1728,6 +1728,7 @@ cpan/Pod-Simple/t/junk2o.txt				Pod::Simple test file
 cpan/Pod-Simple/t/JustPod01.t
 cpan/Pod-Simple/t/JustPod02.t
 cpan/Pod-Simple/t/JustPod_corpus.t
+cpan/Pod-Simple/t/lib/helpers.pm			Pod::Simple test file
 cpan/Pod-Simple/t/linkclas.t				Pod::Simple test file
 cpan/Pod-Simple/t/output.t				Pod::Simple test file
 cpan/Pod-Simple/t/perlcyg.pod				Pod::Simple test file
