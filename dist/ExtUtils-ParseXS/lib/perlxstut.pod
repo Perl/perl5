@@ -129,7 +129,7 @@ The file Mytest.pm should start with something like this:
 
   package Mytest;
 
-  use 5.008008;
+  use 5.022002;
   use strict;
   use warnings;
 
