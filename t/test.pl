@@ -20,7 +20,7 @@
 # will be worked over by t/op/inc.t
 
 $| = 1;
-$Level = 1;
+our $Level = 1;
 my $test = 1;
 my $planned;
 my $noplan;
@@ -30,9 +30,11 @@ my $Perl;       # Safer version of $^X set by which_perl()
 $::IS_ASCII  = ord 'A' ==  65;
 $::IS_EBCDIC = ord 'A' == 193;
 
-$TODO = 0;
-$NO_ENDING = 0;
-$Tests_Are_Passing = 1;
+# This is 'our' to enable harness to account for TODO-ed tests in
+# overall grade of PASS or FAIL
+our $TODO = 0;
+our $NO_ENDING = 0;
+our $Tests_Are_Passing = 1;
 
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
@@ -1023,7 +1025,7 @@ sub _fresh_perl {
 
     # Use the first line of the program as a name if none was given
     unless( $name ) {
-        ($first_line, $name) = $prog =~ /^((.{1,50}).*)/;
+        (my $first_line, $name) = $prog =~ /^((.{1,50}).*)/;
         $name = $name . '...' if length $first_line > length $name;
     }
 
@@ -1111,6 +1113,7 @@ sub fresh_perl_like {
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
 
+our $FATAL;
 sub _setup_one_file {
     my $fh = shift;
     # Store the filename as a program that started at line 0.
@@ -1435,7 +1438,7 @@ sub can_ok ($@) {
 sub new_ok {
     my($class, $args, $obj_name) = @_;
     $args ||= [];
-    $object_name = "The object" unless defined $obj_name;
+    $obj_name = "The object" unless defined $obj_name;
 
     local $Level = $Level + 1;
 
@@ -1444,7 +1447,7 @@ sub new_ok {
     my $error = $@;
 
     if($ok) {
-        object_ok($obj, $class, $object_name);
+        object_ok($obj, $class, $obj_name);
     }
     else {
         ok( 0, "new() died" );
