@@ -31,7 +31,6 @@ jobs:
         run: |
           echo "Pull request authors"
           echo "# git merge-base origin/${BASE_REF} HEAD"
-          git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
           git config diff.renameLimit 999999
           git fetch --depth=1000 origin ${BASE_REF}
         env:
@@ -177,9 +176,9 @@ jobs:
         run: |
           apt-get update ||:
           apt-get -y install build-essential git-core
+
+      # actions/checkout@v2 doesn't work in a container, so we use v1.
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 0
       - name: fix git remote credential
         run: git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
       - name: git cfg + fetch tags
@@ -213,7 +212,7 @@ jobs:
       CONTINUOUS_INTEGRATION: 1
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       - name: Configure
@@ -245,7 +244,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       #- name: Install clcache
@@ -297,11 +296,17 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}\choco-cache
+          key: v2-msvc100
       - name: Set up MSVC100
         run: |
+          choco config set cacheLocation "${{ github.workspace }}\choco-cache"
           choco install vcexpress2010
       - name: Help
         shell: cmd
@@ -335,13 +340,21 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 10
       - name: Set up Perl build environment
         run: |
-          choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+          # skip installing perl if it is already installed.
+          if (!(Test-Path "C:\strawberry\perl\bin")) {
+            choco install strawberryperl
+          }
+          echo @"
+          C:\strawberry\c\bin
+          C:\strawberry\perl\site\bin
+          C:\strawberry\perl\bin
+          "@ |
+            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Host perl -V
         run: perl -V
       - name: gcc --version
@@ -373,7 +386,8 @@ jobs:
       CONTINUOUS_INTEGRATION: 1
 
     steps:
-      - run: git config --global core.autocrlf false
+      # we use Cygwin git, so no need to configure git here.
+
       - name: Set up Cygwin
         shell: cmd
         run: |
@@ -386,7 +400,8 @@ jobs:
         shell: cmd
         run: |
           path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "mkdir -p ~; cd ~; echo \"$GITHUB_REPOSITORY\"; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
+          sh -c "git config --global core.autocrlf false"
+          sh -c "mkdir -p ~; cd ~; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
       - name: Configure
         shell: cmd
         run: |
