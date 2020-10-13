@@ -349,7 +349,10 @@ jobs:
           if (!(Test-Path "C:\strawberry\perl\bin")) {
             choco install strawberryperl
           }
-          echo "C:\strawberry\c\bin`nC:\strawberry\perl\site\bin`nC:\strawberry\perl\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo @"C:\strawberry\c\bin
+          C:\strawberry\perl\site\bin
+          C:\strawberry\perl\bin" |
+            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Host perl -V
         run: perl -V
       - name: gcc --version
@@ -395,7 +398,8 @@ jobs:
         shell: cmd
         run: |
           path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "mkdir -p ~; cd ~; echo \"$GITHUB_REPOSITORY\"; git config --global core.autocrlf false; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
+          sh -c "git config --global core.autocrlf false"
+          sh -c "mkdir -p ~; cd ~; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
       - name: Configure
         shell: cmd
         run: |
