@@ -102,6 +102,10 @@ my %skip;
     'cpan/Module-Load-Conditional/t/to_load/MustBe/Loaded.pm', # just a test module
     'cpan/Module-Load-Conditional/t/to_load/NotMain.pm',       # just a test module
     'cpan/Module-Load-Conditional/t/to_load/NotX.pm',          # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/InputObjects.pm',     # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/Parser.pm',           # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/PlainText.pm',        # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/Select.pm',           # just a test module
     'cpan/podlators/t/lib/Test/Podlators.pm',       # just a test module
     'cpan/podlators/t/lib/Test/RRA.pm',             # just a test module
     'cpan/podlators/t/lib/Test/RRA/Config.pm',      # just a test module
