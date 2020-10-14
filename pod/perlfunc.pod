@@ -7863,10 +7863,9 @@ produces the output C<abc>, and this:
 
     print join(':', split(//, 'abc', 2)), "\n";
 
-produces the output C<a:bc>, and each of these:
+produces the output C<a:bc>, and this:
 
     print join(':', split(//, 'abc', 3)), "\n";
-    print join(':', split(//, 'abc', 4)), "\n";
 
 produces the output C<a:b:c>.
 
