@@ -10,7 +10,7 @@ BEGIN {
    my $THISDIR = abs_path(dirname $0);
    unshift @INC, $THISDIR;
    require "testcmp.pl";
-   import TestCompare;
+   TestCompare->import;
    # RT#130418: previous use of dirname() was failing on VMS
    $PARENTDIR = File::Spec->catdir($THISDIR, File::Spec->updir());
    push @INC, map { File::Spec->catdir($_, 'lib') } ($PARENTDIR, $THISDIR);
