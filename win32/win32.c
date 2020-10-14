@@ -1474,16 +1474,24 @@ win32_kill(int pid, int sig)
 PERL_STATIC_INLINE
 time_t
 translate_ft_to_time_t(FILETIME ft) {
-    /* Based on Win32::UTCTime.
-       Older CRTs (including MSVCRT used for gcc builds) product
-       strange behaviour when the specified time and the current time
-       differ on whether DST was in effect, this code doesnt have that
-       problem.
-    */
-    ULARGE_INTEGER u;
-    u.LowPart = ft.dwLowDateTime;
-    u.HighPart = ft.dwHighDateTime;
-    return (u.QuadPart - time_t_epoch_base_filetime.QuadPart) / FILETIME_CHUNKS_PER_SECOND;
+    SYSTEMTIME st, local_st;
+    struct tm pt;
+
+    if (!FileTimeToSystemTime(&ft, &st) ||
+        !SystemTimeToTzSpecificLocalTime(NULL, &st, &local_st)) {
+        return -1;
+    }
+
+    Zero(&pt, 1, struct tm);
+    pt.tm_year = local_st.wYear - 1900;
+    pt.tm_mon = local_st.wMonth - 1;
+    pt.tm_mday = local_st.wDay;
+    pt.tm_hour = local_st.wHour;
+    pt.tm_min = local_st.wMinute;
+    pt.tm_sec = local_st.wSecond;
+    pt.tm_isdst = -1;
+
+    return mktime(&pt);
 }
 
 static int
@@ -2173,12 +2181,30 @@ win32_times(struct tms *timebuf)
 static BOOL
 filetime_from_time(PFILETIME pFileTime, time_t Time)
 {
-    ULARGE_INTEGER u;
-    u.QuadPart = Time;
-    u.QuadPart = u.QuadPart * FILETIME_CHUNKS_PER_SECOND + time_t_epoch_base_filetime.QuadPart;
+    struct tm *pt;
+    SYSTEMTIME st;
 
-    pFileTime->dwLowDateTime = u.LowPart;
-    pFileTime->dwHighDateTime = u.HighPart;
+    pt = gmtime(&Time);
+    if (!pt) {
+        pFileTime->dwLowDateTime = 0;
+        pFileTime->dwHighDateTime = 0;
+        fprintf(stderr, "fail bad gmtime\n");
+        return FALSE;
+    }
+
+    st.wYear = pt->tm_year + 1900;
+    st.wMonth = pt->tm_mon + 1;
+    st.wDay = pt->tm_mday;
+    st.wHour = pt->tm_hour;
+    st.wMinute = pt->tm_min;
+    st.wSecond = pt->tm_sec;
+    st.wMilliseconds = 0;
+
+    if (!SystemTimeToFileTime(&st, pFileTime)) {
+        pFileTime->dwLowDateTime = 0;
+        pFileTime->dwHighDateTime = 0;
+        return FALSE;
+    }
 
     return TRUE;
 }
