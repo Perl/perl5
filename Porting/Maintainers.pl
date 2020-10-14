@@ -358,8 +358,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'TODDR/Digest-1.19.tar.gz',
         'FILES'        => q[cpan/Digest],
         'EXCLUDED'     => ['digest-bench'],
-        'CUSTOMIZED'   => [
-        ],
     },
 
     'Digest::MD5' => {
