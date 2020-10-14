@@ -10,14 +10,12 @@
 #define PERLIO_NOT_STDIO 0
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
+/* for CreateSymbolicLinkA() etc */
+#define _WIN32_WINNT 0x0601
 #include <tchar.h>
 
 #ifdef __GNUC__
 #  define Win32_Winsock
-#endif
-
-#ifndef _WIN32_WINNT
-#  define _WIN32_WINNT 0x0500     /* needed for CreateHardlink() etc. */
 #endif
 
 #include <windows.h>
@@ -164,6 +162,8 @@ static HWND	get_hwnd_delay(pTHX, long child, DWORD tries);
 static void	win32_csighandler(int sig);
 #endif
 
+static void translate_to_errno(void);
+
 START_EXTERN_C
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
@@ -179,6 +179,22 @@ static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 static HKEY HKCU_Perl_hnd;
 static HKEY HKLM_Perl_hnd;
 #endif
+
+/* the time_t epoch start time as a filetime expressed as a large integer */
+static ULARGE_INTEGER time_t_epoch_base_filetime;
+
+static const SYSTEMTIME time_t_epoch_base_systemtime = {
+    1970,    /* wYear         */
+    1,       /* wMonth        */
+    0,       /* wDayOfWeek    */
+    1,       /* wDay          */
+    0,       /* wHour         */
+    0,       /* wMinute       */
+    0,       /* wSecond       */
+    0        /* wMilliseconds */
+};
+
+#define FILETIME_CHUNKS_PER_SECOND (10000000UL)
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
 static BOOL silent_invalid_parameter_handler = FALSE;
@@ -1455,143 +1471,136 @@ win32_kill(int pid, int sig)
     return -1;
 }
 
+PERL_STATIC_INLINE
+time_t
+translate_ft_to_time_t(FILETIME ft) {
+    /* Based on Win32::UTCTime.
+       Older CRTs (including MSVCRT used for gcc builds) product
+       strange behaviour when the specified time and the current time
+       differ on whether DST was in effect, this code doesnt have that
+       problem.
+    */
+    ULARGE_INTEGER u;
+    u.LowPart = ft.dwLowDateTime;
+    u.HighPart = ft.dwHighDateTime;
+    return (u.QuadPart - time_t_epoch_base_filetime.QuadPart) / FILETIME_CHUNKS_PER_SECOND;
+}
+
+static int
+win32_stat_low(HANDLE handle, const char *path, STRLEN len, Stat_t *sbuf) {
+    DWORD type = GetFileType(handle);
+    BY_HANDLE_FILE_INFORMATION bhi;
+
+    Zero(sbuf, 1, Stat_t);
+
+    type &= ~FILE_TYPE_REMOTE;
+
+    switch (type) {
+    case FILE_TYPE_DISK:
+        if (GetFileInformationByHandle(handle, &bhi)) {
+            sbuf->st_dev = bhi.dwVolumeSerialNumber;
+            sbuf->st_ino = bhi.nFileIndexHigh;
+            sbuf->st_ino <<= 32;
+            sbuf->st_ino |= bhi.nFileIndexLow;
+            sbuf->st_nlink = bhi.nNumberOfLinks;
+            sbuf->st_uid = 0;
+            sbuf->st_gid = 0;
+            /* ucrt sets this to the drive letter for
+               stat(), lets not reproduce that mistake */
+            sbuf->st_rdev = 0;
+            sbuf->st_size = bhi.nFileSizeHigh;
+            sbuf->st_size <<= 32;
+            sbuf->st_size |= bhi.nFileSizeLow;
+
+            sbuf->st_atime = translate_ft_to_time_t(bhi.ftLastAccessTime);
+            sbuf->st_mtime = translate_ft_to_time_t(bhi.ftLastWriteTime);
+            sbuf->st_ctime = translate_ft_to_time_t(bhi.ftCreationTime);
+
+            if (bhi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                sbuf->st_mode = _S_IFDIR | _S_IREAD | _S_IEXEC;
+                /* duplicate the logic from the end of the old win32_stat() */
+                if (!(bhi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)) {
+                    sbuf->st_mode |= S_IWRITE;
+                }
+            }
+            else {
+                char path_buf[MAX_PATH+1];
+                sbuf->st_mode = _S_IFREG;
+
+                if (!path) {
+                    len = GetFinalPathNameByHandleA(handle, path_buf, sizeof(path_buf), 0);
+                    /* < to ensure there's space for the \0 */
+                    if (len && len < sizeof(path_buf)) {
+                        path = path_buf;
+                    }
+                }
+
+                if (path && len > 4 &&
+                    (_stricmp(path + len - 4, ".exe") == 0 ||
+                     _stricmp(path + len - 4, ".bat") == 0 ||
+                     _stricmp(path + len - 4, ".cmd") == 0 ||
+                     _stricmp(path + len - 4, ".com") == 0)) {
+                    sbuf->st_mode |= _S_IEXEC;
+                }
+                if (!(bhi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)) {
+                    sbuf->st_mode |= _S_IWRITE;
+                }
+                sbuf->st_mode |= _S_IREAD;
+            }
+        }
+        else {
+            translate_to_errno();
+            return -1;
+        }
+        break;
+
+    case FILE_TYPE_CHAR:
+    case FILE_TYPE_PIPE:
+        sbuf->st_mode = (type == FILE_TYPE_CHAR) ? _S_IFCHR : _S_IFIFO;
+        if (handle == GetStdHandle(STD_INPUT_HANDLE) ||
+            handle == GetStdHandle(STD_OUTPUT_HANDLE) ||
+            handle == GetStdHandle(STD_ERROR_HANDLE)) {
+            sbuf->st_mode |= _S_IWRITE | _S_IREAD;
+        }
+        break;
+
+    default:
+        return -1;
+    }
+
+    /* owner == user == group */
+    sbuf->st_mode |= (sbuf->st_mode & 0700) >> 3;
+    sbuf->st_mode |= (sbuf->st_mode & 0700) >> 6;
+
+    return 0;
+}
+
 DllExport int
 win32_stat(const char *path, Stat_t *sbuf)
 {
-    char	buffer[MAX_PATH+1];
-    int		l = strlen(path);
+    size_t	l = strlen(path);
     dTHX;
-    int		res;
-    int         nlink = 1;
-    unsigned __int64 ino = 0;
-    DWORD       vol = 0;
     BOOL        expect_dir = FALSE;
-    struct _stati64 st;
-
-    if (l > 1) {
-	switch(path[l - 1]) {
-	/* FindFirstFile() and stat() are buggy with a trailing
-	 * slashes, except for the root directory of a drive */
-	case '\\':
-        case '/':
-	    if (l > sizeof(buffer)) {
-		errno = ENAMETOOLONG;
-		return -1;
-	    }
-            --l;
-            strncpy(buffer, path, l);
-            /* remove additional trailing slashes */
-            while (l > 1 && (buffer[l-1] == '/' || buffer[l-1] == '\\'))
-                --l;
-            /* add back slash if we otherwise end up with just a drive letter */
-            if (l == 2 && isALPHA(buffer[0]) && buffer[1] == ':')
-                buffer[l++] = '\\';
-            buffer[l] = '\0';
-            path = buffer;
-            expect_dir = TRUE;
-	    break;
-
-	/* FindFirstFile() is buggy with "x:", so add a dot :-( */
-	case ':':
-	    if (l == 2 && isALPHA(path[0])) {
-		buffer[0] = path[0];
-		buffer[1] = ':';
-		buffer[2] = '.';
-		buffer[3] = '\0';
-		l = 3;
-		path = buffer;
-	    }
-	    break;
-	}
-    }
+    int result;
+    HANDLE handle;
 
     path = PerlDir_mapA(path);
     l = strlen(path);
 
-    if (!w32_sloppystat) {
-        /* We must open & close the file once; otherwise file attribute changes  */
-        /* might not yet have propagated to "other" hard links of the same file. */
-        /* This also gives us an opportunity to determine the number of links.   */
-        HANDLE handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-        if (handle != INVALID_HANDLE_VALUE) {
-            BY_HANDLE_FILE_INFORMATION bhi;
-            if (GetFileInformationByHandle(handle, &bhi)) {
-                nlink = bhi.nNumberOfLinks;
-                ino = bhi.nFileIndexHigh;
-                ino <<= 32;
-                ino |= bhi.nFileIndexLow;
-                vol = bhi.dwVolumeSerialNumber;
-            }
-            CloseHandle(handle);
-        }
-	else {
-	    DWORD err = GetLastError();
-	    /* very common case, skip CRT stat and its also failing syscalls */
-	    if(err == ERROR_FILE_NOT_FOUND) {
-		errno = ENOENT;
-		return -1;
-	    }
-	}
-    }
-
-    /* path will be mapped correctly above */
-    res = _stati64(path, sbuf);
-    sbuf->st_dev = vol;
-    sbuf->st_ino = ino;
-    sbuf->st_mode = st.st_mode;
-    sbuf->st_nlink = nlink;
-    sbuf->st_uid = st.st_uid;
-    sbuf->st_gid = st.st_gid;
-    sbuf->st_rdev = st.st_rdev;
-    sbuf->st_size = st.st_size;
-    sbuf->st_atime = st.st_atime;
-    sbuf->st_mtime = st.st_mtime;
-    sbuf->st_ctime = st.st_ctime;
-
-    if (res < 0) {
-	/* CRT is buggy on sharenames, so make sure it really isn't.
-	 * XXX using GetFileAttributesEx() will enable us to set
-	 * sbuf->st_*time (but note that's not available on the
-	 * Windows of 1995) */
-	DWORD r = GetFileAttributesA(path);
-	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
-	    /* sbuf may still contain old garbage since stat() failed */
-	    Zero(sbuf, 1, Stat_t);
-	    sbuf->st_mode = S_IFDIR | S_IREAD;
-	    errno = 0;
-	    if (!(r & FILE_ATTRIBUTE_READONLY))
-		sbuf->st_mode |= S_IWRITE | S_IEXEC;
-	    return 0;
-	}
+    handle =
+        CreateFileA(path, FILE_READ_ATTRIBUTES,
+                    FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+                    NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    if (handle != INVALID_HANDLE_VALUE) {
+        result = win32_stat_low(handle, path, l, sbuf);
+        CloseHandle(handle);
     }
     else {
-	if (l == 3 && isALPHA(path[0]) && path[1] == ':'
-	    && (path[2] == '\\' || path[2] == '/'))
-	{
-	    /* The drive can be inaccessible, some _stat()s are buggy */
-	    if (!GetVolumeInformationA(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
-		errno = ENOENT;
-		return -1;
-	    }
-	}
-        if (expect_dir && !S_ISDIR(sbuf->st_mode)) {
-            errno = ENOTDIR;
-            return -1;
-        }
-	if (S_ISDIR(sbuf->st_mode)) {
-	    /* Ensure the "write" bit is switched off in the mode for
-	     * directories with the read-only attribute set. Some compilers
-	     * switch it on for directories, which is technically correct
-	     * (directories are indeed always writable unless denied by DACLs),
-	     * but we want stat() and -w to reflect the state of the read-only
-	     * attribute for symmetry with chmod(). */
-	    DWORD r = GetFileAttributesA(path);
-	    if (r != 0xffffffff && (r & FILE_ATTRIBUTE_READONLY)) {
-		sbuf->st_mode &= ~S_IWRITE;
-	    }
-	}
+        translate_to_errno();
+        result = -1;
     }
-    return res;
+
+    return result;
 }
 
 static void
@@ -1600,9 +1609,6 @@ translate_to_errno(void)
     /* This isn't perfect, eg. Win32 returns ERROR_ACCESS_DENIED for
        both permissions errors and if the source is a directory, while
        POSIX wants EACCES and EPERM respectively.
-
-       Determined by experimentation on Windows 7 x64 SP1, since MS
-       don't document what error codes are returned.
     */
     switch (GetLastError()) {
     case ERROR_BAD_NET_NAME:
@@ -1618,8 +1624,10 @@ translate_to_errno(void)
       errno = EEXIST;
       break;
     case ERROR_ACCESS_DENIED:
-    case ERROR_PRIVILEGE_NOT_HELD:
       errno = EACCES;
+      break;
+    case ERROR_PRIVILEGE_NOT_HELD:
+      errno = EPERM;
       break;
     case ERROR_NOT_SAME_DEVICE:
       errno = EXDEV;
@@ -1776,7 +1784,6 @@ DllExport int
 win32_lstat(const char *path, Stat_t *sbuf)
 {
     HANDLE f;
-    int fd;
     int result;
     DWORD attr = GetFileAttributes(path); /* doesn't follow symlinks */
 
@@ -1801,12 +1808,13 @@ win32_lstat(const char *path, Stat_t *sbuf)
         return win32_stat(path, sbuf);
     }
 
-    fd = win32_open_osfhandle((intptr_t)f, 0);
-    result = win32_fstat(fd, sbuf);
+    result = win32_stat_low(f, NULL, 0, sbuf);
+    CloseHandle(f);
+
     if (result != -1){
         sbuf->st_mode = (sbuf->st_mode & ~_S_IFMT) | _S_IFLNK;
     }
-    close(fd);
+
     return result;
 }
 
@@ -2162,27 +2170,17 @@ win32_times(struct tms *timebuf)
     return process_time_so_far;
 }
 
-/* fix utime() so it works on directories in NT */
 static BOOL
 filetime_from_time(PFILETIME pFileTime, time_t Time)
 {
-    struct tm *pTM = localtime(&Time);
-    SYSTEMTIME SystemTime;
-    FILETIME LocalTime;
+    ULARGE_INTEGER u;
+    u.QuadPart = Time;
+    u.QuadPart = u.QuadPart * FILETIME_CHUNKS_PER_SECOND + time_t_epoch_base_filetime.QuadPart;
 
-    if (pTM == NULL)
-	return FALSE;
+    pFileTime->dwLowDateTime = u.LowPart;
+    pFileTime->dwHighDateTime = u.HighPart;
 
-    SystemTime.wYear   = pTM->tm_year + 1900;
-    SystemTime.wMonth  = pTM->tm_mon + 1;
-    SystemTime.wDay    = pTM->tm_mday;
-    SystemTime.wHour   = pTM->tm_hour;
-    SystemTime.wMinute = pTM->tm_min;
-    SystemTime.wSecond = pTM->tm_sec;
-    SystemTime.wMilliseconds = 0;
-
-    return SystemTimeToFileTime(&SystemTime, &LocalTime) &&
-           LocalFileTimeToFileTime(&LocalTime, pFileTime);
+    return TRUE;
 }
 
 DllExport int
@@ -2220,38 +2218,38 @@ win32_utime(const char *filename, struct utimbuf *times)
 {
     dTHX;
     HANDLE handle;
-    FILETIME ftCreate;
     FILETIME ftAccess;
     FILETIME ftWrite;
     struct utimbuf TimeBuffer;
-    int rc;
+    int rc = -1;
 
     filename = PerlDir_mapA(filename);
-    rc = utime(filename, times);
-
-    /* EACCES: path specifies directory or readonly file */
-    if (rc == 0 || errno != EACCES)
-	return rc;
-
-    if (times == NULL) {
-	times = &TimeBuffer;
-	time(&times->actime);
-	times->modtime = times->actime;
-    }
-
     /* This will (and should) still fail on readonly files */
     handle = CreateFileA(filename, GENERIC_READ | GENERIC_WRITE,
-                         FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+                         FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-    if (handle == INVALID_HANDLE_VALUE)
-	return rc;
+    if (handle == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
 
-    if (GetFileTime(handle, &ftCreate, &ftAccess, &ftWrite) &&
-	filetime_from_time(&ftAccess, times->actime) &&
-	filetime_from_time(&ftWrite, times->modtime) &&
-	SetFileTime(handle, &ftCreate, &ftAccess, &ftWrite))
-    {
-	rc = 0;
+    if (times == NULL) {
+        times = &TimeBuffer;
+        time(&times->actime);
+        times->modtime = times->actime;
+    }
+
+    if (filetime_from_time(&ftAccess, times->actime) &&
+	filetime_from_time(&ftWrite, times->modtime)) {
+        if (SetFileTime(handle, NULL, &ftAccess, &ftWrite)) {
+            rc = 0;
+        }
+        else {
+            translate_to_errno();
+        }
+    }
+    else {
+        errno = EINVAL; /* bad time? */
     }
 
     CloseHandle(handle);
@@ -3195,39 +3193,9 @@ win32_abort(void)
 DllExport int
 win32_fstat(int fd, Stat_t *sbufptr)
 {
-    int result;
-    struct _stati64 st;
-    dTHX;
-    result = _fstati64(fd, &st);
-    if (result == 0) {
-        sbufptr->st_mode = st.st_mode;
-        sbufptr->st_uid = st.st_uid;
-        sbufptr->st_gid = st.st_gid;
-        sbufptr->st_rdev = st.st_rdev;
-        sbufptr->st_size = st.st_size;
-        sbufptr->st_atime = st.st_atime;
-        sbufptr->st_mtime = st.st_mtime;
-        sbufptr->st_ctime = st.st_ctime;
+    HANDLE handle = (HANDLE)win32_get_osfhandle(fd);
 
-        if (w32_sloppystat) {
-            sbufptr->st_nlink = st.st_nlink;
-            sbufptr->st_dev = st.st_dev;
-            sbufptr->st_ino = st.st_ino;
-        }
-        else {
-            HANDLE handle = (HANDLE)win32_get_osfhandle(fd);
-            BY_HANDLE_FILE_INFORMATION bhi;
-            if (GetFileInformationByHandle(handle, &bhi)) {
-                sbufptr->st_nlink = bhi.nNumberOfLinks;
-                sbufptr->st_ino = bhi.nFileIndexHigh;
-                sbufptr->st_ino <<= 32;
-                sbufptr->st_ino |= bhi.nFileIndexLow;
-                sbufptr->st_dev = bhi.dwVolumeSerialNumber;
-            }
-        }
-    }
-    
-    return result;
+    return win32_stat_low(handle, NULL, 0, sbufptr);
 }
 
 DllExport int
@@ -4818,6 +4786,17 @@ Perl_win32_init(int *argcp, char ***argvp)
 	}
     }
 #endif
+
+    {
+        FILETIME ft;
+        if (!SystemTimeToFileTime(&time_t_epoch_base_systemtime,
+                                  &ft)) {
+	    fprintf(stderr, "panic: cannot convert base system time to filetime\n"); /* no interp */
+	    exit(1);
+        }
+        time_t_epoch_base_filetime.LowPart  = ft.dwLowDateTime;
+        time_t_epoch_base_filetime.HighPart = ft.dwHighDateTime;
+    }
 }
 
 void
