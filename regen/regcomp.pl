@@ -280,7 +280,7 @@ sub read_definition {
 
 # use fixed width to keep the diffs between regcomp.pl recompiles
 # as small as possible.
-my ( $width, $rwidth, $twidth )= ( 22, 12, 9 );
+my ( $base_name_width, $rwidth, $twidth )= ( 22, 12, 9 );
 
 sub print_state_defs {
     my ($out)= @_;
@@ -291,25 +291,25 @@ sub print_state_defs {
 #define %*s\t%d
 
 EOP
-        -$width,
+        -$base_name_width,
         REGNODE_MAX => $#ops,
-        -$width, REGMATCH_STATE_MAX => $#all;
+        -$base_name_width, REGMATCH_STATE_MAX => $#all;
 
     my %rev_type_alias= reverse %type_alias;
     my $format = "#define\t%*s\t%d\t/* %#04x %s */\n";
     for my $node (@ops) {
         printf $out $format,
-            -$width, $node->{name}, $node->{id}, $node->{id}, $node->{comment};
+            -$base_name_width, $node->{name}, $node->{id}, $node->{id}, $node->{comment};
         if ( defined( my $alias= $rev_type_alias{ $node->{name} } ) ) {
             printf $out $format,
-                -$width, $alias, $node->{id}, $node->{id}, "type alias";
+                -$base_name_width, $alias, $node->{id}, $node->{id}, "type alias";
         }
     }
 
     print $out "\t/* ------------ States ------------- */\n";
     for my $node (@states) {
         printf $out "#define\t%*s\t(REGNODE_MAX + %d)\t/* %s */\n",
-            -$width, $node->{name}, $node->{id} - $#ops, $node->{comment};
+            -$base_name_width, $node->{name}, $node->{id} - $#ops, $node->{comment};
     }
 }
 
@@ -328,7 +328,7 @@ EOP
     foreach my $node (@all) {
         print Dumper($node) if !defined $node->{type} or !defined( $node->{name} );
         printf $out "\t%*s\t/* %*s */\n",
-            -1 - $twidth, "$node->{type},", -$width, $node->{name};
+            -1 - $twidth, "$node->{type},", -$base_name_width, $node->{name};
         print $out "\t/* ------------ States ------------- */\n"
             if $node->{id} == $#ops and $node->{id} != $#all;
     }
@@ -413,7 +413,7 @@ EOP
         my $size= $node->{longj} || 0;
 
         printf $out "\t%*s\t/* $sym%#04x */\n",
-            -3 - $width, qq("$node->{name}",), $node->{id} - $ofs;
+            -3 - $base_name_width, qq("$node->{name}",), $node->{id} - $ofs;
         if ( $node->{id} == $#ops and @ops != @all ) {
             print $out "\t/* ------------ States ------------- */\n";
             $ofs= $#ops;
