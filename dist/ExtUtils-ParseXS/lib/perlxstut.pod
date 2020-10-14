@@ -120,9 +120,9 @@ The file Makefile.PL should look something like this:
     WriteMakefile(
 	NAME         => 'Mytest',
 	VERSION_FROM => 'Mytest.pm', # finds $VERSION
-	LIBS         => [''],   # e.g., '-lm'
-	DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
-	INC          => '-I.',  # e.g., '-I/usr/include/other'
+	LIBS         => [''], # e.g., '-lm'
+	DEFINE       => '', # e.g., '-DHAVE_SOMETHING'
+	INC          => '-I.', # e.g., '-I. -I/usr/include/other'
     );
 
 The file Mytest.pm should start with something like this:
@@ -390,7 +390,7 @@ Add the following to the end of Mytest.xs:
 
 Edit the Makefile.PL file so that the corresponding line looks like this:
 
-	LIBS         => ['-lm'],  # e.g., '-lm'
+	LIBS         => ['-lm'], # e.g., '-lm'
 
 Generate the Makefile and run make.  Change the test number in Mytest.t to
 "9" and add the following tests:
@@ -605,9 +605,9 @@ the WriteMakefile call so that it looks like this:
 	WriteMakefile(
 	    NAME         => 'Mytest2',
 	    VERSION_FROM => 'Mytest2.pm', # finds $VERSION
-	    LIBS         => [''],   # e.g., '-lm'
-	    DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
-	    INC          => '-I.',  # e.g., '-I/usr/include/other'
+	    LIBS         => [''], # e.g., '-lm'
+	    DEFINE       => '', # e.g., '-DHAVE_SOMETHING'
+	    INC          => '-I.', # e.g., '-I. -I/usr/include/other'
 	    MYEXTLIB     => 'mylib/libmylib$(LIB_EXT)',
 	);
 
