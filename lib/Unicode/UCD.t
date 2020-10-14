@@ -1,10 +1,17 @@
 #!perl -w
+
+use strict;
+use warnings;
+
+use Config;
+
+my $IS_ASCII = (ord("A") == 65) ? 1 : 0;
+my $IS_EBCDIC = (ord("A") == 193) ? 1 : 0;
+
 BEGIN {
-    $::IS_ASCII = (ord("A") == 65) ? 1 : 0;
-    $::IS_EBCDIC = (ord("A") == 193) ? 1 : 0;
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
+
     if ($Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built; Unicode::UCD uses Storable\n";
         exit 0;
@@ -14,7 +21,6 @@ BEGIN {
 my @warnings;
 local $SIG{__WARN__} = sub { push @warnings, @_  };
 
-use strict;
 use Test::More;
 
 use Unicode::UCD qw(charinfo charprop charprops_all);
@@ -786,7 +792,7 @@ SKIP:
         skip("Latin range count will be wrong when using older Unicode release",
              2) if $current_version lt $expected_version;
         my $n1 = @$r1;
-        is($n1, 32, "number of ranges in Latin script (Unicode $expected_version)") if $::IS_ASCII;
+        is($n1, 32, "number of ranges in Latin script (Unicode $expected_version)") if $IS_ASCII;
         shift @$r1 while @$r1;
         my $r2 = charscript('Latin');
         is(@$r2, $n1, "modifying results should not mess up internal caches");
@@ -1312,7 +1318,7 @@ use Unicode::UCD qw(prop_invlist prop_invmap MAX_CP);
 
 my $prop;
 my ($invlist_ref, $invmap_ref, $format, $missing);
-if ($::IS_ASCII) { # On EBCDIC, other things will come first, and can vary
+if ($IS_ASCII) { # On EBCDIC, other things will come first, and can vary
                 # according to code page
     $prop = "uc";
     ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
@@ -1350,14 +1356,14 @@ if ($v_unicode_version gt v3.1.0) {
     ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
     is($format, 's', "prop_invmap() format of '$prop' is 's'");
     is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
-    if ($::IS_ASCII) {
+    if ($IS_ASCII) {
         is_deeply($invlist_ref, [ 0x0000, 0x0030, 0x003A,
                                 0x0041, 0x0047,
                                 0x0061, 0x0067, 0x110000
                                 ],
             "prop_invmap('$prop') code point list is correct");
     }
-    elsif ($::IS_EBCDIC) {
+    elsif ($IS_EBCDIC) {
         is_deeply($invlist_ref, [
                 utf8::unicode_to_native(0x0000),
                 utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
@@ -1391,7 +1397,7 @@ is(prop_invlist("InKana"), undef, "prop_invlist(<user-defined property returns u
 # prop_invlist() tables fully with the known correct result.  We choose
 # ASCII_Hex_Digit again, as it is stable.
 if ($v_unicode_version gt v3.1.0) {
-    if ($::IS_ASCII) {
+    if ($IS_ASCII) {
         @invlist = prop_invlist("AHex");
         is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
                                     0x0047, 0x0061, 0x0067 ],
@@ -1401,7 +1407,7 @@ if ($v_unicode_version gt v3.1.0) {
                                     0x0047, 0x0061, 0x0067 ],
             "prop_invlist('AHex=f') is exactly the expected set of points");
     }
-    elsif ($::IS_EBCDIC) { # Relies on the ranges 0-9, a-f, and A-F each being
+    elsif ($IS_EBCDIC) { # Relies on the ranges 0-9, a-f, and A-F each being
                         # contiguous
         @invlist = prop_invlist("AHex");
         is_deeply(\@invlist, [
@@ -1937,7 +1943,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             $base_file = "This is a dummy name";
             my $blocks_ref = charblocks();
 
-            if ($::IS_EBCDIC) {
+            if ($IS_EBCDIC) {
                 # On EBCDIC, the first two blocks can each contain multiple
                 # ranges.  We create a new version with each of these
                 # flattened, so have one level.  ($index is used as a dummy
@@ -2471,7 +2477,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         $official =~ s/ ^ 00000 .*? ( .{5} \t SPACE ) $ /$1/xms;
         my $range_2_start;
         my $range_2_end_next;
-        if ($::IS_ASCII) {
+        if ($IS_ASCII) {
             $range_2_start    = '0007F';
             $range_2_end_next = '000A0';
         }
