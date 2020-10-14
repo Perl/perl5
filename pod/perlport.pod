@@ -2080,9 +2080,6 @@ C<ctime> not supported on UFS.
 (Win32)
 C<ctime> is creation time instead of inode change time.
 
-(Win32)
-C<dev> and C<ino> are not meaningful.
-
 (VMS)
 C<dev> and C<ino> are not necessarily reliable.
 
@@ -2098,19 +2095,12 @@ meaningful and will differ between stat calls on the same file.
 Some versions of cygwin when doing a C<stat("foo")> and not finding it
 may then attempt to C<stat("foo.exe")>.
 
-(Win32)
-C<stat> needs to open the file to determine the link count
-and update attributes that may have been changed through hard links.
-Setting L<C<${^WIN32_SLOPPY_STAT}>|perlvar/${^WIN32_SLOPPY_STAT}> to a
-true value speeds up C<stat> by not performing this operation.
-
 =item symlink
 
 (S<RISC OS>)
 Not implemented.
 
 (Win32)
-
 Requires either elevated permissions or developer mode and a
 sufficiently recent version of Windows 10.  Since Windows needs to
 know whether the target is a directory or not when creating the link
