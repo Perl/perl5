@@ -22,6 +22,7 @@ BEGIN {
     # Get function prototypes
     require './regen/regen_lib.pl';
 }
+
 use strict;
 
 # NOTE I don't think anyone actually knows what all of these properties mean,
@@ -296,21 +297,100 @@ EOP
         -$base_name_width, REGMATCH_STATE_MAX => $#all;
 
     my %rev_type_alias= reverse %type_alias;
-    my $format = "#define\t%*s\t%d\t/* %#04x %s */\n";
+    my $base_format = "#define %*s\t%d\t/* %#04x %s */\n";
+    my @withs;
+    my $in_states = 0;
+
+    my $max_name_width = 0;
+    for my $ref (\@ops, \@states) {
+        for my $node ($ref->@*) {
+            my $len = length $node->{name};
+            $max_name_width = $len if $max_name_width < $len;
+        }
+    }
+
+    die "Do a white-space only commit to increase \$base_name_width to"
+     .  " $max_name_width; then re-run"  if $base_name_width < $max_name_width;
+
+    print $out <<EOT;
+/* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte');
+ *    same with pattern (p8, pb) -- */
+#define with_tp_UTF8ness(op, t_utf8, p_utf8)                        \\
+\t\t(((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
+
+/* The #defines below give both the basic regnode and the expanded version for
+   switching on utf8ness */
+EOT
+
     for my $node (@ops) {
-        printf $out $format,
-            -$base_name_width, $node->{name}, $node->{id}, $node->{id}, $node->{comment};
+        print_state_def_line($out, $node->{name}, $node->{id}, $node->{comment});
         if ( defined( my $alias= $rev_type_alias{ $node->{name} } ) ) {
-            printf $out $format,
-                -$base_name_width, $alias, $node->{id}, $node->{id}, "type alias";
+            print_state_def_line($out, $alias, $node->{id}, $node->{comment});
         }
     }
 
     print $out "\t/* ------------ States ------------- */\n";
     for my $node (@states) {
-        printf $out "#define\t%*s\t(REGNODE_MAX + %d)\t/* %s */\n",
-            -$base_name_width, $node->{name}, $node->{id} - $#ops, $node->{comment};
+        print_state_def_line($out, $node->{name}, $node->{id}, $node->{comment});
     }
+}
+
+sub print_state_def_line
+{
+    my ($fh, $name, $id, $comment) = @_;
+
+    # The sub-names are like '_tb_p8' = 6 chars wide
+    my $name_col_width = $base_name_width + 6;
+    my $base_id_width = 3;  # Max is '255' or 3 cols
+    my $full_id_width = 3;  # Max is '1023' but not close to using the 4th
+
+    my $line = "#define " . $name;
+    $line .= " " x ($name_col_width - length($name));
+
+    $line .= sprintf "%*s", $base_id_width, $id;
+    $line .= " " x ($full_id_width + 2);
+
+    $line .= "/* ";
+    my $hanging = length $line;     # Indent any subsequent line to this pos
+    $line .= sprintf "0x%02x", $id;
+
+    my $columns = 79;
+
+    # wrap() needs 80 to achieve 79.
+    $line = wrap($columns + 1, "", " " x $hanging, "$line $comment");
+    chomp $line;            # wrap always adds a trailing \n
+    $line =~ s/ \s+ $ //x;  # trim, just in case.
+
+    # The comment may have wrapped.  Find the final \n and measure the length
+    # to the end.  If it is short enough, just append the ' */' to the line.
+    # If it is too close to the end of the space available, add an extra line
+    # that consists solely of blanks and the ' */'
+    my $len = length($line); my $rindex = rindex($line, "\n");
+    if (length($line) - rindex($line, "\n") - 1 <= $columns - 3) {
+        $line .= " */\n";
+    }
+    else {
+        $line .= "\n" . " " x ($hanging - 3) . "*/\n";
+    }
+
+    print $fh $line;
+
+    # And add the 4 subsidiary #defines used when switching on
+    # with_tp_UTF8nes()
+    my $with_id = $id * 4;
+    for my $with (qw(tb_pb  tb_p8  t8_pb  t8_p8)) {
+        my $with_name = "${name}_$with";
+        print  $fh "#define ", $with_name;
+        print  $fh " " x ($name_col_width - length($with_name) + $base_id_width);
+        printf $fh "%*s", $full_id_width, $with_id;
+        printf $fh "  /*";
+        print  $fh " " x (4 + 2);  # 4 is width of 0xHH that the base entry uses
+        printf $fh "0x%03x */\n", $with_id;
+
+        $with_id++;
+    }
+
+    print $fh "\n"; # Blank line separates groups for clarity
 }
 
 sub print_regkind {
@@ -619,7 +699,7 @@ format GuTS =
 .
 1;
 EOD
-    
+
     my $old_fh= select($guts);
     $~= "GuTS";
 
