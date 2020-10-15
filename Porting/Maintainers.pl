@@ -799,7 +799,10 @@ use File::Glob qw(:case);
         'EXCLUDED'     => ['article.html'],
         'CUSTOMIZED'   => [
             # CVE-2016-1238
-            qw( Memoize.pm )
+            qw( Memoize.pm ),
+
+            # CPAN RT 108382
+            qw( t/expmod_t.t t/speed.t ),
         ],
     },
 
