@@ -563,7 +563,6 @@ struct interp_intern {
     UINT	timerid;
     unsigned 	poll_count;
     Sighandler_t sigtable[SIG_SIZE];
-    bool sloppystat;
 };
 
 #define WIN32_POLL_INTERVAL 32768
@@ -597,7 +596,6 @@ struct interp_intern {
 #define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
 #define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
 #define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
-#define w32_sloppystat	(PL_sys_intern.sloppystat)
 
 #ifdef USE_ITHREADS
 void win32_wait_for_children(pTHX);

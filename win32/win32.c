@@ -5030,11 +5030,6 @@ Perl_sys_intern_init(pTHX)
     w32_timerid                 = 0;
     w32_message_hwnd            = CAST_HWND__(INVALID_HANDLE_VALUE);
     w32_poll_count              = 0;
-#ifdef PERL_IS_MINIPERL
-    w32_sloppystat              = TRUE;
-#else
-    w32_sloppystat              = FALSE;
-#endif
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
     }
@@ -5103,7 +5098,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->timerid                = 0;
     dst->message_hwnd		= CAST_HWND__(INVALID_HANDLE_VALUE);
     dst->poll_count             = 0;
-    dst->sloppystat             = src->sloppystat;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
 #  endif /* USE_ITHREADS */

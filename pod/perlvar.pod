@@ -750,18 +750,9 @@ Mnemonic: use ^V for a version object.
 =item ${^WIN32_SLOPPY_STAT}
 X<${^WIN32_SLOPPY_STAT}> X<sitecustomize> X<sitecustomize.pl>
 
-If this variable is set to a true value, then C<stat()> on Windows will
-not try to open the file.  This means that the link count cannot be
-determined and file attributes may be out of date if additional
-hardlinks to the file exist.  On the other hand, not opening the file
-is considerably faster, especially for files on network drives.
+This variable no longer has any function.
 
-This variable could be set in the F<sitecustomize.pl> file to
-configure the local Perl installation to use "sloppy" C<stat()> by
-default.  See the documentation for B<-f> in L<perlrun|perlrun/-f>
-for more information about site customization.
-
-This variable was added in Perl v5.10.0.
+This variable was added in Perl v5.10.0 and removed in Perl v5.34.0.
 
 =item $EXECUTABLE_NAME
 
