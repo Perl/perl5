@@ -659,9 +659,9 @@ the mylib directory and run make in there as well.
 Now edit the Mytest2.t script and change the number of tests to "5",
 and add the following lines to the end of the script:
 
-	is( &Mytest2::foo(1, 2, "Hello, world!"), 7 );
-	is( &Mytest2::foo(1, 2, "0.0"), 7 );
-	ok( abs(&Mytest2::foo(0, 0, "-3.4") - 0.6) <= 0.01 );
+	is( Mytest2::foo( 1, 2, "Hello, world!" ), 7 );
+	is( Mytest2::foo( 1, 2, "0.0" ),           7 );
+	ok( abs( Mytest2::foo( 0, 0, "-3.4" ) - 0.6 ) <= 0.01 );
 
 (When dealing with floating-point comparisons, it is best to not check for
 equality, but rather that the difference between the expected and actual
