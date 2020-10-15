@@ -25,8 +25,7 @@ jobs:
       - name: setup branch env name
         run: |
           ref="${github_ref/refs\/heads\//}"
-          echo "setenv ref=$ref"
-          echo "::set-env name=ref::$ref"
+          echo "ref=$ref" >> $GITHUB_ENV
         env:
           github_ref: ${{ github.event.ref }}
 
