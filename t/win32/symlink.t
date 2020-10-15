@@ -59,9 +59,10 @@ ok(mkdir($tmpfile1), "make a directory");
 # this may only work in an admin shell
 # MKLINK [[/D] | [/H] | [/J]] Link Target
 if (system("mklink /j $tmpfile2 $tmpfile1") == 0) {
-    ok(!-l $tmpfile2, "junction doesn't look like a symlink");
-    ok(!unlink($tmpfile2), "no unlink magic for junctions");
-    rmdir($tmpfile2);
+    ok(-l $tmpfile2, "junction does look like a symlink");
+    like(readlink($tmpfile2), qr/\Q$tmpfile1\E$/,
+         "readlink() works on a junction");
+    ok(unlink($tmpfile2), "unlink magic for junctions");
 }
 rmdir($tmpfile1);
 
