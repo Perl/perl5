@@ -1266,6 +1266,7 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             qw( lib/version.pm
                 vutil.c
+                vxs.inc
                 ),
         ],
 
