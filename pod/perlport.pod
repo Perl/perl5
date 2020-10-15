@@ -2251,17 +2251,15 @@ at L<http://www.cpan.org/src>
 
 =over
 
-=item Windows 2000
-
-=item Windows XP
-
-=item Windows Server 2003
-
-=item Windows Vista
-
-=item Windows Server 2008
+=item Windows Server 2008/R2
 
 =item Windows 7
+
+=item Windows Server 2012
+
+=item Windows 8
+
+=item Windows 10
 
 =back
 
@@ -2372,6 +2370,14 @@ have worked in 5.12, but supporting code has been removed for 5.14:
 =item Windows ME
 
 =item Windows NT4
+
+=item Windows 2000
+
+=item Windows XP
+
+=item Windows Server 2003
+
+=item Windows Vista
 
 =back
 
