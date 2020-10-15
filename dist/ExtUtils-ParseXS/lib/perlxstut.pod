@@ -276,9 +276,9 @@ when the test is correct, "not ok" when it is not.
     # so read its man page ( perldoc Test::More ) for help writing this
     # test script.
 
-    is(&Mytest::is_even(0), 1);
-    is(&Mytest::is_even(1), 0);
-    is(&Mytest::is_even(2), 1);
+    is( Mytest::is_even(0), 1 );
+    is( Mytest::is_even(1), 0 );
+    is( Mytest::is_even(2), 1 );
 
 We will be calling the test script through the command "C<make test>".  You
 should see output that looks something like this:
