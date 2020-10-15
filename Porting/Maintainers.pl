@@ -784,6 +784,7 @@ use File::Glob qw(:case);
             'lib/Math/Complex.pm', # CPAN RT 118467
             't/Complex.t',         # CPAN RT 118467
             't/Trig.t',            # CPAN RT 118467
+            't/underbar.t',
         ],
         'EXCLUDED'     => [
             qw( t/pod.t
