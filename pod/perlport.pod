@@ -1526,6 +1526,9 @@ C<-x>, C<-o>.
 (Win32, VMS, S<RISC OS>)
 C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
 
+(Win32)
+C<-l> returns true for both symlinks and directory junctions.
+
 (VMS, S<RISC OS>)
 C<-p> is not particularly meaningful.
 
@@ -1952,7 +1955,7 @@ but usually by no more than an hour.
 Not implemented.
 
 (Win32)
-Return values (especially for device and inode) may be bogus.
+Treats directory junctions as symlinks.
 
 =item msgctl
 
@@ -1982,8 +1985,12 @@ implications for your code.
 
 =item readlink
 
-(Win32, VMS, S<RISC OS>)
+(VMS, S<RISC OS>)
 Not implemented.
+
+(Win32)
+readlink() on a directory junction returns the object name, not a
+simple path.
 
 =item rename
 

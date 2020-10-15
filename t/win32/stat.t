@@ -112,10 +112,10 @@ if (system("mklink /d $tmpfile1 win32") == 0) {
     rmdir( $tmpfile1 );
 }
 
-# check a junction doesn't look like a symlink
+# check a junction looks like a symlink
 
 if (system("mklink /j $tmpfile1 win32") == 0) {
-    ok(!-l $tmpfile1, "lstat doesn't see a symlink on the directory junction");
+    ok(-l $tmpfile1, "lstat sees a symlink on the directory junction");
 
     rmdir( $tmpfile1 );
 }
