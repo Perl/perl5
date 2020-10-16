@@ -3818,10 +3818,10 @@ intrinsic function, see its documents for more details.
 #ifdef DEBUGGING
 #  define ASSUME(x) assert(x)
 #  if __has_builtin(__builtin_unreachable)
-#    define HAS_BUILTIN_UNREACHABLE_
+#    define HAS_BUILTIN_UNREACHABLE
 #  elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
                                || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
-#    define HAS_BUILTIN_UNREACHABLE_
+#    define HAS_BUILTIN_UNREACHABLE
 #  endif
 #endif
 
@@ -3830,7 +3830,7 @@ intrinsic function, see its documents for more details.
 #    define ASSUME(x)      /* ASSUME() generates warnings on Solaris */
 #  endif
 #  define NOT_REACHED
-#elif defined(HAS_BUILTIN_UNREACHABLE_)
+#elif defined(HAS_BUILTIN_UNREACHABLE)
 #  ifndef ASSUME
 #    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
 #  endif
@@ -3850,6 +3850,7 @@ intrinsic function, see its documents for more details.
 #  endif
 #  define NOT_REACHED ASSUME(!"UNREACHABLE")
 #endif
+#undef HAS_BUILTIN_UNREACHABLE
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
