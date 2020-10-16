@@ -753,8 +753,9 @@ Ap	|I32	|debop		|NN const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
 pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
-ATp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
-				|NN const char* fromend|int delim|NN I32* retlen
+ATpd	|char*	|delimcpy|NN char* to|NN const char* to_end		\
+			 |NN const char* from|NN const char* from_end	\
+			 |const int delim|NN I32* retlen
 Tpd	|char*	|delimcpy_no_escape|NN char* to|NN const char* toend	\
 				   |NN const char* from			\
 				   |NN const char* fromend|int delim	\

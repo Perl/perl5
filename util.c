@@ -533,44 +533,13 @@ Free_t   Perl_mfree (Malloc_t where)
 
 #endif
 
-/* copy a string up to some (non-backslashed) delimiter, if any.
- * With allow_escape, converts \<delimiter> to <delimiter>, while leaves
- * \<non-delimiter> as-is.
- * Returns the position in the src string of the closing delimiter, if
- * any, or returns fromend otherwise.
- * This is the internal implementation for Perl_delimcpy and
- * Perl_delimcpy_no_escape.
- */
-
-static char *
-S_delimcpy_intern(char *to, const char *toend, const char *from,
-	   const char *fromend, int delim, I32 *retlen,
-	   const bool allow_escape)
-{
-    I32 tolen;
-
-    PERL_ARGS_ASSERT_DELIMCPY;
-
-    for (tolen = 0; from < fromend; from++, tolen++) {
-	if (allow_escape && *from == '\\' && from + 1 < fromend) {
-	    if (from[1] != delim) {
-		if (to < toend)
-		    *to++ = *from;
-		tolen++;
-	    }
-	    from++;
-	}
-	else if (*from == delim)
-	    break;
-	if (to < toend)
-	    *to++ = *from;
-    }
-    if (to < toend)
-	*to = '\0';
-    *retlen = tolen;
-    return (char *)from;
-}
-
+/* This is the value stored in *retlen in the two delimcpy routines below when
+ * there wasn't enough room in the destination to store everything it was asked
+ * to.  The value is deliberately very large so that hopefully if code uses it
+ * unquestioninly to access memory, it will likely segfault.  And it is small
+ * enough that if the caller does some arithmetic on it before accessing, it
+ * won't overflow into a small legal number. */
+#define DELIMCPY_OUT_OF_BOUNDS_RET  I32_MAX
 
 /*
 =for apidoc_section String Handling
@@ -627,12 +596,170 @@ Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
     return (char *) from + copy_len;
 }
 
-char *
-Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend, int delim, I32 *retlen)
-{
-    PERL_ARGS_ASSERT_DELIMCPY;
+/*
+=for apidoc delimcpy
 
-    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 1);
+Copy a source buffer to a destination buffer, stopping at (but not including)
+the first occurrence in the source of an unescaped (defined below) delimiter
+byte, C<delim>.  The source is the bytes between S<C<from> and C<from_end> -
+1>.  Similarly, the dest is C<to> up to C<to_end>.
+
+The number of bytes copied is written to C<*retlen>.
+
+Returns the position of the first uncopied C<delim> in the C<from> buffer, but
+if there is no such occurrence before C<from_end>, then C<from_end> is returned,
+and the entire buffer S<C<from> .. C<from_end> - 1> is copied.
+
+If there is room in the destination available after the copy, an extra
+terminating safety C<NUL> byte is appended (not included in the returned
+length).
+
+The error case is if the destination buffer is not large enough to accommodate
+everything that should be copied.  In this situation, a value larger than
+S<C<to_end> - C<to>> is written to C<*retlen>, and as much of the source as
+fits will be written to the destination.  Not having room for the safety C<NUL>
+is not considered an error.
+
+In the following examples, let C<x> be the delimiter, and C<0> represent a C<NUL>
+byte (B<NOT> the digit C<0>).  Then we would have
+
+  Source     Destination
+ abcxdef        abc0
+
+provided the destination buffer is at least 4 bytes long.
+
+An escaped delimiter is one which is immediately preceded by a single
+backslash.  Escaped delimiters are copied, and the copy continues past the
+delimiter; the backslash is not copied:
+
+  Source       Destination
+ abc\xdef       abcxdef0
+
+(provided the destination buffer is at least 8 bytes long).
+
+It's actually somewhat more complicated than that. A sequence of any odd number
+of backslashes escapes the following delimiter, and the copy continues with
+exactly one of the backslashes stripped.
+
+     Source         Destination
+     abc\xdef          abcxdef0
+   abc\\\xdef        abc\\xdef0
+ abc\\\\\xdef      abc\\\\xdef0
+
+(as always, if the destination is large enough)
+
+An even number of preceding backslashes does not escape the delimiter, so that
+the copy stops just before it, and includes all the backslashes (no stripping;
+zero is considered even):
+
+      Source         Destination
+      abcxdef          abc0
+    abc\\xdef          abc\\0
+  abc\\\\xdef          abc\\\\0
+
+=cut
+*/
+
+char *
+Perl_delimcpy(char *to, const char *to_end,
+              const char *from, const char *from_end,
+              const int delim, I32 *retlen)
+{
+    const char * const orig_to = to;
+    Ptrdiff_t copy_len = 0;
+    bool stopped_early = FALSE;     /* Ran out of room to copy to */
+
+    PERL_ARGS_ASSERT_DELIMCPY;
+    assert(from_end >= from);
+    assert(to_end >= to);
+
+    /* Don't use the loop for the trivial case of the first character being the
+     * delimiter; otherwise would have to worry inside the loop about backing
+     * up before the start of 'from' */
+    if (LIKELY(from_end > from && *from != delim)) {
+        while ((copy_len = from_end - from) > 0) {
+            const char * backslash_pos;
+            const char * delim_pos;
+
+            /* Look for the next delimiter in the remaining portion of the
+             * source. A loop invariant is that we already know that the copy
+             * should include *from; this comes from the conditional before the
+             * loop, and how we set things up at the end of each iteration */
+            delim_pos = (const char *) memchr(from + 1, delim, copy_len - 1);
+
+            /* If didn't find it, done looking; set up so copies all of the
+             * source */
+            if (! delim_pos) {
+                copy_len = from_end - from;
+                break;
+            }
+
+            /* Look for a backslash immediately before the delimiter */
+            backslash_pos = delim_pos - 1;
+
+            /* If the delimiter is not escaped, this ends the copy */
+            if (*backslash_pos != '\\') {
+                copy_len = delim_pos - from;
+                break;
+            }
+
+            /* Here there is a backslash just before the delimiter, but it
+             * could be the final backslash in a sequence of them.  Backup to
+             * find the first one in it. */
+            do {
+                backslash_pos--;
+            }
+            while (backslash_pos >= from && *backslash_pos == '\\');
+
+            /* If the number of backslashes is even, they just escape one
+             * another, leaving the delimiter unescaped, and stopping the copy.
+             * */
+            if (! ((delim_pos - (backslash_pos + 1)) & 1)) {
+                copy_len = delim_pos - from;  /* even, copy up to delimiter */
+                break;
+            }
+
+            /* Here is odd, so the delimiter is escaped.  We will try to copy
+             * all but the final backslash in the sequence */
+            copy_len = delim_pos - 1 - from;
+
+            /* Do the copy, but not beyond the end of the destination */
+            if (copy_len >= to_end - to) {
+                Copy(from, to, to_end - to, char);
+                stopped_early = TRUE;
+                to = (char *) to_end;
+            }
+            else {
+                Copy(from, to, copy_len, char);
+                to += copy_len;
+            }
+
+            /* Set up so next iteration will include the delimiter */
+            from = delim_pos;
+        }
+    }
+
+    /* Here, have found the final segment to copy.  Copy that, but not beyond
+     * the size of the destination.  If not enough room, copy as much as can
+     * fit, and set error return */
+    if (stopped_early || copy_len > to_end - to) {
+        Copy(from, to, to_end - to, char);
+        *retlen = DELIMCPY_OUT_OF_BOUNDS_RET;
+    }
+    else {
+        Copy(from, to, copy_len, char);
+
+        to += copy_len;
+
+        /* If there is extra space available, add a trailing NUL */
+        if (to < to_end) {
+            *to = '\0';
+        }
+
+        *retlen = to - orig_to;
+    }
+
+    return (char *) from + copy_len;
 }
 
 /*
