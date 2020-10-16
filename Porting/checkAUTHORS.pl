@@ -388,7 +388,7 @@ sub update_authors_files {
 
     {
         open my $fh, '>', $author_file or die "Can't open $author_file: $!";
-        binmode $fh, ':encoding(UTF-8)';
+        binmode $fh, ':raw:encoding(UTF-8)';
 
         print {$fh} $AUTHORS_header;
 
