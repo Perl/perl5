@@ -132,15 +132,16 @@ foreach my $d ("x", "\0") {     # Try both printable and NUL delimiters
     } while ($trunc_dest_len > 0);
 }
 
-TODO: {
+{
     # Repeat a few of the tests with a backslash delimiter, which means there
     # is no possibiliby of an escape
 
-        local $TODO = 'current code is broken when the delimiter is a backslash';
         my $d = "\\";
         my $source = $ib;
         my $source_len = 1;
         my $should_be = $source;
+
+        pass 'delimiter is a backslash for the rest of the tests';
 
         $ret = test_delimcpy($source, $source_len, $d, $source_len, $source_len, $poison);
         is($ret->[0], expected($source, $source_len, $poison, $source_len),
