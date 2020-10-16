@@ -3817,7 +3817,7 @@ intrinsic function, see its documents for more details.
 
 #ifdef DEBUGGING
 #  define ASSUME(x) assert(x)
-#  ifdef __builtin_unreachable
+#  if __has_builtin(__builtin_unreachable)
 #    define HAS_BUILTIN_UNREACHABLE_
 #  elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
                                || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
