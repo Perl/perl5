@@ -837,7 +837,7 @@ preprocessing token; the type of C<arg> depends on C<which>.
 #define RV2CVOPCV_MARK_EARLY     0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
 #define RV2CVOPCV_RETURN_STUB    0x00000004
-#ifdef PERL_CORE /* behaviour of this flag is subject to change: */
+#if defined(PERL_CORE) || defined(PERL_EXT) /* behaviour of this flag is subject to change: */
 # define RV2CVOPCV_MAYBE_NAME_GV  0x00000008
 #endif
 #define RV2CVOPCV_FLAG_MASK      0x0000000f /* all of the above */

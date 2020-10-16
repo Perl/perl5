@@ -126,7 +126,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 # define CVf_SLABBED	0x0800	/* Holds refcount on op slab  */
 #endif
 #define CVf_DYNFILE	0x1000	/* The filename is malloced  */
