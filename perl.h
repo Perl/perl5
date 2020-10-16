@@ -3825,7 +3825,7 @@ intrinsic function, see its documents for more details.
 #  endif
 #endif
 
-#if defined(__sun)
+#if defined(__sun) || (defined(__hpux) && !defined(__GNUC__))
 #  ifndef ASSUME
 #    define ASSUME(x)      /* ASSUME() generates warnings on Solaris */
 #  endif
