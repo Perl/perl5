@@ -4191,6 +4191,7 @@ L<https://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *                          string.
  *  FOLDEQ_S2_FOLDS_SANE
  */
+
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                              const char *s2, char **pe2, UV l2, bool u2,
