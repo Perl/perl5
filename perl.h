@@ -3961,8 +3961,9 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #ifndef PERL_STATIC_NO_RET
 #  define PERL_STATIC_NO_RET STATIC
 #endif
-/* PERL_STATIC_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE on
-   builds that dont have a noreturn as a declaration specifier
+
+/* PERL_STATIC_INLINE_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE
+ * on builds that dont have a noreturn as a declaration specifier
 */
 #ifndef PERL_STATIC_INLINE_NO_RET
 #  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
