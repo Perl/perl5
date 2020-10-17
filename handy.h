@@ -2429,7 +2429,14 @@ END_EXTERN_C
                          : (LATIN1_TO_NATIVE(((U8) (c)) ^ 64)))))
 #endif
 
-/* Line numbers are unsigned, 32 bits. */
+/*
+=for apidoc Ay||line_t
+The typedef to use to declare variables that are to hold line numbers.
+
+=cut
+
+  Line numbers are unsigned, 32 bits.
+*/
 typedef U32 line_t;
 #define NOLINE ((line_t) 4294967295UL)  /* = FFFFFFFF */
 
