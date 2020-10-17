@@ -7299,6 +7299,8 @@ extern void moncontrol(int);
 #  define PIPE_OPEN_MODE	PIPESOCK_MODE
 #endif
 
+#ifdef PERL_CORE
+
 #define PERL_MAGIC_UTF8_CACHESIZE	2
 
 #define PERL_UNICODE_STDIN_FLAG			0x0001
@@ -7338,6 +7340,8 @@ extern void moncontrol(int);
 #define PERL_UNICODE_LOCALE			'L'
 #define PERL_UNICODE_WIDESYSCALLS		'W'
 #define PERL_UNICODE_UTF8CACHEASSERT		'a'
+
+#endif
 
 /*
 =for apidoc_section Signals
