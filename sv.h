@@ -2374,51 +2374,54 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 
 #define newIO()	MUTABLE_IO(newSV_type(SVt_PVIO))
 
-#define SV_CONST(name) \
+#if defined(PERL_CORE) || defined(PERL_EXT)
+
+#  define SV_CONST(name) \
 	PL_sv_consts[SV_CONST_##name] \
 		? PL_sv_consts[SV_CONST_##name] \
 		: (PL_sv_consts[SV_CONST_##name] = newSVpv_share(#name, 0))
 
-#define SV_CONST_TIESCALAR 0
-#define SV_CONST_TIEARRAY 1
-#define SV_CONST_TIEHASH 2
-#define SV_CONST_TIEHANDLE 3
+#  define SV_CONST_TIESCALAR 0
+#  define SV_CONST_TIEARRAY 1
+#  define SV_CONST_TIEHASH 2
+#  define SV_CONST_TIEHANDLE 3
 
-#define SV_CONST_FETCH 4
-#define SV_CONST_FETCHSIZE 5
-#define SV_CONST_STORE 6
-#define SV_CONST_STORESIZE 7
-#define SV_CONST_EXISTS 8
+#  define SV_CONST_FETCH 4
+#  define SV_CONST_FETCHSIZE 5
+#  define SV_CONST_STORE 6
+#  define SV_CONST_STORESIZE 7
+#  define SV_CONST_EXISTS 8
 
-#define SV_CONST_PUSH 9
-#define SV_CONST_POP 10
-#define SV_CONST_SHIFT 11
-#define SV_CONST_UNSHIFT 12
-#define SV_CONST_SPLICE 13
-#define SV_CONST_EXTEND 14
+#  define SV_CONST_PUSH 9
+#  define SV_CONST_POP 10
+#  define SV_CONST_SHIFT 11
+#  define SV_CONST_UNSHIFT 12
+#  define SV_CONST_SPLICE 13
+#  define SV_CONST_EXTEND 14
 
-#define SV_CONST_FIRSTKEY 15
-#define SV_CONST_NEXTKEY 16
-#define SV_CONST_SCALAR 17
+#  define SV_CONST_FIRSTKEY 15
+#  define SV_CONST_NEXTKEY 16
+#  define SV_CONST_SCALAR 17
 
-#define SV_CONST_OPEN 18
-#define SV_CONST_WRITE 19
-#define SV_CONST_PRINT 20
-#define SV_CONST_PRINTF 21
-#define SV_CONST_READ 22
-#define SV_CONST_READLINE 23
-#define SV_CONST_GETC 24
-#define SV_CONST_SEEK 25
-#define SV_CONST_TELL 26
-#define SV_CONST_EOF 27
-#define SV_CONST_BINMODE 28
-#define SV_CONST_FILENO 29
-#define SV_CONST_CLOSE 30
+#  define SV_CONST_OPEN 18
+#  define SV_CONST_WRITE 19
+#  define SV_CONST_PRINT 20
+#  define SV_CONST_PRINTF 21
+#  define SV_CONST_READ 22
+#  define SV_CONST_READLINE 23
+#  define SV_CONST_GETC 24
+#  define SV_CONST_SEEK 25
+#  define SV_CONST_TELL 26
+#  define SV_CONST_EOF 27
+#  define SV_CONST_BINMODE 28
+#  define SV_CONST_FILENO 29
+#  define SV_CONST_CLOSE 30
 
-#define SV_CONST_DELETE 31
-#define SV_CONST_CLEAR 32
-#define SV_CONST_UNTIE 33
-#define SV_CONST_DESTROY 34
+#  define SV_CONST_DELETE 31
+#  define SV_CONST_CLEAR 32
+#  define SV_CONST_UNTIE 33
+#  define SV_CONST_DESTROY 34
+#endif
 
 #define SV_CONSTS_COUNT 35
 
