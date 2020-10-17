@@ -2916,7 +2916,7 @@ There are also
 And C<PTRV> which gives the native type for an integer the same size as
 pointers, such as C<unsigned> or C<unsigned long>.
 
-=for apidoc AmhuU|type|PTRV
+=for apidoc Ayh|type|PTRV
 
 =head2 Exception Handling
 
