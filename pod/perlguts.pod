@@ -2765,16 +2765,6 @@ following macros for portability
         NVff            NV %f-like
         NVgf            NV %g-like
 
-=for apidoc_section Formats
-=for apidoc Amnh||IVdf
-=for apidoc Amnh||UVuf
-=for apidoc Amnh||UVof
-=for apidoc Amnh||UVxf
-=for apidoc Amnh||UVXf
-=for apidoc Amnh||NVef
-=for apidoc Amnh||NVff
-=for apidoc Amnh||NVgf
-
 These will take care of 64-bit integers and long doubles.
 For example:
 
