@@ -2369,7 +2369,7 @@ you can simply write:
 On a related note, if you do use C<(X)PUSH[iunp]>, then you're going to
 need a C<dTARG> in your variable declarations so that the C<*PUSH*>
 macros can make use of the local variable C<TARG>.  See also
-C<dTARGET> and C<dXSTARG>.
+L<perlapi/C<dTARGET>> and C<dXSTARG>.
 
 Be careful with TARG: each non-recursive call to your OP, or XSUB for
 dXSTARG, will use the same SV for TARG for each call, so you can't
