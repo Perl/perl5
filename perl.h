@@ -1379,6 +1379,12 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
 #define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
 
+/*
+=for apidoc Am|void|memzero|void * d|Size_t l
+Set the C<l> bytes starting at C<*d> to all zeroes.
+
+=cut
+*/
 #ifndef memzero
 #   define memzero(d,l) memset(d,0,l)
 #endif
