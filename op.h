@@ -1072,6 +1072,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #endif
 
 
+#if defined(PERL_CORE) || defined(PERL_EXT)
+
 /* Stuff for OP_MULTDEREF/pp_multideref. */
 
 /* actions */
@@ -1110,6 +1112,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 
 #define MDEREF_MASK         0x7F
 #define MDEREF_SHIFT           7
+
+#endif  /* end CORE/EXT only */
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
 #   define FATAL_ABOVE_FF_MSG                                       \
