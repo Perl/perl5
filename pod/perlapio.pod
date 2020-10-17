@@ -140,6 +140,8 @@ functions which call stdio. In this case I<only> PerlIO * is a FILE *.
 This has been the default implementation since the abstraction was
 introduced in perl5.003_02.
 
+=for apidoc Amnh||USE_STDIO
+
 =item 2. USE_PERLIO
 
 Introduced just after perl5.7.0, this is a re-implementation of the
@@ -344,6 +346,8 @@ calls.
 The first step is to add this line:
 
    #define PERLIO_NOT_STDIO 0
+
+=for apidoc Amnh ||PERLIO_NOT_STDIO
 
 I<before> including any perl header files. (This will probably become
 the default at some point).  That prevents "perlio.h" from attempting
