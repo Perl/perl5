@@ -97,6 +97,7 @@ struct reg_code_blocks {
 
 
 /*
+= for apidoc AyT||regexp
   The regexp/REGEXP struct, see L<perlreapi> for further documentation
   on the individual fields. The struct is ordered so that the most
   commonly used fields are placed at the start.
@@ -673,12 +674,17 @@ typedef struct {
 } regmatch_info_aux;
 
 
-/* some basic information about the current match that is created by
- * Perl_regexec_flags and then passed to regtry(), regmatch() etc.
- * It is allocated as a local var on the stack, so nothing should be
- * stored in it that needs preserving or clearing up on croak().
- * For that, see the aux_info and aux_info_eval members of the
- * regmatch_state union. */
+/*
+=for apidoc Ay||regmatch_info
+Some basic information about the current match that is created by
+Perl_regexec_flags and then passed to regtry(), regmatch() etc.
+It is allocated as a local var on the stack, so nothing should be
+stored in it that needs preserving or clearing up on croak().
+For that, see the aux_info and aux_info_eval members of the
+regmatch_state union.
+
+=cut
+*/
 
 typedef struct {
     REGEXP *prog;        /* the regex being executed */
