@@ -4,6 +4,8 @@
    Any changes made here will be lost!
  */
 
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+
 /* Regops and State definitions */
 
 #define REGNODE_MAX           	109
@@ -1766,5 +1768,7 @@ EXTCONST U32 PL_EXACT_REQ8_bitmask;
 EXTCONST U32 PL_EXACTFish_bitmask = 0x33F8;
 EXTCONST U32 PL_EXACT_REQ8_bitmask = 0x1E00;
 #endif /* DOINIT */
+
+#endif /* defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
 
 /* ex: set ro: */

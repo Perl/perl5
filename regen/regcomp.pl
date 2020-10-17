@@ -780,9 +780,11 @@ END_OF_DESCR
     close_and_rename($guts);
 }
 
+my $confine_to_core = 'defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)';
 read_definition("regcomp.sym");
 my $out= open_new( 'regnodes.h', '>',
     { by => 'regen/regcomp.pl', from => 'regcomp.sym' } );
+print $out "#if $confine_to_core\n\n";
 print_state_defs($out);
 print_regkind($out);
 wrap_ifdef_print(
@@ -796,6 +798,7 @@ print_reg_extflags_name($out);
 print_reg_intflags_name($out);
 print_process_flags($out);
 print_process_EXACTish($out);
+print $out "\n#endif /* $confine_to_core */\n";
 read_only_bottom_close_and_rename($out);
 
 do_perldebguts();
