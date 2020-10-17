@@ -1227,48 +1227,62 @@ implementation, and subject to change in future releases.
 
 C<toFOLD_utf8_safe> is now just a different spelling of plain C<toFOLD_utf8>
 
-=for apidoc Am|U8|toLOWER|U8 ch
-Converts the specified character to lowercase.  If the input is anything but an
-ASCII uppercase character, that input character itself is returned.  Variant
-C<toLOWER_A> is equivalent.
+=for apidoc Am|UV|toLOWER|UV cp
+=for apidoc_item |UV|toLOWER_A|UV cp
+=for apidoc_item |UV|toLOWER_L1|UV cp
+=for apidoc_item |UV|toLOWER_LATIN1|UV cp
+=for apidoc_item |UV|toLOWER_LC|UV cp
+=for apidoc_item |UV|toLOWER_uvchr|UV cp|U8* s|STRLEN* lenp
+=for apidoc_item |UV|toLOWER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
+=for apidoc_item |UV|toLOWER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
 
-=for apidoc Am|U8|toLOWER_L1|U8 ch
-Converts the specified Latin1 character to lowercase.  The results are
-undefined if the input doesn't fit in a byte.
+These all return the lowercase of a character.  The differences are what domain
+they operate on, and whether the input is specified as a code point (those
+forms with a C<cp> parameter) or as a UTF-8 string (the others).  In the latter
+case, the code point to use is the first one in the buffer of UTF-8 encoded
+code points, delineated by the arguments S<C<p .. e - 1>>.
 
-=for apidoc Am|U8|toLOWER_LC|U8 ch
-Converts the specified character to lowercase using the current locale's rules,
-if possible; otherwise returns the input character itself.
+C<toLOWER> and C<toLOWER_A> are synonyms of each other.  They return the
+lowercase of any uppercase ASCII-range code point.  All other inputs are
+returned unchanged.  Since these are macros, the input type may be any integral
+one, and the output will occupy the same number of bits as the input.
 
-=for apidoc Am|UV|toLOWER_uvchr|UV cp|U8* s|STRLEN* lenp
-Converts the code point C<cp> to its lowercase version, and
-stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  The code
-point is interpreted as native if less than 256; otherwise as Unicode.  Note
-that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
-bytes since the lowercase version may be longer than the original character.
+C<toLOWER_L1> and C<toLOWER_LATIN1> are synonyms of each other.  They behave
+identically as C<toLOWER> for ASCII-range input.  But additionally will return
+the lowercase of any uppercase code point in the entire 0..255 range, assuming
+a Latin-1 encoding (or the EBCDIC equivalent on such platforms).
 
-The first code point of the lowercased version is returned
-(but note, as explained at L<the top of this section|/Character case
-changing>, that there may be more).
+C<toLOWER_LC> returns the lowercase of the input code point according to the
+rules of the current POSIX locale.  Input code points outside the range 0..255
+are returned unchanged.
 
-=for apidoc Am|UV|toLOWER_utf8|U8* p|U8* e|U8* s|STRLEN* lenp
-=for apidoc_item toLOWER_utf8_safe
-Converts the first UTF-8 encoded character in the sequence starting at C<p> and
-extending no further than S<C<e - 1>> to its lowercase version, and
-stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
-that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
-bytes since the lowercase version may be longer than the original character.
+C<toLOWER_uvchr> returns the lowercase of any Unicode code point.  The return
+value is identical to that of C<toLOWER_L1> for input code points in the 0..255
+range.  The lowercase of the vast majority of Unicode code points is the same
+as the code point itself.  For these, and for code points above the legal
+Unicode maximum, this returns the input code point unchanged.  It additionally
+stores the UTF-8 of the result into the buffer beginning at C<s>, and its
+length in bytes into C<*lenp>.  The caller must have made C<s> large enough to
+contain at least C<UTF8_MAXBYTES_CASE+1> bytes to avoid possible overflow.
 
-The first code point of the lowercased version is returned
-(but note, as explained at L<the top of this section|/Character case
-changing>, that there may be more).
-It will not attempt to read beyond S<C<e - 1>>, provided that the constraint
-S<C<s E<lt> e>> is true (this is asserted for in C<-DDEBUGGING> builds).  If
-the UTF-8 for the input character is malformed in some way, the program may
-croak, or the function may return the REPLACEMENT CHARACTER, at the discretion
-of the implementation, and subject to change in future releases.
+NOTE: the lowercase of a code point may be more than one code point.  The
+return value of this function is only the first of these.  The entire lowercase
+is returned in C<s>.  To determine if the result is more than a single code
+point, you can do something like this:
 
-C<toLOWER_utf8_safe> is now just a different spelling of plain C<toLOWER_utf8>
+ uc = toLOWER_uvchr(cp, s, &len);
+ if (len > UTF8SKIP(s)) { is multiple code points }
+ else { is a single code point }
+
+C<toLOWER_utf8> and C<toLOWER_utf8_safe> are synonyms of each other.  The only
+difference between these and C<toLOWER_uvchr> is that the source for these is
+encoded in UTF-8, instead of being a code point.  It is passed as a buffer
+starting at C<p>, with C<e> pointing to one byte beyond its end.  The C<p>
+buffer may certainly contain more than one code point; but only the first one
+(up through S<C<e - 1>>) is examined.  If the UTF-8 for the input character is
+malformed in some way, the program may croak, or the function may return the
+REPLACEMENT CHARACTER, at the discretion of the implementation, and subject to
+change in future releases.
 
 =for apidoc Am|U8|toTITLE|U8 ch
 Converts the specified character to titlecase.  If the input is anything but an
