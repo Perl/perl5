@@ -439,6 +439,13 @@ typedef enum opcode {
 	OP_max		
 } opcode;
 
+/*
+=for apidoc Ay||opcode
+An enum of all the legal Perl opcodes, defined in F<opnames.h>
+
+=cut
+*/
+
 #define MAXO 422
 #define OP_FREED MAXO
 
