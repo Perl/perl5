@@ -671,6 +671,9 @@ Not all platforms support passing va_list to further varargs (stdarg)
 functions.  The right thing to do is to copy the va_list using the
 Perl_va_copy() if the NEED_VA_COPY is defined.
 
+=for apidoc_section $genconfig
+=for apidoc Amnh||NEED_VA_COPY
+
 =item *
 
 Using gcc statement expressions
@@ -883,6 +886,10 @@ Do not use strtol() or strtoul()
 Use grok_atoUV() instead.  strtol() or strtoul() (or their IV/UV-friendly
 macro disguises, Strtol() and Strtoul(), or Atol() and Atoul() are
 affected by locale, which is bad.
+
+=for apidoc_section $numeric
+=for apidoc AmhD||Atol|const char * nptr
+=for apidoc AmhD||Atoul|const char * nptr
 
 =back
 
@@ -1131,6 +1138,9 @@ subroutine:
 We can also dump out this op: the current op is always stored in
 C<PL_op>, and we can dump it with C<Perl_op_dump>.  This'll give us
 similar output to CPAN module B::Debug.
+
+=for apidoc_section $debugging
+=for apidoc Amnh||PL_op
 
     (gdb) print Perl_op_dump(PL_op)
     {
@@ -1686,6 +1696,9 @@ As C<-Dm> is using the PerlIO layer for output, it will by itself
 allocate quite a bunch of SVs, which are hidden to avoid recursion.  You
 can bypass the PerlIO layer if you use the SV logging provided by
 C<-DPERL_MEM_LOG> instead.
+
+=for apidoc_section $debugging
+=for apidoc Amnh||PL_sv_serial
 
 =head2 PERL_MEM_LOG
 
