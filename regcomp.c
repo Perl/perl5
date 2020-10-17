@@ -21867,7 +21867,7 @@ This routine is expected to clone a given regexp structure. It is only
 compiled under USE_ITHREADS.
 
 After all of the core data stored in struct regexp is duplicated
-the regexp_engine.dupe method is used to copy any private data
+the C<regexp_engine.dupe> method is used to copy any private data
 stored in the *pprivate pointer. This allows extensions to handle
 any duplication they need to do.
 
