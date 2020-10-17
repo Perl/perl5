@@ -1294,7 +1294,7 @@ Perl_instr(const char *big, const char *little)
 {
     PERL_ARGS_ASSERT_INSTR;
 
-    return instr((char *) big, (char *) little);
+    return instr(big, little);
 }
 
 SV *
