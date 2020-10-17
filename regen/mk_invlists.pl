@@ -3355,12 +3355,15 @@ my $keywords_fh = open_new('uni_keywords.h', '>',
 		  {style => '*', by => 'regen/mk_invlists.pl',
                   from => "mph.pl"});
 
+print $keywords_fh "\n#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)\n\n";
+
 my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows)
                         = MinimalPerfectHash::make_mph_from_hash(\%keywords);
 print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1,
                                                  $length_all_keys, $smart_blob,
                                                  $rows, undef, undef, undef,
                                                  'match_uniprop' );
+print $keywords_fh "\n#endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */\n";
 
 push @sources, 'regen/mph.pl';
 read_only_bottom_close_and_rename($keywords_fh, \@sources);
