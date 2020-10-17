@@ -1337,7 +1337,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /*
    void below because that's the best fit, and works for Devel::PPPort
 =for apidoc_section Integer configuration values
-=for apidoc AmnU|void|WIDEST_UTYPE
+=for apidoc AyT||WIDEST_UTYPE
 
 Yields the widest unsigned integer type on the platform, currently either
 C<U32> or C<U64>.  This can be used in declarations such as
