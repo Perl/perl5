@@ -502,6 +502,21 @@ C<UNICODE_DISALLOW_PERL_EXTENDED>.  The names are misleading because on EBCDIC
 platforms,these flags can apply to code points that actually do fit in 31 bits.
 The new names accurately describe the situation in all cases.
 
+=for apidoc Amnh||UNICODE_DISALLOW_ABOVE_31_BIT
+=for apidoc Amnh||UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE
+=for apidoc Amnh||UNICODE_DISALLOW_ILLEGAL_INTERCHANGE
+=for apidoc Amnh||UNICODE_DISALLOW_NONCHAR
+=for apidoc Amnh||UNICODE_DISALLOW_PERL_EXTENDED
+=for apidoc Amnh||UNICODE_DISALLOW_SUPER
+=for apidoc Amnh||UNICODE_DISALLOW_SURROGATE
+=for apidoc Amnh||UNICODE_WARN_ABOVE_31_BIT
+=for apidoc Amnh||UNICODE_WARN_ILLEGAL_C9_INTERCHANGE
+=for apidoc Amnh||UNICODE_WARN_ILLEGAL_INTERCHANGE
+=for apidoc Amnh||UNICODE_WARN_NONCHAR
+=for apidoc Amnh||UNICODE_WARN_PERL_EXTENDED
+=for apidoc Amnh||UNICODE_WARN_SUPER
+=for apidoc Amnh||UNICODE_WARN_SURROGATE
+
 =cut
 */
 
@@ -1449,6 +1464,17 @@ C<UTF8_DISALLOW_SURROGATE> or the C<UTF8_WARN_SURROGATE> flags.
 
 To do your own error handling, call this function with the C<UTF8_CHECK_ONLY>
 flag to suppress any warnings, and then examine the C<*errors> return.
+
+=for apidoc Amnh||UTF8_GOT_PERL_EXTENDED
+=for apidoc Amnh||UTF8_GOT_CONTINUATION
+=for apidoc Amnh||UTF8_GOT_EMPTY
+=for apidoc Amnh||UTF8_GOT_LONG
+=for apidoc Amnh||UTF8_GOT_NONCHAR
+=for apidoc Amnh||UTF8_GOT_NON_CONTINUATION
+=for apidoc Amnh||UTF8_GOT_OVERFLOW
+=for apidoc Amnh||UTF8_GOT_SHORT
+=for apidoc Amnh||UTF8_GOT_SUPER
+=for apidoc Amnh||UTF8_GOT_SURROGATE
 
 =cut
 
@@ -4039,7 +4065,13 @@ The pointer to the PV of the C<dsv> is returned.
 
 See also L</sv_uni_display>.
 
-=cut */
+=for apidoc Amnh||UNI_DISPLAY_BACKSLASH
+=for apidoc Amnh||UNI_DISPLAY_BACKSPACE
+=for apidoc Amnh||UNI_DISPLAY_ISPRINT
+=for apidoc Amnh||UNI_DISPLAY_QQ
+=for apidoc Amnh||UNI_DISPLAY_REGEX
+=cut
+*/
 char *
 Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
                           UV flags)
@@ -4158,6 +4190,13 @@ beyond what was matched.  Correspondingly for C<pe2> and C<s2>.
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 L<https://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
+
+=for apidoc Cmnh||FOLDEQ_UTF8_NOMIX_ASCII
+=for apidoc Cmnh||FOLDEQ_LOCALE
+=for apidoc Cmnh||FOLDEQ_S1_ALREADY_FOLDED
+=for apidoc Cmnh||FOLDEQ_S1_FOLDS_SANE
+=for apidoc Cmnh||FOLDEQ_S2_ALREADY_FOLDED
+=for apidoc Cmnh||FOLDEQ_S2_FOLDS_SANE
 
 =cut */
 
