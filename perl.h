@@ -5509,6 +5509,20 @@ EXTERN_C char **environ;  /* environment variables supplied via exec */
                                 STRINGIFY(PERL_API_VERSION) "." \
                                 STRINGIFY(PERL_API_SUBVERSION)
 
+
+/*
+=for apidoc Cmu||INIT|const_expr
+
+Macro to initialize something, used like so:
+
+ EXTCONST char PL_warn_uninit[] INIT("Use of uninitialized value%s%s%s");
+
+It is used to hide whether initialization should take place.  Sometimes code is
+parsed more than once, and we only want the initialization to happen once.
+
+=cut
+*/
+
 START_EXTERN_C
 
 /* handy constants */
