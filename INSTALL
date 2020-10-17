@@ -510,6 +510,10 @@ to be, with the one believed to be most secure at release time being PERL_HASH_F
     PERL_HASH_FUNC_SIPHASH13
     PERL_HASH_FUNC_ZAPHOD32
 
+=for apidoc Amnh;||PERL_HASH_FUNC_SIPHASH
+=for apidoc_item ||PERL_HASH_FUNC_SIPHASH13
+=for apidoc_item ||PERL_HASH_FUNC_ZAPHOD32
+
 In addition, these, (or custom hash functions), may be "fronted" by the
 SBOX32 hash function for keys under a chosen size. This hash function is
 special in that it has proven theoretical security properties, and is very
@@ -526,6 +530,8 @@ with something like this
 
    -Accflags='-DPERL_HASH_USE_SBOX32_ALSO=0'
 
+=for apidoc Amnh||PERL_HASH_USE_SBOX32_ALSO
+
 or alternatively you can use the simple define C<PERL_HASH_NO_SBOX32> like this:
 
     -Accflags='-DPERL_HASH_NO_SBOX32'
@@ -536,6 +542,8 @@ to the desired length, with the maximum length being 256. For example with
 this:
 
     -Accflags='-DSBOX_MAX_LEN=128'
+
+=for apidoc Amn|U32|SBOX32_MAX_LEN
 
 As of Perl 5.18 the order returned by keys(), values(), and each() is
 non-deterministic and distinct per hash, and the insert order for
@@ -555,6 +563,10 @@ or
 
     -Accflags='-DPERL_PERTURB_KEYS_DETERMINISTIC'
 
+=for apidoc Amnh;||PERL_PERTURB_KEYS_DETERMINISTIC
+=for apidoc_item ||PERL_PERTURB_KEYS_DISABLED
+=for apidoc_item ||PERL_PERTURB_KEYS_RANDOM
+
 Since Perl 5.18 the seed used for the hash function is randomly selected
 at process start, which can be overridden by specifying a seed by setting
 the PERL_HASH_SEED environment variable. Be aware that
@@ -572,6 +584,8 @@ You can change this behavior so that your perl is built with a hard coded
 seed with the define C<NO_HASH_SEED> by providing to Configure
 
     -Accflags='-DNO_HASH_SEED'
+
+=for apidoc Amnh||NO_HASH_SEED
 
 Note that if you do this you should modify the code in hv_func.h to specify
 your own key. In the future this define may be renamed and replaced with one
@@ -609,6 +623,8 @@ settings.
 =over 2
 
 =item PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT
+
+=for apidoc Amnh||PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT
 
 This define is used to control the default maximum number of nested
 eval/BEGIN statements, and in this context require should be
@@ -916,6 +932,8 @@ installation, perhaps in a strange place:
     sh Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
 
 =item APPLLIB_EXP
+
+=for apidoc Amnh||APPLLIB_EXP
 
 There is one other way of adding paths to @INC at perl build time, and
 that is by setting the APPLLIB_EXP C pre-processor token to a colon-
@@ -1391,6 +1409,8 @@ default is set.
 
 =item -DPERL_POLLUTE_MALLOC
 
+=for apidoc Amnh||PERL_POLLUTE_MALLOC
+
 NOTE: This flag is enabled automatically on some platforms if you just
 run Configure to accept all the defaults.
 
@@ -1409,6 +1429,8 @@ does not allow its malloc functions to be fully replaced with custom
 versions.
 
 =item -DPERL_DEBUGGING_MSTATS
+
+=for apidoc Amnh||PERL_DEBUGGING_MSTATS
 
 This flag enables debugging mstats, which is required to use the
 Devel::Peek::mstat() function. You cannot enable this unless you are
