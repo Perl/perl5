@@ -22,6 +22,8 @@ my $c = open_new('keywords.c', '>',
 
 my %by_strength;
 
+print $h "#ifdef PERL_CORE\n";
+
 my $keynum = 0;
 while (<DATA>) {
     chop;
@@ -29,9 +31,11 @@ while (<DATA>) {
     next if /^#/;
     my ($strength, $keyword) = /^([- +])([A-Z_a-z2]+)/;
     die "Bad line '$_'" unless defined $strength;
-    print $h tab(5, "#define KEY_$keyword"), $keynum++, "\n";
+    print $h tab(5, "#  define KEY_$keyword"), $keynum++, "\n";
     push @{$by_strength{$strength}}, $keyword;
 }
+
+print $h "#endif\n";
 
 # If this hash changes, make sure the equivalent hash in
 # lib/B/Deparse.pm (%feature_keywords) is also updated.
