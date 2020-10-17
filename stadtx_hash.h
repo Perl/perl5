@@ -5,7 +5,7 @@
 #define DEBUG_STADTX_HASH 0
 #endif
 
-#ifndef PERL_SEEN_HV_FUNC_H
+#ifndef PERL_SEEN_HV_FUNC_H_
 
 #if !defined(U64)
     #include <stdint.h>

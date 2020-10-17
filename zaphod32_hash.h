@@ -38,7 +38,7 @@
 #endif
 #endif
 
-#ifndef PERL_SEEN_HV_FUNC_H
+#ifndef PERL_SEEN_HV_FUNC_H_
 #if !defined(U64)
 #include <stdint.h>
 #define U64 uint64_t

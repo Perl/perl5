@@ -6,8 +6,8 @@
  * If USE_HASH_SEED is defined, hash randomisation is done by default
  * (see also perl.c:perl_parse() and S_init_tls_and_interp() and util.c:get_hash_seed())
  */
-#ifndef PERL_SEEN_HV_FUNC_H /* compile once */
-#define PERL_SEEN_HV_FUNC_H
+#ifndef PERL_SEEN_HV_FUNC_H_ /* compile once */
+#define PERL_SEEN_HV_FUNC_H_
 #include "hv_macro.h"
 
 #if !( 0 \
