@@ -13,6 +13,8 @@
  * Any changes made here will be lost!
  */
 
+#if defined(PERL_CORE) || defined(PERL_EXT)
+
 #define Perl_pp_scalar Perl_pp_null
 #define Perl_pp_padany Perl_unimplemented_op
 #define Perl_pp_regcmaybe Perl_pp_null
@@ -138,6 +140,9 @@
 #define Perl_pp_sgrent Perl_pp_ehostent
 #define Perl_pp_egrent Perl_pp_ehostent
 #define Perl_pp_custom Perl_unimplemented_op
+
+#endif /* End of if defined(PERL_CORE) || defined(PERL_EXT) */
+
 START_EXTERN_C
 
 #ifndef DOINIT

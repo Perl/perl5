@@ -17,6 +17,7 @@
 # This script is normally invoked from regen.pl.
 
 use strict;
+my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
     # Get function prototypes
@@ -917,6 +918,7 @@ require './regen/op_private';
 #use Data::Dumper;
 #print Dumper \%LABELS, \%DEFINES, \%FLAGS, \%BITFIELDS;
 
+print $oc "#$restrict_to_core\n\n";
 
 # Emit defines.
 
@@ -954,6 +956,7 @@ require './regen/op_private';
     # If the last op was conditional, we need to close it out:
     unimplemented();
 }
+print $oc "\n#endif /* End of $restrict_to_core */\n\n";
 
 print $on "typedef enum opcode {\n";
 
