@@ -8,7 +8,8 @@
  *
  */
 
-#ifndef PERL_REGCOMP_H_
+#if ! defined(PERL_REGCOMP_H_) && (   defined(PERL_CORE)            \
+                                   || defined(PERL_EXT_RE_BUILD))
 #define PERL_REGCOMP_H_
 
 #include "regcharclass.h"
