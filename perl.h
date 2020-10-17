@@ -4229,6 +4229,25 @@ Cast an NV to UV while avoiding undefined C behavior
 #define U_I(what) ((unsigned int)U_32(what))
 #define U_L(what) U_32(what)
 
+/*
+=for apidoc_section Integer configuration values
+=for apidoc Amn|IV|IV_MAX
+The largest signed integer that fits in an IV on this platform.
+
+=for apidoc Amn|IV|IV_MIN
+The negative signed integer furthest away from 0 that fits in an IV on this
+platform.
+
+=for apidoc Amn|UV|UV_MAX
+The largest unsigned integer that fits in a UV on this platform.
+
+=for apidoc Amn|UV|UV_MIN
+The smallest unsigned integer that fits in a UV on this platform.  It should
+equal zero.
+
+=cut
+*/
+
 #ifdef HAS_SIGNBIT
 #  ifndef Perl_signbit
 #    define Perl_signbit signbit
