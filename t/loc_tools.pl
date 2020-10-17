@@ -186,7 +186,7 @@ sub valid_locale_categories() {
     return @platform_categories;
 }
 
-sub locales_enabled(;$) {
+sub locales_enabled {
     # Returns 0 if no locale handling is available on this platform; otherwise
     # 1.
     #
@@ -245,8 +245,13 @@ sub locales_enabled(;$) {
         my @local_categories_copy;
 
         if (ref $categories_ref) {
-            @local_categories_copy = @$$categories_ref;
-            $return_categories_numbers = 1;
+            if (ref $categories_ref eq 'ARRAY') {
+                @local_categories_copy = @$categories_ref;
+            }
+            else {
+                @local_categories_copy = @$$categories_ref;
+                $return_categories_numbers = 1;
+            }
         }
         else {  # Single category passed in
             @local_categories_copy = $categories_ref;
