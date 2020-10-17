@@ -237,7 +237,7 @@ Returns the pad name as a mortal SV.
 =for apidoc m|bool|PadnameIsOUR|PADNAME * pn
 Whether this is an "our" variable.
 
-=for apidoc m|HV *|PadnameOURSTASH
+=for apidoc m|HV *|PadnameOURSTASH|PADNAME * pn
 The stash in which this "our" variable was declared.
 
 =for apidoc m|bool|PadnameOUTER|PADNAME * pn
