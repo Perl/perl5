@@ -874,10 +874,18 @@ Example usage:
 #   define BYTEORDER 0x1234
 #endif
 
+/*
+=for apidoc Amn#||ASCIIish
+
+A preprocessor symbol that is defined iff the system is an ASCII platform; this
+symbol would not be defined on C<L</EBCDIC>> platforms.
+
+=cut
+*/
 #if 'A' == 65 && 'I' == 73 && 'J' == 74 && 'Z' == 90
-#define ASCIIish
+#  define ASCIIish
 #else
-#undef  ASCIIish
+#  undef  ASCIIish
 #endif
 
 /*
