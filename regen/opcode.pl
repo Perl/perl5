@@ -1234,6 +1234,16 @@ sub generate_opnames_h_opcode_enum {
 
     print "\t", tab(3,"OP_max"), "\n";
     print "} opcode;\n";
+    print <<~EOT;
+
+        /*
+        =for apidoc Ay||opcode
+        An enum of all the legal Perl opcodes, defined in F<opnames.h>
+
+        =cut
+        */
+        EOT
+
     print "\n#define MAXO ", scalar @ops, "\n";
     print "#define OP_FREED MAXO\n";
 }
