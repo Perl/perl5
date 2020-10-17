@@ -132,25 +132,26 @@ foreach my $d ("x", "\0") {     # Try both printable and NUL delimiters
     } while ($trunc_dest_len > 0);
 }
 
-{
-    # Repeat a few of the tests with a backslash delimiter, which means there
-    # is no possibiliby of an escape
+# Repeat a few of the tests with a backslash delimiter, which means there
+# is no possibiliby of an escape.  And this escape-less form can be used to
+# also do a general test on 'delimcpy_no_escape'
+foreach my $d ("x", "\0", '\\') {
+    for my $func (qw(delimcpy delimcpy_no_escape)) {
+        next if $func eq 'delimcpy' && $d ne '\\';
+        my $test_func = "test_$func";
 
-        my $d = "\\";
         my $source = $ib;
         my $source_len = 1;
         my $should_be = $source;
 
-        pass 'delimiter is a backslash for the rest of the tests';
-
-        $ret = test_delimcpy($source, $source_len, $d, $source_len, $source_len, $poison);
+        $ret = eval "$test_func(\$source, \$source_len, \$d, \$source_len, \$source_len, \$poison)";
         is($ret->[0], expected($source, $source_len, $poison, $source_len),
-           "delimcpy works when there is no delimiter at all");
+           "$func works when there is no delimiter at all");
         is($ret->[1], $source_len, "Destination length is correct");
         is($ret->[2], 1, "Source advance is correct");
 
         $source .= $d;
-        $ret = test_delimcpy($source, $source_len, $d, $source_len, $source_len, $poison);
+        $ret = eval "$test_func(\$source, \$source_len, \$d, \$source_len, \$source_len, \$poison)";
         is($ret->[0], expected($source, $source_len, $poison, $source_len),
         "Works when delimiter is just beyond the examined portion");
         is($ret->[1], $source_len, "Destination length is correct");
@@ -158,7 +159,7 @@ foreach my $d ("x", "\0") {     # Try both printable and NUL delimiters
 
         # Delimiter in first byte
         my $actual_dest_len = 5;
-        $ret = test_delimcpy($d, 1, $d, $actual_dest_len, $actual_dest_len, $poison);
+        $ret = eval "$test_func(\$d, 1, \$d, \$actual_dest_len, \$actual_dest_len, \$poison)";
         is($ret->[0], "\0" . $poison x ($actual_dest_len - 1),
         "Copied correctly when delimiter is first character");
         is($ret->[1], 0, "0 bytes copied");
@@ -169,23 +170,24 @@ foreach my $d ("x", "\0") {     # Try both printable and NUL delimiters
         my $with_NULL = $source . "\0";
         $source .= $d . ($ib x 7);
         $source_len = length $source;
-        $ret = test_delimcpy($source, $source_len, $d, $source_len, $source_len, $poison);
+        $ret = eval "$test_func(\$source, \$source_len, \$d, \$source_len, \$source_len, \$poison)";
         is($ret->[0], expected($with_NULL, $len_sans_delim + 1, $poison, $source_len),
-           "delimcpy works when delim is in middle of source, plenty of room");
+           "$func works when delim is in middle of source, plenty of room");
         is($ret->[1], $len_sans_delim, "Destination length is correct");
         is($ret->[2], $len_sans_delim, "Source advance is correct");
 
-        $ret = test_delimcpy($source, $source_len, $d, $source_len, $len_sans_delim, $poison);
+        $ret = eval "$test_func(\$source, \$source_len, \$d, \$source_len, \$len_sans_delim, \$poison)";
         is($ret->[0], expected($source, $len_sans_delim, $poison, $source_len),
-           "delimcpy works when delim is in middle of source; no room for safety NUL");
+           "$func works when delim is in middle of source; no room for safety NUL");
         is($ret->[1], $len_sans_delim, "Destination length is correct");
         is($ret->[2], $len_sans_delim, "Source advance is correct");
 
-        $ret = test_delimcpy($source, $source_len, $d, $source_len, $len_sans_delim - 1, $poison);
+        $ret = eval "$test_func(\$source, \$source_len, \$d, \$source_len, \$len_sans_delim - 1, \$poison)";
         is($ret->[0], expected($source, $len_sans_delim - 1, $poison, $source_len),
-           "delimcpy works when not enough space for copy");
+           "$func works when not enough space for copy");
         is($ret->[1], $failure_return, "Destination length is correct");
         is($ret->[2], $len_sans_delim, "Source advance is correct");
+    }
 }
 
 done_testing();

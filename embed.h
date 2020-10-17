@@ -927,6 +927,7 @@
 #define cntrl_to_mnemonic	Perl_cntrl_to_mnemonic
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define delimcpy_no_escape	Perl_delimcpy_no_escape
 #define do_uniprop_match	Perl_do_uniprop_match
 #define get_and_check_backslash_N_name(a,b,c,d)	Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
 #define get_deprecated_property_msg	Perl_get_deprecated_property_msg
@@ -1282,7 +1283,6 @@
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
 #define defelem_target(a,b)	Perl_defelem_target(aTHX_ a,b)
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
-#define delimcpy_no_escape	Perl_delimcpy_no_escape
 #define die_unwind(a)		Perl_die_unwind(aTHX_ a)
 #define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)

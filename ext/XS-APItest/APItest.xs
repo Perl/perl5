@@ -6821,6 +6821,33 @@ test_delimcpy(SV * from_sv, STRLEN trunc_from, char delim, STRLEN to_len, STRLEN
     OUTPUT:
         RETVAL
 
+AV *
+test_delimcpy_no_escape(SV * from_sv, STRLEN trunc_from, char delim, STRLEN to_len, STRLEN trunc_to, char poison = '?')
+    PREINIT:
+        char * from;
+        AV *av;
+        I32 retlen;
+        char * from_pos_after_copy;
+        char * to;
+    CODE:
+        from = SvPV_nolen(from_sv);
+        Newx(to, to_len, char);
+	PoisonWith(to, to_len, char, poison);
+        assert(trunc_from <= SvCUR(from_sv));
+        /* trunc_to allows us to throttle the output size available */
+        assert(trunc_to <= to_len);
+        from_pos_after_copy = delimcpy_no_escape(to, to + trunc_to,
+                                       from, from + trunc_from,
+                                       delim, &retlen);
+        av = newAV();
+        av_push(av, newSVpvn(to, to_len));
+        av_push(av, newSVuv(retlen));
+        av_push(av, newSVuv(from_pos_after_copy - from));
+        Safefree(to);
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
 SV *
 test_Gconvert(SV * number, SV * num_digits)
     PREINIT:
