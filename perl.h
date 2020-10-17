@@ -114,9 +114,9 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 #undef END_EXTERN_C
 #undef EXTERN_C
 #ifdef __cplusplus
-#  define START_EXTERN_C extern "C" {
-#  define END_EXTERN_C }
 #  define EXTERN_C extern "C"
+#  define START_EXTERN_C EXTERN_C {
+#  define END_EXTERN_C }
 #else
 #  define START_EXTERN_C
 #  define END_EXTERN_C
@@ -3946,7 +3946,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 #ifndef PERL_CALLCONV
 #  ifdef __cplusplus
-#    define PERL_CALLCONV extern "C"
+#    define PERL_CALLCONV  EXTERN_C
 #  else
 #    define PERL_CALLCONV
 #  endif
