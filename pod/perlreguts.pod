@@ -111,6 +111,8 @@ C<regnode> is the smallest struct needed, and has a field structure which is
 shared with all the other larger structures.  (Outside this document, the term
 "regnode" is sometimes used to mean "regop", which could be confusing.)
 
+=for apidoc Cyh||regnode
+
 The "next" pointers of all regops except C<BRANCH> implement concatenation;
 a "next" pointer with a C<BRANCH> on both ends of it is connecting two
 alternatives.  [Here we have one of the subtle syntax dependencies: an
