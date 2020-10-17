@@ -818,6 +818,9 @@ struct subst {
     void *	sbu_rxres;
     REGEXP *	sbu_rx;
 };
+
+#ifdef PERL_CORE
+
 #define sb_iters	cx_u.cx_subst.sbu_iters
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
 #define sb_rflags	cx_u.cx_subst.sbu_rflags
@@ -831,7 +834,6 @@ struct subst {
 #define sb_rxres	cx_u.cx_subst.sbu_rxres
 #define sb_rx		cx_u.cx_subst.sbu_rx
 
-#ifdef PERL_CORE
 #  define CX_PUSHSUBST(cx) CXINC, cx = CX_CUR(),		        \
 	cx->blk_oldsaveix = oldsave,				        \
 	cx->sb_iters		= iters,				\
