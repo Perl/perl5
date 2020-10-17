@@ -3770,7 +3770,13 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #define PNfARG(pn) (int)1, (UV)PadnameLEN(pn), (void *)PadnamePV(pn)
 
 #ifdef PERL_CORE
-/* not used; but needed for backward compatibility with XS code? - RMB */
+/* not used; but needed for backward compatibility with XS code? - RMB
+=for apidoc AmnD|const char *|UVf
+
+Obsolete form of C<UVuf>, which you should convert to instead use
+
+=cut
+*/
 #  undef UVf
 #elif !defined(UVf)
 #  define UVf UVuf
