@@ -242,14 +242,14 @@
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                            \
 ( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                                 \
 	    ( ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ? 3 : 2 )\
 	: ( ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ) ? 2 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                            \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'H' ) ?                                 \
 	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'I' ) ?                             \
@@ -324,7 +324,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                            \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -381,7 +381,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                            \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -417,7 +417,7 @@
 ( ((e)-(s) > 5) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
-    : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )\
 : ((e)-(s) > 4) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -476,10 +476,10 @@
 	    ( ( ( ( ( ((const U8*)s)[2] & 0xD8 ) == 0x80 ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 5 : 0 )\
 	: ( ( ( ( 0xBD == ((const U8*)s)[1] ) && ( ( ( ((const U8*)s)[2] & 0xF8 ) == 0xA0 ) || ( ( ((const U8*)s)[2] & 0xFB ) == 0xB0 ) || ((const U8*)s)[2] == 0xBC ) ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 5 : 0 )\
     : 0 )                                                                   \
-: ((e)-(s) > 3) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
+: ((e)-(s) > 3) ? is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) )
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
 ( ( 0x81 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
@@ -506,7 +506,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
 ( ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
 	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
@@ -578,7 +578,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
 ( ( 0x81 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
@@ -593,7 +593,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
 ( ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
 	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
@@ -665,7 +665,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -739,7 +739,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                          \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -784,7 +784,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -844,11 +844,11 @@
 		: 0 )                                                       \
 	    : ( ( 0xCD == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
 	: 0 )                                                               \
-    : ( 0xCF == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+    : ( 0xCF == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                          \
 ( ((e)-(s) > 4) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -896,13 +896,13 @@
 		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
 	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
 	: ( ( ( 0xB9 == ((const U8*)s)[1] ) && ( 0xCD == ((const U8*)s)[2] ) ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
-    : ( 0xCF == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )\
-: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )
+    : ( 0xCF == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) )\
+: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e) )
 
 
 /*** GENERATED CODE ***/
 #define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
-( ((e)-(s) > 5) ? what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e) )
+( ((e)-(s) > 5) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
 
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
@@ -1374,14 +1374,14 @@
 	\p{_Perl_Quotemeta}
 */
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high_part0(s)                                          \
+#define is_QUOTEMETA_high_part0_(s)                                         \
 ( ( 0x63 == ((const U8*)s)[1] ) ?                                           \
 	( ( 0x41 == ((const U8*)s)[2] ) ? 3 : 0 )                           \
     : ( ( 0x71 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x63, 0x64) ) ) ? 3 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high_part1(s)                                          \
+#define is_QUOTEMETA_high_part1_(s)                                         \
 ( ( 0xBE == ((const U8*)s)[0] ) ?                                           \
     ( ( ( 0x41 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x52, 0x55) ) ) ? 3 : 0 )\
 : ( 0xCA == ((const U8*)s)[0] ) ?                                           \
@@ -1441,7 +1441,7 @@
     ( ( 0x51 == ((const U8*)s)[1] ) ?                                       \
 	( ( 0x73 == ((const U8*)s)[2] ) ? 3 : 0 )                           \
     : ( ( 0x52 == ((const U8*)s)[1] ) && ( 0x41 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
-: ( 0xBC == ((const U8*)s)[0] ) ? is_QUOTEMETA_high_part0(s) : is_QUOTEMETA_high_part1(s) )
+: ( 0xBC == ((const U8*)s)[0] ) ? is_QUOTEMETA_high_part0_(s) : is_QUOTEMETA_high_part1_(s) )
 
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
@@ -1449,12 +1449,12 @@
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                            \
 ( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 3 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                            \
 ( ( 0x8F == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x73 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x8F == ((const U8*)s)[2] ) ?                               \
@@ -1529,7 +1529,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                            \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -1586,7 +1586,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                            \
 ( ((e)-(s) > 3) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -1679,11 +1679,11 @@
 	: ( ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ) ? 2 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
 	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
-    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )\
-: ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )\
+: ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) )
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
 ( ( 0x52 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( 0x46 == ((const U8*)s)[2] ) ?                               \
 		( ( ( ( 0xB8 == ((const U8*)s)[3] ) && ( 0x53 == ((const U8*)s)[4] ) ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x587 : 0 )\
@@ -1697,7 +1697,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x67 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -1758,7 +1758,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
 ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                                 \
 	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
 	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
@@ -1767,7 +1767,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                                 \
 	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
@@ -1845,11 +1845,11 @@
 		: 0 )                                                       \
 	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
 	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB4 == ((const U8*)s)[2] ) ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
-    : ( 0xB8 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+    : ( 0xB8 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                          \
 ( ( 0x42 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x62 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
@@ -1864,7 +1864,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                          \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x67 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -1925,7 +1925,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -1990,7 +1990,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                          \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -2040,7 +2040,7 @@
 ( ((e)-(s) > 5) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
-    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) )\
 : ((e)-(s) > 4) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -2090,8 +2090,8 @@
 		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
 	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
 	: ( ( ( 0x68 == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
-    : ( 0xB5 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )\
-: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e) )
+    : ( 0xB5 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e) )\
+: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
 
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
@@ -2552,7 +2552,7 @@
 	\p{_Perl_Quotemeta}
 */
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high_part0(s)                                          \
+#define is_QUOTEMETA_high_part0_(s)                                         \
 ( ( 0x41 == ((const U8*)s)[1] || inRANGE_helper_(U8, ((const U8*)s)[1], 0x54, 0x59) || 0x5F == ((const U8*)s)[1] || inRANGE_helper_(U8, ((const U8*)s)[1], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[1], 0x70, 0x72) ) ?\
 	( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x59) || 0x5F == ((const U8*)s)[2] || inRANGE_helper_(U8, ((const U8*)s)[2], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x72) ) ? 3 : 0 )\
     : ( 0x42 == ((const U8*)s)[1] ) ?                                       \
@@ -2565,7 +2565,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high_part1(s)                                          \
+#define is_QUOTEMETA_high_part1_(s)                                         \
 ( ( 0xCB == ((const U8*)s)[0] ) ?                                           \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x41, 0x43) || inRANGE_helper_(U8, ((const U8*)s)[1], 0x49, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[1], 0x51, 0x59) || 0x5F == ((const U8*)s)[1] || inRANGE_helper_(U8, ((const U8*)s)[1], 0x62, 0x68) || inRANGE_helper_(U8, ((const U8*)s)[1], 0x70, 0x72) ) ?\
 	( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x59) || 0x5F == ((const U8*)s)[2] || inRANGE_helper_(U8, ((const U8*)s)[2], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x72) ) ? 3 : 0 )\
@@ -2619,7 +2619,7 @@
     : ( ( 0x70 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x62, 0x63) ) ) ? 3 : 0 )\
 : ( 0xBE == ((const U8*)s)[0] ) ?                                           \
     ( ( ( 0x41 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x52, 0x55) ) ) ? 3 : 0 )\
-: ( 0xCA == ((const U8*)s)[0] ) ? is_QUOTEMETA_high_part0(s) : is_QUOTEMETA_high_part1(s) )
+: ( 0xCA == ((const U8*)s)[0] ) ? is_QUOTEMETA_high_part0_(s) : is_QUOTEMETA_high_part1_(s) )
 
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
@@ -2627,12 +2627,12 @@
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                            \
 ( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 3 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                            \
 ( ( 0x8E == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x72 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x8E == ((const U8*)s)[2] ) ?                               \
@@ -2707,7 +2707,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                            \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -2764,7 +2764,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                             \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                            \
 ( ((e)-(s) > 3) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -2857,11 +2857,11 @@
 	: ( ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ) ? 2 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
 	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
-    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )\
-: ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )\
+: ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) )
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
 ( ( 0x52 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( 0x46 == ((const U8*)s)[2] ) ?                               \
 		( ( ( ( 0xB7 == ((const U8*)s)[3] ) && ( 0x53 == ((const U8*)s)[4] ) ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x587 : 0 )\
@@ -2875,7 +2875,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x66 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -2936,7 +2936,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
 ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                                 \
 	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
 	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
@@ -2945,7 +2945,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                                 \
 	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
@@ -3023,11 +3023,11 @@
 		: 0 )                                                       \
 	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
 	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB3 == ((const U8*)s)[2] ) ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
-    : ( 0xB7 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+    : ( 0xB7 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                          \
 ( ( 0x42 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xAD == ((const U8*)s)[2] ) && ( 0x5F == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
@@ -3042,7 +3042,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                          \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x66 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -3103,7 +3103,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -3168,7 +3168,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e)                           \
+#define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                          \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -3218,7 +3218,7 @@
 ( ((e)-(s) > 5) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
-    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) )\
 : ((e)-(s) > 4) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -3268,8 +3268,8 @@
 		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
 	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
 	: ( ( ( 0x67 == ((const U8*)s)[1] ) && ( 0xAF == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
-    : ( 0xB4 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )\
-: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e) )
+    : ( 0xB4 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e) )\
+: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
 
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
@@ -3617,6 +3617,6 @@
  * ee0dd174fd5b158d82dfea95d7d822ca0bfcd490182669353dca3ab39a8ee807 lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
- * f0ac417314b8da8e05d386ca3d0d8074e38ecd9dc77a7d966aa48ec4ec247e2a regen/regcharclass.pl
+ * 491175747e1f1e52ce6d6fbcbd7ad75fc5c7a77eec49c0b6fff46fc9a31ca089 regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

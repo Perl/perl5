@@ -1270,11 +1270,11 @@ sub _render {
     my $str= "$lb$cond ?$yes$ind: $no$rb";
     if (length $str > 6000) {
         push @$submacros, sprintf "#define $def\n( %s )", "_part"
-                                  . (my $yes_idx= 0+@$submacros), $yes;
+                                  . (my $yes_idx= 0+@$submacros) . "_", $yes;
         push @$submacros, sprintf "#define $def\n( %s )", "_part"
-                                  . (my $no_idx= 0+@$submacros), $no;
-        return sprintf "%s%s ? $def : $def%s", $lb, $cond, "_part$yes_idx",
-                                                            "_part$no_idx", $rb;
+                                  . (my $no_idx= 0+@$submacros) . "_", $no;
+        return sprintf "%s%s ? $def : $def%s", $lb, $cond,
+                                    "_part${yes_idx}_", "_part${no_idx}_", $rb;
     }
     return $str;
 }
