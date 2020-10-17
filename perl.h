@@ -28,8 +28,24 @@
 #   include "config.h"
 #endif
 
-/* this is used for functions which take a depth trailing
- * argument under debugging */
+/*
+=for apidoc_section $embedding
+=for apidoc CmnW ||_aDEPTH
+Some functions when compiled under DEBUGGING take an extra final argument named
+C<depth>, indicating the C stack depth.  This argument is omitted otherwise.
+This macro expands to either S<C<, depth>> under DEBUGGING, or to nothing at
+all when not under DEBUGGING, reducing the number of C<#ifdef>'s in the code.
+
+The program is responsible for maintaining the correct value for C<depth>.
+
+=for apidoc CyW ||_pDEPTH
+This is used in the prototype declarations for functions that take a L</C<_aDEPTH>>
+final parameter, much like L<C<pTHX_>|perlguts/Background and MULTIPLICITY>
+is used in functions that take a thread context initial parameter.
+
+=cut
+ */
+
 #ifdef DEBUGGING
 #  define _pDEPTH ,U32 depth
 #  define _aDEPTH ,depth
