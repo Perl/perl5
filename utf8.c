@@ -3335,10 +3335,8 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
                     }
                     goto cases_to_self;
                 }
-#ifdef HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C
-                if (UNLIKELY(uv1
-                    > HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C))
-                {
+#ifdef HIGHEST_CASE_CHANGING_CP
+                if (UNLIKELY(uv1 > HIGHEST_CASE_CHANGING_CP)) {
 
                     goto cases_to_self;
                 }

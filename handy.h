@@ -1616,16 +1616,21 @@ END_EXTERN_C
 #   endif
 
     /* Participates in a single-character fold with a character above 255 */
-#   define _HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_SIMPLE_FOLD)))
+#   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#     define HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(c)                          \
+        ((   ! cBOOL(FITS_IN_8_BITS(c)))                                    \
+          || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_SIMPLE_FOLD)))
+
+#   define IS_NON_FINAL_FOLD(c)   _generic_isCC(c, _CC_NON_FINAL_FOLD)
+#   define IS_IN_SOME_FOLD_L1(c)  _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
+#  endif
 
     /* Like the above, but also can be part of a multi-char fold */
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
+#   define HAS_NONLATIN1_FOLD_CLOSURE(c)                                    \
+      (   (! cBOOL(FITS_IN_8_BITS(c)))                                      \
+       || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
 
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
-#   define _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
-                                           _generic_isCC(c, _CC_NON_FINAL_FOLD)
-#   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
-                                           _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
 
 /* is c a control character for which we have a mnemonic? */
 #  if defined(PERL_CORE) || defined(PERL_EXT)

@@ -162,9 +162,15 @@ foreach my $charset (get_supported_code_pages()) {
     for my $i (0x20 .. 0x7E) {
         $max_PRINT_A = $a2n[$i] if $a2n[$i] > $max_PRINT_A;
     }
-    printf $out_fh "#   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0x%02X   /* The max code point that isPRINT_A */\n", $max_PRINT_A;
+    $max_PRINT_A = sprintf "0x%02X", $max_PRINT_A;
+    print $out_fh <<"EOT";
 
-    print $out_fh "\n" . get_conditional_compile_line_end();
+#    ifdef PERL_IN_REGCOMP_C
+#      define MAX_PRINT_A  $max_PRINT_A   /* The max code point that isPRINT_A */
+#    endif
+EOT
+
+    print $out_fh get_conditional_compile_line_end();
 
 }
 
@@ -178,9 +184,14 @@ for (my $i = 0; $i < @other_invlist; $i += 2) {
               : 0x110000)
               - $other_invlist[$i];
 }
-printf $out_fh "\n/* The number of code points not matching \\pC */\n"
-             . "#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  %d\n",
-            0x110000 - $count;
+$count = 0x110000 - $count;
+print $out_fh <<~"EOT";
+
+    /* The number of code points not matching \\pC */
+    #ifdef PERL_IN_REGCOMP_C
+    #  define NON_OTHER_COUNT  $count
+    #endif
+    EOT
 
 # If this release has both the CWCM and CWCF properties, find the highest code
 # point which changes under any case change.  We can use this to short-circuit
@@ -192,9 +203,14 @@ if (@cwcm) {
         my $max = ($cwcm[-1] < $cwcf[-1])
                   ? $cwcf[-1]
                   : $cwcm[-1];
-        printf $out_fh "\n/* The highest code point that has any type of case change */\n"
-             . "#define HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C  0x%X\n",
-            $max - 1;
+        $max = sprintf "0x%X", $max - 1;
+        print $out_fh <<~"EOS";
+
+            /* The highest code point that has any type of case change */
+            #ifdef PERL_IN_UTF8_C
+            #  define HIGHEST_CASE_CHANGING_CP  $max
+            #endif
+            EOS
     }
 }
 

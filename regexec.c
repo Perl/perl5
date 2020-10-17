@@ -118,8 +118,6 @@ static const char non_utf8_target_but_utf8_required[]
     goto target;                                                         \
 } STMT_END
 
-#define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
-
 #ifndef STATIC
 #define	STATIC	static
 #endif
