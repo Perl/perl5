@@ -1011,6 +1011,12 @@ struct stackinfo {
 
 };
 
+/*
+=for apidoc Ay||PERL_SI
+Use this typedef to declare variables that are to hold C<struct stackinfo>.
+
+=cut
+*/
 typedef struct stackinfo PERL_SI;
 
 #define cxstack		(PL_curstackinfo->si_cxstack)
