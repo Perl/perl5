@@ -2103,7 +2103,7 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
      #include "perl.h"
      #include "XSUB.h"
 
-     #include <rpc/rpc.h>
+     #include <tirpc/rpc/rpc.h>
 
      typedef struct netconfig Netconfig;
 
@@ -2162,6 +2162,8 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
      $a = rpcb_gettime("poplar");
      print "time = $a\n";
      print "netconf = $netconf\n";
+
+In Makefile.PL add -ltirpc and -I/usr/include/tirpc.
 
 =head1 CAVEATS
 
