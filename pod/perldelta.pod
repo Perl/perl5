@@ -142,6 +142,8 @@ L<Pod::Usage> has been upgraded from version 1.70 to 2.01.
 
 L<re> has been upgraded from version 0.40 to 0.41.
 
+(See under L</Internal Changes> for more information.)
+
 =item *
 
 L<Storable> has been upgraded from version 3.22 to 3.23.
@@ -192,9 +194,9 @@ L<XS::APItest> has been upgraded from version 1.11 to 1.12.
 
 =head2 Changes to Existing Documentation
 
-We have attempted to update the documentation to reflect the changes
-listed in this document.  If you find any we have missed, open an issue
-at L<https://github.com/Perl/perl5/issues>.
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, open an issue at
+L<https://github.com/Perl/perl5/issues>.
 
 =head1 Configuration and Compilation
 
@@ -202,14 +204,26 @@ at L<https://github.com/Perl/perl5/issues>.
 
 =item *
 
-XXX
+Added the F<Configure> option B<-Dusedefaultstrict> to enable strict by default
+in perl programs when not invoked with B<-e> or B<-E>.  This is a diagnostic
+tool for development.
+
+=item *
+
+We now trap SIGBUS when F<Configure> checks for C<va_copy>.
+
+On several systems the attempt to determine if we need C<va_copy> or similar
+results in a SIGBUS instead of the expected SIGSEGV, which previously caused a
+core dump.
+
+[L<GH #18148|https://github.com/Perl/perl5/issues/18148>]
 
 =back
 
 =head1 Testing
 
-Tests were added and changed to reflect the other additions and changes
-in this release.
+Tests were added and changed to reflect the other additions and changes in this
+release.
 
 =head1 Platform Support
 
@@ -217,9 +231,24 @@ in this release.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+The same manifest is now used for Visual C++ and gcc builds.
+
+Previously, MSVC builds were using the B</manifestdependency> flag instead of
+embedding F<perlexe.manifest>, which caused issues such as C<GetVersionEx()>
+returning the wrong version number on Windows 10.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The L<re> module has a new function C<optimization>, which can return a hashref
+of optimization data discovered about a compiled regexp.
 
 =back
 
@@ -229,7 +258,10 @@ XXX
 
 =item *
 
-XXX
+Fixed a bug in which some regexps with recursive subpatterns matched
+incorrectly.
+
+[L<GH #18096|https://github.com/Perl/perl5/issues/18096>]
 
 =back
 
@@ -241,8 +273,8 @@ XXX Generate this with:
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the perl bug database
-at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+If you find what you think is a bug, you might check the perl bug database at
+L<https://github.com/Perl/perl5/issues>.  There may also be information at
 L<http://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please open an issue at
@@ -251,13 +283,13 @@ tiny but sufficient test case.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a public issue tracker, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
