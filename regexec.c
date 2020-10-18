@@ -4451,7 +4451,7 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 #define CHRTEST_NOT_A_CP_2 -998
 
 static bool
-S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
+S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node, int *c1p,
         U8* c1_utf8, int *c2p, U8* c2_utf8, regmatch_info *reginfo)
 {
     /* This function determines if there are zero, one, two, or more characters
@@ -8681,7 +8681,7 @@ NULL
 		    if (! HAS_TEXT(text_node))
 			FIND_NEXT_IMPT(text_node);
 		    if (PL_regkind[OP(text_node)] == EXACT) {
-                        if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
+                        if (! S_setup_EXACTISH_ST(aTHX_
                            text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
                            reginfo))
                         {
@@ -8855,7 +8855,7 @@ NULL
 			ST.c1 = ST.c2 = CHRTEST_VOID;
 		    }
 		    else {
-                        if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
+                        if (! S_setup_EXACTISH_ST(aTHX_
                            text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
                            reginfo))
                         {
@@ -9860,7 +9860,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
         assert(STR_LENs(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRINGs(p)) : 1);
 
-        if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8,
+        if (S_setup_EXACTISH_ST(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8,
                                         reginfo))
         {
             if (c1 == CHRTEST_VOID) {
