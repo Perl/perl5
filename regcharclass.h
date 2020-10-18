@@ -239,7 +239,7 @@
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', 'a')
+	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*** GENERATED CODE ***/
 #define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
@@ -478,10 +478,436 @@
     : 0 )                                                                   \
 : ((e)-(s) > 3) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
 
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                           \
+( ( 0x81 == ((const U8*)s)[1] ) ?                                           \
+	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCC == ((const U8*)s)[2] ) ?                               \
+		( ( 0x88 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xCC == ((const U8*)s)[4] ) ?                       \
+			( ( 0x80 == ((const U8*)s)[5] ) ? 0x1FE2            \
+			: ( 0x81 == ((const U8*)s)[5] ) ? 0x3B0 : 0 )       \
+		    : ( ( 0xCD == ((const U8*)s)[4] ) && ( 0x82 == ((const U8*)s)[5] ) ) ? 0x1FE7 : 0 )\
+		: ( 0x93 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xCC == ((const U8*)s)[4] ) ?                       \
+			( ( 0x80 == ((const U8*)s)[5] ) ? 0x1F52            \
+			: ( 0x81 == ((const U8*)s)[5] ) ? 0x1F54 : 0x1F50 ) \
+		    : ( ( 0xCD == ((const U8*)s)[4] ) && ( 0x82 == ((const U8*)s)[5] ) ) ? 0x1F56 : 0x1F50 )\
+		: 0 )                                                       \
+	    : ( ( 0xCD == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x89 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xCE == ((const U8*)s)[4] ) && ( 0xB9 == ((const U8*)s)[5] ) ) ? 0x1FF7 : 0x1FF6 )\
+		: 0 )                                                       \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x8E == ((const U8*)s)[1] ) && ( 0xCE == ((const U8*)s)[2] ) ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                           \
+( ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
+	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
+	: ( 0xB4 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xD5 == ((const U8*)s)[2] ) ?                               \
+		( ( 0xA5 == ((const U8*)s)[3] ) ? 0xFB14                    \
+		: ( 0xAB == ((const U8*)s)[3] ) ? 0xFB15                    \
+		: ( 0xAD == ((const U8*)s)[3] ) ? 0xFB17                    \
+		: ( 0xB6 == ((const U8*)s)[3] ) ? 0xFB13 : 0 )              \
+	    : 0 )                                                           \
+	: ( ( ( 0xBE == ((const U8*)s)[1] ) && ( 0xD5 == ((const U8*)s)[2] ) ) && ( 0xB6 == ((const U8*)s)[3] ) ) ? 0xFB16 : 0 )\
+    : ( 0xE1 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xBC == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x80 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F80 : 0 )\
+	    : ( 0x81 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F81 : 0 )\
+	    : ( 0x82 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F82 : 0 )\
+	    : ( 0x83 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F83 : 0 )\
+	    : ( 0x84 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F84 : 0 )\
+	    : ( 0x85 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F85 : 0 )\
+	    : ( 0x86 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F86 : 0 )\
+	    : ( 0x87 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F87 : 0 )\
+	    : ( 0xA0 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F90 : 0 )\
+	    : ( 0xA1 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F91 : 0 )\
+	    : ( 0xA2 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F92 : 0 )\
+	    : ( 0xA3 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F93 : 0 )\
+	    : ( 0xA4 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F94 : 0 )\
+	    : ( 0xA5 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F95 : 0 )\
+	    : ( 0xA6 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F96 : 0 )\
+	    : ( ( ( 0xA7 == ((const U8*)s)[2] ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F97 : 0 )\
+	: ( 0xBD == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xA0 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA0 : 0 )\
+	    : ( 0xA1 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA1 : 0 )\
+	    : ( 0xA2 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA2 : 0 )\
+	    : ( 0xA3 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA3 : 0 )\
+	    : ( 0xA4 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA4 : 0 )\
+	    : ( 0xA5 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA5 : 0 )\
+	    : ( 0xA6 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA6 : 0 )\
+	    : ( 0xA7 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA7 : 0 )\
+	    : ( 0xB0 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FB2 : 0 )\
+	    : ( 0xB4 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FC2 : 0 )\
+	    : ( ( ( 0xBC == ((const U8*)s)[2] ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FF2 : 0 )\
+	: 0 )                                                               \
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                           \
+( ( 0x81 == ((const U8*)s)[1] ) ?                                           \
+	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCC == ((const U8*)s)[2] ) ?                               \
+		( ( 0x93 == ((const U8*)s)[3] ) ? 0x1F50 : 0 )              \
+	    : ( ( 0xCD == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x89 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FF6 : 0 )              \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x8E == ((const U8*)s)[1] ) && ( 0xCE == ((const U8*)s)[2] ) ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                           \
+( ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
+	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
+	: ( 0xB4 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xD5 == ((const U8*)s)[2] ) ?                               \
+		( ( 0xA5 == ((const U8*)s)[3] ) ? 0xFB14                    \
+		: ( 0xAB == ((const U8*)s)[3] ) ? 0xFB15                    \
+		: ( 0xAD == ((const U8*)s)[3] ) ? 0xFB17                    \
+		: ( 0xB6 == ((const U8*)s)[3] ) ? 0xFB13 : 0 )              \
+	    : 0 )                                                           \
+	: ( ( ( 0xBE == ((const U8*)s)[1] ) && ( 0xD5 == ((const U8*)s)[2] ) ) && ( 0xB6 == ((const U8*)s)[3] ) ) ? 0xFB16 : 0 )\
+    : ( 0xE1 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xBC == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x80 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F80 : 0 )\
+	    : ( 0x81 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F81 : 0 )\
+	    : ( 0x82 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F82 : 0 )\
+	    : ( 0x83 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F83 : 0 )\
+	    : ( 0x84 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F84 : 0 )\
+	    : ( 0x85 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F85 : 0 )\
+	    : ( 0x86 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F86 : 0 )\
+	    : ( 0x87 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F87 : 0 )\
+	    : ( 0xA0 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F90 : 0 )\
+	    : ( 0xA1 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F91 : 0 )\
+	    : ( 0xA2 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F92 : 0 )\
+	    : ( 0xA3 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F93 : 0 )\
+	    : ( 0xA4 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F94 : 0 )\
+	    : ( 0xA5 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F95 : 0 )\
+	    : ( 0xA6 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F96 : 0 )\
+	    : ( ( ( 0xA7 == ((const U8*)s)[2] ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1F97 : 0 )\
+	: ( 0xBD == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xA0 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA0 : 0 )\
+	    : ( 0xA1 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA1 : 0 )\
+	    : ( 0xA2 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA2 : 0 )\
+	    : ( 0xA3 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA3 : 0 )\
+	    : ( 0xA4 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA4 : 0 )\
+	    : ( 0xA5 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA5 : 0 )\
+	    : ( 0xA6 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA6 : 0 )\
+	    : ( 0xA7 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FA7 : 0 )\
+	    : ( 0xB0 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FB2 : 0 )\
+	    : ( 0xB4 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xCE == ((const U8*)s)[3] ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FC2 : 0 )\
+	    : ( ( ( 0xBC == ((const U8*)s)[2] ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 0x1FF2 : 0 )\
+	: 0 )                                                               \
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                           \
+( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
+	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'H' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'I' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x87 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8C == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05                  \
+	: ( ( 0xC5 == ((const U8*)s)[1] ) && ( 0xBF == ((const U8*)s)[2] ) ) ? 0xDF : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x88 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'W' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xC5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xBF == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'S' ) ? 0xDF                \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'T' ) ? 0xFB05              \
+	    : ( ( 0xC5 == ((const U8*)s)[2] ) && ( 0xBF == ((const U8*)s)[3] ) ) ? 0xDF : 0 )\
+	: 0 )                                                               \
+    : ( 0xCA == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0xBC == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xDF ) == 'N' ) ) ? 0x149 : 0 )\
+    : ( 0xCE == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xAC == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0xAE == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0xB1 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FB6 : 0 )              \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0xB7 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( ( ( 0xB9 == ((const U8*)s)[1] ) && ( 0xCD == ((const U8*)s)[2] ) ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+    : ( 0xCF == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x81 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCC == ((const U8*)s)[2] ) ?                               \
+		( ( 0x93 == ((const U8*)s)[3] ) ? 0x1F50 : 0 )              \
+	    : ( ( 0xCD == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x89 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FF6 : 0 )              \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x8E == ((const U8*)s)[1] ) && ( 0xCE == ((const U8*)s)[2] ) ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
+    : ( 0xD5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
+	: ( 0xB4 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xD5 == ((const U8*)s)[2] ) ?                               \
+		( ( 0xA5 == ((const U8*)s)[3] ) ? 0xFB14                    \
+		: ( 0xAB == ((const U8*)s)[3] ) ? 0xFB15                    \
+		: ( 0xAD == ((const U8*)s)[3] ) ? 0xFB17                    \
+		: ( 0xB6 == ((const U8*)s)[3] ) ? 0xFB13 : 0 )              \
+	    : 0 )                                                           \
+	: ( ( ( 0xBE == ((const U8*)s)[1] ) && ( 0xD5 == ((const U8*)s)[2] ) ) && ( 0xB6 == ((const U8*)s)[3] ) ) ? 0xFB16 : 0 )\
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                           \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
+	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'H' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'I' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x87 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8C == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05                  \
+	: ( ( 0xC5 == ((const U8*)s)[1] ) && ( 0xBF == ((const U8*)s)[2] ) ) ? 0xDF : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x88 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'W' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xC5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xBF == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'S' ) ? 0xDF                \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'T' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ( 0xCA == ((const U8*)s)[0] ) && ( 0xBC == ((const U8*)s)[1] ) ) && ( ( ((const U8*)s)[2] & 0xDF ) == 'N' ) ) ? 0x149 : 0 )\
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ? 0xFB00                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e)                           \
+( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
+	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'H' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'I' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x87 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8C == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05                  \
+	: ( ( 0xC5 == ((const U8*)s)[1] ) && ( 0xBF == ((const U8*)s)[2] ) ) ? 0xDF : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x88 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'W' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xC5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xBF == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'S' ) ? 0xDF                \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'T' ) ? 0xFB05              \
+	    : ( ( 0xC5 == ((const U8*)s)[2] ) && ( 0xBF == ((const U8*)s)[3] ) ) ? 0xDF : 0 )\
+	: 0 )                                                               \
+    : ( 0xCA == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0xBC == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xDF ) == 'N' ) ) ? 0x149 : 0 )\
+    : ( 0xCE == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xAC == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0xAE == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0xB1 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xCE == ((const U8*)s)[4] ) && ( 0xB9 == ((const U8*)s)[5] ) ) ? 0x1FB7 : 0x1FB6 )\
+		: 0 )                                                       \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0xB7 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xCE == ((const U8*)s)[4] ) && ( 0xB9 == ((const U8*)s)[5] ) ) ? 0x1FC7 : 0x1FC6 )\
+		: 0 )                                                       \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( 0xB9 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCC == ((const U8*)s)[2] ) ?                               \
+		( ( 0x88 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xCC == ((const U8*)s)[4] ) ?                       \
+			( ( 0x80 == ((const U8*)s)[5] ) ? 0x1FD2            \
+			: ( 0x81 == ((const U8*)s)[5] ) ? 0x390 : 0 )       \
+		    : ( ( 0xCD == ((const U8*)s)[4] ) && ( 0x82 == ((const U8*)s)[5] ) ) ? 0x1FD7 : 0 )\
+		: 0 )                                                       \
+	    : ( ( 0xCD == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+	: 0 )                                                               \
+    : ( 0xCF == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e)                           \
+( ((e)-(s) > 4) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
+	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'H' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'I' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x87 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8C == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05                  \
+	: ( ( 0xC5 == ((const U8*)s)[1] ) && ( 0xBF == ((const U8*)s)[2] ) ) ? 0xDF : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x88 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'W' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) ?                             \
+	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0x8A == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xC5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xBF == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'S' ) ? 0xDF                \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'T' ) ? 0xFB05              \
+	    : ( ( 0xC5 == ((const U8*)s)[2] ) && ( 0xBF == ((const U8*)s)[3] ) ) ? 0xDF : 0 )\
+	: 0 )                                                               \
+    : ( 0xCA == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0xBC == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xDF ) == 'N' ) ) ? 0x149 : 0 )\
+    : ( 0xCE == ((const U8*)s)[0] ) ?                                       \
+	( ( 0xAC == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0xAE == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0xB1 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FB6 : 0 )              \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0xB7 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xCD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x82 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
+	    : ( ( 0xCE == ((const U8*)s)[2] ) && ( 0xB9 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( ( ( 0xB9 == ((const U8*)s)[1] ) && ( 0xCD == ((const U8*)s)[2] ) ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+    : ( 0xCF == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )\
+: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
+( ((e)-(s) > 5) ? what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e) )
+
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', 'a')
+	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
 /*** GENERATED CODE ***/
 #define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
@@ -497,10 +923,34 @@
     : ( ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 'S', 'T') || inRANGE_helper_(U8, ((const U8*)s)[1], 's', 't') ) ) ? 2 : 0 )\
 : 0 )
 
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ? 0xFB00                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xDF ) == 'S' ) ? 0xDF                    \
+	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: 0 )
+
 /*
 	THREE_CHAR_FOLD: A three-character multi-char fold
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', '3')
+	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                   \
@@ -525,7 +975,7 @@
 /*
 	THREE_CHAR_FOLD: A three-character multi-char fold
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', '3')
+	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_latin1_safe(s,e)                                 \
@@ -534,7 +984,7 @@
 /*
 	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', 'h')
+	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                              \
@@ -606,7 +1056,7 @@
 /*
 	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', 'h')
+	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                            \
@@ -996,7 +1446,7 @@
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', 'a')
+	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*** GENERATED CODE ***/
 #define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
@@ -1232,10 +1682,421 @@
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )\
 : ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
 
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                           \
+( ( 0x52 == ((const U8*)s)[1] ) ?                                           \
+	    ( ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( ( 0xB8 == ((const U8*)s)[3] ) && ( 0x53 == ((const U8*)s)[4] ) ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x587 : 0 )\
+	    : ( 0x63 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB8 == ((const U8*)s)[3] ) && ( 0x52 == ((const U8*)s)[4] ) ) ? ( ( 0x46 == ((const U8*)s)[5] ) ? 0xFB14\
+			: ( 0x52 == ((const U8*)s)[5] ) ? 0xFB15            \
+			: ( 0x54 == ((const U8*)s)[5] ) ? 0xFB17            \
+			: ( 0x65 == ((const U8*)s)[5] ) ? 0xFB13 : 0 ) : 0 )\
+	    : ( ( ( ( 0x72 == ((const U8*)s)[2] ) && ( 0xB8 == ((const U8*)s)[3] ) ) && ( 0x52 == ((const U8*)s)[4] ) ) && ( 0x65 == ((const U8*)s)[5] ) ) ? 0xFB16 : 0 )\
+	: 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                           \
+( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
+	( ( 0x67 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F80 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F81 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F82 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F83 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F84 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F85 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F86 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB4 == ((const U8*)s)[3] ) ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F87 : 0 )\
+	: ( 0x68 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F90 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F91 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F92 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F93 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F94 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F95 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F96 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB4 == ((const U8*)s)[3] ) ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F97 : 0 )\
+	: ( 0x6A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA0 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA1 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA2 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA3 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA4 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA5 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA6 : 0 )\
+	    : ( 0x48 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA7 : 0 )\
+	    : ( 0x57 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FB2 : 0 )\
+	    : ( 0x63 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FC2 : 0 )\
+	    : ( ( ( 0x70 == ((const U8*)s)[2] ) && ( 0xB4 == ((const U8*)s)[3] ) ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FF2 : 0 )\
+	: 0 )                                                               \
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                           \
+( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                                 \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                           \
+( ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                                 \
+	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8F == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x73 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x8F == ((const U8*)s)[2] ) ?                               \
+		( ( 0x73 == ((const U8*)s)[3] ) ? 0x59 : 0 )                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8F == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x73 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xAB == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0x70 == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+    : ( 0xB4 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x53 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0x55 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0x58 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xB4 == ((const U8*)s)[4] ) && ( 0x68 == ((const U8*)s)[5] ) ) ? 0x1FB7 : 0x1FB6 )\
+		: 0 )                                                       \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0x66 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xB4 == ((const U8*)s)[4] ) && ( 0x68 == ((const U8*)s)[5] ) ) ? 0x1FC7 : 0x1FC6 )\
+		: 0 )                                                       \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( 0x68 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x49 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xAF == ((const U8*)s)[4] ) ?                       \
+			( ( 0x41 == ((const U8*)s)[5] ) ? 0x1FD2            \
+			: ( 0x42 == ((const U8*)s)[5] ) ? 0x390 : 0 )       \
+		    : ( ( 0xB1 == ((const U8*)s)[4] ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x1FD7 : 0 )\
+		: 0 )                                                       \
+	    : ( ( 0xB1 == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+	: 0 )                                                               \
+    : ( 0xB5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x42 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x62 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x49 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xAF == ((const U8*)s)[4] ) ?                       \
+			( ( 0x41 == ((const U8*)s)[5] ) ? 0x1FE2            \
+			: ( 0x42 == ((const U8*)s)[5] ) ? 0x3B0 : 0 )       \
+		    : ( ( 0xB1 == ((const U8*)s)[4] ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x1FE7 : 0 )\
+		: ( 0x62 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xAF == ((const U8*)s)[4] ) ?                       \
+			( ( 0x41 == ((const U8*)s)[5] ) ? 0x1F52            \
+			: ( 0x42 == ((const U8*)s)[5] ) ? 0x1F54 : 0x1F50 ) \
+		    : ( ( 0xB1 == ((const U8*)s)[4] ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x1F56 : 0x1F50 )\
+		: 0 )                                                       \
+	    : ( ( 0xB1 == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x4A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xB4 == ((const U8*)s)[4] ) && ( 0x68 == ((const U8*)s)[5] ) ) ? 0x1FF7 : 0x1FF6 )\
+		: 0 )                                                       \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB4 == ((const U8*)s)[2] ) ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
+    : ( 0xB8 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                           \
+( ( 0x42 == ((const U8*)s)[1] ) ?                                           \
+	    ( ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x62 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x62 == ((const U8*)s)[3] ) ? 0x1F50 : 0 )              \
+	    : ( ( 0xB1 == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x4A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FF6 : 0 )              \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB4 == ((const U8*)s)[2] ) ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                           \
+( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
+	( ( 0x67 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F80 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F81 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F82 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F83 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F84 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F85 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F86 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB4 == ((const U8*)s)[3] ) ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F87 : 0 )\
+	: ( 0x68 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F90 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F91 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F92 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F93 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F94 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F95 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F96 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB4 == ((const U8*)s)[3] ) ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1F97 : 0 )\
+	: ( 0x6A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA0 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA1 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA2 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA3 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA4 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA5 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA6 : 0 )\
+	    : ( 0x48 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FA7 : 0 )\
+	    : ( 0x57 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FB2 : 0 )\
+	    : ( 0x63 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB4 == ((const U8*)s)[3] ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FC2 : 0 )\
+	    : ( ( ( 0x70 == ((const U8*)s)[2] ) && ( 0xB4 == ((const U8*)s)[3] ) ) && ( 0x68 == ((const U8*)s)[4] ) ) ? 0x1FF2 : 0 )\
+	: 0 )                                                               \
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e)                           \
+( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
+	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
+	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8F == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x73 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x8F == ((const U8*)s)[2] ) ?                               \
+		( ( 0x73 == ((const U8*)s)[3] ) ? 0x59 : 0 )                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8F == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x73 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xAB == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0x70 == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+    : ( 0xB4 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x53 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0x55 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0x58 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FB6 : 0 )              \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0x66 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( ( ( 0x68 == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+    : ( 0xB5 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x42 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x62 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x62 == ((const U8*)s)[3] ) ? 0x1F50 : 0 )              \
+	    : ( ( 0xB1 == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x4A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FF6 : 0 )              \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB4 == ((const U8*)s)[2] ) ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e)                           \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
+	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
+	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8F == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x73 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8F == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x73 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( ( ( 0xAB == ((const U8*)s)[0] ) && ( 0x70 == ((const U8*)s)[1] ) ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ? 0xFB00                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
+( ((e)-(s) > 5) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
+	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )\
+: ((e)-(s) > 4) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
+	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
+	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8F == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x73 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x8F == ((const U8*)s)[2] ) ?                               \
+		( ( 0x73 == ((const U8*)s)[3] ) ? 0x59 : 0 )                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8F == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x73 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xAB == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0x70 == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+    : ( 0xB4 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x53 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0x55 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0x58 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FB6 : 0 )              \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0x66 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
+	    : ( ( 0xB4 == ((const U8*)s)[2] ) && ( 0x68 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( ( ( 0x68 == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+    : ( 0xB5 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )\
+: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e) )
+
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', 'a')
+	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
 /*** GENERATED CODE ***/
 #define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
@@ -1251,10 +2112,34 @@
     : ( ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) && ( ( ((const U8*)s)[1] & 0xBE ) == 's' ) ) ? 2 : 0 )\
 : 0 )
 
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ? 0xFB00                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: 0 )
+
 /*
 	THREE_CHAR_FOLD: A three-character multi-char fold
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', '3')
+	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                   \
@@ -1279,7 +2164,7 @@
 /*
 	THREE_CHAR_FOLD: A three-character multi-char fold
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', '3')
+	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_latin1_safe(s,e)                                 \
@@ -1288,7 +2173,7 @@
 /*
 	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', 'h')
+	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                              \
@@ -1358,7 +2243,7 @@
 /*
 	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', 'h')
+	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                            \
@@ -1739,7 +2624,7 @@
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', 'a')
+	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*** GENERATED CODE ***/
 #define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
@@ -1975,10 +2860,421 @@
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )\
 : ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
 
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                           \
+( ( 0x52 == ((const U8*)s)[1] ) ?                                           \
+	    ( ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( ( 0xB7 == ((const U8*)s)[3] ) && ( 0x53 == ((const U8*)s)[4] ) ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x587 : 0 )\
+	    : ( 0x62 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB7 == ((const U8*)s)[3] ) && ( 0x52 == ((const U8*)s)[4] ) ) ? ( ( 0x46 == ((const U8*)s)[5] ) ? 0xFB14\
+			: ( 0x52 == ((const U8*)s)[5] ) ? 0xFB15            \
+			: ( 0x54 == ((const U8*)s)[5] ) ? 0xFB17            \
+			: ( 0x64 == ((const U8*)s)[5] ) ? 0xFB13 : 0 ) : 0 )\
+	    : ( ( ( ( 0x71 == ((const U8*)s)[2] ) && ( 0xB7 == ((const U8*)s)[3] ) ) && ( 0x52 == ((const U8*)s)[4] ) ) && ( 0x64 == ((const U8*)s)[5] ) ) ? 0xFB16 : 0 )\
+	: 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                           \
+( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
+	( ( 0x66 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F80 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F81 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F82 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F83 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F84 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F85 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F86 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB3 == ((const U8*)s)[3] ) ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F87 : 0 )\
+	: ( 0x67 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F90 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F91 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F92 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F93 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F94 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F95 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F96 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB3 == ((const U8*)s)[3] ) ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F97 : 0 )\
+	: ( 0x69 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA0 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA1 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA2 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA3 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA4 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA5 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA6 : 0 )\
+	    : ( 0x48 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA7 : 0 )\
+	    : ( 0x57 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FB2 : 0 )\
+	    : ( 0x62 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FC2 : 0 )\
+	    : ( ( ( 0x6A == ((const U8*)s)[2] ) && ( 0xB3 == ((const U8*)s)[3] ) ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FF2 : 0 )\
+	: 0 )                                                               \
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                           \
+( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                                 \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                           \
+( ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                                 \
+	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8E == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x72 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x8E == ((const U8*)s)[2] ) ?                               \
+		( ( 0x72 == ((const U8*)s)[3] ) ? 0x59 : 0 )                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8E == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x72 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xAA == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0x6A == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+    : ( 0xB3 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x53 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0x55 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0x58 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xB3 == ((const U8*)s)[4] ) && ( 0x67 == ((const U8*)s)[5] ) ) ? 0x1FB7 : 0x1FB6 )\
+		: 0 )                                                       \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0x65 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xB3 == ((const U8*)s)[4] ) && ( 0x67 == ((const U8*)s)[5] ) ) ? 0x1FC7 : 0x1FC6 )\
+		: 0 )                                                       \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( 0x67 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x49 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xAD == ((const U8*)s)[4] ) ?                       \
+			( ( 0x41 == ((const U8*)s)[5] ) ? 0x1FD2            \
+			: ( 0x42 == ((const U8*)s)[5] ) ? 0x390 : 0 )       \
+		    : ( ( 0xAF == ((const U8*)s)[4] ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x1FD7 : 0 )\
+		: 0 )                                                       \
+	    : ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+	: 0 )                                                               \
+    : ( 0xB4 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x42 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xAD == ((const U8*)s)[2] ) && ( 0x5F == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x49 == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xAD == ((const U8*)s)[4] ) ?                       \
+			( ( 0x41 == ((const U8*)s)[5] ) ? 0x1FE2            \
+			: ( 0x42 == ((const U8*)s)[5] ) ? 0x3B0 : 0 )       \
+		    : ( ( 0xAF == ((const U8*)s)[4] ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x1FE7 : 0 )\
+		: ( 0x5F == ((const U8*)s)[3] ) ?                           \
+		    ( ( 0xAD == ((const U8*)s)[4] ) ?                       \
+			( ( 0x41 == ((const U8*)s)[5] ) ? 0x1F52            \
+			: ( 0x42 == ((const U8*)s)[5] ) ? 0x1F54 : 0x1F50 ) \
+		    : ( ( 0xAF == ((const U8*)s)[4] ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x1F56 : 0x1F50 )\
+		: 0 )                                                       \
+	    : ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x4A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ?                           \
+		    ( ( ( 0xB3 == ((const U8*)s)[4] ) && ( 0x67 == ((const U8*)s)[5] ) ) ? 0x1FF7 : 0x1FF6 )\
+		: 0 )                                                       \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB3 == ((const U8*)s)[2] ) ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
+    : ( 0xB7 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                           \
+( ( 0x42 == ((const U8*)s)[1] ) ?                                           \
+	    ( ( ( 0xAD == ((const U8*)s)[2] ) && ( 0x5F == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x5F == ((const U8*)s)[3] ) ? 0x1F50 : 0 )              \
+	    : ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x4A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FF6 : 0 )              \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB3 == ((const U8*)s)[2] ) ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                           \
+( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
+	( ( 0x66 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F80 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F81 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F82 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F83 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F84 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F85 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F86 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB3 == ((const U8*)s)[3] ) ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F87 : 0 )\
+	: ( 0x67 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F90 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F91 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F92 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F93 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F94 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F95 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F96 : 0 )\
+	    : ( ( ( 0x48 == ((const U8*)s)[2] ) && ( 0xB3 == ((const U8*)s)[3] ) ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1F97 : 0 )\
+	: ( 0x69 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA0 : 0 )\
+	    : ( 0x42 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA1 : 0 )\
+	    : ( 0x43 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA2 : 0 )\
+	    : ( 0x44 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA3 : 0 )\
+	    : ( 0x45 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA4 : 0 )\
+	    : ( 0x46 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA5 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA6 : 0 )\
+	    : ( 0x48 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FA7 : 0 )\
+	    : ( 0x57 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FB2 : 0 )\
+	    : ( 0x62 == ((const U8*)s)[2] ) ?                               \
+		( ( ( 0xB3 == ((const U8*)s)[3] ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FC2 : 0 )\
+	    : ( ( ( 0x6A == ((const U8*)s)[2] ) && ( 0xB3 == ((const U8*)s)[3] ) ) && ( 0x67 == ((const U8*)s)[4] ) ) ? 0x1FF2 : 0 )\
+	: 0 )                                                               \
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e)                           \
+( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
+	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
+	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8E == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x72 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x8E == ((const U8*)s)[2] ) ?                               \
+		( ( 0x72 == ((const U8*)s)[3] ) ? 0x59 : 0 )                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8E == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x72 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xAA == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0x6A == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+    : ( 0xB3 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x53 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0x55 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0x58 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FB6 : 0 )              \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0x65 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( ( ( 0x67 == ((const U8*)s)[1] ) && ( 0xAF == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+    : ( 0xB4 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x42 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xAD == ((const U8*)s)[2] ) && ( 0x5F == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
+	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAD == ((const U8*)s)[2] ) ?                               \
+		( ( 0x5F == ((const U8*)s)[3] ) ? 0x1F50 : 0 )              \
+	    : ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FE6 : 0 )\
+	: ( 0x4A == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FF6 : 0 )              \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF3 : 0 )\
+	: ( ( ( 0x55 == ((const U8*)s)[1] ) && ( 0xB3 == ((const U8*)s)[2] ) ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FF4 : 0 )\
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e)                           \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
+	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
+	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8E == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x72 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8E == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x72 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( ( ( 0xAA == ((const U8*)s)[0] ) && ( 0x6A == ((const U8*)s)[1] ) ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ? 0xFB00                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: 0 )
+
+
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
+( ((e)-(s) > 5) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
+	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ? what_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )\
+: ((e)-(s) > 4) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
+	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                             \
+	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 0x130 : 0 )\
+    : ( 0x8E == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x72 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x8E == ((const U8*)s)[2] ) ?                               \
+		( ( 0x72 == ((const U8*)s)[3] ) ? 0x59 : 0 )                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 's' ) ? 0x59                \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 't' ) ? 0xFB05 : 0 )        \
+	: 0 )                                                               \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'j' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x53 == ((const U8*)s)[2] ) ) ? 0x1F0 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( 0x8E == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0x72 == ((const U8*)s)[2] ) ? 0x59 : 0 )                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 't' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x49 == ((const U8*)s)[2] ) ) ? 0x1E97 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E98 : 0 )\
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ?                             \
+	( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x51 == ((const U8*)s)[2] ) ) ? 0x1E99 : 0 )\
+    : ( 0xAA == ((const U8*)s)[0] ) ?                                       \
+	( ( ( 0x6A == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xBF ) == 'n' ) ) ? 0x149 : 0 )\
+    : ( 0xB3 == ((const U8*)s)[0] ) ?                                       \
+	( ( 0x53 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FB4 : 0 )\
+	: ( 0x55 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC4 : 0 )\
+	: ( 0x58 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FB6 : 0 )              \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FB3 : 0 )\
+	: ( 0x65 == ((const U8*)s)[1] ) ?                                   \
+	    ( ( 0xAF == ((const U8*)s)[2] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[3] ) ? 0x1FC6 : 0 )              \
+	    : ( ( 0xB3 == ((const U8*)s)[2] ) && ( 0x67 == ((const U8*)s)[3] ) ) ? 0x1FC3 : 0 )\
+	: ( ( ( 0x67 == ((const U8*)s)[1] ) && ( 0xAF == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
+    : ( 0xB4 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )\
+: ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7(s,e) )
+
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', 'a')
+	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
 /*** GENERATED CODE ***/
 #define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
@@ -1994,10 +3290,34 @@
     : ( ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) && ( ( ((const U8*)s)[1] & 0xBE ) == 's' ) ) ? 2 : 0 )\
 : 0 )
 
+/*** GENERATED CODE ***/
+#define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
+	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
+	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ? 0xFB00                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) ? 0xFB01                  \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ? 0xFB02 : 0 )            \
+    : ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) ?                             \
+	( ( ( ((const U8*)s)[1] & 0xBF ) == 's' ) ? 0x59                    \
+	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
+    : 0 )                                                                   \
+: 0 )
+
 /*
 	THREE_CHAR_FOLD: A three-character multi-char fold
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', '3')
+	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                   \
@@ -2022,7 +3342,7 @@
 /*
 	THREE_CHAR_FOLD: A three-character multi-char fold
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', '3')
+	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_latin1_safe(s,e)                                 \
@@ -2031,7 +3351,7 @@
 /*
 	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 
-	&regcharclass_multi_char_folds::multi_char_folds('u', 'h')
+	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                              \
@@ -2101,7 +3421,7 @@
 /*
 	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 
-	&regcharclass_multi_char_folds::multi_char_folds('l', 'h')
+	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
 /*** GENERATED CODE ***/
 #define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                            \
@@ -2297,6 +3617,6 @@
  * ee0dd174fd5b158d82dfea95d7d822ca0bfcd490182669353dca3ab39a8ee807 lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
- * e3e72d7df46550e894d860fec08cc81ca9e1d2205a81fb48733e74b8853281be regen/regcharclass.pl
- * c0a5e4cb2b9ffad78691938e122c1310bbc98aca2364af243e5c6b2ec0f59dc3 regen/regcharclass_multi_char_folds.pl
+ * f0ac417314b8da8e05d386ca3d0d8074e38ecd9dc77a7d966aa48ec4ec247e2a regen/regcharclass.pl
+ * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

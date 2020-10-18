@@ -42,6 +42,7 @@ sub gen_combinations ($;) {
     my @ret;
 
     # Look at each element in this level's array.
+    if (ref $fold_ref->[$i]) {
     foreach my $j (0 .. @{$fold_ref->[$i]} - 1) {
 
         # Append its representation to what we have currently
@@ -55,6 +56,7 @@ sub gen_combinations ($;) {
         else {  # Generate the combinations for the next level with this one's
             push @ret, &gen_combinations($fold_ref, $new_string, $i + 1);
         }
+    }
     }
 
     return @ret;
@@ -87,7 +89,7 @@ sub multi_char_folds ($$) {
     }
 
     my @folds;
-    my @output_folds;
+    my %output_folds;
 
     for my $i (0 .. @$folds_ref - 1) {
         next unless ref $folds_ref->[$i];   # Skip single-char folds
@@ -122,10 +124,8 @@ sub multi_char_folds ($$) {
         $fold = "\"$fold\"";
 
         # Skip if something else already has this fold
-        next if grep { $_ eq $fold } @output_folds;
+        next if grep { $_ eq $fold } keys %output_folds;
 
-        # If the fold is to a cased letter, replace the entry with an
-        # array which also includes its upper case.
         my $this_fold_ref = \@folds;
         for my $j (0 .. @$this_fold_ref - 1) {
             my $this_ord = $this_fold_ref->[$j];
@@ -143,8 +143,7 @@ sub multi_char_folds ($$) {
         }
 
         # Then generate all combinations of upper/lower case of the fold.
-        push @output_folds, gen_combinations($this_fold_ref);
-
+        $output_folds{$_} = $cp_ref->[$i] for gen_combinations($this_fold_ref);
     }
 
     # \x17F is the small LONG S, which folds to 's'.  Both Capital and small
@@ -167,9 +166,9 @@ sub multi_char_folds ($$) {
     #
     # No combinations of this with 's' need be added, as any of these
     # containing 's' are prohibited under /iaa.
-    push @output_folds, '"\x{17F}\x{17F}"' if $type eq 'u' && $range eq 'a';
+    $output_folds{"\"\x{17F}\x{17F}\""} = 0xDF if $type eq 'u' && $range eq 'a';
 
-    return @output_folds;
+    return %output_folds;
 }
 
 1
