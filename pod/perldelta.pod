@@ -95,33 +95,101 @@ XXX
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
+=head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-XXX Remove this section if not applicable.
+L<bytes> has been upgraded from version 1.07 to 1.08.
 
-=back
+=item *
 
-=head2 Updated Modules and Pragmata
+L<CPAN> has been upgraded from version 2.27 to 2.28.
 
-=over 4
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.175 to 2.176.
+
+=item *
+
+L<DB> has been upgraded from version 1.58 to 1.59.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.854 to 1.855.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<Digest> has been upgraded from version 1.17_01 to 1.19.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.55_01 to 2.58.
+
+=item *
+
+L<Encode> has been upgraded from version 3.06 to 3.07.
+
+=item *
+
+L<Errno> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<experimental> has been upgraded from version 0.020 to 0.022.
+
+=item *
+
+L<Exporter> has been upgraded from version 5.75 to 5.76.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.44 to 7.48.
+
+=item *
+
+L<ExtUtils::PL2Bat> has been upgraded from version 0.002 to 0.003.
+
+=item *
+
+L<feature> has been upgraded from version 1.60 to 1.61.
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.2309 to 0.2311.
+
+=item *
+
+L<FindBin> has been upgraded from version 1.51 to 1.52.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.51 to 2.52.
+
+=item *
+
+L<Getopt::Std> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<I18N::LangTags> has been upgraded from version 0.44 to 0.45.
+
+=item *
+
+L<if> has been upgraded from version 0.0608 to 0.0609.
+
+=item *
+
+L<locale> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<MIME::Base64> has been upgraded from version 3.15 to 3.16.
 
 =item *
 
@@ -129,19 +197,75 @@ L<Module::CoreList> has been upgraded from version 5.20200920 to 5.20201020.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Module::Load> has been upgraded from version 0.34 to 0.36.
 
 =item *
 
-XXX
+L<mro> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<overload> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.73 to 1.74.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.40 to 3.41.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.70 to 2.01.
+
+=item *
+
+L<re> has been upgraded from version 0.40 to 0.41.
+
+=item *
+
+L<Storable> has been upgraded from version 3.22 to 3.23.
+
+=item *
+
+L<subs> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Symbol> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302181 to 1.302182.
+
+=item *
+
+L<Tie::RefHash> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<Time::Local> has been upgraded from version 1.28 to 1.30.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.27 to 1.29.
+
+=item *
+
+L<utf8> has been upgraded from version 1.22 to 1.24.
+
+=item *
+
+L<version> has been upgraded from version 0.9924 to 0.9928.
+
+=item *
+
+L<Win32> has been upgraded from version 0.53 to 0.54.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.11 to 1.12.
 
 =back
 
