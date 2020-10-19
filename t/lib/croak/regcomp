@@ -120,8 +120,63 @@ qr/(*negative_lookbehind:a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(*negative_lookbehind:a\K <-- HERE a)a/ at - line 2.
 ########
+# NAME \K nesting in lookahead after lookahead
+qr{(?=(?=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookahead after negative lookahead
+qr{(?=(?!y)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?!y)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookahead in negative lookahead
+qr{(?=(?!y\K)x)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?!y\K <-- HERE )x)x/ at - line 1.
+########
+# NAME \K nesting in lookahead in lookahead
+qr{(?=(?=x\K)x)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?=x\K <-- HERE )x)x/ at - line 1.
+########
+# NAME \K nesting in lookbehind after lookbehind
+qr{(?<=(?<=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=(?<=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookahead after lookbehind
+qr{(?=(?<=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?<=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookbehind after lookahead
+qr{(?<=(?=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=(?=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in negative lookbehind after lookahead
+qr{(?<!(?=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<!(?=x)x\K <-- HERE )x/ at - line 1.
+########
 # NAME \K is permitted after the lookahead GH#18123
 qr/(?=(?=x)x)\K/;
+qr/(?!(?=x)x)\K/;
+qr/(?=(?!x)x)\K/;
+qr/(?!(?!x)x)\K/;
+qr/(?<=(?=x)x)\K/;
+qr/(?<!(?=x)x)\K/;
+qr/(?<=(?!x)x)\K/;
+qr/(?<!(?!x)x)\K/;
+qr/(?=(?<=x)x)\K/;
+qr/(?!(?<=x)x)\K/;
+qr/(?=(?<!x)x)\K/;
+qr/(?!(?<!x)x)\K/;
+qr/(?<=(?<=x)x)\K/;
+qr/(?<!(?<=x)x)\K/;
+qr/(?<=(?<!x)x)\K/;
+qr/(?<!(?<!x)x)\K/;
 EXPECT
 OPTIONS nonfatal
 ########
