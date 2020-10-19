@@ -107,6 +107,8 @@ foreach my $element (@embeds) {
 my $PPPort = "$main_dir/PPPort_pm.PL";
 open F, "<", $PPPort or die "Can't open $PPPort: $!";
 
+# Now find all the elements furnished by us whose signatures we don't know
+# (hence not in embed.fnc nor apidoc.fnc) and have no parameters.
 my @no_parameters;
 while (<F>) {
     next unless/^%include (\w+)/;

@@ -46,7 +46,7 @@ __UNDEFINED__ PERL_LOADMOD_DENY         0x1
 __UNDEFINED__ PERL_LOADMOD_NOIMPORT     0x2
 __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS   0x4
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined(PERL_USE_GCC_BRACE_GROUPS)
 # define D_PPP_CROAK_IF_ERROR(cond) ({ SV *_errsv; ((cond) && (_errsv = ERRSV) && (SvROK(_errsv) || SvTRUE(_errsv)) && (croak_sv(_errsv), 1)); })
 #else
 # define D_PPP_CROAK_IF_ERROR(cond) ((cond) && (SvROK(ERRSV) || SvTRUE(ERRSV)) && (croak_sv(ERRSV), 1))
@@ -71,7 +71,7 @@ __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS   0x4
 # ifdef eval_sv
 #  undef eval_sv
 # endif
-# if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+# if defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define eval_sv(sv, flags) ({ I32 _flags = (flags); I32 _ret = Perl_eval_sv(aTHX_ sv, (_flags & ~G_RETHROW)); D_PPP_CROAK_IF_ERROR(_flags & G_RETHROW); _ret; })
 # else
 #  define eval_sv(sv, flags) ((PL_na = Perl_eval_sv(aTHX_ sv, ((flags) & ~G_RETHROW))), D_PPP_CROAK_IF_ERROR((flags) & G_RETHROW), (I32)PL_na)
@@ -82,7 +82,7 @@ __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS   0x4
 #if { VERSION < 5.31.2 }
 # ifdef eval_pv
 #  undef eval_pv
-#  if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  if defined(PERL_USE_GCC_BRACE_GROUPS)
 #   define eval_pv(p, croak_on_error) ({ SV *_sv = Perl_eval_pv(aTHX_ p, 0); D_PPP_CROAK_IF_ERROR(croak_on_error); _sv; })
 #  else
 #   define eval_pv(p, croak_on_error) ((PL_Sv = Perl_eval_pv(aTHX_ p, 0)), D_PPP_CROAK_IF_ERROR(croak_on_error), PL_Sv)

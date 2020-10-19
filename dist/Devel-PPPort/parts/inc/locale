@@ -1,8 +1,45 @@
 =provides
 
 __UNDEFINED__
+LOCK_NUMERIC_STANDARD
+UNLOCK_NUMERIC_STANDARD
 
 =implementation
+
+#if PERL_VERSION_LT(5,27,9)
+__UNDEFINED__ LC_NUMERIC_LOCK
+__UNDEFINED__ LC_NUMERIC_UNLOCK
+#  if PERL_VERSION_LT(5,19,0)
+#    undef STORE_LC_NUMERIC_SET_STANDARD
+#    undef RESTORE_LC_NUMERIC
+#    undef DECLARATION_FOR_LC_NUMERIC_MANIPULATION
+#    ifdef USE_LOCALE
+__UNDEFINED__ DECLARATION_FOR_LC_NUMERIC_MANIPULATION char *LoC_
+__UNDEFINED__ STORE_NUMERIC_SET_STANDARD()            \
+	 LoC_ = savepv(setlocale(LC_NUMERIC, NULL));  \
+	 SAVEFREEPV(LoC_);                            \
+	 setlocale(LC_NUMERIC, "C");
+__UNDEFINED__ RESTORE_LC_NUMERIC()                    \
+	 setlocale(LC_NUMERIC, LoC_);
+#    else
+__UNDEFINED__ DECLARATION_FOR_LC_NUMERIC_MANIPULATION
+__UNDEFINED__ STORE_LC_NUMERIC_SET_STANDARD()
+__UNDEFINED__ RESTORE_LC_NUMERIC()
+#    endif
+#  endif
+#endif
+
+#ifndef LOCK_NUMERIC_STANDARD
+#  define LOCK_NUMERIC_STANDARD()
+#endif
+
+#ifndef UNLOCK_NUMERIC_STANDARD
+#  define UNLOCK_NUMERIC_STANDARD()
+#endif
+
+/* The names of these changed in 5.28 */
+__UNDEFINED__ LOCK_LC_NUMERIC_STANDARD    LOCK_NUMERIC_STANDARD
+__UNDEFINED__ UNLOCK_LC_NUMERIC_STANDARD  UNLOCK_NUMERIC_STANDARD
 
 /* If this doesn't exist, it's not needed, so is void noop */
 __UNDEFINED__  switch_to_global_locale()
