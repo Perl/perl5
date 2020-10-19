@@ -1329,6 +1329,7 @@ p	|int	|magic_settaint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setuvar	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setvec	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setutf8	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_freeutf8	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_set_all_env|NN SV* sv|NN MAGIC* mg
 p	|U32	|magic_sizepack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_wipepack	|NN SV* sv|NN MAGIC* mg

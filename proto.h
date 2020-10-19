@@ -1860,6 +1860,9 @@ PERL_CALLCONV int	Perl_magic_freearylen_p(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_freeovrld(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_FREEOVRLD	\
 	assert(sv); assert(mg)
+PERL_CALLCONV int	Perl_magic_freeutf8(pTHX_ SV* sv, MAGIC* mg);
+#define PERL_ARGS_ASSERT_MAGIC_FREEUTF8	\
+	assert(sv); assert(mg)
 PERL_CALLCONV int	Perl_magic_get(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_GET	\
 	assert(sv); assert(mg)

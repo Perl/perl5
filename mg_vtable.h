@@ -190,7 +190,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_get, Perl_magic_set, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setutf8, 0, 0, Perl_magic_freeutf8, 0, 0, 0 },
   { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 }
 };

@@ -555,7 +555,7 @@ S_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
 	vtbl->svt_free(aTHX_ sv, mg);
 
     if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-	if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
+	if (mg->mg_len > 0)
 	    Safefree(mg->mg_ptr);
 	else if (mg->mg_len == HEf_SVKEY)
 	    SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
@@ -2673,6 +2673,22 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
     mg->mg_len = -1;		/* The mg_len holds the len cache. */
     return 0;
 }
+
+int
+Perl_magic_freeutf8(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_FREEUTF8;
+    PERL_UNUSED_ARG(sv);
+
+    /* utf8 magic uses mg_len as a string length rather than a buffer
+     * length, so we need to free even with mg_len == 0: hence we can't
+     * rely on standard magic free handling */
+    assert(mg->mg_type == PERL_MAGIC_utf8 && mg->mg_len >= -1);
+    Safefree(mg->mg_ptr);
+    mg->mg_ptr = NULL;
+    return 0;
+}
+
 
 int
 Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
