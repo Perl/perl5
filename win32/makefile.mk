@@ -1227,7 +1227,7 @@ $(GLOBEXE) : perlglob.c
 # with MULTI, ITHREADS, IMP_SYS and LARGE_FILES off), then make
 # this target to regenerate config_H.gc.
 regen_config_h:
-	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file $(mktmp $(CFG_VARS)) \
+	$(MINIPERL) -I..\lib config_sh.PL --prebuilt --cfgsh-option-file $(mktmp $(CFG_VARS)) \
 	    $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-del /f $(CFGH_TMPL)

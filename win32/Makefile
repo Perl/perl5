@@ -954,7 +954,7 @@ perlglob$(o)  : perlglob.c
 # ITHREADS, IMP_SYS and LARGE_FILES off), then make this target
 # to regenerate config_H.vc.
 regen_config_h:
-	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL --prebuilt $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-del /f $(CFGH_TMPL)
 	-$(MINIPERL) -I..\lib config_h.PL
