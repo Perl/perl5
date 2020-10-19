@@ -432,7 +432,7 @@ __UNDEFINED__  utf8_to_uvchr(s, lp)                                             
    /* Also note that SvGETMAGIC() may change presence of SVf_UTF8 flag */
 #  if { VERSION < 5.17.5 }
 #    undef sv_len_utf8
-#    if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#    if defined(PERL_USE_GCC_BRACE_GROUPS)
 #      define sv_len_utf8_nomg(sv) ({ SV *_sv2 = (sv); (SvUTF8(_sv2) ? Perl_sv_len_utf8(aTHX_ (!SvGMAGICAL(_sv2) ? _sv2 : sv_mortalcopy_flags(_sv2, SV_NOSTEAL))) : ({ STRLEN _len; SvPV_nomg(_sv2, _len); _len; })); })
 #      define sv_len_utf8(sv) ({ SV *_sv1 = (sv); SvGETMAGIC(_sv1); sv_len_utf8_nomg(_sv1); })
 #    else
@@ -440,7 +440,7 @@ __UNDEFINED__  utf8_to_uvchr(s, lp)                                             
 #      define sv_len_utf8(sv) (PL_Sv = (sv), SvGETMAGIC(PL_Sv), sv_len_utf8_nomg(PL_Sv))
 #    endif
 #  endif
-#  if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  if defined(PERL_USE_GCC_BRACE_GROUPS)
      __UNDEFINED__ sv_len_utf8_nomg(sv) ({ SV *_sv = (sv); sv_len_utf8(!SvGMAGICAL(_sv) ? _sv : sv_mortalcopy_flags(_sv, SV_NOSTEAL)); })
 #  else
      __UNDEFINED__ sv_len_utf8_nomg(sv) ((PL_Sv = (sv)), sv_len_utf8(!SvGMAGICAL(PL_Sv) ? PL_Sv : sv_mortalcopy_flags(PL_Sv, SV_NOSTEAL)))
