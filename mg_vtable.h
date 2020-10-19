@@ -158,7 +158,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
   { 0, 0, 0, 0, 0, Perl_magic_copycallchecker, 0, 0 },
 #ifdef USE_LOCALE_COLLATE
-  { 0, Perl_magic_setcollxfrm, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setcollxfrm, 0, 0, Perl_magic_freecollxfrm, 0, 0, 0 },
 #else
   { 0, 0, 0, 0, 0, 0, 0, 0 },
 #endif

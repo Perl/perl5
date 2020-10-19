@@ -276,6 +276,7 @@ my %sig =
      'ovrld' => {free => 'freeovrld'},
      'utf8' => {set => 'setutf8'},
      'collxfrm' => {set => 'setcollxfrm',
+                    free => 'freecollxfrm',
 		    cond => '#ifdef USE_LOCALE_COLLATE'},
      'hintselem' => {set => 'sethint', clear => 'clearhint'},
      'hints' => {clear => 'clearhints'},

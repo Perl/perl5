@@ -2006,6 +2006,7 @@
 #define padnamelist_dup(a,b)	Perl_padnamelist_dup(aTHX_ a,b)
 #  endif
 #  if defined(USE_LOCALE_COLLATE)
+#define magic_freecollxfrm(a,b)	Perl_magic_freecollxfrm(aTHX_ a,b)
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
 #ifndef NO_MATHOMS
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
