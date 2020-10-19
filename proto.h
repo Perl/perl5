@@ -1857,6 +1857,9 @@ PERL_CALLCONV int	Perl_magic_existspack(pTHX_ SV* sv, const MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_freearylen_p(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_FREEARYLEN_P	\
 	assert(sv); assert(mg)
+PERL_CALLCONV int	Perl_magic_freemglob(pTHX_ SV* sv, MAGIC* mg);
+#define PERL_ARGS_ASSERT_MAGIC_FREEMGLOB	\
+	assert(sv); assert(mg)
 PERL_CALLCONV int	Perl_magic_freeovrld(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_FREEOVRLD	\
 	assert(sv); assert(mg)

@@ -1339,6 +1339,7 @@
 #define magic_copycallchecker(a,b,c,d,e)	Perl_magic_copycallchecker(aTHX_ a,b,c,d,e)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
 #define magic_freearylen_p(a,b)	Perl_magic_freearylen_p(aTHX_ a,b)
+#define magic_freemglob(a,b)	Perl_magic_freemglob(aTHX_ a,b)
 #define magic_freeovrld(a,b)	Perl_magic_freeovrld(aTHX_ a,b)
 #define magic_freeutf8(a,b)	Perl_magic_freeutf8(aTHX_ a,b)
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)

@@ -172,7 +172,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
   { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setlvref, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setmglob, 0, 0, Perl_magic_freemglob, 0, 0, 0 },
   { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setnonelem, 0, 0, 0, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },

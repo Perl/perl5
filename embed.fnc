@@ -1319,6 +1319,7 @@ dp	|int	|magic_sethint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setisa	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setlvref	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setmglob	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_freemglob|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setnkeys	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setpack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setpos	|NN SV* sv|NN MAGIC* mg
