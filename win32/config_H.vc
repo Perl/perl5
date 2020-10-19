@@ -9,7 +9,7 @@
 
 /* Package name      : perl5
  * Source directory  : 
- * Configuration time: Wed Oct  7 16:33:14 2020
+ * Configuration time: Mon Oct 19 14:24:24 2020
  * Configured by     : tony
  * Target system     : 
  */
@@ -1369,7 +1369,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "MSWin32"		/**/
-#define OSVERS "10.0.18363.1082"		/**/
+#define OSVERS "10.0.18363.1139"		/**/
 
 /* CAT2:
  *	This macro concatenates 2 tokens together.
@@ -3732,13 +3732,13 @@
  *	This symbol, if defined, indicates that <stdbool.h> exists and
  *	can be included.
  */
-#define	I_STDBOOL		/**/
+/*#define	I_STDBOOL		/ **/
 
 /* I_STDINT:
  *	This symbol, if defined, indicates that <stdint.h> exists and
  *	should be included.
  */
-#define I_STDINT		/**/
+/*#define I_STDINT		/ **/
 
 /* I_SUNMATH:
  *	This symbol, if defined, indicates that <sunmath.h> exists and
@@ -4247,7 +4247,7 @@
  *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
-#define	USE_LARGE_FILES		/**/
+/*#define	USE_LARGE_FILES		/ **/
 #endif
 
 /* USE_LONG_DOUBLE:
@@ -5211,9 +5211,9 @@
 /* Off_t_size:
  *	This symbol holds the number of bytes used by the Off_t.
  */
-#define Off_t __int64		/* <offset> type */
-#define LSEEKSIZE 8		/* <offset> size */
-#define Off_t_size 8	/* <offset> size */
+#define Off_t long		/* <offset> type */
+#define LSEEKSIZE 4		/* <offset> size */
+#define Off_t_size 4	/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes
