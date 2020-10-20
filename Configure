@@ -10445,6 +10445,15 @@ int main()
 	else
 	    checkit("1e+34", buf);
 
+        /* Test for an Ubuntu/Debian bug in gcvt and qgcvt. See:        *
+         * https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1899553 */
+
+	Gconvert((DOUBLETYPE)0.4, 53, 0, buf);
+        if(sizeof(DOUBLETYPE) == 8)
+	  checkit("0.40000000000000002220446049250313080847263336181640625", buf);
+        else
+	  checkit("0.40000000000000000000542101086242752217003726400434971", buf);
+
 	/* For Perl, if you add additional tests here, also add them to
 	 * t/base/num.t for benefit of platforms not using Configure or
 	 * overriding d_Gconvert */
