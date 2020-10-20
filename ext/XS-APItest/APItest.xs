@@ -6853,10 +6853,21 @@ test_Gconvert(SV * number, SV * num_digits)
     PREINIT:
         char buffer[100];
         int len;
+        int extras;
     CODE:
         len = (int) SvIV(num_digits);
-        if (len > 99) croak("Too long a number for test_Gconvert");
-        if (len < 0) croak("Too short a number for test_Gconvert");
+        /* To silence a -Wformat-overflow compiler warning we     *
+         * make allowance for the following characters that may   *
+         * appear, in addition to the digits of the significand:  *
+         * a leading "-", a single byte radix point, "e-", the    *
+         * terminating NULL, and a 3 or 4 digit exponent.         *
+         * Ie, allow 8 bytes if nvtype is "double", otherwise 9   *
+         * bytes (as the exponent could then contain 4 digits ).  */
+        extras = sizeof(NV) == 8 ? 8 : 9;
+        if(len > 100 - extras)
+            croak("Too long a number for test_Gconvert");
+        if (len < 0)
+            croak("Too short a number for test_Gconvert");
         PERL_UNUSED_RESULT(Gconvert(SvNV(number), len,
                  0,    /* No trailing zeroes */
                  buffer));
