@@ -1284,6 +1284,7 @@ sub construct_missings_section {
     return $text unless $missings_ref->@*;
 
     $text .= <<~EOT;
+
         =head1 Undocumented functions
 
         EOT
@@ -1334,7 +1335,7 @@ sub dictionary_order {
 }
 
 sub output {
-    my ($podname, $header, $dochash, $missing, $footer) = @_;
+    my ($podname, $header, $dochash, $missings_ref, $footer) = @_;
     #
     # strip leading '|' from each line which had been used to hide
     # pod from pod checkers.
@@ -1384,38 +1385,7 @@ sub output {
                             && defined $valid_sections{$section_name}{footer};
     }
 
-    if (@$missing) {
-        print $fh "\n=head1 Undocumented functions\n";
-        print $fh $podname eq 'perlapi' ? <<'_EOB_' : <<'_EOB_';
-
-The following functions have been flagged as part of the public API,
-but are currently undocumented.  Use them at your own risk, as the
-interfaces are subject to change.  Functions that are not listed in this
-document are not intended for public use, and should NOT be used under any
-circumstances.
-
-If you feel you need to use one of these functions, first send email to
-L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.  It may be
-that there is a good reason for the function not being documented, and it
-should be removed from this list; or it may just be that no one has gotten
-around to documenting it.  In the latter case, you will be asked to submit a
-patch to document the function.  Once your patch is accepted, it will indicate
-that the interface is stable (unless it is explicitly marked otherwise) and
-usable by you.
-
-_EOB_
-The following functions are currently undocumented.  If you use one of
-them, you may wish to consider creating and submitting documentation for
-it.
-
-_EOB_
-        print $fh "\n=over $description_indent\n";
-
-        for my $missing (sort sort_helper @$missing) {
-            print $fh "\n=item C<$missing>\nX<$missing>\n";
-        }
-        print $fh "\n=back\n";
-    }
+    print $fh construct_missings_section($podname, $missings_ref);
 
     print $fh "\n$footer\n=cut\n";
 
