@@ -10374,6 +10374,15 @@ void checkit(const char *expect, char *got)
 	}
 }
 
+void lencheck(int expect, int got)
+{
+    if (expect != got) {
+		printf("%s length mismatch:  Expected %d, got %d\n",
+			myname, expect, got);
+		exit(1);
+        }
+}
+
 int main()
 {
 	char buf[64];
@@ -10445,6 +10454,12 @@ int main()
 	    checkit("1e+034", buf); /* for Microsoft */
 	else
 	    checkit("1e+34", buf);
+
+        /* Test for an Ubuntu/Debian bug in gcvt and qgcvt. See:        *
+         * https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1899553 */
+
+	Gconvert((DOUBLETYPE)0.4, 53, 0, buf);
+	lencheck(55, (int)strlen(buf));
 
 	/* For Perl, if you add additional tests here, also add them to
 	 * t/base/num.t for benefit of platforms not using Configure or
