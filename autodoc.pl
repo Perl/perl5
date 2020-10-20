@@ -92,36 +92,95 @@ my $link_text = "Described in";
 my $description_indent = 4;
 my $usage_indent = 3;   # + initial blank yields 4 total
 
+my $av_scn = 'AV Handling';
+my $callback_scn = 'Callback Functions';
+my $casting_scn = 'Casting';
+my $casing_scn = 'Character case changing';
+my $classification_scn = 'Character classification';
+my $names_scn = 'Character names';
+my $scope_scn = 'Compile-time scope hooks';
+my $compiler_scn = 'Compiler and Preprocessor information';
+my $directives_scn = 'Compiler directives';
+my $concurrency_scn = 'Concurrency';
+my $COP_scn = 'COP Hint Hashes';
+my $CV_scn = 'CV Handling';
+my $custom_scn = 'Custom Operators';
+my $dump_scn = 'Display and Dump functions';
+my $embedding_scn = 'Embedding and Interpreter Cloning';
+my $errno_scn = 'Errno';
+my $exceptions_scn = 'Exception Handling (simple) Macros';
+my $filesystem_scn = 'Filesystem configuration values';
+my $floating_scn = 'Floating point configuration values';
+my $formats_scn = 'Formats';
+my $genconfig_scn = 'General Configuration';
+my $globals_scn = 'Global Variables';
+my $GV_scn = 'GV Handling';
+my $hook_scn = 'Hook manipulation';
+my $HV_scn = 'HV Handling';
+my $io_scn = 'Input/Output';
+my $integer_scn = 'Integer configuration values';
+my $lexer_scn = 'Lexer interface';
+my $locales_scn = 'Locales';
+my $magic_scn = 'Magic';
+my $memory_scn = 'Memory Management';
+my $mro_scn = 'MRO';
+my $multicall_scn = 'Multicall Functions';
+my $numeric_scn = 'Numeric Functions';
+my $optree_construction_scn = 'Optree construction';
+my $optree_manipulation_scn = 'Optree Manipulation Functions';
+my $pack_scn = 'Pack and Unpack';
+my $pad_scn = 'Pad Data Structures';
+my $password_scn = 'Password and Group access';
+my $paths_scn = 'Paths to system commands';
+my $intrpvar_scn = 'Per-Interpreter Variables';
+my $prototypes_scn = 'Prototype information';
+my $regexp_scn = 'REGEXP Functions';
+my $signals_scn = 'Signals';
+my $site_scn = 'Site configuration';
+my $sockets_scn = 'Sockets configuration values';
+my $filters_scn = 'Source Filters';
+my $stack_scn = 'Stack Manipulation Macros';
+my $string_scn = 'String Handling';
+my $SV_flags_scn = 'SV Flags';
+my $SV_scn = 'SV Handling';
+my $time_scn = 'Time';
+my $typedefs_scn = 'Typedef names';
+my $unicode_scn = 'Unicode Support';
+my $utility_scn = 'Utility Functions';
+my $versioning_scn = 'Versioning';
+my $warning_scn = 'Warning and Dieing';
+my $xs_scn = 'XS';
+
 my %valid_sections = (
-    'AV Handling' => {},
-    'Callback Functions' => {},
-    'Casting' => {},
-    'Character case changing' => {},
-    'Character classification' => {},
-    'Compile-time scope hooks' => {},
-    'Compiler and Preprocessor information' => {},
-    'Compiler directives' => {},
-    'Concurrency' => {},
-    'COP Hint Hashes' => {},
-    'CV Handling' => {},
-    'Custom Operators' => {},
-    'Display and Dump functions' => {},
-    'Embedding and Interpreter Cloning' => {},
-    'Errno' => {},
-    'Exception Handling (simple) Macros' => {},
-    'Filesystem configuration values' => {
+    $av_scn => {},
+    $callback_scn => {},
+    $casting_scn => {},
+    $casing_scn => {},
+    $classification_scn => {},
+    $scope_scn => {},
+    $compiler_scn => {},
+    $directives_scn => {},
+    $concurrency_scn => {},
+    $COP_scn => {},
+    $CV_scn => {},
+    $custom_scn => {},
+    $dump_scn => {},
+    $embedding_scn => {},
+    $errno_scn => {},
+    $exceptions_scn => {},
+    $filesystem_scn => {
         header => <<~'EOT',
             Also see L</List of capability HAS_foo symbols>.
             EOT
         },
-    'Floating point configuration values' => {
+    $floating_scn => {
         header => <<~'EOT',
             Also L</List of capability HAS_foo symbols> lists capabilities
             that arent in this section.  For example C<HAS_ASINH>, for the
             hyperbolic sine function.
             EOT
         },
-    'Formats' => {
+    $formats_scn => {
         header => <<~'EOT',
             These are used for formatting the corresponding type For example,
             instead of saying
@@ -136,7 +195,7 @@ my %valid_sections = (
             printed as C<%d>, C<%ld>, or something else.
             EOT
       },
-    'General Configuration' => {
+    $genconfig_scn => {
         header => <<~'EOT',
             This section contains configuration information not otherwise
             found in the more specialized sections of this document.  At the
@@ -205,53 +264,53 @@ my %valid_sections = (
             =back
             EOT
       },
-    'Global Variables' => {},
-    'GV Handling' => {},
-    'Hook manipulation' => {},
-    'HV Handling' => {},
-    'Input/Output' => {},
-    'Integer configuration values' => {},
-    'Lexer interface' => {},
-    'Locales' => {},
-    'Magic' => {},
-    'Memory Management' => {},
-    'MRO' => {},
-    'Multicall Functions' => {},
-    'Numeric Functions' => {},
-    'Optree construction' => {},
-    'Optree Manipulation Functions' => {},
-    'Pack and Unpack' => {},
-    'Pad Data Structures' => {},
-    'Password and Group access' => {},
-    'Paths to system commands' => {},
-    'Per-Interpreter Variables' => {},
-    'Prototype information' => {},
-    'REGEXP Functions' => {},
-    'Signals' => {},
-    'Site configuration' => {
+    $globals_scn => {},
+    $GV_scn => {},
+    $hook_scn => {},
+    $HV_scn => {},
+    $io_scn => {},
+    $integer_scn => {},
+    $lexer_scn => {},
+    $locales_scn => {},
+    $magic_scn => {},
+    $memory_scn => {},
+    $mro_scn => {},
+    $multicall_scn => {},
+    $numeric_scn => {},
+    $optree_construction_scn => {},
+    $optree_manipulation_scn => {},
+    $pack_scn => {},
+    $pad_scn => {},
+    $password_scn => {},
+    $paths_scn => {},
+    $intrpvar_scn => {},
+    $prototypes_scn => {},
+    $regexp_scn => {},
+    $signals_scn => {},
+    $site_scn => {
         header => <<~'EOT',
             These variables give details as to where various libraries,
             installation destinations, I<etc.>, go, as well as what various
             installation options were selected
             EOT
       },
-    'Sockets configuration values' => {},
-    'Source Filters' => {},
-    'Stack Manipulation Macros' => {},
-    'String Handling' => {
+    $sockets_scn => {},
+    $filters_scn => {},
+    $stack_scn => {},
+    $string_scn => {
         header => <<~'EOT',
             See also C<L</Unicode Support>>.
             EOT
       },
-    'SV Flags' => {},
-    'SV Handling' => {},
-    'Time' => {},
-    'Typedef names' => {},
-    'Unicode Support' => {},
-    'Utility Functions' => {},
-    'Versioning' => {},
-    'Warning and Dieing' => {},
-    'XS' => {},
+    $SV_flags_scn => {},
+    $SV_scn => {},
+    $time_scn => {},
+    $typedefs_scn => {},
+    $unicode_scn => {},
+    $utility_scn => {},
+    $versioning_scn => {},
+    $warning_scn => {},
+    $xs_scn => {},
 );
 
 # Somewhat loose match for an apidoc line so we can catch minor typos.
@@ -858,11 +917,11 @@ sub parse_config_h {
             my $dash_or_spaces = qr/ - | \s+ /x;
             my $pod = $configs{$name}{pod};
             if ($name =~ / ^ USE_ /x) {
-                $configs{$name}{'section'} = 'Site configuration';
+                $configs{$name}{'section'} = $site_scn;
             }
             elsif ($name =~ / SLEEP | (*nlb:SYS_) TIME | TZ | $sb TM $sb /x)
             {
-                $configs{$name}{'section'} = 'Time';
+                $configs{$name}{'section'} = $time_scn;
             }
             elsif ($name =~ /  DOUBLE | FLOAT | LONGDBL | LDBL | ^ NV
                             | $sb CASTFLAGS $sb
@@ -872,35 +931,35 @@ sub parse_config_h {
                             /x)
             {
                 $configs{$name}{'section'} =
-                                    'Floating point configuration values';
+                                    $floating_scn;
             }
             elsif ($name =~ / (?: POS | OFF | DIR ) 64 /x) {
-                $configs{$name}{'section'} = 'Filesystem configuration values';
+                $configs{$name}{'section'} = $filesystem_scn;
             }
             elsif (   $name =~ / $sb (?: BUILTIN | CPP ) $sb | ^ CPP /x
                    || $configs{$name}{pod} =~ m/ \b align /x)
             {
-                $configs{$name}{'section'} = 'Compiler and Preprocessor information';
+                $configs{$name}{'section'} = $compiler_scn;
             }
             elsif ($name =~ / ^ [IU] [ \d V ]
                             | ^ INT | SHORT | LONG | QUAD | 64 | 32 /xx)
             {
-                $configs{$name}{'section'} = 'Integer configuration values';
+                $configs{$name}{'section'} = $integer_scn;
             }
             elsif ($name =~ / $sb t $sb /x) {
-                $configs{$name}{'section'} = 'Typedef names';
+                $configs{$name}{'section'} = $typedefs_scn;
                 $flags .= 'y';
             }
             elsif (   $name =~ / ^ PERL_ ( PRI | SCN ) | $sb FORMAT $sb /x
                     && $configs{$name}{pod} =~ m/ \b format \b /ix)
             {
-                $configs{$name}{'section'} = 'Formats';
+                $configs{$name}{'section'} = $formats_scn;
             }
             elsif ($name =~ / BACKTRACE /x) {
-                $configs{$name}{'section'} = 'Display and Dump functions';
+                $configs{$name}{'section'} = $dump_scn;
             }
             elsif ($name =~ / ALLOC $sb /x) {
-                $configs{$name}{'section'} = 'Memory Management';
+                $configs{$name}{'section'} = $memory_scn;
             }
             elsif (   $name =~ /   STDIO | FCNTL | EOF | FFLUSH
                                 | $sb FILE $sb
@@ -920,42 +979,42 @@ sub parse_config_h {
                                                 | statfs
                                                 !x)
             {
-                $configs{$name}{'section'} = 'Filesystem configuration values';
+                $configs{$name}{'section'} = $filesystem_scn;
             }
             elsif ($name =~ / ^ SIG | SIGINFO | signal /ix) {
-                $configs{$name}{'section'} = 'Signals';
+                $configs{$name}{'section'} = $signals_scn;
             }
             elsif ($name =~ / $sb ( PROTO (?: TYPE)? S? ) $sb /x) {
-                $configs{$name}{'section'} = 'Prototype information';
+                $configs{$name}{'section'} = $prototypes_scn;
             }
             elsif (   $name =~ / ^ LOC_ /x
                     || $configs{$name}{pod} =~ /full path/i)
             {
-                $configs{$name}{'section'} = 'Paths to system commands';
+                $configs{$name}{'section'} = $paths_scn;
             }
             elsif ($name =~ / $sb LC_ | LOCALE | langinfo /xi) {
-                $configs{$name}{'section'} = 'Locales';
+                $configs{$name}{'section'} = $locales_scn;
             }
             elsif ($configs{$name}{pod} =~ /  GCC | C99 | C\+\+ /xi) {
-                $configs{$name}{'section'} = 'Compiler and Preprocessor information';
+                $configs{$name}{'section'} = $compiler_scn;
             }
             elsif ($name =~ / PASSW (OR)? D | ^ PW | ( PW | GR ) ENT /x)
             {
-                $configs{$name}{'section'} = 'Password and Group access';
+                $configs{$name}{'section'} = $password_scn;
             }
             elsif ($name =~ /  SOCKET | $sb SOCK /x) {
-                $configs{$name}{'section'} = 'Sockets configuration values';
+                $configs{$name}{'section'} = $sockets_scn;
             }
             elsif (   $name =~ / THREAD | MULTIPLICITY /x
                     || $configs{$name}{pod} =~ m/ \b pthread /ix)
             {
-                $configs{$name}{'section'} = 'Concurrency';
+                $configs{$name}{'section'} = $concurrency_scn;
             }
             elsif ($name =~ /  PERL | ^ PRIV | SITE | ARCH | BIN
                                 | VENDOR | ^ USE
                             /x)
             {
-                $configs{$name}{'section'} = 'Site configuration';
+                $configs{$name}{'section'} = $site_scn;
             }
             elsif (   $pod =~ / \b floating $dash_or_spaces point \b /ix
                     || $pod =~ / \b (double | single) $dash_or_spaces precision \b /ix
@@ -963,7 +1022,7 @@ sub parse_config_h {
                     || $pod =~ / \b (?: a | the | long ) \s+ (?: double | NV ) \b /ix)
             {
                 $configs{$name}{'section'} =
-                                    'Floating point configuration values';
+                                    $floating_scn;
             }
             else {
                 # Above are the specific sections.  The rest go into a
@@ -1007,7 +1066,7 @@ sub parse_config_h {
                     }
                 }
 
-                $configs{$name}{'section'} = 'General Configuration';
+                $configs{$name}{'section'} = $genconfig_scn;
             }
 
             my $section = $configs{$name}{'section'};
@@ -1561,11 +1620,11 @@ my $other_places = join ", ", map { "L<$_>" } sort dictionary_order qw( perlclib
 # The S< > makes things less densely packed, hence more readable
 my $has_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_defs;
 my $has_r_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_r_defs;
-$valid_sections{'General Configuration'}{footer} =~ s/__HAS_LIST__/$has_defs_text/;
-$valid_sections{'General Configuration'}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
+$valid_sections{$genconfig_scn}{footer} =~ s/__HAS_LIST__/$has_defs_text/;
+$valid_sections{$genconfig_scn}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
 
 my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @include_defs;
-$valid_sections{'General Configuration'}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
+$valid_sections{$genconfig_scn}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
 
 my $section_list = join "\n\n", map { "=item L</$_>" } sort dictionary_order keys %valid_sections;
 
