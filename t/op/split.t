@@ -703,3 +703,8 @@ fresh_perl_is('my @ary; @ary = split(/\w(?{ @ary[1000] = 1 })/, "abc");',
 fresh_perl_is('my @ary; @ary = split(/\w(?{ undef @ary })/, "abc");',
         '',{},'(@ary = split ...) survives an (undef @ary)');
 
+# check the (@ary = split) optimisation survives stack-not-refcounted bugs
+fresh_perl_is('our @ary; @ary = split(/\w(?{ *ary = 0 })/, "abc");',
+        '',{},'(@ary = split ...) survives @ary destruction via typeglob');
+fresh_perl_is('my $ary = []; @$ary = split(/\w(?{ $ary = [] })/, "abc");',
+        '',{},'(@ary = split ...) survives @ary destruction via reassignment');

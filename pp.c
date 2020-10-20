@@ -6034,6 +6034,9 @@ PP(pp_split)
             oldsave = PL_savestack_ix;
         }
 
+	/* Some defence against stack-not-refcounted bugs */
+	(void)sv_2mortal(SvREFCNT_inc_simple_NN(ary));
+
 	if ((mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied))) {
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj(MUTABLE_SV(ary), mg));
@@ -6356,7 +6359,7 @@ PP(pp_split)
     }
 
     PUTBACK;
-    LEAVE_SCOPE(oldsave); /* may undo an earlier SWITCHSTACK */
+    LEAVE_SCOPE(oldsave);
     SPAGAIN;
     if (realarray) {
         if (!mg) {
