@@ -6802,8 +6802,14 @@ test_Gconvert(SV * number, SV * num_digits)
         int len;
     CODE:
         len = (int) SvIV(num_digits);
-        if (len > 99) croak("Too long a number for test_Gconvert");
-        if (len < 0) croak("Too short a number for test_Gconvert");
+        if (sizeof(NV) == 8) {
+            if(len > 92)
+              croak("Too long a number for test_Gconvert");
+        }
+        else if (len > 91) /* exponent can be 1 digit larger */
+            croak("Too long a number for test_Gconvert");
+        if (len < 0)
+            croak("Too short a number for test_Gconvert");
         PERL_UNUSED_RESULT(Gconvert(SvNV(number), len,
                  0,    /* No trailing zeroes */
                  buffer));
