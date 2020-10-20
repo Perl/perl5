@@ -60,6 +60,10 @@ use Text::Tabs;
 use strict;
 use warnings;
 
+# 80 column terminal - 1 for pager adding a column; -7 for nroff
+# indent;
+my $max_width = 80 - 1 - 7;
+
 if (@ARGV) {
     my $workdir = shift;
     chdir $workdir
@@ -1315,10 +1319,121 @@ sub construct_missings_section {
             EOT
     }
 
-    $text .= "\n=over $description_indent\n";
+    $text .= "\n";
 
-    for my $missing (sort dictionary_order $missings_ref->@*) {
-        $text .= "\n=item C<$missing>\nX<$missing>\n";
+    # Sort the elements.
+    my @missings = sort dictionary_order $missings_ref->@*;
+
+    # Output the X<> references to the names, packed since they don't get
+    # displayed, but not too many per line so that when someone is editing the
+    # file, it doesn't run on
+    my $line_length = 0;
+    for my $missing (sort dictionary_order @missings) {
+        my $entry = "X<$missing>";
+        my $entry_length = length $entry;
+
+        # Don't loop forever if we have a verrry long name, and don't go too
+        # far to the right.
+        if ($line_length > 0 && $line_length + $entry_length > $max_width) {
+            $text .= "\n";
+            $line_length = 0;
+        }
+
+        $text .= $entry;
+        $line_length += $entry_length;
+    }
+
+    use integer;
+
+    # Look through all the elements in the list and see how many columns we
+    # could place them in the output what will fit in the available width.
+    my $min_spacer = 2;     # Need this much space between columns
+    my $columns;
+    my $rows;
+    my @col_widths;
+
+  COLUMN:
+    # We start with more columns, and work down until we find a number that
+    # can accommodate all the data.  This algorithm doesn't require the
+    # resulting columns to all have the same width.  This can allow for
+    # as tight of packing as the data will possibly allow.
+    for ($columns = 7; $columns > 1; $columns--) {
+
+        # For this many columns, we will need this many rows (final row might
+        # not be completely filled)
+        $rows = (@missings + $columns - 1) / $columns;
+
+        my $row_width = 0;
+        my $i = 0;  # Which missing element
+
+        # For each column ...
+        for my $col (0 .. $columns - 1) {
+
+            # Calculate how wide the column needs to be, which is based on the
+            # widest element in it
+            $col_widths[$col] = 0;
+
+            # Look through all the rows to find the widest element
+            for my $row (0 .. $rows - 1) {
+
+                # Skip if this row doesn't have an entry for this column
+                last if $i >= @missings;
+
+                # This entry occupies this many bytes.
+                my $this_width = length $missings[$i];
+
+                # All but the final column need a spacer between it and the
+                # next column over.
+                $this_width += $min_spacer if $col < $columns - 1;
+
+
+                # This column will need to have enough width to accommodate
+                # this element
+                if ($this_width > $col_widths[$col]) {
+
+                    # We can't have this many columns if the total width
+                    # exceeds the available; bail now and try fewer columns
+                    next COLUMN if $row_width + $this_width > $max_width;
+
+                    $col_widths[$col] = $this_width;
+                }
+
+                $i++;   # The next row will contain the next item
+            }
+
+            $row_width += $col_widths[$col];
+            next COLUMN if $row_width > $max_width;
+        }
+
+        # If we get this far, this many columns works
+        last;
+    }
+
+    # Here, have calculated the number of rows ($rows) and columns ($columns)
+    # required to list the elements.  @col_widths contains the width of each
+    # column.
+
+    $text .= "\n\n=over $description_indent\n\n";
+
+    # Assemble the output
+    for my $row (0 .. $rows - 1) {
+        for my $col (0 .. $columns - 1) {
+            $text .= " " if $col == 0;  # Indent one to mark as verbatim
+
+            my $index = $row + $rows * $col;  # Convert 2 dimensions to 1
+
+            # Skip if this row doesn't have an entry for this column
+            next if $index >= @missings;
+
+            my $element = $missings[$index];
+            $text .= $element;
+
+            # Add alignment spaces for all but final column
+            $text .= " " x ($col_widths[$col] - length $element)
+                                                        if $col < $columns - 1;
+        }
+
+        $text .= "\n";  # End of row
     }
 
     $text .= "\n=back\n";
