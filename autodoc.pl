@@ -1277,7 +1277,55 @@ sub docout ($$$) { # output the docs for one function
     print $fh "\n=for hackers\nFound in file $file\n";
 }
 
-sub sort_helper {
+sub construct_missings_section {
+    my ($pod_name, $missings_ref) = @_;
+    my $text = "";
+
+    return $text unless $missings_ref->@*;
+
+    $text .= <<~EOT;
+        =head1 Undocumented functions
+
+        EOT
+    if ($pod_name eq 'perlapi') {
+        $text .= <<~'EOT';
+            The following functions have been flagged as part of the public
+            API, but are currently undocumented.  Use them at your own risk,
+            as the interfaces are subject to change.  Functions that are not
+            listed in this document are not intended for public use, and
+            should NOT be used under any circumstances.
+
+            If you feel you need to use one of these functions, first send
+            email to L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
+            It may be that there is a good reason for the function not being
+            documented, and it should be removed from this list; or it may
+            just be that no one has gotten around to documenting it.  In the
+            latter case, you will be asked to submit a patch to document the
+            function.  Once your patch is accepted, it will indicate that the
+            interface is stable (unless it is explicitly marked otherwise) and
+            usable by you.
+            EOT
+    }
+    else {
+        $text .= <<~'EOT';
+            The following functions are currently undocumented.  If you use
+            one of them, you may wish to consider creating and submitting
+            documentation for it.
+            EOT
+    }
+
+    $text .= "\n=over $description_indent\n";
+
+    for my $missing (sort dictionary_order $missings_ref->@*) {
+        $text .= "\n=item C<$missing>\nX<$missing>\n";
+    }
+
+    $text .= "\n=back\n";
+
+    return $text;
+}
+
+sub dictionary_order {
     # Do a case-insensitive dictionary sort, with only alphabetics
     # significant, falling back to using everything for determinancy
     return (uc($a =~ s/[[:^alpha:]]//r) cmp uc($b =~ s/[[:^alpha:]]//r))
@@ -1298,7 +1346,7 @@ sub output {
 
     print $fh $header, "\n";
 
-    for my $section_name (sort sort_helper keys %valid_sections) {
+    for my $section_name (sort dictionary_order keys %valid_sections) {
         my $section_info = $dochash->{$section_name};
 
         # We allow empty sections in perlintern.
@@ -1323,7 +1371,7 @@ sub output {
 
 
         if ($section_info) {
-            for my $function_name (sort sort_helper keys %$section_info) {
+            for my $function_name (sort dictionary_order keys %$section_info) {
                 docout($fh, $function_name, $section_info->{$function_name});
             }
         }
@@ -1422,19 +1470,19 @@ my @missing_api = grep $funcflags{$_}{flags} =~ /A/
                     && !$docs{api}{$_}, keys %funcflags;
 push @missing_api, keys %missing_macros;
 
-my $other_places = join ", ", map { "L<$_>" } sort sort_helper qw( perlclib perlxs),
+my $other_places = join ", ", map { "L<$_>" } sort dictionary_order qw( perlclib perlxs),
                                                                keys %described_elsewhere;
 
 # The S< > makes things less densely packed, hence more readable
-my $has_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @has_defs;
-my $has_r_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @has_r_defs;
+my $has_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_defs;
+my $has_r_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_r_defs;
 $valid_sections{'General Configuration'}{footer} =~ s/__HAS_LIST__/$has_defs_text/;
 $valid_sections{'General Configuration'}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
 
-my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort sort_helper @include_defs;
+my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @include_defs;
 $valid_sections{'General Configuration'}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
 
-my $section_list = join "\n\n", map { "=item L</$_>" } sort sort_helper keys %valid_sections;
+my $section_list = join "\n\n", map { "=item L</$_>" } sort dictionary_order keys %valid_sections;
 
 output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |=encoding UTF-8
