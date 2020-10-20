@@ -1494,6 +1494,8 @@ translate_ft_to_time_t(FILETIME ft) {
     return mktime(&pt);
 }
 
+typedef DWORD (__stdcall *pGetFinalPathNameByHandleA_t)(HANDLE, LPSTR, DWORD, DWORD);
+
 static int
 win32_stat_low(HANDLE handle, const char *path, STRLEN len, Stat_t *sbuf) {
     DWORD type = GetFileType(handle);
@@ -1536,7 +1538,15 @@ win32_stat_low(HANDLE handle, const char *path, STRLEN len, Stat_t *sbuf) {
                 sbuf->st_mode = _S_IFREG;
 
                 if (!path) {
-                    len = GetFinalPathNameByHandleA(handle, path_buf, sizeof(path_buf), 0);
+                    pGetFinalPathNameByHandleA_t pGetFinalPathNameByHandleA =
+                        (pGetFinalPathNameByHandleA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "GetFinalPathNameByHandleA");
+                    if (pGetFinalPathNameByHandleA) {
+                        len = pGetFinalPathNameByHandleA(handle, path_buf, sizeof(path_buf), 0);
+                    }
+                    else {
+                        len = 0;
+                    }
+
                     /* < to ensure there's space for the \0 */
                     if (len && len < sizeof(path_buf)) {
                         path = path_buf;
@@ -1694,6 +1704,10 @@ typedef struct {
     } GenericReparseBuffer;
   } Data;
 } MY_REPARSE_DATA_BUFFER, *PMY_REPARSE_DATA_BUFFER;
+
+#ifndef IO_REPARSE_TAG_SYMLINK
+#  define IO_REPARSE_TAG_SYMLINK                  (0xA000000CL)
+#endif
 
 static BOOL
 is_symlink(HANDLE h) {

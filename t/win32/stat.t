@@ -12,6 +12,10 @@ use Fcntl ":seek";
 Win32::FsType() eq 'NTFS'
     or skip_all("need NTFS");
 
+my (undef, $maj, $min) = Win32::GetOSVersion();
+
+my $vista_or_later = $maj >= 6;
+
 my $tmpfile1 = tempfile();
 
 # test some of the win32 specific stat code, since we
@@ -71,7 +75,11 @@ unlink($tmpfile1); # no more hard link
 
 if (open my $fh, ">", "$tmpfile1.bat") {
     ok(-x "$tmpfile1.bat", 'batch file is "executable"');
-    ok(-x $fh, 'batch file handle is "executable"');
+    SKIP: {
+        skip "executable bit for handles needs vista or later", 1
+            unless $vista_or_later;
+        ok(-x $fh, 'batch file handle is "executable"');
+    }
     close $fh;
     unlink "$tmpfile1.bat";
 }
