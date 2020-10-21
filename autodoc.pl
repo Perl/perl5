@@ -354,7 +354,7 @@ Expected:
 (or 'apidoc_item')
 EOS
 
-    die "Only [$display_flags] allowed in apidoc_item"
+    die "Only [$display_flags] allowed in apidoc_item:\n$in"
                             if $is_item && $flags =~ /[^$display_flags]/;
 
     return ($name, $flags, $ret_type, $is_item, $proto_in_file, @args);
@@ -433,7 +433,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $missing{$element_name} = $file;
             }
 
-            die "flag $1 is not legal (for function $element_name (from $file))"
+            die "flag '$1' is not legal (for function $element_name (from $file))"
                         if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXxy] ) /x;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
@@ -491,7 +491,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
                                                         unless $element_name;
 
             # We accept blank lines between these, but nothing else;
-            die "apidoc_item lines must immediately follow apidoc lines"
+            die "apidoc_item lines must immediately follow apidoc lines for "
+              . " '$element_name' in $file"
                                                             if $text =~ /\S/;
             # Override this line with any info in embed.fnc
             my ($embed_flags, $embed_ret_type, @embed_args)
@@ -552,7 +553,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             my $is_link_only = ($flags =~ /h/);
             if ($is_link_only) {
                 if ($file_is_C) {
-                    die "Can't currently handle link with items to it" if @items;
+                    die "Can't currently handle link with items to it:\n$in" if @items;
                     redo;    # Don't put anything if C source
                 }
 
