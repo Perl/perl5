@@ -1843,9 +1843,15 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
     /* now apply the sign */
     if (negative)
 	result[2] = -result[2];
-#endif /* USE_PERL_ATOF */
     *value = result[2];
     return (char *)s;
+#else  /* USE_PERL_ATOF */
+    /* If you see this error you both don't have strtod (or configured -Ud_strtod or
+       or it's long double/quadmath equivalent) and disabled USE_PERL_ATOF, thus
+       removing any way for perl to convert strings to floating point numbers.
+    */
+# error No mechanism to convert strings to numbers available
+#endif
 }
 
 /*
