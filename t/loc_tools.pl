@@ -215,8 +215,13 @@ sub locales_enabled(;$) {
     # normally would be available
     return 0 if ! defined &DynaLoader::boot_DynaLoader;
 
-    # Don't test locales where they aren't safe.
-    return 0 unless  ${^SAFE_LOCALES};
+    # Don't test locales where they aren't safe.  On systems with unsafe
+    # threads, for the purposes of testing, we consider the main thread safe,
+    # and all other threads unsafe.
+    if (! ${^SAFE_LOCALES}) {
+        require threads;
+        return 0 if threads->tid() != 0;
+    }
 
     # If no setlocale, we need the POSIX 2008 alternatives
     if (! $Config{d_setlocale}) {
