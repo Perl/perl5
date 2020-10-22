@@ -11422,6 +11422,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     NV hexfp_mult = 1.0;
     UV high_non_zero = 0; /* highest digit */
     int non_zero_integer_digits = 0;
+    bool new_octal = FALSE;     /* octal with "0o" prefix */
 
     PERL_ARGS_ASSERT_SCAN_NUM;
 
@@ -11481,6 +11482,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 if (isALPHA_FOLD_EQ(*s, 'o')) {
                     s++;
                     just_zero = FALSE;
+                    new_octal = TRUE;
                 }
 	    }
 
@@ -11491,7 +11493,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 	    base = bases[shift];
 	    Base = Bases[shift];
-	    max  = maxima[shift];
+	    max  = new_octal ? "0o37777777777" : maxima[shift];
 
 	    /* read the rest of the number */
 	    for (;;) {
@@ -11818,6 +11820,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 s = start + 2;
                 break;
             case 3:
+                if (new_octal) {
+                    *d++ = 'o';
+                    s = start + 2;
+                    break;
+                }
                 s = start + 1;
                 break;
             case 1:
