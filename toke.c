@@ -11366,7 +11366,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
   \d(_?\d)*(\.(\d(_?\d)*)?)?[Ee][\+\-]?(\d(_?\d)*)	12 12.34 12.
   \.\d(_?\d)*[Ee][\+\-]?(\d(_?\d)*)			.34
   0b[01](_?[01])*                                       binary integers
-  0[0-7](_?[0-7])*                                      octal integers
+  0o?[0-7](_?[0-7])*                                    octal integers
   0x[0-9A-Fa-f](_?[0-9A-Fa-f])*                         hexadecimal integers
   0x[0-9A-Fa-f](_?[0-9A-Fa-f])*(?:\.\d*)?p[+-]?[0-9]+   hexadecimal floats
 
@@ -11478,6 +11478,10 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    else {
 		shift = 3;
 		s++;
+                if (isALPHA_FOLD_EQ(*s, 'o')) {
+                    s++;
+                    just_zero = FALSE;
+                }
 	    }
 
 	    if (*s == '_') {
@@ -11755,8 +11759,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 }
             }
 
-            if (shift != 3 && !has_digs) {
-                /* 0x or 0b with no digits, treat it as an error.
+            if (!just_zero && !has_digs) {
+                /* 0x, 0o or 0b with no digits, treat it as an error.
                    Originally this backed up the parse before the b or
                    x, but that has the potential for silent changes in
                    behaviour, like for: "0x.3" and "0x+$foo".
@@ -11766,7 +11770,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 if (*d) ++d; /* so the user sees the bad non-digit */
                 PL_bufptr = (char *)d; /* so yyerror reports the context */
                 yyerror(Perl_form(aTHX_ "No digits found for %s literal",
-                                  shift == 4 ? "hexadecimal" : "binary"));
+                                  base));
                 PL_bufptr = oldbp;
             }
 
