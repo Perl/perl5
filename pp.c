@@ -3099,8 +3099,12 @@ PP(pp_oct)
         flags |= PERL_SCAN_DISALLOW_PREFIX;
         result_uv = grok_bin (tmps, &len, &flags, &result_nv);
     }
-    else
+    else {
+        if (isALPHA_FOLD_EQ(*tmps, 'o')) {
+            tmps++, len--;
+        }
         result_uv = grok_oct (tmps, &len, &flags, &result_nv);
+    }
 
     if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
         SETn(result_nv);
