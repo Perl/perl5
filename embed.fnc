@@ -558,6 +558,13 @@
 :   ;  autodoc.pl adds a terminating semi-colon to the usage example in the
 :      documentation.
 :
+:   #  The number sign flag indicates that this is a pre-processor symbol that
+:      is just #define'd or #undef'd.  (Mnemonic: The ';' indicates the end of
+:      statement, with no definition to follow the symbol name.
+:
+:   ?  The question mark flag is used internally by Devel::PPPort to indicate
+:      that it does not have enough information to generate a proper test case.
+:
 : In this file, pointer parameters that must not be passed NULLs should be
 : prefixed with NN.
 :

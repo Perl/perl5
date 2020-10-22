@@ -529,12 +529,18 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
 
             die "flag '$1' is not legal (for function $element_name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSUuWXxy;] ) /x;
+                        if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSsUuWXxy;#] ) /x;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                             if $flags =~ /u/ && $flags !~ /[my]/;
             warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
                         if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
+
+            if ($flags =~ /#/) {
+                die "Return type must be empty for '$element_name'"
+                                                                   if $ret_type;
+                $ret_type = '#ifdef';
+            }
 
             if (exists $seen{$element_name} && $flags !~ /h/) {
                 die ("'$element_name' in $file was already documented in $seen{$element_name}");
