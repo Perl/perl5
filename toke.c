@@ -11460,7 +11460,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		"",
 		"037777777777",
 		"0xffffffff" };
-	    const char *base, *Base, *max;
 
 	    /* check for hex */
 	    if (isALPHA_FOLD_EQ(s[1], 'x')) {
@@ -11490,10 +11489,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		WARN_ABOUT_UNDERSCORE();
 	       lastub = s++;
 	    }
-
-	    base = bases[shift];
-	    Base = Bases[shift];
-	    max  = new_octal ? "0o37777777777" : maxima[shift];
 
 	    /* read the rest of the number */
 	    for (;;) {
@@ -11558,7 +11553,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 			    n = (NV) u;
 			    Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
 					     "Integer overflow in %s number",
-					     base);
+                                             bases[shift]);
 			} else
 			    u = x | b;		/* add the digit to the end */
 		    }
@@ -11772,7 +11767,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 if (*d) ++d; /* so the user sees the bad non-digit */
                 PL_bufptr = (char *)d; /* so yyerror reports the context */
                 yyerror(Perl_form(aTHX_ "No digits found for %s literal",
-                                  base));
+                                  bases[shift]));
                 PL_bufptr = oldbp;
             }
 
@@ -11780,7 +11775,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		if (n > 4294967295.0)
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
 				   "%s number > %s non-portable",
-				   Base, max);
+                                   Bases[shift],
+                                   new_octal ? "0o37777777777" : maxima[shift]);
 		sv = newSVnv(n);
 	    }
 	    else {
@@ -11788,7 +11784,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		if (u > 0xffffffff)
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
 				   "%s number > %s non-portable",
-				   Base, max);
+                                   Bases[shift],
+                                   new_octal ? "0o37777777777" : maxima[shift]);
 #endif
 		sv = newSVuv(u);
 	    }
