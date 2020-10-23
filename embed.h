@@ -1339,7 +1339,9 @@
 #define magic_copycallchecker(a,b,c,d,e)	Perl_magic_copycallchecker(aTHX_ a,b,c,d,e)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
 #define magic_freearylen_p(a,b)	Perl_magic_freearylen_p(aTHX_ a,b)
+#define magic_freemglob(a,b)	Perl_magic_freemglob(aTHX_ a,b)
 #define magic_freeovrld(a,b)	Perl_magic_freeovrld(aTHX_ a,b)
+#define magic_freeutf8(a,b)	Perl_magic_freeutf8(aTHX_ a,b)
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)
 #define magic_getarylen(a,b)	Perl_magic_getarylen(aTHX_ a,b)
 #define magic_getdebugvar(a,b)	Perl_magic_getdebugvar(aTHX_ a,b)
@@ -2006,6 +2008,7 @@
 #define padnamelist_dup(a,b)	Perl_padnamelist_dup(aTHX_ a,b)
 #  endif
 #  if defined(USE_LOCALE_COLLATE)
+#define magic_freecollxfrm(a,b)	Perl_magic_freecollxfrm(aTHX_ a,b)
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
 #ifndef NO_MATHOMS
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)

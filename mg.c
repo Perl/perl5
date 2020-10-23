@@ -554,16 +554,10 @@ S_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
     if (vtbl && vtbl->svt_free)
 	vtbl->svt_free(aTHX_ sv, mg);
 
-    if (mg->mg_type == PERL_MAGIC_collxfrm && mg->mg_len >= 0)
-        /* collate magic uses string len not buffer len, so
-         * free even with mg_len == 0 */
+    if (mg->mg_len > 0)
         Safefree(mg->mg_ptr);
-    else if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-	if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
-	    Safefree(mg->mg_ptr);
-	else if (mg->mg_len == HEf_SVKEY)
-	    SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
-    }
+    else if (mg->mg_len == HEf_SVKEY)
+        SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
 
     if (mg->mg_flags & MGf_REFCOUNTED)
 	SvREFCNT_dec(mg->mg_obj);
@@ -2604,6 +2598,23 @@ Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+
+int
+Perl_magic_freemglob(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_FREEMGLOB;
+    PERL_UNUSED_ARG(sv);
+
+    /* glob magic uses mg_len as a string length rather than a buffer
+     * length, so we need to free even with mg_len == 0: hence we can't
+     * rely on standard magic free handling */
+    assert(mg->mg_type == PERL_MAGIC_regex_global && mg->mg_len >= -1);
+    Safefree(mg->mg_ptr);
+    mg->mg_ptr = NULL;
+    return 0;
+}
+
+
 int
 Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -2648,6 +2659,21 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
     }
     return 0;
 }
+
+int
+Perl_magic_freecollxfrm(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_FREECOLLXFRM;
+    PERL_UNUSED_ARG(sv);
+
+    /* Collate magic uses mg_len as a string length rather than a buffer
+     * length, so we need to free even with mg_len == 0: hence we can't
+     * rely on standard magic free handling */
+    assert(mg->mg_type == PERL_MAGIC_collxfrm && mg->mg_len >= 0);
+    Safefree(mg->mg_ptr);
+    mg->mg_ptr = NULL;
+    return 0;
+}
 #endif /* USE_LOCALE_COLLATE */
 
 /* Just clear the UTF-8 cache data. */
@@ -2662,6 +2688,22 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
     mg->mg_len = -1;		/* The mg_len holds the len cache. */
     return 0;
 }
+
+int
+Perl_magic_freeutf8(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_FREEUTF8;
+    PERL_UNUSED_ARG(sv);
+
+    /* utf8 magic uses mg_len as a string length rather than a buffer
+     * length, so we need to free even with mg_len == 0: hence we can't
+     * rely on standard magic free handling */
+    assert(mg->mg_type == PERL_MAGIC_utf8 && mg->mg_len >= -1);
+    Safefree(mg->mg_ptr);
+    mg->mg_ptr = NULL;
+    return 0;
+}
+
 
 int
 Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)

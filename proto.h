@@ -1857,8 +1857,14 @@ PERL_CALLCONV int	Perl_magic_existspack(pTHX_ SV* sv, const MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_freearylen_p(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_FREEARYLEN_P	\
 	assert(sv); assert(mg)
+PERL_CALLCONV int	Perl_magic_freemglob(pTHX_ SV* sv, MAGIC* mg);
+#define PERL_ARGS_ASSERT_MAGIC_FREEMGLOB	\
+	assert(sv); assert(mg)
 PERL_CALLCONV int	Perl_magic_freeovrld(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_FREEOVRLD	\
+	assert(sv); assert(mg)
+PERL_CALLCONV int	Perl_magic_freeutf8(pTHX_ SV* sv, MAGIC* mg);
+#define PERL_ARGS_ASSERT_MAGIC_FREEUTF8	\
 	assert(sv); assert(mg)
 PERL_CALLCONV int	Perl_magic_get(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_GET	\
@@ -6780,6 +6786,9 @@ PERL_CALLCONV bool	Perl__is_cur_LC_category_utf8(pTHX_ int category);
 #define PERL_ARGS_ASSERT__IS_CUR_LC_CATEGORY_UTF8
 #endif
 #if defined(USE_LOCALE_COLLATE)
+PERL_CALLCONV int	Perl_magic_freecollxfrm(pTHX_ SV* sv, MAGIC* mg);
+#define PERL_ARGS_ASSERT_MAGIC_FREECOLLXFRM	\
+	assert(sv); assert(mg)
 PERL_CALLCONV int	Perl_magic_setcollxfrm(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_SETCOLLXFRM	\
 	assert(sv); assert(mg)
