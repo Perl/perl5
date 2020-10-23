@@ -414,6 +414,11 @@ struct RExC_state_t {
                                      }                                     \
                              } STMT_END
 
+/* /u is to be chosen if we are supposed to use Unicode rules, or if the
+ * pattern is in UTF-8.  This latter condition is in case the outermost rules
+ * are locale.  See GH #17278 */
+#define toUSE_UNI_CHARSET_NOT_DEPENDS (RExC_uni_semantics || UTF)
+
 /* Change from /d into /u rules, and restart the parse.  RExC_uni_semantics is
  * a flag that indicates we need to override /d with /u as a result of
  * something in the pattern.  It should only be used in regards to calling
@@ -7736,7 +7741,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     rx_flags = orig_rx_flags;
 
-    if (   (UTF || RExC_uni_semantics)
+    if (   toUSE_UNI_CHARSET_NOT_DEPENDS
         && initial_charset == REGEX_DEPENDS_CHARSET)
     {
 
@@ -10819,7 +10824,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         RExC_parse++;
         has_use_defaults = TRUE;
         STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
-        cs = (RExC_uni_semantics)
+        cs = (toUSE_UNI_CHARSET_NOT_DEPENDS)
              ? REGEX_UNICODE_CHARSET
              : REGEX_DEPENDS_CHARSET;
         set_regex_charset(&RExC_flags, cs);
@@ -10827,7 +10832,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
     else {
         cs = get_regex_charset(RExC_flags);
         if (   cs == REGEX_DEPENDS_CHARSET
-            && RExC_uni_semantics)
+            && (toUSE_UNI_CHARSET_NOT_DEPENDS))
         {
             cs = REGEX_UNICODE_CHARSET;
         }
@@ -10911,7 +10916,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                  * pattern (or target, not known until runtime) are
                  * utf8, or something in the pattern indicates unicode
                  * semantics */
-                cs = (RExC_uni_semantics)
+                cs = (toUSE_UNI_CHARSET_NOT_DEPENDS)
                      ? REGEX_UNICODE_CHARSET
                      : REGEX_DEPENDS_CHARSET;
                 has_charset_modifier = DEPENDS_PAT_MOD;
@@ -12447,7 +12452,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         /* restore original flags, but keep (?p) and, if we've encountered
          * something in the parse that changes /d rules into /u, keep the /u */
 	RExC_flags = oregflags | (RExC_flags & RXf_PMf_KEEPCOPY);
-        if (DEPENDS_SEMANTICS && RExC_uni_semantics) {
+        if (DEPENDS_SEMANTICS && toUSE_UNI_CHARSET_NOT_DEPENDS) {
             set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
         }
 	if (RExC_parse >= RExC_end || UCHARAT(RExC_parse) != ')') {

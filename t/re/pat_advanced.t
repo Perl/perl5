@@ -2562,6 +2562,20 @@ EOF
                          {}, "GH #17734");
     }
 
+    {   # GH $17278 assertion fails
+        fresh_perl_is('use locale;
+                       my $A_grave = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
+                       utf8::encode($A_grave);
+                       my $a_grave = "\N{LATIN SMALL LETTER A WITH GRAVE}";
+                       utf8::encode($a_grave);
+
+                       my $z="q!$a_grave! =~ m!(?^i)[$A_grave]!";
+                       utf8::decode($z);
+                       print eval $z, "\n";',
+                       1,
+                       {}, "GH #17278");
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
