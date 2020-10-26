@@ -135,6 +135,7 @@ if ($^O eq 'cygwin') {
 print "# \$^O = $^O, atime = $atime, mtime = $mtime\n";
 
 my $skip_atime = $^O eq 'netbsd' && tempfile_has_noatime_mount();
+$skip_atime = 1 if $^O eq 'dragonfly'; # noatime by default
 
 if ($skip_atime) {
     printf("# Skipping atime tests because tempfiles seem to be in a filesystem mounted with 'noatime' ($^O)\n'");

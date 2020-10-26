@@ -500,7 +500,7 @@ sub check_utime_result {
         else {
             # Operating systems whose filesystems may be mounted with the noatime option
             # RT 132663
-            my %noatime_oses = map { $_ => 1 } ( qw| haiku netbsd | );
+            my %noatime_oses = map { $_ => 1 } ( qw| haiku netbsd dragonfly | );
             if ($^O =~ /\blinux\b/i) {
                 note("# Maybe stat() cannot get the correct atime, ".
                     "as happens via NFS on linux?");
