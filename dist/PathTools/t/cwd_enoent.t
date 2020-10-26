@@ -26,6 +26,8 @@ foreach my $type (qw(regular perl)) {
 	    if $type eq "perl" &&
 		!(($Config{prefix} =~ m/\//) && $^O ne "cygwin");
 
+        # https://github.com/Perl/perl5/issues/16525
+        # https://bugs.dragonflybsd.org/issues/3250
 	skip "getcwd() doesn't fail on non-existent directories on this platform", 4
 	    if $type eq 'regular' && $^O eq 'dragonfly';
 
