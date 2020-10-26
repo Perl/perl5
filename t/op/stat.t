@@ -147,8 +147,13 @@ SKIP: {
         # expect netware to be the same ...
         skip "No ctime concept on this OS", 2
                                      if $Is_MSWin32 || $ufs_no_ctime;
-
-        if( !ok($mtime, 'hard link mtime') ||
+        my $ok_mtime = ok($mtime, 'hard link mtime');
+        local our $TODO;
+        # https://bugs.dragonflybsd.org/issues/3251
+        # this might be hammer/hammer2 specific
+        $TODO = "DragonFly BSD doesn't touch ctime on link()/chmod"
+            if $^O eq "dragonfly" && $Config{myuname} =~ /5\.8/;
+        if(!$ok_mtime ||
             !isnt($mtime, $ctime, 'hard link ctime != mtime') ) {
             print STDERR <<DIAG;
 # Check if you are on a tmpfs of some sort.  Building in /tmp sometimes
