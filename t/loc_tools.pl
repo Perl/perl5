@@ -325,11 +325,11 @@ sub find_locales ($;$) {
     # multiple) for all of them.  Each category can be a name (like 'LC_ALL'
     # or simply 'ALL') or the C enum value for the category.
 
-    my $categories = shift;
+    my $input_categories = shift;
     my $allow_incompatible = shift // 0;
 
-    $categories = [ $categories ] unless ref $categories;
-    return unless locales_enabled(\$categories);
+    my @categories = (ref $input_categories) ? $input_categories->@* : $input_categories;
+    return unless locales_enabled(\@categories);
 
     # Note, the subroutine call above converts the $categories into a form
     # suitable for _trylocale().
@@ -347,11 +347,11 @@ sub find_locales ($;$) {
     return if ($^O =~ /^uwin/);
 
     my @Locale;
-    _trylocale("C", $categories, \@Locale, $allow_incompatible);
-    _trylocale("POSIX", $categories, \@Locale, $allow_incompatible);
+    _trylocale("C", \@categories, \@Locale, $allow_incompatible);
+    _trylocale("POSIX", \@categories, \@Locale, $allow_incompatible);
 
     if ($Config{d_has_C_UTF8} && $Config{d_has_C_UTF8} eq 'true') {
-        _trylocale("C.UTF-8", $categories, \@Locale, $allow_incompatible);
+        _trylocale("C.UTF-8", \@categories, \@Locale, $allow_incompatible);
     }
 
     # There's no point in looking at anything more if we know that setlocale
@@ -359,13 +359,13 @@ sub find_locales ($;$) {
     return sort @Locale if defined $Config{d_setlocale_accepts_any_locale_name};
 
     foreach (1..16) {
-        _trylocale("ISO8859-$_", $categories, \@Locale, $allow_incompatible);
-        _trylocale("iso8859$_", $categories, \@Locale, $allow_incompatible);
-        _trylocale("iso8859-$_", $categories, \@Locale, $allow_incompatible);
-        _trylocale("iso_8859_$_", $categories, \@Locale, $allow_incompatible);
-        _trylocale("isolatin$_", $categories, \@Locale, $allow_incompatible);
-        _trylocale("isolatin-$_", $categories, \@Locale, $allow_incompatible);
-        _trylocale("iso_latin_$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("ISO8859-$_", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("iso8859$_", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("iso8859-$_", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("iso_8859_$_", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("isolatin$_", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("isolatin-$_", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("iso_latin_$_", \@categories, \@Locale, $allow_incompatible);
     }
 
     # Sanitize the environment so that we can run the external 'locale'
@@ -386,7 +386,7 @@ sub find_locales ($;$) {
             # locales will cause all IO hadles to default to (assume) utf8
             next unless utf8::valid($_);
             chomp;
-            _trylocale($_, $categories, \@Locale, $allow_incompatible);
+            _trylocale($_, \@categories, \@Locale, $allow_incompatible);
         }
         close(LOCALES);
     } elsif ($^O eq 'VMS'
@@ -398,7 +398,7 @@ sub find_locales ($;$) {
         opendir(LOCALES, "SYS\$I18N_LOCALE:");
         while ($_ = readdir(LOCALES)) {
             chomp;
-            _trylocale($_, $categories, \@Locale, $allow_incompatible);
+            _trylocale($_, \@categories, \@Locale, $allow_incompatible);
         }
         close(LOCALES);
     } elsif (($^O eq 'openbsd' || $^O eq 'bitrig' ) && -e '/usr/share/locale') {
@@ -410,7 +410,7 @@ sub find_locales ($;$) {
         opendir(LOCALES, '/usr/share/locale');
         while ($_ = readdir(LOCALES)) {
             chomp;
-            _trylocale($_, $categories, \@Locale, $allow_incompatible);
+            _trylocale($_, \@categories, \@Locale, $allow_incompatible);
         }
         close(LOCALES);
     } else { # Final fallback.  Try our list of locales hard-coded here
@@ -441,30 +441,30 @@ sub find_locales ($;$) {
                                                      unless defined $locale_name;
             my @enc = _decode_encodings($encodings);
             foreach my $loc (split(/ /, $locale_name)) {
-                _trylocale($loc, $categories, \@Locale, $allow_incompatible);
+                _trylocale($loc, \@categories, \@Locale, $allow_incompatible);
                 foreach my $enc (@enc) {
-                    _trylocale("$loc.$enc", $categories, \@Locale,
+                    _trylocale("$loc.$enc", \@categories, \@Locale,
                                                             $allow_incompatible);
                 }
                 $loc = lc $loc;
                 foreach my $enc (@enc) {
-                    _trylocale("$loc.$enc", $categories, \@Locale,
+                    _trylocale("$loc.$enc", \@categories, \@Locale,
                                                             $allow_incompatible);
                 }
             }
             foreach my $lang (split(/ /, $language_codes)) {
-                _trylocale($lang, $categories, \@Locale, $allow_incompatible);
+                _trylocale($lang, \@categories, \@Locale, $allow_incompatible);
                 foreach my $country (split(/ /, $country_codes)) {
                     my $lc = "${lang}_${country}";
-                    _trylocale($lc, $categories, \@Locale, $allow_incompatible);
+                    _trylocale($lc, \@categories, \@Locale, $allow_incompatible);
                     foreach my $enc (@enc) {
-                        _trylocale("$lc.$enc", $categories, \@Locale,
+                        _trylocale("$lc.$enc", \@categories, \@Locale,
                                                             $allow_incompatible);
                     }
                     my $lC = "${lang}_\U${country}";
-                    _trylocale($lC, $categories, \@Locale, $allow_incompatible);
+                    _trylocale($lC, \@categories, \@Locale, $allow_incompatible);
                     foreach my $enc (@enc) {
-                        _trylocale("$lC.$enc", $categories, \@Locale,
+                        _trylocale("$lC.$enc", \@categories, \@Locale,
                                                             $allow_incompatible);
                     }
                 }
