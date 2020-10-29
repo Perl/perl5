@@ -2669,9 +2669,12 @@ Perl_magic_freecollxfrm(pTHX_ SV *sv, MAGIC *mg)
     /* Collate magic uses mg_len as a string length rather than a buffer
      * length, so we need to free even with mg_len == 0: hence we can't
      * rely on standard magic free handling */
-    assert(mg->mg_type == PERL_MAGIC_collxfrm && mg->mg_len >= 0);
-    Safefree(mg->mg_ptr);
-    mg->mg_ptr = NULL;
+    if (mg->mg_len >= 0) {
+        assert(mg->mg_type == PERL_MAGIC_collxfrm);
+        Safefree(mg->mg_ptr);
+        mg->mg_ptr = NULL;
+    }
+
     return 0;
 }
 #endif /* USE_LOCALE_COLLATE */

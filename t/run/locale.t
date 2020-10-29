@@ -510,4 +510,29 @@ EOF
 
 }
 
+SKIP:
+{
+    use locale;
+    # look for an english locale (so a < B, hopefully)
+    my ($en) = grep /^en_/, @locales;
+    POSIX::setlocale(LC_COLLATE, $en);
+    unless ("a" lt "B") {
+        skip "didn't find a suitable locale", 1;
+    }
+    fresh_perl_is(<<'EOF', "ok\n", { args => [ $en ] }, "check for failed assertion");
+use locale ':collate';
+use POSIX qw(setlocale LC_COLLATE);
+if (setlocale(LC_COLLATE, shift)) {
+     my $x = "a";
+     my $y = "B";
+     print $x lt $y ? "ok\n" : "not ok\n";
+     $x = "c"; # should empty the collxfrm magic but not remove it
+     # which the free code asserts on
+}
+else {
+     print "ok\n";
+}
+EOF
+}
+
 done_testing();
