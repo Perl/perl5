@@ -15,6 +15,7 @@ use Test::More tests => 96;
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
 use strict 'subs';
+use warnings;
 
 sub next_test {
     my $builder = Test::More->builder;
