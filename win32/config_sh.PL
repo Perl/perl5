@@ -117,16 +117,6 @@ elsif ($opt{cc} =~ /\bgcc\b/) {
     $int64  = 'long long';
 }
 
-# set large files options
-if ($opt{uselargefiles} eq 'define') {
-    $opt{lseeksize} = 8;
-    $opt{lseektype} = $int64;
-}
-else {
-    $opt{lseeksize} = 4;
-    $opt{lseektype} = 'long';
-}
-
 # set 64-bit options
 if ($opt{WIN64} eq 'define') {
     $opt{d_atoll} = 'define';
