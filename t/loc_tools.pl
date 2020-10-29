@@ -12,6 +12,7 @@
 
 use Config;
 use strict;
+use warnings;
 
 eval { require POSIX; import POSIX 'locale_h'; };
 my $has_locale_h = ! $@;
