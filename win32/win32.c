@@ -1526,11 +1526,7 @@ win32_stat(const char *path, Stat_t *sbuf)
     }
 
     /* path will be mapped correctly above */
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     res = _stati64(path, sbuf);
-#else
-    res = stat(path, sbuf);
-#endif
     sbuf->st_nlink = nlink;
 
     if (res < 0) {
@@ -2853,20 +2849,15 @@ win32_fflush(FILE *pf)
 DllExport Off_t
 win32_ftell(FILE *pf)
 {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     fpos_t pos;
     if (fgetpos(pf, &pos))
 	return -1;
     return (Off_t)pos;
-#else
-    return ftell(pf);
-#endif
 }
 
 DllExport int
 win32_fseek(FILE *pf, Off_t offset,int origin)
 {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     fpos_t pos;
     switch (origin) {
     case SEEK_CUR:
@@ -2886,9 +2877,6 @@ win32_fseek(FILE *pf, Off_t offset,int origin)
 	return -1;
     }
     return fsetpos(pf, &offset);
-#else
-    return fseek(pf, (long)offset, origin);
-#endif
 }
 
 DllExport int
@@ -2967,11 +2955,7 @@ win32_abort(void)
 DllExport int
 win32_fstat(int fd, Stat_t *sbufptr)
 {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     return _fstati64(fd, sbufptr);
-#else
-    return fstat(fd, sbufptr);
-#endif
 }
 
 DllExport int
@@ -3256,7 +3240,6 @@ win32_setmode(int fd, int mode)
 DllExport int
 win32_chsize(int fd, Off_t size)
 {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     int retval = 0;
     Off_t cur, end, extend;
 
@@ -3296,29 +3279,18 @@ win32_chsize(int fd, Off_t size)
     }
     win32_lseek(fd, cur, SEEK_SET);
     return retval;
-#else
-    return chsize(fd, (long)size);
-#endif
 }
 
 DllExport Off_t
 win32_lseek(int fd, Off_t offset, int origin)
 {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     return _lseeki64(fd, offset, origin);
-#else
-    return lseek(fd, (long)offset, origin);
-#endif
 }
 
 DllExport Off_t
 win32_tell(int fd)
 {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
     return _telli64(fd);
-#else
-    return tell(fd);
-#endif
 }
 
 DllExport int
