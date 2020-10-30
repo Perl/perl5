@@ -18100,6 +18100,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 	else
 	    xop = INT2PTR(XOP *, SvIV(HeVAL(he)));
     }
+
     {
 	XOPRETANY any;
 	if(field == XOPe_xop_ptr) {
@@ -18121,7 +18122,10 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = xop->xop_peep;
 		    break;
 		default:
-		    NOT_REACHED; /* NOTREACHED */
+                  field_panic:
+                    Perl_croak(aTHX_
+                        "panic: custom_op_get_field(): invalid field %d\n",
+                        (int)field);
 		    break;
 		}
 	    } else {
@@ -18139,17 +18143,11 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = XOPd_xop_peep;
 		    break;
 		default:
-		    NOT_REACHED; /* NOTREACHED */
+                    goto field_panic;
 		    break;
 		}
 	    }
 	}
-        /* On some platforms (HP-UX, IA64) gcc emits a warning for this function:
-         * op.c: In function 'Perl_custom_op_get_field':
-         * op.c:...: warning: 'any.xop_name' may be used uninitialized in this function [-Wmaybe-uninitialized]
-         * This is because on those platforms (with -DEBUGGING) NOT_REACHED
-         * expands to assert(0), which expands to ((0) ? (void)0 :
-         * __assert(...)), and gcc doesn't know that __assert can never return. */
 	return any;
     }
 }
