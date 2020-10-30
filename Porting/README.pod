@@ -274,6 +274,10 @@ This script outputs the added tests between the two versions of Perl.
 
 Template for F<perldelta>.
 
+=head2 F<perldocstyle.pod>
+
+A style guide for core Perl documentation.
+
 =head2 F<perlhist_calculate.pl>
 
 Generates info for F<perlhist> from this perl tree.
