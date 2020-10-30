@@ -5374,7 +5374,7 @@ Porting/mksample		Generate Porting/config_H and Porting/config.sh
 Porting/new-perldelta.pl	Generate a new perldelta
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests
 Porting/perldelta_template.pod	Template for creating new perldelta.pod files
-Porting/perldocstyle.pod    Style guide for core Perl documentation
+Porting/perldocstyle.pod		Style guide for core Perl docs
 Porting/perlhist_calculate.pl		Perform calculations to update perlhist
 Porting/pod_lib.pl		Code for handling generated pods
 Porting/pod_rules.pl		generate lists of pod files for Makefiles
