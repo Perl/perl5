@@ -444,6 +444,7 @@ integer formats:
  0xff                # hex
  0xdead_beef         # more hex
  0377                # octal (only numbers, begins with 0)
+ 0o12_345            # alternative octal (introduced in Perl 5.XXX)
  0b011011            # binary
  0x1.999ap-4         # hexadecimal floating point (the 'p' is required)
 
