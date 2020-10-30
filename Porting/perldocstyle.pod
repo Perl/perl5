@@ -28,7 +28,8 @@ the L<C<perlfunc>|perlfunc> file.
 
 =back
 
-This guide will hereafter refer to user-manual section files as I, per Unix convention.
+This guide will hereafter refer to user-manual section files as I<man
+pages>, per Unix convention.
 
 =head2 Purpose of this guide
 
@@ -83,10 +84,11 @@ with Perl itself.
 For a comprehensive reference to Pod syntax, see L<C<perlpod>|perlpod>.
 For the sake of reading this guide, familiarity with the Pod syntax for
 section headers (C<=head2>, et cetera) and for inline text formatting
-(C<<< CE<lt>like thisE<gt> >>>) should suffice.
+(C<CE<lt>like thisE<gt>>) should suffice.
 
 Perl programmers also use Pod to document their own scripts, libraries,
-and modules. This use of Pod has its own style guide, outlined by L<C<perlpodstyle>|perlpodstyle>.
+and modules. This use of Pod has its own style guide, outlined by
+L<C<perlpodstyle>|perlpodstyle>.
 
 =head2 Choice of language: American English
 
@@ -192,7 +194,7 @@ exhaustive list of every obscure method or alternate syntax available.
 Pages should conclude, when appropriate, with a SEE ALSO section
 containing hyperlinks to relevant sections of Perl's manual, other Unix
 man pages, or appropriate web pages. Hyperlink each such cross-reference via
-C<<< LE<lt>...E<gt> >>>.
+C<LE<lt>...E<gt>>.
 
 What other sections to include depends entirely upon the topic at hand.
 Authors should feel free to include further C<=head1>-level sections,
@@ -262,16 +264,16 @@ so:
 
 =head3 Inline code and literals
 
-Within a paragraph of text, use C<<< CE<lt>...E<gt> >>> when quoting or
+Within a paragraph of text, use C<CE<lt>...E<gt>> when quoting or
 referring to any bit of Perl code--even if it is only one character
 long.
 
 For instance, when referring within an explanatory paragraph to Perl's
-operator for adding two numbers together, you'd write "C<<< CE<lt>+E<gt> >>>".
+operator for adding two numbers together, you'd write "C<CE<lt>+E<gt>>".
 
 =head3 Function names
 
-Use C<<< CE<lt>...E<gt> >>> to render all Perl function names in monospace,
+Use C<CE<lt>...E<gt>> to render all Perl function names in monospace,
 whenever they appear in text.
 
 Unless you need to specifically quote a function call with a list of
@@ -282,7 +284,7 @@ function, write it as "C<print>", not "C<print()>".
 =head3 Function arguments
 
 Represent functions' expected arguments in all-caps, with no sigils, and
-using C<<< CE<lt>...E<gt> >>> to render them in monospace. These arguments
+using C<CE<lt>...E<gt>> to render them in monospace. These arguments
 should have short names making their nature and purpose clear.
 Convention specifies a few ones commonly seen throughout Perl's
 documentation:
@@ -350,18 +352,18 @@ When referring to a Unix program or C function with its own man page
 parentheses. For example: C<malloc(3)>, or C<mkdir(1)>.
 
 If mentioning this program for the first time within a man page or
-section, make it a cross reference, e.g. C<<< LE<lt>malloc(3)E<gt> >>>.
+section, make it a cross reference, e.g. C<LE<lt>malloc(3)E<gt>>.
 
 Do not otherwise style this text.
 
 =head3 Cross-references and hyperlinks
 
-Make generous use of Pod's C<<< LE<lt>...E<gt> >>> syntax to create hyperlinks
+Make generous use of Pod's C<LE<lt>...E<gt>> syntax to create hyperlinks
 to other parts of the current man page, or to other documents entirely
 -- whether elsewhere on the reader's computer, or somewhere on the
 internet, via URL.
 
-Use C<<< LE<lt>...E<gt> >>> to link to another section of the current man page
+Use C<LE<lt>...E<gt>> to link to another section of the current man page
 when mentioning it, and make use of its page-and-section syntax to link to
 the most specific section of a separate page within Perl's
 documentation. Generally, the first time you refer to a specific
@@ -483,7 +485,7 @@ If modern best practices prefer certain ways to invoke the function
 over others, then those ways should lead the list.
 
 The first item of the list should be immediately followed by one or
-more C<<< XE<lt>...E<gt> >>> terms listing index-worthy topics; if nothing
+more C<XE<lt>...E<gt>> terms listing index-worthy topics; if nothing
 else, then the name of the function, with no arguments.
 
 =item 2.
@@ -792,7 +794,7 @@ for the reader. Authors can improve this situation through breaking long
 passages up into subsections with short, meaningful headers.
 
 Since every section-header in Pod also acts as a potential end-point for
-a cross-reference (made via Pod's C<<< LE<lt>...E<gt> >>> syntax), putting
+a cross-reference (made via Pod's C<LE<lt>...E<gt>> syntax), putting
 plenty of subsections in your documentation lets other man pages more
 precisely link to a particular topic. This creates hyperlinks directly
 to the most appropriate section rather than to the whole page in
@@ -953,21 +955,15 @@ to Perl documentation.
 
 =over
 
-=item *
-
-B<built-in function>
+=item built-in function
 
 Not "builtin".
 
-=item *
+=item Darwin
 
-B<Darwin>
+See L<macOS|/macOS>.
 
-See L<macOS|"macOS">.
-
-=item *
-
-B<macOS>
+=item macOS
 
 Use this term for Apple's operating system instead of "Mac OS X" or
 variants thereof.
@@ -975,15 +971,11 @@ variants thereof.
 This term is also preferable to "Darwin", unless one needs to refer
 to macOS's Unix layer specifically.
 
-=item *
-
-B<man page>
+=item man page
 
 One unit of Unix-style documentation. Not "manpage". Preferable to "manual page".
 
-=item *
-
-B<Perl; perl>
+=item Perl; perl
 
 The name of the programming language is Perl, with a leading capital
 "P", and the remainder in lowercase. (Never "PERL".)
@@ -996,9 +988,7 @@ Generally, unless you are specifically writing about the
 command-line C<perl> progam (as, for example, L<C<perlrun>|perlrun>
 does), use "Perl" instead.
 
-=item *
-
-B<Perl 5>
+=item Perl 5
 
 Documentation need not follow Perl's name with a "5", or any other
 number, except during discussions of Perl's history, future plans,
@@ -1008,15 +998,11 @@ Before 2019, specifying "Perl 5" was sometimes needed to distinguish
 the language from Perl 6. With the latter's renaming to "Raku", this
 practice became unnecessary.
 
-=item *
+=item Perl 6
 
-B<Perl 6>
+See L<Raku|/Raku>.
 
-See L<Raku|"Raku">.
-
-=item *
-
-B<Perl 5 Porters, the; porters, the; p5p>
+=item Perl 5 Porters, the; porters, the; p5p
 
 The full name of the team responsible for Perl's ongoing maintenance
 and development is "the Perl 5 Porters", and this sobriquet should
@@ -1025,37 +1011,29 @@ thereafter call the team "the porters" or "p5p".
 
 Not "Perl5 Porters".
 
-=item *
-
-B<program>
+=item program
 
 The most general descriptor for a stand-alone work made out of
 executable Perl code. Synonymous with, and preferable to, "script".
 
-=item *
+=item Raku
 
-B<Raku>
+Perl's "sister language", whose homepage is L<https://raku.org>.
 
-Perl's "sister language", and the current open-source language
-project led by Larry Wall, Perl's original designer. Perl's
-documentation should always refer to this language as "Raku" and not
-"Perl 6", its former name.
+Previously known as "Perl 6". In 2019, its design team renamed the
+language to better reflect its identity as a project independent from
+Perl. As such, Perl's documentation should always refer to this language
+as "Raku" and not "Perl 6".
 
-=item *
+=item script
 
-B<script>
+See L<program|/program>.
 
-See L<program|"program">.
-
-=item *
-
-B<semicolon>
+=item semicolon
 
 Perl code's frequently overlooked punctuation mark. Not "semi-colon".
 
-=item *
-
-B<Unix>
+=item Unix
 
 Not "UNIX", "*nix", or "Un*x". Applicable to both the original operating
 system from the 1970s as well as all its conceptual descendants. You may
