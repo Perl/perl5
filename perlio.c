@@ -26,9 +26,9 @@
  * Invent a dSYS macro to abstract this out
  */
 #ifdef PERL_IMPLICIT_SYS
-#define dSYS dTHX
+#  define dSYS dTHX
 #else
-#define dSYS dNOOP
+#  define dSYS dNOOP
 #endif
 
 #define PERLIO_NOT_STDIO 0
@@ -43,14 +43,14 @@
 #include "perl.h"
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#undef dSYS
-#define dSYS dTHX
+#  undef dSYS
+#  define dSYS dTHX
 #endif
 
 #include "XSUB.h"
 
 #ifdef VMS
-#include <rms.h>
+#  include <rms.h>
 #endif
 
 #define PerlIO_lockcnt(f) (((PerlIOl*)(f))->head->flags)
@@ -123,11 +123,11 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 #ifdef DOSISH
     dTHX;
     PERL_UNUSED_ARG(iotype);
-#ifdef NETWARE
+#  ifdef NETWARE
     if (PerlLIO_setmode(fp, mode) != -1) {
-#else
+#  else
     if (PerlLIO_setmode(fileno(fp), mode) != -1) {
-#endif
+#  endif
         return 1;
     }
     else
@@ -152,7 +152,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 }
 
 #ifndef O_ACCMODE
-#define O_ACCMODE 3             /* Assume traditional implementation */
+#  define O_ACCMODE 3             /* Assume traditional implementation */
 #endif
 
 int
@@ -199,7 +199,7 @@ PerlIO_intmode2str(int rawmode, char *mode, int *writing)
      * with it won't do much good. */
     if (rawmode & O_BINARY)
 	mode[ix++] = 'b';
-# endif
+#endif
     mode[ix] = '\0';
     return ptype;
 }
@@ -236,23 +236,23 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
-#if defined(PERL_MICRO)
+#  if defined(PERL_MICRO)
     return NULL;
-#elif defined(PERL_IMPLICIT_SYS)
+#  elif defined(PERL_IMPLICIT_SYS)
     return PerlSIO_fdupopen(f);
-#else
-# ifdef WIN32
+#  else
+#    ifdef WIN32
     return win32_fdupopen(f);
-# else
+#    else
     if (f) {
 	const int fd = PerlLIO_dup_cloexec(PerlIO_fileno(f));
 	if (fd >= 0) {
 	    char mode[8];
-#  ifdef DJGPP
+#      ifdef DJGPP
 	    const int omode = djgpp_get_stream_mode(f);
-#  else
+#      else
 	    const int omode = fcntl(fd, F_GETFL);
-#  endif
+#      endif
 	    PerlIO_intmode2str(omode,mode,NULL);
 	    /* the r+ is a hack */
 	    return PerlIO_fdopen(fd, mode);
@@ -262,9 +262,9 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     else {
 	SETERRNO(EBADF, SS_IVCHAN);
     }
-# endif
+#    endif
     return NULL;
-#endif
+#  endif
 }
 
 
@@ -415,9 +415,9 @@ PerlIO_verify_head(pTHX_ PerlIO *f)
 {
     PerlIOl *head, *p;
     int seen = 0;
-#ifndef PERL_IMPLICIT_SYS
+#  ifndef PERL_IMPLICIT_SYS
     PERL_UNUSED_CONTEXT;
-#endif
+#  endif
     if (!PerlIOValid(f))
 	return;
     p = head = PerlIOBase(f)->head;
@@ -1066,9 +1066,9 @@ PerlIO_default_layers(pTHX)
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_unix));
 #if defined(WIN32)
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_win32));
-#if 0
+#  if 0
 	osLayer = &PerlIO_win32;
-#endif
+#  endif
 #endif
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_raw));
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_perlio));
@@ -2333,7 +2333,6 @@ PerlIOUnix_refcnt_dec(int fd)
     if (fd >= 0) {
 #ifdef DEBUGGING
         dTHX;
-#else
 #endif
 	MUTEX_LOCK(&PL_perlio_mutex);
 	if (fd >= PL_perlio_fd_refcnt_size) {
@@ -2418,7 +2417,7 @@ void PerlIO_teardown(void) /* Call only from PERL_SYS_TERM(). */
    being present (at least in win32) :-(.
    Disable for now.
 */
-#ifdef DEBUGGING
+#  ifdef DEBUGGING
     {
 	/* By now all filehandles should have been closed, so any
 	 * stray (non-STD-)filehandles indicate *possible* (PerlIO)
@@ -2437,7 +2436,7 @@ void PerlIO_teardown(void) /* Call only from PERL_SYS_TERM(). */
 	    }
 	}
     }
-#endif
+#  endif
 #endif
     /* Not bothering with PL_perlio_mutex since by now
      * all the interpreters are gone. */
@@ -2555,7 +2554,7 @@ PerlIOUnix_oflags(const char *mode)
         mode++;
         break;
     default:
-#  if O_BINARY != 0
+#if O_BINARY != 0
         /* bit-or:ing with zero O_BINARY would be useless. */
 	/*
 	 * If neither "t" nor "b" was specified, open the file
@@ -2566,7 +2565,7 @@ PerlIOUnix_oflags(const char *mode)
          * set the errno and invalidate the flags.
 	 */
 	oflags |= O_BINARY;
-#  endif
+#endif
         break;
     }
     if (*mode || oflags == -1) {
@@ -2870,7 +2869,7 @@ PERLIO_FUNCS_DECL(PerlIO_unix) = {
 /* perl5.8 - This ensures the last minute VMS ungetc fix is not
    broken by the last second glibc 2.3 fix
  */
-#define STDIO_BUFFER_WRITABLE
+#  define STDIO_BUFFER_WRITABLE
 #endif
 
 
@@ -3168,22 +3167,22 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     /* XXX this could use PerlIO_canset_fileno() and
      * PerlIO_set_fileno() support from Configure
      */
-#  if defined(HAS_FDCLOSE)
+#if defined(HAS_FDCLOSE)
     return fdclose(f, NULL) == 0 ? 1 : 0;
-#  elif defined(__UCLIBC__)
+#elif defined(__UCLIBC__)
     /* uClibc must come before glibc because it defines __GLIBC__ as well. */
     f->__filedes = -1;
     return 1;
-#  elif defined(__GLIBC__)
+#elif defined(__GLIBC__)
     /* There may be a better way for GLIBC:
     	- libio.h defines a flag to not close() on cleanup
      */	
     f->_fileno = -1;
     return 1;
-#  elif defined(__sun)
+#elif defined(__sun)
     PERL_UNUSED_ARG(f);
     return 0;
-#  elif defined(__hpux)
+#elif defined(__hpux)
     f->__fileH = 0xff;
     f->__fileL = 0xff;
     return 1;
@@ -3192,47 +3191,47 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
       [For OSF only have confirmation for Tru64 (alpha)
       but assume other OSFs will be similar.]
     */
-#  elif defined(_AIX) || defined(__osf__) || defined(__irix__)
+#elif defined(_AIX) || defined(__osf__) || defined(__irix__)
     f->_file = -1;
     return 1;
-#  elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__)
     /* There may be a better way on FreeBSD:
         - we could insert a dummy func in the _close function entry
 	f->_close = (int (*)(void *)) dummy_close;
      */
     f->_file = -1;
     return 1;
-#  elif defined(__OpenBSD__)
+#elif defined(__OpenBSD__)
     /* There may be a better way on OpenBSD:
         - we could insert a dummy func in the _close function entry
 	f->_close = (int (*)(void *)) dummy_close;
      */
     f->_file = -1;
     return 1;
-#  elif defined(__EMX__)
+#elif defined(__EMX__)
     /* f->_flags &= ~_IOOPEN; */	/* Will leak stream->_buffer */
     f->_handle = -1;
     return 1;
-#  elif defined(__CYGWIN__)
+#elif defined(__CYGWIN__)
     /* There may be a better way on CYGWIN:
         - we could insert a dummy func in the _close function entry
 	f->_close = (int (*)(void *)) dummy_close;
      */
     f->_file = -1;
     return 1;
-#  elif defined(WIN32)
+#elif defined(WIN32)
     PERLIO_FILE_file(f) = -1;
     return 1;
-#  else
-#if 0
+#else
+#  if 0
     /* Sarathy's code did this - we fall back to a dup/dup2 hack
        (which isn't thread safe) instead
      */
 #    error "Don't know how to set FILE.fileno on your platform"
-#endif
+#  endif
     PERL_UNUSED_ARG(f);
     return 0;
-#  endif
+#endif
 }
 
 IV
@@ -3249,8 +3248,6 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	IV result = 0;
 	int dupfd = -1;
 	dSAVEDERRNO;
-#ifdef USE_ITHREADS
-#endif
 #ifdef SOCKS5_VERSION_NAME
     	/* Socks lib overrides close() but stdio isn't linked to
 	   that library (though we are) - so we must call close()
@@ -3578,7 +3575,7 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     PERL_UNUSED_CONTEXT;
     if (ptr != NULL) {
-#ifdef STDIO_PTR_LVALUE
+#  ifdef STDIO_PTR_LVALUE
         /* This is a long-standing infamous mess.  The root of the
          * problem is that one cannot know the signedness of char, and
          * more precisely the signedness of FILE._ptr.  The following
@@ -3593,31 +3590,31 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
         GCC_DIAG_IGNORE_STMT(-Wpointer-sign);
 	PerlSIO_set_ptr(stdio, ptr); /* LHS STDCHAR* cast non-portable */
         GCC_DIAG_RESTORE_STMT;
-#ifdef STDIO_PTR_LVAL_SETS_CNT
+#    ifdef STDIO_PTR_LVAL_SETS_CNT
 	assert(PerlSIO_get_cnt(stdio) == (cnt));
-#endif
-#if (!defined(STDIO_PTR_LVAL_NOCHANGE_CNT))
+#    endif
+#    if (!defined(STDIO_PTR_LVAL_NOCHANGE_CNT))
 	/*
 	 * Setting ptr _does_ change cnt - we are done
 	 */
 	return;
-#endif
-#else                           /* STDIO_PTR_LVALUE */
+#    endif
+#  else                           /* STDIO_PTR_LVALUE */
 	PerlProc_abort();
-#endif                          /* STDIO_PTR_LVALUE */
+#  endif                          /* STDIO_PTR_LVALUE */
     }
     /*
      * Now (or only) set cnt
      */
-#ifdef STDIO_CNT_LVALUE
+#  ifdef STDIO_CNT_LVALUE
     PerlSIO_set_cnt(stdio, cnt);
-#elif (defined(STDIO_PTR_LVALUE) && defined(STDIO_PTR_LVAL_SETS_CNT))
+#  elif (defined(STDIO_PTR_LVALUE) && defined(STDIO_PTR_LVAL_SETS_CNT))
     PerlSIO_set_ptr(stdio,
 		    PerlSIO_get_ptr(stdio) + (PerlSIO_get_cnt(stdio) -
 					      cnt));
-#else                           /* STDIO_PTR_LVAL_SETS_CNT */
+#  else                           /* STDIO_PTR_LVAL_SETS_CNT */
     PerlProc_abort();
-#endif                          /* STDIO_CNT_LVALUE */
+#  endif                          /* STDIO_CNT_LVALUE */
 }
 
 
@@ -3653,7 +3650,7 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 
 #if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
 
-#ifdef STDIO_BUFFER_WRITABLE
+#  ifdef STDIO_BUFFER_WRITABLE
     if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
 	/* Fake ungetc() to the real buffer in case system's ungetc
 	   goes elsewhere
@@ -3670,7 +3667,7 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	}
     }
     else
-#endif
+#  endif
     if (PerlIO_has_cntptr(f)) {
 	STDCHAR ch = c;
 	if (PerlIOStdio_unread(aTHX_ f,&ch,1) == 1) {
@@ -5083,9 +5080,9 @@ PerlIO_tmpfile_flags(int imode)
          f = PerlIO_fdopen(fd, mode);
 	  if (f)
 	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-#   ifndef VMS
+#  ifndef VMS
 	  PerlLIO_unlink(sv ? SvPVX_const(sv) : tempname);
-#   endif
+#  endif
      }
      SvREFCNT_dec(sv);
 #else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
@@ -5167,7 +5164,7 @@ Perl_PerlIO_context_layers(pTHX_ const char *mode)
 
 
 #ifndef HAS_FSETPOS
-#undef PerlIO_setpos
+#  undef PerlIO_setpos
 int
 PerlIO_setpos(PerlIO *f, SV *pos)
 {
@@ -5184,7 +5181,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
     return -1;
 }
 #else
-#undef PerlIO_setpos
+#  undef PerlIO_setpos
 int
 PerlIO_setpos(PerlIO *f, SV *pos)
 {
@@ -5194,11 +5191,11 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 	    STRLEN len;
 	    Fpos_t * const fpos = (Fpos_t *) SvPV(pos, len);
 	    if(len == sizeof(Fpos_t))
-#if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
+#  if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
 		return fsetpos64(f, fpos);
-#else
+#  else
 		return fsetpos(f, fpos);
-#endif
+#  endif
 	}
     }
     SETERRNO(EINVAL, SS_IVCHAN);
@@ -5207,7 +5204,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 #endif
 
 #ifndef HAS_FGETPOS
-#undef PerlIO_getpos
+#  undef PerlIO_getpos
 int
 PerlIO_getpos(PerlIO *f, SV *pos)
 {
@@ -5217,18 +5214,18 @@ PerlIO_getpos(PerlIO *f, SV *pos)
     return (posn == (Off_t) - 1) ? -1 : 0;
 }
 #else
-#undef PerlIO_getpos
+#  undef PerlIO_getpos
 int
 PerlIO_getpos(PerlIO *f, SV *pos)
 {
     dTHX;
     Fpos_t fpos;
     int code;
-#if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
+#  if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
     code = fgetpos64(f, &fpos);
-#else
+#  else
     code = fgetpos(f, &fpos);
-#endif
+#  endif
     sv_setpvn(pos, (char *) &fpos, sizeof(fpos));
     return code;
 }
