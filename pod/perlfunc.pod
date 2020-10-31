@@ -4432,7 +4432,10 @@ X<oct> X<octal> X<hex> X<hexadecimal> X<binary> X<bin>
 =for Pod::Functions convert a string to an octal number
 
 Interprets EXPR as an octal string and returns the corresponding
-value.  (If EXPR happens to start off with C<0x> or C<x>, interprets it as a
+value.  An octal string consists of octal digits and, as of Perl 5.XXX,
+an optional C<0o> or C<o> prefix.  Each octal digit may be preceded by
+a single underscore, which will be ignored.
+(If EXPR happens to start off with C<0x> or C<x>, interprets it as a
 hex string.  If EXPR starts off with C<0b> or C<b>, it is interpreted as a
 binary string.  Leading whitespace is ignored in all three cases.)
 The following will handle decimal, binary, octal, and hex in standard
