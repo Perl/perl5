@@ -272,7 +272,7 @@ so:
 
 Even the simplest code blocks often require the use of example
 variables and subroutines, L<whose names you should choose with
-care/Use meaningful variable and symbol names in examples>.
+care|/Use meaningful variable and symbol names in examples>.
 
 =head3 Inline code and literals
 
