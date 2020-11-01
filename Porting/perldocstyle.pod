@@ -576,7 +576,7 @@ presents the reader with small, interesting examples that allow them to
 follow along themselves using their own Perl interpreter. The tutorial
 inspires comprehension by letting its readers immediately experience
 (and experiment on) the concept in question. Examples include
-C<perlxstut>, <C<perlpacktut>, and
+C<perlxstut>, C<perlpacktut>, and
 C<perlretut>.
 
 Tutorial man pages must strive for a welcoming and reassuring tone from
@@ -634,7 +634,7 @@ Perl's own best example of a reference work is C<perlfunc>, the
 sprawling man page that details the operation of every function built
 into Perl, with each function's documentation presenting the same kinds
 of information in the same order as every other. For an example of a
-shorter reference on a single topic, see C<perlreref>.
+shorter reference on a single topic, look at C<perlreref>.
 
 Module documentation--including that of all the modules listed in
 L<C<perlmodlib>|perlmodlib>--also counts as reference. They follow
@@ -784,7 +784,7 @@ magazine articles, published elsewhere and with a narrower readership in
 mind. But Perl's own docs should use language as accessible and
 welcoming to as wide an audience as possible.
 
-=head2 Submit only complete documentation
+=head2 Omit placeholder text or commentary
 
 Placeholder text does not belong in the documentation that ships with
 Perl. No section header should be followed by text reading only "Watch
